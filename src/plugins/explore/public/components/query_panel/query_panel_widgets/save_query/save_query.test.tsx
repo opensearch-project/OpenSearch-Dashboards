@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
@@ -20,6 +19,9 @@ const mockTimeFilter = {
 const mockSavedQueryService = {
   saveQuery: jest.fn(),
   getSavedQuery: jest.fn(),
+};
+const mockQueryStringManager = {
+  getQuery: jest.fn(() => ({ query: 'fallback_query_text', language: 'PROMQL' })),
 };
 const mockSetEditorTextWithQuery = jest.fn();
 const mockLoadQueryActionCreator = jest.fn();
@@ -38,6 +40,7 @@ jest.doMock('../../../../../../opensearch_dashboards_react/public', () => ({
       data: {
         query: {
           savedQueries: mockSavedQueryService,
+          queryString: mockQueryStringManager,
         },
       },
       notifications: {
@@ -61,9 +64,11 @@ jest.doMock('../../utils', () => ({
   }),
 }));
 
+const mockGetEditorText = jest.fn(() => 'SELECT * FROM logs');
+
 jest.doMock('../../../../application/hooks', () => ({
   useSetEditorTextWithQuery: () => mockSetEditorTextWithQuery,
-  useEditorText: () => () => 'SELECT * FROM logs',
+  useEditorText: () => mockGetEditorText,
 }));
 
 jest.doMock('../../../../application/utils/state_management/actions/query_editor', () => ({
@@ -208,6 +213,11 @@ describe('SaveQueryButton', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockSelectIsPromptEditorMode.mockReturnValue(false);
+    mockGetEditorText.mockReturnValue('SELECT * FROM logs');
+    mockQueryStringManager.getQuery.mockReturnValue({
+      query: 'fallback_query_text',
+      language: 'PROMQL',
+    });
     mockSavedQueryService.saveQuery.mockResolvedValue({ id: 'saved-query-id' });
     mockSavedQueryService.getSavedQuery.mockResolvedValue({
       id: 'test-query-id',
@@ -505,6 +515,30 @@ describe('SaveQueryButton', () => {
       const saveButton = screen.getByTestId('mock-save-button');
       expect(saveButton).toBeDisabled();
       expect(screen.getByTestId('save-disabled-indicator')).toBeInTheDocument();
+    });
+  });
+
+  it('falls back to queryString.getQuery() when editor text is empty', async () => {
+    mockGetEditorText.mockReturnValue('');
+    mockQueryStringManager.getQuery.mockReturnValue({ query: 'up{job="api"}', language: 'PROMQL' });
+
+    renderWithStore();
+
+    const button = screen.getByTestId('queryPanelFooterSaveQueryButton');
+    fireEvent.click(button);
+
+    const saveButton = screen.getByTestId('mock-save-button');
+    fireEvent.click(saveButton);
+
+    await waitFor(() => {
+      expect(mockSavedQueryService.saveQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: expect.objectContaining({
+            query: 'up{job="api"}',
+          }),
+        }),
+        expect.anything()
+      );
     });
   });
 });

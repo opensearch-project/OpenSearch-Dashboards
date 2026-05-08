@@ -58,7 +58,7 @@ const uiMetricFromDataPluginSchema: MakeSchemaFrom<UIMetricUsage> = {
 export const uiMetricSchema: MakeSchemaFrom<UIMetricUsage> = {
   console: commonSchema,
   DashboardPanelVersionInUrl: commonSchema,
-  OpenSearch_Dashboards_home: commonSchema, // eslint-disable-line @typescript-eslint/naming-convention
+  OpenSearch_Dashboards_home: commonSchema,
   visualize: commonSchema,
   canvas: commonSchema,
   cross_cluster_replication: commonSchema,

@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { mount } from 'enzyme';
 import { DocViewRenderTab } from './doc_viewer_render_tab';
 // @ts-expect-error TS2307 TODO(ts-error): fixme

@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { EventEmitter } from 'events';
 
 import { useEditorUpdates } from './use_editor_updates';

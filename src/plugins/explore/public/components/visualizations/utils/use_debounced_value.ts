@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect, useRef } from 'react';
+import { useCallback, useState, useEffect, useRef } from 'react';
+import { useDebounce, useEffectOnce } from 'react-use';
 
 /**
  * Custom hook for debouncing values
@@ -18,81 +19,89 @@ export function useDebouncedValue<T>(
   delay: number = 500
 ): [T, (value: T) => void] {
   const [localValue, setLocalValue] = useState<T>(value);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const initialValueRef = useRef(value);
+  const isDirtyRef = useRef(false);
 
-  // Update local value when external value changes
+  useEffect(() => {
+    if (initialValueRef.current !== localValue) {
+      isDirtyRef.current = true;
+    }
+  }, [localValue]);
+
+  // Update local value when input value changes
   useEffect(() => {
     setLocalValue(value);
   }, [value]);
 
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
+  useDebounce(
+    () => {
+      // Skip onChange call for the initial value
+      if (isDirtyRef.current) {
+        onChange(localValue);
       }
-    };
-  }, []);
+    },
+    delay,
+    [localValue]
+  );
 
-  const handleChange = (newValue: T) => {
-    // Update local value immediately
-    setLocalValue(newValue);
-
-    // Clear existing timeout
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-
-    // Set new timeout
-    timeoutRef.current = setTimeout(() => {
-      onChange(newValue);
-      timeoutRef.current = null;
-    }, delay);
-  };
-
-  return [localValue, handleChange];
+  return [localValue, setLocalValue];
 }
 
-/**
- * Custom hook for debouncing numeric input values
- * Includes validation for min/max bounds
- */
-export function useDebouncedNumericValue(
-  value: number,
-  onChange: (value: number) => void,
-  options: {
-    delay?: number;
-    min?: number;
-    max?: number;
-    defaultValue?: number;
-  } = {}
-): [number, (value: string | number) => void] {
-  const { delay = 500, min, max, defaultValue = 0 } = options;
+export const useDebouncedNumber = (
+  value: number | undefined,
+  onChange: (val: number | undefined) => void,
+  options: { delay?: number; min?: number; max?: number } = {}
+) => {
+  const { min, max, delay } = options;
 
-  const [localValue, setDebouncedValue] = useDebouncedValue(value, onChange, delay);
-
-  const handleNumericChange = (newValue: string | number) => {
-    let numValue: number;
-
-    if (typeof newValue === 'string') {
-      numValue = parseFloat(newValue);
-      if (isNaN(numValue)) {
-        numValue = defaultValue;
+  // Apply constraints to a value
+  const getConstrainedValue = useCallback(
+    (num: number | undefined) => {
+      let finalValue = num;
+      if (typeof num === 'number' && typeof max === 'number' && num > max) {
+        finalValue = max;
       }
-    } else {
-      numValue = newValue;
-    }
+      if (typeof num === 'number' && typeof min === 'number' && num < min) {
+        finalValue = min;
+      }
+      return finalValue;
+    },
+    [min, max]
+  );
 
-    // Apply min/max bounds
-    if (min !== undefined && numValue < min) {
-      numValue = min;
-    }
-    if (max !== undefined && numValue > max) {
-      numValue = max;
-    }
+  // Apply constraints to initial value
+  const constrainedInitialValue = getConstrainedValue(value);
+  const [localValue, setLocalValue] = useState(constrainedInitialValue);
 
-    setDebouncedValue(numValue);
-  };
+  // Call onChange immediately if initial value was constrained
+  useEffectOnce(() => {
+    if (constrainedInitialValue !== value) {
+      onChange(constrainedInitialValue);
+    }
+  });
 
-  return [localValue, handleNumericChange];
-}
+  const onDebouncedValueChange = useCallback(
+    (num: number | undefined) => {
+      const finalValue = getConstrainedValue(num);
+      setLocalValue(finalValue);
+      onChange(finalValue);
+    },
+    [getConstrainedValue, onChange]
+  );
+
+  const [, onValueChange] = useDebouncedValue<number | undefined>(
+    constrainedInitialValue,
+    onDebouncedValueChange,
+    delay
+  );
+
+  const onLocalChange = useCallback(
+    (val: number | undefined) => {
+      setLocalValue(val);
+      onValueChange(val);
+    },
+    [onValueChange]
+  );
+
+  return [localValue, onLocalChange] as const;
+};

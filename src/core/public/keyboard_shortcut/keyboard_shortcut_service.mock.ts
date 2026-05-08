@@ -16,12 +16,17 @@ const createSetupMock = (): jest.Mocked<KeyboardShortcutSetup> => ({
 const createStartMock = (): jest.Mocked<KeyboardShortcutStart> => ({
   register: jest.fn(),
   unregister: jest.fn(),
+  useKeyboardShortcut: jest.fn(),
+  getAllShortcuts: jest.fn().mockReturnValue([]),
 });
 
 const createMock = (): jest.Mocked<KeyboardShortcutServiceContract> => ({
   setup: jest.fn().mockReturnValue(createSetupMock()),
   start: jest.fn().mockReturnValue(createStartMock()),
   stop: jest.fn(),
+  register: jest.fn(),
+  unregister: jest.fn(),
+  getAllShortcuts: jest.fn().mockReturnValue([]),
 });
 
 export const keyboardShortcutServiceMock = {

@@ -54,7 +54,7 @@ import {
   InternalApplicationStart,
 } from './types';
 import { MountPoint } from '../types';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import { workspacesServiceMock } from '../mocks';
 
 const createApp = (props: Partial<App>): App => {
@@ -818,6 +818,7 @@ describe('#start()', () => {
       delete (window as any).location;
 
       // Mocking the window object
+      // @ts-expect-error TODO FIX ME
       window.location = {
         ...originalLocation,
         assign: jest.fn(),
@@ -849,6 +850,7 @@ describe('#start()', () => {
       await navigateToApp('app2');
       // assign should not be called
       expect(window.location.assign).toBeCalledTimes(1);
+      // @ts-expect-error TODO FIX ME
       window.location = originalLocation;
     });
 

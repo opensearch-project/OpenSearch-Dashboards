@@ -1,0 +1,33 @@
+.slashCommandMenu {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  right: 0;
+  margin-bottom: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1000;
+
+  &__item {
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+
+    &:hover {
+      background-color: transparentize($euiColorPrimary, 0.9);
+    }
+
+    &--selected {
+      background-color: transparentize($euiColorPrimary, 0.85);
+    }
+
+    &:not(:last-child) {
+      border-bottom: $euiBorderThin;
+    }
+  }
+
+  &__item &__text + &__text {
+    margin-top: 2px;
+    line-height: 1.2;
+  }
+}

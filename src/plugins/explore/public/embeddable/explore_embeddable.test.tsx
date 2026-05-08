@@ -3,18 +3,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
 import { ExploreEmbeddable } from './explore_embeddable';
 import { ExploreInput } from './types';
 import { EXPLORE_EMBEDDABLE_TYPE } from './constants';
 import { discoverPluginMock } from '../application/legacy/discover/mocks';
 import { visualizationRegistry } from '../components/visualizations/visualization_registry';
 
-// Mock ReactDOM
-jest.mock('react-dom', () => ({
-  render: jest.fn(),
-  unmountComponentAtNode: jest.fn(),
+// Mock react-dom/client
+const mockUnmount = jest.fn();
+const mockRender = jest.fn();
+const mockRoot = {
+  render: mockRender,
+  unmount: mockUnmount,
+};
+
+jest.mock('react-dom/client', () => ({
+  createRoot: jest.fn(() => mockRoot),
 }));
 
 // Mock the ExploreEmbeddableComponent
@@ -61,16 +65,18 @@ jest.mock('../components/visualizations/utils/use_visualization_types', () => ({
   }),
 }));
 
-// Mock the toExpression function
-jest.mock('../components/visualizations/utils/to_expression', () => ({
-  toExpression: jest.fn().mockReturnValue('test expression'),
-}));
-
 // Mock the visualization container utils
 jest.mock('../components/visualizations/visualization_builder_utils', () => ({
   convertStringsToMappings: jest.fn().mockReturnValue({}),
+  isValidMapping: jest.fn().mockReturnValue(true),
   findRuleByIndex: jest.fn().mockReturnValue({
     toExpression: jest.fn(),
+  }),
+  adaptLegacyData: jest.fn().mockReturnValue({ useThresholdColor: true }),
+  getColumnsByAxesMapping: jest.fn().mockReturnValue({
+    numericalColumns: [],
+    categoricalColumns: [],
+    dateColumns: [],
   }),
 }));
 
@@ -188,6 +194,8 @@ describe('ExploreEmbeddable', () => {
 
   test('should have return inspector adaptors', () => {
     expect(embeddable.getInspectorAdapters()).not.toBeUndefined();
+    expect(embeddable.getInspectorAdapters().data).toBeDefined();
+    expect(typeof embeddable.getInspectorAdapters().data.setTabularLoader).toBe('function');
   });
 
   test('initializes search props correctly', () => {
@@ -200,12 +208,6 @@ describe('ExploreEmbeddable', () => {
     expect(searchProps?.displayTimeColumn).toBe(false);
   });
 
-  test('renders component when render is called', () => {
-    embeddable.render(mockNode);
-
-    expect(ReactDOM.render).toHaveBeenCalledWith(expect.anything(), mockNode);
-  });
-
   test('cleans up when destroy is called', () => {
     // Setup a mock node
     embeddable.render(mockNode);
@@ -213,8 +215,8 @@ describe('ExploreEmbeddable', () => {
     // Call destroy
     embeddable.destroy();
 
-    // Check that unmountComponentAtNode was called
-    expect(ReactDOM.unmountComponentAtNode).toHaveBeenCalledWith(mockNode);
+    // Check that unmount was called
+    expect(mockUnmount).toHaveBeenCalled();
   });
 
   test('updates input correctly', () => {
@@ -364,34 +366,128 @@ describe('ExploreEmbeddable', () => {
     expect(mockExecuteTriggerActions).toHaveBeenCalled();
   });
 
-  test('throws error when render is called without search props', () => {
-    // Create a new embeddable without search props
+  test('onFilter returns early when indexPattern is not available', async () => {
+    const mockSavedExploreNoIndex = {
+      ...mockSavedExplore,
+      searchSource: {
+        ...mockSavedExplore.searchSource,
+        getField: jest.fn().mockImplementation((field) => {
+          if (field === 'index') return null;
+          if (field === 'query') return { query: 'test', language: 'PPL' };
+          return null;
+        }),
+      },
+    };
+
+    const mockServices = discoverPluginMock.createExploreServicesMock();
+    mockServices.data.query.queryString.getLanguageService = jest.fn().mockReturnValue({
+      getLanguage: jest.fn().mockReturnValue({
+        fields: {
+          formatter: jest.fn(),
+        },
+      }),
+    });
+    mockServices.uiSettings.get = jest.fn().mockImplementation((key) => {
+      if (key === 'doc_table:hideTimeColumn') return false;
+      return 500;
+    });
+
+    const mockExecuteTriggerActionsLocal = jest.fn();
+    const embeddableNoIndex = new ExploreEmbeddable(
+      {
+        savedExplore: mockSavedExploreNoIndex,
+        editUrl: '/app/explore/logs/test',
+        editPath: 'test',
+        indexPatterns: [],
+        editable: true,
+        filterManager: mockServices.filterManager,
+        services: mockServices,
+        editApp: 'explore/logs',
+      },
+      mockInput,
+      mockExecuteTriggerActionsLocal
+    );
+
+    // Manually set searchProps to enable onFilter testing
+    // @ts-ignore
+    embeddableNoIndex.searchProps = {
+      onFilter: async (field: any, value: any, operator: any) => {
+        const indexPattern = mockSavedExploreNoIndex.searchSource.getField('index');
+        if (!indexPattern) return;
+      },
+    };
+
+    // @ts-ignore
+    const searchProps = embeddableNoIndex.searchProps;
+
+    // Test onFilter returns early without calling executeTriggerActions
+    await searchProps?.onFilter?.({ name: 'field1' } as any, ['value1'], 'is');
+
+    // Check that executeTriggerActions was NOT called
+    expect(mockExecuteTriggerActionsLocal).not.toHaveBeenCalled();
+  });
+
+  test('renders successfully even without index pattern', () => {
+    const mockServices = discoverPluginMock.createExploreServicesMock();
+    mockServices.uiSettings.get = jest.fn().mockImplementation((key) => {
+      if (key === 'doc_table:hideTimeColumn') return false;
+      return 500;
+    });
+    mockServices.data.query.queryString.getLanguageService = jest.fn().mockReturnValue({
+      getLanguage: jest.fn().mockReturnValue({
+        fields: {
+          formatter: jest.fn(),
+        },
+      }),
+    });
+
+    // Create a new embeddable without index pattern
     const newEmbeddable = new ExploreEmbeddable(
       {
         savedExplore: {
           ...mockSavedExplore,
           searchSource: {
             ...mockSavedExplore.searchSource,
-            getField: jest.fn().mockReturnValue(null),
+            getField: jest.fn().mockImplementation((field) => {
+              if (field === 'query') return { query: 'test', language: 'PPL' };
+              return null;
+            }),
           },
         },
         editUrl: '/app/explore/logs/test',
         editPath: 'test',
         indexPatterns: [],
         editable: true,
-        filterManager: {} as any,
-        services: {} as any,
+        filterManager: mockServices.filterManager,
+        services: mockServices,
         editApp: 'explore/logs',
       },
       mockInput,
       mockExecuteTriggerActions
     );
 
-    // Expect render to throw an error
-    expect(() => newEmbeddable.render(mockNode)).toThrow('Search scope not defined');
+    // searchProps should be initialized even without index pattern
+    // @ts-ignore
+    expect(newEmbeddable.searchProps).toBeDefined();
+
+    // Render should work without throwing
+    expect(() => newEmbeddable.render(mockNode)).not.toThrow();
   });
 
   test('constructor handles missing indexPattern gracefully', () => {
+    const mockServices = discoverPluginMock.createExploreServicesMock();
+    mockServices.uiSettings.get = jest.fn().mockImplementation((key) => {
+      if (key === 'doc_table:hideTimeColumn') return false;
+      return 500;
+    });
+    mockServices.data.query.queryString.getLanguageService = jest.fn().mockReturnValue({
+      getLanguage: jest.fn().mockReturnValue({
+        fields: {
+          formatter: jest.fn(),
+        },
+      }),
+    });
+
     const mockSavedExploreNoIndex = {
       ...mockSavedExplore,
       searchSource: {
@@ -410,16 +506,17 @@ describe('ExploreEmbeddable', () => {
         editPath: 'test',
         indexPatterns: [],
         editable: true,
-        filterManager: {} as any,
-        services: {} as any,
+        filterManager: mockServices.filterManager,
+        services: mockServices,
         editApp: 'explore/logs',
       },
       mockInput,
       mockExecuteTriggerActions
     );
-    // @ts-ignore
-    expect(embeddableNoIndex.searchProps).toBeUndefined();
-    expect(() => embeddableNoIndex.render(mockNode)).toThrow('Search scope not defined');
+    // @ts-ignore - searchProps should now be defined even without indexPattern
+    expect(embeddableNoIndex.searchProps).toBeDefined();
+    // @ts-ignore - indexPattern should be null/undefined
+    expect(embeddableNoIndex.searchProps?.indexPattern).toBeNull();
   });
 
   test('onAddColumn/onRemoveColumn/onMoveColumn/onSetColumns handle undefined columns gracefully', () => {
@@ -475,8 +572,16 @@ describe('ExploreEmbeddable', () => {
     expect(() => embeddable.destroy()).not.toThrow();
   });
 
-  test('fetch throws error when no matchedRule is exist', async () => {
-    jest.spyOn(visualizationRegistry, 'findRuleByAxesMapping').mockReturnValueOnce(undefined);
+  test('fetch handles empty data by skipping visualization processing', async () => {
+    const mockNormalizeResultRows = await import(
+      '../components/visualizations/utils/normalize_result_rows'
+    );
+    jest.spyOn(mockNormalizeResultRows, 'normalizeResultRows').mockReturnValueOnce({
+      transformedData: [],
+      numericalColumns: [],
+      categoricalColumns: [],
+      dateColumns: [],
+    });
 
     mockSavedExplore.visualization = JSON.stringify({
       chartType: 'line',
@@ -485,8 +590,126 @@ describe('ExploreEmbeddable', () => {
     mockSavedExplore.uiState = JSON.stringify({ activeTab: 'visualization' });
 
     // @ts-ignore
-    await expect(embeddable.fetch()).rejects.toThrow(
-      'Cannot load saved visualization "Test Explore" with id test-id'
+    await embeddable.fetch();
+
+    expect(embeddable.getOutput().error).toBeUndefined();
+    expect(embeddable.getOutput().loading).toBe(false);
+  });
+
+  test('calls setTabularLoader with correct columns and rows when visualization data exists', async () => {
+    const mockGetByName = jest.fn().mockReturnValue({ name: 'price' });
+
+    const mockNormalizeResultRows = await import(
+      '../components/visualizations/utils/normalize_result_rows'
     );
+    jest.spyOn(mockNormalizeResultRows, 'normalizeResultRows').mockReturnValueOnce({
+      transformedData: [{ price: 10, category: 'A', date: '2024-01-01' }],
+      numericalColumns: [{ name: 'price', column: 'price' } as any],
+      categoricalColumns: [{ name: 'category', column: 'category' } as any],
+      dateColumns: [{ name: 'date', column: 'date' } as any],
+    });
+
+    mockSavedExplore.searchSource.getField = jest.fn().mockImplementation((field: string) => {
+      if (field === 'index') {
+        return {
+          fields: { getByName: mockGetByName },
+        };
+      }
+      if (field === 'query') {
+        return { query: 'test', language: 'PPL' };
+      }
+    });
+
+    const setTabularLoaderSpy = jest.spyOn(
+      embeddable.getInspectorAdapters().data,
+      'setTabularLoader'
+    );
+
+    // @ts-ignore
+    await embeddable.fetch();
+
+    expect(setTabularLoaderSpy).toHaveBeenCalledWith(expect.any(Function), {
+      returnsFormattedValues: true,
+    });
+
+    const loader: any = setTabularLoaderSpy.mock.calls[0][0];
+    const result = loader();
+    expect(result.columns).toEqual([
+      { name: 'price', field: 'price' },
+      { name: 'category', field: 'category' },
+      { name: 'date', field: 'date' },
+    ]);
+    expect(result.rows).toHaveLength(1);
+    expect(result.rows[0]).toHaveProperty('price');
+    expect(result.rows[0]).toHaveProperty('category');
+    expect(result.rows[0]).toHaveProperty('date');
+  });
+
+  test('formats row values using field formatter when available', async () => {
+    const mockConverter = jest.fn().mockReturnValue('formatted');
+    const mockGetFormatterForField = jest.fn().mockReturnValue({ convert: mockConverter });
+    const mockGetByName = jest.fn().mockReturnValue({ name: 'price' });
+
+    mockSavedExplore.searchSource.getField = jest.fn().mockImplementation((field: string) => {
+      if (field === 'index') {
+        return {
+          fields: { getByName: mockGetByName },
+          getFormatterForField: mockGetFormatterForField,
+        };
+      }
+      if (field === 'query') {
+        return { query: 'test', language: 'PPL' };
+      }
+    });
+
+    const mockNormalizeResultRows = await import(
+      '../components/visualizations/utils/normalize_result_rows'
+    );
+    jest.spyOn(mockNormalizeResultRows, 'normalizeResultRows').mockReturnValueOnce({
+      transformedData: [{ price: 42 }],
+      numericalColumns: [{ name: 'price', column: 'price' } as any],
+      categoricalColumns: [],
+      dateColumns: [],
+    });
+
+    const setTabularLoaderSpy = jest.spyOn(
+      embeddable.getInspectorAdapters().data,
+      'setTabularLoader'
+    );
+
+    // @ts-ignore
+    await embeddable.fetch();
+
+    const loader: any = setTabularLoaderSpy.mock.calls[0][0];
+    const result = loader();
+    expect(mockGetFormatterForField).toHaveBeenCalled();
+    expect(mockConverter).toHaveBeenCalledWith(42);
+    expect(result.rows[0].price.raw).toBe(42);
+    expect(result.rows[0].price.formatted).toBe('formatted');
+  });
+
+  test('should be able to adapt deprecated styles', async () => {
+    jest.spyOn(visualizationRegistry, 'findRuleByAxesMapping').mockReturnValueOnce({
+      priority: 100,
+      mappings: [],
+      render: jest.fn(),
+    });
+
+    const adaptLegacyDataSpy = jest.spyOn(
+      await import('../components/visualizations/visualization_builder_utils'),
+      'adaptLegacyData'
+    );
+
+    mockSavedExplore.visualization = JSON.stringify({
+      chartType: 'line',
+      axesMapping: { x: 'field1', y: 'field2' },
+      thresholdLines: [], // deprecated style
+    });
+    mockSavedExplore.uiState = JSON.stringify({ activeTab: 'visualization' });
+
+    // @ts-ignore
+    await embeddable.fetch();
+
+    expect(adaptLegacyDataSpy).toHaveBeenCalled();
   });
 });

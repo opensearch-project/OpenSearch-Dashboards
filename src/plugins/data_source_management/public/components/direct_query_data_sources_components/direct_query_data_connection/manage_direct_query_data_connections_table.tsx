@@ -194,7 +194,7 @@ export const ManageDirectQueryDataConnectionsTable = ({
   const onClickDelete = () => {
     setIsDeleting(true);
 
-    deleteMultipleDataSources(savedObjects.client, selectedDataSources)
+    deleteMultipleDataSources(savedObjects.client, selectedDataSources, http)
       .then(() => {
         setSelectedDataSources([]);
         // Fetch data sources
@@ -391,12 +391,16 @@ export const ManageDirectQueryDataConnectionsTable = ({
 
         const indentStyle =
           featureFlagStatus &&
-          record.connectionType !== DataSourceConnectionType.OpenSearchConnection
+          record.connectionType !== DataSourceConnectionType.OpenSearchConnection &&
+          // Prometheus data-connections are shown on top level
+          record.type !== DataConnectionType.Prometheus &&
+          record.type !== DataConnectionType.AWSPrometheus
             ? { marginLeft: '20px' }
             : {};
         if (
           record.type === DataConnectionType.SecurityLake ||
-          record.type === DataConnectionType.CloudWatch
+          record.type === DataConnectionType.CloudWatch ||
+          record.type === DataConnectionType.AWSPrometheus
         ) {
           // TODO: link to details page for security lake and cloudwatch
           return <span style={indentStyle}> {name}</span>;

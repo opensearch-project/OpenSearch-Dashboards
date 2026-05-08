@@ -6,7 +6,7 @@
 import React from 'react';
 import { EuiAvatar, EuiAvatarProps } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot, Root } from 'react-dom/client';
 import { ExpressionRenderDefinition } from '../../../../../src/plugins/expressions/public';
 
 export interface AvatarRenderValue {
@@ -21,10 +21,13 @@ export const avatar: ExpressionRenderDefinition<AvatarRenderValue> = {
   }),
   reuseDomNode: true,
   render: (domNode, { name, size }, handlers) => {
+    const root = createRoot(domNode);
+
     handlers.onDestroy(() => {
-      unmountComponentAtNode(domNode);
+      root.unmount();
     });
 
-    render(<EuiAvatar size={size} name={name} />, domNode, handlers.done);
+    root.render(<EuiAvatar size={size} name={name} />);
+    handlers.done();
   },
 };

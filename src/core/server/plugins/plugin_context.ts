@@ -173,6 +173,8 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     },
     opensearch: {
       legacy: deps.opensearch.legacy,
+      registerClientTransport: deps.opensearch.registerClientTransport,
+      hasClientTransport: deps.opensearch.hasClientTransport,
     },
     http: {
       createCookieSessionStorageFactory: deps.http.createCookieSessionStorageFactory,
@@ -190,6 +192,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       basePath: deps.http.basePath,
       auth: { get: deps.http.auth.get, isAuthenticated: deps.http.auth.isAuthenticated },
       csp: deps.http.csp,
+      cspReportOnly: deps.http.cspReportOnly,
       getServerInfo: deps.http.getServerInfo,
     },
     logging: {

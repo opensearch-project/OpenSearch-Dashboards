@@ -1,0 +1,62 @@
+.celHealthDonutLegend {
+  position: absolute;
+  width: fit-content;
+  height: fit-content;
+  background-color: var(--osd-color-container-default);
+  border-radius: 2px;
+  /* stylelint-disable-next-line @osd/stylelint/no_restricted_values */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 10%), 0 1px 3px rgba(0, 0, 0, 8%);
+  z-index: 10;
+  left: 50%;
+  top: 50%;
+}
+
+/* Common triangle styles */
+.celTriangleLeft::before,
+.celTriangleRight::before {
+  content: "";
+  position: absolute;
+  top: 25%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+}
+
+/* Left triangle */
+.celTriangleLeft {
+  transform: translate(8px, -25%); /* Aligns triangle with center */
+}
+
+.celTriangleLeft::before {
+  left: -8px;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-right: 8px solid var(--osd-color-container-default);
+  /* stylelint-disable-next-line @osd/stylelint/no_restricted_values */
+  filter: drop-shadow(-3px 0 2px rgba(0, 0, 0, 10%));
+}
+
+/* Right triangle */
+.celTriangleRight {
+  transform: translate(calc(-100% - 8px), -25%)  /* Aligns triangle with center */
+}
+
+.celTriangleRight::before {
+  right: -8px;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-left: 8px solid var(--osd-color-container-default);
+  /* stylelint-disable-next-line @osd/stylelint/no_restricted_values */
+  filter: drop-shadow(3px 0 2px rgba(0, 0, 0, 10%));
+}
+
+.celHealthDonutLegendContent {
+  width: fit-content;
+  height: fit-content;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  gap: 4px;
+  white-space: nowrap;
+}

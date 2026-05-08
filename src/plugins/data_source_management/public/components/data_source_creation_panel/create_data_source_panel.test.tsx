@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
 import { CreateDataSourcePanel } from './create_data_source_panel';
 import { CreateDataSourcePanelHeader } from './create_data_source_panel_header';

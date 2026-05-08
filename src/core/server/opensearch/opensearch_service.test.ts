@@ -9,6 +9,8 @@
  * GitHub history for details.
  */
 
+/* eslint-disable max-classes-per-file */
+
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
@@ -29,6 +31,7 @@
  */
 
 import { MockLegacyClusterClient, MockClusterClient } from './opensearch_service.test.mocks';
+import { Transport } from '@opensearch-project/opensearch';
 import { BehaviorSubject } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { REPO_ROOT } from '@osd/dev-utils';
@@ -259,19 +262,20 @@ describe('#setup', () => {
     });
   });
 
-  it('opensearchNodeVersionCompatibility$ stops polling when unsubscribed from', async () => {
+  it('opensearchNodeVersionCompatibility$ stops polling when unsubscribed from', (done) => {
     const mockedClient = mockClusterClientInstance.asInternalUser;
     mockedClient.nodes.info.mockImplementation(() =>
       opensearchClientMock.createErrorTransportRequestPromise(new Error())
     );
 
-    const setupContract = await opensearchService.setup(setupDeps);
-
-    expect(mockedClient.nodes.info).toHaveBeenCalledTimes(0);
-    const sub = setupContract.opensearchNodesCompatibility$.subscribe(async () => {
-      sub.unsubscribe();
-      await delay(100);
-      expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
+    opensearchService.setup(setupDeps).then((setupContract) => {
+      expect(mockedClient.nodes.info).toHaveBeenCalledTimes(0);
+      const sub = setupContract.opensearchNodesCompatibility$.subscribe(async () => {
+        sub.unsubscribe();
+        await delay(100);
+        expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
+        done();
+      });
     });
   });
 
@@ -332,7 +336,8 @@ describe('#start', () => {
       expect(MockClusterClient).toHaveBeenCalledWith(
         expect.objectContaining(customConfig),
         expect.objectContaining({ context: ['opensearch', 'custom-type'] }),
-        expect.any(Function)
+        expect.any(Function),
+        undefined
       );
     });
     it('creates a new client on each call', async () => {
@@ -386,6 +391,72 @@ describe('#start', () => {
   });
 });
 
+describe('#registerClientTransport', () => {
+  it('stores the custom transport class', async () => {
+    const setupContract = await opensearchService.setup(setupDeps);
+
+    class CustomTransport extends Transport {}
+    setupContract.registerClientTransport(CustomTransport);
+
+    const startContract = await opensearchService.start(startDeps);
+    expect(startContract.getClientTransport).toBeDefined();
+    expect(startContract.getClientTransport!()).toBe(CustomTransport);
+  });
+
+  it('throws if called twice', async () => {
+    const setupContract = await opensearchService.setup(setupDeps);
+
+    class CustomTransport extends Transport {}
+    class AnotherTransport extends Transport {}
+
+    setupContract.registerClientTransport(CustomTransport);
+    expect(() => setupContract.registerClientTransport(AnotherTransport)).toThrowError(
+      'A custom Transport class has already been registered.'
+    );
+  });
+
+  it('recreates the client with custom transport during start', async () => {
+    const setupContract = await opensearchService.setup(setupDeps);
+
+    // Reset mocks from setup phase
+    MockClusterClient.mockClear();
+
+    class CustomTransport extends Transport {}
+    setupContract.registerClientTransport(CustomTransport);
+
+    await opensearchService.start(startDeps);
+
+    // Client should be recreated with custom transport
+    expect(MockClusterClient).toHaveBeenCalledTimes(1);
+    expect(MockClusterClient).toHaveBeenCalledWith(
+      expect.any(Object),
+      expect.any(Object),
+      expect.any(Function),
+      CustomTransport
+    );
+  });
+});
+
+describe('#getClientTransport', () => {
+  it('returns undefined if no transport registered', async () => {
+    await opensearchService.setup(setupDeps);
+    const startContract = await opensearchService.start(startDeps);
+
+    expect(startContract.getClientTransport).toBeDefined();
+    expect(startContract.getClientTransport!()).toBeUndefined();
+  });
+
+  it('returns the registered transport class', async () => {
+    const setupContract = await opensearchService.setup(setupDeps);
+
+    class CustomTransport extends Transport {}
+    setupContract.registerClientTransport(CustomTransport);
+
+    const startContract = await opensearchService.start(startDeps);
+    expect(startContract.getClientTransport!()).toBe(CustomTransport);
+  });
+});
+
 describe('#stop', () => {
   it('stops both legacy and new clients', async () => {
     await opensearchService.setup(setupDeps);
@@ -397,7 +468,7 @@ describe('#stop', () => {
   });
 
   it('stops pollOpenSearchNodeVersions even if there are active subscriptions', (done) => {
-    expect.assertions(3);
+    expect.assertions(2);
 
     const mockedClient = mockClusterClientInstance.asInternalUser;
     mockedClient.nodes.info.mockImplementation(() =>

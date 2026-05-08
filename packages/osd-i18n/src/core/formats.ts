@@ -116,7 +116,8 @@ export const formats: Formats = {
   },
 };
 
-interface NumberFormatOptions<TStyle extends string> extends Intl.NumberFormatOptions {
+interface NumberFormatOptions<TStyle extends keyof Intl.NumberFormatOptionsStyleRegistry>
+  extends Intl.NumberFormatOptions {
   style?: TStyle;
   localeMatcher?: 'lookup' | 'best fit';
   currencyDisplay?: 'symbol' | 'code' | 'name';

@@ -29,7 +29,10 @@
  */
 
 jest.mock('./mode/worker', () => {
-  return { workerModule: { id: 'sense_editor/mode/worker', src: '' } };
+  return {
+    workerUrl: '/mock-worker.js',
+    workerModule: { id: 'sense_editor/mode/worker', src: '' },
+  };
 });
 
 // @ts-ignore
@@ -40,9 +43,7 @@ window.Worker = function () {
 
 // @ts-ignore
 window.URL = {
-  createObjectURL: () => {
-    return '';
-  },
+  createObjectURL: () => '/mock-worker.js',
 };
 
 import 'brace';

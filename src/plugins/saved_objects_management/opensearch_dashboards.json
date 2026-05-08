@@ -14,8 +14,9 @@
     "visAugmenter",
     "dataSource",
     "dataSourceManagement",
-    "contentManagement"
+    "contentManagement",
+    "datasetManagement"
   ],
   "extraPublicDirs": ["public/lib"],
-  "requiredBundles": ["opensearchDashboardsReact", "home", "contentManagement"]
+  "requiredBundles": ["opensearchDashboardsReact", "home", "contentManagement", "opensearchDashboardsUtils"]
 }

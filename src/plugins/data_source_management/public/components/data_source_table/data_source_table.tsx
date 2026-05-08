@@ -448,7 +448,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
   const onClickDelete = () => {
     setIsDeleting(true);
 
-    deleteMultipleDataSources(savedObjects.client, selectedDataSources)
+    deleteMultipleDataSources(savedObjects.client, selectedDataSources, http)
       .then(() => {
         setSelectedDataSources([]);
         // Fetch data sources

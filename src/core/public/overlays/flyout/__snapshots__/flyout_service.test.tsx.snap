@@ -2,17 +2,13 @@
 
 exports[`FlyoutService FlyoutRef#close() can be called multiple times on the same FlyoutRef 1`] = `
 Array [
-  Array [
-    <div />,
-  ],
+  Array [],
 ]
 `;
 
 exports[`FlyoutService closeFlyout() can be called multiple times 1`] = `
 Array [
-  Array [
-    <div />,
-  ],
+  Array [],
 ]
 `;
 
@@ -29,7 +25,6 @@ Array [
         />
       </EuiFlyout>
     </mockConstructor>,
-    <div />,
   ],
 ]
 `;
@@ -49,7 +44,6 @@ Array [
         />
       </EuiFlyout>
     </mockConstructor>,
-    <div />,
   ],
   Array [
     <mockConstructor>
@@ -62,7 +56,6 @@ Array [
         />
       </EuiFlyout>
     </mockConstructor>,
-    <div />,
   ],
 ]
 `;

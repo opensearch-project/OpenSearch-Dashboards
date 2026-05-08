@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { unmountComponentAtNode } from 'react-dom';
+import { createRoot, Root } from 'react-dom/client';
 import { act } from '@testing-library/react';
 
 import { CoreStart } from 'opensearch-dashboards/public';
@@ -35,6 +35,7 @@ const mockCoreStart = {} as CoreStart;
 
 describe('getTableVisRenderer', () => {
   let container: any = null;
+  let root: Root | null = null;
 
   beforeEach(() => {
     container = document.createElement('div');
@@ -42,7 +43,10 @@ describe('getTableVisRenderer', () => {
   });
 
   afterEach(() => {
-    unmountComponentAtNode(container);
+    if (root) {
+      root.unmount();
+      root = null;
+    }
     container.remove();
     container = null;
   });
@@ -71,7 +75,8 @@ describe('getTableVisRenderer', () => {
       renderer.render(container, mockTableVisRenderValue, mockHandlers);
     });
     await act(async () => {
-      unmountComponentAtNode(container);
+      root = createRoot(container);
+      root.unmount();
     });
     expect(mockHandlers.onDestroy).toHaveBeenCalled();
   });

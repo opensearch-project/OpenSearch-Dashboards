@@ -3,10 +3,23 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import JSON11 from 'json11';
+import * as JSON11 from 'json11';
 import { stringify, parse } from './json';
 
+jest.mock('json11', () => ({
+  __esModule: true,
+  ...jest.requireActual('json11'), // Keep actual implementations
+  parse: jest.fn().mockImplementation((...args) => {
+    // Optionally call the real parse if you want it to actually run
+    return jest.requireActual('json11').parse(...args);
+  }),
+}));
+
 describe('json', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('can parse', () => {
     const input = {
       a: [
@@ -161,7 +174,7 @@ describe('json', () => {
   });
 
   it('does not use JSON11 when not needed', () => {
-    const spyParse = jest.spyOn(JSON11, 'parse');
+    // const spyParse = jest.spyOn(JSON11, 'parse');
 
     const longPositive = BigInt(Number.MAX_SAFE_INTEGER) * 2n + 1n;
     const longNegative = BigInt(Number.MIN_SAFE_INTEGER) * 2n - 1n;
@@ -172,11 +185,11 @@ describe('json', () => {
       `}`;
     parse(text);
 
-    expect(spyParse).not.toHaveBeenCalled();
+    expect(JSON11.parse).not.toHaveBeenCalled();
   });
 
   it('uses JSON11 when dealing with long numerals', () => {
-    const spyParse = jest.spyOn(JSON11, 'parse');
+    // const spyParse = jest.spyOn(JSON11, 'parse');
 
     const longPositive = BigInt(Number.MAX_SAFE_INTEGER) * 2n + 1n;
     const longNegative = BigInt(Number.MIN_SAFE_INTEGER) * 2n - 1n;
@@ -188,7 +201,7 @@ describe('json', () => {
       `}`;
     parse(text);
 
-    expect(spyParse).toHaveBeenCalled();
+    expect(JSON11.parse).toHaveBeenCalled();
   });
 
   it('can handle BigInt values while stringifying', () => {

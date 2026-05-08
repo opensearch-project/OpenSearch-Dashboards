@@ -28,6 +28,16 @@
  * under the License.
  */
 
+// Mock react-markdown ESM module before imports
+jest.mock('react-markdown', () => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const React = require('react');
+  return {
+    __esModule: true,
+    default: ({ children }: { children: string }) => React.createElement('div', null, children),
+  };
+});
+
 import { uiSettingsServiceMock } from '../../ui_settings/ui_settings_service.mock';
 import { UserBannerService } from './user_banner_service';
 import { overlayBannersServiceMock } from './banners_service.mock';
@@ -67,13 +77,17 @@ describe('OverlayBannersService', () => {
     expect(banners.replace).not.toHaveBeenCalled();
   });
 
-  it('adds banner if setting is specified', () => {
+  it('adds banner if setting is specified', async () => {
     startService('testing banner!');
     expect(banners.replace).toHaveBeenCalled();
 
     const mount = banners.replace.mock.calls[0][1];
     const div = document.createElement('div');
     mount(div);
+
+    // Wait for React 18 async rendering (including lazy component loading)
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
     expect(div.querySelector('.euiCallOut')).toBeInstanceOf(HTMLDivElement);
   });
 

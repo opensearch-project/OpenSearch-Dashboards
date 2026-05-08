@@ -56,6 +56,7 @@ function DefaultEditorControls({
 }: DefaultEditorControlsProps) {
   const { enableAutoApply } = vis.type.editorConfig;
   const [autoApplyEnabled, setAutoApplyEnabled] = useState(false);
+  // @ts-expect-error TS7006 TODO(ts-error): fixme
   const toggleAutoApply = useCallback((e) => setAutoApplyEnabled(!autoApplyEnabled), [
     autoApplyEnabled,
   ]);

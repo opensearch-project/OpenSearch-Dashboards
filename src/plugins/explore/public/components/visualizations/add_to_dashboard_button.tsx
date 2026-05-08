@@ -5,7 +5,7 @@
 
 import { i18n } from '@osd/i18n';
 import { EuiText, EuiLink, EuiButtonEmpty } from '@elastic/eui';
-import React, { useState, useMemo } from 'react';
+import { useState, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { SimpleSavedObject } from 'src/core/public';
 import { useObservable } from 'react-use';
@@ -13,10 +13,9 @@ import {
   toMountPoint,
   useOpenSearchDashboards,
 } from '../../../../opensearch_dashboards_react/public';
-import { createOsdUrlStateStorage } from '../../../../opensearch_dashboards_utils/public';
 import { SavedExplore } from '../../saved_explore';
 import { AddToDashboardModal } from './add_to_dashboard_modal';
-import { selectUIState } from '../../application/utils/state_management/selectors';
+import { selectActiveTabId } from '../../application/utils/state_management/selectors';
 import {
   DataView as Dataset,
   IndexPattern,
@@ -48,37 +47,40 @@ export interface OnSaveProps {
 
 export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern | Dataset }) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
-  const {
-    core,
-    dashboard,
-    savedObjects,
-    toastNotifications,
-    uiSettings,
-    scopedHistory,
-    data,
-  } = services;
+  const { core, dashboard, savedObjects, toastNotifications, data, keyboardShortcut } = services;
   const visualizationBuilder = getVisualizationBuilder();
   const chartConfig = useObservable(visualizationBuilder.visConfig$);
 
   const searchContext = useSearchContext();
 
-  // Create osdUrlStateStorage from storage
-  const osdUrlStateStorage = useMemo(() => {
-    return createOsdUrlStateStorage({
-      useHash: uiSettings.get('state:storeInSessionStorage', false),
-      history: scopedHistory,
-    });
-  }, [uiSettings, scopedHistory]);
+  const handleAddToDashboard = useCallback(() => {
+    setShowAddToDashboardModal(true);
+  }, []);
 
+  keyboardShortcut?.useKeyboardShortcut({
+    id: 'addToDashboard',
+    pluginId: 'explore',
+    name: i18n.translate('explore.addToDashboard.addToDashboardShortcut', {
+      defaultMessage: 'Add to dashboard',
+    }),
+    category: i18n.translate('explore.addToDashboard.dataActionsCategory', {
+      defaultMessage: 'Data actions',
+    }),
+    keys: 'a',
+    execute: handleAddToDashboard,
+  });
+
+  // Use the shared osdUrlStateStorage instance from services to avoid
+  // multiple instances competing to update the same URL.
   const { startSyncingQueryStateWithUrl } = useSyncQueryStateWithUrl(
     data.query,
-    osdUrlStateStorage
+    services.osdUrlStateStorage!
   );
 
   const [showAddToDashboardModal, setShowAddToDashboardModal] = useState(false);
 
-  const uiState = useSelector(selectUIState);
-  const tabDefinition = services.tabRegistry?.getTab?.(uiState.activeTabId);
+  const activeTabId = useSelector(selectActiveTabId);
+  const tabDefinition = services.tabRegistry?.getTab?.(activeTabId);
 
   const savedExploreIdFromUrl = useCurrentExploreId();
   const flavorId = useFlavorId();
@@ -97,7 +99,7 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
     const savedExploreWithState = saveStateToSavedObject(
       savedExplore,
       flavorId ?? 'logs',
-      tabDefinition!,
+      tabDefinition,
       {
         chartType: chartConfig?.type,
         axesMapping: chartConfig?.axesMapping,

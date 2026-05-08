@@ -35,7 +35,6 @@ exports[`<FeatureCards /> render with complex navLinks 1`] = `
                   title1
                 </button>
               </span>
-              
             </div>
           </div>
         </div>
@@ -61,7 +60,6 @@ exports[`<FeatureCards /> render with complex navLinks 1`] = `
                   title2
                 </button>
               </span>
-              
             </div>
           </div>
         </div>
@@ -87,7 +85,6 @@ exports[`<FeatureCards /> render with complex navLinks 1`] = `
                   title3
                 </button>
               </span>
-              
             </div>
           </div>
         </div>
@@ -113,7 +110,6 @@ exports[`<FeatureCards /> render with complex navLinks 1`] = `
                   title4
                 </button>
               </span>
-              
             </div>
           </div>
         </div>
@@ -139,7 +135,6 @@ exports[`<FeatureCards /> render with complex navLinks 1`] = `
                   title5
                 </button>
               </span>
-              
             </div>
           </div>
         </div>
@@ -182,7 +177,6 @@ exports[`<FeatureCards /> render with complex navLinks 1`] = `
                   title1
                 </button>
               </span>
-              
             </div>
           </div>
         </div>
@@ -208,7 +202,6 @@ exports[`<FeatureCards /> render with complex navLinks 1`] = `
                   title2
                 </button>
               </span>
-              
             </div>
           </div>
         </div>
@@ -234,7 +227,6 @@ exports[`<FeatureCards /> render with complex navLinks 1`] = `
                   title3
                 </button>
               </span>
-              
             </div>
           </div>
         </div>
@@ -260,7 +252,6 @@ exports[`<FeatureCards /> render with complex navLinks 1`] = `
                   title4
                 </button>
               </span>
-              
             </div>
           </div>
         </div>
@@ -286,7 +277,6 @@ exports[`<FeatureCards /> render with complex navLinks 1`] = `
                   title5
                 </button>
               </span>
-              
             </div>
           </div>
         </div>

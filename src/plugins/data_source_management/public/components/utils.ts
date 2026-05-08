@@ -38,7 +38,10 @@ import {
 } from '../service/data_source_selection_service';
 import { DataSourceError } from '../types';
 import { DATACONNECTIONS_BASE, LOCAL_CLUSTER } from '../constants';
-import { DataConnectionSavedObjectAttributes } from '../../../data_source/common/data_connections';
+import {
+  DataConnectionSavedObjectAttributes,
+  DATA_CONNECTION_SAVED_OBJECT_TYPE,
+} from '../../../data_source/common/data_connections';
 import { DataSourceEngineType } from '../../../data_source/common/data_sources';
 
 export const getDirectQueryConnections = async (dataSourceId: string, http: HttpSetup) => {
@@ -47,8 +50,10 @@ export const getDirectQueryConnections = async (dataSourceId: string, http: Http
   if (!Array.isArray(res)) {
     throw new Error('Unexpected response format: expected an array of direct query connections.');
   }
-  const directQueryConnections: DataSourceTableItem[] = res.map(
-    (dataConnection: DirectQueryDatasourceDetails) => ({
+  const directQueryConnections: DataSourceTableItem[] = res
+    // Prometheus will come from data-connection saved objects
+    .filter((dc: DirectQueryDatasourceDetails) => dc.connector !== 'PROMETHEUS')
+    .map((dataConnection: DirectQueryDatasourceDetails) => ({
       id: `${dataSourceId}-${dataConnection.name}`,
       title: dataConnection.name,
       type:
@@ -59,8 +64,7 @@ export const getDirectQueryConnections = async (dataSourceId: string, http: Http
       connectionType: DataSourceConnectionType.DirectQueryConnection,
       description: dataConnection.description,
       parentId: dataSourceId,
-    })
-  );
+    }));
   return directQueryConnections;
 };
 
@@ -87,8 +91,10 @@ export const getRemoteClusterConnections = async (dataSourceId: string, http: Ht
 
 export const getLocalClusterConnections = async (http: HttpSetup) => {
   const res = await http.get(`${DATACONNECTIONS_BASE}/dataSourceMDSId=`);
-  const localClusterConnections: DataSourceTableItem[] = res.map(
-    (dataConnection: DirectQueryDatasourceDetails) => ({
+  const localClusterConnections: DataSourceTableItem[] = res
+    // Prometheus will come from data-connection saved objects
+    .filter((dc: DirectQueryDatasourceDetails) => dc.connector !== 'PROMETHEUS')
+    .map((dataConnection: DirectQueryDatasourceDetails) => ({
       id: `${dataConnection.name}`,
       title: dataConnection.name,
       type:
@@ -99,8 +105,7 @@ export const getLocalClusterConnections = async (http: HttpSetup) => {
       connectionType: DataSourceConnectionType.DirectQueryConnection,
       description: dataConnection.description,
       parentId: LOCAL_CLUSTER,
-    })
-  );
+    }));
   return localClusterConnections;
 };
 
@@ -443,11 +448,24 @@ export async function deleteDataSourceById(
 
 export async function deleteMultipleDataSources(
   savedObjectsClient: SavedObjectsClientContract,
-  selectedDataSources: DataSourceTableItem[]
+  selectedDataSources: DataSourceTableItem[],
+  http: HttpSetup
 ) {
   await Promise.all(
     selectedDataSources.map(async (selectedDataSource) => {
-      await deleteDataSourceById(selectedDataSource.id, savedObjectsClient);
+      if (selectedDataSource.objectType === DATA_CONNECTION_SAVED_OBJECT_TYPE) {
+        const savedObject = await savedObjectsClient.get(
+          DATA_CONNECTION_SAVED_OBJECT_TYPE,
+          selectedDataSource.id
+        );
+        const dataSourceMDSId = savedObject.references.find((r) => r.type === 'data-source')?.id;
+        return http.delete(
+          `${DATACONNECTIONS_BASE}/${selectedDataSource.title}/dataSourceMDSId=${
+            dataSourceMDSId || ''
+          }`
+        );
+      }
+      return deleteDataSourceById(selectedDataSource.id, savedObjectsClient);
     })
   );
 }

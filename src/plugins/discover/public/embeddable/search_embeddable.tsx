@@ -32,7 +32,7 @@ import { isEqual } from 'lodash';
 import * as Rx from 'rxjs';
 import { Subscription } from 'rxjs';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot, Root } from 'react-dom/client';
 import { i18n } from '@osd/i18n';
 import { UiActionsStart, APPLY_FILTER_TRIGGER } from '../../../ui_actions/public';
 import { RequestAdapter, Adapters } from '../../../inspector/public';
@@ -120,6 +120,7 @@ export class SearchEmbeddable
   private prevQuery?: Query;
 
   private node?: HTMLElement;
+  private root?: Root;
 
   constructor(
     {
@@ -185,10 +186,11 @@ export class SearchEmbeddable
     if (!this.searchProps) {
       throw new Error('Search scope not defined');
     }
-    if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
+    if (this.root) {
+      this.root.unmount();
     }
     this.node = node;
+    this.root = createRoot(node);
   }
 
   public destroy() {
@@ -199,8 +201,8 @@ export class SearchEmbeddable
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
-    if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
+    if (this.root) {
+      this.root.unmount();
     }
     if (this.autoRefreshFetchSubscription) {
       this.autoRefreshFetchSubscription.unsubscribe();
@@ -362,7 +364,7 @@ export class SearchEmbeddable
   };
 
   private renderComponent(node: HTMLElement, searchProps: SearchProps) {
-    if (!this.searchProps) {
+    if (!this.searchProps || !this.root) {
       return;
     }
     const props = {
@@ -370,7 +372,7 @@ export class SearchEmbeddable
     };
 
     const MemorizedSearchEmbeddableComponent = React.memo(SearchEmbeddableComponent);
-    ReactDOM.render(<MemorizedSearchEmbeddableComponent {...props} />, node);
+    this.root.render(<MemorizedSearchEmbeddableComponent {...props} />);
   }
 
   private async pushContainerStateParamsToProps(searchProps: SearchProps, force: boolean = false) {

@@ -28,8 +28,7 @@
  * under the License.
  */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot, Root } from 'react-dom/client';
 import { EuiLoadingChart } from '@elastic/eui';
 import classNames from 'classnames';
 import { Embeddable, EmbeddableInput, IContainer } from '../../../../../embeddable/public';
@@ -38,24 +37,25 @@ export const PLACEHOLDER_EMBEDDABLE = 'placeholder';
 
 export class PlaceholderEmbeddable extends Embeddable {
   public readonly type = PLACEHOLDER_EMBEDDABLE;
-  private node?: HTMLElement;
+  private root?: Root;
 
   constructor(initialInput: EmbeddableInput, parent?: IContainer) {
     super(initialInput, {}, parent);
     this.input = initialInput;
   }
   public render(node: HTMLElement) {
-    if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
+    if (this.root) {
+      this.root.unmount();
     }
-    this.node = node;
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
+    this.__node = node;
+    this.root = createRoot(node);
 
     const classes = classNames('embPanel', 'embPanel-isLoading');
-    ReactDOM.render(
+    this.root.render(
       <div className={classes}>
         <EuiLoadingChart size="l" mono />
-      </div>,
-      node
+      </div>
     );
   }
 

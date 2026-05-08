@@ -1,2 +1,0 @@
-fix:
-- [Query Enhancement] Fix Enter command behaviour in query editor ([#10446](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10446))

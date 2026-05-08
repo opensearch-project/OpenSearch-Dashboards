@@ -66,18 +66,44 @@ describe('WorkspaceCollaboratorTypesService', () => {
         },
       ];
 
-      service.setTypes(initialTypes);
-
+      // Track all emitted values
+      const emittedValues: WorkspaceCollaboratorType[][] = [];
       const subscription = service.getTypes$().subscribe((types) => {
-        expect(types).toEqual(initialTypes);
-        service.setTypes(updatedTypes);
+        emittedValues.push(types);
       });
 
-      const secondSubscription = service.getTypes$().subscribe((types) => {
-        expect(types).toEqual(updatedTypes);
-        subscription.unsubscribe();
-        secondSubscription.unsubscribe();
-      });
+      // Initially empty
+      expect(emittedValues).toHaveLength(1);
+      expect(emittedValues[0]).toEqual([]);
+
+      // Set initial types
+      service.setTypes(initialTypes);
+      expect(emittedValues).toHaveLength(2);
+      expect(emittedValues[1]).toEqual(initialTypes);
+
+      // Update to new types
+      service.setTypes(updatedTypes);
+      expect(emittedValues).toHaveLength(3);
+      expect(emittedValues[2]).toEqual(updatedTypes);
+
+      subscription.unsubscribe();
+    });
+
+    it('should support types with identitySource', () => {
+      const typesWithIdentitySource: WorkspaceCollaboratorType[] = [
+        {
+          id: 'user',
+          name: 'User',
+          buttonLabel: 'Add Users',
+          onAdd: jest.fn(),
+          identitySource: { source: 'LDAP', type: 'user' },
+        },
+      ];
+
+      service.setTypes(typesWithIdentitySource);
+
+      const types = service.getTypes$().getValue();
+      expect(types[0].identitySource).toEqual({ source: 'LDAP', type: 'user' });
     });
   });
 
@@ -94,18 +120,27 @@ describe('WorkspaceCollaboratorTypesService', () => {
 
       service.setTypes(collaboratorTypes);
 
+      // Track emissions and completion
+      const emittedValues: WorkspaceCollaboratorType[][] = [];
+      let completed = false;
+
       const subscription = service.getTypes$().subscribe({
-        next: () => {
-          // This should not be called after stop()
-          expect(true).toBe(false);
+        next: (types) => {
+          emittedValues.push(types);
         },
         complete: () => {
-          // The observable should complete
-          expect(true).toBe(true);
+          completed = true;
         },
       });
 
+      // BehaviorSubject emits current value immediately on subscribe
+      expect(emittedValues).toHaveLength(1);
+      expect(emittedValues[0]).toEqual(collaboratorTypes);
+
       service.stop();
+
+      // Observable should complete
+      expect(completed).toBe(true);
 
       // Trying to update collaborator types after stop() should not emit any values
       service.setTypes([
@@ -116,6 +151,9 @@ describe('WorkspaceCollaboratorTypesService', () => {
           onAdd: jest.fn(),
         },
       ]);
+
+      // No new emissions after stop
+      expect(emittedValues).toHaveLength(1);
 
       subscription.unsubscribe();
     });

@@ -30,7 +30,8 @@
 
 import { EuiBreadcrumb, IconType } from '@elastic/eui';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
+import type { Root } from 'react-dom/client';
 import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
 import {
   BehaviorSubject,
@@ -72,6 +73,7 @@ import {
   GlobalSearchServiceStartContract,
 } from './global_search';
 import { searchPages } from './ui/global_search/search_pages_command';
+import { KeyboardShortcutStart } from '../keyboard_shortcut';
 
 export { ChromeNavControls, ChromeRecentlyAccessed, ChromeDocTitle };
 
@@ -117,12 +119,9 @@ export interface ChromeGlobalBanner {
   component: React.ReactNode;
 }
 
-interface ConstructorParams {
-  browserSupportsCsp: boolean;
-}
-
 export interface SetupDeps {
   uiSettings: IUiSettingsClient;
+  injectedMetadata: InjectedMetadataStart;
 }
 
 export interface StartDeps {
@@ -134,6 +133,7 @@ export interface StartDeps {
   uiSettings: IUiSettingsClient;
   overlays: OverlayStart;
   workspaces: WorkspacesStart;
+  keyboardShortcut: KeyboardShortcutStart | undefined;
 }
 
 type CollapsibleNavHeaderRender = () => JSX.Element | null;
@@ -152,13 +152,15 @@ export class ChromeService {
   private readonly navGroup = new ChromeNavGroupService();
   private readonly globalSearch = new GlobalSearchService();
   private useUpdatedHeader = false;
+  private enableIconSideNav = false;
   private updatedHeaderSubscription: Subscription | undefined;
   private collapsibleNavHeaderRender?: CollapsibleNavHeaderRender;
   private navGroupStart?: ChromeNavGroupServiceStartContract;
   private applicationStart?: InternalApplicationStart;
   private globalBanner$ = new BehaviorSubject<ChromeGlobalBanner | undefined>(undefined);
+  private helpMenuRoot?: Root;
 
-  constructor(private readonly params: ConstructorParams) {}
+  constructor() {}
 
   /**
    * These observables allow consumers to toggle the chrome visibility via either:
@@ -220,9 +222,11 @@ export class ChromeService {
     );
   }
 
-  public setup({ uiSettings }: SetupDeps): ChromeSetup {
+  public setup({ uiSettings, injectedMetadata }: SetupDeps): ChromeSetup {
     const navGroup = this.navGroup.setup({ uiSettings });
     const globalSearch = this.globalSearch.setup();
+
+    this.enableIconSideNav = injectedMetadata.getEnableIconSideNav();
 
     globalSearch.registerSearchCommand({
       id: 'pagesSearch',
@@ -243,6 +247,7 @@ export class ChromeService {
       },
       navGroup,
       globalSearch,
+      getIsIconSideNavEnabled: () => this.enableIconSideNav,
     };
   }
 
@@ -255,6 +260,7 @@ export class ChromeService {
     uiSettings,
     overlays,
     workspaces,
+    keyboardShortcut,
   }: StartDeps): Promise<InternalChromeStart> {
     this.initVisibility(application);
     this.initHeaderVariant(application);
@@ -315,7 +321,8 @@ export class ChromeService {
       navControls.registerLeftBottom({
         order: 9000,
         mount: (element: HTMLElement) => {
-          ReactDOM.render(
+          this.helpMenuRoot = createRoot(element);
+          this.helpMenuRoot.render(
             <I18nProvider>
               <HeaderHelpMenu
                 helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
@@ -325,10 +332,14 @@ export class ChromeService {
                 surveyLink={injectedMetadata.getSurvey()}
                 useUpdatedAppearance
               />
-            </I18nProvider>,
-            element
+            </I18nProvider>
           );
-          return () => ReactDOM.unmountComponentAtNode(element);
+          return () => {
+            if (this.helpMenuRoot) {
+              this.helpMenuRoot.unmount();
+              this.helpMenuRoot = undefined;
+            }
+          };
         },
       });
     }
@@ -340,17 +351,6 @@ export class ChromeService {
 
       return msie > 0 || trident > 0;
     };
-
-    if (!this.params.browserSupportsCsp && injectedMetadata.getCspConfig().warnLegacyBrowsers) {
-      notifications.toasts.addWarning({
-        title: mountReactNode(
-          <FormattedMessage
-            id="core.chrome.legacyBrowserWarning"
-            defaultMessage="Your browser does not meet the security requirements for OpenSearch Dashboards."
-          />
-        ),
-      });
-    }
 
     if (isIE()) {
       notifications.toasts.addWarning({
@@ -415,6 +415,7 @@ export class ChromeService {
           navControlsExpandedRight$={navControls.getExpandedRight$()}
           navControlsLeftBottom$={navControls.getLeftBottom$()}
           navControlsPrimaryHeaderRight$={navControls.getPrimaryHeaderRight$()}
+          navControlsIconSideNavFooter$={navControls.getIconSideNavFooter$()}
           onIsLockedUpdate={setIsNavDrawerLocked}
           isLocked$={getIsNavDrawerLocked$}
           branding={injectedMetadata.getBranding()}
@@ -429,8 +430,10 @@ export class ChromeService {
           workspaceList$={workspaces.workspaceList$}
           currentWorkspace$={workspaces.currentWorkspace$}
           useUpdatedHeader={this.useUpdatedHeader}
-          globalSearchCommands={globalSearch.getAllSearchCommands()}
+          enableIconSideNav={this.enableIconSideNav}
+          globalSearchCommands$={globalSearch.getAllSearchCommands$()}
           globalBanner$={this.globalBanner$.pipe(takeUntil(this.stop$))}
+          keyboardShortcut={keyboardShortcut}
         />
       ),
 
@@ -501,6 +504,8 @@ export class ChromeService {
       setGlobalBanner: (banner?: ChromeGlobalBanner) => {
         this.globalBanner$.next(banner);
       },
+
+      getIsIconSideNavEnabled: () => this.enableIconSideNav,
     };
   }
 
@@ -527,6 +532,7 @@ export interface ChromeSetup {
   navGroup: ChromeNavGroupServiceSetupContract;
   /** {@inheritdoc GlobalSearchService} */
   globalSearch: GlobalSearchServiceSetupContract;
+  getIsIconSideNavEnabled: () => boolean;
 }
 
 /**
@@ -547,9 +553,12 @@ export interface ChromeSetup {
  * @example
  * How to set the help dropdown extension:
  * ```tsx
+ * import { createRoot } from 'react-dom/client';
+ *
  * core.chrome.setHelpExtension(elem => {
- *   ReactDOM.render(<MyHelpComponent />, elem);
- *   return () => ReactDOM.unmountComponentAtNode(elem);
+ *   const root = createRoot(elem);
+ *   root.render(<MyHelpComponent />);
+ *   return () => root.unmount();
  * });
  * ```
  *
@@ -687,6 +696,11 @@ export interface ChromeStart {
    * Set or unset the global banner component
    */
   setGlobalBanner(banner?: ChromeGlobalBanner): void;
+
+  /**
+   * Returns whether the icon side nav is enabled via config.
+   */
+  getIsIconSideNavEnabled(): boolean;
 }
 
 /** @internal */

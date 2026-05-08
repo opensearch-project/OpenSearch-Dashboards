@@ -35,7 +35,7 @@ import { checkServerIdentity } from 'tls';
 import { pick } from '@osd/std';
 import { Logger } from '../../logging';
 import { OpenSearchConfig } from '../opensearch_config';
-import { DEFAULT_HEADERS } from '../default_headers';
+import { getDefaultHeaders } from '../default_headers';
 
 /**
  * @privateRemarks Config that consumers can pass to the OpenSearch JS client is complex and includes
@@ -57,6 +57,7 @@ export type LegacyOpenSearchClientConfig = Pick<ConfigOptions, 'keepAlive' | 'lo
     | 'hosts'
     | 'username'
     | 'password'
+    | 'requestCompression'
   > & {
     pingTimeout?: OpenSearchConfig['pingTimeout'] | ConfigOptions['pingTimeout'];
     requestTimeout?: OpenSearchConfig['requestTimeout'] | ConfigOptions['requestTimeout'];
@@ -143,7 +144,7 @@ export function parseOpenSearchClientConfig(
         path: uri.pathname,
         query: query === '' ? null : query,
         headers: {
-          ...DEFAULT_HEADERS,
+          ...getDefaultHeaders(config.requestCompression),
           ...config.customHeaders,
         },
       };

@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { unparse } from 'papaparse';
 import moment from 'moment';
 import { saveAs } from 'file-saver';
+import { autoBom } from '@osd/std';
 import { useDiscoverContext } from '../../view_components/context';
 import { DownloadCsvFormId, MAX_DOWNLOAD_CSV_COUNT } from './constants';
 import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
@@ -57,7 +58,7 @@ export const formatRowsForCsv = ({
 export const saveDataAsCsv = (csvData: string) => {
   const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8' });
   const fileName = `opensearch_export_${moment().format('YYYY-MM-DD')}`;
-  saveAs(blob, fileName);
+  saveAs(autoBom(blob), fileName);
 };
 
 export const useDiscoverDownloadCsv = ({

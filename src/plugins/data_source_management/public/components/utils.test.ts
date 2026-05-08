@@ -293,25 +293,78 @@ describe('DataSourceManagement: Utils.ts', () => {
   });
 
   describe('Delete multiple data sources by id', () => {
+    let http: jest.Mocked<HttpStart>;
+
+    beforeEach(() => {
+      http = coreMock.createStart().http;
+    });
+
     test('Success: deleting multiple data source', async () => {
       try {
         mockResponseForSavedObjectsCalls(savedObjects.client, 'delete', {});
         // @ts-expect-error TS2345 TODO(ts-error): fixme
-        await deleteMultipleDataSources(savedObjects.client, getMappedDataSources);
+        await deleteMultipleDataSources(savedObjects.client, getMappedDataSources, http);
         expect(true).toBe(true); // This will be executed if multiple delete call is successful.
       } catch (e) {
         // this block should not execute as the test case name suggests
         expect(e).toBeFalsy();
       }
     });
+
     test('failure: deleting multiple data sources', async () => {
       try {
         mockErrorResponseForSavedObjectsCalls(savedObjects.client, 'delete');
         // @ts-expect-error TS2345 TODO(ts-error): fixme
-        await deleteMultipleDataSources(savedObjects.client, getMappedDataSources);
+        await deleteMultipleDataSources(savedObjects.client, getMappedDataSources, http);
       } catch (e) {
         expect(e).toBeTruthy();
       }
+    });
+
+    test('Success: deleting prometheus data connection via saved object', async () => {
+      const prometheusDataSource = {
+        id: 'test-prometheus-id',
+        title: 'test-prometheus',
+        objectType: 'data-connection',
+      };
+
+      mockResponseForSavedObjectsCalls(savedObjects.client, 'get', {
+        id: 'test-prometheus-id',
+        type: 'data-connection',
+        references: [{ id: 'data-source-123', type: 'data-source', name: 'dataSource' }],
+        attributes: {},
+      });
+
+      http.delete.mockResolvedValue({ success: true });
+
+      await deleteMultipleDataSources(savedObjects.client, [prometheusDataSource], http);
+
+      expect(http.delete).toHaveBeenCalledWith(
+        '/api/directquery/dataconnections/test-prometheus/dataSourceMDSId=data-source-123'
+      );
+    });
+
+    test('Success: deleting prometheus data connection without data source reference', async () => {
+      const prometheusDataSource = {
+        id: 'test-prometheus-id',
+        title: 'test-prometheus',
+        objectType: 'data-connection',
+      };
+
+      mockResponseForSavedObjectsCalls(savedObjects.client, 'get', {
+        id: 'test-prometheus-id',
+        type: 'data-connection',
+        references: [],
+        attributes: {},
+      });
+
+      http.delete.mockResolvedValue({ success: true });
+
+      await deleteMultipleDataSources(savedObjects.client, [prometheusDataSource], http);
+
+      expect(http.delete).toHaveBeenCalledWith(
+        '/api/directquery/dataconnections/test-prometheus/dataSourceMDSId='
+      );
     });
   });
 

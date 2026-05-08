@@ -7,7 +7,17 @@
 import dns from 'dns-sync';
 import IPCIDR from 'ip-cidr';
 
-export function isValidURL(endpoint: string, deniedIPs?: string[]) {
+export interface URLValidationResult {
+  valid: boolean;
+  error?: string; // Detailed error message for server logs
+  userMessage?: string; // Safe message for client response
+}
+
+export function isValidURL(
+  endpoint: string,
+  deniedIPs?: string[],
+  allowlistedSuffixes?: string[]
+): URLValidationResult {
   // Check the format of URL, URL has be in the format as
   // scheme://server/path/resource otherwise an TypeError
   // would be thrown.
@@ -15,16 +25,35 @@ export function isValidURL(endpoint: string, deniedIPs?: string[]) {
   try {
     url = new URL(endpoint);
   } catch (err) {
-    return false;
+    return {
+      valid: false,
+      error: `Invalid URL format: ${err instanceof Error ? err.message : String(err)}`,
+      userMessage: 'Invalid URL format',
+    };
   }
 
   if (!(Boolean(url) && (url.protocol === 'http:' || url.protocol === 'https:'))) {
-    return false;
+    return {
+      valid: false,
+      error: `Invalid protocol: ${url.protocol}. Only http and https are allowed`,
+      userMessage: 'Invalid protocol. Only http and https are allowed',
+    };
+  }
+
+  if (allowlistedSuffixes && allowlistedSuffixes.length > 0) {
+    const isallowlisted = allowlistedSuffixes.some((suffix) => url.hostname.endsWith(suffix));
+    if (isallowlisted) {
+      return { valid: true };
+    }
   }
 
   const ip = getIpAddress(url);
   if (!ip) {
-    return false;
+    return {
+      valid: false,
+      error: `Failed to resolve hostname "${url.hostname}" to IP address`,
+      userMessage: 'Unable to resolve hostname to IP address',
+    };
   }
 
   // IP CIDR check if a specific IP address fall in the
@@ -32,10 +61,16 @@ export function isValidURL(endpoint: string, deniedIPs?: string[]) {
   for (const deniedIP of deniedIPs ?? []) {
     const cidr = new IPCIDR(deniedIP);
     if (cidr.contains(ip)) {
-      return false;
+      const range = cidr.toRange();
+      return {
+        valid: false,
+        error: `IP ${ip} is blocked by denied range ${deniedIP} (${range[0]} - ${range[1]})`,
+        userMessage: 'Endpoint IP address is not allowed',
+      };
     }
   }
-  return true;
+
+  return { valid: true };
 }
 
 /**

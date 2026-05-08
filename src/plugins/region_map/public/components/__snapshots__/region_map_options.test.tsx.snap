@@ -161,9 +161,7 @@ exports[`region_map_options renders the RegionMapOptions with custom option if c
                     disabled={true}
                     hidden={true}
                     value="EMPTY_VALUE"
-                  >
-                    
-                  </option>
+                  />
                   <option>
                     sample
                   </option>
@@ -226,9 +224,7 @@ exports[`region_map_options renders the RegionMapOptions with custom option if c
                     disabled={true}
                     hidden={true}
                     value="EMPTY_VALUE"
-                  >
-                    
-                  </option>
+                  />
                   <option
                     label="name"
                     value="name"
@@ -409,9 +405,7 @@ exports[`region_map_options renders the RegionMapOptions with custom option if c
                 disabled={true}
                 hidden={true}
                 value="EMPTY_VALUE"
-              >
-                
-              </option>
+              />
             </select>
             <div
               className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
@@ -573,9 +567,7 @@ exports[`region_map_options renders the RegionMapOptions with custom option if c
                 disabled={true}
                 hidden={true}
                 value="EMPTY_VALUE"
-              >
-                
-              </option>
+              />
             </select>
             <div
               className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
@@ -659,9 +651,7 @@ exports[`region_map_options renders the RegionMapOptions with default option if 
                     disabled={true}
                     hidden={true}
                     value="EMPTY_VALUE"
-                  >
-                    
-                  </option>
+                  />
                   <option>
                     sample
                   </option>
@@ -724,9 +714,7 @@ exports[`region_map_options renders the RegionMapOptions with default option if 
                     disabled={true}
                     hidden={true}
                     value="EMPTY_VALUE"
-                  >
-                    
-                  </option>
+                  />
                   <option
                     value="name"
                   />
@@ -906,9 +894,7 @@ exports[`region_map_options renders the RegionMapOptions with default option if 
                 disabled={true}
                 hidden={true}
                 value="EMPTY_VALUE"
-              >
-                
-              </option>
+              />
             </select>
             <div
               className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
@@ -1070,9 +1056,7 @@ exports[`region_map_options renders the RegionMapOptions with default option if 
                 disabled={true}
                 hidden={true}
                 value="EMPTY_VALUE"
-              >
-                
-              </option>
+              />
             </select>
             <div
               className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"

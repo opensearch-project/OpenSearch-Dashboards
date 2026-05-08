@@ -6,7 +6,7 @@
 import React, { useCallback, useState } from 'react';
 import { EuiForm, EuiFormRow, EuiButton, EuiFieldText } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot, Root } from 'react-dom/client';
 import { ExpressionRenderDefinition } from '../../../../../src/plugins/expressions/public';
 
 export interface QuickFormRenderValue {
@@ -21,11 +21,13 @@ export const quickFormRenderer: ExpressionRenderDefinition<QuickFormRenderValue>
   }),
   reuseDomNode: true,
   render: (domNode, config, handlers) => {
+    const root = createRoot(domNode);
+
     handlers.onDestroy(() => {
-      unmountComponentAtNode(domNode);
+      root.unmount();
     });
 
-    render(
+    root.render(
       <QuickForm
         {...config}
         onSubmit={(value) =>
@@ -33,10 +35,9 @@ export const quickFormRenderer: ExpressionRenderDefinition<QuickFormRenderValue>
             data: value,
           })
         }
-      />,
-      domNode,
-      handlers.done
+      />
     );
+    handlers.done();
   },
 };
 

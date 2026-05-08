@@ -83,7 +83,7 @@ export class OsdClient {
   /**
    * Make a direct request to the OpenSearch Dashboards server
    */
-  async request<T>(options: ReqOptions) {
+  async request<T>(options: ReqOptions): Promise<import('axios').AxiosResponse<T>> {
     return await this.requester.request<T>(options);
   }
 

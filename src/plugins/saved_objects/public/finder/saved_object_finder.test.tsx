@@ -44,7 +44,7 @@ import {
 } from '@elastic/eui';
 import { IconType } from '@elastic/eui';
 import { shallow } from 'enzyme';
-import React from 'react';
+
 import * as sinon from 'sinon';
 import { SavedObjectFinderUi as SavedObjectFinder } from './saved_object_finder';
 import { coreMock } from '../../../../core/public/mocks';
@@ -91,7 +91,7 @@ describe('SavedObjectsFinder', () => {
 
     expect(core.savedObjects.client.find).toHaveBeenCalledWith({
       type: ['search'],
-      fields: ['title'],
+      fields: ['title', 'displayName'],
       search: undefined,
       page: 1,
       perPage: 10,
@@ -246,7 +246,7 @@ describe('SavedObjectsFinder', () => {
 
       expect(core.savedObjects.client.find).toHaveBeenCalledWith({
         type: ['search'],
-        fields: ['title'],
+        fields: ['title', 'displayName'],
         search: 'abc*',
         page: 1,
         perPage: 10,
@@ -289,7 +289,7 @@ describe('SavedObjectsFinder', () => {
 
       expect(core.savedObjects.client.find).toHaveBeenCalledWith({
         type: ['type1', 'type2'],
-        fields: ['title', 'field1', 'field2', 'field3'],
+        fields: ['title', 'displayName', 'field1', 'field2', 'field3'],
         search: 'abc*',
         page: 1,
         perPage: 10,
@@ -355,7 +355,7 @@ describe('SavedObjectsFinder', () => {
 
     expect(core.savedObjects.client.find).toHaveBeenCalledWith({
       type: ['search', 'vis'],
-      fields: ['title'],
+      fields: ['title', 'displayName'],
       search: undefined,
       page: 1,
       perPage: 10,
@@ -676,6 +676,7 @@ describe('SavedObjectsFinder', () => {
     core.uiSettings.get.mockImplementation(() => 10);
 
     const wrapper = shallow(
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       <SavedObjectFinder
         savedObjects={core.savedObjects}
         uiSettings={core.uiSettings}

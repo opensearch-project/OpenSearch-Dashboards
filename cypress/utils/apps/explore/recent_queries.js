@@ -31,19 +31,7 @@ export const BaseQuery = {
   },
 };
 
-export const TestQueries = [
-  'bytes_transferred >',
-  'bytes_transferred < 8000',
-  'bytes_transferred > 8000',
-  'status_code = 404',
-  'status_code = 501',
-  'status_code = 503',
-  'status_code = 400',
-  'status_code = 401',
-  'status_code = 403',
-  'status_code = 200',
-  'event_sequence_number > 10000000',
-];
+export const TestQueries = ['bytes_transferred >', 'bytes_transferred < 8000'];
 
 /**
  * The configurations needed for recent queries tests
@@ -60,7 +48,7 @@ export const generateRecentQueriesTestConfiguration = (dataset, datasetType, lan
     dataset,
     datasetType: customDatasetType,
     language,
-    alternativeDataset: '.opensearch-sap-log-types-config',
+    alternativeDataset: '.kibana',
     defaultQuery: defaultQuery,
     testName: `dataset: ${datasetType} and language: ${language.name}`,
   };

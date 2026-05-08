@@ -29,7 +29,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 
 import { registerTestBed, TestBed } from '../shared_imports';
 import { Form, UseField } from '../components';

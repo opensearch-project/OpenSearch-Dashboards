@@ -11,7 +11,7 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import type { ApplicationStart } from 'opensearch-dashboards/public';
 import { WorkspaceFormDataState, WorkspaceCancelModal } from '../workspace_form';
 import {
@@ -24,7 +24,6 @@ interface WorkspaceCreateActionPanelProps {
   formData: Pick<WorkspaceFormDataState, 'name' | 'description' | 'selectedDataSourceConnections'>;
   application: ApplicationStart;
   isSubmitting: boolean;
-  dataSourceEnabled: boolean;
 }
 
 export const WorkspaceCreateActionPanel = ({
@@ -32,15 +31,13 @@ export const WorkspaceCreateActionPanel = ({
   formData,
   application,
   isSubmitting,
-  dataSourceEnabled,
 }: WorkspaceCreateActionPanelProps) => {
   const [isCancelModalVisible, setIsCancelModalVisible] = useState(false);
   const closeCancelModal = useCallback(() => setIsCancelModalVisible(false), []);
   const showCancelModal = useCallback(() => setIsCancelModalVisible(true), []);
   const createButtonDisabled =
     (formData.name?.length ?? 0) > MAX_WORKSPACE_NAME_LENGTH ||
-    (formData.description?.length ?? 0) > MAX_WORKSPACE_DESCRIPTION_LENGTH ||
-    (dataSourceEnabled && formData.selectedDataSourceConnections.length === 0);
+    (formData.description?.length ?? 0) > MAX_WORKSPACE_DESCRIPTION_LENGTH;
 
   return (
     <>

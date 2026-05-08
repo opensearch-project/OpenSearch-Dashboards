@@ -20,3 +20,12 @@ export function plugin(initializerContext: PluginInitializerContext) {
 
 export { Facet, FacetProps, OpenSearchEnhancements, shimStats, shimSchemaRow } from './utils';
 export { QueryEnhancementsPluginSetup, QueryEnhancementsPluginStart } from './types';
+export {
+  BaseConnectionManager,
+  QueryExecutor,
+} from './connections/managers/base_connection_manager';
+export {
+  PromQLQueryParams,
+  PromQLQueryResponse,
+  MetricResult,
+} from './connections/managers/prometheus_manager';

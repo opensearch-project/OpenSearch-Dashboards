@@ -11,7 +11,7 @@ import {
   EuiPageContent,
   EuiCallOut,
 } from '@elastic/eui';
-import React from 'react';
+
 import { FormattedMessage } from '@osd/i18n/react';
 import { HttpSetup } from 'opensearch-dashboards/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';

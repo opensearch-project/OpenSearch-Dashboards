@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { mount, ReactWrapper } from 'enzyme';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import { EuiCompressedComboBox, EuiRadioGroup } from '@elastic/eui';
 import { QUERY_ALL, QUERY_RESTRICTED } from '../../../constants';
 import { QueryPermissionsConfiguration } from './query_permissions';

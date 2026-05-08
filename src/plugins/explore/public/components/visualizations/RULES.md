@@ -2,359 +2,177 @@
 
 ## Table of Contents
 
-- [Overview](#rule-overview)
-- [Rules Summary](#rules-summary)
-- [Detailed Rules](#current-rules)
-  - [Time Series Rules](#time-series-rules)
-  - [Metric and Category Combined Rules](#metric-and-category-combined-rules)
-  - [Metric Rules](#metric-rules)
+- [Overview](#overview)
+- [Rules Summary by Chart Type](#rules-summary-by-chart-type)
+- [Detailed Rules](#detailed-rules)
+  - [Line](#line)
+  - [Bar](#bar)
+  - [Area](#area)
+  - [Pie](#pie)
+  - [Scatter](#scatter)
+  - [Heatmap](#heatmap)
+  - [Metric](#metric)
+  - [Gauge](#gauge)
+  - [Bar Gauge](#bar-gauge)
+  - [Histogram](#histogram)
+  - [State Timeline](#state-timeline)
+  - [Table](#table)
 - [Rule Evaluation Process](#rule-evaluation-process)
 
-## Rule Overview
+## Overview
 
-Rules are evaluated based on the number and types of columns in the query resulted data:
+Each chart type registers one or more `VisRule` objects. A rule declares:
 
-- **Numerical columns**: Columns containing numeric values
-- **Categorical columns**: Columns containing text or categorical values
-- **Date columns**: Columns containing date/timestamp values
+- **priority** — higher values win when multiple rules match the same data shape
+- **mappings** — one or more axis-role-to-field-type maps; a rule matches if any mapping is compatible with the input columns
+- **render** — produces the chart React element
 
-Each rule has a unique ID, a matching function, and a list of chart types with priorities. The rule with the highest priority chart type is selected for visualization by default.
+Axis roles: `x`, `y`, `y2`, `color`, `facet`, `size`, `value`, `time`
+Field types: `numerical`, `categorical`, `date`
 
-## Rules Summary
+## Rules Summary by Chart Type
 
-| Rule ID                                  | Numerical | Categorical | Date | Default Chart | Other Charts    |
-| ---------------------------------------- | --------- | ----------- | ---- | ------------- | --------------- |
-| one-metric-one-date                      | 1         | 0           | 1    | Line          | Area, Bar       |
-| two-metric-one-date                      | 2         | 0           | 1    | Line          | Area, Bar       |
-| one-metric-one-category-one-date         | 1         | 1           | 1    | Line          | Area, Bar       |
-| one-metric-two-category-one-date         | 1         | 2           | 1    | Line          | Area, Bar       |
-| three-metric                             | 3         | 0           | 0    | Heatmap       | -               |
-| one-metric-two-category-high-cardinality | 1         | 2           | 0    | Heatmap       | Bar, Area       |
-| one-metric-two-category-low-cardinality  | 1         | 2           | 0    | Bar           | Heatmap, Area   |
-| one-metric-one-category                  | 1         | 1           | 0    | Bar           | Pie, Line, Area |
-| one-metric                               | 1         | 0           | 0    | Metric        | -               |
-| two-metric                               | 2         | 0           | 0    | Scatter       | -               |
-| two-metric-one-category                  | 2         | 1           | 0    | Scatter       | -               |
-| three-metric-one-category                | 3         | 1           | 0    | Scatter       | -               |
+| Chart Type     | # Rules | Axis Patterns Supported                                                                                                                        |
+| -------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Line           | 9       | Date×Num, Date×Num×Num, Date×Num×Cat, Date×Num×Num(color), Date×Num×Cat×Cat(facet), Date×Num×Num×Cat(facet), Cat×Num, Cat×Num×Cat, Cat×Num×Num |
+| Bar            | 9       | Cat×Num, Date×Num, Date×Num×Cat, Date×Num×Num, Date×Num×Cat×Cat(facet), Date×Num×Num×Cat(facet), Cat×Num×Cat, Cat×Num×Num, Num×Num             |
+| Area           | 8       | Date×Num, Date×Num×Cat, Date×Num×Num, Date×Num×Cat×Cat(facet), Date×Num×Num×Cat(facet), Cat×Num, Cat×Num×Cat, Cat×Num×Num                      |
+| Pie            | 2       | Num×Cat (size×color), Num×Num (size×color)                                                                                                     |
+| Scatter        | 3       | Num×Num, Num×Num×Cat, Num×Num×Cat×Num(size)                                                                                                    |
+| Heatmap        | 1       | Cat×Cat×Num (x×y×color)                                                                                                                        |
+| Metric         | 4       | Num(value), Num×Date(value×time), Num×Cat(value×facet), Num×Date×Cat(value×time×facet)                                                         |
+| Gauge          | 1       | Num(value)                                                                                                                                     |
+| Bar Gauge      | 1       | Num×Cat (y×x or x×y)                                                                                                                           |
+| Histogram      | 2       | Num×Num, Num(single)                                                                                                                           |
+| State Timeline | 4       | Date×Cat×Num, Date×Cat×Cat, Date×Cat(single), Date×Num(single)                                                                                 |
+| Table          | 0       | No rules (always available as a fallback)                                                                                                      |
 
-## Current Rules
+## Detailed Rules
 
-### Time Series Rules
-
-These rules apply to data with date columns and are typically used for time series visualizations.
-
-#### 1. One Metric & One Date Rule
+### Line
 
 <table>
-  <tr><td><strong>ID</strong></td><td><code>one-metric-one-date</code></td></tr>
-  <tr><td><strong>Description</strong></td><td>Time series visualization for single metric</td></tr>
-  <tr><td><strong>Matching Criteria</strong></td>
-      <td>
-        <ul>
-          <li>1 Numerical column</li>
-          <li>1 Date column</li>
-          <li>0 Categorical columns</li>
-        </ul>
-      </td>
-  </tr>
-  <tr><td><strong>Chart Types</strong></td>
-      <td>
-        <ul>
-          <li>Line Chart (priority: 100) - Default</li>
-          <li>Area Chart (priority: 80)</li>
-          <li>Bar Chart (priority: 60)</li>
-        </ul>
-      </td>
-  </tr>
+  <tr><th>Priority</th><th>Axis Mapping</th><th>Renderer</th></tr>
+  <tr><td>100</td><td><code>x: date, y: numerical</code></td><td>Simple line chart</td></tr>
+  <tr><td>100</td><td><code>x: date, y: numerical, y2: numerical</code></td><td>Line + bar combo chart</td></tr>
+  <tr><td>100</td><td><code>x: date, y: numerical, color: categorical</code></td><td>Multi-line chart (grouped by category)</td></tr>
+  <tr><td>80</td><td><code>x: date, y: numerical, color: numerical</code></td><td>Multi-line chart (grouped by numerical)</td></tr>
+  <tr><td>100</td><td><code>x: date, y: numerical, color: categorical, facet: categorical</code></td><td>Faceted multi-line chart</td></tr>
+  <tr><td>80</td><td><code>x: date, y: numerical, color: numerical, facet: categorical</code></td><td>Faceted multi-line chart (numerical color)</td></tr>
+  <tr><td>40</td><td><code>x: categorical, y: numerical</code></td><td>Category line chart</td></tr>
+  <tr><td>40</td><td><code>x: categorical, y: numerical, color: categorical</code></td><td>Category multi-line chart</td></tr>
+  <tr><td>40</td><td><code>x: categorical, y: numerical, color: numerical</code></td><td>Category multi-line chart (numerical color)</td></tr>
 </table>
 
-#### 2. Two Metric & One Date Rule
+### Bar
 
 <table>
-  <tr><td><strong>ID</strong></td><td><code>two-metric-one-date</code></td></tr>
-  <tr><td><strong>Description</strong></td><td>Time series visualization for double metrics</td></tr>
-  <tr><td><strong>Matching Criteria</strong></td>
-      <td>
-        <ul>
-          <li>2 Numerical columns</li>
-          <li>1 Date column</li>
-          <li>0 Categorical columns</li>
-        </ul>
-      </td>
-  </tr>
-  <tr><td><strong>Chart Types</strong></td>
-      <td>
-        <ul>
-          <li>Line Chart (priority: 100) - Default</li>
-          <li>Area Chart (priority: 80)</li>
-          <li>Bar Chart (priority: 60)</li>
-        </ul>
-      </td>
-  </tr>
+  <tr><th>Priority</th><th>Axis Mapping</th><th>Renderer</th></tr>
+  <tr><td>100</td><td><code>x: categorical, y: numerical</code> (or swapped)</td><td>Simple bar chart</td></tr>
+  <tr><td>60</td><td><code>x: date, y: numerical</code> (or swapped)</td><td>Time bar chart</td></tr>
+  <tr><td>60</td><td><code>x: date, y: numerical, color: categorical</code> (or swapped x/y)</td><td>Grouped time bar chart</td></tr>
+  <tr><td>80</td><td><code>x: date, y: numerical, color: numerical</code> (or swapped x/y)</td><td>Grouped time bar chart (numerical color)</td></tr>
+  <tr><td>60</td><td><code>x: date, y: numerical, color: categorical, facet: categorical</code> (or swapped x/y)</td><td>Faceted time bar chart</td></tr>
+  <tr><td>100</td><td><code>x: date, y: numerical, color: numerical, facet: categorical</code> (or swapped x/y)</td><td>Faceted time bar chart (numerical color)</td></tr>
+  <tr><td>100</td><td><code>x: categorical, y: numerical, color: categorical</code> (or swapped x/y)</td><td>Stacked bar chart</td></tr>
+  <tr><td>80</td><td><code>x: categorical, y: numerical, color: numerical</code> (or swapped x/y)</td><td>Stacked bar chart (numerical color)</td></tr>
+  <tr><td>60</td><td><code>x: numerical, y: numerical</code></td><td>Double numerical bar chart</td></tr>
 </table>
 
-#### 3. One Metric, One Category & One Date Rule
+Note: Many bar rules include a swapped mapping variant (x↔y) to support horizontal orientation.
+
+### Area
 
 <table>
-  <tr><td><strong>ID</strong></td><td><code>one-metric-one-category-one-date</code></td></tr>
-  <tr><td><strong>Description</strong></td><td>Time series visualization with one metric and one category</td></tr>
-  <tr><td><strong>Matching Criteria</strong></td>
-      <td>
-        <ul>
-          <li>1 Numerical column</li>
-          <li>1 Categorical column</li>
-          <li>1 Date column</li>
-        </ul>
-      </td>
-  </tr>
-  <tr><td><strong>Chart Types</strong></td>
-      <td>
-        <ul>
-          <li>Line Chart (priority: 100) - Default</li>
-          <li>Area Chart (priority: 80)</li>
-          <li>Bar Chart (priority: 60)</li>
-        </ul>
-      </td>
-  </tr>
+  <tr><th>Priority</th><th>Axis Mapping</th><th>Renderer</th></tr>
+  <tr><td>80</td><td><code>x: date, y: numerical</code></td><td>Simple area chart</td></tr>
+  <tr><td>80</td><td><code>x: date, y: numerical, color: categorical</code></td><td>Multi-area chart</td></tr>
+  <tr><td>60</td><td><code>x: date, y: numerical, color: numerical</code></td><td>Multi-area chart (numerical color)</td></tr>
+  <tr><td>80</td><td><code>x: date, y: numerical, color: categorical, facet: categorical</code></td><td>Faceted multi-area chart</td></tr>
+  <tr><td>60</td><td><code>x: date, y: numerical, color: numerical, facet: categorical</code></td><td>Faceted multi-area chart (numerical color)</td></tr>
+  <tr><td>20</td><td><code>x: categorical, y: numerical</code></td><td>Category area chart</td></tr>
+  <tr><td>60</td><td><code>x: categorical, y: numerical, color: categorical</code></td><td>Stacked area chart</td></tr>
+  <tr><td>60</td><td><code>x: categorical, y: numerical, color: numerical</code></td><td>Stacked area chart (numerical color)</td></tr>
 </table>
 
-#### 4. One Metric, Two Category & One Date Rule
+### Pie
 
 <table>
-  <tr><td><strong>ID</strong></td><td><code>one-metric-two-category-one-date</code></td></tr>
-  <tr><td><strong>Description</strong></td><td>Multiple time series visualizations</td></tr>
-  <tr><td><strong>Matching Criteria</strong></td>
-      <td>
-        <ul>
-          <li>1 Numerical column</li>
-          <li>2 Categorical columns</li>
-          <li>1 Date column</li>
-        </ul>
-      </td>
-  </tr>
-  <tr><td><strong>Chart Types</strong></td>
-      <td>
-        <ul>
-          <li>Line Chart (priority: 100) - Default</li>
-          <li>Area Chart (priority: 80)</li>
-          <li>Bar Chart (priority: 60)</li>
-        </ul>
-      </td>
-  </tr>
+  <tr><th>Priority</th><th>Axis Mapping</th><th>Renderer</th></tr>
+  <tr><td>60</td><td><code>size: numerical, color: categorical</code></td><td>Pie/donut chart</td></tr>
+  <tr><td>40</td><td><code>size: numerical, color: numerical</code></td><td>Pie/donut chart (numerical slices)</td></tr>
 </table>
 
----
-
-### Metric and Category Combined Rules
-
-These rules apply to data with categorical columns and/or multiple numerical columns but no date columns.
-
-#### 5. One Metric, Two Category (High Cardinality) Rule
+### Scatter
 
 <table>
-  <tr><td><strong>ID</strong></td><td><code>one-metric-two-category-high-cardinality</code></td></tr>
-  <tr><td><strong>Description</strong></td><td>Heatmap for one metric and two category with high cardinality</td></tr>
-  <tr><td><strong>Matching Criteria</strong></td>
-      <td>
-        <ul>
-          <li>1 Numerical column</li>
-          <li>2 Categorical columns</li>
-          <li>0 Date columns</li>
-          <li>At least one column has 7 or more unique values</li>
-        </ul>
-      </td>
-  </tr>
-  <tr><td><strong>Chart Types</strong></td>
-      <td>
-        <ul>
-          <li>Heatmap (priority: 100) - Default</li>
-          <li>Bar Chart (priority: 80)</li>
-          <li>Area Chart (priority: 60)</li>
-        </ul>
-      </td>
-  </tr>
+  <tr><th>Priority</th><th>Axis Mapping</th><th>Renderer</th></tr>
+  <tr><td>100</td><td><code>x: numerical, y: numerical</code></td><td>Two-metric scatter</td></tr>
+  <tr><td>100</td><td><code>x: numerical, y: numerical, color: categorical</code></td><td>Two-metric scatter with category coloring</td></tr>
+  <tr><td>100</td><td><code>x: numerical, y: numerical, color: categorical, size: numerical</code></td><td>Bubble chart (three metrics + category)</td></tr>
 </table>
 
-#### 6. One Metric, Two Category (Low Cardinality) Rule
+### Heatmap
 
 <table>
-  <tr><td><strong>ID</strong></td><td><code>one-metric-two-category-low-cardinality</code></td></tr>
-  <tr><td><strong>Description</strong></td><td>Bar chart for one metric and two category with low cardinality</td></tr>
-  <tr><td><strong>Matching Criteria</strong></td>
-      <td>
-        <ul>
-          <li>1 Numerical column</li>
-          <li>2 Categorical columns</li>
-          <li>0 Date columns</li>
-          <li>All columns have fewer than 7 unique values</li>
-        </ul>
-      </td>
-  </tr>
-  <tr><td><strong>Chart Types</strong></td>
-      <td>
-        <ul>
-          <li>Bar Chart (priority: 100) - Default</li>
-          <li>Heatmap (priority: 80)</li>
-          <li>Area Chart (priority: 60)</li>
-        </ul>
-      </td>
-  </tr>
+  <tr><th>Priority</th><th>Axis Mapping</th><th>Renderer</th></tr>
+  <tr><td>90</td><td><code>x: categorical, y: categorical, color: numerical</code></td><td>Regular heatmap</td></tr>
 </table>
 
-#### 7. One Metric, One Category Rule
+### Metric
 
 <table>
-  <tr><td><strong>ID</strong></td><td><code>one-metric-one-category</code></td></tr>
-  <tr><td><strong>Description</strong></td><td>Multiple visualizations for one metric and one category</td></tr>
-  <tr><td><strong>Matching Criteria</strong></td>
-      <td>
-        <ul>
-          <li>1 Numerical column</li>
-          <li>1 Categorical column</li>
-          <li>0 Date columns</li>
-        </ul>
-      </td>
-  </tr>
-  <tr><td><strong>Chart Types</strong></td>
-      <td>
-        <ul>
-          <li>Bar Chart (priority: 100) - Default</li>
-          <li>Pie Chart (priority: 80)</li>
-          <li>Line Chart (priority: 60)</li>
-          <li>Area Chart (priority: 40)</li>
-        </ul>
-      </td>
-  </tr>
+  <tr><th>Priority</th><th>Axis Mapping</th><th>Renderer</th></tr>
+  <tr><td>100</td><td><code>value: numerical</code></td><td>Single metric</td></tr>
+  <tr><td>40</td><td><code>value: numerical, time: date</code></td><td>Single metric (with time context)</td></tr>
+  <tr><td>50</td><td><code>value: numerical, facet: categorical</code></td><td>Multi-metric (faceted by category)</td></tr>
+  <tr><td>50</td><td><code>value: numerical, time: date, facet: categorical</code></td><td>Multi-metric (faceted, with time context)</td></tr>
 </table>
 
-#### 8. Two Metric, One Category Rule
+### Gauge
 
 <table>
-  <tr><td><strong>ID</strong></td><td><code>two-metric-one-category</code></td></tr>
-  <tr><td><strong>Description</strong></td><td>Scatter plot for two metrics and one category</td></tr>
-  <tr><td><strong>Matching Criteria</strong></td>
-      <td>
-        <ul>
-          <li>2 Numerical columns</li>
-          <li>1 Categorical column</li>
-          <li>0 Date columns</li>
-        </ul>
-      </td>
-  </tr>
-  <tr><td><strong>Chart Types</strong></td>
-      <td>
-        <ul>
-          <li>Scatter (priority: 100) - Default</li>
-        </ul>
-      </td>
-  </tr>
+  <tr><th>Priority</th><th>Axis Mapping</th><th>Renderer</th></tr>
+  <tr><td>80</td><td><code>value: numerical</code></td><td>Gauge</td></tr>
 </table>
 
-#### 9. Three Metric, One Category Rule
+### Bar Gauge
 
 <table>
-  <tr><td><strong>ID</strong></td><td><code>three-metric-one-category</code></td></tr>
-  <tr><td><strong>Description</strong></td><td>Scatter plot for three metrics and one category</td></tr>
-  <tr><td><strong>Matching Criteria</strong></td>
-      <td>
-        <ul>
-          <li>3 Numerical columns</li>
-          <li>1 Categorical column</li>
-          <li>0 Date columns</li>
-        </ul>
-      </td>
-  </tr>
-  <tr><td><strong>Chart Types</strong></td>
-      <td>
-        <ul>
-          <li>Scatter (priority: 100) - Default</li>
-        </ul>
-      </td>
-  </tr>
+  <tr><th>Priority</th><th>Axis Mapping</th><th>Renderer</th></tr>
+  <tr><td>80</td><td><code>y: numerical, x: categorical</code> (or swapped)</td><td>Bar gauge</td></tr>
 </table>
 
----
-
-### Metric Rules
-
-These rules apply to data with only numerical columns and no categorical or date columns.
-
-#### 10. Two Metric Rule
+### Histogram
 
 <table>
-  <tr><td><strong>ID</strong></td><td><code>two-metric</code></td></tr>
-  <tr><td><strong>Description</strong></td><td>Scatter plot for two metrics</td></tr>
-  <tr><td><strong>Matching Criteria</strong></td>
-      <td>
-        <ul>
-          <li>2 Numerical columns</li>
-          <li>0 Categorical columns</li>
-          <li>0 Date columns</li>
-        </ul>
-      </td>
-  </tr>
-  <tr><td><strong>Chart Types</strong></td>
-      <td>
-        <ul>
-          <li>Scatter (priority: 100) - Default</li>
-        </ul>
-      </td>
-  </tr>
+  <tr><th>Priority</th><th>Axis Mapping</th><th>Renderer</th></tr>
+  <tr><td>80</td><td><code>x: numerical, y: numerical</code></td><td>Numerical histogram</td></tr>
+  <tr><td>60</td><td><code>x: numerical</code></td><td>Single-column histogram</td></tr>
 </table>
 
-#### 11. Three Metrics Rule
+### State Timeline
 
 <table>
-  <tr><td><strong>ID</strong></td><td><code>three-metric</code></td></tr>
-  <tr><td><strong>Description</strong></td><td>Heatmap with bin for three metric</td></tr>
-  <tr><td><strong>Matching Criteria</strong></td>
-      <td>
-        <ul>
-          <li>3 Numerical columns</li>
-          <li>0 Categorical columns</li>
-          <li>0 Date columns</li>
-        </ul>
-      </td>
-  </tr>
-  <tr><td><strong>Chart Types</strong></td>
-      <td>
-        <ul>
-          <li>Heatmap (priority: 100) - Default</li>
-        </ul>
-      </td>
-  </tr>
+  <tr><th>Priority</th><th>Axis Mapping</th><th>Renderer</th></tr>
+  <tr><td>100</td><td><code>x: date, y: categorical, color: numerical</code></td><td>Numerical state timeline</td></tr>
+  <tr><td>100</td><td><code>x: date, y: categorical, color: categorical</code></td><td>Categorical state timeline</td></tr>
+  <tr><td>100</td><td><code>x: date, color: categorical</code></td><td>Single categorical state timeline</td></tr>
+  <tr><td>40</td><td><code>x: date, color: numerical</code></td><td>Single numerical state timeline</td></tr>
 </table>
 
-#### 12. One Metric Rule
+### Table
 
-<table>
-  <tr><td><strong>ID</strong></td><td><code>one-metric</code></td></tr>
-  <tr><td><strong>Description</strong></td><td>Metric visualization for one metric</td></tr>
-  <tr><td><strong>Matching Criteria</strong></td>
-      <td>
-        <ul>
-          <li>1 Numerical column</li>
-          <li>0 Categorical columns</li>
-          <li>0 Date columns</li>
-          <li>Exactly 1 valid value in the numerical column</li>
-        </ul>
-      </td>
-  </tr>
-  <tr><td><strong>Chart Types</strong></td>
-      <td>
-        <ul>
-          <li>Metric (priority: 100) - Default</li>
-        </ul>
-      </td>
-  </tr>
-</table>
+Table has no rules. It is always available as a visualization type and renders data in a tabular format regardless of column types.
 
 ## Rule Evaluation Process
 
 When visualizing data, the system:
 
-1. Analyzes the dataset to identify numerical, categorical, and date columns
-2. Evaluates all registered rules against the dataset
-3. For each matching rule, selects the chart type with the highest priority
-4. Among all matching rules, selects the one with the highest priority chart type
-5. Renders the visualization using the selected chart type
+1. Classifies all columns in the dataset as `numerical`, `categorical`, or `date`
+2. For each registered `VisualizationType`, iterates over its rules and their mappings
+3. Counts the required field types in each mapping and compares against available column counts
+4. Collects **exact matches** (required counts === available counts) and **compatible matches** (required <= available)
+5. Among exact matches, selects the rule with the highest priority — this determines the default chart type
+6. The `VisualizationBuilder` uses the matched rule's `render()` function to produce the chart, passing transformed data, style options, and axis-column mappings
+7. Users can switch to any other chart type that has at least one compatible rule for the current data

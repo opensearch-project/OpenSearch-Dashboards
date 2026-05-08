@@ -87,6 +87,7 @@ import { normalizeSortRequest } from './normalize_sort_request';
 import { filterDocvalueFields } from './filter_docvalue_fields';
 import { fieldWildcardFilter } from '../../../../opensearch_dashboards_utils/common';
 import { IIndexPattern } from '../../index_patterns';
+import { Dataset } from '../../datasets';
 import {
   DATA_FRAME_TYPES,
   FetchStatusResponse,
@@ -157,6 +158,14 @@ export interface SearchSourceDependencies extends FetchHandlers {
     set: (dataFrame: IDataFrame) => void;
     clear: () => void;
   };
+  /**
+   * Optional hook to prime the index-pattern cache for a dataset that has no backing
+   * saved object (e.g. INDEXES, S3, Prometheus). Invoked by `createSearchSource` when
+   * it encounters a non-INDEX_PATTERN dataset whose id is not already cached. Wired
+   * up in `data/public` plugin start via `datasetService.cacheDataset`; left
+   * undefined on the server or in tests that don't care about hydration.
+   */
+  hydrateDataset?: (dataset: Dataset) => Promise<void>;
 }
 
 /** @public **/
@@ -327,7 +336,7 @@ export class SearchSource {
    */
   async createDataFrame(searchRequest: SearchRequest) {
     const dataFrame = createDataFrame({
-      name: searchRequest.index.title || searchRequest.index,
+      name: searchRequest.index?.title || searchRequest.index,
       fields: [],
     });
     await this.setDataFrame(dataFrame);
@@ -640,7 +649,7 @@ export class SearchSource {
     const { body, index, fields, query, filters, highlightAll } = searchRequest;
     searchRequest.indexType = this.getIndexType(index);
 
-    const computedFields = index ? index.getComputedFields() : {};
+    const computedFields = index && index.getComputedFields ? index.getComputedFields() : {};
 
     body.stored_fields = computedFields.storedFields;
     body.script_fields = body.script_fields || {};
@@ -654,7 +663,7 @@ export class SearchSource {
       : [];
     body.docvalue_fields = body.docvalue_fields || defaultDocValueFields;
 
-    if (!body.hasOwnProperty('_source') && index) {
+    if (!body.hasOwnProperty('_source') && index && index.getSourceFiltering) {
       body._source = index.getSourceFiltering();
     }
 

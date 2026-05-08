@@ -1,0 +1,170 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`metric_utils assembleForMetric should configure spec correctly for metric visualization 1`] = `
+Object {
+  "grid": Object {
+    "bottom": 0,
+    "left": 0,
+    "right": 0,
+    "top": 0,
+  },
+  "legend": Object {
+    "show": false,
+  },
+  "tooltip": Object {
+    "show": false,
+  },
+  "xAxis": Object {
+    "show": false,
+    "silent": true,
+  },
+  "yAxis": Object {
+    "show": false,
+    "silent": true,
+  },
+}
+`;
+
+exports[`metric_utils assembleForMetric should preserve existing spec properties while hiding axes 1`] = `
+Object {
+  "grid": Object {
+    "bottom": 0,
+    "left": 0,
+    "right": 0,
+    "top": 0,
+  },
+  "legend": Object {
+    "show": false,
+  },
+  "tooltip": Object {
+    "show": false,
+  },
+  "xAxis": Object {
+    "data": Array [
+      "A",
+      "B",
+      "C",
+    ],
+    "show": false,
+    "silent": true,
+    "type": "category",
+  },
+  "yAxis": Object {
+    "max": 100,
+    "min": 0,
+    "show": false,
+    "silent": true,
+    "type": "value",
+  },
+}
+`;
+
+exports[`metric_utils createMetricChartSeries snapshot tests should create basic metric series structure 1`] = `
+Array [
+  Object {
+    "areaStyle": Object {
+      "color": "#5470c6",
+      "opacity": 0.5,
+    },
+    "encode": Object {
+      "x": "date_field",
+      "y": "value_field",
+    },
+    "lineStyle": Object {
+      "color": "#5470c6",
+      "width": 1,
+    },
+    "name": "Test Metric",
+    "symbol": "none",
+    "type": "line",
+    "z": 1,
+  },
+]
+`;
+
+exports[`metric_utils createMetricChartSeries snapshot tests should create metric with sparkline when date field is provided 1`] = `
+Array [
+  Object {
+    "areaStyle": Object {
+      "color": "#5470c6",
+      "opacity": 0.5,
+    },
+    "encode": Object {
+      "x": "date_field",
+      "y": "value_field",
+    },
+    "lineStyle": Object {
+      "color": "#5470c6",
+      "width": 1,
+    },
+    "name": "Test Metric",
+    "symbol": "none",
+    "type": "line",
+    "z": 1,
+  },
+]
+`;
+
+exports[`metric_utils createMetricChartSeries snapshot tests should create metric with threshold colors enabled 1`] = `
+Array [
+  Object {
+    "areaStyle": Object {
+      "color": "#ff0000",
+      "opacity": 0.5,
+    },
+    "encode": Object {
+      "x": "date_field",
+      "y": "value_field",
+    },
+    "lineStyle": Object {
+      "color": "#ff0000",
+      "width": 1,
+    },
+    "name": "Test Metric",
+    "symbol": "none",
+    "type": "line",
+    "z": 1,
+  },
+]
+`;
+
+exports[`metric_utils createMetricChartSeries snapshot tests should create multiple metric series 1`] = `
+Array [
+  Object {
+    "areaStyle": Object {
+      "color": "#5470c6",
+      "opacity": 0.5,
+    },
+    "encode": Object {
+      "x": "date_field",
+      "y": "value_field",
+    },
+    "lineStyle": Object {
+      "color": "#5470c6",
+      "width": 1,
+    },
+    "name": "Test Metric",
+    "symbol": "none",
+    "type": "line",
+    "z": 1,
+  },
+  Object {
+    "areaStyle": Object {
+      "color": "#5470c6",
+      "opacity": 0.5,
+    },
+    "encode": Object {
+      "x": "date_field",
+      "y": "value_field_2",
+    },
+    "lineStyle": Object {
+      "color": "#5470c6",
+      "width": 1,
+    },
+    "name": "value_field_2",
+    "symbol": "none",
+    "type": "line",
+    "z": 1,
+  },
+]
+`;

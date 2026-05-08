@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import {
   EuiPage,
   EuiPageBody,
@@ -69,7 +69,8 @@ const AppStatusApp = ({ appId }: { appId: string }) => (
 );
 
 export const renderApp = (appId: string, { element }: AppMountParameters) => {
-  render(<AppStatusApp appId={appId} />, element);
+  const root = createRoot(element);
+  root.render(<AppStatusApp appId={appId} />);
 
-  return () => unmountComponentAtNode(element);
+  return () => root.unmount();
 };

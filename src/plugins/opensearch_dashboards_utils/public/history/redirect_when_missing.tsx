@@ -32,7 +32,7 @@ import React from 'react';
 import { History } from 'history';
 import { i18n } from '@osd/i18n';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import { ApplicationStart, HttpStart, ToastsSetup } from 'opensearch-dashboards/public';
 import { SavedObjectNotFound } from '..';
@@ -116,8 +116,9 @@ export function redirectWhenMissing({
         }
       ),
       text: (element: HTMLElement) => {
-        ReactDOM.render(<ErrorRenderer>{error.message}</ErrorRenderer>, element);
-        return () => ReactDOM.unmountComponentAtNode(element);
+        const root = createRoot(element);
+        root.render(<ErrorRenderer>{error.message}</ErrorRenderer>);
+        return () => root.unmount();
       },
     });
 

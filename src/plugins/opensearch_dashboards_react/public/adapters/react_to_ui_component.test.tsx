@@ -29,6 +29,7 @@
  */
 
 import * as React from 'react';
+import { act } from 'react';
 import { reactToUiComponent } from './react_to_ui_component';
 
 const ReactComp: React.FC<{ cnt?: number }> = ({ cnt = 0 }) => {
@@ -36,12 +37,15 @@ const ReactComp: React.FC<{ cnt?: number }> = ({ cnt = 0 }) => {
 };
 
 describe('reactToUiComponent', () => {
-  test('can render UI component', () => {
+  test('can render UI component', async () => {
     const UiComp = reactToUiComponent(ReactComp);
     const div = document.createElement('div');
 
     const instance = UiComp();
-    instance.render(div, {});
+    // Use act() to wait for React 18's async rendering with createRoot
+    await act(async () => {
+      instance.render(div, {});
+    });
 
     expect(div.innerHTML).toBe('<div>cnt: 0</div>');
   });
@@ -51,7 +55,10 @@ describe('reactToUiComponent', () => {
     const div = document.createElement('div');
 
     const instance = UiComp();
-    instance.render(div, { cnt: 5 });
+    // Use act() to wait for React 18's async rendering with createRoot
+    await act(async () => {
+      instance.render(div, { cnt: 5 });
+    });
 
     expect(div.innerHTML).toBe('<div>cnt: 5</div>');
   });
@@ -61,16 +68,21 @@ describe('reactToUiComponent', () => {
     const div = document.createElement('div');
     const instance = UiComp();
 
-    instance.render(div, { cnt: 1 });
+    // Use act() to wait for React 18's async rendering with createRoot
+    await act(async () => {
+      instance.render(div, { cnt: 1 });
+    });
 
     expect(div.innerHTML).toBe('<div>cnt: 1</div>');
 
-    instance.render(div, { cnt: 2 });
+    await act(async () => {
+      instance.render(div, { cnt: 2 });
+    });
 
     expect(div.innerHTML).toBe('<div>cnt: 2</div>');
   });
 
-  test('renders React component only when .render() method is called', () => {
+  test('renders React component only when .render() method is called', async () => {
     let renderCnt = 0;
     const MyReactComp: React.FC<{ cnt?: number }> = ({ cnt = 0 }) => {
       renderCnt++;
@@ -82,15 +94,22 @@ describe('reactToUiComponent', () => {
 
     expect(renderCnt).toBe(0);
 
-    instance.render(div, { cnt: 1 });
+    // Use act() to wait for React 18's async rendering with createRoot
+    await act(async () => {
+      instance.render(div, { cnt: 1 });
+    });
 
     expect(renderCnt).toBe(1);
 
-    instance.render(div, { cnt: 2 });
+    await act(async () => {
+      instance.render(div, { cnt: 2 });
+    });
 
     expect(renderCnt).toBe(2);
 
-    instance.render(div, { cnt: 3 });
+    await act(async () => {
+      instance.render(div, { cnt: 3 });
+    });
 
     expect(renderCnt).toBe(3);
   });

@@ -164,6 +164,12 @@ export const createOsdUrlControls = (
 ): IOsdUrlControls => {
   const updateQueue: UrlUpdaterFnType[] = [];
 
+  // React 18 fix: Capture the pathname when this URL controls instance is created.
+  // This allows us to detect if the app has changed (navigated away) before flushing
+  // async URL updates. In React 18 concurrent mode, effects can be deferred and run
+  // after navigation has already changed the URL to another app.
+  const initialPathname = window.location.pathname;
+
   // if we should replace or push with next async update,
   // if any call in a queue asked to push, then we should push
   let shouldReplace = true;
@@ -191,13 +197,21 @@ export const createOsdUrlControls = (
 
   // runs scheduled url updates
   function flush(replace = shouldReplace) {
-    const nextUrl = getPendingUrl();
+    // React 18 fix: If the app has changed (pathname changed), cancel pending updates.
+    // This prevents URL corruption when effects run after navigation.
+    // Use startsWith to handle trailing slash differences.
+    const currentPath = window.location.pathname.replace(/\/+$/, '');
+    const initialPath = initialPathname.replace(/\/+$/, '');
+    if (currentPath !== initialPath) {
+      cleanUp();
+      return undefined;
+    }
 
+    const nextUrl = getPendingUrl();
     if (!nextUrl) return;
 
     cleanUp();
-    const newUrl = updateUrl(nextUrl, replace);
-    return newUrl;
+    return updateUrl(nextUrl, replace);
   }
 
   function getPendingUrl() {
@@ -224,9 +238,7 @@ export const createOsdUrlControls = (
 
       // Schedule url update to the next microtask
       // this allows to batch synchronous url changes
-      return Promise.resolve().then(() => {
-        return flush();
-      });
+      return Promise.resolve().then(() => flush());
     },
     flush: (replace?: boolean) => {
       return flush(replace);

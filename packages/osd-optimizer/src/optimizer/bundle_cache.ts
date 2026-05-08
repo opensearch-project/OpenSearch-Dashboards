@@ -121,7 +121,7 @@ export function getBundleCacheEvent$(
 
       const bundleRefsDiff = diffCacheKey(
         refs.map((r) => r.exportId).sort((a, b) => a.localeCompare(b)),
-        bundleRefExportIds
+        bundleRefExportIds.sort((a, b) => a.localeCompare(b))
       );
       if (bundleRefsDiff) {
         events.push({

@@ -54,6 +54,31 @@ describe('CSVProcessor', () => {
     );
 
     it.each<CSVTestCaseFormat>(VALID_CSV_CASES)(
+      'should inject lookup field when lookupId and lookupField are provided',
+      async ({ rawStringArray, delimiter, expected }) => {
+        const lookupId = 'test-lookup-id';
+        const lookupField = '__lookup';
+
+        await processor.ingestText(rawStringArray.join(''), {
+          client: clientMock,
+          indexName: 'foo',
+          delimiter,
+          lookupId,
+          lookupField,
+        });
+
+        expect(clientMock.index).toHaveBeenCalledTimes(expected.length);
+
+        // Verify each indexed document includes the lookup field
+        // @ts-expect-error TS7006 TODO(ts-upgrade): fixme
+        clientMock.index.mock.calls.forEach((call) => {
+          const callArgs = call[0];
+          expect(callArgs.body).toHaveProperty(lookupField, lookupId);
+        });
+      }
+    );
+
+    it.each<CSVTestCaseFormat>(VALID_CSV_CASES)(
       'should handle OpenSearch errors and show the correct failedRow',
       async ({ rawStringArray, delimiter, expected }) => {
         const mockSuccessfulResponse = opensearchServiceMock.createApiResponse<IndexResponse>();
@@ -98,6 +123,32 @@ describe('CSVProcessor', () => {
 
         expect(clientMock.index).toHaveBeenCalledTimes(expected.length);
         expect(response.total).toBe(expected.length);
+      }
+    );
+
+    it.each<CSVTestCaseFormat>(VALID_CSV_CASES)(
+      'should inject lookup field when lookupId and lookupField are provided',
+      async ({ expected, delimiter, rawStringArray }) => {
+        const lookupId = 'test-lookup-id';
+        const lookupField = '__lookup';
+        const validCSVFileStream = Readable.from(rawStringArray);
+
+        await processor.ingestFile(validCSVFileStream, {
+          client: clientMock,
+          indexName: 'foo',
+          delimiter,
+          lookupId,
+          lookupField,
+        });
+
+        expect(clientMock.index).toHaveBeenCalledTimes(expected.length);
+
+        // Verify each indexed document includes the lookup field
+        // @ts-expect-error TS7006 TODO(ts-upgrade): fixme
+        clientMock.index.mock.calls.forEach((call) => {
+          const callArgs = call[0];
+          expect(callArgs.body).toHaveProperty(lookupField, lookupId);
+        });
       }
     );
 

@@ -55,16 +55,16 @@ describe('check timeline visualization', () => {
     it('.es(*, kibana1=true) should report search error', () => {
       cy.get('[class="view-line"]').type('.es(*, kibana1=true)');
       cy.get('[data-test-subj="visualizeEditorRenderButton"]').click();
-      cy.osd.waitForLoader();
+      cy.waitForLoader();
       cy.get('[data-test-subj="globalToastList"]')
         .find('[data-test-subj="errorToastMessage"]')
-        .contains('Timeline request error: undefined Error: Unknown argument to es: kibana1');
+        .contains('Unknown argument to es: kibana1');
     });
 
     it('.es(*, kibana=true) should not report search error', () => {
       cy.get('[class="view-line"]').type('.es(*, kibana=true)');
       cy.get('[data-test-subj="visualizeEditorRenderButton"]').click();
-      cy.osd.waitForLoader();
+      cy.waitForLoader();
       cy.get('[data-test-subj="globalToastList"]')
         .find('[data-test-subj="errorToastMessage"]')
         .should('not.exist');
@@ -73,7 +73,7 @@ describe('check timeline visualization', () => {
     it('.es(*, opensearchDashboards=true) should not report search error', () => {
       cy.get('[class="view-line"]').type('.es(*, opensearchDashboards=true)');
       cy.get('[data-test-subj="visualizeEditorRenderButton"]').click();
-      cy.osd.waitForLoader();
+      cy.waitForLoader();
       cy.get('[data-test-subj="globalToastList"]')
         .find('[data-test-subj="errorToastMessage"]')
         .should('not.exist');
@@ -82,16 +82,16 @@ describe('check timeline visualization', () => {
     it('.elasticsearch(*, kibana1=true) should report search error', () => {
       cy.get('[class="view-line"]').type('.elasticsearch(*, kibana1=true)');
       cy.get('[data-test-subj="visualizeEditorRenderButton"]').click();
-      cy.osd.waitForLoader();
+      cy.waitForLoader();
       cy.get('[data-test-subj="globalToastList"]')
         .find('[data-test-subj="errorToastMessage"]')
-        .contains('Timeline request error: undefined Error: Unknown argument to es: kibana1');
+        .contains('Unknown argument to es: kibana1');
     });
 
     it('.elasticsearch(*, kibana=true) should not report search error', () => {
       cy.get('[class="view-line"]').type('.elasticsearch(*, kibana=true)');
       cy.get('[data-test-subj="visualizeEditorRenderButton"]').click();
-      cy.osd.waitForLoader();
+      cy.waitForLoader();
       cy.get('[data-test-subj="globalToastList"]')
         .find('[data-test-subj="errorToastMessage"]')
         .should('not.exist');
@@ -100,7 +100,7 @@ describe('check timeline visualization', () => {
     it('.elasticsearch(*, opensearchDashboards=true) should not report search error', () => {
       cy.get('[class="view-line"]').type('.elasticsearch(*, opensearchDashboards=true)');
       cy.get('[data-test-subj="visualizeEditorRenderButton"]').click();
-      cy.osd.waitForLoader();
+      cy.waitForLoader();
       cy.get('[data-test-subj="globalToastList"]')
         .find('[data-test-subj="errorToastMessage"]')
         .should('not.exist');
@@ -109,16 +109,16 @@ describe('check timeline visualization', () => {
     it('.opensearch(*, kibana1=true) should report search error', () => {
       cy.get('[class="view-line"]').type('.opensearch(*, kibana1=true)');
       cy.get('[data-test-subj="visualizeEditorRenderButton"]').click();
-      cy.osd.waitForLoader();
+      cy.waitForLoader();
       cy.get('[data-test-subj="globalToastList"]')
         .find('[data-test-subj="errorToastMessage"]')
-        .contains('Timeline request error: undefined Error: Unknown argument to es: kibana1');
+        .contains('Unknown argument to es: kibana1');
     });
 
     it('.opensearch(*, kibana=true) should not report search error', () => {
       cy.get('[class="view-line"]').type('.opensearch(*, kibana=true)');
       cy.get('[data-test-subj="visualizeEditorRenderButton"]').click();
-      cy.osd.waitForLoader();
+      cy.waitForLoader();
       cy.get('[data-test-subj="globalToastList"]')
         .find('[data-test-subj="errorToastMessage"]')
         .should('not.exist');
@@ -127,7 +127,7 @@ describe('check timeline visualization', () => {
     it('.opensearch(*, opensearchDashboards=true) should not report search error', () => {
       cy.get('[class="view-line"]').type('.opensearch(*, opensearchDashboards=true)');
       cy.get('[data-test-subj="visualizeEditorRenderButton"]').click();
-      cy.osd.waitForLoader();
+      cy.waitForLoader();
       cy.get('[data-test-subj="globalToastList"]')
         .find('[data-test-subj="errorToastMessage"]')
         .should('not.exist');

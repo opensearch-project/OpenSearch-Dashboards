@@ -23,13 +23,30 @@ jest.mock('./query_panel_widgets', () => ({
   QueryPanelWidgets: () => <div data-test-subj="query-panel-widgets">Query Panel Widgets</div>,
 }));
 
+jest.mock('../../application/hooks', () => ({
+  useSetEditorTextWithQuery: jest.fn(),
+}));
+
+jest.mock('./actions/ppl_execute_query_action', () => ({
+  usePPLExecuteQueryAction: jest.fn(),
+}));
+
 jest.mock('react-redux', () => ({
   ...jest.requireActual('react-redux'),
   useSelector: jest.fn(),
 }));
 
 import { useSelector } from 'react-redux';
+import { useSetEditorTextWithQuery } from '../../application/hooks';
+import { usePPLExecuteQueryAction } from './actions/ppl_execute_query_action';
+
 const mockUseSelector = useSelector as jest.MockedFunction<typeof useSelector>;
+const mockUseSetEditorTextWithQuery = useSetEditorTextWithQuery as jest.MockedFunction<
+  typeof useSetEditorTextWithQuery
+>;
+const mockUsePPLExecuteQueryAction = usePPLExecuteQueryAction as jest.MockedFunction<
+  typeof usePPLExecuteQueryAction
+>;
 
 describe('QueryPanel', () => {
   const createMockStore = () => {
@@ -48,6 +65,11 @@ describe('QueryPanel', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseSelector.mockReturnValue(false); // Default to not loading
+
+    // Mock the new hooks
+    const mockSetEditorTextWithQuery = jest.fn();
+    mockUseSetEditorTextWithQuery.mockReturnValue(mockSetEditorTextWithQuery);
+    mockUsePPLExecuteQueryAction.mockImplementation(() => {});
   });
 
   it('renders QueryPanelEditor component', () => {
@@ -90,5 +112,30 @@ describe('QueryPanel', () => {
 
     renderWithProvider(<QueryPanel />);
     expect(screen.queryByTestId('exploreQueryPanelIsLoading')).not.toBeInTheDocument();
+  });
+
+  it('calls useSetEditorTextWithQuery hook', () => {
+    renderWithProvider(<QueryPanel />);
+    expect(mockUseSetEditorTextWithQuery).toHaveBeenCalled();
+  });
+
+  it('calls usePPLExecuteQueryAction hook with setEditorTextWithQuery', () => {
+    const mockSetEditorTextWithQuery = jest.fn();
+    mockUseSetEditorTextWithQuery.mockReturnValue(mockSetEditorTextWithQuery);
+
+    renderWithProvider(<QueryPanel />);
+
+    expect(mockUsePPLExecuteQueryAction).toHaveBeenCalledWith(mockSetEditorTextWithQuery);
+  });
+
+  it('integrates assistant action functionality', () => {
+    const mockSetEditorTextWithQuery = jest.fn();
+    mockUseSetEditorTextWithQuery.mockReturnValue(mockSetEditorTextWithQuery);
+
+    renderWithProvider(<QueryPanel />);
+
+    // Verify both hooks are called for assistant integration
+    expect(mockUseSetEditorTextWithQuery).toHaveBeenCalled();
+    expect(mockUsePPLExecuteQueryAction).toHaveBeenCalledWith(mockSetEditorTextWithQuery);
   });
 });

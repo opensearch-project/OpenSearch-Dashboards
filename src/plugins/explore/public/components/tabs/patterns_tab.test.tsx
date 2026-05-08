@@ -6,6 +6,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { PatternsTab } from './patterns_tab';
+import { EXPLORE_ACTION_BAR_SLOT_ID } from './tabs';
 
 // Mock the dependencies
 jest.mock('./action_bar/action_bar', () => ({
@@ -22,7 +23,12 @@ jest.mock('../patterns_table/patterns_container', () => ({
 
 describe('PatternsTab', () => {
   it('renders ActionBar and PatternsContainer with correct test subjects', () => {
-    const { container } = render(<PatternsTab />);
+    const { container } = render(
+      <div>
+        <div id={EXPLORE_ACTION_BAR_SLOT_ID} />
+        <PatternsTab />
+      </div>
+    );
 
     // Check if the main container is rendered
     expect(container.querySelector('.explore-logs-tab')).toBeInTheDocument();

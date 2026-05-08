@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { BrowserRouter as Router, Route, withRouter, RouteComponentProps } from 'react-router-dom';
 
 import { EuiPage, EuiPageSideBar, EuiSideNav } from '@elastic/eui';
@@ -160,7 +160,8 @@ const EmbeddableExplorerApp = ({
 };
 
 export const renderApp = (props: Props, element: AppMountParameters['element']) => {
-  ReactDOM.render(<EmbeddableExplorerApp {...props} />, element);
+  const root = createRoot(element);
+  root.render(<EmbeddableExplorerApp {...props} />);
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

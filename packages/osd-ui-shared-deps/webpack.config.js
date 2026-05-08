@@ -30,14 +30,17 @@
 
 const Path = require('path');
 
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CompressionPlugin = require('compression-webpack-plugin');
 const { REPO_ROOT } = require('@osd/utils');
-const webpack = require('webpack');
+// const webpack = require('webpack');
+const { rspack } = require('@rspack/core');
+const { getSwcLoaderConfig } = require('@osd/utils');
 
 const UiSharedDeps = require('./index');
 
 const MOMENT_SRC = require.resolve('moment/min/moment-with-locales.js');
+
+const targets = ['last 2 versions', 'ie >= 11'];
 
 exports.getWebpackConfig = ({ dev = false } = {}) => ({
   mode: dev ? 'development' : 'production',
@@ -51,7 +54,7 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
     'osd-ui-shared-deps.v9.light': ['@elastic/eui/dist/eui_theme_v9_light.css'],
   },
   context: __dirname,
-  devtool: dev ? '#cheap-source-map' : false,
+  devtool: dev ? 'cheap-module-source-map' : false,
   output: {
     path: UiSharedDeps.distDir,
     filename: '[name].js',
@@ -59,10 +62,15 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
     devtoolModuleFilenameTemplate: (info) =>
       `osd-ui-shared-deps/${Path.relative(REPO_ROOT, info.absoluteResourcePath)}`,
     library: '__osdSharedDeps__',
-    hashFunction: 'Xxh64',
+    hashFunction: 'xxhash64',
   },
 
   module: {
+    parser: {
+      javascript: {
+        unknownContextCritical: false,
+      },
+    },
     noParse: [MOMENT_SRC],
     rules: [
       {
@@ -79,7 +87,7 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
       {
         test: /\.css$/,
         use: [
-          MiniCssExtractPlugin.loader,
+          rspack.CssExtractRspackPlugin.loader,
           'css-loader',
           {
             loader: 'comment-stripper',
@@ -88,6 +96,7 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
             },
           },
         ],
+        type: 'javascript/auto',
         // Exclude Monaco's codicon CSS which is binary and can't be processed by the standard CSS loader
         exclude: /[\/\\]node_modules[\/\\]monaco-editor[\/\\].*codicon.*\.css$/,
       },
@@ -95,24 +104,22 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
       {
         test: /[\/\\]node_modules[\/\\]monaco-editor[\/\\].*codicon.*\.css$/,
         use: ['style-loader', 'css-loader'],
+        type: 'javascript/auto',
       },
       // Handle Monaco's codicon font files
       {
         test: /[\/\\]node_modules[\/\\]monaco-editor[\/\\].*\.ttf$/,
-        use: [
-          {
-            loader: 'file-loader',
-            options: {
-              name: '[name].[ext]',
-              outputPath: 'fonts/',
-            },
-          },
-        ],
+        type: 'asset/resource',
+        generator: {
+          filename: '[name][ext]',
+          outputPath: 'fonts/',
+          publicPath: 'fonts/',
+        },
       },
       {
         test: /\.scss$/,
         use: [
-          MiniCssExtractPlugin.loader,
+          rspack.CssExtractRspackPlugin.loader,
           'css-loader',
           {
             loader: 'comment-stripper',
@@ -120,117 +127,48 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
               language: 'css',
             },
           },
-          'sass-loader',
+          {
+            loader: 'sass-loader',
+            options: {
+              api: 'modern-compiler',
+              implementation: require.resolve('sass-embedded'),
+            },
+          },
         ],
+        type: 'css',
       },
       {
         include: [require.resolve('./theme.ts')],
-        use: [
-          {
-            loader: 'babel-loader',
-            options: {
-              presets: [require.resolve('@osd/babel-preset/webpack_preset')],
-            },
-          },
-        ],
+        use: getSwcLoaderConfig({ syntax: 'typescript', targets }),
       },
       {
         test: !dev ? /[\\\/]@elastic[\\\/]eui[\\\/].*\.js$/ : () => false,
-        use: [
-          {
-            loader: 'babel-loader',
-            options: {
-              plugins: [
-                [
-                  require.resolve('babel-plugin-transform-react-remove-prop-types'),
-                  {
-                    mode: 'remove',
-                    removeImport: true,
-                  },
-                ],
-              ],
-            },
-          },
-        ],
+        use: getSwcLoaderConfig({ syntax: 'ecmascript', targets }),
       },
       {
         test: /worker_proxy_service\.js$/,
         exclude: /node_modules/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            babelrc: false,
-            presets: [require.resolve('@osd/babel-preset/webpack_preset')],
-          },
-        },
+        use: getSwcLoaderConfig({ syntax: 'ecmascript', targets }),
       },
       // Add special handling for monaco-editor files to transpile newer JavaScript syntax
       {
         test: /[\/\\]node_modules[\/\\]monaco-editor[\/\\].*\.js$/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            babelrc: false,
-            presets: [require.resolve('@osd/babel-preset/webpack_preset')],
-            plugins: [
-              require.resolve('@babel/plugin-transform-class-static-block'),
-              require.resolve('@babel/plugin-transform-nullish-coalescing-operator'),
-              require.resolve('@babel/plugin-transform-optional-chaining'),
-              require.resolve('@babel/plugin-transform-numeric-separator'),
-            ],
-          },
-        },
+        use: getSwcLoaderConfig({ syntax: 'ecmascript', targets }),
       },
       // Add special handling for ANTLR-generated JavaScript files in osd-monaco
       {
         test: /[\/\\]osd-antlr-grammar[\/\\]target[\/\\].*\.generated[\/\\].*\.js$/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            babelrc: false,
-            presets: [require.resolve('@osd/babel-preset/webpack_preset')],
-            plugins: [
-              require.resolve('@babel/plugin-transform-class-static-block'),
-              require.resolve('@babel/plugin-transform-nullish-coalescing-operator'),
-              require.resolve('@babel/plugin-transform-optional-chaining'),
-              require.resolve('@babel/plugin-transform-numeric-separator'),
-            ],
-          },
-        },
+        use: getSwcLoaderConfig({ syntax: 'ecmascript', targets }),
       },
       // Add special handling for antlr4ng ES module files
       {
         test: /[\/\\]node_modules[\/\\]antlr4ng[\/\\].*\.m?js$/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            babelrc: false,
-            presets: [require.resolve('@osd/babel-preset/webpack_preset')],
-            plugins: [
-              require.resolve('@babel/plugin-transform-class-static-block'),
-              require.resolve('@babel/plugin-transform-nullish-coalescing-operator'),
-              require.resolve('@babel/plugin-transform-optional-chaining'),
-              require.resolve('@babel/plugin-transform-numeric-separator'),
-            ],
-          },
-        },
+        use: getSwcLoaderConfig({ syntax: 'ecmascript', targets }),
       },
       // Add special handling for all osd-monaco target JavaScript files
       {
         test: /[\/\\]osd-monaco[\/\\]target[\/\\].*\.js$/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            babelrc: false,
-            presets: [require.resolve('@osd/babel-preset/webpack_preset')],
-            plugins: [
-              require.resolve('@babel/plugin-transform-class-static-block'),
-              require.resolve('@babel/plugin-transform-nullish-coalescing-operator'),
-              require.resolve('@babel/plugin-transform-optional-chaining'),
-              require.resolve('@babel/plugin-transform-numeric-separator'),
-            ],
-          },
-        },
+        use: getSwcLoaderConfig({ syntax: 'ecmascript', targets }),
       },
     ],
   },
@@ -243,7 +181,7 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
   },
 
   optimization: {
-    noEmitOnErrors: true,
+    emitOnErrors: false,
     splitChunks: {
       cacheGroups: {
         'osd-ui-shared-deps.@elastic': {
@@ -264,10 +202,8 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
   },
 
   plugins: [
-    new MiniCssExtractPlugin({
-      filename: '[name].css',
-    }),
-    new webpack.DefinePlugin({
+    new rspack.CssExtractRspackPlugin({}),
+    new rspack.DefinePlugin({
       'process.env.NODE_ENV': dev ? '"development"' : '"production"',
     }),
     ...(dev
@@ -275,15 +211,13 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
       : [
           new CompressionPlugin({
             algorithm: 'brotliCompress',
-            filename: '[path].br',
+            filename: '[path][base].br',
             test: /\.(js|css)$/,
-            cache: false,
           }),
           new CompressionPlugin({
             algorithm: 'gzip',
-            filename: '[path].gz',
+            filename: '[path][base].gz',
             test: /\.(js|css)$/,
-            cache: false,
           }),
         ]),
   ],

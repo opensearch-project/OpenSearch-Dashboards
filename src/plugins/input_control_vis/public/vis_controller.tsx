@@ -28,9 +28,8 @@
  * under the License.
  */
 
-import React from 'react';
 import { isEqual } from 'lodash';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot, Root } from 'react-dom/client';
 
 import { Subscription } from 'rxjs';
 import { I18nStart } from 'opensearch-dashboards/public';
@@ -48,6 +47,7 @@ export const createInputControlVisController = (deps: InputControlVisDependencie
   return class InputControlVisController {
     private I18nContext?: I18nStart['Context'];
     private _isLoaded = false;
+    private root: Root | null = null;
 
     controls: Array<RangeControl | ListControl>;
     queryBarUpdateHandler: () => void;
@@ -91,7 +91,10 @@ export const createInputControlVisController = (deps: InputControlVisDependencie
     destroy() {
       this.updateSubsciption.unsubscribe();
       this.timeFilterSubscription.unsubscribe();
-      unmountComponentAtNode(this.el);
+      if (this.root) {
+        this.root.unmount();
+        this.root = null;
+      }
       this.controls.forEach((control) => control.destroy());
     }
 
@@ -100,7 +103,11 @@ export const createInputControlVisController = (deps: InputControlVisDependencie
         throw new Error('no i18n context found');
       }
 
-      render(
+      if (!this.root) {
+        this.root = createRoot(this.el as HTMLElement);
+      }
+
+      this.root.render(
         <this.I18nContext>
           <InputControlVis
             updateFiltersOnChange={this.visParams?.updateFiltersOnChange}
@@ -113,8 +120,7 @@ export const createInputControlVisController = (deps: InputControlVisDependencie
             hasValues={this.hasValues}
             refreshControl={this.refreshControl}
           />
-        </this.I18nContext>,
-        this.el
+        </this.I18nContext>
       );
     };
 

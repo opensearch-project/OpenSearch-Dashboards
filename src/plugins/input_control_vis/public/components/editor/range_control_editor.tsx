@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { Component, Fragment, ComponentType } from 'react';
+import { Component, Fragment, ComponentType } from 'react';
 
 import { EuiCompressedFormRow, EuiCompressedFieldNumber } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';

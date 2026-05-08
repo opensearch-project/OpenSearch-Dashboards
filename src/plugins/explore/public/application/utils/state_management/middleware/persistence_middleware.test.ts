@@ -108,7 +108,7 @@ describe('persistence_middleware', () => {
 
       actionHandler(action);
 
-      expect(persistReduxState).toHaveBeenCalledWith(mockState, mockServices);
+      expect(persistReduxState).toHaveBeenCalledWith(mockState, mockServices, { replace: true });
     });
 
     it('should persist state for ui/ actions', () => {
@@ -116,7 +116,7 @@ describe('persistence_middleware', () => {
 
       actionHandler(action);
 
-      expect(persistReduxState).toHaveBeenCalledWith(mockState, mockServices);
+      expect(persistReduxState).toHaveBeenCalledWith(mockState, mockServices, { replace: true });
     });
 
     it('should persist state for tab/ actions', () => {
@@ -124,7 +124,7 @@ describe('persistence_middleware', () => {
 
       actionHandler(action);
 
-      expect(persistReduxState).toHaveBeenCalledWith(mockState, mockServices);
+      expect(persistReduxState).toHaveBeenCalledWith(mockState, mockServices, { replace: true });
     });
 
     it('should persist state for legacy/ actions', () => {
@@ -132,7 +132,7 @@ describe('persistence_middleware', () => {
 
       actionHandler(action);
 
-      expect(persistReduxState).toHaveBeenCalledWith(mockState, mockServices);
+      expect(persistReduxState).toHaveBeenCalledWith(mockState, mockServices, { replace: true });
     });
 
     it('should not persist state for non-triggering actions', () => {
@@ -164,7 +164,7 @@ describe('persistence_middleware', () => {
 
       actionHandler(action);
 
-      expect(persistReduxState).toHaveBeenCalledWith(mockState, mockServices);
+      expect(persistReduxState).toHaveBeenCalledWith(mockState, mockServices, { replace: true });
     });
 
     it('should handle multiple persist-triggering actions', () => {
@@ -177,7 +177,7 @@ describe('persistence_middleware', () => {
       actions.forEach((action) => actionHandler(action));
 
       expect(persistReduxState).toHaveBeenCalledTimes(3);
-      expect(persistReduxState).toHaveBeenCalledWith(mockState, mockServices);
+      expect(persistReduxState).toHaveBeenCalledWith(mockState, mockServices, { replace: true });
     });
 
     it('should get fresh state for each persistence call', () => {
@@ -190,8 +190,12 @@ describe('persistence_middleware', () => {
       actionHandler(action1);
       actionHandler(action2);
 
-      expect(persistReduxState).toHaveBeenNthCalledWith(1, mockState, mockServices);
-      expect(persistReduxState).toHaveBeenNthCalledWith(2, updatedState, mockServices);
+      expect(persistReduxState).toHaveBeenNthCalledWith(1, mockState, mockServices, {
+        replace: true,
+      });
+      expect(persistReduxState).toHaveBeenNthCalledWith(2, updatedState, mockServices, {
+        replace: true,
+      });
     });
 
     it('should handle actions with no type gracefully', () => {

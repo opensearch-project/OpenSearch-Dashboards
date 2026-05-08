@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { shallow, mount } from 'enzyme';
 import { EuiConfirmModal, EuiFieldText } from '@elastic/eui';
 import {
@@ -12,7 +11,7 @@ import {
 } from './acceleration_action_overlay';
 import { ACC_DELETE_MSG, ACC_VACUUM_MSG, ACC_SYNC_MSG } from './acceleration_utils';
 import { CachedAcceleration } from '../../../../framework/types';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 
 const mockAcceleration: CachedAcceleration = {
   flintIndexName: 'flint_index',
@@ -79,7 +78,6 @@ describe('AccelerationActionOverlay', () => {
 
   test('calls onConfirm when confirm button is clicked', () => {
     const wrapper = mountComponent();
-    // @ts-expect-error TS2722, TS2554 TODO(ts-error): fixme
     wrapper.find(EuiConfirmModal).prop('onConfirm')();
     expect(defaultProps.onConfirm).toHaveBeenCalled();
   });
@@ -99,18 +97,16 @@ describe('AccelerationActionOverlay', () => {
     // @ts-expect-error TS2345 TODO(ts-error): fixme
     const wrapper = mountComponent(props);
 
+    // Use invoke instead of simulate for React 18 compatibility
     await act(async () => {
-      wrapper
-        .find(EuiFieldText)
-        .simulate('change', { target: { value: mockAcceleration.indexName } });
-      wrapper.update();
+      const onChange = wrapper.find(EuiFieldText).prop('onChange');
+      onChange({ target: { value: mockAcceleration.indexName } });
     });
+    wrapper.update();
 
-    setTimeout(() => {
-      const confirmButton = wrapper
-        .find(EuiConfirmModal)
-        .find('button[data-test-subj="confirmModalConfirmButton"]');
-      expect(confirmButton.prop('disabled')).toBe(false);
-    }, 0);
+    const confirmButton = wrapper
+      .find(EuiConfirmModal)
+      .find('button[data-test-subj="confirmModalConfirmButton"]');
+    expect(confirmButton.prop('disabled')).toBe(false);
   });
 });

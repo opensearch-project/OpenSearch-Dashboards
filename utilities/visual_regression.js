@@ -29,7 +29,7 @@
  */
 
 import bluebird, { promisify } from 'bluebird';
-import Handlebars from 'handlebars';
+import Handlebars from 'kbn-handlebars';
 import fs from 'fs';
 import path from 'path';
 import { PNG } from 'pngjs';

@@ -29,7 +29,8 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
+import { flushSync } from 'react-dom';
 import { I18nProvider } from '@osd/i18n/react';
 import { MountPoint } from '../types';
 
@@ -53,6 +54,10 @@ export const MountWrapper: React.FunctionComponent<{ mount: MountPoint; classNam
  * @param node to get a mount for
  */
 export const mountReactNode = (node: React.ReactNode): MountPoint => (element: HTMLElement) => {
-  render(<I18nProvider>{node}</I18nProvider>, element);
-  return () => unmountComponentAtNode(element);
+  const root = createRoot(element);
+  // Use flushSync to ensure synchronous rendering for consistent DOM measurements
+  flushSync(() => {
+    root.render(<I18nProvider>{node}</I18nProvider>);
+  });
+  return () => root.unmount();
 };

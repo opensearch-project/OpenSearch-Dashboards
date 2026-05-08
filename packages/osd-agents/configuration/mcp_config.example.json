@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "opensearch-mcp-server": {
+      "command": "uvx",
+      "args": [
+        "opensearch-mcp-server-py",
+        "--mode",
+        "multi",
+        "--config",
+        "./configuration/opensearch-config.yml"
+      ],
+      "disabled": false,
+      "env": {}
+    }
+  }
+}

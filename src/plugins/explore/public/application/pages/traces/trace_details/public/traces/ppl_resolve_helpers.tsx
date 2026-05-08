@@ -15,11 +15,23 @@ export function convertTimestampToNanos(timestamp: string | number): number {
       if (numericMatch) {
         time = parseInt(timestamp, 10);
       } else {
-        // Handle ISO string format
-        time = new Date(timestamp).getTime();
+        let dateString = timestamp;
+
+        // Convert "YYYY-MM-DD HH:mm:ss.SSS" format to ISO format for better parsing
+        if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(\.\d+)?$/.test(timestamp)) {
+          dateString = timestamp.replace(' ', 'T') + 'Z';
+        }
+
+        time = new Date(dateString).getTime();
         // Check if the date is invalid (NaN)
         if (isNaN(time)) {
-          return 0;
+          // Try parsing as a direct timestamp if ISO parsing fails
+          const directParse = Date.parse(timestamp);
+          if (!isNaN(directParse)) {
+            time = directParse;
+          } else {
+            return 0;
+          }
         }
       }
     } else {
@@ -107,28 +119,33 @@ export function resolveServiceName(fieldMap: Map<string, any[]>, index: number):
     return resource.attributes.service.name;
   }
 
-  const attributes = fieldMap.get('attributes')?.[index];
-  if (attributes?.aws?.local?.service) {
-    return attributes.aws.local.service;
-  }
-
   return fieldMap.get('serviceName')?.[index] || '';
 }
 
 export function resolveStartTime(fieldMap: Map<string, any[]>, index: number): string {
-  return fieldMap.get('startTimeUnixNano')?.[index] || fieldMap.get('startTime')?.[index] || '';
+  return fieldMap.get('startTime')?.[index] || fieldMap.get('startTimeUnixNano')?.[index] || '';
 }
 
 export function resolveEndTime(fieldMap: Map<string, any[]>, index: number): string {
-  return fieldMap.get('endTimeUnixNano')?.[index] || fieldMap.get('endTime')?.[index] || '';
+  return fieldMap.get('endTime')?.[index] || fieldMap.get('endTimeUnixNano')?.[index] || '';
 }
 
 export function resolveTimestamp(fieldMap: Map<string, any[]>, index: number): string {
-  return fieldMap.get('endTimeUnixNano')?.[index] || fieldMap.get('@timestamp')?.[index] || '';
+  return (
+    fieldMap.get('@timestamp')?.[index] ||
+    fieldMap.get('endTime')?.[index] ||
+    fieldMap.get('endTimeUnixNano')?.[index] ||
+    ''
+  );
 }
 
 export function resolveTime(fieldMap: Map<string, any[]>, index: number): string {
-  return fieldMap.get('endTimeUnixNano')?.[index] || fieldMap.get('time')?.[index] || '';
+  return (
+    fieldMap.get('time')?.[index] ||
+    fieldMap.get('endTime')?.[index] ||
+    fieldMap.get('endTimeUnixNano')?.[index] ||
+    ''
+  );
 }
 
 export function resolveDuration(
@@ -137,8 +154,8 @@ export function resolveDuration(
   startTime: string,
   endTime: string
 ): number {
-  const durationNano = fieldMap.get('durationNano')?.[index];
   const durationInNanos = fieldMap.get('durationInNanos')?.[index];
+  const durationNano = fieldMap.get('durationNano')?.[index];
 
   if (startTime && endTime) {
     const hasStartNanoPrecision = hasNanosecondPrecision(startTime);
@@ -158,8 +175,8 @@ export function resolveDuration(
     }
 
     // If timestamps lack precision, prefer provided duration fields for better accuracy
-    if ((!hasStartNanoPrecision || !hasEndNanoPrecision) && (durationNano || durationInNanos)) {
-      return durationNano || durationInNanos;
+    if ((!hasStartNanoPrecision || !hasEndNanoPrecision) && (durationInNanos || durationNano)) {
+      return durationInNanos || durationNano;
     }
 
     // Fall back to calculated duration from lower-precision timestamps
@@ -176,11 +193,11 @@ export function resolveDuration(
   }
 
   // Final fallback to provided duration fields
-  return durationNano || durationInNanos || 0;
+  return durationInNanos || durationNano || 0;
 }
 
 export function resolveInstrumentationScope(fieldMap: Map<string, any[]>, index: number): any {
-  return fieldMap.get('scope')?.[index] || fieldMap.get('instrumentationScope')?.[index] || {};
+  return fieldMap.get('instrumentationScope')?.[index] || fieldMap.get('scope')?.[index] || {};
 }
 
 export function resolveServiceNameFromDatarows(getValueByName: (name: string) => any): string {
@@ -189,20 +206,15 @@ export function resolveServiceNameFromDatarows(getValueByName: (name: string) =>
     return resource.attributes.service.name;
   }
 
-  const attributes = getValueByName('attributes');
-  if (attributes?.aws?.local?.service) {
-    return attributes.aws.local.service;
-  }
-
   return getValueByName('serviceName') || '';
 }
 
 export function resolveStartTimeFromDatarows(getValueByName: (name: string) => any): string {
-  return getValueByName('startTimeUnixNano') || getValueByName('startTime') || '';
+  return getValueByName('startTime') || getValueByName('startTimeUnixNano') || '';
 }
 
 export function resolveEndTimeFromDatarows(getValueByName: (name: string) => any): string {
-  return getValueByName('endTimeUnixNano') || getValueByName('endTime') || '';
+  return getValueByName('endTime') || getValueByName('endTimeUnixNano') || '';
 }
 
 export function resolveDurationFromDatarows(
@@ -210,8 +222,8 @@ export function resolveDurationFromDatarows(
   startTime: string,
   endTime: string
 ): number {
-  const durationNano = getValueByName('durationNano');
   const durationInNanos = getValueByName('durationInNanos');
+  const durationNano = getValueByName('durationNano');
 
   if (startTime && endTime) {
     const hasStartNanoPrecision = hasNanosecondPrecision(startTime);
@@ -231,8 +243,8 @@ export function resolveDurationFromDatarows(
     }
 
     // If timestamps lack precision, prefer provided duration fields for better accuracy
-    if ((!hasStartNanoPrecision || !hasEndNanoPrecision) && (durationNano || durationInNanos)) {
-      return durationNano || durationInNanos;
+    if ((!hasStartNanoPrecision || !hasEndNanoPrecision) && (durationInNanos || durationNano)) {
+      return durationInNanos || durationNano;
     }
 
     // Fall back to calculated duration from lower-precision timestamps
@@ -249,13 +261,13 @@ export function resolveDurationFromDatarows(
   }
 
   // Final fallback to provided duration fields
-  return durationNano || durationInNanos || 0;
+  return durationInNanos || durationNano || 0;
 }
 
 export function resolveInstrumentationScopeFromDatarows(
   getValueByName: (name: string) => any
 ): any {
-  return getValueByName('scope') || getValueByName('instrumentationScope') || {};
+  return getValueByName('instrumentationScope') || getValueByName('scope') || {};
 }
 
 export function isSpanError(span: any): boolean {
@@ -307,14 +319,6 @@ export function resolveServiceNameFromSpan(span: any): string {
 
   if (span.resource?.attributes?.['service.name']) {
     return span.resource.attributes['service.name'];
-  }
-
-  if (span.attributes?.aws?.local?.service) {
-    return span.attributes.aws.local.service;
-  }
-
-  if (span.attributes?.['aws.local.service']) {
-    return span.attributes['aws.local.service'];
   }
 
   return span.serviceName || span.name || '';

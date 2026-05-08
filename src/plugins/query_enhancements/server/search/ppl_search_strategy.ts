@@ -14,9 +14,11 @@ import {
   Query,
   createDataFrame,
 } from '../../../data/common';
-import { getFields, throwFacetError } from '../../common/utils';
+import { getFields, queryEndsWithHead, throwFacetError } from '../../common/utils';
 import { Facet } from '../utils';
 import { QueryAggConfig } from '../../common';
+
+const SAMPLE_SIZE_SETTING = 'discover:sampleSize';
 
 export const pplSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
@@ -30,6 +32,7 @@ export const pplSearchStrategyProvider = (
     endpoint: 'enhancements.pplQuery',
     useJobs: false,
     shimResponse: true,
+    requestCompression: true,
   });
 
   return {
@@ -37,9 +40,25 @@ export const pplSearchStrategyProvider = (
       try {
         const query: Query = request.body.query;
         const aggConfig: QueryAggConfig | undefined = request.body.aggConfig;
+
+        const hasHead = typeof query.query === 'string' && queryEndsWithHead(query.query);
+        if (!hasHead) {
+          const fetchSize = await context.core.uiSettings.client.get<number>(SAMPLE_SIZE_SETTING);
+          request.body = { ...request.body, fetchSize };
+        }
+
         const rawResponse: any = await pplFacet.describeQuery(context, request);
 
         if (!rawResponse.success) throwFacetError(rawResponse);
+
+        // Extract _highlight column from schema/datarows if present
+        const hlIndex = rawResponse.data.schema?.findIndex((s: any) => s.name === '_highlight');
+        let highlights: any[] | undefined;
+        if (hlIndex !== undefined && hlIndex >= 0) {
+          highlights = rawResponse.data.datarows?.map((row: any) => row[hlIndex]) ?? [];
+          rawResponse.data.schema.splice(hlIndex, 1);
+          rawResponse.data.datarows?.forEach((row: any) => row.splice(hlIndex, 1));
+        }
 
         const dataFrame = createDataFrame({
           name: query.dataset?.id,
@@ -49,6 +68,10 @@ export const pplSearchStrategyProvider = (
         });
 
         dataFrame.size = rawResponse.data.datarows.length;
+
+        if (highlights) {
+          dataFrame.meta = { ...dataFrame.meta, highlights };
+        }
 
         if (usage) usage.trackSuccess(rawResponse.took);
 

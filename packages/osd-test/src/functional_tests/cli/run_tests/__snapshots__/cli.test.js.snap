@@ -30,42 +30,42 @@ Options:
 
 exports[`run tests CLI options rejects boolean config value 1`] = `
 "
-[31mfunctional_tests: invalid argument [true] to option [config][39m
+functional_tests: invalid argument [true] to option [config]
     ...stack trace...
 "
 `;
 
 exports[`run tests CLI options rejects boolean value for opensearch-dashboards-install-dir 1`] = `
 "
-[31mfunctional_tests: invalid argument [true] to option [opensearch-dashboards-install-dir][39m
+functional_tests: invalid argument [true] to option [opensearch-dashboards-install-dir]
     ...stack trace...
 "
 `;
 
 exports[`run tests CLI options rejects empty config value if no default passed 1`] = `
 "
-[31mfunctional_tests: config is required[39m
+functional_tests: config is required
     ...stack trace...
 "
 `;
 
 exports[`run tests CLI options rejects invalid options even if valid options exist 1`] = `
 "
-[31mfunctional_tests: invalid option [aintnothang][39m
+functional_tests: invalid option [aintnothang]
     ...stack trace...
 "
 `;
 
 exports[`run tests CLI options rejects non-boolean value for bail 1`] = `
 "
-[31mfunctional_tests: invalid argument [peanut] to option [bail][39m
+functional_tests: invalid argument [peanut] to option [bail]
     ...stack trace...
 "
 `;
 
 exports[`run tests CLI options rejects non-enum value for opensearchFrom 1`] = `
 "
-[31mfunctional_tests: invalid argument [butter] to option [opensearchFrom][39m
+functional_tests: invalid argument [butter] to option [opensearchFrom]
     ...stack trace...
 "
 `;

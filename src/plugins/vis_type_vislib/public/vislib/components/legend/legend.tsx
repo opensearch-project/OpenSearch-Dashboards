@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { BaseSyntheticEvent, KeyboardEvent, PureComponent } from 'react';
+import { BaseSyntheticEvent, KeyboardEvent, PureComponent } from 'react';
 import classNames from 'classnames';
 import { compact, uniqBy, map, every, isUndefined } from 'lodash';
 
@@ -275,7 +275,6 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
             type="button"
             onClick={this.toggleLegend}
             className={classNames('visLegend__toggle osd-resetFocusState', {
-              // eslint-disable-next-line @typescript-eslint/naming-convention
               'visLegend__toggle--isOpen': open,
             })}
             aria-label={i18n.translate('visTypeVislib.vislib.legend.toggleLegendButtonAriaLabel', {

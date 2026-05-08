@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { Component } from 'react';
+import { Component } from 'react';
 import { createSelector } from 'reselect';
 
 import { EuiSpacer } from '@elastic/eui';
@@ -181,7 +181,11 @@ export class SourceFiltersTable extends Component<
     return (
       <>
         <Header />
-        <AddFilter useUpdatedUX={this.props.useUpdatedUX} onAddFilter={this.onAddFilter} />
+        <AddFilter
+          useUpdatedUX={this.props.useUpdatedUX}
+          onAddFilter={this.onAddFilter}
+          isSaving={isSaving}
+        />
         <EuiSpacer size="l" />
         <Table
           isSaving={isSaving}
@@ -197,6 +201,7 @@ export class SourceFiltersTable extends Component<
             filterToDeleteValue={filterToDelete.value}
             onCancelConfirmationModal={this.hideDeleteConfirmationModal}
             onDeleteFilter={this.deleteFilter}
+            isSaving={isSaving}
           />
         )}
       </>

@@ -30,6 +30,7 @@
 
 import { createInterface } from 'readline';
 import { join, isAbsolute, relative } from 'path';
+import { standardize } from '@osd/cross-platform';
 import { createReadStream, createWriteStream } from 'fs';
 import { copyAll, Task } from '../lib';
 
@@ -117,7 +118,7 @@ export const copyYarnLock = async (repoRoot: string, buildRoot: string) => {
         line.replace(linkedFileDepPattern, (match, m1, m2) => {
           if (isAbsolute(m2)) return `${m1}${fileLinkDelimiter}${m2}`;
           // Join the relative path and repoRoot and find how to ge there from buildRoot
-          return `${m1}${fileLinkDelimiter}${relative(buildRoot, join(repoRoot, m2))}`;
+          return `${m1}${fileLinkDelimiter}${standardize(relative(buildRoot, join(repoRoot, m2)))}`;
         })
       );
     } else {

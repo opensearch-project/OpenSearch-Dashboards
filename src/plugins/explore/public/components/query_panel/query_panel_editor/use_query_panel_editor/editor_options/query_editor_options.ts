@@ -13,6 +13,8 @@ export const queryEditorOptions: IEditorConstructionOptions = {
   lineNumbersMinChars: 1,
   tabCompletion: 'on',
   renderValidationDecorations: 'on', // Explicitly enable validation decorations for markers
+  formatOnType: true,
+  formatOnPaste: true,
   suggest: {
     snippetsPreventQuickSuggestions: false, // Ensure all suggestions are shown
     filterGraceful: false, // Don't filter suggestions

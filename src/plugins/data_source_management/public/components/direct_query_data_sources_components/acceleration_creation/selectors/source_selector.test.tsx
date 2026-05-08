@@ -3,9 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { mount } from 'enzyme';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import { AccelerationDataSourceSelector } from './source_selector';
 import { EuiComboBox, EuiDescriptionList, EuiFormRow } from '@elastic/eui';
 import { CatalogCacheManager } from '../../../../../framework/catalog_cache/cache_manager';

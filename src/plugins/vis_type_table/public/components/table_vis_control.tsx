@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { EuiPopover, EuiButtonEmpty, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
 import { OpenSearchDashboardsDatatableRow } from 'src/plugins/expressions';
 import { CoreStart } from 'opensearch-dashboards/public';

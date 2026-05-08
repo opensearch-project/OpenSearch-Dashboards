@@ -47,6 +47,7 @@ describe('QueryEditor Slice', () => {
     queryExecutionButtonStatus: 'REFRESH',
     dateRange: undefined,
     isQueryEditorDirty: false,
+    hasUserInitiatedQuery: false,
   };
 
   it('should return the initial state', () => {
@@ -84,6 +85,7 @@ describe('QueryEditor Slice', () => {
         queryExecutionButtonStatus: 'DISABLED',
         dateRange: undefined,
         isQueryEditorDirty: true,
+        hasUserInitiatedQuery: true,
       };
 
       const action = setQueryEditorState(newState);

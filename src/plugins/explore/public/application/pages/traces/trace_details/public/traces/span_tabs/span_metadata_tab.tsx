@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import React, { useMemo } from 'react';
-import { EuiText, EuiSpacer, EuiAccordion } from '@elastic/eui';
+import { EuiText, EuiSpacer, EuiAccordion, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { isEmpty } from '../../utils/helper_functions';
 import { formatSpanAttributes, sortAttributes } from '../../utils/span_data_utils';
@@ -160,18 +160,20 @@ export const SpanMetadataTab: React.FC<SpanMetadataTabProps> = ({
           <EuiSpacer size="s" />
           {renderAttributeList(attributes)}
         </EuiAccordion>
-        <EuiSpacer size="m" />
+        <EuiHorizontalRule margin="xs" />
       </>
     );
   };
 
   if (!selectedSpan || isEmpty(selectedSpan)) {
     return (
-      <EuiText color="subdued" textAlign="center">
-        {i18n.translate('explore.spanMetadataTab.noSpanSelected', {
-          defaultMessage: 'No span selected',
-        })}
-      </EuiText>
+      <div data-test-subj="span-metadata-tab">
+        <EuiText color="subdued" textAlign="center">
+          {i18n.translate('explore.spanMetadataTab.noSpanSelected', {
+            defaultMessage: 'No span selected',
+          })}
+        </EuiText>
+      </div>
     );
   }
 
@@ -180,16 +182,18 @@ export const SpanMetadataTab: React.FC<SpanMetadataTabProps> = ({
     Object.values(categorizedAttributes).every((attrs) => attrs.length === 0)
   ) {
     return (
-      <EuiText color="subdued" textAlign="center">
-        {i18n.translate('explore.spanMetadataTab.noAttributes', {
-          defaultMessage: 'No metadata attributes found for this span',
-        })}
-      </EuiText>
+      <div data-test-subj="span-metadata-tab">
+        <EuiText color="subdued" textAlign="center">
+          {i18n.translate('explore.spanMetadataTab.noAttributes', {
+            defaultMessage: 'No metadata attributes found for this span',
+          })}
+        </EuiText>
+      </div>
     );
   }
 
   return (
-    <>
+    <div data-test-subj="span-metadata-tab">
       {renderSection(
         i18n.translate('explore.spanMetadataTab.section.http', {
           defaultMessage: 'HTTP',
@@ -217,6 +221,6 @@ export const SpanMetadataTab: React.FC<SpanMetadataTabProps> = ({
         }),
         categorizedAttributes.general
       )}
-    </>
+    </div>
   );
 };

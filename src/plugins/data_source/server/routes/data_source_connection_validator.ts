@@ -55,7 +55,9 @@ export class DataSourceConnectionValidator {
 
       await this.callDataCluster
         .info()
+        // @ts-expect-error TS7006 TODO(ts-upgrade): fixme
         .then((response) => response.body)
+        // @ts-expect-error TS7006 TODO(ts-upgrade): fixme
         .then((body) => {
           dataSourceInfo.dataSourceVersion = body.version.number;
 
@@ -92,8 +94,11 @@ export class DataSourceConnectionValidator {
           format: 'JSON',
           v: true,
         })
+        // @ts-expect-error TS7006 TODO(ts-upgrade): fixme
         .then((response) => response.body)
+        // @ts-expect-error TS7006 TODO(ts-upgrade): fixme
         .then((body) => {
+          // @ts-expect-error TS7006 TODO(ts-upgrade): fixme
           body.forEach((plugin) => {
             installedPlugins.add(plugin.component);
           });

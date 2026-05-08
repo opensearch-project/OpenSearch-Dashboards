@@ -5,7 +5,7 @@
 
 import { configureStore } from '@reduxjs/toolkit';
 import { render, screen } from '@testing-library/react';
-import React, { FC } from 'react';
+import { FC } from 'react';
 import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
@@ -25,6 +25,17 @@ import {
 import { QueryExecutionStatus } from '../../utils/state_management/types';
 import { LogsPage } from './logs_page';
 import { defaultPrepareQueryString } from '../../utils/state_management/actions/query_actions';
+
+const mockUseKeyboardShortcut = jest.fn();
+
+// Mock i18n translate function
+jest.mock('@osd/i18n', () => ({
+  i18n: {
+    translate: jest.fn(
+      (key: string, options: { defaultMessage: string }) => options.defaultMessage
+    ),
+  },
+}));
 
 jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
   useOpenSearchDashboards: jest.fn().mockReturnValue({
@@ -150,10 +161,12 @@ describe('LogsPage', () => {
         query: queryReducer,
         queryEditor: queryEditorReducer,
       },
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       preloadedState,
     });
   };
 
+  // @ts-expect-error TS2339 TODO(ts-error): fixme
   const TestHarness: FC<{ store: ReturnType<typeof createTestStore> }> = ({ children, store }) => {
     return (
       <MemoryRouter>
@@ -166,6 +179,14 @@ describe('LogsPage', () => {
     const exploreServices = discoverPluginMock.createExploreServicesMock();
     const exploreServicesMock = exploreServices as jest.MaybeMockedDeep<typeof exploreServices>;
     exploreServicesMock.uiSettings.get.mockImplementation((_, defaultValue) => defaultValue);
+
+    exploreServicesMock.keyboardShortcut = {
+      useKeyboardShortcut: mockUseKeyboardShortcut,
+      register: jest.fn(),
+      unregister: jest.fn(),
+      getAllShortcuts: jest.fn(),
+    };
+
     (useOpenSearchDashboards as jest.Mock).mockReturnValue({
       services: exploreServicesMock,
     });
@@ -173,11 +194,13 @@ describe('LogsPage', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+    mockUseKeyboardShortcut.mockClear();
   });
 
   it('renders without crashing', () => {
     const store = createTestStore();
     render(
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       <TestHarness store={store}>
         <LogsPage />
       </TestHarness>
@@ -193,6 +216,7 @@ describe('LogsPage', () => {
     const mockSetHeaderActionMenu = jest.fn();
     const store = createTestStore();
     render(
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       <TestHarness store={store}>
         <LogsPage setHeaderActionMenu={mockSetHeaderActionMenu} />
       </TestHarness>
@@ -205,6 +229,7 @@ describe('LogsPage', () => {
   it('renders when dataset is loading', () => {
     const store = createTestStore();
     render(
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       <TestHarness store={store}>
         <LogsPage />
       </TestHarness>
@@ -212,5 +237,96 @@ describe('LogsPage', () => {
 
     expect(screen.getByTestId('query-panel')).toBeInTheDocument();
     expect(screen.getByTestId('top-nav')).toBeInTheDocument();
+  });
+
+  describe('Keyboard Shortcuts', () => {
+    it('registers all keyboard shortcuts correctly', () => {
+      const store = createTestStore();
+      render(
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
+        <TestHarness store={store}>
+          <LogsPage />
+        </TestHarness>
+      );
+
+      expect(mockUseKeyboardShortcut).toHaveBeenCalledTimes(3);
+
+      expect(mockUseKeyboardShortcut).toHaveBeenCalledWith({
+        id: 'switchToLogsTabLogs',
+        pluginId: 'explore',
+        name: 'Switch to logs tab',
+        category: 'Navigation',
+        keys: 'shift+l',
+        execute: expect.any(Function),
+      });
+
+      expect(mockUseKeyboardShortcut).toHaveBeenCalledWith({
+        id: 'switchToPatternsTabLogs',
+        pluginId: 'explore',
+        name: 'Switch to patterns tab',
+        category: 'Navigation',
+        keys: 'shift+p',
+        execute: expect.any(Function),
+      });
+
+      expect(mockUseKeyboardShortcut).toHaveBeenCalledWith({
+        id: 'switchToVisualizationTabLogs',
+        pluginId: 'explore',
+        name: 'Switch to visualization tab',
+        category: 'Navigation',
+        keys: 'shift+v',
+        execute: expect.any(Function),
+      });
+    });
+
+    it('keyboard shortcuts dispatch correct Redux actions', () => {
+      const store = createTestStore();
+      const dispatchSpy = jest.spyOn(store, 'dispatch');
+
+      render(
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
+        <TestHarness store={store}>
+          <LogsPage />
+        </TestHarness>
+      );
+
+      const logsTabCall = mockUseKeyboardShortcut.mock.calls.find(
+        (call) => call[0].id === 'switchToLogsTabLogs'
+      );
+      const patternsTabCall = mockUseKeyboardShortcut.mock.calls.find(
+        (call) => call[0].id === 'switchToPatternsTabLogs'
+      );
+      const visualizationTabCall = mockUseKeyboardShortcut.mock.calls.find(
+        (call) => call[0].id === 'switchToVisualizationTabLogs'
+      );
+
+      expect(logsTabCall).toBeDefined();
+      expect(patternsTabCall).toBeDefined();
+      expect(visualizationTabCall).toBeDefined();
+
+      logsTabCall[0].execute();
+      expect(dispatchSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: expect.stringContaining('setActiveTab'),
+          payload: 'logs',
+        })
+      );
+
+      patternsTabCall[0].execute();
+      expect(dispatchSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: expect.stringContaining('setActiveTab'),
+          payload: 'explore_patterns_tab',
+        })
+      );
+
+      visualizationTabCall[0].execute();
+      expect(dispatchSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: expect.stringContaining('setActiveTab'),
+          payload: 'explore_visualization_tab',
+        })
+      );
+    });
   });
 });

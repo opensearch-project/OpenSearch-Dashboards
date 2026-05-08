@@ -35,17 +35,27 @@ import { IntlProvider } from 'react-intl';
 import * as i18n from '../core';
 import { PseudoLocaleWrapper } from './pseudo_locale_wrapper';
 
+interface I18nProviderProps {
+  children: React.ReactNode;
+}
+
+// Cast IntlProvider to accept children prop for React 18 compatibility
+// The old @types/react-intl doesn't include children in the props
+const TypedIntlProvider = IntlProvider as React.ComponentType<
+  React.ComponentProps<typeof IntlProvider> & { children?: React.ReactNode }
+>;
+
 /**
  * The library uses the provider pattern to scope an i18n context to a tree
  * of components. This component is used to setup the i18n context for a tree.
  * IntlProvider should wrap react app's root component (inside each react render method).
  */
-export class I18nProvider extends React.PureComponent {
+export class I18nProvider extends React.PureComponent<I18nProviderProps> {
   public static propTypes = { children: PropTypes.element.isRequired };
 
   public render() {
     return (
-      <IntlProvider
+      <TypedIntlProvider
         locale={i18n.getLocale()}
         messages={i18n.getTranslation().messages}
         defaultLocale={i18n.getDefaultLocale()}
@@ -53,7 +63,7 @@ export class I18nProvider extends React.PureComponent {
         textComponent={React.Fragment}
       >
         <PseudoLocaleWrapper>{this.props.children}</PseudoLocaleWrapper>
-      </IntlProvider>
+      </TypedIntlProvider>
     );
   }
 }

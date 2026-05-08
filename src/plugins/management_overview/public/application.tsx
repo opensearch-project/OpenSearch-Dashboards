@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { I18nProvider, FormattedMessage } from '@osd/i18n/react';
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { EuiFlexGrid, EuiFlexItem, EuiPage, EuiPageBody, EuiSpacer, EuiText } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import { ApplicationStart, AppNavLinkStatus, CoreStart } from '../../../core/public';
@@ -59,15 +59,15 @@ export function renderApp(
   overviewApps: OverviewApp[],
   element: HTMLElement
 ) {
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <I18nProvider>
       <ManagementOverviewWrapper application={application} overviewApps={overviewApps} />
-    </I18nProvider>,
-    element
+    </I18nProvider>
   );
 
   return () => {
     chrome.docTitle.reset();
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 }

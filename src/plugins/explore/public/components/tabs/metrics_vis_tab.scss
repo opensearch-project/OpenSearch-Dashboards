@@ -1,0 +1,81 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.metricsVisTab {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+
+  &__chartTypeToggle {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: $euiSizeS;
+    padding: $euiSizeXS;
+
+    [data-test-subj="seriesLimitDisclaimer"] {
+      margin-right: auto;
+    }
+  }
+
+  &__chartArea {
+    height: 400px;
+    min-height: 400px;
+    flex-shrink: 0;
+    display: flex;
+  }
+
+  &__settingsPanel {
+    flex: 0 0 280px;
+    min-width: 280px;
+    overflow-y: auto;
+    border-left: $euiBorderThin;
+  }
+
+  // Collapsed layout: chart fills width, thin expand button on the right
+  &__collapsedLayout {
+    display: flex;
+    width: 100%;
+    height: 100%;
+  }
+
+  &__collapsedChart {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+
+    .exploreVisContainer {
+      height: 100%;
+      width: 100%;
+    }
+
+    .exploreVisPanel__inner > div {
+      overflow: hidden;
+    }
+  }
+
+  &__expandButton {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    background-color: $euiColorLightShade;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    transition: background-color 150ms ease-in-out;
+
+    &:hover {
+      background-color: $euiColorMediumShade;
+    }
+  }
+
+  &__rawTable {
+    flex: 1 0 auto;
+    min-height: 500px;
+  }
+}

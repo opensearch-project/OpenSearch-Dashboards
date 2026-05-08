@@ -234,20 +234,24 @@ export class VisualizePlugin
       defaultMessage: 'Visualizations',
     });
 
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
-      {
-        id: visualizeAppId,
-        category: DEFAULT_APP_CATEGORIES.visualizeAndReport,
-        order: 100,
-        title: titleInLeftNav,
-      },
-    ]);
+    if (!core.chrome.getIsIconSideNavEnabled()) {
+      core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
+        {
+          id: visualizeAppId,
+          category: DEFAULT_APP_CATEGORIES.visualizeAndReport,
+          order: 100,
+          title: titleInLeftNav,
+          euiIconType: 'visualizeApp',
+        },
+      ]);
+    }
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS['security-analytics'], [
       {
         id: visualizeAppId,
         category: DEFAULT_APP_CATEGORIES.visualizeAndReport,
         order: 100,
         title: titleInLeftNav,
+        euiIconType: 'visualizeApp',
       },
     ]);
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.essentials, [
@@ -256,6 +260,7 @@ export class VisualizePlugin
         category: undefined,
         order: 400,
         title: titleInLeftNav,
+        euiIconType: 'visualizeApp',
       },
     ]);
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.search, [
@@ -264,6 +269,7 @@ export class VisualizePlugin
         category: DEFAULT_APP_CATEGORIES.visualizeAndReport,
         order: 100,
         title: titleInLeftNav,
+        euiIconType: 'visualizeApp',
       },
     ]);
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
@@ -272,6 +278,7 @@ export class VisualizePlugin
         category: DEFAULT_APP_CATEGORIES.visualizeAndReport,
         order: 100,
         title: titleInLeftNav,
+        euiIconType: 'visualizeApp',
       },
     ]);
 
@@ -297,6 +304,30 @@ export class VisualizePlugin
     setApplication(core.application);
     setIndexPatterns(plugins.data.indexPatterns);
     setQueryService(plugins.data.query);
+
+    // Register visualization navigation shortcuts only when workspace is available
+    if (core.keyboardShortcut) {
+      // Check if workspaces are initialized and available
+      const isInitialized = core.workspaces.initialized$.getValue();
+      const currentWorkspace = core.workspaces.currentWorkspace$.getValue();
+
+      if (isInitialized && currentWorkspace) {
+        core.keyboardShortcut.register({
+          id: 'nav.visualization',
+          name: i18n.translate('visualize.keyboardShortcut.goToVisualization.name', {
+            defaultMessage: 'Go to visualization',
+          }),
+          pluginId: 'visualize',
+          category: i18n.translate('visualize.keyboardShortcut.category.navigation', {
+            defaultMessage: 'Navigation',
+          }),
+          keys: 'g v',
+          execute: () => {
+            core.application.navigateToApp('visualize');
+          },
+        });
+      }
+    }
 
     if (plugins.share) {
       setShareService(plugins.share);

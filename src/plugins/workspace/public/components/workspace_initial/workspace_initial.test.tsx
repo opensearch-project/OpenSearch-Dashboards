@@ -4,7 +4,7 @@
  */
 
 import { fireEvent, render } from '@testing-library/react';
-import React from 'react';
+
 import { WorkspaceInitial } from './workspace_initial';
 import { coreMock } from '../../../../../core/public/mocks';
 import { createOpenSearchDashboardsReactContext } from '../../../../opensearch_dashboards_react/public';
@@ -40,6 +40,7 @@ const WorkspaceInitialPage = (props: { isDashboardAdmin: boolean }) => {
   });
 
   return (
+    // @ts-expect-error TS2769 TODO(ts-error): fixme
     <IntlProvider locale="en">
       <Provider>
         {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}

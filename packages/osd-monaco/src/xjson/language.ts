@@ -34,17 +34,11 @@ import { monaco } from '../monaco';
 import { WorkerProxyService } from './worker_proxy_service';
 import { registerLexerRules } from './lexer_rules';
 import { ID } from './constants';
-import { registerWorker } from '../worker_store';
-// @ts-ignore
-import workerSrc from '!!raw-loader!../../target/public/xjson.editor.worker.js';
 
 const wps = new WorkerProxyService();
 
 // Register rules against shared monaco instance.
 registerLexerRules(monaco);
-
-// register xjson worker to the worker map.
-registerWorker(ID, workerSrc);
 
 monaco.languages.onLanguage(ID, async () => {
   return wps.setup();

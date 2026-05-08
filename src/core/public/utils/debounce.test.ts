@@ -12,6 +12,7 @@ describe('debounce', () => {
   });
   afterEach(() => {
     jest.clearAllTimers();
+    jest.useRealTimers();
   });
 
   test('it should call the debounced fn once at the end of the quiet time', () => {

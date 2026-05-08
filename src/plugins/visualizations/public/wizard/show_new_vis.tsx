@@ -28,8 +28,7 @@
  * under the License.
  */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import { I18nProvider } from '@osd/i18n/react';
 import { NewVisModal } from './new_vis_modal';
@@ -50,6 +49,10 @@ export interface ShowNewVisModalParams {
   originatingApp?: string;
   outsideVisualizeApp?: boolean;
   createByValue?: boolean;
+  containerInfo?: {
+    containerId: string;
+    containerName: string;
+  };
 }
 
 /**
@@ -62,12 +65,14 @@ export function showNewVisModal({
   onClose,
   originatingApp,
   outsideVisualizeApp,
+  containerInfo,
 }: ShowNewVisModalParams = {}) {
   const container = document.createElement('div');
+  const root = createRoot(container);
   let isClosed = false;
   const handleClose = () => {
     if (isClosed) return;
-    ReactDOM.unmountComponentAtNode(container);
+    root.unmount();
     document.body.removeChild(container);
     if (onClose) {
       onClose();
@@ -92,10 +97,11 @@ export function showNewVisModal({
         usageCollection={getUsageCollector()}
         application={getApplication()}
         data={getDataStart()}
+        containerInfo={containerInfo}
       />
     </I18nProvider>
   );
-  ReactDOM.render(element, container);
+  root.render(element);
 
   return () => handleClose();
 }

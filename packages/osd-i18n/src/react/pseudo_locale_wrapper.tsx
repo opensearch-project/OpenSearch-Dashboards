@@ -55,6 +55,10 @@ function translateFormattedMessageUsingPseudoLocale(message: string) {
   return translateUsingPseudoLocale(message);
 }
 
+interface PseudoLocaleWrapperProps {
+  children: React.ReactNode;
+}
+
 /**
  * If the locale is our pseudo locale (e.g. en-xa), we override the
  * intl.formatMessage function to display scrambled characters. We are
@@ -63,14 +67,14 @@ function translateFormattedMessageUsingPseudoLocale(message: string) {
  * be inefficient in some cases, and can cause React hooks to lose
  * their state.
  */
-export class PseudoLocaleWrapper extends React.PureComponent {
+export class PseudoLocaleWrapper extends React.PureComponent<PseudoLocaleWrapperProps> {
   public static propTypes = { children: PropTypes.element.isRequired };
 
   public static contextTypes = {
     intl: PropTypes.object.isRequired,
   };
 
-  constructor(props: { children: React.ReactNode }, context: any) {
+  constructor(props: PseudoLocaleWrapperProps, context: any) {
     super(props, context);
 
     if (isPseudoLocale(i18n.getLocale())) {

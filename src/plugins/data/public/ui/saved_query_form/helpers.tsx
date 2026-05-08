@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import {
   EuiSmallButtonEmpty,
   EuiSmallButton,
@@ -147,6 +147,7 @@ export function useSaveQueryFormContent({
     }
   }, [validate, onSave, title, description, shouldIncludeFilters, shouldIncludeTimeFilter]);
 
+  // @ts-expect-error TS7006 TODO(ts-error): fixme
   const onInputChange = useCallback((event) => {
     setEnabledSaveButton(Boolean(event.target.value));
     setFormErrors([]);

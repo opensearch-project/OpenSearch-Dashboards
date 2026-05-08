@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import * as React from 'react';
 import { OpenSearchDashboardsServices } from '../context/types';
 import { OpenSearchDashboardsReactOverlays } from './types';
 import { toMountPoint } from '../util';

@@ -139,6 +139,7 @@ describe('OptimizerConfig::parseOptions()', () => {
       })
     ).toMatchInlineSnapshot(`
       Object {
+        "bundleRefs": Array [],
         "cache": true,
         "dist": false,
         "filters": Array [],
@@ -166,6 +167,7 @@ describe('OptimizerConfig::parseOptions()', () => {
       })
     ).toMatchInlineSnapshot(`
       Object {
+        "bundleRefs": Array [],
         "cache": false,
         "dist": false,
         "filters": Array [],
@@ -193,6 +195,7 @@ describe('OptimizerConfig::parseOptions()', () => {
       })
     ).toMatchInlineSnapshot(`
       Object {
+        "bundleRefs": Array [],
         "cache": true,
         "dist": false,
         "filters": Array [],
@@ -220,6 +223,7 @@ describe('OptimizerConfig::parseOptions()', () => {
       })
     ).toMatchInlineSnapshot(`
       Object {
+        "bundleRefs": Array [],
         "cache": true,
         "dist": false,
         "filters": Array [],
@@ -247,6 +251,7 @@ describe('OptimizerConfig::parseOptions()', () => {
       })
     ).toMatchInlineSnapshot(`
       Object {
+        "bundleRefs": Array [],
         "cache": true,
         "dist": false,
         "filters": Array [],
@@ -274,6 +279,7 @@ describe('OptimizerConfig::parseOptions()', () => {
       })
     ).toMatchInlineSnapshot(`
       Object {
+        "bundleRefs": Array [],
         "cache": true,
         "dist": false,
         "filters": Array [],
@@ -298,6 +304,7 @@ describe('OptimizerConfig::parseOptions()', () => {
       })
     ).toMatchInlineSnapshot(`
       Object {
+        "bundleRefs": Array [],
         "cache": false,
         "dist": false,
         "filters": Array [],
@@ -322,6 +329,7 @@ describe('OptimizerConfig::parseOptions()', () => {
       })
     ).toMatchInlineSnapshot(`
       Object {
+        "bundleRefs": Array [],
         "cache": false,
         "dist": false,
         "filters": Array [],
@@ -347,6 +355,7 @@ describe('OptimizerConfig::parseOptions()', () => {
       })
     ).toMatchInlineSnapshot(`
       Object {
+        "bundleRefs": Array [],
         "cache": false,
         "dist": false,
         "filters": Array [],
@@ -372,6 +381,7 @@ describe('OptimizerConfig::parseOptions()', () => {
       })
     ).toMatchInlineSnapshot(`
       Object {
+        "bundleRefs": Array [],
         "cache": true,
         "dist": false,
         "filters": Array [],
@@ -397,6 +407,7 @@ describe('OptimizerConfig::parseOptions()', () => {
       })
     ).toMatchInlineSnapshot(`
       Object {
+        "bundleRefs": Array [],
         "cache": true,
         "dist": false,
         "filters": Array [],
@@ -424,6 +435,7 @@ describe('OptimizerConfig::parseOptions()', () => {
       })
     ).toMatchInlineSnapshot(`
       Object {
+        "bundleRefs": Array [],
         "cache": false,
         "dist": false,
         "filters": Array [],
@@ -451,6 +463,7 @@ describe('OptimizerConfig::parseOptions()', () => {
       })
     ).toMatchInlineSnapshot(`
       Object {
+        "bundleRefs": Array [],
         "cache": true,
         "dist": false,
         "filters": Array [],
@@ -478,6 +491,7 @@ describe('OptimizerConfig::parseOptions()', () => {
       })
     ).toMatchInlineSnapshot(`
       Object {
+        "bundleRefs": Array [],
         "cache": true,
         "dist": false,
         "filters": Array [],
@@ -505,6 +519,7 @@ describe('OptimizerConfig::parseOptions()', () => {
       })
     ).toMatchInlineSnapshot(`
       Object {
+        "bundleRefs": Array [],
         "cache": true,
         "dist": false,
         "filters": Array [],
@@ -532,6 +547,7 @@ describe('OptimizerConfig::parseOptions()', () => {
       })
     ).toMatchInlineSnapshot(`
       Object {
+        "bundleRefs": Array [],
         "cache": true,
         "dist": false,
         "filters": Array [],
@@ -556,6 +572,7 @@ describe('OptimizerConfig::parseOptions()', () => {
       })
     ).toMatchInlineSnapshot(`
       Object {
+        "bundleRefs": Array [],
         "cache": false,
         "dist": false,
         "filters": Array [],
@@ -580,6 +597,7 @@ describe('OptimizerConfig::parseOptions()', () => {
       })
     ).toMatchInlineSnapshot(`
       Object {
+        "bundleRefs": Array [],
         "cache": false,
         "dist": false,
         "filters": Array [],
@@ -605,6 +623,7 @@ describe('OptimizerConfig::parseOptions()', () => {
       })
     ).toMatchInlineSnapshot(`
       Object {
+        "bundleRefs": Array [],
         "cache": false,
         "dist": false,
         "filters": Array [],
@@ -630,6 +649,7 @@ describe('OptimizerConfig::parseOptions()', () => {
       })
     ).toMatchInlineSnapshot(`
       Object {
+        "bundleRefs": Array [],
         "cache": true,
         "dist": false,
         "filters": Array [],
@@ -693,6 +713,7 @@ describe('OptimizerConfig::create()', () => {
       profileWebpack: Symbol('parsed profile webpack'),
       filters: [],
       includeCoreBundle: false,
+      bundleRefs: Symbol('bundle refs'),
     }));
   });
 
@@ -703,6 +724,7 @@ describe('OptimizerConfig::create()', () => {
 
     expect(config).toMatchInlineSnapshot(`
       OptimizerConfig {
+        "bundleRefs": Symbol(bundle refs),
         "bundles": Symbol(filtered bundles),
         "cache": Symbol(parsed cache),
         "dist": Symbol(parsed dist),

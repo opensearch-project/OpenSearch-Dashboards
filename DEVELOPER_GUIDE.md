@@ -270,11 +270,59 @@ $ yarn start --run-examples
 
 #### Join the discussion
 
-See the [communication guide](COMMUNICATION.md) for information on how to join our slack workspace, forum, or developer office hours.
+See the [communication guide](COMMUNICATIONS.md) for information on how to join our slack workspace, forum, or developer office hours.
 
 ## Alternative development installations
 
 Although the [getting started guide](#getting-started-guide) covers the recommended development environment setup, there are several alternatives worth being aware of.
+
+### Alternative - Run without OpenSearch (SQLite backend)
+
+You can run OpenSearch Dashboards without a running OpenSearch cluster by using the built-in SQLite storage backend. This stores saved objects (dashboards, visualizations, index patterns, etc.) in a local SQLite file instead of OpenSearch.
+
+```bash
+# Start OSD with SQLite backend (no OpenSearch needed)
+$ yarn start --savedObjects.storage.backend=sqlite
+```
+
+Metadata is stored in `data/osd-metadata.db` by default. You can customize the path:
+
+```yaml
+# opensearch_dashboards.yml
+savedObjects.storage.backend: "sqlite"
+savedObjects.storage.sqlite.path: "data/osd-metadata.db"
+```
+
+#### Resource savings
+
+|  | With OpenSearch | With SQLite |
+|--|----------------|-------------|
+| Disk space | ~1.4 GB | 4 KB |
+| Memory (RSS) | ~2-3 GB (OSD + OpenSearch JVM) | ~500 MB (OSD only) |
+| Startup time | ~30-60s | ~3s |
+| Prerequisites | Java runtime + OpenSearch binary | None |
+
+#### When to use SQLite vs OpenSearch
+
+**Works with SQLite (no OpenSearch needed):**
+- UI and frontend development — React components, pages, layouts, styling
+- Workspace features — create, edit, delete, navigate workspaces
+- Saved object CRUD — import/export, management page, copy to workspace
+- Plugin scaffolding — registering saved object types, routes, and UI
+- Application chrome — header, sidebar, breadcrumbs, home page
+- Management pages — index patterns UI, advanced settings, saved objects
+- Theming, accessibility, and i18n work
+- Unit and component tests using in-memory SQLite (`:memory:`)
+
+**Still needs OpenSearch:**
+- Data exploration (Discover) and querying actual indices
+- Visualizations with real data — charts, maps, aggregations
+- Index pattern field discovery — fetching field mappings
+- Security plugin — authentication, tenants, roles
+- Alerting, observability, and trace analytics
+- Performance testing with realistic data volumes
+
+> **Note:** The SQLite backend is a proof of concept intended for development use. It does not support multi-node deployments or full-text search. See the [design doc](docs/saved_objects/pluggable_storage_backend.md) and [RFC](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/11772) for details.
 
 ### Optional - Run OpenSearch with plugins
 
@@ -379,6 +427,7 @@ You could pass one or multiple flags. If you don't pass any flag, `yarn build-pl
 Currently, the supported flags for this script are:
 
 - `darwin` (builds Darwin x64)
+- `darwin-arm` (builds Darwin ARM64)
 - `linux` (builds Linux x64) **Note:** This build relies on the `dart-sass-embeddable` module, which uses `glibc`. Some Linux distributions (such as Alpine Linux) use `musl` instead of `glibc` and are not compatible with this build. If you are using a musl-based distro, consider building on a glibc-based environment (for example, using a Docker image based on Debian or CentOS) to avoid compatibility issues.
 - `linux-arm` (builds Linux ARM64).
 - `windows` (builds Windows x64)
@@ -420,6 +469,22 @@ yarn build --docker
 
 ### General
 
+#### Module README files
+
+Every module or subsystem directory should include a `README.md` that explains:
+
+- What the module does and why it exists
+- Architecture or key abstractions
+- File inventory (what each file is for)
+- Usage examples or how to get started
+- Known limitations or future work
+
+**Why:** README files co-located with source code are the most universal documentation convention. They are rendered automatically on GitHub, discovered by AI coding tools (Claude, Codex, Copilot, Kiro), and stay in sync with the code they describe. When contributing a new module or making significant changes to an existing one, add or update the README.
+
+**Examples:**
+- `src/core/server/saved_objects/storage/README.md`
+- `src/core/README.md`
+
 #### Filenames
 
 All filenames should use `snake_case`.
@@ -437,7 +502,7 @@ remove it, don't simply comment it out.
 
 We are gradually moving the OpenSearch Dashboards code base over to Prettier. All TypeScript code
 and some JavaScript code (check `.eslintrc.js`) is using Prettier to format code. You
-can run `node script/eslint --fix` to fix linting issues and apply Prettier formatting.
+can run `yarn run lint:es --fix && yarn run lint:style --fix` to fix linting issues and apply Prettier formatting.
 We recommend you to enable running ESLint via your IDE.
 
 Whenever possible we are trying to use Prettier and linting over written developer guide rules.
@@ -1071,10 +1136,6 @@ Name action functions in the form of a strong verb and passed properties in the 
 <sort-button onClick={action.sort}/>
 <pagerButton onPageNext={action.turnToNextPage} />
 ```
-
-#### Storybook
-
-OpenSearch Dashboards supports creating [Storybook](https://storybook.js.org/) for React components. New UI components should have a corresponding storybook component. See [osd-storybook](/packages/osd-storybook) for details.
 
 ### API endpoints
 

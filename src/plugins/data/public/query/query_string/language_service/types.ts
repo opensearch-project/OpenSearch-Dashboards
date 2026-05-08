@@ -31,6 +31,7 @@ export interface RecentQueriesTableProps {
   queryString: QueryStringContract;
   onClickRecentQuery: (query: Query, timeRange?: TimeRange) => void;
   isVisible: boolean;
+  className?: string;
 }
 
 export interface EditorEnhancements {

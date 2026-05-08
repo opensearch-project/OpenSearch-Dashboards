@@ -60,12 +60,12 @@ describe('DataSetTable', () => {
     path: mockPath,
     setPath: jest.fn(),
     index: 2,
-    explorerDataset: undefined,
     selectDataStructure: jest.fn(),
-    fetchNextDataStructure: jest.fn().mockResolvedValue([]),
+    fetchDataStructure: jest.fn().mockResolvedValue([]),
   };
 
   const renderWithIntl = (component: React.ReactNode) =>
+    // @ts-expect-error TS2769 TODO(ts-error): fixme
     render(<IntlProvider locale="en">{component}</IntlProvider>);
 
   beforeEach(() => {
@@ -123,7 +123,7 @@ describe('DataSetTable', () => {
     expect(mockedTypeId).toBeDefined();
 
     await waitFor(() => {
-      expect(mockProps.fetchNextDataStructure).toHaveBeenCalledWith(
+      expect(mockProps.fetchDataStructure).toHaveBeenCalledWith(
         mockPath,
         mockedTypeId,
         expect.objectContaining({ search: 'test' })
@@ -136,7 +136,7 @@ describe('DataSetTable', () => {
     fireEvent.click(screen.getByText('Load more'));
 
     await waitFor(() => {
-      expect(mockProps.fetchNextDataStructure).toHaveBeenCalledWith(
+      expect(mockProps.fetchDataStructure).toHaveBeenCalledWith(
         mockPath,
         mockedTypeId,
         expect.objectContaining({ paginationToken: 'token' })

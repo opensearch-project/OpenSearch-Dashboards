@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import React from 'react';
+import { renderHook } from '@testing-library/react';
+
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import { useTimefilterSubscription } from './use_timefilter_subscription';

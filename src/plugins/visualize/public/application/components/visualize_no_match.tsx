@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
@@ -46,6 +46,13 @@ export const VisualizeNoMatch = () => {
   const { services } = useOpenSearchDashboards<VisualizeServices>();
 
   useEffect(() => {
+    // React 18 fix: Check if we're still on visualize app before modifying URL.
+    // In concurrent mode, this effect can run after navigation to another app
+    // has already changed the URL, which would corrupt the destination URL.
+    if (!window.location.pathname.includes('/app/visualize')) {
+      return;
+    }
+
     services.restorePreviousUrl();
 
     const { navigated } = services.urlForwarding.navigateToLegacyOpenSearchDashboardsUrl(

@@ -128,6 +128,7 @@ import {
 } from './attribute_service/attribute_service';
 import { DashboardProvider, DashboardServices } from './types';
 import { bootstrap } from './ui_triggers';
+import { VariablesBar } from './application/components/dashboard_variables';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -177,6 +178,7 @@ export interface DashboardStart {
     embeddableId: string;
     embeddableType: string;
   }) => void | undefined;
+  VariablesBar: typeof VariablesBar;
   dashboardUrlGenerator?: DashboardUrlGenerator;
   dashboardFeatureFlagConfig: DashboardFeatureFlagConfig;
   DashboardContainerByValueRenderer: ReturnType<typeof createDashboardContainerByValueRenderer>;
@@ -273,6 +275,7 @@ export class DashboardPlugin
         capabilities: coreStart.application.capabilities,
         application: coreStart.application,
         chrome: coreStart.chrome,
+        savedObjects: coreStart.savedObjects,
         notifications: coreStart.notifications,
         overlays: coreStart.overlays,
         embeddable: deps.embeddable,
@@ -280,6 +283,7 @@ export class DashboardPlugin
         SavedObjectFinder: getSavedObjectFinder(coreStart.savedObjects, coreStart.uiSettings),
         ExitFullScreenButton,
         uiActions: deps.uiActions,
+        data: deps.data,
       };
     };
 
@@ -464,8 +468,9 @@ export class DashboardPlugin
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
       {
         id: app.id,
-        order: 400,
+        order: core.chrome.getIsIconSideNavEnabled() ? 100 : 400,
         category: undefined,
+        euiIconType: 'dashboardApp',
       },
     ]);
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS['security-analytics'], [
@@ -473,6 +478,7 @@ export class DashboardPlugin
         id: app.id,
         order: 400,
         category: undefined,
+        euiIconType: 'dashboardApp',
       },
     ]);
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.essentials, [
@@ -480,6 +486,7 @@ export class DashboardPlugin
         id: app.id,
         order: 300,
         category: undefined,
+        euiIconType: 'dashboardApp',
       },
     ]);
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.search, [
@@ -487,6 +494,7 @@ export class DashboardPlugin
         id: app.id,
         order: 300,
         category: undefined,
+        euiIconType: 'dashboardApp',
       },
     ]);
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
@@ -494,6 +502,7 @@ export class DashboardPlugin
         id: app.id,
         order: 300,
         category: undefined,
+        euiIconType: 'dashboardApp',
       },
     ]);
 
@@ -582,6 +591,30 @@ export class DashboardPlugin
       core.application
     );
 
+    // Register dashboard navigation shortcuts only when workspace is available
+    if (core.keyboardShortcut) {
+      // Check if workspaces are initialized and available
+      const isInitialized = core.workspaces.initialized$.getValue();
+      const currentWorkspace = core.workspaces.currentWorkspace$.getValue();
+
+      if (isInitialized && currentWorkspace) {
+        core.keyboardShortcut.register({
+          id: 'nav.dashboard',
+          name: i18n.translate('dashboard.keyboardShortcut.goToDashboard.name', {
+            defaultMessage: 'Go to dashboard',
+          }),
+          pluginId: 'dashboard',
+          category: i18n.translate('dashboard.keyboardShortcut.category.navigation', {
+            defaultMessage: 'Navigation',
+          }),
+          keys: 'g b',
+          execute: () => {
+            core.application.navigateToApp('dashboards');
+          },
+        });
+      }
+    }
+
     const changeViewAction = new ReplacePanelAction(
       core,
       SavedObjectFinder,
@@ -622,6 +655,7 @@ export class DashboardPlugin
     return {
       getSavedDashboardLoader: () => savedDashboardLoader,
       addEmbeddableToDashboard: this.addEmbeddableToDashboard.bind(this, core),
+      VariablesBar,
       dashboardUrlGenerator: this.dashboardUrlGenerator,
       dashboardFeatureFlagConfig: this.dashboardFeatureFlagConfig!,
       DashboardContainerByValueRenderer: createDashboardContainerByValueRenderer({

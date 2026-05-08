@@ -4,7 +4,7 @@
  */
 
 import { OPENSEARCH_FIELD_TYPES, OSD_FIELD_TYPES, PPL_FIELD_TYPES } from '../../../../data/common';
-import { ChartMetadata, VisFieldType } from './types';
+import { AxisRole, ChartMetadata, Positions, StandardAxes, VisFieldType } from './types';
 import { ChartType } from './utils/use_visualization_types';
 
 export const CHART_METADATA: Record<ChartType, ChartMetadata> = {
@@ -16,6 +16,11 @@ export const CHART_METADATA: Record<ChartType, ChartMetadata> = {
   metric: { type: 'metric', name: 'Metric', icon: 'visMetric' },
   scatter: { type: 'scatter', name: 'Scatter', icon: '' },
   table: { type: 'table', name: 'Table', icon: 'visTable' },
+  gauge: { type: 'gauge', name: 'Gauge', icon: 'visGauge' },
+  state_timeline: { type: 'state_timeline', name: 'State timeline', icon: 'visBarHorizontal' },
+  bar_gauge: { type: 'bar_gauge', name: 'Bar Gauge', icon: 'visBarHorizontal' },
+  // TODO add histogram icons
+  histogram: { type: 'histogram', name: 'Histogram', icon: 'visBarVertical' },
 };
 
 // Map both OSD_FIELD_TYPES and OPENSEARCH_FIELD_TYPES to VisFieldType
@@ -53,9 +58,48 @@ export const FIELD_TYPE_MAP: Partial<Record<string, VisFieldType>> = {
   [PPL_FIELD_TYPES.TIMESTAMP]: VisFieldType.Date,
   [PPL_FIELD_TYPES.TIME]: VisFieldType.Date,
   [PPL_FIELD_TYPES.INTERVAL]: VisFieldType.Unknown,
-  [PPL_FIELD_TYPES.IP]: VisFieldType.Unknown,
+  [PPL_FIELD_TYPES.IP]: VisFieldType.Categorical,
   [PPL_FIELD_TYPES.GEO_POINT]: VisFieldType.Unknown,
   [PPL_FIELD_TYPES.BINARY]: VisFieldType.Unknown,
   [PPL_FIELD_TYPES.STRUCT]: VisFieldType.Unknown,
   [PPL_FIELD_TYPES.ARRAY]: VisFieldType.Unknown,
+};
+
+export const DEFAULT_OPACITY = 0.5;
+export const AXIS_LABEL_MAX_LENGTH = 100;
+
+const DEFAULT_AXIS_CONFIG: StandardAxes = {
+  position: Positions.BOTTOM,
+  show: true,
+  labels: {
+    show: true,
+    filter: true,
+    rotate: 0,
+    truncate: AXIS_LABEL_MAX_LENGTH,
+  },
+  title: {
+    text: '',
+  },
+  grid: {
+    showLines: true,
+  },
+  axisRole: AxisRole.X,
+};
+
+export const DEFAULT_X_AXIS_CONFIG: StandardAxes = {
+  ...DEFAULT_AXIS_CONFIG,
+  position: Positions.BOTTOM,
+  axisRole: AxisRole.X,
+};
+
+export const DEFAULT_Y_AXIS_CONFIG: StandardAxes = {
+  ...DEFAULT_AXIS_CONFIG,
+  position: Positions.LEFT,
+  axisRole: AxisRole.Y,
+};
+
+export const DEFAULT_Y_2_AXIS_CONFIG: StandardAxes = {
+  ...DEFAULT_AXIS_CONFIG,
+  position: Positions.RIGHT,
+  axisRole: AxisRole.Y_SECOND,
 };

@@ -28,8 +28,7 @@
  * under the License.
  */
 
-import React from 'react';
-import ReactDom from 'react-dom';
+import { createRoot, Root } from 'react-dom/client';
 import { Subscription } from 'rxjs';
 import { UiActionsStart } from 'src/plugins/ui_actions/public';
 import { Container } from '../../../containers';
@@ -63,7 +62,7 @@ export class ContactCardEmbeddable extends Embeddable<
   ContactCardEmbeddableOutput
 > {
   private subscription: Subscription;
-  private node?: Element;
+  private root: Root | null = null;
   public readonly type: string = CONTACT_CARD_EMBEDDABLE;
 
   constructor(
@@ -90,19 +89,21 @@ export class ContactCardEmbeddable extends Embeddable<
     });
   }
 
-  public render(node: HTMLElement) {
-    this.node = node;
-    ReactDom.render(
-      <ContactCardEmbeddableComponent embeddable={this} execTrigger={this.options.execAction} />,
-      node
+  public render(_node: HTMLElement) {
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
+    this._node = _node;
+    this.root = createRoot(_node);
+    this.root.render(
+      <ContactCardEmbeddableComponent embeddable={this} execTrigger={this.options.execAction} />
     );
   }
 
   public destroy() {
     super.destroy();
     this.subscription.unsubscribe();
-    if (this.node) {
-      ReactDom.unmountComponentAtNode(this.node);
+    if (this.root) {
+      this.root.unmount();
+      this.root = null;
     }
   }
 

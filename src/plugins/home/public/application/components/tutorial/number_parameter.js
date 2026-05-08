@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import PropTypes from 'prop-types';
 
 export function NumberParameter({ id, label, value, setParameter }) {

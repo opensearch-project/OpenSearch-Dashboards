@@ -42,6 +42,7 @@ export * from './search';
 export * from './types';
 export * from './utils';
 export * from './storage';
+export * from './correlations/types';
 
 /**
  * Use data plugin interface instead

@@ -4,7 +4,7 @@
  */
 
 import { EuiLink, EuiPageHeader, EuiPageHeaderSection, EuiSpacer, EuiText } from '@elastic/eui';
-import React from 'react';
+
 import { OPENSEARCH_ACC_DOCUMENTATION_URL } from '../../../constants';
 
 export const CreateAccelerationHeader = () => {

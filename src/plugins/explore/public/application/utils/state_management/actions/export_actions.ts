@@ -5,8 +5,32 @@
 
 import { Dispatch } from 'redux';
 import { saveAs } from 'file-saver';
+import { autoBom } from '@osd/std';
 import { ExploreServices } from '../../../../types';
 import { AppDispatch, RootState } from '../store';
+import { processDisplayedColumnNames } from '../../../../helpers/use_displayed_columns';
+import { defaultResultsProcessor, defaultPrepareQueryString } from './query_actions';
+import { resultsCache } from '../slices';
+
+/**
+ * Utility function to get filtered displayed column names for use in Redux thunks.
+ * Uses the same core logic as useDisplayedColumns hook.
+ */
+export const getFilteredDisplayedColumnNames = (
+  state: RootState,
+  dataset: any,
+  services: ExploreServices
+): string[] => {
+  const columns = state.legacy?.columns || [];
+  const query = state.query;
+  const cacheKey = defaultPrepareQueryString(query);
+  const rawResults = resultsCache.get(cacheKey);
+  const processedResults =
+    rawResults && dataset ? defaultResultsProcessor(rawResults, dataset) : null;
+
+  // Use the same core logic as the hook
+  return processDisplayedColumnNames(columns, dataset, services.uiSettings, processedResults);
+};
 
 /**
  * Redux Thunk for exporting data to CSV
@@ -32,7 +56,7 @@ export const exportToCsv = (options: { fileName?: string; services?: ExploreServ
       : query.query;
 
     // Get results from cache
-    const results = state.results[preparedQuery];
+    const results = resultsCache.get(preparedQuery);
 
     if (!results || !results.hits || !results.hits.hits) {
       throw new Error('No results available for export');
@@ -44,8 +68,8 @@ export const exportToCsv = (options: { fileName?: string; services?: ExploreServ
     // Get index pattern
     const indexPattern = query.dataset || services.data.indexPatterns;
 
-    // Get columns from legacy state
-    const columns = state.legacy?.columns || [];
+    // Get filtered columns (same as DataTable display and CSV download)
+    const columns = getFilteredDisplayedColumnNames(state, indexPattern, services);
 
     // Generate CSV
     const csv = generateCsv(rows, indexPattern, columns);
@@ -53,7 +77,7 @@ export const exportToCsv = (options: { fileName?: string; services?: ExploreServ
     // Download CSV
     const fileName = options.fileName || `explore_export_${new Date().toISOString()}.csv`;
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
-    saveAs(blob, fileName);
+    saveAs(autoBom(blob), fileName);
   };
 };
 
@@ -133,8 +157,8 @@ export const exportMaxSizeCsv = (
       // Get rows from results
       const rows = results.hits.hits;
 
-      // Get columns from legacy state
-      const columns = state.legacy?.columns || [];
+      // Get filtered columns (same as DataTable display and CSV download)
+      const columns = getFilteredDisplayedColumnNames(state, indexPattern, services);
 
       // Generate CSV
       const csv = generateCsv(rows, indexPattern, columns);
@@ -142,7 +166,7 @@ export const exportMaxSizeCsv = (
       // Download CSV
       const fileName = options.fileName || `explore_export_${new Date().toISOString()}.csv`;
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
-      saveAs(blob, fileName);
+      saveAs(autoBom(blob), fileName);
     } catch (error) {
       // Error exporting CSV
       throw error;

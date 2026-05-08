@@ -29,7 +29,8 @@
  */
 
 import classNames from 'classnames';
-import React, { ReactNode } from 'react';
+import { ReactNode } from 'react';
+import DOMPurify from 'dompurify';
 import { FieldMapping, DocViewFilterFn } from '../../doc_views/doc_views_types';
 import { DocViewTableRowBtnFilterAdd } from './table_row_btn_filter_add';
 import { DocViewTableRowBtnFilterRemove } from './table_row_btn_filter_remove';
@@ -72,7 +73,6 @@ export function DocViewTableRow({
   valueRaw,
 }: Props) {
   const valueClassName = classNames({
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     osdDocViewer__value: true,
     'truncate-by-height': isCollapsible && isCollapsed,
   });
@@ -121,7 +121,7 @@ export function DocViewTableRow({
            * We just use values encoded by our field formatters
            */
           // eslint-disable-next-line react/no-danger
-          dangerouslySetInnerHTML={{ __html: value as string }}
+          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(value as string) }}
         />
       </td>
     </tr>

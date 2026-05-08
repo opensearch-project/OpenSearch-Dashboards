@@ -3,14 +3,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
+
 import { VisualizationContainer } from './visualization_container';
 import * as VB from './visualization_builder';
 import * as TabResultsHooks from '../../application/utils/hooks/use_tab_results';
 import { BehaviorSubject } from 'rxjs';
 import { VisFieldType } from './types';
 import { VisData } from './visualization_builder.types';
+
+// Mock react-redux before importing any components
+jest.mock('react-redux', () => ({
+  ...jest.requireActual('react-redux'),
+  useDispatch: () => jest.fn(),
+  useSelector: jest.fn(),
+}));
 
 jest.mock('../../application/utils/hooks/use_tab_results', () => ({
   useTabResults: jest.fn(() => ({
@@ -102,6 +109,7 @@ describe('VisualizationContainer', () => {
 
   it('handles empty results', () => {
     // Override the mock for this test
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     jest.spyOn(TabResultsHooks, 'useTabResults').mockReturnValueOnce({
       results: null,
     });

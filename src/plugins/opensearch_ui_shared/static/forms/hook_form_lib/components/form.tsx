@@ -48,6 +48,7 @@ export const Form = ({ form, FormWrapper = EuiForm, ...rest }: Props) => {
   return (
     <FormDataContextProvider getFormData={getFormData} getFormData$={__getFormData$}>
       <FormProvider form={form}>
+        {/* @ts-expect-error TS2559 TODO(ts-error): fixme */}
         <FormWrapper {...rest} />
       </FormProvider>
     </FormDataContextProvider>

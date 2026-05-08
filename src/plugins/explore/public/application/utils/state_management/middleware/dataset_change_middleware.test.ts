@@ -8,7 +8,6 @@ import {
   setQueryState,
   setQueryWithHistory,
   clearResults,
-  setActiveTab,
   setPromptModeIsAvailable,
   setSummaryAgentIsAvailable,
   clearLastExecutedData,
@@ -21,7 +20,6 @@ import { DEFAULT_DATA } from '../../../../../../data/common';
 import { getPromptModeIsAvailable } from '../../get_prompt_mode_is_available';
 import { getSummaryAgentIsAvailable } from '../../get_summary_agent_is_available';
 import * as queryActions from '../actions/query_actions';
-import * as tabActions from '../actions/detect_optimal_tab';
 import * as resetLegacyStateActions from '../actions/reset_legacy_state';
 
 jest.mock('../../get_prompt_mode_is_available', () => ({
@@ -36,19 +34,12 @@ jest.mock('../actions/query_actions', () => ({
   executeQueries: jest.fn().mockReturnValue({ type: 'mock/executeQueries' }),
 }));
 
-jest.mock('../actions/detect_optimal_tab', () => ({
-  detectAndSetOptimalTab: jest.fn().mockReturnValue({ type: 'mock/detectOptimalTab' }),
-}));
-
 jest.mock('../actions/reset_legacy_state', () => ({
   resetLegacyStateActionCreator: jest.fn().mockReturnValue({ type: 'mock/resetLegacyState' }),
 }));
 
 const mockedExecuteQueries = queryActions.executeQueries as jest.MockedFunction<
   typeof queryActions.executeQueries
->;
-const mockedDetectAndSetOptimalTab = tabActions.detectAndSetOptimalTab as jest.MockedFunction<
-  typeof tabActions.detectAndSetOptimalTab
 >;
 const mockedGetPromptModeIsAvailable = getPromptModeIsAvailable as jest.MockedFunction<
   typeof getPromptModeIsAvailable
@@ -112,7 +103,6 @@ describe('createDatasetChangeMiddleware', () => {
     await middleware(action);
 
     // Verify the clearing actions were dispatched
-    expect(mockStore.dispatch).toHaveBeenCalledWith(setActiveTab(''));
     expect(mockStore.dispatch).toHaveBeenCalledWith(clearResults());
     expect(mockStore.dispatch).toHaveBeenCalledWith(clearQueryStatusMap());
     expect(mockStore.dispatch).toHaveBeenCalledWith(clearLastExecutedData());
@@ -126,10 +116,6 @@ describe('createDatasetChangeMiddleware', () => {
     // Verify the executeQueries action was dispatched
     expect(mockedExecuteQueries).toHaveBeenCalledWith({ services: mockServices });
     expect(mockStore.dispatch).toHaveBeenCalledWith({ type: 'mock/executeQueries' });
-
-    // Verify the detectAndSetOptimalTab action was dispatched
-    expect(mockedDetectAndSetOptimalTab).toHaveBeenCalledWith({ services: mockServices });
-    expect(mockStore.dispatch).toHaveBeenCalledWith({ type: 'mock/detectOptimalTab' });
   });
 
   it('should trigger side effects when dataset changes with setQueryWithHistory', async () => {
@@ -147,7 +133,6 @@ describe('createDatasetChangeMiddleware', () => {
     await middleware(action);
 
     // Verify the clearing actions were dispatched
-    expect(mockStore.dispatch).toHaveBeenCalledWith(setActiveTab(''));
     expect(mockStore.dispatch).toHaveBeenCalledWith(clearResults());
     expect(mockStore.dispatch).toHaveBeenCalledWith(clearQueryStatusMap());
     expect(mockStore.dispatch).toHaveBeenCalledWith(clearLastExecutedData());
@@ -181,7 +166,6 @@ describe('createDatasetChangeMiddleware', () => {
     await middleware(setQueryState({ query: 'source=updated', language: 'PPL' }));
 
     // Verify that no clearing actions were dispatched since dataset didn't change
-    expect(mockStore.dispatch).not.toHaveBeenCalledWith(setActiveTab(''));
     expect(mockStore.dispatch).not.toHaveBeenCalledWith(clearResults());
     expect(mockStore.dispatch).not.toHaveBeenCalledWith(clearQueryStatusMap());
   });
@@ -221,7 +205,6 @@ describe('createDatasetChangeMiddleware', () => {
 
     // Verify that execute queries was not called
     expect(mockedExecuteQueries).not.toHaveBeenCalled();
-    expect(mockedDetectAndSetOptimalTab).not.toHaveBeenCalled();
   });
 
   it('should update prompt mode availability only if different from current state', async () => {

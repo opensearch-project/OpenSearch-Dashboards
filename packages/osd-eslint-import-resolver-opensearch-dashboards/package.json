@@ -18,7 +18,6 @@
     "eslint-import-resolver-webpack": "0.13.8",
     "glob-all": "^3.2.1",
     "lru-cache": "^4.1.5",
-    "resolve": "^1.7.1",
-    "webpack": "npm:@amoo-miki/webpack@4.46.0-xxhash.1"
+    "resolve": "^1.7.1"
   }
 }

@@ -125,8 +125,10 @@ describe('promiseFromStreams', () => {
           this.push('c');
           this.push(null);
         },
-        destroy() {
+        destroy(err, callback) {
           destroyCalled = true;
+          // In Node 22, we need to call the callback to properly handle destruction
+          callback(err);
         },
       });
       const transformStream = new Transform({

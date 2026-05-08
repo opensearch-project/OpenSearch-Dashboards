@@ -28,8 +28,8 @@
  * under the License.
  */
 
-import React, { ReactElement } from 'react';
-import { act } from 'react-dom/test-utils';
+import { ReactElement } from 'react';
+import { act } from 'react';
 import { mount } from 'enzyme';
 import { I18nProvider } from '@osd/i18n/react';
 

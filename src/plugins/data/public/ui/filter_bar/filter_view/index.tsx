@@ -30,7 +30,7 @@
 
 import { EuiBadge, useInnerText } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import React, { FC } from 'react';
+import { FC } from 'react';
 import { FilterLabel } from '../';
 import { Filter, isFilterPinned } from '../../../../common';
 import type { FilterLabelStatus } from '../filter_item';

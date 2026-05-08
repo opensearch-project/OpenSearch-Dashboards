@@ -1,0 +1,29 @@
+{
+  "name": "@osd/apm-topology",
+  "version": "1.0.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "main": "./target/node/index.js",
+  "browser": "./target/web/index.js",
+  "scripts": {
+    "build:babel:node": "babel src --env-name node --out-dir target/node --extensions .ts,.tsx --copy-files --quiet",
+    "build:babel:web": "babel src --env-name web --out-dir target/web --extensions .ts,.tsx --copy-files --quiet",
+    "build:babel": "yarn build:babel:node && yarn build:babel:web",
+    "build": "yarn build:babel",
+    "osd:bootstrap": "yarn build",
+    "osd:watch": "babel src --env-name node --out-dir target/node --extensions .ts,.tsx --copy-files --watch"
+  },
+  "dependencies": {
+    "@dagrejs/dagre": "^1.1.5",
+    "@osd/i18n": "1.0.0",
+    "@xyflow/react": "^12.8.2",
+    "ramda": "^0.30.1"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  },
+  "devDependencies": {
+    "@types/ramda": "^0.30.1"
+  }
+}

@@ -12,7 +12,7 @@ import {
   EuiFlexItem,
   EuiSmallButton,
 } from '@elastic/eui';
-import React from 'react';
+
 import { AuthMethod } from '../../../constants';
 import { Role } from '../../../../types';
 
@@ -95,7 +95,9 @@ export const ReviewPrometheusDatasource = (props: ConfigurePrometheusDatasourceP
                   Authentication method
                 </EuiText>
                 <EuiText size="s" className="overview-content" data-test-subj="currentAuthMethod">
-                  {currentAuthMethod === 'basicauth'
+                  {currentAuthMethod === 'noauth'
+                    ? 'No authentication'
+                    : currentAuthMethod === 'basicauth'
                     ? 'Basic authentication'
                     : 'AWS Signature Version 4'}
                 </EuiText>

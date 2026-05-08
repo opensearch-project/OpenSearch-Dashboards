@@ -30,7 +30,6 @@
 
 import { mockReactDomRender, mockReactDomUnmount } from '../overlay.test.mocks';
 
-import React from 'react';
 import { mount } from 'enzyme';
 import { i18nServiceMock } from '../../i18n/i18n_service.mock';
 import { ModalService, OverlayModalStart } from './modal_service';

@@ -104,7 +104,9 @@ describe('RenderingService', () => {
       });
 
       it('renders "core" page', async () => {
-        const content = await render(createOpenSearchDashboardsRequest(), uiSettings);
+        const content = await render(createOpenSearchDashboardsRequest(), uiSettings, {
+          nonce: 'test-nonce',
+        });
         const dom = load(content);
         const data = JSON.parse(dom('osd-injected-metadata').attr('data') || '');
 
@@ -114,7 +116,9 @@ describe('RenderingService', () => {
       it('renders "core" page for blank basepath', async () => {
         mockRenderingSetupDeps.http.basePath.get.mockReturnValueOnce('');
 
-        const content = await render(createOpenSearchDashboardsRequest(), uiSettings);
+        const content = await render(createOpenSearchDashboardsRequest(), uiSettings, {
+          nonce: 'test-nonce',
+        });
         const dom = load(content);
         const data = JSON.parse(dom('osd-injected-metadata').attr('data') || '');
 
@@ -126,6 +130,7 @@ describe('RenderingService', () => {
         uiSettings.getOverrideOrDefault.mockImplementation((name) => name === 'theme:darkMode');
         const content = await render(createOpenSearchDashboardsRequest(), uiSettings, {
           includeUserSettings: false,
+          nonce: 'test-nonce',
         });
         const dom = load(content);
         const data = JSON.parse(dom('osd-injected-metadata').attr('data') || '');
@@ -137,7 +142,9 @@ describe('RenderingService', () => {
       it('renders "core" page driven by settings', async () => {
         uiSettings.getUserProvided.mockResolvedValue({ 'theme:darkMode': { userValue: true } });
         uiSettings.getRegistered.mockReturnValue({ 'theme:darkMode': { value: false } });
-        const content = await render(createOpenSearchDashboardsRequest(), uiSettings);
+        const content = await render(createOpenSearchDashboardsRequest(), uiSettings, {
+          nonce: 'test-nonce',
+        });
         const dom = load(content);
         const data = JSON.parse(dom('osd-injected-metadata').attr('data') || '');
 
@@ -151,6 +158,7 @@ describe('RenderingService', () => {
         );
         const content = await render(createOpenSearchDashboardsRequest(), uiSettings, {
           includeUserSettings: false,
+          nonce: 'test-nonce',
         });
         const dom = load(content);
         const data = JSON.parse(dom('osd-injected-metadata').attr('data') || '');
@@ -162,6 +170,7 @@ describe('RenderingService', () => {
       it('renders "core" with excluded user settings', async () => {
         const content = await render(createOpenSearchDashboardsRequest(), uiSettings, {
           includeUserSettings: false,
+          nonce: 'test-nonce',
         });
         const dom = load(content);
         const data = JSON.parse(dom('osd-injected-metadata').attr('data') || '');
@@ -170,7 +179,9 @@ describe('RenderingService', () => {
       });
 
       it('renders "core" from legacy request', async () => {
-        const content = await render(createRawRequest(), uiSettings);
+        const content = await render(createRawRequest(), uiSettings, {
+          nonce: 'test-nonce',
+        });
         const dom = load(content);
         const data = JSON.parse(dom('osd-injected-metadata').attr('data') || '');
 
@@ -182,7 +193,7 @@ describe('RenderingService', () => {
         const content = await render(
           createOpenSearchDashboardsRequest({ query: { locale: 'TR-tr' } }),
           uiSettings,
-          {}
+          { nonce: 'test-nonce' }
         );
         const dom = load(content);
         const $elStyle = dom('html');
@@ -196,7 +207,7 @@ describe('RenderingService', () => {
         const content = await render(
           createOpenSearchDashboardsRequest({ query: { locale: 'xx-XX' } }),
           uiSettings,
-          {}
+          { nonce: 'test-nonce' }
         );
         const dom = load(content);
         const $elStyle = dom('html');

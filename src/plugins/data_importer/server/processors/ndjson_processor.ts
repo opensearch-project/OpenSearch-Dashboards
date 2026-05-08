@@ -31,7 +31,7 @@ export class NDJSONProcessor implements IFileProcessor {
   }
 
   public async ingestText(text: string, options: IngestOptions) {
-    const { client, indexName } = options;
+    const { client, indexName, lookupId, lookupField } = options;
     const stringStream = new Readable();
     stringStream._read = () => {};
     stringStream.push(text);
@@ -52,9 +52,13 @@ export class NDJSONProcessor implements IFileProcessor {
           const task = (async () => {
             const curRow = ++numDocumentsCount;
             try {
+              // Inject lookup field if provided
+              const doc =
+                lookupId && lookupField ? { ...document, [lookupField]: lookupId } : document;
+
               await client.index({
                 index: indexName,
-                body: document,
+                body: doc,
               });
             } catch (e) {
               failedRows.push(curRow);
@@ -76,7 +80,7 @@ export class NDJSONProcessor implements IFileProcessor {
   }
 
   public async ingestFile(file: Readable, options: IngestOptions) {
-    const { client, indexName } = options;
+    const { client, indexName, lookupId, lookupField } = options;
 
     const failedRows: number[] = [];
     const numDocuments = await new Promise<number>((resolve, reject) => {
@@ -95,9 +99,13 @@ export class NDJSONProcessor implements IFileProcessor {
               failedRows.push(curRow);
             } else {
               try {
+                // Inject lookup field if provided
+                const doc =
+                  lookupId && lookupField ? { [lookupField]: lookupId, ...document } : document;
+
                 await client.index({
                   index: indexName,
-                  body: document,
+                  body: doc,
                 });
               } catch (_) {
                 failedRows.push(curRow);

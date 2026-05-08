@@ -242,78 +242,85 @@ exports[`Inspector Data View component should render empty state 1`] = `
     title="Test Data"
     uiSettings={Object {}}
   >
-    <EuiEmptyPrompt
-      body={
-        <React.Fragment>
-          <p>
-            <FormattedMessage
-              defaultMessage="The element did not provide any data."
-              id="inspector.data.noDataAvailableDescription"
-              values={Object {}}
-            />
-          </p>
-        </React.Fragment>
-      }
-      title={
-        <h2>
-          <FormattedMessage
-            defaultMessage="No data available"
-            id="inspector.data.noDataAvailableTitle"
-            values={Object {}}
-          />
-        </h2>
+    <EuiFlexGroup
+      alignItems="center"
+      justifyContent="center"
+      style={
+        Object {
+          "height": "100%",
+        }
       }
     >
       <div
-        className="euiEmptyPrompt"
+        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+        style={
+          Object {
+            "height": "100%",
+          }
+        }
       >
-        <EuiTitle
-          size="m"
+        <EuiFlexItem
+          grow={false}
         >
-          <h2
-            className="euiTitle euiTitle--medium"
+          <div
+            className="euiFlexItem euiFlexItem--flexGrowZero"
           >
-            <FormattedMessage
-              defaultMessage="No data available"
-              id="inspector.data.noDataAvailableTitle"
-              values={Object {}}
-            >
-              No data available
-            </FormattedMessage>
-          </h2>
-        </EuiTitle>
-        <EuiTextColor
-          color="subdued"
-        >
-          <span
-            className="euiTextColor euiTextColor--subdued"
-          >
-            <EuiSpacer
-              size="m"
+            <EuiPanel
+              className="eui-textCenter"
             >
               <div
-                className="euiSpacer euiSpacer--m"
-              />
-            </EuiSpacer>
-            <EuiText>
-              <div
-                className="euiText euiText--medium"
+                className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow eui-textCenter"
               >
-                <p>
-                  <FormattedMessage
-                    defaultMessage="The element did not provide any data."
-                    id="inspector.data.noDataAvailableDescription"
-                    values={Object {}}
+                <EuiLoadingChart
+                  size="m"
+                >
+                  <span
+                    className="euiLoadingChart euiLoadingChart--medium"
                   >
-                    The element did not provide any data.
-                  </FormattedMessage>
-                </p>
+                    <span
+                      className="euiLoadingChart__bar"
+                    />
+                    <span
+                      className="euiLoadingChart__bar"
+                    />
+                    <span
+                      className="euiLoadingChart__bar"
+                    />
+                    <span
+                      className="euiLoadingChart__bar"
+                    />
+                  </span>
+                </EuiLoadingChart>
+                <EuiSpacer
+                  size="s"
+                >
+                  <div
+                    className="euiSpacer euiSpacer--s"
+                  />
+                </EuiSpacer>
+                <EuiText
+                  size="s"
+                >
+                  <div
+                    className="euiText euiText--small"
+                  >
+                    <p>
+                      <FormattedMessage
+                        defaultMessage="Gathering data"
+                        id="inspector.data.gatheringDataLabel"
+                        values={Object {}}
+                      >
+                        Gathering data
+                      </FormattedMessage>
+                    </p>
+                  </div>
+                </EuiText>
               </div>
-            </EuiText>
-          </span>
-        </EuiTextColor>
+            </EuiPanel>
+          </div>
+        </EuiFlexItem>
       </div>
-    </EuiEmptyPrompt>
+    </EuiFlexGroup>
   </DataViewComponent>
 </component>
 `;

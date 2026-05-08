@@ -4,7 +4,7 @@
  */
 
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import React from 'react';
+
 import { dataPluginMock } from 'src/plugins/data/public/mocks';
 import { CoreSetup } from 'opensearch-dashboards/public';
 import { DataPublicPluginSetup, QueryEditorExtensionDependencies } from 'src/plugins/data/public';
@@ -16,8 +16,6 @@ import { QueryAssistContext, QueryAssistContextValue } from '../hooks';
 import { DATA_FRAME_TYPES, IDataFrame } from '../../../../data/common';
 import { coreMock } from '../../../../../core/public/mocks';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-
-jest.useFakeTimers();
 
 describe('query assist summary', () => {
   const defaultCoreSetupMock = coreMock.createSetup();
@@ -150,8 +148,13 @@ describe('query assist summary', () => {
     };
   };
 
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
   afterEach(() => {
     jest.clearAllTimers();
+    jest.useRealTimers();
   });
 
   it('should show summary component', async () => {

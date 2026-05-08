@@ -44,6 +44,7 @@ const automcompleteSetupMock: jest.Mocked<AutocompleteSetup> = {
   getQuerySuggestions: jest.fn(),
 };
 
+// @ts-expect-error TS2322 TODO(ts-error): fixme
 const autocompleteStartMock: jest.Mocked<AutocompleteStart> = {
   getValueSuggestions: jest.fn(),
   getQuerySuggestions: jest.fn(),
@@ -52,6 +53,7 @@ const autocompleteStartMock: jest.Mocked<AutocompleteStart> = {
 
 const createSetupContract = (isEnhancementsEnabled: boolean = false): Setup => {
   const querySetupMock = queryServiceMock.createSetupContract(isEnhancementsEnabled);
+  // @ts-expect-error TS2322 TODO(ts-error): fixme
   return {
     autocomplete: automcompleteSetupMock,
     search: searchServiceMock.createSetupContract(),
@@ -63,6 +65,7 @@ const createSetupContract = (isEnhancementsEnabled: boolean = false): Setup => {
 
 const createStartContract = (isEnhancementsEnabled: boolean = false): Start => {
   const queryStartMock = queryServiceMock.createStartContract(isEnhancementsEnabled);
+  // @ts-expect-error TS2322 TODO(ts-error): fixme
   return {
     actions: {
       createFiltersFromValueClickAction: jest.fn().mockResolvedValue(['yes']),
@@ -138,6 +141,7 @@ const createStartContract = (isEnhancementsEnabled: boolean = false): Start => {
           },
         })
       ),
+      getIds: jest.fn().mockReturnValue(Promise.resolve(['id'])),
       getDefault: jest.fn().mockReturnValue(
         Promise.resolve({
           name: 'Default name',
@@ -151,6 +155,7 @@ const createStartContract = (isEnhancementsEnabled: boolean = false): Start => {
         type: 'INDEX_PATTERN',
       }),
       saveToCache: jest.fn(),
+      convertToDataset: jest.fn(),
     } as unknown) as DataViewsContract,
     dataSources: dataSourceServiceMock.createStartContract(),
   };

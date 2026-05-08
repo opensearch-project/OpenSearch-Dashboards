@@ -1,0 +1,67 @@
+.agentTracesDocViewerTable {
+  margin-top: $ouiSizeXXS;
+}
+
+.agentTracesDocViewer {
+  pre,
+  .agentTracesDocViewer__value {
+    display: inline-block;
+    word-break: break-all;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    color: $euiColorFullShade;
+    vertical-align: top;
+    padding-top: 2px;
+  }
+
+  .agentTracesDocViewer__field {
+    padding-top: 8px;
+  }
+
+  .dscFieldName {
+    color: $euiColorDarkShade;
+  }
+
+  tr:first-child td {
+    border-top-color: transparent;
+  }
+
+  tr:hover {
+    .agentTracesDocViewer__actionButton {
+      opacity: 1;
+    }
+  }
+}
+
+.agentTracesDocViewer__buttons,
+.agentTracesDocViewer__field {
+  white-space: nowrap;
+}
+
+.agentTracesDocViewer__buttons {
+  width: 60px;
+
+  // Show all icons if one is focused,
+  // IE doesn't support, but the fallback is just the focused button becomes visible
+  &:focus-within {
+    .agentTracesDocViewer__actionButton {
+      opacity: 1;
+    }
+  }
+}
+
+.agentTracesDocViewer__field {
+  width: 160px;
+}
+
+.agentTracesDocViewer__actionButton {
+  opacity: 0;
+
+  &:focus {
+    opacity: 1;
+  }
+}
+
+.agentTracesDocViewer__warning {
+  margin-right: $ouiSizeXXS;
+}

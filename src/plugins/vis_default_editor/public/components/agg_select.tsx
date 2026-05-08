@@ -107,7 +107,7 @@ function DefaultEditorAggSelect({
         defaultMessage:
           'The index pattern {indexPatternTitle} does not have any aggregatable fields.',
         values: {
-          indexPatternTitle: indexPattern && indexPattern.title,
+          indexPatternTitle: indexPattern && (indexPattern.displayName || indexPattern.title),
         },
       })
     );
@@ -124,6 +124,7 @@ function DefaultEditorAggSelect({
     },
     [setValue]
   );
+  // @ts-expect-error TS7006 TODO(ts-error): fixme
   const onSearchChange = useCallback((searchValue) => setIsDirty(Boolean(searchValue)), []);
 
   const setTouched = useCallback(
@@ -131,6 +132,7 @@ function DefaultEditorAggSelect({
     [onChangeAggType]
   );
   const setValidity = useCallback(
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     (valid) => onChangeAggType({ type: AGG_TYPE_ACTION_KEYS.VALID, payload: valid }),
     [onChangeAggType]
   );

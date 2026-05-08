@@ -27,10 +27,14 @@ export function buildExploreLogsUrl(params: {
   const basePathMatch = pathname.match(/^(.*?)\/app/);
   const basePath = basePathMatch ? basePathMatch[1] : '';
 
-  let pplQuery = `%7C%20where%20traceId%20%3D%20!'${traceId}!'`;
+  // Use schema mappings for field names, with fallbacks to default field names
+  const traceIdFieldName = logDataset.schemaMappings?.otelLogs?.traceId || 'traceId';
+  const spanIdFieldName = logDataset.schemaMappings?.otelLogs?.spanId || 'spanId';
+
+  let pplQuery = `%7C%20where%20${traceIdFieldName}%20%3D%20!'${traceId}!'`;
 
   if (spanId) {
-    pplQuery += `%20%7C%20where%20spanId%20%3D%20!'${spanId}!'`;
+    pplQuery += `%20%7C%20where%20${spanIdFieldName}%20%3D%20!'${spanId}!'`;
   }
 
   const baseUrl = `${origin}${basePath}/app/explore/logs/#/`;
@@ -38,11 +42,11 @@ export function buildExploreLogsUrl(params: {
   const timeFieldName = logDataset.timeFieldName || 'time';
 
   // Build _q parameter (dataset and query)
-  let datasetParam = `(id:'${logDataset.id}',timeFieldName:${timeFieldName},title:'${logDataset.title}',type:${logDataset.type}`;
+  let datasetParam = `(id:'${logDataset.id}',timeFieldName:'${timeFieldName}',title:'${logDataset.title}',type:'${logDataset.type}'`;
 
   // Include dataSource if present for external data sources
   if (logDataset.dataSource) {
-    datasetParam += `,dataSource:(id:'${logDataset.dataSource.id}',title:'${logDataset.dataSource.title}',type:${logDataset.dataSource.type})`;
+    datasetParam += `,dataSource:(id:'${logDataset.dataSource.id}',title:'${logDataset.dataSource.title}',type:'${logDataset.dataSource.type}')`;
   }
 
   datasetParam += ')';
@@ -50,7 +54,7 @@ export function buildExploreLogsUrl(params: {
   const qParam = `(dataset:${datasetParam},language:PPL,query:'${pplQuery}')`;
 
   // Build _a parameter (app state)
-  const aParam = `(legacy:(columns:!(_source),interval:auto,isDirty:!f,sort:!()),tab:(logs:(),patterns:(patternsField:'',usingRegexPatterns:!f)),ui:(activeTabId:logs,showHistogram:!t))`;
+  const aParam = `(legacy:(interval:auto,isDirty:!f,sort:!()),tab:(logs:(),patterns:(patternsField:'',usingRegexPatterns:!f)),ui:(activeTabId:logs,showHistogram:!t))`;
 
   // Build _g parameter (global state with time range)
   const gParam = `(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'${timeRange.from}',to:'${timeRange.to}'))`;
@@ -110,6 +114,13 @@ export function getTimeRangeFromTraceData(traceData: any[]): TimeRange {
   return { from, to };
 }
 
-export function filterLogsBySpanId(logs: LogHit[], spanId: string): LogHit[] {
-  return logs.filter((log) => log.spanId === spanId);
+export function filterLogsBySpanId(logs: LogHit[], spanId: string, dataset: Dataset): LogHit[] {
+  // Use schema mappings for spanId field name, with fallback to default
+  const spanIdFieldName = dataset.schemaMappings?.otelLogs?.spanId || 'spanId';
+
+  return logs.filter((log) => {
+    // Check both the mapped field name and the default spanId property for compatibility
+    const logSpanId = log._source?.[spanIdFieldName] || log.spanId;
+    return logSpanId === spanId;
+  });
 }

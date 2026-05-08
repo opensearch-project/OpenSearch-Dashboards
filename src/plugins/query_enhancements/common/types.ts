@@ -29,6 +29,8 @@ export interface EnhancedFetchContext {
   body?: {
     pollQueryResultsParams?: PollQueryResultsParams;
     timeRange?: TimeRange;
+    options?: Record<string, unknown>;
+    queryId?: string;
   };
 }
 

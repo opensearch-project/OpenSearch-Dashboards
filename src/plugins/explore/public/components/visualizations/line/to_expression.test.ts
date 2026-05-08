@@ -9,747 +9,270 @@ import {
   createMultiLineChart,
   createFacetedMultiLineChart,
   createCategoryLineChart,
+  createCategoryMultiLineChart,
 } from './to_expression';
-import {
-  ThresholdLineStyle,
-  VisColumn,
-  VisFieldType,
-  Positions,
-  TooltipOptions,
-  AxisRole,
-  AxisColumnMappings,
-} from '../types';
-import * as lineChartUtils from './line_chart_utils';
-import * as thresholdUtils from '../style_panel/threshold/utils';
+import { VisColumn, VisFieldType, ThresholdMode, Positions, AxisRole } from '../types';
+import { defaultLineChartStyles } from './line_vis_config';
 
-// Mock the line chart utils
-jest.mock('./line_chart_utils', () => ({
-  buildMarkConfig: jest.fn().mockReturnValue({ type: 'line', tooltip: true }),
-  createTimeMarkerLayer: jest.fn().mockReturnValue(null),
-  applyAxisStyling: jest.fn().mockReturnValue({ title: 'Mocked Axis' }),
-  ValueAxisPosition: {
-    Left: 'left',
-    Right: 'right',
-  },
-}));
-
-// Mock the threshold utils
-jest.mock('../style_panel/threshold/utils', () => ({
-  getStrokeDash: jest.fn().mockReturnValue([5, 5]),
-  createThresholdLayer: jest.fn().mockReturnValue(null),
-}));
-
-describe('to_expression', () => {
-  // Sample data for testing
-  const transformedData = [
-    { 'field-0': '2023-01-01', 'field-1': 100, 'field-2': 'Category A', 'field-3': 'Group 1' },
-    { 'field-0': '2023-01-02', 'field-1': 200, 'field-2': 'Category B', 'field-3': 'Group 2' },
+describe('Line Chart to_expression', () => {
+  const mockData = [
+    { date: '2023-01-01', value: 10, value2: 5, category: 'A', category2: 'X' },
+    { date: '2023-01-02', value: 20, value2: 15, category: 'B', category2: 'Y' },
+    { date: '2023-01-03', value: 15, value2: 10, category: 'A', category2: 'X' },
   ];
 
-  const dateColumn: VisColumn = {
+  const mockDateColumn: VisColumn = {
     id: 0,
-    name: 'date',
+    name: 'Date',
     schema: VisFieldType.Date,
-    column: 'field-0',
-    validValuesCount: 1,
-    uniqueValuesCount: 1,
+    column: 'date',
+    validValuesCount: 3,
+    uniqueValuesCount: 3,
   };
 
-  const numericColumn1: VisColumn = {
+  const mockNumericColumn: VisColumn = {
     id: 1,
-    name: 'value1',
+    name: 'Value',
     schema: VisFieldType.Numerical,
-    column: 'field-1',
-    validValuesCount: 1,
-    uniqueValuesCount: 1,
+    column: 'value',
+    validValuesCount: 3,
+    uniqueValuesCount: 3,
   };
 
-  const numericColumn2: VisColumn = {
+  const mockNumericColumn2: VisColumn = {
     id: 2,
-    name: 'value2',
+    name: 'Value2',
     schema: VisFieldType.Numerical,
-    column: 'field-2',
-    validValuesCount: 1,
-    uniqueValuesCount: 1,
+    column: 'value2',
+    validValuesCount: 3,
+    uniqueValuesCount: 3,
   };
 
-  const categoricalColumn1: VisColumn = {
+  const mockCategoricalColumn: VisColumn = {
     id: 3,
-    name: 'category1',
+    name: 'Category',
     schema: VisFieldType.Categorical,
-    column: 'field-2',
-    validValuesCount: 1,
-    uniqueValuesCount: 1,
+    column: 'category',
+    validValuesCount: 3,
+    uniqueValuesCount: 2,
   };
 
-  const categoricalColumn2: VisColumn = {
+  const mockCategoricalColumn2: VisColumn = {
     id: 4,
-    name: 'category2',
+    name: 'Category2',
     schema: VisFieldType.Categorical,
-    column: 'field-3',
-    validValuesCount: 1,
-    uniqueValuesCount: 1,
+    column: 'category2',
+    validValuesCount: 3,
+    uniqueValuesCount: 2,
   };
 
-  const styleOptions = {
+  const mockStyles = {
+    ...defaultLineChartStyles,
     addLegend: true,
     legendPosition: Positions.RIGHT,
-    thresholdLines: [
-      {
-        id: '1',
-        show: false,
-        value: 100,
-        color: 'red',
-        width: 1,
-        style: ThresholdLineStyle.Dashed,
-        name: '',
-      },
-    ],
-    tooltipOptions: {
-      mode: 'all' as TooltipOptions['mode'],
+    thresholdOptions: {
+      baseColor: '#00BD6B',
+      thresholds: [],
+      thresholdStyle: ThresholdMode.Off,
     },
-    addTimeMarker: false,
-    titleOptions: {
-      show: true,
-      titleName: '',
-    },
+    titleOptions: { show: true, titleName: '' },
+    showFullTimeRange: false,
   };
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
   describe('createSimpleLineChart', () => {
-    it('should create a simple line chart with one metric and one date', () => {
-      // Enable threshold and time marker for this test
-      const mockThresholdLayer = { mark: { type: 'rule' } };
-      const mockTimeMarkerLayer = { mark: { type: 'rule' } };
-      (thresholdUtils.createThresholdLayer as jest.Mock).mockReturnValueOnce(mockThresholdLayer);
-      (lineChartUtils.createTimeMarkerLayer as jest.Mock).mockReturnValueOnce(mockTimeMarkerLayer);
+    const mockAxisMappings = {
+      [AxisRole.Y]: [mockNumericColumn],
+      [AxisRole.X]: mockDateColumn,
+    };
 
-      const mockAxisColumnMappings: AxisColumnMappings = {
-        [AxisRole.Y]: numericColumn1,
-        [AxisRole.X]: dateColumn,
-      };
+    it('returns an ECharts spec with dataset, series, and axes', () => {
+      const result = createSimpleLineChart(mockData, mockStyles, mockAxisMappings);
 
-      const result = createSimpleLineChart(
-        transformedData,
-        [numericColumn1],
-        [dateColumn],
-        styleOptions,
-        mockAxisColumnMappings
-      );
-
-      // Verify the result structure
-      expect(result).toHaveProperty('$schema');
-      expect(result).toHaveProperty('title', 'value1 Over Time');
-      expect(result).toHaveProperty('data.values', transformedData);
-      expect(result).toHaveProperty('layer');
-      expect(result.layer).toHaveLength(3); // Main layer + threshold + time marker
-
-      // Verify the main layer
-      expect(result.layer[0]).toHaveProperty('mark');
-      expect(result.layer[0]).toHaveProperty('encoding.x.field', 'field-0');
-      expect(result.layer[0]).toHaveProperty('encoding.y.field', 'field-1');
-
-      // Verify utility functions were called
-      expect(lineChartUtils.buildMarkConfig).toHaveBeenCalledWith(styleOptions, 'line');
-      expect(lineChartUtils.applyAxisStyling).toHaveBeenCalledTimes(2);
-      expect(thresholdUtils.createThresholdLayer).toHaveBeenCalledWith(
-        styleOptions.thresholdLines,
-        styleOptions.tooltipOptions?.mode
-      );
-      expect(lineChartUtils.createTimeMarkerLayer).toHaveBeenCalledWith(styleOptions);
+      expect(result).toHaveProperty('dataset');
+      expect(result).toHaveProperty('series');
+      expect(result).toHaveProperty('xAxis');
+      expect(result).toHaveProperty('yAxis');
+      expect(result.title).toEqual({ text: 'Value Over Time' });
     });
 
-    it('should handle different title display options', () => {
-      const mockAxisColumnMappings: AxisColumnMappings = {
-        [AxisRole.Y]: numericColumn1,
-        [AxisRole.X]: dateColumn,
-      };
+    it('produces line-type series', () => {
+      const result = createSimpleLineChart(mockData, mockStyles, mockAxisMappings);
 
-      // Case 1: No title (show = false)
-      const noTitleStyles = {
-        ...styleOptions,
-        titleOptions: {
-          show: false,
-          titleName: '',
-        },
-      };
-
-      const noTitleResult = createSimpleLineChart(
-        transformedData,
-        [numericColumn1],
-        [dateColumn],
-        noTitleStyles,
-        mockAxisColumnMappings
-      );
-      expect(noTitleResult.title).toBeUndefined();
-
-      // Case 2: Default title (show = true, titleName = '')
-      const defaultTitleStyles = {
-        ...styleOptions,
-        titleOptions: {
-          show: true,
-          titleName: '',
-        },
-      };
-
-      const defaultTitleResult = createSimpleLineChart(
-        transformedData,
-        [numericColumn1],
-        [dateColumn],
-        defaultTitleStyles,
-        mockAxisColumnMappings
-      );
-      expect(defaultTitleResult.title).toBe('value1 Over Time');
-
-      // Case 3: Custom title (show = true, titleName = 'Custom Title')
-      const customTitleStyles = {
-        ...styleOptions,
-        titleOptions: {
-          show: true,
-          titleName: 'Custom Simple Line Chart',
-        },
-      };
-
-      const customTitleResult = createSimpleLineChart(
-        transformedData,
-        [numericColumn1],
-        [dateColumn],
-        customTitleStyles,
-        mockAxisColumnMappings
-      );
-      expect(customTitleResult.title).toBe('Custom Simple Line Chart');
+      expect(result.series.length).toBeGreaterThanOrEqual(1);
+      expect(result.series[0].type).toBe('line');
     });
 
-    it('should fallback to default tooltip format when dateField is missing', () => {
-      const incompleteAxisColumnMappings: AxisColumnMappings = {
-        [AxisRole.Y]: numericColumn1,
-        [AxisRole.X]: { ...dateColumn, column: undefined as any },
-      };
-
-      const result = createSimpleLineChart(
-        transformedData,
-        [numericColumn1],
-        [dateColumn],
-        styleOptions,
-        incompleteAxisColumnMappings
+    it('handles title display options', () => {
+      const noTitle = createSimpleLineChart(
+        mockData,
+        { ...mockStyles, titleOptions: { show: false, titleName: '' } },
+        mockAxisMappings
       );
+      expect(noTitle.title.text).toBeUndefined();
 
-      const tooltip = result.layer[0].encoding.tooltip;
-      expect(tooltip[0].format).toBe('%b %d, %Y %H:%M:%S');
+      const customTitle = createSimpleLineChart(
+        mockData,
+        { ...mockStyles, titleOptions: { show: true, titleName: 'Custom Line' } },
+        mockAxisMappings
+      );
+      expect(customTitle.title.text).toBe('Custom Line');
     });
   });
 
   describe('createLineBarChart', () => {
-    it('should create a combined line and bar chart with two metrics and one date', () => {
-      const mockAxisColumnMappings: AxisColumnMappings = {
-        [AxisRole.Y]: numericColumn1,
-        [AxisRole.X]: dateColumn,
-        [AxisRole.Y_SECOND]: numericColumn2,
-      };
+    const mockAxisMappings = {
+      [AxisRole.Y]: [mockNumericColumn],
+      [AxisRole.X]: mockDateColumn,
+      [AxisRole.Y_SECOND]: [mockNumericColumn2],
+    };
 
-      const result = createLineBarChart(
-        transformedData,
-        [numericColumn1, numericColumn2],
-        [dateColumn],
-        styleOptions,
-        mockAxisColumnMappings
-      );
+    it('returns an ECharts spec with dataset and series', () => {
+      const result = createLineBarChart(mockData, mockStyles, mockAxisMappings);
 
-      // Verify the result structure
-      expect(result).toHaveProperty('$schema');
-      expect(result).toHaveProperty('title', 'value1 (Bar) and value2 (Line) Over Time');
-      expect(result).toHaveProperty('data.values', transformedData);
-      expect(result).toHaveProperty('layer');
-      expect(result.layer).toHaveLength(2); // Bar layer + line layer (no threshold or time marker in this test)
-
-      // Verify the bar layer
-      expect(result.layer[0].layer[0]).toHaveProperty('encoding.x.field', 'field-0');
-      expect(result.layer[0].layer[0]).toHaveProperty('encoding.y.field', 'field-1');
-      expect(result.layer[0].layer[0]).toHaveProperty('encoding.color.datum', 'value1');
-
-      // Verify the line layer
-      expect(result.layer[1]).toHaveProperty('encoding.x.field', 'field-0');
-      expect(result.layer[1]).toHaveProperty('encoding.y.field', 'field-2');
-      expect(result.layer[1]).toHaveProperty('encoding.color.datum', 'value2');
-
-      // Verify the scales are resolved independently
-      expect(result).toHaveProperty('resolve.scale.y', 'independent');
-
-      // Verify utility functions were called
-      expect(lineChartUtils.buildMarkConfig).toHaveBeenCalledWith(styleOptions, 'bar');
-      expect(lineChartUtils.buildMarkConfig).toHaveBeenCalledWith(styleOptions, 'line');
-      expect(lineChartUtils.applyAxisStyling).toHaveBeenCalledTimes(3);
+      expect(result).toHaveProperty('dataset');
+      expect(result).toHaveProperty('series');
+      expect(result.title.text).toBe('Value (Bar) and Value2 (Line) Over Time');
+      expect(result.series.length).toBeGreaterThanOrEqual(2);
     });
 
-    it('should handle different title display options', () => {
-      const mockAxisColumnMappings: AxisColumnMappings = {
-        [AxisRole.Y]: numericColumn1,
-        [AxisRole.X]: dateColumn,
-        [AxisRole.Y_SECOND]: numericColumn2,
-      };
-
-      // Case 1: No title (show = false)
-      const noTitleStyles = {
-        ...styleOptions,
-        titleOptions: {
-          show: false,
-          titleName: '',
-        },
-      };
-
-      const noTitleResult = createLineBarChart(
-        transformedData,
-        [numericColumn1, numericColumn2],
-        [dateColumn],
-        noTitleStyles,
-        mockAxisColumnMappings
+    it('handles title display options', () => {
+      const noTitle = createLineBarChart(
+        mockData,
+        { ...mockStyles, titleOptions: { show: false, titleName: '' } },
+        mockAxisMappings
       );
-      expect(noTitleResult.title).toBeUndefined();
-
-      // Case 2: Default title (show = true, titleName = '')
-      const defaultTitleStyles = {
-        ...styleOptions,
-        titleOptions: {
-          show: true,
-          titleName: '',
-        },
-      };
-
-      const defaultTitleResult = createLineBarChart(
-        transformedData,
-        [numericColumn1, numericColumn2],
-        [dateColumn],
-        defaultTitleStyles,
-        mockAxisColumnMappings
-      );
-      expect(defaultTitleResult.title).toBe('value1 (Bar) and value2 (Line) Over Time');
-
-      // Case 3: Custom title (show = true, titleName = 'Custom Title')
-      const customTitleStyles = {
-        ...styleOptions,
-        titleOptions: {
-          show: true,
-          titleName: 'Custom Line-Bar Chart',
-        },
-      };
-
-      const customTitleResult = createLineBarChart(
-        transformedData,
-        [numericColumn1, numericColumn2],
-        [dateColumn],
-        customTitleStyles,
-        mockAxisColumnMappings
-      );
-      expect(customTitleResult.title).toBe('Custom Line-Bar Chart');
+      expect(noTitle.title.text).toBeUndefined();
     });
 
-    it('should fallback to default tooltip format when dateField is missing', () => {
-      const incompleteAxisColumnMappings: AxisColumnMappings = {
-        [AxisRole.Y]: numericColumn1,
-        [AxisRole.Y_SECOND]: numericColumn2,
-        [AxisRole.X]: { ...dateColumn, column: undefined as any },
-      };
-
-      const result = createLineBarChart(
-        transformedData,
-        [numericColumn1, numericColumn2],
-        [dateColumn],
-        styleOptions,
-        incompleteAxisColumnMappings
-      );
-
-      const barTooltip = result.layer[0].layer[0].encoding.tooltip;
-      const lineTooltip = result.layer[1].encoding.tooltip;
-
-      expect(barTooltip[0].format).toBe('%b %d, %Y %H:%M:%S');
-      expect(lineTooltip[0].format).toBe('%b %d, %Y %H:%M:%S');
+    it('throws when axis config is missing', () => {
+      expect(() => createLineBarChart(mockData, mockStyles, {} as any)).toThrow();
     });
   });
 
   describe('createMultiLineChart', () => {
-    it('should create a multi-line chart with one metric, one date, and one categorical column', () => {
-      const mockAxisColumnMappings: AxisColumnMappings = {
-        [AxisRole.Y]: numericColumn1,
-        [AxisRole.X]: dateColumn,
-        [AxisRole.COLOR]: categoricalColumn1,
-      };
+    const mockAxisMappings = {
+      [AxisRole.Y]: mockNumericColumn,
+      [AxisRole.X]: mockDateColumn,
+      [AxisRole.COLOR]: mockCategoricalColumn,
+    };
 
-      const result = createMultiLineChart(
-        transformedData,
-        [numericColumn1],
-        [categoricalColumn1],
-        [dateColumn],
-        styleOptions,
-        mockAxisColumnMappings
-      );
+    it('returns an ECharts spec with multiple series', () => {
+      const result = createMultiLineChart(mockData, mockStyles, mockAxisMappings);
 
-      // Verify the result structure
-      expect(result).toHaveProperty('$schema');
-      expect(result).toHaveProperty('title', 'value1 Over Time by category1');
-      expect(result).toHaveProperty('data.values', transformedData);
-      expect(result).toHaveProperty('layer');
-      expect(result.layer).toHaveLength(1); // Main layer only (no threshold or time marker in this test)
-
-      // Verify the main layer
-      expect(result.layer[0]).toHaveProperty('encoding.x.field', 'field-0');
-      expect(result.layer[0]).toHaveProperty('encoding.y.field', 'field-1');
-      expect(result.layer[0]).toHaveProperty('encoding.color.field', 'field-2');
-
-      // Verify utility functions were called
-      expect(lineChartUtils.buildMarkConfig).toHaveBeenCalledWith(styleOptions, 'line');
-      expect(lineChartUtils.applyAxisStyling).toHaveBeenCalledTimes(2);
+      expect(result).toHaveProperty('dataset');
+      expect(result).toHaveProperty('series');
+      expect(result.title.text).toBe('Value Over Time by Category');
+      expect(result.series.length).toBeGreaterThanOrEqual(1);
     });
 
-    it('should handle different title display options', () => {
-      const mockAxisColumnMappings: AxisColumnMappings = {
-        [AxisRole.Y]: numericColumn1,
-        [AxisRole.X]: dateColumn,
-        [AxisRole.COLOR]: categoricalColumn1,
-      };
-
-      // Case 1: No title (show = false)
-      const noTitleStyles = {
-        ...styleOptions,
-        titleOptions: {
-          show: false,
-          titleName: '',
-        },
-      };
-
-      const noTitleResult = createMultiLineChart(
-        transformedData,
-        [numericColumn1],
-        [categoricalColumn1],
-        [dateColumn],
-        noTitleStyles,
-        mockAxisColumnMappings
+    it('handles title display options', () => {
+      const noTitle = createMultiLineChart(
+        mockData,
+        { ...mockStyles, titleOptions: { show: false, titleName: '' } },
+        mockAxisMappings
       );
-      expect(noTitleResult.title).toBeUndefined();
+      expect(noTitle.title.text).toBeUndefined();
 
-      // Case 2: Default title (show = true, titleName = '')
-      const defaultTitleStyles = {
-        ...styleOptions,
-        titleOptions: {
-          show: true,
-          titleName: '',
-        },
-      };
-
-      const defaultTitleResult = createMultiLineChart(
-        transformedData,
-        [numericColumn1],
-        [categoricalColumn1],
-        [dateColumn],
-        defaultTitleStyles,
-        mockAxisColumnMappings
+      const customTitle = createMultiLineChart(
+        mockData,
+        { ...mockStyles, titleOptions: { show: true, titleName: 'Custom Multi-Line' } },
+        mockAxisMappings
       );
-      expect(defaultTitleResult.title).toBe('value1 Over Time by category1');
-
-      // Case 3: Custom title (show = true, titleName = 'Custom Title')
-      const customTitleStyles = {
-        ...styleOptions,
-        titleOptions: {
-          show: true,
-          titleName: 'Custom Multi-Line Chart',
-        },
-      };
-
-      const customTitleResult = createMultiLineChart(
-        transformedData,
-        [numericColumn1],
-        [categoricalColumn1],
-        [dateColumn],
-        customTitleStyles,
-        mockAxisColumnMappings
-      );
-      expect(customTitleResult.title).toBe('Custom Multi-Line Chart');
-    });
-
-    it('should fallback to default tooltip format when dateField is missing', () => {
-      const incompleteAxisColumnMappings: AxisColumnMappings = {
-        [AxisRole.Y]: numericColumn1,
-        [AxisRole.COLOR]: categoricalColumn1,
-        [AxisRole.X]: { ...dateColumn, column: undefined as any },
-      };
-
-      const result = createMultiLineChart(
-        transformedData,
-        [numericColumn1],
-        [categoricalColumn1],
-        [dateColumn],
-        styleOptions,
-        incompleteAxisColumnMappings
-      );
-
-      const tooltip = result.layer[0].encoding.tooltip;
-      expect(tooltip[0].format).toBe('%b %d, %Y %H:%M:%S');
+      expect(customTitle.title.text).toBe('Custom Multi-Line');
     });
   });
 
   describe('createFacetedMultiLineChart', () => {
-    it('should create a faceted multi-line chart with one metric, one date, and two categorical columns', () => {
-      // Enable threshold and time marker for this test
-      styleOptions.thresholdLines[0].show = true;
-      styleOptions.addTimeMarker = true;
+    const mockAxisMappings = {
+      [AxisRole.Y]: mockNumericColumn,
+      [AxisRole.X]: mockDateColumn,
+      [AxisRole.COLOR]: mockCategoricalColumn,
+      [AxisRole.FACET]: mockCategoricalColumn2,
+    };
 
-      const mockAxisColumnMappings: AxisColumnMappings = {
-        [AxisRole.Y]: numericColumn1,
-        [AxisRole.X]: dateColumn,
-        [AxisRole.COLOR]: categoricalColumn1,
-        [AxisRole.FACET]: categoricalColumn2,
-      };
+    it('returns an ECharts spec with faceted datasets', () => {
+      const result = createFacetedMultiLineChart(mockData, mockStyles, mockAxisMappings);
 
-      const result = createFacetedMultiLineChart(
-        transformedData,
-        [numericColumn1],
-        [categoricalColumn1, categoricalColumn2],
-        [dateColumn],
-        styleOptions,
-        mockAxisColumnMappings
-      );
-
-      // Verify the result structure
-      expect(result).toHaveProperty('$schema');
-      expect(result).toHaveProperty(
-        'title',
-        'value1 Over Time by category1 (Faceted by category2)'
-      );
-      expect(result).toHaveProperty('data.values', transformedData);
-      expect(result).toHaveProperty('facet.field', 'field-3');
-      expect(result).toHaveProperty('spec.layer');
-      expect(result.spec.layer).toHaveLength(3); // Main layer + threshold + time marker
-
-      // Verify the main layer
-      expect(result.spec.layer[0]).toHaveProperty('encoding.x.field', 'field-0');
-      expect(result.spec.layer[0]).toHaveProperty('encoding.y.field', 'field-1');
-      expect(result.spec.layer[0]).toHaveProperty('encoding.color.field', 'field-2');
-
-      // Verify the threshold layer
-      expect(result.spec.layer[1]).toHaveProperty('mark.type', 'rule');
-      expect(result.spec.layer[1]).toHaveProperty('encoding.y.datum', 100);
-
-      // Verify the time marker layer
-      expect(result.spec.layer[2]).toHaveProperty('mark.type', 'rule');
-      expect(result.spec.layer[2]).toHaveProperty('encoding.x.datum');
-
-      // Verify utility functions were called
-      expect(lineChartUtils.buildMarkConfig).toHaveBeenCalledWith(styleOptions, 'line');
-      expect(lineChartUtils.applyAxisStyling).toHaveBeenCalledTimes(2);
-      expect(thresholdUtils.getStrokeDash).toHaveBeenCalled();
+      expect(result).toHaveProperty('dataset');
+      expect(result).toHaveProperty('series');
+      expect(result.title.text).toBe('Value Over Time by Category (Faceted by Category2)');
     });
 
-    it('should handle different title display options', () => {
-      const mockAxisColumnMappings: AxisColumnMappings = {
-        [AxisRole.Y]: numericColumn1,
-        [AxisRole.X]: dateColumn,
-        [AxisRole.COLOR]: categoricalColumn1,
-        [AxisRole.FACET]: categoricalColumn2,
-      };
-
-      // Case 1: No title (show = false)
-      const noTitleStyles = {
-        ...styleOptions,
-        titleOptions: {
-          show: false,
-          titleName: '',
-        },
-      };
-
-      const noTitleResult = createFacetedMultiLineChart(
-        transformedData,
-        [numericColumn1],
-        [categoricalColumn1, categoricalColumn2],
-        [dateColumn],
-        noTitleStyles,
-        mockAxisColumnMappings
+    it('handles title display options', () => {
+      const noTitle = createFacetedMultiLineChart(
+        mockData,
+        { ...mockStyles, titleOptions: { show: false, titleName: '' } },
+        mockAxisMappings
       );
-      expect(noTitleResult.title).toBeUndefined();
-
-      // Case 2: Default title (show = true, titleName = '')
-      const defaultTitleStyles = {
-        ...styleOptions,
-        titleOptions: {
-          show: true,
-          titleName: '',
-        },
-      };
-
-      const defaultTitleResult = createFacetedMultiLineChart(
-        transformedData,
-        [numericColumn1],
-        [categoricalColumn1, categoricalColumn2],
-        [dateColumn],
-        defaultTitleStyles,
-        mockAxisColumnMappings
-      );
-      expect(defaultTitleResult.title).toBe('value1 Over Time by category1 (Faceted by category2)');
-
-      // Case 3: Custom title (show = true, titleName = 'Custom Title')
-      const customTitleStyles = {
-        ...styleOptions,
-        titleOptions: {
-          show: true,
-          titleName: 'Custom Faceted Line Chart',
-        },
-      };
-
-      const customTitleResult = createFacetedMultiLineChart(
-        transformedData,
-        [numericColumn1],
-        [categoricalColumn1, categoricalColumn2],
-        [dateColumn],
-        customTitleStyles,
-        mockAxisColumnMappings
-      );
-      expect(customTitleResult.title).toBe('Custom Faceted Line Chart');
-    });
-
-    it('should fallback to default tooltip format when dateField is missing', () => {
-      const incompleteAxisColumnMappings: AxisColumnMappings = {
-        [AxisRole.Y]: numericColumn1,
-        [AxisRole.COLOR]: categoricalColumn1,
-        [AxisRole.FACET]: categoricalColumn2,
-        [AxisRole.X]: { ...dateColumn, column: undefined as any },
-      };
-
-      const result = createFacetedMultiLineChart(
-        transformedData,
-        [numericColumn1],
-        [categoricalColumn1, categoricalColumn2],
-        [dateColumn],
-        styleOptions,
-        incompleteAxisColumnMappings
-      );
-
-      const tooltip = result.spec.layer[0].encoding.tooltip;
-      expect(tooltip[0].format).toBe('%b %d, %Y %H:%M:%S');
+      expect(noTitle.title.text).toBeUndefined();
     });
   });
 
   describe('createCategoryLineChart', () => {
-    it('should create a category-based line chart with one metric and one categorical column', () => {
-      // Enable threshold for this test
-      const mockThresholdLayer = { mark: { type: 'rule' } };
-      (thresholdUtils.createThresholdLayer as jest.Mock).mockReturnValueOnce(mockThresholdLayer);
+    const mockAxisMappings = {
+      [AxisRole.Y]: [mockNumericColumn],
+      [AxisRole.X]: mockCategoricalColumn,
+    };
 
-      const mockAxisColumnMappings: AxisColumnMappings = {
-        [AxisRole.Y]: numericColumn1,
-        [AxisRole.X]: categoricalColumn1,
-      };
+    it('returns an ECharts spec for category-based line chart', () => {
+      const result = createCategoryLineChart(mockData, mockStyles, mockAxisMappings);
 
-      const result = createCategoryLineChart(
-        transformedData,
-        [numericColumn1],
-        [categoricalColumn1],
-        [],
-        styleOptions,
-        mockAxisColumnMappings
-      );
-
-      // Verify the result structure
-      expect(result).toHaveProperty('$schema');
-      expect(result).toHaveProperty('title', 'value1 by category1');
-      expect(result).toHaveProperty('data.values', transformedData);
-      expect(result).toHaveProperty('layer');
-      expect(result.layer).toHaveLength(2); // Main layer + threshold
-
-      // Verify the main layer
-      expect(result.layer[0]).toHaveProperty('mark');
-      expect(result.layer[0]).toHaveProperty('encoding.x.field', 'field-2');
-      expect(result.layer[0]).toHaveProperty('encoding.x.type', 'nominal');
-      expect(result.layer[0]).toHaveProperty('encoding.y.field', 'field-1');
-      expect(result.layer[0]).toHaveProperty('encoding.y.type', 'quantitative');
-
-      // Verify utility functions were called
-      expect(lineChartUtils.buildMarkConfig).toHaveBeenCalledWith(styleOptions, 'line');
-      expect(lineChartUtils.applyAxisStyling).toHaveBeenCalledTimes(2);
-      expect(thresholdUtils.createThresholdLayer).toHaveBeenCalledWith(
-        styleOptions.thresholdLines,
-        styleOptions.tooltipOptions?.mode
-      );
+      expect(result).toHaveProperty('dataset');
+      expect(result).toHaveProperty('series');
+      expect(result.title.text).toBe('Value by Category');
+      expect(result.series[0].type).toBe('line');
     });
 
-    it('should handle different title display options', () => {
-      const mockAxisColumnMappings: AxisColumnMappings = {
-        [AxisRole.Y]: numericColumn1,
-        [AxisRole.X]: categoricalColumn1,
-      };
-
-      // Case 1: No title (show = false)
-      const noTitleStyles = {
-        ...styleOptions,
-        titleOptions: {
-          show: false,
-          titleName: '',
-        },
-      };
-
-      const noTitleResult = createCategoryLineChart(
-        transformedData,
-        [numericColumn1],
-        [categoricalColumn1],
-        [],
-        noTitleStyles,
-        mockAxisColumnMappings
+    it('handles title display options', () => {
+      const noTitle = createCategoryLineChart(
+        mockData,
+        { ...mockStyles, titleOptions: { show: false, titleName: '' } },
+        mockAxisMappings
       );
-      expect(noTitleResult.title).toBeUndefined();
+      expect(noTitle.title.text).toBeUndefined();
+    });
+  });
 
-      // Case 2: Default title (show = true, titleName = '')
-      const defaultTitleStyles = {
-        ...styleOptions,
-        titleOptions: {
-          show: true,
-          titleName: '',
-        },
-      };
+  describe('createCategoryMultiLineChart', () => {
+    const mockAxisMappings = {
+      [AxisRole.Y]: mockNumericColumn,
+      [AxisRole.X]: mockCategoricalColumn,
+      [AxisRole.COLOR]: mockCategoricalColumn2,
+    };
 
-      const defaultTitleResult = createCategoryLineChart(
-        transformedData,
-        [numericColumn1],
-        [categoricalColumn1],
-        [],
-        defaultTitleStyles,
-        mockAxisColumnMappings
-      );
-      expect(defaultTitleResult.title).toBe('value1 by category1');
+    it('returns an ECharts spec with multiple category-based series', () => {
+      const result = createCategoryMultiLineChart(mockData, mockStyles, mockAxisMappings);
 
-      // Case 3: Custom title (show = true, titleName = 'Custom Title')
-      const customTitleStyles = {
-        ...styleOptions,
-        titleOptions: {
-          show: true,
-          titleName: 'Custom Category Line Chart',
-        },
-      };
-
-      const customTitleResult = createCategoryLineChart(
-        transformedData,
-        [numericColumn1],
-        [categoricalColumn1],
-        [],
-        customTitleStyles,
-        mockAxisColumnMappings
-      );
-      expect(customTitleResult.title).toBe('Custom Category Line Chart');
+      expect(result).toHaveProperty('dataset');
+      expect(result).toHaveProperty('series');
+      expect(result.title.text).toBe('Value by Category and Category2');
+      expect(result.series.length).toBeGreaterThanOrEqual(1);
     });
 
-    it('should throw an error when required columns are missing', () => {
-      // Test with missing numerical column
-      expect(() => {
-        createCategoryLineChart(transformedData, [], [categoricalColumn1], [], styleOptions);
-      }).toThrow(
-        'Category line chart requires at least one numerical column and one categorical column'
+    it('handles title display options', () => {
+      const noTitle = createCategoryMultiLineChart(
+        mockData,
+        { ...mockStyles, titleOptions: { show: false, titleName: '' } },
+        mockAxisMappings
       );
+      expect(noTitle.title.text).toBeUndefined();
+    });
 
-      // Test with missing categorical column
-      expect(() => {
-        createCategoryLineChart(transformedData, [numericColumn1], [], [], styleOptions);
-      }).toThrow(
-        'Category line chart requires at least one numerical column and one categorical column'
-      );
+    it('includes markLine for threshold when enabled', () => {
+      const stylesWithThreshold = {
+        ...mockStyles,
+        thresholdOptions: {
+          baseColor: '#00BD6B',
+          thresholds: [{ value: 15, color: '#E7664C' }],
+          thresholdStyle: ThresholdMode.Solid,
+        },
+      };
+
+      const result = createCategoryMultiLineChart(mockData, stylesWithThreshold, mockAxisMappings);
+
+      const seriesWithMarkLine = result.series.find((s: any) => s.markLine);
+      expect(seriesWithMarkLine).toBeDefined();
+      expect(seriesWithMarkLine.markLine.data[0].yAxis).toBe(15);
     });
   });
 });

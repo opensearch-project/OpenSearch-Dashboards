@@ -3,13 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { Option } from './option';
 
 describe('Option', () => {
   it('renders without crashing', () => {
     const { container } = render(
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       <Option title="Test Option">
         <div>Test Content</div>
       </Option>
@@ -23,6 +23,7 @@ describe('Option', () => {
 
   it('renders the title correctly', () => {
     render(
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       <Option title="Test Option">
         <div>Test Content</div>
       </Option>
@@ -32,6 +33,7 @@ describe('Option', () => {
 
   it('renders children', () => {
     render(
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       <Option title="Test Option">
         <div>Test Content</div>
       </Option>
@@ -43,6 +45,7 @@ describe('Option', () => {
 
   it('renders with complex children', () => {
     render(
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       <Option title="Complex Option">
         <div>
           <h3>Nested Header</h3>

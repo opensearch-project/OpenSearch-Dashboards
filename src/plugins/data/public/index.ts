@@ -70,6 +70,9 @@ export {
   SingleLineInput,
   DatasetSelector,
   DatasetSelectorAppearance,
+  DetailedDataset,
+  AdvancedSelector,
+  ConfiguratorV2,
 } from './ui';
 
 import {
@@ -364,6 +367,7 @@ export {
   QuerySuggestionGetFnArgs,
   QuerySuggestionBasic,
   QuerySuggestionField,
+  MonacoCompatibleQuerySuggestion,
   AutocompleteStart,
 } from './autocomplete';
 
@@ -466,6 +470,9 @@ export type { SearchSource } from './search';
 
 export { ISearchOptions, isErrorResponse, isCompleteResponse, isPartialResponse } from '../common';
 
+import { calcAutoIntervalNear } from '../common/search/aggs/buckets/lib/time_buckets/calc_auto_interval';
+import { TimeBuckets } from '../common/search/aggs/buckets/lib/time_buckets';
+
 // Search namespace
 export const search = {
   aggs: {
@@ -488,6 +495,8 @@ export const search = {
     siblingPipelineType,
     termsAggFilter,
     toAbsoluteDates,
+    calcAutoIntervalNear,
+    TimeBuckets,
   },
   getRequestInspectorStats,
   getResponseInspectorStats,
@@ -517,6 +526,7 @@ export {
   IUiStart as DataPublicPluginStartUi,
   useQueryStringManager,
   getEffectiveLanguageForAutoComplete,
+  useCancelButtonTiming,
 } from './ui';
 
 /**
@@ -628,3 +638,17 @@ export {
 
 export { SavedQueryManagementComponent } from './ui/saved_query_management';
 export { SaveQueryForm, SavedQueryMeta } from './ui/saved_query_form';
+export {
+  getSchemaConfigs,
+  SchemaConfig,
+  SchemaAttributeConfig,
+} from './ui/dataset_selector/configurator/schema_config';
+
+export { BaseResourceClient, ResourceClientFactory, ResourceClientCreator } from './resources';
+
+export {
+  attachPPLValidationContext,
+  attachPPLGrammarRefresh,
+  syncPPLValidationContext,
+} from './ui/query_editor/validation_context';
+export { pplGrammarCache, shouldUseRuntimeGrammar } from './antlr/opensearch_ppl/ppl_grammar_cache';

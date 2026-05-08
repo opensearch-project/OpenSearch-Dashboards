@@ -201,4 +201,21 @@ describe('parseClientOptions', () => {
       })
     );
   });
+
+  test('includes accept-encoding header when requestCompression is true', () => {
+    const config = {
+      enabled: true,
+      clientPool: {
+        size: 5,
+      },
+      globalOpenSearchConfig: {
+        requestTimeout: duration(1, 'seconds'),
+        pingTimeout: duration(2, 'seconds'),
+        requestCompression: true,
+      },
+    } as DataSourcePluginConfigType;
+
+    const parsedConfig = parseClientOptions(config, TEST_DATA_SOURCE_ENDPOINT, []);
+    expect(parsedConfig.headers).toEqual({ 'accept-encoding': 'gzip, deflate' });
+  });
 });

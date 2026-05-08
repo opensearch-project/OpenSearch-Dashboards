@@ -1,0 +1,127 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+@import "@elastic/eui/src/global_styling/variables/size";
+@import "@elastic/eui/src/global_styling/variables/colors";
+
+.indexDataStructureCreator {
+  padding: $euiSize;
+
+  &__selectedIndices {
+    display: flex;
+    flex-direction: column;
+    gap: $euiSizeXS;
+    margin-top: $euiSizeS;
+  }
+
+  &__badgeContainer {
+    display: flex;
+  }
+
+  &__selectedList {
+    height: 40vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__emptyState {
+    height: 40vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__selectedTable {
+    max-height: 400px;
+    overflow-y: auto;
+  }
+
+  &__tableHeader {
+    padding: $euiSizeS $euiSize;
+    border-bottom: 1px solid $euiBorderColor;
+    background-color: $euiColorLightestShade;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+
+  &__tableRow {
+    padding: $euiSizeXS $euiSize;
+
+    &:not(:last-child) {
+      border-bottom: 1px solid $euiBorderColor;
+    }
+  }
+
+  &__columnStatus,
+  &__columnDocuments,
+  &__columnSize {
+    min-width: 100px;
+  }
+
+  &__columnActions {
+    min-width: 60px;
+  }
+
+  &__wildcardPopover {
+    width: 500px;
+    max-height: 500px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__wildcardPopoverHeader {
+    padding: $euiSizeS $euiSizeM;
+    border-bottom: 1px solid $euiBorderColor;
+    background-color: $euiColorEmptyShade;
+    flex-shrink: 0;
+  }
+
+  &__wildcardPopoverContent {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+  }
+
+  &__wildcardPopoverTableHeader {
+    padding: $euiSizeS $euiSizeM;
+    border-bottom: 1px solid $euiBorderColor;
+    background-color: $euiColorLightestShade;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+
+  &__wildcardPopoverTableBody {
+    // Just a container for rows
+  }
+
+  &__wildcardPopoverRow {
+    padding: $euiSizeXS $euiSizeM;
+    border-bottom: 1px solid $euiColorLightestShade;
+  }
+
+  &__wildcardPopoverColumn {
+    min-width: 80px;
+  }
+
+  &__wildcardPopoverFooter {
+    padding: $euiSizeS $euiSizeM;
+    border-top: 1px solid $euiBorderColor;
+    background-color: $euiColorEmptyShade;
+    flex-shrink: 0;
+  }
+
+  &__healthPopover {
+    width: 200px;
+    padding: $euiSizeM;
+  }
+
+  &__healthPopoverLoading {
+    width: 250px;
+    padding: $euiSizeM;
+    text-align: center;
+  }
+}

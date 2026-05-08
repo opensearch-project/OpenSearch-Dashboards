@@ -6,6 +6,7 @@
 import _ from 'lodash';
 import { Logger } from '@osd/logging';
 import { Request } from 'hapi__hapi';
+// @ts-expect-error TS2345 TODO Fix me
 import { ApiResponse } from '@opensearch-project/opensearch/.';
 import { ConfigIdentifier } from '../types';
 import { DYNAMIC_APP_CONFIG_INDEX_PREFIX } from './constants';

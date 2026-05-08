@@ -28,13 +28,14 @@
  * under the License.
  */
 
-import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot, Root } from 'react-dom/client';
 import { VisualizationController } from '../types';
 import { getI18n, getUISettings } from '../services';
 import { ExprVis } from '../expressions/vis';
 
 export class ReactVisController implements VisualizationController {
+  private root?: Root;
+
   constructor(private element: HTMLElement, private vis: ExprVis) {}
 
   public render(visData: any, visParams: any): Promise<void> {
@@ -47,7 +48,10 @@ export class ReactVisController implements VisualizationController {
 
       const Component = this.vis.type.visConfig.component;
       const config = getUISettings();
-      render(
+      if (!this.root) {
+        this.root = createRoot(this.element);
+      }
+      this.root.render(
         <I18nContext>
           <Component
             config={config}
@@ -56,13 +60,14 @@ export class ReactVisController implements VisualizationController {
             visParams={visParams}
             renderComplete={resolve}
           />
-        </I18nContext>,
-        this.element
+        </I18nContext>
       );
     });
   }
 
   public destroy() {
-    unmountComponentAtNode(this.element);
+    if (this.root) {
+      this.root.unmount();
+    }
   }
 }

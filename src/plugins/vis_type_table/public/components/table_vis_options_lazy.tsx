@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { lazy, Suspense } from 'react';
+import { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
 import { TableVisParams } from '../types';

@@ -10,7 +10,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import React from 'react';
+
 import { DataView as Dataset } from 'src/plugins/data/common';
 import { TopNavMenuIconRun, TopNavMenuIconUIData } from '../types';
 import { ExploreServices } from '../../../../types';
@@ -69,7 +69,7 @@ export const getSaveButtonRun = (
     const savedExploreWithState = saveStateToSavedObject(
       savedExplore,
       saveStateProps.flavorId ?? 'logs',
-      saveStateProps.tabDefinition!,
+      saveStateProps.tabDefinition,
       { axesMapping, chartType: visConfig?.type, styleOptions: visConfig?.styles },
       saveStateProps.dataset,
       saveStateProps.activeTabId

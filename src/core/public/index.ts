@@ -103,6 +103,8 @@ import {
 import { Branding } from '../types';
 import { WorkspacesStart, WorkspacesSetup } from './workspace';
 import { KeyboardShortcutSetup, KeyboardShortcutStart } from './keyboard_shortcut';
+import { ChatServiceSetup, ChatServiceStart } from './chat';
+import type { TelemetryServiceSetup, TelemetryServiceStart } from './telemetry';
 
 export type { Logos } from '../common';
 export { PackageInfo, EnvironmentMode } from '../server/types';
@@ -122,6 +124,7 @@ export {
   OBSERVABILITY_USE_CASE_ID,
   SECURITY_ANALYTICS_USE_CASE_ID,
   ENABLE_AI_FEATURES,
+  UseCaseId,
 } from '../utils';
 export {
   AppCategory,
@@ -291,6 +294,10 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   workspaces: WorkspacesSetup;
   /** {@link KeyboardShortcutsSetup} */
   keyboardShortcut: KeyboardShortcutSetup;
+  /** {@link ChatServiceSetup} */
+  chat: ChatServiceSetup;
+  /** {@link TelemetryServiceSetup} */
+  telemetry: TelemetryServiceSetup;
 }
 
 /**
@@ -348,7 +355,11 @@ export interface CoreStart {
   /** {@link WorkspacesStart} */
   workspaces: WorkspacesStart;
   /** {@link KeyboardShortcutStart} */
-  keyboardShortcut: KeyboardShortcutStart;
+  keyboardShortcut?: KeyboardShortcutStart;
+  /** {@link ChatServiceStart} */
+  chat: ChatServiceStart;
+  /** {@link TelemetryServiceStart} */
+  telemetry: TelemetryServiceStart;
 }
 
 export {
@@ -425,8 +436,63 @@ export {
   KeyboardShortcutSetup,
   KeyboardShortcutStart,
   ShortcutDefinition,
+  KeyboardShortcutHelpModal,
 } from './keyboard_shortcut';
 
-export { debounce } from './utils';
+export {
+  ChatServiceInterface,
+  ChatServiceSetup,
+  ChatServiceStart,
+  ChatImplementationFunctions,
+  Message,
+  ChatWindowState,
+  SavedConversation,
+  ConversationMemoryProvider,
+  ConversationPaginationParams,
+  PaginatedConversations,
+  ChatScreenshotServiceInterface,
+  ChatScreenshotButton,
+  // AG-UI Event types
+  EventType,
+  BaseEvent,
+  Event,
+  RunStartedEvent,
+  RunFinishedEvent,
+  RunErrorEvent,
+  MessagesSnapshotEvent,
+  TextMessageStartEvent,
+  TextMessageContentEvent,
+  TextMessageEndEvent,
+  TextMessageChunkEvent,
+  ThinkingTextMessageStartEvent,
+  ThinkingTextMessageContentEvent,
+  ThinkingTextMessageEndEvent,
+  ThinkingStartEvent,
+  ThinkingEndEvent,
+  ToolCallStartEvent,
+  ToolCallArgsEvent,
+  ToolCallEndEvent,
+  ToolCallResultEvent,
+  ToolCallChunkEvent,
+  StateSnapshotEvent,
+  StateDeltaEvent,
+  StepStartedEvent,
+  StepFinishedEvent,
+  RawEvent,
+  CustomEvent,
+} from './chat';
+
+export { debounce, getNonce } from './utils';
 
 export { searchNavigationLinks, GlobalSearchPageItem, renderNavGroupElement } from './chrome';
+
+export {
+  TelemetryService,
+  TelemetryServiceStart,
+  TelemetryEvent,
+  TelemetryMetric,
+  TelemetryError,
+  PluginTelemetryRecorder,
+  TelemetryServiceSetup,
+  TelemetryProvider,
+} from './telemetry';

@@ -4,3 +4,31 @@
   display: flex;
   align-items: center;
 }
+
+// Add horizontal scroll to preview table
+.previewTableContainer {
+  height: calc(100% - 40px);
+  overflow-x: auto;
+  overflow-y: auto;
+}
+
+.previewTable {
+  table-layout: auto;
+  width: auto;
+
+  td,
+  th {
+    white-space: nowrap;
+    max-width: 300px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  // Keep the row number column narrow
+  td:first-child,
+  th:first-child {
+    width: 50px;
+    min-width: 50px;
+    max-width: 50px;
+  }
+}

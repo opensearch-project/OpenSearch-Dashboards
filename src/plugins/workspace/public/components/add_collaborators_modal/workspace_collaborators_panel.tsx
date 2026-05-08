@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import {
   EuiSmallButton,
   EuiCompressedFormRow,
@@ -11,6 +10,7 @@ import {
   EuiText,
   EuiSpacer,
 } from '@elastic/eui';
+import { HttpStart } from 'opensearch-dashboards/public';
 import { WorkspaceCollaborator, WorkspaceCollaboratorAccessLevel } from '../../types';
 import {
   WorkspaceCollaboratorInput,
@@ -30,6 +30,8 @@ export interface WorkspaceCollaboratorsPanelProps {
   onChange: (value: WorkspaceCollaboratorInner[]) => void;
   collaboratorIdInputPlaceholder?: string;
   addAnotherButtonLabel: string;
+  identitySource?: { source: string; type: string };
+  http?: HttpStart;
 }
 
 export const WorkspaceCollaboratorsPanel = ({
@@ -40,6 +42,8 @@ export const WorkspaceCollaboratorsPanel = ({
   addAnotherButtonLabel,
   collaboratorIdInputPlaceholder,
   onChange,
+  identitySource,
+  http,
 }: WorkspaceCollaboratorsPanelProps) => {
   const handleAddNewOne = () => {
     const nextId = Math.max(...[0, ...collaborators.map(({ id }) => id)]) + 1;
@@ -108,6 +112,8 @@ export const WorkspaceCollaboratorsPanel = ({
             onDelete={handleDelete}
             collaboratorIdInputPlaceholder={collaboratorIdInputPlaceholder}
             error={errors?.[item.id]}
+            identitySource={identitySource}
+            http={http}
           />
         </EuiCompressedFormRow>
       ))}

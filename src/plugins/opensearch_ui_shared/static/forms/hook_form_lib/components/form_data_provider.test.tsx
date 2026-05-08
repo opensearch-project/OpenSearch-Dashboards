@@ -28,8 +28,8 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
-import { act } from 'react-dom/test-utils';
+import { useState } from 'react';
+import { act } from 'react';
 
 import { registerTestBed, TestBed } from '../shared_imports';
 import { OnUpdateHandler } from '../types';

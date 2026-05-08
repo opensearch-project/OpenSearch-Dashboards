@@ -81,6 +81,8 @@ export const WORKSPACE_USE_CASES = Object.freeze({
       'observability-applications',
       // Add management avoid index patterns application not found for dashboards or visualize
       'management',
+      'indexPatterns',
+      'datasets',
     ] as string[],
   },
   'security-analytics': {
@@ -105,6 +107,7 @@ export const WORKSPACE_USE_CASES = Object.freeze({
       'opensearch_security_analytics_dashboards',
       // Add management avoid index patterns application not found for dashboards or visualize
       'management',
+      'indexPatterns',
     ] as string[],
   },
   essentials: {
@@ -128,6 +131,7 @@ export const WORKSPACE_USE_CASES = Object.freeze({
       'anomaly-detection-dashboards',
       // Add management avoid index patterns application not found for dashboards or visualize
       'management',
+      'indexPatterns',
     ] as string[],
   },
   search: {
@@ -148,6 +152,7 @@ export const WORKSPACE_USE_CASES = Object.freeze({
       'searchRelevance',
       // Add management avoid index patterns application not found for dashboards or visualize
       'management',
+      'indexPatterns',
     ] as string[],
   },
 });

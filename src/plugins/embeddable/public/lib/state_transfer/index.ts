@@ -29,4 +29,4 @@
  */
 
 export { EmbeddableStateTransfer } from './embeddable_state_transfer';
-export { EmbeddableEditorState, EmbeddablePackageState } from './types';
+export { EmbeddableEditorState, EmbeddablePackageState, ContainerInfo } from './types';

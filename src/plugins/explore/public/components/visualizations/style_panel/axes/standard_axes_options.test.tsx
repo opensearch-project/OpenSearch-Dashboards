@@ -3,11 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { Provider } from 'react-redux';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { AllAxesOptions } from './standard_axes_options';
-import { StandardAxes, Positions, AxisRole } from '../../types';
+import { StandardAxes, Positions, AxisRole, VisFieldType } from '../../types';
 import configureMockStore from 'redux-mock-store';
 
 const mockStore = configureMockStore([]);
@@ -15,26 +14,21 @@ const mockStore = configureMockStore([]);
 const store = mockStore({
   tab: {
     visualizations: {
-      styleOptions: {
-        switchAxes: false,
-      },
+      styleOptions: {},
     },
   },
 });
 
 // Mock the debounced components
 jest.mock('../../style_panel/utils', () => ({
-  DebouncedTruncateField: ({
+  DebouncedFieldNumber: ({
     value,
     onChange,
-    label,
   }: {
     value: number;
     onChange: (val: number) => void;
-    label: string;
   }) => (
     <div>
-      <label htmlFor="truncate-field">{label}</label>
       <input
         id="truncate-field"
         type="number"
@@ -44,19 +38,16 @@ jest.mock('../../style_panel/utils', () => ({
       />
     </div>
   ),
-  DebouncedText: ({
+  DebouncedFieldText: ({
     value,
     onChange,
-    label,
     placeholder,
   }: {
     value: string;
     onChange: (val: string) => void;
-    label: string;
     placeholder?: string;
   }) => (
     <div>
-      <label htmlFor="text-field">{label}</label>
       <input
         id="text-field"
         type="text"
@@ -72,10 +63,8 @@ jest.mock('../../style_panel/utils', () => ({
 describe('AllAxesOptions', () => {
   const mockStandardAxes: StandardAxes[] = [
     {
-      id: 'Axis-1',
       position: Positions.BOTTOM,
       show: true,
-      style: {},
       labels: {
         show: true,
         rotate: 0,
@@ -91,10 +80,8 @@ describe('AllAxesOptions', () => {
       axisRole: AxisRole.X,
     },
     {
-      id: 'Axis-2',
       position: Positions.LEFT,
       show: true,
-      style: {},
       labels: {
         show: true,
         rotate: 0,
@@ -114,9 +101,27 @@ describe('AllAxesOptions', () => {
   const defaultProps = {
     standardAxes: mockStandardAxes,
     onStandardAxesChange: jest.fn(),
-    onChangeSwitchAxes: jest.fn(),
     disableGrid: false,
-    axisColumnMappings: {},
+    axisColumnMappings: {
+      [AxisRole.X]: {
+        name: 'category',
+        column: 'category',
+        id: 0,
+        schema: VisFieldType.Categorical,
+        validValuesCount: 1,
+        uniqueValuesCount: 1,
+      },
+      [AxisRole.Y]: {
+        name: 'value',
+        column: 'value',
+        id: 1,
+        schema: VisFieldType.Numerical,
+        validValuesCount: 1,
+        uniqueValuesCount: 1,
+      },
+    },
+    showFullTimeRange: false,
+    onShowFullTimeRangeChange: jest.fn(),
   };
 
   beforeEach(() => {
@@ -138,27 +143,10 @@ describe('AllAxesOptions', () => {
         <AllAxesOptions {...defaultProps} />
       </Provider>
     );
-    expect(screen.getByText('X-Axis')).toBeInTheDocument();
-    expect(screen.getByText('Y-Axis')).toBeInTheDocument();
+    expect(screen.getByText('Show X-Axis')).toBeInTheDocument();
+    expect(screen.getByText('Show Y-Axis')).toBeInTheDocument();
   });
 
-  it('should switch label is switchAxes is true', () => {
-    const switchStore = mockStore({
-      tab: {
-        visualizations: {
-          styleOptions: {
-            switchAxes: true,
-          },
-        },
-      },
-    });
-
-    render(
-      <Provider store={switchStore}>
-        <AllAxesOptions {...defaultProps} />
-      </Provider>
-    );
-  });
   it('shows/hides label options based on show labels toggle', () => {
     render(
       <Provider store={store}>
@@ -309,5 +297,52 @@ describe('AllAxesOptions', () => {
         ])
       );
     });
+  });
+
+  it('calls stopPropagation on mouseUp for alignment select', () => {
+    render(
+      <Provider store={store}>
+        <AllAxesOptions {...defaultProps} />
+      </Provider>
+    );
+
+    const alignmentSelect = screen.getAllByRole('combobox')[0];
+    expect(alignmentSelect).toBeInTheDocument(); // Verify element exists
+
+    const stopPropagation = jest.fn();
+    const mouseUpEvent = new MouseEvent('mouseup', {
+      bubbles: true,
+      cancelable: true,
+    });
+    Object.defineProperty(mouseUpEvent, 'stopPropagation', { value: stopPropagation });
+
+    alignmentSelect.dispatchEvent(mouseUpEvent);
+
+    expect(stopPropagation).toHaveBeenCalled();
+  });
+
+  it('does not render "Show full time range" when axis is not temporal', () => {
+    const axisColumnMappingsNonTemporal = {
+      [AxisRole.X]: {
+        id: 2,
+        name: 'category',
+        column: 'category',
+        schema: VisFieldType.Categorical,
+        validValuesCount: 10,
+        uniqueValuesCount: 5,
+      },
+    };
+
+    render(
+      <Provider store={store}>
+        <AllAxesOptions
+          {...defaultProps}
+          axisColumnMappings={axisColumnMappingsNonTemporal}
+          showFullTimeRange={false}
+        />
+      </Provider>
+    );
+
+    expect(screen.queryByTestId('showFullTimeRangeSwitch')).toBeNull();
   });
 });

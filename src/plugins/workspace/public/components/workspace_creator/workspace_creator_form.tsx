@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { EuiSpacer, EuiForm, EuiText, EuiFlexItem, EuiFlexGroup, EuiPanel } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import {
@@ -103,7 +102,7 @@ export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
                 <EuiText size="xs">
                   {i18n.translate('workspace.creator.form.associateDataSourceDescription', {
                     defaultMessage:
-                      'Add at least one data source that will be available in the workspace. If a selected data source has related Direct Query data sources, they will also be available in the workspace.',
+                      'Optionally select data sources to include in this workspace. Any Direct Query data sources linked to your selections will be automatically included.',
                   })}
                 </EuiText>
                 <SelectDataSourcePanel

@@ -57,3 +57,15 @@
   justify-content: center;
   z-index: 2;
 }
+
+// Secondary toolbar positioned on the right side
+.exploreCustomDataGrid__secondaryToolbar {
+  position: absolute;
+  top: -4px;
+  right: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  height: 40px;
+  padding: 0 12px;
+}

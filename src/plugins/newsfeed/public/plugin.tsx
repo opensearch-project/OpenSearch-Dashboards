@@ -30,8 +30,7 @@
 
 import * as Rx from 'rxjs';
 import { catchError, takeUntil, share } from 'rxjs/operators';
-import ReactDOM from 'react-dom';
-import React from 'react';
+import { createRoot } from 'react-dom/client';
 import moment from 'moment';
 import { I18nProvider } from '@osd/i18n/react';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
@@ -97,12 +96,12 @@ export class NewsfeedPublicPlugin
   }
 
   private mount(coreStart: CoreStart, api$: NewsfeedApiFetchResult, targetDomElement: HTMLElement) {
-    ReactDOM.render(
+    const root = createRoot(targetDomElement);
+    root.render(
       <I18nProvider>
         <NewsfeedNavButton coreStart={coreStart} apiFetchResult={api$} />
-      </I18nProvider>,
-      targetDomElement
+      </I18nProvider>
     );
-    return () => ReactDOM.unmountComponentAtNode(targetDomElement);
+    return () => root.unmount();
   }
 }

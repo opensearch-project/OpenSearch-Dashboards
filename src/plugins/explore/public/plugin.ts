@@ -11,6 +11,7 @@ import { filter, map, take } from 'rxjs/operators';
 import {
   App,
   AppMountParameters,
+  AppNavLinkStatus,
   AppUpdater,
   CoreSetup,
   CoreStart,
@@ -28,8 +29,14 @@ import {
   url,
   withNotifyOnErrors,
 } from '../../opensearch_dashboards_utils/public';
-import { ExploreFlavor, PLUGIN_ID, PLUGIN_NAME } from '../common';
-import { ConfigSchema } from '../common/config';
+import { VisTypeAlias } from '../../visualizations/public';
+import {
+  ExploreFlavor,
+  PLUGIN_ID,
+  PLUGIN_NAME,
+  VISUALIZATION_EDITOR_APP_ID,
+  VISUALIZATION_EDITOR_APP_NAME,
+} from '../common';
 import { generateDocViewsUrl } from './application/legacy/discover/application/components/doc_views/generate_doc_views_url';
 import { DocViewsLinksRegistry } from './application/legacy/discover/application/doc_views_links/doc_views_links_registry';
 import {
@@ -54,6 +61,7 @@ import {
 import { createSavedExploreLoader } from './saved_explore';
 import { TabRegistryService } from './services/tab_registry/tab_registry_service';
 import { setUsageCollector } from './services/usage_collector';
+import { QueryPanelActionsRegistryService } from './services/query_panel_actions_registry';
 import { VisualizationRegistryService } from './services/visualization_registry_service';
 import {
   ExplorePluginSetup,
@@ -69,6 +77,18 @@ import { createAbortDataQueryAction } from './application/utils/state_management
 import { ABORT_DATA_QUERY_TRIGGER } from '../../ui_actions/public';
 import { abortAllActiveQueries } from './application/utils/state_management/actions/query_actions';
 import { setServices } from './services/services';
+import { SlotRegistryService } from './services/slot_registry';
+
+// Log Actions
+import { logActionRegistry } from './services/log_action_registry';
+import { createAskAiAction } from './actions/ask_ai_action';
+import { importDataActionConfig } from './actions/import_data_action';
+import { AskAIEmbeddableAction } from './actions/ask_ai_embeddable_action';
+import { CONTEXT_MENU_TRIGGER } from '../../embeddable/public';
+import {
+  registerDisabledPPLExecuteQueryAction,
+  EXECUTE_PPL_QUERY_TOOL_DEFINITION,
+} from './components/query_panel/actions/ppl_execute_query_action';
 
 export class ExplorePlugin
   implements
@@ -78,13 +98,17 @@ export class ExplorePlugin
       ExploreSetupDependencies,
       ExploreStartDependencies
     > {
-  // @ts-ignore
-  private config: ConfigSchema;
-  private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
+  private stateUpdaterByApp: Partial<
+    Record<ExploreFlavor | 'explore', BehaviorSubject<AppUpdater>>
+  > = {
+    explore: new BehaviorSubject<AppUpdater>(() => ({})),
+  };
 
-  private stopUrlTracking?: () => void;
+  private stopUrlTrackingCallbackByApp: Partial<Record<ExploreFlavor | 'explore', () => void>> = {};
   private currentHistory?: ScopedHistory;
   private readonly DISCOVER_VISUALIZATION_NAME = 'DiscoverVisualization';
+  private readonly METRICS_VISUALIZATION_NAME = 'MetricsVisualization';
+  private readonly VISUALIZATION_EDITOR_NAME = 'VisualizationEditor';
 
   /** discover */
   private docViewsRegistry: DocViewsRegistry | null = null;
@@ -92,25 +116,50 @@ export class ExplorePlugin
   private servicesInitialized: boolean = false;
   private urlGenerator?: import('./types').ExplorePluginStart['urlGenerator'];
   private initializeServices?: () => { core: CoreStart; plugins: ExploreStartDependencies };
+  private isDatasetManagementEnabled: boolean = false;
+  private dataImporterConfig?: import('./types').ExploreServices['dataImporterConfig'];
+  private dataSourceEnabled: boolean = false;
+  private hideLocalCluster: boolean = false;
+  private dataSourceManagement?: import('./types').ExploreServices['dataSourceManagement'];
 
-  // Add a new property for the tab registry
+  // Registries
   private tabRegistry: TabRegistryService = new TabRegistryService();
-
-  /** visualization registry */
   private visualizationRegistryService = new VisualizationRegistryService();
+  private queryPanelActionsRegistryService = new QueryPanelActionsRegistryService();
+  private slotRegistryService = new SlotRegistryService();
+  private editorAppStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
+  private editorStopUrlTracking?: () => void;
+  private unregisterPPLExecuteQueryAction?: () => void;
 
-  constructor(private readonly initializerContext: PluginInitializerContext) {
-    this.config = initializerContext.config.get<ConfigSchema>();
-  }
+  constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   public setup(
     core: CoreSetup<ExploreStartDependencies, ExplorePluginStart>,
     setupDeps: ExploreSetupDependencies
   ): ExplorePluginSetup {
+    // Check if dataset management plugin is enabled
+    this.isDatasetManagementEnabled = !!setupDeps.datasetManagement;
+
+    // Store data importer config if available
+    this.dataImporterConfig = setupDeps.dataImporter?.config;
+
+    // Store data source configuration
+    this.dataSourceEnabled = !!setupDeps.dataSource;
+    this.hideLocalCluster = setupDeps.dataSource?.hideLocalCluster || false;
+    this.dataSourceManagement = setupDeps.dataSourceManagement;
+
     // Set usage collector
     setUsageCollector(setupDeps.usageCollection);
-    this.registerExploreVisualization(core, setupDeps);
+    this.registerExploreVisualizationAlias(setupDeps);
     const visualizationRegistryService = this.visualizationRegistryService.setup();
+
+    // Setup query panel actions registry
+    const queryPanelActionsRegistry = this.queryPanelActionsRegistryService.setup();
+
+    // Register import data action if data importer is available
+    if (this.dataImporterConfig) {
+      queryPanelActionsRegistry.register(importDataActionConfig);
+    }
 
     this.docViewsRegistry = new DocViewsRegistry();
     setDocViewsRegistry(this.docViewsRegistry);
@@ -205,150 +254,272 @@ export class ExplorePlugin
       order: 2,
     });
 
-    const { appMounted, appUnMounted, stop: stopUrlTracker } = createOsdUrlTracker({
-      baseUrl: core.http.basePath.prepend(`/app/${PLUGIN_ID}`),
-      defaultSubUrl: '#/',
-      storageKey: `lastUrl:${core.http.basePath.get()}:${PLUGIN_ID}`,
-      navLinkUpdater$: this.appStateUpdater,
-      toastNotifications: core.notifications.toasts,
-      stateParams: [
-        {
-          osdUrlKey: '_g',
-          stateUpdate$: setupDeps.data.query.state$.pipe(
-            filter(
-              (value: Record<string, unknown>) =>
-                !!((value.changes as any)?.time || (value.changes as any)?.refreshInterval)
-            ),
-            map((value: Record<string, unknown>) => ({
-              ...(value.state as Record<string, unknown>),
-              // Note: We don't use data plugin's filterManager, filters are managed in Redux
-            }))
-          ),
-        },
-      ],
-      getHistory: () => {
-        return this.currentHistory!;
-      },
-    });
-    this.stopUrlTracking = () => {
-      stopUrlTracker();
-    };
-
     setupDeps.data.__enhance({
       editor: {
         queryEditorExtension: createQueryEditorExtensionConfig(core),
       },
     });
 
-    const createExploreApp = (flavor?: ExploreFlavor, options: Partial<App> = {}): App => ({
-      id: PLUGIN_ID,
-      title: PLUGIN_NAME,
-      updater$: this.appStateUpdater.asObservable(),
-      order: 1000,
-      workspaceAvailability: WorkspaceAvailability.insideWorkspace,
-      euiIconType: 'inputOutput',
-      defaultPath: '#/',
-      category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
-      mount: async (params: AppMountParameters) => {
-        if (!this.initializeServices) {
-          throw Error('Explore plugin method initializeServices is undefined');
-        }
+    const createExploreApp = (flavor?: ExploreFlavor, options: Partial<App> = {}): App => {
+      let appStateUpdater = this.stateUpdaterByApp.explore as BehaviorSubject<AppUpdater>;
+      if (flavor) {
+        this.stateUpdaterByApp[flavor] =
+          this.stateUpdaterByApp[flavor] || new BehaviorSubject<AppUpdater>(() => ({}));
+        appStateUpdater = this.stateUpdaterByApp[flavor] as BehaviorSubject<AppUpdater>;
+      }
+      const flavorSuffix = flavor ? `/${flavor}` : '';
+      const trackerBaseUrl = core.http.basePath.prepend(`/app/${PLUGIN_ID}${flavorSuffix}`);
+      const trackerStorageKey = `lastUrl:${core.http.basePath.get()}:${PLUGIN_ID}${flavorSuffix}`;
+      const { appMounted, appUnMounted, stop: stopUrlTracker } = createOsdUrlTracker({
+        baseUrl: trackerBaseUrl,
+        defaultSubUrl: '#/',
+        storageKey: trackerStorageKey,
+        navLinkUpdater$: appStateUpdater,
+        toastNotifications: core.notifications.toasts,
+        stateParams: [
+          {
+            osdUrlKey: '_g',
+            stateUpdate$: setupDeps.data.query.state$.pipe(
+              filter(
+                (value: Record<string, unknown>) =>
+                  !!((value.changes as any)?.time || (value.changes as any)?.refreshInterval)
+              ),
+              map((value: Record<string, unknown>) => ({
+                ...(value.state as Record<string, unknown>),
+                // Note: We don't use data plugin's filterManager, filters are managed in Redux
+              }))
+            ),
+          },
+        ],
+        getHistory: () => {
+          return this.currentHistory!;
+        },
+      });
+      this.stopUrlTrackingCallbackByApp[flavor ?? 'explore'] = stopUrlTracker;
 
-        // Get start services
-        const { core: coreStart, plugins: pluginsStart } = await this.initializeServices();
-        const isExploreEnabledWorkspace = await this.getIsExploreEnabledWorkspace(coreStart);
-        // We want to limit explore UI to only show up under the explore-enabled
-        // workspaces. If user lands in the explore plugin URL in a different
-        // workspace, we will redirect them to classic discover. We will also redirect if
-        // they have manually selected classic discover
-        if (
-          !isExploreEnabledWorkspace ||
-          !!localStorage.getItem(SHOW_CLASSIC_DISCOVER_LOCAL_STORAGE_KEY)
-        ) {
-          coreStart.application.navigateToApp('discover', { replace: true });
-          return () => {};
-        }
+      return {
+        id: PLUGIN_ID,
+        title: PLUGIN_NAME,
+        updater$: appStateUpdater.asObservable(),
+        order: 1000,
+        workspaceAvailability: WorkspaceAvailability.insideWorkspace,
+        euiIconType: 'inputOutput',
+        defaultPath: '#/',
+        category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
+        mount: async (params: AppMountParameters) => {
+          if (!this.initializeServices) {
+            throw Error('Explore plugin method initializeServices is undefined');
+          }
 
-        // If there's no flavor id, by default redirect to the logs flavor.
-        if (!flavor) {
-          coreStart.application.navigateToApp(`${PLUGIN_ID}/${ExploreFlavor.Logs}`, {
-            path: '#/',
-            replace: true,
-          });
-          return () => {};
-        }
+          // Get start services
+          const { core: coreStart, plugins: pluginsStart } = await this.initializeServices();
+          const isExploreEnabledWorkspace = await this.getIsExploreEnabledWorkspace(coreStart);
+          // We want to limit explore UI to only show up under the explore-enabled
+          // workspaces. If user lands in the explore plugin URL in a different
+          // workspace, we will redirect them to classic discover. We will also redirect if
+          // they have manually selected classic discover
+          if (
+            !isExploreEnabledWorkspace ||
+            !!localStorage.getItem(SHOW_CLASSIC_DISCOVER_LOCAL_STORAGE_KEY)
+          ) {
+            coreStart.application.navigateToApp('discover', { replace: true });
+            return () => {};
+          }
 
-        this.currentHistory = params.history;
+          // If there's no flavor id, by default redirect to the logs flavor.
+          if (!flavor) {
+            coreStart.application.navigateToApp(`${PLUGIN_ID}/${ExploreFlavor.Logs}`, {
+              path: '#/',
+              replace: true,
+            });
+            return () => {};
+          }
 
-        // make sure the index pattern list is up to date
-        pluginsStart.data.indexPatterns.clearCache();
+          this.currentHistory = params.history;
 
-        // Check if this is a context or doc route (following discover pattern)
-        const path = window.location.hash;
-        if (path.startsWith('#/context') || path.startsWith('#/doc')) {
-          const { renderDocView } = await import(
-            './application/legacy/discover/application/components/doc_views'
+          // make sure the index pattern list is up to date
+          pluginsStart.data.indexPatterns.clearCache();
+
+          // Check if this is a context or doc route (following discover pattern)
+          const path = window.location.hash;
+          if (path.startsWith('#/context') || path.startsWith('#/doc')) {
+            const { renderDocView } = await import(
+              './application/legacy/discover/application/components/doc_views'
+            );
+            const unmount = renderDocView(params.element);
+            return () => {
+              unmount();
+            };
+          }
+
+          // For main explore routes, load the full application
+          const { renderApp } = await import('./application');
+          const { registerTabs } = await import('./application/register_tabs');
+
+          // Build services using the buildServices function
+          const services = buildServices(
+            coreStart,
+            pluginsStart,
+            this.initializerContext,
+            this.tabRegistry,
+            this.visualizationRegistryService,
+            this.queryPanelActionsRegistryService,
+            this.isDatasetManagementEnabled,
+            this.slotRegistryService,
+            this.dataImporterConfig,
+            this.dataSourceEnabled,
+            this.hideLocalCluster,
+            this.dataSourceManagement
           );
-          const unmount = renderDocView(params.element);
+
+          // Add osdUrlStateStorage to services (like VisBuilder and DataExplorer)
+          services.osdUrlStateStorage = createOsdUrlStateStorage({
+            history: this.currentHistory,
+            useHash: coreStart.uiSettings.get('state:storeInSessionStorage'),
+            ...withNotifyOnErrors(coreStart.notifications.toasts),
+          });
+
+          // Add scopedHistory to services
+          services.scopedHistory = this.currentHistory;
+
+          // Register tabs with the tab registry
+          registerTabs(services, flavor);
+
+          // Instantiate the store
+          const {
+            store,
+            unsubscribe: unsubscribeStore,
+            reset: resetStore,
+          } = await getPreloadedStore(services);
+          services.store = store;
+
+          // Register abort action
+          const abortActionId = `${PLUGIN_ID}`;
+          const abortAction = createAbortDataQueryAction(abortActionId);
+          services.uiActions.addTriggerAction(ABORT_DATA_QUERY_TRIGGER, abortAction);
+          setServices(services);
+          setLegacyServices(services);
+          appMounted();
+
+          // Call renderApp with params, services, and store
+          const unmount = renderApp(params, services, store, flavor);
+
           return () => {
+            abortAllActiveQueries();
+            services.uiActions.detachAction(ABORT_DATA_QUERY_TRIGGER, abortActionId);
+            appUnMounted();
             unmount();
+            unsubscribeStore();
+            resetStore();
+            pluginsStart.data.query.queryString.clearQuery();
           };
-        }
+        },
+        ...options,
+      };
+    };
 
-        // For main explore routes, load the full application
-        const { renderApp } = await import('./application');
-        const { registerTabs } = await import('./application/register_tabs');
+    const createExploreVisualizationEditorApp = () => {
+      const { appMounted, appUnMounted, stop: stopUrlTracker } = createOsdUrlTracker({
+        baseUrl: core.http.basePath.prepend(`/app/${VISUALIZATION_EDITOR_APP_ID}`),
+        defaultSubUrl: '#/',
+        storageKey: `lastUrl:${core.http.basePath.get()}:${VISUALIZATION_EDITOR_APP_ID}`,
+        navLinkUpdater$: this.editorAppStateUpdater,
+        toastNotifications: core.notifications.toasts,
+        stateParams: [
+          {
+            osdUrlKey: '_g',
+            stateUpdate$: setupDeps.data.query.state$.pipe(
+              filter(
+                (value: Record<string, unknown>) =>
+                  !!((value.changes as any)?.time || (value.changes as any)?.refreshInterval)
+              ),
+              map((value: Record<string, unknown>) => ({
+                ...(value.state as Record<string, unknown>),
+                // Note: We don't use data plugin's filterManager, filters are managed in Redux
+              }))
+            ),
+          },
+        ],
+        getHistory: () => {
+          return this.currentHistory!;
+        },
+      });
 
-        // Build services using the buildServices function
-        const services = buildServices(
-          coreStart,
-          pluginsStart,
-          this.initializerContext,
-          this.tabRegistry,
-          this.visualizationRegistryService
-        );
+      this.editorStopUrlTracking = () => {
+        stopUrlTracker();
+      };
 
-        // Add osdUrlStateStorage to services (like VisBuilder and DataExplorer)
-        services.osdUrlStateStorage = createOsdUrlStateStorage({
-          history: this.currentHistory,
-          useHash: coreStart.uiSettings.get('state:storeInSessionStorage'),
-          ...withNotifyOnErrors(coreStart.notifications.toasts),
-        });
+      return {
+        id: VISUALIZATION_EDITOR_APP_ID,
+        title: VISUALIZATION_EDITOR_APP_NAME,
+        navLinkStatus: AppNavLinkStatus.hidden,
+        defaultPath: '#/',
+        mount: async (params: AppMountParameters) => {
+          if (!this.initializeServices) {
+            throw Error('Explore plugin method initializeServices is undefined');
+          }
+          // Get start services
+          const { core: coreStart, plugins: pluginsStart } = await this.initializeServices();
 
-        // Add scopedHistory to services
-        services.scopedHistory = this.currentHistory;
+          this.currentHistory = params.history;
 
-        // Register tabs with the tab registry
-        registerTabs(services, flavor);
+          // make sure the index pattern list is up to date
+          pluginsStart.data.indexPatterns.clearCache();
 
-        // Instantiate the store
-        const { store, unsubscribe: unsubscribeStore, reset: resetStore } = await getPreloadedStore(
-          services
-        );
-        services.store = store;
+          const { renderEditor } = await import('./application/visualization_editor_editor_app');
 
-        // Register abort action
-        const abortActionId = `${PLUGIN_ID}`;
-        const abortAction = createAbortDataQueryAction(abortActionId);
-        services.uiActions.addTriggerAction(ABORT_DATA_QUERY_TRIGGER, abortAction);
-        setServices(services);
+          const services = buildServices(
+            coreStart,
+            pluginsStart,
+            this.initializerContext,
+            this.tabRegistry,
+            this.visualizationRegistryService,
+            this.queryPanelActionsRegistryService,
+            this.isDatasetManagementEnabled,
+            this.slotRegistryService,
+            this.dataImporterConfig,
+            this.dataSourceEnabled,
+            this.hideLocalCluster,
+            this.dataSourceManagement
+          );
 
-        appMounted();
+          // Add osdUrlStateStorage to services (like VisBuilder and DataExplorer)
+          services.osdUrlStateStorage = createOsdUrlStateStorage({
+            history: this.currentHistory,
+            useHash: coreStart.uiSettings.get('state:storeInSessionStorage'),
+            ...withNotifyOnErrors(coreStart.notifications.toasts),
+          });
 
-        // Call renderApp with params, services, and store
-        const unmount = renderApp(params, services, store, flavor);
+          // Add scopedHistory to services
+          services.scopedHistory = this.currentHistory;
 
-        return () => {
-          abortAllActiveQueries();
-          services.uiActions.detachAction(ABORT_DATA_QUERY_TRIGGER, abortActionId);
-          appUnMounted();
-          unmount();
-          unsubscribeStore();
-          resetStore();
-        };
-      },
-      ...options,
-    });
+          const editorAbortActionId = VISUALIZATION_EDITOR_APP_ID;
+          const abortAction = createAbortDataQueryAction(editorAbortActionId);
+          services.uiActions.addTriggerAction(ABORT_DATA_QUERY_TRIGGER, abortAction);
+          setServices(services);
+          appMounted();
+          const unmount = renderEditor(params, services);
+
+          // Render the application
+          return () => {
+            services.uiActions.detachAction(ABORT_DATA_QUERY_TRIGGER, editorAbortActionId);
+            appUnMounted();
+            unmount();
+            pluginsStart.data.query.queryString.clearQuery();
+          };
+        },
+      };
+    };
+
+    core.application.register(createExploreVisualizationEditorApp());
+
+    // Create updaters for Traces and Metrics to control visibility
+    if (!this.stateUpdaterByApp[ExploreFlavor.Traces]) {
+      this.stateUpdaterByApp[ExploreFlavor.Traces] = new BehaviorSubject<AppUpdater>(() => ({}));
+    }
+    if (!this.stateUpdaterByApp[ExploreFlavor.Metrics]) {
+      this.stateUpdaterByApp[ExploreFlavor.Metrics] = new BehaviorSubject<AppUpdater>(() => ({}));
+    }
 
     // Register applications into the side navigation menu
     core.application.register(
@@ -361,43 +532,76 @@ export class ExplorePlugin
       createExploreApp(ExploreFlavor.Traces, {
         id: `${PLUGIN_ID}/${ExploreFlavor.Traces}`,
         title: 'Traces',
+        updater$: this.stateUpdaterByApp[ExploreFlavor.Traces]!.asObservable(),
       })
     );
     core.application.register(
       createExploreApp(ExploreFlavor.Metrics, {
         id: `${PLUGIN_ID}/${ExploreFlavor.Metrics}`,
         title: 'Metrics',
+        updater$: this.stateUpdaterByApp[ExploreFlavor.Metrics]!.asObservable(),
       })
     );
     core.application.register(createExploreApp());
 
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
+    // Register nav links for different workspaces
+    const navLinks = (isObservability: boolean) => [
       {
         id: PLUGIN_ID,
         category: undefined,
         order: 300,
+        euiIconType: 'discoverApp' as const,
+        ...(isObservability ? {} : { title: 'Explorer' }),
       },
       {
         id: `${PLUGIN_ID}/${ExploreFlavor.Logs}`,
         category: undefined,
         order: 300,
         parentNavLinkId: PLUGIN_ID,
+        euiIconType: 'logsApp' as const,
       },
       {
         id: `${PLUGIN_ID}/${ExploreFlavor.Traces}`,
         category: undefined,
         order: 300,
         parentNavLinkId: PLUGIN_ID,
+        euiIconType: 'apmTrace' as const,
       },
-      // uncomment when metrics is ready for launch
-      /*
       {
         id: `${PLUGIN_ID}/${ExploreFlavor.Metrics}`,
         category: undefined,
         order: 300,
         parentNavLinkId: PLUGIN_ID,
-      }, */
-    ]);
+        euiIconType: 'stats' as const,
+      },
+    ];
+
+    if (core.chrome.getIsIconSideNavEnabled()) {
+      core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
+        {
+          id: `${PLUGIN_ID}/${ExploreFlavor.Logs}`,
+          category: undefined,
+          order: 200,
+          euiIconType: 'discoverApp' as const,
+        },
+        {
+          id: `${PLUGIN_ID}/${ExploreFlavor.Traces}`,
+          category: DEFAULT_APP_CATEGORIES.applicationPerformance,
+          order: 100,
+          euiIconType: 'apmTrace' as const,
+        },
+        {
+          id: `${PLUGIN_ID}/${ExploreFlavor.Metrics}`,
+          category: undefined,
+          order: 300,
+          euiIconType: 'visAreaStacked' as const,
+        },
+      ]);
+    } else {
+      core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, navLinks(true));
+    }
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, navLinks(false));
     this.registerEmbeddable(core, setupDeps);
 
     setupDeps.urlForwarding.forwardApp('doc', PLUGIN_ID, (path) => {
@@ -435,6 +639,10 @@ export class ExplorePlugin
           this.docViewsLinksRegistry?.addDocViewLink(docViewLinkSpec as any),
       },
       visualizationRegistry: visualizationRegistryService,
+      queryPanelActionsRegistry,
+      logActionRegistry: {
+        registerAction: (action) => logActionRegistry.registerAction(action),
+      },
     };
   }
 
@@ -448,6 +656,43 @@ export class ExplorePlugin
       setExpressionLoader(plugins.expressions.ExpressionLoader);
     }
 
+    // Control nav link visibility based on dynamic capabilities
+    const capabilities = core.application.capabilities;
+
+    // Update Traces nav link visibility based on dynamic capabilities
+    if (this.stateUpdaterByApp[ExploreFlavor.Traces]) {
+      this.stateUpdaterByApp[ExploreFlavor.Traces]!.next((app) => {
+        if (app.id === `${PLUGIN_ID}/${ExploreFlavor.Traces}`) {
+          return {
+            navLinkStatus: capabilities.explore?.discoverTracesEnabled
+              ? AppNavLinkStatus.visible
+              : AppNavLinkStatus.hidden,
+          };
+        }
+        return {};
+      });
+    }
+
+    // Update Metrics nav link visibility based on dynamic capabilities
+    if (this.stateUpdaterByApp[ExploreFlavor.Metrics]) {
+      this.stateUpdaterByApp[ExploreFlavor.Metrics]!.next((app) => {
+        if (app.id === `${PLUGIN_ID}/${ExploreFlavor.Metrics}`) {
+          return {
+            navLinkStatus: capabilities.explore?.discoverMetricsEnabled
+              ? AppNavLinkStatus.visible
+              : AppNavLinkStatus.hidden,
+          };
+        }
+        return {};
+      });
+    }
+
+    // Configure visualization visibility based on workspace
+    this.configureExploreVisualizationVisibility(core, plugins).catch((error) => {
+      // eslint-disable-next-line no-console
+      console.error('Failed to configure explore visualization visibility', error);
+    });
+
     this.initializeServices = () => {
       if (this.servicesInitialized) {
         return { core, plugins };
@@ -457,7 +702,14 @@ export class ExplorePlugin
         plugins,
         this.initializerContext,
         this.tabRegistry,
-        this.visualizationRegistryService
+        this.visualizationRegistryService,
+        this.queryPanelActionsRegistryService,
+        this.isDatasetManagementEnabled,
+        this.slotRegistryService,
+        this.dataImporterConfig,
+        this.dataSourceEnabled,
+        this.hideLocalCluster,
+        this.dataSourceManagement
       );
       setLegacyServices({
         ...services,
@@ -469,6 +721,29 @@ export class ExplorePlugin
     };
 
     this.initializeServices();
+
+    // Register Log Actions
+    // Always register Ask AI action - let isCompatible handle enablement logic
+    const askAiAction = createAskAiAction(core.chat);
+    logActionRegistry.registerAction(askAiAction);
+
+    if (core.chat && plugins.contextProvider) {
+      const askAIEmbeddableAction = new AskAIEmbeddableAction(core, plugins.contextProvider);
+      plugins.uiActions.registerAction(askAIEmbeddableAction);
+      plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, askAIEmbeddableAction);
+    }
+
+    // Register disabled execute_ppl_query action as placeholder
+    // This will be overridden when query panel mounts and restored when it unmounts
+    if (plugins.contextProvider) {
+      registerDisabledPPLExecuteQueryAction(
+        plugins.contextProvider.actions.registerAssistantAction
+      );
+      this.unregisterPPLExecuteQueryAction = () =>
+        plugins.contextProvider!.actions.unregisterAssistantAction(
+          EXECUTE_PPL_QUERY_TOOL_DEFINITION.name
+        );
+    }
 
     const savedExploreLoader = createSavedExploreLoader({
       savedObjectsClient: core.savedObjects.client,
@@ -483,13 +758,16 @@ export class ExplorePlugin
       savedSearchLoader: savedExploreLoader, // For backward compatibility
       savedExploreLoader,
       visualizationRegistry: this.visualizationRegistryService.start(),
+      slotRegistry: this.slotRegistryService.start(),
     };
   }
 
   public stop() {
-    if (this.stopUrlTracking) {
-      this.stopUrlTracking();
+    Object.values(this.stopUrlTrackingCallbackByApp).forEach((callback) => callback());
+    if (this.editorStopUrlTracking) {
+      this.editorStopUrlTracking();
     }
+    this.unregisterPPLExecuteQueryAction?.();
   }
 
   private registerEmbeddable(
@@ -511,73 +789,109 @@ export class ExplorePlugin
     plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
   }
 
-  private async registerExploreVisualization(
-    core: CoreSetup<ExploreStartDependencies, ExplorePluginStart>,
-    setupDeps: ExploreSetupDependencies
-  ) {
-    const exploreVisDisplayName = i18n.translate('explore.visualization.title', {
-      defaultMessage: 'Visualize with Discover',
-    });
+  private registerExploreVisualizationAlias(setupDeps: ExploreSetupDependencies) {
+    const appExtensions: VisTypeAlias['appExtensions'] = {
+      visualizations: {
+        docTypes: [SAVED_OBJECT_TYPE],
+        toListItem: ({ id, attributes, updated_at: updatedAt }) => {
+          let iconType = '';
+          let chartName = '';
+          try {
+            const vis = JSON.parse(attributes.visualization as string);
+            const chart = this.visualizationRegistryService
+              .getRegistry()
+              .getAvailableChartTypes()
+              .find((t) => t.type === vis.chartType);
+            if (chart) {
+              iconType = chart.icon;
+              chartName = chart.name;
+            }
+          } catch (e) {
+            iconType = '';
+          }
+
+          const adjustEditApp = attributes.type
+            ? `${PLUGIN_ID}/${ExploreFlavor.Logs}`
+            : VISUALIZATION_EDITOR_APP_ID;
+          const adjustEditUrl = attributes.type
+            ? `#/view/${encodeURIComponent(id)}` // regular explore vis
+            : `#/edit/${encodeURIComponent(id)}`; // visualization editor
+
+          return {
+            description: `${attributes?.description || ''}`,
+            editApp: adjustEditApp,
+            editUrl: adjustEditUrl,
+            icon: iconType,
+            id,
+            savedObjectType: SAVED_OBJECT_TYPE,
+            title: `${attributes?.title || ''}`,
+            typeTitle: chartName,
+            updated_at: updatedAt,
+            stage: 'production',
+          };
+        },
+      },
+    };
     // Register explore visualization as visualization alias
     setupDeps.visualizations.registerAlias({
       name: this.DISCOVER_VISUALIZATION_NAME,
+      // Create new visualization
+      // TODO creating a visualization inside visualization list should direct to in-context editor or normal explore app
+      // Need to define a two-way route
       aliasPath: '#/',
       aliasApp: PLUGIN_ID,
-      title: exploreVisDisplayName,
+      title: i18n.translate('explore.visualization.title', {
+        defaultMessage: 'Visualize with Discover',
+      }),
       description: i18n.translate('explore.visualization.description', {
         defaultMessage: 'Create visualization with Discover',
       }),
+      icon: 'discoverApp',
+      stage: 'production',
+      appExtensions,
+    });
+    setupDeps.visualizations.registerAlias({
+      name: this.METRICS_VISUALIZATION_NAME,
+      aliasPath: '#/?_a=(ui:(metricsPageMode:query))',
+      aliasApp: `${PLUGIN_ID}/${ExploreFlavor.Metrics}`,
+      title: i18n.translate('explore.visualization.metrics.title', {
+        defaultMessage: 'Visualize with Metrics',
+      }),
+      description: i18n.translate('explore.visualization.metrics.description', {
+        defaultMessage: 'Create visualization with Metrics',
+      }),
+      icon: 'metricsApp',
+      stage: 'production',
+      appExtensions,
+    });
+    setupDeps.visualizations.registerAlias({
+      name: this.VISUALIZATION_EDITOR_NAME,
+      // Create new visualization
+      // TODO creating a visualization inside visualization list should direct to in-context editor or normal explore app
+      // Need to define a two-way route
+      aliasPath: '#/edit/',
+      aliasApp: VISUALIZATION_EDITOR_APP_ID,
+      title: i18n.translate('explore.visualization.editor.title', {
+        defaultMessage: 'Add visualization',
+      }),
+      description: i18n.translate('explore.visualization.editor.description', {
+        defaultMessage: 'Create visualization with visualization editor',
+      }),
       icon: 'visualizeApp',
       stage: 'production',
-      promotion: {
-        buttonText: exploreVisDisplayName,
-        description: 'Build query-powered visualizations',
-      },
-      appExtensions: {
-        visualizations: {
-          docTypes: [SAVED_OBJECT_TYPE],
-          toListItem: ({ id, attributes, updated_at: updatedAt }) => {
-            let iconType = '';
-            let chartName = '';
-            try {
-              const vis = JSON.parse(attributes.visualization as string);
-              const chart = this.visualizationRegistryService
-                .getRegistry()
-                .getAvailableChartTypes()
-                .find((t) => t.type === vis.chartType);
-              if (chart) {
-                iconType = chart.icon;
-                chartName = chart.name;
-              }
-            } catch (e) {
-              iconType = '';
-            }
-            return {
-              description: `${attributes?.description || ''}`,
-              // TODO: it should navigate to different explore flavor based on the `attributes.type`
-              editApp: `${PLUGIN_ID}/${ExploreFlavor.Logs}`,
-              editUrl: `#/view/${encodeURIComponent(id)}`,
-              icon: iconType,
-              id,
-              savedObjectType: SAVED_OBJECT_TYPE,
-              title: `${attributes?.title || ''}`,
-              typeTitle: chartName,
-              updated_at: updatedAt,
-              stage: 'production',
-            };
-          },
-        },
-      },
+      appExtensions,
     });
+  }
 
-    const [coreStart, pluginsStart] = await core.getStartServices();
-    const isExploreEnabledWorkspace = await this.getIsExploreEnabledWorkspace(coreStart);
+  private async configureExploreVisualizationVisibility(
+    core: CoreStart,
+    plugins: ExploreStartDependencies
+  ) {
+    const isExploreEnabledWorkspace = await this.getIsExploreEnabledWorkspace(core);
     if (isExploreEnabledWorkspace) {
-      const dashboardVisActions = pluginsStart.uiActions.getTriggerActions(
-        DASHBOARD_ADD_PANEL_TRIGGER
-      );
-      const visTypes = pluginsStart.visualizations.all();
-      const aliasTypes = pluginsStart.visualizations.getAliases();
+      const dashboardVisActions = plugins.uiActions.getTriggerActions(DASHBOARD_ADD_PANEL_TRIGGER);
+      const visTypes = plugins.visualizations.all();
+      const aliasTypes = plugins.visualizations.getAliases();
       const allVisTypes = [...visTypes, ...aliasTypes];
       dashboardVisActions.forEach((action) => {
         const visOfAction = allVisTypes.find((vis) => action.id === `add_vis_action_${vis.name}`);
@@ -590,15 +904,18 @@ export class ExplorePlugin
         }
       });
     } else {
-      const registeredVisAlias = pluginsStart.visualizations
+      plugins.visualizations
         .getAliases()
-        .find((v) => v.name === this.DISCOVER_VISUALIZATION_NAME);
-
-      // if current workspace has NO explore enabled, the explore visualization ingress should be hidden
-      if (registeredVisAlias) {
-        // Do not display it in the create vis modal
-        registeredVisAlias.hidden = true;
-      }
+        .filter(
+          (v) =>
+            v.name === this.DISCOVER_VISUALIZATION_NAME ||
+            v.name === this.METRICS_VISUALIZATION_NAME ||
+            v.name === this.VISUALIZATION_EDITOR_NAME
+        )
+        .forEach((visAlias) => {
+          // if current workspace has NO explore enabled, the explore visualization ingress should be hidden
+          visAlias.hidden = true;
+        });
     }
   }
 
@@ -608,7 +925,9 @@ export class ExplorePlugin
       .toPromise()
       .then((workspace) => workspace?.features);
     return (
-      (features && isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.observability.id, features)) ??
+      (features &&
+        (isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.observability.id, features) ||
+          isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.all.id, features))) ??
       false
     );
   }

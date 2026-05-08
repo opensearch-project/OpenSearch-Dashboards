@@ -28,8 +28,8 @@
  * under the License.
  */
 
-import React, { useEffect } from 'react';
-import { act } from 'react-dom/test-utils';
+import { useEffect } from 'react';
+import { act } from 'react';
 
 import { registerTestBed, getRandomString, TestBed } from '../shared_imports';
 

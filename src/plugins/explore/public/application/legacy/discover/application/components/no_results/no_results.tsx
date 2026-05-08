@@ -29,7 +29,7 @@
  */
 
 import './no_results.scss';
-import React, { Fragment, useEffect, useMemo, useState } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 import { I18nProvider } from '@osd/i18n/react';
 
 import {
@@ -47,6 +47,7 @@ import {
   SavedQuery,
   SavedQueryService,
 } from '../../../../../../../../data/public';
+import { MetricsEmptyState } from '../../../../../pages/metrics/explore/components/metrics_empty_state';
 
 interface Props {
   queryString: QueryStringContract;
@@ -223,12 +224,12 @@ export const DiscoverNoResults = ({ queryString, query, savedQuery, timeFieldNam
   const tabs = useMemo(() => {
     const buildSampleQueryBlock = (sampleTitle: string, sampleQuery: string) => {
       return (
-        <>
+        <Fragment key={sampleQuery}>
           <EuiText size="s">{sampleTitle}</EuiText>
           <EuiSpacer size="s" />
           <EuiCodeBlock isCopyable>{sampleQuery}</EuiCodeBlock>
           <EuiSpacer size="s" />
-        </>
+        </Fragment>
       );
     };
     return [
@@ -273,10 +274,27 @@ export const DiscoverNoResults = ({ queryString, query, savedQuery, timeFieldNam
     ];
   }, [savedQueries, sampleQueries]);
 
+  if (query?.language === 'PROMQL') {
+    return (
+      <I18nProvider>
+        <MetricsEmptyState
+          title={i18n.translate('explore.metricsExplore.emptyTitle', {
+            defaultMessage: 'No metrics found',
+          })}
+          body={i18n.translate('explore.metricsExplore.emptyBody', {
+            defaultMessage:
+              'The selected Prometheus data source returned no metrics for the current time range. Try adjusting the time range or verify the data source is scraping targets.',
+          })}
+        />
+      </I18nProvider>
+    );
+  }
+
   return (
     <I18nProvider>
       <>
         <EuiEmptyPrompt
+          className="exploreNoResults"
           iconType="editorCodeBlock"
           iconColor="default"
           data-test-subj="discoverNoResults"

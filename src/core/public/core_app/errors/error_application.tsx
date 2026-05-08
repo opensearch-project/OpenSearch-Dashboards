@@ -29,7 +29,7 @@
  */
 
 import React, { ReactChild, useState, useLayoutEffect } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { History } from 'history';
 import { i18n } from '@osd/i18n';
 import { I18nProvider } from '@osd/i18n/react';
@@ -100,14 +100,14 @@ interface Deps {
  * @internal
  */
 export const renderApp = ({ element, history }: AppMountParameters, { basePath }: Deps) => {
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <I18nProvider>
       <ErrorApp history={history} basePath={basePath} />
-    </I18nProvider>,
-    element
+    </I18nProvider>
   );
 
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };

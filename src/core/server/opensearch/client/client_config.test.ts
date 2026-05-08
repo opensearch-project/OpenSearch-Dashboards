@@ -30,7 +30,7 @@
 
 import { duration } from 'moment';
 import { OpenSearchClientConfig, parseClientOptions } from './client_config';
-import { DEFAULT_HEADERS } from '../default_headers';
+import { DEFAULT_HEADERS, getDefaultHeaders } from '../default_headers';
 
 const createConfig = (parts: Partial<OpenSearchClientConfig> = {}): OpenSearchClientConfig => {
   return {
@@ -41,6 +41,7 @@ const createConfig = (parts: Partial<OpenSearchClientConfig> = {}): OpenSearchCl
     sniffInterval: false,
     requestHeadersWhitelist: ['authorization'],
     hosts: ['http://localhost:80'],
+    requestCompression: false,
     ...parts,
   };
 };
@@ -79,19 +80,19 @@ describe('parseClientOptions', () => {
     });
 
     it('`customHeaders` take precedence to default opensearchDashboards headers', () => {
-      const customHeader = {
-        [Object.keys(DEFAULT_HEADERS)[0]]: 'foo',
-      };
+      const customHeaders = Object.fromEntries(
+        Object.keys(DEFAULT_HEADERS).map((key) => [key, 'foo'])
+      );
       const config = createConfig({
         customHeaders: {
-          ...customHeader,
+          ...customHeaders,
         },
       });
 
       expect(parseClientOptions(config, false)).toEqual(
         expect.objectContaining({
           headers: {
-            ...customHeader,
+            ...customHeaders,
           },
         })
       );
@@ -201,6 +202,24 @@ describe('parseClientOptions', () => {
       expect(
         parseClientOptions(createConfig({}), true).disablePrototypePoisoningProtection
       ).toBeUndefined();
+    });
+
+    it('`requestCompression` option', () => {
+      expect(parseClientOptions(createConfig({ requestCompression: false }), false)).toEqual(
+        expect.objectContaining({
+          headers: {
+            ...DEFAULT_HEADERS,
+          },
+        })
+      );
+
+      expect(parseClientOptions(createConfig({ requestCompression: true }), false)).toEqual(
+        expect.objectContaining({
+          headers: {
+            ...getDefaultHeaders(true),
+          },
+        })
+      );
     });
   });
 

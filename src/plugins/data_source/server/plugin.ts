@@ -67,6 +67,7 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
       globalOpenSearchConfig: {
         requestTimeout: globalConfig.opensearch.requestTimeout,
         pingTimeout: globalConfig.opensearch.pingTimeout,
+        requestCompression: globalConfig.opensearch.requestCompression,
       },
     };
 
@@ -83,7 +84,8 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
       cryptographyServiceSetup,
       this.logger.get('data-source-saved-objects-client-wrapper-factory'),
       authRegistryPromise,
-      config.endpointDeniedIPs
+      config.endpointDeniedIPs,
+      config.endpointAllowlistedSuffixes
     );
 
     // Add data source saved objects client wrapper factory
@@ -144,7 +146,10 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
       dataSourceService,
       cryptographyServiceSetup,
       authRegistryPromise,
-      customApiSchemaRegistryPromise
+      customApiSchemaRegistryPromise,
+      this.logger.get('test-connection'),
+      config.endpointDeniedIPs,
+      config.endpointAllowlistedSuffixes
     );
     registerFetchDataSourceMetaDataRoute(
       router,

@@ -82,7 +82,15 @@ function create(id: string) {
   } = stubbedSavedObjectIndexPattern(id);
 
   return new IndexPattern({
-    spec: { id, type, version, timeFieldName, fields, title },
+    spec: {
+      id,
+      type,
+      version,
+      timeFieldName,
+      fields,
+      title,
+      schemaMappings: { otelLogs: { traceId: 'trace.id', spanId: 'span.id' } },
+    },
     savedObjectsClient: {} as any,
     fieldFormats: fieldFormatsMock,
     shortDotsEnable: false,
@@ -100,7 +108,17 @@ function createWithDataSource(id: string) {
 
   const dataSourceRef = { id: reference[0].id, type: reference[0].type };
   return new IndexPattern({
-    spec: { id, type, version, timeFieldName, fields, title, dataSourceRef },
+    spec: {
+      id,
+      type,
+      version,
+      timeFieldName,
+      fields,
+      title,
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
+      dataSourceRef,
+      schemaMappings: { otelLogs: { serviceName: 'service.name' } },
+    },
     savedObjectsClient: {} as any,
     fieldFormats: fieldFormatsMock,
     shortDotsEnable: false,
@@ -390,6 +408,59 @@ describe('IndexPatternWithDataSource', () => {
       nestedArrayIndexPattern.flattenHit(hit);
 
       expect(hit).toEqual(hitClone);
+    });
+  });
+
+  describe('getDisplayName', () => {
+    test('returns displayName when set', () => {
+      const pattern = create('test-pattern');
+      pattern.displayName = 'My Friendly Name';
+      expect(pattern.getDisplayName()).toBe('My Friendly Name');
+    });
+
+    test('falls back to title when displayName is not set', () => {
+      const pattern = create('test-pattern');
+      pattern.displayName = undefined;
+      expect(pattern.getDisplayName()).toBe(pattern.title);
+    });
+
+    test('falls back to title when displayName is empty string', () => {
+      const pattern = create('test-pattern');
+      pattern.displayName = '';
+      expect(pattern.getDisplayName()).toBe(pattern.title);
+    });
+
+    test('preserves displayName through constructor', () => {
+      const {
+        type,
+        version,
+        attributes: { timeFieldName, fields, title },
+      } = stubbedSavedObjectIndexPattern('test-pattern');
+
+      const pattern = new IndexPattern({
+        spec: {
+          id: 'test-pattern',
+          type,
+          version,
+          timeFieldName,
+          fields,
+          title,
+          displayName: 'Custom Name',
+        },
+        savedObjectsClient: {} as any,
+        fieldFormats: fieldFormatsMock,
+        shortDotsEnable: false,
+        metaFields: [],
+      });
+      expect(pattern.displayName).toBe('Custom Name');
+      expect(pattern.getDisplayName()).toBe('Custom Name');
+    });
+
+    test('includes displayName in getAsSavedObjectBody()', () => {
+      const pattern = create('test-pattern');
+      pattern.displayName = 'Custom Name';
+      const body = pattern.getAsSavedObjectBody();
+      expect(body.displayName).toBe('Custom Name');
     });
   });
 });

@@ -3,6 +3,32 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// Mock @ag-ui/client before any imports that use it
+jest.mock('@ag-ui/client', () => ({
+  parseSSEStream: jest.fn(),
+  runHttpRequest: jest.fn(),
+}));
+
+jest.mock('@ag-ui/core', () => ({
+  EventType: {
+    RUN_STARTED: 'RUN_STARTED',
+    RUN_FINISHED: 'RUN_FINISHED',
+    RUN_ERROR: 'RUN_ERROR',
+    TEXT_MESSAGE_START: 'TEXT_MESSAGE_START',
+    TEXT_MESSAGE_CONTENT: 'TEXT_MESSAGE_CONTENT',
+    TEXT_MESSAGE_END: 'TEXT_MESSAGE_END',
+    TOOL_CALL_START: 'TOOL_CALL_START',
+    TOOL_CALL_ARGS: 'TOOL_CALL_ARGS',
+    TOOL_CALL_END: 'TOOL_CALL_END',
+  },
+}));
+
+// Mock the query_assist module to prevent transitive @ag-ui imports
+jest.mock('../../../../../query_assist', () => ({
+  generatePromQLWithAgUi: jest.fn(),
+}));
+
+import moment from 'moment';
 import { callAgentActionCreator } from './call_agent';
 import {
   setPromptToQueryIsLoading,
@@ -59,6 +85,7 @@ describe('callAgentActionCreator', () => {
               dataset: {
                 title: 'test-index',
                 dataSource: { id: 'test-datasource' },
+                timeFieldName: 'timestamp',
               },
             }),
           },
@@ -100,8 +127,8 @@ describe('callAgentActionCreator', () => {
     const mockResponse = {
       query: '| where user_count > 0 | head 10',
       timeRange: {
-        from: 'now-7d',
-        to: 'now',
+        from: '2025-04-25 03:05:42',
+        to: '2025-05-02 03:05:42',
       },
     };
 
@@ -117,14 +144,16 @@ describe('callAgentActionCreator', () => {
 
       await thunk(mockDispatch, jest.fn(), undefined);
 
-      expect(mockServices.http.post).toHaveBeenCalledWith('/api/enhancements/assist/generate', {
-        body: JSON.stringify({
-          question: testEditorText,
-          index: 'test-index',
-          language: 'PPL',
-          dataSourceId: 'test-datasource',
-        }),
-      });
+      const callArgs = (mockServices.http.post as jest.Mock).mock.calls[0];
+      const bodyData = JSON.parse(callArgs[1].body);
+
+      expect(callArgs[0]).toBe('/api/enhancements/assist/generate');
+      expect(bodyData.question).toBe(testEditorText);
+      expect(bodyData.index).toBe('test-index');
+      expect(bodyData.language).toBe('PPL');
+      expect(bodyData.dataSourceId).toBe('test-datasource');
+      expect(typeof bodyData.currentTime).toBe('string');
+      expect(bodyData.timeField).toBe('timestamp');
     });
 
     it('should dispatch runQueryActionCreator with the response query', async () => {
@@ -150,9 +179,10 @@ describe('callAgentActionCreator', () => {
 
       await thunk(mockDispatch, jest.fn(), undefined);
 
-      expect(mockServices.data.query.timefilter.timefilter.setTime).toHaveBeenCalledWith(
-        mockResponse.timeRange
-      );
+      expect(mockServices.data.query.timefilter.timefilter.setTime).toHaveBeenCalledWith({
+        from: moment(mockResponse.timeRange.from, 'YYYY-MM-DD HH:mm:ss').toISOString(),
+        to: moment(mockResponse.timeRange.to, 'YYYY-MM-DD HH:mm:ss').toISOString(),
+      });
     });
 
     it('should set last executed translated query', async () => {
@@ -236,14 +266,16 @@ describe('callAgentActionCreator', () => {
       await thunk(mockDispatch, jest.fn(), undefined);
 
       // The actual code only checks !editorText.length, so whitespace text with length > 0 will not trigger warning
-      expect(mockServices.http.post).toHaveBeenCalledWith('/api/enhancements/assist/generate', {
-        body: JSON.stringify({
-          question: whitespaceText,
-          index: 'test-index',
-          language: 'PPL',
-          dataSourceId: 'test-datasource',
-        }),
-      });
+      const callArgs = (mockServices.http.post as jest.Mock).mock.calls[0];
+      const bodyData = JSON.parse(callArgs[1].body);
+
+      expect(callArgs[0]).toBe('/api/enhancements/assist/generate');
+      expect(bodyData.question).toBe(whitespaceText);
+      expect(bodyData.index).toBe('test-index');
+      expect(bodyData.language).toBe('PPL');
+      expect(bodyData.dataSourceId).toBe('test-datasource');
+      expect(typeof bodyData.currentTime).toBe('string');
+      expect(bodyData.timeField).toBe('timestamp');
     });
 
     it('should show warning when dataset is missing', async () => {
@@ -405,14 +437,16 @@ describe('callAgentActionCreator', () => {
 
       await thunk(mockDispatch, jest.fn(), undefined);
 
-      expect(mockServices.http.post).toHaveBeenCalledWith('/api/enhancements/assist/generate', {
-        body: JSON.stringify({
-          question: testEditorText,
-          index: 'test-index',
-          language: 'PPL',
-          dataSourceId: undefined,
-        }),
-      });
+      const callArgs = (mockServices.http.post as jest.Mock).mock.calls[0];
+      const bodyData = JSON.parse(callArgs[1].body);
+
+      expect(callArgs[0]).toBe('/api/enhancements/assist/generate');
+      expect(bodyData.question).toBe(testEditorText);
+      expect(bodyData.index).toBe('test-index');
+      expect(bodyData.language).toBe('PPL');
+      expect(typeof bodyData.currentTime).toBe('string');
+      expect(bodyData).not.toHaveProperty('dataSourceId');
+      expect(bodyData).not.toHaveProperty('timeField');
     });
 
     it('should handle dataset with empty dataSource', async () => {
@@ -430,14 +464,16 @@ describe('callAgentActionCreator', () => {
 
       await thunk(mockDispatch, jest.fn(), undefined);
 
-      expect(mockServices.http.post).toHaveBeenCalledWith('/api/enhancements/assist/generate', {
-        body: JSON.stringify({
-          question: testEditorText,
-          index: 'test-index',
-          language: 'PPL',
-          dataSourceId: undefined,
-        }),
-      });
+      const callArgs = (mockServices.http.post as jest.Mock).mock.calls[0];
+      const bodyData = JSON.parse(callArgs[1].body);
+
+      expect(callArgs[0]).toBe('/api/enhancements/assist/generate');
+      expect(bodyData.question).toBe(testEditorText);
+      expect(bodyData.index).toBe('test-index');
+      expect(bodyData.language).toBe('PPL');
+      expect(typeof bodyData.currentTime).toBe('string');
+      expect(bodyData).not.toHaveProperty('dataSourceId');
+      expect(bodyData).not.toHaveProperty('timeField');
     });
   });
 

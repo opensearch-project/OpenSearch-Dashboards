@@ -34,7 +34,6 @@ import File from 'vinyl';
 
 interface BufferedFile extends File {
   contents: Buffer;
-  isDirectory(): false;
 }
 
 /**

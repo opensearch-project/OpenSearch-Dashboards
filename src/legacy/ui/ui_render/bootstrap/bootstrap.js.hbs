@@ -2,15 +2,44 @@ var osdCsp = JSON.parse(document.querySelector('osd-csp').getAttribute('data'));
 window.__osdStrictCsp__ = osdCsp.strictCsp;
 window.__osdPublicPath__ = {{publicPathMap}};
 window.__osdBundles__ = {{osdBundlesLoaderSource}}
+window.__webpack_nonce__ = (function() {
+  var meta = document.querySelector('meta[name="csp-nonce"]');
+  return meta ? meta.getAttribute('content') : '';
+})();
+
+// Intercept dynamically created style elements to add CSP nonce
+// This handles third-party libraries (like nano-css from react-use, brace/ace editor)
+// that create style elements without using webpack's style-loader nonce mechanism
+(function() {
+  if (!window.__webpack_nonce__) return;
+
+  var nonce = window.__webpack_nonce__;
+
+  // Patch document.createElement
+  var originalCreateElement = document.createElement.bind(document);
+  document.createElement = function(tagName, options) {
+    var element = originalCreateElement(tagName, options);
+    if (tagName.toLowerCase() === 'style') {
+      element.setAttribute('nonce', nonce);
+    }
+    return element;
+  };
+
+  // Patch document.createElementNS (used by brace/ace editor)
+  var originalCreateElementNS = document.createElementNS.bind(document);
+  document.createElementNS = function(namespaceURI, qualifiedName) {
+    var element = originalCreateElementNS(namespaceURI, qualifiedName);
+    if (qualifiedName.toLowerCase() === 'style') {
+      element.setAttribute('nonce', nonce);
+    }
+    return element;
+  };
+})();
 
 if (window.__osdStrictCsp__ && window.__osdCspNotEnforced__) {
   var legacyBrowserError = document.getElementById('osd_legacy_browser_error');
   legacyBrowserError.style.display = 'flex';
 } else {
-  if (!window.__osdCspNotEnforced__ && window.console) {
-    window.console.log("^ A single error about an inline script not firing due to content security policy is expected!");
-  }
-
   var themeCssDistFilenames = {{THEME_CSS_DIST_FILENAMES}};
   var kuiCssDistFilenames = {{KUI_CSS_DIST_FILENAMES}};
 

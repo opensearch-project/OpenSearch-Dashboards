@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React from 'react';
+
 import { render, screen, fireEvent } from '@testing-library/react';
 import { PieExclusiveVisOptions } from './pie_exclusive_vis_options';
 
@@ -77,21 +77,12 @@ describe('PieExclusiveVisOptions', () => {
     expect(screen.getByTestId('showLabelsSwitch')).toBeInTheDocument();
   });
 
-  it('should render truncate when turn on show labels', () => {
+  it('should render truncate', () => {
     const props = {
       ...defaultProps,
       styles: { donut: false, showValues: false, showLabels: true, truncate: 100 },
     };
     render(<PieExclusiveVisOptions {...props} />);
     expect(screen.getByText('Truncate after')).toBeInTheDocument();
-  });
-
-  it('should not render truncate when turn off show labels', () => {
-    const props = {
-      ...defaultProps,
-      styles: { donut: false, showValues: false, showLabels: false, truncate: 100 },
-    };
-    render(<PieExclusiveVisOptions {...props} />);
-    expect(screen.queryByText('Truncate after')).not.toBeInTheDocument();
   });
 });

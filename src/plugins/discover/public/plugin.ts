@@ -307,7 +307,8 @@ export class DiscoverPlugin
 
     // If Explore plugin is enabled, it will register a Discover menu to the
     // side nav in observability workspaces, we should skip registration here.
-    if (!plugins.explore) {
+    // Also hide from observability when icon side nav is enabled.
+    if (!plugins.explore && !core.chrome.getIsIconSideNavEnabled()) {
       core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
         {
           id: PLUGIN_ID,
@@ -322,6 +323,7 @@ export class DiscoverPlugin
         id: PLUGIN_ID,
         category: undefined,
         order: 300,
+        euiIconType: 'discoverApp',
       },
     ]);
 
@@ -330,6 +332,7 @@ export class DiscoverPlugin
         id: PLUGIN_ID,
         category: undefined,
         order: 200,
+        euiIconType: 'discoverApp',
       },
     ]);
 
@@ -338,6 +341,7 @@ export class DiscoverPlugin
         id: PLUGIN_ID,
         category: undefined,
         order: 200,
+        euiIconType: 'discoverApp',
       },
     ]);
 
@@ -346,6 +350,7 @@ export class DiscoverPlugin
         id: PLUGIN_ID,
         category: undefined,
         order: 200,
+        euiIconType: 'discoverApp',
       },
     ]);
 
@@ -427,6 +432,30 @@ export class DiscoverPlugin
 
       return { core, plugins };
     };
+
+    // Register discover navigation shortcuts only when workspace is available
+    if (core.keyboardShortcut) {
+      // Check if workspaces are initialized and available
+      const isInitialized = core.workspaces.initialized$.getValue();
+      const currentWorkspace = core.workspaces.currentWorkspace$.getValue();
+
+      if (isInitialized && currentWorkspace) {
+        core.keyboardShortcut.register({
+          id: 'nav.discover',
+          name: i18n.translate('discover.keyboardShortcut.goToDiscover.name', {
+            defaultMessage: 'Go to discover',
+          }),
+          pluginId: 'discover',
+          category: i18n.translate('discover.keyboardShortcut.category.navigation', {
+            defaultMessage: 'Navigation',
+          }),
+          keys: 'g d',
+          execute: () => {
+            core.application.navigateToApp('explore/logs');
+          },
+        });
+      }
+    }
 
     this.initializeServices();
 

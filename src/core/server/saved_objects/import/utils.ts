@@ -88,7 +88,7 @@ export const updateDataSourceNameInVegaSpec = (
         bracesSameLine: true,
         keepWsc: true,
         space: stringifiedSpacing,
-      });
+      }).replace(/\r\n/g, '\n');
 };
 
 export const updateDataSourceNameInTimeline = (

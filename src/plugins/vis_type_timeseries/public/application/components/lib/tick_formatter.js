@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import handlebars from 'handlebars/dist/handlebars';
+import Handlebars from 'kbn-handlebars';
 import { isNumber } from 'lodash';
 import { inputFormats, outputFormats, isDuration } from '../lib/durations';
 import { getFieldFormats } from '../../../services';
@@ -37,7 +37,7 @@ export const createTickFormatter = (format = '0,0.[00]', template, getConfig = n
   const fieldFormats = getFieldFormats();
 
   if (!template) template = '{{value}}';
-  const render = handlebars.compile(template, { knownHelpersOnly: true });
+  const render = Handlebars.compileAST(template, { knownHelpersOnly: true });
   let formatter;
 
   if (isDuration(format)) {

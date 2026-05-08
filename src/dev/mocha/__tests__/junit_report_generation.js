@@ -105,7 +105,9 @@ describe('dev/mocha/junit report generation', () => {
     });
 
     expect(testFail.$.time).to.match(DURATION_REGEX);
-    expect(testFail.failure[0]).to.match(/Error: FORCE_TEST_FAIL\n.+fixtures.project.test.js/);
+    expect(testFail.failure[0]).to.match(
+      /Error: FORCE_TEST_FAIL\n.+fixtures.{1,2}project.{1,2}test\.js/
+    );
     expect(testFail).to.eql({
       $: {
         classname: sharedClassname,
@@ -120,7 +122,7 @@ describe('dev/mocha/junit report generation', () => {
     expect(beforeEachFail.$.time).to.match(DURATION_REGEX);
     expect(beforeEachFail.failure).to.have.length(1);
     expect(beforeEachFail.failure[0]).to.match(
-      /Error: FORCE_HOOK_FAIL\n.+fixtures.project.test.js/
+      /Error: FORCE_HOOK_FAIL\n.+fixtures.{1,2}project.{1,2}test\.js/
     );
     expect(beforeEachFail).to.eql({
       $: {

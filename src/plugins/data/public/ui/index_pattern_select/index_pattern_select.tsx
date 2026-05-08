@@ -29,7 +29,7 @@
  */
 
 import _ from 'lodash';
-import React, { Component } from 'react';
+import { Component } from 'react';
 
 import { Required } from '@osd/utility-types';
 import { EuiCompressedComboBox, EuiComboBoxProps } from '@elastic/eui';
@@ -68,7 +68,7 @@ const getIndexPatterns = async (
     type: 'index-pattern',
     fields,
     search: `${search}*`,
-    searchFields: ['title'],
+    searchFields: ['title', 'displayName'],
     perPage: 100,
   });
   return resp.savedObjects;
@@ -144,7 +144,7 @@ export default class IndexPatternSelect extends Component<IndexPatternSelectProp
   debouncedFetch = _.debounce(async (searchValue: string) => {
     const { fieldTypes, onNoIndexPatterns, savedObjectsClient } = this.props;
 
-    const savedObjectFields = ['title'];
+    const savedObjectFields = ['title', 'displayName'];
     if (fieldTypes) {
       savedObjectFields.push('fields');
     }
@@ -174,6 +174,7 @@ export default class IndexPatternSelect extends Component<IndexPatternSelectProp
       const dataSourcesToFetch: Array<{ type: string; id: string }> = [];
       const dataSourceIdSet = new Set();
       savedObjects.map((indexPatternSavedObject: SimpleSavedObject<any>) => {
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         const dataSourceReference = getDataSourceReference(indexPatternSavedObject.references);
         if (
           dataSourceReference &&
@@ -198,22 +199,25 @@ export default class IndexPatternSelect extends Component<IndexPatternSelectProp
       }
 
       const options = savedObjects.map((indexPatternSavedObject: SimpleSavedObject<any>) => {
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         const dataSourceReference = getDataSourceReference(indexPatternSavedObject.references);
         if (dataSourceReference) {
           const dataSourceTitle =
             this.state.dataSourceIdToTitle.get(dataSourceReference.id) ||
             dataSourceIdToTitleToUpdate.get(dataSourceReference.id) ||
             dataSourceReference.id;
+          const patternLabel =
+            indexPatternSavedObject.attributes.displayName ||
+            indexPatternSavedObject.attributes.title;
           return {
-            label: `${concatDataSourceWithIndexPattern(
-              dataSourceTitle,
-              indexPatternSavedObject.attributes.title
-            )}`,
+            label: `${concatDataSourceWithIndexPattern(dataSourceTitle, patternLabel)}`,
             value: indexPatternSavedObject.id,
           };
         }
         return {
-          label: indexPatternSavedObject.attributes.title,
+          label:
+            indexPatternSavedObject.attributes.displayName ||
+            indexPatternSavedObject.attributes.title,
           value: indexPatternSavedObject.id,
         };
       });

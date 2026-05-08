@@ -29,7 +29,7 @@
  */
 
 import PropTypes from 'prop-types';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { AggRow } from './agg_row';
 import { AggSelect } from './agg_select';
 

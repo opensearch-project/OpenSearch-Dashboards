@@ -10,6 +10,7 @@ import { stubbedSavedObjectIndexPattern } from '../../../../../fixtures/stubbed_
 import { DataViewUiSettingsCommon, DataViewSavedObjectsClientCommon, SavedObject } from '../types';
 import { UI_SETTINGS } from '../../constants';
 import { IndexPatternsService } from '../../index_patterns';
+import { DuplicateDataViewError } from '../errors/duplicate_data_view';
 
 const createFieldsFetcher = jest.fn().mockImplementation(() => ({
   getFieldsForWildcard: jest.fn().mockImplementation(() => {
@@ -143,23 +144,20 @@ describe('DataViews', () => {
       },
     });
 
-    // Create a normal index patterns
+    // get() is read-only and does not trigger a save
     const pattern = await dataViews.get('foo');
-
-    expect(pattern.version).toBe('fooa');
+    expect(pattern.version).toBe('foo');
     dataViews.clearCache();
 
-    // Create the same one - we're going to handle concurrency
     const samePattern = await dataViews.get('foo');
+    expect(samePattern.version).toBe('foo');
 
-    expect(samePattern.version).toBe('fooaa');
-
-    // This will conflict because samePattern did a save (from refreshFields)
-    // but the resave should work fine
+    // First save succeeds and bumps the version
     pattern.title = 'foo2';
     await dataViews.updateSavedObject(pattern);
+    expect(pattern.version).toBe('fooa');
 
-    // This should not be able to recover
+    // Second save conflicts because samePattern still has the old version
     samePattern.title = 'foo3';
 
     let result;
@@ -206,6 +204,7 @@ describe('DataViews', () => {
         fieldFormatMap: '{"field":{}}',
         typeMeta: '{}',
         type: '',
+        signalType: undefined,
       },
       type: 'index-pattern',
       references: [],
@@ -226,6 +225,7 @@ describe('DataViews', () => {
         fieldFormatMap: '{"field":{}}',
         typeMeta: '{}',
         type: '',
+        signalType: undefined,
       },
       type: 'index-pattern',
       references: [
@@ -247,5 +247,372 @@ describe('DataViews', () => {
       Promise.resolve(key === UI_SETTINGS.DATA_WITH_LONG_NUMERALS ? true : undefined)
     );
     expect(await dataViews.isLongNumeralsSupported()).toBe(true);
+  });
+
+  describe('createSavedObject error handling', () => {
+    test('throws DuplicateDataViewError on 409 conflict with statusCode', async () => {
+      const title = 'test-pattern-*';
+      // Mock findByTitle to return nothing (no dupe check)
+      savedObjectsClient.find = jest.fn().mockResolvedValue([]);
+      // Mock create to throw 409 error
+      savedObjectsClient.create = jest.fn().mockRejectedValue({
+        statusCode: 409,
+        message: 'document already exists',
+      });
+
+      const dataView = await dataViews.create({ title }, true);
+
+      await expect(dataViews.createSavedObject(dataView)).rejects.toThrow(DuplicateDataViewError);
+      await expect(dataViews.createSavedObject(dataView)).rejects.toThrow(
+        `Duplicate data view: ${title}`
+      );
+    });
+
+    test('throws DuplicateDataViewError on 409 conflict with status', async () => {
+      const title = 'test-pattern-*';
+      savedObjectsClient.find = jest.fn().mockResolvedValue([]);
+      savedObjectsClient.create = jest.fn().mockRejectedValue({
+        status: 409,
+        message: 'version conflict',
+      });
+
+      const dataView = await dataViews.create({ title }, true);
+
+      await expect(dataViews.createSavedObject(dataView)).rejects.toThrow(DuplicateDataViewError);
+    });
+
+    test('throws DuplicateDataViewError on 409 conflict with body.statusCode', async () => {
+      const title = 'test-pattern-*';
+      savedObjectsClient.find = jest.fn().mockResolvedValue([]);
+      savedObjectsClient.create = jest.fn().mockRejectedValue({
+        body: {
+          statusCode: 409,
+          message: 'document already exists',
+        },
+      });
+
+      const dataView = await dataViews.create({ title }, true);
+
+      await expect(dataViews.createSavedObject(dataView)).rejects.toThrow(DuplicateDataViewError);
+    });
+
+    test('throws DuplicateDataViewError on 409 conflict with body.message', async () => {
+      const title = 'test-pattern-*';
+      savedObjectsClient.find = jest.fn().mockResolvedValue([]);
+      savedObjectsClient.create = jest.fn().mockRejectedValue({
+        statusCode: 409,
+        body: {
+          message: 'version conflict, required seqNo',
+        },
+      });
+
+      const dataView = await dataViews.create({ title }, true);
+
+      await expect(dataViews.createSavedObject(dataView)).rejects.toThrow(DuplicateDataViewError);
+    });
+
+    test('re-throws other errors without wrapping', async () => {
+      const title = 'test-pattern-*';
+      const originalError = new Error('Network error');
+      savedObjectsClient.find = jest.fn().mockResolvedValue([]);
+      savedObjectsClient.create = jest.fn().mockRejectedValue(originalError);
+
+      const dataView = await dataViews.create({ title }, true);
+
+      await expect(dataViews.createSavedObject(dataView)).rejects.toThrow('Network error');
+      await expect(dataViews.createSavedObject(dataView)).rejects.not.toThrow(
+        DuplicateDataViewError
+      );
+    });
+
+    test('re-throws 409 errors that are not duplicate-related', async () => {
+      const title = 'test-pattern-*';
+      savedObjectsClient.find = jest.fn().mockResolvedValue([]);
+      const error409 = { statusCode: 409, message: 'some other conflict' };
+      savedObjectsClient.create = jest.fn().mockRejectedValue(error409);
+
+      const dataView = await dataViews.create({ title }, true);
+
+      // Should throw the original error, not a DuplicateDataViewError
+      await expect(dataViews.createSavedObject(dataView)).rejects.toEqual(error409);
+    });
+
+    test('successfully creates saved object when no conflict', async () => {
+      const title = 'test-pattern-*';
+      const mockResponse = { id: 'test-id' };
+      savedObjectsClient.find = jest.fn().mockResolvedValue([]);
+      savedObjectsClient.create = jest.fn().mockResolvedValue(mockResponse);
+
+      const dataView = await dataViews.create({ title }, true);
+      const result = await dataViews.createSavedObject(dataView);
+
+      expect(result).toBe(dataView);
+      expect(result.id).toBe('test-id');
+    });
+  });
+
+  describe('plain IndexPattern cache poisoning', () => {
+    // DatasetService.fetchDefaultDataset() calls IndexPatternsService.get() during plugin
+    // start(), which caches a plain IndexPattern (no toDataset, no initializeDataSourceRef)
+    // into the shared indexPatternCache. DataViewsService.get() and getMultiple() must
+    // treat such entries as cache misses so they re-fetch and create a proper DataView,
+    // ensuring dataSource.title is populated from the saved object rather than the raw
+    // saved-object reference name "dataSource".
+
+    const plainIndexPattern = { id: 'test-id', title: 'test-*' }; // no toDataset
+
+    const properDataView = ({
+      id: 'test-id',
+      title: 'test-*',
+      toDataset: jest.fn(),
+    } as unknown) as DataView;
+
+    test('get() bypasses cache when cached entry is a plain IndexPattern', async () => {
+      const localPatternsMock = ({
+        clearCache: jest.fn(),
+        get: jest.fn().mockResolvedValue(plainIndexPattern),
+        getByTitle: jest.fn(),
+        saveToCache: jest.fn(),
+      } as unknown) as IndexPatternsService;
+
+      const localDataViews = new DataViewsService({
+        patterns: localPatternsMock,
+        uiSettings: { get: jest.fn().mockResolvedValue(false), getAll: () => {} } as any,
+        savedObjectsClient: (savedObjectsClient as unknown) as DataViewSavedObjectsClientCommon,
+        apiClient: createFieldsFetcher(),
+        fieldFormats,
+        onNotification: () => {},
+        onError: () => {},
+        onRedirectNoDataView: () => {},
+        onUnsupportedTimePattern: () => {},
+      });
+
+      setDocsourcePayload('test-id', {
+        id: 'test-id',
+        version: '1',
+        attributes: { title: 'test-*' },
+      });
+
+      const result = await localDataViews.get('test-id');
+
+      // Should have fetched from savedObjects, not returned the plain IndexPattern
+      expect(savedObjectsClient.get).toHaveBeenCalled();
+      expect(result).toBeInstanceOf(DataView);
+    });
+
+    test('get() with onlyCheckCache returns undefined when cached entry is a plain IndexPattern', async () => {
+      const localPatternsMock = ({
+        clearCache: jest.fn(),
+        get: jest.fn().mockResolvedValue(plainIndexPattern),
+        getByTitle: jest.fn(),
+        saveToCache: jest.fn(),
+      } as unknown) as IndexPatternsService;
+
+      const localDataViews = new DataViewsService({
+        patterns: localPatternsMock,
+        uiSettings: { get: jest.fn().mockResolvedValue(false), getAll: () => {} } as any,
+        savedObjectsClient: (savedObjectsClient as unknown) as DataViewSavedObjectsClientCommon,
+        apiClient: createFieldsFetcher(),
+        fieldFormats,
+        onNotification: () => {},
+        onError: () => {},
+        onRedirectNoDataView: () => {},
+        onUnsupportedTimePattern: () => {},
+      });
+
+      const result = await localDataViews.get('test-id', true);
+
+      expect(result).toBeUndefined();
+      expect(savedObjectsClient.get).not.toHaveBeenCalled();
+    });
+
+    test('get() uses cache when entry is a proper DataView', async () => {
+      const localPatternsMock = ({
+        clearCache: jest.fn(),
+        get: jest.fn().mockResolvedValue(properDataView),
+        getByTitle: jest.fn(),
+        saveToCache: jest.fn(),
+      } as unknown) as IndexPatternsService;
+
+      const localDataViews = new DataViewsService({
+        patterns: localPatternsMock,
+        uiSettings: { get: jest.fn().mockResolvedValue(false), getAll: () => {} } as any,
+        savedObjectsClient: (savedObjectsClient as unknown) as DataViewSavedObjectsClientCommon,
+        apiClient: createFieldsFetcher(),
+        fieldFormats,
+        onNotification: () => {},
+        onError: () => {},
+        onRedirectNoDataView: () => {},
+        onUnsupportedTimePattern: () => {},
+      });
+
+      const result = await localDataViews.get('test-id');
+
+      expect(result).toBe(properDataView);
+      expect(savedObjectsClient.get).not.toHaveBeenCalled();
+    });
+
+    test('getMultiple() bypasses cache when cached entry is a plain IndexPattern', async () => {
+      const localPatternsMock = ({
+        clearCache: jest.fn(),
+        get: jest.fn().mockResolvedValue(plainIndexPattern),
+        getByTitle: jest.fn(),
+        saveToCache: jest.fn(),
+      } as unknown) as IndexPatternsService;
+
+      const localDataViews = new DataViewsService({
+        patterns: localPatternsMock,
+        uiSettings: { get: jest.fn().mockResolvedValue(false), getAll: () => {} } as any,
+        savedObjectsClient: (savedObjectsClient as unknown) as DataViewSavedObjectsClientCommon,
+        apiClient: createFieldsFetcher(),
+        fieldFormats,
+        onNotification: () => {},
+        onError: () => {},
+        onRedirectNoDataView: () => {},
+        onUnsupportedTimePattern: () => {},
+      });
+
+      setDocsourcePayload('test-id', {
+        id: 'test-id',
+        version: '1',
+        attributes: { title: 'test-*' },
+      });
+      savedObjectsClient.bulkGet = jest.fn().mockResolvedValue({
+        savedObjects: [
+          { id: 'test-id', version: '1', attributes: { title: 'test-*' }, references: [] },
+        ],
+      });
+
+      const results = await localDataViews.getMultiple(['test-id']);
+
+      // Should have gone to bulkGet, not used the plain IndexPattern from cache
+      expect(savedObjectsClient.bulkGet).toHaveBeenCalled();
+      expect(results).toHaveLength(1);
+      expect(results[0]).toBeInstanceOf(DataView);
+    });
+
+    test('getMultiple() uses cache when entry is a proper DataView', async () => {
+      const localPatternsMock = ({
+        clearCache: jest.fn(),
+        get: jest.fn().mockResolvedValue(properDataView),
+        getByTitle: jest.fn(),
+        saveToCache: jest.fn(),
+      } as unknown) as IndexPatternsService;
+
+      const localDataViews = new DataViewsService({
+        patterns: localPatternsMock,
+        uiSettings: { get: jest.fn().mockResolvedValue(false), getAll: () => {} } as any,
+        savedObjectsClient: (savedObjectsClient as unknown) as DataViewSavedObjectsClientCommon,
+        apiClient: createFieldsFetcher(),
+        fieldFormats,
+        onNotification: () => {},
+        onError: () => {},
+        onRedirectNoDataView: () => {},
+        onUnsupportedTimePattern: () => {},
+      });
+
+      savedObjectsClient.bulkGet = jest.fn();
+
+      const results = await localDataViews.getMultiple(['test-id']);
+
+      expect(savedObjectsClient.bulkGet).not.toHaveBeenCalled();
+      expect(results[0]).toBe(properDataView);
+    });
+
+    test('getMultiple() skips not-found saved objects instead of throwing', async () => {
+      const localPatternsMock = ({
+        clearCache: jest.fn(),
+        get: jest.fn().mockResolvedValue(undefined),
+        getByTitle: jest.fn(),
+        saveToCache: jest.fn(),
+      } as unknown) as IndexPatternsService;
+
+      const localDataViews = new DataViewsService({
+        patterns: localPatternsMock,
+        uiSettings: { get: jest.fn().mockResolvedValue(false), getAll: () => {} } as any,
+        savedObjectsClient: (savedObjectsClient as unknown) as DataViewSavedObjectsClientCommon,
+        apiClient: createFieldsFetcher(),
+        fieldFormats,
+        onNotification: () => {},
+        onError: () => {},
+        onRedirectNoDataView: () => {},
+        onUnsupportedTimePattern: () => {},
+      });
+
+      setDocsourcePayload('valid-id', {
+        id: 'valid-id',
+        version: '1',
+        attributes: { title: 'valid-*' },
+      });
+
+      savedObjectsClient.bulkGet = jest.fn().mockResolvedValue({
+        savedObjects: [
+          { id: 'valid-id', version: '1', attributes: { title: 'valid-*' }, references: [] },
+          {
+            id: 'orphaned-id',
+            attributes: {},
+            type: 'index-pattern',
+            error: { statusCode: 404, message: 'Not found' },
+            references: [],
+          },
+        ],
+      });
+
+      const results = await localDataViews.getMultiple(['valid-id', 'orphaned-id']);
+
+      expect(results).toHaveLength(1);
+      expect(results[0]).toBeInstanceOf(DataView);
+      expect(results[0].id).toBe('valid-id');
+    });
+
+    test('getMultiple() skips objects that throw during processing without breaking others', async () => {
+      const onErrorMock = jest.fn();
+      const localPatternsMock = ({
+        clearCache: jest.fn(),
+        get: jest.fn().mockResolvedValue(undefined),
+        getByTitle: jest.fn(),
+        saveToCache: jest.fn(),
+      } as unknown) as IndexPatternsService;
+
+      const localDataViews = new DataViewsService({
+        patterns: localPatternsMock,
+        uiSettings: { get: jest.fn().mockResolvedValue(false), getAll: () => {} } as any,
+        savedObjectsClient: (savedObjectsClient as unknown) as DataViewSavedObjectsClientCommon,
+        apiClient: createFieldsFetcher(),
+        fieldFormats,
+        onNotification: () => {},
+        onError: onErrorMock,
+        onRedirectNoDataView: () => {},
+        onUnsupportedTimePattern: () => {},
+      });
+
+      setDocsourcePayload('valid-id', {
+        id: 'valid-id',
+        version: '1',
+        attributes: { title: 'valid-*' },
+      });
+
+      savedObjectsClient.bulkGet = jest.fn().mockResolvedValue({
+        savedObjects: [
+          { id: 'valid-id', version: '1', attributes: { title: 'valid-*' }, references: [] },
+          {
+            id: 'corrupt-id',
+            version: '1',
+            attributes: { title: 'corrupt-*', fieldFormatMap: '{invalid json' },
+            references: [],
+          },
+        ],
+      });
+
+      const results = await localDataViews.getMultiple(['valid-id', 'corrupt-id']);
+
+      expect(results).toHaveLength(1);
+      expect(results[0]).toBeInstanceOf(DataView);
+      expect(results[0].id).toBe('valid-id');
+      expect(onErrorMock).toHaveBeenCalledWith(
+        expect.any(Error),
+        expect.objectContaining({ title: 'Failed to load data view "corrupt-id"' })
+      );
+    });
   });
 });

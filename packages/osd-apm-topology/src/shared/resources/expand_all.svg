@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Top-left arrow -->
+  <path d="M8 3H3v5M3 3l6 6"/>
+  
+  <!-- Top-right arrow -->
+  <path d="M16 3h5v5M21 3l-6 6"/>
+  
+  <!-- Bottom-left arrow -->
+  <path d="M8 21H3v-5M3 21l6-6"/>
+  
+  <!-- Bottom-right arrow -->
+  <path d="M16 21h5v-5M21 21l-6-6"/>
+  
+  <!-- Center square -->
+  <rect x="9" y="9" width="6" height="6" rx="1"/>
+</svg>

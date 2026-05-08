@@ -11,8 +11,8 @@ function open_artifact() {
   cd $artifact_dir
 
   # check if artifact provided is URL or attempt if passing by absolute path
-  if curl -I -L $artifact; then
-    curl -L $artifact | tar -xz --strip-components=1
+  if curl -I -L "$artifact"; then
+    curl -L "$artifact" | tar -xz --strip-components=1
   else
     echo "Artifact is not a URL; attempting to unarchive a local file..."
     tar -xf $artifact --strip-components=1
@@ -74,7 +74,7 @@ function check_status() {
 function upload_data() {
   rm -rf "$OPENSEARCH_DIR/data"
   cd $OPENSEARCH_DIR
-  cp "$CWD/cypress/test-data/$DASHBOARDS_TYPE/$1.tar.gz" .
+  cp "$CWD/cypress/test_data/$DASHBOARDS_TYPE/$1.tar.gz" .
   tar -xvf "$OPENSEARCH_DIR/$1.tar.gz" >> /dev/null 2>&1
   rm "$1.tar.gz"
   echo "Data has been uploaded and ready to test"

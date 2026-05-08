@@ -12,7 +12,7 @@
 import './_table_header.scss';
 
 import { i18n } from '@osd/i18n';
-import React, { ReactNode } from 'react';
+import { ReactNode } from 'react';
 import { EuiSmallButtonIcon, EuiToolTip } from '@elastic/eui';
 import { SortOrder } from '../../../../../../types/saved_explore_types';
 

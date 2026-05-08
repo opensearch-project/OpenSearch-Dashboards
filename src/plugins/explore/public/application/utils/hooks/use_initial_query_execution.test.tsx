@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
-import React from 'react';
+import { renderHook, act } from '@testing-library/react';
+
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import { useInitialQueryExecution } from './use_initial_query_execution';
@@ -22,6 +22,12 @@ import { clearResults } from '../state_management/slices';
 import { detectAndSetOptimalTab } from '../state_management/actions/detect_optimal_tab';
 import { MockStore } from '../state_management/__mocks__';
 import * as CurrentExploreIdHook from './use_current_explore_id';
+import * as DatasetContextHook from '../../context';
+
+// Mock DatasetContext
+jest.mock('../../context', () => ({
+  useDatasetContext: jest.fn(),
+}));
 
 // Mock Redux actions
 jest.mock('../state_management/actions/query_actions', () => ({
@@ -76,6 +82,13 @@ describe('useInitialQueryExecution', () => {
 
     jest.spyOn(CurrentExploreIdHook, 'useCurrentExploreId').mockReturnValue(undefined);
 
+    // Mock useDatasetContext to return dataset loaded state
+    jest.spyOn(DatasetContextHook, 'useDatasetContext').mockReturnValue({
+      dataset: { id: 'test-dataset', title: 'Test Dataset', type: 'INDEX_PATTERN' } as any,
+      isLoading: false,
+      error: null,
+    });
+
     mockServices = {
       uiSettings: {
         get: jest.fn().mockReturnValue(true), // Default: searchOnPageLoad = true
@@ -98,6 +111,9 @@ describe('useInitialQueryExecution', () => {
         query: {
           queryString: {
             addToQueryHistory: jest.fn(),
+            getDatasetService: jest.fn().mockReturnValue({
+              getType: jest.fn().mockReturnValue(undefined),
+            }),
           },
           timefilter: {
             timefilter: {
@@ -193,15 +209,23 @@ describe('useInitialQueryExecution', () => {
       expect(result.current.isInitialized).toBe(false); // Still false until Redux state updates
     });
 
-    it('should only initialize once', () => {
-      const { rerender } = renderHookWithProvider(mockServices);
+    it('should only initialize once', async () => {
+      let hookResult: any;
+
+      await act(async () => {
+        hookResult = renderHookWithProvider(mockServices);
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      });
 
       // First render
       expect(mockExecuteQueries).toHaveBeenCalledTimes(1);
       expect(mockServices.data.query.queryString.addToQueryHistory).toHaveBeenCalledTimes(1);
 
       // Re-render should not trigger again
-      rerender();
+      await act(async () => {
+        hookResult.rerender();
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      });
       expect(mockExecuteQueries).toHaveBeenCalledTimes(1);
       expect(mockServices.data.query.queryString.addToQueryHistory).toHaveBeenCalledTimes(1);
     });
@@ -274,6 +298,13 @@ describe('useInitialQueryExecution', () => {
 
   describe('when dataset is missing', () => {
     it('should not execute query or add to history', () => {
+      // Mock dataset context to return no dataset
+      jest.spyOn(DatasetContextHook, 'useDatasetContext').mockReturnValue({
+        dataset: undefined,
+        isLoading: false,
+        error: null,
+      });
+
       const { result } = renderHookWithProvider(mockServices, {
         query: {
           query: 'source=logs',
@@ -281,6 +312,24 @@ describe('useInitialQueryExecution', () => {
           dataset: undefined,
         },
       });
+
+      expect(mockServices.data.query.queryString.addToQueryHistory).not.toHaveBeenCalled();
+      expect(mockClearResults).not.toHaveBeenCalled();
+      expect(mockExecuteQueries).not.toHaveBeenCalled();
+      expect(result.current.isInitialized).toBe(false);
+    });
+  });
+
+  describe('when dataset is still loading', () => {
+    it('should not execute query or add to history', () => {
+      // Mock dataset context to return loading state
+      jest.spyOn(DatasetContextHook, 'useDatasetContext').mockReturnValue({
+        dataset: undefined,
+        isLoading: true,
+        error: null,
+      });
+
+      const { result } = renderHookWithProvider(mockServices);
 
       expect(mockServices.data.query.queryString.addToQueryHistory).not.toHaveBeenCalled();
       expect(mockClearResults).not.toHaveBeenCalled();
@@ -367,6 +416,41 @@ describe('useInitialQueryExecution', () => {
       renderHookWithProvider(newServices);
 
       expect(newServices.uiSettings.get).toHaveBeenCalledWith('discover:searchOnPageLoad', true);
+    });
+  });
+
+  describe('dataset-specific searchOnLoad', () => {
+    it('should use dataset type config searchOnLoad when available and set to false', () => {
+      const servicesWithDatasetConfig = {
+        ...mockServices,
+        data: {
+          ...mockServices.data,
+          query: {
+            ...mockServices.data.query,
+            queryString: {
+              ...mockServices.data.query.queryString,
+              getDatasetService: jest.fn().mockReturnValue({
+                getType: jest.fn().mockReturnValue({
+                  meta: {
+                    searchOnLoad: false,
+                  },
+                }),
+              }),
+            },
+          },
+        },
+        uiSettings: {
+          ...mockServices.uiSettings,
+          get: jest.fn().mockReturnValue(true), // UI setting is true, but dataset config is false
+        },
+      } as any;
+
+      const { result } = renderHookWithProvider(servicesWithDatasetConfig);
+
+      // Should NOT execute query because dataset config searchOnLoad is false
+      expect(mockExecuteQueries).not.toHaveBeenCalled();
+      expect(mockClearResults).not.toHaveBeenCalled();
+      expect(result.current.isInitialized).toBe(false);
     });
   });
 

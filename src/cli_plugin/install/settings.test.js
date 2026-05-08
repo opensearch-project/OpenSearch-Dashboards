@@ -90,7 +90,7 @@ describe('parse function', function () {
         "pluginDir": <absolute path>/plugins,
         "quiet": false,
         "silent": false,
-        "singleVersion": "strict",
+        "singleVersion": "ignore",
         "tempArchiveFile": <absolute path>/plugins/.plugin.installing/archive.part,
         "timeout": 0,
         "urls": Array [
@@ -126,7 +126,7 @@ describe('parse function', function () {
         "pluginDir": <absolute path>/plugins,
         "quiet": true,
         "silent": true,
-        "singleVersion": "strict",
+        "singleVersion": "ignore",
         "tempArchiveFile": <absolute path>/plugins/.plugin.installing/archive.part,
         "timeout": 0,
         "urls": Array [
@@ -155,7 +155,7 @@ describe('parse function', function () {
         "pluginDir": <absolute path>/plugins,
         "quiet": false,
         "silent": false,
-        "singleVersion": "strict",
+        "singleVersion": "ignore",
         "tempArchiveFile": <absolute path>/plugins/.plugin.installing/archive.part,
         "timeout": 0,
         "urls": Array [
@@ -184,7 +184,7 @@ describe('parse function', function () {
         "pluginDir": <absolute path>/plugins,
         "quiet": false,
         "silent": false,
-        "singleVersion": "strict",
+        "singleVersion": "ignore",
         "tempArchiveFile": <absolute path>/plugins/.plugin.installing/archive.part,
         "timeout": 0,
         "urls": Array [

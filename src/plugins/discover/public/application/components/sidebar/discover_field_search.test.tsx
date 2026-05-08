@@ -28,8 +28,7 @@
  * under the License.
  */
 
-import React from 'react';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { findTestSubject } from 'test_utils/helpers';
 // @ts-expect-error TS6133 TODO(ts-error): fixme

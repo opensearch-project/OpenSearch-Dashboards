@@ -29,7 +29,7 @@
  */
 
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
+import { createRoot, Root } from 'react-dom/client';
 import {
   context,
   createOpenSearchDashboardsReactContext,
@@ -38,8 +38,10 @@ import {
 } from './context';
 import { coreMock, overlayServiceMock } from '../../../../core/public/mocks';
 import { CoreStart } from '../../../../core/public';
+import { act } from 'react';
 
 let container: HTMLDivElement | null;
+let root: Root | null;
 
 beforeEach(() => {
   container = document.createElement('div');
@@ -47,18 +49,28 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  document.body.removeChild(container!);
+  if (root) {
+    act(() => {
+      root!.unmount();
+    });
+    root = null;
+  }
+  if (container) {
+    document.body.removeChild(container!);
+  }
   container = null;
 });
 
 test('can mount <Provider> without crashing', () => {
   const services = coreMock.createStart();
-  ReactDOM.render(
-    <context.Provider value={{ services } as any}>
-      <div>Hello world</div>
-    </context.Provider>,
-    container
-  );
+  act(() => {
+    root = createRoot(container!);
+    root.render(
+      <context.Provider value={{ services } as any}>
+        <div>Hello world</div>
+      </context.Provider>
+    );
+  });
 });
 
 const TestConsumer = () => {
@@ -69,12 +81,14 @@ const TestConsumer = () => {
 test('useOpenSearchDashboards() hook retrieves OpenSearch Dashboards context', () => {
   const core = coreMock.createStart();
   (core as any).foo = 'bar';
-  ReactDOM.render(
-    <context.Provider value={{ services: core } as any}>
-      <TestConsumer />
-    </context.Provider>,
-    container
-  );
+  act(() => {
+    root = createRoot(container!);
+    root.render(
+      <context.Provider value={{ services: core } as any}>
+        <TestConsumer />
+      </context.Provider>
+    );
+  });
 
   const div = container!.querySelector('div');
   expect(div!.textContent).toBe('bar');
@@ -86,12 +100,14 @@ test('createContext() creates context that can be consumed by useOpenSearchDashb
   } as Partial<CoreStart>;
   const { Provider } = createOpenSearchDashboardsReactContext(services);
 
-  ReactDOM.render(
-    <Provider>
-      <TestConsumer />
-    </Provider>,
-    container
-  );
+  act(() => {
+    root = createRoot(container!);
+    root.render(
+      <Provider>
+        <TestConsumer />
+      </Provider>
+    );
+  });
 
   const div = container!.querySelector('div');
   expect(div!.textContent).toBe('baz');
@@ -109,12 +125,14 @@ test('services, notifications and overlays objects are always available', () => 
     return null;
   };
 
-  ReactDOM.render(
-    <Provider>
-      <Test />
-    </Provider>,
-    container
-  );
+  act(() => {
+    root = createRoot(container!);
+    root.render(
+      <Provider>
+        <Test />
+      </Provider>
+    );
+  });
 });
 
 test('<OpenSearchDashboardsContextProvider> provider provides default opensearch-dashboards-react context', () => {
@@ -128,12 +146,14 @@ test('<OpenSearchDashboardsContextProvider> provider provides default opensearch
     return null;
   };
 
-  ReactDOM.render(
-    <OpenSearchDashboardsContextProvider>
-      <Test />
-    </OpenSearchDashboardsContextProvider>,
-    container
-  );
+  act(() => {
+    root = createRoot(container!);
+    root.render(
+      <OpenSearchDashboardsContextProvider>
+        <Test />
+      </OpenSearchDashboardsContextProvider>
+    );
+  });
 });
 
 test('<OpenSearchDashboardsContextProvider> can set custom services in context', () => {
@@ -143,12 +163,14 @@ test('<OpenSearchDashboardsContextProvider> can set custom services in context',
     return null;
   };
 
-  ReactDOM.render(
-    <OpenSearchDashboardsContextProvider services={{ test: 'quux' }}>
-      <Test />
-    </OpenSearchDashboardsContextProvider>,
-    container
-  );
+  act(() => {
+    root = createRoot(container!);
+    root.render(
+      <OpenSearchDashboardsContextProvider services={{ test: 'quux' }}>
+        <Test />
+      </OpenSearchDashboardsContextProvider>
+    );
+  });
 });
 
 test('nested <OpenSearchDashboardsContextProvider> override and merge services', () => {
@@ -160,16 +182,18 @@ test('nested <OpenSearchDashboardsContextProvider> override and merge services',
     return null;
   };
 
-  ReactDOM.render(
-    <OpenSearchDashboardsContextProvider services={{ foo: 'foo', bar: 'bar', baz: 'baz' }}>
-      <OpenSearchDashboardsContextProvider services={{ foo: 'foo2' }}>
-        <OpenSearchDashboardsContextProvider services={{ baz: 'baz3' }}>
-          <Test />
+  act(() => {
+    root = createRoot(container!);
+    root.render(
+      <OpenSearchDashboardsContextProvider services={{ foo: 'foo', bar: 'bar', baz: 'baz' }}>
+        <OpenSearchDashboardsContextProvider services={{ foo: 'foo2' }}>
+          <OpenSearchDashboardsContextProvider services={{ baz: 'baz3' }}>
+            <Test />
+          </OpenSearchDashboardsContextProvider>
         </OpenSearchDashboardsContextProvider>
       </OpenSearchDashboardsContextProvider>
-    </OpenSearchDashboardsContextProvider>,
-    container
-  );
+    );
+  });
 });
 
 test('overlays wrapper uses the closest overlays service', () => {
@@ -188,14 +212,16 @@ test('overlays wrapper uses the closest overlays service', () => {
     overlays: overlayServiceMock.createStartContract(),
   } as Partial<CoreStart>;
 
-  ReactDOM.render(
-    <OpenSearchDashboardsContextProvider services={core1}>
-      <OpenSearchDashboardsContextProvider services={core2}>
-        <Test />
+  act(() => {
+    root = createRoot(container!);
+    root.render(
+      <OpenSearchDashboardsContextProvider services={core1}>
+        <OpenSearchDashboardsContextProvider services={core2}>
+          <Test />
+        </OpenSearchDashboardsContextProvider>
       </OpenSearchDashboardsContextProvider>
-    </OpenSearchDashboardsContextProvider>,
-    container
-  );
+    );
+  });
 
   expect(core1.overlays!.openFlyout).toHaveBeenCalledTimes(0);
   expect(core1.overlays!.openModal).toHaveBeenCalledTimes(0);
@@ -226,14 +252,16 @@ test('notifications wrapper uses the closest notifications service', () => {
     } as unknown) as CoreStart['notifications'],
   } as Partial<CoreStart>;
 
-  ReactDOM.render(
-    <OpenSearchDashboardsContextProvider services={core1}>
-      <OpenSearchDashboardsContextProvider services={core2}>
-        <Test />
+  act(() => {
+    root = createRoot(container!);
+    root.render(
+      <OpenSearchDashboardsContextProvider services={core1}>
+        <OpenSearchDashboardsContextProvider services={core2}>
+          <Test />
+        </OpenSearchDashboardsContextProvider>
       </OpenSearchDashboardsContextProvider>
-    </OpenSearchDashboardsContextProvider>,
-    container
-  );
+    );
+  });
 
   expect(core1.notifications!.toasts.add).toHaveBeenCalledTimes(0);
   expect(core2.notifications!.toasts.add).toHaveBeenCalledTimes(1);
@@ -265,14 +293,16 @@ test('overlays wrapper uses available overlays service, higher up in <OpenSearch
 
   expect(core1.overlays!.openFlyout).toHaveBeenCalledTimes(0);
 
-  ReactDOM.render(
-    <OpenSearchDashboardsContextProvider services={core1}>
-      <OpenSearchDashboardsContextProvider services={core2}>
-        <Test />
+  act(() => {
+    root = createRoot(container!);
+    root.render(
+      <OpenSearchDashboardsContextProvider services={core1}>
+        <OpenSearchDashboardsContextProvider services={core2}>
+          <Test />
+        </OpenSearchDashboardsContextProvider>
       </OpenSearchDashboardsContextProvider>
-    </OpenSearchDashboardsContextProvider>,
-    container
-  );
+    );
+  });
 
   expect(core1.overlays!.openFlyout).toHaveBeenCalledTimes(1);
 });

@@ -38,7 +38,6 @@ import {
   saveAsMock,
 } from './saved_objects_table.test.mocks';
 
-import React from 'react';
 import { Query } from '@elastic/eui';
 import { waitFor } from '@testing-library/dom';
 import { ShallowWrapper } from 'enzyme';
@@ -170,6 +169,7 @@ describe('SavedObjectsTable', () => {
       canGoInApp: () => true,
       search,
       workspaces,
+      isDatasetManagementEnabled: false,
     };
 
     findObjectsMock.mockImplementation(() => ({

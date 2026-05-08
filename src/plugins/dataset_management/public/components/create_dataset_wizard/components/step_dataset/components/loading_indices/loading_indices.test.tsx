@@ -1,0 +1,15 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { LoadingIndices } from '../loading_indices';
+import { shallow } from 'enzyme';
+
+describe('LoadingIndices', () => {
+  it('should render normally', () => {
+    const component = shallow(<LoadingIndices />);
+
+    expect(component).toMatchSnapshot();
+  });
+});

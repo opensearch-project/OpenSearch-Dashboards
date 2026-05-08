@@ -28,8 +28,7 @@
  * under the License.
  */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot, Root } from 'react-dom/client';
 import { Subscription } from 'rxjs';
 import {
   Embeddable,
@@ -74,7 +73,7 @@ function getOutput(input: MultiTaskTodoInput) {
 export class MultiTaskTodoEmbeddable extends Embeddable<MultiTaskTodoInput, MultiTaskTodoOutput> {
   public readonly type = MULTI_TASK_TODO_EMBEDDABLE;
   private subscription: Subscription;
-  private node?: HTMLElement;
+  private root: Root | null = null;
 
   constructor(initialInput: MultiTaskTodoInput, parent?: IContainer) {
     super(initialInput, getOutput(initialInput), parent);
@@ -89,11 +88,12 @@ export class MultiTaskTodoEmbeddable extends Embeddable<MultiTaskTodoInput, Mult
   }
 
   public render(node: HTMLElement) {
-    if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
+    if (this.root) {
+      this.root.unmount();
+      this.root = null;
     }
-    this.node = node;
-    ReactDOM.render(<MultiTaskTodoEmbeddableComponent embeddable={this} />, node);
+    this.root = createRoot(node);
+    this.root.render(<MultiTaskTodoEmbeddableComponent embeddable={this} />);
   }
 
   public reload() {}
@@ -101,8 +101,9 @@ export class MultiTaskTodoEmbeddable extends Embeddable<MultiTaskTodoInput, Mult
   public destroy() {
     super.destroy();
     this.subscription.unsubscribe();
-    if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
+    if (this.root) {
+      this.root.unmount();
+      this.root = null;
     }
   }
 }

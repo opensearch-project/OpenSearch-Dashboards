@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { AppMountParameters } from 'opensearch-dashboards/public';
 import {
   EuiPage,
@@ -111,7 +111,8 @@ function RoutingExplorer({
 }
 
 export const renderApp = (props: Props, element: AppMountParameters['element']) => {
-  ReactDOM.render(<RoutingExplorer {...props} />, element);
+  const root = createRoot(element);
+  root.render(<RoutingExplorer {...props} />);
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

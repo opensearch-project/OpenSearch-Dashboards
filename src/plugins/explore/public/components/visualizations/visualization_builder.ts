@@ -4,12 +4,12 @@
  */
 
 import React from 'react';
-import { BehaviorSubject, Subscription, combineLatest } from 'rxjs';
-import { isEmpty } from 'lodash';
-import { debounceTime } from 'rxjs/operators';
+import { BehaviorSubject, Observable, Subscription, combineLatest } from 'rxjs';
+import { isEmpty, isEqual } from 'lodash';
+import { debounceTime, map } from 'rxjs/operators';
 
-import { ChartType, StyleOptions } from './utils/use_visualization_types';
-import { convertMappingsToStrings, isValidMapping } from './visualization_builder_utils';
+import { ChartStyles, ChartType, StyleOptions } from './utils/use_visualization_types';
+import { isValidMapping } from './visualization_builder_utils';
 import { getServices } from '../../services/services';
 import { IOsdUrlStateStorage } from '../../../../opensearch_dashboards_utils/public';
 import { OpenSearchSearchHit } from '../../types/doc_views_types';
@@ -17,36 +17,37 @@ import { isChartType } from './utils/is_chart_type';
 import { visualizationRegistry } from './visualization_registry';
 import { normalizeResultRows } from './utils/normalize_result_rows';
 import { ChartConfig, VisData } from './visualization_builder.types';
-import { ExecutionContextSearch } from '../../../../expressions/common/';
 import { VisualizationRender } from './visualization_render';
-import { ExpressionsStart } from '../../../../expressions/public';
 import { StylePanelRender } from './style_panel_render';
+import { adaptLegacyData } from './visualization_builder_utils';
+import { mergeStyles } from './utils/utils';
+import { AxisFieldNameMappings, RenderChartConfig } from './types';
+import { TimeRange } from '../../../../data/common';
 
 interface VisState {
   styleOptions?: StyleOptions;
   chartType?: string;
-  axesMapping?: Record<string, string>;
+  axesMapping?: AxisFieldNameMappings;
 }
 
 interface Options {
   getUrlStateStorage?: () => IOsdUrlStateStorage | undefined;
-  getExpressions: () => ExpressionsStart;
 }
 
 export class VisualizationBuilder {
   private isInitialized = false;
   private getUrlStateStorage: Options['getUrlStateStorage'];
-  private getExpression: Options['getExpressions'];
   private subscriptions = Array<Subscription>();
 
   visConfig$ = new BehaviorSubject<ChartConfig | undefined>(undefined);
   data$ = new BehaviorSubject<VisData | undefined>(undefined);
+  showRawTable$ = new BehaviorSubject<boolean>(false);
+  isVisDirty$ = new BehaviorSubject<boolean>(false);
 
-  constructor({ getUrlStateStorage, getExpressions }: Options) {
+  constructor({ getUrlStateStorage }: Options) {
     if (getUrlStateStorage) {
       this.getUrlStateStorage = getUrlStateStorage;
     }
-    this.getExpression = getExpressions;
   }
 
   init() {
@@ -59,8 +60,16 @@ export class VisualizationBuilder {
     // Read state from url
     const urlStateStorage = this.getUrlStateStorage?.();
     if (urlStateStorage) {
-      const urlState = urlStateStorage.get<VisState>('_v');
-      state = { ...state, ...urlState };
+      const urlState = urlStateStorage.get<VisState & { isVisDirty: boolean }>('_v');
+
+      if (urlState) {
+        const { isVisDirty, ...visState } = urlState;
+        state = { ...state, ...visState };
+
+        // sync url isVisDirty state to visualization builder
+        // this is to track user's modification after reloading page
+        if (typeof isVisDirty === 'boolean' && isVisDirty) this.isVisDirty$.next(isVisDirty);
+      }
     }
 
     // update visualization state accordingly
@@ -79,19 +88,30 @@ export class VisualizationBuilder {
 
     // Subscribe to visualization state updates and sync the state to url
     this.subscriptions.push(
-      combineLatest([this.visConfig$])
+      combineLatest([this.visConfig$, this.isVisDirty$])
         .pipe(debounceTime(500))
-        .subscribe(([visConfig]) =>
-          this.syncToUrl({
-            chartType: visConfig?.type,
-            axesMapping: visConfig?.axesMapping,
-            styleOptions: visConfig?.styles,
-          })
+        .subscribe(([visConfig, isVisDirty]) =>
+          this.syncToUrl(
+            {
+              chartType: visConfig?.type,
+              axesMapping: visConfig?.axesMapping,
+              styleOptions: visConfig?.styles,
+            },
+            isVisDirty
+          )
         ),
       this.data$.subscribe((data) => this.onDataChange(data))
     );
 
     this.setIsInitialized(true);
+  }
+
+  setShowRawTable(on: boolean) {
+    this.showRawTable$.next(on);
+  }
+
+  setIsVisDirty(on: boolean) {
+    this.isVisDirty$.next(on);
   }
 
   setIsInitialized(isInitialized: boolean) {
@@ -104,10 +124,14 @@ export class VisualizationBuilder {
       return;
     }
 
+    if (chartType === 'table' && this.showRawTable$.value) {
+      this.showRawTable$.next(false);
+    }
+
     const currentVisConfig = this.visConfig$.value;
     const newVisConfig: ChartConfig = { type: chartType };
 
-    const visConfig = visualizationRegistry.getVisualizationConfig(chartType);
+    const visConfig = visualizationRegistry.getVisualization(chartType);
     if (!visConfig) {
       this.setVisConfig(undefined);
       return;
@@ -165,17 +189,16 @@ export class VisualizationBuilder {
       return;
     }
 
-    const axesColumnMapping = visualizationRegistry.getDefaultAxesMapping(
+    const axesMapping = visualizationRegistry.getAxesMappingByRule(
       bestMatch.rule,
-      bestMatch.chartType.type,
       numericalColumns,
       categoricalColumns,
       dateColumns
     );
 
     return {
-      chartType: bestMatch.chartType.type as ChartType,
-      axesMapping: convertMappingsToStrings(axesColumnMapping),
+      chartType: bestMatch.chartType as ChartType,
+      axesMapping,
     };
   }
 
@@ -185,7 +208,7 @@ export class VisualizationBuilder {
    */
   reuseCurrentAxesMapping(
     chartType: ChartType,
-    axesMapping: Record<string, string>,
+    axesMapping: AxisFieldNameMappings,
     data: VisData | undefined
   ) {
     const allColumns = [
@@ -193,26 +216,11 @@ export class VisualizationBuilder {
       ...(data?.categoricalColumns ?? []),
       ...(data?.dateColumns ?? []),
     ];
-    const visConfig = visualizationRegistry.getVisualizationConfig(chartType);
+    const visConfig = visualizationRegistry.getVisualization(chartType);
     if (!visConfig) {
       return;
     }
-
-    const currentRule = visualizationRegistry.findRuleByAxesMapping(axesMapping, allColumns);
-    if (!isEmpty(axesMapping) && currentRule) {
-      const columnMapping = visualizationRegistry.getDefaultAxesMapping(
-        currentRule,
-        chartType,
-        data?.numericalColumns ?? [],
-        data?.categoricalColumns ?? [],
-        data?.dateColumns ?? []
-      );
-      const updatedAxesMapping: Record<string, string> = {};
-      Object.entries(columnMapping).forEach(([role, value]) => {
-        updatedAxesMapping[role] = value.name;
-      });
-      return updatedAxesMapping;
-    }
+    return visualizationRegistry.updateAxesMappingByChartType(chartType, axesMapping, allColumns);
   }
 
   /**
@@ -232,20 +240,15 @@ export class VisualizationBuilder {
 
     const columns = [...data.numericalColumns, ...data.categoricalColumns, ...data.dateColumns];
 
-    // Metric chart cannot be created from multiple data points
-    const invalidMetricData =
-      columns.length > 0 && columns[0].validValuesCount > 1 && currentChartType === 'metric';
-
     // We cannot apply the current chart type and axes mapping if:
-    // 1. The current chart type is 'metric', but it has multiple data points
-    // 2. It has axes mapping, but the mapping is incompatible with the received data
-    // 3. No current axes mapping
+    // 1. It has axes mapping, but the mapping is incompatible with the received data
+    // 2. No current axes mapping
     // For these cases, we will create auto vis based on the rules. If not auto vis can be created,
     // reset chart type and axes mapping to empty, this will let user to choose.
-    if (invalidMetricData || isEmpty(axesMapping) || !isValidMapping(axesMapping ?? {}, columns)) {
+    if (isEmpty(axesMapping) || !isValidMapping(axesMapping ?? {}, columns)) {
       const autoVis = this.createAutoVis(data);
       if (autoVis) {
-        const chartTypeConfig = visualizationRegistry.getVisualizationConfig(autoVis.chartType);
+        const chartTypeConfig = visualizationRegistry.getVisualization(autoVis.chartType);
         if (chartTypeConfig) {
           const newVisConfig: ChartConfig = {
             type: autoVis.chartType,
@@ -255,7 +258,7 @@ export class VisualizationBuilder {
           this.setVisConfig(newVisConfig);
         }
       } else {
-        const chartTypeConfig = visualizationRegistry.getVisualizationConfig('table');
+        const chartTypeConfig = visualizationRegistry.getVisualization('table');
         if (!chartTypeConfig) {
           this.setVisConfig(undefined);
         }
@@ -298,34 +301,39 @@ export class VisualizationBuilder {
       return;
     }
     if (currentVisConfig.styles) {
+      this.setIsVisDirty(true);
       this.visConfig$.next({
         ...currentVisConfig,
-        styles: { ...currentVisConfig.styles, ...styles } as StyleOptions,
+        styles: { ...currentVisConfig.styles, ...styles },
       });
     }
   }
 
   setVisConfig(config?: ChartConfig) {
-    this.visConfig$.next(config);
+    const newConfig = adaptLegacyData(config);
+    this.visConfig$.next(newConfig);
   }
 
   setCurrentChartType(chartType?: ChartType) {
     if (this.visConfig$.value?.type !== chartType) {
+      this.setIsVisDirty(true);
       this.onChartTypeChange(chartType);
     }
   }
 
-  setAxesMapping(mapping: Record<string, string>) {
+  setAxesMapping(mapping: AxisFieldNameMappings) {
     const config = this.visConfig$.value;
-    if (config) {
+    if (config && !isEqual(config.axesMapping, mapping)) {
+      this.setIsVisDirty(true);
       this.visConfig$.next({ ...config, axesMapping: mapping });
     }
   }
 
-  syncToUrl<State>(visState: VisState) {
+  syncToUrl(visState: VisState, isVisDirty?: boolean) {
     const urlStateStorage = this.getUrlStateStorage?.();
+
     if (urlStateStorage) {
-      urlStateStorage.set('_v', visState, { replace: true });
+      urlStateStorage.set('_v', { ...visState, isVisDirty }, { replace: true });
     }
   }
 
@@ -335,6 +343,8 @@ export class VisualizationBuilder {
 
     this.visConfig$.complete();
     this.data$.complete();
+    this.showRawTable$.complete();
+    this.isVisDirty$.complete();
   }
 
   reset(): void {
@@ -342,6 +352,8 @@ export class VisualizationBuilder {
 
     this.visConfig$ = new BehaviorSubject<ChartConfig | undefined>(undefined);
     this.data$ = new BehaviorSubject<VisData | undefined>(undefined);
+    this.showRawTable$ = new BehaviorSubject<boolean>(false);
+    this.isVisDirty$ = new BehaviorSubject<boolean>(false);
     this.isInitialized = false;
   }
 
@@ -349,17 +361,35 @@ export class VisualizationBuilder {
     this.syncToUrl({ axesMapping: {}, styleOptions: undefined, chartType: undefined });
   }
 
-  renderVisualization({ searchContext }: { searchContext?: ExecutionContextSearch }) {
-    const ExpressionRenderer = this.getExpression()?.ReactExpressionRenderer;
-    if (!ExpressionRenderer) {
-      return null;
-    }
+  getRenderConfig$(): Observable<RenderChartConfig | undefined> {
+    return this.visConfig$.pipe(
+      map((config) => {
+        if (config?.type) {
+          const vis = visualizationRegistry.getVisualization(config.type);
+          if (vis) {
+            const styles: ChartStyles = mergeStyles(vis.ui.style.defaults, config.styles);
+            return { styles, type: config.type, axesMapping: config.axesMapping };
+          }
+          return undefined;
+        }
+      })
+    );
+  }
 
+  renderVisualization({
+    timeRange,
+    onSelectTimeRange,
+  }: {
+    timeRange?: TimeRange;
+    onSelectTimeRange?: (range?: TimeRange) => void;
+  }) {
     return React.createElement(VisualizationRender, {
       data$: this.data$,
-      visConfig$: this.visConfig$,
-      searchContext,
-      ExpressionRenderer,
+      config$: this.getRenderConfig$(),
+      showRawTable$: this.showRawTable$,
+      timeRange,
+      onSelectTimeRange,
+      onStyleChange: this.updateStyles.bind(this),
     });
   }
 
@@ -367,7 +397,7 @@ export class VisualizationBuilder {
     return React.createElement(StylePanelRender, {
       className,
       data$: this.data$,
-      visConfig$: this.visConfig$,
+      config$: this.getRenderConfig$(),
       onStyleChange: this.updateStyles.bind(this),
       onAxesMappingChange: this.setAxesMapping.bind(this),
       onChartTypeChange: this.setCurrentChartType.bind(this),
@@ -381,7 +411,6 @@ export const getVisualizationBuilder = () => {
   if (!visualizationBuilder) {
     visualizationBuilder = new VisualizationBuilder({
       getUrlStateStorage: () => getServices().osdUrlStateStorage,
-      getExpressions: () => getServices().expressions,
     });
   }
   return visualizationBuilder;

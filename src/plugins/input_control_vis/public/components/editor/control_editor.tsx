@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { PureComponent, ChangeEvent } from 'react';
+import { PureComponent, ChangeEvent } from 'react';
 import { injectI18n, FormattedMessage, InjectedIntlProps } from '@osd/i18n/react';
 
 import {

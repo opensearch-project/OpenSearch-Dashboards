@@ -12,6 +12,7 @@ import {
 import { KeyStringParser } from './key_parser';
 import { SequenceHandler } from './sequence_handler';
 import { SEQUENCE_PREFIX } from './constants';
+import { useKeyboardShortcut } from './use_keyboard_shortcut';
 
 /**
  * @internal
@@ -40,6 +41,8 @@ export class KeyboardShortcutService {
     return {
       register: (shortcut) => this.register(shortcut),
       unregister: (shortcut) => this.unregister(shortcut),
+      useKeyboardShortcut: (shortcut) => useKeyboardShortcut(shortcut, this),
+      getAllShortcuts: () => this.getAllShortcuts(),
     };
   }
 
@@ -53,7 +56,7 @@ export class KeyboardShortcutService {
   private getNamespacedId = (shortcut: Pick<ShortcutDefinition, 'id' | 'pluginId'>) =>
     `${shortcut.id.toLowerCase()}.${shortcut.pluginId.toLowerCase()}`;
 
-  private register(shortcut: ShortcutDefinition): void {
+  public register(shortcut: ShortcutDefinition): void {
     if (!this.config.enabled) {
       return;
     }
@@ -91,7 +94,7 @@ export class KeyboardShortcutService {
     this.namespacedIdToKeyLookup.set(namespacedId, key);
   }
 
-  private unregister(shortcut: Pick<ShortcutDefinition, 'id' | 'pluginId'>): void {
+  public unregister(shortcut: Pick<ShortcutDefinition, 'id' | 'pluginId'>): void {
     const namespacedId = this.getNamespacedId(shortcut);
 
     const key = this.namespacedIdToKeyLookup.get(namespacedId);
@@ -193,5 +196,16 @@ export class KeyboardShortcutService {
 
   private stopEventListener(): void {
     document.removeEventListener('keydown', this.handleKeyboardEvent, true);
+  }
+
+  public getAllShortcuts(): ShortcutDefinition[] {
+    const allShortcuts: ShortcutDefinition[] = [];
+
+    // Iterate through all shortcuts in the map and collect all shortcuts
+    for (const shortcuts of this.shortcutsMapByKey.values()) {
+      allShortcuts.push(...shortcuts);
+    }
+
+    return allShortcuts;
   }
 }

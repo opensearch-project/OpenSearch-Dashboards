@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { TutorialService } from './tutorial_service';
 
 describe('TutorialService', () => {

@@ -9,28 +9,22 @@ exports[`TopNavMenu mounts the data source menu as well as top nav menu 1`] = `
     popoverBreakpoints="none"
   >
     <TopNavMenuItem
-      disableButton={false}
       id="test"
       key="nav-menu-0"
       label="test"
       run={[MockFunction]}
-      tooltip=""
     />
     <TopNavMenuItem
-      disableButton={false}
       id="test2"
       key="nav-menu-1"
       label="test2"
       run={[MockFunction]}
-      tooltip=""
     />
     <TopNavMenuItem
-      disableButton={false}
       id="test3"
       key="nav-menu-2"
       label="test3"
       run={[MockFunction]}
-      tooltip=""
     />
     <Component
       componentConfig={

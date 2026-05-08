@@ -3,18 +3,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import './visualization_container.scss';
 import { EuiPanel } from '@elastic/eui';
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect } from 'react';
+import moment from 'moment';
+import { useDispatch } from 'react-redux';
 
 import './visualization_container.scss';
-import { AxisColumnMappings } from './types';
 import { useTabResults } from '../../application/utils/hooks/use_tab_results';
 import { useSearchContext } from '../query_panel/utils/use_search_context';
 import { getVisualizationBuilder } from './visualization_builder';
+import { TimeRange } from '../../../../data/common';
+import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import { ExploreServices } from '../../types';
+import {
+  clearQueryStatusMap,
+  clearResults,
+  setDateRange,
+} from '../../application/utils/state_management/slices';
+import { executeQueries } from '../../application/utils/state_management/actions/query_actions';
+import { AxisFieldNameMappings } from './types';
 
 export interface UpdateVisualizationProps {
-  mappings: AxisColumnMappings;
+  mappings: AxisFieldNameMappings;
 }
 // TODO: add back notifications
 // const VISUALIZATION_TOAST_MSG = {
@@ -32,18 +42,21 @@ export interface UpdateVisualizationProps {
 //   }),
 // };
 
-export const VisualizationContainer = () => {
+export const VisualizationContainer = React.memo(() => {
+  const { services } = useOpenSearchDashboards<ExploreServices>();
   const { results } = useTabResults();
   const searchContext = useSearchContext();
-
-  const rows = useMemo(() => results?.hits?.hits || [], [results]);
-  const fieldSchema = useMemo(() => results?.fieldSchema || [], [results]);
+  const dispatch = useDispatch();
 
   const visualizationBuilder = getVisualizationBuilder();
 
   useEffect(() => {
-    visualizationBuilder.handleData(rows, fieldSchema);
-  }, [rows, fieldSchema, visualizationBuilder]);
+    if (results) {
+      const rows = results.hits?.hits || [];
+      const fieldSchema = results.fieldSchema || [];
+      visualizationBuilder.handleData(rows, fieldSchema);
+    }
+  }, [visualizationBuilder, results]);
 
   useEffect(() => {
     visualizationBuilder.init();
@@ -52,6 +65,24 @@ export const VisualizationContainer = () => {
       visualizationBuilder.reset();
     };
   }, [visualizationBuilder]);
+
+  const onSelectTimeRange = useCallback(
+    (timeRange?: TimeRange) => {
+      if (timeRange) {
+        dispatch(
+          setDateRange({
+            from: moment(timeRange.from).toISOString(),
+            to: moment(timeRange.to).toISOString(),
+          })
+        );
+        dispatch(clearResults());
+        dispatch(clearQueryStatusMap());
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
+        dispatch(executeQueries({ services }));
+      }
+    },
+    [services, dispatch]
+  );
 
   return (
     <div className="exploreVisContainer">
@@ -63,9 +94,12 @@ export const VisualizationContainer = () => {
         paddingSize="none"
       >
         <div className="exploreVisPanel__inner">
-          {visualizationBuilder.renderVisualization({ searchContext })}
+          {visualizationBuilder.renderVisualization({
+            timeRange: searchContext?.timeRange,
+            onSelectTimeRange,
+          })}
         </div>
       </EuiPanel>
     </div>
   );
-};
+});

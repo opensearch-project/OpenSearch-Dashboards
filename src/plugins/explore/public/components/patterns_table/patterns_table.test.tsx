@@ -8,12 +8,18 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { PatternsTable, PatternItem } from './patterns_table';
 import { mockPatternItems, generateLargeDataset } from './utils/patterns_table.stubs';
+import { PatternsFlyoutProvider } from './patterns_table_flyout/patterns_flyout_context';
+
+const renderWithProvider = (ui: React.ReactElement) => {
+  return render(<PatternsFlyoutProvider>{ui}</PatternsFlyoutProvider>);
+};
 
 describe('PatternsTable', () => {
   // Standard test cases
   describe('Standard scenarios', () => {
     it('should render with default items', () => {
-      const { container } = render(<PatternsTable items={mockPatternItems} />);
+      // @ts-expect-error TS2739 TODO(ts-error): fixme
+      const { container } = renderWithProvider(<PatternsTable items={mockPatternItems} />);
 
       // Check if table is rendered
       const table = container.querySelector('table');
@@ -25,12 +31,13 @@ describe('PatternsTable', () => {
 
       // Check if column headers are rendered
       expect(screen.getAllByText('Event ratio')[0]).toBeInTheDocument();
-      expect(screen.getAllByText('Pattern Sample Log')[0]).toBeInTheDocument();
+      expect(screen.getAllByText('Pattern')[0]).toBeInTheDocument();
       expect(screen.getAllByText('Event count')[0]).toBeInTheDocument();
     });
 
     it('should render empty state when no items are provided', () => {
-      const { container } = render(<PatternsTable items={[]} />);
+      // @ts-expect-error TS2739 TODO(ts-error): fixme
+      const { container } = renderWithProvider(<PatternsTable items={[]} />);
 
       // Check if table is rendered
       const table = container.querySelector('table');
@@ -42,7 +49,8 @@ describe('PatternsTable', () => {
 
     it('should render a single item correctly', () => {
       const singleItem = [mockPatternItems[0]];
-      const { container } = render(<PatternsTable items={singleItem} />);
+      // @ts-expect-error TS2739 TODO(ts-error): fixme
+      const { container } = renderWithProvider(<PatternsTable items={singleItem} />);
 
       // Check if table is rendered with one row
       const rows = container.querySelectorAll('tbody tr');
@@ -58,7 +66,8 @@ describe('PatternsTable', () => {
       const user = userEvent.setup();
       const largeDataset = generateLargeDataset(mockPatternItems, 30);
 
-      const { container } = render(<PatternsTable items={largeDataset} />);
+      // @ts-expect-error TS2739 TODO(ts-error): fixme
+      const { container } = renderWithProvider(<PatternsTable items={largeDataset} />);
 
       // Check initial page
       const initialRows = container.querySelectorAll('tbody tr');
@@ -85,11 +94,13 @@ describe('PatternsTable', () => {
   describe('Edge cases', () => {
     it('should handle NaN values correctly', () => {
       const nanItems: PatternItem[] = [
+        // @ts-expect-error TS2741 TODO(ts-error): fixme
         {
           sample: 'ERROR [calculation] Division by zero',
           ratio: NaN,
           count: 42,
         },
+        // @ts-expect-error TS2741 TODO(ts-error): fixme
         {
           sample: 'WARN [calculation] Invalid operation',
           ratio: 0.15,
@@ -97,29 +108,30 @@ describe('PatternsTable', () => {
         },
       ];
 
-      const { container } = render(<PatternsTable items={nanItems} />);
+      // @ts-expect-error TS2739 TODO(ts-error): fixme
+      const { container } = renderWithProvider(<PatternsTable items={nanItems} />);
 
       // Check if table is rendered
       const rows = container.querySelectorAll('tbody tr');
       expect(rows.length).toBe(2);
 
       // Check if NaN values are displayed as '—'
-      const cells = container.querySelectorAll('td');
-
       // First row: NaN ratio should be displayed as '—'
-      expect(cells[0].textContent).toContain('—');
+      expect(rows[0].querySelectorAll('td')[1].textContent).toContain('—');
 
       // Second row: NaN count should be displayed as '—'
-      expect(cells[5].textContent).toContain('—');
+      expect(rows[1].querySelectorAll('td')[2].textContent).toContain('—');
     });
 
     it('should handle Infinity values correctly', () => {
       const infinityItems: PatternItem[] = [
+        // @ts-expect-error TS2741 TODO(ts-error): fixme
         {
           sample: 'ERROR [overflow] Maximum value exceeded',
           ratio: Infinity,
           count: 75,
         },
+        // @ts-expect-error TS2741 TODO(ts-error): fixme
         {
           sample: 'WARN [underflow] Minimum value exceeded',
           ratio: 0.08,
@@ -127,34 +139,36 @@ describe('PatternsTable', () => {
         },
       ];
 
-      const { container } = render(<PatternsTable items={infinityItems} />);
+      // @ts-expect-error TS2739 TODO(ts-error): fixme
+      const { container } = renderWithProvider(<PatternsTable items={infinityItems} />);
 
       // Check if table is rendered
       const rows = container.querySelectorAll('tbody tr');
       expect(rows.length).toBe(2);
 
       // Check if Infinity values are displayed as '—'
-      const cells = container.querySelectorAll('td');
-
       // First row: Infinity ratio should be displayed as '—'
-      expect(cells[0].textContent).toContain('—');
+      expect(rows[0].querySelectorAll('td')[1].textContent).toContain('—');
 
       // Second row: Infinity count should be displayed as '—'
-      expect(cells[5].textContent).toContain('—');
+      expect(rows[1].querySelectorAll('td')[2].textContent).toContain('—');
     });
 
     it('should handle empty pattern strings correctly', () => {
       const emptyPatternItems: PatternItem[] = [
+        // @ts-expect-error TS2741 TODO(ts-error): fixme
         {
           sample: '',
           ratio: 0.15,
           count: 150,
         },
+        // @ts-expect-error TS2741 TODO(ts-error): fixme
         {
           sample: (null as unknown) as string,
           ratio: 0.1,
           count: 100,
         },
+        // @ts-expect-error TS2741 TODO(ts-error): fixme
         {
           sample: (undefined as unknown) as string,
           ratio: 0.05,
@@ -162,27 +176,27 @@ describe('PatternsTable', () => {
         },
       ];
 
-      const { container } = render(<PatternsTable items={emptyPatternItems} />);
+      // @ts-expect-error TS2739 TODO(ts-error): fixme
+      const { container } = renderWithProvider(<PatternsTable items={emptyPatternItems} />);
 
       // Check if table is rendered
       const rows = container.querySelectorAll('tbody tr');
       expect(rows.length).toBe(3);
 
       // Check if empty patterns are displayed as '—'
-      const cells = container.querySelectorAll('td');
-
       // Empty string pattern should be displayed as '—'
-      expect(cells[1].querySelector('span')?.textContent).toContain('—');
+      expect(rows[0].querySelectorAll('td')[3].querySelector('span')?.textContent).toContain('—');
 
       // Null pattern should be displayed as '—'
-      expect(cells[4].querySelector('span')?.textContent).toContain('—');
+      expect(rows[1].querySelectorAll('td')[3].querySelector('span')?.textContent).toContain('—');
 
       // Undefined pattern should be displayed as '—'
-      expect(cells[7].querySelector('span')?.textContent).toContain('—');
+      expect(rows[2].querySelectorAll('td')[3].querySelector('span')?.textContent).toContain('—');
     });
 
     it('should handle extremely long pattern strings correctly', () => {
       const longPatternItems: PatternItem[] = [
+        // @ts-expect-error TS2741 TODO(ts-error): fixme
         {
           sample:
             'INFO [main] ' +
@@ -192,14 +206,15 @@ describe('PatternsTable', () => {
         },
       ];
 
-      const { container } = render(<PatternsTable items={longPatternItems} />);
+      // @ts-expect-error TS2739 TODO(ts-error): fixme
+      const { container } = renderWithProvider(<PatternsTable items={longPatternItems} />);
 
       // Check if table is rendered
       const rows = container.querySelectorAll('tbody tr');
       expect(rows.length).toBe(1);
 
       // Check if long pattern is displayed (not truncated by the test)
-      const patternCell = container.querySelectorAll('td')[1];
+      const patternCell = rows[0].querySelectorAll('td')[3];
       expect(patternCell.textContent).toContain('INFO [main]');
       expect(patternCell.textContent).toContain('Very long log message');
     });

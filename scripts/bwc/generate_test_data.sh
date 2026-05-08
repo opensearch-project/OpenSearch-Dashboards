@@ -16,7 +16,7 @@ function run_generate_data_spec() {
 function archive_data() {
   echo "[ Archiving test data. Beep boo-boo, boo-boo bop ]"
   PACKAGE_VERSION=$(get_dashboards_package_version)
-  cd "$OPENSEARCH_DIR" && tar -zcvf "osd-$PACKAGE_VERSION.tar.gz" data
-  cp "osd-$PACKAGE_VERSION.tar.gz" "$CWD/cypress/test-data/$DASHBOARDS_TYPE"
-  echo "[ Archive complete. Location: $CWD/cypress/test-data/$DASHBOARDS_TYPE/osd-$PACKAGE_VERSION.tar.gz' ]"
+  cd "$OPENSEARCH_DIR" && tar -zcvf "osd_$PACKAGE_VERSION.tar.gz" data
+  cp "osd_$PACKAGE_VERSION.tar.gz" "$CWD/cypress/test_data/$DASHBOARDS_TYPE"
+  echo "[ Archive complete. Location: $CWD/cypress/test_data/$DASHBOARDS_TYPE/osd_$PACKAGE_VERSION.tar.gz' ]"
 }

@@ -31,7 +31,7 @@
 import { EuiCompressedFormRow } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@osd/i18n/react';
 import { uniq } from 'lodash';
-import React from 'react';
+
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
 import { PhraseSuggestorUI, PhraseSuggestorProps } from './phrase_suggestor';
 import { withOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
@@ -47,6 +47,7 @@ class PhrasesValuesInputUI extends PhraseSuggestorUI<Props> {
     const { suggestions } = this.state;
     const { values, intl, onChange } = this.props;
     const options = values ? uniq([...values, ...suggestions]) : suggestions;
+
     return (
       <EuiCompressedFormRow
         fullWidth={true}
@@ -66,6 +67,7 @@ class PhrasesValuesInputUI extends PhraseSuggestorUI<Props> {
           selectedOptions={values || []}
           onSearchChange={this.onSearchChange}
           onCreateOption={(option: string) => onChange([...(values || []), option])}
+          onPasteValues={(pasted: string) => onChange([...(values || []), ...pasted])}
           onChange={onChange}
           isClearable={false}
           data-test-subj="filterParamsComboBox phrasesParamsComboxBox"

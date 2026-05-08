@@ -4,8 +4,39 @@
   flex-grow: 1;
 }
 
+.dshViewportRow {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  min-height: 0;
+}
+
 #dashboardViewport {
   display: flex;
   flex-direction: column;
   flex: 1;
+  min-width: 0;
+}
+
+// --- Variable Editor/Manage Panel Container ---
+#variablePanelContent {
+  &:empty {
+    display: none;
+  }
+
+  &:not(:empty) {
+    animation: slideInFromRight 250ms cubic-bezier(0.694, 0.0482, 0.335, 1);
+  }
+}
+
+@keyframes slideInFromRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }

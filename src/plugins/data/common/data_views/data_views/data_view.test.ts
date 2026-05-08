@@ -101,8 +101,26 @@ function createWithDataSource(id: string) {
 
   const dataSourceRef = { id: reference[0].id, type: reference[0].type };
   return new DataView({
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     spec: { id, type, version, timeFieldName, fields, title, dataSourceRef },
     savedObjectsClient,
+    fieldFormats: fieldFormatsMock,
+    shortDotsEnable: false,
+    metaFields: [],
+  });
+}
+
+function createWithDataSourceMeta(id: string) {
+  const {
+    type,
+    version,
+    attributes: { timeFieldName, fields, title },
+  } = stubbedSavedObjectIndexPattern(id);
+
+  const dataSourceMeta = { prometheusUrl: 'http://localhost:9090', customField: 'value' };
+  return new DataView({
+    spec: { id, type, version, timeFieldName, fields, title, dataSourceMeta },
+    savedObjectsClient: {} as any,
     fieldFormats: fieldFormatsMock,
     shortDotsEnable: false,
     metaFields: [],
@@ -383,6 +401,28 @@ describe('DataViewWithDataSource', () => {
       nestedArrayDataView.flattenHit(hit);
 
       expect(hit).toEqual(hitClone);
+    });
+  });
+});
+
+describe('DataViewWithDataSourceMeta', () => {
+  let dataView: DataView;
+
+  beforeEach(() => {
+    dataView = createWithDataSourceMeta('test-pattern');
+  });
+
+  describe('dataSourceMeta', () => {
+    test('should store dataSourceMeta from spec', () => {
+      expect(dataView.dataSourceMeta).toEqual({
+        prometheusUrl: 'http://localhost:9090',
+        customField: 'value',
+      });
+    });
+
+    test('should be undefined when not provided in spec', () => {
+      const dataViewWithoutMeta = create('test-pattern');
+      expect(dataViewWithoutMeta.dataSourceMeta).toBeUndefined();
     });
   });
 });

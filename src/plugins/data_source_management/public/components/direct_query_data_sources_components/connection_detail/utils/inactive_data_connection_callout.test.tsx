@@ -3,14 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
 import { InactiveDataConnectionCallout } from './inactive_data_connection_callout';
 import { EuiCallOut, EuiButton } from '@elastic/eui';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { DirectQueryDatasourceType } from '../../../../types';
 import { DATACONNECTIONS_BASE, DATACONNECTIONS_UPDATE_STATUS, EDIT } from '../../../../constants';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 
 jest.mock('../../../../../../opensearch_dashboards_react/public', () => ({
   useOpenSearchDashboards: jest.fn(),

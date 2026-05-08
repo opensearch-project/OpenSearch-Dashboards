@@ -114,7 +114,11 @@ export const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> 
         break;
       case 'PROMETHEUS':
         const prometheusProperties =
-          authMethod === 'basicauth'
+          authMethod === 'noauth'
+            ? {
+                'prometheus.uri': storeURI,
+              }
+            : authMethod === 'basicauth'
             ? {
                 'prometheus.uri': storeURI,
                 'prometheus.auth.type': authMethod,
@@ -143,7 +147,7 @@ export const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> 
     response
       .then(() => {
         toasts.addSuccess(`Data source ${name} created`);
-        history.push('/manage');
+        history.push('/');
       })
       .catch((err) => {
         const formattedError = formatError(err.name, err.message, err.body.message);

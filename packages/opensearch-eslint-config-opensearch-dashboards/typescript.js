@@ -36,8 +36,7 @@
 const semver = require('semver');
 const PKG = require('../../package.json');
 
-const eslintConfigPrettierTypescriptEslintRules = require('eslint-config-prettier/@typescript-eslint')
-  .rules;
+const eslintConfigPrettierTypescriptEslintRules = require('eslint-config-prettier').rules;
 
 // The current implementation excluded all the variables matching the regexp.
 // We should remove it as soon as multiple underscores are supported by the linter.
@@ -105,7 +104,7 @@ module.exports = {
             'error',
             { default: 'array-simple', readonly: 'array-simple' },
           ],
-          '@typescript-eslint/ban-types': [
+          '@typescript-eslint/no-restricted-types': [
             'error',
             {
               types: {
@@ -125,10 +124,6 @@ module.exports = {
                   message: 'Use FunctionComponent instead.',
                   fixWith: 'React.FunctionComponent',
                 },
-                // used in the codebase in the wild
-                '{}': false,
-                object: false,
-                Function: false,
               },
             },
           ],
@@ -197,6 +192,19 @@ module.exports = {
               selector: 'enum',
               format: ['PascalCase', 'UPPER_CASE', 'camelCase'],
             },
+            {
+              selector: 'import',
+              format: null,
+            },
+            {
+              selector: ['objectLiteralProperty', 'objectLiteralMethod'],
+              format: null,
+            },
+            {
+              selector: 'typeProperty',
+              modifiers: ['requiresQuotes'],
+              format: null,
+            },
           ],
           '@typescript-eslint/explicit-member-accessibility': [
             'error',
@@ -253,7 +261,8 @@ module.exports = {
           'no-eval': 'error',
           'no-new-wrappers': 'error',
           'no-script-url': 'error',
-          'no-shadow': 'error',
+          'no-shadow': 'off',
+          '@typescript-eslint/no-shadow': 'error',
           'no-throw-literal': 'error',
           'no-undef-init': 'error',
           'no-unsafe-finally': 'error',

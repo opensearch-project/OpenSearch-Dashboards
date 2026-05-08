@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, fireEvent, screen } from '@testing-library/react';
 import { WorkspaceCollaboratorsPanel } from './workspace_collaborators_panel';
 
@@ -98,5 +97,15 @@ describe('WorkspaceCollaboratorsPanel', () => {
     );
 
     expect(screen.getByText('A test error message')).toBeInTheDocument();
+  });
+
+  it('passes identitySource and http to WorkspaceCollaboratorInput', () => {
+    const identitySource = { source: 'LDAP', type: 'user' };
+    const http = { get: jest.fn() } as any;
+    const { container } = render(
+      <WorkspaceCollaboratorsPanel {...defaultProps} identitySource={identitySource} http={http} />
+    );
+    // When identitySource is provided, EuiComboBox is rendered instead of EuiFieldText
+    expect(container.querySelector('[role="textbox"]')).toBeInTheDocument();
   });
 });

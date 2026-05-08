@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { EuiCompressedComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 // @ts-ignore

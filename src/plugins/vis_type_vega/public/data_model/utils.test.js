@@ -131,3 +131,17 @@ describe('Utils.handleInvalidQuery', () => {
     expect(Utils.checkForFunctionProperty(nestedInputWithoutFn)).toBe(false);
   });
 });
+
+describe('Utils.checkForFunctionProperty - Array Fix', () => {
+  test('should detect function in array of objects (CVE fix)', () => {
+    expect(Utils.checkForFunctionProperty({ a: [{ func: () => jest.fn() }] })).toBe(true);
+  });
+
+  test('should detect exploit pattern: toJSON in nested array', () => {
+    expect(Utils.checkForFunctionProperty({ a: [{ key: { toJSON: setTimeout } }] })).toBe(true);
+  });
+
+  test('should allow valid array structures', () => {
+    expect(Utils.checkForFunctionProperty({ arr: [{ key: 'value' }] })).toBe(false);
+  });
+});

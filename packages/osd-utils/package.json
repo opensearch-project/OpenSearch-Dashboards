@@ -13,8 +13,5 @@
     "@osd/config-schema": "1.0.0",
     "@osd/cross-platform": "1.0.0",
     "load-json-file": "^6.2.0"
-  },
-  "devDependencies": {
-    "typescript": "4.5.5"
   }
 }

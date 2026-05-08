@@ -542,6 +542,10 @@ exports[`ConfigurePrometheusDatasourcePanel renders correctly 1`] = `
                         options={
                           Array [
                             Object {
+                              "text": "No authentication",
+                              "value": "noauth",
+                            },
+                            Object {
                               "text": "Basic authentication",
                               "value": "basicauth",
                             },
@@ -561,6 +565,10 @@ exports[`ConfigurePrometheusDatasourcePanel renders correctly 1`] = `
                           onFocus={[Function]}
                           options={
                             Array [
+                              Object {
+                                "text": "No authentication",
+                                "value": "noauth",
+                              },
                               Object {
                                 "text": "Basic authentication",
                                 "value": "basicauth",
@@ -603,12 +611,18 @@ exports[`ConfigurePrometheusDatasourcePanel renders correctly 1`] = `
                                   >
                                     <option
                                       key="0"
+                                      value="noauth"
+                                    >
+                                      No authentication
+                                    </option>
+                                    <option
+                                      key="1"
                                       value="basicauth"
                                     >
                                       Basic authentication
                                     </option>
                                     <option
-                                      key="1"
+                                      key="2"
                                       value="awssigv4"
                                     >
                                       AWS Signature Version 4

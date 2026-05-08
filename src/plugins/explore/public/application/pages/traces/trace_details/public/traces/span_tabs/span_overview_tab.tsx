@@ -22,6 +22,7 @@ import { nanoToMilliSec, isEmpty, round } from '../../utils/helper_functions';
 import { extractSpanDuration, extractHttpStatusCode } from '../../utils/span_data_utils';
 import { isSpanError, resolveServiceNameFromSpan } from '../ppl_resolve_helpers';
 import './span_tabs.scss';
+import { getStatusCodeColor } from '../../../../../../../components/data_table/table_cell/trace_utils/trace_utils';
 
 export interface SpanOverviewTabProps {
   selectedSpan?: any;
@@ -49,6 +50,11 @@ const OverviewField: React.FC<OverviewFieldProps> = ({
     {copyable && copyValue ? (
       <EuiFlexGroup gutterSize="xs" alignItems="center">
         <EuiFlexItem grow={false}>
+          <EuiText size="s" color="default">
+            {value}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiCopy textToCopy={copyValue}>
             {(copy) => (
               <EuiSmallButtonIcon
@@ -60,11 +66,6 @@ const OverviewField: React.FC<OverviewFieldProps> = ({
               />
             )}
           </EuiCopy>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText size="s" color="default">
-            {value}
-          </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     ) : (
@@ -79,16 +80,6 @@ export const SpanOverviewTab: React.FC<SpanOverviewTabProps> = ({
   selectedSpan,
   onSwitchToErrorsTab,
 }) => {
-  const getStatusCodeColor = (statusCode: number | undefined): string => {
-    if (!statusCode) return 'default';
-
-    if (statusCode >= 200 && statusCode < 300) return 'success';
-    if (statusCode >= 300 && statusCode < 400) return 'primary';
-    if (statusCode >= 400 && statusCode < 500) return 'warning';
-    if (statusCode >= 500 && statusCode < 600) return 'danger';
-    return 'default';
-  };
-
   const spanData = useMemo(() => {
     if (!selectedSpan || isEmpty(selectedSpan)) {
       return null;
@@ -132,7 +123,6 @@ export const SpanOverviewTab: React.FC<SpanOverviewTabProps> = ({
 
   const {
     spanId,
-    serviceName,
     operation,
     duration,
     startTime,
@@ -151,9 +141,9 @@ export const SpanOverviewTab: React.FC<SpanOverviewTabProps> = ({
             label={i18n.translate('explore.spanOverviewTab.serviceIdentifier', {
               defaultMessage: 'Service identifier',
             })}
-            value={serviceName || '-'}
-            copyable={!!serviceName}
-            copyValue={serviceName}
+            value={operation || '-'}
+            copyable={!!operation}
+            copyValue={operation}
           />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -198,8 +188,8 @@ export const SpanOverviewTab: React.FC<SpanOverviewTabProps> = ({
                 <EuiFlexItem grow={false}>
                   <EuiText size="s">
                     {hasError
-                      ? i18n.translate('explore.spanOverviewTab.fault', {
-                          defaultMessage: 'Fault',
+                      ? i18n.translate('explore.spanOverviewTab.error', {
+                          defaultMessage: 'Error',
                         })
                       : i18n.translate('explore.spanOverviewTab.ok', {
                           defaultMessage: 'OK',

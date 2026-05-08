@@ -42,6 +42,11 @@ export const selectShowHistogram = createSelector(
   (uiState) => uiState.showHistogram
 );
 
+export const selectWrapCellText = createSelector(
+  [selectUIState],
+  (uiState) => uiState.wrapCellText
+);
+
 export const selectPatternsField = createSelector(
   [selectTabState],
   (tabState) => tabState.patterns.patternsField
@@ -76,5 +81,13 @@ export const selectSavedSearch = createSelector(
   [selectLegacyState],
   (legacyState) => legacyState.savedSearch
 );
+
+/**
+ * Query execution status selectors
+ */
+export {
+  selectIsLoading as selectIsQueryRunning,
+  selectShouldShowCancelButton,
+} from './query_editor';
 
 export * from './query_editor';

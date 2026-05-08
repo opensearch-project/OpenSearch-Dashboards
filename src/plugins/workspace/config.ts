@@ -8,6 +8,7 @@ import { schema, TypeOf } from '@osd/config-schema';
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
   maximum_workspaces: schema.maybe(schema.number()),
+  aclEnforceEndpointPatterns: schema.arrayOf(schema.string(), { defaultValue: [] }),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;

@@ -15,6 +15,7 @@ export interface ImportTextProps {
   delimiter?: string;
   selectedDataSourceId?: string;
   mapping?: Record<string, any>;
+  importIdentifier?: string;
 }
 
 export async function importText({
@@ -26,6 +27,7 @@ export async function importText({
   delimiter,
   selectedDataSourceId,
   mapping,
+  importIdentifier,
 }: ImportTextProps) {
   const query = {
     indexName,
@@ -33,6 +35,7 @@ export async function importText({
     createMode,
     ...(selectedDataSourceId && { dataSource: selectedDataSourceId }),
     delimiter,
+    ...(importIdentifier && { importIdentifier }),
   };
 
   return await http.post<ImportResponse>('/api/data_importer/_import_text', {

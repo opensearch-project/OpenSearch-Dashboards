@@ -1,2 +1,0 @@
-refactor:
-- Move viz render functions to VisualizationBuilder ([#10390](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10390))

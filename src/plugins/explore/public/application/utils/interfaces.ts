@@ -4,6 +4,7 @@
  */
 
 import { Duration, Moment } from 'moment';
+import { IUiSettingsClient } from 'opensearch-dashboards/public';
 import { DataView as Dataset, DataPublicPluginStart } from '../../../../data/public';
 import { QueryState, ISearchResult } from './state_management/slices';
 import { ExploreServices } from '../../types';
@@ -29,6 +30,15 @@ interface Ordered {
 }
 
 /**
+ * Interface for histogram series data
+ */
+export interface HistogramSeries {
+  id: string;
+  name: string;
+  data: Array<{ x: number; y: number }>;
+}
+
+/**
  * Interface for chart data
  */
 export interface ChartData {
@@ -39,6 +49,7 @@ export interface ChartData {
   yAxisLabel: string;
   buckets?: ChartDataBucket[];
   ordered: Ordered;
+  series?: HistogramSeries[];
 }
 
 /**
@@ -131,7 +142,9 @@ export type HistogramDataProcessor = (
   rawResults: ISearchResult,
   dataset: Dataset,
   data: DataPublicPluginStart,
-  interval: string
+  interval: string,
+  uiSettings: IUiSettingsClient,
+  breakdownField?: string
 ) => ProcessedSearchResults;
 
 /**

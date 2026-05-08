@@ -15,6 +15,7 @@ export interface ImportFileProps {
   delimiter?: string;
   selectedDataSourceId?: string;
   mapping?: Record<string, any>;
+  importIdentifier?: string;
 }
 
 export async function importFile({
@@ -26,6 +27,7 @@ export async function importFile({
   delimiter,
   selectedDataSourceId,
   mapping,
+  importIdentifier,
 }: ImportFileProps) {
   const formData = new FormData();
   formData.append('file', file);
@@ -39,6 +41,7 @@ export async function importFile({
     fileExtension,
     ...(selectedDataSourceId && { dataSource: selectedDataSourceId }),
     delimiter,
+    ...(importIdentifier && { importIdentifier }),
   };
 
   return await http.post<ImportResponse>('/api/data_importer/_import_file', {

@@ -1,0 +1,131 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { i18n } from '@osd/i18n';
+import { EuiSwitch, EuiButtonGroup, EuiFormRow } from '@elastic/eui';
+
+import { BarGaugeChartStyle } from './bar_gauge_vis_config';
+import { StyleAccordion } from '../style_panel/style_accordion';
+
+interface BarGaugeVisOptionsProps {
+  styles: BarGaugeChartStyle['exclusive'];
+  onChange: (styles: BarGaugeChartStyle['exclusive']) => void;
+}
+
+const displayModeOption = [
+  {
+    id: 'gradient',
+    label: i18n.translate('explore.vis.barGauge.displayMode.gradient', {
+      defaultMessage: 'Gradient',
+    }),
+  },
+  {
+    id: 'stack',
+    label: i18n.translate('explore.vis.barGauge.displayMode.stack', {
+      defaultMessage: 'Stack',
+    }),
+  },
+  {
+    id: 'basic',
+    label: i18n.translate('explore.vis.barGauge.displayMode.basic', {
+      defaultMessage: 'Basic',
+    }),
+  },
+];
+
+const valueDisplayOption = [
+  {
+    id: 'valueColor',
+    label: i18n.translate('explore.vis.barGauge.valueDisplay.valueColor', {
+      defaultMessage: 'Value Color',
+    }),
+    'data-test-subj': `valueDisplayOption-value`,
+  },
+  {
+    id: 'textColor',
+    label: i18n.translate('explore.vis.barGauge.valueDisplay.textColor', {
+      defaultMessage: 'Text Color',
+    }),
+    'data-test-subj': `valueDisplayOption-text`,
+  },
+  {
+    id: 'hidden',
+    label: i18n.translate('explore.vis.barGauge.valueDisplay.hidden', {
+      defaultMessage: 'Hidden',
+    }),
+    'data-test-subj': `valueDisplayOption-hidden`,
+  },
+];
+
+export const BarGaugeExclusiveVisOptions = ({ styles, onChange }: BarGaugeVisOptionsProps) => {
+  const updateExclusiveOption = (key: keyof BarGaugeChartStyle['exclusive'], value: any) => {
+    onChange({
+      ...styles,
+      [key]: value,
+    });
+  };
+
+  return (
+    <StyleAccordion
+      id="barGaugeSection"
+      accordionLabel={i18n.translate('explore.stylePanel.tabs.barGauge', {
+        defaultMessage: 'Bar Gauge',
+      })}
+      initialIsOpen={true}
+      data-test-subj="barGaugeExclusivePanel"
+    >
+      <EuiFormRow
+        label={i18n.translate('explore.stylePanel.barGauge.exclusive.displayStyle', {
+          defaultMessage: 'Display style',
+        })}
+      >
+        <EuiButtonGroup
+          legend={i18n.translate('explore.stylePanel.barGauge.exclusive.displayStyle', {
+            defaultMessage: 'Display style',
+          })}
+          isFullWidth
+          options={displayModeOption}
+          onChange={(optionId) => {
+            updateExclusiveOption('displayMode', optionId);
+          }}
+          type="single"
+          idSelected={styles?.displayMode ?? 'gradient'}
+          buttonSize="compressed"
+        />
+      </EuiFormRow>
+
+      <EuiFormRow
+        label={i18n.translate('explore.stylePanel.barGauge.exclusive.valueDisplay', {
+          defaultMessage: 'Value display',
+        })}
+      >
+        <EuiButtonGroup
+          legend={i18n.translate('explore.stylePanel.barGauge.exclusive.valueDisplay', {
+            defaultMessage: 'Value display',
+          })}
+          isFullWidth
+          options={valueDisplayOption}
+          onChange={(optionId) => {
+            updateExclusiveOption('valueDisplay', optionId);
+          }}
+          type="single"
+          idSelected={styles?.valueDisplay ?? 'valueColor'}
+          buttonSize="compressed"
+        />
+      </EuiFormRow>
+
+      <EuiFormRow>
+        <EuiSwitch
+          compressed
+          label={i18n.translate('explore.vis.heatmap.showUnfilledArea', {
+            defaultMessage: 'Show unfilled area',
+          })}
+          checked={styles?.showUnfilledArea ?? false}
+          onChange={(e) => updateExclusiveOption('showUnfilledArea', e.target.checked)}
+        />
+      </EuiFormRow>
+    </StyleAccordion>
+  );
+};

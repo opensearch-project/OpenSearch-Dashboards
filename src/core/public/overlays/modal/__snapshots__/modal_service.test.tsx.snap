@@ -2,9 +2,7 @@
 
 exports[`ModalService ModalRef#close() can be called multiple times on the same ModalRef 1`] = `
 Array [
-  Array [
-    <div />,
-  ],
+  Array [],
 ]
 `;
 
@@ -24,7 +22,6 @@ Array [
         />
       </EuiConfirmModal>
     </mockConstructor>,
-    <div />,
   ],
 ]
 `;
@@ -44,7 +41,6 @@ Array [
         Some message
       </EuiConfirmModal>
     </mockConstructor>,
-    <div />,
   ],
 ]
 `;
@@ -64,7 +60,6 @@ Array [
         confirm 1
       </EuiConfirmModal>
     </mockConstructor>,
-    <div />,
   ],
   Array [
     <mockConstructor>
@@ -77,7 +72,6 @@ Array [
         some confirm
       </EuiConfirmModal>
     </mockConstructor>,
-    <div />,
   ],
 ]
 `;
@@ -95,7 +89,6 @@ Array [
         />
       </EuiModal>
     </mockConstructor>,
-    <div />,
   ],
   Array [
     <mockConstructor>
@@ -108,7 +101,6 @@ Array [
         some confirm
       </EuiConfirmModal>
     </mockConstructor>,
-    <div />,
   ],
 ]
 `;
@@ -126,7 +118,6 @@ Array [
         />
       </EuiModal>
     </mockConstructor>,
-    <div />,
   ],
 ]
 `;
@@ -146,7 +137,6 @@ Array [
         confirm 1
       </EuiConfirmModal>
     </mockConstructor>,
-    <div />,
   ],
   Array [
     <mockConstructor>
@@ -159,7 +149,6 @@ Array [
         some confirm
       </EuiConfirmModal>
     </mockConstructor>,
-    <div />,
   ],
 ]
 `;
@@ -177,7 +166,6 @@ Array [
         />
       </EuiModal>
     </mockConstructor>,
-    <div />,
   ],
   Array [
     <mockConstructor>
@@ -190,7 +178,6 @@ Array [
         />
       </EuiModal>
     </mockConstructor>,
-    <div />,
   ],
 ]
 `;

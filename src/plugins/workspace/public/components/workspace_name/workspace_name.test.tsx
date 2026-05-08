@@ -5,7 +5,7 @@
 
 import { render } from '@testing-library/react';
 import { WorkspaceTitleDisplay } from './workspace_name';
-import React from 'react';
+
 import { DEFAULT_NAV_GROUPS, WorkspaceObject } from '../../../../../core/public';
 
 describe('<WorkspaceNameWithIcon />', () => {

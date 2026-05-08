@@ -30,6 +30,22 @@ jest.mock('../../../../application/hooks', () => ({
   useEditorRef: () => mockEditorRef,
 }));
 
+// Mock getServices to provide language title
+const mockGetLanguage = jest.fn();
+jest.mock('../../../../services/services', () => ({
+  getServices: () => ({
+    data: {
+      query: {
+        queryString: {
+          getLanguageService: () => ({
+            getLanguage: mockGetLanguage,
+          }),
+        },
+      },
+    },
+  }),
+}));
+
 // Mock the useLanguageSwitch hook
 jest.mock('../../../../application/hooks/editor_hooks/use_switch_language', () => ({
   useLanguageSwitch: () =>
@@ -93,6 +109,7 @@ describe('LanguageToggle', () => {
     mockSelectIsPromptEditorMode.mockReturnValue(false);
     mockSelectPromptModeIsAvailable.mockReturnValue(true);
     mockSelectQueryLanguage.mockReturnValue('PPL');
+    mockGetLanguage.mockReturnValue({ title: 'PPL' });
   });
 
   it('renders the language toggle button', () => {
@@ -257,6 +274,55 @@ describe('LanguageToggle', () => {
       await waitFor(() => {
         expect(screen.queryByText('PPL')).not.toBeInTheDocument();
       });
+    });
+  });
+
+  describe('Language Title from Service', () => {
+    it('should show PromQL when using PROMQL language', () => {
+      mockSelectQueryLanguage.mockReturnValue('PROMQL');
+      mockGetLanguage.mockReturnValue({ title: 'PromQL' });
+
+      renderWithProvider(<LanguageToggle />);
+
+      expect(screen.getByTestId('queryPanelFooterLanguageToggle')).toBeInTheDocument();
+
+      const button = screen.getByTestId('queryPanelFooterLanguageToggle');
+      fireEvent.click(button);
+
+      // Should show PromQL option (title from language service)
+      expect(screen.getByTestId('queryPanelFooterLanguageToggle-PromQL')).toBeInTheDocument();
+      expect(screen.queryByTestId('queryPanelFooterLanguageToggle-PPL')).not.toBeInTheDocument();
+    });
+
+    it('should show PPL when using PPL language', () => {
+      mockSelectQueryLanguage.mockReturnValue('PPL');
+      mockGetLanguage.mockReturnValue({ title: 'PPL' });
+
+      renderWithProvider(<LanguageToggle />);
+
+      expect(screen.getByTestId('queryPanelFooterLanguageToggle')).toBeInTheDocument();
+
+      const button = screen.getByTestId('queryPanelFooterLanguageToggle');
+      fireEvent.click(button);
+
+      // Should show PPL option
+      expect(screen.getByTestId('queryPanelFooterLanguageToggle-PPL')).toBeInTheDocument();
+      expect(screen.queryByTestId('queryPanelFooterLanguageToggle-PromQL')).not.toBeInTheDocument();
+    });
+
+    it('should fallback to language ID when title is not available', () => {
+      mockSelectQueryLanguage.mockReturnValue('UNKNOWN');
+      mockGetLanguage.mockReturnValue(undefined);
+
+      renderWithProvider(<LanguageToggle />);
+
+      expect(screen.getByTestId('queryPanelFooterLanguageToggle')).toBeInTheDocument();
+
+      const button = screen.getByTestId('queryPanelFooterLanguageToggle');
+      fireEvent.click(button);
+
+      // Should show the language ID as fallback
+      expect(screen.getByTestId('queryPanelFooterLanguageToggle-UNKNOWN')).toBeInTheDocument();
     });
   });
 });

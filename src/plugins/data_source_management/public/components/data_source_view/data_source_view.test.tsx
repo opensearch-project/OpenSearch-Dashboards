@@ -4,7 +4,7 @@
  */
 
 import { ShallowWrapper, shallow, mount, ReactWrapper } from 'enzyme';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import React from 'react';
 import { DataSourceView } from './data_source_view';
 import { SavedObjectsClientContract, UiSettingScope } from 'opensearch-dashboards/public';

@@ -4,7 +4,7 @@
  */
 
 import { EuiCodeBlock, EuiText } from '@elastic/eui';
-import React from 'react';
+
 import './error_code_block.scss';
 
 export interface ErrorCodeBlockProps {

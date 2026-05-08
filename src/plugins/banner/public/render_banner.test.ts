@@ -10,20 +10,26 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { renderBanner, unmountBanner } from './render_banner';
 import { GlobalBanner } from './components/global_banner';
 import { BANNER_CONTAINER_ID } from '../common';
 import { HttpStart } from '../../../core/public';
 
-// Mock React and ReactDOM
+// Mock React and react-dom/client
 jest.mock('react', () => ({
   createElement: jest.fn(),
 }));
 
-jest.mock('react-dom', () => ({
-  render: jest.fn(),
-  unmountComponentAtNode: jest.fn(),
+const mockUnmount = jest.fn();
+const mockRender = jest.fn();
+const mockRoot = {
+  render: mockRender,
+  unmount: mockUnmount,
+};
+
+jest.mock('react-dom/client', () => ({
+  createRoot: jest.fn(() => mockRoot),
 }));
 
 // Mock GlobalBanner component
@@ -35,8 +41,6 @@ describe('render_banner', () => {
   let mockHttp: jest.Mocked<HttpStart>;
   let mockContainer: HTMLElement;
   let originalCreateElement: jest.Mock;
-  let originalRender: jest.Mock;
-  let originalUnmountComponentAtNode: jest.Mock;
 
   beforeEach(() => {
     // Create minimal mocks with only the methods needed for tests
@@ -51,8 +55,6 @@ describe('render_banner', () => {
 
     // Store original mocked functions
     originalCreateElement = React.createElement as jest.Mock;
-    originalRender = ReactDOM.render as jest.Mock;
-    originalUnmountComponentAtNode = ReactDOM.unmountComponentAtNode as jest.Mock;
 
     // Clear all mocks before each test
     jest.clearAllMocks();
@@ -74,11 +76,11 @@ describe('render_banner', () => {
         http: mockHttp,
       });
 
-      // Check that ReactDOM.render was called with the result of createElement
-      expect(originalRender).toHaveBeenCalledWith(
-        originalCreateElement.mock.results[0].value,
-        mockContainer
-      );
+      // Check that createRoot was called with the container
+      expect(createRoot).toHaveBeenCalledWith(mockContainer);
+
+      // Check that root.render was called with the result of createElement
+      expect(mockRender).toHaveBeenCalledWith(originalCreateElement.mock.results[0].value);
     });
 
     test('uses requestAnimationFrame if container is not found', () => {
@@ -90,8 +92,8 @@ describe('render_banner', () => {
 
       renderBanner(mockHttp);
 
-      // Check that ReactDOM.render was not called
-      expect(originalRender).not.toHaveBeenCalled();
+      // Check that createRoot was not called
+      expect(createRoot).not.toHaveBeenCalled();
 
       // Check that requestAnimationFrame was called
       expect(requestAnimationFrameSpy).toHaveBeenCalledWith(expect.any(Function));
@@ -103,10 +105,13 @@ describe('render_banner', () => {
 
   describe('unmountBanner', () => {
     test('unmounts the component from the container', () => {
+      // First render to create the root
+      renderBanner(mockHttp);
+
       unmountBanner();
 
-      // Check that ReactDOM.unmountComponentAtNode was called with the container
-      expect(originalUnmountComponentAtNode).toHaveBeenCalledWith(mockContainer);
+      // Check that root.unmount was called
+      expect(mockUnmount).toHaveBeenCalled();
     });
 
     test('does nothing if container is not found', () => {
@@ -115,8 +120,8 @@ describe('render_banner', () => {
 
       unmountBanner();
 
-      // Check that ReactDOM.unmountComponentAtNode was not called
-      expect(originalUnmountComponentAtNode).not.toHaveBeenCalled();
+      // Check that unmount was not called (because container wasn't found)
+      expect(mockUnmount).not.toHaveBeenCalled();
     });
   });
 });

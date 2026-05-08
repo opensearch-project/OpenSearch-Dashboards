@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { EuiIconTip } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 
@@ -49,6 +48,7 @@ export function DocViewTableRowIconNoMapping() {
       color="warning"
       content={tooltipContent}
       iconProps={{
+        // @ts-expect-error TS2353 TODO(ts-error): fixme
         className: 'osdDocViewer__warning',
         'data-test-subj': 'noMappingWarning',
       }}

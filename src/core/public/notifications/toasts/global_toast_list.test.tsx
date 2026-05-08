@@ -30,7 +30,7 @@
 
 import { EuiGlobalToastList } from '@elastic/eui';
 import { shallow } from 'enzyme';
-import React from 'react';
+
 import * as Rx from 'rxjs';
 
 import { GlobalToastList } from './global_toast_list';

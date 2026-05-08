@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ManageDirectQueryDataConnectionsTable fetch security lake and cloudwatch direct query connections should render empty table 1`] = `
+exports[`ManageDirectQueryDataConnectionsTable fetch security lake, cloudwatch, and AWS Prometheus direct query connections should render empty table 1`] = `
 <IntlProvider
   locale="en"
 >
@@ -120,6 +120,12 @@ exports[`ManageDirectQueryDataConnectionsTable fetch security lake and cloudwatc
                         "title": "Connection 2",
                         "type": "AWS Security Lake",
                       },
+                      Object {
+                        "id": "connection3",
+                        "objectType": "data-connection",
+                        "title": "Connection 3",
+                        "type": "Amazon Managed Prometheus",
+                      },
                     ]
                   }
                   pagination={
@@ -157,6 +163,13 @@ exports[`ManageDirectQueryDataConnectionsTable fetch security lake and cloudwatc
                               "value": "AWS Security Lake",
                               "view": <React.Fragment>
                                 AWS Security Lake
+                              </React.Fragment>,
+                            },
+                            Object {
+                              "name": "Amazon Managed Prometheus",
+                              "value": "Amazon Managed Prometheus",
+                              "view": <React.Fragment>
+                                Amazon Managed Prometheus
                               </React.Fragment>,
                             },
                           ],
@@ -209,6 +222,13 @@ exports[`ManageDirectQueryDataConnectionsTable fetch security lake and cloudwatc
                                 "value": "AWS Security Lake",
                                 "view": <React.Fragment>
                                   AWS Security Lake
+                                </React.Fragment>,
+                              },
+                              Object {
+                                "name": "Amazon Managed Prometheus",
+                                "value": "Amazon Managed Prometheus",
+                                "view": <React.Fragment>
+                                  Amazon Managed Prometheus
                                 </React.Fragment>,
                               },
                             ],
@@ -348,6 +368,13 @@ exports[`ManageDirectQueryDataConnectionsTable fetch security lake and cloudwatc
                                             AWS Security Lake
                                           </React.Fragment>,
                                         },
+                                        Object {
+                                          "name": "Amazon Managed Prometheus",
+                                          "value": "Amazon Managed Prometheus",
+                                          "view": <React.Fragment>
+                                            Amazon Managed Prometheus
+                                          </React.Fragment>,
+                                        },
                                       ],
                                       "type": "field_value_selection",
                                     },
@@ -398,6 +425,13 @@ exports[`ManageDirectQueryDataConnectionsTable fetch security lake and cloudwatc
                                               "value": "AWS Security Lake",
                                               "view": <React.Fragment>
                                                 AWS Security Lake
+                                              </React.Fragment>,
+                                            },
+                                            Object {
+                                              "name": "Amazon Managed Prometheus",
+                                              "value": "Amazon Managed Prometheus",
+                                              "view": <React.Fragment>
+                                                Amazon Managed Prometheus
                                               </React.Fragment>,
                                             },
                                           ],
@@ -607,6 +641,12 @@ exports[`ManageDirectQueryDataConnectionsTable fetch security lake and cloudwatc
                             "title": "Connection 2",
                             "type": "AWS Security Lake",
                           },
+                          Object {
+                            "id": "connection3",
+                            "objectType": "data-connection",
+                            "title": "Connection 3",
+                            "type": "Amazon Managed Prometheus",
+                          },
                         ]
                       }
                       noItemsMessage="No items found"
@@ -621,7 +661,7 @@ exports[`ManageDirectQueryDataConnectionsTable fetch security lake and cloudwatc
                             10,
                             15,
                           ],
-                          "totalItemCount": 2,
+                          "totalItemCount": 3,
                         }
                       }
                       responsive={true}
@@ -1626,6 +1666,233 @@ exports[`ManageDirectQueryDataConnectionsTable fetch security lake and cloudwatc
                                       </EuiTableRowCell>
                                     </tr>
                                   </EuiTableRow>
+                                  <EuiTableRow
+                                    isExpandable={true}
+                                    isSelectable={true}
+                                    isSelected={false}
+                                  >
+                                    <tr
+                                      className="euiTableRow euiTableRow-isSelectable euiTableRow-isExpandable"
+                                    >
+                                      <EuiTableRowCellCheckbox
+                                        key="_selection_column_connection3"
+                                      >
+                                        <td
+                                          className="euiTableRowCellCheckbox"
+                                        >
+                                          <div
+                                            className="euiTableCellContent"
+                                          >
+                                            <EuiI18n
+                                              default="Select this row"
+                                              token="euiBasicTable.selectThisRow"
+                                            >
+                                              <EuiCheckbox
+                                                aria-label="Select this row"
+                                                checked={false}
+                                                compressed={false}
+                                                data-test-subj="checkboxSelectRow-connection3"
+                                                disabled={false}
+                                                id="_selection_column_connection3-checkbox"
+                                                indeterminate={false}
+                                                onChange={[Function]}
+                                                title="Select this row"
+                                                type="inList"
+                                              >
+                                                <div
+                                                  className="euiCheckbox euiCheckbox--inList euiCheckbox--noLabel"
+                                                >
+                                                  <input
+                                                    aria-label="Select this row"
+                                                    checked={false}
+                                                    className="euiCheckbox__input"
+                                                    data-test-subj="checkboxSelectRow-connection3"
+                                                    disabled={false}
+                                                    id="_selection_column_connection3-checkbox"
+                                                    onChange={[Function]}
+                                                    title="Select this row"
+                                                    type="checkbox"
+                                                  />
+                                                  <div
+                                                    className="euiCheckbox__square"
+                                                  />
+                                                </div>
+                                              </EuiCheckbox>
+                                            </EuiI18n>
+                                          </div>
+                                        </td>
+                                      </EuiTableRowCellCheckbox>
+                                      <EuiTableRowCell
+                                        align="left"
+                                        isExpander={true}
+                                        key="_computed_column_connection3_0"
+                                        mobileOptions={
+                                          Object {
+                                            "header": undefined,
+                                            "render": undefined,
+                                          }
+                                        }
+                                        setScopeRow={false}
+                                        textOnly={false}
+                                        width="40px"
+                                      >
+                                        <td
+                                          className="euiTableRowCell euiTableRowCell--isExpander"
+                                          style={
+                                            Object {
+                                              "width": "40px",
+                                            }
+                                          }
+                                        >
+                                          <div
+                                            className="euiTableCellContent euiTableCellContent--overflowingContent"
+                                          />
+                                        </td>
+                                      </EuiTableRowCell>
+                                      <EuiTableRowCell
+                                        align="left"
+                                        key="_data_column_title_connection3_1"
+                                        mobileOptions={
+                                          Object {
+                                            "header": "Data source",
+                                            "render": undefined,
+                                          }
+                                        }
+                                        setScopeRow={false}
+                                        textOnly={false}
+                                        truncateText={true}
+                                        width="32%"
+                                      >
+                                        <td
+                                          className="euiTableRowCell"
+                                          style={
+                                            Object {
+                                              "width": "32%",
+                                            }
+                                          }
+                                        >
+                                          <div
+                                            className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                                          >
+                                            Data source
+                                          </div>
+                                          <div
+                                            className="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
+                                          >
+                                            <span
+                                              className=""
+                                              key=".0"
+                                              style={Object {}}
+                                            >
+                                               
+                                              Connection 3
+                                            </span>
+                                          </div>
+                                        </td>
+                                      </EuiTableRowCell>
+                                      <EuiTableRowCell
+                                        align="left"
+                                        key="_data_column_type_connection3_2"
+                                        mobileOptions={
+                                          Object {
+                                            "header": "Type",
+                                            "render": undefined,
+                                          }
+                                        }
+                                        setScopeRow={false}
+                                        textOnly={true}
+                                        truncateText={true}
+                                        width="22%"
+                                      >
+                                        <td
+                                          className="euiTableRowCell"
+                                          style={
+                                            Object {
+                                              "width": "22%",
+                                            }
+                                          }
+                                        >
+                                          <div
+                                            className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                                          >
+                                            Type
+                                          </div>
+                                          <div
+                                            className="euiTableCellContent euiTableCellContent--truncateText"
+                                          >
+                                            <span
+                                              className="euiTableCellContent__text"
+                                            >
+                                              Amazon Managed Prometheus
+                                            </span>
+                                          </div>
+                                        </td>
+                                      </EuiTableRowCell>
+                                      <EuiTableRowCell
+                                        align="left"
+                                        key="_data_column_description_connection3_3"
+                                        mobileOptions={
+                                          Object {
+                                            "header": "Description",
+                                            "render": undefined,
+                                            "show": false,
+                                          }
+                                        }
+                                        setScopeRow={false}
+                                        textOnly={true}
+                                        truncateText={true}
+                                        width="45%"
+                                      >
+                                        <td
+                                          className="euiTableRowCell euiTableRowCell--hideForMobile"
+                                          style={
+                                            Object {
+                                              "width": "45%",
+                                            }
+                                          }
+                                        >
+                                          <div
+                                            className="euiTableCellContent euiTableCellContent--truncateText"
+                                          >
+                                            <span
+                                              className="euiTableCellContent__text"
+                                            />
+                                          </div>
+                                        </td>
+                                      </EuiTableRowCell>
+                                      <EuiTableRowCell
+                                        align="right"
+                                        key="_data_column_relatedConnections_connection3_4"
+                                        mobileOptions={
+                                          Object {
+                                            "header": "Related connections",
+                                            "render": undefined,
+                                          }
+                                        }
+                                        setScopeRow={false}
+                                        textOnly={false}
+                                        truncateText={true}
+                                      >
+                                        <td
+                                          className="euiTableRowCell"
+                                          style={
+                                            Object {
+                                              "width": undefined,
+                                            }
+                                          }
+                                        >
+                                          <div
+                                            className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                                          >
+                                            Related connections
+                                          </div>
+                                          <div
+                                            className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
+                                          />
+                                        </td>
+                                      </EuiTableRowCell>
+                                    </tr>
+                                  </EuiTableRow>
                                 </tbody>
                               </EuiTableBody>
                             </table>
@@ -1645,7 +1912,7 @@ exports[`ManageDirectQueryDataConnectionsTable fetch security lake and cloudwatc
                                 10,
                                 15,
                               ],
-                              "totalItemCount": 2,
+                              "totalItemCount": 3,
                             }
                           }
                         >
@@ -2004,7 +2271,7 @@ exports[`ManageDirectQueryDataConnectionsTable fetch security lake and cloudwatc
 </IntlProvider>
 `;
 
-exports[`ManageDirectQueryDataConnectionsTable fetch security lake and cloudwatch direct query connections should render normally 1`] = `
+exports[`ManageDirectQueryDataConnectionsTable fetch security lake, cloudwatch, and AWS Prometheus direct query connections should render normally 1`] = `
 <IntlProvider
   locale="en"
 >
@@ -2124,6 +2391,12 @@ exports[`ManageDirectQueryDataConnectionsTable fetch security lake and cloudwatc
                         "title": "Connection 2",
                         "type": "AWS Security Lake",
                       },
+                      Object {
+                        "id": "connection3",
+                        "objectType": "data-connection",
+                        "title": "Connection 3",
+                        "type": "Amazon Managed Prometheus",
+                      },
                     ]
                   }
                   pagination={
@@ -2161,6 +2434,13 @@ exports[`ManageDirectQueryDataConnectionsTable fetch security lake and cloudwatc
                               "value": "AWS Security Lake",
                               "view": <React.Fragment>
                                 AWS Security Lake
+                              </React.Fragment>,
+                            },
+                            Object {
+                              "name": "Amazon Managed Prometheus",
+                              "value": "Amazon Managed Prometheus",
+                              "view": <React.Fragment>
+                                Amazon Managed Prometheus
                               </React.Fragment>,
                             },
                           ],
@@ -2213,6 +2493,13 @@ exports[`ManageDirectQueryDataConnectionsTable fetch security lake and cloudwatc
                                 "value": "AWS Security Lake",
                                 "view": <React.Fragment>
                                   AWS Security Lake
+                                </React.Fragment>,
+                              },
+                              Object {
+                                "name": "Amazon Managed Prometheus",
+                                "value": "Amazon Managed Prometheus",
+                                "view": <React.Fragment>
+                                  Amazon Managed Prometheus
                                 </React.Fragment>,
                               },
                             ],
@@ -2352,6 +2639,13 @@ exports[`ManageDirectQueryDataConnectionsTable fetch security lake and cloudwatc
                                             AWS Security Lake
                                           </React.Fragment>,
                                         },
+                                        Object {
+                                          "name": "Amazon Managed Prometheus",
+                                          "value": "Amazon Managed Prometheus",
+                                          "view": <React.Fragment>
+                                            Amazon Managed Prometheus
+                                          </React.Fragment>,
+                                        },
                                       ],
                                       "type": "field_value_selection",
                                     },
@@ -2402,6 +2696,13 @@ exports[`ManageDirectQueryDataConnectionsTable fetch security lake and cloudwatc
                                               "value": "AWS Security Lake",
                                               "view": <React.Fragment>
                                                 AWS Security Lake
+                                              </React.Fragment>,
+                                            },
+                                            Object {
+                                              "name": "Amazon Managed Prometheus",
+                                              "value": "Amazon Managed Prometheus",
+                                              "view": <React.Fragment>
+                                                Amazon Managed Prometheus
                                               </React.Fragment>,
                                             },
                                           ],
@@ -2611,6 +2912,12 @@ exports[`ManageDirectQueryDataConnectionsTable fetch security lake and cloudwatc
                             "title": "Connection 2",
                             "type": "AWS Security Lake",
                           },
+                          Object {
+                            "id": "connection3",
+                            "objectType": "data-connection",
+                            "title": "Connection 3",
+                            "type": "Amazon Managed Prometheus",
+                          },
                         ]
                       }
                       noItemsMessage="No items found"
@@ -2625,7 +2932,7 @@ exports[`ManageDirectQueryDataConnectionsTable fetch security lake and cloudwatc
                             10,
                             15,
                           ],
-                          "totalItemCount": 2,
+                          "totalItemCount": 3,
                         }
                       }
                       responsive={true}
@@ -3630,6 +3937,233 @@ exports[`ManageDirectQueryDataConnectionsTable fetch security lake and cloudwatc
                                       </EuiTableRowCell>
                                     </tr>
                                   </EuiTableRow>
+                                  <EuiTableRow
+                                    isExpandable={true}
+                                    isSelectable={true}
+                                    isSelected={false}
+                                  >
+                                    <tr
+                                      className="euiTableRow euiTableRow-isSelectable euiTableRow-isExpandable"
+                                    >
+                                      <EuiTableRowCellCheckbox
+                                        key="_selection_column_connection3"
+                                      >
+                                        <td
+                                          className="euiTableRowCellCheckbox"
+                                        >
+                                          <div
+                                            className="euiTableCellContent"
+                                          >
+                                            <EuiI18n
+                                              default="Select this row"
+                                              token="euiBasicTable.selectThisRow"
+                                            >
+                                              <EuiCheckbox
+                                                aria-label="Select this row"
+                                                checked={false}
+                                                compressed={false}
+                                                data-test-subj="checkboxSelectRow-connection3"
+                                                disabled={false}
+                                                id="_selection_column_connection3-checkbox"
+                                                indeterminate={false}
+                                                onChange={[Function]}
+                                                title="Select this row"
+                                                type="inList"
+                                              >
+                                                <div
+                                                  className="euiCheckbox euiCheckbox--inList euiCheckbox--noLabel"
+                                                >
+                                                  <input
+                                                    aria-label="Select this row"
+                                                    checked={false}
+                                                    className="euiCheckbox__input"
+                                                    data-test-subj="checkboxSelectRow-connection3"
+                                                    disabled={false}
+                                                    id="_selection_column_connection3-checkbox"
+                                                    onChange={[Function]}
+                                                    title="Select this row"
+                                                    type="checkbox"
+                                                  />
+                                                  <div
+                                                    className="euiCheckbox__square"
+                                                  />
+                                                </div>
+                                              </EuiCheckbox>
+                                            </EuiI18n>
+                                          </div>
+                                        </td>
+                                      </EuiTableRowCellCheckbox>
+                                      <EuiTableRowCell
+                                        align="left"
+                                        isExpander={true}
+                                        key="_computed_column_connection3_0"
+                                        mobileOptions={
+                                          Object {
+                                            "header": undefined,
+                                            "render": undefined,
+                                          }
+                                        }
+                                        setScopeRow={false}
+                                        textOnly={false}
+                                        width="40px"
+                                      >
+                                        <td
+                                          className="euiTableRowCell euiTableRowCell--isExpander"
+                                          style={
+                                            Object {
+                                              "width": "40px",
+                                            }
+                                          }
+                                        >
+                                          <div
+                                            className="euiTableCellContent euiTableCellContent--overflowingContent"
+                                          />
+                                        </td>
+                                      </EuiTableRowCell>
+                                      <EuiTableRowCell
+                                        align="left"
+                                        key="_data_column_title_connection3_1"
+                                        mobileOptions={
+                                          Object {
+                                            "header": "Data source",
+                                            "render": undefined,
+                                          }
+                                        }
+                                        setScopeRow={false}
+                                        textOnly={false}
+                                        truncateText={true}
+                                        width="32%"
+                                      >
+                                        <td
+                                          className="euiTableRowCell"
+                                          style={
+                                            Object {
+                                              "width": "32%",
+                                            }
+                                          }
+                                        >
+                                          <div
+                                            className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                                          >
+                                            Data source
+                                          </div>
+                                          <div
+                                            className="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
+                                          >
+                                            <span
+                                              className=""
+                                              key=".0"
+                                              style={Object {}}
+                                            >
+                                               
+                                              Connection 3
+                                            </span>
+                                          </div>
+                                        </td>
+                                      </EuiTableRowCell>
+                                      <EuiTableRowCell
+                                        align="left"
+                                        key="_data_column_type_connection3_2"
+                                        mobileOptions={
+                                          Object {
+                                            "header": "Type",
+                                            "render": undefined,
+                                          }
+                                        }
+                                        setScopeRow={false}
+                                        textOnly={true}
+                                        truncateText={true}
+                                        width="22%"
+                                      >
+                                        <td
+                                          className="euiTableRowCell"
+                                          style={
+                                            Object {
+                                              "width": "22%",
+                                            }
+                                          }
+                                        >
+                                          <div
+                                            className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                                          >
+                                            Type
+                                          </div>
+                                          <div
+                                            className="euiTableCellContent euiTableCellContent--truncateText"
+                                          >
+                                            <span
+                                              className="euiTableCellContent__text"
+                                            >
+                                              Amazon Managed Prometheus
+                                            </span>
+                                          </div>
+                                        </td>
+                                      </EuiTableRowCell>
+                                      <EuiTableRowCell
+                                        align="left"
+                                        key="_data_column_description_connection3_3"
+                                        mobileOptions={
+                                          Object {
+                                            "header": "Description",
+                                            "render": undefined,
+                                            "show": false,
+                                          }
+                                        }
+                                        setScopeRow={false}
+                                        textOnly={true}
+                                        truncateText={true}
+                                        width="45%"
+                                      >
+                                        <td
+                                          className="euiTableRowCell euiTableRowCell--hideForMobile"
+                                          style={
+                                            Object {
+                                              "width": "45%",
+                                            }
+                                          }
+                                        >
+                                          <div
+                                            className="euiTableCellContent euiTableCellContent--truncateText"
+                                          >
+                                            <span
+                                              className="euiTableCellContent__text"
+                                            />
+                                          </div>
+                                        </td>
+                                      </EuiTableRowCell>
+                                      <EuiTableRowCell
+                                        align="right"
+                                        key="_data_column_relatedConnections_connection3_4"
+                                        mobileOptions={
+                                          Object {
+                                            "header": "Related connections",
+                                            "render": undefined,
+                                          }
+                                        }
+                                        setScopeRow={false}
+                                        textOnly={false}
+                                        truncateText={true}
+                                      >
+                                        <td
+                                          className="euiTableRowCell"
+                                          style={
+                                            Object {
+                                              "width": undefined,
+                                            }
+                                          }
+                                        >
+                                          <div
+                                            className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                                          >
+                                            Related connections
+                                          </div>
+                                          <div
+                                            className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
+                                          />
+                                        </td>
+                                      </EuiTableRowCell>
+                                    </tr>
+                                  </EuiTableRow>
                                 </tbody>
                               </EuiTableBody>
                             </table>
@@ -3649,7 +4183,7 @@ exports[`ManageDirectQueryDataConnectionsTable fetch security lake and cloudwatc
                                 10,
                                 15,
                               ],
-                              "totalItemCount": 2,
+                              "totalItemCount": 3,
                             }
                           }
                         >

@@ -61,7 +61,7 @@ interface StepIndexPatternProps {
   allIndices: MatchedItem[];
   indexPatternCreationType: IndexPatternCreationConfig;
   goToPreviousStep: () => void;
-  goToNextStep: (query: string, timestampField?: string) => void;
+  goToNextStep: (query: string, timestampField?: string, displayName?: string) => void;
   initialQuery?: string;
   showSystemIndices: boolean;
   dataSourceRef?: DataSourceRef;
@@ -84,6 +84,7 @@ interface StepIndexPatternState {
   showingIndexPatternQueryErrors: boolean;
   indexPatternName: string;
   isIncludingSystemIndices: boolean;
+  displayName: string;
 }
 
 export const canPreselectTimeField = (indices: MatchedItem[]) => {
@@ -129,6 +130,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
     showingIndexPatternQueryErrors: false,
     indexPatternName: '',
     isIncludingSystemIndices: false,
+    displayName: '',
   };
 
   ILLEGAL_CHARACTERS = [...indexPatterns.ILLEGAL_CHARACTERS];
@@ -266,7 +268,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
     if (query.length === 1 && canAppendWildcard(query)) {
       query += '*';
       this.setState({ appendedWildcard: true });
-      setTimeout(() => target.setSelectionRange(1, 1));
+      setTimeout(() => target.setSelectionRange?.(1, 1));
     } else {
       if (query === '*' && appendedWildcard) {
         query = '';
@@ -379,6 +381,10 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
     );
   }
 
+  onDisplayNameChanged = (e: React.ChangeEvent<HTMLInputElement>) => {
+    this.setState({ displayName: e.target.value });
+  };
+
   renderHeader({ exactMatchedIndices: indices }: { exactMatchedIndices: MatchedItem[] }) {
     const { goToNextStep, indexPatternCreationType, stepInfo, dataSourceRef } = this.props;
     const {
@@ -387,6 +393,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
       indexPatternExists,
       indexPatternName,
       isIncludingSystemIndices,
+      displayName,
     } = this.state;
 
     let containsErrors = false;
@@ -428,13 +435,17 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
         characterList={characterList}
         query={query}
         onQueryChanged={this.onQueryChanged}
-        goToNextStep={() => goToNextStep(query, canPreselectTimeField(indices))}
+        goToNextStep={() =>
+          goToNextStep(query, canPreselectTimeField(indices), displayName || undefined)
+        }
         isNextStepDisabled={isNextStepDisabled}
         onChangeIncludingSystemIndices={this.onChangeIncludingSystemIndices}
         isIncludingSystemIndices={isIncludingSystemIndices}
         showSystemIndices={this.props.showSystemIndices}
         stepInfo={stepInfo}
         dataSourceRef={dataSourceRef}
+        displayName={displayName}
+        onDisplayNameChanged={this.onDisplayNameChanged}
       />
     );
   }

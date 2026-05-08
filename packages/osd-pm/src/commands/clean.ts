@@ -34,13 +34,19 @@ import { join, relative } from 'path';
 
 import { isDirectory } from '../utils/fs';
 import { log } from '../utils/log';
+import { deleteFingerprint } from '../utils/bootstrap_fingerprint';
 import { ICommand } from './';
 
 export const CleanCommand: ICommand = {
   description: 'Remove the node_modules and target directories from all projects.',
   name: 'clean',
 
-  async run(projects) {
+  async run(projects, _projectGraph, { osd }) {
+    // Bootstrap's fingerprint relies on node_modules/target existing and
+    // matching a prior successful run; wipe it now so the next bootstrap
+    // can't falsely short-circuit.
+    deleteFingerprint(osd);
+
     const toDelete = [];
     for (const project of projects.values()) {
       if (await isDirectory(project.nodeModulesLocation)) {

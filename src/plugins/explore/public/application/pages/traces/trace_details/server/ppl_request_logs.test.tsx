@@ -178,6 +178,57 @@ describe('ppl_request_logs', () => {
         type: 'INDEX_PATTERN',
       });
     });
+
+    it('uses otelLogs traceId field from schema mappings', async () => {
+      const mockExecuteQuery = jest.fn().mockResolvedValue({ body: { fields: [] } });
+      (PPLService as jest.Mock).mockImplementation(() => ({
+        executeQuery: mockExecuteQuery,
+      }));
+
+      const datasetWithOtelMapping = {
+        ...createMockDataset(),
+        schemaMappings: {
+          otelLogs: {
+            traceId: 'trace_id_otel',
+          },
+        },
+      };
+      const params = { ...defaultParams, dataset: datasetWithOtelMapping };
+
+      await fetchTraceLogsByTraceId(mockDataService, params);
+
+      expect(mockExecuteQuery).toHaveBeenCalledWith(
+        expect.any(Object),
+        'source = test-logs-index | where trace_id_otel = "test-trace-id-123" | head 1000'
+      );
+    });
+
+    it('falls back to default traceId when no schema mappings contain traceId', async () => {
+      const mockExecuteQuery = jest.fn().mockResolvedValue({ body: { fields: [] } });
+      (PPLService as jest.Mock).mockImplementation(() => ({
+        executeQuery: mockExecuteQuery,
+      }));
+
+      const datasetWithoutTraceIdMapping = {
+        ...createMockDataset(),
+        schemaMappings: {
+          logs: {
+            spanId: 'span_field',
+          },
+          customLogs: {
+            timestamp: 'time_field',
+          },
+        },
+      };
+      const params = { ...defaultParams, dataset: datasetWithoutTraceIdMapping };
+
+      await fetchTraceLogsByTraceId(mockDataService, params);
+
+      expect(mockExecuteQuery).toHaveBeenCalledWith(
+        expect.any(Object),
+        'source = test-logs-index | where traceId = "test-trace-id-123" | head 1000'
+      );
+    });
   });
 
   describe('transformLogsResponseToHits', () => {

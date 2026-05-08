@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { PureComponent, Fragment } from 'react';
+import { PureComponent, Fragment } from 'react';
 
 import {
   EuiFlexGroup,

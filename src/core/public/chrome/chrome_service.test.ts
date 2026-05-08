@@ -43,6 +43,7 @@ import { ChromeService } from './chrome_service';
 import { getAppInfo } from '../application/utils';
 import { overlayServiceMock, workspacesServiceMock } from '../mocks';
 import { HeaderVariant } from './constants';
+import { keyboardShortcutServiceMock } from '../keyboard_shortcut/keyboard_shortcut_service.mock';
 
 class FakeApp implements App {
   public title: string;
@@ -80,6 +81,7 @@ function defaultStartDeps(availableApps?: App[]) {
     uiSettings: uiSettingsServiceMock.createStartContract(),
     overlays: overlayServiceMock.createStartContract(),
     workspaces: workspacesServiceMock.createStartContract(),
+    keyboardShortcut: keyboardShortcutServiceMock.createStart(),
     updateApplications: (() => {}) as (applications?: App[]) => void,
   };
 
@@ -98,13 +100,12 @@ function defaultStartDeps(availableApps?: App[]) {
 }
 
 async function start({
-  options = { browserSupportsCsp: true },
   cspConfigMock = { warnLegacyBrowsers: true },
   startDeps = defaultStartDeps(),
 }: { options?: any; cspConfigMock?: any; startDeps?: ReturnType<typeof defaultStartDeps> } = {}) {
-  const service = new ChromeService(options);
+  const service = new ChromeService();
 
-  service.setup({ uiSettings: startDeps.uiSettings });
+  service.setup({ uiSettings: startDeps.uiSettings, injectedMetadata: startDeps.injectedMetadata });
 
   if (cspConfigMock) {
     startDeps.injectedMetadata.getCspConfig.mockReturnValue(cspConfigMock);
@@ -134,10 +135,11 @@ describe('setup', () => {
   it('register custom Nav Header render', async () => {
     const customHeaderMock = React.createElement('TestCustomNavHeader');
     const renderMock = jest.fn().mockReturnValue(customHeaderMock);
-    const chrome = new ChromeService({ browserSupportsCsp: true });
+    const chrome = new ChromeService();
     const uiSettings = uiSettingsServiceMock.createSetupContract();
 
-    const chromeSetup = chrome.setup({ uiSettings });
+    const injectedMetadata = injectedMetadataServiceMock.createStartContract();
+    const chromeSetup = chrome.setup({ uiSettings, injectedMetadata });
     chromeSetup.registerCollapsibleNavHeader(renderMock);
 
     const chromeStart = await chrome.start(defaultStartDeps());
@@ -151,10 +153,11 @@ describe('setup', () => {
     jest.spyOn(console, 'warn').mockImplementation(warnMock);
     const customHeaderMock = React.createElement('TestCustomNavHeader');
     const renderMock = jest.fn().mockReturnValue(customHeaderMock);
-    const chrome = new ChromeService({ browserSupportsCsp: true });
+    const chrome = new ChromeService();
     const uiSettings = uiSettingsServiceMock.createSetupContract();
 
-    const chromeSetup = chrome.setup({ uiSettings });
+    const injectedMetadata = injectedMetadataServiceMock.createStartContract();
+    const chromeSetup = chrome.setup({ uiSettings, injectedMetadata });
     // call 1st time
     chromeSetup.registerCollapsibleNavHeader(renderMock);
     // call 2nd time
@@ -167,14 +170,15 @@ describe('setup', () => {
 
   it('should register page search', () => {
     const uiSettings = uiSettingsServiceMock.createSetupContract();
-    const chrome = new ChromeService({ browserSupportsCsp: true });
+    const chrome = new ChromeService();
 
     const registerSearchCommandSpy = jest.fn();
     jest.spyOn((chrome as any).globalSearch, 'setup').mockReturnValue({
       registerSearchCommand: registerSearchCommandSpy,
     });
 
-    chrome.setup({ uiSettings });
+    const injectedMetadata = injectedMetadataServiceMock.createStartContract();
+    chrome.setup({ uiSettings, injectedMetadata });
 
     expect(registerSearchCommandSpy).toHaveBeenCalledWith({
       id: 'pagesSearch',
@@ -185,20 +189,6 @@ describe('setup', () => {
 });
 
 describe('start', () => {
-  it('adds legacy browser warning if browserSupportsCsp is disabled and warnLegacyBrowsers is enabled', async () => {
-    const { startDeps } = await start({ options: { browserSupportsCsp: false } });
-
-    expect(startDeps.notifications.toasts.addWarning.mock.calls).toMatchInlineSnapshot(`
-      Array [
-        Array [
-          Object {
-            "title": [Function],
-          },
-        ],
-      ]
-    `);
-  });
-
   it('does not add legacy browser warning if browser supports CSP', async () => {
     const { startDeps } = await start();
 
@@ -207,7 +197,6 @@ describe('start', () => {
 
   it('does not add legacy browser warning if warnLegacyBrowsers is disabled', async () => {
     const { startDeps } = await start({
-      options: { browserSupportsCsp: false },
       cspConfigMock: { warnLegacyBrowsers: false },
     });
 

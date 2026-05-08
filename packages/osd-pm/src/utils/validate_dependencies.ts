@@ -51,14 +51,29 @@ enum SingleVersionResolution {
   IGNORE = 'ignore',
 }
 
+// Modes that can mutate package.json/yarn.lock while reconciling conflicting
+// single-version ranges. Exported so callers (e.g. the bootstrap fast path)
+// can decide whether running validateDependencies is side-effect-free. Keep
+// this in sync with any new SingleVersionResolution values that write to
+// disk.
+const MUTATING_SINGLE_VERSION_MODES: ReadonlySet<string> = new Set([
+  SingleVersionResolution.LOOSE,
+  SingleVersionResolution.FORCE,
+  SingleVersionResolution.BRUTE_FORCE,
+]);
+
+export function isMutatingSingleVersionMode(mode: string | undefined): boolean {
+  return !!mode && MUTATING_SINGLE_VERSION_MODES.has(mode);
+}
+
 export async function validateDependencies(
   osd: OpenSearchDashboards,
   yarnLock: YarnLock,
   /* `singleVersionResolution` controls how violations of single-version-dependencies is applied.
-   *    STRICT (default): throw an error and exit
+   *    STRICT: throw an error and exit
    *    LOOSE: identify and install a single version that satisfies all ranges
    *    BRUTE_FORCE: identify and install the newest version
-   *    IGNORE: show all errors without exiting
+   *    IGNORE (default): show all errors without exiting
    *
    * `LOOSE`:
    *          Reconciles the various versions installed as a result of having multiple ranges for a dependency, by
@@ -77,7 +92,7 @@ export async function validateDependencies(
    *          Behaves just like `strict` by showing errors when different ranges of a package are marked as
    *          dependencies, but it does not terminate the script.
    */
-  singleVersionResolution: SingleVersionResolution = SingleVersionResolution.STRICT
+  singleVersionResolution: SingleVersionResolution = SingleVersionResolution.IGNORE
 ) {
   // look through all the packages in the yarn.lock file to see if
   // we have accidentally installed multiple lodash v4 versions

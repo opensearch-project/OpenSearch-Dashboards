@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { VisColumn } from './types';
+import { AxisFieldNameMappings, VisColumn } from './types';
 import { ChartType, StyleOptions } from './utils/use_visualization_types';
 
 export interface VisData {
@@ -16,5 +16,5 @@ export interface VisData {
 export interface ChartConfig {
   type: ChartType;
   styles?: StyleOptions;
-  axesMapping?: Record<string, string>;
+  axesMapping?: AxisFieldNameMappings;
 }

@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { mount } from 'enzyme';
 import { DocViewerTab, DocViewerTabProps } from './doc_viewer_tab';
 import { DocViewRenderProps } from '../../doc_views/doc_views_types';

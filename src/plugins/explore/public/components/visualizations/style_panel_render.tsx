@@ -3,42 +3,43 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useObservable } from 'react-use';
 import { EuiSpacer } from '@elastic/eui';
-import { BehaviorSubject } from 'rxjs';
+import { Observable } from 'rxjs';
 
 import { ChartTypeSelector } from './chart_type_selector';
-import { ChartType, StyleOptions } from './utils/use_visualization_types';
-import { AxisColumnMappings } from './types';
-import { convertMappingsToStrings, convertStringsToMappings } from './visualization_builder_utils';
+import { ChartStylesMapping, ChartType, StyleOptions } from './utils/use_visualization_types';
+import { AxisFieldNameMappings, RenderChartConfig } from './types';
+import { convertStringsToMappings } from './visualization_builder_utils';
 import { visualizationRegistry } from './visualization_registry';
-import { ChartConfig, VisData } from './visualization_builder.types';
+import { VisData } from './visualization_builder.types';
+import { getAxisConfigByColumnMapping } from './utils/axis';
 
 interface StylePanelProps<T> {
-  data$: BehaviorSubject<VisData | undefined>;
-  visConfig$: BehaviorSubject<ChartConfig | undefined>;
+  data$: Observable<VisData | undefined>;
+  config$: Observable<RenderChartConfig | undefined>;
   onStyleChange: (changes: Partial<StyleOptions>) => void;
   onChartTypeChange: (type: ChartType) => void;
-  onAxesMappingChange: (mappings: Record<string, string>) => void;
+  onAxesMappingChange: (mappings: AxisFieldNameMappings) => void;
   className?: string;
 }
 
 export const StylePanelRender = <T extends ChartType>({
   data$,
-  visConfig$,
+  config$,
   onStyleChange,
   onChartTypeChange,
   onAxesMappingChange,
   className,
 }: StylePanelProps<T>) => {
   const visualizationData = useObservable(data$);
-  const chartConfig = useObservable(visConfig$);
+  const chartConfig = useObservable(config$);
   const axesMapping = chartConfig?.axesMapping;
 
   const updateVisualization = useCallback(
-    ({ mappings }: { mappings: AxisColumnMappings }) => {
-      onAxesMappingChange(convertMappingsToStrings(mappings));
+    ({ mappings }: { mappings: AxisFieldNameMappings }) => {
+      onAxesMappingChange(mappings);
     },
     [onAxesMappingChange]
   );
@@ -54,19 +55,28 @@ export const StylePanelRender = <T extends ChartType>({
     ]);
   }, [axesMapping, visualizationData]);
 
+  const styleOptions = useMemo(() => {
+    if (chartConfig) {
+      const standardAxes =
+        'standardAxes' in chartConfig.styles ? chartConfig.styles.standardAxes : [];
+      // initialize axis config
+      const allAxisConfig = getAxisConfigByColumnMapping(axisColumnMappings, standardAxes);
+      return { ...chartConfig.styles, standardAxes: allAxisConfig };
+    }
+    return null;
+  }, [axisColumnMappings, chartConfig]);
+
   if (!visualizationData) {
     return null;
   }
 
   const visConfig = chartConfig?.type
-    ? visualizationRegistry.getVisualizationConfig(chartConfig?.type)
+    ? visualizationRegistry.getVisualization(chartConfig?.type)
     : null;
 
-  const bestMatch = visualizationRegistry.findBestMatch(
-    visualizationData.numericalColumns,
-    visualizationData.categoricalColumns,
-    visualizationData.dateColumns
-  );
+  if (!chartConfig?.styles || !visConfig || !styleOptions) {
+    return null;
+  }
 
   return (
     <div className={className} data-test-subj="exploreVisStylePanel">
@@ -76,14 +86,12 @@ export const StylePanelRender = <T extends ChartType>({
         chartType={chartConfig?.type}
       />
       <EuiSpacer size="s" />
-      {visConfig?.ui.style.render({
-        styleOptions: chartConfig?.styles ?? ({} as any),
+      {visConfig.ui.style.render({
+        styleOptions: styleOptions as ChartStylesMapping[T],
         onStyleChange,
         numericalColumns: visualizationData.numericalColumns,
         categoricalColumns: visualizationData.categoricalColumns,
         dateColumns: visualizationData.dateColumns,
-        availableChartTypes: bestMatch?.rule.chartTypes,
-        selectedChartType: chartConfig?.type,
         axisColumnMappings,
         updateVisualization,
       })}

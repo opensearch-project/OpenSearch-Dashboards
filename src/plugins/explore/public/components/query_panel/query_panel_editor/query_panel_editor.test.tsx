@@ -60,6 +60,7 @@ describe('QueryPanelEditor', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     mockUseQueryPanelEditor.mockReturnValue(mockUseQueryPanelEditorReturn);
   });
 
@@ -77,6 +78,7 @@ describe('QueryPanelEditor', () => {
   });
 
   it('applies focused class when editor is focused', () => {
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     mockUseQueryPanelEditor.mockReturnValue({
       ...mockUseQueryPanelEditorReturn,
       isFocused: true,
@@ -89,6 +91,7 @@ describe('QueryPanelEditor', () => {
   });
 
   it('does not apply focused class when editor is not focused', () => {
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     mockUseQueryPanelEditor.mockReturnValue({
       ...mockUseQueryPanelEditorReturn,
       isFocused: false,
@@ -101,6 +104,7 @@ describe('QueryPanelEditor', () => {
   });
 
   it('applies prompt mode class when in prompt mode', () => {
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     mockUseQueryPanelEditor.mockReturnValue({
       ...mockUseQueryPanelEditorReturn,
       isPromptMode: true,
@@ -113,6 +117,7 @@ describe('QueryPanelEditor', () => {
   });
 
   it('does not apply prompt mode class when not in prompt mode', () => {
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     mockUseQueryPanelEditor.mockReturnValue({
       ...mockUseQueryPanelEditorReturn,
       isPromptMode: false,
@@ -125,6 +130,7 @@ describe('QueryPanelEditor', () => {
   });
 
   it('applies prompt is typing class when promptIsTyping is true', () => {
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     mockUseQueryPanelEditor.mockReturnValue({
       ...mockUseQueryPanelEditorReturn,
       promptIsTyping: true,
@@ -137,6 +143,7 @@ describe('QueryPanelEditor', () => {
   });
 
   it('does not apply prompt is typing class when promptIsTyping is false', () => {
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     mockUseQueryPanelEditor.mockReturnValue({
       ...mockUseQueryPanelEditorReturn,
       promptIsTyping: false,
@@ -149,6 +156,7 @@ describe('QueryPanelEditor', () => {
   });
 
   it('shows placeholder when showPlaceholder is true', () => {
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     mockUseQueryPanelEditor.mockReturnValue({
       ...mockUseQueryPanelEditorReturn,
       showPlaceholder: true,
@@ -161,6 +169,7 @@ describe('QueryPanelEditor', () => {
   });
 
   it('does not show placeholder when showPlaceholder is false', () => {
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     mockUseQueryPanelEditor.mockReturnValue({
       ...mockUseQueryPanelEditorReturn,
       showPlaceholder: false,
@@ -174,6 +183,7 @@ describe('QueryPanelEditor', () => {
 
   it('shows custom placeholder text', () => {
     const customPlaceholder = 'Custom placeholder text';
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     mockUseQueryPanelEditor.mockReturnValue({
       ...mockUseQueryPanelEditorReturn,
       showPlaceholder: true,
@@ -192,6 +202,7 @@ describe('QueryPanelEditor', () => {
       languageId: 'ppl',
     };
 
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     mockUseQueryPanelEditor.mockReturnValue(customProps);
 
     renderWithProvider(<QueryPanelEditor />);
@@ -204,6 +215,7 @@ describe('QueryPanelEditor', () => {
   describe('onEditorClick', () => {
     it('calls onEditorClick when editor wrapper is clicked', () => {
       const mockOnEditorClick = jest.fn();
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       mockUseQueryPanelEditor.mockReturnValue({
         ...mockUseQueryPanelEditorReturn,
         onEditorClick: mockOnEditorClick,

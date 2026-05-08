@@ -30,6 +30,7 @@
 
 import { IContextProvider, IContextContainer } from '../context';
 import { ICspConfig } from '../csp';
+import { ICspReportOnlyConfig } from '../csp_report_only';
 import { GetAuthState, IsAuthenticated } from './auth_state_storage';
 import { GetAuthHeaders } from './auth_headers_storage';
 import { RequestHandler, IRouter } from './router';
@@ -235,6 +236,11 @@ export interface HttpServiceSetup {
    * The CSP config used for OpenSearch Dashboards.
    */
   csp: ICspConfig;
+
+  /**
+   * The CSP-Report-Only config used for OpenSearch Dashboards.
+   */
+  cspReportOnly: ICspReportOnlyConfig;
 
   /**
    * Provides ability to declare a handler function for a particular path and HTTP request method.

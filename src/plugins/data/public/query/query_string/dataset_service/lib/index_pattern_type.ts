@@ -35,6 +35,7 @@ export const indexPatternTypeConfig: DatasetTypeConfig = {
     return {
       id: pattern.id,
       title: pattern.title,
+      ...(patternMeta?.displayName && { displayName: patternMeta.displayName }),
       type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
       timeFieldName: patternMeta?.timeFieldName,
       isRemoteDataset: pattern?.title?.includes(':') ?? false,
@@ -99,18 +100,29 @@ export const indexPatternTypeConfig: DatasetTypeConfig = {
 const fetchIndexPatterns = async (client: SavedObjectsClientContract): Promise<DataStructure[]> => {
   const resp = await client.find<IIndexPattern>({
     type: 'index-pattern',
-    fields: ['title', 'timeFieldName', 'references'],
+    fields: ['title', 'displayName', 'timeFieldName', 'references'],
     search: `*`,
-    searchFields: ['title'],
+    searchFields: ['title', 'displayName'],
     perPage: 100,
   });
 
-  // Get all unique data source ids
+  // Get all unique data source ids from both references and index pattern IDs
   const datasourceIds = Array.from(
     new Set(
       resp.savedObjects
-        .filter((savedObject) => savedObject.references.length > 0)
-        .map((savedObject) => savedObject.references.find((ref) => ref.type === 'data-source')?.id)
+        .map((savedObject) => {
+          // First try to get from references
+          const refDataSourceId = savedObject.references.find((ref) => ref.type === 'data-source')
+            ?.id;
+          if (refDataSourceId) {
+            return refDataSourceId;
+          }
+          // If not in references, check if the ID contains :: (namespaced format)
+          if (savedObject.id.includes('::')) {
+            return savedObject.id.split('::')[0];
+          }
+          return undefined;
+        })
         .filter(Boolean)
     )
   ) as string[];
@@ -128,7 +140,14 @@ const fetchIndexPatterns = async (client: SavedObjectsClientContract): Promise<D
 
   const dataStructures = resp.savedObjects.map(
     (savedObject): DataStructure => {
-      const dataSourceId = savedObject.references.find((ref) => ref.type === 'data-source')?.id;
+      // First try to get dataSourceId from references
+      let dataSourceId = savedObject.references.find((ref) => ref.type === 'data-source')?.id;
+
+      // If not in references, check if the ID contains :: (namespaced format)
+      if (!dataSourceId && savedObject.id.includes('::')) {
+        dataSourceId = savedObject.id.split('::')[0];
+      }
+
       const dataSource = dataSourceId ? dataSourceMap[dataSourceId] : undefined;
 
       const indexPatternDataStructure: DataStructure = {
@@ -138,6 +157,7 @@ const fetchIndexPatterns = async (client: SavedObjectsClientContract): Promise<D
         meta: {
           type: DATA_STRUCTURE_META_TYPES.CUSTOM,
           timeFieldName: savedObject.attributes.timeFieldName,
+          displayName: savedObject.attributes.displayName,
         },
       };
 

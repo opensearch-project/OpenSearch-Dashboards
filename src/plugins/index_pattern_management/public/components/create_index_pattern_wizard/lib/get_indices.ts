@@ -285,7 +285,6 @@ const buildQuery = (showAllIndices: boolean, dataSourceId?: string) => {
 const buildSearchRequest = (showAllIndices: boolean, pattern: string, dataSourceId?: string) => {
   const request: IOpenSearchSearchRequest = {
     params: {
-      // @ts-expect-error TS2322 TODO(ts-error): fixme
       ignoreUnavailable: true,
       expand_wildcards: showAllIndices ? 'all' : 'open',
       index: pattern,

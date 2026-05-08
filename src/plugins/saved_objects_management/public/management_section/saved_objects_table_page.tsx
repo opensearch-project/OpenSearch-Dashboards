@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { get } from 'lodash';
 import { i18n } from '@osd/i18n';
 import { CoreStart, ChromeBreadcrumb } from 'src/core/public';
@@ -58,6 +58,7 @@ const SavedObjectsTablePage = ({
   dataSourceManagement,
   navigation,
   useUpdatedUX,
+  isDatasetManagementEnabled,
 }: {
   coreStart: CoreStart;
   dataStart: DataPublicPluginStart;
@@ -71,6 +72,7 @@ const SavedObjectsTablePage = ({
   dataSourceManagement?: DataSourceManagementPluginSetup;
   navigation: NavigationPublicPluginStart;
   useUpdatedUX: boolean;
+  isDatasetManagementEnabled: boolean;
 }) => {
   const capabilities = coreStart.application.capabilities;
   const itemsPerPage = coreStart.uiSettings.get<number>('savedObjects:perPage', 50);
@@ -131,6 +133,7 @@ const SavedObjectsTablePage = ({
       dataSourceManagement={dataSourceManagement}
       navigationUI={navigation.ui}
       useUpdatedUX={useUpdatedUX}
+      isDatasetManagementEnabled={isDatasetManagementEnabled}
     />
   );
 };

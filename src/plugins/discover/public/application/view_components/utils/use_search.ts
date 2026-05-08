@@ -13,7 +13,7 @@ import { useLocation } from 'react-router-dom';
 import { useEffectOnce } from 'react-use';
 import { RequestAdapter } from '../../../../../inspector/public';
 import { DiscoverViewServices } from '../../../build_services';
-import { search, syncQueryStateWithUrl, UI_SETTINGS } from '../../../../../data/public';
+import { Filter, search, syncQueryStateWithUrl, UI_SETTINGS } from '../../../../../data/public';
 import { validateTimeRange } from '../../helpers/validate_time_range';
 import { updateSearchSource } from './update_search_source';
 import { useIndexPattern } from './use_index_pattern';
@@ -135,6 +135,17 @@ export const useSearch = (services: DiscoverViewServices) => {
     chrome,
     uiSettings,
   } = services;
+
+  // Capture whether _q was in the initial URL before any effects modify it.
+  // This is used to determine if we should load filters from saved search or use URL filters.
+  // The ref captures the URL state at component mount time, before connectStorageToQueryState
+  // potentially adds _q to the URL.
+  const initialUrlHadQueryState = useRef<boolean | null>(null);
+  if (initialUrlHadQueryState.current === null) {
+    // Check if _q parameter exists in the initial URL hash
+    const hashParams = window.location.hash.split('?')[1] || '';
+    initialUrlHadQueryState.current = hashParams.includes('_q=');
+  }
   const timefilter = data.query.timefilter.timefilter;
   const fetchStateRef = useRef<{
     abortController: AbortController | undefined;
@@ -552,8 +563,10 @@ export const useSearch = (services: DiscoverViewServices) => {
       const isDataQueryDefault = dataQuery.query === defaultQuery.query;
       const savedSearchQuery = savedSearchInstance.searchSource.getField('query');
 
-      // Use eixisting query, if eixisting query match default, use query from saved search
-      const query = isDataQueryDefault ? savedSearchQuery ?? dataQuery : dataQuery;
+      // Use existing query; if it matches default, prefer savedSearchQuery, then the freshly
+      // computed defaultQuery (which reflects the post-init default dataset and language clamp),
+      // falling back to dataQuery for back-compat.
+      const query = isDataQueryDefault ? savedSearchQuery ?? defaultQuery ?? dataQuery : dataQuery;
 
       const isEnhancementsEnabled = await uiSettings.get('query:enhancements:enabled');
       if (isEnhancementsEnabled && query.dataset) {
@@ -577,22 +590,23 @@ export const useSearch = (services: DiscoverViewServices) => {
         }
       }
 
-      // sync initial app filters from savedObject to filterManager
-      const filters = cloneDeep(savedSearchInstance.searchSource.getOwnField('filter'));
+      // URL had no _q - load filters from saved search
+      if (!initialUrlHadQueryState.current) {
+        // sync initial app filters from savedObject to filterManager
+        const filters = cloneDeep(savedSearchInstance.searchSource.getOwnField('filter'));
+        let actualFilters: Filter[] = [];
 
-      // merge filters in saved search with exisiting filters in filterManager
-      const actualFilters = cloneDeep(filterManager.getAppFilters());
-
-      if (savedQuery) {
-        actualFilters.push.apply(actualFilters, data.query.filterManager.getFilters());
-      } else if (filters !== undefined) {
-        const result = typeof filters === 'function' ? filters() : filters;
-        if (result !== undefined) {
-          actualFilters.push(...(Array.isArray(result) ? result : [result]));
+        if (savedQuery) {
+          actualFilters = cloneDeep(data.query.filterManager.getFilters());
+        } else if (filters !== undefined) {
+          const result = typeof filters === 'function' ? filters() : filters;
+          if (result !== undefined) {
+            actualFilters = Array.isArray(result) ? cloneDeep(result) : [cloneDeep(result)];
+          }
         }
-      }
 
-      filterManager.setAppFilters(actualFilters);
+        filterManager.setAppFilters(actualFilters);
+      }
       data.query.queryString.setQuery(query);
       // Update local storage after loading saved search
       data.query.queryString.getLanguageService().setUserQueryLanguage(query.language);

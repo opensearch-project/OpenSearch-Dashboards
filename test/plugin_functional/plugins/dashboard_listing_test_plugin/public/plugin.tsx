@@ -10,7 +10,7 @@
  */
 
 import * as React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Router, Switch, Route, Link } from 'react-router-dom';
 import { CoreSetup, Plugin } from 'opensearch-dashboards/public';
 
@@ -35,12 +35,12 @@ export class DashboardListingTestPlugin
       title: 'Dashboard Listing Test Plugin',
       appRoute: `app/${ID}`,
       async mount(context, { element }) {
-        render(
-          <h1 data-test-subj="dashboardListingTestHeader">Dashboard Listing Test Header</h1>,
-          element
+        const root = createRoot(element);
+        root.render(
+          <h1 data-test-subj="dashboardListingTestHeader">Dashboard Listing Test Header</h1>
         );
 
-        return () => unmountComponentAtNode(element);
+        return () => root.unmount();
       },
     });
   }

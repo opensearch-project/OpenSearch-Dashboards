@@ -29,7 +29,6 @@
  */
 
 import { mount, shallow } from 'enzyme';
-import * as React from 'react';
 import { injectI18n } from './inject';
 import { I18nProvider } from './provider';
 

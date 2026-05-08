@@ -24,8 +24,8 @@ const colors = {
 };
 
 const TSC_BIN = path.join(process.cwd(), 'node_modules/.bin/tsc');
-const TSCONFIG_PATH = path.join(process.cwd(), 'tsconfig.check.json');
-const TSC_ARGS = ['--project', TSCONFIG_PATH, '--noEmit', '--pretty', 'false', '--skipLibCheck'];
+const TSCONFIG_PATH = path.join(process.cwd(), 'tsconfig.refs.json');
+const TSC_ARGS = ['-b', TSCONFIG_PATH, '--pretty', 'false'];
 
 // Helper functions for console output
 function logHeader(text) {

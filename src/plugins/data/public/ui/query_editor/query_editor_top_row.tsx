@@ -3,18 +3,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import dateMath from '@elastic/datemath';
+
 import {
   EuiSuperUpdateButton,
   EuiCompressedFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSuperDatePicker,
+  EuiButtonIcon,
   OnRefreshProps,
   prettyDuration,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import classNames from 'classnames';
-import React, { useState } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import {
   DatasetSelector,
@@ -33,6 +35,7 @@ import { UI_SETTINGS } from '../../../common';
 import { getQueryLog, PersistedLog, QueryStatus } from '../../query';
 import { NoDataPopover } from './no_data_popover';
 import QueryEditorUI from './query_editor';
+import { useCancelButtonTiming } from '../hooks';
 
 const QueryEditor = withOpenSearchDashboards(QueryEditorUI);
 
@@ -65,15 +68,54 @@ export interface QueryEditorTopRowProps {
   datePickerRef?: React.RefObject<HTMLDivElement>;
   savedQueryManagement?: any;
   queryStatus?: QueryStatus;
+  showCancelButton?: boolean;
+  onCancel?: () => void;
+  isQueryRunning?: boolean;
 }
 
 // Needed for React.lazy
 // eslint-disable-next-line import/no-default-export
-export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
+export default function QueryEditorTopRow({
+  showQueryEditor = true,
+  showDatePicker = true,
+  showAutoRefreshOnly = false,
+  ...restProps
+}: QueryEditorTopRowProps) {
+  const props = { showQueryEditor, showDatePicker, showAutoRefreshOnly, ...restProps };
+  const datePickerRef = useRef<EuiSuperDatePicker | null>(null);
   const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
   const [isQueryEditorFocused, setIsQueryEditorFocused] = useState(false);
+  // Use custom hook for cancel button timing logic
+  const shouldShowCancelButton = useCancelButtonTiming(
+    Boolean(props.isQueryRunning && props.showCancelButton),
+    Boolean(props.isQueryRunning && props.showCancelButton) // Only show initially if both conditions are true
+  );
   const opensearchDashboards = useOpenSearchDashboards<IDataPluginServices>();
-  const { uiSettings, storage, appName, data } = opensearchDashboards.services;
+  const { uiSettings, storage, appName, data, keyboardShortcut } = opensearchDashboards.services;
+
+  const handleOpenDatePicker = useCallback(() => {
+    if (datePickerRef.current) {
+      const datePicker = datePickerRef.current;
+      if (datePicker.onStartDatePopoverToggle) {
+        datePicker.onStartDatePopoverToggle();
+      } else if (datePicker.onEndDatePopoverToggle) {
+        datePicker.onEndDatePopoverToggle();
+      }
+    }
+  }, []);
+
+  keyboardShortcut?.useKeyboardShortcut({
+    id: 'date_picker',
+    pluginId: 'data',
+    name: i18n.translate('data.query.queryEditor.openDatePickerShortcut', {
+      defaultMessage: 'Open date picker',
+    }),
+    category: i18n.translate('data.query.queryEditor.searchCategory', {
+      defaultMessage: 'Search',
+    }),
+    keys: 'shift+d',
+    execute: handleOpenDatePicker,
+  });
 
   const queryLanguage = props.query && props.query.language;
   const persistedLog: PersistedLog | undefined = React.useMemo(
@@ -279,31 +321,58 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   }
 
   function renderUpdateButton() {
-    const button = props.customSubmitButton ? (
-      React.cloneElement(props.customSubmitButton, { onClick: onClickSubmitButton })
-    ) : (
-      <EuiSuperUpdateButton
-        needsUpdate={props.isDirty}
-        isDisabled={isDateRangeInvalid}
-        isLoading={props.isLoading}
-        onClick={onClickSubmitButton}
-        data-test-subj="querySubmitButton"
-        aria-label={i18n.translate('data.query.queryBar.querySubmitButtonLabel', {
-          defaultMessage: 'Submit query',
-        })}
-        compressed={true}
-      />
-    );
+    // If a custom submit button is provided, enhance it with cancel functionality
+    let buttonGroup;
+    if (props.customSubmitButton) {
+      buttonGroup = React.cloneElement(props.customSubmitButton, {
+        onClick: onClickSubmitButton,
+      });
+    } else {
+      // Default QueryEditor button with integrated cancel
+      const runButton = (
+        <EuiSuperUpdateButton
+          needsUpdate={props.isDirty}
+          isDisabled={isDateRangeInvalid}
+          isLoading={props.isLoading}
+          onClick={onClickSubmitButton}
+          data-test-subj="querySubmitButton"
+          aria-label={i18n.translate('data.query.queryBar.querySubmitButtonLabel', {
+            defaultMessage: 'Submit query',
+          })}
+          compressed={true}
+        />
+      );
+
+      const cancelButton = shouldShowCancelButton ? (
+        <EuiButtonIcon
+          size="s"
+          color="danger"
+          onClick={props.onCancel}
+          data-test-subj="queryCancelButton"
+          aria-label={i18n.translate('data.query.queryBar.queryCancelButtonLabel', {
+            defaultMessage: 'Cancel',
+          })}
+          iconType="cross"
+          className="osdQueryEditor__cancelButton"
+        />
+      ) : null;
+      buttonGroup = (
+        <EuiFlexGroup gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>{runButton}</EuiFlexItem>
+          {cancelButton && <EuiFlexItem grow={false}>{cancelButton}</EuiFlexItem>}
+        </EuiFlexGroup>
+      );
+    }
 
     if (!shouldRenderDatePicker()) {
-      return button;
+      return buttonGroup;
     }
 
     return (
       <NoDataPopover storage={storage} showNoDataPopover={props.indicateNoData}>
         <EuiFlexGroup responsive={false} gutterSize="s" alignItems="flexStart">
           {renderDatePicker()}
-          <EuiFlexItem grow={false}>{button}</EuiFlexItem>
+          <EuiFlexItem grow={false}>{buttonGroup}</EuiFlexItem>
         </EuiFlexGroup>
       </NoDataPopover>
     );
@@ -337,13 +406,13 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
       });
 
     const wrapperClasses = classNames('osdQueryEditor__datePickerWrapper', {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'osdQueryEditor__datePickerWrapper-isHidden': isQueryEditorFocused,
     });
 
     return (
       <EuiFlexItem className={wrapperClasses}>
         <EuiSuperDatePicker
+          ref={datePickerRef}
           start={props.dateRangeFrom}
           end={props.dateRangeTo}
           isPaused={props.isRefreshPaused}
@@ -383,30 +452,28 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   const datasetSelector = <>{renderDatasetSelector()}</>;
 
   return (
-    <EuiFlexGroup
-      className={classes}
-      responsive={!!props.showDatePicker}
-      gutterSize="xs"
-      direction="column"
-      justifyContent="flexEnd"
-    >
+    <>
       {props?.datasetSelectorRef?.current &&
         createPortal(datasetSelector, props.datasetSelectorRef.current)}
       {props?.datePickerRef?.current && uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED)
         ? createPortal(datePicker, props.datePickerRef.current)
         : datePicker}
-      {renderQueryEditor()}
-      <EuiFlexItem>
-        <EuiFlexGroup responsive={false} gutterSize="s" direction="column">
-          <EuiFlexItem>{renderSharingMetaFields()}</EuiFlexItem>
+      {props.showQueryEditor && (
+        <EuiFlexGroup
+          className={classes}
+          responsive={!!props.showDatePicker}
+          gutterSize="xs"
+          direction="column"
+          justifyContent="flexEnd"
+        >
+          {renderQueryEditor()}
+          <EuiFlexItem>
+            <EuiFlexGroup responsive={false} gutterSize="s" direction="column">
+              <EuiFlexItem>{renderSharingMetaFields()}</EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      )}
+    </>
   );
 }
-
-QueryEditorTopRow.defaultProps = {
-  showQueryEditor: true,
-  showDatePicker: true,
-  showAutoRefreshOnly: false,
-};

@@ -3,99 +3,94 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { MetricChartStyleControls } from './metric_vis_config';
-import {
-  VisColumn,
-  RangeValue,
-  ColorSchemas,
-  VEGASCHEMA,
-  AxisRole,
-  AxisColumnMappings,
-} from '../types';
-import { generateColorBySchema } from '../utils/utils';
+import { MetricChartStyle } from './metric_vis_config';
+import { AxisRole, VisColumn, RendererSpecConfig } from '../types';
+import { assembleSpec, buildAxisConfigs, createBaseConfig, pipe } from '../utils/echarts_spec';
+import { convertTo2DArray, transform } from '../utils/data_transformation';
+import { assembleForMetric, createMetricChartSeries } from './metric_utils';
+
+export interface MetricAxisMapping {
+  [AxisRole.Value]: VisColumn;
+  [AxisRole.Time]?: VisColumn;
+  [AxisRole.FACET]?: VisColumn;
+}
 
 export const createSingleMetric = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
-  categoricalColumns: VisColumn[],
-  dateColumns: VisColumn[],
-  styleOptions: Partial<MetricChartStyleControls>,
-  axisColumnMappings?: AxisColumnMappings
+  styles: MetricChartStyle,
+  axisColumnMappings: { [AxisRole.Value]: VisColumn; [AxisRole.Time]?: VisColumn }
 ) => {
-  // Only contains one and the only one value
-  const valueMapping = axisColumnMappings?.[AxisRole.Value];
-  const numericFields = valueMapping?.column;
-  const numericNames = valueMapping?.name;
+  const valueColumn = axisColumnMappings[AxisRole.Value];
+  const numericField = valueColumn.column;
+  const numericFieldName = valueColumn.name;
 
-  function generateColorConditions(ranges: RangeValue[], color: ColorSchemas) {
-    const colors = generateColorBySchema(ranges.length + 1, color);
-    const conditions = [];
+  const dateColumn = axisColumnMappings[AxisRole.Time];
+  const dateField = dateColumn?.column;
 
-    for (let i = 0; i < ranges.length; i++) {
-      const r = ranges[i];
-
-      const minTest = `datum["${numericFields}"] >= ${r.min}`;
-      const maxTest = r.max !== undefined ? ` && datum["${numericFields}"] < ${r.max}` : '';
-
-      conditions.push({
-        test: minTest + maxTest,
-        value: colors[i] || colors[colors.length - 1], // fallback color if not enough
-      });
-    }
-    const last = ranges[ranges.length - 1];
-    if (last.max) {
-      conditions.push({
-        test: `datum["${numericFields}"] >= ${last.max}`,
-        value: colors[colors.length - 1],
-      });
-    }
-
-    return conditions;
+  if (!dateField) {
+    return { spec: undefined, name: numericFieldName, data: transformedData };
   }
 
-  const markLayer: any = {
-    mark: {
-      type: 'text',
-      align: 'center',
-      fontSize: styleOptions?.fontSize,
-      fontWeight: 'bold',
-    },
-    encoding: {
-      text: {
-        field: numericFields,
-        type: 'quantitative',
-      },
-    },
+  // Return React component spec for HTML text rendering with ECharts sparkline
+  const result = pipe(
+    transform(convertTo2DArray()),
+    createBaseConfig({ title: '' }),
+    buildAxisConfigs,
+    createMetricChartSeries({
+      styles,
+      dateField,
+      seriesFields: [numericField],
+    }),
+    assembleSpec,
+    assembleForMetric
+  )({
+    data: transformedData,
+    styles,
+    axisConfig: {},
+    axisColumnMappings,
+  });
+  return { spec: result.spec, name: numericFieldName, data: transformedData };
+};
+
+export const createMultiMetric = (
+  transformedData: Array<Record<string, any>>,
+  styles: MetricChartStyle,
+  axisColumnMappings: {
+    [AxisRole.Value]: VisColumn;
+    [AxisRole.Time]?: VisColumn;
+    [AxisRole.FACET]: VisColumn;
+  }
+) => {
+  const valueMapping = axisColumnMappings[AxisRole.Value];
+  const splitByMapping = axisColumnMappings[AxisRole.FACET];
+  const splitByField = splitByMapping.column;
+
+  // Group data by the split by field (categorical)
+  const groupedData = new Map<string, any[]>();
+  transformedData.forEach((row) => {
+    const splitByValue = row[splitByField];
+    if (splitByValue === undefined || splitByValue === null) return;
+    const groupKey = String(splitByValue);
+    if (!groupedData.has(groupKey)) {
+      groupedData.set(groupKey, []);
+    }
+    groupedData.get(groupKey)!.push(row);
+  });
+
+  const singleMapping: { [AxisRole.Value]: VisColumn; [AxisRole.Time]?: VisColumn } = {
+    [AxisRole.Value]: valueMapping,
+    ...(axisColumnMappings[AxisRole.Time] && {
+      [AxisRole.Time]: axisColumnMappings[AxisRole.Time],
+    }),
   };
 
-  const titleLayer = {
-    mark: {
-      type: 'text',
-      align: 'center',
-      dy: 50,
-      fontSize: 16,
-      fontWeight: 'bold',
-    },
-    encoding: {
-      text: {
-        value: styleOptions?.title || numericNames,
-      },
-    },
-  };
-
-  if (styleOptions?.useColor && styleOptions.customRanges && styleOptions.customRanges.length > 0) {
-    markLayer.encoding.color = {};
-    markLayer.encoding.color.condition = generateColorConditions(
-      styleOptions.customRanges,
-      styleOptions.colorSchema!
-    );
+  const specs: RendererSpecConfig[] = [];
+  for (const [key, value] of groupedData) {
+    const result = createSingleMetric(value, styles, singleMapping);
+    if (result && 'spec' in result) {
+      specs.push({ spec: result.spec, name: key, data: value });
+    }
   }
 
-  const baseSpec = {
-    $schema: VEGASCHEMA,
-    data: { values: transformedData },
-    layer: [markLayer, styleOptions?.showTitle ? titleLayer : null].filter(Boolean),
-  };
-
-  return baseSpec;
+  return specs;
 };

@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React from 'react';
+
 import { EuiBadge, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { DataSourceOption } from '../data_source_menu/types';
 

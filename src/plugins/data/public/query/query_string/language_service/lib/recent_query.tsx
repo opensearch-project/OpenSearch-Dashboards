@@ -5,7 +5,7 @@
 
 import './_index.scss';
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { EuiBasicTable, EuiBasicTableColumn, EuiButtonIcon, EuiCopy } from '@elastic/eui';
 import moment from 'moment';
 import { RecentQueriesTableProps, RecentQueryItem, RecentQueryTableItem } from '../types';
@@ -16,6 +16,7 @@ export function RecentQueriesTable({
   queryString,
   onClickRecentQuery,
   isVisible,
+  className,
 }: RecentQueriesTableProps) {
   const currentLanguage = queryString.getQuery().language;
   const [recentQueries, setRecentQueries] = useState<RecentQueryItem[]>(
@@ -95,7 +96,7 @@ export function RecentQueriesTable({
       columns={tableColumns}
       rowProps={getRowProps}
       cellProps={getCellProps}
-      className="recentQuery__table"
+      className={className || 'recentQuery__table'}
       data-test-subj="recentQueryTable"
       tableLayout="fixed"
       compressed

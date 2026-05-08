@@ -68,6 +68,7 @@ export interface HttpServerSetup {
   registerStaticDir: (path: string, dirPath: string) => void;
   basePath: HttpServiceSetup['basePath'];
   csp: HttpServiceSetup['csp'];
+  cspReportOnly: HttpServiceSetup['cspReportOnly'];
   createCookieSessionStorageFactory: HttpServiceSetup['createCookieSessionStorageFactory'];
   registerOnPreRouting: HttpServiceSetup['registerOnPreRouting'];
   registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];
@@ -145,9 +146,13 @@ export class HttpServer {
       registerOnPostAuth: this.registerOnPostAuth.bind(this),
       registerOnPreResponse: this.registerOnPreResponse.bind(this),
       createCookieSessionStorageFactory: <T>(cookieOptions: SessionStorageCookieOptions<T>) =>
-        this.createCookieSessionStorageFactory(cookieOptions, config.basePath),
+        this.createCookieSessionStorageFactory(
+          cookieOptions as SessionStorageCookieOptions<T & Record<string, any>>,
+          config.basePath
+        ),
       basePath: basePathService,
       csp: config.csp,
+      cspReportOnly: config.cspReportOnly,
       auth: {
         get: this.authState.get,
         isAuthenticated: this.authState.isAuthenticated,
@@ -359,7 +364,7 @@ export class HttpServer {
     this.server.ext('onPreResponse', adoptToHapiOnPreResponseFormat(fn, this.log));
   }
 
-  private async createCookieSessionStorageFactory<T>(
+  private async createCookieSessionStorageFactory<T extends Record<string, any>>(
     cookieOptions: SessionStorageCookieOptions<T>,
     basePath?: string
   ) {

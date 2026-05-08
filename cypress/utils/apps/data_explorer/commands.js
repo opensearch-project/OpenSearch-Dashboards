@@ -184,4 +184,7 @@ Cypress.Commands.add('deleteSavedQuery', (name) => {
     .click();
 
   cy.getElementByTestId('confirmModalConfirmButton').click();
+
+  cy.wait(2000);
+  cy.get('.euiFlyoutFooter').find('button[type="button"]').contains('Cancel').first().click();
 });

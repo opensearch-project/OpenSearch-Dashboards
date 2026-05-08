@@ -64,6 +64,7 @@ export function parseClientOptions(
     plugins: registeredSchema,
     requestTimeout: config.globalOpenSearchConfig.requestTimeout.asMilliseconds(),
     pingTimeout: config.globalOpenSearchConfig.pingTimeout.asMilliseconds(),
+    suggestCompression: config.globalOpenSearchConfig.requestCompression,
   };
 
   return configOptions;

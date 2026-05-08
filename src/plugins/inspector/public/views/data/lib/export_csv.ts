@@ -30,6 +30,7 @@
 
 import { isObject } from 'lodash';
 import { saveAs } from 'file-saver';
+import { autoBom } from '@osd/std';
 
 import { DataViewColumn, DataViewRow } from '../types';
 
@@ -88,5 +89,5 @@ export function exportAsCsv({
   const csv = new Blob([buildCsv(columns, rows, csvSeparator, quoteValues, valueFormatter)], {
     type,
   });
-  saveAs(csv, filename);
+  saveAs(autoBom(csv), filename);
 }

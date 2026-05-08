@@ -27,7 +27,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
+
 import { mountWithIntl } from '../../../../test_utils/public/enzyme_helpers';
 import { MountPointPortal } from '../../../opensearch_dashboards_react/public';
 import { TopNavControlData } from './top_nav_control_data';

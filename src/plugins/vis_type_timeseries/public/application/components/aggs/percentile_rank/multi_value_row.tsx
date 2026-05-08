@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { ChangeEvent } from 'react';
+import { ChangeEvent } from 'react';
 import { get } from 'lodash';
 import { FormattedMessage } from '@osd/i18n/react';
 import {

@@ -29,6 +29,7 @@
  */
 
 import { configureClientMock } from './cluster_client.test.mocks';
+import { Transport } from '@opensearch-project/opensearch';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { httpServerMock } from '../../http/http_server.mocks';
 import { GetAuthHeaders } from '../../http';
@@ -46,6 +47,7 @@ const createConfig = (parts: Partial<OpenSearchClientConfig> = {}): OpenSearchCl
     requestHeadersWhitelist: ['authorization'],
     customHeaders: {},
     hosts: ['http://localhost'],
+    requestCompression: false,
     ...parts,
   };
 };
@@ -95,6 +97,23 @@ describe('ClusterClient', () => {
     expect(configureClientMock).toHaveBeenCalledTimes(4);
     expect(configureClientMock).toHaveBeenCalledWith(config, { logger });
     expect(configureClientMock).toHaveBeenCalledWith(config, { logger, scoped: true });
+  });
+
+  it('passes custom transport to configureClient when provided', () => {
+    const config = createConfig();
+    class CustomTransport extends Transport {}
+
+    new ClusterClient(config, logger, getAuthHeaders, CustomTransport);
+
+    expect(configureClientMock).toHaveBeenCalledWith(config, {
+      logger,
+      customTransport: CustomTransport,
+    });
+    expect(configureClientMock).toHaveBeenCalledWith(config, {
+      logger,
+      scoped: true,
+      customTransport: CustomTransport,
+    });
   });
 
   describe('#asInternalUser', () => {
@@ -355,10 +374,12 @@ describe('ClusterClient', () => {
     });
 
     it('respect the precedence of config headers over default headers', () => {
-      const headerKey = Object.keys(DEFAULT_HEADERS)[0];
+      const customHeaders = Object.fromEntries(
+        Object.keys(DEFAULT_HEADERS).map((key) => [key, 'foo'])
+      );
       const config = createConfig({
         customHeaders: {
-          [headerKey]: 'foo',
+          ...customHeaders,
         },
       });
       getAuthHeaders.mockReturnValue({});
@@ -370,7 +391,7 @@ describe('ClusterClient', () => {
 
       const expected = {
         headers: {
-          [headerKey]: 'foo',
+          ...customHeaders,
           'x-opaque-id': expect.any(String),
         },
       };
@@ -383,22 +404,24 @@ describe('ClusterClient', () => {
     });
 
     it('respect the precedence of request headers over default headers', () => {
-      const headerKey = Object.keys(DEFAULT_HEADERS)[0];
+      const requestHeaders = Object.fromEntries(
+        Object.keys(DEFAULT_HEADERS).map((key) => [key, 'foo'])
+      );
       const config = createConfig({
-        requestHeadersWhitelist: [headerKey],
+        requestHeadersWhitelist: Object.keys(DEFAULT_HEADERS),
       });
       getAuthHeaders.mockReturnValue({});
 
       const clusterClient = new ClusterClient(config, logger, getAuthHeaders);
       const request = httpServerMock.createOpenSearchDashboardsRequest({
-        headers: { [headerKey]: 'foo' },
+        headers: requestHeaders,
       });
 
       clusterClient.asScoped(request);
 
       const expected = {
         headers: {
-          [headerKey]: 'foo',
+          ...requestHeaders,
           'x-opaque-id': expect.any(String),
         },
       };

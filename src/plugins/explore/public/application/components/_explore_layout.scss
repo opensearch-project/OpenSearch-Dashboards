@@ -12,7 +12,7 @@
 
 .exploreTopNav {
   flex-shrink: 0;
-  padding: $euiSizeS;
+  padding: $ouiSizeXXS;
   border-bottom: $euiBorderThin;
   background-color: $euiColorEmptyShade;
 
@@ -52,7 +52,7 @@
 .exploreChartContainer {
   flex-shrink: 0;
   height: 200px;
-  margin: $euiSizeS;
+  margin: $ouiSizeXXS;
   border: $euiBorderThin;
   border-radius: $euiBorderRadius;
 }
@@ -61,5 +61,5 @@
 .exploreTabContent {
   flex: 1;
   overflow: hidden;
-  margin: $euiSizeS;
+  margin: $ouiSizeXXS;
 }

@@ -124,6 +124,8 @@ export function createPluginSetupContext<
     getStartServices: () => plugin.startDependencies,
     workspaces: deps.workspaces,
     keyboardShortcut: deps.keyboardShortcut,
+    chat: deps.chat,
+    telemetry: deps.telemetry,
   };
 }
 
@@ -179,5 +181,11 @@ export function createPluginStartContext<
     fatalErrors: deps.fatalErrors,
     workspaces: deps.workspaces,
     keyboardShortcut: deps.keyboardShortcut,
+    chat: deps.chat,
+    telemetry: {
+      isEnabled: () => deps.telemetry.isEnabled(),
+      // Auto-inject plugin name - plugins don't need to pass pluginId
+      getPluginRecorder: () => deps.telemetry.getPluginRecorder(plugin.name),
+    },
   };
 }

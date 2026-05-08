@@ -52,7 +52,6 @@ import { QueryEditorTopRow } from '../query_editor';
 import QueryBarTopRow from '../query_string_input/query_bar_top_row';
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
 import { FilterOptions } from '../filter_bar/filter_options';
-
 interface SearchBarInjectedDeps {
   opensearchDashboards: OpenSearchDashboardsReactContextValue<IDataPluginServices>;
   intl: InjectedIntl;
@@ -101,6 +100,10 @@ export interface SearchBarOwnProps {
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
   indicateNoData?: boolean;
   queryStatus?: QueryStatus;
+  // Cancel query functionality
+  showCancelButton?: boolean;
+  onQueryCancel?: () => void;
+  isQueryRunning?: boolean;
 }
 
 export type SearchBarProps = SearchBarOwnProps & SearchBarInjectedDeps;
@@ -348,7 +351,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         this.props.intl.formatMessage(
           {
             id: 'data.search_bar.save_query.failedToSaveQuery',
-            defaultMessage: 'An error occured while saving your query{errorMessage}',
+            defaultMessage: 'An error occurred while saving your query{errorMessage}',
           },
           { errorMessage: error.message ? `: ${error.message}` : '' }
         )
@@ -479,7 +482,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     let filterBar;
     if (this.shouldRenderFilterBar(isEnhancementsEnabledOverride)) {
       const filterGroupClasses = classNames('globalFilterGroup__wrapper', {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'globalFilterGroup__wrapper-isVisible': this.state.isFiltersVisible,
       });
       filterBar = (
@@ -573,6 +575,9 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           datePickerRef={this.props.datePickerRef}
           savedQueryManagement={searchBarMenu(false, true)}
           queryStatus={this.props.queryStatus}
+          showCancelButton={this.props.showCancelButton}
+          onCancel={this.props.onQueryCancel}
+          isQueryRunning={this.props.isQueryRunning}
         />
       );
     }
@@ -584,7 +589,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         {queryBar}
         {queryEditor}
         {!isEnhancementsEnabledOverride && filterBar}
-
         {this.state.showSaveQueryModal ? (
           <SaveQueryForm
             formUiType="Modal"

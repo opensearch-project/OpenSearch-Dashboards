@@ -126,7 +126,7 @@ export function* traverseNodes(nodes) {
  * Forms an formatted error message for parser errors.
  *
  * This function returns a string which represents an error message and a place in the code where the error happened.
- * In total five lines of the code are displayed: the line where the error occured, two lines before and two lines after.
+ * In total five lines of the code are displayed: the line where the error occurred, two lines before and two lines after.
  *
  * @param {string} content a code string where parsed error happened
  * @param {{ loc: { line: number, column: number }, message: string }} error an object that contains an error message and

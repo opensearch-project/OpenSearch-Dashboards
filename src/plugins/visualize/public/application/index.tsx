@@ -28,8 +28,7 @@
  * under the License.
  */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Router } from 'react-router-dom';
 
 import { AppMountParameters } from 'opensearch-dashboards/public';
@@ -59,7 +58,8 @@ export const renderApp = (
     </Router>
   );
 
-  ReactDOM.render(app, element);
+  const root = createRoot(element);
+  root.render(app);
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };
