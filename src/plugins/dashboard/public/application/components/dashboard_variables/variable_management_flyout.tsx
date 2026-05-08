@@ -54,6 +54,7 @@ export const VariableManagementFlyout: React.FC<VariableManagementFlyoutProps> =
   const { notifications } = services;
   const [variables, setVariables] = useState<VariableWithState[]>([]);
   const [deleteTarget, setDeleteTarget] = useState<Variable | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const subscription = variableService.getVariables$().subscribe((newVariables) => {
@@ -77,6 +78,7 @@ export const VariableManagementFlyout: React.FC<VariableManagementFlyoutProps> =
 
   const confirmDelete = useCallback(async () => {
     if (deleteTarget) {
+      setIsDeleting(true);
       try {
         await variableService.removeVariable(deleteTarget.id);
         setDeleteTarget(null);
@@ -92,6 +94,8 @@ export const VariableManagementFlyout: React.FC<VariableManagementFlyoutProps> =
           }),
           text: error instanceof Error ? error.message : 'Unknown error',
         });
+      } finally {
+        setIsDeleting(false);
       }
     }
   }, [deleteTarget, variableService, notifications.toasts]);
@@ -373,6 +377,8 @@ export const VariableManagementFlyout: React.FC<VariableManagementFlyoutProps> =
             defaultMessage: 'Delete',
           })}
           buttonColor="danger"
+          confirmButtonDisabled={isDeleting}
+          isLoading={isDeleting}
         >
           <p>
             {i18n.translate('dashboard.variableManagement.deleteConfirmBody', {

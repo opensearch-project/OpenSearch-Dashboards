@@ -41,7 +41,7 @@ export const useVariables = (containerVariables?: Variable[]) => {
 
   const interpolationService = useMemo(() => {
     if (!variableService) return createNoOpVariableInterpolationService();
-    const svc = new VariableInterpolationService(() => variableService.getVariables());
+    const svc = new VariableInterpolationService(() => variableService.getVariablesWithState());
     variableService.setInterpolationService(svc);
     return svc;
   }, [variableService]);
@@ -62,12 +62,12 @@ export const useVariables = (containerVariables?: Variable[]) => {
     }
   }, [variableService]);
 
-  // Refresh on time range change
+  // Refresh on time range change (only variables with useTimeFilter enabled)
   useEffect(() => {
     if (!variableService) return;
     const sub = services.data.query.timefilter.timefilter
       .getTimeUpdate$()
-      .subscribe(() => variableService.refreshAllVariableOptions());
+      .subscribe(() => variableService.refreshTimeFilteredVariableOptions());
     return () => sub.unsubscribe();
   }, [variableService, services.data]);
 

@@ -51,6 +51,7 @@ const mockQueryBuilder = {
   executeQuery: jest.fn(),
   reset: jest.fn(),
   queryState$: { getValue: jest.fn().mockReturnValue({ query: '' }) },
+  setVariableNames: jest.fn(),
 };
 
 const mockVisualizationBuilder = {

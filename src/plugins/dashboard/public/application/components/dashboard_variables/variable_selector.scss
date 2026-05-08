@@ -11,7 +11,7 @@
   background-color: $euiPageBackgroundColor;
   border: 1px solid $euiColorMediumShade;
   border-radius: $euiBorderRadius;
-  padding: 5px 12px 2px;
+  padding: 5px 12px 3px;
 
   &:hover {
     border-color: $euiColorPrimary;
@@ -62,4 +62,13 @@
 .variableSelectorErrorIcon {
   pointer-events: auto !important;
   cursor: help !important;
+}
+
+.manageVariablesButton {
+  border-color: $euiColorMediumShade !important;
+  color: $euiColorDarkShade !important;
+
+  svg {
+    fill: $euiColorDarkShade !important;
+  }
 }

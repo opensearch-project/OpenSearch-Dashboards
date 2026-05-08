@@ -44,8 +44,8 @@ const mockCategoricalColumns: VisColumn[] = [
 ];
 
 const mockAxisColumnMappings: AxisColumnMappings = {
-  [AxisRole.X]: mockCategoricalColumns[0],
-  [AxisRole.Y]: mockNumericalColumns[0],
+  [AxisRole.X]: [mockCategoricalColumns[0]],
+  [AxisRole.Y]: [mockNumericalColumns[0]],
 };
 
 jest.mock('@osd/i18n', () => ({
@@ -313,14 +313,16 @@ describe('BarVisStyleControls', () => {
       ...defaultProps,
       axisColumnMappings: {
         ...mockAxisColumnMappings,
-        [AxisRole.COLOR]: {
-          id: 5,
-          name: 'Color Category',
-          schema: VisFieldType.Categorical,
-          column: 'color',
-          validValuesCount: 10,
-          uniqueValuesCount: 5,
-        },
+        [AxisRole.COLOR]: [
+          {
+            id: 5,
+            name: 'Color Category',
+            schema: VisFieldType.Categorical,
+            column: 'color',
+            validValuesCount: 10,
+            uniqueValuesCount: 5,
+          },
+        ],
       },
     };
 
@@ -338,22 +340,26 @@ describe('BarVisStyleControls', () => {
       ...defaultProps,
       axisColumnMappings: {
         ...mockAxisColumnMappings,
-        [AxisRole.COLOR]: {
-          id: 5,
-          name: 'Color Category',
-          schema: VisFieldType.Categorical,
-          column: 'color',
-          validValuesCount: 10,
-          uniqueValuesCount: 5,
-        },
-        [AxisRole.FACET]: {
-          id: 6,
-          name: 'Facet Category',
-          schema: VisFieldType.Categorical,
-          column: 'facet',
-          validValuesCount: 10,
-          uniqueValuesCount: 5,
-        },
+        [AxisRole.COLOR]: [
+          {
+            id: 5,
+            name: 'Color Category',
+            schema: VisFieldType.Categorical,
+            column: 'color',
+            validValuesCount: 10,
+            uniqueValuesCount: 5,
+          },
+        ],
+        [AxisRole.FACET]: [
+          {
+            id: 6,
+            name: 'Facet Category',
+            schema: VisFieldType.Categorical,
+            column: 'facet',
+            validValuesCount: 10,
+            uniqueValuesCount: 5,
+          },
+        ],
       },
     };
 
@@ -371,14 +377,16 @@ describe('BarVisStyleControls', () => {
       ...defaultProps,
       axisColumnMappings: {
         ...mockAxisColumnMappings,
-        [AxisRole.COLOR]: {
-          id: 5,
-          name: 'Color Category',
-          schema: VisFieldType.Categorical,
-          column: 'color',
-          validValuesCount: 10,
-          uniqueValuesCount: 5,
-        },
+        [AxisRole.COLOR]: [
+          {
+            id: 5,
+            name: 'Color Category',
+            schema: VisFieldType.Categorical,
+            column: 'color',
+            validValuesCount: 10,
+            uniqueValuesCount: 5,
+          },
+        ],
       },
     };
 
@@ -565,14 +573,16 @@ describe('BarVisStyleControls', () => {
       ...defaultProps,
       axisColumnMappings: {
         ...mockAxisColumnMappings,
-        x: {
-          id: 1,
-          name: 'Date X',
-          schema: VisFieldType.Date,
-          column: 'column',
-          validValuesCount: 100,
-          uniqueValuesCount: 50,
-        },
+        x: [
+          {
+            id: 1,
+            name: 'Date X',
+            schema: VisFieldType.Date,
+            column: 'column',
+            validValuesCount: 100,
+            uniqueValuesCount: 50,
+          },
+        ],
       },
     };
 

@@ -7,24 +7,28 @@ import {
   VariableInterpolationService,
   createNoOpVariableInterpolationService,
 } from './variable_interpolation_service';
-import { VariableType, CustomVariable } from './types';
+import { VariableType, VariableWithState, CustomVariable, VariableState } from './types';
 
-const makeCustomVar = (overrides: Partial<CustomVariable> = {}): CustomVariable => ({
+type CustomVariableWithState = CustomVariable & VariableState;
+
+const makeCustomVar = (overrides: Partial<CustomVariableWithState> = {}): VariableWithState => ({
   id: '1',
   name: 'service',
   type: VariableType.Custom,
   current: ['api'],
   customOptions: ['api', 'web', 'worker'],
+  options: ['api', 'web', 'worker'],
   ...overrides,
 });
 
-const makeMultiVar = (overrides: Partial<CustomVariable> = {}): CustomVariable => ({
+const makeMultiVar = (overrides: Partial<CustomVariableWithState> = {}): VariableWithState => ({
   id: '2',
   name: 'region',
   type: VariableType.Custom,
   current: ['us-east', 'us-west'],
   multi: true,
   customOptions: ['us-east', 'us-west', 'eu-west'],
+  options: ['us-east', 'us-west', 'eu-west'],
   ...overrides,
 });
 
@@ -160,6 +164,56 @@ describe('VariableInterpolationService', () => {
     it('should return empty string for default when multi-select has no values', () => {
       const svc = new VariableInterpolationService(() => [makeMultiVar({ current: [] })]);
       expect(svc.interpolate('$region')).toBe('');
+    });
+  });
+
+  describe('interpolate — optionType handling', () => {
+    it('should format PPL multi-select number options without quotes', () => {
+      const svc = new VariableInterpolationService(() => [
+        makeMultiVar({ current: ['120', '223'], optionType: 'number' }),
+      ]);
+      expect(svc.interpolate('where id IN $region', 'PPL')).toBe('where id IN (120, 223)');
+    });
+
+    it('should format PPL multi-select boolean options without quotes', () => {
+      const svc = new VariableInterpolationService(() => [
+        makeMultiVar({ current: ['true', 'false'], optionType: 'boolean' }),
+      ]);
+      expect(svc.interpolate('where active IN $region', 'PPL')).toBe(
+        'where active IN (true, false)'
+      );
+    });
+
+    it('should format PPL multi-select string options with quotes', () => {
+      const svc = new VariableInterpolationService(() => [
+        makeMultiVar({ current: ['api', 'web'], optionType: 'string' }),
+      ]);
+      expect(svc.interpolate('where service IN $region', 'PPL')).toBe(
+        "where service IN ('api', 'web')"
+      );
+    });
+
+    it('should format PPL multi-select with quotes when optionType is undefined', () => {
+      const svc = new VariableInterpolationService(() => [
+        makeMultiVar({ current: ['api', 'web'], optionType: undefined }),
+      ]);
+      expect(svc.interpolate('where service IN $region', 'PPL')).toBe(
+        "where service IN ('api', 'web')"
+      );
+    });
+
+    it('should not affect PromQL formatting based on optionType', () => {
+      const svc = new VariableInterpolationService(() => [
+        makeMultiVar({ current: ['120', '223'], optionType: 'number' }),
+      ]);
+      expect(svc.interpolate('{id=~"$region"}', 'PROMQL')).toBe('{id=~"(120|223)"}');
+    });
+
+    it('should not affect default formatting based on optionType', () => {
+      const svc = new VariableInterpolationService(() => [
+        makeMultiVar({ current: ['120', '223'], optionType: 'number' }),
+      ]);
+      expect(svc.interpolate('$region')).toBe('120, 223');
     });
   });
 

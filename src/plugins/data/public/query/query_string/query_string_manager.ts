@@ -54,10 +54,12 @@ export class QueryStringManager {
     private readonly defaultSearchInterceptor: ISearchInterceptor,
     private readonly notifications: NotificationsSetup
   ) {
-    this.query$ = new BehaviorSubject<Query>(this.getDefaultQuery());
-    this.queryHistory = createHistory({ storage: this.sessionStorage });
+    // datasetService and languageService must exist before getDefaultQuery() runs,
+    // otherwise the initial query skips the dataset-aware language clamp.
     this.datasetService = new DatasetService(uiSettings, this.sessionStorage);
     this.languageService = new LanguageService(this.defaultSearchInterceptor, this.storage);
+    this.query$ = new BehaviorSubject<Query>(this.getDefaultQuery());
+    this.queryHistory = createHistory({ storage: this.sessionStorage });
     try {
       const application = getApplication();
       if (application && application.currentAppId$) {
@@ -106,7 +108,14 @@ export class QueryStringManager {
       defaultDataset &&
       this.languageService
     ) {
-      const newQuery = { ...query, dataset: defaultDataset };
+      let languageId = defaultLanguageId;
+      const supportedLanguages = this.datasetService
+        .getType(defaultDataset.type)
+        ?.supportedLanguages(defaultDataset);
+      if (supportedLanguages && !supportedLanguages.includes(languageId)) {
+        languageId = supportedLanguages[0];
+      }
+      const newQuery = { ...query, language: languageId, dataset: defaultDataset };
 
       return {
         ...newQuery,
@@ -115,6 +124,18 @@ export class QueryStringManager {
     }
 
     return query;
+  }
+
+  /**
+   * Re-seeds query$ from getDefaultQuery() if the user hasn't changed the query yet.
+   * Called after DatasetService.init() resolves so the default dataset (and any
+   * language clamp it implies) can be applied to the initial query.
+   */
+  public refreshDefaultQuery(previousDefault: Query): void {
+    const currentQuery = this.query$.getValue();
+    if (isEqual(currentQuery, previousDefault)) {
+      this.query$.next(this.getDefaultQuery());
+    }
   }
 
   public formatQuery(query: Query | string | undefined): Query {

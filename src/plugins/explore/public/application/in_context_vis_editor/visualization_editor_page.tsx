@@ -152,6 +152,19 @@ export const VisualizationEditorPage = ({
     };
   }, [queryBuilder, visualizationBuilderForEditor]);
 
+  // Update variable names in queryBuilder when variables change
+  useEffect(() => {
+    if (!variableService) {
+      queryBuilder.setVariableNames([]);
+      return;
+    }
+    const subscription = variableService.getVariables$().subscribe((variables) => {
+      const variableNames = variables.map((v) => v.name);
+      queryBuilder.setVariableNames(variableNames);
+    });
+    return () => subscription.unsubscribe();
+  }, [variableService, queryBuilder]);
+
   useHeaderVariants(services, HeaderVariant.APPLICATION);
 
   // Show only the dashboard selection modal if needed

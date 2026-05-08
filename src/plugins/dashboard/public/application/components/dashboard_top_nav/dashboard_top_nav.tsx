@@ -4,9 +4,12 @@
  */
 
 import { memo, useState, useEffect, useCallback } from 'react';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiText, EuiSmallButtonEmpty } from '@elastic/eui';
 import { IndexPattern } from 'src/plugins/data/public';
 import { useLocation } from 'react-router-dom';
 import { i18n } from '@osd/i18n';
+import { take } from 'rxjs/operators';
+import { DEFAULT_NAV_GROUPS, isNavGroupInFeatureConfigs } from '../../../../../../core/public';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { getTopNavConfig, getTopNavRightConfig, getTopNavLegacyConfig } from './top_nav';
 import { DashboardAppStateContainer, DashboardAppState, DashboardServices } from '../../../types';
@@ -17,6 +20,7 @@ import { TopNavMenuItemRenderType, TopNavControlData } from '../../../../../navi
 import { TopNavIds } from './top_nav';
 import { ViewMode, isErrorEmbeddable, openAddPanelFlyout } from '../../../../../embeddable/public';
 import { getSavedObjectFinder } from '../../../../../saved_objects/public';
+import './dashboard_top_nav.scss';
 
 interface DashboardTopNavProps {
   isChromeVisible: boolean;
@@ -54,10 +58,14 @@ const TopNav = ({
   const [topNavMenu, setTopNavMenu] = useState<any>();
   const [topRightControls, setTopRightControls] = useState<TopNavControlData[]>([]);
   const [isFullScreenMode, setIsFullScreenMode] = useState<any>();
+  const [isObservabilityOrAnalyticsWorkspace, setIsObservabilityOrAnalyticsWorkspace] = useState(
+    false
+  );
+  const [userRestoredSearchBar, setUserRestoredSearchBar] = useState(false);
 
   const { services } = useOpenSearchDashboards<DashboardServices>();
   const { TopNavMenu, HeaderControl } = services.navigation.ui;
-  const { dashboardConfig, setHeaderActionMenu, keyboardShortcut } = services;
+  const { dashboardConfig, setHeaderActionMenu, keyboardShortcut, workspaces } = services;
   const { setAppRightControls } = services.application;
 
   // Get nav actions for direct function calls
@@ -251,6 +259,45 @@ const TopNav = ({
     setIsFullScreenMode(currentAppState?.fullScreenMode);
   }, [currentAppState, services]);
 
+  // Check if current workspace is Observability or Analytics
+  useEffect(() => {
+    workspaces.currentWorkspace$
+      .pipe(take(1))
+      .toPromise()
+      .then((ws) => {
+        const features = ws?.features;
+        // The 'all' nav group represents Analytics workspace
+        const isTargetWorkspace =
+          features &&
+          (isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.observability.id, features) ||
+            isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.all.id, features));
+        setIsObservabilityOrAnalyticsWorkspace(!!isTargetWorkspace);
+      });
+  }, [workspaces.currentWorkspace$]);
+
+  // Helper to check if query is empty (only for string queries or Query objects)
+  const isQueryEmpty = (query: any): boolean => {
+    if (!query) return true;
+    if (typeof query === 'string') return query.trim() === '';
+    if (typeof query === 'object' && 'query' in query) {
+      return !query.query || query.query.trim() === '';
+    }
+    return false;
+  };
+
+  // Helper to check if filters are empty
+  const areFiltersEmpty = (filters: any[]): boolean => {
+    return !filters || filters.length === 0;
+  };
+
+  // Check if searchSource has non-empty query or filters
+  const hasSearchSourceContent = (): boolean => {
+    if (!savedDashboardInstance?.searchSource) return false;
+    const query = savedDashboardInstance.getQuery();
+    const filters = savedDashboardInstance.getFilters();
+    return !isQueryEmpty(query) || !areFiltersEmpty(filters);
+  };
+
   const shouldShowFilterBar = (forceHide: boolean): boolean =>
     !forceHide && (currentAppState.filters!.length > 0 || !currentAppState?.fullScreenMode);
 
@@ -259,10 +306,29 @@ const TopNav = ({
   const forceShowDatePicker = shouldForceDisplay(UrlParams.SHOW_TIME_FILTER);
   const forceHideFilterBar = shouldForceDisplay(UrlParams.HIDE_FILTER_BAR);
   const showTopNavMenu = shouldShowNavBarComponent(forceShowTopNavMenu);
-  const showQueryInput = shouldShowNavBarComponent(forceShowQueryInput);
+
+  // Workspace-specific logic for Observability and Analytics
+  // In these workspaces, we hide the search bar by default to encourage using Variables
+  const shouldHideSearchBarForWorkspace =
+    isObservabilityOrAnalyticsWorkspace && !userRestoredSearchBar && !isEmbeddedExternally;
+
+  const shouldShowMigrationCallout =
+    isObservabilityOrAnalyticsWorkspace &&
+    hasSearchSourceContent() &&
+    !userRestoredSearchBar &&
+    !isEmbeddedExternally;
+
+  let showQueryInput = shouldShowNavBarComponent(forceShowQueryInput);
   const showDatePicker = shouldShowNavBarComponent(forceShowDatePicker);
+  let showFilterBar = shouldShowFilterBar(forceHideFilterBar);
+
+  // Override for workspace-specific hiding
+  if (shouldHideSearchBarForWorkspace) {
+    showQueryInput = false;
+    showFilterBar = false;
+  }
+
   const showQueryBar = showQueryInput || showDatePicker;
-  const showFilterBar = shouldShowFilterBar(forceHideFilterBar);
   const showSearchBar = showQueryBar || showFilterBar;
 
   return (
@@ -295,6 +361,34 @@ const TopNav = ({
         groupActions={showActionsInGroup}
       />
       <HeaderControl setMountPoint={setAppRightControls} controls={topRightControls} />
+
+      {/* Show migration callout when legacy search content exists */}
+      {shouldShowMigrationCallout && (
+        <EuiCallOut color="primary" size="s" dismissible className="dshMigrationCallout">
+          <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="xs">
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">
+                {i18n.translate('dashboard.topNav.migrationCallout.description', {
+                  defaultMessage:
+                    'This dashboard has legacy query or filter bars. Consider using Variables for better flexibility.',
+                })}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiSmallButtonEmpty
+                color="primary"
+                onClick={() => setUserRestoredSearchBar(true)}
+                data-test-subj="restoreSearchBarButton"
+                iconType="eye"
+              >
+                {i18n.translate('dashboard.topNav.migrationCallout.restoreButton', {
+                  defaultMessage: 'Show filter and search bar',
+                })}
+              </EuiSmallButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiCallOut>
+      )}
     </>
   );
 };

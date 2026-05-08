@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Variable } from './types';
+import { VariableWithState, VariableOptionType } from './types';
 
 /**
  * Variable value with metadata for interpolation
@@ -13,6 +13,7 @@ export interface VariableValue {
   value: string;
   multi?: boolean;
   values?: string[];
+  optionType?: VariableOptionType;
 }
 
 /**
@@ -62,7 +63,7 @@ export class VariableInterpolationService implements IVariableInterpolationServi
     return /\$\{(\w+)\}|\$(\w+)/g;
   }
 
-  constructor(private readonly getVariablesFn: () => Variable[]) {}
+  constructor(private readonly getVariablesFn: () => VariableWithState[]) {}
 
   /**
    * Check if a query string contains variable placeholders
@@ -106,7 +107,7 @@ export class VariableInterpolationService implements IVariableInterpolationServi
         }
 
         if (variable.multi) {
-          return this.formatMultiValue(variable.values ?? [], lang);
+          return this.formatMultiValue(variable.values ?? [], lang, variable.optionType);
         }
 
         return this.escapeForLanguage(variable.value, lang);
@@ -130,7 +131,7 @@ export class VariableInterpolationService implements IVariableInterpolationServi
 
   /**
    * Get all variable values with metadata
-   * Converts from Variable[] to VariableValue[]
+   * Converts from VariableWithState[] to VariableValue[]
    */
   getVariables(): VariableValue[] {
     const variables = this.getVariablesFn();
@@ -140,17 +141,23 @@ export class VariableInterpolationService implements IVariableInterpolationServi
       value: (v.current ?? []).join(','),
       multi: v.multi,
       values: v.multi ? v.current : undefined,
+      optionType: v.optionType,
     }));
   }
 
   /**
-   * Format multi-select values based on query language
+   * Format multi-select values based on query language and option type
    *
-   * - PPL: ('value1', 'value2') — for use with IN operator
+   * - PPL string: ('value1', 'value2') — quoted for use with IN operator
+   * - PPL number/boolean: (123, 456) — unquoted
    * - PROMQL: (value1|value2)
    * - Default: value1, value2
    */
-  private formatMultiValue(values: string[], language: string): string {
+  private formatMultiValue(
+    values: string[],
+    language: string,
+    optionType?: VariableOptionType
+  ): string {
     if (values.length === 0) {
       switch (language) {
         case 'PPL':
@@ -165,7 +172,12 @@ export class VariableInterpolationService implements IVariableInterpolationServi
     switch (language) {
       case 'PPL': {
         const escaped = values.map((v) => this.escapeForLanguage(v, language));
-        return `(${escaped.map((v) => `'${v}'`).join(', ')})`;
+        if (!optionType || optionType === 'string') {
+          return `(${escaped.map((v) => `'${v}'`).join(', ')})`;
+        } else {
+          // For numbers and booleans, don't quote
+          return `(${escaped.join(', ')})`;
+        }
       }
       case 'PROMQL': {
         const escaped = values.map((v) => this.escapeForLanguage(v, language));

@@ -4,7 +4,6 @@
  */
 import React from 'react';
 
-import '../../_celestial.generated.scss';
 import { Handle, Node, NodeProps, Position } from '@xyflow/react';
 import { useCallback, useRef } from 'react';
 import { useContextMenu } from '../../shared/hooks/use_context_menu.hook';
