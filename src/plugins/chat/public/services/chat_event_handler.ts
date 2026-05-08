@@ -6,6 +6,7 @@
 import { Observable, Subscription } from 'rxjs';
 import { i18n } from '@osd/i18n';
 import { EventType } from '../../common/events';
+import { TOOL_EXECUTION_ERROR_PREFIX } from '../../common';
 import type {
   Event as ChatEvent,
   TextMessageStartEvent,
@@ -158,9 +159,7 @@ export class ChatEventHandler {
     // Clear any remaining active messages (cleanup)
     this.activeAssistantMessages.clear();
     // Reset the connection state to allow new chats
-    if (this.chatService && (this.chatService as any).resetConnection) {
-      (this.chatService as any).resetConnection();
-    }
+    this.chatService.resetConnection();
 
     // Record success telemetry only if no error occurred during this run
     if (this.telemetryRecorder && !this.runErrorOccurred) {
@@ -402,7 +401,7 @@ export class ChatEventHandler {
         toolCall.function.name,
         args,
         toolCallId,
-        await this.chatService?.getCurrentDataSourceId()
+        await this.chatService.getCurrentDataSourceId()
       );
 
       // Check if tool execution was cancelled (e.g., due to cleanup)
@@ -412,15 +411,14 @@ export class ChatEventHandler {
       }
 
       if (result.userRejected) {
-        // User rejected the tool execution
+        // User rejected the tool execution. Hold off on marking 'failed'
+        // until the rejection has actually been delivered to the assistant,
+        // so the tool row keeps its running indicator during the send
+        // rather than showing a failed state while still doing work.
+        await this.sendToolResultToAssistant(toolCallId, result);
         this.assistantActionService.updateToolCallState(toolCallId, {
           status: 'failed',
         });
-
-        // Send rejection message back to assistant
-        if (this.chatService && (this.chatService as any).sendToolResult) {
-          await this.sendToolResultToAssistant(toolCallId, result);
-        }
 
         // Clean up pending tool call
         this.pendingToolCalls.delete(toolCallId);
@@ -436,43 +434,49 @@ export class ChatEventHandler {
         });
         // Don't send result back immediately, wait for TOOL_CALL_RESULT event
       } else {
-        // Tool was executed locally
-
+        // Tool was executed locally. Hold off on marking 'complete' until
+        // the result has actually been delivered to the assistant and the
+        // next streaming turn has started. Otherwise there would be a
+        // confusing window where the tool row shows a checkmark while the
+        // UI is still waiting on the network round-trip with no visible
+        // activity. If the send itself fails, `sendToolResultToAssistant`
+        // appends a system message to the timeline so the user can see the
+        // conversation is out of sync — the tool call itself still
+        // completed locally, so mark it 'complete'.
+        await this.sendToolResultToAssistant(toolCallId, result.data);
         this.assistantActionService.updateToolCallState(toolCallId, {
           status: 'complete',
           result: result.data,
         });
-
-        // Send tool result back to assistant if chatService is available
-        if (this.chatService && (this.chatService as any).sendToolResult) {
-          await this.sendToolResultToAssistant(toolCallId, result.data);
-        }
       }
     } catch (error: any) {
       // eslint-disable-next-line no-console
       console.error(`Error executing tool ${toolCall.function.name}:`, error);
 
+      // Send error back to assistant. Prefix the content with
+      // `TOOL_EXECUTION_ERROR_PREFIX` so a snapshot reload can render the
+      // tool row as an error via `getToolStatus` — `chatService.sendToolResult`
+      // passes this string straight into the ToolMessage content (which is
+      // what is persisted to agentic memory), so the UI can detect the
+      // prefix without needing a separate local-only ToolMessage that
+      // would diverge from the saved conversation. Natural-language prose
+      // also keeps the payload readable for the LLM on the next turn.
+      //
+      // Hold off on marking 'failed' until the error has actually been
+      // delivered, so the tool row keeps its running indicator during the
+      // send rather than flipping to a failed state while the UI is still
+      // doing work. `sendToolResultToAssistant` owns the timeline append on
+      // success, skip, and send failure.
+      await this.sendToolResultToAssistant(
+        toolCallId,
+        `${TOOL_EXECUTION_ERROR_PREFIX}${error.message}`
+      );
+
       // Update state to failed
       this.assistantActionService.updateToolCallState(toolCallId, {
         status: 'failed',
-        error: error.message,
+        error: error instanceof Error ? error : new Error(error.message),
       });
-
-      // Add error tool result message to timeline
-      const errorToolMessage: ToolMessage = {
-        id: `tool-error-${toolCallId}`,
-        role: 'tool',
-        content: error.message,
-        toolCallId,
-        error: error.message,
-      };
-
-      this.onTimelineUpdate((prev) => [...prev, errorToolMessage]);
-
-      // Send error back to assistant
-      if (this.chatService && (this.chatService as any).sendToolResult) {
-        await this.sendToolResultToAssistant(toolCallId, { error: error.message });
-      }
     } finally {
       // Clean up pending tool call
       this.pendingToolCalls.delete(toolCallId);
@@ -510,6 +514,14 @@ export class ChatEventHandler {
     };
 
     this.onTimelineUpdate((prev) => [...prev, toolMessage]);
+
+    // Mark the tool call as complete now that the agent has reported a result.
+    // This keeps the event-driven toolCallStates in sync with the real
+    // TOOL_CALL_RESULT event so the UI reflects the actual running status.
+    this.assistantActionService.updateToolCallState(toolCallId, {
+      status: 'complete',
+      result: resultContent,
+    });
 
     // Clear pending tool if it was an agent-only tool
     if (this.toolExecutor.isPendingAgentResponse(toolCallId)) {
@@ -661,7 +673,13 @@ export class ChatEventHandler {
   }
 
   /**
-   * Send tool result back to assistant
+   * Send tool result back to assistant.
+   *
+   * On send failure, appends a system message to the timeline so the user
+   * can tell the conversation is out of sync (the assistant never received
+   * the result). The originating tool call is still considered complete from
+   * the local perspective — it ran and produced a result — the delivery is
+   * what failed, and that is surfaced via the system message.
    */
   async sendToolResultToAssistant(toolCallId: string, result: any): Promise<void> {
     // Abort any in-flight tool result send so we don't leak controllers or
@@ -838,6 +856,11 @@ export class ChatEventHandler {
     this.pendingToolCalls.clear();
     this.toolExecutor.clearAllPendingTools();
     this.lastTextMessageStartId = null;
+    // Drain the process-wide AssistantActionService tool call states so
+    // stale pending/executing entries from a previous run do not bleed
+    // into a freshly replayed or newly started conversation and leave
+    // phantom running indicators on its tool calls.
+    this.assistantActionService.clearAllToolCallStates();
     // @ts-expect-error TS2339 TODO(ts-error): fixme
     this._lastAssistantMessageId = null;
 
