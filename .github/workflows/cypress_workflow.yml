@@ -369,7 +369,7 @@ jobs:
           IFS="," read -a SPEC_ARRAY <<< $(yarn --silent osd:ciGroup${{ matrix.group }})
           FORMATTED_SPEC=''
           for i in "${SPEC_ARRAY[@]}"; do
-            FORMATTED_SPEC+="cypress/integration/core-opensearch-dashboards/opensearch-dashboards/${i},"
+            FORMATTED_SPEC+="cypress/integration/core-opensearch-dashboards/opensearch-dashboards/${i}"
           done
           echo "SPEC=${FORMATTED_SPEC}" >> $GITHUB_ENV
           echo "SPEC=${FORMATTED_SPEC}"
