@@ -41,7 +41,9 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: '[name].js',
-    libraryTarget: 'commonjs2',
+    library: {
+      type: 'commonjs2',
+    },
     hashFunction: 'xxhash64',
   },
 
