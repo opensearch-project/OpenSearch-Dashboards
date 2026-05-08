@@ -134,6 +134,7 @@
     "**/@babel/traverse": "^7.27.0",
     "**/@cypress/request": "^3.0.9",
     "**/@microsoft/tsdoc-config/ajv": "^6.14.0",
+    "**/ajv/fast-uri": "^3.1.1",
     "**/@langchain/core/langsmith": "0.5.18",
     "**/cipher-base": "^1.0.5",
     "**/sha.js": "^2.4.12",
