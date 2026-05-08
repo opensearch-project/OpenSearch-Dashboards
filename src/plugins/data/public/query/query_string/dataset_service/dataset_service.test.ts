@@ -445,6 +445,61 @@ describe('DatasetService', () => {
     // expect(service.getRecentDatasets().length).toEqual(4);
   });
 
+  test('fetchDefaultDataset preserves the saved object type for non-INDEX_PATTERN datasets', async () => {
+    jest.clearAllMocks();
+    uiSettings = coreMock.createSetup().uiSettings;
+    uiSettings.get = jest.fn().mockImplementation((setting: string) => {
+      if (setting === UI_SETTINGS.SEARCH_MAX_RECENT_DATASETS) return 4;
+      if (setting === 'defaultIndex') return 'id';
+      if (setting === UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED) return true;
+    });
+    sessionStorage = new DataStorage(window.sessionStorage, 'opensearchDashboards.');
+    service = new DatasetService(uiSettings, sessionStorage);
+
+    indexPatterns = ({
+      ...dataPluginMock.createStartContract().indexPatterns,
+      get: jest.fn().mockResolvedValue({
+        id: 'id',
+        title: 'my-index-*',
+        type: DEFAULT_DATA.SET_TYPES.INDEX,
+      }),
+      getDataSource: jest.fn().mockResolvedValue(undefined),
+    } as unknown) as IndexPatternsContract;
+    service.init(indexPatterns);
+
+    await waitFor(() => {
+      const def = service.getDefault();
+      expect(def?.type).toBe(DEFAULT_DATA.SET_TYPES.INDEX);
+    });
+  });
+
+  test('fetchDefaultDataset defaults to INDEX_PATTERN when saved object type is missing', async () => {
+    jest.clearAllMocks();
+    uiSettings = coreMock.createSetup().uiSettings;
+    uiSettings.get = jest.fn().mockImplementation((setting: string) => {
+      if (setting === UI_SETTINGS.SEARCH_MAX_RECENT_DATASETS) return 4;
+      if (setting === 'defaultIndex') return 'id';
+      if (setting === UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED) return true;
+    });
+    sessionStorage = new DataStorage(window.sessionStorage, 'opensearchDashboards.');
+    service = new DatasetService(uiSettings, sessionStorage);
+
+    indexPatterns = ({
+      ...dataPluginMock.createStartContract().indexPatterns,
+      get: jest.fn().mockResolvedValue({
+        id: 'id',
+        title: 'my-index-*',
+      }),
+      getDataSource: jest.fn().mockResolvedValue(undefined),
+    } as unknown) as IndexPatternsContract;
+    service.init(indexPatterns);
+
+    await waitFor(() => {
+      const def = service.getDefault();
+      expect(def?.type).toBe(DEFAULT_DATA.SET_TYPES.INDEX_PATTERN);
+    });
+  });
+
   test('test get default dataset ', async () => {
     jest.clearAllMocks();
     uiSettings = coreMock.createSetup().uiSettings;
