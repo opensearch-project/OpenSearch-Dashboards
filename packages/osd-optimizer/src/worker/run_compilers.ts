@@ -105,7 +105,15 @@ const observeCompiler = (
       if (workerConfig.profileWebpack) {
         Fs.writeFileSync(
           Path.resolve(bundle.outputDir, 'stats.json'),
-          JSON.stringify(stats.toJson())
+          JSON.stringify(
+            stats.toJson({
+              assets: true,
+              chunks: true,
+              chunkGroups: true,
+              entrypoints: true,
+              modules: true,
+            })
+          )
         );
       }
 
