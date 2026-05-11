@@ -9,7 +9,11 @@
  * GitHub history for details.
  */
 
-import { IndexPatternsFetcher, __resetFieldCapsCacheForTests } from './index_patterns_fetcher';
+import {
+  IndexPatternsFetcher,
+  __getFieldCapsInFlightSizeForTests,
+  __resetFieldCapsCacheForTests,
+} from './index_patterns_fetcher';
 import * as lib from './lib';
 
 jest.mock('./lib', () => {
@@ -107,6 +111,25 @@ describe('IndexPatternsFetcher.getFieldsForWildcard cache + dedupe', () => {
 
     expect(second.map((f) => f.name)).toEqual(['a']);
     expect(mockedGetFieldCapabilities).toHaveBeenCalledTimes(2);
+  });
+
+  test('sweeps stale in-flight entries past the timeout to prevent unbounded growth', () => {
+    // Make every fetch hang so entries stay in flight.
+    mockedGetFieldCapabilities.mockReturnValue(new Promise(() => {}));
+    const fetcher = new IndexPatternsFetcher(jest.fn() as any);
+    const nowSpy = jest.spyOn(Date, 'now').mockImplementation(() => 1000);
+
+    for (let i = 0; i < 5; i++) {
+      void fetcher.getFieldsForWildcard({ pattern: `stuck-${i}` });
+    }
+    expect(__getFieldCapsInFlightSizeForTests()).toBe(5);
+
+    // Advance past the 30 s in-flight timeout, then trigger a sweep via a fresh fetch.
+    nowSpy.mockImplementation(() => 1000 + 31000);
+    void fetcher.getFieldsForWildcard({ pattern: 'fresh' });
+
+    expect(__getFieldCapsInFlightSizeForTests()).toBe(1);
+    nowSpy.mockRestore();
   });
 
   test('shares the cache between different IndexPatternsFetcher instances', async () => {

@@ -52,6 +52,11 @@ interface FieldCapsCacheEntry {
   fields: FieldDescriptor[];
 }
 
+interface FieldCapsInFlightEntry {
+  ts: number;
+  promise: Promise<FieldDescriptor[]>;
+}
+
 // Short-lived, module-level cache + in-flight deduplication for _field_caps responses.
 // The goal is to flatten the thundering herd when many concurrent requests hit the same
 // wildcard pattern (e.g. multiple users opening Discover on the same index pattern after
@@ -60,14 +65,24 @@ interface FieldCapsCacheEntry {
 // risks serving one user's view of the mapping to another.
 const FIELD_CAPS_TTL_MS = 5000;
 const FIELD_CAPS_CACHE_MAX_ENTRIES = 200;
+// Promises that have not resolved within this window are assumed to be stuck (network
+// timeout, dead-locked cluster, dropped connection). Evicting them on subsequent writes
+// keeps the in-flight map from growing unboundedly when a flood of distinct patterns
+// hits a slow backend.
+const FIELD_CAPS_INFLIGHT_TIMEOUT_MS = 30000;
 const fieldCapsCache = new Map<string, FieldCapsCacheEntry>();
-const fieldCapsInFlight = new Map<string, Promise<FieldDescriptor[]>>();
+const fieldCapsInFlight = new Map<string, FieldCapsInFlightEntry>();
 
-const sweepExpired = (now: number) => {
-  if (fieldCapsCache.size < FIELD_CAPS_CACHE_MAX_ENTRIES) return;
-  const cutoff = now - FIELD_CAPS_TTL_MS;
-  for (const [key, entry] of fieldCapsCache) {
-    if (entry.ts < cutoff) fieldCapsCache.delete(key);
+const sweepStale = (now: number) => {
+  if (fieldCapsCache.size >= FIELD_CAPS_CACHE_MAX_ENTRIES) {
+    const cacheCutoff = now - FIELD_CAPS_TTL_MS;
+    for (const [key, entry] of fieldCapsCache) {
+      if (entry.ts < cacheCutoff) fieldCapsCache.delete(key);
+    }
+  }
+  const inflightCutoff = now - FIELD_CAPS_INFLIGHT_TIMEOUT_MS;
+  for (const [key, entry] of fieldCapsInFlight) {
+    if (entry.ts < inflightCutoff) fieldCapsInFlight.delete(key);
   }
 };
 
@@ -82,12 +97,14 @@ const buildFieldCapsCacheKey = (
     o: fieldCapsOptions ?? null,
   });
 
-// Test-only helper. Exposed via the same module so tests can guarantee an empty starting
-// state. Not exported through the plugin's public surface.
+// Test-only helpers. Exposed via the same module so tests can guarantee an empty
+// starting state and observe internal sizes. Not exported through the plugin's public
+// surface.
 export const __resetFieldCapsCacheForTests = () => {
   fieldCapsCache.clear();
   fieldCapsInFlight.clear();
 };
+export const __getFieldCapsInFlightSizeForTests = () => fieldCapsInFlight.size;
 
 export class IndexPatternsFetcher {
   private _callDataCluster: LegacyAPICaller;
@@ -120,7 +137,7 @@ export class IndexPatternsFetcher {
     }
 
     const inFlight = fieldCapsInFlight.get(cacheKey);
-    if (inFlight) return inFlight;
+    if (inFlight) return inFlight.promise;
 
     const promise = getFieldCapabilities(
       this._callDataCluster,
@@ -129,7 +146,7 @@ export class IndexPatternsFetcher {
       fieldCapsOptions
     )
       .then((fields) => {
-        sweepExpired(Date.now());
+        sweepStale(Date.now());
         fieldCapsCache.set(cacheKey, { ts: Date.now(), fields });
         return fields;
       })
@@ -137,7 +154,8 @@ export class IndexPatternsFetcher {
         fieldCapsInFlight.delete(cacheKey);
       });
 
-    fieldCapsInFlight.set(cacheKey, promise);
+    sweepStale(now);
+    fieldCapsInFlight.set(cacheKey, { ts: now, promise });
     return promise;
   }
 

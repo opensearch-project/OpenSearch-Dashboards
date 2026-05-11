@@ -414,6 +414,30 @@ describe('IndexPatterns', () => {
       expect(result.id).toBe('auto-id');
     });
 
+    test('claims the in-flight slot synchronously to coalesce concurrent invocations', () => {
+      enableAutoRefresh();
+      // A fetcher that never resolves keeps the work promise pending.
+      (indexPatterns as any).apiClient.getFieldsForWildcard = jest
+        .fn()
+        .mockReturnValue(new Promise(() => {}));
+
+      // A minimal stand-in pattern; we only invoke the private dedup entry point so it
+      // doesn't need a full IndexPattern instance.
+      const fakePattern: any = {
+        id: 'race-id',
+        title: 'race-pattern-*',
+        version: 'v1',
+        fields: { getAll: () => [], replaceAll: jest.fn() },
+        getScriptedFields: () => [],
+      };
+
+      const p1 = (indexPatterns as any).maybeRefreshFieldsInBackground(fakePattern);
+      const p2 = (indexPatterns as any).maybeRefreshFieldsInBackground(fakePattern);
+
+      // Same promise => slot was claimed synchronously between p1 and p2.
+      expect(p1).toBe(p2);
+    });
+
     test('coalesces persistence: skips the write when another client already wrote a superset', async () => {
       enableAutoRefresh();
       // Simulate another client persisting a superset between our fetch and our write.
