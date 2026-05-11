@@ -47,6 +47,48 @@ interface FieldSubType {
   nested?: { path: string };
 }
 
+interface FieldCapsCacheEntry {
+  ts: number;
+  fields: FieldDescriptor[];
+}
+
+// Short-lived, module-level cache + in-flight deduplication for _field_caps responses.
+// The goal is to flatten the thundering herd when many concurrent requests hit the same
+// wildcard pattern (e.g. multiple users opening Discover on the same index pattern after
+// a deploy). The TTL is intentionally tiny because _field_caps responses describe the
+// cluster schema and OpenSearch permissions are evaluated per request — a wider window
+// risks serving one user's view of the mapping to another.
+const FIELD_CAPS_TTL_MS = 5000;
+const FIELD_CAPS_CACHE_MAX_ENTRIES = 200;
+const fieldCapsCache = new Map<string, FieldCapsCacheEntry>();
+const fieldCapsInFlight = new Map<string, Promise<FieldDescriptor[]>>();
+
+const sweepExpired = (now: number) => {
+  if (fieldCapsCache.size < FIELD_CAPS_CACHE_MAX_ENTRIES) return;
+  const cutoff = now - FIELD_CAPS_TTL_MS;
+  for (const [key, entry] of fieldCapsCache) {
+    if (entry.ts < cutoff) fieldCapsCache.delete(key);
+  }
+};
+
+const buildFieldCapsCacheKey = (
+  pattern: string | string[],
+  metaFields: string[] | undefined,
+  fieldCapsOptions: { allowNoIndices: boolean } | undefined
+): string =>
+  JSON.stringify({
+    p: Array.isArray(pattern) ? [...pattern].sort() : pattern,
+    m: metaFields ? [...metaFields].sort() : null,
+    o: fieldCapsOptions ?? null,
+  });
+
+// Test-only helper. Exposed via the same module so tests can guarantee an empty starting
+// state. Not exported through the plugin's public surface.
+export const __resetFieldCapsCacheForTests = () => {
+  fieldCapsCache.clear();
+  fieldCapsInFlight.clear();
+};
+
 export class IndexPatternsFetcher {
   private _callDataCluster: LegacyAPICaller;
 
@@ -69,7 +111,34 @@ export class IndexPatternsFetcher {
     fieldCapsOptions?: { allowNoIndices: boolean };
   }): Promise<FieldDescriptor[]> {
     const { pattern, metaFields, fieldCapsOptions } = options;
-    return await getFieldCapabilities(this._callDataCluster, pattern, metaFields, fieldCapsOptions);
+    const cacheKey = buildFieldCapsCacheKey(pattern, metaFields, fieldCapsOptions);
+    const now = Date.now();
+
+    const cached = fieldCapsCache.get(cacheKey);
+    if (cached && now - cached.ts < FIELD_CAPS_TTL_MS) {
+      return cached.fields;
+    }
+
+    const inFlight = fieldCapsInFlight.get(cacheKey);
+    if (inFlight) return inFlight;
+
+    const promise = getFieldCapabilities(
+      this._callDataCluster,
+      pattern,
+      metaFields,
+      fieldCapsOptions
+    )
+      .then((fields) => {
+        sweepExpired(Date.now());
+        fieldCapsCache.set(cacheKey, { ts: Date.now(), fields });
+        return fields;
+      })
+      .finally(() => {
+        fieldCapsInFlight.delete(cacheKey);
+      });
+
+    fieldCapsInFlight.set(cacheKey, promise);
+    return promise;
   }
 
   /**

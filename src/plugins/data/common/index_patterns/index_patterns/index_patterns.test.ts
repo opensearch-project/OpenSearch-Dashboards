@@ -414,6 +414,30 @@ describe('IndexPatterns', () => {
       expect(result.id).toBe('auto-id');
     });
 
+    test('coalesces persistence: skips the write when another client already wrote a superset', async () => {
+      enableAutoRefresh();
+      // Simulate another client persisting a superset between our fetch and our write.
+      (indexPatterns as any).apiClient.getFieldsForWildcard = jest
+        .fn()
+        .mockImplementation(async () => {
+          object.version = 'v2';
+          object.attributes.fields = JSON.stringify([
+            buildField('existing'),
+            buildField('brand-new'),
+          ]);
+          return [buildField('existing'), buildField('brand-new')];
+        });
+
+      await indexPatterns.get('auto-id');
+      await flushPromises();
+
+      expect(savedObjectsClient.update).not.toHaveBeenCalled();
+      // The coalescer must have observed the newer saved object via an explicit get.
+      // Two calls expected: one from the initial indexPatterns.get(id), one from the
+      // coalescer's freshness check.
+      expect((savedObjectsClient.get as jest.Mock).mock.calls.length).toBeGreaterThanOrEqual(2);
+    });
+
     test('swallows fetcher errors without raising onError or onNotification', async () => {
       enableAutoRefresh();
       (indexPatterns as any).apiClient.getFieldsForWildcard = jest

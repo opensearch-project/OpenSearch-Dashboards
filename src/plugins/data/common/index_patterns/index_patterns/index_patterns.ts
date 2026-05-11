@@ -449,10 +449,10 @@ export class IndexPatternsService {
 
     const work: Promise<void> = (async () => {
       const previousFieldNames = new Set(indexPattern.fields.getAll().map((f) => f.name));
+      const scripted = indexPattern.getScriptedFields().map((field) => field.spec);
 
       try {
         const newFields = await this.getFieldsForIndexPattern(indexPattern);
-        const scripted = indexPattern.getScriptedFields().map((field) => field.spec);
         indexPattern.fields.replaceAll([...newFields, ...scripted]);
       } catch (e) {
         // Silent best-effort: the manual "Refresh field list" button stays available for
@@ -469,11 +469,41 @@ export class IndexPatternsService {
       const hasDiff = addedFields.length > 0 || hasRemovedField;
 
       if (hasDiff) {
+        // Coalesce concurrent writers: if another client already persisted a field list
+        // that is a superset of ours, adopt their state and skip the write. We only fall
+        // back to writing ourselves when we still have something new to contribute.
+        let needsWrite = true;
         try {
-          await this.updateSavedObject(indexPattern, 0, true);
+          const latest = await this.savedObjectsClient.get<IndexPatternAttributes>(
+            savedObjectType,
+            id
+          );
+          if (latest?.version && latest.version !== indexPattern.version) {
+            const updatedSpec = this.savedObjectToSpec(latest);
+            const updatedFieldNames = new Set(Object.keys(updatedSpec.fields ?? {}));
+            const allLocalCovered = [...currentFieldNames].every((name) =>
+              updatedFieldNames.has(name)
+            );
+            if (allLocalCovered) {
+              const updatedFieldsList = Object.values(updatedSpec.fields ?? {}) as FieldSpec[];
+              indexPattern.fields.replaceAll([...updatedFieldsList, ...scripted]);
+              indexPattern.version = latest.version;
+              needsWrite = false;
+            }
+          }
         } catch (e) {
-          // Persistence failure is non-fatal: in-memory fields are already updated, so the
-          // session benefits even if the saved object stayed behind.
+          // Best-effort coalescer: if the freshness check fails we fall through to the
+          // normal write path, where updateSavedObject's existing 409 retry+merge logic
+          // is the next line of defense.
+        }
+
+        if (needsWrite) {
+          try {
+            await this.updateSavedObject(indexPattern, 0, true);
+          } catch (e) {
+            // Persistence failure is non-fatal: in-memory fields are already updated, so
+            // the session benefits even if the saved object stayed behind.
+          }
         }
       }
 
