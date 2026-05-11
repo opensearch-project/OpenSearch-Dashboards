@@ -58,7 +58,6 @@ import {
   isConcatenatedModule,
   getModulePath,
 } from './webpack_helpers';
-import { getHashes } from '../optimizer/get_hashes';
 
 const PLUGIN_NAME = '@osd/optimizer';
 
@@ -106,7 +105,15 @@ const observeCompiler = (
       if (workerConfig.profileWebpack) {
         Fs.writeFileSync(
           Path.resolve(bundle.outputDir, 'stats.json'),
-          JSON.stringify(stats.toJson())
+          JSON.stringify(
+            stats.toJson({
+              assets: true,
+              chunks: true,
+              chunkGroups: true,
+              entrypoints: true,
+              modules: true,
+            })
+          )
         );
       }
 
@@ -185,20 +192,12 @@ const observeCompiler = (
 
       const files = Array.from(referencedFiles).sort(ascending((p) => p));
 
-      getHashes(files)
-        .then((hashes) => {
-          bundle.cache.set({
-            bundleRefExportIds: [...new Set(bundleRefExportIds)],
-            optimizerCacheKey: workerConfig.optimizerCacheKey,
-            cacheKey: bundle.createCacheKey(files, hashes),
-            moduleCount,
-            workUnits,
-            files,
-          });
-        })
-        .catch((_err) => {
-          // If cache fails to write, it's alright to ignore and reattempt next build
-        });
+      bundle.cache.set({
+        bundleRefExportIds: [...new Set(bundleRefExportIds)],
+        moduleCount,
+        workUnits,
+        files,
+      });
 
       return compilerMsgs.compilerSuccess({
         moduleCount,
