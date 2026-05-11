@@ -17,6 +17,8 @@ import { TimeRange } from '../../../../data/public';
 import { visualizationRegistry } from './visualization_registry';
 import { convertStringsToMappings } from './visualization_builder_utils';
 import { getAxisConfigByColumnMapping } from './utils/axis';
+import { groupDataBySplitField } from './utils/group_data_by_split';
+import { SplitContainer } from './split_container';
 
 interface Props {
   data$: Observable<VisData | undefined>;
@@ -102,6 +104,32 @@ export const VisualizationRender = ({
         disableActions={false}
       />
     );
+  }
+
+  // Split grouping: when splitField is configured and chart type is not 'table',
+  // group data by the split field and render via SplitContainer
+  if (visConfig?.splitField) {
+    const splitColumn = columns.find((col) => col.name === visConfig.splitField);
+    if (splitColumn) {
+      const groups = groupDataBySplitField(rows, splitColumn.column);
+
+      return (
+        <SplitContainer
+          groups={groups}
+          layout={visConfig.splitLayout ?? 'auto'}
+          showLabel={visConfig.showSplitLabel}
+          renderChart={(groupData) => (
+            <ChartRender
+              data={{ ...visualizationData, transformedData: groupData }}
+              config={visConfig}
+              timeRange={timeRange}
+              onSelectTimeRange={onSelectTimeRange}
+            />
+          )}
+        />
+      );
+    }
+    // splitField references non-existent column: fall through to ungrouped single-chart render
   }
 
   const hasSelectionMapping = Object.keys(visConfig?.axesMapping ?? {}).length !== 0;

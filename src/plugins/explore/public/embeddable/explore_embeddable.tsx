@@ -59,6 +59,9 @@ import { normalizeResultRows } from '../components/visualizations/utils/normaliz
 import { visualizationRegistry } from '../components/visualizations/visualization_registry';
 import { prepareQueryForLanguage } from '../application/utils/languages';
 import { mergeStyles } from '../components/visualizations/utils/utils';
+import { groupDataBySplitField } from '../components/visualizations/utils/group_data_by_split';
+import { SplitContainer } from '../components/visualizations/split_container';
+import { SplitLayout } from '../components/visualizations/visualization_builder.types';
 
 // TODO cleanup unused props
 export interface SearchProps {
@@ -500,13 +503,22 @@ export class ExploreEmbeddable
           };
         } else {
           const savedAxesMapping = visualization.axesMapping ?? {};
-          let effectiveAxesMapping = savedAxesMapping;
+          const styleOptions = visualization.params;
 
-          // Check if the saved axes mapping is still compatible with the current data columns.
-          if (!isValidMapping(savedAxesMapping, allColumns)) {
+          // Apply legacy migration (FACET→splitField, threshold conversions)
+          const migratedConfig = adaptLegacyData({
+            type: selectedChartType,
+            styles: styleOptions,
+            axesMapping: savedAxesMapping,
+          });
+          let effectiveAxesMapping = migratedConfig?.axesMapping ?? savedAxesMapping;
+          let styles = migratedConfig?.styles;
+
+          // Check if the axes mapping is still compatible with the current data columns.
+          if (!isValidMapping(effectiveAxesMapping, allColumns)) {
             const reusedMapping = visualizationRegistry.reuseAxesMapping(
               selectedChartType,
-              savedAxesMapping,
+              effectiveAxesMapping,
               allColumns
             );
 
@@ -532,27 +544,51 @@ export class ExploreEmbeddable
             filters: this.input.filters,
             timeRange: this.input.timeRange,
           };
-          const styleOptions = visualization.params;
-
-          let styles = adaptLegacyData({
-            type: selectedChartType,
-            styles: styleOptions,
-            axesMapping: effectiveAxesMapping,
-          })?.styles;
 
           if (vis) {
             styles = mergeStyles(vis.ui.style.defaults, styles);
           }
           this.searchProps.styleOptions = styles;
 
-          const chartRender = () =>
-            matchedRule.render({
+          const splitField =
+            (visualization.splitField as string | undefined) ?? migratedConfig?.splitField;
+          const splitLayout = (visualization.splitLayout as SplitLayout) ?? 'auto';
+          const showSplitLabel = (visualization.showSplitLabel as boolean) ?? false;
+
+          const chartRender = () => {
+            if (splitField) {
+              const splitColumn = allColumns.find((col) => col.name === splitField);
+              if (splitColumn) {
+                const groups = groupDataBySplitField(
+                  visualizationData.transformedData,
+                  splitColumn.column
+                );
+                return (
+                  <SplitContainer
+                    groups={groups}
+                    layout={splitLayout}
+                    showLabel={showSplitLabel}
+                    renderChart={(groupData) =>
+                      matchedRule.render({
+                        transformedData: groupData,
+                        styleOptions: styles || styleOptions,
+                        onSelectTimeRange: this.searchProps?.onSelectTimeRange,
+                        axisColumnMappings: axesMapping,
+                        timeRange: searchContext.timeRange,
+                      })
+                    }
+                  />
+                );
+              }
+            }
+            return matchedRule.render({
               transformedData: visualizationData.transformedData,
               styleOptions: styles || styleOptions,
               onSelectTimeRange: this.searchProps?.onSelectTimeRange,
               axisColumnMappings: axesMapping,
               timeRange: searchContext.timeRange,
             });
+          };
           this.searchProps.chartRender = chartRender;
         }
       }

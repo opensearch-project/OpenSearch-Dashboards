@@ -65,20 +65,6 @@ jest.mock('@osd/i18n', () => ({
   },
 }));
 
-jest.mock('../style_panel/axes/axes_selector', () => ({
-  AxesSelectPanel: jest.fn(({ updateVisualization, chartType, currentMapping }) => (
-    <div data-test-subj="mockAxesSelectPanel">
-      <div data-test-subj="chartType">{chartType}</div>
-      <button
-        data-test-subj="mockUpdateVisualization"
-        onClick={() => updateVisualization({ mappings: { x: 'date', y: 'value' } })}
-      >
-        Update Visualization
-      </button>
-    </div>
-  )),
-}));
-
 jest.mock('../style_panel/legend/legend_options_wrapper', () => {
   const { Positions: PositionsEnum } = jest.requireActual('../types');
   return {

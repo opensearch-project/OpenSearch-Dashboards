@@ -7,7 +7,7 @@ import { AxisRole, VisFieldType, TimeUnit, AggregationType, VisColumn } from '..
 import { BarChartStyle } from './bar_vis_config';
 import { getAxisConfig } from '../utils/utils';
 
-import { createBarSeries, createFacetBarSeries } from './bar_chart_utils';
+import { createBarSeries } from './bar_chart_utils';
 import {
   pipe,
   createBaseConfig,
@@ -16,13 +16,7 @@ import {
   buildVisMap,
   applyTimeRange,
 } from '../utils/echarts_spec';
-import {
-  aggregate,
-  convertTo2DArray,
-  transform,
-  pivot,
-  facetTransform,
-} from '../utils/data_transformation';
+import { aggregate, convertTo2DArray, transform, pivot } from '../utils/data_transformation';
 
 const getNormalizedAxisConfig = (
   axisColumnMappings:
@@ -255,79 +249,6 @@ export const createGroupedTimeBarChart = (
     timeRange,
   });
 
-  return result.spec;
-};
-
-/**
- * Create a faceted time-based bar chart with one metric, two categories, and one date
- */
-export const createFacetedTimeBarChart = (
-  transformedData: Array<Record<string, any>>,
-  styles: BarChartStyle,
-  axisColumnMappings: {
-    [AxisRole.X]: VisColumn;
-    [AxisRole.Y]: VisColumn;
-    [AxisRole.COLOR]: VisColumn;
-    [AxisRole.FACET]: VisColumn;
-  },
-  timeRange?: { from: string; to: string }
-): any => {
-  const axisConfig = getAxisConfig(styles);
-
-  const xCol = axisColumnMappings[AxisRole.X];
-  const yCol = axisColumnMappings[AxisRole.Y];
-  const colorField = axisColumnMappings[AxisRole.COLOR].column;
-  const facetColumn = axisColumnMappings[AxisRole.FACET].column;
-
-  let timeField = '';
-  let valueField = '';
-  let valueFieldName = '';
-  if (xCol.schema === VisFieldType.Date) {
-    timeField = xCol.column;
-    valueField = yCol.column;
-    valueFieldName = yCol.name;
-  } else {
-    timeField = yCol.column;
-    valueField = xCol.column;
-    valueFieldName = xCol.name;
-  }
-
-  const timeUnit = styles?.bucket?.bucketTimeUnit ?? TimeUnit.AUTO;
-  const aggregationType = styles?.bucket?.aggregationType ?? AggregationType.SUM;
-  const skipBucketing = styles.bucket.aggregationType === AggregationType.NONE;
-
-  const result = pipe(
-    facetTransform(
-      facetColumn,
-      pivot({
-        groupBy: timeField,
-        pivot: colorField,
-        field: valueField,
-        timeUnit: skipBucketing ? undefined : timeUnit,
-        // Pivot requires grouping — when bucketing is disabled, fall back to SUM to group raw timestamps by pivot column
-        aggregationType: skipBucketing ? AggregationType.SUM : aggregationType,
-      }),
-      convertTo2DArray()
-    ),
-    createBaseConfig({}),
-    buildAxisConfigs,
-    applyTimeRange,
-    buildVisMap({
-      seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
-    }),
-    createFacetBarSeries({
-      styles,
-      categoryField: timeField,
-      seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
-    }),
-    assembleSpec
-  )({
-    data: transformedData,
-    styles,
-    axisConfig,
-    axisColumnMappings: axisColumnMappings ?? {},
-    timeRange,
-  });
   return result.spec;
 };
 

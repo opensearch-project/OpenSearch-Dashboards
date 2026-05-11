@@ -53,27 +53,6 @@ jest.mock('@osd/i18n', () => ({
     translate: jest.fn().mockImplementation((id, { defaultMessage }) => defaultMessage),
   },
 }));
-jest.mock('../style_panel/axes/axes_selector', () => ({
-  AxesSelectPanel: jest.fn(
-    ({
-      numericalColumns,
-      categoricalColumns,
-      dateColumns,
-      currentMapping,
-      updateVisualization,
-    }) => (
-      <div data-test-subj="mockAxesSelectPanel">
-        <button
-          data-test-subj="mockUpdateVisualization"
-          onClick={() => updateVisualization({ type: 'test' })}
-        >
-          Update Visualization
-        </button>
-      </div>
-    )
-  ),
-}));
-
 jest.mock('../style_panel/threshold/threshold_panel', () => ({
   ThresholdPanel: jest.fn(({ thresholdsOptions, onChange }) => (
     <div data-test-subj="mockThresholdOptions">
@@ -276,7 +255,6 @@ describe('BarVisStyleControls', () => {
     );
 
     // Check if all components are rendered
-    expect(screen.getByTestId('mockAxesSelectPanel')).toBeInTheDocument();
     expect(screen.getByTestId('allAxesOptions')).toBeInTheDocument();
     expect(screen.getByTestId('mockTooltipOptionsPanel')).toBeInTheDocument();
     expect(screen.queryByTestId('mockLegendOptionsPanel')).not.toBeInTheDocument();

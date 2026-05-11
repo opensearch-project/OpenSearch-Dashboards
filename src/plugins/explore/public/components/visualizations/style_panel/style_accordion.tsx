@@ -6,8 +6,6 @@
 import { EuiText, EuiPanel, EuiAccordion, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 
-import './style_accordion.scss';
-
 export interface StyleAccordionProps {
   id: string;
   accordionLabel: React.ReactNode;

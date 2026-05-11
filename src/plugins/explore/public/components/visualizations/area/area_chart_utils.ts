@@ -4,7 +4,6 @@
  */
 
 import { LineSeriesOption } from 'echarts';
-import { TimeUnit } from '../types';
 import { getSeriesDisplayName } from '../utils/series';
 import { AreaChartStyle } from './area_vis_config';
 import { BaseChartStyle, PipelineFn } from '../utils/echarts_spec';
@@ -30,25 +29,6 @@ export const replaceNullWithZero = (
     });
     return newRow;
   });
-};
-
-export const transformIntervalsToTickCount = (interval: TimeUnit | undefined) => {
-  switch (interval) {
-    case TimeUnit.YEAR:
-      return 'year';
-    case TimeUnit.MONTH:
-      return 'month';
-    case TimeUnit.DATE:
-      return 'day';
-    case TimeUnit.HOUR:
-      return 'hour';
-    case TimeUnit.MINUTE:
-      return 'minute';
-    case TimeUnit.SECOND:
-      return 'second';
-    default:
-      return 'day';
-  }
 };
 
 /**
@@ -98,55 +78,6 @@ export const createAreaSeries = <T extends BaseChartStyle>({
   });
 
   newState.series = series as LineSeriesOption[];
-
-  return newState;
-};
-
-/**
- * Create faceted area series configuration for ECharts
- */
-export const createFacetAreaSeries = <T extends BaseChartStyle>({
-  styles,
-  seriesFields,
-  categoryField,
-}: {
-  styles: AreaChartStyle;
-  seriesFields: (headers?: string[]) => string[];
-  categoryField: string;
-}): PipelineFn<T> => (state) => {
-  const { transformedData } = state;
-  const newState = { ...state };
-  const thresholdLines = generateThresholdLines(styles.thresholdOptions);
-
-  const allSeries = transformedData?.map((seriesData: any[], index: number) => {
-    const header = seriesData[0];
-    const cateColumns = seriesFields(header);
-    return cateColumns.map((item: string, seriesIndex: number) => ({
-      name: String(item),
-      type: 'line',
-      showSymbol: false,
-      stack: `Total_${index}`, // Use unique stack name for each facet
-      connectNulls: true,
-      areaStyle: {
-        opacity: styles.areaOpacity || DEFAULT_OPACITY,
-      },
-      smooth: true,
-      encode: {
-        x: categoryField,
-        y: item,
-      },
-      datasetIndex: index,
-      gridIndex: index,
-      xAxisIndex: index,
-      yAxisIndex: index,
-      emphasis: {
-        focus: 'self',
-      },
-      ...(seriesIndex === 0 && (thresholdLines as any)),
-    }));
-  });
-
-  newState.series = allSeries?.flat() as LineSeriesOption[];
 
   return newState;
 };

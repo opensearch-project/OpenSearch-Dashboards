@@ -9,12 +9,14 @@ import { EuiSpacer } from '@elastic/eui';
 import { Observable } from 'rxjs';
 
 import { ChartTypeSelector } from './chart_type_selector';
+import { SplitSettingsAccordion } from './split_settings_accordion';
 import { ChartStylesMapping, ChartType, StyleOptions } from './utils/use_visualization_types';
 import { AxisFieldNameMappings, RenderChartConfig } from './types';
 import { convertStringsToMappings } from './visualization_builder_utils';
 import { visualizationRegistry } from './visualization_registry';
-import { VisData } from './visualization_builder.types';
+import { SplitLayout, VisData } from './visualization_builder.types';
 import { getAxisConfigByColumnMapping } from './utils/axis';
+import { AxesSelectPanel } from './style_panel/axes/axes_selector';
 
 interface StylePanelProps<T> {
   data$: Observable<VisData | undefined>;
@@ -22,6 +24,9 @@ interface StylePanelProps<T> {
   onStyleChange: (changes: Partial<StyleOptions>) => void;
   onChartTypeChange: (type: ChartType) => void;
   onAxesMappingChange: (mappings: AxisFieldNameMappings) => void;
+  onSplitFieldChange: (field: string | undefined) => void;
+  onSplitLayoutChange: (layout: SplitLayout) => void;
+  onShowSplitLabelChange: (show: boolean) => void;
   className?: string;
 }
 
@@ -31,6 +36,9 @@ export const StylePanelRender = <T extends ChartType>({
   onStyleChange,
   onChartTypeChange,
   onAxesMappingChange,
+  onSplitFieldChange,
+  onSplitLayoutChange,
+  onShowSplitLabelChange,
   className,
 }: StylePanelProps<T>) => {
   const visualizationData = useObservable(data$);
@@ -86,6 +94,26 @@ export const StylePanelRender = <T extends ChartType>({
         chartType={chartConfig?.type}
       />
       <EuiSpacer size="s" />
+      <AxesSelectPanel
+        numericalColumns={visualizationData.numericalColumns}
+        categoricalColumns={visualizationData.categoricalColumns}
+        dateColumns={visualizationData.dateColumns}
+        currentMapping={axisColumnMappings}
+        updateVisualization={updateVisualization}
+        chartType={chartConfig.type}
+      />
+      {chartConfig?.type !== 'table' && (
+        <SplitSettingsAccordion
+          categoricalColumns={visualizationData.categoricalColumns}
+          numericalColumns={visualizationData.numericalColumns}
+          splitField={chartConfig?.splitField}
+          splitLayout={chartConfig?.splitLayout}
+          showSplitLabel={chartConfig?.showSplitLabel}
+          onSplitFieldChange={onSplitFieldChange}
+          onSplitLayoutChange={onSplitLayoutChange}
+          onShowSplitLabelChange={onShowSplitLabelChange}
+        />
+      )}
       {visConfig.ui.style.render({
         styleOptions: styleOptions as ChartStylesMapping[T],
         onStyleChange,

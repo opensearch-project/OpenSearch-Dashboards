@@ -14,13 +14,12 @@ import {
   buildVisMap,
   applyTimeRange,
 } from '../utils/echarts_spec';
-import { createAreaSeries, createFacetAreaSeries, replaceNullWithZero } from './area_chart_utils';
+import { createAreaSeries, replaceNullWithZero } from './area_chart_utils';
 import {
   convertTo2DArray,
   transform,
   sortByTime,
   pivot,
-  facetTransform,
   aggregate,
 } from '../utils/data_transformation';
 
@@ -110,63 +109,6 @@ export const createMultiAreaChart = (
       categoryField: timeField,
       seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
       stack: true,
-    }),
-    assembleSpec
-  )({
-    data: transformedData,
-    styles,
-    axisConfig,
-    axisColumnMappings: axisColumnMappings ?? {},
-    timeRange,
-  });
-
-  return result.spec;
-};
-
-/**
- * Create a faceted multi-area chart with one metric, one date, and two categorical columns
- */
-export const createFacetedMultiAreaChart = (
-  transformedData: Array<Record<string, any>>,
-  styles: AreaChartStyle,
-  axisColumnMappings: {
-    [AxisRole.X]: VisColumn;
-    [AxisRole.Y]: VisColumn;
-    [AxisRole.COLOR]: VisColumn;
-    [AxisRole.FACET]: VisColumn;
-  },
-  timeRange?: { from: string; to: string }
-): any => {
-  const axisConfig = getAxisConfig(styles);
-
-  const timeField = axisColumnMappings[AxisRole.X].column;
-  const valueField = axisColumnMappings[AxisRole.Y].column;
-  const colorField = axisColumnMappings[AxisRole.COLOR].column;
-  const facetColumn = axisColumnMappings[AxisRole.FACET].column;
-
-  const result = pipe(
-    facetTransform(
-      facetColumn,
-      sortByTime(timeField),
-      pivot({
-        groupBy: timeField,
-        pivot: colorField,
-        field: valueField,
-        timeUnit: TimeUnit.SECOND,
-        aggregationType: AggregationType.SUM,
-      }),
-      (data) => replaceNullWithZero(data, [timeField]),
-      convertTo2DArray()
-    ),
-    createBaseConfig({
-      legend: { show: styles.addLegend },
-    }),
-    buildAxisConfigs,
-    applyTimeRange,
-    createFacetAreaSeries({
-      styles,
-      categoryField: timeField,
-      seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
     }),
     assembleSpec
   )({
