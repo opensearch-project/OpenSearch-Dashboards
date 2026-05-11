@@ -9,17 +9,26 @@
  * GitHub history for details.
  */
 
-import React from 'react';
+import React, { CSSProperties } from 'react';
 import { ChromeGlobalBanner } from '../../chrome_service';
 
 interface HeaderBannerProps {
   globalBanner?: ChromeGlobalBanner;
+  style?: CSSProperties;
 }
 
 /**
  * HeaderBanner component that renders the banner in the header
  * This component is extracted from the Header component for better separation and extensibility
  */
-export const HeaderBanner: React.FC<HeaderBannerProps> = ({ globalBanner }) => {
-  return <>{globalBanner && <div className="globalBanner">{globalBanner.component}</div>}</>;
+export const HeaderBanner: React.FC<HeaderBannerProps> = ({ globalBanner, style }) => {
+  return (
+    <>
+      {globalBanner && (
+        <div className="globalBanner" style={style}>
+          {globalBanner.component}
+        </div>
+      )}
+    </>
+  );
 };
