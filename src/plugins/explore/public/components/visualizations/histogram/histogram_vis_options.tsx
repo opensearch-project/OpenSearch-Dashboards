@@ -35,7 +35,10 @@ export const HistogramVisStyleControls: React.FC<HistogramVisStyleControlsProps>
     onStyleChange({ [key]: value });
   };
 
-  const axes = [axisColumnMappings[AxisRole.X], axisColumnMappings[AxisRole.Y]];
+  const axes = [
+    ...(axisColumnMappings[AxisRole.X] ?? []),
+    ...(axisColumnMappings[AxisRole.Y] ?? []),
+  ];
   const hasNum = axes.some((axis) => axis?.schema === VisFieldType.Numerical);
 
   // bucket types for histogram chart:

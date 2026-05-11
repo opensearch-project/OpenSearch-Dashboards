@@ -36,7 +36,10 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
     onStyleChange({ [key]: value });
   };
 
-  const axes = [axisColumnMappings[AxisRole.X], axisColumnMappings[AxisRole.Y]];
+  const axes = [
+    ...(axisColumnMappings[AxisRole.X] ?? []),
+    ...(axisColumnMappings[AxisRole.Y] ?? []),
+  ];
   const hasDate = axes.some((axis) => axis?.schema === VisFieldType.Date);
 
   // 3 bucket types for bar chart:

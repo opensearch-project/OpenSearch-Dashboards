@@ -16,18 +16,17 @@ import { DataSourceSavedObjectsClientWrapper } from './data_source_saved_objects
 import { SavedObject } from 'opensearch-dashboards/public';
 import { DATA_SOURCE_TITLE_LENGTH_LIMIT } from '../util/constants';
 
-// Mock dns-sync module to allow DNS resolution in tests
-jest.mock('dns-sync', () => ({
-  resolve: jest.fn((hostname: string) => {
-    // Return a mock IP address for test hostnames
-    if (hostname === 'test.com') {
-      return '1.2.3.4';
-    }
-    if (hostname === '127.0.0.1') {
-      return '127.0.0.1';
-    }
-    return '1.2.3.4'; // Default mock IP for any other hostname
-  }),
+// Mock dns module to avoid real DNS lookups in tests
+jest.mock('dns', () => ({
+  promises: {
+    lookup: jest.fn(async (hostname: string) => {
+      if (hostname === '127.0.0.1') {
+        return { address: '127.0.0.1', family: 4 };
+      }
+      // Default mock IP for any other hostname (e.g., test.com)
+      return { address: '1.2.3.4', family: 4 };
+    }),
+  },
 }));
 
 describe('DataSourceSavedObjectsClientWrapper', () => {

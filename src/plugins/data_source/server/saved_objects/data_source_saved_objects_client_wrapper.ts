@@ -259,12 +259,12 @@ export class DataSourceSavedObjectsClientWrapper {
     // @ts-expect-error TS2339 TODO(ts-error): fixme
     const { title, endpoint, auth } = attributes;
     this.validateTitle(title);
-    this.validateEndpoint(endpoint);
+    await this.validateEndpoint(endpoint);
     await this.validateAuth(auth);
   }
 
-  private validateEndpoint(endpoint: string) {
-    const validationResult = isValidURL(
+  private async validateEndpoint(endpoint: string) {
+    const validationResult = await isValidURL(
       endpoint,
       this.endpointBlockedIps,
       this.endpointAllowlistedSuffixes
