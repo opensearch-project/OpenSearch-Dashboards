@@ -105,7 +105,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
     name: bundle.id,
     mode: worker.dist ? 'production' : 'development',
     context: Path.normalize(bundle.contextDir),
-    cache: worker.cache,
+    cache: true,
     ...(worker.cache
       ? {
           experiments: {
