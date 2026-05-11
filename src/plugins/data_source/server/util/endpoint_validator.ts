@@ -3,8 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// @ts-expect-error TS7016 TODO(ts-error): fixme
-import dns from 'dns-sync';
+import { promises as dnsPromises } from 'dns';
 import IPCIDR from 'ip-cidr';
 
 export interface URLValidationResult {
@@ -13,11 +12,11 @@ export interface URLValidationResult {
   userMessage?: string; // Safe message for client response
 }
 
-export function isValidURL(
+export async function isValidURL(
   endpoint: string,
   deniedIPs?: string[],
   allowlistedSuffixes?: string[]
-): URLValidationResult {
+): Promise<URLValidationResult> {
   // Check the format of URL, URL has be in the format as
   // scheme://server/path/resource otherwise an TypeError
   // would be thrown.
@@ -47,7 +46,7 @@ export function isValidURL(
     }
   }
 
-  const ip = getIpAddress(url);
+  const ip = await getIpAddress(url);
   if (!ip) {
     return {
       valid: false,
@@ -76,17 +75,21 @@ export function isValidURL(
 /**
  * Resolve hostname to IP address
  * @param {object} urlObject
- * @returns {string} configuredIP
- * or null if it cannot be resolve
+ * @returns {Promise<string | null>} configuredIP
+ * or null if it cannot be resolved.
  * According to RFC, all IPv6 IP address needs to be in []
  * such as [::1].
  * So if we detect a IPv6 address, we remove brackets.
  */
-function getIpAddress(urlObject: URL) {
+async function getIpAddress(urlObject: URL): Promise<string | null> {
   const hostname = urlObject.hostname;
-  const configuredIP = dns.resolve(hostname);
-  if (configuredIP) {
-    return configuredIP;
+  try {
+    const { address } = await dnsPromises.lookup(hostname);
+    if (address) {
+      return address;
+    }
+  } catch {
+    // Fall through to bracketed-IPv6 handling below.
   }
   if (hostname.startsWith('[') && hostname.endsWith(']')) {
     return hostname.substr(1).slice(0, -1);
