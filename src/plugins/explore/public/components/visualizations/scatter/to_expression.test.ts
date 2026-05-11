@@ -91,11 +91,7 @@ describe('Scatter Chart to_expression', () => {
     };
 
     it('returns an ECharts spec with colored scatter series', () => {
-      const result = createTwoMetricOneCateScatter(
-        mockData,
-        { ...mockStyles, titleOptions: { show: true, titleName: '' } },
-        mockAxisMappings
-      );
+      const result = createTwoMetricOneCateScatter(mockData, mockStyles, mockAxisMappings);
 
       expect(result).toHaveProperty('dataset');
       expect(result).toHaveProperty('series');
@@ -120,11 +116,7 @@ describe('Scatter Chart to_expression', () => {
     };
 
     it('returns an ECharts spec with size-encoded scatter series', () => {
-      const result = createThreeMetricOneCateScatter(
-        mockData,
-        { ...mockStyles, titleOptions: { show: true, titleName: '' } },
-        mockAxisMappings
-      );
+      const result = createThreeMetricOneCateScatter(mockData, mockStyles, mockAxisMappings);
 
       expect(result).toHaveProperty('dataset');
       expect(result).toHaveProperty('series');

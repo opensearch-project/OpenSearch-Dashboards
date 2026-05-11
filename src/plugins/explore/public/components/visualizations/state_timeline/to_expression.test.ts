@@ -56,7 +56,6 @@ describe('State Timeline to_expression', () => {
 
   const mockStyles = {
     ...defaultStateTimeLineChartStyles,
-    titleOptions: { show: true, titleName: '' },
   };
 
   describe('createNumericalStateTimeline', () => {

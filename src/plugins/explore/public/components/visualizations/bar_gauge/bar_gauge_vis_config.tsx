@@ -6,7 +6,7 @@
 import React from 'react';
 import { VisRule, VisualizationType } from '../utils/use_visualization_types';
 import { BarGaugeVisStyleControls } from './bar_gauge_vis_options';
-import { TitleOptions, AxisRole, VisFieldType, ThresholdOptions, TooltipOptions } from '../types';
+import { AxisRole, VisFieldType, ThresholdOptions, TooltipOptions } from '../types';
 import { CalculationMethod } from '../utils/calculation';
 import { getColors } from '../theme/default_colors';
 import { createBarGaugeSpec } from './to_expression';
@@ -23,7 +23,6 @@ export interface BarGaugeChartStyleOptions {
   exclusive?: ExclusiveBarGaugeConfig;
   thresholdOptions?: ThresholdOptions;
   valueCalculation?: CalculationMethod;
-  titleOptions?: TitleOptions;
   min?: number;
   max?: number;
   unitId?: string;
@@ -45,10 +44,6 @@ export const defaultBarGaugeChartStyles: BarGaugeChartStyle = {
   },
   thresholdOptions: { thresholds: [], baseColor: getColors().statusGreen },
   valueCalculation: 'last',
-  titleOptions: {
-    show: false,
-    titleName: '',
-  },
 };
 
 export const createBarGaugeConfig = (): VisualizationType<'bar_gauge'> => ({

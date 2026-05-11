@@ -13,7 +13,6 @@ import {
   Positions,
   TooltipOptions,
   VisFieldType,
-  TitleOptions,
   ThresholdMode,
   ThresholdOptions,
 } from '../types';
@@ -44,8 +43,6 @@ export interface ScatterChartStyleOptions {
   standardAxes?: StandardAxes[];
 
   exclusive?: ExclusiveScatterConfig;
-
-  titleOptions?: TitleOptions;
 
   useThresholdColor?: boolean;
   thresholdOptions?: ThresholdOptions;
@@ -80,10 +77,6 @@ export const defaultScatterChartStyles: ScatterChartStyle = {
     thresholdStyle: ThresholdMode.Off,
   },
   standardAxes: [],
-  titleOptions: {
-    show: false,
-    titleName: '',
-  },
 };
 
 export const createScatterConfig = (): VisualizationType<'scatter'> => ({

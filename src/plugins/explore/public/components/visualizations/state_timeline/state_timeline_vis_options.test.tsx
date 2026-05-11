@@ -121,24 +121,6 @@ jest.mock('../style_panel/legend/legend_options_wrapper', () => {
   };
 });
 
-jest.mock('../style_panel/title/title', () => ({
-  TitleOptionsPanel: jest.fn(({ titleOptions, onShowTitleChange }) => (
-    <div data-test-subj="mockTitleOptionsPanel">
-      <button
-        data-test-subj="titleModeSwitch"
-        onClick={() => onShowTitleChange({ show: !titleOptions.show })}
-      >
-        Toggle Title
-      </button>
-      <input
-        data-test-subj="titleInput"
-        placeholder="Default title"
-        onChange={(e) => onShowTitleChange({ titleName: e.target.value })}
-      />
-    </div>
-  )),
-}));
-
 jest.mock('../style_panel/tooltip/tooltip', () => ({
   TooltipOptionsPanel: jest.fn(({ tooltipOptions, onTooltipOptionsChange }) => (
     <div data-test-subj="mockTooltipOptionsPanel">
@@ -237,7 +219,6 @@ describe('StateTimeLineVisStyleControls', () => {
     expect(screen.getByTestId('mockTooltipOptionsPanel')).toBeInTheDocument();
     expect(screen.getByTestId('mockStateTimelineExclusiveOptions')).toBeInTheDocument();
     expect(screen.queryByTestId('mockLegendOptionsWrapper')).toBeInTheDocument();
-    expect(screen.getByTestId('mockTitleOptionsPanel')).toBeInTheDocument();
     expect(screen.getByTestId('mockValueMappingOption')).toBeInTheDocument();
   });
 
@@ -293,49 +274,6 @@ describe('StateTimeLineVisStyleControls', () => {
       exclusive: {
         showValues: true,
       },
-    });
-  });
-
-  it('updates title show option correctly', async () => {
-    render(<StateTimeLineVisStyleControls {...mockProps} />);
-
-    // Find the title switch and toggle it
-    const titleSwitch = screen.getByTestId('titleModeSwitch');
-    await userEvent.click(titleSwitch);
-
-    expect(mockProps.onStyleChange).toHaveBeenCalledWith({
-      titleOptions: {
-        ...mockProps.styleOptions.titleOptions,
-        show: true,
-      },
-    });
-  });
-
-  it('updates title name when text is entered', async () => {
-    // Set show to true to ensure the title field is visible
-    const props = {
-      ...mockProps,
-      styleOptions: {
-        ...mockProps.styleOptions,
-        titleOptions: {
-          show: true,
-          titleName: '',
-        },
-      },
-    };
-
-    render(<StateTimeLineVisStyleControls {...props} />);
-
-    const titleInput = screen.getByPlaceholderText('Default title');
-    await userEvent.type(titleInput, 'New Chart Title');
-
-    waitFor(() => {
-      expect(mockProps.onStyleChange).toHaveBeenCalledWith({
-        titleOptions: {
-          ...props.styleOptions.titleOptions,
-          titleName: 'New Chart Title',
-        },
-      });
     });
   });
 

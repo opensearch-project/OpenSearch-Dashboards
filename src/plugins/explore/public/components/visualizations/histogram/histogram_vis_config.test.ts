@@ -29,10 +29,6 @@ describe('bar_vis_config', () => {
           thresholdStyle: ThresholdMode.Off,
         },
 
-        titleOptions: {
-          show: false,
-          titleName: '',
-        },
         bucket: {
           aggregationType: AggregationType.SUM,
         },
@@ -49,11 +45,6 @@ describe('bar_vis_config', () => {
           axisRole: AxisRole.X,
         })
       );
-
-      expect(defaultHistogramChartStyles.titleOptions).toMatchObject({
-        show: false,
-        titleName: '',
-      });
     });
   });
 

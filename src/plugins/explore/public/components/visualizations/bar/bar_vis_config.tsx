@@ -14,7 +14,6 @@ import {
   VisFieldType,
   AxisRole,
   StandardAxes,
-  TitleOptions,
   AggregationType,
   BucketOptions,
   TimeUnit,
@@ -57,8 +56,6 @@ export interface BarChartStyleOptions {
   // Axes configuration
   standardAxes?: StandardAxes[];
 
-  titleOptions?: TitleOptions;
-
   // histogram bucket config
   bucket?: BucketOptions;
 
@@ -98,10 +95,6 @@ export const defaultBarChartStyles: BarChartStyle = {
   },
   useThresholdColor: false,
   standardAxes: [{ ...DEFAULT_X_AXIS_CONFIG, grid: { showLines: false } }],
-  titleOptions: {
-    show: false,
-    titleName: '',
-  },
   bucket: {
     aggregationType: AggregationType.SUM,
     bucketTimeUnit: TimeUnit.AUTO,

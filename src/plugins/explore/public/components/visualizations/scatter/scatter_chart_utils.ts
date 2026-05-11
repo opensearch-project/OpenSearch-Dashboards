@@ -224,45 +224,6 @@ export const createCategoryScatterSeries = <T extends BaseChartStyle>({
 };
 
 /**
- * Custom spec assembly for category scatter charts with dataset support
- */
-export const assembleCategoryScatterSpec = <T extends BaseChartStyle>() => (state: any) => {
-  const { styles, axisConfig, series, transformedData } = state;
-
-  const spec = {
-    title: {
-      text: styles.titleOptions?.show ? styles.titleOptions?.titleName : undefined,
-    },
-    tooltip: {
-      trigger: 'item',
-      show: styles.tooltipOptions?.mode !== 'hidden',
-    },
-    legend: {
-      show: styles.addLegend,
-    },
-    xAxis: {
-      type: 'value',
-      name: axisConfig?.xAxisStyle?.title?.text || axisConfig?.xAxis?.name,
-      nameLocation: 'middle',
-      nameGap: 35,
-    },
-    yAxis: {
-      type: 'value',
-      name: axisConfig?.yAxisStyle?.title?.text || axisConfig?.yAxis?.name,
-      nameLocation: 'middle',
-      nameGap: 50,
-    },
-    // Use dataset for pivot data format
-    dataset: {
-      source: transformedData,
-    },
-    series,
-  };
-
-  return { ...state, spec };
-};
-
-/**
  * Create scatter series with both color and size encoding
  */
 export const createSizeScatterSeries = <T extends BaseChartStyle>({

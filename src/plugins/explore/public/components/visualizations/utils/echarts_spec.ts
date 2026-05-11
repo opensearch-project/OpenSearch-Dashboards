@@ -33,10 +33,6 @@ import { DEFAULT_OPACITY } from '../constants';
  * Base style interface that all chart styles should extend
  */
 export interface BaseChartStyle {
-  titleOptions?: {
-    show: boolean;
-    titleName?: string;
-  };
   tooltipOptions?: {
     mode: string;
   };

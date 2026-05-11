@@ -75,7 +75,6 @@ describe('Line Chart to_expression', () => {
       thresholds: [],
       thresholdStyle: ThresholdMode.Off,
     },
-    titleOptions: { show: true, titleName: '' },
     showFullTimeRange: false,
   };
 

@@ -73,10 +73,6 @@ describe('Area Chart to_expression', () => {
       thresholds: [],
       thresholdStyle: ThresholdMode.Solid,
     },
-    titleOptions: {
-      show: true,
-      titleName: '',
-    },
     standardAxes: [],
     showFullTimeRange: false,
   };

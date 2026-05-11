@@ -47,7 +47,6 @@ describe('createBarGaugeSpec', () => {
       ],
     },
     valueCalculation: 'last',
-    titleOptions: { show: true, titleName: 'Test Chart' },
   };
 
   const mockTransformedData = [
