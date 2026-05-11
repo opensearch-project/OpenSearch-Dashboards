@@ -78,6 +78,8 @@ interface IndexPatternsServiceDeps {
   canUpdateUiSetting?: boolean;
 }
 
+const DEFAULT_AUTO_REFRESH_INTERVAL_MS = 300000;
+
 export class IndexPatternsService {
   private config: UiSettingsCommon;
   private savedObjectsClient: SavedObjectsClientCommon;
@@ -87,6 +89,9 @@ export class IndexPatternsService {
   private onNotification: OnNotification;
   private onError: OnError;
   private onUnsupportedTimePattern: OnUnsupportedTimePattern;
+  private lastFieldsRefresh = new Map<string, number>();
+  private notifiedNewFields = new Set<string>();
+  private refreshInFlight = new Map<string, Promise<void>>();
   ensureDefaultIndexPattern: EnsureDefaultIndexPattern;
 
   constructor({
@@ -410,6 +415,93 @@ export class IndexPatternsService {
   };
 
   /**
+   * Best-effort background refresh of an index pattern's field list, modelled on Kibana's
+   * implicit refresh: refetch mappings if the configured TTL has elapsed, persist any diff,
+   * and optionally notify the user about brand-new fields. Errors are swallowed because this
+   * runs detached from the caller — a regression would only delay surfacing new fields, never
+   * break the UI flow that triggered get().
+   */
+  private maybeRefreshFieldsInBackground = async (indexPattern: IndexPattern): Promise<void> => {
+    const id = indexPattern.id;
+    if (!id || !indexPattern.title) return;
+
+    const existing = this.refreshInFlight.get(id);
+    if (existing) {
+      return existing;
+    }
+
+    let autoRefresh: boolean;
+    let intervalMs: number;
+    let notify: boolean;
+    try {
+      autoRefresh = (await this.config.get(UI_SETTINGS.INDEXPATTERN_AUTO_REFRESH_FIELDS)) ?? true;
+      intervalMs =
+        (await this.config.get(UI_SETTINGS.INDEXPATTERN_AUTO_REFRESH_FIELDS_INTERVAL_MS)) ??
+        DEFAULT_AUTO_REFRESH_INTERVAL_MS;
+      notify = (await this.config.get(UI_SETTINGS.INDEXPATTERN_NOTIFY_ON_NEW_FIELDS)) ?? true;
+    } catch (e) {
+      return;
+    }
+    if (!autoRefresh) return;
+
+    const last = this.lastFieldsRefresh.get(id);
+    if (last !== undefined && Date.now() - last < intervalMs) return;
+
+    const work: Promise<void> = (async () => {
+      const previousFieldNames = new Set(indexPattern.fields.getAll().map((f) => f.name));
+
+      try {
+        const newFields = await this.getFieldsForIndexPattern(indexPattern);
+        const scripted = indexPattern.getScriptedFields().map((field) => field.spec);
+        indexPattern.fields.replaceAll([...newFields, ...scripted]);
+      } catch (e) {
+        // Silent best-effort: the manual "Refresh field list" button stays available for
+        // surfacing actionable errors. Do not toast here.
+        return;
+      }
+
+      const currentFieldNames = new Set(indexPattern.fields.getAll().map((f) => f.name));
+      const addedFields: string[] = [];
+      currentFieldNames.forEach((name) => {
+        if (!previousFieldNames.has(name)) addedFields.push(name);
+      });
+      const hasRemovedField = [...previousFieldNames].some((name) => !currentFieldNames.has(name));
+      const hasDiff = addedFields.length > 0 || hasRemovedField;
+
+      if (hasDiff) {
+        try {
+          await this.updateSavedObject(indexPattern, 0, true);
+        } catch (e) {
+          // Persistence failure is non-fatal: in-memory fields are already updated, so the
+          // session benefits even if the saved object stayed behind.
+        }
+      }
+
+      if (addedFields.length > 0 && notify && !this.notifiedNewFields.has(id)) {
+        this.notifiedNewFields.add(id);
+        this.onNotification({
+          title: i18n.translate('data.indexPatterns.newFieldsDetectedTitle', {
+            defaultMessage:
+              '{count, plural, one {# new field} other {# new fields}} detected in {indexPatternTitle}',
+            values: { count: addedFields.length, indexPatternTitle: indexPattern.title },
+          }),
+          color: 'primary',
+          iconType: 'iInCircle',
+        });
+      }
+
+      this.lastFieldsRefresh.set(id, Date.now());
+    })();
+
+    this.refreshInFlight.set(id, work);
+    try {
+      await work;
+    } finally {
+      this.refreshInFlight.delete(id);
+    }
+  };
+
+  /**
    * Get an index pattern by id. Cache optimized
    * @param id
    * @param onlyCheckCache - Only check cache for index pattern if it doesn't exist it will not error out
@@ -419,6 +511,10 @@ export class IndexPatternsService {
     const cache = indexPatternCache.get(id);
 
     if (cache || onlyCheckCache) {
+      if (cache) {
+        // Stale-while-revalidate: schedule a background field refresh without awaiting.
+        void this.maybeRefreshFieldsInBackground(cache);
+      }
       return cache;
     }
 
@@ -459,6 +555,9 @@ export class IndexPatternsService {
     }
 
     indexPattern.resetOriginalSavedObjectBody();
+    // Stale-while-revalidate: a freshly-loaded pattern still pulls fields from the persisted
+    // saved object, so trigger a background refresh on first access too.
+    void this.maybeRefreshFieldsInBackground(indexPattern);
     return indexPattern;
   };
 
