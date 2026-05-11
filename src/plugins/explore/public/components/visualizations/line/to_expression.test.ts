@@ -7,7 +7,6 @@ import {
   createSimpleLineChart,
   createLineBarChart,
   createMultiLineChart,
-  createFacetedMultiLineChart,
   createCategoryLineChart,
   createCategoryMultiLineChart,
 } from './to_expression';
@@ -179,32 +178,6 @@ describe('Line Chart to_expression', () => {
         mockAxisMappings
       );
       expect(customTitle.title.text).toBe('Custom Multi-Line');
-    });
-  });
-
-  describe('createFacetedMultiLineChart', () => {
-    const mockAxisMappings = {
-      [AxisRole.Y]: mockNumericColumn,
-      [AxisRole.X]: mockDateColumn,
-      [AxisRole.COLOR]: mockCategoricalColumn,
-      [AxisRole.FACET]: mockCategoricalColumn2,
-    };
-
-    it('returns an ECharts spec with faceted datasets', () => {
-      const result = createFacetedMultiLineChart(mockData, mockStyles, mockAxisMappings);
-
-      expect(result).toHaveProperty('dataset');
-      expect(result).toHaveProperty('series');
-      expect(result.title.text).toBe('Value Over Time by Category (Faceted by Category2)');
-    });
-
-    it('handles title display options', () => {
-      const noTitle = createFacetedMultiLineChart(
-        mockData,
-        { ...mockStyles, titleOptions: { show: false, titleName: '' } },
-        mockAxisMappings
-      );
-      expect(noTitle.title.text).toBeUndefined();
     });
   });
 

@@ -15,7 +15,7 @@ import {
 import { applyAxisStyling, getSchemaByAxis, generateThresholdLines } from '../utils/utils';
 import { BarChartStyle } from './bar_vis_config';
 import { getColors, DEFAULT_GREY } from '../theme/default_colors';
-import { BaseChartStyle, PipelineFn, EChartsSpecState } from '../utils/echarts_spec';
+import { BaseChartStyle, PipelineFn } from '../utils/echarts_spec';
 import { getSeriesDisplayName } from '../utils/series';
 
 export const inferTimeIntervals = (data: Array<Record<string, any>>, field: string | undefined) => {
@@ -248,75 +248,6 @@ export const createBarSeries = <T extends BaseChartStyle>(options: Options): Pip
     return seriesConfig as BarSeriesOption;
   }) as BarSeriesOption[];
   newState.series = series;
-
-  return newState;
-};
-
-export const createFacetBarSeries = <T extends BaseChartStyle>({
-  styles,
-  categoryField,
-  seriesFields,
-  categoryEncode = 'x',
-  seriesEncode = 'y',
-}: {
-  styles: BarChartStyle;
-  categoryField: string;
-  seriesFields: (headers?: string[]) => string[];
-  categoryEncode?: 'x' | 'y';
-  seriesEncode?: 'x' | 'y';
-}): PipelineFn<T> => (state) => {
-  const { transformedData } = state;
-
-  const newState = { ...state };
-  const thresholdLines = generateThresholdLines(styles?.thresholdOptions);
-
-  // facet into one chart
-  if (!Array.isArray(transformedData?.[0]?.[0])) {
-    const simpleBar = createBarSeries({
-      styles,
-      categoryField,
-      seriesFields,
-      categoryEncode,
-      seriesEncode,
-    })(newState);
-    return simpleBar as EChartsSpecState<T>;
-  }
-  const allSeries = transformedData?.map((seriesData: any[], index: number) => {
-    const header = seriesData[0];
-    const cateColumns = seriesFields(header);
-
-    return cateColumns.map((item: string, i: number) => {
-      const seriesConfig = {
-        name: String(item),
-        type: 'bar',
-        encode: {
-          [categoryEncode]: categoryField,
-          [seriesEncode]: item,
-        },
-        datasetIndex: index,
-        gridIndex: index,
-        xAxisIndex: index,
-        yAxisIndex: index,
-        emphasis: {
-          focus: 'self',
-        },
-        barWidth:
-          styles.barSizeMode === 'manual' ? `${(styles.barWidth || 0.7) * 100}%` : undefined,
-        ...(styles.showBarBorder && {
-          itemStyle: {
-            borderWidth: styles.barBorderWidth,
-            borderColor: styles.barBorderColor,
-          },
-        }),
-        ...(i === 0 && thresholdLines),
-        ...(styles.stackMode === 'total' && { stack: `stack_${index}` }),
-      };
-
-      return seriesConfig as BarSeriesOption;
-    });
-  });
-
-  newState.series = allSeries?.flat() as BarSeriesOption[];
 
   return newState;
 };

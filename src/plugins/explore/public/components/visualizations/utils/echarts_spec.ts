@@ -338,8 +338,8 @@ export const applyAxisStyling = ({
   if (axisStyle?.labels) {
     echartsAxisConfig.axisLabel = {
       show: !!axisStyle.labels.show,
-      // Prevent label overlap by showing all labels
       interval: 0,
+      hideOverlap: true,
     };
 
     if (axisStyle.labels.show) {

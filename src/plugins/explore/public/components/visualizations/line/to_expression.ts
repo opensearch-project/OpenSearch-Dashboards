@@ -5,7 +5,7 @@
 
 import { LineChartStyle } from './line_vis_config';
 import { AxisRole, VisColumn } from '../types';
-import { createLineSeries, createLineBarSeries, createFacetLineSeries } from './line_chart_utils';
+import { createLineSeries, createLineBarSeries } from './line_chart_utils';
 import { getAxisConfig, getColumnsFromAxisColumnMapping } from '../utils/utils';
 import {
   pipe,
@@ -19,7 +19,6 @@ import {
   transform,
   pivot,
   sortByTime,
-  facetTransform,
   flatten,
 } from '../utils/data_transformation';
 
@@ -151,64 +150,6 @@ export const createMultiLineChart = (
     buildAxisConfigs,
     applyTimeRange,
     createLineSeries({
-      styles,
-      categoryField: timeField,
-      seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
-    }),
-    assembleSpec
-  )({
-    data: transformedData,
-    styles,
-    axisConfig,
-    axisColumnMappings: axisColumnMappings ?? {},
-    timeRange,
-  });
-
-  return result.spec;
-};
-
-/**
- * Create a faceted multi-line chart with one metric, one date, and two categorical columns
- */
-export const createFacetedMultiLineChart = (
-  transformedData: Array<Record<string, any>>,
-  styles: LineChartStyle,
-  axisColumnMappings: {
-    [AxisRole.X]: VisColumn;
-    [AxisRole.Y]: VisColumn;
-    [AxisRole.COLOR]: VisColumn;
-    [AxisRole.FACET]: VisColumn;
-  },
-  timeRange?: { from: string; to: string }
-): any => {
-  const axisConfig = getAxisConfig(styles);
-
-  const timeField = axisColumnMappings[AxisRole.X].column;
-  const valueField = axisColumnMappings[AxisRole.Y].column;
-  const colorField = axisColumnMappings[AxisRole.COLOR].column;
-  const facetColumn = axisColumnMappings[AxisRole.FACET].column;
-
-  const result = pipe(
-    facetTransform(
-      facetColumn,
-      sortByTime(timeField),
-      pivot({
-        groupBy: timeField,
-        pivot: colorField,
-        field: valueField,
-      }),
-      flatten(),
-      convertTo2DArray()
-    ),
-    createBaseConfig({
-      title: `${axisColumnMappings[AxisRole.Y].name} Over Time by ${
-        axisColumnMappings[AxisRole.COLOR].name
-      } (Faceted by ${axisColumnMappings[AxisRole.FACET].name})`,
-      legend: { show: styles.addLegend },
-    }),
-    buildAxisConfigs,
-    applyTimeRange,
-    createFacetLineSeries({
       styles,
       categoryField: timeField,
       seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),

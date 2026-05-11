@@ -11,7 +11,6 @@ import { PieExclusiveVisOptions } from './pie_exclusive_vis_options';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
 import { LegendOptionsWrapper } from '../style_panel/legend/legend_options_wrapper';
-import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
 import { TitleOptionsPanel } from '../style_panel/title/title';
 
 export type PieVisStyleControlsProps = StyleControlsProps<PieChartStyle>;
@@ -38,16 +37,6 @@ export const PieVisStyleControls: React.FC<PieVisStyleControlsProps> = ({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
-      <EuiFlexItem>
-        <AxesSelectPanel
-          numericalColumns={numericalColumns}
-          categoricalColumns={categoricalColumns}
-          dateColumns={dateColumns}
-          currentMapping={axisColumnMappings}
-          updateVisualization={updateVisualization}
-          chartType="pie"
-        />
-      </EuiFlexItem>
       {hasMappingSelected && (
         <>
           <EuiFlexItem grow={false}>

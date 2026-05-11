@@ -104,6 +104,9 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
         chartType: chartConfig?.type,
         axesMapping: chartConfig?.axesMapping,
         styleOptions: chartConfig?.styles,
+        splitField: chartConfig?.splitField,
+        splitLayout: chartConfig?.splitLayout,
+        showSplitLabel: chartConfig?.showSplitLabel,
       },
       dataset
     );

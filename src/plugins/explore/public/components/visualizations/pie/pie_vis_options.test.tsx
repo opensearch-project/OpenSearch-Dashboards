@@ -25,20 +25,6 @@ jest.mock('@osd/i18n', () => ({
 }));
 
 // Mock child components
-jest.mock('../style_panel/axes/axes_selector', () => ({
-  AxesSelectPanel: jest.fn(({ updateVisualization, chartType, currentMapping }) => (
-    <div data-test-subj="mockAxesSelectPanel">
-      <div data-test-subj="chartType">{chartType}</div>
-      <button
-        data-test-subj="mockUpdateVisualization"
-        onClick={() => updateVisualization({ mappings: { size: 'value', color: 'category' } })}
-      >
-        Update Visualization
-      </button>
-    </div>
-  )),
-}));
-
 jest.mock('../style_panel/legend/legend', () => ({
   LegendOptionsPanel: jest.fn(({ legendOptions, onLegendOptionsChange }) => (
     <div data-test-subj="mockLegendOptionsPanel">

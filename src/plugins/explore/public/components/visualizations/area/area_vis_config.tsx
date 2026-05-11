@@ -23,7 +23,6 @@ import { getColors } from '../theme/default_colors';
 import {
   createSimpleAreaChart,
   createMultiAreaChart,
-  createFacetedMultiAreaChart,
   createCategoryAreaChart,
   createStackedAreaChart,
 } from './to_expression';
@@ -169,60 +168,6 @@ export const createAreaConfig = (): VisualizationType<'area'> => ({
             props.transformedData,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
-            props.timeRange
-          );
-          return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
-        },
-      },
-      {
-        priority: 80,
-        mappings: [
-          {
-            [AxisRole.X]: { type: VisFieldType.Date },
-            [AxisRole.Y]: { type: VisFieldType.Numerical },
-            [AxisRole.COLOR]: { type: VisFieldType.Categorical },
-            [AxisRole.FACET]: { type: VisFieldType.Categorical },
-          },
-        ],
-        render(props) {
-          const x = props.axisColumnMappings.x?.[0];
-          const y = props.axisColumnMappings.y?.[0];
-          const color = props.axisColumnMappings.color?.[0];
-          const facet = props.axisColumnMappings.facet?.[0];
-          if (!x || !y || !color || !facet)
-            throw Error('Missing axis config for faceted multi-area chart');
-
-          const spec = createFacetedMultiAreaChart(
-            props.transformedData,
-            props.styleOptions,
-            { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color, [AxisRole.FACET]: facet },
-            props.timeRange
-          );
-          return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
-        },
-      },
-      {
-        priority: 60,
-        mappings: [
-          {
-            [AxisRole.X]: { type: VisFieldType.Date },
-            [AxisRole.Y]: { type: VisFieldType.Numerical },
-            [AxisRole.COLOR]: { type: VisFieldType.Numerical },
-            [AxisRole.FACET]: { type: VisFieldType.Categorical },
-          },
-        ],
-        render(props) {
-          const x = props.axisColumnMappings.x?.[0];
-          const y = props.axisColumnMappings.y?.[0];
-          const color = props.axisColumnMappings.color?.[0];
-          const facet = props.axisColumnMappings.facet?.[0];
-          if (!x || !y || !color || !facet)
-            throw Error('Missing axis config for faceted multi-area chart');
-
-          const spec = createFacetedMultiAreaChart(
-            props.transformedData,
-            props.styleOptions,
-            { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color, [AxisRole.FACET]: facet },
             props.timeRange
           );
           return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;

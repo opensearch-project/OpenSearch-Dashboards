@@ -6,6 +6,8 @@
 import { AxisFieldNameMappings, VisColumn } from './types';
 import { ChartType, StyleOptions } from './utils/use_visualization_types';
 
+export type SplitLayout = 'auto' | 'horizontal' | 'vertical';
+
 export interface VisData {
   transformedData: Array<Record<string, any>>;
   dateColumns: VisColumn[];
@@ -17,4 +19,7 @@ export interface ChartConfig {
   type: ChartType;
   styles?: StyleOptions;
   axesMapping?: AxisFieldNameMappings;
+  splitField?: string;
+  splitLayout?: SplitLayout;
+  showSplitLabel?: boolean;
 }

@@ -6,7 +6,6 @@
 import {
   createSimpleAreaChart,
   createMultiAreaChart,
-  createFacetedMultiAreaChart,
   createCategoryAreaChart,
   createStackedAreaChart,
 } from './to_expression';
@@ -163,43 +162,6 @@ describe('Area Chart to_expression', () => {
         axisColumnMappings
       );
       expect(customTitleResult.title.text).toBe('Custom Multi-Area Chart');
-    });
-  });
-
-  describe('createFacetedMultiAreaChart', () => {
-    const axisColumnMappings = {
-      [AxisRole.Y]: mockNumericalColumn,
-      [AxisRole.X]: mockDateColumn,
-      [AxisRole.COLOR]: mockCategoricalColumns[0],
-      [AxisRole.FACET]: mockCategoricalColumns[1],
-    };
-
-    it('returns an ECharts spec with faceted datasets', () => {
-      const result = createFacetedMultiAreaChart(
-        mockTransformedData,
-        mockStyles,
-        axisColumnMappings
-      );
-
-      expect(result).toHaveProperty('dataset');
-      expect(result).toHaveProperty('series');
-      expect(result.title.text).toBe('Value Over Time by Category (Faceted by Category2)');
-    });
-
-    it('handles title display options', () => {
-      const noTitleResult = createFacetedMultiAreaChart(
-        mockTransformedData,
-        { ...mockStyles, titleOptions: { show: false, titleName: '' } },
-        axisColumnMappings
-      );
-      expect(noTitleResult.title.text).toBeUndefined();
-
-      const customTitleResult = createFacetedMultiAreaChart(
-        mockTransformedData,
-        { ...mockStyles, titleOptions: { show: true, titleName: 'Custom Faceted Chart' } },
-        axisColumnMappings
-      );
-      expect(customTitleResult.title.text).toBe('Custom Faceted Chart');
     });
   });
 

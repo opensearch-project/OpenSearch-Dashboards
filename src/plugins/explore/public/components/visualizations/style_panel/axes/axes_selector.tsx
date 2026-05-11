@@ -37,9 +37,6 @@ const AXIS_SELECT_LABEL = {
   [AxisRole.COLOR]: i18n.translate('explore.visualize.axisSelectLabelColor', {
     defaultMessage: 'Color',
   }),
-  [AxisRole.FACET]: i18n.translate('explore.visualize.axisSelectLabelFacet', {
-    defaultMessage: 'Split chart by',
-  }),
   [AxisRole.SIZE]: i18n.translate('explore.visualize.axisSelectLabelSize', {
     defaultMessage: 'Size',
   }),
@@ -55,7 +52,7 @@ const AXIS_SELECT_LABEL = {
 };
 
 const getAxisLabel = (axisRole: AxisRole): string => {
-  return AXIS_SELECT_LABEL[axisRole];
+  return AXIS_SELECT_LABEL[axisRole as keyof typeof AXIS_SELECT_LABEL] ?? axisRole;
 };
 
 const isMultiAxis = (axisRole: AxisRole, mappings: AxisTypeMapping[]): boolean =>

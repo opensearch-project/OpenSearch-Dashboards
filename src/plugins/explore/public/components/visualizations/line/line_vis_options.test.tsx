@@ -18,20 +18,6 @@ import {
 import { LineStyle } from './line_exclusive_vis_options';
 
 // Mock the child components
-jest.mock('../style_panel/axes/axes_selector', () => ({
-  AxesSelectPanel: jest.fn(({ updateVisualization, chartType, currentMapping }) => (
-    <div data-test-subj="mockAxesSelectPanel">
-      <div data-test-subj="chartType">{chartType}</div>
-      <button
-        data-test-subj="mockUpdateVisualization"
-        onClick={() => updateVisualization({ mappings: { x: 'date', y: 'value' } })}
-      >
-        Update Visualization
-      </button>
-    </div>
-  )),
-}));
-
 jest.mock('../style_panel/legend/legend', () => ({
   LegendOptionsPanel: jest.fn(({ legendOptions, onLegendOptionsChange }) => (
     <div data-test-subj="mockLegendOptionsPanel">
@@ -262,7 +248,6 @@ describe('LineVisStyleControls', () => {
   test('renders with default props', () => {
     render(<LineVisStyleControls {...mockProps} />);
 
-    expect(screen.getByTestId('mockAxesSelectPanel')).toBeInTheDocument();
     expect(screen.getByTestId('mockLegendOptionsPanel')).toBeInTheDocument();
     expect(screen.getByTestId('mockThresholdOptions')).toBeInTheDocument();
     expect(screen.getByTestId('mockTooltipOptionsPanel')).toBeInTheDocument();
@@ -270,7 +255,7 @@ describe('LineVisStyleControls', () => {
     expect(screen.getByTestId('mockTitleOptionsPanel')).toBeInTheDocument();
   });
 
-  test('hides legend when no COLOR, FACET, or Y_SECOND mappings are present', () => {
+  test('hides legend when no COLOR or Y_SECOND mappings are present', () => {
     const propsWithNoLegend = {
       ...mockProps,
       axisColumnMappings: {
@@ -298,19 +283,6 @@ describe('LineVisStyleControls', () => {
     expect(screen.getByTestId('mockLegendOptionsPanel')).toBeInTheDocument();
   });
 
-  test('renders legend panel when FACET mapping is present', () => {
-    const propsWithFacetMapping = {
-      ...mockProps,
-      axisColumnMappings: {
-        ...mockAxisColumnMappings,
-        [AxisRole.FACET]: mockCategoricalColumn,
-      },
-    };
-
-    render(<LineVisStyleControls {...propsWithFacetMapping} />);
-
-    expect(screen.getByTestId('mockLegendOptionsPanel')).toBeInTheDocument();
-  });
 
   test('renders legend panel when Y_SECOND mapping is present', () => {
     const propsWithYSecondMapping = {
