@@ -462,6 +462,29 @@ describe('IndexPatterns', () => {
       expect((savedObjectsClient.get as jest.Mock).mock.calls.length).toBeGreaterThanOrEqual(2);
     });
 
+    test('coalesces persistence: still writes when the remote superset changes a field type', async () => {
+      enableAutoRefresh();
+      // The peer client persisted the SAME field names but with a different type for
+      // `existing`. Our local fetcher still sees the canonical `string` type, so the
+      // coalescer must NOT skip the write — the saved object would otherwise drift
+      // from the real cluster schema.
+      (indexPatterns as any).apiClient.getFieldsForWildcard = jest
+        .fn()
+        .mockImplementation(async () => {
+          object.version = 'v2';
+          object.attributes.fields = JSON.stringify([
+            { ...buildField('existing'), type: 'text' },
+            buildField('brand-new'),
+          ]);
+          return [buildField('existing'), buildField('brand-new')];
+        });
+
+      await indexPatterns.get('auto-id');
+      await flushPromises();
+
+      expect(savedObjectsClient.update).toHaveBeenCalled();
+    });
+
     test('swallows fetcher errors without raising onError or onNotification', async () => {
       enableAutoRefresh();
       (indexPatterns as any).apiClient.getFieldsForWildcard = jest

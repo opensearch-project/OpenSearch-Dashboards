@@ -497,12 +497,16 @@ export class IndexPatternsService {
         );
         if (latest?.version && latest.version !== indexPattern.version) {
           const updatedSpec = this.savedObjectToSpec(latest);
-          const updatedFieldNames = new Set(Object.keys(updatedSpec.fields ?? {}));
-          const allLocalCovered = [...currentFieldNames].every((name) =>
-            updatedFieldNames.has(name)
-          );
+          const updatedFieldsByName = updatedSpec.fields ?? {};
+          // The persisted superset must cover every local field by name AND type. A type
+          // change (e.g. text -> keyword) means the cluster schema shifted in a way the
+          // peer write did not capture, so we still need to persist our refreshed view.
+          const allLocalCovered = indexPattern.fields.getAll().every((local) => {
+            const remote = updatedFieldsByName[local.name];
+            return remote !== undefined && remote.type === local.type;
+          });
           if (allLocalCovered) {
-            const updatedFieldsList = Object.values(updatedSpec.fields ?? {}) as FieldSpec[];
+            const updatedFieldsList = Object.values(updatedFieldsByName) as FieldSpec[];
             indexPattern.fields.replaceAll([...updatedFieldsList, ...scripted]);
             indexPattern.version = latest.version;
             needsWrite = false;

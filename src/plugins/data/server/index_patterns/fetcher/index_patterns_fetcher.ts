@@ -146,8 +146,9 @@ export class IndexPatternsFetcher {
       fieldCapsOptions
     )
       .then((fields) => {
-        sweepStale(Date.now());
-        fieldCapsCache.set(cacheKey, { ts: Date.now(), fields });
+        const completedAt = Date.now();
+        sweepStale(completedAt);
+        fieldCapsCache.set(cacheKey, { ts: completedAt, fields });
         return fields;
       })
       .finally(() => {
