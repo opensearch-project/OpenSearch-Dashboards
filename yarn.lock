@@ -15121,13 +15121,12 @@ known-css-properties@^0.24.0:
   resolved "https://registry.yarnpkg.com/known-css-properties/-/known-css-properties-0.24.0.tgz#19aefd85003ae5698a5560d2b55135bf5432155c"
   integrity sha512-RTSoaUAfLvpR357vWzAz/50Q/BmHfmE6ETSWfutT0AJiw10e6CmcdYRQJlLRd95B53D0Y2aD1jSxD3V3ySF+PA==
 
-langsmith@0.5.18, langsmith@^0.3.67:
-  version "0.5.18"
-  resolved "https://registry.yarnpkg.com/langsmith/-/langsmith-0.5.18.tgz#c691ad23614f0b46eaf07d982e0ac988e1f43880"
-  integrity sha512-3zuZUWffTHQ+73EAwnodADtf534VNEZUpXr9jC12qyG8/IQuJET7PRsCpTb9wX2lmBspakwLUpqpj3tNm/0bVA==
+langsmith@0.5.26, langsmith@^0.3.67:
+  version "0.5.26"
+  resolved "https://registry.yarnpkg.com/langsmith/-/langsmith-0.5.26.tgz#49c720450991c81b1ddd86aec1aa633417753885"
+  integrity sha512-HmmFgeQR2n9x1Kq8NiVaNL/j72ta71qN11hYjbyePJ/QuYEnOMhQjbNv9KeyKB3bOetpIzNalQbhHm+RyKoPRQ==
   dependencies:
     p-queue "6.6.2"
-    uuid "10.0.0"
 
 language-subtag-registry@^0.3.20:
   version "0.3.23"
@@ -21851,15 +21850,15 @@ utrie@^1.0.2:
   dependencies:
     base64-arraybuffer "^1.0.2"
 
-uuid@10.0.0, uuid@^10.0.0:
-  version "10.0.0"
-  resolved "https://registry.yarnpkg.com/uuid/-/uuid-10.0.0.tgz#5a95aa454e6e002725c79055fd42aaba30ca6294"
-  integrity sha512-8XkAphELsDnEGrDxUOHB3RGvXz6TeuYSGEZBOjtTtPm2lwhGBjLgOzLHB63IUWfBpNucQjND6d3AOudO+H3RWQ==
-
 uuid@3.3.2:
   version "3.3.2"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-3.3.2.tgz#1b4af4955eb3077c501c23872fc6513811587131"
   integrity sha512-yXJmeNaw3DnnKAOKJE51sL/ZaYfWJRl1pK9dr19YFCu0ObS231AB1/LbqTKRAQ5kw8A90rA6fr4riOUpTZvQZA==
+
+uuid@^10.0.0:
+  version "10.0.0"
+  resolved "https://registry.yarnpkg.com/uuid/-/uuid-10.0.0.tgz#5a95aa454e6e002725c79055fd42aaba30ca6294"
+  integrity sha512-8XkAphELsDnEGrDxUOHB3RGvXz6TeuYSGEZBOjtTtPm2lwhGBjLgOzLHB63IUWfBpNucQjND6d3AOudO+H3RWQ==
 
 uuid@^11.1.0:
   version "11.1.1"
