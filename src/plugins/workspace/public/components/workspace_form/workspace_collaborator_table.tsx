@@ -40,6 +40,8 @@ import { BackgroundPic } from '../../assets/background_pic';
 export type PermissionSetting = Pick<WorkspacePermissionSetting, 'id'> &
   Partial<WorkspacePermissionSetting>;
 
+const MAX_IDS_PER_REQUEST = 1000;
+
 // TODO: Update PermissionModeId to align with WorkspaceCollaboratorAccessLevel
 const permissionModeId2WorkspaceAccessLevelMap: {
   [key in PermissionModeId]: WorkspaceCollaboratorAccessLevel;
@@ -207,18 +209,33 @@ export const WorkspaceCollaboratorTable = ({
           .map(async ([, { source, type, ids }]) => {
             const newIds = ids.filter((id) => !(id in idToAttributesMapRef.current));
             try {
-              const resp = await http.post<Array<{ id: string; name: string; alias?: string }>>(
-                '/api/security/identity/_entries',
-                {
-                  body: JSON.stringify({ source, type, ids: newIds }),
-                  signal: abortController.signal,
-                }
-              );
-              resp?.forEach(({ id, name, alias }) => {
-                newMap[id] = { name, alias };
-              });
-            } catch {
-              // silently ignore, Name column will remain empty
+              for (let i = 0; i < newIds.length; i += MAX_IDS_PER_REQUEST) {
+                const slice = newIds.slice(i, i + MAX_IDS_PER_REQUEST);
+                const resp = await http.post<Array<{ id: string; name: string; alias?: string }>>(
+                  '/api/security/identity/_entries',
+                  {
+                    body: JSON.stringify({ source, type, ids: slice }),
+                    signal: abortController.signal,
+                  }
+                );
+                resp?.forEach(({ id, name, alias }) => {
+                  newMap[id] = { name, alias };
+                });
+              }
+            } catch (e) {
+              if ((e as Error).name !== 'AbortError') {
+                const detail = (e as any)?.body?.message;
+                notifications?.toasts?.addDanger(
+                  detail
+                    ? i18n.translate('workspace.collaborator.table.fetchNames.errorWithDetail', {
+                      defaultMessage: 'Failed to load collaborator names: {detail}',
+                      values: { detail },
+                    })
+                    : i18n.translate('workspace.collaborator.table.fetchNames.error', {
+                      defaultMessage: 'Failed to load collaborator names.',
+                    })
+                );
+              }
             }
           })
       );

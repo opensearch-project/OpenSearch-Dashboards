@@ -93,4 +93,45 @@ describe('IdentitySourceService', () => {
       }).toThrow(`Identity source 'unknown-source' has not been registered`);
     });
   });
+
+  describe('prototype pollution safety', () => {
+    const prototypePollutionSources = ['constructor', 'hasOwnProperty', 'toString', '__proto__', 'valueOf', '__defineGetter__'];
+
+    it.each(prototypePollutionSources)(
+      'should register and retrieve handler for reserved key "%s"',
+      (source) => {
+        const logger = loggingSystemMock.create().get();
+        const service = new IdentitySourceService(logger);
+        const mockHandler = createMockHandler();
+
+        service.registerIdentitySourceHandler(source, mockHandler);
+        expect(service.getIdentitySourceHandler(source)).toBe(mockHandler);
+      }
+    );
+
+    it.each(prototypePollutionSources)(
+      'should throw when re-registering reserved key "%s"',
+      (source) => {
+        const logger = loggingSystemMock.create().get();
+        const service = new IdentitySourceService(logger);
+
+        service.registerIdentitySourceHandler(source, createMockHandler());
+        expect(() => service.registerIdentitySourceHandler(source, createMockHandler())).toThrow(
+          `Identity source '${source}' has already been registered`
+        );
+      }
+    );
+
+    it.each(prototypePollutionSources)(
+      'should throw when getting unregistered reserved key "%s"',
+      (source) => {
+        const logger = loggingSystemMock.create().get();
+        const service = new IdentitySourceService(logger);
+
+        expect(() => service.getIdentitySourceHandler(source)).toThrow(
+          `Identity source '${source}' has not been registered`
+        );
+      }
+    );
+  });
 });
