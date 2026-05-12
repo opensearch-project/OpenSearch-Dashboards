@@ -32,7 +32,6 @@ import { InjectedIntl, injectI18n } from '@osd/i18n/react';
 import classNames from 'classnames';
 import { cloneDeep, compact, get, isEqual } from 'lodash';
 import React, { Component } from 'react';
-import ResizeObserver from 'resize-observer-polyfill';
 import {
   OpenSearchDashboardsReactContextValue,
   withOpenSearchDashboards,

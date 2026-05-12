@@ -31,47 +31,47 @@ describe('endpoint_validator', function () {
     'ff00::/8',
   ];
 
-  it('Url1 that should be blocked should return invalid with error', function () {
-    const result = validator.isValidURL('http://127.0.0.1', ['127.0.0.0/8']);
+  it('Url1 that should be blocked should return invalid with error', async function () {
+    const result = await validator.isValidURL('http://127.0.0.1', ['127.0.0.0/8']);
     expect(result.valid).toEqual(false);
     expect(result.error).toBeDefined();
   });
 
-  it('Url2 that is invalid should return invalid with error', function () {
-    const result = validator.isValidURL('www.test.com', []);
+  it('Url2 that is invalid should return invalid with error', async function () {
+    const result = await validator.isValidURL('www.test.com', []);
     expect(result.valid).toEqual(false);
     expect(result.error).toBeDefined();
   });
 
-  it('Url3 that is invalid should return invalid with error', function () {
-    const result = validator.isValidURL('ftp://www.test.com', []);
+  it('Url3 that is invalid should return invalid with error', async function () {
+    const result = await validator.isValidURL('ftp://www.test.com', []);
     expect(result.valid).toEqual(false);
     expect(result.error).toBeDefined();
   });
 
-  it('Url4 that should be blocked should return invalid with error', function () {
-    const result = validator.isValidURL('http://169.254.169.254/latest/meta-data/', [
+  it('Url4 that should be blocked should return invalid with error', async function () {
+    const result = await validator.isValidURL('http://169.254.169.254/latest/meta-data/', [
       '169.254.0.0/16',
     ]);
     expect(result.valid).toEqual(false);
     expect(result.error).toBeDefined();
   });
 
-  it('Url5 that should not be blocked should return valid', function () {
-    const result = validator.isValidURL('https://www.opensearch.org', ['127.0.0.0/8']);
+  it('Url5 that should not be blocked should return valid', async function () {
+    const result = await validator.isValidURL('https://www.opensearch.org', ['127.0.0.0/8']);
     expect(result.valid).toEqual(true);
     expect(result.error).toBeUndefined();
   });
 
-  it('Url6 that should not be blocked should return valid when null IPs', function () {
-    const result = validator.isValidURL('https://www.opensearch.org');
+  it('Url6 that should not be blocked should return valid when null IPs', async function () {
+    const result = await validator.isValidURL('https://www.opensearch.org');
     expect(result.valid).toEqual(true);
     expect(result.error).toBeUndefined();
   });
 
-  it('allowlisted url should bypass IP validation', function () {
+  it('allowlisted url should bypass IP validation', async function () {
     const allowlistedSuffixes = ['.allowlisted-service.example.com'];
-    const result = validator.isValidURL(
+    const result = await validator.isValidURL(
       'https://test.allowlisted-service.example.com',
       BLOCKED_IP_LIST,
       allowlistedSuffixes
@@ -80,9 +80,9 @@ describe('endpoint_validator', function () {
     expect(result.error).toBeUndefined();
   });
 
-  it('non-allowlisted url should go through normal IP validation', function () {
+  it('non-allowlisted url should go through normal IP validation', async function () {
     const allowlistedSuffixes = ['.allowlisted-service.example.com'];
-    const result = validator.isValidURL(
+    const result = await validator.isValidURL(
       'https://www.opensearch.org',
       BLOCKED_IP_LIST,
       allowlistedSuffixes
@@ -91,9 +91,9 @@ describe('endpoint_validator', function () {
     expect(result.error).toBeUndefined();
   });
 
-  it('url not matching allowlist should be validated normally', function () {
+  it('url not matching allowlist should be validated normally', async function () {
     const allowlistedSuffixes = ['.allowlisted.example.com'];
-    const result = validator.isValidURL(
+    const result = await validator.isValidURL(
       'https://notallowlisted.example.com',
       BLOCKED_IP_LIST,
       allowlistedSuffixes
