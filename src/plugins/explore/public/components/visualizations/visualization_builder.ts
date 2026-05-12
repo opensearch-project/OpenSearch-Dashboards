@@ -23,6 +23,8 @@ import { adaptLegacyData } from './visualization_builder_utils';
 import { mergeStyles } from './utils/utils';
 import { AxisFieldNameMappings, RenderChartConfig } from './types';
 import { TimeRange } from '../../../../data/common';
+import { ITransformationService } from '../../application/in_context_vis_editor/data_transformations/types';
+import { createNoOpTransformationService } from '../../application/in_context_vis_editor/data_transformations/transformation_service';
 
 interface VisState {
   styleOptions?: StyleOptions;
@@ -41,16 +43,25 @@ export class VisualizationBuilder {
   private isInitialized = false;
   private getUrlStateStorage: Options['getUrlStateStorage'];
   private subscriptions = Array<Subscription>();
+  private transformationService: ITransformationService = createNoOpTransformationService();
 
   visConfig$ = new BehaviorSubject<ChartConfig | undefined>(undefined);
   data$ = new BehaviorSubject<VisData | undefined>(undefined);
   showRawTable$ = new BehaviorSubject<boolean>(false);
   isVisDirty$ = new BehaviorSubject<boolean>(false);
 
+  /** Per-stage field schemas produced by the transformation pipeline */
+  stageSchemas$ = new BehaviorSubject<Array<Array<{ name?: string; type?: string }>>>([]);
+
   constructor({ getUrlStateStorage }: Options) {
     if (getUrlStateStorage) {
       this.getUrlStateStorage = getUrlStateStorage;
     }
+  }
+
+  // set transformation service
+  setTransformationService(service: ITransformationService) {
+    this.transformationService = service;
   }
 
   init() {
@@ -314,7 +325,6 @@ export class VisualizationBuilder {
         if (!chartTypeConfig) {
           this.setVisConfig(undefined);
         }
-        // Default to show a table if no auto vis created
         const newVisConfig: ChartConfig = {
           type: 'table',
           styles: chartTypeConfig?.ui.style.defaults,
@@ -337,17 +347,29 @@ export class VisualizationBuilder {
     this.setVisConfig(undefined);
   }
 
+  /**
+   * Apply the current transformation pipeline against the given raw rows and
+   * schema, then publish the result to data$
+   */
   handleData<T = unknown>(
     rows: Array<OpenSearchSearchHit<T>>,
     schema: Array<{ type?: string; name?: string }>
   ) {
+    const { rows: transformedRows, stageSchemas } = this.transformationService.applyPipeline(
+      rows,
+      schema
+    );
+    this.stageSchemas$.next(stageSchemas);
+
+    const finalSchema = stageSchemas[stageSchemas.length - 1] ?? schema;
     const {
       transformedData,
       numericalColumns,
       categoricalColumns,
       dateColumns,
       unknownColumns,
-    } = normalizeResultRows(rows, schema);
+    } = normalizeResultRows(transformedRows, finalSchema);
+
     this.data$.next({
       transformedData,
       numericalColumns,
@@ -445,6 +467,7 @@ export class VisualizationBuilder {
     this.data$.complete();
     this.showRawTable$.complete();
     this.isVisDirty$.complete();
+    this.stageSchemas$.complete();
   }
 
   reset(): void {
@@ -454,6 +477,8 @@ export class VisualizationBuilder {
     this.data$ = new BehaviorSubject<VisData | undefined>(undefined);
     this.showRawTable$ = new BehaviorSubject<boolean>(false);
     this.isVisDirty$ = new BehaviorSubject<boolean>(false);
+    this.stageSchemas$ = new BehaviorSubject<Array<Array<{ name?: string; type?: string }>>>([]);
+    this.transformationService = createNoOpTransformationService();
     this.isInitialized = false;
   }
 

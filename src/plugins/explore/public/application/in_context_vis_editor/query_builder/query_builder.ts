@@ -38,7 +38,11 @@ import {
   handleAgentError,
 } from './utils';
 import { getServices as getExploreServices } from '../../../services/services';
-import { QUERY_BUILDER_QUERY_STATE_KEY, QUERY_EDITOR_STATE_KEY } from '../types';
+import {
+  QUERY_BUILDER_QUERY_STATE_KEY,
+  QUERY_EDITOR_STATE_KEY,
+  ActiveBottomPanelTab,
+} from '../types';
 
 // AbortControllers for active queries, keyed by query string
 // Currently only one query executing at a time
@@ -76,6 +80,7 @@ export interface QueryEditorState {
   userInitiatedQuery: boolean;
   languageType: SupportLanguageType;
   lastExecutedTranslatedQuery?: string; // last generated query
+  activeBottomPanelTab?: ActiveBottomPanelTab; // track which panel tab is active
 }
 
 export type QueryResultState = ISearchResult | undefined;
@@ -103,6 +108,7 @@ const initialQueryEditorState: QueryEditorState = {
   userInitiatedQuery: false, // user click the refresh button
   languageType: SupportLanguageType.ppl,
   lastExecutedTranslatedQuery: undefined,
+  activeBottomPanelTab: 'QUERY_TAB',
 };
 
 /**
@@ -129,12 +135,12 @@ export class QueryBuilder {
   private subscriptions = Array<Subscription>();
   private getServices: () => ExploreServices;
   private interpolationService?: IVariableInterpolationService;
+  private onDatasetChangedCallback?: () => void;
   public lastExecutedInterpolatedQuery?: string;
 
   constructor(getServices: () => ExploreServices) {
     this.getServices = getServices;
   }
-
   async init(options?: { savedQueryState?: QueryState }) {
     if (this.isInitialized) {
       return;
@@ -281,6 +287,10 @@ export class QueryBuilder {
           // sync dataset change
           // check isLanguageChanged and isInitialized for the initial sync
           if (isDatasetChanged || isLanguageChanged || !this.isInitialized) {
+            // Only clear the transformation pipeline when the user actively switches datasets after initialization
+            if (isDatasetChanged && this.isInitialized) {
+              this.onDatasetChangedCallback?.();
+            }
             this.datasetView$.next({ ...this.datasetView$.getValue(), isLoading: true });
             return from(this.handleDatasetChange(newQuery.dataset));
           }
@@ -585,6 +595,12 @@ export class QueryBuilder {
 
   getVariableNames(): string[] {
     return this.variableNames$.value;
+  }
+
+  // register a callback that fires when the dataset changes,
+  // for example, used to clear the transformation pipeline on dataset switch.
+  setOnDatasetChanged(callback: () => void) {
+    this.onDatasetChangedCallback = callback;
   }
 
   setEditorRef(editor: monaco.editor.IStandaloneCodeEditor | null) {
