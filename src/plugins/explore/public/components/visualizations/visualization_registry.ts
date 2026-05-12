@@ -200,10 +200,10 @@ export class VisualizationRegistry {
       return !!fieldType && fieldType === expectedType;
     };
 
-    // Find matching rule: Roles must align and existing fields must have compatible types
-    let matchedRule: AxisTypeMapping | undefined;
+    // Find all matching rules: Roles must align and existing fields must have compatible types
+    const matchedRules: AxisTypeMapping[] = [];
     for (const rule of rules) {
-      matchedRule = rule.mappings.find((ruleMapping) => {
+      const candidateRules = rule.mappings.filter((ruleMapping) => {
         const mappingKeys = Object.keys(ruleMapping);
         if (
           mappingKeys.length !== savedRoles.length ||
@@ -220,66 +220,82 @@ export class VisualizationRegistry {
             return !savedFieldType || savedFieldType === expectedType;
           });
         });
-      }) as AxisTypeMapping | undefined;
+      }) as AxisTypeMapping[];
 
-      if (matchedRule) break;
+      matchedRules.push(...candidateRules);
     }
-    if (!matchedRule) return undefined;
+    if (matchedRules.length === 0) return undefined;
 
-    // Preserve surviving fields and identify missing roles
-    const result: AxisFieldNameMappings = {};
-    const used = new Set<string>();
-    const missingRoles: string[] = [];
+    // Try each matched rule until we find one that produces a complete result
+    for (const matchedRule of matchedRules) {
+      // Preserve surviving fields and identify missing roles
+      const result: AxisFieldNameMappings = {};
+      const used = new Set<string>();
+      const missingRoles: string[] = [];
 
-    for (const role of savedRoles) {
-      const savedValue = savedAxesMapping[role];
-      const fieldNames = toFieldArray(savedValue);
-      const expectedType = matchedRule[role as AxisRole]?.type;
-      const survivingFields = fieldNames.filter((name) => isValidField(name, expectedType));
+      for (const role of savedRoles) {
+        const savedValue = savedAxesMapping[role];
+        const fieldNames = toFieldArray(savedValue);
+        const expectedType = matchedRule[role as AxisRole]?.type;
+        const survivingFields = fieldNames.filter((name) => isValidField(name, expectedType));
 
-      if (survivingFields.length === 0) {
-        // All fields lost or empty
-        missingRoles.push(role);
-      } else if (survivingFields.length === fieldNames.length) {
-        // All fields survived - preserve original structure
-        result[role] = savedValue;
-        survivingFields.forEach((f) => used.add(f));
-      } else {
-        // Partial survival - preserve structure but mark as incomplete
-        result[role] = Array.isArray(savedValue) ? survivingFields : survivingFields[0];
-        survivingFields.forEach((f) => used.add(f));
-        missingRoles.push(role);
+        if (survivingFields.length === 0) {
+          // All fields lost or empty
+          missingRoles.push(role);
+        } else if (survivingFields.length === fieldNames.length) {
+          // All fields survived - preserve original structure
+          result[role] = savedValue;
+          survivingFields.forEach((f) => used.add(f));
+        } else {
+          // Partial survival - preserve structure but mark as incomplete
+          result[role] = Array.isArray(savedValue) ? survivingFields : survivingFields[0];
+          survivingFields.forEach((f) => used.add(f));
+          missingRoles.push(role);
+        }
+      }
+
+      // Try to fill missing roles with unused columns of matching type
+      let failed = false;
+      for (const role of missingRoles) {
+        const axisRole = role as AxisRole;
+        const ruleConfig = matchedRule[axisRole];
+        if (!ruleConfig) continue;
+
+        const { type: expectedType, multi: isMulti } = ruleConfig;
+        const existingFields = toFieldArray(result[role]);
+
+        const availableColumns = allColumns.filter(
+          (c) => c.schema === expectedType && !used.has(c.name)
+        );
+
+        if (isMulti) {
+          // Multi-axis: combine existing + all available columns
+          if (existingFields.length === 0 && availableColumns.length === 0) {
+            failed = true;
+            break;
+          }
+          result[role] = [...existingFields, ...availableColumns.map((c) => c.name)];
+          availableColumns.forEach((c) => used.add(c.name));
+        } else {
+          // Single-axis: use existing field or find one replacement
+          if (existingFields.length > 0) continue;
+          if (availableColumns.length === 0) {
+            failed = true;
+            break;
+          }
+          result[role] = availableColumns[0].name;
+          used.add(availableColumns[0].name);
+        }
+      }
+
+      // If this rule worked, return the result
+      if (!failed) {
+        return result;
       }
     }
 
-    // Fill missing roles with unused columns of matching type
-    for (const role of missingRoles) {
-      const axisRole = role as AxisRole;
-      const ruleConfig = matchedRule[axisRole];
-      if (!ruleConfig) continue;
-
-      const { type: expectedType, multi: isMulti } = ruleConfig;
-      const existingFields = toFieldArray(result[role]);
-
-      const availableColumns = allColumns.filter(
-        (c) => c.schema === expectedType && !used.has(c.name)
-      );
-
-      if (isMulti) {
-        // Multi-axis: combine existing + all available columns
-        if (existingFields.length === 0 && availableColumns.length === 0) return undefined;
-        result[role] = [...existingFields, ...availableColumns.map((c) => c.name)];
-        availableColumns.forEach((c) => used.add(c.name));
-      } else {
-        // Single-axis: use existing field or find one replacement
-        if (existingFields.length > 0) continue;
-        if (availableColumns.length === 0) return undefined;
-        result[role] = availableColumns[0].name;
-        used.add(availableColumns[0].name);
-      }
-    }
-
-    return result;
+    // None of the matched rules could produce a complete result
+    return undefined;
   }
 
   /**
