@@ -25,6 +25,7 @@ import { useCurrentExploreId } from '../hooks/use_explore_id';
 import { useVisualizationBuilder } from '../hooks/use_visualization_builder';
 import { EditorMode } from '../../utils/state_management/types';
 import { ContainerState, CONTAINER_URL_KEY } from '../types';
+import { useTransformationService } from '../hooks/use_transformation_service';
 
 export interface OnSaveProps {
   savedExplore: SavedExplore;
@@ -49,6 +50,7 @@ export const SaveVisButton = () => {
   const { queryEditorState, datasetView } = useQueryBuilderState();
   const { visualizationBuilderForEditor: visualizationBuilder } = useVisualizationBuilder();
   const visConfig = visualizationBuilder.visConfig$.value;
+  const transformationService = useTransformationService();
 
   const { services } = useOpenSearchDashboards<ExploreServices>();
 
@@ -125,6 +127,19 @@ export const SaveVisButton = () => {
       isTitleDuplicateConfirmed,
       onTitleDuplicate,
     }: OnSaveProps) => {
+      const pipeline = transformationService.pipeline$.getValue();
+      const serializedPipeline = pipeline.map((instance) => {
+        const definition = transformationService
+          .getDefinitions()
+          .find((def) => def.label === instance.label);
+        return {
+          definitionId: definition?.id || instance.label.toLowerCase().replace(/\s+/g, '_'),
+          instanceId: instance.instance_id,
+          config: instance.config,
+          hide: instance.hide,
+        };
+      });
+
       const axesMapping = visConfig?.axesMapping;
       const currentTitle = savedExploreToSave.title;
       savedExploreToSave.title = newTitle;
@@ -134,6 +149,7 @@ export const SaveVisButton = () => {
         chartType: visConfig?.type ?? 'line',
         params: visConfig?.styles ?? {},
         axesMapping,
+        dataTransformationJSON: JSON.stringify(serializedPipeline),
       });
       savedExploreToSave.version = 1;
 
@@ -193,6 +209,7 @@ export const SaveVisButton = () => {
       toastNotifications,
       isPromptMode,
       queryEditorState.lastExecutedTranslatedQuery,
+      transformationService,
     ]
   );
 

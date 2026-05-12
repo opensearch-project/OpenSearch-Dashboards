@@ -51,7 +51,11 @@ $osdHeaderOffset: $euiHeaderHeightCompensation;
         height: 100%;
       }
 
-      .exploreInContexQueryPanel {
+      .visualizationEditorTabPanel {
+        border: 0;
+      }
+
+      .multiTabsPanel {
         border-top-right-radius: $euiSizeXS;
       }
     }
