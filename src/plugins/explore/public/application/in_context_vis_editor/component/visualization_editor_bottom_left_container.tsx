@@ -3,9 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useMemo } from 'react';
 import moment from 'moment';
 import { i18n } from '@osd/i18n';
+import { monaco } from '@osd/monaco';
 import {
   EuiFlexGroup,
   EuiResizableContainer,
@@ -14,17 +15,21 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 import { TimeRange } from 'src/plugins/data/common';
+import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { QueryExecutionStatus } from '../../utils/state_management/types';
 import { VisEditorUninitialized } from './vis_editor_uninitialized';
 import { VisEditorNoResults } from './vis_editor_no_results';
 import { VisEditorLoadingState } from './vis_editor_loading_state';
 import { useSearchContext } from '../../../components/query_panel/utils/use_search_context';
-import { QueryPanel } from './visualization_editor_query_panel';
+import QueryPanel from './query_panel/visualization_editor_query_panel';
+import { QueryPanelProps } from './query_panel/query_panel_context';
 import { useQueryBuilderState } from '../hooks/use_query_builder_state';
 import { ErrorCodeBlock } from '../../../components/tabs/error_guard/error_code_block';
 import { EditorPanel } from './editor_panel';
 import { useVisualizationBuilder } from '../hooks/use_visualization_builder';
 import '../visualization_editor.scss';
+import { ExploreServices } from '../../../types';
+import { QueryState, QueryEditorState, SupportLanguageType } from '../query_builder/query_builder';
 
 const errorDefaultTitle = i18n.translate('explore.errorPanel.defaultTitle', {
   defaultMessage: 'An error occurred while executing the query',
@@ -37,7 +42,8 @@ const typeText = i18n.translate('explore.errorPanel.type', {
 });
 
 export const ResizableQueryPanelAndVisualization = () => {
-  const { queryBuilder, queryEditorState } = useQueryBuilderState();
+  const { services } = useOpenSearchDashboards<ExploreServices>();
+  const { queryBuilder, queryEditorState, queryState } = useQueryBuilderState();
   const queryStatus = queryEditorState.queryStatus;
 
   const renderVis = () => {
@@ -90,6 +96,75 @@ export const ResizableQueryPanelAndVisualization = () => {
     }
     return <VisualizationContainer />;
   };
+
+  const getEditor = useCallback(() => queryBuilder.getEditorRef(), [queryBuilder]);
+  const setEditor = useCallback(
+    (editor: monaco.editor.IStandaloneCodeEditor | null) => queryBuilder.setEditorRef(editor),
+    [queryBuilder]
+  );
+
+  const onQuerySubmit = useCallback(() => queryBuilder.onQueryExecutionSubmit(), [queryBuilder]);
+  const handleQueryChange = useCallback(
+    (updates: Partial<QueryState>) => queryBuilder.updateQueryState(updates),
+    [queryBuilder]
+  );
+  const handleEditorChange = useCallback(
+    (updates: Partial<QueryEditorState>) => queryBuilder.updateQueryEditorState(updates),
+    [queryBuilder]
+  );
+  const handleLanguageTypeChange = useCallback(
+    (languageType: SupportLanguageType | undefined) =>
+      queryBuilder.updateQueryEditorState({ languageType }),
+    [queryBuilder]
+  );
+
+  const queryPanelProps: QueryPanelProps = useMemo(
+    () => ({
+      services: {
+        keyboardShortcut: services.keyboardShortcut,
+        data: services.data,
+        notifications: services.notifications,
+        appName: services.appName,
+        capabilities: services.capabilities,
+      },
+
+      queryState,
+      queryEditorState,
+
+      onQuerySubmit,
+      handleQueryChange,
+      handleEditorChange,
+      handleLanguageTypeChange,
+
+      showLanguageToggle: true,
+      showDatasetSelect: true,
+      showSaveQueryButton: true,
+
+      // refer to editor inside QueryBuilder
+      getEditor,
+      setEditor,
+
+      // dataset supported types
+      supportedTypes: services.supportedTypes,
+    }),
+    [
+      services.keyboardShortcut,
+      services.data,
+      services.notifications,
+      services.appName,
+      services.capabilities,
+      services.supportedTypes,
+      queryState,
+      queryEditorState,
+      onQuerySubmit,
+      handleQueryChange,
+      handleEditorChange,
+      handleLanguageTypeChange,
+      getEditor,
+      setEditor,
+    ]
+  );
+
   return (
     <EuiResizableContainer direction="vertical">
       {(EuiResizablePanel, EuiResizableButton) => {
@@ -102,7 +177,7 @@ export const ResizableQueryPanelAndVisualization = () => {
             <EuiResizableButton />
 
             <EuiResizablePanel initialSize={30} minSize="20%" paddingSize="none" hasBorder={false}>
-              <QueryPanel queryEditorState$={queryBuilder.queryEditorState$} />
+              <QueryPanel {...queryPanelProps} />
             </EuiResizablePanel>
           </>
         );

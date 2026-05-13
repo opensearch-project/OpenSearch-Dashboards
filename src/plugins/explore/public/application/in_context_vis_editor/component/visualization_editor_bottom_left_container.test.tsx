@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ResizableQueryPanelAndVisualization } from './visualization_editor_bottom_left_container';
 import { QueryExecutionStatus } from '../../utils/state_management/types';
@@ -27,8 +26,9 @@ jest.mock('./vis_editor_no_results', () => ({
 jest.mock('./vis_editor_loading_state', () => ({
   VisEditorLoadingState: () => <div data-test-subj="vis-loading" />,
 }));
-jest.mock('./visualization_editor_query_panel', () => ({
-  QueryPanel: () => <div data-test-subj="query-panel" />,
+jest.mock('../component/query_panel/visualization_editor_query_panel', () => ({
+  __esModule: true,
+  default: () => <div data-test-subj="query-panel" />,
 }));
 jest.mock('../../../components/tabs/error_guard/error_code_block', () => ({
   ErrorCodeBlock: ({ title, text }: any) => (
@@ -36,7 +36,6 @@ jest.mock('../../../components/tabs/error_guard/error_code_block', () => ({
   ),
 }));
 jest.mock('../query_builder/query_builder', () => ({}));
-jest.mock('../visualization_editor.scss', () => ({}), { virtual: true });
 jest.mock('@osd/i18n', () => ({
   i18n: {
     translate: jest.fn((key, options) => options.defaultMessage),

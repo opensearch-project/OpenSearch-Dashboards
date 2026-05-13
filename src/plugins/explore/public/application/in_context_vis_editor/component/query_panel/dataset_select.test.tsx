@@ -3,44 +3,42 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { DatasetSelectWidget } from './dataset_select';
-import { useQueryBuilderState } from '../hooks/use_query_builder_state';
-import { useEditorOperations } from '../hooks/use_editor_operations';
-import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
+import { QueryPanelFullProps } from './query_panel_context';
 
-const mockUpdateQueryState = jest.fn();
-const mockUpdateQueryEditorState = jest.fn();
-const mockGetInitialQueryByDataset = jest.fn();
+const mockHandleQueryChange = jest.fn();
+const mockHandleEditorChange = jest.fn();
 const mockClearEditor = jest.fn();
-const mockSetQuery = jest.fn();
-const mockGetQuery = jest.fn();
-const mockCacheDataset = jest.fn();
+const mockGetInitialQueryByDataset = jest.fn();
 const mockToastAddError = jest.fn();
-const mockToastAddWarning = jest.fn();
 
 let capturedSupportedTypes: string[];
 let capturedSignalType: string | string[];
+let mockQueryEditorState: any;
+let mockServices: any;
 
-jest.mock('../hooks/use_query_builder_state', () => ({
-  useQueryBuilderState: jest.fn(),
-}));
-jest.mock('../hooks/use_editor_operations', () => ({
-  useEditorOperations: jest.fn(),
-}));
-jest.mock('../query_builder/query_builder', () => ({
+jest.mock('../../query_builder/query_builder', () => ({
   SupportLanguageType: { ppl: 'PPL', promQL: 'PROMQL', ai: 'AI' },
 }));
-jest.mock('../query_builder/utils', () => ({
+jest.mock('../../query_builder/utils', () => ({
   getRequiredSignalType: jest.fn((lang) => (lang === 'PROMQL' ? 'metrics' : ['logs', 'traces'])),
 }));
-jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
-  useOpenSearchDashboards: jest.fn(),
-}));
-jest.mock('../visualization_editor.scss', () => ({}), { virtual: true });
 
-const buildServices = (overrides: Record<string, any> = {}) => ({
+jest.mock('./query_panel_context', () => ({
+  useQueryPanelContext: (): Partial<QueryPanelFullProps> => ({
+    services: mockServices,
+    supportedTypes: ['INDEXES', 'INDEX_PATTERN'],
+    queryEditorState: mockQueryEditorState,
+    handleQueryChange: mockHandleQueryChange,
+    handleEditorChange: mockHandleEditorChange,
+    editorOperations: {
+      clearEditor: mockClearEditor,
+    } as any,
+  }),
+}));
+
+const buildServices = () => ({
   data: {
     ui: {
       DatasetSelect: ({ onSelect, supportedTypes, signalType }: any) => {
@@ -63,15 +61,9 @@ const buildServices = (overrides: Record<string, any> = {}) => ({
     },
     query: {
       queryString: {
-        getQuery: mockGetQuery,
-        setQuery: mockSetQuery,
         getInitialQueryByDataset: mockGetInitialQueryByDataset,
-        getQueryHistory: jest.fn(() => [
-          { query: 'source = table1 | head 10', language: 'PPL' },
-          { query: 'source = table2 | head 10', language: 'PPL' },
-        ]),
         getDatasetService: () => ({
-          cacheDataset: mockCacheDataset,
+          cacheDataset: jest.fn(),
         }),
       },
     },
@@ -79,25 +71,16 @@ const buildServices = (overrides: Record<string, any> = {}) => ({
   notifications: {
     toasts: {
       addError: mockToastAddError,
-      addWarning: mockToastAddWarning,
     },
   },
-  ...overrides,
+  appName: 'explore',
 });
 
 beforeEach(() => {
   jest.clearAllMocks();
   mockGetInitialQueryByDataset.mockReturnValue({ query: '', language: 'PPL', dataset: undefined });
-
-  (useOpenSearchDashboards as jest.Mock).mockReturnValue({ services: buildServices() });
-  (useQueryBuilderState as jest.Mock).mockReturnValue({
-    queryEditorState: { languageType: 'PPL' },
-    queryBuilder: {
-      updateQueryState: mockUpdateQueryState,
-      updateQueryEditorState: mockUpdateQueryEditorState,
-    },
-  });
-  (useEditorOperations as jest.Mock).mockReturnValue({ clearEditor: mockClearEditor });
+  mockQueryEditorState = { languageType: 'PPL' };
+  mockServices = buildServices();
 });
 
 describe('DatasetSelectWidget', () => {
@@ -116,10 +99,13 @@ describe('DatasetSelectWidget', () => {
         id: 'ds1',
         type: 'INDEX_PATTERN',
       });
-      expect(mockUpdateQueryState).toHaveBeenCalledWith(
+      expect(mockHandleQueryChange).toHaveBeenCalledWith(
         expect.objectContaining({ query: '', dataset: { id: 'ds1', type: 'INDEX_PATTERN' } })
       );
-      expect(mockUpdateQueryEditorState).toHaveBeenCalledWith({ isQueryEditorDirty: true });
+      expect(mockHandleEditorChange).toHaveBeenCalledWith({
+        isQueryEditorDirty: true,
+        editorMode: 'query',
+      });
       expect(mockClearEditor).toHaveBeenCalled();
     });
   });
@@ -130,14 +116,7 @@ describe('DatasetSelectWidget', () => {
   });
 
   it('passes PROMETHEUS supportedTypes for promQL language', () => {
-    (useQueryBuilderState as jest.Mock).mockReturnValue({
-      queryEditorState: { languageType: 'PROMQL' },
-      queryBuilder: {
-        updateQueryState: mockUpdateQueryState,
-        updateQueryEditorState: mockUpdateQueryEditorState,
-      },
-    });
-
+    mockQueryEditorState = { languageType: 'PROMQL' };
     render(<DatasetSelectWidget />);
     expect(capturedSupportedTypes).toEqual(['PROMETHEUS']);
   });
@@ -148,14 +127,7 @@ describe('DatasetSelectWidget', () => {
   });
 
   it('passes metric signalType from getRequiredSignalType for promQL', () => {
-    (useQueryBuilderState as jest.Mock).mockReturnValue({
-      queryEditorState: { languageType: 'PROMQL' },
-      queryBuilder: {
-        updateQueryState: mockUpdateQueryState,
-        updateQueryEditorState: mockUpdateQueryEditorState,
-      },
-    });
-
+    mockQueryEditorState = { languageType: 'PROMQL' };
     render(<DatasetSelectWidget />);
     expect(capturedSignalType).toBe('metrics');
   });
