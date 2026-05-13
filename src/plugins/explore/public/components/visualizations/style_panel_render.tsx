@@ -14,7 +14,7 @@ import { ChartStylesMapping, ChartType, StyleOptions } from './utils/use_visuali
 import { AxisFieldNameMappings, RenderChartConfig } from './types';
 import { convertStringsToMappings } from './visualization_builder_utils';
 import { visualizationRegistry } from './visualization_registry';
-import { SplitLayout, VisData } from './visualization_builder.types';
+import { SplitConfig, VisData } from './visualization_builder.types';
 import { getAxisConfigByColumnMapping } from './utils/axis';
 import { AxesSelectPanel } from './style_panel/axes/axes_selector';
 
@@ -24,9 +24,7 @@ interface StylePanelProps<T> {
   onStyleChange: (changes: Partial<StyleOptions>) => void;
   onChartTypeChange: (type: ChartType) => void;
   onAxesMappingChange: (mappings: AxisFieldNameMappings) => void;
-  onSplitFieldChange: (field: string | undefined) => void;
-  onSplitLayoutChange: (layout: SplitLayout) => void;
-  onShowSplitLabelChange: (show: boolean) => void;
+  onSplitConfigChange: (config: Partial<SplitConfig>) => void;
   className?: string;
 }
 
@@ -36,9 +34,7 @@ export const StylePanelRender = <T extends ChartType>({
   onStyleChange,
   onChartTypeChange,
   onAxesMappingChange,
-  onSplitFieldChange,
-  onSplitLayoutChange,
-  onShowSplitLabelChange,
+  onSplitConfigChange,
   className,
 }: StylePanelProps<T>) => {
   const visualizationData = useObservable(data$);
@@ -109,9 +105,7 @@ export const StylePanelRender = <T extends ChartType>({
           splitField={chartConfig?.splitField}
           splitLayout={chartConfig?.splitLayout}
           showSplitLabel={chartConfig?.showSplitLabel}
-          onSplitFieldChange={onSplitFieldChange}
-          onSplitLayoutChange={onSplitLayoutChange}
-          onShowSplitLabelChange={onShowSplitLabelChange}
+          onSplitConfigChange={onSplitConfigChange}
         />
       )}
       {visConfig.ui.style.render({

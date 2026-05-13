@@ -8,6 +8,7 @@ import { LineChartStyle, LineMode } from './line_vis_config';
 import { BaseChartStyle, PipelineFn } from '../utils/echarts_spec';
 import { composeMarkLine } from '../utils/utils';
 import { getSeriesDisplayName } from '../utils/series';
+import { getColors } from '../theme/default_colors';
 
 const getLineInterpolation = (lineMode: LineMode) => {
   switch (lineMode) {
@@ -47,12 +48,16 @@ export const createLineSeries = <T extends BaseChartStyle>({
   addTimeMarker?: boolean;
 }): PipelineFn<T> => (state) => {
   const { xAxisConfig, transformedData = [], axisColumnMappings } = state;
+  const palette = getColors().categories;
   const newState = { ...state };
   const usedTimeMarker = addTimeMarker && styles.addTimeMarker;
 
   if (!Array.isArray(seriesFields)) {
     seriesFields = seriesFields(transformedData[0]);
   }
+
+  const allColumns = Object.values(axisColumnMappings).flat();
+  const sortedNames = seriesFields.map((f) => getSeriesDisplayName(f, allColumns)).sort();
 
   if (usedTimeMarker) {
     {
@@ -64,7 +69,8 @@ export const createLineSeries = <T extends BaseChartStyle>({
   }
 
   const series = seriesFields?.map((item: string) => {
-    const name = getSeriesDisplayName(item, Object.values(axisColumnMappings).flat());
+    const name = getSeriesDisplayName(item, allColumns);
+    const colorIndex = sortedNames.indexOf(name);
 
     return {
       name,
@@ -79,6 +85,9 @@ export const createLineSeries = <T extends BaseChartStyle>({
       },
       ...generateLineStyles(styles),
       ...composeMarkLine(styles?.thresholdOptions, styles?.addTimeMarker),
+      itemStyle: {
+        color: palette[colorIndex % palette.length],
+      },
     };
   });
 

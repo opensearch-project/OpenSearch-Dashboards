@@ -16,11 +16,14 @@ export interface VisData {
   unknownColumns: VisColumn[];
 }
 
-export interface ChartConfig {
-  type: ChartType;
-  styles?: StyleOptions;
-  axesMapping?: AxisFieldNameMappings;
+export interface SplitConfig {
   splitField?: string;
   splitLayout?: SplitLayout;
   showSplitLabel?: boolean;
+}
+
+export interface ChartConfig extends SplitConfig {
+  type: ChartType;
+  styles?: StyleOptions;
+  axesMapping?: AxisFieldNameMappings;
 }

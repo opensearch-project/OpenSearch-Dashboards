@@ -1,0 +1,62 @@
+.customLegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  padding: 6px 8px;
+  overflow: auto;
+  max-height: 80px;
+  align-items: center;
+}
+
+.customLegend--vertical {
+  flex-direction: column;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  max-height: 100%;
+  max-width: 150px;
+  overflow-y: auto;
+}
+
+.customLegend--horizontal {
+  flex-direction: row;
+  overflow-x: auto;
+}
+
+.customLegend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 2px 4px;
+  border-radius: 2px;
+  font-size: 12px;
+  line-height: 1;
+  white-space: nowrap;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+}
+
+.customLegend__item--hidden {
+  opacity: 0.5;
+
+  .customLegend__indicator {
+    background-color: currentColor;
+  }
+}
+
+.customLegend__indicator {
+  width: 14px;
+  height: 6px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.customLegend__label {
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

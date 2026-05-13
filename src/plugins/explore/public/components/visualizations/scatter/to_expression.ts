@@ -12,18 +12,22 @@ import {
   buildAxisConfigs,
   assembleSpec,
   buildVisMap,
+  collectLegend,
 } from '../utils/echarts_spec';
 import {
   createScatterSeries,
   createCategoryScatterSeries,
   createSizeScatterSeries,
+  assembleScatterSpec,
 } from './scatter_chart_utils';
 import { convertTo2DArray, transform, pivot } from '../utils/data_transformation';
+import { ColorMap } from '../utils/color_map';
 
 export const createTwoMetricScatter = (
   transformedData: Array<Record<string, any>>,
   styles: ScatterChartStyle,
-  axisColumnMappings: { [AxisRole.X]: VisColumn; [AxisRole.Y]: VisColumn }
+  axisColumnMappings: { [AxisRole.X]: VisColumn; [AxisRole.Y]: VisColumn },
+  onLegend?: (legend: ColorMap) => void
 ): any => {
   const axisConfig = getAxisConfig(styles);
   const xCol = axisColumnMappings[AxisRole.X];
@@ -43,6 +47,7 @@ export const createTwoMetricScatter = (
       xField: xCol.column,
       yField: yCol.column,
     }),
+    collectLegend(onLegend),
     assembleSpec
   )({
     data: transformedData,
@@ -61,7 +66,8 @@ export const createTwoMetricOneCateScatter = (
     [AxisRole.X]: VisColumn;
     [AxisRole.Y]: VisColumn;
     [AxisRole.COLOR]: VisColumn;
-  }
+  },
+  onLegend?: (legend: ColorMap) => void
 ): any => {
   const axisConfig = getAxisConfig(styles);
   const xCol = axisColumnMappings[AxisRole.X];
@@ -85,6 +91,7 @@ export const createTwoMetricOneCateScatter = (
       yField: yCol.column,
       colorField: colorCol.column,
     }),
+    collectLegend(onLegend),
     assembleSpec
   )({
     data: transformedData,
@@ -104,7 +111,8 @@ export const createThreeMetricOneCateScatter = (
     [AxisRole.Y]: VisColumn;
     [AxisRole.COLOR]: VisColumn;
     [AxisRole.SIZE]: VisColumn;
-  }
+  },
+  onLegend?: (legend: ColorMap) => void
 ): any => {
   const axisConfig = getAxisConfig(styles);
   const xCol = axisColumnMappings[AxisRole.X];
@@ -125,7 +133,9 @@ export const createThreeMetricOneCateScatter = (
       colorField: colorCol.column,
       sizeField: sizeCol.column,
     }),
-    assembleSpec
+    collectLegend(onLegend),
+    assembleSpec,
+    assembleScatterSpec
   )({
     data: transformedData,
     styles,

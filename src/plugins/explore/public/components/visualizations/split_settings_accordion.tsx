@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { EuiFormRow, EuiSelect, EuiSwitch } from '@elastic/eui';
-import { SplitLayout } from './visualization_builder.types';
+import { SplitConfig, SplitLayout } from './visualization_builder.types';
 import { VisColumn } from './types';
 import { SplitFieldSelector } from './split_field_selector';
 import { StyleAccordion } from './style_panel/style_accordion';
@@ -16,9 +16,7 @@ interface SplitSettingsAccordionProps {
   splitField?: string;
   splitLayout?: SplitLayout;
   showSplitLabel?: boolean;
-  onSplitFieldChange: (field: string | undefined) => void;
-  onSplitLayoutChange: (layout: SplitLayout) => void;
-  onShowSplitLabelChange: (show: boolean) => void;
+  onSplitConfigChange: (config: Partial<SplitConfig>) => void;
 }
 
 const layoutOptions = [
@@ -33,9 +31,7 @@ export const SplitSettingsAccordion: React.FC<SplitSettingsAccordionProps> = ({
   splitField,
   splitLayout,
   showSplitLabel,
-  onSplitFieldChange,
-  onSplitLayoutChange,
-  onShowSplitLabelChange,
+  onSplitConfigChange,
 }) => {
   return (
     <StyleAccordion id="splitSettings" accordionLabel="Split" initialIsOpen={!!splitField}>
@@ -43,7 +39,7 @@ export const SplitSettingsAccordion: React.FC<SplitSettingsAccordionProps> = ({
         categoricalColumns={categoricalColumns}
         numericalColumns={numericalColumns}
         splitField={splitField}
-        onSplitFieldChange={onSplitFieldChange}
+        onSplitFieldChange={(field) => onSplitConfigChange({ splitField: field })}
       />
       {splitField && (
         <>
@@ -52,7 +48,7 @@ export const SplitSettingsAccordion: React.FC<SplitSettingsAccordionProps> = ({
               compressed
               options={layoutOptions}
               value={splitLayout || 'auto'}
-              onChange={(e) => onSplitLayoutChange(e.target.value as SplitLayout)}
+              onChange={(e) => onSplitConfigChange({ splitLayout: e.target.value as SplitLayout })}
               data-test-subj="splitLayoutSelect"
             />
           </EuiFormRow>
@@ -60,7 +56,7 @@ export const SplitSettingsAccordion: React.FC<SplitSettingsAccordionProps> = ({
             <EuiSwitch
               label="Show labels"
               checked={showSplitLabel ?? false}
-              onChange={(e) => onShowSplitLabelChange(e.target.checked)}
+              onChange={(e) => onSplitConfigChange({ showSplitLabel: e.target.checked })}
               data-test-subj="splitShowLabelSwitch"
               compressed
             />

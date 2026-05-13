@@ -28,6 +28,8 @@ import {
 } from '../types';
 import { convertThresholds } from './utils';
 import { DEFAULT_OPACITY } from '../constants';
+import { ColorMap } from './color_map';
+import { getColors } from '../theme/default_colors';
 
 /**
  * Base style interface that all chart styles should extend
@@ -155,6 +157,7 @@ export const createBaseConfig = <T extends BaseChartStyle>({
       axisPointer: { type: 'shadow' as const },
     },
     legend: {
+      show: false,
       type: 'scroll',
       ...legend,
       ...(styles?.legendPosition === Positions.LEFT || styles?.legendPosition === Positions.RIGHT
@@ -412,4 +415,57 @@ export const applyTimeRange = <T extends BaseChartStyle>(
     xAxisConfig: updatedXAxisConfig,
     yAxisConfig: updatedYAxisConfig,
   };
+};
+
+/**
+ * Collect legend data from series and notify via callback.
+ * Read-only: does not assign colors. Each series builder must set itemStyle.color explicitly.
+ * For scatter unfilled mode (color: 'transparent'), uses borderColor instead.
+ */
+export const collectLegend = <T extends BaseChartStyle>(
+  onLegend?: (legend: ColorMap) => void
+): PipelineFn<T> => (state) => {
+  const { series } = state;
+  if (!series || !onLegend) return state;
+
+  const legend: ColorMap = {};
+  series.forEach((s) => {
+    const name = typeof s.name === 'string' ? s.name : undefined;
+    if (!name) return;
+    const itemStyle = 'itemStyle' in s ? s.itemStyle : undefined;
+    const color = itemStyle?.color;
+    const legendColor = !color || color === 'transparent' ? itemStyle?.borderColor : color;
+    if (legendColor && typeof legendColor === 'string') {
+      legend[name] = legendColor;
+    }
+  });
+
+  onLegend(legend);
+
+  return state;
+};
+
+/**
+ * Collect legend data for pie charts from the series data items.
+ * Pie assigns colors per data item (not per series), so we read from series[0].data.
+ */
+export const collectPieLegend = <T extends BaseChartStyle>(
+  onLegend?: (legend: ColorMap) => void
+): PipelineFn<T> => (state) => {
+  const { series } = state;
+  if (!series || !onLegend) return state;
+
+  const legend: ColorMap = {};
+  const pieSeries = series[0] as any;
+  if (pieSeries?.data) {
+    pieSeries.data.forEach((item: any) => {
+      if (item?.name && item?.itemStyle?.color) {
+        legend[item.name] = item.itemStyle.color;
+      }
+    });
+  }
+
+  onLegend(legend);
+
+  return state;
 };

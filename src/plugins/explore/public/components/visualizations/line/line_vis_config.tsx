@@ -118,9 +118,17 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
             props.transformedData,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y },
-            props.timeRange
+            props.timeRange,
+            props.onLegend
           );
-          return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
+          return (
+            <EchartsRender
+              spec={spec}
+              onSelectTimeRange={props.onSelectTimeRange}
+              legendSelected$={props.legendSelected$}
+              highlightedSeries$={props.highlightedSeries$}
+            />
+          );
         },
       },
       {
@@ -144,9 +152,17 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
             props.transformedData,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.Y_SECOND]: y2 },
-            props.timeRange
+            props.timeRange,
+            props.onLegend
           );
-          return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
+          return (
+            <EchartsRender
+              spec={spec}
+              onSelectTimeRange={props.onSelectTimeRange}
+              legendSelected$={props.legendSelected$}
+              highlightedSeries$={props.highlightedSeries$}
+            />
+          );
         },
       },
       {
@@ -168,9 +184,17 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
             props.transformedData,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
-            props.timeRange
+            props.timeRange,
+            props.onLegend
           );
-          return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
+          return (
+            <EchartsRender
+              spec={spec}
+              onSelectTimeRange={props.onSelectTimeRange}
+              legendSelected$={props.legendSelected$}
+              highlightedSeries$={props.highlightedSeries$}
+            />
+          );
         },
       },
       {
@@ -192,9 +216,17 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
             props.transformedData,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
-            props.timeRange
+            props.timeRange,
+            props.onLegend
           );
-          return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
+          return (
+            <EchartsRender
+              spec={spec}
+              onSelectTimeRange={props.onSelectTimeRange}
+              legendSelected$={props.legendSelected$}
+              highlightedSeries$={props.highlightedSeries$}
+            />
+          );
         },
       },
       {
@@ -211,11 +243,20 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
           if (!x || !y || y.length === 0)
             throw Error('Missing axis config for category line chart');
 
-          const spec = createCategoryLineChart(props.transformedData, props.styleOptions, {
-            [AxisRole.X]: x,
-            [AxisRole.Y]: y,
-          });
-          return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
+          const spec = createCategoryLineChart(
+            props.transformedData,
+            props.styleOptions,
+            { [AxisRole.X]: x, [AxisRole.Y]: y },
+            props.onLegend
+          );
+          return (
+            <EchartsRender
+              spec={spec}
+              onSelectTimeRange={props.onSelectTimeRange}
+              legendSelected$={props.legendSelected$}
+              highlightedSeries$={props.highlightedSeries$}
+            />
+          );
         },
       },
       {
@@ -233,12 +274,20 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
           const color = props.axisColumnMappings.color?.[0];
           if (!x || !y || !color) throw Error('Missing axis config for category multi-line chart');
 
-          const spec = createCategoryMultiLineChart(props.transformedData, props.styleOptions, {
-            [AxisRole.X]: x,
-            [AxisRole.Y]: y,
-            [AxisRole.COLOR]: color,
-          });
-          return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
+          const spec = createCategoryMultiLineChart(
+            props.transformedData,
+            props.styleOptions,
+            { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
+            props.onLegend
+          );
+          return (
+            <EchartsRender
+              spec={spec}
+              onSelectTimeRange={props.onSelectTimeRange}
+              legendSelected$={props.legendSelected$}
+              highlightedSeries$={props.highlightedSeries$}
+            />
+          );
         },
       },
       {
@@ -256,12 +305,20 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
           const color = props.axisColumnMappings.color?.[0];
           if (!x || !y || !color) throw Error('Missing axis config for category multi-line chart');
 
-          const spec = createCategoryMultiLineChart(props.transformedData, props.styleOptions, {
-            [AxisRole.X]: x,
-            [AxisRole.Y]: y,
-            [AxisRole.COLOR]: color,
-          });
-          return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
+          const spec = createCategoryMultiLineChart(
+            props.transformedData,
+            props.styleOptions,
+            { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
+            props.onLegend
+          );
+          return (
+            <EchartsRender
+              spec={spec}
+              onSelectTimeRange={props.onSelectTimeRange}
+              legendSelected$={props.legendSelected$}
+              highlightedSeries$={props.highlightedSeries$}
+            />
+          );
         },
       },
     ];

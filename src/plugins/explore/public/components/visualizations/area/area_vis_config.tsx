@@ -112,9 +112,17 @@ export const createAreaConfig = (): VisualizationType<'area'> => ({
             props.transformedData,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y },
-            props.timeRange
+            props.timeRange,
+            props.onLegend
           );
-          return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
+          return (
+            <EchartsRender
+              spec={spec}
+              onSelectTimeRange={props.onSelectTimeRange}
+              legendSelected$={props.legendSelected$}
+              highlightedSeries$={props.highlightedSeries$}
+            />
+          );
         },
       },
       {
@@ -136,9 +144,17 @@ export const createAreaConfig = (): VisualizationType<'area'> => ({
             props.transformedData,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
-            props.timeRange
+            props.timeRange,
+            props.onLegend
           );
-          return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
+          return (
+            <EchartsRender
+              spec={spec}
+              onSelectTimeRange={props.onSelectTimeRange}
+              legendSelected$={props.legendSelected$}
+              highlightedSeries$={props.highlightedSeries$}
+            />
+          );
         },
       },
       {
@@ -160,9 +176,17 @@ export const createAreaConfig = (): VisualizationType<'area'> => ({
             props.transformedData,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
-            props.timeRange
+            props.timeRange,
+            props.onLegend
           );
-          return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
+          return (
+            <EchartsRender
+              spec={spec}
+              onSelectTimeRange={props.onSelectTimeRange}
+              legendSelected$={props.legendSelected$}
+              highlightedSeries$={props.highlightedSeries$}
+            />
+          );
         },
       },
       {
@@ -179,11 +203,20 @@ export const createAreaConfig = (): VisualizationType<'area'> => ({
           if (!x || !y || y.length === 0)
             throw Error('Missing axis config for category area chart');
 
-          const spec = createCategoryAreaChart(props.transformedData, props.styleOptions, {
-            [AxisRole.X]: x,
-            [AxisRole.Y]: y,
-          });
-          return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
+          const spec = createCategoryAreaChart(
+            props.transformedData,
+            props.styleOptions,
+            { [AxisRole.X]: x, [AxisRole.Y]: y },
+            props.onLegend
+          );
+          return (
+            <EchartsRender
+              spec={spec}
+              onSelectTimeRange={props.onSelectTimeRange}
+              legendSelected$={props.legendSelected$}
+              highlightedSeries$={props.highlightedSeries$}
+            />
+          );
         },
       },
       {
@@ -201,12 +234,20 @@ export const createAreaConfig = (): VisualizationType<'area'> => ({
           const color = props.axisColumnMappings.color?.[0];
           if (!x || !y || !color) throw Error('Missing axis config for stacked area chart');
 
-          const spec = createStackedAreaChart(props.transformedData, props.styleOptions, {
-            [AxisRole.X]: x,
-            [AxisRole.Y]: y,
-            [AxisRole.COLOR]: color,
-          });
-          return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
+          const spec = createStackedAreaChart(
+            props.transformedData,
+            props.styleOptions,
+            { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
+            props.onLegend
+          );
+          return (
+            <EchartsRender
+              spec={spec}
+              onSelectTimeRange={props.onSelectTimeRange}
+              legendSelected$={props.legendSelected$}
+              highlightedSeries$={props.highlightedSeries$}
+            />
+          );
         },
       },
       {
@@ -224,12 +265,20 @@ export const createAreaConfig = (): VisualizationType<'area'> => ({
           const color = props.axisColumnMappings.color?.[0];
           if (!x || !y || !color) throw Error('Missing axis config for stacked area chart');
 
-          const spec = createStackedAreaChart(props.transformedData, props.styleOptions, {
-            [AxisRole.X]: x,
-            [AxisRole.Y]: y,
-            [AxisRole.COLOR]: color,
-          });
-          return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
+          const spec = createStackedAreaChart(
+            props.transformedData,
+            props.styleOptions,
+            { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
+            props.onLegend
+          );
+          return (
+            <EchartsRender
+              spec={spec}
+              onSelectTimeRange={props.onSelectTimeRange}
+              legendSelected$={props.legendSelected$}
+              highlightedSeries$={props.highlightedSeries$}
+            />
+          );
         },
       },
     ];

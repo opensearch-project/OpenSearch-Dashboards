@@ -16,7 +16,7 @@ import { OpenSearchSearchHit } from '../../types/doc_views_types';
 import { isChartType } from './utils/is_chart_type';
 import { visualizationRegistry } from './visualization_registry';
 import { normalizeResultRows } from './utils/normalize_result_rows';
-import { ChartConfig, SplitLayout, VisData } from './visualization_builder.types';
+import { ChartConfig, SplitConfig, SplitLayout, VisData } from './visualization_builder.types';
 import { VisualizationRender } from './visualization_render';
 import { StylePanelRender } from './style_panel_render';
 import { adaptLegacyData } from './visualization_builder_utils';
@@ -395,43 +395,20 @@ export class VisualizationBuilder {
    * Sets the split field. Validates that the field exists as a categorical or numerical column.
    * Marks vis as dirty and updates visConfig$.
    */
-  setSplitField(fieldName: string | undefined): void {
+  updateSplitConfig(splitConfig: Partial<SplitConfig>): void {
     const config = this.visConfig$.value;
     if (!config) return;
 
-    if (fieldName) {
-      // Validate field exists in categorical or numerical columns
+    if ('splitField' in splitConfig && splitConfig.splitField) {
       const data = this.data$.value;
       const isValid =
-        data?.categoricalColumns.some((col) => col.name === fieldName) ||
-        data?.numericalColumns.some((col) => col.name === fieldName);
+        data?.categoricalColumns.some((col) => col.name === splitConfig.splitField) ||
+        data?.numericalColumns.some((col) => col.name === splitConfig.splitField);
       if (!isValid) return;
     }
 
     this.setIsVisDirty(true);
-    this.visConfig$.next({ ...config, splitField: fieldName || undefined });
-  }
-
-  /**
-   * Sets the split layout mode.
-   */
-  setSplitLayout(layout: SplitLayout): void {
-    const config = this.visConfig$.value;
-    if (!config) return;
-
-    this.setIsVisDirty(true);
-    this.visConfig$.next({ ...config, splitLayout: layout });
-  }
-
-  /**
-   * Sets whether to show split labels.
-   */
-  setShowSplitLabel(show: boolean): void {
-    const config = this.visConfig$.value;
-    if (!config) return;
-
-    this.setIsVisDirty(true);
-    this.visConfig$.next({ ...config, showSplitLabel: show });
+    this.visConfig$.next({ ...config, ...splitConfig });
   }
 
   /**
@@ -531,9 +508,7 @@ export class VisualizationBuilder {
       onStyleChange: this.updateStyles.bind(this),
       onAxesMappingChange: this.setAxesMapping.bind(this),
       onChartTypeChange: this.setCurrentChartType.bind(this),
-      onSplitFieldChange: this.setSplitField.bind(this),
-      onSplitLayoutChange: this.setSplitLayout.bind(this),
-      onShowSplitLabelChange: this.setShowSplitLabel.bind(this),
+      onSplitConfigChange: this.updateSplitConfig.bind(this),
     });
   }
 }

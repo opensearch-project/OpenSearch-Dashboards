@@ -8,6 +8,7 @@ import { getSeriesDisplayName } from '../utils/series';
 import { AreaChartStyle } from './area_vis_config';
 import { BaseChartStyle, PipelineFn } from '../utils/echarts_spec';
 import { generateThresholdLines } from '../utils/utils';
+import { getColors } from '../theme/default_colors';
 import { DEFAULT_OPACITY } from '../constants';
 
 /**
@@ -46,15 +47,20 @@ export const createAreaSeries = <T extends BaseChartStyle>({
   stack?: boolean;
 }): PipelineFn<T> => (state) => {
   const { transformedData = [], axisColumnMappings } = state;
+  const palette = getColors().categories;
   const newState = { ...state };
 
   if (!Array.isArray(seriesFields)) {
     seriesFields = seriesFields(transformedData[0]);
   }
 
+  const allColumns = Object.values(axisColumnMappings).flat();
+  const sortedNames = seriesFields.map((f) => getSeriesDisplayName(f, allColumns)).sort();
+
   const thresholdLines = generateThresholdLines(styles.thresholdOptions);
   const series = seriesFields?.map((item: string, index: number) => {
-    const name = getSeriesDisplayName(item, Object.values(axisColumnMappings).flat());
+    const name = getSeriesDisplayName(item, allColumns);
+    const colorIndex = sortedNames.indexOf(name);
 
     return {
       name,
@@ -72,6 +78,9 @@ export const createAreaSeries = <T extends BaseChartStyle>({
       },
       emphasis: {
         focus: 'self',
+      },
+      itemStyle: {
+        color: palette[colorIndex % palette.length],
       },
       ...(index === 0 && thresholdLines),
     };

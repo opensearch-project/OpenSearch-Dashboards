@@ -9,6 +9,7 @@ import { generateThresholdLines } from '../utils/utils';
 import { BarChartStyle } from './bar_vis_config';
 import { BaseChartStyle, PipelineFn } from '../utils/echarts_spec';
 import { getSeriesDisplayName } from '../utils/series';
+import { getColors } from '../theme/default_colors';
 
 export const inferTimeIntervals = (data: Array<Record<string, any>>, field: string | undefined) => {
   if (!data || data.length === 0 || !field) {
@@ -58,11 +59,15 @@ export const createBarSeries = <T extends BaseChartStyle>(options: Options): Pip
   let seriesFields = options.seriesFields;
 
   const { axisColumnMappings, transformedData = [] } = state;
+  const palette = getColors().categories;
   const newState = { ...state };
 
   if (!Array.isArray(seriesFields)) {
     seriesFields = seriesFields(transformedData[0]);
   }
+
+  const allColumns = Object.values(axisColumnMappings).flat();
+  const sortedNames = seriesFields.map((f) => getSeriesDisplayName(f, allColumns)).sort();
 
   const thresholdLines = generateThresholdLines(options.styles?.thresholdOptions);
 
@@ -72,7 +77,8 @@ export const createBarSeries = <T extends BaseChartStyle>(options: Options): Pip
   }
 
   const series = seriesFields.map((seriesField, index) => {
-    const name = getSeriesDisplayName(seriesField, Object.values(axisColumnMappings).flat());
+    const name = getSeriesDisplayName(seriesField, allColumns);
+    const colorIndex = sortedNames.indexOf(name);
     const seriesConfig = {
       type: 'bar',
       emphasis: {
@@ -85,12 +91,13 @@ export const createBarSeries = <T extends BaseChartStyle>(options: Options): Pip
       },
       barWidth,
       ...(index === 0 && thresholdLines),
-      ...(styles?.showBarBorder && {
-        itemStyle: {
+      itemStyle: {
+        color: palette[colorIndex % palette.length],
+        ...(styles?.showBarBorder && {
           borderWidth: styles.barBorderWidth,
           borderColor: styles.barBorderColor,
-        },
-      }),
+        }),
+      },
       // Apply stack configuration based on stackMode
       ...('stackMode' in styles && styles.stackMode === 'total' && { stack: 'total' }),
     };

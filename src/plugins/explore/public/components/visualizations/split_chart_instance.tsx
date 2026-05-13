@@ -11,7 +11,7 @@ interface SplitChartInstanceProps {
   style?: React.CSSProperties;
   showLabel?: boolean;
   scrollRoot?: React.RefObject<HTMLElement>;
-  renderChart: (groupData: Array<Record<string, any>>) => React.ReactNode;
+  renderChart: (groupData: Array<Record<string, any>>, groupKey: string) => React.ReactNode;
 }
 
 export const SplitChartInstance: React.FC<SplitChartInstanceProps> = ({
@@ -58,7 +58,7 @@ export const SplitChartInstance: React.FC<SplitChartInstanceProps> = ({
           {label}
         </div>
       )}
-      <div className="splitChartInstance__chart">{isVisible ? renderChart(data) : null}</div>
+      <div className="splitChartInstance__chart">{isVisible ? renderChart(data, label) : null}</div>
     </div>
   );
 };

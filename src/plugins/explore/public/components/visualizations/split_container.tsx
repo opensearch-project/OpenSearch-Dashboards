@@ -14,7 +14,7 @@ interface SplitContainerProps {
   groups: SplitGroup[];
   layout: SplitLayout;
   showLabel?: boolean;
-  renderChart: (groupData: Array<Record<string, any>>) => React.ReactNode;
+  renderChart: (groupData: Array<Record<string, any>>, groupKey: string) => React.ReactNode;
 }
 
 /**
@@ -86,24 +86,24 @@ export const SplitContainer: React.FC<SplitContainerProps> = ({
     };
   }, [layout]);
 
-  const getItemStyle = useMemo(() => {
-    return (index: number): React.CSSProperties => {
-      if (layout === 'horizontal') {
-        return { flex: 1, minWidth: 300 };
-      }
-      if (layout === 'vertical') {
-        return { flex: 1, minHeight: 200 };
-      }
-      const span = SUB_COLUMNS / columns;
-      const itemsInLastRow = groups.length % columns || columns;
-      const lastRowStart = groups.length - itemsInLastRow;
+  const itemStyles = useMemo((): React.CSSProperties[] => {
+    if (layout === 'horizontal') {
+      return groups.map(() => ({ flex: 1, minWidth: 300 }));
+    }
+    if (layout === 'vertical') {
+      return groups.map(() => ({ flex: 1, minHeight: 200 }));
+    }
+    const span = SUB_COLUMNS / columns;
+    const itemsInLastRow = groups.length % columns || columns;
+    const lastRowStart = groups.length - itemsInLastRow;
+    const lastRowSpan = SUB_COLUMNS / itemsInLastRow;
+    return groups.map((_, index) => {
       if (index >= lastRowStart && itemsInLastRow < columns) {
-        const lastRowSpan = SUB_COLUMNS / itemsInLastRow;
         return { gridColumn: `span ${lastRowSpan}` };
       }
       return { gridColumn: `span ${span}` };
-    };
-  }, [layout, columns, groups.length]);
+    });
+  }, [layout, columns, groups]);
 
   const layoutClass = `layout-${layout || 'auto'}`;
 
@@ -115,7 +115,7 @@ export const SplitContainer: React.FC<SplitContainerProps> = ({
             key={group.key}
             label={group.key}
             data={group.data}
-            style={getItemStyle(index)}
+            style={itemStyles[index]}
             showLabel={showLabel}
             scrollRoot={containerRef}
             renderChart={renderChart}

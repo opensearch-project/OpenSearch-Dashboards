@@ -59,9 +59,9 @@ import { normalizeResultRows } from '../components/visualizations/utils/normaliz
 import { visualizationRegistry } from '../components/visualizations/visualization_registry';
 import { prepareQueryForLanguage } from '../application/utils/languages';
 import { mergeStyles } from '../components/visualizations/utils/utils';
-import { groupDataBySplitField } from '../components/visualizations/utils/group_data_by_split';
-import { SplitContainer } from '../components/visualizations/split_container';
 import { SplitLayout } from '../components/visualizations/visualization_builder.types';
+import { CommonVisualizationRender } from '../components/visualizations/visualization_render';
+import { RenderChartConfig } from '../components/visualizations/types';
 
 // TODO cleanup unused props
 export interface SearchProps {
@@ -90,7 +90,7 @@ export interface SearchProps {
   onSetColumns?: (columns: string[]) => void;
   onFilter?: (field: IFieldType, value: string[], operator: string) => void;
   onExpressionEvent?: (e: ExpressionRendererEvent) => void;
-  onSelectTimeRange?: (range: TimeRange) => void;
+  onSelectTimeRange?: (range?: TimeRange) => void;
   tableData?: {
     rows: Array<Record<string, any>>;
     columns: VisColumn[];
@@ -367,7 +367,10 @@ export class ExploreEmbeddable
       }
     };
 
-    searchProps.onSelectTimeRange = async (range: TimeRange) => {
+    searchProps.onSelectTimeRange = async (range?: TimeRange) => {
+      if (!range) {
+        return;
+      }
       await this.executeTriggerActions(APPLY_FILTER_TRIGGER, {
         embeddable: this,
         filters: [
@@ -555,40 +558,24 @@ export class ExploreEmbeddable
           const splitLayout = (visualization.splitLayout as SplitLayout) ?? 'auto';
           const showSplitLabel = (visualization.showSplitLabel as boolean) ?? false;
 
-          const chartRender = () => {
-            if (splitField) {
-              const splitColumn = allColumns.find((col) => col.name === splitField);
-              if (splitColumn) {
-                const groups = groupDataBySplitField(
-                  visualizationData.transformedData,
-                  splitColumn.column
-                );
-                return (
-                  <SplitContainer
-                    groups={groups}
-                    layout={splitLayout}
-                    showLabel={showSplitLabel}
-                    renderChart={(groupData) =>
-                      matchedRule.render({
-                        transformedData: groupData,
-                        styleOptions: styles || styleOptions,
-                        onSelectTimeRange: this.searchProps?.onSelectTimeRange,
-                        axisColumnMappings: axesMapping,
-                        timeRange: searchContext.timeRange,
-                      })
-                    }
-                  />
-                );
-              }
-            }
-            return matchedRule.render({
-              transformedData: visualizationData.transformedData,
-              styleOptions: styles || styleOptions,
-              onSelectTimeRange: this.searchProps?.onSelectTimeRange,
-              axisColumnMappings: axesMapping,
-              timeRange: searchContext.timeRange,
-            });
+          const visConfig: RenderChartConfig = {
+            type: selectedChartType,
+            axesMapping: effectiveAxesMapping,
+            styles: styles || styleOptions,
+            splitField,
+            splitLayout,
+            showSplitLabel,
           };
+
+          const chartRender = () => (
+            <CommonVisualizationRender
+              visualizationData={visualizationData}
+              visConfig={visConfig}
+              showRawTable={false}
+              timeRange={searchContext.timeRange}
+              onSelectTimeRange={this.searchProps?.onSelectTimeRange}
+            />
+          );
           this.searchProps.chartRender = chartRender;
         }
       }

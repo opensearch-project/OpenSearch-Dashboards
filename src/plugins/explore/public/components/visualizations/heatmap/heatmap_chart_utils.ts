@@ -8,9 +8,10 @@ import { HeatmapSeriesOption } from 'echarts';
 import { Positions, ColorSchemas, ScaleType } from '../types';
 import { HeatmapChartStyle } from './heatmap_vis_config';
 import { getColors, DEFAULT_GREY } from '../theme/default_colors';
-import { BaseChartStyle, PipelineFn } from '../utils/echarts_spec';
+import { BaseChartStyle, EChartsSpecState, PipelineFn } from '../utils/echarts_spec';
 import { rgbToHex, hexToRgb } from '../theme/color_utils';
 import { getSeriesDisplayName } from '../utils/series';
+import { DEFAULT_GRID } from '../constants';
 
 // Uses Interquartile Range method to find robust min/max values by excluding statistical outliers
 // 1.5 × IQR rule is a common method to identify outliers in a dataset
@@ -45,11 +46,15 @@ const buildVisualMap = (visualMap: any, styles: HeatmapChartStyle, numericalValu
   // TODO a dynamic way to place legend
   const baseStyle = {
     show: styles.addLegend,
+    itemWidth: 10,
+    itemHeight: 80,
     orient: [Positions.LEFT, Positions.RIGHT].includes(styles?.legendPosition)
       ? 'vertical'
       : 'horizontal',
     ...([Positions.BOTTOM, Positions.TOP].includes(styles?.legendPosition) && { left: 'center' }),
-    [String(styles?.legendPosition ?? Positions.BOTTOM)]: 1,
+    [String(styles?.legendPosition ?? Positions.BOTTOM)]: String(
+      styles?.legendPosition ?? Positions.BOTTOM
+    ),
     inRange: {
       color: colorRange,
     },
@@ -301,4 +306,27 @@ const getColorRange = (
       colors = generateSchemeList(getColors().statusBlue, maxNumberOfColors);
   }
   return reverseSchema ? colors.reverse() : colors;
+};
+
+export const assembleHeatmapSpec = <T extends BaseChartStyle>(
+  state: EChartsSpecState<T>
+): EChartsSpecState<T> => {
+  const grid = { ...DEFAULT_GRID };
+  const { visualMap, spec } = state;
+  if (visualMap && !Array.isArray(visualMap)) {
+    if (visualMap.bottom === 'bottom') {
+      grid.bottom = 50;
+    }
+    if (visualMap.right === 'right') {
+      grid.right = 40;
+    }
+    if (visualMap.left === 'left') {
+      grid.left = 80;
+    }
+    if (visualMap.top === 'top') {
+      grid.top = 40;
+    }
+  }
+
+  return { ...state, spec: { ...spec, grid } };
 };
