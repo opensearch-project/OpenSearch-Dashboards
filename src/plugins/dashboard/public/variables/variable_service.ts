@@ -530,7 +530,9 @@ export class VariableService {
     }
 
     try {
-      const variablesJSON = variables.length > 0 ? JSON.stringify({ variables }) : undefined;
+      // Use empty string to clear variablesJSON when all variables are deleted
+      // Using undefined would not remove the field from saved object
+      const variablesJSON = variables.length > 0 ? JSON.stringify({ variables }) : '';
       await this.savedObjectsClient.update('dashboard', this.dashboardId, {
         variablesJSON,
       });

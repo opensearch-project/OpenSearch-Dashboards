@@ -328,6 +328,21 @@ describe('VariableService', () => {
       // Variables should still have both items
       expect(service.getVariables()).toHaveLength(2);
     });
+
+    it('should use empty string when removing last variable', async () => {
+      const { service, mockSavedObjectsClient } = createService(
+        [makeCustomVariable()],
+        'dashboard-123'
+      );
+      await service.removeVariable('custom-1');
+
+      expect(service.getVariables()).toHaveLength(0);
+      // Verify that empty string (not undefined) was passed to savedObjectsClient.update
+      // This ensures the variablesJSON field is cleared from the saved object
+      expect(mockSavedObjectsClient.update).toHaveBeenCalledWith('dashboard', 'dashboard-123', {
+        variablesJSON: '',
+      });
+    });
   });
 
   describe('updateVariableValue', () => {
