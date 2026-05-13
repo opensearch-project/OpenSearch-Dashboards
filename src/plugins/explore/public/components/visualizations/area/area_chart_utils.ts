@@ -4,7 +4,6 @@
  */
 
 import { LineSeriesOption } from 'echarts';
-import { TimeUnit } from '../types';
 import { getSeriesDisplayName } from '../utils/series';
 import { AreaChartStyle } from './area_vis_config';
 import { BaseChartStyle, PipelineFn } from '../utils/echarts_spec';
@@ -30,25 +29,6 @@ export const replaceNullWithZero = (
     });
     return newRow;
   });
-};
-
-export const transformIntervalsToTickCount = (interval: TimeUnit | undefined) => {
-  switch (interval) {
-    case TimeUnit.YEAR:
-      return 'year';
-    case TimeUnit.MONTH:
-      return 'month';
-    case TimeUnit.DATE:
-      return 'day';
-    case TimeUnit.HOUR:
-      return 'hour';
-    case TimeUnit.MINUTE:
-      return 'minute';
-    case TimeUnit.SECOND:
-      return 'second';
-    default:
-      return 'day';
-  }
 };
 
 /**
