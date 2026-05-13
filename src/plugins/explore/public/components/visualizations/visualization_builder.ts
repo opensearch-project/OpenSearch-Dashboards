@@ -291,8 +291,15 @@ export class VisualizationBuilder {
       numericalColumns,
       categoricalColumns,
       dateColumns,
+      unknownColumns,
     } = normalizeResultRows(rows, schema);
-    this.data$.next({ transformedData, numericalColumns, categoricalColumns, dateColumns });
+    this.data$.next({
+      transformedData,
+      numericalColumns,
+      categoricalColumns,
+      dateColumns,
+      unknownColumns,
+    });
   }
 
   updateStyles(styles?: Partial<StyleOptions>) {
