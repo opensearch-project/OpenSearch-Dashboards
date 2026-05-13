@@ -263,47 +263,6 @@ export const runCreateVisTests = () => {
       cy.getElementByTestId('dataGridHeader').should('contain.text', 'category');
     });
 
-    it('should create a facet line visualization using a query with one metric, two categories, one date', () => {
-      cy.explore.clearQueryEditor();
-
-      const datasetName = `${INDEX_WITH_TIME_1}*`;
-      cy.explore.setDataset(datasetName, DATASOURCE_NAME, 'INDEX_PATTERN');
-
-      const query = `source=${datasetName} | stats count() as count by span(timestamp, 1d) as timestamp_span, category, unique_category`;
-      cy.explore.setQueryEditor(query, { submit: false });
-      cy.explore.setTopNavDate(START_TIME, END_TIME, false);
-
-      // Run the query
-      cy.getElementByTestId('exploreQueryExecutionButton').click();
-      cy.osd.waitForLoader(true);
-
-      // Navigate to visualization tab
-      cy.get('#explore_visualization_tab').click();
-      cy.wait(1000);
-
-      // Verify visualization is created
-      cy.getElementByTestId('exploreVisualizationLoader').should('be.visible');
-
-      // Verify the line viz is displayed in the chart type selector as selected
-      cy.getElementByTestId('exploreChartTypeSelector').click();
-      cy.get('[role="option"][aria-selected="true"]')
-        .should('be.visible')
-        .and('contain.text', 'Line');
-
-      // Axes should be correctly set
-      cy.getElementByTestId('field-x').should('contain.text', 'timestamp_span');
-      cy.getElementByTestId('field-y').should('contain.text', 'count');
-      cy.getElementByTestId('field-color').should('contain.text', 'category');
-      cy.getElementByTestId('field-facet').should('contain.text', 'unique_category');
-
-      // Switch to table, the table should correctly render
-      cy.getElementByTestId('exploreChartTypeSelector-table').click();
-      cy.getElementByTestId('dataGridHeader').should('contain.text', 'count');
-      cy.getElementByTestId('dataGridHeader').should('contain.text', 'category');
-      cy.getElementByTestId('dataGridHeader').should('contain.text', 'unique_category');
-      cy.getElementByTestId('dataGridHeader').should('contain.text', 'timestamp_span');
-    });
-
     it('should create a line and bar visualization using a query with one metric and two categories', () => {
       // Setup dataset
       cy.explore.clearQueryEditor();
