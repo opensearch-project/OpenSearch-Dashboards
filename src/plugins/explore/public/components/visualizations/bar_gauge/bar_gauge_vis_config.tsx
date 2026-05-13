@@ -82,10 +82,7 @@ export const createBarGaugeConfig = (): VisualizationType<'bar_gauge'> => ({
           const gaugeData = aggregated.map((row) => {
             return {
               category: String(row[categoryField] ?? '-') || '-',
-              value:
-                row[valueField] !== undefined && row[valueField] !== null
-                  ? Number(row[valueField])
-                  : null,
+              value: row[valueField] !== null ? row[valueField] : null,
             };
           });
 

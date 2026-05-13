@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { Threshold } from '../types';
 import { BarGaugeChartStyle } from './bar_gauge_vis_config';
 import { getColors } from '../theme/default_colors';
@@ -137,7 +137,11 @@ export const BarGaugeItem: React.FC<BarGaugeItemProps> = ({
     </div>
   );
 
-  const categoryLabel = <div className="bar-gauge-label">{category}</div>;
+  const categoryLabel = (
+    <EuiToolTip position="bottom" content={category}>
+      <div className="bar-gauge-label">{category} </div>
+    </EuiToolTip>
+  );
 
   const renderVertical = () => {
     return (
