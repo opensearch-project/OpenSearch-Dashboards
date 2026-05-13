@@ -46,43 +46,17 @@ function stripTailwindDeps() {
 }
 stripTailwindDeps.postcss = true;
 
-/**
- * Removes @layer wrappers from Tailwind v4 output.
- *
- * Layered rules always lose to unlayered ones. Since OSD's existing styles
- * (EUI, etc.) are unlayered, Tailwind utilities inside @layer get overridden.
- * Only runs when @tailwindcss/postcss processed the file.
- *  - Removes @layer base (Tailwind reset conflicts with OSD)
- *  - Unwraps @layer theme / utilities (keeps content, drops wrapper)
- *  - Keeps @layer properties (@property declarations are fine in layers)
- */
-function stripCssLayers() {
-  return {
-    postcssPlugin: 'postcss-strip-css-layers',
-    OnceExit(root, { result }) {
-      const tailwindRan = result.messages.some((msg) => msg.plugin === '@tailwindcss/postcss');
-      if (!tailwindRan) return;
-
-      root.walkAtRules('layer', (rule) => {
-        const name = rule.params.trim();
-        if (name === 'base' || name === 'components' || name.includes(',')) {
-          rule.remove();
-        } else if (name === 'theme' || name === 'utilities') {
-          rule.replaceWith(rule.nodes);
-        }
-      });
-    },
-  };
-}
-stripCssLayers.postcss = true;
-
 module.exports = {
   plugins: [
     /*require('autoprefixer')()*/
-    // Safe to include unconditionally. Bails out for files without Tailwind directives.
+    // Plugins should import "tailwindcss/theme" + "tailwindcss/utilities" rather
+    // than the full "tailwindcss" entry. The full entry wraps utilities in
+    // @layer base/utilities, which lose specificity to OSD's unlayered EUI styles
+    // and forces a fragile postcss post-process to unwrap them. The modular
+    // imports emit unlayered utilities directly and skip preflight.
+    // Postcss is safe to include unconditionally. Bails out for files without Tailwind directives.
     // eslint-disable-next-line import/no-unresolved -- package uses `exports` field; resolver lacks support
     require('@tailwindcss/postcss')(),
-    stripCssLayers(),
     stripTailwindDeps(),
   ],
 };
