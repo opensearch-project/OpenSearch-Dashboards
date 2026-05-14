@@ -53,7 +53,9 @@ export default function (this: LoaderContext<ThemeLoaderOptions>) {
     if (themeTags.includes(tag)) {
       return `
   case '${tag}':
-    return require(${JSON.stringify(this.utils.contextify(this.context, `${this.resourcePath}?${tag}`))});`;
+    return require(${JSON.stringify(
+      this.utils.contextify(this.context, `${this.resourcePath}?${tag}`)
+    )});`;
     }
 
     const fallback = themeTags
@@ -65,7 +67,9 @@ export default function (this: LoaderContext<ThemeLoaderOptions>) {
     return `
   case '${tag}':
     console.error(new Error(${JSON.stringify(message)}));
-    return require(${JSON.stringify(this.utils.contextify(this.context, `${this.resourcePath}?${fallback}`))})`;
+    return require(${JSON.stringify(
+      this.utils.contextify(this.context, `${this.resourcePath}?${fallback}`)
+    )})`;
   }).join('\n');
 
   return `
