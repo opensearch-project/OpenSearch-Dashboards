@@ -105,7 +105,7 @@ describe('WorkspaceCollaboratorTable', () => {
   it('should fetch names when displayedCollaboratorTypes have identitySource', async () => {
     const httpPostMock = mockCoreStart.http.post as jest.Mock;
     httpPostMock.mockResolvedValue([
-      { id: 'admin', name: 'Admin User' },
+      { id: 'admin', name: 'Admin User', alias: 'admin_alias' },
       { id: 'group', name: 'Dev Group' },
     ]);
 
@@ -146,7 +146,9 @@ describe('WorkspaceCollaboratorTable', () => {
     });
 
     await waitFor(() => {
-      expect(getByText('Admin User')).toBeInTheDocument();
+      // User with alias shows "Name (alias)" format
+      expect(getByText('Admin User (admin_alias)')).toBeInTheDocument();
+      // Group without alias shows name only
       expect(getByText('Dev Group')).toBeInTheDocument();
     });
   });

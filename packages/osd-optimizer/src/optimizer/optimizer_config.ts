@@ -31,15 +31,7 @@
 import Path from 'path';
 import Os from 'os';
 
-import {
-  Bundle,
-  WorkerConfig,
-  CacheableWorkerConfig,
-  ThemeTag,
-  ThemeTags,
-  parseThemeTags,
-  BundleRef,
-} from '../common';
+import { Bundle, WorkerConfig, ThemeTag, ThemeTags, parseThemeTags, BundleRef } from '../common';
 
 import {
   findOpenSearchDashboardsPlatformPlugins,
@@ -62,16 +54,6 @@ function pickMaxWorkerCount(dist: boolean) {
   const maxWorkers = dist ? cpuCount - 1 : Math.ceil(cpuCount / 3);
   // ensure we always have at least two workers
   return Math.max(maxWorkers, 2);
-}
-
-function omit<T, K extends keyof T>(obj: T, keys: K[]): Omit<T, K> {
-  const result: any = {};
-  for (const [key, value] of Object.entries(obj as Record<string, any>)) {
-    if (!keys.includes(key as K)) {
-      result[key] = value;
-    }
-  }
-  return result as Omit<T, K>;
 }
 
 interface Options {
@@ -285,26 +267,15 @@ export class OptimizerConfig {
     public readonly bundleRefs: BundleRef[]
   ) {}
 
-  getWorkerConfig(optimizerCacheKey: unknown): WorkerConfig {
+  getWorkerConfig(): WorkerConfig {
     return {
       cache: this.cache,
       dist: this.dist,
       profileWebpack: this.profileWebpack,
       repoRoot: this.repoRoot,
       watch: this.watch,
-      optimizerCacheKey,
       themeTags: this.themeTags,
       browserslistEnv: this.dist ? 'production' : process.env.BROWSERSLIST_ENV || 'dev',
     };
-  }
-
-  getCacheableWorkerConfig(): CacheableWorkerConfig {
-    return omit(this.getWorkerConfig('♻'), [
-      // these config options don't change the output of the bundles, so
-      // should not invalidate caches when they change
-      'watch',
-      'profileWebpack',
-      'cache',
-    ]);
   }
 }
