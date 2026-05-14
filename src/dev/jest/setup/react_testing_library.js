@@ -45,11 +45,17 @@ configure({ testIdAttribute: 'data-test-subj', asyncUtilTimeout: 4500 });
 // React 18 concurrent mode fix: Ensure all pending React work is flushed before cleanup
 // This prevents "Cannot read properties of null (reading 'body')" errors when React
 // tries to commit async updates after jsdom has cleaned up the document
+//
+// We capture the real setTimeout before any test can replace it with fake timers.
+// Jest 29's modern fake timers (@sinonjs/fake-timers) intercept setTimeout, which would
+// cause the flush promise to never resolve if a test left fake timers active.
+const realSetTimeout = global.setTimeout;
+
 afterEach(async () => {
   // Flush all pending React work using act()
   await act(async () => {
     // Allow any pending timers and promises to resolve
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await new Promise((resolve) => realSetTimeout(resolve, 0));
   });
   // Then run the standard cleanup
   cleanup();

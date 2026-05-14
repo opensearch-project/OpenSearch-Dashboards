@@ -83,27 +83,32 @@ describe('getOptimizerCacheKey()', () => {
     });
 
     await expect(getOptimizerCacheKey(config)).resolves.toMatchInlineSnapshot(`
-            Object {
-              "bootstrap": "<bootstrap cache>",
-              "deletedPaths": Array [
-                "/foo/bar/c",
-              ],
-              "fileHashes": Object {
-                "/foo/bar/a": "<content hash>",
-                "/foo/bar/b": "<content hash>",
-              },
-              "lastCommit": "<last commit sha>",
-              "workerConfig": Object {
-                "browserslistEnv": "dev",
-                "dist": false,
-                "optimizerCacheKey": "♻",
-                "repoRoot": <absolute path>,
-                "themeTags": Array [
-                  "v8light",
-                ],
-              },
-            }
-          `);
+      Object {
+        "bootstrap": "<bootstrap cache>",
+        "deletedPaths": Array [
+          "/foo/bar/c",
+        ],
+        "fileHashes": Object {
+          "/foo/bar/a": "<content hash>",
+          "/foo/bar/b": "<content hash>",
+        },
+        "lastCommit": "<last commit sha>",
+        "workerConfig": Object {
+          "browserslistEnv": "dev",
+          "dist": false,
+          "optimizerCacheKey": "♻",
+          "repoRoot": <absolute path>,
+          "themeTags": Array [
+            "v7dark",
+            "v7light",
+            "v8dark",
+            "v8light",
+            "v9dark",
+            "v9light",
+          ],
+        },
+      }
+    `);
 
     mockFSReadFileAsync.mockRestore();
   });

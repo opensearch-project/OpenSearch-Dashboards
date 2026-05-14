@@ -384,11 +384,11 @@ describe('PluginsService', () => {
         await pluginsService.setup(mockSetupDeps);
 
         const promise = pluginsService.start(mockStartDeps);
-        jest.runAllTimers();
-
-        await expect(promise).rejects.toMatchInlineSnapshot(
+        const rejection = expect(promise).rejects.toMatchInlineSnapshot(
           `[Error: Start lifecycle of "pluginA" plugin wasn't completed in 30sec. Consider disabling the plugin and re-start.]`
         );
+        await jest.advanceTimersByTimeAsync(30_000);
+        await rejection;
       });
     });
   });

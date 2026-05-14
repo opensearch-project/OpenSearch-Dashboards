@@ -300,7 +300,7 @@ describe('usePageContext', () => {
       expect(mockUseDynamicContext).toHaveBeenCalled();
     });
 
-    it('should handle pushState calls', () => {
+    it('should handle pushState calls', async () => {
       renderHook(() => usePageContext());
 
       // Clear initial call
@@ -309,13 +309,12 @@ describe('usePageContext', () => {
       // Simulate pushState call
       window.history.pushState({}, '', '/new-path');
 
-      // Use setTimeout to wait for microtask
-      setTimeout(() => {
-        expect(mockUseDynamicContext).toHaveBeenCalled();
-      }, 0);
+      // Wait for microtask/async handler
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockUseDynamicContext).toHaveBeenCalled();
     });
 
-    it('should handle replaceState calls', () => {
+    it('should handle replaceState calls', async () => {
       renderHook(() => usePageContext());
 
       // Clear initial call
@@ -324,10 +323,9 @@ describe('usePageContext', () => {
       // Simulate replaceState call
       window.history.replaceState({}, '', '/new-path');
 
-      // Use setTimeout to wait for microtask
-      setTimeout(() => {
-        expect(mockUseDynamicContext).toHaveBeenCalled();
-      }, 0);
+      // Wait for microtask/async handler
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockUseDynamicContext).toHaveBeenCalled();
     });
   });
 

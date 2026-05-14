@@ -43,7 +43,17 @@ jest.mock('@osd/i18n', () => {
   };
 });
 
-const i18nLoaderMock = jest.mocked(i18nLoader, true);
+// Axios http adapter is unavailable in jsdom 20+ (exposes browser APIs that cause
+// Axios to skip the Node.js http adapter). Mock for URL validation tests.
+jest.mock('axios', () => ({
+  get: jest.fn((url: string) =>
+    url.startsWith('https://')
+      ? Promise.resolve({ status: 200 })
+      : Promise.reject(new Error('Not found'))
+  ),
+}));
+
+const i18nLoaderMock = jest.mocked(i18nLoader, { shallow: true });
 
 import { httpServerMock } from '../http/http_server.mocks';
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';

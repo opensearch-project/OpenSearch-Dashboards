@@ -116,7 +116,7 @@ describe('AssociatedObjectsTable', () => {
   it.skip('should call the correct action when clicking on the "Discover" button', async () => {
     // TODO: need to enable MDS
     const { uiSettings } = coreMock.createSetup();
-    spyOn(utils, 'getUiSettings').and.returnValue(uiSettings);
+    jest.spyOn(utils, 'getUiSettings').mockReturnValue(uiSettings);
 
     renderComponent(props);
 

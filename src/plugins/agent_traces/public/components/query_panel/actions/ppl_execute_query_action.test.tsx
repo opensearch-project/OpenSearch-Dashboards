@@ -230,6 +230,10 @@ describe('usePPLExecuteQueryAction', () => {
   });
 
   it('should handle query execution timeout', async () => {
+    // This test needs modern fake timers to fake Date.now() for the polling timeout check
+    jest.useRealTimers();
+    jest.useFakeTimers();
+
     const handler = renderAndGetHandler();
     const args = { query: 'source=logs | head 10' };
 
@@ -245,8 +249,12 @@ describe('usePPLExecuteQueryAction', () => {
     });
 
     const resultPromise = handler(args);
-    jest.advanceTimersByTime(PPL_QUERY_EXECUTION_TIMEOUT_MS + 1000);
+    await jest.advanceTimersByTimeAsync(PPL_QUERY_EXECUTION_TIMEOUT_MS + 1000);
     const result = await resultPromise;
+
+    // Restore legacy fake timers for subsequent tests
+    jest.useRealTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
 
     expect(result).toEqual({
       success: false,

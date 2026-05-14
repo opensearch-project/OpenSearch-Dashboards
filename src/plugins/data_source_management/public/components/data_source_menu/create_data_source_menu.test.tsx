@@ -52,11 +52,11 @@ describe('create data source menu', () => {
       onManageDataSource: jest.fn(),
     };
 
-    spyOn(utils, 'getApplication').and.returnValue({ id: 'test2' });
-    spyOn(utils, 'getUiSettings').and.returnValue(uiSettings);
-    spyOn(utils, 'getWorkspaces').and.returnValue(workspaces);
-    spyOn(utils, 'getHideLocalCluster').and.returnValue({ enabled: true });
-    spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
+    jest.spyOn(utils, 'getApplication').mockReturnValue({ id: 'test2' });
+    jest.spyOn(utils, 'getUiSettings').mockReturnValue(uiSettings);
+    jest.spyOn(utils, 'getWorkspaces').mockReturnValue(workspaces);
+    jest.spyOn(utils, 'getHideLocalCluster').mockReturnValue({ enabled: true });
+    jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
 
     const TestComponent = createDataSourceMenu<DataSourceSelectableConfig>();
 
@@ -86,11 +86,11 @@ describe('create data source menu', () => {
       application,
       onManageDataSource: jest.fn(),
     };
-    spyOn(utils, 'getApplication').and.returnValue({ id: 'test2' });
-    spyOn(utils, 'getUiSettings').and.returnValue(uiSettings);
-    spyOn(utils, 'getWorkspaces').and.returnValue(workspaces);
-    spyOn(utils, 'getHideLocalCluster').and.returnValue({ enabled: true });
-    spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
+    jest.spyOn(utils, 'getApplication').mockReturnValue({ id: 'test2' });
+    jest.spyOn(utils, 'getUiSettings').mockReturnValue(uiSettings);
+    jest.spyOn(utils, 'getWorkspaces').mockReturnValue(workspaces);
+    jest.spyOn(utils, 'getHideLocalCluster').mockReturnValue({ enabled: true });
+    jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
     const TestComponent = createDataSourceMenu<DataSourceSelectableConfig>();
     await act(async () => {
       component = render(<TestComponent {...props} />);
@@ -160,11 +160,11 @@ describe('when setMenuMountPoint is provided', () => {
       onManageDataSource: jest.fn(),
     };
 
-    spyOn(utils, 'getApplication').and.returnValue({ id: 'test2' });
-    spyOn(utils, 'getUiSettings').and.returnValue(uiSettings);
-    spyOn(utils, 'getWorkspaces').and.returnValue(workspaces);
-    spyOn(utils, 'getHideLocalCluster').and.returnValue({ enabled: true });
-    spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
+    jest.spyOn(utils, 'getApplication').mockReturnValue({ id: 'test2' });
+    jest.spyOn(utils, 'getUiSettings').mockReturnValue(uiSettings);
+    jest.spyOn(utils, 'getWorkspaces').mockReturnValue(workspaces);
+    jest.spyOn(utils, 'getHideLocalCluster').mockReturnValue({ enabled: true });
+    jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
 
     const TestComponent = createDataSourceMenu<DataSourceSelectableConfig>();
     const component = render(<TestComponent {...props} />);

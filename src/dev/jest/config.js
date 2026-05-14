@@ -187,12 +187,10 @@ export default {
     '<rootDir>/packages/osd-pm/dist/',
     `${RESERVED_DIR_JEST_INTEGRATION_TESTS}/`,
   ],
-  // angular is not compatible with the default circus runner
-  testRunner: 'jest-jasmine2',
   transform: {
     '^.+\\.(js|tsx?)$': '<rootDir>/src/dev/jest/babel_transform.js',
-    '^.+\\.txt?$': 'jest-raw-loader',
-    '^.+\\.html?$': 'jest-raw-loader',
+    '^.+\\.txt?$': '<rootDir>/src/dev/jest/raw_loader_transformer.js',
+    '^.+\\.html?$': '<rootDir>/src/dev/jest/raw_loader_transformer.js',
   },
   transformIgnorePatterns: [
     // ignore all node_modules except those which require babel transforms to handle dynamic import()
@@ -204,6 +202,12 @@ export default {
     '<rootDir>/src/plugins/opensearch_dashboards_react/public/util/test_helpers/react_mount_serializer.ts',
     '<rootDir>/node_modules/enzyme-to-json/serializer',
   ],
+  // Retain Jest 28 snapshot defaults; Jest 29 flipped escapeString and printBasicPrototype to false,
+  // which would invalidate existing snapshots. See https://jestjs.io/docs/29.0/upgrading-to-jest29
+  snapshotFormat: {
+    escapeString: true,
+    printBasicPrototype: true,
+  },
   reporters: ['default', '<rootDir>/src/dev/jest/junit_reporter.js'],
   globals: {
     Uint8Array: Uint8Array,
