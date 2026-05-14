@@ -28,14 +28,12 @@
  * under the License.
  */
 
-import * as Rx from 'rxjs';
-import { map } from 'rxjs/operators';
 import ActualWatchpack from 'watchpack';
 import { lastValueFrom } from '@osd/std';
+import { map } from 'rxjs/operators';
 
 import { Bundle, ascending } from '../common';
 import { watchBundlesForChanges$ } from '../optimizer/watch_bundles_for_changes';
-import { BundleCacheEvent } from '../optimizer';
 
 jest.mock('fs');
 jest.mock('watchpack');
@@ -54,9 +52,7 @@ const makeTestBundle = (id: string) => {
   });
 
   bundle.cache.set({
-    cacheKey: 'abc',
     moduleCount: 1,
-    optimizerCacheKey: 'abc',
     files: [bundleEntryPath(bundle)],
   });
 
@@ -70,15 +66,6 @@ const BOX_BUNDLE = makeTestBundle('box');
 const CAR_BUNDLE = makeTestBundle('car');
 const BUNDLES = [FOO_BUNDLE, BAR_BUNDLE, BAZ_BUNDLE, BOX_BUNDLE, CAR_BUNDLE];
 
-const bundleCacheEvent$ = Rx.from(BUNDLES).pipe(
-  map(
-    (bundle): BundleCacheEvent => ({
-      type: 'bundle cached',
-      bundle,
-    })
-  )
-);
-
 beforeEach(async () => {
   jest.useFakeTimers();
 });
@@ -91,7 +78,7 @@ it('notifies of changes and completes once all bundles have changed', async () =
   expect.assertions(18);
 
   const promise = lastValueFrom(
-    watchBundlesForChanges$(bundleCacheEvent$, Date.now()).pipe(
+    watchBundlesForChanges$(BUNDLES, Date.now()).pipe(
       map((event, i) => {
         // each time we trigger a change event we get a 'changed detected' event
         if (i === 0 || i === 2 || i === 4 || i === 6) {
