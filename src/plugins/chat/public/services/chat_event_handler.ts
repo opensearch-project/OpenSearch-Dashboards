@@ -68,6 +68,7 @@ export class ChatEventHandler {
 
   // Telemetry tracking
   private interactionStartTime: number | null = null;
+  private runErrorOccurred = false;
 
   constructor(config: ChatEventHandlerConfig) {
     this.assistantActionService = config.assistantActionService;
@@ -140,6 +141,7 @@ export class ChatEventHandler {
 
     // Start timing for telemetry
     this.interactionStartTime = Date.now();
+    this.runErrorOccurred = false;
   }
 
   /**
@@ -154,9 +156,8 @@ export class ChatEventHandler {
       (this.chatService as any).resetConnection();
     }
 
-    // Record success telemetry
-    if (this.telemetryRecorder) {
-      // Record successful interaction event
+    // Record success telemetry only if no error occurred during this run
+    if (this.telemetryRecorder && !this.runErrorOccurred) {
       this.telemetryRecorder.recordEvent({
         name: 'chat_interaction_success',
         data: {
@@ -514,6 +515,7 @@ export class ChatEventHandler {
    * Handle run errors and record failure telemetry
    */
   private handleRunError(event: any): void {
+    this.runErrorOccurred = true;
     const errorMessage: SystemMessage = {
       id: `error-${Date.now()}`,
       role: 'system',
