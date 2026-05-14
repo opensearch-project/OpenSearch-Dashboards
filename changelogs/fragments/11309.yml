@@ -1,0 +1,2 @@
+fix:
+- Fix heatmap visual map overlap ([#11309](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11309))
