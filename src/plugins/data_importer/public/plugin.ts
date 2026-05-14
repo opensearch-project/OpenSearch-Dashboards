@@ -60,6 +60,7 @@ export class DataImporterPlugin
         id: PLUGIN_ID,
         category: DEFAULT_APP_CATEGORIES.manageData,
         order: 450,
+        euiIconType: 'importAction',
       },
     ]);
 

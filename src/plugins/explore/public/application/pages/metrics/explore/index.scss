@@ -1,0 +1,17 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.metricsExploreTab {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  padding: $euiSizeS;
+}
+
+.metricsExploreDetail__queryDivider {
+  border-left: $euiBorderThin;
+  padding-left: $euiSizeS;
+  margin-left: $euiSizeXS;
+}

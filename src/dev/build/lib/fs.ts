@@ -36,6 +36,8 @@ import { resolve, dirname, isAbsolute, sep } from 'path';
 import { createGunzip } from 'zlib';
 import { inspect, promisify } from 'util';
 
+import { spawn, spawnSync } from 'child_process';
+
 import archiver from 'archiver';
 import * as StreamZip from 'node-stream-zip';
 import vfs from 'vinyl-fs';
@@ -275,6 +277,31 @@ export async function getFileHash(path: string, algo: string) {
   return hash.digest('hex');
 }
 
+// Compute multiple digests from a single read-pass over `path`. Avoids the 2× disk I/O
+// that `await getFileHash(p,'sha1'); await getFileHash(p,'sha256')` would cost per file.
+export async function getFileHashes<A extends string>(
+  path: string,
+  algos: readonly A[]
+): Promise<Record<A, string>> {
+  assertAbsolute(path);
+
+  const hashes = algos.map((algo) => createHash(algo));
+  const readStream = fs.createReadStream(path);
+  await new Promise((res, rej) => {
+    readStream
+      // @ts-expect-error TS2345 TODO(ts-upgrade): fixme — matches getFileHash pattern
+      .on('data', (chunk) => hashes.forEach((h) => h.update(chunk)))
+      .on('error', rej)
+      .on('end', res);
+  });
+
+  const out = {} as Record<A, string>;
+  algos.forEach((algo, i) => {
+    out[algo] = hashes[i].digest('hex');
+  });
+  return out;
+}
+
 export async function untar(source: string, destination: string, extractOptions = {}) {
   assertAbsolute(source);
   assertAbsolute(destination);
@@ -342,14 +369,148 @@ interface CompressTarOptions {
   source: string;
   destination: string;
   archiverOptions?: archiver.TarOptions & archiver.CoreOptions;
+  log?: ToolingLog;
 }
+
+let pigzAvailable: boolean | undefined;
+const probePigz = () => spawnSync('pigz', ['--version']).status === 0;
+export const hasPigz = () => {
+  if (process.env.OSD_BUILD_NO_PIGZ === '1') return false;
+  // Respect a test-side override first; otherwise cache the probe for the process lifetime.
+  if (process.env.OSD_BUILD_FORCE_PIGZ_PROBE === '1') return probePigz();
+  if (pigzAvailable === undefined) pigzAvailable = probePigz();
+  return pigzAvailable;
+};
+// Stall timeout: if pigz neither emits output nor exits for this long, fail loudly
+// so operators see a useful error instead of a hung build. Read per-call so tests
+// (and operators) can override via OSD_BUILD_PIGZ_STALL_MS without re-importing.
+const getPigzStallMs = () => Number(process.env.OSD_BUILD_PIGZ_STALL_MS) || 5 * 60 * 1000;
+
 export async function compressTar({
   source,
   destination,
   archiverOptions,
   createRootDirectory,
+  log,
 }: CompressTarOptions) {
+  // Fail-fast if source is missing so operators get a clean ENOENT instead of a silently
+  // empty archive (archiver's directory walker tolerates missing dirs).
+  await statAsync(source);
+  const useGzip = !!archiverOptions?.gzip;
+  const usingPigz = useGzip && hasPigz();
+  log?.debug(
+    `compressTar: ${destination} — ${useGzip ? (usingPigz ? 'pigz' : 'Node zlib') : 'no gzip'}`
+  );
   const output = fs.createWriteStream(destination);
+
+  // When gzipping, prefer pigz (parallel gzip) if available — output is standard gzip,
+  // readable by any gunzip. Set OSD_BUILD_NO_PIGZ=1 to force pure Node path.
+  if (usingPigz) {
+    const level = archiverOptions?.gzipOptions?.level ?? 6;
+    const threads = Number(process.env.OSD_BUILD_PIGZ_THREADS);
+    const args = [`-${level}`, '-c'];
+    if (Number.isInteger(threads) && threads >= 1) args.unshift('-p', String(threads));
+
+    const pigz = spawn('pigz', args, { stdio: ['pipe', 'pipe', 'pipe'] });
+    const archive = archiver('tar', { ...archiverOptions, gzip: false });
+    const name = createRootDirectory ? source.split(sep).slice(-1)[0] : false;
+
+    let fileCount = 0;
+    archive.on('entry', (entry) => {
+      if (entry.stats?.isFile()) fileCount += 1;
+    });
+
+    const stderrChunks: Uint8Array[] = [];
+    // Cap stderr accumulation so a pathologically-chatty pigz can't OOM the build.
+    let stderrBytes = 0;
+    const STDERR_LIMIT = 64 * 1024;
+    pigz.stderr.on('data', (chunk) => {
+      if (stderrBytes >= STDERR_LIMIT) return;
+      stderrBytes += chunk.length;
+      stderrChunks.push(chunk);
+    });
+
+    const done = new Promise<void>((resolveDone, reject) => {
+      let settled = false;
+      let stallTimer: NodeJS.Timeout | undefined;
+      const clearStall = () => {
+        if (stallTimer) clearTimeout(stallTimer);
+        stallTimer = undefined;
+      };
+      const fail = (err: Error) => {
+        if (settled) return;
+        settled = true;
+        clearStall();
+        // Archiver's documented cancel: abort() stops the entry walker and emits 'close'.
+        try {
+          archive.abort();
+        } catch {
+          /* noop */
+        }
+        try {
+          pigz.kill('SIGTERM');
+        } catch {
+          /* noop */
+        }
+        output.destroy(err);
+        reject(err);
+      };
+      const armStall = () => {
+        clearStall();
+        const stallMs = getPigzStallMs();
+        stallTimer = setTimeout(() => {
+          fail(
+            new Error(
+              `pigz stalled — no output for ${stallMs} ms (set OSD_BUILD_NO_PIGZ=1 to bypass)`
+            )
+          );
+        }, stallMs);
+      };
+
+      archive.on('error', (e) => fail(e));
+      pigz.stdin.on('error', (e) => {
+        // EPIPE means pigz closed its stdin (e.g. it died); the pigz 'exit' handler
+        // will produce the useful error. Swallow here to avoid a generic EPIPE.
+        if ((e as NodeJS.ErrnoException).code !== 'EPIPE') fail(e);
+      });
+      pigz.stdout.on('error', (e) => fail(e));
+      pigz.on('error', (e) => fail(e));
+      output.on('error', (e) => fail(e));
+
+      // Any forward progress (new bytes flushed to the archive) resets the stall timer.
+      output.on('drain', armStall);
+      pigz.stdout.on('data', armStall);
+
+      pigz.on('exit', (code, signal) => {
+        if (code === 0) return; // wait for output 'close'
+        const detail = Buffer.concat(stderrChunks).toString('utf8').trim();
+        const reason = signal ? `signal ${signal}` : `code ${code}`;
+        fail(new Error(`pigz exited with ${reason}${detail ? `: ${detail}` : ''}`));
+      });
+
+      output.on('close', () => {
+        if (settled) return;
+        settled = true;
+        clearStall();
+        resolveDone();
+      });
+      armStall();
+    });
+
+    archive.pipe(pigz.stdin);
+    pigz.stdout.pipe(output);
+
+    // Start walking the source tree. finalize() resolves when archiver has flushed
+    // all entries into pigz.stdin, but the pipeline isn't done until output 'close'
+    // fires (see `done` above). If finalize rejects with anything archiver hasn't
+    // already emitted as 'error', re-emit so the fail() path still sees it.
+    archive.directory(source, name);
+    archive.finalize().catch((e) => archive.emit('error', e));
+
+    await done;
+    return fileCount;
+  }
+
   const archive = archiver('tar', archiverOptions);
   const name = createRootDirectory ? source.split(sep).slice(-1)[0] : false;
 
@@ -379,6 +540,10 @@ export async function compressZip({
   archiverOptions,
   createRootDirectory,
 }: CompressZipOptions) {
+  // Match compressTar: fail-fast on missing source for a clean ENOENT instead of a
+  // silently empty archive. (No pigz-style parallel zip exists, so the rest of this
+  // function is intentionally untouched.)
+  await statAsync(source);
   const output = fs.createWriteStream(destination);
   const archive = archiver('zip', archiverOptions);
   const name = createRootDirectory ? source.split(sep).slice(-1)[0] : false;

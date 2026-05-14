@@ -48,4 +48,44 @@ describe('DevToolsPlugin', () => {
       expect(deps.uiActions.registerTrigger).not.toHaveBeenCalled();
     });
   });
+
+  describe('start', () => {
+    it('should register icon side nav footer when icon side nav is enabled', () => {
+      const plugin = new DevToolsPlugin();
+      const setupCore: CoreSetup = coreMock.createSetup();
+      const setupDeps: DevToolsSetupDependencies = {
+        urlForwarding: urlForwardingPluginMock.createSetupContract(),
+        uiActions: uiActionsPluginMock.createSetupContract(),
+      };
+      plugin.setup(setupCore, setupDeps);
+
+      const startCore = coreMock.createStart();
+      (startCore.chrome.navGroup.getNavGroupEnabled as jest.Mock).mockReturnValue(true);
+      (startCore.chrome.getIsIconSideNavEnabled as jest.Mock).mockReturnValue(true);
+
+      const startDeps = { uiActions: uiActionsPluginMock.createStartContract() };
+      plugin.start(startCore, startDeps);
+
+      expect(startCore.chrome.navControls.registerIconSideNavFooter).toHaveBeenCalled();
+    });
+
+    it('should not register icon side nav footer when icon side nav is disabled', () => {
+      const plugin = new DevToolsPlugin();
+      const setupCore: CoreSetup = coreMock.createSetup();
+      const setupDeps: DevToolsSetupDependencies = {
+        urlForwarding: urlForwardingPluginMock.createSetupContract(),
+        uiActions: uiActionsPluginMock.createSetupContract(),
+      };
+      plugin.setup(setupCore, setupDeps);
+
+      const startCore = coreMock.createStart();
+      (startCore.chrome.navGroup.getNavGroupEnabled as jest.Mock).mockReturnValue(true);
+      (startCore.chrome.getIsIconSideNavEnabled as jest.Mock).mockReturnValue(false);
+
+      const startDeps = { uiActions: uiActionsPluginMock.createStartContract() };
+      plugin.start(startCore, startDeps);
+
+      expect(startCore.chrome.navControls.registerIconSideNavFooter).not.toHaveBeenCalled();
+    });
+  });
 });

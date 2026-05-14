@@ -47,7 +47,7 @@ type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
 type LanguageConfiguration = monaco.languages.LanguageConfiguration;
 type IEditorConstructionOptions = monaco.editor.IEditorConstructionOptions;
 
-export const DEFAULT_TRIGGER_CHARACTERS = [' ', '=', "'", '"', '`'];
+export const DEFAULT_TRIGGER_CHARACTERS = [' ', '=', "'", '"', '`', '$'];
 
 export const languageConfiguration: LanguageConfiguration = {
   autoClosingPairs: [

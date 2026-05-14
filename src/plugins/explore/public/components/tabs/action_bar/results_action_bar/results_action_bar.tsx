@@ -123,7 +123,7 @@ export const DiscoverResultsActionBar = ({
                         label={i18n.translate('explore.discover.wrapCellText', {
                           defaultMessage: 'Wrap cell text',
                         })}
-                        checked={wrapCellText}
+                        checked={wrapCellText ?? false}
                         onChange={(e) => dispatch(setWrapCellText(e.target.checked))}
                         data-test-subj="exploreWrapCellTextSwitch"
                       />

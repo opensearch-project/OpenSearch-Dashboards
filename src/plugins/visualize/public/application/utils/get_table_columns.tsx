@@ -117,12 +117,23 @@ export const getTableColumns = (
     render: (field: string, { editApp, editUrl, title, error }: VisualizationListItem) =>
       // In case an error occurs i.e. the vis has wrong type, we render the vis but without the link
       !error ? (
-        <EuiLink
-          href={editApp ? application.getUrlForApp(editApp, { path: editUrl }) : `#${editUrl}`}
-          data-test-subj={`visListingTitleLink-${title.split(' ').join('-')}`}
-        >
-          {field}
-        </EuiLink>
+        editApp ? (
+          // Use onClick for cross-app navigation to avoid page refresh
+          <EuiLink
+            onClick={() => application.navigateToApp(editApp, { path: editUrl })}
+            data-test-subj={`visListingTitleLink-${title.split(' ').join('-')}`}
+          >
+            {field}
+          </EuiLink>
+        ) : (
+          // Use href for in-app hash navigation (no page refresh)
+          <EuiLink
+            href={`#${editUrl}`}
+            data-test-subj={`visListingTitleLink-${title.split(' ').join('-')}`}
+          >
+            {field}
+          </EuiLink>
+        )
       ) : (
         field
       ),

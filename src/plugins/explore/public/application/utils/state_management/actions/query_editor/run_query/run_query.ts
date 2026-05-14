@@ -13,7 +13,7 @@ import {
   clearQueryStatusMap,
   setIsQueryEditorDirty,
 } from '../../../slices/query_editor/query_editor_slice';
-import { executeQueries } from '../../query_actions';
+import { executeQueries, shouldSkipQueryExecution } from '../../query_actions';
 import { ExploreServices } from '../../../../../../types';
 import { detectAndSetOptimalTab } from '../../detect_optimal_tab';
 
@@ -40,7 +40,10 @@ export const runQueryActionCreator = (services: ExploreServices, query?: string)
     await dispatch(detectAndSetOptimalTab({ services }));
   }
 
-  await dispatch(executeQueries({ services }));
+  const state = getState();
+  if (!shouldSkipQueryExecution(state.query)) {
+    await dispatch(executeQueries({ services }));
+  }
 
   dispatch(setQueryExecutionButtonStatus('REFRESH'));
 };

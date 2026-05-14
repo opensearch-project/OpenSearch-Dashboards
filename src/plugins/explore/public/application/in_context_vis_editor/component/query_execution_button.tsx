@@ -65,6 +65,7 @@ export const QueryExecutionButton: React.FC<QueryExecutionButtonProps> = ({
       })}
       compressed={true}
       color="primary"
+      fill={needsUpdate}
     >
       {buttonText}
     </EuiSuperUpdateButton>

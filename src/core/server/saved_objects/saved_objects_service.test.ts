@@ -68,6 +68,10 @@ describe('SavedObjectsService', () => {
       return new BehaviorSubject({
         maxImportPayloadBytes: new ByteSizeValue(0),
         maxImportExportSize: new ByteSizeValue(0),
+        storage: {
+          backend: 'opensearch',
+          sqlite: { path: ':memory:' },
+        },
       });
     });
     const config$ = new BehaviorSubject<Config>(

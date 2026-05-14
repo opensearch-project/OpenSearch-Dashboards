@@ -64,10 +64,13 @@ export function fulfillRegistrationLinksToChromeNavLinks(
   return (
     registerNavLinks
       .filter((navLink) => allExistingNavLinkId.includes(navLink.id))
-      .map((navLink) => ({
-        ...navLinks[allExistingNavLinkId.indexOf(navLink.id)],
-        ...navLink,
-      })) || []
+      .map(
+        (navLink) =>
+          ({
+            ...navLinks[allExistingNavLinkId.indexOf(navLink.id)],
+            ...navLink,
+          } as ChromeNavLink & ChromeRegistrationNavLink)
+      ) || []
   );
 }
 

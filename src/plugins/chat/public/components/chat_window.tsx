@@ -68,11 +68,10 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   const [currentRunId, setCurrentRunId] = useState<string | null>(null);
   const [pendingConfirmation, setPendingConfirmation] = useState<ConfirmationRequest | null>(null);
   const [showHistory, setShowHistory] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [restoreError, setRestoreError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const handleSendRef = useRef<typeof handleSend>();
   const currentSubscriptionRef = useRef<any>(null);
-  const loadingAbortControllerRef = useRef<AbortController | null>(null);
+  const conversationLoadAbortControllerRef = useRef<AbortController | null>(null);
   const {screenshotFeatureEnabled,isCapturing, capturePageContainer} = usePageContainerCapture();
   const [screenshotData, setScreenshotData] = useState<{pageTitle: string, createdAt: moment.Moment} & PageContainerImageData>();
   const [toolCallStates, setToolCallStates] = useState<Record<string, any>>({});
@@ -150,54 +149,9 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     };
   }, [eventHandler]);
 
-  // Extracted restoration logic to avoid duplication
-  const restoreConversationTimeline = useCallback(async () => {
-    // Create abort controller for this loading operation
-    const abortController = new AbortController();
-    loadingAbortControllerRef.current = abortController;
-
-    setIsLoading(true);
-    setRestoreError(null);
-
-    try {
-      // Check if aborted before starting
-      if (abortController.signal.aborted) return;
-
-      const events = await chatService.restoreLatestConversation();
-
-      // Check if aborted after async operation
-      if (abortController.signal.aborted) return;
-      
-      eventHandler.clearState();
-      setIsLoading(false);
-
-      if (events) {
-        for (const event of events) {
-          if (abortController.signal.aborted) return;
-          await eventHandler.handleEvent(event);
-        }
-      }
-    } catch (error: any) {
-      // Don't show error if aborted
-      if (!abortController.signal.aborted) {
-        console.error('Error restoring conversation:', error);
-        setRestoreError(error.message || 'Failed to restore conversation');
-      }
-    } finally {
-      // Only update loading state if not aborted
-      if (!abortController.signal.aborted) {
-        setIsLoading(false);
-      }
-      // Clear the abort controller reference
-      if (loadingAbortControllerRef.current === abortController) {
-        loadingAbortControllerRef.current = null;
-      }
-    }
-  }, [chatService, eventHandler]);
-
-  // Restore timeline from latest conversation on component mount
+  // Initialize with fresh conversation on mount
   useMount(() => {
-    restoreConversationTimeline();
+    chatService.newThread();
   });
 
   // Save conversation to history whenever timeline changes
@@ -207,7 +161,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     }
   }, [timeline, chatService, isLoading]);
 
-  // Clear thread ID so next mount can restore the latest conversation
+  // Clear thread ID on unmount to start fresh next time
   useUnmount(() => {
     services.core.chat.resetThreadId()
   });
@@ -370,18 +324,8 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     subscribeToMessageStream(textContent, [...truncatedTimeline,...additionalMessages]);
   }, [timeline, subscribeToMessageStream, setInput, setTimeline]);
 
-  const handleNewChat = useCallback(() => {
-    chatService.newThread();
-    setTimeline([]);
-    setCurrentRunId(null);
-    setIsStreaming(false);
-    setPendingConfirmation(null);
-    confirmationService.cleanAll();
-    setShowHistory(false);
-    setRestoreError(null);
-  }, [chatService, confirmationService]);
-
-  const handleStop = useCallback(() => {
+  // Helper function to stop streaming and clean up subscriptions
+  const stopStreaming = useCallback(() => {
     // Abort the current streaming request
     chatService.abort();
     // Unsubscribe from current observable if exists
@@ -390,11 +334,30 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       currentSubscriptionRef.current = null;
     }
 
+    // Stop tool result streaming if active
+    eventHandler.stopToolResultStreaming();
+
     // Update streaming state (both ref and state for React 18 compatibility)
     isStreamingRef.current = false;
     setIsStreaming(false);
     setStartResponse(false);
-  }, [chatService]);
+  }, [chatService, eventHandler]);
+
+  const handleNewChat = useCallback(() => {
+    // Stop any ongoing streaming before starting a new chat
+    stopStreaming();
+
+    chatService.newThread();
+    setTimeline([]);
+    setCurrentRunId(null);
+    setPendingConfirmation(null);
+    confirmationService.cleanAll();
+    setShowHistory(false);
+  }, [chatService, confirmationService, stopStreaming]);
+
+  const handleStop = useCallback(() => {
+    stopStreaming();
+  }, [stopStreaming]);
 
   const handleApproveConfirmation = useCallback(() => {
     if (pendingConfirmation) {
@@ -448,58 +411,56 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   }, [timeline]);
 
   const handleShowHistory = useCallback(() => {
-    loadingAbortControllerRef.current?.abort();
-    setIsLoading(false);
     setShowHistory(true);
-    setRestoreError(null);
   }, []);
 
   const handleCloseHistory = useCallback(() => {
-    // Abort any ongoing loading operation
-    if (loadingAbortControllerRef.current) {
-      loadingAbortControllerRef.current.abort();
-      loadingAbortControllerRef.current = null;
-    }
-
-    // Reset loading state and show history panel
-    setIsLoading(false);
     setShowHistory(false);
   }, []);
 
   const handleSelectConversation = useCallback(async (conversation: SavedConversation) => {
-    // Create abort controller for this loading operation
+    // Stop any ongoing streaming before switching conversations
+    stopStreaming();
+
+    // Abort any ongoing conversation loading
+    if (conversationLoadAbortControllerRef.current) {
+      conversationLoadAbortControllerRef.current.abort();
+    }
+
+    // Create new abort controller for this load operation
     const abortController = new AbortController();
-    loadingAbortControllerRef.current = abortController;
+    conversationLoadAbortControllerRef.current = abortController;
 
     setIsLoading(true);
 
     try {
-      // Check if aborted before starting
-      if (abortController.signal.aborted) return;
-
       // Load the conversation and get AG-UI event array
       const events = await chatService.loadConversation(conversation.threadId);
 
-      // Check if aborted after async operation
-      if (abortController.signal.aborted) return;
+      // Check if this load was aborted (user switched to another conversation)
+      if (abortController.signal.aborted) {
+        return;
+      }
 
       if (events) {
         // Reset UI state
         eventHandler.clearState();
         setCurrentRunId(null);
-        setIsStreaming(false);
         setPendingConfirmation(null);
         confirmationService.cleanAll();
         setShowHistory(false);
         setIsLoading(false);
 
+        // Replay all events to reconstruct the conversation
         for (const event of events) {
-          if (abortController.signal.aborted) return;
+          // Check abort signal during replay
+          if (abortController.signal.aborted) {
+            return;
+          }
           await eventHandler.handleEvent(event);
         }
       }
     } catch (error: any) {
-      // Don't show error if aborted
       if (!abortController.signal.aborted) {
         toasts?.addWarning({
           title: i18n.translate('chat.window.loadConversationErrorTitle', {
@@ -514,16 +475,15 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         });
       }
     } finally {
-      // Only update loading state if not aborted
       if (!abortController.signal.aborted) {
         setIsLoading(false);
       }
-      // Clear the abort controller reference
-      if (loadingAbortControllerRef.current === abortController) {
-        loadingAbortControllerRef.current = null;
+      // Clear abort controller reference
+      if (conversationLoadAbortControllerRef.current === abortController) {
+        conversationLoadAbortControllerRef.current = null;
       }
     }
-  }, [chatService, eventHandler, confirmationService, toasts]);
+  }, [chatService, eventHandler, confirmationService, toasts, stopStreaming]);
 
   const windowInstance = useMemo<ChatWindowInstance>(() => ({
     startNewChat: () => handleNewChat(),
@@ -564,25 +524,6 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             })}
           </EuiText>
         </div>
-      ) : restoreError ? (
-        <div className="chatWindow__errorContainer">
-          <EuiText color="danger" textAlign="center">
-            <h3>
-              {i18n.translate('chat.window.restoreErrorTitle', {
-                defaultMessage: 'Failed to restore conversation',
-              })}
-            </h3>
-            <p>{restoreError}</p>
-          </EuiText>
-          <EuiButton
-            onClick={restoreConversationTimeline}
-            iconType="refresh"
-          >
-            {i18n.translate('chat.window.retryButton', {
-              defaultMessage: 'Retry',
-            })}
-          </EuiButton>
-        </div>
       ) : showHistory ? (
         <ConversationHistoryPanel
           conversationHistoryService={chatService.conversationHistoryService}
@@ -598,6 +539,10 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             onApproveConfirmation={handleApproveConfirmation}
             onRejectConfirmation={handleRejectConfirmation}
             onFillInput={setInput}
+            threadId={chatService.getThreadId()}
+            onShowHistory={handleShowHistory}
+            conversationHistoryService={chatService.conversationHistoryService}
+            onSelectConversation={handleSelectConversation}
             {...enhancedProps}
             startResponse={startResponse}
           />

@@ -241,6 +241,43 @@ exports[`Header handles visibility and lock changes 1`] = `
               "syncErrorThrown": false,
               "syncErrorValue": null,
             },
+            Subscriber {
+              "_parentOrParents": null,
+              "_subscriptions": Array [
+                SubjectSubscription {
+                  "_parentOrParents": [Circular],
+                  "_subscriptions": null,
+                  "closed": false,
+                  "subject": [Circular],
+                  "subscriber": [Circular],
+                },
+              ],
+              "closed": false,
+              "destination": SafeSubscriber {
+                "_complete": undefined,
+                "_context": [Circular],
+                "_error": undefined,
+                "_next": [Function],
+                "_parentOrParents": null,
+                "_parentSubscriber": [Circular],
+                "_subscriptions": null,
+                "closed": false,
+                "destination": Object {
+                  "closed": true,
+                  "complete": [Function],
+                  "error": [Function],
+                  "next": [Function],
+                },
+                "isStopped": false,
+                "syncErrorThrowable": false,
+                "syncErrorThrown": false,
+                "syncErrorValue": null,
+              },
+              "isStopped": false,
+              "syncErrorThrowable": true,
+              "syncErrorThrown": false,
+              "syncErrorValue": null,
+            },
           ],
           "thrownError": null,
         },
@@ -903,7 +940,45 @@ exports[`Header handles visibility and lock changes 1`] = `
       "closed": false,
       "hasError": false,
       "isStopped": false,
-      "observers": Array [],
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
       "thrownError": null,
     }
   }
@@ -2454,6 +2529,17 @@ exports[`Header handles visibility and lock changes 1`] = `
       "thrownError": null,
     }
   }
+  navControlsIconSideNavFooter$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Array [],
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [],
+      "thrownError": null,
+    }
+  }
   navControlsLeft$={
     BehaviorSubject {
       "_isScalar": false,
@@ -2915,7 +3001,13 @@ exports[`Header handles visibility and lock changes 1`] = `
     }
   }
 >
-  <HeaderBanner />
+  <HeaderBanner
+    style={
+      Object {
+        "paddingRight": 648,
+      }
+    }
+  />
   <header
     className="hide-for-sharing headerGlobalNav"
     data-test-subj="headerGlobalNav"
@@ -7426,6 +7518,43 @@ exports[`Header handles visibility and lock changes 1`] = `
                 "syncErrorThrown": false,
                 "syncErrorValue": null,
               },
+              Subscriber {
+                "_parentOrParents": null,
+                "_subscriptions": Array [
+                  SubjectSubscription {
+                    "_parentOrParents": [Circular],
+                    "_subscriptions": null,
+                    "closed": false,
+                    "subject": [Circular],
+                    "subscriber": [Circular],
+                  },
+                ],
+                "closed": false,
+                "destination": SafeSubscriber {
+                  "_complete": undefined,
+                  "_context": [Circular],
+                  "_error": undefined,
+                  "_next": [Function],
+                  "_parentOrParents": null,
+                  "_parentSubscriber": [Circular],
+                  "_subscriptions": null,
+                  "closed": false,
+                  "destination": Object {
+                    "closed": true,
+                    "complete": [Function],
+                    "error": [Function],
+                    "next": [Function],
+                  },
+                  "isStopped": false,
+                  "syncErrorThrowable": false,
+                  "syncErrorThrown": false,
+                  "syncErrorValue": null,
+                },
+                "isStopped": false,
+                "syncErrorThrowable": true,
+                "syncErrorThrown": false,
+                "syncErrorValue": null,
+              },
             ],
             "thrownError": null,
           },
@@ -8461,6 +8590,43 @@ exports[`Header renders application header without title 1`] = `
               "syncErrorThrown": false,
               "syncErrorValue": null,
             },
+            Subscriber {
+              "_parentOrParents": null,
+              "_subscriptions": Array [
+                SubjectSubscription {
+                  "_parentOrParents": [Circular],
+                  "_subscriptions": null,
+                  "closed": false,
+                  "subject": [Circular],
+                  "subscriber": [Circular],
+                },
+              ],
+              "closed": false,
+              "destination": SafeSubscriber {
+                "_complete": undefined,
+                "_context": [Circular],
+                "_error": undefined,
+                "_next": [Function],
+                "_parentOrParents": null,
+                "_parentSubscriber": [Circular],
+                "_subscriptions": null,
+                "closed": false,
+                "destination": Object {
+                  "closed": true,
+                  "complete": [Function],
+                  "error": [Function],
+                  "next": [Function],
+                },
+                "isStopped": false,
+                "syncErrorThrowable": false,
+                "syncErrorThrown": false,
+                "syncErrorValue": null,
+              },
+              "isStopped": false,
+              "syncErrorThrowable": true,
+              "syncErrorThrown": false,
+              "syncErrorValue": null,
+            },
           ],
           "thrownError": null,
         },
@@ -9093,7 +9259,45 @@ exports[`Header renders application header without title 1`] = `
       "closed": false,
       "hasError": false,
       "isStopped": false,
-      "observers": Array [],
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
       "thrownError": null,
     }
   }
@@ -9740,6 +9944,17 @@ exports[`Header renders application header without title 1`] = `
       "thrownError": null,
     }
   }
+  navControlsIconSideNavFooter$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Array [],
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [],
+      "thrownError": null,
+    }
+  }
   navControlsLeft$={
     BehaviorSubject {
       "_isScalar": false,
@@ -10190,7 +10405,13 @@ exports[`Header renders application header without title 1`] = `
     }
   }
 >
-  <HeaderBanner />
+  <HeaderBanner
+    style={
+      Object {
+        "paddingRight": 648,
+      }
+    }
+  />
   <header
     className="hide-for-sharing headerGlobalNav"
     data-test-subj="headerGlobalNav"
@@ -11433,6 +11654,43 @@ exports[`Header renders application header without title 1`] = `
                 "syncErrorThrown": false,
                 "syncErrorValue": null,
               },
+              Subscriber {
+                "_parentOrParents": null,
+                "_subscriptions": Array [
+                  SubjectSubscription {
+                    "_parentOrParents": [Circular],
+                    "_subscriptions": null,
+                    "closed": false,
+                    "subject": [Circular],
+                    "subscriber": [Circular],
+                  },
+                ],
+                "closed": false,
+                "destination": SafeSubscriber {
+                  "_complete": undefined,
+                  "_context": [Circular],
+                  "_error": undefined,
+                  "_next": [Function],
+                  "_parentOrParents": null,
+                  "_parentSubscriber": [Circular],
+                  "_subscriptions": null,
+                  "closed": false,
+                  "destination": Object {
+                    "closed": true,
+                    "complete": [Function],
+                    "error": [Function],
+                    "next": [Function],
+                  },
+                  "isStopped": false,
+                  "syncErrorThrowable": false,
+                  "syncErrorThrown": false,
+                  "syncErrorValue": null,
+                },
+                "isStopped": false,
+                "syncErrorThrowable": true,
+                "syncErrorThrown": false,
+                "syncErrorValue": null,
+              },
             ],
             "thrownError": null,
           },
@@ -11962,6 +12220,43 @@ exports[`Header renders condensed header 1`] = `
           "hasError": false,
           "isStopped": false,
           "observers": Array [
+            Subscriber {
+              "_parentOrParents": null,
+              "_subscriptions": Array [
+                SubjectSubscription {
+                  "_parentOrParents": [Circular],
+                  "_subscriptions": null,
+                  "closed": false,
+                  "subject": [Circular],
+                  "subscriber": [Circular],
+                },
+              ],
+              "closed": false,
+              "destination": SafeSubscriber {
+                "_complete": undefined,
+                "_context": [Circular],
+                "_error": undefined,
+                "_next": [Function],
+                "_parentOrParents": null,
+                "_parentSubscriber": [Circular],
+                "_subscriptions": null,
+                "closed": false,
+                "destination": Object {
+                  "closed": true,
+                  "complete": [Function],
+                  "error": [Function],
+                  "next": [Function],
+                },
+                "isStopped": false,
+                "syncErrorThrowable": false,
+                "syncErrorThrown": false,
+                "syncErrorValue": null,
+              },
+              "isStopped": false,
+              "syncErrorThrowable": true,
+              "syncErrorThrown": false,
+              "syncErrorValue": null,
+            },
             Subscriber {
               "_parentOrParents": null,
               "_subscriptions": Array [
@@ -12661,7 +12956,45 @@ exports[`Header renders condensed header 1`] = `
       "closed": false,
       "hasError": false,
       "isStopped": false,
-      "observers": Array [],
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
       "thrownError": null,
     }
   }
@@ -14096,6 +14429,17 @@ exports[`Header renders condensed header 1`] = `
       "thrownError": null,
     }
   }
+  navControlsIconSideNavFooter$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Array [],
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [],
+      "thrownError": null,
+    }
+  }
   navControlsLeft$={
     BehaviorSubject {
       "_isScalar": false,
@@ -14507,7 +14851,13 @@ exports[`Header renders condensed header 1`] = `
     }
   }
 >
-  <HeaderBanner />
+  <HeaderBanner
+    style={
+      Object {
+        "paddingRight": 648,
+      }
+    }
+  />
   <header
     className="hide-for-sharing headerGlobalNav"
     data-test-subj="headerGlobalNav"
@@ -17764,6 +18114,43 @@ exports[`Header renders condensed header 1`] = `
                 "syncErrorThrown": false,
                 "syncErrorValue": null,
               },
+              Subscriber {
+                "_parentOrParents": null,
+                "_subscriptions": Array [
+                  SubjectSubscription {
+                    "_parentOrParents": [Circular],
+                    "_subscriptions": null,
+                    "closed": false,
+                    "subject": [Circular],
+                    "subscriber": [Circular],
+                  },
+                ],
+                "closed": false,
+                "destination": SafeSubscriber {
+                  "_complete": undefined,
+                  "_context": [Circular],
+                  "_error": undefined,
+                  "_next": [Function],
+                  "_parentOrParents": null,
+                  "_parentSubscriber": [Circular],
+                  "_subscriptions": null,
+                  "closed": false,
+                  "destination": Object {
+                    "closed": true,
+                    "complete": [Function],
+                    "error": [Function],
+                    "next": [Function],
+                  },
+                  "isStopped": false,
+                  "syncErrorThrowable": false,
+                  "syncErrorThrown": false,
+                  "syncErrorValue": null,
+                },
+                "isStopped": false,
+                "syncErrorThrowable": true,
+                "syncErrorThrown": false,
+                "syncErrorValue": null,
+              },
             ],
             "thrownError": null,
           },
@@ -18219,6 +18606,43 @@ exports[`Header renders page header with application title 1`] = `
           "hasError": false,
           "isStopped": false,
           "observers": Array [
+            Subscriber {
+              "_parentOrParents": null,
+              "_subscriptions": Array [
+                SubjectSubscription {
+                  "_parentOrParents": [Circular],
+                  "_subscriptions": null,
+                  "closed": false,
+                  "subject": [Circular],
+                  "subscriber": [Circular],
+                },
+              ],
+              "closed": false,
+              "destination": SafeSubscriber {
+                "_complete": undefined,
+                "_context": [Circular],
+                "_error": undefined,
+                "_next": [Function],
+                "_parentOrParents": null,
+                "_parentSubscriber": [Circular],
+                "_subscriptions": null,
+                "closed": false,
+                "destination": Object {
+                  "closed": true,
+                  "complete": [Function],
+                  "error": [Function],
+                  "next": [Function],
+                },
+                "isStopped": false,
+                "syncErrorThrowable": false,
+                "syncErrorThrown": false,
+                "syncErrorValue": null,
+              },
+              "isStopped": false,
+              "syncErrorThrowable": true,
+              "syncErrorThrown": false,
+              "syncErrorValue": null,
+            },
             Subscriber {
               "_parentOrParents": null,
               "_subscriptions": Array [
@@ -18964,7 +19388,45 @@ exports[`Header renders page header with application title 1`] = `
       "closed": false,
       "hasError": false,
       "isStopped": false,
-      "observers": Array [],
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
       "thrownError": null,
     }
   }
@@ -19611,6 +20073,17 @@ exports[`Header renders page header with application title 1`] = `
       "thrownError": null,
     }
   }
+  navControlsIconSideNavFooter$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Array [],
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [],
+      "thrownError": null,
+    }
+  }
   navControlsLeft$={
     BehaviorSubject {
       "_isScalar": false,
@@ -20061,7 +20534,13 @@ exports[`Header renders page header with application title 1`] = `
     }
   }
 >
-  <HeaderBanner />
+  <HeaderBanner
+    style={
+      Object {
+        "paddingRight": 648,
+      }
+    }
+  />
   <header
     className="hide-for-sharing headerGlobalNav"
     data-test-subj="headerGlobalNav"
@@ -21508,6 +21987,43 @@ exports[`Header renders page header with application title 1`] = `
                 "syncErrorThrown": false,
                 "syncErrorValue": null,
               },
+              Subscriber {
+                "_parentOrParents": null,
+                "_subscriptions": Array [
+                  SubjectSubscription {
+                    "_parentOrParents": [Circular],
+                    "_subscriptions": null,
+                    "closed": false,
+                    "subject": [Circular],
+                    "subscriber": [Circular],
+                  },
+                ],
+                "closed": false,
+                "destination": SafeSubscriber {
+                  "_complete": undefined,
+                  "_context": [Circular],
+                  "_error": undefined,
+                  "_next": [Function],
+                  "_parentOrParents": null,
+                  "_parentSubscriber": [Circular],
+                  "_subscriptions": null,
+                  "closed": false,
+                  "destination": Object {
+                    "closed": true,
+                    "complete": [Function],
+                    "error": [Function],
+                    "next": [Function],
+                  },
+                  "isStopped": false,
+                  "syncErrorThrowable": false,
+                  "syncErrorThrown": false,
+                  "syncErrorValue": null,
+                },
+                "isStopped": false,
+                "syncErrorThrowable": true,
+                "syncErrorThrown": false,
+                "syncErrorValue": null,
+              },
             ],
             "thrownError": null,
           },
@@ -22037,6 +22553,43 @@ exports[`Header toggles primary navigation menu when clicked 1`] = `
           "hasError": false,
           "isStopped": false,
           "observers": Array [
+            Subscriber {
+              "_parentOrParents": null,
+              "_subscriptions": Array [
+                SubjectSubscription {
+                  "_parentOrParents": [Circular],
+                  "_subscriptions": null,
+                  "closed": false,
+                  "subject": [Circular],
+                  "subscriber": [Circular],
+                },
+              ],
+              "closed": false,
+              "destination": SafeSubscriber {
+                "_complete": undefined,
+                "_context": [Circular],
+                "_error": undefined,
+                "_next": [Function],
+                "_parentOrParents": null,
+                "_parentSubscriber": [Circular],
+                "_subscriptions": null,
+                "closed": false,
+                "destination": Object {
+                  "closed": true,
+                  "complete": [Function],
+                  "error": [Function],
+                  "next": [Function],
+                },
+                "isStopped": false,
+                "syncErrorThrowable": false,
+                "syncErrorThrown": false,
+                "syncErrorValue": null,
+              },
+              "isStopped": false,
+              "syncErrorThrowable": true,
+              "syncErrorThrown": false,
+              "syncErrorValue": null,
+            },
             Subscriber {
               "_parentOrParents": null,
               "_subscriptions": Array [
@@ -22736,7 +23289,45 @@ exports[`Header toggles primary navigation menu when clicked 1`] = `
       "closed": false,
       "hasError": false,
       "isStopped": false,
-      "observers": Array [],
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
       "thrownError": null,
     }
   }
@@ -24171,6 +24762,17 @@ exports[`Header toggles primary navigation menu when clicked 1`] = `
       "thrownError": null,
     }
   }
+  navControlsIconSideNavFooter$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Array [],
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [],
+      "thrownError": null,
+    }
+  }
   navControlsLeft$={
     BehaviorSubject {
       "_isScalar": false,
@@ -24582,7 +25184,13 @@ exports[`Header toggles primary navigation menu when clicked 1`] = `
     }
   }
 >
-  <HeaderBanner />
+  <HeaderBanner
+    style={
+      Object {
+        "paddingRight": 648,
+      }
+    }
+  />
   <header
     className="hide-for-sharing headerGlobalNav"
     data-test-subj="headerGlobalNav"
@@ -27802,6 +28410,43 @@ exports[`Header toggles primary navigation menu when clicked 1`] = `
             "hasError": false,
             "isStopped": false,
             "observers": Array [
+              Subscriber {
+                "_parentOrParents": null,
+                "_subscriptions": Array [
+                  SubjectSubscription {
+                    "_parentOrParents": [Circular],
+                    "_subscriptions": null,
+                    "closed": false,
+                    "subject": [Circular],
+                    "subscriber": [Circular],
+                  },
+                ],
+                "closed": false,
+                "destination": SafeSubscriber {
+                  "_complete": undefined,
+                  "_context": [Circular],
+                  "_error": undefined,
+                  "_next": [Function],
+                  "_parentOrParents": null,
+                  "_parentSubscriber": [Circular],
+                  "_subscriptions": null,
+                  "closed": false,
+                  "destination": Object {
+                    "closed": true,
+                    "complete": [Function],
+                    "error": [Function],
+                    "next": [Function],
+                  },
+                  "isStopped": false,
+                  "syncErrorThrowable": false,
+                  "syncErrorThrown": false,
+                  "syncErrorValue": null,
+                },
+                "isStopped": false,
+                "syncErrorThrowable": true,
+                "syncErrorThrown": false,
+                "syncErrorValue": null,
+              },
               Subscriber {
                 "_parentOrParents": null,
                 "_subscriptions": Array [

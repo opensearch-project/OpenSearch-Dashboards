@@ -29,6 +29,7 @@ import { VISUALIZATION_EDITOR_APP_ID } from '../../../common';
 import { getBreadcrumbs } from './utils';
 import { useInitialContainerContext } from './hooks/use_initial_container_context';
 import { useVariables } from './hooks/use_variables';
+import { DashboardSelectionModal } from './component/dashboard_selection_modal';
 
 export const VisualizationEditorPage = ({
   setHeaderActionMenu,
@@ -51,9 +52,14 @@ export const VisualizationEditorPage = ({
 
   const {
     context: { containerInfo, originatingApp },
+    containerVariables,
+    referencingDashboards,
+    needsDashboardSelection,
+    selectDashboard,
+    skipDashboardSelection,
   } = useInitialContainerContext();
 
-  const { variableService } = useVariables();
+  const { variableService } = useVariables(containerVariables);
   const { VariablesBar } = dashboard;
 
   const [initialized, setInitialized] = useState(false);
@@ -69,6 +75,9 @@ export const VisualizationEditorPage = ({
   useEffect(() => {
     const init = async () => {
       if (!savedExplore) return;
+
+      // Wait for dashboard selection if needed
+      if (needsDashboardSelection) return;
 
       if (error) {
         // return to default path
@@ -123,6 +132,7 @@ export const VisualizationEditorPage = ({
     savedVisConfig,
     savedQueryState,
     visualizationBuilderForEditor,
+    needsDashboardSelection,
   ]);
 
   useEffect(() => {
@@ -142,7 +152,33 @@ export const VisualizationEditorPage = ({
     };
   }, [queryBuilder, visualizationBuilderForEditor]);
 
+  // Update variable names in queryBuilder when variables change
+  useEffect(() => {
+    if (!variableService) {
+      queryBuilder.setVariableNames([]);
+      return;
+    }
+    const subscription = variableService.getVariables$().subscribe((variables) => {
+      const variableNames = variables.map((v) => v.name);
+      queryBuilder.setVariableNames(variableNames);
+    });
+    return () => subscription.unsubscribe();
+  }, [variableService, queryBuilder]);
+
   useHeaderVariants(services, HeaderVariant.APPLICATION);
+
+  // Show only the dashboard selection modal if needed
+  if (needsDashboardSelection) {
+    return (
+      <EuiErrorBoundary>
+        <DashboardSelectionModal
+          dashboards={referencingDashboards}
+          onSelect={selectDashboard}
+          onCancel={skipDashboardSelection}
+        />
+      </EuiErrorBoundary>
+    );
+  }
 
   if (isLoading || !initialized) {
     return null;

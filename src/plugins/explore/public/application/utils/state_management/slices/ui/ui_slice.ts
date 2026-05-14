@@ -9,6 +9,7 @@ export interface UIState {
   activeTabId: string;
   showHistogram: boolean;
   wrapCellText: boolean;
+  metricsPageMode?: 'explore' | 'query';
 }
 
 const initialState: UIState = {
@@ -33,9 +34,18 @@ const uiSlice = createSlice({
     setWrapCellText: (state, action: PayloadAction<boolean>) => {
       state.wrapCellText = action.payload;
     },
+    setMetricsPageMode: (state, action: PayloadAction<'explore' | 'query'>) => {
+      state.metricsPageMode = action.payload;
+    },
   },
 });
 
-export const { setActiveTab, setUiState, setShowHistogram, setWrapCellText } = uiSlice.actions;
+export const {
+  setActiveTab,
+  setUiState,
+  setShowHistogram,
+  setWrapCellText,
+  setMetricsPageMode,
+} = uiSlice.actions;
 export const uiReducer = uiSlice.reducer;
 export const uiInitialState = uiSlice.getInitialState();

@@ -76,6 +76,7 @@ export interface RenderingMetadata {
     };
     branding: Branding;
     survey?: string;
+    enableIconSideNav: boolean;
     keyboardShortcuts: {
       enabled: boolean;
     };

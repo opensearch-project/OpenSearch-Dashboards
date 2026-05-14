@@ -406,6 +406,34 @@ describe('ExplorePlugin', () => {
         expect.any(Function)
       );
     });
+
+    it('should register icon side nav specific nav links when icon side nav is enabled', () => {
+      (coreSetup.chrome.getIsIconSideNavEnabled as jest.Mock).mockReturnValue(true);
+
+      plugin.setup(coreSetup, setupDeps);
+
+      expect(coreSetup.chrome.navGroup.addNavLinksToGroup).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'observability' }),
+        expect.arrayContaining([
+          expect.objectContaining({ id: 'explore/logs', order: 200 }),
+          expect.objectContaining({
+            id: 'explore/traces',
+            category: expect.objectContaining({ id: 'applicationPerformance' }),
+          }),
+        ])
+      );
+    });
+
+    it('should register default nav links when icon side nav is disabled', () => {
+      (coreSetup.chrome.getIsIconSideNavEnabled as jest.Mock).mockReturnValue(false);
+
+      plugin.setup(coreSetup, setupDeps);
+
+      expect(coreSetup.chrome.navGroup.addNavLinksToGroup).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'observability' }),
+        expect.arrayContaining([expect.objectContaining({ id: 'explore' })])
+      );
+    });
   });
 
   describe('start', () => {

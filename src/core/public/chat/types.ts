@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 import type { ChatScreenshotServiceInterface } from './screenshot_service';
 import type { Event } from './events';
 
-interface TextInputContent {
+export interface TextInputContent {
   type: 'text';
   text: string;
 }

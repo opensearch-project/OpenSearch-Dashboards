@@ -123,6 +123,7 @@ export class QueryBuilder {
     isLoading: false,
     error: null,
   });
+  public variableNames$ = new BehaviorSubject<string[]>([]);
   private isInitialized = false;
   private editorRef: monaco.editor.IStandaloneCodeEditor | null = null;
   private subscriptions = Array<Subscription>();
@@ -577,6 +578,14 @@ export class QueryBuilder {
     this.interpolationService = service;
   }
 
+  setVariableNames(names: string[]) {
+    this.variableNames$.next(names);
+  }
+
+  getVariableNames(): string[] {
+    return this.variableNames$.value;
+  }
+
   setEditorRef(editor: monaco.editor.IStandaloneCodeEditor | null) {
     this.editorRef = editor;
   }
@@ -597,6 +606,7 @@ export class QueryBuilder {
     this.queryState$.complete();
     this.resultState$.complete();
     this.datasetView$.complete();
+    this.variableNames$.complete();
     abortAllActiveQueries();
   }
 
@@ -615,6 +625,7 @@ export class QueryBuilder {
       isLoading: false,
       error: null,
     });
+    this.variableNames$ = new BehaviorSubject<string[]>([]);
     this.editorRef = null;
     this.isInitialized = false;
   }

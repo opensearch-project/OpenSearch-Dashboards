@@ -107,16 +107,7 @@ export async function generatePromQLWithAgUi({
       };
       messages.push(assistantMessage);
 
-      const observable = agent.sendToolResult(toolCallId, result, {
-        messages,
-        dataSourceName,
-        language: 'PROMQL',
-        // ml-commons agent currently do not support multiple tool calls: https://github.com/opensearch-project/ml-commons/issues/4548
-        // tools: PROMQL_FRONTEND_TOOLS,
-        dataSourceId,
-      });
-
-      // Add tool result to messages for subsequent requests in the conversation
+      // Add tool result to messages
       const toolResultMessage: Message = {
         id: agent.generateMessageId(),
         role: 'tool',
@@ -124,6 +115,24 @@ export async function generatePromQLWithAgUi({
         toolCallId,
       };
       messages.push(toolResultMessage);
+
+      // Reinforce: write the query from the tool result, do not call any other tools
+      const reinforceMessage: Message = {
+        id: agent.generateMessageId(),
+        role: 'user',
+        content:
+          'The tool result above contains the Prometheus metrics and labels. ' +
+          'Do NOT call any other tools. Do NOT try to query OpenSearch. ' +
+          `Write the PromQL query now based on the tool result above. Original user question: ${question}`,
+      };
+      messages.push(reinforceMessage);
+
+      const observable = agent.runAgent({
+        messages,
+        dataSourceName,
+        language: 'PROMQL',
+        dataSourceId,
+      });
 
       await processStream(observable);
     } catch (err) {

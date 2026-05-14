@@ -276,6 +276,54 @@ See the [communication guide](COMMUNICATIONS.md) for information on how to join 
 
 Although the [getting started guide](#getting-started-guide) covers the recommended development environment setup, there are several alternatives worth being aware of.
 
+### Alternative - Run without OpenSearch (SQLite backend)
+
+You can run OpenSearch Dashboards without a running OpenSearch cluster by using the built-in SQLite storage backend. This stores saved objects (dashboards, visualizations, index patterns, etc.) in a local SQLite file instead of OpenSearch.
+
+```bash
+# Start OSD with SQLite backend (no OpenSearch needed)
+$ yarn start --savedObjects.storage.backend=sqlite
+```
+
+Metadata is stored in `data/osd-metadata.db` by default. You can customize the path:
+
+```yaml
+# opensearch_dashboards.yml
+savedObjects.storage.backend: "sqlite"
+savedObjects.storage.sqlite.path: "data/osd-metadata.db"
+```
+
+#### Resource savings
+
+|  | With OpenSearch | With SQLite |
+|--|----------------|-------------|
+| Disk space | ~1.4 GB | 4 KB |
+| Memory (RSS) | ~2-3 GB (OSD + OpenSearch JVM) | ~500 MB (OSD only) |
+| Startup time | ~30-60s | ~3s |
+| Prerequisites | Java runtime + OpenSearch binary | None |
+
+#### When to use SQLite vs OpenSearch
+
+**Works with SQLite (no OpenSearch needed):**
+- UI and frontend development — React components, pages, layouts, styling
+- Workspace features — create, edit, delete, navigate workspaces
+- Saved object CRUD — import/export, management page, copy to workspace
+- Plugin scaffolding — registering saved object types, routes, and UI
+- Application chrome — header, sidebar, breadcrumbs, home page
+- Management pages — index patterns UI, advanced settings, saved objects
+- Theming, accessibility, and i18n work
+- Unit and component tests using in-memory SQLite (`:memory:`)
+
+**Still needs OpenSearch:**
+- Data exploration (Discover) and querying actual indices
+- Visualizations with real data — charts, maps, aggregations
+- Index pattern field discovery — fetching field mappings
+- Security plugin — authentication, tenants, roles
+- Alerting, observability, and trace analytics
+- Performance testing with realistic data volumes
+
+> **Note:** The SQLite backend is a proof of concept intended for development use. It does not support multi-node deployments or full-text search. See the [design doc](docs/saved_objects/pluggable_storage_backend.md) and [RFC](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/11772) for details.
+
 ### Optional - Run OpenSearch with plugins
 
 By default, the snapshot command will run [a minimal distribution of OpenSearch](https://opensearch.org/downloads.html#minimal), with no plugins installed.
@@ -420,6 +468,22 @@ yarn build --docker
 ## Code guidelines
 
 ### General
+
+#### Module README files
+
+Every module or subsystem directory should include a `README.md` that explains:
+
+- What the module does and why it exists
+- Architecture or key abstractions
+- File inventory (what each file is for)
+- Usage examples or how to get started
+- Known limitations or future work
+
+**Why:** README files co-located with source code are the most universal documentation convention. They are rendered automatically on GitHub, discovered by AI coding tools (Claude, Codex, Copilot, Kiro), and stay in sync with the code they describe. When contributing a new module or making significant changes to an existing one, add or update the README.
+
+**Examples:**
+- `src/core/server/saved_objects/storage/README.md`
+- `src/core/README.md`
 
 #### Filenames
 

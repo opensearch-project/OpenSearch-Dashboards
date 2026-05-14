@@ -175,6 +175,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
               "getHeaderComponent": [MockFunction],
               "getHeaderVariant$": [MockFunction],
               "getHelpExtension$": [MockFunction],
+              "getIsIconSideNavEnabled": [MockFunction],
               "getIsNavDrawerLocked$": [MockFunction],
               "getIsVisible$": [MockFunction],
               "globalSearch": Object {
@@ -248,11 +249,13 @@ exports[`Dashboard top nav render in embed mode 1`] = `
               },
               "navControls": Object {
                 "getCenter$": [MockFunction],
+                "getIconSideNavFooter$": [MockFunction],
                 "getLeft$": [MockFunction],
                 "getLeftBottom$": [MockFunction],
                 "getPrimaryHeaderRight$": [MockFunction],
                 "getRight$": [MockFunction],
                 "registerCenter": [MockFunction],
+                "registerIconSideNavFooter": [MockFunction],
                 "registerLeft": [MockFunction],
                 "registerLeftBottom": [MockFunction],
                 "registerPrimaryHeaderRight": [MockFunction],
@@ -1033,8 +1036,22 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                   Array [
                     "home:useNewHomePage",
                   ],
+                  Array [
+                    "home:useNewHomePage",
+                  ],
+                  Array [
+                    "home:useNewHomePage",
+                  ],
                 ],
                 "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
                   Object {
                     "type": "return",
                     "value": undefined,
@@ -1181,14 +1198,10 @@ exports[`Dashboard top nav render in embed mode 1`] = `
           <TopNavMenu
             appName="dashboard"
             className="osdTopNavMenu-isFullScreen"
-            groupActions={false}
             indexPatterns={Array []}
             onQuerySubmit={[Function]}
             onSavedQueryIdChange={[Function]}
             screenTitle="Dashboard Test Title"
-            showCancelButton={false}
-            showDataSourceMenu={false}
-            showDatasetSelect={false}
             showDatePicker={false}
             showFilterBar={false}
             showQueryBar={false}
@@ -1383,6 +1396,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
               "getHeaderComponent": [MockFunction],
               "getHeaderVariant$": [MockFunction],
               "getHelpExtension$": [MockFunction],
+              "getIsIconSideNavEnabled": [MockFunction],
               "getIsNavDrawerLocked$": [MockFunction],
               "getIsVisible$": [MockFunction],
               "globalSearch": Object {
@@ -1456,11 +1470,13 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
               },
               "navControls": Object {
                 "getCenter$": [MockFunction],
+                "getIconSideNavFooter$": [MockFunction],
                 "getLeft$": [MockFunction],
                 "getLeftBottom$": [MockFunction],
                 "getPrimaryHeaderRight$": [MockFunction],
                 "getRight$": [MockFunction],
                 "registerCenter": [MockFunction],
+                "registerIconSideNavFooter": [MockFunction],
                 "registerLeft": [MockFunction],
                 "registerLeftBottom": [MockFunction],
                 "registerPrimaryHeaderRight": [MockFunction],
@@ -2241,8 +2257,22 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                   Array [
                     "home:useNewHomePage",
                   ],
+                  Array [
+                    "home:useNewHomePage",
+                  ],
+                  Array [
+                    "home:useNewHomePage",
+                  ],
                 ],
                 "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
                   Object {
                     "type": "return",
                     "value": undefined,
@@ -2389,14 +2419,10 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
           <TopNavMenu
             appName="dashboard"
             className="osdTopNavMenu-isFullScreen"
-            groupActions={false}
             indexPatterns={Array []}
             onQuerySubmit={[Function]}
             onSavedQueryIdChange={[Function]}
             screenTitle="Dashboard Test Title"
-            showCancelButton={false}
-            showDataSourceMenu={false}
-            showDatasetSelect={false}
             showDatePicker={false}
             showFilterBar={false}
             showQueryBar={false}
@@ -2591,6 +2617,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
               "getHeaderComponent": [MockFunction],
               "getHeaderVariant$": [MockFunction],
               "getHelpExtension$": [MockFunction],
+              "getIsIconSideNavEnabled": [MockFunction],
               "getIsNavDrawerLocked$": [MockFunction],
               "getIsVisible$": [MockFunction],
               "globalSearch": Object {
@@ -2664,11 +2691,13 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
               },
               "navControls": Object {
                 "getCenter$": [MockFunction],
+                "getIconSideNavFooter$": [MockFunction],
                 "getLeft$": [MockFunction],
                 "getLeftBottom$": [MockFunction],
                 "getPrimaryHeaderRight$": [MockFunction],
                 "getRight$": [MockFunction],
                 "registerCenter": [MockFunction],
+                "registerIconSideNavFooter": [MockFunction],
                 "registerLeft": [MockFunction],
                 "registerLeftBottom": [MockFunction],
                 "registerPrimaryHeaderRight": [MockFunction],
@@ -3449,8 +3478,22 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                   Array [
                     "home:useNewHomePage",
                   ],
+                  Array [
+                    "home:useNewHomePage",
+                  ],
+                  Array [
+                    "home:useNewHomePage",
+                  ],
                 ],
                 "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
                   Object {
                     "type": "return",
                     "value": undefined,
@@ -3597,14 +3640,10 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
           <TopNavMenu
             appName="dashboard"
             className="osdTopNavMenu-isFullScreen"
-            groupActions={false}
             indexPatterns={Array []}
             onQuerySubmit={[Function]}
             onSavedQueryIdChange={[Function]}
             screenTitle="Dashboard Test Title"
-            showCancelButton={false}
-            showDataSourceMenu={false}
-            showDatasetSelect={false}
             showDatePicker={false}
             showFilterBar={false}
             showQueryBar={false}
@@ -3799,6 +3838,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
               "getHeaderComponent": [MockFunction],
               "getHeaderVariant$": [MockFunction],
               "getHelpExtension$": [MockFunction],
+              "getIsIconSideNavEnabled": [MockFunction],
               "getIsNavDrawerLocked$": [MockFunction],
               "getIsVisible$": [MockFunction],
               "globalSearch": Object {
@@ -3872,11 +3912,13 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
               },
               "navControls": Object {
                 "getCenter$": [MockFunction],
+                "getIconSideNavFooter$": [MockFunction],
                 "getLeft$": [MockFunction],
                 "getLeftBottom$": [MockFunction],
                 "getPrimaryHeaderRight$": [MockFunction],
                 "getRight$": [MockFunction],
                 "registerCenter": [MockFunction],
+                "registerIconSideNavFooter": [MockFunction],
                 "registerLeft": [MockFunction],
                 "registerLeftBottom": [MockFunction],
                 "registerPrimaryHeaderRight": [MockFunction],
@@ -4657,8 +4699,22 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                   Array [
                     "home:useNewHomePage",
                   ],
+                  Array [
+                    "home:useNewHomePage",
+                  ],
+                  Array [
+                    "home:useNewHomePage",
+                  ],
                 ],
                 "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
                   Object {
                     "type": "return",
                     "value": undefined,
@@ -4805,14 +4861,10 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
           <TopNavMenu
             appName="dashboard"
             className="osdTopNavMenu-isFullScreen"
-            groupActions={false}
             indexPatterns={Array []}
             onQuerySubmit={[Function]}
             onSavedQueryIdChange={[Function]}
             screenTitle="Dashboard Test Title"
-            showCancelButton={false}
-            showDataSourceMenu={false}
-            showDatasetSelect={false}
             showDatePicker={false}
             showFilterBar={false}
             showQueryBar={false}
@@ -5007,6 +5059,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
               "getHeaderComponent": [MockFunction],
               "getHeaderVariant$": [MockFunction],
               "getHelpExtension$": [MockFunction],
+              "getIsIconSideNavEnabled": [MockFunction],
               "getIsNavDrawerLocked$": [MockFunction],
               "getIsVisible$": [MockFunction],
               "globalSearch": Object {
@@ -5080,11 +5133,13 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
               },
               "navControls": Object {
                 "getCenter$": [MockFunction],
+                "getIconSideNavFooter$": [MockFunction],
                 "getLeft$": [MockFunction],
                 "getLeftBottom$": [MockFunction],
                 "getPrimaryHeaderRight$": [MockFunction],
                 "getRight$": [MockFunction],
                 "registerCenter": [MockFunction],
+                "registerIconSideNavFooter": [MockFunction],
                 "registerLeft": [MockFunction],
                 "registerLeftBottom": [MockFunction],
                 "registerPrimaryHeaderRight": [MockFunction],
@@ -5865,8 +5920,22 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                   Array [
                     "home:useNewHomePage",
                   ],
+                  Array [
+                    "home:useNewHomePage",
+                  ],
+                  Array [
+                    "home:useNewHomePage",
+                  ],
                 ],
                 "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
                   Object {
                     "type": "return",
                     "value": undefined,
@@ -6013,14 +6082,10 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
           <TopNavMenu
             appName="dashboard"
             className="osdTopNavMenu-isFullScreen"
-            groupActions={false}
             indexPatterns={Array []}
             onQuerySubmit={[Function]}
             onSavedQueryIdChange={[Function]}
             screenTitle="Dashboard Test Title"
-            showCancelButton={false}
-            showDataSourceMenu={false}
-            showDatasetSelect={false}
             showDatePicker={false}
             showFilterBar={false}
             showQueryBar={false}
@@ -6215,6 +6280,7 @@ exports[`Dashboard top nav render with all components 1`] = `
               "getHeaderComponent": [MockFunction],
               "getHeaderVariant$": [MockFunction],
               "getHelpExtension$": [MockFunction],
+              "getIsIconSideNavEnabled": [MockFunction],
               "getIsNavDrawerLocked$": [MockFunction],
               "getIsVisible$": [MockFunction],
               "globalSearch": Object {
@@ -6288,11 +6354,13 @@ exports[`Dashboard top nav render with all components 1`] = `
               },
               "navControls": Object {
                 "getCenter$": [MockFunction],
+                "getIconSideNavFooter$": [MockFunction],
                 "getLeft$": [MockFunction],
                 "getLeftBottom$": [MockFunction],
                 "getPrimaryHeaderRight$": [MockFunction],
                 "getRight$": [MockFunction],
                 "registerCenter": [MockFunction],
+                "registerIconSideNavFooter": [MockFunction],
                 "registerLeft": [MockFunction],
                 "registerLeftBottom": [MockFunction],
                 "registerPrimaryHeaderRight": [MockFunction],
@@ -7073,8 +7141,22 @@ exports[`Dashboard top nav render with all components 1`] = `
                   Array [
                     "home:useNewHomePage",
                   ],
+                  Array [
+                    "home:useNewHomePage",
+                  ],
+                  Array [
+                    "home:useNewHomePage",
+                  ],
                 ],
                 "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
                   Object {
                     "type": "return",
                     "value": undefined,
@@ -7220,14 +7302,10 @@ exports[`Dashboard top nav render with all components 1`] = `
         >
           <TopNavMenu
             appName="dashboard"
-            groupActions={false}
             indexPatterns={Array []}
             onQuerySubmit={[Function]}
             onSavedQueryIdChange={[Function]}
             screenTitle="Dashboard Test Title"
-            showCancelButton={false}
-            showDataSourceMenu={false}
-            showDatasetSelect={false}
             showDatePicker={false}
             showFilterBar={true}
             showQueryBar={false}
