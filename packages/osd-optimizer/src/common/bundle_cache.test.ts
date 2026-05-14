@@ -36,10 +36,8 @@ const mockMkdirSync: jest.Mock = jest.requireMock('fs').mkdirSync;
 const mockWriteFileSync: jest.Mock = jest.requireMock('fs').writeFileSync;
 
 const SOME_STATE: State = {
-  cacheKey: 'abc',
   files: ['123'],
   moduleCount: 123,
-  optimizerCacheKey: 'abc',
 };
 
 beforeEach(() => {
@@ -70,12 +68,10 @@ it(`updates files on disk when calling set()`, () => {
       Array [
         "/foo/bar.json",
         "{
-      \\"cacheKey\\": \\"abc\\",
       \\"files\\": [
         \\"123\\"
       ],
-      \\"moduleCount\\": 123,
-      \\"optimizerCacheKey\\": \\"abc\\"
+      \\"moduleCount\\": 123
     }",
       ],
     ]
@@ -117,13 +113,9 @@ it('provides accessors to specific state properties', () => {
 
   expect(cache.getModuleCount()).toBe(undefined);
   expect(cache.getReferencedFiles()).toEqual(undefined);
-  expect(cache.getCacheKey()).toEqual(undefined);
-  expect(cache.getOptimizerCacheKey()).toEqual(undefined);
 
   cache.set(SOME_STATE);
 
   expect(cache.getModuleCount()).toBe(123);
   expect(cache.getReferencedFiles()).toEqual(['123']);
-  expect(cache.getCacheKey()).toEqual('abc');
-  expect(cache.getOptimizerCacheKey()).toEqual('abc');
 });

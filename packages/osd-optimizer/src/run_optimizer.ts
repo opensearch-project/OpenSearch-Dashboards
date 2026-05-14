@@ -29,7 +29,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { mergeMap, share, observeOn } from 'rxjs/operators';
+import { mergeMap, share } from 'rxjs/operators';
 
 import { summarizeEventStream, Update } from './common';
 
@@ -37,8 +37,6 @@ import {
   OptimizerConfig,
   OptimizerEvent,
   OptimizerState,
-  getBundleCacheEvent$,
-  getOptimizerCacheKey,
   watchBundlesForChanges$,
   runWorkers,
   OptimizerInitializedEvent,
@@ -67,32 +65,23 @@ export function runOptimizer(config: OptimizerConfig) {
 
     return {
       startTime: Date.now(),
-      cacheKey: await getOptimizerCacheKey(config),
     };
   }).pipe(
-    mergeMap(({ startTime, cacheKey }) => {
-      const bundleCacheEvent$ = getBundleCacheEvent$(config, cacheKey).pipe(
-        observeOn(Rx.asyncScheduler),
-        share()
-      );
+    mergeMap(({ startTime }) => {
+      // initialization completes immediately — all bundles go to workers
+      const init$ = Rx.of<OptimizerInitializedEvent>({
+        type: 'optimizer initialized',
+      });
 
-      // initialization completes once all bundle caches have been resolved
-      const init$ = Rx.concat(
-        bundleCacheEvent$,
-        Rx.of<OptimizerInitializedEvent>({
-          type: 'optimizer initialized',
-        })
-      );
-
-      // watch the offline bundles for changes, turning them online...
+      // watch all bundles for changes in watch mode
       const changeEvent$ = config.watch
-        ? watchBundlesForChanges$(bundleCacheEvent$, startTime).pipe(share())
+        ? watchBundlesForChanges$(config.bundles, startTime).pipe(share())
         : Rx.EMPTY;
 
-      // run workers to build all the online bundles, including the bundles turned online by changeEvent$
-      const workerEvent$ = runWorkers(config, cacheKey, bundleCacheEvent$, changeEvent$);
+      // run workers to build all bundles, plus any changed bundles from watch mode
+      const workerEvent$ = runWorkers(config, config.bundles, changeEvent$);
 
-      // create the stream that summarized all the events into specific states
+      // create the stream that summarizes all the events into specific states
       return summarizeEventStream<OptimizerEvent, OptimizerState>(
         Rx.merge(init$, changeEvent$, workerEvent$),
         {

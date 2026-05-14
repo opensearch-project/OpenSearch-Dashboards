@@ -24,9 +24,11 @@ import {
 const workspaceName = getRandomizedWorkspaceName();
 const datasetId = getRandomizedDatasetId();
 
+const datasetName = `${INDEX_WITH_TIME_1}*`;
+
 const createMetricVisualization = () => {
   cy.explore.clearQueryEditor();
-  const datasetName = `${INDEX_WITH_TIME_1}*`;
+
   const query = `source=${datasetName} | stats count()`;
   cy.explore.setDataset(datasetName, DATASOURCE_NAME, 'INDEX_PATTERN');
   setDatePickerDatesAndSearchIfRelevant('PPL');
@@ -38,7 +40,6 @@ const createMetricVisualization = () => {
   cy.osd.waitForLoader(true);
   // Navigate to visualization tab
   cy.get('#explore_visualization_tab').click();
-  cy.wait(1000);
   cy.getElementByTestId('exploreVisualizationLoader').should('be.visible');
 
   // Ensure chart type is Metric
@@ -93,7 +94,7 @@ export const runDownLoadCSVFromDashboardTests = () => {
         DATASOURCE_NAME,
         workspaceName,
         datasetId,
-        `${INDEX_WITH_TIME_1}*`,
+        datasetName,
         'timestamp', // timestampField
         'logs', // signalType
         ['use-case-observability'] // features
@@ -120,8 +121,9 @@ export const runDownLoadCSVFromDashboardTests = () => {
     });
 
     it('should be able to open inspector panel and download formatted csv', () => {
-      const exploreName = 'count';
-      const newDashboardName = 'das-1';
+      const suffix = Math.random().toString(36).substring(2, 8);
+      const exploreName = `formatted${suffix}`;
+      const newDashboardName = `das-${suffix}`;
       addToDashboard(exploreName, newDashboardName);
       cy.explore.setTopNavDate(START_TIME, END_TIME, false);
       cy.getElementByTestId('querySubmitButton').click();
@@ -146,8 +148,10 @@ export const runDownLoadCSVFromDashboardTests = () => {
     });
 
     it('should be able to open inspector panel and download raw csv', () => {
-      const exploreName = 'raw';
-      const newDashboardName = 'das-2';
+      const suffix = Math.random().toString(36).substring(2, 8);
+      const exploreName = `raw${suffix}`;
+      const newDashboardName = `das-${suffix}`;
+
       addToDashboard(exploreName, newDashboardName);
       cy.explore.setTopNavDate(START_TIME, END_TIME, false);
       cy.getElementByTestId('querySubmitButton').click();
