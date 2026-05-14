@@ -5,6 +5,7 @@
 
 import fs from 'fs';
 import { defineConfig } from 'cypress';
+import webpackPreprocessor from '@cypress/webpack-preprocessor';
 
 module.exports = defineConfig({
   experimentalMemoryManagement: true,
@@ -72,6 +73,17 @@ function setupNodeEvents(
   on: Cypress.PluginEvents,
   config: Cypress.PluginConfigOptions
 ): Cypress.PluginConfigOptions {
+  // The @opensearch-dashboards-test library declares "type": "module" but uses
+  // extensionless imports internally. Cypress's default preprocessor enforces
+  // fully-specified imports (webpack 5 behavior), so we relax that check.
+  const { webpackOptions } = webpackPreprocessor.defaultOptions;
+  // @ts-expect-error webpack module rules typing
+  webpackOptions!.module!.rules.unshift({
+    test: /\.m?js/,
+    resolve: { fullySpecified: false },
+  });
+  on('file:preprocessor', webpackPreprocessor({ webpackOptions }));
+
   // Delete video files for specs where all tests passed.
   // Keeps compressed videos only for failures to aid debugging.
   on('after:spec', (spec: Cypress.Spec, results: CypressCommandLine.RunResult) => {
