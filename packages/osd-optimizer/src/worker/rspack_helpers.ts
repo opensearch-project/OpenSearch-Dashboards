@@ -36,7 +36,7 @@ export function isFailureStats(stats: Stats) {
   // Log warnings if present
   if (warnings && warnings.length > 0) {
     // eslint-disable-next-line no-console
-    console.warn(`[Webpack] ${warnings.length} warning(s) found:`);
+    console.warn(`[Rspack] ${warnings.length} warning(s) found:`);
     warnings.forEach((warning, index) => {
       // eslint-disable-next-line no-console
       console.warn(`  Warning ${index + 1}: ${warning.message || warning}`);
@@ -46,7 +46,7 @@ export function isFailureStats(stats: Stats) {
   // Log errors if present
   if (errors && errors.length > 0) {
     // eslint-disable-next-line no-console
-    console.error(`[Webpack] ${errors.length} error(s) found:`);
+    console.error(`[Rspack] ${errors.length} error(s) found:`);
     errors.forEach((error, index) => {
       // eslint-disable-next-line no-console
       console.error(`  Error ${index + 1}: ${error.message || error}`);

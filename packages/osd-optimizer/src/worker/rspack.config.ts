@@ -38,7 +38,7 @@ import browserslist from 'browserslist';
 import * as sass from 'sass-embedded';
 
 import { Bundle, BundleRefs, WorkerConfig } from '../common';
-import { STATS_WARNINGS_FILTER } from './webpack_helpers';
+import { STATS_WARNINGS_FILTER } from './rspack_helpers';
 import { BundleDepsCheckPlugin } from './bundle_deps_check_plugin';
 
 const compilers: sass.AsyncCompiler[] = [];
@@ -74,7 +74,7 @@ export const sassCompiler = {
   },
 };
 
-export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker: WorkerConfig) {
+export function getRspackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker: WorkerConfig) {
   const targets = browserslist.loadConfig({ path: worker.repoRoot });
   const ENTRY_CREATOR = require.resolve('./entry_point_creator');
   const resolveOptions = {
@@ -110,7 +110,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
     },
 
     devtool: worker.dist ? false : 'cheap-module-source-map',
-    profile: worker.profileWebpack,
+    profile: worker.profileRspack,
 
     output: {
       path: bundle.outputDir,

@@ -93,7 +93,7 @@ interface Options {
   /** build assets suitable for use in the distributable */
   dist?: boolean;
   /** enable webpack profiling, writes stats.json files to the root of each plugin's output dir */
-  profileWebpack?: boolean;
+  profileRspack?: boolean;
   /** set to true to inspecting workers when the parent process is being inspected */
   inspectWorkers?: boolean;
 
@@ -141,7 +141,7 @@ export interface ParsedOptions {
   outputRoot: string;
   watch: boolean;
   maxWorkerCount: number;
-  profileWebpack: boolean;
+  profileRspack: boolean;
   cache: boolean;
   dist: boolean;
   pluginPaths: string[];
@@ -158,7 +158,7 @@ export class OptimizerConfig {
     const watch = !!options.watch;
     const dist = !!options.dist;
     const examples = !!options.examples;
-    const profileWebpack = !!options.profileWebpack;
+    const profileRspack = !!options.profileRspack;
     const inspectWorkers = !!options.inspectWorkers;
     const cache = options.cache !== false && !process.env.OSD_OPTIMIZER_NO_CACHE;
     const includeCoreBundle = !!options.includeCoreBundle;
@@ -220,7 +220,7 @@ export class OptimizerConfig {
       repoRoot,
       outputRoot,
       maxWorkerCount,
-      profileWebpack,
+      profileRspack,
       cache,
       pluginScanDirs,
       pluginPaths,
@@ -263,7 +263,7 @@ export class OptimizerConfig {
       options.repoRoot,
       options.maxWorkerCount,
       options.dist,
-      options.profileWebpack,
+      options.profileRspack,
       options.themeTags,
       readLimits(),
       options.bundleRefs
@@ -279,7 +279,7 @@ export class OptimizerConfig {
     public readonly repoRoot: string,
     public readonly maxWorkerCount: number,
     public readonly dist: boolean,
-    public readonly profileWebpack: boolean,
+    public readonly profileRspack: boolean,
     public readonly themeTags: ThemeTags,
     public readonly limits: Limits,
     public readonly bundleRefs: BundleRef[]
@@ -289,7 +289,7 @@ export class OptimizerConfig {
     return {
       cache: this.cache,
       dist: this.dist,
-      profileWebpack: this.profileWebpack,
+      profileRspack: this.profileRspack,
       repoRoot: this.repoRoot,
       watch: this.watch,
       optimizerCacheKey,
@@ -303,7 +303,7 @@ export class OptimizerConfig {
       // these config options don't change the output of the bundles, so
       // should not invalidate caches when they change
       'watch',
-      'profileWebpack',
+      'profileRspack',
       'cache',
     ]);
   }

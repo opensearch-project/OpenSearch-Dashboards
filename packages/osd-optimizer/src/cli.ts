@@ -69,8 +69,8 @@ run(
       throw createFlagError('expected --no-examples to have no value');
     }
 
-    const profileWebpack = flags.profile ?? false;
-    if (typeof profileWebpack !== 'boolean') {
+    const profileRspack = flags.profile ?? false;
+    if (typeof profileRspack !== 'boolean') {
       throw createFlagError('expected --profile to have no value');
     }
 
@@ -118,7 +118,7 @@ run(
       dist: dist || updateLimits,
       cache,
       examples: examples && !(validateLimits || updateLimits),
-      profileWebpack,
+      profileRspack,
       extraPluginScanDirs,
       inspectWorkers,
       includeCoreBundle,
