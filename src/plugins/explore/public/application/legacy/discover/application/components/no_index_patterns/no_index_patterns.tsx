@@ -16,10 +16,13 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { getServices } from '../../../opensearch_dashboards_services';
+import { useFlavorId } from '../../../../../../helpers/use_flavor_id';
+import { ExploreFlavor } from '../../../../../../../common';
 
 export const DiscoverNoIndexPatterns: React.FC = () => {
   const languageService = getServices().data.query.queryString.getLanguageService();
   const registeredLanguages = languageService.getLanguages();
+  const flavorId = useFlavorId();
 
   return (
     <EuiFlexGroup
@@ -46,10 +49,14 @@ export const DiscoverNoIndexPatterns: React.FC = () => {
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText textAlign="center" color="subdued" size="xs">
-                {i18n.translate('explore.discover.noIndexPatterns.selectDataDescription', {
-                  defaultMessage:
-                    'Select an available data source and choose a query language to use for running queries. You can use the data dropdown or use the enhanced data selector to select data.',
-                })}
+                {flavorId === ExploreFlavor.Metrics
+                  ? i18n.translate('explore.discover.noIndexPatterns.selectPrometheusDescription', {
+                      defaultMessage: 'Select a Prometheus data source to run queries in PromQL.',
+                    })
+                  : i18n.translate('explore.discover.noIndexPatterns.selectDataDescription', {
+                      defaultMessage:
+                        'Select an available data source and choose a query language to use for running queries. You can use the data dropdown or use the enhanced data selector to select data.',
+                    })}
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem>
