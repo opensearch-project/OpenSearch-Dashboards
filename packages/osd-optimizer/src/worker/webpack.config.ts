@@ -278,9 +278,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
                     implementation: sassCompiler,
                     sassOptions: {
                       sourceMap: !worker.dist,
-                      // tailwindcss uses @import "tailwindcss/theme" prefix(osd),
-                      // this is not exactly SASS syntax and breaks if style is compressed.
-                      style: 'expanded',
+                      style: worker.dist ? 'compressed' : 'expanded',
                       quietDeps: true,
                       loadPaths: [
                         Path.resolve(worker.repoRoot, 'node_modules'),

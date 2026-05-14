@@ -46,9 +46,29 @@ function stripTailwindDeps() {
 }
 stripTailwindDeps.postcss = true;
 
+/**
+ * Restores the space between the import URL and the `prefix(...)` directive
+ * in `@import "tailwindcss/..." prefix(xxx)` rules. Sass `style: 'compressed'`
+ * strips whitespace inside `@import` params, producing
+ * `@import"tailwindcss/theme"prefix(osd)`, which @tailwindcss/postcss does
+ * not parse — it silently skips the import and emits zero utilities.
+ */
+function normalizeTailwindImports() {
+  return {
+    postcssPlugin: 'postcss-normalize-tailwind-imports',
+    Once(root) {
+      root.walkAtRules('import', (rule) => {
+        rule.params = rule.params.replace(/("tailwindcss\/[^"]+")(prefix)/g, '$1 $2');
+      });
+    },
+  };
+}
+normalizeTailwindImports.postcss = true;
+
 module.exports = {
   plugins: [
     /*require('autoprefixer')()*/
+    normalizeTailwindImports(),
     // Plugins should import "tailwindcss/theme" + "tailwindcss/utilities" rather
     // than the full "tailwindcss" entry. The full entry wraps utilities in
     // @layer base/utilities, which lose specificity to OSD's unlayered EUI styles
