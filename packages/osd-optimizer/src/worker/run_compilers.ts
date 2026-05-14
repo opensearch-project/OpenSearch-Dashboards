@@ -34,7 +34,6 @@ import Fs from 'fs';
 import Path from 'path';
 import { inspect } from 'util';
 
-// import webpack, { Stats } from 'webpack';
 import { rspack, Compiler, Stats } from '@rspack/core';
 import * as Rx from 'rxjs';
 import { mergeMap, map, mapTo, takeUntil, finalize } from 'rxjs/operators';
@@ -49,15 +48,15 @@ import {
   parseFilePath,
   BundleRefs,
 } from '../common';
-import { getWebpackConfig, sassCompiler } from './webpack.config';
-import { isFailureStats, failedStatsToErrorMessage, isContextModule } from './webpack_helpers';
+import { getRspackConfig, sassCompiler } from './rspack.config';
+import { isFailureStats, failedStatsToErrorMessage, isContextModule } from './rspack_helpers';
 import {
   isExternalModule,
   isNormalModule,
   isIgnoredModule,
   isConcatenatedModule,
   getModulePath,
-} from './webpack_helpers';
+} from './rspack_helpers';
 import { getHashes } from '../optimizer/get_hashes';
 
 const PLUGIN_NAME = '@osd/optimizer';
@@ -103,7 +102,7 @@ const observeCompiler = (
         return undefined;
       }
 
-      if (workerConfig.profileWebpack) {
+      if (workerConfig.profileRspack) {
         Fs.writeFileSync(
           Path.resolve(bundle.outputDir, 'stats.json'),
           JSON.stringify(stats.toJson())
@@ -235,7 +234,7 @@ export const runCompilers = (
   bundleRefs: BundleRefs
 ) => {
   const multiCompiler = rspack(
-    bundles.map((def) => getWebpackConfig(def, bundleRefs, workerConfig))
+    bundles.map((def) => getRspackConfig(def, bundleRefs, workerConfig))
   );
 
   return Rx.merge(
