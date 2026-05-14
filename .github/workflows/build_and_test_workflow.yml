@@ -7,6 +7,7 @@ name: Build and test
 on:
   pull_request:
     branches: ['**']
+  workflow_dispatch:
 
 env:
   OSD_OPTIMIZER_THEMES: v8light
@@ -368,7 +369,18 @@ jobs:
         id: mocha-tests
         run: yarn test:mocha:coverage
 
+      - name: Check for Codecov token
+        id: check-codecov
+        shell: bash
+        run: |
+          if [ -n "${{ secrets.CODECOV_TOKEN }}" ]; then
+            echo "has_token=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_token=false" >> $GITHUB_OUTPUT
+          fi
+      
       - name: Upload Code Coverage
+        if: steps.check-codecov.outputs.has_token == 'true' || github.repository == 'opensearch-project/OpenSearch-Dashboards'
         id: upload-code-coverage
         if: matrix.os != 'windows-latest'
         uses: codecov/codecov-action@v4
