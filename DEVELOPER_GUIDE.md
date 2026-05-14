@@ -22,6 +22,7 @@ This guide applies to all development within the OpenSearch Dashboards project a
   - [General](#general)
   - [HTML](#html)
   - [SASS files](#sass-files)
+  - [Tailwind CSS](#tailwind-css)
   - [TypeScript/JavaScript](#typescriptjavascript)
   - [React](#react)
   - [API endpoints](#api-endpoints)
@@ -626,6 +627,47 @@ export const Component = () => {
 ```
 
 Do not use the underscore `_` SASS file naming pattern when importing directly into a javascript file.
+
+### Tailwind CSS
+
+OpenSearch Dashboards supports [Tailwind CSS v4](https://tailwindcss.com/) inside `.scss` files. The `@osd/optimizer` build pipes SCSS through `sass-loader` → `@tailwindcss/postcss` automatically — no per-plugin Tailwind config is required.
+
+To opt in, import Tailwind into the **top** of an SCSS entry file with a plugin-scoped prefix:
+
+```scss
+// my_plugin/public/styles/my_plugin.scss
+@import "tailwindcss/theme" prefix(plg);
+@import "tailwindcss/utilities" prefix(plg);
+
+@source "../components";
+@source "../views";
+```
+
+Then write utilities with the prefix you chose: `<div className="plg:flex plg:gap-2 plg:text-sm" />`. Use a short prefix (matching your plugin's three-letter SASS prefix) to avoid colliding with other plugins, since utilities are emitted to a single global stylesheet.
+
+#### Conventions
+
+- **Always use a prefix.** Unprefixed utilities collide across plugins and with EUI/OUI class names.
+- **Import the modular entrypoints**, not `@import "tailwindcss"`. The full entry wraps everything in `@layer base/components/utilities`, which OSD then has to strip — see [limitations](#limitations) below.
+- **`@source` directives** tell Tailwind v4 where to scan for utility classes. Point them at directories containing your `.tsx`/`.html` files.
+- **Theme tokens** (custom colors, spacing) go in an `@theme inline { ... }` block in your SCSS entry.
+
+#### Limitations
+
+Tailwind in OSD is utilities-only — several pieces of the default Tailwind experience are intentionally disabled. Be aware of:
+
+1. **No Preflight (CSS reset).** The `tailwindcss/utilities` and `tailwindcss/theme` entrypoints don't include preflight, and importing `tailwindcss/preflight` would fight EUI's own reset. Consequences:
+   - `border-2` won't render a border in code copy-pasted from Tailwind docs without first setting `border-style: solid`. Tailwind v4 defaults `border` to `0 solid` and relies on preflight to fix it.
+   - List, heading, and form-element resets you'd expect from a fresh Tailwind project are not applied. Lean on EUI components or explicit utilities (`list-disc`, `font-bold`).
+2. **No components layer.** Tailwind plugins that register component-layer rules (`addComponents`) won't have a declared `@layer components` to live in, so their output collides with utilities by source order. Prefer utility-only Tailwind plugins.
+3. **Utilities are unlayered.** The modular entrypoints emit utilities without an `@layer utilities` wrapper, which is what lets them win against unlayered EUI styles. Side effect: variant ties (e.g., `:hover` vs `[data-state=active]`) are decided by emit order, not layer precedence. Resolve conflicts by (in order) plain CSS, an explicit `!important` variant, or scoping the loser.
+4. **No layer-ordering declaration.** The `@layer theme, base, components, utilities;` line that the full `tailwindcss` entry emits is absent. Mixing your own `@layer` rules with Tailwind output may produce unexpected precedence — prefer unlayered CSS.
+5. **Re-scans only on SCSS change.** Tailwind v4's `@source` scanning runs when the SCSS entry rebuilds. Adding a new `.tsx` file with arbitrary-value utilities like `plg:text-[48px]` won't emit them until the SCSS changes. Workarounds: `touch` the SCSS file, restart the dev server, or prefer theme-token utilities (`plg:text-4xl`) which are always emitted.
+6. **Global stylesheet, not scoped.** Every plugin's compiled utilities ship in a global bundle. Always prefix; avoid generic class names in adjacent custom CSS.
+
+#### Build details
+
+The pipeline lives in `packages/osd-optimizer`. SCSS is compiled with sass-embedded, then passed through `@tailwindcss/postcss` and a small `postcss.config.js` plugin that strips Tailwind's dependency messages.
 
 ### TypeScript/JavaScript
 
