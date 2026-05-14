@@ -93,7 +93,7 @@ describe('accessibility settings', () => {
         `"Invalid day of week: invalid value"`
       );
       expect(() => validate(true)).toThrowErrorMatchingInlineSnapshot(
-        `"expected value of type [string] but got [boolean]"`
+        `"Invalid day of week: true"`
       );
     });
   });

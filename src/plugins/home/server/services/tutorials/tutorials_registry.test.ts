@@ -115,7 +115,7 @@ describe('TutorialsRegistry', () => {
       const setup = new TutorialsRegistry().setup(mockCoreSetup);
       testProvider = ({}) => invalidTutorialProvider;
       expect(() => setup.registerTutorial(testProvider)).toThrowErrorMatchingInlineSnapshot(
-        `"Unable to register tutorial spec because its invalid. ValidationError: child \\"name\\" fails because [\\"name\\" is not allowed to be empty]"`
+        `"Unable to register tutorial spec because its invalid. ValidationError: \\"name\\" is not allowed to be empty"`
       );
     });
 

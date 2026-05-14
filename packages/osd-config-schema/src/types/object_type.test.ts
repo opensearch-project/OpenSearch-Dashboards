@@ -207,10 +207,9 @@ test('handles oneOf', () => {
   });
 
   expect(type.validate({ key: 'foo' })).toEqual({ key: 'foo' });
-  expect(() => type.validate({ key: 123 })).toThrowErrorMatchingInlineSnapshot(`
-"[key]: types that failed validation:
-- [key.0]: expected value of type [string] but got [number]"
-`);
+  expect(() => type.validate({ key: 123 })).toThrowErrorMatchingInlineSnapshot(
+    `"[key]: expected value of type [string] but got [number]"`
+  );
 });
 
 test('handles references', () => {
