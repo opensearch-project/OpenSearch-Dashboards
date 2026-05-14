@@ -46,7 +46,7 @@ let mockCoreSetup: MockedKeys<CoreSetup>;
 
 const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 // @ts-expect-error TS2559 TODO(ts-error): fixme
-jest.useFakeTimers('legacy');
+jest.useFakeTimers({ legacyFakeTimers: true });
 setImmediate(() => {});
 
 describe('SearchInterceptor', () => {

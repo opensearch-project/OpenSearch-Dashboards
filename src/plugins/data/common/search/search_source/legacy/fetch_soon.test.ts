@@ -73,8 +73,7 @@ jest.mock('./call_client', () => ({
 
 describe('fetchSoon', () => {
   beforeEach(() => {
-    // @ts-expect-error TS2559 TODO(ts-error): fixme
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
     (callClient as jest.Mock).mockClear();
   });
 

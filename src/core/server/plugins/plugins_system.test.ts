@@ -490,11 +490,11 @@ describe('setup', () => {
     mockCreatePluginSetupContext.mockImplementation(() => ({}));
 
     const promise = pluginsSystem.setupPlugins(setupDeps);
-    jest.runAllTimers();
-
-    await expect(promise).rejects.toMatchInlineSnapshot(
+    const rejection = expect(promise).rejects.toMatchInlineSnapshot(
       `[Error: Setup lifecycle of "timeout-setup" plugin wasn't completed in 30sec. Consider disabling the plugin and re-start.]`
     );
+    await jest.advanceTimersByTimeAsync(30_000);
+    await rejection;
   });
 
   it('logs only server-side plugins', async () => {
@@ -541,11 +541,11 @@ describe('start', () => {
 
     await pluginsSystem.setupPlugins(setupDeps);
     const promise = pluginsSystem.startPlugins(startDeps);
-    jest.runAllTimers();
-
-    await expect(promise).rejects.toMatchInlineSnapshot(
+    const rejection = expect(promise).rejects.toMatchInlineSnapshot(
       `[Error: Start lifecycle of "timeout-start" plugin wasn't completed in 30sec. Consider disabling the plugin and re-start.]`
     );
+    await jest.advanceTimersByTimeAsync(30_000);
+    await rejection;
   });
 
   it('logs only server-side plugins', async () => {
