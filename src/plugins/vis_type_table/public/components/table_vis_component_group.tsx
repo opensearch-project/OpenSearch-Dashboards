@@ -22,8 +22,13 @@ export const TableVisComponentGroup = memo(
   ({ tableGroups, visConfig, event, uiState }: TableVisGroupComponentProps) => {
     return (
       <>
-        {tableGroups.map(({ table, title }) => (
-          <EuiFlexItem key={title} className="visTable__group" grow={false}>
+        {tableGroups.map(({ table, title }, index) => (
+          <EuiFlexItem
+            key={title}
+            className="visTable__group"
+            data-test-subj={`visTableGroup${index}`}
+            grow={false}
+          >
             <TableVisComponent
               title={title}
               table={table}
