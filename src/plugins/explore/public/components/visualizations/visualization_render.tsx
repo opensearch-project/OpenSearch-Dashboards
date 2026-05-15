@@ -213,7 +213,7 @@ export const CommonVisualizationRender = ({
           <ChartRender
             data={visualizationData}
             config={visConfig}
-            onLegend={(legend) => onLegend('__default__', legend)}
+            onLegend={(legend) => onLegend('__default__', legend, ['__default__'])}
             timeRange={timeRange}
             onSelectTimeRange={onSelectTimeRange}
             legendSelected$={legendSelected$}
@@ -295,9 +295,6 @@ const ChartRender = ({
   // initialize axis config
   const allAxisConfig = getAxisConfigByColumnMapping(axisColumnMappings, standardAxes);
   const styles = { ...config.styles, standardAxes: allAxisConfig };
-
-  // Reset legend before render — collectLegend will set it if the chart has one
-  onLegend?.({});
 
   return rule.render({
     transformedData: data.transformedData,
