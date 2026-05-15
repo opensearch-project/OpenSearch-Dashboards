@@ -32,7 +32,8 @@ export const AreaVisStyleControls: React.FC<AreaVisStyleControlsProps> = ({
     onStyleChange({ [key]: value });
   };
 
-  const hasColorMapping = !!axisColumnMappings?.[AxisRole.COLOR];
+  const hasColorMapping =
+    !!axisColumnMappings?.[AxisRole.COLOR] && axisColumnMappings?.[AxisRole.COLOR].length > 0;
   const shouldShowLegend = hasColorMapping;
 
   // The mapping object will be an empty object if no fields are selected on the axes selector. No

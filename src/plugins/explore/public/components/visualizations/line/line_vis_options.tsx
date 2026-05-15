@@ -33,9 +33,11 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
     onStyleChange({ [key]: value });
   };
 
-  const hasColorMapping = !!axisColumnMappings?.[AxisRole.COLOR];
-  const hasYSecondMapping = !!axisColumnMappings?.[AxisRole.Y_SECOND];
-  const shouldShowTimeMarker = axisColumnMappings?.[AxisRole.X]?.schema === VisFieldType.Date;
+  const hasColorMapping =
+    !!axisColumnMappings?.[AxisRole.COLOR] && axisColumnMappings?.[AxisRole.COLOR].length > 0;
+  const hasYSecondMapping =
+    !!axisColumnMappings?.[AxisRole.Y_SECOND] && axisColumnMappings?.[AxisRole.Y_SECOND].length > 0;
+  const shouldShowTimeMarker = axisColumnMappings?.[AxisRole.X]?.[0]?.schema === VisFieldType.Date;
 
   const shouldShowLegend = hasColorMapping || hasYSecondMapping;
   // The mapping object will be an empty object if no fields are selected on the axes selector. No

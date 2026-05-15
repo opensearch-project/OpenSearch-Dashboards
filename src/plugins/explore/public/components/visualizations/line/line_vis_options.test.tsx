@@ -188,9 +188,9 @@ describe('LineVisStyleControls', () => {
   };
 
   const mockAxisColumnMappings: AxisColumnMappings = {
-    [AxisRole.X]: mockDateColumn,
-    [AxisRole.Y]: mockNumericalColumn,
-    [AxisRole.COLOR]: mockCategoricalColumn,
+    [AxisRole.X]: [mockDateColumn],
+    [AxisRole.Y]: [mockNumericalColumn],
+    [AxisRole.COLOR]: [mockCategoricalColumn],
   };
 
   const mockProps: LineVisStyleControlsProps = {
@@ -236,8 +236,8 @@ describe('LineVisStyleControls', () => {
     const propsWithNoLegend = {
       ...mockProps,
       axisColumnMappings: {
-        [AxisRole.X]: mockDateColumn,
-        [AxisRole.Y]: mockNumericalColumn,
+        [AxisRole.X]: [mockDateColumn],
+        [AxisRole.Y]: [mockNumericalColumn],
       },
     };
 
@@ -251,7 +251,7 @@ describe('LineVisStyleControls', () => {
       ...mockProps,
       axisColumnMappings: {
         ...mockAxisColumnMappings,
-        [AxisRole.COLOR]: mockCategoricalColumn,
+        [AxisRole.COLOR]: [mockCategoricalColumn],
       },
     };
 
@@ -260,13 +260,12 @@ describe('LineVisStyleControls', () => {
     expect(screen.getByTestId('mockLegendOptionsPanel')).toBeInTheDocument();
   });
 
-
   test('renders legend panel when Y_SECOND mapping is present', () => {
     const propsWithYSecondMapping = {
       ...mockProps,
       axisColumnMappings: {
         ...mockAxisColumnMappings,
-        [AxisRole.Y_SECOND]: mockNumericalColumn,
+        [AxisRole.Y_SECOND]: [mockNumericalColumn],
       },
     };
 
@@ -280,7 +279,7 @@ describe('LineVisStyleControls', () => {
       ...mockProps,
       axisColumnMappings: {
         ...mockAxisColumnMappings,
-        [AxisRole.COLOR]: mockCategoricalColumn,
+        [AxisRole.COLOR]: [mockCategoricalColumn],
       },
     };
 

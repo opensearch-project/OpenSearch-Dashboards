@@ -7,7 +7,12 @@ import React from 'react';
 import { isEmpty } from 'lodash';
 import { i18n } from '@osd/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiFormRow, EuiSelect } from '@elastic/eui';
-import { defaultMetricChartStyles, MetricChartStyle, TextMode, ColorMode } from './metric_vis_config';
+import {
+  defaultMetricChartStyles,
+  MetricChartStyle,
+  TextMode,
+  ColorMode,
+} from './metric_vis_config';
 import { DebouncedFieldNumber } from '../style_panel/utils';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { StyleAccordion } from '../style_panel/style_accordion';
@@ -37,7 +42,6 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
   // The mapping object will be an empty object if no fields are selected on the axes selector. No
   // visualization is generated in this case so we shouldn't display style option panels.
   const hasMappingSelected = !isEmpty(axisColumnMappings);
-
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none">

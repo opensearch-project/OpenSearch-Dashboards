@@ -7,18 +7,21 @@ import { render, fireEvent } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import { CustomLegend } from './custom_legend';
 import { Positions } from './types';
+import { ColorMap } from './utils/color_map';
 
 describe('CustomLegend', () => {
-  const colorMap = {
+  const colorMap: ColorMap = {
     seriesA: '#5C7FFF',
     seriesB: '#A669E2',
     seriesC: '#FF4B14',
   };
 
+  let legend$: BehaviorSubject<Record<string, ColorMap>>;
   let legendSelected$: BehaviorSubject<Record<string, boolean>>;
   let highlightedSeries$: BehaviorSubject<string | undefined>;
 
   beforeEach(() => {
+    legend$ = new BehaviorSubject<Record<string, ColorMap>>({ default: colorMap });
     legendSelected$ = new BehaviorSubject<Record<string, boolean>>({});
     highlightedSeries$ = new BehaviorSubject<string | undefined>(undefined);
   });
@@ -26,7 +29,7 @@ describe('CustomLegend', () => {
   it('renders all legend items', () => {
     const { getByTestId } = render(
       <CustomLegend
-        colorMap={colorMap}
+        legend$={legend$}
         legendSelected$={legendSelected$}
         highlightedSeries$={highlightedSeries$}
       />
@@ -41,7 +44,7 @@ describe('CustomLegend', () => {
   it('displays series names as labels', () => {
     const { getByTestId } = render(
       <CustomLegend
-        colorMap={colorMap}
+        legend$={legend$}
         legendSelected$={legendSelected$}
         highlightedSeries$={highlightedSeries$}
       />
@@ -54,7 +57,7 @@ describe('CustomLegend', () => {
   it('toggles series selection on click and emits to legendSelected$', () => {
     const { getByTestId } = render(
       <CustomLegend
-        colorMap={colorMap}
+        legend$={legend$}
         legendSelected$={legendSelected$}
         highlightedSeries$={highlightedSeries$}
       />
@@ -75,7 +78,7 @@ describe('CustomLegend', () => {
   it('emits highlighted series on mouse enter', () => {
     const { getByTestId } = render(
       <CustomLegend
-        colorMap={colorMap}
+        legend$={legend$}
         legendSelected$={legendSelected$}
         highlightedSeries$={highlightedSeries$}
       />
@@ -88,7 +91,7 @@ describe('CustomLegend', () => {
   it('clears highlighted series on mouse leave', () => {
     const { getByTestId } = render(
       <CustomLegend
-        colorMap={colorMap}
+        legend$={legend$}
         legendSelected$={legendSelected$}
         highlightedSeries$={highlightedSeries$}
       />
@@ -102,7 +105,7 @@ describe('CustomLegend', () => {
   it('does not highlight a hidden series on hover', () => {
     const { getByTestId } = render(
       <CustomLegend
-        colorMap={colorMap}
+        legend$={legend$}
         legendSelected$={legendSelected$}
         highlightedSeries$={highlightedSeries$}
       />
@@ -120,7 +123,7 @@ describe('CustomLegend', () => {
   it('applies horizontal layout by default (bottom position)', () => {
     const { getByTestId } = render(
       <CustomLegend
-        colorMap={colorMap}
+        legend$={legend$}
         legendSelected$={legendSelected$}
         highlightedSeries$={highlightedSeries$}
         position={Positions.BOTTOM}
@@ -133,7 +136,7 @@ describe('CustomLegend', () => {
   it('applies vertical layout for left position', () => {
     const { getByTestId } = render(
       <CustomLegend
-        colorMap={colorMap}
+        legend$={legend$}
         legendSelected$={legendSelected$}
         highlightedSeries$={highlightedSeries$}
         position={Positions.LEFT}
@@ -146,7 +149,7 @@ describe('CustomLegend', () => {
   it('applies vertical layout for right position', () => {
     const { getByTestId } = render(
       <CustomLegend
-        colorMap={colorMap}
+        legend$={legend$}
         legendSelected$={legendSelected$}
         highlightedSeries$={highlightedSeries$}
         position={Positions.RIGHT}
@@ -159,7 +162,7 @@ describe('CustomLegend', () => {
   it('sets indicator color from colorMap', () => {
     const { getByTestId } = render(
       <CustomLegend
-        colorMap={colorMap}
+        legend$={legend$}
         legendSelected$={legendSelected$}
         highlightedSeries$={highlightedSeries$}
       />
@@ -174,7 +177,7 @@ describe('CustomLegend', () => {
   it('removes indicator color when hidden', () => {
     const { getByTestId } = render(
       <CustomLegend
-        colorMap={colorMap}
+        legend$={legend$}
         legendSelected$={legendSelected$}
         highlightedSeries$={highlightedSeries$}
       />

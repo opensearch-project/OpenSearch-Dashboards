@@ -78,7 +78,9 @@ export const GaugeVisStyleControls: React.FC<GaugeVisStyleControlsProps> = ({
               {styleOptions.showTitle && (
                 <EuiFormRow>
                   <DebouncedFieldText
-                    value={styleOptions.title || axisColumnMappings[AxisRole.Value]?.name || ''}
+                    value={
+                      styleOptions.title || axisColumnMappings[AxisRole.Value]?.[0]?.name || ''
+                    }
                     placeholder={i18n.translate('explore.vis.gauge.title', {
                       defaultMessage: 'Title',
                     })}
