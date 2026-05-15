@@ -446,6 +446,7 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
               useTimeFilter={useTimeFilter}
               onUseTimeFilterChange={setUseTimeFilter}
               onPreviewValidationChange={setIsPreviewValid}
+              currentVariableName={name}
             />
           )}
 

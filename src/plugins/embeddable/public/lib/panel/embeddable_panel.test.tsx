@@ -553,3 +553,72 @@ test('Check when hide header option is true', async () => {
   const title = findTestSubject(component, `embeddablePanelHeading-HelloAryaStark`);
   expect(title.length).toBe(0);
 });
+
+test('Does not show progress when output.loading is false', async () => {
+  const inspector = inspectorPluginMock.createStartContract();
+  const container = new HelloWorldContainer({ id: '123', panels: {}, viewMode: ViewMode.VIEW }, {
+    getEmbeddableFactory,
+  } as any);
+  const embeddable = await container.addNewEmbeddable<
+    ContactCardEmbeddableInput,
+    ContactCardEmbeddableOutput,
+    ContactCardEmbeddable
+  >(CONTACT_CARD_EMBEDDABLE, { firstName: 'Sam' });
+  const component = mount(
+    <I18nProvider>
+      <EmbeddablePanel
+        embeddable={embeddable}
+        getActions={() => Promise.resolve([])}
+        getAllEmbeddableFactories={start.getEmbeddableFactories}
+        getEmbeddableFactory={start.getEmbeddableFactory}
+        notifications={{} as any}
+        overlays={{} as any}
+        application={applicationMock}
+        inspector={inspector}
+        SavedObjectFinder={() => null}
+      />
+    </I18nProvider>
+  );
+
+  await act(async () => {
+    (embeddable as any).updateOutput({ loading: false });
+  });
+  component.update();
+
+  expect(findTestSubject(component, 'panelLoadingProgress').length).toBe(0);
+});
+
+test('show progress when output.loading is true', async () => {
+  const inspector = inspectorPluginMock.createStartContract();
+  const container = new HelloWorldContainer({ id: '123', panels: {}, viewMode: ViewMode.VIEW }, {
+    getEmbeddableFactory,
+  } as any);
+  const embeddable = await container.addNewEmbeddable<
+    ContactCardEmbeddableInput,
+    ContactCardEmbeddableOutput,
+    ContactCardEmbeddable
+  >(CONTACT_CARD_EMBEDDABLE, { firstName: 'Sam' });
+  const component = mount(
+    <I18nProvider>
+      <EmbeddablePanel
+        embeddable={embeddable}
+        getActions={() => Promise.resolve([])}
+        getAllEmbeddableFactories={start.getEmbeddableFactories}
+        getEmbeddableFactory={start.getEmbeddableFactory}
+        notifications={{} as any}
+        overlays={{} as any}
+        application={applicationMock}
+        inspector={inspector}
+        SavedObjectFinder={() => null}
+      />
+    </I18nProvider>
+  );
+
+  await act(async () => {
+    (embeddable as any).updateOutput({ loading: true });
+  });
+  component.update();
+
+  expect(findTestSubject(component, 'panelLoadingProgress').length).toBe(1);
+  expect(component.find('.embPanel__content[data-loading]').hostNodes().length).toBe(1);
+});
