@@ -16,7 +16,6 @@ import {
   TooltipOptions,
   AggregationType,
   VisFieldType,
-  TitleOptions,
   ThresholdOptions,
 } from '../types';
 import { getColors } from '../theme/default_colors';
@@ -63,7 +62,6 @@ export interface HeatmapChartStyleOptions {
 
   exclusive?: ExclusiveHeatmapConfig;
 
-  titleOptions?: TitleOptions;
   useThresholdColor?: boolean;
   thresholdOptions?: ThresholdOptions;
 }
@@ -118,10 +116,6 @@ export const defaultHeatmapChartStyles: HeatmapChartStyle = {
       },
     },
   ],
-  titleOptions: {
-    show: false,
-    titleName: '',
-  },
 };
 
 export const createHeatmapConfig = (): VisualizationType<'heatmap'> => ({

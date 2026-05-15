@@ -14,7 +14,6 @@ import {
   Positions,
   AxisRole,
   VisFieldType,
-  TitleOptions,
   ThresholdOptions,
   StandardAxes,
 } from '../types';
@@ -62,7 +61,6 @@ export interface LineChartStyleOptions {
   valueAxes?: ValueAxis[];
   standardAxes?: StandardAxes[];
 
-  titleOptions?: TitleOptions;
   thresholdOptions?: ThresholdOptions;
 
   showFullTimeRange?: boolean;
@@ -94,11 +92,6 @@ export const defaultLineChartStyles: LineChartStyle = {
   },
 
   standardAxes: [],
-
-  titleOptions: {
-    show: false,
-    titleName: '',
-  },
 
   showFullTimeRange: false,
 };

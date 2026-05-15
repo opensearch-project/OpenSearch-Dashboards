@@ -12,7 +12,6 @@ import { BarExclusiveVisOptions } from '../bar/bar_exclusive_vis_options';
 import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
 import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
 import { AllAxesOptions } from '../style_panel/axes/standard_axes_options';
-import { TitleOptionsPanel } from '../style_panel/title/title';
 import { AxisRole, VisFieldType } from '../types';
 import { BucketOptionsPanel } from '../bar/bucket_options';
 import { ThresholdPanel } from '../style_panel/threshold/threshold_panel';
@@ -118,17 +117,6 @@ export const HistogramVisStyleControls: React.FC<HistogramVisStyleControlsProps>
             />
           </EuiFlexItem>
 
-          <EuiFlexItem grow={false}>
-            <TitleOptionsPanel
-              titleOptions={styleOptions.titleOptions}
-              onShowTitleChange={(titleOptions) => {
-                updateStyleOption('titleOptions', {
-                  ...styleOptions.titleOptions,
-                  ...titleOptions,
-                });
-              }}
-            />
-          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <TooltipOptionsPanel
               tooltipOptions={styleOptions.tooltipOptions}

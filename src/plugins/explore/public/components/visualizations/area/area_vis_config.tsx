@@ -15,7 +15,6 @@ import {
   TooltipOptions,
   AxisRole,
   VisFieldType,
-  TitleOptions,
   ThresholdOptions,
   StandardAxes,
 } from '../types';
@@ -57,8 +56,6 @@ export interface AreaChartStyleOptions {
 
   standardAxes?: StandardAxes[];
 
-  titleOptions?: TitleOptions;
-
   thresholdOptions?: ThresholdOptions;
   showFullTimeRange?: boolean;
 }
@@ -89,11 +86,6 @@ const defaultAreaChartStyles: AreaChartStyle = {
   },
 
   standardAxes: [],
-
-  titleOptions: {
-    show: false,
-    titleName: '',
-  },
 
   showFullTimeRange: false,
 };

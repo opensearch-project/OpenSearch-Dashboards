@@ -99,24 +99,6 @@ jest.mock('../style_panel/tooltip/tooltip', () => ({
   )),
 }));
 
-jest.mock('../style_panel/title/title', () => ({
-  TitleOptionsPanel: jest.fn(({ titleOptions, onShowTitleChange }) => (
-    <div data-test-subj="title-panel">
-      <button
-        data-test-subj="titleModeSwitch"
-        onClick={() => onShowTitleChange({ show: !titleOptions.show })}
-      >
-        Toggle Title
-      </button>
-      <input
-        data-test-subj="titleInput"
-        placeholder="Default title"
-        onChange={(e) => onShowTitleChange({ titleName: e.target.value })}
-      />
-    </div>
-  )),
-}));
-
 describe('AreaVisStyleControls', () => {
   const defaultProps = {
     styleOptions: {
@@ -169,10 +151,6 @@ describe('AreaVisStyleControls', () => {
           axisRole: AxisRole.Y,
         },
       ],
-      titleOptions: {
-        show: true,
-        titleName: '',
-      },
       showFullTimeRange: false,
     },
     onStyleChange: jest.fn(),
@@ -221,7 +199,6 @@ describe('AreaVisStyleControls', () => {
     expect(screen.getByTestId('legend-panel')).toBeInTheDocument();
     expect(screen.getByTestId('mockAreaThresholdPanel')).toBeInTheDocument();
     expect(screen.getByTestId('tooltip-panel')).toBeInTheDocument();
-    expect(screen.getByTestId('title-panel')).toBeInTheDocument();
   });
 
   test('shows legend when COLOR mapping is present', () => {
@@ -362,7 +339,6 @@ describe('AreaVisStyleControls', () => {
     expect(screen.queryByTestId('mockAreaThresholdPanel')).not.toBeInTheDocument();
     expect(screen.queryByTestId('tooltip-panel')).not.toBeInTheDocument();
     expect(screen.queryByTestId('axes-panel')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('title-panel')).not.toBeInTheDocument();
   });
 
   test('handles empty arrays for columns', () => {
@@ -402,46 +378,6 @@ describe('AreaVisStyleControls', () => {
     };
 
     expect(() => render(<AreaVisStyleControls {...props} />)).not.toThrow();
-  });
-
-  test('updates title show option correctly', async () => {
-    render(<AreaVisStyleControls {...defaultProps} />);
-
-    await userEvent.click(screen.getByTestId('titleModeSwitch'));
-
-    expect(defaultProps.onStyleChange).toHaveBeenCalledWith({
-      titleOptions: {
-        ...defaultProps.styleOptions.titleOptions,
-        show: false,
-      },
-    });
-  });
-
-  test('updates title name when text is entered', async () => {
-    const props = {
-      ...defaultProps,
-      styleOptions: {
-        ...defaultProps.styleOptions,
-        titleOptions: {
-          show: true,
-          titleName: '',
-        },
-      },
-    };
-
-    render(<AreaVisStyleControls {...props} />);
-
-    const titleInput = screen.getByTestId('titleInput');
-    await userEvent.type(titleInput, 'New Chart Title');
-
-    await waitFor(() => {
-      expect(defaultProps.onStyleChange).toHaveBeenCalledWith({
-        titleOptions: {
-          ...props.styleOptions.titleOptions,
-          titleName: 'New Chart Title',
-        },
-      });
-    });
   });
 
   test('updates showFullTimeRange correctly', async () => {

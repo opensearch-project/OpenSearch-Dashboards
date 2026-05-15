@@ -7,6 +7,7 @@ import { useMemo } from 'react';
 import { Observable } from 'rxjs';
 import { useObservable } from 'react-use';
 import dateMath from '@elastic/datemath';
+
 import { VisData } from './visualization_builder.types';
 import { TableVis } from './table/table_vis';
 import { defaultTableChartStyles, TableChartStyle } from './table/table_vis_config';

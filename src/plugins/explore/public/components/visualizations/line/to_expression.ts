@@ -42,7 +42,7 @@ export const createSimpleLineChart = (
 
   const result = pipe(
     transform(sortByTime(timeField), convertTo2DArray(allColumns)),
-    createBaseConfig({ title: `${valueFieldNames.join(', ')} Over Time`, legend: { show: false } }),
+    createBaseConfig({ legend: { show: false } }),
     buildAxisConfigs,
     applyTimeRange,
     createLineSeries({
@@ -92,9 +92,6 @@ export const createLineBarChart = (
   const result = pipe(
     transform(sortByTime(timeField), convertTo2DArray(allColumns)),
     createBaseConfig({
-      title: `${valueFieldNames.join(', ')} (Bar) and ${value2FieldNames.join(
-        ', '
-      )} (Line) Over Time`,
       legend: { show: styles.addLegend },
     }),
     buildAxisConfigs,
@@ -143,9 +140,6 @@ export const createMultiLineChart = (
       convertTo2DArray()
     ),
     createBaseConfig({
-      title: `${axisColumnMappings[AxisRole.Y].name} Over Time by ${
-        axisColumnMappings[AxisRole.COLOR].name
-      }`,
       legend: { show: styles.addLegend },
     }),
     buildAxisConfigs,
@@ -201,9 +195,6 @@ export const createFacetedMultiLineChart = (
       convertTo2DArray()
     ),
     createBaseConfig({
-      title: `${axisColumnMappings[AxisRole.Y].name} Over Time by ${
-        axisColumnMappings[AxisRole.COLOR].name
-      } (Faceted by ${axisColumnMappings[AxisRole.FACET].name})`,
       legend: { show: styles.addLegend },
     }),
     buildAxisConfigs,
@@ -244,7 +235,6 @@ export const createCategoryLineChart = (
   const result = pipe(
     transform(convertTo2DArray(allColumns)),
     createBaseConfig({
-      title: `${valueFieldNames.join(', ')} by ${axisColumnMappings[AxisRole.X].name}`,
       legend: { show: false },
     }),
     buildAxisConfigs,
@@ -291,9 +281,6 @@ export const createCategoryMultiLineChart = (
       convertTo2DArray()
     ),
     createBaseConfig({
-      title: `${axisColumnMappings[AxisRole.Y].name} by ${
-        axisColumnMappings[AxisRole.X].name
-      } and ${axisColumnMappings[AxisRole.COLOR].name}`,
       legend: { show: styles.addLegend },
     }),
     buildAxisConfigs,

@@ -76,24 +76,6 @@ jest.mock('../style_panel/tooltip/tooltip', () => ({
   )),
 }));
 
-jest.mock('../style_panel/title/title', () => ({
-  TitleOptionsPanel: jest.fn(({ titleOptions, onShowTitleChange }) => (
-    <div data-test-subj="mockTitleOptionsPanel">
-      <button
-        data-test-subj="titleModeSwitch"
-        onClick={() => onShowTitleChange({ show: !titleOptions.show })}
-      >
-        Toggle Title
-      </button>
-      <input
-        data-test-subj="titleInput"
-        placeholder="Default title"
-        onChange={(e) => onShowTitleChange({ titleName: e.target.value })}
-      />
-    </div>
-  )),
-}));
-
 jest.mock('./pie_exclusive_vis_options', () => ({
   PieExclusiveVisOptions: jest.fn(({ styles, onChange }) => (
     <div data-test-subj="mockPieExclusiveVisOptions">
@@ -193,55 +175,5 @@ describe('PieVisStyleControls', () => {
     expect(screen.queryByTestId('mockLegendOptionsPanel')).not.toBeInTheDocument();
     expect(screen.queryByTestId('mockPieExclusiveVisOptions')).not.toBeInTheDocument();
     expect(screen.queryByTestId('mockTooltipOptionsPanel')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('mockTitleOptionsPanel')).not.toBeInTheDocument();
-  });
-
-  it('updates title show option correctly', async () => {
-    const props = {
-      ...mockProps,
-      styleOptions: {
-        ...mockProps.styleOptions,
-        titleOptions: {
-          show: false,
-          titleName: '',
-        },
-      },
-    };
-
-    render(<PieVisStyleControls {...props} />);
-    await userEvent.click(screen.getByTestId('titleModeSwitch'));
-    await waitFor(() => {
-      expect(props.onStyleChange).toHaveBeenCalledWith({
-        titleOptions: {
-          ...props.styleOptions.titleOptions,
-          show: true,
-        },
-      });
-    });
-  });
-
-  it('updates title name when text is entered', async () => {
-    const props = {
-      ...mockProps,
-      styleOptions: {
-        ...mockProps.styleOptions,
-        titleOptions: {
-          show: true,
-          titleName: '',
-        },
-      },
-    };
-
-    render(<PieVisStyleControls {...props} />);
-    const titleInput = screen.getByTestId('titleInput');
-    await userEvent.type(titleInput, 'New Chart Title');
-    await waitFor(() => {
-      expect(props.onStyleChange).toHaveBeenCalledWith({
-        titleOptions: {
-          ...props.styleOptions.titleOptions,
-          titleName: 'New Chart Title',
-        },
-      });
-    });
   });
 });

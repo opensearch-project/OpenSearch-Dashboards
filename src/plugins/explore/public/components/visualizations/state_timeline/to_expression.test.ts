@@ -56,7 +56,6 @@ describe('State Timeline to_expression', () => {
 
   const mockStyles = {
     ...defaultStateTimeLineChartStyles,
-    titleOptions: { show: true, titleName: '' },
   };
 
   describe('createNumericalStateTimeline', () => {
@@ -73,23 +72,6 @@ describe('State Timeline to_expression', () => {
       expect(result).toHaveProperty('series');
       expect(result).toHaveProperty('xAxis');
       expect(result).toHaveProperty('yAxis');
-      expect(result.title.text).toBe('NumValue by Group and Time');
-    });
-
-    it('handles title display options', () => {
-      const noTitle = createNumericalStateTimeline(
-        mockData,
-        { ...mockStyles, titleOptions: { show: false, titleName: '' } },
-        mockAxisMappings
-      );
-      expect(noTitle.title.text).toBeUndefined();
-
-      const customTitle = createNumericalStateTimeline(
-        mockData,
-        { ...mockStyles, titleOptions: { show: true, titleName: 'Custom Timeline' } },
-        mockAxisMappings
-      );
-      expect(customTitle.title.text).toBe('Custom Timeline');
     });
 
     it('throws when required fields are missing', () => {
@@ -109,16 +91,6 @@ describe('State Timeline to_expression', () => {
 
       expect(result).toHaveProperty('dataset');
       expect(result).toHaveProperty('series');
-      expect(result.title.text).toBe('Color by Group and Time');
-    });
-
-    it('handles title display options', () => {
-      const noTitle = createCategoricalStateTimeline(
-        mockData,
-        { ...mockStyles, titleOptions: { show: false, titleName: '' } },
-        mockAxisMappings
-      );
-      expect(noTitle.title.text).toBeUndefined();
     });
 
     it('throws when required fields are missing', () => {
@@ -137,16 +109,6 @@ describe('State Timeline to_expression', () => {
 
       expect(result).toHaveProperty('dataset');
       expect(result).toHaveProperty('series');
-      expect(result.title.text).toBe('Color  by Time');
-    });
-
-    it('handles title display options', () => {
-      const noTitle = createSingleCategoricalStateTimeline(
-        mockData,
-        { ...mockStyles, titleOptions: { show: false, titleName: '' } },
-        mockAxisMappings
-      );
-      expect(noTitle.title.text).toBeUndefined();
     });
 
     it('throws when required fields are missing', () => {

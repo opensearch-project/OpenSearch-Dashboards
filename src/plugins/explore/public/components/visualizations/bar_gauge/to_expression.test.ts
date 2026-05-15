@@ -5,7 +5,8 @@
 
 import { createBarGaugeSpec } from './to_expression';
 import { BarGaugeChartStyle } from './bar_gauge_vis_config';
-import { VisColumn, VisFieldType, AxisRole, AxisColumnMappings } from '../types';
+import { VisColumn, VisFieldType, AxisRole } from '../types';
+import { BarGaugeAxisMapping } from './types';
 
 describe('createBarGaugeSpec', () => {
   const mockNumericalColumn: VisColumn = {
@@ -26,7 +27,7 @@ describe('createBarGaugeSpec', () => {
     uniqueValuesCount: 3,
   };
 
-  const mockAxisColumnMappings: AxisColumnMappings = {
+  const mockAxisColumnMappings: BarGaugeAxisMapping = {
     [AxisRole.X]: mockCategoricalColumn,
     [AxisRole.Y]: mockNumericalColumn,
   };
@@ -34,7 +35,6 @@ describe('createBarGaugeSpec', () => {
   const mockStyleOptions: BarGaugeChartStyle = {
     tooltipOptions: { mode: 'all' },
     exclusive: {
-      orientation: 'vertical',
       displayMode: 'gradient',
       valueDisplay: 'valueColor',
       showUnfilledArea: true,
@@ -47,7 +47,6 @@ describe('createBarGaugeSpec', () => {
       ],
     },
     valueCalculation: 'last',
-    titleOptions: { show: true, titleName: 'Test Chart' },
   };
 
   const mockTransformedData = [
@@ -63,17 +62,5 @@ describe('createBarGaugeSpec', () => {
 
     expect(spec).toHaveProperty('dataset');
     expect(spec).toHaveProperty('series');
-    expect(spec.title.text).toBe('Test Chart');
-  });
-
-  it('handles no title', () => {
-    const noTitleStyle: BarGaugeChartStyle = {
-      ...mockStyleOptions,
-      titleOptions: { show: false, titleName: '' },
-    };
-
-    const spec = createBarGaugeSpec(mockTransformedData, noTitleStyle, mockAxisColumnMappings);
-
-    expect(spec.title.text).toBeUndefined();
   });
 });
