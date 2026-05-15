@@ -227,9 +227,7 @@ const GroupByEditor = ({
 export function createGroupByTransformation(): TransformationInstance {
   return {
     instance_id: uuid.v4(),
-    label: i18n.translate('explore.transformations.groupBy.label', {
-      defaultMessage: 'Group By',
-    }),
+    definition_id: 'group_by',
     config: {
       groupByField: undefined,
       aggregations: [],

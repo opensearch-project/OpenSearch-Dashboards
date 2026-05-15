@@ -40,7 +40,7 @@ const LimitEditor = ({
 export function createLimitTransformation(): TransformationInstance {
   return {
     instance_id: uuid.v4(),
-    label: i18n.translate('explore.transformations.limit.label', { defaultMessage: 'Limit' }),
+    definition_id: 'limit',
     config: { limit: 10 } as LimitConfig,
     hide: false,
     transformationMethod: (data: OpenSearchSearchHit[], config: LimitConfig) => {

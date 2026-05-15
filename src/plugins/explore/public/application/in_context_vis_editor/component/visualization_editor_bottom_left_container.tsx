@@ -32,7 +32,6 @@ import { TransformPanel } from './transform_panel';
 import { useTransformationService } from '../hooks/use_transformation_service';
 
 import '../visualization_editor.scss';
-import { SupportLanguageType } from '../query_builder/query_builder';
 import { TransformationService } from '../data_transformations';
 
 type ActiveTab = 'QUERY_TAB' | 'TRANSFORM_TAB';
@@ -68,7 +67,9 @@ export const ResizableQueryPanelAndVisualization = ({
 }: ResizableQueryPanelAndVisualizationProps) => {
   const { queryBuilder, queryEditorState } = useQueryBuilderState();
   const queryStatus = queryEditorState.queryStatus;
-  const [activeTab, setActiveTab] = useState<ActiveTab>('QUERY_TAB');
+  const [activeTab, setActiveTab] = useState<ActiveTab>(
+    queryEditorState.activeBottomPanelTab ?? 'QUERY_TAB'
+  );
 
   const transformServices = useTransformationService(savedTransformationPipeline);
 
@@ -155,15 +156,13 @@ export const ResizableQueryPanelAndVisualization = ({
                   >
                     {queryTabLabel}
                   </EuiTab>
-                  {queryEditorState.languageType === SupportLanguageType.ppl && (
-                    <EuiTab
-                      isSelected={activeTab === 'TRANSFORM_TAB'}
-                      onClick={() => setActiveTab('TRANSFORM_TAB')}
-                      data-test-subj="transformPanelTab"
-                    >
-                      {transformTabLabel}
-                    </EuiTab>
-                  )}
+                  <EuiTab
+                    isSelected={activeTab === 'TRANSFORM_TAB'}
+                    onClick={() => setActiveTab('TRANSFORM_TAB')}
+                    data-test-subj="transformPanelTab"
+                  >
+                    {transformTabLabel}
+                  </EuiTab>
                 </EuiTabs>
 
                 {activeTab === 'QUERY_TAB' ? (

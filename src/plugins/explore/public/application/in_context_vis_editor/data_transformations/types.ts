@@ -14,12 +14,18 @@ export interface FieldSchema {
   name: string;
   visFieldType: VisFieldType;
 }
+export interface UrlTransformationState {
+  definitionId: string; // defination identifier
+  instanceId: string; // unique instance identifier
+  config: Record<string, unknown>;
+  hide: boolean;
+}
 
 export interface TransformationInstance {
   // Unique runtime UUID — allows multiple instances of the same definition in the pipeline
   instance_id: string;
 
-  label: string;
+  definition_id: string;
   // User settings (e.g. { limit: 5 })
   config: any;
   // set true to skip transformation during pipeline execution

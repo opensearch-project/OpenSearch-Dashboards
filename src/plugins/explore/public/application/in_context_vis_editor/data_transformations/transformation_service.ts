@@ -12,6 +12,7 @@ import {
   TransformationPipeline,
   TransformationDefinition,
   ITransformationService,
+  UrlTransformationState,
 } from './types';
 import {
   addTransformation,
@@ -22,13 +23,6 @@ import {
 } from './transformation_utils';
 import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 import { TRANSFORMATION_STATE_KEY } from '../types';
-
-export interface UrlTransformationState {
-  definitionId: string; // defination identifier
-  instanceId: string; // unique instance identifier
-  config: any;
-  hide: boolean;
-}
 
 export class TransformationService implements ITransformationService {
   // catelog of available transformations
@@ -83,7 +77,7 @@ export class TransformationService implements ITransformationService {
     this.pipeline$.next(removeTransformation(this.pipeline$.getValue(), id));
   }
 
-  updateInstanceConfig(id: string, newConfig: any): void {
+  updateInstanceConfig(id: string, newConfig: Record<string, unknown>): void {
     this.pipeline$.next(updateTransformationConfig(this.pipeline$.getValue(), id, newConfig));
   }
 
@@ -211,32 +205,18 @@ export class TransformationService implements ITransformationService {
     if (!this.urlStateStorage) return;
 
     try {
-      const states: UrlTransformationState[] = pipeline.map((instance) => {
-        // Find which definition created this instance
-        const definitionId = this.findDefinitionIdForInstance(instance);
-        return {
-          definitionId,
-          instanceId: instance.instance_id,
-          config: instance.config,
-          hide: instance.hide,
-        };
-      });
+      const states: UrlTransformationState[] = pipeline.map((instance) => ({
+        definitionId: instance.definition_id,
+        instanceId: instance.instance_id,
+        config: instance.config,
+        hide: instance.hide,
+      }));
 
       this.urlStateStorage.set(TRANSFORMATION_STATE_KEY, states, { replace: true });
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error('TransformationService: failed to persist to URL', err);
     }
-  }
-
-  private findDefinitionIdForInstance(instance: TransformationInstance): string {
-    for (const [id, definition] of this.definitions.entries()) {
-      if (definition.label === instance.label) {
-        return id;
-      }
-    }
-    // Fallback: use label as id
-    return instance.label.toLowerCase().replace(/\s+/g, '_');
   }
 
   destroy(): void {
