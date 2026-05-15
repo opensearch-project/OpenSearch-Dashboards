@@ -69,12 +69,7 @@ module.exports = {
   plugins: [
     /*require('autoprefixer')()*/
     normalizeTailwindImports(),
-    // Plugins should import "tailwindcss/theme" + "tailwindcss/utilities" rather
-    // than the full "tailwindcss" entry. The full entry wraps utilities in
-    // @layer base/utilities, which lose specificity to OSD's unlayered EUI styles
-    // and forces a fragile postcss post-process to unwrap them. The modular
-    // imports emit unlayered utilities directly and skip preflight.
-    // Postcss is safe to include unconditionally. Bails out for files without Tailwind directives.
+    // Safe to include unconditionally. Bails out for files without Tailwind directives.
     // eslint-disable-next-line import/no-unresolved -- package uses `exports` field; resolver lacks support
     require('@tailwindcss/postcss')(),
     stripTailwindDeps(),
