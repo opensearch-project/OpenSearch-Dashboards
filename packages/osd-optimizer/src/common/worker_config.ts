@@ -41,10 +41,7 @@ export interface WorkerConfig {
   readonly cache: boolean;
   readonly profileWebpack: boolean;
   readonly browserslistEnv: string;
-  readonly optimizerCacheKey: unknown;
 }
-
-export type CacheableWorkerConfig = Omit<WorkerConfig, 'watch' | 'profileWebpack' | 'cache'>;
 
 export function parseWorkerConfig(json: string): WorkerConfig {
   try {
@@ -83,11 +80,6 @@ export function parseWorkerConfig(json: string): WorkerConfig {
       throw new Error('`profileWebpack` must be a boolean');
     }
 
-    const optimizerCacheKey = parsed.optimizerCacheKey;
-    if (optimizerCacheKey === undefined) {
-      throw new Error('`optimizerCacheKey` must be defined');
-    }
-
     const browserslistEnv = parsed.browserslistEnv;
     if (typeof browserslistEnv !== 'string') {
       throw new Error('`browserslistEnv` must be a string');
@@ -101,7 +93,6 @@ export function parseWorkerConfig(json: string): WorkerConfig {
       watch,
       dist,
       profileWebpack,
-      optimizerCacheKey,
       browserslistEnv,
       themeTags: themes,
     };
