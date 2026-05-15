@@ -26,6 +26,7 @@ export interface IdentityEntry {
   name: string;
   id: string;
   error?: string;
+  alias?: string;
 }
 
 /**

@@ -1441,6 +1441,41 @@ describe('ChatEventHandler', () => {
       // Restore Date.now
       Date.now = originalDateNow;
     });
+
+    it('should not record success telemetry when run finishes after an error', async () => {
+      // Start run
+      await chatEventHandlerWithTelemetry.handleEvent({
+        type: EventType.RUN_STARTED,
+        threadId: 'test-thread',
+        runId: 'test-run',
+      });
+
+      // Error occurs
+      await chatEventHandlerWithTelemetry.handleEvent({
+        type: EventType.RUN_ERROR,
+        message: 'Something went wrong',
+        code: 'ERR_001',
+      });
+
+      // Clear mocks to isolate what handleRunFinished records
+      mockTelemetryRecorder.recordEvent.mockClear();
+      mockTelemetryRecorder.recordMetric.mockClear();
+
+      // Run finished after error
+      await chatEventHandlerWithTelemetry.handleEvent({
+        type: EventType.RUN_FINISHED,
+        threadId: 'test-thread',
+        runId: 'test-run',
+      });
+
+      // Verify success event was NOT recorded
+      expect(mockTelemetryRecorder.recordEvent).not.toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'chat_interaction_success' })
+      );
+
+      // Verify success duration metric was NOT recorded
+      expect(mockTelemetryRecorder.recordMetric).not.toHaveBeenCalled();
+    });
   });
 
   describe('sendToolResultToAssistant skip handling (duplicate tool result)', () => {
