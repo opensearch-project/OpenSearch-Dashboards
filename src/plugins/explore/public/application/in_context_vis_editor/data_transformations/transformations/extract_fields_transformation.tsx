@@ -145,9 +145,7 @@ const ExtractFieldsEditor = ({
 export function createExtractFieldsTransformation(): TransformationInstance {
   return {
     instance_id: uuid.v4(),
-    label: i18n.translate('explore.transformations.extractFields.label', {
-      defaultMessage: 'Extract Fields',
-    }),
+    definition_id: 'extract_fields',
     config: {
       field: undefined,
       format: 'object',

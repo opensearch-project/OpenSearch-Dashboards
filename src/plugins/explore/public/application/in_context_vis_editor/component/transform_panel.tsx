@@ -132,6 +132,10 @@ export const TransformPanel = ({
                     <TransformationCard
                       index={index}
                       instance={instance}
+                      label={
+                        transformationService.getDefinition(instance.definition_id)?.label ??
+                        instance.definition_id
+                      }
                       onRemove={onRemove}
                       onConfigChange={onConfigChange}
                       onToggleHide={onToggleHide}
@@ -158,6 +162,7 @@ export const TransformPanel = ({
 interface TransformationCardProps {
   index: number;
   instance: TransformationInstance;
+  label: string;
   onRemove: (id: string) => void;
   onConfigChange: (id: string, newConfig: any) => void;
   onToggleHide: (id: string) => void;
@@ -168,6 +173,7 @@ interface TransformationCardProps {
 const TransformationCard = ({
   index,
   instance,
+  label,
   onRemove,
   onConfigChange,
   onToggleHide,
@@ -190,7 +196,7 @@ const TransformationCard = ({
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
             <EuiFlexItem>
               <EuiText size="s" color={instance.hide ? 'subdued' : 'default'}>
-                <strong>{`${index + 1} - ${instance.label}`}</strong>
+                <strong>{`${index + 1} - ${label}`}</strong>
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>

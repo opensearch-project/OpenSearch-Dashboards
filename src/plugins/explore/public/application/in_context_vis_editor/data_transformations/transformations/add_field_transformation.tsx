@@ -95,20 +95,85 @@ const applyUnary = (v: number, op: UnaryOperator): number | null => {
   }
 };
 
+const parseArithmetic = (input: string): number | null => {
+  let pos = 0;
+  const skipWhitespace = () => {
+    while (pos < input.length && /\s/.test(input[pos])) pos++;
+  };
+
+  const parseNumber = (): number | null => {
+    skipWhitespace();
+    const start = pos;
+    if (pos < input.length && input[pos] === '-') pos++;
+    if (pos >= input.length || !/\d/.test(input[pos])) {
+      pos = start;
+      return null;
+    }
+    while (pos < input.length && /\d/.test(input[pos])) pos++;
+    if (pos < input.length && input[pos] === '.') {
+      pos++;
+      while (pos < input.length && /\d/.test(input[pos])) pos++;
+    }
+    return Number(input.slice(start, pos));
+  };
+
+  const parseFactor = (): number | null => {
+    skipWhitespace();
+    if (pos < input.length && input[pos] === '(') {
+      pos++;
+      const val = parseExpr();
+      skipWhitespace();
+      if (pos >= input.length || input[pos] !== ')') return null;
+      pos++;
+      return val;
+    }
+    return parseNumber();
+  };
+
+  const parseTerm = (): number | null => {
+    let left = parseFactor();
+    if (left === null) return null;
+    while (pos < input.length) {
+      skipWhitespace();
+      const op = input[pos];
+      if (op !== '*' && op !== '/') break;
+      pos++;
+      const right = parseFactor();
+      if (right === null) return null;
+      left = op === '*' ? left * right : right !== 0 ? left / right : null;
+      if (left === null) return null;
+    }
+    return left;
+  };
+
+  const parseExpr = (): number | null => {
+    let left = parseTerm();
+    if (left === null) return null;
+    while (pos < input.length) {
+      skipWhitespace();
+      const op = input[pos];
+      if (op !== '+' && op !== '-') break;
+      pos++;
+      const right = parseTerm();
+      if (right === null) return null;
+      left = op === '+' ? left + right : left - right;
+    }
+    return left;
+  };
+
+  const result = parseExpr();
+  skipWhitespace();
+  if (pos !== input.length) return null;
+  return result !== null && isFinite(result) ? result : null;
+};
+
 const evaluateExpression = (expression: string, source: Record<string, unknown>): number | null => {
   const expr = expression.replace(/\$\{([^}]+)\}/g, (_, fieldName) => {
     const val = Number(source[fieldName]);
     return isNaN(val) ? 'NaN' : String(val);
   });
   if (expr.includes('NaN')) return null;
-  if (!/^[\d\s+\-*/().]+$/.test(expr)) return null;
-  try {
-    // Safe to use Function here — regex above guarantees no identifiers or side effects
-    const result = new Function(`return (${expr})`)();
-    return typeof result === 'number' && isFinite(result) ? result : null;
-  } catch {
-    return null;
-  }
+  return parseArithmetic(expr);
 };
 
 const operatorMap: Record<BinaryOperator, string> = {
@@ -450,9 +515,7 @@ const AddFieldEditor = ({
 export function createAddFieldTransformation(): TransformationInstance {
   return {
     instance_id: uuid.v4(),
-    label: i18n.translate('explore.transformations.addField.label', {
-      defaultMessage: 'Add Field',
-    }),
+    definition_id: 'add_field',
     config: {
       mode: 'binary',
       field1: undefined,

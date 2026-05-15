@@ -9,8 +9,9 @@ export type {
   TransformationDefinition,
   ITransformationService,
   FieldSchema,
+  UrlTransformationState,
 } from './types';
-export type { UrlTransformationState } from './transformation_service';
+
 export { TransformationService, createNoOpTransformationService } from './transformation_service';
 export {
   addTransformation,

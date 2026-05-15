@@ -180,6 +180,12 @@ export class QueryBuilder {
       this.updateQueryEditorState({ languageType: queryEditorStateFromUrl.languageType });
     }
 
+    if (queryEditorStateFromUrl?.activeBottomPanelTab) {
+      this.updateQueryEditorState({
+        activeBottomPanelTab: queryEditorStateFromUrl.activeBottomPanelTab,
+      });
+    }
+
     // read isQueryEditorDirty from url to prevent losing state after reloading page
     // only update when isQueryEditorDirty is true
     if (
@@ -217,7 +223,11 @@ export class QueryBuilder {
     const urlSync = combineLatest([
       this.queryState$,
       this.queryEditorState$.pipe(
-        map((s) => ({ languageType: s.languageType, isQueryEditorDirty: s.isQueryEditorDirty }))
+        map((s) => ({
+          languageType: s.languageType,
+          isQueryEditorDirty: s.isQueryEditorDirty,
+          ...(s.activeBottomPanelTab ? { activeBottomPanelTab: s.activeBottomPanelTab } : {}),
+        }))
       ),
     ])
       .pipe(debounceTime(500))

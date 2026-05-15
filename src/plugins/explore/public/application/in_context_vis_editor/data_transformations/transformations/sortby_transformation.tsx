@@ -92,7 +92,7 @@ const SortByEditor = ({
 export function createSortByTransformation(): TransformationInstance {
   return {
     instance_id: uuid.v4(),
-    label: i18n.translate('explore.transformations.sortBy.label', { defaultMessage: 'Sort By' }),
+    definition_id: 'sort_by',
     config: {
       field: undefined,
       order: 'asc',

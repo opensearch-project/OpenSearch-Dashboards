@@ -96,9 +96,7 @@ const FilterFieldsEditor = ({
 export function createFilterFieldsTransformation(): TransformationInstance {
   return {
     instance_id: uuid.v4(),
-    label: i18n.translate('explore.transformations.filterFields.label', {
-      defaultMessage: 'Filter Fields',
-    }),
+    definition_id: 'filter_fields',
     config: {
       mode: 'exclude',
       fieldOptions: [],

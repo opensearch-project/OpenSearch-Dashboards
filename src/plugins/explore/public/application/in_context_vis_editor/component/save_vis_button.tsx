@@ -128,17 +128,12 @@ export const SaveVisButton = () => {
       onTitleDuplicate,
     }: OnSaveProps) => {
       const pipeline = transformationService.pipeline$.getValue();
-      const serializedPipeline = pipeline.map((instance) => {
-        const definition = transformationService
-          .getDefinitions()
-          .find((def) => def.label === instance.label);
-        return {
-          definitionId: definition?.id || instance.label.toLowerCase().replace(/\s+/g, '_'),
-          instanceId: instance.instance_id,
-          config: instance.config,
-          hide: instance.hide,
-        };
-      });
+      const serializedPipeline = pipeline.map((instance) => ({
+        definitionId: instance.definition_id,
+        instanceId: instance.instance_id,
+        config: instance.config,
+        hide: instance.hide,
+      }));
 
       const axesMapping = visConfig?.axesMapping;
       const currentTitle = savedExploreToSave.title;

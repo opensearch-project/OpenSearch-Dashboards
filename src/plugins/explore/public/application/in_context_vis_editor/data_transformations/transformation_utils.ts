@@ -23,7 +23,7 @@ export function removeTransformation(
 export function updateTransformationConfig(
   registry: TransformationPipeline,
   instanceId: string,
-  newConfig: any
+  newConfig: Record<string, unknown>
 ): TransformationPipeline {
   return registry.map((instance) =>
     instance.instance_id === instanceId

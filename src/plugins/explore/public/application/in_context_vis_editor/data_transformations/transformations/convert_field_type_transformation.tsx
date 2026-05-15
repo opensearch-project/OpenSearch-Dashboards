@@ -182,9 +182,7 @@ const ConvertFieldTypeEditor = ({
 export function createConvertFieldTypeTransformation(): TransformationInstance {
   return {
     instance_id: uuid.v4(),
-    label: i18n.translate('explore.transformations.convertFieldType.label', {
-      defaultMessage: 'Convert Field Type',
-    }),
+    definition_id: 'convert_field_type',
     config: { rules: [] } as ConvertFieldTypeConfig,
     hide: false,
     transformationMethod: (data: OpenSearchSearchHit[], config: ConvertFieldTypeConfig) => {

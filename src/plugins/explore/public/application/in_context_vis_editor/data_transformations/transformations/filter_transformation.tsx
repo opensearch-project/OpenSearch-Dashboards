@@ -126,7 +126,7 @@ const FilterEditor = ({
 export function createFilterTransformation(): TransformationInstance {
   return {
     instance_id: uuid.v4(),
-    label: i18n.translate('explore.transformations.filter.label', { defaultMessage: 'Filter' }),
+    definition_id: 'filter',
     config: {
       field: undefined,
       operator: 'equals',
