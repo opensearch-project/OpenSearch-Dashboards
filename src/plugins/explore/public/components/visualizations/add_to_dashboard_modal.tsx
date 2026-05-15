@@ -19,19 +19,23 @@ import {
   EuiModalHeader,
   EuiRadio,
 } from '@elastic/eui';
-import { FormattedMessage } from '@osd/i18n/react';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { SavedObjectsClientContract } from 'src/core/public';
 import { DebouncedFieldText } from './style_panel/utils';
 import { OnSaveProps } from './add_to_dashboard_button';
 import { useSavedExplore } from '../../application/utils/hooks/use_saved_explore';
 import { useExistingDashboard } from '../../application/utils/hooks/use_existing_dashboard';
+import { DashboardAttributes } from './add_to_dashboard_button';
 
 interface AddToDashboardModalProps {
   savedObjectsClient: SavedObjectsClientContract;
   onConfirm: (props: OnSaveProps) => void;
   onCancel: () => void;
   savedExploreId: string | undefined;
+}
+
+export interface ExploreAttributes {
+  title?: string;
 }
 
 export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
@@ -44,8 +48,59 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
   const [newDashboardName, setNewDashboardName] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const [isTitleOrDashboardTitleDuplicate, setIsTitleOrDashboardTitleDuplicate] = useState<boolean>(
-    false
+  const [isExploreDuplicate, setIsExploreDuplicate] = useState<boolean>(false);
+  const [isDashboardDuplicate, setIsDashboardDuplicate] = useState<boolean>(false);
+
+  // Refs to track the latest requested name and detect stale responses
+  const latestExploreTitleRef = React.useRef<string>('');
+  const latestDashboardTitleRef = React.useRef<string>('');
+
+  const checkExploreDuplicate = useCallback(
+    async (name: string) => {
+      latestExploreTitleRef.current = name;
+      if (!name.trim()) {
+        setIsExploreDuplicate(false);
+        return;
+      }
+      try {
+        const res = await savedObjectsClient.find<ExploreAttributes>({
+          type: 'explore',
+          search: `"${name}"`,
+          searchFields: ['title'],
+        });
+        // Ignore stale responses — only apply if this is still the latest query
+        if (latestExploreTitleRef.current === name) {
+          setIsExploreDuplicate(res.savedObjects.some((o) => o.attributes?.title === name));
+        }
+      } catch {
+        // ignore errors, leave state unchanged
+      }
+    },
+    [savedObjectsClient]
+  );
+
+  const checkDashboardDuplicate = useCallback(
+    async (name: string) => {
+      latestDashboardTitleRef.current = name;
+      if (!name.trim()) {
+        setIsDashboardDuplicate(false);
+        return;
+      }
+      try {
+        const res = await savedObjectsClient.find<DashboardAttributes>({
+          type: 'dashboard',
+          search: `"${name}"`,
+          searchFields: ['title'],
+        });
+        // Ignore stale responses — only apply if this is still the latest query
+        if (latestDashboardTitleRef.current === name) {
+          setIsDashboardDuplicate(res.savedObjects.some((o) => o.attributes?.title === name));
+        }
+      } catch {
+        // ignore errors, leave state unchanged
+      }
+    },
+    [savedObjectsClient]
   );
 
   const { savedExplore } = useSavedExplore(savedExploreId);
@@ -77,52 +132,54 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
   const handleSave = async () => {
     if (isLoading) return;
     setIsLoading(true);
-    if (savedExplore) {
-      await onConfirm({
-        savedExplore,
-        newTitle: title,
-        isTitleDuplicateConfirmed: isTitleOrDashboardTitleDuplicate,
-        onTitleDuplicate: handleTitleDuplicate,
-        mode: selectedOption,
-        selectDashboard: selectedDashboard,
-        newDashboardName,
-      });
+    try {
+      if (savedExplore) {
+        await onConfirm({
+          savedExplore,
+          newTitle: title,
+          mode: selectedOption,
+          selectDashboard: selectedDashboard,
+          newDashboardName,
+        });
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleTitleDuplicate = () => {
-    setIsLoading(false);
-    setIsTitleOrDashboardTitleDuplicate(true);
-  };
-
-  const renderDuplicateTitleCallout = () => {
-    if (!isTitleOrDashboardTitleDuplicate) {
+  const renderExploreDuplicateCallout = () => {
+    if (!isExploreDuplicate) {
       return null;
     }
 
     return (
-      <EuiFlexItem style={{ width: '100%' }}>
-        <EuiCallOut
-          title={
-            <FormattedMessage
-              id="explore.addtoDashboardModal.duplicateTitleLabel"
-              defaultMessage="This object already exists"
-            />
-          }
-          color="warning"
-          data-test-subj="titleDupicateWarnMsg"
-        >
-          <p>
-            <FormattedMessage
-              id="explore.addtoDashboardModal.duplicateTitleDescription"
-              defaultMessage="Saving '{title}' creates a duplicate title."
-              values={{
-                title,
-              }}
-            />
-          </p>
-        </EuiCallOut>
-      </EuiFlexItem>
+      <EuiCallOut
+        title={i18n.translate('explore.addtoDashboardModal.exploreDuplicateWarning', {
+          defaultMessage: 'A visualization with this name already exists.',
+        })}
+        color="warning"
+        iconType="alert"
+        size="s"
+        data-test-subj="titleDuplicateWarnMsg"
+      />
+    );
+  };
+
+  const renderDashboardDuplicateCallout = () => {
+    if (!isDashboardDuplicate) {
+      return null;
+    }
+
+    return (
+      <EuiCallOut
+        title={i18n.translate('explore.addtoDashboardModal.dashboardDuplicateWarning', {
+          defaultMessage: 'A dashboard with this name already exists.',
+        })}
+        color="warning"
+        iconType="alert"
+        size="s"
+        data-test-subj="dashboardTitleDuplicateWarnMsg"
+      />
     );
   };
 
@@ -229,12 +286,13 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
                   placeholder="Enter dashboard name"
                   onChange={(text) => {
                     setNewDashboardName(text);
+                    checkDashboardDuplicate(text);
                   }}
                 />
               </EuiFormRow>
+              {renderDashboardDuplicateCallout()}
             </EuiFlexItem>
           )}
-          {renderDuplicateTitleCallout()}
 
           <EuiFlexItem grow={true} style={{ width: '100%' }}>
             <EuiFormRow
@@ -246,11 +304,12 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
                 value={title}
                 placeholder="Enter save search name"
                 onChange={(text) => {
-                  setIsTitleOrDashboardTitleDuplicate(false);
                   setTitle(text);
+                  checkExploreDuplicate(text);
                 }}
               />
             </EuiFormRow>
+            {renderExploreDuplicateCallout()}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiModalBody>
