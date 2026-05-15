@@ -49,7 +49,7 @@ export const TableColumnHeader = ({
   setFilters,
   uniques,
 }: TableColumnHeaderProps) => {
-  if (!showColumnFilter || col.schema === 'date') {
+  if (!showColumnFilter || col.schema === 'date' || col.schema === 'unknown') {
     return <span>{col.name}</span>;
   }
 

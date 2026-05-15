@@ -478,11 +478,17 @@ export class ExploreEmbeddable
     this.searchProps.activeTab = uiState.activeTab;
     this.searchProps.styleOptions = visualization.params;
     if (uiState.activeTab !== 'logs' && visualizationData) {
-      const { numericalColumns, categoricalColumns, dateColumns } = visualizationData;
+      const {
+        numericalColumns,
+        categoricalColumns,
+        dateColumns,
+        unknownColumns,
+      } = visualizationData;
       const allColumns = [
         ...(numericalColumns ?? []),
         ...(categoricalColumns ?? []),
         ...(dateColumns ?? []),
+        ...(unknownColumns ?? []),
       ];
 
       // Check if there's data to visualize
@@ -564,7 +570,8 @@ export class ExploreEmbeddable
         ...(visualizationData.numericalColumns ?? []),
         ...(visualizationData.categoricalColumns ?? []),
         ...(visualizationData.dateColumns ?? []),
-      ];
+        ...(visualizationData.unknownColumns ?? []),
+      ].sort((a, b) => a.id - b.id);
       const indexPattern = searchSource.getField('index');
 
       this.inspectorAdaptors.data.setTabularLoader(

@@ -63,11 +63,13 @@ export const VisualizationRender = ({
       ...(visualizationData?.numericalColumns ?? []),
       ...(visualizationData?.categoricalColumns ?? []),
       ...(visualizationData?.dateColumns ?? []),
+      ...(visualizationData?.unknownColumns ?? []),
     ];
   }, [
     visualizationData?.numericalColumns,
     visualizationData?.categoricalColumns,
     visualizationData?.dateColumns,
+    visualizationData?.unknownColumns,
   ]);
 
   if (!visualizationData || columns.length === 0) {

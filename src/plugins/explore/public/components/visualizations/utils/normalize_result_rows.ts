@@ -52,5 +52,10 @@ export const normalizeResultRows = <T = unknown>(
   );
   const dateColumns = columnsWithStats.filter((column) => column.schema === VisFieldType.Date);
 
-  return { transformedData, numericalColumns, categoricalColumns, dateColumns };
+  // unknownColumns should only be used for table display, not for the auto-vis logic
+  const unknownColumns = columnsWithStats.filter(
+    (column) => column.schema === VisFieldType.Unknown
+  );
+
+  return { transformedData, numericalColumns, categoricalColumns, dateColumns, unknownColumns };
 };

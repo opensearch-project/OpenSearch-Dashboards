@@ -11,6 +11,7 @@ export interface VisData {
   dateColumns: VisColumn[];
   numericalColumns: VisColumn[];
   categoricalColumns: VisColumn[];
+  unknownColumns: VisColumn[];
 }
 
 export interface ChartConfig {
