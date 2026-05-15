@@ -47,7 +47,10 @@ export const createSingleMetric = (
     data: transformedData,
     styles,
     axisConfig: {},
-    axisColumnMappings,
+    axisColumnMappings: {
+      [AxisRole.X]: dateColumn,
+      [AxisRole.Y]: valueColumn,
+    },
   });
   return { spec: result.spec, name: numericFieldName, data: transformedData };
 };
