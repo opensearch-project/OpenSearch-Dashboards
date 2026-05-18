@@ -107,7 +107,6 @@ export interface ToolMessage {
   content: string;
   role: 'tool';
   toolCallId: string;
-  error?: string;
 }
 
 /**
