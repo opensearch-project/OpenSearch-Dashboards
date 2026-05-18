@@ -66,6 +66,11 @@ interface ChatMessagesProps {
   timeline: Message[];
   isStreaming: boolean;
   onResendMessage?: (message: Message) => void;
+  onResendToolResult?: (params: {
+    messageId: string;
+    toolCallId: string;
+    toolResult: any;
+  }) => Promise<void>;
   onApproveConfirmation?: () => void;
   onRejectConfirmation?: () => void;
   onFillInput?: (content: string) => void;
@@ -240,6 +245,7 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
   timeline,
   isStreaming,
   onResendMessage,
+  onResendToolResult,
   onApproveConfirmation,
   onRejectConfirmation,
   onFillInput,
@@ -542,7 +548,9 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
 
           // Handle system messages as errors
           if (message.role === 'system') {
-            return <ErrorRow key={message.id} error={message} />;
+            return (
+              <ErrorRow key={message.id} error={message} onResendToolResult={onResendToolResult} />
+            );
           }
 
           return null;

@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
+import { i18n } from '@osd/i18n';
 import { EventType } from '../../common/events';
 import type {
   Event as ChatEvent,
@@ -65,6 +66,11 @@ export class ChatEventHandler {
   private onSendToolResultStateChange?: (isSending: boolean) => void;
   private getTimeline: () => Message[];
   private toolResultSubscription: Subscription | null = null;
+
+  // Controls the currently in-flight tool result send (polling + agent stream).
+  // When aborted, `waitForToolCallSync` bails out with reason 'aborted' and the
+  // agent fetch is cancelled.
+  private toolResultAbortController: AbortController | null = null;
 
   // Telemetry tracking
   private interactionStartTime: number | null = null;
@@ -657,67 +663,157 @@ export class ChatEventHandler {
   /**
    * Send tool result back to assistant
    */
-  private async sendToolResultToAssistant(toolCallId: string, result: any): Promise<void> {
+  async sendToolResultToAssistant(toolCallId: string, result: any): Promise<void> {
+    // Abort any in-flight tool result send so we don't leak controllers or
+    // race two dispatches against the same toolCallId.
+    if (this.toolResultAbortController) {
+      this.toolResultAbortController.abort();
+    }
+    const abortController = new AbortController();
+    this.toolResultAbortController = abortController;
+
+    // Release our claim on the shared slot — but only if it's still ours.
+    // A later send may have already replaced it.
+    const releaseController = () => {
+      if (this.toolResultAbortController === abortController) {
+        this.toolResultAbortController = null;
+      }
+    };
+
+    let observable: Observable<ChatEvent>;
+    let toolMessage: ToolMessage;
+    let skipped:
+      | { reason: 'result_already_exists' | 'sync_timeout' | 'no_thread_id' | 'aborted' }
+      | undefined;
+
     try {
       // Notify that we're starting to send tool result
       this.onSendToolResultStateChange?.(true);
-
       const messages = this.getTimeline();
 
-      const { observable, toolMessage, skipped } = await this.chatService.sendToolResult(
+      ({ observable, toolMessage, skipped } = await this.chatService.sendToolResult(
         toolCallId,
         result,
-        messages
-      );
-
-      // Notify that sending tool result is complete
-      this.onSendToolResultStateChange?.(false);
-
-      if (skipped) {
-        // Another window already persisted a tool result for this toolCallId.
-        // Skip appending the locally-constructed toolMessage and surface an
-        // informational system message instead.
-        const infoMessage: SystemMessage = {
-          id: `tool-skipped-${toolCallId}-${Date.now()}`,
-          role: 'system',
-          content: 'This tool result was already submitted from another window.',
-        };
-        this.onTimelineUpdate((prev) => [...prev, infoMessage]);
-        return;
-      }
-
-      this.onTimelineUpdate((prev) => [...prev, toolMessage]);
-
-      // Set streaming state and subscribe to the response stream
-      this.onStreamingStateChange(true);
-
-      const subscription = observable.subscribe({
-        next: (event: ChatEvent) => {
-          // Handle the assistant's response to the tool result
-          this.handleEvent(event);
-        },
-        error: (error: any) => {
-          // eslint-disable-next-line no-console
-          console.error('Tool result response error:', error);
-          this.onStreamingStateChange(false);
-          this.onStartResponse(false);
-          this.toolResultSubscription = null;
-        },
-        complete: () => {
-          this.onStreamingStateChange(false);
-          this.onStartResponse(false);
-          this.toolResultSubscription = null;
-        },
-      });
-
-      // Store subscription so it can be unsubscribed in clearState
-      this.toolResultSubscription = subscription;
+        messages,
+        abortController.signal
+      ));
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Failed to send tool result:', error);
-      this.onSendToolResultStateChange?.(false);
-      this.onStreamingStateChange(false);
+      releaseController();
+
+      // Surface the failure in the timeline so the user can tell the
+      // conversation is out of sync (the assistant never received the
+      // result) rather than silently showing a failed tool row.
+      const failureMessage: SystemMessage = {
+        id: `tool-send-failed-${toolCallId}-${Date.now()}`,
+        role: 'system',
+        content: i18n.translate('chat.toolResult.sendFailed', {
+          defaultMessage:
+            'Failed to send tool result to the assistant. The conversation may be out of sync.',
+        }),
+      };
+      this.onTimelineUpdate((prev) => [...prev, failureMessage]);
+      return;
+    } finally {
+      // Only notify "done" if a newer send has not replaced the controller.
+      if (
+        this.toolResultAbortController === abortController ||
+        this.toolResultAbortController === null
+      ) {
+        this.onSendToolResultStateChange?.(false);
+      }
     }
+
+    if (skipped) {
+      if (skipped.reason === 'aborted') {
+        // User initiated the abort (e.g. via cancelToolResultDispatch). No
+        // user-facing system message — the cancellation is intentional.
+        releaseController();
+        return;
+      }
+
+      if (skipped.reason === 'sync_timeout') {
+        // Sync polling exhausted without observing the tool call in history.
+        // Store the result on the system message so the user can retry via
+        // the resend affordance without needing an external map.
+        const timeoutMessage: SystemMessage = {
+          id: `tool-sync-timeout-${toolCallId}-${Date.now()}`,
+          role: 'system',
+          content: i18n.translate('chat.toolResult.syncTimeout', {
+            defaultMessage:
+              'We could not confirm the tool call was synced before sending the result. You can resend the tool result to try again.',
+          }),
+          toolCallId,
+          canResend: true,
+          toolResult: result,
+        };
+        this.onTimelineUpdate((prev) => [...prev, timeoutMessage]);
+        releaseController();
+        return;
+      }
+
+      if (skipped.reason === 'no_thread_id') {
+        // No thread id is an unusual state — surface it so the user isn't
+        // left wondering why nothing happened. No resend affordance since
+        // retrying without a thread would hit the same path.
+        const noThreadMessage: SystemMessage = {
+          id: `tool-no-thread-${toolCallId}-${Date.now()}`,
+          role: 'system',
+          content: i18n.translate('chat.toolResult.noThreadId', {
+            defaultMessage:
+              'Tool result could not be sent because the conversation thread is missing. Start a new chat and try again.',
+          }),
+          toolCallId,
+        };
+        this.onTimelineUpdate((prev) => [...prev, noThreadMessage]);
+        releaseController();
+        return;
+      }
+
+      // result_already_exists: another window already persisted a tool
+      // result for this toolCallId. Skip appending the locally-constructed
+      // toolMessage and surface an informational system message instead.
+      const infoMessage: SystemMessage = {
+        id: `tool-skipped-${toolCallId}-${Date.now()}`,
+        role: 'system',
+        content: i18n.translate('chat.toolResult.alreadySubmitted', {
+          defaultMessage: 'This tool result was already submitted from another window.',
+        }),
+      };
+      this.onTimelineUpdate((prev) => [...prev, infoMessage]);
+      releaseController();
+      return;
+    }
+
+    this.onTimelineUpdate((prev) => [...prev, toolMessage]);
+
+    // Set streaming state and subscribe to the response stream
+    this.onStreamingStateChange(true);
+
+    const subscription = observable.subscribe({
+      next: (event: ChatEvent) => {
+        // Handle the assistant's response to the tool result
+        this.handleEvent(event);
+      },
+      error: (error: Error) => {
+        // A deliberate abort surfaces as AbortError — treat it as a quiet
+        // cancellation rather than a real error.
+        if (error?.name !== 'AbortError') {
+          // eslint-disable-next-line no-console
+          console.error('Tool result response error:', error);
+        }
+      },
+    });
+    subscription.add(() => {
+      this.onStreamingStateChange(false);
+      this.onStartResponse(false);
+      this.toolResultSubscription = null;
+      releaseController();
+    });
+
+    // Store subscription so it can be unsubscribed in clearState
+    this.toolResultSubscription = subscription;
   }
 
   // timelineToMessages method removed - timeline is now directly AG-UI compatible
@@ -745,19 +841,26 @@ export class ChatEventHandler {
     // @ts-expect-error TS2339 TODO(ts-error): fixme
     this._lastAssistantMessageId = null;
 
-    // Stop tool result streaming if active
-    this.stopToolResultStreaming();
+    // Cancel any in-flight tool result dispatch
+    this.cancelToolResultDispatch();
   }
 
   /**
-   * Stop tool result streaming if active
+   * Cancel the in-flight tool result dispatch if active.
+   *
+   * Aborts both the pre-dispatch polling loop and the post-dispatch agent
+   * stream via `toolResultAbortController`. Also unsubscribes from the
+   * wrapped observable, triggering the registered teardown callback for
+   * state cleanup.
    */
-  stopToolResultStreaming(): void {
+  cancelToolResultDispatch(): void {
+    if (this.toolResultAbortController) {
+      this.toolResultAbortController.abort();
+      this.toolResultAbortController = null;
+    }
     if (this.toolResultSubscription) {
       this.toolResultSubscription.unsubscribe();
       this.toolResultSubscription = null;
-      this.onStreamingStateChange(false);
-      this.onStartResponse(false);
     }
   }
 }

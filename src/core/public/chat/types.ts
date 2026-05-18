@@ -64,6 +64,21 @@ export interface DeveloperMessage extends BaseMessage {
 export interface SystemMessage extends BaseMessage {
   role: 'system';
   content: string;
+  /**
+   * When set, this system message corresponds to a failed tool result
+   * submission for the given tool call. The UI may use this (together with
+   * `canResend`) to offer a resend affordance.
+   */
+  toolCallId?: string;
+  /**
+   * Whether the associated tool result submission can be retried by the user.
+   */
+  canResend?: boolean;
+  /**
+   * The tool result payload to resend. Stored directly on the timeline message
+   * so no external map is needed.
+   */
+  toolResult?: any;
 }
 
 /**
