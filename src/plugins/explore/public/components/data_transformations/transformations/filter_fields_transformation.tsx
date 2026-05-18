@@ -9,7 +9,7 @@ import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/
 import { i18n } from '@osd/i18n';
 import { TransformationInstance, TransformationDefinition, FieldSchema } from '../index';
 import { FieldSelector } from '../field_selector';
-import { OpenSearchSearchHit } from '../../../../types/doc_views_types';
+import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 
 type FilterFieldsMode = 'include' | 'exclude';
 

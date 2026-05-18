@@ -7,8 +7,8 @@ import uuid from 'uuid';
 import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { TransformationInstance, TransformationDefinition } from '../index';
-import { OpenSearchSearchHit } from '../../../../types/doc_views_types';
-import { DebouncedFieldNumber } from '../../../../components/visualizations/style_panel/utils';
+import { OpenSearchSearchHit } from '../../../types/doc_views_types';
+import { DebouncedFieldNumber } from '../../visualizations/style_panel/utils';
 
 interface LimitConfig {
   limit: number | undefined;

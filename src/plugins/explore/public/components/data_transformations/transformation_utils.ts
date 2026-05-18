@@ -4,7 +4,7 @@
  */
 
 import { TransformationInstance, TransformationPipeline } from './types';
-import { OpenSearchSearchHit } from '../../../types/doc_views_types';
+import { OpenSearchSearchHit } from '../../types/doc_views_types';
 
 export function addTransformation(
   currentPipe: TransformationPipeline,

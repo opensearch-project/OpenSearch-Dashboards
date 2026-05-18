@@ -66,7 +66,7 @@ import {
   TransformationService,
   UrlTransformationState,
   registerAllTransformations,
-} from '../application/in_context_vis_editor/data_transformations';
+} from '../components/data_transformations';
 
 // TODO cleanup unused props
 export interface SearchProps {
@@ -219,7 +219,7 @@ export class ExploreEmbeddable
       );
       this.transformationService.restoreFromState(savedPipeline);
     } catch (error) {
-      // skip failed pipeline
+      // skip failed pipeline, no transformations applied
     }
   }
 

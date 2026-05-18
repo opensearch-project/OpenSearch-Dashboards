@@ -4,11 +4,14 @@
  */
 
 import { useMemo, useEffect } from 'react';
-import { TransformationService } from '../data_transformations/transformation_service';
+import {
+  TransformationService,
+  registerAllTransformations,
+  UrlTransformationState,
+} from '../../../components/data_transformations';
 import { useQueryBuilderState } from './use_query_builder_state';
 import { useVisualizationBuilder } from './use_visualization_builder';
 import { getServices } from '../../../services/services';
-import { registerAllTransformations, UrlTransformationState } from '../data_transformations';
 
 let globalTransformationService: TransformationService | undefined;
 

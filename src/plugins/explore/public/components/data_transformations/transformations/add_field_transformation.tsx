@@ -17,9 +17,9 @@ import { i18n } from '@osd/i18n';
 import { get } from 'lodash';
 import { TransformationInstance, TransformationDefinition, FieldSchema } from '../index';
 import { FieldSelector } from '../field_selector';
-import { VisFieldType } from '../../../../components/visualizations/types';
-import { OpenSearchSearchHit } from '../../../../types/doc_views_types';
-import { DebouncedFieldText } from '../../../../components/visualizations/style_panel/utils';
+import { VisFieldType } from '../../visualizations/types';
+import { OpenSearchSearchHit } from '../../../types/doc_views_types';
+import { DebouncedFieldText } from '../../visualizations/style_panel/utils';
 import { binaryOperatorOptions, unaryOperatorOptions, modeToggleOptions } from '../types';
 
 type Mode = 'binary' | 'unary' | 'crossFields';

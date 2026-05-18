@@ -19,7 +19,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { ITransformationService } from '../data_transformations';
+import { ITransformationService } from './types';
 
 interface TransformSelectorButtonProps {
   transformationService: ITransformationService;

@@ -10,7 +10,7 @@ import { i18n } from '@osd/i18n';
 import { get } from 'lodash';
 import { TransformationInstance, TransformationDefinition, FieldSchema } from '../index';
 import { FieldSelector } from '../field_selector';
-import { OpenSearchSearchHit } from '../../../../types/doc_views_types';
+import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 
 interface SortByConfig {
   field: string | undefined;

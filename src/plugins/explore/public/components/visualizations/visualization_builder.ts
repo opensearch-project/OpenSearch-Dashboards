@@ -23,8 +23,8 @@ import { adaptLegacyData } from './visualization_builder_utils';
 import { mergeStyles } from './utils/utils';
 import { AxisFieldNameMappings, RenderChartConfig } from './types';
 import { TimeRange } from '../../../../data/common';
-import { ITransformationService } from '../../application/in_context_vis_editor/data_transformations/types';
-import { createNoOpTransformationService } from '../../application/in_context_vis_editor/data_transformations/transformation_service';
+import { ITransformationService } from '../data_transformations/types';
+import { createNoOpTransformationService } from '../data_transformations/transformation_service';
 
 interface VisState {
   styleOptions?: StyleOptions;
