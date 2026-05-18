@@ -114,6 +114,50 @@ describe('createSavedObjectsStreamFromNdJson', () => {
       },
     ]);
   });
+
+  it('rejects objects with __proto__ keys', async () => {
+    await expect(
+      createSavedObjectsStreamFromNdJson(
+        new Readable({
+          read() {
+            this.push('{"id": "foo", "type": "foo-type", "__proto__": {"polluted": true}}\n');
+            this.push(null);
+          },
+        })
+      )
+    ).rejects.toThrowError(/invalid key/i);
+    expect(({} as any).polluted).toBeUndefined();
+  });
+
+  it('rejects objects with constructor.prototype keys', async () => {
+    await expect(
+      createSavedObjectsStreamFromNdJson(
+        new Readable({
+          read() {
+            this.push(
+              '{"id": "foo", "type": "foo-type", "constructor": {"prototype": {"bad": true}}}\n'
+            );
+            this.push(null);
+          },
+        })
+      )
+    ).rejects.toThrowError(/invalid key/i);
+  });
+
+  it('rejects objects with __proto__ in nested attributes', async () => {
+    await expect(
+      createSavedObjectsStreamFromNdJson(
+        new Readable({
+          read() {
+            this.push(
+              '{"id": "foo", "type": "foo-type", "attributes": {"title": "safe", "__proto__": {"x": 1}}}\n'
+            );
+            this.push(null);
+          },
+        })
+      )
+    ).rejects.toThrowError(/invalid key/i);
+  });
 });
 
 describe('validateTypes', () => {
