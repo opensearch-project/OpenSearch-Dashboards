@@ -197,19 +197,6 @@ describe('Chat Types and Schemas', () => {
         expect(result.success).toBe(true);
       });
 
-      it('should validate tool message with error', () => {
-        const validMessage = {
-          id: 'msg-123',
-          content: 'Tool error',
-          role: 'tool' as const,
-          toolCallId: 'tool-123',
-          error: 'Tool execution failed',
-        };
-
-        const result = ToolMessageSchema.safeParse(validMessage);
-        expect(result.success).toBe(true);
-      });
-
       it('should reject tool message without toolCallId', () => {
         const invalidMessage = {
           id: 'msg-123',

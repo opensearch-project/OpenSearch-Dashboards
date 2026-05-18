@@ -7,6 +7,7 @@ import { ChatEventHandler } from './chat_event_handler';
 import { AssistantActionService } from '../../../context_provider/public';
 import { ChatService } from './chat_service';
 import { EventType } from '../../common/events';
+import { TOOL_EXECUTION_ERROR_PREFIX } from '../../common';
 import type {
   TextMessageStartEvent,
   TextMessageContentEvent,
@@ -29,11 +30,13 @@ const mockAssistantActionService = ({
   hasAction: jest.fn().mockReturnValue(true),
   getCurrentState: mockGetCurrentState,
   isUserConfirmRequired: jest.fn().mockReturnValue(false),
+  clearAllToolCallStates: jest.fn(),
 } as unknown) as jest.Mocked<AssistantActionService>;
 
 const mockChatService = ({
   sendToolResult: jest.fn(),
   getCurrentDataSourceId: jest.fn().mockReturnValue(undefined),
+  resetConnection: jest.fn(),
 } as unknown) as jest.Mocked<ChatService>;
 
 const mockConfirmationService = {
@@ -533,6 +536,20 @@ describe('ChatEventHandler', () => {
       // The timeline should have been updated twice: once for TEXT_MESSAGE_START and once for TOOL_CALL_START
       expect(mockOnTimelineUpdate).toHaveBeenCalledTimes(2);
     });
+
+    it('should drain AssistantActionService tool call states', async () => {
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_START,
+        toolCallId: 'tool-1',
+        toolCallName: 'test_tool',
+      } as ToolCallStartEvent);
+
+      chatEventHandler.clearState();
+
+      // Process-wide singleton state must be drained so stale pending/executing
+      // entries from this run do not bleed into the next conversation.
+      expect(mockAssistantActionService.clearAllToolCallStates).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('user confirmation handling', () => {
@@ -669,8 +686,69 @@ describe('ChatEventHandler', () => {
       // Should handle JSON parse error gracefully
       expect(mockAssistantActionService.updateToolCallState).toHaveBeenCalledWith(toolCallId, {
         status: 'failed',
-        error: expect.stringContaining('Unexpected token'),
+        error: expect.objectContaining({ message: expect.stringContaining('Unexpected token') }),
       });
+    });
+
+    it('should prefix the tool result content with the execution error prefix when tool execution throws', async () => {
+      const toolCallId = 'tool-err-1';
+
+      mockChatService.sendToolResult = jest.fn().mockResolvedValue({
+        observable: {
+          subscribe: jest.fn().mockReturnValue({ unsubscribe: jest.fn(), add: jest.fn() }),
+        },
+        toolMessage: {
+          id: `tool-result-${toolCallId}`,
+          role: 'tool',
+          content: '',
+          toolCallId,
+        } as ToolMessage,
+      });
+
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_START,
+        toolCallId,
+        toolCallName: 'test_tool',
+      } as ToolCallStartEvent);
+
+      // Invalid JSON will throw from JSON.parse inside handleToolCallEnd,
+      // reaching the outer catch that is responsible for delivering the
+      // error to the assistant.
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_ARGS,
+        toolCallId,
+        delta: 'invalid-json',
+      } as ToolCallArgsEvent);
+
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_END,
+        toolCallId,
+      } as ToolCallEndEvent);
+
+      // The payload sent to the assistant starts with the execution error
+      // prefix so a snapshot reload can render the tool row as an error
+      // via getToolStatus — no local-only ToolMessage is appended, which
+      // keeps the UI consistent with the persisted agentic memory.
+      expect(mockChatService.sendToolResult).toHaveBeenCalledWith(
+        toolCallId,
+        expect.stringContaining(TOOL_EXECUTION_ERROR_PREFIX),
+        expect.any(Array),
+        expect.any(AbortSignal)
+      );
+
+      // No locally-constructed error ToolMessage should be appended to the
+      // timeline — only the toolMessage returned by sendToolResult.
+      const localErrorMessage = timeline.find((msg) => msg.id === `tool-error-${toolCallId}`);
+      expect(localErrorMessage).toBeUndefined();
+
+      // The error field must be a proper Error object (not a plain string).
+      expect(mockAssistantActionService.updateToolCallState).toHaveBeenCalledWith(
+        toolCallId,
+        expect.objectContaining({
+          status: 'failed',
+          error: expect.any(Error),
+        })
+      );
     });
 
     it('should handle missing tool call', async () => {
