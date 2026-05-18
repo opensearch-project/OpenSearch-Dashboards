@@ -112,6 +112,7 @@ export interface VariableQueryPanelProps {
   onUseTimeFilterChange?: (useTimeFilter: boolean) => void;
   /** Callback to notify parent about preview validation state */
   onPreviewValidationChange?: (isValid: boolean) => void;
+  currentVariableName?: string;
 }
 
 export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
@@ -128,6 +129,7 @@ export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
   useTimeFilter = false,
   onUseTimeFilterChange,
   onPreviewValidationChange,
+  currentVariableName,
 }) => {
   const { services } = useOpenSearchDashboards<DashboardServices>();
   const { data } = services;
@@ -372,7 +374,11 @@ export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
       // Interpolate variable references before executing the preview query
       let queryToExecute = query.trim();
       if (interpolationService && interpolationService.hasVariables(queryToExecute)) {
-        queryToExecute = interpolationService.interpolate(queryToExecute, language);
+        queryToExecute = interpolationService.interpolate(
+          queryToExecute,
+          language,
+          currentVariableName
+        );
       }
 
       const options = await executeQueryForOptions(
@@ -428,6 +434,7 @@ export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
     regex,
     useTimeFilter,
     onPreviewValidationChange,
+    currentVariableName,
   ]);
 
   // Keep ref updated for use in editorDidMount closure

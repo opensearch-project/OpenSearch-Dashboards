@@ -187,6 +187,7 @@ describe('VisualizationBuilder', () => {
         categoricalColumns: [],
         dateColumns: [],
         transformedData: [],
+        unknownColumns: [],
       });
       builder.visConfig$.next({
         type: 'line',
@@ -222,6 +223,7 @@ describe('VisualizationBuilder', () => {
           categoricalColumns: [],
           dateColumns: [],
           transformedData: [],
+          unknownColumns: [],
         })
       ).toBe(undefined);
 
@@ -232,6 +234,7 @@ describe('VisualizationBuilder', () => {
           categoricalColumns: [],
           dateColumns: [],
           transformedData: [],
+          unknownColumns: [],
         })
       ).toBe(undefined);
 
@@ -242,6 +245,7 @@ describe('VisualizationBuilder', () => {
           categoricalColumns: [],
           dateColumns: [],
           transformedData: [],
+          unknownColumns: [],
         })
       ).toEqual({ chartType: 'metric', axesMapping: { value: 'name-numerical-0' } });
     });
@@ -269,6 +273,7 @@ describe('VisualizationBuilder', () => {
           categoricalColumns: createMockVisColumns(1, VisFieldType.Categorical),
           dateColumns: [],
           transformedData: [],
+          unknownColumns: [],
         }
       );
       // For line, the axes are x/y
@@ -299,6 +304,7 @@ describe('VisualizationBuilder', () => {
         categoricalColumns: createMockVisColumns(1, VisFieldType.Categorical),
         dateColumns: [],
         transformedData: [],
+        unknownColumns: [],
       });
       expect(setVisConfigSpy).not.toHaveBeenCalled();
     });
@@ -323,6 +329,7 @@ describe('VisualizationBuilder', () => {
           categoricalColumns: [],
           dateColumns: [],
           transformedData: [],
+          unknownColumns: [],
         });
         expect(setVisConfigSpy).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -357,6 +364,7 @@ describe('VisualizationBuilder', () => {
           categoricalColumns: [],
           dateColumns: [],
           transformedData: [],
+          unknownColumns: [],
         });
         expect(setVisConfigSpy).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -391,6 +399,7 @@ describe('VisualizationBuilder', () => {
         categoricalColumns: [],
         dateColumns: [],
         transformedData: [],
+        unknownColumns: [],
       });
       expect(setVisConfigSpy).toHaveBeenCalledWith(expect.objectContaining({ type: 'table' }));
     });
@@ -411,6 +420,7 @@ describe('VisualizationBuilder', () => {
         categoricalColumns: [],
         dateColumns: createMockVisColumns(1, VisFieldType.Date),
         transformedData: [],
+        unknownColumns: [],
       });
       expect(setVisConfigSpy).not.toHaveBeenCalled();
     });
@@ -453,6 +463,7 @@ describe('VisualizationBuilder', () => {
           'field-1': 'name',
         },
       ],
+      unknownColumns: [],
     });
   });
 

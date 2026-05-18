@@ -33,10 +33,6 @@ import { DEFAULT_OPACITY } from '../constants';
  * Base style interface that all chart styles should extend
  */
 export interface BaseChartStyle {
-  titleOptions?: {
-    show: boolean;
-    titleName?: string;
-  };
   tooltipOptions?: {
     mode: string;
   };
@@ -86,7 +82,7 @@ export interface EChartsSpecState<T extends BaseChartStyle = BaseChartStyle>
   // Built incrementally
   // TODO: avoid any
   transformedData?: any[];
-  baseConfig?: Pick<EChartsOption, 'title' | 'tooltip' | 'legend'>;
+  baseConfig?: Pick<EChartsOption, 'tooltip' | 'legend'>;
   xAxisConfig?: any;
   yAxisConfig?: any;
   series?: Array<
@@ -138,25 +134,20 @@ export function getAxisType(axis: Axis | Axis[] | undefined): 'category' | 'valu
 }
 
 /**
- * Create base configuration (title, tooltip)
+ * Create base configuration (tooltip)
  */
 export const createBaseConfig = <T extends BaseChartStyle>({
-  title,
   addTrigger = true,
   legend,
 }: {
-  title?: string;
   addTrigger?: boolean;
   legend?: EChartsOption['legend'];
-}) => (state: EChartsSpecState<T>): EChartsSpecState<T> => {
+} = {}) => (state: EChartsSpecState<T>): EChartsSpecState<T> => {
   const { styles, axisConfig } = state;
 
   const baseConfig = {
-    title: {
-      text: styles.titleOptions?.show ? styles.titleOptions?.titleName || title : undefined,
-    },
     tooltip: {
-      extraCssText: `overflow-y: auto; max-height: 50%;`,
+      extraCssText: `overflow: auto; max-height: 50%; max-width: 80%;`,
       enterable: true, // for y direction overflow
       confine: true, // for x direction
       show: styles.tooltipOptions?.mode !== 'hidden',
@@ -197,6 +188,7 @@ export const buildAxisConfigs = <T extends BaseChartStyle>(
       type: getAxisType(axis),
       ...applyAxisStyling({ axisStyle, addSplitLineStyle }),
       ...(hasFacet && { gridIndex: gridNumber }),
+      nameGap: 8,
     };
   };
 

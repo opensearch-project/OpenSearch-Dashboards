@@ -69,10 +69,6 @@ describe('BarVisStyleControls', () => {
   const defaultProps: HistogramVisStyleControlsProps = {
     styleOptions: {
       ...defaultHistogramChartStyles,
-      titleOptions: {
-        show: true,
-        titleName: '',
-      },
     },
     onStyleChange: jest.fn(),
     numericalColumns: mockNumericalColumns,

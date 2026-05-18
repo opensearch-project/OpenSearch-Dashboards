@@ -7,6 +7,7 @@ import { useMemo } from 'react';
 import { Observable } from 'rxjs';
 import { useObservable } from 'react-use';
 import dateMath from '@elastic/datemath';
+
 import { VisData } from './visualization_builder.types';
 import { TableVis } from './table/table_vis';
 import { defaultTableChartStyles, TableChartStyle } from './table/table_vis_config';
@@ -63,11 +64,13 @@ export const VisualizationRender = ({
       ...(visualizationData?.numericalColumns ?? []),
       ...(visualizationData?.categoricalColumns ?? []),
       ...(visualizationData?.dateColumns ?? []),
+      ...(visualizationData?.unknownColumns ?? []),
     ];
   }, [
     visualizationData?.numericalColumns,
     visualizationData?.categoricalColumns,
     visualizationData?.dateColumns,
+    visualizationData?.unknownColumns,
   ]);
 
   if (!visualizationData || columns.length === 0) {

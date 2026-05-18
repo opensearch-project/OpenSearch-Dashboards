@@ -109,10 +109,6 @@ export const EchartsRender = React.memo(({ spec, onSelectTimeRange }: Props) => 
             } else if (spec.legend?.top) {
               grid.top = legendHeight + grid.top;
               legendConfig.top = 18;
-              if (spec.title && !Array.isArray(spec.title) && spec.title.text) {
-                grid.top = 20 + grid.top;
-                legendConfig.top = 50;
-              }
             } else if (spec.legend?.bottom) {
               grid.bottom = legendHeight + grid.bottom;
             }
@@ -140,7 +136,7 @@ export const EchartsRender = React.memo(({ spec, onSelectTimeRange }: Props) => 
     return () => {
       instance?.off('finished', adjustGrid);
     };
-  }, [instance, spec.legend, spec.visualMap, spec.grid, spec.title]);
+  }, [instance, spec.legend, spec.visualMap, spec.grid]);
 
   useEffect(() => {
     if (instance && spec) {

@@ -12,7 +12,6 @@ import {
   Positions,
   TooltipOptions,
   VisFieldType,
-  TitleOptions,
   ValueMappingOptions,
   DisconnectValuesOption,
   ConnectNullValuesOption,
@@ -47,8 +46,6 @@ export interface StateTimeLineChartStyleOptions {
   standardAxes?: StandardAxes[];
 
   exclusive?: ExclusiveStateTimeLineConfig;
-
-  titleOptions?: TitleOptions;
 
   valueMappingOptions?: ValueMappingOptions;
   // TODO add Color mode options(temporary name) to make a switch between No style, Use Value Mapping Color, Use Threshold Color
@@ -105,11 +102,6 @@ export const defaultStateTimeLineChartStyles: StateTimeLineChartStyle = {
       },
     },
   ],
-
-  titleOptions: {
-    show: false,
-    titleName: '',
-  },
 };
 
 export const createStateTimelineConfig = (): VisualizationType<'state_timeline'> => ({

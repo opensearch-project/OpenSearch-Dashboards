@@ -72,37 +72,6 @@ describe('bar to_expression', () => {
       expect(spec.series[0].type).toBe('bar');
     });
 
-    test('handles title display options', () => {
-      const axisMappings = {
-        [AxisRole.X]: mockCategoricalColumn,
-        [AxisRole.Y]: [mockNumericalColumn],
-      };
-
-      const noTitleResult = createBarSpec(
-        mockData,
-        { ...defaultBarChartStyles, titleOptions: { show: false, titleName: '' } },
-        axisMappings
-      );
-      expect(noTitleResult.title.text).toBeUndefined();
-
-      const defaultTitleResult = createBarSpec(
-        mockData,
-        { ...defaultBarChartStyles, titleOptions: { show: true, titleName: '' } },
-        axisMappings
-      );
-      expect(defaultTitleResult.title.text).toBe('Count by Category');
-
-      const customTitleResult = createBarSpec(
-        mockData,
-        {
-          ...defaultBarChartStyles,
-          titleOptions: { show: true, titleName: 'Custom Bar Chart Title' },
-        },
-        axisMappings
-      );
-      expect(customTitleResult.title.text).toBe('Custom Bar Chart Title');
-    });
-
     test('includes markLine for threshold when enabled', () => {
       const customStyles = {
         ...defaultBarChartStyles,
@@ -137,38 +106,6 @@ describe('bar to_expression', () => {
       expect(spec.series.length).toBeGreaterThanOrEqual(1);
       expect(spec.series[0].type).toBe('bar');
     });
-
-    test('handles title display options', () => {
-      const axisMappings = {
-        [AxisRole.X]: mockCategoricalColumn,
-        [AxisRole.Y]: mockNumericalColumn,
-        [AxisRole.COLOR]: mockCategoricalColumn2,
-      };
-
-      const noTitleResult = createStackedBarSpec(
-        mockData,
-        { ...defaultBarChartStyles, titleOptions: { show: false, titleName: '' } },
-        axisMappings
-      );
-      expect(noTitleResult.title.text).toBeUndefined();
-
-      const defaultTitleResult = createStackedBarSpec(
-        mockData,
-        { ...defaultBarChartStyles, titleOptions: { show: true, titleName: '' } },
-        axisMappings
-      );
-      expect(defaultTitleResult.title.text).toBe('Count by Category and Category2');
-
-      const customTitleResult = createStackedBarSpec(
-        mockData,
-        {
-          ...defaultBarChartStyles,
-          titleOptions: { show: true, titleName: 'Custom Stacked Bar Chart' },
-        },
-        axisMappings
-      );
-      expect(customTitleResult.title.text).toBe('Custom Stacked Bar Chart');
-    });
   });
 
   describe('createTimeBarChart', () => {
@@ -186,37 +123,6 @@ describe('bar to_expression', () => {
       expect(spec).toHaveProperty('yAxis');
       expect(spec.series.length).toBeGreaterThanOrEqual(1);
       expect(spec.series[0].type).toBe('bar');
-    });
-
-    test('handles title display options', () => {
-      const axisMappings = {
-        [AxisRole.X]: mockDateColumn,
-        [AxisRole.Y]: [mockNumericalColumn],
-      };
-
-      const noTitleResult = createTimeBarChart(
-        mockData,
-        { ...defaultBarChartStyles, titleOptions: { show: false, titleName: '' } },
-        axisMappings
-      );
-      expect(noTitleResult.title.text).toBeUndefined();
-
-      const defaultTitleResult = createTimeBarChart(
-        mockData,
-        { ...defaultBarChartStyles, titleOptions: { show: true, titleName: '' } },
-        axisMappings
-      );
-      expect(defaultTitleResult.title.text).toBe('Count Over Time');
-
-      const customTitleResult = createTimeBarChart(
-        mockData,
-        {
-          ...defaultBarChartStyles,
-          titleOptions: { show: true, titleName: 'Custom Time Bar Chart' },
-        },
-        axisMappings
-      );
-      expect(customTitleResult.title.text).toBe('Custom Time Bar Chart');
     });
 
     test('includes markLine for threshold when enabled', () => {
@@ -293,28 +199,6 @@ describe('bar to_expression', () => {
       expect(spec.series[0].type).toBe('bar');
     });
 
-    test('handles title display options', () => {
-      const axisMappings = {
-        [AxisRole.X]: mockDateColumn,
-        [AxisRole.Y]: mockNumericalColumn,
-        [AxisRole.COLOR]: mockCategoricalColumn,
-      };
-
-      const noTitleResult = createGroupedTimeBarChart(
-        mockData,
-        { ...defaultBarChartStyles, titleOptions: { show: false, titleName: '' } },
-        axisMappings
-      );
-      expect(noTitleResult.title.text).toBeUndefined();
-
-      const defaultTitleResult = createGroupedTimeBarChart(
-        mockData,
-        { ...defaultBarChartStyles, titleOptions: { show: true, titleName: '' } },
-        axisMappings
-      );
-      expect(defaultTitleResult.title.text).toBe('Count Over Time by Category');
-    });
-
     describe('bucketing vs skip bucketing', () => {
       const axisMappings = {
         [AxisRole.X]: mockDateColumn,
@@ -372,31 +256,6 @@ describe('bar to_expression', () => {
       expect(spec).toHaveProperty('dataset');
       expect(spec).toHaveProperty('series');
       expect(spec.series.length).toBeGreaterThanOrEqual(1);
-    });
-
-    test('handles title display options', () => {
-      const axisMappings = {
-        [AxisRole.X]: mockDateColumn,
-        [AxisRole.Y]: mockNumericalColumn,
-        [AxisRole.COLOR]: mockCategoricalColumn,
-        [AxisRole.FACET]: mockCategoricalColumn2,
-      };
-
-      const noTitleResult = createFacetedTimeBarChart(
-        mockData,
-        { ...defaultBarChartStyles, titleOptions: { show: false, titleName: '' } },
-        axisMappings
-      );
-      expect(noTitleResult.title.text).toBeUndefined();
-
-      const defaultTitleResult = createFacetedTimeBarChart(
-        mockData,
-        { ...defaultBarChartStyles, titleOptions: { show: true, titleName: '' } },
-        axisMappings
-      );
-      expect(defaultTitleResult.title.text).toBe(
-        'Count Over Time by Category (Faceted by Category2)'
-      );
     });
 
     describe('bucketing vs skip bucketing', () => {

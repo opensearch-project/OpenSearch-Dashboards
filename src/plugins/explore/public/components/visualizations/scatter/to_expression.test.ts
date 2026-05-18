@@ -81,29 +81,6 @@ describe('Scatter Chart to_expression', () => {
       const scatterSeries = result.series.filter((s: any) => s.type === 'scatter');
       expect(scatterSeries.length).toBeGreaterThanOrEqual(1);
     });
-
-    it('handles title display options', () => {
-      const noTitle = createTwoMetricScatter(
-        mockData,
-        { ...mockStyles, titleOptions: { show: false, titleName: '' } },
-        mockAxisMappings
-      );
-      expect(noTitle.title.text).toBeUndefined();
-
-      const defaultTitle = createTwoMetricScatter(
-        mockData,
-        { ...mockStyles, titleOptions: { show: true, titleName: '' } },
-        mockAxisMappings
-      );
-      expect(defaultTitle.title.text).toBe('X Value vs Y Value');
-
-      const customTitle = createTwoMetricScatter(
-        mockData,
-        { ...mockStyles, titleOptions: { show: true, titleName: 'Custom Scatter' } },
-        mockAxisMappings
-      );
-      expect(customTitle.title.text).toBe('Custom Scatter');
-    });
   });
 
   describe('createTwoMetricOneCateScatter', () => {
@@ -114,24 +91,10 @@ describe('Scatter Chart to_expression', () => {
     };
 
     it('returns an ECharts spec with colored scatter series', () => {
-      const result = createTwoMetricOneCateScatter(
-        mockData,
-        { ...mockStyles, titleOptions: { show: true, titleName: '' } },
-        mockAxisMappings
-      );
+      const result = createTwoMetricOneCateScatter(mockData, mockStyles, mockAxisMappings);
 
       expect(result).toHaveProperty('dataset');
       expect(result).toHaveProperty('series');
-      expect(result.title.text).toBe('X Value vs Y Value by Category');
-    });
-
-    it('handles title display options', () => {
-      const noTitle = createTwoMetricOneCateScatter(
-        mockData,
-        { ...mockStyles, titleOptions: { show: false, titleName: '' } },
-        mockAxisMappings
-      );
-      expect(noTitle.title.text).toBeUndefined();
     });
 
     it('throws when color field is missing', () => {
@@ -153,31 +116,10 @@ describe('Scatter Chart to_expression', () => {
     };
 
     it('returns an ECharts spec with size-encoded scatter series', () => {
-      const result = createThreeMetricOneCateScatter(
-        mockData,
-        { ...mockStyles, titleOptions: { show: true, titleName: '' } },
-        mockAxisMappings
-      );
+      const result = createThreeMetricOneCateScatter(mockData, mockStyles, mockAxisMappings);
 
       expect(result).toHaveProperty('dataset');
       expect(result).toHaveProperty('series');
-      expect(result.title.text).toBe('X Value vs Y Value by Category (Size: Size)');
-    });
-
-    it('handles title display options', () => {
-      const noTitle = createThreeMetricOneCateScatter(
-        mockData,
-        { ...mockStyles, titleOptions: { show: false, titleName: '' } },
-        mockAxisMappings
-      );
-      expect(noTitle.title.text).toBeUndefined();
-
-      const customTitle = createThreeMetricOneCateScatter(
-        mockData,
-        { ...mockStyles, titleOptions: { show: true, titleName: 'Custom Bubble' } },
-        mockAxisMappings
-      );
-      expect(customTitle.title.text).toBe('Custom Bubble');
     });
 
     it('throws when size field is missing', () => {

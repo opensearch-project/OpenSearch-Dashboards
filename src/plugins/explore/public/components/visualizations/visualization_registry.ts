@@ -179,9 +179,9 @@ export class VisualizationRegistry {
    */
   public reuseAxesMapping(
     chartType: string,
-    savedAxesMapping: Record<string, string>,
+    savedAxesMapping: AxisFieldNameMappings,
     allColumns: VisColumn[]
-  ): Record<string, string> | undefined {
+  ): AxisFieldNameMappings | undefined {
     const rules = this.getVisualization(chartType)?.getRules();
     if (!rules) return undefined;
 
@@ -189,47 +189,113 @@ export class VisualizationRegistry {
     const savedRoles = Object.keys(savedAxesMapping);
     const savedRoleSet = new Set(savedRoles);
 
-    // Find the best rule: keys must match, and surviving fields' types must agree
-    type TypeMapping = Record<string, { type: VisFieldType }>;
-    let matched: TypeMapping | undefined;
+    const toFieldArray = (value: string | string[] | undefined): string[] => {
+      if (!value) return [];
+      return Array.isArray(value) ? value : [value];
+    };
+
+    // Helper: check if field exists and has expected type
+    const isValidField = (fieldName: string, expectedType?: VisFieldType): boolean => {
+      const fieldType = columnTypeByName.get(fieldName);
+      return !!fieldType && fieldType === expectedType;
+    };
+
+    // Find all matching rules: Roles must align and existing fields must have compatible types
+    const matchedRules: AxisTypeMapping[] = [];
     for (const rule of rules) {
-      matched = rule.mappings.find((m) => {
-        const keys = Object.keys(m);
-        if (keys.length !== savedRoles.length || !keys.every((k) => savedRoleSet.has(k))) {
+      const candidateRules = rule.mappings.filter((ruleMapping) => {
+        const mappingKeys = Object.keys(ruleMapping);
+        if (
+          mappingKeys.length !== savedRoles.length ||
+          !mappingKeys.every((k) => savedRoleSet.has(k))
+        ) {
           return false;
         }
+
         return savedRoles.every((role) => {
-          const fieldType = columnTypeByName.get(savedAxesMapping[role]);
-          return !fieldType || fieldType === (m as TypeMapping)[role].type;
+          const savedFieldNames = toFieldArray(savedAxesMapping[role]);
+          const expectedType = (ruleMapping as AxisTypeMapping)[role as AxisRole]?.type;
+          return savedFieldNames.every((savedFieldName) => {
+            const savedFieldType = columnTypeByName.get(savedFieldName);
+            return !savedFieldType || savedFieldType === expectedType;
+          });
         });
-      }) as TypeMapping | undefined;
-      if (matched) break;
+      }) as AxisTypeMapping[];
+
+      matchedRules.push(...candidateRules);
     }
-    if (!matched) return undefined;
+    if (matchedRules.length === 0) return undefined;
 
-    // Lock surviving fields first, then fill missing roles with same-type replacements
-    const result: Record<string, string> = {};
-    const used = new Set<string>();
-    const missingRoles: string[] = [];
+    // Try each matched rule until we find one that produces a complete result
+    for (const matchedRule of matchedRules) {
+      // Preserve surviving fields and identify missing roles
+      const result: AxisFieldNameMappings = {};
+      const used = new Set<string>();
+      const missingRoles: string[] = [];
 
-    for (const role of savedRoles) {
-      const fieldType = columnTypeByName.get(savedAxesMapping[role]);
-      if (fieldType && fieldType === matched[role].type) {
-        result[role] = savedAxesMapping[role];
-        used.add(savedAxesMapping[role]);
-      } else {
-        missingRoles.push(role);
+      for (const role of savedRoles) {
+        const savedValue = savedAxesMapping[role];
+        const fieldNames = toFieldArray(savedValue);
+        const expectedType = matchedRule[role as AxisRole]?.type;
+        const survivingFields = fieldNames.filter((name) => isValidField(name, expectedType));
+
+        if (survivingFields.length === 0) {
+          // All fields lost or empty
+          missingRoles.push(role);
+        } else if (survivingFields.length === fieldNames.length) {
+          // All fields survived - preserve original structure
+          result[role] = savedValue;
+          survivingFields.forEach((f) => used.add(f));
+        } else {
+          // Partial survival - preserve structure but mark as incomplete
+          result[role] = Array.isArray(savedValue) ? survivingFields : survivingFields[0];
+          survivingFields.forEach((f) => used.add(f));
+          missingRoles.push(role);
+        }
+      }
+
+      // Try to fill missing roles with unused columns of matching type
+      let failed = false;
+      for (const role of missingRoles) {
+        const axisRole = role as AxisRole;
+        const ruleConfig = matchedRule[axisRole];
+        if (!ruleConfig) continue;
+
+        const { type: expectedType, multi: isMulti } = ruleConfig;
+        const existingFields = toFieldArray(result[role]);
+
+        const availableColumns = allColumns.filter(
+          (c) => c.schema === expectedType && !used.has(c.name)
+        );
+
+        if (isMulti) {
+          // Multi-axis: combine existing + all available columns
+          if (existingFields.length === 0 && availableColumns.length === 0) {
+            failed = true;
+            break;
+          }
+          result[role] = [...existingFields, ...availableColumns.map((c) => c.name)];
+          availableColumns.forEach((c) => used.add(c.name));
+        } else {
+          // Single-axis: use existing field or find one replacement
+          if (existingFields.length > 0) continue;
+          if (availableColumns.length === 0) {
+            failed = true;
+            break;
+          }
+          result[role] = availableColumns[0].name;
+          used.add(availableColumns[0].name);
+        }
+      }
+
+      // If this rule worked, return the result
+      if (!failed) {
+        return result;
       }
     }
 
-    for (const role of missingRoles) {
-      const col = allColumns.find((c) => c.schema === matched![role].type && !used.has(c.name));
-      if (!col) return undefined;
-      result[role] = col.name;
-      used.add(col.name);
-    }
-
-    return result;
+    // None of the matched rules could produce a complete result
+    return undefined;
   }
 
   /**

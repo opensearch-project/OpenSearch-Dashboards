@@ -19,8 +19,6 @@ export const createPieSpec = (
 
   const allColumns = Object.values(axisColumnMappings).map((m) => m.column);
 
-  const defaultTitle = `${sizeCol.name} by ${colorCol.name}`;
-
   const result = pipe(
     transform(
       aggregate({
@@ -30,7 +28,7 @@ export const createPieSpec = (
       }),
       convertTo2DArray(allColumns)
     ),
-    createBaseConfig({ title: defaultTitle, legend: { show: styleOptions.addLegend } }),
+    createBaseConfig({ legend: { show: styleOptions.addLegend } }),
     createPieSeries({
       styles: styleOptions,
       cateField: colorCol.column,
