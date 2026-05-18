@@ -41,7 +41,7 @@ describe('groupDataBySplitField', () => {
     expect(groups.map((g) => g.key)).toEqual(['Apple', 'Mango', 'Zebra']);
   });
 
-  it('places null, undefined, and empty string values in the "-" group', () => {
+  it('places null, undefined, and empty string values in the "(empty)" group', () => {
     const data = [
       { cat: null, v: 1 },
       { cat: undefined, v: 2 },
@@ -52,7 +52,7 @@ describe('groupDataBySplitField', () => {
     const groups = groupDataBySplitField(data, 'cat');
 
     expect(groups).toHaveLength(2);
-    const emptyGroup = groups.find((g) => g.key === '-');
+    const emptyGroup = groups.find((g) => g.key === '(empty)');
     expect(emptyGroup).toBeDefined();
     expect(emptyGroup!.data).toHaveLength(3);
   });
@@ -101,13 +101,13 @@ describe('groupDataBySplitField', () => {
     expect(groups[1].data[0]).toEqual({ cat: 'B', x: 4, y: 5, z: 6 });
   });
 
-  it('handles missing column values as null (placed in "-" group)', () => {
+  it('handles missing column values as null (placed in "(empty)" group)', () => {
     const data = [{ cat: 'A', v: 1 }, { v: 2 }, { cat: 'A', v: 3 }];
 
     const groups = groupDataBySplitField(data, 'cat');
 
     expect(groups).toHaveLength(2);
-    const emptyGroup = groups.find((g) => g.key === '-');
+    const emptyGroup = groups.find((g) => g.key === '(empty)');
     expect(emptyGroup!.data).toHaveLength(1);
     expect(emptyGroup!.data[0]).toEqual({ v: 2 });
   });

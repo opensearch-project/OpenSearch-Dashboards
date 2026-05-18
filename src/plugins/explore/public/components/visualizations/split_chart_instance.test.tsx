@@ -59,7 +59,7 @@ describe('SplitChartInstance', () => {
       intersectionCallback([{ isIntersecting: true }]);
     });
 
-    expect(mockRenderChart).toHaveBeenCalledWith(defaultProps.data);
+    expect(mockRenderChart).toHaveBeenCalledWith(defaultProps.data, defaultProps.label);
     expect(screen.getByText('2 items')).toBeInTheDocument();
   });
 
