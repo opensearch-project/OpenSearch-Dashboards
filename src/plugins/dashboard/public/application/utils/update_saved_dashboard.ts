@@ -50,7 +50,7 @@ export function updateSavedDashboard(
   savedDashboard.variablesJSON =
     appState.variables && appState.variables.length > 0
       ? JSON.stringify({ variables: appState.variables })
-      : undefined;
+      : '';
 
   const timeFrom = savedDashboard.timeRestore
     ? FilterUtils.convertTimeToUTCString(timeFilter.getTime().from)

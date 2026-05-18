@@ -137,24 +137,6 @@ jest.mock('./line_exclusive_vis_options', () => ({
   },
 }));
 
-jest.mock('../style_panel/title/title', () => ({
-  TitleOptionsPanel: jest.fn(({ titleOptions, onShowTitleChange }) => (
-    <div data-test-subj="mockTitleOptionsPanel">
-      <button
-        data-test-subj="mockTitleModeSwitch"
-        onClick={() => onShowTitleChange({ show: !titleOptions.show })}
-      >
-        Toggle Title
-      </button>
-      <input
-        data-test-subj="mockTitleInput"
-        placeholder="Default title"
-        onChange={(e) => onShowTitleChange({ titleName: e.target.value })}
-      />
-    </div>
-  )),
-}));
-
 describe('LineVisStyleControls', () => {
   const defaultCategoryAxis: StandardAxes = {
     position: Positions.BOTTOM,
@@ -241,10 +223,6 @@ describe('LineVisStyleControls', () => {
       },
       tooltipOptions: defaultTooltipOptions,
       standardAxes: [defaultCategoryAxis, defaultValueAxis],
-      titleOptions: {
-        show: true,
-        titleName: '',
-      },
       showFullTimeRange: false,
     },
     onStyleChange: jest.fn(),
@@ -267,7 +245,6 @@ describe('LineVisStyleControls', () => {
     expect(screen.getByTestId('mockThresholdOptions')).toBeInTheDocument();
     expect(screen.getByTestId('mockTooltipOptionsPanel')).toBeInTheDocument();
     expect(screen.getByTestId('mockLineExclusiveVisOptions')).toBeInTheDocument();
-    expect(screen.getByTestId('mockTitleOptionsPanel')).toBeInTheDocument();
   });
 
   test('hides legend when no COLOR, FACET, or Y_SECOND mappings are present', () => {
@@ -393,44 +370,5 @@ describe('LineVisStyleControls', () => {
 
     await userEvent.click(screen.getByTestId('mockUpdateLineStyle'));
     expect(mockProps.onStyleChange).toHaveBeenCalledWith({ lineStyle: 'line' });
-  });
-
-  test('updates title show option correctly', async () => {
-    render(<LineVisStyleControls {...mockProps} />);
-
-    await userEvent.click(screen.getByTestId('mockTitleModeSwitch'));
-    expect(mockProps.onStyleChange).toHaveBeenCalledWith({
-      titleOptions: {
-        ...mockProps.styleOptions.titleOptions,
-        show: false,
-      },
-    });
-  });
-
-  test('updates title name when text is entered', async () => {
-    const props = {
-      ...mockProps,
-      styleOptions: {
-        ...mockProps.styleOptions,
-        titleOptions: {
-          show: true,
-          titleName: '',
-        },
-      },
-    };
-
-    render(<LineVisStyleControls {...props} />);
-
-    const titleInput = screen.getByTestId('mockTitleInput');
-    await userEvent.type(titleInput, 'New Chart Title');
-
-    await waitFor(() => {
-      expect(mockProps.onStyleChange).toHaveBeenCalledWith({
-        titleOptions: {
-          ...props.styleOptions.titleOptions,
-          titleName: 'New Chart Title',
-        },
-      });
-    });
   });
 });

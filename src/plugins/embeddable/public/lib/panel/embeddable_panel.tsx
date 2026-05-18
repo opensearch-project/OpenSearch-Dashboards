@@ -28,7 +28,12 @@
  * under the License.
  */
 
-import { EuiContextMenuPanelDescriptor, EuiPanel, htmlIdGenerator } from '@elastic/eui';
+import {
+  EuiContextMenuPanelDescriptor,
+  EuiPanel,
+  htmlIdGenerator,
+  EuiProgress,
+} from '@elastic/eui';
 import classNames from 'classnames';
 import React from 'react';
 import { Subscription } from 'rxjs';
@@ -251,6 +256,15 @@ export class EmbeddablePanel extends React.Component<Props, State> {
         hasBorder={this.props.hasBorder}
         hasShadow={this.props.hasShadow}
       >
+        {this.state.loading && (
+          <EuiProgress
+            data-test-subj="panelLoadingProgress"
+            size="xs"
+            color="accent"
+            position="absolute"
+            style={{ top: -1, left: 0, right: 0 }}
+          />
+        )}
         {!this.props.hideHeader && (
           <PanelHeader
             getActionContextMenuPanel={this.getActionContextMenuPanel}

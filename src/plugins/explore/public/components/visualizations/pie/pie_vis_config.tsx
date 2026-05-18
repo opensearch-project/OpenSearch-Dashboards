@@ -7,7 +7,7 @@ import React from 'react';
 import { VisRule, VisualizationType } from '../utils/use_visualization_types';
 
 import { PieVisStyleControls } from './pie_vis_options';
-import { AxisRole, Positions, TitleOptions, TooltipOptions, VisFieldType } from '../types';
+import { AxisRole, Positions, TooltipOptions, VisFieldType } from '../types';
 import { createPieSpec } from './to_expression';
 import { EchartsRender } from '../echarts_render';
 
@@ -31,8 +31,6 @@ export interface PieChartStyleOptions {
 
   // Exclusive controls
   exclusive?: PieExclusiveStyleOptions;
-
-  titleOptions?: TitleOptions;
 }
 
 export type PieChartStyle = Required<Omit<PieChartStyleOptions, 'legendTitle'>> &
@@ -52,10 +50,6 @@ export const defaultPieChartStyles: PieChartStyle = {
     showValues: false,
     showLabels: false,
     truncate: 100,
-  },
-  titleOptions: {
-    show: false,
-    titleName: '',
   },
 };
 

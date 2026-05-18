@@ -371,6 +371,7 @@ jobs:
           for i in "${SPEC_ARRAY[@]}"; do
             FORMATTED_SPEC+="cypress/integration/core-opensearch-dashboards/opensearch-dashboards/${i},"
           done
+          FORMATTED_SPEC=${FORMATTED_SPEC%,}
           echo "SPEC=${FORMATTED_SPEC}" >> $GITHUB_ENV
           echo "SPEC=${FORMATTED_SPEC}"
 

@@ -367,13 +367,16 @@ export class DatasetService {
       dataSource = await this.indexPatterns?.getDataSource(indexPattern.dataSourceRef?.id);
     }
 
-    const dataType = this.typesRegistry.get(DEFAULT_DATA.SET_TYPES.INDEX_PATTERN);
+    const actualType = indexPattern.type || DEFAULT_DATA.SET_TYPES.INDEX_PATTERN;
+    const dataType =
+      this.typesRegistry.get(actualType) ??
+      this.typesRegistry.get(DEFAULT_DATA.SET_TYPES.INDEX_PATTERN);
     if (dataType) {
       const dataset = dataType.toDataset([
         {
           id: indexPattern.id,
           title: indexPattern.title,
-          type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+          type: actualType,
           meta: {
             type: DATA_STRUCTURE_META_TYPES.CUSTOM,
             ...(indexPattern.displayName && { displayName: indexPattern.displayName }),

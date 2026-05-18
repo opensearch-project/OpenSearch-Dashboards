@@ -41,7 +41,6 @@ export const createRegularHeatmap = (
       convertTo2DArray()
     ),
     createBaseConfig({
-      title: `${colorCol.name} by ${xCol.name} and ${yCol.name}`,
       addTrigger: false,
       legend: { show: styles.addLegend },
     }),

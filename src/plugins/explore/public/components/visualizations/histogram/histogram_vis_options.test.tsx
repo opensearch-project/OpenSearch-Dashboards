@@ -30,8 +30,8 @@ const mockNumericalColumns: VisColumn[] = [
 ];
 
 const mockAxisColumnMappings: AxisColumnMappings = {
-  [AxisRole.X]: mockNumericalColumns[0],
-  [AxisRole.Y]: mockNumericalColumns[1],
+  [AxisRole.X]: [mockNumericalColumns[0]],
+  [AxisRole.Y]: [mockNumericalColumns[1]],
 };
 
 jest.mock('../bar/bucket_options.tsx', () => ({
@@ -69,10 +69,6 @@ describe('BarVisStyleControls', () => {
   const defaultProps: HistogramVisStyleControlsProps = {
     styleOptions: {
       ...defaultHistogramChartStyles,
-      titleOptions: {
-        show: true,
-        titleName: '',
-      },
     },
     onStyleChange: jest.fn(),
     numericalColumns: mockNumericalColumns,
@@ -120,7 +116,7 @@ describe('BarVisStyleControls', () => {
 
   test('render correct bucket panel for one numerical fields', async () => {
     const mockSingleAxisColumnMappings: AxisColumnMappings = {
-      [AxisRole.X]: mockNumericalColumns[0],
+      [AxisRole.X]: [mockNumericalColumns[0]],
     };
 
     const propsWithNumBucket = {

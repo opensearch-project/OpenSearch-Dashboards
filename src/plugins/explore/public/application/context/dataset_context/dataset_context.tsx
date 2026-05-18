@@ -43,6 +43,9 @@ export const DatasetProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   useEffect(() => {
     let isMounted = true;
+    // Reset the fetching guard when dependencies change so the new fetch isn't
+    // blocked by a stale in-flight request from the previous effect invocation.
+    isFetchingRef.current = false;
 
     const fetchDataset = async () => {
       // Prevent parallel executions

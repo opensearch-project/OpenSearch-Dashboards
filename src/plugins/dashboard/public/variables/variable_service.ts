@@ -482,8 +482,14 @@ export class VariableService {
 
   private refreshDependentVariables(changedVarName: string): void {
     const variables = this.getVariables();
+    const changedVarIndex = variables.findIndex((v) => v.name === changedVarName);
+    if (changedVarIndex === -1) return;
+
     const pattern = new RegExp(`\\$\\{${changedVarName}\\}|\\$${changedVarName}\\b`);
-    for (const v of variables) {
+    // Only refresh variables that come AFTER the changed variable
+    // Variables before the changed variable cannot reference it due to order constraints
+    for (let i = changedVarIndex + 1; i < variables.length; i++) {
+      const v = variables[i];
       if (v.type === VariableType.Query) {
         const qv = v as QueryVariable;
         if (pattern.test(qv.query)) {
@@ -502,7 +508,8 @@ export class VariableService {
     }
     let query = variable.query;
     if (this.interpolationService && this.interpolationService.hasVariables(query)) {
-      query = this.interpolationService.interpolate(query, variable.language);
+      // Enforce order constraint: only interpolate variables that appear before current variable
+      query = this.interpolationService.interpolate(query, variable.language, variable.name);
     }
     return executeQueryForOptionsWithType(
       this.dataPlugin,
@@ -530,7 +537,9 @@ export class VariableService {
     }
 
     try {
-      const variablesJSON = variables.length > 0 ? JSON.stringify({ variables }) : undefined;
+      // Use empty string to clear variablesJSON when all variables are deleted
+      // Using undefined would not remove the field from saved object
+      const variablesJSON = variables.length > 0 ? JSON.stringify({ variables }) : '';
       await this.savedObjectsClient.update('dashboard', this.dashboardId, {
         variablesJSON,
       });

@@ -34,7 +34,7 @@ export const createSingleMetric = (
   // Return React component spec for HTML text rendering with ECharts sparkline
   const result = pipe(
     transform(convertTo2DArray()),
-    createBaseConfig({ title: '' }),
+    createBaseConfig({}),
     buildAxisConfigs,
     createMetricChartSeries({
       styles,
@@ -47,7 +47,10 @@ export const createSingleMetric = (
     data: transformedData,
     styles,
     axisConfig: {},
-    axisColumnMappings,
+    axisColumnMappings: {
+      [AxisRole.X]: dateColumn,
+      [AxisRole.Y]: valueColumn,
+    },
   });
   return { spec: result.spec, name: numericFieldName, data: transformedData };
 };
