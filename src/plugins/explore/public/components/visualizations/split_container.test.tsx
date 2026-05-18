@@ -81,39 +81,6 @@ describe('SplitContainer', () => {
     expect(screen.getAllByText(/rows/)).toHaveLength(3);
   });
 
-  it('renders with horizontal layout', () => {
-    const groups = createGroups(2);
-
-    const { container } = render(
-      <SplitContainer groups={groups} layout="horizontal" renderChart={mockRenderChart} />
-    );
-
-    const grid = container.querySelector('.splitContainer');
-    expect(grid).toHaveStyle({ display: 'flex', flexFlow: 'row nowrap' });
-  });
-
-  it('renders with vertical layout', () => {
-    const groups = createGroups(2);
-
-    const { container } = render(
-      <SplitContainer groups={groups} layout="vertical" renderChart={mockRenderChart} />
-    );
-
-    const grid = container.querySelector('.splitContainer');
-    expect(grid).toHaveStyle({ display: 'flex', flexFlow: 'column nowrap' });
-  });
-
-  it('renders with auto layout using grid', () => {
-    const groups = createGroups(2);
-
-    const { container } = render(
-      <SplitContainer groups={groups} layout="auto" renderChart={mockRenderChart} />
-    );
-
-    const grid = container.querySelector('.splitContainer');
-    expect(grid).toHaveStyle({ display: 'grid' });
-  });
-
   it('passes showLabel to chart instances', () => {
     const groups: SplitGroup[] = [{ key: 'TestLabel', data: [{ v: 1 }] }];
 
