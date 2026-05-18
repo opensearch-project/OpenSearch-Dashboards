@@ -36,6 +36,7 @@ import {
   SavedObjectsImportResponse,
   SavedObjectsResolveImportErrorsOptions,
   SavedObjectsImportSuccess,
+  SavedObjectsImportUnsupportedTypeError,
 } from './types';
 import { regenerateIds } from './regenerate_ids';
 import { validateReferences } from './validate_references';
@@ -83,6 +84,24 @@ export async function resolveSavedObjectsImportErrors({
     }
   );
   errorAccumulator = [...errorAccumulator, ...collectorErrors];
+
+  // Block config type from being imported via retry/resolve path
+  const configErrors: SavedObjectsImportError[] = objectsToResolve
+    .filter((obj) => obj.type === 'config')
+    .map((obj) => ({
+      error: { type: 'unsupported_type' } as SavedObjectsImportUnsupportedTypeError,
+      type: obj.type,
+      id: obj.id,
+      title: obj.id,
+      meta: { title: obj.id },
+    }));
+  if (configErrors.length > 0) {
+    return {
+      successCount: 0,
+      success: false,
+      errors: configErrors,
+    };
+  }
 
   // Create a map of references to replace for each object to avoid iterating through
   // retries for every object to resolve
