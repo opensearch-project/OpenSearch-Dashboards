@@ -63,6 +63,9 @@ export const DeveloperMessageSchema = BaseMessageSchema.extend({
 export const SystemMessageSchema = BaseMessageSchema.extend({
   role: z.literal('system'),
   content: z.string(),
+  toolCallId: z.string().optional(),
+  canResend: z.boolean().optional(),
+  toolResult: z.any().optional(),
 });
 
 export const AssistantMessageSchema = BaseMessageSchema.extend({
@@ -81,7 +84,6 @@ export const ToolMessageSchema = z.object({
   content: z.string(),
   role: z.literal('tool'),
   toolCallId: z.string(),
-  error: z.string().optional(),
 });
 
 export const MessageSchema = z.discriminatedUnion('role', [
