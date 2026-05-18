@@ -378,7 +378,8 @@ export class QueryBuilder {
           http: this.getServices().http,
           data: this.getServices().data,
         },
-        false
+        false,
+        dataset?.signalType // set data view signalType from dataset
       );
 
       // Try to get it again from cache
