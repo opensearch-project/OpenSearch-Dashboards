@@ -7,7 +7,6 @@ export const CONTAINER_URL_KEY = '_c';
 export const QUERY_EDITOR_STATE_KEY = '_e';
 export const QUERY_BUILDER_QUERY_STATE_KEY = '_eq';
 export const VARIABLE_VALUES_URL_KEY = '_va';
-export const TRANSFORMATION_STATE_KEY = '_t';
 
 export interface ContainerState {
   originatingApp: string | undefined;

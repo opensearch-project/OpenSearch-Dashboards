@@ -6,9 +6,9 @@
 import { i18n } from '@osd/i18n';
 import React from 'react';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { IOsdUrlStateStorage } from '../../../../../opensearch_dashboards_utils/public';
-import { VisFieldType } from '../../../components/visualizations/types';
-import { OpenSearchSearchHit } from '../../../types/doc_views_types';
+import { IOsdUrlStateStorage } from '../../../../opensearch_dashboards_utils/public';
+import { VisFieldType } from '../visualizations/types';
+import { OpenSearchSearchHit } from '../../types/doc_views_types';
 
 export interface FieldSchema {
   name: string;
@@ -70,7 +70,6 @@ export interface ITransformationService {
   readonly pipeline$: BehaviorSubject<TransformationPipeline>;
   getPipeline$(): Observable<TransformationPipeline>;
   addInstance(id: string): void;
-  addInstanceDirect(instance: TransformationInstance): void;
   removeInstance(id: string): void;
   updateInstanceConfig(id: string, newConfig: Record<string, any>): void;
   toggleInstanceHide(id: string): void;

@@ -12,7 +12,11 @@ export type {
   UrlTransformationState,
 } from './types';
 
-export { TransformationService, createNoOpTransformationService } from './transformation_service';
+export {
+  TransformationService,
+  createNoOpTransformationService,
+  TRANSFORMATION_STATE_KEY,
+} from './transformation_service';
 export {
   addTransformation,
   removeTransformation,
@@ -50,6 +54,10 @@ export {
   createAddFieldTransformation,
   addFieldTransformationDefinition,
 } from './transformations/add_field_transformation';
+
+export { TransformPanel } from './transform_panel';
+export type { TransformPanelProps } from './transform_panel';
+export { TransformSelectorButton } from './transform_selector_overlay';
 
 import { TransformationService } from './transformation_service';
 import { limitTransformationDefinition } from './transformations/limit_transformation';

@@ -17,10 +17,10 @@ import {
   numericalOperatorOptions,
   allOperatorOptions,
 } from '../types';
-import { VisFieldType } from '../../../../components/visualizations/types';
+import { VisFieldType } from '../../visualizations/types';
 import { FieldSelector } from '../field_selector';
-import { OpenSearchSearchHit } from '../../../../types/doc_views_types';
-import { DebouncedFieldText } from '../../../../components/visualizations/style_panel/utils';
+import { OpenSearchSearchHit } from '../../../types/doc_views_types';
+import { DebouncedFieldText } from '../../visualizations/style_panel/utils';
 
 const isConfigComplete = (config: FilterConfig): boolean => {
   return !!config.field && !!config.operator && config.value.trim() !== '';

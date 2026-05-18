@@ -6,14 +6,14 @@
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { distinctUntilChanged, debounceTime } from 'rxjs/operators';
 import { isEqual } from 'lodash';
-import { IOsdUrlStateStorage } from '../../../../../opensearch_dashboards_utils/public';
+import { IOsdUrlStateStorage } from '../../../../opensearch_dashboards_utils/public';
 import {
-  TransformationInstance,
   TransformationPipeline,
   TransformationDefinition,
   ITransformationService,
   UrlTransformationState,
 } from './types';
+import type { TransformationInstance } from './types';
 import {
   addTransformation,
   removeTransformation,
@@ -21,8 +21,9 @@ import {
   toggleTransformationHide,
   deriveSchemaFromRows,
 } from './transformation_utils';
-import { OpenSearchSearchHit } from '../../../types/doc_views_types';
-import { TRANSFORMATION_STATE_KEY } from '../types';
+import { OpenSearchSearchHit } from '../../types/doc_views_types';
+
+export const TRANSFORMATION_STATE_KEY = '_t';
 
 export class TransformationService implements ITransformationService {
   // catelog of available transformations
@@ -67,10 +68,6 @@ export class TransformationService implements ITransformationService {
       throw new Error(`TransformationService: unknown transformation id "${id}"`);
     }
     this.pipeline$.next(addTransformation(this.pipeline$.getValue(), definition.createInstance()));
-  }
-
-  addInstanceDirect(instance: TransformationInstance): void {
-    this.pipeline$.next(addTransformation(this.pipeline$.getValue(), instance));
   }
 
   removeInstance(id: string): void {
@@ -236,7 +233,6 @@ export const createNoOpTransformationService = (): ITransformationService => ({
   pipeline$: new BehaviorSubject<TransformationPipeline>([]),
   getPipeline$: () => new BehaviorSubject<TransformationPipeline>([]).asObservable(),
   addInstance: () => {},
-  addInstanceDirect: () => {},
   removeInstance: () => {},
   updateInstanceConfig: () => {},
   toggleInstanceHide: () => {},

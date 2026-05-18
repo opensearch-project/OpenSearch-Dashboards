@@ -10,13 +10,10 @@ import { i18n } from '@osd/i18n';
 import { get } from 'lodash';
 import { TransformationInstance, TransformationDefinition, FieldSchema } from '../types';
 import { FieldSelector } from '../field_selector';
-import { VisFieldType } from '../../../../components/visualizations/types';
-import { OpenSearchSearchHit } from '../../../../types/doc_views_types';
-import {
-  CalculationMethod,
-  calculateValue,
-} from '../../../../components/visualizations/utils/calculation';
-import { ValueCalculationSelector } from '../../../../components/visualizations/style_panel/value/value_calculation_selector';
+import { VisFieldType } from '../../visualizations/types';
+import { OpenSearchSearchHit } from '../../../types/doc_views_types';
+import { CalculationMethod, calculateValue } from '../../visualizations/utils/calculation';
+import { ValueCalculationSelector } from '../../visualizations/style_panel/value/value_calculation_selector';
 
 // Methods not applicable to string fields
 const STRING_DISABLED: CalculationMethod[] = [
