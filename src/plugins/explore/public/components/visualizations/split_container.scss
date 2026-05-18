@@ -9,6 +9,28 @@
   flex: 1;
   min-height: 0;
   width: 100%;
+  height: 100%;
+  gap: 2px;
+}
+
+.splitContainer--horizontal {
+  display: flex;
+  flex-flow: row nowrap;
+  overflow-x: auto;
+  align-items: stretch;
+}
+
+.splitContainer--vertical {
+  display: flex;
+  flex-flow: column nowrap;
+  overflow-y: auto;
+  align-items: stretch;
+}
+
+.splitContainer--auto {
+  display: grid;
+  grid-auto-rows: minmax(200px, 1fr);
+  overflow-y: auto;
 }
 
 .splitChartInstance {

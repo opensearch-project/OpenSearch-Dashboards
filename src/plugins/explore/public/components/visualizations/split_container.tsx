@@ -52,38 +52,11 @@ export const SplitContainer: React.FC<SplitContainerProps> = ({
   // Use 60 sub-columns (LCM of 2,3,4,5,6) so last-row items can spread evenly
   const SUB_COLUMNS = 60;
 
-  const containerStyle = useMemo((): React.CSSProperties => {
-    if (layout === 'horizontal') {
-      return {
-        display: 'flex',
-        flexFlow: 'row nowrap',
-        gap: '2px',
-        width: '100%',
-        height: '100%',
-        overflowX: 'auto',
-        alignItems: 'stretch',
-      };
+  const containerStyle = useMemo((): React.CSSProperties | undefined => {
+    if (layout === 'auto') {
+      return { gridTemplateColumns: `repeat(${SUB_COLUMNS}, 1fr)` };
     }
-    if (layout === 'vertical') {
-      return {
-        display: 'flex',
-        flexFlow: 'column nowrap',
-        gap: '2px',
-        width: '100%',
-        height: '100%',
-        overflowY: 'auto',
-        alignItems: 'stretch',
-      };
-    }
-    return {
-      display: 'grid',
-      gridTemplateColumns: `repeat(${SUB_COLUMNS}, 1fr)`,
-      gridAutoRows: 'minmax(200px, 1fr)',
-      gap: '2px',
-      width: '100%',
-      height: '100%',
-      overflowY: 'auto',
-    };
+    return undefined;
   }, [layout]);
 
   const itemStyles = useMemo((): React.CSSProperties[] => {
@@ -105,7 +78,7 @@ export const SplitContainer: React.FC<SplitContainerProps> = ({
     });
   }, [layout, columns, groups]);
 
-  const layoutClass = `layout-${layout || 'auto'}`;
+  const layoutClass = `splitContainer--${layout || 'auto'}`;
 
   return (
     <div className="splitContainer__wrapper">
