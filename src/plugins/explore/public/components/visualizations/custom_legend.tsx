@@ -43,6 +43,7 @@ export const CustomLegend: React.FC<CustomLegendProps> = ({
   const handleToggle = useCallback(
     (name: string) => {
       setSelected((prev) => {
+        // First click (undefined) deselects the item; subsequent clicks toggle visibility
         const next = { ...prev, [name]: prev[name] === undefined ? false : !prev[name] };
         legendSelected$.next(next);
         return next;
