@@ -12,7 +12,6 @@
   display: flex;
   justify-content: space-between;
   padding-left: $ouiSizeXS;
-  padding-top: $ouiSizeS;
   padding-bottom: $ouiSizeXXS;
   position: relative;
 
@@ -42,6 +41,5 @@
   &__editButton {
     position: absolute;
     right: 0;
-    top: $ouiSizeS;
   }
 }
