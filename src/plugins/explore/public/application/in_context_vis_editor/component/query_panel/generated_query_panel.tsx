@@ -5,23 +5,23 @@
 
 import { i18n } from '@osd/i18n';
 import { EuiButtonEmpty, EuiIcon, EuiText } from '@elastic/eui';
-import { useQueryBuilderState } from '../hooks/use_query_builder_state';
-import { useEditorOperations } from '../hooks/use_editor_operations';
-import { useEditorFocus } from '../../../application/hooks';
-import '../../../components/query_panel/query_panel_generated_query/query_panel_generated_query.scss';
-import { EditorMode } from '../../utils/state_management/types';
+import '../../../../components/query_panel/query_panel_generated_query/query_panel_generated_query.scss';
+import { EditorMode } from '../../../utils/state_management/types';
+import { useQueryPanelContext } from './query_panel_context';
 
 const editQueryText = i18n.translate('explore.queryPanel.queryPanelGeneratedQuery.editQuery', {
   defaultMessage: 'Replace query',
 });
 
 export const QueryPanelGeneratedQuery = () => {
-  const { queryEditorState, queryBuilder } = useQueryBuilderState();
+  const {
+    queryEditorState,
+    handleEditorChange,
+    editorOperations: { setEditorText, focusEditor },
+  } = useQueryPanelContext();
 
   const lastExecutedTranslatedQuery = queryEditorState.lastExecutedTranslatedQuery;
-  const focusOnEditor = useEditorFocus();
 
-  const { setEditorText } = useEditorOperations();
   if (!lastExecutedTranslatedQuery) {
     return null;
   }
@@ -29,11 +29,11 @@ export const QueryPanelGeneratedQuery = () => {
   const onEditClick = () => {
     setEditorText(lastExecutedTranslatedQuery);
 
-    queryBuilder.updateQueryEditorState({
+    handleEditorChange({
       editorMode: EditorMode.Query,
       lastExecutedTranslatedQuery: undefined,
     });
-    focusOnEditor(true);
+    focusEditor(true);
   };
 
   return (

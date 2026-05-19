@@ -3,26 +3,26 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useObservable } from 'react-use';
-import { BehaviorSubject } from 'rxjs';
 import { EuiPanel, EuiProgress } from '@elastic/eui';
-import { QueryEditorState } from '../query_builder/query_builder';
-import { QueryExecutionStatus } from '../../utils/state_management/types';
+import { QueryExecutionStatus } from '../../../utils/state_management/types';
 import { QueryPanelWidgets } from './query_panel_widget';
 import { QueryPanelEditor } from './query_editor';
 import { QueryPanelGeneratedQuery } from './generated_query_panel';
+import { QueryPanelProvider, useQueryPanelContext, QueryPanelProps } from './query_panel_context';
 
-export const QueryPanel = ({
-  queryEditorState$,
-}: {
-  queryEditorState$: BehaviorSubject<QueryEditorState>;
-}) => {
-  const queryEditorState = useObservable(queryEditorState$, queryEditorState$.getValue());
+const InnerQueryPanel = () => {
+  const {
+    queryEditorState,
+    showDatasetSelect,
+    showLanguageToggle,
+    showSaveQueryButton,
+  } = useQueryPanelContext();
 
   const isLoading =
-    queryEditorState?.queryStatus.status === QueryExecutionStatus.LOADING ||
+    queryEditorState?.queryStatus?.status === QueryExecutionStatus.LOADING ||
     queryEditorState?.promptToQueryIsLoading;
 
+  const showWidgets = showDatasetSelect || showLanguageToggle || showSaveQueryButton;
   return (
     <EuiPanel
       paddingSize="s"
@@ -30,7 +30,7 @@ export const QueryPanel = ({
       className="exploreInContexQueryPanel"
       style={{ height: '100%' }}
     >
-      <QueryPanelWidgets />
+      {showWidgets && <QueryPanelWidgets />}
       <div className="exploreQueryPanel__editorsWrapper">
         <QueryPanelEditor />
         <QueryPanelGeneratedQuery />
@@ -46,3 +46,17 @@ export const QueryPanel = ({
     </EuiPanel>
   );
 };
+
+/**
+ * QueryPanel component - Exposed for external plugins to use
+ */
+const QueryPanel = (props: QueryPanelProps) => {
+  return (
+    <QueryPanelProvider value={props}>
+      <InnerQueryPanel />
+    </QueryPanelProvider>
+  );
+};
+
+// eslint-disable-next-line import/no-default-export
+export default QueryPanel;

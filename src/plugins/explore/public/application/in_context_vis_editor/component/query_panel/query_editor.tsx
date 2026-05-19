@@ -4,9 +4,9 @@
  */
 
 import classNames from 'classnames';
-import { CodeEditor } from '../../../../../opensearch_dashboards_react/public';
-import { useQueryPanelEditor } from '../hooks/use_query_panel_editor';
-import '../../../components/query_panel/query_panel_editor/query_panel_editor.scss';
+import { CodeEditor } from '../../../../../../opensearch_dashboards_react/public';
+import { useQueryPanelEditor } from '../../hooks/use_query_panel_editor';
+import '../../../../components/query_panel/query_panel_editor/query_panel_editor.scss';
 
 export const QueryPanelEditor = () => {
   const {
