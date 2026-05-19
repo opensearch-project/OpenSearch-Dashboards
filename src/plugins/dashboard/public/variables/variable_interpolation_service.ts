@@ -68,7 +68,9 @@ export class VariableInterpolationService implements IVariableInterpolationServi
     if (!query || typeof query !== 'string') {
       return false;
     }
-    return VARIABLE_REFERENCE_PATTERN.test(query);
+    // Create a new regex instance to avoid lastIndex state issues with global regex
+    const pattern = new RegExp(VARIABLE_REFERENCE_PATTERN.source, VARIABLE_REFERENCE_PATTERN.flags);
+    return pattern.test(query);
   }
 
   /**
