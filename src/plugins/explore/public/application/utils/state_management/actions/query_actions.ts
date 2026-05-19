@@ -16,6 +16,7 @@ import {
 import { QueryExecutionStatus } from '../types';
 import { setResults, ISearchResult, IPrometheusSearchResult } from '../slices';
 import { setIndividualQueryStatus } from '../slices/query_editor/query_editor_slice';
+import { OpenSearchErrorResponse } from '../../../../../../data/public';
 import { ExploreServices } from '../../../../types';
 import {
   DataPublicPluginStart,
@@ -653,16 +654,17 @@ const executeQueryBase = async (
       return;
     }
 
-    let parsedError;
+    let parsedError: OpenSearchErrorResponse | undefined;
     try {
-      parsedError = JSON.parse(error.body.message);
+      parsedError = JSON.parse(error.body.message) as OpenSearchErrorResponse;
     } catch (parseError) {
       parsedError = {
         error: {
-          reason: error.body?.message || error.message || 'Unknown Error',
-          details: error.body?.error || 'An error occurred',
+          reason: error.body?.error || 'Unknown Error',
+          details: error.body?.message || error.message || 'An error occurred',
           type: error.name,
         },
+        status: error.body?.statusCode || 500,
       };
     }
 
@@ -686,8 +688,17 @@ const executeQueryBase = async (
                 reason: parsedError?.error?.reason || 'Unknown Error',
                 type: parsedError?.error?.type,
               },
-              statusCode: error.body?.statusCode,
+              statusCode: error.body?.statusCode || 500,
               originalErrorMessage: error.body?.message,
+              ...(parsedError?.error && {
+                errorBody: parsedError,
+                errorContext: {
+                  ...(parsedError.error.context && { context: parsedError.error.context }),
+                  ...(parsedError.error.code && { code: parsedError.error.code }),
+                  ...(parsedError.error.type && { type: parsedError.error.type }),
+                  ...(parsedError.error.location && { location: parsedError.error.location }),
+                },
+              }),
             },
           },
         })

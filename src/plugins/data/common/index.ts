@@ -29,6 +29,7 @@
  */
 
 export * from './constants';
+export * from './error_types';
 export * from './opensearch_query';
 export * from './data_views';
 export * from './data_frames';
