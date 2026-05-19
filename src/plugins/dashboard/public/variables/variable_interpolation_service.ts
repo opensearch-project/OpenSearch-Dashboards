@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { VariableWithState, VariableOptionType } from './types';
+import { VariableWithState, VariableOptionType, VARIABLE_REFERENCE_PATTERN } from './types';
 
 /**
  * Variable value with metadata for interpolation
@@ -59,11 +59,6 @@ export interface IVariableInterpolationService {
  * - Braced: ${variableName}
  */
 export class VariableInterpolationService implements IVariableInterpolationService {
-  // Regex to match variable syntax: $variable or ${variable}
-  private static get VARIABLE_PATTERN() {
-    return /\$\{(\w+)\}|\$(\w+)/g;
-  }
-
   constructor(private readonly getVariablesFn: () => VariableWithState[]) {}
 
   /**
@@ -73,7 +68,9 @@ export class VariableInterpolationService implements IVariableInterpolationServi
     if (!query || typeof query !== 'string') {
       return false;
     }
-    return VariableInterpolationService.VARIABLE_PATTERN.test(query);
+    // Create a new regex instance to avoid lastIndex state issues with global regex
+    const pattern = new RegExp(VARIABLE_REFERENCE_PATTERN.source, VARIABLE_REFERENCE_PATTERN.flags);
+    return pattern.test(query);
   }
 
   /**
@@ -113,30 +110,27 @@ export class VariableInterpolationService implements IVariableInterpolationServi
       }
     }
 
-    return query.replace(
-      VariableInterpolationService.VARIABLE_PATTERN,
-      (match, bracedName, simpleName) => {
-        const varName = bracedName || simpleName;
-        const variable = valuesMap.get(varName);
+    return query.replace(VARIABLE_REFERENCE_PATTERN, (match, bracedName, simpleName) => {
+      const varName = bracedName || simpleName;
+      const variable = valuesMap.get(varName);
 
-        if (variable === undefined) {
-          // Variable not found, keep original placeholder
-          return match;
-        }
-
-        // If we have order constraints and this variable comes after current variable,
-        // keep the placeholder
-        if (precedingVarNames && !precedingVarNames.has(varName)) {
-          return match;
-        }
-
-        if (variable.multi) {
-          return this.formatMultiValue(variable.values ?? [], lang, variable.optionType);
-        }
-
-        return this.escapeForLanguage(variable.value, lang);
+      if (variable === undefined) {
+        // Variable not found, keep original placeholder
+        return match;
       }
-    );
+
+      // If we have order constraints and this variable comes after current variable,
+      // keep the placeholder
+      if (precedingVarNames && !precedingVarNames.has(varName)) {
+        return match;
+      }
+
+      if (variable.multi) {
+        return this.formatMultiValue(variable.values ?? [], lang, variable.optionType);
+      }
+
+      return this.escapeForLanguage(variable.value, lang);
+    });
   }
 
   /**

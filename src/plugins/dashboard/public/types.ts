@@ -284,3 +284,15 @@ export interface DashboardServices extends CoreStart {
   addBasePath?: (url: string) => string;
   toastNotifications: ToastsStart;
 }
+
+/**
+ * Panel information including query and title
+ */
+export interface PanelInfo {
+  /** Query string from the panel */
+  query: string;
+  /** Panel title (user-defined or default) */
+  title?: string;
+  /** Panel ID */
+  id: string;
+}

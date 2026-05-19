@@ -13,13 +13,13 @@ import { Variable } from '../../../variables/types';
 import { VariableService } from '../../../variables/variable_service';
 import { IVariableInterpolationService } from '../../../variables/variable_interpolation_service';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
-import { DashboardServices } from '../../../types';
+import { DashboardServices, PanelInfo } from '../../../types';
 
 export interface DashboardVariablesProps {
   variableService: VariableService;
   interpolationService?: IVariableInterpolationService;
   isEditMode: boolean;
-  getPanelQueries?: () => string[];
+  getPanels?: () => PanelInfo[];
   dashboardId?: string;
   onSaveDashboard?: () => void;
   onEnterEditMode?: () => void;
@@ -33,7 +33,7 @@ export const DashboardVariables: React.FC<DashboardVariablesProps> = ({
   variableService,
   interpolationService,
   isEditMode,
-  getPanelQueries,
+  getPanels,
   dashboardId,
   onSaveDashboard,
   onEnterEditMode,
@@ -162,7 +162,7 @@ export const DashboardVariables: React.FC<DashboardVariablesProps> = ({
               onClose={handleCloseVariableManagement}
               onAddVariable={handleAddVariable}
               onEditVariable={handleEditVariable}
-              panelQueries={getPanelQueries?.() ?? []}
+              panels={getPanels?.() ?? []}
             />,
             panelContainer
           );
