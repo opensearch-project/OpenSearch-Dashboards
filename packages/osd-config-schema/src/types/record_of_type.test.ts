@@ -82,11 +82,9 @@ test('fails when not receiving expected key type', () => {
     name: 'foo',
   };
 
-  expect(() => type.validate(value)).toThrowErrorMatchingInlineSnapshot(`
-"[key(\\"name\\")]: types that failed validation:
-- [0]: expected value to equal [nickName]
-- [1]: expected value to equal [lastName]"
-`);
+  expect(() => type.validate(value)).toThrowErrorMatchingInlineSnapshot(
+    `"[key(\\"name\\")]: SchemaTypeError: expected value to equal [lastName]"`
+  );
 });
 
 test('fails after parsing when not receiving expected key type', () => {
@@ -97,11 +95,9 @@ test('fails after parsing when not receiving expected key type', () => {
 
   const value = `{"name": "foo"}`;
 
-  expect(() => type.validate(value)).toThrowErrorMatchingInlineSnapshot(`
-"[key(\\"name\\")]: types that failed validation:
-- [0]: expected value to equal [nickName]
-- [1]: expected value to equal [lastName]"
-`);
+  expect(() => type.validate(value)).toThrowErrorMatchingInlineSnapshot(
+    `"[key(\\"name\\")]: SchemaTypeError: expected value to equal [lastName]"`
+  );
 });
 
 test('includes namespace in failure when wrong top-level type', () => {

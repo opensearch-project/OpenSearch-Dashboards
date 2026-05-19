@@ -303,21 +303,14 @@ describe('#sslSchema', () => {
         supportedProtocols: ['TLSv1', 'TLSv1.1', 'TLSv1.2', 'TLSv1.3', 'SOMEv100500'],
       };
 
-      expect(() => sslSchema.validate(singleUnknownProtocol)).toThrowErrorMatchingInlineSnapshot(`
-"[supportedProtocols.0]: types that failed validation:
-- [supportedProtocols.0.0]: expected value to equal [TLSv1]
-- [supportedProtocols.0.1]: expected value to equal [TLSv1.1]
-- [supportedProtocols.0.2]: expected value to equal [TLSv1.2]
-- [supportedProtocols.0.3]: expected value to equal [TLSv1.3]"
-`);
-      expect(() => sslSchema.validate(allKnownWithOneUnknownProtocols))
-        .toThrowErrorMatchingInlineSnapshot(`
-"[supportedProtocols.4]: types that failed validation:
-- [supportedProtocols.4.0]: expected value to equal [TLSv1]
-- [supportedProtocols.4.1]: expected value to equal [TLSv1.1]
-- [supportedProtocols.4.2]: expected value to equal [TLSv1.2]
-- [supportedProtocols.4.3]: expected value to equal [TLSv1.3]"
-`);
+      expect(() => sslSchema.validate(singleUnknownProtocol)).toThrowErrorMatchingInlineSnapshot(
+        `"[supportedProtocols.0]: SchemaTypeError: expected value to equal [TLSv1.3]"`
+      );
+      expect(() =>
+        sslSchema.validate(allKnownWithOneUnknownProtocols)
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[supportedProtocols.4]: SchemaTypeError: expected value to equal [TLSv1.3]"`
+      );
     });
   });
 
