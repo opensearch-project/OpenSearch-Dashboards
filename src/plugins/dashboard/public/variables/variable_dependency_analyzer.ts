@@ -63,8 +63,6 @@ export interface DependencyAnalysisResult {
   variables: Map<string, VariableDependencyInfo>;
   /** All dependency edges */
   dependencies: VariableDependency[];
-  /** Whether any issues were detected */
-  hasIssues: boolean;
   /** Circular dependency chains detected */
   circularChains: string[][];
 }
@@ -73,13 +71,6 @@ export interface DependencyAnalysisResult {
  * Analyzer for variable dependencies
  */
 export class VariableDependencyAnalyzer {
-  /**
-   * Extract variable names referenced in a query string
-   */
-  private static extractVariableReferences(query: string): string[] {
-    return VariableUtils.extractVariableNames(query);
-  }
-
   /**
    * Build dependency map from variables
    */
@@ -92,7 +83,7 @@ export class VariableDependencyAnalyzer {
       let dependencies: string[] = [];
 
       if (variable.type === VariableType.Query) {
-        dependencies = this.extractVariableReferences(variable.query);
+        dependencies = VariableUtils.extractVariableNames(variable.query);
       }
 
       map.set(variable.name, { variable, index, dependencies });
@@ -106,7 +97,7 @@ export class VariableDependencyAnalyzer {
    * The canonical form starts with the lexicographically smallest variable
    */
   private static normalizeChain(chain: string[]): string {
-    if (chain.length <= 1) return chain.join('→');
+    if (chain.length <= 1) return chain.join('->');
 
     // Find the index of the lexicographically smallest variable (excluding the last duplicate)
     const chainWithoutDup = chain.slice(0, -1);
@@ -117,7 +108,7 @@ export class VariableDependencyAnalyzer {
 
     // Rotate the chain to start with the smallest variable
     const rotated = [...chainWithoutDup.slice(minIndex), ...chainWithoutDup.slice(0, minIndex)];
-    return rotated.join('→');
+    return rotated.join('->');
   }
 
   /**
@@ -147,15 +138,26 @@ export class VariableDependencyAnalyzer {
           if (recursionStack.has(dep)) {
             // Found a cycle - path doesn't include varName yet, so add it
             const cycleStart = path.indexOf(dep);
-            const cycle = [...path.slice(cycleStart), varName, dep];
 
-            // Normalize and check for duplicates
-            const normalized = this.normalizeChain(cycle);
-            if (!seenChains.has(normalized)) {
-              seenChains.add(normalized);
+            // cycleStart will be -1 for self-references (dep not in path yet)
+            // In this case, the cycle is just: varName -> dep (which is also varName)
+            if (cycleStart >= 0) {
+              // Normal cycle: extract path from where cycle starts
+              const cycle = [...path.slice(cycleStart), varName, dep];
+
+              // Normalize and check for duplicates
+              const normalized = this.normalizeChain(cycle);
+              if (!seenChains.has(normalized)) {
+                seenChains.add(normalized);
+                circularChains.push(cycle);
+                // Mark all variables in the cycle (excluding the duplicate at the end)
+                cycle.slice(0, -1).forEach((v) => variablesInCycles.add(v));
+              }
+            } else {
+              // Self-reference: variable depends on itself
+              const cycle = [varName, dep]; // Both are the same variable
               circularChains.push(cycle);
-              // Mark all variables in the cycle (excluding the duplicate at the end)
-              cycle.slice(0, -1).forEach((v) => variablesInCycles.add(v));
+              variablesInCycles.add(varName);
             }
           } else if (!visited.has(dep)) {
             // Pass path with varName appended (functional style)
@@ -184,7 +186,6 @@ export class VariableDependencyAnalyzer {
     const { chains: circularChains, variablesInCycles } = this.detectCircularDependencies(depMap);
     const variableInfo = new Map<string, VariableDependencyInfo>();
     const allDependencies: VariableDependency[] = [];
-    let hasIssues = false;
 
     // Build reverse dependency map (who depends on me)
     const dependents = new Map<string, Set<string>>();
@@ -242,23 +243,18 @@ export class VariableDependencyAnalyzer {
           issues.push({
             type: DependencyIssueType.CircularDependency,
             message: `Circular dependency: variable "${varName}" is part of circular dependency: ${circularChain.join(
-              ' → '
+              ' -> '
             )}`,
             relatedVariables: circularChain,
           });
         }
       }
 
-      const hasVariableIssues = issues.length > 0;
-      if (hasVariableIssues) {
-        hasIssues = true;
-      }
-
       variableInfo.set(varName, {
         name: varName,
         dependencies,
         dependents: Array.from(dependents.get(varName) || []),
-        hasIssues: hasVariableIssues,
+        hasIssues: issues.length > 0,
         issues,
       });
     }
@@ -266,7 +262,6 @@ export class VariableDependencyAnalyzer {
     return {
       variables: variableInfo,
       dependencies: allDependencies,
-      hasIssues,
       circularChains,
     };
   }
