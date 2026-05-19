@@ -16,7 +16,7 @@
     "lodash": "^4.18.0",
     "prop-types": "^15.7.2",
     "react": "^18.2.0",
-    "uuid": "3.3.2"
+    "uuid": "14.0.0"
   },
   "peerDependencies": {
     "enzyme": "^3.8.0",
