@@ -403,6 +403,12 @@ export class ExploreEmbeddable
     if (needFetch) {
       this.prevState = { filters, query, timeRange };
       this.searchProps = searchProps;
+
+      // Apply dashboard filters to the SearchSource (same as PPL)
+      if (this.filtersSearchSource) {
+        this.filtersSearchSource.setField('filter', filters || []);
+      }
+
       try {
         await this.fetch();
       } catch (error: any) {
@@ -633,6 +639,7 @@ export class ExploreEmbeddable
     this.renderComplete.dispatchError();
     this.updateOutput({ loading: false, error });
   };
+
 
   public render(node: HTMLElement) {
     if (!this.searchProps) {

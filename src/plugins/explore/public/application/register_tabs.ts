@@ -28,6 +28,7 @@ import {
   brainPatternQuery,
   findDefaultPatternsField,
   regexPatternQuery,
+  sqlPatternQuery,
 } from '../components/patterns_table/utils/utils';
 import { setUsingRegexPatterns } from './utils/state_management/slices/tab/tab_slice';
 import { executeTabQuery } from './utils/state_management/actions/query_actions';
