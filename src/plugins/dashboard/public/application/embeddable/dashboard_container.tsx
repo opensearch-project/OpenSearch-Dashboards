@@ -351,23 +351,28 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   }
 
   /**
-   * Get query strings from all panel embeddables.
-   * Used to detect variable references in visualizations.
+   * Get all panel information including queries and titles.
+   * Used for variable dependency visualization and reference detection.
    */
-  public getPanelQueries(): string[] {
-    const queries: string[] = [];
+  public getPanels(): Array<{ query: string; title?: string; id: string }> {
+    const panels: Array<{ query: string; title?: string; id: string }> = [];
     for (const id of this.getChildIds()) {
       try {
         const child = this.getChild<any>(id);
         if (child?.originalQuery && typeof child.originalQuery === 'string') {
-          queries.push(child.originalQuery);
+          const panel = this.input.panels[id];
+          panels.push({
+            query: child.originalQuery,
+            title: panel?.explicitInput?.title || child.getTitle?.() || id,
+            id,
+          });
         }
       } catch {
         // Skip embeddables that can't be accessed or aren't loaded yet
         continue;
       }
     }
-    return queries;
+    return panels;
   }
 
   protected getInheritedInput(id: string): InheritedChildInput {
