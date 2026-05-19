@@ -15,7 +15,7 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { Variable } from '../../../variables/types';
+import { Variable, VariableUtils } from '../../../variables/types';
 import { PanelInfo } from '../../../types';
 import { DependencyAnalysisResult } from '../../../variables/variable_dependency_analyzer';
 
@@ -39,8 +39,9 @@ export const VariableReferencePopover: React.FC<VariableReferencePopoverProps> =
     const varInfo = dependencyAnalysis.variables.get(variable.name);
 
     // Check which explore visualizations reference this variable
-    const pattern = new RegExp(`\\$\\{${variable.name}\\}|\\$${variable.name}\\b`);
-    const referencingPanels = panels.filter((panel) => pattern.test(panel.query));
+    const referencingPanels = panels.filter((panel) =>
+      VariableUtils.containsReference(panel.query, variable.name)
+    );
 
     const hasDangerIssue = varInfo?.hasIssues ?? false;
     const isUnused =

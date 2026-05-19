@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Variable, VariableType } from './types';
+import { Variable, VariableType, VariableUtils } from './types';
 
 /**
  * Dependency relationship between variables
@@ -73,28 +73,11 @@ export interface DependencyAnalysisResult {
  * Analyzer for variable dependencies
  */
 export class VariableDependencyAnalyzer {
-  // Regex to match variable syntax: $variable or ${variable}
-  private static readonly VARIABLE_PATTERN = /\$\{(\w+)\}|\$(\w+)/g;
-
   /**
    * Extract variable names referenced in a query string
    */
   private static extractVariableReferences(query: string): string[] {
-    if (!query || typeof query !== 'string') {
-      return [];
-    }
-
-    const references = new Set<string>();
-    let match;
-    // Reset lastIndex to ensure clean state
-    const pattern = new RegExp(this.VARIABLE_PATTERN.source, this.VARIABLE_PATTERN.flags);
-
-    while ((match = pattern.exec(query)) !== null) {
-      const varName = match[1] || match[2];
-      references.add(varName);
-    }
-
-    return Array.from(references);
+    return VariableUtils.extractVariableNames(query);
   }
 
   /**
@@ -119,6 +102,25 @@ export class VariableDependencyAnalyzer {
   }
 
   /**
+   * Normalize a circular chain to a canonical form for deduplication
+   * The canonical form starts with the lexicographically smallest variable
+   */
+  private static normalizeChain(chain: string[]): string {
+    if (chain.length <= 1) return chain.join('→');
+
+    // Find the index of the lexicographically smallest variable (excluding the last duplicate)
+    const chainWithoutDup = chain.slice(0, -1);
+    const minIndex = chainWithoutDup.reduce(
+      (minIdx, val, idx) => (val < chainWithoutDup[minIdx] ? idx : minIdx),
+      0
+    );
+
+    // Rotate the chain to start with the smallest variable
+    const rotated = [...chainWithoutDup.slice(minIndex), ...chainWithoutDup.slice(0, minIndex)];
+    return rotated.join('→');
+  }
+
+  /**
    * Detect circular dependencies using DFS
    */
   private static detectCircularDependencies(
@@ -128,11 +130,11 @@ export class VariableDependencyAnalyzer {
     const recursionStack = new Set<string>();
     const circularChains: string[][] = [];
     const variablesInCycles = new Set<string>();
+    const seenChains = new Set<string>(); // Track normalized chains for deduplication
 
     const dfs = (varName: string, path: string[]): void => {
       visited.add(varName);
       recursionStack.add(varName);
-      path.push(varName);
 
       const varInfo = depMap.get(varName);
       if (varInfo) {
@@ -143,14 +145,21 @@ export class VariableDependencyAnalyzer {
           }
 
           if (recursionStack.has(dep)) {
-            // Found a cycle
+            // Found a cycle - path doesn't include varName yet, so add it
             const cycleStart = path.indexOf(dep);
-            const cycle = [...path.slice(cycleStart), dep];
-            circularChains.push(cycle);
-            // Mark all variables in the cycle
-            cycle.forEach((v) => variablesInCycles.add(v));
+            const cycle = [...path.slice(cycleStart), varName, dep];
+
+            // Normalize and check for duplicates
+            const normalized = this.normalizeChain(cycle);
+            if (!seenChains.has(normalized)) {
+              seenChains.add(normalized);
+              circularChains.push(cycle);
+              // Mark all variables in the cycle (excluding the duplicate at the end)
+              cycle.slice(0, -1).forEach((v) => variablesInCycles.add(v));
+            }
           } else if (!visited.has(dep)) {
-            dfs(dep, [...path]);
+            // Pass path with varName appended (functional style)
+            dfs(dep, [...path, varName]);
           }
         }
       }
