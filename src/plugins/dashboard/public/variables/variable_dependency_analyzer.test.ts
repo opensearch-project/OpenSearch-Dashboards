@@ -31,7 +31,6 @@ describe('VariableDependencyAnalyzer', () => {
 
       const result = VariableDependencyAnalyzer.analyze(variables);
 
-      expect(result.hasIssues).toBe(false);
       expect(result.dependencies).toHaveLength(0);
       expect(result.circularChains).toHaveLength(0);
     });
@@ -44,7 +43,6 @@ describe('VariableDependencyAnalyzer', () => {
 
       const result = VariableDependencyAnalyzer.analyze(variables);
 
-      expect(result.hasIssues).toBe(false);
       expect(result.dependencies).toHaveLength(1);
       expect(result.dependencies[0]).toEqual({ from: 'b', to: 'a' });
 
@@ -61,7 +59,6 @@ describe('VariableDependencyAnalyzer', () => {
 
       const result = VariableDependencyAnalyzer.analyze(variables);
 
-      expect(result.hasIssues).toBe(true);
       const varA = result.variables.get('a');
       expect(varA?.hasIssues).toBe(true);
       expect(varA?.issues).toHaveLength(1);
@@ -75,7 +72,6 @@ describe('VariableDependencyAnalyzer', () => {
 
       const result = VariableDependencyAnalyzer.analyze(variables);
 
-      expect(result.hasIssues).toBe(true);
       const varA = result.variables.get('a');
       expect(varA?.hasIssues).toBe(true);
       expect(varA?.issues[0].type).toBe(DependencyIssueType.SelfReference);
@@ -89,7 +85,6 @@ describe('VariableDependencyAnalyzer', () => {
 
       const result = VariableDependencyAnalyzer.analyze(variables);
 
-      expect(result.hasIssues).toBe(true);
       expect(result.circularChains.length).toBeGreaterThan(0);
 
       const varA = result.variables.get('a');
@@ -109,8 +104,6 @@ describe('VariableDependencyAnalyzer', () => {
       ];
 
       const result = VariableDependencyAnalyzer.analyze(variables);
-
-      expect(result.hasIssues).toBe(true);
       expect(result.circularChains.length).toBeGreaterThan(0);
     });
 
@@ -121,7 +114,6 @@ describe('VariableDependencyAnalyzer', () => {
 
       const result = VariableDependencyAnalyzer.analyze(variables);
 
-      expect(result.hasIssues).toBe(true);
       const varA = result.variables.get('a');
       expect(varA?.hasIssues).toBe(true);
       expect(varA?.issues[0].type).toBe(DependencyIssueType.MissingReference);
@@ -135,8 +127,6 @@ describe('VariableDependencyAnalyzer', () => {
       ];
 
       const result = VariableDependencyAnalyzer.analyze(variables);
-
-      expect(result.hasIssues).toBe(false);
       expect(result.dependencies).toHaveLength(2);
     });
 
@@ -148,8 +138,6 @@ describe('VariableDependencyAnalyzer', () => {
       ];
 
       const result = VariableDependencyAnalyzer.analyze(variables);
-
-      expect(result.hasIssues).toBe(false);
       const varC = result.variables.get('c');
       expect(varC?.dependencies).toEqual(['a', 'b']);
     });
@@ -176,8 +164,6 @@ describe('VariableDependencyAnalyzer', () => {
       ];
 
       const result = VariableDependencyAnalyzer.analyze(variables);
-
-      expect(result.hasIssues).toBe(false);
       const varA = result.variables.get('a');
       expect(varA?.dependencies).toHaveLength(0);
       expect(varA?.dependents).toEqual(['b']);
@@ -187,8 +173,6 @@ describe('VariableDependencyAnalyzer', () => {
       const variables: Variable[] = [createQueryVar('a', ''), createQueryVar('b', 'source=logs')];
 
       const result = VariableDependencyAnalyzer.analyze(variables);
-
-      expect(result.hasIssues).toBe(false);
       const varA = result.variables.get('a');
       expect(varA?.dependencies).toHaveLength(0);
     });
@@ -232,8 +216,6 @@ describe('VariableDependencyAnalyzer', () => {
       ];
 
       const result = VariableDependencyAnalyzer.analyze(variables);
-
-      expect(result.hasIssues).toBe(true);
       expect(result.circularChains.length).toBeGreaterThan(0);
 
       // All variables in the chain should have circular dependency issues
@@ -259,8 +241,6 @@ describe('VariableDependencyAnalyzer', () => {
       ];
 
       const result = VariableDependencyAnalyzer.analyze(variables);
-
-      expect(result.hasIssues).toBe(true);
       expect(result.circularChains.length).toBeGreaterThanOrEqual(2);
 
       // Variables in cycles should have issues
@@ -299,9 +279,6 @@ describe('VariableDependencyAnalyzer', () => {
       ];
 
       const result = VariableDependencyAnalyzer.analyze(variables);
-
-      expect(result.hasIssues).toBe(false);
-
       const varA = result.variables.get('a');
       expect(varA?.dependents).toContain('b');
       expect(varA?.dependents).toContain('c');
@@ -317,7 +294,6 @@ describe('VariableDependencyAnalyzer', () => {
 
       expect(result.variables.size).toBe(0);
       expect(result.dependencies).toHaveLength(0);
-      expect(result.hasIssues).toBe(false);
       expect(result.circularChains).toHaveLength(0);
     });
 
@@ -325,8 +301,6 @@ describe('VariableDependencyAnalyzer', () => {
       const variables: Variable[] = [createQueryVar('a', 'source=logs | fields host')];
 
       const result = VariableDependencyAnalyzer.analyze(variables);
-
-      expect(result.hasIssues).toBe(false);
       const varA = result.variables.get('a');
       expect(varA?.dependencies).toHaveLength(0);
       expect(varA?.dependents).toHaveLength(0);
@@ -368,8 +342,6 @@ describe('VariableDependencyAnalyzer', () => {
       ];
 
       const result = VariableDependencyAnalyzer.analyze(variables);
-
-      expect(result.hasIssues).toBe(false);
       expect(result.variables.get('host_name_2')?.dependencies).toEqual(['region_1']);
       expect(result.variables.get('service_v3')?.dependencies).toEqual(['host_name_2']);
     });
@@ -402,7 +374,6 @@ describe('VariableDependencyAnalyzer', () => {
 
       const result = VariableDependencyAnalyzer.analyze(variables);
 
-      expect(result.hasIssues).toBe(false);
       expect(result.circularChains).toHaveLength(0);
 
       // Each variable should depend on the previous one
@@ -410,6 +381,57 @@ describe('VariableDependencyAnalyzer', () => {
       expect(result.variables.get('v3')?.dependencies).toEqual(['v2']);
       expect(result.variables.get('v4')?.dependencies).toEqual(['v3']);
       expect(result.variables.get('v5')?.dependencies).toEqual(['v4']);
+    });
+
+    it('should detect self-reference as a cycle', () => {
+      const variables: Variable[] = [createQueryVar('a', 'where x=$a | fields host')];
+
+      const result = VariableDependencyAnalyzer.analyze(variables);
+      expect(result.circularChains.length).toBeGreaterThan(0);
+
+      const varA = result.variables.get('a');
+      expect(varA?.hasIssues).toBe(true);
+
+      // Should have both self-reference and circular dependency issues
+      const hasSelfRef = varA?.issues.some((i) => i.type === DependencyIssueType.SelfReference);
+      const hasCircular = varA?.issues.some(
+        (i) => i.type === DependencyIssueType.CircularDependency
+      );
+
+      expect(hasSelfRef).toBe(true);
+      expect(hasCircular).toBe(true);
+
+      // The cycle should be ['a', 'a']
+      const cycle = result.circularChains.find((chain) => chain.includes('a'));
+      expect(cycle).toEqual(['a', 'a']);
+    });
+
+    it('should not report invalid cycles when cycleStart is -1', () => {
+      // This test ensures we don't create incorrect cycles due to slice(-1)
+      const variables: Variable[] = [
+        createQueryVar('a', 'source=logs'),
+        createQueryVar('b', 'where x=$a'), // Valid dependency
+        createQueryVar('c', 'where x=$c'), // Self-reference (cycleStart = -1)
+      ];
+
+      const result = VariableDependencyAnalyzer.analyze(variables);
+
+      // Should detect self-reference for 'c' but not false cycles
+      const varC = result.variables.get('c');
+      expect(varC?.hasIssues).toBe(true);
+
+      // Find cycles involving 'c'
+      const cyclesWithC = result.circularChains.filter((chain) => chain.includes('c'));
+
+      // Should only have one cycle: ['c', 'c']
+      expect(cyclesWithC).toHaveLength(1);
+      expect(cyclesWithC[0]).toEqual(['c', 'c']);
+
+      // Should NOT have invalid cycles like ['a', 'c', 'c'] or ['b', 'c', 'c']
+      cyclesWithC.forEach((cycle) => {
+        expect(cycle).not.toContain('a');
+        expect(cycle).not.toContain('b');
+      });
     });
 
     it('should provide detailed messages for all issue types', () => {
@@ -440,7 +462,7 @@ describe('VariableDependencyAnalyzer', () => {
       const circularIssue = varB?.issues.find(
         (i) => i.type === DependencyIssueType.CircularDependency
       );
-      expect(circularIssue?.message).toContain('→');
+      expect(circularIssue?.message).toContain('->');
       expect(circularIssue?.relatedVariables.length).toBeGreaterThan(1);
     });
   });
