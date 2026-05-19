@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import {
   EuiTitle,
   EuiFlexGroup,
@@ -22,20 +22,21 @@ import {
   EuiHorizontalRule,
   DropResult,
   EuiSmallButtonIcon,
-  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { VariableService } from '../../../variables/variable_service';
 import { Variable, VariableType, VariableWithState } from '../../../variables/types';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
-import { DashboardServices } from '../../../types';
+import { DashboardServices, PanelInfo } from '../../../types';
+import { VariableReferencePopover } from './variable_reference_popover';
+import { VariableDependencyAnalyzer } from '../../../variables/variable_dependency_analyzer';
 
 export interface VariableManagementFlyoutProps {
   variableService: VariableService;
   onClose: () => void;
   onAddVariable: () => void;
   onEditVariable: (variable: Variable) => void;
-  panelQueries?: string[];
+  panels?: PanelInfo[];
 }
 
 const variableTypeLabels: Record<VariableType, string> = {
@@ -48,7 +49,7 @@ export const VariableManagementFlyout: React.FC<VariableManagementFlyoutProps> =
   onClose,
   onAddVariable,
   onEditVariable,
-  panelQueries = [],
+  panels = [],
 }) => {
   const { services } = useOpenSearchDashboards<DashboardServices>();
   const { notifications } = services;
@@ -62,6 +63,11 @@ export const VariableManagementFlyout: React.FC<VariableManagementFlyoutProps> =
     });
     return () => subscription.unsubscribe();
   }, [variableService]);
+
+  // Memoize dependency analysis to avoid recomputing for each variable
+  const dependencyAnalysis = useMemo(() => {
+    return VariableDependencyAnalyzer.analyze(variables);
+  }, [variables]);
 
   const handleDragEnd = useCallback(
     ({ source, destination }: DropResult) => {
@@ -105,21 +111,6 @@ export const VariableManagementFlyout: React.FC<VariableManagementFlyoutProps> =
       variableService.toggleVariableHide(variable.id);
     },
     [variableService]
-  );
-
-  /** Check if a variable is referenced by other variables or panel queries */
-  const isReferenced = useCallback(
-    (varName: string): boolean => {
-      const pattern = new RegExp(`\\$\\{${varName}\\}|\\$${varName}\\b`);
-      // Check other query variables
-      const referencedByVariable = variables.some(
-        (v) => v.type === VariableType.Query && v.name !== varName && pattern.test(v.query)
-      );
-      if (referencedByVariable) return true;
-      // Check panel queries
-      return panelQueries.some((q) => pattern.test(q));
-    },
-    [variables, panelQueries]
   );
 
   return (
@@ -271,21 +262,13 @@ export const VariableManagementFlyout: React.FC<VariableManagementFlyoutProps> =
                                 alignItems="center"
                                 responsive={false}
                               >
-                                {isReferenced(variable.name) && (
-                                  <EuiFlexItem grow={false}>
-                                    <EuiToolTip
-                                      content={i18n.translate(
-                                        'dashboard.variables.referencedTooltip',
-                                        {
-                                          defaultMessage:
-                                            'This variable is referenced by other variables or dashboard.',
-                                        }
-                                      )}
-                                    >
-                                      <EuiIcon type="check" color="success" />
-                                    </EuiToolTip>
-                                  </EuiFlexItem>
-                                )}
+                                <EuiFlexItem grow={false}>
+                                  <VariableReferencePopover
+                                    variable={variable}
+                                    dependencyAnalysis={dependencyAnalysis}
+                                    panels={panels}
+                                  />
+                                </EuiFlexItem>
                                 <EuiFlexItem grow={false}>
                                   <EuiSmallButtonIcon
                                     iconType={variable.hide ? 'eyeClosed' : 'eye'}
