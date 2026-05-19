@@ -41,6 +41,10 @@ const DUPLICATE_WORKSPACE_NAME_ERROR = i18n.translate('workspace.duplicate.name.
   defaultMessage: 'workspace name has already been used, try with a different name',
 });
 
+const DUPLICATE_WORKSPACE_ID_ERROR = i18n.translate('workspace.duplicate.id.error', {
+  defaultMessage: 'workspace id has already been used, try with a different id',
+});
+
 const WORKSPACE_NOT_FOUND_ERROR = i18n.translate('workspace.notFound.error', {
   defaultMessage: 'workspace not found',
 });
@@ -114,13 +118,14 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
   public async create(
     requestDetail: IRequestDetail,
     payload: Omit<WorkspaceAttributeWithPermission, 'id'> & {
+      id?: string;
       dataSources?: string[];
       dataConnections?: string[];
     }
   ): ReturnType<IWorkspaceClientImpl['create']> {
     try {
-      const { permissions, dataSources, dataConnections, ...attributes } = payload;
-      const id = generateRandomId(WORKSPACE_ID_SIZE);
+      const { permissions, dataSources, dataConnections, id: payloadId, ...attributes } = payload;
+      const id = payloadId || generateRandomId(WORKSPACE_ID_SIZE);
       const client = this.getSavedObjectClientsFromRequestDetail(requestDetail);
       const clientWithoutPermission = this.getScopedClientWithoutPermission(requestDetail);
       const existingWorkspaceRes = await clientWithoutPermission?.find({
@@ -130,6 +135,18 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
       });
       if (existingWorkspaceRes && existingWorkspaceRes.total > 0) {
         throw new Error(DUPLICATE_WORKSPACE_NAME_ERROR);
+      }
+
+      if (payloadId) {
+        try {
+          await clientWithoutPermission?.get(WORKSPACE_TYPE, payloadId);
+          throw new Error(DUPLICATE_WORKSPACE_ID_ERROR);
+        } catch (e: unknown) {
+          if (e instanceof Error && e.message === DUPLICATE_WORKSPACE_ID_ERROR) {
+            throw e;
+          }
+          // get() throws when the workspace does not exist — that is the expected path
+        }
       }
 
       if (this.config?.maximum_workspaces) {
