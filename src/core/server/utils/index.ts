@@ -28,6 +28,7 @@
  * under the License.
  */
 
+export * from './cidr';
 export * from './crypto';
 export * from './from_root';
 export * from './package_json';
