@@ -17,3 +17,5 @@ export interface ContainerInfo {
   containerName: string;
   containerId: string;
 }
+
+export type ActiveBottomPanelTab = 'QUERY_TAB' | 'TRANSFORM_TAB';

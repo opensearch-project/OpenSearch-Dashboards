@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useState } from 'react';
+import { useObservable } from 'react-use';
 import moment from 'moment';
 import { i18n } from '@osd/i18n';
 import {
@@ -12,6 +13,9 @@ import {
   EuiTitle,
   EuiErrorBoundary,
   EuiIcon,
+  EuiTabs,
+  EuiTab,
+  EuiPanel,
 } from '@elastic/eui';
 import { TimeRange } from 'src/plugins/data/common';
 import { QueryExecutionStatus } from '../../utils/state_management/types';
@@ -24,7 +28,13 @@ import { useQueryBuilderState } from '../hooks/use_query_builder_state';
 import { ErrorCodeBlock } from '../../../components/tabs/error_guard/error_code_block';
 import { EditorPanel } from './editor_panel';
 import { useVisualizationBuilder } from '../hooks/use_visualization_builder';
+import { TransformPanel } from './transform_panel';
+import { useTransformationService } from '../hooks/use_transformation_service';
+
 import '../visualization_editor.scss';
+import { TransformationService } from '../data_transformations';
+
+type ActiveTab = 'QUERY_TAB' | 'TRANSFORM_TAB';
 
 const errorDefaultTitle = i18n.translate('explore.errorPanel.defaultTitle', {
   defaultMessage: 'An error occurred while executing the query',
@@ -36,9 +46,36 @@ const typeText = i18n.translate('explore.errorPanel.type', {
   defaultMessage: 'Type',
 });
 
-export const ResizableQueryPanelAndVisualization = () => {
+const queryTabLabel = i18n.translate('explore.bottomPanel.queryTab', {
+  defaultMessage: 'Query',
+});
+const transformTabLabel = i18n.translate('explore.bottomPanel.transformTab', {
+  defaultMessage: 'Transform',
+});
+
+interface ResizableQueryPanelAndVisualizationProps {
+  savedTransformationPipeline?: Array<{
+    definitionId: string;
+    instanceId: string;
+    config: any;
+    hide: boolean;
+  }>;
+}
+
+export const ResizableQueryPanelAndVisualization = ({
+  savedTransformationPipeline,
+}: ResizableQueryPanelAndVisualizationProps) => {
   const { queryBuilder, queryEditorState } = useQueryBuilderState();
   const queryStatus = queryEditorState.queryStatus;
+  const [activeTab, setActiveTab] = useState<ActiveTab>(
+    queryEditorState.activeBottomPanelTab ?? 'QUERY_TAB'
+  );
+
+  const transformServices = useTransformationService(savedTransformationPipeline);
+
+  useEffect(() => {
+    queryBuilder.updateQueryEditorState({ activeBottomPanelTab: activeTab });
+  }, [activeTab, queryBuilder]);
 
   const renderVis = () => {
     if (queryStatus.status === QueryExecutionStatus.NO_RESULTS) {
@@ -88,21 +125,52 @@ export const ResizableQueryPanelAndVisualization = () => {
         </EuiErrorBoundary>
       );
     }
-    return <VisualizationContainer />;
+    return <VisualizationContainer transformationService={transformServices} />;
   };
   return (
     <EuiResizableContainer direction="vertical">
       {(EuiResizablePanel, EuiResizableButton) => {
         return (
           <>
-            <EuiResizablePanel initialSize={70} minSize="60%" paddingSize="none">
+            <EuiResizablePanel initialSize={70} minSize="0%" paddingSize="none">
               {renderVis()}
             </EuiResizablePanel>
 
             <EuiResizableButton />
 
             <EuiResizablePanel initialSize={30} minSize="20%" paddingSize="none" hasBorder={false}>
-              <QueryPanel queryEditorState$={queryBuilder.queryEditorState$} />
+              <EuiPanel
+                paddingSize="none"
+                className="multiTabsPanel"
+                style={{
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}
+              >
+                <EuiTabs size="s">
+                  <EuiTab
+                    isSelected={activeTab === 'QUERY_TAB'}
+                    onClick={() => setActiveTab('QUERY_TAB')}
+                    data-test-subj="queryPanelTab"
+                  >
+                    {queryTabLabel}
+                  </EuiTab>
+                  <EuiTab
+                    isSelected={activeTab === 'TRANSFORM_TAB'}
+                    onClick={() => setActiveTab('TRANSFORM_TAB')}
+                    data-test-subj="transformPanelTab"
+                  >
+                    {transformTabLabel}
+                  </EuiTab>
+                </EuiTabs>
+
+                {activeTab === 'QUERY_TAB' ? (
+                  <QueryPanel queryEditorState$={queryBuilder.queryEditorState$} />
+                ) : (
+                  <TransformPanel transformationService={transformServices} />
+                )}
+              </EuiPanel>
             </EuiResizablePanel>
           </>
         );
@@ -111,20 +179,29 @@ export const ResizableQueryPanelAndVisualization = () => {
   );
 };
 
-export const VisualizationContainer = () => {
+export const VisualizationContainer = ({
+  transformationService,
+}: {
+  transformationService: TransformationService;
+}) => {
   const searchContext = useSearchContext();
 
   const { visualizationBuilderForEditor: visualizationBuilder } = useVisualizationBuilder();
-  const { resultState: results, queryBuilder } = useQueryBuilderState();
+  const { queryBuilder } = useQueryBuilderState();
+
+  const resultState = useObservable(queryBuilder.resultState$, undefined);
+
+  const pipeline = useObservable(
+    transformationService.getPipeline$(),
+    transformationService.pipeline$.getValue()
+  );
 
   useEffect(() => {
-    if (results) {
-      const rows = results.hits?.hits || [];
-      const fieldSchema = results.fieldSchema || [];
-
-      visualizationBuilder.handleData(rows, fieldSchema);
-    }
-  }, [visualizationBuilder, results]);
+    if (!resultState) return;
+    const rows = resultState.hits?.hits || [];
+    const fieldSchema = resultState.fieldSchema || [];
+    visualizationBuilder.handleData(rows, fieldSchema);
+  }, [visualizationBuilder, resultState, pipeline]);
 
   const onSelectTimeRange = useCallback(
     (timeRange?: TimeRange) => {
