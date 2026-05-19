@@ -17,13 +17,13 @@ import {
 import { i18n } from '@osd/i18n';
 import { Variable, VariableUtils } from '../../../variables/types';
 import { PanelInfo } from '../../../types';
-import { DependencyAnalysisResult } from '../../../variables/variable_dependency_analyzer';
+import { VariableDependencyInfo } from '../../../variables/variable_dependency_analyzer';
 
 export interface VariableReferencePopoverProps {
   /** The variable to show references for */
   variable: Variable;
   /** Pre-computed dependency analysis result for all variables */
-  dependencyAnalysis: DependencyAnalysisResult;
+  dependencyAnalysis: Map<string, VariableDependencyInfo>;
   /** Panel information to check for references */
   panels?: PanelInfo[];
 }
@@ -36,7 +36,7 @@ export const VariableReferencePopover: React.FC<VariableReferencePopoverProps> =
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const referenceInfo = useMemo(() => {
-    const varInfo = dependencyAnalysis.variables.get(variable.name);
+    const varInfo = dependencyAnalysis.get(variable.name);
 
     // Check which explore visualizations reference this variable
     const referencingPanels = panels.filter((panel) =>
