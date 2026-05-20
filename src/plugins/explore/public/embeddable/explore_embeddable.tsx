@@ -69,6 +69,7 @@ export interface SearchProps {
   indexPattern?: IndexPattern;
   hits?: number;
   isLoading?: boolean;
+  error?: ExpressionRenderError;
   services: ExploreServices;
   chartRender?: () => any;
   sharedItemTitle?: string;
@@ -406,14 +407,15 @@ export class ExploreEmbeddable
       try {
         await this.fetch();
       } catch (error: any) {
+        this.searchProps.isLoading = false;
+        this.searchProps.error = {
+          name: error?.body?.error || error?.name || 'Error',
+          message: error?.body?.message || error?.message || 'An error occurred',
+        };
         this.updateOutput({
           loading: false,
-          error: {
-            name: error?.body?.error,
-            message: error?.body?.message,
-          },
+          error: this.searchProps.error,
         });
-        throw error;
       }
     } else if (searchProps) {
       this.searchProps = searchProps;
@@ -450,6 +452,7 @@ export class ExploreEmbeddable
     });
     this.updateOutput({ loading: true, error: undefined });
     this.searchProps.isLoading = true;
+    this.searchProps.error = undefined;
     const query = searchSource.getField('query');
     const languageConfig = this.services.data.query.queryString
       .getLanguageService()
