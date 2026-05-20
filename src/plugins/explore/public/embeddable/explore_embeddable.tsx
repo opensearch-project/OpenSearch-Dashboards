@@ -59,6 +59,9 @@ import { normalizeResultRows } from '../components/visualizations/utils/normaliz
 import { visualizationRegistry } from '../components/visualizations/visualization_registry';
 import { prepareQueryForLanguage } from '../application/utils/languages';
 import { mergeStyles } from '../components/visualizations/utils/utils';
+import { SplitLayout } from '../components/visualizations/visualization_builder.types';
+import { CommonVisualizationRender } from '../components/visualizations/visualization_render';
+import { RenderChartConfig } from '../components/visualizations/types';
 
 // TODO cleanup unused props
 export interface SearchProps {
@@ -69,6 +72,7 @@ export interface SearchProps {
   indexPattern?: IndexPattern;
   hits?: number;
   isLoading?: boolean;
+  error?: ExpressionRenderError;
   services: ExploreServices;
   chartRender?: () => any;
   sharedItemTitle?: string;
@@ -87,7 +91,7 @@ export interface SearchProps {
   onSetColumns?: (columns: string[]) => void;
   onFilter?: (field: IFieldType, value: string[], operator: string) => void;
   onExpressionEvent?: (e: ExpressionRendererEvent) => void;
-  onSelectTimeRange?: (range: TimeRange) => void;
+  onSelectTimeRange?: (range?: TimeRange) => void;
   tableData?: {
     rows: Array<Record<string, any>>;
     columns: VisColumn[];
@@ -364,7 +368,10 @@ export class ExploreEmbeddable
       }
     };
 
-    searchProps.onSelectTimeRange = async (range: TimeRange) => {
+    searchProps.onSelectTimeRange = async (range?: TimeRange) => {
+      if (!range) {
+        return;
+      }
       await this.executeTriggerActions(APPLY_FILTER_TRIGGER, {
         embeddable: this,
         filters: [
@@ -406,14 +413,15 @@ export class ExploreEmbeddable
       try {
         await this.fetch();
       } catch (error: any) {
+        this.searchProps.isLoading = false;
+        this.searchProps.error = {
+          name: error?.body?.error || error?.name || 'Error',
+          message: error?.body?.message || error?.message || 'An error occurred',
+        };
         this.updateOutput({
           loading: false,
-          error: {
-            name: error?.body?.error,
-            message: error?.body?.message,
-          },
+          error: this.searchProps.error,
         });
-        throw error;
       }
     } else if (searchProps) {
       this.searchProps = searchProps;
@@ -450,6 +458,7 @@ export class ExploreEmbeddable
     });
     this.updateOutput({ loading: true, error: undefined });
     this.searchProps.isLoading = true;
+    this.searchProps.error = undefined;
     const query = searchSource.getField('query');
     const languageConfig = this.services.data.query.queryString
       .getLanguageService()
@@ -500,13 +509,22 @@ export class ExploreEmbeddable
           };
         } else {
           const savedAxesMapping = visualization.axesMapping ?? {};
-          let effectiveAxesMapping = savedAxesMapping;
+          const styleOptions = visualization.params;
 
-          // Check if the saved axes mapping is still compatible with the current data columns.
-          if (!isValidMapping(savedAxesMapping, allColumns)) {
+          // Apply legacy migration (FACET→splitField, threshold conversions)
+          const migratedConfig = adaptLegacyData({
+            type: selectedChartType,
+            styles: styleOptions,
+            axesMapping: savedAxesMapping,
+          });
+          let effectiveAxesMapping = migratedConfig?.axesMapping ?? savedAxesMapping;
+          let styles = migratedConfig?.styles;
+
+          // Check if the axes mapping is still compatible with the current data columns.
+          if (!isValidMapping(effectiveAxesMapping, allColumns)) {
             const reusedMapping = visualizationRegistry.reuseAxesMapping(
               selectedChartType,
-              savedAxesMapping,
+              effectiveAxesMapping,
               allColumns
             );
 
@@ -532,27 +550,35 @@ export class ExploreEmbeddable
             filters: this.input.filters,
             timeRange: this.input.timeRange,
           };
-          const styleOptions = visualization.params;
-
-          let styles = adaptLegacyData({
-            type: selectedChartType,
-            styles: styleOptions,
-            axesMapping: effectiveAxesMapping,
-          })?.styles;
 
           if (vis) {
             styles = mergeStyles(vis.ui.style.defaults, styles);
           }
           this.searchProps.styleOptions = styles;
 
-          const chartRender = () =>
-            matchedRule.render({
-              transformedData: visualizationData.transformedData,
-              styleOptions: styles || styleOptions,
-              onSelectTimeRange: this.searchProps?.onSelectTimeRange,
-              axisColumnMappings: axesMapping,
-              timeRange: searchContext.timeRange,
-            });
+          const splitField =
+            (visualization.splitField as string | undefined) ?? migratedConfig?.splitField;
+          const splitLayout = (visualization.splitLayout as SplitLayout) ?? 'auto';
+          const showSplitLabel = (visualization.showSplitLabel as boolean) ?? false;
+
+          const visConfig: RenderChartConfig = {
+            type: selectedChartType,
+            axesMapping: effectiveAxesMapping,
+            styles: styles || styleOptions,
+            splitField,
+            splitLayout,
+            showSplitLabel,
+          };
+
+          const chartRender = () => (
+            <CommonVisualizationRender
+              visualizationData={visualizationData}
+              visConfig={visConfig}
+              showRawTable={false}
+              timeRange={searchContext.timeRange}
+              onSelectTimeRange={this.searchProps?.onSelectTimeRange}
+            />
+          );
           this.searchProps.chartRender = chartRender;
         }
       }

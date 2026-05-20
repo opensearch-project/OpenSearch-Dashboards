@@ -148,8 +148,8 @@ describe('pivot', () => {
       })(data);
 
       expect(result).toEqual([
-        { region: 'US', '-': 100, Electronics: 200 },
-        { region: 'EU', '-': 150, Electronics: null },
+        { region: 'US', '(empty)': 100, Electronics: 200 },
+        { region: 'EU', '(empty)': 150, Electronics: null },
       ]);
     });
 
@@ -166,7 +166,7 @@ describe('pivot', () => {
         aggregationType: AggregationType.SUM,
       })(data);
 
-      expect(result).toEqual([{ region: 'US', '-': 100, Electronics: 200 }]);
+      expect(result).toEqual([{ region: 'US', '(empty)': 100, Electronics: 200 }]);
     });
   });
 

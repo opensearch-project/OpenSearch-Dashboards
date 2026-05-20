@@ -8,7 +8,6 @@ import {
   createStackedBarSpec,
   createTimeBarChart,
   createGroupedTimeBarChart,
-  createFacetedTimeBarChart,
   createDoubleNumericalBarChart,
 } from './to_expression';
 import { BarChartStyle, defaultBarChartStyles } from './bar_vis_config';
@@ -238,71 +237,6 @@ describe('bar to_expression', () => {
 
         // No bucketing: pivot groups by raw timestamp strings (3 unique = header + 3 data rows)
         expect(noBucketSpec.dataset.source.length).toBe(4);
-      });
-    });
-  });
-
-  describe('createFacetedTimeBarChart', () => {
-    test('creates a faceted time bar chart ECharts spec', () => {
-      const axisMappings = {
-        [AxisRole.X]: mockDateColumn,
-        [AxisRole.Y]: mockNumericalColumn,
-        [AxisRole.COLOR]: mockCategoricalColumn,
-        [AxisRole.FACET]: mockCategoricalColumn2,
-      };
-
-      const spec = createFacetedTimeBarChart(mockData, defaultBarChartStyles, axisMappings);
-
-      expect(spec).toHaveProperty('dataset');
-      expect(spec).toHaveProperty('series');
-      expect(spec.series.length).toBeGreaterThanOrEqual(1);
-    });
-
-    describe('bucketing vs skip bucketing', () => {
-      // Timestamps within the same second — auto-inferred interval will bucket them together
-      const sameBucketData = [
-        { count: 10, category: 'A', category2: 'X', date: '2023-01-01T08:00:00.100Z' },
-        { count: 20, category: 'B', category2: 'X', date: '2023-01-01T08:00:00.200Z' },
-        { count: 30, category: 'A', category2: 'Y', date: '2023-01-01T08:00:00.300Z' },
-      ];
-      const axisMappings = {
-        [AxisRole.X]: mockDateColumn,
-        [AxisRole.Y]: mockNumericalColumn,
-        [AxisRole.COLOR]: mockCategoricalColumn,
-        [AxisRole.FACET]: mockCategoricalColumn2,
-      };
-
-      test('with bucketing, merges same-bucket timestamps within each facet', () => {
-        const spec = createFacetedTimeBarChart(sameBucketData, defaultBarChartStyles, axisMappings);
-
-        const bucketedTotalRows = spec.dataset.reduce(
-          (sum: number, ds: any) => sum + ds.source.length - 1,
-          0
-        );
-
-        // Each facet: bucketing merges timestamps into 1 row per facet
-        expect(bucketedTotalRows).toBe(spec.dataset.length);
-      });
-
-      test('without bucketing, preserves raw timestamps within each facet', () => {
-        const noBucketStyles: BarChartStyle = {
-          ...defaultBarChartStyles,
-          bucket: { ...defaultBarChartStyles.bucket, aggregationType: AggregationType.NONE },
-        };
-
-        const noBucketSpec = createFacetedTimeBarChart(
-          sameBucketData,
-          noBucketStyles,
-          axisMappings
-        );
-
-        const unbucketedTotalRows = noBucketSpec.dataset.reduce(
-          (sum: number, ds: any) => sum + ds.source.length - 1,
-          0
-        );
-
-        // No bucketing: raw timestamps preserved, more data rows than facet count
-        expect(unbucketedTotalRows).toBeGreaterThan(noBucketSpec.dataset.length);
       });
     });
   });

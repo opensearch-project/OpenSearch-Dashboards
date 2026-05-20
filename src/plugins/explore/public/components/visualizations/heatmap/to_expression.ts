@@ -6,7 +6,7 @@
 import { HeatmapChartStyle } from './heatmap_vis_config';
 import { AxisRole, VisColumn, AggregationType } from '../types';
 import { getAxisConfig } from '../utils/utils';
-import { createHeatmapSeries } from './heatmap_chart_utils';
+import { assembleHeatmapSpec, createHeatmapSeries } from './heatmap_chart_utils';
 
 import {
   pipe,
@@ -54,7 +54,8 @@ export const createRegularHeatmap = (
       categoryFields: [xCol.column, yCol.column],
       seriesField: colorCol.column,
     }),
-    assembleSpec
+    assembleSpec,
+    assembleHeatmapSpec
   )({
     data: transformedData,
     styles,

@@ -6,7 +6,6 @@
 import {
   createSimpleAreaChart,
   createMultiAreaChart,
-  createFacetedMultiAreaChart,
   createCategoryAreaChart,
   createStackedAreaChart,
 } from './to_expression';
@@ -115,26 +114,6 @@ describe('Area Chart to_expression', () => {
       expect(result).toHaveProperty('dataset');
       expect(result).toHaveProperty('series');
       expect(result.series.length).toBeGreaterThanOrEqual(1);
-    });
-  });
-
-  describe('createFacetedMultiAreaChart', () => {
-    const axisColumnMappings = {
-      [AxisRole.Y]: mockNumericalColumn,
-      [AxisRole.X]: mockDateColumn,
-      [AxisRole.COLOR]: mockCategoricalColumns[0],
-      [AxisRole.FACET]: mockCategoricalColumns[1],
-    };
-
-    it('returns an ECharts spec with faceted datasets', () => {
-      const result = createFacetedMultiAreaChart(
-        mockTransformedData,
-        mockStyles,
-        axisColumnMappings
-      );
-
-      expect(result).toHaveProperty('dataset');
-      expect(result).toHaveProperty('series');
     });
   });
 

@@ -70,7 +70,14 @@ export const getSaveButtonRun = (
       savedExplore,
       saveStateProps.flavorId ?? 'logs',
       saveStateProps.tabDefinition,
-      { axesMapping, chartType: visConfig?.type, styleOptions: visConfig?.styles },
+      {
+        axesMapping,
+        chartType: visConfig?.type,
+        styleOptions: visConfig?.styles,
+        splitField: visConfig?.splitField,
+        splitLayout: visConfig?.splitLayout,
+        showSplitLabel: visConfig?.showSplitLabel,
+      },
       saveStateProps.dataset,
       saveStateProps.activeTabId
     );

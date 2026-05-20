@@ -9,7 +9,6 @@ import { i18n } from '@osd/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { BarGaugeChartStyle, BarGaugeChartStyleOptions } from './bar_gauge_vis_config';
 import { StyleControlsProps } from '../utils/use_visualization_types';
-import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
 import { ThresholdPanel } from '../style_panel/threshold/threshold_panel';
 import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
 import { BarGaugeExclusiveVisOptions } from './bar_gauge_exclusive_vis_options';
@@ -39,16 +38,6 @@ export const BarGaugeVisStyleControls: React.FC<BarGaugeVisStyleControlsProps> =
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
-      <EuiFlexItem>
-        <AxesSelectPanel
-          numericalColumns={numericalColumns}
-          categoricalColumns={categoricalColumns}
-          dateColumns={dateColumns}
-          currentMapping={axisColumnMappings}
-          updateVisualization={updateVisualization}
-          chartType="bar_gauge"
-        />
-      </EuiFlexItem>
       {hasMappingSelected && (
         <>
           <EuiFlexItem>
