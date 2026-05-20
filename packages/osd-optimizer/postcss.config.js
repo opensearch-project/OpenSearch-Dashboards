@@ -28,6 +28,8 @@
  * under the License.
  */
 
+const Path = require('path');
+
 /**
  * Strips dependency messages from @tailwindcss/postcss.
  *
@@ -65,13 +67,15 @@ function normalizeTailwindImports() {
 }
 normalizeTailwindImports.postcss = true;
 
-module.exports = {
+module.exports = (ctx) => ({
   plugins: [
     /*require('autoprefixer')()*/
     normalizeTailwindImports(),
     // Safe to include unconditionally. Bails out for files without Tailwind directives.
     // eslint-disable-next-line import/no-unresolved -- package uses `exports` field; resolver lacks support
-    require('@tailwindcss/postcss')(),
+    require('@tailwindcss/postcss')({
+      base: ctx && ctx.file ? Path.dirname(ctx.file) : process.cwd(),
+    }),
     stripTailwindDeps(),
   ],
-};
+});
