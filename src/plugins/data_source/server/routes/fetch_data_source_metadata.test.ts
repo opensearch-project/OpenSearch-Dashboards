@@ -530,9 +530,7 @@ describe(`Fetch DataSource MetaData ${URL}`, () => {
       })
       .expect(400);
 
-    expect(result.body.message).toEqual(
-      'Fetch data source metadata endpoint validation failed'
-    );
+    expect(result.body.message).toEqual('Fetch data source metadata endpoint validation failed');
     expect(dataSourceServiceSetupMock.getDataSourceClient).not.toHaveBeenCalled();
   });
 });
