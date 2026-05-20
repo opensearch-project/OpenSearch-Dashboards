@@ -24,6 +24,7 @@
       - [Query panel actions](plugins/explore/query-panel-actions.md)
     - [Data_persistence](plugins/data_persistence.md)
   - Saved_objects
+    - [Data_driven_migration_testing](saved_objects/data_driven_migration_testing.md)
     - [Pluggable_storage_backend](saved_objects/pluggable_storage_backend.md)
     - [Saved_object_repository_factory_design](saved_objects/saved_object_repository_factory_design.md)
   - Telemetry
