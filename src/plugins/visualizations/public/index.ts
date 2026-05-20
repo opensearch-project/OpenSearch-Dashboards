@@ -47,7 +47,11 @@ export {
   VisualizeEmbeddable,
   DisabledLabEmbeddable,
 } from './embeddable';
-export { VisualizationContainer, VisualizationNoResults } from './components';
+export {
+  VisualizationContainer,
+  VisualizationNoResults,
+  VisualizationRequestError,
+} from './components';
 export {
   getSchemas as getVisSchemas,
   buildVislibDimensions,
