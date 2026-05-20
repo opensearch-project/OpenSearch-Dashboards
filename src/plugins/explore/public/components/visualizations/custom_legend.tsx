@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { useObservable } from 'react-use';
 import { ColorMap } from './utils/color_map';
@@ -37,17 +37,14 @@ export const CustomLegend: React.FC<CustomLegendProps> = ({
       });
     return sorted;
   }, [legendMap]);
-  const [selected, setSelected] = useState<Record<string, boolean>>({});
+  const selected = useObservable(legendSelected$) ?? {};
   const isVertical = position === Positions.LEFT || position === Positions.RIGHT;
 
   const handleToggle = useCallback(
     (name: string) => {
-      setSelected((prev) => {
-        // First click (undefined) deselects the item; subsequent clicks toggle visibility
-        const next = { ...prev, [name]: prev[name] === undefined ? false : !prev[name] };
-        legendSelected$.next(next);
-        return next;
-      });
+      const prev = legendSelected$.getValue();
+      const next = { ...prev, [name]: prev[name] === undefined ? false : !prev[name] };
+      legendSelected$.next(next);
     },
     [legendSelected$]
   );
