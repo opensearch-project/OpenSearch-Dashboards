@@ -120,7 +120,7 @@ export const BarGaugeItem: React.FC<BarGaugeItemProps> = ({
         />
       )}
       {!isHorizontal && !showUnfilled && !valueHidden && (
-        <div className="bar-gauge-value" style={clampValueStyle}>
+        <div className="bar-gauge-value" style={clampValueStyle} title={displayValue}>
           {displayValue}
         </div>
       )}
@@ -132,6 +132,7 @@ export const BarGaugeItem: React.FC<BarGaugeItemProps> = ({
     <div
       className="bar-gauge-value"
       style={!valueHidden && showUnfilled ? valueStyle : { visibility: 'hidden' }}
+      title={displayValue}
     >
       {displayValue}
     </div>
@@ -160,7 +161,7 @@ export const BarGaugeItem: React.FC<BarGaugeItemProps> = ({
           <EuiFlexItem grow={false}>
             {/* 80px = category label width, 8px = padding */}
             <div style={{ paddingLeft: 80 + 8 }}>
-              <div className="bar-gauge-value" style={valueStyle}>
+              <div className="bar-gauge-value" style={valueStyle} title={displayValue}>
                 {displayValue}
               </div>
             </div>

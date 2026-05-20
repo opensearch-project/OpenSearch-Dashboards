@@ -7,7 +7,6 @@ import {
   createSimpleLineChart,
   createLineBarChart,
   createMultiLineChart,
-  createFacetedMultiLineChart,
   createCategoryLineChart,
   createCategoryMultiLineChart,
 } from './to_expression';
@@ -134,22 +133,6 @@ describe('Line Chart to_expression', () => {
       expect(result).toHaveProperty('dataset');
       expect(result).toHaveProperty('series');
       expect(result.series.length).toBeGreaterThanOrEqual(1);
-    });
-  });
-
-  describe('createFacetedMultiLineChart', () => {
-    const mockAxisMappings = {
-      [AxisRole.Y]: mockNumericColumn,
-      [AxisRole.X]: mockDateColumn,
-      [AxisRole.COLOR]: mockCategoricalColumn,
-      [AxisRole.FACET]: mockCategoricalColumn2,
-    };
-
-    it('returns an ECharts spec with faceted datasets', () => {
-      const result = createFacetedMultiLineChart(mockData, mockStyles, mockAxisMappings);
-
-      expect(result).toHaveProperty('dataset');
-      expect(result).toHaveProperty('series');
     });
   });
 

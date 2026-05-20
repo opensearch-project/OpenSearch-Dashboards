@@ -103,3 +103,10 @@ export const DEFAULT_Y_2_AXIS_CONFIG: StandardAxes = {
   position: Positions.RIGHT,
   axisRole: AxisRole.Y_SECOND,
 };
+
+export const DEFAULT_GRID = {
+  top: 20,
+  right: 30,
+  bottom: 30,
+  left: 40,
+};

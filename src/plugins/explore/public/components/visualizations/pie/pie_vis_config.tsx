@@ -71,11 +71,22 @@ export const createPieConfig = (): VisualizationType<'pie'> => ({
           const size = props.axisColumnMappings.size?.[0];
           const color = props.axisColumnMappings.color?.[0];
           if (!size || !color) throw Error('Missing axis config for pie chart');
-          const spec = createPieSpec(props.transformedData, props.styleOptions, {
-            [AxisRole.SIZE]: size,
-            [AxisRole.COLOR]: color,
-          });
-          return <EchartsRender spec={spec ?? {}} />;
+          const spec = createPieSpec(
+            props.transformedData,
+            props.styleOptions,
+            {
+              [AxisRole.SIZE]: size,
+              [AxisRole.COLOR]: color,
+            },
+            props.onLegend
+          );
+          return (
+            <EchartsRender
+              spec={spec ?? {}}
+              legendSelected$={props.legendSelected$}
+              highlightedSeries$={props.highlightedSeries$}
+            />
+          );
         },
       },
       {
@@ -90,11 +101,22 @@ export const createPieConfig = (): VisualizationType<'pie'> => ({
           const size = props.axisColumnMappings.size?.[0];
           const color = props.axisColumnMappings.color?.[0];
           if (!size || !color) throw Error('Missing axis config for pie chart');
-          const spec = createPieSpec(props.transformedData, props.styleOptions, {
-            [AxisRole.SIZE]: size,
-            [AxisRole.COLOR]: color,
-          });
-          return <EchartsRender spec={spec ?? {}} />;
+          const spec = createPieSpec(
+            props.transformedData,
+            props.styleOptions,
+            {
+              [AxisRole.SIZE]: size,
+              [AxisRole.COLOR]: color,
+            },
+            props.onLegend
+          );
+          return (
+            <EchartsRender
+              spec={spec ?? {}}
+              legendSelected$={props.legendSelected$}
+              highlightedSeries$={props.highlightedSeries$}
+            />
+          );
         },
       },
     ];

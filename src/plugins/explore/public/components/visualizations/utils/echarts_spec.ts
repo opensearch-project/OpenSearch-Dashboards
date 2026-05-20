@@ -28,6 +28,8 @@ import {
 } from '../types';
 import { convertThresholds } from './utils';
 import { DEFAULT_OPACITY } from '../constants';
+import { ColorMap } from './color_map';
+import { getColors } from '../theme/default_colors';
 
 /**
  * Base style interface that all chart styles should extend
@@ -155,6 +157,7 @@ export const createBaseConfig = <T extends BaseChartStyle>({
       axisPointer: { type: 'shadow' as const },
     },
     legend: {
+      show: false,
       type: 'scroll',
       ...legend,
       ...(styles?.legendPosition === Positions.LEFT || styles?.legendPosition === Positions.RIGHT
@@ -173,21 +176,18 @@ export const createBaseConfig = <T extends BaseChartStyle>({
 export const buildAxisConfigs = <T extends BaseChartStyle>(
   state: EChartsSpecState<T>
 ): EChartsSpecState<T> => {
-  const { axisConfig, transformedData = [], axisColumnMappings } = state;
+  const { axisConfig, axisColumnMappings } = state;
 
-  const hasFacet = Array.isArray(transformedData[0]?.[0]) && axisColumnMappings.facet !== undefined;
   const hasY2 = axisColumnMappings.y2 !== undefined;
 
   const getConfig = (
     axis: Axis | Axis[] | undefined,
     axisStyle: StandardAxes | undefined,
-    gridNumber?: number,
     addSplitLineStyle: boolean = false
   ) => {
     return {
       type: getAxisType(axis),
       ...applyAxisStyling({ axisStyle, addSplitLineStyle }),
-      ...(hasFacet && { gridIndex: gridNumber }),
       nameGap: 8,
     };
   };
@@ -196,32 +196,12 @@ export const buildAxisConfigs = <T extends BaseChartStyle>(
     throw new Error('axisConfig must be derived before buildAxisConfigs');
   }
 
-  let xAxisConfig;
-  let yAxisConfig;
+  const xAxisConfig = getConfig(axisColumnMappings.x, axisConfig.xAxisStyle);
+  let yAxisConfig: any = getConfig(axisColumnMappings.y, axisConfig.yAxisStyle);
 
-  if (hasFacet) {
-    // each grids needs an axis config
-    xAxisConfig = transformedData.map((_: any, index: number) => {
-      return getConfig(axisColumnMappings.x, axisConfig.xAxisStyle, index);
-    });
-
-    yAxisConfig = transformedData.map((_: any, index: number) => {
-      return getConfig(axisColumnMappings.y, axisConfig.yAxisStyle, index);
-    });
-  } else {
-    xAxisConfig = getConfig(axisColumnMappings.x, axisConfig.xAxisStyle);
-
-    yAxisConfig = getConfig(axisColumnMappings.y, axisConfig.yAxisStyle);
-
-    if (hasY2) {
-      const y2AxisConfig = getConfig(
-        axisColumnMappings.y2,
-        axisConfig.y2AxisStyle,
-        undefined,
-        true
-      );
-      yAxisConfig = [yAxisConfig, y2AxisConfig];
-    }
+  if (hasY2) {
+    const y2AxisConfig = getConfig(axisColumnMappings.y2, axisConfig.y2AxisStyle, true);
+    yAxisConfig = [yAxisConfig, y2AxisConfig];
   }
 
   return { ...state, xAxisConfig, yAxisConfig };
@@ -233,45 +213,14 @@ export const buildAxisConfigs = <T extends BaseChartStyle>(
 export const assembleSpec = <T extends BaseChartStyle>(
   state: EChartsSpecState<T>
 ): EChartsSpecState<T> => {
-  const {
-    baseConfig,
-    transformedData = [],
-    xAxisConfig,
-    yAxisConfig,
-    series,
-    visualMap,
-    axisColumnMappings,
-  } = state;
+  const { baseConfig, transformedData = [], xAxisConfig, yAxisConfig, series, visualMap } = state;
 
   const hasMultiDatasets = Array.isArray(transformedData[0]?.[0]);
-  const hasFacet = hasMultiDatasets && axisColumnMappings.facet !== undefined;
 
-  // Multi-datasets case (faceted or state-timeline)
+  // Multi-datasets case (e.g. state-timeline)
   const data = hasMultiDatasets
-    ? transformedData.map((facetData: any) => ({ source: facetData }))
+    ? transformedData.map((ds: any) => ({ source: ds }))
     : { source: transformedData };
-
-  const facetNumber = transformedData.length;
-
-  let grid;
-
-  if (hasFacet && facetNumber > 1) {
-    const cols = Math.ceil(facetNumber / 2); // always in two rows
-    const colWidth = 90 / cols;
-    const rowHeight = 39; // slightly smaller to make legend fit
-
-    grid = Array.from({ length: facetNumber }).map((_, i) => {
-      const row = Math.floor(i / cols);
-      const col = i % cols;
-      return {
-        left: `${5 + col * colWidth}%`,
-        width: `${colWidth - 2}%`,
-        top: `${5 + row * (rowHeight + 10)}%`,
-        height: `${rowHeight}%`,
-        containLabel: true,
-      };
-    });
-  }
 
   const spec = {
     ...baseConfig,
@@ -280,7 +229,6 @@ export const assembleSpec = <T extends BaseChartStyle>(
     yAxis: yAxisConfig,
     visualMap,
     series,
-    grid,
   };
 
   return { ...state, spec };
@@ -330,8 +278,8 @@ export const applyAxisStyling = ({
   if (axisStyle?.labels) {
     echartsAxisConfig.axisLabel = {
       show: !!axisStyle.labels.show,
-      // Prevent label overlap by showing all labels
       interval: 0,
+      hideOverlap: true,
     };
 
     if (axisStyle.labels.show) {
@@ -364,8 +312,6 @@ export const buildVisMap = ({
 }) => (state: EChartsSpecState) => {
   const { styles, transformedData = [] } = state;
 
-  const hasFacet = Array.isArray(transformedData[0]?.[0]);
-
   if (!styles.useThresholdColor) return state;
 
   const completeThreshold =
@@ -383,39 +329,16 @@ export const buildVisMap = ({
     color: t.color,
   }));
 
-  let visualMap;
-  if (hasFacet) {
-    let seriesIndexCounter = 0;
-    const facetVis = transformedData.map((seriesData: any[], index: number) => {
-      const header = seriesData[0];
-      const cateColumns = seriesFields(header);
-      return cateColumns.map((c: string) => {
-        const originalIndex = header?.indexOf(c);
-        return {
-          datasetIndex: index,
-          gridIndex: index,
-          type: 'piecewise',
-          show: false,
-          seriesIndex: seriesIndexCounter++,
-          dimension: originalIndex,
-          pieces,
-        };
-      });
-    });
-
-    visualMap = facetVis.flat();
-  } else {
-    visualMap = seriesFields(transformedData[0]).map((c: string, index: number) => {
-      const originalIndex = transformedData[0]?.indexOf(c);
-      return {
-        type: 'piecewise',
-        show: false,
-        seriesIndex: index,
-        dimension: originalIndex,
-        pieces,
-      };
-    });
-  }
+  const visualMap = seriesFields(transformedData[0]).map((c: string, index: number) => {
+    const originalIndex = transformedData[0]?.indexOf(c);
+    return {
+      type: 'piecewise',
+      show: false,
+      seriesIndex: index,
+      dimension: originalIndex,
+      pieces,
+    };
+  });
 
   return {
     ...state,
@@ -492,4 +415,57 @@ export const applyTimeRange = <T extends BaseChartStyle>(
     xAxisConfig: updatedXAxisConfig,
     yAxisConfig: updatedYAxisConfig,
   };
+};
+
+/**
+ * Collect legend data from series and notify via callback.
+ * Read-only: does not assign colors. Each series builder must set itemStyle.color explicitly.
+ * For scatter unfilled mode (color: 'transparent'), uses borderColor instead.
+ */
+export const collectLegend = <T extends BaseChartStyle>(
+  onLegend?: (legend: ColorMap) => void
+): PipelineFn<T> => (state) => {
+  const { series } = state;
+  if (!series || !onLegend) return state;
+
+  const legend: ColorMap = {};
+  series.forEach((s) => {
+    const name = typeof s.name === 'string' ? s.name : undefined;
+    if (!name) return;
+    const itemStyle = 'itemStyle' in s ? s.itemStyle : undefined;
+    const color = itemStyle?.color;
+    const legendColor = !color || color === 'transparent' ? itemStyle?.borderColor : color;
+    if (legendColor && typeof legendColor === 'string') {
+      legend[name] = legendColor;
+    }
+  });
+
+  onLegend(legend);
+
+  return state;
+};
+
+/**
+ * Collect legend data for pie charts from the series data items.
+ * Pie assigns colors per data item (not per series), so we read from series[0].data.
+ */
+export const collectPieLegend = <T extends BaseChartStyle>(
+  onLegend?: (legend: ColorMap) => void
+): PipelineFn<T> => (state) => {
+  const { series } = state;
+  if (!series || !onLegend) return state;
+
+  const legend: ColorMap = {};
+  const pieSeries = series[0] as any;
+  if (pieSeries?.data) {
+    pieSeries.data.forEach((item: any) => {
+      if (item?.name && item?.itemStyle?.color) {
+        legend[item.name] = item.itemStyle.color;
+      }
+    });
+  }
+
+  onLegend(legend);
+
+  return state;
 };

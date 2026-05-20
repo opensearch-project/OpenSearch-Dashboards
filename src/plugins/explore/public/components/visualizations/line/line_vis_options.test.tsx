@@ -18,20 +18,6 @@ import {
 import { LineStyle } from './line_exclusive_vis_options';
 
 // Mock the child components
-jest.mock('../style_panel/axes/axes_selector', () => ({
-  AxesSelectPanel: jest.fn(({ updateVisualization, chartType, currentMapping }) => (
-    <div data-test-subj="mockAxesSelectPanel">
-      <div data-test-subj="chartType">{chartType}</div>
-      <button
-        data-test-subj="mockUpdateVisualization"
-        onClick={() => updateVisualization({ mappings: { x: 'date', y: 'value' } })}
-      >
-        Update Visualization
-      </button>
-    </div>
-  )),
-}));
-
 jest.mock('../style_panel/legend/legend', () => ({
   LegendOptionsPanel: jest.fn(({ legendOptions, onLegendOptionsChange }) => (
     <div data-test-subj="mockLegendOptionsPanel">
@@ -202,9 +188,9 @@ describe('LineVisStyleControls', () => {
   };
 
   const mockAxisColumnMappings: AxisColumnMappings = {
-    [AxisRole.X]: mockDateColumn,
-    [AxisRole.Y]: mockNumericalColumn,
-    [AxisRole.COLOR]: mockCategoricalColumn,
+    [AxisRole.X]: [mockDateColumn],
+    [AxisRole.Y]: [mockNumericalColumn],
+    [AxisRole.COLOR]: [mockCategoricalColumn],
   };
 
   const mockProps: LineVisStyleControlsProps = {
@@ -240,19 +226,18 @@ describe('LineVisStyleControls', () => {
   test('renders with default props', () => {
     render(<LineVisStyleControls {...mockProps} />);
 
-    expect(screen.getByTestId('mockAxesSelectPanel')).toBeInTheDocument();
     expect(screen.getByTestId('mockLegendOptionsPanel')).toBeInTheDocument();
     expect(screen.getByTestId('mockThresholdOptions')).toBeInTheDocument();
     expect(screen.getByTestId('mockTooltipOptionsPanel')).toBeInTheDocument();
     expect(screen.getByTestId('mockLineExclusiveVisOptions')).toBeInTheDocument();
   });
 
-  test('hides legend when no COLOR, FACET, or Y_SECOND mappings are present', () => {
+  test('hides legend when no COLOR or Y_SECOND mappings are present', () => {
     const propsWithNoLegend = {
       ...mockProps,
       axisColumnMappings: {
-        [AxisRole.X]: mockDateColumn,
-        [AxisRole.Y]: mockNumericalColumn,
+        [AxisRole.X]: [mockDateColumn],
+        [AxisRole.Y]: [mockNumericalColumn],
       },
     };
 
@@ -266,25 +251,11 @@ describe('LineVisStyleControls', () => {
       ...mockProps,
       axisColumnMappings: {
         ...mockAxisColumnMappings,
-        [AxisRole.COLOR]: mockCategoricalColumn,
+        [AxisRole.COLOR]: [mockCategoricalColumn],
       },
     };
 
     render(<LineVisStyleControls {...propsWithColorMapping} />);
-
-    expect(screen.getByTestId('mockLegendOptionsPanel')).toBeInTheDocument();
-  });
-
-  test('renders legend panel when FACET mapping is present', () => {
-    const propsWithFacetMapping = {
-      ...mockProps,
-      axisColumnMappings: {
-        ...mockAxisColumnMappings,
-        [AxisRole.FACET]: mockCategoricalColumn,
-      },
-    };
-
-    render(<LineVisStyleControls {...propsWithFacetMapping} />);
 
     expect(screen.getByTestId('mockLegendOptionsPanel')).toBeInTheDocument();
   });
@@ -294,7 +265,7 @@ describe('LineVisStyleControls', () => {
       ...mockProps,
       axisColumnMappings: {
         ...mockAxisColumnMappings,
-        [AxisRole.Y_SECOND]: mockNumericalColumn,
+        [AxisRole.Y_SECOND]: [mockNumericalColumn],
       },
     };
 
@@ -308,7 +279,7 @@ describe('LineVisStyleControls', () => {
       ...mockProps,
       axisColumnMappings: {
         ...mockAxisColumnMappings,
-        [AxisRole.COLOR]: mockCategoricalColumn,
+        [AxisRole.COLOR]: [mockCategoricalColumn],
       },
     };
 

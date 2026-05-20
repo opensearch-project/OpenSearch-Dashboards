@@ -104,6 +104,9 @@ export const VisualizationEditorPage = ({
           type: savedVisConfig.chartType,
           styles: savedVisConfig.params,
           axesMapping: savedVisConfig.axesMapping,
+          splitField: savedVisConfig.splitField,
+          splitLayout: savedVisConfig.splitLayout,
+          showSplitLabel: savedVisConfig.showSplitLabel,
         });
       }
       visualizationBuilderForEditor.init();
