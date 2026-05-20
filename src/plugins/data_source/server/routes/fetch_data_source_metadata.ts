@@ -83,7 +83,11 @@ export const registerFetchDataSourceMetaDataRoute = async (
       // Validate endpoint before attempting connection
       const { endpoint } = dataSourceAttr;
 
-      const validationResult = await isValidURL(endpoint, endpointDeniedIPs, endpointAllowlistedSuffixes);
+      const validationResult = await isValidURL(
+        endpoint,
+        endpointDeniedIPs,
+        endpointAllowlistedSuffixes
+      );
       if (!validationResult.valid) {
         // Log detailed error for server-side debugging
         logger.error(`Endpoint validation failed for ${endpoint}: ${validationResult.error}`);

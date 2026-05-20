@@ -141,11 +141,6 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
     );
 
     const router = core.http.createRouter();
-    // Default deny list covers cloud metadata (IMDS) and IPv6 link-local —
-    // the network ranges the SSRF report flagged. Loopback is intentionally
-    // excluded so OSD deployed alongside OpenSearch on the same host (and
-    // Cypress test runs) keep working; operators that want stricter blocking
-    // can configure `data_source.endpointDeniedIPs` explicitly.
     const endpointDeniedIPs = config.endpointDeniedIPs ?? ['169.254.0.0/16', 'fe80::/10'];
     registerTestConnectionRoute(
       router,
