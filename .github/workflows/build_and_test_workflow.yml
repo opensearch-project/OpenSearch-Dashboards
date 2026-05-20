@@ -51,6 +51,8 @@ jobs:
               - 'tsconfig*.json'
               - '.browserslistrc'
               - '.github/workflows/build_and_test_workflow.yml'
+              - '.nvmrc'
+              - '.node-version'
 
   prepare-source:
     name: Prepare source and warm cache

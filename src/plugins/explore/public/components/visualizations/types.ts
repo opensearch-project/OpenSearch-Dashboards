@@ -116,6 +116,7 @@ export enum AxisRole {
   X = 'x',
   Y = 'y',
   COLOR = 'color',
+  /** @deprecated Use splitField on ChartConfig instead */
   FACET = 'facet',
   SIZE = 'size',
   Y_SECOND = 'y2',

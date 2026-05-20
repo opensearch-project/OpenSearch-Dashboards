@@ -134,6 +134,9 @@ export const SaveVisButton = () => {
         chartType: visConfig?.type ?? 'line',
         params: visConfig?.styles ?? {},
         axesMapping,
+        splitField: visConfig?.splitField,
+        splitLayout: visConfig?.splitLayout,
+        showSplitLabel: visConfig?.showSplitLabel,
       });
       savedExploreToSave.version = 1;
 

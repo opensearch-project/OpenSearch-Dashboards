@@ -7,7 +7,7 @@ import { AxisRole, VisFieldType, TimeUnit, AggregationType, VisColumn } from '..
 import { BarChartStyle } from './bar_vis_config';
 import { getAxisConfig } from '../utils/utils';
 
-import { createBarSeries, createFacetBarSeries } from './bar_chart_utils';
+import { createBarSeries } from './bar_chart_utils';
 import {
   pipe,
   createBaseConfig,
@@ -15,14 +15,10 @@ import {
   assembleSpec,
   buildVisMap,
   applyTimeRange,
+  collectLegend,
 } from '../utils/echarts_spec';
-import {
-  aggregate,
-  convertTo2DArray,
-  transform,
-  pivot,
-  facetTransform,
-} from '../utils/data_transformation';
+import { ColorMap } from '../utils/color_map';
+import { aggregate, convertTo2DArray, transform, pivot } from '../utils/data_transformation';
 
 const getNormalizedAxisConfig = (
   axisColumnMappings:
@@ -67,7 +63,8 @@ export const createBarSpec = (
   styles: BarChartStyle,
   axisColumnMappings:
     | { [AxisRole.X]: VisColumn; [AxisRole.Y]: VisColumn[] }
-    | { [AxisRole.X]: VisColumn[]; [AxisRole.Y]: VisColumn }
+    | { [AxisRole.X]: VisColumn[]; [AxisRole.Y]: VisColumn },
+  onLegend?: (legend: ColorMap) => void
 ): any => {
   const axisConfig = getAxisConfig(styles);
 
@@ -104,6 +101,7 @@ export const createBarSpec = (
       categoryEncode,
       seriesEncode,
     }),
+    collectLegend(onLegend),
     assembleSpec
   )({
     data: transformedData,
@@ -123,7 +121,8 @@ export const createTimeBarChart = (
   axisColumnMappings:
     | { [AxisRole.X]: VisColumn; [AxisRole.Y]: VisColumn[] }
     | { [AxisRole.X]: VisColumn[]; [AxisRole.Y]: VisColumn },
-  timeRange?: { from: string; to: string }
+  timeRange?: { from: string; to: string },
+  onLegend?: (legend: ColorMap) => void
 ): any => {
   const axisConfig = getAxisConfig(styles);
 
@@ -165,6 +164,7 @@ export const createTimeBarChart = (
       categoryEncode,
       seriesEncode,
     }),
+    collectLegend(onLegend),
     assembleSpec
   )({
     data: transformedData,
@@ -188,7 +188,8 @@ export const createGroupedTimeBarChart = (
     [AxisRole.Y]: VisColumn;
     [AxisRole.COLOR]: VisColumn;
   },
-  timeRange?: { from: string; to: string }
+  timeRange?: { from: string; to: string },
+  onLegend?: (legend: ColorMap) => void
 ): any => {
   const axisConfig = getAxisConfig(styles);
 
@@ -230,7 +231,7 @@ export const createGroupedTimeBarChart = (
       convertTo2DArray()
     ),
     createBaseConfig({
-      legend: { show: styles.addLegend },
+      legend: { show: false },
     }),
     buildAxisConfigs,
     applyTimeRange,
@@ -246,6 +247,7 @@ export const createGroupedTimeBarChart = (
       categoryEncode,
       seriesEncode,
     }),
+    collectLegend(onLegend),
     assembleSpec
   )({
     data: transformedData,
@@ -255,79 +257,6 @@ export const createGroupedTimeBarChart = (
     timeRange,
   });
 
-  return result.spec;
-};
-
-/**
- * Create a faceted time-based bar chart with one metric, two categories, and one date
- */
-export const createFacetedTimeBarChart = (
-  transformedData: Array<Record<string, any>>,
-  styles: BarChartStyle,
-  axisColumnMappings: {
-    [AxisRole.X]: VisColumn;
-    [AxisRole.Y]: VisColumn;
-    [AxisRole.COLOR]: VisColumn;
-    [AxisRole.FACET]: VisColumn;
-  },
-  timeRange?: { from: string; to: string }
-): any => {
-  const axisConfig = getAxisConfig(styles);
-
-  const xCol = axisColumnMappings[AxisRole.X];
-  const yCol = axisColumnMappings[AxisRole.Y];
-  const colorField = axisColumnMappings[AxisRole.COLOR].column;
-  const facetColumn = axisColumnMappings[AxisRole.FACET].column;
-
-  let timeField = '';
-  let valueField = '';
-  let valueFieldName = '';
-  if (xCol.schema === VisFieldType.Date) {
-    timeField = xCol.column;
-    valueField = yCol.column;
-    valueFieldName = yCol.name;
-  } else {
-    timeField = yCol.column;
-    valueField = xCol.column;
-    valueFieldName = xCol.name;
-  }
-
-  const timeUnit = styles?.bucket?.bucketTimeUnit ?? TimeUnit.AUTO;
-  const aggregationType = styles?.bucket?.aggregationType ?? AggregationType.SUM;
-  const skipBucketing = styles.bucket.aggregationType === AggregationType.NONE;
-
-  const result = pipe(
-    facetTransform(
-      facetColumn,
-      pivot({
-        groupBy: timeField,
-        pivot: colorField,
-        field: valueField,
-        timeUnit: skipBucketing ? undefined : timeUnit,
-        // Pivot requires grouping — when bucketing is disabled, fall back to SUM to group raw timestamps by pivot column
-        aggregationType: skipBucketing ? AggregationType.SUM : aggregationType,
-      }),
-      convertTo2DArray()
-    ),
-    createBaseConfig({}),
-    buildAxisConfigs,
-    applyTimeRange,
-    buildVisMap({
-      seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
-    }),
-    createFacetBarSeries({
-      styles,
-      categoryField: timeField,
-      seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
-    }),
-    assembleSpec
-  )({
-    data: transformedData,
-    styles,
-    axisConfig,
-    axisColumnMappings: axisColumnMappings ?? {},
-    timeRange,
-  });
   return result.spec;
 };
 
@@ -338,7 +267,8 @@ export const createStackedBarSpec = (
     [AxisRole.X]: VisColumn;
     [AxisRole.Y]: VisColumn;
     [AxisRole.COLOR]: VisColumn;
-  }
+  },
+  onLegend?: (legend: ColorMap) => void
 ): any => {
   const axisConfig = getAxisConfig(styles);
 
@@ -379,7 +309,7 @@ export const createStackedBarSpec = (
       convertTo2DArray()
     ),
     createBaseConfig({
-      legend: { show: styles.addLegend },
+      legend: { show: false },
     }),
     buildAxisConfigs,
     buildVisMap({
@@ -394,6 +324,7 @@ export const createStackedBarSpec = (
       categoryEncode,
       seriesEncode,
     }),
+    collectLegend(onLegend),
     assembleSpec
   )({
     data: transformedData,
@@ -407,7 +338,8 @@ export const createStackedBarSpec = (
 export const createDoubleNumericalBarChart = (
   transformedData: Array<Record<string, any>>,
   styles: BarChartStyle,
-  axisColumnMappings: { [AxisRole.X]: VisColumn; [AxisRole.Y]: VisColumn[] }
+  axisColumnMappings: { [AxisRole.X]: VisColumn; [AxisRole.Y]: VisColumn[] },
+  onLegend?: (legend: ColorMap) => void
 ): any => {
   const axisConfig = getAxisConfig(styles);
 
@@ -440,6 +372,7 @@ export const createDoubleNumericalBarChart = (
       categoryEncode: 'x',
       seriesEncode: 'y',
     }),
+    collectLegend(onLegend),
     assembleSpec
   )({
     data: transformedData,

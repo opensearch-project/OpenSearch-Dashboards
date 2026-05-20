@@ -25,6 +25,9 @@ interface VisState {
   chartType?: ChartType;
   styleOptions?: StyleOptions;
   axesMapping?: AxisFieldNameMappings;
+  splitField?: string;
+  splitLayout?: string;
+  showSplitLabel?: boolean;
 }
 
 export const saveStateToSavedObject = (
@@ -44,6 +47,9 @@ export const saveStateToSavedObject = (
     chartType: visState?.chartType ?? 'line',
     params: visState?.styleOptions ?? {},
     axesMapping: visState?.axesMapping,
+    splitField: visState?.splitField,
+    splitLayout: visState?.splitLayout,
+    showSplitLabel: visState?.showSplitLabel,
   });
 
   obj.uiState = JSON.stringify({

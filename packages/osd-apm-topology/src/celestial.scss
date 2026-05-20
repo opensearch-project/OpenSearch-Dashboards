@@ -1,6 +1,7 @@
 /* Celestial styles. Tailwind v4 directives are processed by @tailwindcss/postcss
    in osd-optimizer's postcss-loader step after sass-loader passes them through. */
-@import "tailwindcss" prefix(osd);
+@import "tailwindcss/theme" prefix(osd);
+@import "tailwindcss/utilities" prefix(osd);
 
 @theme {
   /* Converting sizing to pixel instead of rem to keep size of nodes consistent no matter the font size*/

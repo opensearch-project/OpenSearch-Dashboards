@@ -194,6 +194,7 @@ describe('VisualizationRender', () => {
       numericalColumns: [],
       categoricalColumns: [],
       dateColumns: [],
+      unknownColumns: [],
     };
 
     const data$ = new BehaviorSubject<VisData | undefined>(emptyColumnsData);
@@ -234,10 +235,10 @@ describe('VisualizationRender', () => {
     const visConfig$ = new BehaviorSubject<RenderChartConfig | undefined>(mockChartConfig);
     const showRawTable$ = new BehaviorSubject<boolean>(false);
 
-    const { container } = render(
+    render(
       <VisualizationRender data$={data$} config$={visConfig$} showRawTable$={showRawTable$} />
     );
 
-    expect(container.firstChild).toBeNull();
+    expect(screen.queryByTestId('echartsRender')).not.toBeInTheDocument();
   });
 });

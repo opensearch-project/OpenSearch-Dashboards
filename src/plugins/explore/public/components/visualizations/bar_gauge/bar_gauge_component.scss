@@ -37,6 +37,7 @@ $bar-gauge-radius: 2px;
     flex-direction: column;
     height: 100%;
     min-width: 40px; // don't shrink below this — container scrolls
+    overflow: hidden;
   }
 }
 
@@ -130,6 +131,8 @@ $bar-gauge-radius: 2px;
 .bar-gauge-value {
   font-weight: 400;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 
   .vertical & {
     font-size: 14px;

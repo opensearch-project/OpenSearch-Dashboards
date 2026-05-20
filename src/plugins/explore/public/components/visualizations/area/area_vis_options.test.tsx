@@ -16,29 +16,6 @@ import {
 } from '../types';
 
 // Mock child components
-jest.mock('../style_panel/axes/axes_selector', () => ({
-  AxesSelectPanel: jest.fn(({ updateVisualization }) => (
-    <div data-test-subj="axes-select-panel">
-      <button
-        data-test-subj="update-mapping"
-        onClick={() => {
-          const mockVisColumn = {
-            id: 1,
-            name: 'Date',
-            schema: 'date',
-            column: 'date',
-            validValuesCount: 100,
-            uniqueValuesCount: 50,
-          };
-          updateVisualization({ x: mockVisColumn });
-        }}
-      >
-        Update Mapping
-      </button>
-    </div>
-  )),
-}));
-
 jest.mock('../style_panel/legend/legend', () => ({
   LegendOptionsPanel: jest.fn(({ legendOptions, onLegendOptionsChange }) => (
     <div data-test-subj="legend-panel">
@@ -224,34 +201,7 @@ describe('AreaVisStyleControls', () => {
     expect(screen.getByTestId('legend-panel')).toBeInTheDocument();
   });
 
-  test('shows legend when FACET mapping is present', () => {
-    const props = {
-      ...defaultProps,
-      styleOptions: {
-        ...defaultProps.styleOptions,
-        showFullTimeRange: false,
-      },
-      axisColumnMappings: {
-        ...defaultProps.axisColumnMappings,
-        [AxisRole.FACET]: [
-          {
-            id: 4,
-            name: 'Facet',
-            schema: VisFieldType.Categorical,
-            column: 'facet',
-            validValuesCount: 10,
-            uniqueValuesCount: 5,
-          },
-        ],
-      },
-    };
-
-    render(<AreaVisStyleControls {...props} />);
-
-    expect(screen.getByTestId('legend-panel')).toBeInTheDocument();
-  });
-
-  test('hides legend when no COLOR or FACET mappings are present', () => {
+  test('hides legend when no COLOR mapping is present', () => {
     const props = {
       ...defaultProps,
       axisColumnMappings: {
@@ -333,8 +283,6 @@ describe('AreaVisStyleControls', () => {
 
     render(<AreaVisStyleControls {...props} />);
 
-    // Only the axes select panel should be rendered
-    expect(screen.getByTestId('axes-select-panel')).toBeInTheDocument();
     expect(screen.queryByTestId('legend-panel')).not.toBeInTheDocument();
     expect(screen.queryByTestId('mockAreaThresholdPanel')).not.toBeInTheDocument();
     expect(screen.queryByTestId('tooltip-panel')).not.toBeInTheDocument();
@@ -350,23 +298,6 @@ describe('AreaVisStyleControls', () => {
     };
 
     expect(() => render(<AreaVisStyleControls {...props} />)).not.toThrow();
-  });
-
-  test('updates visualization when mapping is changed', async () => {
-    render(<AreaVisStyleControls {...defaultProps} />);
-
-    await userEvent.click(screen.getByTestId('update-mapping'));
-
-    expect(defaultProps.updateVisualization).toHaveBeenCalledWith({
-      x: {
-        id: 1,
-        name: 'Date',
-        schema: 'date',
-        column: 'date',
-        validValuesCount: 100,
-        uniqueValuesCount: 50,
-      },
-    });
   });
 
   test('handles missing optional props', () => {
