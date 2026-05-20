@@ -262,4 +262,245 @@ describe('IndexPatterns', () => {
     );
     expect(await indexPatterns.isLongNumeralsSupported()).toBe(true);
   });
+
+  describe('auto-refresh of fields', () => {
+    const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
+
+    const buildField = (name: string) => ({
+      name,
+      type: 'string',
+      searchable: true,
+      aggregatable: true,
+    });
+
+    const enableAutoRefresh = (interval: number = 300000, notify: boolean = true) => {
+      uiSettingsGet.mockImplementation((key: string) => {
+        if (key === UI_SETTINGS.INDEXPATTERN_AUTO_REFRESH_FIELDS) return Promise.resolve(true);
+        if (key === UI_SETTINGS.INDEXPATTERN_AUTO_REFRESH_FIELDS_INTERVAL_MS) {
+          return Promise.resolve(interval);
+        }
+        if (key === UI_SETTINGS.INDEXPATTERN_NOTIFY_ON_NEW_FIELDS) return Promise.resolve(notify);
+        return Promise.resolve(undefined);
+      });
+    };
+
+    const mockApi = (
+      fields: Array<{ name: string; type: string; searchable: boolean; aggregatable: boolean }>
+    ) => {
+      const fetcher = jest.fn().mockResolvedValue(fields);
+      (indexPatterns as any).apiClient.getFieldsForWildcard = fetcher;
+      return fetcher;
+    };
+
+    beforeEach(() => {
+      indexPatterns.clearCache();
+      setDocsourcePayload('auto-id', {
+        id: 'auto-id',
+        version: 'v1',
+        attributes: {
+          title: 'auto-pattern-*',
+          fields: JSON.stringify([buildField('existing')]),
+        },
+      });
+    });
+
+    test('does not refresh when the setting is disabled', async () => {
+      uiSettingsGet.mockResolvedValue(false);
+      const fetcher = mockApi([buildField('existing'), buildField('brand-new')]);
+
+      await indexPatterns.get('auto-id');
+      await flushPromises();
+
+      expect(fetcher).not.toHaveBeenCalled();
+    });
+
+    test('refreshes fields in the background on first access', async () => {
+      enableAutoRefresh();
+      const fetcher = mockApi([buildField('existing')]);
+
+      await indexPatterns.get('auto-id');
+      await flushPromises();
+
+      expect(fetcher).toHaveBeenCalledTimes(1);
+    });
+
+    test('respects the TTL between consecutive get() calls', async () => {
+      enableAutoRefresh(300000);
+      const fetcher = mockApi([buildField('existing')]);
+
+      await indexPatterns.get('auto-id');
+      await flushPromises();
+      await indexPatterns.get('auto-id');
+      await flushPromises();
+
+      expect(fetcher).toHaveBeenCalledTimes(1);
+    });
+
+    test('refreshes again once the TTL has elapsed', async () => {
+      enableAutoRefresh(1000);
+      const fetcher = mockApi([buildField('existing')]);
+      const realNow = Date.now.bind(Date);
+      const nowSpy = jest.spyOn(Date, 'now').mockImplementation(() => 1000);
+
+      await indexPatterns.get('auto-id');
+      await flushPromises();
+
+      nowSpy.mockImplementation(() => 3000);
+      await indexPatterns.get('auto-id');
+      await flushPromises();
+
+      expect(fetcher).toHaveBeenCalledTimes(2);
+      nowSpy.mockRestore();
+      // Sanity check no test left a frozen clock around.
+      expect(typeof realNow()).toBe('number');
+    });
+
+    test('does not persist when the field list has not changed', async () => {
+      enableAutoRefresh();
+      mockApi([buildField('existing')]);
+
+      await indexPatterns.get('auto-id');
+      await flushPromises();
+
+      expect(savedObjectsClient.update).not.toHaveBeenCalled();
+    });
+
+    test('persists and notifies once when a new field is discovered', async () => {
+      enableAutoRefresh();
+      mockApi([buildField('existing'), buildField('brand-new')]);
+      const notify = jest.fn();
+      (indexPatterns as any).onNotification = notify;
+
+      await indexPatterns.get('auto-id');
+      await flushPromises();
+
+      expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
+      expect(notify).toHaveBeenCalledTimes(1);
+      expect(notify.mock.calls[0][0].color).toBe('primary');
+    });
+
+    test('does not re-notify for the same pattern within a session', async () => {
+      enableAutoRefresh(1);
+      const fetcher = mockApi([buildField('existing'), buildField('brand-new')]);
+      const notify = jest.fn();
+      (indexPatterns as any).onNotification = notify;
+      const nowSpy = jest.spyOn(Date, 'now').mockImplementation(() => 1000);
+
+      await indexPatterns.get('auto-id');
+      await flushPromises();
+
+      nowSpy.mockImplementation(() => 5000);
+      fetcher.mockResolvedValue([
+        buildField('existing'),
+        buildField('brand-new'),
+        buildField('another-one'),
+      ]);
+      await indexPatterns.get('auto-id');
+      await flushPromises();
+
+      expect(notify).toHaveBeenCalledTimes(1);
+      nowSpy.mockRestore();
+    });
+
+    test('get() does not block on the background refresh', async () => {
+      enableAutoRefresh();
+      const neverResolves = new Promise(() => {});
+      (indexPatterns as any).apiClient.getFieldsForWildcard = jest
+        .fn()
+        .mockReturnValue(neverResolves);
+
+      const result = await indexPatterns.get('auto-id');
+      expect(result).toBeDefined();
+      expect(result.id).toBe('auto-id');
+    });
+
+    test('claims the in-flight slot synchronously to coalesce concurrent invocations', () => {
+      enableAutoRefresh();
+      // A fetcher that never resolves keeps the work promise pending.
+      (indexPatterns as any).apiClient.getFieldsForWildcard = jest
+        .fn()
+        .mockReturnValue(new Promise(() => {}));
+
+      // A minimal stand-in pattern; we only invoke the private dedup entry point so it
+      // doesn't need a full IndexPattern instance.
+      const fakePattern: any = {
+        id: 'race-id',
+        title: 'race-pattern-*',
+        version: 'v1',
+        fields: { getAll: () => [], replaceAll: jest.fn() },
+        getScriptedFields: () => [],
+      };
+
+      const p1 = (indexPatterns as any).maybeRefreshFieldsInBackground(fakePattern);
+      const p2 = (indexPatterns as any).maybeRefreshFieldsInBackground(fakePattern);
+
+      // Same promise => slot was claimed synchronously between p1 and p2.
+      expect(p1).toBe(p2);
+    });
+
+    test('coalesces persistence: skips the write when another client already wrote a superset', async () => {
+      enableAutoRefresh();
+      // Simulate another client persisting a superset between our fetch and our write.
+      (indexPatterns as any).apiClient.getFieldsForWildcard = jest
+        .fn()
+        .mockImplementation(async () => {
+          object.version = 'v2';
+          object.attributes.fields = JSON.stringify([
+            buildField('existing'),
+            buildField('brand-new'),
+          ]);
+          return [buildField('existing'), buildField('brand-new')];
+        });
+
+      await indexPatterns.get('auto-id');
+      await flushPromises();
+
+      expect(savedObjectsClient.update).not.toHaveBeenCalled();
+      // The coalescer must have observed the newer saved object via an explicit get.
+      // Two calls expected: one from the initial indexPatterns.get(id), one from the
+      // coalescer's freshness check.
+      expect((savedObjectsClient.get as jest.Mock).mock.calls.length).toBeGreaterThanOrEqual(2);
+    });
+
+    test('coalesces persistence: still writes when the remote superset changes a field type', async () => {
+      enableAutoRefresh();
+      // The peer client persisted the SAME field names but with a different type for
+      // `existing`. Our local fetcher still sees the canonical `string` type, so the
+      // coalescer must NOT skip the write — the saved object would otherwise drift
+      // from the real cluster schema.
+      (indexPatterns as any).apiClient.getFieldsForWildcard = jest
+        .fn()
+        .mockImplementation(async () => {
+          object.version = 'v2';
+          object.attributes.fields = JSON.stringify([
+            { ...buildField('existing'), type: 'text' },
+            buildField('brand-new'),
+          ]);
+          return [buildField('existing'), buildField('brand-new')];
+        });
+
+      await indexPatterns.get('auto-id');
+      await flushPromises();
+
+      expect(savedObjectsClient.update).toHaveBeenCalled();
+    });
+
+    test('swallows fetcher errors without raising onError or onNotification', async () => {
+      enableAutoRefresh();
+      (indexPatterns as any).apiClient.getFieldsForWildcard = jest
+        .fn()
+        .mockRejectedValue(new Error('cluster unreachable'));
+      const notify = jest.fn();
+      const onError = jest.fn();
+      (indexPatterns as any).onNotification = notify;
+      (indexPatterns as any).onError = onError;
+
+      await expect(indexPatterns.get('auto-id')).resolves.toBeDefined();
+      await flushPromises();
+
+      expect(notify).not.toHaveBeenCalled();
+      expect(onError).not.toHaveBeenCalled();
+      expect(savedObjectsClient.update).not.toHaveBeenCalled();
+    });
+  });
 });

@@ -701,6 +701,45 @@ export function getUiSettings(
       }),
       schema: schema.string(),
     },
+    [UI_SETTINGS.INDEXPATTERN_AUTO_REFRESH_FIELDS]: {
+      name: i18n.translate('data.advancedSettings.indexPatternAutoRefreshFieldsTitle', {
+        defaultMessage: 'Auto-refresh index pattern fields',
+      }),
+      value: true,
+      description: i18n.translate('data.advancedSettings.indexPatternAutoRefreshFieldsText', {
+        defaultMessage:
+          'When enabled, OpenSearch Dashboards refreshes the field list of an index pattern in the background after it is opened, so new fields detected in the source indices appear without pressing the manual "Refresh field list" button. Refresh happens at most once per index pattern within the configured interval and never blocks the UI.',
+      }),
+      category: ['data'],
+      schema: schema.boolean(),
+    },
+    [UI_SETTINGS.INDEXPATTERN_AUTO_REFRESH_FIELDS_INTERVAL_MS]: {
+      name: i18n.translate('data.advancedSettings.indexPatternAutoRefreshFieldsIntervalTitle', {
+        defaultMessage: 'Auto-refresh interval (ms)',
+      }),
+      value: 300000,
+      description: i18n.translate(
+        'data.advancedSettings.indexPatternAutoRefreshFieldsIntervalText',
+        {
+          defaultMessage:
+            'Minimum time in milliseconds between two automatic field-list refreshes of the same index pattern. Lower values pick up new fields faster but increase load on the cluster. Minimum allowed value is 30000 (30 s).',
+        }
+      ),
+      category: ['data'],
+      schema: schema.number({ min: 30000 }),
+    },
+    [UI_SETTINGS.INDEXPATTERN_NOTIFY_ON_NEW_FIELDS]: {
+      name: i18n.translate('data.advancedSettings.indexPatternNotifyOnNewFieldsTitle', {
+        defaultMessage: 'Notify on new fields',
+      }),
+      value: true,
+      description: i18n.translate('data.advancedSettings.indexPatternNotifyOnNewFieldsText', {
+        defaultMessage:
+          'When auto-refresh detects fields that were not previously known for an index pattern, show an informational toast. Disable to refresh silently.',
+      }),
+      category: ['data'],
+      schema: schema.boolean(),
+    },
     [UI_SETTINGS.FILTERS_PINNED_BY_DEFAULT]: {
       name: i18n.translate('data.advancedSettings.pinFiltersTitle', {
         defaultMessage: 'Pin filters by default',
