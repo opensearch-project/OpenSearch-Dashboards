@@ -185,6 +185,10 @@ export const discoverSlice = createSlice({
         isDirty: false,
       };
     },
+    clearSavedSearch(state) {
+      const { savedSearch, ...rest } = state;
+      return { ...rest };
+    },
     setMetadata(state, action: PayloadAction<Partial<DiscoverState['metadata']>>) {
       return {
         ...state,
@@ -221,6 +225,7 @@ export const {
   setState,
   updateState,
   setSavedSearchId,
+  clearSavedSearch,
   setMetadata,
   setSavedQuery,
 } = discoverSlice.actions;
