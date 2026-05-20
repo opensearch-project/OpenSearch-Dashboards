@@ -78,6 +78,8 @@ interface IndexPatternsServiceDeps {
   canUpdateUiSetting?: boolean;
 }
 
+const DEFAULT_AUTO_REFRESH_INTERVAL_MS = 300000;
+
 export class IndexPatternsService {
   private config: UiSettingsCommon;
   private savedObjectsClient: SavedObjectsClientCommon;
@@ -87,6 +89,9 @@ export class IndexPatternsService {
   private onNotification: OnNotification;
   private onError: OnError;
   private onUnsupportedTimePattern: OnUnsupportedTimePattern;
+  private lastFieldsRefresh = new Map<string, number>();
+  private notifiedNewFields = new Set<string>();
+  private refreshInFlight = new Map<string, Promise<void>>();
   ensureDefaultIndexPattern: EnsureDefaultIndexPattern;
 
   constructor({
@@ -410,6 +415,138 @@ export class IndexPatternsService {
   };
 
   /**
+   * Best-effort background refresh of an index pattern's field list, modelled on Kibana's
+   * implicit refresh: refetch mappings if the configured TTL has elapsed, persist any diff,
+   * and optionally notify the user about brand-new fields. Errors are swallowed because this
+   * runs detached from the caller — a regression would only delay surfacing new fields, never
+   * break the UI flow that triggered get().
+   */
+  private maybeRefreshFieldsInBackground = (indexPattern: IndexPattern): Promise<void> => {
+    const id = indexPattern.id;
+    if (!id || !indexPattern.title) return Promise.resolve();
+
+    const existing = this.refreshInFlight.get(id);
+    if (existing) return existing;
+
+    // Claim the slot synchronously, before any awaits, so two concurrent callers cannot
+    // both pass the existence check and create separate refreshes. doFieldsRefresh
+    // performs the TTL gate and field reload behind that slot.
+    const work = this.doFieldsRefresh(indexPattern, id);
+    this.refreshInFlight.set(id, work);
+    work.finally(() => {
+      if (this.refreshInFlight.get(id) === work) {
+        this.refreshInFlight.delete(id);
+      }
+    });
+    return work;
+  };
+
+  private doFieldsRefresh = async (indexPattern: IndexPattern, id: string): Promise<void> => {
+    let autoRefresh: boolean;
+    let intervalMs: number;
+    let notify: boolean;
+    try {
+      autoRefresh = (await this.config.get(UI_SETTINGS.INDEXPATTERN_AUTO_REFRESH_FIELDS)) ?? true;
+      intervalMs =
+        (await this.config.get(UI_SETTINGS.INDEXPATTERN_AUTO_REFRESH_FIELDS_INTERVAL_MS)) ??
+        DEFAULT_AUTO_REFRESH_INTERVAL_MS;
+      notify = (await this.config.get(UI_SETTINGS.INDEXPATTERN_NOTIFY_ON_NEW_FIELDS)) ?? true;
+    } catch (e) {
+      return;
+    }
+    if (!autoRefresh) return;
+
+    const last = this.lastFieldsRefresh.get(id);
+    if (last !== undefined && Date.now() - last < intervalMs) return;
+
+    // Stamp the start time before any awaits. If the actual refresh takes longer than
+    // intervalMs, a duplicate caller cannot slip past the TTL check before we record
+    // completion. The dedup map already coalesces calls that overlap a live work
+    // promise; this stamp covers the gap right after the slot is freed.
+    this.lastFieldsRefresh.set(id, Date.now());
+
+    const previousFieldNames = new Set(indexPattern.fields.getAll().map((f) => f.name));
+    const scripted = indexPattern.getScriptedFields().map((field) => field.spec);
+
+    try {
+      const newFields = await this.getFieldsForIndexPattern(indexPattern);
+      indexPattern.fields.replaceAll([...newFields, ...scripted]);
+    } catch (e) {
+      // Silent best-effort: the manual "Refresh field list" button stays available for
+      // surfacing actionable errors. Do not toast here.
+      return;
+    }
+
+    const currentFieldNames = new Set(indexPattern.fields.getAll().map((f) => f.name));
+    const addedFields: string[] = [];
+    currentFieldNames.forEach((name) => {
+      if (!previousFieldNames.has(name)) addedFields.push(name);
+    });
+    const hasRemovedField = [...previousFieldNames].some((name) => !currentFieldNames.has(name));
+    const hasDiff = addedFields.length > 0 || hasRemovedField;
+
+    if (hasDiff) {
+      // Coalesce concurrent writers: if another client already persisted a field list
+      // that is a superset of ours, adopt their state and skip the write. We only fall
+      // back to writing ourselves when we still have something new to contribute.
+      let needsWrite = true;
+      try {
+        const latest = await this.savedObjectsClient.get<IndexPatternAttributes>(
+          savedObjectType,
+          id
+        );
+        if (latest?.version && latest.version !== indexPattern.version) {
+          const updatedSpec = this.savedObjectToSpec(latest);
+          const updatedFieldsByName = updatedSpec.fields ?? {};
+          // The persisted superset must cover every local field by name AND type. A type
+          // change (e.g. text -> keyword) means the cluster schema shifted in a way the
+          // peer write did not capture, so we still need to persist our refreshed view.
+          const allLocalCovered = indexPattern.fields.getAll().every((local) => {
+            const remote = updatedFieldsByName[local.name];
+            return remote !== undefined && remote.type === local.type;
+          });
+          if (allLocalCovered) {
+            const updatedFieldsList = Object.values(updatedFieldsByName) as FieldSpec[];
+            indexPattern.fields.replaceAll([...updatedFieldsList, ...scripted]);
+            indexPattern.version = latest.version;
+            needsWrite = false;
+          }
+        }
+      } catch (e) {
+        // Best-effort coalescer: if the freshness check fails we fall through to the
+        // normal write path, where updateSavedObject's existing 409 retry+merge logic
+        // is the next line of defense.
+      }
+
+      if (needsWrite) {
+        try {
+          await this.updateSavedObject(indexPattern, 0, true);
+        } catch (e) {
+          // Persistence failure is non-fatal: in-memory fields are already updated, so
+          // the session benefits even if the saved object stayed behind.
+        }
+      }
+    }
+
+    if (addedFields.length > 0 && notify && !this.notifiedNewFields.has(id)) {
+      this.notifiedNewFields.add(id);
+      this.onNotification({
+        title: i18n.translate('data.indexPatterns.newFieldsDetectedTitle', {
+          defaultMessage:
+            '{count, plural, one {# new field} other {# new fields}} detected in {indexPatternTitle}',
+          values: { count: addedFields.length, indexPatternTitle: indexPattern.title },
+        }),
+        color: 'primary',
+        iconType: 'iInCircle',
+      });
+    }
+
+    // Re-stamp on successful completion so the TTL window starts from the moment the
+    // refresh finished rather than the moment it started.
+    this.lastFieldsRefresh.set(id, Date.now());
+  };
+
+  /**
    * Get an index pattern by id. Cache optimized
    * @param id
    * @param onlyCheckCache - Only check cache for index pattern if it doesn't exist it will not error out
@@ -419,6 +556,10 @@ export class IndexPatternsService {
     const cache = indexPatternCache.get(id);
 
     if (cache || onlyCheckCache) {
+      if (cache) {
+        // Stale-while-revalidate: schedule a background field refresh without awaiting.
+        void this.maybeRefreshFieldsInBackground(cache);
+      }
       return cache;
     }
 
@@ -459,6 +600,9 @@ export class IndexPatternsService {
     }
 
     indexPattern.resetOriginalSavedObjectBody();
+    // Stale-while-revalidate: a freshly-loaded pattern still pulls fields from the persisted
+    // saved object, so trigger a background refresh on first access too.
+    void this.maybeRefreshFieldsInBackground(indexPattern);
     return indexPattern;
   };
 
