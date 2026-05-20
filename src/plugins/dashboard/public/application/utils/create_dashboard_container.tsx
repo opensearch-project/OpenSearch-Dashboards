@@ -411,8 +411,12 @@ const getChangesForContainerStateFromAppState = (
     differences.filters = appStateDashboardInput.filters;
   }
 
+  const keysToSkip = ['filters', 'panels'];
   Object.keys(containerInput).forEach((key) => {
-    if (key === 'filters') return;
+    // Skip filters and panels comparison
+    // - filters: handled separately above
+    // - panels: sync is handled by handleDashboardContainerChanges to prevent circular updates
+    if (keysToSkip.includes(key)) return;
     const containerValue = (containerInput as { [key: string]: unknown })[key];
     const appStateValue = ((appStateDashboardInput as unknown) as {
       [key: string]: unknown;
