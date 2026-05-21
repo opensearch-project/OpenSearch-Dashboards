@@ -18,7 +18,6 @@ import { AuthType } from '../../common/data_sources';
 import { opensearchClientMock } from '../../../../../src/core/server/opensearch/client/mocks';
 import { dynamicConfigServiceMock } from '../../../../../src/core/server/mocks';
 
-// Mock the endpoint validator
 jest.mock('../util/endpoint_validator', () => ({
   isValidURL: jest.fn(),
 }));
@@ -174,7 +173,6 @@ describe(`Fetch DataSource MetaData ${URL}`, () => {
       getDataSourceLegacyClient: jest.fn(),
     };
 
-    // Mock endpoint validator to allow by default; individual SSRF cases override.
     mockedIsValidURL.mockResolvedValue({ valid: true });
 
     const router = httpSetup.createRouter('');
@@ -405,10 +403,6 @@ describe(`Fetch DataSource MetaData ${URL}`, () => {
       installedPlugins: ['opensearch-ml', 'opensearch-sql'],
     });
   });
-
-  // ---------------------------------------------------------------------------
-  // SSRF endpoint validation tests
-  // ---------------------------------------------------------------------------
 
   it('should fail when endpoint is invalid', async () => {
     mockedIsValidURL.mockResolvedValue({

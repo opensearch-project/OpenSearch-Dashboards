@@ -74,8 +74,6 @@ export async function importSavedObjectsFromStream({
     supportedTypes,
     dataSourceId,
   });
-  // Block config type from being imported — config objects control global UI settings
-  // (e.g. defaultRoute, banners) and must only be modified via the advancedSettings API.
   const configErrors: SavedObjectsImportError[] = collectSavedObjectsResult.collectedObjects
     .filter((obj) => obj.type === 'config')
     .map((obj) => ({

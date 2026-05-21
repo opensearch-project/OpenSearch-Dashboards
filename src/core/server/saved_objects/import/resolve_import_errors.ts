@@ -85,7 +85,6 @@ export async function resolveSavedObjectsImportErrors({
   );
   errorAccumulator = [...errorAccumulator, ...collectorErrors];
 
-  // Block config type from being imported via retry/resolve path
   const configErrors: SavedObjectsImportError[] = objectsToResolve
     .filter((obj) => obj.type === 'config')
     .map((obj) => ({
