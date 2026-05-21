@@ -555,12 +555,13 @@ const executeQueryBase = async (
       const pplBody = (pplResponse as any)?.body;
       const rawResults: ISearchResult = {
         hits: {
-          hits: pplBody?.fields?.[0]?.values?.map((_: any, i: number) => ({
-            _source: pplBody.fields.reduce((acc: any, f: any) => {
-              acc[f.name] = f.values[i];
-              return acc;
-            }, {}),
-          })) || [],
+          hits:
+            pplBody?.fields?.[0]?.values?.map((_: any, i: number) => ({
+              _source: pplBody.fields.reduce((acc: any, f: any) => {
+                acc[f.name] = f.values[i];
+                return acc;
+              }, {}),
+            })) || [],
           total: pplBody?.size || 0,
         },
         fieldSchema: pplBody?.schema,
@@ -572,9 +573,10 @@ const executeQueryBase = async (
         setIndividualQueryStatus({
           cacheKey,
           status: {
-            status: histogramResults.hits?.hits?.length > 0
-              ? QueryExecutionStatus.READY
-              : QueryExecutionStatus.NO_RESULTS,
+            status:
+              histogramResults.hits?.hits?.length > 0
+                ? QueryExecutionStatus.READY
+                : QueryExecutionStatus.NO_RESULTS,
             startTime: queryStartTime,
             elapsedMs: Date.now() - queryStartTime,
             error: undefined,
@@ -656,7 +658,6 @@ const executeQueryBase = async (
     }
 
     dispatch(setResults({ cacheKey, results: rawResultsWithMeta }));
-
 
     dispatch(
       setIndividualQueryStatus({
