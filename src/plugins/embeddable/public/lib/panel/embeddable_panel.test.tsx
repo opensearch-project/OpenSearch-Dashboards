@@ -162,23 +162,31 @@ test('HelloWorldContainer in view mode hides edit mode actions', async () => {
     firstName: 'Bob',
   });
 
-  const component = mount(
-    <I18nProvider>
-      <EmbeddablePanel
-        embeddable={embeddable}
-        getActions={() => Promise.resolve([])}
-        getAllEmbeddableFactories={start.getEmbeddableFactories}
-        getEmbeddableFactory={start.getEmbeddableFactory}
-        notifications={{} as any}
-        application={applicationMock}
-        overlays={{} as any}
-        inspector={inspector}
-        SavedObjectFinder={() => null}
-      />
-    </I18nProvider>
-  );
+  let component: any;
+  await act(async () => {
+    component = mount(
+      <I18nProvider>
+        <EmbeddablePanel
+          embeddable={embeddable}
+          getActions={() => Promise.resolve([])}
+          getAllEmbeddableFactories={start.getEmbeddableFactories}
+          getEmbeddableFactory={start.getEmbeddableFactory}
+          notifications={{} as any}
+          application={applicationMock}
+          overlays={{} as any}
+          inspector={inspector}
+          SavedObjectFinder={() => null}
+        />
+      </I18nProvider>
+    );
+  });
+  component.update();
 
-  findTestSubject(component, 'embeddablePanelToggleMenuIcon').simulate('click');
+  await act(async () => {
+    findTestSubject(component, 'embeddablePanelToggleMenuIcon').simulate('click');
+  });
+  component.update();
+
   expect(findTestSubject(component, `embeddablePanelContextMenuOpen`).length).toBe(1);
   await nextTick();
   component.update();
