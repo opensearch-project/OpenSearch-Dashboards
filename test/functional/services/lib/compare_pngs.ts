@@ -29,7 +29,8 @@
  */
 
 import { parse, join } from 'path';
-import Jimp from 'jimp';
+import { writeFile } from 'fs/promises';
+import { Jimp, diff } from 'jimp';
 import { ToolingLog } from '@osd/dev-utils';
 
 /**
@@ -66,12 +67,9 @@ export async function comparePngs(
 
     const width = Math.min(session.bitmap.width, baseline.bitmap.width);
     const height = Math.min(session.bitmap.height, baseline.bitmap.height);
-    session.resize(width, height); // , Jimp.HORIZONTAL_ALIGN_LEFT | Jimp.VERTICAL_ALIGN_TOP);
-    baseline.resize(width, height); // , Jimp.HORIZONTAL_ALIGN_LEFT | Jimp.VERTICAL_ALIGN_TOP);
+    session.resize({ w: width, h: height }); // , Jimp.HORIZONTAL_ALIGN_LEFT | Jimp.VERTICAL_ALIGN_TOP);
+    baseline.resize({ w: width, h: height }); // , Jimp.HORIZONTAL_ALIGN_LEFT | Jimp.VERTICAL_ALIGN_TOP);
   }
-
-  session.quality(60);
-  baseline.quality(60);
 
   log.debug(`calculating diff pixels...`);
   // Note that this threshold value only affects color comparison from pixel to pixel. It won't have
@@ -79,14 +77,20 @@ export async function comparePngs(
   // will still show up as diffs, but upping this will not help that.  Instead we keep the threshold low, and expect
   // some the diffCount to be lower than our own threshold value.
   const THRESHOLD = 0.1;
-  const { image, percent } = Jimp.diff(session, baseline, THRESHOLD);
+  const { image, percent } = diff(session, baseline, THRESHOLD);
   log.debug(`percent different: ${percent}`);
   if (percent > 0) {
-    image.write(diffPath);
+    await writeFile(diffPath, await image.getBuffer('image/png'));
 
     // For debugging purposes it'll help to see the resized images and how they compare.
-    session.write(join(sessionDirectory, `${parse(sessionPath).name}-session-resized.png`));
-    baseline.write(join(sessionDirectory, `${parse(baselinePath).name}-baseline-resized.png`));
+    await writeFile(
+      join(sessionDirectory, `${parse(sessionPath).name}-session-resized.png`),
+      await session.getBuffer('image/png')
+    );
+    await writeFile(
+      join(sessionDirectory, `${parse(baselinePath).name}-baseline-resized.png`),
+      await baseline.getBuffer('image/png')
+    );
   }
   return percent;
 }
