@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import Joi from 'joi';
 import { SavedObject } from 'src/core/public';
 import { CoreSetup, PluginInitializerContext } from 'src/core/server';
 import {
@@ -80,7 +79,7 @@ export class SampleDataRegistry {
 
     return {
       registerSampleDataset: (specProvider: SampleDatasetProvider) => {
-        const { error, value } = Joi.validate(specProvider(), sampleDataSchema);
+        const { error, value } = sampleDataSchema.validate(specProvider());
 
         if (error) {
           throw new Error(`Unable to register sample dataset spec because it's invalid. ${error}`);
