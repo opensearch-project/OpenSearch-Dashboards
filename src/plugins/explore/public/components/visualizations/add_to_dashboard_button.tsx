@@ -29,6 +29,7 @@ import { useFlavorId } from '../../../public/helpers/use_flavor_id';
 import { useSearchContext } from '../query_panel/utils/use_search_context';
 import { ExploreServices } from '../../types';
 import { getVisualizationBuilder } from './visualization_builder';
+import { UrlTransformationState } from '../data_transformations';
 
 export interface DashboardAttributes {
   title?: string;
@@ -50,6 +51,8 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
   const chartConfig = useObservable(visualizationBuilder.visConfig$);
 
   const searchContext = useSearchContext();
+
+  const transformationService = visualizationBuilder.getTransformationService();
 
   const handleAddToDashboard = useCallback(() => {
     setShowAddToDashboardModal(true);
@@ -92,6 +95,14 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
     selectDashboard,
     newDashboardName,
   }: OnSaveProps) => {
+    const pipeline = transformationService.pipeline$.getValue();
+    const serializedPipeline: UrlTransformationState[] = pipeline.map((instance) => ({
+      definitionId: instance.definition_id,
+      instanceId: instance.instance_id,
+      config: instance.config,
+      hide: instance.hide,
+    }));
+
     const savedExploreWithState = saveStateToSavedObject(
       savedExplore,
       flavorId ?? 'logs',
@@ -103,6 +114,7 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
         splitField: chartConfig?.splitField,
         splitLayout: chartConfig?.splitLayout,
         showSplitLabel: chartConfig?.showSplitLabel,
+        serializedPipeline,
       },
       dataset
     );

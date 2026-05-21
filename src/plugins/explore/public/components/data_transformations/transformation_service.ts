@@ -13,7 +13,6 @@ import {
   ITransformationService,
   UrlTransformationState,
 } from './types';
-import type { TransformationInstance } from './types';
 import {
   addTransformation,
   removeTransformation,
@@ -31,6 +30,7 @@ export class TransformationService implements ITransformationService {
 
   // Active pipeline — list of transformation instances user choice
   public pipeline$ = new BehaviorSubject<TransformationPipeline>([]);
+  private debouncedPipeline$ = this.pipeline$.pipe(debounceTime(300));
 
   private urlStateStorage?: IOsdUrlStateStorage;
   private urlSyncSubscription?: Subscription;
@@ -59,7 +59,7 @@ export class TransformationService implements ITransformationService {
    */
 
   getPipeline$(): Observable<TransformationPipeline> {
-    return this.pipeline$.pipe(debounceTime(300));
+    return this.debouncedPipeline$;
   }
 
   addInstance(id: string): void {
@@ -225,20 +225,25 @@ export class TransformationService implements ITransformationService {
   }
 }
 
-export const createNoOpTransformationService = (): ITransformationService => ({
-  registerDefinition: () => {},
-  getDefinitions: () => [],
-  getDefinitionsByType: () => [],
-  getDefinition: () => undefined,
-  pipeline$: new BehaviorSubject<TransformationPipeline>([]),
-  getPipeline$: () => new BehaviorSubject<TransformationPipeline>([]).asObservable(),
-  addInstance: () => {},
-  removeInstance: () => {},
-  updateInstanceConfig: () => {},
-  toggleInstanceHide: () => {},
-  setPipeline: () => {},
-  clearPipeline: () => {},
-  applyPipeline: (rawRows: any[]) => ({ rows: rawRows ?? [], stageSchemas: [] }),
-  initUrlSync: () => {},
-  destroy: () => {},
-});
+export const createNoOpTransformationService = (): ITransformationService => {
+  const pipeline$ = new BehaviorSubject<TransformationPipeline>([]);
+
+  return {
+    registerDefinition: () => {},
+    getDefinitions: () => [],
+    getDefinitionsByType: () => [],
+    getDefinition: () => undefined,
+    pipeline$,
+    getPipeline$: () => pipeline$,
+    addInstance: () => {},
+    removeInstance: () => {},
+    updateInstanceConfig: () => {},
+    toggleInstanceHide: () => {},
+    setPipeline: () => {},
+    clearPipeline: () => {},
+    applyPipeline: (rawRows: any[]) => ({ rows: rawRows ?? [], stageSchemas: [] }),
+    initUrlSync: () => {},
+    destroy: () => {},
+    restoreFromState: (states: UrlTransformationState[]) => {},
+  };
+};

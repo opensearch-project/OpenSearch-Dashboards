@@ -70,7 +70,6 @@ export const VisualizationEditorPage = ({
     savedQueryState,
     savedVisConfig,
     error,
-    savedTransformationPipeline,
     isLoading,
   } = useInitialSaveExplore();
 
@@ -109,6 +108,7 @@ export const VisualizationEditorPage = ({
           splitField: savedVisConfig.splitField,
           splitLayout: savedVisConfig.splitLayout,
           showSplitLabel: savedVisConfig.showSplitLabel,
+          dataTransformationJSON: savedVisConfig.dataTransformationJSON,
         });
       }
 
@@ -137,7 +137,6 @@ export const VisualizationEditorPage = ({
     queryBuilder,
     savedVisConfig,
     savedQueryState,
-    savedTransformationPipeline,
     osdUrlStateStorage,
     visualizationBuilderForEditor,
     needsDashboardSelection,
@@ -217,9 +216,7 @@ export const VisualizationEditorPage = ({
                       {variableService && VariablesBar && (
                         <VariablesBar variableService={variableService} />
                       )}
-                      <ResizableQueryPanelAndVisualization
-                        savedTransformationPipeline={savedTransformationPipeline}
-                      />
+                      <ResizableQueryPanelAndVisualization />
                     </EuiResizablePanel>
                     <EuiResizableButton />
                     <EuiResizablePanel

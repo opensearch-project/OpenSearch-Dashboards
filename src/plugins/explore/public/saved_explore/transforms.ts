@@ -14,6 +14,7 @@ import {
   StyleOptions,
 } from '../components/visualizations/utils/use_visualization_types';
 import { AxisFieldNameMappings } from '../components/visualizations/types';
+import { UrlTransformationState } from '../components/data_transformations';
 
 export interface ExploreState {
   legacy: LegacyState;
@@ -28,6 +29,7 @@ interface VisState {
   splitField?: string;
   splitLayout?: string;
   showSplitLabel?: boolean;
+  serializedPipeline?: UrlTransformationState[];
 }
 
 export const saveStateToSavedObject = (
@@ -50,6 +52,7 @@ export const saveStateToSavedObject = (
     splitField: visState?.splitField,
     splitLayout: visState?.splitLayout,
     showSplitLabel: visState?.showSplitLabel,
+    dataTransformationJSON: JSON.stringify(visState?.serializedPipeline),
   });
 
   obj.uiState = JSON.stringify({

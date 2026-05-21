@@ -50,7 +50,7 @@ export const SaveVisButton = () => {
   const { queryEditorState, datasetView } = useQueryBuilderState();
   const { visualizationBuilderForEditor: visualizationBuilder } = useVisualizationBuilder();
   const visConfig = visualizationBuilder.visConfig$.value;
-  const transformationService = useTransformationService();
+  const transformationService = visualizationBuilder.getTransformationService();
 
   const { services } = useOpenSearchDashboards<ExploreServices>();
 

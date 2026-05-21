@@ -89,6 +89,7 @@ export interface ITransformationService {
   initUrlSync(urlStateStorage: IOsdUrlStateStorage): void;
 
   destroy(): void;
+  restoreFromState(states: UrlTransformationState[]): void;
 }
 
 export interface FilterConfig {

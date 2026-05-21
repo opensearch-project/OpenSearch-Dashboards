@@ -26,4 +26,5 @@ export interface ChartConfig extends SplitConfig {
   type: ChartType;
   styles?: StyleOptions;
   axesMapping?: AxisFieldNameMappings;
+  dataTransformationJSON?: string;
 }

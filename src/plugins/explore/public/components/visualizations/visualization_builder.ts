@@ -59,9 +59,18 @@ export class VisualizationBuilder {
     }
   }
 
-  // set transformation service
   setTransformationService(service: ITransformationService) {
     this.transformationService = service;
+
+    if (this.visConfig$.value?.dataTransformationJSON) {
+      this.transformationService.restoreFromState(
+        JSON.parse(this.visConfig$.value?.dataTransformationJSON)
+      );
+    }
+  }
+
+  getTransformationService() {
+    return this.transformationService;
   }
 
   init() {

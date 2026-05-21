@@ -28,11 +28,13 @@ import { useQueryBuilderState } from '../hooks/use_query_builder_state';
 import { ErrorCodeBlock } from '../../../components/tabs/error_guard/error_code_block';
 import { EditorPanel } from './editor_panel';
 import { useVisualizationBuilder } from '../hooks/use_visualization_builder';
-import { TransformPanel } from './transform_panel';
-import { useTransformationService } from '../hooks/use_transformation_service';
 
 import '../visualization_editor.scss';
-import { TransformationService } from '../data_transformations';
+import {
+  TransformationService,
+  useTransformationService,
+  TransformPanel,
+} from '../../../components/data_transformations';
 
 type ActiveTab = 'QUERY_TAB' | 'TRANSFORM_TAB';
 
@@ -53,25 +55,19 @@ const transformTabLabel = i18n.translate('explore.bottomPanel.transformTab', {
   defaultMessage: 'Transform',
 });
 
-interface ResizableQueryPanelAndVisualizationProps {
-  savedTransformationPipeline?: Array<{
-    definitionId: string;
-    instanceId: string;
-    config: any;
-    hide: boolean;
-  }>;
-}
-
-export const ResizableQueryPanelAndVisualization = ({
-  savedTransformationPipeline,
-}: ResizableQueryPanelAndVisualizationProps) => {
+export const ResizableQueryPanelAndVisualization = () => {
   const { queryBuilder, queryEditorState } = useQueryBuilderState();
   const queryStatus = queryEditorState.queryStatus;
   const [activeTab, setActiveTab] = useState<ActiveTab>(
     queryEditorState.activeBottomPanelTab ?? 'QUERY_TAB'
   );
+  const { visualizationBuilderForEditor } = useVisualizationBuilder();
 
-  const transformServices = useTransformationService(savedTransformationPipeline);
+  const transformServices = useTransformationService(visualizationBuilderForEditor, {
+    onPipelineChange: useCallback(() => {
+      queryBuilder.updateQueryEditorState({ isQueryEditorDirty: true });
+    }, [queryBuilder]),
+  });
 
   useEffect(() => {
     queryBuilder.updateQueryEditorState({ activeBottomPanelTab: activeTab });
@@ -168,7 +164,10 @@ export const ResizableQueryPanelAndVisualization = ({
                 {activeTab === 'QUERY_TAB' ? (
                   <QueryPanel queryEditorState$={queryBuilder.queryEditorState$} />
                 ) : (
-                  <TransformPanel transformationService={transformServices} />
+                  <TransformPanel
+                    transformationService={transformServices}
+                    visualizationBuilder={visualizationBuilderForEditor}
+                  />
                 )}
               </EuiPanel>
             </EuiResizablePanel>

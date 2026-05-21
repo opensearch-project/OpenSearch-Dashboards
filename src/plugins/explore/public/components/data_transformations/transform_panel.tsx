@@ -27,18 +27,27 @@ import { TransformationInstance, FieldSchema } from './types';
 import { TransformationService } from './transformation_service';
 import { FIELD_TYPE_MAP } from '../visualizations/constants';
 import { VisFieldType } from '../visualizations/types';
+import { VisualizationBuilder } from '../visualizations/visualization_builder';
 
 const DROPPABLE_ID = 'transformationPipelineDroppable';
 
 export interface TransformPanelProps {
   transformationService: TransformationService;
-  stageSchemas: Array<Array<{ name?: string; type?: string }>>;
+  visualizationBuilder: VisualizationBuilder;
 }
 
-export const TransformPanel = ({ transformationService, stageSchemas }: TransformPanelProps) => {
+export const TransformPanel = ({
+  transformationService,
+  visualizationBuilder,
+}: TransformPanelProps) => {
   const pipeline = useObservable(
     transformationService.pipeline$,
     transformationService.pipeline$.getValue()
+  );
+
+  const stageSchemas = useObservable(
+    visualizationBuilder.stageSchemas$,
+    visualizationBuilder.stageSchemas$.getValue()
   );
 
   const availableFieldsByStage = useMemo(() => {
@@ -85,7 +94,9 @@ export const TransformPanel = ({ transformationService, stageSchemas }: Transfor
   return (
     <EuiPanel
       paddingSize="m"
-      className="visualizationEditorTabPanel"
+      hasBorder={false}
+      hasShadow={false}
+      borderRadius="none"
       style={{ height: '100%', overflowY: 'auto' }}
     >
       {pipeline.length === 0 && (
@@ -179,7 +190,7 @@ const TransformationCard = ({
   }
 
   return (
-    <EuiPanel paddingSize="s" hasBorder hasShadow={false}>
+    <EuiPanel paddingSize="m" hasBorder hasShadow={false}>
       <EuiAccordion
         id={`transformation-accordion-${instance.instance_id}`}
         initialIsOpen={true}
