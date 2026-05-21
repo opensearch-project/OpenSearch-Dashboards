@@ -195,6 +195,7 @@ function run_cypress() {
     do
       SPEC_FILES+="$TEST_DIR/cypress/integration/$DASHBOARDS_TYPE/*$test.js,"
     done
+    SPEC_FILES=${SPEC_FILES%,}
     [ $IS_CORE == false ] && echo "Running tests from plugins"
     [ $IS_CORE == true ] && spec="$SPEC_FILES" || "$TEST_DIR/cypress/integration/$DASHBOARDS_TYPE/plugins/*.js"
     [ $IS_CORE == true ] && success_msg="BWC tests for core passed ($spec)" || success_msg="BWC tests for plugin passed ($spec)"
