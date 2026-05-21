@@ -277,6 +277,7 @@ export const executeQueries = createAsyncThunk<
     dataTableQueryStatus?.status === QueryExecutionStatus.UNINITIALIZED;
   const needsHistogramQuery =
     query.language !== 'PROMQL' &&
+    query.language !== 'SQL' && // Disable histograms for SQL
     (!results[histogramCacheKey] ||
       histogramQueryStatus?.status === QueryExecutionStatus.UNINITIALIZED);
   const promises = [];
