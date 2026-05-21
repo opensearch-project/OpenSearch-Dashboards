@@ -154,6 +154,9 @@ function transformAutoDateHistogram(adh: Record<string, any>): Record<string, an
 function transformGeotileToGeohash(gt: Record<string, any>): Record<string, any> {
   const result: Record<string, any> = { field: gt.field };
   if (typeof gt.precision === 'number') {
+    // Geotile zoom levels (0–29) map to geohash precision (1–12) at different rates.
+    // Geotile uses web mercator zoom; geohash uses character-based precision.
+    // Approximate spatial equivalence: zoom 4 ≈ geohash 2, zoom 10 ≈ geohash 5, zoom 20 ≈ geohash 9.
     const p = gt.precision;
     if (p <= 4) result.precision = Math.max(1, Math.ceil(p / 2));
     else if (p <= 10) result.precision = Math.min(5, 3 + Math.floor((p - 5) / 2));

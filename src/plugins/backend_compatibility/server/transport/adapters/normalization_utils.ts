@@ -41,3 +41,9 @@ export function normalizeTotalHits(
   if (typeof total === 'number') return { value: total, relation: 'eq' };
   return total;
 }
+
+export function extractQueryString(params: { querystring?: any }): Record<string, any> {
+  return typeof params.querystring === 'object' && params.querystring !== null
+    ? params.querystring
+    : {};
+}

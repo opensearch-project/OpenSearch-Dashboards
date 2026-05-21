@@ -4,7 +4,10 @@
  */
 
 import { BackendInfo, DEFAULT_DOCUMENT_TYPE } from '../types';
-import { isPlainObject, synthesizeSeqNo } from './normalization_utils';
+import { isPlainObject, synthesizeSeqNo, extractQueryString } from './normalization_utils';
+
+/** Bulk action verbs used in bulk request/response processing */
+const DOC_ACTIONS = ['index', 'create', 'update', 'delete'] as const;
 
 /**
  * ES 6.x doesn't support if_seq_no/if_primary_term — stripping disables OCC.
@@ -30,7 +33,7 @@ export function translateBulkRequest(params: any, backend: BackendInfo): any {
 
   const transformed = source.map((item: any) => {
     if (!item || typeof item !== 'object') return item;
-    for (const action of ['index', 'create', 'update', 'delete']) {
+    for (const action of DOC_ACTIONS) {
       if (action in item) {
         const meta = { ...item[action] };
         if (!meta._type && !meta.type) {
@@ -53,8 +56,7 @@ export function translateBulkRequest(params: any, backend: BackendInfo): any {
 
 export function translateCreateRequest(params: any, backend: BackendInfo): any {
   const newPath = params.path.replace('/_create', '/_doc');
-  const existing =
-    typeof params.querystring === 'object' && params.querystring !== null ? params.querystring : {};
+  const existing = extractQueryString(params);
   const qs = stripSeqNoFromQuerystring({ ...existing, op_type: 'create' });
   return { ...params, path: newPath, querystring: qs };
 }
@@ -95,13 +97,14 @@ export function translateDeleteByQueryRequest(params: any, backend: BackendInfo)
 
 export function translateResponse(response: any, backend: BackendInfo): any {
   const body = response?.body || response;
-  if (!body) return response;
+  if (!body || typeof body !== 'object') return response;
 
   if (body._id !== undefined) normalizeDocResponse(body);
 
   if (Array.isArray(body.items)) {
     body.items.forEach((item: any) => {
-      for (const action of ['index', 'create', 'update', 'delete']) {
+      if (!item || typeof item !== 'object') return;
+      for (const action of DOC_ACTIONS) {
         if (item[action]) normalizeDocResponse(item[action]);
       }
     });
@@ -109,7 +112,7 @@ export function translateResponse(response: any, backend: BackendInfo): any {
 
   if (Array.isArray(body.docs)) {
     body.docs.forEach((doc: any) => {
-      if (doc && !doc.error) normalizeDocResponse(doc);
+      if (doc && typeof doc === 'object' && !doc.error) normalizeDocResponse(doc);
     });
   }
 

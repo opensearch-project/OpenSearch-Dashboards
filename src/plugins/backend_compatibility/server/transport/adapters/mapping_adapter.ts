@@ -4,13 +4,13 @@
  */
 
 import { BackendInfo, DEFAULT_DOCUMENT_TYPE } from '../types';
-import { isPlainObject } from './normalization_utils';
+import { isPlainObject, extractQueryString } from './normalization_utils';
 
 interface FieldDefinition {
   type?: string;
   properties?: Record<string, FieldDefinition>;
   enabled?: boolean;
-  dynamic?: boolean | string;
+  dynamic?: boolean | 'true' | 'false' | 'strict';
   value?: any;
   null_value?: any;
   [key: string]: any;
@@ -44,10 +44,10 @@ const FIELD_TYPE_DOWNGRADES: Record<string, FieldTypeDowngrader> = {
     return { ...rest, type: 'text' };
   },
 
-  constant_keyword: (def) => ({
-    type: 'keyword',
-    ...(def.value !== undefined && { null_value: def.value }),
-  }),
+  constant_keyword: (def) => {
+    const { value, type, ...rest } = def;
+    return { ...rest, type: 'keyword', ...(value !== undefined && { null_value: value }) };
+  },
 
   histogram: (def) => ({
     type: 'object',
@@ -158,8 +158,7 @@ function downgradeMappings(mappings: any): { mappings: any; downgrades: string[]
 // ── Request/Response Translators ─────────────────────────────────────────────
 
 export function translateRequest(params: any, backend: BackendInfo): any {
-  const existing =
-    typeof params.querystring === 'object' && params.querystring !== null ? params.querystring : {};
+  const existing = extractQueryString(params);
   const qs = { ...existing, include_type_name: true };
 
   // Rewrite /{index}/_mapping → /{index}/_doc/_mapping (ES 6.x requires type in path)
@@ -180,8 +179,7 @@ export function translateRequest(params: any, backend: BackendInfo): any {
 }
 
 export function translateIndexCreateRequest(params: any, backend: BackendInfo): any {
-  const existing =
-    typeof params.querystring === 'object' && params.querystring !== null ? params.querystring : {};
+  const existing = extractQueryString(params);
   const qs = { ...existing, include_type_name: true };
 
   if (!isPlainObject(params.body) || !params.body.mappings) {

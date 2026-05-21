@@ -15,6 +15,7 @@ import * as scrollAdapter from './adapters/scroll_adapter';
 
 const DETECTION_TIMEOUT_MS = 30000;
 const MAX_DETECTION_ATTEMPTS = 3;
+const DETECTION_RETRY_DELAYS_MS = [500, 1000, 2000];
 
 interface RouteEntry {
   name: string;
@@ -172,14 +173,18 @@ export class CompatibilityTransport extends Transport {
       return this.handleResolveIndex(params, options);
     }
 
+    return this.applyES6Request(params, options);
+  }
+
+  private async applyES6Request(params: any, options?: any): Promise<any> {
     const normalized = this.normalizeParams(params);
     const route = this.matchRoute(normalized);
 
-    const translatedParams = route?.request ? route.request(normalized, this.backend) : normalized;
+    const translatedParams = route?.request ? route.request(normalized, this.backend!) : normalized;
 
     const response = await super.request(translatedParams, options);
 
-    return route?.response ? route.response(response, this.backend) : response;
+    return route?.response ? route.response(response, this.backend!) : response;
   }
 
   // ── Route matching ──────────────────────────────────────────────────
@@ -227,11 +232,12 @@ export class CompatibilityTransport extends Transport {
 
   private async performDetection(options?: any): Promise<void> {
     this.detectionAttempts++;
+    let timer: ReturnType<typeof setTimeout> | undefined;
     try {
       const detectionPromise = super.request({ method: 'GET', path: '/' }, options);
 
       const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(
+        timer = setTimeout(
           () => reject(new Error(`Backend detection timed out after ${DETECTION_TIMEOUT_MS}ms`)),
           DETECTION_TIMEOUT_MS
         );
@@ -243,6 +249,11 @@ export class CompatibilityTransport extends Transport {
       CompatibilityTransport.lastDetectedBackend = this.backend;
     } catch (error) {
       if (this.detectionAttempts >= MAX_DETECTION_ATTEMPTS) {
+        // eslint-disable-next-line no-console
+        console.error(
+          `[backend_compatibility] Failed to detect backend after ${MAX_DETECTION_ATTEMPTS} attempts. ` +
+            `Falling back to OpenSearch pass-through. Last error: ${error}`
+        );
         this.backend = {
           distribution: 'opensearch',
           version: '0.0.0',
@@ -250,7 +261,12 @@ export class CompatibilityTransport extends Transport {
           minorVersion: 0,
           patchVersion: 0,
         };
+      } else {
+        const delay = DETECTION_RETRY_DELAYS_MS[this.detectionAttempts - 1] || 1000;
+        await new Promise((resolve) => setTimeout(resolve, delay));
       }
+    } finally {
+      if (timer) clearTimeout(timer);
     }
   }
 

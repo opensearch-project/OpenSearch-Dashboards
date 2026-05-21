@@ -4,11 +4,10 @@
  */
 
 import { BackendInfo } from '../types';
-import { isPlainObject } from './normalization_utils';
+import { isPlainObject, extractQueryString } from './normalization_utils';
 
 export function translateRequest(params: any, backend: BackendInfo): any {
-  const existing =
-    typeof params.querystring === 'object' && params.querystring !== null ? params.querystring : {};
+  const existing = extractQueryString(params);
   const qs = { ...existing };
   delete qs.include_unmapped;
 
