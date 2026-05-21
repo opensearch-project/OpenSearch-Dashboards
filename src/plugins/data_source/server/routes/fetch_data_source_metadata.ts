@@ -80,7 +80,6 @@ export const registerFetchDataSourceMetaDataRoute = async (
     async (context, request, response) => {
       const { dataSourceAttr, id: dataSourceId } = request.body;
 
-      // Validate endpoint before attempting connection
       const { endpoint } = dataSourceAttr;
 
       const validationResult = await isValidURL(
@@ -89,10 +88,8 @@ export const registerFetchDataSourceMetaDataRoute = async (
         endpointAllowlistedSuffixes
       );
       if (!validationResult.valid) {
-        // Log detailed error for server-side debugging
         logger.error(`Endpoint validation failed for ${endpoint}: ${validationResult.error}`);
 
-        // Return safe message to client
         return response.customError({
           statusCode: 400,
           body: {
