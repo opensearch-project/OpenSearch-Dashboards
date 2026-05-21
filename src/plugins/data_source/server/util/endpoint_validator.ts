@@ -4,7 +4,7 @@
  */
 
 import { promises as dnsPromises } from 'dns';
-import { IPCIDR } from '../../../../../src/core/server/utils';
+import { IPCIDR } from '@osd/utils';
 
 export interface URLValidationResult {
   valid: boolean;

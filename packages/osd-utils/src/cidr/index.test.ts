@@ -10,7 +10,7 @@
  */
 
 import { Address4, Address6 } from 'ip-address';
-import { IPCIDR } from './cidr';
+import { IPCIDR } from './';
 
 describe('IPCIDR', () => {
   describe('constructor', () => {
