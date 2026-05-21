@@ -145,33 +145,6 @@ describe('IPCIDR', () => {
     });
   });
 
-  describe('toObject', () => {
-    it('should return object with start and end as strings by default', () => {
-      const cidr = new IPCIDR('192.168.1.0/24');
-      const obj = cidr.toObject();
-      expect(obj).toEqual({
-        start: '192.168.1.0',
-        end: '192.168.1.255',
-      });
-    });
-
-    it('should return object with bigints when specified', () => {
-      const cidr = new IPCIDR('192.168.1.0/24');
-      const obj = cidr.toObject({ type: 'bigInteger' });
-      expect(typeof obj.start).toBe('bigint');
-      expect(typeof obj.end).toBe('bigint');
-      expect(obj.start).toBe(3232235776n);
-      expect(obj.end).toBe(3232236031n);
-    });
-
-    it('should return object with address objects when specified', () => {
-      const cidr = new IPCIDR('192.168.1.0/24');
-      const obj = cidr.toObject({ type: 'addressObject' });
-      expect(obj.start).toBeInstanceOf(Address4);
-      expect(obj.end).toBeInstanceOf(Address4);
-    });
-  });
-
   describe('formatIP', () => {
     it('should return string by default', () => {
       const addr = new Address4('192.168.1.1');

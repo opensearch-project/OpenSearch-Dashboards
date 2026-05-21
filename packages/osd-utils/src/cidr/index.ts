@@ -18,11 +18,6 @@ interface FormatOptions {
   type?: 'bigInteger' | 'addressObject';
 }
 
-interface RangeObject {
-  start: string | bigint | IPAddress;
-  end: string | bigint | IPAddress;
-}
-
 /**
  * A utility class for working with CIDR (Classless Inter-Domain Routing) notation IP addresses.
  * Supports both IPv4 and IPv6 address ranges. It's based on not maintained ip-cidr module,
@@ -81,7 +76,7 @@ class IPCIDR {
       }
 
       return addr.isInSubnet(this.address);
-    } catch (err) {
+    } catch {
       return false;
     }
   }
@@ -104,20 +99,6 @@ class IPCIDR {
    */
   toRange(options?: FormatOptions): [string | bigint | IPAddress, string | bigint | IPAddress] {
     return [IPCIDR.formatIP(this.addressStart, options), IPCIDR.formatIP(this.addressEnd, options)];
-  }
-
-  /**
-   * Converts the CIDR range to an object containing start and end properties.
-   *
-   * @param options - Optional formatting options for the returned addresses
-   * @param options.type - Format type: 'bigInteger' returns bigint values, 'addressObject' returns IPAddress objects, otherwise returns string addresses
-   * @returns An object with `start` and `end` properties representing the address range
-   */
-  toObject(options?: FormatOptions): RangeObject {
-    return {
-      start: IPCIDR.formatIP(this.addressStart, options),
-      end: IPCIDR.formatIP(this.addressEnd, options),
-    };
   }
 
   /**
@@ -187,7 +168,7 @@ class IPCIDR {
   static isValidAddress(address: string): boolean {
     try {
       return !!this.createAddress(address);
-    } catch (err) {
+    } catch {
       return false;
     }
   }
@@ -205,7 +186,7 @@ class IPCIDR {
 
     try {
       return !!this.createAddress(address);
-    } catch (err) {
+    } catch {
       return false;
     }
   }
