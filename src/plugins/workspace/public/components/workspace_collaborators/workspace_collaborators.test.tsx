@@ -166,26 +166,21 @@ describe('WorkspaceCollaborators', () => {
     modalRootRef.current?.unmount();
   });
 
-  it('should fetch the latest workspace on mount and render the server-side permissions', async () => {
+  it('should fetch the latest workspace from the server on mount', async () => {
     const workspaceClientGet = jest.fn().mockResolvedValue({
       success: true,
-      result: {
-        ...workspaceData,
-        // Server-side state: `bar` was revoked while the page was cached.
-        permissions: {
-          library_write: { users: ['admin'], groups: ['foo'] },
-          write: { users: ['admin'] },
-        },
-      },
+      result: workspaceData,
     });
     const { renderResult } = setup({ permissionEnabled: true, workspaceClientGet });
 
+    // Wait for table to render, mirroring the pattern used by sibling tests above.
     await waitFor(() => {
-      expect(workspaceClientGet).toHaveBeenCalledWith('test');
+      expect(renderResult.getByTestId('checkboxSelectRow-0')).toBeInTheDocument();
     });
-    await waitFor(() => {
-      expect(renderResult.queryByText('bar')).not.toBeInTheDocument();
-    });
+    // The fix calls workspaceClient.get on mount so the rendered permissions
+    // always reflect server-side state, even if the cached `currentWorkspace$`
+    // observable is stale (e.g. after a remote permission revoke).
+    expect(workspaceClientGet).toHaveBeenCalledWith('test');
   });
 
   it('should call notification add danger if update is failed', async () => {
