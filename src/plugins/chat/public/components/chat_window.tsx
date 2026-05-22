@@ -11,13 +11,8 @@ import moment from "moment";
 import { i18n } from '@osd/i18n';
 import { EuiButton, EuiButtonIcon, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { useChatContext } from '../contexts/chat_context';
-import { ChatEventHandler } from '../services/chat_event_handler';
 import { AssistantActionService } from '../../../context_provider/public';
 import { ConfirmationRequest } from '../services/confirmation_service';
-import {
-  // eslint-disable-next-line prettier/prettier
-  type Event as ChatEvent,
-} from '../../common/events';
 import type {
   Message,
   SystemMessage,
@@ -30,6 +25,7 @@ import { ChatMessages } from './chat_messages';
 import { ChatInput } from './chat_input';
 import { slashCommandRegistry } from '../services/slash_commands';
 import { usePageContainerCapture, PageContainerImageData } from '../hooks/use_page_container_capture';
+import { useChatStreaming } from '../hooks/use_chat_streaming';
 import { ConversationHistoryPanel } from './conversation_history_panel';
 import type { SavedConversation } from '../services/conversation_history_service';
 import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
@@ -63,22 +59,16 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   const { chatService, confirmationService } = useChatContext();
   const { services } = useOpenSearchDashboards<{ core: CoreStart }>();
   const toasts = services.core?.notifications?.toasts;
-  const [timeline, setTimeline] = useState<Message[]>([]);
   const [input, setInput] = useState('');
-  const [isStreaming, setIsStreaming] = useState(false);
-  const [currentRunId, setCurrentRunId] = useState<string | null>(null);
   const [pendingConfirmation, setPendingConfirmation] = useState<ConfirmationRequest | null>(null);
   const [showHistory, setShowHistory] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const handleSendRef = useRef<typeof handleSend>();
-  const currentSubscriptionRef = useRef<any>(null);
   const conversationLoadAbortControllerRef = useRef<AbortController | null>(null);
   const {screenshotFeatureEnabled,isCapturing, capturePageContainer} = usePageContainerCapture();
   const [screenshotData, setScreenshotData] = useState<{pageTitle: string, createdAt: moment.Moment} & PageContainerImageData>();
   const [toolCallStates, setToolCallStates] = useState<Map<string, any>>(new Map());
   const resendAvailable = !!chatService.conversationHistoryService.getMemoryProvider().includeFullHistory;
-  const [startResponse, setStartResponse] = useState(false);
-
   const hasActiveToolCalls = useMemo(() => {
     if (toolCallStates instanceof Map) {
       for (const state of toolCallStates.values()) {
@@ -90,20 +80,36 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   const hasActiveToolCallsRef = useRef(false);
   hasActiveToolCallsRef.current = hasActiveToolCalls;
 
+  // Get telemetry recorder from core services
+  const telemetryRecorder = useMemo(
+    () => services.core?.telemetry?.getPluginRecorder('chat'),
+    [services.core?.telemetry]
+  );
+
+  // Use the streaming hook
+  const {
+    timeline,
+    setTimeline,
+    isStreaming,
+    isStreamingRef,
+    isSendingToolResult,
+    isSendingToolResultRef,
+    startResponse,
+    setCurrentRunId,
+    eventHandler,
+    subscribeToMessageStream,
+    stopStreaming,
+  } = useChatStreaming({
+    chatService,
+    confirmationService,
+    telemetryRecorder,
+    onMessageSent: () => setScreenshotData(undefined),
+  });
+
   const hasPendingResend = useMemo(
     () => timeline.some((msg) => msg.role === 'system' && (msg as SystemMessage).canResend),
     [timeline]
   );
-
-  // Use ref to track streaming state synchronously for React 18 compatibility
-  // React 18 batches state updates, so we need a ref for immediate checks
-  const isStreamingRef = useRef(false);
-
-  const timelineRef = React.useRef<Message[]>(timeline);
-
-  React.useEffect(() => {
-    timelineRef.current = timeline;
-  }, [timeline]);
 
   // Subscribe to pending confirmations
   useEffect(() => {
@@ -119,29 +125,6 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     return () => subscription.unsubscribe();
   }, [confirmationService]);
 
-  // Get telemetry recorder from core services
-  const telemetryRecorder = useMemo(
-    () => services.core?.telemetry?.getPluginRecorder('chat'),
-    [services.core?.telemetry]
-  );
-
-  // Create the event handler using useMemo
-  const eventHandler = useMemo(
-    () =>
-      new ChatEventHandler({
-        assistantActionService: service,
-        chatService,
-        confirmationService,
-        telemetryRecorder,
-        callbacks: {
-          onTimelineUpdate: setTimeline,
-          onStreamingStateChange: setIsStreaming,
-          onStartResponse: setStartResponse,
-          getTimeline: () => timelineRef.current,
-        },
-      }),
-    [service, chatService, confirmationService, telemetryRecorder]
-  );
 
   // Subscribe to tool updates from the service
   useEffect(() => {
@@ -156,13 +139,6 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
     return () => subscription.unsubscribe();
   }, [service, chatService]);
-
-  // Clean up event handler on component unmount
-  useEffect(() => {
-    return () => {
-      eventHandler.clearState();
-    };
-  }, [eventHandler]);
 
   // Initialize with fresh conversation on mount
   useMount(() => {
@@ -207,89 +183,6 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     }
   }, [chatService, services.core?.savedObjects?.client]);
 
-  // Helper function to handle message streaming with observable subscription
-  const subscribeToMessageStream = useCallback(async (
-    messageContent: string,
-    messages: Message[],
-    rawMessage?: string
-  ) => {
-    // Block AI features for unsupported data sources
-    if (await isUnsupportedDataSource()) {
-      const userMsg: UserMessage = {
-        id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
-        role: 'user',
-        content: messageContent,
-        rawMessage: rawMessage || messageContent,
-      };
-      const systemMsg: SystemMessage = {
-        id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
-        role: 'system',
-        content: i18n.translate('chat.dataSourceUnsupported', {
-          defaultMessage: 'The current data source does not support AI features.',
-        }),
-      };
-      setTimeline((prev) => [...prev, userMsg, systemMsg]);
-      return;
-    }
-
-    isStreamingRef.current = true;
-    setIsStreaming(true);
-    setStartResponse(false);
-
-    try {
-      const { observable, userMessage } = await chatService.sendMessage(
-        messageContent,
-        messages
-      );
-
-      const timelineUserMessage: UserMessage = {
-        id: userMessage.id,
-        role: 'user',
-        content: userMessage.content,
-        rawMessage: Array.isArray(userMessage.content) ? undefined : rawMessage || messageContent,  // For regular messages, raw and content are the same
-      };
-
-      setTimeline((prev) => [...prev, timelineUserMessage]);
-      setScreenshotData(undefined);
-
-      // Subscribe to streaming response
-      const subscription = observable.subscribe({
-        next: async (event: ChatEvent) => {
-          // Update runId if we get it from the event
-          if ('runId' in event && event.runId && event.runId !== currentRunId) {
-            setCurrentRunId(event.runId);
-          }
-
-          // Handle all events through the event handler service
-          await eventHandler.handleEvent(event);
-        },
-        error: (error: any) => {
-          console.error('Subscription error:', error);
-          isStreamingRef.current = false;
-          setStartResponse(false);
-          setIsStreaming(false);
-          currentSubscriptionRef.current = null;
-        },
-        complete: () => {
-          isStreamingRef.current = false;
-          setStartResponse(false);
-          setIsStreaming(false);
-          currentSubscriptionRef.current = null;
-        },
-      });
-
-      // Store subscription for potential cancellation
-      currentSubscriptionRef.current = subscription;
-
-      return () => subscription.unsubscribe();
-    } catch (error) {
-      console.error('Failed to send message:', error);
-      isStreamingRef.current = false;
-      setIsStreaming(false);
-      currentSubscriptionRef.current = null;
-    }
-  }, [chatService, currentRunId, eventHandler, isUnsupportedDataSource]);
-
   const handleSend = async (options?: {input?: string, messages?: Message[]}) => {
     const messageContent = options?.input ?? input.trim();
     // Use ref for immediate check since React 18 batches state updates
@@ -326,6 +219,25 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       if (commandResult.message) {
         return subscribeToMessageStream(commandResult.message, messagesToSend, messageContent);
       }
+      return;
+    }
+
+    // Block AI features for unsupported data sources
+    if (await isUnsupportedDataSource()) {
+      const userMsg: UserMessage = {
+        id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+        role: 'user',
+        content: messageContent,
+        rawMessage: messageContent,
+      };
+      const systemMsg: SystemMessage = {
+        id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+        role: 'system',
+        content: i18n.translate('chat.dataSourceUnsupported', {
+          defaultMessage: 'The current data source does not support AI features.',
+        }),
+      };
+      setTimeline((prev) => [...prev, userMsg, systemMsg]);
       return;
     }
 
@@ -394,25 +306,6 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     },
     [eventHandler, setTimeline]
   );
-
-  // Helper function to stop streaming and clean up subscriptions
-  const stopStreaming = useCallback(() => {
-    // Abort the current streaming request
-    chatService.abort();
-    // Unsubscribe from current observable if exists
-    if (currentSubscriptionRef.current) {
-      currentSubscriptionRef.current.unsubscribe();
-      currentSubscriptionRef.current = null;
-    }
-
-    // Cancel any in-flight tool result dispatch
-    eventHandler.cancelToolResultDispatch();
-
-    // Update streaming state (both ref and state for React 18 compatibility)
-    isStreamingRef.current = false;
-    setIsStreaming(false);
-    setStartResponse(false);
-  }, [chatService, eventHandler]);
 
   const handleNewChat = useCallback(() => {
     // Stop any ongoing streaming before starting a new chat
