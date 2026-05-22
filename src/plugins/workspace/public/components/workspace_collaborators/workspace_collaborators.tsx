@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { EuiPage, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 
@@ -24,7 +24,10 @@ import {
   convertPermissionSettingsToPermissions,
   convertPermissionsToPermissionSettings,
 } from '../workspace_form';
-import { WorkspaceAttributeWithPermission } from '../../../../../core/types';
+import {
+  SavedObjectPermissions,
+  WorkspaceAttributeWithPermission,
+} from '../../../../../core/types';
 import { WorkspaceClient } from '../../workspace_client';
 import { WorkspacePrivacyFlyout } from '../workspace_form/workspace_privacy_flyout';
 import { WorkspaceCollaboratorPrivacySettingPanel } from '../workspace_form/workspace_collaborator_privacy_setting_panel';
@@ -53,11 +56,40 @@ export const WorkspaceCollaborators = () => {
     workspaces ? workspaces.currentWorkspace$ : of(null)
   ) as WorkspaceAttributeWithPermission;
 
+  /**
+   * The permissions stored in `currentWorkspace$` are populated once at app boot via
+   * `WorkspaceClient.init()` and only refreshed after the local user mutates a workspace.
+   * If a different user (e.g. an admin) revokes this user's access remotely, the cached
+   * value remains stale until the page is hard reloaded, and the collaborator list shown
+   * here would still display the previous state.
+   *
+   * To always reflect server-side truth, fetch the workspace on mount (and when the
+   * workspace id changes) and drive the rendered permission list from that response.
+   */
+  const [latestPermissions, setLatestPermissions] = useState<SavedObjectPermissions | undefined>();
   const permissionSettings = convertPermissionsToPermissionSettings(
-    currentWorkspace?.permissions ?? {}
+    latestPermissions ?? currentWorkspace?.permissions ?? {}
   );
 
   const isPermissionEnabled = application?.capabilities.workspaces.permissionEnabled;
+
+  const refreshCollaborators = useCallback(async () => {
+    if (!currentWorkspace?.id || !workspaceClient?.get) {
+      return;
+    }
+    try {
+      const response = await workspaceClient.get(currentWorkspace.id);
+      if (response.success) {
+        setLatestPermissions(response.result.permissions ?? {});
+      }
+    } catch {
+      // Fall back to the cached permissions from `currentWorkspace$`.
+    }
+  }, [currentWorkspace?.id, workspaceClient]);
+
+  useEffect(() => {
+    refreshCollaborators();
+  }, [refreshCollaborators]);
 
   const handleSubmitPermissionSettings = async (settings: WorkspacePermissionSetting[]) => {
     const showErrorNotification = (errorText?: string) => {
@@ -80,6 +112,8 @@ export const WorkspaceCollaborators = () => {
 
       if (!result.success) {
         showErrorNotification(result.error);
+      } else {
+        await refreshCollaborators();
       }
       return result;
     } catch (error) {

@@ -13,6 +13,7 @@ import { fireEvent } from '@testing-library/react';
 import { WorkspaceCollaboratorPermissionType } from '../../types';
 
 const workspaceClientUpdateMock = jest.fn();
+const workspaceClientGetMock = jest.fn();
 const addDangerMock = jest.fn();
 const coreStartMock = coreMock.createStart();
 
@@ -44,9 +45,11 @@ const workspaceData = {
 const setup = ({
   permissionEnabled = true,
   workspaceClientUpdate = workspaceClientUpdateMock,
+  workspaceClientGet = workspaceClientGetMock,
 }: {
   permissionEnabled?: boolean;
   workspaceClientUpdate?: jest.Mock;
+  workspaceClientGet?: jest.Mock;
 }) => {
   const collaboratorTypes: WorkspaceCollaboratorPermissionType[] = [];
   // Use BehaviorSubject instead of of() to avoid infinite loops with useObservable in React 18
@@ -68,6 +71,7 @@ const setup = ({
     },
     workspaceClient: {
       update: workspaceClientUpdate,
+      get: workspaceClientGet,
     },
     navigationUI: {
       HeaderControl: () => null,
@@ -99,6 +103,12 @@ const setup = ({
 describe('WorkspaceCollaborators', () => {
   beforeEach(() => {
     mockOverlays.openModal.mockClear();
+    workspaceClientGetMock.mockReset();
+    // Default behaviour: server returns the same permissions as the cached observable.
+    workspaceClientGetMock.mockResolvedValue({
+      success: true,
+      result: workspaceData,
+    });
   });
 
   afterEach(() => {
@@ -154,6 +164,28 @@ describe('WorkspaceCollaborators', () => {
       }
     );
     modalRootRef.current?.unmount();
+  });
+
+  it('should fetch the latest workspace on mount and render the server-side permissions', async () => {
+    const workspaceClientGet = jest.fn().mockResolvedValue({
+      success: true,
+      result: {
+        ...workspaceData,
+        // Server-side state: `bar` was revoked while the page was cached.
+        permissions: {
+          library_write: { users: ['admin'], groups: ['foo'] },
+          write: { users: ['admin'] },
+        },
+      },
+    });
+    const { renderResult } = setup({ permissionEnabled: true, workspaceClientGet });
+
+    await waitFor(() => {
+      expect(workspaceClientGet).toHaveBeenCalledWith('test');
+    });
+    await waitFor(() => {
+      expect(renderResult.queryByText('bar')).not.toBeInTheDocument();
+    });
   });
 
   it('should call notification add danger if update is failed', async () => {
