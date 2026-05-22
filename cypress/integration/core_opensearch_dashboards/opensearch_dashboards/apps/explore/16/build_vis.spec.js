@@ -16,6 +16,7 @@ import {
 
 const workspaceName = getRandomizedWorkspaceName();
 const datasetId = getRandomizedDatasetId();
+const datasetName = `${INDEX_WITH_TIME_1}*`;
 
 export const runBuildVisTests = () => {
   describe('build visualization manully tests', () => {
@@ -49,7 +50,7 @@ export const runBuildVisTests = () => {
         DATASOURCE_NAME,
         workspaceName,
         datasetId,
-        `${INDEX_WITH_TIME_1}*`,
+        datasetName,
         'timestamp', // timestampField
         'logs', // signalType
         ['use-case-observability'] // features
@@ -60,8 +61,6 @@ export const runBuildVisTests = () => {
         page: 'explore/logs',
         isEnhancement: true,
       });
-
-      const datasetName = `${INDEX_WITH_TIME_1}*`;
 
       // Setup dataset
       cy.explore.setDataset(datasetName, DATASOURCE_NAME, 'INDEX_PATTERN');
@@ -79,7 +78,6 @@ export const runBuildVisTests = () => {
       cy.explore.clearQueryEditor();
 
       // Input query that returns all the fields
-      const datasetName = `${INDEX_WITH_TIME_1}*`;
       const query = `source=${datasetName} | head 5`;
       cy.explore.setQueryEditor(query);
 
@@ -170,7 +168,6 @@ export const runBuildVisTests = () => {
     });
 
     it('should be able to build metric', () => {
-      const datasetName = `${INDEX_WITH_TIME_1}*`;
       const query = `source=${datasetName} | head 1`;
       cy.explore.setQueryEditor(query);
 

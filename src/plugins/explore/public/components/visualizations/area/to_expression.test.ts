@@ -6,7 +6,6 @@
 import {
   createSimpleAreaChart,
   createMultiAreaChart,
-  createFacetedMultiAreaChart,
   createCategoryAreaChart,
   createStackedAreaChart,
 } from './to_expression';
@@ -73,10 +72,6 @@ describe('Area Chart to_expression', () => {
       thresholds: [],
       thresholdStyle: ThresholdMode.Solid,
     },
-    titleOptions: {
-      show: true,
-      titleName: '',
-    },
     standardAxes: [],
     showFullTimeRange: false,
   };
@@ -94,7 +89,6 @@ describe('Area Chart to_expression', () => {
       expect(result).toHaveProperty('series');
       expect(result).toHaveProperty('xAxis');
       expect(result).toHaveProperty('yAxis');
-      expect(result.title).toEqual({ text: 'Value Over Time' });
     });
 
     it('returns series with line type and area style', () => {
@@ -104,32 +98,6 @@ describe('Area Chart to_expression', () => {
       const mainSeries = result.series[0];
       expect(mainSeries.type).toBe('line');
       expect(mainSeries).toHaveProperty('areaStyle');
-    });
-
-    it('handles title display options', () => {
-      // No title
-      const noTitleResult = createSimpleAreaChart(
-        mockTransformedData,
-        { ...mockStyles, titleOptions: { show: false, titleName: '' } },
-        axisColumnMappings
-      );
-      expect(noTitleResult.title.text).toBeUndefined();
-
-      // Default title
-      const defaultTitleResult = createSimpleAreaChart(
-        mockTransformedData,
-        { ...mockStyles, titleOptions: { show: true, titleName: '' } },
-        axisColumnMappings
-      );
-      expect(defaultTitleResult.title.text).toBe('Value Over Time');
-
-      // Custom title
-      const customTitleResult = createSimpleAreaChart(
-        mockTransformedData,
-        { ...mockStyles, titleOptions: { show: true, titleName: 'Custom Area Chart Title' } },
-        axisColumnMappings
-      );
-      expect(customTitleResult.title.text).toBe('Custom Area Chart Title');
     });
   });
 
@@ -145,61 +113,7 @@ describe('Area Chart to_expression', () => {
 
       expect(result).toHaveProperty('dataset');
       expect(result).toHaveProperty('series');
-      expect(result.title.text).toBe('Value Over Time by Category');
       expect(result.series.length).toBeGreaterThanOrEqual(1);
-    });
-
-    it('handles title display options', () => {
-      const noTitleResult = createMultiAreaChart(
-        mockTransformedData,
-        { ...mockStyles, titleOptions: { show: false, titleName: '' } },
-        axisColumnMappings
-      );
-      expect(noTitleResult.title.text).toBeUndefined();
-
-      const customTitleResult = createMultiAreaChart(
-        mockTransformedData,
-        { ...mockStyles, titleOptions: { show: true, titleName: 'Custom Multi-Area Chart' } },
-        axisColumnMappings
-      );
-      expect(customTitleResult.title.text).toBe('Custom Multi-Area Chart');
-    });
-  });
-
-  describe('createFacetedMultiAreaChart', () => {
-    const axisColumnMappings = {
-      [AxisRole.Y]: mockNumericalColumn,
-      [AxisRole.X]: mockDateColumn,
-      [AxisRole.COLOR]: mockCategoricalColumns[0],
-      [AxisRole.FACET]: mockCategoricalColumns[1],
-    };
-
-    it('returns an ECharts spec with faceted datasets', () => {
-      const result = createFacetedMultiAreaChart(
-        mockTransformedData,
-        mockStyles,
-        axisColumnMappings
-      );
-
-      expect(result).toHaveProperty('dataset');
-      expect(result).toHaveProperty('series');
-      expect(result.title.text).toBe('Value Over Time by Category (Faceted by Category2)');
-    });
-
-    it('handles title display options', () => {
-      const noTitleResult = createFacetedMultiAreaChart(
-        mockTransformedData,
-        { ...mockStyles, titleOptions: { show: false, titleName: '' } },
-        axisColumnMappings
-      );
-      expect(noTitleResult.title.text).toBeUndefined();
-
-      const customTitleResult = createFacetedMultiAreaChart(
-        mockTransformedData,
-        { ...mockStyles, titleOptions: { show: true, titleName: 'Custom Faceted Chart' } },
-        axisColumnMappings
-      );
-      expect(customTitleResult.title.text).toBe('Custom Faceted Chart');
     });
   });
 
@@ -214,24 +128,7 @@ describe('Area Chart to_expression', () => {
 
       expect(result).toHaveProperty('dataset');
       expect(result).toHaveProperty('series');
-      expect(result.title.text).toBe('Value by Category');
       expect(result.series.length).toBeGreaterThanOrEqual(1);
-    });
-
-    it('handles title display options', () => {
-      const noTitleResult = createCategoryAreaChart(
-        mockTransformedData,
-        { ...mockStyles, titleOptions: { show: false, titleName: '' } },
-        axisColumnMappings
-      );
-      expect(noTitleResult.title.text).toBeUndefined();
-
-      const customTitleResult = createCategoryAreaChart(
-        mockTransformedData,
-        { ...mockStyles, titleOptions: { show: true, titleName: 'Custom Category Chart' } },
-        axisColumnMappings
-      );
-      expect(customTitleResult.title.text).toBe('Custom Category Chart');
     });
   });
 
@@ -247,7 +144,6 @@ describe('Area Chart to_expression', () => {
 
       expect(result).toHaveProperty('dataset');
       expect(result).toHaveProperty('series');
-      expect(result.title.text).toBe('Value by Category and Category2');
       expect(result.series.length).toBeGreaterThanOrEqual(1);
 
       // Verify stacked series
@@ -255,22 +151,6 @@ describe('Area Chart to_expression', () => {
       expect(mainSeries.type).toBe('line');
       expect(mainSeries).toHaveProperty('areaStyle');
       expect(mainSeries).toHaveProperty('stack');
-    });
-
-    it('handles title display options', () => {
-      const noTitleResult = createStackedAreaChart(
-        mockTransformedData,
-        { ...mockStyles, titleOptions: { show: false, titleName: '' } },
-        axisColumnMappings
-      );
-      expect(noTitleResult.title.text).toBeUndefined();
-
-      const customTitleResult = createStackedAreaChart(
-        mockTransformedData,
-        { ...mockStyles, titleOptions: { show: true, titleName: 'Custom Stacked Chart' } },
-        axisColumnMappings
-      );
-      expect(customTitleResult.title.text).toBe('Custom Stacked Chart');
     });
 
     it('includes markLine for threshold when enabled', () => {

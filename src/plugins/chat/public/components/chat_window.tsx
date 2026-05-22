@@ -20,6 +20,7 @@ import {
 } from '../../common/events';
 import type {
   Message,
+  SystemMessage,
   UserMessage,
 } from '../../common/types';
 import { ChatLayoutMode } from '../types';
@@ -78,6 +79,13 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   const resendAvailable = !!chatService.conversationHistoryService.getMemoryProvider().includeFullHistory;
   const [startResponse, setStartResponse] = useState(false);
   const [isSendingToolResult, setIsSendingToolResult] = useState(false);
+  const isSendingToolResultRef = useRef(false);
+  isSendingToolResultRef.current = isSendingToolResult;
+
+  const hasPendingResend = useMemo(
+    () => timeline.some((msg) => msg.role === 'system' && (msg as SystemMessage).canResend),
+    [timeline]
+  );
 
   // Use ref to track streaming state synchronously for React 18 compatibility
   // React 18 batches state updates, so we need a ref for immediate checks
@@ -233,7 +241,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   const handleSend = async (options?: {input?: string, messages?: Message[]}) => {
     const messageContent = options?.input ?? input.trim();
     // Use ref for immediate check since React 18 batches state updates
-    if (!messageContent || isStreamingRef.current) return;
+    if (!messageContent || isStreamingRef.current || hasPendingResend) return;
 
     // Prepare additional messages for sending (but don't add to timeline yet)
     let additionalMessages = options?.messages ?? [];
@@ -324,6 +332,17 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     subscribeToMessageStream(textContent, [...truncatedTimeline,...additionalMessages]);
   }, [timeline, subscribeToMessageStream, setInput, setTimeline]);
 
+  const handleResendToolResult = useCallback(
+    async ({ messageId, toolCallId, toolResult }: { messageId: string; toolCallId: string; toolResult: any }) => {
+      // Avoid concurrent resends while streaming or already sending a tool result
+      if (isStreamingRef.current || isSendingToolResultRef.current) return;
+      // Remove the error message from timeline
+      setTimeline((prev) => prev.filter((msg) => msg.id !== messageId));
+      await eventHandler.sendToolResultToAssistant(toolCallId, toolResult);
+    },
+    [eventHandler, setTimeline]
+  );
+
   // Helper function to stop streaming and clean up subscriptions
   const stopStreaming = useCallback(() => {
     // Abort the current streaming request
@@ -334,8 +353,8 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       currentSubscriptionRef.current = null;
     }
 
-    // Stop tool result streaming if active
-    eventHandler.stopToolResultStreaming();
+    // Cancel any in-flight tool result dispatch
+    eventHandler.cancelToolResultDispatch();
 
     // Update streaming state (both ref and state for React 18 compatibility)
     isStreamingRef.current = false;
@@ -536,6 +555,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             timeline={timeline}
             isStreaming={isStreaming}
             onResendMessage={resendAvailable ? handleResendMessage : undefined}
+            onResendToolResult={handleResendToolResult}
             onApproveConfirmation={handleApproveConfirmation}
             onRejectConfirmation={handleRejectConfirmation}
             onFillInput={setInput}
@@ -583,8 +603,18 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             input={input}
             isCapturing={isCapturing}
             isStreaming={isStreaming}
-            isSendingToolResult={isSendingToolResult}
-            pendingConfirmation={pendingConfirmation}
+            disabled={isSendingToolResult || hasPendingResend || !!pendingConfirmation}
+            placeholder={
+              pendingConfirmation
+                ? i18n.translate('chat.input.waitingForConfirmation', {
+                    defaultMessage: 'Waiting for confirmation...',
+                  })
+                : hasPendingResend
+                ? i18n.translate('chat.input.pendingResend', {
+                    defaultMessage: 'Resend the tool result to continue...',
+                  })
+                : undefined
+            }
             onInputChange={setInput}
             onSend={handleSend}
             onStop={handleStop}

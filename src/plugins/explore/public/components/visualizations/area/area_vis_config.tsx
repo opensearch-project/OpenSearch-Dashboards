@@ -15,7 +15,6 @@ import {
   TooltipOptions,
   AxisRole,
   VisFieldType,
-  TitleOptions,
   ThresholdOptions,
   StandardAxes,
 } from '../types';
@@ -23,7 +22,6 @@ import { getColors } from '../theme/default_colors';
 import {
   createSimpleAreaChart,
   createMultiAreaChart,
-  createFacetedMultiAreaChart,
   createCategoryAreaChart,
   createStackedAreaChart,
 } from './to_expression';
@@ -57,8 +55,6 @@ export interface AreaChartStyleOptions {
 
   standardAxes?: StandardAxes[];
 
-  titleOptions?: TitleOptions;
-
   thresholdOptions?: ThresholdOptions;
   showFullTimeRange?: boolean;
 }
@@ -90,11 +86,6 @@ const defaultAreaChartStyles: AreaChartStyle = {
 
   standardAxes: [],
 
-  titleOptions: {
-    show: false,
-    titleName: '',
-  },
-
   showFullTimeRange: false,
 };
 
@@ -121,9 +112,17 @@ export const createAreaConfig = (): VisualizationType<'area'> => ({
             props.transformedData,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y },
-            props.timeRange
+            props.timeRange,
+            props.onLegend
           );
-          return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
+          return (
+            <EchartsRender
+              spec={spec}
+              onSelectTimeRange={props.onSelectTimeRange}
+              legendSelected$={props.legendSelected$}
+              highlightedSeries$={props.highlightedSeries$}
+            />
+          );
         },
       },
       {
@@ -145,9 +144,17 @@ export const createAreaConfig = (): VisualizationType<'area'> => ({
             props.transformedData,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
-            props.timeRange
+            props.timeRange,
+            props.onLegend
           );
-          return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
+          return (
+            <EchartsRender
+              spec={spec}
+              onSelectTimeRange={props.onSelectTimeRange}
+              legendSelected$={props.legendSelected$}
+              highlightedSeries$={props.highlightedSeries$}
+            />
+          );
         },
       },
       {
@@ -169,63 +176,17 @@ export const createAreaConfig = (): VisualizationType<'area'> => ({
             props.transformedData,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
-            props.timeRange
+            props.timeRange,
+            props.onLegend
           );
-          return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
-        },
-      },
-      {
-        priority: 80,
-        mappings: [
-          {
-            [AxisRole.X]: { type: VisFieldType.Date },
-            [AxisRole.Y]: { type: VisFieldType.Numerical },
-            [AxisRole.COLOR]: { type: VisFieldType.Categorical },
-            [AxisRole.FACET]: { type: VisFieldType.Categorical },
-          },
-        ],
-        render(props) {
-          const x = props.axisColumnMappings.x?.[0];
-          const y = props.axisColumnMappings.y?.[0];
-          const color = props.axisColumnMappings.color?.[0];
-          const facet = props.axisColumnMappings.facet?.[0];
-          if (!x || !y || !color || !facet)
-            throw Error('Missing axis config for faceted multi-area chart');
-
-          const spec = createFacetedMultiAreaChart(
-            props.transformedData,
-            props.styleOptions,
-            { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color, [AxisRole.FACET]: facet },
-            props.timeRange
+          return (
+            <EchartsRender
+              spec={spec}
+              onSelectTimeRange={props.onSelectTimeRange}
+              legendSelected$={props.legendSelected$}
+              highlightedSeries$={props.highlightedSeries$}
+            />
           );
-          return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
-        },
-      },
-      {
-        priority: 60,
-        mappings: [
-          {
-            [AxisRole.X]: { type: VisFieldType.Date },
-            [AxisRole.Y]: { type: VisFieldType.Numerical },
-            [AxisRole.COLOR]: { type: VisFieldType.Numerical },
-            [AxisRole.FACET]: { type: VisFieldType.Categorical },
-          },
-        ],
-        render(props) {
-          const x = props.axisColumnMappings.x?.[0];
-          const y = props.axisColumnMappings.y?.[0];
-          const color = props.axisColumnMappings.color?.[0];
-          const facet = props.axisColumnMappings.facet?.[0];
-          if (!x || !y || !color || !facet)
-            throw Error('Missing axis config for faceted multi-area chart');
-
-          const spec = createFacetedMultiAreaChart(
-            props.transformedData,
-            props.styleOptions,
-            { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color, [AxisRole.FACET]: facet },
-            props.timeRange
-          );
-          return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
         },
       },
       {
@@ -242,11 +203,20 @@ export const createAreaConfig = (): VisualizationType<'area'> => ({
           if (!x || !y || y.length === 0)
             throw Error('Missing axis config for category area chart');
 
-          const spec = createCategoryAreaChart(props.transformedData, props.styleOptions, {
-            [AxisRole.X]: x,
-            [AxisRole.Y]: y,
-          });
-          return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
+          const spec = createCategoryAreaChart(
+            props.transformedData,
+            props.styleOptions,
+            { [AxisRole.X]: x, [AxisRole.Y]: y },
+            props.onLegend
+          );
+          return (
+            <EchartsRender
+              spec={spec}
+              onSelectTimeRange={props.onSelectTimeRange}
+              legendSelected$={props.legendSelected$}
+              highlightedSeries$={props.highlightedSeries$}
+            />
+          );
         },
       },
       {
@@ -264,12 +234,20 @@ export const createAreaConfig = (): VisualizationType<'area'> => ({
           const color = props.axisColumnMappings.color?.[0];
           if (!x || !y || !color) throw Error('Missing axis config for stacked area chart');
 
-          const spec = createStackedAreaChart(props.transformedData, props.styleOptions, {
-            [AxisRole.X]: x,
-            [AxisRole.Y]: y,
-            [AxisRole.COLOR]: color,
-          });
-          return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
+          const spec = createStackedAreaChart(
+            props.transformedData,
+            props.styleOptions,
+            { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
+            props.onLegend
+          );
+          return (
+            <EchartsRender
+              spec={spec}
+              onSelectTimeRange={props.onSelectTimeRange}
+              legendSelected$={props.legendSelected$}
+              highlightedSeries$={props.highlightedSeries$}
+            />
+          );
         },
       },
       {
@@ -287,12 +265,20 @@ export const createAreaConfig = (): VisualizationType<'area'> => ({
           const color = props.axisColumnMappings.color?.[0];
           if (!x || !y || !color) throw Error('Missing axis config for stacked area chart');
 
-          const spec = createStackedAreaChart(props.transformedData, props.styleOptions, {
-            [AxisRole.X]: x,
-            [AxisRole.Y]: y,
-            [AxisRole.COLOR]: color,
-          });
-          return <EchartsRender spec={spec} onSelectTimeRange={props.onSelectTimeRange} />;
+          const spec = createStackedAreaChart(
+            props.transformedData,
+            props.styleOptions,
+            { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
+            props.onLegend
+          );
+          return (
+            <EchartsRender
+              spec={spec}
+              onSelectTimeRange={props.onSelectTimeRange}
+              legendSelected$={props.legendSelected$}
+              highlightedSeries$={props.highlightedSeries$}
+            />
+          );
         },
       },
     ];

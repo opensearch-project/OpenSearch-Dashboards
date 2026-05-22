@@ -75,11 +75,6 @@ export interface GridOptions {
   yLines: boolean;
 }
 
-export interface TitleOptions {
-  show: boolean;
-  titleName: string;
-}
-
 // Styling: Axis label configuration
 export interface AxisLabels {
   show: boolean;
@@ -121,6 +116,7 @@ export enum AxisRole {
   X = 'x',
   Y = 'y',
   COLOR = 'color',
+  /** @deprecated Use splitField on ChartConfig instead */
   FACET = 'facet',
   SIZE = 'size',
   Y_SECOND = 'y2',

@@ -33,9 +33,10 @@ export interface IVariableInterpolationService {
    * Interpolate variables in a query string
    * @param query - The query string with variable placeholders
    * @param language - The query language (e.g., 'PPL', 'PROMQL') for formatting multi-select values
+   * @param currentVarName - Optional name of the current variable (for order constraint)
    * @returns The query string with variables replaced by their values
    */
-  interpolate(query: string, language?: string): string;
+  interpolate(query: string, language?: string, currentVarName?: string): string;
 
   /**
    * Get current variable values as a key-value map
@@ -80,13 +81,21 @@ export class VariableInterpolationService implements IVariableInterpolationServi
    *
    * @param query - The query string with variable placeholders
    * @param language - The query language for formatting multi-select values
+   * @param currentVarName - Optional name of the current variable (for order constraint)
    * @example
    * // Multi-select with PPL:
    * // Query: source=logs | where service IN $service
    * // Variables: [{ name: 'service', current: 'api,web', multi: true }]
    * // Result: source=logs | where service IN ('api', 'web')
+   *
+   * @example
+   * // Partial interpolation with order constraint:
+   * // Query: $a and $b
+   * // Variables: [{ name: 'a', value: 'value-a' }, { name: 'b', value: 'value-b' }]
+   * // currentVarName: 'b'
+   * // Result: value-a and $b (only 'a' is interpolated because it comes before 'b')
    */
-  interpolate(query: string, language?: string): string {
+  interpolate(query: string, language?: string, currentVarName?: string): string {
     if (!query || typeof query !== 'string') {
       return query;
     }
@@ -94,6 +103,15 @@ export class VariableInterpolationService implements IVariableInterpolationServi
     const variables = this.getVariables();
     const valuesMap = new Map(variables.map((v) => [v.name, v]));
     const lang = (language || '').toUpperCase();
+
+    // If currentVarName is provided, only interpolate variables that come before it
+    let precedingVarNames: Set<string> | undefined;
+    if (currentVarName) {
+      const currentVarIndex = variables.findIndex((v) => v.name === currentVarName);
+      if (currentVarIndex !== -1) {
+        precedingVarNames = new Set(variables.slice(0, currentVarIndex).map((v) => v.name));
+      }
+    }
 
     return query.replace(
       VariableInterpolationService.VARIABLE_PATTERN,
@@ -103,6 +121,12 @@ export class VariableInterpolationService implements IVariableInterpolationServi
 
         if (variable === undefined) {
           // Variable not found, keep original placeholder
+          return match;
+        }
+
+        // If we have order constraints and this variable comes after current variable,
+        // keep the placeholder
+        if (precedingVarNames && !precedingVarNames.has(varName)) {
           return match;
         }
 
@@ -244,7 +268,7 @@ export class VariableInterpolationService implements IVariableInterpolationServi
  */
 export const createNoOpVariableInterpolationService = (): IVariableInterpolationService => ({
   hasVariables: () => false,
-  interpolate: (query: string) => query,
+  interpolate: (query: string, _language?: string, _currentVarName?: string) => query,
   getCurrentValues: () => ({}),
   getVariables: () => [],
 });

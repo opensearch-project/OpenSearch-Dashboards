@@ -35,7 +35,7 @@ jest.mock('../services/chat_event_handler', () => ({
   ChatEventHandler: jest.fn().mockImplementation(() => ({
     handleEvent: jest.fn(),
     clearState: jest.fn(),
-    stopToolResultStreaming: jest.fn(),
+    cancelToolResultDispatch: jest.fn(),
   })),
 }));
 
@@ -971,7 +971,7 @@ describe('ChatWindow', () => {
       ChatEventHandler.mockImplementation(() => ({
         handleEvent: mockHandleEvent,
         clearState: mockClearState,
-        stopToolResultStreaming: jest.fn(),
+        cancelToolResultDispatch: jest.fn(),
       }));
 
       const mockEvents = [
@@ -1023,7 +1023,7 @@ describe('ChatWindow', () => {
       ChatEventHandler.mockImplementation(() => ({
         handleEvent: mockHandleEvent,
         clearState: mockClearState,
-        stopToolResultStreaming: jest.fn(),
+        cancelToolResultDispatch: jest.fn(),
       }));
 
       const mockEvents = [
@@ -1160,7 +1160,7 @@ describe('ChatWindow', () => {
       ChatEventHandler.mockImplementation(() => ({
         handleEvent: mockHandleEvent,
         clearState: mockClearState,
-        stopToolResultStreaming: jest.fn(),
+        cancelToolResultDispatch: jest.fn(),
       }));
 
       // Mock ongoing streaming that continues after switch
@@ -1702,6 +1702,135 @@ describe('ChatWindow', () => {
 
       // Verify chatService.abort was called
       expect(mockChatService.abort).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('hasPendingResend blocking input', () => {
+    it('should prevent sending messages when a canResend system message exists in timeline', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { ChatEventHandler } = require('../services/chat_event_handler');
+      let capturedOnTimelineUpdate: any;
+      ChatEventHandler.mockImplementation((config: any) => {
+        capturedOnTimelineUpdate = config.callbacks.onTimelineUpdate;
+        return {
+          handleEvent: jest.fn(),
+          clearState: jest.fn(),
+          cancelToolResultDispatch: jest.fn(),
+        };
+      });
+
+      const ref = React.createRef<ChatWindowInstance>();
+      renderWithContext(<ChatWindow ref={ref} onClose={jest.fn()} />);
+
+      // Inject a canResend system message into the timeline
+      await act(async () => {
+        capturedOnTimelineUpdate((prev: any[]) => [
+          ...prev,
+          {
+            id: 'timeout-msg-1',
+            role: 'system',
+            content: 'Sync timeout',
+            toolCallId: 'tool-1',
+            canResend: true,
+            toolResult: { ok: true },
+          },
+        ]);
+      });
+
+      // Try to send a message — should be blocked
+      await act(async () => {
+        await ref.current?.sendMessage({ content: 'should be blocked' });
+      });
+
+      expect(mockChatService.sendMessage).not.toHaveBeenCalled();
+    });
+
+    it('should disable the input textarea when a canResend system message exists', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { ChatEventHandler } = require('../services/chat_event_handler');
+      let capturedOnTimelineUpdate: any;
+      ChatEventHandler.mockImplementation((config: any) => {
+        capturedOnTimelineUpdate = config.callbacks.onTimelineUpdate;
+        return {
+          handleEvent: jest.fn(),
+          clearState: jest.fn(),
+          cancelToolResultDispatch: jest.fn(),
+        };
+      });
+
+      const { getByPlaceholderText } = renderWithContext(<ChatWindow onClose={jest.fn()} />);
+
+      // Inject a canResend system message
+      await act(async () => {
+        capturedOnTimelineUpdate((prev: any[]) => [
+          ...prev,
+          {
+            id: 'timeout-msg-2',
+            role: 'system',
+            content: 'Sync timeout',
+            toolCallId: 'tool-2',
+            canResend: true,
+            toolResult: { data: 'test' },
+          },
+        ]);
+      });
+
+      const input = getByPlaceholderText(
+        'Resend the tool result to continue...'
+      ) as HTMLTextAreaElement;
+      expect(input.disabled).toBe(true);
+    });
+
+    it('should re-enable input after canResend message is removed from timeline', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { ChatEventHandler } = require('../services/chat_event_handler');
+      let capturedOnTimelineUpdate: any;
+      ChatEventHandler.mockImplementation((config: any) => {
+        capturedOnTimelineUpdate = config.callbacks.onTimelineUpdate;
+        return {
+          handleEvent: jest.fn(),
+          clearState: jest.fn(),
+          cancelToolResultDispatch: jest.fn(),
+          sendToolResultToAssistant: jest.fn().mockResolvedValue(undefined),
+        };
+      });
+
+      const ref = React.createRef<ChatWindowInstance>();
+      const { getByPlaceholderText } = renderWithContext(
+        <ChatWindow ref={ref} onClose={jest.fn()} />
+      );
+
+      // Inject a canResend system message
+      await act(async () => {
+        capturedOnTimelineUpdate((prev: any[]) => [
+          ...prev,
+          {
+            id: 'timeout-msg-3',
+            role: 'system',
+            content: 'Sync timeout',
+            toolCallId: 'tool-3',
+            canResend: true,
+            toolResult: { ok: true },
+          },
+        ]);
+      });
+
+      // Verify disabled
+      const input = getByPlaceholderText(
+        'Resend the tool result to continue...'
+      ) as HTMLTextAreaElement;
+      expect(input.disabled).toBe(true);
+
+      // Remove the canResend message (simulates what handleResendToolResult does)
+      await act(async () => {
+        capturedOnTimelineUpdate((prev: any[]) =>
+          prev.filter((msg: any) => msg.id !== 'timeout-msg-3')
+        );
+      });
+
+      // Input should be re-enabled with default placeholder
+      const enabledInput = getByPlaceholderText('How can I help you today?') as HTMLTextAreaElement;
+      expect(enabledInput.disabled).toBe(false);
     });
   });
 });

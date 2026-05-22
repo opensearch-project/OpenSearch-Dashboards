@@ -99,6 +99,7 @@ export const WorkspaceCollaboratorInput = ({
           const results: Array<{
             id: string;
             name: string;
+            alias?: string;
           }> = await http.get('/api/security/identity/_entries', {
             query: {
               source: identitySource.source,
@@ -107,7 +108,12 @@ export const WorkspaceCollaboratorInput = ({
             },
             signal: abortController.current.signal,
           });
-          setOptions(results.map((r) => ({ label: `${r.name} (${r.id})`, value: r.id })));
+          setOptions(
+            results.map((r) => ({
+              label: r.alias ? `${r.name} (${r.alias})` : r.name,
+              value: r.id,
+            }))
+          );
         } catch (e) {
           if ((e as Error).name !== 'AbortError') setOptions([]);
         } finally {

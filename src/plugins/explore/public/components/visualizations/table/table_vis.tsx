@@ -345,11 +345,15 @@ export const TableVis = React.memo(
           }}
           renderCellValue={renderCellValue}
           renderFooterCellValue={styleOptions?.showFooter ? renderFooterCellValue : undefined}
-          toolbarVisibility={{
-            showFullScreenSelector: false,
-            showStyleSelector: disableActions ? false : showStyleSelector ?? true,
-            showColumnSelector: disableActions ? false : true,
-          }}
+          toolbarVisibility={
+            disableActions
+              ? false
+              : {
+                  showFullScreenSelector: false,
+                  showStyleSelector: showStyleSelector ?? true,
+                  showColumnSelector: true,
+                }
+          }
           gridStyle={{ rowHover: 'highlight' }}
           leadingControlColumns={[]}
           trailingControlColumns={[]}

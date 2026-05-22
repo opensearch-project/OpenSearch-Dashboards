@@ -9,15 +9,12 @@ import { i18n } from '@osd/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { BarGaugeChartStyle, BarGaugeChartStyleOptions } from './bar_gauge_vis_config';
 import { StyleControlsProps } from '../utils/use_visualization_types';
-import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
-import { TitleOptionsPanel } from '../style_panel/title/title';
 import { ThresholdPanel } from '../style_panel/threshold/threshold_panel';
 import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
 import { BarGaugeExclusiveVisOptions } from './bar_gauge_exclusive_vis_options';
 import { ValueCalculationSelector } from '../style_panel/value/value_calculation_selector';
 import { StyleAccordion } from '../style_panel/style_accordion';
 import { StandardOptionsPanel } from '../style_panel/standard_options/standard_options_panel';
-import { AxisRole, VisFieldType } from '../types';
 
 export type BarGaugeVisStyleControlsProps = StyleControlsProps<BarGaugeChartStyle>;
 
@@ -41,16 +38,6 @@ export const BarGaugeVisStyleControls: React.FC<BarGaugeVisStyleControlsProps> =
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
-      <EuiFlexItem>
-        <AxesSelectPanel
-          numericalColumns={numericalColumns}
-          categoricalColumns={categoricalColumns}
-          dateColumns={dateColumns}
-          currentMapping={axisColumnMappings}
-          updateVisualization={updateVisualization}
-          chartType="bar_gauge"
-        />
-      </EuiFlexItem>
       {hasMappingSelected && (
         <>
           <EuiFlexItem>
@@ -96,18 +83,6 @@ export const BarGaugeVisStyleControls: React.FC<BarGaugeVisStyleControlsProps> =
             <BarGaugeExclusiveVisOptions
               styles={styleOptions.exclusive}
               onChange={(options) => updateStyleOption('exclusive', options)}
-            />
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <TitleOptionsPanel
-              titleOptions={styleOptions.titleOptions}
-              onShowTitleChange={(titleOptions) => {
-                updateStyleOption('titleOptions', {
-                  ...styleOptions.titleOptions,
-                  ...titleOptions,
-                });
-              }}
             />
           </EuiFlexItem>
 

@@ -158,8 +158,8 @@ describe('transformToMultiSeriesWithSize', () => {
 
       const result = transformToMultiSeriesWithSize(data, 'x', 'y', 'color', 'size');
 
-      expect(result.categories).toEqual(['undefined']);
-      expect(result.seriesData.undefined).toEqual([
+      expect(result.categories).toEqual(['(empty)']);
+      expect(result.seriesData['(empty)']).toEqual([
         [1, 10, 5],
         [2, 20, 10],
       ]);

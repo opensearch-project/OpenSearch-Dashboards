@@ -12,7 +12,14 @@ import {
   groupByMergedLabel,
   createStateTimeLineSpec,
 } from './state_timeline_utils';
-import { pipe, createBaseConfig, buildAxisConfigs, assembleSpec } from '../utils/echarts_spec';
+import {
+  pipe,
+  createBaseConfig,
+  buildAxisConfigs,
+  assembleSpec,
+  collectLegend,
+} from '../utils/echarts_spec';
+import { ColorMap } from '../utils/color_map';
 import { convertTo2DArray, transform, map, pick, sortByTime } from '../utils/data_transformation';
 
 const normalizeConfig = (styleOptions: StateTimeLineChartStyle) => {
@@ -44,7 +51,8 @@ export const createNumericalStateTimeline = (
     [AxisRole.X]: VisColumn;
     [AxisRole.Y]: VisColumn;
     [AxisRole.COLOR]: VisColumn;
-  }
+  },
+  onLegend?: (legend: ColorMap) => void
 ): any => {
   const axisConfig = getAxisConfig(styleOptions);
   const xCol = axisColumnMappings[AxisRole.X];
@@ -84,12 +92,12 @@ export const createNumericalStateTimeline = (
       groupByMergedLabel(convertTo2DArray())
     ),
     createBaseConfig({
-      title: `${colorCol.name} by ${yCol.name} and ${xCol.name}`,
       addTrigger: false,
-      legend: { show: styleOptions.addLegend },
+      legend: { show: false },
     }),
     buildAxisConfigs,
     createStateTimeLineSpec({ styles: styleOptions, groupField: yCol.column }),
+    collectLegend(onLegend),
     assembleSpec
   )({
     data: transformedData,
@@ -108,7 +116,8 @@ export const createCategoricalStateTimeline = (
     [AxisRole.X]: VisColumn;
     [AxisRole.Y]: VisColumn;
     [AxisRole.COLOR]: VisColumn;
-  }
+  },
+  onLegend?: (legend: ColorMap) => void
 ): any => {
   const axisConfig = getAxisConfig(styleOptions);
   const xCol = axisColumnMappings[AxisRole.X];
@@ -137,12 +146,12 @@ export const createCategoricalStateTimeline = (
       groupByMergedLabel(convertTo2DArray())
     ),
     createBaseConfig({
-      title: `${colorCol.name} by ${yCol.name} and ${xCol.name}`,
       addTrigger: false,
-      legend: { show: styleOptions.addLegend },
+      legend: { show: false },
     }),
     buildAxisConfigs,
     createStateTimeLineSpec({ styles: styleOptions, groupField: yCol.column }),
+    collectLegend(onLegend),
     assembleSpec
   )({
     data: transformedData,
@@ -157,7 +166,8 @@ export const createCategoricalStateTimeline = (
 export const createSingleCategoricalStateTimeline = (
   transformedData: Array<Record<string, any>>,
   styleOptions: StateTimeLineChartStyle,
-  axisColumnMappings: { [AxisRole.X]: VisColumn; [AxisRole.COLOR]: VisColumn }
+  axisColumnMappings: { [AxisRole.X]: VisColumn; [AxisRole.COLOR]: VisColumn },
+  onLegend?: (legend: ColorMap) => void
 ): any => {
   const axisConfig = getAxisConfig(styleOptions);
   const xCol = axisColumnMappings[AxisRole.X];
@@ -185,12 +195,12 @@ export const createSingleCategoricalStateTimeline = (
       groupByMergedLabel(convertTo2DArray())
     ),
     createBaseConfig({
-      title: `${colorCol.name}  by ${xCol.name}`,
       addTrigger: false,
-      legend: { show: styleOptions.addLegend },
+      legend: { show: false },
     }),
     buildAxisConfigs,
     createStateTimeLineSpec({ styles: styleOptions, groupField: undefined }),
+    collectLegend(onLegend),
     assembleSpec
   )({
     data: transformedData,
@@ -205,7 +215,8 @@ export const createSingleCategoricalStateTimeline = (
 export const createSingleNumericalStateTimeline = (
   transformedData: Array<Record<string, any>>,
   styleOptions: StateTimeLineChartStyle,
-  axisColumnMappings: { [AxisRole.X]: VisColumn; [AxisRole.COLOR]: VisColumn }
+  axisColumnMappings: { [AxisRole.X]: VisColumn; [AxisRole.COLOR]: VisColumn },
+  onLegend?: (legend: ColorMap) => void
 ): any => {
   const axisConfig = getAxisConfig(styleOptions);
   const xCol = axisColumnMappings[AxisRole.X];
@@ -243,12 +254,12 @@ export const createSingleNumericalStateTimeline = (
       groupByMergedLabel(convertTo2DArray())
     ),
     createBaseConfig({
-      title: `${colorCol.name}  by ${xCol.name}`,
       addTrigger: false,
-      legend: { show: styleOptions.addLegend },
+      legend: { show: false },
     }),
     buildAxisConfigs,
     createStateTimeLineSpec({ styles: styleOptions, groupField: undefined }),
+    collectLegend(onLegend),
     assembleSpec
   )({
     data: transformedData,
