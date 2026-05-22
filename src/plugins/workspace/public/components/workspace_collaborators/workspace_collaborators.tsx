@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { EuiPage, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 
@@ -73,23 +73,25 @@ export const WorkspaceCollaborators = () => {
 
   const isPermissionEnabled = application?.capabilities.workspaces.permissionEnabled;
 
-  const refreshCollaborators = useCallback(async () => {
-    if (!currentWorkspace?.id || !workspaceClient?.get) {
+  useEffect(() => {
+    if (!currentWorkspace?.id) {
       return;
     }
-    try {
-      const response = await workspaceClient.get(currentWorkspace.id);
-      if (response.success) {
+    let cancelled = false;
+    workspaceClient
+      .get(currentWorkspace.id)
+      .then((response) => {
+        if (cancelled || !response.success) {
+          return;
+        }
         setLatestPermissions(response.result.permissions ?? {});
-      }
-    } catch {
-      // Fall back to the cached permissions from `currentWorkspace$`.
-    }
+      })
+      // eslint-disable-next-line no-console
+      .catch((error) => console.warn('Failed to refresh workspace collaborators', error));
+    return () => {
+      cancelled = true;
+    };
   }, [currentWorkspace?.id, workspaceClient]);
-
-  useEffect(() => {
-    refreshCollaborators();
-  }, [refreshCollaborators]);
 
   const handleSubmitPermissionSettings = async (settings: WorkspacePermissionSetting[]) => {
     const showErrorNotification = (errorText?: string) => {
@@ -102,18 +104,19 @@ export const WorkspaceCollaborators = () => {
     };
 
     try {
+      const nextPermissions = convertPermissionSettingsToPermissions(settings);
       const result = await workspaceClient.update(
         currentWorkspace.id,
         {},
-        {
-          permissions: convertPermissionSettingsToPermissions(settings),
-        }
+        { permissions: nextPermissions }
       );
 
       if (!result.success) {
         showErrorNotification(result.error);
       } else {
-        await refreshCollaborators();
+        // The server has just persisted these permissions, so reflect them locally
+        // without a redundant round-trip via workspaceClient.get(...).
+        setLatestPermissions(nextPermissions);
       }
       return result;
     } catch (error) {
