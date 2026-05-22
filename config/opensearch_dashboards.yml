@@ -409,13 +409,16 @@
 # Please note, workspace will not work with multi-tenancy. To enable workspace feature, you need to disable multi-tenancy first with `opensearch_security.multitenancy.enabled: false`
 # workspace.enabled: true
 
-# explore.enabled: true
+explore.enabled: true
+
+# @experimental Set the value to true to enable SQL query support in Explore (logs only)
+explore.sqlSupport.enabled: true
 
 # @experimental Set the value to true to enable discover traces
-# explore.discoverTraces.enabled: true
+explore.discoverTraces.enabled: true
 
 # @experimental Set the value to true to enable discover metrics
-# explore.discoverMetrics.enabled: true
+explore.discoverMetrics.enabled: true
 
 # @experimental Set the enabled value to true and provide an AG-UI agent to enable chat
 # chat:
@@ -426,3 +429,12 @@
 # @experimental Set the value to true to enable context provider
 # contextProvider:
 #   enabled: true
+
+opensearch.hosts: ["http://localhost:9200"]
+opensearch.username: "admin"
+opensearch.password: "Welcomeuser@123"
+opensearch.ssl.verificationMode: none
+opensearch.ignoreVersionMismatch: true
+data_source.enabled: true
+workspace.enabled: true
+opensearch_security.enabled: false

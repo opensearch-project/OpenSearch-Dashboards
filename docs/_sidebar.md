@@ -231,6 +231,4 @@
   - [TESTING](../TESTING.md)
   - [TRIAGING](../TRIAGING.md)
   - [TYPESCRIPT](../TYPESCRIPT.md)
-  - [Progress](../progress.md)
-  - [Task_plan](../task_plan.md)
   - [Testing_strategy](../testing_strategy.md)

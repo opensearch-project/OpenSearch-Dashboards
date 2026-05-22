@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { EuiBetaBadge, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
@@ -61,7 +61,8 @@ export const LanguageToggle = () => {
 
       // Get the default query string for the new language
       // SQL needs a base query (SELECT * FROM ...) to be valid; PPL works with empty
-      const newQueryString = newLanguage === 'PPL' ? '' : (langConfig?.getQueryString?.(currentQuery) ?? '');
+      const newQueryString =
+        newLanguage === 'PPL' ? '' : langConfig?.getQueryString?.(currentQuery) ?? '';
 
       queryString.setQuery({ query: newQueryString, language: newLanguage, dataset });
       languageSvc.setUserQueryLanguage(newLanguage);
@@ -79,15 +80,32 @@ export const LanguageToggle = () => {
     return languageService.getLanguage(language)?.title ?? language;
   }, [language, languageService]);
 
+  // State for supported languages (async lookup required)
+  const [supportedLanguages, setSupportedLanguages] = useState<string[]>(['PPL']);
+
   // Get supported languages for the active tab
-  const supportedLanguages = useMemo(() => {
-    const services = getServices();
-    const activeTab = services.tabRegistry?.getTab(activeTabId);
-    if (activeTab?.supportedLanguages?.length) {
-      return activeTab.supportedLanguages;
-    }
-    // Fallback to PPL and SQL when tab is not resolved
-    return ['PPL', 'SQL'];
+  useEffect(() => {
+    const updateSupportedLanguages = () => {
+      const services = getServices();
+      const activeTab = services.tabRegistry?.getTab(activeTabId);
+
+      let tabSupportedLanguages: string[];
+      if (activeTab?.supportedLanguages?.length) {
+        tabSupportedLanguages = activeTab.supportedLanguages;
+      } else {
+        // Fallback to PPL and SQL when tab is not resolved
+        tabSupportedLanguages = ['PPL', 'SQL'];
+      }
+
+      // Filter out SQL if feature flag is disabled
+      if (tabSupportedLanguages.includes('SQL') && !services.sqlSupportEnabled) {
+        tabSupportedLanguages = tabSupportedLanguages.filter((lang) => lang !== 'SQL');
+      }
+
+      setSupportedLanguages(tabSupportedLanguages);
+    };
+
+    updateSupportedLanguages();
   }, [activeTabId]);
 
   const badgeLabel = isPromptMode ? promptOptionText : languageTitle;
@@ -102,7 +120,9 @@ export const LanguageToggle = () => {
       output.push(
         <EuiContextMenuItem
           key={langId}
-          onClick={() => langId === language ? onItemClick(EditorMode.Query) : onLanguageClick(langId)}
+          onClick={() =>
+            langId === language ? onItemClick(EditorMode.Query) : onLanguageClick(langId)
+          }
           disabled={!isPromptMode && langId === language}
           data-test-subj={`queryPanelFooterLanguageToggle-${title}`}
         >
@@ -125,7 +145,15 @@ export const LanguageToggle = () => {
     }
 
     return output;
-  }, [isPromptMode, onItemClick, onLanguageClick, promptModeIsAvailable, languageTitle, supportedLanguages, language, languageService]);
+  }, [
+    isPromptMode,
+    onItemClick,
+    onLanguageClick,
+    promptModeIsAvailable,
+    supportedLanguages,
+    language,
+    languageService,
+  ]);
 
   return (
     // This div is needed to allow for the gradient styling

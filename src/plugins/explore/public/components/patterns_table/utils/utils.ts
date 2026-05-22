@@ -31,13 +31,6 @@ export const brainPatternQuery = (queryBase: string, patternsField: string) => {
   return `${queryBase} | patterns \`${patternsField}\` method=brain mode=label | stats count() as ${COUNT_FIELD}, take(\`${patternsField}\`, 1) as ${SAMPLE_FIELD} by patterns_field | sort - ${COUNT_FIELD} | fields ${PATTERNS_FIELD}, ${COUNT_FIELD}, ${SAMPLE_FIELD}`;
 };
 
-export const sqlPatternQuery = (queryBase: string, patternsField: string) => {
-  // Use the base query as a subquery to preserve existing filters and table references
-  // This wraps the user's query and adds pattern analysis on top
-  // Note: We use the subquery alias 'base_data' to make the query structure clearer
-  return `SELECT REGEXP_REPLACE(base_data.\`${patternsField}\`, '[a-zA-Z0-9]+', '<*>') as patterns_field, COUNT(*) as count_field, REGEXP_REPLACE(base_data.\`${patternsField}\`, '[a-zA-Z0-9]+', '<*>') as sample_field FROM (${queryBase}) as base_data GROUP BY patterns_field ORDER BY count_field DESC LIMIT 50`;
-};
-
 export const regexUpdateSearchPatternQuery = (
   queryBase: string,
   patternsField: string,

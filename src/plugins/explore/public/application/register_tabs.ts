@@ -28,7 +28,6 @@ import {
   brainPatternQuery,
   findDefaultPatternsField,
   regexPatternQuery,
-  sqlPatternQuery,
 } from '../components/patterns_table/utils/utils';
 import { setUsingRegexPatterns } from './utils/state_management/slices/tab/tab_slice';
 import { executeTabQuery } from './utils/state_management/actions/query_actions';
@@ -85,9 +84,10 @@ export const registerBuiltInTabs = (
       flavor: [ExploreFlavor.Logs, ExploreFlavor.Traces],
       order: 10,
       // SQL is only supported for Logs flavor, not Traces
-      supportedLanguages: registryFlavor === ExploreFlavor.Traces
-        ? [EXPLORE_DEFAULT_LANGUAGE]
-        : [EXPLORE_DEFAULT_LANGUAGE, 'SQL'],
+      supportedLanguages:
+        registryFlavor === ExploreFlavor.Traces
+          ? [EXPLORE_DEFAULT_LANGUAGE]
+          : [EXPLORE_DEFAULT_LANGUAGE, 'SQL'],
       component: LogsTab,
     };
     tabRegistry.registerTab(logsTabDefinition);

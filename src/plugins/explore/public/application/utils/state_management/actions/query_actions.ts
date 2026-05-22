@@ -542,49 +542,6 @@ const executeQueryBase = async (
     let effectiveQuery = queryString;
     if (query.language === 'PPL' && histogramConfig && isHistogramQuery) {
       effectiveQuery = buildPPLHistogramQuery(queryString, histogramConfig);
-    } else if (query.language === 'SQL' && histogramConfig && isHistogramQuery) {
-      // SQL engine doesn't support span() aggregation; use PPL for histogram via direct fetch
-      const fromMatch = queryString.match(/FROM\s+([^\s]+)/i);
-      const source = fromMatch ? fromMatch[1] : dataset?.title || '';
-      const pplQuery = buildPPLHistogramQuery(`source = ${source}`, histogramConfig);
-      const pplResponse = await services.http.post('/api/enhancements/search/ppl', {
-        body: JSON.stringify({
-          query: { query: pplQuery, language: 'PPL', dataset: query.dataset, format: 'jdbc' },
-        }),
-      });
-      const pplBody = (pplResponse as any)?.body;
-      const rawResults: ISearchResult = {
-        hits: {
-          hits:
-            pplBody?.fields?.[0]?.values?.map((_: any, i: number) => ({
-              _source: pplBody.fields.reduce((acc: any, f: any) => {
-                acc[f.name] = f.values[i];
-                return acc;
-              }, {}),
-            })) || [],
-          total: pplBody?.size || 0,
-        },
-        fieldSchema: pplBody?.schema,
-        elapsedMs: Date.now() - queryStartTime,
-      };
-      const histogramResults = processRawResultsForHistogram(pplQuery, rawResults, histogramConfig);
-      dispatch(setResults({ cacheKey, results: histogramResults }));
-      dispatch(
-        setIndividualQueryStatus({
-          cacheKey,
-          status: {
-            status:
-              histogramResults.hits?.hits?.length > 0
-                ? QueryExecutionStatus.READY
-                : QueryExecutionStatus.NO_RESULTS,
-            startTime: queryStartTime,
-            elapsedMs: Date.now() - queryStartTime,
-            error: undefined,
-          },
-        })
-      );
-      activeQueryAbortControllers.delete(cacheKey);
-      return histogramResults;
     }
 
     const preparedQueryObject = {
