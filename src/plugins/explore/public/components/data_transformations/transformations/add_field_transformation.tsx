@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import uuid from 'uuid';
 import {
   EuiFormRow,
@@ -235,6 +235,9 @@ const FieldPicker = ({
             iconType="list"
             size="s"
             color="text"
+            aria-label={i18n.translate('explore.transformations.addField.switchToFieldList', {
+              defaultMessage: 'Show fields',
+            })}
             onClick={() => onFieldChange(undefined)}
           />
         </EuiFlexItem>
@@ -259,10 +262,10 @@ const FieldPicker = ({
           iconType="pencil"
           size="s"
           color="text"
-          onClick={() => onFieldChange(CUSTOM_VALUE_KEY)}
-          title={i18n.translate('explore.transformations.addField.switchToCustom', {
+          aria-label={i18n.translate('explore.transformations.addField.switchToCustom', {
             defaultMessage: 'Enter custom value',
           })}
+          onClick={() => onFieldChange(CUSTOM_VALUE_KEY)}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -290,37 +293,6 @@ const AddFieldEditor = ({
     () => availableFields.filter((f) => f.visFieldType === VisFieldType.Numerical),
     [availableFields]
   );
-
-  // Remove any selected fields that no longer exist in availableFields
-  useEffect(() => {
-    if (availableFields.length === 0) return;
-    if (config.mode === 'crossFields' && config.crossFieldsOperator === 'expression') return;
-
-    const names = new Set(numericalFields.map((f) => f.name));
-    const patch: Partial<AddFieldConfig> = {};
-
-    if (config.mode === 'binary') {
-      if (config.field1 && config.field1 !== CUSTOM_VALUE_KEY && !names.has(config.field1)) {
-        patch.field1 = undefined;
-        patch.field1CustomValue = '';
-      }
-      if (config.field2 && config.field2 !== CUSTOM_VALUE_KEY && !names.has(config.field2)) {
-        patch.field2 = undefined;
-        patch.field2CustomValue = '';
-      }
-    } else if (config.mode === 'unary') {
-      if (config.unaryField && !names.has(config.unaryField)) {
-        patch.unaryField = undefined;
-      }
-    } else {
-      const valid = (config.crossFields ?? []).filter((f) => names.has(f.name));
-      if (valid.length !== (config.crossFields ?? []).length) {
-        patch.crossFields = valid;
-      }
-    }
-
-    if (Object.keys(patch).length > 0) onChange({ ...config, ...patch });
-  }, [numericalFields]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
@@ -572,6 +544,32 @@ export function createAddFieldTransformation(): TransformationInstance {
 
         return { ...row, _source: newSource };
       });
+    },
+    validateConfig: (config: AddFieldConfig, availableFields: Array<{ name?: string }>) => {
+      const fieldNames = new Set(availableFields.map((f) => f.name));
+      const patch: Partial<AddFieldConfig> = {};
+
+      if (config.mode === 'binary') {
+        if (config.field1 && config.field1 !== CUSTOM_VALUE_KEY && !fieldNames.has(config.field1)) {
+          patch.field1 = undefined;
+          patch.field1CustomValue = '';
+        }
+        if (config.field2 && config.field2 !== CUSTOM_VALUE_KEY && !fieldNames.has(config.field2)) {
+          patch.field2 = undefined;
+          patch.field2CustomValue = '';
+        }
+      } else if (config.mode === 'unary') {
+        if (config.unaryField && !fieldNames.has(config.unaryField)) {
+          patch.unaryField = undefined;
+        }
+      } else if (config.crossFieldsOperator !== 'expression') {
+        const valid = (config.crossFields ?? []).filter((f) => fieldNames.has(f.name));
+        if (valid.length !== (config.crossFields ?? []).length) {
+          patch.crossFields = valid;
+        }
+      }
+
+      return Object.keys(patch).length > 0 ? { ...config, ...patch } : config;
     },
     Editor: AddFieldEditor,
   };

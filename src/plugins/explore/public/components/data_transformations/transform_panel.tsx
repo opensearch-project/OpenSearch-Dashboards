@@ -27,40 +27,42 @@ import { TransformationInstance, FieldSchema } from './types';
 import { TransformationService } from './transformation_service';
 import { FIELD_TYPE_MAP } from '../visualizations/constants';
 import { VisFieldType } from '../visualizations/types';
-import { VisualizationBuilder } from '../visualizations/visualization_builder';
 
 const DROPPABLE_ID = 'transformationPipelineDroppable';
 
 export interface TransformPanelProps {
   transformationService: TransformationService;
-  visualizationBuilder: VisualizationBuilder;
 }
 
-export const TransformPanel = ({
-  transformationService,
-  visualizationBuilder,
-}: TransformPanelProps) => {
+export const TransformPanel = ({ transformationService }: TransformPanelProps) => {
   const pipeline = useObservable(
     transformationService.pipeline$,
     transformationService.pipeline$.getValue()
   );
 
-  const stageSchemas = useObservable(
-    visualizationBuilder.stageSchemas$,
-    visualizationBuilder.stageSchemas$.getValue()
+  const stageSchemasMap = useObservable(
+    transformationService.stageSchemas$,
+    transformationService.stageSchemas$.getValue()
   );
 
-  const availableFieldsByStage = useMemo(() => {
-    return stageSchemas.map((raw) =>
-      raw.map((field) => ({
-        name: field.name || '',
-        visFieldType: FIELD_TYPE_MAP[field.type || ''] || VisFieldType.Unknown,
-      }))
-    );
-  }, [stageSchemas]);
+  // stageSchemas$ is updated asynchronously via handleData
+  // among this gap, each editor still use its last own stage schemas
+  const availableFieldsForInstanceId = useMemo(() => {
+    const result = new Map<string, FieldSchema[]>();
+    stageSchemasMap.forEach((raw, instanceId) => {
+      result.set(
+        instanceId,
+        raw.map((field) => ({
+          name: field.name || '',
+          visFieldType: FIELD_TYPE_MAP[field.type || ''] || VisFieldType.Unknown,
+        }))
+      );
+    });
+    return result;
+  }, [stageSchemasMap]);
 
-  const getAvailableFieldsForIndex = (index: number): FieldSchema[] => {
-    return availableFieldsByStage[index] ?? [];
+  const getAvailableFieldsForInstance = (instanceId: string): FieldSchema[] => {
+    return availableFieldsForInstanceId.get(instanceId) ?? [];
   };
 
   const onSelectTransformation = (id: string) => {
@@ -142,7 +144,7 @@ export const TransformPanel = ({
                       onConfigChange={onConfigChange}
                       onToggleHide={onToggleHide}
                       dragHandleProps={provided.dragHandleProps}
-                      availableFields={getAvailableFieldsForIndex(index)}
+                      availableFields={getAvailableFieldsForInstance(instance.instance_id)}
                     />
                   )}
                 </EuiDraggable>
@@ -204,11 +206,12 @@ const TransformationCard = ({
           </EuiFlexGroup>
         }
         extraAction={
-          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+          <EuiFlexGroup gutterSize="xs" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
                 iconType={instance.hide ? 'eyeClosed' : 'eye'}
                 color="text"
+                aria-label={instance.hide ? 'Show transformation' : 'Hide transformation'}
                 onClick={() => onToggleHide(instance.instance_id)}
                 data-test-subj={`transformHideButton-${instance.instance_id}`}
               />
@@ -217,6 +220,7 @@ const TransformationCard = ({
               <EuiButtonIcon
                 iconType="trash"
                 color="text"
+                aria-label="Remove transformation"
                 onClick={() => onRemove(instance.instance_id)}
                 data-test-subj={`transformRemoveButton-${instance.instance_id}`}
               />
@@ -226,8 +230,6 @@ const TransformationCard = ({
                 {...dragHandleProps}
                 style={{
                   cursor: 'grab',
-                  display: 'flex',
-                  alignItems: 'center',
                   marginLeft: '10px',
                 }}
               >

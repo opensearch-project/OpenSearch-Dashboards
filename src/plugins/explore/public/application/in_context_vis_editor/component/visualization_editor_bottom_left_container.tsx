@@ -31,7 +31,7 @@ import { useVisualizationBuilder } from '../hooks/use_visualization_builder';
 
 import '../visualization_editor.scss';
 import {
-  TransformationService,
+  ITransformationService,
   useTransformationService,
   TransformPanel,
 } from '../../../components/data_transformations';
@@ -68,6 +68,12 @@ export const ResizableQueryPanelAndVisualization = () => {
       queryBuilder.updateQueryEditorState({ isQueryEditorDirty: true });
     }, [queryBuilder]),
   });
+
+  useEffect(() => {
+    queryBuilder.setOnDatasetChanged(() => {
+      transformServices.clearPipeline();
+    });
+  }, [queryBuilder, transformServices]);
 
   useEffect(() => {
     queryBuilder.updateQueryEditorState({ activeBottomPanelTab: activeTab });
@@ -164,10 +170,7 @@ export const ResizableQueryPanelAndVisualization = () => {
                 {activeTab === 'QUERY_TAB' ? (
                   <QueryPanel queryEditorState$={queryBuilder.queryEditorState$} />
                 ) : (
-                  <TransformPanel
-                    transformationService={transformServices}
-                    visualizationBuilder={visualizationBuilderForEditor}
-                  />
+                  <TransformPanel transformationService={transformServices} />
                 )}
               </EuiPanel>
             </EuiResizablePanel>
@@ -179,7 +182,7 @@ export const ResizableQueryPanelAndVisualization = () => {
 };
 
 export const VisualizationContainer = React.memo(
-  ({ transformationService }: { transformationService: TransformationService }) => {
+  ({ transformationService }: { transformationService: ITransformationService }) => {
     const searchContext = useSearchContext();
 
     const { visualizationBuilderForEditor: visualizationBuilder } = useVisualizationBuilder();

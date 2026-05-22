@@ -30,6 +30,10 @@ export class TransformationService implements ITransformationService {
 
   // Active pipeline — list of transformation instances user choice
   public pipeline$ = new BehaviorSubject<TransformationPipeline>([]);
+  // Per-instance field schemas produced by the transformation pipeline
+  public stageSchemas$ = new BehaviorSubject<Map<string, Array<{ name?: string; type?: string }>>>(
+    new Map()
+  );
   private debouncedPipeline$ = this.pipeline$.pipe(debounceTime(300));
 
   private urlStateStorage?: IOsdUrlStateStorage;
@@ -123,18 +127,30 @@ export class TransformationService implements ITransformationService {
   applyPipeline(
     rawRows: OpenSearchSearchHit[],
     originalSchema: Array<{ name?: string; type?: string }> = []
-  ): { rows: OpenSearchSearchHit[]; stageSchemas: Array<Array<{ name?: string; type?: string }>> } {
+  ): { rows: OpenSearchSearchHit[]; finalSchema: Array<{ name?: string; type?: string }> } {
     const instances = this.pipeline$.getValue();
-    const stageSchemas: Array<Array<{ name?: string; type?: string }>> = [];
 
-    if (instances.length === 0) return { rows: rawRows, stageSchemas: [originalSchema] };
+    if (instances.length === 0) {
+      this.stageSchemas$.next(new Map());
+      return { rows: rawRows, finalSchema: originalSchema };
+    }
 
+    const schemaMap = new Map<string, Array<{ name?: string; type?: string }>>();
     let rows = [...rawRows];
     let currentSchema: Array<{ name?: string; type?: string }> = [...originalSchema];
 
-    for (const instance of instances) {
-      stageSchemas.push(currentSchema);
+    let pipelineChanged = false;
 
+    for (const instance of instances) {
+      schemaMap.set(instance.instance_id, currentSchema);
+
+      if (instance.validateConfig) {
+        const cleaned = instance.validateConfig(instance.config, currentSchema);
+        if (cleaned !== instance.config) {
+          instance.config = cleaned;
+          pipelineChanged = true;
+        }
+      }
       if (instance.hide) continue;
 
       try {
@@ -148,16 +164,19 @@ export class TransformationService implements ITransformationService {
       } catch (err) {
         // eslint-disable-next-line no-console
         console.error(
-          `TransformationService: step "${instance.instance_id}" threw — skipping`,
+          `TransformationService: step "${instance.instance_id}" throws — skipping`,
           err
         );
       }
     }
 
-    // Push final schema, return output of last step
-    stageSchemas.push(currentSchema);
+    if (pipelineChanged) {
+      this.pipeline$.next([...instances]);
+    }
 
-    return { rows, stageSchemas };
+    this.stageSchemas$.next(schemaMap);
+
+    return { rows, finalSchema: currentSchema };
   }
 
   /**
@@ -221,12 +240,16 @@ export class TransformationService implements ITransformationService {
       this.urlSyncSubscription.unsubscribe();
     }
     this.pipeline$.complete();
+    this.stageSchemas$.complete();
     this.definitions.clear();
   }
 }
 
 export const createNoOpTransformationService = (): ITransformationService => {
   const pipeline$ = new BehaviorSubject<TransformationPipeline>([]);
+  const stageSchemas$ = new BehaviorSubject<Map<string, Array<{ name?: string; type?: string }>>>(
+    new Map()
+  );
 
   return {
     registerDefinition: () => {},
@@ -234,6 +257,7 @@ export const createNoOpTransformationService = (): ITransformationService => {
     getDefinitionsByType: () => [],
     getDefinition: () => undefined,
     pipeline$,
+    stageSchemas$,
     getPipeline$: () => pipeline$,
     addInstance: () => {},
     removeInstance: () => {},
@@ -241,7 +265,10 @@ export const createNoOpTransformationService = (): ITransformationService => {
     toggleInstanceHide: () => {},
     setPipeline: () => {},
     clearPipeline: () => {},
-    applyPipeline: (rawRows: any[]) => ({ rows: rawRows ?? [], stageSchemas: [] }),
+    applyPipeline: (rawRows: any[], originalSchema: any[] = []) => ({
+      rows: rawRows ?? [],
+      finalSchema: originalSchema,
+    }),
     initUrlSync: () => {},
     destroy: () => {},
     restoreFromState: (states: UrlTransformationState[]) => {},

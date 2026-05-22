@@ -50,9 +50,6 @@ export class VisualizationBuilder {
   showRawTable$ = new BehaviorSubject<boolean>(false);
   isVisDirty$ = new BehaviorSubject<boolean>(false);
 
-  /** Per-stage field schemas produced by the transformation pipeline */
-  stageSchemas$ = new BehaviorSubject<Array<Array<{ name?: string; type?: string }>>>([]);
-
   constructor({ getUrlStateStorage }: Options) {
     if (getUrlStateStorage) {
       this.getUrlStateStorage = getUrlStateStorage;
@@ -62,6 +59,7 @@ export class VisualizationBuilder {
   setTransformationService(service: ITransformationService) {
     this.transformationService = service;
 
+    // restore saved dataTransformationJSON once
     if (this.visConfig$.value?.dataTransformationJSON) {
       this.transformationService.restoreFromState(
         JSON.parse(this.visConfig$.value?.dataTransformationJSON)
@@ -364,13 +362,10 @@ export class VisualizationBuilder {
     rows: Array<OpenSearchSearchHit<T>>,
     schema: Array<{ type?: string; name?: string }>
   ) {
-    const { rows: transformedRows, stageSchemas } = this.transformationService.applyPipeline(
+    const { rows: transformedRows, finalSchema } = this.transformationService.applyPipeline(
       rows,
       schema
     );
-    this.stageSchemas$.next(stageSchemas);
-
-    const finalSchema = stageSchemas[stageSchemas.length - 1] ?? schema;
     const {
       transformedData,
       numericalColumns,
@@ -476,7 +471,6 @@ export class VisualizationBuilder {
     this.data$.complete();
     this.showRawTable$.complete();
     this.isVisDirty$.complete();
-    this.stageSchemas$.complete();
   }
 
   reset(): void {
@@ -486,7 +480,6 @@ export class VisualizationBuilder {
     this.data$ = new BehaviorSubject<VisData | undefined>(undefined);
     this.showRawTable$ = new BehaviorSubject<boolean>(false);
     this.isVisDirty$ = new BehaviorSubject<boolean>(false);
-    this.stageSchemas$ = new BehaviorSubject<Array<Array<{ name?: string; type?: string }>>>([]);
     this.transformationService = createNoOpTransformationService();
     this.isInitialized = false;
   }

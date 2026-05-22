@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect } from 'react';
 import uuid from 'uuid';
 import { EuiFormRow, EuiButtonGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
@@ -44,14 +43,6 @@ const SortByEditor = ({
   const handleFieldChange = (fieldSchema: FieldSchema | undefined) => {
     onChange({ ...config, field: fieldSchema?.name || undefined });
   };
-
-  // Reset field if it no longer exists in availableFields
-  useEffect(() => {
-    if (availableFields.length === 0) return;
-    if (config.field && !availableFields.find((f) => f.name === config.field)) {
-      onChange({ ...config, field: undefined });
-    }
-  }, [availableFields]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
@@ -129,6 +120,13 @@ export function createSortByTransformation(): TransformationInstance {
       });
 
       return sorted;
+    },
+
+    validateConfig: (config: SortByConfig, availableFields: Array<{ name?: string }>) => {
+      if (config.field && !availableFields.find((f) => f.name === config.field)) {
+        return { ...config, field: undefined };
+      }
+      return config;
     },
     Editor: SortByEditor,
   };

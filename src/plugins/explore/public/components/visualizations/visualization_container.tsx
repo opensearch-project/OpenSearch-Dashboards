@@ -3,9 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { i18n } from '@osd/i18n';
-import { EuiPanel, EuiAccordion } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import { EuiPanel } from '@elastic/eui';
+import React, { useCallback, useEffect } from 'react';
 import moment from 'moment';
 import { useDispatch } from 'react-redux';
 import { useObservable } from 'react-use';

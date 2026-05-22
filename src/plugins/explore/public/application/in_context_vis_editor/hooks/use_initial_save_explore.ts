@@ -24,17 +24,14 @@ export const useInitialSaveExplore = () => {
   }, [savedExplore]);
 
   // parse saved vis state and transformation from saved explore
-  const { savedVisConfig } = useMemo(() => {
-    if (!savedExplore?.visualization)
-      return { savedVisConfig: undefined, savedTransformationPipeline: undefined };
+  const savedVisConfig = useMemo(() => {
+    if (!savedExplore?.visualization) return undefined;
     try {
       const parsedVisualization = JSON.parse(savedExplore.visualization);
 
-      return {
-        savedVisConfig: parsedVisualization,
-      };
+      return parsedVisualization;
     } catch {
-      return { savedVisConfig: undefined, savedTransformationPipeline: undefined };
+      return undefined;
     }
   }, [savedExplore]);
 

@@ -74,17 +74,6 @@
     }
   }
 
-  &__transformPanel {
-    // max-height: 500px;
-    // overflow-y: auto;
-    padding: $ouiSizeS;
-
-    // TODO fix
-    .euiAccordion__childWrapper {
-      overflow: visible;
-    }
-  }
-
   &__rawTable {
     flex: 1 0 auto;
     min-height: 500px;

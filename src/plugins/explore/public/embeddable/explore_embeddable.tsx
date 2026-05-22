@@ -505,14 +505,12 @@ export class ExploreEmbeddable
     });
     const rawRows = resp.hits.hits;
     const fieldSchema = searchSource.getDataFrame()?.schema;
-    const { rows: transformedRows, stageSchemas } = this.transformationService.applyPipeline(
+    const { rows: transformedRows, finalSchema } = this.transformationService.applyPipeline(
       rawRows,
       fieldSchema ?? []
     );
 
-    const finalFieldSchema = stageSchemas[stageSchemas?.length - 1];
-
-    const visualizationData = normalizeResultRows(transformedRows, finalFieldSchema ?? []);
+    const visualizationData = normalizeResultRows(transformedRows, finalSchema ?? []);
 
     // TODO: Confirm if tab is in visualization but visualization is null, what to display?
     // const displayVis = rows?.length > 0 && visualizationData && visualizationData.ruleId;

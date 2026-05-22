@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import uuid from 'uuid';
 import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
@@ -33,18 +33,6 @@ const FilterFieldsEditor = ({
     (partial: Partial<FilterFieldsConfig>) => onChange({ ...config, ...partial }),
     [config, onChange]
   );
-
-  // Reset field if it no longer exists in availableFields
-  useEffect(() => {
-    if (availableFields.length === 0) return;
-    const availableNames = new Set(availableFields.map((f) => f.name));
-    const valid = config.fieldOptions.filter((f) => availableNames.has(f.name));
-    if (valid.length !== config.fieldOptions.length) {
-      onChange({ ...config, fieldOptions: valid });
-    }
-    // this effect should only run when availableFields changes (upstream schema change),
-    // only for config state cleanup, not on every config edit.
-  }, [availableFields]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const modeOptions = [
     {
@@ -116,6 +104,14 @@ export function createFilterFieldsTransformation(): TransformationInstance {
 
         return { ...row, _source: newSource };
       });
+    },
+    validateConfig: (config: FilterFieldsConfig, availableFields: Array<{ name?: string }>) => {
+      const fieldNames = new Set(availableFields.map((f) => f.name));
+      const valid = config.fieldOptions.filter((f) => fieldNames.has(f.name));
+      if (valid.length !== config.fieldOptions.length) {
+        return { ...config, fieldOptions: valid };
+      }
+      return config;
     },
     Editor: FilterFieldsEditor,
   };

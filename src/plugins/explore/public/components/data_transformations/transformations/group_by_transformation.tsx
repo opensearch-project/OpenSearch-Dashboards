@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import uuid from 'uuid';
 import { EuiAccordion, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
@@ -11,6 +11,7 @@ import { get } from 'lodash';
 import { TransformationInstance, TransformationDefinition, FieldSchema } from '../types';
 import { FieldSelector } from '../field_selector';
 import { VisFieldType } from '../../visualizations/types';
+import { FIELD_TYPE_MAP } from '../../visualizations/constants';
 import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 import { CalculationMethod, calculateValue } from '../../visualizations/utils/calculation';
 import { ValueCalculationSelector } from '../../visualizations/style_panel/value/value_calculation_selector';
@@ -48,8 +49,9 @@ const getDisabledForField = (field: FieldSchema): CalculationMethod[] => {
   }
 };
 
-const defaultMethodForField = (field: FieldSchema): CalculationMethod => {
-  switch (field.visFieldType) {
+const defaultMethodForField = (field: { type?: string; name?: string }): CalculationMethod => {
+  const fieldType = FIELD_TYPE_MAP[field.type || ''] || VisFieldType.Unknown;
+  switch (fieldType) {
     case VisFieldType.Numerical:
       return 'total';
     case VisFieldType.Date:
@@ -100,39 +102,13 @@ const GroupByEditor = ({
     [config, onChange]
   );
 
-  // Reset field if it no longer exists in availableFields
-  useEffect(() => {
-    if (availableFields.length === 0) return;
-    // Clear groupByField if it no longer exists in availableFields
-    if (config.groupByField && !availableFields.some((f) => f.name === config.groupByField)) {
-      update({ groupByField: undefined, aggregations: [] });
-      return;
-    }
-
-    const currentAggs = config.aggregations ?? [];
-    const existingMap = new Map(currentAggs.map((r) => [r.field, r]));
-
-    const newAggs: AggMethod[] = availableFields
-      .filter((f) => f.name !== config.groupByField)
-      .map((f) => existingMap.get(f.name) ?? { field: f.name, method: defaultMethodForField(f) });
-
-    const hasChanged =
-      newAggs.length !== currentAggs.length ||
-      newAggs.some((agg) => {
-        const existing = currentAggs.find((c) => c.field === agg.field);
-        return !existing || existing.method !== agg.method || existing.hidden !== agg.hidden;
-      });
-
-    if (hasChanged) update({ aggregations: newAggs });
-  }, [availableFields, config.groupByField]); // eslint-disable-line react-hooks/exhaustive-deps
-
   const updateAgg = (index: number, method: CalculationMethod) => {
-    const updated = (config.aggregations ?? []).map((r, i) => (i === index ? { ...r, method } : r));
+    const updated = config.aggregations.map((r, i) => (i === index ? { ...r, method } : r));
     update({ aggregations: updated });
   };
 
   const toggleHidden = (index: number) => {
-    const updated = (config.aggregations ?? []).map((r, i) =>
+    const updated = config.aggregations.map((r, i) =>
       i === index ? { ...r, hidden: !r.hidden } : r
     );
     update({ aggregations: updated });
@@ -140,8 +116,8 @@ const GroupByEditor = ({
 
   const fieldMap = new Map(availableFields.map((f) => [f.name, f]));
 
-  const visibleCount = (config.aggregations ?? []).filter((r) => !r.hidden).length;
-  const totalCount = (config.aggregations ?? []).length;
+  const visibleCount = config.aggregations.filter((r) => !r.hidden).length;
+  const totalCount = config.aggregations.length;
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
@@ -172,7 +148,7 @@ const GroupByEditor = ({
             paddingSize="s"
           >
             <EuiFlexGroup direction="column" gutterSize="xs">
-              {(config.aggregations ?? []).map((agg, index) => {
+              {config.aggregations.map((agg, index) => {
                 const fieldSchema = fieldMap.get(agg.field);
                 if (!fieldSchema) return null;
 
@@ -231,7 +207,7 @@ export function createGroupByTransformation(): TransformationInstance {
     } as GroupByConfig,
     hide: false,
     transformationMethod: (data: OpenSearchSearchHit[], config: GroupByConfig) => {
-      if (!config.groupByField || (config.aggregations ?? []).length === 0) return data;
+      if (!config.groupByField || config.aggregations.length === 0) return data;
       const groups = new Map<string, OpenSearchSearchHit[]>();
       for (const row of data) {
         const key = String(get(row, `_source.${config.groupByField}`) ?? '');
@@ -252,6 +228,32 @@ export function createGroupByTransformation(): TransformationInstance {
       });
       return result;
     },
+    validateConfig: (
+      config: GroupByConfig,
+      availableFields: Array<{ name?: string; type?: string }>
+    ) => {
+      const fieldNames = new Set(availableFields.map((f) => f.name));
+
+      if (config.groupByField && !fieldNames.has(config.groupByField)) {
+        return { ...config, groupByField: undefined, aggregations: [] };
+      }
+
+      if (config.groupByField) {
+        const validAggs = config.aggregations.filter((a) => fieldNames.has(a.field));
+        const existingFields = new Set(validAggs.map((a) => a.field));
+
+        const newAggs = availableFields
+          .filter((f) => f.name && f.name !== config.groupByField && !existingFields.has(f.name))
+          .map((f) => ({ field: f.name ?? '', method: defaultMethodForField(f) }));
+
+        if (newAggs.length > 0 || validAggs.length !== config.aggregations.length) {
+          return { ...config, aggregations: [...validAggs, ...newAggs] };
+        }
+      }
+
+      return config;
+    },
+
     Editor: GroupByEditor,
   };
 }

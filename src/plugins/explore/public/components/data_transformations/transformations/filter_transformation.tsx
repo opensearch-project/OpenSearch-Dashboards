@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import uuid from 'uuid';
 import { EuiFormRow, EuiSelect, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
@@ -44,14 +44,6 @@ const FilterEditor = ({
     },
     [onChange]
   );
-
-  // Reset field if it no longer exists in availableFields
-  useEffect(() => {
-    if (availableFields.length === 0) return;
-    if (config.field && !availableFields.find((f) => f.name === config.field)) {
-      onChange({ ...config, field: undefined, value: '' });
-    }
-  }, [availableFields]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const getOperatorsForType = (type: VisFieldType | undefined) => {
     if (type === VisFieldType.Numerical)
@@ -203,6 +195,13 @@ export function createFilterTransformation(): TransformationInstance {
             return true;
         }
       });
+    },
+
+    validateConfig: (config: FilterConfig, availableFields: Array<{ name?: string }>) => {
+      if (config.field && !availableFields.find((f) => f.name === config.field)) {
+        return { ...config, field: undefined, value: '' };
+      }
+      return config;
     },
     Editor: FilterEditor,
   };

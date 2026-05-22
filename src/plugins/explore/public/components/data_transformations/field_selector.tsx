@@ -100,6 +100,7 @@ export const FieldSelector = ({
                   iconType="cross"
                   size="s"
                   color="danger"
+                  aria-label="Clear selection"
                   onClick={handleClearSelection}
                   data-test-subj={`${testSubjPrefix}ClearButton`}
                 />

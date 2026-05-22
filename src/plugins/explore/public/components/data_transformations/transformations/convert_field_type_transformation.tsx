@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import uuid from 'uuid';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
@@ -95,16 +95,6 @@ const ConvertFieldTypeEditor = ({
     (newRules: ConvertRule[]) => onChange({ ...config, rules: newRules }),
     [config, onChange]
   );
-
-  // Reset field if it no longer exists in availableFields
-  useEffect(() => {
-    if (availableFields.length === 0 || rules.length === 0) return;
-    const names = new Set(availableFields.map((f) => f.name));
-    const cleaned = rules.map((r) =>
-      r.field && !names.has(r.field) ? { ...r, field: undefined } : r
-    );
-    if (cleaned.some((r, i) => r !== rules[i])) update(cleaned);
-  }, [availableFields]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const updateRule = (index: number, patch: Partial<ConvertRule>) => {
     const updated = rules.map((r, i) => (i === index ? { ...r, ...patch } : r));
@@ -207,6 +197,21 @@ export function createConvertFieldTypeTransformation(): TransformationInstance {
         const target = f.name ? typeMap.get(f.name) : null;
         return target ? { ...f, type: target } : f;
       });
+    },
+    validateConfig: (config: ConvertFieldTypeConfig, availableFields: Array<{ name?: string }>) => {
+      const fieldNames = new Set(availableFields.map((f) => f.name));
+      let changed = false;
+      const cleaned = config.rules.map((r) => {
+        if (r.field && !fieldNames.has(r.field)) {
+          changed = true;
+          return { ...r, field: undefined };
+        }
+        return r;
+      });
+      if (changed) {
+        return { ...config, rules: cleaned };
+      }
+      return config;
     },
     Editor: ConvertFieldTypeEditor,
   };

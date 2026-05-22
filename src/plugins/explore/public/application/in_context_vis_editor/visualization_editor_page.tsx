@@ -30,7 +30,6 @@ import { getBreadcrumbs } from './utils';
 import { useInitialContainerContext } from './hooks/use_initial_container_context';
 import { useVariables } from './hooks/use_variables';
 import { DashboardSelectionModal } from './component/dashboard_selection_modal';
-import { cleanupGlobalTransformationService } from './hooks/use_transformation_service';
 
 export const VisualizationEditorPage = ({
   setHeaderActionMenu,
@@ -156,7 +155,6 @@ export const VisualizationEditorPage = ({
     return () => {
       queryBuilder.reset();
       visualizationBuilderForEditor.reset();
-      cleanupGlobalTransformationService();
     };
   }, [queryBuilder, visualizationBuilderForEditor]);
 

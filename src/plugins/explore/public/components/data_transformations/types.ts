@@ -43,6 +43,8 @@ export interface TransformationInstance {
     schema: Array<{ name?: string; type?: string }>,
     config: any
   ) => Array<{ name?: string; type?: string }>;
+  // clean config when changing
+  validateConfig?: (config: any, availableFields: Array<{ name?: string; type?: string }>) => any;
 }
 
 export type TransformationPipeline = TransformationInstance[];
@@ -68,6 +70,7 @@ export interface ITransformationService {
 
   //  Pipeline instance management --
   readonly pipeline$: BehaviorSubject<TransformationPipeline>;
+  readonly stageSchemas$: BehaviorSubject<Map<string, Array<{ name?: string; type?: string }>>>;
   getPipeline$(): Observable<TransformationPipeline>;
   addInstance(id: string): void;
   removeInstance(id: string): void;
@@ -79,10 +82,10 @@ export interface ITransformationService {
   // execution
   applyPipeline(
     rawRows: OpenSearchSearchHit[],
-    originalSchema?: Array<{ name?: string; type?: string }>
+    originalSchema: Array<{ name?: string; type?: string }>
   ): {
     rows: OpenSearchSearchHit[];
-    stageSchemas: Array<Array<{ name?: string; type?: string }>>;
+    finalSchema: Array<{ name?: string; type?: string }>;
   };
 
   // URL persistence

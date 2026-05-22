@@ -25,7 +25,6 @@ import { useCurrentExploreId } from '../hooks/use_explore_id';
 import { useVisualizationBuilder } from '../hooks/use_visualization_builder';
 import { EditorMode } from '../../utils/state_management/types';
 import { ContainerState, CONTAINER_URL_KEY } from '../types';
-import { useTransformationService } from '../hooks/use_transformation_service';
 
 export interface OnSaveProps {
   savedExplore: SavedExplore;

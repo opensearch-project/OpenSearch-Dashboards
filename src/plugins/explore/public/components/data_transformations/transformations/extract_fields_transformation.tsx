@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import uuid from 'uuid';
 import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
@@ -69,14 +69,6 @@ const ExtractFieldsEditor = ({
       ),
     [availableFields]
   );
-
-  useEffect(() => {
-    // only guard initial load
-    if (availableFields.length === 0) return;
-    if (config.field && !possibleFields.find((f) => f.name === config.field)) {
-      onChange({ ...config, field: undefined });
-    }
-  }, [possibleFields]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const formatOptions = [
     {
@@ -169,6 +161,13 @@ export function createExtractFieldsTransformation(): TransformationInstance {
           _source: { ...(row._source as Record<string, unknown>), ...extracted },
         };
       });
+    },
+    validateConfig: (config: ExtractFieldsConfig, availableFields: Array<{ name?: string }>) => {
+      const fieldNames = new Set(availableFields.map((f) => f.name));
+      if (config.field && !fieldNames.has(config.field)) {
+        return { ...config, field: undefined };
+      }
+      return config;
     },
     Editor: ExtractFieldsEditor,
   };

@@ -136,6 +136,7 @@ export class QueryBuilder {
   private getServices: () => ExploreServices;
   private interpolationService?: IVariableInterpolationService;
   public lastExecutedInterpolatedQuery?: string;
+  private onDatasetChangedCallback?: () => void;
 
   constructor(getServices: () => ExploreServices) {
     this.getServices = getServices;
@@ -296,6 +297,9 @@ export class QueryBuilder {
           // sync dataset change
           // check isLanguageChanged and isInitialized for the initial sync
           if (isDatasetChanged || isLanguageChanged || !this.isInitialized) {
+            if (isDatasetChanged && this.isInitialized) {
+              this.onDatasetChangedCallback?.();
+            }
             this.datasetView$.next({ ...this.datasetView$.getValue(), isLoading: true });
             return from(this.handleDatasetChange(newQuery.dataset));
           }
@@ -608,6 +612,12 @@ export class QueryBuilder {
 
   getEditorRef(): monaco.editor.IStandaloneCodeEditor | null {
     return this.editorRef;
+  }
+
+  // register a callback that fires when the dataset changes,
+  // for example, used to clear the transformation pipeline on dataset switch.
+  setOnDatasetChanged(callback: () => void) {
+    this.onDatasetChangedCallback = callback;
   }
 
   getQueryEditorState() {

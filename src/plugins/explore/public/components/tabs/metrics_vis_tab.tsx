@@ -141,27 +141,22 @@ export const MetricsVisTab = () => {
 
   const renderTransformPanel = () => {
     return (
-      <div className="metricsVisTab__transformPanel">
-        <EuiPanel paddingSize="m" hasBorder={false} hasShadow={false}>
-          <EuiAccordion
-            id="metricsVisTab__transformPanel"
-            buttonContent={
-              <EuiText size="s" style={{ fontWeight: 600 }}>
-                {i18n.translate('explore.metricsVisTab.transformPanelTitle', {
-                  defaultMessage: 'Transformations',
-                })}
-              </EuiText>
-            }
-            paddingSize="m"
-            initialIsOpen={true}
-          >
-            <TransformPanel
-              transformationService={transformationService}
-              visualizationBuilder={visualizationBuilder}
-            />
-          </EuiAccordion>
-        </EuiPanel>
-      </div>
+      <EuiPanel paddingSize="m" hasBorder={false} hasShadow={false}>
+        <EuiAccordion
+          id="metricsVisTab__transformPanel"
+          buttonContent={
+            <EuiText size="s" style={{ fontWeight: 600 }}>
+              {i18n.translate('explore.metricsVisTab.transformPanelTitle', {
+                defaultMessage: 'Transformations',
+              })}
+            </EuiText>
+          }
+          paddingSize="m"
+          initialIsOpen={true}
+        >
+          <TransformPanel transformationService={transformationService} />
+        </EuiAccordion>
+      </EuiPanel>
     );
   };
 

@@ -32,6 +32,26 @@ jest.mock('./save_vis_modal', () => ({
   SaveVisModal: () => <div data-test-subj="save-vis-modal">Modal</div>,
 }));
 
+jest.mock('../../../components/data_transformations', () => {
+  const mockObs = {
+    subscribe: jest.fn().mockReturnValue({ unsubscribe: jest.fn() }),
+    getValue: jest.fn().mockReturnValue([]),
+  };
+  const mockMapObs = {
+    subscribe: jest.fn().mockReturnValue({ unsubscribe: jest.fn() }),
+    getValue: jest.fn().mockReturnValue(new Map()),
+  };
+  return {
+    useTransformationService: jest.fn().mockReturnValue({
+      clearPipeline: jest.fn(),
+      pipeline$: mockObs,
+      getPipeline$: () => mockObs,
+      stageSchemas$: mockMapObs,
+    }),
+    TransformPanel: () => null,
+  };
+});
+
 jest.mock('@osd/i18n', () => ({
   i18n: {
     translate: jest.fn((key, options) => options.defaultMessage),
@@ -67,6 +87,7 @@ const buildVisualizationBuilder = () => ({
   visualizationBuilderForEditor: {
     visConfig$: { value: { type: 'bar', styles: {}, axesMapping: { x: 'field' } } },
     isVisDirty$: new BehaviorSubject(false),
+    getTransformationService: jest.fn().mockReturnValue({ pipeline$: new BehaviorSubject([]) }),
   },
 });
 
