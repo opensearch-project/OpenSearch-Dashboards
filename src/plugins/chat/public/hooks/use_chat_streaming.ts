@@ -28,8 +28,12 @@ export const useChatStreaming = ({
   const service = AssistantActionService.getInstance();
 
   const [timeline, setTimeline] = useState<Message[]>([]);
-  const [isStreaming, setIsStreaming] = useState(false);
-  const [startResponse, setStartResponse] = useState(false);
+  const [isMainStreaming, setIsMainStreaming] = useState(false);
+  const [isToolResultStreaming, setIsToolResultStreaming] = useState(false);
+  const isStreaming = isMainStreaming || isToolResultStreaming;
+  const [mainStartResponse, setMainStartResponse] = useState(false);
+  const [toolResultStartResponse, setToolResultStartResponse] = useState(false);
+  const startResponse = mainStartResponse || toolResultStartResponse;
   const [isSendingToolResult, setIsSendingToolResult] = useState(false);
   const [currentRunId, setCurrentRunId] = useState<string | null>(null);
 
@@ -38,12 +42,52 @@ export const useChatStreaming = ({
   const isSendingToolResultRef = useRef(false);
   const timelineRef = useRef<Message[]>(timeline);
   const currentSubscriptionRef = useRef<any>(null);
+  const toolResultSubscriptionRef = useRef<any>(null);
 
   isSendingToolResultRef.current = isSendingToolResult;
 
   useEffect(() => {
     timelineRef.current = timeline;
   }, [timeline]);
+
+  // Handle tool result stream subscription (called by ChatEventHandler)
+  const toolResultRunIdRef = useRef<string | null>(null);
+  const handleToolResultStream = useCallback(
+    (observable: any, abortController: AbortController) => {
+      setIsToolResultStreaming(true);
+
+      const subscription = observable.subscribe({
+        next: (event: ChatEvent) => {
+          // Capture the tool result stream's runId
+          if ('runId' in event && event.runId) {
+            toolResultRunIdRef.current = event.runId;
+          }
+          eventHandlerRef.current?.handleEvent(event);
+        },
+        error: (error: Error) => {
+          if (error?.name !== 'AbortError') {
+            // eslint-disable-next-line no-console
+            console.error('Tool result response error:', error);
+          }
+        },
+      });
+      subscription.add(() => {
+        setIsToolResultStreaming(false);
+        setToolResultStartResponse(false);
+        toolResultRunIdRef.current = null;
+        toolResultSubscriptionRef.current = null;
+        if (abortController) {
+          eventHandlerRef.current?.releaseToolResultController(abortController);
+        }
+      });
+
+      toolResultSubscriptionRef.current = subscription;
+    },
+    []
+  );
+
+  // Ref to access eventHandler inside handleToolResultStream without circular dep
+  const eventHandlerRef = useRef<ChatEventHandler | null>(null);
 
   // Create the event handler
   const eventHandler = useMemo(
@@ -55,14 +99,22 @@ export const useChatStreaming = ({
         telemetryRecorder,
         callbacks: {
           onTimelineUpdate: setTimeline,
-          onStreamingStateChange: setIsStreaming,
-          onStartResponse: setStartResponse,
+          onStartResponse: (runId?: string) => {
+            if (runId && runId === toolResultRunIdRef.current) {
+              setToolResultStartResponse(true);
+            } else {
+              setMainStartResponse(true);
+            }
+          },
           onSendToolResultStateChange: setIsSendingToolResult,
+          onSubscribeToToolResultStream: handleToolResultStream,
           getTimeline: () => timelineRef.current,
         },
       }),
-    [service, chatService, confirmationService, telemetryRecorder]
+    [service, chatService, confirmationService, telemetryRecorder, handleToolResultStream]
   );
+
+  eventHandlerRef.current = eventHandler;
 
   // Clean up event handler on unmount
   useEffect(() => {
@@ -75,8 +127,8 @@ export const useChatStreaming = ({
   const subscribeToMessageStream = useCallback(
     async (messageContent: string, messages: Message[], rawMessage?: string) => {
       isStreamingRef.current = true;
-      setIsStreaming(true);
-      setStartResponse(false);
+      setIsMainStreaming(true);
+      setMainStartResponse(false);
 
       try {
         const { observable, userMessage } = await chatService.sendMessage(messageContent, messages);
@@ -94,6 +146,13 @@ export const useChatStreaming = ({
 
         onMessageSent?.();
 
+        const onStreamEnd = () => {
+          isStreamingRef.current = false;
+          setIsMainStreaming(false);
+          setMainStartResponse(false);
+          currentSubscriptionRef.current = null;
+        };
+
         const subscription = observable.subscribe({
           next: async (event: ChatEvent) => {
             if ('runId' in event && event.runId && event.runId !== currentRunId) {
@@ -104,17 +163,9 @@ export const useChatStreaming = ({
           error: (error: any) => {
             // eslint-disable-next-line no-console
             console.error('Subscription error:', error);
-            isStreamingRef.current = false;
-            setStartResponse(false);
-            setIsStreaming(false);
-            currentSubscriptionRef.current = null;
+            onStreamEnd();
           },
-          complete: () => {
-            isStreamingRef.current = false;
-            setStartResponse(false);
-            setIsStreaming(false);
-            currentSubscriptionRef.current = null;
-          },
+          complete: onStreamEnd,
         });
 
         currentSubscriptionRef.current = subscription;
@@ -123,7 +174,7 @@ export const useChatStreaming = ({
         // eslint-disable-next-line no-console
         console.error('Failed to send message:', error);
         isStreamingRef.current = false;
-        setIsStreaming(false);
+        setIsMainStreaming(false);
         currentSubscriptionRef.current = null;
       }
     },
@@ -133,15 +184,32 @@ export const useChatStreaming = ({
   // Stop streaming and clean up
   const stopStreaming = useCallback(() => {
     chatService.abort();
+    chatService.resetConnection();
     if (currentSubscriptionRef.current) {
       currentSubscriptionRef.current.unsubscribe();
       currentSubscriptionRef.current = null;
     }
+    if (toolResultSubscriptionRef.current) {
+      toolResultSubscriptionRef.current.unsubscribe();
+      toolResultSubscriptionRef.current = null;
+    }
     eventHandler.cancelToolResultDispatch();
     isStreamingRef.current = false;
-    setIsStreaming(false);
-    setStartResponse(false);
+    setIsMainStreaming(false);
+    setIsToolResultStreaming(false);
+    setMainStartResponse(false);
+    setToolResultStartResponse(false);
   }, [chatService, eventHandler]);
+
+  // Resend a tool result to the assistant
+  const sendToolResult = useCallback(
+    async ({ messageId, toolCallId, toolResult }: { messageId: string; toolCallId: string; toolResult: any }) => {
+      if (isStreamingRef.current || isSendingToolResultRef.current) return;
+      setTimeline((prev) => prev.filter((msg) => msg.id !== messageId));
+      await eventHandler.sendToolResultToAssistant(toolCallId, toolResult);
+    },
+    [eventHandler]
+  );
 
   return {
     timeline,
@@ -156,5 +224,6 @@ export const useChatStreaming = ({
     eventHandler,
     subscribeToMessageStream,
     stopStreaming,
+    sendToolResult,
   };
 };

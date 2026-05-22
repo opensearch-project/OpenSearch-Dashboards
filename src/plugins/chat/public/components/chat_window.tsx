@@ -98,6 +98,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     eventHandler,
     subscribeToMessageStream,
     stopStreaming,
+    sendToolResult,
   } = useChatStreaming({
     chatService,
     confirmationService,
@@ -249,17 +250,6 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
     subscribeToMessageStream(textContent, [...truncatedTimeline,...additionalMessages]);
   }, [timeline, subscribeToMessageStream, setInput, setTimeline]);
-
-  const handleResendToolResult = useCallback(
-    async ({ messageId, toolCallId, toolResult }: { messageId: string; toolCallId: string; toolResult: any }) => {
-      // Avoid concurrent resends while streaming or already sending a tool result
-      if (isStreamingRef.current || hasActiveToolCallsRef.current) return;
-      // Remove the error message from timeline
-      setTimeline((prev) => prev.filter((msg) => msg.id !== messageId));
-      await eventHandler.sendToolResultToAssistant(toolCallId, toolResult);
-    },
-    [eventHandler, setTimeline]
-  );
 
   const handleNewChat = useCallback(() => {
     // Stop any ongoing streaming before starting a new chat
@@ -454,7 +444,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             timeline={timeline}
             isStreaming={isStreaming}
             onResendMessage={resendAvailable ? handleResendMessage : undefined}
-            onResendToolResult={handleResendToolResult}
+            onResendToolResult={sendToolResult}
             onApproveConfirmation={handleApproveConfirmation}
             onRejectConfirmation={handleRejectConfirmation}
             onFillInput={setInput}

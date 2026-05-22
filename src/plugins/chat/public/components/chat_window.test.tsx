@@ -75,6 +75,7 @@ describe('ChatWindow', () => {
       newThread: jest.fn(),
       getThreadId: jest.fn().mockReturnValue('mock-thread-id'),
       abort: jest.fn(),
+      resetConnection: jest.fn(),
       setChatWindowInstance: jest.fn(),
       clearChatWindowInstance: jest.fn(),
       conversationHistoryService: {

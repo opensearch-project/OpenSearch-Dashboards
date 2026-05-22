@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Observable, Subscription } from 'rxjs';
+import { Observable } from 'rxjs';
 import { i18n } from '@osd/i18n';
 import { EventType } from '../../common/events';
 import { TOOL_EXECUTION_ERROR_PREFIX } from '../../common';
@@ -41,8 +41,12 @@ export interface ChatEventHandlerConfig {
   telemetryRecorder?: PluginTelemetryRecorder;
   callbacks: {
     onTimelineUpdate: (updater: (prev: Message[]) => Message[]) => void;
-    onStreamingStateChange: (isStreaming: boolean) => void;
-    onStartResponse: (flag: boolean) => void;
+    onStartResponse: (runId?: string) => void;
+    onSendToolResultStateChange?: (isSending: boolean) => void;
+    onSubscribeToToolResultStream: (
+      observable: Observable<ChatEvent>,
+      abortController: AbortController
+    ) => void;
     getTimeline: () => Message[];
   };
 }
@@ -61,10 +65,13 @@ export class ChatEventHandler {
   private chatService: ChatService;
   private telemetryRecorder?: PluginTelemetryRecorder;
   private onTimelineUpdate: (updater: (prev: Message[]) => Message[]) => void;
-  private onStreamingStateChange: (isStreaming: boolean) => void;
-  private onStartResponse: (flag: boolean) => void;
+  private onStartResponse: (runId?: string) => void;
+  private onSendToolResultStateChange?: (isSending: boolean) => void;
+  private onSubscribeToToolResultStream: (
+    observable: Observable<ChatEvent>,
+    abortController: AbortController
+  ) => void;
   private getTimeline: () => Message[];
-  private toolResultSubscription: Subscription | null = null;
 
   // Controls the currently in-flight tool result send (polling + agent stream).
   // When aborted, `waitForToolCallSync` bails out with reason 'aborted' and the
@@ -72,16 +79,18 @@ export class ChatEventHandler {
   private toolResultAbortController: AbortController | null = null;
 
   // Telemetry tracking
-  private interactionStartTime: number | null = null;
+  private runStartTimes = new Map<string, number>();
   private runErrorOccurred = false;
+  private currentRunId: string | null = null;
 
   constructor(config: ChatEventHandlerConfig) {
     this.assistantActionService = config.assistantActionService;
     this.chatService = config.chatService;
     this.telemetryRecorder = config.telemetryRecorder;
     this.onTimelineUpdate = config.callbacks.onTimelineUpdate;
-    this.onStreamingStateChange = config.callbacks.onStreamingStateChange;
     this.onStartResponse = config.callbacks.onStartResponse;
+    this.onSendToolResultStateChange = config.callbacks.onSendToolResultStateChange;
+    this.onSubscribeToToolResultStream = config.callbacks.onSubscribeToToolResultStream;
     this.getTimeline = config.callbacks.getTimeline;
     this.toolExecutor = new ToolExecutor(config.assistantActionService, config.confirmationService);
   }
@@ -141,10 +150,12 @@ export class ChatEventHandler {
    * Handle run started - set streaming state and start timing
    */
   private handleRunStarted(event: any): void {
-    this.onStreamingStateChange(true);
-
-    // Start timing for telemetry
-    this.interactionStartTime = Date.now();
+    // Track current run for routing callbacks
+    this.currentRunId = event.runId || null;
+    // Start timing for telemetry (keyed by runId to avoid race conditions)
+    if (event.runId) {
+      this.runStartTimes.set(event.runId, Date.now());
+    }
     this.runErrorOccurred = false;
   }
 
@@ -152,11 +163,6 @@ export class ChatEventHandler {
    * Handle run finished - clear streaming state, cleanup, and record success telemetry
    */
   private handleRunFinished(event: any): void {
-    this.onStreamingStateChange(false);
-    // Clear any remaining active messages (cleanup)
-    this.activeAssistantMessages.clear();
-    // Reset the connection state to allow new chats
-    this.chatService.resetConnection();
 
     // Record success telemetry only if no error occurred during this run
     if (this.telemetryRecorder && !this.runErrorOccurred) {
@@ -168,9 +174,10 @@ export class ChatEventHandler {
         },
       });
 
-      // Record duration metric if we have a start time
-      if (this.interactionStartTime !== null) {
-        const duration = Date.now() - this.interactionStartTime;
+      // Record duration metric if we have a start time for this run
+      const startTime = event.runId ? this.runStartTimes.get(event.runId) : undefined;
+      if (startTime !== undefined) {
+        const duration = Date.now() - startTime;
         this.telemetryRecorder.recordMetric({
           name: 'chat_interaction_duration_ms',
           value: duration,
@@ -179,7 +186,7 @@ export class ChatEventHandler {
             status: 'success',
           },
         });
-        this.interactionStartTime = null;
+        this.runStartTimes.delete(event.runId);
       }
     }
   }
@@ -188,7 +195,7 @@ export class ChatEventHandler {
    * Handle start of a text message
    */
   private handleTextMessageStart(event: TextMessageStartEvent): void {
-    this.onStartResponse(true);
+    this.onStartResponse(this.currentRunId || undefined);
     // Track this as the last TEXT_MESSAGE_START for tool call association
     this.lastTextMessageStartId = event.messageId;
 
@@ -287,7 +294,7 @@ export class ChatEventHandler {
    * in the conversation timeline, maintaining proper message ordering.
    */
   private handleToolCallStart(event: ToolCallStartEvent): void {
-    this.onStartResponse(true);
+    this.onStartResponse(this.currentRunId || undefined);
     const { toolCallId, toolCallName, parentMessageId } = event;
 
     // Update tool call state in AssistantActionService
@@ -538,7 +545,6 @@ export class ChatEventHandler {
     };
 
     this.onTimelineUpdate((prev) => [...prev, errorMessage]);
-    this.onStreamingStateChange(false);
 
     // Record failure telemetry
     if (this.telemetryRecorder) {
@@ -563,8 +569,9 @@ export class ChatEventHandler {
       });
 
       // Record duration metric if we have a start time (with failure status)
-      if (this.interactionStartTime !== null) {
-        const duration = Date.now() - this.interactionStartTime;
+      const startTime = event.runId ? this.runStartTimes.get(event.runId) : undefined;
+      if (startTime !== undefined) {
+        const duration = Date.now() - startTime;
         this.telemetryRecorder.recordMetric({
           name: 'chat_interaction_duration_ms',
           value: duration,
@@ -573,7 +580,7 @@ export class ChatEventHandler {
             status: 'failure',
           },
         });
-        this.interactionStartTime = null;
+        this.runStartTimes.delete(event.runId);
       }
     }
   }
@@ -794,32 +801,8 @@ export class ChatEventHandler {
 
     this.onTimelineUpdate((prev) => [...prev, toolMessage]);
 
-    // Set streaming state and subscribe to the response stream
-    this.onStreamingStateChange(true);
-
-    const subscription = observable.subscribe({
-      next: (event: ChatEvent) => {
-        // Handle the assistant's response to the tool result
-        this.handleEvent(event);
-      },
-      error: (error: Error) => {
-        // A deliberate abort surfaces as AbortError — treat it as a quiet
-        // cancellation rather than a real error.
-        if (error?.name !== 'AbortError') {
-          // eslint-disable-next-line no-console
-          console.error('Tool result response error:', error);
-        }
-      },
-    });
-    subscription.add(() => {
-      this.onStreamingStateChange(false);
-      this.onStartResponse(false);
-      this.toolResultSubscription = null;
-      releaseController();
-    });
-
-    // Store subscription so it can be unsubscribed in clearState
-    this.toolResultSubscription = subscription;
+    // Delegate stream subscription to the hook
+    this.onSubscribeToToolResultStream(observable, abortController);
   }
 
   // timelineToMessages method removed - timeline is now directly AG-UI compatible
@@ -831,9 +814,6 @@ export class ChatEventHandler {
   private async handleMessagesSnapshot(event: MessagesSnapshotEvent): Promise<void> {
     // Set timeline to snapshot messages
     this.onTimelineUpdate(() => event.messages || []);
-
-    // Reset streaming state
-    this.onStreamingStateChange(false);
   }
 
   /**
@@ -869,9 +849,15 @@ export class ChatEventHandler {
       this.toolResultAbortController.abort();
       this.toolResultAbortController = null;
     }
-    if (this.toolResultSubscription) {
-      this.toolResultSubscription.unsubscribe();
-      this.toolResultSubscription = null;
+  }
+
+  /**
+   * Release the tool result abort controller if it matches the given one.
+   * Called by the hook when the tool result stream subscription completes.
+   */
+  releaseToolResultController(abortController: AbortController): void {
+    if (this.toolResultAbortController === abortController) {
+      this.toolResultAbortController = null;
     }
   }
 }
