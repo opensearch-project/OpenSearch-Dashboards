@@ -54,6 +54,7 @@ const setup = ({
   const collaboratorTypes: WorkspaceCollaboratorPermissionType[] = [];
   // Use BehaviorSubject instead of of() to avoid infinite loops with useObservable in React 18
   const currentWorkspace$ = new BehaviorSubject(permissionEnabled ? workspaceData : null);
+  const workspaceError$ = new BehaviorSubject<string>('');
   const services = {
     ...coreStartMock,
     application: {
@@ -68,6 +69,7 @@ const setup = ({
     workspaces: {
       ...coreStartMock.workspaces,
       currentWorkspace$,
+      workspaceError$,
     },
     workspaceClient: {
       update: workspaceClientUpdate,
@@ -97,6 +99,7 @@ const setup = ({
   );
   return {
     renderResult,
+    workspaceError$,
   };
 };
 
@@ -181,6 +184,26 @@ describe('WorkspaceCollaborators', () => {
     // always reflect server-side state, even if the cached `currentWorkspace$`
     // observable is stale (e.g. after a remote permission revoke).
     expect(workspaceClientGet).toHaveBeenCalledWith('test');
+  });
+
+  it('should surface a workspace error if the on-mount fetch is unauthorized', async () => {
+    const workspaceClientGet = jest.fn().mockResolvedValue({
+      success: false,
+      error: 'Invalid saved objects permission',
+    });
+    const { workspaceError$ } = setup({ permissionEnabled: true, workspaceClientGet });
+
+    // The on-mount fetch comes back with a permission error (e.g. another user
+    // revoked this user's access while the tab was open). The component must
+    // push the error onto workspaces.workspaceError$ so WorkspaceValidationService
+    // can redirect the user to the fatal-error app instead of leaving the stale
+    // collaborator list visible.
+    await waitFor(() => {
+      expect(workspaceClientGet).toHaveBeenCalledWith('test');
+    });
+    await waitFor(() => {
+      expect(workspaceError$.getValue()).toBe('Invalid saved objects permission');
+    });
   });
 
   it('should call notification add danger if update is failed', async () => {

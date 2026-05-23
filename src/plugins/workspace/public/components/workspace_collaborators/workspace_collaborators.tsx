@@ -74,24 +74,33 @@ export const WorkspaceCollaborators = () => {
   const isPermissionEnabled = application?.capabilities.workspaces.permissionEnabled;
 
   useEffect(() => {
-    if (!currentWorkspace?.id) {
+    if (!currentWorkspace?.id || !workspaces) {
       return;
     }
     let cancelled = false;
     workspaceClient
       .get(currentWorkspace.id)
       .then((response) => {
-        if (cancelled || !response.success) {
+        if (cancelled) {
           return;
         }
-        setLatestPermissions(response.result.permissions ?? {});
+        if (response.success) {
+          setLatestPermissions(response.result.permissions ?? {});
+        } else {
+          // The user no longer has access to this workspace (e.g. another admin
+          // revoked their permissions while this tab was open). Surface the
+          // error via the same channel that WorkspaceValidationService uses for
+          // stale workspaces so the user is redirected to the fatal-error app
+          // instead of seeing a stale collaborator list.
+          workspaces.workspaceError$.next(response.error ?? 'Workspace is no longer accessible');
+        }
       })
       // eslint-disable-next-line no-console
       .catch((error) => console.warn('Failed to refresh workspace collaborators', error));
     return () => {
       cancelled = true;
     };
-  }, [currentWorkspace?.id, workspaceClient]);
+  }, [currentWorkspace?.id, workspaceClient, workspaces]);
 
   const handleSubmitPermissionSettings = async (settings: WorkspacePermissionSetting[]) => {
     const showErrorNotification = (errorText?: string) => {
