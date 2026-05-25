@@ -12,7 +12,9 @@ type Props = ComponentProps<typeof QueryAssistCallOut>;
 
 const IntlWrapper = ({ children }: PropsWithChildren<unknown>) => (
   // @ts-expect-error TS2769 TODO(ts-error): fixme
-  <IntlProvider locale="en">{children}</IntlProvider>
+  <IntlProvider locale="en" defaultLocale="en">
+    {children}
+  </IntlProvider>
 );
 
 const renderCallOut = (overrideProps: Partial<Props> = {}) => {

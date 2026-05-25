@@ -37,7 +37,7 @@ import {
   EuiResizeObserver,
   EuiText,
 } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@osd/i18n/react';
+import { FormattedMessage, IntlShape, injectI18n } from '@osd/i18n/react';
 import classNames from 'classnames';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -55,7 +55,7 @@ interface Props {
   onFiltersUpdated?: (filters: Filter[]) => void;
   className: string;
   indexPatterns: IIndexPattern[];
-  intl: InjectedIntl;
+  intl: IntlShape;
   isFilterBarPortable?: boolean;
 }
 

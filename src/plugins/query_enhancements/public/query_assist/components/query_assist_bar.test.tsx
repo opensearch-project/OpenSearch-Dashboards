@@ -66,7 +66,9 @@ type Props = ComponentProps<typeof QueryAssistBar>;
 
 const IntlWrapper = ({ children }: PropsWithChildren<unknown>) => (
   // @ts-expect-error TS2769 TODO(ts-error): fixme
-  <IntlProvider locale="en">{children}</IntlProvider>
+  <IntlProvider locale="en" defaultLocale="en">
+    {children}
+  </IntlProvider>
 );
 
 const uiActionsStartMock = uiActionsPluginMock.createStartContract();

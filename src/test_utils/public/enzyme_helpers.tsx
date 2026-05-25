@@ -35,10 +35,10 @@
  * intl context around them.
  */
 
-import { I18nProvider, InjectedIntl, intlShape, __IntlProvider } from '@osd/i18n/react';
+import { I18nProvider, IntlShape, __IntlProvider } from '@osd/i18n/react';
 import { mount, ReactWrapper, render, shallow } from 'enzyme';
 import React, { ReactElement, ValidationMap } from 'react';
-import { IntlProvider } from 'react-intl';
+import { IntlProvider, intlShape } from 'react-intl';
 
 // Cast IntlProvider to accept children prop for React 18 compatibility
 // The old @types/react-intl doesn't include children in the props
@@ -72,9 +72,7 @@ function getOptions(context = {}, childContextTypes: ValidationMap<any> = {}, pr
 /**
  * When using @osd/i18n `injectI18n` on components, props.intl is required.
  */
-export function nodeWithIntlProp<T>(
-  node: ReactElement<T>
-): ReactElement<T & { intl: InjectedIntl }> {
+export function nodeWithIntlProp<T>(node: ReactElement<T>): ReactElement<T & { intl: IntlShape }> {
   return React.cloneElement<any>(node, { intl });
 }
 

@@ -163,7 +163,7 @@ describe('table_shared', () => {
     it('renders empty state with title and instrumentation guidance', () => {
       render(
         // @ts-expect-error TS2769 TODO(ts-error): fixme
-        <IntlProvider locale="en">
+        <IntlProvider locale="en" defaultLocale="en">
           <TableEmptyState title="No traces found" />
         </IntlProvider>
       );
@@ -243,7 +243,7 @@ describe('table_shared', () => {
     it('renders count with total for spans', () => {
       render(
         // @ts-expect-error TS2769 TODO(ts-error): fixme
-        <IntlProvider locale="en">
+        <IntlProvider locale="en" defaultLocale="en">
           <DataTableInfoBar {...defaultProps} />
         </IntlProvider>
       );
@@ -255,7 +255,7 @@ describe('table_shared', () => {
     it('renders count without total when hasHead is true', () => {
       render(
         // @ts-expect-error TS2769 TODO(ts-error): fixme
-        <IntlProvider locale="en">
+        <IntlProvider locale="en" defaultLocale="en">
           <DataTableInfoBar {...defaultProps} hasHead={true} />
         </IntlProvider>
       );
@@ -267,7 +267,7 @@ describe('table_shared', () => {
     it('renders trace entity name', () => {
       render(
         // @ts-expect-error TS2769 TODO(ts-error): fixme
-        <IntlProvider locale="en">
+        <IntlProvider locale="en" defaultLocale="en">
           <DataTableInfoBar {...defaultProps} entityName="trace" />
         </IntlProvider>
       );
@@ -277,7 +277,7 @@ describe('table_shared', () => {
     it('renders em dash when elapsedMs is undefined', () => {
       render(
         // @ts-expect-error TS2769 TODO(ts-error): fixme
-        <IntlProvider locale="en">
+        <IntlProvider locale="en" defaultLocale="en">
           <DataTableInfoBar {...defaultProps} elapsedMs={undefined} />
         </IntlProvider>
       );
@@ -288,7 +288,7 @@ describe('table_shared', () => {
       const onWrapChange = jest.fn();
       render(
         // @ts-expect-error TS2769 TODO(ts-error): fixme
-        <IntlProvider locale="en">
+        <IntlProvider locale="en" defaultLocale="en">
           <DataTableInfoBar {...defaultProps} onWrapCellTextChange={onWrapChange} />
         </IntlProvider>
       );

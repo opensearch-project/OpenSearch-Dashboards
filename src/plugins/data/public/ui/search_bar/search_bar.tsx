@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { InjectedIntl, injectI18n } from '@osd/i18n/react';
+import { IntlShape, injectI18n } from '@osd/i18n/react';
 import classNames from 'classnames';
 import { cloneDeep, compact, get, isEqual } from 'lodash';
 import React, { Component } from 'react';
@@ -53,7 +53,7 @@ import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
 import { FilterOptions } from '../filter_bar/filter_options';
 interface SearchBarInjectedDeps {
   opensearchDashboards: OpenSearchDashboardsReactContextValue<IDataPluginServices>;
-  intl: InjectedIntl;
+  intl: IntlShape;
   timeHistory: TimeHistoryContract;
   // Filter bar
   onFiltersUpdated?: (filters: Filter[]) => void;

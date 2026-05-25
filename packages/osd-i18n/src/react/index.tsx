@@ -28,23 +28,18 @@
  * under the License.
  */
 
-import { InjectedIntl as _InjectedIntl, InjectedIntlProps as _InjectedIntlProps } from 'react-intl';
-
-export type InjectedIntl = _InjectedIntl;
-export type InjectedIntlProps = _InjectedIntlProps;
-
 export {
-  intlShape,
   FormattedDate,
   FormattedTime,
-  FormattedRelative,
+  FormattedRelativeTime,
   FormattedNumber,
   FormattedPlural,
   FormattedMessage,
-  FormattedHTMLMessage,
   // Only used for testing. Use I18nProvider otherwise.
   IntlProvider as __IntlProvider,
 } from 'react-intl';
+
+export type { IntlShape, WrappedComponentProps } from 'react-intl';
 
 export { I18nProvider } from './provider';
 export { injectI18n } from './inject';

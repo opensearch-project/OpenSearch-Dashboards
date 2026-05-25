@@ -255,31 +255,41 @@ This prop is optional context comment that will be extracted by i18n tools
 and added as a comment next to translation message at `defaultMessages.json`
 
 **NOTE:** To minimize the chance of having multiple `I18nProvider` components in the React tree, try to use `I18nProvider` only to wrap the topmost component that you render, e.g. the one that's passed to `reactDirective` or `ReactDOM.render`.
+### FormattedRelativeTime
 
-### FormattedRelative
+`FormattedRelativeTime` formats a relative time value (e.g., "3 days ago" or "in 5 minutes") using the Intl.RelativeTimeFormat API. It expects several attributes:
 
-`FormattedRelative` expects several attributes (read more [here](https://github.com/yahoo/react-intl/wiki/Components#formattedrelative)), including
-
-- `value` that can be parsed as a date,
-- `formats` that should be one of `'years' | 'months' | 'days' | 'hours' | 'minutes' | 'seconds'` (this options are configured in [`formats.ts`](./src/core/formats.ts))
--  etc.
-
-If `formats` is not provided then it will be chosen automatically:\
-`x seconds ago` for `x < 60`, `1 minute ago` for `60 <= x < 120`, etc.
+- `value` - The numeric value to format (e.g., -3 for "3 days ago", 5 for "in 5 minutes")
+- `unit` - The unit of time: `'second' | 'minute' | 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year'`
+- `numeric` (optional) - Display format: `'always'` (default, e.g., "1 day ago") or `'auto'` (e.g., "yesterday")
+- `style` (optional) - Length of formatted message: `'long'` (default), `'short'`, or `'narrow'`
 
 ```jsx
-<FormattedRelative
-  value={Date.now() - 90000}
-  format="seconds"
+<FormattedRelativeTime
+  value={-3}
+  unit="day"
 />
 ```
-Initial result: `90 seconds ago`
+Result: `3 days ago`
+
 ```jsx
-<FormattedRelative
-  value={Date.now() - 90000}
+<FormattedRelativeTime
+  value={-1}
+  unit="day"
+  numeric="auto"
 />
 ```
-Initial result: `1 minute ago`
+Result: `yesterday`
+
+```jsx
+<FormattedRelativeTime
+  value={5}
+  unit="minute"
+  style="short"
+/>
+```
+Result: `in 5 min.`
+
 
 ### Attributes translation in React
 

@@ -41,7 +41,7 @@ import {
   EuiContextMenuPanelDescriptor,
 } from '@elastic/eui';
 import { stringify } from '@osd/std';
-import { InjectedIntl, injectI18n } from '@osd/i18n/react';
+import { IntlShape, injectI18n } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
 import React from 'react';
 import {
@@ -64,7 +64,7 @@ import { SavedQueryMeta } from '../saved_query_form';
 import { getUseNewSavedQueriesUI } from '../../services';
 
 interface Props {
-  intl: InjectedIntl;
+  intl: IntlShape;
   filters: Filter[];
   indexPatterns: IIndexPattern[];
   savedQueryService: SavedQueryService;

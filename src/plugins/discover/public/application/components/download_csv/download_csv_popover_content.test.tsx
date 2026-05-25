@@ -23,7 +23,7 @@ const mockMaxLabel = `Max available (${mockProps.hitsCount})`;
 const TestHarness = (props: Partial<DiscoverDownloadCsvPopoverContentProps>) => {
   return (
     // @ts-expect-error TS2769 TODO(ts-error): fixme
-    <IntlProvider locale="en">
+    <IntlProvider locale="en" defaultLocale="en">
       <DiscoverDownloadCsvPopoverContent {...mockProps} {...props} />
     </IntlProvider>
   );

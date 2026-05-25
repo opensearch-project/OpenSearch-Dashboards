@@ -30,7 +30,7 @@
 
 import moment from 'moment';
 import { EuiFormControlLayoutDelimited } from '@elastic/eui';
-import { InjectedIntl, injectI18n } from '@osd/i18n/react';
+import { IntlShape, injectI18n } from '@osd/i18n/react';
 import { get } from 'lodash';
 
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
@@ -48,7 +48,7 @@ interface Props {
   field?: IFieldType;
   value?: RangeParams;
   onChange: (params: RangeParamsPartial) => void;
-  intl: InjectedIntl;
+  intl: IntlShape;
 }
 
 function RangeValueInputUI(props: Props) {

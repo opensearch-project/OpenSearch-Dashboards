@@ -61,7 +61,7 @@ describe('IndexHeader at new home page', () => {
 
     return (
       // @ts-expect-error TS2769 TODO(ts-error): fixme
-      <IntlProvider locale="en">
+      <IntlProvider locale="en" defaultLocale="en">
         <Provider>
           <IndexHeader
             setDefault={setDefault}
@@ -194,7 +194,7 @@ describe('IndexHeader at new home page', () => {
 
     const { getByTestId } = render(
       // @ts-expect-error TS2769 TODO(ts-error): fixme
-      <IntlProvider locale="en">
+      <IntlProvider locale="en" defaultLocale="en">
         <Provider>
           <IndexHeader
             setDefault={setDefault}
@@ -233,7 +233,7 @@ describe('IndexHeader at new home page', () => {
 
     const { getByTestId } = render(
       // @ts-expect-error TS2769 TODO(ts-error): fixme
-      <IntlProvider locale="en">
+      <IntlProvider locale="en" defaultLocale="en">
         <Provider>
           <IndexHeader
             setDefault={setDefault}

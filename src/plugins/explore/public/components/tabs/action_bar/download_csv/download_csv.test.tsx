@@ -71,7 +71,7 @@ const mockDownloadCsvForOption = jest.fn();
 const TestHarness = (props: Partial<DiscoverDownloadCsvProps>) => {
   return (
     // @ts-expect-error TS2769 TODO(ts-error): fixme
-    <IntlProvider locale="en">
+    <IntlProvider locale="en" defaultLocale="en">
       <DiscoverDownloadCsv {...mockProps} {...props} />
     </IntlProvider>
   );

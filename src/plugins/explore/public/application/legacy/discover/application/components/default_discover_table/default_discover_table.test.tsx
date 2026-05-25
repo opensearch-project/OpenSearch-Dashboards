@@ -58,7 +58,7 @@ describe('DefaultDiscoverTable', () => {
 
   const getDefaultDiscoverTable = (hitsOverride?: OpenSearchSearchHit[]) => (
     // @ts-expect-error TS2769 TODO(ts-error): fixme
-    <IntlProvider locale="en">
+    <IntlProvider locale="en" defaultLocale="en">
       <DefaultDiscoverTable
         columns={['textField', 'longField', '@timestamp']}
         rows={(hitsOverride ?? hits) as OpenSearchSearchHit[]}

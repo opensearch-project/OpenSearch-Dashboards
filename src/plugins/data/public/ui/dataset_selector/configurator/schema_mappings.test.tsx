@@ -50,8 +50,12 @@ const defaultProps: SchemaMappingsProps = {
 };
 
 const renderWithIntl = (component: React.ReactElement) => {
-  // @ts-expect-error TS2769 TODO(ts-error): fixme
-  return render(<IntlProvider locale="en">{component}</IntlProvider>);
+  return render(
+    // @ts-expect-error TS2769 TODO(ts-error): fixme
+    <IntlProvider locale="en" defaultLocale="en">
+      {component}
+    </IntlProvider>
+  );
 };
 
 describe('SchemaMappings Component', () => {

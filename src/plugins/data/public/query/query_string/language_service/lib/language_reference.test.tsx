@@ -11,8 +11,12 @@ import { IntlProvider } from 'react-intl';
 // Helper to wrap component with IntlProvider
 // @ts-expect-error TS7006 TODO(ts-error): fixme
 const renderWithIntl = (ui) => {
-  // @ts-expect-error TS2769 TODO(ts-error): fixme
-  return render(<IntlProvider locale="en">{ui}</IntlProvider>);
+  return render(
+    // @ts-expect-error TS2769 TODO(ts-error): fixme
+    <IntlProvider locale="en" defaultLocale="en">
+      {ui}
+    </IntlProvider>
+  );
 };
 
 describe('LanguageReference Component', () => {

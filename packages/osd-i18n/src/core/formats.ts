@@ -28,6 +28,8 @@
  * under the License.
  */
 
+import { Formats } from 'intl-messageformat';
+
 /**
  * Default format options used for "en" locale.
  * These are used when constructing the internal Intl.NumberFormat
@@ -94,71 +96,9 @@ export const formats: Formats = {
       timeZoneName: 'short',
     },
   },
-  relative: {
-    years: {
-      units: 'year',
-    },
-    months: {
-      units: 'month',
-    },
-    days: {
-      units: 'day',
-    },
-    hours: {
-      units: 'hour',
-    },
-    minutes: {
-      units: 'minute',
-    },
-    seconds: {
-      units: 'second',
-    },
-  },
 };
 
-interface NumberFormatOptions<TStyle extends keyof Intl.NumberFormatOptionsStyleRegistry>
-  extends Intl.NumberFormatOptions {
-  style?: TStyle;
-  localeMatcher?: 'lookup' | 'best fit';
-  currencyDisplay?: 'symbol' | 'code' | 'name';
-}
-
-export interface Formats {
-  number?: Partial<{
-    [key: string]: NumberFormatOptions<'currency' | 'percent' | 'decimal'>;
-    currency: NumberFormatOptions<'currency'>;
-    percent: NumberFormatOptions<'percent'>;
-  }>;
-  date?: Partial<{
-    [key: string]: DateTimeFormatOptions;
-    short: DateTimeFormatOptions;
-    medium: DateTimeFormatOptions;
-    long: DateTimeFormatOptions;
-    full: DateTimeFormatOptions;
-  }>;
-  time?: Partial<{
-    [key: string]: DateTimeFormatOptions;
-    short: DateTimeFormatOptions;
-    medium: DateTimeFormatOptions;
-    long: DateTimeFormatOptions;
-    full: DateTimeFormatOptions;
-  }>;
-  relative?: Partial<{
-    [key: string]: {
-      style?: 'numeric' | 'best fit';
-      units: 'year' | 'month' | 'day' | 'hour' | 'minute' | 'second';
-    };
-  }>;
-}
-
-interface DateTimeFormatOptions extends Intl.DateTimeFormatOptions {
-  weekday?: 'narrow' | 'short' | 'long';
-  era?: 'narrow' | 'short' | 'long';
-  year?: 'numeric' | '2-digit';
-  month?: 'numeric' | '2-digit' | 'narrow' | 'short' | 'long';
-  day?: 'numeric' | '2-digit';
-  hour?: 'numeric' | '2-digit';
-  minute?: 'numeric' | '2-digit';
-  second?: 'numeric' | '2-digit';
-  timeZoneName?: 'short' | 'long';
-}
+/**
+ * Re-export Formats type from intl-messageformat for type compatibility
+ */
+export type { Formats } from 'intl-messageformat';

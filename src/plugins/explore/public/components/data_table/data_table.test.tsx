@@ -39,7 +39,7 @@ describe('DefaultDiscoverTable', () => {
     const rows = rowsOverride ?? mockRows;
     return (
       // @ts-expect-error TS2769 TODO(ts-error): fixme
-      <IntlProvider locale="en">
+      <IntlProvider locale="en" defaultLocale="en">
         <DataTable
           columns={mockColumns}
           rows={rows}
