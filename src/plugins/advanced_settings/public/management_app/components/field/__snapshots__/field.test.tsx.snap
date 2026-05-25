@@ -71,7 +71,7 @@ exports[`Field for array setting should render as read only with help text if ov
           size="xs"
         >
           <React.Fragment>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Default: {value}"
               id="advancedSettings.field.defaultValueText"
               values={
@@ -112,10 +112,9 @@ exports[`Field for array setting should render as read only with help text if ov
       <EuiText
         size="xs"
       >
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="This setting is overridden by the OpenSearch Dashboards server and can not be changed."
           id="advancedSettings.field.helpText"
-          values={Object {}}
         />
       </EuiText>
     }
@@ -154,7 +153,7 @@ exports[`Field for array setting should render as read only with help text if pe
           size="xs"
         >
           <React.Fragment>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Default: {value}"
               id="advancedSettings.field.defaultValueText"
               values={
@@ -195,10 +194,9 @@ exports[`Field for array setting should render as read only with help text if pe
       <EuiText
         size="xs"
       >
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="This setting is controlled by dashboard admin only."
           id="advancedSettings.field.permissionControlledHelpText"
-          values={Object {}}
         />
       </EuiText>
     }
@@ -244,10 +242,9 @@ exports[`Field for array setting should render custom setting icon if it is cust
         aria-label="Custom setting"
         color="primary"
         content={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Custom setting"
             id="advancedSettings.field.customSettingTooltip"
-            values={Object {}}
           />
         }
         type="asterisk"
@@ -357,10 +354,9 @@ exports[`Field for array setting should render unsaved value if there are unsave
         aria-label="Custom setting"
         color="primary"
         content={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Custom setting"
             id="advancedSettings.field.customSettingTooltip"
-            values={Object {}}
           />
         }
         type="asterisk"
@@ -430,7 +426,7 @@ exports[`Field for array setting should render user value if there is user value
           size="xs"
         >
           <React.Fragment>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Default: {value}"
               id="advancedSettings.field.defaultValueText"
               values={
@@ -475,10 +471,9 @@ exports[`Field for array setting should render user value if there is user value
             data-test-subj="advancedSetting-resetField-array:test:setting"
             onClick={[Function]}
           >
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Reset to default"
               id="advancedSettings.field.resetToDefaultLinkText"
-              values={Object {}}
             />
           </EuiLink>
              
@@ -545,10 +540,9 @@ exports[`Field for boolean setting should render as read only if saving is disab
       data-test-subj="advancedSetting-editField-boolean:test:setting"
       disabled={true}
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="On"
           id="advancedSettings.field.onLabel"
-          values={Object {}}
         />
       }
       onChange={[Function]}
@@ -577,7 +571,7 @@ exports[`Field for boolean setting should render as read only with help text if 
           size="xs"
         >
           <React.Fragment>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Default: {value}"
               id="advancedSettings.field.defaultValueText"
               values={
@@ -618,10 +612,9 @@ exports[`Field for boolean setting should render as read only with help text if 
       <EuiText
         size="xs"
       >
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="This setting is overridden by the OpenSearch Dashboards server and can not be changed."
           id="advancedSettings.field.helpText"
-          values={Object {}}
         />
       </EuiText>
     }
@@ -634,10 +627,9 @@ exports[`Field for boolean setting should render as read only with help text if 
       data-test-subj="advancedSetting-editField-boolean:test:setting"
       disabled={true}
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Off"
           id="advancedSettings.field.offLabel"
-          values={Object {}}
         />
       }
       onChange={[Function]}
@@ -666,7 +658,7 @@ exports[`Field for boolean setting should render as read only with help text if 
           size="xs"
         >
           <React.Fragment>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Default: {value}"
               id="advancedSettings.field.defaultValueText"
               values={
@@ -707,10 +699,9 @@ exports[`Field for boolean setting should render as read only with help text if 
       <EuiText
         size="xs"
       >
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="This setting is controlled by dashboard admin only."
           id="advancedSettings.field.permissionControlledHelpText"
-          values={Object {}}
         />
       </EuiText>
     }
@@ -723,10 +714,9 @@ exports[`Field for boolean setting should render as read only with help text if 
       data-test-subj="advancedSetting-editField-boolean:test:setting"
       disabled={true}
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Off"
           id="advancedSettings.field.offLabel"
-          values={Object {}}
         />
       }
       onChange={[Function]}
@@ -762,10 +752,9 @@ exports[`Field for boolean setting should render custom setting icon if it is cu
         aria-label="Custom setting"
         color="primary"
         content={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Custom setting"
             id="advancedSettings.field.customSettingTooltip"
-            values={Object {}}
           />
         }
         type="asterisk"
@@ -791,10 +780,9 @@ exports[`Field for boolean setting should render custom setting icon if it is cu
       data-test-subj="advancedSetting-editField-boolean:test:setting"
       disabled={false}
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="On"
           id="advancedSettings.field.onLabel"
-          values={Object {}}
         />
       }
       onChange={[Function]}
@@ -848,10 +836,9 @@ exports[`Field for boolean setting should render default value if there is no us
       data-test-subj="advancedSetting-editField-boolean:test:setting"
       disabled={false}
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="On"
           id="advancedSettings.field.onLabel"
-          values={Object {}}
         />
       }
       onChange={[Function]}
@@ -887,10 +874,9 @@ exports[`Field for boolean setting should render unsaved value if there are unsa
         aria-label="Custom setting"
         color="primary"
         content={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Custom setting"
             id="advancedSettings.field.customSettingTooltip"
-            values={Object {}}
           />
         }
         type="asterisk"
@@ -923,10 +909,9 @@ exports[`Field for boolean setting should render unsaved value if there are unsa
       data-test-subj="advancedSetting-editField-boolean:test:setting"
       disabled={false}
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Off"
           id="advancedSettings.field.offLabel"
-          values={Object {}}
         />
       }
       onChange={[Function]}
@@ -962,7 +947,7 @@ exports[`Field for boolean setting should render user value if there is user val
           size="xs"
         >
           <React.Fragment>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Default: {value}"
               id="advancedSettings.field.defaultValueText"
               values={
@@ -1007,10 +992,9 @@ exports[`Field for boolean setting should render user value if there is user val
             data-test-subj="advancedSetting-resetField-boolean:test:setting"
             onClick={[Function]}
           >
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Reset to default"
               id="advancedSettings.field.resetToDefaultLinkText"
-              values={Object {}}
             />
           </EuiLink>
              
@@ -1026,10 +1010,9 @@ exports[`Field for boolean setting should render user value if there is user val
       data-test-subj="advancedSetting-editField-boolean:test:setting"
       disabled={false}
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Off"
           id="advancedSettings.field.offLabel"
-          values={Object {}}
         />
       }
       onChange={[Function]}
@@ -1112,7 +1095,7 @@ exports[`Field for image setting should render as read only with help text if ov
           size="xs"
         >
           <React.Fragment>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Default: {value}"
               id="advancedSettings.field.defaultValueText"
               values={
@@ -1153,10 +1136,9 @@ exports[`Field for image setting should render as read only with help text if ov
       <EuiText
         size="xs"
       >
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="This setting is overridden by the OpenSearch Dashboards server and can not be changed."
           id="advancedSettings.field.helpText"
-          values={Object {}}
         />
       </EuiText>
     }
@@ -1193,7 +1175,7 @@ exports[`Field for image setting should render as read only with help text if pe
           size="xs"
         >
           <React.Fragment>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Default: {value}"
               id="advancedSettings.field.defaultValueText"
               values={
@@ -1234,10 +1216,9 @@ exports[`Field for image setting should render as read only with help text if pe
       <EuiText
         size="xs"
       >
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="This setting is controlled by dashboard admin only."
           id="advancedSettings.field.permissionControlledHelpText"
-          values={Object {}}
         />
       </EuiText>
     }
@@ -1281,10 +1262,9 @@ exports[`Field for image setting should render custom setting icon if it is cust
         aria-label="Custom setting"
         color="primary"
         content={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Custom setting"
             id="advancedSettings.field.customSettingTooltip"
-            values={Object {}}
           />
         }
         type="asterisk"
@@ -1400,10 +1380,9 @@ exports[`Field for image setting should render unsaved value if there are unsave
         aria-label="Custom setting"
         color="primary"
         content={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Custom setting"
             id="advancedSettings.field.customSettingTooltip"
-            values={Object {}}
           />
         }
         type="asterisk"
@@ -1471,7 +1450,7 @@ exports[`Field for image setting should render user value if there is user value
           size="xs"
         >
           <React.Fragment>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Default: {value}"
               id="advancedSettings.field.defaultValueText"
               values={
@@ -1516,10 +1495,9 @@ exports[`Field for image setting should render user value if there is user value
             data-test-subj="advancedSetting-resetField-image:test:setting"
             onClick={[Function]}
           >
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Reset to default"
               id="advancedSettings.field.resetToDefaultLinkText"
-              values={Object {}}
             />
           </EuiLink>
              
@@ -1530,10 +1508,9 @@ exports[`Field for image setting should render user value if there is user value
             data-test-subj="advancedSetting-changeImage-image:test:setting"
             onClick={[Function]}
           >
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Change image"
               id="advancedSettings.field.changeImageLinkText"
-              values={Object {}}
             />
           </EuiLink>
         </span>
@@ -1572,7 +1549,7 @@ exports[`Field for json setting should render as read only if saving is disabled
           size="xs"
         >
           <React.Fragment>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Default: {value}"
               id="advancedSettings.field.defaultValueTypeJsonText"
               values={
@@ -1668,7 +1645,7 @@ exports[`Field for json setting should render as read only with help text if ove
           size="xs"
         >
           <React.Fragment>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Default: {value}"
               id="advancedSettings.field.defaultValueTypeJsonText"
               values={
@@ -1712,10 +1689,9 @@ exports[`Field for json setting should render as read only with help text if ove
       <EuiText
         size="xs"
       >
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="This setting is overridden by the OpenSearch Dashboards server and can not be changed."
           id="advancedSettings.field.helpText"
-          values={Object {}}
         />
       </EuiText>
     }
@@ -1774,7 +1750,7 @@ exports[`Field for json setting should render as read only with help text if per
           size="xs"
         >
           <React.Fragment>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Default: {value}"
               id="advancedSettings.field.defaultValueTypeJsonText"
               values={
@@ -1818,10 +1794,9 @@ exports[`Field for json setting should render as read only with help text if per
       <EuiText
         size="xs"
       >
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="This setting is controlled by dashboard admin only."
           id="advancedSettings.field.permissionControlledHelpText"
-          values={Object {}}
         />
       </EuiText>
     }
@@ -1887,10 +1862,9 @@ exports[`Field for json setting should render custom setting icon if it is custo
         aria-label="Custom setting"
         color="primary"
         content={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Custom setting"
             id="advancedSettings.field.customSettingTooltip"
-            values={Object {}}
           />
         }
         type="asterisk"
@@ -1962,7 +1936,7 @@ exports[`Field for json setting should render default value if there is no user 
           size="xs"
         >
           <React.Fragment>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Default: {value}"
               id="advancedSettings.field.defaultValueTypeJsonText"
               values={
@@ -2010,10 +1984,9 @@ exports[`Field for json setting should render default value if there is no user 
             data-test-subj="advancedSetting-resetField-json:test:setting"
             onClick={[Function]}
           >
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Reset to default"
               id="advancedSettings.field.resetToDefaultLinkText"
-              values={Object {}}
             />
           </EuiLink>
              
@@ -2082,10 +2055,9 @@ exports[`Field for json setting should render unsaved value if there are unsaved
         aria-label="Custom setting"
         color="primary"
         content={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Custom setting"
             id="advancedSettings.field.customSettingTooltip"
-            values={Object {}}
           />
         }
         type="asterisk"
@@ -2175,7 +2147,7 @@ exports[`Field for json setting should render user value if there is user value 
           size="xs"
         >
           <React.Fragment>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Default: {value}"
               id="advancedSettings.field.defaultValueTypeJsonText"
               values={
@@ -2223,10 +2195,9 @@ exports[`Field for json setting should render user value if there is user value 
             data-test-subj="advancedSetting-resetField-json:test:setting"
             onClick={[Function]}
           >
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Reset to default"
               id="advancedSettings.field.resetToDefaultLinkText"
-              values={Object {}}
             />
           </EuiLink>
              
@@ -2359,7 +2330,7 @@ exports[`Field for markdown setting should render as read only with help text if
           size="xs"
         >
           <React.Fragment>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Default: {value}"
               id="advancedSettings.field.defaultValueText"
               values={
@@ -2400,10 +2371,9 @@ exports[`Field for markdown setting should render as read only with help text if
       <EuiText
         size="xs"
       >
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="This setting is overridden by the OpenSearch Dashboards server and can not be changed."
           id="advancedSettings.field.helpText"
-          values={Object {}}
         />
       </EuiText>
     }
@@ -2462,7 +2432,7 @@ exports[`Field for markdown setting should render as read only with help text if
           size="xs"
         >
           <React.Fragment>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Default: {value}"
               id="advancedSettings.field.defaultValueText"
               values={
@@ -2503,10 +2473,9 @@ exports[`Field for markdown setting should render as read only with help text if
       <EuiText
         size="xs"
       >
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="This setting is controlled by dashboard admin only."
           id="advancedSettings.field.permissionControlledHelpText"
-          values={Object {}}
         />
       </EuiText>
     }
@@ -2572,10 +2541,9 @@ exports[`Field for markdown setting should render custom setting icon if it is c
         aria-label="Custom setting"
         color="primary"
         content={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Custom setting"
             id="advancedSettings.field.customSettingTooltip"
-            values={Object {}}
           />
         }
         type="asterisk"
@@ -2725,10 +2693,9 @@ exports[`Field for markdown setting should render unsaved value if there are uns
         aria-label="Custom setting"
         color="primary"
         content={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Custom setting"
             id="advancedSettings.field.customSettingTooltip"
-            values={Object {}}
           />
         }
         type="asterisk"
@@ -2814,7 +2781,7 @@ exports[`Field for markdown setting should render user value if there is user va
           size="xs"
         >
           <React.Fragment>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Default: {value}"
               id="advancedSettings.field.defaultValueText"
               values={
@@ -2859,10 +2826,9 @@ exports[`Field for markdown setting should render user value if there is user va
             data-test-subj="advancedSetting-resetField-markdown:test:setting"
             onClick={[Function]}
           >
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Reset to default"
               id="advancedSettings.field.resetToDefaultLinkText"
-              values={Object {}}
             />
           </EuiLink>
              
@@ -2975,7 +2941,7 @@ exports[`Field for number setting should render as read only with help text if o
           size="xs"
         >
           <React.Fragment>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Default: {value}"
               id="advancedSettings.field.defaultValueText"
               values={
@@ -3016,10 +2982,9 @@ exports[`Field for number setting should render as read only with help text if o
       <EuiText
         size="xs"
       >
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="This setting is overridden by the OpenSearch Dashboards server and can not be changed."
           id="advancedSettings.field.helpText"
-          values={Object {}}
         />
       </EuiText>
     }
@@ -3058,7 +3023,7 @@ exports[`Field for number setting should render as read only with help text if p
           size="xs"
         >
           <React.Fragment>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Default: {value}"
               id="advancedSettings.field.defaultValueText"
               values={
@@ -3099,10 +3064,9 @@ exports[`Field for number setting should render as read only with help text if p
       <EuiText
         size="xs"
       >
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="This setting is controlled by dashboard admin only."
           id="advancedSettings.field.permissionControlledHelpText"
-          values={Object {}}
         />
       </EuiText>
     }
@@ -3148,10 +3112,9 @@ exports[`Field for number setting should render custom setting icon if it is cus
         aria-label="Custom setting"
         color="primary"
         content={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Custom setting"
             id="advancedSettings.field.customSettingTooltip"
-            values={Object {}}
           />
         }
         type="asterisk"
@@ -3261,10 +3224,9 @@ exports[`Field for number setting should render unsaved value if there are unsav
         aria-label="Custom setting"
         color="primary"
         content={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Custom setting"
             id="advancedSettings.field.customSettingTooltip"
-            values={Object {}}
           />
         }
         type="asterisk"
@@ -3330,7 +3292,7 @@ exports[`Field for number setting should render user value if there is user valu
           size="xs"
         >
           <React.Fragment>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Default: {value}"
               id="advancedSettings.field.defaultValueText"
               values={
@@ -3375,10 +3337,9 @@ exports[`Field for number setting should render user value if there is user valu
             data-test-subj="advancedSetting-resetField-number:test:setting"
             onClick={[Function]}
           >
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Reset to default"
               id="advancedSettings.field.resetToDefaultLinkText"
-              values={Object {}}
             />
           </EuiLink>
              
@@ -3487,7 +3448,7 @@ exports[`Field for select setting should render as read only with help text if o
           size="xs"
         >
           <React.Fragment>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Default: {value}"
               id="advancedSettings.field.defaultValueText"
               values={
@@ -3528,10 +3489,9 @@ exports[`Field for select setting should render as read only with help text if o
       <EuiText
         size="xs"
       >
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="This setting is overridden by the OpenSearch Dashboards server and can not be changed."
           id="advancedSettings.field.helpText"
-          values={Object {}}
         />
       </EuiText>
     }
@@ -3586,7 +3546,7 @@ exports[`Field for select setting should render as read only with help text if p
           size="xs"
         >
           <React.Fragment>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Default: {value}"
               id="advancedSettings.field.defaultValueText"
               values={
@@ -3627,10 +3587,9 @@ exports[`Field for select setting should render as read only with help text if p
       <EuiText
         size="xs"
       >
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="This setting is controlled by dashboard admin only."
           id="advancedSettings.field.permissionControlledHelpText"
-          values={Object {}}
         />
       </EuiText>
     }
@@ -3692,10 +3651,9 @@ exports[`Field for select setting should render custom setting icon if it is cus
         aria-label="Custom setting"
         color="primary"
         content={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Custom setting"
             id="advancedSettings.field.customSettingTooltip"
-            values={Object {}}
           />
         }
         type="asterisk"
@@ -3837,10 +3795,9 @@ exports[`Field for select setting should render unsaved value if there are unsav
         aria-label="Custom setting"
         color="primary"
         content={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Custom setting"
             id="advancedSettings.field.customSettingTooltip"
-            values={Object {}}
           />
         }
         type="asterisk"
@@ -3922,7 +3879,7 @@ exports[`Field for select setting should render user value if there is user valu
           size="xs"
         >
           <React.Fragment>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Default: {value}"
               id="advancedSettings.field.defaultValueText"
               values={
@@ -3967,10 +3924,9 @@ exports[`Field for select setting should render user value if there is user valu
             data-test-subj="advancedSetting-resetField-select:test:setting"
             onClick={[Function]}
           >
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Reset to default"
               id="advancedSettings.field.resetToDefaultLinkText"
-              values={Object {}}
             />
           </EuiLink>
              
@@ -4079,7 +4035,7 @@ exports[`Field for string setting should render as read only with help text if o
           size="xs"
         >
           <React.Fragment>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Default: {value}"
               id="advancedSettings.field.defaultValueText"
               values={
@@ -4120,10 +4076,9 @@ exports[`Field for string setting should render as read only with help text if o
       <EuiText
         size="xs"
       >
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="This setting is overridden by the OpenSearch Dashboards server and can not be changed."
           id="advancedSettings.field.helpText"
-          values={Object {}}
         />
       </EuiText>
     }
@@ -4162,7 +4117,7 @@ exports[`Field for string setting should render as read only with help text if p
           size="xs"
         >
           <React.Fragment>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Default: {value}"
               id="advancedSettings.field.defaultValueText"
               values={
@@ -4203,10 +4158,9 @@ exports[`Field for string setting should render as read only with help text if p
       <EuiText
         size="xs"
       >
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="This setting is controlled by dashboard admin only."
           id="advancedSettings.field.permissionControlledHelpText"
-          values={Object {}}
         />
       </EuiText>
     }
@@ -4252,10 +4206,9 @@ exports[`Field for string setting should render custom setting icon if it is cus
         aria-label="Custom setting"
         color="primary"
         content={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Custom setting"
             id="advancedSettings.field.customSettingTooltip"
-            values={Object {}}
           />
         }
         type="asterisk"
@@ -4365,10 +4318,9 @@ exports[`Field for string setting should render unsaved value if there are unsav
         aria-label="Custom setting"
         color="primary"
         content={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Custom setting"
             id="advancedSettings.field.customSettingTooltip"
-            values={Object {}}
           />
         }
         type="asterisk"
@@ -4434,7 +4386,7 @@ exports[`Field for string setting should render user value if there is user valu
           size="xs"
         >
           <React.Fragment>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Default: {value}"
               id="advancedSettings.field.defaultValueText"
               values={
@@ -4479,10 +4431,9 @@ exports[`Field for string setting should render user value if there is user valu
             data-test-subj="advancedSetting-resetField-string:test:setting"
             onClick={[Function]}
           >
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Reset to default"
               id="advancedSettings.field.resetToDefaultLinkText"
-              values={Object {}}
             />
           </EuiLink>
              
@@ -4575,7 +4526,7 @@ exports[`Field for stringWithValidation setting should render as read only with 
           size="xs"
         >
           <React.Fragment>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Default: {value}"
               id="advancedSettings.field.defaultValueText"
               values={
@@ -4616,10 +4567,9 @@ exports[`Field for stringWithValidation setting should render as read only with 
       <EuiText
         size="xs"
       >
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="This setting is overridden by the OpenSearch Dashboards server and can not be changed."
           id="advancedSettings.field.helpText"
-          values={Object {}}
         />
       </EuiText>
     }
@@ -4658,7 +4608,7 @@ exports[`Field for stringWithValidation setting should render as read only with 
           size="xs"
         >
           <React.Fragment>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Default: {value}"
               id="advancedSettings.field.defaultValueText"
               values={
@@ -4699,10 +4649,9 @@ exports[`Field for stringWithValidation setting should render as read only with 
       <EuiText
         size="xs"
       >
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="This setting is controlled by dashboard admin only."
           id="advancedSettings.field.permissionControlledHelpText"
-          values={Object {}}
         />
       </EuiText>
     }
@@ -4748,10 +4697,9 @@ exports[`Field for stringWithValidation setting should render custom setting ico
         aria-label="Custom setting"
         color="primary"
         content={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Custom setting"
             id="advancedSettings.field.customSettingTooltip"
-            values={Object {}}
           />
         }
         type="asterisk"
@@ -4861,10 +4809,9 @@ exports[`Field for stringWithValidation setting should render unsaved value if t
         aria-label="Custom setting"
         color="primary"
         content={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Custom setting"
             id="advancedSettings.field.customSettingTooltip"
-            values={Object {}}
           />
         }
         type="asterisk"
@@ -4930,7 +4877,7 @@ exports[`Field for stringWithValidation setting should render user value if ther
           size="xs"
         >
           <React.Fragment>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Default: {value}"
               id="advancedSettings.field.defaultValueText"
               values={
@@ -4975,10 +4922,9 @@ exports[`Field for stringWithValidation setting should render user value if ther
             data-test-subj="advancedSetting-resetField-string:test-validation:setting"
             onClick={[Function]}
           >
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Reset to default"
               id="advancedSettings.field.resetToDefaultLinkText"
-              values={Object {}}
             />
           </EuiLink>
              

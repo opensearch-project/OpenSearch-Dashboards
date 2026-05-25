@@ -4,10 +4,9 @@ exports[`TimeField should render a loading state 1`] = `
 <EuiForm>
   <EuiText>
     <p>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Select a primary time field for use with the global time filter."
         id="indexPatternManagement.createIndexPattern.stepTime.timeDescription"
-        values={Object {}}
       />
     </p>
   </EuiText>
@@ -19,10 +18,9 @@ exports[`TimeField should render a loading state 1`] = `
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Time field"
         id="indexPatternManagement.createIndexPattern.stepTime.fieldLabel"
-        values={Object {}}
       />
     }
     labelAppend={
@@ -53,10 +51,9 @@ exports[`TimeField should render a selected time field 1`] = `
 <EuiForm>
   <EuiText>
     <p>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Select a primary time field for use with the global time filter."
         id="indexPatternManagement.createIndexPattern.stepTime.timeDescription"
-        values={Object {}}
       />
     </p>
   </EuiText>
@@ -68,10 +65,9 @@ exports[`TimeField should render a selected time field 1`] = `
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Time field"
         id="indexPatternManagement.createIndexPattern.stepTime.fieldLabel"
-        values={Object {}}
       />
     }
     labelAppend={
@@ -81,10 +77,9 @@ exports[`TimeField should render a selected time field 1`] = `
         <EuiLink
           onClick={[Function]}
         >
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Refresh"
             id="indexPatternManagement.createIndexPattern.stepTime.refreshButton"
-            values={Object {}}
           />
         </EuiLink>
       </EuiText>
@@ -115,10 +110,9 @@ exports[`TimeField should render normally 1`] = `
 <EuiForm>
   <EuiText>
     <p>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Select a primary time field for use with the global time filter."
         id="indexPatternManagement.createIndexPattern.stepTime.timeDescription"
-        values={Object {}}
       />
     </p>
   </EuiText>
@@ -130,10 +124,9 @@ exports[`TimeField should render normally 1`] = `
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Time field"
         id="indexPatternManagement.createIndexPattern.stepTime.fieldLabel"
-        values={Object {}}
       />
     }
     labelAppend={
@@ -143,10 +136,9 @@ exports[`TimeField should render normally 1`] = `
         <EuiLink
           onClick={[Function]}
         >
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Refresh"
             id="indexPatternManagement.createIndexPattern.stepTime.refreshButton"
-            values={Object {}}
           />
         </EuiLink>
       </EuiText>
@@ -177,10 +169,9 @@ exports[`TimeField should render something if hiding time field 1`] = `
 <EuiForm>
   <EuiText>
     <p>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="The indices which match this index pattern don't contain any time fields."
         id="indexPatternManagement.createIndexPattern.stepTime.field.noTimeFieldsLabel"
-        values={Object {}}
       />
     </p>
   </EuiText>

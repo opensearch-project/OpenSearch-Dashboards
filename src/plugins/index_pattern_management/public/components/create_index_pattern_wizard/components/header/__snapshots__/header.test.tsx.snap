@@ -2,7 +2,15 @@
 
 exports[`Header should render a different name, prompt, and beta tag if provided 1`] = `
 <IntlProvider
+  defaultFormats={Object {}}
+  defaultLocale="en"
+  fallbackOnEmptyString={true}
+  formats={Object {}}
   locale="en"
+  messages={Object {}}
+  onError={[Function]}
+  onWarn={[Function]}
+  textComponent={Symbol(react.fragment)}
 >
   <Header
     docLinks={
@@ -85,37 +93,41 @@ exports[`Header should render a different name, prompt, and beta tag if provided
                   }
                 }
               >
-                <span>
-                  An index pattern can match a single source, for example, 
-                  <EuiCode>
-                    <EuiCodeBlockImpl
-                      inline={true}
-                    >
-                      <span>
-                        <code>
-                          filebeat-4-3-22
-                        </code>
-                      </span>
-                    </EuiCodeBlockImpl>
-                  </EuiCode>
-                  , or 
-                  <strong>
-                    multiple
-                  </strong>
-                   data sources, 
-                  <EuiCode>
-                    <EuiCodeBlockImpl
-                      inline={true}
-                    >
-                      <span>
-                        <code>
-                          filebeat-*
-                        </code>
-                      </span>
-                    </EuiCodeBlockImpl>
-                  </EuiCode>
-                  .
-                </span>
+                An index pattern can match a single source, for example, 
+                <EuiCode
+                  key=".$.1"
+                >
+                  <EuiCodeBlockImpl
+                    inline={true}
+                  >
+                    <span>
+                      <code>
+                        filebeat-4-3-22
+                      </code>
+                    </span>
+                  </EuiCodeBlockImpl>
+                </EuiCode>
+                , or 
+                <strong
+                  key=".$.3"
+                >
+                  multiple
+                </strong>
+                 data sources, 
+                <EuiCode
+                  key=".$.5"
+                >
+                  <EuiCodeBlockImpl
+                    inline={true}
+                  >
+                    <span>
+                      <code>
+                        filebeat-*
+                      </code>
+                    </span>
+                  </EuiCodeBlockImpl>
+                </EuiCode>
+                .
               </FormattedMessage>
               <br />
               <EuiLink
@@ -130,11 +142,8 @@ exports[`Header should render a different name, prompt, and beta tag if provided
                   <FormattedMessage
                     defaultMessage="Read documentation"
                     id="indexPatternManagement.createIndexPattern.documentation"
-                    values={Object {}}
                   >
-                    <span>
-                      Read documentation
-                    </span>
+                    Read documentation
                   </FormattedMessage>
                 </button>
               </EuiLink>
@@ -159,7 +168,15 @@ exports[`Header should render a different name, prompt, and beta tag if provided
 
 exports[`Header should render normally 1`] = `
 <IntlProvider
+  defaultFormats={Object {}}
+  defaultLocale="en"
+  fallbackOnEmptyString={true}
+  formats={Object {}}
   locale="en"
+  messages={Object {}}
+  onError={[Function]}
+  onWarn={[Function]}
+  textComponent={Symbol(react.fragment)}
 >
   <Header
     docLinks={
@@ -225,37 +242,41 @@ exports[`Header should render normally 1`] = `
                   }
                 }
               >
-                <span>
-                  An index pattern can match a single source, for example, 
-                  <EuiCode>
-                    <EuiCodeBlockImpl
-                      inline={true}
-                    >
-                      <span>
-                        <code>
-                          filebeat-4-3-22
-                        </code>
-                      </span>
-                    </EuiCodeBlockImpl>
-                  </EuiCode>
-                  , or 
-                  <strong>
-                    multiple
-                  </strong>
-                   data sources, 
-                  <EuiCode>
-                    <EuiCodeBlockImpl
-                      inline={true}
-                    >
-                      <span>
-                        <code>
-                          filebeat-*
-                        </code>
-                      </span>
-                    </EuiCodeBlockImpl>
-                  </EuiCode>
-                  .
-                </span>
+                An index pattern can match a single source, for example, 
+                <EuiCode
+                  key=".$.1"
+                >
+                  <EuiCodeBlockImpl
+                    inline={true}
+                  >
+                    <span>
+                      <code>
+                        filebeat-4-3-22
+                      </code>
+                    </span>
+                  </EuiCodeBlockImpl>
+                </EuiCode>
+                , or 
+                <strong
+                  key=".$.3"
+                >
+                  multiple
+                </strong>
+                 data sources, 
+                <EuiCode
+                  key=".$.5"
+                >
+                  <EuiCodeBlockImpl
+                    inline={true}
+                  >
+                    <span>
+                      <code>
+                        filebeat-*
+                      </code>
+                    </span>
+                  </EuiCodeBlockImpl>
+                </EuiCode>
+                .
               </FormattedMessage>
               <br />
               <EuiLink
@@ -270,11 +291,8 @@ exports[`Header should render normally 1`] = `
                   <FormattedMessage
                     defaultMessage="Read documentation"
                     id="indexPatternManagement.createIndexPattern.documentation"
-                    values={Object {}}
                   >
-                    <span>
-                      Read documentation
-                    </span>
+                    Read documentation
                   </FormattedMessage>
                 </button>
               </EuiLink>
@@ -289,7 +307,15 @@ exports[`Header should render normally 1`] = `
 
 exports[`Header should render without including system indices 1`] = `
 <IntlProvider
+  defaultFormats={Object {}}
+  defaultLocale="en"
+  fallbackOnEmptyString={true}
+  formats={Object {}}
   locale="en"
+  messages={Object {}}
+  onError={[Function]}
+  onWarn={[Function]}
+  textComponent={Symbol(react.fragment)}
 >
   <Header
     docLinks={
@@ -355,37 +381,41 @@ exports[`Header should render without including system indices 1`] = `
                   }
                 }
               >
-                <span>
-                  An index pattern can match a single source, for example, 
-                  <EuiCode>
-                    <EuiCodeBlockImpl
-                      inline={true}
-                    >
-                      <span>
-                        <code>
-                          filebeat-4-3-22
-                        </code>
-                      </span>
-                    </EuiCodeBlockImpl>
-                  </EuiCode>
-                  , or 
-                  <strong>
-                    multiple
-                  </strong>
-                   data sources, 
-                  <EuiCode>
-                    <EuiCodeBlockImpl
-                      inline={true}
-                    >
-                      <span>
-                        <code>
-                          filebeat-*
-                        </code>
-                      </span>
-                    </EuiCodeBlockImpl>
-                  </EuiCode>
-                  .
-                </span>
+                An index pattern can match a single source, for example, 
+                <EuiCode
+                  key=".$.1"
+                >
+                  <EuiCodeBlockImpl
+                    inline={true}
+                  >
+                    <span>
+                      <code>
+                        filebeat-4-3-22
+                      </code>
+                    </span>
+                  </EuiCodeBlockImpl>
+                </EuiCode>
+                , or 
+                <strong
+                  key=".$.3"
+                >
+                  multiple
+                </strong>
+                 data sources, 
+                <EuiCode
+                  key=".$.5"
+                >
+                  <EuiCodeBlockImpl
+                    inline={true}
+                  >
+                    <span>
+                      <code>
+                        filebeat-*
+                      </code>
+                    </span>
+                  </EuiCodeBlockImpl>
+                </EuiCode>
+                .
               </FormattedMessage>
               <br />
               <EuiLink
@@ -400,11 +430,8 @@ exports[`Header should render without including system indices 1`] = `
                   <FormattedMessage
                     defaultMessage="Read documentation"
                     id="indexPatternManagement.createIndexPattern.documentation"
-                    values={Object {}}
                   >
-                    <span>
-                      Read documentation
-                    </span>
+                    Read documentation
                   </FormattedMessage>
                 </button>
               </EuiLink>

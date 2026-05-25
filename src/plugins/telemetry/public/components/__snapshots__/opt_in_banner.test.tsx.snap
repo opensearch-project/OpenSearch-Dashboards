@@ -4,10 +4,9 @@ exports[`OptInDetailsComponent renders as expected 1`] = `
 <EuiCallOut
   iconType="questionInCircle"
   title={
-    <FormattedMessage
+    <Memo(MemoizedFormattedMessage)
       defaultMessage="Help us improve the OpenSearch Stack"
       id="telemetry.welcomeBanner.title"
-      values={Object {}}
     />
   }
 >
@@ -27,10 +26,9 @@ exports[`OptInDetailsComponent renders as expected 1`] = `
         onClick={[Function]}
         size="s"
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Enable"
           id="telemetry.welcomeBanner.enableButtonLabel"
-          values={Object {}}
         />
       </EuiButton>
     </EuiFlexItem>
@@ -42,10 +40,9 @@ exports[`OptInDetailsComponent renders as expected 1`] = `
         onClick={[Function]}
         size="s"
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Disable"
           id="telemetry.welcomeBanner.disableButtonLabel"
-          values={Object {}}
         />
       </EuiButton>
     </EuiFlexItem>

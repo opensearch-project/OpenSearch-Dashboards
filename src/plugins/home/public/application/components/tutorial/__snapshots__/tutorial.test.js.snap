@@ -8,7 +8,7 @@ exports[`isCloudEnabled is false should not render instruction toggle when ON_PR
     component="main"
   >
     <div>
-      <InjectIntl(IntroductionUI)
+      <injectIntl(IntroductionUI)
         description="tutorial used to drive jest tests"
         title="jest test tutorial"
       />
@@ -20,7 +20,7 @@ exports[`isCloudEnabled is false should not render instruction toggle when ON_PR
       <EuiPanel
         paddingSize="l"
       >
-        <InjectIntl(InstructionSetUi)
+        <injectIntl(InstructionSetUi)
           instructionVariants={
             Array [
               Object {
@@ -56,7 +56,7 @@ exports[`isCloudEnabled is false should render ON_PREM instructions with instruc
     component="main"
   >
     <div>
-      <InjectIntl(IntroductionUI)
+      <injectIntl(IntroductionUI)
         description="tutorial used to drive jest tests"
         iconType="logoApache"
         title="jest test tutorial"
@@ -98,7 +98,7 @@ exports[`isCloudEnabled is false should render ON_PREM instructions with instruc
       <EuiPanel
         paddingSize="l"
       >
-        <InjectIntl(InstructionSetUi)
+        <injectIntl(InstructionSetUi)
           instructionVariants={
             Array [
               Object {
@@ -134,7 +134,7 @@ exports[`should render ELASTIC_CLOUD instructions when isCloudEnabled is true 1`
     component="main"
   >
     <div>
-      <InjectIntl(IntroductionUI)
+      <injectIntl(IntroductionUI)
         description="tutorial used to drive jest tests"
         iconType="logoApache"
         title="jest test tutorial"
@@ -147,7 +147,7 @@ exports[`should render ELASTIC_CLOUD instructions when isCloudEnabled is true 1`
       <EuiPanel
         paddingSize="l"
       >
-        <InjectIntl(InstructionSetUi)
+        <injectIntl(InstructionSetUi)
           instructionVariants={
             Array [
               Object {

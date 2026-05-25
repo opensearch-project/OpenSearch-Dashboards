@@ -27,23 +27,20 @@ exports[`EmptyIndexPatternPrompt should render normally 1`] = `
         grow={false}
       >
         <h2>
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="You have data in OpenSearch."
             id="indexPatternManagement.emptyIndexPatternPrompt.youHaveData"
-            values={Object {}}
           />
           <br />
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Now, create an index pattern."
             id="indexPatternManagement.emptyIndexPatternPrompt.nowCreate"
-            values={Object {}}
           />
         </h2>
         <p>
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="OpenSearch Dashboards requires an index pattern to identify which indices you want to explore. An index pattern can point to a specific index, for example, your log data from yesterday, or all indices that contain your log data."
             id="indexPatternManagement.emptyIndexPatternPrompt.indexPatternExplanation"
-            values={Object {}}
           />
         </p>
         <CreateButton
@@ -56,10 +53,9 @@ exports[`EmptyIndexPatternPrompt should render normally 1`] = `
             ]
           }
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Create index pattern"
             id="indexPatternManagement.indexPatternTable.createBtn"
-            values={Object {}}
           />
         </CreateButton>
       </EuiText>
@@ -75,10 +71,9 @@ exports[`EmptyIndexPatternPrompt should render normally 1`] = `
     <EuiDescriptionListTitle
       className="inpEmptyIndexPatternPrompt__title"
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Want to learn more?"
         id="indexPatternManagement.emptyIndexPatternPrompt.learnMore"
-        values={Object {}}
       />
     </EuiDescriptionListTitle>
     <EuiDescriptionListDescription>
@@ -87,10 +82,9 @@ exports[`EmptyIndexPatternPrompt should render normally 1`] = `
         href="testUrl"
         target="_blank"
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Read documentation"
           id="indexPatternManagement.emptyIndexPatternPrompt.documentation"
-          values={Object {}}
         />
       </EuiLink>
     </EuiDescriptionListDescription>

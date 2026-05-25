@@ -6,7 +6,7 @@ exports[`Header should render normally 1`] = `
     size="s"
   >
     <h2>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Step {currentStepNumber} of {totalStepNumber}: Configure settings"
         id="datasetManagement.createDataset.stepTimeHeader"
         values={
@@ -22,7 +22,7 @@ exports[`Header should render normally 1`] = `
     size="m"
   />
   <EuiText>
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="Specify settings for your {dataset} {datasetName}."
       id="datasetManagement.createDataset.stepTimeLabel"
       values={

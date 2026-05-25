@@ -12,10 +12,9 @@ exports[`DataSourceHeader renders correctly 1`] = `
       size="s"
     >
       <h1>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Data Sources"
           id="dataSourcesManagement.dataSourcesTable.title"
-          values={Object {}}
         />
       </h1>
     </EuiText>
@@ -26,10 +25,9 @@ exports[`DataSourceHeader renders correctly 1`] = `
       size="s"
     >
       <p>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Create and manage data source connections."
           id="dataSourcesManagement.dataSourcesTable.mdsEnabled.description"
-          values={Object {}}
         />
       </p>
     </EuiText>

@@ -57,10 +57,9 @@ exports[`Header should render normally 1`] = `
         size="s"
       >
         <h1>
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Saved Objects"
             id="savedObjectsManagement.objectsTable.header.savedObjectsTitle"
-            values={Object {}}
           />
         </h1>
       </EuiText>
@@ -82,10 +81,9 @@ exports[`Header should render normally 1`] = `
             onClick={[Function]}
             size="s"
           >
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="Export all objects"
               id="savedObjectsManagement.objectsTable.header.exportButtonLabel"
-              values={Object {}}
             />
           </EuiButtonEmpty>
         </EuiFlexItem>
@@ -98,10 +96,9 @@ exports[`Header should render normally 1`] = `
             onClick={[Function]}
             size="s"
           >
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="Import"
               id="savedObjectsManagement.objectsTable.header.importButtonLabel"
-              values={Object {}}
             />
           </EuiButtonEmpty>
         </EuiFlexItem>
@@ -113,10 +110,9 @@ exports[`Header should render normally 1`] = `
             onClick={[Function]}
             size="s"
           >
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="Refresh"
               id="savedObjectsManagement.objectsTable.header.refreshButtonLabel"
-              values={Object {}}
             />
           </EuiButtonEmpty>
         </EuiFlexItem>
@@ -133,10 +129,9 @@ exports[`Header should render normally 1`] = `
       <EuiTextColor
         color="subdued"
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Manage and share your saved objects. To edit the underlying data of an object, go to its associated application."
           id="savedObjectsManagement.objectsTable.howToDeleteSavedObjectsDescription"
-          values={Object {}}
         />
       </EuiTextColor>
     </p>
@@ -160,10 +155,9 @@ exports[`Header should render normally when showDuplicateAll is undefined 1`] = 
         size="s"
       >
         <h1>
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Saved Objects"
             id="savedObjectsManagement.objectsTable.header.savedObjectsTitle"
-            values={Object {}}
           />
         </h1>
       </EuiText>
@@ -185,10 +179,9 @@ exports[`Header should render normally when showDuplicateAll is undefined 1`] = 
             onClick={[Function]}
             size="s"
           >
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="Export all objects"
               id="savedObjectsManagement.objectsTable.header.exportButtonLabel"
-              values={Object {}}
             />
           </EuiButtonEmpty>
         </EuiFlexItem>
@@ -201,10 +194,9 @@ exports[`Header should render normally when showDuplicateAll is undefined 1`] = 
             onClick={[Function]}
             size="s"
           >
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="Import"
               id="savedObjectsManagement.objectsTable.header.importButtonLabel"
-              values={Object {}}
             />
           </EuiButtonEmpty>
         </EuiFlexItem>
@@ -216,10 +208,9 @@ exports[`Header should render normally when showDuplicateAll is undefined 1`] = 
             onClick={[Function]}
             size="s"
           >
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="Refresh"
               id="savedObjectsManagement.objectsTable.header.refreshButtonLabel"
-              values={Object {}}
             />
           </EuiButtonEmpty>
         </EuiFlexItem>
@@ -236,10 +227,9 @@ exports[`Header should render normally when showDuplicateAll is undefined 1`] = 
       <EuiTextColor
         color="subdued"
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Manage and share your saved objects. To edit the underlying data of an object, go to its associated application."
           id="savedObjectsManagement.objectsTable.howToDeleteSavedObjectsDescription"
-          values={Object {}}
         />
       </EuiTextColor>
     </p>

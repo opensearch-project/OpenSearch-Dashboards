@@ -6,10 +6,9 @@ exports[`AdvancedOptions should hide if not showing 1`] = `
     iconType="arrowRight"
     onClick={[Function]}
   >
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="Show advanced settings"
       id="datasetManagement.createDataset.stepTime.options.showButton"
-      values={Object {}}
     />
   </EuiSmallButtonEmpty>
   <EuiSpacer
@@ -24,10 +23,9 @@ exports[`AdvancedOptions should render normally 1`] = `
     iconType="arrowDown"
     onClick={[Function]}
   >
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="Hide advanced settings"
       id="datasetManagement.createDataset.stepTime.options.hideButton"
-      values={Object {}}
     />
   </EuiSmallButtonEmpty>
   <EuiSpacer
@@ -41,17 +39,15 @@ exports[`AdvancedOptions should render normally 1`] = `
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
       helpText={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="OpenSearch Dashboards will provide a unique identifier for each index pattern. If you do not want to use this unique ID, enter a custom one."
           id="datasetManagement.createDataset.stepTime.options.patternLabel"
-          values={Object {}}
         />
       }
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Custom index pattern ID"
           id="datasetManagement.createDataset.stepTime.options.patternHeader"
-          values={Object {}}
         />
       }
       labelType="label"

@@ -29,10 +29,9 @@ exports[`props exportedFieldsUrl 1`] = `
         rel="noopener noreferrer"
         target="_blank"
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="View exported fields"
           id="home.tutorial.introduction.viewButtonLabel"
-          values={Object {}}
         />
       </EuiSmallButton>
     </div>

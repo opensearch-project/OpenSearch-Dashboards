@@ -12,10 +12,9 @@ exports[`renders DashboardCloneModal 1`] = `
         size="s"
       >
         <h2>
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Clone dashboard"
             id="dashboard.topNav.cloneModal.cloneDashboardModalHeaderTitle"
-            values={Object {}}
           />
         </h2>
       </EuiText>
@@ -26,10 +25,9 @@ exports[`renders DashboardCloneModal 1`] = `
       size="s"
     >
       <p>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Please enter a new name for your dashboard."
           id="dashboard.topNav.cloneModal.enterNewNameForDashboardDescription"
-          values={Object {}}
         />
       </p>
     </EuiText>
@@ -48,10 +46,9 @@ exports[`renders DashboardCloneModal 1`] = `
       data-test-subj="cloneCancelButton"
       onClick={[Function]}
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Cancel"
         id="dashboard.topNav.cloneModal.cancelButtonLabel"
-        values={Object {}}
       />
     </EuiSmallButtonEmpty>
     <EuiSmallButton
@@ -60,10 +57,9 @@ exports[`renders DashboardCloneModal 1`] = `
       isLoading={false}
       onClick={[Function]}
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Confirm Clone"
         id="dashboard.topNav.cloneModal.confirmButtonLabel"
-        values={Object {}}
       />
     </EuiSmallButton>
   </EuiModalFooter>

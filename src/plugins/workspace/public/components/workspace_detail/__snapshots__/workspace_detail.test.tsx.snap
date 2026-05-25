@@ -507,18 +507,14 @@ exports[`WorkspaceDetail render workspace detail page normally 1`] = `
                 <div
                   class="euiTextColor euiTextColor--subdued"
                 >
-                  <span>
-                    Manage who can view or edit workspace and assign workspace administrators on the 
-                    <button
-                      class="euiLink euiLink--primary"
-                      type="button"
-                    >
-                      <span>
-                        Collaborators
-                      </span>
-                    </button>
-                     page.
-                  </span>
+                  Manage who can view or edit workspace and assign workspace administrators on the 
+                  <button
+                    class="euiLink euiLink--primary"
+                    type="button"
+                  >
+                    Collaborators
+                  </button>
+                   page.
                 </div>
               </div>
             </div>

@@ -35,10 +35,9 @@ exports[`OverviewPageFooter render 1`] = `
             iconType="apps"
             size="xs"
           >
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="View app directory"
               id="opensearch-dashboards-react.pageFooter.appDirectoryButtonLabel"
-              values={Object {}}
             />
           </EuiButtonEmpty>
         </mockConstructor>

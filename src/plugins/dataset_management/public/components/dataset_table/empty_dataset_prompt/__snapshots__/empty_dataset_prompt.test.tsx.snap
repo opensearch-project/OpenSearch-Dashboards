@@ -27,23 +27,20 @@ exports[`EmptyDatasetPrompt should not render button when canSave is false 1`] =
         grow={false}
       >
         <h2>
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="You have data in OpenSearch."
             id="datasetManagement.emptyDatasetPrompt.youHaveData"
-            values={Object {}}
           />
           <br />
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Now, create an index pattern."
             id="datasetManagement.emptyDatasetPrompt.nowCreate"
-            values={Object {}}
           />
         </h2>
         <p>
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="OpenSearch Dashboards requires an index pattern to identify which indices you want to explore. An index pattern can point to a specific index, for example, your log data from yesterday, or all indices that contain your log data."
             id="datasetManagement.emptyDatasetPrompt.datasetExplanation"
-            values={Object {}}
           />
         </p>
       </EuiText>
@@ -59,10 +56,9 @@ exports[`EmptyDatasetPrompt should not render button when canSave is false 1`] =
     <EuiDescriptionListTitle
       className="inpEmptyDatasetPrompt__title"
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Want to learn more?"
         id="datasetManagement.emptyDatasetPrompt.learnMore"
-        values={Object {}}
       />
     </EuiDescriptionListTitle>
     <EuiDescriptionListDescription>
@@ -71,10 +67,9 @@ exports[`EmptyDatasetPrompt should not render button when canSave is false 1`] =
         href="testUrl"
         target="_blank"
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Read documentation"
           id="datasetManagement.emptyDatasetPrompt.documentation"
-          values={Object {}}
         />
       </EuiLink>
     </EuiDescriptionListDescription>
@@ -109,23 +104,20 @@ exports[`EmptyDatasetPrompt should render normally with creationOptions 1`] = `
         grow={false}
       >
         <h2>
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="You have data in OpenSearch."
             id="datasetManagement.emptyDatasetPrompt.youHaveData"
-            values={Object {}}
           />
           <br />
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Now, create an index pattern."
             id="datasetManagement.emptyDatasetPrompt.nowCreate"
-            values={Object {}}
           />
         </h2>
         <p>
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="OpenSearch Dashboards requires an index pattern to identify which indices you want to explore. An index pattern can point to a specific index, for example, your log data from yesterday, or all indices that contain your log data."
             id="datasetManagement.emptyDatasetPrompt.datasetExplanation"
-            values={Object {}}
           />
         </p>
         <CreateButton
@@ -138,10 +130,9 @@ exports[`EmptyDatasetPrompt should render normally with creationOptions 1`] = `
             ]
           }
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Create index pattern"
             id="datasetManagement.datasetTable.createBtn"
-            values={Object {}}
           />
         </CreateButton>
       </EuiText>
@@ -157,10 +148,9 @@ exports[`EmptyDatasetPrompt should render normally with creationOptions 1`] = `
     <EuiDescriptionListTitle
       className="inpEmptyDatasetPrompt__title"
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Want to learn more?"
         id="datasetManagement.emptyDatasetPrompt.learnMore"
-        values={Object {}}
       />
     </EuiDescriptionListTitle>
     <EuiDescriptionListDescription>
@@ -169,10 +159,9 @@ exports[`EmptyDatasetPrompt should render normally with creationOptions 1`] = `
         href="testUrl"
         target="_blank"
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Read documentation"
           id="datasetManagement.emptyDatasetPrompt.documentation"
-          values={Object {}}
         />
       </EuiLink>
     </EuiDescriptionListDescription>
@@ -207,32 +196,28 @@ exports[`EmptyDatasetPrompt should render normally with onCreateDataset 1`] = `
         grow={false}
       >
         <h2>
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="You have data in OpenSearch."
             id="datasetManagement.emptyDatasetPrompt.youHaveData"
-            values={Object {}}
           />
           <br />
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Now, create an index pattern."
             id="datasetManagement.emptyDatasetPrompt.nowCreate"
-            values={Object {}}
           />
         </h2>
         <p>
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="OpenSearch Dashboards requires an index pattern to identify which indices you want to explore. An index pattern can point to a specific index, for example, your log data from yesterday, or all indices that contain your log data."
             id="datasetManagement.emptyDatasetPrompt.datasetExplanation"
-            values={Object {}}
           />
         </p>
         <CreateDatasetButton
           onCreateDataset={[MockFunction]}
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Create dataset"
             id="datasetManagement.datasetTable.createButton"
-            values={Object {}}
           />
         </CreateDatasetButton>
       </EuiText>
@@ -248,10 +233,9 @@ exports[`EmptyDatasetPrompt should render normally with onCreateDataset 1`] = `
     <EuiDescriptionListTitle
       className="inpEmptyDatasetPrompt__title"
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Want to learn more?"
         id="datasetManagement.emptyDatasetPrompt.learnMore"
-        values={Object {}}
       />
     </EuiDescriptionListTitle>
     <EuiDescriptionListDescription>
@@ -260,10 +244,9 @@ exports[`EmptyDatasetPrompt should render normally with onCreateDataset 1`] = `
         href="testUrl"
         target="_blank"
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Read documentation"
           id="datasetManagement.emptyDatasetPrompt.documentation"
-          values={Object {}}
         />
       </EuiLink>
     </EuiDescriptionListDescription>

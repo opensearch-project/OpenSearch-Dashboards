@@ -4,7 +4,7 @@ exports[`OptInDetailsComponent renders as expected 1`] = `
 <EuiCallOut
   title="Help us improve the OpenSearch Stack"
 >
-  <FormattedMessage
+  <MemoizedFormattedMessage
     defaultMessage="To learn about how usage data helps us manage and improve our products and services, see our {privacyStatementLink}. To stop collection, {disableLink}."
     id="telemetry.telemetryOptedInNoticeDescription"
     values={
@@ -13,10 +13,9 @@ exports[`OptInDetailsComponent renders as expected 1`] = `
           href="management/opensearch-dashboards/settings"
           onClick={[Function]}
         >
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="disable usage data here"
             id="telemetry.telemetryOptedInDisableUsage"
-            values={Object {}}
           />
         </EuiLink>,
         "privacyStatementLink": <EuiLink
@@ -24,10 +23,9 @@ exports[`OptInDetailsComponent renders as expected 1`] = `
           onClick={[Function]}
           target="_blank"
         >
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Privacy Statement"
             id="telemetry.telemetryOptedInPrivacyStatement"
-            values={Object {}}
           />
         </EuiLink>,
       }
@@ -40,10 +38,9 @@ exports[`OptInDetailsComponent renders as expected 1`] = `
     onClick={[Function]}
     size="s"
   >
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="Dismiss"
       id="telemetry.telemetryOptedInDismissMessage"
-      values={Object {}}
     />
   </EuiButton>
 </EuiCallOut>

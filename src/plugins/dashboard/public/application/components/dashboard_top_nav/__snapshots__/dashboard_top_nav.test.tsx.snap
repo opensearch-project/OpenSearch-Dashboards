@@ -3,7 +3,9 @@
 exports[`Dashboard top nav render in embed mode 1`] = `
 <I18nProvider>
   <IntlProvider
+    defaultFormats={Object {}}
     defaultLocale="en"
+    fallbackOnEmptyString={true}
     formats={
       Object {
         "date": Object {
@@ -37,26 +39,6 @@ exports[`Dashboard top nav render in embed mode 1`] = `
             "style": "percent",
           },
         },
-        "relative": Object {
-          "days": Object {
-            "units": "day",
-          },
-          "hours": Object {
-            "units": "hour",
-          },
-          "minutes": Object {
-            "units": "minute",
-          },
-          "months": Object {
-            "units": "month",
-          },
-          "seconds": Object {
-            "units": "second",
-          },
-          "years": Object {
-            "units": "year",
-          },
-        },
         "time": Object {
           "full": Object {
             "hour": "numeric",
@@ -84,6 +66,8 @@ exports[`Dashboard top nav render in embed mode 1`] = `
     }
     locale="en"
     messages={Object {}}
+    onError={[Function]}
+    onWarn={[Function]}
     textComponent={Symbol(react.fragment)}
   >
     <PseudoLocaleWrapper>
@@ -1210,7 +1194,9 @@ exports[`Dashboard top nav render in embed mode 1`] = `
 exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] = `
 <I18nProvider>
   <IntlProvider
+    defaultFormats={Object {}}
     defaultLocale="en"
+    fallbackOnEmptyString={true}
     formats={
       Object {
         "date": Object {
@@ -1244,26 +1230,6 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
             "style": "percent",
           },
         },
-        "relative": Object {
-          "days": Object {
-            "units": "day",
-          },
-          "hours": Object {
-            "units": "hour",
-          },
-          "minutes": Object {
-            "units": "minute",
-          },
-          "months": Object {
-            "units": "month",
-          },
-          "seconds": Object {
-            "units": "second",
-          },
-          "years": Object {
-            "units": "year",
-          },
-        },
         "time": Object {
           "full": Object {
             "hour": "numeric",
@@ -1291,6 +1257,8 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
     }
     locale="en"
     messages={Object {}}
+    onError={[Function]}
+    onWarn={[Function]}
     textComponent={Symbol(react.fragment)}
   >
     <PseudoLocaleWrapper>
@@ -2417,7 +2385,9 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
 exports[`Dashboard top nav render in embed mode, components can be forced show by appending URL param 1`] = `
 <I18nProvider>
   <IntlProvider
+    defaultFormats={Object {}}
     defaultLocale="en"
+    fallbackOnEmptyString={true}
     formats={
       Object {
         "date": Object {
@@ -2451,26 +2421,6 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
             "style": "percent",
           },
         },
-        "relative": Object {
-          "days": Object {
-            "units": "day",
-          },
-          "hours": Object {
-            "units": "hour",
-          },
-          "minutes": Object {
-            "units": "minute",
-          },
-          "months": Object {
-            "units": "month",
-          },
-          "seconds": Object {
-            "units": "second",
-          },
-          "years": Object {
-            "units": "year",
-          },
-        },
         "time": Object {
           "full": Object {
             "hour": "numeric",
@@ -2498,6 +2448,8 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
     }
     locale="en"
     messages={Object {}}
+    onError={[Function]}
+    onWarn={[Function]}
     textComponent={Symbol(react.fragment)}
   >
     <PseudoLocaleWrapper>
@@ -3624,7 +3576,9 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
 exports[`Dashboard top nav render in full screen mode with appended URL param but none of the componenets can be forced show 1`] = `
 <I18nProvider>
   <IntlProvider
+    defaultFormats={Object {}}
     defaultLocale="en"
+    fallbackOnEmptyString={true}
     formats={
       Object {
         "date": Object {
@@ -3658,26 +3612,6 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
             "style": "percent",
           },
         },
-        "relative": Object {
-          "days": Object {
-            "units": "day",
-          },
-          "hours": Object {
-            "units": "hour",
-          },
-          "minutes": Object {
-            "units": "minute",
-          },
-          "months": Object {
-            "units": "month",
-          },
-          "seconds": Object {
-            "units": "second",
-          },
-          "years": Object {
-            "units": "year",
-          },
-        },
         "time": Object {
           "full": Object {
             "hour": "numeric",
@@ -3705,6 +3639,8 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
     }
     locale="en"
     messages={Object {}}
+    onError={[Function]}
+    onWarn={[Function]}
     textComponent={Symbol(react.fragment)}
   >
     <PseudoLocaleWrapper>
@@ -4831,7 +4767,9 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
 exports[`Dashboard top nav render in full screen mode, no componenets should be shown 1`] = `
 <I18nProvider>
   <IntlProvider
+    defaultFormats={Object {}}
     defaultLocale="en"
+    fallbackOnEmptyString={true}
     formats={
       Object {
         "date": Object {
@@ -4865,26 +4803,6 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
             "style": "percent",
           },
         },
-        "relative": Object {
-          "days": Object {
-            "units": "day",
-          },
-          "hours": Object {
-            "units": "hour",
-          },
-          "minutes": Object {
-            "units": "minute",
-          },
-          "months": Object {
-            "units": "month",
-          },
-          "seconds": Object {
-            "units": "second",
-          },
-          "years": Object {
-            "units": "year",
-          },
-        },
         "time": Object {
           "full": Object {
             "hour": "numeric",
@@ -4912,6 +4830,8 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
     }
     locale="en"
     messages={Object {}}
+    onError={[Function]}
+    onWarn={[Function]}
     textComponent={Symbol(react.fragment)}
   >
     <PseudoLocaleWrapper>
@@ -6038,7 +5958,9 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
 exports[`Dashboard top nav render with all components 1`] = `
 <I18nProvider>
   <IntlProvider
+    defaultFormats={Object {}}
     defaultLocale="en"
+    fallbackOnEmptyString={true}
     formats={
       Object {
         "date": Object {
@@ -6072,26 +5994,6 @@ exports[`Dashboard top nav render with all components 1`] = `
             "style": "percent",
           },
         },
-        "relative": Object {
-          "days": Object {
-            "units": "day",
-          },
-          "hours": Object {
-            "units": "hour",
-          },
-          "minutes": Object {
-            "units": "minute",
-          },
-          "months": Object {
-            "units": "month",
-          },
-          "seconds": Object {
-            "units": "second",
-          },
-          "years": Object {
-            "units": "year",
-          },
-        },
         "time": Object {
           "full": Object {
             "hour": "numeric",
@@ -6119,6 +6021,8 @@ exports[`Dashboard top nav render with all components 1`] = `
     }
     locale="en"
     messages={Object {}}
+    onError={[Function]}
+    onWarn={[Function]}
     textComponent={Symbol(react.fragment)}
   >
     <PseudoLocaleWrapper>

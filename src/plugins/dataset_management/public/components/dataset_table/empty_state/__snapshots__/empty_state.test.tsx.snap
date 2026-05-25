@@ -12,10 +12,9 @@ exports[`EmptyState should render normally 1`] = `
       <EuiPageContentHeaderSection>
         <EuiTitle>
           <h2>
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="Ready to try OpenSearch Dashboards? First, you need data."
               id="datasetManagement.createDataset.emptyState.noDataTitle"
-              values={Object {}}
             />
           </h2>
         </EuiTitle>
@@ -34,10 +33,9 @@ exports[`EmptyState should render normally 1`] = `
           <EuiCard
             className="inpEmptyState__card"
             description={
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="Load a data set and a OpenSearch Dashboards dashboard."
                 id="datasetManagement.createDataset.emptyState.sampleDataCardDescription"
-                values={Object {}}
               />
             }
             icon={
@@ -49,10 +47,9 @@ exports[`EmptyState should render normally 1`] = `
             }
             onClick={[Function]}
             title={
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="Add sample data"
                 id="datasetManagement.createDataset.emptyState.sampleDataCardTitle"
-                values={Object {}}
               />
             }
           />
@@ -79,16 +76,14 @@ exports[`EmptyState should render normally 1`] = `
                       href="https://opensearch.org/docs/mocked-test-branch"
                       target="_blank"
                     >
-                      <FormattedMessage
+                      <Memo(MemoizedFormattedMessage)
                         defaultMessage="Read documentation"
                         id="datasetManagement.createDataset.emptyState.readDocs"
-                        values={Object {}}
                       />
                     </EuiLink>,
-                    "title": <FormattedMessage
+                    "title": <Memo(MemoizedFormattedMessage)
                       defaultMessage="Want to learn more?"
                       id="datasetManagement.createDataset.emptyState.learnMore"
-                      values={Object {}}
                     />,
                   },
                 ]
@@ -106,10 +101,9 @@ exports[`EmptyState should render normally 1`] = `
                       data-test-subj="refreshIndicesButton"
                       onClick={[Function]}
                     >
-                      <FormattedMessage
+                      <Memo(MemoizedFormattedMessage)
                         defaultMessage="Check for new data"
                         id="datasetManagement.createDataset.emptyState.checkDataButton"
-                        values={Object {}}
                       />
                        
                       <EuiIcon
@@ -117,10 +111,9 @@ exports[`EmptyState should render normally 1`] = `
                         type="refresh"
                       />
                     </EuiLink>,
-                    "title": <FormattedMessage
+                    "title": <Memo(MemoizedFormattedMessage)
                       defaultMessage="Think you already have data?"
                       id="datasetManagement.createDataset.emptyState.haveData"
-                      values={Object {}}
                     />,
                   },
                 ]
@@ -137,7 +130,7 @@ exports[`EmptyState should render normally 1`] = `
     size="xs"
     textAlign="center"
   >
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="Some indices may be hidden. Try to {link} anyway."
       id="datasetManagement.createDataset.emptyState.createAnyway"
       values={
@@ -146,10 +139,9 @@ exports[`EmptyState should render normally 1`] = `
             data-test-subj="createAnyway"
             onClick={[Function]}
           >
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="create an index pattern"
               id="datasetManagement.createDataset.emptyState.createAnywayLink"
-              values={Object {}}
             />
           </EuiLink>,
         }

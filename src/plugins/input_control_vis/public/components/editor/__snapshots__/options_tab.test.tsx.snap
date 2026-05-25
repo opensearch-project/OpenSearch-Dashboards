@@ -15,10 +15,9 @@ exports[`OptionsTab should renders OptionsTab 1`] = `
       checked={false}
       data-test-subj="inputControlEditorUpdateFiltersOnChangeCheckbox"
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Update OpenSearch Dashboards filters on each change"
           id="inputControl.editor.optionsTab.updateFilterLabel"
-          values={Object {}}
         />
       }
       onChange={[Function]}
@@ -37,10 +36,9 @@ exports[`OptionsTab should renders OptionsTab 1`] = `
       checked={false}
       data-test-subj="inputControlEditorUseTimeFilterCheckbox"
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Use time filter"
           id="inputControl.editor.optionsTab.useTimeFilterLabel"
-          values={Object {}}
         />
       }
       onChange={[Function]}
@@ -59,10 +57,9 @@ exports[`OptionsTab should renders OptionsTab 1`] = `
       checked={false}
       data-test-subj="inputControlEditorPinFiltersCheckbox"
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Pin filters for all applications"
           id="inputControl.editor.optionsTab.pinFiltersLabel"
-          values={Object {}}
         />
       }
       onChange={[Function]}

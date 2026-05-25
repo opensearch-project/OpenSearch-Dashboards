@@ -41,20 +41,18 @@ exports[`NoDataSource should render correctly with the provided totalDataSourceC
           size="s"
           textAlign="center"
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="No data sources connected yet."
             id="dataSourcesManagement.dataSourceEmptyMenu.noConnectedDataSource"
-            values={Object {}}
           />
         </EuiText>
         <EuiText
           size="s"
           textAlign="center"
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Connect your data sources to get started."
             id="dataSourcesManagement.dataSourceEmptyMenu.connect"
-            values={Object {}}
           />
         </EuiText>
       </EuiFlexItem>
@@ -71,10 +69,9 @@ exports[`NoDataSource should render correctly with the provided totalDataSourceC
           onClick={[Function]}
           size="s"
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Manage data sources"
             id="dataSourcesManagement.dataSourceMenu.manageDataSource"
-            values={Object {}}
           />
         </EuiButton>
       </EuiFlexItem>
@@ -124,20 +121,18 @@ exports[`NoDataSource should render normally when incompatibleDataSourcesExist i
           size="s"
           textAlign="center"
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="No data sources connected yet."
             id="dataSourcesManagement.dataSourceEmptyMenu.noConnectedDataSource"
-            values={Object {}}
           />
         </EuiText>
         <EuiText
           size="s"
           textAlign="center"
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Connect your data sources to get started."
             id="dataSourcesManagement.dataSourceEmptyMenu.connect"
-            values={Object {}}
           />
         </EuiText>
       </EuiFlexItem>
@@ -154,10 +149,9 @@ exports[`NoDataSource should render normally when incompatibleDataSourcesExist i
           onClick={[Function]}
           size="s"
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Manage data sources"
             id="dataSourcesManagement.dataSourceMenu.manageDataSource"
-            values={Object {}}
           />
         </EuiButton>
       </EuiFlexItem>
@@ -207,20 +201,18 @@ exports[`NoDataSource should render normally when incompatibleDataSourcesExist i
           size="s"
           textAlign="center"
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="No data sources connected yet."
             id="dataSourcesManagement.dataSourceEmptyMenu.noConnectedDataSource"
-            values={Object {}}
           />
         </EuiText>
         <EuiText
           size="s"
           textAlign="center"
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Connect your data sources to get started."
             id="dataSourcesManagement.dataSourceEmptyMenu.connect"
-            values={Object {}}
           />
         </EuiText>
       </EuiFlexItem>
@@ -237,10 +229,9 @@ exports[`NoDataSource should render normally when incompatibleDataSourcesExist i
           onClick={[Function]}
           size="s"
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Manage data sources"
             id="dataSourcesManagement.dataSourceMenu.manageDataSource"
-            values={Object {}}
           />
         </EuiButton>
       </EuiFlexItem>

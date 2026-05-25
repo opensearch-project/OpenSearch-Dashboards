@@ -14,10 +14,9 @@ exports[`DateFormatEditor should render normally 1`] = `
           href="https://momentjs.com/"
           target="_blank"
         >
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Documentation"
             id="indexPatternManagement.date.documentationLabel"
-            values={Object {}}
           />
            
           <EuiIcon
@@ -28,7 +27,7 @@ exports[`DateFormatEditor should render normally 1`] = `
     }
     isInvalid={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Moment.js format pattern (Default: {defaultPattern})"
         id="indexPatternManagement.date.momentLabel"
         values={

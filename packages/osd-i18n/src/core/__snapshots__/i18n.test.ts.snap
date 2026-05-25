@@ -22,12 +22,12 @@ exports[`I18n engine translate should throw error if translation message and def
 
 exports[`I18n engine translate should throw error if used format is not specified 1`] = `
 "[I18n] Error formatting message: \\"a.b.c\\" for locale: \\"en\\".
-SyntaxError: Expected \\"date\\", \\"number\\", \\"plural\\", \\"select\\", \\"selectordinal\\", or \\"time\\" but \\"f\\" found."
+SyntaxError: INVALID_ARGUMENT_TYPE"
 `;
 
 exports[`I18n engine translate should throw error if used format is not specified 2`] = `
 "[I18n] Error formatting the default message for: \\"d.e.f\\".
-SyntaxError: Expected \\"date\\", \\"number\\", \\"plural\\", \\"select\\", \\"selectordinal\\", or \\"time\\" but \\"b\\" found."
+SyntaxError: INVALID_ARGUMENT_TYPE"
 `;
 
 exports[`I18n engine translate should throw error if wrong context is provided to the translation string 1`] = `

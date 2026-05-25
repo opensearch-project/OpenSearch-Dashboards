@@ -2,7 +2,7 @@
 
 exports[`renders dynamic options should display disabled dynamic options with tooltip for non-string fields 1`] = `
 <Fragment>
-  <InjectIntl(IndexPatternSelectFormRowUi)
+  <injectIntl(IndexPatternSelectFormRowUi)
     IndexPatternSelect={[Function]}
     allowedIndexPatternIds={
       Set {
@@ -14,7 +14,7 @@ exports[`renders dynamic options should display disabled dynamic options with to
     indexPatternId="mockIndexPattern"
     onChange={[Function]}
   />
-  <InjectIntl(FieldSelectUi)
+  <injectIntl(FieldSelectUi)
     controlIndex={0}
     fieldName="numberField"
     filterField={[Function]}
@@ -29,10 +29,9 @@ exports[`renders dynamic options should display disabled dynamic options with to
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Allow multiple selection"
         id="inputControl.editor.listControl.multiselectDescription"
-        values={Object {}}
       />
     }
     id="multiselect-0"
@@ -43,10 +42,9 @@ exports[`renders dynamic options should display disabled dynamic options with to
       checked={true}
       data-test-subj="listControlMultiselectInput"
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Multiselect"
           id="inputControl.editor.listControl.multiselectLabel"
-          values={Object {}}
         />
       }
       onChange={[Function]}
@@ -59,10 +57,9 @@ exports[`renders dynamic options should display disabled dynamic options with to
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Only available for \\"string\\" fields"
         id="inputControl.editor.listControl.dynamicOptions.stringFieldDescription"
-        values={Object {}}
       />
     }
     id="dynamicOptions-0"
@@ -74,10 +71,9 @@ exports[`renders dynamic options should display disabled dynamic options with to
       data-test-subj="listControlDynamicOptionsSwitch"
       disabled={true}
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Dynamic Options"
           id="inputControl.editor.listControl.dynamicOptionsLabel"
-          values={Object {}}
         />
       }
       onChange={[Function]}
@@ -90,19 +86,17 @@ exports[`renders dynamic options should display disabled dynamic options with to
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Number of options"
         id="inputControl.editor.listControl.sizeDescription"
-        values={Object {}}
       />
     }
     id="size-0"
     key="size"
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Size"
         id="inputControl.editor.listControl.sizeLabel"
-        values={Object {}}
       />
     }
     labelType="label"
@@ -119,7 +113,7 @@ exports[`renders dynamic options should display disabled dynamic options with to
 
 exports[`renders dynamic options should display dynamic options for string fields 1`] = `
 <Fragment>
-  <InjectIntl(IndexPatternSelectFormRowUi)
+  <injectIntl(IndexPatternSelectFormRowUi)
     IndexPatternSelect={[Function]}
     allowedIndexPatternIds={
       Set {
@@ -131,7 +125,7 @@ exports[`renders dynamic options should display dynamic options for string field
     indexPatternId="mockIndexPattern"
     onChange={[Function]}
   />
-  <InjectIntl(FieldSelectUi)
+  <injectIntl(FieldSelectUi)
     controlIndex={0}
     fieldName="keywordField"
     filterField={[Function]}
@@ -146,10 +140,9 @@ exports[`renders dynamic options should display dynamic options for string field
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Allow multiple selection"
         id="inputControl.editor.listControl.multiselectDescription"
-        values={Object {}}
       />
     }
     id="multiselect-0"
@@ -160,10 +153,9 @@ exports[`renders dynamic options should display dynamic options for string field
       checked={true}
       data-test-subj="listControlMultiselectInput"
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Multiselect"
           id="inputControl.editor.listControl.multiselectLabel"
-          values={Object {}}
         />
       }
       onChange={[Function]}
@@ -176,10 +168,9 @@ exports[`renders dynamic options should display dynamic options for string field
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Update options in response to user input"
         id="inputControl.editor.listControl.dynamicOptions.updateDescription"
-        values={Object {}}
       />
     }
     id="dynamicOptions-0"
@@ -191,10 +182,9 @@ exports[`renders dynamic options should display dynamic options for string field
       data-test-subj="listControlDynamicOptionsSwitch"
       disabled={false}
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Dynamic Options"
           id="inputControl.editor.listControl.dynamicOptionsLabel"
-          values={Object {}}
         />
       }
       onChange={[Function]}
@@ -205,7 +195,7 @@ exports[`renders dynamic options should display dynamic options for string field
 
 exports[`renders dynamic options should display size field when dynamic options is disabled 1`] = `
 <Fragment>
-  <InjectIntl(IndexPatternSelectFormRowUi)
+  <injectIntl(IndexPatternSelectFormRowUi)
     IndexPatternSelect={[Function]}
     allowedIndexPatternIds={
       Set {
@@ -217,7 +207,7 @@ exports[`renders dynamic options should display size field when dynamic options 
     indexPatternId="mockIndexPattern"
     onChange={[Function]}
   />
-  <InjectIntl(FieldSelectUi)
+  <injectIntl(FieldSelectUi)
     controlIndex={0}
     fieldName="keywordField"
     filterField={[Function]}
@@ -232,10 +222,9 @@ exports[`renders dynamic options should display size field when dynamic options 
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Allow multiple selection"
         id="inputControl.editor.listControl.multiselectDescription"
-        values={Object {}}
       />
     }
     id="multiselect-0"
@@ -246,10 +235,9 @@ exports[`renders dynamic options should display size field when dynamic options 
       checked={true}
       data-test-subj="listControlMultiselectInput"
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Multiselect"
           id="inputControl.editor.listControl.multiselectLabel"
-          values={Object {}}
         />
       }
       onChange={[Function]}
@@ -262,10 +250,9 @@ exports[`renders dynamic options should display size field when dynamic options 
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Update options in response to user input"
         id="inputControl.editor.listControl.dynamicOptions.updateDescription"
-        values={Object {}}
       />
     }
     id="dynamicOptions-0"
@@ -277,10 +264,9 @@ exports[`renders dynamic options should display size field when dynamic options 
       data-test-subj="listControlDynamicOptionsSwitch"
       disabled={false}
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Dynamic Options"
           id="inputControl.editor.listControl.dynamicOptionsLabel"
-          values={Object {}}
         />
       }
       onChange={[Function]}
@@ -293,19 +279,17 @@ exports[`renders dynamic options should display size field when dynamic options 
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Number of options"
         id="inputControl.editor.listControl.sizeDescription"
-        values={Object {}}
       />
     }
     id="size-0"
     key="size"
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Size"
         id="inputControl.editor.listControl.sizeLabel"
-        values={Object {}}
       />
     }
     labelType="label"
@@ -322,7 +306,7 @@ exports[`renders dynamic options should display size field when dynamic options 
 
 exports[`renders should display chaining input when parents are provided 1`] = `
 <Fragment>
-  <InjectIntl(IndexPatternSelectFormRowUi)
+  <injectIntl(IndexPatternSelectFormRowUi)
     IndexPatternSelect={[Function]}
     allowedIndexPatternIds={
       Set {
@@ -334,7 +318,7 @@ exports[`renders should display chaining input when parents are provided 1`] = `
     indexPatternId="indexPattern1"
     onChange={[Function]}
   />
-  <InjectIntl(FieldSelectUi)
+  <injectIntl(FieldSelectUi)
     controlIndex={0}
     fieldName="keywordField"
     filterField={[Function]}
@@ -349,19 +333,17 @@ exports[`renders should display chaining input when parents are provided 1`] = `
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Options are based on the value of parent control. Disabled if parent is not set."
         id="inputControl.editor.listControl.parentDescription"
-        values={Object {}}
       />
     }
     id="parentSelect-0"
     key="parentSelect"
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Parent control"
         id="inputControl.editor.listControl.parentLabel"
-        values={Object {}}
       />
     }
     labelType="label"
@@ -394,10 +376,9 @@ exports[`renders should display chaining input when parents are provided 1`] = `
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Allow multiple selection"
         id="inputControl.editor.listControl.multiselectDescription"
-        values={Object {}}
       />
     }
     id="multiselect-0"
@@ -408,10 +389,9 @@ exports[`renders should display chaining input when parents are provided 1`] = `
       checked={true}
       data-test-subj="listControlMultiselectInput"
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Multiselect"
           id="inputControl.editor.listControl.multiselectLabel"
-          values={Object {}}
         />
       }
       onChange={[Function]}
@@ -424,10 +404,9 @@ exports[`renders should display chaining input when parents are provided 1`] = `
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Update options in response to user input"
         id="inputControl.editor.listControl.dynamicOptions.updateDescription"
-        values={Object {}}
       />
     }
     id="dynamicOptions-0"
@@ -439,10 +418,9 @@ exports[`renders should display chaining input when parents are provided 1`] = `
       data-test-subj="listControlDynamicOptionsSwitch"
       disabled={false}
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Dynamic Options"
           id="inputControl.editor.listControl.dynamicOptionsLabel"
-          values={Object {}}
         />
       }
       onChange={[Function]}
@@ -455,19 +433,17 @@ exports[`renders should display chaining input when parents are provided 1`] = `
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Number of options"
         id="inputControl.editor.listControl.sizeDescription"
-        values={Object {}}
       />
     }
     id="size-0"
     key="size"
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Size"
         id="inputControl.editor.listControl.sizeLabel"
-        values={Object {}}
       />
     }
     labelType="label"
@@ -484,7 +460,7 @@ exports[`renders should display chaining input when parents are provided 1`] = `
 
 exports[`renders should not display any options until field is selected 1`] = `
 <Fragment>
-  <InjectIntl(IndexPatternSelectFormRowUi)
+  <injectIntl(IndexPatternSelectFormRowUi)
     IndexPatternSelect={[Function]}
     allowedIndexPatternIds={
       Set {
@@ -496,7 +472,7 @@ exports[`renders should not display any options until field is selected 1`] = `
     indexPatternId="mockIndexPattern"
     onChange={[Function]}
   />
-  <InjectIntl(FieldSelectUi)
+  <injectIntl(FieldSelectUi)
     controlIndex={0}
     fieldName=""
     filterField={[Function]}

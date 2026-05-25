@@ -2,7 +2,15 @@
 
 exports[`ManageDirectQueryDataConnectionsTable fetch security lake, cloudwatch, and AWS Prometheus direct query connections should render empty table 1`] = `
 <IntlProvider
+  defaultFormats={Object {}}
+  defaultLocale="en"
+  fallbackOnEmptyString={true}
+  formats={Object {}}
   locale="en"
+  messages={Object {}}
+  onError={[Function]}
+  onWarn={[Function]}
+  textComponent={Symbol(react.fragment)}
 >
   <ManageDirectQueryDataConnectionsTable
     featureFlagStatus={true}
@@ -2273,7 +2281,15 @@ exports[`ManageDirectQueryDataConnectionsTable fetch security lake, cloudwatch, 
 
 exports[`ManageDirectQueryDataConnectionsTable fetch security lake, cloudwatch, and AWS Prometheus direct query connections should render normally 1`] = `
 <IntlProvider
+  defaultFormats={Object {}}
+  defaultLocale="en"
+  fallbackOnEmptyString={true}
+  formats={Object {}}
   locale="en"
+  messages={Object {}}
+  onError={[Function]}
+  onWarn={[Function]}
+  textComponent={Symbol(react.fragment)}
 >
   <ManageDirectQueryDataConnectionsTable
     featureFlagStatus={true}
@@ -4544,7 +4560,15 @@ exports[`ManageDirectQueryDataConnectionsTable fetch security lake, cloudwatch, 
 
 exports[`ManageDirectQueryDataConnectionsTable should get direct query connections failed should render empty table 1`] = `
 <IntlProvider
+  defaultFormats={Object {}}
+  defaultLocale="en"
+  fallbackOnEmptyString={true}
+  formats={Object {}}
   locale="en"
+  messages={Object {}}
+  onError={[Function]}
+  onWarn={[Function]}
+  textComponent={Symbol(react.fragment)}
 >
   <ManageDirectQueryDataConnectionsTable
     featureFlagStatus={true}
@@ -5666,7 +5690,15 @@ exports[`ManageDirectQueryDataConnectionsTable should get direct query connectio
 
 exports[`ManageDirectQueryDataConnectionsTable should get direct query connections successful should render normally 1`] = `
 <IntlProvider
+  defaultFormats={Object {}}
+  defaultLocale="en"
+  fallbackOnEmptyString={true}
+  formats={Object {}}
   locale="en"
+  messages={Object {}}
+  onError={[Function]}
+  onWarn={[Function]}
+  textComponent={Symbol(react.fragment)}
 >
   <ManageDirectQueryDataConnectionsTable
     featureFlagStatus={true}

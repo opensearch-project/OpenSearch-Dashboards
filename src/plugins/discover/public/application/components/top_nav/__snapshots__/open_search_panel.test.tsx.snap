@@ -13,10 +13,9 @@ exports[`render 1`] = `
       size="s"
     >
       <h2>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="OpenSearch"
           id="discover.topNav.openSearchPanel.openSearchTitle"
-          values={Object {}}
         />
       </h2>
     </EuiText>
@@ -24,10 +23,9 @@ exports[`render 1`] = `
   <EuiFlyoutBody>
     <SavedObjectFinderUi
       noItemsMessage={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="No matching searches found."
           id="discover.topNav.openSearchPanel.noSearchesFoundDescription"
-          values={Object {}}
         />
       }
       onChoose={[Function]}
@@ -58,10 +56,9 @@ exports[`render 1`] = `
           href="/app/management/opensearch-dashboards/objects?_a=(tab:search)"
           onClick={[Function]}
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Manage searches"
             id="discover.topNav.openSearchPanel.manageSearchesButtonLabel"
-            values={Object {}}
           />
         </EuiSmallButtonEmpty>
       </EuiFlexItem>

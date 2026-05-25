@@ -10,10 +10,9 @@ exports[`SolutionsSection only renders a spacer if no solutions are available 1`
       <h2
         id="homSolutions__title"
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Pick your solution"
           id="home.solutionsSection.sectionTitle"
-          values={Object {}}
         />
       </h2>
     </EuiScreenReaderOnly>
@@ -39,10 +38,9 @@ exports[`SolutionsSection renders a single solution 1`] = `
       <h2
         id="homSolutions__title"
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Pick your solution"
           id="home.solutionsSection.sectionTitle"
-          values={Object {}}
         />
       </h2>
     </EuiScreenReaderOnly>
@@ -95,10 +93,9 @@ exports[`SolutionsSection renders multiple solutions in a single column when Ope
       <h2
         id="homSolutions__title"
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Pick your solution"
           id="home.solutionsSection.sectionTitle"
-          values={Object {}}
         />
       </h2>
     </EuiScreenReaderOnly>
@@ -218,10 +215,9 @@ exports[`SolutionsSection renders multiple solutions in two columns with OpenSea
       <h2
         id="homSolutions__title"
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Pick your solution"
           id="home.solutionsSection.sectionTitle"
-          values={Object {}}
         />
       </h2>
     </EuiScreenReaderOnly>

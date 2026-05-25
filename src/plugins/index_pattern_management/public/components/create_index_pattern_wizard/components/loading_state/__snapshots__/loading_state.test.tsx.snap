@@ -20,10 +20,9 @@ exports[`LoadingState should render normally 1`] = `
           }
         }
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Checking for OpenSearch data"
           id="indexPatternManagement.createIndexPattern.loadingState.checkingLabel"
-          values={Object {}}
         />
       </h2>
     </EuiTitle>

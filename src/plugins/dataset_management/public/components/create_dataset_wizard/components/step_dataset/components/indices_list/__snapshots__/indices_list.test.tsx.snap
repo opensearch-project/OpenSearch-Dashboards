@@ -45,7 +45,7 @@ exports[`IndicesList should change pages 1`] = `
             onClick={[Function]}
             size="s"
           >
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Rows per page: {perPage}"
               id="datasetManagement.createDataset.step.pagingLabel"
               values={
@@ -139,7 +139,7 @@ exports[`IndicesList should change per page 1`] = `
             onClick={[Function]}
             size="s"
           >
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Rows per page: {perPage}"
               id="datasetManagement.createDataset.step.pagingLabel"
               values={
@@ -250,7 +250,7 @@ exports[`IndicesList should highlight the query in the matches 1`] = `
             onClick={[Function]}
             size="s"
           >
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Rows per page: {perPage}"
               id="datasetManagement.createDataset.step.pagingLabel"
               values={
@@ -352,7 +352,7 @@ exports[`IndicesList should render normally 1`] = `
             onClick={[Function]}
             size="s"
           >
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Rows per page: {perPage}"
               id="datasetManagement.createDataset.step.pagingLabel"
               values={
@@ -518,7 +518,7 @@ exports[`IndicesList updating props should render all new indices 1`] = `
             onClick={[Function]}
             size="s"
           >
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Rows per page: {perPage}"
               id="datasetManagement.createDataset.step.pagingLabel"
               values={

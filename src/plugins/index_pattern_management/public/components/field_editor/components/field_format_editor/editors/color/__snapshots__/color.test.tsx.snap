@@ -7,36 +7,32 @@ exports[`ColorFormatEditor should render multiple colors 1`] = `
       Array [
         Object {
           "field": "regex",
-          "name": <FormattedMessage
+          "name": <Memo(MemoizedFormattedMessage)
             defaultMessage="Pattern (regular expression)"
             id="indexPatternManagement.color.patternLabel"
-            values={Object {}}
           />,
           "render": [Function],
         },
         Object {
           "field": "text",
-          "name": <FormattedMessage
+          "name": <Memo(MemoizedFormattedMessage)
             defaultMessage="Text color"
             id="indexPatternManagement.color.textColorLabel"
-            values={Object {}}
           />,
           "render": [Function],
         },
         Object {
           "field": "background",
-          "name": <FormattedMessage
+          "name": <Memo(MemoizedFormattedMessage)
             defaultMessage="Background color"
             id="indexPatternManagement.color.backgroundLabel"
-            values={Object {}}
           />,
           "render": [Function],
         },
         Object {
-          "name": <FormattedMessage
+          "name": <Memo(MemoizedFormattedMessage)
             defaultMessage="Example"
             id="indexPatternManagement.color.exampleLabel"
-            values={Object {}}
           />,
           "render": [Function],
         },
@@ -87,10 +83,9 @@ exports[`ColorFormatEditor should render multiple colors 1`] = `
     onClick={[Function]}
     size="s"
   >
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="Add color"
       id="indexPatternManagement.color.addColorButton"
-      values={Object {}}
     />
   </EuiButton>
   <EuiSpacer
@@ -106,36 +101,32 @@ exports[`ColorFormatEditor should render other type normally (range field) 1`] =
       Array [
         Object {
           "field": "range",
-          "name": <FormattedMessage
+          "name": <Memo(MemoizedFormattedMessage)
             defaultMessage="Range (min:max)"
             id="indexPatternManagement.color.rangeLabel"
-            values={Object {}}
           />,
           "render": [Function],
         },
         Object {
           "field": "text",
-          "name": <FormattedMessage
+          "name": <Memo(MemoizedFormattedMessage)
             defaultMessage="Text color"
             id="indexPatternManagement.color.textColorLabel"
-            values={Object {}}
           />,
           "render": [Function],
         },
         Object {
           "field": "background",
-          "name": <FormattedMessage
+          "name": <Memo(MemoizedFormattedMessage)
             defaultMessage="Background color"
             id="indexPatternManagement.color.backgroundLabel"
-            values={Object {}}
           />,
           "render": [Function],
         },
         Object {
-          "name": <FormattedMessage
+          "name": <Memo(MemoizedFormattedMessage)
             defaultMessage="Example"
             id="indexPatternManagement.color.exampleLabel"
-            values={Object {}}
           />,
           "render": [Function],
         },
@@ -179,10 +170,9 @@ exports[`ColorFormatEditor should render other type normally (range field) 1`] =
     onClick={[Function]}
     size="s"
   >
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="Add color"
       id="indexPatternManagement.color.addColorButton"
-      values={Object {}}
     />
   </EuiButton>
   <EuiSpacer
@@ -198,36 +188,32 @@ exports[`ColorFormatEditor should render string type normally (regex field) 1`] 
       Array [
         Object {
           "field": "regex",
-          "name": <FormattedMessage
+          "name": <Memo(MemoizedFormattedMessage)
             defaultMessage="Pattern (regular expression)"
             id="indexPatternManagement.color.patternLabel"
-            values={Object {}}
           />,
           "render": [Function],
         },
         Object {
           "field": "text",
-          "name": <FormattedMessage
+          "name": <Memo(MemoizedFormattedMessage)
             defaultMessage="Text color"
             id="indexPatternManagement.color.textColorLabel"
-            values={Object {}}
           />,
           "render": [Function],
         },
         Object {
           "field": "background",
-          "name": <FormattedMessage
+          "name": <Memo(MemoizedFormattedMessage)
             defaultMessage="Background color"
             id="indexPatternManagement.color.backgroundLabel"
-            values={Object {}}
           />,
           "render": [Function],
         },
         Object {
-          "name": <FormattedMessage
+          "name": <Memo(MemoizedFormattedMessage)
             defaultMessage="Example"
             id="indexPatternManagement.color.exampleLabel"
-            values={Object {}}
           />,
           "render": [Function],
         },
@@ -271,10 +257,9 @@ exports[`ColorFormatEditor should render string type normally (regex field) 1`] 
     onClick={[Function]}
     size="s"
   >
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="Add color"
       id="indexPatternManagement.color.addColorButton"
-      values={Object {}}
     />
   </EuiButton>
   <EuiSpacer

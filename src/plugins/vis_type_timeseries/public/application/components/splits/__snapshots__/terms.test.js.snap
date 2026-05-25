@@ -12,15 +12,14 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
         hasEmptyLabelSpace={false}
         id="42"
         label={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Group by"
             id="visTypeTimeseries.splits.terms.groupByLabel"
-            values={Object {}}
           />
         }
         labelType="label"
       >
-        <InjectIntl(GroupBySelectUi)
+        <injectIntl(GroupBySelectUi)
           onChange={[Function]}
         />
       </EuiCompressedFormRow>
@@ -34,16 +33,15 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
         hasEmptyLabelSpace={false}
         id="42"
         label={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="By"
             description="This labels a field selector allowing the user to chose 'by' which field to group."
             id="visTypeTimeseries.splits.terms.byLabel"
-            values={Object {}}
           />
         }
         labelType="label"
       >
-        <InjectIntl(FieldSelectUi)
+        <injectIntl(FieldSelectUi)
           data-test-subj="groupByField"
           fields={
             Object {
@@ -79,10 +77,9 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
         hasEmptyLabelSpace={false}
         id="42"
         label={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Include"
             id="visTypeTimeseries.splits.terms.includeLabel"
-            values={Object {}}
           />
         }
         labelType="label"
@@ -101,10 +98,9 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
         hasEmptyLabelSpace={false}
         id="42"
         label={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Exclude"
             id="visTypeTimeseries.splits.terms.excludeLabel"
-            values={Object {}}
           />
         }
         labelType="label"
@@ -125,10 +121,9 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
         hasEmptyLabelSpace={false}
         id="42"
         label={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Top"
             id="visTypeTimeseries.splits.terms.topLabel"
-            values={Object {}}
           />
         }
         labelType="label"
@@ -148,15 +143,14 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
         hasEmptyLabelSpace={false}
         id="42"
         label={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Order by"
             id="visTypeTimeseries.splits.terms.orderByLabel"
-            values={Object {}}
           />
         }
         labelType="label"
       >
-        <InjectIntl(MetricSelectUi)
+        <injectIntl(MetricSelectUi)
           additionalOptions={
             Array [
               Object {
@@ -185,10 +179,9 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
         hasEmptyLabelSpace={false}
         id="42"
         label={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Direction"
             id="visTypeTimeseries.splits.terms.directionLabel"
-            values={Object {}}
           />
         }
         labelType="label"

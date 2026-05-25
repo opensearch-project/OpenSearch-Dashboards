@@ -6,10 +6,9 @@ exports[`CreateButton should render normally 1`] = `
   fill={true}
   onClick={[Function]}
 >
-  <FormattedMessage
+  <MemoizedFormattedMessage
     defaultMessage="Create data source connection"
     id="dataSourcesManagement.dataSourceListing.createDataSourceButton"
-    values={Object {}}
   />
 </EuiSmallButton>
 `;

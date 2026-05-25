@@ -2,7 +2,15 @@
 
 exports[`DataSourceTable should get datasources failed should render empty table 1`] = `
 <IntlProvider
+  defaultFormats={Object {}}
+  defaultLocale="en"
+  fallbackOnEmptyString={true}
+  formats={Object {}}
   locale="en"
+  messages={Object {}}
+  onError={[Function]}
+  onWarn={[Function]}
+  textComponent={Symbol(react.fragment)}
 >
   <DataSourceTable
     history={
@@ -65,11 +73,8 @@ exports[`DataSourceTable should get datasources failed should render empty table
             <FormattedMessage
               defaultMessage="No Data Source Connections have been created yet."
               id="dataSourcesManagement.dataSourcesTable.noData"
-              values={Object {}}
             >
-              <span>
-                No Data Source Connections have been created yet.
-              </span>
+              No Data Source Connections have been created yet.
             </FormattedMessage>
           </div>
         </EuiText>
@@ -157,11 +162,8 @@ exports[`DataSourceTable should get datasources failed should render empty table
                         <FormattedMessage
                           defaultMessage="Create direct query connection"
                           id="dataSourcesManagement.dataSourceListing.createDirectQueryButton"
-                          values={Object {}}
                         >
-                          <span>
-                            Create direct query connection
-                          </span>
+                          Create direct query connection
                         </FormattedMessage>
                       </span>
                     </span>
@@ -186,7 +188,15 @@ exports[`DataSourceTable should get datasources failed should render empty table
 
 exports[`DataSourceTable should get datasources successful should render normally 1`] = `
 <IntlProvider
+  defaultFormats={Object {}}
+  defaultLocale="en"
+  fallbackOnEmptyString={true}
+  formats={Object {}}
   locale="en"
+  messages={Object {}}
+  onError={[Function]}
+  onWarn={[Function]}
+  textComponent={Symbol(react.fragment)}
 >
   <DataSourceTable
     history={
@@ -2844,10 +2854,17 @@ exports[`DataSourceTable should get datasources successful should render normall
 </IntlProvider>
 `;
 
-
 exports[`DataSourceTable should not manage datasources when canManageDataSource is false should render empty table 1`] = `
 <IntlProvider
+  defaultFormats={Object {}}
+  defaultLocale="en"
+  fallbackOnEmptyString={true}
+  formats={Object {}}
   locale="en"
+  messages={Object {}}
+  onError={[Function]}
+  onWarn={[Function]}
+  textComponent={Symbol(react.fragment)}
 >
   <DataSourceTable
     history={
@@ -3671,11 +3688,8 @@ exports[`DataSourceTable should not manage datasources when canManageDataSource 
             <FormattedMessage
               defaultMessage="No Data Source Connections have been created yet."
               id="dataSourcesManagement.dataSourcesTable.noData"
-              values={Object {}}
             >
-              <span>
-                No Data Source Connections have been created yet.
-              </span>
+              No Data Source Connections have been created yet.
             </FormattedMessage>
           </div>
         </EuiText>

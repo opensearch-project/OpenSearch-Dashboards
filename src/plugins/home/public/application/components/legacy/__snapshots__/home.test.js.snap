@@ -13,10 +13,9 @@ exports[`home change home route should render a link to change the default route
     showDevToolsLink={true}
     showManagementLink={true}
     title={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Home"
         id="home.header.title"
-        values={Object {}}
       />
     }
   />
@@ -64,10 +63,9 @@ exports[`home directories should not render directory entry when showOnHomePage 
     showDevToolsLink={true}
     showManagementLink={true}
     title={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Home"
         id="home.header.title"
-        values={Object {}}
       />
     }
   />
@@ -115,10 +113,9 @@ exports[`home directories should render ADMIN directory entry in "Manage your da
     showDevToolsLink={true}
     showManagementLink={true}
     title={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Home"
         id="home.header.title"
-        values={Object {}}
       />
     }
   />
@@ -178,10 +175,9 @@ exports[`home directories should render DATA directory entry in "Ingest your dat
     showDevToolsLink={true}
     showManagementLink={true}
     title={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Home"
         id="home.header.title"
-        values={Object {}}
       />
     }
   />
@@ -241,10 +237,9 @@ exports[`home directories should render solutions in the "solution section" 1`] 
     showDevToolsLink={true}
     showManagementLink={true}
     title={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Home"
         id="home.header.title"
-        values={Object {}}
       />
     }
   />
@@ -345,10 +340,9 @@ exports[`home header render 1`] = `
     showDevToolsLink={true}
     showManagementLink={true}
     title={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Home"
         id="home.header.title"
-        values={Object {}}
       />
     }
   />
@@ -396,10 +390,9 @@ exports[`home header should show "Dev tools" link if console is available 1`] = 
     showDevToolsLink={true}
     showManagementLink={true}
     title={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Home"
         id="home.header.title"
-        values={Object {}}
       />
     }
   />
@@ -459,10 +452,9 @@ exports[`home header should show "Manage" link if stack management is available 
     showDevToolsLink={true}
     showManagementLink={true}
     title={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Home"
         id="home.header.title"
-        values={Object {}}
       />
     }
   />
@@ -510,10 +502,9 @@ exports[`home isNewOpenSearchDashboardsInstance should safely handle execeptions
     showDevToolsLink={true}
     showManagementLink={true}
     title={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Home"
         id="home.header.title"
-        values={Object {}}
       />
     }
   />
@@ -561,10 +552,9 @@ exports[`home isNewOpenSearchDashboardsInstance should set isNewOpenSearchDashbo
     showDevToolsLink={true}
     showManagementLink={true}
     title={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Home"
         id="home.header.title"
-        values={Object {}}
       />
     }
   />
@@ -612,10 +602,9 @@ exports[`home isNewOpenSearchDashboardsInstance should set isNewOpenSearchDashbo
     showDevToolsLink={true}
     showManagementLink={true}
     title={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Home"
         id="home.header.title"
-        values={Object {}}
       />
     }
   />
@@ -663,10 +652,9 @@ exports[`home should render home component 1`] = `
     showDevToolsLink={true}
     showManagementLink={true}
     title={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Home"
         id="home.header.title"
-        values={Object {}}
       />
     }
   />
@@ -714,10 +702,9 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
     showDevToolsLink={true}
     showManagementLink={true}
     title={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Home"
         id="home.header.title"
-        values={Object {}}
       />
     }
   />
@@ -765,10 +752,9 @@ exports[`home welcome should show the normal home page if welcome screen is disa
     showDevToolsLink={true}
     showManagementLink={true}
     title={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Home"
         id="home.header.title"
-        values={Object {}}
       />
     }
   />
@@ -824,10 +810,9 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
     showDevToolsLink={true}
     showManagementLink={true}
     title={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Home"
         id="home.header.title"
-        values={Object {}}
       />
     }
   />
