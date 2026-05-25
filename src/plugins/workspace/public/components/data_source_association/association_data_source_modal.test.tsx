@@ -60,7 +60,6 @@ const setupAssociationDataSourceModal = ({
   ]);
   const { logos } = chromeServiceMock.createStartContract();
   render(
-    // @ts-expect-error TS2769 TODO(ts-error): fixme
     <IntlProvider locale="en" defaultLocale="en">
       <AssociationDataSourceModal
         logos={logos}
@@ -103,7 +102,6 @@ const setupAssociationDataSourceModalForCrossClusterSearch = ({
   ]);
   const { logos } = chromeServiceMock.createStartContract();
   render(
-    // @ts-expect-error TS2769 TODO(ts-error): fixme
     <IntlProvider locale="en" defaultLocale="en">
       <AssociationDataSourceModal
         logos={logos}

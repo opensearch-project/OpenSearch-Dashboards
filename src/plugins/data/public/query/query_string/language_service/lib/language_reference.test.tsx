@@ -12,7 +12,6 @@ import { IntlProvider } from 'react-intl';
 // @ts-expect-error TS7006 TODO(ts-error): fixme
 const renderWithIntl = (ui) => {
   return render(
-    // @ts-expect-error TS2769 TODO(ts-error): fixme
     <IntlProvider locale="en" defaultLocale="en">
       {ui}
     </IntlProvider>

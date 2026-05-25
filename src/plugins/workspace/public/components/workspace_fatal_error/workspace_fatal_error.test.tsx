@@ -12,7 +12,6 @@ import { coreMock } from '../../../../../core/public/mocks';
 describe('<WorkspaceFatalError />', () => {
   it('render normally', async () => {
     const { findByText, container } = render(
-      // @ts-expect-error TS2769 TODO(ts-error): fixme
       <IntlProvider locale="en" defaultLocale="en">
         <WorkspaceFatalError />
       </IntlProvider>
@@ -23,7 +22,6 @@ describe('<WorkspaceFatalError />', () => {
 
   it('render error with callout', async () => {
     const { findByText, container } = render(
-      // @ts-expect-error TS2769 TODO(ts-error): fixme
       <IntlProvider locale="en" defaultLocale="en">
         <WorkspaceFatalError error="errorInCallout" />
       </IntlProvider>
@@ -47,7 +45,6 @@ describe('<WorkspaceFatalError />', () => {
     });
     const coreStartMock = coreMock.createStart();
     const { getByText } = render(
-      // @ts-expect-error TS2769 TODO(ts-error): fixme
       <IntlProvider locale="en" defaultLocale="en">
         <context.Provider
           value={

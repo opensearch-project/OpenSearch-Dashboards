@@ -52,7 +52,6 @@ describe('DefaultDiscoverTable', () => {
   ) => {
     const rows = rowsOverride ?? mockRows;
     return (
-      // @ts-expect-error TS2769 TODO(ts-error): fixme
       <IntlProvider locale="en" defaultLocale="en">
         <DataTable
           columns={mockColumns}
@@ -118,7 +117,6 @@ describe('DefaultDiscoverTable', () => {
   it('should not display the sample size callout when rows are fewer than sample size', () => {
     const fewRows = mockRows.slice(0, 5);
     render(
-      // @ts-expect-error TS2769 TODO(ts-error): fixme
       <IntlProvider locale="en" defaultLocale="en">
         <DataTable
           columns={mockColumns}

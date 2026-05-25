@@ -40,7 +40,6 @@ const WorkspaceInitialPage = (props: { isDashboardAdmin: boolean }) => {
   });
 
   return (
-    // @ts-expect-error TS2769 TODO(ts-error): fixme
     <IntlProvider locale="en" defaultLocale="en">
       <Provider>
         {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}

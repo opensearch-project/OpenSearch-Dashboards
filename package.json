@@ -168,7 +168,7 @@
     "**/engine.io/ws": "^8.20.1",
     "**/mime-db": "^1.54.0",
     "**/socket.io-adapter/ws": "^8.20.1",
-    "**/react-intl": "^3.12.1",
+    "**/react-intl": "^6.8.9",
     "**/tmp": "^0.2.7"
   },
   "workspaces": {

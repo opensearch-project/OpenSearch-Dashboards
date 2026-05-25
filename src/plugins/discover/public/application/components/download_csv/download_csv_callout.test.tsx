@@ -10,7 +10,6 @@ import { MAX_DOWNLOAD_CSV_COUNT } from './constants';
 
 const TestHarness = () => {
   return (
-    // @ts-expect-error TS2769 TODO(ts-error): fixme
     <IntlProvider locale="en" defaultLocale="en">
       <DiscoverDownloadCsvCallout />
     </IntlProvider>

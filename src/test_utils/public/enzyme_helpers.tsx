@@ -38,13 +38,6 @@
 import { I18nProvider, IntlShape, __IntlProvider } from '@osd/i18n/react';
 import { mount, ReactWrapper, render, shallow } from 'enzyme';
 import React, { ReactElement, ValidationMap } from 'react';
-import { IntlProvider, intlShape } from 'react-intl';
-
-// Cast IntlProvider to accept children prop for React 18 compatibility
-// The old @types/react-intl doesn't include children in the props
-const TypedIntlProvider = IntlProvider as React.ComponentType<
-  React.ComponentProps<typeof IntlProvider> & { children?: React.ReactNode }
->;
 
 // Use fake component to extract `intl` property to use in tests.
 const { intl } = (mount(
@@ -83,7 +76,12 @@ export function nodeWithIntlProp<T>(node: ReactElement<T>): ReactElement<T & { i
  *  @return The wrapped IntlProvider instance
  */
 export function wrapWithIntl<T>(node: ReactElement<T>) {
-  return <TypedIntlProvider locale="en">{node}</TypedIntlProvider>;
+  return (
+    // eslint-disable-next-line react/jsx-pascal-case
+    <__IntlProvider locale="en" defaultLocale="en">
+      {node}
+    </__IntlProvider>
+  );
 }
 
 /**

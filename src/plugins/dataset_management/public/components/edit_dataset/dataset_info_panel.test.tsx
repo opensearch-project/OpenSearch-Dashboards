@@ -44,7 +44,6 @@ const createMockDataset = (overrides = {}) => ({
 describe('DatasetInfoPanel', () => {
   const renderComponent = (dataset: any, editConfiguration?: () => void) => {
     return render(
-      // @ts-expect-error TS2769 TODO(ts-error): fixme
       <IntlProvider locale="en" defaultLocale="en">
         <DatasetInfoPanel dataset={dataset} editConfiguration={editConfiguration} />
       </IntlProvider>

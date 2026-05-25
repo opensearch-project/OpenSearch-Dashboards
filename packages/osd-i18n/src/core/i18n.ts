@@ -75,8 +75,6 @@ let defaultLocale = EN_LOCALE;
 let currentLocale = EN_LOCALE;
 let formats = EN_FORMATS;
 
-IntlMessageFormat.defaultLocale = defaultLocale;
-
 /**
  * Returns message by the given message id.
  * @param id - path to the message
@@ -167,7 +165,6 @@ export function setDefaultLocale(locale: string) {
   }
 
   defaultLocale = normalizeLocale(locale);
-  IntlMessageFormat.defaultLocale = defaultLocale;
 }
 
 export function getDefaultLocale() {
@@ -241,8 +238,8 @@ export function translate(id: string, { values = {}, defaultMessage }: Translate
       const formattedMessage = getMessageFormat(message, getLocale(), getFormats()).format(values);
 
       return shouldUsePseudoLocale
-        ? translateUsingPseudoLocale(formattedMessage)
-        : formattedMessage;
+        ? translateUsingPseudoLocale(String(formattedMessage))
+        : String(formattedMessage);
     } catch (e) {
       throw new Error(
         `[I18n] Error formatting message: "${id}" for locale: "${getLocale()}".\n${e}`
