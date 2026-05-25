@@ -43,6 +43,10 @@ export class TransformationService implements ITransformationService {
    * transformation catalog management
    */
   registerDefinition<TConfig>(definition: TransformationDefinition<TConfig>): void {
+    if (this.definitions.has(definition.id)) {
+      // eslint-disable-next-line no-console
+      console.warn(`TransformationService: overwriting existing definition "${definition.id}"`);
+    }
     this.definitions.set(definition.id, definition as TransformationDefinition);
   }
 
@@ -139,38 +143,43 @@ export class TransformationService implements ITransformationService {
     let currentSchema: Array<{ name?: string; type?: string }> = [...originalSchema];
 
     let pipelineChanged = false;
+    const updatedInstances = [...instances];
 
-    for (const instance of instances) {
+    for (let i = 0; i < updatedInstances.length; i++) {
+      const instance = updatedInstances[i];
       schemaMap.set(instance.instance_id, currentSchema);
 
       if (instance.validateConfig) {
         const cleaned = instance.validateConfig(instance.config, currentSchema);
         if (cleaned !== instance.config) {
-          instance.config = cleaned;
+          updatedInstances[i] = { ...instance, config: cleaned };
           pipelineChanged = true;
         }
       }
-      if (instance.hide) continue;
+
+      const current = updatedInstances[i];
+      if (current.hide) continue;
 
       try {
-        rows = instance.transformationMethod(rows, instance.config);
+        rows = current.transformationMethod(rows, current.config);
         // deriveSchemaFromRows handles field add/remove
+
         currentSchema = deriveSchemaFromRows(rows, currentSchema);
         // transformSchema handles type override
-        if (instance.transformSchema) {
-          currentSchema = instance.transformSchema(currentSchema, instance.config);
+        if (current.transformSchema) {
+          currentSchema = current.transformSchema(currentSchema, current.config);
         }
       } catch (err) {
         // eslint-disable-next-line no-console
         console.error(
-          `TransformationService: step "${instance.instance_id}" throws — skipping`,
+          `TransformationService: step "${current.instance_id}" throws — skipping`,
           err
         );
       }
     }
 
     if (pipelineChanged) {
-      this.pipeline$.next([...instances]);
+      this.pipeline$.next(updatedInstances);
     }
 
     this.stageSchemas$.next(schemaMap);

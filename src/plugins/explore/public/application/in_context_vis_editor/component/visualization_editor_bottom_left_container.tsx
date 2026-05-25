@@ -30,11 +30,7 @@ import { EditorPanel } from './editor_panel';
 import { useVisualizationBuilder } from '../hooks/use_visualization_builder';
 
 import '../visualization_editor.scss';
-import {
-  ITransformationService,
-  useTransformationService,
-  TransformPanel,
-} from '../../../components/data_transformations';
+import { useTransformationService, TransformPanel } from '../../../components/data_transformations';
 
 type ActiveTab = 'QUERY_TAB' | 'TRANSFORM_TAB';
 
@@ -127,7 +123,7 @@ export const ResizableQueryPanelAndVisualization = () => {
         </EuiErrorBoundary>
       );
     }
-    return <VisualizationContainer transformationService={transformServices} />;
+    return <VisualizationContainer />;
   };
   return (
     <EuiResizableContainer direction="vertical">
