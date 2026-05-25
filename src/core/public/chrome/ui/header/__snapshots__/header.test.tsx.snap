@@ -1920,108 +1920,6 @@ exports[`Header handles visibility and lock changes 1`] = `
       "put": [MockFunction],
     }
   }
-  intl={
-    Object {
-      "defaultFormats": Object {},
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {
-        "date": Object {
-          "full": Object {
-            "day": "numeric",
-            "month": "long",
-            "weekday": "long",
-            "year": "numeric",
-          },
-          "long": Object {
-            "day": "numeric",
-            "month": "long",
-            "year": "numeric",
-          },
-          "medium": Object {
-            "day": "numeric",
-            "month": "short",
-            "year": "numeric",
-          },
-          "short": Object {
-            "day": "numeric",
-            "month": "numeric",
-            "year": "2-digit",
-          },
-        },
-        "number": Object {
-          "currency": Object {
-            "style": "currency",
-          },
-          "percent": Object {
-            "style": "percent",
-          },
-        },
-        "relative": Object {
-          "days": Object {
-            "units": "day",
-          },
-          "hours": Object {
-            "units": "hour",
-          },
-          "minutes": Object {
-            "units": "minute",
-          },
-          "months": Object {
-            "units": "month",
-          },
-          "seconds": Object {
-            "units": "second",
-          },
-          "years": Object {
-            "units": "year",
-          },
-        },
-        "time": Object {
-          "full": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "long": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "medium": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-          },
-          "short": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-          },
-        },
-      },
-      "formatters": Object {
-        "getDateTimeFormat": [Function],
-        "getMessageFormat": [Function],
-        "getNumberFormat": [Function],
-        "getPluralFormat": [Function],
-        "getRelativeFormat": [Function],
-      },
-      "locale": "en",
-      "messages": Object {},
-      "now": [Function],
-      "onError": [Function],
-      "textComponent": Symbol(react.fragment),
-      "timeZone": null,
-    }
-  }
   isLocked$={
     BehaviorSubject {
       "_isScalar": false,
@@ -5805,7 +5703,7 @@ exports[`Header handles visibility and lock changes 1`] = `
                 <div
                   className="euiHeaderSectionItem euiHeaderSectionItem--borderLeft"
                 >
-                  <InjectIntl(HeaderHelpMenuUI)
+                  <injectIntl(HeaderHelpMenuUI)
                     helpExtension$={
                       BehaviorSubject {
                         "_isScalar": false,
@@ -7210,104 +7108,41 @@ exports[`Header handles visibility and lock changes 1`] = `
                       }
                       intl={
                         Object {
+                          "$t": [Function],
                           "defaultFormats": Object {},
                           "defaultLocale": "en",
+                          "defaultRichTextElements": undefined,
+                          "fallbackOnEmptyString": true,
                           "formatDate": [Function],
-                          "formatHTMLMessage": [Function],
+                          "formatDateTimeRange": [Function],
+                          "formatDateToParts": [Function],
+                          "formatDisplayName": [Function],
+                          "formatList": [Function],
+                          "formatListToParts": [Function],
                           "formatMessage": [Function],
                           "formatNumber": [Function],
+                          "formatNumberToParts": [Function],
                           "formatPlural": [Function],
-                          "formatRelative": [Function],
+                          "formatRelativeTime": [Function],
                           "formatTime": [Function],
-                          "formats": Object {
-                            "date": Object {
-                              "full": Object {
-                                "day": "numeric",
-                                "month": "long",
-                                "weekday": "long",
-                                "year": "numeric",
-                              },
-                              "long": Object {
-                                "day": "numeric",
-                                "month": "long",
-                                "year": "numeric",
-                              },
-                              "medium": Object {
-                                "day": "numeric",
-                                "month": "short",
-                                "year": "numeric",
-                              },
-                              "short": Object {
-                                "day": "numeric",
-                                "month": "numeric",
-                                "year": "2-digit",
-                              },
-                            },
-                            "number": Object {
-                              "currency": Object {
-                                "style": "currency",
-                              },
-                              "percent": Object {
-                                "style": "percent",
-                              },
-                            },
-                            "relative": Object {
-                              "days": Object {
-                                "units": "day",
-                              },
-                              "hours": Object {
-                                "units": "hour",
-                              },
-                              "minutes": Object {
-                                "units": "minute",
-                              },
-                              "months": Object {
-                                "units": "month",
-                              },
-                              "seconds": Object {
-                                "units": "second",
-                              },
-                              "years": Object {
-                                "units": "year",
-                              },
-                            },
-                            "time": Object {
-                              "full": Object {
-                                "hour": "numeric",
-                                "minute": "numeric",
-                                "second": "numeric",
-                                "timeZoneName": "short",
-                              },
-                              "long": Object {
-                                "hour": "numeric",
-                                "minute": "numeric",
-                                "second": "numeric",
-                                "timeZoneName": "short",
-                              },
-                              "medium": Object {
-                                "hour": "numeric",
-                                "minute": "numeric",
-                                "second": "numeric",
-                              },
-                              "short": Object {
-                                "hour": "numeric",
-                                "minute": "numeric",
-                              },
-                            },
-                          },
+                          "formatTimeToParts": [Function],
+                          "formats": Object {},
                           "formatters": Object {
                             "getDateTimeFormat": [Function],
+                            "getDisplayNames": [Function],
+                            "getListFormat": [Function],
                             "getMessageFormat": [Function],
                             "getNumberFormat": [Function],
-                            "getPluralFormat": [Function],
-                            "getRelativeFormat": [Function],
+                            "getPluralRules": [Function],
+                            "getRelativeTimeFormat": [Function],
                           },
                           "locale": "en",
                           "messages": Object {},
-                          "now": [Function],
                           "onError": [Function],
+                          "onWarn": [Function],
                           "textComponent": Symbol(react.fragment),
-                          "timeZone": null,
+                          "timeZone": undefined,
+                          "wrapRichTextChunksInFragment": undefined,
                         }
                       }
                       opensearchDashboardsDocLink="/docs"
@@ -7463,7 +7298,7 @@ exports[`Header handles visibility and lock changes 1`] = `
                         </div>
                       </EuiPopover>
                     </HeaderHelpMenuUI>
-                  </InjectIntl(HeaderHelpMenuUI)>
+                  </injectIntl(HeaderHelpMenuUI)>
                 </div>
               </EuiHeaderSectionItem>
             </div>
@@ -9481,44 +9316,6 @@ exports[`Header renders application header without title 1`] = `
       "patch": [MockFunction],
       "post": [MockFunction],
       "put": [MockFunction],
-    }
-  }
-  intl={
-    Object {
-      "$t": [Function],
-      "defaultFormats": Object {},
-      "defaultLocale": "en",
-      "defaultRichTextElements": undefined,
-      "fallbackOnEmptyString": true,
-      "formatDate": [Function],
-      "formatDateTimeRange": [Function],
-      "formatDateToParts": [Function],
-      "formatDisplayName": [Function],
-      "formatList": [Function],
-      "formatListToParts": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatNumberToParts": [Function],
-      "formatPlural": [Function],
-      "formatRelativeTime": [Function],
-      "formatTime": [Function],
-      "formatTimeToParts": [Function],
-      "formats": Object {},
-      "formatters": Object {
-        "getDateTimeFormat": [Function],
-        "getDisplayNames": [Function],
-        "getListFormat": [Function],
-        "getMessageFormat": [Function],
-        "getNumberFormat": [Function],
-        "getPluralRules": [Function],
-        "getRelativeTimeFormat": [Function],
-      },
-      "locale": "en",
-      "messages": Object {},
-      "onError": [Function],
-      "onWarn": [Function],
-      "textComponent": Symbol(react.fragment),
-      "timeZone": undefined,
     }
   }
   isLocked$={
@@ -13830,108 +13627,6 @@ exports[`Header renders condensed header 1`] = `
       "put": [MockFunction],
     }
   }
-  intl={
-    Object {
-      "defaultFormats": Object {},
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {
-        "date": Object {
-          "full": Object {
-            "day": "numeric",
-            "month": "long",
-            "weekday": "long",
-            "year": "numeric",
-          },
-          "long": Object {
-            "day": "numeric",
-            "month": "long",
-            "year": "numeric",
-          },
-          "medium": Object {
-            "day": "numeric",
-            "month": "short",
-            "year": "numeric",
-          },
-          "short": Object {
-            "day": "numeric",
-            "month": "numeric",
-            "year": "2-digit",
-          },
-        },
-        "number": Object {
-          "currency": Object {
-            "style": "currency",
-          },
-          "percent": Object {
-            "style": "percent",
-          },
-        },
-        "relative": Object {
-          "days": Object {
-            "units": "day",
-          },
-          "hours": Object {
-            "units": "hour",
-          },
-          "minutes": Object {
-            "units": "minute",
-          },
-          "months": Object {
-            "units": "month",
-          },
-          "seconds": Object {
-            "units": "second",
-          },
-          "years": Object {
-            "units": "year",
-          },
-        },
-        "time": Object {
-          "full": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "long": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "medium": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-          },
-          "short": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-          },
-        },
-      },
-      "formatters": Object {
-        "getDateTimeFormat": [Function],
-        "getMessageFormat": [Function],
-        "getNumberFormat": [Function],
-        "getPluralFormat": [Function],
-        "getRelativeFormat": [Function],
-      },
-      "locale": "en",
-      "messages": Object {},
-      "now": [Function],
-      "onError": [Function],
-      "textComponent": Symbol(react.fragment),
-      "timeZone": null,
-    }
-  }
   isLocked$={
     BehaviorSubject {
       "_isScalar": false,
@@ -16337,7 +16032,7 @@ exports[`Header renders condensed header 1`] = `
                 <div
                   className="euiHeaderSectionItem euiHeaderSectionItem--borderLeft"
                 >
-                  <InjectIntl(HeaderHelpMenuUI)
+                  <injectIntl(HeaderHelpMenuUI)
                     helpExtension$={
                       BehaviorSubject {
                         "_isScalar": false,
@@ -17742,104 +17437,41 @@ exports[`Header renders condensed header 1`] = `
                       }
                       intl={
                         Object {
+                          "$t": [Function],
                           "defaultFormats": Object {},
                           "defaultLocale": "en",
+                          "defaultRichTextElements": undefined,
+                          "fallbackOnEmptyString": true,
                           "formatDate": [Function],
-                          "formatHTMLMessage": [Function],
+                          "formatDateTimeRange": [Function],
+                          "formatDateToParts": [Function],
+                          "formatDisplayName": [Function],
+                          "formatList": [Function],
+                          "formatListToParts": [Function],
                           "formatMessage": [Function],
                           "formatNumber": [Function],
+                          "formatNumberToParts": [Function],
                           "formatPlural": [Function],
-                          "formatRelative": [Function],
+                          "formatRelativeTime": [Function],
                           "formatTime": [Function],
-                          "formats": Object {
-                            "date": Object {
-                              "full": Object {
-                                "day": "numeric",
-                                "month": "long",
-                                "weekday": "long",
-                                "year": "numeric",
-                              },
-                              "long": Object {
-                                "day": "numeric",
-                                "month": "long",
-                                "year": "numeric",
-                              },
-                              "medium": Object {
-                                "day": "numeric",
-                                "month": "short",
-                                "year": "numeric",
-                              },
-                              "short": Object {
-                                "day": "numeric",
-                                "month": "numeric",
-                                "year": "2-digit",
-                              },
-                            },
-                            "number": Object {
-                              "currency": Object {
-                                "style": "currency",
-                              },
-                              "percent": Object {
-                                "style": "percent",
-                              },
-                            },
-                            "relative": Object {
-                              "days": Object {
-                                "units": "day",
-                              },
-                              "hours": Object {
-                                "units": "hour",
-                              },
-                              "minutes": Object {
-                                "units": "minute",
-                              },
-                              "months": Object {
-                                "units": "month",
-                              },
-                              "seconds": Object {
-                                "units": "second",
-                              },
-                              "years": Object {
-                                "units": "year",
-                              },
-                            },
-                            "time": Object {
-                              "full": Object {
-                                "hour": "numeric",
-                                "minute": "numeric",
-                                "second": "numeric",
-                                "timeZoneName": "short",
-                              },
-                              "long": Object {
-                                "hour": "numeric",
-                                "minute": "numeric",
-                                "second": "numeric",
-                                "timeZoneName": "short",
-                              },
-                              "medium": Object {
-                                "hour": "numeric",
-                                "minute": "numeric",
-                                "second": "numeric",
-                              },
-                              "short": Object {
-                                "hour": "numeric",
-                                "minute": "numeric",
-                              },
-                            },
-                          },
+                          "formatTimeToParts": [Function],
+                          "formats": Object {},
                           "formatters": Object {
                             "getDateTimeFormat": [Function],
+                            "getDisplayNames": [Function],
+                            "getListFormat": [Function],
                             "getMessageFormat": [Function],
                             "getNumberFormat": [Function],
-                            "getPluralFormat": [Function],
-                            "getRelativeFormat": [Function],
+                            "getPluralRules": [Function],
+                            "getRelativeTimeFormat": [Function],
                           },
                           "locale": "en",
                           "messages": Object {},
-                          "now": [Function],
                           "onError": [Function],
+                          "onWarn": [Function],
                           "textComponent": Symbol(react.fragment),
-                          "timeZone": null,
+                          "timeZone": undefined,
+                          "wrapRichTextChunksInFragment": undefined,
                         }
                       }
                       opensearchDashboardsDocLink="/docs"
@@ -17995,7 +17627,7 @@ exports[`Header renders condensed header 1`] = `
                         </div>
                       </EuiPopover>
                     </HeaderHelpMenuUI>
-                  </InjectIntl(HeaderHelpMenuUI)>
+                  </injectIntl(HeaderHelpMenuUI)>
                 </div>
               </EuiHeaderSectionItem>
             </div>
@@ -19546,44 +19178,6 @@ exports[`Header renders page header with application title 1`] = `
       "patch": [MockFunction],
       "post": [MockFunction],
       "put": [MockFunction],
-    }
-  }
-  intl={
-    Object {
-      "$t": [Function],
-      "defaultFormats": Object {},
-      "defaultLocale": "en",
-      "defaultRichTextElements": undefined,
-      "fallbackOnEmptyString": true,
-      "formatDate": [Function],
-      "formatDateTimeRange": [Function],
-      "formatDateToParts": [Function],
-      "formatDisplayName": [Function],
-      "formatList": [Function],
-      "formatListToParts": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatNumberToParts": [Function],
-      "formatPlural": [Function],
-      "formatRelativeTime": [Function],
-      "formatTime": [Function],
-      "formatTimeToParts": [Function],
-      "formats": Object {},
-      "formatters": Object {
-        "getDateTimeFormat": [Function],
-        "getDisplayNames": [Function],
-        "getListFormat": [Function],
-        "getMessageFormat": [Function],
-        "getNumberFormat": [Function],
-        "getPluralRules": [Function],
-        "getRelativeTimeFormat": [Function],
-      },
-      "locale": "en",
-      "messages": Object {},
-      "onError": [Function],
-      "onWarn": [Function],
-      "textComponent": Symbol(react.fragment),
-      "timeZone": undefined,
     }
   }
   isLocked$={
@@ -24099,108 +23693,6 @@ exports[`Header toggles primary navigation menu when clicked 1`] = `
       "put": [MockFunction],
     }
   }
-  intl={
-    Object {
-      "defaultFormats": Object {},
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {
-        "date": Object {
-          "full": Object {
-            "day": "numeric",
-            "month": "long",
-            "weekday": "long",
-            "year": "numeric",
-          },
-          "long": Object {
-            "day": "numeric",
-            "month": "long",
-            "year": "numeric",
-          },
-          "medium": Object {
-            "day": "numeric",
-            "month": "short",
-            "year": "numeric",
-          },
-          "short": Object {
-            "day": "numeric",
-            "month": "numeric",
-            "year": "2-digit",
-          },
-        },
-        "number": Object {
-          "currency": Object {
-            "style": "currency",
-          },
-          "percent": Object {
-            "style": "percent",
-          },
-        },
-        "relative": Object {
-          "days": Object {
-            "units": "day",
-          },
-          "hours": Object {
-            "units": "hour",
-          },
-          "minutes": Object {
-            "units": "minute",
-          },
-          "months": Object {
-            "units": "month",
-          },
-          "seconds": Object {
-            "units": "second",
-          },
-          "years": Object {
-            "units": "year",
-          },
-        },
-        "time": Object {
-          "full": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "long": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "medium": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-          },
-          "short": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-          },
-        },
-      },
-      "formatters": Object {
-        "getDateTimeFormat": [Function],
-        "getMessageFormat": [Function],
-        "getNumberFormat": [Function],
-        "getPluralFormat": [Function],
-        "getRelativeFormat": [Function],
-      },
-      "locale": "en",
-      "messages": Object {},
-      "now": [Function],
-      "onError": [Function],
-      "textComponent": Symbol(react.fragment),
-      "timeZone": null,
-    }
-  }
   isLocked$={
     BehaviorSubject {
       "_isScalar": false,
@@ -26606,7 +26098,7 @@ exports[`Header toggles primary navigation menu when clicked 1`] = `
                 <div
                   className="euiHeaderSectionItem euiHeaderSectionItem--borderLeft"
                 >
-                  <InjectIntl(HeaderHelpMenuUI)
+                  <injectIntl(HeaderHelpMenuUI)
                     helpExtension$={
                       BehaviorSubject {
                         "_isScalar": false,
@@ -28011,104 +27503,41 @@ exports[`Header toggles primary navigation menu when clicked 1`] = `
                       }
                       intl={
                         Object {
+                          "$t": [Function],
                           "defaultFormats": Object {},
                           "defaultLocale": "en",
+                          "defaultRichTextElements": undefined,
+                          "fallbackOnEmptyString": true,
                           "formatDate": [Function],
-                          "formatHTMLMessage": [Function],
+                          "formatDateTimeRange": [Function],
+                          "formatDateToParts": [Function],
+                          "formatDisplayName": [Function],
+                          "formatList": [Function],
+                          "formatListToParts": [Function],
                           "formatMessage": [Function],
                           "formatNumber": [Function],
+                          "formatNumberToParts": [Function],
                           "formatPlural": [Function],
-                          "formatRelative": [Function],
+                          "formatRelativeTime": [Function],
                           "formatTime": [Function],
-                          "formats": Object {
-                            "date": Object {
-                              "full": Object {
-                                "day": "numeric",
-                                "month": "long",
-                                "weekday": "long",
-                                "year": "numeric",
-                              },
-                              "long": Object {
-                                "day": "numeric",
-                                "month": "long",
-                                "year": "numeric",
-                              },
-                              "medium": Object {
-                                "day": "numeric",
-                                "month": "short",
-                                "year": "numeric",
-                              },
-                              "short": Object {
-                                "day": "numeric",
-                                "month": "numeric",
-                                "year": "2-digit",
-                              },
-                            },
-                            "number": Object {
-                              "currency": Object {
-                                "style": "currency",
-                              },
-                              "percent": Object {
-                                "style": "percent",
-                              },
-                            },
-                            "relative": Object {
-                              "days": Object {
-                                "units": "day",
-                              },
-                              "hours": Object {
-                                "units": "hour",
-                              },
-                              "minutes": Object {
-                                "units": "minute",
-                              },
-                              "months": Object {
-                                "units": "month",
-                              },
-                              "seconds": Object {
-                                "units": "second",
-                              },
-                              "years": Object {
-                                "units": "year",
-                              },
-                            },
-                            "time": Object {
-                              "full": Object {
-                                "hour": "numeric",
-                                "minute": "numeric",
-                                "second": "numeric",
-                                "timeZoneName": "short",
-                              },
-                              "long": Object {
-                                "hour": "numeric",
-                                "minute": "numeric",
-                                "second": "numeric",
-                                "timeZoneName": "short",
-                              },
-                              "medium": Object {
-                                "hour": "numeric",
-                                "minute": "numeric",
-                                "second": "numeric",
-                              },
-                              "short": Object {
-                                "hour": "numeric",
-                                "minute": "numeric",
-                              },
-                            },
-                          },
+                          "formatTimeToParts": [Function],
+                          "formats": Object {},
                           "formatters": Object {
                             "getDateTimeFormat": [Function],
+                            "getDisplayNames": [Function],
+                            "getListFormat": [Function],
                             "getMessageFormat": [Function],
                             "getNumberFormat": [Function],
-                            "getPluralFormat": [Function],
-                            "getRelativeFormat": [Function],
+                            "getPluralRules": [Function],
+                            "getRelativeTimeFormat": [Function],
                           },
                           "locale": "en",
                           "messages": Object {},
-                          "now": [Function],
                           "onError": [Function],
+                          "onWarn": [Function],
                           "textComponent": Symbol(react.fragment),
-                          "timeZone": null,
+                          "timeZone": undefined,
+                          "wrapRichTextChunksInFragment": undefined,
                         }
                       }
                       opensearchDashboardsDocLink="/docs"
@@ -28264,7 +27693,7 @@ exports[`Header toggles primary navigation menu when clicked 1`] = `
                         </div>
                       </EuiPopover>
                     </HeaderHelpMenuUI>
-                  </InjectIntl(HeaderHelpMenuUI)>
+                  </injectIntl(HeaderHelpMenuUI)>
                 </div>
               </EuiHeaderSectionItem>
             </div>

@@ -3,11 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { mount } from 'enzyme';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { DirectQueryDataSourceConfigure } from './configure_direct_query_data_sources';
 import { NotificationsStart } from '../../../../../../core/public';
 import { act } from 'react';
 import { createMemoryHistory } from 'history';
+import { I18nProvider } from '@osd/i18n/react';
+import { Router, Route } from 'react-router-dom';
 
 const mockSetBreadcrumbs = jest.fn();
 const mockToasts = {
@@ -16,7 +19,17 @@ const mockToasts = {
 };
 const mockHttp = {
   get: jest.fn().mockResolvedValue({ data: { role1: {}, role2: {} } }),
-  post: jest.fn().mockResolvedValue({}),
+  post: jest.fn().mockImplementation((url: string) => {
+    if (url === '/api/ppl/search') {
+      return Promise.resolve({
+        json: jest.fn().mockResolvedValue({ jsonData: [] }),
+      });
+    }
+    if (url === '/api/directquery/dataconnections') {
+      return Promise.resolve({});
+    }
+    return Promise.resolve({});
+  }),
 };
 const mockSavedObjects = {
   client: {},
@@ -25,7 +38,9 @@ const mockNavigation = {};
 const mockApplication = {};
 
 const mockServices = {
-  chrome: {},
+  chrome: {
+    setBreadcrumbs: mockSetBreadcrumbs,
+  },
   setBreadcrumbs: mockSetBreadcrumbs,
   notifications: { toasts: mockToasts },
   http: mockHttp,
@@ -34,106 +49,97 @@ const mockServices = {
   application: mockApplication,
 };
 
-const mockUseOpenSearchDashboards = jest.fn(() => ({
-  services: mockServices,
-}));
-
 jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
-  useOpenSearchDashboards: () => mockUseOpenSearchDashboards(),
-}));
-
-const mockUseParams = jest.fn();
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'),
-  useParams: () => mockUseParams(),
-}));
-
-const mockContext = {
-  chrome: {
-    setBreadcrumbs: mockSetBreadcrumbs,
-  },
-  http: mockHttp,
-  notifications: {
-    toasts: mockToasts,
-  },
-  services: {
-    chrome: {
-      setBreadcrumbs: mockSetBreadcrumbs,
-    },
-    http: mockHttp,
-    notifications: {
-      toasts: mockToasts,
-    },
-  },
-};
-
-jest.mock('react', () => ({
-  ...jest.requireActual('react'),
-  useContext: jest.fn(() => mockContext),
+  useOpenSearchDashboards: () => ({
+    services: mockServices,
+  }),
 }));
 
 describe('ConfigureDirectQueryDataSourceWithRouter', () => {
   const mockNotifications = ({ toasts: mockToasts } as unknown) as NotificationsStart;
-  const mockLocation = { pathname: '', search: '', state: '', hash: '' };
   const mockMatch = { params: { type: 'AmazonS3AWSGlue' }, isExact: true, path: '', url: '' };
   const mockHistory = createMemoryHistory();
 
-  const mountComponent = (type: string) => {
-    mockUseParams.mockReturnValue({ type });
-    return mount(
-      <DirectQueryDataSourceConfigure
-        notifications={mockNotifications}
-        history={mockHistory}
-        location={mockLocation}
-        match={{ ...mockMatch, params: { type } }}
-        useNewUX={false}
-      />
-    );
+  const renderComponent = async (type: string) => {
+    mockHistory.push(`/configure/${type}`);
+
+    await act(async () => {
+      render(
+        <Router history={mockHistory}>
+          <I18nProvider>
+            <Route path="/configure/:type">
+              <DirectQueryDataSourceConfigure
+                notifications={mockNotifications}
+                history={mockHistory}
+                location={mockHistory.location}
+                match={{ ...mockMatch, params: { type } }}
+                useNewUX={false}
+              />
+            </Route>
+          </I18nProvider>
+        </Router>
+      );
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('reviewSaveOrCancel')).toBeInTheDocument();
+    });
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockHistory.push('/');
   });
 
-  it('renders the component for Amazon S3 data source', () => {
-    const wrapper = mountComponent('AmazonS3AWSGlue');
-    expect(wrapper.exists()).toBeTruthy();
-    expect(wrapper.find('DirectQueryDataSourceConfigure').exists()).toBeTruthy();
+  it.each([
+    ['AmazonS3AWSGlue', 'Connect to Amazon S3'],
+    ['Prometheus', 'Connect to Prometheus'],
+  ])('renders the component for %s data source', async (type, expectedButtonText) => {
+    await renderComponent(type);
+
+    expect(screen.getByTestId('createButton')).toHaveTextContent(expectedButtonText);
   });
 
-  it('renders the component for Prometheus data source', () => {
-    const wrapper = mountComponent('Prometheus');
-    expect(wrapper.exists()).toBeTruthy();
-    expect(wrapper.find('DirectQueryDataSourceConfigure').exists()).toBeTruthy();
-  });
+  it('sets breadcrumbs', async () => {
+    await renderComponent('AmazonS3AWSGlue');
 
-  it('sets breadcrumbs', () => {
-    mountComponent('AmazonS3AWSGlue');
     expect(mockSetBreadcrumbs).toHaveBeenCalled();
   });
 
   it('redirects to root path after successful data source creation', async () => {
-    // Mount the component
-    const wrapper = mountComponent('Prometheus');
+    const user = userEvent.setup();
     const pushSpy = jest.spyOn(mockHistory, 'push');
 
+    await renderComponent('Prometheus');
+
+    const nameInput = await waitFor(
+      () => {
+        const input = document.querySelector(
+          'input[data-test-subj="direct_query-data-source-name"]'
+        );
+        if (!input) throw new Error('Name input not found');
+        return input as HTMLInputElement;
+      },
+      { timeout: 5000 }
+    );
+
     await act(async () => {
-      // Find and fill in the data source name
-      const nameInput = wrapper.find('input[data-test-subj="direct_query-data-source-name"]');
-      nameInput.simulate('change', { target: { value: 'test' } });
-
-      // Find and fill in the Prometheus URI
-      const uriInput = wrapper.find('input[data-test-subj="Prometheus-URI"]');
-      uriInput.simulate('change', { target: { value: 'http://localhost:9090/' } });
-
-      // Find the create button and simulate click
-      const createButton = wrapper.find('button[data-test-subj="createButton"]');
-      createButton.simulate('click');
-
-      // Wait for the promise to resolve
-      await new Promise((resolve) => setImmediate(resolve));
+      fireEvent.change(nameInput, { target: { value: 'test' } });
+      fireEvent.blur(nameInput);
     });
 
-    expect(pushSpy).toHaveBeenCalledWith('/');
+    const uriInput = await screen.findByTestId('Prometheus-URI');
+    await act(async () => {
+      fireEvent.change(uriInput, { target: { value: 'http://localhost:9090/' } });
+      fireEvent.blur(uriInput);
+    });
+
+    await act(async () => {
+      await user.click(screen.getByTestId('createButton'));
+    });
+
+    await waitFor(() => {
+      expect(pushSpy).toHaveBeenCalledWith('/');
+    });
   });
 });

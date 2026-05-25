@@ -7,6 +7,7 @@ import { render } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import configureStore from 'redux-mock-store';
 import { ExploreMetricsRawTable } from './explore_metrics_raw_table';
+import { I18nProvider } from '@osd/i18n/react';
 
 const mockStore = configureStore([]);
 
@@ -49,7 +50,9 @@ describe('ExploreMetricsRawTable', () => {
 
     const { container } = render(
       <Provider store={store}>
-        <ExploreMetricsRawTable />
+        <I18nProvider>
+          <ExploreMetricsRawTable />
+        </I18nProvider>
       </Provider>
     );
 
@@ -68,7 +71,9 @@ describe('ExploreMetricsRawTable', () => {
 
     const { container } = render(
       <Provider store={store}>
-        <ExploreMetricsRawTable />
+        <I18nProvider>
+          <ExploreMetricsRawTable />
+        </I18nProvider>
       </Provider>
     );
 

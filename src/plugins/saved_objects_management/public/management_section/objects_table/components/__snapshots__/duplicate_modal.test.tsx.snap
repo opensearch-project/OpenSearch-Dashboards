@@ -58,9 +58,7 @@ HTMLCollection [
                 <div
                   class="euiModalHeader__title"
                 >
-                  <span>
-                    Copy 3 objects to another workspace?
-                  </span>
+                  Copy 3 objects to another workspace?
                 </div>
               </div>
               <div
@@ -205,9 +203,7 @@ HTMLCollection [
                     <span
                       class="euiButtonEmpty__text"
                     >
-                      <span>
-                        Cancel
-                      </span>
+                      Cancel
                     </span>
                   </span>
                 </button>
@@ -223,9 +219,7 @@ HTMLCollection [
                     <span
                       class="euiButton__text"
                     >
-                      <span>
-                        Copy
-                      </span>
+                      Copy
                     </span>
                   </span>
                 </button>

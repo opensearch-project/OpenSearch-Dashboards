@@ -205,7 +205,10 @@ export function getRegisteredLocales() {
 }
 
 interface TranslateArguments {
-  values?: Record<string, string | number | boolean | Date | null | undefined>;
+  values?: Record<
+    string,
+    string | number | boolean | Date | null | undefined | ((...chunks: any[]) => string)
+  >;
   defaultMessage: string;
   description?: string;
 }
@@ -232,10 +235,13 @@ export function translate(id: string, { values = {}, defaultMessage }: Translate
 
   if (message) {
     try {
+      // IntlMessageFormat natively supports functions in values for rich text formatting
       // We should call `format` even for messages without any value references
       // to let it handle escaped curly braces `\\{` that are the part of the text itself
       // and not value reference boundaries.
-      const formattedMessage = getMessageFormat(message, getLocale(), getFormats()).format(values);
+      const formattedMessage = getMessageFormat(message, getLocale(), getFormats()).format(
+        values as any
+      );
 
       // Ensure we always return a string by converting the result
       const messageString = Array.isArray(formattedMessage)
@@ -252,7 +258,7 @@ export function translate(id: string, { values = {}, defaultMessage }: Translate
 
   try {
     const msg = getMessageFormat(defaultMessage, getDefaultLocale(), getFormats());
-    const formattedDefault = msg.format(values);
+    const formattedDefault = msg.format(values as any);
 
     // Ensure we always return a string by converting the result
     return Array.isArray(formattedDefault) ? formattedDefault.join('') : String(formattedDefault);

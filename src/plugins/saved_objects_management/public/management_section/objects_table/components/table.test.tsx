@@ -40,6 +40,7 @@ import { SavedObjectsManagementAction } from '../../..';
 import { Table, TableProps } from './table';
 import { WorkspaceAttribute } from 'opensearch-dashboards/public';
 import { render } from '@testing-library/react';
+import { I18nProvider } from '@osd/i18n/react';
 
 // @ts-expect-error TS2739 TODO(ts-error): fixme
 const defaultProps: TableProps = {
@@ -288,7 +289,11 @@ describe('Table', () => {
         },
       ],
     };
-    const { getByTestId } = render(<Table {...customizedProps} />);
+    const { getByTestId } = render(
+      <I18nProvider>
+        <Table {...customizedProps} />
+      </I18nProvider>
+    );
     expect(
       getByTestId('savedObjectsTableRowTitle').querySelector(
         '[href="/app/indexPatterns/patterns/1"]'
@@ -318,7 +323,11 @@ describe('Table', () => {
       useUpdatedUX: true,
       items: [item],
     };
-    const { getByTestId } = render(<Table {...customizedProps} />);
+    const { getByTestId } = render(
+      <I18nProvider>
+        <Table {...customizedProps} />
+      </I18nProvider>
+    );
     expect(
       getByTestId('savedObjectsTableRowTitle').querySelector(
         '[href="/app/indexPatterns/patterns/bed098d0-4c7d-11f0-9c24-f31368ce9197::otel_v1_apm_span_sample_1"]'

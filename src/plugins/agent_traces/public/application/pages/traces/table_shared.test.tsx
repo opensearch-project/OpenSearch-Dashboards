@@ -162,7 +162,7 @@ describe('table_shared', () => {
   describe('TableEmptyState', () => {
     it('renders empty state with title and instrumentation guidance', () => {
       render(
-        <IntlProvider locale="en" defaultLocale="en">
+        <IntlProvider locale="en">
           <TableEmptyState title="No traces found" />
         </IntlProvider>
       );
@@ -241,7 +241,7 @@ describe('table_shared', () => {
 
     it('renders count with total for spans', () => {
       render(
-        <IntlProvider locale="en" defaultLocale="en">
+        <IntlProvider locale="en">
           <DataTableInfoBar {...defaultProps} />
         </IntlProvider>
       );
@@ -252,7 +252,7 @@ describe('table_shared', () => {
 
     it('renders count without total when hasHead is true', () => {
       render(
-        <IntlProvider locale="en" defaultLocale="en">
+        <IntlProvider locale="en">
           <DataTableInfoBar {...defaultProps} hasHead={true} />
         </IntlProvider>
       );
@@ -263,7 +263,7 @@ describe('table_shared', () => {
 
     it('renders trace entity name', () => {
       render(
-        <IntlProvider locale="en" defaultLocale="en">
+        <IntlProvider locale="en">
           <DataTableInfoBar {...defaultProps} entityName="trace" />
         </IntlProvider>
       );
@@ -272,7 +272,7 @@ describe('table_shared', () => {
 
     it('renders em dash when elapsedMs is undefined', () => {
       render(
-        <IntlProvider locale="en" defaultLocale="en">
+        <IntlProvider locale="en">
           <DataTableInfoBar {...defaultProps} elapsedMs={undefined} />
         </IntlProvider>
       );
@@ -282,7 +282,7 @@ describe('table_shared', () => {
     it('toggles wrap cell text switch', () => {
       const onWrapChange = jest.fn();
       render(
-        <IntlProvider locale="en" defaultLocale="en">
+        <IntlProvider locale="en">
           <DataTableInfoBar {...defaultProps} onWrapCellTextChange={onWrapChange} />
         </IntlProvider>
       );

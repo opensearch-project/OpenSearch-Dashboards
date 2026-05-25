@@ -50,11 +50,7 @@ const defaultProps: SchemaMappingsProps = {
 };
 
 const renderWithIntl = (component: React.ReactElement) => {
-  return render(
-    <IntlProvider locale="en" defaultLocale="en">
-      {component}
-    </IntlProvider>
-  );
+  return render(<IntlProvider locale="en">{component}</IntlProvider>);
 };
 
 describe('SchemaMappings Component', () => {

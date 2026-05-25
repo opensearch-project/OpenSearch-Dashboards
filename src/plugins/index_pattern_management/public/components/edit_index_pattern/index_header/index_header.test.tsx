@@ -60,7 +60,7 @@ describe('IndexHeader at new home page', () => {
     });
 
     return (
-      <IntlProvider locale="en" defaultLocale="en">
+      <IntlProvider locale="en">
         <Provider>
           <IndexHeader
             setDefault={setDefault}

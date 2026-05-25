@@ -60,7 +60,7 @@ const setupAssociationDataSourceModal = ({
   ]);
   const { logos } = chromeServiceMock.createStartContract();
   render(
-    <IntlProvider locale="en" defaultLocale="en">
+    <IntlProvider locale="en">
       <AssociationDataSourceModal
         logos={logos}
         mode={mode ?? AssociationDataSourceModalMode.OpenSearchConnections}
@@ -102,7 +102,7 @@ const setupAssociationDataSourceModalForCrossClusterSearch = ({
   ]);
   const { logos } = chromeServiceMock.createStartContract();
   render(
-    <IntlProvider locale="en" defaultLocale="en">
+    <IntlProvider locale="en">
       <AssociationDataSourceModal
         logos={logos}
         mode={AssociationDataSourceModalMode.OpenSearchConnections}

@@ -9,9 +9,9 @@ import { WorkspaceInitial } from './workspace_initial';
 import { coreMock } from '../../../../../core/public/mocks';
 import { createOpenSearchDashboardsReactContext } from '../../../../opensearch_dashboards_react/public';
 import { createMockedRegisteredUseCases$ } from '../../mocks';
-import { IntlProvider } from 'react-intl';
 import { of } from 'rxjs';
 import { ChromeNavControl } from 'opensearch-dashboards/public';
+import { I18nProvider } from '@osd/i18n/react';
 
 const mockNavControls: ChromeNavControl[] = [
   { mount: jest.fn(), order: 1 },
@@ -40,12 +40,12 @@ const WorkspaceInitialPage = (props: { isDashboardAdmin: boolean }) => {
   });
 
   return (
-    <IntlProvider locale="en" defaultLocale="en">
+    <I18nProvider>
       <Provider>
         {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}
         <WorkspaceInitial registeredUseCases$={registeredUseCases$} />
       </Provider>
-    </IntlProvider>
+    </I18nProvider>
   );
 };
 

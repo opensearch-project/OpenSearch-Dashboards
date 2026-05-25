@@ -4,7 +4,8 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mount } from 'enzyme';
+import { wrapWithIntl } from 'test_utils/enzyme_helpers';
 import { HeaderHelpMenu } from './header_help_menu';
 
 function mockProps() {
@@ -23,10 +24,10 @@ describe('Header help menu', () => {
       ...mockProps(),
       surveyLink: '/',
     };
-    const component = mountWithIntl(<HeaderHelpMenu {...props} />);
+    const component = mount(wrapWithIntl(<HeaderHelpMenu {...props} />));
     component.find('button').simulate('click');
 
-    expect(component).toMatchSnapshot();
+    expect(component.children()).toMatchSnapshot();
   });
 
   it('hides survey link', () => {
@@ -34,9 +35,9 @@ describe('Header help menu', () => {
       ...mockProps(),
       surveyLink: '',
     };
-    const component = mountWithIntl(<HeaderHelpMenu {...props} />);
+    const component = mount(wrapWithIntl(<HeaderHelpMenu {...props} />));
     component.find('button').simulate('click');
 
-    expect(component).toMatchSnapshot();
+    expect(component.children()).toMatchSnapshot();
   });
 });

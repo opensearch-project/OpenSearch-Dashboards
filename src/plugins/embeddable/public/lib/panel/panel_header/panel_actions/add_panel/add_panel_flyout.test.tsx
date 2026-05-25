@@ -38,11 +38,11 @@ import {
 import { HelloWorldContainer } from '../../../../test_samples/embeddables/hello_world_container';
 import { ContactCardEmbeddable } from '../../../../test_samples/embeddables/contact_card/contact_card_embeddable';
 import { ContainerInput } from '../../../../containers';
-import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
-import { ReactWrapper } from 'enzyme';
+import { mount, ReactWrapper } from 'enzyme';
 import { coreMock } from '../../../../../../../../core/public/mocks';
 import { findTestSubject } from 'test_utils/helpers';
 import { embeddablePluginMock } from '../../../../../mocks';
+import { I18nProvider } from '@osd/i18n/react';
 
 function DummySavedObjectFinder(props: { children: React.ReactNode }) {
   return (
@@ -76,15 +76,17 @@ test('createNewEmbeddable() add embeddable to container', async () => {
   const container = new HelloWorldContainer(input, { getEmbeddableFactory } as any);
   const onClose = jest.fn();
   const component = mount(
-    <AddPanelFlyout
-      container={container}
-      onClose={onClose}
-      getFactory={getEmbeddableFactory}
-      getAllFactories={start.getEmbeddableFactories}
-      notifications={core.notifications}
-      SavedObjectFinder={() => null}
-    />
-  ) as ReactWrapper<unknown, unknown, AddPanelFlyout>;
+    <I18nProvider>
+      <AddPanelFlyout
+        container={container}
+        onClose={onClose}
+        getFactory={getEmbeddableFactory}
+        getAllFactories={start.getEmbeddableFactories}
+        notifications={core.notifications}
+        SavedObjectFinder={() => null}
+      />
+    </I18nProvider>
+  ).find('AddPanelFlyout') as ReactWrapper<unknown, unknown, AddPanelFlyout>;
 
   // https://github.com/elastic/kibana/issues/64789
   expect(component.exists(EuiFlyout)).toBe(false);
@@ -126,24 +128,33 @@ test('selecting embeddable in "Create new ..." list calls createNewEmbeddable()'
   };
   const container = new HelloWorldContainer(input, { getEmbeddableFactory } as any);
   const onClose = jest.fn();
-  const component = mount(
-    <AddPanelFlyout
-      container={container}
-      onClose={onClose}
-      getFactory={getEmbeddableFactory}
-      getAllFactories={start.getEmbeddableFactories}
-      notifications={core.notifications}
-      SavedObjectFinder={(props) => <DummySavedObjectFinder {...props} />}
-    />
-  ) as ReactWrapper<any, {}, AddPanelFlyout>;
+  const wrapper = mount(
+    <I18nProvider>
+      <AddPanelFlyout
+        container={container}
+        onClose={onClose}
+        getFactory={getEmbeddableFactory}
+        getAllFactories={start.getEmbeddableFactories}
+        notifications={core.notifications}
+        SavedObjectFinder={(props) => <DummySavedObjectFinder {...props} />}
+      />
+    </I18nProvider>
+  );
+  const component = wrapper.find('AddPanelFlyout') as ReactWrapper<any, {}, AddPanelFlyout>;
 
   const spy = jest.fn();
   component.instance().createNewEmbeddable = spy;
 
   expect(spy).toHaveBeenCalledTimes(0);
 
-  findTestSubject(component, 'createNew').simulate('click');
-  findTestSubject(component, `createNew-${CONTACT_CARD_EMBEDDABLE}`).simulate('click');
+  const button = findTestSubject(wrapper, 'createNew');
+  expect(button.length).toBe(1);
+  button.simulate('click');
+  wrapper.update();
+
+  const menuItem = findTestSubject(wrapper, `createNew-${CONTACT_CARD_EMBEDDABLE}`);
+  expect(menuItem.length).toBe(1);
+  menuItem.simulate('click');
 
   expect(spy).toHaveBeenCalledTimes(1);
 });

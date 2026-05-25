@@ -10,9 +10,7 @@ exports[`region_map_options renders the RegionMapOptions with custom option if c
     <h2
       className="euiTitle euiTitle--xsmall"
     >
-      <span>
-        Layer settings
-      </span>
+      Layer settings
     </h2>
     <div
       className="euiSpacer euiSpacer--m"
@@ -228,7 +226,9 @@ exports[`region_map_options renders the RegionMapOptions with custom option if c
                   <option
                     label="name"
                     value="name"
-                  />
+                  >
+                    Name
+                  </option>
                 </select>
                 <div
                   className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
@@ -362,9 +362,7 @@ exports[`region_map_options renders the RegionMapOptions with custom option if c
       className="euiTitle euiTitle--xsmall"
       id="styleSettingTitleId"
     >
-      <span>
-        Style settings
-      </span>
+      Style settings
     </h2>
     <div
       className="euiSpacer euiSpacer--s"
@@ -399,7 +397,7 @@ exports[`region_map_options renders the RegionMapOptions with custom option if c
               onChange={[Function]}
               onFocus={[Function]}
               onMouseUp={[Function]}
-              value={Object {}}
+              value="Yellow to Red"
             >
               <option
                 disabled={true}
@@ -456,7 +454,7 @@ exports[`region_map_options renders the RegionMapOptions with custom option if c
               onChange={[Function]}
               onFocus={[Function]}
               type="number"
-              value={Object {}}
+              value={1}
             />
           </div>
         </div>
@@ -472,9 +470,7 @@ exports[`region_map_options renders the RegionMapOptions with custom option if c
     <h2
       className="euiTitle euiTitle--xsmall"
     >
-      <span>
-        Base layer settings
-      </span>
+      Base layer settings
     </h2>
     <div
       className="euiSpacer euiSpacer--s"
@@ -601,9 +597,7 @@ exports[`region_map_options renders the RegionMapOptions with default option if 
     <h2
       className="euiTitle euiTitle--xsmall"
     >
-      <span>
-        Layer settings
-      </span>
+      Layer settings
     </h2>
     <div
       className="euiSpacer euiSpacer--m"
@@ -717,7 +711,9 @@ exports[`region_map_options renders the RegionMapOptions with default option if 
                   />
                   <option
                     value="name"
-                  />
+                  >
+                    Name
+                  </option>
                 </select>
                 <div
                   className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
@@ -851,9 +847,7 @@ exports[`region_map_options renders the RegionMapOptions with default option if 
       className="euiTitle euiTitle--xsmall"
       id="styleSettingTitleId"
     >
-      <span>
-        Style settings
-      </span>
+      Style settings
     </h2>
     <div
       className="euiSpacer euiSpacer--s"
@@ -888,7 +882,7 @@ exports[`region_map_options renders the RegionMapOptions with default option if 
               onChange={[Function]}
               onFocus={[Function]}
               onMouseUp={[Function]}
-              value={Object {}}
+              value="Yellow to Red"
             >
               <option
                 disabled={true}
@@ -945,7 +939,7 @@ exports[`region_map_options renders the RegionMapOptions with default option if 
               onChange={[Function]}
               onFocus={[Function]}
               type="number"
-              value={Object {}}
+              value={1}
             />
           </div>
         </div>
@@ -961,9 +955,7 @@ exports[`region_map_options renders the RegionMapOptions with default option if 
     <h2
       className="euiTitle euiTitle--xsmall"
     >
-      <span>
-        Base layer settings
-      </span>
+      Base layer settings
     </h2>
     <div
       className="euiSpacer euiSpacer--s"

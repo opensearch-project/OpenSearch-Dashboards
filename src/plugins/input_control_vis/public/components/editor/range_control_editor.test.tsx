@@ -30,7 +30,7 @@
 
 import { shallow } from 'enzyme';
 import { SinonSpy, spy, assert } from 'sinon';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { wrapWithIntl } from 'test_utils/enzyme_helpers';
 
 import { findTestSubject } from 'test_utils/helpers';
 
@@ -38,6 +38,7 @@ import { RangeControlEditor } from './range_control_editor';
 import { ControlParams } from '../../editor_utils';
 import { getDepsMock } from '../../test_utils/get_deps_mock';
 import { getIndexPatternMock, updateComponent } from '../../test_utils';
+import { mount } from 'enzyme';
 
 const controlParams: ControlParams = {
   id: '1',
@@ -81,16 +82,18 @@ test('renders RangeControlEditor', async () => {
 });
 
 test('handleOptionsChange - step', async () => {
-  const component = mountWithIntl(
-    <RangeControlEditor
-      deps={deps}
-      getIndexPattern={getIndexPatternMock}
-      controlIndex={0}
-      controlParams={controlParams}
-      handleFieldNameChange={handleFieldNameChange}
-      handleIndexPatternChange={handleIndexPatternChange}
-      handleOptionsChange={handleOptionsChange}
-    />
+  const component = mount(
+    wrapWithIntl(
+      <RangeControlEditor
+        deps={deps}
+        getIndexPattern={getIndexPatternMock}
+        controlIndex={0}
+        controlParams={controlParams}
+        handleFieldNameChange={handleFieldNameChange}
+        handleIndexPatternChange={handleIndexPatternChange}
+        handleOptionsChange={handleOptionsChange}
+      />
+    )
   );
 
   await updateComponent(component);
@@ -106,16 +109,18 @@ test('handleOptionsChange - step', async () => {
 });
 
 test('handleOptionsChange - decimalPlaces', async () => {
-  const component = mountWithIntl(
-    <RangeControlEditor
-      deps={deps}
-      getIndexPattern={getIndexPatternMock}
-      controlIndex={0}
-      controlParams={controlParams}
-      handleFieldNameChange={handleFieldNameChange}
-      handleIndexPatternChange={handleIndexPatternChange}
-      handleOptionsChange={handleOptionsChange}
-    />
+  const component = mount(
+    wrapWithIntl(
+      <RangeControlEditor
+        deps={deps}
+        getIndexPattern={getIndexPatternMock}
+        controlIndex={0}
+        controlParams={controlParams}
+        handleFieldNameChange={handleFieldNameChange}
+        handleIndexPatternChange={handleIndexPatternChange}
+        handleOptionsChange={handleOptionsChange}
+      />
+    )
   );
 
   await updateComponent(component);

@@ -11,9 +11,7 @@ import { QueryAssistCallOut } from './call_outs';
 type Props = ComponentProps<typeof QueryAssistCallOut>;
 
 const IntlWrapper = ({ children }: PropsWithChildren<unknown>) => (
-  <IntlProvider locale="en" defaultLocale="en">
-    {children}
-  </IntlProvider>
+  <IntlProvider locale="en">{children}</IntlProvider>
 );
 
 const renderCallOut = (overrideProps: Partial<Props> = {}) => {

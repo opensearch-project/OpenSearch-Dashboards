@@ -7,13 +7,19 @@ import { Description } from './description';
 import { mount } from 'enzyme';
 
 import { mockManagementPlugin } from '../../../../mocks';
+import { I18nProvider } from '@osd/i18n/react';
 
 const mockContext = mockManagementPlugin.createIndexPatternManagmentContext();
 
 describe('Description', () => {
   it('render normally', () => {
-    // @ts-expect-error TS2739 TODO(ts-error): fixme
-    const component = mount(<Description docLinks={mockContext.docLinks} />);
+    const componentW = mount(
+      <I18nProvider>
+        {/* @ts-expect-error TS2739 TODO(ts-error): fixme */}
+        <Description docLinks={mockContext.docLinks} />
+      </I18nProvider>
+    );
+    const component = componentW.find('Description');
     expect(component).toMatchSnapshot();
   });
 });

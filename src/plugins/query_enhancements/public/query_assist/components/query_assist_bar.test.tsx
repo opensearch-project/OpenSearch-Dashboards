@@ -65,9 +65,7 @@ const dependencies: QueryEditorExtensionDependencies = {
 type Props = ComponentProps<typeof QueryAssistBar>;
 
 const IntlWrapper = ({ children }: PropsWithChildren<unknown>) => (
-  <IntlProvider locale="en" defaultLocale="en">
-    {children}
-  </IntlProvider>
+  <IntlProvider locale="en">{children}</IntlProvider>
 );
 
 const uiActionsStartMock = uiActionsPluginMock.createStartContract();

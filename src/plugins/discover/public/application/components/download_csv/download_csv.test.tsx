@@ -53,7 +53,7 @@ const mockDownloadCsvForOption = jest.fn();
 
 const TestHarness = (props: Partial<DiscoverDownloadCsvProps>) => {
   return (
-    <IntlProvider locale="en" defaultLocale="en">
+    <IntlProvider locale="en">
       <DiscoverDownloadCsv {...mockProps} {...props} />
     </IntlProvider>
   );

@@ -10,11 +10,7 @@ import { IntlProvider } from 'react-intl';
 import { DatasetMetadataFields } from './dataset_metadata_fields';
 
 const renderWithIntl = (component: React.ReactElement) => {
-  return render(
-    <IntlProvider locale="en" defaultLocale="en">
-      {component}
-    </IntlProvider>
-  );
+  return render(<IntlProvider locale="en">{component}</IntlProvider>);
 };
 
 describe('DatasetMetadataFields', () => {

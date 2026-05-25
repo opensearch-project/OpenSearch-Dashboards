@@ -38,6 +38,7 @@ jest.mock('react-markdown', () => {
   };
 });
 
+import { act } from 'react';
 import { uiSettingsServiceMock } from '../../ui_settings/ui_settings_service.mock';
 import { UserBannerService } from './user_banner_service';
 import { overlayBannersServiceMock } from './banners_service.mock';
@@ -83,10 +84,11 @@ describe('OverlayBannersService', () => {
 
     const mount = banners.replace.mock.calls[0][1];
     const div = document.createElement('div');
-    mount(div);
 
-    // Wait for React 18 async rendering (including lazy component loading)
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await act(async () => {
+      mount(div);
+      await Promise.resolve();
+    });
 
     expect(div.querySelector('.euiCallOut')).toBeInstanceOf(HTMLDivElement);
   });
@@ -98,7 +100,10 @@ describe('OverlayBannersService', () => {
 
     // Must mount in order for timer to start
     const mount = banners.replace.mock.calls[0][1];
-    mount(document.createElement('div'));
+    await act(async () => {
+      mount(document.createElement('div'));
+      await Promise.resolve();
+    });
     // Process all timers
     jest.runAllTimers();
     expect(banners.remove).toHaveBeenCalled();

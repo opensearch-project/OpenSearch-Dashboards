@@ -28,7 +28,8 @@
  * under the License.
  */
 
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mount } from 'enzyme';
+import { I18nProvider } from '@osd/i18n/react';
 import { DateRangesParamEditor } from './date_ranges';
 import { OpenSearchDashboardsContextProvider } from '../../../../opensearch_dashboards_react/public';
 import { docLinksServiceMock } from '../../../../../core/public/mocks';
@@ -63,20 +64,22 @@ describe('DateRangesParamEditor component', () => {
       docLinks: docLinksServiceMock.createStartContract(),
     };
     return (
-      <OpenSearchDashboardsContextProvider services={services}>
-        <DateRangesParamEditor {...props} />
-      </OpenSearchDashboardsContextProvider>
+      <I18nProvider>
+        <OpenSearchDashboardsContextProvider services={services}>
+          <DateRangesParamEditor {...props} />
+        </OpenSearchDashboardsContextProvider>
+      </I18nProvider>
     );
   }
 
   it('should add default range if there is an empty ininitial value', () => {
-    mountWithIntl(<DateRangesWrapped {...defaultProps} />);
+    mount(<DateRangesWrapped {...defaultProps} />);
 
     expect(setValue).toHaveBeenCalledWith([{}]);
   });
 
   it('should validate range values with date math', function () {
-    const component = mountWithIntl(<DateRangesWrapped {...defaultProps} />);
+    const component = mount(<DateRangesWrapped {...defaultProps} />);
 
     // should allow empty values
     expect(setValidity).toHaveBeenNthCalledWith(1, true);

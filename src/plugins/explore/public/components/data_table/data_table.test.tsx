@@ -38,7 +38,7 @@ describe('DefaultDiscoverTable', () => {
   ) => {
     const rows = rowsOverride ?? mockRows;
     return (
-      <IntlProvider locale="en" defaultLocale="en">
+      <IntlProvider locale="en">
         <DataTable
           columns={mockColumns}
           rows={rows}

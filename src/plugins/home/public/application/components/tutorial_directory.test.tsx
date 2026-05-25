@@ -43,7 +43,7 @@ const setup = async ({ props, services }) => {
   };
 
   const renderResult = render(
-    <IntlProvider locale="en" defaultLocale="en">
+    <IntlProvider locale="en">
       <OpenSearchDashboardsContextProvider services={finalServices}>
         <TutorialDirectory {...makeProps()} {...props} />
       </OpenSearchDashboardsContextProvider>

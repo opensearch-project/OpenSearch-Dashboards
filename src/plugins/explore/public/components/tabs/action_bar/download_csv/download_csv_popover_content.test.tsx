@@ -22,7 +22,7 @@ const mockMaxLabel = `Max available (${mockProps.hitsCount})`;
 
 const TestHarness = (props: Partial<DiscoverDownloadCsvPopoverContentProps>) => {
   return (
-    <IntlProvider locale="en" defaultLocale="en">
+    <IntlProvider locale="en">
       <DiscoverDownloadCsvPopoverContent {...mockProps} {...props} />
     </IntlProvider>
   );

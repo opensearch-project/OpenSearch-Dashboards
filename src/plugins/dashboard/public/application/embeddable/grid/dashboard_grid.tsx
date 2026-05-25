@@ -33,7 +33,7 @@ import 'react-resizable/css/styles.css';
 // @ts-ignore
 import sizeMe from 'react-sizeme';
 
-import { injectI18n } from '@osd/i18n/react';
+import { injectI18n, WrappedComponentProps } from '@osd/i18n/react';
 import classNames from 'classnames';
 import _ from 'lodash';
 import React from 'react';
@@ -124,7 +124,7 @@ function ResponsiveGrid({
 const config = { monitorWidth: true };
 const ResponsiveSizedGrid = sizeMe(config)(ResponsiveGrid);
 
-export interface DashboardGridProps extends ReactIntl.InjectedIntlProps {
+export interface DashboardGridProps extends WrappedComponentProps {
   opensearchDashboards: DashboardReactContextValue;
   PanelComponent: EmbeddableStart['EmbeddablePanel'];
   container: DashboardContainer;

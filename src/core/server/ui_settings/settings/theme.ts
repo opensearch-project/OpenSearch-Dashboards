@@ -76,11 +76,15 @@ export const getThemeSettings = (): Record<string, UiSettingsParams> => {
       options: themeOptions,
       optionLabels: themeVersionLabelMap,
       description: i18n.translate('core.ui_settings.params.themeVersionText', {
-        defaultMessage: `<p>Switch between the themes used for the current and next versions of OpenSearch Dashboards. A page refresh is required for the setting to be applied.</p><p><a href="{href}">{linkText}</a></p>`,
+        defaultMessage: `<p>Switch between the themes used for the current and next versions of OpenSearch Dashboards. A page refresh is required for the setting to be applied.</p><p><a>{linkText}</a></p>`,
         values: {
-          href: 'https://forum.opensearch.org/t/feedback-on-dark-mode-experience/15725',
+          p: (...chunks: any[]) => `<p>${chunks.join('')}</p>`,
+          a: (...chunks: any[]) =>
+            `<a href="https://forum.opensearch.org/t/feedback-on-dark-mode-experience/15725">${chunks.join(
+              ''
+            )}</a>`,
           linkText: 'Theme feedback',
-        },
+        } as any,
       }),
       requiresPageReload: true,
       preferBrowserSetting: true,

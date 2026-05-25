@@ -70,7 +70,7 @@ describe('ConfiguratorV2', () => {
   it('renders correctly', async () => {
     await act(async () => {
       render(
-        <IntlProvider locale="en" defaultLocale="en">
+        <IntlProvider locale="en">
           <ConfiguratorV2
             services={mockServices as any}
             baseDataset={mockBaseDataset}
@@ -95,7 +95,7 @@ describe('ConfiguratorV2', () => {
 
   it('calls onCancel when cancel is clicked', async () => {
     render(
-      <IntlProvider locale="en" defaultLocale="en">
+      <IntlProvider locale="en">
         <ConfiguratorV2
           services={mockServices as any}
           baseDataset={mockBaseDataset}
@@ -117,7 +117,7 @@ describe('ConfiguratorV2', () => {
 
   it('calls onPrevious when back is clicked', async () => {
     render(
-      <IntlProvider locale="en" defaultLocale="en">
+      <IntlProvider locale="en">
         <ConfiguratorV2
           services={mockServices as any}
           baseDataset={mockBaseDataset}
@@ -139,7 +139,7 @@ describe('ConfiguratorV2', () => {
 
   it('displays PPL language', async () => {
     render(
-      <IntlProvider locale="en" defaultLocale="en">
+      <IntlProvider locale="en">
         <ConfiguratorV2
           services={mockServices as any}
           baseDataset={mockBaseDataset}
@@ -156,7 +156,7 @@ describe('ConfiguratorV2', () => {
 
   it('shows time field select for non-index-pattern datasets', async () => {
     render(
-      <IntlProvider locale="en" defaultLocale="en">
+      <IntlProvider locale="en">
         <ConfiguratorV2
           services={mockServices as any}
           baseDataset={mockBaseDataset}
@@ -174,7 +174,7 @@ describe('ConfiguratorV2', () => {
 
   it('disables confirm when time field not selected', async () => {
     render(
-      <IntlProvider locale="en" defaultLocale="en">
+      <IntlProvider locale="en">
         <ConfiguratorV2
           services={mockServices as any}
           baseDataset={mockBaseDataset}
@@ -192,7 +192,7 @@ describe('ConfiguratorV2', () => {
 
   it('shows save dataset checkbox', async () => {
     render(
-      <IntlProvider locale="en" defaultLocale="en">
+      <IntlProvider locale="en">
         <ConfiguratorV2
           services={mockServices as any}
           baseDataset={mockBaseDataset}

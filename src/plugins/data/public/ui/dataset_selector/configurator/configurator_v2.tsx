@@ -221,11 +221,12 @@ export const ConfiguratorV2 = ({
                   showNonTimeFieldDatasets ? (
                     <FormattedMessage
                       id="data.explorer.datasetSelector.advancedSelector.configurator.timeFieldLabelOptional"
-                      defaultMessage="Time field {optionalSuffix}"
+                      defaultMessage="Time field <span>{optionalSuffix}</span>"
                       values={{
-                        optionalSuffix: (
-                          <span className="datasetConfigurator-optionalSuffix">– optional</span>
+                        span: (chunks) => (
+                          <span className="datasetConfigurator-optionalSuffix">{chunks}</span>
                         ),
+                        optionalSuffix: '– optional',
                       }}
                     />
                   ) : (

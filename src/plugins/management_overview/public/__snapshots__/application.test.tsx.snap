@@ -12,9 +12,7 @@ exports[`Overview page rendering should render normally 1`] = `
       class="euiText euiText--small"
     >
       <h1>
-        <span>
-          Overview
-        </span>
+        Overview
       </h1>
     </div>
     <div

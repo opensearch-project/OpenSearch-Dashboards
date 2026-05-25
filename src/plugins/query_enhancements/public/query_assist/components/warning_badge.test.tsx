@@ -29,7 +29,7 @@ const renderWarningBadge = (overrideProps: Partial<WarningBadgeProps> = {}) => {
     overrideProps
   );
   const component = render(
-    <IntlProvider locale="en" defaultLocale="en">
+    <IntlProvider locale="en">
       <WarningBadge {...props} />
     </IntlProvider>
   );

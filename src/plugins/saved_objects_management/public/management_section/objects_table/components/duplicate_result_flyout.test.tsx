@@ -39,7 +39,7 @@ describe('DuplicateResultFlyout', () => {
 
   const DuplicateResultFlyoutComponent = (props: DuplicateResultFlyoutProps) => {
     return (
-      <IntlProvider locale="en" defaultLocale="en">
+      <IntlProvider locale="en">
         <DuplicateResultFlyout {...props} />
       </IntlProvider>
     );

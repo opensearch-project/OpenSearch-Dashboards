@@ -32,7 +32,8 @@ import { shallow } from 'enzyme';
 
 import { SavedObjectSaveModal } from './saved_object_save_modal';
 
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { wrapWithIntl } from 'test_utils/enzyme_helpers';
+import { mount } from 'enzyme';
 
 describe('SavedObjectSaveModal', () => {
   it('should render matching snapshot', () => {
@@ -50,16 +51,18 @@ describe('SavedObjectSaveModal', () => {
   });
 
   it('allows specifying custom save button label', () => {
-    const wrapper = mountWithIntl(
-      <SavedObjectSaveModal
-        onSave={() => void 0}
-        onClose={() => void 0}
-        title={'Saved Object title'}
-        showCopyOnSave={false}
-        objectType="visualization"
-        showDescription={true}
-        confirmButtonLabel="Save and done"
-      />
+    const wrapper = mount(
+      wrapWithIntl(
+        <SavedObjectSaveModal
+          onSave={() => void 0}
+          onClose={() => void 0}
+          title={'Saved Object title'}
+          showCopyOnSave={false}
+          objectType="visualization"
+          showDescription={true}
+          confirmButtonLabel="Save and done"
+        />
+      )
     );
     expect(wrapper.find('button[data-test-subj="confirmSaveSavedObjectButton"]').text()).toBe(
       'Save and done'

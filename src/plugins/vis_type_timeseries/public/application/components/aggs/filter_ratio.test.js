@@ -28,7 +28,8 @@
  * under the License.
  */
 
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mount } from 'enzyme';
+import { wrapWithIntl } from 'test_utils/enzyme_helpers';
 import { FilterRatioAgg } from './filter_ratio';
 import { FIELDS, METRIC, SERIES, PANEL } from '../../../test_utils';
 import { EuiCompressedComboBox } from '@elastic/eui';
@@ -46,20 +47,22 @@ describe('TSVB Filter Ratio', () => {
     const series = { ...SERIES, metrics: [metric] };
     const panel = { ...PANEL, series };
 
-    const wrapper = mountWithIntl(
-      <div>
-        <FilterRatioAgg
-          onAdd={jest.fn()}
-          onChange={jest.fn()}
-          onDelete={jest.fn()}
-          panel={panel}
-          fields={FIELDS}
-          model={metric}
-          series={series}
-          siblings={series.metrics}
-          dragHandleProps={{}}
-        />
-      </div>
+    const wrapper = mount(
+      wrapWithIntl(
+        <div>
+          <FilterRatioAgg
+            onAdd={jest.fn()}
+            onChange={jest.fn()}
+            onDelete={jest.fn()}
+            panel={panel}
+            fields={FIELDS}
+            model={metric}
+            series={series}
+            siblings={series.metrics}
+            dragHandleProps={{}}
+          />
+        </div>
+      )
     );
     return wrapper;
   };

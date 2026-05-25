@@ -12,7 +12,7 @@ import { coreMock } from '../../../../../core/public/mocks';
 describe('<WorkspaceFatalError />', () => {
   it('render normally', async () => {
     const { findByText, container } = render(
-      <IntlProvider locale="en" defaultLocale="en">
+      <IntlProvider locale="en">
         <WorkspaceFatalError />
       </IntlProvider>
     );
@@ -22,7 +22,7 @@ describe('<WorkspaceFatalError />', () => {
 
   it('render error with callout', async () => {
     const { findByText, container } = render(
-      <IntlProvider locale="en" defaultLocale="en">
+      <IntlProvider locale="en">
         <WorkspaceFatalError error="errorInCallout" />
       </IntlProvider>
     );
@@ -45,7 +45,7 @@ describe('<WorkspaceFatalError />', () => {
     });
     const coreStartMock = coreMock.createStart();
     const { getByText } = render(
-      <IntlProvider locale="en" defaultLocale="en">
+      <IntlProvider locale="en">
         <context.Provider
           value={
             {

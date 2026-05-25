@@ -52,7 +52,7 @@ describe('DefaultDiscoverTable', () => {
   ) => {
     const rows = rowsOverride ?? mockRows;
     return (
-      <IntlProvider locale="en" defaultLocale="en">
+      <IntlProvider locale="en">
         <DataTable
           columns={mockColumns}
           rows={rows}
@@ -117,7 +117,7 @@ describe('DefaultDiscoverTable', () => {
   it('should not display the sample size callout when rows are fewer than sample size', () => {
     const fewRows = mockRows.slice(0, 5);
     render(
-      <IntlProvider locale="en" defaultLocale="en">
+      <IntlProvider locale="en">
         <DataTable
           columns={mockColumns}
           rows={fewRows}

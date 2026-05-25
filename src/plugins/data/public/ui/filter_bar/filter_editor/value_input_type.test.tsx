@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mount } from 'enzyme';
+import { wrapWithIntl } from 'test_utils/enzyme_helpers';
 import { ValueInputType } from './value_input_type';
 
 let onChangeMock: any;
@@ -20,7 +21,7 @@ describe('Value input type', () => {
       onBlur: () => {},
       placeholder: '',
     };
-    const component = mountWithIntl(<ValueInputType {...valueInputProps} />);
+    const component = mount(wrapWithIntl(<ValueInputType {...valueInputProps} />));
     expect(component.find('EuiFieldNumber').exists()).toBeTruthy();
     expect(component.find('EuiFieldNumber').prop('value')).toBe(1);
   });
@@ -33,7 +34,7 @@ describe('Value input type', () => {
       onBlur: () => {},
       placeholder: '',
     };
-    const component = mountWithIntl(<ValueInputType {...valueInputProps} />);
+    const component = mount(wrapWithIntl(<ValueInputType {...valueInputProps} />));
     expect(component.find('EuiFieldText').exists()).toBeTruthy();
     expect(component.find('EuiFieldText').prop('value')).toBe('value');
   });
@@ -46,7 +47,7 @@ describe('Value input type', () => {
       onBlur: () => {},
       placeholder: '',
     };
-    const component = mountWithIntl(<ValueInputType {...valueInputProps} />);
+    const component = mount(wrapWithIntl(<ValueInputType {...valueInputProps} />));
     expect(component.find('EuiSelect').exists()).toBeTruthy();
     expect(component.find('EuiSelect').prop('value')).toBe('true');
   });
@@ -59,7 +60,7 @@ describe('Value input type', () => {
       onBlur: () => {},
       placeholder: '',
     };
-    const component = mountWithIntl(<ValueInputType {...valueInputProps} />);
+    const component = mount(wrapWithIntl(<ValueInputType {...valueInputProps} />));
     expect(component.find('EuiFieldText').exists()).toBeTruthy();
     expect(component.find('EuiFieldText').prop('value')).toBe('Jun 18, 2024 @ 12:01:55.000');
   });
@@ -72,7 +73,7 @@ describe('Value input type', () => {
       onBlur: () => {},
       placeholder: '',
     };
-    const component = mountWithIntl(<ValueInputType {...valueInputProps} />);
+    const component = mount(wrapWithIntl(<ValueInputType {...valueInputProps} />));
     expect(component.find('EuiFieldText').exists()).toBeTruthy();
     expect(component.find('EuiFieldText').prop('value')).toBe('127.0.0.1');
   });

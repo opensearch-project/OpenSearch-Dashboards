@@ -10,6 +10,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { deepFreeze } from '@osd/std';
 import { OverviewApp } from './overview_app';
 import { AppNavLinkStatus, AppStatus } from '../../../core/public';
+import { I18nProvider } from '@osd/i18n/react';
 
 const applicationStartMock = (apps: Map<string, PublicAppInfo>): jest.Mocked<ApplicationStart> => {
   const currentAppId$ = new Subject<string | undefined>();
@@ -32,10 +33,12 @@ const applicationStartMock = (apps: Map<string, PublicAppInfo>): jest.Mocked<App
 
 function renderOverviewPage(apps: Map<string, PublicAppInfo>, overviewApps?: OverviewApp[]) {
   return render(
-    <ManagementOverviewWrapper
-      application={applicationStartMock(apps)}
-      overviewApps={overviewApps}
-    />
+    <I18nProvider>
+      <ManagementOverviewWrapper
+        application={applicationStartMock(apps)}
+        overviewApps={overviewApps}
+      />
+    </I18nProvider>
   );
 }
 

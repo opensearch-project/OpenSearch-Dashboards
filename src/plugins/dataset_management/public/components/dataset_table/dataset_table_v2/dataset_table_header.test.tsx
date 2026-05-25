@@ -26,11 +26,7 @@ jest.mock('../../create_button', () => ({
 }));
 
 const renderWithIntl = (component: React.ReactElement) => {
-  return render(
-    <IntlProvider locale="en" defaultLocale="en">
-      {component}
-    </IntlProvider>
-  );
+  return render(<IntlProvider locale="en">{component}</IntlProvider>);
 };
 
 describe('DatasetTableHeader', () => {

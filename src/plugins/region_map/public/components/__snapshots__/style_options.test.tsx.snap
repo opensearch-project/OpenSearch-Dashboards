@@ -8,9 +8,7 @@ exports[`style_options renders the Style options comprising of style settings, c
     className="euiTitle euiTitle--xsmall"
     id="styleSettingTitleId"
   >
-    <span>
-      Style settings
-    </span>
+    Style settings
   </h2>
   <div
     className="euiSpacer euiSpacer--s"
@@ -45,7 +43,7 @@ exports[`style_options renders the Style options comprising of style settings, c
             onChange={[Function]}
             onFocus={[Function]}
             onMouseUp={[Function]}
-            value={Object {}}
+            value="Yellow to Red"
           >
             <option
               disabled={true}
@@ -102,7 +100,7 @@ exports[`style_options renders the Style options comprising of style settings, c
             onChange={[Function]}
             onFocus={[Function]}
             type="number"
-            value={Object {}}
+            value={1}
           />
         </div>
       </div>

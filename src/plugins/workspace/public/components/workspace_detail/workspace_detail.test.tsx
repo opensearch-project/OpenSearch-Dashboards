@@ -127,7 +127,7 @@ const WorkspaceDetailPage = (props: any) => {
   const registeredUseCases$ = createMockedRegisteredUseCases$();
 
   return (
-    <IntlProvider locale="en" defaultLocale="en">
+    <IntlProvider locale="en">
       <MemoryRouter>
         <WorkspaceFormProvider
           application={mockCoreStart.application}

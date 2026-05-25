@@ -119,11 +119,12 @@ export const DashboardDirectQuerySyncBanner: React.FC<DirectQuerySyncProps> = ({
         <EuiText size="s">
           {i18n.translate('dataSourcesManagement.directQuerySync.dataScheduledToSync', {
             defaultMessage:
-              'Data scheduled to sync every {interval}. Last sync: {lastSyncTime, select, -- {--} other {{lastSyncTime} ago}}.',
+              'Data scheduled to sync every {interval}. Last sync: {hasLastSyncTime, select, yes {{lastSyncTime} ago} other {--}}.',
             values: {
               interval: syncInfo.refreshInterval
                 ? intervalAsMinutes(1000 * syncInfo.refreshInterval)
                 : '--',
+              hasLastSyncTime: syncInfo.lastRefreshTime ? 'yes' : 'no',
               lastSyncTime: syncInfo.lastRefreshTime
                 ? `${new Date(syncInfo.lastRefreshTime).toLocaleString()}, ${intervalAsMinutes(
                     new Date().getTime() - syncInfo.lastRefreshTime

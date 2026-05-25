@@ -10,11 +10,7 @@ import { IntlProvider } from 'react-intl';
 import { SaveAsDatasetOption } from './save_as_dataset_option';
 
 const renderWithIntl = (component: React.ReactElement) => {
-  return render(
-    <IntlProvider locale="en" defaultLocale="en">
-      {component}
-    </IntlProvider>
-  );
+  return render(<IntlProvider locale="en">{component}</IntlProvider>);
 };
 
 describe('SaveAsDatasetOption', () => {

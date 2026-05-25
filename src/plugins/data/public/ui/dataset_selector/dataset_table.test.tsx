@@ -65,11 +65,7 @@ describe('DataSetTable', () => {
   };
 
   const renderWithIntl = (component: React.ReactNode) =>
-    render(
-      <IntlProvider locale="en" defaultLocale="en">
-        {component}
-      </IntlProvider>
-    );
+    render(<IntlProvider locale="en">{component}</IntlProvider>);
 
   beforeEach(() => {
     jest.clearAllMocks();

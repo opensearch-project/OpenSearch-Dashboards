@@ -5,6 +5,7 @@
 
 import { render, screen, fireEvent } from '@testing-library/react';
 import { OpenSearchPanel } from './open_search_panel';
+import { I18nProvider } from '@osd/i18n/react';
 
 // Mock services
 const mockOnClose = jest.fn();
@@ -90,7 +91,11 @@ describe('OpenSearchPanel', () => {
   });
 
   it('renders flyout with header and footer', () => {
-    render(<OpenSearchPanel onClose={mockOnClose} />);
+    render(
+      <I18nProvider>
+        <OpenSearchPanel onClose={mockOnClose} />
+      </I18nProvider>
+    );
 
     expect(screen.getByTestId('loadSearchForm')).toBeInTheDocument();
     expect(screen.getByText('Select Saved Search')).toBeInTheDocument();
@@ -98,13 +103,21 @@ describe('OpenSearchPanel', () => {
   });
 
   it('renders SavedObjectFinderUi', () => {
-    render(<OpenSearchPanel onClose={mockOnClose} />);
+    render(
+      <I18nProvider>
+        <OpenSearchPanel onClose={mockOnClose} />
+      </I18nProvider>
+    );
 
     expect(screen.getByTestId('savedObjectFinder')).toBeInTheDocument();
   });
 
   it('handles search selection and navigates to discover', () => {
-    render(<OpenSearchPanel onClose={mockOnClose} />);
+    render(
+      <I18nProvider>
+        <OpenSearchPanel onClose={mockOnClose} />
+      </I18nProvider>
+    );
 
     fireEvent.click(screen.getByTestId('choose-search'));
 
@@ -115,7 +128,11 @@ describe('OpenSearchPanel', () => {
   });
 
   it('handles explore selection and navigates to explore', () => {
-    render(<OpenSearchPanel onClose={mockOnClose} />);
+    render(
+      <I18nProvider>
+        <OpenSearchPanel onClose={mockOnClose} />
+      </I18nProvider>
+    );
 
     fireEvent.click(screen.getByTestId('choose-explore'));
 
@@ -127,7 +144,11 @@ describe('OpenSearchPanel', () => {
   });
 
   it('closes flyout when close button is clicked', () => {
-    render(<OpenSearchPanel onClose={mockOnClose} />);
+    render(
+      <I18nProvider>
+        <OpenSearchPanel onClose={mockOnClose} />
+      </I18nProvider>
+    );
 
     fireEvent.click(screen.getByText('Manage searches'));
     expect(mockOnClose).toHaveBeenCalled();
@@ -135,7 +156,11 @@ describe('OpenSearchPanel', () => {
 
   describe('savedObjectMetadata filtering', () => {
     it('includes showSavedObject filter for explore type', () => {
-      render(<OpenSearchPanel onClose={mockOnClose} />);
+      render(
+        <I18nProvider>
+          <OpenSearchPanel onClose={mockOnClose} />
+        </I18nProvider>
+      );
 
       expect(capturedSavedObjectMetaData).toBeDefined();
       expect(capturedSavedObjectMetaData).toHaveLength(2);
@@ -149,7 +174,11 @@ describe('OpenSearchPanel', () => {
     });
 
     it('showSavedObject returns true for explore with type attribute', () => {
-      render(<OpenSearchPanel onClose={mockOnClose} />);
+      render(
+        <I18nProvider>
+          <OpenSearchPanel onClose={mockOnClose} />
+        </I18nProvider>
+      );
 
       const exploreMetadata = capturedSavedObjectMetaData.find(
         (meta: any) => meta.type === 'explore'
@@ -163,7 +192,11 @@ describe('OpenSearchPanel', () => {
     });
 
     it('showSavedObject returns false for explore without type attribute', () => {
-      render(<OpenSearchPanel onClose={mockOnClose} />);
+      render(
+        <I18nProvider>
+          <OpenSearchPanel onClose={mockOnClose} />
+        </I18nProvider>
+      );
 
       const exploreMetadata = capturedSavedObjectMetaData.find(
         (meta: any) => meta.type === 'explore'
@@ -177,7 +210,11 @@ describe('OpenSearchPanel', () => {
     });
 
     it('showSavedObject returns false for explore with undefined attributes', () => {
-      render(<OpenSearchPanel onClose={mockOnClose} />);
+      render(
+        <I18nProvider>
+          <OpenSearchPanel onClose={mockOnClose} />
+        </I18nProvider>
+      );
 
       const exploreMetadata = capturedSavedObjectMetaData.find(
         (meta: any) => meta.type === 'explore'
@@ -189,7 +226,11 @@ describe('OpenSearchPanel', () => {
     });
 
     it('search type does not have showSavedObject filter', () => {
-      render(<OpenSearchPanel onClose={mockOnClose} />);
+      render(
+        <I18nProvider>
+          <OpenSearchPanel onClose={mockOnClose} />
+        </I18nProvider>
+      );
 
       const searchMetadata = capturedSavedObjectMetaData.find(
         (meta: any) => meta.type === 'search'

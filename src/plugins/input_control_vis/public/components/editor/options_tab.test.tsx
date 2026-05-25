@@ -29,10 +29,11 @@
  */
 
 import { shallow } from 'enzyme';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { wrapWithIntl } from 'test_utils/enzyme_helpers';
 
 import { Vis } from '../../../../visualizations/public';
 import { OptionsTab, OptionsTabProps } from './options_tab';
+import { mount } from 'enzyme';
 
 describe('OptionsTab', () => {
   let props: OptionsTabProps;
@@ -56,7 +57,7 @@ describe('OptionsTab', () => {
   });
 
   it('should update updateFiltersOnChange', () => {
-    const component = mountWithIntl(<OptionsTab {...props} />);
+    const component = mount(wrapWithIntl(<OptionsTab {...props} />));
     const checkbox = component.find(
       '[data-test-subj="inputControlEditorUpdateFiltersOnChangeCheckbox"] button'
     );
@@ -67,7 +68,7 @@ describe('OptionsTab', () => {
   });
 
   it('should update useTimeFilter', () => {
-    const component = mountWithIntl(<OptionsTab {...props} />);
+    const component = mount(wrapWithIntl(<OptionsTab {...props} />));
     const checkbox = component.find(
       '[data-test-subj="inputControlEditorUseTimeFilterCheckbox"] button'
     );
@@ -78,7 +79,7 @@ describe('OptionsTab', () => {
   });
 
   it('should update pinFilters', () => {
-    const component = mountWithIntl(<OptionsTab {...props} />);
+    const component = mount(wrapWithIntl(<OptionsTab {...props} />));
     const checkbox = component.find(
       '[data-test-subj="inputControlEditorPinFiltersCheckbox"] button'
     );

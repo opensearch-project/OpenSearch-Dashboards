@@ -32,7 +32,8 @@ import { collectionActions } from './lib/collection_actions';
 import { ColorRules } from './color_rules';
 import { keys } from '@elastic/eui';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mount } from 'enzyme';
+import { wrapWithIntl } from 'test_utils/enzyme_helpers';
 
 describe('src/legacy/core_plugins/metrics/public/components/color_rules.test.js', () => {
   let defaultProps;
@@ -58,20 +59,20 @@ describe('src/legacy/core_plugins/metrics/public/components/color_rules.test.js'
         model: {},
         onChange: jest.fn(),
       };
-      const wrapper = mountWithIntl(<ColorRules.WrappedComponent {...emptyProps} />);
+      const wrapper = mount(wrapWithIntl(<ColorRules {...emptyProps} />));
       const isNode = wrapper.find('div').children().exists();
       expect(isNode).toBeFalsy();
     });
 
     it('should render non-empty <div/> node', () => {
-      const wrapper = mountWithIntl(<ColorRules.WrappedComponent {...defaultProps} />);
+      const wrapper = mount(wrapWithIntl(<ColorRules {...defaultProps} />));
       const isNode = wrapper.find('div.tvbColorPicker').exists();
 
       expect(isNode).toBeTruthy();
     });
     it('should handle change of operator and value correctly', () => {
       collectionActions.handleChange = jest.fn();
-      const wrapper = mountWithIntl(<ColorRules.WrappedComponent {...defaultProps} />);
+      const wrapper = mount(wrapWithIntl(<ColorRules {...defaultProps} />));
       const operatorInput = findTestSubject(wrapper, 'colorRuleOperator');
       operatorInput.simulate('keyDown', { key: keys.ARROW_DOWN });
       operatorInput.simulate('keyDown', { key: keys.ARROW_DOWN });

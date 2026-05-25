@@ -57,7 +57,7 @@ describe('DefaultDiscoverTable', () => {
   });
 
   const getDefaultDiscoverTable = (hitsOverride?: OpenSearchSearchHit[]) => (
-    <IntlProvider locale="en" defaultLocale="en">
+    <IntlProvider locale="en">
       <DefaultDiscoverTable
         columns={['textField', 'longField', '@timestamp']}
         rows={(hitsOverride ?? hits) as OpenSearchSearchHit[]}

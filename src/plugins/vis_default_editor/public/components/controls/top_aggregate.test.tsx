@@ -28,7 +28,8 @@
  * under the License.
  */
 
-import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { I18nProvider } from '@osd/i18n/react';
+import { mount } from 'enzyme';
 import {
   AggregateValueProp,
   TopAggregateParamEditor,
@@ -36,6 +37,7 @@ import {
 } from './top_aggregate';
 import { aggParamCommonPropsMock } from './test_utils';
 import { IAggConfig } from 'src/plugins/data/public';
+import { shallowWithIntl } from '../../../../../test_utils/public/enzyme_helpers';
 
 describe('TopAggregateParamEditor', () => {
   let agg: IAggConfig;
@@ -90,6 +92,14 @@ describe('TopAggregateParamEditor', () => {
     };
   });
 
+  function TopAggregateParamEditorWrapped(props: any) {
+    return (
+      <I18nProvider>
+        <TopAggregateParamEditor {...props} />
+      </I18nProvider>
+    );
+  }
+
   it('should init with the default set of props', () => {
     const comp = shallowWithIntl(<TopAggregateParamEditor {...defaultProps} />);
 
@@ -98,8 +108,9 @@ describe('TopAggregateParamEditor', () => {
 
   it('should be disabled if a field type is set but there are no compatible options', () => {
     options = [];
-    const comp = mountWithIntl(<TopAggregateParamEditor {...defaultProps} showValidation={true} />);
-    const select = comp.find('select');
+    const compW = mount(<TopAggregateParamEditorWrapped {...defaultProps} showValidation={true} />);
+    const select = compW.find('select');
+    const comp = compW.find('TopAggregateParamEditor');
 
     expect(defaultProps.setValidity).toHaveBeenCalledWith(true);
     expect(comp.children().props()).toHaveProperty('isInvalid', false);
@@ -108,30 +119,37 @@ describe('TopAggregateParamEditor', () => {
   });
 
   it('should change its validity due to passed props', () => {
-    const comp = mountWithIntl(
-      <TopAggregateParamEditor {...defaultProps} value={{ value: 'min' } as AggregateValueProp} />
+    const compW = mount(
+      <TopAggregateParamEditorWrapped
+        {...defaultProps}
+        value={{ value: 'min' } as AggregateValueProp}
+      />
     );
 
     expect(defaultProps.setValidity).toHaveBeenCalledWith(true);
 
-    comp.setProps({ showValidation: true, value: undefined });
+    compW.setProps({ showValidation: true, value: undefined });
+    let comp = compW.find('TopAggregateParamEditor');
 
     expect(comp.children().props()).toHaveProperty('isInvalid', true);
     expect(defaultProps.setValidity).toHaveBeenCalledWith(false);
 
-    comp.setProps({ value: { value: 'max' } });
-    const select = comp.find('select');
-
+    compW.setProps({ value: { value: 'max' } });
+    comp = compW.find('TopAggregateParamEditor');
     expect(comp.children().props()).toHaveProperty('isInvalid', false);
     expect(defaultProps.setValidity).toHaveBeenCalledWith(true);
     expect(defaultProps.setValidity).toHaveBeenCalledTimes(3);
+    const select = compW.find('select');
     expect(select.children()).toHaveLength(3);
     expect(select.prop('value')).toEqual('max');
   });
 
   it('should call setValue on change', () => {
-    const comp = mountWithIntl(
-      <TopAggregateParamEditor {...defaultProps} value={{ value: 'min' } as AggregateValueProp} />
+    const comp = mount(
+      <TopAggregateParamEditorWrapped
+        {...defaultProps}
+        value={{ value: 'min' } as AggregateValueProp}
+      />
     );
     const select = comp.find('select');
 
@@ -146,8 +164,11 @@ describe('TopAggregateParamEditor', () => {
   });
 
   it('should reflect on fieldType changes', () => {
-    const comp = mountWithIntl(
-      <TopAggregateParamEditor {...defaultProps} value={{ value: 'min' } as AggregateValueProp} />
+    const comp = mount(
+      <TopAggregateParamEditorWrapped
+        {...defaultProps}
+        value={{ value: 'min' } as AggregateValueProp}
+      />
     );
 
     // should not be called on the first render

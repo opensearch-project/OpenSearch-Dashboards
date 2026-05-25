@@ -29,10 +29,12 @@
  */
 
 import { shallow } from 'enzyme';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { wrapWithIntl } from 'test_utils/enzyme_helpers';
 
 import { NumberList, NumberListProps } from './number_list';
 import { NumberRow } from './number_row';
+import { mount } from 'enzyme';
+import { I18nProvider } from '@osd/i18n/react';
 
 jest.mock('./number_row', () => ({
   NumberRow: () => 'NumberRow',
@@ -51,6 +53,12 @@ jest.mock('@elastic/eui', () => ({
 
 describe('NumberList', () => {
   let defaultProps: NumberListProps;
+
+  const NumberListWrapper = (props: NumberListProps) => (
+    <I18nProvider>
+      <NumberList {...props} />
+    </I18nProvider>
+  );
 
   beforeEach(() => {
     defaultProps = {
@@ -75,7 +83,7 @@ describe('NumberList', () => {
     defaultProps.numberArray = [3, 1];
     defaultProps.validateAscendingOrder = true;
     defaultProps.showValidation = true;
-    const comp = mountWithIntl(<NumberList {...defaultProps} />);
+    const comp = mount(wrapWithIntl(<NumberList {...defaultProps} />));
 
     expect(comp.find('EuiFormErrorText').length).toBe(1);
   });
@@ -84,7 +92,7 @@ describe('NumberList', () => {
     defaultProps.numberArray = [3, 1, 3];
     defaultProps.disallowDuplicates = true;
     defaultProps.showValidation = true;
-    const comp = mountWithIntl(<NumberList {...defaultProps} />);
+    const comp = mount(wrapWithIntl(<NumberList {...defaultProps} />));
 
     expect(comp.find('EuiFormErrorText').length).toBeGreaterThan(0);
   });
@@ -93,13 +101,13 @@ describe('NumberList', () => {
     defaultProps.numberArray = [3, 1, 3, 1, 3, 1, 3, 1];
     defaultProps.disallowDuplicates = true;
     defaultProps.showValidation = true;
-    const comp = mountWithIntl(<NumberList {...defaultProps} />);
+    const comp = mount(wrapWithIntl(<NumberList {...defaultProps} />));
 
     expect(comp.find('EuiFormErrorText').length).toBe(6);
   });
 
   test('should set validity as true', () => {
-    mountWithIntl(<NumberList {...defaultProps} />);
+    mount(wrapWithIntl(<NumberList {...defaultProps} />));
 
     expect(defaultProps.setValidity).lastCalledWith(true);
   });
@@ -107,25 +115,25 @@ describe('NumberList', () => {
   test('should set validity as false when the order is invalid', () => {
     defaultProps.numberArray = [3, 2];
     defaultProps.validateAscendingOrder = true;
-    const comp = mountWithIntl(<NumberList {...defaultProps} />);
+    const compW = mount(<NumberListWrapper {...defaultProps} />);
 
     expect(defaultProps.setValidity).lastCalledWith(false);
 
-    comp.setProps({ numberArray: [1, 2] });
+    compW.setProps({ numberArray: [1, 2] });
     expect(defaultProps.setValidity).lastCalledWith(true);
   });
 
   test('should set validity as false when there is an empty field', () => {
     defaultProps.numberArray = [1, 2];
-    const comp = mountWithIntl(<NumberList {...defaultProps} />);
+    const compW = mount(<NumberListWrapper {...defaultProps} />);
 
-    comp.setProps({ numberArray: [1, undefined] });
+    compW.setProps({ numberArray: [1, undefined] });
     expect(defaultProps.setValidity).lastCalledWith(false);
   });
 
   test('should set 0 when number array is empty', () => {
     defaultProps.numberArray = [];
-    mountWithIntl(<NumberList {...defaultProps} />);
+    mount(wrapWithIntl(<NumberList {...defaultProps} />));
 
     expect(defaultProps.onChange).lastCalledWith([0]);
   });

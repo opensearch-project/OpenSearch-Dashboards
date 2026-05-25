@@ -33,7 +33,8 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { act, waitFor } from '@testing-library/react';
 // @ts-ignore
 import stubbedLogstashFields from 'fixtures/logstash_fields';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mount } from 'enzyme';
+import { wrapWithIntl } from 'test_utils/enzyme_helpers';
 
 // Helper to flush all pending promises for React 18 concurrent mode
 const flushPromises = async () => {
@@ -85,7 +86,7 @@ describe('discover sidebar field details', function () {
 
   function mountComponent(field: IndexPatternField, props?: Record<string, any>) {
     const compProps = { ...defaultProps, ...props, field };
-    return mountWithIntl(<DiscoverFieldDetails {...compProps} />);
+    return mount(wrapWithIntl(<DiscoverFieldDetails {...compProps} />));
   }
 
   it('should render buckets if they exist', async function () {

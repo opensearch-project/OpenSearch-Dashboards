@@ -10,7 +10,7 @@ import { MAX_DOWNLOAD_CSV_COUNT } from './constants';
 
 const TestHarness = () => {
   return (
-    <IntlProvider locale="en" defaultLocale="en">
+    <IntlProvider locale="en">
       <DiscoverDownloadCsvCallout />
     </IntlProvider>
   );

@@ -33,9 +33,10 @@ import { shallow } from 'enzyme';
 import sinon from 'sinon';
 // @ts-expect-error TS2306 TODO(ts-error): fixme
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { wrapWithIntl } from 'test_utils/enzyme_helpers';
 import { docLinksServiceMock } from '../../../../../../core/public/mocks';
 import { MlCardState } from '../../../types';
+import { mount } from 'enzyme';
 
 const docLinks = docLinksServiceMock.createStartContract();
 
@@ -65,14 +66,16 @@ describe('EmptyState', () => {
       it('is called when refresh button is clicked', () => {
         const onRefreshHandler = sinon.stub();
 
-        const component = mountWithIntl(
-          <EmptyState
-            docLinks={docLinks}
-            onRefresh={onRefreshHandler}
-            navigateToApp={async () => {}}
-            getMlCardState={() => MlCardState.ENABLED}
-            canSave={true}
-          />
+        const component = mount(
+          wrapWithIntl(
+            <EmptyState
+              docLinks={docLinks}
+              onRefresh={onRefreshHandler}
+              navigateToApp={async () => {}}
+              getMlCardState={() => MlCardState.ENABLED}
+              canSave={true}
+            />
+          )
         );
 
         findTestSubject(component, 'refreshIndicesButton').simulate('click');

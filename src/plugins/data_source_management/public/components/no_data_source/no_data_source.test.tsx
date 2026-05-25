@@ -4,13 +4,19 @@
  */
 
 import { ShallowWrapper, shallow } from 'enzyme';
-import React from 'react';
+import React, { act } from 'react';
 import { render } from '@testing-library/react';
 import { NoDataSource } from './no_data_source';
 import { coreMock } from '../../../../../core/public/mocks';
 import { DSM_APP_ID } from '../../plugin';
+import { I18nProvider } from '@osd/i18n/react';
 
 describe('NoDataSource', () => {
+  const NoDataSourceWrapper = (props: any) => (
+    <I18nProvider>
+      <NoDataSource {...props} />
+    </I18nProvider>
+  );
   let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
   const totalDataSourceCount = 0;
   const nextTick = () => new Promise((res) => process.nextTick(res));
@@ -26,8 +32,7 @@ describe('NoDataSource', () => {
   it('should display popover when click "No data sources" button', async () => {
     const applicationMock = coreMock.createStart().application;
     const container = render(
-      <NoDataSource
-        // @ts-expect-error TS2322 TODO(ts-error): fixme
+      <NoDataSourceWrapper
         totalDataSourceCount={totalDataSourceCount}
         application={applicationMock}
         hasIncompatibleDatasource={false}
@@ -37,7 +42,9 @@ describe('NoDataSource', () => {
     await nextTick();
 
     const button = await container.findByTestId('dataSourceEmptyMenuHeaderLink');
-    button.click();
+    await act(async () => {
+      button.click();
+    });
 
     expect(container.getByTestId('dataSourceEmptyStatePopover')).toBeVisible();
   });
@@ -47,8 +54,7 @@ describe('NoDataSource', () => {
     const navigateToAppMock = applicationMock.navigateToApp;
 
     const container = render(
-      <NoDataSource
-        // @ts-expect-error TS2322 TODO(ts-error): fixme
+      <NoDataSourceWrapper
         totalDataSourceCount={totalDataSourceCount}
         application={applicationMock}
         hasIncompatibleDatasource={false}
@@ -58,11 +64,15 @@ describe('NoDataSource', () => {
     await nextTick();
 
     const button = await container.findByTestId('dataSourceEmptyMenuHeaderLink');
-    button.click();
+    await act(async () => {
+      button.click();
+    });
     const redirectButton = await container.findByTestId(
       'dataSourceEmptyStateManageDataSourceButton'
     );
-    redirectButton.click();
+    await act(async () => {
+      redirectButton.click();
+    });
     expect(navigateToAppMock).toHaveBeenCalledWith('management', {
       path: `opensearch-dashboards/${DSM_APP_ID}`,
     });

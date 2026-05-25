@@ -30,12 +30,13 @@
 
 import sinon from 'sinon';
 import { shallow } from 'enzyme';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { wrapWithIntl } from 'test_utils/enzyme_helpers';
 import { findTestSubject } from 'test_utils/helpers';
 
 import { InputControlVis } from './input_control_vis';
 import { ListControl } from '../../control/list_control_factory';
 import { RangeControl } from '../../control/range_control_factory';
+import { mount } from 'enzyme';
 
 const mockListControl: ListControl = {
   id: 'mock-list-control',
@@ -169,22 +170,24 @@ test('Clear btns enabled when there are values', () => {
 });
 
 test('clearControls', () => {
-  const component = mountWithIntl(
-    <InputControlVis
-      stageFilter={stageFilter}
-      submitFilters={submitFilters}
-      resetControls={resetControls}
-      clearControls={clearControls}
-      controls={[mockListControl]}
-      updateFiltersOnChange={updateFiltersOnChange}
-      hasChanges={() => {
-        return true;
-      }}
-      hasValues={() => {
-        return true;
-      }}
-      refreshControl={refreshControlMock}
-    />
+  const component = mount(
+    wrapWithIntl(
+      <InputControlVis
+        stageFilter={stageFilter}
+        submitFilters={submitFilters}
+        resetControls={resetControls}
+        clearControls={clearControls}
+        controls={[mockListControl]}
+        updateFiltersOnChange={updateFiltersOnChange}
+        hasChanges={() => {
+          return true;
+        }}
+        hasValues={() => {
+          return true;
+        }}
+        refreshControl={refreshControlMock}
+      />
+    )
   );
   findTestSubject(component, 'inputControlClearBtn').simulate('click');
   sinon.assert.calledOnce(clearControls);
@@ -194,22 +197,24 @@ test('clearControls', () => {
 });
 
 test('submitFilters', () => {
-  const component = mountWithIntl(
-    <InputControlVis
-      stageFilter={stageFilter}
-      submitFilters={submitFilters}
-      resetControls={resetControls}
-      clearControls={clearControls}
-      controls={[mockListControl]}
-      updateFiltersOnChange={updateFiltersOnChange}
-      hasChanges={() => {
-        return true;
-      }}
-      hasValues={() => {
-        return true;
-      }}
-      refreshControl={refreshControlMock}
-    />
+  const component = mount(
+    wrapWithIntl(
+      <InputControlVis
+        stageFilter={stageFilter}
+        submitFilters={submitFilters}
+        resetControls={resetControls}
+        clearControls={clearControls}
+        controls={[mockListControl]}
+        updateFiltersOnChange={updateFiltersOnChange}
+        hasChanges={() => {
+          return true;
+        }}
+        hasValues={() => {
+          return true;
+        }}
+        refreshControl={refreshControlMock}
+      />
+    )
   );
   findTestSubject(component, 'inputControlSubmitBtn').simulate('click');
   sinon.assert.calledOnce(submitFilters);
@@ -219,22 +224,24 @@ test('submitFilters', () => {
 });
 
 test('resetControls', () => {
-  const component = mountWithIntl(
-    <InputControlVis
-      stageFilter={stageFilter}
-      submitFilters={submitFilters}
-      resetControls={resetControls}
-      clearControls={clearControls}
-      controls={[mockListControl]}
-      updateFiltersOnChange={updateFiltersOnChange}
-      hasChanges={() => {
-        return true;
-      }}
-      hasValues={() => {
-        return true;
-      }}
-      refreshControl={refreshControlMock}
-    />
+  const component = mount(
+    wrapWithIntl(
+      <InputControlVis
+        stageFilter={stageFilter}
+        submitFilters={submitFilters}
+        resetControls={resetControls}
+        clearControls={clearControls}
+        controls={[mockListControl]}
+        updateFiltersOnChange={updateFiltersOnChange}
+        hasChanges={() => {
+          return true;
+        }}
+        hasValues={() => {
+          return true;
+        }}
+        refreshControl={refreshControlMock}
+      />
+    )
   );
   findTestSubject(component, 'inputControlCancelBtn').simulate('click');
   sinon.assert.calledOnce(resetControls);

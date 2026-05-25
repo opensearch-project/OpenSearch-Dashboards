@@ -7,6 +7,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 
 import { MetricsRawTable } from './metrics_raw_table';
 import { IPrometheusSearchResult } from '../../application/utils/state_management/slices';
+import { I18nProvider } from '@osd/i18n/react';
 
 describe('MetricsRawTable', () => {
   const mockSearchResult: IPrometheusSearchResult = {
@@ -52,30 +53,50 @@ describe('MetricsRawTable', () => {
   };
 
   it('renders without crashing', () => {
-    const { container } = render(<MetricsRawTable searchResult={mockSearchResult} />);
+    const { container } = render(
+      <I18nProvider>
+        <MetricsRawTable searchResult={mockSearchResult} />
+      </I18nProvider>
+    );
     expect(container.querySelector('.euiBasicTable')).toBeInTheDocument();
   });
 
   it('displays metric in raw format', () => {
-    render(<MetricsRawTable searchResult={mockSearchResult} />);
+    render(
+      <I18nProvider>
+        <MetricsRawTable searchResult={mockSearchResult} />
+      </I18nProvider>
+    );
     // Multiple rows will have the metric name
     const metricElements = screen.getAllByText(/node_cpu_seconds_total\{/);
     expect(metricElements.length).toBeGreaterThan(0);
   });
 
   it('displays value right-aligned', () => {
-    render(<MetricsRawTable searchResult={mockSearchResult} />);
+    render(
+      <I18nProvider>
+        <MetricsRawTable searchResult={mockSearchResult} />
+      </I18nProvider>
+    );
     expect(screen.getByText('15276.26')).toBeInTheDocument();
     expect(screen.getByText('14.84')).toBeInTheDocument();
   });
 
   it('renders expand toggle', () => {
-    render(<MetricsRawTable searchResult={mockSearchResult} />);
+    render(
+      <I18nProvider>
+        <MetricsRawTable searchResult={mockSearchResult} />
+      </I18nProvider>
+    );
     expect(screen.getByText('Expand results')).toBeInTheDocument();
   });
 
   it('expands labels on toggle', () => {
-    render(<MetricsRawTable searchResult={mockSearchResult} />);
+    render(
+      <I18nProvider>
+        <MetricsRawTable searchResult={mockSearchResult} />
+      </I18nProvider>
+    );
     const toggle = screen.getByRole('switch');
 
     // Initially collapsed - check toggle is not checked
@@ -103,7 +124,11 @@ describe('MetricsRawTable', () => {
       },
     };
 
-    const { container } = render(<MetricsRawTable searchResult={emptySearchResult} />);
+    const { container } = render(
+      <I18nProvider>
+        <MetricsRawTable searchResult={emptySearchResult} />
+      </I18nProvider>
+    );
     expect(container.querySelector('.euiBasicTable')).toBeInTheDocument();
   });
 
@@ -125,7 +150,11 @@ describe('MetricsRawTable', () => {
       },
     };
 
-    render(<MetricsRawTable searchResult={resultWithSimpleMetric} />);
+    render(
+      <I18nProvider>
+        <MetricsRawTable searchResult={resultWithSimpleMetric} />
+      </I18nProvider>
+    );
     expect(screen.getByText(/simple_metric\{cpu="0"/)).toBeInTheDocument();
   });
 
@@ -148,7 +177,11 @@ describe('MetricsRawTable', () => {
       },
     };
 
-    const { container } = render(<MetricsRawTable searchResult={resultWithMissingSource} />);
+    const { container } = render(
+      <I18nProvider>
+        <MetricsRawTable searchResult={resultWithMissingSource} />
+      </I18nProvider>
+    );
     expect(container.querySelector('.euiBasicTable')).toBeInTheDocument();
   });
 
@@ -170,7 +203,11 @@ describe('MetricsRawTable', () => {
       },
     };
 
-    const { container } = render(<MetricsRawTable searchResult={resultWithMissingValue} />);
+    const { container } = render(
+      <I18nProvider>
+        <MetricsRawTable searchResult={resultWithMissingValue} />
+      </I18nProvider>
+    );
     expect(container.querySelector('.euiBasicTable')).toBeInTheDocument();
     // Should only show Metric column, no Value column when no value fields exist
     expect(
@@ -196,7 +233,11 @@ describe('MetricsRawTable', () => {
       },
     };
 
-    const { container } = render(<MetricsRawTable searchResult={largeResult} />);
+    const { container } = render(
+      <I18nProvider>
+        <MetricsRawTable searchResult={largeResult} />
+      </I18nProvider>
+    );
     expect(container.querySelector('.euiBasicTable')).toBeInTheDocument();
     // Default page size is 50, so should show pagination
     expect(container.querySelector('.euiPagination')).toBeInTheDocument();
@@ -221,7 +262,11 @@ describe('MetricsRawTable', () => {
       },
     };
 
-    render(<MetricsRawTable searchResult={multiValueResult} />);
+    render(
+      <I18nProvider>
+        <MetricsRawTable searchResult={multiValueResult} />
+      </I18nProvider>
+    );
     const valueAElements = screen.getAllByText('Value #A');
     const valueBElements = screen.getAllByText('Value #B');
     expect(valueAElements.length).toBeGreaterThan(0);
@@ -241,13 +286,21 @@ describe('MetricsRawTable', () => {
         },
       };
 
-      render(<MetricsRawTable searchResult={truncatedResult} />);
+      render(
+        <I18nProvider>
+          <MetricsRawTable searchResult={truncatedResult} />
+        </I18nProvider>
+      );
       expect(screen.getByTestId('metricsRawTableTruncationWarning')).toBeInTheDocument();
       expect(screen.getByText(/2,000 of 3,000/)).toBeInTheDocument();
     });
 
     it('does not show warning when data is not truncated', () => {
-      render(<MetricsRawTable searchResult={mockSearchResult} />);
+      render(
+        <I18nProvider>
+          <MetricsRawTable searchResult={mockSearchResult} />
+        </I18nProvider>
+      );
       expect(screen.queryByTestId('metricsRawTableTruncationWarning')).not.toBeInTheDocument();
     });
   });
@@ -287,7 +340,11 @@ describe('MetricsRawTable', () => {
     };
 
     it('sorts by Value column when header is clicked', () => {
-      const { container } = render(<MetricsRawTable searchResult={sortableSearchResult} />);
+      const { container } = render(
+        <I18nProvider>
+          <MetricsRawTable searchResult={sortableSearchResult} />
+        </I18nProvider>
+      );
 
       const valueHeader = container.querySelector(
         'th[data-test-subj="tableHeaderCell_value_0_1"] button'
@@ -316,7 +373,11 @@ describe('MetricsRawTable', () => {
     });
 
     it('returns to default order on third click (neutral sort)', () => {
-      const { container } = render(<MetricsRawTable searchResult={sortableSearchResult} />);
+      const { container } = render(
+        <I18nProvider>
+          <MetricsRawTable searchResult={sortableSearchResult} />
+        </I18nProvider>
+      );
 
       const valueHeader = container.querySelector(
         'th[data-test-subj="tableHeaderCell_value_0_1"] button'
@@ -370,7 +431,11 @@ describe('MetricsRawTable', () => {
         },
       };
 
-      const { container } = render(<MetricsRawTable searchResult={largeResult} />);
+      const { container } = render(
+        <I18nProvider>
+          <MetricsRawTable searchResult={largeResult} />
+        </I18nProvider>
+      );
 
       const nextPageButton = container.querySelector('[data-test-subj="pagination-button-1"]');
       if (nextPageButton) {

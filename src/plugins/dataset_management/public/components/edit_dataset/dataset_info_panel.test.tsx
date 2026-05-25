@@ -44,7 +44,7 @@ const createMockDataset = (overrides = {}) => ({
 describe('DatasetInfoPanel', () => {
   const renderComponent = (dataset: any, editConfiguration?: () => void) => {
     return render(
-      <IntlProvider locale="en" defaultLocale="en">
+      <IntlProvider locale="en">
         <DatasetInfoPanel dataset={dataset} editConfiguration={editConfiguration} />
       </IntlProvider>
     );

@@ -5,6 +5,7 @@
 
 import { render, screen, fireEvent } from '@testing-library/react';
 import { OpenSearchPanel } from './open_search_panel';
+import { I18nProvider } from '@osd/i18n/react';
 
 // Mock services
 const mockOnClose = jest.fn();
@@ -76,7 +77,11 @@ describe('OpenSearchPanel', () => {
   });
 
   it('renders flyout with header and footer', () => {
-    render(<OpenSearchPanel onClose={mockOnClose} />);
+    render(
+      <I18nProvider>
+        <OpenSearchPanel onClose={mockOnClose} />
+      </I18nProvider>
+    );
 
     expect(screen.getByTestId('loadSearchForm')).toBeInTheDocument();
     expect(screen.getByText('Select Saved Search')).toBeInTheDocument();
@@ -84,13 +89,21 @@ describe('OpenSearchPanel', () => {
   });
 
   it('renders SavedObjectFinderUi', () => {
-    render(<OpenSearchPanel onClose={mockOnClose} />);
+    render(
+      <I18nProvider>
+        <OpenSearchPanel onClose={mockOnClose} />
+      </I18nProvider>
+    );
 
     expect(screen.getByTestId('savedObjectFinder')).toBeInTheDocument();
   });
 
   it('handles search selection and navigates to discover', () => {
-    render(<OpenSearchPanel onClose={mockOnClose} />);
+    render(
+      <I18nProvider>
+        <OpenSearchPanel onClose={mockOnClose} />
+      </I18nProvider>
+    );
 
     fireEvent.click(screen.getByTestId('choose-search'));
 
@@ -101,7 +114,11 @@ describe('OpenSearchPanel', () => {
   });
 
   it('handles agent traces selection and navigates', () => {
-    render(<OpenSearchPanel onClose={mockOnClose} />);
+    render(
+      <I18nProvider>
+        <OpenSearchPanel onClose={mockOnClose} />
+      </I18nProvider>
+    );
 
     fireEvent.click(screen.getByTestId('choose-agentic-observability'));
 
@@ -117,7 +134,11 @@ describe('OpenSearchPanel', () => {
   });
 
   it('closes flyout when close button is clicked', () => {
-    render(<OpenSearchPanel onClose={mockOnClose} />);
+    render(
+      <I18nProvider>
+        <OpenSearchPanel onClose={mockOnClose} />
+      </I18nProvider>
+    );
 
     fireEvent.click(screen.getByText('Manage searches'));
     expect(mockOnClose).toHaveBeenCalled();

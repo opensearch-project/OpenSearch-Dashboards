@@ -60,7 +60,7 @@ describe('IndexHeader at new home page', () => {
     });
 
     return (
-      <IntlProvider locale="en" defaultLocale="en">
+      <IntlProvider locale="en">
         <Provider>
           <IndexHeader
             setDefault={setDefault}
@@ -192,7 +192,7 @@ describe('IndexHeader at new home page', () => {
     });
 
     const { getByTestId } = render(
-      <IntlProvider locale="en" defaultLocale="en">
+      <IntlProvider locale="en">
         <Provider>
           <IndexHeader
             setDefault={setDefault}
@@ -230,7 +230,7 @@ describe('IndexHeader at new home page', () => {
     });
 
     const { getByTestId } = render(
-      <IntlProvider locale="en" defaultLocale="en">
+      <IntlProvider locale="en">
         <Provider>
           <IndexHeader
             setDefault={setDefault}

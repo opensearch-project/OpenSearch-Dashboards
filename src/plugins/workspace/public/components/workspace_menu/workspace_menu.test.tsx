@@ -42,7 +42,7 @@ describe('<WorkspaceMenu />', () => {
 
   const WorkspaceMenuCreatorComponent = () => {
     return (
-      <IntlProvider locale="en" defaultLocale="en">
+      <IntlProvider locale="en">
         {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}
         <WorkspaceMenu coreStart={coreStartMock} registeredUseCases$={registeredUseCases$} />
       </IntlProvider>

@@ -38,6 +38,10 @@ import {
   isStringLiteral,
   isTemplateLiteral,
   isBinaryExpression,
+  isArrowFunctionExpression,
+  isFunctionExpression,
+  isTSAsExpression,
+  isTSTypeAssertion,
 } from '@babel/types';
 import fs from 'fs';
 import glob from 'glob';
@@ -319,13 +323,23 @@ export function extractDescriptionValueFromNode(node, messageId) {
 }
 
 export function extractValuesKeysFromNode(node, messageId) {
-  if (!isObjectExpression(node)) {
+  // Handle TypeScript type assertions (e.g., { ... } as any)
+  let objectNode = node;
+  if (isTSAsExpression(node) || isTSTypeAssertion(node)) {
+    objectNode = node.expression;
+  }
+
+  if (!isObjectExpression(objectNode)) {
     throw createFailError(`"values" value should be an object expression ("${messageId}").`);
   }
 
-  return node.properties.map((property) =>
-    isStringLiteral(property.key) ? property.key.value : property.key.name
-  );
+  return objectNode.properties
+    .filter((property) => {
+      // Filter out function values (used for rich text formatting in react-intl 6.8.0+)
+      // e.g., span: (chunks) => <span>{chunks}</span>
+      return !isArrowFunctionExpression(property.value) && !isFunctionExpression(property.value);
+    })
+    .map((property) => (isStringLiteral(property.key) ? property.key.value : property.key.name));
 }
 
 export class ErrorReporter {

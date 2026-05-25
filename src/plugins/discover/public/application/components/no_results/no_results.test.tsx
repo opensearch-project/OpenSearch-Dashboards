@@ -62,7 +62,7 @@ describe('DiscoverNoResults - Saved Queries Mapping', () => {
 
   const renderComponent = (props = {}) => {
     return render(
-      <IntlProvider locale="en" defaultLocale="en">
+      <IntlProvider locale="en">
         {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}
         <DiscoverNoResults {...defaultProps} {...props} />
       </IntlProvider>

@@ -96,67 +96,103 @@ exports[`Sidecar component it should emit setSidecarConfig with new style when r
         "results": Array [
           Object {
             "type": "return",
-            "value": <div
-              className="osdSidecarFlyout"
-              data-test-subj="sidecar-component-wrapper"
-              style={
-                Object {
-                  "width": undefined,
-                }
-              }
+            "value": <IntlProvider
+              defaultFormats={Object {}}
+              defaultLocale="en"
+              fallbackOnEmptyString={true}
+              formats={Object {}}
+              locale="en"
+              messages={Object {}}
+              onError={[Function]}
+              onWarn={[Function]}
+              textComponent={Symbol(react.fragment)}
             >
-              <ResizableButton
-                flyoutSize={0}
-                onResize={[Function]}
-              />
-              <MountWrapper
-                className="osdSidecarMountWrapper"
-                mount={[Function]}
-              />
-            </div>,
+              <div
+                className="osdSidecarFlyout"
+                data-test-subj="sidecar-component-wrapper"
+                style={
+                  Object {
+                    "width": undefined,
+                  }
+                }
+              >
+                <ResizableButton
+                  flyoutSize={0}
+                  onResize={[Function]}
+                />
+                <MountWrapper
+                  className="osdSidecarMountWrapper"
+                  mount={[Function]}
+                />
+              </div>
+            </IntlProvider>,
           },
           Object {
             "type": "return",
-            "value": <div
-              className="osdSidecarFlyout"
-              data-test-subj="sidecar-component-wrapper"
-              style={
-                Object {
-                  "width": undefined,
-                }
-              }
+            "value": <IntlProvider
+              defaultFormats={Object {}}
+              defaultLocale="en"
+              fallbackOnEmptyString={true}
+              formats={Object {}}
+              locale="en"
+              messages={Object {}}
+              onError={[Function]}
+              onWarn={[Function]}
+              textComponent={Symbol(react.fragment)}
             >
-              <ResizableButton
-                flyoutSize={0}
-                onResize={[Function]}
-              />
-              <MountWrapper
-                className="osdSidecarMountWrapper"
-                mount={[Function]}
-              />
-            </div>,
+              <div
+                className="osdSidecarFlyout"
+                data-test-subj="sidecar-component-wrapper"
+                style={
+                  Object {
+                    "width": undefined,
+                  }
+                }
+              >
+                <ResizableButton
+                  flyoutSize={0}
+                  onResize={[Function]}
+                />
+                <MountWrapper
+                  className="osdSidecarMountWrapper"
+                  mount={[Function]}
+                />
+              </div>
+            </IntlProvider>,
           },
           Object {
             "type": "return",
-            "value": <div
-              className="osdSidecarFlyout osdSidecarFlyout--dockedRight"
-              data-test-subj="sidecar-component-wrapper"
-              style={
-                Object {
-                  "width": 460,
-                }
-              }
+            "value": <IntlProvider
+              defaultFormats={Object {}}
+              defaultLocale="en"
+              fallbackOnEmptyString={true}
+              formats={Object {}}
+              locale="en"
+              messages={Object {}}
+              onError={[Function]}
+              onWarn={[Function]}
+              textComponent={Symbol(react.fragment)}
             >
-              <ResizableButton
-                dockedMode="right"
-                flyoutSize={460}
-                onResize={[Function]}
-              />
-              <MountWrapper
-                className="osdSidecarMountWrapper"
-                mount={[Function]}
-              />
-            </div>,
+              <div
+                className="osdSidecarFlyout osdSidecarFlyout--dockedRight"
+                data-test-subj="sidecar-component-wrapper"
+                style={
+                  Object {
+                    "width": 460,
+                  }
+                }
+              >
+                <ResizableButton
+                  dockedMode="right"
+                  flyoutSize={460}
+                  onResize={[Function]}
+                />
+                <MountWrapper
+                  className="osdSidecarMountWrapper"
+                  mount={[Function]}
+                />
+              </div>
+            </IntlProvider>,
           },
         ],
       },
@@ -224,38 +260,50 @@ exports[`Sidecar component it should emit setSidecarConfig with new style when r
   }
 >
   <mockConstructor>
-    <div
-      className="osdSidecarFlyout osdSidecarFlyout--dockedRight"
-      data-test-subj="sidecar-component-wrapper"
-      style={
-        Object {
-          "width": 460,
-        }
-      }
+    <IntlProvider
+      defaultFormats={Object {}}
+      defaultLocale="en"
+      fallbackOnEmptyString={true}
+      formats={Object {}}
+      locale="en"
+      messages={Object {}}
+      onError={[Function]}
+      onWarn={[Function]}
+      textComponent={Symbol(react.fragment)}
     >
-      <ResizableButton
-        dockedMode="right"
-        flyoutSize={460}
-        onResize={[Function]}
+      <div
+        className="osdSidecarFlyout osdSidecarFlyout--dockedRight"
+        data-test-subj="sidecar-component-wrapper"
+        style={
+          Object {
+            "width": 460,
+          }
+        }
       >
-        <button
-          className="sidecar-resizableButton resizableButton--horizontal"
-          data-test-subj="resizableButton"
-          onClick={[Function]}
-          onMouseDown={[Function]}
-          onTouchStart={[Function]}
-          type="button"
-        />
-      </ResizableButton>
-      <MountWrapper
-        className="osdSidecarMountWrapper"
-        mount={[Function]}
-      >
-        <div
+        <ResizableButton
+          dockedMode="right"
+          flyoutSize={460}
+          onResize={[Function]}
+        >
+          <button
+            className="sidecar-resizableButton resizableButton--horizontal"
+            data-test-subj="resizableButton"
+            onClick={[Function]}
+            onMouseDown={[Function]}
+            onTouchStart={[Function]}
+            type="button"
+          />
+        </ResizableButton>
+        <MountWrapper
           className="osdSidecarMountWrapper"
-        />
-      </MountWrapper>
-    </div>
+          mount={[Function]}
+        >
+          <div
+            className="osdSidecarMountWrapper"
+          />
+        </MountWrapper>
+      </div>
+    </IntlProvider>
   </mockConstructor>
 </Sidecar>
 `;
@@ -434,153 +482,237 @@ exports[`Sidecar component it should have a height style when dockedDirection is
         "results": Array [
           Object {
             "type": "return",
-            "value": <div
-              className="osdSidecarFlyout"
-              data-test-subj="sidecar-component-wrapper"
-              style={
-                Object {
-                  "width": undefined,
-                }
-              }
+            "value": <IntlProvider
+              defaultFormats={Object {}}
+              defaultLocale="en"
+              fallbackOnEmptyString={true}
+              formats={Object {}}
+              locale="en"
+              messages={Object {}}
+              onError={[Function]}
+              onWarn={[Function]}
+              textComponent={Symbol(react.fragment)}
             >
-              <ResizableButton
-                flyoutSize={0}
-                onResize={[Function]}
-              />
-              <MountWrapper
-                className="osdSidecarMountWrapper"
-                mount={[Function]}
-              />
-            </div>,
+              <div
+                className="osdSidecarFlyout"
+                data-test-subj="sidecar-component-wrapper"
+                style={
+                  Object {
+                    "width": undefined,
+                  }
+                }
+              >
+                <ResizableButton
+                  flyoutSize={0}
+                  onResize={[Function]}
+                />
+                <MountWrapper
+                  className="osdSidecarMountWrapper"
+                  mount={[Function]}
+                />
+              </div>
+            </IntlProvider>,
           },
           Object {
             "type": "return",
-            "value": <div
-              className="osdSidecarFlyout"
-              data-test-subj="sidecar-component-wrapper"
-              style={
-                Object {
-                  "width": undefined,
-                }
-              }
+            "value": <IntlProvider
+              defaultFormats={Object {}}
+              defaultLocale="en"
+              fallbackOnEmptyString={true}
+              formats={Object {}}
+              locale="en"
+              messages={Object {}}
+              onError={[Function]}
+              onWarn={[Function]}
+              textComponent={Symbol(react.fragment)}
             >
-              <ResizableButton
-                flyoutSize={0}
-                onResize={[Function]}
-              />
-              <MountWrapper
-                className="osdSidecarMountWrapper"
-                mount={[Function]}
-              />
-            </div>,
+              <div
+                className="osdSidecarFlyout"
+                data-test-subj="sidecar-component-wrapper"
+                style={
+                  Object {
+                    "width": undefined,
+                  }
+                }
+              >
+                <ResizableButton
+                  flyoutSize={0}
+                  onResize={[Function]}
+                />
+                <MountWrapper
+                  className="osdSidecarMountWrapper"
+                  mount={[Function]}
+                />
+              </div>
+            </IntlProvider>,
           },
           Object {
             "type": "return",
-            "value": <div
-              className="osdSidecarFlyout osdSidecarFlyout--dockedRight"
-              data-test-subj="sidecar-component-wrapper"
-              style={
-                Object {
-                  "width": 460,
-                }
-              }
+            "value": <IntlProvider
+              defaultFormats={Object {}}
+              defaultLocale="en"
+              fallbackOnEmptyString={true}
+              formats={Object {}}
+              locale="en"
+              messages={Object {}}
+              onError={[Function]}
+              onWarn={[Function]}
+              textComponent={Symbol(react.fragment)}
             >
-              <ResizableButton
-                dockedMode="right"
-                flyoutSize={460}
-                onResize={[Function]}
-              />
-              <MountWrapper
-                className="osdSidecarMountWrapper"
-                mount={[Function]}
-              />
-            </div>,
+              <div
+                className="osdSidecarFlyout osdSidecarFlyout--dockedRight"
+                data-test-subj="sidecar-component-wrapper"
+                style={
+                  Object {
+                    "width": 460,
+                  }
+                }
+              >
+                <ResizableButton
+                  dockedMode="right"
+                  flyoutSize={460}
+                  onResize={[Function]}
+                />
+                <MountWrapper
+                  className="osdSidecarMountWrapper"
+                  mount={[Function]}
+                />
+              </div>
+            </IntlProvider>,
           },
           Object {
             "type": "return",
-            "value": <div
-              className="osdSidecarFlyout"
-              data-test-subj="sidecar-component-wrapper"
-              style={
-                Object {
-                  "width": undefined,
-                }
-              }
+            "value": <IntlProvider
+              defaultFormats={Object {}}
+              defaultLocale="en"
+              fallbackOnEmptyString={true}
+              formats={Object {}}
+              locale="en"
+              messages={Object {}}
+              onError={[Function]}
+              onWarn={[Function]}
+              textComponent={Symbol(react.fragment)}
             >
-              <ResizableButton
-                flyoutSize={0}
-                onResize={[Function]}
-              />
-              <MountWrapper
-                className="osdSidecarMountWrapper"
-                mount={[Function]}
-              />
-            </div>,
+              <div
+                className="osdSidecarFlyout"
+                data-test-subj="sidecar-component-wrapper"
+                style={
+                  Object {
+                    "width": undefined,
+                  }
+                }
+              >
+                <ResizableButton
+                  flyoutSize={0}
+                  onResize={[Function]}
+                />
+                <MountWrapper
+                  className="osdSidecarMountWrapper"
+                  mount={[Function]}
+                />
+              </div>
+            </IntlProvider>,
           },
           Object {
             "type": "return",
-            "value": <div
-              className="osdSidecarFlyout osdSidecarFlyout--dockedRight"
-              data-test-subj="sidecar-component-wrapper"
-              style={
-                Object {
-                  "width": 460,
-                }
-              }
+            "value": <IntlProvider
+              defaultFormats={Object {}}
+              defaultLocale="en"
+              fallbackOnEmptyString={true}
+              formats={Object {}}
+              locale="en"
+              messages={Object {}}
+              onError={[Function]}
+              onWarn={[Function]}
+              textComponent={Symbol(react.fragment)}
             >
-              <ResizableButton
-                dockedMode="right"
-                flyoutSize={460}
-                onResize={[Function]}
-              />
-              <MountWrapper
-                className="osdSidecarMountWrapper"
-                mount={[Function]}
-              />
-            </div>,
+              <div
+                className="osdSidecarFlyout osdSidecarFlyout--dockedRight"
+                data-test-subj="sidecar-component-wrapper"
+                style={
+                  Object {
+                    "width": 460,
+                  }
+                }
+              >
+                <ResizableButton
+                  dockedMode="right"
+                  flyoutSize={460}
+                  onResize={[Function]}
+                />
+                <MountWrapper
+                  className="osdSidecarMountWrapper"
+                  mount={[Function]}
+                />
+              </div>
+            </IntlProvider>,
           },
           Object {
             "type": "return",
-            "value": <div
-              className="osdSidecarFlyout"
-              data-test-subj="sidecar-component-wrapper"
-              style={
-                Object {
-                  "width": undefined,
-                }
-              }
+            "value": <IntlProvider
+              defaultFormats={Object {}}
+              defaultLocale="en"
+              fallbackOnEmptyString={true}
+              formats={Object {}}
+              locale="en"
+              messages={Object {}}
+              onError={[Function]}
+              onWarn={[Function]}
+              textComponent={Symbol(react.fragment)}
             >
-              <ResizableButton
-                flyoutSize={0}
-                onResize={[Function]}
-              />
-              <MountWrapper
-                className="osdSidecarMountWrapper"
-                mount={[Function]}
-              />
-            </div>,
+              <div
+                className="osdSidecarFlyout"
+                data-test-subj="sidecar-component-wrapper"
+                style={
+                  Object {
+                    "width": undefined,
+                  }
+                }
+              >
+                <ResizableButton
+                  flyoutSize={0}
+                  onResize={[Function]}
+                />
+                <MountWrapper
+                  className="osdSidecarMountWrapper"
+                  mount={[Function]}
+                />
+              </div>
+            </IntlProvider>,
           },
           Object {
             "type": "return",
-            "value": <div
-              className="osdSidecarFlyout osdSidecarFlyout--dockedTakeover"
-              data-test-subj="sidecar-component-wrapper"
-              style={
-                Object {
-                  "height": 460,
-                }
-              }
+            "value": <IntlProvider
+              defaultFormats={Object {}}
+              defaultLocale="en"
+              fallbackOnEmptyString={true}
+              formats={Object {}}
+              locale="en"
+              messages={Object {}}
+              onError={[Function]}
+              onWarn={[Function]}
+              textComponent={Symbol(react.fragment)}
             >
-              <ResizableButton
-                dockedMode="takeover"
-                flyoutSize={460}
-                onResize={[Function]}
-              />
-              <MountWrapper
-                className="osdSidecarMountWrapper"
-                mount={[Function]}
-              />
-            </div>,
+              <div
+                className="osdSidecarFlyout osdSidecarFlyout--dockedTakeover"
+                data-test-subj="sidecar-component-wrapper"
+                style={
+                  Object {
+                    "height": 460,
+                  }
+                }
+              >
+                <ResizableButton
+                  dockedMode="takeover"
+                  flyoutSize={460}
+                  onResize={[Function]}
+                />
+                <MountWrapper
+                  className="osdSidecarMountWrapper"
+                  mount={[Function]}
+                />
+              </div>
+            </IntlProvider>,
           },
         ],
       },
@@ -648,38 +780,50 @@ exports[`Sidecar component it should have a height style when dockedDirection is
   }
 >
   <mockConstructor>
-    <div
-      className="osdSidecarFlyout osdSidecarFlyout--dockedTakeover"
-      data-test-subj="sidecar-component-wrapper"
-      style={
-        Object {
-          "height": 460,
-        }
-      }
+    <IntlProvider
+      defaultFormats={Object {}}
+      defaultLocale="en"
+      fallbackOnEmptyString={true}
+      formats={Object {}}
+      locale="en"
+      messages={Object {}}
+      onError={[Function]}
+      onWarn={[Function]}
+      textComponent={Symbol(react.fragment)}
     >
-      <ResizableButton
-        dockedMode="takeover"
-        flyoutSize={460}
-        onResize={[Function]}
+      <div
+        className="osdSidecarFlyout osdSidecarFlyout--dockedTakeover"
+        data-test-subj="sidecar-component-wrapper"
+        style={
+          Object {
+            "height": 460,
+          }
+        }
       >
-        <button
-          className="sidecar-resizableButton resizableButton--vertical"
-          data-test-subj="resizableButton"
-          onClick={[Function]}
-          onMouseDown={[Function]}
-          onTouchStart={[Function]}
-          type="button"
-        />
-      </ResizableButton>
-      <MountWrapper
-        className="osdSidecarMountWrapper"
-        mount={[Function]}
-      >
-        <div
+        <ResizableButton
+          dockedMode="takeover"
+          flyoutSize={460}
+          onResize={[Function]}
+        >
+          <button
+            className="sidecar-resizableButton resizableButton--vertical"
+            data-test-subj="resizableButton"
+            onClick={[Function]}
+            onMouseDown={[Function]}
+            onTouchStart={[Function]}
+            type="button"
+          />
+        </ResizableButton>
+        <MountWrapper
           className="osdSidecarMountWrapper"
-        />
-      </MountWrapper>
-    </div>
+          mount={[Function]}
+        >
+          <div
+            className="osdSidecarMountWrapper"
+          />
+        </MountWrapper>
+      </div>
+    </IntlProvider>
   </mockConstructor>
 </Sidecar>
 `;
@@ -905,196 +1049,304 @@ exports[`Sidecar component it should have a height style when isHidden is true 1
         "results": Array [
           Object {
             "type": "return",
-            "value": <div
-              className="osdSidecarFlyout"
-              data-test-subj="sidecar-component-wrapper"
-              style={
-                Object {
-                  "width": undefined,
-                }
-              }
+            "value": <IntlProvider
+              defaultFormats={Object {}}
+              defaultLocale="en"
+              fallbackOnEmptyString={true}
+              formats={Object {}}
+              locale="en"
+              messages={Object {}}
+              onError={[Function]}
+              onWarn={[Function]}
+              textComponent={Symbol(react.fragment)}
             >
-              <ResizableButton
-                flyoutSize={0}
-                onResize={[Function]}
-              />
-              <MountWrapper
-                className="osdSidecarMountWrapper"
-                mount={[Function]}
-              />
-            </div>,
+              <div
+                className="osdSidecarFlyout"
+                data-test-subj="sidecar-component-wrapper"
+                style={
+                  Object {
+                    "width": undefined,
+                  }
+                }
+              >
+                <ResizableButton
+                  flyoutSize={0}
+                  onResize={[Function]}
+                />
+                <MountWrapper
+                  className="osdSidecarMountWrapper"
+                  mount={[Function]}
+                />
+              </div>
+            </IntlProvider>,
           },
           Object {
             "type": "return",
-            "value": <div
-              className="osdSidecarFlyout"
-              data-test-subj="sidecar-component-wrapper"
-              style={
-                Object {
-                  "width": undefined,
-                }
-              }
+            "value": <IntlProvider
+              defaultFormats={Object {}}
+              defaultLocale="en"
+              fallbackOnEmptyString={true}
+              formats={Object {}}
+              locale="en"
+              messages={Object {}}
+              onError={[Function]}
+              onWarn={[Function]}
+              textComponent={Symbol(react.fragment)}
             >
-              <ResizableButton
-                flyoutSize={0}
-                onResize={[Function]}
-              />
-              <MountWrapper
-                className="osdSidecarMountWrapper"
-                mount={[Function]}
-              />
-            </div>,
+              <div
+                className="osdSidecarFlyout"
+                data-test-subj="sidecar-component-wrapper"
+                style={
+                  Object {
+                    "width": undefined,
+                  }
+                }
+              >
+                <ResizableButton
+                  flyoutSize={0}
+                  onResize={[Function]}
+                />
+                <MountWrapper
+                  className="osdSidecarMountWrapper"
+                  mount={[Function]}
+                />
+              </div>
+            </IntlProvider>,
           },
           Object {
             "type": "return",
-            "value": <div
-              className="osdSidecarFlyout osdSidecarFlyout--dockedRight"
-              data-test-subj="sidecar-component-wrapper"
-              style={
-                Object {
-                  "width": 460,
-                }
-              }
+            "value": <IntlProvider
+              defaultFormats={Object {}}
+              defaultLocale="en"
+              fallbackOnEmptyString={true}
+              formats={Object {}}
+              locale="en"
+              messages={Object {}}
+              onError={[Function]}
+              onWarn={[Function]}
+              textComponent={Symbol(react.fragment)}
             >
-              <ResizableButton
-                dockedMode="right"
-                flyoutSize={460}
-                onResize={[Function]}
-              />
-              <MountWrapper
-                className="osdSidecarMountWrapper"
-                mount={[Function]}
-              />
-            </div>,
+              <div
+                className="osdSidecarFlyout osdSidecarFlyout--dockedRight"
+                data-test-subj="sidecar-component-wrapper"
+                style={
+                  Object {
+                    "width": 460,
+                  }
+                }
+              >
+                <ResizableButton
+                  dockedMode="right"
+                  flyoutSize={460}
+                  onResize={[Function]}
+                />
+                <MountWrapper
+                  className="osdSidecarMountWrapper"
+                  mount={[Function]}
+                />
+              </div>
+            </IntlProvider>,
           },
           Object {
             "type": "return",
-            "value": <div
-              className="osdSidecarFlyout"
-              data-test-subj="sidecar-component-wrapper"
-              style={
-                Object {
-                  "width": undefined,
-                }
-              }
+            "value": <IntlProvider
+              defaultFormats={Object {}}
+              defaultLocale="en"
+              fallbackOnEmptyString={true}
+              formats={Object {}}
+              locale="en"
+              messages={Object {}}
+              onError={[Function]}
+              onWarn={[Function]}
+              textComponent={Symbol(react.fragment)}
             >
-              <ResizableButton
-                flyoutSize={0}
-                onResize={[Function]}
-              />
-              <MountWrapper
-                className="osdSidecarMountWrapper"
-                mount={[Function]}
-              />
-            </div>,
+              <div
+                className="osdSidecarFlyout"
+                data-test-subj="sidecar-component-wrapper"
+                style={
+                  Object {
+                    "width": undefined,
+                  }
+                }
+              >
+                <ResizableButton
+                  flyoutSize={0}
+                  onResize={[Function]}
+                />
+                <MountWrapper
+                  className="osdSidecarMountWrapper"
+                  mount={[Function]}
+                />
+              </div>
+            </IntlProvider>,
           },
           Object {
             "type": "return",
-            "value": <div
-              className="osdSidecarFlyout osdSidecarFlyout--dockedRight"
-              data-test-subj="sidecar-component-wrapper"
-              style={
-                Object {
-                  "width": 460,
-                }
-              }
+            "value": <IntlProvider
+              defaultFormats={Object {}}
+              defaultLocale="en"
+              fallbackOnEmptyString={true}
+              formats={Object {}}
+              locale="en"
+              messages={Object {}}
+              onError={[Function]}
+              onWarn={[Function]}
+              textComponent={Symbol(react.fragment)}
             >
-              <ResizableButton
-                dockedMode="right"
-                flyoutSize={460}
-                onResize={[Function]}
-              />
-              <MountWrapper
-                className="osdSidecarMountWrapper"
-                mount={[Function]}
-              />
-            </div>,
+              <div
+                className="osdSidecarFlyout osdSidecarFlyout--dockedRight"
+                data-test-subj="sidecar-component-wrapper"
+                style={
+                  Object {
+                    "width": 460,
+                  }
+                }
+              >
+                <ResizableButton
+                  dockedMode="right"
+                  flyoutSize={460}
+                  onResize={[Function]}
+                />
+                <MountWrapper
+                  className="osdSidecarMountWrapper"
+                  mount={[Function]}
+                />
+              </div>
+            </IntlProvider>,
           },
           Object {
             "type": "return",
-            "value": <div
-              className="osdSidecarFlyout"
-              data-test-subj="sidecar-component-wrapper"
-              style={
-                Object {
-                  "width": undefined,
-                }
-              }
+            "value": <IntlProvider
+              defaultFormats={Object {}}
+              defaultLocale="en"
+              fallbackOnEmptyString={true}
+              formats={Object {}}
+              locale="en"
+              messages={Object {}}
+              onError={[Function]}
+              onWarn={[Function]}
+              textComponent={Symbol(react.fragment)}
             >
-              <ResizableButton
-                flyoutSize={0}
-                onResize={[Function]}
-              />
-              <MountWrapper
-                className="osdSidecarMountWrapper"
-                mount={[Function]}
-              />
-            </div>,
+              <div
+                className="osdSidecarFlyout"
+                data-test-subj="sidecar-component-wrapper"
+                style={
+                  Object {
+                    "width": undefined,
+                  }
+                }
+              >
+                <ResizableButton
+                  flyoutSize={0}
+                  onResize={[Function]}
+                />
+                <MountWrapper
+                  className="osdSidecarMountWrapper"
+                  mount={[Function]}
+                />
+              </div>
+            </IntlProvider>,
           },
           Object {
             "type": "return",
-            "value": <div
-              className="osdSidecarFlyout osdSidecarFlyout--dockedTakeover"
-              data-test-subj="sidecar-component-wrapper"
-              style={
-                Object {
-                  "height": 460,
-                }
-              }
+            "value": <IntlProvider
+              defaultFormats={Object {}}
+              defaultLocale="en"
+              fallbackOnEmptyString={true}
+              formats={Object {}}
+              locale="en"
+              messages={Object {}}
+              onError={[Function]}
+              onWarn={[Function]}
+              textComponent={Symbol(react.fragment)}
             >
-              <ResizableButton
-                dockedMode="takeover"
-                flyoutSize={460}
-                onResize={[Function]}
-              />
-              <MountWrapper
-                className="osdSidecarMountWrapper"
-                mount={[Function]}
-              />
-            </div>,
+              <div
+                className="osdSidecarFlyout osdSidecarFlyout--dockedTakeover"
+                data-test-subj="sidecar-component-wrapper"
+                style={
+                  Object {
+                    "height": 460,
+                  }
+                }
+              >
+                <ResizableButton
+                  dockedMode="takeover"
+                  flyoutSize={460}
+                  onResize={[Function]}
+                />
+                <MountWrapper
+                  className="osdSidecarMountWrapper"
+                  mount={[Function]}
+                />
+              </div>
+            </IntlProvider>,
           },
           Object {
             "type": "return",
-            "value": <div
-              className="osdSidecarFlyout"
-              data-test-subj="sidecar-component-wrapper"
-              style={
-                Object {
-                  "width": undefined,
-                }
-              }
+            "value": <IntlProvider
+              defaultFormats={Object {}}
+              defaultLocale="en"
+              fallbackOnEmptyString={true}
+              formats={Object {}}
+              locale="en"
+              messages={Object {}}
+              onError={[Function]}
+              onWarn={[Function]}
+              textComponent={Symbol(react.fragment)}
             >
-              <ResizableButton
-                flyoutSize={0}
-                onResize={[Function]}
-              />
-              <MountWrapper
-                className="osdSidecarMountWrapper"
-                mount={[Function]}
-              />
-            </div>,
+              <div
+                className="osdSidecarFlyout"
+                data-test-subj="sidecar-component-wrapper"
+                style={
+                  Object {
+                    "width": undefined,
+                  }
+                }
+              >
+                <ResizableButton
+                  flyoutSize={0}
+                  onResize={[Function]}
+                />
+                <MountWrapper
+                  className="osdSidecarMountWrapper"
+                  mount={[Function]}
+                />
+              </div>
+            </IntlProvider>,
           },
           Object {
             "type": "return",
-            "value": <div
-              className="osdSidecarFlyout osdSidecarFlyout--dockedTakeover osdSidecarFlyout--hide"
-              data-test-subj="sidecar-component-wrapper"
-              style={
-                Object {
-                  "height": 460,
-                }
-              }
+            "value": <IntlProvider
+              defaultFormats={Object {}}
+              defaultLocale="en"
+              fallbackOnEmptyString={true}
+              formats={Object {}}
+              locale="en"
+              messages={Object {}}
+              onError={[Function]}
+              onWarn={[Function]}
+              textComponent={Symbol(react.fragment)}
             >
-              <ResizableButton
-                dockedMode="takeover"
-                flyoutSize={460}
-                onResize={[Function]}
-              />
-              <MountWrapper
-                className="osdSidecarMountWrapper"
-                mount={[Function]}
-              />
-            </div>,
+              <div
+                className="osdSidecarFlyout osdSidecarFlyout--dockedTakeover osdSidecarFlyout--hide"
+                data-test-subj="sidecar-component-wrapper"
+                style={
+                  Object {
+                    "height": 460,
+                  }
+                }
+              >
+                <ResizableButton
+                  dockedMode="takeover"
+                  flyoutSize={460}
+                  onResize={[Function]}
+                />
+                <MountWrapper
+                  className="osdSidecarMountWrapper"
+                  mount={[Function]}
+                />
+              </div>
+            </IntlProvider>,
           },
         ],
       },
@@ -1162,38 +1414,50 @@ exports[`Sidecar component it should have a height style when isHidden is true 1
   }
 >
   <mockConstructor>
-    <div
-      className="osdSidecarFlyout osdSidecarFlyout--dockedTakeover osdSidecarFlyout--hide"
-      data-test-subj="sidecar-component-wrapper"
-      style={
-        Object {
-          "height": 460,
-        }
-      }
+    <IntlProvider
+      defaultFormats={Object {}}
+      defaultLocale="en"
+      fallbackOnEmptyString={true}
+      formats={Object {}}
+      locale="en"
+      messages={Object {}}
+      onError={[Function]}
+      onWarn={[Function]}
+      textComponent={Symbol(react.fragment)}
     >
-      <ResizableButton
-        dockedMode="takeover"
-        flyoutSize={460}
-        onResize={[Function]}
+      <div
+        className="osdSidecarFlyout osdSidecarFlyout--dockedTakeover osdSidecarFlyout--hide"
+        data-test-subj="sidecar-component-wrapper"
+        style={
+          Object {
+            "height": 460,
+          }
+        }
       >
-        <button
-          className="sidecar-resizableButton resizableButton--vertical"
-          data-test-subj="resizableButton"
-          onClick={[Function]}
-          onMouseDown={[Function]}
-          onTouchStart={[Function]}
-          type="button"
-        />
-      </ResizableButton>
-      <MountWrapper
-        className="osdSidecarMountWrapper"
-        mount={[Function]}
-      >
-        <div
+        <ResizableButton
+          dockedMode="takeover"
+          flyoutSize={460}
+          onResize={[Function]}
+        >
+          <button
+            className="sidecar-resizableButton resizableButton--vertical"
+            data-test-subj="resizableButton"
+            onClick={[Function]}
+            onMouseDown={[Function]}
+            onTouchStart={[Function]}
+            type="button"
+          />
+        </ResizableButton>
+        <MountWrapper
           className="osdSidecarMountWrapper"
-        />
-      </MountWrapper>
-    </div>
+          mount={[Function]}
+        >
+          <div
+            className="osdSidecarMountWrapper"
+          />
+        </MountWrapper>
+      </div>
+    </IntlProvider>
   </mockConstructor>
 </Sidecar>
 `;
@@ -1325,110 +1589,170 @@ exports[`Sidecar component it should have a width style when dockedDirection is 
         "results": Array [
           Object {
             "type": "return",
-            "value": <div
-              className="osdSidecarFlyout"
-              data-test-subj="sidecar-component-wrapper"
-              style={
-                Object {
-                  "width": undefined,
-                }
-              }
+            "value": <IntlProvider
+              defaultFormats={Object {}}
+              defaultLocale="en"
+              fallbackOnEmptyString={true}
+              formats={Object {}}
+              locale="en"
+              messages={Object {}}
+              onError={[Function]}
+              onWarn={[Function]}
+              textComponent={Symbol(react.fragment)}
             >
-              <ResizableButton
-                flyoutSize={0}
-                onResize={[Function]}
-              />
-              <MountWrapper
-                className="osdSidecarMountWrapper"
-                mount={[Function]}
-              />
-            </div>,
+              <div
+                className="osdSidecarFlyout"
+                data-test-subj="sidecar-component-wrapper"
+                style={
+                  Object {
+                    "width": undefined,
+                  }
+                }
+              >
+                <ResizableButton
+                  flyoutSize={0}
+                  onResize={[Function]}
+                />
+                <MountWrapper
+                  className="osdSidecarMountWrapper"
+                  mount={[Function]}
+                />
+              </div>
+            </IntlProvider>,
           },
           Object {
             "type": "return",
-            "value": <div
-              className="osdSidecarFlyout"
-              data-test-subj="sidecar-component-wrapper"
-              style={
-                Object {
-                  "width": undefined,
-                }
-              }
+            "value": <IntlProvider
+              defaultFormats={Object {}}
+              defaultLocale="en"
+              fallbackOnEmptyString={true}
+              formats={Object {}}
+              locale="en"
+              messages={Object {}}
+              onError={[Function]}
+              onWarn={[Function]}
+              textComponent={Symbol(react.fragment)}
             >
-              <ResizableButton
-                flyoutSize={0}
-                onResize={[Function]}
-              />
-              <MountWrapper
-                className="osdSidecarMountWrapper"
-                mount={[Function]}
-              />
-            </div>,
+              <div
+                className="osdSidecarFlyout"
+                data-test-subj="sidecar-component-wrapper"
+                style={
+                  Object {
+                    "width": undefined,
+                  }
+                }
+              >
+                <ResizableButton
+                  flyoutSize={0}
+                  onResize={[Function]}
+                />
+                <MountWrapper
+                  className="osdSidecarMountWrapper"
+                  mount={[Function]}
+                />
+              </div>
+            </IntlProvider>,
           },
           Object {
             "type": "return",
-            "value": <div
-              className="osdSidecarFlyout osdSidecarFlyout--dockedRight"
-              data-test-subj="sidecar-component-wrapper"
-              style={
-                Object {
-                  "width": 460,
-                }
-              }
+            "value": <IntlProvider
+              defaultFormats={Object {}}
+              defaultLocale="en"
+              fallbackOnEmptyString={true}
+              formats={Object {}}
+              locale="en"
+              messages={Object {}}
+              onError={[Function]}
+              onWarn={[Function]}
+              textComponent={Symbol(react.fragment)}
             >
-              <ResizableButton
-                dockedMode="right"
-                flyoutSize={460}
-                onResize={[Function]}
-              />
-              <MountWrapper
-                className="osdSidecarMountWrapper"
-                mount={[Function]}
-              />
-            </div>,
+              <div
+                className="osdSidecarFlyout osdSidecarFlyout--dockedRight"
+                data-test-subj="sidecar-component-wrapper"
+                style={
+                  Object {
+                    "width": 460,
+                  }
+                }
+              >
+                <ResizableButton
+                  dockedMode="right"
+                  flyoutSize={460}
+                  onResize={[Function]}
+                />
+                <MountWrapper
+                  className="osdSidecarMountWrapper"
+                  mount={[Function]}
+                />
+              </div>
+            </IntlProvider>,
           },
           Object {
             "type": "return",
-            "value": <div
-              className="osdSidecarFlyout"
-              data-test-subj="sidecar-component-wrapper"
-              style={
-                Object {
-                  "width": undefined,
-                }
-              }
+            "value": <IntlProvider
+              defaultFormats={Object {}}
+              defaultLocale="en"
+              fallbackOnEmptyString={true}
+              formats={Object {}}
+              locale="en"
+              messages={Object {}}
+              onError={[Function]}
+              onWarn={[Function]}
+              textComponent={Symbol(react.fragment)}
             >
-              <ResizableButton
-                flyoutSize={0}
-                onResize={[Function]}
-              />
-              <MountWrapper
-                className="osdSidecarMountWrapper"
-                mount={[Function]}
-              />
-            </div>,
+              <div
+                className="osdSidecarFlyout"
+                data-test-subj="sidecar-component-wrapper"
+                style={
+                  Object {
+                    "width": undefined,
+                  }
+                }
+              >
+                <ResizableButton
+                  flyoutSize={0}
+                  onResize={[Function]}
+                />
+                <MountWrapper
+                  className="osdSidecarMountWrapper"
+                  mount={[Function]}
+                />
+              </div>
+            </IntlProvider>,
           },
           Object {
             "type": "return",
-            "value": <div
-              className="osdSidecarFlyout osdSidecarFlyout--dockedRight"
-              data-test-subj="sidecar-component-wrapper"
-              style={
-                Object {
-                  "width": 460,
-                }
-              }
+            "value": <IntlProvider
+              defaultFormats={Object {}}
+              defaultLocale="en"
+              fallbackOnEmptyString={true}
+              formats={Object {}}
+              locale="en"
+              messages={Object {}}
+              onError={[Function]}
+              onWarn={[Function]}
+              textComponent={Symbol(react.fragment)}
             >
-              <ResizableButton
-                dockedMode="right"
-                flyoutSize={460}
-                onResize={[Function]}
-              />
-              <MountWrapper
-                className="osdSidecarMountWrapper"
-                mount={[Function]}
-              />
-            </div>,
+              <div
+                className="osdSidecarFlyout osdSidecarFlyout--dockedRight"
+                data-test-subj="sidecar-component-wrapper"
+                style={
+                  Object {
+                    "width": 460,
+                  }
+                }
+              >
+                <ResizableButton
+                  dockedMode="right"
+                  flyoutSize={460}
+                  onResize={[Function]}
+                />
+                <MountWrapper
+                  className="osdSidecarMountWrapper"
+                  mount={[Function]}
+                />
+              </div>
+            </IntlProvider>,
           },
         ],
       },
@@ -1533,38 +1857,50 @@ exports[`Sidecar component it should have a width style when dockedDirection is 
   }
 >
   <mockConstructor>
-    <div
-      className="osdSidecarFlyout osdSidecarFlyout--dockedRight"
-      data-test-subj="sidecar-component-wrapper"
-      style={
-        Object {
-          "width": 460,
-        }
-      }
+    <IntlProvider
+      defaultFormats={Object {}}
+      defaultLocale="en"
+      fallbackOnEmptyString={true}
+      formats={Object {}}
+      locale="en"
+      messages={Object {}}
+      onError={[Function]}
+      onWarn={[Function]}
+      textComponent={Symbol(react.fragment)}
     >
-      <ResizableButton
-        dockedMode="right"
-        flyoutSize={460}
-        onResize={[Function]}
+      <div
+        className="osdSidecarFlyout osdSidecarFlyout--dockedRight"
+        data-test-subj="sidecar-component-wrapper"
+        style={
+          Object {
+            "width": 460,
+          }
+        }
       >
-        <button
-          className="sidecar-resizableButton resizableButton--horizontal"
-          data-test-subj="resizableButton"
-          onClick={[Function]}
-          onMouseDown={[Function]}
-          onTouchStart={[Function]}
-          type="button"
-        />
-      </ResizableButton>
-      <MountWrapper
-        className="osdSidecarMountWrapper"
-        mount={[Function]}
-      >
-        <div
+        <ResizableButton
+          dockedMode="right"
+          flyoutSize={460}
+          onResize={[Function]}
+        >
+          <button
+            className="sidecar-resizableButton resizableButton--horizontal"
+            data-test-subj="resizableButton"
+            onClick={[Function]}
+            onMouseDown={[Function]}
+            onTouchStart={[Function]}
+            type="button"
+          />
+        </ResizableButton>
+        <MountWrapper
           className="osdSidecarMountWrapper"
-        />
-      </MountWrapper>
-    </div>
+          mount={[Function]}
+        >
+          <div
+            className="osdSidecarMountWrapper"
+          />
+        </MountWrapper>
+      </div>
+    </IntlProvider>
   </mockConstructor>
 </Sidecar>
 `;

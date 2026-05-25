@@ -3,7 +3,7 @@
 exports[`TelemetryManagementSectionComponent does not show the endpoint link when isSecurityExampleEnabled returns false 1`] = `
 <React.Fragment>
   <p>
-    <FormattedMessage
+    <Memo(MemoizedFormattedMessage)
       defaultMessage="Enabling data usage collection helps us manage and improve our products and services. See our {privacyStatementLink} for more details."
       id="telemetry.telemetryConfigAndLinkDescription"
       values={
@@ -12,10 +12,9 @@ exports[`TelemetryManagementSectionComponent does not show the endpoint link whe
             href=""
             target="_blank"
           >
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Privacy Statement"
               id="telemetry.readOurUsageDataPrivacyStatementLinkText"
-              values={Object {}}
             />
           </EuiLink>,
         }
@@ -23,7 +22,7 @@ exports[`TelemetryManagementSectionComponent does not show the endpoint link whe
     />
   </p>
   <p>
-    <FormattedMessage
+    <Memo(MemoizedFormattedMessage)
       defaultMessage="See an example of the {clusterData} that we collect."
       id="telemetry.seeExampleOfClusterData"
       values={
@@ -32,10 +31,9 @@ exports[`TelemetryManagementSectionComponent does not show the endpoint link whe
             data-test-id="cluster_data_example"
             onClick={[Function]}
           >
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="cluster data"
               id="telemetry.clusterData"
-              values={Object {}}
             />
           </EuiLink>,
         }
@@ -164,136 +162,100 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
 `;
 
 exports[`TelemetryManagementSectionComponent renders null because allowChangingOptInStatus is false 1`] = `
-<TelemetryManagementSection
-  enableSaving={true}
-  intl={
-    Object {
-      "$t": [Function],
-      "defaultFormats": Object {},
-      "defaultLocale": "en",
-      "defaultRichTextElements": undefined,
-      "fallbackOnEmptyString": true,
-      "formatDate": [Function],
-      "formatDateTimeRange": [Function],
-      "formatDateToParts": [Function],
-      "formatDisplayName": [Function],
-      "formatList": [Function],
-      "formatListToParts": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatNumberToParts": [Function],
-      "formatPlural": [Function],
-      "formatRelativeTime": [Function],
-      "formatTime": [Function],
-      "formatTimeToParts": [Function],
-      "formats": Object {},
-      "formatters": Object {
-        "getDateTimeFormat": [Function],
-        "getDisplayNames": [Function],
-        "getListFormat": [Function],
-        "getMessageFormat": [Function],
-        "getNumberFormat": [Function],
-        "getPluralRules": [Function],
-        "getRelativeTimeFormat": [Function],
-      },
-      "locale": "en",
-      "messages": Object {},
-      "onError": [Function],
-      "onWarn": [Function],
-      "textComponent": Symbol(react.fragment),
-      "timeZone": undefined,
+<PseudoLocaleWrapper>
+  <TelemetryManagementSection
+    enableSaving={true}
+    isSecurityExampleEnabled={
+      [MockFunction] {
+        "calls": Array [
+          Array [],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": true,
+          },
+        ],
+      }
     }
-  }
-  isSecurityExampleEnabled={
-    [MockFunction] {
-      "calls": Array [
-        Array [],
-      ],
-      "results": Array [
-        Object {
-          "type": "return",
-          "value": true,
+    onQueryMatchChange={[MockFunction]}
+    showAppliesSettingMessage={true}
+    telemetryService={
+      TelemetryService {
+        "defaultConfig": Object {
+          "allowChangingOptInStatus": false,
+          "banner": true,
+          "enabled": true,
+          "optIn": true,
+          "optInStatusUrl": "",
+          "sendUsageFrom": "browser",
+          "url": "",
         },
-      ],
+        "fetchExample": [Function],
+        "fetchTelemetry": [Function],
+        "getCanChangeOptInStatus": [Function],
+        "getIsOptedIn": [Function],
+        "getOptInStatusUrl": [Function],
+        "getTelemetryUrl": [Function],
+        "http": Object {
+          "addLoadingCountSource": [MockFunction],
+          "anonymousPaths": Object {
+            "isAnonymous": [MockFunction],
+            "register": [MockFunction],
+          },
+          "basePath": BasePath {
+            "basePath": "",
+            "clientBasePath": "",
+            "get": [Function],
+            "getBasePath": [Function],
+            "prepend": [Function],
+            "remove": [Function],
+            "serverBasePath": "",
+          },
+          "delete": [MockFunction],
+          "fetch": [MockFunction],
+          "get": [MockFunction],
+          "getLoadingCount$": [MockFunction],
+          "head": [MockFunction],
+          "intercept": [MockFunction],
+          "options": [MockFunction],
+          "patch": [MockFunction],
+          "post": [MockFunction],
+          "put": [MockFunction],
+        },
+        "notifications": Object {
+          "toasts": Object {
+            "add": [MockFunction],
+            "addDanger": [MockFunction],
+            "addError": [MockFunction],
+            "addInfo": [MockFunction],
+            "addSuccess": [MockFunction],
+            "addWarning": [MockFunction],
+            "get$": [MockFunction],
+            "remove": [MockFunction],
+          },
+        },
+        "reportOptInStatus": [Function],
+        "reportOptInStatusChange": false,
+        "setOptIn": [Function],
+        "setUserHasSeenNotice": [Function],
+        "updatedConfig": undefined,
+      }
     }
-  }
-  onQueryMatchChange={[MockFunction]}
-  showAppliesSettingMessage={true}
-  telemetryService={
-    TelemetryService {
-      "defaultConfig": Object {
-        "allowChangingOptInStatus": false,
-        "banner": true,
-        "enabled": true,
-        "optIn": true,
-        "optInStatusUrl": "",
-        "sendUsageFrom": "browser",
-        "url": "",
-      },
-      "fetchExample": [Function],
-      "fetchTelemetry": [Function],
-      "getCanChangeOptInStatus": [Function],
-      "getIsOptedIn": [Function],
-      "getOptInStatusUrl": [Function],
-      "getTelemetryUrl": [Function],
-      "http": Object {
-        "addLoadingCountSource": [MockFunction],
-        "anonymousPaths": Object {
-          "isAnonymous": [MockFunction],
-          "register": [MockFunction],
-        },
-        "basePath": BasePath {
-          "basePath": "",
-          "clientBasePath": "",
-          "get": [Function],
-          "getBasePath": [Function],
-          "prepend": [Function],
-          "remove": [Function],
-          "serverBasePath": "",
-        },
-        "delete": [MockFunction],
-        "fetch": [MockFunction],
-        "get": [MockFunction],
-        "getLoadingCount$": [MockFunction],
-        "head": [MockFunction],
-        "intercept": [MockFunction],
-        "options": [MockFunction],
-        "patch": [MockFunction],
-        "post": [MockFunction],
-        "put": [MockFunction],
-      },
-      "notifications": Object {
-        "toasts": Object {
-          "add": [MockFunction],
-          "addDanger": [MockFunction],
-          "addError": [MockFunction],
-          "addInfo": [MockFunction],
-          "addSuccess": [MockFunction],
-          "addWarning": [MockFunction],
-          "get$": [MockFunction],
-          "remove": [MockFunction],
-        },
-      },
-      "reportOptInStatus": [Function],
-      "reportOptInStatusChange": false,
-      "setOptIn": [Function],
-      "setUserHasSeenNotice": [Function],
-      "updatedConfig": undefined,
+    toasts={
+      Object {
+        "add": [MockFunction],
+        "addDanger": [MockFunction],
+        "addError": [MockFunction],
+        "addInfo": [MockFunction],
+        "addSuccess": [MockFunction],
+        "addWarning": [MockFunction],
+        "get$": [MockFunction],
+        "remove": [MockFunction],
+      }
     }
-  }
-  toasts={
-    Object {
-      "add": [MockFunction],
-      "addDanger": [MockFunction],
-      "addError": [MockFunction],
-      "addInfo": [MockFunction],
-      "addSuccess": [MockFunction],
-      "addWarning": [MockFunction],
-      "get$": [MockFunction],
-      "remove": [MockFunction],
-    }
-  }
-/>
+  />
+</PseudoLocaleWrapper>
 `;
 
 exports[`TelemetryManagementSectionComponent test the wrapper (for coverage purposes) 1`] = `null`;
