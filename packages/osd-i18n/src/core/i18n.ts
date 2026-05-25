@@ -237,9 +237,12 @@ export function translate(id: string, { values = {}, defaultMessage }: Translate
       // and not value reference boundaries.
       const formattedMessage = getMessageFormat(message, getLocale(), getFormats()).format(values);
 
-      return shouldUsePseudoLocale
-        ? translateUsingPseudoLocale(String(formattedMessage))
+      // Ensure we always return a string by converting the result
+      const messageString = Array.isArray(formattedMessage)
+        ? formattedMessage.join('')
         : String(formattedMessage);
+
+      return shouldUsePseudoLocale ? translateUsingPseudoLocale(messageString) : messageString;
     } catch (e) {
       throw new Error(
         `[I18n] Error formatting message: "${id}" for locale: "${getLocale()}".\n${e}`
@@ -249,8 +252,10 @@ export function translate(id: string, { values = {}, defaultMessage }: Translate
 
   try {
     const msg = getMessageFormat(defaultMessage, getDefaultLocale(), getFormats());
+    const formattedDefault = msg.format(values);
 
-    return msg.format(values);
+    // Ensure we always return a string by converting the result
+    return Array.isArray(formattedDefault) ? formattedDefault.join('') : String(formattedDefault);
   } catch (e) {
     throw new Error(`[I18n] Error formatting the default message for: "${id}".\n${e}`);
   }

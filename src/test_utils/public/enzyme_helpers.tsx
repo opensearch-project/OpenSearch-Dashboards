@@ -38,25 +38,21 @@
 import { I18nProvider, IntlShape, __IntlProvider } from '@osd/i18n/react';
 import { mount, ReactWrapper, render, shallow } from 'enzyme';
 import React, { ReactElement, ValidationMap } from 'react';
+import { createIntl } from 'react-intl';
 
-// Use fake component to extract `intl` property to use in tests.
-const { intl } = (mount(
-  <I18nProvider>
-    <br />
-  </I18nProvider>
-).find('IntlProvider') as ReactWrapper<{}, {}, __IntlProvider>)
-  .instance()
-  .getChildContext();
+// Create intl instance for use in tests.
+// This replaces the legacy getChildContext() approach which doesn't exist in react-intl 6.x
+const intl = createIntl({
+  locale: 'en',
+  defaultLocale: 'en',
+  messages: {},
+});
 
 function getOptions(context = {}, childContextTypes: ValidationMap<any> = {}, props = {}) {
   return {
     context: {
       ...context,
       intl,
-    },
-    childContextTypes: {
-      ...childContextTypes,
-      intl: intlShape,
     },
     ...props,
   };
