@@ -37,11 +37,11 @@ const LimitEditor = ({
   </EuiFormRow>
 );
 
-export function createLimitTransformation(): TransformationInstance {
+export function createLimitTransformation(): TransformationInstance<LimitConfig> {
   return {
     instance_id: uuid.v4(),
     definition_id: 'limit',
-    config: { limit: 10 } as LimitConfig,
+    config: { limit: 10 },
     hide: false,
     transformationMethod: (data: OpenSearchSearchHit[], config: LimitConfig) => {
       if (config.limit === undefined) return data;
@@ -51,7 +51,7 @@ export function createLimitTransformation(): TransformationInstance {
   };
 }
 
-export const limitTransformationDefinition: TransformationDefinition = {
+export const limitTransformationDefinition: TransformationDefinition<LimitConfig> = {
   id: 'limit',
   type: 'filter',
   label: i18n.translate('explore.transformations.limit.label', { defaultMessage: 'Limit' }),

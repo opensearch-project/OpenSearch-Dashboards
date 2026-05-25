@@ -81,14 +81,14 @@ const FilterFieldsEditor = ({
   );
 };
 
-export function createFilterFieldsTransformation(): TransformationInstance {
+export function createFilterFieldsTransformation(): TransformationInstance<FilterFieldsConfig> {
   return {
     instance_id: uuid.v4(),
     definition_id: 'filter_fields',
     config: {
       mode: 'exclude',
       fieldOptions: [],
-    } as FilterFieldsConfig,
+    },
     hide: false,
     transformationMethod: (data: OpenSearchSearchHit[], config: FilterFieldsConfig) => {
       if (!isConfigComplete(config)) return data;
@@ -117,7 +117,7 @@ export function createFilterFieldsTransformation(): TransformationInstance {
   };
 }
 
-export const filterFieldsTransformationDefinition: TransformationDefinition = {
+export const filterFieldsTransformationDefinition: TransformationDefinition<FilterFieldsConfig> = {
   id: 'filter_fields',
   type: 'filter',
   label: i18n.translate('explore.transformations.filterFields.label', {

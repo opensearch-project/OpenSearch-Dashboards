@@ -52,7 +52,7 @@ export const saveStateToSavedObject = (
     splitField: visState?.splitField,
     splitLayout: visState?.splitLayout,
     showSplitLabel: visState?.showSplitLabel,
-    dataTransformationJSON: JSON.stringify(visState?.serializedPipeline),
+    dataTransformations: visState?.serializedPipeline,
   });
 
   obj.uiState = JSON.stringify({

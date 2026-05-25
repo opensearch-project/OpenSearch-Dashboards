@@ -129,7 +129,6 @@ export const SaveVisButton = () => {
       const pipeline = transformationService.pipeline$.getValue();
       const serializedPipeline = pipeline.map((instance) => ({
         definitionId: instance.definition_id,
-        instanceId: instance.instance_id,
         config: instance.config,
         hide: instance.hide,
       }));
@@ -146,7 +145,7 @@ export const SaveVisButton = () => {
         splitField: visConfig?.splitField,
         splitLayout: visConfig?.splitLayout,
         showSplitLabel: visConfig?.showSplitLabel,
-        dataTransformationJSON: JSON.stringify(serializedPipeline),
+        dataTransformations: serializedPipeline,
       });
       savedExploreToSave.version = 1;
 

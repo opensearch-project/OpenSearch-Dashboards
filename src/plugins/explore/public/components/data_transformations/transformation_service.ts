@@ -42,8 +42,8 @@ export class TransformationService implements ITransformationService {
   /**
    * transformation catalog management
    */
-  registerDefinition(definition: TransformationDefinition): void {
-    this.definitions.set(definition.id, definition);
+  registerDefinition<TConfig>(definition: TransformationDefinition<TConfig>): void {
+    this.definitions.set(definition.id, definition as TransformationDefinition);
   }
 
   getDefinitions(): TransformationDefinition[] {
@@ -108,7 +108,6 @@ export class TransformationService implements ITransformationService {
       const instance = definition.createInstance();
       restoredPipeline.push({
         ...instance,
-        instance_id: item.instanceId,
         config: item.config,
         hide: item.hide,
       });
@@ -223,7 +222,6 @@ export class TransformationService implements ITransformationService {
     try {
       const states: UrlTransformationState[] = pipeline.map((instance) => ({
         definitionId: instance.definition_id,
-        instanceId: instance.instance_id,
         config: instance.config,
         hide: instance.hide,
       }));

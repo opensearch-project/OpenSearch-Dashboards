@@ -134,7 +134,7 @@ const ExtractFieldsEditor = ({
   );
 };
 
-export function createExtractFieldsTransformation(): TransformationInstance {
+export function createExtractFieldsTransformation(): TransformationInstance<ExtractFieldsConfig> {
   return {
     instance_id: uuid.v4(),
     definition_id: 'extract_fields',
@@ -142,7 +142,7 @@ export function createExtractFieldsTransformation(): TransformationInstance {
       field: undefined,
       format: 'object',
       prefix: '',
-    } as ExtractFieldsConfig,
+    },
     hide: false,
     transformationMethod: (data: OpenSearchSearchHit[], config: ExtractFieldsConfig) => {
       if (!isConfigComplete(config)) return data;
@@ -173,7 +173,7 @@ export function createExtractFieldsTransformation(): TransformationInstance {
   };
 }
 
-export const extractFieldsTransformationDefinition: TransformationDefinition = {
+export const extractFieldsTransformationDefinition: TransformationDefinition<ExtractFieldsConfig> = {
   id: 'extract_fields',
   type: 'transform',
   label: i18n.translate('explore.transformations.extractFields.label', {

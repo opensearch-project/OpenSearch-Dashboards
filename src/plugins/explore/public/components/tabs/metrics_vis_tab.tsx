@@ -255,7 +255,7 @@ export const MetricsVisTab = () => {
         <div className="metricsVisTab__collapsedLayout">
           <div className="metricsVisTab__collapsedChart">
             {chartTypeToggle}
-            <VisualizationContainer transformationService={transformationService} />
+            <VisualizationContainer />
           </div>
           {showSettings && isSettingsCollapsed && (
             <button

@@ -5,6 +5,7 @@
 
 import { AxisFieldNameMappings, VisColumn } from './types';
 import { ChartType, StyleOptions } from './utils/use_visualization_types';
+import { UrlTransformationState } from '../data_transformations/types';
 
 export type SplitLayout = 'auto' | 'horizontal' | 'vertical';
 
@@ -26,5 +27,5 @@ export interface ChartConfig extends SplitConfig {
   type: ChartType;
   styles?: StyleOptions;
   axesMapping?: AxisFieldNameMappings;
-  dataTransformationJSON?: string;
+  dataTransformations?: UrlTransformationState[];
 }

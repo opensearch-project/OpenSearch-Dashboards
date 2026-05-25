@@ -484,7 +484,7 @@ const AddFieldEditor = ({
   );
 };
 
-export function createAddFieldTransformation(): TransformationInstance {
+export function createAddFieldTransformation(): TransformationInstance<AddFieldConfig> {
   return {
     instance_id: uuid.v4(),
     definition_id: 'add_field',
@@ -501,7 +501,7 @@ export function createAddFieldTransformation(): TransformationInstance {
       crossFields: [],
       expression: '',
       alias: '',
-    } as AddFieldConfig,
+    },
     hide: false,
     transformationMethod: (data: OpenSearchSearchHit[], config: AddFieldConfig) => {
       if (!isConfigComplete(config)) return data;
@@ -575,7 +575,7 @@ export function createAddFieldTransformation(): TransformationInstance {
   };
 }
 
-export const addFieldTransformationDefinition: TransformationDefinition = {
+export const addFieldTransformationDefinition: TransformationDefinition<AddFieldConfig> = {
   id: 'add_field',
   type: 'transform',
   label: i18n.translate('explore.transformations.addField.label', { defaultMessage: 'Add Field' }),

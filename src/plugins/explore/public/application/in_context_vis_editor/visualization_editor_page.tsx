@@ -107,7 +107,7 @@ export const VisualizationEditorPage = ({
           splitField: savedVisConfig.splitField,
           splitLayout: savedVisConfig.splitLayout,
           showSplitLabel: savedVisConfig.showSplitLabel,
-          dataTransformationJSON: savedVisConfig.dataTransformationJSON,
+          dataTransformations: savedVisConfig.dataTransformations,
         });
       }
 

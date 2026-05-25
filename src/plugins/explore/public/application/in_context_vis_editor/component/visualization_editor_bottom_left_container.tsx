@@ -181,59 +181,52 @@ export const ResizableQueryPanelAndVisualization = () => {
   );
 };
 
-export const VisualizationContainer = React.memo(
-  ({ transformationService }: { transformationService: ITransformationService }) => {
-    const searchContext = useSearchContext();
+export const VisualizationContainer = React.memo(() => {
+  const searchContext = useSearchContext();
 
-    const { visualizationBuilderForEditor: visualizationBuilder } = useVisualizationBuilder();
-    const { queryBuilder } = useQueryBuilderState();
+  const { visualizationBuilderForEditor: visualizationBuilder } = useVisualizationBuilder();
+  const { queryBuilder } = useQueryBuilderState();
 
-    const resultState = useObservable(queryBuilder.resultState$, undefined);
+  const resultState = useObservable(queryBuilder.resultState$, undefined);
 
-    const pipeline = useObservable(
-      transformationService.getPipeline$(),
-      transformationService.pipeline$.getValue()
-    );
+  useEffect(() => {
+    if (!resultState) return;
+    const rows = resultState.hits?.hits || [];
+    const fieldSchema = resultState.fieldSchema || [];
+    visualizationBuilder.handleData(rows, fieldSchema);
+  }, [visualizationBuilder, resultState]);
 
-    useEffect(() => {
-      if (!resultState) return;
-      const rows = resultState.hits?.hits || [];
-      const fieldSchema = resultState.fieldSchema || [];
-      visualizationBuilder.handleData(rows, fieldSchema);
-    }, [visualizationBuilder, resultState, pipeline]);
+  const onSelectTimeRange = useCallback(
+    (timeRange?: TimeRange) => {
+      if (timeRange) {
+        queryBuilder.updateQueryEditorState({
+          dateRange: {
+            from: moment(timeRange.from).toISOString(),
+            to: moment(timeRange.to).toISOString(),
+          },
+        });
 
-    const onSelectTimeRange = useCallback(
-      (timeRange?: TimeRange) => {
-        if (timeRange) {
-          queryBuilder.updateQueryEditorState({
-            dateRange: {
-              from: moment(timeRange.from).toISOString(),
-              to: moment(timeRange.to).toISOString(),
-            },
-          });
+        queryBuilder.clearResultState();
+        queryBuilder.updateQueryEditorState({
+          queryStatus: {
+            status: QueryExecutionStatus.UNINITIALIZED,
+            elapsedMs: undefined,
+            startTime: undefined,
+            error: undefined,
+          },
+        });
+        queryBuilder.executeQuery();
+      }
+    },
+    [queryBuilder]
+  );
 
-          queryBuilder.clearResultState();
-          queryBuilder.updateQueryEditorState({
-            queryStatus: {
-              status: QueryExecutionStatus.UNINITIALIZED,
-              elapsedMs: undefined,
-              startTime: undefined,
-              error: undefined,
-            },
-          });
-          queryBuilder.executeQuery();
-        }
-      },
-      [queryBuilder]
-    );
-
-    return (
-      <EditorPanel>
-        {visualizationBuilder.renderVisualization({
-          timeRange: searchContext?.timeRange,
-          onSelectTimeRange,
-        })}
-      </EditorPanel>
-    );
-  }
-);
+  return (
+    <EditorPanel>
+      {visualizationBuilder.renderVisualization({
+        timeRange: searchContext?.timeRange,
+        onSelectTimeRange,
+      })}
+    </EditorPanel>
+  );
+});

@@ -115,7 +115,7 @@ const FilterEditor = ({
   );
 };
 
-export function createFilterTransformation(): TransformationInstance {
+export function createFilterTransformation(): TransformationInstance<FilterConfig> {
   return {
     instance_id: uuid.v4(),
     definition_id: 'filter',
@@ -123,7 +123,7 @@ export function createFilterTransformation(): TransformationInstance {
       field: undefined,
       operator: 'equals',
       value: '',
-    } as FilterConfig,
+    },
     hide: false,
     transformationMethod: (data: OpenSearchSearchHit[], config: FilterConfig) => {
       const { field, operator, value } = config;
@@ -207,7 +207,7 @@ export function createFilterTransformation(): TransformationInstance {
   };
 }
 
-export const filterTransformationDefinition: TransformationDefinition = {
+export const filterTransformationDefinition: TransformationDefinition<FilterConfig> = {
   id: 'filter',
   type: 'filter',
   label: i18n.translate('explore.transformations.filter.label', { defaultMessage: 'Filter' }),

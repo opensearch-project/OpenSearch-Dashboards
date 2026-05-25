@@ -15,41 +15,42 @@ export interface FieldSchema {
   visFieldType: VisFieldType;
 }
 export interface UrlTransformationState {
-  definitionId: string; // defination identifier
-  instanceId: string; // unique instance identifier
+  definitionId: string;
   config: Record<string, unknown>;
   hide: boolean;
 }
 
-export interface TransformationInstance {
+export interface TransformationInstance<TConfig = Record<string, unknown>> {
   // Unique runtime UUID — allows multiple instances of the same definition in the pipeline
   instance_id: string;
-
   definition_id: string;
   // User settings (e.g. { limit: 5 })
-  config: any;
+  config: TConfig;
   // set true to skip transformation during pipeline execution
   hide: boolean;
   // core transformation method
-  transformationMethod: (data: OpenSearchSearchHit[], config: any) => OpenSearchSearchHit[];
+  transformationMethod: (data: OpenSearchSearchHit[], config: TConfig) => OpenSearchSearchHit[];
   // config editor
   Editor: React.ComponentType<{
-    config: any;
-    onChange: (newConfig: any) => void;
+    config: TConfig;
+    onChange: (newConfig: TConfig) => void;
     availableFields: FieldSchema[];
   }>;
   // rechange schema types after transformation (e.g. convert field type)
   transformSchema?: (
     schema: Array<{ name?: string; type?: string }>,
-    config: any
+    config: TConfig
   ) => Array<{ name?: string; type?: string }>;
   // clean config when changing
-  validateConfig?: (config: any, availableFields: Array<{ name?: string; type?: string }>) => any;
+  validateConfig?: (
+    config: TConfig,
+    availableFields: Array<{ name?: string; type?: string }>
+  ) => TConfig;
 }
 
 export type TransformationPipeline = TransformationInstance[];
 
-export interface TransformationDefinition {
+export interface TransformationDefinition<TConfig = Record<string, unknown>> {
   // name of this transformation
   id: string;
   // sub-group (e.g. 'filter', 'format', 'aggregate')
@@ -58,12 +59,12 @@ export interface TransformationDefinition {
   label: string;
   description: string;
   iconType: string;
-  createInstance: () => TransformationInstance;
+  createInstance: () => TransformationInstance<TConfig>;
 }
 
 export interface ITransformationService {
   // Catalog of definition registry
-  registerDefinition(definition: TransformationDefinition): void;
+  registerDefinition<TConfig>(definition: TransformationDefinition<TConfig>): void;
   getDefinitions(): TransformationDefinition[];
   getDefinitionsByType(type: string): TransformationDefinition[];
   getDefinition(id: string): TransformationDefinition | undefined;

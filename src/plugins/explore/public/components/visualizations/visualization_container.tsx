@@ -7,7 +7,6 @@ import { EuiPanel } from '@elastic/eui';
 import React, { useCallback, useEffect } from 'react';
 import moment from 'moment';
 import { useDispatch } from 'react-redux';
-import { useObservable } from 'react-use';
 
 import './visualization_container.scss';
 import { useTabResults } from '../../application/utils/hooks/use_tab_results';
@@ -23,10 +22,6 @@ import {
 } from '../../application/utils/state_management/slices';
 import { executeQueries } from '../../application/utils/state_management/actions/query_actions';
 import { AxisFieldNameMappings } from './types';
-import {
-  ITransformationService,
-  createNoOpTransformationService,
-} from '../../components/data_transformations';
 
 export interface UpdateVisualizationProps {
   mappings: AxisFieldNameMappings;
@@ -47,75 +42,64 @@ export interface UpdateVisualizationProps {
 //   }),
 // };
 
-export const VisualizationContainer = React.memo(
-  ({
-    transformationService = createNoOpTransformationService(),
-  }: {
-    transformationService?: ITransformationService;
-  }) => {
-    const { services } = useOpenSearchDashboards<ExploreServices>();
-    const { results } = useTabResults();
-    const searchContext = useSearchContext();
-    const dispatch = useDispatch();
+export const VisualizationContainer = React.memo(() => {
+  const { services } = useOpenSearchDashboards<ExploreServices>();
+  const { results } = useTabResults();
+  const searchContext = useSearchContext();
+  const dispatch = useDispatch();
 
-    const visualizationBuilder = getVisualizationBuilder();
+  const visualizationBuilder = getVisualizationBuilder();
 
-    const pipeline = useObservable(
-      transformationService.getPipeline$(),
-      transformationService.pipeline$.getValue()
-    );
+  useEffect(() => {
+    if (results) {
+      const rows = results.hits?.hits || [];
+      const fieldSchema = results.fieldSchema || [];
+      visualizationBuilder.handleData(rows, fieldSchema);
+    }
+  }, [visualizationBuilder, results]);
 
-    useEffect(() => {
-      if (results) {
-        const rows = results.hits?.hits || [];
-        const fieldSchema = results.fieldSchema || [];
-        visualizationBuilder.handleData(rows, fieldSchema);
+  useEffect(() => {
+    visualizationBuilder.init();
+    return () => {
+      // reset visualization builder
+      visualizationBuilder.reset();
+    };
+  }, [visualizationBuilder]);
+
+  const onSelectTimeRange = useCallback(
+    (timeRange?: TimeRange) => {
+      if (timeRange) {
+        dispatch(
+          setDateRange({
+            from: moment(timeRange.from).toISOString(),
+            to: moment(timeRange.to).toISOString(),
+          })
+        );
+        dispatch(clearResults());
+        dispatch(clearQueryStatusMap());
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
+        dispatch(executeQueries({ services }));
       }
-    }, [visualizationBuilder, results, pipeline]);
+    },
+    [services, dispatch]
+  );
 
-    useEffect(() => {
-      visualizationBuilder.init();
-      return () => {
-        // reset visualization builder
-        visualizationBuilder.reset();
-      };
-    }, [visualizationBuilder]);
-
-    const onSelectTimeRange = useCallback(
-      (timeRange?: TimeRange) => {
-        if (timeRange) {
-          dispatch(
-            setDateRange({
-              from: moment(timeRange.from).toISOString(),
-              to: moment(timeRange.to).toISOString(),
-            })
-          );
-          dispatch(clearResults());
-          dispatch(clearQueryStatusMap());
-          // @ts-expect-error TS2345 TODO(ts-error): fixme
-          dispatch(executeQueries({ services }));
-        }
-      },
-      [services, dispatch]
-    );
-
-    return (
-      <div className="exploreVisContainer">
-        <EuiPanel
-          hasBorder={false}
-          hasShadow={false}
-          data-test-subj="exploreVisualizationLoader"
-          className="exploreVisPanel"
-          paddingSize="none"
-        >
-          <div className="exploreVisPanel__inner">
-            {visualizationBuilder.renderVisualization({
-              timeRange: searchContext?.timeRange,
-              onSelectTimeRange,
-            })}
-          </div>
-        </EuiPanel>
-      </div>
-    );
-  }
-);
+  return (
+    <div className="exploreVisContainer">
+      <EuiPanel
+        hasBorder={false}
+        hasShadow={false}
+        data-test-subj="exploreVisualizationLoader"
+        className="exploreVisPanel"
+        paddingSize="none"
+      >
+        <div className="exploreVisPanel__inner">
+          {visualizationBuilder.renderVisualization({
+            timeRange: searchContext?.timeRange,
+            onSelectTimeRange,
+          })}
+        </div>
+      </EuiPanel>
+    </div>
+  );
+});

@@ -69,7 +69,6 @@ export const getSaveButtonRun = (
     const pipeline = transformationService.pipeline$.getValue();
     const serializedPipeline: UrlTransformationState[] = pipeline.map((instance) => ({
       definitionId: instance.definition_id,
-      instanceId: instance.instance_id,
       config: instance.config,
       hide: instance.hide,
     }));

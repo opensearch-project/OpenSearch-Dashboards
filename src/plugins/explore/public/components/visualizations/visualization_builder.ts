@@ -44,6 +44,8 @@ export class VisualizationBuilder {
   private getUrlStateStorage: Options['getUrlStateStorage'];
   private subscriptions = Array<Subscription>();
   private transformationService: ITransformationService = createNoOpTransformationService();
+  private lastRawRows: Array<OpenSearchSearchHit<unknown>> = [];
+  private lastSchema: Array<{ type?: string; name?: string }> = [];
 
   visConfig$ = new BehaviorSubject<ChartConfig | undefined>(undefined);
   data$ = new BehaviorSubject<VisData | undefined>(undefined);
@@ -59,11 +61,18 @@ export class VisualizationBuilder {
   setTransformationService(service: ITransformationService) {
     this.transformationService = service;
 
-    // restore saved dataTransformationJSON once
-    if (this.visConfig$.value?.dataTransformationJSON) {
-      this.transformationService.restoreFromState(
-        JSON.parse(this.visConfig$.value?.dataTransformationJSON)
-      );
+    // subscribe pipeline change first
+    this.subscriptions.push(
+      service.getPipeline$().subscribe(() => {
+        if (this.lastRawRows.length > 0) {
+          this.handleData(this.lastRawRows, this.lastSchema);
+        }
+      })
+    );
+
+    // restore saved dataTransformations once
+    if (this.visConfig$.value?.dataTransformations) {
+      this.transformationService.restoreFromState(this.visConfig$.value.dataTransformations);
     }
   }
 
@@ -362,6 +371,11 @@ export class VisualizationBuilder {
     rows: Array<OpenSearchSearchHit<T>>,
     schema: Array<{ type?: string; name?: string }>
   ) {
+    // when the pipeline changes, we need to re-apply the new pipeline against the previous raw data
+    // cache the reference
+    this.lastRawRows = rows;
+    this.lastSchema = schema;
+
     const { rows: transformedRows, finalSchema } = this.transformationService.applyPipeline(
       rows,
       schema
@@ -481,6 +495,8 @@ export class VisualizationBuilder {
     this.showRawTable$ = new BehaviorSubject<boolean>(false);
     this.isVisDirty$ = new BehaviorSubject<boolean>(false);
     this.transformationService = createNoOpTransformationService();
+    this.lastRawRows = [];
+    this.lastSchema = [];
     this.isInitialized = false;
   }
 

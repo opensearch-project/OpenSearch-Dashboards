@@ -77,7 +77,7 @@ export const useInitPage = () => {
             splitField,
             splitLayout,
             showSplitLabel,
-            dataTransformationJSON,
+            dataTransformations,
           } = JSON.parse(visualization);
           visualizationBuilder.setVisConfig({
             type: chartType,
@@ -86,7 +86,7 @@ export const useInitPage = () => {
             splitField,
             splitLayout,
             showSplitLabel,
-            dataTransformationJSON,
+            dataTransformations,
           });
         }
         // Only use saved object's activeTab if there's no activeTab in URL state

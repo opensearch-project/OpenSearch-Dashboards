@@ -197,14 +197,14 @@ const GroupByEditor = ({
   );
 };
 
-export function createGroupByTransformation(): TransformationInstance {
+export function createGroupByTransformation(): TransformationInstance<GroupByConfig> {
   return {
     instance_id: uuid.v4(),
     definition_id: 'group_by',
     config: {
       groupByField: undefined,
       aggregations: [],
-    } as GroupByConfig,
+    },
     hide: false,
     transformationMethod: (data: OpenSearchSearchHit[], config: GroupByConfig) => {
       if (!config.groupByField || config.aggregations.length === 0) return data;
@@ -258,7 +258,7 @@ export function createGroupByTransformation(): TransformationInstance {
   };
 }
 
-export const groupByTransformationDefinition: TransformationDefinition = {
+export const groupByTransformationDefinition: TransformationDefinition<GroupByConfig> = {
   id: 'group_by',
   type: 'aggregate',
   label: i18n.translate('explore.transformations.groupBy.label', {

@@ -80,14 +80,14 @@ const SortByEditor = ({
   );
 };
 
-export function createSortByTransformation(): TransformationInstance {
+export function createSortByTransformation(): TransformationInstance<SortByConfig> {
   return {
     instance_id: uuid.v4(),
     definition_id: 'sort_by',
     config: {
       field: undefined,
       order: 'asc',
-    } as SortByConfig,
+    },
     hide: false,
     transformationMethod: (data: OpenSearchSearchHit[], config: SortByConfig) => {
       const { field, order } = config;
@@ -132,7 +132,7 @@ export function createSortByTransformation(): TransformationInstance {
   };
 }
 
-export const sortByTransformationDefinition: TransformationDefinition = {
+export const sortByTransformationDefinition: TransformationDefinition<SortByConfig> = {
   id: 'sort_by',
   type: 'sort',
   label: i18n.translate('explore.transformations.sortBy.label', { defaultMessage: 'Sort By' }),

@@ -169,11 +169,13 @@ const ConvertFieldTypeEditor = ({
   );
 };
 
-export function createConvertFieldTypeTransformation(): TransformationInstance {
+export function createConvertFieldTypeTransformation(): TransformationInstance<
+  ConvertFieldTypeConfig
+> {
   return {
     instance_id: uuid.v4(),
     definition_id: 'convert_field_type',
-    config: { rules: [] } as ConvertFieldTypeConfig,
+    config: { rules: [] },
     hide: false,
     transformationMethod: (data: OpenSearchSearchHit[], config: ConvertFieldTypeConfig) => {
       if (!isConfigComplete(config)) return data;
@@ -217,7 +219,7 @@ export function createConvertFieldTypeTransformation(): TransformationInstance {
   };
 }
 
-export const convertFieldTypeTransformationDefinition: TransformationDefinition = {
+export const convertFieldTypeTransformationDefinition: TransformationDefinition<ConvertFieldTypeConfig> = {
   id: 'convert_field_type',
   type: 'transform',
   label: i18n.translate('explore.transformations.convertFieldType.label', {

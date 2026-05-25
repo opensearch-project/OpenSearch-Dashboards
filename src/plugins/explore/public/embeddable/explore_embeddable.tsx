@@ -214,10 +214,10 @@ export class ExploreEmbeddable
     }
 
     try {
-      const savedPipeline: UrlTransformationState[] = JSON.parse(
-        JSON.parse(this.savedExplore.visualization).dataTransformationJSON
-      );
-      this.transformationService.restoreFromState(savedPipeline);
+      const parsed = JSON.parse(this.savedExplore.visualization);
+      if (parsed?.dataTransformations) {
+        this.transformationService.restoreFromState(parsed?.dataTransformations);
+      }
     } catch (error) {
       // skip failed pipeline, no transformations applied
     }
