@@ -56,7 +56,10 @@ import {
 import { ManagementOverViewPluginSetup } from '../../management_overview/public';
 import { toMountPoint } from '../../opensearch_dashboards_react/public';
 import { SettingsIcon } from './components/settings_icon';
-import { KeyboardShortcutIcon } from './components/keyboard_shortcut_icon';
+import {
+  KeyboardShortcutIcon,
+  KeyboardShortcutListener,
+} from './components/keyboard_shortcut_icon';
 import {
   fulfillRegistrationLinksToChromeNavLinks,
   LinkItemType,
@@ -348,6 +351,12 @@ export class ManagementPlugin
         core.chrome.navControls.registerLeftBottom({
           order: 5,
           mount: toMountPoint(React.createElement(KeyboardShortcutIcon, { core })),
+        });
+        // Mount a trigger-less listener in the icon side nav footer so the shift+/
+        // keyboard shortcut stays active even when the nav is collapsed.
+        core.chrome.navControls.registerIconSideNavFooter({
+          order: 5,
+          mount: toMountPoint(React.createElement(KeyboardShortcutListener, { core })),
         });
       }
     }

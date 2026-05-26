@@ -64,7 +64,7 @@ const createSetupContractMock = () => {
     },
   } as any);
   setupContract.getPlugins.mockReturnValue([]);
-  setupContract.getEnableIconSideNav.mockReturnValue(false);
+  setupContract.getEnableIconSideNav.mockReturnValue(true);
   setupContract.getKeyboardShortcuts.mockReturnValue({ enabled: true });
   return setupContract;
 };
