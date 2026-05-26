@@ -18,12 +18,18 @@ import {
   SearchInterceptorDeps,
 } from '../../../data/public';
 import { formatTimePickerDate, Query } from '../../../data/common';
-import { API, DATASET, EnhancedFetchContext, formatDate, QueryAggConfig, SEARCH_STRATEGY, fetch } from '../../common';
+import {
+  API,
+  DATASET,
+  EnhancedFetchContext,
+  formatDate,
+  SEARCH_STRATEGY,
+  fetch,
+} from '../../common';
 import { QueryEnhancementsPluginStartDependencies } from '../types';
 
 export class SQLSearchInterceptor extends SearchInterceptor {
   protected queryService!: DataPublicPluginStart['query'];
-  protected aggsService!: DataPublicPluginStart['search']['aggs'];
   protected notifications!: CoreStart['notifications'];
 
   constructor(deps: SearchInterceptorDeps) {
@@ -31,7 +37,6 @@ export class SQLSearchInterceptor extends SearchInterceptor {
 
     deps.startServices.then(([coreStart, depsStart]) => {
       this.queryService = (depsStart as QueryEnhancementsPluginStartDependencies).data.query;
-      this.aggsService = (depsStart as QueryEnhancementsPluginStartDependencies).data.search.aggs;
       this.notifications = coreStart.notifications;
     });
   }
@@ -55,7 +60,7 @@ export class SQLSearchInterceptor extends SearchInterceptor {
     const query =
       request.params?.body?.query?.queries?.[0] || this.queryService.queryString.getQuery();
 
-    return fetch(context, this.buildQuery(query, request), this.getAggConfig(request, query)).pipe(
+    return fetch(context, this.buildQuery(query, request)).pipe(
       catchError((error) => {
         return throwError(error);
       })
@@ -70,9 +75,9 @@ export class SQLSearchInterceptor extends SearchInterceptor {
 
     const timeRange = this.queryService.timefilter.timefilter.getTime();
     const { fromDate, toDate } = formatTimePickerDate(timeRange, 'YYYY-MM-DD HH:mm:ss.SSS');
-    const whereClause = `\`${dataset.timeFieldName}\` >= '${formatDate(
-      fromDate
-    )}' AND \`${dataset.timeFieldName}\` <= '${formatDate(toDate)}'`;
+    const whereClause = `\`${dataset.timeFieldName}\` >= '${formatDate(fromDate)}' AND \`${
+      dataset.timeFieldName
+    }\` <= '${formatDate(toDate)}'`;
 
     return {
       ...query,
@@ -134,33 +139,5 @@ export class SQLSearchInterceptor extends SearchInterceptor {
     }
 
     return this.runSearch(request, options.abortSignal, strategy);
-  }
-
-  private getAggConfig(request: IOpenSearchDashboardsSearchRequest, query: Query): QueryAggConfig | undefined {
-    const { aggs } = request.params?.body || {};
-    if (!aggs || !query.dataset?.timeFieldName) return;
-    const aggsConfig: QueryAggConfig = {};
-    const { fromDate, toDate } = formatTimePickerDate(
-      this.queryService.timefilter.timefilter.getTime(),
-      'YYYY-MM-DD HH:mm:ss.SSS'
-    );
-    Object.entries(aggs as Record<number, any>).forEach(([key, value]) => {
-      const aggTypeKeys = Object.keys(value);
-      if (aggTypeKeys.length === 0) return;
-      const aggTypeKey = aggTypeKeys[0];
-      if (aggTypeKey === 'date_histogram') {
-        aggsConfig[aggTypeKey] = { ...value[aggTypeKey] };
-        const interval = value[aggTypeKey].fixed_interval ??
-          value[aggTypeKey].calendar_interval ??
-          this.aggsService?.calculateAutoTimeExpression({ from: fromDate, to: toDate, mode: 'absolute' });
-        // Use PPL for histogram aggregation since SQL doesn't support span()
-        const fromMatch = query.query.match(/FROM\s+([^\s]+)/i);
-        const source = fromMatch ? fromMatch[1] : query.dataset!.title;
-        aggsConfig.qs = {
-          [key]: `source = ${source} | stats count() by span(${query.dataset!.timeFieldName}, ${interval})`,
-        };
-      }
-    });
-    return Object.keys(aggsConfig).length > 0 ? aggsConfig : undefined;
   }
 }

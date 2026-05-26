@@ -9,13 +9,11 @@ import { ISearchStrategy, SearchUsage } from '../../../data/server';
 import {
   DATA_FRAME_TYPES,
   IDataFrameResponse,
-  IDataFrameWithAggs,
   IOpenSearchDashboardsSearchRequest,
   Query,
   createDataFrame,
 } from '../../../data/common';
 import { getFields, throwFacetError } from '../../common/utils';
-import { QueryAggConfig } from '../../common';
 import { Facet } from '../utils';
 
 export const sqlSearchStrategyProvider = (
@@ -32,19 +30,10 @@ export const sqlSearchStrategyProvider = (
     shimResponse: true,
   });
 
-  const pplFacet = new Facet({
-    client,
-    logger,
-    endpoint: 'enhancements.pplQuery',
-    useJobs: false,
-    shimResponse: true,
-  });
-
   return {
     search: async (context, request: any, options) => {
       try {
         const query: Query = request.body.query;
-        const aggConfig: QueryAggConfig | undefined = request.body.aggConfig;
         const rawResponse: any = await sqlFacet.describeQuery(context, request);
 
         if (!rawResponse.success) throwFacetError(rawResponse);
@@ -58,19 +47,6 @@ export const sqlSearchStrategyProvider = (
         dataFrame.size = rawResponse.data.datarows?.length ?? 0;
 
         if (usage) usage.trackSuccess(rawResponse.took);
-
-        if (aggConfig?.qs) {
-          for (const [key, aggQueryString] of Object.entries(aggConfig.qs)) {
-            request.body.query.query = aggQueryString;
-            const rawAggs: any = await pplFacet.describeQuery(context, request);
-            if (!rawAggs.success) continue;
-            (dataFrame as IDataFrameWithAggs).aggs = {};
-            (dataFrame as IDataFrameWithAggs).aggs[key] = rawAggs.data.datarows?.map((hit: any) => ({
-              key: hit[1],
-              value: hit[0],
-            }));
-          }
-        }
 
         return {
           type: DATA_FRAME_TYPES.DEFAULT,

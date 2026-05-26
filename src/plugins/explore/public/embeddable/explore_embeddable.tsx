@@ -713,7 +713,6 @@ export class ExploreEmbeddable
     this.updateOutput({ loading: false, error });
   };
 
-
   public render(node: HTMLElement) {
     if (!this.searchProps) {
       throw new Error('Search scope not defined');

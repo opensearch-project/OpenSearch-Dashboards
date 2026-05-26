@@ -51,8 +51,7 @@ export const useChangeQueryEditor = () => {
         dataset.id ?? ''
       );
       setEditorText((text) => {
-        const baseText =
-          text || languageConfig.getQueryString?.(query) || '';
+        const baseText = text || languageConfig.getQueryString?.(query) || '';
         const newText =
           editorMode === EditorMode.Prompt
             ? languageConfig.addFiltersToPrompt?.(baseText, newFilters)
@@ -71,7 +70,7 @@ export const useChangeQueryEditor = () => {
     [
       dataset,
       queryString,
-      query.language,
+      query,
       filterManager,
       setEditorText,
       focusOnEditor,
