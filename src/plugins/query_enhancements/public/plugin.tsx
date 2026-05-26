@@ -189,6 +189,7 @@ export class QueryEnhancementsPlugin
         'dataset_management',
         'agentTraces',
       ],
+      hideDatePicker: true,
       sampleQueries: [
         {
           title: i18n.translate('queryEnhancements.sampleQuery.titleContainsWind', {
