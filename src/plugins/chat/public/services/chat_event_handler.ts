@@ -163,7 +163,6 @@ export class ChatEventHandler {
    * Handle run finished - clear streaming state, cleanup, and record success telemetry
    */
   private handleRunFinished(event: any): void {
-
     // Record success telemetry only if no error occurred during this run
     if (this.telemetryRecorder && !this.runErrorOccurred) {
       this.telemetryRecorder.recordEvent({
@@ -686,6 +685,8 @@ export class ChatEventHandler {
    * what failed, and that is surfaced via the system message.
    */
   async sendToolResultToAssistant(toolCallId: string, result: any): Promise<void> {
+    this.onSendToolResultStateChange?.(true);
+
     // Abort any in-flight tool result send so we don't leak controllers or
     // race two dispatches against the same toolCallId.
     if (this.toolResultAbortController) {
@@ -693,6 +694,17 @@ export class ChatEventHandler {
     }
     const abortController = new AbortController();
     this.toolResultAbortController = abortController;
+
+    // Only emit (false) if this send is still the active one — a superseded
+    // send must not reset the flag that the newer send owns.
+    const notifySendDone = () => {
+      if (
+        this.toolResultAbortController === abortController ||
+        this.toolResultAbortController === null
+      ) {
+        this.onSendToolResultStateChange?.(false);
+      }
+    };
 
     // Release our claim on the shared slot — but only if it's still ours.
     // A later send may have already replaced it.
@@ -722,6 +734,7 @@ export class ChatEventHandler {
       // eslint-disable-next-line no-console
       console.error('Failed to send tool result:', error);
       releaseController();
+      notifySendDone();
 
       // Surface the failure in the timeline so the user can tell the
       // conversation is out of sync (the assistant never received the
@@ -743,6 +756,7 @@ export class ChatEventHandler {
         // User initiated the abort (e.g. via cancelToolResultDispatch). No
         // user-facing system message — the cancellation is intentional.
         releaseController();
+        notifySendDone();
         return;
       }
 
@@ -763,6 +777,7 @@ export class ChatEventHandler {
         };
         this.onTimelineUpdate((prev) => [...prev, timeoutMessage]);
         releaseController();
+        notifySendDone();
         return;
       }
 
@@ -781,6 +796,7 @@ export class ChatEventHandler {
         };
         this.onTimelineUpdate((prev) => [...prev, noThreadMessage]);
         releaseController();
+        notifySendDone();
         return;
       }
 
@@ -796,6 +812,7 @@ export class ChatEventHandler {
       };
       this.onTimelineUpdate((prev) => [...prev, infoMessage]);
       releaseController();
+      notifySendDone();
       return;
     }
 
