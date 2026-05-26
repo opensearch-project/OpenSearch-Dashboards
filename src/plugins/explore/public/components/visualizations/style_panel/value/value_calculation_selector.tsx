@@ -126,27 +126,31 @@ const VALUE_CALCULATION_OPTIONS: Array<{
 export interface ValueCalculationSelectorProps {
   selectedValue: CalculationMethod;
   onChange?: (value: CalculationMethod) => void;
+  disabledList?: CalculationMethod[];
 }
 
 export const ValueCalculationSelector = ({
   selectedValue,
   onChange = () => {},
+  disabledList = [],
 }: ValueCalculationSelectorProps) => {
   const options = useMemo(
     () =>
-      VALUE_CALCULATION_OPTIONS.map(({ value, display, description }) => ({
-        value,
-        inputDisplay: display,
-        dropdownDisplay: (
-          <>
-            <strong>{display}</strong>
-            <EuiText size="s" color="subdued">
-              <p className="ouiTextColor--subdued">{description}</p>
-            </EuiText>
-          </>
-        ),
-      })),
-    []
+      VALUE_CALCULATION_OPTIONS.filter((option) => !disabledList.includes(option.value)).map(
+        ({ value, display, description }) => ({
+          value,
+          inputDisplay: display,
+          dropdownDisplay: (
+            <>
+              <strong>{display}</strong>
+              <EuiText size="s" color="subdued">
+                <p className="ouiTextColor--subdued">{description}</p>
+              </EuiText>
+            </>
+          ),
+        })
+      ),
+    [disabledList]
   );
 
   return (

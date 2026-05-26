@@ -70,6 +70,7 @@ const KNOWN_MANIFEST_FIELDS = (() => {
     requiredBundles: true,
     supportedOSDataSourceVersions: true,
     requiredOSDataSourcePlugins: true,
+    unsupportedOSDataSourceEngineTypes: true,
   };
 
   return new Set(Object.keys(manifestFields));
@@ -250,6 +251,9 @@ export async function parseManifest(
         : '',
     requiredOSDataSourcePlugins: Array.isArray(manifest.requiredOSDataSourcePlugins)
       ? manifest.requiredOSDataSourcePlugins
+      : [],
+    unsupportedOSDataSourceEngineTypes: Array.isArray(manifest.unsupportedOSDataSourceEngineTypes)
+      ? manifest.unsupportedOSDataSourceEngineTypes
       : [],
   };
 }

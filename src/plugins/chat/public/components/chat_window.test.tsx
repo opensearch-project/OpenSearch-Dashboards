@@ -15,13 +15,13 @@ import { SuggestedActionsService } from '../services/suggested_action';
 import { ConfirmationService } from '../services/confirmation_service';
 
 // Create mock observable before using it in mocks
-const mockObservable = of({ toolDefinitions: [], toolCallStates: {} });
+const mockObservable = of({ toolDefinitions: [], toolCallStates: new Map() });
 
 // Mock dependencies
 jest.mock('../../../context_provider/public', () => {
   const assistantActionsInstance = {
     getState$: jest.fn(() => mockObservable),
-    getCurrentState: jest.fn(() => ({ toolDefinitions: [], toolCallStates: {} })),
+    getCurrentState: jest.fn(() => ({ toolDefinitions: [], toolCallStates: new Map() })),
     getActionRenderer: jest.fn(),
   };
   return {
@@ -806,7 +806,7 @@ describe('ChatWindow', () => {
       const mockGetState = jest.fn(() => mockObservable);
       const mockService = {
         getState$: mockGetState,
-        getCurrentState: jest.fn(() => ({ toolDefinitions: [], toolCallStates: {} })),
+        getCurrentState: jest.fn(() => ({ toolDefinitions: [], toolCallStates: new Map() })),
         getActionRenderer: jest.fn(),
       };
 

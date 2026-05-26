@@ -18,9 +18,17 @@ import { AuthType } from '../../common/data_sources';
 import { opensearchClientMock } from '../../../../../src/core/server/opensearch/client/mocks';
 import { dynamicConfigServiceMock } from '../../../../../src/core/server/mocks';
 
+jest.mock('../util/endpoint_validator', () => ({
+  isValidURL: jest.fn(),
+}));
+
+import { isValidURL } from '../util/endpoint_validator';
+const mockedIsValidURL = isValidURL as jest.MockedFunction<typeof isValidURL>;
+
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
 const URL = '/internal/data-source-management/fetchDataSourceMetaData';
+const BLOCKED_IP_RANGES = ['127.0.0.0/8', '169.254.0.0/16'];
 
 describe(`Fetch DataSource MetaData ${URL}`, () => {
   let server: SetupServerReturn['server'];
@@ -165,6 +173,8 @@ describe(`Fetch DataSource MetaData ${URL}`, () => {
       getDataSourceLegacyClient: jest.fn(),
     };
 
+    mockedIsValidURL.mockResolvedValue({ valid: true });
+
     const router = httpSetup.createRouter('');
     dataSourceClient.info.mockImplementationOnce(() =>
       opensearchClientMock.createSuccessTransportRequestPromise({
@@ -180,13 +190,26 @@ describe(`Fetch DataSource MetaData ${URL}`, () => {
       opensearchClientMock.createSuccessTransportRequestPromise(installedPlugins)
     );
 
+    const mockLogger: any = {
+      error: jest.fn(),
+      warn: jest.fn(),
+      info: jest.fn(),
+      debug: jest.fn(),
+      trace: jest.fn(),
+      fatal: jest.fn(),
+      log: jest.fn(),
+      get: jest.fn().mockReturnThis(),
+    };
+
     registerFetchDataSourceMetaDataRoute(
       router,
       dataSourceServiceSetupMock,
       // @ts-expect-error TS2454 TODO(ts-upgrade): fixme
       cryptographyMock,
       authRegistryPromiseMock,
-      customApiSchemaRegistryPromise
+      customApiSchemaRegistryPromise,
+      mockLogger as any,
+      BLOCKED_IP_RANGES
     );
 
     await server.start({ dynamicConfigService: dynamicConfigServiceStart });
@@ -194,6 +217,7 @@ describe(`Fetch DataSource MetaData ${URL}`, () => {
 
   afterEach(async () => {
     await server.stop();
+    mockedIsValidURL.mockReset();
   });
 
   it('shows successful response', async () => {
@@ -380,5 +404,129 @@ describe(`Fetch DataSource MetaData ${URL}`, () => {
       dataSourceEngineType: 'OpenSearch',
       installedPlugins: ['opensearch-ml', 'opensearch-sql'],
     });
+  });
+
+  it('should fail when endpoint is invalid', async () => {
+    mockedIsValidURL.mockResolvedValue({
+      valid: false,
+      error: 'Invalid URL format',
+      userMessage: 'Invalid URL format',
+    });
+
+    const result = await supertest(httpSetup.server.listener)
+      .post(URL)
+      .send({
+        id: 'testId',
+        dataSourceAttr: {
+          endpoint: 'invalid-endpoint',
+          auth: {
+            type: AuthType.NoAuth,
+            credentials: {},
+          },
+        },
+      })
+      .expect(400);
+
+    expect(result.body.message).toContain('Invalid URL format');
+    expect(mockedIsValidURL).toHaveBeenCalledWith('invalid-endpoint', BLOCKED_IP_RANGES, undefined);
+    expect(dataSourceServiceSetupMock.getDataSourceClient).not.toHaveBeenCalled();
+  });
+
+  it('should succeed when endpoint is valid', async () => {
+    mockedIsValidURL.mockResolvedValue({ valid: true });
+
+    const result = await supertest(httpSetup.server.listener)
+      .post(URL)
+      .send({
+        id: 'testId',
+        dataSourceAttr,
+      })
+      .expect(200);
+
+    expect(result.body).toEqual({
+      dataSourceVersion: '2.11.0',
+      dataSourceEngineType: 'OpenSearch',
+      installedPlugins: ['opensearch-ml', 'opensearch-sql'],
+    });
+    expect(mockedIsValidURL).toHaveBeenCalledWith('https://test.com', BLOCKED_IP_RANGES, undefined);
+    expect(dataSourceServiceSetupMock.getDataSourceClient).toHaveBeenCalled();
+  });
+
+  it('should fail when endpoint resolves to a blocked IP range', async () => {
+    mockedIsValidURL.mockResolvedValue({
+      valid: false,
+      error: 'IP 127.0.0.1 is blocked by denied range 127.0.0.0/8',
+      userMessage: 'Endpoint IP address is not allowed',
+    });
+
+    const result = await supertest(httpSetup.server.listener)
+      .post(URL)
+      .send({
+        id: 'testId',
+        dataSourceAttr: {
+          endpoint: 'http://127.0.0.1:9200',
+          auth: {
+            type: AuthType.NoAuth,
+            credentials: {},
+          },
+        },
+      })
+      .expect(400);
+
+    expect(result.body.message).toContain('Endpoint IP address is not allowed');
+    expect(mockedIsValidURL).toHaveBeenCalledWith(
+      'http://127.0.0.1:9200',
+      BLOCKED_IP_RANGES,
+      undefined
+    );
+    expect(dataSourceServiceSetupMock.getDataSourceClient).not.toHaveBeenCalled();
+  });
+
+  it('should fail when endpoint targets the cloud metadata IP', async () => {
+    mockedIsValidURL.mockResolvedValue({
+      valid: false,
+      error: 'IP 169.254.169.254 is blocked by denied range 169.254.0.0/16',
+      userMessage: 'Endpoint IP address is not allowed',
+    });
+
+    const result = await supertest(httpSetup.server.listener)
+      .post(URL)
+      .send({
+        id: 'testId',
+        dataSourceAttr: {
+          endpoint: 'http://169.254.169.254/latest/meta-data/',
+          auth: {
+            type: AuthType.NoAuth,
+            credentials: {},
+          },
+        },
+      })
+      .expect(400);
+
+    expect(result.body.message).toContain('Endpoint IP address is not allowed');
+    expect(mockedIsValidURL).toHaveBeenCalledWith(
+      'http://169.254.169.254/latest/meta-data/',
+      BLOCKED_IP_RANGES,
+      undefined
+    );
+    expect(dataSourceServiceSetupMock.getDataSourceClient).not.toHaveBeenCalled();
+  });
+
+  it('should use a generic message when validator returns no userMessage', async () => {
+    mockedIsValidURL.mockResolvedValue({
+      valid: false,
+      error: 'unexpected validator failure',
+    });
+
+    const result = await supertest(httpSetup.server.listener)
+      .post(URL)
+      .send({
+        id: 'testId',
+        dataSourceAttr,
+      })
+      .expect(400);
+
+    expect(result.body.message).toEqual('Fetch data source metadata endpoint validation failed');
+    expect(dataSourceServiceSetupMock.getDataSourceClient).not.toHaveBeenCalled();
   });
 });

@@ -43,7 +43,6 @@ export interface ChatEventHandlerConfig {
     onTimelineUpdate: (updater: (prev: Message[]) => Message[]) => void;
     onStreamingStateChange: (isStreaming: boolean) => void;
     onStartResponse: (flag: boolean) => void;
-    onSendToolResultStateChange?: (isSending: boolean) => void;
     getTimeline: () => Message[];
   };
 }
@@ -64,7 +63,6 @@ export class ChatEventHandler {
   private onTimelineUpdate: (updater: (prev: Message[]) => Message[]) => void;
   private onStreamingStateChange: (isStreaming: boolean) => void;
   private onStartResponse: (flag: boolean) => void;
-  private onSendToolResultStateChange?: (isSending: boolean) => void;
   private getTimeline: () => Message[];
   private toolResultSubscription: Subscription | null = null;
 
@@ -84,7 +82,6 @@ export class ChatEventHandler {
     this.onTimelineUpdate = config.callbacks.onTimelineUpdate;
     this.onStreamingStateChange = config.callbacks.onStreamingStateChange;
     this.onStartResponse = config.callbacks.onStartResponse;
-    this.onSendToolResultStateChange = config.callbacks.onSendToolResultStateChange;
     this.getTimeline = config.callbacks.getTimeline;
     this.toolExecutor = new ToolExecutor(config.assistantActionService, config.confirmationService);
   }
@@ -706,7 +703,6 @@ export class ChatEventHandler {
 
     try {
       // Notify that we're starting to send tool result
-      this.onSendToolResultStateChange?.(true);
       const messages = this.getTimeline();
 
       ({ observable, toolMessage, skipped } = await this.chatService.sendToolResult(
@@ -733,14 +729,6 @@ export class ChatEventHandler {
       };
       this.onTimelineUpdate((prev) => [...prev, failureMessage]);
       return;
-    } finally {
-      // Only notify "done" if a newer send has not replaced the controller.
-      if (
-        this.toolResultAbortController === abortController ||
-        this.toolResultAbortController === null
-      ) {
-        this.onSendToolResultStateChange?.(false);
-      }
     }
 
     if (skipped) {
