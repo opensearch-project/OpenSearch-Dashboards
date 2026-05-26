@@ -740,6 +740,8 @@ export const createSearchSourceWithQuery = async (
     highlightAll: true,
     version: true,
     filter: filters,
+    // Enable time filtering for SQL queries in Explore
+    ...(preparedQuery.language === 'SQL' ? { enableTimeFiltering: true } : {}),
   });
 
   if (!includeHistogram || !dataView.timeFieldName || !customInterval) {

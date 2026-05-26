@@ -226,13 +226,24 @@ describe('SQLSearchInterceptor', () => {
       expect(result).toBe(query);
     });
 
-    it('appends a WHERE clause with the time range to a query without one', () => {
+    it('returns the query unchanged when enableTimeFiltering is not set', () => {
       const query = {
         language: 'SQL',
         query: 'SELECT * FROM test_index',
         dataset: { type: 'DEFAULT', timeFieldName: '@timestamp' },
       };
       const result = (sqlSearchInterceptor as any).buildQuery(query, baseRequest);
+      expect(result).toBe(query);
+    });
+
+    it('appends a WHERE clause with the time range when enableTimeFiltering is set', () => {
+      const query = {
+        language: 'SQL',
+        query: 'SELECT * FROM test_index',
+        dataset: { type: 'DEFAULT', timeFieldName: '@timestamp' },
+      };
+      const request = { params: { body: { enableTimeFiltering: true } } };
+      const result = (sqlSearchInterceptor as any).buildQuery(query, request);
 
       expect(result.query).toBe(
         "SELECT * FROM test_index WHERE `@timestamp` >= '2023-01-01 00:00:00.000' " +
@@ -240,13 +251,14 @@ describe('SQLSearchInterceptor', () => {
       );
     });
 
-    it('AND-merges the time range with an existing WHERE clause', () => {
+    it('AND-merges the time range with an existing WHERE clause when enableTimeFiltering is set', () => {
       const query = {
         language: 'SQL',
         query: "SELECT * FROM test_index WHERE `host` = 'a'",
         dataset: { type: 'DEFAULT', timeFieldName: '@timestamp' },
       };
-      const result = (sqlSearchInterceptor as any).buildQuery(query, baseRequest);
+      const request = { params: { body: { enableTimeFiltering: true } } };
+      const result = (sqlSearchInterceptor as any).buildQuery(query, request);
 
       expect(result.query).toBe(
         "SELECT * FROM test_index WHERE `@timestamp` >= '2023-01-01 00:00:00.000' " +
@@ -254,13 +266,14 @@ describe('SQLSearchInterceptor', () => {
       );
     });
 
-    it('falls back to appending WHERE when the SQL is unparseable', () => {
+    it('falls back to appending WHERE when the SQL is unparseable and enableTimeFiltering is set', () => {
       const query = {
         language: 'SQL',
         query: 'NOT VALID SQL',
         dataset: { type: 'DEFAULT', timeFieldName: '@timestamp' },
       };
-      const result = (sqlSearchInterceptor as any).buildQuery(query, baseRequest);
+      const request = { params: { body: { enableTimeFiltering: true } } };
+      const result = (sqlSearchInterceptor as any).buildQuery(query, request);
 
       expect(result.query).toBe(
         "NOT VALID SQL WHERE `@timestamp` >= '2023-01-01 00:00:00.000' " +
