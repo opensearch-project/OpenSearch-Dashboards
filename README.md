@@ -1,31 +1,5 @@
 <img src="https://raw.githubusercontent.com/opensearch-project/project-website/refs/heads/main/assets/brand/SVG/Logo/opensearch_dashboards_logo_darkmode.svg" height="64px"/>
 
-## SQL Support in Explore Logs
-
-### Changes
-
-- **SQL language toggle**: Switching to SQL auto-generates a base query (`SELECT * FROM <index> LIMIT 1000`) and executes it.
-- **SQL filter buttons**: Filter for/out value buttons generate proper SQL `WHERE` clauses via `sql_filter_utils.ts`.
-- **SQL histogram**: Uses a PPL sidecar query (`/api/enhancements/search/ppl`) with `span()` for time bucketing, since the SQL engine lacks a pushdown-capable histogram function.
-
-### Limitation: SQL Histogram Uses PPL Internally
-
-The OpenSearch SQL engine does not support `span()` or any function that pushes down to a native `date_histogram` aggregation. The tokens `DATE_HISTOGRAM` / `HISTOGRAM` exist in the SQL lexer but are only wired in the legacy engine, not the current v3 Calcite engine.
-
-Approaches that don't work:
-- `DATE_FORMAT(time, '%Y-%m-%d') GROUP BY ...` — no aggregation pushdown, times out on large indices
-- `FLOOR(UNIX_TIMESTAMP(time) / interval)` — same issue
-
-Current workaround: the histogram query is issued as PPL via direct HTTP POST, bypassing the SQL interceptor. To remove PPL fully, the SQL plugin needs `span()` added to its grammar (the backend `AggregateAnalyzer` already handles it).
-
-### Files Modified
-
-- `src/plugins/explore/public/application/utils/state_management/actions/query_actions.ts` — PPL sidecar fetch + dispatch for SQL histogram
-- `src/plugins/query_enhancements/public/search/filters/sql_filter_utils.ts` — SQL filter generation
-- `src/plugins/query_enhancements/public/language_toggle.tsx` — SQL/PPL language switch behavior
-
----
-
 - [Welcome!](#welcome)
 - [Project Resources](#project-resources)
 - [Code of Conduct](#code-of-conduct)
@@ -38,7 +12,7 @@ OpenSearch Dashboards is an open-source data visualization tool designed to work
 
 We aim to be an exceptional community-driven platform and to foster open participation and collective contribution with all contributors. Stay up to date on what's happening with the OpenSearch Project by tracking GitHub [issues](https://github.com/opensearch-project/OpenSearch-Dashboards/issues) and [pull requests](https://github.com/opensearch-project/OpenSearch-Dashboards/pulls). 
 
-You can [contribute to this project](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/CONTRIBUTING.md) by [opening issues](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/new/choose) to give feedback, share ideas, identify bugs, and contribute code.
+You can [contribute to this project](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/CONTRIBUTING.md) by [opening issues](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/new/choose) to give feedback, share ideas, identify bugs, and contribute code.
 
 Set up your [OpenSearch Dashboards development environment](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/DEVELOPER_GUIDE.md#getting-started-guide) today! The project team looks forward to your contributions.
 
