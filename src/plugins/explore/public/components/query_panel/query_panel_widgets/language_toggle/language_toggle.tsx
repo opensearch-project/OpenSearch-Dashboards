@@ -93,8 +93,7 @@ export const LanguageToggle = () => {
       if (activeTab?.supportedLanguages?.length) {
         tabSupportedLanguages = activeTab.supportedLanguages;
       } else {
-        // Fallback to PPL and SQL when tab is not resolved
-        tabSupportedLanguages = ['PPL', 'SQL'];
+        tabSupportedLanguages = ['PPL'];
       }
 
       // Filter out SQL if feature flag is disabled

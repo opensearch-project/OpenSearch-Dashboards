@@ -49,8 +49,6 @@ export const sqlSearchStrategyProvider = (
 
         if (!rawResponse.success) throwFacetError(rawResponse);
 
-        logger.info(`sqlSearchStrategy: query=${query.query?.substring(0, 100)}, schema=${JSON.stringify(rawResponse.data.schema?.map((s: any) => s.name))}, datarows=${rawResponse.data.datarows?.length ?? 'undefined'}`);
-
         const dataFrame = createDataFrame({
           name: query.dataset?.id,
           schema: rawResponse.data.schema,

@@ -408,7 +408,7 @@ describe('LanguageToggle', () => {
       expect(screen.queryByTestId('queryPanelFooterLanguageToggle-SQL')).not.toBeInTheDocument();
     });
 
-    it('should fallback to PPL+SQL when tab is not resolved and feature flag is enabled', async () => {
+    it('should fallback to PPL only when tab is not resolved, even with feature flag enabled', async () => {
       mockSqlSupportEnabled = true;
       mockGetTab.mockReturnValue(undefined); // Tab not resolved
       mockGetLanguage.mockImplementation((lang: string) => ({ title: lang }));
@@ -418,8 +418,9 @@ describe('LanguageToggle', () => {
       fireEvent.click(button);
 
       await waitFor(() => {
-        expect(screen.getByTestId('queryPanelFooterLanguageToggle-SQL')).toBeInTheDocument();
+        expect(screen.getByTestId('queryPanelFooterLanguageToggle-PPL')).toBeInTheDocument();
       });
+      expect(screen.queryByTestId('queryPanelFooterLanguageToggle-SQL')).not.toBeInTheDocument();
     });
 
     it('should fallback to PPL only when tab is not resolved and feature flag is disabled', async () => {
