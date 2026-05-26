@@ -21,6 +21,12 @@ $bar-gauge-radius: 2px;
   }
 }
 
+.bar-gauge-item-tooltip {
+  flex: 1;
+  display: flex;
+  min-width: 0;
+}
+
 // bar gauge item
 .bar-gauge-item {
   display: flex;
