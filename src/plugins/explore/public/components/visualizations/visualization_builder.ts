@@ -23,6 +23,8 @@ import { adaptLegacyData } from './visualization_builder_utils';
 import { mergeStyles } from './utils/utils';
 import { AxisFieldNameMappings, RenderChartConfig } from './types';
 import { TimeRange } from '../../../../data/common';
+import { ITransformationService } from '../data_transformations/types';
+import { createNoOpTransformationService } from '../data_transformations/transformation_service';
 
 interface VisState {
   styleOptions?: StyleOptions;
@@ -41,6 +43,9 @@ export class VisualizationBuilder {
   private isInitialized = false;
   private getUrlStateStorage: Options['getUrlStateStorage'];
   private subscriptions = Array<Subscription>();
+  private transformationService: ITransformationService = createNoOpTransformationService();
+  private lastRawRows: Array<OpenSearchSearchHit<unknown>> = [];
+  private lastSchema: Array<{ type?: string; name?: string }> = [];
 
   visConfig$ = new BehaviorSubject<ChartConfig | undefined>(undefined);
   data$ = new BehaviorSubject<VisData | undefined>(undefined);
@@ -51,6 +56,28 @@ export class VisualizationBuilder {
     if (getUrlStateStorage) {
       this.getUrlStateStorage = getUrlStateStorage;
     }
+  }
+
+  setTransformationService(service: ITransformationService) {
+    this.transformationService = service;
+
+    // subscribe pipeline change first
+    this.subscriptions.push(
+      service.getPipeline$().subscribe(() => {
+        if (this.lastRawRows.length > 0) {
+          this.handleData(this.lastRawRows, this.lastSchema);
+        }
+      })
+    );
+
+    // restore saved dataTransformations once
+    if (this.visConfig$.value?.dataTransformations) {
+      this.transformationService.restoreFromState(this.visConfig$.value.dataTransformations);
+    }
+  }
+
+  getTransformationService() {
+    return this.transformationService;
   }
 
   init() {
@@ -314,7 +341,6 @@ export class VisualizationBuilder {
         if (!chartTypeConfig) {
           this.setVisConfig(undefined);
         }
-        // Default to show a table if no auto vis created
         const newVisConfig: ChartConfig = {
           type: 'table',
           styles: chartTypeConfig?.ui.style.defaults,
@@ -337,17 +363,31 @@ export class VisualizationBuilder {
     this.setVisConfig(undefined);
   }
 
+  /**
+   * Apply the current transformation pipeline against the given raw rows and
+   * schema, then publish the result to data$
+   */
   handleData<T = unknown>(
     rows: Array<OpenSearchSearchHit<T>>,
     schema: Array<{ type?: string; name?: string }>
   ) {
+    // when the pipeline changes, we need to re-apply the new pipeline against the previous raw data
+    // cache the reference
+    this.lastRawRows = rows;
+    this.lastSchema = schema;
+
+    const { rows: transformedRows, finalSchema } = this.transformationService.applyPipeline(
+      rows,
+      schema
+    );
     const {
       transformedData,
       numericalColumns,
       categoricalColumns,
       dateColumns,
       unknownColumns,
-    } = normalizeResultRows(rows, schema);
+    } = normalizeResultRows(transformedRows, finalSchema);
+
     this.data$.next({
       transformedData,
       numericalColumns,
@@ -454,6 +494,9 @@ export class VisualizationBuilder {
     this.data$ = new BehaviorSubject<VisData | undefined>(undefined);
     this.showRawTable$ = new BehaviorSubject<boolean>(false);
     this.isVisDirty$ = new BehaviorSubject<boolean>(false);
+    this.transformationService = createNoOpTransformationService();
+    this.lastRawRows = [];
+    this.lastSchema = [];
     this.isInitialized = false;
   }
 
