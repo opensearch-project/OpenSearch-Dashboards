@@ -154,7 +154,11 @@ describe('SQLSearchInterceptor', () => {
       const spy = jest.spyOn(sqlSearchInterceptor as any, 'runSearch');
       sqlSearchInterceptor.search(buildRequest(), mockOptions);
 
-      expect(spy).toHaveBeenCalledWith(expect.anything(), mockOptions.abortSignal, 'custom_strategy');
+      expect(spy).toHaveBeenCalledWith(
+        expect.anything(),
+        mockOptions.abortSignal,
+        'custom_strategy'
+      );
     });
 
     it('attaches timeRange when hideDatePicker is explicitly false', () => {
@@ -365,9 +369,7 @@ describe('SQLSearchInterceptor', () => {
       };
       const result = (sqlSearchInterceptor as any).getAggConfig(request, queryWithDifferentFrom);
 
-      expect(result.qs['1']).toBe(
-        'source = other_index | stats count() by span(@timestamp, 5m)'
-      );
+      expect(result.qs['1']).toBe('source = other_index | stats count() by span(@timestamp, 5m)');
     });
 
     it('falls back to dataset.title when no FROM clause is present', () => {
@@ -384,9 +386,7 @@ describe('SQLSearchInterceptor', () => {
       };
       const result = (sqlSearchInterceptor as any).getAggConfig(request, queryWithoutFrom);
 
-      expect(result.qs['1']).toBe(
-        'source = test_index | stats count() by span(@timestamp, 5m)'
-      );
+      expect(result.qs['1']).toBe('source = test_index | stats count() by span(@timestamp, 5m)');
     });
 
     it('skips non-date_histogram aggregations', () => {
