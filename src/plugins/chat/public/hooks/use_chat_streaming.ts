@@ -39,6 +39,10 @@ export const useChatStreaming = ({
 
   // Use ref to track streaming state synchronously for React 18 compatibility
   const isStreamingRef = useRef(false);
+
+  useEffect(() => {
+    isStreamingRef.current = isStreaming;
+  }, [isStreaming]);
   const isSendingToolResultRef = useRef(false);
   const timelineRef = useRef<Message[]>(timeline);
   const currentSubscriptionRef = useRef<any>(null);
@@ -126,7 +130,6 @@ export const useChatStreaming = ({
   // Subscribe to message stream and handle events
   const subscribeToMessageStream = useCallback(
     async (messageContent: string, messages: Message[], rawMessage?: string) => {
-      isStreamingRef.current = true;
       setIsMainStreaming(true);
       setMainStartResponse(false);
 
@@ -137,9 +140,7 @@ export const useChatStreaming = ({
           id: userMessage.id,
           role: 'user',
           content: userMessage.content,
-          rawMessage: Array.isArray(userMessage.content)
-            ? undefined
-            : rawMessage || messageContent,
+          rawMessage: Array.isArray(userMessage.content) ? undefined : rawMessage || messageContent,
         };
 
         setTimeline((prev) => [...prev, timelineUserMessage]);
@@ -147,7 +148,6 @@ export const useChatStreaming = ({
         onMessageSent?.();
 
         const onStreamEnd = () => {
-          isStreamingRef.current = false;
           setIsMainStreaming(false);
           setMainStartResponse(false);
           currentSubscriptionRef.current = null;
@@ -173,7 +173,6 @@ export const useChatStreaming = ({
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error('Failed to send message:', error);
-        isStreamingRef.current = false;
         setIsMainStreaming(false);
         currentSubscriptionRef.current = null;
       }
@@ -185,6 +184,7 @@ export const useChatStreaming = ({
   const stopStreaming = useCallback(() => {
     chatService.abort();
     chatService.resetConnection();
+    eventHandler.cancelToolResultDispatch();
     if (currentSubscriptionRef.current) {
       currentSubscriptionRef.current.unsubscribe();
       currentSubscriptionRef.current = null;
@@ -193,18 +193,28 @@ export const useChatStreaming = ({
       toolResultSubscriptionRef.current.unsubscribe();
       toolResultSubscriptionRef.current = null;
     }
-    eventHandler.cancelToolResultDispatch();
-    isStreamingRef.current = false;
     setIsMainStreaming(false);
     setIsToolResultStreaming(false);
+    // Synchronously reset ref so that handleSend called immediately after
+    // stopStreaming (e.g. from nav search "start new chat + send") isn't blocked.
+    // The useEffect will also sync it, but that's async (React 18 batching).
+    isStreamingRef.current = false;
     setMainStartResponse(false);
     setToolResultStartResponse(false);
   }, [chatService, eventHandler]);
 
   // Resend a tool result to the assistant
   const sendToolResult = useCallback(
-    async ({ messageId, toolCallId, toolResult }: { messageId: string; toolCallId: string; toolResult: any }) => {
-      if (isStreamingRef.current || isSendingToolResultRef.current) return;
+    async ({
+      messageId,
+      toolCallId,
+      toolResult,
+    }: {
+      messageId: string;
+      toolCallId: string;
+      toolResult: any;
+    }) => {
+      if (isStreamingRef.current) return;
       setTimeline((prev) => prev.filter((msg) => msg.id !== messageId));
       await eventHandler.sendToolResultToAssistant(toolCallId, toolResult);
     },

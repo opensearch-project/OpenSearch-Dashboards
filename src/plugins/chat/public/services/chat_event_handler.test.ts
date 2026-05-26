@@ -477,7 +477,6 @@ describe('ChatEventHandler', () => {
         threadId: 'test-thread',
         runId: 'test-run',
       });
-
     });
 
     it('should handle run finished', async () => {
@@ -486,7 +485,6 @@ describe('ChatEventHandler', () => {
         threadId: 'test-thread',
         runId: 'test-run',
       });
-
     });
 
     it('should handle run error', async () => {
@@ -494,7 +492,6 @@ describe('ChatEventHandler', () => {
         type: EventType.RUN_ERROR,
         message: 'Something went wrong',
       });
-
 
       const errorMessage = timeline.find((msg) => msg.role === 'system');
       expect(errorMessage).toBeDefined();
@@ -843,7 +840,6 @@ describe('ChatEventHandler', () => {
       // Verify onSubscribeToToolResultStream was called with the observable and an AbortController
       expect(mockOnSubscribe).toHaveBeenCalledWith(mockObservable, expect.any(AbortController));
     });
-
   });
 
   describe('handleMessagesSnapshot', () => {
@@ -872,7 +868,6 @@ describe('ChatEventHandler', () => {
         messages,
         timestamp: Date.now(),
       });
-
     });
 
     it('should handle empty messages array', async () => {
@@ -1090,7 +1085,7 @@ describe('ChatEventHandler', () => {
       expect(sendToolResultCalled).toBe(true);
     });
 
-    it('should call onSendToolResultStateChange(false) after sending tool result succeeds', async () => {
+    it('should not call onSendToolResultStateChange(false) immediately on success (stream still active)', async () => {
       const toolCallId = 'tool-123';
       const mockResult = { success: true, data: 'test result' };
 
@@ -1130,15 +1125,10 @@ describe('ChatEventHandler', () => {
         toolCallId,
       } as ToolCallEndEvent);
 
-      // Verify the callback sequence: true before, false after
+      // true is called at the start
       expect(mockOnSendToolResultStateChange).toHaveBeenCalledWith(true);
-      expect(mockOnSendToolResultStateChange).toHaveBeenCalledWith(false);
-
-      // Verify the order: true was called before false
-      const calls = mockOnSendToolResultStateChange.mock.calls;
-      const trueCallIndex = calls.findIndex((call: any) => call[0] === true);
-      const falseCallIndex = calls.findIndex((call: any) => call[0] === false);
-      expect(trueCallIndex).toBeLessThan(falseCallIndex);
+      // false is NOT called immediately — stream is still active (hook handles it)
+      expect(mockOnSendToolResultStateChange).not.toHaveBeenCalledWith(false);
     });
 
     it('should call onSendToolResultStateChange(false) when sendToolResult fails', async () => {
@@ -1589,7 +1579,6 @@ describe('ChatEventHandler', () => {
         skipped: { reason: 'result_already_exists' },
       });
 
-
       await chatEventHandler.handleEvent({
         type: EventType.TOOL_CALL_START,
         toolCallId,
@@ -1674,7 +1663,9 @@ describe('ChatEventHandler', () => {
         toolCallId,
       };
 
-      const observable = { subscribe: jest.fn().mockReturnValue({ unsubscribe: jest.fn(), add: jest.fn() }) };
+      const observable = {
+        subscribe: jest.fn().mockReturnValue({ unsubscribe: jest.fn(), add: jest.fn() }),
+      };
 
       mockChatService.sendToolResult = jest.fn().mockResolvedValue({
         observable,
@@ -2027,8 +2018,8 @@ describe('ChatEventHandler', () => {
       // The first send's finally block should NOT have emitted (false) because
       // the controller was already replaced by the second send.
       const falseCalls = mockOnSendToolResultStateChange.mock.calls.filter((c) => c[0] === false);
-      // Only the second send should have emitted (false) — exactly once.
-      expect(falseCalls.length).toBe(1);
+      // Neither send emits (false): first is superseded, second delegates to stream hook
+      expect(falseCalls.length).toBe(0);
     });
 
     it('should append a non-resendable system message when sendToolResult returns skipped reason no_thread_id', async () => {
