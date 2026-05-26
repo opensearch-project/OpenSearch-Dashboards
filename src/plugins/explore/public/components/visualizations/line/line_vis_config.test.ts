@@ -50,11 +50,6 @@ describe('line_vis_config', () => {
         thresholds: [],
         thresholdStyle: ThresholdMode.Off,
       });
-
-      expect(defaults.titleOptions).toMatchObject({
-        show: false,
-        titleName: '',
-      });
     });
 
     it('should have getRules configured', () => {
@@ -86,10 +81,6 @@ describe('line_vis_config', () => {
           tooltipOptions: { mode: 'all' } as TooltipOptions,
           grid: {} as GridOptions,
           standardAxes: [],
-          titleOptions: {
-            show: true,
-            titleName: '',
-          },
           showFullTimeRange: false,
         },
         onStyleChange: jest.fn(),

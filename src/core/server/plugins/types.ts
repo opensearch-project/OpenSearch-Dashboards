@@ -212,6 +212,20 @@ export interface PluginManifest {
    * when adding OpenSearch cluster as data sources.
    */
   readonly requiredOSDataSourcePlugins?: readonly PluginName[];
+
+  /**
+   * Specifies data source engine types that this plugin does NOT support. Index patterns and
+   * data sources whose `dataSourceEngineType` matches any value listed here should be excluded
+   * from selectors owned by this plugin (e.g. legacy Discover hides AnalyticEngine domains).
+   *
+   * Values come from the `DataSourceEngineType` enum (string form), e.g. "AnalyticEngine",
+   * "Elasticsearch". Omit or leave empty to support all engines (current default behavior).
+   *
+   * Negative form is intentional: most plugins are mostly compatible with new engines and only
+   * need to declare specific incompatibilities, which keeps existing manifests stable as new
+   * engines are added.
+   */
+  readonly unsupportedOSDataSourceEngineTypes?: readonly string[];
 }
 
 /**

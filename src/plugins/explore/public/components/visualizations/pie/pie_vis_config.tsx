@@ -7,7 +7,7 @@ import React from 'react';
 import { VisRule, VisualizationType } from '../utils/use_visualization_types';
 
 import { PieVisStyleControls } from './pie_vis_options';
-import { AxisRole, Positions, TitleOptions, TooltipOptions, VisFieldType } from '../types';
+import { AxisRole, Positions, TooltipOptions, VisFieldType } from '../types';
 import { createPieSpec } from './to_expression';
 import { EchartsRender } from '../echarts_render';
 
@@ -31,8 +31,6 @@ export interface PieChartStyleOptions {
 
   // Exclusive controls
   exclusive?: PieExclusiveStyleOptions;
-
-  titleOptions?: TitleOptions;
 }
 
 export type PieChartStyle = Required<Omit<PieChartStyleOptions, 'legendTitle'>> &
@@ -52,10 +50,6 @@ export const defaultPieChartStyles: PieChartStyle = {
     showValues: false,
     showLabels: false,
     truncate: 100,
-  },
-  titleOptions: {
-    show: false,
-    titleName: '',
   },
 };
 
@@ -77,11 +71,22 @@ export const createPieConfig = (): VisualizationType<'pie'> => ({
           const size = props.axisColumnMappings.size?.[0];
           const color = props.axisColumnMappings.color?.[0];
           if (!size || !color) throw Error('Missing axis config for pie chart');
-          const spec = createPieSpec(props.transformedData, props.styleOptions, {
-            [AxisRole.SIZE]: size,
-            [AxisRole.COLOR]: color,
-          });
-          return <EchartsRender spec={spec ?? {}} />;
+          const spec = createPieSpec(
+            props.transformedData,
+            props.styleOptions,
+            {
+              [AxisRole.SIZE]: size,
+              [AxisRole.COLOR]: color,
+            },
+            props.onLegend
+          );
+          return (
+            <EchartsRender
+              spec={spec ?? {}}
+              legendSelected$={props.legendSelected$}
+              highlightedSeries$={props.highlightedSeries$}
+            />
+          );
         },
       },
       {
@@ -96,11 +101,22 @@ export const createPieConfig = (): VisualizationType<'pie'> => ({
           const size = props.axisColumnMappings.size?.[0];
           const color = props.axisColumnMappings.color?.[0];
           if (!size || !color) throw Error('Missing axis config for pie chart');
-          const spec = createPieSpec(props.transformedData, props.styleOptions, {
-            [AxisRole.SIZE]: size,
-            [AxisRole.COLOR]: color,
-          });
-          return <EchartsRender spec={spec ?? {}} />;
+          const spec = createPieSpec(
+            props.transformedData,
+            props.styleOptions,
+            {
+              [AxisRole.SIZE]: size,
+              [AxisRole.COLOR]: color,
+            },
+            props.onLegend
+          );
+          return (
+            <EchartsRender
+              spec={spec ?? {}}
+              legendSelected$={props.legendSelected$}
+              highlightedSeries$={props.highlightedSeries$}
+            />
+          );
         },
       },
     ];

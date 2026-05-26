@@ -16,18 +16,23 @@ import { OpenSearchSearchHit } from '../../types/doc_views_types';
 import { isChartType } from './utils/is_chart_type';
 import { visualizationRegistry } from './visualization_registry';
 import { normalizeResultRows } from './utils/normalize_result_rows';
-import { ChartConfig, VisData } from './visualization_builder.types';
+import { ChartConfig, SplitConfig, SplitLayout, VisData } from './visualization_builder.types';
 import { VisualizationRender } from './visualization_render';
 import { StylePanelRender } from './style_panel_render';
 import { adaptLegacyData } from './visualization_builder_utils';
 import { mergeStyles } from './utils/utils';
 import { AxisFieldNameMappings, RenderChartConfig } from './types';
 import { TimeRange } from '../../../../data/common';
+import { ITransformationService } from '../data_transformations/types';
+import { createNoOpTransformationService } from '../data_transformations/transformation_service';
 
 interface VisState {
   styleOptions?: StyleOptions;
   chartType?: string;
   axesMapping?: AxisFieldNameMappings;
+  splitField?: string;
+  splitLayout?: SplitLayout;
+  showSplitLabel?: boolean;
 }
 
 interface Options {
@@ -38,6 +43,9 @@ export class VisualizationBuilder {
   private isInitialized = false;
   private getUrlStateStorage: Options['getUrlStateStorage'];
   private subscriptions = Array<Subscription>();
+  private transformationService: ITransformationService = createNoOpTransformationService();
+  private lastRawRows: Array<OpenSearchSearchHit<unknown>> = [];
+  private lastSchema: Array<{ type?: string; name?: string }> = [];
 
   visConfig$ = new BehaviorSubject<ChartConfig | undefined>(undefined);
   data$ = new BehaviorSubject<VisData | undefined>(undefined);
@@ -48,6 +56,28 @@ export class VisualizationBuilder {
     if (getUrlStateStorage) {
       this.getUrlStateStorage = getUrlStateStorage;
     }
+  }
+
+  setTransformationService(service: ITransformationService) {
+    this.transformationService = service;
+
+    // subscribe pipeline change first
+    this.subscriptions.push(
+      service.getPipeline$().subscribe(() => {
+        if (this.lastRawRows.length > 0) {
+          this.handleData(this.lastRawRows, this.lastSchema);
+        }
+      })
+    );
+
+    // restore saved dataTransformations once
+    if (this.visConfig$.value?.dataTransformations) {
+      this.transformationService.restoreFromState(this.visConfig$.value.dataTransformations);
+    }
+  }
+
+  getTransformationService() {
+    return this.transformationService;
   }
 
   init() {
@@ -83,7 +113,35 @@ export class VisualizationBuilder {
       if (state.axesMapping) {
         initialVisConfig.axesMapping = state.axesMapping;
       }
+
+      if (state.splitField) {
+        initialVisConfig.splitField = state.splitField;
+      }
+
+      if (state.splitLayout) {
+        initialVisConfig.splitLayout = state.splitLayout;
+      }
+
+      if (state.showSplitLabel !== undefined) {
+        initialVisConfig.showSplitLabel = state.showSplitLabel;
+      }
+
       this.setVisConfig(initialVisConfig);
+
+      // Validate restored splitField against current dataset columns.
+      // If data is already available, validate immediately; otherwise,
+      // validation will occur when data arrives via onDataChange -> validateSplitField.
+      if (state.splitField && this.data$.value) {
+        const data = this.data$.value;
+        const allColumns = [...data.categoricalColumns, ...data.numericalColumns];
+        const exists = allColumns.some((col) => col.name === state.splitField);
+        if (!exists) {
+          const config = this.visConfig$.value;
+          if (config) {
+            this.visConfig$.next({ ...config, splitField: undefined });
+          }
+        }
+      }
     }
 
     // Subscribe to visualization state updates and sync the state to url
@@ -96,6 +154,9 @@ export class VisualizationBuilder {
               chartType: visConfig?.type,
               axesMapping: visConfig?.axesMapping,
               styleOptions: visConfig?.styles,
+              splitField: visConfig?.splitField,
+              splitLayout: visConfig?.splitLayout,
+              showSplitLabel: visConfig?.showSplitLabel,
             },
             isVisDirty
           )
@@ -140,6 +201,17 @@ export class VisualizationBuilder {
     // Always reset style after changing chart type
     if (currentVisConfig?.type !== chartType) {
       newVisConfig.styles = visConfig.ui.style.defaults;
+    }
+
+    // Preserve splitField and splitLayout across chart type changes
+    if (currentVisConfig?.splitField) {
+      newVisConfig.splitField = currentVisConfig.splitField;
+    }
+    if (currentVisConfig?.splitLayout) {
+      newVisConfig.splitLayout = currentVisConfig.splitLayout;
+    }
+    if (currentVisConfig?.showSplitLabel !== undefined) {
+      newVisConfig.showSplitLabel = currentVisConfig.showSplitLabel;
     }
 
     // Table chart doesn't have axes mapping, but we need to keep current axes mapping, so when switch back to other types
@@ -233,6 +305,9 @@ export class VisualizationBuilder {
       return;
     }
 
+    // Validate that the current split field still exists in the new data
+    this.validateSplitField(data);
+
     // Do nothing for table, as any data can render with a table
     if (currentChartType === 'table') {
       return;
@@ -247,6 +322,7 @@ export class VisualizationBuilder {
     // reset chart type and axes mapping to empty, this will let user to choose.
     if (isEmpty(axesMapping) || !isValidMapping(axesMapping ?? {}, columns)) {
       const autoVis = this.createAutoVis(data);
+      const currentConfig = this.visConfig$.value;
       if (autoVis) {
         const chartTypeConfig = visualizationRegistry.getVisualization(autoVis.chartType);
         if (chartTypeConfig) {
@@ -254,6 +330,9 @@ export class VisualizationBuilder {
             type: autoVis.chartType,
             styles: chartTypeConfig.ui.style.defaults,
             axesMapping: autoVis.axesMapping,
+            splitField: currentConfig?.splitField,
+            splitLayout: currentConfig?.splitLayout,
+            showSplitLabel: currentConfig?.showSplitLabel,
           };
           this.setVisConfig(newVisConfig);
         }
@@ -262,10 +341,12 @@ export class VisualizationBuilder {
         if (!chartTypeConfig) {
           this.setVisConfig(undefined);
         }
-        // Default to show a table if no auto vis created
         const newVisConfig: ChartConfig = {
           type: 'table',
           styles: chartTypeConfig?.ui.style.defaults,
+          splitField: currentConfig?.splitField,
+          splitLayout: currentConfig?.splitLayout,
+          showSplitLabel: currentConfig?.showSplitLabel,
         };
         this.setVisConfig(newVisConfig);
       }
@@ -282,17 +363,38 @@ export class VisualizationBuilder {
     this.setVisConfig(undefined);
   }
 
+  /**
+   * Apply the current transformation pipeline against the given raw rows and
+   * schema, then publish the result to data$
+   */
   handleData<T = unknown>(
     rows: Array<OpenSearchSearchHit<T>>,
     schema: Array<{ type?: string; name?: string }>
   ) {
+    // when the pipeline changes, we need to re-apply the new pipeline against the previous raw data
+    // cache the reference
+    this.lastRawRows = rows;
+    this.lastSchema = schema;
+
+    const { rows: transformedRows, finalSchema } = this.transformationService.applyPipeline(
+      rows,
+      schema
+    );
     const {
       transformedData,
       numericalColumns,
       categoricalColumns,
       dateColumns,
-    } = normalizeResultRows(rows, schema);
-    this.data$.next({ transformedData, numericalColumns, categoricalColumns, dateColumns });
+      unknownColumns,
+    } = normalizeResultRows(transformedRows, finalSchema);
+
+    this.data$.next({
+      transformedData,
+      numericalColumns,
+      categoricalColumns,
+      dateColumns,
+      unknownColumns,
+    });
   }
 
   updateStyles(styles?: Partial<StyleOptions>) {
@@ -329,6 +431,44 @@ export class VisualizationBuilder {
     }
   }
 
+  /**
+   * Sets the split field. Validates that the field exists as a categorical or numerical column.
+   * Marks vis as dirty and updates visConfig$.
+   */
+  updateSplitConfig(splitConfig: Partial<SplitConfig>): void {
+    const config = this.visConfig$.value;
+    if (!config) return;
+
+    if ('splitField' in splitConfig && splitConfig.splitField) {
+      const data = this.data$.value;
+      const isValid =
+        data?.categoricalColumns.some((col) => col.name === splitConfig.splitField) ||
+        data?.numericalColumns.some((col) => col.name === splitConfig.splitField);
+      if (!isValid) return;
+    }
+
+    this.setIsVisDirty(true);
+    this.visConfig$.next({ ...config, ...splitConfig });
+  }
+
+  /**
+   * On data change, validate that the current splitField still exists in the dataset.
+   * If the field no longer exists, clear it from the config.
+   */
+  private validateSplitField(data: VisData): void {
+    const currentSplitField = this.visConfig$.value?.splitField;
+    if (!currentSplitField) return;
+
+    const allColumns = [...data.categoricalColumns, ...data.numericalColumns];
+    const exists = allColumns.some((col) => col.name === currentSplitField);
+    if (!exists) {
+      const config = this.visConfig$.value;
+      if (config) {
+        this.visConfig$.next({ ...config, splitField: undefined });
+      }
+    }
+  }
+
   syncToUrl(visState: VisState, isVisDirty?: boolean) {
     const urlStateStorage = this.getUrlStateStorage?.();
 
@@ -354,6 +494,9 @@ export class VisualizationBuilder {
     this.data$ = new BehaviorSubject<VisData | undefined>(undefined);
     this.showRawTable$ = new BehaviorSubject<boolean>(false);
     this.isVisDirty$ = new BehaviorSubject<boolean>(false);
+    this.transformationService = createNoOpTransformationService();
+    this.lastRawRows = [];
+    this.lastSchema = [];
     this.isInitialized = false;
   }
 
@@ -368,7 +511,14 @@ export class VisualizationBuilder {
           const vis = visualizationRegistry.getVisualization(config.type);
           if (vis) {
             const styles: ChartStyles = mergeStyles(vis.ui.style.defaults, config.styles);
-            return { styles, type: config.type, axesMapping: config.axesMapping };
+            return {
+              styles,
+              type: config.type,
+              axesMapping: config.axesMapping,
+              splitField: config.splitField,
+              splitLayout: config.splitLayout,
+              showSplitLabel: config.showSplitLabel,
+            };
           }
           return undefined;
         }
@@ -401,6 +551,7 @@ export class VisualizationBuilder {
       onStyleChange: this.updateStyles.bind(this),
       onAxesMappingChange: this.setAxesMapping.bind(this),
       onChartTypeChange: this.setCurrentChartType.bind(this),
+      onSplitConfigChange: this.updateSplitConfig.bind(this),
     });
   }
 }

@@ -12,7 +12,6 @@ import {
   VisFieldType,
   AxisRole,
   StandardAxes,
-  TitleOptions,
   AggregationType,
   BucketOptions,
   ThresholdOptions,
@@ -36,8 +35,6 @@ export interface HistogramChartStyleOptions {
 
   // Axes configuration
   standardAxes?: StandardAxes[];
-
-  titleOptions?: TitleOptions;
 
   // histogram bucket config
   bucket?: BucketOptions;
@@ -77,10 +74,6 @@ export const defaultHistogramChartStyles: HistogramChartStyle = {
       },
     },
   ],
-  titleOptions: {
-    show: false,
-    titleName: '',
-  },
   bucket: {
     aggregationType: AggregationType.SUM,
   },

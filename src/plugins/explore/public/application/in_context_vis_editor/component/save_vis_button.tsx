@@ -49,6 +49,7 @@ export const SaveVisButton = () => {
   const { queryEditorState, datasetView } = useQueryBuilderState();
   const { visualizationBuilderForEditor: visualizationBuilder } = useVisualizationBuilder();
   const visConfig = visualizationBuilder.visConfig$.value;
+  const transformationService = visualizationBuilder.getTransformationService();
 
   const { services } = useOpenSearchDashboards<ExploreServices>();
 
@@ -125,6 +126,13 @@ export const SaveVisButton = () => {
       isTitleDuplicateConfirmed,
       onTitleDuplicate,
     }: OnSaveProps) => {
+      const pipeline = transformationService.pipeline$.getValue();
+      const serializedPipeline = pipeline.map((instance) => ({
+        definitionId: instance.definition_id,
+        config: instance.config,
+        hide: instance.hide,
+      }));
+
       const axesMapping = visConfig?.axesMapping;
       const currentTitle = savedExploreToSave.title;
       savedExploreToSave.title = newTitle;
@@ -134,6 +142,10 @@ export const SaveVisButton = () => {
         chartType: visConfig?.type ?? 'line',
         params: visConfig?.styles ?? {},
         axesMapping,
+        splitField: visConfig?.splitField,
+        splitLayout: visConfig?.splitLayout,
+        showSplitLabel: visConfig?.showSplitLabel,
+        dataTransformations: serializedPipeline,
       });
       savedExploreToSave.version = 1;
 
@@ -193,6 +205,7 @@ export const SaveVisButton = () => {
       toastNotifications,
       isPromptMode,
       queryEditorState.lastExecutedTranslatedQuery,
+      transformationService,
     ]
   );
 

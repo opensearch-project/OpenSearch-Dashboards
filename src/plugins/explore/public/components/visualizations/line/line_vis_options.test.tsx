@@ -18,20 +18,6 @@ import {
 import { LineStyle } from './line_exclusive_vis_options';
 
 // Mock the child components
-jest.mock('../style_panel/axes/axes_selector', () => ({
-  AxesSelectPanel: jest.fn(({ updateVisualization, chartType, currentMapping }) => (
-    <div data-test-subj="mockAxesSelectPanel">
-      <div data-test-subj="chartType">{chartType}</div>
-      <button
-        data-test-subj="mockUpdateVisualization"
-        onClick={() => updateVisualization({ mappings: { x: 'date', y: 'value' } })}
-      >
-        Update Visualization
-      </button>
-    </div>
-  )),
-}));
-
 jest.mock('../style_panel/legend/legend', () => ({
   LegendOptionsPanel: jest.fn(({ legendOptions, onLegendOptionsChange }) => (
     <div data-test-subj="mockLegendOptionsPanel">
@@ -137,24 +123,6 @@ jest.mock('./line_exclusive_vis_options', () => ({
   },
 }));
 
-jest.mock('../style_panel/title/title', () => ({
-  TitleOptionsPanel: jest.fn(({ titleOptions, onShowTitleChange }) => (
-    <div data-test-subj="mockTitleOptionsPanel">
-      <button
-        data-test-subj="mockTitleModeSwitch"
-        onClick={() => onShowTitleChange({ show: !titleOptions.show })}
-      >
-        Toggle Title
-      </button>
-      <input
-        data-test-subj="mockTitleInput"
-        placeholder="Default title"
-        onChange={(e) => onShowTitleChange({ titleName: e.target.value })}
-      />
-    </div>
-  )),
-}));
-
 describe('LineVisStyleControls', () => {
   const defaultCategoryAxis: StandardAxes = {
     position: Positions.BOTTOM,
@@ -220,9 +188,9 @@ describe('LineVisStyleControls', () => {
   };
 
   const mockAxisColumnMappings: AxisColumnMappings = {
-    [AxisRole.X]: mockDateColumn,
-    [AxisRole.Y]: mockNumericalColumn,
-    [AxisRole.COLOR]: mockCategoricalColumn,
+    [AxisRole.X]: [mockDateColumn],
+    [AxisRole.Y]: [mockNumericalColumn],
+    [AxisRole.COLOR]: [mockCategoricalColumn],
   };
 
   const mockProps: LineVisStyleControlsProps = {
@@ -241,10 +209,6 @@ describe('LineVisStyleControls', () => {
       },
       tooltipOptions: defaultTooltipOptions,
       standardAxes: [defaultCategoryAxis, defaultValueAxis],
-      titleOptions: {
-        show: true,
-        titleName: '',
-      },
       showFullTimeRange: false,
     },
     onStyleChange: jest.fn(),
@@ -262,20 +226,18 @@ describe('LineVisStyleControls', () => {
   test('renders with default props', () => {
     render(<LineVisStyleControls {...mockProps} />);
 
-    expect(screen.getByTestId('mockAxesSelectPanel')).toBeInTheDocument();
     expect(screen.getByTestId('mockLegendOptionsPanel')).toBeInTheDocument();
     expect(screen.getByTestId('mockThresholdOptions')).toBeInTheDocument();
     expect(screen.getByTestId('mockTooltipOptionsPanel')).toBeInTheDocument();
     expect(screen.getByTestId('mockLineExclusiveVisOptions')).toBeInTheDocument();
-    expect(screen.getByTestId('mockTitleOptionsPanel')).toBeInTheDocument();
   });
 
-  test('hides legend when no COLOR, FACET, or Y_SECOND mappings are present', () => {
+  test('hides legend when no COLOR or Y_SECOND mappings are present', () => {
     const propsWithNoLegend = {
       ...mockProps,
       axisColumnMappings: {
-        [AxisRole.X]: mockDateColumn,
-        [AxisRole.Y]: mockNumericalColumn,
+        [AxisRole.X]: [mockDateColumn],
+        [AxisRole.Y]: [mockNumericalColumn],
       },
     };
 
@@ -289,25 +251,11 @@ describe('LineVisStyleControls', () => {
       ...mockProps,
       axisColumnMappings: {
         ...mockAxisColumnMappings,
-        [AxisRole.COLOR]: mockCategoricalColumn,
+        [AxisRole.COLOR]: [mockCategoricalColumn],
       },
     };
 
     render(<LineVisStyleControls {...propsWithColorMapping} />);
-
-    expect(screen.getByTestId('mockLegendOptionsPanel')).toBeInTheDocument();
-  });
-
-  test('renders legend panel when FACET mapping is present', () => {
-    const propsWithFacetMapping = {
-      ...mockProps,
-      axisColumnMappings: {
-        ...mockAxisColumnMappings,
-        [AxisRole.FACET]: mockCategoricalColumn,
-      },
-    };
-
-    render(<LineVisStyleControls {...propsWithFacetMapping} />);
 
     expect(screen.getByTestId('mockLegendOptionsPanel')).toBeInTheDocument();
   });
@@ -317,7 +265,7 @@ describe('LineVisStyleControls', () => {
       ...mockProps,
       axisColumnMappings: {
         ...mockAxisColumnMappings,
-        [AxisRole.Y_SECOND]: mockNumericalColumn,
+        [AxisRole.Y_SECOND]: [mockNumericalColumn],
       },
     };
 
@@ -331,7 +279,7 @@ describe('LineVisStyleControls', () => {
       ...mockProps,
       axisColumnMappings: {
         ...mockAxisColumnMappings,
-        [AxisRole.COLOR]: mockCategoricalColumn,
+        [AxisRole.COLOR]: [mockCategoricalColumn],
       },
     };
 
@@ -393,44 +341,5 @@ describe('LineVisStyleControls', () => {
 
     await userEvent.click(screen.getByTestId('mockUpdateLineStyle'));
     expect(mockProps.onStyleChange).toHaveBeenCalledWith({ lineStyle: 'line' });
-  });
-
-  test('updates title show option correctly', async () => {
-    render(<LineVisStyleControls {...mockProps} />);
-
-    await userEvent.click(screen.getByTestId('mockTitleModeSwitch'));
-    expect(mockProps.onStyleChange).toHaveBeenCalledWith({
-      titleOptions: {
-        ...mockProps.styleOptions.titleOptions,
-        show: false,
-      },
-    });
-  });
-
-  test('updates title name when text is entered', async () => {
-    const props = {
-      ...mockProps,
-      styleOptions: {
-        ...mockProps.styleOptions,
-        titleOptions: {
-          show: true,
-          titleName: '',
-        },
-      },
-    };
-
-    render(<LineVisStyleControls {...props} />);
-
-    const titleInput = screen.getByTestId('mockTitleInput');
-    await userEvent.type(titleInput, 'New Chart Title');
-
-    await waitFor(() => {
-      expect(mockProps.onStyleChange).toHaveBeenCalledWith({
-        titleOptions: {
-          ...props.styleOptions.titleOptions,
-          titleName: 'New Chart Title',
-        },
-      });
-    });
   });
 });

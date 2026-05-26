@@ -6,9 +6,10 @@
 import { groupBy } from 'lodash';
 import { Threshold, ValueMapping } from '../types';
 import { StateTimeLineChartStyle } from './state_timeline_config';
-import { BaseChartStyle, PipelineFn } from '../utils/echarts_spec';
+import { BaseChartStyle, EChartsSpecState, PipelineFn } from '../utils/echarts_spec';
 import { resolveColor } from '../theme/color_utils';
 import { TransformFn } from '../utils/data_transformation';
+import { getColors } from '../theme/default_colors';
 
 const addThresholdTime = (currentTime: string, threshold: string): number | undefined => {
   const date = new Date(currentTime.replace(' ', 'T'));
@@ -509,16 +510,20 @@ export const createStateTimeLineSpec = <T extends BaseChartStyle>({
     newState.yAxisConfig = newyAxisConfig;
   }
 
+  const palette = getColors().categories;
+  const sortedNames = mergeLabelCombo.map((m) => m.displayText || m.label).sort();
   const allSeries = mergeLabelCombo.map((mapping, index: number) => {
+    const name = mapping.displayText || mapping.label;
+    const colorIndex = sortedNames.indexOf(name);
     return {
-      name: mapping.displayText || mapping.label,
+      name,
       type: 'custom',
       renderItem: groupField
         ? renderItem(styles, groupField, mapping.displayText)
         : renderSingleStateTimeLineItem(styles, mapping.displayText),
       datasetIndex: index,
       itemStyle: {
-        color: decideSeriesStyle(mapping),
+        color: decideSeriesStyle(mapping) || palette[colorIndex % palette.length],
       },
       encode: {
         x: ['start', 'end'],

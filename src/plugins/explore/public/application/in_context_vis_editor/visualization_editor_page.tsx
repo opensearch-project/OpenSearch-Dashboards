@@ -104,8 +104,13 @@ export const VisualizationEditorPage = ({
           type: savedVisConfig.chartType,
           styles: savedVisConfig.params,
           axesMapping: savedVisConfig.axesMapping,
+          splitField: savedVisConfig.splitField,
+          splitLayout: savedVisConfig.splitLayout,
+          showSplitLabel: savedVisConfig.showSplitLabel,
+          dataTransformations: savedVisConfig.dataTransformations,
         });
       }
+
       visualizationBuilderForEditor.init();
       await queryBuilder.init({ savedQueryState });
 
@@ -131,6 +136,7 @@ export const VisualizationEditorPage = ({
     queryBuilder,
     savedVisConfig,
     savedQueryState,
+    osdUrlStateStorage,
     visualizationBuilderForEditor,
     needsDashboardSelection,
   ]);
