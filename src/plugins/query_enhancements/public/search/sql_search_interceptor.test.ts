@@ -215,17 +215,6 @@ describe('SQLSearchInterceptor', () => {
       expect(result).toBe(query);
     });
 
-    it('returns the query unchanged when skipTimeFilter is set', () => {
-      const query = {
-        language: 'SQL',
-        query: 'SELECT * FROM test_index',
-        dataset: { type: 'DEFAULT', timeFieldName: '@timestamp' },
-      };
-      const request = { params: { body: { skipTimeFilter: true } } };
-      const result = (sqlSearchInterceptor as any).buildQuery(query, request);
-      expect(result).toBe(query);
-    });
-
     it('returns the query unchanged when enableTimeFiltering is not set', () => {
       const query = {
         language: 'SQL',

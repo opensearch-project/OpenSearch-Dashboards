@@ -69,11 +69,10 @@ export class SQLSearchInterceptor extends SearchInterceptor {
 
   private buildQuery(query: Query, request: IOpenSearchDashboardsSearchRequest): Query {
     const dataset = query.dataset;
-    const skipTimeFilter = request.params?.body?.skipTimeFilter;
     const enableTimeFiltering = request.params?.body?.enableTimeFiltering;
 
     // Only apply time filtering when explicitly enabled (e.g., by Explore)
-    if (!dataset?.timeFieldName || skipTimeFilter || !enableTimeFiltering) return query;
+    if (!dataset?.timeFieldName || !enableTimeFiltering) return query;
 
     const timeRange = this.queryService.timefilter.timefilter.getTime();
     const { fromDate, toDate } = formatTimePickerDate(timeRange, 'YYYY-MM-DD HH:mm:ss.SSS');
@@ -86,7 +85,6 @@ export class SQLSearchInterceptor extends SearchInterceptor {
       query: SQLSearchInterceptor.insertWhereClause(query.query, whereClause),
     };
   }
-
 
   private static insertWhereClause(sql: string, whereClause: string): string {
     const inputStream = CharStream.fromString(sql);
