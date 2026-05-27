@@ -431,3 +431,7 @@
 # @experimental Set the value to true to enable context provider
 # contextProvider:
 #   enabled: true
+
+# @experimental Enable legacy Elasticsearch backend compatibility.
+# This feature is currently being developed and should be used with caution in production environments.
+# backendCompatibility.enabled: false
