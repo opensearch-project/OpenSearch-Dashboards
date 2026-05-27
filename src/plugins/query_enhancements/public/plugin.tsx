@@ -172,7 +172,7 @@ export class QueryEnhancementsPlugin
       getQueryString: (currentQuery: Query) =>
         `SELECT * FROM ${currentQuery.dataset?.title} LIMIT 10`,
       addFiltersToQuery: SQLFilterUtils.addFiltersToQuery,
-      fields: { sortable: false, filterable: true, visualizable: false },
+      fields: { sortable: false, filterable: false, visualizable: false },
       docLink: {
         title: i18n.translate('queryEnhancements.sqlLanguage.docLink', {
           defaultMessage: 'SQL documentation',
