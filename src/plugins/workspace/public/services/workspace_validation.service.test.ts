@@ -77,6 +77,10 @@ describe('WorkspaceValidationService', () => {
 
       const currentAppId$ = new BehaviorSubject<string | undefined>(undefined);
       core.application.currentAppId$ = currentAppId$;
+      core.application.capabilities = {
+        ...core.application.capabilities,
+        workspaces: { permissionEnabled: true },
+      };
 
       workspaceClientMock.refreshWorkspace.mockResolvedValue({
         success: false,
@@ -106,6 +110,10 @@ describe('WorkspaceValidationService', () => {
 
       const currentAppId$ = new BehaviorSubject<string | undefined>(undefined);
       core.application.currentAppId$ = currentAppId$;
+      core.application.capabilities = {
+        ...core.application.capabilities,
+        workspaces: { permissionEnabled: true },
+      };
 
       workspaceClientMock.refreshWorkspace.mockResolvedValue({
         success: true,
@@ -131,6 +139,10 @@ describe('WorkspaceValidationService', () => {
 
       const currentAppId$ = new BehaviorSubject<string | undefined>(undefined);
       core.application.currentAppId$ = currentAppId$;
+      core.application.capabilities = {
+        ...core.application.capabilities,
+        workspaces: { permissionEnabled: true },
+      };
 
       workspaceClientMock.refreshWorkspace.mockResolvedValue({
         success: false,
@@ -147,6 +159,34 @@ describe('WorkspaceValidationService', () => {
       await waitFor(() => {
         expect(workspaceClientMock.refreshWorkspace).toHaveBeenCalledWith('test-workspace');
       });
+      expect(core.chrome.setIsVisible).not.toHaveBeenCalled();
+    });
+
+    it('should not show fatal error page on page switch when permission control is disabled', async () => {
+      const core = coreMock.createStart();
+      const service = new WorkspaceValidationService();
+      workspaceClientMock.refreshWorkspace.mockClear();
+
+      const currentAppId$ = new BehaviorSubject<string | undefined>(undefined);
+      core.application.currentAppId$ = currentAppId$;
+      // permissionEnabled is falsy by default
+
+      workspaceClientMock.refreshWorkspace.mockResolvedValue({
+        success: false,
+        error: 'Invalid saved objects permission',
+      });
+
+      const coreSetup = coreMock.createSetup();
+      await service.setup(coreSetup, 'test-workspace');
+      service.start(core);
+
+      // Simulate page switch
+      currentAppId$.next('some-app');
+
+      await waitFor(() => {
+        expect(workspaceClientMock.refreshWorkspace).toHaveBeenCalledWith('test-workspace');
+      });
+      // Should not show error page when permission control is disabled
       expect(core.chrome.setIsVisible).not.toHaveBeenCalled();
     });
 

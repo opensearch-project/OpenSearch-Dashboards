@@ -59,13 +59,21 @@ export class WorkspaceValidationService {
 
   async start(core: CoreStart) {
     const { workspaces, application, chrome } = core;
+    const isPermissionEnabled = core.application.capabilities.workspaces.permissionEnabled;
 
     // Refresh the active workspace when switching pages to ensure fresh data;
     // show error page if the user no longer has permission.
+    if (isPermissionEnabled) {
+      this.workspaceClient?.setPermissionEnabled(true);
+    }
     this.currentAppIdSubscription = application.currentAppId$.subscribe(() => {
       if (this.workspaceClient && this.workspaceId) {
-        this.workspaceClient.refreshWorkspace(this.workspaceId).then((resp) => {
-          if (!resp.success && resp.error === 'Invalid saved objects permission') {
+        this.workspaceClient.refreshWorkspace(this.workspaceId)?.then((resp) => {
+          if (
+            isPermissionEnabled &&
+            !resp.success &&
+            resp.error === 'Invalid saved objects permission'
+          ) {
             this.handleFatalError(
               application,
               chrome,

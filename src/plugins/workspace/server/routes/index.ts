@@ -191,6 +191,15 @@ export function registerRoutes({
         id
       );
 
+      if (result.success) {
+        const principals = permissionControlClient?.getPrincipalsFromRequest(req);
+        (result.result as WorkspaceAttributeWithPermission).permissionMode = translatePermissionsToRole(
+          isPermissionControlEnabled,
+          (result.result as WorkspaceAttributeWithPermission).permissions,
+          principals
+        );
+      }
+
       return res.ok({
         body: result,
       });

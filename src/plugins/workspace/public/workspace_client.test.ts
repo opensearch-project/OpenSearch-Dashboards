@@ -289,28 +289,79 @@ describe('#WorkspaceClient', () => {
 });
 
 describe('WorkspaceClient.refreshWorkspace', () => {
-  it('should update workspace in workspaceList$ on success', async () => {
+  it('should update workspace in workspaceList$ with readonly/owner flags from permissionMode', async () => {
     const { workspaceClient, httpSetupMock, workspaceMock } = getWorkspaceClient();
+    workspaceClient.setPermissionEnabled(true);
     workspaceMock.workspaceList$.next([
-      { id: 'foo', name: 'old-name' },
+      { id: 'foo', name: 'old-name', readonly: true, owner: false },
       { id: 'bar', name: 'bar' },
     ]);
     httpSetupMock.fetch.mockResolvedValueOnce({
       success: true,
-      result: { id: 'foo', name: 'new-name' },
+      result: { id: 'foo', name: 'new-name', permissionMode: 'owner' },
     });
 
     const resp = await workspaceClient.refreshWorkspace('foo');
 
     expect(resp.success).toBe(true);
     expect(workspaceMock.workspaceList$.getValue()).toEqual([
-      { id: 'foo', name: 'new-name' },
+      { id: 'foo', name: 'new-name', readonly: false, owner: true },
       { id: 'bar', name: 'bar' },
+    ]);
+  });
+
+  it('should set readonly true when permissionMode is read', async () => {
+    const { workspaceClient, httpSetupMock, workspaceMock } = getWorkspaceClient();
+    workspaceClient.setPermissionEnabled(true);
+    workspaceMock.workspaceList$.next([{ id: 'foo', name: 'old-name', readonly: false }]);
+    httpSetupMock.fetch.mockResolvedValueOnce({
+      success: true,
+      result: { id: 'foo', name: 'new-name', permissionMode: 'read' },
+    });
+
+    await workspaceClient.refreshWorkspace('foo');
+
+    expect(workspaceMock.workspaceList$.getValue()).toEqual([
+      { id: 'foo', name: 'new-name', readonly: true, owner: false },
+    ]);
+  });
+
+  it('should set readonly false and owner false when permissionMode is read+write', async () => {
+    const { workspaceClient, httpSetupMock, workspaceMock } = getWorkspaceClient();
+    workspaceClient.setPermissionEnabled(true);
+    workspaceMock.workspaceList$.next([{ id: 'foo', name: 'old-name' }]);
+    httpSetupMock.fetch.mockResolvedValueOnce({
+      success: true,
+      result: { id: 'foo', name: 'new-name', permissionMode: 'read+write' },
+    });
+
+    await workspaceClient.refreshWorkspace('foo');
+
+    expect(workspaceMock.workspaceList$.getValue()).toEqual([
+      { id: 'foo', name: 'new-name', readonly: false, owner: false },
+    ]);
+  });
+
+  it('should set readonly false and owner true when permission is disabled', async () => {
+    const { workspaceClient, httpSetupMock, workspaceMock } = getWorkspaceClient();
+    workspaceMock.workspaceList$.next([
+      { id: 'foo', name: 'old-name', readonly: true, owner: false },
+    ]);
+    httpSetupMock.fetch.mockResolvedValueOnce({
+      success: true,
+      result: { id: 'foo', name: 'new-name' },
+    });
+
+    await workspaceClient.refreshWorkspace('foo');
+
+    expect(workspaceMock.workspaceList$.getValue()).toEqual([
+      { id: 'foo', name: 'new-name', readonly: false, owner: true },
     ]);
   });
 
   it('should not update workspaceList$ on failure', async () => {
     const { workspaceClient, httpSetupMock, workspaceMock } = getWorkspaceClient();
+    workspaceClient.setPermissionEnabled(true);
     workspaceMock.workspaceList$.next([{ id: 'foo', name: 'old-name' }]);
     httpSetupMock.fetch.mockResolvedValueOnce({
       success: false,
@@ -320,7 +371,9 @@ describe('WorkspaceClient.refreshWorkspace', () => {
     const resp = await workspaceClient.refreshWorkspace('foo');
 
     expect(resp.success).toBe(false);
-    expect(resp.error).toBe('Invalid saved objects permission');
+    if (!resp.success) {
+      expect(resp.error).toBe('Invalid saved objects permission');
+    }
     expect(workspaceMock.workspaceList$.getValue()).toEqual([{ id: 'foo', name: 'old-name' }]);
   });
 });
