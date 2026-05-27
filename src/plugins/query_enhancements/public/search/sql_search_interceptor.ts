@@ -81,7 +81,7 @@ export class SQLSearchInterceptor extends SearchInterceptor {
 
     return {
       ...query,
-      query: SQLFilterUtils.insertWhereClause(query.query, whereClause),
+      query: SQLFilterUtils.wrapWithTimeFilterCTE(query.query, dataset.title, whereClause),
     };
   }
 

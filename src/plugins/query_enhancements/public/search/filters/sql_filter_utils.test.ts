@@ -26,39 +26,22 @@ describe('SQLFilterUtils', () => {
       expect(SQLFilterUtils.addFiltersToQuery(query, [])).toBe(query);
     });
 
-    it('appends a WHERE clause to a query that has none', () => {
+    it('wraps the query with a single filter predicate', () => {
       const query = 'SELECT * FROM test_index';
       const result = SQLFilterUtils.addFiltersToQuery(query, [createFilter('field1', 'value1')]);
-      expect(result).toBe("SELECT * FROM test_index WHERE `field1` = 'value1'");
-    });
-
-    it('combines an existing WHERE clause with the new predicate using AND', () => {
-      const query = "SELECT * FROM test_index WHERE `existing` = 'x'";
-      const result = SQLFilterUtils.addFiltersToQuery(query, [createFilter('field1', 'value1')]);
       expect(result).toBe(
-        "SELECT * FROM test_index WHERE `field1` = 'value1' AND ( `existing` = 'x')"
+        "SELECT * FROM (SELECT * FROM test_index) AS _wrap WHERE `field1` = 'value1'"
       );
     });
 
-    it('preserves operator precedence by wrapping an OR-predicate WHERE in parentheses', () => {
-      const query = 'SELECT * FROM test_index WHERE `a` = 1 OR `b` = 2';
-      const result = SQLFilterUtils.addFiltersToQuery(query, [createFilter('field1', 'value1')]);
-      expect(result).toBe(
-        "SELECT * FROM test_index WHERE `field1` = 'value1' AND ( `a` = 1 OR `b` = 2)"
-      );
-    });
-
-    it('appends multiple filters, each as its own AND-ed predicate', () => {
+    it('AND-merges multiple predicates inside a single wrap', () => {
       const query = 'SELECT * FROM test_index';
       const result = SQLFilterUtils.addFiltersToQuery(query, [
         createFilter('field1', 'value1'),
         createFilter('field2', 'value2'),
       ]);
-      // Filters reduce left-to-right; each call inserts at the WHERE keyword,
-      // so the most recently added predicate ends up first. The previous
-      // predicate gets wrapped in parens to preserve operator precedence.
       expect(result).toBe(
-        "SELECT * FROM test_index WHERE `field2` = 'value2' AND ( `field1` = 'value1')"
+        "SELECT * FROM (SELECT * FROM test_index) AS _wrap WHERE (`field1` = 'value1') AND (`field2` = 'value2')"
       );
     });
 
@@ -67,7 +50,9 @@ describe('SQLFilterUtils', () => {
       const result = SQLFilterUtils.addFiltersToQuery(query, [
         createFilter('field1', 'value1', true),
       ]);
-      expect(result).toBe("SELECT * FROM test_index WHERE `field1` != 'value1'");
+      expect(result).toBe(
+        "SELECT * FROM (SELECT * FROM test_index) AS _wrap WHERE `field1` != 'value1'"
+      );
     });
 
     it('skips filters that produce no predicate', () => {
@@ -82,56 +67,95 @@ describe('SQLFilterUtils', () => {
       expect(result).toBe(query);
     });
 
-    it('returns the original query unchanged when the SQL is unparseable', () => {
-      // Not a valid SELECT — return as-is rather than blindly appending which
-      // would emit invalid SQL for shapes the grammar doesn't model (JOIN,
-      // UNION, CTE, etc.).
-      const query = 'NOT VALID SQL';
-      const result = SQLFilterUtils.addFiltersToQuery(query, [createFilter('field1', 'value1')]);
-      expect(result).toBe(query);
-    });
-
-    it('handles aliased table names', () => {
-      const query = 'SELECT * FROM test_index t';
-      const result = SQLFilterUtils.addFiltersToQuery(query, [createFilter('field1', 'value1')]);
-      expect(result).toBe("SELECT * FROM test_index t WHERE `field1` = 'value1'");
-    });
-
-    it('injects WHERE inside a subquery when the FROM is a subquery', () => {
-      // The predicate references a column that the subquery doesn't project.
-      // Injecting at the inner scan level (where the column exists) is correct;
-      // injecting at the outer level would fail at runtime.
-      const query = 'SELECT * FROM (SELECT msg FROM test_index) AS s';
-      const result = SQLFilterUtils.addFiltersToQuery(query, [createFilter('field1', 'value1')]);
+    it('wraps queries with arbitrary SQL shapes (JOIN) without parsing them', () => {
+      const query = 'SELECT host FROM logs JOIN errors ON logs.id = errors.log_id';
+      const result = SQLFilterUtils.addFiltersToQuery(query, [createFilter('host', 'a')]);
       expect(result).toBe(
-        "SELECT * FROM (SELECT msg FROM test_index WHERE `field1` = 'value1') AS s"
+        "SELECT * FROM (SELECT host FROM logs JOIN errors ON logs.id = errors.log_id) AS _wrap WHERE `host` = 'a'"
       );
     });
 
-    it('injects WHERE inside the deepest subquery for nested subqueries', () => {
-      const query = 'SELECT * FROM (SELECT * FROM (SELECT * FROM test_index) AS x) AS y';
+    it('preserves operator precedence in the user query — wrap evaluates inner WHERE first', () => {
+      const query = 'SELECT * FROM test_index WHERE `a` = 1 OR `b` = 2';
       const result = SQLFilterUtils.addFiltersToQuery(query, [createFilter('field1', 'value1')]);
       expect(result).toBe(
-        "SELECT * FROM (SELECT * FROM (SELECT * FROM test_index WHERE `field1` = 'value1') AS x) AS y"
+        "SELECT * FROM (SELECT * FROM test_index WHERE `a` = 1 OR `b` = 2) AS _wrap WHERE `field1` = 'value1'"
+      );
+    });
+  });
+
+  describe('wrapWithTimeFilterCTE', () => {
+    const where = "`@timestamp` >= 'X' AND `@timestamp` <= 'Y'";
+
+    it('wraps a simple SELECT with a CTE that shadows the dataset table', () => {
+      const result = SQLFilterUtils.wrapWithTimeFilterCTE('SELECT * FROM logs', 'logs', where);
+      expect(result).toBe(
+        "WITH `logs` AS (SELECT * FROM `logs` WHERE `@timestamp` >= 'X' AND `@timestamp` <= 'Y') SELECT * FROM logs"
       );
     });
 
-    it('AND-merges with an existing WHERE inside a subquery', () => {
-      const query = "SELECT * FROM (SELECT msg FROM test_index WHERE `existing` = 'x') AS s";
-      const result = SQLFilterUtils.addFiltersToQuery(query, [createFilter('field1', 'value1')]);
+    it('wraps a JOIN query — table-shadow CTE applies only to the dataset table', () => {
+      const result = SQLFilterUtils.wrapWithTimeFilterCTE(
+        'SELECT * FROM logs JOIN errors ON logs.id = errors.log_id',
+        'logs',
+        where
+      );
       expect(result).toBe(
-        "SELECT * FROM (SELECT msg FROM test_index WHERE `field1` = 'value1' AND ( `existing` = 'x')) AS s"
+        "WITH `logs` AS (SELECT * FROM `logs` WHERE `@timestamp` >= 'X' AND `@timestamp` <= 'Y') SELECT * FROM logs JOIN errors ON logs.id = errors.log_id"
       );
     });
 
-    it('still injects when the subquery aliases the filter target column', () => {
-      // Even though the inner query renames `field1` → `aliased`, the predicate
-      // we inject runs against the underlying scan where `field1` exists.
-      const query = 'SELECT s.aliased FROM (SELECT field1 AS aliased FROM test_index) AS s';
-      const result = SQLFilterUtils.addFiltersToQuery(query, [createFilter('field1', 'value1')]);
-      expect(result).toBe(
-        "SELECT s.aliased FROM (SELECT field1 AS aliased FROM test_index WHERE `field1` = 'value1') AS s"
+    it('wraps a UNION query without parsing it', () => {
+      const result = SQLFilterUtils.wrapWithTimeFilterCTE(
+        'SELECT * FROM logs UNION SELECT * FROM logs2',
+        'logs',
+        where
       );
+      expect(result).toBe(
+        "WITH `logs` AS (SELECT * FROM `logs` WHERE `@timestamp` >= 'X' AND `@timestamp` <= 'Y') SELECT * FROM logs UNION SELECT * FROM logs2"
+      );
+    });
+
+    it("merges into the user's existing WITH clause", () => {
+      const result = SQLFilterUtils.wrapWithTimeFilterCTE(
+        'WITH foo AS (SELECT 1) SELECT * FROM foo, logs',
+        'logs',
+        where
+      );
+      expect(result).toBe(
+        "WITH `logs` AS (SELECT * FROM `logs` WHERE `@timestamp` >= 'X' AND `@timestamp` <= 'Y'), foo AS (SELECT 1) SELECT * FROM foo, logs"
+      );
+    });
+
+    it('returns the SQL unchanged on CTE name collision with the user', () => {
+      const sql = 'WITH logs AS (SELECT 1) SELECT * FROM logs';
+      const result = SQLFilterUtils.wrapWithTimeFilterCTE(sql, 'logs', where);
+      expect(result).toBe(sql);
+    });
+
+    it('returns the SQL unchanged when tableName is empty', () => {
+      const sql = 'SELECT * FROM logs';
+      const result = SQLFilterUtils.wrapWithTimeFilterCTE(sql, '', where);
+      expect(result).toBe(sql);
+    });
+
+    it('escapes regex metacharacters in the table name', () => {
+      // No collision should be detected even though `.` is regex-special.
+      const result = SQLFilterUtils.wrapWithTimeFilterCTE(
+        'SELECT * FROM `my.index`',
+        'my.index',
+        where
+      );
+      expect(result).toBe(
+        "WITH `my.index` AS (SELECT * FROM `my.index` WHERE `@timestamp` >= 'X' AND `@timestamp` <= 'Y') SELECT * FROM `my.index`"
+      );
+    });
+  });
+
+  describe('wrapWithFilter', () => {
+    it('wraps SQL in an outer SELECT with the predicate', () => {
+      const result = SQLFilterUtils.wrapWithFilter('SELECT * FROM logs', "`host` = 'a'");
+      expect(result).toBe("SELECT * FROM (SELECT * FROM logs) AS _wrap WHERE `host` = 'a'");
     });
   });
 });

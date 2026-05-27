@@ -200,7 +200,7 @@ describe('SQLSearchInterceptor', () => {
     });
   });
 
-  describe('buildQuery (private — time-filter WHERE injection)', () => {
+  describe('buildQuery (private — CTE-based time filter)', () => {
     const baseRequest: IOpenSearchDashboardsSearchRequest = {
       params: { body: {} },
     };
@@ -209,7 +209,7 @@ describe('SQLSearchInterceptor', () => {
       const query = {
         language: 'SQL',
         query: 'SELECT * FROM test_index',
-        dataset: { type: 'DEFAULT' },
+        dataset: { type: 'DEFAULT', title: 'test_index' },
       };
       const result = (sqlSearchInterceptor as any).buildQuery(query, baseRequest);
       expect(result).toBe(query);
@@ -219,72 +219,70 @@ describe('SQLSearchInterceptor', () => {
       const query = {
         language: 'SQL',
         query: 'SELECT * FROM test_index',
-        dataset: { type: 'DEFAULT', timeFieldName: '@timestamp' },
+        dataset: { type: 'DEFAULT', title: 'test_index', timeFieldName: '@timestamp' },
       };
       const result = (sqlSearchInterceptor as any).buildQuery(query, baseRequest);
       expect(result).toBe(query);
     });
 
-    it('appends a WHERE clause with the time range when enableTimeFiltering is set', () => {
+    it('wraps the user query with a CTE that shadows the dataset table', () => {
       const query = {
         language: 'SQL',
         query: 'SELECT * FROM test_index',
-        dataset: { type: 'DEFAULT', timeFieldName: '@timestamp' },
+        dataset: { type: 'DEFAULT', title: 'test_index', timeFieldName: '@timestamp' },
       };
       const request = { params: { body: { enableTimeFiltering: true } } };
       const result = (sqlSearchInterceptor as any).buildQuery(query, request);
 
       expect(result.query).toBe(
-        "SELECT * FROM test_index WHERE `@timestamp` >= '2023-01-01 00:00:00.000' " +
-          "AND `@timestamp` <= '2023-01-02 00:00:00.000'"
+        "WITH `test_index` AS (SELECT * FROM `test_index` WHERE `@timestamp` >= '2023-01-01 00:00:00.000' " +
+          "AND `@timestamp` <= '2023-01-02 00:00:00.000') SELECT * FROM test_index"
       );
     });
 
-    it('AND-merges the time range with an existing WHERE clause when enableTimeFiltering is set', () => {
+    it('wraps queries with arbitrary shapes (JOIN) without parsing them', () => {
       const query = {
         language: 'SQL',
-        query: "SELECT * FROM test_index WHERE `host` = 'a'",
-        dataset: { type: 'DEFAULT', timeFieldName: '@timestamp' },
+        query: 'SELECT * FROM test_index JOIN errors ON test_index.id = errors.log_id',
+        dataset: { type: 'DEFAULT', title: 'test_index', timeFieldName: '@timestamp' },
       };
       const request = { params: { body: { enableTimeFiltering: true } } };
       const result = (sqlSearchInterceptor as any).buildQuery(query, request);
 
       expect(result.query).toBe(
-        "SELECT * FROM test_index WHERE `@timestamp` >= '2023-01-01 00:00:00.000' " +
-          "AND `@timestamp` <= '2023-01-02 00:00:00.000' AND ( `host` = 'a')"
+        "WITH `test_index` AS (SELECT * FROM `test_index` WHERE `@timestamp` >= '2023-01-01 00:00:00.000' " +
+          "AND `@timestamp` <= '2023-01-02 00:00:00.000') " +
+          'SELECT * FROM test_index JOIN errors ON test_index.id = errors.log_id'
       );
     });
 
-    it('returns the query unchanged when the SQL is unparseable and enableTimeFiltering is set', () => {
-      // Skip-on-failure rather than blind-append: emitting `NOT VALID SQL WHERE ...`
-      // would just produce different invalid SQL.
+    it("merges into the user's existing WITH clause", () => {
       const query = {
         language: 'SQL',
-        query: 'NOT VALID SQL',
-        dataset: { type: 'DEFAULT', timeFieldName: '@timestamp' },
-      };
-      const request = { params: { body: { enableTimeFiltering: true } } };
-      const result = (sqlSearchInterceptor as any).buildQuery(query, request);
-
-      expect(result.query).toBe('NOT VALID SQL');
-    });
-
-    it('injects the time filter inside a FROM-subquery rather than at the outer level', () => {
-      // A subquery whose projection doesn't expose `@timestamp`. Injecting at
-      // the outer level would fail at runtime; pushing into the inner scan
-      // succeeds because `@timestamp` is in scope before projection.
-      const query = {
-        language: 'SQL',
-        query: 'SELECT * FROM (SELECT msg FROM test_index) AS s',
-        dataset: { type: 'DEFAULT', timeFieldName: '@timestamp' },
+        query: 'WITH foo AS (SELECT 1) SELECT * FROM foo, test_index',
+        dataset: { type: 'DEFAULT', title: 'test_index', timeFieldName: '@timestamp' },
       };
       const request = { params: { body: { enableTimeFiltering: true } } };
       const result = (sqlSearchInterceptor as any).buildQuery(query, request);
 
       expect(result.query).toBe(
-        "SELECT * FROM (SELECT msg FROM test_index WHERE `@timestamp` >= '2023-01-01 00:00:00.000' " +
-          "AND `@timestamp` <= '2023-01-02 00:00:00.000') AS s"
+        "WITH `test_index` AS (SELECT * FROM `test_index` WHERE `@timestamp` >= '2023-01-01 00:00:00.000' " +
+          "AND `@timestamp` <= '2023-01-02 00:00:00.000'), foo AS (SELECT 1) SELECT * FROM foo, test_index"
       );
+    });
+
+    it('returns the query unchanged on CTE name collision with the user', () => {
+      // User already has a CTE named `test_index`; adding ours would be a
+      // duplicate-name error, so we leave the query alone.
+      const query = {
+        language: 'SQL',
+        query: 'WITH test_index AS (SELECT 1) SELECT * FROM test_index',
+        dataset: { type: 'DEFAULT', title: 'test_index', timeFieldName: '@timestamp' },
+      };
+      const request = { params: { body: { enableTimeFiltering: true } } };
+      const result = (sqlSearchInterceptor as any).buildQuery(query, request);
+
+      expect(result.query).toBe('WITH test_index AS (SELECT 1) SELECT * FROM test_index');
     });
   });
 
