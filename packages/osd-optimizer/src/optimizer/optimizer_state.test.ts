@@ -81,87 +81,29 @@ describe('createOptimizerStateSummarizer', () => {
     expect(state.phase).toBe('success');
   });
 
-  describe('watch-mode rebuild', () => {
-    it('reaches success again after a changes event triggers rebuild', () => {
-      let state = assertDefined(
-        summarize(INITIAL_STATE, { type: 'optimizer initialized' }, injectEvent)
-      );
+  it('transitions to running on compiler events after success', () => {
+    let state = assertDefined(
+      summarize(INITIAL_STATE, { type: 'optimizer initialized' }, injectEvent)
+    );
 
-      // Initial build succeeds
-      state = assertDefined(
-        summarize(state, { type: 'compiler success', bundleId: 'a', moduleCount: 10 }, injectEvent)
-      );
-      state = assertDefined(
-        summarize(state, { type: 'compiler success', bundleId: 'b', moduleCount: 10 }, injectEvent)
-      );
-      state = assertDefined(
-        summarize(state, { type: 'compiler success', bundleId: 'c', moduleCount: 10 }, injectEvent)
-      );
-      expect(state.phase).toBe('success');
+    // Initial build succeeds
+    state = assertDefined(
+      summarize(state, { type: 'compiler success', bundleId: 'a', moduleCount: 10 }, injectEvent)
+    );
+    state = assertDefined(
+      summarize(state, { type: 'compiler success', bundleId: 'b', moduleCount: 10 }, injectEvent)
+    );
+    state = assertDefined(
+      summarize(state, { type: 'compiler success', bundleId: 'c', moduleCount: 10 }, injectEvent)
+    );
+    expect(state.phase).toBe('success');
 
-      // File change detected — only bundles A and B are affected
-      state = assertDefined(summarize(state, { type: 'changes detected' }, injectEvent));
-      expect(state.phase).toBe('reallocating');
+    state = assertDefined(summarize(state, { type: 'running', bundleId: 'a' }, injectEvent));
+    expect(state.phase).toBe('running');
 
-      state = assertDefined(
-        summarize(state, { type: 'changes', bundles: [BUNDLE_A, BUNDLE_B] }, injectEvent)
-      );
-      expect(state.phase).toBe('running');
-
-      // onlineBundles should NOT grow beyond 3 (deduped)
-      expect(state.onlineBundles).toHaveLength(3);
-
-      // Rebuild completes for affected bundles
-      state = assertDefined(
-        summarize(state, { type: 'compiler success', bundleId: 'a', moduleCount: 11 }, injectEvent)
-      );
-      state = assertDefined(
-        summarize(state, { type: 'compiler success', bundleId: 'b', moduleCount: 11 }, injectEvent)
-      );
-
-      // Should reach success — all 3 bundles have reported (c from prior build, a+b from rebuild)
-      expect(state.phase).toBe('success');
-    });
-
-    it('does not grow onlineBundles on repeated changes events', () => {
-      let state = assertDefined(
-        summarize(INITIAL_STATE, { type: 'optimizer initialized' }, injectEvent)
-      );
-
-      // Initial build
-      state = assertDefined(
-        summarize(state, { type: 'compiler success', bundleId: 'a', moduleCount: 10 }, injectEvent)
-      );
-      state = assertDefined(
-        summarize(state, { type: 'compiler success', bundleId: 'b', moduleCount: 10 }, injectEvent)
-      );
-      state = assertDefined(
-        summarize(state, { type: 'compiler success', bundleId: 'c', moduleCount: 10 }, injectEvent)
-      );
-
-      // Multiple rebuild cycles
-      for (let i = 0; i < 5; i++) {
-        state = assertDefined(
-          summarize(state, { type: 'changes', bundles: [BUNDLE_A, BUNDLE_B] }, injectEvent)
-        );
-        expect(state.onlineBundles).toHaveLength(3);
-
-        state = assertDefined(
-          summarize(
-            state,
-            { type: 'compiler success', bundleId: 'a', moduleCount: 10 },
-            injectEvent
-          )
-        );
-        state = assertDefined(
-          summarize(
-            state,
-            { type: 'compiler success', bundleId: 'b', moduleCount: 10 },
-            injectEvent
-          )
-        );
-        expect(state.phase).toBe('success');
-      }
-    });
+    state = assertDefined(
+      summarize(state, { type: 'compiler success', bundleId: 'a', moduleCount: 11 }, injectEvent)
+    );
+    expect(state.phase).toBe('success');
   });
 });

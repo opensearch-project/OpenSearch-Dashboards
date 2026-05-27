@@ -31,10 +31,9 @@
 import * as Rx from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
 
-import { Bundle, maybeMap } from '../common';
+import { Bundle } from '../common';
 
 import { OptimizerConfig } from './optimizer_config';
-import { ChangeEvent } from './watcher';
 import { assignBundlesToWorkers } from './assign_bundles_to_workers';
 import { observeWorker } from './observe_worker';
 
@@ -45,23 +44,11 @@ import { observeWorker } from './observe_worker';
  * `assignBundlesToWorkers()` and then start a worker for each
  * assignment with `observeWorker()`.
  *
- * Subscribes to `changeEvent$` in order to determine when more
- * bundles should be assigned to workers.
- *
  * Completes when all workers have exited. If we are running in
  * watch mode this observable will never exit.
  */
-export function runWorkers(
-  config: OptimizerConfig,
-  bundles: Bundle[],
-  changeEvent$: Rx.Observable<ChangeEvent>
-) {
-  return Rx.concat(
-    // first batch of bundles — all of them
-    Rx.of(bundles),
-    // subsequent batches are defined by changeEvent$
-    changeEvent$.pipe(maybeMap((c) => (c.type === 'changes' ? c.bundles : undefined)))
-  ).pipe(
+export function runWorkers(config: OptimizerConfig, bundles: Bundle[]) {
+  return Rx.of(bundles).pipe(
     mergeMap((batchBundles) =>
       Rx.from(assignBundlesToWorkers(batchBundles, config.maxWorkerCount)).pipe(
         mergeMap((assignment) =>

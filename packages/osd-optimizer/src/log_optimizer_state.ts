@@ -115,11 +115,6 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
           log.debug(`modules [${moduleCount}] work units [${workUnits}]`);
         }
 
-        if (state.phase === 'reallocating') {
-          log.debug(`changes detected...`);
-          return;
-        }
-
         if (state.phase === 'initialized') {
           if (!loggedInit) {
             loggedInit = true;
