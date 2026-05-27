@@ -229,6 +229,16 @@ export const Homepage = () => {
         text: i18n.translate('home.breadcrumbs.homeTitle', { defaultMessage: 'Home' }),
       },
     ]);
+
+    // POC: intentional script-src CSP violation. Under csp.enable: true, the strict
+    // CSP rule is `script-src 'self'` (no 'unsafe-eval'), so this `new Function(...)`
+    // call will be blocked by the browser at runtime and throw an uncaught EvalError.
+    // This is added to demonstrate that CI tests do not detect such violations
+    // (jsdom/jest do not enforce CSP, and headless functional tests do not assert on
+    // CSP violation reports).
+    // eslint-disable-next-line no-new-func
+    const cspPocViolation = new Function('return "intentional-csp-script-src-violation"');
+    cspPocViolation();
   });
 
   const sideItems: React.ReactNode[] = [

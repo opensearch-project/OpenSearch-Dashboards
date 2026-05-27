@@ -40,6 +40,11 @@
 # It requires the application config plugin as its dependency.
 # csp_handler.enabled: true
 
+# POC: enable strict Content-Security-Policy hardening so script-src is 'self' (no 'unsafe-eval').
+# This is intentionally turned on for this POC PR to demonstrate that introducing a script-src
+# CSP violation (e.g. `new Function(...)`) is not caught by CI tests.
+csp.enable: true
+
 # The default application to load.
 # opensearchDashboards.defaultAppId: "home"
 
