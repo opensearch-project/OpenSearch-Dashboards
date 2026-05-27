@@ -17,10 +17,10 @@ import {
   CustomVariable,
   VariableState,
   VariableWithState,
-  VariableUtils,
 } from './types';
 import { executeQueryForOptionsWithType, filterOptionsByRegex } from './variable_query_utils';
 import { IVariableInterpolationService } from './variable_interpolation_service';
+import { VariableUtils } from './utils';
 
 /**
  * Maximum number of options to display for a variable.

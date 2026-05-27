@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { VariableWithState, VariableOptionType, VARIABLE_REFERENCE_PATTERN } from './types';
+import { VariableWithState, VariableOptionType } from './types';
+import { VARIABLE_REFERENCE_PATTERN } from './constants';
 
 /**
  * Variable value with metadata for interpolation
