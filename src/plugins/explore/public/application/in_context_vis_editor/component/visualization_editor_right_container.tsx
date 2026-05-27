@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import React from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 import { EuiPanel, EuiEmptyPrompt, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 import { QueryExecutionStatus } from '../../utils/state_management/types';
@@ -10,7 +11,7 @@ import { useQueryBuilderState } from '../hooks/use_query_builder_state';
 import { useVisualizationBuilder } from '../hooks/use_visualization_builder';
 import '../visualization_editor.scss';
 
-export const RightStyleOptionsPanel = () => {
+export const RightStyleOptionsPanel = React.memo(() => {
   const { queryEditorState } = useQueryBuilderState();
   const queryStatus = queryEditorState.queryStatus;
   const { visualizationBuilderForEditor: visualizationBuilder } = useVisualizationBuilder();
@@ -50,7 +51,7 @@ export const RightStyleOptionsPanel = () => {
       {visualizationBuilder.renderStylePanel({ className: 'visStylePanelBody' })}
     </EuiPanel>
   );
-};
+});
 
 export const StylePanelEmptyState = () => {
   return (

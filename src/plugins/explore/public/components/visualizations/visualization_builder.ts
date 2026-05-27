@@ -447,10 +447,26 @@ export class VisualizationBuilder {
 
   setAxesMapping(mapping: AxisFieldNameMappings) {
     const config = this.visConfig$.value;
-    if (config && !isEqual(config.axesMapping, mapping)) {
+    if (
+      config &&
+      !isEqual(this.normalizeMapping(config.axesMapping), this.normalizeMapping(mapping))
+    ) {
       this.setIsVisDirty(true);
       this.visConfig$.next({ ...config, axesMapping: mapping });
     }
+  }
+
+  private normalizeMapping(
+    mapping: AxisFieldNameMappings | undefined
+  ): Record<string, string[]> | undefined {
+    if (!mapping) return undefined;
+    const normalized: Record<string, string[]> = {};
+    for (const [key, value] of Object.entries(mapping)) {
+      if (value) {
+        normalized[key] = Array.isArray(value) ? value : [value];
+      }
+    }
+    return normalized;
   }
 
   /**

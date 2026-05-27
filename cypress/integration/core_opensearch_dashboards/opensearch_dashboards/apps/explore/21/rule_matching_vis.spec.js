@@ -263,7 +263,7 @@ export const runCreateVisTests = () => {
       cy.getElementByTestId('dataGridHeader').should('contain.text', 'category');
     });
 
-    it('should create a line and bar visualization using a query with one metric and two categories', () => {
+    it('should create a multi series line visualization using a query with two metrics and one date', () => {
       // Setup dataset
       cy.explore.clearQueryEditor();
       const datasetName = `${INDEX_WITH_TIME_1}*`;
@@ -282,24 +282,24 @@ export const runCreateVisTests = () => {
       // Verify visualization is created
       cy.getElementByTestId('exploreVisualizationLoader').should('be.visible');
 
-      // Verify the metric viz is displayed in the chart type selector
+      // Verify the line viz is displayed in the chart type selector
       cy.getElementByTestId('exploreVisStylePanel')
         .should('be.visible')
         .within(() => {
-          // Try finding the EuiSuperSelect button directly
           cy.getElementByTestId('exploreChartTypeSelector').should('be.visible').click();
         });
       cy.get('[role="option"][aria-selected="true"]')
         .should('be.visible')
         .and('contain.text', 'Line');
 
-      // Verify a line bar chart has been created
-      cy.contains('Y-Axis (2nd)');
-
       // Close dropdown
       cy.get('body').click(0, 0);
 
-      // Verify the visualization are displayed
+      // Verify both metrics are on the same Y-Axis as a multi-series line chart
+      cy.getElementByTestId('field-y').should('contain.text', 'avg_bytes');
+      cy.getElementByTestId('field-y').should('contain.text', 'max_bytes');
+
+      // Verify the visualization is displayed
       cy.get('.exploreVisContainer canvas').should('be.visible');
       cy.getElementByTestId('exploreVisStylePanel').should('be.visible');
     });
