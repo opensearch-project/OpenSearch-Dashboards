@@ -101,7 +101,6 @@ export const LanguageToggle = () => {
         tabSupportedLanguages = ['PPL'];
       }
 
-
       // Filter out SQL if feature flag is disabled
       if (tabSupportedLanguages.includes('SQL') && !services.sqlSupportEnabled) {
         tabSupportedLanguages = tabSupportedLanguages.filter((lang) => lang !== 'SQL');
