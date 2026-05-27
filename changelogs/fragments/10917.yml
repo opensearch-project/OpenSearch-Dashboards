@@ -1,0 +1,2 @@
+refactor:
+- Implement field normalization for Vega-Lite compatibility ([#10917](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10917))
