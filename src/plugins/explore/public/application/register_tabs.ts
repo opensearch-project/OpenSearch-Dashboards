@@ -85,9 +85,9 @@ export const registerBuiltInTabs = (
       order: 10,
       // SQL is only supported for Logs flavor, not Traces
       supportedLanguages:
-        registryFlavor === ExploreFlavor.Traces
-          ? [EXPLORE_DEFAULT_LANGUAGE]
-          : [EXPLORE_DEFAULT_LANGUAGE, 'SQL'],
+        registryFlavor === ExploreFlavor.Logs
+          ? [EXPLORE_DEFAULT_LANGUAGE, 'SQL']
+          : [EXPLORE_DEFAULT_LANGUAGE],
       component: LogsTab,
     };
     tabRegistry.registerTab(logsTabDefinition);
@@ -194,9 +194,9 @@ export const registerBuiltInTabs = (
     supportedLanguages:
       registryFlavor === ExploreFlavor.Metrics
         ? [EXPLORE_DEFAULT_LANGUAGE, 'PROMQL']
-        : registryFlavor === ExploreFlavor.Traces
-        ? [EXPLORE_DEFAULT_LANGUAGE]
-        : [EXPLORE_DEFAULT_LANGUAGE, 'SQL'],
+        : registryFlavor === ExploreFlavor.Logs
+        ? [EXPLORE_DEFAULT_LANGUAGE, 'SQL']
+        : [EXPLORE_DEFAULT_LANGUAGE],
 
     // Prepare query based on language
     prepareQuery: (query) => {
@@ -214,7 +214,10 @@ export const registerBuiltInTabs = (
     }),
     flavor: [ExploreFlavor.Logs],
     order: 17,
-    supportedLanguages: [EXPLORE_DEFAULT_LANGUAGE, 'SQL'],
+    supportedLanguages:
+      registryFlavor === ExploreFlavor.Logs
+        ? [EXPLORE_DEFAULT_LANGUAGE, 'SQL']
+        : [EXPLORE_DEFAULT_LANGUAGE],
 
     // Prepare query based on language
     prepareQuery: (query) => {

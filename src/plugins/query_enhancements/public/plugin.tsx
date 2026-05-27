@@ -182,13 +182,7 @@ export class QueryEnhancementsPlugin
       showDocLinks: false,
       editor: createEditor(SingleLineInput, null, sqlControls, DefaultInput),
       editorSupportedAppNames: ['discover', 'explore', 'agentTraces'],
-      supportedAppNames: [
-        'discover',
-        'data-explorer',
-        'explore',
-        'dataset_management',
-        'agentTraces',
-      ],
+      supportedAppNames: ['discover', 'data-explorer', 'explore', 'agentTraces'],
       hideDatePicker: true,
       sampleQueries: [
         {

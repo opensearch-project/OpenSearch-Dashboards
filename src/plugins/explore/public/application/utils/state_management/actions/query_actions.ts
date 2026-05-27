@@ -296,7 +296,7 @@ export const executeQueries = createAsyncThunk<
 
   // Execute histogram query in background (non-blocking)
   if (needsHistogramQuery) {
-    const interval = state.legacy?.interval || 'auto';
+    const interval = state.legacy?.interval;
     dispatch(
       executeHistogramQuery({
         services,
@@ -555,7 +555,7 @@ const executeQueryBase = async (
     if (includeHistogram) {
       // Histogram-specific: Get interval and create with aggregations
       const state = getState();
-      const effectiveInterval = interval || state.legacy?.interval || 'auto';
+      const effectiveInterval = interval || state.legacy?.interval;
       searchSource = await createSearchSourceWithQuery(
         preparedQueryObject,
         dataView,

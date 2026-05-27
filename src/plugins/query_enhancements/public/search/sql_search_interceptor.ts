@@ -7,8 +7,6 @@ import { trimEnd } from 'lodash';
 import { CoreStart } from 'opensearch-dashboards/public';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { CharStream, CommonTokenStream } from 'antlr4ng';
-import { OpenSearchSQLLexer, OpenSearchSQLParser } from '@osd/antlr-grammar';
 import {
   DataPublicPluginStart,
   IOpenSearchDashboardsSearchRequest,
@@ -27,6 +25,7 @@ import {
   fetch,
 } from '../../common';
 import { QueryEnhancementsPluginStartDependencies } from '../types';
+import { SQLFilterUtils } from './filters';
 
 export class SQLSearchInterceptor extends SearchInterceptor {
   protected queryService!: DataPublicPluginStart['query'];
@@ -82,39 +81,8 @@ export class SQLSearchInterceptor extends SearchInterceptor {
 
     return {
       ...query,
-      query: SQLSearchInterceptor.insertWhereClause(query.query, whereClause),
+      query: SQLFilterUtils.insertWhereClause(query.query, whereClause),
     };
-  }
-
-  private static insertWhereClause(sql: string, whereClause: string): string {
-    const inputStream = CharStream.fromString(sql);
-    const lexer = new OpenSearchSQLLexer(inputStream);
-    const tokenStream = new CommonTokenStream(lexer);
-    const parser = new OpenSearchSQLParser(tokenStream);
-    parser.removeErrorListeners();
-
-    const tree = parser.root();
-    const selectStmt = tree.sqlStatement()?.dmlStatement()?.selectStatement();
-    if (!selectStmt) return `${sql} WHERE ${whereClause}`;
-
-    const querySpec = (selectStmt as any).querySpecification?.();
-    if (!querySpec) return `${sql} WHERE ${whereClause}`;
-
-    const fromClause = querySpec.fromClause?.();
-    if (!fromClause) return `${sql} WHERE ${whereClause}`;
-
-    const existingWhere = fromClause.whereClause?.();
-    if (existingWhere) {
-      // Insert after WHERE keyword, wrapping existing expression with AND
-      const whereToken = existingWhere.start!;
-      const insertPos = whereToken.stop! + 1;
-      return sql.slice(0, insertPos) + ` ${whereClause} AND` + sql.slice(insertPos);
-    }
-
-    // Insert WHERE after the relation (table name + alias)
-    const relation = fromClause.relation();
-    const insertPos = relation.stop!.stop! + 1;
-    return sql.slice(0, insertPos) + ` WHERE ${whereClause}` + sql.slice(insertPos);
   }
 
   public search(request: IOpenSearchDashboardsSearchRequest, options: ISearchOptions) {

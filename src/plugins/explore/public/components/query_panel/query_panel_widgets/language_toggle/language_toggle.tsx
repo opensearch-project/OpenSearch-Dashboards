@@ -178,7 +178,7 @@ export const LanguageToggle = () => {
         anchorPosition="downCenter"
         panelPaddingSize="none"
       >
-        {isPopoverOpen && <EuiContextMenuPanel size="s" items={items} />}
+        <EuiContextMenuPanel size="s" items={items} />
       </EuiPopover>
     </div>
   );

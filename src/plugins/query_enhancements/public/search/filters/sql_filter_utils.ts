@@ -9,7 +9,7 @@ import { Filter } from '../../../../data/common';
 import { FilterUtils } from './filter_utils';
 
 export class SQLFilterUtils extends FilterUtils {
-  private static insertWhereClause(sql: string, whereClause: string): string {
+  public static insertWhereClause(sql: string, whereClause: string): string {
     const inputStream = CharStream.fromString(sql);
     const lexer = new OpenSearchSQLLexer(inputStream);
     const tokenStream = new CommonTokenStream(lexer);
@@ -28,13 +28,15 @@ export class SQLFilterUtils extends FilterUtils {
 
     const existingWhere = fromClause.whereClause?.();
     if (existingWhere) {
-      const whereToken = existingWhere.start!;
-      const insertPos = whereToken.stop! + 1;
+      const whereToken = existingWhere.start;
+      if (!whereToken?.stop) return `${sql} WHERE ${whereClause}`;
+      const insertPos = whereToken.stop + 1;
       return sql.slice(0, insertPos) + ` ${whereClause} AND` + sql.slice(insertPos);
     }
 
     const relation = fromClause.relation();
-    const insertPos = relation.stop!.stop! + 1;
+    if (!relation?.stop?.stop) return `${sql} WHERE ${whereClause}`;
+    const insertPos = relation.stop.stop + 1;
     return sql.slice(0, insertPos) + ` WHERE ${whereClause}` + sql.slice(insertPos);
   }
 
