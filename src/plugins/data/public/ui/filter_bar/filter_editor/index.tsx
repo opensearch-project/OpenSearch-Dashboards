@@ -43,6 +43,7 @@ import {
   EuiSpacer,
   EuiCompressedSwitch,
   EuiSwitchEvent,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@osd/i18n/react';
@@ -119,23 +120,33 @@ class FilterEditorUI extends Component<Props, State> {
             </EuiFlexItem>
             <EuiFlexItem grow={false} className="filterEditor__hiddenItem" />
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="xs"
-                data-test-subj="editQueryDSL"
-                onClick={this.toggleCustomEditor}
+              <EuiToolTip
+                content={
+                  this.state.isCustomEditorOpen
+                    ? undefined
+                    : i18n.translate('data.filter.filterEditor.editQueryDslTooltip', {
+                        defaultMessage: 'Raw DSL input only applies to DSL-based visualizations',
+                      })
+                }
               >
-                {this.state.isCustomEditorOpen ? (
-                  <FormattedMessage
-                    id="data.filter.filterEditor.editFilterValuesButtonLabel"
-                    defaultMessage="Edit filter values"
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="data.filter.filterEditor.editQueryDslButtonLabel"
-                    defaultMessage="Edit as Query DSL"
-                  />
-                )}
-              </EuiButtonEmpty>
+                <EuiButtonEmpty
+                  size="xs"
+                  data-test-subj="editQueryDSL"
+                  onClick={this.toggleCustomEditor}
+                >
+                  {this.state.isCustomEditorOpen ? (
+                    <FormattedMessage
+                      id="data.filter.filterEditor.editFilterValuesButtonLabel"
+                      defaultMessage="Edit filter values"
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="data.filter.filterEditor.editQueryDslButtonLabel"
+                      defaultMessage="Edit as Query DSL"
+                    />
+                  )}
+                </EuiButtonEmpty>
+              </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPopoverTitle>
@@ -299,6 +310,7 @@ class FilterEditorUI extends Component<Props, State> {
           isClearable={false}
           className="globalFilterEditor__fieldInput"
           data-test-subj="filterFieldSuggestionList"
+          autoFocus
         />
       </EuiCompressedFormRow>
     );

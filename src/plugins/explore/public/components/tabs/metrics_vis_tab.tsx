@@ -18,7 +18,10 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiText,
+  EuiAccordion,
   EuiTitle,
+  EuiHorizontalRule,
+  EuiPanel,
 } from '@elastic/eui';
 
 import { VisualizationContainer } from '../visualizations/visualization_container';
@@ -30,6 +33,11 @@ import { getVisualizationBuilder } from '../visualizations/visualization_builder
 import { shouldSkipQueryExecution } from '../../application/utils/state_management/actions/query_actions';
 import { RootState } from '../../application/utils/state_management/store';
 import { ChartType } from '../visualizations/utils/use_visualization_types';
+
+import {
+  TransformPanel,
+  useTransformationService as useMetricsTransformationService,
+} from '../../components/data_transformations';
 
 const DEFAULT_SERIES_LIMIT = 20;
 
@@ -128,6 +136,29 @@ export const MetricsVisTab = () => {
     },
     [visualizationBuilder]
   );
+
+  const transformationService = useMetricsTransformationService(visualizationBuilder);
+
+  const renderTransformPanel = () => {
+    return (
+      <EuiPanel paddingSize="m" hasBorder={false} hasShadow={false}>
+        <EuiAccordion
+          id="metricsVisTab__transformPanel"
+          buttonContent={
+            <EuiText size="s" style={{ fontWeight: 600 }}>
+              {i18n.translate('explore.metricsVisTab.transformPanelTitle', {
+                defaultMessage: 'Transformations',
+              })}
+            </EuiText>
+          }
+          paddingSize="m"
+          initialIsOpen={true}
+        >
+          <TransformPanel transformationService={transformationService} />
+        </EuiAccordion>
+      </EuiPanel>
+    );
+  };
 
   const chartTypeToggle = showSettings && visConfig?.type && (
     <div className="metricsVisTab__chartTypeToggle">
@@ -246,6 +277,9 @@ export const MetricsVisTab = () => {
           {settingsPanel}
         </div>
       </div>
+      <EuiHorizontalRule margin="xs" />
+      {renderTransformPanel()}
+      <EuiHorizontalRule margin="xs" />
       <div className="metricsVisTab__rawTable">
         <ExploreMetricsRawTable />
       </div>
