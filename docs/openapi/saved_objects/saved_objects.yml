@@ -9,168 +9,9 @@ info:
 tags:
   - name: saved objects
     description: Manage Dashboards saved objects, including dashboards, visualizations, saved search, and more.
-components:
-  parameters:
-    type:
-      name: type
-      in: path
-      description: The type of SavedObject to retrieve.
-      required: true
-      schema:
-        type: string
-        enum:
-          - dashboard
-          - config
-          - index-pattern
-        example: dashboard
-    id: 
-      name: id
-      in: path
-      description: Unique id of the saved object.
-      required: true
-      schema:
-        type: string
-        example: I2CFyW_27a48aa0-b274-11ef-b63c-9f43fceaea0c_7adfa750-4c81-11e8-b3d7-01146121b73d
-  schemas:
-    SavedObjectCreateRequest:
-      type: object
-      required:
-        - attributes
-      properties:
-        attributes:
-          type: object
-          description: The metadata of the saved object to be created, and the object is not validated.
-        migrationVersion:
-          type: object
-          description: The information about the migrations that have been applied to this saved object to be created.
-        references:
-          description: List of objects that describe other saved objects the created object references. 
-          type: array
-          items:
-            type: object
-            properties:
-              id:
-                type: string
-              name:
-                type: string
-              type:
-                type: string
-        initialNamespaces:
-          description: Namespaces that this saved object exists in. This attribute is only used for multi-namespace saved object types.
-          type: array
-          items:
-            type: string
-        workspaces:
-          type: array
-          items:
-            type: string
-          description: Workspaces that this saved object exists in.
-    400_bad_request:
-      title: Bad request
-      type: object
-      required:
-        - error
-        - message
-        - statusCode
-      properties:
-        error:
-          type: string
-          enum:
-            - Bad Request
-        message:
-          type: string
-        statusCode:
-          type: integer
-          enum:
-            - 400
+  - name: dashboards-as-code
+    description: Programmatic dashboard management — bulk apply, diff, validate, export clean, and schema registry endpoints.
 paths:
-  /api/saved_objects/{type}:
-    post:
-      tags:
-        - saved objects
-      summary: Create a new saved object without specifying an ID
-      parameters:
-        - $ref: '#/components/parameters/type'
-        - in: query
-          name: overwrite
-          description: If set to true, will overwrite the existing saved object with same type and id.
-          schema: 
-            type: boolean
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SavedObjectCreateRequest'
-            examples:
-              indexPattern:
-                summary: Example of creating an index pattern saved object
-                value:
-                  attributes:
-                    title: 'my-index-pattern'
-                    fields: '[{"count":"1","name":"@timestamp","searchable":"true"}]'
-                  references:
-                    - id: '51339560-1d7c-11ef-b757-55fac6c80d9a'
-                      name: 'dataSource'
-                      type: 'data-source'
-              vegaVisualization:
-                summary: Example of creating a Vega visualization saved object
-                value:
-                  attributes:
-                    title: 'my-vega-visualization'
-                    visState: '{"title":"vegaVisualization","type":"vega","aggs":[]}}'
-                    uiStateJSON: '{}'
-                    description: ''
-                    version: 1
-                    kibanaSavedObjectMeta: {
-                      searchSourceJSON: '{"query":{"language":"kuery","query":""},"filter":[]}'
-                    }
-                  references:
-                    - id: '51339560-1d7c-11ef-b757-55fac6c80d9a'
-                      name: 'dataSource'
-                      type: 'data-source'
-              dashboards:
-                summary: Example of creating a dashboard saved object
-                value:
-                  attributes:
-                    title: 'Revenue Dashboard'
-                    description: 'Revenue dashboard'
-                    panelsJSON: '[{"version":"2.9.0","gridData":{"x":0,"y":0,"w":24,"h":15,"i":"5db1d75d-f680-4869-a0e8-0f2b8b05b99c"},"panelIndex":"5db1d75d-f680-4869-a0e8-0f2b8b05b99c","embeddableConfig":{},"panelRefName":"panel_0"}]'
-                    optionsJSON: '{"hidePanelTitles":false,"useMargins":true}'
-                    version: 1
-                    timeRestore: true
-                    kibanaSavedObjectMeta: {
-                      searchSourceJSON: '{"query":{"language":"kuery","query":""},"filter":[]}'
-                    }
-                  references:
-                    - id: '37cc8650-b882-11e8-a6d9-e546fe2bba5f'
-                      name: 'panel_0'
-                      type: 'visualization'  
-      responses:
-        '200':
-          description: The creation request is successful
-          content:
-            application/json:
-              schema:
-                type: object
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/400_bad_request'
-        '409':
-          description: There was a conflict when processing the request, usually due to a saved object with the same id
-          content:
-            application/json:
-              schema:
-                type: object
-        '500':
-          description: An internal server error occurred when processing the request
-          content:
-            application/json:
-              schema:
-                type: object
   /api/saved_objects/{type}/{id}:
     get:
       tags:
@@ -195,10 +36,10 @@ paths:
     post:
       tags:
         - saved objects
-      summary: Create a new saved object with a specific ID
+      summary: Create a new saved object with type and id.
       parameters:
-        - $ref: '#/components/parameters/type'
-        - $ref: '#/components/parameters/id'
+        - $ref: '#components/parameters/type'
+        - $ref: '#components/parameters/id'
         - in: query
           name: overwrite
           description: If set to true, will overwrite the existing saved object with same type and id.
@@ -209,7 +50,38 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SavedObjectCreateRequest'
+              type: object
+              required:
+                - attributes
+              properties:
+                attributes:
+                  type: object
+                  description: The metadata of the saved object to be created, and the object is not validated.
+                migrationVersion:
+                  type: object
+                  description: The information about the migrations that have been applied to this saved object to be created.
+                references:
+                  description: List of objects that describe other saved objects the created object references. 
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      type:
+                        type: string
+                initialNamespaces:
+                  description: Namespaces that this saved object exists in. This attribute is only used for multi-namespace saved object types.
+                  type: array
+                  items:
+                    type: string
+                workspaces:
+                  type: array
+                  items:
+                    type: string
+                  description: Workspaces that this saved object exists in.
             examples:
               indexPattern:
                 summary: Example of creating an index pattern saved object
@@ -267,25 +139,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_bad_request'
-        '409':
-          description: There was a conflict when processing the request, usually due to a saved object with the same id
-          content:
-            application/json:
-              schema:
-                type: object
-        '500':
-          description: An internal server error occurred when processing the request
-          content:
-            application/json:
-              schema:
-                type: object
     put:
       tags:
         - saved objects
       summary: Update existing saved object
       parameters:
-        - $ref: '#/components/parameters/type'
-        - $ref: '#/components/parameters/id'
+        - $ref: '#components/parameters/type'
+        - $ref: '#components/parameters/id'
       requestBody:
         required: true
         content:
@@ -330,8 +190,8 @@ paths:
         - saved objects
       summary: Delete a saved object
       parameters:
-        - $ref: '#/components/parameters/type'
-        - $ref: '#/components/parameters/id'
+        - $ref: '#components/parameters/type'
+        - $ref: '#components/parameters/id'
         - in: query
           name: force
           description: If set to true, will force deletion of an object that exists in multiple namespaces.
@@ -668,7 +528,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
+                type: object  
   /api/saved_objects/_import:
     post:
       tags:
@@ -972,3 +832,557 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_bad_request'
+  /api/saved_objects/_bulk_apply:
+    post:
+      tags:
+        - dashboards-as-code
+      summary: Deploy saved objects with dependency resolution
+      description: >
+        Atomic bulk deploy of saved objects. Validates all resources, resolves dependency order
+        using topological sort, compares against existing objects, and writes in a single batch.
+        Objects are stamped with `managed-by: osdctl` label for managed lock enforcement.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkApplyRequest'
+            examples:
+              deployDashboard:
+                summary: Deploy a dashboard with a visualization
+                value:
+                  resources:
+                    - type: visualization
+                      id: vis-001
+                      attributes:
+                        title: Request Rate
+                        visState: '{"type":"line","aggs":[]}'
+                        uiStateJSON: '{}'
+                        kibanaSavedObjectMeta:
+                          searchSourceJSON: '{"query":{"language":"kuery","query":""}}'
+                      references:
+                        - name: kibanaSavedObjectMeta.searchSourceJSON.index
+                          type: index-pattern
+                          id: logs-*
+                    - type: dashboard
+                      id: dash-001
+                      attributes:
+                        title: Overview Dashboard
+                        panelsJSON: '[{"panelIndex":"1","gridData":{"x":0,"y":0,"w":24,"h":15,"i":"1"},"panelRefName":"panel_0"}]'
+                        optionsJSON: '{"useMargins":true,"hidePanelTitles":false}'
+                      references:
+                        - name: panel_0
+                          type: visualization
+                          id: vis-001
+                  options:
+                    dryRun: false
+                    overwrite: true
+      responses:
+        '200':
+          description: Apply completed (may include per-resource errors).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkApplyResponse'
+        '400':
+          description: Validation failed or circular dependency detected.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_bad_request'
+  /api/saved_objects/_diff:
+    post:
+      tags:
+        - dashboards-as-code
+      summary: Compare local saved object against deployed version
+      description: >
+        Computes a recursive diff between the provided attributes and the existing saved object.
+        Returns status `new` (object does not exist), `unchanged`, or `updated` with a list of
+        diff entries (add/remove/replace operations with JSON pointer paths).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DiffRequest'
+            examples:
+              diffDashboard:
+                summary: Diff a dashboard
+                value:
+                  type: dashboard
+                  id: dash-001
+                  attributes:
+                    title: Updated Dashboard
+                    panelsJSON: '[]'
+                    optionsJSON: '{"useMargins":true}'
+      responses:
+        '200':
+          description: Diff computed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiffResponse'
+  /api/saved_objects/_export_clean:
+    post:
+      tags:
+        - dashboards-as-code
+      summary: Export saved objects in clean, deterministic format
+      description: >
+        Exports saved objects stripped of internal metadata, with deterministic key sorting.
+        Designed for Dashboards-as-Code workflows where exported files are stored in Git.
+        Objects are sorted by type then id for stable diffs.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExportCleanRequest'
+            examples:
+              exportAllDashboards:
+                summary: Export all dashboards
+                value:
+                  type: dashboard
+              exportSpecificObjects:
+                summary: Export specific objects
+                value:
+                  objects:
+                    - type: dashboard
+                      id: dash-001
+                    - type: visualization
+                      id: vis-001
+      responses:
+        '200':
+          description: Clean export successful.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CleanSavedObject'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_bad_request'
+  /api/saved_objects/_validate:
+    post:
+      tags:
+        - dashboards-as-code
+      summary: Validate saved object attributes against JSON Schema
+      description: >
+        Validates a saved object's attributes against the registered JSON Schema for its type.
+        In `schema` mode (default), performs offline schema validation only. In `full` mode,
+        also checks that referenced saved objects exist on the server.
+      parameters:
+        - in: query
+          name: mode
+          description: Validation mode. `schema` for offline validation, `full` to also check references exist.
+          schema:
+            type: string
+            enum:
+              - schema
+              - full
+            default: schema
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ValidateRequest'
+            examples:
+              validateDashboard:
+                summary: Validate a dashboard
+                value:
+                  type: dashboard
+                  attributes:
+                    title: My Dashboard
+                    panelsJSON: '[]'
+                    optionsJSON: '{"useMargins":true}'
+      responses:
+        '200':
+          description: Validation result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidateResponse'
+        '400':
+          description: Unknown saved object type.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_bad_request'
+  /api/saved_objects/_schemas:
+    get:
+      tags:
+        - dashboards-as-code
+      summary: List all registered saved object JSON Schemas
+      description: >
+        Returns a list of all saved object types that have registered JSON Schemas,
+        with their versions and URLs for retrieval.
+      responses:
+        '200':
+          description: Schema list retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SchemaListResponse'
+              example:
+                schemas:
+                  - type: dashboard
+                    version: v1
+                    url: /api/saved_objects/_schemas/dashboard/v1
+                  - type: visualization
+                    version: v1
+                    url: /api/saved_objects/_schemas/visualization/v1
+                  - type: index-pattern
+                    version: v1
+                    url: /api/saved_objects/_schemas/index-pattern/v1
+                  - type: search
+                    version: v1
+                    url: /api/saved_objects/_schemas/search/v1
+  /api/saved_objects/_schemas/{type}/{version}:
+    get:
+      tags:
+        - dashboards-as-code
+      summary: Retrieve a specific saved object JSON Schema
+      parameters:
+        - $ref: '#/components/parameters/type'
+        - in: path
+          name: version
+          required: true
+          description: Schema version (e.g. v1).
+          schema:
+            type: string
+      responses:
+        '200':
+          description: JSON Schema for the requested type and version.
+          content:
+            application/json:
+              schema:
+                type: object
+                description: A JSON Schema document (draft 2020-12).
+        '404':
+          description: Schema not found for the given type and version.
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/saved_objects/_unlock/{type}/{id}:
+    post:
+      tags:
+        - dashboards-as-code
+      summary: Emergency unlock a code-managed saved object
+      description: >
+        Removes the `managed-by: osdctl` label from a saved object, releasing the managed lock
+        so it can be edited through the UI or standard CRUD routes again.
+      parameters:
+        - $ref: '#/components/parameters/type'
+        - $ref: '#/components/parameters/id'
+      responses:
+        '200':
+          description: Unlock result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnlockResponse'
+        '404':
+          description: Saved object not found.
+          content:
+            application/json:
+              schema:
+                type: object
+components:
+  parameters:
+    type:
+      name: type
+      in: path
+      description: The type of SavedObject to retrieve.
+      required: true
+      schema:
+        type: string
+    id: 
+      name: id
+      in: path
+      description: Unique id of the saved object.
+      required: true
+      schema:
+        type: string
+  schemas:
+    400_bad_request:
+      title: Bad request
+      type: object
+      required:
+        - error
+        - message
+        - statusCode
+      properties:
+        error:
+          type: string
+          enum:
+            - Bad Request
+        message:
+          type: string
+        statusCode:
+          type: integer
+          enum:
+            - 400
+    SavedObjectReference:
+      type: object
+      required:
+        - name
+        - type
+        - id
+      properties:
+        name:
+          type: string
+          description: Reference name used to map back into saved object attributes.
+        type:
+          type: string
+          description: The saved object type of the referenced object.
+        id:
+          type: string
+          description: The saved object id of the referenced object.
+    BulkApplyRequest:
+      type: object
+      required:
+        - resources
+      properties:
+        resources:
+          type: array
+          description: Array of saved object resources to deploy.
+          items:
+            type: object
+            required:
+              - type
+              - id
+              - attributes
+            properties:
+              type:
+                type: string
+                description: Saved object type (e.g. dashboard, visualization, index-pattern, search).
+              id:
+                type: string
+                description: Unique saved object id.
+              attributes:
+                type: object
+                description: >
+                  Saved object attributes. Schema depends on type — see /_schemas/{type}/{version}
+                  for the JSON Schema definition for each type.
+              labels:
+                type: object
+                description: Key-value labels for tagging and grouping.
+                additionalProperties:
+                  type: string
+              references:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SavedObjectReference'
+        options:
+          type: object
+          properties:
+            dryRun:
+              type: boolean
+              default: false
+              description: If true, compute what would change without writing.
+            overwrite:
+              type: boolean
+              default: true
+              description: If false, fail when an object already exists with different attributes.
+    BulkApplyResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            type: object
+            required:
+              - type
+              - id
+              - status
+            properties:
+              type:
+                type: string
+              id:
+                type: string
+              status:
+                type: string
+                enum:
+                  - created
+                  - updated
+                  - unchanged
+                  - error
+              error:
+                type: string
+                description: Error message if status is error.
+    DiffRequest:
+      type: object
+      required:
+        - type
+        - id
+        - attributes
+      properties:
+        type:
+          type: string
+          description: Saved object type.
+        id:
+          type: string
+          description: Saved object id.
+        attributes:
+          type: object
+          description: The local attributes to compare against the deployed version.
+    DiffResponse:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum:
+            - new
+            - unchanged
+            - updated
+          description: >
+            `new` — object does not exist on server.
+            `unchanged` — attributes are identical.
+            `updated` — differences found.
+        diff:
+          type: array
+          description: List of diff entries (present only when status is `updated`).
+          items:
+            type: object
+            required:
+              - op
+              - path
+            properties:
+              op:
+                type: string
+                enum:
+                  - add
+                  - remove
+                  - replace
+              path:
+                type: string
+                description: Dot-delimited path to the changed field.
+              oldValue:
+                description: Previous value (present for remove and replace).
+              newValue:
+                description: New value (present for add and replace).
+    ExportCleanRequest:
+      type: object
+      properties:
+        type:
+          description: Saved object type(s) to export.
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
+        objects:
+          type: array
+          description: Specific objects to export.
+          items:
+            type: object
+            required:
+              - type
+              - id
+            properties:
+              type:
+                type: string
+              id:
+                type: string
+        search:
+          type: string
+          description: Query string to filter objects.
+    CleanSavedObject:
+      type: object
+      required:
+        - type
+        - id
+        - attributes
+      properties:
+        type:
+          type: string
+        id:
+          type: string
+        attributes:
+          type: object
+          description: >
+            Saved object attributes. Schema depends on type — see /_schemas/{type}/{version}
+            for the JSON Schema definition for each type.
+        references:
+          type: array
+          items:
+            $ref: '#/components/schemas/SavedObjectReference'
+        migrationVersion:
+          type: object
+          description: Migration version metadata.
+    ValidateRequest:
+      type: object
+      required:
+        - type
+        - attributes
+      properties:
+        type:
+          type: string
+          description: Saved object type to validate against.
+        attributes:
+          type: object
+          description: Attributes to validate against the type's JSON Schema.
+        references:
+          type: array
+          description: References to check in `full` mode.
+          items:
+            $ref: '#/components/schemas/SavedObjectReference'
+    ValidateResponse:
+      type: object
+      required:
+        - valid
+      properties:
+        valid:
+          type: boolean
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              path:
+                type: string
+                description: JSON path to the invalid field.
+              message:
+                type: string
+                description: Validation error message.
+              schemaPath:
+                type: string
+        warnings:
+          type: array
+          items:
+            type: string
+          description: Non-fatal warnings (e.g. no schema registered, referenced objects may not exist).
+    SchemaListResponse:
+      type: object
+      properties:
+        schemas:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+              version:
+                type: string
+              url:
+                type: string
+                description: URL to retrieve the full JSON Schema.
+    UnlockResponse:
+      type: object
+      properties:
+        type:
+          type: string
+        id:
+          type: string
+        unlocked:
+          type: boolean
+          description: Whether the lock was actually removed.
+        message:
+          type: string
