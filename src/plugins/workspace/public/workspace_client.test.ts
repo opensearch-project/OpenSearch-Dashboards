@@ -288,6 +288,43 @@ describe('#WorkspaceClient', () => {
   });
 });
 
+describe('WorkspaceClient.refreshWorkspace', () => {
+  it('should update workspace in workspaceList$ on success', async () => {
+    const { workspaceClient, httpSetupMock, workspaceMock } = getWorkspaceClient();
+    workspaceMock.workspaceList$.next([
+      { id: 'foo', name: 'old-name' },
+      { id: 'bar', name: 'bar' },
+    ]);
+    httpSetupMock.fetch.mockResolvedValueOnce({
+      success: true,
+      result: { id: 'foo', name: 'new-name' },
+    });
+
+    const resp = await workspaceClient.refreshWorkspace('foo');
+
+    expect(resp.success).toBe(true);
+    expect(workspaceMock.workspaceList$.getValue()).toEqual([
+      { id: 'foo', name: 'new-name' },
+      { id: 'bar', name: 'bar' },
+    ]);
+  });
+
+  it('should not update workspaceList$ on failure', async () => {
+    const { workspaceClient, httpSetupMock, workspaceMock } = getWorkspaceClient();
+    workspaceMock.workspaceList$.next([{ id: 'foo', name: 'old-name' }]);
+    httpSetupMock.fetch.mockResolvedValueOnce({
+      success: false,
+      error: 'Invalid saved objects permission',
+    });
+
+    const resp = await workspaceClient.refreshWorkspace('foo');
+
+    expect(resp.success).toBe(false);
+    expect(resp.error).toBe('Invalid saved objects permission');
+    expect(workspaceMock.workspaceList$.getValue()).toEqual([{ id: 'foo', name: 'old-name' }]);
+  });
+});
+
 describe('WorkspaceClient.batchDelete', () => {
   it('should delete all workspaces successfully', async () => {
     const { workspaceClient, httpSetupMock } = getWorkspaceClient();

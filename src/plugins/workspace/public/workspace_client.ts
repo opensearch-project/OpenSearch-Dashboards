@@ -415,6 +415,21 @@ export class WorkspaceClient implements IWorkspaceClient {
     };
   }
 
+  /**
+   * Refresh a workspace by fetching the latest data from the server
+   * and updating it in the workspace list.
+   */
+  public async refreshWorkspace(id: string): Promise<IResponse<WorkspaceAttributeWithPermission>> {
+    const resp = await this.get(id);
+    if (resp.success) {
+      const workspaceList = this.workspaces.workspaceList$.getValue();
+      this.workspaces.workspaceList$.next(
+        workspaceList.map((ws) => (ws.id === id ? { ...ws, ...resp.result } : ws))
+      );
+    }
+    return resp;
+  }
+
   public stop() {
     this.workspaces.workspaceList$.unsubscribe();
     this.workspaces.currentWorkspaceId$.unsubscribe();

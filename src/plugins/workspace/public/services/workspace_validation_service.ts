@@ -30,6 +30,7 @@ export class WorkspaceValidationService {
   private workspaceClient?: WorkspaceClient;
   private workspaceId: string | undefined;
   private workspaceValidationSubscription?: Subscription;
+  private currentAppIdSubscription?: Subscription;
 
   /**
    * Fatal error service does not support customized actions
@@ -58,6 +59,24 @@ export class WorkspaceValidationService {
 
   async start(core: CoreStart) {
     const { workspaces, application, chrome } = core;
+
+    // Refresh the active workspace when switching pages to ensure fresh data;
+    // show error page if the user no longer has permission.
+    this.currentAppIdSubscription = application.currentAppId$.subscribe(() => {
+      if (this.workspaceClient && this.workspaceId) {
+        this.workspaceClient.refreshWorkspace(this.workspaceId).then((resp) => {
+          if (!resp.success && resp.error === 'Invalid saved objects permission') {
+            this.handleFatalError(
+              application,
+              chrome,
+              i18n.translate('workspace.error.noPermission', {
+                defaultMessage: 'You do not have permission to access this workspace',
+              })
+            );
+          }
+        });
+      }
+    });
 
     this.workspaceValidationSubscription = combineLatest([
       workspaces.workspaceError$,
@@ -94,5 +113,6 @@ export class WorkspaceValidationService {
 
   stop() {
     this.workspaceValidationSubscription?.unsubscribe();
+    this.currentAppIdSubscription?.unsubscribe();
   }
 }
