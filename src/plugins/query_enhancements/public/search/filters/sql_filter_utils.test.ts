@@ -82,17 +82,56 @@ describe('SQLFilterUtils', () => {
       expect(result).toBe(query);
     });
 
-    it('falls back to appending WHERE when the SQL is unparseable', () => {
-      // Not a valid SELECT — interceptor short-circuits and just appends.
+    it('returns the original query unchanged when the SQL is unparseable', () => {
+      // Not a valid SELECT — return as-is rather than blindly appending which
+      // would emit invalid SQL for shapes the grammar doesn't model (JOIN,
+      // UNION, CTE, etc.).
       const query = 'NOT VALID SQL';
       const result = SQLFilterUtils.addFiltersToQuery(query, [createFilter('field1', 'value1')]);
-      expect(result).toBe("NOT VALID SQL WHERE `field1` = 'value1'");
+      expect(result).toBe(query);
     });
 
     it('handles aliased table names', () => {
       const query = 'SELECT * FROM test_index t';
       const result = SQLFilterUtils.addFiltersToQuery(query, [createFilter('field1', 'value1')]);
       expect(result).toBe("SELECT * FROM test_index t WHERE `field1` = 'value1'");
+    });
+
+    it('injects WHERE inside a subquery when the FROM is a subquery', () => {
+      // The predicate references a column that the subquery doesn't project.
+      // Injecting at the inner scan level (where the column exists) is correct;
+      // injecting at the outer level would fail at runtime.
+      const query = 'SELECT * FROM (SELECT msg FROM test_index) AS s';
+      const result = SQLFilterUtils.addFiltersToQuery(query, [createFilter('field1', 'value1')]);
+      expect(result).toBe(
+        "SELECT * FROM (SELECT msg FROM test_index WHERE `field1` = 'value1') AS s"
+      );
+    });
+
+    it('injects WHERE inside the deepest subquery for nested subqueries', () => {
+      const query = 'SELECT * FROM (SELECT * FROM (SELECT * FROM test_index) AS x) AS y';
+      const result = SQLFilterUtils.addFiltersToQuery(query, [createFilter('field1', 'value1')]);
+      expect(result).toBe(
+        "SELECT * FROM (SELECT * FROM (SELECT * FROM test_index WHERE `field1` = 'value1') AS x) AS y"
+      );
+    });
+
+    it('AND-merges with an existing WHERE inside a subquery', () => {
+      const query = "SELECT * FROM (SELECT msg FROM test_index WHERE `existing` = 'x') AS s";
+      const result = SQLFilterUtils.addFiltersToQuery(query, [createFilter('field1', 'value1')]);
+      expect(result).toBe(
+        "SELECT * FROM (SELECT msg FROM test_index WHERE `field1` = 'value1' AND ( `existing` = 'x')) AS s"
+      );
+    });
+
+    it('still injects when the subquery aliases the filter target column', () => {
+      // Even though the inner query renames `field1` → `aliased`, the predicate
+      // we inject runs against the underlying scan where `field1` exists.
+      const query = 'SELECT s.aliased FROM (SELECT field1 AS aliased FROM test_index) AS s';
+      const result = SQLFilterUtils.addFiltersToQuery(query, [createFilter('field1', 'value1')]);
+      expect(result).toBe(
+        "SELECT s.aliased FROM (SELECT field1 AS aliased FROM test_index WHERE `field1` = 'value1') AS s"
+      );
     });
   });
 });

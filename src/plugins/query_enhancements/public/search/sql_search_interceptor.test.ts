@@ -255,7 +255,9 @@ describe('SQLSearchInterceptor', () => {
       );
     });
 
-    it('falls back to appending WHERE when the SQL is unparseable and enableTimeFiltering is set', () => {
+    it('returns the query unchanged when the SQL is unparseable and enableTimeFiltering is set', () => {
+      // Skip-on-failure rather than blind-append: emitting `NOT VALID SQL WHERE ...`
+      // would just produce different invalid SQL.
       const query = {
         language: 'SQL',
         query: 'NOT VALID SQL',
@@ -264,9 +266,24 @@ describe('SQLSearchInterceptor', () => {
       const request = { params: { body: { enableTimeFiltering: true } } };
       const result = (sqlSearchInterceptor as any).buildQuery(query, request);
 
+      expect(result.query).toBe('NOT VALID SQL');
+    });
+
+    it('injects the time filter inside a FROM-subquery rather than at the outer level', () => {
+      // A subquery whose projection doesn't expose `@timestamp`. Injecting at
+      // the outer level would fail at runtime; pushing into the inner scan
+      // succeeds because `@timestamp` is in scope before projection.
+      const query = {
+        language: 'SQL',
+        query: 'SELECT * FROM (SELECT msg FROM test_index) AS s',
+        dataset: { type: 'DEFAULT', timeFieldName: '@timestamp' },
+      };
+      const request = { params: { body: { enableTimeFiltering: true } } };
+      const result = (sqlSearchInterceptor as any).buildQuery(query, request);
+
       expect(result.query).toBe(
-        "NOT VALID SQL WHERE `@timestamp` >= '2023-01-01 00:00:00.000' " +
-          "AND `@timestamp` <= '2023-01-02 00:00:00.000'"
+        "SELECT * FROM (SELECT msg FROM test_index WHERE `@timestamp` >= '2023-01-01 00:00:00.000' " +
+          "AND `@timestamp` <= '2023-01-02 00:00:00.000') AS s"
       );
     });
   });
