@@ -840,6 +840,7 @@ export class ChatEventHandler {
     this.activeAssistantMessages.clear();
     this.pendingToolCalls.clear();
     this.toolExecutor.clearAllPendingTools();
+    this.runStartTimes.clear();
     this.lastTextMessageStartId = null;
     // Drain the process-wide AssistantActionService tool call states so
     // stale pending/executing entries from a previous run do not bleed

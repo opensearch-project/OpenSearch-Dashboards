@@ -130,6 +130,7 @@ export const useChatStreaming = ({
   // Subscribe to message stream and handle events
   const subscribeToMessageStream = useCallback(
     async (messageContent: string, messages: Message[], rawMessage?: string) => {
+      isStreamingRef.current = true;
       setIsMainStreaming(true);
       setMainStartResponse(false);
 
@@ -173,6 +174,7 @@ export const useChatStreaming = ({
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error('Failed to send message:', error);
+        isStreamingRef.current = false;
         setIsMainStreaming(false);
         currentSubscriptionRef.current = null;
       }
@@ -184,7 +186,7 @@ export const useChatStreaming = ({
   const stopStreaming = useCallback(() => {
     chatService.abort();
     chatService.resetConnection();
-    eventHandler.cancelToolResultDispatch();
+    eventHandler.clearState();
     if (currentSubscriptionRef.current) {
       currentSubscriptionRef.current.unsubscribe();
       currentSubscriptionRef.current = null;
@@ -199,6 +201,7 @@ export const useChatStreaming = ({
     // stopStreaming (e.g. from nav search "start new chat + send") isn't blocked.
     // The useEffect will also sync it, but that's async (React 18 batching).
     isStreamingRef.current = false;
+    setCurrentRunId(null);
     setMainStartResponse(false);
     setToolResultStartResponse(false);
   }, [chatService, eventHandler]);

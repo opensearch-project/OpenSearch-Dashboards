@@ -18,11 +18,7 @@ import { EuiButton, EuiButtonIcon, EuiLoadingSpinner, EuiText } from '@elastic/e
 import { useChatContext } from '../contexts/chat_context';
 import { AssistantActionService } from '../../../context_provider/public';
 import { ConfirmationRequest } from '../services/confirmation_service';
-import type {
-  Message,
-  SystemMessage,
-  UserMessage,
-} from '../../common/types';
+import type { Message, SystemMessage, UserMessage } from '../../common/types';
 import { ChatLayoutMode } from '../types';
 import { ChatContainer } from './chat_container';
 import { ChatHeader } from './chat_header';
