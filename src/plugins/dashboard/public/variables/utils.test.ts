@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { VariableUtils, VARIABLE_REFERENCE_PATTERN } from './types';
+import { VariableUtils } from './utils';
+import { VARIABLE_REFERENCE_PATTERN } from './constants';
 
 describe('VARIABLE_REFERENCE_PATTERN', () => {
   it('should be a global regex with correct flags', () => {

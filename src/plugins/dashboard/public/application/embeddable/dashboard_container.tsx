@@ -70,6 +70,7 @@ import {
 } from '../../../../opensearch_dashboards_react/public';
 import { PLACEHOLDER_EMBEDDABLE } from './placeholder';
 import { PanelPlacementMethod, IPanelPlacementArgs } from './panel/dashboard_panel_placement';
+import { PanelInfo } from '../../types';
 
 export interface DashboardContainerInput extends ContainerInput {
   viewMode: ViewMode;
@@ -354,8 +355,8 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
    * Get all panel information including queries and titles.
    * Used for variable dependency visualization and reference detection.
    */
-  public getPanels(): Array<{ query: string; title?: string; id: string }> {
-    const panels: Array<{ query: string; title?: string; id: string }> = [];
+  public getPanels(): PanelInfo[] {
+    const panels: PanelInfo[] = [];
     for (const id of this.getChildIds()) {
       try {
         const child = this.getChild<any>(id);

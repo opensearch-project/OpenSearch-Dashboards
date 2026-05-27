@@ -15,9 +15,10 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { Variable, VariableUtils } from '../../../variables/types';
+import { Variable } from '../../../variables/types';
 import { PanelInfo } from '../../../types';
 import { VariableDependencyInfo } from '../../../variables/variable_dependency_analyzer';
+import { VariableUtils } from '../../../variables/utils';
 
 export interface VariableReferencePopoverProps {
   /** The variable to show references for */

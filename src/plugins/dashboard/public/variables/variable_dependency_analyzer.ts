@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Variable, VariableType, VariableUtils } from './types';
+import { Variable, VariableType } from './types';
+import { VariableUtils } from './utils';
 
 /**
  * Dependency analysis result for a variable
