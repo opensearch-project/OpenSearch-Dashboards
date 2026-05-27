@@ -251,7 +251,7 @@ describe('SQLSearchInterceptor', () => {
 
       expect(result.query).toBe(
         "SELECT * FROM test_index WHERE `@timestamp` >= '2023-01-01 00:00:00.000' " +
-          "AND `@timestamp` <= '2023-01-02 00:00:00.000' AND `host` = 'a'"
+          "AND `@timestamp` <= '2023-01-02 00:00:00.000' AND ( `host` = 'a')"
       );
     });
 

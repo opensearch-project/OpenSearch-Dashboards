@@ -30,8 +30,20 @@ export class SQLFilterUtils extends FilterUtils {
     if (existingWhere) {
       const whereToken = existingWhere.start;
       if (!whereToken?.stop) return `${sql} WHERE ${whereClause}`;
-      const insertPos = whereToken.stop + 1;
-      return sql.slice(0, insertPos) + ` ${whereClause} AND` + sql.slice(insertPos);
+      // Position right after the WHERE keyword
+      const afterWhereKeyword = whereToken.stop + 1;
+      // Position right after the existing WHERE predicate
+      const afterWherePredicate = existingWhere.stop?.stop;
+      if (afterWherePredicate === undefined) return `${sql} WHERE ${whereClause}`;
+      // Wrap the existing predicate in parens to preserve operator precedence
+      // (e.g. user's OR shouldn't bind tighter than our AND)
+      return (
+        sql.slice(0, afterWhereKeyword) +
+        ` ${whereClause} AND (` +
+        sql.slice(afterWhereKeyword, afterWherePredicate + 1) +
+        ')' +
+        sql.slice(afterWherePredicate + 1)
+      );
     }
 
     const relation = fromClause.relation();

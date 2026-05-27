@@ -36,7 +36,15 @@ describe('SQLFilterUtils', () => {
       const query = "SELECT * FROM test_index WHERE `existing` = 'x'";
       const result = SQLFilterUtils.addFiltersToQuery(query, [createFilter('field1', 'value1')]);
       expect(result).toBe(
-        "SELECT * FROM test_index WHERE `field1` = 'value1' AND `existing` = 'x'"
+        "SELECT * FROM test_index WHERE `field1` = 'value1' AND ( `existing` = 'x')"
+      );
+    });
+
+    it('preserves operator precedence by wrapping an OR-predicate WHERE in parentheses', () => {
+      const query = 'SELECT * FROM test_index WHERE `a` = 1 OR `b` = 2';
+      const result = SQLFilterUtils.addFiltersToQuery(query, [createFilter('field1', 'value1')]);
+      expect(result).toBe(
+        "SELECT * FROM test_index WHERE `field1` = 'value1' AND ( `a` = 1 OR `b` = 2)"
       );
     });
 
@@ -47,9 +55,10 @@ describe('SQLFilterUtils', () => {
         createFilter('field2', 'value2'),
       ]);
       // Filters reduce left-to-right; each call inserts at the WHERE keyword,
-      // so the most recently added predicate ends up first.
+      // so the most recently added predicate ends up first. The previous
+      // predicate gets wrapped in parens to preserve operator precedence.
       expect(result).toBe(
-        "SELECT * FROM test_index WHERE `field2` = 'value2' AND `field1` = 'value1'"
+        "SELECT * FROM test_index WHERE `field2` = 'value2' AND ( `field1` = 'value1')"
       );
     });
 
