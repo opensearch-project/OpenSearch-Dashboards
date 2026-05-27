@@ -86,6 +86,11 @@ export const LanguageToggle = () => {
   // Get supported languages for the active tab
   useEffect(() => {
     const updateSupportedLanguages = () => {
+      if (!activeTabId) {
+        // Don't update if active tab isn't set yet
+        return;
+      }
+
       const services = getServices();
       const activeTab = services.tabRegistry?.getTab(activeTabId);
 
@@ -95,6 +100,7 @@ export const LanguageToggle = () => {
       } else {
         tabSupportedLanguages = ['PPL'];
       }
+
 
       // Filter out SQL if feature flag is disabled
       if (tabSupportedLanguages.includes('SQL') && !services.sqlSupportEnabled) {
