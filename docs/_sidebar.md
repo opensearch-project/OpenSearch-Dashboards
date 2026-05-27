@@ -22,6 +22,7 @@
     - explore
       - [Explore plugin components](plugins/explore/explore-plugin-components.md)
       - [Query panel actions](plugins/explore/query-panel-actions.md)
+      - [Sql support](plugins/explore/sql-support.md)
     - [Data_persistence](plugins/data_persistence.md)
   - Saved_objects
     - [Pluggable_storage_backend](saved_objects/pluggable_storage_backend.md)

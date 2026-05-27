@@ -306,6 +306,11 @@ export default function QueryEditorTopRow({
     // Check if dataset type explicitly configures the `supportsTimeFilter` option
     if (datasetType?.meta?.supportsTimeFilter === false) return false;
 
+    // Special handling for SQL in Explore: always show date picker
+    if (queryLanguage === 'SQL' && appName === 'explore') {
+      return true;
+    }
+
     if (
       queryLanguage &&
       datasetType?.languageOverrides?.[queryLanguage]?.hideDatePicker !== undefined
