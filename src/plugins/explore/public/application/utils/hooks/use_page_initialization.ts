@@ -23,7 +23,7 @@ import { executeQueries } from '../state_management/actions/query_actions';
 import { ExploreFlavor } from '../../../../common';
 import { useSetEditorText } from '../../hooks';
 import { EditorMode } from '../state_management/types';
-import { getVisualizationBuilder } from '../../../components/visualizations/visualization_builder';
+// import { getVisualizationBuilder } from '../../../components/visualizations/visualization_builder';
 
 export const useInitPage = () => {
   const dispatch = useDispatch();
@@ -32,7 +32,7 @@ export const useInitPage = () => {
   const { savedExplore, error } = useSavedExplore(exploreId);
   const setEditorText = useSetEditorText();
   const { chrome, data } = services;
-  const visualizationBuilder = getVisualizationBuilder();
+  // const visualizationBuilder = getVisualizationBuilder();
 
   useEffect(() => {
     if (savedExplore && !error) {
@@ -67,28 +67,28 @@ export const useInitPage = () => {
         dispatch(setSavedSearch(savedExplore.id));
 
         // Init vis state and ui state
-        const visualization = savedExplore.visualization;
+        // const visualization = savedExplore.visualization;
         const uiState = savedExplore.uiState;
-        if (visualization) {
-          const {
-            chartType,
-            params,
-            axesMapping,
-            splitField,
-            splitLayout,
-            showSplitLabel,
-            dataTransformations,
-          } = JSON.parse(visualization);
-          visualizationBuilder.setVisConfig({
-            type: chartType,
-            styles: params,
-            axesMapping,
-            splitField,
-            splitLayout,
-            showSplitLabel,
-            dataTransformations,
-          });
-        }
+        // if (visualization) {
+        //   const {
+        //     chartType,
+        //     params,
+        //     axesMapping,
+        //     splitField,
+        //     splitLayout,
+        //     showSplitLabel,
+        //     dataTransformations,
+        //   } = JSON.parse(visualization);
+        //   visualizationBuilder.setVisConfig({
+        //     type: chartType,
+        //     styles: params,
+        //     axesMapping,
+        //     splitField,
+        //     splitLayout,
+        //     showSplitLabel,
+        //     dataTransformations,
+        //   });
+        // }
         // Only use saved object's activeTab if there's no activeTab in URL state
         // This preserves user's tab selection from URL
         if (uiState) {
@@ -133,7 +133,7 @@ export const useInitPage = () => {
     savedExplore,
     services,
     setEditorText,
-    visualizationBuilder,
+    // visualizationBuilder,
   ]);
 
   const pageContext = { savedExplore };
