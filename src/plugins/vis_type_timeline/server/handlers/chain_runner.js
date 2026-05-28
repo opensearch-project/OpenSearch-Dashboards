@@ -47,6 +47,10 @@ export default function chainRunner(tlConfig) {
   let sheet;
 
   function throwWithCell(cell, exception) {
+    // Preserve AnalyticEngineError to ensure it's handled correctly on the client
+    if (exception.name === 'AnalyticEngineError') {
+      throw exception;
+    }
     const e = new Error(exception.message);
     e.name = `Expression parse error in cell #${cell + 1}`;
     throw e;

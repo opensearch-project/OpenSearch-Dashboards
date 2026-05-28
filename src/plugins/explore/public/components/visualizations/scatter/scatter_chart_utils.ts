@@ -256,7 +256,6 @@ export const createSizeScatterSeries = <T extends BaseChartStyle>({
   }
 
   const headers = transformedData[0] ?? [];
-  const sizeDimension = headers.indexOf(sizeField);
 
   // Transform data using multi-series approach
   const { categories, seriesData, sizeRange } = transformToMultiSeriesWithSize(
@@ -330,7 +329,7 @@ export const createSizeScatterSeries = <T extends BaseChartStyle>({
   newState.visualMap = {
     show: styles.addLegend === true,
     type: 'continuous',
-    dimension: sizeDimension,
+    dimension: 2, // data type is [x, y, size] format
     min: sizeRange.min,
     max: sizeRange.max,
     itemWidth: 15,

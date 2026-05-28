@@ -11,6 +11,7 @@ import { EmbeddableContext, IEmbeddable } from '../../../embeddable/public';
 import { Action, IncompatibleActionError } from '../../../ui_actions/public';
 import { CoreStart } from '../../../../core/public';
 import { ContextProviderStart } from '../../../context_provider/public';
+import { IndexPatternsContract } from '../../../data/public';
 import { Vis } from '../vis';
 
 interface VisualizeEmbeddable extends IEmbeddable {
@@ -44,6 +45,7 @@ export class AskAIVisualizeEmbeddableAction implements Action<EmbeddableContext>
 
   constructor(
     private readonly core: CoreStart,
+    private readonly indexPatterns: IndexPatternsContract,
     private readonly contextProvider?: ContextProviderStart
   ) {}
 
@@ -60,9 +62,23 @@ export class AskAIVisualizeEmbeddableAction implements Action<EmbeddableContext>
   public async isCompatible({ embeddable }: EmbeddableContext) {
     // Check if this is a visualization embeddable and if context provider is available
     const hasContextProvider = this.contextProvider !== undefined;
-    return (
-      embeddable.type === 'visualization' && hasContextProvider && this.core.chat.isAvailable()
-    );
+    if (
+      !(embeddable.type === 'visualization' && hasContextProvider && this.core.chat.isAvailable())
+    ) {
+      return false;
+    }
+    // Hide for AnalyticEngine data sources
+    const visEmbeddable = embeddable as VisualizeEmbeddable;
+    const indexPatternId = visEmbeddable.vis.data.indexPattern?.id;
+    if (indexPatternId) {
+      const cache = await this.indexPatterns.getCache({
+        excludeEngineTypes: ['AnalyticEngine'],
+      });
+      if (cache && !cache.find((ip) => ip.id === indexPatternId)) {
+        return false;
+      }
+    }
+    return true;
   }
 
   public async execute({ embeddable }: EmbeddableContext) {

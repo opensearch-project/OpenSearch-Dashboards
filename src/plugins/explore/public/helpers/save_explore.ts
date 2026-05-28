@@ -77,7 +77,10 @@ export async function saveSavedExplore({
       });
 
       if (id !== originalId) {
-        services.scopedHistory?.push(`#/view/${encodeURIComponent(id)}`);
+        const currentHash = services.scopedHistory?.location.hash || '';
+        const hashSearch =
+          currentHash.indexOf('?') >= 0 ? currentHash.substring(currentHash.indexOf('?')) : '';
+        services.scopedHistory?.push(`#/view/${encodeURIComponent(id)}${hashSearch}`);
       } else {
         // Update browser title and breadcrumbs
         chrome.docTitle.change(newTitle);

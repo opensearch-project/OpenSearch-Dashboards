@@ -7,6 +7,7 @@ import { IndexPattern } from '../../../../../data/public';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { VisBuilderServices } from '../../../types';
 import { useTypedSelector } from '../state_management';
+import { UNSUPPORTED_ENGINE_TYPES } from '../../../../../data/common';
 
 export const useIndexPatterns = () => {
   const { indexPattern: indexId = '' } = useTypedSelector((state) => state.visualization);
@@ -14,16 +15,16 @@ export const useIndexPatterns = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | undefined>(undefined);
   const {
-    services: { data },
+    services: { data, savedObjects },
   } = useOpenSearchDashboards<VisBuilderServices>();
 
   let foundSelected: IndexPattern | undefined;
-  if (!loading && !error) {
+  if (!loading && !error && indexId) {
     foundSelected = indexPatterns.filter((p) => p.id === indexId)[0];
-    if (foundSelected === undefined) {
-      setError(
-        new Error("Attempted to select an index pattern that wasn't in the index pattern list")
-      );
+    // If the selected index pattern was filtered out (e.g., it's an AnalyticEngine data source),
+    // don't treat it as an error - it will be handled by selecting the first available pattern
+    if (foundSelected === undefined && indexPatterns.length === 0) {
+      setError(new Error('No index patterns available'));
     }
   }
 
@@ -32,7 +33,14 @@ export const useIndexPatterns = () => {
       try {
         const ids = await data.indexPatterns.getIds(true);
         const patterns = await Promise.all(ids.map((id) => data.indexPatterns.get(id)));
-        setIndexPatterns(patterns);
+
+        const indexPatternList =
+          (await data.indexPatterns.getCache({
+            excludeEngineTypes: UNSUPPORTED_ENGINE_TYPES,
+          })) ?? [];
+
+        const indexPatternIds = new Set(indexPatternList.map((item) => item.id));
+        setIndexPatterns(patterns.filter((i) => indexPatternIds.has(i.id)));
       } catch (e) {
         setError(e as Error);
       } finally {
@@ -41,7 +49,7 @@ export const useIndexPatterns = () => {
     };
 
     handleUpdate();
-  }, [data.indexPatterns]);
+  }, [data.indexPatterns, savedObjects.client]);
 
   return {
     indexPatterns,

@@ -12,6 +12,7 @@ import { map } from 'rxjs/operators';
 export interface SlotTypeDefinitions {
   resultsActionBar: {
     render: () => React.ReactElement;
+    isCompatible?: (context: { dataSourceEngineType?: string }) => boolean;
   };
   // Add more slot types as needed
 }

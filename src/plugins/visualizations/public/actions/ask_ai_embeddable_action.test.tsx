@@ -63,6 +63,7 @@ describe('AskAIVisualizeEmbeddableAction', () => {
             }),
           },
           indexPattern: {
+            id: 'test-index-pattern-id',
             title: 'test-index',
           },
         },
@@ -71,7 +72,10 @@ describe('AskAIVisualizeEmbeddableAction', () => {
     } as unknown) as VisualizeEmbeddable;
 
     // Create action instance
-    action = new AskAIVisualizeEmbeddableAction(mockCore, mockContextProvider);
+    const mockIndexPatterns = {
+      getCache: jest.fn().mockResolvedValue([{ id: 'test-index-pattern-id' }]),
+    } as any;
+    action = new AskAIVisualizeEmbeddableAction(mockCore, mockIndexPatterns, mockContextProvider);
   });
 
   afterEach(() => {
@@ -106,12 +110,14 @@ describe('AskAIVisualizeEmbeddableAction', () => {
     });
 
     it('should return false when context provider is not available', async () => {
-      const actionWithoutContext = new AskAIVisualizeEmbeddableAction(mockCore, undefined);
+      const mockIp = { getCache: jest.fn().mockResolvedValue([]) } as any;
+      const actionWithoutContext = new AskAIVisualizeEmbeddableAction(mockCore, mockIp, undefined);
       const result = await actionWithoutContext.isCompatible({ embeddable: mockEmbeddable });
       expect(result).toBe(false);
     });
 
     it('should return false when chat is not available', async () => {
+      const mockIp = { getCache: jest.fn().mockResolvedValue([]) } as any;
       const actionWithoutContext = new AskAIVisualizeEmbeddableAction(
         {
           ...mockCore,
@@ -119,6 +125,7 @@ describe('AskAIVisualizeEmbeddableAction', () => {
             isAvailable: () => false,
           },
         },
+        mockIp,
         undefined
       );
       const result = await actionWithoutContext.isCompatible({ embeddable: mockEmbeddable });

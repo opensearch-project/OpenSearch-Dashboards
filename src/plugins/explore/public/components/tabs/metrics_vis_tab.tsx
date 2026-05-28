@@ -22,6 +22,7 @@ import {
   EuiTitle,
   EuiHorizontalRule,
   EuiPanel,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { VisualizationContainer } from '../visualizations/visualization_container';
@@ -141,7 +142,7 @@ export const MetricsVisTab = React.memo(() => {
 
   const renderTransformPanel = () => {
     return (
-      <EuiPanel paddingSize="m" hasBorder={false} hasShadow={false}>
+      <EuiPanel paddingSize="none" hasBorder={false} hasShadow={false}>
         <EuiAccordion
           id="metricsVisTab__transformPanel"
           buttonContent={
@@ -151,9 +152,10 @@ export const MetricsVisTab = React.memo(() => {
               })}
             </EuiText>
           }
-          paddingSize="m"
+          paddingSize="none"
           initialIsOpen={true}
         >
+          <EuiSpacer size="s" />
           <TransformPanel transformationService={transformationService} />
         </EuiAccordion>
       </EuiPanel>

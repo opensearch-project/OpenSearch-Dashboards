@@ -47,8 +47,8 @@ describe('CspConfig', () => {
   test('DEFAULT', () => {
     expect(CspConfig.DEFAULT).toMatchInlineSnapshot(`
       CspConfig {
-        "enable": false,
-        "header": "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
+        "enable": true,
+        "header": "default-src 'self'; script-src 'self'; script-src-attr 'none'; style-src 'self'; style-src-elem 'self'; style-src-attr 'self' 'unsafe-inline'; child-src 'none'; worker-src 'self'; frame-src 'none'; object-src 'none'; manifest-src 'self'; media-src 'none'; font-src 'self'; connect-src 'self' https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org; img-src 'self' data: https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org; form-action 'self'; frame-ancestors 'self'",
         "looseHeader": "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
         "looseRules": Array [
           "script-src 'unsafe-eval' 'self'",
@@ -60,11 +60,25 @@ describe('CspConfig', () => {
           "style-src-elem",
         ],
         "rules": Array [
-          "script-src 'unsafe-eval' 'self'",
-          "worker-src blob: 'self'",
-          "style-src 'unsafe-inline' 'self'",
+          "default-src 'self'",
+          "script-src 'self'",
+          "script-src-attr 'none'",
+          "style-src 'self'",
+          "style-src-elem 'self'",
+          "style-src-attr 'self' 'unsafe-inline'",
+          "child-src 'none'",
+          "worker-src 'self'",
+          "frame-src 'none'",
+          "object-src 'none'",
+          "manifest-src 'self'",
+          "media-src 'none'",
+          "font-src 'self'",
+          "connect-src 'self' https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org",
+          "img-src 'self' data: https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org",
+          "form-action 'self'",
+          "frame-ancestors 'self'",
         ],
-        "strict": false,
+        "strict": true,
         "strictRules": Array [
           "default-src 'self'",
           "script-src 'self'",
@@ -92,8 +106,8 @@ describe('CspConfig', () => {
   test('defaults from config', () => {
     expect(new CspConfig()).toMatchInlineSnapshot(`
       CspConfig {
-        "enable": false,
-        "header": "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
+        "enable": true,
+        "header": "default-src 'self'; script-src 'self'; script-src-attr 'none'; style-src 'self'; style-src-elem 'self'; style-src-attr 'self' 'unsafe-inline'; child-src 'none'; worker-src 'self'; frame-src 'none'; object-src 'none'; manifest-src 'self'; media-src 'none'; font-src 'self'; connect-src 'self' https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org; img-src 'self' data: https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org; form-action 'self'; frame-ancestors 'self'",
         "looseHeader": "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
         "looseRules": Array [
           "script-src 'unsafe-eval' 'self'",
@@ -105,11 +119,25 @@ describe('CspConfig', () => {
           "style-src-elem",
         ],
         "rules": Array [
-          "script-src 'unsafe-eval' 'self'",
-          "worker-src blob: 'self'",
-          "style-src 'unsafe-inline' 'self'",
+          "default-src 'self'",
+          "script-src 'self'",
+          "script-src-attr 'none'",
+          "style-src 'self'",
+          "style-src-elem 'self'",
+          "style-src-attr 'self' 'unsafe-inline'",
+          "child-src 'none'",
+          "worker-src 'self'",
+          "frame-src 'none'",
+          "object-src 'none'",
+          "manifest-src 'self'",
+          "media-src 'none'",
+          "font-src 'self'",
+          "connect-src 'self' https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org",
+          "img-src 'self' data: https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org",
+          "form-action 'self'",
+          "frame-ancestors 'self'",
         ],
-        "strict": false,
+        "strict": true,
         "strictRules": Array [
           "default-src 'self'",
           "script-src 'self'",
@@ -198,8 +226,8 @@ describe('CspConfig', () => {
 
     expect(cspConfig).toMatchInlineSnapshot(`
       CspConfig {
-        "enable": false,
-        "header": "alpha; beta; gamma",
+        "enable": true,
+        "header": "default-src 'self'; script-src 'self'; script-src-attr 'none'; style-src 'self'; style-src-elem 'self'; style-src-attr 'self' 'unsafe-inline'; child-src 'none'; worker-src 'self'; frame-src 'none'; object-src 'none'; manifest-src 'self'; media-src 'none'; font-src 'self'; connect-src 'self' https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org; img-src 'self' data: https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org; form-action 'self'; frame-ancestors 'self'",
         "looseHeader": "alpha; beta; gamma",
         "looseRules": Array [
           "alpha",
@@ -211,11 +239,25 @@ describe('CspConfig', () => {
           "style-src-elem",
         ],
         "rules": Array [
-          "alpha",
-          "beta",
-          "gamma",
+          "default-src 'self'",
+          "script-src 'self'",
+          "script-src-attr 'none'",
+          "style-src 'self'",
+          "style-src-elem 'self'",
+          "style-src-attr 'self' 'unsafe-inline'",
+          "child-src 'none'",
+          "worker-src 'self'",
+          "frame-src 'none'",
+          "object-src 'none'",
+          "manifest-src 'self'",
+          "media-src 'none'",
+          "font-src 'self'",
+          "connect-src 'self' https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org",
+          "img-src 'self' data: https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org",
+          "form-action 'self'",
+          "frame-ancestors 'self'",
         ],
-        "strict": false,
+        "strict": true,
         "strictRules": Array [
           "default-src 'self'",
           "script-src 'self'",
@@ -320,7 +362,7 @@ describe('CspConfig', () => {
 
       expect(config).toMatchInlineSnapshot(`
         CspConfig {
-          "enable": false,
+          "enable": true,
           "header": "default-src 'self'; script-src 'unsafe-eval' 'self'; script-src-attr 'none'; style-src 'self'; style-src-elem 'self'; style-src-attr 'self' 'unsafe-inline'; child-src 'none'; worker-src blob: 'self'; frame-src 'none'; object-src 'none'; manifest-src 'self'; media-src 'none'; font-src 'self'; connect-src 'self' https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org; img-src 'self' data: https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org; form-action 'self'; frame-ancestors 'self'",
           "looseHeader": "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
           "looseRules": Array [
@@ -354,7 +396,7 @@ describe('CspConfig', () => {
             "form-action 'self'",
             "frame-ancestors 'self'",
           ],
-          "strict": false,
+          "strict": true,
           "strictRules": Array [
             "default-src 'self'",
             "script-src 'unsafe-eval' 'self'",
@@ -382,6 +424,7 @@ describe('CspConfig', () => {
     test('has no effect in non-strict mode', () => {
       const config = new CspConfig({
         strict: false,
+        enable: false,
         loosenCspDirectives: ['script-src', 'worker-src'],
         rules: ["script-src 'self'", "worker-src 'self'"],
       });
@@ -432,6 +475,7 @@ describe('CspConfig', () => {
     test('has no effect in non-strict mode without custom rules', () => {
       const config = new CspConfig({
         strict: false,
+        enable: false,
         allowedImgSources: ['https://images.example.com'],
       });
 

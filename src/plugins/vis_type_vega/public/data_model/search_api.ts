@@ -44,6 +44,7 @@ import {
 import { search as dataPluginSearch } from '../../../data/public';
 import { VegaInspectorAdapters } from '../vega_inspector';
 import { RequestResponder, RequestStatistics } from '../../../inspector/public';
+import { UNSUPPORTED_ENGINE_TYPES } from '../../../data/common';
 
 interface RawPPLStrategySearchResponse {
   rawResponse: {
@@ -134,7 +135,20 @@ export class SearchAPI {
       );
     }
 
-    return possibleDataSourceIds.pop()?.id;
+    const dataSource = possibleDataSourceIds[0];
+    if (
+      dataSource?.attributes?.dataSourceEngineType &&
+      UNSUPPORTED_ENGINE_TYPES.includes(dataSource?.attributes?.dataSourceEngineType)
+    ) {
+      throw new Error(
+        i18n.translate('visTypeVega.search.analyticEngineNotSupported', {
+          defaultMessage:
+            'This data source uses Analytic Engine which does not support DSL queries. Use PPL-compatible features or switch to a standard OpenSearch data source.',
+        })
+      );
+    }
+
+    return dataSource.id;
   }
 
   async dataSourceFindQuery(dataSourceName: string) {
@@ -143,7 +157,7 @@ export class SearchAPI {
       perPage: 10,
       search: `"${dataSourceName}"`,
       searchFields: ['title'],
-      fields: ['id', 'title'],
+      fields: ['id', 'title', 'dataSourceEngineType'],
     });
   }
 

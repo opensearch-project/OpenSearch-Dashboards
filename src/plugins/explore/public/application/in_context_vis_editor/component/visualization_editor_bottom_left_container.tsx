@@ -66,12 +66,6 @@ export const ResizableQueryPanelAndVisualization = () => {
   });
 
   useEffect(() => {
-    queryBuilder.setOnDatasetChanged(() => {
-      transformServices.clearPipeline();
-    });
-  }, [queryBuilder, transformServices]);
-
-  useEffect(() => {
     queryBuilder.updateQueryEditorState({ activeBottomPanelTab: activeTab });
   }, [activeTab, queryBuilder]);
 
@@ -166,7 +160,9 @@ export const ResizableQueryPanelAndVisualization = () => {
                 {activeTab === 'QUERY_TAB' ? (
                   <QueryPanel queryEditorState$={queryBuilder.queryEditorState$} />
                 ) : (
-                  <TransformPanel transformationService={transformServices} />
+                  <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s">
+                    <TransformPanel transformationService={transformServices} />
+                  </EuiPanel>
                 )}
               </EuiPanel>
             </EuiResizablePanel>
