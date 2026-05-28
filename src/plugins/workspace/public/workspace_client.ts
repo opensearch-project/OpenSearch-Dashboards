@@ -15,12 +15,9 @@ import {
   SavedObjectsImportResponse,
   WorkspaceFindOptions,
   WorkspacePermissionMode,
-} from '../../../core/public';
-import {
-  SavedObjectPermissions,
-  WorkspaceAttributeWithPermission,
   PermissionModeId,
-} from '../../../core/types';
+} from '../../../core/public';
+import { SavedObjectPermissions, WorkspaceAttributeWithPermission } from '../../../core/types';
 import { DataSourceAssociation } from './components/data_source_association/data_source_association';
 
 const WORKSPACES_API_BASE_URL = '/api/workspaces';
