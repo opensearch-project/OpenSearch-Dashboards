@@ -15,14 +15,26 @@ export class SQLFilterUtils extends FilterUtils {
   public static wrapWithTimeFilterCTE(sql: string, tableName: string, whereClause: string): string {
     if (!tableName) return sql;
 
+    // Only wrap SELECT/WITH queries. Other statements (SHOW, DESCRIBE, EXPLAIN,
+    // etc.) don't accept a CTE prefix and would be broken by our wrap. Allow
+    // line/block comments and whitespace before the keyword.
+    const wrappablePrefixRe = /^(?:\s|--[^\n]*\n?|\/\*[\s\S]*?\*\/)*(?:SELECT|WITH)\b/i;
+    if (!wrappablePrefixRe.test(sql)) return sql;
+
     const escapedName = tableName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const collisionRe = new RegExp(`\\bWITH\\b[\\s\\S]*?\\b${escapedName}\\b\\s+AS\\s*\\(`, 'i');
     if (collisionRe.test(sql)) return sql;
 
     const ourCte = `\`${tableName}\` AS (SELECT * FROM \`${tableName}\` WHERE ${whereClause})`;
-    const leadingWithRe = /^(\s*)WITH(\s+)/i;
-    if (leadingWithRe.test(sql)) {
-      return sql.replace(leadingWithRe, `$1WITH$2${ourCte},$2`);
+
+    // Detect a leading WITH, allowing line/block comments and whitespace before
+    // it. This way `-- some comment\nWITH foo AS (...)` still triggers a merge
+    // instead of producing two WITH clauses.
+    const leadingPrefixRe = /^(?:\s|--[^\n]*\n?|\/\*[\s\S]*?\*\/)*WITH\b/i;
+    if (leadingPrefixRe.test(sql)) {
+      // Insert our CTE right after the user's `WITH` keyword.
+      const withRe = /\bWITH\b/i;
+      return sql.replace(withRe, `WITH ${ourCte},`);
     }
     return `WITH ${ourCte} ${sql}`;
   }

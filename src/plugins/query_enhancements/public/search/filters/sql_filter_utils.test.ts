@@ -139,6 +139,34 @@ describe('SQLFilterUtils', () => {
       expect(result).toBe(sql);
     });
 
+    it('returns SHOW/DESCRIBE/EXPLAIN statements unchanged — these reject a CTE prefix', () => {
+      expect(SQLFilterUtils.wrapWithTimeFilterCTE('SHOW TABLES', 'logs', where)).toBe(
+        'SHOW TABLES'
+      );
+      expect(SQLFilterUtils.wrapWithTimeFilterCTE('DESCRIBE logs', 'logs', where)).toBe(
+        'DESCRIBE logs'
+      );
+      expect(
+        SQLFilterUtils.wrapWithTimeFilterCTE('EXPLAIN SELECT * FROM logs', 'logs', where)
+      ).toBe('EXPLAIN SELECT * FROM logs');
+    });
+
+    it('handles a leading line comment before the WITH clause', () => {
+      const sql = '-- this gets the errors\nWITH foo AS (SELECT 1) SELECT * FROM foo, logs';
+      const result = SQLFilterUtils.wrapWithTimeFilterCTE(sql, 'logs', where);
+      expect(result).toBe(
+        "-- this gets the errors\nWITH `logs` AS (SELECT * FROM `logs` WHERE `@timestamp` >= 'X' AND `@timestamp` <= 'Y'), foo AS (SELECT 1) SELECT * FROM foo, logs"
+      );
+    });
+
+    it('handles a leading block comment before the WITH clause', () => {
+      const sql = '/* version 2 */ WITH foo AS (SELECT 1) SELECT * FROM foo, logs';
+      const result = SQLFilterUtils.wrapWithTimeFilterCTE(sql, 'logs', where);
+      expect(result).toBe(
+        "/* version 2 */ WITH `logs` AS (SELECT * FROM `logs` WHERE `@timestamp` >= 'X' AND `@timestamp` <= 'Y'), foo AS (SELECT 1) SELECT * FROM foo, logs"
+      );
+    });
+
     it('escapes regex metacharacters in the table name', () => {
       // No collision should be detected even though `.` is regex-special.
       const result = SQLFilterUtils.wrapWithTimeFilterCTE(
