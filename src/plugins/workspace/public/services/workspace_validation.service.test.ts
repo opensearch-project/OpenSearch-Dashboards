@@ -190,6 +190,33 @@ describe('WorkspaceValidationService', () => {
       expect(core.chrome.setIsVisible).not.toHaveBeenCalled();
     });
 
+    it('should not refresh workspace when navigating to fatal error page', async () => {
+      const core = coreMock.createStart();
+      const service = new WorkspaceValidationService();
+      workspaceClientMock.refreshWorkspace.mockClear();
+
+      const currentAppId$ = new BehaviorSubject<string | undefined>(undefined);
+      core.application.currentAppId$ = currentAppId$;
+      core.application.capabilities = {
+        ...core.application.capabilities,
+        workspaces: { permissionEnabled: true },
+      };
+
+      workspaceClientMock.refreshWorkspace.mockResolvedValue({ success: true, result: {} });
+
+      const coreSetup = coreMock.createSetup();
+      await service.setup(coreSetup, 'test-workspace');
+      service.start(core);
+
+      // Clear calls from initial subscription emission
+      workspaceClientMock.refreshWorkspace.mockClear();
+
+      // Simulate navigation to fatal error page
+      currentAppId$.next(WORKSPACE_FATAL_ERROR_APP_ID);
+
+      expect(workspaceClientMock.refreshWorkspace).not.toHaveBeenCalled();
+    });
+
     it('should redirect from error page to workspace detail when workspace becomes valid', async () => {
       const core = coreMock.createStart();
       const service = new WorkspaceValidationService();

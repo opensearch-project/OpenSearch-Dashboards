@@ -66,23 +66,29 @@ export class WorkspaceValidationService {
     if (isPermissionEnabled) {
       this.workspaceClient?.setPermissionEnabled(true);
     }
-    this.currentAppIdSubscription = application.currentAppId$.subscribe(() => {
+    this.currentAppIdSubscription = application.currentAppId$.subscribe((appId) => {
+      if (appId === WORKSPACE_FATAL_ERROR_APP_ID) {
+        return;
+      }
       if (this.workspaceClient && this.workspaceId) {
-        this.workspaceClient.refreshWorkspace(this.workspaceId)?.then((resp) => {
-          if (
-            isPermissionEnabled &&
-            !resp.success &&
-            resp.error === 'Invalid saved objects permission'
-          ) {
-            this.handleFatalError(
-              application,
-              chrome,
-              i18n.translate('workspace.error.noPermission', {
-                defaultMessage: 'You do not have permission to access this workspace',
-              })
-            );
-          }
-        });
+        this.workspaceClient
+          .refreshWorkspace(this.workspaceId)
+          ?.then((resp) => {
+            if (
+              isPermissionEnabled &&
+              !resp.success &&
+              resp.error === 'Invalid saved objects permission'
+            ) {
+              this.handleFatalError(
+                application,
+                chrome,
+                i18n.translate('workspace.error.noPermission', {
+                  defaultMessage: 'You do not have permission to access this workspace',
+                })
+              );
+            }
+          })
+          .catch(() => {});
       }
     });
 
