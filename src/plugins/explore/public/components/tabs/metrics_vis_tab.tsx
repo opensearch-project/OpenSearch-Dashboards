@@ -5,7 +5,7 @@
 
 import './metrics_vis_tab.scss';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useObservable } from 'react-use';
 import { useSelector } from 'react-redux';
 import { createPortal } from 'react-dom';
@@ -64,7 +64,7 @@ const QUICK_CHART_TYPES: Array<{ id: ChartType; label: string; iconType: string 
   },
 ];
 
-export const MetricsVisTab = () => {
+export const MetricsVisTab = React.memo(() => {
   const [slot, setSlot] = useState<HTMLElement | null>(null);
   const [isSettingsCollapsed, setIsSettingsCollapsed] = useState(true);
   const [showAllSeries, setShowAllSeries] = useState(false);
@@ -285,4 +285,4 @@ export const MetricsVisTab = () => {
       </div>
     </div>
   );
-};
+});
