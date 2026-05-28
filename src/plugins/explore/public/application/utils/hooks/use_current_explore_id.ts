@@ -5,11 +5,9 @@
 
 import { useLocation } from 'react-router-dom';
 
-export const useCurrentExploreId = () => {
+export const useCurrentExploreId = (operation: 'edit' | 'view' = 'view') => {
   const location = useLocation();
   const hash = location.hash;
-
-  const match = hash.match(/^#\/view\/([^\/\?]+)/);
-  const id = match ? match[1] : undefined;
-  return id;
+  const match = hash.match(new RegExp(`^#\\/${operation}\\/([^\\/\\?]+)`));
+  return match ? match[1] : undefined;
 };

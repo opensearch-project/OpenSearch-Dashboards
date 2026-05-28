@@ -279,9 +279,14 @@ describe('QueryBuilder', () => {
       );
     });
 
-    it('does nothing when datasetView is loading', async () => {
+    it('waits for dataset ready when datasetView is loading then returns if no dataView', async () => {
       builder.setIsInitialized(true);
       builder.datasetView$.next({ dataView: undefined, isLoading: true, error: null });
+
+      setTimeout(() => {
+        builder.datasetView$.next({ dataView: undefined, isLoading: false, error: null });
+      }, 10);
+
       await builder.executeQuery();
       expect(builder.queryEditorState$.value.queryStatus.status).toBe(
         QueryExecutionStatus.UNINITIALIZED
@@ -611,6 +616,108 @@ describe('QueryBuilder', () => {
       await new Promise((resolve) => setTimeout(resolve, 10));
 
       expect(builder.datasetView$.value.error).toContain('Error loading dataset');
+    });
+  });
+
+  describe('setupHistorySync', () => {
+    let historyListeners: Array<(location: any, action: string) => void>;
+    let urlStateMap: Record<string, any>;
+
+    beforeEach(async () => {
+      historyListeners = [];
+      urlStateMap = {};
+
+      services.scopedHistory = {
+        listen: jest.fn((cb) => {
+          historyListeners.push(cb);
+          return () => {};
+        }),
+      } as any;
+
+      services.osdUrlStateStorage = {
+        get: jest.fn((key: string) => urlStateMap[key] ?? null),
+        set: jest.fn(),
+      } as any;
+
+      await builder.init();
+    });
+
+    const triggerPop = () => {
+      historyListeners.forEach((cb) => cb({}, 'POP'));
+    };
+
+    it('ignores REPLACE and PUSH actions', async () => {
+      const executeQuerySpy = jest.spyOn(builder, 'executeQuery').mockResolvedValue();
+      urlStateMap._g = { time: { from: 'now-30m', to: 'now' } };
+
+      historyListeners.forEach((cb) => cb({}, 'REPLACE'));
+      historyListeners.forEach((cb) => cb({}, 'PUSH'));
+
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      expect(executeQuerySpy).not.toHaveBeenCalled();
+    });
+
+    it('does nothing when URL state matches current state', async () => {
+      const executeQuerySpy = jest.spyOn(builder, 'executeQuery').mockResolvedValue();
+
+      urlStateMap._eq = builder.queryState$.value;
+      urlStateMap._e = {
+        languageType: builder.queryEditorState$.value.languageType,
+        isQueryEditorDirty: builder.queryEditorState$.value.isQueryEditorDirty,
+      };
+      urlStateMap._g = { time: builder.queryEditorState$.value.dateRange };
+
+      triggerPop();
+
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      expect(executeQuerySpy).not.toHaveBeenCalled();
+    });
+
+    it('restores time from _g and re-executes query', async () => {
+      const executeQuerySpy = jest.spyOn(builder, 'executeQuery').mockResolvedValue();
+      builder.datasetView$.next({ dataView: {} as any, isLoading: false, error: null });
+
+      urlStateMap._g = { time: { from: 'now-1h', to: 'now' } };
+
+      triggerPop();
+
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      expect(builder.queryEditorState$.value.dateRange).toEqual({ from: 'now-1h', to: 'now' });
+      expect(executeQuerySpy).toHaveBeenCalled();
+    });
+
+    it('restores query state after language sync completes', async () => {
+      const mockDataView = { id: 'logs', title: 'logs' } as any;
+      builder.datasetView$.next({ dataView: mockDataView, isLoading: false, error: null });
+      builder.updateQueryEditorState({ languageType: SupportLanguageType.promQL });
+
+      // Simulate switching back to PPL via POP
+      const pplQueryState = {
+        query: 'source=logs | head 10',
+        language: 'PPL',
+        dataset: { id: 'logs', title: 'logs', type: 'INDEX_PATTERN' },
+      };
+      urlStateMap._eq = pplQueryState;
+      urlStateMap._e = { languageType: SupportLanguageType.ppl };
+
+      // setupLanguageSync will reset query to ''
+      (getPreloadedQueryState as jest.Mock).mockResolvedValue({
+        query: '',
+        language: 'PPL',
+        dataset: pplQueryState.dataset,
+      });
+
+      const editorRef = { setValue: jest.fn(), getValue: jest.fn() } as any;
+      builder.setEditorRef(editorRef);
+
+      triggerPop();
+
+      // Wait for setupLanguageSync + waitForDatasetReady
+      await new Promise((resolve) => setTimeout(resolve, 150));
+
+      // Query state should be restored from URL, not the empty one from setupLanguageSync
+      expect(builder.queryState$.value.query).toBe('source=logs | head 10');
+      expect(editorRef.setValue).toHaveBeenCalledWith('source=logs | head 10');
     });
   });
 

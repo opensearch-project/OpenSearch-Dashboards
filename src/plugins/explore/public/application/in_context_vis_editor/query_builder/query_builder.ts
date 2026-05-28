@@ -214,10 +214,10 @@ export class QueryBuilder {
     this.setupGlobalDataRangeSync();
     this.setupQuerySync();
     this.setupLanguageSync();
+    this.setupHistorySync();
     // start sync until dataview is ready
     await this.waitForDatasetReady();
     this.startUrlSync();
-    this.setupHistorySync();
     this.setIsInitialized(true);
   }
 
@@ -234,7 +234,6 @@ export class QueryBuilder {
     ])
       .pipe(debounceTime(500))
       .subscribe(([queryState, editorState]) => {
-        // if (this.isRestoringFromHistory) return;
         this.syncToUrl(QUERY_BUILDER_QUERY_STATE_KEY, queryState);
         this.syncToUrl(QUERY_EDITOR_STATE_KEY, editorState);
       });
@@ -250,12 +249,15 @@ export class QueryBuilder {
     }
   }
 
+  // Listen to browser history changes to sync URL state back
   private setupHistorySync() {
     const scopedHistory = this.getServices().scopedHistory;
     const urlStateStorage = this.getServices().osdUrlStateStorage;
     if (!scopedHistory || !urlStateStorage) return;
 
+    let syncVersion = 0;
     const unlisten = scopedHistory.listen((_location, historyAction) => {
+      // Only handle POP actions (back/forward and manual URL edits)
       if (historyAction === 'REPLACE' || historyAction === 'PUSH') {
         return;
       }
@@ -279,11 +281,6 @@ export class QueryBuilder {
 
       if (isEqual(normalizedUrl, normalizedCurrent)) return;
 
-      if (urlQueryState) {
-        this.updateQueryState(urlQueryState);
-        this.getEditorRef()?.setValue(urlQueryState.query);
-      }
-
       if (urlEditorState) {
         this.updateQueryEditorState({
           ...(urlEditorState.languageType && { languageType: urlEditorState.languageType }),
@@ -297,7 +294,18 @@ export class QueryBuilder {
         this.updateQueryEditorState({ dateRange: urlGlobalState.time });
       }
 
-      this.waitForDatasetReady().then(() => this.executeQuery());
+      const version = ++syncVersion;
+      // Wait for setupLanguageSync to finish loading the dataset, then restore
+      // query state. This order matters: setupLanguageSync resets query to '',
+      // so we apply the URL query after
+      this.waitForDatasetReady().then(async () => {
+        if (version !== syncVersion) return;
+        if (urlQueryState) {
+          this.updateQueryState(urlQueryState);
+          this.getEditorRef()?.setValue(urlQueryState.query);
+        }
+        this.executeQuery();
+      });
     });
 
     this.subscriptions.push(new Subscription(unlisten));
@@ -619,11 +627,11 @@ export class QueryBuilder {
       queryStatus: initialQueryStatus,
     });
 
-    if (
-      this.datasetView$.value.isLoading ||
-      this.datasetView$.value.error ||
-      !this.datasetView$.value.dataView
-    ) {
+    if (this.datasetView$.value.isLoading) {
+      await this.waitForDatasetReady();
+    }
+
+    if (this.datasetView$.value.error || !this.datasetView$.value.dataView) {
       return;
     }
     const currentQuery = this.queryState$.value;
