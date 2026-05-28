@@ -157,6 +157,17 @@ describe('#importSavedObjectsFromStream', () => {
       attributes: { title: 'some-title' },
     };
   };
+
+  const createConfigObject = (): SavedObject<{
+    title: string;
+  }> => {
+    return {
+      type: 'config',
+      id: uuidv4(),
+      references: [],
+      attributes: { title: 'some-title' },
+    };
+  };
   const createError = (): SavedObjectsImportError => {
     const title = 'some-title';
     return {
@@ -749,6 +760,82 @@ describe('#importSavedObjectsFromStream', () => {
       const result = await importSavedObjectsFromStream(options);
       const expectedErrors = errors.map(({ type, id }) => expect.objectContaining({ type, id }));
       expect(result).toEqual({ success: false, successCount: 0, errors: expectedErrors });
+    });
+
+    test('early return if import contains config type object', async () => {
+      const options = setupOptions();
+      const configObj = createConfigObject();
+      const collectedObjects = [configObj];
+
+      const errors = [
+        {
+          type: configObj.type,
+          id: configObj.id,
+          title: configObj.id,
+          meta: { title: configObj.id },
+          error: { type: 'unsupported_type' },
+        },
+      ];
+      getMockFn(collectSavedObjects).mockResolvedValue({
+        errors: [],
+        collectedObjects,
+        importIdMap: new Map(),
+      });
+      const result = await importSavedObjectsFromStream(options);
+      const expectedErrors = errors.map(({ type, id }) => expect.objectContaining({ type, id }));
+      expect(result).toEqual({ success: false, successCount: 0, errors: expectedErrors });
+      expect(createSavedObjects).not.toHaveBeenCalled();
+    });
+
+    test('early return if import contains config type mixed with valid objects', async () => {
+      const options = setupOptions();
+      const configObj = createConfigObject();
+      const validObj = createObject();
+      const collectedObjects = [validObj, configObj];
+
+      const errors = [
+        {
+          type: configObj.type,
+          id: configObj.id,
+          title: configObj.id,
+          meta: { title: configObj.id },
+          error: { type: 'unsupported_type' },
+        },
+      ];
+      getMockFn(collectSavedObjects).mockResolvedValue({
+        errors: [],
+        collectedObjects,
+        importIdMap: new Map(),
+      });
+      const result = await importSavedObjectsFromStream(options);
+      const expectedErrors = errors.map(({ type, id }) => expect.objectContaining({ type, id }));
+      expect(result).toEqual({ success: false, successCount: 0, errors: expectedErrors });
+      expect(createSavedObjects).not.toHaveBeenCalled();
+    });
+
+    test('early return if import contains config type in workspace-scoped import', async () => {
+      const options = setupOptions(false, undefined, true, ['workspace-1']);
+      const configObj = createConfigObject();
+      const collectedObjects = [configObj];
+
+      const errors = [
+        {
+          type: configObj.type,
+          id: configObj.id,
+          title: configObj.id,
+          meta: { title: configObj.id },
+          error: { type: 'unsupported_type' },
+        },
+      ];
+      getMockFn(collectSavedObjects).mockResolvedValue({
+        errors: [],
+        collectedObjects,
+        importIdMap: new Map(),
+      });
+      const result = await importSavedObjectsFromStream(options);
+      const expectedErrors = errors.map(({ type, id }) => expect.objectContaining({ type, id }));
+      expect(result).toEqual({ success: false, successCount: 0, errors: expectedErrors });
+      expect(createSavedObjects).not.toHaveBeenCalled();
     });
   });
 });

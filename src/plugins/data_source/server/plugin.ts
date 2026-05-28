@@ -128,19 +128,26 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
     );
 
     const router = core.http.createRouter();
+    const endpointDeniedIPs = config.endpointDeniedIPs ?? ['169.254.0.0/16', 'fe80::/10'];
     registerTestConnectionRoute(
       router,
       dataSourceService,
       cryptographyServiceSetup,
       authRegistryPromise,
-      customApiSchemaRegistryPromise
+      customApiSchemaRegistryPromise,
+      this.logger.get('test-connection'),
+      endpointDeniedIPs,
+      config.endpointAllowlistedSuffixes
     );
     registerFetchDataSourceMetaDataRoute(
       router,
       dataSourceService,
       cryptographyServiceSetup,
       authRegistryPromise,
-      customApiSchemaRegistryPromise
+      customApiSchemaRegistryPromise,
+      this.logger.get('fetch-data-source-metadata'),
+      endpointDeniedIPs,
+      config.endpointAllowlistedSuffixes
     );
 
     const registerCredentialProvider = (method: AuthenticationMethod) => {

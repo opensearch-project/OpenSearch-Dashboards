@@ -74,6 +74,23 @@ export async function importSavedObjectsFromStream({
     supportedTypes,
     dataSourceId,
   });
+  const configErrors: SavedObjectsImportError[] = collectSavedObjectsResult.collectedObjects
+    .filter((obj) => obj.type === 'config')
+    .map((obj) => ({
+      error: { type: 'unsupported_type' } as SavedObjectsImportUnsupportedTypeError,
+      type: obj.type,
+      id: obj.id,
+      title: obj.id,
+      meta: { title: obj.id },
+    }));
+  if (configErrors.length > 0) {
+    return {
+      successCount: 0,
+      success: false,
+      errors: configErrors,
+    };
+  }
+
   // if dataSource is not enabled, but object type is data-source, or saved object id contains datasource id
   // return unsupported type error
   if (!dataSourceEnabled) {
