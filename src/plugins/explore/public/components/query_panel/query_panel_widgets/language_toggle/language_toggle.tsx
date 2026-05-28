@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useMemo, useState, useEffect } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { EuiBetaBadge, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
@@ -37,16 +37,34 @@ export const LanguageToggle = () => {
 
   const switchEditorMode = useLanguageSwitch();
 
+  // Track pending timeouts so they can be cancelled if the component unmounts
+  // before they fire, avoiding dispatches against a stale store.
+  const pendingTimeouts = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
+  useEffect(() => {
+    const timeouts = pendingTimeouts.current;
+    return () => {
+      timeouts.forEach(clearTimeout);
+      timeouts.clear();
+    };
+  }, []);
+  const scheduleTimeout = useCallback((cb: () => void) => {
+    const id = setTimeout(() => {
+      pendingTimeouts.current.delete(id);
+      cb();
+    });
+    pendingTimeouts.current.add(id);
+  }, []);
+
   const onButtonClick = () => setIsPopoverOpen(!isPopoverOpen);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
   const onItemClick = useCallback(
     (editorMode: EditorMode) => {
       closePopover();
-      setTimeout(focusOnEditor);
+      scheduleTimeout(focusOnEditor);
       switchEditorMode(editorMode);
     },
-    [closePopover, focusOnEditor, switchEditorMode]
+    [closePopover, focusOnEditor, switchEditorMode, scheduleTimeout]
   );
 
   const onLanguageClick = useCallback(
@@ -67,11 +85,11 @@ export const LanguageToggle = () => {
       queryString.setQuery({ query: newQueryString, language: newLanguage, dataset });
       languageSvc.setUserQueryLanguage(newLanguage);
       dispatch(setQueryWithHistory({ ...queryString.getQuery() }));
-      setTimeout(focusOnEditor);
+      scheduleTimeout(focusOnEditor);
       // Auto-execute query after language switch
-      setTimeout(() => dispatch(onEditorRunActionCreator(services, newQueryString)));
+      scheduleTimeout(() => dispatch(onEditorRunActionCreator(services, newQueryString)));
     },
-    [closePopover, focusOnEditor, dispatch]
+    [closePopover, focusOnEditor, dispatch, scheduleTimeout]
   );
 
   const languageService = getServices().data.query.queryString.getLanguageService();

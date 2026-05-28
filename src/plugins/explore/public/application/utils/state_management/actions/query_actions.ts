@@ -555,7 +555,7 @@ const executeQueryBase = async (
     if (includeHistogram) {
       // Histogram-specific: Get interval and create with aggregations
       const state = getState();
-      const effectiveInterval = interval || state.legacy?.interval;
+      const effectiveInterval = interval || state.legacy?.interval || 'auto';
       searchSource = await createSearchSourceWithQuery(
         preparedQueryObject,
         dataView,

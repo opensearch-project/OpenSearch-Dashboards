@@ -49,7 +49,7 @@ export class SQLFilterUtils extends FilterUtils {
     const target = SQLFilterUtils.findInjectionTarget(querySpec);
     if (!target) return sql;
 
-    const { fromClause, existingWhere } = target;
+    const { relation, existingWhere } = target;
 
     if (existingWhere) {
       const whereToken = existingWhere.start;
@@ -70,8 +70,9 @@ export class SQLFilterUtils extends FilterUtils {
       );
     }
 
-    // Use fromClause.stop so WHERE is inserted after all JOINs at this level
-    const insertPos = fromClause.stop?.stop;
+    // Insert WHERE right after the relation but before GROUP BY/HAVING/ORDER BY,
+    // which the grammar models as siblings of relation inside fromClause.
+    const insertPos = relation.stop?.stop;
     if (insertPos === undefined) return sql;
     return sql.slice(0, insertPos + 1) + ` WHERE ${whereClause}` + sql.slice(insertPos + 1);
   }
@@ -88,7 +89,7 @@ export class SQLFilterUtils extends FilterUtils {
    */
   private static findInjectionTarget(
     querySpec: any
-  ): { fromClause: any; existingWhere?: any } | null {
+  ): { relation: any; existingWhere?: any } | null {
     const fromClause = querySpec?.fromClause?.();
     if (!fromClause) return null;
 
@@ -96,9 +97,8 @@ export class SQLFilterUtils extends FilterUtils {
     if (!relation) return null;
 
     // `tableAsRelation` alternative exposes a `tableName()` accessor.
-    // Return the fromClause so WHERE is inserted after all JOINs at this level.
     if (typeof relation.tableName === 'function' && relation.tableName()) {
-      return { fromClause, existingWhere: fromClause.whereClause?.() };
+      return { relation, existingWhere: fromClause.whereClause?.() };
     }
 
     // `subqueryAsRelation` alternative wraps an inner `querySpecification`.
