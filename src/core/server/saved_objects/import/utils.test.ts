@@ -199,6 +199,21 @@ describe('updateDataSourceNameInVegaSpec()', () => {
 
     expect(isEqual(originalHJSONParse, hjsonParse)).toBe(true);
   });
+
+  test('When HJSON parsing fails due to complex Vega expressions, return the original spec unchanged', () => {
+    // This spec contains expressions like "datum.size/domain('y')[1]" which HJSON
+    // misinterprets as unquoted strings with array brackets, causing a parse error.
+    // The fix should gracefully return the original spec instead of throwing.
+    const problematicSpec = `{$schema:https://vega.github.io/schema/vega/v5.json,data:[{name:rawData,url:{index:test-index},transform:[{type:formula,expr:datum.total/domain('y')[1],as:percentage}]}]}`;
+
+    const result = updateDataSourceNameInVegaSpec({
+      spec: problematicSpec,
+      newDataSourceName: 'newDataSource',
+    });
+
+    // Should return the original spec unchanged when HJSON parsing fails
+    expect(result).toBe(problematicSpec);
+  });
 });
 
 describe('updateDataSourceNameInTimeline()', () => {
