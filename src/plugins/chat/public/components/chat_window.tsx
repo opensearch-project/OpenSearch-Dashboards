@@ -181,21 +181,29 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     services.core.chat.resetThreadId()
   });
 
-  // Check if the current data source is AnalyticEngine (unsupported for AI features)
+  // Cache data source compatibility check to avoid network call on every message
+  const unsupportedDataSourceRef = useRef<{ dataSourceId: string | undefined; result: boolean } | null>(null);
+
   const isUnsupportedDataSource = useCallback(async (): Promise<boolean> => {
     try {
       const dataSourceId = await chatService.getCurrentDataSourceId();
       if (!dataSourceId) return false;
+      // Return cached result if data source hasn't changed
+      if (unsupportedDataSourceRef.current?.dataSourceId === dataSourceId) {
+        return unsupportedDataSourceRef.current.result;
+      }
       const savedObjectsClient = services.core?.savedObjects?.client;
       if (!savedObjectsClient) return false;
       const ds = await savedObjectsClient.get<{ dataSourceEngineType?: string }>(
         'data-source',
         dataSourceId
       );
-      return ds?.attributes?.dataSourceEngineType === 'AnalyticEngine';
+      const result = ds?.attributes?.dataSourceEngineType === 'AnalyticEngine';
+      unsupportedDataSourceRef.current = { dataSourceId, result };
+      return result;
     } catch {
-      // Data source not found or inaccessible — treat as unsupported
-      return true;
+      // Fail-open: transient errors should not block AI features
+      return false;
     }
   }, [chatService, services.core?.savedObjects?.client]);
 
