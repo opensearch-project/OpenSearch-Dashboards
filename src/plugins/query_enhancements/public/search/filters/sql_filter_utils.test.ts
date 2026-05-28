@@ -39,7 +39,7 @@ describe('SQLFilterUtils', () => {
         createFilter('field2', 'value2'),
       ]);
       expect(result).toBe(
-        "SELECT * FROM test_index WHERE `field2` = 'value2' AND (`field1` = 'value1')"
+        "SELECT * FROM test_index WHERE `field2` = 'value2' AND ( `field1` = 'value1')"
       );
     });
 
@@ -66,7 +66,7 @@ describe('SQLFilterUtils', () => {
     it('handles queries with existing WHERE clauses', () => {
       const query = 'SELECT * FROM test_index WHERE status = 200';
       const result = SQLFilterUtils.addFiltersToQuery(query, [createFilter('field1', 'value1')]);
-      expect(result).toBe("SELECT * FROM test_index WHERE `field1` = 'value1' AND (status = 200)");
+      expect(result).toBe("SELECT * FROM test_index WHERE `field1` = 'value1' AND ( status = 200)");
     });
   });
 
@@ -84,7 +84,7 @@ describe('SQLFilterUtils', () => {
         where
       );
       expect(result).toBe(
-        "SELECT * FROM logs WHERE `@timestamp` >= 'X' AND `@timestamp` <= 'Y' AND (status = 500 OR method = 'GET')"
+        "SELECT * FROM logs WHERE `@timestamp` >= 'X' AND `@timestamp` <= 'Y' AND ( status = 500 OR method = 'GET')"
       );
     });
 
