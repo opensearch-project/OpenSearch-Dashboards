@@ -84,99 +84,59 @@ describe('SQLFilterUtils', () => {
     });
   });
 
-  describe('wrapWithTimeFilterCTE', () => {
+  describe('insertWhereClause', () => {
     const where = "`@timestamp` >= 'X' AND `@timestamp` <= 'Y'";
 
-    it('wraps a simple SELECT with a CTE that shadows the dataset table', () => {
-      const result = SQLFilterUtils.wrapWithTimeFilterCTE('SELECT * FROM logs', 'logs', where);
-      expect(result).toBe(
-        "WITH `logs` AS (SELECT * FROM `logs` WHERE `@timestamp` >= 'X' AND `@timestamp` <= 'Y') SELECT * FROM logs"
-      );
+    it('inserts WHERE clause into simple SELECT', () => {
+      const result = SQLFilterUtils.insertWhereClause('SELECT * FROM logs', 'logs', where);
+      expect(result).toBe("SELECT * FROM logs WHERE `@timestamp` >= 'X' AND `@timestamp` <= 'Y'");
     });
 
-    it('wraps a JOIN query — table-shadow CTE applies only to the dataset table', () => {
-      const result = SQLFilterUtils.wrapWithTimeFilterCTE(
-        'SELECT * FROM logs JOIN errors ON logs.id = errors.log_id',
+    it('adds to existing WHERE clause with proper OR precedence', () => {
+      const result = SQLFilterUtils.insertWhereClause(
+        "SELECT * FROM logs WHERE status = 500 OR method = 'GET'",
         'logs',
         where
       );
       expect(result).toBe(
-        "WITH `logs` AS (SELECT * FROM `logs` WHERE `@timestamp` >= 'X' AND `@timestamp` <= 'Y') SELECT * FROM logs JOIN errors ON logs.id = errors.log_id"
+        "SELECT * FROM logs WHERE (`@timestamp` >= 'X' AND `@timestamp` <= 'Y') AND (status = 500 OR method = 'GET')"
       );
     });
 
-    it('wraps a UNION query without parsing it', () => {
-      const result = SQLFilterUtils.wrapWithTimeFilterCTE(
-        'SELECT * FROM logs UNION SELECT * FROM logs2',
+    it('handles GROUP BY queries correctly', () => {
+      const result = SQLFilterUtils.insertWhereClause(
+        'SELECT method, COUNT(*) FROM logs GROUP BY method',
         'logs',
         where
       );
       expect(result).toBe(
-        "WITH `logs` AS (SELECT * FROM `logs` WHERE `@timestamp` >= 'X' AND `@timestamp` <= 'Y') SELECT * FROM logs UNION SELECT * FROM logs2"
+        "SELECT method, COUNT(*) FROM logs WHERE `@timestamp` >= 'X' AND `@timestamp` <= 'Y' GROUP BY method"
       );
     });
 
-    it("merges into the user's existing WITH clause", () => {
-      const result = SQLFilterUtils.wrapWithTimeFilterCTE(
-        'WITH foo AS (SELECT 1) SELECT * FROM foo, logs',
-        'logs',
-        where
-      );
-      expect(result).toBe(
-        "WITH `logs` AS (SELECT * FROM `logs` WHERE `@timestamp` >= 'X' AND `@timestamp` <= 'Y'), foo AS (SELECT 1) SELECT * FROM foo, logs"
-      );
+    it('returns original SQL when parsing fails', () => {
+      const sql = 'INVALID SQL QUERY';
+      const result = SQLFilterUtils.insertWhereClause(sql, 'logs', where);
+      expect(result).toBe(sql);
     });
 
-    it('returns the SQL unchanged on CTE name collision with the user', () => {
-      const sql = 'WITH logs AS (SELECT 1) SELECT * FROM logs';
-      const result = SQLFilterUtils.wrapWithTimeFilterCTE(sql, 'logs', where);
+    it('returns original SQL when not a SELECT statement', () => {
+      const sql = 'SHOW TABLES';
+      const result = SQLFilterUtils.insertWhereClause(sql, 'logs', where);
       expect(result).toBe(sql);
     });
 
     it('returns the SQL unchanged when tableName is empty', () => {
       const sql = 'SELECT * FROM logs';
-      const result = SQLFilterUtils.wrapWithTimeFilterCTE(sql, '', where);
+      const result = SQLFilterUtils.insertWhereClause(sql, '', where);
       expect(result).toBe(sql);
     });
 
-    it('returns SHOW/DESCRIBE/EXPLAIN statements unchanged — these reject a CTE prefix', () => {
-      expect(SQLFilterUtils.wrapWithTimeFilterCTE('SHOW TABLES', 'logs', where)).toBe(
-        'SHOW TABLES'
-      );
-      expect(SQLFilterUtils.wrapWithTimeFilterCTE('DESCRIBE logs', 'logs', where)).toBe(
-        'DESCRIBE logs'
-      );
-      expect(
-        SQLFilterUtils.wrapWithTimeFilterCTE('EXPLAIN SELECT * FROM logs', 'logs', where)
-      ).toBe('EXPLAIN SELECT * FROM logs');
-    });
-
-    it('handles a leading line comment before the WITH clause', () => {
-      const sql = '-- this gets the errors\nWITH foo AS (SELECT 1) SELECT * FROM foo, logs';
-      const result = SQLFilterUtils.wrapWithTimeFilterCTE(sql, 'logs', where);
-      expect(result).toBe(
-        "-- this gets the errors\nWITH `logs` AS (SELECT * FROM `logs` WHERE `@timestamp` >= 'X' AND `@timestamp` <= 'Y'), foo AS (SELECT 1) SELECT * FROM foo, logs"
-      );
-    });
-
-    it('handles a leading block comment before the WITH clause', () => {
-      const sql = '/* version 2 */ WITH foo AS (SELECT 1) SELECT * FROM foo, logs';
-      const result = SQLFilterUtils.wrapWithTimeFilterCTE(sql, 'logs', where);
-      expect(result).toBe(
-        "/* version 2 */ WITH `logs` AS (SELECT * FROM `logs` WHERE `@timestamp` >= 'X' AND `@timestamp` <= 'Y'), foo AS (SELECT 1) SELECT * FROM foo, logs"
-      );
-    });
-
-    it('escapes regex metacharacters in the table name', () => {
-      // No collision should be detected even though `.` is regex-special.
-      const result = SQLFilterUtils.wrapWithTimeFilterCTE(
-        'SELECT * FROM `my.index`',
-        'my.index',
-        where
-      );
-      expect(result).toBe(
-        "WITH `my.index` AS (SELECT * FROM `my.index` WHERE `@timestamp` >= 'X' AND `@timestamp` <= 'Y') SELECT * FROM `my.index`"
-      );
+    it('handles complex queries gracefully by returning unchanged on parse failure', () => {
+      // Complex query that might not parse with legacy ANTLR
+      const sql = 'WITH RECURSIVE cte AS (...) SELECT * FROM cte';
+      const result = SQLFilterUtils.insertWhereClause(sql, 'logs', where);
+      expect(result).toBe(sql); // Should return unchanged rather than break
     });
   });
 

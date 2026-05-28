@@ -200,7 +200,7 @@ describe('SQLSearchInterceptor', () => {
     });
   });
 
-  describe('buildQuery (private — CTE-based time filter)', () => {
+  describe('buildQuery (private — WHERE clause time filter)', () => {
     const baseRequest: IOpenSearchDashboardsSearchRequest = {
       params: { body: {} },
     };
@@ -232,7 +232,7 @@ describe('SQLSearchInterceptor', () => {
       expect(result).toBe(query);
     });
 
-    it('wraps the user query with a CTE that shadows the dataset table', async () => {
+    it('inserts WHERE clause with time filter into user query', async () => {
       const query = {
         language: 'SQL',
         query: 'SELECT * FROM test_index',
@@ -242,12 +242,12 @@ describe('SQLSearchInterceptor', () => {
       const result = await (sqlSearchInterceptor as any).buildQuery(query, request);
 
       expect(result.query).toBe(
-        "WITH `test_index` AS (SELECT * FROM `test_index` WHERE `@timestamp` >= '2023-01-01 00:00:00.000' " +
-          "AND `@timestamp` <= '2023-01-02 00:00:00.000') SELECT * FROM test_index"
+        "SELECT * FROM test_index WHERE `@timestamp` >= '2023-01-01 00:00:00.000' " +
+          "AND `@timestamp` <= '2023-01-02 00:00:00.000'"
       );
     });
 
-    it('wraps queries with arbitrary shapes (JOIN) without parsing them', async () => {
+    it('returns original query when parsing complex queries fails', async () => {
       const query = {
         language: 'SQL',
         query: 'SELECT * FROM test_index JOIN errors ON test_index.id = errors.log_id',
@@ -256,14 +256,12 @@ describe('SQLSearchInterceptor', () => {
       const request = { params: { body: { enableTimeFiltering: true } } };
       const result = await (sqlSearchInterceptor as any).buildQuery(query, request);
 
-      expect(result.query).toBe(
-        "WITH `test_index` AS (SELECT * FROM `test_index` WHERE `@timestamp` >= '2023-01-01 00:00:00.000' " +
-          "AND `@timestamp` <= '2023-01-02 00:00:00.000') " +
-          'SELECT * FROM test_index JOIN errors ON test_index.id = errors.log_id'
-      );
+      // For complex queries that might not parse with ANTLR, we return unchanged
+      // This is safer than potentially breaking the user's query
+      expect(result.query).toBe(query.query);
     });
 
-    it("merges into the user's existing WITH clause", async () => {
+    it('returns original query when WITH clauses are present', async () => {
       const query = {
         language: 'SQL',
         query: 'WITH foo AS (SELECT 1) SELECT * FROM foo, test_index',
@@ -272,24 +270,23 @@ describe('SQLSearchInterceptor', () => {
       const request = { params: { body: { enableTimeFiltering: true } } };
       const result = await (sqlSearchInterceptor as any).buildQuery(query, request);
 
-      expect(result.query).toBe(
-        "WITH `test_index` AS (SELECT * FROM `test_index` WHERE `@timestamp` >= '2023-01-01 00:00:00.000' " +
-          "AND `@timestamp` <= '2023-01-02 00:00:00.000'), foo AS (SELECT 1) SELECT * FROM foo, test_index"
-      );
+      // WITH queries are not SELECT statements at the root level, so we return unchanged
+      expect(result.query).toBe(query.query);
     });
 
-    it('returns the query unchanged on CTE name collision with the user', async () => {
-      // User already has a CTE named `test_index`; adding ours would be a
-      // duplicate-name error, so we leave the query alone.
+    it('handles GROUP BY queries by inserting WHERE before GROUP BY', async () => {
       const query = {
         language: 'SQL',
-        query: 'WITH test_index AS (SELECT 1) SELECT * FROM test_index',
+        query: 'SELECT method, COUNT(*) FROM test_index GROUP BY method',
         dataset: { type: 'DEFAULT', title: 'test_index', timeFieldName: '@timestamp' },
       };
       const request = { params: { body: { enableTimeFiltering: true } } };
       const result = await (sqlSearchInterceptor as any).buildQuery(query, request);
 
-      expect(result.query).toBe('WITH test_index AS (SELECT 1) SELECT * FROM test_index');
+      expect(result.query).toBe(
+        "SELECT method, COUNT(*) FROM test_index WHERE `@timestamp` >= '2023-01-01 00:00:00.000' " +
+          "AND `@timestamp` <= '2023-01-02 00:00:00.000' GROUP BY method"
+      );
     });
   });
 

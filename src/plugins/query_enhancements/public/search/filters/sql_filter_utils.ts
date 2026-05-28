@@ -3,40 +3,64 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { CharStream, CommonTokenStream } from 'antlr4ng';
+import { OpenSearchSQLLexer, OpenSearchSQLParser } from '@osd/antlr-grammar';
 import { Filter } from '../../../../data/common';
 import { FilterUtils } from './filter_utils';
 
 export class SQLFilterUtils extends FilterUtils {
   /**
-   * Wrap user SQL with a CTE that shadows the dataset's table with a filtered
-   * version. Returns `sql` unchanged when the user already has a CTE with the
-   * same name (collision risk). Requires CTE support in the target engine.
+   * Insert time filter WHERE clause into user SQL using ANTLR parsing.
+   * Returns `sql` unchanged if parsing fails or insertion is unsafe.
    */
-  public static wrapWithTimeFilterCTE(sql: string, tableName: string, whereClause: string): string {
+  public static insertWhereClause(sql: string, tableName: string, whereClause: string): string {
     if (!tableName) return sql;
 
-    // Only wrap SELECT/WITH queries. Other statements (SHOW, DESCRIBE, EXPLAIN,
-    // etc.) don't accept a CTE prefix and would be broken by our wrap. Allow
-    // line/block comments and whitespace before the keyword.
-    const wrappablePrefixRe = /^(?:\s|--[^\n]*\n?|\/\*[\s\S]*?\*\/)*(?:SELECT|WITH)\b/i;
-    if (!wrappablePrefixRe.test(sql)) return sql;
+    try {
+      // Use ANTLR to parse the SQL and find WHERE insertion point
 
-    const escapedName = tableName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const collisionRe = new RegExp(`\\bWITH\\b[\\s\\S]*?\\b${escapedName}\\b\\s+AS\\s*\\(`, 'i');
-    if (collisionRe.test(sql)) return sql;
+      const inputStream = CharStream.fromString(sql);
+      const lexer = new OpenSearchSQLLexer(inputStream);
+      const tokenStream = new CommonTokenStream(lexer);
+      const parser = new OpenSearchSQLParser(tokenStream);
+      const tree = parser.root();
 
-    const ourCte = `\`${tableName}\` AS (SELECT * FROM \`${tableName}\` WHERE ${whereClause})`;
+      // Navigate to the SELECT statement and find FROM clause
+      const selectStatement = tree.sqlStatement()?.selectStatement();
+      if (!selectStatement) return sql; // Not a SELECT statement, skip filtering
 
-    // Detect a leading WITH, allowing line/block comments and whitespace before
-    // it. This way `-- some comment\nWITH foo AS (...)` still triggers a merge
-    // instead of producing two WITH clauses.
-    const leadingPrefixRe = /^(?:\s|--[^\n]*\n?|\/\*[\s\S]*?\*\/)*WITH\b/i;
-    if (leadingPrefixRe.test(sql)) {
-      // Insert our CTE right after the user's `WITH` keyword.
-      const withRe = /\bWITH\b/i;
-      return sql.replace(withRe, `WITH ${ourCte},`);
+      const fromClause = selectStatement.fromClause();
+      if (!fromClause || !fromClause.relation()) return sql;
+
+      const relation = fromClause.relation();
+      const insertPos = relation.stop!.stop! + 1;
+
+      // Check if WHERE clause already exists
+      const existingWhereClause = selectStatement.whereClause();
+      if (existingWhereClause) {
+        // Add to existing WHERE with proper OR precedence handling
+        const existingWhere = existingWhereClause.expression();
+        const existingWhereText = sql.slice(
+          existingWhere.start!.start!,
+          existingWhere.stop!.stop! + 1
+        );
+        const wrappedExisting = `(${existingWhereText})`;
+        const newWhereText = `(${whereClause}) AND ${wrappedExisting}`;
+
+        return (
+          sql.slice(0, existingWhere.start!.start!) +
+          newWhereText +
+          sql.slice(existingWhere.stop!.stop! + 1)
+        );
+      } else {
+        // Insert new WHERE clause
+        return sql.slice(0, insertPos) + ` WHERE ${whereClause}` + sql.slice(insertPos);
+      }
+    } catch (error) {
+      // If ANTLR parsing fails, return original query unchanged (no time filter)
+      // This ensures we never break a working query
+      return sql;
     }
-    return `WITH ${ourCte} ${sql}`;
   }
 
   /**
