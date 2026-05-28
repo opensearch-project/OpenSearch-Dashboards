@@ -144,6 +144,30 @@ describe('Query Assist Routes', () => {
         configuredLanguages: [],
       });
     });
+
+    it('returns empty languages with a timeout error when the agent probe hangs', async () => {
+      mockGetAgentIdByConfig.mockReturnValue(new Promise(() => {}));
+
+      const realSetTimeout = global.setTimeout;
+      const setTimeoutSpy = jest
+        .spyOn(global, 'setTimeout')
+        .mockImplementation(((fn: (...args: any[]) => void, ms?: number, ...args: any[]) =>
+          realSetTimeout(fn, ms === 5000 ? 0 : ms, ...args)) as typeof setTimeout);
+
+      try {
+        const httpSetup = await testSetup();
+        const result = await supertest(httpSetup.server.listener)
+          .get(API.QUERY_ASSIST.LANGUAGES)
+          .expect(200);
+
+        expect(result.body).toEqual({
+          configuredLanguages: [],
+          error: 'assist/languages probe timed out',
+        });
+      } finally {
+        setTimeoutSpy.mockRestore();
+      }
+    });
   });
 
   describe('POST /api/query_assist/generate', () => {
