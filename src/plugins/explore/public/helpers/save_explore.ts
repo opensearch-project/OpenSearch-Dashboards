@@ -77,10 +77,6 @@ export async function saveSavedExplore({
       });
 
       if (id !== originalId) {
-        // const currentHash = services.scopedHistory?.location.hash || '';
-        // const hashSearch =
-        //   currentHash.indexOf('?') >= 0 ? currentHash.substring(currentHash.indexOf('?')) : '';
-        // services.scopedHistory?.push(`#/view/${encodeURIComponent(id)}${hashSearch}`);
         services.scopedHistory?.push(`#/view/${encodeURIComponent(id)}`);
       } else {
         // Update browser title and breadcrumbs
