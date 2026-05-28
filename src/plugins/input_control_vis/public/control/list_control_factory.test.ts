@@ -39,6 +39,7 @@ describe('listControlFactory', () => {
       create: searchSourceMock,
     },
   });
+  const allowedIndexPatternIds = new Set(['mockIndexPattern']);
 
   describe('hasValue', () => {
     const controlParams: ControlParams = {
@@ -47,14 +48,19 @@ describe('listControlFactory', () => {
       options: {} as any,
       type: CONTROL_TYPES.LIST,
       label: 'test',
-      indexPattern: {} as any,
+      indexPattern: 'mockIndexPattern' as any,
       parent: 'parent',
     };
     const useTimeFilter = false;
 
     let listControl: ListControl;
     beforeEach(async () => {
-      listControl = await listControlFactory(controlParams, useTimeFilter, deps);
+      listControl = await listControlFactory(
+        controlParams,
+        useTimeFilter,
+        deps,
+        allowedIndexPatternIds
+      );
     });
 
     test('should be false when control has no value', () => {
@@ -79,14 +85,19 @@ describe('listControlFactory', () => {
       options: {} as any,
       type: CONTROL_TYPES.LIST,
       label: 'test',
-      indexPattern: {} as any,
+      indexPattern: 'mockIndexPattern' as any,
       parent: 'parent',
     };
     const useTimeFilter = false;
 
     let listControl: ListControl;
     beforeEach(async () => {
-      listControl = await listControlFactory(controlParams, useTimeFilter, deps);
+      listControl = await listControlFactory(
+        controlParams,
+        useTimeFilter,
+        deps,
+        allowedIndexPatternIds
+      );
     });
 
     test('should pass in timeout parameters from injected vars', async () => {
@@ -113,7 +124,7 @@ describe('listControlFactory', () => {
       options: {} as any,
       type: CONTROL_TYPES.LIST,
       label: 'test',
-      indexPattern: {} as any,
+      indexPattern: 'mockIndexPattern' as any,
       parent: 'parent',
     };
     const useTimeFilter = false;
@@ -121,7 +132,12 @@ describe('listControlFactory', () => {
     let listControl: ListControl;
     let parentControl;
     beforeEach(async () => {
-      listControl = await listControlFactory(controlParams, useTimeFilter, deps);
+      listControl = await listControlFactory(
+        controlParams,
+        useTimeFilter,
+        deps,
+        allowedIndexPatternIds
+      );
 
       const parentControlParams: ControlParams = {
         id: 'parent',
@@ -129,10 +145,15 @@ describe('listControlFactory', () => {
         options: {} as any,
         type: CONTROL_TYPES.LIST,
         label: 'test',
-        indexPattern: {} as any,
+        indexPattern: 'mockIndexPattern' as any,
         parent: 'parent',
       };
-      parentControl = await listControlFactory(parentControlParams, useTimeFilter, deps);
+      parentControl = await listControlFactory(
+        parentControlParams,
+        useTimeFilter,
+        deps,
+        allowedIndexPatternIds
+      );
       parentControl.clear();
       listControl.setAncestors([parentControl]);
     });

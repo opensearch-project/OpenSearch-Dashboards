@@ -30,7 +30,13 @@
 
 import { i18n } from '@osd/i18n';
 import { OPENSEARCH_DASHBOARDS_CONTEXT_NAME } from 'src/plugins/expressions/public';
-import { TimeRange, Filter, opensearchQuery, Query } from '../../../data/public';
+import {
+  TimeRange,
+  Filter,
+  opensearchQuery,
+  Query,
+  AnalyticEngineError,
+} from '../../../data/public';
 import { TimelineVisDependencies } from '../plugin';
 import { getTimezone } from './get_timezone';
 import { TimelineVisParams } from '../timeline_vis_fn';
@@ -129,8 +135,14 @@ export function getTimelineRequestHandler({
       });
     } catch (e) {
       if (e && e.body) {
-        const errorTitle =
-          e.body.attributes && e.body.attributes.title ? ` (${e.body.attributes.title})` : '';
+        const errorName = e.body.attributes?.title;
+
+        // For AnalyticEngineError, throw the error directly without wrapping
+        if (errorName === 'AnalyticEngineError') {
+          throw new AnalyticEngineError();
+        }
+
+        const errorTitle = errorName ? ` (${errorName})` : '';
         const err = new Error(
           `${i18n.translate('timeline.requestHandlerErrorTitle', {
             defaultMessage: 'Timeline request error',
