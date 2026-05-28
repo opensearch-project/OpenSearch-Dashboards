@@ -247,20 +247,6 @@ describe('SQLSearchInterceptor', () => {
       );
     });
 
-    it('returns original query when parsing complex queries fails', async () => {
-      const query = {
-        language: 'SQL',
-        query: 'SELECT * FROM test_index JOIN errors ON test_index.id = errors.log_id',
-        dataset: { type: 'DEFAULT', title: 'test_index', timeFieldName: '@timestamp' },
-      };
-      const request = { params: { body: { enableTimeFiltering: true } } };
-      const result = await (sqlSearchInterceptor as any).buildQuery(query, request);
-
-      // For complex queries that might not parse with ANTLR, we return unchanged
-      // This is safer than potentially breaking the user's query
-      expect(result.query).toBe(query.query);
-    });
-
     it('returns original query when WITH clauses are present', async () => {
       const query = {
         language: 'SQL',
@@ -324,7 +310,7 @@ describe('SQLSearchInterceptor', () => {
       expect(result).toBe(query);
     });
 
-    it('wraps the query with filterManager filters when on dashboards', async () => {
+    it('applies filterManager filters to the query when on dashboards', async () => {
       (mockDataService.query.filterManager.getFilters as jest.Mock).mockReturnValue([
         phraseFilter('host', 'a'),
       ]);
@@ -334,9 +320,7 @@ describe('SQLSearchInterceptor', () => {
         dataset: { type: 'DEFAULT', title: 'test_index' },
       };
       const result = await (sqlSearchInterceptor as any).buildQuery(query, baseRequest);
-      expect(result.query).toBe(
-        "SELECT * FROM (SELECT * FROM test_index) AS _wrap WHERE `host` = 'a'"
-      );
+      expect(result.query).toBe("SELECT * FROM test_index WHERE `host` = 'a'");
     });
 
     it('skips filterManager filters when not on a supported app', async () => {

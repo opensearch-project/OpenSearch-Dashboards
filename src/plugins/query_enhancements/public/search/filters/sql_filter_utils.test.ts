@@ -26,22 +26,20 @@ describe('SQLFilterUtils', () => {
       expect(SQLFilterUtils.addFiltersToQuery(query, [])).toBe(query);
     });
 
-    it('wraps the query with a single filter predicate', () => {
+    it('applies a single filter predicate to the query', () => {
       const query = 'SELECT * FROM test_index';
       const result = SQLFilterUtils.addFiltersToQuery(query, [createFilter('field1', 'value1')]);
-      expect(result).toBe(
-        "SELECT * FROM (SELECT * FROM test_index) AS _wrap WHERE `field1` = 'value1'"
-      );
+      expect(result).toBe("SELECT * FROM test_index WHERE `field1` = 'value1'");
     });
 
-    it('AND-merges multiple predicates inside a single wrap', () => {
+    it('applies multiple filter predicates with AND', () => {
       const query = 'SELECT * FROM test_index';
       const result = SQLFilterUtils.addFiltersToQuery(query, [
         createFilter('field1', 'value1'),
         createFilter('field2', 'value2'),
       ]);
       expect(result).toBe(
-        "SELECT * FROM (SELECT * FROM test_index) AS _wrap WHERE (`field1` = 'value1') AND (`field2` = 'value2')"
+        "SELECT * FROM test_index WHERE `field2` = 'value2' AND (`field1` = 'value1')"
       );
     });
 
@@ -50,9 +48,7 @@ describe('SQLFilterUtils', () => {
       const result = SQLFilterUtils.addFiltersToQuery(query, [
         createFilter('field1', 'value1', true),
       ]);
-      expect(result).toBe(
-        "SELECT * FROM (SELECT * FROM test_index) AS _wrap WHERE `field1` != 'value1'"
-      );
+      expect(result).toBe("SELECT * FROM test_index WHERE `field1` != 'value1'");
     });
 
     it('skips filters that produce no predicate', () => {
@@ -67,20 +63,10 @@ describe('SQLFilterUtils', () => {
       expect(result).toBe(query);
     });
 
-    it('wraps queries with arbitrary SQL shapes (JOIN) without parsing them', () => {
-      const query = 'SELECT host FROM logs JOIN errors ON logs.id = errors.log_id';
-      const result = SQLFilterUtils.addFiltersToQuery(query, [createFilter('host', 'a')]);
-      expect(result).toBe(
-        "SELECT * FROM (SELECT host FROM logs JOIN errors ON logs.id = errors.log_id) AS _wrap WHERE `host` = 'a'"
-      );
-    });
-
-    it('preserves operator precedence in the user query — wrap evaluates inner WHERE first', () => {
-      const query = 'SELECT * FROM test_index WHERE `a` = 1 OR `b` = 2';
+    it('handles queries with existing WHERE clauses', () => {
+      const query = 'SELECT * FROM test_index WHERE status = 200';
       const result = SQLFilterUtils.addFiltersToQuery(query, [createFilter('field1', 'value1')]);
-      expect(result).toBe(
-        "SELECT * FROM (SELECT * FROM test_index WHERE `a` = 1 OR `b` = 2) AS _wrap WHERE `field1` = 'value1'"
-      );
+      expect(result).toBe("SELECT * FROM test_index WHERE `field1` = 'value1' AND (status = 200)");
     });
   });
 
@@ -88,25 +74,23 @@ describe('SQLFilterUtils', () => {
     const where = "`@timestamp` >= 'X' AND `@timestamp` <= 'Y'";
 
     it('inserts WHERE clause into simple SELECT', () => {
-      const result = SQLFilterUtils.insertWhereClause('SELECT * FROM logs', 'logs', where);
+      const result = SQLFilterUtils.insertWhereClause('SELECT * FROM logs', where);
       expect(result).toBe("SELECT * FROM logs WHERE `@timestamp` >= 'X' AND `@timestamp` <= 'Y'");
     });
 
     it('adds to existing WHERE clause with proper OR precedence', () => {
       const result = SQLFilterUtils.insertWhereClause(
         "SELECT * FROM logs WHERE status = 500 OR method = 'GET'",
-        'logs',
         where
       );
       expect(result).toBe(
-        "SELECT * FROM logs WHERE (`@timestamp` >= 'X' AND `@timestamp` <= 'Y') AND (status = 500 OR method = 'GET')"
+        "SELECT * FROM logs WHERE `@timestamp` >= 'X' AND `@timestamp` <= 'Y' AND (status = 500 OR method = 'GET')"
       );
     });
 
     it('handles GROUP BY queries correctly', () => {
       const result = SQLFilterUtils.insertWhereClause(
         'SELECT method, COUNT(*) FROM logs GROUP BY method',
-        'logs',
         where
       );
       expect(result).toBe(
@@ -116,34 +100,21 @@ describe('SQLFilterUtils', () => {
 
     it('returns original SQL when parsing fails', () => {
       const sql = 'INVALID SQL QUERY';
-      const result = SQLFilterUtils.insertWhereClause(sql, 'logs', where);
+      const result = SQLFilterUtils.insertWhereClause(sql, where);
       expect(result).toBe(sql);
     });
 
     it('returns original SQL when not a SELECT statement', () => {
       const sql = 'SHOW TABLES';
-      const result = SQLFilterUtils.insertWhereClause(sql, 'logs', where);
-      expect(result).toBe(sql);
-    });
-
-    it('returns the SQL unchanged when tableName is empty', () => {
-      const sql = 'SELECT * FROM logs';
-      const result = SQLFilterUtils.insertWhereClause(sql, '', where);
+      const result = SQLFilterUtils.insertWhereClause(sql, where);
       expect(result).toBe(sql);
     });
 
     it('handles complex queries gracefully by returning unchanged on parse failure', () => {
       // Complex query that might not parse with legacy ANTLR
       const sql = 'WITH RECURSIVE cte AS (...) SELECT * FROM cte';
-      const result = SQLFilterUtils.insertWhereClause(sql, 'logs', where);
+      const result = SQLFilterUtils.insertWhereClause(sql, where);
       expect(result).toBe(sql); // Should return unchanged rather than break
-    });
-  });
-
-  describe('wrapWithFilter', () => {
-    it('wraps SQL in an outer SELECT with the predicate', () => {
-      const result = SQLFilterUtils.wrapWithFilter('SELECT * FROM logs', "`host` = 'a'");
-      expect(result).toBe("SELECT * FROM (SELECT * FROM logs) AS _wrap WHERE `host` = 'a'");
     });
   });
 });

@@ -159,6 +159,8 @@ export class QueryEnhancementsPlugin
     queryString.getLanguageService().registerLanguage(pplLanguageConfig);
 
     // Register SQL language configuration
+    // TODO: once analytics engine support lands, gate SQL language registration
+    // on dataset type so SQL is only exposed for Mustang-backed datasets.
     const sqlLanguageConfig: LanguageConfig = {
       id: 'SQL',
       title: 'OpenSearch SQL',

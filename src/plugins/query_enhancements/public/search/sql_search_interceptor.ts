@@ -5,9 +5,8 @@
 
 import { trimEnd } from 'lodash';
 import { ApplicationStart, CoreStart } from 'opensearch-dashboards/public';
-import { first } from 'rxjs/operators';
 import { from, Observable, throwError } from 'rxjs';
-import { catchError, switchMap } from 'rxjs/operators';
+import { catchError, first, switchMap } from 'rxjs/operators';
 import {
   DataPublicPluginStart,
   IOpenSearchDashboardsSearchRequest,
@@ -105,7 +104,7 @@ export class SQLSearchInterceptor extends SearchInterceptor {
 
     return {
       ...nextQuery,
-      query: SQLFilterUtils.insertWhereClause(nextQuery.query, dataset.title, whereClause),
+      query: SQLFilterUtils.insertWhereClause(nextQuery.query, whereClause),
     };
   }
 
