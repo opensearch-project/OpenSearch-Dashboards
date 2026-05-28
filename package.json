@@ -33,6 +33,7 @@
         ".eslintcache",
         ".node_binaries",
         "src/plugins/*/target",
+        "src/plugins/*/node_modules/.cache",
         "src/core/target",
         "src/test_utils/target"
       ]
