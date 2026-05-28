@@ -141,7 +141,7 @@ export const MetricsVisTab = React.memo(() => {
 
   const renderTransformPanel = () => {
     return (
-      <EuiPanel paddingSize="m" hasBorder={false} hasShadow={false}>
+      <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false}>
         <EuiAccordion
           id="metricsVisTab__transformPanel"
           buttonContent={

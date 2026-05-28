@@ -95,7 +95,7 @@ export const TransformPanel = ({ transformationService }: TransformPanelProps) =
 
   return (
     <EuiPanel
-      paddingSize="m"
+      paddingSize="s"
       hasBorder={false}
       hasShadow={false}
       borderRadius="none"

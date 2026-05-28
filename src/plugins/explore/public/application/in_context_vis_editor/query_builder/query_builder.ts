@@ -36,6 +36,7 @@ import {
   showMissingPromptWarning,
   showMissingDatasetWarning,
   handleAgentError,
+  normalizeHistoryStateForComparison,
 } from './utils';
 import { getServices as getExploreServices } from '../../../services/services';
 import {
@@ -213,6 +214,7 @@ export class QueryBuilder {
     this.setupGlobalDataRangeSync();
     this.setupQuerySync();
     this.setupLanguageSync();
+    this.setupHistorySync();
     // start sync until dataview is ready
     await this.waitForDatasetReady();
     this.startUrlSync();
@@ -245,6 +247,68 @@ export class QueryBuilder {
     if (urlStateStorage) {
       urlStateStorage.set(place, state, { replace: true });
     }
+  }
+
+  // Listen to browser history changes to sync URL state back
+  private setupHistorySync() {
+    const scopedHistory = this.getServices().scopedHistory;
+    const urlStateStorage = this.getServices().osdUrlStateStorage;
+    if (!scopedHistory || !urlStateStorage) return;
+
+    let syncVersion = 0;
+    const unlisten = scopedHistory.listen((_location, historyAction) => {
+      // Only handle POP actions (back/forward and manual URL edits)
+      if (historyAction === 'REPLACE' || historyAction === 'PUSH') {
+        return;
+      }
+
+      const urlQueryState = urlStateStorage.get<QueryState>(QUERY_BUILDER_QUERY_STATE_KEY);
+      const urlEditorState = urlStateStorage.get<Partial<QueryEditorState>>(QUERY_EDITOR_STATE_KEY);
+      const urlGlobalState = urlStateStorage.get<{ time?: { from: string; to: string } }>('_g');
+      const currentQueryState = this.queryState$.value;
+      const currentEditorState = this.queryEditorState$.value;
+
+      const normalizedUrl = normalizeHistoryStateForComparison(
+        urlQueryState,
+        urlEditorState,
+        urlGlobalState
+      );
+      const normalizedCurrent = normalizeHistoryStateForComparison(
+        currentQueryState,
+        currentEditorState,
+        { time: currentEditorState.dateRange }
+      );
+
+      if (isEqual(normalizedUrl, normalizedCurrent)) return;
+
+      if (urlEditorState) {
+        this.updateQueryEditorState({
+          ...(urlEditorState.languageType && { languageType: urlEditorState.languageType }),
+          ...(urlEditorState.isQueryEditorDirty !== undefined && {
+            isQueryEditorDirty: urlEditorState.isQueryEditorDirty,
+          }),
+        });
+      }
+
+      if (urlGlobalState?.time) {
+        this.updateQueryEditorState({ dateRange: urlGlobalState.time });
+      }
+
+      const version = ++syncVersion;
+      // Wait for setupLanguageSync to finish loading the dataset, then restore
+      // query state. This order matters: setupLanguageSync resets query to '',
+      // so we apply the URL query after
+      this.waitForDatasetReady().then(async () => {
+        if (version !== syncVersion) return;
+        if (urlQueryState) {
+          this.updateQueryState(urlQueryState);
+          this.getEditorRef()?.setValue(urlQueryState.query);
+        }
+        this.executeQuery();
+      });
+    });
+
+    this.subscriptions.push(new Subscription(unlisten));
   }
 
   // Subscribe to sync date range with global time filter
@@ -563,11 +627,11 @@ export class QueryBuilder {
       queryStatus: initialQueryStatus,
     });
 
-    if (
-      this.datasetView$.value.isLoading ||
-      this.datasetView$.value.error ||
-      !this.datasetView$.value.dataView
-    ) {
+    if (this.datasetView$.value.isLoading) {
+      await this.waitForDatasetReady();
+    }
+
+    if (this.datasetView$.value.error || !this.datasetView$.value.dataView) {
       return;
     }
     const currentQuery = this.queryState$.value;
