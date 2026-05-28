@@ -21,6 +21,12 @@ $bar-gauge-radius: 2px;
   }
 }
 
+.bar-gauge-item-tooltip {
+  flex: 1;
+  display: flex;
+  min-width: 0;
+}
+
 // bar gauge item
 .bar-gauge-item {
   display: flex;
@@ -37,7 +43,7 @@ $bar-gauge-radius: 2px;
     flex-direction: column;
     height: 100%;
     min-width: 40px; // don't shrink below this — container scrolls
-    overflow: hidden;
+    overflow: visible;
   }
 }
 

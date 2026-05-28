@@ -138,11 +138,9 @@ export const BarGaugeItem: React.FC<BarGaugeItemProps> = ({
     </div>
   );
 
-  const categoryLabel = (
-    <EuiToolTip position="bottom" content={category}>
-      <div className="bar-gauge-label">{category} </div>
-    </EuiToolTip>
-  );
+  const categoryLabel = <div className="bar-gauge-label">{category} </div>;
+
+  const tooltipContent = `${category}: ${displayValue}`;
 
   const renderVertical = () => {
     return (
@@ -177,5 +175,19 @@ export const BarGaugeItem: React.FC<BarGaugeItemProps> = ({
     );
   };
 
-  return isHorizontal ? renderHorizontal() : renderVertical();
+  const content = isHorizontal ? renderHorizontal() : renderVertical();
+
+  if (styles.tooltipOptions.mode === 'hidden') {
+    return content;
+  }
+
+  return (
+    <EuiToolTip
+      position={isHorizontal ? 'top' : 'right'}
+      content={tooltipContent}
+      anchorClassName="bar-gauge-item-tooltip"
+    >
+      {content}
+    </EuiToolTip>
+  );
 };
