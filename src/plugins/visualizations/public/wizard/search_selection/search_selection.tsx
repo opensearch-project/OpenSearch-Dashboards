@@ -37,6 +37,7 @@ import { ApplicationStart, IUiSettingsClient, SavedObjectsStart } from '../../..
 
 import { SavedObjectFinderUi } from '../../../../saved_objects/public';
 import { VisType } from '../../vis_types';
+import { UNSUPPORTED_ENGINE_TYPES } from '../../../../data/common';
 
 interface SearchSelectionProps {
   onSearchSelected: (searchId: string, searchType: string) => void;
@@ -47,8 +48,29 @@ interface SearchSelectionProps {
   application: ApplicationStart;
 }
 
-export class SearchSelection extends React.Component<SearchSelectionProps> {
+interface SearchSelectionState {
+  indexPatternIds: Set<string>;
+}
+
+export class SearchSelection extends React.Component<SearchSelectionProps, SearchSelectionState> {
   private fixedPageSize: number = 8;
+
+  constructor(props: SearchSelectionProps) {
+    super(props);
+    this.state = {
+      indexPatternIds: new Set(),
+    };
+  }
+
+  async componentDidMount() {
+    const indexPatternList = await this.props.data.indexPatterns.getCache({
+      excludeEngineTypes: UNSUPPORTED_ENGINE_TYPES,
+    });
+
+    this.setState({
+      indexPatternIds: new Set(indexPatternList?.map((indexpattern) => indexpattern.id)),
+    });
+  }
 
   public render() {
     return (
@@ -89,6 +111,15 @@ export class SearchSelection extends React.Component<SearchSelectionProps> {
                   }
                 ),
                 includeFields: ['kibanaSavedObjectMeta'],
+                showSavedObject: (savedSearch) => {
+                  const indexPatternRef = savedSearch.references?.find(
+                    (ref: any) => ref.type === 'index-pattern'
+                  );
+                  if (!indexPatternRef) {
+                    return true;
+                  }
+                  return this.state.indexPatternIds.has(indexPatternRef.id);
+                },
               },
               {
                 type: 'index-pattern',
@@ -99,6 +130,9 @@ export class SearchSelection extends React.Component<SearchSelectionProps> {
                     defaultMessage: 'Index pattern',
                   }
                 ),
+                showSavedObject: (index) => {
+                  return this.state.indexPatternIds.has(index.id);
+                },
               },
             ]}
             fixedPageSize={this.fixedPageSize}

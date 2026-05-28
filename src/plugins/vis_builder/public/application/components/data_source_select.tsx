@@ -5,6 +5,7 @@
 
 import { i18n } from '@osd/i18n';
 import { EuiIcon } from '@elastic/eui';
+import React, { useEffect } from 'react';
 import { SearchableDropdown, SearchableDropdownOption } from './searchable_dropdown';
 import { useIndexPatterns } from '../utils/use';
 import { useTypedDispatch } from '../utils/state_management';
@@ -27,6 +28,14 @@ function toSearchableDropdownOption(indexPattern: IndexPattern): SearchableDropd
 export const DataSourceSelect = () => {
   const { indexPatterns, loading, error, selected } = useIndexPatterns();
   const dispatch = useTypedDispatch();
+
+  // If no index pattern is selected (e.g., the selected one was filtered out as AnalyticEngine),
+  // automatically select the first available one
+  useEffect(() => {
+    if (!loading && !error && !selected && indexPatterns.length > 0 && indexPatterns[0].id) {
+      dispatch(setIndexPattern(indexPatterns[0].id));
+    }
+  }, [loading, error, selected, indexPatterns, dispatch]);
 
   // TODO: Should be a standard EUI component
   return (
