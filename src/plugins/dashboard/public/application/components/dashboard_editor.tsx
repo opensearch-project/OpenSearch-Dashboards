@@ -90,9 +90,7 @@ export const DashboardEditor = () => {
       .then((ws) => {
         const features = ws?.features;
         setIsExploreWorkspace(
-          (features &&
-            (isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.observability.id, features) ||
-              isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.all.id, features))) ??
+          (features && isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.observability.id, features)) ??
             false
         );
       });
