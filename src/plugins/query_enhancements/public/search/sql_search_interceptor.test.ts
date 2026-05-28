@@ -205,34 +205,41 @@ describe('SQLSearchInterceptor', () => {
       params: { body: {} },
     };
 
-    it('returns the query unchanged when the dataset has no timeFieldName', () => {
+    beforeEach(() => {
+      // Default to a non-dashboards app so filter-manager merging is skipped.
+      (mockCoreStart.application.currentAppId$ as any) = of('explore/logs');
+      (sqlSearchInterceptor as any).application = mockCoreStart.application;
+      (mockDataService.query.filterManager.getFilters as jest.Mock).mockReturnValue([]);
+    });
+
+    it('returns the query unchanged when the dataset has no timeFieldName', async () => {
       const query = {
         language: 'SQL',
         query: 'SELECT * FROM test_index',
         dataset: { type: 'DEFAULT', title: 'test_index' },
       };
-      const result = (sqlSearchInterceptor as any).buildQuery(query, baseRequest);
+      const result = await (sqlSearchInterceptor as any).buildQuery(query, baseRequest);
       expect(result).toBe(query);
     });
 
-    it('returns the query unchanged when enableTimeFiltering is not set', () => {
+    it('returns the query unchanged when enableTimeFiltering is not set', async () => {
       const query = {
         language: 'SQL',
         query: 'SELECT * FROM test_index',
         dataset: { type: 'DEFAULT', title: 'test_index', timeFieldName: '@timestamp' },
       };
-      const result = (sqlSearchInterceptor as any).buildQuery(query, baseRequest);
+      const result = await (sqlSearchInterceptor as any).buildQuery(query, baseRequest);
       expect(result).toBe(query);
     });
 
-    it('wraps the user query with a CTE that shadows the dataset table', () => {
+    it('wraps the user query with a CTE that shadows the dataset table', async () => {
       const query = {
         language: 'SQL',
         query: 'SELECT * FROM test_index',
         dataset: { type: 'DEFAULT', title: 'test_index', timeFieldName: '@timestamp' },
       };
       const request = { params: { body: { enableTimeFiltering: true } } };
-      const result = (sqlSearchInterceptor as any).buildQuery(query, request);
+      const result = await (sqlSearchInterceptor as any).buildQuery(query, request);
 
       expect(result.query).toBe(
         "WITH `test_index` AS (SELECT * FROM `test_index` WHERE `@timestamp` >= '2023-01-01 00:00:00.000' " +
@@ -240,14 +247,14 @@ describe('SQLSearchInterceptor', () => {
       );
     });
 
-    it('wraps queries with arbitrary shapes (JOIN) without parsing them', () => {
+    it('wraps queries with arbitrary shapes (JOIN) without parsing them', async () => {
       const query = {
         language: 'SQL',
         query: 'SELECT * FROM test_index JOIN errors ON test_index.id = errors.log_id',
         dataset: { type: 'DEFAULT', title: 'test_index', timeFieldName: '@timestamp' },
       };
       const request = { params: { body: { enableTimeFiltering: true } } };
-      const result = (sqlSearchInterceptor as any).buildQuery(query, request);
+      const result = await (sqlSearchInterceptor as any).buildQuery(query, request);
 
       expect(result.query).toBe(
         "WITH `test_index` AS (SELECT * FROM `test_index` WHERE `@timestamp` >= '2023-01-01 00:00:00.000' " +
@@ -256,14 +263,14 @@ describe('SQLSearchInterceptor', () => {
       );
     });
 
-    it("merges into the user's existing WITH clause", () => {
+    it("merges into the user's existing WITH clause", async () => {
       const query = {
         language: 'SQL',
         query: 'WITH foo AS (SELECT 1) SELECT * FROM foo, test_index',
         dataset: { type: 'DEFAULT', title: 'test_index', timeFieldName: '@timestamp' },
       };
       const request = { params: { body: { enableTimeFiltering: true } } };
-      const result = (sqlSearchInterceptor as any).buildQuery(query, request);
+      const result = await (sqlSearchInterceptor as any).buildQuery(query, request);
 
       expect(result.query).toBe(
         "WITH `test_index` AS (SELECT * FROM `test_index` WHERE `@timestamp` >= '2023-01-01 00:00:00.000' " +
@@ -271,7 +278,7 @@ describe('SQLSearchInterceptor', () => {
       );
     });
 
-    it('returns the query unchanged on CTE name collision with the user', () => {
+    it('returns the query unchanged on CTE name collision with the user', async () => {
       // User already has a CTE named `test_index`; adding ours would be a
       // duplicate-name error, so we leave the query alone.
       const query = {
@@ -280,9 +287,74 @@ describe('SQLSearchInterceptor', () => {
         dataset: { type: 'DEFAULT', title: 'test_index', timeFieldName: '@timestamp' },
       };
       const request = { params: { body: { enableTimeFiltering: true } } };
-      const result = (sqlSearchInterceptor as any).buildQuery(query, request);
+      const result = await (sqlSearchInterceptor as any).buildQuery(query, request);
 
       expect(result.query).toBe('WITH test_index AS (SELECT 1) SELECT * FROM test_index');
+    });
+  });
+
+  describe('buildQuery (private — filterManager merging on dashboards)', () => {
+    const baseRequest: IOpenSearchDashboardsSearchRequest = {
+      params: { body: {} },
+    };
+
+    const phraseFilter = (field: string, value: string) => ({
+      meta: {
+        alias: null,
+        disabled: false,
+        index: 'mock-index',
+        negate: false,
+        type: 'phrase',
+        params: { query: value },
+        key: field,
+      },
+      query: { match_phrase: { [field]: value } },
+    });
+
+    beforeEach(() => {
+      (mockCoreStart.application.currentAppId$ as any) = of('dashboards');
+      (sqlSearchInterceptor as any).application = mockCoreStart.application;
+    });
+
+    it('leaves the query alone when there are no filters', async () => {
+      (mockDataService.query.filterManager.getFilters as jest.Mock).mockReturnValue([]);
+      const query = {
+        language: 'SQL',
+        query: 'SELECT * FROM test_index',
+        dataset: { type: 'DEFAULT', title: 'test_index' },
+      };
+      const result = await (sqlSearchInterceptor as any).buildQuery(query, baseRequest);
+      expect(result).toBe(query);
+    });
+
+    it('wraps the query with filterManager filters when on dashboards', async () => {
+      (mockDataService.query.filterManager.getFilters as jest.Mock).mockReturnValue([
+        phraseFilter('host', 'a'),
+      ]);
+      const query = {
+        language: 'SQL',
+        query: 'SELECT * FROM test_index',
+        dataset: { type: 'DEFAULT', title: 'test_index' },
+      };
+      const result = await (sqlSearchInterceptor as any).buildQuery(query, baseRequest);
+      expect(result.query).toBe(
+        "SELECT * FROM (SELECT * FROM test_index) AS _wrap WHERE `host` = 'a'"
+      );
+    });
+
+    it('skips filterManager filters when not on a supported app', async () => {
+      (mockCoreStart.application.currentAppId$ as any) = of('explore/logs');
+      (sqlSearchInterceptor as any).application = mockCoreStart.application;
+      (mockDataService.query.filterManager.getFilters as jest.Mock).mockReturnValue([
+        phraseFilter('host', 'a'),
+      ]);
+      const query = {
+        language: 'SQL',
+        query: 'SELECT * FROM test_index',
+        dataset: { type: 'DEFAULT', title: 'test_index' },
+      };
+      const result = await (sqlSearchInterceptor as any).buildQuery(query, baseRequest);
+      expect(result).toBe(query);
     });
   });
 
@@ -290,7 +362,7 @@ describe('SQLSearchInterceptor', () => {
     it('passes the rewritten query to fetch', async () => {
       const buildQuerySpy = jest
         .spyOn(sqlSearchInterceptor as any, 'buildQuery')
-        .mockReturnValue({ language: 'SQL', query: 'rewritten', dataset: {} });
+        .mockResolvedValue({ language: 'SQL', query: 'rewritten', dataset: {} });
 
       const request: IOpenSearchDashboardsSearchRequest = {
         params: {
@@ -313,6 +385,8 @@ describe('SQLSearchInterceptor', () => {
         .runSearch(request, signal, SEARCH_STRATEGY.SQL)
         .subscribe(() => {});
 
+      await flushPromises();
+
       expect(buildQuerySpy).toHaveBeenCalled();
       expect(mockFetch).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -324,7 +398,7 @@ describe('SQLSearchInterceptor', () => {
       );
     });
 
-    it('falls back to queryString.getQuery when the request has no inline query', () => {
+    it('falls back to queryString.getQuery when the request has no inline query', async () => {
       const fallbackQuery = {
         language: 'SQL',
         query: 'SELECT * FROM fallback',
@@ -334,11 +408,13 @@ describe('SQLSearchInterceptor', () => {
 
       const buildQuerySpy = jest
         .spyOn(sqlSearchInterceptor as any, 'buildQuery')
-        .mockReturnValue(fallbackQuery);
+        .mockResolvedValue(fallbackQuery);
 
       (sqlSearchInterceptor as any)
         .runSearch({ params: { body: {} } }, undefined, SEARCH_STRATEGY.SQL)
         .subscribe(() => {});
+
+      await flushPromises();
 
       expect(buildQuerySpy).toHaveBeenCalledWith(fallbackQuery, expect.anything());
     });

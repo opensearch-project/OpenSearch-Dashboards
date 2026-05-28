@@ -4,9 +4,10 @@
  */
 
 import { trimEnd } from 'lodash';
-import { CoreStart } from 'opensearch-dashboards/public';
-import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { ApplicationStart, CoreStart } from 'opensearch-dashboards/public';
+import { first } from 'rxjs/operators';
+import { from, Observable, throwError } from 'rxjs';
+import { catchError, switchMap } from 'rxjs/operators';
 import {
   DataPublicPluginStart,
   IOpenSearchDashboardsSearchRequest,
@@ -28,8 +29,11 @@ import { QueryEnhancementsPluginStartDependencies } from '../types';
 import { SQLFilterUtils } from './filters';
 
 export class SQLSearchInterceptor extends SearchInterceptor {
+  private static readonly filterManagerSupportedAppNames = ['dashboards'];
+
   protected queryService!: DataPublicPluginStart['query'];
   protected notifications!: CoreStart['notifications'];
+  private application!: ApplicationStart;
 
   constructor(deps: SearchInterceptorDeps) {
     super(deps);
@@ -37,6 +41,7 @@ export class SQLSearchInterceptor extends SearchInterceptor {
     deps.startServices.then(([coreStart, depsStart]) => {
       this.queryService = (depsStart as QueryEnhancementsPluginStartDependencies).data.query;
       this.notifications = coreStart.notifications;
+      this.application = coreStart.application;
     });
   }
 
@@ -59,19 +64,38 @@ export class SQLSearchInterceptor extends SearchInterceptor {
     const query =
       request.params?.body?.query?.queries?.[0] || this.queryService.queryString.getQuery();
 
-    return fetch(context, this.buildQuery(query, request)).pipe(
+    return from(this.buildQuery(query, request)).pipe(
+      switchMap((finalQuery) => fetch(context, finalQuery)),
       catchError((error) => {
         return throwError(error);
       })
     );
   }
 
-  private buildQuery(query: Query, request: IOpenSearchDashboardsSearchRequest): Query {
+  private async buildQuery(
+    query: Query,
+    request: IOpenSearchDashboardsSearchRequest
+  ): Promise<Query> {
     const dataset = query.dataset;
     const enableTimeFiltering = request.params?.body?.enableTimeFiltering;
 
+    let nextQuery = query;
+
+    // Apply filterManager filters (e.g. from the dashboard top filter bar) on
+    // supported apps so chip filters affect SQL results.
+    const appId = await this.application.currentAppId$.pipe(first()).toPromise();
+    if (appId && SQLSearchInterceptor.filterManagerSupportedAppNames.includes(appId)) {
+      const filters = this.queryService.filterManager.getFilters();
+      if (filters?.length) {
+        nextQuery = {
+          ...nextQuery,
+          query: SQLFilterUtils.addFiltersToQuery(nextQuery.query, filters),
+        };
+      }
+    }
+
     // Only apply time filtering when explicitly enabled (e.g., by Explore)
-    if (!dataset?.timeFieldName || !enableTimeFiltering) return query;
+    if (!dataset?.timeFieldName || !enableTimeFiltering) return nextQuery;
 
     const timeRange = this.queryService.timefilter.timefilter.getTime();
     const { fromDate, toDate } = formatTimePickerDate(timeRange, 'YYYY-MM-DD HH:mm:ss.SSS');
@@ -80,8 +104,8 @@ export class SQLSearchInterceptor extends SearchInterceptor {
     }\` <= '${formatDate(toDate)}'`;
 
     return {
-      ...query,
-      query: SQLFilterUtils.wrapWithTimeFilterCTE(query.query, dataset.title, whereClause),
+      ...nextQuery,
+      query: SQLFilterUtils.wrapWithTimeFilterCTE(nextQuery.query, dataset.title, whereClause),
     };
   }
 

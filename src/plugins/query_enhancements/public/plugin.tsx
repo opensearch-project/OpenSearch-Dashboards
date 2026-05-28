@@ -172,7 +172,18 @@ export class QueryEnhancementsPlugin
       getQueryString: (currentQuery: Query) =>
         `SELECT * FROM ${currentQuery.dataset?.title} LIMIT 10`,
       addFiltersToQuery: SQLFilterUtils.addFiltersToQuery,
-      fields: { sortable: false, filterable: false, visualizable: false },
+      fields: {
+        sortable: false,
+        get filterable() {
+          const currentAppId = currentAppId$.getValue();
+          // SQL filters are supported in explore and dashboards. Return undefined
+          // to use the `filterable` value from field definitions.
+          if (currentAppId?.startsWith('explore/') || currentAppId === 'dashboards')
+            return undefined;
+          return false;
+        },
+        visualizable: false,
+      },
       docLink: {
         title: i18n.translate('queryEnhancements.sqlLanguage.docLink', {
           defaultMessage: 'SQL documentation',
