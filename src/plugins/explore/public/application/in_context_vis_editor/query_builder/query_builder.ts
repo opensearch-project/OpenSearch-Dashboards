@@ -36,6 +36,7 @@ import {
   showMissingPromptWarning,
   showMissingDatasetWarning,
   handleAgentError,
+  normalizeHistoryStateForComparison,
 } from './utils';
 import { getServices as getExploreServices } from '../../../services/services';
 import {
@@ -216,6 +217,7 @@ export class QueryBuilder {
     // start sync until dataview is ready
     await this.waitForDatasetReady();
     this.startUrlSync();
+    this.setupHistorySync();
     this.setIsInitialized(true);
   }
 
@@ -232,6 +234,7 @@ export class QueryBuilder {
     ])
       .pipe(debounceTime(500))
       .subscribe(([queryState, editorState]) => {
+        // if (this.isRestoringFromHistory) return;
         this.syncToUrl(QUERY_BUILDER_QUERY_STATE_KEY, queryState);
         this.syncToUrl(QUERY_EDITOR_STATE_KEY, editorState);
       });
@@ -245,6 +248,59 @@ export class QueryBuilder {
     if (urlStateStorage) {
       urlStateStorage.set(place, state, { replace: true });
     }
+  }
+
+  private setupHistorySync() {
+    const scopedHistory = this.getServices().scopedHistory;
+    const urlStateStorage = this.getServices().osdUrlStateStorage;
+    if (!scopedHistory || !urlStateStorage) return;
+
+    const unlisten = scopedHistory.listen((_location, historyAction) => {
+      if (historyAction === 'REPLACE' || historyAction === 'PUSH') {
+        return;
+      }
+
+      const urlQueryState = urlStateStorage.get<QueryState>(QUERY_BUILDER_QUERY_STATE_KEY);
+      const urlEditorState = urlStateStorage.get<Partial<QueryEditorState>>(QUERY_EDITOR_STATE_KEY);
+      const urlGlobalState = urlStateStorage.get<{ time?: { from: string; to: string } }>('_g');
+      const currentQueryState = this.queryState$.value;
+      const currentEditorState = this.queryEditorState$.value;
+
+      const normalizedUrl = normalizeHistoryStateForComparison(
+        urlQueryState,
+        urlEditorState,
+        urlGlobalState
+      );
+      const normalizedCurrent = normalizeHistoryStateForComparison(
+        currentQueryState,
+        currentEditorState,
+        { time: currentEditorState.dateRange }
+      );
+
+      if (isEqual(normalizedUrl, normalizedCurrent)) return;
+
+      if (urlQueryState) {
+        this.updateQueryState(urlQueryState);
+        this.getEditorRef()?.setValue(urlQueryState.query);
+      }
+
+      if (urlEditorState) {
+        this.updateQueryEditorState({
+          ...(urlEditorState.languageType && { languageType: urlEditorState.languageType }),
+          ...(urlEditorState.isQueryEditorDirty !== undefined && {
+            isQueryEditorDirty: urlEditorState.isQueryEditorDirty,
+          }),
+        });
+      }
+
+      if (urlGlobalState?.time) {
+        this.updateQueryEditorState({ dateRange: urlGlobalState.time });
+      }
+
+      this.waitForDatasetReady().then(() => this.executeQuery());
+    });
+
+    this.subscriptions.push(new Subscription(unlisten));
   }
 
   // Subscribe to sync date range with global time filter
