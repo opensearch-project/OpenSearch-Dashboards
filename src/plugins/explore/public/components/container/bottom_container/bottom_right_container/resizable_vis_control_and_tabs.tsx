@@ -5,7 +5,7 @@
 
 import './resizable_vis_control_and_tabs.scss';
 
-import { useRef } from 'react';
+import React, { useRef } from 'react';
 import { useObservable } from 'react-use';
 import { useSelector } from 'react-redux';
 import { i18n } from '@osd/i18n';
@@ -26,7 +26,7 @@ import { ExploreServices } from '../../../../types';
 import { EXPLORE_VISUALIZATION_TAB_ID } from '../../../../../common';
 import { selectActiveTab } from '../../../../application/utils/state_management/selectors';
 
-export const ResizableVisControlAndTabs = () => {
+export const ResizableVisControlAndTabs = React.memo(() => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const visualizationTab = services.tabRegistry.getTab(EXPLORE_VISUALIZATION_TAB_ID);
   const visualizationTabError = useTabError(visualizationTab);
@@ -109,4 +109,4 @@ export const ResizableVisControlAndTabs = () => {
       }}
     </EuiResizableContainer>
   );
-};
+});

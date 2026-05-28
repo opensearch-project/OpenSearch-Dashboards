@@ -217,7 +217,11 @@ export class VisualizationsPlugin
     });
 
     // Register Ask AI action for visualizations
-    const askAIAction = new AskAIVisualizeEmbeddableAction(core, contextProvider);
+    const askAIAction = new AskAIVisualizeEmbeddableAction(
+      core,
+      data.indexPatterns,
+      contextProvider
+    );
     uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, askAIAction);
 
     setDataStart(data);

@@ -5,7 +5,7 @@
 
 import './metrics_vis_tab.scss';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useObservable } from 'react-use';
 import { useSelector } from 'react-redux';
 import { createPortal } from 'react-dom';
@@ -22,6 +22,7 @@ import {
   EuiTitle,
   EuiHorizontalRule,
   EuiPanel,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { VisualizationContainer } from '../visualizations/visualization_container';
@@ -64,7 +65,7 @@ const QUICK_CHART_TYPES: Array<{ id: ChartType; label: string; iconType: string 
   },
 ];
 
-export const MetricsVisTab = () => {
+export const MetricsVisTab = React.memo(() => {
   const [slot, setSlot] = useState<HTMLElement | null>(null);
   const [isSettingsCollapsed, setIsSettingsCollapsed] = useState(true);
   const [showAllSeries, setShowAllSeries] = useState(false);
@@ -141,7 +142,7 @@ export const MetricsVisTab = () => {
 
   const renderTransformPanel = () => {
     return (
-      <EuiPanel paddingSize="m" hasBorder={false} hasShadow={false}>
+      <EuiPanel paddingSize="none" hasBorder={false} hasShadow={false}>
         <EuiAccordion
           id="metricsVisTab__transformPanel"
           buttonContent={
@@ -151,9 +152,10 @@ export const MetricsVisTab = () => {
               })}
             </EuiText>
           }
-          paddingSize="m"
+          paddingSize="none"
           initialIsOpen={true}
         >
+          <EuiSpacer size="s" />
           <TransformPanel transformationService={transformationService} />
         </EuiAccordion>
       </EuiPanel>
@@ -285,4 +287,4 @@ export const MetricsVisTab = () => {
       </div>
     </div>
   );
-};
+});

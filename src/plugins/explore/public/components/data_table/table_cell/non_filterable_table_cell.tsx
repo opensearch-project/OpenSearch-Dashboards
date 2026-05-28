@@ -48,7 +48,7 @@ export const NonFilterableTableCell: React.FC<NonFilterableTableCellProps> = ({
                 document={rowData._source}
                 query={undefined}
                 indexPattern={dataset?.title}
-                metadata={{ index }}
+                metadata={{ index, dataSourceEngineType: dataset?.dataSource?.type }}
                 iconType="generate"
                 size="xs"
               />

@@ -77,6 +77,7 @@ describe('ChatWindow', () => {
       abort: jest.fn(),
       setChatWindowInstance: jest.fn(),
       clearChatWindowInstance: jest.fn(),
+      getCurrentDataSourceId: jest.fn().mockResolvedValue(undefined),
       conversationHistoryService: {
         getMemoryProvider: jest.fn().mockReturnValue({
           includeFullHistory: true,

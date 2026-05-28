@@ -830,7 +830,7 @@ export class ExplorePlugin
           }
 
           const adjustEditApp = attributes.type
-            ? `${PLUGIN_ID}/${ExploreFlavor.Logs}`
+            ? `${PLUGIN_ID}/${attributes.type ?? ExploreFlavor.Logs}`
             : VISUALIZATION_EDITOR_APP_ID;
           const adjustEditUrl = attributes.type
             ? `#/view/${encodeURIComponent(id)}` // regular explore vis

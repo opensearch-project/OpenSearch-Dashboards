@@ -181,12 +181,57 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     services.core.chat.resetThreadId()
   });
 
+  // Cache data source compatibility check to avoid network call on every message
+  const unsupportedDataSourceRef = useRef<{ dataSourceId: string | undefined; result: boolean } | null>(null);
+
+  const isUnsupportedDataSource = useCallback(async (): Promise<boolean> => {
+    try {
+      const dataSourceId = await chatService.getCurrentDataSourceId();
+      if (!dataSourceId) return false;
+      // Return cached result if data source hasn't changed
+      if (unsupportedDataSourceRef.current?.dataSourceId === dataSourceId) {
+        return unsupportedDataSourceRef.current.result;
+      }
+      const savedObjectsClient = services.core?.savedObjects?.client;
+      if (!savedObjectsClient) return false;
+      const ds = await savedObjectsClient.get<{ dataSourceEngineType?: string }>(
+        'data-source',
+        dataSourceId
+      );
+      const result = ds?.attributes?.dataSourceEngineType === 'AnalyticEngine';
+      unsupportedDataSourceRef.current = { dataSourceId, result };
+      return result;
+    } catch {
+      // Fail-open: transient errors should not block AI features
+      return false;
+    }
+  }, [chatService, services.core?.savedObjects?.client]);
+
   // Helper function to handle message streaming with observable subscription
   const subscribeToMessageStream = useCallback(async (
     messageContent: string,
     messages: Message[],
     rawMessage?: string
   ) => {
+    // Block AI features for unsupported data sources
+    if (await isUnsupportedDataSource()) {
+      const userMsg: UserMessage = {
+        id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+        role: 'user',
+        content: messageContent,
+        rawMessage: rawMessage || messageContent,
+      };
+      const systemMsg: SystemMessage = {
+        id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+        role: 'system',
+        content: i18n.translate('chat.dataSourceUnsupported', {
+          defaultMessage: 'The current data source does not support AI features.',
+        }),
+      };
+      setTimeline((prev) => [...prev, userMsg, systemMsg]);
+      return;
+    }
+
     isStreamingRef.current = true;
     setIsStreaming(true);
     setStartResponse(false);
@@ -243,7 +288,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       setIsStreaming(false);
       currentSubscriptionRef.current = null;
     }
-  }, [chatService, currentRunId, eventHandler]);
+  }, [chatService, currentRunId, eventHandler, isUnsupportedDataSource]);
 
   const handleSend = async (options?: {input?: string, messages?: Message[]}) => {
     const messageContent = options?.input ?? input.trim();
