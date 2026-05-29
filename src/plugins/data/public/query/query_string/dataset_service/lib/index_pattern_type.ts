@@ -103,7 +103,7 @@ const fetchIndexPatterns = async (client: SavedObjectsClientContract): Promise<D
     fields: ['title', 'displayName', 'timeFieldName', 'references'],
     search: `*`,
     searchFields: ['title', 'displayName'],
-    perPage: 100,
+    perPage: 10000,
   });
 
   // Get all unique data source ids from both references and index pattern IDs
