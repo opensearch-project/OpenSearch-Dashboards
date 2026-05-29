@@ -4,14 +4,14 @@
  */
 
 import { EuiPanel } from '@elastic/eui';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import moment from 'moment';
 import { useDispatch } from 'react-redux';
 
 import './visualization_container.scss';
 import { useTabResults } from '../../application/utils/hooks/use_tab_results';
 import { useSearchContext } from '../query_panel/utils/use_search_context';
-import { getVisualizationBuilder } from './visualization_builder';
+import { getVisualizationBuilder, VisState } from './visualization_builder';
 import { TimeRange } from '../../../../data/common';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../types';
@@ -22,6 +22,8 @@ import {
 } from '../../application/utils/state_management/slices';
 import { executeQueries } from '../../application/utils/state_management/actions/query_actions';
 import { AxisFieldNameMappings } from './types';
+import { useCurrentExploreId } from '../../application/utils/hooks/use_current_explore_id';
+import { useSavedExplore } from '../../application/utils/hooks/use_saved_explore';
 
 export interface UpdateVisualizationProps {
   mappings: AxisFieldNameMappings;
@@ -43,6 +45,43 @@ export interface UpdateVisualizationProps {
 // };
 
 export const VisualizationContainer = React.memo(() => {
+  const exploreId = useCurrentExploreId();
+  const { savedExplore } = useSavedExplore(exploreId);
+
+  const visState: VisState | undefined = useMemo(() => {
+    if (savedExplore?.id) {
+      const visualization = savedExplore.visualization;
+      if (visualization) {
+        const {
+          chartType,
+          params,
+          axesMapping,
+          splitField,
+          splitLayout,
+          showSplitLabel,
+          dataTransformations,
+        } = JSON.parse(visualization);
+        return {
+          chartType,
+          styleOptions: params,
+          axesMapping,
+          splitField,
+          splitLayout,
+          showSplitLabel,
+          dataTransformations,
+        };
+      }
+    }
+  }, [savedExplore?.id, savedExplore?.visualization]);
+
+  // Don't render chart if loading a saved explore, but the saved explore not yet loaded
+  if (exploreId && !savedExplore?.id) {
+    return null;
+  }
+  return <Container visState={visState} />;
+});
+
+const Container = React.memo((props: { visState?: VisState }) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const { results } = useTabResults();
   const searchContext = useSearchContext();
@@ -59,12 +98,12 @@ export const VisualizationContainer = React.memo(() => {
   }, [visualizationBuilder, results]);
 
   useEffect(() => {
-    visualizationBuilder.init();
+    visualizationBuilder.init(props.visState);
     return () => {
       // reset visualization builder
       visualizationBuilder.reset();
     };
-  }, [visualizationBuilder]);
+  }, [visualizationBuilder, props.visState]);
 
   const onSelectTimeRange = useCallback(
     (timeRange?: TimeRange) => {
