@@ -45,6 +45,7 @@ import { registerExportRoute } from './export';
 import { registerImportRoute } from './import';
 import { registerResolveImportErrorsRoute } from './resolve_import_errors';
 import { registerMigrateRoute } from './migrate';
+import { registerManagedLockRoute } from './managed_lock';
 
 export function registerRoutes({
   http,
@@ -71,6 +72,7 @@ export function registerRoutes({
   registerExportRoute(router, config);
   registerImportRoute(router, config);
   registerResolveImportErrorsRoute(router, config);
+  registerManagedLockRoute(router);
 
   const internalRouter = http.createRouter('/internal/saved_objects/');
 
