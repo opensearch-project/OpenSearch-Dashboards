@@ -30,6 +30,8 @@
 
 import { schema } from '@osd/config-schema';
 import { IRouter } from '../../http';
+import { isManagedByCode, managedLockConflictMessage } from './managed_lock';
+import { SavedObjectsErrorHelpers } from '../service';
 
 export const registerDeleteRoute = (router: IRouter) => {
   router.delete(
@@ -41,14 +43,31 @@ export const registerDeleteRoute = (router: IRouter) => {
           id: schema.string(),
         }),
         query: schema.object({
-          force: schema.maybe(schema.boolean()),
+          force: schema.boolean({ defaultValue: false }),
         }),
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
       const { type, id } = req.params;
       const { force } = req.query;
-      const result = await context.core.savedObjects.client.delete(type, id, { force });
+
+      // Check managed lock before allowing delete
+      if (!force) {
+        try {
+          const existing = await context.core.savedObjects.client.get(type, id);
+          if (isManagedByCode(existing.attributes as Record<string, unknown>)) {
+            return res.conflict({ body: managedLockConflictMessage(type, id) });
+          }
+        } catch (e: any) {
+          if (!SavedObjectsErrorHelpers.isNotFoundError(e)) {
+            throw e;
+          }
+        }
+      }
+
+      // Do not forward `force` to the client delete — it has a different meaning
+      // (namespace-agnostic deletion). The lock override is handled above.
+      const result = await context.core.savedObjects.client.delete(type, id);
       return res.ok({ body: result });
     })
   );
