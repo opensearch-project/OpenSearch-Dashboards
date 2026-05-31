@@ -41,8 +41,23 @@ import { IndexMapping } from '../../mappings';
 import { SavedObjectsMigrationVersion } from '../../types';
 import { AliasAction, RawDoc } from './call_cluster';
 import { SavedObjectsRawDocSource } from '../../serialization';
+import { MigrationRetryConfig } from './migration_reconciliation';
+import { readMigrationSentinel, MIGRATION_SENTINEL_TYPE } from './migration_sentinel';
+import { SavedObjectsMigrationLogger } from './migration_logger';
 
 const settings = { number_of_shards: 1, auto_expand_replicas: '0-1' };
+
+/**
+ * Default retry config applied to `write` calls when no config is passed.
+ * Matches the `savedObjectsMigrationConfig.retry` schema defaults.
+ */
+const DEFAULT_RETRY_CONFIG: MigrationRetryConfig = {
+  enabled: true,
+  maxRetries: 5,
+  initialBackoffMs: 1000,
+  maxBackoffMs: 30000,
+  clusterEventTimeoutMs: 120000,
+};
 
 export interface FullIndexInfo {
   aliases: { [name: string]: object };
@@ -123,38 +138,152 @@ export function reader(
 }
 
 /**
- * Writes the specified documents to the index, throws an exception
- * if any of the documents fail to save.
+ * Writes the specified documents to the index. Retries transient bulk-item
+ * errors (503 / 429 / process_cluster_event_timeout_exception /
+ * cluster_block_exception / "failed to process cluster event" reasons) with
+ * bounded exponential backoff before throwing. Non-retriable errors throw
+ * immediately.
+ *
+ * A single transient 503 from OS on `put-mapping` used to crash the entire
+ * migration. With retries, the same condition now auto-recovers after a
+ * brief wait.
  *
  * @param {CallCluster} callCluster
  * @param {string} index
  * @param {RawDoc[]} docs
+ * @param {MigrationRetryConfig} retryConfig - optional; defaults to the
+ *   schema defaults. Pass `{ enabled: false, ... }` to force legacy
+ *   single-shot behavior for callers that have their own retry layer.
  */
-export async function write(client: MigrationOpenSearchClient, index: string, docs: RawDoc[]) {
-  const { body } = await client.bulk({
-    body: docs.reduce((acc: object[], doc: RawDoc) => {
-      acc.push({
-        index: {
-          _id: doc._id,
-          _index: index,
-        },
+export async function write(
+  client: MigrationOpenSearchClient,
+  index: string,
+  docs: RawDoc[],
+  retryConfig: MigrationRetryConfig = DEFAULT_RETRY_CONFIG
+) {
+  let attempt = 0;
+  let remainingDocs = docs;
+  const retryHistory: Array<{ attempt: number; reason: string; type?: string }> = [];
+
+  while (true) {
+    const body = buildBulkBody(index, remainingDocs);
+    const { body: resp } = await client.bulk({ body });
+
+    const items = (resp?.items ?? []) as Array<{
+      index?: {
+        _id?: string;
+        status?: number;
+        error?: { type?: string; reason?: string };
+      };
+    }>;
+
+    // Bucket items by (ok | retriable-error | fatal-error). The response's
+    // items[] is in the same order as the request's docs[] entries, so the
+    // index in items[] maps directly to remainingDocs[i].
+    const retriable: RawDoc[] = [];
+    let firstFatal: { _id?: string; error?: { type?: string; reason?: string } } | null = null;
+    let firstRetriable: { type?: string; reason?: string } | null = null;
+    for (let i = 0; i < items.length; i++) {
+      const op = items[i].index;
+      if (!op || !op.error) continue; // succeeded
+      if (isRetriableBulkItemError(op)) {
+        retriable.push(remainingDocs[i]);
+        if (!firstRetriable) firstRetriable = op.error;
+      } else if (!firstFatal) {
+        firstFatal = { _id: op._id, error: op.error };
+      }
+    }
+
+    if (firstFatal) {
+      const reason = firstFatal.error?.reason ?? 'unknown bulk error';
+
+      const exception: any = new Error(reason);
+      exception.detail = { index: { _id: firstFatal._id, error: firstFatal.error } };
+      throw exception;
+    }
+
+    if (retriable.length === 0) {
+      return;
+    }
+
+    if (!retryConfig.enabled || attempt >= retryConfig.maxRetries) {
+      retryHistory.push({
+        attempt: attempt + 1,
+        reason: firstRetriable?.reason ?? 'transient error',
+        type: firstRetriable?.type,
       });
 
-      acc.push(doc._source);
+      const exception: any = new Error(
+        `Bulk write to ${index} failed after ${retryHistory.length} attempt(s); ` +
+          `last error: ${firstRetriable?.reason ?? 'transient error'}. ` +
+          `Retry history: ${JSON.stringify(retryHistory)}`
+      );
+      exception.detail = { index: { error: firstRetriable } };
+      exception.retryHistory = retryHistory;
+      throw exception;
+    }
 
-      return acc;
-    }, []),
-  });
+    attempt++;
+    retryHistory.push({
+      attempt,
+      reason: firstRetriable?.reason ?? 'transient error',
+      type: firstRetriable?.type,
+    });
 
-  const err = _.find(body.items, 'index.error.reason');
-
-  if (!err) {
-    return;
+    const backoff = computeBackoff(attempt, retryConfig.initialBackoffMs, retryConfig.maxBackoffMs);
+    remainingDocs = retriable;
+    await sleep(backoff);
   }
+}
 
-  const exception: any = new Error(err.index!.error!.reason);
-  exception.detail = err;
-  throw exception;
+function buildBulkBody(index: string, docs: RawDoc[]): object[] {
+  return docs.reduce((acc: object[], doc: RawDoc) => {
+    acc.push({
+      index: {
+        _id: doc._id,
+        _index: index,
+      },
+    });
+    acc.push(doc._source);
+    return acc;
+  }, []);
+}
+
+/**
+ * A bulk-item error is considered retriable if ANY of these match. (Union,
+ * not intersection — a 503 alone is enough to retry.)
+ *
+ * Covers transient cluster-state-stall failures that can surface as
+ * per-item errors on _bulk / put-mapping paths:
+ *   - HTTP 503 / 429 (server-side overload or throttling)
+ *   - `process_cluster_event_timeout_exception` (cluster-manager commit stall)
+ *   - `cluster_block_exception` (transient blocks; bounded by maxRetries)
+ *   - `cluster_manager_not_discovered_exception` (master election in flight)
+ */
+export function isRetriableBulkItemError(op: {
+  status?: number;
+  error?: { type?: string; reason?: string };
+}): boolean {
+  if (!op || !op.error) return false;
+  if (op.status === 503) return true;
+  if (op.status === 429) return true;
+  const type = op.error.type;
+  if (type === 'process_cluster_event_timeout_exception') return true;
+  if (type === 'cluster_block_exception') return true;
+  // Defensive: cluster_manager_not_discovered_exception currently returns 503,
+  // but adding the explicit type match hardens against a future status change.
+  if (type === 'cluster_manager_not_discovered_exception') return true;
+  return false;
+}
+
+function computeBackoff(attempt: number, initialMs: number, maxMs: number): number {
+  // Full-jitter exponential backoff: sleep = randInt(0, min(maxMs, initialMs * 2^attempt))
+  const ceiling = Math.min(maxMs, initialMs * Math.pow(2, attempt));
+  return Math.floor(Math.random() * Math.max(1, ceiling));
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((r) => setTimeout(r, ms));
 }
 
 /**
@@ -382,9 +511,152 @@ async function reindex(
 
     if (body.error) {
       const e = body.error;
+      // If the task-poll error is retriable (transient cluster-state
+      // failure), swallow and continue polling rather than fail the
+      // reindex outright. The in-flight reindex task is still running on
+      // the OS side; we just need a clean view of its status.
+      if (isRetriableReindexError(e)) {
+        continue;
+      }
       throw new Error(`Re-index failed [${e.type}] ${e.reason} :: ${JSON.stringify(e)}`);
     }
 
     completed = body.completed;
   }
+}
+
+function isRetriableReindexError(err: { type?: string; reason?: string } | undefined): boolean {
+  if (!err) return false;
+  const type = err.type;
+  if (type === 'process_cluster_event_timeout_exception') return true;
+  if (type === 'cluster_block_exception') return true;
+  const reason = err.reason ?? '';
+  if (/failed to process cluster event/i.test(reason)) return true;
+  return false;
+}
+
+/**
+ * Returns a Map<type, count> for the given saved-objects index by running a
+ * `terms` aggregation on the `type` keyword field. The migration-status
+ * sentinel type is filtered out so it cannot contribute a noise bucket to
+ * per-type delta calculations.
+ *
+ * Used by `migration_coordinator.ts::verifyDestIndexIntegrity` for the
+ * per-type count check when a legacy destination has no sentinel doc.
+ */
+export async function countByType(
+  client: MigrationOpenSearchClient,
+  index: string
+): Promise<Map<string, number>> {
+  const { body, statusCode } = await (client as any).search(
+    {
+      index,
+      body: {
+        size: 0,
+        query: {
+          bool: {
+            must_not: [{ term: { type: MIGRATION_SENTINEL_TYPE } }],
+          },
+        },
+        aggs: { by_type: { terms: { field: 'type', size: 1000 } } },
+      },
+    },
+    { ignore: [404] }
+  );
+  const result = new Map<string, number>();
+  if (statusCode === 404) return result;
+
+  const buckets = (body as any)?.aggregations?.by_type?.buckets ?? [];
+  for (const b of buckets) {
+    if (typeof b.key === 'string' && typeof b.doc_count === 'number') {
+      result.set(b.key, b.doc_count);
+    }
+  }
+  return result;
+}
+
+/**
+ * Find the highest-numbered existing `.kibana_N` index suitable as an
+ * authoritative baseline for the integrity-gate count comparison. Returns
+ * `null` if no plausible prior index exists.
+ *
+ * Candidate enumeration picks exact versioned siblings of the alias
+ * (`${alias}_<digits>`, no extra path segments) and sorts them by numeric
+ * suffix descending. For each candidate, the sentinel doc is consulted:
+ *
+ *   - `complete` / `copied`: accepted as the baseline.
+ *   - No sentinel doc: accepted (legacy or pre-patch index; assumed
+ *     authoritative since the framework never accepted partial dests before
+ *     this patch landed).
+ *   - `aborted`: skipped. A poisoned sibling left behind by a prior crashed
+ *     migration must not be used as a reference for count comparison, or
+ *     the integrity gate will flag a healthy destination as partial against
+ *     a half-populated baseline.
+ *   - `in-progress`: skipped. An index still being populated by a live
+ *     migrator is not yet authoritative.
+ *
+ * If every candidate is skipped, returns `null` and the caller routes to
+ * the "no prior source" path (defer to wait loop for fresh bootstrap).
+ */
+export async function findPriorSavedObjectsIndex(
+  client: MigrationOpenSearchClient,
+  alias: string,
+  existingDestName: string,
+  log?: SavedObjectsMigrationLogger
+): Promise<string | null> {
+  const { body, statusCode } = await client.indices.get({ index: `${alias}*` }, { ignore: [404] });
+  if (statusCode === 404 || !body) return null;
+
+  // Match only exact versioned siblings of the alias — `${alias}_<digits>`,
+  // with no additional path segments between the alias and the number. This
+  // prevents matching sibling system indices (e.g., `.kibana_task_manager_1`,
+  // `.kibana_security_session_1`) or other multi-segment indices that share
+  // the `.kibana*` prefix but are not the prior version of the saved-object
+  // alias.
+  const suffixRegex = new RegExp(`^${escapeRegex(alias)}_(\\d+)$`);
+  const names = Object.keys(body).filter((n) => n !== existingDestName && suffixRegex.test(n));
+  if (names.length === 0) return null;
+
+  names.sort((a, b) => {
+    const na = parseInt(a.match(suffixRegex)![1], 10);
+    const nb = parseInt(b.match(suffixRegex)![1], 10);
+    return nb - na; // descending
+  });
+
+  // Walk descending candidates and pick the first with a usable sentinel
+  // status (or no sentinel at all). Poisoned / in-progress siblings are
+  // skipped so the integrity gate doesn't compare against a garbage baseline.
+  for (const candidate of names) {
+    let sentinel;
+    try {
+      sentinel = await readMigrationSentinel(client, candidate);
+    } catch (e) {
+      // A non-404 failure on the sentinel read (auth, network, cluster
+      // issue) is ambiguous: the candidate may or may not have a sentinel.
+      // Treat as "no sentinel" so the candidate is still accepted — this
+      // matches pre-change behavior — but surface a warning so operators
+      // have a breadcrumb if subsequent count comparisons look off.
+      log?.warning(
+        `Unable to read migration sentinel on ${candidate} while selecting ` +
+          `prior source: ${(e as Error).message}. Treating as legacy (no-sentinel) ` +
+          `candidate.`
+      );
+      sentinel = null;
+    }
+    if (!sentinel) {
+      // Pre-patch or legacy: the only way `.kibana_N` existed without a
+      // sentinel before this change was for the framework to have accepted
+      // it as the authoritative destination at some prior boot.
+      return candidate;
+    }
+    if (sentinel.status === 'complete' || sentinel.status === 'copied') {
+      return candidate;
+    }
+    // `aborted` or `in-progress` — skip this candidate, keep walking.
+  }
+  return null;
+}
+
+function escapeRegex(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
