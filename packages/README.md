@@ -19,7 +19,7 @@ For example if you want to use the `@osd/i18n` package in OpenSearch Dashboards 
 can specify the dependency like this:
 
 ```
-"@osd/i18n": "1.0.0"
+"@osd/i18n": "2.0.0"
 ```
 
 However, if you want to use this from a OpenSearch Dashboards plugin, you need to use a `link:`
