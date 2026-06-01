@@ -8,15 +8,16 @@ import {
   savedObjectsClientMock,
   uiSettingsServiceMock,
 } from '../../../core/server/mocks';
-import { UiSettingScope } from '../../../core/server';
+import { PermissionModeId, UiSettingScope } from '../../../core/server';
 import {
   generateRandomId,
+  getPermissionMode,
   updateDashboardAdminStateForRequest,
   transferCurrentUserInPermissions,
   getDataSourcesList,
   checkAndSetDefaultDataSource,
 } from './utils';
-import { getWorkspaceState } from '../../../core/server/utils';
+import { getWorkspaceState, updateWorkspaceState } from '../../../core/server/utils';
 import { DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from '../../data_source_management/common';
 import { OSD_ADMIN_WILDCARD_MATCH_ALL } from '../common/constants';
 
@@ -191,5 +192,60 @@ describe('workspace utils', () => {
       undefined,
       UiSettingScope.WORKSPACE
     );
+  });
+});
+
+describe('getPermissionMode', () => {
+  it('should return Owner when user is dashboard admin', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    updateWorkspaceState(mockRequest, { isDashboardAdmin: true });
+
+    const result = getPermissionMode({
+      request: mockRequest,
+      isPermissionControlEnabled: true,
+      permissionControlClient: { getPrincipalsFromRequest: jest.fn() } as any,
+      permissions: { read: { users: ['user1'] } },
+    });
+
+    expect(result).toBe(PermissionModeId.Owner);
+  });
+
+  it('should fall back to translatePermissionsToRole when user is not dashboard admin', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    updateWorkspaceState(mockRequest, { isDashboardAdmin: false });
+
+    const mockPermissionControlClient = {
+      getPrincipalsFromRequest: jest.fn().mockReturnValue({ users: ['user1'], groups: [] }),
+    } as any;
+
+    const result = getPermissionMode({
+      request: mockRequest,
+      isPermissionControlEnabled: true,
+      permissionControlClient: mockPermissionControlClient,
+      permissions: {
+        write: { users: ['user1'] },
+        library_write: { users: ['user1'] },
+      },
+    });
+
+    expect(result).toBe(PermissionModeId.Owner);
+  });
+
+  it('should return Read when non-admin user only has read permission', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    updateWorkspaceState(mockRequest, { isDashboardAdmin: false });
+
+    const mockPermissionControlClient = {
+      getPrincipalsFromRequest: jest.fn().mockReturnValue({ users: ['user1'], groups: [] }),
+    } as any;
+
+    const result = getPermissionMode({
+      request: mockRequest,
+      isPermissionControlEnabled: true,
+      permissionControlClient: mockPermissionControlClient,
+      permissions: { read: { users: ['user1'] } },
+    });
+
+    expect(result).toBe(PermissionModeId.Read);
   });
 });
