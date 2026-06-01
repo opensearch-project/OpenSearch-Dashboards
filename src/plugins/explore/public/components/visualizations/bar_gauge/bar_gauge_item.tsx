@@ -104,6 +104,7 @@ export const BarGaugeItem: React.FC<BarGaugeItemProps> = ({
     left: '50%',
     transform: 'translateX(-50%)',
     marginBottom: '4px',
+    maxWidth: '100%',
   };
 
   const bar = (
