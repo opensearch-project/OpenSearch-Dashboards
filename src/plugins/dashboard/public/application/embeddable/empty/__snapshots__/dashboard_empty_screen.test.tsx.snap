@@ -128,6 +128,18 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
     <IntlProvider
       defaultFormats={Object {}}
       defaultLocale="en"
+      defaultRichTextElements={
+        Object {
+          "b": [Function],
+          "code": [Function],
+          "em": [Function],
+          "i": [Function],
+          "li": [Function],
+          "p": [Function],
+          "strong": [Function],
+          "ul": [Function],
+        }
+      }
       fallbackOnEmptyString={true}
       formats={
         Object {
@@ -397,6 +409,18 @@ exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
     <IntlProvider
       defaultFormats={Object {}}
       defaultLocale="en"
+      defaultRichTextElements={
+        Object {
+          "b": [Function],
+          "code": [Function],
+          "em": [Function],
+          "i": [Function],
+          "li": [Function],
+          "p": [Function],
+          "strong": [Function],
+          "ul": [Function],
+        }
+      }
       fallbackOnEmptyString={true}
       formats={
         Object {
@@ -706,6 +730,18 @@ exports[`DashboardEmptyScreen renders correctly without visualize paragraph 1`] 
     <IntlProvider
       defaultFormats={Object {}}
       defaultLocale="en"
+      defaultRichTextElements={
+        Object {
+          "b": [Function],
+          "code": [Function],
+          "em": [Function],
+          "i": [Function],
+          "li": [Function],
+          "p": [Function],
+          "strong": [Function],
+          "ul": [Function],
+        }
+      }
       fallbackOnEmptyString={true}
       formats={
         Object {

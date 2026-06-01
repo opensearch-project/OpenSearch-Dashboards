@@ -36,6 +36,16 @@ import { hasValues, isObject, isString, mergeAll } from './helper';
 import { isPseudoLocale, translateUsingPseudoLocale } from './pseudo_locale';
 
 const EN_LOCALE = 'en';
+const globalRichTextElements = {
+  b: (chunks: any) => `<b>${chunks}</b>`,
+  code: (chunks: any) => `<code>${chunks}</code>`,
+  em: (chunks: any) => `<em>${chunks}</em>`,
+  i: (chunks: any) => `<i>${chunks}</i>`,
+  li: (chunks: any) => `<li>${chunks}</li>`,
+  p: (chunks: any) => `<p>${chunks}</p>`,
+  strong: (chunks: any) => `<strong>${chunks}</strong>`,
+  ul: (chunks: any) => `<ul>${chunks}</ul>`,
+};
 const translationsForLocale: Record<string, Translation> = {};
 
 // Memoization cache for IntlMessageFormat instances
@@ -239,9 +249,10 @@ export function translate(id: string, { values = {}, defaultMessage }: Translate
       // We should call `format` even for messages without any value references
       // to let it handle escaped curly braces `\\{` that are the part of the text itself
       // and not value reference boundaries.
-      const formattedMessage = getMessageFormat(message, getLocale(), getFormats()).format(
-        values as any
-      );
+      const formattedMessage = getMessageFormat(message, getLocale(), getFormats()).format({
+        ...globalRichTextElements,
+        ...values,
+      });
 
       // Ensure we always return a string by converting the result
       const messageString = Array.isArray(formattedMessage)
@@ -258,7 +269,10 @@ export function translate(id: string, { values = {}, defaultMessage }: Translate
 
   try {
     const msg = getMessageFormat(defaultMessage, getDefaultLocale(), getFormats());
-    const formattedDefault = msg.format(values as any);
+    const formattedDefault = msg.format({
+      ...globalRichTextElements,
+      ...values,
+    });
 
     // Ensure we always return a string by converting the result
     return Array.isArray(formattedDefault) ? formattedDefault.join('') : String(formattedDefault);

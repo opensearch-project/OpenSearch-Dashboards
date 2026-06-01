@@ -30,7 +30,7 @@
 
 import * as PropTypes from 'prop-types';
 import * as React from 'react';
-import { IntlProvider } from 'react-intl';
+import { IntlProvider, ReactIntlErrorCode } from 'react-intl';
 
 import * as i18n from '../core';
 import { PseudoLocaleWrapper } from './pseudo_locale_wrapper';
@@ -38,6 +38,17 @@ import { PseudoLocaleWrapper } from './pseudo_locale_wrapper';
 interface I18nProviderProps {
   children: React.ReactNode;
 }
+
+const globalRichTextElements = {
+  b: (chunks: any) => <b>{chunks}</b>,
+  code: (chunks: any) => <code>{chunks}</code>,
+  em: (chunks: any) => <em>{chunks}</em>,
+  i: (chunks: any) => <i>{chunks}</i>,
+  li: (chunks: any) => <li>{chunks}</li>,
+  p: (chunks: any) => <p>{chunks}</p>,
+  strong: (chunks: any) => <strong>{chunks}</strong>,
+  ul: (chunks: any) => <ul>{chunks}</ul>,
+};
 
 /**
  * The library uses the provider pattern to scope an i18n context to a tree
@@ -55,6 +66,16 @@ export class I18nProvider extends React.PureComponent<I18nProviderProps> {
         defaultLocale={i18n.getDefaultLocale()}
         formats={i18n.getFormats()}
         textComponent={React.Fragment}
+        defaultRichTextElements={globalRichTextElements}
+        onError={(err) => {
+          // Suppress missing translation errors for en locale
+          if (err.code === ReactIntlErrorCode.MISSING_TRANSLATION && i18n.getLocale() === 'en') {
+            return;
+          }
+          // Let other format errors pass through normally
+          // eslint-disable-next-line no-console
+          console.error(err);
+        }}
       >
         <PseudoLocaleWrapper>{this.props.children}</PseudoLocaleWrapper>
       </IntlProvider>

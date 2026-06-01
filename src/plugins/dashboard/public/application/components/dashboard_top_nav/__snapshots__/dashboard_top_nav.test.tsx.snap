@@ -5,6 +5,18 @@ exports[`Dashboard top nav render in embed mode 1`] = `
   <IntlProvider
     defaultFormats={Object {}}
     defaultLocale="en"
+    defaultRichTextElements={
+      Object {
+        "b": [Function],
+        "code": [Function],
+        "em": [Function],
+        "i": [Function],
+        "li": [Function],
+        "p": [Function],
+        "strong": [Function],
+        "ul": [Function],
+      }
+    }
     fallbackOnEmptyString={true}
     formats={
       Object {
@@ -1196,6 +1208,18 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
   <IntlProvider
     defaultFormats={Object {}}
     defaultLocale="en"
+    defaultRichTextElements={
+      Object {
+        "b": [Function],
+        "code": [Function],
+        "em": [Function],
+        "i": [Function],
+        "li": [Function],
+        "p": [Function],
+        "strong": [Function],
+        "ul": [Function],
+      }
+    }
     fallbackOnEmptyString={true}
     formats={
       Object {
@@ -2387,6 +2411,18 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
   <IntlProvider
     defaultFormats={Object {}}
     defaultLocale="en"
+    defaultRichTextElements={
+      Object {
+        "b": [Function],
+        "code": [Function],
+        "em": [Function],
+        "i": [Function],
+        "li": [Function],
+        "p": [Function],
+        "strong": [Function],
+        "ul": [Function],
+      }
+    }
     fallbackOnEmptyString={true}
     formats={
       Object {
@@ -3578,6 +3614,18 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
   <IntlProvider
     defaultFormats={Object {}}
     defaultLocale="en"
+    defaultRichTextElements={
+      Object {
+        "b": [Function],
+        "code": [Function],
+        "em": [Function],
+        "i": [Function],
+        "li": [Function],
+        "p": [Function],
+        "strong": [Function],
+        "ul": [Function],
+      }
+    }
     fallbackOnEmptyString={true}
     formats={
       Object {
@@ -4769,6 +4817,18 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
   <IntlProvider
     defaultFormats={Object {}}
     defaultLocale="en"
+    defaultRichTextElements={
+      Object {
+        "b": [Function],
+        "code": [Function],
+        "em": [Function],
+        "i": [Function],
+        "li": [Function],
+        "p": [Function],
+        "strong": [Function],
+        "ul": [Function],
+      }
+    }
     fallbackOnEmptyString={true}
     formats={
       Object {
@@ -5960,6 +6020,18 @@ exports[`Dashboard top nav render with all components 1`] = `
   <IntlProvider
     defaultFormats={Object {}}
     defaultLocale="en"
+    defaultRichTextElements={
+      Object {
+        "b": [Function],
+        "code": [Function],
+        "em": [Function],
+        "i": [Function],
+        "li": [Function],
+        "p": [Function],
+        "strong": [Function],
+        "ul": [Function],
+      }
+    }
     fallbackOnEmptyString={true}
     formats={
       Object {

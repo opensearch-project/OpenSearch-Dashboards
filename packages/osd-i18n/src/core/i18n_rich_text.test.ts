@@ -10,9 +10,8 @@ describe('i18n rich text formatting', () => {
     const result = translate('test.richText', {
       defaultMessage: '<p>This is a <a>link</a></p>',
       values: {
-        p: (...chunks: any[]) => `<p>${chunks.join('')}</p>`,
-        a: (...chunks: any[]) => `<a href="https://example.com">${chunks.join('')}</a>`,
-      } as any,
+        a: (chunks: any) => `<a href="https://example.com">${chunks}</a>`,
+      },
     });
 
     expect(result).toBe('<p>This is a <a href="https://example.com">link</a></p>');
@@ -21,11 +20,6 @@ describe('i18n rich text formatting', () => {
   it('should support multiple tag functions', () => {
     const result = translate('test.multipleTags', {
       defaultMessage: '<p>Text with <strong>bold</strong> and <em>italic</em></p>',
-      values: {
-        p: (...chunks: any[]) => `<p>${chunks.join('')}</p>`,
-        strong: (...chunks: any[]) => `<strong>${chunks.join('')}</strong>`,
-        em: (...chunks: any[]) => `<em>${chunks.join('')}</em>`,
-      } as any,
     });
 
     expect(result).toBe('<p>Text with <strong>bold</strong> and <em>italic</em></p>');
@@ -36,9 +30,8 @@ describe('i18n rich text formatting', () => {
       defaultMessage: '<p>Hello {name}, click <a>here</a></p>',
       values: {
         name: 'World',
-        p: (...chunks: any[]) => `<p>${chunks.join('')}</p>`,
-        a: (...chunks: any[]) => `<a href="/link">${chunks.join('')}</a>`,
-      } as any,
+        a: (chunks: any) => `<a href="/link">${chunks}</a>`,
+      },
     });
 
     expect(result).toBe('<p>Hello World, click <a href="/link">here</a></p>');
