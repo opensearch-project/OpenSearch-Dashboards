@@ -57,6 +57,7 @@ import {
   SavedObjectEmbeddableInput,
   EmbeddableInput,
   PANEL_NOTIFICATION_TRIGGER,
+  EmbeddableContext,
 } from '../../embeddable/public';
 import { DataPublicPluginSetup, DataPublicPluginStart, opensearchFilters } from '../../data/public';
 import { SharePluginSetup, SharePluginStart, UrlGeneratorContract } from '../../share/public';
@@ -111,6 +112,11 @@ import {
   LibraryNotificationActionContext,
   LibraryNotificationAction,
 } from './application';
+import {
+  VARIABLE_BADGE_ACTION,
+  VariableBadgeAction,
+} from './application/actions/variable_badge_action';
+import { PANEL_BADGE_TRIGGER } from '../../embeddable/public';
 import {
   createDashboardUrlGenerator,
   DASHBOARD_APP_URL_GENERATOR,
@@ -202,6 +208,7 @@ declare module '../../../plugins/ui_actions/public' {
     [ACTION_ADD_TO_LIBRARY]: AddToLibraryActionContext;
     [ACTION_UNLINK_FROM_LIBRARY]: UnlinkFromLibraryActionContext;
     [ACTION_LIBRARY_NOTIFICATION]: LibraryNotificationActionContext;
+    [VARIABLE_BADGE_ACTION]: EmbeddableContext;
   }
 }
 
@@ -640,6 +647,11 @@ export class DashboardPlugin
       uiActions.registerAction(libraryNotificationAction);
       uiActions.attachAction(PANEL_NOTIFICATION_TRIGGER, libraryNotificationAction.id);
     }
+
+    // Register variable badge action to show which variables are used in panels
+    const variableBadgeAction = new VariableBadgeAction();
+    uiActions.registerAction(variableBadgeAction);
+    uiActions.attachAction(PANEL_BADGE_TRIGGER, variableBadgeAction.id);
 
     const savedDashboardLoader = createSavedDashboardLoader({
       savedObjectsClient: core.savedObjects.client,
