@@ -38,6 +38,7 @@ This document contains a list of maintainers in this repo. See [opensearch-proje
 | Paul Sebastian            | [paulstn](https://github.com/paulstn)               | Amazon      |
 | Qianxi Yang               | [Qxisylolo](https://github.com/Qxisylolo)           | Amazon      |
 | Yubo Luo                  | [yubonluo](https://github.com/yubonluo)             | Amazon      |
+| Owen Wang                 | [FriedhelmWS](https://github.com/FriedhelmWS)       | Amazon      |
 
 ## Emeritus
 
