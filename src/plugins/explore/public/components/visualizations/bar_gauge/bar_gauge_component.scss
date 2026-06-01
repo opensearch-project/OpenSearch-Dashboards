@@ -24,7 +24,14 @@ $bar-gauge-radius: 2px;
 .bar-gauge-item-tooltip {
   flex: 1;
   display: flex;
-  min-width: 0;
+
+  .vertical & {
+    min-width: 40px;
+  }
+
+  .horizontal & {
+    min-height: 24px;
+  }
 }
 
 // bar gauge item
