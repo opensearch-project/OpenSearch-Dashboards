@@ -95,7 +95,7 @@ export const TransformPanel = ({ transformationService }: TransformPanelProps) =
 
   return (
     <EuiPanel
-      paddingSize="m"
+      paddingSize="s"
       hasBorder={false}
       hasShadow={false}
       borderRadius="none"
@@ -127,7 +127,7 @@ export const TransformPanel = ({ transformationService }: TransformPanelProps) =
             <EuiDroppable droppableId={DROPPABLE_ID}>
               {pipeline.map((instance: TransformationInstance, index: number) => (
                 <EuiDraggable
-                  spacing="m"
+                  spacing="s"
                   key={instance.instance_id}
                   index={index}
                   draggableId={instance.instance_id}
@@ -151,7 +151,7 @@ export const TransformPanel = ({ transformationService }: TransformPanelProps) =
               ))}
             </EuiDroppable>
           </EuiDragDropContext>
-          <EuiSpacer size="m" />
+          <EuiSpacer size="s" />
         </>
       )}
 

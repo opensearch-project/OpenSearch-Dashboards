@@ -53,6 +53,7 @@ export const TransformSelectorButton = ({
   return (
     <>
       <EuiButton
+        size="s"
         iconType="plus"
         onClick={() => setIsOpen(true)}
         data-test-subj="transformPanelAddButton"

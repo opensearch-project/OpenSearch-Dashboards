@@ -44,15 +44,20 @@ export function registerQueryAssistRoutes(router: IRouter) {
         }
 
         // Check other languages via ML Commons agent config
-        await Promise.allSettled(
-          // @ts-expect-error TS7006 TODO(ts-error): fixme
-          config.queryAssist.supportedLanguages.map((languageConfig) =>
-            // if the call does not throw any error, then the agent is properly configured
-            getAgentIdByConfig(client, languageConfig.agentConfig).then(() =>
-              configuredLanguages.push(languageConfig.language)
+        await Promise.race([
+          Promise.allSettled(
+            // @ts-expect-error TS7006 TODO(ts-error): fixme
+            config.queryAssist.supportedLanguages.map((languageConfig) =>
+              // if the call does not throw any error, then the agent is properly configured
+              getAgentIdByConfig(client, languageConfig.agentConfig).then(() =>
+                configuredLanguages.push(languageConfig.language)
+              )
             )
-          )
-        );
+          ),
+          new Promise<never>((_, reject) =>
+            setTimeout(() => reject(new Error('assist/languages probe timed out')), 5000)
+          ),
+        ]);
         return response.ok({ body: { configuredLanguages } });
       } catch (error) {
         return response.ok({ body: { configuredLanguages, error: error.message } });

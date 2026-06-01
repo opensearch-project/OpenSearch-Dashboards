@@ -40,6 +40,18 @@
 # It requires the application config plugin as its dependency.
 # csp_handler.enabled: true
 
+# Content Security Policy (CSP) configuration.
+# csp.enable: false
+# csp.allowedFrameAncestorSources: []
+# csp.allowedConnectSources: []
+# csp.allowedImgSources: []
+#
+# Content-Security-Policy-Report-Only settings.
+# csp-report-only.isEmitting: false
+# csp-report-only.allowedFrameAncestorSources: []
+# csp-report-only.allowedConnectSources: []
+# csp-report-only.allowedImgSources: []
+
 # The default application to load.
 # opensearchDashboards.defaultAppId: "home"
 

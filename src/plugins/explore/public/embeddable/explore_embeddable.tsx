@@ -440,6 +440,12 @@ export class ExploreEmbeddable
     if (needFetch) {
       this.prevState = { filters, query, timeRange };
       this.searchProps = searchProps;
+
+      // Apply dashboard filters to the SearchSource (same as PPL)
+      if (this.filtersSearchSource) {
+        this.filtersSearchSource.setField('filter', filters || []);
+      }
+
       try {
         await this.fetch();
       } catch (error: any) {

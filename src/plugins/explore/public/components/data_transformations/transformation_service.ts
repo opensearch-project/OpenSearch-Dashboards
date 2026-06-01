@@ -215,6 +215,10 @@ export class TransformationService implements ITransformationService {
     try {
       const states = this.urlStateStorage.get<UrlTransformationState[]>(TRANSFORMATION_STATE_KEY);
       if (!states || !Array.isArray(states)) return;
+      if (states.length === 0) {
+        this.pipeline$.next([]);
+        return;
+      }
       this.restoreFromState(states);
     } catch (err) {
       // eslint-disable-next-line no-console

@@ -248,6 +248,13 @@ export class ChatService {
     return contextValue?.dataset?.dataSource?.id;
   }
 
+  private getDataSourceFromPageContext() {
+    const contextStore = (window as any).assistantContextStore;
+    const allContexts = contextStore ? contextStore.getAllContexts() : [];
+
+    return this.extractDataSourceIdFromPageContext(allContexts);
+  }
+
   /**
    * Get workspace-aware data source ID
    * Determines the correct data source based on current workspace context
@@ -255,10 +262,7 @@ export class ChatService {
   private async getWorkspaceAwareDataSourceId(): Promise<string | undefined> {
     try {
       // Try to get data source from page context first
-      const contextStore = (window as any).assistantContextStore;
-      const allContexts = contextStore ? contextStore.getAllContexts() : [];
-
-      const pageDataSourceId = this.extractDataSourceIdFromPageContext(allContexts);
+      const pageDataSourceId = this.getDataSourceFromPageContext();
       if (pageDataSourceId) {
         this.cachedDataSourceId = pageDataSourceId;
         return pageDataSourceId;
@@ -303,7 +307,11 @@ export class ChatService {
    * Returns the datasourceId that was last retrieved
    */
   public async getCurrentDataSourceId(): Promise<string | undefined> {
-    return this.cachedDataSourceId || (await this.getWorkspaceAwareDataSourceId());
+    return (
+      this.getDataSourceFromPageContext() ||
+      this.cachedDataSourceId ||
+      (await this.getWorkspaceAwareDataSourceId())
+    );
   }
 
   public async sendMessage(

@@ -10,6 +10,7 @@
  */
 
 import { DATA_STRUCTURE_META_TYPES, DataStructure } from './types';
+import * as dataManifest from '../opensearch_dashboards.json';
 
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
@@ -125,3 +126,7 @@ export const UI_SETTINGS = {
   DATE_FORMAT: 'dateFormat',
   DATE_FORMAT_TIMEZONE: 'dateFormat:tz',
 } as const;
+
+export const UNSUPPORTED_ENGINE_TYPES =
+  (dataManifest as { unsupportedOSDataSourceEngineTypes?: readonly string[] })
+    .unsupportedOSDataSourceEngineTypes ?? [];

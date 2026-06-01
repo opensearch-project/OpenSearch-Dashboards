@@ -78,6 +78,7 @@ export const defaultPrepareQueryString = (query: Query): string => {
   switch (query.language) {
     case 'PPL':
       return defaultPreparePplQuery(query).query;
+    case 'SQL':
     case 'PROMQL':
       return query.query as string;
     default:
@@ -276,6 +277,7 @@ export const executeQueries = createAsyncThunk<
     dataTableQueryStatus?.status === QueryExecutionStatus.UNINITIALIZED;
   const needsHistogramQuery =
     query.language !== 'PROMQL' &&
+    query.language !== 'SQL' && // Disable histograms for SQL
     (!results[histogramCacheKey] ||
       histogramQueryStatus?.status === QueryExecutionStatus.UNINITIALIZED);
   const promises = [];
@@ -738,6 +740,8 @@ export const createSearchSourceWithQuery = async (
     highlightAll: true,
     version: true,
     filter: filters,
+    // Enable time filtering for SQL queries in Explore
+    ...(preparedQuery.language === 'SQL' ? { enableTimeFiltering: true } : {}),
   });
 
   if (!includeHistogram || !dataView.timeFieldName || !customInterval) {

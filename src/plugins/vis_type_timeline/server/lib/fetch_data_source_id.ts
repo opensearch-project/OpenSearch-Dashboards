@@ -7,6 +7,8 @@ import { SavedObjectsClientContract } from 'src/core/server';
 import { DataSourceAttributes } from 'src/plugins/data_source/common/data_sources';
 import { getDataSourceEnabled } from './services';
 import { OpenSearchFunctionConfig } from '../types';
+import { throwError } from '../../../data/server';
+import { UNSUPPORTED_ENGINE_TYPES } from '../../../data/common';
 
 export const fetchDataSourceIdByName = async (
   config: OpenSearchFunctionConfig,
@@ -27,7 +29,7 @@ export const fetchDataSourceIdByName = async (
     perPage: 100,
     search: `"${config.data_source_name}"`,
     searchFields: ['title'],
-    fields: ['id', 'title'],
+    fields: ['id', 'title', 'dataSourceEngineType'],
   });
 
   const possibleDataSourceIds = dataSources.saved_objects.filter(
@@ -40,5 +42,15 @@ export const fetchDataSourceIdByName = async (
     );
   }
 
-  return possibleDataSourceIds.pop()?.id;
+  const dataSource = possibleDataSourceIds[0];
+
+  // Check if the data source uses AnalyticEngine
+  if (
+    !!dataSource?.attributes?.dataSourceEngineType &&
+    UNSUPPORTED_ENGINE_TYPES.includes(dataSource.attributes.dataSourceEngineType)
+  ) {
+    throwError();
+  }
+
+  return dataSource.id;
 };

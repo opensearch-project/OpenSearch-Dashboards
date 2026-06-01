@@ -144,6 +144,16 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
     queryLanguageRef.current = queryLanguage;
   }, [queryLanguage]);
 
+  // Sync editor text when Redux query string changes externally (e.g., language switch)
+  useEffect(() => {
+    if (userQueryString !== editorText) {
+      setEditorText(userQueryString);
+      editorRef.current?.setValue(userQueryString);
+    }
+    // Only react to external Redux changes, not local edits
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userQueryString]);
+
   // Sync PPL validation context when datasource changes
   useEffect(() => {
     const dsId = dataset?.dataSource?.id;
