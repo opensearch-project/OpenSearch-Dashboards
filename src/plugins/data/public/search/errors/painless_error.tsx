@@ -43,7 +43,7 @@ export class PainlessError extends OsdError {
 
     super(
       i18n.translate('data.painlessError.painlessScriptedFieldErrorMessage', {
-        defaultMessage: "Error executing Painless script: '{script}'.",
+        defaultMessage: "Error executing Painless script: ''{script}''.",
         values: { script: rootCause?.script },
       })
     );

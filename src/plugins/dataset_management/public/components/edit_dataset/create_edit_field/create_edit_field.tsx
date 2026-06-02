@@ -47,7 +47,7 @@ export const CreateEditField = withRouter(
     if (mode === 'edit' && !spec) {
       const message = i18n.translate('datasetManagement.editDataset.scripted.noFieldLabel', {
         defaultMessage:
-          "'{datasetTitle}' index pattern doesn't have a scripted field called '{fieldName}'",
+          "''{datasetTitle}'' index pattern doesn't have a scripted field called ''{fieldName}''",
         values: { datasetTitle: dataset.title, fieldName },
       });
       notifications.toasts.addWarning(message);

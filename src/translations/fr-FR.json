@@ -279,7 +279,7 @@
     "core.ui_settings.params.pageNavigationName": "Style de navigation latérale",
     "core.ui_settings.params.storeUrlText": "L’URL peut parfois devenir trop grande, ce qui empêche certains navigateurs de la gérer. Pour remédier à ce problème, nous testons actuellement si le stockage de certaines parties de l’URL dans le stockage de session peut être utile à cet effet. Dites-nous si cela fonctionne !",
     "core.ui_settings.params.storeUrlTitle": "Stocker les URL dans le stockage de session",
-    "core.ui_settings.params.themeVersionText": "<p>Basculez entre les thèmes utilisés pour la version actuelle et la version suivante d’OpenSearch Dashboards. Vous devez actualiser la page pour que le paramètre soit appliqué.</p><p><a href=\"{href}\">{linkText}</a></p>",
+    "core.ui_settings.params.themeVersionText": "<p>Basculez entre les thèmes utilisés pour la version actuelle et la version suivante d’OpenSearch Dashboards. Vous devez actualiser la page pour que le paramètre soit appliqué.</p><p><a>{linkText}</a></p>",
     "core.ui_settings.params.themeVersionTitle": "Version thématique",
     "core.ui.analyzeSearch.label": "Analyser la recherche",
     "core.ui.chrome.headerGlobalNav.goHomePageIconAriaLabel": "Accéder à la page d’accueil",

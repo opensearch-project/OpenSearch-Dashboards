@@ -21,7 +21,7 @@ exports[`Header should render normally 1`] = `
   onConfirm={[Function]}
   title={
     <Memo(MemoizedFormattedMessage)
-      defaultMessage="Delete source filter '{value}'?"
+      defaultMessage="Delete source filter ''{value}''?"
       id="datasetManagement.editDataset.source.deleteSourceFilterLabel"
       values={
         Object {

@@ -433,7 +433,7 @@ export const getNavActions = (
       if (id) {
         notifications.toasts.addSuccess({
           title: i18n.translate('dashboard.dashboardWasSavedSuccessMessage', {
-            defaultMessage: `Dashboard '{dashTitle}' was saved`,
+            defaultMessage: `Dashboard ''{dashTitle}'' was saved`,
             values: { dashTitle: savedDashboard.title },
           }),
           'data-test-subj': 'saveDashboardSuccess',
@@ -451,7 +451,7 @@ export const getNavActions = (
     } catch (error) {
       notifications.toasts.addDanger({
         title: i18n.translate('dashboard.dashboardWasNotSavedDangerMessage', {
-          defaultMessage: `Dashboard '{dashTitle}' was not saved. Error: {errorMessage}`,
+          defaultMessage: `Dashboard ''{dashTitle}'' was not saved. Error: {errorMessage}`,
           values: {
             dashTitle: savedDashboard.title,
             errorMessage: savedDashboard.message,

@@ -225,12 +225,12 @@ export const EditDataset = withRouter(({ dataset, history, location }: EditDatas
   }, [dataset, data, overlays, services, notifications]);
 
   const typeHeader = i18n.translate('datasetManagement.editDataset.typeHeader', {
-    defaultMessage: "Type: '{type}'",
+    defaultMessage: "Type: ''{type}''",
     values: { type: dataset.signalType },
   });
 
   const timeFilterHeader = i18n.translate('datasetManagement.editDataset.timeFilterHeader', {
-    defaultMessage: "Time field: '{timeFieldName}'",
+    defaultMessage: "Time field: ''{timeFieldName}''",
     values: { timeFieldName: dataset.timeFieldName },
   });
 

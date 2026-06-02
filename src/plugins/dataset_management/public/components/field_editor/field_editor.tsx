@@ -619,7 +619,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     return this.state.showDeleteModal ? (
       <EuiConfirmModal
         title={i18n.translate('datasetManagement.deleteFieldHeader', {
-          defaultMessage: "Delete field '{fieldName}'",
+          defaultMessage: "Delete field ''{fieldName}''",
           values: { fieldName: spec.name },
         })}
         onCancel={this.hideDeleteModal}
@@ -752,7 +752,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     dataset.removeScriptedField(spec.name);
     saveDataset(dataset).then(() => {
       const message = i18n.translate('datasetManagement.deleteField.deletedHeader', {
-        defaultMessage: "Deleted '{fieldName}'",
+        defaultMessage: "Deleted ''{fieldName}''",
         values: { fieldName: spec.name },
       });
       this.context.services.notifications.toasts.addSuccess(message);
@@ -808,7 +808,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     return saveDataset(dataset)
       .then(() => {
         const message = i18n.translate('datasetManagement.deleteField.savedHeader', {
-          defaultMessage: "Saved '{fieldName}'",
+          defaultMessage: "Saved ''{fieldName}''",
           values: { fieldName: field.name },
         });
         this.context.services.notifications.toasts.addSuccess(message);

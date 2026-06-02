@@ -68,7 +68,7 @@ export async function saveSavedExplore({
     if (id && openAfterSave) {
       toastNotifications.addSuccess({
         title: i18n.translate('explore.notifications.SavedExploreTitle', {
-          defaultMessage: `Search '{savedQueryTitle}' was saved`,
+          defaultMessage: `Search ''{savedQueryTitle}'' was saved`,
           values: {
             savedQueryTitle: savedExplore?.title,
           },
@@ -97,7 +97,7 @@ export async function saveSavedExplore({
   } catch (error) {
     toastNotifications.addDanger({
       title: i18n.translate('explore.notifications.notSavedExploreTitle', {
-        defaultMessage: `Search '{savedExploreTitle}' was not saved.`,
+        defaultMessage: `Search ''{savedExploreTitle}'' was not saved.`,
         values: {
           savedExploreTitle: savedExplore.title,
         },

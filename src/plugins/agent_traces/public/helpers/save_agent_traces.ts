@@ -73,7 +73,7 @@ export async function saveSavedAgentTraces({
     if (id && openAfterSave) {
       toastNotifications.addSuccess({
         title: i18n.translate('agentTraces.notifications.SavedAgentTracesTitle', {
-          defaultMessage: `Search '{savedQueryTitle}' was saved`,
+          defaultMessage: `Search ''{savedQueryTitle}'' was saved`,
           values: {
             savedQueryTitle: savedAgentTraces?.title,
           },
@@ -98,7 +98,7 @@ export async function saveSavedAgentTraces({
   } catch (error) {
     toastNotifications.addDanger({
       title: i18n.translate('agentTraces.notifications.notSavedAgentTracesTitle', {
-        defaultMessage: `Search '{savedAgentTracesTitle}' was not saved.`,
+        defaultMessage: `Search ''{savedAgentTracesTitle}'' was not saved.`,
         values: {
           savedAgentTracesTitle: savedAgentTraces.title,
         },

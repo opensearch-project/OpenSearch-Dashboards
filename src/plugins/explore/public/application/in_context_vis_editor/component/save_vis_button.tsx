@@ -75,7 +75,7 @@ export const SaveVisButton = () => {
       if (exploreId === undefined) {
         toastNotifications.addSuccess({
           title: i18n.translate('explore.editor.saveVisualization.successNotificationText', {
-            defaultMessage: `Saved '{visTitle}'`,
+            defaultMessage: `Saved ''{visTitle}''`,
             values: {
               visTitle: newTitle,
             },
@@ -85,7 +85,7 @@ export const SaveVisButton = () => {
       } else {
         toastNotifications.addSuccess({
           title: i18n.translate('explore.editor.updateVisualization.successNotificationText', {
-            defaultMessage: `Updated '{visTitle}'`,
+            defaultMessage: `Updated ''{visTitle}''`,
             values: {
               visTitle: newTitle,
             },

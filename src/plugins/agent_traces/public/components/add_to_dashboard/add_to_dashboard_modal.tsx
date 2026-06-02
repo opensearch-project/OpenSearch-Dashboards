@@ -118,7 +118,7 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
           <p>
             <FormattedMessage
               id="agentTraces.addtoDashboardModal.duplicateTitleDescription"
-              defaultMessage="Saving '{title}' creates a duplicate title."
+              defaultMessage="Saving ''{title}'' creates a duplicate title."
               values={{
                 title,
               }}

@@ -90,7 +90,7 @@ export const SaveVisModal: React.FC<SaveVisModalProps> = ({
           <p>
             <FormattedMessage
               id="explore.addtoDashboardModal.duplicateTitleDescription"
-              defaultMessage="Saving '{title}' creates a duplicate title."
+              defaultMessage="Saving ''{title}'' creates a duplicate title."
               values={{
                 title,
               }}

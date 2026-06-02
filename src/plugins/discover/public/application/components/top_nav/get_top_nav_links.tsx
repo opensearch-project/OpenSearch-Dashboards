@@ -104,7 +104,7 @@ const getLegacyTopNavLinks = (
           if (id) {
             toastNotifications.addSuccess({
               title: i18n.translate('discover.notifications.savedSearchTitle', {
-                defaultMessage: `Search '{savedSearchTitle}' was saved`,
+                defaultMessage: `Search ''{savedSearchTitle}'' was saved`,
                 values: {
                   savedSearchTitle: savedSearch.title,
                 },
@@ -130,7 +130,7 @@ const getLegacyTopNavLinks = (
         } catch (error) {
           toastNotifications.addDanger({
             title: i18n.translate('discover.notifications.notSavedSearchTitle', {
-              defaultMessage: `Search '{savedSearchTitle}' was not saved.`,
+              defaultMessage: `Search ''{savedSearchTitle}'' was not saved.`,
               values: {
                 savedSearchTitle: savedSearch.title,
               },
@@ -387,7 +387,7 @@ export const getTopNavLinks = (
             if (id) {
               toastNotifications.addSuccess({
                 title: i18n.translate('discover.notifications.savedSearchTitle', {
-                  defaultMessage: `Search '{savedSearchTitle}' was saved`,
+                  defaultMessage: `Search ''{savedSearchTitle}'' was saved`,
                   values: {
                     savedSearchTitle: savedSearch.title,
                   },
@@ -413,7 +413,7 @@ export const getTopNavLinks = (
           } catch (error) {
             toastNotifications.addDanger({
               title: i18n.translate('discover.notifications.notSavedSearchTitle', {
-                defaultMessage: `Search '{savedSearchTitle}' was not saved.`,
+                defaultMessage: `Search ''{savedSearchTitle}'' was not saved.`,
                 values: {
                   savedSearchTitle: savedSearch.title,
                 },

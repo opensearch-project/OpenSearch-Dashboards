@@ -7,6 +7,6 @@ exports[`DeleteScritpedFieldConfirmationModal should render normally 1`] = `
   defaultFocusedButton="confirm"
   onCancel={[Function]}
   onConfirm={[Function]}
-  title="Delete scripted field {fieldName}?"
+  title="Delete scripted field ''?"
 />
 `;

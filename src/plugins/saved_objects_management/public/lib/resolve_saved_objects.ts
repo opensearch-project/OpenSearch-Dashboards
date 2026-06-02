@@ -116,7 +116,7 @@ async function importIndexPattern(
       const isConfirmed = await openConfirm(
         i18n.translate('savedObjectsManagement.indexPattern.confirmOverwriteLabel', {
           values: { title },
-          defaultMessage: "Are you sure you want to overwrite '{title}'?",
+          defaultMessage: "Are you sure you want to overwrite ''{title}''?",
         }),
         {
           title: i18n.translate('savedObjectsManagement.indexPattern.confirmOverwriteTitle', {
