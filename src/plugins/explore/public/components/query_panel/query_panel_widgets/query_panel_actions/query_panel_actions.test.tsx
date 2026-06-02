@@ -32,7 +32,6 @@ jest.mock('../../../../application/hooks/editor_hooks/use_editor_text/use_editor
 
 const mockUseSelector = useSelector as jest.MockedFunction<typeof useSelector>;
 
-// Import the mocked selectors and hooks
 import {
   selectQuery,
   selectOverallQueryStatus,
@@ -45,6 +44,19 @@ const mockSelectOverallQueryStatus = selectOverallQueryStatus as jest.MockedFunc
 >;
 const mockUseEditorText = useEditorText as jest.MockedFunction<typeof useEditorText>;
 
+const buildAction = (
+  id: string,
+  overrides: Partial<QueryPanelActionConfig> = {}
+): QueryPanelActionConfig =>
+  ({
+    id,
+    order: 1,
+    actionType: 'button',
+    getLabel: () => `label-${id}`,
+    onClick: jest.fn(),
+    ...overrides,
+  } as QueryPanelActionConfig);
+
 describe('QueryPanelActions', () => {
   let mockRegistry: jest.Mocked<QueryPanelActionsRegistryService>;
   let mockQuery: any;
@@ -53,362 +65,179 @@ describe('QueryPanelActions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    // Mock registry service
     mockRegistry = {
       getSortedActions: jest.fn(),
+      getAction: jest.fn(),
       isEmpty: jest.fn(),
       setup: jest.fn(),
     } as any;
 
-    // Mock query and status data
-    mockQuery = {
-      query: 'SELECT * FROM table',
-      language: 'sql',
-    };
-
-    mockResultStatus = {
-      status: QueryExecutionStatus.READY,
-    };
+    mockQuery = { query: 'SELECT * FROM table', language: 'sql' };
+    mockResultStatus = { status: QueryExecutionStatus.READY };
   });
 
   const setupUseSelectorMock = () => {
-    // Set up the individual selector mocks
     mockSelectQuery.mockReturnValue(mockQuery);
     mockSelectOverallQueryStatus.mockReturnValue(mockResultStatus);
-
-    // Set up useEditorText to return a function that returns the editor text
     mockUseEditorText.mockReturnValue(() => 'SELECT * FROM table');
-
-    // Set up useSelector to delegate to the selector functions
     mockUseSelector.mockImplementation((selector) => {
-      if (selector === mockSelectQuery) {
-        return mockQuery;
-      }
-      if (selector === mockSelectOverallQueryStatus) {
-        return mockResultStatus;
-      }
-      // Call the selector with empty state as fallback
+      if (selector === mockSelectQuery) return mockQuery;
+      if (selector === mockSelectOverallQueryStatus) return mockResultStatus;
       return selector({} as any);
     });
   };
 
-  describe('component rendering', () => {
-    it('renders the actions button with correct attributes', () => {
+  // ---- Inline rendering (≤ INLINE_ACTION_LIMIT actions) -------------------
+
+  describe('inline rendering', () => {
+    it('renders nothing visible when no actions are registered', () => {
       setupUseSelectorMock();
       mockRegistry.getSortedActions.mockReturnValue([]);
-
       render(<QueryPanelActions registry={mockRegistry} />);
-
-      const button = screen.getByTestId('queryPanelFooterActionsButton');
-      expect(button).toBeInTheDocument();
-      expect(button).toHaveTextContent('Actions');
+      // Nothing inline + no overflow button.
+      expect(screen.queryByTestId('queryPanelFooterActionsButton')).not.toBeInTheDocument();
     });
 
-    it('renders action items when actions are registered', () => {
+    it('renders each registered action as an inline button when count is ≤ 5', () => {
       setupUseSelectorMock();
-      const mockActions: QueryPanelActionConfig[] = [
-        {
-          id: 'action-1',
-          order: 1,
-          actionType: 'button',
-          getLabel: () => 'Test Action 1',
-          onClick: jest.fn(),
-        },
-        {
-          id: 'action-2',
-          order: 2,
-          actionType: 'button',
-          getLabel: () => 'Test Action 2',
-          onClick: jest.fn(),
-        },
+      const actions = [
+        buildAction('a', { getLabel: () => 'Alpha' }),
+        buildAction('b', { getLabel: () => 'Beta' }),
+        buildAction('c', { getLabel: () => 'Gamma' }),
       ];
-
-      mockRegistry.getSortedActions.mockReturnValue(mockActions);
-
-      render(<QueryPanelActions registry={mockRegistry} />);
-
-      const button = screen.getByTestId('queryPanelFooterActionsButton');
-      fireEvent.click(button);
-
-      expect(screen.getByText('Test Action 1')).toBeInTheDocument();
-      expect(screen.getByText('Test Action 2')).toBeInTheDocument();
-    });
-  });
-
-  describe('popover behavior', () => {
-    it('opens popover when button is clicked', () => {
-      setupUseSelectorMock();
-      mockRegistry.getSortedActions.mockReturnValue([]);
+      mockRegistry.getSortedActions.mockReturnValue(actions);
 
       render(<QueryPanelActions registry={mockRegistry} />);
 
-      const button = screen.getByTestId('queryPanelFooterActionsButton');
-      fireEvent.click(button);
-
-      // Popover should be open (EuiPopover content becomes visible)
-      expect(button).toBeInTheDocument();
+      expect(screen.getByTestId('queryPanelActionInline-a')).toBeInTheDocument();
+      expect(screen.getByTestId('queryPanelActionInline-b')).toBeInTheDocument();
+      expect(screen.getByTestId('queryPanelActionInline-c')).toBeInTheDocument();
+      expect(screen.getByText('Alpha')).toBeInTheDocument();
+      expect(screen.getByText('Beta')).toBeInTheDocument();
+      expect(screen.getByText('Gamma')).toBeInTheDocument();
+      // No overflow button.
+      expect(screen.queryByTestId('queryPanelFooterActionsButton')).not.toBeInTheDocument();
     });
 
-    it('toggles popover state on multiple button clicks', () => {
+    it('clicking an inline button dispatches the action with current dependencies', () => {
       setupUseSelectorMock();
-      mockRegistry.getSortedActions.mockReturnValue([]);
+      const onClick = jest.fn();
+      mockRegistry.getSortedActions.mockReturnValue([
+        buildAction('act', { getLabel: () => 'Run', onClick }),
+      ]);
 
       render(<QueryPanelActions registry={mockRegistry} />);
+      fireEvent.click(screen.getByTestId('queryPanelActionInline-act'));
 
-      const button = screen.getByTestId('queryPanelFooterActionsButton');
-
-      // Click to open
-      fireEvent.click(button);
-      // Click to close
-      fireEvent.click(button);
-
-      expect(button).toBeInTheDocument();
-    });
-  });
-
-  describe('action interactions', () => {
-    it('calls action onClick when action button is clicked', () => {
-      setupUseSelectorMock();
-      const mockOnClick = jest.fn();
-      const mockActions: QueryPanelActionConfig[] = [
-        {
-          id: 'clickable-action',
-          order: 1,
-          actionType: 'button',
-          getLabel: () => 'Clickable Action',
-          onClick: mockOnClick,
-        },
-      ];
-
-      mockRegistry.getSortedActions.mockReturnValue(mockActions);
-
-      render(<QueryPanelActions registry={mockRegistry} />);
-
-      // Open popover
-      const button = screen.getByTestId('queryPanelFooterActionsButton');
-      fireEvent.click(button);
-
-      // Click action button
-      const actionButton = screen.getByText('Clickable Action');
-      fireEvent.click(actionButton);
-
-      expect(mockOnClick).toHaveBeenCalledTimes(1);
-      expect(mockOnClick).toHaveBeenCalledWith({
+      expect(onClick).toHaveBeenCalledTimes(1);
+      expect(onClick).toHaveBeenCalledWith({
         query: mockQuery,
         resultStatus: mockResultStatus,
         queryInEditor: 'SELECT * FROM table',
       });
     });
 
-    it('handles action with getIsEnabled returning false', () => {
+    it('renders disabled inline buttons when getIsEnabled returns false', () => {
       setupUseSelectorMock();
-      const mockActions: QueryPanelActionConfig[] = [
-        {
-          id: 'disabled-action',
-          order: 1,
-          actionType: 'button',
-          getLabel: () => 'Disabled Action',
+      mockRegistry.getSortedActions.mockReturnValue([
+        buildAction('off', {
+          getLabel: () => 'Off',
           getIsEnabled: () => false,
-          onClick: jest.fn(),
-        },
-      ];
-
-      mockRegistry.getSortedActions.mockReturnValue(mockActions);
+        }),
+      ]);
 
       render(<QueryPanelActions registry={mockRegistry} />);
-
-      // Open popover
-      const button = screen.getByTestId('queryPanelFooterActionsButton');
-      fireEvent.click(button);
-
-      // Check that action button is disabled by testing the actual text element
-      const actionButton = screen.getByText('Disabled Action');
-      expect(actionButton).toBeInTheDocument();
-
-      // The button should have disabled styling/behavior
-      const buttonParent = actionButton.closest('button');
-      expect(buttonParent).toHaveAttribute('disabled');
+      const btn = screen.getByTestId('queryPanelActionInline-off');
+      expect(btn).toBeDisabled();
     });
 
-    it('handles action with getIsEnabled returning true', () => {
+    it('passes the live dependencies to getLabel / getIsEnabled / getIcon', () => {
       setupUseSelectorMock();
-      const mockActions: QueryPanelActionConfig[] = [
-        {
-          id: 'enabled-action',
-          order: 1,
-          actionType: 'button',
-          getLabel: () => 'Enabled Action',
-          getIsEnabled: () => true,
-          onClick: jest.fn(),
-        },
-      ];
-
-      mockRegistry.getSortedActions.mockReturnValue(mockActions);
+      const getLabel = jest.fn().mockReturnValue('Dynamic');
+      const getIsEnabled = jest.fn().mockReturnValue(true);
+      const getIcon = jest.fn().mockReturnValue('settings');
+      mockRegistry.getSortedActions.mockReturnValue([
+        buildAction('full', { getLabel, getIsEnabled, getIcon }),
+      ]);
 
       render(<QueryPanelActions registry={mockRegistry} />);
 
-      // Open popover
-      const button = screen.getByTestId('queryPanelFooterActionsButton');
-      fireEvent.click(button);
-
-      // Check that action button is enabled
-      const actionButton = screen.getByText('Enabled Action');
-      expect(actionButton).not.toBeDisabled();
-    });
-
-    it('handles action without getIsEnabled (defaults to enabled)', () => {
-      setupUseSelectorMock();
-      const mockActions: QueryPanelActionConfig[] = [
-        {
-          id: 'default-enabled-action',
-          order: 1,
-          actionType: 'button',
-          getLabel: () => 'Default Enabled Action',
-          onClick: jest.fn(),
-        },
-      ];
-
-      mockRegistry.getSortedActions.mockReturnValue(mockActions);
-
-      render(<QueryPanelActions registry={mockRegistry} />);
-
-      // Open popover
-      const button = screen.getByTestId('queryPanelFooterActionsButton');
-      fireEvent.click(button);
-
-      // Check that action button is enabled by default
-      const actionButton = screen.getByText('Default Enabled Action');
-      expect(actionButton).not.toBeDisabled();
-    });
-
-    it('renders action with icon when getIcon is provided', () => {
-      setupUseSelectorMock();
-      const mockActions: QueryPanelActionConfig[] = [
-        {
-          id: 'action-with-icon',
-          order: 1,
-          actionType: 'button',
-          getLabel: () => 'Action With Icon',
-          getIcon: () => 'download',
-          onClick: jest.fn(),
-        },
-      ];
-
-      mockRegistry.getSortedActions.mockReturnValue(mockActions);
-
-      render(<QueryPanelActions registry={mockRegistry} />);
-
-      // Open popover
-      const button = screen.getByTestId('queryPanelFooterActionsButton');
-      fireEvent.click(button);
-
-      // Just verify the action renders - icon testing is complex with EUI
-      expect(screen.getByText('Action With Icon')).toBeInTheDocument();
-    });
-
-    it('renders action without icon when getIcon is not provided', () => {
-      setupUseSelectorMock();
-      const mockActions: QueryPanelActionConfig[] = [
-        {
-          id: 'action-without-icon',
-          order: 1,
-          actionType: 'button',
-          getLabel: () => 'Action Without Icon',
-          onClick: jest.fn(),
-        },
-      ];
-
-      mockRegistry.getSortedActions.mockReturnValue(mockActions);
-
-      render(<QueryPanelActions registry={mockRegistry} />);
-
-      // Open popover
-      const button = screen.getByTestId('queryPanelFooterActionsButton');
-      fireEvent.click(button);
-
-      const actionButton = screen.getByText('Action Without Icon');
-      expect(actionButton).toBeInTheDocument();
-    });
-  });
-
-  describe('dependencies calculation', () => {
-    it('passes correct dependencies to action callbacks', () => {
-      setupUseSelectorMock();
-      const mockGetLabel = jest.fn().mockReturnValue('Dynamic Label');
-      const mockGetIsEnabled = jest.fn().mockReturnValue(true);
-      const mockGetIcon = jest.fn().mockReturnValue('settings');
-      const mockOnClick = jest.fn();
-
-      const mockActions: QueryPanelActionConfig[] = [
-        {
-          id: 'full-featured-action',
-          order: 1,
-          actionType: 'button',
-          getLabel: mockGetLabel,
-          getIsEnabled: mockGetIsEnabled,
-          getIcon: mockGetIcon,
-          onClick: mockOnClick,
-        },
-      ];
-
-      mockRegistry.getSortedActions.mockReturnValue(mockActions);
-
-      render(<QueryPanelActions registry={mockRegistry} />);
-
-      // Open popover
-      const button = screen.getByTestId('queryPanelFooterActionsButton');
-      fireEvent.click(button);
-
-      const expectedDependencies = {
+      const expected = {
         query: mockQuery,
         resultStatus: mockResultStatus,
         queryInEditor: 'SELECT * FROM table',
       };
+      expect(getLabel).toHaveBeenCalledWith(expected);
+      expect(getIsEnabled).toHaveBeenCalledWith(expected);
+      expect(getIcon).toHaveBeenCalledWith(expected);
+    });
+  });
 
-      // Verify all callbacks receive correct dependencies
-      expect(mockGetLabel).toHaveBeenCalledWith(expectedDependencies);
-      expect(mockGetIsEnabled).toHaveBeenCalledWith(expectedDependencies);
-      expect(mockGetIcon).toHaveBeenCalledWith(expectedDependencies);
+  // ---- Overflow popover (> INLINE_ACTION_LIMIT actions) -------------------
 
-      // Click action to test onClick dependencies
-      const actionButton = screen.getByText('Dynamic Label');
-      fireEvent.click(actionButton);
+  describe('overflow popover', () => {
+    const buildSix = () =>
+      Array.from({ length: 6 }, (_, i) => buildAction(`a${i}`, { getLabel: () => `Action ${i}` }));
 
-      expect(mockOnClick).toHaveBeenCalledWith(expectedDependencies);
+    it('shows the first 5 inline and a "+1 more" overflow button when 6 actions exist', () => {
+      setupUseSelectorMock();
+      mockRegistry.getSortedActions.mockReturnValue(buildSix());
+
+      render(<QueryPanelActions registry={mockRegistry} />);
+
+      // First 5 are inline.
+      for (let i = 0; i < 5; i++) {
+        expect(screen.getByTestId(`queryPanelActionInline-a${i}`)).toBeInTheDocument();
+      }
+      // Sixth is NOT inline.
+      expect(screen.queryByTestId('queryPanelActionInline-a5')).not.toBeInTheDocument();
+      // Overflow button is present, labeled with the remaining count.
+      const overflow = screen.getByTestId('queryPanelFooterActionsButton');
+      expect(overflow).toBeInTheDocument();
+      expect(overflow).toHaveTextContent('+1 more');
     });
 
-    it('updates dependencies when selectors change', () => {
+    it('reveals the overflow actions inside the popover when clicked', () => {
       setupUseSelectorMock();
-      const mockActions: QueryPanelActionConfig[] = [
-        {
-          id: 'test-action',
-          order: 1,
-          actionType: 'button',
-          getLabel: jest.fn().mockReturnValue('Test Action'),
-          onClick: jest.fn(),
-        },
+      mockRegistry.getSortedActions.mockReturnValue(buildSix());
+
+      render(<QueryPanelActions registry={mockRegistry} />);
+      fireEvent.click(screen.getByTestId('queryPanelFooterActionsButton'));
+
+      // The 6th action is rendered inside the popover.
+      expect(screen.getByTestId('queryPanelActionOverflow-a5')).toBeInTheDocument();
+      expect(screen.getByText('Action 5')).toBeInTheDocument();
+    });
+
+    it('clicking an overflow action dispatches it with current dependencies', () => {
+      setupUseSelectorMock();
+      const onClick = jest.fn();
+      const seven = [
+        ...Array.from({ length: 5 }, (_, i) => buildAction(`a${i}`)),
+        buildAction('overflow', { getLabel: () => 'Overflowed', onClick }),
       ];
+      mockRegistry.getSortedActions.mockReturnValue(seven);
 
-      mockRegistry.getSortedActions.mockReturnValue(mockActions);
+      render(<QueryPanelActions registry={mockRegistry} />);
+      fireEvent.click(screen.getByTestId('queryPanelFooterActionsButton'));
+      fireEvent.click(screen.getByTestId('queryPanelActionOverflow-overflow'));
 
-      // First render
-      const { rerender } = render(<QueryPanelActions registry={mockRegistry} />);
+      expect(onClick).toHaveBeenCalledTimes(1);
+      expect(onClick).toHaveBeenCalledWith({
+        query: mockQuery,
+        resultStatus: mockResultStatus,
+        queryInEditor: 'SELECT * FROM table',
+      });
+    });
 
-      // Mock new selector values for rerender
-      const newQuery = { query: 'SELECT * FROM new_table', language: 'sql' };
-      const newResultStatus = { status: QueryExecutionStatus.LOADING };
+    it('renders the overflow button label as "+N more" plural-aware', () => {
+      setupUseSelectorMock();
+      // 5 inline + 3 overflow = "+3 more"
+      const eight = Array.from({ length: 8 }, (_, i) => buildAction(`a${i}`));
+      mockRegistry.getSortedActions.mockReturnValue(eight);
 
-      mockUseSelector.mockReturnValueOnce(newQuery).mockReturnValueOnce(newResultStatus);
-
-      // Rerender with new values
-      rerender(<QueryPanelActions registry={mockRegistry} />);
-
-      // Open popover and verify new dependencies are used
-      const button = screen.getByTestId('queryPanelFooterActionsButton');
-      fireEvent.click(button);
-
-      // The component should have updated its memoized dependencies
-      expect(mockRegistry.getSortedActions).toHaveBeenCalled();
+      render(<QueryPanelActions registry={mockRegistry} />);
+      expect(screen.getByTestId('queryPanelFooterActionsButton')).toHaveTextContent('+3 more');
     });
   });
 });
