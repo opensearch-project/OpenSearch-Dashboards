@@ -228,12 +228,12 @@ export const WorkspaceCollaboratorTable = ({
                 notifications?.toasts?.addDanger(
                   detail
                     ? i18n.translate('workspace.collaborator.table.fetchNames.errorWithDetail', {
-                      defaultMessage: 'Failed to load collaborator names: {detail}',
-                      values: { detail },
-                    })
+                        defaultMessage: 'Failed to load collaborator names: {detail}',
+                        values: { detail },
+                      })
                     : i18n.translate('workspace.collaborator.table.fetchNames.error', {
-                      defaultMessage: 'Failed to load collaborator names.',
-                    })
+                        defaultMessage: 'Failed to load collaborator names.',
+                      })
                 );
               }
             }
@@ -243,7 +243,7 @@ export const WorkspaceCollaboratorTable = ({
     };
     fetchNames();
     return () => abortController.abort();
-  }, [permissionSettings, displayedCollaboratorTypes, http]);
+  }, [permissionSettings, displayedCollaboratorTypes, http, notifications?.toasts]);
 
   const items: PermissionSettingWithAccessLevelAndDisplayedType[] = useMemo(() => {
     return permissionSettings

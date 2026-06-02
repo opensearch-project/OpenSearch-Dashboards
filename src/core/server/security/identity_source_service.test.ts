@@ -95,7 +95,14 @@ describe('IdentitySourceService', () => {
   });
 
   describe('prototype pollution safety', () => {
-    const prototypePollutionSources = ['constructor', 'hasOwnProperty', 'toString', '__proto__', 'valueOf', '__defineGetter__'];
+    const prototypePollutionSources = [
+      'constructor',
+      'hasOwnProperty',
+      'toString',
+      '__proto__',
+      'valueOf',
+      '__defineGetter__',
+    ];
 
     it.each(prototypePollutionSources)(
       'should register and retrieve handler for reserved key "%s"',

@@ -128,7 +128,7 @@ export const WorkspaceCollaboratorInput = ({
         }
       }, 300);
     },
-    [http, identitySource]
+    [http, identitySource, index, onSearchError]
   );
 
   const handlePermissionModeOptionChange = useCallback(
