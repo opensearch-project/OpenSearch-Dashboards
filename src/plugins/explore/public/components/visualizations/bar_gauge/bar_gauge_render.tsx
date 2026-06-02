@@ -188,12 +188,12 @@ export const BarGaugeRender = ({ data, styles, isHorizontal }: BarGaugeRenderPro
     const leftWidth = size * (1 - 0.04 * 2) - size * 0.02 * (barCount - 1);
     const computedThickness = (leftWidth / barCount) * 0.7;
 
-    // when bars overflow and scroll, each bar is clamped to the min-height/min-width
-    const minThickness = isHorizontal ? 24 : 40;
+    // when bars overflow and scroll, each bar is clamped to the min-height/min-width(40px)
+    const minThickness = 40;
     const barThickness = Math.max(computedThickness, minThickness);
 
     const maxValueLen = items.reduce((max, item) => Math.max(max, item.displayValue.length), 1);
-    const fontSize = isHorizontal ? barThickness / 3 : barThickness / (maxValueLen * 0.5);
+    const fontSize = isHorizontal ? barThickness / 2 : barThickness / (maxValueLen * 0.5);
     return Math.min(24, fontSize);
   }, [containerDimensions, data.length, isHorizontal, items]);
 

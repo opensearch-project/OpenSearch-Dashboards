@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { useObservable } from 'react-use';
 import dateMath from '@elastic/datemath';
@@ -60,6 +60,20 @@ export const CommonVisualizationRender = ({
   const legendSelected$ = useRef(new BehaviorSubject<Record<string, boolean>>({})).current;
   const highlightedSeries$ = useRef(new BehaviorSubject<string | undefined>(undefined)).current;
   const legend$ = useRef(new BehaviorSubject<Record<string, ColorMap>>({})).current;
+
+  useEffect(() => {
+    const visSupportCustomLegend = [
+      'area',
+      'line',
+      'bar',
+      'pie',
+      'scatter',
+      'state_timeline',
+    ].includes(visConfig?.type ?? '');
+    if (!visSupportCustomLegend) {
+      legend$.next({});
+    }
+  }, [visConfig?.type, legend$]);
 
   const timeRange = useMemo(() => {
     return {
