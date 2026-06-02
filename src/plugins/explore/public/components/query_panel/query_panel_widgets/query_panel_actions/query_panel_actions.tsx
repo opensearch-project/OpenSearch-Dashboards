@@ -87,24 +87,13 @@ export const QueryPanelActions = ({ registry }: QueryPanelActionsProps) => {
     return action?.actionType === 'flyout' ? (action as FlyoutActionConfig) : null;
   }, [openFlyoutId, registry]);
 
+  // Wrap the action buttons in a right-anchored group so they sit on the
+  // far end of the toolbar's left section, visually separated from the
+  // save/recent/dataset controls. `flex: 1` consumes leftover horizontal
+  // space; `justify-content: flex-end` shoves the buttons to the right
+  // edge.
   return (
-    <>
-      {/* Subtle "Actions:" label scopes the inline buttons that follow.
-          Always rendered when there's at least one action so the toolbar
-          reads consistently, regardless of whether the overflow popover
-          is in play. Plain text (not a button) — purely a visual anchor. */}
-      {(inlineActions.length > 0 || overflowActions.length > 0) && (
-        <EuiText
-          size="xs"
-          color="subdued"
-          className="exploreQueryPanelActions__label"
-          data-test-subj="queryPanelActionsLabel"
-        >
-          {i18n.translate('explore.queryPanel.actions.label', {
-            defaultMessage: 'Actions:',
-          })}
-        </EuiText>
-      )}
+    <div className="exploreQueryPanelActions__group" data-test-subj="queryPanelActionsGroup">
       {inlineActions.map((action) => {
         const isEnabled = action.getIsEnabled ? action.getIsEnabled(dependencies) : true;
         const label = action.getLabel(dependencies);
@@ -188,6 +177,6 @@ export const QueryPanelActions = ({ registry }: QueryPanelActionsProps) => {
           services={services}
         />
       )}
-    </>
+    </div>
   );
 };

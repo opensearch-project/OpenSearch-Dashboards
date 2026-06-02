@@ -16,16 +16,18 @@
     }
   }
 
-  // Subtle "Actions:" anchor preceding the inline action buttons. Sized to
-  // match the surrounding `EuiButtonEmpty size="xs"` text (`extraSmall`)
-  // so it reads as part of the toolbar row. `inline-flex` centers it
-  // vertically against the buttons; the small horizontal margins give the
-  // first action button breathing room without wedging the label against
-  // the upstream separator.
-  &__label {
-    display: inline-flex;
+  // Right-anchor wrapper for the inline action buttons + overflow popover.
+  // The parent (`.exploreQueryPanelWidgets__left`) is a flex row whose
+  // outer container uses `justify-content: space-between` — meaning
+  // `__left` only takes its content width, so `flex: 1` here would have
+  // nothing to grow into. `margin-left: auto` instead pushes this wrapper
+  // to the right edge of `__left` regardless of how wide `__left` is,
+  // visually separating the actions from the save / recent / dataset
+  // controls on the left without an explicit divider.
+  &__group {
+    display: flex;
+    margin-left: auto;
     align-items: center;
-    margin-right: $euiSizeXS;
-    margin-left: $euiSizeXS;
+    gap: $euiSizeXS;
   }
 }
