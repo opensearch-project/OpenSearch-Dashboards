@@ -470,6 +470,46 @@ describe('SlashCommandRegistry', () => {
     });
   });
 
+  describe('localMessage support', () => {
+    it('should return localMessage when handler returns object with localMessage', async () => {
+      slashCommandRegistry.register({
+        command: 'local',
+        description: 'Local response command',
+        handler: () => ({ localMessage: 'This is shown locally' }),
+      });
+
+      const result = await slashCommandRegistry.execute('/local');
+      expect(result.handled).toBe(true);
+      expect(result.localMessage).toBe('This is shown locally');
+      expect(result.message).toBeUndefined();
+    });
+
+    it('should return message when handler returns a string', async () => {
+      slashCommandRegistry.register({
+        command: 'remote',
+        description: 'Remote response command',
+        handler: () => 'sent to agent',
+      });
+
+      const result = await slashCommandRegistry.execute('/remote');
+      expect(result.handled).toBe(true);
+      expect(result.message).toBe('sent to agent');
+      expect(result.localMessage).toBeUndefined();
+    });
+
+    it('should pass args to handler that returns localMessage', async () => {
+      slashCommandRegistry.register({
+        command: 'info',
+        description: 'Info command',
+        handler: (args) => ({ localMessage: `Info: ${args}` }),
+      });
+
+      const result = await slashCommandRegistry.execute('/info some details');
+      expect(result.handled).toBe(true);
+      expect(result.localMessage).toBe('Info: some details');
+    });
+  });
+
   describe('integration scenarios', () => {
     it('should handle complete workflow: register, execute, unregister', async () => {
       const command: SlashCommand = {
