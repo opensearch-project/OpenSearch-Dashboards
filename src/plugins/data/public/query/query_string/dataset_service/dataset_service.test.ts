@@ -322,7 +322,7 @@ describe('DatasetService', () => {
     } as Dataset;
 
     const mockCreatedDataView = {
-      id: 'data-source-123::generated-uuid-5678',
+      id: 'data-source-123_generated-uuid-5678',
     };
 
     const mockDataViews = {
@@ -343,7 +343,7 @@ describe('DatasetService', () => {
     // Should call createAndSave with data source prefixed ID
     expect(mockDataViews.createAndSave).toHaveBeenCalledWith(
       expect.objectContaining({
-        id: expect.stringMatching(/^data-source-123::[0-9a-f-]{36}$/), // Should match data-source-id::uuid pattern
+        id: expect.stringMatching(/^data-source-123_[0-9a-f-]{36}$/), // Should match data-source-id_uuid pattern
         title: 'Test Dataset',
         displayName: 'My Dataset',
         description: 'Test description',
@@ -362,7 +362,7 @@ describe('DatasetService', () => {
     );
 
     // Should update the dataset with the generated UUID
-    expect(mockDataset.id).toBe('data-source-123::generated-uuid-5678');
+    expect(mockDataset.id).toBe('data-source-123_generated-uuid-5678');
   });
 
   test('saveDataset does not save index pattern datasets', async () => {
