@@ -63,6 +63,7 @@ export const DeveloperMessageSchema = BaseMessageSchema.extend({
 export const SystemMessageSchema = BaseMessageSchema.extend({
   role: z.literal('system'),
   content: z.string(),
+  title: z.string().optional(),
   toolCallId: z.string().optional(),
   canResend: z.boolean().optional(),
   toolResult: z.any().optional(),

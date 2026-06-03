@@ -449,6 +449,9 @@ export class ExploreEmbeddable
       try {
         await this.fetch();
       } catch (error: any) {
+        if (error?.name === 'AbortError' || this.abortController?.signal?.aborted) {
+          return;
+        }
         this.searchProps.isLoading = false;
         this.searchProps.error = {
           name: error?.body?.error || error?.name || 'Error',
