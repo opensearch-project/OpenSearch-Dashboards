@@ -216,13 +216,13 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     // Block AI features for unsupported data sources
     if (await isUnsupportedDataSource()) {
       const userMsg: UserMessage = {
-        id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+        id: chatService.generateMessageId(),
         role: 'user',
         content: messageContent,
         rawMessage: rawMessage || messageContent,
       };
       const systemMsg: SystemMessage = {
-        id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+        id: chatService.generateMessageId(),
         role: 'system',
         content: i18n.translate('chat.dataSourceUnsupported', {
           defaultMessage: 'The current data source does not support AI features.',
@@ -303,7 +303,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         additionalMessages = [
           {
             role: 'user' as const,
-            id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+            id: chatService.generateMessageId(),
             content: [
               {
                 type: 'binary' as const,
@@ -322,6 +322,22 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     // Check if this is a slash command
     const commandResult = await slashCommandRegistry.execute(messageContent);
     if (commandResult.handled) {
+      if (commandResult.localMessage) {
+        const userMsg: UserMessage = {
+          id: chatService.generateMessageId(),
+          role: 'user',
+          content: messageContent,
+          rawMessage: messageContent,
+        };
+        const systemMsg: SystemMessage = {
+          id: chatService.generateMessageId(),
+          role: 'system',
+          content: commandResult.localMessage,
+          ...(commandResult.title && { title: commandResult.title }),
+        };
+        setTimeline((prev) => [...prev, userMsg, systemMsg]);
+        return;
+      }
       // If command was handled and returned a message, send it to the AI
       if (commandResult.message) {
         return subscribeToMessageStream(commandResult.message, messagesToSend, messageContent);
