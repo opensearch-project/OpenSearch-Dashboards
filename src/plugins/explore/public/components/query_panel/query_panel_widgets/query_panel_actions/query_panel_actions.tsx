@@ -133,7 +133,7 @@ export const QueryPanelActions = ({ registry }: QueryPanelActionsProps) => {
               <div className="exploreQueryPanelActions__buttonTextWrapper">
                 <EuiText size="xs">
                   {i18n.translate('explore.queryPanel.actions.overflow', {
-                    defaultMessage: '+{count} more',
+                    defaultMessage: '+{count} more {count, plural, one {action} other {actions}}',
                     values: { count: overflowActions.length },
                   })}
                 </EuiText>

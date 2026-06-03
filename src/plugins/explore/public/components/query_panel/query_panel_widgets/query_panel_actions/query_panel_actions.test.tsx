@@ -179,7 +179,7 @@ describe('QueryPanelActions', () => {
     const buildSix = () =>
       Array.from({ length: 6 }, (_, i) => buildAction(`a${i}`, { getLabel: () => `Action ${i}` }));
 
-    it('shows the first 5 inline and a "+1 more" overflow button when 6 actions exist', () => {
+    it('shows the first 5 inline and a "+1 more action" overflow button when 6 actions exist', () => {
       setupUseSelectorMock();
       mockRegistry.getSortedActions.mockReturnValue(buildSix());
 
@@ -194,7 +194,8 @@ describe('QueryPanelActions', () => {
       // Overflow button is present, labeled with the remaining count.
       const overflow = screen.getByTestId('queryPanelFooterActionsButton');
       expect(overflow).toBeInTheDocument();
-      expect(overflow).toHaveTextContent('+1 more');
+      // Singular form — `+1 more action` (not `actions`).
+      expect(overflow).toHaveTextContent('+1 more action');
     });
 
     it('reveals the overflow actions inside the popover when clicked', () => {
@@ -232,12 +233,14 @@ describe('QueryPanelActions', () => {
 
     it('renders the overflow button label as "+N more" plural-aware', () => {
       setupUseSelectorMock();
-      // 5 inline + 3 overflow = "+3 more"
+      // 5 inline + 3 overflow → plural form `+3 more actions`.
       const eight = Array.from({ length: 8 }, (_, i) => buildAction(`a${i}`));
       mockRegistry.getSortedActions.mockReturnValue(eight);
 
       render(<QueryPanelActions registry={mockRegistry} />);
-      expect(screen.getByTestId('queryPanelFooterActionsButton')).toHaveTextContent('+3 more');
+      expect(screen.getByTestId('queryPanelFooterActionsButton')).toHaveTextContent(
+        '+3 more actions'
+      );
     });
   });
 });
