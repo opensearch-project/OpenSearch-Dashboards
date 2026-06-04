@@ -46,9 +46,10 @@ export const ErrorRow: React.FC<ErrorRowProps> = ({ error, onResendToolResult })
       <div className="errorRow__content">
         <div className="errorRow__info">
           <EuiText size="s" style={{ fontWeight: 600, color: '#BD271E' }}>
-            {i18n.translate('chat.errorRow.title', {
-              defaultMessage: 'Something went wrong',
-            })}
+            {error.title ||
+              i18n.translate('chat.errorRow.title', {
+                defaultMessage: 'Something went wrong',
+              })}
           </EuiText>
         </div>
         <div className="errorRow__message">
