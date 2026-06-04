@@ -47,4 +47,3 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     schema: schema.number(),
   },
 };
-};
