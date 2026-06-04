@@ -29,7 +29,7 @@ where `locale` is [ISO 639 language code](https://en.wikipedia.org/wiki/List_of_
 
 For example:
 ```
-src/legacy/core_plugins/opensearch-dashboards/translations/fr.json
+src/plugins/opensearch-dashboards/translations/fr.json
 ```
 
 The engine scans `src/core_plugins/*/translations`, `plugins/*/translations` and `src/legacy/ui/translations` folders on initialization, so there is no need to register translation files.
@@ -76,7 +76,7 @@ For the detailed explanation, see the section below
 - `translate(id: string, { values: object, defaultMessage: string, description: string })` –
 translate message by id. `description` is optional context comment that will be extracted
 by i18n tools and added as a comment next to translation message at `defaultMessages.json`.
-- `init(messages: Map<string, string>)` - initializes the engine
+- `init(translation: Translation)` - initializes the engine with translation object containing locale, messages, and optional formats.
 - `load(translationsUrl: string)` - loads JSON with translations from the specified URL and initializes i18n engine with them.
 
 #### I18n engine internals
@@ -125,18 +125,7 @@ the underlying `Intl.NumberFormat` instance as its options.
 you can find default format options used as the prototype of the formats
 provided to the constructor.
 
-Creating instances of `IntlMessageFormat` is expensive.
-[Intl-format-cache](https://github.com/yahoo/intl-format-cache)
-library is simply to make it easier to create a cache of format
-instances of a particular type to aid in their reuse. Under the
-hood, this package creates a cache key based on the arguments passed
-to the memoized constructor.
-
-```js
-import memoizeIntlConstructor from 'intl-format-cache';
-
-const getMessageFormat = memoizeIntlConstructor(IntlMessageFormat);
-```
+Creating instances of `IntlMessageFormat` is expensive, so the i18n engine uses an internal cache (Map) to store and reuse `IntlMessageFormat` instances based on the message and locale.
 
 ## Vanilla JS
 

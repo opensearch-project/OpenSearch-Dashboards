@@ -68,8 +68,8 @@ export class I18nProvider extends React.PureComponent<I18nProviderProps> {
         textComponent={React.Fragment}
         defaultRichTextElements={globalRichTextElements}
         onError={(err) => {
-          // Suppress missing translation errors for en locale
-          if (err.code === ReactIntlErrorCode.MISSING_TRANSLATION && i18n.getLocale() === 'en') {
+          // Suppress missing translation errors, it's common for OSD
+          if (err.code === ReactIntlErrorCode.MISSING_TRANSLATION) {
             return;
           }
           // Let other format errors pass through normally

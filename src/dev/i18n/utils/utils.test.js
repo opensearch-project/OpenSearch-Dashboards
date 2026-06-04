@@ -37,9 +37,12 @@ import {
   traverseNodes,
   formatJSString,
   checkValuesProperty,
+  checkSingleApostropheWrappedValues,
+  checkLegacyEscapedCurlyBraces,
   createParserErrorMessage,
   normalizePath,
   extractMessageValueFromNode,
+  extractValueReferencesFromMessage,
 } from './utils';
 
 const i18nTranslateSources = ['i18n', 'i18n.translate'].map(
@@ -187,6 +190,49 @@ describe('i18n utils', () => {
     expect(() =>
       checkValuesProperty(valuesKeys, defaultMessage, messageId)
     ).toThrowErrorMatchingSnapshot();
+  });
+
+  test('should throw if defaultMessage wraps a value reference in single apostrophes', () => {
+    const valuesKeys = ['title'];
+    const defaultMessage = "Test message with '{title}'.";
+    const messageId = 'namespace.message.id';
+
+    expect(() =>
+      checkSingleApostropheWrappedValues(valuesKeys, defaultMessage, messageId)
+    ).toThrowErrorMatchingSnapshot();
+  });
+
+  test('should allow defaultMessage to wrap a value reference in escaped apostrophes', () => {
+    const valuesKeys = ['title'];
+    const defaultMessage = "Test message with ''{title}''.";
+    const messageId = 'namespace.message.id';
+
+    expect(() =>
+      checkSingleApostropheWrappedValues(valuesKeys, defaultMessage, messageId)
+    ).not.toThrow();
+  });
+
+  test('should throw if defaultMessage uses legacy escaped curly braces', () => {
+    const defaultMessage = 'Test message with \\{title\\}.';
+    const messageId = 'namespace.message.id';
+
+    expect(() =>
+      checkLegacyEscapedCurlyBraces(defaultMessage, messageId)
+    ).toThrowErrorMatchingSnapshot();
+  });
+
+  test('should allow apostrophe-escaped curly braces', () => {
+    const defaultMessage = "Test message with '{title}'.";
+    const messageId = 'namespace.message.id';
+
+    expect(() => checkLegacyEscapedCurlyBraces(defaultMessage, messageId)).not.toThrow();
+  });
+
+  test('should ignore single-apostrophe escaped curly braces when extracting value references', () => {
+    const defaultMessage = "Use '{var}' literally and {name} as a value.";
+    const messageId = 'namespace.message.id';
+
+    expect(extractValueReferencesFromMessage(defaultMessage, messageId)).toEqual(['name']);
   });
 
   test(`should parse string concatenation`, () => {

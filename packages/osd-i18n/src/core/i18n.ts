@@ -36,7 +36,7 @@ import { hasValues, isObject, isString, mergeAll } from './helper';
 import { isPseudoLocale, translateUsingPseudoLocale } from './pseudo_locale';
 
 const EN_LOCALE = 'en';
-const globalRichTextElements = {
+const gRichTextElements = {
   b: (chunks: any) => `<b>${chunks}</b>`,
   code: (chunks: any) => `<code>${chunks}</code>`,
   em: (chunks: any) => `<em>${chunks}</em>`,
@@ -198,6 +198,10 @@ export function setFormats(newFormats: Formats) {
   }
 
   formats = mergeAll(formats, newFormats) as Formats;
+
+  // Clear the message format cache since formats have changed
+  // Any cached IntlMessageFormat instances were created with old formats
+  clearMessageFormatCache();
 }
 
 /**
@@ -247,12 +251,10 @@ export function translate(id: string, { values = {}, defaultMessage }: Translate
     try {
       // IntlMessageFormat natively supports functions in values for rich text formatting
       // We should call `format` even for messages without any value references
-      // to let it handle escaped curly braces `\\{` that are the part of the text itself
+      // to let it handle escaped curly braces `'{` that are the part of the text itself
       // and not value reference boundaries.
-      const formattedMessage = getMessageFormat(message, getLocale(), getFormats()).format({
-        ...globalRichTextElements,
-        ...values,
-      });
+      const eValues = message.includes('<') ? { ...gRichTextElements, ...values } : values;
+      const formattedMessage = getMessageFormat(message, getLocale(), getFormats()).format(eValues);
 
       // Ensure we always return a string by converting the result
       const messageString = Array.isArray(formattedMessage)
@@ -269,10 +271,8 @@ export function translate(id: string, { values = {}, defaultMessage }: Translate
 
   try {
     const msg = getMessageFormat(defaultMessage, getDefaultLocale(), getFormats());
-    const formattedDefault = msg.format({
-      ...globalRichTextElements,
-      ...values,
-    });
+    const eValues = defaultMessage.includes('<') ? { ...gRichTextElements, ...values } : values;
+    const formattedDefault = msg.format(eValues);
 
     // Ensure we always return a string by converting the result
     return Array.isArray(formattedDefault) ? formattedDefault.join('') : String(formattedDefault);

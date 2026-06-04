@@ -109,4 +109,58 @@ i18n('message-id', { defaultMessage: message });
 
     expect(() => extractI18nCallMessages(callExpressionNode)).toThrowErrorMatchingSnapshot();
   });
+
+  test('throws if defaultMessage wraps a value reference in single apostrophes', () => {
+    const source = `
+i18n('message-id', {
+  defaultMessage: "Index pattern '{indexPatternTitle}' is invalid",
+  values: { indexPatternTitle: 'logs-*' },
+});
+`;
+    const callExpressionNode = [...traverseNodes(parse(source).program.body)].find((node) =>
+      isCallExpression(node)
+    );
+
+    expect(() => extractI18nCallMessages(callExpressionNode)).toThrowErrorMatchingSnapshot();
+  });
+
+  test('allows defaultMessage to wrap a value reference in escaped apostrophes', () => {
+    const source = `
+i18n('message-id', {
+  defaultMessage: "Index pattern ''{indexPatternTitle}'' is invalid",
+  values: { indexPatternTitle: 'logs-*' },
+});
+`;
+    const callExpressionNode = [...traverseNodes(parse(source).program.body)].find((node) =>
+      isCallExpression(node)
+    );
+
+    expect(() => extractI18nCallMessages(callExpressionNode)).not.toThrow();
+  });
+
+  test('throws if defaultMessage uses legacy escaped curly braces', () => {
+    const source = String.raw`
+i18n('message-id', {
+  defaultMessage: "\\{foo\\}",
+});
+`;
+    const callExpressionNode = [...traverseNodes(parse(source).program.body)].find((node) =>
+      isCallExpression(node)
+    );
+
+    expect(() => extractI18nCallMessages(callExpressionNode)).toThrowErrorMatchingSnapshot();
+  });
+
+  test('allows apostrophe-escaped curly braces', () => {
+    const source = `
+i18n('message-id', {
+  defaultMessage: "'{foo}'",
+});
+`;
+    const callExpressionNode = [...traverseNodes(parse(source).program.body)].find((node) =>
+      isCallExpression(node)
+    );
+
+    expect(() => extractI18nCallMessages(callExpressionNode)).not.toThrow();
+  });
 });

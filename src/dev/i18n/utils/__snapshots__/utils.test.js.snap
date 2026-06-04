@@ -26,6 +26,10 @@ exports[`i18n utils should throw if "values" property is not provided and defaul
 
 exports[`i18n utils should throw if "values" property is provided and defaultMessage doesn't include any references 1`] = `"\\"values\\" object contains unused properties (\\"namespace.message.id\\"): [url,username]."`;
 
+exports[`i18n utils should throw if defaultMessage uses legacy escaped curly braces 1`] = `"defaultMessage contains legacy escaped curly braces (\\"namespace.message.id\\"). Use apostrophe escaping like '{foo}' instead of \\\\{foo\\\\}."`;
+
+exports[`i18n utils should throw if defaultMessage wraps a value reference in single apostrophes 1`] = `"defaultMessage contains value references wrapped in single apostrophes (\\"namespace.message.id\\"): [title]. Use {key} or ''{key}'' instead."`;
+
 exports[`i18n utils should throw if some key is missing in "values" 1`] = `"some properties are missing in \\"values\\" object (\\"namespace.message.id\\"): [password]."`;
 
 exports[`i18n utils should throw on wrong nested ICU message 1`] = `"\\"values\\" object contains unused properties (\\"namespace.message.id\\"): [third]."`;

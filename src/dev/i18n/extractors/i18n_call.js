@@ -34,6 +34,8 @@ import {
   isPropertyWithKey,
   formatJSString,
   checkValuesProperty,
+  checkSingleApostropheWrappedValues,
+  checkLegacyEscapedCurlyBraces,
   extractMessageIdFromNode,
   extractMessageValueFromNode,
   extractDescriptionValueFromNode,
@@ -84,6 +86,8 @@ export function extractI18nCallMessages(node) {
     : [];
 
   checkValuesProperty(valuesKeys, message, messageId);
+  checkSingleApostropheWrappedValues(valuesKeys, message, messageId);
+  checkLegacyEscapedCurlyBraces(message, messageId);
 
   return [messageId, { message, description }];
 }
