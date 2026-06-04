@@ -29,6 +29,7 @@
  */
 
 import { createRoot, Root } from 'react-dom/client';
+import { I18nProvider } from '@osd/i18n/react';
 import { Embeddable, EmbeddableOutput } from '../../../embeddable/public';
 
 import { DisabledLabVisualization } from './disabled_lab_visualization';
@@ -53,7 +54,11 @@ export class DisabledLabEmbeddable extends Embeddable<VisualizeInput, Embeddable
       }
       this.domNode = domNode;
       this.root = createRoot(domNode);
-      this.root.render(<DisabledLabVisualization title={this.title} />);
+      this.root.render(
+        <I18nProvider>
+          <DisabledLabVisualization title={this.title} />
+        </I18nProvider>
+      );
     }
   }
 

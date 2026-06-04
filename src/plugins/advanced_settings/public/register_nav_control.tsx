@@ -5,6 +5,7 @@
 
 import { createRoot } from 'react-dom/client';
 import { CoreStart } from 'opensearch-dashboards/public';
+import { I18nProvider } from '@osd/i18n/react';
 import { OpenSearchDashboardsContextProvider } from '../../opensearch_dashboards_react/public';
 import { HeaderUserThemeMenu } from './header_user_theme_menu';
 
@@ -14,13 +15,15 @@ export function setupTopNavThemeButton(coreStart: CoreStart, useUpdatedAppearanc
     mount: (element: HTMLElement) => {
       const root = createRoot(element);
       root.render(
-        <OpenSearchDashboardsContextProvider
-          services={{
-            ...coreStart,
-          }}
-        >
-          <HeaderUserThemeMenu />
-        </OpenSearchDashboardsContextProvider>
+        <I18nProvider>
+          <OpenSearchDashboardsContextProvider
+            services={{
+              ...coreStart,
+            }}
+          >
+            <HeaderUserThemeMenu />
+          </OpenSearchDashboardsContextProvider>
+        </I18nProvider>
       );
       return () => root.unmount();
     },
