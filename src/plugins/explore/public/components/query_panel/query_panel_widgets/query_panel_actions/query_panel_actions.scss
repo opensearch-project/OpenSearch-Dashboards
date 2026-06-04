@@ -30,4 +30,9 @@
     align-items: center;
     gap: $euiSizeXS;
   }
+
+  &__overflowList {
+    display: flex;
+    flex-direction: column;
+  }
 }

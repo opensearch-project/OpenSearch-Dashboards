@@ -4,7 +4,7 @@
  */
 
 import { useCallback, useMemo, useState } from 'react';
-import { EuiButtonEmpty, EuiIcon, EuiListGroup, EuiPopover, EuiText } from '@elastic/eui';
+import { EuiButtonEmpty, EuiIcon, EuiPopover, EuiText } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import {
@@ -103,7 +103,6 @@ export const QueryPanelActions = ({ registry }: QueryPanelActionsProps) => {
           <EuiButtonEmpty
             key={action.id}
             size="xs"
-            className="exploreQueryPanelActions__inlineButton"
             onClick={() => handleActionClick(action)}
             disabled={!isEnabled}
             iconType={icon}
@@ -146,7 +145,7 @@ export const QueryPanelActions = ({ registry }: QueryPanelActionsProps) => {
           anchorPosition="downCenter"
           panelPaddingSize="none"
         >
-          <EuiListGroup>
+          <div className="exploreQueryPanelActions__overflowList">
             {overflowActions.map((action) => {
               const isEnabled = action.getIsEnabled ? action.getIsEnabled(dependencies) : true;
               const label = action.getLabel(dependencies);
@@ -165,7 +164,7 @@ export const QueryPanelActions = ({ registry }: QueryPanelActionsProps) => {
                 </EuiButtonEmpty>
               );
             })}
-          </EuiListGroup>
+          </div>
         </EuiPopover>
       )}
 
