@@ -4,8 +4,16 @@
  */
 
 import './metrics_page_tabs.scss';
-import React from 'react';
-import { EuiTabs, EuiTab, EuiHorizontalRule, EuiIcon } from '@elastic/eui';
+import React, { useMemo, useState } from 'react';
+import {
+  EuiTabs,
+  EuiTab,
+  EuiHorizontalRule,
+  EuiIcon,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { useSelector, useDispatch } from 'react-redux';
 import { MetricsExploreTab } from './explore';
@@ -15,6 +23,9 @@ import { DatasetSelectWidget } from '../../../components/query_panel/query_panel
 import { RootState } from '../../utils/state_management/store';
 import { setMetricsPageMode } from '../../utils/state_management/slices/ui/ui_slice';
 import { MetricsPageMode, MetricsPageModeContext } from './metrics_page_mode_context';
+import { CreateMetricsRuleFlyout } from './create_metrics_rule_flyout';
+import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
+import { ExploreServices } from '../../../types';
 
 export { useMetricsPageMode } from './metrics_page_mode_context';
 
@@ -33,24 +44,62 @@ const PAGE_TABS: Array<{ id: MetricsPageMode; label: string; iconType: string }>
 
 export const MetricsPageTabs: React.FC = () => {
   const dispatch = useDispatch();
+  const { services } = useOpenSearchDashboards<ExploreServices>();
   const mode = useSelector((state: RootState) => state.ui.metricsPageMode) || 'explore';
+  const dataConnectionId = useSelector((state: RootState) => state.query.dataset?.id || '');
+  const [showAlertRuleFlyout, setShowAlertRuleFlyout] = useState(false);
+
+  // Read queries from the QueryStringManager which is synced on every keystroke
+  // (unlike the Redux store which only updates on "Update" button click).
+  const parsedQueries = useMemo(() => {
+    if (!showAlertRuleFlyout) return [];
+    const raw = String(services.data.query.queryString.getQuery().query || '');
+    if (!raw.trim()) return [];
+    if (raw.includes(';\n') || raw.endsWith(';')) {
+      return raw
+        .split(/;\s*\n/)
+        .map((q) => q.replace(/;\s*$/, '').trim())
+        .filter(Boolean);
+    }
+    return [raw.trim()];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showAlertRuleFlyout]);
+
   return (
     <MetricsPageModeContext.Provider value={mode}>
       <div className="metricsPageTabs__tabBar">
-        <DatasetSelectWidget />
-        <EuiTabs size="s" className="metricsPageTabs__tabs" bottomBorder={false}>
-          {PAGE_TABS.map((tab) => (
-            <EuiTab
-              key={tab.id}
-              isSelected={mode === tab.id}
-              onClick={() => dispatch(setMetricsPageMode(tab.id))}
-              data-test-subj={`metricsPageTab-${tab.id}`}
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <DatasetSelectWidget />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiTabs size="s" className="metricsPageTabs__tabs" bottomBorder={false}>
+              {PAGE_TABS.map((tab) => (
+                <EuiTab
+                  key={tab.id}
+                  isSelected={mode === tab.id}
+                  onClick={() => dispatch(setMetricsPageMode(tab.id))}
+                  data-test-subj={`metricsPageTab-${tab.id}`}
+                >
+                  <EuiIcon type={tab.iconType} size="m" style={{ marginRight: 6 }} />
+                  {tab.label}
+                </EuiTab>
+              ))}
+            </EuiTabs>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="s"
+              iconType="bell"
+              onClick={() => setShowAlertRuleFlyout(true)}
+              data-test-subj="metricsCreateAlertRuleBtn"
             >
-              <EuiIcon type={tab.iconType} size="m" style={{ marginRight: 6 }} />
-              {tab.label}
-            </EuiTab>
-          ))}
-        </EuiTabs>
+              {i18n.translate('explore.metricsPage.createAlertRule', {
+                defaultMessage: 'Create alert rule',
+              })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </div>
       {mode === 'explore' ? (
         <div className="explore-layout__canvas metricsPageTabs__exploreCanvas">
@@ -62,6 +111,14 @@ export const MetricsPageTabs: React.FC = () => {
           <EuiHorizontalRule margin="none" />
           <BottomRightContainer />
         </>
+      )}
+      {showAlertRuleFlyout && (
+        <CreateMetricsRuleFlyout
+          queries={parsedQueries}
+          datasourceId={dataConnectionId}
+          onClose={() => setShowAlertRuleFlyout(false)}
+          http={services.http as any}
+        />
       )}
     </MetricsPageModeContext.Provider>
   );
