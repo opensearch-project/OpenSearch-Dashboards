@@ -31,10 +31,10 @@
 import Path from 'path';
 import { rspack, Configuration } from '@rspack/core';
 import { getSwcLoaderConfig } from '@osd/utils';
-import * as UiSharedDeps from '@osd/ui-shared-deps';
 import browserslist from 'browserslist';
 
 import { DiscoveredUiPlugin } from './discover_plugins';
+import { getMfeExternals, getMfeSharedConfig } from './mfe_shared_deps';
 
 // `node-polyfill-webpack-plugin` ships type declarations that pull in a newer
 // `type-fest` than this repo's TypeScript (4.6) can parse. Require it as a value
@@ -78,10 +78,10 @@ export interface MfeRspackConfigOptions {
  * The config deliberately mirrors the loader/resolve settings used by the
  * existing optimizer (`packages/osd-optimizer/src/worker/webpack.config.ts`):
  * the same `builtin:swc-loader` settings (via `getSwcLoaderConfig`), the same
- * resolve aliases, and the same `@osd/ui-shared-deps` externals so the remote
- * does not bundle its own copy of React/EUI/etc. Converting those externals to
- * Module Federation `shared` singletons is handled in the next story; for now
- * `shared` is left empty (the "default").
+ * resolve aliases. The `@osd/ui-shared-deps` set is split between Module
+ * Federation `shared` singletons (top-level package roots — react, react-dom,
+ * @elastic/eui, ...) and plain `externals` (sub-path/JSON specifiers). Either
+ * way the remote does not bundle its own copy of React/EUI/etc.
  *
  * This is purely additive and never writes to the plugin's existing
  * `target/public` optimizer output.
@@ -145,9 +145,14 @@ export function getMfeRspackConfig(options: MfeRspackConfigOptions): Configurati
       clean: true,
     },
 
-    // Reuse OSD's existing shared-deps externals so the remote references the
-    // `__osdSharedDeps__` globals instead of bundling react/react-dom/EUI/etc.
-    externals: [UiSharedDeps.externals],
+    // Reuse OSD's existing shared-deps externals for the specifiers that are NOT
+    // handled by Module Federation `shared` below (sub-path/JSON imports such as
+    // `react-dom/server`, `@elastic/eui/lib/services`, `*.json`, the
+    // `@osd/ui-shared-deps/theme` virtual, and the deep `monaco-editor` path).
+    // These continue to reference the `__osdSharedDeps__` globals. The top-level
+    // package roots (react, react-dom, @elastic/eui, ...) are removed here and
+    // declared as MF singletons instead — see getMfeExternals/getMfeSharedConfig.
+    externals: [getMfeExternals()],
 
     plugins: [
       new NodePolyfillPlugin({ additionalAliases: ['process'] }),
@@ -165,9 +170,13 @@ export function getMfeRspackConfig(options: MfeRspackConfigOptions): Configurati
         exposes: {
           './public': publicEntry,
         },
-        // Shared singletons (react, react-dom, @osd/i18n, ...) are wired in the
-        // next story; until then shared deps are provided via the externals map.
-        shared: {},
+        // Declare the OSD shared dependencies (react, react-dom, @osd/i18n,
+        // rxjs, lodash, @elastic/eui, moment, styled-components, ...) as Module
+        // Federation singletons, derived programmatically from
+        // `@osd/ui-shared-deps`. Each is consume-only (`import: false`), so the
+        // remote uses the host-provided instance and never bundles its own copy
+        // of React/EUI/etc. See packages/osd-mfe/src/mfe_shared_deps.ts.
+        shared: getMfeSharedConfig(repoRoot),
       }),
     ],
 
