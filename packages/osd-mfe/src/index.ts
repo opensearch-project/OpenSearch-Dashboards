@@ -15,6 +15,11 @@ export { getMfeRspackConfig } from './mfe_rspack_config';
 export type { MfeRspackConfigOptions } from './mfe_rspack_config';
 export { getMfeSharedConfig, getMfeExternals, getSharedPackageRoots } from './mfe_shared_deps';
 export type { MfeSharedConfig, MfeSharedMap } from './mfe_shared_deps';
-export { buildMfeForPlugin } from './build_mfe_for_plugin';
-export type { MfeBuildResult } from './build_mfe_for_plugin';
+export { buildMfeForPlugin, buildAllMfe } from './build_mfe_for_plugin';
+export type {
+  MfeBuildResult,
+  MfeBuildAllResult,
+  MfeBuildFailure,
+  BuildAllMfeOptions,
+} from './build_mfe_for_plugin';
 export { runCli } from './cli';
