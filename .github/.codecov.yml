@@ -1,6 +1,6 @@
 # https://docs.codecov.com/docs/codecov-yaml
 codecov:
-  require_ci_to_pass: yes
+  require_ci_to_pass: true
 
 coverage:
   status:
@@ -8,4 +8,8 @@ coverage:
       default:
         target: auto
         threshold: 2% # the leniency in hitting the target
+    patch:
+      default:
+        target: 80%
+        threshold: 0%
 
