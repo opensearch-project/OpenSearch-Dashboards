@@ -4087,9 +4087,9 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@opensearch-dashboards-test/opensearch-dashboards-test-library@https://github.com/opensearch-project/opensearch-dashboards-test-library/archive/refs/tags/1.0.6.tar.gz":
-  version "1.0.6"
-  resolved "https://github.com/opensearch-project/opensearch-dashboards-test-library/archive/refs/tags/1.0.6.tar.gz#f2f489832a75191e243c6d2b42d49047265d9ce3"
+"@opensearch-dashboards-test/opensearch-dashboards-test-library@https://github.com/opensearch-project/opensearch-dashboards-test-library/archive/refs/tags/1.0.7.tar.gz":
+  version "1.0.7"
+  resolved "https://github.com/opensearch-project/opensearch-dashboards-test-library/archive/refs/tags/1.0.7.tar.gz#32af05ec531cca05922cb3010af5c33b757232a7"
 
 "@opensearch-project/opensearch@^2.13.0":
   version "2.13.0"
