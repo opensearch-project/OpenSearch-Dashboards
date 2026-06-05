@@ -26,7 +26,24 @@ var runCli = require('../packages/osd-mfe/src').runCli;
 var repoRoot = Path.resolve(__dirname, '..');
 
 try {
-  process.exitCode = runCli(process.argv.slice(2), repoRoot);
+  var result = runCli(process.argv.slice(2), repoRoot);
+  // `--plugin` runs an async Rspack build and returns a Promise; `--list`/etc.
+  // return a number synchronously. Handle both without using async/await so the
+  // file stays a plain (non-transpiled) bootstrap script.
+  if (result && typeof result.then === 'function') {
+    result.then(
+      function (code) {
+        process.exitCode = code;
+      },
+      function (error) {
+        // eslint-disable-next-line no-console
+        console.error(error && error.stack ? error.stack : error);
+        process.exitCode = 1;
+      }
+    );
+  } else {
+    process.exitCode = result;
+  }
 } catch (error) {
   // eslint-disable-next-line no-console
   console.error(error && error.stack ? error.stack : error);

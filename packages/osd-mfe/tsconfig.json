@@ -1,7 +1,8 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "tsBuildInfoFile": "../../build/tsbuildinfo/packages/osd-mfe"
+    "tsBuildInfoFile": "../../build/tsbuildinfo/packages/osd-mfe",
+    "skipLibCheck": true
   },
   "include": [
     "index.d.ts",

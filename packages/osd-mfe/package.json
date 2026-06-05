@@ -10,7 +10,16 @@
     "osd:watch": "yarn build --watch"
   },
   "dependencies": {
-    "@osd/optimizer": "1.0.0"
+    "@osd/optimizer": "1.0.0",
+    "@osd/ui-shared-deps": "1.0.0",
+    "@osd/utils": "1.0.0",
+    "@rspack/core": "1.6.4",
+    "browserslist": "^4.21.5",
+    "css-loader": "^5.2.7",
+    "node-polyfill-webpack-plugin": "^4.1.0",
+    "sass-embedded": "1.93.3",
+    "sass-loader": "16.0.5",
+    "style-loader": "^1.1.3"
   },
   "devDependencies": {
     "@babel/cli": "^7.22.9",

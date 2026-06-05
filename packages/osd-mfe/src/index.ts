@@ -11,4 +11,8 @@
 
 export { discoverUiPlugins } from './discover_plugins';
 export type { DiscoveredUiPlugin } from './discover_plugins';
+export { getMfeRspackConfig } from './mfe_rspack_config';
+export type { MfeRspackConfigOptions } from './mfe_rspack_config';
+export { buildMfeForPlugin } from './build_mfe_for_plugin';
+export type { MfeBuildResult } from './build_mfe_for_plugin';
 export { runCli } from './cli';
