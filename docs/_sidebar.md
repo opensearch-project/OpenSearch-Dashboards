@@ -137,6 +137,7 @@
     - [Osd expect](../packages/osd-expect/README.md)
     - [Osd i18n](../packages/osd-i18n/README.md)
     - [Osd logging](../packages/osd-logging/README.md)
+    - [Osd mfe](../packages/osd-mfe/README.md)
     - [Osd monaco](../packages/osd-monaco/README.md)
     - [Osd opensearch](../packages/osd-opensearch/README.md)
     - [Osd optimizer](../packages/osd-optimizer/README.md)

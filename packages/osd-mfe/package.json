@@ -1,0 +1,20 @@
+{
+  "name": "@osd/mfe",
+  "version": "1.0.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "main": "./target/index.js",
+  "scripts": {
+    "build": "babel src --out-dir target --copy-files --delete-dir-on-start --extensions .ts --ignore *.test.ts --source-maps=inline",
+    "osd:bootstrap": "yarn build",
+    "osd:watch": "yarn build --watch"
+  },
+  "dependencies": {
+    "@osd/optimizer": "1.0.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.22.9",
+    "@babel/core": "^7.22.9",
+    "@osd/babel-preset": "1.0.0"
+  }
+}
