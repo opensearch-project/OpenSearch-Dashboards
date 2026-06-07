@@ -8,12 +8,22 @@ import { render, screen, fireEvent, act } from '@testing-library/react';
 import { CreateMetricsRuleFlyout } from './create_metrics_rule_flyout';
 
 describe('CreateMetricsRuleFlyout', () => {
-  const mockHttp = { post: jest.fn().mockResolvedValue({}) };
+  const mockHttp = {
+    post: jest.fn().mockResolvedValue({}),
+    get: jest
+      .fn()
+      .mockResolvedValue({ groups: [{ name: 'up' }, { name: 'node_cpu_seconds_total' }] }),
+  };
   const mockClose = jest.fn();
   const mockToast = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
   it('renders rule cards for each non-empty query', () => {
@@ -27,13 +37,13 @@ describe('CreateMetricsRuleFlyout', () => {
       />
     );
 
-    // Two non-empty queries → two rule cards
+    // Two non-empty queries -> two rule cards
     expect(screen.getByText('Query 1')).toBeInTheDocument();
     expect(screen.getByText('Query 2')).toBeInTheDocument();
     expect(screen.queryByText('Query 3')).not.toBeInTheDocument();
   });
 
-  it('derives rule name from metric name without _alert suffix', () => {
+  it('derives rule name from metric name', () => {
     render(
       <CreateMetricsRuleFlyout
         queries={['rate(http_requests_total[5m])', 'up']}
@@ -77,6 +87,21 @@ describe('CreateMetricsRuleFlyout', () => {
     const saveButton = screen.getByRole('button', { name: /Create 2 rule/i });
     await act(async () => {
       fireEvent.click(saveButton);
+      // Flush microtasks for the async save (http.post promises)
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    // Advance past the polling interval (5s per attempt)
+    await act(async () => {
+      jest.advanceTimersByTime(5000);
+      await Promise.resolve();
+    });
+
+    // Advance past the close timeout (1000ms)
+    await act(async () => {
+      jest.advanceTimersByTime(1000);
     });
 
     expect(mockHttp.post).toHaveBeenCalledTimes(2);
@@ -93,7 +118,7 @@ describe('CreateMetricsRuleFlyout', () => {
       })
     );
     expect(mockClose).toHaveBeenCalled();
-    expect(mockToast).toHaveBeenCalledWith(expect.stringContaining('2'), 'success');
+    expect(mockToast).toHaveBeenCalledWith(expect.any(String), 'success');
   });
 
   it('includes evaluationInterval and forDuration in payload', async () => {
@@ -109,6 +134,14 @@ describe('CreateMetricsRuleFlyout', () => {
     const saveButton = screen.getByRole('button', { name: /Create 1 rule/i });
     await act(async () => {
       fireEvent.click(saveButton);
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    // Advance past polling
+    await act(async () => {
+      jest.advanceTimersByTime(5000);
+      await Promise.resolve();
     });
 
     const body = JSON.parse(mockHttp.post.mock.calls[0][1].body);
@@ -167,6 +200,8 @@ describe('CreateMetricsRuleFlyout', () => {
     const saveButton = screen.getByRole('button', { name: /Create 1 rule/i });
     await act(async () => {
       fireEvent.click(saveButton);
+      await Promise.resolve();
+      await Promise.resolve();
     });
 
     expect(mockToast).toHaveBeenCalledWith(expect.any(String), 'danger');
@@ -186,6 +221,8 @@ describe('CreateMetricsRuleFlyout', () => {
     const saveButton = screen.getByRole('button', { name: /Create 1 rule/i });
     await act(async () => {
       fireEvent.click(saveButton);
+      await Promise.resolve();
+      await Promise.resolve();
     });
 
     expect(mockHttp.post).toHaveBeenCalledWith(

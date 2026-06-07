@@ -77,6 +77,11 @@ export interface CreateMetricsRuleFlyoutProps {
 }
 
 function deriveRuleName(query: string): string {
+  // Try to extract the innermost metric name, skipping PromQL function wrappers
+  // e.g., rate(http_requests_total[5m]) → http_requests_total
+  const innerMatch = query.match(/\(\s*([a-zA-Z_:][a-zA-Z0-9_:]*)/);
+  if (innerMatch) return innerMatch[1];
+  // Fallback: first identifier that's followed by { ( [ or whitespace
   const match = query.match(/\b([a-zA-Z_:][a-zA-Z0-9_:]*)\s*[{([\s]/);
   if (match) return match[1];
   const simpleMatch = query.match(/^([a-zA-Z_:][a-zA-Z0-9_:]*)/);
@@ -93,9 +98,7 @@ export const CreateMetricsRuleFlyout: React.FC<CreateMetricsRuleFlyoutProps> = (
 }) => {
   const [evaluationInterval, setEvaluationInterval] = useState('1m');
   const [isSaving, setIsSaving] = useState(false);
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'creating' | 'confirming' | 'done'>(
-    'idle'
-  );
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'creating' | 'confirming' | 'done'>('idle');
 
   const [rules, setRules] = useState<RuleEntry[]>(() =>
     queries
@@ -151,9 +154,7 @@ export const CreateMetricsRuleFlyout: React.FC<CreateMetricsRuleFlyoutProps> = (
           const resp = (await http.get(
             `/api/alerting/prometheus/${encodeURIComponent(datasourceId)}/rules`
           )) as { groups?: Array<{ name: string }> };
-          const existingGroups = new Set(
-            (resp?.groups || []).map((g) => g.name)
-          );
+          const existingGroups = new Set((resp?.groups || []).map((g) => g.name));
           if ([...ruleNames].every((name) => existingGroups.has(name))) {
             confirmed = true;
             break;
