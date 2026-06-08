@@ -226,6 +226,29 @@ export function getMfeRspackConfig(options: MfeRspackConfigOptions): Configurati
             fullySpecified: false,
           },
         },
+        {
+          // Transpile CommonJS sources shipped by node_modules that use modern
+          // syntax (mirrors the optimizer's `.cjs` rule). core-js is excluded so
+          // its polyfills are not reprocessed.
+          test: /\.cjs$/,
+          include: /node_modules/,
+          exclude: [/node_modules[\\/]core-js/],
+          use: getSwcLoaderConfig({ syntax: 'ecmascript', targets }),
+        },
+        {
+          // A few node_modules ship only modern/untranspiled ESM and have no es5
+          // build, so they must be transpiled from source for the browser targets
+          // (mirrors the optimizer's selective node_modules `.m?js` rule).
+          test: /\.m?js$/,
+          include: [
+            /node_modules[\\/]@dagrejs/,
+            /node_modules[\\/]@xyflow/,
+            /node_modules[\\/]fast-png/,
+            /node_modules[\\/]iobuffer/,
+          ],
+          exclude: [/node_modules[\\/]core-js/],
+          use: getSwcLoaderConfig({ syntax: 'ecmascript', targets }),
+        },
       ],
     },
 
