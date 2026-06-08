@@ -894,7 +894,13 @@ describe('#createSavedObjects', () => {
             }),
           },
         },
-        references: [{ name: 'kibanaSavedObjectMeta.searchSourceJSON.index', type: 'index-pattern', id: 'old-ip-id' }],
+        references: [
+          {
+            name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+            type: 'index-pattern',
+            id: 'old-ip-id',
+          },
+        ],
       };
 
       importIdMap.set('index-pattern:old-ip-id', { id: 'ds-123_new-ip-uuid' });
@@ -914,6 +920,7 @@ describe('#createSavedObjects', () => {
 
       expect(bulkCreate).toHaveBeenCalledTimes(1);
       const createdObj = bulkCreate.mock.calls[0][0][0];
+      // @ts-expect-error
       const searchSource = JSON.parse(createdObj.attributes.kibanaSavedObjectMeta.searchSourceJSON);
       expect(searchSource.query.dataset.id).toBe('ds-123_new-ip-uuid');
     });
@@ -955,6 +962,7 @@ describe('#createSavedObjects', () => {
       await createSavedObjects(options);
 
       const createdObj = bulkCreate.mock.calls[0][0][0];
+      // @ts-expect-error
       const searchSource = JSON.parse(createdObj.attributes.kibanaSavedObjectMeta.searchSourceJSON);
       expect(searchSource.query.dataset.id).toBe('unknown-ip-id');
     });
@@ -999,6 +1007,7 @@ describe('#createSavedObjects', () => {
       await createSavedObjects(options);
 
       const createdObj = bulkCreate.mock.calls[0][0][0];
+      // @ts-expect-error
       const searchSource = JSON.parse(createdObj.attributes.kibanaSavedObjectMeta.searchSourceJSON);
       expect(searchSource.query.dataset.id).toBe('ds-123_new-ip-uuid');
     });
