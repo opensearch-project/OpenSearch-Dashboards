@@ -222,14 +222,17 @@ describe('SQLSearchInterceptor', () => {
       expect(result).toBe(query);
     });
 
-    it('returns the query unchanged when enableTimeFiltering is not set', async () => {
+    it('applies time filtering automatically for all SQL queries', async () => {
       const query = {
         language: 'SQL',
         query: 'SELECT * FROM test_index',
         dataset: { type: 'DEFAULT', title: 'test_index', timeFieldName: '@timestamp' },
       };
       const result = await (sqlSearchInterceptor as any).buildQuery(query, baseRequest);
-      expect(result).toBe(query);
+      expect(result.query).toBe(
+        "SELECT * FROM test_index WHERE `@timestamp` >= '2023-01-01 00:00:00.000' " +
+          "AND `@timestamp` <= '2023-01-02 00:00:00.000'"
+      );
     });
 
     it('inserts WHERE clause with time filter into user query', async () => {
@@ -317,10 +320,12 @@ describe('SQLSearchInterceptor', () => {
       const query = {
         language: 'SQL',
         query: 'SELECT * FROM test_index',
-        dataset: { type: 'DEFAULT', title: 'test_index' },
+        dataset: { type: 'DEFAULT', title: 'test_index', timeFieldName: '@timestamp' },
       };
       const result = await (sqlSearchInterceptor as any).buildQuery(query, baseRequest);
-      expect(result.query).toBe("SELECT * FROM test_index WHERE `host` = 'a'");
+      expect(result.query).toBe(
+        "SELECT * FROM test_index WHERE `@timestamp` >= '2023-01-01 00:00:00.000' AND `@timestamp` <= '2023-01-02 00:00:00.000' AND ( `host` = 'a')"
+      );
     });
 
     it('skips filterManager filters when not on a supported app', async () => {
@@ -332,10 +337,12 @@ describe('SQLSearchInterceptor', () => {
       const query = {
         language: 'SQL',
         query: 'SELECT * FROM test_index',
-        dataset: { type: 'DEFAULT', title: 'test_index' },
+        dataset: { type: 'DEFAULT', title: 'test_index', timeFieldName: '@timestamp' },
       };
       const result = await (sqlSearchInterceptor as any).buildQuery(query, baseRequest);
-      expect(result).toBe(query);
+      expect(result.query).toBe(
+        "SELECT * FROM test_index WHERE `@timestamp` >= '2023-01-01 00:00:00.000' AND `@timestamp` <= '2023-01-02 00:00:00.000'"
+      );
     });
   });
 
