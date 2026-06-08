@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { PublicAppInfo, UseCaseId } from 'opensearch-dashboards/public';
+import { PublicAppInfo } from 'opensearch-dashboards/public';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import { coreMock } from '../../../../../core/public/mocks';
@@ -164,9 +164,6 @@ const WorkspaceCreator = ({
       dataSourceManagement: dataSourceEnabled ? {} : undefined,
       navigationUI: {
         HeaderControl: () => null,
-      },
-      useCaseService: {
-        supportedUseCasesForServerless: [UseCaseId.ESSENTIAL_USE_CASE_ID],
       },
     },
   });
