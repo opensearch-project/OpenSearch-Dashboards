@@ -25,3 +25,6 @@ export type { GenerateRegistryOptions } from './generate';
 
 export { FileRegistryProvider } from './provider';
 export type { RegistryProvider, RegistryFs, FileRegistryProviderOptions } from './provider';
+
+export { resolve } from './resolve';
+export type { ResolvedRemote, OverrideMap } from './resolve';
