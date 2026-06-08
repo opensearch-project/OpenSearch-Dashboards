@@ -33,10 +33,7 @@ import {
 } from '../common/constants';
 import { WorkspaceUseCase, WorkspaceUseCaseFeature } from './types';
 import { formatUrlWithWorkspaceId } from '../../../core/public/utils';
-import {
-  DataSourceEngineType,
-  SigV4ServiceName,
-} from '../../../plugins/data_source/common/data_sources';
+import { DataSourceEngineType } from '../../../plugins/data_source/common/data_sources';
 import {
   DATACONNECTIONS_BASE,
   DatasourceTypeToDisplayName,
@@ -397,19 +394,6 @@ export const mergeDataSourcesWithConnections = (
   }
 
   return result;
-};
-
-// If all connected data sources are serverless, will use the list of registered use cases specifically for serverless collections.
-export const areAllDataSourcesOpenSearchServerless = async (
-  client: SavedObjectsStart['client']
-) => {
-  const allDataSources = await getDataSourcesList(client);
-  if (allDataSources.length > 0) {
-    return allDataSources.every(
-      (ds) => ds?.auth?.credentials?.service === SigV4ServiceName.OpenSearchServerless
-    );
-  }
-  return false;
 };
 
 export const convertNavGroupToWorkspaceUseCase = ({

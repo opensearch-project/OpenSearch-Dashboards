@@ -8,7 +8,8 @@ import { IdentitySourceHandler } from './types';
 
 export class IdentitySourceService {
   // A identity source to store all registered identity source handlers.
-  private identitySource: Record<string, IdentitySourceHandler> = {};
+  // Use Object.create(null) to avoid prototype pollution from keys like 'constructor', '__proto__', etc.
+  private identitySource: Record<string, IdentitySourceHandler> = Object.create(null);
   private logger: Logger;
 
   constructor(logger: Logger) {
