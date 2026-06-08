@@ -22,3 +22,6 @@ export type { Registry, MfeEntry, SharedDepsDescriptor, ValidationResult } from 
 
 export { generateRegistry } from './generate';
 export type { GenerateRegistryOptions } from './generate';
+
+export { FileRegistryProvider } from './provider';
+export type { RegistryProvider, RegistryFs, FileRegistryProviderOptions } from './provider';
