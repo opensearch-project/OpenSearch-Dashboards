@@ -167,7 +167,7 @@
     "**/@tootallnate/once": "^3.0.1",
     "**/fast-xml-parser": "^5.7.0",
     "**/grunt/minimatch": "^3.1.5",
-    "**/@hapi/content": "^6.0.1",
+    "**/@hapi/content": "^6.0.2",
     "**/engine.io/ws": "^8.20.1",
     "**/socket.io-adapter/ws": "^8.20.1"
   },
