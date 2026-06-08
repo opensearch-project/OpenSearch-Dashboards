@@ -93,9 +93,7 @@ export class SQLSearchInterceptor extends SearchInterceptor {
       }
     }
 
-    // Only apply time filtering when explicitly enabled (e.g., by Explore)
-    if (!dataset?.timeFieldName || !enableTimeFiltering) return nextQuery;
-
+    // Apply time filtering for all SQL queries - SQL visualizations should respect time picker
     const timeRange = this.queryService.timefilter.timefilter.getTime();
     const { fromDate, toDate } = formatTimePickerDate(timeRange, 'YYYY-MM-DD HH:mm:ss.SSS');
     const whereClause = `\`${dataset.timeFieldName}\` >= '${formatDate(fromDate)}' AND \`${
