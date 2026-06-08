@@ -28,3 +28,6 @@ export type { RegistryProvider, RegistryFs, FileRegistryProviderOptions } from '
 
 export { resolve } from './resolve';
 export type { ResolvedRemote, OverrideMap } from './resolve';
+
+export { runUpdateCli, resolveRegistryPath } from './update_cli';
+export type { UpdateCliConsole } from './update_cli';

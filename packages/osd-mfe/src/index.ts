@@ -27,7 +27,13 @@ export { runCli } from './cli';
 // Registry (Phase 2): schema, validation, and generation logic. The registry
 // DATA file lives outside the source tree (workspace-root registry/registry.json)
 // and is read at serve time — never imported as a code constant.
-export { SCHEMA_VERSION, validate, assertValidRegistry, generateRegistry } from './registry';
+export {
+  SCHEMA_VERSION,
+  validate,
+  assertValidRegistry,
+  generateRegistry,
+  runUpdateCli,
+} from './registry';
 export type {
   Registry,
   MfeEntry,
