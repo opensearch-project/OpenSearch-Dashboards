@@ -231,3 +231,36 @@ describe('CreateMetricsRuleFlyout', () => {
     );
   });
 });
+
+describe('deriveRuleName', () => {
+  // Import the exported function directly
+  const { deriveRuleName } = jest.requireActual('./create_metrics_rule_flyout');
+
+  it.each([
+    // Function-wrapped metrics → extracts inner metric name
+    ['rate(http_requests_total[5m])', 'http_requests_total'],
+    ['sum(node_cpu_seconds_total)', 'node_cpu_seconds_total'],
+    ['avg(container_memory_usage_bytes{namespace="prod"})', 'container_memory_usage_bytes'],
+    [
+      'histogram_quantile(0.99, rate(http_duration_seconds_bucket[5m]))',
+      'http_duration_seconds_bucket',
+    ],
+    ['increase(process_cpu_seconds_total[1h])', 'process_cpu_seconds_total'],
+
+    // Simple metric names (no function wrapper)
+    ['up', 'up'],
+    ['node_load1', 'node_load1'],
+    ['process_resident_memory_bytes', 'process_resident_memory_bytes'],
+
+    // Metric with label selector (no function)
+    ['http_requests_total{method="GET"}', 'http_requests_total'],
+
+    // Nested functions → extracts deepest metric
+    ['rate(http_requests_total{code=~"5.."}[5m])', 'http_requests_total'],
+
+    // Fallback for unrecognizable input
+    ['123 + 456', 'metrics_alert'],
+  ])('deriveRuleName(%s) → %s', (input, expected) => {
+    expect(deriveRuleName(input)).toBe(expected);
+  });
+});

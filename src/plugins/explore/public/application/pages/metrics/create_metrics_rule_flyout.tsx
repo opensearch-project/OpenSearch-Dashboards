@@ -76,7 +76,7 @@ export interface CreateMetricsRuleFlyoutProps {
   addToast?: (title: string, color?: 'success' | 'danger') => void;
 }
 
-function deriveRuleName(query: string): string {
+export function deriveRuleName(query: string): string {
   // Try to extract the innermost metric name, skipping PromQL function wrappers
   // e.g., rate(http_requests_total[5m]) → http_requests_total
   const innerMatch = query.match(/\(\s*([a-zA-Z_:][a-zA-Z0-9_:]*)/);
