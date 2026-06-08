@@ -79,6 +79,17 @@ export interface RenderingMetadata {
     keyboardShortcuts: {
       enabled: boolean;
     };
+    /**
+     * Present ONLY in MFE mode (`opensearchDashboards.mfe.enabled`). Carries the
+     * serve-time registry source + shared-deps URLs so the browser MFE bootstrap
+     * can load plugin remotes instead of the locally-bundled plugin scripts.
+     * Absent (and therefore omitted from the serialized metadata) when MFE mode is
+     * off, keeping the non-MFE HTML byte-for-byte unchanged. See docs/01-MFE-DESIGN.md §6.
+     */
+    mfe?: {
+      registryUrl: string;
+      sharedDepsUrl: string;
+    };
   };
 }
 

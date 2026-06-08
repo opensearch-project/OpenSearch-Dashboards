@@ -134,6 +134,56 @@ export function uiRenderMixin(osdServer, server, config) {
 
       const regularBundlePath = `${basePath}/${buildHash}/bundles`;
 
+      // Phase 3 MFE mode (docs/01-MFE-DESIGN.md §6). When enabled, serve a bootstrap
+      // that OMITS the local plugin bundles and instead loads core.entry.js plus the
+      // MFE bootstrap (which seeds the MF share scope from the origin shared-deps,
+      // fetches the registry at serve time, loads each plugin remote, and registers it
+      // into the __osdBundles__ shim before invoking core boot). Without the flag this
+      // branch is skipped entirely, so the default bootstrap below is byte-for-byte
+      // unchanged.
+      const mfeEnabled = !!config.get('opensearchDashboards.mfe.enabled');
+      if (mfeEnabled) {
+        const mfeRegistryUrl = config.get('opensearchDashboards.mfe.registryUrl');
+        const mfeSharedDepsUrl = config.get('opensearchDashboards.mfe.sharedDepsUrl');
+        const mfeBootstrapUrl = config.get('opensearchDashboards.mfe.bootstrapUrl');
+
+        // Only core is loaded locally; plugin remotes are resolved from the registry at
+        // runtime. shared-deps for the share scope are loaded by the MFE bootstrap.
+        const mfeJsDependencyPaths = [`${regularBundlePath}/core/core.entry.js`];
+
+        const mfePublicPathMap = JSON.stringify({
+          core: `${regularBundlePath}/core/`,
+          'osd-ui-shared-deps': `${regularBundlePath}/osd-ui-shared-deps/`,
+        });
+
+        const mfeBootstrap = new AppBootstrap(
+          {
+            templateData: {
+              jsDependencyPaths: mfeJsDependencyPaths,
+              publicPathMap: mfePublicPathMap,
+              basePath,
+              regularBundlePath,
+              UiSharedDeps,
+              THEME_CSS_DIST_FILENAMES: JSON.stringify(UiSharedDeps.themeCssDistFilenames),
+              KUI_CSS_DIST_FILENAMES: JSON.stringify(UiSharedDeps.kuiCssDistFilenames),
+              mfeRegistryUrl,
+              mfeSharedDepsUrl,
+              mfeBootstrapUrl,
+            },
+          },
+          'bootstrap_mfe'
+        );
+
+        const mfeBody = await mfeBootstrap.getJsFile();
+        const mfeEtag = await mfeBootstrap.getJsFileHash();
+
+        return h
+          .response(mfeBody)
+          .header('cache-control', 'must-revalidate')
+          .header('content-type', 'application/javascript')
+          .etag(mfeEtag);
+      }
+
       const kpUiPlugins = osdServer.newPlatform.__internals.uiPlugins;
       const kpPluginPublicPaths = new Map();
       const kpPluginBundlePaths = new Set();

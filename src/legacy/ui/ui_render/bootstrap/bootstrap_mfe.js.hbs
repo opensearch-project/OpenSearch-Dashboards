@@ -1,0 +1,154 @@
+var osdCsp = JSON.parse(document.querySelector('osd-csp').getAttribute('data'));
+window.__osdStrictCsp__ = osdCsp.strictCsp;
+window.__osdPublicPath__ = {{publicPathMap}};
+window.__osdBundles__ = {{osdBundlesLoaderSource}}
+window.__webpack_nonce__ = (function() {
+  var meta = document.querySelector('meta[name="csp-nonce"]');
+  return meta ? meta.getAttribute('content') : '';
+})();
+
+// Intercept dynamically created style elements to add CSP nonce
+// This handles third-party libraries (like nano-css from react-use, brace/ace editor)
+// that create style elements without using webpack's style-loader nonce mechanism
+(function() {
+  if (!window.__webpack_nonce__) return;
+
+  var nonce = window.__webpack_nonce__;
+
+  // Patch document.createElement
+  var originalCreateElement = document.createElement.bind(document);
+  document.createElement = function(tagName, options) {
+    var element = originalCreateElement(tagName, options);
+    if (tagName.toLowerCase() === 'style') {
+      element.setAttribute('nonce', nonce);
+    }
+    return element;
+  };
+
+  // Patch document.createElementNS (used by brace/ace editor)
+  var originalCreateElementNS = document.createElementNS.bind(document);
+  document.createElementNS = function(namespaceURI, qualifiedName) {
+    var element = originalCreateElementNS(namespaceURI, qualifiedName);
+    if (qualifiedName.toLowerCase() === 'style') {
+      element.setAttribute('nonce', nonce);
+    }
+    return element;
+  };
+})();
+
+if (window.__osdStrictCsp__ && window.__osdCspNotEnforced__) {
+  var legacyBrowserError = document.getElementById('osd_legacy_browser_error');
+  legacyBrowserError.style.display = 'flex';
+} else {
+  var themeCssDistFilenames = {{THEME_CSS_DIST_FILENAMES}};
+  var kuiCssDistFilenames = {{KUI_CSS_DIST_FILENAMES}};
+
+  var isDarkMode = window.__osdThemeTag__.endsWith('dark');
+  var themeMode = isDarkMode ? 'dark' : 'light';
+  var themeVersion = window.__osdThemeTag__.replace(/(light|dark)$/, '');
+  if (!themeCssDistFilenames[themeVersion]) {
+    themeVersion = 'v8'; // this default should only be needed by tests
+  }
+
+  var loadingMessage = document.getElementById('osd_loading_message');
+  loadingMessage.style.display = 'flex';
+
+  var styleSheetPaths = [
+    '{{regularBundlePath}}/osd-ui-shared-deps/{{UiSharedDeps.baseCssDistFilename}}',
+    '{{regularBundlePath}}/osd-ui-shared-deps/' + themeCssDistFilenames[themeVersion][themeMode],
+    '{{basePath}}/node_modules/@osd/ui-framework/dist/' + kuiCssDistFilenames[themeVersion][themeMode],
+    '{{basePath}}/ui/legacy_' + themeMode + '_theme.css',
+  ];
+
+  // MFE mode (Phase 3, see docs/01-MFE-DESIGN.md §6). The injected metadata carries the
+  // serve-time registry source + shared-deps URLs that the MFE bootstrap consumes.
+  window.__osdMfe__ = {
+    registryUrl: '{{mfeRegistryUrl}}',
+    sharedDepsUrl: '{{mfeSharedDepsUrl}}',
+  };
+
+  window.onload = function () {
+    function failure() {
+      // make subsequent calls to failure() noop
+      failure = function () {};
+
+      var err = document.createElement('h1');
+      err.style['color'] = 'white';
+      err.style['font-family'] = 'monospace';
+      err.style['text-align'] = 'center';
+      err.style['background'] = '#F44336';
+      err.style['padding'] = '25px';
+      err.innerText = document.querySelector('[data-error-message]').dataset.errorMessage;
+
+      document.body.innerHTML = err.outerHTML;
+    }
+
+    var stylesheetTarget = document.querySelector('head meta[name="add-styles-here"]')
+    function loadStyleSheet(url, cb) {
+      var dom = document.createElement('link');
+      dom.rel = 'stylesheet';
+      dom.type = 'text/css';
+      dom.href = url;
+      dom.addEventListener('error', failure);
+      dom.addEventListener('load', cb);
+      document.head.insertBefore(dom, stylesheetTarget);
+    }
+
+    var scriptsTarget = document.querySelector('head meta[name="add-scripts-here"]')
+    function loadScript(url, cb) {
+      var dom = document.createElement('script');
+      {{!-- NOTE: async = false is used to trigger async-download/ordered-execution as outlined here: https://www.html5rocks.com/en/tutorials/speed/script-loading/ --}}
+      dom.async = false;
+      dom.src = url;
+      dom.addEventListener('error', failure);
+      dom.addEventListener('load', cb);
+      document.head.insertBefore(dom, scriptsTarget);
+    }
+
+    function load(urls, cb) {
+      var pending = urls.length;
+      urls.forEach(function (url) {
+        var innerCb = function () {
+          pending = pending - 1;
+          if (pending === 0 && typeof cb === 'function') {
+            cb();
+          }
+        }
+
+        if (typeof url !== 'string') {
+          load(url, innerCb);
+        } else if (url.slice(-4) === '.css') {
+          loadStyleSheet(url, innerCb);
+        } else {
+          loadScript(url, innerCb);
+        }
+      });
+    }
+
+    {{!--
+      MFE mode load sequence (LOCKED, design §6):
+        1. Load core.entry.js (server-provided) so `entry/core/public` is registered
+           into the __osdBundles__ shim. Its app code does not run until
+           __osdBootstrap__() is invoked, so it is safe to load before shared deps.
+        2. Load the MFE bootstrap bundle, which exposes window.__osdBootstrapMfe__.
+        3. Invoke __osdBootstrapMfe__: it loads shared deps (origin) and seeds the MF
+           share scope, fetches the CURRENT registry at serve time, loads every plugin
+           remote and registers it as `plugin/<id>/public` in the shim, THEN runs core
+           __osdBootstrap__() — so plugin_reader resolves plugins synchronously, UNCHANGED.
+      NOTE: local plugin jsDependencyPaths are intentionally OMITTED in this mode.
+    --}}
+    load([
+      {{#each jsDependencyPaths}}
+        '{{this}}',
+      {{/each}}
+      '{{mfeBootstrapUrl}}',
+    ], function () {
+      window.__osdBootstrapMfe__({
+        registryUrl: window.__osdMfe__.registryUrl,
+        sharedDepsUrl: window.__osdMfe__.sharedDepsUrl,
+      });
+
+      load(styleSheetPaths);
+    });
+  }
+}

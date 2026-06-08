@@ -172,6 +172,18 @@ export class RenderingService {
             keyboardShortcuts: {
               enabled: opensearchDashboardsConfig.keyboardShortcuts.enabled,
             },
+            // MFE mode (Phase 3): only when enabled do we add the `mfe` key, so the
+            // serialized injected metadata for the default (non-MFE) path is
+            // byte-for-byte unchanged. The browser MFE bootstrap reads these to load
+            // plugin remotes from the origin instead of local plugin scripts.
+            ...(opensearchDashboardsConfig.mfe.enabled
+              ? {
+                  mfe: {
+                    registryUrl: opensearchDashboardsConfig.mfe.registryUrl,
+                    sharedDepsUrl: opensearchDashboardsConfig.mfe.sharedDepsUrl,
+                  },
+                }
+              : {}),
           },
         };
 

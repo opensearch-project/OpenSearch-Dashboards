@@ -188,6 +188,12 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   if (opts.verbose) set('logging.verbose', true);
   if (opts.logFile) set('logging.dest', opts.logFile);
 
+  // Phase 3 MFE mode: `--mfe` boots the UI from Module Federation remotes. It only
+  // toggles `opensearchDashboards.mfe.enabled`; the registry/shared-deps/bootstrap
+  // URLs are supplied via config (see docs/01-MFE-DESIGN.md §6). Without the flag,
+  // the rendered HTML and bootstrap are byte-for-byte unchanged.
+  if (opts.mfe) set('opensearchDashboards.mfe.enabled', true);
+
   set('plugins.scanDirs', _.compact([].concat(get('plugins.scanDirs'), opts.pluginDir)));
   set('plugins.paths', _.compact([].concat(get('plugins.paths'), opts.pluginPath)));
 
@@ -231,7 +237,12 @@ export default function (program) {
       []
     )
     .option('--plugins <path>', 'an alias for --plugin-dir', pluginDirCollector)
-    .option('--optimize', 'Deprecated, running the optimizer is no longer required');
+    .option('--optimize', 'Deprecated, running the optimizer is no longer required')
+    .option(
+      '--mfe',
+      'Boot the UI from Module Federation remotes (Phase 3 micro-frontend mode). ' +
+        'Registry/shared-deps URLs are taken from the opensearchDashboards.mfe config.'
+    );
 
   if (CAN_REPL) {
     command.option('--repl', 'Run the server with a REPL prompt and access to the server object');

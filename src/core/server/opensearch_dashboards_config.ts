@@ -103,6 +103,23 @@ export const config = {
     keyboardShortcuts: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
     }),
+    // Phase 3 Micro-Frontend (MFE) mode. When `enabled`, OSD boots its UI from
+    // Module Federation remotes served by an external origin instead of loading
+    // the locally-bundled plugin scripts. This is OFF by default; with it off the
+    // server's rendered HTML and bootstrap are byte-for-byte unchanged.
+    // See docs/01-MFE-DESIGN.md §6.
+    mfe: schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
+      // URL of the dynamic MFE registry document, read at serve time (GET /registry
+      // on the origin). The browser MFE bootstrap fetches this per page load, so a
+      // registry version edit is reflected on reload with no rebuild/restart.
+      registryUrl: schema.string({ defaultValue: '' }),
+      // URL of the shared-deps bundle (assigns `window.__osdSharedDeps__`) served by
+      // the origin's /shared-deps/.
+      sharedDepsUrl: schema.string({ defaultValue: '' }),
+      // URL of the browser MFE bootstrap bundle (exposes `window.__osdBootstrapMfe__`).
+      bootstrapUrl: schema.string({ defaultValue: '' }),
+    }),
   }),
   deprecations,
 };
