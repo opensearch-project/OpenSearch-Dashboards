@@ -71,7 +71,10 @@ export const visDataRoutes = (
         return response.ok({ body: results });
       } catch (error) {
         return response.internalError({
-          body: error.message,
+          body: {
+            ...(error?.name === 'AnalyticEngineError' && { attributes: { title: error?.name } }),
+            message: error.message,
+          },
         });
       }
     }

@@ -16,6 +16,7 @@ describe('AskAIVisualizeEmbeddableAction', () => {
   let mockCore: any;
   let mockContextProvider: any;
   let mockEmbeddable: any;
+  let mockIndexPatterns: any;
 
   beforeEach(() => {
     // Mock core
@@ -75,12 +76,13 @@ describe('AskAIVisualizeEmbeddableAction', () => {
         },
       },
       domNode: document.createElement('div'),
+      getOutput: jest.fn().mockReturnValue({ usesUnsupportedEngineDataSource: false }),
     } as unknown) as VisualizeEmbeddable;
 
     // Create action instance
-    const mockIndexPatterns = {
+    mockIndexPatterns = {
       getCache: jest.fn().mockResolvedValue([{ id: 'test-index-pattern-id' }]),
-    } as any;
+    };
     action = new AskAIVisualizeEmbeddableAction(mockCore, mockIndexPatterns, mockContextProvider);
   });
 
@@ -101,43 +103,48 @@ describe('AskAIVisualizeEmbeddableAction', () => {
   });
 
   describe('isCompatible', () => {
-    it('should return true for VisualizeEmbeddable', async () => {
-      const result = await action.isCompatible({ embeddable: mockEmbeddable });
+    const withOutput = (usesUnsupportedEngineDataSource?: boolean) =>
+      (({
+        ...mockEmbeddable,
+        getOutput: jest.fn().mockReturnValue({ usesUnsupportedEngineDataSource }),
+      } as unknown) as VisualizeEmbeddable);
+
+    it('should return true when the data source engine is supported', async () => {
+      const result = await action.isCompatible({ embeddable: withOutput(false) });
       expect(result).toBe(true);
     });
 
-    it('should memoize the index pattern lookup for a normal visualization', async () => {
-      const getCache = jest.fn().mockResolvedValue([{ id: 'test-index-pattern-id' }]);
-      const memoAction = new AskAIVisualizeEmbeddableAction(
-        mockCore,
-        { getCache } as any,
-        mockContextProvider
-      );
-      await memoAction.isCompatible({ embeddable: mockEmbeddable });
-      await memoAction.isCompatible({ embeddable: mockEmbeddable });
-      await memoAction.isCompatible({ embeddable: mockEmbeddable });
-      // The index pattern classification is cached after the first lookup.
-      expect(getCache).toHaveBeenCalledTimes(1);
+    it('should fail open (return true) while engine resolution is still in flight', async () => {
+      const result = await action.isCompatible({ embeddable: withOutput(undefined) });
+      expect(result).toBe(true);
+    });
+
+    it('should return false when the data source engine is unsupported', async () => {
+      const result = await action.isCompatible({ embeddable: withOutput(true) });
+      expect(result).toBe(false);
     });
 
     it('should return false for non-VisualizeEmbeddable', async () => {
       const nonVisualizeEmbeddable = {
         type: 'other_type',
         getInput: jest.fn(),
+        getOutput: jest.fn().mockReturnValue({}),
       };
       const result = await action.isCompatible({ embeddable: nonVisualizeEmbeddable as any });
       expect(result).toBe(false);
     });
 
     it('should return false when context provider is not available', async () => {
-      const mockIp = { getCache: jest.fn().mockResolvedValue([]) } as any;
-      const actionWithoutContext = new AskAIVisualizeEmbeddableAction(mockCore, mockIp, undefined);
+      const actionWithoutContext = new AskAIVisualizeEmbeddableAction(
+        mockCore,
+        mockIndexPatterns,
+        undefined
+      );
       const result = await actionWithoutContext.isCompatible({ embeddable: mockEmbeddable });
       expect(result).toBe(false);
     });
 
     it('should return false when chat is not available', async () => {
-      const mockIp = { getCache: jest.fn().mockResolvedValue([]) } as any;
       const actionWithoutContext = new AskAIVisualizeEmbeddableAction(
         {
           ...mockCore,
@@ -145,143 +152,46 @@ describe('AskAIVisualizeEmbeddableAction', () => {
             isAvailable: () => false,
           },
         },
-        mockIp,
-        undefined
+        mockIndexPatterns,
+        mockContextProvider
       );
       const result = await actionWithoutContext.isCompatible({ embeddable: mockEmbeddable });
       expect(result).toBe(false);
     });
 
-    const buildEmbeddable = (vis: any) =>
-      (({ ...mockEmbeddable, vis } as unknown) as VisualizeEmbeddable);
+    describe('input controls (resolved via index-pattern cache, not the render-error flag)', () => {
+      const buildInputControlEmbeddable = (indexPattern: string) =>
+        (({
+          ...mockEmbeddable,
+          vis: { type: { name: 'input_control_vis' }, params: { controls: [{ indexPattern }] } },
+          // Output flag is irrelevant for input controls; ensure it isn't read.
+          getOutput: jest.fn().mockReturnValue({ usesUnsupportedEngineDataSource: undefined }),
+        } as unknown) as VisualizeEmbeddable);
 
-    it('should hide for TSVB (metrics) backed by an AnalyticEngine data source', async () => {
-      mockCore.savedObjects.client.get.mockResolvedValue({
-        attributes: { dataSourceEngineType: 'AnalyticEngine' },
-      });
-      const embeddable = buildEmbeddable({
-        type: { name: 'metrics' },
-        params: { data_source_id: 'ae-id' },
-        data: {},
-      });
-      const result = await action.isCompatible({ embeddable });
-      expect(result).toBe(false);
-      expect(mockCore.savedObjects.client.get).toHaveBeenCalledWith('data-source', 'ae-id');
-    });
-
-    it('should memoize the data source lookup across repeated isCompatible calls', async () => {
-      mockCore.savedObjects.client.get.mockResolvedValue({
-        attributes: { dataSourceEngineType: 'AnalyticEngine' },
-      });
-      const embeddable = buildEmbeddable({
-        type: { name: 'metrics' },
-        params: { data_source_id: 'ae-id' },
-        data: {},
-      });
-      await action.isCompatible({ embeddable });
-      await action.isCompatible({ embeddable });
-      await action.isCompatible({ embeddable });
-      // The engine type is cached after the first lookup, so the API is only hit once.
-      expect(mockCore.savedObjects.client.get).toHaveBeenCalledTimes(1);
-    });
-
-    it('should show for TSVB (metrics) backed by a non-AnalyticEngine data source', async () => {
-      mockCore.savedObjects.client.get.mockResolvedValue({
-        attributes: { dataSourceEngineType: 'OpenSearch' },
-      });
-      const embeddable = buildEmbeddable({
-        type: { name: 'metrics' },
-        params: { data_source_id: 'os-id' },
-        data: {},
-      });
-      expect(await action.isCompatible({ embeddable })).toBe(true);
-    });
-
-    it('should hide for Vega referencing an AnalyticEngine data source by name', async () => {
-      mockCore.savedObjects.client.find.mockResolvedValue({
-        savedObjects: [
-          { attributes: { title: 'my source', dataSourceEngineType: 'AnalyticEngine' } },
-        ],
-      });
-      const embeddable = buildEmbeddable({
-        type: { name: 'vega' },
-        params: { spec: JSON.stringify({ data: { url: { data_source_name: 'my source' } } }) },
-        data: {},
-      });
-      expect(await action.isCompatible({ embeddable })).toBe(false);
-    });
-
-    it('should hide for Vega when the spec is authored in HJSON (unquoted keys)', async () => {
-      mockCore.savedObjects.client.find.mockResolvedValue({
-        savedObjects: [
-          { attributes: { title: 'my source', dataSourceEngineType: 'AnalyticEngine' } },
-        ],
-      });
-      // HJSON: unquoted keys and a comment, which strict JSON.parse cannot handle.
-      const hjsonSpec = `{
-        // an hjson spec
-        data: {
-          url: {
-            index: my-index
-            data_source_name: my source
-          }
-        }
-      }`;
-      const embeddable = buildEmbeddable({
-        type: { name: 'vega' },
-        params: { spec: hjsonSpec },
-        data: {},
-      });
-      expect(await action.isCompatible({ embeddable })).toBe(false);
-    });
-
-    it('should hide for Timeline referencing an AnalyticEngine data source by name', async () => {
-      mockCore.savedObjects.client.find.mockResolvedValue({
-        savedObjects: [
-          { attributes: { title: 'my source', dataSourceEngineType: 'AnalyticEngine' } },
-        ],
-      });
-      const embeddable = buildEmbeddable({
-        type: { name: 'timelion' },
-        params: { expression: '.opensearch(index=*, data_source_name="my source")' },
-        data: {},
-      });
-      expect(await action.isCompatible({ embeddable })).toBe(false);
-    });
-
-    it('should hide for input controls whose index pattern is AnalyticEngine-backed', async () => {
-      const mockIndexPatterns = {
+      it('should hide when a control index pattern is AnalyticEngine-backed', async () => {
         // 'ae-ip' is intentionally excluded from the engine-filtered cache.
-        getCache: jest.fn().mockResolvedValue([{ id: 'os-ip' }]),
-      } as any;
-      const controlsAction = new AskAIVisualizeEmbeddableAction(
-        mockCore,
-        mockIndexPatterns,
-        mockContextProvider
-      );
-      const embeddable = buildEmbeddable({
-        type: { name: 'input_control_vis' },
-        params: { controls: [{ indexPattern: 'ae-ip' }] },
-        data: {},
+        mockIndexPatterns.getCache.mockResolvedValue([{ id: 'os-ip' }]);
+        const result = await action.isCompatible({
+          embeddable: buildInputControlEmbeddable('ae-ip'),
+        });
+        expect(result).toBe(false);
       });
-      expect(await controlsAction.isCompatible({ embeddable })).toBe(false);
-    });
 
-    it('should show for input controls whose index pattern is allowed', async () => {
-      const mockIndexPatterns = {
-        getCache: jest.fn().mockResolvedValue([{ id: 'os-ip' }]),
-      } as any;
-      const controlsAction = new AskAIVisualizeEmbeddableAction(
-        mockCore,
-        mockIndexPatterns,
-        mockContextProvider
-      );
-      const embeddable = buildEmbeddable({
-        type: { name: 'input_control_vis' },
-        params: { controls: [{ indexPattern: 'os-ip' }] },
-        data: {},
+      it('should show when all control index patterns are allowed', async () => {
+        mockIndexPatterns.getCache.mockResolvedValue([{ id: 'os-ip' }]);
+        const result = await action.isCompatible({
+          embeddable: buildInputControlEmbeddable('os-ip'),
+        });
+        expect(result).toBe(true);
       });
-      expect(await controlsAction.isCompatible({ embeddable })).toBe(true);
+
+      it('should fail open when the index-pattern cache is unavailable', async () => {
+        mockIndexPatterns.getCache.mockResolvedValue(undefined);
+        const result = await action.isCompatible({
+          embeddable: buildInputControlEmbeddable('ae-ip'),
+        });
+        expect(result).toBe(true);
+      });
     });
   });
 
