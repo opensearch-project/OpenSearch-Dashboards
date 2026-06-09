@@ -37,6 +37,7 @@ import {
   registerPluginFactory,
 } from './osd_bundles';
 import { buildOverrideMap, OverrideStorage, parseOverrideSources } from './override_sources';
+import { mountInspector as mountInspectorPanel } from './inspector';
 import { mfeWindow } from './types';
 
 /**
@@ -61,6 +62,15 @@ export interface BootstrapMfeDeps {
    * store.
    */
   readOverrideStorage: () => OverrideStorage | undefined;
+  /**
+   * Mount the dev-only Inspector panel (Phase 5, Story 3) for the resolved
+   * remotes. The bootstrap calls this ONLY when the non-production
+   * `allowOverride` gate is on (see {@link bootstrapMfe}), so the panel is never
+   * mounted in production. The default mounts the real React/EUI panel and
+   * swallows any render failure (the inspector is a dev convenience that must
+   * NEVER break app boot); tests inject a spy.
+   */
+  mountInspector: (entries: ResolvedRemote[]) => void;
 }
 
 /** Inputs to {@link bootstrapMfe}. */
@@ -111,6 +121,16 @@ function resolveDeps(overrides?: Partial<BootstrapMfeDeps>): BootstrapMfeDeps {
         return typeof window !== 'undefined' ? window.localStorage : undefined;
       } catch {
         return undefined;
+      }
+    },
+    mountInspector: (entries: ResolvedRemote[]) => {
+      try {
+        mountInspectorPanel({ entries });
+      } catch (error) {
+        // The inspector is a dev-only convenience; a render failure must NEVER
+        // abort or degrade app boot.
+        // eslint-disable-next-line no-console
+        console.warn('[mfe] dev inspector failed to mount; continuing without it.', error);
       }
     },
     ...overrides,
@@ -266,4 +286,16 @@ export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> 
   //    plugin_reader reads __osdBundles__ synchronously during CoreSystem start,
   //    evaluating each plugin factory (and any peer factories it pulls in) lazily.
   await deps.invokeCoreBootstrap();
+
+  // 5. Dev-only Inspector panel (Phase 5, Story 3), GATED by the non-production
+  //    `allowOverride` flag. It lists each MFE with its resolved source
+  //    (registry/CDN vs override) and lets a developer repoint a single remote.
+  //    SECURITY: mounting is inside the `allowOverride` branch, so in production
+  //    (gate off) the panel is NEVER rendered — the same boundary that makes
+  //    `buildOverrides()` return an empty map. Mounted after core boot so it
+  //    observes the booted app and never interferes with the locked load
+  //    sequence above.
+  if (allowOverride) {
+    deps.mountInspector(Array.from(resolved.values()));
+  }
 }

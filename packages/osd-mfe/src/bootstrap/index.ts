@@ -51,3 +51,18 @@ export {
   resolveAllowOverride,
 } from './override_sources';
 export type { ParsedOverrides, OverrideSourcesInput, OverrideStorage } from './override_sources';
+
+export {
+  INSPECTOR_ROOT_ID,
+  MfeInspector,
+  applyOverride,
+  clearOverride,
+  mountInspector,
+} from './inspector';
+export type {
+  InspectorEntry,
+  MfeInspectorProps,
+  InspectorEnv,
+  OverrideWritableStorage,
+  MountInspectorOptions,
+} from './inspector';

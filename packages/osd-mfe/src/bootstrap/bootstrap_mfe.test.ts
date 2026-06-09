@@ -324,6 +324,9 @@ describe('bootstrapMfe — dev URL-override wiring (Phase 5, Story 1)', () => {
       getRemoteModuleFactory: jest.fn(async () => () => ({ plugin: () => undefined })),
       registerPluginFactory: jest.fn(),
       invokeCoreBootstrap: jest.fn(async () => undefined),
+      // Stub the dev Inspector mount so these load-focused tests don't render
+      // the real React/EUI panel; a dedicated describe below asserts the gate.
+      mountInspector: jest.fn(),
       ...extra,
     };
     return { deps, loadedByScope };
@@ -402,5 +405,92 @@ describe('bootstrapMfe — dev URL-override wiring (Phase 5, Story 1)', () => {
     // Both plugins load from the REGISTRY; the override sources are not consulted.
     expect(loadedByScope.get('inspector')).toBe(REGISTRY_INSPECTOR_URL);
     expect(loadedByScope.get('data')).toBe(REGISTRY_DATA_URL);
+  });
+});
+
+describe('bootstrapMfe — dev Inspector mount gate (Phase 5, Story 3)', () => {
+  /** Minimal happy-path deps plus an injectable mountInspector spy. */
+  function inspectorDeps(): {
+    deps: Partial<BootstrapMfeDeps>;
+    mountInspector: jest.Mock;
+  } {
+    const mountInspector = jest.fn();
+    const deps: Partial<BootstrapMfeDeps> = {
+      loadScript: jest.fn(async (url: string) => {
+        if (url === SHARED_DEPS_URL) {
+          testWindow().__osdSharedDeps__ = { React: { version: '16.14.0' } };
+        }
+      }),
+      fetchImpl: ((async () => ({
+        ok: true,
+        status: 200,
+        json: async () => validRegistry(),
+      })) as unknown) as typeof fetch,
+      loadRemoteContainer: jest.fn(async () => ({
+        init: () => undefined,
+        get: () => Promise.resolve(() => ({ plugin: () => undefined })),
+      })),
+      getRemoteModuleFactory: jest.fn(async () => () => ({ plugin: () => undefined })),
+      registerPluginFactory: jest.fn(),
+      invokeCoreBootstrap: jest.fn(async () => undefined),
+      mountInspector,
+    };
+    return { deps, mountInspector };
+  }
+
+  it('mounts the inspector with the resolved remotes when allowOverride=true', async () => {
+    const { deps, mountInspector } = inspectorDeps();
+
+    await bootstrapMfe({
+      registryUrl: REGISTRY_URL,
+      sharedDepsUrl: SHARED_DEPS_URL,
+      allowOverride: true,
+      deps,
+    });
+
+    expect(mountInspector).toHaveBeenCalledTimes(1);
+    const entries = mountInspector.mock.calls[0][0] as Array<{
+      id: string;
+      remoteEntry: string;
+      source: string;
+    }>;
+    // The inspector receives every registry plugin with its resolved source.
+    const ids = entries.map((e) => e.id).sort();
+    expect(ids).toEqual(['data', 'inspector']);
+    expect(entries.every((e) => e.source === 'registry')).toBe(true);
+  });
+
+  it('reports an OVERRIDE source to the inspector for an overridden plugin', async () => {
+    const { deps, mountInspector } = inspectorDeps();
+
+    await bootstrapMfe({
+      registryUrl: REGISTRY_URL,
+      sharedDepsUrl: SHARED_DEPS_URL,
+      allowOverride: true,
+      deps: {
+        ...deps,
+        readOverrideSearch: () =>
+          '?mfe.inspector=http://localhost:5601/mfe/inspector/remoteEntry.js',
+        readOverrideStorage: () => undefined,
+      },
+    });
+
+    const entries = mountInspector.mock.calls[0][0] as Array<{ id: string; source: string }>;
+    const byId = Object.fromEntries(entries.map((e) => [e.id, e.source]));
+    expect(byId.inspector).toBe('override');
+    expect(byId.data).toBe('registry');
+  });
+
+  it('does NOT mount the inspector when allowOverride is off (production gate)', async () => {
+    const { deps, mountInspector } = inspectorDeps();
+
+    // No allowOverride passed → defaults to false (production behavior).
+    await bootstrapMfe({
+      registryUrl: REGISTRY_URL,
+      sharedDepsUrl: SHARED_DEPS_URL,
+      deps,
+    });
+
+    expect(mountInspector).not.toHaveBeenCalled();
   });
 });
