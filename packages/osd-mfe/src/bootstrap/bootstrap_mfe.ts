@@ -26,7 +26,9 @@
  *   4. Then run core `__osdBootstrap__()` → `CoreSystem.setup()/start()`.
  */
 
-import { assertValidRegistry } from '../registry/schema';
+import { assertValidRegistry, Registry } from '../registry/schema';
+import { RegistryProvider } from '../registry/provider';
+import { resolve, OverrideMap, ResolvedRemote } from '../registry/resolve';
 import { buildShareScope } from './share_scope';
 import { getRemoteModuleFactory, loadRemoteContainer, loadScript } from './load_remote';
 import {
@@ -34,6 +36,7 @@ import {
   invokeCoreBootstrap,
   registerPluginFactory,
 } from './osd_bundles';
+import { buildOverrideMap, OverrideStorage, parseOverrideSources } from './override_sources';
 import { mfeWindow } from './types';
 
 /**
@@ -47,6 +50,17 @@ export interface BootstrapMfeDeps {
   registerPluginFactory: typeof registerPluginFactory;
   invokeCoreBootstrap: typeof invokeCoreBootstrap;
   fetchImpl: typeof fetch;
+  /**
+   * Read the current page's query string (defaults to `window.location.search`)
+   * — the source of `?mfe.<id>=<url>` dev overrides. Injectable for tests.
+   */
+  readOverrideSearch: () => string;
+  /**
+   * Read the persisted-override store (defaults to `window.localStorage`), or
+   * `undefined` when unavailable. Injectable for tests / tolerant of a blocked
+   * store.
+   */
+  readOverrideStorage: () => OverrideStorage | undefined;
 }
 
 /** Inputs to {@link bootstrapMfe}. */
@@ -64,6 +78,17 @@ export interface BootstrapMfeOptions {
    * `jsFilename`. Defaults to none (the entry is self-contained).
    */
   sharedDepsDepUrls?: string[];
+  /**
+   * The non-production security GATE for dev URL-overrides
+   * (`mfe.allowOverride`, docs/01-MFE-DESIGN.md §7). When `false` (the DEFAULT,
+   * and the only value in production), ALL override sources — query param,
+   * inspector, `localStorage` — are IGNORED and every plugin loads from the
+   * registry/CDN. Phase 5, Story 2 wires the real config value (injected into
+   * the page, default off in prod) into this option; Story 1 only plumbs it,
+   * with a safe default of `false` so no override URL can load while the gate
+   * is off.
+   */
+  allowOverride?: boolean;
   /** Optional collaborator overrides (used by tests). */
   deps?: Partial<BootstrapMfeDeps>;
 }
@@ -78,7 +103,57 @@ function resolveDeps(overrides?: Partial<BootstrapMfeDeps>): BootstrapMfeDeps {
     // Bind so the default `fetch` keeps its `window` receiver.
     fetchImpl: ((input: RequestInfo | URL, init?: RequestInit) =>
       window.fetch(input, init)) as typeof fetch,
+    readOverrideSearch: () => (typeof window !== 'undefined' ? window.location.search : ''),
+    readOverrideStorage: () => {
+      // Accessing localStorage can throw (privacy mode / disabled storage); a
+      // missing store simply means "no persisted overrides".
+      try {
+        return typeof window !== 'undefined' ? window.localStorage : undefined;
+      } catch {
+        return undefined;
+      }
+    },
     ...overrides,
+  };
+}
+
+/**
+ * Build the dev-override {@link OverrideMap} for the current registry, GATED by
+ * the non-production `allowOverride` flag.
+ *
+ * SECURITY (docs/01-MFE-DESIGN.md §7): when the gate is off (production, the
+ * default), this returns an EMPTY map so `resolve()` always yields the
+ * registry/CDN URL and no override source can load arbitrary remote code. When
+ * the gate is on (dev), query-param and `localStorage` sources are parsed and
+ * expanded against the registry entries.
+ */
+function buildOverrides(
+  allowOverride: boolean,
+  registry: Registry,
+  deps: BootstrapMfeDeps
+): OverrideMap {
+  if (!allowOverride) {
+    return {};
+  }
+  const parsed = parseOverrideSources({
+    search: deps.readOverrideSearch(),
+    storage: deps.readOverrideStorage(),
+  });
+  return buildOverrideMap(parsed, registry.mfes);
+}
+
+/**
+ * Wrap an already-fetched, validated {@link Registry} as a
+ * {@link RegistryProvider} so the bootstrap resolves each remote through the
+ * shared, unit-tested `resolve()` contract (registry → descriptor, with the
+ * dev-override hook). The registry is a static snapshot here (one fetch per
+ * boot), so the provider just reads the in-memory object.
+ */
+function inMemoryProvider(registry: Registry): RegistryProvider {
+  return {
+    read: () => registry,
+    getMfe: (id: string) => registry.mfes[id],
+    list: () => Object.keys(registry.mfes),
   };
 }
 
@@ -96,7 +171,7 @@ function resolveDeps(overrides?: Partial<BootstrapMfeDeps>): BootstrapMfeDeps {
  *   disabled (it does NOT throw / abort boot).
  */
 export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> {
-  const { registryUrl, sharedDepsUrl, sharedDepsDepUrls } = options;
+  const { registryUrl, sharedDepsUrl, sharedDepsDepUrls, allowOverride = false } = options;
   const deps = resolveDeps(options.deps);
 
   // 1. Load shared deps and seed the MF share scope (singletons). The shared-deps
@@ -119,6 +194,13 @@ export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> 
   }
   const registry = assertValidRegistry(await response.json());
 
+  // 2b. Build the dev-override map (GATED: empty unless `allowOverride`), and
+  //     wrap the registry as a provider so each remote is resolved through the
+  //     shared `resolve()` contract — an overridden id yields the override URL,
+  //     everything else the registry/CDN URL. See docs/01-MFE-DESIGN.md §7.
+  const overrides = buildOverrides(allowOverride, registry, deps);
+  const provider = inMemoryProvider(registry);
+
   // 3. Load every plugin remote and register its FACTORY into the __osdBundles__
   //    shim. We register factories (lazy) rather than evaluated modules, and define
   //    ALL of them before core boot, so when a plugin module is evaluated during
@@ -135,11 +217,21 @@ export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> 
   //    plugins boot normally. A plugin that hard-depends on a failed peer's exports
   //    may still surface its own error, but a leaf/optional plugin degrades cleanly.
   const ids = Object.keys(registry.mfes);
+  // Pre-resolve each id (override URL wins over registry) so both the loader and
+  // the failure log below reference the EFFECTIVE remoteEntry. ids come from the
+  // registry, so resolve() never returns null here (the empty filter is defensive).
+  const resolved = new Map<string, ResolvedRemote>();
+  for (const id of ids) {
+    const descriptor = resolve(provider, id, overrides);
+    if (descriptor !== null) {
+      resolved.set(id, descriptor);
+    }
+  }
   const results = await Promise.allSettled(
     ids.map(async (id) => {
-      const entry = registry.mfes[id];
-      const container = await deps.loadRemoteContainer(entry.remoteEntry, entry.scope);
-      const factory = await deps.getRemoteModuleFactory(container, shareScope, entry.module);
+      const descriptor = resolved.get(id)!;
+      const container = await deps.loadRemoteContainer(descriptor.remoteEntry, descriptor.scope);
+      const factory = await deps.getRemoteModuleFactory(container, shareScope, descriptor.module);
       deps.registerPluginFactory(id, factory);
     })
   );
@@ -156,7 +248,7 @@ export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> 
       deps.registerPluginFactory(id, createDisabledPluginModule);
       // eslint-disable-next-line no-console
       console.error(
-        `[mfe] Failed to load remote "${id}" from ${registry.mfes[id].remoteEntry}; ` +
+        `[mfe] Failed to load remote "${id}" from ${resolved.get(id)!.remoteEntry}; ` +
           `registering it as DISABLED and continuing to boot the rest of the app.`,
         result.reason
       );

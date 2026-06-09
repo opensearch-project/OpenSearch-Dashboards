@@ -41,3 +41,12 @@ export {
 
 export { bootstrapMfe } from './bootstrap_mfe';
 export type { BootstrapMfeOptions, BootstrapMfeDeps } from './bootstrap_mfe';
+
+export {
+  OVERRIDE_STORAGE_KEY,
+  parseQueryOverrides,
+  parseStorageOverrides,
+  parseOverrideSources,
+  buildOverrideMap,
+} from './override_sources';
+export type { ParsedOverrides, OverrideSourcesInput, OverrideStorage } from './override_sources';

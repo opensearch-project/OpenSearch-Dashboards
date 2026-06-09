@@ -289,3 +289,118 @@ describe('bootstrapMfe (locked sequence)', () => {
     consoleWarn.mockRestore();
   });
 });
+
+describe('bootstrapMfe — dev URL-override wiring (Phase 5, Story 1)', () => {
+  const REGISTRY_INSPECTOR_URL = 'http://localhost:8080/mfe/inspector/remoteEntry.js';
+  const REGISTRY_DATA_URL = 'http://localhost:8080/mfe/data/remoteEntry.js';
+  const OVERRIDE_INSPECTOR_URL = 'http://localhost:5601/mfe/inspector/remoteEntry.js';
+
+  /**
+   * Build deps that record every (remoteEntry, scope) passed to
+   * loadRemoteContainer so a test can assert which URL each plugin loaded from.
+   */
+  function recordingDeps(
+    extra: Partial<BootstrapMfeDeps> = {}
+  ): { deps: Partial<BootstrapMfeDeps>; loadedByScope: Map<string, string> } {
+    const loadedByScope = new Map<string, string>();
+    const deps: Partial<BootstrapMfeDeps> = {
+      loadScript: jest.fn(async (url: string) => {
+        if (url === SHARED_DEPS_URL) {
+          testWindow().__osdSharedDeps__ = { React: { version: '16.14.0' } };
+        }
+      }),
+      fetchImpl: ((async () => ({
+        ok: true,
+        status: 200,
+        json: async () => validRegistry(),
+      })) as unknown) as typeof fetch,
+      loadRemoteContainer: jest.fn(async (remoteEntry: string, scope: string) => {
+        loadedByScope.set(scope, remoteEntry);
+        return {
+          init: () => undefined,
+          get: () => Promise.resolve(() => ({ plugin: () => undefined })),
+        } as MfeContainer;
+      }),
+      getRemoteModuleFactory: jest.fn(async () => () => ({ plugin: () => undefined })),
+      registerPluginFactory: jest.fn(),
+      invokeCoreBootstrap: jest.fn(async () => undefined),
+      ...extra,
+    };
+    return { deps, loadedByScope };
+  }
+
+  it('loads an overridden plugin from its override URL while others use the registry (allowOverride=true)', async () => {
+    const { deps, loadedByScope } = recordingDeps({
+      readOverrideSearch: () => `?mfe.inspector=${OVERRIDE_INSPECTOR_URL}`,
+      readOverrideStorage: () => undefined,
+    });
+
+    await bootstrapMfe({
+      registryUrl: REGISTRY_URL,
+      sharedDepsUrl: SHARED_DEPS_URL,
+      allowOverride: true,
+      deps,
+    });
+
+    expect(loadedByScope.get('inspector')).toBe(OVERRIDE_INSPECTOR_URL);
+    expect(loadedByScope.get('data')).toBe(REGISTRY_DATA_URL);
+  });
+
+  it('applies a base override (?mfe.all) to every plugin, swapping origin but keeping the path', async () => {
+    const { deps, loadedByScope } = recordingDeps({
+      readOverrideSearch: () => '?mfe.all=http://localhost:5601',
+      readOverrideStorage: () => undefined,
+    });
+
+    await bootstrapMfe({
+      registryUrl: REGISTRY_URL,
+      sharedDepsUrl: SHARED_DEPS_URL,
+      allowOverride: true,
+      deps,
+    });
+
+    expect(loadedByScope.get('inspector')).toBe(
+      'http://localhost:5601/mfe/inspector/remoteEntry.js'
+    );
+    expect(loadedByScope.get('data')).toBe('http://localhost:5601/mfe/data/remoteEntry.js');
+  });
+
+  it('reads a persisted localStorage override when allowOverride=true', async () => {
+    const { deps, loadedByScope } = recordingDeps({
+      readOverrideSearch: () => '',
+      readOverrideStorage: () => ({
+        getItem: () => JSON.stringify({ inspector: OVERRIDE_INSPECTOR_URL }),
+      }),
+    });
+
+    await bootstrapMfe({
+      registryUrl: REGISTRY_URL,
+      sharedDepsUrl: SHARED_DEPS_URL,
+      allowOverride: true,
+      deps,
+    });
+
+    expect(loadedByScope.get('inspector')).toBe(OVERRIDE_INSPECTOR_URL);
+  });
+
+  it('IGNORES every override source when the gate is off (allowOverride defaults to false)', async () => {
+    const { deps, loadedByScope } = recordingDeps({
+      readOverrideSearch: () =>
+        `?mfe.inspector=${OVERRIDE_INSPECTOR_URL}&mfe.all=http://localhost:5601`,
+      readOverrideStorage: () => ({
+        getItem: () => JSON.stringify({ data: 'http://evil/data/remoteEntry.js' }),
+      }),
+    });
+
+    // No allowOverride passed → defaults to false (production behavior).
+    await bootstrapMfe({
+      registryUrl: REGISTRY_URL,
+      sharedDepsUrl: SHARED_DEPS_URL,
+      deps,
+    });
+
+    // Both plugins load from the REGISTRY; the override sources are not consulted.
+    expect(loadedByScope.get('inspector')).toBe(REGISTRY_INSPECTOR_URL);
+    expect(loadedByScope.get('data')).toBe(REGISTRY_DATA_URL);
+  });
+});
