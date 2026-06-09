@@ -22,7 +22,7 @@ import { registerDuplicateRoute } from './duplicate';
 import { getPermissionMode, transferCurrentUserInPermissions } from '../utils';
 import {
   validateWorkspaceColor,
-  getWorkspacePermissionWarning,
+  getInvalidWorkspacePermissionsError,
   normalizeWorkspacePermissions,
 } from '../../common/utils';
 import { getUseCaseFeatureConfig } from '../../../../core/server';
@@ -226,14 +226,13 @@ export function registerRoutes({
         dataConnections?: string[];
       } = attributes;
 
-      // Non-blocking warning for permission combinations that do not map to a
-      // recognized collaborator access level. The request still succeeds to keep
-      // the API backward compatible.
-      const permissionWarning = isPermissionControlEnabled
-        ? getWorkspacePermissionWarning(settings.permissions)
-        : undefined;
-
+      // Reject permission combinations that do not map to a recognized
+      // collaborator access level (read only, read and write, or admin).
       if (isPermissionControlEnabled) {
+        const invalidPermissionsError = getInvalidWorkspacePermissionsError(settings.permissions);
+        if (invalidPermissionsError) {
+          return res.badRequest({ body: invalidPermissionsError });
+        }
         const normalizedPermissions = normalizeWorkspacePermissions(settings.permissions);
         createPayload.permissions = normalizedPermissions;
         if (!!principals?.users?.length) {
@@ -254,9 +253,7 @@ export function registerRoutes({
         },
         createPayload
       );
-      return res.ok({
-        body: permissionWarning ? { ...result, warning: permissionWarning } : result,
-      });
+      return res.ok({ body: result });
     })
   );
   router.put(
@@ -276,12 +273,14 @@ export function registerRoutes({
       const { id } = req.params;
       const { attributes, settings } = req.body;
 
-      // Non-blocking warning for permission combinations that do not map to a
-      // recognized collaborator access level. The request still succeeds to keep
-      // the API backward compatible.
-      const permissionWarning = isPermissionControlEnabled
-        ? getWorkspacePermissionWarning(settings.permissions)
-        : undefined;
+      // Reject permission combinations that do not map to a recognized
+      // collaborator access level (read only, read and write, or admin).
+      if (isPermissionControlEnabled) {
+        const invalidPermissionsError = getInvalidWorkspacePermissionsError(settings.permissions);
+        if (invalidPermissionsError) {
+          return res.badRequest({ body: invalidPermissionsError });
+        }
+      }
 
       const result = await client.update(
         {
@@ -297,9 +296,7 @@ export function registerRoutes({
           ...{ dataConnections: settings.dataConnections },
         }
       );
-      return res.ok({
-        body: permissionWarning ? { ...result, warning: permissionWarning } : result,
-      });
+      return res.ok({ body: result });
     })
   );
   router.delete(

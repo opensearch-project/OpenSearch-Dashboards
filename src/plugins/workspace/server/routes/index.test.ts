@@ -188,7 +188,7 @@ describe(`Workspace routes permission validation`, () => {
   });
 
   describe('create', () => {
-    it('returns a warning but still succeeds when a group has an incomplete permission combination', async () => {
+    it('returns 400 when a group has an incomplete permission combination', async () => {
       const result = await supertest(httpSetup.server.listener)
         .post(WORKSPACES_API_BASE_URL)
         .send({
@@ -202,17 +202,10 @@ describe(`Workspace routes permission validation`, () => {
             },
           },
         })
-        .expect(200);
-      // Backward compatible: the request succeeds and the permission is persisted as-is...
-      expect(mockedWorkspaceClient.create).toHaveBeenCalledWith(
-        expect.any(Object),
-        expect.objectContaining({
-          permissions: { read: { groups: ['obs-users'] } },
-        })
-      );
-      // ...but a non-blocking warning is returned to the caller (visible from the CLI response).
-      expect(typeof result.body.warning).toBe('string');
-      expect(result.body.warning).toContain('obs-users');
+        .expect(400);
+      expect(result.body.message).toContain('Invalid workspace permissions');
+      expect(result.body.message).toContain('obs-users');
+      expect(mockedWorkspaceClient.create).not.toHaveBeenCalled();
     });
 
     it('persists a valid read only collaborator unchanged', async () => {
@@ -273,7 +266,7 @@ describe(`Workspace routes permission validation`, () => {
   });
 
   describe('update', () => {
-    it('returns warnings but still succeeds when permissions have incomplete combinations', async () => {
+    it('returns 400 when permissions have an incomplete combination', async () => {
       const result = await supertest(httpSetup.server.listener)
         .put(`${WORKSPACES_API_BASE_URL}/mock-workspace-id`)
         .send({
@@ -285,22 +278,11 @@ describe(`Workspace routes permission validation`, () => {
             },
           },
         })
-        .expect(200);
-      // Backward compatible: the #11996 payload still persists as-is instead of being rejected.
-      expect(mockedWorkspaceClient.update).toHaveBeenCalledWith(
-        expect.any(Object),
-        'mock-workspace-id',
-        expect.objectContaining({
-          permissions: {
-            library_write: { groups: ['obs-admins'] },
-            read: { groups: ['obs-users'] },
-          },
-        })
-      );
-      // Both incomplete principals are reported in a single warning string.
-      expect(typeof result.body.warning).toBe('string');
-      expect(result.body.warning).toContain('obs-admins');
-      expect(result.body.warning).toContain('obs-users');
+        .expect(400);
+      expect(result.body.message).toContain('Invalid workspace permissions');
+      expect(result.body.message).toContain('obs-admins');
+      expect(result.body.message).toContain('obs-users');
+      expect(mockedWorkspaceClient.update).not.toHaveBeenCalled();
     });
 
     it('normalizes a redundant permission combination before calling the workspace client', async () => {

@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import { SavedObjectPermissions } from '../../../core/types';
+import type { SavedObjectPermissions } from '../../../core/types';
 import { WORKSPACE_DATA_SOURCE_AND_CONNECTION_OBJECT_TYPES } from './constants';
 
 // Reference https://github.com/opensearch-project/oui/blob/main/src/services/color/is_valid_hex.ts
@@ -48,10 +48,7 @@ const collectPrincipalModes = (permissions: SavedObjectPermissions) => {
 
 /**
  * Validate that every principal in a workspace `permissions` object forms a
- * recognized collaborator access level (see {@link WORKSPACE_ACCESS_LEVEL_MODES}).
- *
- * Returns the list of principals whose granted permission modes do not contain
- * all the modes of any access level. An empty array means the permissions are valid.
+ * recognized collaborator access level.
  */
 export const getInvalidWorkspacePermissions = (
   permissions?: SavedObjectPermissions
@@ -84,26 +81,24 @@ export const getInvalidWorkspacePermissions = (
 };
 
 /**
- * Build a single human-readable, non-blocking warning message for any principal
- * whose granted permission modes do not form a recognized collaborator access level.
+ * Build a single human-readable error message for any principal whose granted
+ * permission modes do not form a recognized collaborator access level.
  */
-export const getWorkspacePermissionWarning = (
+export const getInvalidWorkspacePermissionsError = (
   permissions?: SavedObjectPermissions
 ): string | undefined => {
   const invalidPrincipals = getInvalidWorkspacePermissions(permissions);
   if (invalidPrincipals.length === 0) {
     return undefined;
   }
-  const lines = invalidPrincipals.map(
-    ({ type, name, modes }) =>
-      `The ${type} "${name}" was granted [${modes.join(
-        ', '
-      )}], which is not a recognized workspace access level and will not appear as a collaborator.`
+  const details = invalidPrincipals
+    .map(({ type, name, modes }) => `${type} "${name}" ([${modes.join(', ')}])`)
+    .join('; ');
+  return (
+    `Invalid workspace permissions for: ${details}. Each user or group must be granted one of ` +
+    `the following permission mode combinations: ["library_read", "read"] for read only, ` +
+    `["library_write", "read"] for read and write, or ["library_write", "write"] for admin.`
   );
-  lines.push(
-    `Grant one of these permission mode combinations instead: ["library_read", "read"] for read only, ["library_write", "read"] for read and write, or ["library_write", "write"] for admin.`
-  );
-  return lines.join(' ');
 };
 
 /**
@@ -123,8 +118,6 @@ export const normalizeWorkspacePermissions = (
     const matched = WORKSPACE_ACCESS_LEVEL_MODES.find((requiredModes) =>
       requiredModes.every((requiredMode) => modes.has(requiredMode))
     );
-    // Fall back to the original modes if no access level matches, to avoid
-    // silently dropping permissions that validation would have already rejected.
     return matched ?? [...modes];
   };
 

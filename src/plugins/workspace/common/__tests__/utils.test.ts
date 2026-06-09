@@ -6,7 +6,7 @@
 import {
   validateWorkspaceColor,
   getInvalidWorkspacePermissions,
-  getWorkspacePermissionWarning,
+  getInvalidWorkspacePermissionsError,
   normalizeWorkspacePermissions,
 } from '../utils';
 
@@ -116,10 +116,10 @@ describe('getInvalidWorkspacePermissions', () => {
   });
 });
 
-describe('getWorkspacePermissionWarning', () => {
+describe('getInvalidWorkspacePermissionsError', () => {
   it('should return undefined for valid permissions', () => {
     expect(
-      getWorkspacePermissionWarning({
+      getInvalidWorkspacePermissionsError({
         library_read: { groups: ['obs-users'] },
         read: { groups: ['obs-users'] },
       })
@@ -127,21 +127,19 @@ describe('getWorkspacePermissionWarning', () => {
   });
 
   it('should return undefined when permissions are undefined', () => {
-    expect(getWorkspacePermissionWarning()).toBeUndefined();
+    expect(getInvalidWorkspacePermissionsError()).toBeUndefined();
   });
 
-  it('should return a single message listing each invalid principal once, with guidance appended once', () => {
-    const warning = getWorkspacePermissionWarning({
+  it('should return a message naming each invalid principal with guidance', () => {
+    const error = getInvalidWorkspacePermissionsError({
       library_write: { groups: ['obs-admins'] },
       read: { groups: ['obs-users'] },
     });
-    expect(typeof warning).toBe('string');
-    expect(warning).toContain('obs-admins');
-    expect(warning).toContain('obs-users');
-    // each invalid principal is described exactly once
-    expect(warning!.match(/which is not a recognized workspace access level/g)).toHaveLength(2);
-    // guidance text appears exactly once
-    expect(warning!.match(/Grant one of these permission mode combinations/g)).toHaveLength(1);
+    expect(typeof error).toBe('string');
+    expect(error).toContain('obs-admins');
+    expect(error).toContain('obs-users');
+    expect(error).toContain('Invalid workspace permissions');
+    expect(error).toContain('["library_write", "write"] for admin');
   });
 });
 
