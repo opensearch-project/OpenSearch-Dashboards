@@ -13,10 +13,11 @@
  * `update_registry` CLI logic (Phase 2, Story 4).
  *
  * This wraps the pure {@link generateRegistry} library in a DATA-ONLY writer: it
- * either regenerates the whole registry from the built Module Federation remotes
- * or patches a single plugin's version/url, then validates and writes the
- * registry JSON. Versions stay DATA — the operator flips a version by editing
- * data through this tool, never by changing code. See docs/01-MFE-DESIGN.md §5.
+ * either regenerates the whole registry from the built Module Federation remotes,
+ * registers a CDN revision from a deploy manifest (`--from-manifest`), or patches
+ * a single plugin's version/url, then validates and writes the registry JSON.
+ * Versions stay DATA — the operator flips a version by editing data through this
+ * tool, never by changing code. See docs/01-MFE-DESIGN.md §5–§6.
  *
  * The ONLY filesystem write this performs is the registry data file (resolved
  * from `--registry-path` or `MFE_REGISTRY_PATH`). It never touches OSD source,
@@ -31,7 +32,7 @@ import Fs from 'fs';
 import Path from 'path';
 
 import { generateRegistry } from './generate';
-import { assertValidRegistry, MfeEntry, Registry } from './schema';
+import { assertValidRegistry, MfeEntry, Registry, SCHEMA_VERSION } from './schema';
 
 const USAGE = `Usage: node scripts/update_registry [options]
 
@@ -43,7 +44,17 @@ Modes:
   (default)              Regenerate the whole registry from the built remotes
                          under target/mfe/<id>/remoteEntry.js (content-hash
                          versions). Use --base-url to point the remote URLs at a
-                         specific origin.
+                         specific origin (e.g. the local :8080 mock CDN). This is
+                         also how you RESTORE the local origin after pointing at
+                         the CDN: re-run with --base-url http://localhost:8080.
+  --from-manifest        Register a CDN revision: read the deploy-manifest.json
+                         emitted by \`scripts/deploy_mfe\` and point every
+                         remoteEntry at its CONTENT-ADDRESSED CloudFront URL
+                         (<baseUrl>/<prefix>/<id>/<hash>/remoteEntry.js) and
+                         sharedDeps at the CDN shared-deps URL. Versions/scope/
+                         module (and SRI, when the current registry still pins
+                         the same content hash) are carried over — this only
+                         repoints the URLs. Data-only: no upload, no AWS call.
   --plugin <id>          Patch a SINGLE existing entry in place. Requires at
                          least one of --version / --url. The entry's integrity
                          (SRI) is dropped because the recorded hash no longer
@@ -52,12 +63,20 @@ Modes:
 Options:
   --base-url <url>       Origin the remotes are served from (full-regen mode).
                          Defaults to REGISTRY_BASE_URL env or http://localhost:8080.
+  --from-manifest        Register the CDN revision from a deploy manifest (see above).
+  --manifest-path <p>    deploy-manifest.json to read (--from-manifest mode).
+                         Defaults to deploy-manifest.json next to the registry file.
   --plugin <id>          Plugin id to patch (e.g. "inspector").
   --version <version>    New version string for the patched plugin.
   --url <url>            New remoteEntry URL for the patched plugin.
   --registry-path <p>    Registry data file to write. Defaults to the
                          MFE_REGISTRY_PATH env var.
-  --help, -h             Show this message`;
+  --help, -h             Show this message
+
+Restore the local origin (undo --from-manifest):
+  node scripts/update_registry --base-url http://localhost:8080
+  (or set REGISTRY_BASE_URL). A snapshot is also kept at
+  registry/registry.local.json — copy it over registry/registry.json to restore.`;
 
 /** Minimal console surface, injectable so tests can assert/silence output. */
 export interface UpdateCliConsole {
@@ -149,6 +168,190 @@ function patchEntry(
   return registry;
 }
 
+/**
+ * The subset of the `deploy-manifest.json` document (emitted by
+ * `scripts/deploy_mfe`, see {@link import('../deploy').DeployManifest}) that the
+ * registry writer consumes. Declared independently here — and validated at
+ * runtime by {@link assertValidManifest} — because the manifest is EXTERNAL data
+ * read from disk, not a trusted in-process value.
+ */
+interface ManifestMfeEntry {
+  /** Content-addressed version `<osdVersion>+<contentHash>` (matches the registry). */
+  version: string;
+  /** First 12 hex chars of `sha256(remoteEntry.js)` — the immutable path segment. */
+  contentHash: string;
+  /** Public CloudFront URL of the plugin's `remoteEntry.js`. */
+  cdnUrl: string;
+}
+
+/** The `deploy-manifest.json` fields consumed when registering a CDN revision. */
+interface DeployManifestData {
+  /** Manifest schema version; must equal {@link DEPLOY_MANIFEST_SCHEMA_VERSION}. */
+  schemaVersion: number;
+  /** CDN coordinates the artifacts were published to (recorded for traceability). */
+  cdn: { baseUrl: string };
+  /** Shared-deps singletons published location. */
+  sharedDeps: { version: string; cdnUrl: string };
+  /** Map of plugin id -> its published CDN descriptor. */
+  mfes: Record<string, ManifestMfeEntry>;
+}
+
+/**
+ * The deploy-manifest schema version this writer understands. Kept in sync with
+ * `deploy/deploy_cli.ts` (`DEPLOY_MANIFEST_SCHEMA_VERSION`); a newer manifest is
+ * rejected with a clear error rather than silently mis-read.
+ */
+const DEPLOY_MANIFEST_SCHEMA_VERSION = 1;
+
+/** Type guard: a plain (non-null, non-array) object. */
+function isObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+/** True when `value` is a non-empty string. */
+function isNonEmptyString(value: unknown): value is string {
+  return typeof value === 'string' && value.length > 0;
+}
+
+/**
+ * Validate a parsed deploy manifest against the fields the registry writer needs
+ * and narrow it to {@link DeployManifestData}. The manifest is external data, so
+ * this throws a precise, operator-actionable error rather than trusting it.
+ *
+ * @throws Error listing every missing/invalid field
+ */
+function assertValidManifest(value: unknown, manifestPath: string): DeployManifestData {
+  const errors: string[] = [];
+
+  if (!isObject(value)) {
+    throw new Error(`Deploy manifest ${manifestPath} is not a JSON object.`);
+  }
+  if (value.schemaVersion !== DEPLOY_MANIFEST_SCHEMA_VERSION) {
+    errors.push(
+      `schemaVersion must equal ${DEPLOY_MANIFEST_SCHEMA_VERSION} ` +
+        `(got ${JSON.stringify(value.schemaVersion)}) — regenerate with this tool's deploy_mfe`
+    );
+  }
+  if (!isObject(value.cdn) || !isNonEmptyString(value.cdn.baseUrl)) {
+    errors.push('cdn.baseUrl must be a non-empty string');
+  }
+  if (!isObject(value.sharedDeps)) {
+    errors.push('sharedDeps must be an object with { version, cdnUrl }');
+  } else {
+    if (!isNonEmptyString(value.sharedDeps.cdnUrl)) {
+      errors.push('sharedDeps.cdnUrl must be a non-empty string');
+    }
+    if (!isNonEmptyString(value.sharedDeps.version)) {
+      errors.push('sharedDeps.version must be a non-empty string');
+    }
+  }
+  if (!isObject(value.mfes)) {
+    errors.push('mfes must be an object keyed by plugin id');
+  } else {
+    const ids = Object.keys(value.mfes);
+    if (ids.length === 0) {
+      errors.push('mfes must contain at least one entry');
+    }
+    for (const id of ids) {
+      const entry = value.mfes[id];
+      if (!isObject(entry)) {
+        errors.push(`mfes.${id} must be an object`);
+        continue;
+      }
+      if (!isNonEmptyString(entry.cdnUrl)) {
+        errors.push(`mfes.${id}.cdnUrl must be a non-empty string`);
+      }
+      if (!isNonEmptyString(entry.version)) {
+        errors.push(`mfes.${id}.version must be a non-empty string`);
+      }
+    }
+  }
+
+  if (errors.length > 0) {
+    throw new Error(
+      `Invalid deploy manifest ${manifestPath}:\n  - ${errors.join('\n  - ')}\n` +
+        'Run `node scripts/deploy_mfe` to (re)generate it.'
+    );
+  }
+  return (value as unknown) as DeployManifestData;
+}
+
+/**
+ * Resolve the deploy-manifest.json path for `--from-manifest`: `--manifest-path`
+ * wins, else `deploy-manifest.json` next to the registry file (they live
+ * together and describe the same revision). Mirrors `deploy_cli.ts`.
+ */
+function resolveManifestPath(argv: string[], registryPath: string): string {
+  const fromArg = readOption(argv, '--manifest-path');
+  return fromArg ?? Path.join(Path.dirname(registryPath), 'deploy-manifest.json');
+}
+
+/**
+ * Best-effort read of the CURRENT registry's `mfes` map, used to carry forward
+ * `scope`/`module`/`integrity` when registering a CDN revision. Returns `{}` when
+ * the file is missing or invalid — registering the CDN revision must not depend
+ * on a pre-existing (or valid) registry; it just means SRI is omitted.
+ */
+function readExistingMfes(registryPath: string): Record<string, MfeEntry> {
+  try {
+    const raw = Fs.readFileSync(registryPath, 'utf8');
+    return assertValidRegistry(JSON.parse(raw)).mfes;
+  } catch {
+    return {};
+  }
+}
+
+/**
+ * Build a {@link Registry} from a deploy manifest, pointing each remoteEntry at
+ * its content-addressed CloudFront URL and `sharedDeps` at the CDN shared-deps
+ * URL. This ONLY repoints URLs — `version`, `scope` and `module` are preserved
+ * from `priorMfes` when present, else derived to the canonical values produced
+ * by {@link generateRegistry} (`scope = osdMfe_<id>`, `module = ./public`).
+ *
+ * `integrity` (SRI) is carried over from the current registry entry ONLY when it
+ * still pins the SAME content (its `version`, i.e. `<osdVersion>+<contentHash>`,
+ * equals the manifest's). Because the CDN object is byte-identical to the build
+ * that produced that hash, the recorded SRI hash remains valid against the CDN
+ * bytes. When the versions differ (or there is no prior entry), `integrity` is
+ * omitted — it is optional in the schema (recommended in prod).
+ *
+ * @param manifest validated deploy manifest data
+ * @param now timestamp to stamp into `generatedAt`
+ * @param priorMfes the current registry's `mfes` map (pass `{}` when none)
+ * @returns an in-memory registry (validate + write it separately)
+ */
+export function buildRegistryFromManifest(
+  manifest: DeployManifestData,
+  now: Date,
+  priorMfes: Record<string, MfeEntry> = {}
+): Registry {
+  const mfes: Record<string, MfeEntry> = {};
+  for (const id of Object.keys(manifest.mfes).sort((a, b) => a.localeCompare(b))) {
+    const entry = manifest.mfes[id];
+    const prior = priorMfes[id];
+    const carryIntegrity =
+      prior !== undefined && prior.version === entry.version && prior.integrity !== undefined;
+
+    mfes[id] = {
+      version: entry.version,
+      remoteEntry: entry.cdnUrl,
+      scope: prior?.scope ?? `osdMfe_${id}`,
+      module: prior?.module ?? './public',
+      ...(carryIntegrity ? { integrity: prior!.integrity } : {}),
+    };
+  }
+
+  return {
+    schemaVersion: SCHEMA_VERSION,
+    generatedAt: now.toISOString(),
+    sharedDeps: {
+      url: manifest.sharedDeps.cdnUrl,
+      version: manifest.sharedDeps.version,
+    },
+    mfes,
+  };
+}
+
 /** Write the registry as pretty JSON (trailing newline) to `registryPath`. */
 function writeRegistry(registryPath: string, registry: Registry): void {
   Fs.mkdirSync(Path.dirname(registryPath), { recursive: true });
@@ -181,6 +384,7 @@ export function runUpdateCli(
   try {
     const registryPath = resolveRegistryPath(argv, env);
     const pluginId = readOption(argv, '--plugin');
+    const fromManifest = argv.includes('--from-manifest');
 
     let registry: Registry;
     let summary: string;
@@ -189,6 +393,16 @@ export function runUpdateCli(
       const url = readOption(argv, '--url');
       registry = patchEntry(registryPath, pluginId, version, url, now);
       summary = `Patched "${pluginId}" -> version=${registry.mfes[pluginId].version}, remoteEntry=${registry.mfes[pluginId].remoteEntry}`;
+    } else if (fromManifest) {
+      const manifestPath = resolveManifestPath(argv, registryPath);
+      const manifest = assertValidManifest(
+        JSON.parse(Fs.readFileSync(manifestPath, 'utf8')),
+        manifestPath
+      );
+      registry = buildRegistryFromManifest(manifest, now, readExistingMfes(registryPath));
+      summary =
+        `Registered CDN revision from ${manifestPath} ` +
+        `(${Object.keys(registry.mfes).length} entrie(s) @ ${manifest.cdn.baseUrl})`;
     } else {
       const baseUrl = readOption(argv, '--base-url');
       registry = generateRegistry({
