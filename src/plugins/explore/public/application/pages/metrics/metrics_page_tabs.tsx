@@ -51,13 +51,18 @@ export const MetricsPageTabs: React.FC = () => {
 
   const metricsExploreState = useSelector((state: RootState) => state.tab.metricsExplore);
 
-  // Read queries from either:
+  // Read queries based on the active mode:
+  // - Explore tab: selected metric from exploration state
   // - Query tab: QueryStringManager (synced on every keystroke)
-  // - Explore tab: the selected metric from the exploration state
   const parsedQueries = useMemo(() => {
     if (!showAlertRuleFlyout) return [];
 
-    // Try QueryStringManager first (Query tab)
+    // Explore tab: use the selected metric from the exploration state
+    if (mode === 'explore' && metricsExploreState?.metric) {
+      return [metricsExploreState.metric];
+    }
+
+    // Query tab: read from QueryStringManager
     const raw = String(services.data.query.queryString.getQuery().query || '');
     if (raw.trim()) {
       if (raw.includes(';\n') || raw.endsWith(';')) {
@@ -67,11 +72,6 @@ export const MetricsPageTabs: React.FC = () => {
           .filter(Boolean);
       }
       return [raw.trim()];
-    }
-
-    // Fallback: read from Explore tab's selected metric
-    if (mode === 'explore' && metricsExploreState?.metric) {
-      return [metricsExploreState.metric];
     }
 
     return [];

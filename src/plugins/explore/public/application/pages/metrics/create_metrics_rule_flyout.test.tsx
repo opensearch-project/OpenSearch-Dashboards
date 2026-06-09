@@ -264,3 +264,49 @@ describe('deriveRuleName', () => {
     expect(deriveRuleName(input)).toBe(expected);
   });
 });
+
+describe('CreateMetricsRuleFlyout - Explore tab integration', () => {
+  const mockHttp = {
+    post: jest.fn().mockResolvedValue({}),
+    get: jest.fn().mockResolvedValue({ groups: [{ name: 'up' }] }),
+  };
+  const mockClose = jest.fn();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('renders a single rule card when Explore tab passes one metric name', () => {
+    render(
+      <CreateMetricsRuleFlyout
+        queries={['process_resident_memory_bytes']}
+        datasourceId="ds-1"
+        onClose={mockClose}
+        http={mockHttp}
+      />
+    );
+
+    expect(screen.getByText('Query 1')).toBeInTheDocument();
+    expect(screen.queryByText('Query 2')).not.toBeInTheDocument();
+    // Rule name derived from the metric
+    expect(screen.getByDisplayValue('process_resident_memory_bytes')).toBeInTheDocument();
+  });
+
+  it('derives correct rule name for plain metric without function wrapper', () => {
+    render(
+      <CreateMetricsRuleFlyout
+        queries={['node_cpu_seconds_total']}
+        datasourceId="ds-1"
+        onClose={mockClose}
+        http={mockHttp}
+      />
+    );
+
+    expect(screen.getByDisplayValue('node_cpu_seconds_total')).toBeInTheDocument();
+  });
+});
