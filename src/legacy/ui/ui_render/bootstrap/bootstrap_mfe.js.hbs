@@ -66,6 +66,10 @@ if (window.__osdStrictCsp__ && window.__osdCspNotEnforced__) {
     registryUrl: '{{mfeRegistryUrl}}',
     sharedDepsUrl: '{{mfeSharedDepsUrl}}',
     sharedDepsDepUrls: {{{mfeSharedDepsDepUrls}}},
+    {{!-- Non-prod security gate (§7): a boolean injected by the server. When
+          false (production default), the bootstrap IGNORES every override
+          source so no override URL can load arbitrary remote code. --}}
+    allowOverride: {{mfeAllowOverride}},
   };
 
   window.onload = function () {
@@ -148,6 +152,7 @@ if (window.__osdStrictCsp__ && window.__osdCspNotEnforced__) {
         registryUrl: window.__osdMfe__.registryUrl,
         sharedDepsUrl: window.__osdMfe__.sharedDepsUrl,
         sharedDepsDepUrls: window.__osdMfe__.sharedDepsDepUrls,
+        allowOverride: window.__osdMfe__.allowOverride,
       });
 
       load(styleSheetPaths);

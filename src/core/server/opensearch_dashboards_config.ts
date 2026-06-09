@@ -119,6 +119,16 @@ export const config = {
       sharedDepsUrl: schema.string({ defaultValue: '' }),
       // URL of the browser MFE bootstrap bundle (exposes `window.__osdBootstrapMfe__`).
       bootstrapUrl: schema.string({ defaultValue: '' }),
+      // Non-production security GATE for dev URL-overrides (Phase 5, §7). When
+      // true, runtime overrides (`?mfe.<id>=<url>`, the dev inspector,
+      // `localStorage`) are honored so a developer can repoint a single MFE at a
+      // local dev server; when false, ALL override sources are IGNORED and every
+      // plugin loads from the registry/CDN. Left UNSET here (no default) so the
+      // effective value defaults to the server's dev mode at injection time
+      // (resolveAllowOverride: dev => true, prod => false); an explicit boolean
+      // always wins. This is the boundary that keeps arbitrary remote code out of
+      // production.
+      allowOverride: schema.maybe(schema.boolean()),
     }),
   }),
   deprecations,

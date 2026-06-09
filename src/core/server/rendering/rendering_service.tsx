@@ -181,6 +181,15 @@ export class RenderingService {
                   mfe: {
                     registryUrl: opensearchDashboardsConfig.mfe.registryUrl,
                     sharedDepsUrl: opensearchDashboardsConfig.mfe.sharedDepsUrl,
+                    // Non-prod security gate (Phase 5, §7): an explicit
+                    // `mfe.allowOverride` wins, else default to dev mode (dev =>
+                    // true, prod => false). The dev-only inspector reads this to
+                    // decide whether to mount. Mirrors resolveAllowOverride() in
+                    // @osd/mfe (not a dependency of src/, so inlined).
+                    allowOverride:
+                      typeof opensearchDashboardsConfig.mfe.allowOverride === 'boolean'
+                        ? opensearchDashboardsConfig.mfe.allowOverride
+                        : !!env.mode.dev,
                   },
                 }
               : {}),

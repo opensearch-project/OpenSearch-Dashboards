@@ -147,6 +147,18 @@ export function uiRenderMixin(osdServer, server, config) {
         const mfeSharedDepsUrl = config.get('opensearchDashboards.mfe.sharedDepsUrl');
         const mfeBootstrapUrl = config.get('opensearchDashboards.mfe.bootstrapUrl');
 
+        // Non-production security GATE for dev URL-overrides (Phase 5, §7). An
+        // explicit `mfe.allowOverride` always wins; when unset it defaults to the
+        // server's dev mode (dev => true, prod => false) so arbitrary remote code
+        // can never load via an override in production. Mirrors the canonical
+        // resolveAllowOverride() in @osd/mfe (which is not a dependency of src/,
+        // so the one-liner is duplicated rather than imported).
+        const mfeAllowOverrideConfig = config.get('opensearchDashboards.mfe.allowOverride');
+        const mfeAllowOverride =
+          typeof mfeAllowOverrideConfig === 'boolean'
+            ? mfeAllowOverrideConfig
+            : !!server.newPlatform.env.mode.dev;
+
         // The OSD shared-deps bundle is split: the entry (`mfeSharedDepsUrl`) only
         // assigns window.__osdSharedDeps__ once its dependency chunks
         // (UiSharedDeps.jsDepFilenames — e.g. the large `@elastic` vendor chunk)
@@ -181,6 +193,7 @@ export function uiRenderMixin(osdServer, server, config) {
               mfeSharedDepsUrl,
               mfeSharedDepsDepUrls,
               mfeBootstrapUrl,
+              mfeAllowOverride,
             },
           },
           'bootstrap_mfe'

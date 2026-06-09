@@ -253,3 +253,28 @@ export function buildOverrideMap(
 
   return map;
 }
+
+/**
+ * Resolve the EFFECTIVE value of the `mfe.allowOverride` security gate from the
+ * (optional) server config value and the server's dev/prod mode (Phase 5,
+ * Story 2). This is the canonical, unit-tested specification of the gate's
+ * default; the server injection sites mirror this exact expression inline (they
+ * cannot import `@osd/mfe`, which is not a dependency of `src/`).
+ *
+ * SECURITY (docs/01-MFE-DESIGN.md §7): dev URL-overrides let arbitrary remote
+ * code load, so the gate is honored ONLY in non-production. The default is
+ * therefore tied to the server's dev mode:
+ *  - `configured` explicitly set (a boolean) ALWAYS wins (operators can force it
+ *    on or off in any mode).
+ *  - `configured` unset (`undefined`) falls back to `dev`, so the gate is ON in
+ *    development and — critically — OFF in production.
+ *
+ * @param configured the `mfe.allowOverride` config value (`undefined` when unset).
+ * @param dev `true` when the server runs in development mode (`env.mode.dev`).
+ * @returns the effective gate value passed to the browser bootstrap; `false`
+ *   means EVERY override source (query param, inspector, `localStorage`) is
+ *   ignored.
+ */
+export function resolveAllowOverride(configured: boolean | undefined, dev: boolean): boolean {
+  return typeof configured === 'boolean' ? configured : !!dev;
+}

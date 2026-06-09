@@ -271,6 +271,11 @@ export default () =>
         registryUrl: Joi.string().allow('').default(''),
         sharedDepsUrl: Joi.string().allow('').default(''),
         bootstrapUrl: Joi.string().allow('').default(''),
+        // Non-prod security gate for dev URL-overrides (Phase 5, §7). No
+        // `.default()` so an unset value resolves to undefined and the effective
+        // gate defaults to dev mode at injection time (dev => true, prod => false,
+        // see resolveAllowOverride); an explicit boolean always wins.
+        allowOverride: Joi.boolean(),
       }).default(),
     }).default(),
 

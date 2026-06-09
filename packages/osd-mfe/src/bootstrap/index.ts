@@ -48,5 +48,6 @@ export {
   parseStorageOverrides,
   parseOverrideSources,
   buildOverrideMap,
+  resolveAllowOverride,
 } from './override_sources';
 export type { ParsedOverrides, OverrideSourcesInput, OverrideStorage } from './override_sources';

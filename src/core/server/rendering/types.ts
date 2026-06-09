@@ -89,6 +89,13 @@ export interface RenderingMetadata {
     mfe?: {
       registryUrl: string;
       sharedDepsUrl: string;
+      /**
+       * Non-production security GATE for dev URL-overrides (Phase 5, §7). When
+       * false (the production default), runtime overrides are ignored and the
+       * dev-only inspector is NOT mounted. An explicit `mfe.allowOverride` config
+       * wins; otherwise this defaults to the server's dev mode.
+       */
+      allowOverride: boolean;
     };
   };
 }

@@ -17,6 +17,7 @@ import {
   parseOverrideSources,
   parseQueryOverrides,
   parseStorageOverrides,
+  resolveAllowOverride,
 } from './override_sources';
 
 /** Registry entries used to exercise base-override origin rewriting. */
@@ -192,5 +193,26 @@ describe('buildOverrideMap (expand parsed overrides against the registry)', () =
 
   it('returns an empty map when there are no overrides', () => {
     expect(buildOverrideMap({ byId: {} }, REGISTRY)).toEqual({});
+  });
+});
+
+describe('resolveAllowOverride (the non-prod security gate default)', () => {
+  it('defaults the gate OFF in production (unset config, dev=false)', () => {
+    // SECURITY: the crux of Phase 5 — with no explicit config, production must
+    // resolve to false so every override source is ignored.
+    expect(resolveAllowOverride(undefined, false)).toBe(false);
+  });
+
+  it('defaults the gate ON in development (unset config, dev=true)', () => {
+    expect(resolveAllowOverride(undefined, true)).toBe(true);
+  });
+
+  it('honors an explicit `true` even in production (dev=false)', () => {
+    expect(resolveAllowOverride(true, false)).toBe(true);
+  });
+
+  it('honors an explicit `false` even in development (dev=true)', () => {
+    // An operator can force the gate off in dev; explicit config always wins.
+    expect(resolveAllowOverride(false, true)).toBe(false);
   });
 });
