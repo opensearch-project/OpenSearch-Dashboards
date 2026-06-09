@@ -41,3 +41,19 @@ export type {
   ValidationResult,
   GenerateRegistryOptions,
 } from './registry';
+
+// Deploy (Phase 4): publish-only CDN deploy logic. Reads the provisioned CDN
+// location from the environment (never hardcoded), publishes artifacts to
+// immutable versioned keys, and emits the deploy manifest. Never creates infra.
+export { runDeployCli, buildDeployPlan, resolveCdnConfig, parseEnvFile } from './deploy';
+export type {
+  DeployPlan,
+  RemotePlan,
+  SharedDepsPlan,
+  PlannedFile,
+  BuildDeployPlanOptions,
+  ResolvedCdnConfig,
+  DeployManifest,
+  DeployCliConsole,
+  DeployCliDeps,
+} from './deploy';
