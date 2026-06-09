@@ -317,8 +317,50 @@ describe('buildMfeCspRules', () => {
         sharedDepsUrl: '',
       })
     ).not.toThrow();
-    // Malformed cdnOrigin falls back to trimmed string
+    // A malformed cdnOrigin is rejected (not injected verbatim); a valid https
+    // origin is still allow-listed.
     const result = buildMfeCspRules(baseRules, { cdnOrigin: 'https://cdn.example.net' });
+    expect(result[0]).toContain('https://cdn.example.net');
+  });
+
+  it('rejects a wildcard cdnOrigin (no verbatim injection into script-src)', () => {
+    const result = buildMfeCspRules(baseRules, { cdnOrigin: '*' });
+    // '*' is not a parseable origin => no origins derived => rules returned unchanged.
+    expect(result).toBe(baseRules);
+    expect(result[0]).not.toContain('*');
+  });
+
+  it('rejects a bare hostname cdnOrigin (scheme required)', () => {
+    const result = buildMfeCspRules(baseRules, { cdnOrigin: 'cdn.example.com' });
+    expect(result).toBe(baseRules);
+    expect(result[0]).not.toContain('cdn.example.com');
+  });
+
+  it('rejects a non-http(s) cdnOrigin scheme', () => {
+    const result = buildMfeCspRules(baseRules, { cdnOrigin: 'ftp://cdn.example.net' });
+    expect(result).toBe(baseRules);
+    expect(result[0]).not.toContain('ftp://');
+  });
+
+  it('still allow-lists a valid https cdnOrigin alongside a rejected one', () => {
+    // A valid bootstrap origin is added; the wildcard cdnOrigin is dropped.
+    const result = buildMfeCspRules(baseRules, {
+      bootstrapUrl: 'https://bootstrap.example.net/b.js',
+      cdnOrigin: '*',
+    });
+    expect(result[0]).toContain('https://bootstrap.example.net');
+    expect(result[0]).not.toContain('*');
+  });
+
+  it('rejects a wildcard devOverrideOrigin even when allowOverride is true', () => {
+    const result = buildMfeCspRules(baseRules, {
+      cdnOrigin: 'https://cdn.example.net',
+      allowOverride: true,
+      devOverrideOrigins: ['*', 'http://localhost:9090'],
+    });
+    // The wildcard is dropped; the valid http origin is still allow-listed.
+    expect(result[0]).not.toContain(' *');
+    expect(result[0]).toContain('http://localhost:9090');
     expect(result[0]).toContain('https://cdn.example.net');
   });
 

@@ -67,18 +67,33 @@ export function applyCspModifications(baseRules, modifications) {
 
 const MFE_WIDENED_DIRECTIVES = new Set(['script-src', 'worker-src']);
 
+// Only http(s) origins are ever injected into the CSP. This rejects opaque /
+// non-network schemes (e.g. `javascript:`, `data:`, `file:`) so they can never
+// be allow-listed as a script source.
+const MFE_ALLOWED_ORIGIN_PROTOCOLS = new Set(['http:', 'https:']);
+
 /**
- * Returns `new URL(url).origin`, or `undefined` for non-string / empty / unparseable input.
+ * Validates and normalizes a configured MFE origin to a CSP-safe `scheme://host[:port]`
+ * string. Returns the parsed `origin` ONLY when `url` is a parseable absolute URL with
+ * an http(s) scheme; returns `undefined` for non-string / empty / unparseable input,
+ * a bare hostname (e.g. `cdn.example.com` — no scheme), a wildcard (`'*'`), or any
+ * non-http(s) scheme.
+ *
+ * This is the guard that prevents verbatim injection of an attacker- or
+ * misconfiguration-controlled value (e.g. `'*'`) into `script-src`/`worker-src`:
+ * anything that is not a concrete http(s) origin is dropped rather than appended.
  *
  * @param {*} url
- * @returns {string | undefined}
+ * @returns {string | undefined} the normalized http(s) origin, or `undefined` when invalid.
  */
 function mfeOriginOf(url) {
   if (typeof url !== 'string') return undefined;
   const trimmed = url.trim();
   if (!trimmed) return undefined;
   try {
-    return new URL(trimmed).origin;
+    const parsed = new URL(trimmed);
+    if (!MFE_ALLOWED_ORIGIN_PROTOCOLS.has(parsed.protocol)) return undefined;
+    return parsed.origin;
   } catch (e) {
     return undefined;
   }
@@ -103,8 +118,10 @@ function mfeOriginOf(url) {
  *
  * The no-flag (MFE disabled) path never calls this, so its CSP is byte-for-byte
  * unchanged. Only `script-src`/`worker-src` are widened; all other directives
- * (e.g. `style-src`) are returned untouched. Origins are appended verbatim (only
- * the directive name is lowercased for comparison).
+ * (e.g. `style-src`) are returned untouched. Every configured origin is VALIDATED
+ * (via `mfeOriginOf`) to a concrete http(s) `scheme://host[:port]` before it is
+ * added; a wildcard (`'*'`), a bare hostname, or any non-http(s) value is rejected
+ * (never injected verbatim). Only the directive name is lowercased for comparison.
  *
  * @param {string[]} baseRules - Base CSP rule strings (e.g. `http.csp.rules`).
  * @param {{ cdnOrigin?: string, bootstrapUrl?: string, sharedDepsUrl?: string, allowOverride?: boolean, devOverrideOrigins?: string[] }} [options]
@@ -122,10 +139,14 @@ export function buildMfeCspRules(baseRules, options = {}) {
 
   addOrigin(mfeOriginOf(bootstrapUrl));
   addOrigin(mfeOriginOf(sharedDepsUrl));
-  if (cdnOrigin) addOrigin(mfeOriginOf(cdnOrigin) || cdnOrigin);
+  // cdnOrigin is allow-listed ONLY when it validates to a concrete http(s) origin.
+  // A wildcard ('*'), bare hostname, or any non-http(s) value is rejected (never
+  // injected verbatim into script-src/worker-src).
+  if (cdnOrigin) addOrigin(mfeOriginOf(cdnOrigin));
   if (allowOverride === true && Array.isArray(devOverrideOrigins)) {
     for (const o of devOverrideOrigins) {
-      addOrigin(mfeOriginOf(o) || (typeof o === 'string' ? o : undefined));
+      // Same validation as cdnOrigin: only concrete http(s) origins are added.
+      addOrigin(mfeOriginOf(o));
     }
   }
 

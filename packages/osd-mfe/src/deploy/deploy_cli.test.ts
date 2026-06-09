@@ -96,7 +96,7 @@ function makeFixtureRepo(): { root: string; manifestPath: string; env: NodeJS.Pr
     CDN_DOMAIN: 'cdn.example.net',
     MFE_REGISTRY_PATH: registryPath,
     AWS_PROFILE: 'osd-mfe',
-    ADA_ACCOUNT: '282370370404',
+    ADA_ACCOUNT: '000000000000',
     ADA_PROVIDER: 'isengard',
     ADA_ROLE: 'Admin',
   };

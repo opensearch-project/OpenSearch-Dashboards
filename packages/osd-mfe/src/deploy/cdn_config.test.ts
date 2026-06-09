@@ -32,23 +32,23 @@ describe('parseEnvFile', () => {
 
 describe('resolveCdnConfig', () => {
   const fullEnv = {
-    CDN_BUCKET: 'zengyan-osd-mfe-cdn-us-west-2',
+    CDN_BUCKET: 'test-bucket-000',
     CDN_REGION: 'us-west-2',
-    CDN_BASE_URL: 'https://d2eehzn0i3rher.cloudfront.net',
+    CDN_BASE_URL: 'https://dxxxxxxxxxxxxx.cloudfront.net',
     CDN_KEY_PREFIX: 'mfe',
-    CDN_DISTRIBUTION_ID: 'E30HEFE5GCV2WH',
-    CDN_DOMAIN: 'd2eehzn0i3rher.cloudfront.net',
+    CDN_DISTRIBUTION_ID: 'EXXXXXXXXXX',
+    CDN_DOMAIN: 'dxxxxxxxxxxxxx.cloudfront.net',
   };
 
   it('resolves all fields from the environment', () => {
     const cdn = resolveCdnConfig(fullEnv);
     expect(cdn).toEqual({
-      bucket: 'zengyan-osd-mfe-cdn-us-west-2',
+      bucket: 'test-bucket-000',
       region: 'us-west-2',
-      baseUrl: 'https://d2eehzn0i3rher.cloudfront.net',
+      baseUrl: 'https://dxxxxxxxxxxxxx.cloudfront.net',
       keyPrefix: 'mfe',
-      distributionId: 'E30HEFE5GCV2WH',
-      domain: 'd2eehzn0i3rher.cloudfront.net',
+      distributionId: 'EXXXXXXXXXX',
+      domain: 'dxxxxxxxxxxxxx.cloudfront.net',
     });
   });
 

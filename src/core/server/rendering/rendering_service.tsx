@@ -51,6 +51,7 @@ import { OpenSearchDashboardsConfigType } from '../opensearch_dashboards_config'
 import { HttpConfigType } from '../http/http_config';
 import { SslConfig } from '../http/ssl_config';
 import { LoggerFactory } from '../logging';
+import { resolveAllowOverride } from '../utils/resolve_allow_override';
 
 const DEFAULT_TITLE = 'OpenSearch Dashboards';
 
@@ -184,12 +185,13 @@ export class RenderingService {
                     // Non-prod security gate (Phase 5, §7): an explicit
                     // `mfe.allowOverride` wins, else default to dev mode (dev =>
                     // true, prod => false). The dev-only inspector reads this to
-                    // decide whether to mount. Mirrors resolveAllowOverride() in
-                    // @osd/mfe (not a dependency of src/, so inlined).
-                    allowOverride:
-                      typeof opensearchDashboardsConfig.mfe.allowOverride === 'boolean'
-                        ? opensearchDashboardsConfig.mfe.allowOverride
-                        : !!env.mode.dev,
+                    // decide whether to mount. Uses the shared core
+                    // resolveAllowOverride() helper (mirrors @osd/mfe, which is
+                    // not a dependency of src/).
+                    allowOverride: resolveAllowOverride(
+                      opensearchDashboardsConfig.mfe.allowOverride,
+                      !!env.mode.dev
+                    ),
                   },
                 }
               : {}),

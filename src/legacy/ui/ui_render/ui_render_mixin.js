@@ -39,6 +39,7 @@ import * as v9light from '@elastic/eui/dist/eui_theme_v9_light.json';
 import * as v9dark from '@elastic/eui/dist/eui_theme_v9_dark.json';
 import * as UiSharedDeps from '@osd/ui-shared-deps';
 import { OpenSearchDashboardsRequest } from '../../../core/server';
+import { resolveAllowOverride } from '../../../core/server/utils/resolve_allow_override';
 import { AppBootstrap } from './bootstrap';
 import { getApmConfig } from '../apm';
 import { applyCspModifications, buildMfeCspRules } from './utils';
@@ -150,14 +151,13 @@ export function uiRenderMixin(osdServer, server, config) {
         // Non-production security GATE for dev URL-overrides (Phase 5, §7). An
         // explicit `mfe.allowOverride` always wins; when unset it defaults to the
         // server's dev mode (dev => true, prod => false) so arbitrary remote code
-        // can never load via an override in production. Mirrors the canonical
-        // resolveAllowOverride() in @osd/mfe (which is not a dependency of src/,
-        // so the one-liner is duplicated rather than imported).
-        const mfeAllowOverrideConfig = config.get('opensearchDashboards.mfe.allowOverride');
-        const mfeAllowOverride =
-          typeof mfeAllowOverrideConfig === 'boolean'
-            ? mfeAllowOverrideConfig
-            : !!server.newPlatform.env.mode.dev;
+        // can never load via an override in production. Uses the shared core
+        // resolveAllowOverride() helper (mirrors the canonical one in @osd/mfe,
+        // which is not a dependency of src/).
+        const mfeAllowOverride = resolveAllowOverride(
+          config.get('opensearchDashboards.mfe.allowOverride'),
+          !!server.newPlatform.env.mode.dev
+        );
 
         // The OSD shared-deps bundle is split: the entry (`mfeSharedDepsUrl`) only
         // assigns window.__osdSharedDeps__ once its dependency chunks
@@ -412,11 +412,10 @@ export function uiRenderMixin(osdServer, server, config) {
     let cspRules = http.csp.rules;
     let cspHeader = http.csp.header;
     if (mfeCspEnabled) {
-      const mfeAllowOverrideCfg = config.get('opensearchDashboards.mfe.allowOverride');
-      const mfeAllowOverrideForCsp =
-        typeof mfeAllowOverrideCfg === 'boolean'
-          ? mfeAllowOverrideCfg
-          : !!server.newPlatform.env.mode.dev;
+      const mfeAllowOverrideForCsp = resolveAllowOverride(
+        config.get('opensearchDashboards.mfe.allowOverride'),
+        !!server.newPlatform.env.mode.dev
+      );
       cspRules = buildMfeCspRules(http.csp.rules, {
         cdnOrigin: config.get('opensearchDashboards.mfe.cdnOrigin'),
         bootstrapUrl: config.get('opensearchDashboards.mfe.bootstrapUrl'),
