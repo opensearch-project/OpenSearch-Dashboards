@@ -49,21 +49,34 @@ export const MetricsPageTabs: React.FC = () => {
   const dataConnectionId = useSelector((state: RootState) => state.query.dataset?.id || '');
   const [showAlertRuleFlyout, setShowAlertRuleFlyout] = useState(false);
 
-  // Read queries from the QueryStringManager which is synced on every keystroke
-  // (unlike the Redux store which only updates on "Update" button click).
+  const metricsExploreState = useSelector((state: RootState) => state.tab.metricsExplore);
+
+  // Read queries from either:
+  // - Query tab: QueryStringManager (synced on every keystroke)
+  // - Explore tab: the selected metric from the exploration state
   const parsedQueries = useMemo(() => {
     if (!showAlertRuleFlyout) return [];
+
+    // Try QueryStringManager first (Query tab)
     const raw = String(services.data.query.queryString.getQuery().query || '');
-    if (!raw.trim()) return [];
-    if (raw.includes(';\n') || raw.endsWith(';')) {
-      return raw
-        .split(/;\s*\n/)
-        .map((q) => q.replace(/;\s*$/, '').trim())
-        .filter(Boolean);
+    if (raw.trim()) {
+      if (raw.includes(';\n') || raw.endsWith(';')) {
+        return raw
+          .split(/;\s*\n/)
+          .map((q) => q.replace(/;\s*$/, '').trim())
+          .filter(Boolean);
+      }
+      return [raw.trim()];
     }
-    return [raw.trim()];
+
+    // Fallback: read from Explore tab's selected metric
+    if (mode === 'explore' && metricsExploreState?.metric) {
+      return [metricsExploreState.metric];
+    }
+
+    return [];
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showAlertRuleFlyout]);
+  }, [showAlertRuleFlyout, mode, metricsExploreState?.metric]);
 
   return (
     <MetricsPageModeContext.Provider value={mode}>
