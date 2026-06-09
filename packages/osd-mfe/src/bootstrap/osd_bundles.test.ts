@@ -10,6 +10,7 @@
  */
 
 import {
+  createDisabledPluginModule,
   invokeCoreBootstrap,
   isPluginRegistered,
   pluginBundleKey,
@@ -89,5 +90,36 @@ describe('osd_bundles shim bridge', () => {
     await invokeCoreBootstrap();
 
     expect(bootstrap).toHaveBeenCalledTimes(1);
+  });
+
+  it('createDisabledPluginModule satisfies plugin_reader with an inert plugin', () => {
+    const mod = createDisabledPluginModule();
+
+    // plugin_reader.read() requires `.plugin` to be a function.
+    expect(typeof mod.plugin).toBe('function');
+
+    // PluginWrapper.createPluginInstance() requires the instance to expose
+    // `setup`/`start` functions; the lifecycle methods are inert (empty contracts).
+    const instance = mod.plugin() as {
+      setup: () => unknown;
+      start: () => unknown;
+      stop: () => unknown;
+    };
+    expect(typeof instance.setup).toBe('function');
+    expect(typeof instance.start).toBe('function');
+    expect(typeof instance.stop).toBe('function');
+    expect(instance.setup()).toEqual({});
+    expect(instance.start()).toEqual({});
+    expect(instance.stop()).toBeUndefined();
+  });
+
+  it('a disabled placeholder registers under plugin/<id>/public so the reader resolves it', () => {
+    registerPlugin('regionMap', createDisabledPluginModule());
+
+    expect(isPluginRegistered('regionMap')).toBe(true);
+    const resolved = testWindow().__osdBundles__.get('plugin/regionMap/public') as {
+      plugin: unknown;
+    };
+    expect(typeof resolved.plugin).toBe('function');
   });
 });

@@ -63,6 +63,33 @@ export function isPluginRegistered(id: string): boolean {
 }
 
 /**
+ * Build an INERT, no-op plugin module for a remote that FAILED to load
+ * (Phase 4, Story 5 — graceful degradation).
+ *
+ * OSD core's `plugin_reader.read()`
+ * (src/core/public/plugins/plugin_reader.ts, UNCHANGED) iterates the
+ * server-injected UI plugin list and, for each, looks up `plugin/<id>/public`
+ * in the `__osdBundles__` shim — throwing `Definition of plugin "<id>" not
+ * found and may have failed to load.` if it is absent, which aborts the WHOLE
+ * boot. So merely skipping a failed remote is not enough; we must still register
+ * SOMETHING under its key. This placeholder satisfies the reader's contract — a
+ * `plugin` initializer returning an instance with `setup`/`start`/`stop`
+ * functions — but its lifecycle methods are no-ops returning empty contracts, so
+ * the plugin is effectively DISABLED rather than fatal and the rest of the app
+ * boots. (A plugin that hard-depends on the failed one's exports may still
+ * surface its own error, but a leaf/optional plugin degrades cleanly.)
+ */
+export function createDisabledPluginModule(): PluginPublicModule {
+  return {
+    plugin: () => ({
+      setup: () => ({}),
+      start: () => ({}),
+      stop: () => undefined,
+    }),
+  };
+}
+
+/**
  * Invoke core boot via the server-provided core entry bundle, mirroring
  * `bootstrap.js.hbs`: `__osdBundles__.get('entry/core/public').__osdBootstrap__()`.
  * MUST be called only AFTER every plugin shim is registered.

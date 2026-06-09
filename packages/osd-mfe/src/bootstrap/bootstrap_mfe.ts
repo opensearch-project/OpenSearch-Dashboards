@@ -29,7 +29,11 @@
 import { assertValidRegistry } from '../registry/schema';
 import { buildShareScope } from './share_scope';
 import { getRemoteModuleFactory, loadRemoteContainer, loadScript } from './load_remote';
-import { invokeCoreBootstrap, registerPluginFactory } from './osd_bundles';
+import {
+  createDisabledPluginModule,
+  invokeCoreBootstrap,
+  registerPluginFactory,
+} from './osd_bundles';
 import { mfeWindow } from './types';
 
 /**
@@ -82,8 +86,14 @@ function resolveDeps(overrides?: Partial<BootstrapMfeDeps>): BootstrapMfeDeps {
  * Boot OSD's UI from Module Federation remotes. Resolves once core boot has
  * been invoked (and, for the default core bootstrap, once it completes).
  *
- * @throws if shared deps are unavailable, the registry fetch fails, the
- *   registry is invalid, or a remote cannot be loaded.
+ * Individual remote-load failures are tolerated (Phase 4, Story 5): a remote
+ * that cannot be loaded is logged and registered as a DISABLED placeholder
+ * (so OSD core's plugin_reader still resolves it) rather than aborting boot.
+ * Only the fatal prerequisites still throw.
+ *
+ * @throws if shared deps are unavailable, the registry fetch fails, or the
+ *   registry is invalid. A single remote that cannot be loaded is logged and
+ *   disabled (it does NOT throw / abort boot).
  */
 export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> {
   const { registryUrl, sharedDepsUrl, sharedDepsDepUrls } = options;
@@ -116,8 +126,17 @@ export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> 
   //    factory is already defined and resolves synchronously (the remotes load
   //    concurrently, so eager evaluation here would hit an unregistered peer).
   //    All remotes share the SAME share scope object, so singletons stay single.
-  await Promise.all(
-    Object.keys(registry.mfes).map(async (id) => {
+  //
+  //    Graceful degradation (Phase 4, Story 5): we use Promise.allSettled rather
+  //    than Promise.all so a single failed or missing remote (e.g. one unreachable
+  //    CDN object among the 58) does NOT abort the whole app boot. Each remote that
+  //    fails is logged and registered as a DISABLED placeholder (see below) so that
+  //    OSD core's plugin_reader still finds a definition for it and the remaining
+  //    plugins boot normally. A plugin that hard-depends on a failed peer's exports
+  //    may still surface its own error, but a leaf/optional plugin degrades cleanly.
+  const ids = Object.keys(registry.mfes);
+  const results = await Promise.allSettled(
+    ids.map(async (id) => {
       const entry = registry.mfes[id];
       const container = await deps.loadRemoteContainer(entry.remoteEntry, entry.scope);
       const factory = await deps.getRemoteModuleFactory(container, shareScope, entry.module);
@@ -125,7 +144,33 @@ export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> 
     })
   );
 
-  // 4. Only now — every plugin factory is defined in the shim — drive core boot.
+  // Report each remote that failed and register an INERT placeholder in its
+  // place so OSD core's plugin_reader (UNCHANGED) finds a definition for every
+  // plugin in the server-injected list and core boot is NOT aborted. The failed
+  // plugin is effectively disabled; the rest of the app still boots.
+  const failedIds: string[] = [];
+  results.forEach((result, index) => {
+    if (result.status === 'rejected') {
+      const id = ids[index];
+      failedIds.push(id);
+      deps.registerPluginFactory(id, createDisabledPluginModule);
+      // eslint-disable-next-line no-console
+      console.error(
+        `[mfe] Failed to load remote "${id}" from ${registry.mfes[id].remoteEntry}; ` +
+          `registering it as DISABLED and continuing to boot the rest of the app.`,
+        result.reason
+      );
+    }
+  });
+  if (failedIds.length > 0) {
+    // eslint-disable-next-line no-console
+    console.warn(
+      `[mfe] ${failedIds.length} of ${ids.length} remote(s) failed to load and were disabled: ` +
+        `${failedIds.join(', ')}. Affected plugins will be unavailable.`
+    );
+  }
+
+  // 4. Only now — every plugin factory (real or disabled placeholder) is defined
   //    plugin_reader reads __osdBundles__ synchronously during CoreSystem start,
   //    evaluating each plugin factory (and any peer factories it pulls in) lazily.
   await deps.invokeCoreBootstrap();

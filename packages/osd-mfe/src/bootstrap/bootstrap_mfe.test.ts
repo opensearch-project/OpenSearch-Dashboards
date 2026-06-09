@@ -178,4 +178,114 @@ describe('bootstrapMfe (locked sequence)', () => {
       bootstrapMfe({ registryUrl: REGISTRY_URL, sharedDepsUrl: SHARED_DEPS_URL, deps })
     ).rejects.toThrow(/HTTP 503/);
   });
+
+  it('disables a single failed remote (allSettled) and still boots core with the rest', async () => {
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    const consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const factories = new Map<string, () => PluginPublicModule>();
+    let coreBooted = false;
+
+    const deps: Partial<BootstrapMfeDeps> = {
+      loadScript: jest.fn(async (url: string) => {
+        if (url === SHARED_DEPS_URL) {
+          testWindow().__osdSharedDeps__ = { React: { version: '16.14.0' } };
+        }
+      }),
+      fetchImpl: ((async () => ({
+        ok: true,
+        status: 200,
+        json: async () => validRegistry(),
+      })) as unknown) as typeof fetch,
+      // `inspector` fails to load; `data` succeeds.
+      loadRemoteContainer: jest.fn(async (_remoteEntry: string, scope: string) => {
+        if (scope === 'inspector') {
+          throw new Error(`boom: ${scope}`);
+        }
+        return {
+          init: () => undefined,
+          get: () => Promise.resolve(() => ({ plugin: () => undefined })),
+        } as MfeContainer;
+      }),
+      getRemoteModuleFactory: jest.fn(async () => () => ({ plugin: () => undefined })),
+      registerPluginFactory: jest.fn((id: string, factory: () => PluginPublicModule) => {
+        factories.set(id, factory);
+      }),
+      invokeCoreBootstrap: jest.fn(async () => {
+        coreBooted = true;
+      }),
+    };
+
+    // A single failed remote MUST NOT reject the whole boot.
+    await expect(
+      bootstrapMfe({ registryUrl: REGISTRY_URL, sharedDepsUrl: SHARED_DEPS_URL, deps })
+    ).resolves.toBeUndefined();
+
+    // Both plugins are registered (the healthy one + a placeholder for the failed
+    // one) and core still booted.
+    expect(factories.has('data')).toBe(true);
+    expect(factories.has('inspector')).toBe(true);
+    expect(coreBooted).toBe(true);
+    expect(deps.invokeCoreBootstrap).toHaveBeenCalledTimes(1);
+
+    // The failed plugin's registered factory must yield an INERT plugin so OSD
+    // core's plugin_reader resolves it (has `.plugin`, instance has setup/start).
+    const disabled = factories.get('inspector')!();
+    expect(typeof disabled.plugin).toBe('function');
+    const instance = disabled.plugin() as {
+      setup: () => unknown;
+      start: () => unknown;
+      stop: () => unknown;
+    };
+    expect(typeof instance.setup).toBe('function');
+    expect(typeof instance.start).toBe('function');
+    expect(instance.setup()).toEqual({});
+    expect(instance.start()).toEqual({});
+
+    // The failure is logged clearly (per-remote error naming the id + a summary warn).
+    expect(consoleError).toHaveBeenCalledTimes(1);
+    expect(consoleError.mock.calls[0][0]).toContain('inspector');
+    expect(consoleWarn).toHaveBeenCalledTimes(1);
+    expect(consoleWarn.mock.calls[0][0]).toContain('inspector');
+
+    consoleError.mockRestore();
+    consoleWarn.mockRestore();
+  });
+
+  it('does not log failures and registers all remotes when every remote loads', async () => {
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    const consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const registered = new Set<string>();
+
+    const deps: Partial<BootstrapMfeDeps> = {
+      loadScript: jest.fn(async (url: string) => {
+        if (url === SHARED_DEPS_URL) {
+          testWindow().__osdSharedDeps__ = { React: { version: '16.14.0' } };
+        }
+      }),
+      fetchImpl: ((async () => ({
+        ok: true,
+        status: 200,
+        json: async () => validRegistry(),
+      })) as unknown) as typeof fetch,
+      loadRemoteContainer: jest.fn(async () => ({
+        init: () => undefined,
+        get: () => Promise.resolve(() => ({ plugin: () => undefined })),
+      })),
+      getRemoteModuleFactory: jest.fn(async () => () => ({ plugin: () => undefined })),
+      registerPluginFactory: jest.fn((id: string) => {
+        registered.add(id);
+      }),
+      invokeCoreBootstrap: jest.fn(async () => undefined),
+    };
+
+    await bootstrapMfe({ registryUrl: REGISTRY_URL, sharedDepsUrl: SHARED_DEPS_URL, deps });
+
+    expect(registered.has('inspector')).toBe(true);
+    expect(registered.has('data')).toBe(true);
+    expect(consoleError).not.toHaveBeenCalled();
+    expect(consoleWarn).not.toHaveBeenCalled();
+
+    consoleError.mockRestore();
+    consoleWarn.mockRestore();
+  });
 });
