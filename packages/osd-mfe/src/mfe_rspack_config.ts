@@ -55,6 +55,19 @@ export interface MfeRspackConfigOptions {
   /** Absolute path to the resolved public entry module to expose (`public/index.ts`). */
   publicEntry: string;
   /**
+   * Every discovered UI plugin (id + source directory), used to externalize
+   * cross-plugin imports. OSD plugins may import another plugin's PUBLIC entry
+   * directly (e.g. `visualizations` imports `../../vis_augmenter/public`). Such an
+   * import must NOT be bundled into this remote — the imported plugin has its own
+   * module-singleton state (e.g. `createGetterSetter('UISettings')`) that is only
+   * initialized in ITS OWN remote's `start()`. Bundling a second copy here yields a
+   * never-initialized duplicate ("UISettings was not set."). Instead we redirect
+   * those imports to `__osdBundles__.get('plugin/<id>/public')` (the same plugin
+   * instance the MFE bootstrap registers before core boot), mirroring how the
+   * optimizer externalizes cross-bundle refs. Defaults to `[plugin]` (no peers).
+   */
+  allPlugins?: DiscoveredUiPlugin[];
+  /**
    * A Sass implementation (e.g. an initialized `sass-embedded` compiler) handed
    * to `sass-loader`. The caller owns its lifecycle so it can be disposed once
    * the build finishes, allowing the process to exit cleanly.
@@ -89,6 +102,7 @@ export interface MfeRspackConfigOptions {
 export function getMfeRspackConfig(options: MfeRspackConfigOptions): Configuration {
   const { plugin, repoRoot, publicEntry, sassImplementation, dist = false } = options;
   const themeGlobals = options.themeGlobals ?? DEFAULT_THEME_GLOBALS;
+  const allPlugins = options.allPlugins ?? [plugin];
 
   // Same browser targets the optimizer transpiles for, read from the repo's
   // browserslist config so SWC output matches the existing build.
@@ -103,6 +117,34 @@ export function getMfeRspackConfig(options: MfeRspackConfigOptions): Configurati
       'opensearch-dashboards/public': Path.resolve(repoRoot, 'src/core/public'),
     },
   };
+
+  // Externalize cross-plugin PUBLIC imports to the host's `__osdBundles__` shim so
+  // each peer plugin resolves to the SINGLE instance the MFE bootstrap registers
+  // (as `plugin/<id>/public`) before core boot — never a bundled-in duplicate.
+  // This mirrors the optimizer (packages/osd-optimizer/src/worker/webpack.config.ts):
+  // resolve each OTHER plugin's `public` entry to its absolute path and back it with
+  // a virtual module `module.exports = __osdBundles__.get('plugin/<id>/public')`, so
+  // any import (relative like `../../vis_augmenter/public`, or otherwise) that resolves
+  // to that path is redirected to the shared remote instead of recompiled here.
+  const crossPluginVirtualFiles: Record<string, string> = {};
+  const resolver = new rspack.experiments.resolver.ResolverFactory(resolveOptions);
+  for (const peer of allPlugins) {
+    if (peer.id === plugin.id) {
+      continue;
+    }
+    let resolvedPath: string | undefined;
+    try {
+      resolvedPath = resolver.sync(peer.directory, './public')?.path;
+    } catch (e) {
+      // A peer without a resolvable `public` entry simply has nothing to redirect.
+      resolvedPath = undefined;
+    }
+    if (resolvedPath && !crossPluginVirtualFiles[resolvedPath]) {
+      crossPluginVirtualFiles[
+        resolvedPath
+      ] = `module.exports = __osdBundles__.get('plugin/${peer.id}/public')`;
+    }
+  }
 
   // Absolute path (forward-slashed for Sass) to the theme globals prepended to
   // every plugin `.scss` import, exactly as the optimizer's sass-loader does.
@@ -155,6 +197,7 @@ export function getMfeRspackConfig(options: MfeRspackConfigOptions): Configurati
     externals: [getMfeExternals()],
 
     plugins: [
+      new rspack.experiments.VirtualModulesPlugin(crossPluginVirtualFiles),
       new NodePolyfillPlugin({ additionalAliases: ['process'] }),
       new rspack.DefinePlugin({
         // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -163,7 +206,17 @@ export function getMfeRspackConfig(options: MfeRspackConfigOptions): Configurati
         ),
       }),
       new rspack.container.ModuleFederationPlugin({
-        name: plugin.id,
+        // Namespace the container's GLOBAL variable so a plugin id can never
+        // collide with a browser global. The default Module Federation library is
+        // `var <name>`, i.e. the container is assigned to `window[<name>]`. With a
+        // bare `name: plugin.id`, the plugin whose id is `console` overwrites
+        // `window.console` (so `console.log` becomes the container and core boot
+        // throws "console.log is not a function"). Other ids could clash similarly
+        // (e.g. `status`, `length`). Prefixing every container name with `osdMfe_`
+        // keeps the globals unique and collision-free. The registry `scope`
+        // (registry/generate.ts) mirrors this prefix so the browser MFE bootstrap
+        // reads the matching `window[scope]`.
+        name: `osdMfe_${plugin.id}`,
         filename: 'remoteEntry.js',
         // Expose the plugin's public entry as `./public`, matching the design's
         // registry `module: "./public"` convention (see docs/01-MFE-DESIGN.md).
@@ -232,7 +285,21 @@ export function getMfeRspackConfig(options: MfeRspackConfigOptions): Configurati
           // its polyfills are not reprocessed.
           test: /\.cjs$/,
           include: /node_modules/,
-          exclude: [/node_modules[\\/]core-js/],
+          exclude: [
+            /node_modules[\\/]core-js/,
+            // Do NOT re-transpile the Module Federation runtime that the
+            // ModuleFederationPlugin injects (its files are named `*.cjs.cjs`, so
+            // they match this `.cjs` rule). Running them through swc with
+            // `externalHelpers` rewrites them to import `@swc/helpers` in a way
+            // that leaves an MF-runtime module factory undefined, crashing the
+            // container's startup (`Cannot read properties of undefined (reading
+            // 'call')`) before `init()`/`get()` can run. The optimizer's identical
+            // `.cjs` rule never hits this because it never builds MF containers.
+            // The MF runtime already targets the browser, so it needs no transpile.
+            /node_modules[\\/]@module-federation[\\/]/,
+            // swc's own helper runtime must not be transpiled by swc.
+            /node_modules[\\/]@swc[\\/]helpers[\\/]/,
+          ],
           use: getSwcLoaderConfig({ syntax: 'ecmascript', targets }),
         },
         {

@@ -65,6 +65,7 @@ if (window.__osdStrictCsp__ && window.__osdCspNotEnforced__) {
   window.__osdMfe__ = {
     registryUrl: '{{mfeRegistryUrl}}',
     sharedDepsUrl: '{{mfeSharedDepsUrl}}',
+    sharedDepsDepUrls: {{{mfeSharedDepsDepUrls}}},
   };
 
   window.onload = function () {
@@ -146,6 +147,7 @@ if (window.__osdStrictCsp__ && window.__osdCspNotEnforced__) {
       window.__osdBootstrapMfe__({
         registryUrl: window.__osdMfe__.registryUrl,
         sharedDepsUrl: window.__osdMfe__.sharedDepsUrl,
+        sharedDepsDepUrls: window.__osdMfe__.sharedDepsDepUrls,
       });
 
       load(styleSheetPaths);

@@ -128,11 +128,18 @@ function createSassImplementation(sassCompiler: sass.AsyncCompiler) {
 async function compilePluginRemote(
   plugin: DiscoveredUiPlugin,
   repoRoot: string,
-  sassImplementation: unknown
+  sassImplementation: unknown,
+  allPlugins: DiscoveredUiPlugin[]
 ): Promise<MfeBuildResult> {
   const publicEntry = resolvePublicEntry(plugin.directory);
   const outputDir = Path.resolve(repoRoot, 'target/mfe', plugin.id);
-  const config = getMfeRspackConfig({ plugin, repoRoot, publicEntry, sassImplementation });
+  const config = getMfeRspackConfig({
+    plugin,
+    repoRoot,
+    publicEntry,
+    sassImplementation,
+    allPlugins,
+  });
 
   await new Promise<void>((resolve, reject) => {
     const compiler = rspack(config);
@@ -187,7 +194,8 @@ export async function buildMfeForPlugin(
   pluginId: string,
   repoRoot: string
 ): Promise<MfeBuildResult> {
-  const plugin = discoverUiPlugins(repoRoot).find((candidate) => candidate.id === pluginId);
+  const allPlugins = discoverUiPlugins(repoRoot);
+  const plugin = allPlugins.find((candidate) => candidate.id === pluginId);
   if (!plugin) {
     throw new Error(
       `Unknown UI plugin "${pluginId}". ` +
@@ -200,7 +208,12 @@ export async function buildMfeForPlugin(
   // and the CLI never exits.
   const sassCompiler = await sass.initAsyncCompiler();
   try {
-    return await compilePluginRemote(plugin, repoRoot, createSassImplementation(sassCompiler));
+    return await compilePluginRemote(
+      plugin,
+      repoRoot,
+      createSassImplementation(sassCompiler),
+      allPlugins
+    );
   } finally {
     await sassCompiler.dispose();
   }
@@ -237,7 +250,8 @@ export async function buildAllMfe(
       const result = await compilePluginRemote(
         plugin,
         repoRoot,
-        createSassImplementation(sassCompiler)
+        createSassImplementation(sassCompiler),
+        plugins
       );
       succeeded.push(result);
       options.onPluginResult?.({ pluginId: plugin.id, ok: true });

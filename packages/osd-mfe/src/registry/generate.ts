@@ -100,7 +100,11 @@ function buildEntry(
   return {
     version: `${osdVersion}+${contentHash}`,
     remoteEntry: `${baseUrl.replace(/\/+$/, '')}/mfe/${id}/remoteEntry.js`,
-    scope: id,
+    // The Module Federation container's global variable name. It is namespaced
+    // with `osdMfe_` (see mfe_rspack_config.ts) so a plugin id (e.g. `console`)
+    // can never collide with a browser global on `window`. The browser MFE
+    // bootstrap reads `window[scope]` to obtain the container.
+    scope: `osdMfe_${id}`,
     module: EXPOSED_MODULE,
     integrity,
   };

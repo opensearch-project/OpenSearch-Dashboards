@@ -28,8 +28,8 @@
 
 import { assertValidRegistry } from '../registry/schema';
 import { buildShareScope } from './share_scope';
-import { getRemoteModule, loadRemoteContainer, loadScript } from './load_remote';
-import { invokeCoreBootstrap, registerPlugin } from './osd_bundles';
+import { getRemoteModuleFactory, loadRemoteContainer, loadScript } from './load_remote';
+import { invokeCoreBootstrap, registerPluginFactory } from './osd_bundles';
 import { mfeWindow } from './types';
 
 /**
@@ -39,8 +39,8 @@ import { mfeWindow } from './types';
 export interface BootstrapMfeDeps {
   loadScript: typeof loadScript;
   loadRemoteContainer: typeof loadRemoteContainer;
-  getRemoteModule: typeof getRemoteModule;
-  registerPlugin: typeof registerPlugin;
+  getRemoteModuleFactory: typeof getRemoteModuleFactory;
+  registerPluginFactory: typeof registerPluginFactory;
   invokeCoreBootstrap: typeof invokeCoreBootstrap;
   fetchImpl: typeof fetch;
 }
@@ -51,6 +51,15 @@ export interface BootstrapMfeOptions {
   registryUrl: string;
   /** URL of the shared-deps bundle that assigns `window.__osdSharedDeps__`. */
   sharedDepsUrl: string;
+  /**
+   * URLs of the shared-deps dependency chunks that MUST load (in order) BEFORE
+   * `sharedDepsUrl`. The OSD shared-deps bundle is split (`jsDepFilenames` — e.g.
+   * the large `@elastic` vendor chunk), and the entry (`sharedDepsUrl`) only
+   * assigns `window.__osdSharedDeps__` once its dependency chunks are present.
+   * This mirrors the normal OSD bootstrap, which loads `jsDepFilenames` then
+   * `jsFilename`. Defaults to none (the entry is self-contained).
+   */
+  sharedDepsDepUrls?: string[];
   /** Optional collaborator overrides (used by tests). */
   deps?: Partial<BootstrapMfeDeps>;
 }
@@ -59,8 +68,8 @@ function resolveDeps(overrides?: Partial<BootstrapMfeDeps>): BootstrapMfeDeps {
   return {
     loadScript,
     loadRemoteContainer,
-    getRemoteModule,
-    registerPlugin,
+    getRemoteModuleFactory,
+    registerPluginFactory,
     invokeCoreBootstrap,
     // Bind so the default `fetch` keeps its `window` receiver.
     fetchImpl: ((input: RequestInfo | URL, init?: RequestInit) =>
@@ -77,10 +86,15 @@ function resolveDeps(overrides?: Partial<BootstrapMfeDeps>): BootstrapMfeDeps {
  *   registry is invalid, or a remote cannot be loaded.
  */
 export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> {
-  const { registryUrl, sharedDepsUrl } = options;
+  const { registryUrl, sharedDepsUrl, sharedDepsDepUrls } = options;
   const deps = resolveDeps(options.deps);
 
-  // 1. Load shared deps and seed the MF share scope (singletons).
+  // 1. Load shared deps and seed the MF share scope (singletons). The shared-deps
+  //    bundle is split, so load its dependency chunks (in order) BEFORE the entry
+  //    — the entry only assigns window.__osdSharedDeps__ once they are present.
+  for (const depUrl of sharedDepsDepUrls ?? []) {
+    await deps.loadScript(depUrl);
+  }
   await deps.loadScript(sharedDepsUrl);
   const sharedDeps = mfeWindow().__osdSharedDeps__;
   if (!sharedDeps) {
@@ -95,19 +109,24 @@ export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> 
   }
   const registry = assertValidRegistry(await response.json());
 
-  // 3. Load every plugin remote and register it into the __osdBundles__ shim.
+  // 3. Load every plugin remote and register its FACTORY into the __osdBundles__
+  //    shim. We register factories (lazy) rather than evaluated modules, and define
+  //    ALL of them before core boot, so when a plugin module is evaluated during
+  //    core start and imports a peer plugin via __osdBundles__.get, the peer's
+  //    factory is already defined and resolves synchronously (the remotes load
+  //    concurrently, so eager evaluation here would hit an unregistered peer).
   //    All remotes share the SAME share scope object, so singletons stay single.
   await Promise.all(
     Object.keys(registry.mfes).map(async (id) => {
       const entry = registry.mfes[id];
       const container = await deps.loadRemoteContainer(entry.remoteEntry, entry.scope);
-      const mod = await deps.getRemoteModule(container, shareScope, entry.module);
-      deps.registerPlugin(id, mod);
+      const factory = await deps.getRemoteModuleFactory(container, shareScope, entry.module);
+      deps.registerPluginFactory(id, factory);
     })
   );
 
-  // 4. Only now — every plugin shim is in place — drive core boot. plugin_reader
-  //    reads __osdBundles__ synchronously during CoreSystem start, so this MUST
-  //    run after step 3 completes.
+  // 4. Only now — every plugin factory is defined in the shim — drive core boot.
+  //    plugin_reader reads __osdBundles__ synchronously during CoreSystem start,
+  //    evaluating each plugin factory (and any peer factories it pulls in) lazily.
   await deps.invokeCoreBootstrap();
 }

@@ -260,6 +260,18 @@ export default () =>
       keyboardShortcuts: Joi.object({
         enabled: Joi.boolean().default(false),
       }),
+      // Phase 3 MFE mode (docs/01-MFE-DESIGN.md §6). Declared here so the LEGACY
+      // config (read by src/legacy/ui/ui_render/ui_render_mixin.js via
+      // `config.get('opensearchDashboards.mfe.*')`) resolves these keys; it mirrors
+      // the new-platform schema in src/core/server/opensearch_dashboards_config.ts.
+      // OFF by default: without `--mfe`, `enabled` is false so the render branch is
+      // skipped and the served bootstrap/HTML are byte-for-byte unchanged.
+      mfe: Joi.object({
+        enabled: Joi.boolean().default(false),
+        registryUrl: Joi.string().allow('').default(''),
+        sharedDepsUrl: Joi.string().allow('').default(''),
+        bootstrapUrl: Joi.string().allow('').default(''),
+      }).default(),
     }).default(),
 
     savedObjects: HANDLED_IN_NEW_PLATFORM,

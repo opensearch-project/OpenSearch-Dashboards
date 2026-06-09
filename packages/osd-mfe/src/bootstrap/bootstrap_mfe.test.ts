@@ -69,13 +69,16 @@ describe('bootstrapMfe (locked sequence)', () => {
         json: async () => validRegistry(),
       })) as unknown) as typeof fetch,
       loadRemoteContainer: jest.fn(async () => fakeContainer),
-      getRemoteModule: jest.fn(
-        async (_container: MfeContainer, shareScope: ShareScope): Promise<PluginPublicModule> => {
+      getRemoteModuleFactory: jest.fn(
+        async (
+          _container: MfeContainer,
+          shareScope: ShareScope
+        ): Promise<() => PluginPublicModule> => {
           scopeSeenByRemotes = shareScope;
-          return { plugin: () => undefined };
+          return () => ({ plugin: () => undefined });
         }
       ),
-      registerPlugin: jest.fn((id: string) => {
+      registerPluginFactory: jest.fn((id: string) => {
         order.push(`register:${id}`);
         registered.add(id);
       }),
@@ -107,6 +110,44 @@ describe('bootstrapMfe (locked sequence)', () => {
     expect(scopeSeenByRemotes!.react).toBeDefined();
     expect(scopeSeenByRemotes!['react-dom']).toBeDefined();
     expect(deps.loadRemoteContainer).toHaveBeenCalledTimes(2);
+  });
+
+  it('loads the shared-deps dependency chunks (in order) BEFORE the entry', async () => {
+    const loadOrder: string[] = [];
+    const DEP_A = 'http://localhost:8080/shared-deps/osd-ui-shared-deps.@elastic.js';
+
+    const deps: Partial<BootstrapMfeDeps> = {
+      loadScript: jest.fn(async (url: string) => {
+        loadOrder.push(url);
+        if (url === SHARED_DEPS_URL) {
+          testWindow().__osdSharedDeps__ = { React: { version: '16.14.0' } };
+        }
+      }),
+      fetchImpl: ((async () => ({
+        ok: true,
+        status: 200,
+        json: async () => validRegistry(),
+      })) as unknown) as typeof fetch,
+      loadRemoteContainer: jest.fn(async () => ({
+        init: () => undefined,
+        get: () => Promise.resolve(() => ({ plugin: () => undefined })),
+      })),
+      getRemoteModuleFactory: jest.fn(async () => () => ({ plugin: () => undefined })),
+      registerPluginFactory: jest.fn(),
+      invokeCoreBootstrap: jest.fn(async () => undefined),
+    };
+
+    await bootstrapMfe({
+      registryUrl: REGISTRY_URL,
+      sharedDepsUrl: SHARED_DEPS_URL,
+      sharedDepsDepUrls: [DEP_A],
+      deps,
+    });
+
+    // The dependency chunk must load strictly before the shared-deps entry, since
+    // the entry only assigns window.__osdSharedDeps__ once its chunks are present.
+    expect(loadOrder.indexOf(DEP_A)).toBeGreaterThanOrEqual(0);
+    expect(loadOrder.indexOf(DEP_A)).toBeLessThan(loadOrder.indexOf(SHARED_DEPS_URL));
   });
 
   it('throws when shared deps are unavailable after loading the script', async () => {

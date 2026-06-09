@@ -36,12 +36,25 @@ export function pluginBundleKey(id: string): string {
  * shim's `define` throws on duplicate keys, so we guard with `has`).
  */
 export function registerPlugin(id: string, mod: PluginPublicModule): void {
+  registerPluginFactory(id, () => mod);
+}
+
+/**
+ * Register a remote-loaded plugin by its FACTORY (a synchronous `() => module`),
+ * so the module is evaluated LAZILY on the first `__osdBundles__.get(key)` rather
+ * than eagerly at registration time. This is what lets a plugin that imports a peer
+ * plugin's public entry resolve it through the shim: the bootstrap defines every
+ * plugin's factory first, then core boot evaluates them, and any cross-plugin
+ * `get('plugin/<id>/public')` finds the peer factory already defined. No-op if
+ * already registered (the shim's `define` throws on duplicate keys).
+ */
+export function registerPluginFactory(id: string, factory: () => PluginPublicModule): void {
   const w = mfeWindow();
   const key = pluginBundleKey(id);
   if (w.__osdBundles__.has(key)) {
     return;
   }
-  w.__osdBundles__.define(key, () => mod);
+  w.__osdBundles__.define(key, factory);
 }
 
 /** Whether a plugin id is already present in the `__osdBundles__` shim. */

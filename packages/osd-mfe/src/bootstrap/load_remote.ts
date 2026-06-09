@@ -78,10 +78,35 @@ export async function getRemoteModule(
   shareScope: ShareScope,
   moduleKey: string
 ): Promise<PluginPublicModule> {
+  const factory = await getRemoteModuleFactory(container, shareScope, moduleKey);
+  return factory();
+}
+
+/**
+ * Seed the container's share scope (once) and resolve the exposed module's
+ * FACTORY — without invoking it. The factory (`() => module`) is synchronous and
+ * memoized by the container, so calling it later returns the same exports.
+ *
+ * This lazy form is what the bootstrap registers into the `__osdBundles__` shim:
+ * every plugin's factory is defined BEFORE any is evaluated, so when a plugin's
+ * module is finally evaluated (during core boot) and it pulls in a peer plugin via
+ * `__osdBundles__.get('plugin/<id>/public')`, that peer's factory is already
+ * defined and resolves synchronously — mirroring how the optimizer's
+ * `__osdBundles__.define(id, () => require(...))` thunks resolve lazily. Evaluating
+ * eagerly here instead would call a peer's `get` before it was registered (remotes
+ * load concurrently), throwing "__osdBundles__ does not have a module defined".
+ *
+ * @returns the exposed module's factory (call it to obtain the module exports)
+ */
+export async function getRemoteModuleFactory(
+  container: MfeContainer,
+  shareScope: ShareScope,
+  moduleKey: string
+): Promise<() => PluginPublicModule> {
   if (!initialized.has(container)) {
     await container.init(shareScope);
     initialized.add(container);
   }
   const factory = await container.get(moduleKey);
-  return factory() as PluginPublicModule;
+  return factory as () => PluginPublicModule;
 }

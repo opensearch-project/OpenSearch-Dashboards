@@ -147,6 +147,17 @@ export function uiRenderMixin(osdServer, server, config) {
         const mfeSharedDepsUrl = config.get('opensearchDashboards.mfe.sharedDepsUrl');
         const mfeBootstrapUrl = config.get('opensearchDashboards.mfe.bootstrapUrl');
 
+        // The OSD shared-deps bundle is split: the entry (`mfeSharedDepsUrl`) only
+        // assigns window.__osdSharedDeps__ once its dependency chunks
+        // (UiSharedDeps.jsDepFilenames — e.g. the large `@elastic` vendor chunk)
+        // are loaded first. Derive their origin URLs as siblings of the entry (same
+        // directory) so the MFE bootstrap can load them in order before the entry,
+        // mirroring the default bootstrap's jsDepFilenames-then-jsFilename order.
+        const mfeSharedDepsDir = String(mfeSharedDepsUrl).replace(/[^/]*$/, '');
+        const mfeSharedDepsDepUrls = JSON.stringify(
+          UiSharedDeps.jsDepFilenames.map((filename) => `${mfeSharedDepsDir}${filename}`)
+        );
+
         // Only core is loaded locally; plugin remotes are resolved from the registry at
         // runtime. shared-deps for the share scope are loaded by the MFE bootstrap.
         const mfeJsDependencyPaths = [`${regularBundlePath}/core/core.entry.js`];
@@ -168,6 +179,7 @@ export function uiRenderMixin(osdServer, server, config) {
               KUI_CSS_DIST_FILENAMES: JSON.stringify(UiSharedDeps.kuiCssDistFilenames),
               mfeRegistryUrl,
               mfeSharedDepsUrl,
+              mfeSharedDepsDepUrls,
               mfeBootstrapUrl,
             },
           },
