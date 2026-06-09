@@ -131,6 +131,9 @@ export const MetricsPageTabs: React.FC = () => {
           datasourceId={dataConnectionId}
           onClose={() => setShowAlertRuleFlyout(false)}
           http={services.http as any}
+          addToast={(title, color) =>
+            services.notifications.toasts[color === 'danger' ? 'addDanger' : 'addSuccess'](title)
+          }
         />
       )}
     </MetricsPageModeContext.Provider>
