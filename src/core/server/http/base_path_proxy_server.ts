@@ -177,11 +177,19 @@ export class BasePathProxyServer {
               `${this.httpConfig.basePath}/${request.params.osdPath}`,
               `${request.server.info.protocol}://${request.server.info.host}:${this.devConfig.basePathProxyTargetPort}`
             );
-            uri.search = new URLSearchParams(request.query).toString();
+            uri.search = new URLSearchParams(request.query as Record<string, string>).toString();
+
+            // Convert headers to the format expected by h2o2
+            const headers: { [key: string]: string } = {};
+            Object.entries(request.headers).forEach(([key, value]) => {
+              if (value !== undefined) {
+                headers[key] = Array.isArray(value) ? value[0] : value;
+              }
+            });
 
             return {
               uri: uri.toString(),
-              headers: request.headers,
+              headers,
             };
           },
         },
