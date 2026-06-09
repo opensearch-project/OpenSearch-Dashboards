@@ -166,16 +166,10 @@ export const CreateMetricsRuleFlyout: React.FC<CreateMetricsRuleFlyoutProps> = (
 
       setSaveStatus('done');
       addToast?.(
-        confirmed
-          ? i18n.translate('explore.metricsRule.toast.confirmed', {
-              defaultMessage: '{count} alert rule(s) created and confirmed.',
-              values: { count: rules.length },
-            })
-          : i18n.translate('explore.metricsRule.toast.created', {
-              defaultMessage:
-                '{count} alert rule(s) created. They may take a moment to appear on the Rules page.',
-              values: { count: rules.length },
-            }),
+        i18n.translate('explore.metricsRule.toast.created', {
+          defaultMessage: '{count} alert rule(s) created successfully.',
+          values: { count: rules.length },
+        }),
         'success'
       );
 
@@ -319,7 +313,7 @@ export const CreateMetricsRuleFlyout: React.FC<CreateMetricsRuleFlyoutProps> = (
                 })}
               {saveStatus === 'confirming' &&
                 i18n.translate('explore.metricsRule.saveButton.confirming', {
-                  defaultMessage: 'Confirming rule creation...',
+                  defaultMessage: 'Creating in Prometheus...',
                 })}
               {saveStatus === 'done' &&
                 i18n.translate('explore.metricsRule.saveButton.done', {
