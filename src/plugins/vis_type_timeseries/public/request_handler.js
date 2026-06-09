@@ -31,6 +31,7 @@
 import { getTimezone, validateInterval } from './application';
 import { getUISettings, getDataStart, getCoreStart } from './services';
 import { MAX_BUCKETS_SETTING } from '../common/constants';
+import { AnalyticEngineError } from '../../data/public';
 
 export const metricsRequestHandler = async ({
   uiState,
@@ -74,6 +75,9 @@ export const metricsRequestHandler = async ({
         ...resp,
       };
     } catch (error) {
+      if (error?.body?.attributes?.title === 'AnalyticEngineError') {
+        throw new AnalyticEngineError();
+      }
       return Promise.reject(error);
     }
   }

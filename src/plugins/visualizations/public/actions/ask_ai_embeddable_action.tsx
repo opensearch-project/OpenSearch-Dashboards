@@ -13,6 +13,7 @@ import { CoreStart } from '../../../../core/public';
 import { ContextProviderStart } from '../../../context_provider/public';
 import { IndexPatternsContract } from '../../../data/public';
 import { Vis } from '../vis';
+import { UNSUPPORTED_ENGINE_TYPES } from '../../../data/common';
 
 interface VisualizeEmbeddable extends IEmbeddable {
   vis: Vis;
@@ -67,18 +68,45 @@ export class AskAIVisualizeEmbeddableAction implements Action<EmbeddableContext>
     ) {
       return false;
     }
-    // Hide for AnalyticEngine data sources
+
     const visEmbeddable = embeddable as VisualizeEmbeddable;
-    const indexPatternId = visEmbeddable.vis.data.indexPattern?.id;
-    if (indexPatternId) {
-      const cache = await this.indexPatterns.getCache({
-        excludeEngineTypes: ['AnalyticEngine'],
-      });
-      if (cache && !cache.find((ip) => ip.id === indexPatternId)) {
-        return false;
-      }
+
+    // Input controls never produce a render error for an AnalyticEngine data source — the
+    // unsupported index patterns are silently filtered out at render time — so there is no error
+    // signal to rely on. Resolve their engine type directly from the index-pattern cache instead.
+    if (visEmbeddable.vis?.type?.name === 'input_control_vis') {
+      const controlIndexPatternIds: string[] = ((visEmbeddable.vis.params as any)?.controls || [])
+        .map((control: { indexPattern?: string }) => control.indexPattern)
+        .filter(Boolean);
+      const usesAnalyticEngine = await this.hasAnalyticEngineIndexPattern(controlIndexPatternIds);
+      return !usesAnalyticEngine;
     }
-    return true;
+
+    // Every other visualization type surfaces an AnalyticEngine data source as a render error, which
+    // the VisualizeEmbeddable captures and publishes on its output. Read it synchronously here.
+    // While the value is still `undefined` (not yet rendered) we fail open and keep the action.
+    const output = embeddable.getOutput() as { usesUnsupportedEngineDataSource?: boolean };
+    return output.usesUnsupportedEngineDataSource !== true;
+  }
+
+  /**
+   * Whether any of the given index patterns is backed by an unsupported (AnalyticEngine) engine.
+   * Index patterns backed by an unsupported engine are excluded from the engine-filtered cache, so
+   * any id missing from it is unsupported-engine-backed. Fails open (false) if the cache is
+   * unavailable so the action stays visible.
+   */
+  private async hasAnalyticEngineIndexPattern(indexPatternIds: string[]): Promise<boolean> {
+    if (indexPatternIds.length === 0) {
+      return false;
+    }
+    const cache = await this.indexPatterns.getCache({
+      excludeEngineTypes: UNSUPPORTED_ENGINE_TYPES,
+    });
+    if (!cache) {
+      return false;
+    }
+    const allowedIds = new Set(cache.map((ip) => ip.id));
+    return indexPatternIds.some((id) => !allowedIds.has(id));
   }
 
   public async execute({ embeddable }: EmbeddableContext) {

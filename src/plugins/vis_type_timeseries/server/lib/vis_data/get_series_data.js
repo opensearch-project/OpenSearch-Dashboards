@@ -88,7 +88,7 @@ export async function getSeriesData(req, panel) {
       },
     };
   } catch (err) {
-    if (err.body || err.name === 'DQLSyntaxError' || err.name === 'AnalyticEngineError') {
+    if (err.body || err.name === 'DQLSyntaxError') {
       err.response = err.body;
 
       return {

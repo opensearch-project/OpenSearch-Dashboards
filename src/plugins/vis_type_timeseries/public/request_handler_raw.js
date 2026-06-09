@@ -7,6 +7,7 @@ import { getTimezone, validateInterval } from './application';
 import { getUISettings, getDataStart, getCoreStart } from './services';
 import { MAX_BUCKETS_SETTING } from '../common/constants';
 import { evaluateMathExpressions } from './lib/process_math_series';
+import { AnalyticEngineError } from '../../data/public';
 
 /**
  * Request handler for TSVB visualizations with client-side math evaluation.
@@ -70,6 +71,9 @@ export const metricsRequestHandlerRaw = async ({
         ...processedResp,
       };
     } catch (error) {
+      if (error?.body?.attributes?.title === 'AnalyticEngineError') {
+        throw new AnalyticEngineError();
+      }
       return Promise.reject(error);
     }
   }
