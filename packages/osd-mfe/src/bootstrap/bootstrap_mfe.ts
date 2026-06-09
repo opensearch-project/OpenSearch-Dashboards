@@ -37,8 +37,17 @@ import {
   registerPluginFactory,
 } from './osd_bundles';
 import { buildOverrideMap, OverrideStorage, parseOverrideSources } from './override_sources';
-import { mountInspector as mountInspectorPanel } from './inspector';
 import { mfeWindow } from './types';
+
+// NOTE: `./inspector` is intentionally NOT imported statically here. It pulls in
+// react / react-dom / @elastic/eui, which the bootstrap build externalizes to the
+// `window.__osdSharedDeps__` globals (harness/build_mfe_bootstrap.js). A static
+// import would evaluate those externals when the bootstrap bundle is first run by
+// the page (docs §6 load step 2), which is BEFORE bootstrapMfe() loads shared-deps
+// (step 1, below) — so `__osdSharedDeps__` would be undefined and the whole bundle
+// would throw `ReferenceError`, never assigning window.__osdBootstrapMfe__. Instead
+// the default `mountInspector` dep below lazily `import()`s it at mount time (step 5),
+// AFTER shared-deps is loaded, so the externals resolve safely.
 
 /**
  * Collaborators of {@link bootstrapMfe}, injectable for unit testing. Each
@@ -124,14 +133,24 @@ function resolveDeps(overrides?: Partial<BootstrapMfeDeps>): BootstrapMfeDeps {
       }
     },
     mountInspector: (entries: ResolvedRemote[]) => {
-      try {
-        mountInspectorPanel({ entries });
-      } catch (error) {
-        // The inspector is a dev-only convenience; a render failure must NEVER
-        // abort or degrade app boot.
-        // eslint-disable-next-line no-console
-        console.warn('[mfe] dev inspector failed to mount; continuing without it.', error);
-      }
+      // Lazily load the Inspector so its react / react-dom / @elastic/eui imports
+      // (externalized to window.__osdSharedDeps__ by the bootstrap build) are only
+      // evaluated HERE — at mount time (step 5), AFTER step 1 has loaded shared-deps.
+      // A static import would resolve those externals when the bootstrap bundle is
+      // first evaluated by the page (before shared-deps exists), throwing a
+      // ReferenceError that aborts the entire boot. The `webpackMode: 'eager'` hint
+      // (and the build's parser dynamicImportMode='eager') keeps the inspector in the
+      // single bootstrap file rather than emitting a separate async chunk.
+      import(/* webpackMode: "eager" */ './inspector')
+        .then(({ mountInspector: mountInspectorPanel }) => {
+          mountInspectorPanel({ entries });
+        })
+        .catch((error) => {
+          // The inspector is a dev-only convenience; a load/render failure must
+          // NEVER abort or degrade app boot.
+          // eslint-disable-next-line no-console
+          console.warn('[mfe] dev inspector failed to mount; continuing without it.', error);
+        });
     },
     ...overrides,
   };
