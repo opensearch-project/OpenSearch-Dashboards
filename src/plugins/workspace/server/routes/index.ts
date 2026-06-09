@@ -20,7 +20,11 @@ import { IWorkspaceClientImpl, WorkspaceAttributeWithPermission } from '../types
 import { SavedObjectsPermissionControlContract } from '../permission_control/client';
 import { registerDuplicateRoute } from './duplicate';
 import { getPermissionMode, transferCurrentUserInPermissions } from '../utils';
-import { validateWorkspaceColor } from '../../common/utils';
+import {
+  validateWorkspaceColor,
+  getWorkspacePermissionWarning,
+  normalizeWorkspacePermissions,
+} from '../../common/utils';
 import { getUseCaseFeatureConfig } from '../../../../core/server';
 
 export const WORKSPACES_API_BASE_URL = '/api/workspaces';
@@ -222,12 +226,20 @@ export function registerRoutes({
         dataConnections?: string[];
       } = attributes;
 
+      // Non-blocking warning for permission combinations that do not map to a
+      // recognized collaborator access level. The request still succeeds to keep
+      // the API backward compatible.
+      const permissionWarning = isPermissionControlEnabled
+        ? getWorkspacePermissionWarning(settings.permissions)
+        : undefined;
+
       if (isPermissionControlEnabled) {
-        createPayload.permissions = settings.permissions;
+        const normalizedPermissions = normalizeWorkspacePermissions(settings.permissions);
+        createPayload.permissions = normalizedPermissions;
         if (!!principals?.users?.length) {
           const currentUserId = principals.users[0];
           const acl = new ACL(
-            transferCurrentUserInPermissions(currentUserId, settings.permissions)
+            transferCurrentUserInPermissions(currentUserId, normalizedPermissions)
           );
           createPayload.permissions = acl.getPermissions();
         }
@@ -242,7 +254,9 @@ export function registerRoutes({
         },
         createPayload
       );
-      return res.ok({ body: result });
+      return res.ok({
+        body: permissionWarning ? { ...result, warning: permissionWarning } : result,
+      });
     })
   );
   router.put(
@@ -262,6 +276,13 @@ export function registerRoutes({
       const { id } = req.params;
       const { attributes, settings } = req.body;
 
+      // Non-blocking warning for permission combinations that do not map to a
+      // recognized collaborator access level. The request still succeeds to keep
+      // the API backward compatible.
+      const permissionWarning = isPermissionControlEnabled
+        ? getWorkspacePermissionWarning(settings.permissions)
+        : undefined;
+
       const result = await client.update(
         {
           request: req,
@@ -269,12 +290,16 @@ export function registerRoutes({
         id,
         {
           ...attributes,
-          ...(isPermissionControlEnabled ? { permissions: settings.permissions } : {}),
+          ...(isPermissionControlEnabled
+            ? { permissions: normalizeWorkspacePermissions(settings.permissions) }
+            : {}),
           ...{ dataSources: settings.dataSources },
           ...{ dataConnections: settings.dataConnections },
         }
       );
-      return res.ok({ body: result });
+      return res.ok({
+        body: permissionWarning ? { ...result, warning: permissionWarning } : result,
+      });
     })
   );
   router.delete(

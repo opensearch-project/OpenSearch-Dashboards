@@ -153,3 +153,181 @@ describe(`Workspace routes`, () => {
     });
   });
 });
+
+describe(`Workspace routes permission validation`, () => {
+  let server: SetupServerReturn['server'];
+  let httpSetup: SetupServerReturn['httpSetup'];
+  let mockedWorkspaceClient: IWorkspaceClientImpl;
+
+  beforeEach(async () => {
+    ({ server, httpSetup } = await setupServer());
+
+    const router = httpSetup.createRouter('');
+
+    mockedWorkspaceClient = workspaceClientMock.create();
+    (mockedWorkspaceClient.update as jest.Mock).mockResolvedValue({
+      success: true,
+      result: true,
+    });
+
+    registerRoutes({
+      router,
+      client: mockedWorkspaceClient,
+      logger: loggingSystemMock.create().get(),
+      maxImportExportSize: Number.MAX_SAFE_INTEGER,
+      // Permission validation/normalization only runs when permission control is enabled.
+      isPermissionControlEnabled: true,
+      isDataSourceEnabled: true,
+    });
+
+    await server.start({ dynamicConfigService: mockDynamicConfigService });
+  });
+
+  afterEach(async () => {
+    await server.stop();
+  });
+
+  describe('create', () => {
+    it('returns a warning but still succeeds when a group has an incomplete permission combination', async () => {
+      const result = await supertest(httpSetup.server.listener)
+        .post(WORKSPACES_API_BASE_URL)
+        .send({
+          attributes: {
+            name: 'Observability',
+            features: ['use-case-observability'],
+          },
+          settings: {
+            permissions: {
+              read: { groups: ['obs-users'] },
+            },
+          },
+        })
+        .expect(200);
+      // Backward compatible: the request succeeds and the permission is persisted as-is...
+      expect(mockedWorkspaceClient.create).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.objectContaining({
+          permissions: { read: { groups: ['obs-users'] } },
+        })
+      );
+      // ...but a non-blocking warning is returned to the caller (visible from the CLI response).
+      expect(typeof result.body.warning).toBe('string');
+      expect(result.body.warning).toContain('obs-users');
+    });
+
+    it('persists a valid read only collaborator unchanged', async () => {
+      await supertest(httpSetup.server.listener)
+        .post(WORKSPACES_API_BASE_URL)
+        .send({
+          attributes: {
+            name: 'Observability',
+            features: ['use-case-observability'],
+          },
+          settings: {
+            permissions: {
+              library_read: { groups: ['obs-users'] },
+              read: { groups: ['obs-users'] },
+            },
+          },
+        })
+        .expect(200);
+      expect(mockedWorkspaceClient.create).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.objectContaining({
+          permissions: {
+            library_read: { groups: ['obs-users'] },
+            read: { groups: ['obs-users'] },
+          },
+        })
+      );
+    });
+
+    it('normalizes a redundant permission combination to a single access level before persisting', async () => {
+      await supertest(httpSetup.server.listener)
+        .post(WORKSPACES_API_BASE_URL)
+        .send({
+          attributes: {
+            name: 'Observability',
+            features: ['use-case-observability'],
+          },
+          settings: {
+            permissions: {
+              library_write: { users: ['admin'] },
+              write: { users: ['admin'] },
+              library_read: { users: ['admin'] },
+              read: { users: ['admin'] },
+            },
+          },
+        })
+        .expect(200);
+      expect(mockedWorkspaceClient.create).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.objectContaining({
+          permissions: {
+            library_write: { users: ['admin'] },
+            write: { users: ['admin'] },
+          },
+        })
+      );
+    });
+  });
+
+  describe('update', () => {
+    it('returns warnings but still succeeds when permissions have incomplete combinations', async () => {
+      const result = await supertest(httpSetup.server.listener)
+        .put(`${WORKSPACES_API_BASE_URL}/mock-workspace-id`)
+        .send({
+          attributes: {},
+          settings: {
+            permissions: {
+              library_write: { groups: ['obs-admins'] },
+              read: { groups: ['obs-users'] },
+            },
+          },
+        })
+        .expect(200);
+      // Backward compatible: the #11996 payload still persists as-is instead of being rejected.
+      expect(mockedWorkspaceClient.update).toHaveBeenCalledWith(
+        expect.any(Object),
+        'mock-workspace-id',
+        expect.objectContaining({
+          permissions: {
+            library_write: { groups: ['obs-admins'] },
+            read: { groups: ['obs-users'] },
+          },
+        })
+      );
+      // Both incomplete principals are reported in a single warning string.
+      expect(typeof result.body.warning).toBe('string');
+      expect(result.body.warning).toContain('obs-admins');
+      expect(result.body.warning).toContain('obs-users');
+    });
+
+    it('normalizes a redundant permission combination before calling the workspace client', async () => {
+      await supertest(httpSetup.server.listener)
+        .put(`${WORKSPACES_API_BASE_URL}/mock-workspace-id`)
+        .send({
+          attributes: {},
+          settings: {
+            permissions: {
+              library_write: { users: ['admin'] },
+              write: { users: ['admin'] },
+              library_read: { users: ['admin'] },
+              read: { users: ['admin'] },
+            },
+          },
+        })
+        .expect(200);
+      expect(mockedWorkspaceClient.update).toHaveBeenCalledWith(
+        expect.any(Object),
+        'mock-workspace-id',
+        expect.objectContaining({
+          permissions: {
+            library_write: { users: ['admin'] },
+            write: { users: ['admin'] },
+          },
+        })
+      );
+    });
+  });
+});
