@@ -169,7 +169,8 @@
     "**/grunt/minimatch": "^3.1.5",
     "**/@hapi/content": "^6.0.2",
     "**/engine.io/ws": "^8.20.1",
-    "**/socket.io-adapter/ws": "^8.20.1"
+    "**/socket.io-adapter/ws": "^8.20.1",
+    "**/tmp": "^0.2.7"
   },
   "workspaces": {
     "packages": [
