@@ -62,6 +62,13 @@ export class HttpsRedirectServer {
     );
 
     this.server.ext('onRequest', (request: Request, responseToolkit: ResponseToolkit) => {
+      // Reject protocol-relative paths (e.g. `//attacker.com/...`). Without this
+      // check, the pathname is reflected into the redirect Location header and
+      // browsers interpret the leading `//` as a cross-origin redirect.
+      if (request.url.pathname.startsWith('//')) {
+        return responseToolkit.response('Not Found').code(404).takeover();
+      }
+
       return responseToolkit
         .redirect(
           formatUrl({

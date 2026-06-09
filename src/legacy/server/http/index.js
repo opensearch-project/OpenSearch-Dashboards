@@ -50,6 +50,11 @@ export default async function (osdServer, server) {
         throw Boom.notFound();
       }
 
+      // Reject protocol-relative paths (e.g. `//attacker.com/...` or `/\attacker.com/...`).
+      if (path.charAt(1) === '/' || path.charAt(1) === '\\') {
+        throw Boom.notFound();
+      }
+
       const pathPrefix = req.getBasePath() ? `${req.getBasePath()}/` : '';
       return h
         .redirect(
