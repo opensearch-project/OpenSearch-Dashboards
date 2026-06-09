@@ -41,7 +41,7 @@ import * as UiSharedDeps from '@osd/ui-shared-deps';
 import { OpenSearchDashboardsRequest } from '../../../core/server';
 import { AppBootstrap } from './bootstrap';
 import { getApmConfig } from '../apm';
-import { applyCspModifications } from './utils';
+import { applyCspModifications, buildMfeCspRules } from './utils';
 
 /**
  * @typedef {import('../../server/osd_server').default} OsdServer
@@ -401,7 +401,31 @@ export function uiRenderMixin(osdServer, server, config) {
       nonce,
     });
 
+    // Phase 5 (docs/01-MFE-DESIGN.md §6/§7): in MFE mode, widen the served CSP
+    // script-src/worker-src to the configured MFE origins (the CDN serving plugin
+    // remoteEntry.js + chunks, plus the bootstrap/shared-deps script origins; and,
+    // ONLY in non-prod when the allowOverride gate is on, the dev-override origins)
+    // so the cross-origin MFE scripts can load. This is the SHIPPED-config
+    // replacement for the old harness temp-yaml csp.rules hack. Without --mfe
+    // (mfe.enabled false) the base rules/header are byte-for-byte unchanged.
+    const mfeCspEnabled = !!config.get('opensearchDashboards.mfe.enabled');
+    let cspRules = http.csp.rules;
     let cspHeader = http.csp.header;
+    if (mfeCspEnabled) {
+      const mfeAllowOverrideCfg = config.get('opensearchDashboards.mfe.allowOverride');
+      const mfeAllowOverrideForCsp =
+        typeof mfeAllowOverrideCfg === 'boolean'
+          ? mfeAllowOverrideCfg
+          : !!server.newPlatform.env.mode.dev;
+      cspRules = buildMfeCspRules(http.csp.rules, {
+        cdnOrigin: config.get('opensearchDashboards.mfe.cdnOrigin'),
+        bootstrapUrl: config.get('opensearchDashboards.mfe.bootstrapUrl'),
+        sharedDepsUrl: config.get('opensearchDashboards.mfe.sharedDepsUrl'),
+        allowOverride: mfeAllowOverrideForCsp,
+        devOverrideOrigins: config.get('opensearchDashboards.mfe.devOverrideOrigins'),
+      });
+      cspHeader = cspRules.join('; ');
+    }
     try {
       const dynamicConfigClient = dynamicConfig.getClient();
       const dynamicConfigStore = dynamicConfig.createStoreFromRequest(req);
@@ -412,7 +436,7 @@ export function uiRenderMixin(osdServer, server, config) {
 
       const modifications = cspModificationsDynamicConfig?.modifications;
       if (modifications && modifications.length > 0) {
-        cspHeader = applyCspModifications(http.csp.rules, modifications);
+        cspHeader = applyCspModifications(cspRules, modifications);
       }
     } catch (e) {
       // Fall back to default CSP header on error

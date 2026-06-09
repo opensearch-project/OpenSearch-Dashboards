@@ -129,6 +129,16 @@ export const config = {
       // always wins. This is the boundary that keeps arbitrary remote code out of
       // production.
       allowOverride: schema.maybe(schema.boolean()),
+      // CDN origin serving the plugin remoteEntry.js + chunks. When MFE mode is on
+      // it is allow-listed in the served CSP script-src/worker-src (together with the
+      // bootstrap/shared-deps script origins, derived from their URLs) so the
+      // cross-origin MFE scripts can load. Empty default => no CSP change. This is the
+      // shipped-config replacement for the Phase 3/4 harness temp-yaml csp.rules hack.
+      cdnOrigin: schema.string({ defaultValue: '' }),
+      // Extra script origins allow-listed in the CSP ONLY in non-prod (when the
+      // allowOverride gate is on) so a developer can repoint an MFE at a local dev
+      // server. NEVER applied in production. Empty default.
+      devOverrideOrigins: schema.arrayOf(schema.string(), { defaultValue: [] }),
     }),
   }),
   deprecations,

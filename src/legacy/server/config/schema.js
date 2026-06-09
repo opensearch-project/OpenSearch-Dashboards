@@ -276,6 +276,13 @@ export default () =>
         // gate defaults to dev mode at injection time (dev => true, prod => false,
         // see resolveAllowOverride); an explicit boolean always wins.
         allowOverride: Joi.boolean(),
+        // CDN origin for plugin remoteEntry.js + chunks; allow-listed in the served
+        // CSP script-src/worker-src in MFE mode (with the bootstrap/shared-deps script
+        // origins). Empty default => no CSP change. Mirrors the new-platform schema.
+        cdnOrigin: Joi.string().allow('').default(''),
+        // Extra dev-only script origins, allow-listed in CSP ONLY when allowOverride
+        // is on (non-prod). Never applied in production.
+        devOverrideOrigins: Joi.array().items(Joi.string()).default([]),
       }).default(),
     }).default(),
 

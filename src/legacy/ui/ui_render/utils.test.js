@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { applyCspModifications } from './utils';
+import { applyCspModifications, buildMfeCspRules } from './utils';
 
 describe('applyCspModifications', () => {
   const defaultRules = [
@@ -253,5 +253,100 @@ describe('applyCspModifications', () => {
       expect(result).toContain('*.example.com');
       expect(result).toContain('https://*.examples.com');
     });
+  });
+});
+
+describe('buildMfeCspRules', () => {
+  const baseRules = [
+    "script-src 'unsafe-eval' 'self'",
+    "worker-src blob: 'self'",
+    "style-src 'unsafe-inline' 'self'",
+  ];
+
+  it('widens script-src and worker-src with de-duplicated origins', () => {
+    const result = buildMfeCspRules(baseRules, {
+      bootstrapUrl: 'http://localhost:8080/bootstrap/x.js',
+      sharedDepsUrl: 'http://localhost:8080/shared-deps/y.js',
+      cdnOrigin: 'https://cdn.example.net',
+    });
+    expect(result[0]).toBe(
+      "script-src 'unsafe-eval' 'self' http://localhost:8080 https://cdn.example.net"
+    );
+    expect(result[1]).toBe("worker-src blob: 'self' http://localhost:8080 https://cdn.example.net");
+    expect(result[2]).toBe("style-src 'unsafe-inline' 'self'");
+  });
+
+  it('ignores devOverrideOrigins when allowOverride is false', () => {
+    const result = buildMfeCspRules(baseRules, {
+      bootstrapUrl: 'http://localhost:8080/bootstrap/x.js',
+      cdnOrigin: 'https://cdn.example.net',
+      allowOverride: false,
+      devOverrideOrigins: ['http://localhost:9090'],
+    });
+    expect(result[0]).not.toContain('http://localhost:9090');
+  });
+
+  it('includes devOverrideOrigins when allowOverride is true', () => {
+    const result = buildMfeCspRules(baseRules, {
+      bootstrapUrl: 'http://localhost:8080/bootstrap/x.js',
+      cdnOrigin: 'https://cdn.example.net',
+      allowOverride: true,
+      devOverrideOrigins: ['http://localhost:9090', 'http://devbox:3000'],
+    });
+    expect(result[0]).toContain('http://localhost:9090');
+    expect(result[0]).toContain('http://devbox:3000');
+    expect(result[1]).toContain('http://localhost:9090');
+    expect(result[1]).toContain('http://devbox:3000');
+  });
+
+  it('returns rules unchanged when no origins can be derived', () => {
+    const result = buildMfeCspRules(baseRules, {});
+    expect(result).toBe(baseRules);
+  });
+
+  it('returns rules unchanged with empty options', () => {
+    const result = buildMfeCspRules(baseRules);
+    expect(result).toBe(baseRules);
+  });
+
+  it('tolerates malformed cdnOrigin and bootstrapUrl without throwing', () => {
+    expect(() =>
+      buildMfeCspRules(baseRules, {
+        bootstrapUrl: 'not a url',
+        cdnOrigin: ':::invalid',
+        sharedDepsUrl: '',
+      })
+    ).not.toThrow();
+    // Malformed cdnOrigin falls back to trimmed string
+    const result = buildMfeCspRules(baseRules, { cdnOrigin: 'https://cdn.example.net' });
+    expect(result[0]).toContain('https://cdn.example.net');
+  });
+
+  it('does not duplicate an origin already present in a rule', () => {
+    const rulesWithOrigin = ["script-src 'self' http://localhost:8080", "worker-src blob: 'self'"];
+    const result = buildMfeCspRules(rulesWithOrigin, {
+      bootstrapUrl: 'http://localhost:8080/bootstrap/x.js',
+      cdnOrigin: 'https://cdn.example.net',
+    });
+    // http://localhost:8080 should NOT be duplicated in script-src
+    const tokens = result[0].split(/\s+/);
+    const count = tokens.filter((t) => t === 'http://localhost:8080').length;
+    expect(count).toBe(1);
+    // but cdn should be added
+    expect(result[0]).toContain('https://cdn.example.net');
+    // worker-src gets both
+    expect(result[1]).toContain('http://localhost:8080');
+    expect(result[1]).toContain('https://cdn.example.net');
+  });
+
+  it('handles non-string rules gracefully', () => {
+    const mixedRules = ["script-src 'self'", null, undefined, 42];
+    const result = buildMfeCspRules(mixedRules, {
+      cdnOrigin: 'https://cdn.example.net',
+    });
+    expect(result[0]).toContain('https://cdn.example.net');
+    expect(result[1]).toBe(null);
+    expect(result[2]).toBe(undefined);
+    expect(result[3]).toBe(42);
   });
 });
