@@ -46,6 +46,12 @@ export function spansToFlow(spanTree: CategorizedSpan[]): FlowTransformResult {
   const nodes: FlowNode[] = [];
   const edges: FlowEdge[] = [];
 
+  // Compute the root span duration to use as the max for latency bars
+  const rootDurationMs =
+    spanTree.length > 0 && spanTree[0].durationNanos > 0
+      ? spanTree[0].durationNanos / 1_000_000
+      : 0;
+
   const processSpan = (span: CategorizedSpan, parentId?: string) => {
     const nodeId = span.spanId || span.id;
     const nodeKind = CATEGORY_TO_NODE_KIND[span.category] ?? 'other';
@@ -60,6 +66,7 @@ export function spansToFlow(spanTree: CategorizedSpan[]): FlowTransformResult {
         title: span.displayName || span.name || 'Unknown',
         nodeKind,
         duration: durationMs > 0 ? durationMs : undefined,
+        maxDuration: rootDurationMs > 0 ? rootDurationMs : undefined,
         latency: span.latency || undefined,
         status: span.status === 'error' ? 'error' : undefined,
       },

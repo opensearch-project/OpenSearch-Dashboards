@@ -29,6 +29,8 @@ export type AgentNodeKind =
 export interface AgentNodeData extends BaseNodeData {
   nodeKind: AgentNodeKind;
   duration?: number;
+  /** Maximum duration (e.g., root trace duration) for scaling the latency bar. */
+  maxDuration?: number;
   latency?: string;
   tokens?: { prompt: number; completion: number };
   cost?: number;
