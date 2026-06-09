@@ -191,6 +191,7 @@ export class SearchEmbeddable
     }
     this.node = node;
     this.root = createRoot(node);
+    this.pushContainerStateParamsToProps(this.searchProps);
   }
 
   public destroy() {
@@ -300,7 +301,7 @@ export class SearchEmbeddable
       });
     };
 
-    this.pushContainerStateParamsToProps(searchProps);
+    this.searchProps = searchProps;
   }
 
   public reload() {
@@ -376,12 +377,14 @@ export class SearchEmbeddable
   }
 
   private async pushContainerStateParamsToProps(searchProps: SearchProps, force: boolean = false) {
+    // no fetch until the panel is mounted in the viewport and render(node) sets this.node.
     const isFetchRequired =
-      force ||
-      !opensearchFilters.onlyDisabledFiltersChanged(this.input.filters, this.prevFilters) ||
-      !isEqual(this.prevQuery, this.input.query) ||
-      !isEqual(this.prevTimeRange, this.input.timeRange) ||
-      !isEqual(searchProps.sort, this.input.sort || this.savedSearch.sort);
+      this.node &&
+      (force ||
+        !opensearchFilters.onlyDisabledFiltersChanged(this.input.filters, this.prevFilters) ||
+        !isEqual(this.prevQuery, this.input.query) ||
+        !isEqual(this.prevTimeRange, this.input.timeRange) ||
+        !isEqual(searchProps.sort, this.input.sort || this.savedSearch.sort));
 
     // If there is column or sort data on the panel, that means the original columns or sort settings have
     // been overridden in a dashboard.
