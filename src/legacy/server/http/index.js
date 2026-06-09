@@ -50,6 +50,14 @@ export default async function (osdServer, server) {
         throw Boom.notFound();
       }
 
+      // Reject protocol-relative paths (e.g. `//attacker.com/...` or `/\attacker.com/...`).
+      // Without this check, such a path would be reflected verbatim into the redirect
+      // `Location` header and the browser would treat it as a cross-origin redirect.
+      // (`charAt` returns '' for out-of-range indices, so no length check is needed.)
+      if (path.charAt(1) === '/' || path.charAt(1) === '\\') {
+        throw Boom.notFound();
+      }
+
       const pathPrefix = req.getBasePath() ? `${req.getBasePath()}/` : '';
       return h
         .redirect(
