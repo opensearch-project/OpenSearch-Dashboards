@@ -71,7 +71,6 @@ export interface CreateMetricsRuleFlyoutProps {
   onClose: () => void;
   http: {
     post: (path: string, options: { body: string }) => Promise<unknown>;
-    get: (path: string) => Promise<unknown>;
   };
   addToast?: (title: string, color?: 'success' | 'danger') => void;
 }
@@ -98,7 +97,7 @@ export const CreateMetricsRuleFlyout: React.FC<CreateMetricsRuleFlyoutProps> = (
 }) => {
   const [evaluationInterval, setEvaluationInterval] = useState('1m');
   const [isSaving, setIsSaving] = useState(false);
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'creating' | 'confirming' | 'done'>('idle');
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'creating' | 'done'>('idle');
 
   const [rules, setRules] = useState<RuleEntry[]>(() =>
     queries
@@ -142,28 +141,8 @@ export const CreateMetricsRuleFlyout: React.FC<CreateMetricsRuleFlyoutProps> = (
         });
       }
 
-      // Poll Cortex until the rules appear (up to 90s, every 5s)
-      setSaveStatus('confirming');
-      const ruleNames = new Set(rules.map((r) => r.name));
-      const maxAttempts = 18; // 18 * 5s = 90s
-      let confirmed = false;
-
-      for (let attempt = 0; attempt < maxAttempts; attempt++) {
-        await new Promise((resolve) => setTimeout(resolve, 5000));
-        try {
-          const resp = (await http.get(
-            `/api/alerting/prometheus/${encodeURIComponent(datasourceId)}/rules`
-          )) as { groups?: Array<{ name: string }> };
-          const existingGroups = new Set((resp?.groups || []).map((g) => g.name));
-          if ([...ruleNames].every((name) => existingGroups.has(name))) {
-            confirmed = true;
-            break;
-          }
-        } catch {
-          // Ignore fetch errors during polling, keep trying
-        }
-      }
-
+      // Success — show toast and close immediately (Cortex has eventual
+      // consistency; rules appear on the Alerting page after ~30-60s).
       setSaveStatus('done');
       addToast?.(
         i18n.translate('explore.metricsRule.toast.created', {
@@ -172,9 +151,7 @@ export const CreateMetricsRuleFlyout: React.FC<CreateMetricsRuleFlyoutProps> = (
         }),
         'success'
       );
-
-      // Brief delay to show "Created ✓" state before closing
-      setTimeout(() => onClose(), 1000);
+      onClose();
     } catch {
       setSaveStatus('idle');
       addToast?.(
@@ -303,16 +280,12 @@ export const CreateMetricsRuleFlyout: React.FC<CreateMetricsRuleFlyoutProps> = (
             <EuiButton
               fill
               onClick={handleSave}
-              isLoading={saveStatus === 'creating' || saveStatus === 'confirming'}
+              isLoading={saveStatus === 'creating'}
               disabled={!isValid || saveStatus === 'done'}
               iconType={saveStatus === 'done' ? 'check' : undefined}
             >
               {saveStatus === 'creating' &&
                 i18n.translate('explore.metricsRule.saveButton.creating', {
-                  defaultMessage: 'Creating in Prometheus...',
-                })}
-              {saveStatus === 'confirming' &&
-                i18n.translate('explore.metricsRule.saveButton.confirming', {
                   defaultMessage: 'Creating in Prometheus...',
                 })}
               {saveStatus === 'done' &&
