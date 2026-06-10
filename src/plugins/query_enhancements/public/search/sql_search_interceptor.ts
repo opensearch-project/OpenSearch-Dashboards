@@ -29,6 +29,7 @@ import { SQLFilterUtils } from './filters';
 
 export class SQLSearchInterceptor extends SearchInterceptor {
   private static readonly filterManagerSupportedAppNames = ['dashboards'];
+  private static readonly timeFilterSupportedAppNames = ['dashboards'];
 
   protected queryService!: DataPublicPluginStart['query'];
   protected notifications!: CoreStart['notifications'];
@@ -92,9 +93,9 @@ export class SQLSearchInterceptor extends SearchInterceptor {
       }
     }
 
-    // Apply time filtering only for supported apps (not legacy discover).
-    // Legacy discover handles time filtering at the search source level.
-    if (!appId || !SQLSearchInterceptor.filterManagerSupportedAppNames.includes(appId)) {
+    // Apply time filtering only for supported apps.
+    // Other apps (like legacy discover) handle time filtering at the search source level.
+    if (!appId || !SQLSearchInterceptor.timeFilterSupportedAppNames.includes(appId)) {
       return nextQuery;
     }
 
