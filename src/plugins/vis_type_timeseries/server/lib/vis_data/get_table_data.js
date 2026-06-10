@@ -84,7 +84,11 @@ export async function getTableData(req, panel) {
       series: buckets.map(processBucket(panel)),
     };
   } catch (err) {
-    if (err.body || err.name === 'DQLSyntaxError' || err.name === 'AnalyticEngineError') {
+    if (err.name === 'AnalyticEngineError') {
+      throw err;
+    }
+
+    if (err.body || err.name === 'DQLSyntaxError') {
       err.response = err.body;
 
       return {

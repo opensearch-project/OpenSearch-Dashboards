@@ -207,6 +207,31 @@ export const createSavedObjects = async <T>({
             object.attributes.visState = JSON.stringify(visState);
           }
         }
+
+        // Rewrite inline dataset.id inside searchSourceJSON for all SO types that embed it.
+        // The references[] rewriter (below) handles the official pointer, but the inline copy
+        // at searchSourceJSON.query.dataset.id is opaque to the references walker and must be
+        // rewritten separately using importIdMap.
+        // @ts-expect-error
+        const ssJSON = object.attributes?.kibanaSavedObjectMeta?.searchSourceJSON;
+        if (ssJSON) {
+          try {
+            const searchSource = JSON.parse(ssJSON);
+            const inlineDatasetId = searchSource?.query?.dataset?.id;
+            if (typeof inlineDatasetId === 'string') {
+              const newId = importIdMap.get(`index-pattern:${inlineDatasetId}`)?.id;
+              if (newId) {
+                searchSource.query.dataset.id = newId;
+                // @ts-expect-error
+                object.attributes.kibanaSavedObjectMeta.searchSourceJSON = JSON.stringify(
+                  searchSource
+                );
+              }
+            }
+          } catch (e) {
+            // If searchSourceJSON is malformed, leave it untouched
+          }
+        }
       }
 
       // use the import ID map to ensure that each reference is being created with the correct ID

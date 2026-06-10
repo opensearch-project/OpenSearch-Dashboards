@@ -96,6 +96,10 @@ export const ExploreTabs = () => {
         return false;
       }
       if (isPatternsTab || isFieldStatsTab) {
+        // Hide patterns and field statistics tabs for SQL queries
+        if (query?.language === 'SQL') {
+          return false;
+        }
         return registeredFlavor && isDefaultDataset;
       }
       return registeredFlavor;

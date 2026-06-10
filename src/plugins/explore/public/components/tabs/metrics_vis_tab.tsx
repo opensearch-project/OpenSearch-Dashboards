@@ -112,9 +112,10 @@ export const MetricsVisTab = React.memo(() => {
 
   // Override VisualizationContainer's handleData with limited rows.
   // React fires child effects before parent effects, so this runs after
-  // VisualizationContainer's own handleData(allRows) call.
+  // VisualizationContainer's own handleData(allRows) call. Must also re-fire
+  // when showAllSeries toggles, since VisualizationContainer doesn't depend on it.
   useEffect(() => {
-    if (results && limitedRows !== (results.hits?.hits || [])) {
+    if (results) {
       const fieldSchema = results.fieldSchema || [];
       visualizationBuilder.handleData(limitedRows, fieldSchema);
     }

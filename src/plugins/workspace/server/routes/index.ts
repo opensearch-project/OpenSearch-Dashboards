@@ -19,7 +19,7 @@ import {
 import { IWorkspaceClientImpl, WorkspaceAttributeWithPermission } from '../types';
 import { SavedObjectsPermissionControlContract } from '../permission_control/client';
 import { registerDuplicateRoute } from './duplicate';
-import { transferCurrentUserInPermissions, translatePermissionsToRole } from '../utils';
+import { getPermissionMode, transferCurrentUserInPermissions } from '../utils';
 import { validateWorkspaceColor } from '../../common/utils';
 import { getUseCaseFeatureConfig } from '../../../../core/server';
 
@@ -158,14 +158,13 @@ export function registerRoutes({
       const { workspaces } = result.result;
 
       // enrich workspace permissionMode
-      const principals = permissionControlClient?.getPrincipalsFromRequest(req);
       workspaces.forEach((workspace) => {
-        const permissionMode = translatePermissionsToRole(
+        workspace.permissionMode = getPermissionMode({
           isPermissionControlEnabled,
-          workspace.permissions,
-          principals
-        );
-        workspace.permissionMode = permissionMode;
+          request: req,
+          permissionControlClient,
+          permissions: workspace.permissions,
+        });
       });
 
       return res.ok({
@@ -192,12 +191,12 @@ export function registerRoutes({
       );
 
       if (result.success) {
-        const principals = permissionControlClient?.getPrincipalsFromRequest(req);
-        (result.result as WorkspaceAttributeWithPermission).permissionMode = translatePermissionsToRole(
+        (result.result as WorkspaceAttributeWithPermission).permissionMode = getPermissionMode({
           isPermissionControlEnabled,
-          (result.result as WorkspaceAttributeWithPermission).permissions,
-          principals
-        );
+          request: req,
+          permissionControlClient,
+          permissions: (result.result as WorkspaceAttributeWithPermission).permissions,
+        });
       }
 
       return res.ok({

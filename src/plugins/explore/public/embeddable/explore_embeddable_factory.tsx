@@ -56,11 +56,28 @@ export class ExploreEmbeddableFactory
       return iconType;
     },
     includeFields: ['kibanaSavedObjectMeta', 'visualization'],
+    // Hide SQL-language saved explores from the dashboard add-panel picker
+    // when the SQL feature flag is disabled.
+    showSavedObject: (
+      savedObject: SimpleSavedObject<{
+        kibanaSavedObjectMeta?: { searchSourceJSON?: string };
+      }>
+    ) => {
+      if (this.sqlSupportEnabled) return true;
+      try {
+        const json = savedObject.attributes?.kibanaSavedObjectMeta?.searchSourceJSON;
+        if (!json) return true;
+        return JSON.parse(json)?.query?.language !== 'SQL';
+      } catch {
+        return true;
+      }
+    },
   };
 
   constructor(
     private getStartServices: () => Promise<StartServices>,
-    private readonly visualizationRegistryService: VisualizationRegistryService
+    private readonly visualizationRegistryService: VisualizationRegistryService,
+    private readonly sqlSupportEnabled: boolean = false
   ) {}
 
   public canCreateNew() {
@@ -90,6 +107,20 @@ export class ExploreEmbeddableFactory
       const savedObject = await services.getSavedExploreById(savedObjectId);
       if (!savedObject) {
         throw new Error('Saved object not found');
+      }
+      // Block rendering SQL-language saved explores when SQL support is disabled.
+      if (
+        !this.sqlSupportEnabled &&
+        savedObject.searchSource?.getField('query')?.language === 'SQL'
+      ) {
+        return new ErrorEmbeddable(
+          i18n.translate('explore.embeddable.sqlNotEnabledError', {
+            defaultMessage:
+              'This visualization uses SQL, which is currently disabled. Enable Explore SQL support to view it.',
+          }),
+          input,
+          parent
+        );
       }
       const indexPattern = savedObject.searchSource.getField('index');
       const { executeTriggerActions } = await this.getStartServices();

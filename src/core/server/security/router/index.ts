@@ -35,7 +35,12 @@ export function registerRoutes({
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
-      const handler = identitySourceService.getIdentitySourceHandler(req.query.source);
+      let handler;
+      try {
+        handler = identitySourceService.getIdentitySourceHandler(req.query.source);
+      } catch (e) {
+        return res.badRequest({ body: e.message });
+      }
 
       if (!handler.getIdentityEntries) {
         throw new Error(`getIdentityEntries method has not been implemented`);
@@ -61,7 +66,12 @@ export function registerRoutes({
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
-      const handler = identitySourceService.getIdentitySourceHandler(req.body.source);
+      let handler;
+      try {
+        handler = identitySourceService.getIdentitySourceHandler(req.body.source);
+      } catch (e) {
+        return res.badRequest({ body: e.message });
+      }
 
       if (!handler.getIdentityEntriesByIds) {
         throw new Error(`getIdentityEntriesByIds method has not been implemented`);

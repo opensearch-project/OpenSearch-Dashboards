@@ -51,12 +51,13 @@ export const useChangeQueryEditor = () => {
         dataset.id ?? ''
       );
       setEditorText((text) => {
+        const baseText = text || languageConfig.getQueryString?.(query) || '';
         const newText =
           editorMode === EditorMode.Prompt
-            ? languageConfig.addFiltersToPrompt?.(text, newFilters)
-            : languageConfig.addFiltersToQuery?.(text, newFilters);
+            ? languageConfig.addFiltersToPrompt?.(baseText, newFilters)
+            : languageConfig.addFiltersToQuery?.(baseText, newFilters);
         if (newText) return newText;
-        return text;
+        return baseText;
       });
 
       // Set isDirty to true when adding filters, but only if it's not already dirty
@@ -69,7 +70,7 @@ export const useChangeQueryEditor = () => {
     [
       dataset,
       queryString,
-      query.language,
+      query,
       filterManager,
       setEditorText,
       focusOnEditor,

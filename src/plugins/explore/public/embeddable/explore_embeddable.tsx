@@ -420,16 +420,18 @@ export class ExploreEmbeddable
       });
     };
 
-    this.updateHandler(searchProps);
+    this.searchProps = searchProps;
   }
 
   private async updateHandler(searchProps: SearchProps, force = false) {
     const { filters, query, timeRange } = this.input;
+    // no fetch until the panel is mounted in the viewport and render(node) sets this.node.
     const needFetch =
-      force ||
-      !opensearchFilters.onlyDisabledFiltersChanged(filters, this.prevState.filters) ||
-      !isEqual(query, this.prevState.query) ||
-      !isEqual(timeRange, this.prevState.timeRange);
+      this.node &&
+      (force ||
+        !opensearchFilters.onlyDisabledFiltersChanged(filters, this.prevState.filters) ||
+        !isEqual(query, this.prevState.query) ||
+        !isEqual(timeRange, this.prevState.timeRange));
 
     // If there is column or sort data on the panel, that means the original columns or sort settings have
     // been overridden in a dashboard.
@@ -440,9 +442,18 @@ export class ExploreEmbeddable
     if (needFetch) {
       this.prevState = { filters, query, timeRange };
       this.searchProps = searchProps;
+
+      // Apply dashboard filters to the SearchSource (same as PPL)
+      if (this.filtersSearchSource) {
+        this.filtersSearchSource.setField('filter', filters || []);
+      }
+
       try {
         await this.fetch();
       } catch (error: any) {
+        if (error?.name === 'AbortError' || this.abortController?.signal?.aborted) {
+          return;
+        }
         this.searchProps.isLoading = false;
         this.searchProps.error = {
           name: error?.body?.error || error?.name || 'Error',
@@ -717,6 +728,7 @@ export class ExploreEmbeddable
     this.node = node;
     this.node.style.height = '100%';
     this.root = createRoot(node);
+    this.updateHandler(this.searchProps);
   }
 
   public getInspectorAdapters() {

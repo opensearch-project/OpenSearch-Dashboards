@@ -14,6 +14,14 @@ jest.mock('rxjs', () => ({
 
 jest.mock('../../../data/public', () => ({
   getSearchParamsFromRequest: jest.fn().mockImplementation((obj, _) => obj),
+  AnalyticEngineError: class AnalyticEngineError extends Error {
+    constructor() {
+      super(
+        'This data source uses Analytic Engine which does not support DSL queries. Use PPL-compatible features or switch to a standard OpenSearch data source.'
+      );
+      this.name = 'AnalyticEngineError';
+    }
+  },
 }));
 
 interface MockSearch {

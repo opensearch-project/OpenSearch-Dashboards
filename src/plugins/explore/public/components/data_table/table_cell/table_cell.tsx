@@ -78,7 +78,7 @@ export const TableCellUI = ({
             document={rowData._source}
             query={undefined}
             indexPattern={dataset?.title}
-            metadata={{ index, dataSourceEngineType: dataset?.dataSource?.type }}
+            metadata={{ index, dataSourceEngineType: dataset?.dataSourceRef?.type }}
             iconType="generate"
             size="xs"
           />

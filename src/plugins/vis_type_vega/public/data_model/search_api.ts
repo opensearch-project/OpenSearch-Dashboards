@@ -40,6 +40,7 @@ import {
   DataPublicPluginStart,
   IOpenSearchSearchResponse,
   IOpenSearchSearchRequest,
+  AnalyticEngineError,
 } from '../../../data/public';
 import { search as dataPluginSearch } from '../../../data/public';
 import { VegaInspectorAdapters } from '../vega_inspector';
@@ -140,12 +141,7 @@ export class SearchAPI {
       dataSource?.attributes?.dataSourceEngineType &&
       UNSUPPORTED_ENGINE_TYPES.includes(dataSource?.attributes?.dataSourceEngineType)
     ) {
-      throw new Error(
-        i18n.translate('visTypeVega.search.analyticEngineNotSupported', {
-          defaultMessage:
-            'This data source uses Analytic Engine which does not support DSL queries. Use PPL-compatible features or switch to a standard OpenSearch data source.',
-        })
-      );
+      throw new AnalyticEngineError();
     }
 
     return dataSource.id;

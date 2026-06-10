@@ -13,7 +13,6 @@ import {
   convertNavGroupToWorkspaceUseCase,
   isEqualWorkspaceUseCase,
   prependWorkspaceToBreadcrumbs,
-  areAllDataSourcesOpenSearchServerless,
   mergeDataSourcesWithConnections,
   fetchDataSourceConnections,
   getUseCaseUrl,
@@ -22,10 +21,7 @@ import {
 import { WORKSPACE_USE_CASE_PREFIX, WorkspaceAvailability } from '../../../core/public';
 import { coreMock } from '../../../core/public/mocks';
 import { AssociationDataSourceModalMode } from '../common/constants';
-import {
-  SigV4ServiceName,
-  DataSourceEngineType,
-} from '../../../plugins/data_source/common/data_sources';
+import { DataSourceEngineType } from '../../../plugins/data_source/common/data_sources';
 import { createMockedRegisteredUseCases } from './mocks';
 import {
   DATA_SOURCE_SAVED_OBJECT_TYPE,
@@ -486,56 +482,6 @@ describe('workspace utils: getDataSourcesList', () => {
   it('should return empty array if no saved objects responded', async () => {
     mockedSavedObjectClient.find = jest.fn().mockResolvedValue({});
     expect(await getDataSourcesList(mockedSavedObjectClient, [])).toStrictEqual([]);
-  });
-});
-
-describe('workspace utils: getIsOnlyAllowEssentialUseCase', () => {
-  const mockedSavedObjectClient = startMock.savedObjects.client;
-
-  it('should return true when all data sources are serverless', async () => {
-    mockedSavedObjectClient.find = jest.fn().mockResolvedValue({
-      savedObjects: [
-        {
-          id: 'id1',
-          get: () => {
-            return {
-              credentials: {
-                service: SigV4ServiceName.OpenSearchServerless,
-              },
-            };
-          },
-        },
-      ],
-    });
-    expect(await areAllDataSourcesOpenSearchServerless(mockedSavedObjectClient)).toBe(true);
-  });
-
-  it('should return false when not all data sources are serverless', async () => {
-    mockedSavedObjectClient.find = jest.fn().mockResolvedValue({
-      savedObjects: [
-        {
-          id: 'id1',
-          get: () => {
-            return {
-              credentials: {
-                service: SigV4ServiceName.OpenSearchServerless,
-              },
-            };
-          },
-        },
-        {
-          id: 'id2',
-          get: () => {
-            return {
-              credentials: {
-                service: SigV4ServiceName.OpenSearch,
-              },
-            };
-          },
-        },
-      ],
-    });
-    expect(await areAllDataSourcesOpenSearchServerless(mockedSavedObjectClient)).toBe(false);
   });
 });
 
