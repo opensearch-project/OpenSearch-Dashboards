@@ -2566,7 +2566,7 @@
     "visualizations.newVisWizard.helpText": "Comience a crear la visualización seleccionando un tipo para esa visualización.",
     "visualizations.newVisWizard.helpTextAriaLabel": "Comience a crear la visualización seleccionando un tipo para esa visualización. Pulse escape para cerrar este modal. Pulse la tecla de tabulación para ir más allá.",
     "visualizations.newVisWizard.newVisTypeTitle": "Nuevo {visTypeName}",
-    "visualizations.newVisWizard.resultsFound": "Se encontró {resultCount} {resultCount, plural, uno {type} otro {types}}",
+    "visualizations.newVisWizard.resultsFound": "Se encontró {resultCount} {resultCount, plural, one {tipo} other {tipos}}",
     "visualizations.newVisWizard.searchSelection.notFoundLabel": "No se han encontrado índices coincidentes ni búsquedas guardadas.",
     "visualizations.newVisWizard.searchSelection.savedObjectType.indexPattern": "Patrón de índices",
     "visualizations.newVisWizard.searchSelection.savedObjectType.search": "Búsqueda guardada",
