@@ -92,9 +92,9 @@ export class SQLSearchInterceptor extends SearchInterceptor {
       }
     }
 
-    // Apply time filtering only when NOT in legacy discover.
+    // Apply time filtering only for supported apps (not legacy discover).
     // Legacy discover handles time filtering at the search source level.
-    if (appId === 'discover') {
+    if (!appId || !SQLSearchInterceptor.filterManagerSupportedAppNames.includes(appId)) {
       return nextQuery;
     }
 

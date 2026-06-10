@@ -206,13 +206,13 @@ describe('SQLSearchInterceptor', () => {
     };
 
     beforeEach(() => {
-      // Default to a non-discover app so time filtering is applied.
-      (mockCoreStart.application.currentAppId$ as any) = of('explore/logs');
+      // Default to dashboards app so time filtering is applied.
+      (mockCoreStart.application.currentAppId$ as any) = of('dashboards');
       (sqlSearchInterceptor as any).application = mockCoreStart.application;
       (mockDataService.query.filterManager.getFilters as jest.Mock).mockReturnValue([]);
     });
 
-    it('returns the query unchanged when in legacy discover app', async () => {
+    it('returns the query unchanged when not in a supported app', async () => {
       (mockCoreStart.application.currentAppId$ as any) = of('discover');
       (sqlSearchInterceptor as any).application = mockCoreStart.application;
 
@@ -235,7 +235,7 @@ describe('SQLSearchInterceptor', () => {
       expect(result).toBe(query);
     });
 
-    it('inserts WHERE clause with time filter into user query when not in discover', async () => {
+    it('inserts WHERE clause with time filter into user query when in supported app', async () => {
       const query = {
         language: 'SQL',
         query: 'SELECT * FROM test_index',
@@ -337,9 +337,7 @@ describe('SQLSearchInterceptor', () => {
         dataset: { type: 'DEFAULT', title: 'test_index', timeFieldName: '@timestamp' },
       };
       const result = await (sqlSearchInterceptor as any).buildQuery(query, baseRequest);
-      expect(result.query).toBe(
-        "SELECT * FROM test_index WHERE `@timestamp` >= '2023-01-01 00:00:00.000' AND `@timestamp` <= '2023-01-02 00:00:00.000'"
-      );
+      expect(result).toBe(query);
     });
   });
 
