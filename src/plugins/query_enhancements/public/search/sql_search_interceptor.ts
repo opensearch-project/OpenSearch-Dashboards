@@ -92,12 +92,12 @@ export class SQLSearchInterceptor extends SearchInterceptor {
       }
     }
 
-    // Apply time filtering only when the request includes a timeRange and the dataset has a time field.
+    // Apply time filtering only when using enhanced datasets that don't get search-source-level time filtering.
     // This approach:
-    // - Enables time filtering for dashboard embeddables (which pass timeRange in request body)
-    // - Skips time filtering for legacy discover (which handles time filtering at search source level)
+    // - Enables time filtering for enhanced datasets (Explore SQL, Dashboard SQL embeddables)
+    // - Skips time filtering for legacy discover with default index patterns (which handles time filtering at search source level)
     if (!dataset?.timeFieldName) return nextQuery;
-    if (!request.params?.body?.timeRange) return nextQuery;
+    if (!dataset?.type) return nextQuery; // Skip for default index patterns (legacy discover)
 
     const timeRange = this.queryService.timefilter.timefilter.getTime();
     const { fromDate, toDate } = formatTimePickerDate(timeRange, 'YYYY-MM-DD HH:mm:ss.SSS');

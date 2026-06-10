@@ -222,30 +222,23 @@ describe('SQLSearchInterceptor', () => {
       expect(result).toBe(query);
     });
 
-    it('returns the query unchanged when the request has no timeRange', async () => {
+    it('returns the query unchanged when the dataset has no type (default index pattern)', async () => {
+      const query = {
+        language: 'SQL',
+        query: 'SELECT * FROM test_index',
+        dataset: { title: 'test_index', timeFieldName: '@timestamp' }, // No type = default index pattern
+      };
+      const result = await (sqlSearchInterceptor as any).buildQuery(query, baseRequest);
+      expect(result).toBe(query);
+    });
+
+    it('inserts WHERE clause with time filter into user query for enhanced datasets', async () => {
       const query = {
         language: 'SQL',
         query: 'SELECT * FROM test_index',
         dataset: { type: 'DEFAULT', title: 'test_index', timeFieldName: '@timestamp' },
       };
       const result = await (sqlSearchInterceptor as any).buildQuery(query, baseRequest);
-      expect(result).toBe(query);
-    });
-
-    it('inserts WHERE clause with time filter into user query when timeRange is present', async () => {
-      const query = {
-        language: 'SQL',
-        query: 'SELECT * FROM test_index',
-        dataset: { type: 'DEFAULT', title: 'test_index', timeFieldName: '@timestamp' },
-      };
-      const requestWithTimeRange = {
-        params: {
-          body: {
-            timeRange: { from: '2023-01-01T00:00:00Z', to: '2023-01-02T00:00:00Z' },
-          },
-        },
-      };
-      const result = await (sqlSearchInterceptor as any).buildQuery(query, requestWithTimeRange);
 
       expect(result.query).toBe(
         "SELECT * FROM test_index WHERE `@timestamp` >= '2023-01-01 00:00:00.000' " +
@@ -271,14 +264,7 @@ describe('SQLSearchInterceptor', () => {
         query: 'SELECT method, COUNT(*) FROM test_index GROUP BY method',
         dataset: { type: 'DEFAULT', title: 'test_index', timeFieldName: '@timestamp' },
       };
-      const requestWithTimeRange = {
-        params: {
-          body: {
-            timeRange: { from: '2023-01-01T00:00:00Z', to: '2023-01-02T00:00:00Z' },
-          },
-        },
-      };
-      const result = await (sqlSearchInterceptor as any).buildQuery(query, requestWithTimeRange);
+      const result = await (sqlSearchInterceptor as any).buildQuery(query, baseRequest);
 
       expect(result.query).toBe(
         "SELECT method, COUNT(*) FROM test_index WHERE `@timestamp` >= '2023-01-01 00:00:00.000' " +
@@ -330,14 +316,7 @@ describe('SQLSearchInterceptor', () => {
         query: 'SELECT * FROM test_index',
         dataset: { type: 'DEFAULT', title: 'test_index', timeFieldName: '@timestamp' },
       };
-      const requestWithTimeRange = {
-        params: {
-          body: {
-            timeRange: { from: '2023-01-01T00:00:00Z', to: '2023-01-02T00:00:00Z' },
-          },
-        },
-      };
-      const result = await (sqlSearchInterceptor as any).buildQuery(query, requestWithTimeRange);
+      const result = await (sqlSearchInterceptor as any).buildQuery(query, baseRequest);
       expect(result.query).toBe(
         "SELECT * FROM test_index WHERE `@timestamp` >= '2023-01-01 00:00:00.000' AND `@timestamp` <= '2023-01-02 00:00:00.000' AND ( `host` = 'a')"
       );
@@ -354,14 +333,7 @@ describe('SQLSearchInterceptor', () => {
         query: 'SELECT * FROM test_index',
         dataset: { type: 'DEFAULT', title: 'test_index', timeFieldName: '@timestamp' },
       };
-      const requestWithTimeRange = {
-        params: {
-          body: {
-            timeRange: { from: '2023-01-01T00:00:00Z', to: '2023-01-02T00:00:00Z' },
-          },
-        },
-      };
-      const result = await (sqlSearchInterceptor as any).buildQuery(query, requestWithTimeRange);
+      const result = await (sqlSearchInterceptor as any).buildQuery(query, baseRequest);
       expect(result.query).toBe(
         "SELECT * FROM test_index WHERE `@timestamp` >= '2023-01-01 00:00:00.000' AND `@timestamp` <= '2023-01-02 00:00:00.000'"
       );
