@@ -93,6 +93,8 @@ export class SQLSearchInterceptor extends SearchInterceptor {
     }
 
     // Apply time filtering for all SQL queries - SQL visualizations should respect time picker
+    if (!dataset?.timeFieldName) return nextQuery;
+
     const timeRange = this.queryService.timefilter.timefilter.getTime();
     const { fromDate, toDate } = formatTimePickerDate(timeRange, 'YYYY-MM-DD HH:mm:ss.SSS');
     const whereClause = `\`${dataset.timeFieldName}\` >= '${formatDate(fromDate)}' AND \`${
