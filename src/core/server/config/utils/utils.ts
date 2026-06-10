@@ -5,7 +5,7 @@
 
 import _ from 'lodash';
 import { Logger } from '@osd/logging';
-import { Request } from 'hapi__hapi';
+import { Request } from '@hapi/hapi';
 // @ts-expect-error TS2345 TODO Fix me
 import { ApiResponse } from '@opensearch-project/opensearch/.';
 import { ConfigIdentifier } from '../types';

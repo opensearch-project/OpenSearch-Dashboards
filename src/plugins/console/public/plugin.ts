@@ -44,7 +44,10 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
   ) {
     this.originalCreateObjectURL = URL.createObjectURL;
     URL.createObjectURL = (obj: Blob | MediaSource) => {
-      if (obj instanceof Blob && obj.type === 'application/javascript') {
+      if (
+        obj instanceof Blob &&
+        (obj.type === 'application/javascript' || obj.type === 'text/javascript')
+      ) {
         return workerUrl;
       }
       return this.originalCreateObjectURL!(obj);
