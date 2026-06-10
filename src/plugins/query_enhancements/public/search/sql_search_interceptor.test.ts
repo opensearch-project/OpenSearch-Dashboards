@@ -222,27 +222,13 @@ describe('SQLSearchInterceptor', () => {
       expect(result).toBe(query);
     });
 
-    it('applies time filtering automatically for all SQL queries', async () => {
-      const query = {
-        language: 'SQL',
-        query: 'SELECT * FROM test_index',
-        dataset: { type: 'DEFAULT', title: 'test_index', timeFieldName: '@timestamp' },
-      };
-      const result = await (sqlSearchInterceptor as any).buildQuery(query, baseRequest);
-      expect(result.query).toBe(
-        "SELECT * FROM test_index WHERE `@timestamp` >= '2023-01-01 00:00:00.000' " +
-          "AND `@timestamp` <= '2023-01-02 00:00:00.000'"
-      );
-    });
-
     it('inserts WHERE clause with time filter into user query', async () => {
       const query = {
         language: 'SQL',
         query: 'SELECT * FROM test_index',
         dataset: { type: 'DEFAULT', title: 'test_index', timeFieldName: '@timestamp' },
       };
-      const request = { params: { body: { enableTimeFiltering: true } } };
-      const result = await (sqlSearchInterceptor as any).buildQuery(query, request);
+      const result = await (sqlSearchInterceptor as any).buildQuery(query, baseRequest);
 
       expect(result.query).toBe(
         "SELECT * FROM test_index WHERE `@timestamp` >= '2023-01-01 00:00:00.000' " +
@@ -256,8 +242,7 @@ describe('SQLSearchInterceptor', () => {
         query: 'WITH foo AS (SELECT 1) SELECT * FROM foo, test_index',
         dataset: { type: 'DEFAULT', title: 'test_index', timeFieldName: '@timestamp' },
       };
-      const request = { params: { body: { enableTimeFiltering: true } } };
-      const result = await (sqlSearchInterceptor as any).buildQuery(query, request);
+      const result = await (sqlSearchInterceptor as any).buildQuery(query, baseRequest);
 
       // WITH queries are not SELECT statements at the root level, so we return unchanged
       expect(result.query).toBe(query.query);
@@ -269,8 +254,7 @@ describe('SQLSearchInterceptor', () => {
         query: 'SELECT method, COUNT(*) FROM test_index GROUP BY method',
         dataset: { type: 'DEFAULT', title: 'test_index', timeFieldName: '@timestamp' },
       };
-      const request = { params: { body: { enableTimeFiltering: true } } };
-      const result = await (sqlSearchInterceptor as any).buildQuery(query, request);
+      const result = await (sqlSearchInterceptor as any).buildQuery(query, baseRequest);
 
       expect(result.query).toBe(
         "SELECT method, COUNT(*) FROM test_index WHERE `@timestamp` >= '2023-01-01 00:00:00.000' " +

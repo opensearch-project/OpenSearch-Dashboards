@@ -76,7 +76,6 @@ export class SQLSearchInterceptor extends SearchInterceptor {
     request: IOpenSearchDashboardsSearchRequest
   ): Promise<Query> {
     const dataset = query.dataset;
-    const enableTimeFiltering = request.params?.body?.enableTimeFiltering;
 
     let nextQuery = query;
 
