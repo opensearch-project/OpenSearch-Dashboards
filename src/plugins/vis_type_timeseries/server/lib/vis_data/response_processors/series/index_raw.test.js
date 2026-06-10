@@ -3,29 +3,29 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { processors } from './index';
 import { processorsRaw } from './index_raw';
 
 describe('processorsRaw (for /api/metrics/vis/data-raw endpoint)', () => {
-  test('should exclude mathAgg processor', () => {
+  test('should exclude mathAgg processor (math is evaluated client-side)', () => {
     const processorNames = processorsRaw.map((p) => p.name);
     expect(processorNames).not.toContain('mathAgg');
   });
 
-  test('should have same number of processors as standard list (excluding mathAgg)', () => {
-    // processorsRaw should have exactly one fewer processor than standard (mathAgg is excluded)
-    expect(processorsRaw.length).toBe(processors.length - 1);
+  test('should exclude timeShift and dropLastBucket (applied client-side after math)', () => {
+    const processorNames = processorsRaw.map((p) => p.name);
+    // These must run AFTER math, which happens in the browser, so they are applied
+    // client-side in public/lib/post_process_raw_series.js instead.
+    expect(processorNames).not.toContain('timeShift');
+    expect(processorNames).not.toContain('dropLastBucket');
   });
 
   test('should include expected processors', () => {
     const processorNames = processorsRaw.map((p) => p.name);
 
-    // Verify key processors are present
     expect(processorNames).toContain('percentile');
     expect(processorNames).toContain('percentileRank');
+    expect(processorNames).toContain('percentileRaw');
     expect(processorNames).toContain('seriesAgg');
-    expect(processorNames).toContain('timeShift');
-    expect(processorNames).toContain('dropLastBucket');
     expect(processorNames).toContain('stdDeviationBands');
     expect(processorNames).toContain('stdDeviationSibling');
   });
@@ -45,16 +45,16 @@ describe('processorsRaw (for /api/metrics/vis/data-raw endpoint)', () => {
   test('should maintain expected processor order', () => {
     const processorNames = processorsRaw.map((p) => p.name);
 
-    // Verify processors are in expected order
-    expect(processorNames[0]).toBe('percentile');
-    expect(processorNames[1]).toBe('percentileRank');
-    expect(processorNames[2]).toBe('stdDeviationBands');
-    expect(processorNames[3]).toBe('stdDeviationSibling');
-    expect(processorNames[4]).toBe('stdMetricRaw');
-    expect(processorNames[5]).toBe('stdSiblingRaw');
-    // Note: mathAgg would be here in standard processors but is excluded
-    expect(processorNames[6]).toBe('seriesAgg');
-    expect(processorNames[7]).toBe('timeShift');
-    expect(processorNames[8]).toBe('dropLastBucket');
+    expect(processorNames).toEqual([
+      'percentile',
+      'percentileRank',
+      'percentileRaw',
+      'stdDeviationBands',
+      'stdDeviationSibling',
+      'stdMetricRaw',
+      'stdSiblingRaw',
+      // mathAgg excluded (client-side); timeShift + dropLastBucket excluded (client-side after math)
+      'seriesAgg',
+    ]);
   });
 });
