@@ -59,6 +59,19 @@ export function registerRoutes({
 }) {
   const router = http.createRouter('/api/saved_objects/');
 
+  // Reject compressed payloads on import/resolve_import_errors routes to prevent
+  // decompression bomb DoS (content-encoding is decoded before maxBytes is enforced).
+  http.registerOnPreAuth((request, response, toolkit) => {
+    if (
+      request.headers['content-encoding'] &&
+      (request.url.pathname === '/api/saved_objects/_import' ||
+        request.url.pathname === '/api/saved_objects/_resolve_import_errors')
+    ) {
+      return response.badRequest({ body: 'Content-Encoding is not supported for this endpoint' });
+    }
+    return toolkit.next();
+  });
+
   registerGetRoute(router);
   registerCreateRoute(router);
   registerDeleteRoute(router);

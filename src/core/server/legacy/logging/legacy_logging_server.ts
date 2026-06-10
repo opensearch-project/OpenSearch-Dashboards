@@ -29,8 +29,7 @@
  */
 
 import { ServerExtType } from '@hapi/hapi';
-// @ts-expect-error TS2345 TODO Fix me
-import Podium = require('@hapi/podium');
+import { Podium } from '@hapi/podium';
 import { cleanControlSequences } from '@osd/std';
 // @ts-expect-error: implicit any for JS file
 import { Config } from '../../../../legacy/server/config';
@@ -93,11 +92,18 @@ function getLegacyLogLevel(level: LogLevel) {
 export class LegacyLoggingServer {
   public connections = [];
   // Emulates Hapi's usage of the podium event bus.
-  public events: Podium = new Podium(['log', 'request', 'response']);
+  public events = new Podium();
 
   private onPostStopCallback?: () => void;
 
   constructor(legacyLoggingConfig: Readonly<LegacyVars>) {
+    // Register Podium events
+    this.events.registerEvent([
+      { name: 'log', spread: true },
+      { name: 'request' },
+      { name: 'response' },
+    ]);
+
     // We set `ops.interval` to max allowed number and `ops` filter to value
     // that doesn't exist to avoid logging of ops at all, if turned on it will be
     // logged by the "legacy" OpenSearch Dashboards.
@@ -122,11 +128,13 @@ export class LegacyLoggingServer {
   public log({ level, context, message, error, timestamp, meta = {} }: LogRecord) {
     const { tags = [], ...metadata } = meta;
 
-    this.events.emit('log', {
-      data: getDataToLog(error, metadata, cleanControlSequences(message)),
-      tags: [getLegacyLogLevel(level), ...context.split('.'), ...tags],
-      timestamp: timestamp.getTime(),
-    });
+    this.events.emit('log', [
+      {
+        data: getDataToLog(error, metadata, cleanControlSequences(message)),
+        tags: [getLegacyLogLevel(level), ...context.split('.'), ...tags],
+        timestamp: timestamp.getTime(),
+      },
+    ]);
   }
 
   public stop() {
