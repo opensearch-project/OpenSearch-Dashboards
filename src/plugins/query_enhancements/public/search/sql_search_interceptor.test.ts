@@ -274,6 +274,24 @@ describe('SQLSearchInterceptor', () => {
           "AND `@timestamp` <= '2023-01-02 00:00:00.000' GROUP BY method"
       );
     });
+
+    it('applies time filtering for explore/logs app', async () => {
+      (mockCoreStart.application.currentAppId$ as any) = of('explore/logs');
+      (sqlSearchInterceptor as any).application = mockCoreStart.application;
+      (mockDataService.query.filterManager.getFilters as jest.Mock).mockReturnValue([]);
+
+      const query = {
+        language: 'SQL',
+        query: 'SELECT * FROM test_index',
+        dataset: { type: 'DEFAULT', title: 'test_index', timeFieldName: '@timestamp' },
+      };
+      const result = await (sqlSearchInterceptor as any).buildQuery(query, baseRequest);
+
+      expect(result.query).toBe(
+        "SELECT * FROM test_index WHERE `@timestamp` >= '2023-01-01 00:00:00.000' " +
+          "AND `@timestamp` <= '2023-01-02 00:00:00.000'"
+      );
+    });
   });
 
   describe('buildQuery (private — filterManager merging on dashboards)', () => {
@@ -326,7 +344,7 @@ describe('SQLSearchInterceptor', () => {
     });
 
     it('skips filterManager filters when not on a supported app', async () => {
-      (mockCoreStart.application.currentAppId$ as any) = of('explore/logs');
+      (mockCoreStart.application.currentAppId$ as any) = of('discover');
       (sqlSearchInterceptor as any).application = mockCoreStart.application;
       (mockDataService.query.filterManager.getFilters as jest.Mock).mockReturnValue([
         phraseFilter('host', 'a'),

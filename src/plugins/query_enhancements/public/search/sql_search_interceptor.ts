@@ -29,7 +29,7 @@ import { SQLFilterUtils } from './filters';
 
 export class SQLSearchInterceptor extends SearchInterceptor {
   private static readonly filterManagerSupportedAppNames = ['dashboards'];
-  private static readonly timeFilterSupportedAppNames = ['dashboards'];
+  private static readonly timeFilterSupportedAppNames = ['dashboards', 'explore/logs'];
 
   protected queryService!: DataPublicPluginStart['query'];
   protected notifications!: CoreStart['notifications'];
