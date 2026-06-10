@@ -92,13 +92,12 @@ export class SQLSearchInterceptor extends SearchInterceptor {
       }
     }
 
-    // Apply time filtering only when time picker is visible to users
+    // Apply time filtering only when the request includes a timeRange and the dataset has a time field.
+    // This approach:
+    // - Enables time filtering for dashboard embeddables (which pass timeRange in request body)
+    // - Skips time filtering for legacy discover (which handles time filtering at search source level)
     if (!dataset?.timeFieldName) return nextQuery;
-
-    const languageConfig = this.queryService.queryString
-      .getLanguageService()
-      .getLanguage(query.language);
-    if (languageConfig?.hideDatePicker) return nextQuery;
+    if (!request.params?.body?.timeRange) return nextQuery;
 
     const timeRange = this.queryService.timefilter.timefilter.getTime();
     const { fromDate, toDate } = formatTimePickerDate(timeRange, 'YYYY-MM-DD HH:mm:ss.SSS');
