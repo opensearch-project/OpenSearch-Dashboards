@@ -179,11 +179,12 @@ export class BasePathProxyServer {
             );
             uri.search = new URLSearchParams(request.query as Record<string, string>).toString();
 
-            // Convert headers to the format expected by h2o2
+            // The h2o2's v10 ProxyTarget interface expects headers to be { [key: string]: string }
+            // Convert headers, join array values with comma to preserve all values
             const headers: { [key: string]: string } = {};
             Object.entries(request.headers).forEach(([key, value]) => {
               if (value !== undefined) {
-                headers[key] = Array.isArray(value) ? value[0] : value;
+                headers[key] = Array.isArray(value) ? value.join(', ') : value;
               }
             });
 
