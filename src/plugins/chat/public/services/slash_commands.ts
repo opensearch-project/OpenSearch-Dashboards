@@ -3,7 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export type SlashCommandResult = string | { localMessage: string; title?: string };
+export type SlashCommandResult =
+  | string
+  | { localMessage: string; title?: string; role?: 'system' | 'assistant' };
 
 export interface SlashCommand {
   command: string;
@@ -46,7 +48,13 @@ class SlashCommandRegistry {
 
   async execute(
     input: string
-  ): Promise<{ handled: boolean; message?: string; localMessage?: string; title?: string }> {
+  ): Promise<{
+    handled: boolean;
+    message?: string;
+    localMessage?: string;
+    title?: string;
+    role?: 'system' | 'assistant';
+  }> {
     if (!input.startsWith('/')) {
       return { handled: false };
     }
@@ -63,7 +71,12 @@ class SlashCommandRegistry {
     try {
       const result = await command.handler(args);
       if (typeof result === 'object' && result !== null && 'localMessage' in result) {
-        return { handled: true, localMessage: result.localMessage, title: result.title };
+        return {
+          handled: true,
+          localMessage: result.localMessage,
+          title: result.title,
+          role: result.role,
+        };
       }
       return { handled: true, message: result };
     } catch (error) {

@@ -329,13 +329,14 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
           content: messageContent,
           rawMessage: messageContent,
         };
-        const systemMsg: SystemMessage = {
+        const role = commandResult.role ?? 'system';
+        const responseMsg: Message = {
           id: chatService.generateMessageId(),
-          role: 'system',
+          role,
           content: commandResult.localMessage,
-          ...(commandResult.title && { title: commandResult.title }),
+          ...(role === 'system' && commandResult.title && { title: commandResult.title }),
         };
-        setTimeline((prev) => [...prev, userMsg, systemMsg]);
+        setTimeline((prev) => [...prev, userMsg, responseMsg]);
         return;
       }
       // If command was handled and returned a message, send it to the AI
