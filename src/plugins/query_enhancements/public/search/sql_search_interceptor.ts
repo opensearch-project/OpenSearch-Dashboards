@@ -76,12 +76,12 @@ export class SQLSearchInterceptor extends SearchInterceptor {
     request: IOpenSearchDashboardsSearchRequest
   ): Promise<Query> {
     const dataset = query.dataset;
+    const appId = await this.application.currentAppId$.pipe(first()).toPromise();
 
     let nextQuery = query;
 
     // Apply filterManager filters (e.g. from the dashboard top filter bar) on
     // supported apps so chip filters affect SQL results.
-    const appId = await this.application.currentAppId$.pipe(first()).toPromise();
     if (appId && SQLSearchInterceptor.filterManagerSupportedAppNames.includes(appId)) {
       const filters = this.queryService.filterManager.getFilters();
       if (filters?.length) {
@@ -92,12 +92,15 @@ export class SQLSearchInterceptor extends SearchInterceptor {
       }
     }
 
-    // Apply time filtering only when using enhanced datasets that don't get search-source-level time filtering.
-    // This approach:
-    // - Enables time filtering for enhanced datasets (Explore SQL, Dashboard SQL embeddables)
-    // - Skips time filtering for legacy discover with default index patterns (which handles time filtering at search source level)
-    if (!dataset?.timeFieldName) return nextQuery;
-    if (!dataset?.type) return nextQuery; // Skip for default index patterns (legacy discover)
+    // Apply time filtering only when NOT in legacy discover.
+    // Legacy discover handles time filtering at the search source level.
+    if (appId === 'discover') {
+      return nextQuery;
+    }
+
+    if (!dataset?.timeFieldName) {
+      return nextQuery;
+    }
 
     const timeRange = this.queryService.timefilter.timefilter.getTime();
     const { fromDate, toDate } = formatTimePickerDate(timeRange, 'YYYY-MM-DD HH:mm:ss.SSS');

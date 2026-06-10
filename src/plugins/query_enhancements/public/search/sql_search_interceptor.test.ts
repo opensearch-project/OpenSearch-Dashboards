@@ -206,10 +206,23 @@ describe('SQLSearchInterceptor', () => {
     };
 
     beforeEach(() => {
-      // Default to a non-dashboards app so filter-manager merging is skipped.
+      // Default to a non-discover app so time filtering is applied.
       (mockCoreStart.application.currentAppId$ as any) = of('explore/logs');
       (sqlSearchInterceptor as any).application = mockCoreStart.application;
       (mockDataService.query.filterManager.getFilters as jest.Mock).mockReturnValue([]);
+    });
+
+    it('returns the query unchanged when in legacy discover app', async () => {
+      (mockCoreStart.application.currentAppId$ as any) = of('discover');
+      (sqlSearchInterceptor as any).application = mockCoreStart.application;
+
+      const query = {
+        language: 'SQL',
+        query: 'SELECT * FROM test_index',
+        dataset: { type: 'DEFAULT', title: 'test_index', timeFieldName: '@timestamp' },
+      };
+      const result = await (sqlSearchInterceptor as any).buildQuery(query, baseRequest);
+      expect(result).toBe(query);
     });
 
     it('returns the query unchanged when the dataset has no timeFieldName', async () => {
@@ -222,17 +235,7 @@ describe('SQLSearchInterceptor', () => {
       expect(result).toBe(query);
     });
 
-    it('returns the query unchanged when the dataset has no type (default index pattern)', async () => {
-      const query = {
-        language: 'SQL',
-        query: 'SELECT * FROM test_index',
-        dataset: { title: 'test_index', timeFieldName: '@timestamp' }, // No type = default index pattern
-      };
-      const result = await (sqlSearchInterceptor as any).buildQuery(query, baseRequest);
-      expect(result).toBe(query);
-    });
-
-    it('inserts WHERE clause with time filter into user query for enhanced datasets', async () => {
+    it('inserts WHERE clause with time filter into user query when not in discover', async () => {
       const query = {
         language: 'SQL',
         query: 'SELECT * FROM test_index',
