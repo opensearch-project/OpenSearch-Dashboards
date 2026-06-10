@@ -86,6 +86,7 @@ export const AgentCardNode = ({ data }: NodeProps<AgentCardCustomNode>) => {
           <MetricBar
             value={data.duration!}
             max={data.maxDuration ?? data.duration!}
+            offset={data.startOffset}
             color={kindConfig.color}
             label={data.latency ?? `${data.duration}ms`}
           />
