@@ -92,8 +92,13 @@ export class SQLSearchInterceptor extends SearchInterceptor {
       }
     }
 
-    // Apply time filtering for all SQL queries - SQL visualizations should respect time picker
+    // Apply time filtering only when time picker is visible to users
     if (!dataset?.timeFieldName) return nextQuery;
+
+    const languageConfig = this.queryService.queryString
+      .getLanguageService()
+      .getLanguage(query.language);
+    if (languageConfig?.hideDatePicker) return nextQuery;
 
     const timeRange = this.queryService.timefilter.timefilter.getTime();
     const { fromDate, toDate } = formatTimePickerDate(timeRange, 'YYYY-MM-DD HH:mm:ss.SSS');
