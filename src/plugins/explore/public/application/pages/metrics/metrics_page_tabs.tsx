@@ -24,6 +24,7 @@ import { RootState } from '../../utils/state_management/store';
 import { setMetricsPageMode } from '../../utils/state_management/slices/ui/ui_slice';
 import { MetricsPageMode, MetricsPageModeContext } from './metrics_page_mode_context';
 import { CreateMetricsRuleFlyout } from './create_metrics_rule_flyout';
+import { splitMultiQueries } from '../../utils/multi_query_utils';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
 
@@ -130,7 +131,7 @@ export const MetricsPageTabs: React.FC = () => {
           queries={parsedQueries}
           datasourceId={dataConnectionId}
           onClose={() => setShowAlertRuleFlyout(false)}
-          http={services.http as any}
+          http={services.http}
           addToast={(title, color) =>
             services.notifications.toasts[color === 'danger' ? 'addDanger' : 'addSuccess'](title)
           }

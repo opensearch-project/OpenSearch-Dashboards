@@ -99,8 +99,8 @@ export const CreateMetricsRuleFlyout: React.FC<CreateMetricsRuleFlyoutProps> = (
   const [isSaving, setIsSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'creating' | 'done'>('idle');
 
-  const [rules, setRules] = useState<RuleEntry[]>(() =>
-    queries
+  const [rules, setRules] = useState<RuleEntry[]>(() => {
+    const entries = queries
       .filter((q) => q.trim())
       .map((q, idx) => ({
         id: `rule-${idx}`,
@@ -109,8 +109,15 @@ export const CreateMetricsRuleFlyout: React.FC<CreateMetricsRuleFlyoutProps> = (
         operator: '>',
         threshold: 0,
         forDuration: '5m',
-      }))
-  );
+      }));
+    // Deduplicate names to prevent Cortex group overwrites (upsert semantics)
+    const seenNames = new Map<string, number>();
+    return entries.map((entry) => {
+      const count = seenNames.get(entry.name) || 0;
+      seenNames.set(entry.name, count + 1);
+      return count > 0 ? { ...entry, name: `${entry.name}_${count + 1}` } : entry;
+    });
+  });
 
   const updateRule = useCallback((ruleId: string, field: keyof RuleEntry, value: unknown) => {
     setRules((prev) => prev.map((r) => (r.id === ruleId ? { ...r, [field]: value } : r)));
@@ -166,7 +173,12 @@ export const CreateMetricsRuleFlyout: React.FC<CreateMetricsRuleFlyoutProps> = (
   }, [rules, evaluationInterval, datasourceId, http, isValid, isSaving, onClose, addToast]);
 
   return (
-    <EuiFlyout onClose={onClose} size="l" ownFocus aria-labelledby="createMetricsRuleTitle">
+    <EuiFlyout
+      onClose={isSaving ? undefined : onClose}
+      size="l"
+      ownFocus
+      aria-labelledby="createMetricsRuleTitle"
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2 id="createMetricsRuleTitle">
@@ -242,7 +254,13 @@ export const CreateMetricsRuleFlyout: React.FC<CreateMetricsRuleFlyoutProps> = (
                     <EuiFieldNumber
                       value={rule.threshold}
                       onChange={(e) =>
-                        updateRule(rule.id, 'threshold', Number.parseFloat(e.target.value) || 0)
+                        updateRule(
+                          rule.id,
+                          'threshold',
+                          Number.isNaN(Number.parseFloat(e.target.value))
+                            ? rule.threshold
+                            : Number.parseFloat(e.target.value)
+                        )
                       }
                       compressed
                     />
