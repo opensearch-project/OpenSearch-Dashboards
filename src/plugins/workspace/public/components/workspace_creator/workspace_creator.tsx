@@ -36,7 +36,6 @@ import { navigateToAppWithinWorkspace } from '../utils/workspace';
 import { WorkspaceCreatorForm } from './workspace_creator_form';
 import { optionIdToWorkspacePermissionModesMap } from '../workspace_form/constants';
 import { getUseCaseFeatureConfig } from '../../../../../core/public';
-import { UseCaseService } from '../../services';
 import { detectTraceData, createAutoDetectedDatasets } from '../../../../explore/public';
 
 export interface WorkspaceCreatorProps {
@@ -54,14 +53,12 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
       savedObjects,
       dataSourceManagement,
       navigationUI: { HeaderControl },
-      useCaseService,
       data: dataPlugin,
     },
   } = useOpenSearchDashboards<{
     workspaceClient: WorkspaceClient;
     dataSourceManagement?: DataSourceManagementPluginSetup;
     navigationUI: NavigationPublicPluginStart['ui'];
-    useCaseService: UseCaseService;
     data: DataPublicPluginStart;
   }>();
   const [isFormSubmitting, setIsFormSubmitting] = useState(false);
@@ -69,9 +66,7 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
   const isPermissionEnabled = application?.capabilities.workspaces.permissionEnabled;
 
   const { availableUseCases } = useFormAvailableUseCases({
-    savedObjects,
     registeredUseCases$,
-    useCaseService,
   });
 
   const location = useLocation();

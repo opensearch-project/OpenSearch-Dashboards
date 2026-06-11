@@ -10,7 +10,7 @@ $bar-gauge-radius: 2px;
   &.horizontal {
     flex-direction: column;
     padding: 4% 2%;
-    gap: 2%;
+    gap: 40px; // fixed to 40px, min height for horizontal bar
   }
 
   &.vertical {
@@ -18,6 +18,19 @@ $bar-gauge-radius: 2px;
     align-items: stretch;
     padding: 2% 4%;
     gap: 2%;
+  }
+}
+
+.bar-gauge-item-tooltip {
+  flex: 1;
+  display: flex;
+
+  .vertical & {
+    min-width: 40px;
+  }
+
+  .horizontal & {
+    min-height: 40px;
   }
 }
 
@@ -30,14 +43,14 @@ $bar-gauge-radius: 2px;
     flex-direction: row;
     align-items: center;
     width: 100%;
-    min-height: 24px; // don't shrink below this — container scrolls
+    min-height: 40px; // don't shrink below this — container scrolls
   }
 
   &.vertical {
     flex-direction: column;
     height: 100%;
     min-width: 40px; // don't shrink below this — container scrolls
-    overflow: hidden;
+    overflow: visible;
   }
 }
 

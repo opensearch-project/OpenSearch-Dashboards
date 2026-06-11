@@ -99,6 +99,25 @@ describe('Security router', () => {
         )
       ).rejects.toThrow('getIdentityEntries method has not been implemented');
     });
+
+    it('should return badRequest when getIdentitySourceHandler throws', async () => {
+      identitySourceService.getIdentitySourceHandler.mockImplementation(() => {
+        throw new Error('Unknown source');
+      });
+
+      const routeHandler = router.get.mock.calls[0][1];
+      const mockRequest = {
+        query: { source: 'invalid', type: 'users' },
+      };
+
+      await routeHandler(
+        context,
+        mockRequest as OpenSearchDashboardsRequest<unknown, unknown, unknown, 'get'>,
+        responseFactory
+      );
+
+      expect(responseFactory.badRequest).toHaveBeenCalledWith({ body: 'Unknown source' });
+    });
   });
 
   describe('POST identity/_entries', () => {
@@ -147,6 +166,25 @@ describe('Security router', () => {
           responseFactory
         )
       ).rejects.toThrow('getIdentityEntriesByIds method has not been implemented');
+    });
+
+    it('should return badRequest when getIdentitySourceHandler throws', async () => {
+      identitySourceService.getIdentitySourceHandler.mockImplementation(() => {
+        throw new Error('Unknown source');
+      });
+
+      const routeHandler = router.post.mock.calls[0][1];
+      const mockRequest = {
+        body: { ids: ['id1'], source: 'invalid', type: 'users' },
+      };
+
+      await routeHandler(
+        context,
+        mockRequest as OpenSearchDashboardsRequest<unknown, unknown, unknown, 'post'>,
+        responseFactory
+      );
+
+      expect(responseFactory.badRequest).toHaveBeenCalledWith({ body: 'Unknown source' });
     });
   });
 });

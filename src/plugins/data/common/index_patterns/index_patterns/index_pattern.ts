@@ -342,7 +342,7 @@ export class IndexPattern implements IIndexPattern {
   }
 
   isTimeBased(): boolean {
-    return !!this.timeFieldName && (!this.fields || !!this.getTimeField());
+    return !!this.timeFieldName;
   }
 
   isTimeNanosBased(): boolean {

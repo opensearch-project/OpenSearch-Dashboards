@@ -37,6 +37,7 @@ import {
   VISUALIZATION_EDITOR_APP_ID,
   VISUALIZATION_EDITOR_APP_NAME,
 } from '../common';
+import { ConfigSchema } from '../common/config';
 import { generateDocViewsUrl } from './application/legacy/discover/application/components/doc_views/generate_doc_views_url';
 import { DocViewsLinksRegistry } from './application/legacy/discover/application/doc_views_links/doc_views_links_registry';
 import {
@@ -782,18 +783,36 @@ export class ExplorePlugin
       };
     };
 
+    const sqlSupportEnabled =
+      this.initializerContext.config.get<ConfigSchema>().sqlSupport?.enabled ?? false;
     const factory = new ExploreEmbeddableFactory(
       getStartServices,
-      this.visualizationRegistryService
+      this.visualizationRegistryService,
+      sqlSupportEnabled
     );
     plugins.embeddable.registerEmbeddableFactory(factory.type, factory);
   }
 
   private registerExploreVisualizationAlias(setupDeps: ExploreSetupDependencies) {
+    const sqlSupportEnabled =
+      this.initializerContext.config.get<ConfigSchema>().sqlSupport?.enabled ?? false;
     const appExtensions: VisTypeAlias['appExtensions'] = {
       visualizations: {
         docTypes: [SAVED_OBJECT_TYPE],
         toListItem: ({ id, attributes, updated_at: updatedAt }) => {
+          // Hide SQL-language saved explores from listings when SQL support is disabled.
+          if (!sqlSupportEnabled) {
+            try {
+              const searchSourceJSON = (attributes as any)?.kibanaSavedObjectMeta?.searchSourceJSON;
+              if (searchSourceJSON) {
+                const searchSource = JSON.parse(searchSourceJSON);
+                if (searchSource?.query?.language === 'SQL') return null;
+              }
+            } catch {
+              // fall through and render the item normally
+            }
+          }
+
           let iconType = '';
           let chartName = '';
           try {
@@ -811,7 +830,7 @@ export class ExplorePlugin
           }
 
           const adjustEditApp = attributes.type
-            ? `${PLUGIN_ID}/${ExploreFlavor.Logs}`
+            ? `${PLUGIN_ID}/${attributes.type ?? ExploreFlavor.Logs}`
             : VISUALIZATION_EDITOR_APP_ID;
           const adjustEditUrl = attributes.type
             ? `#/view/${encodeURIComponent(id)}` // regular explore vis

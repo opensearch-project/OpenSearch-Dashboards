@@ -62,6 +62,11 @@ import { mergeStyles } from '../components/visualizations/utils/utils';
 import { SplitLayout } from '../components/visualizations/visualization_builder.types';
 import { CommonVisualizationRender } from '../components/visualizations/visualization_render';
 import { RenderChartConfig } from '../components/visualizations/types';
+import {
+  TransformationService,
+  UrlTransformationState,
+  registerAllTransformations,
+} from '../components/data_transformations';
 
 // TODO cleanup unused props
 export interface SearchProps {
@@ -137,6 +142,9 @@ export class ExploreEmbeddable
   public originalQuery?: string;
   private lastInterpolatedQuery?: string;
 
+  // Data transformation support
+  private transformationService: TransformationService;
+
   constructor(
     {
       savedExplore,
@@ -173,6 +181,12 @@ export class ExploreEmbeddable
       data: new DataAdapter(),
     };
 
+    // Initialize transformation service
+    this.transformationService = new TransformationService();
+    registerAllTransformations(this.transformationService);
+
+    this.initializeTransformationPipeline();
+
     // Initialize variable support BEFORE search props so the interpolation
     // service is available for the initial query setup.
     this.initializeVariableSubscription(parent);
@@ -191,6 +205,22 @@ export class ExploreEmbeddable
           this.updateHandler(this.searchProps, true);
         }
       });
+  }
+
+  // initialize transformation pipeline from saved explore
+  private initializeTransformationPipeline() {
+    if (!this.savedExplore.visualization) {
+      return;
+    }
+
+    try {
+      const parsed = JSON.parse(this.savedExplore.visualization);
+      if (parsed?.dataTransformations) {
+        this.transformationService.restoreFromState(parsed?.dataTransformations);
+      }
+    } catch (error) {
+      // skip failed pipeline, no transformations applied
+    }
   }
 
   /**
@@ -390,16 +420,18 @@ export class ExploreEmbeddable
       });
     };
 
-    this.updateHandler(searchProps);
+    this.searchProps = searchProps;
   }
 
   private async updateHandler(searchProps: SearchProps, force = false) {
     const { filters, query, timeRange } = this.input;
+    // no fetch until the panel is mounted in the viewport and render(node) sets this.node.
     const needFetch =
-      force ||
-      !opensearchFilters.onlyDisabledFiltersChanged(filters, this.prevState.filters) ||
-      !isEqual(query, this.prevState.query) ||
-      !isEqual(timeRange, this.prevState.timeRange);
+      this.node &&
+      (force ||
+        !opensearchFilters.onlyDisabledFiltersChanged(filters, this.prevState.filters) ||
+        !isEqual(query, this.prevState.query) ||
+        !isEqual(timeRange, this.prevState.timeRange));
 
     // If there is column or sort data on the panel, that means the original columns or sort settings have
     // been overridden in a dashboard.
@@ -410,9 +442,18 @@ export class ExploreEmbeddable
     if (needFetch) {
       this.prevState = { filters, query, timeRange };
       this.searchProps = searchProps;
+
+      // Apply dashboard filters to the SearchSource (same as PPL)
+      if (this.filtersSearchSource) {
+        this.filtersSearchSource.setField('filter', filters || []);
+      }
+
       try {
         await this.fetch();
       } catch (error: any) {
+        if (error?.name === 'AbortError' || this.abortController?.signal?.aborted) {
+          return;
+        }
         this.searchProps.isLoading = false;
         this.searchProps.error = {
           name: error?.body?.error || error?.name || 'Error',
@@ -473,9 +514,14 @@ export class ExploreEmbeddable
           formatter: languageConfig.fields.formatter,
         }),
     });
-    const rows = resp.hits.hits;
+    const rawRows = resp.hits.hits;
     const fieldSchema = searchSource.getDataFrame()?.schema;
-    const visualizationData = normalizeResultRows(rows, fieldSchema ?? []);
+    const { rows: transformedRows, finalSchema } = this.transformationService.applyPipeline(
+      rawRows,
+      fieldSchema ?? []
+    );
+
+    const visualizationData = normalizeResultRows(transformedRows, finalSchema ?? []);
 
     // TODO: Confirm if tab is in visualization but visualization is null, what to display?
     // const displayVis = rows?.length > 0 && visualizationData && visualizationData.ruleId;
@@ -585,9 +631,9 @@ export class ExploreEmbeddable
     }
     this.updateOutput({ loading: false, error: undefined });
     inspectorRequest.stats(getResponseInspectorStats(resp, searchSource)).ok({ json: resp });
-    this.searchProps.rows = rows;
+    this.searchProps.rows = transformedRows;
     // NOTE: PPL response is not the same as OpenSearch response, resp.hits.total here is 0.
-    this.searchProps.hits = resp.hits.hits.length;
+    this.searchProps.hits = transformedRows.length;
     this.searchProps.isLoading = false;
 
     // set tabular for DataViewComponent to display via adapters.data.getTabular()
@@ -648,6 +694,11 @@ export class ExploreEmbeddable
       this.variableSubscription.unsubscribe();
     }
 
+    // Cleanup transformation service
+    if (this.transformationService) {
+      this.transformationService.destroy();
+    }
+
     if (this.abortController) {
       this.abortController.abort();
     }
@@ -677,6 +728,7 @@ export class ExploreEmbeddable
     this.node = node;
     this.node.style.height = '100%';
     this.root = createRoot(node);
+    this.updateHandler(this.searchProps);
   }
 
   public getInspectorAdapters() {

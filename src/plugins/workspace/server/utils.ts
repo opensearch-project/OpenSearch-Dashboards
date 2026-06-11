@@ -13,7 +13,7 @@ import {
   WorkspacePermissionMode,
   UiSettingScope,
 } from '../../../core/server';
-import { updateWorkspaceState } from '../../../core/server/utils';
+import { getWorkspaceState, updateWorkspaceState } from '../../../core/server/utils';
 import { DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from '../../data_source_management/common';
 import {
   CURRENT_USER_PLACEHOLDER,
@@ -21,6 +21,7 @@ import {
   OSD_ADMIN_WILDCARD_MATCH_ALL,
 } from '../common/constants';
 import { PermissionModeId } from '../../../core/server';
+import { SavedObjectsPermissionControlContract } from './permission_control/client';
 
 /**
  * Generate URL friendly random ID
@@ -180,5 +181,33 @@ export const translatePermissionsToRole = (
   } else {
     permissionMode = PermissionModeId.Read;
   }
+  return permissionMode;
+};
+
+/**
+ * get workspace permission mode
+ * @param req OSD request
+ * @param permissions workspace permission object
+ * @returns PermissionModeId
+ */
+export const getPermissionMode = (props: {
+  request: OpenSearchDashboardsRequest;
+  isPermissionControlEnabled: boolean;
+  permissionControlClient?: SavedObjectsPermissionControlContract;
+  permissions?: Permissions;
+}) => {
+  const { isDashboardAdmin } = getWorkspaceState(props.request);
+  let permissionMode: PermissionModeId = PermissionModeId.Read;
+  if (isDashboardAdmin) {
+    permissionMode = PermissionModeId.Owner;
+  } else {
+    const principals = props.permissionControlClient?.getPrincipalsFromRequest(props.request);
+    permissionMode = translatePermissionsToRole(
+      props.isPermissionControlEnabled,
+      props.permissions,
+      principals
+    );
+  }
+
   return permissionMode;
 };

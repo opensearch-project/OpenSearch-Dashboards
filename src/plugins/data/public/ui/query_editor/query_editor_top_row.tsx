@@ -313,6 +313,11 @@ export default function QueryEditorTopRow({
       return Boolean(!datasetType.languageOverrides[queryLanguage].hideDatePicker);
     }
 
+    // Special handling for SQL in Explore: always show date picker
+    if (queryLanguage === 'SQL' && appName === 'explore') {
+      return true;
+    }
+
     return Boolean(!(queryLanguage && languageService.getLanguage(queryLanguage)?.hideDatePicker));
   }
 

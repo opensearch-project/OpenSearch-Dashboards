@@ -177,11 +177,20 @@ export class BasePathProxyServer {
               `${this.httpConfig.basePath}/${request.params.osdPath}`,
               `${request.server.info.protocol}://${request.server.info.host}:${this.devConfig.basePathProxyTargetPort}`
             );
-            uri.search = new URLSearchParams(request.query).toString();
+            uri.search = new URLSearchParams(request.query as Record<string, string>).toString();
+
+            // The h2o2's v10 ProxyTarget interface expects headers to be { [key: string]: string }
+            // Convert headers, join array values with comma to preserve all values
+            const headers: { [key: string]: string } = {};
+            Object.entries(request.headers).forEach(([key, value]) => {
+              if (value !== undefined) {
+                headers[key] = Array.isArray(value) ? value.join(', ') : value;
+              }
+            });
 
             return {
               uri: uri.toString(),
-              headers: request.headers,
+              headers,
             };
           },
         },

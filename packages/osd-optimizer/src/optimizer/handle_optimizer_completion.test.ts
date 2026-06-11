@@ -83,16 +83,6 @@ it('errors if the optimizer completes in phase "initializing"', async () => {
   );
 });
 
-it('errors if the optimizer completes in phase "reallocating"', async () => {
-  const update$ = createUpdate$('reallocating');
-
-  await expect(
-    allValuesFrom(update$.pipe(handleOptimizerCompletion(config())))
-  ).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"optimizer unexpectedly exit in phase \\"reallocating\\""`
-  );
-});
-
 it('errors if the optimizer completes in phase "running"', async () => {
   const update$ = createUpdate$('running');
 

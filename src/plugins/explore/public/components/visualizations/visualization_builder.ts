@@ -23,6 +23,8 @@ import { adaptLegacyData } from './visualization_builder_utils';
 import { mergeStyles } from './utils/utils';
 import { AxisFieldNameMappings, RenderChartConfig } from './types';
 import { TimeRange } from '../../../../data/common';
+import { ITransformationService } from '../data_transformations/types';
+import { createNoOpTransformationService } from '../data_transformations/transformation_service';
 
 interface VisState {
   styleOptions?: StyleOptions;
@@ -41,6 +43,9 @@ export class VisualizationBuilder {
   private isInitialized = false;
   private getUrlStateStorage: Options['getUrlStateStorage'];
   private subscriptions = Array<Subscription>();
+  private transformationService: ITransformationService = createNoOpTransformationService();
+  private lastRawRows: Array<OpenSearchSearchHit<unknown>> = [];
+  private lastSchema: Array<{ type?: string; name?: string }> = [];
 
   visConfig$ = new BehaviorSubject<ChartConfig | undefined>(undefined);
   data$ = new BehaviorSubject<VisData | undefined>(undefined);
@@ -51,6 +56,28 @@ export class VisualizationBuilder {
     if (getUrlStateStorage) {
       this.getUrlStateStorage = getUrlStateStorage;
     }
+  }
+
+  setTransformationService(service: ITransformationService) {
+    this.transformationService = service;
+
+    // subscribe pipeline change first
+    this.subscriptions.push(
+      service.getPipeline$().subscribe(() => {
+        if (this.lastRawRows.length > 0) {
+          this.handleData(this.lastRawRows, this.lastSchema);
+        }
+      })
+    );
+
+    // restore saved dataTransformations once
+    if (this.visConfig$.value?.dataTransformations) {
+      this.transformationService.restoreFromState(this.visConfig$.value.dataTransformations);
+    }
+  }
+
+  getTransformationService() {
+    return this.transformationService;
   }
 
   init() {
@@ -269,6 +296,37 @@ export class VisualizationBuilder {
   }
 
   /**
+   * Helper method to create a vis config with split fields and apply it.
+   * Returns true if successful, false otherwise.
+   */
+  private applyVisConfig(
+    chartType: ChartType,
+    axesMapping: AxisFieldNameMappings,
+    preserveStyles = false
+  ): boolean {
+    const chartTypeConfig = visualizationRegistry.getVisualization(chartType);
+    if (!chartTypeConfig) {
+      return false;
+    }
+
+    const currentConfig = this.visConfig$.value;
+    const newVisConfig: ChartConfig = {
+      type: chartType,
+      styles:
+        preserveStyles && currentConfig?.styles
+          ? currentConfig.styles
+          : chartTypeConfig.ui.style.defaults,
+      axesMapping,
+      splitField: currentConfig?.splitField,
+      splitLayout: currentConfig?.splitLayout,
+      showSplitLabel: currentConfig?.showSplitLabel,
+    };
+
+    this.setVisConfig(newVisConfig);
+    return true;
+  }
+
+  /**
    * For the given data, we need to check if the current chart type and axes mapping can be applied
    */
   onDataChange(data?: VisData) {
@@ -288,66 +346,70 @@ export class VisualizationBuilder {
 
     const columns = [...data.numericalColumns, ...data.categoricalColumns, ...data.dateColumns];
 
-    // We cannot apply the current chart type and axes mapping if:
-    // 1. It has axes mapping, but the mapping is incompatible with the received data
-    // 2. No current axes mapping
-    // For these cases, we will create auto vis based on the rules. If not auto vis can be created,
-    // reset chart type and axes mapping to empty, this will let user to choose.
-    if (isEmpty(axesMapping) || !isValidMapping(axesMapping ?? {}, columns)) {
-      const autoVis = this.createAutoVis(data);
-      const currentConfig = this.visConfig$.value;
-      if (autoVis) {
-        const chartTypeConfig = visualizationRegistry.getVisualization(autoVis.chartType);
-        if (chartTypeConfig) {
-          const newVisConfig: ChartConfig = {
-            type: autoVis.chartType,
-            styles: chartTypeConfig.ui.style.defaults,
-            axesMapping: autoVis.axesMapping,
-            splitField: currentConfig?.splitField,
-            splitLayout: currentConfig?.splitLayout,
-            showSplitLabel: currentConfig?.showSplitLabel,
-          };
-          this.setVisConfig(newVisConfig);
-        }
-      } else {
-        const chartTypeConfig = visualizationRegistry.getVisualization('table');
-        if (!chartTypeConfig) {
-          this.setVisConfig(undefined);
-        }
-        // Default to show a table if no auto vis created
-        const newVisConfig: ChartConfig = {
-          type: 'table',
-          styles: chartTypeConfig?.ui.style.defaults,
-          splitField: currentConfig?.splitField,
-          splitLayout: currentConfig?.splitLayout,
-          showSplitLabel: currentConfig?.showSplitLabel,
-        };
-        this.setVisConfig(newVisConfig);
+    // If current axes mapping is valid, no changes needed
+    if (!isEmpty(axesMapping) && isValidMapping(axesMapping ?? {}, columns)) {
+      return;
+    }
+
+    // Current axes mapping is invalid or empty - try different strategies to rebuild
+
+    // Strategy 1: Try to reuse current axes mapping with the same chart type
+    if (currentChartType && !isEmpty(axesMapping)) {
+      const reusedMapping = visualizationRegistry.reuseAxesMapping(
+        currentChartType,
+        axesMapping ?? {},
+        columns
+      );
+      if (reusedMapping && this.applyVisConfig(currentChartType, reusedMapping, true)) {
+        return;
       }
+    }
+
+    // Strategy 2: Try to create auto vis for the current chart type
+    if (currentChartType) {
+      const autoVis = this.createAutoVis(data, currentChartType);
+      if (autoVis && this.applyVisConfig(autoVis.chartType, autoVis.axesMapping, true)) {
+        return;
+      }
+    }
+
+    // Strategy 3: Try to create auto vis with any chart type
+    const autoVis = this.createAutoVis(data);
+    if (autoVis && this.applyVisConfig(autoVis.chartType, autoVis.axesMapping, false)) {
       return;
     }
 
-    // The current axes mappings can be applied to the data,
-    // it will just use the current chart type and axes mapping
-    if (isValidMapping(axesMapping ?? {}, columns)) {
-      return;
+    // Strategy 4: Fallback to table, or set undefined if table config unavailable
+    if (!this.applyVisConfig('table', {}, false)) {
+      this.setVisConfig(undefined);
     }
-
-    // All other cases will fallback to reset vis state and let user to choose
-    this.setVisConfig(undefined);
   }
 
+  /**
+   * Apply the current transformation pipeline against the given raw rows and
+   * schema, then publish the result to data$
+   */
   handleData<T = unknown>(
     rows: Array<OpenSearchSearchHit<T>>,
     schema: Array<{ type?: string; name?: string }>
   ) {
+    // when the pipeline changes, we need to re-apply the new pipeline against the previous raw data
+    // cache the reference
+    this.lastRawRows = rows;
+    this.lastSchema = schema;
+
+    const { rows: transformedRows, finalSchema } = this.transformationService.applyPipeline(
+      rows,
+      schema
+    );
     const {
       transformedData,
       numericalColumns,
       categoricalColumns,
       dateColumns,
       unknownColumns,
-    } = normalizeResultRows(rows, schema);
+    } = normalizeResultRows(transformedRows, finalSchema);
+
     this.data$.next({
       transformedData,
       numericalColumns,
@@ -385,10 +447,26 @@ export class VisualizationBuilder {
 
   setAxesMapping(mapping: AxisFieldNameMappings) {
     const config = this.visConfig$.value;
-    if (config && !isEqual(config.axesMapping, mapping)) {
+    if (
+      config &&
+      !isEqual(this.normalizeMapping(config.axesMapping), this.normalizeMapping(mapping))
+    ) {
       this.setIsVisDirty(true);
       this.visConfig$.next({ ...config, axesMapping: mapping });
     }
+  }
+
+  private normalizeMapping(
+    mapping: AxisFieldNameMappings | undefined
+  ): Record<string, string[]> | undefined {
+    if (!mapping) return undefined;
+    const normalized: Record<string, string[]> = {};
+    for (const [key, value] of Object.entries(mapping)) {
+      if (value) {
+        normalized[key] = Array.isArray(value) ? value : [value];
+      }
+    }
+    return normalized;
   }
 
   /**
@@ -454,6 +532,9 @@ export class VisualizationBuilder {
     this.data$ = new BehaviorSubject<VisData | undefined>(undefined);
     this.showRawTable$ = new BehaviorSubject<boolean>(false);
     this.isVisDirty$ = new BehaviorSubject<boolean>(false);
+    this.transformationService = createNoOpTransformationService();
+    this.lastRawRows = [];
+    this.lastSchema = [];
     this.isInitialized = false;
   }
 

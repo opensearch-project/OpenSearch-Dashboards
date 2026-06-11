@@ -14,6 +14,13 @@
     display: flex;
     padding: $ouiSizeXXS 0;
     flex-wrap: wrap;
+
+    // Claim leftover horizontal space in the toolbar so children inside
+    // `__left` can `margin-left: auto` to right-anchor (e.g. the action
+    // buttons in `.exploreQueryPanelActions__group`). Without this,
+    // `__left` shrink-wraps its content under `justify-content: space-between`
+    // on the parent, leaving no room for an internal right-anchor.
+    flex: 1;
   }
 
   &__right {

@@ -29,6 +29,7 @@ export interface WorkspaceCollaboratorInputProps {
   onCollaboratorIdChange: (id: string, index: number) => void;
   onAccessLevelChange: (accessLevel: WorkspaceCollaboratorAccessLevel, index: number) => void;
   onDelete: (index: number) => void;
+  onSearchError?: (error: string | undefined, index: number) => void;
   identitySource?: { source: string; type: string };
   http?: HttpStart;
 }
@@ -54,6 +55,7 @@ export const WorkspaceCollaboratorInput = ({
   onAccessLevelChange,
   onCollaboratorIdChange,
   collaboratorIdInputPlaceholder,
+  onSearchError,
   identitySource,
   http,
 }: WorkspaceCollaboratorInputProps) => {
@@ -89,6 +91,7 @@ export const WorkspaceCollaboratorInput = ({
 
       if (!identitySource || !http || !searchValue) {
         setOptions([]);
+        onSearchError?.(undefined, index);
         return;
       }
 
@@ -114,14 +117,18 @@ export const WorkspaceCollaboratorInput = ({
               value: r.id,
             }))
           );
+          onSearchError?.(undefined, index);
         } catch (e) {
-          if ((e as Error).name !== 'AbortError') setOptions([]);
+          if ((e as Error).name !== 'AbortError') {
+            setOptions([]);
+            onSearchError?.((e as any)?.body?.message || (e as Error).message, index);
+          }
         } finally {
           if (!abortController.current?.signal.aborted) setIsLoading(false);
         }
       }, 300);
     },
-    [http, identitySource]
+    [http, identitySource, index, onSearchError]
   );
 
   const handlePermissionModeOptionChange = useCallback(

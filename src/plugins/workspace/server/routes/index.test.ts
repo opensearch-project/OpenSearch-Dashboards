@@ -65,6 +65,29 @@ describe(`Workspace routes`, () => {
     );
   });
 
+  /**
+   * This test verifies that the get route returns the exact error message
+   * "Invalid saved objects permission" when a user lacks access to a workspace.
+   * The public-side code in workspace_validation_service.ts relies on this exact
+   * error string to redirect the user to the fatal error page. If this error
+   * message changes, the client-side check must be updated accordingly.
+   */
+  it('get should return permission error when workspace client returns permission error', async () => {
+    (mockedWorkspaceClient.get as jest.Mock).mockResolvedValueOnce({
+      success: false,
+      error: 'Invalid saved objects permission',
+    });
+
+    const result = await supertest(httpSetup.server.listener)
+      .get(`${WORKSPACES_API_BASE_URL}/mock-workspace-id`)
+      .expect(200);
+
+    expect(result.body).toEqual({
+      success: false,
+      error: 'Invalid saved objects permission',
+    });
+  });
+
   describe('feature validation', () => {
     it('returns 400 when no features is provided during workspace creation', async () => {
       await supertest(httpSetup.server.listener)

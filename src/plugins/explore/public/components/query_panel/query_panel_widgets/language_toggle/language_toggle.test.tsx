@@ -3,6 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// Mock @ag-ui/client before any imports that use it
+jest.mock('@ag-ui/client', () => ({
+  parseSSEStream: jest.fn(),
+  runHttpRequest: jest.fn(),
+}));
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
@@ -32,14 +38,26 @@ jest.mock('../../../../application/hooks', () => ({
 
 // Mock getServices to provide language title
 const mockGetLanguage = jest.fn();
+const mockGetTab = jest.fn();
+const mockGetQuery = jest.fn(() => ({ dataset: undefined }));
+const mockSetUserQueryLanguage = jest.fn();
+const mockSetQuery = jest.fn();
+let mockSqlSupportEnabled = true;
 jest.mock('../../../../services/services', () => ({
   getServices: () => ({
+    sqlSupportEnabled: mockSqlSupportEnabled,
+    tabRegistry: {
+      getTab: mockGetTab,
+    },
     data: {
       query: {
         queryString: {
           getLanguageService: () => ({
             getLanguage: mockGetLanguage,
+            setUserQueryLanguage: mockSetUserQueryLanguage,
           }),
+          getQuery: mockGetQuery,
+          setQuery: mockSetQuery,
         },
       },
     },
@@ -59,9 +77,10 @@ jest.mock('../../../../application/hooks/editor_hooks/use_switch_language', () =
     }),
 }));
 
-// Mock the action creator
+// Mock the action creators from the slices module
 jest.mock('../../../../application/utils/state_management/slices', () => ({
   setEditorMode: jest.fn((mode) => ({ type: 'SET_EDITOR_MODE', payload: mode })),
+  setQueryWithHistory: jest.fn((payload) => ({ type: 'SET_QUERY_WITH_HISTORY', payload })),
 }));
 
 // Mock the selectors directly
@@ -69,7 +88,16 @@ jest.mock('../../../../application/utils/state_management/selectors', () => ({
   selectIsPromptEditorMode: jest.fn(),
   selectPromptModeIsAvailable: jest.fn(),
   selectQueryLanguage: jest.fn(),
+  selectActiveTabId: jest.fn(),
 }));
+
+// Mock onEditorRunActionCreator
+jest.mock(
+  '../../../../application/utils/state_management/actions/query_editor/on_editor_run/on_editor_run',
+  () => ({
+    onEditorRunActionCreator: jest.fn(() => ({ type: 'ON_EDITOR_RUN' })),
+  })
+);
 
 // Mock redux hooks
 jest.mock('react-redux', () => ({
@@ -79,6 +107,7 @@ jest.mock('react-redux', () => ({
 
 // Import the mocked selectors
 import {
+  selectActiveTabId,
   selectIsPromptEditorMode,
   selectPromptModeIsAvailable,
   selectQueryLanguage,
@@ -93,6 +122,7 @@ const mockSelectPromptModeIsAvailable = selectPromptModeIsAvailable as jest.Mock
 const mockSelectQueryLanguage = selectQueryLanguage as jest.MockedFunction<
   typeof selectQueryLanguage
 >;
+const mockSelectActiveTabId = selectActiveTabId as jest.MockedFunction<typeof selectActiveTabId>;
 
 describe('LanguageToggle', () => {
   const renderWithProvider = (component: React.ReactElement) => {
@@ -109,7 +139,10 @@ describe('LanguageToggle', () => {
     mockSelectIsPromptEditorMode.mockReturnValue(false);
     mockSelectPromptModeIsAvailable.mockReturnValue(true);
     mockSelectQueryLanguage.mockReturnValue('PPL');
+    mockSelectActiveTabId.mockReturnValue('logs');
     mockGetLanguage.mockReturnValue({ title: 'PPL' });
+    mockGetTab.mockReturnValue({ supportedLanguages: ['PPL'] });
+    mockSqlSupportEnabled = true;
   });
 
   it('renders the language toggle button', () => {
@@ -310,9 +343,10 @@ describe('LanguageToggle', () => {
       expect(screen.queryByTestId('queryPanelFooterLanguageToggle-PromQL')).not.toBeInTheDocument();
     });
 
-    it('should fallback to language ID when title is not available', () => {
+    it('should fallback to language ID when title is not available', async () => {
       mockSelectQueryLanguage.mockReturnValue('UNKNOWN');
       mockGetLanguage.mockReturnValue(undefined);
+      mockGetTab.mockReturnValue({ supportedLanguages: ['UNKNOWN'] });
 
       renderWithProvider(<LanguageToggle />);
 
@@ -322,7 +356,86 @@ describe('LanguageToggle', () => {
       fireEvent.click(button);
 
       // Should show the language ID as fallback
-      expect(screen.getByTestId('queryPanelFooterLanguageToggle-UNKNOWN')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByTestId('queryPanelFooterLanguageToggle-UNKNOWN')).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('SQL Feature Flag', () => {
+    it('should show SQL option when feature flag is enabled and tab supports SQL', async () => {
+      mockSqlSupportEnabled = true;
+      mockGetTab.mockReturnValue({ supportedLanguages: ['PPL', 'SQL'] });
+      mockGetLanguage.mockImplementation((lang: string) => ({ title: lang }));
+
+      renderWithProvider(<LanguageToggle />);
+      const button = screen.getByTestId('queryPanelFooterLanguageToggle');
+      fireEvent.click(button);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('queryPanelFooterLanguageToggle-SQL')).toBeInTheDocument();
+      });
+      expect(screen.getByTestId('queryPanelFooterLanguageToggle-PPL')).toBeInTheDocument();
+    });
+
+    it('should HIDE SQL option when feature flag is disabled, even if tab supports SQL', async () => {
+      mockSqlSupportEnabled = false;
+      mockGetTab.mockReturnValue({ supportedLanguages: ['PPL', 'SQL'] });
+      mockGetLanguage.mockImplementation((lang: string) => ({ title: lang }));
+
+      renderWithProvider(<LanguageToggle />);
+      const button = screen.getByTestId('queryPanelFooterLanguageToggle');
+      fireEvent.click(button);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('queryPanelFooterLanguageToggle-PPL')).toBeInTheDocument();
+      });
+      expect(screen.queryByTestId('queryPanelFooterLanguageToggle-SQL')).not.toBeInTheDocument();
+    });
+
+    it('should not show SQL when tab does not support it, regardless of feature flag', async () => {
+      mockSqlSupportEnabled = true;
+      mockGetTab.mockReturnValue({ supportedLanguages: ['PPL'] }); // No SQL
+      mockGetLanguage.mockImplementation((lang: string) => ({ title: lang }));
+
+      renderWithProvider(<LanguageToggle />);
+      const button = screen.getByTestId('queryPanelFooterLanguageToggle');
+      fireEvent.click(button);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('queryPanelFooterLanguageToggle-PPL')).toBeInTheDocument();
+      });
+      expect(screen.queryByTestId('queryPanelFooterLanguageToggle-SQL')).not.toBeInTheDocument();
+    });
+
+    it('should fallback to PPL only when tab is not resolved, even with feature flag enabled', async () => {
+      mockSqlSupportEnabled = true;
+      mockGetTab.mockReturnValue(undefined); // Tab not resolved
+      mockGetLanguage.mockImplementation((lang: string) => ({ title: lang }));
+
+      renderWithProvider(<LanguageToggle />);
+      const button = screen.getByTestId('queryPanelFooterLanguageToggle');
+      fireEvent.click(button);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('queryPanelFooterLanguageToggle-PPL')).toBeInTheDocument();
+      });
+      expect(screen.queryByTestId('queryPanelFooterLanguageToggle-SQL')).not.toBeInTheDocument();
+    });
+
+    it('should fallback to PPL only when tab is not resolved and feature flag is disabled', async () => {
+      mockSqlSupportEnabled = false;
+      mockGetTab.mockReturnValue(undefined); // Tab not resolved
+      mockGetLanguage.mockImplementation((lang: string) => ({ title: lang }));
+
+      renderWithProvider(<LanguageToggle />);
+      const button = screen.getByTestId('queryPanelFooterLanguageToggle');
+      fireEvent.click(button);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('queryPanelFooterLanguageToggle-PPL')).toBeInTheDocument();
+      });
+      expect(screen.queryByTestId('queryPanelFooterLanguageToggle-SQL')).not.toBeInTheDocument();
     });
   });
 });

@@ -51,9 +51,9 @@ const getFormattedValueFn = (value: any) => {
 
 const getParams = (filter: PhraseFilter) => {
   const scriptedPhraseValue = getScriptedPhraseValue(filter);
-  const isScriptedFilter = Boolean(scriptedPhraseValue);
+  const isScriptedFilter = scriptedPhraseValue != null;
   const key = isScriptedFilter ? filter.meta.field || '' : getPhraseFilterField(filter);
-  const query = scriptedPhraseValue || getPhraseFilterValue(filter);
+  const query = scriptedPhraseValue ?? getPhraseFilterValue(filter);
   const params = { query };
 
   return {

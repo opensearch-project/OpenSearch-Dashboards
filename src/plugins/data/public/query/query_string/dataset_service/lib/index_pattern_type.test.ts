@@ -157,7 +157,7 @@ describe('indexPatternTypeConfig', () => {
         fields: ['title', 'displayName', 'timeFieldName', 'references'],
         search: '*',
         searchFields: ['title', 'displayName'],
-        perPage: 100,
+        perPage: 10000,
       });
 
       expect(client.bulkGet).toHaveBeenCalledWith([{ id: 'datasource-abc', type: 'data-source' }]);

@@ -32,7 +32,6 @@ import { inspect } from 'util';
 
 import { WorkerMsg, CompilerMsg, Bundle, Summarizer } from '../common';
 
-import { ChangeEvent } from './watcher';
 import { WorkerStatus } from './observe_worker';
 import { OptimizerConfig } from './optimizer_config';
 
@@ -40,10 +39,10 @@ export interface OptimizerInitializedEvent {
   type: 'optimizer initialized';
 }
 
-export type OptimizerEvent = OptimizerInitializedEvent | ChangeEvent | WorkerMsg | WorkerStatus;
+export type OptimizerEvent = OptimizerInitializedEvent | WorkerMsg | WorkerStatus;
 
 export interface OptimizerState {
-  phase: 'initializing' | 'initialized' | 'running' | 'issue' | 'success' | 'reallocating';
+  phase: 'initializing' | 'initialized' | 'running' | 'issue' | 'success';
   startTime: number;
   durSec: number;
   compilerStates: CompilerMsg[];
@@ -63,8 +62,7 @@ function createOptimizerState(
 ): OptimizerState {
   // reset start time if we are transitioning into running
   const startTime =
-    (prevState.phase === 'success' || prevState.phase === 'issue') &&
-    (update?.phase === 'running' || update?.phase === 'reallocating')
+    (prevState.phase === 'success' || prevState.phase === 'issue') && update?.phase === 'running'
       ? Date.now()
       : prevState.startTime;
 
@@ -127,34 +125,6 @@ export function createOptimizerStateSummarizer(
     if (event.type === 'worker stdio' || event.type === 'worker started') {
       // same state, but updated so the event is shared externally
       return createOptimizerState(state);
-    }
-
-    if (event.type === 'changes detected') {
-      // switch to running early, before workers are started, so that
-      // base path proxy can prevent requests in the delay between changes
-      // and workers started
-      return createOptimizerState(state, {
-        phase: 'reallocating',
-      });
-    }
-
-    if (event.type === 'changes') {
-      const onlineBundles: Bundle[] = Array.from(
-        new Set([...state.onlineBundles, ...event.bundles])
-      );
-
-      const offlineBundles: Bundle[] = [];
-      for (const bundle of config.bundles) {
-        if (!onlineBundles.includes(bundle)) {
-          offlineBundles.push(bundle);
-        }
-      }
-
-      return createOptimizerState(state, {
-        phase: 'running',
-        onlineBundles,
-        offlineBundles,
-      });
     }
 
     if (

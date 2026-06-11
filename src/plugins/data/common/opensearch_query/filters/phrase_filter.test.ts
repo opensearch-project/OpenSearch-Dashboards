@@ -32,6 +32,7 @@ import {
   buildInlineScriptForPhraseFilter,
   buildPhraseFilter,
   getPhraseFilterField,
+  isScriptedPhraseFilter,
 } from './phrase_filter';
 import { fields, getField } from '../../index_patterns/mocks';
 import { IIndexPattern } from '../../index_patterns';
@@ -121,5 +122,85 @@ describe('getPhraseFilterField', function () {
     const filter = buildPhraseFilter(field!, 'jpg', indexPattern);
     const result = getPhraseFilterField(filter);
     expect(result).toBe('extension');
+  });
+});
+
+describe('isScriptedPhraseFilter', () => {
+  it('should return true for a scripted phrase filter with value 0', () => {
+    const filter = {
+      meta: { field: 'script number' },
+      script: {
+        script: {
+          lang: 'painless',
+          params: { value: 0 },
+          source: 'boolean compare(Supplier s, def v) {return s.get() == v;}',
+        },
+      },
+    };
+    expect(isScriptedPhraseFilter(filter)).toBe(true);
+  });
+
+  it('should return true for a scripted phrase filter with value false', () => {
+    const filter = {
+      meta: { field: 'script boolean' },
+      script: {
+        script: {
+          lang: 'painless',
+          params: { value: false },
+          source: 'boolean compare(Supplier s, def v) {return s.get() == v;}',
+        },
+      },
+    };
+    expect(isScriptedPhraseFilter(filter)).toBe(true);
+  });
+
+  it('should return true for a scripted phrase filter with empty string value', () => {
+    const filter = {
+      meta: { field: 'script string' },
+      script: {
+        script: {
+          lang: 'painless',
+          params: { value: '' },
+          source: 'boolean compare(Supplier s, def v) {return s.get() == v;}',
+        },
+      },
+    };
+    expect(isScriptedPhraseFilter(filter)).toBe(true);
+  });
+
+  it('should return true for a scripted phrase filter with a truthy value', () => {
+    const filter = {
+      meta: { field: 'script number' },
+      script: {
+        script: {
+          lang: 'expression',
+          params: { value: 5 },
+          source: '(1234) == value',
+        },
+      },
+    };
+    expect(isScriptedPhraseFilter(filter)).toBe(true);
+  });
+
+  it('should return false for a filter without script params value', () => {
+    const filter = {
+      meta: { index: 'logstash-*' },
+      query: { match_phrase: { extension: 'jpg' } },
+    };
+    expect(isScriptedPhraseFilter(filter)).toBe(false);
+  });
+
+  it('should return false for a filter with null script params value', () => {
+    const filter = {
+      meta: { field: 'script number' },
+      script: {
+        script: {
+          lang: 'painless',
+          params: { value: null },
+          source: 'boolean compare(Supplier s, def v) {return s.get() == v;}',
+        },
+      },
+    };
+    expect(isScriptedPhraseFilter(filter)).toBe(false);
   });
 });

@@ -63,6 +63,7 @@ const minMaxAgg = (field?: IFieldType) => {
 
 export class RangeControl extends Control<RangeFilterManager> {
   private searchSource: DataPublicPluginStart['search']['searchSource'];
+  private allowedIndexPatternIds: Set<string>;
 
   timefilter: TimefilterContract;
   abortController: any;
@@ -74,11 +75,13 @@ export class RangeControl extends Control<RangeFilterManager> {
     filterManager: RangeFilterManager,
     useTimeFilter: boolean,
     searchSource: DataPublicPluginStart['search']['searchSource'],
-    deps: InputControlVisDependencies
+    deps: InputControlVisDependencies,
+    allowedIndexPatternIds: Set<string>
   ) {
     super(controlParams, filterManager, useTimeFilter);
     this.timefilter = deps.data.query.timefilter.timefilter;
     this.searchSource = searchSource;
+    this.allowedIndexPatternIds = allowedIndexPatternIds;
   }
 
   async fetch() {
@@ -90,6 +93,18 @@ export class RangeControl extends Control<RangeFilterManager> {
     const indexPattern = this.filterManager.getIndexPattern();
     if (!indexPattern) {
       this.disable(noIndexPatternMsg(this.controlParams.indexPattern));
+      return;
+    }
+
+    // Check if the index pattern uses an AnalyticEngine data source
+    const isAnalyticEngine = !this.allowedIndexPatternIds.has(indexPattern.id || '');
+    if (isAnalyticEngine) {
+      this.disable(
+        i18n.translate('inputControl.rangeControl.analyticEngineNotSupported', {
+          defaultMessage:
+            'This data source uses Analytic Engine which does not support DSL queries. Use PPL-compatible features or switch to a standard OpenSearch data source.',
+        })
+      );
       return;
     }
 
@@ -142,7 +157,8 @@ export class RangeControl extends Control<RangeFilterManager> {
 export async function rangeControlFactory(
   controlParams: ControlParams,
   useTimeFilter: boolean,
-  deps: InputControlVisDependencies
+  deps: InputControlVisDependencies,
+  allowedIndexPatternIds: Set<string>
 ): Promise<RangeControl> {
   const [, { data: dataPluginStart }] = await deps.core.getStartServices();
   const indexPattern = await dataPluginStart.indexPatterns.get(controlParams.indexPattern);
@@ -157,6 +173,7 @@ export async function rangeControlFactory(
     ),
     useTimeFilter,
     dataPluginStart.search.searchSource,
-    deps
+    deps,
+    allowedIndexPatternIds
   );
 }
