@@ -45,7 +45,6 @@
     "postinstall": "scripts/use_node scripts/postinstall",
     "osd": "scripts/use_node scripts/osd",
     "opensearch": "scripts/use_node scripts/opensearch",
-    "test": "grunt test",
     "test:bwc": "./scripts/bwctest_osd.sh",
     "test:jest": "scripts/use_node scripts/jest",
     "test:jest:coverage": "scripts/use_node scripts/jest --coverage",
@@ -79,7 +78,6 @@
     "i18n:extract": "scripts/use_node scripts/i18n_extract.js",
     "i18n:integrate": "scripts/use_node scripts/i18n_integrate.js --ignore-missing --ignore-unused --update",
     "makelogs": "scripts/use_node scripts/makelogs",
-    "uiFramework:compileCss": "cd packages/osd-ui-framework && yarn compileCss",
     "osd:watch": "scripts/use_node scripts/opensearch_dashboards --dev --logging.json=false",
     "build:types": "scripts/use_node scripts/remove.js ./target/types && tsc --p tsconfig.types.json",
     "docs:acceptApiChanges": "scripts/use_node --max-old-space-size=6144 --max-semi-space-size=64 scripts/check_published_api_changes.js --accept",
@@ -122,7 +120,8 @@
     "generate:grammars:sql": "yarn workspace @osd/antlr-grammar generate:opensearchsql",
     "generate:grammars:ppl": "yarn workspace @osd/antlr-grammar generate:opensearchppl",
     "generate:grammars:ppl-simplified": "yarn workspace @osd/antlr-grammar generate:opensearchppl-simplified",
-    "generate:grammars:dql": "yarn workspace @osd/antlr-grammar generate:dql"
+    "generate:grammars:dql": "yarn workspace @osd/antlr-grammar generate:dql",
+    "generate:grammars:peg": "scripts/use_node scripts/generate_grammars"
   },
   "repository": {
     "type": "git",
@@ -166,7 +165,6 @@
     "**/body-parser": "^2.2.1",
     "**/@tootallnate/once": "^3.0.1",
     "**/fast-xml-parser": "^5.7.0",
-    "**/grunt/minimatch": "^3.1.5",
     "**/engine.io/ws": "^8.20.1",
     "**/mime-db": "^1.54.0",
     "**/socket.io-adapter/ws": "^8.20.1",
@@ -182,8 +180,6 @@
     "nohoist": [
       "**/@types/*",
       "**/@types/*/**",
-      "**/grunt-*",
-      "**/grunt-*/**",
       "@elastic/eui/rehype-react",
       "@elastic/eui/remark-rehype",
       "@elastic/eui/remark-rehype/**"
@@ -478,11 +474,6 @@
     "fp-ts": "^2.3.1",
     "geckodriver": "^6.1.0",
     "getopts": "^2.2.5",
-    "grunt": "^1.5.2",
-    "grunt-available-tasks": "^0.6.3",
-    "grunt-cli": "^1.4.3",
-    "grunt-peg": "^2.0.1",
-    "grunt-run": "^0.8.1",
     "gulp-babel": "^8.0.0",
     "has-ansi": "^3.0.0",
     "history": "^4.9.0",
@@ -503,7 +494,6 @@
     "less": "^4.1.3",
     "license-checker": "^25.0.1",
     "listr": "^0.14.1",
-    "load-grunt-config": "^4.0.1",
     "load-json-file": "^6.2.0",
     "luxon": "^3.2.1",
     "markdown-it": "^14.1.1",
