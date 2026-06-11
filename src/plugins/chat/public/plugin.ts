@@ -132,7 +132,12 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
     );
 
     // Always initialize chat service - core service handles enablement
-    this.chatService = new ChatService(core.uiSettings, core.chat, core.workspaces);
+    this.chatService = new ChatService(
+      core.uiSettings,
+      core.chat,
+      core.workspaces,
+      core.savedObjects.client
+    );
 
     if (!isEnabled) {
       return {

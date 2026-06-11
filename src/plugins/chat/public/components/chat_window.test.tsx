@@ -77,7 +77,15 @@ describe('ChatWindow', () => {
       abort: jest.fn(),
       setChatWindowInstance: jest.fn(),
       clearChatWindowInstance: jest.fn(),
-      getCurrentDataSourceId: jest.fn().mockResolvedValue(undefined),
+      getCurrentDataSourceId: jest.fn().mockResolvedValue('mock-ds-id'),
+      getUserMessage: jest.fn((content: string, rawMessage?: string) => ({
+        id: `msg-${Date.now()}`,
+        role: 'user',
+        content,
+        rawMessage: rawMessage || content,
+      })),
+      getAvailableDataSources: jest.fn().mockResolvedValue([]),
+      setDataSourceId: jest.fn(),
       conversationHistoryService: {
         getMemoryProvider: jest.fn().mockReturnValue({
           includeFullHistory: true,
@@ -163,7 +171,8 @@ describe('ChatWindow', () => {
 
       expect(mockChatService.sendMessage).toHaveBeenCalledWith(
         'test message from ref',
-        expect.any(Array)
+        expect.any(Array),
+        expect.any(Object)
       );
     });
   });
@@ -499,7 +508,11 @@ describe('ChatWindow', () => {
       });
 
       // Verify that sendMessage was called for the resend
-      expect(mockChatService.sendMessage).toHaveBeenCalledWith('Second message', expect.any(Array));
+      expect(mockChatService.sendMessage).toHaveBeenCalledWith(
+        'Second message',
+        expect.any(Array),
+        expect.any(Object)
+      );
       expect(resendObservable.subscribe).toHaveBeenCalled();
     });
 
@@ -522,7 +535,8 @@ describe('ChatWindow', () => {
       // The UI prevents showing resend buttons for non-user messages
       expect(mockChatService.sendMessage).toHaveBeenCalledWith(
         'Assistant message',
-        expect.any(Array)
+        expect.any(Array),
+        expect.any(Object)
       );
     });
 
@@ -663,7 +677,11 @@ describe('ChatWindow', () => {
 
       // The component doesn't trim input from sendMessage method, so it will be sent
       // This is the actual behavior - only the internal input state is trimmed
-      expect(mockChatService.sendMessage).toHaveBeenCalledWith('   \n\t  ', expect.any(Array));
+      expect(mockChatService.sendMessage).toHaveBeenCalledWith(
+        '   \n\t  ',
+        expect.any(Array),
+        expect.any(Object)
+      );
     });
 
     it('should not trim input when sent via ref sendMessage', async () => {
@@ -677,7 +695,8 @@ describe('ChatWindow', () => {
       // The sendMessage method via ref doesn't trim the input
       expect(mockChatService.sendMessage).toHaveBeenCalledWith(
         '  test message  ',
-        expect.any(Array)
+        expect.any(Array),
+        expect.any(Object)
       );
     });
   });
@@ -1534,12 +1553,14 @@ describe('ChatWindow', () => {
       expect(mockChatService.sendMessage).toHaveBeenNthCalledWith(
         1,
         'first message',
-        expect.any(Array)
+        expect.any(Array),
+        expect.any(Object)
       );
       expect(mockChatService.sendMessage).toHaveBeenNthCalledWith(
         2,
         'second message',
-        expect.any(Array)
+        expect.any(Array),
+        expect.any(Object)
       );
     });
 

@@ -307,6 +307,7 @@ describe('ChatService', () => {
         id: expect.stringMatching(/^msg-\d+-[a-z0-9]{9}$/),
         role: 'user',
         content: 'Hello, world!',
+        rawMessage: 'Hello, world!',
       });
 
       expect(result.observable).toBeDefined();
