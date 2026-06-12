@@ -1,0 +1,204 @@
+# SPDX-License-Identifier: Apache-2.0
+#
+# MFE dual-path gate (Phase 8) — ADDITIVE, credential-free.
+#
+# Enforces the micro-frontend dual-path invariant on every change to the MFE
+# branch WITHOUT any cloud credentials:
+#   PATH A  old way :5601 (no --mfe) is byte-for-byte unchanged
+#   PATH B  --mfe :5602 loads its UI from Module Federation remotes served by the
+#           LOCAL origin :8080 (NOT the CDN)
+#
+# This workflow is a thin GitHub Actions wrapper. ALL gate logic lives in the
+# committed, path-portable entrypoint `scripts/ci/mfe_dual_path.sh`, which builds
+# the MFE remotes, points the registry at the local origin, (re)launches :8080 +
+# :5602, and runs the credential-free verifier subset with a single aggregate exit
+# code. The CDN/CloudFront paths (deploy_mfe, verify_mfe_cdn, override-against-
+# CloudFront) need Isengard credentials and are DELIBERATELY EXCLUDED — they stay a
+# separate MANUAL job, never in this PR gate. No AWS secrets are referenced here.
+#
+# This file is purely additive: it does not modify any existing workflow.
+#
+# Topology note (real CI-green is confirmed on push):
+#   The entrypoint sources the shared harness (env.sh + verifiers) and reads the
+#   registry data file, both of which live at the WORKSPACE ROOT — the parent of
+#   the OpenSearch-Dashboards repo, mirroring local dev layout. To reproduce that
+#   layout on the runner, the repo is checked out into the `OpenSearch-Dashboards/`
+#   subdirectory so `${{ github.workspace }}` becomes the workspace root and the
+#   harness is expected at `${{ github.workspace }}/harness` (registry at
+#   `${{ github.workspace }}/registry`). The harness is not part of this repo, so a
+#   preflight step verifies it is present and fails fast with a clear message if it
+#   is not — the maintainer vendors/provisions the harness alongside the checkout.
+
+name: MFE dual-path gate
+
+# Trigger only on the MFE feature branch (additive; does not touch other branches'
+# pipelines). paths-ignore mirrors the existing workflows so doc-only changes skip.
+on:
+  push:
+    branches: ['feat/mfe']
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+      - '.lycheeignore'
+      - 'CODEOWNERS'
+      - 'changelogs/fragments/**'
+  pull_request:
+    branches: ['feat/mfe']
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+      - '.lycheeignore'
+      - 'CODEOWNERS'
+      - 'changelogs/fragments/**'
+  workflow_dispatch:
+
+env:
+  CI: 1
+  TEST_BROWSER_HEADLESS: 1
+  OSD_SNAPSHOT_SKIP_VERIFY_CHECKSUM: true
+  OSD_OPTIMIZER_MAX_WORKERS: 8
+  NODE_OPTIONS: '--max-old-space-size=8192 --max-semi-space-size=64 --dns-result-order=ipv4first'
+  # The OSD repo is checked out into this subdir so github.workspace == workspace
+  # root and the harness/registry resolve as siblings (same as local dev layout).
+  OSD_CHECKOUT_DIR: OpenSearch-Dashboards
+
+jobs:
+  mfe-dual-path:
+    name: Credential-free dual-path gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout OpenSearch Dashboards (into workspace-root subdir)
+        uses: actions/checkout@v4
+        with:
+          path: ${{ env.OSD_CHECKOUT_DIR }}
+
+      # OpenSearch snapshot is a JVM service; mirror build_and_test_workflow.yml.
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'adopt'
+
+      # Node 22: pinned by the repo's .nvmrc (22.22.0), same as every existing workflow.
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ${{ env.OSD_CHECKOUT_DIR }}/.nvmrc
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup Yarn
+        run: |
+          npm uninstall -g yarn
+          npm i -g yarn@1.22.10
+          yarn config set network-timeout 1000000 -g
+
+      - name: Configure Yarn Cache
+        working-directory: ${{ env.OSD_CHECKOUT_DIR }}
+        run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
+
+      - name: Initialize Yarn Cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.YARN_CACHE_LOCATION }}
+          key: yarn-${{ hashFiles('OpenSearch-Dashboards/yarn.lock') }}
+          restore-keys: |
+            yarn-
+
+      - name: Run bootstrap
+        working-directory: ${{ env.OSD_CHECKOUT_DIR }}
+        run: yarn osd bootstrap
+
+      # Build the platform plugins so the old-way :5601 renders the real UI (PATH A)
+      # and the MFE build has its inputs. Mirrors the functional/cypress workflows.
+      - name: Build plugins
+        working-directory: ${{ env.OSD_CHECKOUT_DIR }}
+        run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 8
+
+      # The credential-free gate renders pages via the harness verifiers (Playwright).
+      # Install the browser so verify_baseline/verify_mfe_render can run on the runner.
+      - name: Install Playwright Chromium
+        working-directory: ${{ env.OSD_CHECKOUT_DIR }}
+        run: npx --yes playwright install --with-deps chromium
+
+      # The harness (env.sh + verify_*.js) and the registry data file live at the
+      # workspace root, OUTSIDE this repo. They are required by the entrypoint.
+      # Fail fast with an actionable message if the runner does not have them.
+      - name: Preflight — verify MFE harness is present
+        run: |
+          set -euo pipefail
+          HARNESS="${GITHUB_WORKSPACE}/harness"
+          REGISTRY="${GITHUB_WORKSPACE}/registry/registry.json"
+          missing=0
+          if [ ! -f "${HARNESS}/env.sh" ]; then
+            echo "::error::MFE harness not found at ${HARNESS}/env.sh"
+            missing=1
+          fi
+          if [ ! -f "${REGISTRY}" ]; then
+            echo "::error::MFE registry not found at ${REGISTRY}"
+            missing=1
+          fi
+          if [ "${missing}" -ne 0 ]; then
+            echo "The dual-path gate requires the workspace-root harness + registry"
+            echo "alongside the OpenSearch-Dashboards checkout (same layout as local dev)."
+            echo "Vendor/provision them before this step on push for real CI-green."
+            exit 1
+          fi
+          echo "harness   : ${HARNESS}"
+          echo "registry  : ${REGISTRY}"
+
+      # Start OpenSearch (:9200). Mirrors the 'dashboard' config in cypress_workflow.yml.
+      - name: Start OpenSearch
+        working-directory: ${{ env.OSD_CHECKOUT_DIR }}
+        run: |
+          node scripts/opensearch snapshot \
+            -E cluster.routing.allocation.disk.threshold_enabled=false \
+            -E search.concurrent_segment_search.mode=none \
+            -E action.auto_create_index=true &
+          echo "Waiting for OpenSearch on :9200 ..."
+          for i in $(seq 1 60); do
+            if curl -s -o /dev/null http://localhost:9200; then
+              echo "OpenSearch is up"; exit 0
+            fi
+            sleep 5
+          done
+          echo "::error::OpenSearch did not become ready on :9200"; exit 1
+
+      # Start the OLD WAY OSD on :5601 (NO --mfe). Command mirrors the 'dashboard'
+      # START_CMD in cypress_workflow.yml. The entrypoint requires :5601 to be up
+      # and never starts/touches it itself.
+      - name: Start old-way OpenSearch Dashboards (:5601, no --mfe)
+        working-directory: ${{ env.OSD_CHECKOUT_DIR }}
+        run: |
+          node scripts/opensearch_dashboards \
+            --no-base-path --no-watch \
+            --savedObjects.maxImportPayloadBytes=10485760 \
+            --server.maxPayloadBytes=1759977 \
+            --logging.json=false \
+            --home.disableExperienceModal=true &
+          echo "Waiting for OSD on :5601 ..."
+          for i in $(seq 1 60); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:5601/api/status || echo 000)
+            if [ "$code" = "200" ] || [ "$code" = "401" ]; then
+              echo "OSD :5601 is up (HTTP $code)"; exit 0
+            fi
+            sleep 5
+          done
+          echo "::error::old-way OSD did not become ready on :5601"; exit 1
+
+      # The single credential-free gate. Builds the MFE remotes, points the registry
+      # at the local origin :8080, (re)launches :8080 + :5602, and runs PATH A + PATH B
+      # verifiers with one aggregate exit code. Makes ZERO AWS/CDN calls.
+      - name: Run dual-path gate (credential-free)
+        working-directory: ${{ env.OSD_CHECKOUT_DIR }}
+        run: bash scripts/ci/mfe_dual_path.sh
+
+      - name: Upload harness diagnostics on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mfe-dual-path-diagnostics
+          path: |
+            harness/_story*_logs/
+            harness/shots/
+          if-no-files-found: ignore
+          retention-days: 1
