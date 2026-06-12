@@ -56,6 +56,16 @@ export interface MfeEntry {
   module: string;
   /** Optional Subresource Integrity hash (`sha384-…`); recommended in prod. */
   integrity?: string;
+  /**
+   * Optional/nullable compatibility seed (reserved for Phases 9/10): the minimum
+   * OSD core version this remote is known to work against, as a semver string
+   * (e.g. `"3.5.0"`). It is informational DATA only — nothing reads it today, so
+   * its presence never changes resolution/load behavior. Reserving it now lets a
+   * future host gate loading a remote whose `minCoreVersion` exceeds the running
+   * core version without a schema bump. `undefined` (absent) and `null` both mean
+   * "no constraint"; when present and non-null it must be a non-empty string.
+   */
+  minCoreVersion?: string | null;
 }
 
 /**
@@ -165,6 +175,16 @@ function validateMfeEntry(id: string, entry: unknown, errors: string[]): void {
   // `integrity` is optional, but if present it must be a non-empty string.
   if (entry.integrity !== undefined && !isNonEmptyString(entry.integrity)) {
     errors.push(`mfes.${id}.integrity, when present, must be a non-empty string`);
+  }
+  // `minCoreVersion` is an optional/nullable compatibility seed: `undefined`
+  // (absent) and `null` both mean "no constraint". When present and non-null it
+  // must be a non-empty string. It carries no behavior today.
+  if (
+    entry.minCoreVersion !== undefined &&
+    entry.minCoreVersion !== null &&
+    !isNonEmptyString(entry.minCoreVersion)
+  ) {
+    errors.push(`mfes.${id}.minCoreVersion, when present, must be a non-empty string or null`);
   }
 }
 

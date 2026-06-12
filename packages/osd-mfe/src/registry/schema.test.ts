@@ -102,6 +102,32 @@ describe('registry schema validate()', () => {
     expect(result.valid).toBe(false);
     expect(result.errors.some((e) => e.includes('integrity'))).toBe(true);
   });
+
+  it('accepts an entry with a string minCoreVersion (compat seed)', () => {
+    const registry = validRegistry();
+    registry.mfes.inspector.minCoreVersion = '3.5.0';
+    expect(validate(registry).valid).toBe(true);
+  });
+
+  it('accepts a null minCoreVersion (no constraint)', () => {
+    const registry = validRegistry();
+    registry.mfes.inspector.minCoreVersion = null;
+    expect(validate(registry).valid).toBe(true);
+  });
+
+  it('accepts an entry without the optional minCoreVersion field', () => {
+    const registry = validRegistry();
+    delete registry.mfes.inspector.minCoreVersion;
+    expect(validate(registry).valid).toBe(true);
+  });
+
+  it('rejects a non-string, non-null minCoreVersion when present', () => {
+    const registry = validRegistry();
+    (registry.mfes.inspector as { minCoreVersion: unknown }).minCoreVersion = 42;
+    const result = validate(registry);
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.includes('minCoreVersion'))).toBe(true);
+  });
 });
 
 describe('assertValidRegistry()', () => {

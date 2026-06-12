@@ -31,6 +31,10 @@ Commands:
   --plugin <id>     Build a single UI plugin as an MF remote into target/mfe/<id>/
   --all             Build every discovered UI plugin into target/mfe/<id>/ (per-plugin
                     failures are reported in a summary but do not abort the run)
+  --dist            Produce a PRODUCTION build (minified, no source maps): mode
+                    production, SWC/LightningCSS minify, devtool:false. Without it the
+                    build is development (unminified + source maps). Combine with
+                    --plugin/--all (e.g. "--all --dist").
   --help, -h        Show this message`;
 
 /**
@@ -57,11 +61,12 @@ function listPlugins(repoRoot: string): void {
  *
  * @param pluginId the id of the plugin to build (e.g. "inspector")
  * @param repoRoot absolute path to the OpenSearch Dashboards repo root
+ * @param dist produce a production (minified, no source maps) build
  * @returns the process exit code (0 = success, non-zero = build failure)
  */
-async function buildPlugin(pluginId: string, repoRoot: string): Promise<number> {
+async function buildPlugin(pluginId: string, repoRoot: string, dist: boolean): Promise<number> {
   try {
-    const result = await buildMfeForPlugin(pluginId, repoRoot);
+    const result = await buildMfeForPlugin(pluginId, repoRoot, dist);
     // eslint-disable-next-line no-console
     console.log(
       `Built Module Federation remote "${result.pluginId}" -> ${Path.relative(
@@ -100,13 +105,15 @@ function firstLine(text: string | undefined): string {
  * failed (it must always build cleanly) or nothing built at all.
  *
  * @param repoRoot absolute path to the OpenSearch Dashboards repo root
+ * @param dist produce production (minified, no source maps) builds
  * @returns the process exit code (0 = usable build, non-zero = pilot/total failure)
  */
-async function buildAll(repoRoot: string): Promise<number> {
+async function buildAll(repoRoot: string, dist: boolean): Promise<number> {
   // eslint-disable-next-line no-console
   console.log('Building all discovered UI plugins as Module Federation remotes...\n');
 
   const { succeeded, failed } = await buildAllMfe(repoRoot, {
+    dist,
     onPluginResult: (outcome) => {
       if (outcome.ok) {
         // eslint-disable-next-line no-console
@@ -177,8 +184,12 @@ export function runCli(argv: string[], repoRoot: string): number | Promise<numbe
     return 0;
   }
 
+  // Production build toggle: applies to both `--all` and `--plugin`. Absent =>
+  // development build (unminified + source maps), matching the prior default.
+  const dist = argv.includes('--dist');
+
   if (argv.includes('--all')) {
-    return buildAll(repoRoot);
+    return buildAll(repoRoot, dist);
   }
 
   const pluginFlagIndex = argv.indexOf('--plugin');
@@ -191,7 +202,7 @@ export function runCli(argv: string[], repoRoot: string): number | Promise<numbe
       console.error(USAGE);
       return 1;
     }
-    return buildPlugin(pluginId, repoRoot);
+    return buildPlugin(pluginId, repoRoot, dist);
   }
 
   // eslint-disable-next-line no-console

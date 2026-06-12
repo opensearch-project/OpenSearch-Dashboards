@@ -73,6 +73,11 @@ export interface BuildAllMfeOptions {
    * writing to the console directly.
    */
   onPluginResult?: (outcome: { pluginId: string; ok: boolean; error?: string }) => void;
+  /**
+   * Produce a production (minified, no source maps) build. Defaults to `false`
+   * (development). Threaded straight through to {@link getMfeRspackConfig}.
+   */
+  dist?: boolean;
 }
 
 /**
@@ -123,13 +128,16 @@ function createSassImplementation(sassCompiler: sass.AsyncCompiler) {
  * @param plugin the discovered UI plugin to build
  * @param repoRoot absolute path to the OpenSearch Dashboards repo root
  * @param sassImplementation a `sass-loader` implementation (see {@link createSassImplementation})
+ * @param allPlugins every discovered plugin (used to externalize cross-plugin imports)
+ * @param dist produce a production (minified, no source maps) build
  * @returns details of the produced remote
  */
 async function compilePluginRemote(
   plugin: DiscoveredUiPlugin,
   repoRoot: string,
   sassImplementation: unknown,
-  allPlugins: DiscoveredUiPlugin[]
+  allPlugins: DiscoveredUiPlugin[],
+  dist: boolean
 ): Promise<MfeBuildResult> {
   const publicEntry = resolvePublicEntry(plugin.directory);
   const outputDir = Path.resolve(repoRoot, 'target/mfe', plugin.id);
@@ -139,6 +147,7 @@ async function compilePluginRemote(
     publicEntry,
     sassImplementation,
     allPlugins,
+    dist,
   });
 
   await new Promise<void>((resolve, reject) => {
@@ -188,11 +197,13 @@ async function compilePluginRemote(
  *
  * @param pluginId the id of the UI plugin to build (e.g. "inspector")
  * @param repoRoot absolute path to the OpenSearch Dashboards repo root
+ * @param dist produce a production (minified, no source maps) build (default `false`)
  * @returns details of the produced remote
  */
 export async function buildMfeForPlugin(
   pluginId: string,
-  repoRoot: string
+  repoRoot: string,
+  dist = false
 ): Promise<MfeBuildResult> {
   const allPlugins = discoverUiPlugins(repoRoot);
   const plugin = allPlugins.find((candidate) => candidate.id === pluginId);
@@ -212,7 +223,8 @@ export async function buildMfeForPlugin(
       plugin,
       repoRoot,
       createSassImplementation(sassCompiler),
-      allPlugins
+      allPlugins,
+      dist
     );
   } finally {
     await sassCompiler.dispose();
@@ -243,6 +255,7 @@ export async function buildAllMfe(
   const plugins = discoverUiPlugins(repoRoot);
   const succeeded: MfeBuildResult[] = [];
   const failed: MfeBuildFailure[] = [];
+  const dist = options.dist ?? false;
 
   for (const plugin of plugins) {
     const sassCompiler = await sass.initAsyncCompiler();
@@ -251,7 +264,8 @@ export async function buildAllMfe(
         plugin,
         repoRoot,
         createSassImplementation(sassCompiler),
-        plugins
+        plugins,
+        dist
       );
       succeeded.push(result);
       options.onPluginResult?.({ pluginId: plugin.id, ok: true });
