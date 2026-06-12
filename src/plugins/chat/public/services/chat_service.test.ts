@@ -307,6 +307,7 @@ describe('ChatService', () => {
         id: expect.stringMatching(/^msg-\d+-[a-z0-9]{9}$/),
         role: 'user',
         content: 'Hello, world!',
+        rawMessage: 'Hello, world!',
       });
 
       expect(result.observable).toBeDefined();
@@ -2085,6 +2086,258 @@ describe('ChatService', () => {
 
     afterEach(() => {
       jest.clearAllMocks();
+    });
+  });
+
+  describe('getAvailableDataSources', () => {
+    let mockSavedObjectsClient: any;
+
+    beforeEach(() => {
+      mockSavedObjectsClient = {
+        find: jest.fn().mockResolvedValue({
+          savedObjects: [
+            {
+              id: 'ds-1',
+              attributes: { title: 'Beta Source', dataSourceEngineType: 'OpenSearch' },
+            },
+            {
+              id: 'ds-2',
+              attributes: { title: 'Alpha Source', dataSourceEngineType: 'OpenSearch' },
+            },
+            {
+              id: 'ds-3',
+              attributes: { title: 'Gamma AE', dataSourceEngineType: 'AnalyticEngine' },
+            },
+          ],
+        }),
+      };
+    });
+
+    it('should return sorted data sources excluding AnalyticEngine', async () => {
+      const service = new (ChatService as any)(
+        mockUiSettings,
+        mockCoreChatService,
+        undefined,
+        mockSavedObjectsClient
+      );
+
+      const result = await service.getAvailableDataSources();
+
+      expect(result).toEqual([
+        { id: 'ds-2', title: 'Alpha Source' },
+        { id: 'ds-1', title: 'Beta Source' },
+      ]);
+    });
+
+    it('should cache the result and not query again', async () => {
+      const service = new (ChatService as any)(
+        mockUiSettings,
+        mockCoreChatService,
+        undefined,
+        mockSavedObjectsClient
+      );
+
+      await service.getAvailableDataSources();
+      await service.getAvailableDataSources();
+
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledTimes(1);
+    });
+
+    it('should return empty array when savedObjectsClient is not set', async () => {
+      const service = new (ChatService as any)(mockUiSettings, mockCoreChatService);
+
+      const result = await service.getAvailableDataSources();
+
+      expect(result).toEqual([]);
+    });
+
+    it('should return empty array when find throws', async () => {
+      mockSavedObjectsClient.find.mockRejectedValue(new Error('Network error'));
+      const service = new (ChatService as any)(
+        mockUiSettings,
+        mockCoreChatService,
+        undefined,
+        mockSavedObjectsClient
+      );
+
+      const result = await service.getAvailableDataSources();
+
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe('getCurrentDataSourceId', () => {
+    let mockSavedObjectsClient: any;
+    let mockWorkspaces: any;
+
+    beforeEach(() => {
+      mockWorkspaces = {
+        currentWorkspaceId$: { getValue: jest.fn().mockReturnValue('workspace-1') },
+      };
+
+      mockSavedObjectsClient = {
+        find: jest.fn().mockResolvedValue({
+          savedObjects: [
+            { id: 'ds-1', attributes: { title: 'Source One', dataSourceEngineType: 'OpenSearch' } },
+            { id: 'ds-2', attributes: { title: 'Source Two', dataSourceEngineType: 'OpenSearch' } },
+          ],
+        }),
+      };
+    });
+
+    it('should return data source ID when it exists in available data sources', async () => {
+      const { getDefaultDataSourceId } = jest.requireMock('../../../data_source_management/public');
+      getDefaultDataSourceId.mockResolvedValue('ds-1');
+
+      const service = new (ChatService as any)(
+        mockUiSettings,
+        mockCoreChatService,
+        mockWorkspaces,
+        mockSavedObjectsClient
+      );
+
+      const result = await service.getCurrentDataSourceId();
+
+      expect(result).toBe('ds-1');
+    });
+
+    it('should return undefined when data source ID is not in available data sources', async () => {
+      const { getDefaultDataSourceId } = jest.requireMock('../../../data_source_management/public');
+      getDefaultDataSourceId.mockResolvedValue('ds-invalid');
+
+      const service = new (ChatService as any)(
+        mockUiSettings,
+        mockCoreChatService,
+        mockWorkspaces,
+        mockSavedObjectsClient
+      );
+
+      const result = await service.getCurrentDataSourceId();
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when no data sources are available', async () => {
+      mockSavedObjectsClient.find.mockResolvedValue({ savedObjects: [] });
+      const { getDefaultDataSourceId } = jest.requireMock('../../../data_source_management/public');
+      getDefaultDataSourceId.mockResolvedValue('ds-1');
+
+      const service = new (ChatService as any)(
+        mockUiSettings,
+        mockCoreChatService,
+        mockWorkspaces,
+        mockSavedObjectsClient
+      );
+
+      const result = await service.getCurrentDataSourceId();
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should return cachedDataSourceId when it is valid', async () => {
+      const service = new (ChatService as any)(
+        mockUiSettings,
+        mockCoreChatService,
+        mockWorkspaces,
+        mockSavedObjectsClient
+      );
+
+      service.setDataSourceId('ds-2');
+      const result = await service.getCurrentDataSourceId();
+
+      expect(result).toBe('ds-2');
+    });
+
+    it('should return undefined when cachedDataSourceId is not in available data sources', async () => {
+      const service = new (ChatService as any)(
+        mockUiSettings,
+        mockCoreChatService,
+        mockWorkspaces,
+        mockSavedObjectsClient
+      );
+
+      service.setDataSourceId('ds-removed');
+      const result = await service.getCurrentDataSourceId();
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should prioritize page context data source when valid', async () => {
+      (global as any).window.assistantContextStore = {
+        getAllContexts: jest.fn().mockReturnValue([
+          {
+            categories: ['page', 'static'],
+            description: 'Page context',
+            value: { appId: 'explore', dataset: { dataSource: { id: 'ds-1' } } },
+          },
+        ]),
+      };
+
+      const service = new (ChatService as any)(
+        mockUiSettings,
+        mockCoreChatService,
+        mockWorkspaces,
+        mockSavedObjectsClient
+      );
+
+      const result = await service.getCurrentDataSourceId();
+
+      expect(result).toBe('ds-1');
+    });
+
+    it('should return undefined when page context data source is not in available list', async () => {
+      (global as any).window.assistantContextStore = {
+        getAllContexts: jest.fn().mockReturnValue([
+          {
+            categories: ['page', 'static'],
+            description: 'Page context',
+            value: { appId: 'explore', dataset: { dataSource: { id: 'ds-not-in-workspace' } } },
+          },
+        ]),
+      };
+
+      const service = new (ChatService as any)(
+        mockUiSettings,
+        mockCoreChatService,
+        mockWorkspaces,
+        mockSavedObjectsClient
+      );
+
+      const result = await service.getCurrentDataSourceId();
+
+      expect(result).toBeUndefined();
+    });
+
+    afterEach(() => {
+      delete (global as any).window.assistantContextStore;
+      jest.clearAllMocks();
+    });
+  });
+
+  describe('getUserMessage', () => {
+    it('should create a user message with content and rawMessage', () => {
+      const result = chatService.getUserMessage('hello world');
+
+      expect(result).toEqual({
+        id: expect.stringMatching(/^msg-\d+-[a-z0-9]{9}$/),
+        role: 'user',
+        content: 'hello world',
+        rawMessage: 'hello world',
+      });
+    });
+
+    it('should use provided rawMessage when given', () => {
+      const result = chatService.getUserMessage('/command output', '/command input');
+
+      expect(result.content).toBe('/command output');
+      expect(result.rawMessage).toBe('/command input');
+    });
+
+    it('should trim content', () => {
+      const result = chatService.getUserMessage('  spaced  ');
+
+      expect(result.content).toBe('spaced');
+      expect(result.rawMessage).toBe('spaced');
     });
   });
 });
