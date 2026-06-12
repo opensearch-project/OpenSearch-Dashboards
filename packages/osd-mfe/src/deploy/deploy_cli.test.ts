@@ -38,6 +38,20 @@ interface RecordedCommand {
   args: string[];
 }
 
+/** List every file under `dir` recursively (absolute paths). */
+function listFilesRecursive(dir: string): string[] {
+  const out: string[] = [];
+  for (const entry of Fs.readdirSync(dir, { withFileTypes: true })) {
+    const full = Path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      out.push(...listFilesRecursive(full));
+    } else {
+      out.push(full);
+    }
+  }
+  return out;
+}
+
 /**
  * Build a mock {@link CommandRunner} that records calls and returns canned
  * results. `headObjectExists` controls the immutability check; `adaStatus`/
@@ -143,13 +157,22 @@ describe('runDeployCli real publish', () => {
     // one head-object (immutability check) + one s3 cp per artifact (inspector + shared-deps)
     const cps = calls.filter((c) => c.command === 'aws' && c.args[1] === 'cp');
     expect(cps).toHaveLength(2);
-    // upload targets the versioned prefix, recursively
-    expect(cps[0].args).toEqual(expect.arrayContaining(['s3', 'cp', '--recursive', '--region']));
+    // upload targets the versioned prefix, recursively, with Content-Encoding: gzip
+    expect(cps[0].args).toEqual(
+      expect.arrayContaining(['s3', 'cp', '--recursive', '--content-encoding', 'gzip', '--region'])
+    );
+    // every artifact upload is marked gzip (pre-compressed transit, Phase 7 Story 4)
+    expect(cps.every((c) => c.args.includes('--content-encoding') && c.args.includes('gzip'))).toBe(
+      true
+    );
     expect(
       cps.some((c) => c.args.some((a) => /s3:\/\/test-bucket\/mfe\/inspector\//.test(a)))
     ).toBe(true);
+    // shared-deps is content-addressed: s3://.../mfe/shared-deps/<hash>/
     expect(
-      cps.some((c) => c.args.some((a) => a === 's3://test-bucket/mfe/shared-deps/3.5.0/'))
+      cps.some((c) =>
+        c.args.some((a) => /^s3:\/\/test-bucket\/mfe\/shared-deps\/[0-9a-f]{12}\/$/.test(a))
+      )
     ).toBe(true);
 
     // NEVER any infra-creation subcommand
@@ -180,12 +203,10 @@ describe('runDeployCli real publish', () => {
     expect(manifest.mfes.inspector.cdnUrl).toMatch(
       /^https:\/\/cdn\.example\.net\/mfe\/inspector\/[0-9a-f]{12}\/remoteEntry\.js$/
     );
-    expect(manifest.sharedDeps).toEqual(
-      expect.objectContaining({
-        version: '3.5.0',
-        key: 'mfe/shared-deps/3.5.0',
-        cdnUrl: 'https://cdn.example.net/mfe/shared-deps/3.5.0/',
-      })
+    expect(manifest.sharedDeps.version).toBe('3.5.0');
+    expect(manifest.sharedDeps.key).toMatch(/^mfe\/shared-deps\/[0-9a-f]{12}$/);
+    expect(manifest.sharedDeps.cdnUrl).toMatch(
+      /^https:\/\/cdn\.example\.net\/mfe\/shared-deps\/[0-9a-f]{12}\/$/
     );
   });
 
@@ -202,6 +223,57 @@ describe('runDeployCli real publish', () => {
     // No creds refresh under --skip-creds.
     expect(calls.find((c) => c.command === 'ada')).toBeUndefined();
     expect(out.logs.join('\n')).toContain('already published');
+  });
+
+  it('gzip-compresses every upload and never stages source maps for the CDN', () => {
+    const { root, env } = makeFixtureRepo();
+    // A source map alongside the remote must NOT be published to the public CDN.
+    Fs.writeFileSync(
+      Path.join(root, 'target', 'mfe', 'inspector', 'inspector.chunk.js.map'),
+      '{"version":3,"sources":[]}',
+      'utf8'
+    );
+    const out = captureConsole();
+
+    // Custom exec that inspects the staging dir handed to `aws s3 cp` at the
+    // moment of upload (before the CLI removes it), recording the staged file
+    // list and whether each .js body carries the gzip magic bytes.
+    const stagedByDest: Record<string, { files: string[]; jsAreGzip: boolean[] }> = {};
+    const run = (command: string, args: string[]): CommandResult => {
+      if (command === 'ada') {
+        return { status: 0, stdout: '', stderr: '' };
+      }
+      if (command === 'aws' && args[0] === 's3api' && args[1] === 'head-object') {
+        return { status: 254, stdout: '', stderr: '' };
+      }
+      if (command === 'aws' && args[0] === 's3' && args[1] === 'cp') {
+        const stagingDir = args[2];
+        const dest = args[3];
+        const files = listFilesRecursive(stagingDir).map((p) => Path.relative(stagingDir, p));
+        const jsAreGzip = files
+          .filter((f) => f.endsWith('.js'))
+          .map((f) => {
+            const buf = Fs.readFileSync(Path.join(stagingDir, f));
+            return buf[0] === 0x1f && buf[1] === 0x8b; // gzip magic
+          });
+        stagedByDest[dest] = { files, jsAreGzip };
+        return { status: 0, stdout: '', stderr: '' };
+      }
+      return { status: 0, stdout: '', stderr: '' };
+    };
+
+    const code = runDeployCli([], root, { env, out, exec: run });
+    expect(code).toBe(0);
+
+    const allStaged = Object.values(stagedByDest).flatMap((s) => s.files);
+    // Source maps are NEVER published to the public CDN.
+    expect(allStaged.some((f) => f.endsWith('.map'))).toBe(false);
+    // The remote's .js files were still uploaded, all gzip-compressed.
+    const allJsGzip = Object.values(stagedByDest).flatMap((s) => s.jsAreGzip);
+    expect(allJsGzip.length).toBeGreaterThan(0);
+    expect(allJsGzip.every(Boolean)).toBe(true);
+    // The CLI reported excluding the one source map.
+    expect(out.logs.join('\n')).toMatch(/excluded 1 source map/);
   });
 
   it('returns non-zero and aborts when creds refresh fails', () => {

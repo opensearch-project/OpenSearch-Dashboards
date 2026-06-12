@@ -30,17 +30,37 @@
  * `aws s3api head-object` (read, immutability check) and `aws s3 cp --recursive`
  * (object upload). It never calls create-bucket, create-distribution,
  * put-bucket-policy or put-public-access-block. See docs/01-MFE-DESIGN.md §6.
+ *
+ * Phase 7 Story 4 — pre-compressed transit: before uploading, each artifact is
+ * staged into a temp directory where every publishable file is gzip-compressed
+ * (filenames preserved) and source maps (`*.map`) are EXCLUDED so they never
+ * reach the public CDN. The staged tree is uploaded with `Content-Encoding:
+ * gzip`, so CloudFront serves the already-compressed bytes through regardless of
+ * its on-the-fly auto-compress size cap (this is what fixes the 27.8MB
+ * shared-deps). `aws s3 cp` still infers each object's Content-Type from its
+ * preserved filename extension.
  */
 
 import Fs from 'fs';
+import Os from 'os';
 import Path from 'path';
+import Zlib from 'zlib';
 import { spawnSync } from 'child_process';
 
 import { parseEnvFile, resolveCdnConfig, ResolvedCdnConfig } from './cdn_config';
-import { buildDeployPlan, DeployPlan, RemotePlan, SharedDepsPlan } from './plan';
+import { buildDeployPlan, DeployPlan, PlannedFile, RemotePlan, SharedDepsPlan } from './plan';
 
 /** Manifest schema version; bump on incompatible shape changes. */
 export const DEPLOY_MANIFEST_SCHEMA_VERSION = 1;
+
+/**
+ * File extensions that are NEVER published to the public CDN. Source maps stay
+ * private (Phase 7 Story 4 / docs §6): they would expose original sources and
+ * needlessly bloat the bucket. The `--dist` build emits no maps for the remotes,
+ * but the optimizer-built shared-deps dir still contains `.map` siblings, so the
+ * upload layer enforces the exclusion regardless of how the inputs were built.
+ */
+const NON_PUBLISHABLE_EXTENSIONS = new Set(['.map']);
 
 const USAGE = `Usage: node scripts/deploy_mfe [options]
 
@@ -289,26 +309,70 @@ function objectExists(
 }
 
 /**
- * Upload a whole local directory to `s3://<bucket>/<keyPrefix>/` recursively.
- * `aws s3 cp --recursive` writes objects only — it never touches bucket config.
+ * Gzip every publishable file of an artifact into a fresh temp staging dir,
+ * preserving relative paths/filenames and EXCLUDING source maps (which must
+ * never reach the public CDN — see {@link NON_PUBLISHABLE_EXTENSIONS}). The
+ * staged tree is what gets uploaded with `Content-Encoding: gzip`, so the wire
+ * bytes are compressed regardless of CloudFront's on-the-fly compression size
+ * cap. The caller MUST remove the returned directory.
+ *
+ * @returns the staging dir plus counts of files staged / source maps excluded
+ */
+function stageGzippedArtifact(
+  files: PlannedFile[]
+): { dir: string; staged: number; skippedMaps: number } {
+  const dir = Fs.mkdtempSync(Path.join(Os.tmpdir(), 'mfe-deploy-gz-'));
+  let staged = 0;
+  let skippedMaps = 0;
+  for (const file of files) {
+    const ext = Path.extname(file.relativePath).toLowerCase();
+    if (NON_PUBLISHABLE_EXTENSIONS.has(ext)) {
+      skippedMaps += 1;
+      continue;
+    }
+    const dest = Path.join(dir, file.relativePath);
+    Fs.mkdirSync(Path.dirname(dest), { recursive: true });
+    // Pre-compress: gzip is universally supported and decoded transparently by
+    // every HTTP client (the bytes decode back to the content-addressed source,
+    // so registry SRI hashes — computed over the decoded body — still match).
+    Fs.writeFileSync(dest, Zlib.gzipSync(Fs.readFileSync(file.localPath)));
+    staged += 1;
+  }
+  return { dir, staged, skippedMaps };
+}
+
+/**
+ * Upload a staged (already-gzipped) directory to `s3://<bucket>/<keyPrefix>/`
+ * recursively, marking every object `Content-Encoding: gzip`. `aws s3 cp` still
+ * infers each object's Content-Type from its preserved filename extension. This
+ * writes objects only — it never touches bucket or distribution config.
  *
  * @throws Error when the upload exits non-zero
  */
-function uploadDir(
+function uploadGzippedDir(
   exec: CommandRunner,
   cdn: ResolvedCdnConfig,
   env: NodeJS.ProcessEnv,
-  localDir: string,
+  stagingDir: string,
   keyPrefix: string
 ): void {
   const destination = `s3://${cdn.bucket}/${keyPrefix}/`;
   const result = exec(
     'aws',
-    ['s3', 'cp', localDir, destination, '--recursive', ...awsBaseFlags(cdn, env)],
+    [
+      's3',
+      'cp',
+      stagingDir,
+      destination,
+      '--recursive',
+      '--content-encoding',
+      'gzip',
+      ...awsBaseFlags(cdn, env),
+    ],
     { stdio: 'inherit' }
   );
   if (result.status !== 0) {
-    throw new Error(`Upload failed for ${localDir} -> ${destination} (exit ${result.status}).`);
+    throw new Error(`Upload failed for ${stagingDir} -> ${destination} (exit ${result.status}).`);
   }
 }
 
@@ -372,17 +436,21 @@ function printDryRun(plan: DeployPlan, manifestPath: string, out: DeployCliConso
   );
   out.log('');
   out.log(`[dry-run] would write manifest -> ${manifestPath}`);
+  out.log(
+    '[dry-run] each .js/.css/etc. would be uploaded gzip-compressed (Content-Encoding: gzip); ' +
+      'source maps (*.map) are excluded from the public CDN.'
+  );
   out.log('[dry-run] no AWS calls made; nothing was uploaded or written.');
 }
 
-/** Publish a single artifact dir unless its version already exists. Returns 'uploaded'|'skipped'. */
+/** Publish a single artifact's files unless its version already exists. Returns 'uploaded'|'skipped'. */
 function publishArtifact(
   exec: CommandRunner,
   cdn: ResolvedCdnConfig,
   env: NodeJS.ProcessEnv,
   out: DeployCliConsole,
   label: string,
-  localDir: string,
+  files: PlannedFile[],
   keyPrefix: string,
   markerKey: string
 ): 'uploaded' | 'skipped' {
@@ -390,8 +458,18 @@ function publishArtifact(
     out.log(`  = ${label}: already published at ${keyPrefix}/ (immutable, skipping)`);
     return 'skipped';
   }
-  out.log(`  + ${label}: uploading -> s3://${cdn.bucket}/${keyPrefix}/`);
-  uploadDir(exec, cdn, env, localDir, keyPrefix);
+  const { dir, staged, skippedMaps } = stageGzippedArtifact(files);
+  try {
+    out.log(
+      `  + ${label}: uploading ${staged} gzip file(s)` +
+        (skippedMaps > 0 ? ` (excluded ${skippedMaps} source map(s))` : '') +
+        ` -> s3://${cdn.bucket}/${keyPrefix}/`
+    );
+    uploadGzippedDir(exec, cdn, env, dir, keyPrefix);
+  } finally {
+    // Always remove the temp staging tree, even if the upload threw.
+    Fs.rmSync(dir, { recursive: true, force: true });
+  }
   return 'uploaded';
 }
 
@@ -461,7 +539,7 @@ export function runDeployCli(argv: string[], repoRoot: string, deps: DeployCliDe
           env,
           out,
           remote.id,
-          remote.localDir,
+          remote.files,
           remote.keyPrefix,
           remote.remoteEntryKey
         )
@@ -481,7 +559,7 @@ export function runDeployCli(argv: string[], repoRoot: string, deps: DeployCliDe
         env,
         out,
         `shared-deps ${shared.version}`,
-        shared.localDir,
+        shared.files,
         shared.keyPrefix,
         sharedMarker
       )

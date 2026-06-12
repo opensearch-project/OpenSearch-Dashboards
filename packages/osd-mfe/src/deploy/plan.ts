@@ -24,8 +24,11 @@
  * `contentHash = sha256(remoteEntry.js)[:12]` and `version = <osdVersion>+<hash>`,
  * so the key a remote is published under is content-addressed and a registry
  * entry can point straight at it. Artifacts therefore land at immutable paths
- * `<prefix>/<id>/<contentHash>/...` and are never overwritten in place; shared
- * deps land at `<prefix>/shared-deps/<osdVersion>/...`. See docs/01-MFE-DESIGN.md §6.
+ * `<prefix>/<id>/<contentHash>/...` and are never overwritten in place; the
+ * shared-deps bundle is likewise content-addressed by its entry file and lands
+ * at `<prefix>/shared-deps/<contentHash>/...` (Phase 7 Story 4 — so a compressed
+ * (re)publish ADDS a fresh immutable path rather than overwriting the in-use
+ * uncompressed one). See docs/01-MFE-DESIGN.md §6.
  */
 
 import { createHash } from 'crypto';
@@ -36,6 +39,13 @@ import { ResolvedCdnConfig } from './cdn_config';
 
 /** Module Federation exposes the plugin public entry under this module key. */
 const REMOTE_ENTRY_FILE = 'remoteEntry.js';
+
+/**
+ * The shared-deps entry bundle the bootstrap loads first; used to content-address
+ * the whole shared-deps directory (mirrors how a remote is addressed by its
+ * `remoteEntry.js`). Falls back to the first planned file when absent.
+ */
+const SHARED_DEPS_ENTRY_FILE = 'osd-ui-shared-deps.js';
 
 /** A single artifact file mapped to its absolute S3 key (including the prefix). */
 export interface PlannedFile {
@@ -71,9 +81,11 @@ export interface RemotePlan {
 export interface SharedDepsPlan {
   /** Shared-deps version label (the OSD version; matches the registry). */
   version: string;
+  /** First 12 hex chars of `sha256(osd-ui-shared-deps.js)` — the immutable path segment. */
+  contentHash: string;
   /** Absolute path to the local `packages/osd-ui-shared-deps/target` directory. */
   localDir: string;
-  /** S3 key prefix the whole directory is published under: `<prefix>/shared-deps/<ver>`. */
+  /** S3 key prefix the whole directory is published under: `<prefix>/shared-deps/<hash>`. */
   keyPrefix: string;
   /** Public CloudFront base URL of the shared-deps directory (trailing slash). */
   cdnUrl: string;
@@ -229,13 +241,25 @@ export function buildDeployPlan(options: BuildDeployPlanOptions): DeployPlan {
       `No built shared-deps found under ${sharedDepsDir}. Build @osd/ui-shared-deps first.`
     );
   }
-  const sharedKeyPrefix = joinKey(cdn.keyPrefix, 'shared-deps', osdVersion);
-  const sharedFiles = planFiles(sharedDepsDir, sharedKeyPrefix);
-  if (sharedFiles.length === 0) {
+  const sharedRelFiles = listFilesRecursive(sharedDepsDir);
+  if (sharedRelFiles.length === 0) {
     throw new Error(`Shared-deps directory ${sharedDepsDir} is empty; nothing to publish.`);
   }
+  // Content-address the shared-deps bundle by its entry file (mirrors how each
+  // remote is addressed by its remoteEntry.js) so a compressed (re)publish lands
+  // at a fresh immutable path instead of overwriting the in-use uncompressed one.
+  const sharedHashSource = sharedRelFiles.includes(SHARED_DEPS_ENTRY_FILE)
+    ? SHARED_DEPS_ENTRY_FILE
+    : sharedRelFiles[0];
+  const sharedContentHash = createHash('sha256')
+    .update(Fs.readFileSync(Path.join(sharedDepsDir, sharedHashSource)))
+    .digest('hex')
+    .slice(0, 12);
+  const sharedKeyPrefix = joinKey(cdn.keyPrefix, 'shared-deps', sharedContentHash);
+  const sharedFiles = planFiles(sharedDepsDir, sharedKeyPrefix);
   const sharedDeps: SharedDepsPlan = {
     version: osdVersion,
+    contentHash: sharedContentHash,
     localDir: sharedDepsDir,
     keyPrefix: sharedKeyPrefix,
     cdnUrl: `${joinUrl(cdn.baseUrl, sharedKeyPrefix)}/`,
