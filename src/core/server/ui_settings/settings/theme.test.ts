@@ -60,13 +60,9 @@ describe('theme settings', () => {
       expect(() => validate('v8')).not.toThrow();
       expect(() => validate('v9')).not.toThrow();
       expect(() => validate('Next (preview)')).not.toThrow();
-      expect(() => validate('v12')).toThrowErrorMatchingInlineSnapshot(`
-        "types that failed validation:
-        - [0]: expected value to equal [v7]
-        - [1]: expected value to equal [v8]
-        - [2]: expected value to equal [v9]
-        - [3]: expected value to equal [Next (preview)]"
-      `);
+      expect(() => validate('v12')).toThrowErrorMatchingInlineSnapshot(
+        `"SchemaTypeError: expected value to equal [Next (preview)]"`
+      );
     });
   });
 });
