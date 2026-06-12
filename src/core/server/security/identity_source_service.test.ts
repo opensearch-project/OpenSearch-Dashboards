@@ -45,7 +45,7 @@ describe('IdentitySourceService', () => {
 
       expect(() => {
         service.registerIdentitySourceHandler(sourceA, mockHandler2);
-      }).toThrow("Identity source 'sourceA' has already been registered");
+      }).toThrow("Identity source for field 'source' has already been registered");
     });
 
     it('should support registering multiple different sources', () => {
@@ -80,7 +80,7 @@ describe('IdentitySourceService', () => {
 
       expect(() => {
         service.getIdentitySourceHandler(sourceB);
-      }).toThrow("Identity source 'sourceB' has not been registered");
+      }).toThrow("Invalid input for field 'source', no matching identity source handler found");
     });
 
     it('should throw an error with the correct source name in the message', () => {
@@ -90,7 +90,7 @@ describe('IdentitySourceService', () => {
 
       expect(() => {
         service.getIdentitySourceHandler(unknownSource);
-      }).toThrow(`Identity source 'unknown-source' has not been registered`);
+      }).toThrow("Invalid input for field 'source', no matching identity source handler found");
     });
   });
 
@@ -124,7 +124,7 @@ describe('IdentitySourceService', () => {
 
         service.registerIdentitySourceHandler(source, createMockHandler());
         expect(() => service.registerIdentitySourceHandler(source, createMockHandler())).toThrow(
-          `Identity source '${source}' has already been registered`
+          `Identity source for field 'source' has already been registered`
         );
       }
     );
@@ -136,7 +136,7 @@ describe('IdentitySourceService', () => {
         const service = new IdentitySourceService(logger);
 
         expect(() => service.getIdentitySourceHandler(source)).toThrow(
-          `Identity source '${source}' has not been registered`
+          `Invalid input for field 'source', no matching identity source handler found`
         );
       }
     );
