@@ -146,6 +146,43 @@ export function getMfeRspackConfig(options: MfeRspackConfigOptions): Configurati
     }
   }
 
+  // Externalize OSD CORE public imports to the host's `__osdBundles__` shim instead
+  // of bundling a SECOND copy of core into every remote (home was ~24x its old size
+  // because core_public_* chunks were compiled in). The MFE bootstrap loads the
+  // server-provided `core.entry.js` FIRST (see bootstrap_mfe.js.hbs), registering the
+  // core public bundle under `entry/core/public` (+ `entry/core/public/utils`) before
+  // any remote evaluates, so the redirect resolves to the single host core instance.
+  //
+  // This mirrors the optimizer's core externalization
+  // (packages/osd-optimizer/src/worker/webpack.config.ts + optimizer_config.ts): the
+  // optimizer declares the core bundle as `{ type: 'entry', id: 'core',
+  // publicDirNames: ['public', 'public/utils'] }`, yielding bundle refs with exportIds
+  // `entry/core/<dir>` (see common/bundle_refs.ts: `${type}/${id}/${name}`). For each it
+  // resolves `./<dir>` against `src/core` and backs the resolved path with a virtual
+  // module `module.exports = __osdBundles__.get('entry/core/<dir>')`. We replicate that
+  // here so the `opensearch-dashboards/public` alias (which normalizes the import to
+  // `src/core/public`) and direct relative imports of `src/core/public/utils` (used by
+  // e.g. saved_objects_management, workspace, vis_type_vislib) both redirect to the
+  // shared core rather than recompiling core into the remote — a single core instance,
+  // and the multi-MB core chunks are gone. Cross-plugin externalization (above) is
+  // unchanged. The MFE only builds UI plugins (never core itself), so there is no
+  // self-reference to guard against here.
+  const coreContextDir = Path.resolve(repoRoot, 'src/core');
+  for (const coreDir of ['public', 'public/utils']) {
+    let resolvedCorePath: string | undefined;
+    try {
+      resolvedCorePath = resolver.sync(coreContextDir, `./${coreDir}`)?.path;
+    } catch (e) {
+      // If core's public entry can't be resolved there is nothing to redirect.
+      resolvedCorePath = undefined;
+    }
+    if (resolvedCorePath && !crossPluginVirtualFiles[resolvedCorePath]) {
+      crossPluginVirtualFiles[
+        resolvedCorePath
+      ] = `module.exports = __osdBundles__.get('entry/core/${coreDir}')`;
+    }
+  }
+
   // Absolute path (forward-slashed for Sass) to the theme globals prepended to
   // every plugin `.scss` import, exactly as the optimizer's sass-loader does.
   const globalsImport = Path.resolve(
