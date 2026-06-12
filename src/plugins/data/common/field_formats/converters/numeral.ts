@@ -36,6 +36,7 @@ import { OSD_FIELD_TYPES } from '../../osd_field_types/types';
 import { FieldFormat } from '../field_format';
 import { TextContextTypeConvert } from '../types';
 import { UI_SETTINGS } from '../../constants';
+import { formatBigInt } from '../utils/format_bigint';
 
 const numeralInst = numeral();
 
@@ -70,7 +71,12 @@ export abstract class NumeralFormat extends FieldFormat {
       (this.getConfig && this.getConfig(UI_SETTINGS.FORMAT_NUMBER_DEFAULT_LOCALE)) || 'en';
     numeral.language(defaultLocale);
 
-    const formatted = numeralInst.set(val).format(this.param('pattern'));
+    // Stock `@elastic/numeral` has no BigInt support, so long-numeral values are
+    // routed through a faithful port of the BigInt format path instead.
+    const pattern = this.param('pattern');
+    const formatted = isBigInt
+      ? formatBigInt(val, pattern, (numeral as any).languageData())
+      : numeralInst.set(val).format(pattern);
 
     numeral.language(previousLocale);
 
