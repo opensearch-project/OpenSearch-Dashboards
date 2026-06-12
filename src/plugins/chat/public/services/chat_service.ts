@@ -65,6 +65,9 @@ export class ChatService {
   // Data source explicitly selected by user in this session
   private cachedDataSourceId?: string;
 
+  // Cached available data sources for the current workspace
+  private cachedAvailableDataSources?: DataSourceInfo[];
+
   // Conversation history service
   public conversationHistoryService: ConversationHistoryService;
 
@@ -312,15 +315,21 @@ export class ChatService {
   }
 
   /**
-   * Get the current cached data source ID
-   * Returns the datasourceId that was last retrieved
+   * Get the current data source ID, validated against available data sources in the workspace.
    */
   public async getCurrentDataSourceId(): Promise<string | undefined> {
-    return (
+    const dataSourceId =
       this.getDataSourceFromPageContext() ||
       this.cachedDataSourceId ||
-      (await this.getWorkspaceAwareDataSourceId())
-    );
+      (await this.getWorkspaceAwareDataSourceId());
+
+    if (!dataSourceId) return undefined;
+
+    const available = await this.getAvailableDataSources();
+    if (available.length === 0) return undefined;
+    if (available.some((ds) => ds.id === dataSourceId)) return dataSourceId;
+
+    return undefined;
   }
 
   public async sendMessage(
@@ -755,8 +764,9 @@ export class ChatService {
     }
     this.coreChatService.newThread();
 
-    // Clear data source selection for new session
+    // Clear data source selection and cache for new session
     this.cachedDataSourceId = undefined;
+    this.cachedAvailableDataSources = undefined;
 
     // Clear dynamic context from global store for fresh chat session
     this.clearDynamicContextFromStore();
@@ -944,6 +954,7 @@ export class ChatService {
    * Get all available data sources, excluding incompatible ones (e.g. AnalyticEngine)
    */
   public async getAvailableDataSources(): Promise<DataSourceInfo[]> {
+    if (this.cachedAvailableDataSources) return this.cachedAvailableDataSources;
     if (!this.savedObjectsClient) return [];
 
     try {
@@ -956,10 +967,11 @@ export class ChatService {
         perPage: 100,
       });
 
-      return (response?.savedObjects || [])
+      this.cachedAvailableDataSources = (response?.savedObjects || [])
         .filter((ds) => ds.attributes?.dataSourceEngineType !== 'AnalyticEngine')
         .map((ds) => ({ id: ds.id, title: ds.attributes?.title || ds.id }))
         .sort((a, b) => a.title.toLowerCase().localeCompare(b.title.toLowerCase()));
+      return this.cachedAvailableDataSources;
     } catch {
       return [];
     }
