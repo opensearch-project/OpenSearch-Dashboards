@@ -178,9 +178,11 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     }
   }, [timeline, chatService, isLoading]);
 
-  // Clear thread ID on unmount to start fresh next time
+  // Clear thread ID and pending data source selection on unmount
   useUnmount(() => {
-    services.core.chat.resetThreadId()
+    services.core.chat.resetThreadId();
+    setPendingMessage(null);
+    setAvailableDataSources([]);
   });
 
   // Cache data source compatibility check to avoid network call on every message
