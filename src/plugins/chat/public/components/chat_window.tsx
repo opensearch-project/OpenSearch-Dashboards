@@ -310,10 +310,11 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     // Merge additional messages with current timeline for sending
     const messagesToSend = [...timeline, ...additionalMessages];
 
-    // Prompt user to select a data source if not yet determined
+    // Validate data source before sending
     if (!(await chatService.getCurrentDataSourceId())) {
       const dataSources = await chatService.getAvailableDataSources();
       if (dataSources.length >= 1) {
+        // Compatible data sources exist but none selected — prompt user to pick one
         const userMsg = chatService.getUserMessage(messageContent);
         setPendingMessage(userMsg);
         setAvailableDataSources(dataSources);
@@ -321,7 +322,21 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         return;
       }
 
-      // No data sources available
+      // Check if unsupported data sources exist (filtered out by getAvailableDataSources)
+      if (await isUnsupportedDataSource()) {
+        const userMsg = chatService.getUserMessage(messageContent);
+        const systemMsg: SystemMessage = {
+          id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+          role: 'system',
+          content: i18n.translate('chat.dataSourceUnsupported', {
+            defaultMessage: 'The current data source does not support AI features.',
+          }),
+        };
+        setTimeline((prev) => [...prev, userMsg, systemMsg]);
+        return;
+      }
+
+      // No data sources associated with this workspace
       const userMsg = chatService.getUserMessage(messageContent);
       const infoMsg: Message = {
         id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
@@ -331,20 +346,6 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         }),
       };
       setTimeline((prev) => [...prev, userMsg, infoMsg]);
-      return;
-    }
-
-    // Block AI features for unsupported data sources
-    if (await isUnsupportedDataSource()) {
-      const userMsg = chatService.getUserMessage(messageContent);
-      const systemMsg: SystemMessage = {
-        id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
-        role: 'system',
-        content: i18n.translate('chat.dataSourceUnsupported', {
-          defaultMessage: 'The current data source does not support AI features.',
-        }),
-      };
-      setTimeline((prev) => [...prev, userMsg, systemMsg]);
       return;
     }
 
@@ -468,6 +469,8 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     setTimeline([]);
     setCurrentRunId(null);
     setPendingConfirmation(null);
+    setPendingMessage(null);
+    setAvailableDataSources([]);
     confirmationService.cleanAll();
     setShowHistory(false);
   }, [chatService, confirmationService, stopStreaming]);
@@ -538,6 +541,8 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   const handleSelectConversation = useCallback(async (conversation: SavedConversation) => {
     // Stop any ongoing streaming before switching conversations
     stopStreaming();
+    setPendingMessage(null);
+    setAvailableDataSources([]);
 
     // Abort any ongoing conversation loading
     if (conversationLoadAbortControllerRef.current) {

@@ -625,7 +625,7 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
         })}
 
         {availableDataSources && availableDataSources.length > 0 && onDataSourceSelect && (
-          <div className="chatMessages__dataSourcePrompt">
+          <div>
             <EuiText color="subdued" size="xs">
               <small>
                 {i18n.translate('chat.dataSourceSelection.prompt', {
