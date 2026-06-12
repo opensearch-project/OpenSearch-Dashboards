@@ -53,20 +53,21 @@ export class StringType extends Type<string> {
             }
           });
 
-    if (options.minLength !== undefined) {
+    if (options.minLength !== undefined || options.maxLength !== undefined || options.validate) {
+      const { minLength, maxLength, validate: userValidate } = options;
       schema = ((schema as unknown) as OsdSchema).osdCustom((value: any) => {
-        if (value.length < options.minLength!) {
-          return `value has length [${value.length}] but it must have a minimum length of [${options.minLength}].`;
+        if (minLength !== undefined && value.length < minLength) {
+          return `value has length [${value.length}] but it must have a minimum length of [${minLength}].`;
+        }
+        if (maxLength !== undefined && value.length > maxLength) {
+          return `value has length [${value.length}] but it must have a maximum length of [${maxLength}].`;
+        }
+        if (userValidate) {
+          return userValidate(value);
         }
       });
-    }
-
-    if (options.maxLength !== undefined) {
-      schema = ((schema as unknown) as OsdSchema).osdCustom((value: any) => {
-        if (value.length > options.maxLength!) {
-          return `value has length [${value.length}] but it must have a maximum length of [${options.maxLength}].`;
-        }
-      });
+      // Prevent the base Type class from adding another osdCustom for validate
+      delete (options as any).validate;
     }
 
     super(schema, options);
