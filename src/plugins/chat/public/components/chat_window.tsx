@@ -186,13 +186,10 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   });
 
   // Cache data source compatibility check to avoid network call on every message
-  const unsupportedDataSourceRef = useRef<{ dataSourceId: string | undefined; result: boolean } | null>(null);
+  const unsupportedDataSourceRef = useRef<{ dataSourceId: string; result: boolean } | null>(null);
 
-  const isUnsupportedDataSource = useCallback(async (): Promise<boolean> => {
+  const isUnsupportedDataSource = useCallback(async (dataSourceId: string): Promise<boolean> => {
     try {
-      const dataSourceId = await chatService.getCurrentDataSourceId();
-      if (!dataSourceId) return false;
-      // Return cached result if data source hasn't changed
       if (unsupportedDataSourceRef.current?.dataSourceId === dataSourceId) {
         return unsupportedDataSourceRef.current.result;
       }
@@ -206,10 +203,9 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       unsupportedDataSourceRef.current = { dataSourceId, result };
       return result;
     } catch {
-      // Fail-open: transient errors should not block AI features
       return false;
     }
-  }, [chatService, services.core?.savedObjects?.client]);
+  }, [services.core?.savedObjects?.client]);
 
   // Helper function to handle message streaming with observable subscription
   const subscribeToMessageStream = useCallback(async (
@@ -311,32 +307,37 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     const messagesToSend = [...timeline, ...additionalMessages];
 
     // Validate data source before sending
-    if (!(await chatService.getCurrentDataSourceId())) {
-      const dataSources = await chatService.getAvailableDataSources();
-      if (dataSources.length >= 1) {
-        // Compatible data sources exist but none selected — prompt user to pick one
+    const currentDataSourceId = await chatService.getCurrentDataSourceId();
+
+    // 1. Check if current data source is unsupported
+    if (currentDataSourceId && (await isUnsupportedDataSource(currentDataSourceId))) {
+      const userMsg = chatService.getUserMessage(messageContent);
+      const systemMsg: SystemMessage = {
+        id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+        role: 'system',
+        content: i18n.translate('chat.dataSourceUnsupported', {
+          defaultMessage: 'The current data source does not support AI features.',
+        }),
+      };
+      setTimeline((prev) => [...prev, userMsg, systemMsg]);
+      return;
+    }
+
+    // 2. Check if current data source is valid (exists in available list)
+    const compatibleDataSources = await chatService.getAvailableDataSources();
+    const isValid = currentDataSourceId && compatibleDataSources.some((ds) => ds.id === currentDataSourceId);
+
+    if (!isValid) {
+      if (compatibleDataSources.length >= 1) {
+        // Compatible data sources exist — prompt user to pick one
         const userMsg = chatService.getUserMessage(messageContent);
         setPendingMessage(userMsg);
-        setAvailableDataSources(dataSources);
+        setAvailableDataSources(compatibleDataSources);
         setTimeline((prev) => [...prev, userMsg]);
         return;
       }
 
-      // Check if unsupported data sources exist (filtered out by getAvailableDataSources)
-      if (await isUnsupportedDataSource()) {
-        const userMsg = chatService.getUserMessage(messageContent);
-        const systemMsg: SystemMessage = {
-          id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
-          role: 'system',
-          content: i18n.translate('chat.dataSourceUnsupported', {
-            defaultMessage: 'The current data source does not support AI features.',
-          }),
-        };
-        setTimeline((prev) => [...prev, userMsg, systemMsg]);
-        return;
-      }
-
-      // No data sources associated with this workspace
+      // 3. No data sources associated with this workspace
       const userMsg = chatService.getUserMessage(messageContent);
       const infoMsg: Message = {
         id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,

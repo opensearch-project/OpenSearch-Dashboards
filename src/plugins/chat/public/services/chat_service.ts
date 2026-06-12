@@ -315,21 +315,14 @@ export class ChatService {
   }
 
   /**
-   * Get the current data source ID, validated against available data sources in the workspace.
+   * Get the current data source ID from all resolution sources.
    */
   public async getCurrentDataSourceId(): Promise<string | undefined> {
-    const dataSourceId =
+    return (
       this.getDataSourceFromPageContext() ||
       this.cachedDataSourceId ||
-      (await this.getWorkspaceAwareDataSourceId());
-
-    if (!dataSourceId) return undefined;
-
-    const available = await this.getAvailableDataSources();
-    if (available.length === 0) return undefined;
-    if (available.some((ds) => ds.id === dataSourceId)) return dataSourceId;
-
-    return undefined;
+      (await this.getWorkspaceAwareDataSourceId())
+    );
   }
 
   public async sendMessage(
@@ -365,7 +358,7 @@ export class ChatService {
     }
 
     // Get workspace-aware data source ID
-    const dataSourceId = await this.getWorkspaceAwareDataSourceId();
+    const dataSourceId = await this.getCurrentDataSourceId();
 
     // Get all contexts from the assistant context store (static + dynamic)
     const contextStore = (window as any).assistantContextStore;
