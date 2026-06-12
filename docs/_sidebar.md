@@ -214,6 +214,8 @@
     - [Opensearch dashboards.release notes 3.4.0](../release-notes/opensearch-dashboards.release-notes-3.4.0.md)
     - [Opensearch dashboards.release notes 3.5.0](../release-notes/opensearch-dashboards.release-notes-3.5.0.md)
   - scripts
+    - ci
+      - [MFE_SMOKE](../scripts/ci/MFE_SMOKE.md)
     - [README](../scripts/README.md)
   - [DOCS_README](DOCS_README.md)
   - [Theme](theme.md)

@@ -188,9 +188,37 @@ jobs:
       # The single credential-free gate. Builds the MFE remotes, points the registry
       # at the local origin :8080, (re)launches :8080 + :5602, and runs PATH A + PATH B
       # verifiers with one aggregate exit code. Makes ZERO AWS/CDN calls.
+      # KEEP_SERVERS=1 leaves :8080 + :5602 running so the optional Cypress smoke
+      # (next step) can drive the same --mfe instance instead of relaunching it.
       - name: Run dual-path gate (credential-free)
         working-directory: ${{ env.OSD_CHECKOUT_DIR }}
-        run: bash scripts/ci/mfe_dual_path.sh
+        run: KEEP_SERVERS=1 bash scripts/ci/mfe_dual_path.sh
+
+      # Optional FTR/Cypress SMOKE subset against the --mfe instance (:5602).
+      # Small + representative by design (the full FTR/Cypress suite is too heavy
+      # for a PR gate): proves >= 2 core apps (discover + dashboards, plus the home
+      # shell) load END-TO-END via Module Federation. It only drives a browser
+      # against the already-running :5602 (no creds, no CDN). The gate's teardown
+      # restores the registry FILE to its pre-run bytes, so first re-point it at the
+      # LOCAL origin :8080 — keeping the smoke fully credential-free and offline
+      # (no CloudFront). :5602 + :8080 are still running from the gate (KEEP_SERVERS=1);
+      # the mock origin serves the registry file per request, so no relaunch is needed.
+      - name: Re-point registry at local origin for the smoke (credential-free)
+        working-directory: ${{ env.OSD_CHECKOUT_DIR }}
+        run: |
+          MFE_REGISTRY_PATH="${GITHUB_WORKSPACE}/registry/registry.json" \
+            node scripts/update_registry --base-url http://localhost:8080
+
+      - name: MFE Cypress smoke against --mfe :5602 (credential-free)
+        working-directory: ${{ env.OSD_CHECKOUT_DIR }}
+        run: bash scripts/ci/mfe_smoke.sh
+
+      # Always stop the --mfe (:5602) + origin (:8080) the gate left running, on a
+      # clean exit or failure (the old-way :5601 + OpenSearch :9200 are left for the
+      # runner to reap). Best-effort; never fails the job.
+      - name: Teardown --mfe + origin
+        if: always()
+        run: bash "${GITHUB_WORKSPACE}/harness/reset_env.sh" reset || true
 
       - name: Upload harness diagnostics on failure
         if: failure()
@@ -200,5 +228,7 @@ jobs:
           path: |
             harness/_story*_logs/
             harness/shots/
+            OpenSearch-Dashboards/cypress/screenshots/
+            OpenSearch-Dashboards/cypress/videos/
           if-no-files-found: ignore
           retention-days: 1
