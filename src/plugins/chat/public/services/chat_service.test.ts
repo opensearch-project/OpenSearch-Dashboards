@@ -2201,7 +2201,7 @@ describe('ChatService', () => {
       expect(result).toBe('ds-1');
     });
 
-    it('should return undefined when data source ID is not in available data sources', async () => {
+    it('should return data source ID even if not in available data sources', async () => {
       const { getDefaultDataSourceId } = jest.requireMock('../../../data_source_management/public');
       getDefaultDataSourceId.mockResolvedValue('ds-invalid');
 
@@ -2214,10 +2214,10 @@ describe('ChatService', () => {
 
       const result = await service.getCurrentDataSourceId();
 
-      expect(result).toBeUndefined();
+      expect(result).toBe('ds-invalid');
     });
 
-    it('should return undefined when no data sources are available', async () => {
+    it('should return data source ID even when no compatible data sources are available', async () => {
       mockSavedObjectsClient.find.mockResolvedValue({ savedObjects: [] });
       const { getDefaultDataSourceId } = jest.requireMock('../../../data_source_management/public');
       getDefaultDataSourceId.mockResolvedValue('ds-1');
@@ -2231,7 +2231,7 @@ describe('ChatService', () => {
 
       const result = await service.getCurrentDataSourceId();
 
-      expect(result).toBeUndefined();
+      expect(result).toBe('ds-1');
     });
 
     it('should return cachedDataSourceId when it is valid', async () => {
@@ -2248,7 +2248,7 @@ describe('ChatService', () => {
       expect(result).toBe('ds-2');
     });
 
-    it('should return undefined when cachedDataSourceId is not in available data sources', async () => {
+    it('should return cachedDataSourceId even if not in available data sources', async () => {
       const service = new (ChatService as any)(
         mockUiSettings,
         mockCoreChatService,
@@ -2259,7 +2259,7 @@ describe('ChatService', () => {
       service.setDataSourceId('ds-removed');
       const result = await service.getCurrentDataSourceId();
 
-      expect(result).toBeUndefined();
+      expect(result).toBe('ds-removed');
     });
 
     it('should prioritize page context data source when valid', async () => {
@@ -2285,7 +2285,7 @@ describe('ChatService', () => {
       expect(result).toBe('ds-1');
     });
 
-    it('should return undefined when page context data source is not in available list', async () => {
+    it('should return page context data source even if not in available list', async () => {
       (global as any).window.assistantContextStore = {
         getAllContexts: jest.fn().mockReturnValue([
           {
@@ -2305,7 +2305,7 @@ describe('ChatService', () => {
 
       const result = await service.getCurrentDataSourceId();
 
-      expect(result).toBeUndefined();
+      expect(result).toBe('ds-not-in-workspace');
     });
 
     afterEach(() => {
