@@ -30,7 +30,7 @@
 
 import Path from 'path';
 import { rspack, Configuration } from '@rspack/core';
-import { getSwcLoaderConfig } from '@osd/utils';
+import { getSharedLoaderRules } from '@osd/utils';
 import browserslist from 'browserslist';
 
 import { DiscoveredUiPlugin } from './discover_plugins';
@@ -296,37 +296,18 @@ export function getMfeRspackConfig(options: MfeRspackConfigOptions): Configurati
           test: /\.(html|md|txt|tmpl)$/,
           type: 'asset/source',
         },
-        {
-          test: /\.(j|t)sx?$/,
-          exclude: [
-            // Don't transpile node_modules except the few packages that ship
-            // only modern/untranspiled sources (matches the optimizer's list).
-            /[\/\\]node_modules[\/\\](?!(vega(-lite|-label|-functions|-scenegraph)?|kbn-handlebars|@?reactflow)[\/\\])/,
-            // Don't look into release artifacts of installed plugins.
-            /[\/\\]plugins[\/\\][^\/\\]+[\/\\]build[\/\\]/,
-            // Don't reprocess core-js.
-            /node_modules[\\/]core-js/,
-          ],
-          use: getSwcLoaderConfig({ syntax: 'typescript', jsx: true, targets }),
-        },
-        {
-          test: /\.m?js$/,
-          resolve: {
-            // Allow Rspack to resolve ES modules without an explicit extension.
-            fullySpecified: false,
-          },
-        },
-        {
-          // Transpile CommonJS sources shipped by node_modules that use modern
-          // syntax (mirrors the optimizer's `.cjs` rule). core-js is excluded so
-          // its polyfills are not reprocessed.
-          test: /\.cjs$/,
-          include: /node_modules/,
-          exclude: [
-            /node_modules[\\/]core-js/,
+        // The SWC / `.cjs` / selective-node_modules transpile rules are the set the MFE
+        // build mirrored from the optimizer (packages/osd-optimizer/src/worker/
+        // webpack.config.ts). They now live in a single canonical helper in `@osd/utils`
+        // (alongside `getSwcLoaderConfig`, which both builds already import) so the loader
+        // settings can't drift between the two builds. See getSharedLoaderRules.
+        ...getSharedLoaderRules({
+          targets,
+          // The MFE build adds two `.cjs` excludes the optimizer does not need:
+          extraCjsExcludes: [
             // Do NOT re-transpile the Module Federation runtime that the
             // ModuleFederationPlugin injects (its files are named `*.cjs.cjs`, so
-            // they match this `.cjs` rule). Running them through swc with
+            // they match the `.cjs` rule). Running them through swc with
             // `externalHelpers` rewrites them to import `@swc/helpers` in a way
             // that leaves an MF-runtime module factory undefined, crashing the
             // container's startup (`Cannot read properties of undefined (reading
@@ -337,22 +318,7 @@ export function getMfeRspackConfig(options: MfeRspackConfigOptions): Configurati
             // swc's own helper runtime must not be transpiled by swc.
             /node_modules[\\/]@swc[\\/]helpers[\\/]/,
           ],
-          use: getSwcLoaderConfig({ syntax: 'ecmascript', targets }),
-        },
-        {
-          // A few node_modules ship only modern/untranspiled ESM and have no es5
-          // build, so they must be transpiled from source for the browser targets
-          // (mirrors the optimizer's selective node_modules `.m?js` rule).
-          test: /\.m?js$/,
-          include: [
-            /node_modules[\\/]@dagrejs/,
-            /node_modules[\\/]@xyflow/,
-            /node_modules[\\/]fast-png/,
-            /node_modules[\\/]iobuffer/,
-          ],
-          exclude: [/node_modules[\\/]core-js/],
-          use: getSwcLoaderConfig({ syntax: 'ecmascript', targets }),
-        },
+        }),
       ],
     },
 
