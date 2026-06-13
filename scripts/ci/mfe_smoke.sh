@@ -46,7 +46,14 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
 OSD_DIR_DERIVED="$(cd "$SCRIPT_DIR/../.." && pwd)"
 export OSD_DIR="${OSD_DIR:-$OSD_DIR_DERIVED}"
 export WORKSPACE_DIR="${WORKSPACE_DIR:-$(cd "$OSD_DIR/.." && pwd)}"
-HARNESS_DIR="${HARNESS_DIR:-$WORKSPACE_DIR/harness}"
+# Resolve harness: IN-REPO copy first (scripts/ci/mfe-harness/), then workspace parent.
+if [ -z "${HARNESS_DIR:-}" ]; then
+  if [ -f "$SCRIPT_DIR/mfe_harness/env.sh" ]; then
+    HARNESS_DIR="$SCRIPT_DIR/mfe_harness"
+  else
+    HARNESS_DIR="$WORKSPACE_DIR/harness"
+  fi
+fi
 
 log() { printf '[mfe_smoke] %s\n' "$*"; }
 fatal() { log "FATAL: $*"; exit 2; }

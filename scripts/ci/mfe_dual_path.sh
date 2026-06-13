@@ -60,10 +60,17 @@ set -uo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
 OSD_DIR_DERIVED="$(cd "$SCRIPT_DIR/../.." && pwd)"
 export OSD_DIR="${OSD_DIR:-$OSD_DIR_DERIVED}"
-# Standard layout: the harness + registry live in the OSD repo's PARENT (workspace
-# root). Allow explicit overrides so CI can place them elsewhere.
+# Resolve harness: IN-REPO copy first (scripts/ci/mfe-harness/), then workspace parent.
+# This lets the gate run from a plain fork checkout (CI) where ../harness doesn't exist.
+if [ -z "${HARNESS_DIR:-}" ]; then
+  if [ -f "$SCRIPT_DIR/mfe_harness/env.sh" ]; then
+    HARNESS_DIR="$SCRIPT_DIR/mfe_harness"
+  else
+    export WORKSPACE_DIR="${WORKSPACE_DIR:-$(cd "$OSD_DIR/.." && pwd)}"
+    HARNESS_DIR="$WORKSPACE_DIR/harness"
+  fi
+fi
 export WORKSPACE_DIR="${WORKSPACE_DIR:-$(cd "$OSD_DIR/.." && pwd)}"
-HARNESS_DIR="${HARNESS_DIR:-$WORKSPACE_DIR/harness}"
 
 log()  { printf '[mfe_dual_path] %s\n' "$*"; }
 hr()   { printf '\n%s\n=== %s\n%s\n' "$(printf '=%.0s' {1..78})" "$1" "$(printf '=%.0s' {1..78})"; }
@@ -105,6 +112,15 @@ log "creds     : NONE (credential-free gate; CDN/deploy paths are a separate man
 #    instance and OpenSearch are external dependencies (local dev / CI workflow).
 # ---------------------------------------------------------------------------
 [ -d "$OSD_DIR" ]        || fatal "OSD repo not found at $OSD_DIR"
+
+# In repo-only (CI) layout, the registry file doesn't exist yet — generate it.
+if [ ! -f "$REGISTRY_FILE" ]; then
+  log "registry not found — generating at $REGISTRY_FILE (repo-only/CI layout)"
+  mkdir -p "$(dirname "$REGISTRY_FILE")"
+  (cd "$OSD_DIR" && MFE_REGISTRY_PATH="$REGISTRY_FILE" node scripts/update_registry --base-url "$ORIGIN_URL") \
+    || fatal "failed to generate registry at $REGISTRY_FILE"
+fi
+
 [ -f "$REGISTRY_FILE" ]  || fatal "registry data file not found at $REGISTRY_FILE"
 
 http_code() { curl -s -m5 -o /dev/null -w '%{http_code}' "$1" 2>/dev/null || echo 000; }
