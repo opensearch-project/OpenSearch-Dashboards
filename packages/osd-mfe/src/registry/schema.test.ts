@@ -128,6 +128,90 @@ describe('registry schema validate()', () => {
     expect(result.valid).toBe(false);
     expect(result.errors.some((e) => e.includes('minCoreVersion'))).toBe(true);
   });
+
+  describe('Phase 9 builtAgainst + compat metadata', () => {
+    it('accepts an entry with well-formed builtAgainst + compat', () => {
+      const registry = validRegistry();
+      registry.mfes.inspector.builtAgainst = {
+        osdVersion: '3.5.0',
+        sharedDeps: { react: '^16.14.0', 'react-dom': '^16.12.0' },
+      };
+      registry.mfes.inspector.compat = {
+        minCoreVersion: '3.5.0',
+        compatibleCoreRange: '3.5.x',
+      };
+      expect(validate(registry).valid).toBe(true);
+    });
+
+    it('accepts an entry without builtAgainst/compat (legacy/unknown)', () => {
+      const registry = validRegistry();
+      delete registry.mfes.inspector.builtAgainst;
+      delete registry.mfes.inspector.compat;
+      expect(validate(registry).valid).toBe(true);
+    });
+
+    it('accepts an empty builtAgainst.sharedDeps map', () => {
+      const registry = validRegistry();
+      registry.mfes.inspector.builtAgainst = { osdVersion: '3.5.0', sharedDeps: {} };
+      expect(validate(registry).valid).toBe(true);
+    });
+
+    it('rejects builtAgainst without a string osdVersion', () => {
+      const registry = validRegistry();
+      registry.mfes.inspector.builtAgainst = {
+        sharedDeps: {},
+      } as Registry['mfes'][string]['builtAgainst'];
+      const result = validate(registry);
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain(
+        'mfes.inspector.builtAgainst.osdVersion must be a non-empty string'
+      );
+    });
+
+    it('rejects builtAgainst.sharedDeps with a non-string version', () => {
+      const registry = validRegistry();
+      registry.mfes.inspector.builtAgainst = {
+        osdVersion: '3.5.0',
+        sharedDeps: ({ react: 123 } as unknown) as Record<string, string>,
+      };
+      const result = validate(registry);
+      expect(result.valid).toBe(false);
+      expect(result.errors.some((e) => e.includes('builtAgainst.sharedDeps.react'))).toBe(true);
+    });
+
+    it('rejects a builtAgainst that is not an object', () => {
+      const registry = validRegistry();
+      (registry.mfes.inspector as { builtAgainst: unknown }).builtAgainst = 'nope';
+      const result = validate(registry);
+      expect(result.valid).toBe(false);
+      expect(
+        result.errors.some((e) => e.includes('builtAgainst, when present, must be an object'))
+      ).toBe(true);
+    });
+
+    it('rejects compat missing minCoreVersion / compatibleCoreRange', () => {
+      const registry = validRegistry();
+      registry.mfes.inspector.compat = {} as Registry['mfes'][string]['compat'];
+      const result = validate(registry);
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain(
+        'mfes.inspector.compat.minCoreVersion must be a non-empty string'
+      );
+      expect(result.errors).toContain(
+        'mfes.inspector.compat.compatibleCoreRange must be a non-empty string'
+      );
+    });
+
+    it('rejects a compat that is not an object', () => {
+      const registry = validRegistry();
+      (registry.mfes.inspector as { compat: unknown }).compat = 42;
+      const result = validate(registry);
+      expect(result.valid).toBe(false);
+      expect(result.errors.some((e) => e.includes('compat, when present, must be an object'))).toBe(
+        true
+      );
+    });
+  });
 });
 
 describe('assertValidRegistry()', () => {

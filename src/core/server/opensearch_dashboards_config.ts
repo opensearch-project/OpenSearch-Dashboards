@@ -139,6 +139,36 @@ export const config = {
       // allowOverride gate is on) so a developer can repoint an MFE at a local dev
       // server. NEVER applied in production. Empty default.
       devOverrideOrigins: schema.arrayOf(schema.string(), { defaultValue: [] }),
+      // Phase 9 version-compatibility POLICY. Controls how the MFE host reacts
+      // when a remote is built against an incompatible OSD core / shared-singleton
+      // version, or is missing the compatibility metadata. The env-keyed DEFAULTS
+      // (resolved at injection time by `resolveCompatPolicy`, mirroring the
+      // `allowOverride` dev/prod gate) are: onIncompatible => dev `block` / prod
+      // `skip`; onMissing => dev `warn-load` / prod `skip`. Both are left UNSET
+      // here (no default) so the effective value tracks the server's dev mode;
+      // an explicit value always wins. `strictShared` (singleton version strictly
+      // enforced) is not env-keyed and defaults to `true` — a detected mismatch is
+      // then handled by the same onIncompatible action, so strict never
+      // white-screens prod. See docs/01-MFE-DESIGN.md and prd.json (Phase 9).
+      compat: schema.object({
+        // INCOMPATIBLE (known) remote: `block` the whole page (loud, list
+        // offenders) or `skip` the plugin (page keeps working).
+        onIncompatible: schema.maybe(
+          schema.oneOf([schema.literal('block'), schema.literal('skip')])
+        ),
+        // MISSING/UNKNOWN compatibility metadata: `block`, `skip`, or `warn-load`
+        // (load anyway with a warning).
+        onMissing: schema.maybe(
+          schema.oneOf([
+            schema.literal('block'),
+            schema.literal('skip'),
+            schema.literal('warn-load'),
+          ])
+        ),
+        // Enforce strict shared-singleton versions (never silently run a
+        // mismatched singleton). Defaults to true.
+        strictShared: schema.boolean({ defaultValue: true }),
+      }),
     }),
   }),
   deprecations,

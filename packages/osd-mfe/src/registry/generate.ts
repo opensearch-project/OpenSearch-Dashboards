@@ -26,6 +26,7 @@ import Fs from 'fs';
 import Path from 'path';
 
 import { MfeEntry, Registry, SCHEMA_VERSION } from './schema';
+import { computeCompatMetadata } from './compat';
 
 /** Module Federation exposes the plugin public entry under this module key. */
 const EXPOSED_MODULE = './public';
@@ -132,9 +133,18 @@ export function generateRegistry(options: GenerateRegistryOptions): Registry {
     );
   }
 
+  // Phase 9 compatibility contract: every remote is built from one tree, so the
+  // builtAgainst/compat metadata is identical for every entry — compute it once
+  // (reusing the already-resolved osdVersion) and stamp it onto each entry.
+  const { builtAgainst, compat } = computeCompatMetadata(repoRoot, osdVersion);
+
   const mfes: Record<string, MfeEntry> = {};
   for (const id of ids) {
-    mfes[id] = buildEntry(id, Path.join(targetMfeDir, id, 'remoteEntry.js'), baseUrl, osdVersion);
+    mfes[id] = {
+      ...buildEntry(id, Path.join(targetMfeDir, id, 'remoteEntry.js'), baseUrl, osdVersion),
+      builtAgainst,
+      compat,
+    };
   }
 
   return {

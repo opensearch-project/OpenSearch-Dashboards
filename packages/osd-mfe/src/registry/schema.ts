@@ -40,6 +40,50 @@ export interface SharedDepsDescriptor {
 }
 
 /**
+ * What a remote was BUILT AGAINST (Phase 9 compatibility contract). This is the
+ * left-hand side of the compatibility axis: the OSD core version and the
+ * shared-singleton semver ranges the remote's bundle expects from the host.
+ *
+ * It is DATA computed deterministically at generation time (osdVersion from the
+ * repo `package.json`; sharedDeps from `@osd/ui-shared-deps` + the root
+ * `package.json` `requiredVersion`s — the same source Module Federation uses to
+ * configure its shared singletons). Today every remote is built from one tree so
+ * every entry's `builtAgainst` is identical; independent deploys (Phase 10) will
+ * make them diverge, and the host's classifier (Phase 9 Story 2) compares the
+ * running core/shared versions against these to decide compatibility.
+ *
+ * `sharedDeps` only records roots whose `requiredVersion` is an expressible
+ * semver range; roots disabled in the MF config (`npm:` aliases / unknown
+ * versions, whose runtime check is `false`) are intentionally omitted because
+ * there is no range to satisfy.
+ */
+export interface BuiltAgainst {
+  /** OSD core version the remote was built against (semver, e.g. `"3.5.0"`). */
+  osdVersion: string;
+  /** Shared-singleton root -> semver range the remote requires (e.g. `react` -> `^16.14.0`). */
+  sharedDeps: Record<string, string>;
+}
+
+/**
+ * The remote's HOST-COMPATIBILITY declaration (Phase 9 compatibility contract):
+ * the range of OSD core versions it declares itself compatible with. This is the
+ * right-hand side of the OSD-core axis — the classifier checks the running core
+ * version against it.
+ *
+ * Defaults are derived from {@link BuiltAgainst.osdVersion} at generation time:
+ * `minCoreVersion = "<major>.<minor>.0"` and `compatibleCoreRange = "<major>.<minor>.x"`
+ * (i.e. "same OSD major.minor"), matching the locked compatibility axis. It
+ * carries no behavior in this story (data + config surface only); Story 2/3 read
+ * it. This supersedes the reserved top-level {@link MfeEntry.minCoreVersion} seed.
+ */
+export interface CompatDeclaration {
+  /** Minimum compatible OSD core version, inclusive (semver string). */
+  minCoreVersion: string;
+  /** Semver range of compatible OSD core versions (default `"<major>.<minor>.x"`). */
+  compatibleCoreRange: string;
+}
+
+/**
  * A single micro-frontend entry: the Module Federation remote for one plugin.
  */
 export interface MfeEntry {
@@ -66,6 +110,21 @@ export interface MfeEntry {
    * "no constraint"; when present and non-null it must be a non-empty string.
    */
   minCoreVersion?: string | null;
+  /**
+   * What this remote was BUILT AGAINST (Phase 9). DATA populated at generation
+   * time (see {@link BuiltAgainst}). Optional/absent on legacy entries — a
+   * missing `builtAgainst` is treated as UNKNOWN metadata by the classifier
+   * (Phase 9 Story 2), which the env policy then handles (non-prod warn+load,
+   * prod skip). Carries no behavior in this story.
+   */
+  builtAgainst?: BuiltAgainst;
+  /**
+   * The remote's host-compatibility declaration (Phase 9). DATA populated at
+   * generation time (see {@link CompatDeclaration}); defaults derive from
+   * `builtAgainst.osdVersion`. Optional/absent on legacy entries (UNKNOWN).
+   * Carries no behavior in this story.
+   */
+  compat?: CompatDeclaration;
 }
 
 /**
@@ -185,6 +244,51 @@ function validateMfeEntry(id: string, entry: unknown, errors: string[]): void {
     !isNonEmptyString(entry.minCoreVersion)
   ) {
     errors.push(`mfes.${id}.minCoreVersion, when present, must be a non-empty string or null`);
+  }
+  // `builtAgainst` is the Phase 9 compatibility seed (optional). When present it
+  // must carry a non-empty `osdVersion` and a `sharedDeps` map of non-empty
+  // string semver ranges (keyed by package root).
+  if (entry.builtAgainst !== undefined) {
+    validateBuiltAgainst(id, entry.builtAgainst, errors);
+  }
+  // `compat` is the host-compatibility declaration (optional). When present both
+  // `minCoreVersion` and `compatibleCoreRange` must be non-empty strings.
+  if (entry.compat !== undefined) {
+    validateCompat(id, entry.compat, errors);
+  }
+}
+
+/** Validate a single `mfes[id].builtAgainst`, appending any problems to `errors`. */
+function validateBuiltAgainst(id: string, value: unknown, errors: string[]): void {
+  if (!isPlainObject(value)) {
+    errors.push(`mfes.${id}.builtAgainst, when present, must be an object`);
+    return;
+  }
+  if (!isNonEmptyString(value.osdVersion)) {
+    errors.push(`mfes.${id}.builtAgainst.osdVersion must be a non-empty string`);
+  }
+  if (!isPlainObject(value.sharedDeps)) {
+    errors.push(`mfes.${id}.builtAgainst.sharedDeps must be an object of semver ranges`);
+  } else {
+    for (const dep of Object.keys(value.sharedDeps)) {
+      if (!isNonEmptyString(value.sharedDeps[dep])) {
+        errors.push(`mfes.${id}.builtAgainst.sharedDeps.${dep} must be a non-empty string`);
+      }
+    }
+  }
+}
+
+/** Validate a single `mfes[id].compat`, appending any problems to `errors`. */
+function validateCompat(id: string, value: unknown, errors: string[]): void {
+  if (!isPlainObject(value)) {
+    errors.push(`mfes.${id}.compat, when present, must be an object`);
+    return;
+  }
+  if (!isNonEmptyString(value.minCoreVersion)) {
+    errors.push(`mfes.${id}.compat.minCoreVersion must be a non-empty string`);
+  }
+  if (!isNonEmptyString(value.compatibleCoreRange)) {
+    errors.push(`mfes.${id}.compat.compatibleCoreRange must be a non-empty string`);
   }
 }
 

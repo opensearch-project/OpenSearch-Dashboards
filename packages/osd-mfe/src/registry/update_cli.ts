@@ -32,6 +32,7 @@ import Fs from 'fs';
 import Path from 'path';
 
 import { generateRegistry } from './generate';
+import { computeCompatMetadata, CompatMetadata } from './compat';
 import { assertValidRegistry, MfeEntry, Registry, SCHEMA_VERSION } from './schema';
 
 const USAGE = `Usage: node scripts/update_registry [options]
@@ -161,6 +162,11 @@ function patchEntry(
     scope: existing.scope,
     module: existing.module,
     // `integrity` deliberately omitted — see the docstring above.
+    // Carry forward the Phase 9 compatibility metadata: it describes what the
+    // remote was built against and does not change when an operator repoints a
+    // URL or relabels a version.
+    ...(existing.builtAgainst !== undefined ? { builtAgainst: existing.builtAgainst } : {}),
+    ...(existing.compat !== undefined ? { compat: existing.compat } : {}),
   };
 
   registry.mfes[pluginId] = patched;
@@ -318,12 +324,17 @@ function readExistingMfes(registryPath: string): Record<string, MfeEntry> {
  * @param manifest validated deploy manifest data
  * @param now timestamp to stamp into `generatedAt`
  * @param priorMfes the current registry's `mfes` map (pass `{}` when none)
+ * @param compatMeta Phase 9 compatibility metadata to stamp onto every entry
+ *   (`builtAgainst`/`compat`). Optional: when omitted, entries carry no compat
+ *   data (treated as UNKNOWN by the classifier). It is generation-time DATA
+ *   computed from the repo, identical for every entry built from one tree.
  * @returns an in-memory registry (validate + write it separately)
  */
 export function buildRegistryFromManifest(
   manifest: DeployManifestData,
   now: Date,
-  priorMfes: Record<string, MfeEntry> = {}
+  priorMfes: Record<string, MfeEntry> = {},
+  compatMeta?: CompatMetadata
 ): Registry {
   const mfes: Record<string, MfeEntry> = {};
   for (const id of Object.keys(manifest.mfes).sort((a, b) => a.localeCompare(b))) {
@@ -338,6 +349,15 @@ export function buildRegistryFromManifest(
       scope: prior?.scope ?? `osdMfe_${id}`,
       module: prior?.module ?? './public',
       ...(carryIntegrity ? { integrity: prior!.integrity } : {}),
+      // Phase 9: stamp freshly-computed compat metadata when provided, else carry
+      // forward whatever the prior registry recorded (so re-registering a CDN
+      // revision never silently drops the contract data).
+      ...(compatMeta?.builtAgainst ?? prior?.builtAgainst
+        ? { builtAgainst: compatMeta?.builtAgainst ?? prior!.builtAgainst }
+        : {}),
+      ...(compatMeta?.compat ?? prior?.compat
+        ? { compat: compatMeta?.compat ?? prior!.compat }
+        : {}),
     };
   }
 
@@ -350,6 +370,21 @@ export function buildRegistryFromManifest(
     },
     mfes,
   };
+}
+
+/**
+ * Best-effort {@link computeCompatMetadata}: returns `undefined` when the repo
+ * cannot be read (e.g. a test stub repoRoot with no `package.json`). Registering
+ * a CDN revision must not depend on a readable repo — when metadata can't be
+ * computed, {@link buildRegistryFromManifest} carries forward whatever the prior
+ * registry recorded. Mirrors the best-effort {@link readExistingMfes}.
+ */
+function tryComputeCompatMetadata(repoRoot: string): CompatMetadata | undefined {
+  try {
+    return computeCompatMetadata(repoRoot);
+  } catch {
+    return undefined;
+  }
 }
 
 /** Write the registry as pretty JSON (trailing newline) to `registryPath`. */
@@ -399,7 +434,12 @@ export function runUpdateCli(
         JSON.parse(Fs.readFileSync(manifestPath, 'utf8')),
         manifestPath
       );
-      registry = buildRegistryFromManifest(manifest, now, readExistingMfes(registryPath));
+      registry = buildRegistryFromManifest(
+        manifest,
+        now,
+        readExistingMfes(registryPath),
+        tryComputeCompatMetadata(repoRoot)
+      );
       summary =
         `Registered CDN revision from ${manifestPath} ` +
         `(${Object.keys(registry.mfes).length} entrie(s) @ ${manifest.cdn.baseUrl})`;
