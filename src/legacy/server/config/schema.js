@@ -283,6 +283,18 @@ export default () =>
         // Extra dev-only script origins, allow-listed in CSP ONLY when allowOverride
         // is on (non-prod). Never applied in production.
         devOverrideOrigins: Joi.array().items(Joi.string()).default([]),
+        // Phase 9 version-compatibility POLICY. Declared here so the LEGACY config
+        // (read by ui_render_mixin.js) resolves `opensearchDashboards.mfe.compat.*`;
+        // mirrors the new-platform schema in opensearch_dashboards_config.ts.
+        // onIncompatible/onMissing have NO `.default()` so an unset value resolves to
+        // undefined and the effective policy tracks dev mode at injection time
+        // (resolveCompatPolicy: non-prod => block/warn-load, prod => skip/skip); an
+        // explicit value always wins. strictShared defaults to true.
+        compat: Joi.object({
+          onIncompatible: Joi.string().valid('block', 'skip'),
+          onMissing: Joi.string().valid('block', 'skip', 'warn-load'),
+          strictShared: Joi.boolean().default(true),
+        }).default(),
       }).default(),
     }).default(),
 

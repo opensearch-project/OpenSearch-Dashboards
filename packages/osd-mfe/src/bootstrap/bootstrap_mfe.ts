@@ -29,6 +29,7 @@
 import { assertValidRegistry, Registry } from '../registry/schema';
 import { RegistryProvider } from '../registry/provider';
 import { resolve, OverrideMap, ResolvedRemote } from '../registry/resolve';
+import { HostEnvironment } from '../registry/compat_classifier';
 import { buildShareScope } from './share_scope';
 import { getRemoteModuleFactory, loadRemoteContainer, loadScript } from './load_remote';
 import {
@@ -37,6 +38,9 @@ import {
   registerPluginFactory,
 } from './osd_bundles';
 import { buildOverrideMap, OverrideStorage, parseOverrideSources } from './override_sources';
+import { CompatPolicy } from './compat_policy';
+import { decideCompat, EvaluatedRemote } from './compat_enforcement';
+import { renderCompatBlockPage } from './compat_block_page';
 import { mfeWindow } from './types';
 
 // NOTE: `./inspector` is intentionally NOT imported statically here. It pulls in
@@ -80,6 +84,15 @@ export interface BootstrapMfeDeps {
    * NEVER break app boot); tests inject a spy.
    */
   mountInspector: (entries: ResolvedRemote[]) => void;
+  /**
+   * Render the Phase 9 version-compatibility HARD-BLOCK page for the offending
+   * (incompatible) remotes. Called ONLY in the non-production `block` policy when
+   * at least one remote is incompatible: the bootstrap renders this and does NOT
+   * boot core. The default replaces the document body with a plain-DOM error
+   * screen (no React/EUI — a shared-singleton mismatch may be the very cause of
+   * the block); tests inject a spy.
+   */
+  renderBlockPage: (offenders: EvaluatedRemote[]) => void;
 }
 
 /** Inputs to {@link bootstrapMfe}. */
@@ -108,6 +121,30 @@ export interface BootstrapMfeOptions {
    * is off.
    */
   allowOverride?: boolean;
+  /**
+   * The running HOST environment (Phase 9 compatibility contract): the OSD core
+   * version + the shared-singleton versions the host actually provides. Injected
+   * by the server (`window.__osdMfe__.host`, computed by
+   * `src/core/server/utils/resolve_mfe_host_env.ts`) from the SAME sources the
+   * remotes recorded their `builtAgainst` against, so in the happy path (all
+   * remotes built from one tree) every remote classifies COMPATIBLE. The
+   * classifier compares each remote's recorded metadata against this to decide
+   * compatible | incompatible | unknown.
+   *
+   * Optional: when absent (or `compatPolicy` is absent), compatibility
+   * enforcement is DISABLED and every remote loads as before (used by tests / a
+   * pre-Phase-9 injected page).
+   */
+  host?: HostEnvironment;
+  /**
+   * The resolved, env-keyed version-compatibility POLICY (Phase 9). Injected by
+   * the server (`window.__osdMfe__.compatPolicy`, resolved by
+   * `resolveCompatPolicy` from `opensearchDashboards.mfe.compat.*` + the server's
+   * dev/prod mode). Drives how each non-compatible remote is handled: prod skips
+   * incompatible/unknown (page still boots); non-prod hard-blocks the page on
+   * incompatible and warn-loads unknown. Optional — see {@link host}.
+   */
+  compatPolicy?: CompatPolicy;
   /** Optional collaborator overrides (used by tests). */
   deps?: Partial<BootstrapMfeDeps>;
 }
@@ -152,6 +189,7 @@ function resolveDeps(overrides?: Partial<BootstrapMfeDeps>): BootstrapMfeDeps {
           console.warn('[mfe] dev inspector failed to mount; continuing without it.', error);
         });
     },
+    renderBlockPage: (offenders: EvaluatedRemote[]) => renderCompatBlockPage(offenders),
     ...overrides,
   };
 }
@@ -211,6 +249,7 @@ function inMemoryProvider(registry: Registry): RegistryProvider {
  */
 export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> {
   const { registryUrl, sharedDepsUrl, sharedDepsDepUrls, allowOverride = false } = options;
+  const { host, compatPolicy } = options;
   const deps = resolveDeps(options.deps);
 
   // 1. Load shared deps and seed the MF share scope (singletons). The shared-deps
@@ -256,18 +295,102 @@ export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> 
   //    plugins boot normally. A plugin that hard-depends on a failed peer's exports
   //    may still surface its own error, but a leaf/optional plugin degrades cleanly.
   const ids = Object.keys(registry.mfes);
+
+  // 2c. Phase 9 version-compatibility ENFORCEMENT (Story 3). When the host
+  //     environment + policy are injected (always, behind --mfe), classify each
+  //     remote against the running host and apply the locked, env-keyed policy
+  //     BEFORE loading anything:
+  //       - NON-PROD `block`: any INCOMPATIBLE remote is an offender => render a
+  //         loud block page listing offenders + reasons and do NOT boot the app
+  //         (no white-screen, no half-booted app).
+  //       - PROD `skip`: INCOMPATIBLE / UNKNOWN remotes are skipped — registered
+  //         as a DISABLED placeholder (reusing Phase 4 graceful degradation) with
+  //         a clear console reason, and the app still boots from the rest.
+  //       - UNKNOWN under `warn-load` (non-prod default): a warning is logged and
+  //         the remote loads normally.
+  //     Shared singletons are STRICT by default (a mismatch is enforced via the
+  //     same policy); `strictShared:false` tolerates a shared-only mismatch (see
+  //     compat_enforcement). In the happy path (all remotes built from one tree)
+  //     every remote is COMPATIBLE, so this is a no-op and all ids load.
+  let idsToLoad = ids;
+  if (host && compatPolicy) {
+    const decision = decideCompat(ids, (id) => registry.mfes[id], host, compatPolicy);
+
+    if (decision.block) {
+      // HARD-BLOCK (non-prod): list every offender + reason, render the block
+      // page, and abort boot. The app is intentionally NOT started.
+      const offenderSummary = decision.offenders
+        .map((o) => `${o.id} (${o.compatibility}): ${o.reasons.join('; ')}`)
+        .join('\n  - ');
+      // eslint-disable-next-line no-console
+      console.error(
+        `[mfe] Blocking startup: ${decision.offenders.length} incompatible remote(s) detected ` +
+          `(compat policy onIncompatible/onMissing = "block"):\n  - ${offenderSummary}`
+      );
+      deps.renderBlockPage(decision.offenders);
+      return;
+    }
+
+    // PROD skip (or onMissing:skip): register a DISABLED placeholder for each
+    // skipped remote so OSD core's plugin_reader still resolves it and the app
+    // boots; log a clear, per-remote reason (telemetry).
+    for (const skipped of decision.skip) {
+      deps.registerPluginFactory(skipped.id, createDisabledPluginModule);
+      // eslint-disable-next-line no-console
+      console.warn(
+        `[mfe] Skipping ${skipped.compatibility} remote "${skipped.id}" and registering it as ` +
+          `DISABLED (compat policy = "skip"): ${skipped.reasons.join('; ')}`
+      );
+    }
+
+    // UNKNOWN remotes under `warn-load` are in `decision.load`; surface a warning
+    // so a missing-metadata remote is loud in non-prod without blocking. A loaded
+    // remote is "unknown" exactly when its compatibility metadata is incomplete.
+    if (compatPolicy.onMissing === 'warn-load') {
+      for (const id of decision.load) {
+        const entry = registry.mfes[id];
+        if (!entry.builtAgainst || !entry.compat) {
+          // eslint-disable-next-line no-console
+          console.warn(
+            `[mfe] Loading remote "${id}" despite missing/unknown compatibility metadata ` +
+              `(compat policy onMissing = "warn-load").`
+          );
+        }
+      }
+    }
+
+    idsToLoad = decision.load;
+  }
+
+  // 3. Load every selected plugin remote and register its FACTORY into the
+  //    __osdBundles__ shim. We register factories (lazy) rather than evaluated
+  //    modules, and define ALL of them before core boot, so when a plugin module
+  //    is evaluated during core start and imports a peer plugin via
+  //    __osdBundles__.get, the peer's factory is already defined and resolves
+  //    synchronously (the remotes load concurrently, so eager evaluation here
+  //    would hit an unregistered peer). All remotes share the SAME share scope
+  //    object, so singletons stay single.
+  //
+  //    Graceful degradation (Phase 4, Story 5): we use Promise.allSettled rather
+  //    than Promise.all so a single failed or missing remote (e.g. one unreachable
+  //    CDN object among the 58) does NOT abort the whole app boot. Each remote that
+  //    fails is logged and registered as a DISABLED placeholder (see below) so that
+  //    OSD core's plugin_reader still finds a definition for it and the remaining
+  //    plugins boot normally. A plugin that hard-depends on a failed peer's exports
+  //    may still surface its own error, but a leaf/optional plugin degrades cleanly.
+  //
   // Pre-resolve each id (override URL wins over registry) so both the loader and
   // the failure log below reference the EFFECTIVE remoteEntry. ids come from the
   // registry, so resolve() never returns null here (the empty filter is defensive).
   const resolved = new Map<string, ResolvedRemote>();
-  for (const id of ids) {
+  for (const id of idsToLoad) {
     const descriptor = resolve(provider, id, overrides);
     if (descriptor !== null) {
       resolved.set(id, descriptor);
     }
   }
   const results = await Promise.allSettled(
-    ids.map(async (id) => {
+    idsToLoad.map(async (id) => {
       const descriptor = resolved.get(id)!;
       const container = await deps.loadRemoteContainer(descriptor.remoteEntry, descriptor.scope);
       const factory = await deps.getRemoteModuleFactory(container, shareScope, descriptor.module);
@@ -282,7 +405,7 @@ export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> 
   const failedIds: string[] = [];
   results.forEach((result, index) => {
     if (result.status === 'rejected') {
-      const id = ids[index];
+      const id = idsToLoad[index];
       failedIds.push(id);
       deps.registerPluginFactory(id, createDisabledPluginModule);
       // eslint-disable-next-line no-console

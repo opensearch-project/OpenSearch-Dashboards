@@ -42,6 +42,19 @@ export {
 export { bootstrapMfe } from './bootstrap_mfe';
 export type { BootstrapMfeOptions, BootstrapMfeDeps } from './bootstrap_mfe';
 
+export { resolveCompatPolicy } from './compat_policy';
+export type {
+  CompatPolicy,
+  CompatPolicyConfig,
+  IncompatibleAction,
+  MissingAction,
+} from './compat_policy';
+
+export { decideCompat, decideRemoteCompat } from './compat_enforcement';
+export type { CompatAction, CompatDecision, EvaluatedRemote } from './compat_enforcement';
+
+export { COMPAT_BLOCK_ROOT_ID, renderCompatBlockPage } from './compat_block_page';
+
 export {
   OVERRIDE_STORAGE_KEY,
   parseQueryOverrides,

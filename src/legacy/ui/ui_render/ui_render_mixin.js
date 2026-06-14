@@ -39,7 +39,10 @@ import * as v9light from '@elastic/eui/dist/eui_theme_v9_light.json';
 import * as v9dark from '@elastic/eui/dist/eui_theme_v9_dark.json';
 import * as UiSharedDeps from '@osd/ui-shared-deps';
 import { OpenSearchDashboardsRequest } from '../../../core/server';
+import { fromRoot } from '../../../core/server/utils';
 import { resolveAllowOverride } from '../../../core/server/utils/resolve_allow_override';
+import { resolveCompatPolicy } from '../../../core/server/utils/resolve_compat_policy';
+import { resolveMfeHostEnv } from '../../../core/server/utils/resolve_mfe_host_env';
 import { AppBootstrap } from './bootstrap';
 import { getApmConfig } from '../apm';
 import { applyCspModifications, buildMfeCspRules } from './utils';
@@ -159,6 +162,27 @@ export function uiRenderMixin(osdServer, server, config) {
           !!server.newPlatform.env.mode.dev
         );
 
+        // Phase 9 version-compatibility contract. Resolve the EFFECTIVE env-keyed
+        // compat POLICY (onIncompatible/onMissing default dev=block|warn-load vs
+        // prod=skip; strictShared default true; explicit config always wins) and
+        // the running HOST environment (OSD core version + the shared-singleton
+        // ranges the host provides), and inject BOTH into the page so the browser
+        // bootstrap can classify each remote against the host and enforce the
+        // policy (skip incompatible/unknown in prod; hard-block in non-prod). The
+        // host env is derived from the SAME sources the remotes recorded their
+        // builtAgainst against, so the all-from-one-tree happy path stays fully
+        // compatible. Both use the core-side mirrors of the @osd/mfe helpers
+        // (which src/ cannot import), exactly as resolveAllowOverride is mirrored.
+        const mfeCompatPolicy = JSON.stringify(
+          resolveCompatPolicy(
+            config.get('opensearchDashboards.mfe.compat'),
+            !!server.newPlatform.env.mode.dev
+          )
+        );
+        const mfeHostEnv = JSON.stringify(
+          resolveMfeHostEnv(server.newPlatform.env.packageInfo.version, fromRoot('.'))
+        );
+
         // The OSD shared-deps bundle is split: the entry (`mfeSharedDepsUrl`) only
         // assigns window.__osdSharedDeps__ once its dependency chunks
         // (UiSharedDeps.jsDepFilenames — e.g. the large `@elastic` vendor chunk)
@@ -194,6 +218,8 @@ export function uiRenderMixin(osdServer, server, config) {
               mfeSharedDepsDepUrls,
               mfeBootstrapUrl,
               mfeAllowOverride,
+              mfeCompatPolicy,
+              mfeHostEnv,
             },
           },
           'bootstrap_mfe'

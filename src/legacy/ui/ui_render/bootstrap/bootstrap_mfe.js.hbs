@@ -70,6 +70,12 @@ if (window.__osdStrictCsp__ && window.__osdCspNotEnforced__) {
           false (production default), the bootstrap IGNORES every override
           source so no override URL can load arbitrary remote code. --}}
     allowOverride: {{mfeAllowOverride}},
+    {{!-- Phase 9 version-compatibility contract: the resolved env-keyed policy
+          (onIncompatible/onMissing/strictShared) and the running host environment
+          (OSD core version + shared-singleton ranges) the bootstrap classifies
+          each remote against. Raw JSON ({{{ }}} = unescaped). --}}
+    compatPolicy: {{{mfeCompatPolicy}}},
+    host: {{{mfeHostEnv}}},
   };
 
   window.onload = function () {
@@ -153,6 +159,8 @@ if (window.__osdStrictCsp__ && window.__osdCspNotEnforced__) {
         sharedDepsUrl: window.__osdMfe__.sharedDepsUrl,
         sharedDepsDepUrls: window.__osdMfe__.sharedDepsDepUrls,
         allowOverride: window.__osdMfe__.allowOverride,
+        compatPolicy: window.__osdMfe__.compatPolicy,
+        host: window.__osdMfe__.host,
       });
 
       load(styleSheetPaths);

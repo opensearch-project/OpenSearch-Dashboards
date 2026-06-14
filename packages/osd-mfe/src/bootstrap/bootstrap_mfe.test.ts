@@ -494,3 +494,249 @@ describe('bootstrapMfe — dev Inspector mount gate (Phase 5, Story 3)', () => {
     expect(mountInspector).not.toHaveBeenCalled();
   });
 });
+
+describe('bootstrapMfe — Phase 9 version-compatibility enforcement (Story 3)', () => {
+  const HOST = {
+    osdVersion: '3.5.0',
+    sharedDeps: { react: '^16.14.0', 'react-dom': '^16.14.0' },
+  };
+  const NON_PROD = {
+    onIncompatible: 'block' as const,
+    onMissing: 'warn-load' as const,
+    strictShared: true,
+  };
+  const PROD = {
+    onIncompatible: 'skip' as const,
+    onMissing: 'skip' as const,
+    strictShared: true,
+  };
+
+  const COMPAT_META = {
+    builtAgainst: {
+      osdVersion: '3.5.0',
+      sharedDeps: { react: '^16.14.0', 'react-dom': '^16.14.0' },
+    },
+    compat: { minCoreVersion: '3.5.0', compatibleCoreRange: '3.5.x' },
+  };
+  const CORE_INCOMPAT_META = {
+    builtAgainst: { osdVersion: '3.7.0', sharedDeps: { react: '^16.14.0' } },
+    compat: { minCoreVersion: '3.7.0', compatibleCoreRange: '3.7.x' },
+  };
+  const SHARED_INCOMPAT_META = {
+    builtAgainst: { osdVersion: '3.5.0', sharedDeps: { react: '>=999.0.0' } },
+    compat: { minCoreVersion: '3.5.0', compatibleCoreRange: '3.5.x' },
+  };
+
+  /**
+   * A registry whose entries carry Phase 9 compat metadata. `good` is compatible;
+   * `bad` is given `meta` (incompatible or unknown). The `bad` entry has NO
+   * builtAgainst/compat when `meta` is `{}` (the UNKNOWN case).
+   */
+  function compatRegistry(meta: Record<string, unknown>) {
+    return () => ({
+      schemaVersion: 1,
+      generatedAt: new Date().toISOString(),
+      sharedDeps: { url: 'http://localhost:8080/shared-deps/', version: '3.5.0' },
+      mfes: {
+        good: {
+          version: '3.5.0+good',
+          remoteEntry: 'http://localhost:8080/mfe/good/remoteEntry.js',
+          scope: 'good',
+          module: './public',
+          ...COMPAT_META,
+        },
+        bad: {
+          version: '3.5.0+bad',
+          remoteEntry: 'http://localhost:8080/mfe/bad/remoteEntry.js',
+          scope: 'bad',
+          module: './public',
+          ...meta,
+        },
+      },
+    });
+  }
+
+  /** Build deps that record registrations, loads, core-boot and block-page calls. */
+  function enforcementDeps(registryFactory: () => unknown) {
+    const registered = new Map<string, () => PluginPublicModule>();
+    const loadedScopes: string[] = [];
+    const renderBlockPage = jest.fn();
+    const invokeCoreBootstrap = jest.fn(async () => undefined);
+    const deps: Partial<BootstrapMfeDeps> = {
+      loadScript: jest.fn(async (url: string) => {
+        if (url === SHARED_DEPS_URL) {
+          testWindow().__osdSharedDeps__ = { React: { version: '16.14.0' } };
+        }
+      }),
+      fetchImpl: ((async () => ({
+        ok: true,
+        status: 200,
+        json: async () => registryFactory(),
+      })) as unknown) as typeof fetch,
+      loadRemoteContainer: jest.fn(async (_remoteEntry: string, scope: string) => {
+        loadedScopes.push(scope);
+        return {
+          init: () => undefined,
+          get: () => Promise.resolve(() => ({ plugin: () => undefined })),
+        } as MfeContainer;
+      }),
+      getRemoteModuleFactory: jest.fn(async () => () => ({ plugin: () => undefined })),
+      registerPluginFactory: jest.fn((id: string, factory: () => PluginPublicModule) => {
+        registered.set(id, factory);
+      }),
+      invokeCoreBootstrap,
+      renderBlockPage,
+    };
+    return { deps, registered, loadedScopes, renderBlockPage, invokeCoreBootstrap };
+  }
+
+  it('happy path: all compatible remotes load and core boots (non-prod AND prod)', async () => {
+    for (const policy of [NON_PROD, PROD]) {
+      const { deps, loadedScopes, renderBlockPage, invokeCoreBootstrap } = enforcementDeps(
+        compatRegistry(COMPAT_META)
+      );
+
+      await bootstrapMfe({
+        registryUrl: REGISTRY_URL,
+        sharedDepsUrl: SHARED_DEPS_URL,
+        host: HOST,
+        compatPolicy: policy,
+        deps,
+      });
+
+      expect(loadedScopes.sort()).toEqual(['bad', 'good']);
+      expect(invokeCoreBootstrap).toHaveBeenCalledTimes(1);
+      expect(renderBlockPage).not.toHaveBeenCalled();
+    }
+  });
+
+  it('PROD: an incompatible remote is SKIPPED (disabled placeholder), the app still boots', async () => {
+    const consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const {
+      deps,
+      registered,
+      loadedScopes,
+      renderBlockPage,
+      invokeCoreBootstrap,
+    } = enforcementDeps(compatRegistry(CORE_INCOMPAT_META));
+
+    await bootstrapMfe({
+      registryUrl: REGISTRY_URL,
+      sharedDepsUrl: SHARED_DEPS_URL,
+      host: HOST,
+      compatPolicy: PROD,
+      deps,
+    });
+
+    // Only `good` is loaded; `bad` is NOT fetched as a remote.
+    expect(loadedScopes).toEqual(['good']);
+    // `bad` is registered as an INERT disabled placeholder so plugin_reader resolves it.
+    expect(registered.has('bad')).toBe(true);
+    const disabled = registered.get('bad')!();
+    expect(typeof disabled.plugin).toBe('function');
+    // The app boots and a clear reason is logged.
+    expect(invokeCoreBootstrap).toHaveBeenCalledTimes(1);
+    expect(renderBlockPage).not.toHaveBeenCalled();
+    expect(consoleWarn).toHaveBeenCalled();
+    expect(consoleWarn.mock.calls.some((c) => String(c[0]).includes('bad'))).toBe(true);
+
+    consoleWarn.mockRestore();
+  });
+
+  it('NON-PROD: an incompatible remote HARD-BLOCKS the page and core does NOT boot', async () => {
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    const { deps, renderBlockPage, invokeCoreBootstrap } = enforcementDeps(
+      compatRegistry(CORE_INCOMPAT_META)
+    );
+
+    await bootstrapMfe({
+      registryUrl: REGISTRY_URL,
+      sharedDepsUrl: SHARED_DEPS_URL,
+      host: HOST,
+      compatPolicy: NON_PROD,
+      deps,
+    });
+
+    // The page is blocked: block page rendered with the offender, core NOT booted.
+    expect(renderBlockPage).toHaveBeenCalledTimes(1);
+    const offenders = renderBlockPage.mock.calls[0][0] as Array<{ id: string }>;
+    expect(offenders.map((o) => o.id)).toEqual(['bad']);
+    expect(invokeCoreBootstrap).not.toHaveBeenCalled();
+    expect(consoleError).toHaveBeenCalled();
+
+    consoleError.mockRestore();
+  });
+
+  it('UNKNOWN metadata: prod skips it; non-prod warn-loads it', async () => {
+    // PROD: unknown is skipped.
+    {
+      const { deps, registered, loadedScopes, invokeCoreBootstrap } = enforcementDeps(
+        compatRegistry({})
+      );
+      await bootstrapMfe({
+        registryUrl: REGISTRY_URL,
+        sharedDepsUrl: SHARED_DEPS_URL,
+        host: HOST,
+        compatPolicy: PROD,
+        deps,
+      });
+      expect(loadedScopes).toEqual(['good']);
+      expect(registered.has('bad')).toBe(true);
+      expect(invokeCoreBootstrap).toHaveBeenCalledTimes(1);
+    }
+    // NON-PROD: unknown warn-loads (the remote is actually loaded).
+    {
+      const consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+      const { deps, loadedScopes, renderBlockPage, invokeCoreBootstrap } = enforcementDeps(
+        compatRegistry({})
+      );
+      await bootstrapMfe({
+        registryUrl: REGISTRY_URL,
+        sharedDepsUrl: SHARED_DEPS_URL,
+        host: HOST,
+        compatPolicy: NON_PROD,
+        deps,
+      });
+      expect(loadedScopes.sort()).toEqual(['bad', 'good']);
+      expect(renderBlockPage).not.toHaveBeenCalled();
+      expect(invokeCoreBootstrap).toHaveBeenCalledTimes(1);
+      expect(consoleWarn.mock.calls.some((c) => String(c[0]).includes('bad'))).toBe(true);
+      consoleWarn.mockRestore();
+    }
+  });
+
+  it('strictShared=false: a shared-ONLY mismatch is tolerated and loaded (non-prod)', async () => {
+    const { deps, loadedScopes, renderBlockPage, invokeCoreBootstrap } = enforcementDeps(
+      compatRegistry(SHARED_INCOMPAT_META)
+    );
+
+    await bootstrapMfe({
+      registryUrl: REGISTRY_URL,
+      sharedDepsUrl: SHARED_DEPS_URL,
+      host: HOST,
+      compatPolicy: { ...NON_PROD, strictShared: false },
+      deps,
+    });
+
+    // With strict shared OFF, the shared-only mismatch loads instead of blocking.
+    expect(loadedScopes.sort()).toEqual(['bad', 'good']);
+    expect(renderBlockPage).not.toHaveBeenCalled();
+    expect(invokeCoreBootstrap).toHaveBeenCalledTimes(1);
+  });
+
+  it('no host/policy injected: enforcement is disabled and every remote loads (back-compat)', async () => {
+    const { deps, loadedScopes, invokeCoreBootstrap } = enforcementDeps(
+      compatRegistry(CORE_INCOMPAT_META)
+    );
+
+    // Neither host nor compatPolicy => classifier is not consulted.
+    await bootstrapMfe({
+      registryUrl: REGISTRY_URL,
+      sharedDepsUrl: SHARED_DEPS_URL,
+      deps,
+    });
+
+    expect(loadedScopes.sort()).toEqual(['bad', 'good']);
+    expect(invokeCoreBootstrap).toHaveBeenCalledTimes(1);
+  });
+});
