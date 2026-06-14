@@ -104,6 +104,15 @@ export function getMfeRspackConfig(options: MfeRspackConfigOptions): Configurati
   const themeGlobals = options.themeGlobals ?? DEFAULT_THEME_GLOBALS;
   const allPlugins = options.allPlugins ?? [plugin];
 
+  // Stable chunk name pinned to the Module Federation exposed `./public` entry (via
+  // the `exposes` object form below). The bootstrap MUST resolve `./public` for every
+  // plugin at boot (`container.get('./public')` — plugin_reader's synchronous
+  // contract), so this is the eager plugin ENTRY (the MFE analogue of the optimizer's
+  // `<id>.plugin.js`), not a lazy app chunk. Pinning the name lets `output.chunkFilename`
+  // identify it reliably (rspack would otherwise name the chunk after an arbitrary
+  // contained module, and the name varies per plugin / between dev and `--dist`).
+  const EXPOSED_ENTRY_CHUNK_NAME = `${plugin.id}__mfe_public_entry`;
+
   // Same browser targets the optimizer transpiles for, read from the repo's
   // browserslist config so SWC output matches the existing build.
   const targets = browserslist.loadConfig({ path: repoRoot });
@@ -216,12 +225,52 @@ export function getMfeRspackConfig(options: MfeRspackConfigOptions): Configurati
     output: {
       path: Path.resolve(repoRoot, 'target/mfe', plugin.id),
       filename: `${plugin.id}.[name].js`,
-      chunkFilename: `${plugin.id}.chunk.[id].js`,
+      // The Module Federation EXPOSED entry (`./public`) is resolved at BOOT by the
+      // bootstrap's REQUIRED `container.get('./public')` for EVERY plugin (to satisfy
+      // plugin_reader's synchronous `__osdBundles__.get('plugin/<id>/public').plugin`
+      // contract — see bootstrap_mfe.ts step 3). It is therefore the eager plugin
+      // ENTRY — the MFE analogue of the optimizer's eager `<id>.plugin.js` — and NOT
+      // a lazy, navigation-loaded app chunk. Native OSD names eager plugin entries
+      // `<id>.plugin.js` and lazy app chunks `<id>.chunk.<id>.js`; the lazy-loading
+      // regression (Phase 11) was that the MFE emitted the eager exposed entry with
+      // the `.chunk.` infix, so it both looked like — and was measured as — a deferred
+      // app chunk being loaded at boot. Name the exposed-entry chunk as the eager
+      // plugin entry, and keep every genuinely dynamic-`import()`'d chunk (doc views,
+      // embeddables, an app's `application/*` render code) under `.chunk.` so it loads
+      // on navigation, restoring OSD-parity lazy loading.
+      chunkFilename: (pathData: { chunk?: { id?: string | number; name?: string } }) => {
+        const id = String(pathData.chunk?.id ?? pathData.chunk?.name ?? '');
+        // The exposed `./public` entry is pinned to a stable chunk name (see the
+        // `exposes` object form in the ModuleFederationPlugin config below), so it is
+        // identified reliably across ALL plugins and in dev AND `--dist`, regardless
+        // of which source module rspack would otherwise pick to name the chunk.
+        if (id === EXPOSED_ENTRY_CHUNK_NAME) {
+          return `${plugin.id}.plugin.js`;
+        }
+        return `${plugin.id}.chunk.${id}.js`;
+      },
       // `auto` lets the MF runtime infer the base URL from the remoteEntry
       // location so dynamically-loaded chunks resolve wherever the remote is served.
       publicPath: 'auto',
       uniqueName: `osdMfe_${plugin.id}`,
       clean: true,
+    },
+
+    optimization: {
+      // Disable automatic vendor/commons chunk extraction so a plugin's eager entry
+      // loads as a SINGLE file at boot — no separate `<id>.chunk.vendors-*.js` pulled
+      // alongside the exposed `./public` entry (that extra boot chunk was part of the
+      // eager-at-boot regression measured by harness/measure_lazy.js). Explicit
+      // dynamic `import()` split points (doc views, embeddables, app render) are
+      // UNAFFECTED — they remain their own navigation-loaded chunks. This mirrors the
+      // optimizer (packages/osd-optimizer/src/worker/webpack.config.ts), which sets no
+      // splitChunks and folds a plugin's synchronous deps into its single
+      // `<id>.plugin.js` eager entry.
+      splitChunks: false,
+      // Stable, human-readable chunk ids in BOTH development and production builds so
+      // the exposed-entry chunk is reliably identifiable by the `chunkFilename`
+      // function above (rspack's default ids are numeric under `--dist`).
+      chunkIds: 'named',
     },
 
     // Reuse OSD's existing shared-deps externals for the specifiers that are NOT
@@ -256,9 +305,15 @@ export function getMfeRspackConfig(options: MfeRspackConfigOptions): Configurati
         name: `osdMfe_${plugin.id}`,
         filename: 'remoteEntry.js',
         // Expose the plugin's public entry as `./public`, matching the design's
-        // registry `module: "./public"` convention (see docs/01-MFE-DESIGN.md).
+        // registry `module: "./public"` convention (see docs/01-MFE-DESIGN.md). The
+        // object form pins the exposed module's chunk NAME so `output.chunkFilename`
+        // can reliably emit it as the eager plugin entry (`<id>.plugin.js`) rather than
+        // a `.chunk.` (the Phase 11 lazy-loading fix) — see EXPOSED_ENTRY_CHUNK_NAME.
         exposes: {
-          './public': publicEntry,
+          './public': {
+            import: publicEntry,
+            name: EXPOSED_ENTRY_CHUNK_NAME,
+          },
         },
         // Declare the OSD shared dependencies (react, react-dom, @osd/i18n,
         // rxjs, lodash, @elastic/eui, moment, styled-components, ...) as Module
