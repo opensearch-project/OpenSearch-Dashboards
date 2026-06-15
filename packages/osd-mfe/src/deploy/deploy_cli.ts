@@ -48,7 +48,7 @@ import Zlib from 'zlib';
 import { spawnSync } from 'child_process';
 
 import { parseEnvFile, resolveCdnConfig, ResolvedCdnConfig } from './cdn_config';
-import { buildDeployPlan, DeployPlan, PlannedFile, RemotePlan, SharedDepsPlan } from './plan';
+import { buildDeployPlan, DeployPlan, PlannedFile, RemotePlan } from './plan';
 
 /** Manifest schema version; bump on incompatible shape changes. */
 export const DEPLOY_MANIFEST_SCHEMA_VERSION = 1;
@@ -70,6 +70,13 @@ create-bucket / create-distribution / put-bucket-policy). The provisioned
 location is read from the environment (source harness/env.sh) or --cdn-outputs.
 
 Options:
+  --plugin <id>        Single-plugin publish: include ONLY this plugin's
+                       content-addressed remote (from target/mfe/<id>/) and write
+                       a single-entry deploy manifest. Skips shared-deps by
+                       default (pass --with-shared-deps to include them). Absent
+                       this flag, ALL built remotes + shared-deps are published.
+  --with-shared-deps   With --plugin, also publish the shared-deps bundle (off by
+                       default for a single-plugin publish). Ignored without --plugin.
   --dry-run            Plan only: print the intended versioned keys for every
                        remote + shared-deps and exit. Makes ZERO AWS calls and
                        writes nothing (no manifest).
@@ -138,7 +145,7 @@ export interface DeployManifest {
     distributionId?: string;
     domain?: string;
   };
-  sharedDeps: { version: string; key: string; cdnUrl: string; fileCount: number };
+  sharedDeps?: { version: string; key: string; cdnUrl: string; fileCount: number };
   mfes: Record<
     string,
     { version: string; contentHash: string; key: string; cdnUrl: string; fileCount: number }
@@ -399,12 +406,19 @@ function buildManifest(plan: DeployPlan, now: Date): DeployManifest {
       ...(plan.cdn.distributionId !== undefined ? { distributionId: plan.cdn.distributionId } : {}),
       ...(plan.cdn.domain !== undefined ? { domain: plan.cdn.domain } : {}),
     },
-    sharedDeps: {
-      version: plan.sharedDeps.version,
-      key: plan.sharedDeps.keyPrefix,
-      cdnUrl: plan.sharedDeps.cdnUrl,
-      fileCount: plan.sharedDeps.files.length,
-    },
+    // Shared-deps is omitted from the manifest when a single-plugin publish
+    // skipped it (Phase 10 Story 1) so the manifest describes exactly what was
+    // published — a single-entry manifest carries no shared-deps key.
+    ...(plan.sharedDeps !== undefined
+      ? {
+          sharedDeps: {
+            version: plan.sharedDeps.version,
+            key: plan.sharedDeps.keyPrefix,
+            cdnUrl: plan.sharedDeps.cdnUrl,
+            fileCount: plan.sharedDeps.files.length,
+          },
+        }
+      : {}),
     mfes,
   };
 }
@@ -430,10 +444,16 @@ function printDryRun(plan: DeployPlan, manifestPath: string, out: DeployCliConso
   }
   out.log('');
   const shared = plan.sharedDeps;
-  out.log(
-    `[dry-run] shared-deps ${shared.version} (${shared.files.length} file(s)) -> ` +
-      `s3://${plan.cdn.bucket}/${shared.keyPrefix}/`
-  );
+  if (shared !== undefined) {
+    out.log(
+      `[dry-run] shared-deps ${shared.version} (${shared.files.length} file(s)) -> ` +
+        `s3://${plan.cdn.bucket}/${shared.keyPrefix}/`
+    );
+  } else {
+    out.log(
+      '[dry-run] shared-deps: skipped (single-plugin publish; pass --with-shared-deps to include)'
+    );
+  }
   out.log('');
   out.log(`[dry-run] would write manifest -> ${manifestPath}`);
   out.log(
@@ -506,6 +526,13 @@ export function runDeployCli(argv: string[], repoRoot: string, deps: DeployCliDe
       cdn,
       targetMfeDir: readOption(argv, '--target-mfe-dir'),
       sharedDepsDir: readOption(argv, '--shared-deps-dir'),
+      // Phase 10 Story 1 — single-plugin publish: when --plugin <id> is given,
+      // plan ONLY that remote and skip shared-deps unless --with-shared-deps is
+      // also passed. Absent --plugin, the full deploy (all remotes + shared-deps)
+      // is unchanged.
+      pluginId: readOption(argv, '--plugin'),
+      includeSharedDeps:
+        readOption(argv, '--plugin') === undefined ? true : argv.includes('--with-shared-deps'),
     });
     const manifestPath = resolveManifestPath(argv, env, repoRoot);
 
@@ -546,24 +573,30 @@ export function runDeployCli(argv: string[], repoRoot: string, deps: DeployCliDe
       );
     }
 
-    const shared = plan.sharedDeps as SharedDepsPlan;
-    // Immutability marker for shared-deps: the primary bundle file when present,
-    // otherwise the first planned file.
-    const sharedMarker =
-      shared.files.find((f) => f.relativePath === 'osd-ui-shared-deps.js')?.key ??
-      shared.files[0].key;
-    tally(
-      publishArtifact(
-        exec,
-        cdn,
-        env,
-        out,
-        `shared-deps ${shared.version}`,
-        shared.files,
-        shared.keyPrefix,
-        sharedMarker
-      )
-    );
+    const shared = plan.sharedDeps;
+    if (shared !== undefined) {
+      // Immutability marker for shared-deps: the primary bundle file when present,
+      // otherwise the first planned file.
+      const sharedMarker =
+        shared.files.find((f) => f.relativePath === 'osd-ui-shared-deps.js')?.key ??
+        shared.files[0].key;
+      tally(
+        publishArtifact(
+          exec,
+          cdn,
+          env,
+          out,
+          `shared-deps ${shared.version}`,
+          shared.files,
+          shared.keyPrefix,
+          sharedMarker
+        )
+      );
+    } else {
+      out.log(
+        '  = shared-deps: skipped (single-plugin publish; pass --with-shared-deps to include)'
+      );
+    }
 
     const manifest = buildManifest(plan, now);
     writeManifest(fs, manifestPath, manifest);

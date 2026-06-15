@@ -101,8 +101,12 @@ export interface DeployPlan {
   cdn: ResolvedCdnConfig;
   /** One entry per built plugin remote, sorted by id. */
   remotes: RemotePlan[];
-  /** The shared-deps publish plan. */
-  sharedDeps: SharedDepsPlan;
+  /**
+   * The shared-deps publish plan, or `undefined` when shared-deps were
+   * intentionally excluded (Phase 10 Story 1: a single-plugin publish skips
+   * shared-deps by default — see {@link BuildDeployPlanOptions.includeSharedDeps}).
+   */
+  sharedDeps?: SharedDepsPlan;
 }
 
 /** Options for {@link buildDeployPlan}. */
@@ -117,6 +121,18 @@ export interface BuildDeployPlanOptions {
   targetMfeDir?: string;
   /** Built shared-deps directory; defaults to `<repoRoot>/packages/osd-ui-shared-deps/target`. */
   sharedDepsDir?: string;
+  /**
+   * Phase 10 Story 1 — single-plugin publish. When set, the plan includes ONLY
+   * this plugin's content-addressed remote (the other built remotes are
+   * ignored). Throws when the plugin has no built remote under `targetMfeDir`.
+   */
+  pluginId?: string;
+  /**
+   * Phase 10 Story 1 — whether to include the shared-deps publish plan. Defaults
+   * to `true` so the full deploy is unchanged. A single-plugin publish passes
+   * `false` so it never touches shared-deps unless explicitly asked.
+   */
+  includeSharedDeps?: boolean;
 }
 
 /** Read `<repoRoot>/package.json` and return its `version` (mirrors generate.ts). */
@@ -214,7 +230,22 @@ export function buildDeployPlan(options: BuildDeployPlanOptions): DeployPlan {
     );
   }
 
-  const remotes: RemotePlan[] = ids.map((id) => {
+  // Phase 10 Story 1 — single-plugin publish: narrow the plan to exactly one
+  // built remote. The plugin must already be built (build_mfe --plugin <id>).
+  let selectedIds = ids;
+  if (options.pluginId !== undefined) {
+    if (!ids.includes(options.pluginId)) {
+      throw new Error(
+        `Plugin "${options.pluginId}" has no built Module Federation remote under ${targetMfeDir} ` +
+          `(expected ${options.pluginId}/${REMOTE_ENTRY_FILE}). ` +
+          `Run \`node scripts/build_mfe --plugin ${options.pluginId} --dist\` first. ` +
+          `Built remotes: ${ids.join(', ')}.`
+      );
+    }
+    selectedIds = [options.pluginId];
+  }
+
+  const remotes: RemotePlan[] = selectedIds.map((id) => {
     const localDir = Path.join(targetMfeDir, id);
     const remoteEntryPath = Path.join(localDir, REMOTE_ENTRY_FILE);
     const bytes = Fs.readFileSync(remoteEntryPath);
@@ -235,6 +266,13 @@ export function buildDeployPlan(options: BuildDeployPlanOptions): DeployPlan {
       files: planFiles(localDir, keyPrefix),
     };
   });
+
+  // Phase 10 Story 1 — a single-plugin publish skips shared-deps by default
+  // (includeSharedDeps=false); the full deploy (default true) is unchanged.
+  const includeSharedDeps = options.includeSharedDeps ?? true;
+  if (!includeSharedDeps) {
+    return { osdVersion, cdn, remotes, sharedDeps: undefined };
+  }
 
   if (!Fs.existsSync(sharedDepsDir)) {
     throw new Error(

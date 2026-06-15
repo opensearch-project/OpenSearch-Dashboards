@@ -301,3 +301,144 @@ describe('runDeployCli real publish', () => {
     expect(out.errors.join('\n')).toMatch(/Cannot resolve the provisioned CDN location/);
   });
 });
+
+/** Add a second built remote to an existing fixture repo (Phase 10 Story 1). */
+function addRemote(root: string, id: string, files: Record<string, string>): void {
+  const dir = Path.join(root, 'target', 'mfe', id);
+  Fs.mkdirSync(dir, { recursive: true });
+  for (const [name, contents] of Object.entries(files)) {
+    Fs.writeFileSync(Path.join(dir, name), contents, 'utf8');
+  }
+}
+
+describe('runDeployCli --plugin (Phase 10 Story 1: single-plugin publish)', () => {
+  it('--plugin <id> --dry-run plans ONLY that remote, skips shared-deps, makes ZERO calls', () => {
+    const { root, manifestPath, env } = makeFixtureRepo();
+    // A second built remote that MUST be excluded from a single-plugin plan.
+    addRemote(root, 'data', { 'remoteEntry.js': 'DATA' });
+    const out = captureConsole();
+    const { run, calls } = mockExec();
+
+    const code = runDeployCli(['--plugin', 'inspector', '--dry-run'], root, {
+      env,
+      out,
+      exec: run,
+    });
+
+    expect(code).toBe(0);
+    expect(calls).toEqual([]); // ZERO AWS / ada calls under dry-run
+    expect(Fs.existsSync(manifestPath)).toBe(false); // nothing written
+    const joined = out.logs.join('\n');
+    expect(joined).toContain('1 remote(s) would be published');
+    expect(joined).toContain('inspector');
+    // The other built remote is NOT in the plan.
+    expect(joined).not.toContain('  data  ');
+    // Shared-deps is skipped by default for a single-plugin publish.
+    expect(joined).not.toContain('shared-deps 3.5.0');
+    expect(joined).toMatch(/shared-deps: skipped/);
+  });
+
+  it('--plugin <id> publishes ONLY that remote + writes a single-entry manifest (no shared-deps)', () => {
+    const { root, manifestPath, env } = makeFixtureRepo();
+    addRemote(root, 'data', { 'remoteEntry.js': 'DATA' });
+    const out = captureConsole();
+    const { run, calls } = mockExec({ headObjectExists: false });
+
+    const code = runDeployCli(['--plugin', 'inspector', '--skip-creds'], root, {
+      env,
+      out,
+      exec: run,
+    });
+
+    expect(code).toBe(0);
+
+    // Exactly ONE upload — inspector only; shared-deps and the other remote are untouched.
+    const cps = calls.filter((c) => c.command === 'aws' && c.args[1] === 'cp');
+    expect(cps).toHaveLength(1);
+    expect(cps[0].args.some((a) => /s3:\/\/test-bucket\/mfe\/inspector\//.test(a))).toBe(true);
+    expect(cps.some((c) => c.args.some((a) => /shared-deps/.test(a)))).toBe(false);
+    expect(cps.some((c) => c.args.some((a) => /\/mfe\/data\//.test(a)))).toBe(false);
+
+    // No creds refresh under --skip-creds.
+    expect(calls.find((c) => c.command === 'ada')).toBeUndefined();
+
+    // Single-entry manifest: exactly inspector, and NO shared-deps key.
+    const manifest = JSON.parse(Fs.readFileSync(manifestPath, 'utf8'));
+    expect(Object.keys(manifest.mfes)).toEqual(['inspector']);
+    expect(manifest.sharedDeps).toBeUndefined();
+    expect(manifest.mfes.inspector.version).toMatch(/^3\.5\.0\+[0-9a-f]{12}$/);
+    expect(manifest.mfes.inspector.cdnUrl).toMatch(
+      /^https:\/\/cdn\.example\.net\/mfe\/inspector\/[0-9a-f]{12}\/remoteEntry\.js$/
+    );
+  });
+
+  it('--plugin <id> --with-shared-deps also publishes shared-deps + includes it in the manifest', () => {
+    const { root, manifestPath, env } = makeFixtureRepo();
+    addRemote(root, 'data', { 'remoteEntry.js': 'DATA' });
+    const out = captureConsole();
+    const { run, calls } = mockExec({ headObjectExists: false });
+
+    const code = runDeployCli(
+      ['--plugin', 'inspector', '--with-shared-deps', '--skip-creds'],
+      root,
+      {
+        env,
+        out,
+        exec: run,
+      }
+    );
+
+    expect(code).toBe(0);
+
+    // inspector + shared-deps = two uploads; the other remote is still excluded.
+    const cps = calls.filter((c) => c.command === 'aws' && c.args[1] === 'cp');
+    expect(cps).toHaveLength(2);
+    expect(cps.some((c) => c.args.some((a) => /\/mfe\/inspector\//.test(a)))).toBe(true);
+    expect(
+      cps.some((c) =>
+        c.args.some((a) => /^s3:\/\/test-bucket\/mfe\/shared-deps\/[0-9a-f]{12}\/$/.test(a))
+      )
+    ).toBe(true);
+    expect(cps.some((c) => c.args.some((a) => /\/mfe\/data\//.test(a)))).toBe(false);
+
+    const manifest = JSON.parse(Fs.readFileSync(manifestPath, 'utf8'));
+    expect(Object.keys(manifest.mfes)).toEqual(['inspector']);
+    expect(manifest.sharedDeps.version).toBe('3.5.0');
+    expect(manifest.sharedDeps.key).toMatch(/^mfe\/shared-deps\/[0-9a-f]{12}$/);
+  });
+
+  it('--plugin <unknown> aborts with a clear error listing built remotes, ZERO calls', () => {
+    const { root, manifestPath, env } = makeFixtureRepo();
+    addRemote(root, 'data', { 'remoteEntry.js': 'DATA' });
+    const out = captureConsole();
+    const { run, calls } = mockExec();
+
+    const code = runDeployCli(['--plugin', 'nope', '--dry-run'], root, { env, out, exec: run });
+
+    expect(code).toBe(1);
+    const errors = out.errors.join('\n');
+    expect(errors).toMatch(/Plugin "nope" has no built Module Federation remote/);
+    // The error lists the remotes that ARE built so the user can correct the id.
+    expect(errors).toContain('data');
+    expect(errors).toContain('inspector');
+    expect(calls).toEqual([]);
+    expect(Fs.existsSync(manifestPath)).toBe(false);
+  });
+
+  it('regression: WITHOUT --plugin still plans every built remote + shared-deps', () => {
+    const { root, env } = makeFixtureRepo();
+    addRemote(root, 'data', { 'remoteEntry.js': 'DATA' });
+    const out = captureConsole();
+    const { run, calls } = mockExec();
+
+    const code = runDeployCli(['--dry-run'], root, { env, out, exec: run });
+
+    expect(code).toBe(0);
+    expect(calls).toEqual([]);
+    const joined = out.logs.join('\n');
+    expect(joined).toContain('2 remote(s) would be published');
+    expect(joined).toContain('inspector');
+    expect(joined).toContain('data');
+    expect(joined).toContain('shared-deps 3.5.0');
+  });
+});

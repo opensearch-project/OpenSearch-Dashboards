@@ -84,11 +84,11 @@ describe('buildDeployPlan', () => {
     const { sharedDeps } = buildDeployPlan({ repoRoot: root, cdn: CDN });
 
     const sharedHash = sha12('shared');
-    expect(sharedDeps.version).toBe('3.5.0');
-    expect(sharedDeps.contentHash).toBe(sharedHash);
-    expect(sharedDeps.keyPrefix).toBe(`mfe/shared-deps/${sharedHash}`);
-    expect(sharedDeps.cdnUrl).toBe(`https://cdn.example.net/mfe/shared-deps/${sharedHash}/`);
-    expect(sharedDeps.files.map((f) => f.key).sort()).toEqual([
+    expect(sharedDeps!.version).toBe('3.5.0');
+    expect(sharedDeps!.contentHash).toBe(sharedHash);
+    expect(sharedDeps!.keyPrefix).toBe(`mfe/shared-deps/${sharedHash}`);
+    expect(sharedDeps!.cdnUrl).toBe(`https://cdn.example.net/mfe/shared-deps/${sharedHash}/`);
+    expect(sharedDeps!.files.map((f) => f.key).sort()).toEqual([
       `mfe/shared-deps/${sharedHash}/fonts/a.woff2`,
       `mfe/shared-deps/${sharedHash}/osd-ui-shared-deps.js`,
     ]);
@@ -116,8 +116,8 @@ describe('buildDeployPlan', () => {
     expect(inspector.keyPrefix.startsWith('assets/mfe/inspector/')).toBe(true);
     // shared-deps is content-addressed (hash of its entry bundle), independent
     // of the version label, under the custom key prefix.
-    expect(plan.sharedDeps.version).toBe('9.9.9');
-    expect(plan.sharedDeps.keyPrefix).toMatch(/^assets\/mfe\/shared-deps\/[0-9a-f]{12}$/);
+    expect(plan.sharedDeps!.version).toBe('9.9.9');
+    expect(plan.sharedDeps!.keyPrefix).toMatch(/^assets\/mfe\/shared-deps\/[0-9a-f]{12}$/);
   });
 
   it('throws when there are no built remotes', () => {
