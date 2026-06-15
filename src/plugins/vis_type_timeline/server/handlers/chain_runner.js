@@ -132,8 +132,13 @@ export default function chainRunner(tlConfig) {
     } else if (!result) {
       promise = invoke('first', [link]);
     } else {
-      const args = link.arguments ? result.concat(link.arguments) : result;
-      promise = invoke(link.function, args);
+      const functionDef = tlConfig.getFunction(link.function);
+      if (functionDef.datasource) {
+        promise = invoke('first', [link]);
+      } else {
+        const args = link.arguments ? result.concat(link.arguments) : result;
+        promise = invoke(link.function, args);
+      }
     }
 
     return promise.then(function (result) {
