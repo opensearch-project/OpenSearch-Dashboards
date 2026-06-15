@@ -131,6 +131,8 @@
     "**/@microsoft/tsdoc-config/ajv": "^6.14.0",
     "**/@langchain/core/langsmith": "~0.6.0",
     "**/@types/node": "~22.19.0",
+    "**/@types/hapi__cookie/joi": "^18.2.1",
+    "**/@types/hapi__h2o2/joi": "^18.2.1",
     "**/ansi-regex": "^5.0.1",
     "**/async": "^3.2.3",
     "**/cpy/globby": "^10.0.1",
@@ -142,7 +144,6 @@
     "**/glob-parent": "^6.0.0",
     "**/jest-config": "npm:@amoo-miki/jest-config@27.5.1",
     "**/jest-jasmine2": "npm:@amoo-miki/jest-jasmine2@27.5.1",
-
     "**/load-bmfont/phin": "^3.7.1",
     "**/loader-utils": "^2.0.4",
     "**/minimist": "^1.2.8",
