@@ -20,6 +20,7 @@ import {
   runUpdateCli,
   resolveRegistryPath,
   buildRegistryFromManifest,
+  mergeRegistryFromManifest,
   UpdateCliConsole,
 } from './update_cli';
 
@@ -462,5 +463,264 @@ describe('runUpdateCli — --from-manifest', () => {
 
     expect(code).toBe(1);
     expect(out.errors.join('\n')).toMatch(/schemaVersion must equal 1/);
+  });
+});
+
+/**
+ * A single-plugin deploy-manifest (Phase 10 Story 1, `deploy_mfe --plugin <id>`):
+ * exactly one entry and NO `sharedDeps` key (shared-deps were skipped).
+ */
+function singlePluginManifestWith(
+  version: string,
+  cdnUrl = 'https://cdn.example/mfe/inspector/newhash123456/remoteEntry.js'
+) {
+  return {
+    schemaVersion: 1,
+    generatedAt: '2026-06-10T00:00:00.000Z',
+    cdn: {
+      bucket: 'some-bucket',
+      region: 'us-west-2',
+      baseUrl: 'https://cdn.example',
+      keyPrefix: 'mfe',
+      distributionId: 'E123',
+      domain: 'cdn.example',
+    },
+    // NB: no sharedDeps — a single-plugin publish carries none.
+    mfes: {
+      inspector: {
+        version,
+        contentHash: 'newhash123456',
+        key: 'mfe/inspector/newhash123456/remoteEntry.js',
+        cdnUrl,
+        fileCount: 12,
+      },
+    },
+  };
+}
+
+/** A multi-entry registry (inspector + discover + timeline), each with compat. */
+function multiEntryRegistry(): Registry {
+  const entry = (id: string, hash: string): MfeEntry => ({
+    version: `1.0.0+${hash}`,
+    remoteEntry: `http://localhost:8080/mfe/${id}/remoteEntry.js`,
+    scope: `osdMfe_${id}`,
+    module: './public',
+    integrity: `sha384-${id}OLD`,
+    // STALE compat (built against an old OSD version) — merge must REPLACE this
+    // for the patched entry with freshly-computed metadata, but leave the others.
+    builtAgainst: { osdVersion: '1.0.0', sharedDeps: { react: '^16.0.0' } },
+    compat: { minCoreVersion: '1.0.0', compatibleCoreRange: '1.0.x' },
+  });
+  return {
+    schemaVersion: SCHEMA_VERSION,
+    generatedAt: '2026-06-08T00:00:00.000Z',
+    sharedDeps: { url: 'http://localhost:8080/shared-deps/', version: '1.0.0' },
+    mfes: {
+      inspector: entry('inspector', 'oldinspector'),
+      discover: entry('discover', 'olddiscover0'),
+      timeline: entry('timeline', 'oldtimeline0'),
+    },
+  };
+}
+
+describe('mergeRegistryFromManifest', () => {
+  const now = new Date('2026-07-01T12:00:00.000Z');
+
+  it('patches only the manifest entries, leaving the others byte-identical', () => {
+    const existing = multiEntryRegistry();
+    const before = JSON.parse(JSON.stringify(existing)) as Registry;
+
+    const merged = mergeRegistryFromManifest(
+      existing,
+      singlePluginManifestWith('1.0.0+newhash123456'),
+      now
+    );
+
+    // Exactly one entry (inspector) repointed; the others are deep-equal.
+    expect(merged.mfes.inspector.remoteEntry).toBe(
+      'https://cdn.example/mfe/inspector/newhash123456/remoteEntry.js'
+    );
+    expect(merged.mfes.inspector.version).toBe('1.0.0+newhash123456');
+    expect(merged.mfes.discover).toEqual(before.mfes.discover);
+    expect(merged.mfes.timeline).toEqual(before.mfes.timeline);
+    // sharedDeps preserved (single-plugin manifest had none).
+    expect(merged.sharedDeps).toEqual(before.sharedDeps);
+    // generatedAt bumped.
+    expect(merged.generatedAt).toBe('2026-07-01T12:00:00.000Z');
+    expect(validate(merged).valid).toBe(true);
+  });
+
+  it('stamps FRESH compat on the merged entry (overrides stale prior compat)', () => {
+    const existing = multiEntryRegistry();
+    const fresh = {
+      builtAgainst: { osdVersion: '9.9.9', sharedDeps: { react: '^99.0.0' } },
+      compat: { minCoreVersion: '9.9.0', compatibleCoreRange: '9.9.x' },
+    };
+
+    const merged = mergeRegistryFromManifest(
+      existing,
+      singlePluginManifestWith('9.9.9+newhash123456'),
+      now,
+      fresh
+    );
+
+    // Merged entry carries the FRESH metadata, not the stale '1.0.0' values.
+    expect(merged.mfes.inspector.builtAgainst).toEqual(fresh.builtAgainst);
+    expect(merged.mfes.inspector.compat).toEqual(fresh.compat);
+    // Untouched entries keep their original (stale) compat.
+    expect(merged.mfes.discover.builtAgainst?.osdVersion).toBe('1.0.0');
+    expect(validate(merged).valid).toBe(true);
+  });
+
+  it('repoints sharedDeps when the manifest carries one (full publish)', () => {
+    const existing = multiEntryRegistry();
+    const merged = mergeRegistryFromManifest(existing, manifestWith('1.0.0+abc123def456'), now);
+    expect(merged.sharedDeps.url).toBe('https://cdn.example/mfe/shared-deps/3.5.0/');
+    expect(merged.sharedDeps.version).toBe('3.5.0');
+  });
+});
+
+describe('buildRegistryFromManifest — REPLACE guard', () => {
+  it('throws when the manifest has no sharedDeps (single-plugin publish)', () => {
+    expect(() =>
+      buildRegistryFromManifest(
+        singlePluginManifestWith('1.0.0+newhash123456'),
+        new Date('2026-07-01T12:00:00.000Z')
+      )
+    ).toThrow(/Cannot REPLACE the registry from a manifest with no sharedDeps/);
+  });
+});
+
+describe('runUpdateCli — --from-manifest --merge', () => {
+  let dir: string;
+  let repoRoot: string;
+  let registryPath: string;
+  let manifestPath: string;
+
+  beforeEach(() => {
+    dir = makeTempDir();
+    repoRoot = Path.join(dir, 'repo');
+    registryPath = Path.join(dir, 'registry.json');
+    manifestPath = Path.join(dir, 'deploy-manifest.json');
+
+    // Fake repo so tryComputeCompatMetadata can compute FRESH compat (osdVersion
+    // from package.json; getMfeSharedConfig reads UiSharedDeps + repo deps).
+    Fs.mkdirSync(repoRoot, { recursive: true });
+    Fs.writeFileSync(Path.join(repoRoot, 'package.json'), JSON.stringify({ version: '9.9.9' }));
+
+    // Seed a 3-entry registry (inspector + discover + timeline) with STALE compat.
+    Fs.writeFileSync(registryPath, `${JSON.stringify(multiEntryRegistry(), null, 2)}\n`, 'utf8');
+  });
+
+  afterEach(() => {
+    Fs.rmSync(dir, { recursive: true, force: true });
+  });
+
+  it('changes exactly ONE entry; the others are byte-identical + fresh compat', () => {
+    const before = JSON.parse(Fs.readFileSync(registryPath, 'utf8')) as Registry;
+    Fs.writeFileSync(
+      manifestPath,
+      `${JSON.stringify(singlePluginManifestWith('9.9.9+newhash123456'))}\n`
+    );
+    const out = captureConsole();
+
+    const code = runUpdateCli(
+      ['--registry-path', registryPath, '--from-manifest', '--merge'],
+      repoRoot,
+      {},
+      out,
+      new Date('2026-07-01T12:00:00.000Z')
+    );
+
+    expect(code).toBe(0);
+    const written = JSON.parse(Fs.readFileSync(registryPath, 'utf8')) as Registry;
+    expect(validate(written).valid).toBe(true);
+
+    // Same set of plugin ids — merge never drops the other entries.
+    expect(Object.keys(written.mfes).sort()).toEqual(['discover', 'inspector', 'timeline']);
+
+    // Inspector repointed at the new CDN url + version.
+    expect(written.mfes.inspector.remoteEntry).toBe(
+      'https://cdn.example/mfe/inspector/newhash123456/remoteEntry.js'
+    );
+    expect(written.mfes.inspector.version).toBe('9.9.9+newhash123456');
+    // FRESH compat stamped (osdVersion 9.9.9 from the fake repo), NOT stale 1.0.0.
+    expect(written.mfes.inspector.builtAgainst?.osdVersion).toBe('9.9.9');
+    expect(written.mfes.inspector.compat).toEqual({
+      minCoreVersion: '9.9.0',
+      compatibleCoreRange: '9.9.x',
+    });
+
+    // The OTHER two entries are byte-identical to the pre-merge registry.
+    expect(written.mfes.discover).toEqual(before.mfes.discover);
+    expect(written.mfes.timeline).toEqual(before.mfes.timeline);
+    // sharedDeps preserved (single-plugin manifest had none).
+    expect(written.sharedDeps).toEqual(before.sharedDeps);
+
+    expect(out.logs.join('\n')).toMatch(/Merged CDN revision/);
+  });
+
+  it('fails when --merge is used without --from-manifest', () => {
+    const out = captureConsole();
+    const code = runUpdateCli(['--registry-path', registryPath, '--merge'], repoRoot, {}, out);
+    expect(code).toBe(1);
+    expect(out.errors.join('\n')).toMatch(/--merge only applies to --from-manifest/);
+  });
+
+  it('fails when --merge has no existing registry to patch into', () => {
+    Fs.rmSync(registryPath, { force: true });
+    Fs.writeFileSync(
+      manifestPath,
+      `${JSON.stringify(singlePluginManifestWith('9.9.9+newhash123456'))}\n`
+    );
+    const out = captureConsole();
+
+    const code = runUpdateCli(
+      ['--registry-path', registryPath, '--from-manifest', '--merge'],
+      repoRoot,
+      {},
+      out
+    );
+    expect(code).toBe(1);
+    expect(out.errors.join('\n')).toMatch(/--merge requires an existing, valid registry/);
+  });
+});
+
+describe('runUpdateCli — --from-manifest REPLACE (regression)', () => {
+  let dir: string;
+  let registryPath: string;
+  let manifestPath: string;
+
+  beforeEach(() => {
+    dir = makeTempDir();
+    registryPath = Path.join(dir, 'registry.json');
+    manifestPath = Path.join(dir, 'deploy-manifest.json');
+    // Seed a registry with an EXTRA entry not present in the manifest.
+    Fs.writeFileSync(registryPath, `${JSON.stringify(multiEntryRegistry(), null, 2)}\n`, 'utf8');
+  });
+
+  afterEach(() => {
+    Fs.rmSync(dir, { recursive: true, force: true });
+  });
+
+  it('REPLACES the whole mfes map — entries not in the manifest are dropped', () => {
+    // manifestWith() contains only inspector + discover (no timeline).
+    Fs.writeFileSync(manifestPath, `${JSON.stringify(manifestWith('3.5.0+abc123def456'))}\n`);
+    const out = captureConsole();
+
+    const code = runUpdateCli(
+      ['--registry-path', registryPath, '--from-manifest'],
+      '/repo',
+      {},
+      out,
+      new Date('2026-07-01T12:00:00.000Z')
+    );
+
+    expect(code).toBe(0);
+    const written = JSON.parse(Fs.readFileSync(registryPath, 'utf8')) as Registry;
+    // 'timeline' is GONE — replace mode rebuilds the whole map from the manifest.
+    expect(Object.keys(written.mfes).sort()).toEqual(['discover', 'inspector']);
+    // sharedDeps repointed at the manifest's CDN location.
+    expect(written.sharedDeps.url).toBe('https://cdn.example/mfe/shared-deps/3.5.0/');
   });
 });

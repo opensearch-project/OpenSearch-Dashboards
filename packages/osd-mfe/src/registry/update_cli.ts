@@ -56,6 +56,14 @@ Modes:
                          module (and SRI, when the current registry still pins
                          the same content hash) are carried over — this only
                          repoints the URLs. Data-only: no upload, no AWS call.
+  --from-manifest --merge
+                         MERGE a (typically single-plugin) manifest into the
+                         EXISTING registry: patch ONLY the entries present in the
+                         manifest, leave every OTHER entry byte-identical, and
+                         stamp FRESH compat per patched entry. Preserves the
+                         existing sharedDeps when the manifest has none (a
+                         single-plugin publish). The per-plugin registration path
+                         (Phase 10): ship one plugin without re-registering 57.
   --plugin <id>          Patch a SINGLE existing entry in place. Requires at
                          least one of --version / --url. The entry's integrity
                          (SRI) is dropped because the recorded hash no longer
@@ -65,6 +73,9 @@ Options:
   --base-url <url>       Origin the remotes are served from (full-regen mode).
                          Defaults to REGISTRY_BASE_URL env or http://localhost:8080.
   --from-manifest        Register the CDN revision from a deploy manifest (see above).
+  --merge                With --from-manifest: patch only the manifest's entries
+                         into the existing registry (others byte-identical) and
+                         stamp fresh compat, instead of replacing the whole map.
   --manifest-path <p>    deploy-manifest.json to read (--from-manifest mode).
                          Defaults to deploy-manifest.json next to the registry file.
   --plugin <id>          Plugin id to patch (e.g. "inspector").
@@ -196,8 +207,14 @@ interface DeployManifestData {
   schemaVersion: number;
   /** CDN coordinates the artifacts were published to (recorded for traceability). */
   cdn: { baseUrl: string };
-  /** Shared-deps singletons published location. */
-  sharedDeps: { version: string; cdnUrl: string };
+  /**
+   * Shared-deps singletons published location. OPTIONAL: a single-plugin publish
+   * (Phase 10 Story 1, `deploy_mfe --plugin <id>`) skips shared-deps, so its
+   * manifest carries NO `sharedDeps` key. When absent, a full REPLACE
+   * (`--from-manifest`) is rejected (it would drop the registry's sharedDeps),
+   * while a `--merge` preserves the existing registry's `sharedDeps` untouched.
+   */
+  sharedDeps?: { version: string; cdnUrl: string };
   /** Map of plugin id -> its published CDN descriptor. */
   mfes: Record<string, ManifestMfeEntry>;
 }
@@ -241,14 +258,17 @@ function assertValidManifest(value: unknown, manifestPath: string): DeployManife
   if (!isObject(value.cdn) || !isNonEmptyString(value.cdn.baseUrl)) {
     errors.push('cdn.baseUrl must be a non-empty string');
   }
-  if (!isObject(value.sharedDeps)) {
-    errors.push('sharedDeps must be an object with { version, cdnUrl }');
-  } else {
-    if (!isNonEmptyString(value.sharedDeps.cdnUrl)) {
-      errors.push('sharedDeps.cdnUrl must be a non-empty string');
-    }
-    if (!isNonEmptyString(value.sharedDeps.version)) {
-      errors.push('sharedDeps.version must be a non-empty string');
+  if (value.sharedDeps !== undefined) {
+    // Optional: a single-plugin publish omits it. Validate only when present.
+    if (!isObject(value.sharedDeps)) {
+      errors.push('sharedDeps, when present, must be an object with { version, cdnUrl }');
+    } else {
+      if (!isNonEmptyString(value.sharedDeps.cdnUrl)) {
+        errors.push('sharedDeps.cdnUrl must be a non-empty string');
+      }
+      if (!isNonEmptyString(value.sharedDeps.version)) {
+        errors.push('sharedDeps.version must be a non-empty string');
+      }
     }
   }
   if (!isObject(value.mfes)) {
@@ -336,29 +356,20 @@ export function buildRegistryFromManifest(
   priorMfes: Record<string, MfeEntry> = {},
   compatMeta?: CompatMetadata
 ): Registry {
+  if (manifest.sharedDeps === undefined) {
+    // A full REPLACE cannot synthesize a sharedDeps descriptor out of nothing —
+    // the registry schema requires one. A single-plugin manifest (no sharedDeps)
+    // must be applied with `--merge`, which preserves the existing sharedDeps.
+    throw new Error(
+      'Cannot REPLACE the registry from a manifest with no sharedDeps (single-plugin ' +
+        'publish). Re-run update_registry with --merge to patch just the manifest entries ' +
+        'into the existing registry (its sharedDeps is preserved).'
+    );
+  }
+
   const mfes: Record<string, MfeEntry> = {};
   for (const id of Object.keys(manifest.mfes).sort((a, b) => a.localeCompare(b))) {
-    const entry = manifest.mfes[id];
-    const prior = priorMfes[id];
-    const carryIntegrity =
-      prior !== undefined && prior.version === entry.version && prior.integrity !== undefined;
-
-    mfes[id] = {
-      version: entry.version,
-      remoteEntry: entry.cdnUrl,
-      scope: prior?.scope ?? `osdMfe_${id}`,
-      module: prior?.module ?? './public',
-      ...(carryIntegrity ? { integrity: prior!.integrity } : {}),
-      // Phase 9: stamp freshly-computed compat metadata when provided, else carry
-      // forward whatever the prior registry recorded (so re-registering a CDN
-      // revision never silently drops the contract data).
-      ...(compatMeta?.builtAgainst ?? prior?.builtAgainst
-        ? { builtAgainst: compatMeta?.builtAgainst ?? prior!.builtAgainst }
-        : {}),
-      ...(compatMeta?.compat ?? prior?.compat
-        ? { compat: compatMeta?.compat ?? prior!.compat }
-        : {}),
-    };
+    mfes[id] = buildMfeEntry(id, manifest.mfes[id], priorMfes[id], compatMeta);
   }
 
   return {
@@ -368,6 +379,94 @@ export function buildRegistryFromManifest(
       url: manifest.sharedDeps.cdnUrl,
       version: manifest.sharedDeps.version,
     },
+    mfes,
+  };
+}
+
+/**
+ * Build a single {@link MfeEntry} from one manifest entry. Shared by the full
+ * REPLACE ({@link buildRegistryFromManifest}) and single-entry MERGE
+ * ({@link mergeRegistryFromManifest}) paths so both repoint URLs, derive
+ * scope/module, carry SRI (only when the content hash is unchanged), and stamp
+ * compat identically.
+ *
+ * `integrity` (SRI) is carried over from `prior` ONLY when it still pins the
+ * SAME content (its `version` equals the manifest's): the CDN object is then
+ * byte-identical to the build that produced that hash, so the recorded SRI hash
+ * remains valid. Otherwise it is omitted (optional in the schema).
+ *
+ * Compat is stamped FRESH from `compatMeta` when provided (Phase 10 merge stamps
+ * newly-computed metadata); when omitted it carries forward whatever `prior`
+ * recorded so re-registering never silently drops the contract data.
+ */
+function buildMfeEntry(
+  id: string,
+  entry: ManifestMfeEntry,
+  prior: MfeEntry | undefined,
+  compatMeta?: CompatMetadata
+): MfeEntry {
+  const carryIntegrity =
+    prior !== undefined && prior.version === entry.version && prior.integrity !== undefined;
+
+  return {
+    version: entry.version,
+    remoteEntry: entry.cdnUrl,
+    scope: prior?.scope ?? `osdMfe_${id}`,
+    module: prior?.module ?? './public',
+    ...(carryIntegrity ? { integrity: prior!.integrity } : {}),
+    // Phase 9: stamp freshly-computed compat metadata when provided, else carry
+    // forward whatever the prior registry recorded (so re-registering a CDN
+    // revision never silently drops the contract data).
+    ...(compatMeta?.builtAgainst ?? prior?.builtAgainst
+      ? { builtAgainst: compatMeta?.builtAgainst ?? prior!.builtAgainst }
+      : {}),
+    ...(compatMeta?.compat ?? prior?.compat ? { compat: compatMeta?.compat ?? prior!.compat } : {}),
+  };
+}
+
+/**
+ * MERGE a deploy manifest into an EXISTING registry (Phase 10 Story 2): patch
+ * ONLY the entries present in `manifest.mfes` into `existing.mfes`, leaving every
+ * other entry BYTE-IDENTICAL, and stamp FRESH compat (`compatMeta`) onto each
+ * patched entry. This is what lets a single plugin be re-registered on its own
+ * cadence without disturbing the other 57.
+ *
+ * Unlike {@link buildRegistryFromManifest} (which REPLACES the whole `mfes` map),
+ * this preserves untouched entries object-for-object (so they re-serialize
+ * identically) and preserves the existing `sharedDeps` when the manifest has
+ * none (a single-plugin publish). When the manifest DOES carry `sharedDeps`
+ * (a full publish), it is repointed at the manifest's CDN location.
+ *
+ * @param existing the current, already-validated registry to patch into
+ * @param manifest validated deploy manifest data
+ * @param now timestamp to stamp into `generatedAt`
+ * @param compatMeta freshly-computed Phase 9 compat metadata stamped onto each
+ *   merged entry (omitted only when the repo can't be read; then prior compat is
+ *   carried forward)
+ * @returns a NEW in-memory registry (validate + write it separately)
+ */
+export function mergeRegistryFromManifest(
+  existing: Registry,
+  manifest: DeployManifestData,
+  now: Date,
+  compatMeta?: CompatMetadata
+): Registry {
+  // Shallow-copy preserves key order and keeps untouched entries as the SAME
+  // object references, so they re-serialize byte-identically.
+  const mfes: Record<string, MfeEntry> = { ...existing.mfes };
+  for (const id of Object.keys(manifest.mfes)) {
+    mfes[id] = buildMfeEntry(id, manifest.mfes[id], existing.mfes[id], compatMeta);
+  }
+
+  return {
+    schemaVersion: existing.schemaVersion,
+    generatedAt: now.toISOString(),
+    // Preserve the existing sharedDeps when the (single-plugin) manifest omits
+    // it; repoint it only when the manifest carries one (a full publish).
+    sharedDeps:
+      manifest.sharedDeps !== undefined
+        ? { url: manifest.sharedDeps.cdnUrl, version: manifest.sharedDeps.version }
+        : existing.sharedDeps,
     mfes,
   };
 }
@@ -420,6 +519,11 @@ export function runUpdateCli(
     const registryPath = resolveRegistryPath(argv, env);
     const pluginId = readOption(argv, '--plugin');
     const fromManifest = argv.includes('--from-manifest');
+    const merge = argv.includes('--merge');
+
+    if (merge && !fromManifest) {
+      throw new Error('--merge only applies to --from-manifest (it patches manifest entries).');
+    }
 
     let registry: Registry;
     let summary: string;
@@ -434,15 +538,40 @@ export function runUpdateCli(
         JSON.parse(Fs.readFileSync(manifestPath, 'utf8')),
         manifestPath
       );
-      registry = buildRegistryFromManifest(
-        manifest,
-        now,
-        readExistingMfes(registryPath),
-        tryComputeCompatMetadata(repoRoot)
-      );
-      summary =
-        `Registered CDN revision from ${manifestPath} ` +
-        `(${Object.keys(registry.mfes).length} entrie(s) @ ${manifest.cdn.baseUrl})`;
+      if (merge) {
+        // MERGE: patch only the manifest's entries into the existing registry,
+        // stamping FRESH compat. The other entries stay byte-identical. Requires
+        // an existing, valid registry to patch into.
+        let existing: Registry;
+        try {
+          existing = assertValidRegistry(JSON.parse(Fs.readFileSync(registryPath, 'utf8')));
+        } catch (cause) {
+          throw new Error(
+            `--merge requires an existing, valid registry at ${registryPath} to patch into ` +
+              `(${cause instanceof Error ? cause.message : String(cause)}).`
+          );
+        }
+        registry = mergeRegistryFromManifest(
+          existing,
+          manifest,
+          now,
+          tryComputeCompatMetadata(repoRoot)
+        );
+        summary =
+          `Merged CDN revision from ${manifestPath} ` +
+          `(${Object.keys(manifest.mfes).length} entrie(s) patched, ` +
+          `${Object.keys(registry.mfes).length} total @ ${manifest.cdn.baseUrl})`;
+      } else {
+        registry = buildRegistryFromManifest(
+          manifest,
+          now,
+          readExistingMfes(registryPath),
+          tryComputeCompatMetadata(repoRoot)
+        );
+        summary =
+          `Registered CDN revision from ${manifestPath} ` +
+          `(${Object.keys(registry.mfes).length} entrie(s) @ ${manifest.cdn.baseUrl})`;
+      }
     } else {
       const baseUrl = readOption(argv, '--base-url');
       registry = generateRegistry({
