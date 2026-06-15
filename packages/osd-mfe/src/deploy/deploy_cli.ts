@@ -81,7 +81,9 @@ Options:
                        remote + shared-deps and exit. Makes ZERO AWS calls and
                        writes nothing (no manifest).
   --skip-creds         Do not refresh Isengard creds (assume the osd-mfe profile
-                       is already valid). Ignored under --dry-run.
+                       is already valid). Ignored under --dry-run. Also skipped
+                       automatically when AWS_CONTAINER_CREDENTIALS_FULL_URI is
+                       set (e.g. via mfe_refresh_creds with ada credentials serve).
   --cdn-outputs <p>    Path to cdn_outputs.env to read the CDN location from when
                        the CDN_* env vars are absent. Defaults to
                        <repoRoot>/../harness/cdn_outputs.env when it exists.
@@ -245,10 +247,20 @@ function loadFileEnv(path: string | undefined, fs: DeployCliFs): Record<string, 
  * harness/env.sh). This is the node equivalent of the `mfe_refresh_creds` shell
  * function — that function is not visible to a child node process.
  *
+ * When `AWS_CONTAINER_CREDENTIALS_FULL_URI` is set (e.g. via `mfe_refresh_creds`
+ * running `ada credentials serve`), the ada refresh is skipped automatically
+ * because the SDK will use container credentials instead.
+ *
  * @throws Error when required env vars are missing or `ada` exits non-zero. Per
  *   the loop rules we STOP rather than work around a creds failure.
  */
 function refreshCreds(exec: CommandRunner, env: NodeJS.ProcessEnv, out: DeployCliConsole): void {
+  if (env.AWS_CONTAINER_CREDENTIALS_FULL_URI) {
+    out.log(
+      'Using container credentials from AWS_CONTAINER_CREDENTIALS_FULL_URI; skipping ada credentials refresh.'
+    );
+    return;
+  }
   const account = env.ADA_ACCOUNT;
   const provider = env.ADA_PROVIDER;
   const role = env.ADA_ROLE;

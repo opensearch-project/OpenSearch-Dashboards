@@ -225,6 +225,20 @@ describe('runDeployCli real publish', () => {
     expect(out.logs.join('\n')).toContain('already published');
   });
 
+  it('skips ada creds refresh when AWS_CONTAINER_CREDENTIALS_FULL_URI is set', () => {
+    const { root, env } = makeFixtureRepo();
+    env.AWS_CONTAINER_CREDENTIALS_FULL_URI = 'http://169.254.170.23/v1/credentials';
+    const out = captureConsole();
+    const { run, calls } = mockExec();
+
+    const code = runDeployCli([], root, { env, out, exec: run });
+
+    expect(code).toBe(0);
+    // No ada call — container credentials are used instead.
+    expect(calls.find((c) => c.command === 'ada')).toBeUndefined();
+    expect(out.logs.join('\n')).toContain('AWS_CONTAINER_CREDENTIALS_FULL_URI');
+  });
+
   it('gzip-compresses every upload and never stages source maps for the CDN', () => {
     const { root, env } = makeFixtureRepo();
     // A source map alongside the remote must NOT be published to the public CDN.
