@@ -19,8 +19,6 @@ describe('metric_utils', () => {
     name: 'Test Metric',
     schema: VisFieldType.Numerical,
     column: 'value_field',
-    validValuesCount: 10,
-    uniqueValuesCount: 8,
   };
 
   const createMockState = (overrides = {}): EChartsSpecState<MetricChartStyle> => ({

@@ -165,8 +165,6 @@ describe('LineVisStyleControls', () => {
     name: 'value',
     schema: VisFieldType.Numerical,
     column: 'field-1',
-    validValuesCount: 1,
-    uniqueValuesCount: 1,
   };
 
   const mockCategoricalColumn = {
@@ -174,8 +172,6 @@ describe('LineVisStyleControls', () => {
     name: 'category',
     schema: VisFieldType.Categorical,
     column: 'field-2',
-    validValuesCount: 1,
-    uniqueValuesCount: 1,
   };
 
   const mockDateColumn = {
@@ -183,8 +179,6 @@ describe('LineVisStyleControls', () => {
     name: 'date',
     schema: VisFieldType.Date,
     column: 'field-0',
-    validValuesCount: 1,
-    uniqueValuesCount: 1,
   };
 
   const mockAxisColumnMappings: AxisColumnMappings = {

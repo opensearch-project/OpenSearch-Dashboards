@@ -19,8 +19,6 @@ describe('Pie Chart to_expression', () => {
     name: 'Value',
     schema: VisFieldType.Numerical,
     column: 'value',
-    validValuesCount: 3,
-    uniqueValuesCount: 3,
   };
 
   const categoricalColumn: VisColumn = {
@@ -28,8 +26,6 @@ describe('Pie Chart to_expression', () => {
     name: 'Category',
     schema: VisFieldType.Categorical,
     column: 'category',
-    validValuesCount: 3,
-    uniqueValuesCount: 3,
   };
 
   const mockStyles: PieChartStyle = {

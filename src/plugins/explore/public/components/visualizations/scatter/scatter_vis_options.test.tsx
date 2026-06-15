@@ -28,16 +28,12 @@ const mockNumericalColumns: VisColumn[] = [
     name: 'X Value',
     schema: VisFieldType.Numerical,
     column: 'x',
-    validValuesCount: 6,
-    uniqueValuesCount: 6,
   },
   {
     id: 2,
     name: 'Y Value',
     schema: VisFieldType.Numerical,
     column: 'y',
-    validValuesCount: 6,
-    uniqueValuesCount: 6,
   },
 ];
 
@@ -47,8 +43,6 @@ const mockCategoricalColumns: VisColumn[] = [
     name: 'Category',
     schema: VisFieldType.Categorical,
     column: 'category',
-    validValuesCount: 6,
-    uniqueValuesCount: 2,
   },
 ];
 
@@ -210,8 +204,6 @@ describe('ScatterVisStyleControls (updated structure)', () => {
         name: 'Category',
         schema: VisFieldType.Categorical,
         column: 'category',
-        validValuesCount: 6,
-        uniqueValuesCount: 2,
       },
     },
   };
@@ -225,8 +217,6 @@ describe('ScatterVisStyleControls (updated structure)', () => {
         name: 'Size Value',
         schema: VisFieldType.Numerical,
         column: 'size',
-        validValuesCount: 6,
-        uniqueValuesCount: 6,
       },
     },
   };
