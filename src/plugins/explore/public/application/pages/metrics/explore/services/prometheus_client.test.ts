@@ -205,3 +205,45 @@ describe('PrometheusClient resource calls propagate time range', () => {
     expect(rc.getMetrics).toHaveBeenCalledTimes(2);
   });
 });
+
+describe('PrometheusClient.queryRange preserves data connection meta', () => {
+  it('keeps the dataset.dataSource.meta from the live query state', async () => {
+    const setFields = jest.fn();
+    const searchSource = {
+      setFields,
+      fetch: jest.fn().mockResolvedValue({ hits: { hits: [] } }),
+    };
+    const dataset = {
+      id: 'conn-1',
+      title: 'prometheus',
+      type: 'PROMETHEUS',
+      dataSource: { meta: { name: 'my-prom', sessionId: 'abc' } },
+    };
+    const queryState = { language: 'PROMQL', query: '', dataset };
+    const dataView = { id: 'conn-1', type: 'PROMETHEUS' };
+
+    const services = ({
+      data: {
+        query: {
+          timefilter: { timefilter: { getTime: () => ({ from: 'now-1h', to: 'now' }) } },
+          queryString: { getQuery: () => queryState },
+        },
+        dataViews: {
+          get: jest.fn().mockResolvedValue(dataView),
+          getDefault: jest.fn().mockResolvedValue(dataView),
+          // convertToDataset would strip `meta`; assert it is NOT used to build the query.
+          convertToDataset: jest.fn().mockResolvedValue({ id: 'conn-1', title: 'prometheus' }),
+        },
+        search: { searchSource: { create: jest.fn().mockResolvedValue(searchSource) } },
+      },
+    } as unknown) as ExploreServices;
+
+    const client = new PrometheusClient(services, 'conn-1');
+    await client.queryRange('up');
+
+    expect(setFields).toHaveBeenCalledTimes(1);
+    const passedQuery = setFields.mock.calls[0][0].query;
+    expect(passedQuery.query).toBe('up');
+    expect(passedQuery.dataset.dataSource.meta).toEqual({ name: 'my-prom', sessionId: 'abc' });
+  });
+});

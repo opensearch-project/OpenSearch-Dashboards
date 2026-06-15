@@ -86,6 +86,15 @@ describe('ChatWindow - Conversation Name', () => {
       getThreadId: jest.fn().mockReturnValue('mock-thread-id'),
       setChatWindowInstance: jest.fn(),
       clearChatWindowInstance: jest.fn(),
+      getUserMessage: jest.fn((content: string, rawMessage?: string) => ({
+        id: `msg-${Date.now()}`,
+        role: 'user',
+        content,
+        rawMessage: rawMessage || content,
+      })),
+      getCurrentDataSourceId: jest.fn().mockResolvedValue('mock-ds-id'),
+      getAvailableDataSources: jest.fn().mockResolvedValue([]),
+      setDataSourceId: jest.fn(),
       conversationHistoryService: {
         getMemoryProvider: jest.fn().mockReturnValue({
           includeFullHistory: true,

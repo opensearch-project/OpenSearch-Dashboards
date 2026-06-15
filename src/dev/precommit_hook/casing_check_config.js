@@ -44,8 +44,6 @@ export const IGNORE_FILE_GLOBS = [
   '**/+([A-Z_]).asciidoc',
   '**/LICENSE',
   '**/*.txt',
-  '**/Gruntfile.js',
-  'tasks/config/**/*',
   '**/{Dockerfile,docker-compose.yml}',
   '**/.*',
   '**/__mocks__/**/*',

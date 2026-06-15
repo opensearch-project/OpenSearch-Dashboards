@@ -198,6 +198,40 @@ describe('SearchAPI.findDataSourceIdbyName', () => {
     );
   });
 
+  test('If dataSource is AnalyticEngine but the query is PPL, return id without throwing', async () => {
+    const savedObjectsClientWithAnalyticEngine = {} as SavedObjectsClientContract;
+    savedObjectsClientWithAnalyticEngine.find = jest
+      .fn()
+      .mockImplementation((query: SavedObjectsFindOptions) => {
+        if (query.search === `"analyticEngineDataSource"`) {
+          return Promise.resolve({
+            total: 1,
+            savedObjects: [
+              {
+                id: 'ae-datasource-id',
+                attributes: {
+                  title: 'analyticEngineDataSource',
+                  dataSourceEngineType: 'AnalyticEngine',
+                },
+              },
+            ],
+          });
+        }
+        return Promise.resolve({ total: 0, savedObjects: [] });
+      });
+
+    const dependencies = {
+      savedObjectsClient: savedObjectsClientWithAnalyticEngine,
+      dataSourceEnabled: true,
+    } as SearchAPIDependencies;
+    const searchAPI = new SearchAPI(dependencies);
+
+    // AnalyticEngine supports PPL, so a PPL query must not be blocked.
+    expect(await searchAPI.findDataSourceIdbyName('analyticEngineDataSource', true)).toBe(
+      'ae-datasource-id'
+    );
+  });
+
   test('If dataSource is not AnalyticEngine, return id normally', async () => {
     const savedObjectsClientWithOpenSearch = {} as SavedObjectsClientContract;
     savedObjectsClientWithOpenSearch.find = jest

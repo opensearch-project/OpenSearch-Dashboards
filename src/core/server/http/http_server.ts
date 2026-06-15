@@ -206,7 +206,6 @@ export class HttpServer {
             // validation applied in ./http_tools#getServerOptions
             // (All NP routes are already required to specify their own validation in order to access the payload)
             validate,
-            // @ts-expect-error Types are outdated and doesn't allow `payload.multipart` to be `true`
             payload: [allow, maxBytes, output, parse, timeout?.payload].some((x) => x !== undefined)
               ? {
                   allow,

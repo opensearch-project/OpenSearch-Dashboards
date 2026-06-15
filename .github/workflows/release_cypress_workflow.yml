@@ -51,7 +51,7 @@ env:
 
 jobs:
   Get-CI-Image-Tag:
-    uses: opensearch-project/opensearch-build/.github/workflows/get-ci-image-tag.yml@main
+    uses: opensearch-project/opensearch-build/.github/workflows/get-ci-image-tag.yml@c2498b758c08fb7bc48476509a5fc1b8dd5f7493 # main
     with:
       product: opensearch-dashboards
 
@@ -75,14 +75,14 @@ jobs:
     name: Run cypress tests (osd:ciGroup${{ matrix.spec_group }}) ${{ inputs.UNIQUE_ID}}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           path: ./${{ env.OSD_PATH }}
           repository: ${{ env.TEST_REPO }}
           ref: '${{ env.TEST_BRANCH }}'
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version-file: './${{ env.OSD_PATH }}/.nvmrc'
           registry-url: 'https://registry.npmjs.org'
@@ -144,7 +144,7 @@ jobs:
           su `id -un 1000` -c "source ${{ env.OSD_PATH }}/scripts/cypress_tests.sh && run_dashboards_cypress_tests"
 
       # Screenshots are only captured on failures
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: failure()
         with:
           name: release-osd-cypress-screenshots-${{ matrix.spec_group }}
@@ -152,7 +152,7 @@ jobs:
           retention-days: 1
           overwrite: true
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: failure()
         with:
           name: release-osd-cypress-videos-${{ matrix.spec_group }}

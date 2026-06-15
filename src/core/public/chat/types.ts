@@ -184,7 +184,8 @@ export interface ChatImplementationFunctions {
   // Message operations
   sendMessage: (
     content: string,
-    messages: Message[]
+    messages: Message[],
+    userMessage?: UserMessage
   ) => Promise<{ observable: any; userMessage: UserMessage }>;
 
   sendMessageWithWindow: (
