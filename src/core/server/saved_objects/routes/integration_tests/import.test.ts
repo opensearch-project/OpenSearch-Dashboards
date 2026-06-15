@@ -558,4 +558,107 @@ describe(`POST ${URL}`, () => {
       );
     });
   });
+
+  describe('config type capability gating', () => {
+    const configObject =
+      '{"type":"config","id":"test-config","attributes":{"dismissedAt":"2026-01-01T00:00:00Z"}}';
+    const dashboardObject =
+      '{"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"}}';
+
+    const makeRequest = (...lines: string[]) =>
+      supertest(httpSetup.server.listener)
+        .post(URL)
+        .set('content-Type', 'multipart/form-data; boundary=BOUNDARY')
+        .send(
+          [
+            '--BOUNDARY',
+            'Content-Disposition: form-data; name="file"; filename="export.ndjson"',
+            'Content-Type: application/ndjson',
+            '',
+            ...lines,
+            '--BOUNDARY--',
+          ].join('\r\n')
+        );
+
+    describe('when getCapabilities resolver is absent (fail-safe)', () => {
+      it('blocks config objects', async () => {
+        const result = await makeRequest(configObject).expect(200);
+        expect(result.body.success).toBe(false);
+        expect(result.body.errors[0]).toEqual(
+          expect.objectContaining({ type: 'config', error: { type: 'unsupported_type' } })
+        );
+      });
+    });
+
+    describe('when resolver returns advancedSettings.save=false', () => {
+      beforeEach(async () => {
+        await server.stop();
+        ({ server, httpSetup, handlerContext } = await setupServer());
+        handlerContext.savedObjects.typeRegistry.getImportableAndExportableTypes.mockReturnValue(
+          [...allowedTypes, 'config'].map(createExportableType)
+        );
+        handlerContext.savedObjects.typeRegistry.getType.mockImplementation(
+          (type: string) => ({ management: { icon: `${type}-icon` } } as any)
+        );
+        savedObjectsClient = handlerContext.savedObjects.client;
+        savedObjectsClient.find.mockResolvedValue(emptyResponse);
+        savedObjectsClient.checkConflicts.mockResolvedValue({ errors: [] });
+
+        const router = httpSetup.createRouter('/internal/saved_objects/');
+        const mockResolver = jest.fn().mockResolvedValue({ advancedSettings: { save: false } });
+        registerImportRoute(router, config, () => mockResolver);
+
+        const dynamicConfigService = dynamicConfigServiceMock.createInternalStartContract();
+        await server.start({ dynamicConfigService });
+      });
+
+      it('blocks config objects and processes other objects', async () => {
+        savedObjectsClient.bulkCreate.mockResolvedValueOnce({
+          saved_objects: [mockDashboard],
+        });
+
+        const result = await makeRequest(configObject, dashboardObject).expect(200);
+        expect(result.body.successCount).toBe(1);
+        expect(result.body.errors).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({ type: 'config', error: { type: 'unsupported_type' } }),
+          ])
+        );
+      });
+    });
+
+    describe('when resolver returns advancedSettings.save=true', () => {
+      beforeEach(async () => {
+        await server.stop();
+        ({ server, httpSetup, handlerContext } = await setupServer());
+        handlerContext.savedObjects.typeRegistry.getImportableAndExportableTypes.mockReturnValue(
+          [...allowedTypes, 'config'].map(createExportableType)
+        );
+        handlerContext.savedObjects.typeRegistry.getType.mockImplementation(
+          (type: string) => ({ management: { icon: `${type}-icon` } } as any)
+        );
+        savedObjectsClient = handlerContext.savedObjects.client;
+        savedObjectsClient.find.mockResolvedValue(emptyResponse);
+        savedObjectsClient.checkConflicts.mockResolvedValue({ errors: [] });
+
+        const router = httpSetup.createRouter('/internal/saved_objects/');
+        const mockResolver = jest.fn().mockResolvedValue({ advancedSettings: { save: true } });
+        registerImportRoute(router, config, () => mockResolver);
+
+        const dynamicConfigService = dynamicConfigServiceMock.createInternalStartContract();
+        await server.start({ dynamicConfigService });
+      });
+
+      it('allows config objects through', async () => {
+        savedObjectsClient.bulkCreate.mockResolvedValueOnce({
+          saved_objects: [{ type: 'config', id: 'test-config', attributes: {}, references: [] }],
+        });
+
+        const result = await makeRequest(configObject).expect(200);
+        expect(result.body.success).toBe(true);
+        expect(result.body.successCount).toBe(1);
+        expect(result.body.errors).toBeUndefined();
+      });
+    });
+  });
 });
