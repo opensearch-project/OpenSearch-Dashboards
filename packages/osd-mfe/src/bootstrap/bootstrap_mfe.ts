@@ -392,30 +392,103 @@ export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> 
   const results = await Promise.allSettled(
     idsToLoad.map(async (id) => {
       const descriptor = resolved.get(id)!;
-      const container = await deps.loadRemoteContainer(descriptor.remoteEntry, descriptor.scope);
+      // Pass the registry `integrity` (when present) so the remoteEntry <script>
+      // is integrity-checked by the browser (Phase 12, Story 2). An override
+      // descriptor has no integrity (its bytes differ from the registry build),
+      // so it loads without SRI — see resolve() / load_remote.loadScript().
+      const container = await deps.loadRemoteContainer(
+        descriptor.remoteEntry,
+        descriptor.scope,
+        descriptor.integrity
+      );
       const factory = await deps.getRemoteModuleFactory(container, shareScope, descriptor.module);
       deps.registerPluginFactory(id, factory);
     })
   );
 
-  // Report each remote that failed and register an INERT placeholder in its
-  // place so OSD core's plugin_reader (UNCHANGED) finds a definition for every
-  // plugin in the server-injected list and core boot is NOT aborted. The failed
-  // plugin is effectively disabled; the rest of the app still boots.
+  // Report each remote that failed and decide how to handle it.
+  //
+  // Phase 4 graceful degradation (the DEFAULT): a remote that cannot be loaded is
+  // logged and registered as a DISABLED placeholder so OSD core's plugin_reader
+  // (UNCHANGED) still finds a definition for every plugin in the server-injected
+  // list and core boot is NOT aborted. The failed plugin is effectively disabled;
+  // the rest of the app still boots.
+  //
+  // Phase 12, Story 2 — SRI FAIL-CLOSED: a remote that carries an `integrity`
+  // hash and FAILS to load is a potential Subresource-Integrity violation (the
+  // browser refused to execute bytes that did not match the pinned hash — a
+  // compromised CDN / MITM, or simply unavailable bytes). We route that through
+  // the SAME Phase 9 env-keyed policy as a version incompatibility:
+  //   - dev / non-prod (`onIncompatible: 'block'`) => treat it as a page OFFENDER
+  //     and HARD-BLOCK (loud block page, core does NOT boot — never run a
+  //     half-verified app);
+  //   - prod (`onIncompatible: 'skip'`, or no policy injected) => SKIP it (the
+  //     disabled placeholder above), so the app still boots from the rest.
+  // A remote WITHOUT integrity (e.g. a dev override) keeps pure Phase 4 graceful
+  // degradation regardless of env — there is no integrity claim to have violated,
+  // so a load failure cannot be an SRI failure. Because this only fires on an
+  // actual load `error`, a CORRECT artifact never triggers it (no false rejects).
+  const blockOnIntegrityFailure = compatPolicy?.onIncompatible === 'block';
   const failedIds: string[] = [];
+  const integrityOffenders: EvaluatedRemote[] = [];
   results.forEach((result, index) => {
     if (result.status === 'rejected') {
       const id = idsToLoad[index];
+      const descriptor = resolved.get(id)!;
+      const hasIntegrity = descriptor.integrity !== undefined;
+
+      if (hasIntegrity && blockOnIntegrityFailure) {
+        // FAIL-CLOSED (dev block): collect as an offender; the page hard-blocks
+        // below and core never boots. Do NOT register a placeholder (the app is
+        // not going to start).
+        integrityOffenders.push({
+          id,
+          compatibility: 'incompatible',
+          reasons: [
+            `remoteEntry failed to load from ${descriptor.remoteEntry} — the browser refused ` +
+              `to execute it (Subresource Integrity mismatch against ${descriptor.integrity}, ` +
+              `or the bytes were unavailable). Refusing to run unverified code ` +
+              `(compat policy onIncompatible = "block").`,
+          ],
+        });
+        // eslint-disable-next-line no-console
+        console.error(
+          `[mfe] Integrity verification failed for remote "${id}" (${descriptor.remoteEntry}); ` +
+            `blocking startup rather than executing unverified bytes.`,
+          result.reason
+        );
+        return;
+      }
+
+      // Phase 4 graceful degradation (prod skip, no policy, or non-integrity remote).
       failedIds.push(id);
       deps.registerPluginFactory(id, createDisabledPluginModule);
       // eslint-disable-next-line no-console
       console.error(
-        `[mfe] Failed to load remote "${id}" from ${resolved.get(id)!.remoteEntry}; ` +
+        `[mfe] Failed to load remote "${id}" from ${descriptor.remoteEntry}; ` +
           `registering it as DISABLED and continuing to boot the rest of the app.`,
         result.reason
       );
     }
   });
+
+  // FAIL-CLOSED (dev block): if any integrity-protected remote failed its SRI
+  // check, render the loud block page and do NOT boot core. This reuses the same
+  // hard-block surface as a Phase 9 version incompatibility — never a white screen
+  // or a silent hang.
+  if (integrityOffenders.length > 0) {
+    const offenderSummary = integrityOffenders
+      .map((o) => `${o.id}: ${o.reasons.join('; ')}`)
+      .join('\n  - ');
+    // eslint-disable-next-line no-console
+    console.error(
+      `[mfe] Blocking startup: ${integrityOffenders.length} remote(s) failed Subresource ` +
+        `Integrity verification (compat policy onIncompatible = "block"):\n  - ${offenderSummary}`
+    );
+    deps.renderBlockPage(integrityOffenders);
+    return;
+  }
+
   if (failedIds.length > 0) {
     // eslint-disable-next-line no-console
     console.warn(

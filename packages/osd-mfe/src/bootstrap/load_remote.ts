@@ -25,15 +25,47 @@ import { MfeContainer, PluginPublicModule, ShareScope, mfeWindow } from './types
  *
  * `async = false` preserves execution order for scripts appended in sequence;
  * the bootstrap awaits each load explicitly regardless.
+ *
+ * Subresource Integrity (Phase 12, Story 2): when an `integrity` hash is supplied
+ * (`sha384-…`, from the registry entry), it is set on the element together with
+ * `crossorigin="anonymous"` so the browser verifies the DECODED (uncompressed)
+ * response bytes against the hash and REFUSES to execute a tampered/MITM'd script
+ * — a mismatch fires `error` (not `load`), so this Promise REJECTS rather than
+ * running unverified code. `crossorigin` is REQUIRED for SRI enforcement on a
+ * cross-origin script (and for the integrity to be checked at all); the CDN/origin
+ * already answer CORS (ACAO:* locally / Managed-CORS-with-preflight on the CDN), so
+ * the anonymous (no-credentials) request succeeds. When NO integrity is known
+ * (e.g. a dev override, whose bytes differ from the registry build — see
+ * `resolve()`), neither attribute is set so the load keeps its prior,
+ * no-CORS-required behavior.
+ *
+ * @param url absolute URL of the script to inject
+ * @param integrity optional SRI hash (`sha384-…`); enables `crossorigin` + integrity
  */
-export function loadScript(url: string): Promise<void> {
+export function loadScript(url: string, integrity?: string): Promise<void> {
   return new Promise<void>((resolve, reject) => {
     const el = document.createElement('script');
     el.src = url;
     el.type = 'text/javascript';
     el.async = false;
+    if (integrity) {
+      // Setting both is deliberate: SRI on a cross-origin script is only enforced
+      // when the request is made in CORS mode. We gate `crossorigin` on the
+      // presence of integrity so non-integrity loads (shared-deps, dev overrides)
+      // do not suddenly require CORS headers they were not relying on before.
+      el.integrity = integrity;
+      el.crossOrigin = 'anonymous';
+    }
     el.onload = () => resolve();
-    el.onerror = () => reject(new Error(`Failed to load script: ${url}`));
+    el.onerror = () =>
+      reject(
+        new Error(
+          integrity
+            ? `Failed to load script: ${url} ` +
+              `(Subresource Integrity check failed or the script could not be fetched)`
+            : `Failed to load script: ${url}`
+        )
+      );
     document.head.appendChild(el);
   });
 }
@@ -43,13 +75,18 @@ export function loadScript(url: string): Promise<void> {
  *
  * @param remoteEntry absolute URL of the remote's `remoteEntry.js`
  * @param scope the container global name (the plugin id / MF container `name`)
- * @throws if the container global is missing or malformed after the load
+ * @param integrity optional SRI hash for `remoteEntry` (from the registry entry);
+ *   when present the browser integrity-checks the script and this rejects on a
+ *   mismatch instead of executing tampered bytes. Absent for dev overrides.
+ * @throws if the integrity check fails, the script cannot be fetched, or the
+ *   container global is missing or malformed after the load
  */
 export async function loadRemoteContainer(
   remoteEntry: string,
-  scope: string
+  scope: string,
+  integrity?: string
 ): Promise<MfeContainer> {
-  await loadScript(remoteEntry);
+  await loadScript(remoteEntry, integrity);
 
   const container = mfeWindow()[scope] as MfeContainer | undefined;
   if (!container || typeof container.get !== 'function' || typeof container.init !== 'function') {

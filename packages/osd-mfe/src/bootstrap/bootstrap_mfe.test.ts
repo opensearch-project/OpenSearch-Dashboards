@@ -740,3 +740,284 @@ describe('bootstrapMfe — Phase 9 version-compatibility enforcement (Story 3)',
     expect(invokeCoreBootstrap).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('bootstrapMfe — remoteEntry SRI enforcement (Phase 12, Story 2)', () => {
+  const HOST = {
+    osdVersion: '3.5.0',
+    sharedDeps: { react: '^16.14.0', 'react-dom': '^16.14.0' },
+  };
+  const NON_PROD = {
+    onIncompatible: 'block' as const,
+    onMissing: 'warn-load' as const,
+    strictShared: true,
+  };
+  const PROD = {
+    onIncompatible: 'skip' as const,
+    onMissing: 'skip' as const,
+    strictShared: true,
+  };
+  // Compatible metadata so both remotes reach the LOAD step (the SRI failure we
+  // are exercising happens at load time, not during compat classification).
+  const COMPAT_META = {
+    builtAgainst: {
+      osdVersion: '3.5.0',
+      sharedDeps: { react: '^16.14.0', 'react-dom': '^16.14.0' },
+    },
+    compat: { minCoreVersion: '3.5.0', compatibleCoreRange: '3.5.x' },
+  };
+
+  const INSPECTOR_INTEGRITY = 'sha384-INSPECTOR';
+  const DATA_INTEGRITY = 'sha384-DATA';
+
+  /** A registry whose entries carry an `integrity` hash (the Story 1 output). */
+  function registryWithIntegrity() {
+    return {
+      schemaVersion: 1,
+      generatedAt: new Date().toISOString(),
+      sharedDeps: { url: 'http://localhost:8080/shared-deps/', version: '3.5.0' },
+      mfes: {
+        inspector: {
+          version: '3.5.0+aaa',
+          remoteEntry: 'http://localhost:8080/mfe/inspector/remoteEntry.js',
+          scope: 'inspector',
+          module: './public',
+          integrity: INSPECTOR_INTEGRITY,
+          ...COMPAT_META,
+        },
+        data: {
+          version: '3.5.0+bbb',
+          remoteEntry: 'http://localhost:8080/mfe/data/remoteEntry.js',
+          scope: 'data',
+          module: './public',
+          integrity: DATA_INTEGRITY,
+          ...COMPAT_META,
+        },
+      },
+    };
+  }
+
+  /**
+   * Deps that record the (remoteEntry, scope, integrity) triples passed to
+   * loadRemoteContainer, and (optionally) make one scope throw to simulate a
+   * browser-rejected (SRI mismatch / unavailable) remoteEntry.
+   */
+  function sriDeps(failingScope?: string) {
+    const integrityByScope = new Map<string, string | undefined>();
+    const registered = new Map<string, () => PluginPublicModule>();
+    const loadedScopes: string[] = [];
+    const renderBlockPage = jest.fn();
+    const invokeCoreBootstrap = jest.fn(async () => undefined);
+    const deps: Partial<BootstrapMfeDeps> = {
+      loadScript: jest.fn(async (url: string) => {
+        if (url === SHARED_DEPS_URL) {
+          testWindow().__osdSharedDeps__ = { React: { version: '16.14.0' } };
+        }
+      }),
+      fetchImpl: ((async () => ({
+        ok: true,
+        status: 200,
+        json: async () => registryWithIntegrity(),
+      })) as unknown) as typeof fetch,
+      loadRemoteContainer: jest.fn(
+        async (_remoteEntry: string, scope: string, integrity?: string) => {
+          integrityByScope.set(scope, integrity);
+          if (scope === failingScope) {
+            // The browser refused to execute the script (SRI mismatch).
+            throw new Error(
+              `Subresource Integrity check failed or the script could not be fetched`
+            );
+          }
+          loadedScopes.push(scope);
+          return {
+            init: () => undefined,
+            get: () => Promise.resolve(() => ({ plugin: () => undefined })),
+          } as MfeContainer;
+        }
+      ),
+      getRemoteModuleFactory: jest.fn(async () => () => ({ plugin: () => undefined })),
+      registerPluginFactory: jest.fn((id: string, factory: () => PluginPublicModule) => {
+        registered.set(id, factory);
+      }),
+      invokeCoreBootstrap,
+      renderBlockPage,
+      mountInspector: jest.fn(),
+    };
+    return {
+      deps,
+      integrityByScope,
+      registered,
+      loadedScopes,
+      renderBlockPage,
+      invokeCoreBootstrap,
+    };
+  }
+
+  it('passes the registry integrity to loadRemoteContainer for each remote', async () => {
+    const { deps, integrityByScope } = sriDeps();
+
+    await bootstrapMfe({
+      registryUrl: REGISTRY_URL,
+      sharedDepsUrl: SHARED_DEPS_URL,
+      host: HOST,
+      compatPolicy: PROD,
+      deps,
+    });
+
+    expect(integrityByScope.get('inspector')).toBe(INSPECTOR_INTEGRITY);
+    expect(integrityByScope.get('data')).toBe(DATA_INTEGRITY);
+  });
+
+  it('drops integrity (undefined) for an overridden remote, since its bytes differ', async () => {
+    const { deps, integrityByScope } = sriDeps();
+
+    await bootstrapMfe({
+      registryUrl: REGISTRY_URL,
+      sharedDepsUrl: SHARED_DEPS_URL,
+      host: HOST,
+      compatPolicy: PROD,
+      allowOverride: true,
+      deps: {
+        ...deps,
+        readOverrideSearch: () =>
+          '?mfe.inspector=http://localhost:5601/mfe/inspector/remoteEntry.js',
+        readOverrideStorage: () => undefined,
+      },
+    });
+
+    // Overridden remote loads WITHOUT integrity; the non-overridden one keeps it.
+    expect(integrityByScope.get('inspector')).toBeUndefined();
+    expect(integrityByScope.get('data')).toBe(DATA_INTEGRITY);
+  });
+
+  it('DEV (block): a tampered/failed integrity remote HARD-BLOCKS and core does NOT boot', async () => {
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    const { deps, renderBlockPage, invokeCoreBootstrap, registered } = sriDeps('inspector');
+
+    await bootstrapMfe({
+      registryUrl: REGISTRY_URL,
+      sharedDepsUrl: SHARED_DEPS_URL,
+      host: HOST,
+      compatPolicy: NON_PROD,
+      deps,
+    });
+
+    // The integrity failure routes through the SAME hard-block surface as a
+    // version incompatibility: offender listed, core NOT booted, no placeholder.
+    expect(renderBlockPage).toHaveBeenCalledTimes(1);
+    const offenders = renderBlockPage.mock.calls[0][0] as Array<{ id: string; reasons: string[] }>;
+    expect(offenders.map((o) => o.id)).toEqual(['inspector']);
+    expect(offenders[0].reasons.join(' ')).toMatch(/Subresource Integrity/);
+    expect(invokeCoreBootstrap).not.toHaveBeenCalled();
+    // It must NOT be registered as a disabled placeholder (the app never starts).
+    expect(registered.has('inspector')).toBe(false);
+    expect(consoleError).toHaveBeenCalled();
+
+    consoleError.mockRestore();
+  });
+
+  it('PROD (skip): a tampered/failed integrity remote is DISABLED and the app still boots', async () => {
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    const consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const { deps, registered, loadedScopes, renderBlockPage, invokeCoreBootstrap } = sriDeps(
+      'inspector'
+    );
+
+    await bootstrapMfe({
+      registryUrl: REGISTRY_URL,
+      sharedDepsUrl: SHARED_DEPS_URL,
+      host: HOST,
+      compatPolicy: PROD,
+      deps,
+    });
+
+    // Prod degrades gracefully: the failed remote is a disabled placeholder, the
+    // healthy one loads, the app boots, and nothing hard-blocks.
+    expect(renderBlockPage).not.toHaveBeenCalled();
+    expect(loadedScopes).toEqual(['data']);
+    expect(registered.has('inspector')).toBe(true);
+    const disabled = registered.get('inspector')!();
+    expect(typeof disabled.plugin).toBe('function');
+    expect(invokeCoreBootstrap).toHaveBeenCalledTimes(1);
+    expect(consoleError).toHaveBeenCalled();
+
+    consoleError.mockRestore();
+    consoleWarn.mockRestore();
+  });
+
+  it('a NON-integrity remote failure stays graceful (Phase 4) even under DEV block policy', async () => {
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    const consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+
+    // Registry WITHOUT integrity on the failing entry (e.g. an override-style or
+    // pre-Story-1 entry): a load failure cannot be an SRI violation, so it must
+    // keep Phase 4 graceful degradation rather than hard-blocking.
+    const registered = new Map<string, () => PluginPublicModule>();
+    const renderBlockPage = jest.fn();
+    const invokeCoreBootstrap = jest.fn(async () => undefined);
+    const deps: Partial<BootstrapMfeDeps> = {
+      loadScript: jest.fn(async (url: string) => {
+        if (url === SHARED_DEPS_URL) {
+          testWindow().__osdSharedDeps__ = { React: { version: '16.14.0' } };
+        }
+      }),
+      fetchImpl: ((async () => ({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          schemaVersion: 1,
+          generatedAt: new Date().toISOString(),
+          sharedDeps: { url: 'http://localhost:8080/shared-deps/', version: '3.5.0' },
+          mfes: {
+            inspector: {
+              version: '3.5.0+aaa',
+              remoteEntry: 'http://localhost:8080/mfe/inspector/remoteEntry.js',
+              scope: 'inspector',
+              module: './public',
+              ...COMPAT_META,
+            },
+            data: {
+              version: '3.5.0+bbb',
+              remoteEntry: 'http://localhost:8080/mfe/data/remoteEntry.js',
+              scope: 'data',
+              module: './public',
+              ...COMPAT_META,
+            },
+          },
+        }),
+      })) as unknown) as typeof fetch,
+      loadRemoteContainer: jest.fn(async (_remoteEntry: string, scope: string) => {
+        if (scope === 'inspector') {
+          throw new Error('network error');
+        }
+        return {
+          init: () => undefined,
+          get: () => Promise.resolve(() => ({ plugin: () => undefined })),
+        } as MfeContainer;
+      }),
+      getRemoteModuleFactory: jest.fn(async () => () => ({ plugin: () => undefined })),
+      registerPluginFactory: jest.fn((id: string, factory: () => PluginPublicModule) => {
+        registered.set(id, factory);
+      }),
+      invokeCoreBootstrap,
+      renderBlockPage,
+      mountInspector: jest.fn(),
+    };
+
+    await bootstrapMfe({
+      registryUrl: REGISTRY_URL,
+      sharedDepsUrl: SHARED_DEPS_URL,
+      host: HOST,
+      compatPolicy: NON_PROD,
+      deps,
+    });
+
+    // No integrity claim => no hard block; the failed remote is disabled and the
+    // app still boots (Phase 4 graceful degradation preserved).
+    expect(renderBlockPage).not.toHaveBeenCalled();
+    expect(registered.has('inspector')).toBe(true);
+    expect(invokeCoreBootstrap).toHaveBeenCalledTimes(1);
+
+    consoleError.mockRestore();
+    consoleWarn.mockRestore();
+  });
+});
