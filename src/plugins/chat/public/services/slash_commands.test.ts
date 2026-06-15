@@ -508,6 +508,32 @@ describe('SlashCommandRegistry', () => {
       expect(result.handled).toBe(true);
       expect(result.localMessage).toBe('Info: some details');
     });
+
+    it('should return role when handler returns object with role', async () => {
+      slashCommandRegistry.register({
+        command: 'welcome',
+        description: 'Welcome command',
+        handler: () => ({ localMessage: 'Welcome!', role: 'assistant' as const }),
+      });
+
+      const result = await slashCommandRegistry.execute('/welcome');
+      expect(result.handled).toBe(true);
+      expect(result.localMessage).toBe('Welcome!');
+      expect(result.role).toBe('assistant');
+    });
+
+    it('should return undefined role when not specified', async () => {
+      slashCommandRegistry.register({
+        command: 'norole',
+        description: 'No role command',
+        handler: () => ({ localMessage: 'Error occurred' }),
+      });
+
+      const result = await slashCommandRegistry.execute('/norole');
+      expect(result.handled).toBe(true);
+      expect(result.localMessage).toBe('Error occurred');
+      expect(result.role).toBeUndefined();
+    });
   });
 
   describe('integration scenarios', () => {

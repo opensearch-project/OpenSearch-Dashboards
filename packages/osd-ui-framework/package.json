@@ -2,10 +2,7 @@
   "name": "@osd/ui-framework",
   "version": "1.0.0",
   "license": "Apache-2.0",
-  "scripts": {
-    "build": "grunt prodBuild",
-    "compileCss": "grunt compileCss"
-  },
+  "scripts": {},
   "opensearchDashboards": {
     "build": {
       "intermediateBuildDirectory": "target"
@@ -27,10 +24,6 @@
     "@osd/babel-preset": "1.0.0",
     "@osd/optimizer": "1.0.0",
     "comment-stripper": "^0.0.4",
-    "grunt": "^1.5.2",
-    "grunt-babel": "^8.0.0",
-    "grunt-contrib-clean": "^2.0.0",
-    "grunt-contrib-copy": "^1.0.0",
     "sass-embedded": "1.93.3",
     "sass-loader": "16.0.5",
     "postcss": "^8.4.31",

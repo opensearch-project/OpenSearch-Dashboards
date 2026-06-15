@@ -24,10 +24,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout OpenSearch Dashboards
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version-file: '.nvmrc'
           registry-url: 'https://registry.npmjs.org'
@@ -42,7 +42,7 @@ jobs:
         run: yarn build-platform --linux --skip-os-packages --release
 
       - name: Upload Release Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: opensearch-dashboards-${{ env.VERSION }}
           path: target/opensearch-dashboards-*.tar.gz
@@ -87,10 +87,10 @@ jobs:
             repo: opensearch-project/query-insights-dashboards
     steps:
       - name: Checkout OpenSearch Dashboards
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version-file: '.nvmrc'
           registry-url: 'https://registry.npmjs.org'
@@ -99,7 +99,7 @@ jobs:
         run: npm install -g yarn@^1.22.10
 
       - name: Checkout Plugin
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           repository: ${{ matrix.plugin.repo }}
           ref: ${{ env.PLUGIN_REF }}
@@ -114,7 +114,7 @@ jobs:
 
       - name: Upload Plugin Artifact
         if: success()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: ${{ matrix.plugin.name }}-${{ env.VERSION }}
           path: plugins/${{ matrix.plugin.name }}/build/*.zip
@@ -122,7 +122,7 @@ jobs:
 
       - name: Upload Build Log
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: ${{ matrix.plugin.name }}-${{ env.VERSION }}-failed-log
           path: plugins/${{ matrix.plugin.name }}/build.log
@@ -134,7 +134,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download Release Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: opensearch-dashboards-${{ env.VERSION }}
           path: ./
@@ -148,7 +148,7 @@ jobs:
           tar -xzf opensearch-dashboards-*.tar.gz -C opensearch-dashboards-${{ env.VERSION }} --strip-components=1
 
       - name: Download All Plugin Artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           path: plugins
           pattern: "*-${{ env.VERSION }}"
@@ -172,14 +172,14 @@ jobs:
 
       - name: Upload Install Logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: plugin-install-logs
           path: install_logs/
           retention-days: 1
 
       - name: Upload Final Release
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: opensearch-dashboards-${{ env.VERSION }}-with-plugins
           path: opensearch-dashboards-${{ env.VERSION }}/

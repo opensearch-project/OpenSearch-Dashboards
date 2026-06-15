@@ -61,7 +61,11 @@ export class DurationType extends Type<Duration> {
     super(internals.duration(), { ...options, defaultValue });
   }
 
-  protected handleError(type: string, { message, value }: Record<string, any>, path: string[]) {
+  protected handleError(
+    type: string,
+    { message, value }: Record<string, any>,
+    path: Array<string | number>
+  ) {
     switch (type) {
       case 'any.required':
       case 'duration.base':
