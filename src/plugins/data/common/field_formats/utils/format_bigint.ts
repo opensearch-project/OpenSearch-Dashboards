@@ -10,17 +10,14 @@
  */
 
 /*
- * This is a faithful port of the BigInt-handling code path that the forked
- * `@amoo-miki/numeral` package added on top of stock `@elastic/numeral`. It lets us
- * depend on the unmodified upstream `@elastic/numeral` (which has no BigInt support)
- * while preserving byte-for-byte identical output when an OpenSearch `long` field
- * value arrives as a BigInt.
+ * `@elastic/numeral` has no BigInt support, so OpenSearch `long` field values that
+ * arrive as a BigInt are formatted here. This mirrors numeral's own `formatNumber`/
+ * `formatCurrency` logic, specialized for BigInt — an integer, so there is no
+ * fractional part, rounding, or decimal precision to apply.
  *
- * The algorithm mirrors numeral's `formatNumeral` dispatch and `formatNumber`/
- * `formatCurrency` functions, specialized for BigInt (an integer, so there is no
- * fractional part, rounding, or decimal precision to apply). The percent, bytes and
- * ordinal format types intentionally perform the same Number arithmetic numeral does
- * — with a BigInt that throws a TypeError, exactly as the forked package does today.
+ * The percent, bytes and ordinal format types reuse numeral's Number arithmetic,
+ * which throws a TypeError on a BigInt; those patterns have never supported
+ * long-numeral values.
  */
 
 /**
@@ -40,12 +37,11 @@ const IE6 = 1000000n;
 const IE3 = 1000n;
 
 /**
- * Format a BigInt value with a numeral pattern, reproducing the forked package's
- * behavior exactly.
+ * Format a BigInt value with a numeral pattern.
  */
 export function formatBigInt(value: bigint, format: string, language: NumeralLanguageData): string {
-  // Mirror numeral's `formatNumeral` dispatch order: currency, percentage, time,
-  // bytes, then plain number.
+  // numeral's `formatNumeral` dispatch order: currency, percentage, time, bytes,
+  // then plain number.
   if (format.indexOf('$') > -1) {
     return formatCurrency(value, format, language);
   }
@@ -88,8 +84,7 @@ function formatNumber(value: bigint, format: string, language: NumeralLanguageDa
     format = format.replace(/\+/g, '');
   }
 
-  // Abbreviation (k/m/b/t). numeral divides with truncating BigInt division, which
-  // drops the fractional part — preserved here for parity.
+  // Abbreviation (k/m/b/t). BigInt division truncates, dropping the fractional part.
   if (format.indexOf('a') > -1) {
     abbrK = format.indexOf('aK') >= 0;
     abbrM = format.indexOf('aM') >= 0;
@@ -119,8 +114,8 @@ function formatNumber(value: bigint, format: string, language: NumeralLanguageDa
     }
   }
 
-  // Ordinal. numeral's ordinal function does Number arithmetic on the value
-  // (e.g. `number % 10`), which throws for a BigInt — matching the forked package.
+  // Ordinal. numeral's ordinal function does Number arithmetic (e.g. `number % 10`),
+  // which throws for a BigInt.
   if (format.indexOf('o') > -1) {
     if (format.indexOf(' o') > -1) {
       ord = ' ';
@@ -210,7 +205,7 @@ function formatCurrency(value: bigint, format: string, language: NumeralLanguage
 
 function formatPercentage(value: bigint, format: string, language: NumeralLanguageData): string {
   // numeral multiplies by 100 (a Number) before formatting. With a BigInt this throws
-  // `TypeError: Cannot mix BigInt and other types` — identical to today's behavior.
+  // `TypeError: Cannot mix BigInt and other types`.
   const scaled = ((((value as unknown) as number) * 100) as unknown) as bigint;
   let space = '';
   if (format.indexOf(' %') > -1) {
@@ -233,7 +228,7 @@ function formatPercentage(value: bigint, format: string, language: NumeralLangua
 
 function formatBytes(value: bigint): string {
   // numeral floors the value (a Number op) to pick a byte unit. With a BigInt this
-  // throws `TypeError: Cannot convert a BigInt value to a number` — matching today.
+  // throws `TypeError: Cannot convert a BigInt value to a number`.
   Math.floor((value as unknown) as number);
   // Unreachable; the line above always throws for a BigInt.
   return value.toString();

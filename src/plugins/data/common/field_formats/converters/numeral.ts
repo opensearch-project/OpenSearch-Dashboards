@@ -71,8 +71,8 @@ export abstract class NumeralFormat extends FieldFormat {
       (this.getConfig && this.getConfig(UI_SETTINGS.FORMAT_NUMBER_DEFAULT_LOCALE)) || 'en';
     numeral.language(defaultLocale);
 
-    // Stock `@elastic/numeral` has no BigInt support, so long-numeral values are
-    // routed through a faithful port of the BigInt format path instead.
+    // `@elastic/numeral` has no BigInt support, so long-numeral values are routed
+    // through `formatBigInt` instead.
     const pattern = this.param('pattern');
     const formatted = isBigInt
       ? formatBigInt(val, pattern, (numeral as any).languageData())

@@ -21,11 +21,10 @@ import { formatBigInt, NumeralLanguageData } from './format_bigint';
 import goldenCorpus from './__fixtures__/numeral_bigint_golden.json';
 
 /**
- * `numeral_bigint_golden.json` was captured from the forked `@amoo-miki/numeral@2.6.0`
- * package (the implementation OpenSearch shipped before moving to stock
- * `@elastic/numeral` + this helper). Every case asserts that `formatBigInt` reproduces
- * the fork's exact output — or its exact throw — so the migration is provably a
- * no-op for BigInt field-format values.
+ * `numeral_bigint_golden.json` was captured from the long-numeral implementation
+ * OpenSearch shipped before moving to stock `@elastic/numeral` + this helper. Every
+ * case asserts that `formatBigInt` reproduces that exact output — or its exact throw —
+ * so the migration is provably a no-op for BigInt field-format values.
  */
 interface GoldenCase {
   value: string;
@@ -52,7 +51,7 @@ describe('formatBigInt', () => {
     return data;
   };
 
-  describe('parity with the forked @amoo-miki/numeral golden corpus', () => {
+  describe('parity with the captured long-numeral golden corpus', () => {
     const cases = goldenCorpus as GoldenCase[];
 
     it('covers the full captured matrix', () => {
@@ -103,11 +102,11 @@ describe('formatBigInt', () => {
       expect(formatBigInt(1234567890n, '+0,0', en())).toBe('+1,234,567,890');
     });
 
-    it('throws on percent patterns, as the forked package did', () => {
+    it('throws on percent patterns, as long-numeral formatting always has', () => {
       expect(() => formatBigInt(123n, '0,0.[000]%', en())).toThrow();
     });
 
-    it('throws on bytes patterns, as the forked package did', () => {
+    it('throws on bytes patterns, as long-numeral formatting always has', () => {
       expect(() => formatBigInt(123n, '0,0.[0]b', en())).toThrow();
     });
   });
