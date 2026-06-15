@@ -150,7 +150,22 @@ export interface DeployManifest {
   sharedDeps?: { version: string; key: string; cdnUrl: string; fileCount: number };
   mfes: Record<
     string,
-    { version: string; contentHash: string; key: string; cdnUrl: string; fileCount: number }
+    {
+      version: string;
+      contentHash: string;
+      key: string;
+      cdnUrl: string;
+      fileCount: number;
+      /**
+       * SRI hash (`sha384-<base64>`) of the UNCOMPRESSED `remoteEntry.js` bytes
+       * (Phase 12 Story 1). Hashed over the original artifact, NOT the gzipped
+       * upload temp, so the browser (which verifies SRI against the decoded
+       * body) accepts the CDN-served bytes. The registry writer stamps this onto
+       * the canonical entry so per-plugin (`--merge`) deploys keep a real
+       * integrity instead of dropping it.
+       */
+      integrity: string;
+    }
   >;
 }
 
@@ -405,6 +420,9 @@ function buildManifest(plan: DeployPlan, now: Date): DeployManifest {
       key: remote.remoteEntryKey,
       cdnUrl: remote.cdnUrl,
       fileCount: remote.files.length,
+      // SRI over the uncompressed remoteEntry.js (Phase 12 Story 1) — carried so
+      // the registry writer can stamp a correct integrity onto every entry.
+      integrity: remote.integrity,
     };
   }
   return {
@@ -453,6 +471,9 @@ function printDryRun(plan: DeployPlan, manifestPath: string, out: DeployCliConso
       `  ${remote.id}  ${remote.version}  (${remote.files.length} file(s)) -> ` +
         `s3://${plan.cdn.bucket}/${remote.remoteEntryKey}`
     );
+    // SRI over the uncompressed remoteEntry.js (Phase 12 Story 1): shown here so
+    // a dry-run proves the manifest will carry a real integrity for every entry.
+    out.log(`      integrity: ${remote.integrity}`);
   }
   out.log('');
   const shared = plan.sharedDeps;

@@ -13,9 +13,11 @@ import { createHash } from 'crypto';
 import Fs from 'fs';
 import Os from 'os';
 import Path from 'path';
+import Zlib from 'zlib';
 
 import { ResolvedCdnConfig } from './cdn_config';
 import { buildDeployPlan } from './plan';
+import { computeIntegrity } from '../registry/generate';
 
 const CDN: ResolvedCdnConfig = {
   bucket: 'test-bucket',
@@ -76,6 +78,37 @@ describe('buildDeployPlan', () => {
     expect(inspector.files.map((f) => f.key).sort()).toEqual(
       [`mfe/inspector/${hash}/inspector.chunk.js`, `mfe/inspector/${hash}/remoteEntry.js`].sort()
     );
+  });
+
+  it('computes SRI integrity over the UNCOMPRESSED remoteEntry.js bytes (not the gzip temp)', () => {
+    // Phase 12 Story 1: SRI is verified by the browser against the DECODED body,
+    // so integrity MUST be sha384 of the original bytes — never the gzipped
+    // upload. Prove the plan's integrity equals the hash of the pre-gzip artifact
+    // and is DISTINCT from the hash of the gzipped bytes.
+    const root = makeFixtureRepo({ inspector: { 'remoteEntry.js': 'INSPECTOR' } });
+
+    const plan = buildDeployPlan({ repoRoot: root, cdn: CDN });
+    const inspector = plan.remotes.find((r) => r.id === 'inspector')!;
+
+    const uncompressed = Buffer.from('INSPECTOR', 'utf8');
+    expect(inspector.integrity).toBe(computeIntegrity(uncompressed));
+    expect(inspector.integrity).toMatch(/^sha384-.+/);
+    // The hash of the gzipped bytes would be WRONG — assert we did not use it.
+    const gzipped = Zlib.gzipSync(uncompressed);
+    expect(inspector.integrity).not.toBe(computeIntegrity(gzipped));
+  });
+
+  it('yields a DIFFERENT integrity when the remoteEntry.js content changes', () => {
+    const a = buildDeployPlan({
+      repoRoot: makeFixtureRepo({ inspector: { 'remoteEntry.js': 'ONE' } }),
+      cdn: CDN,
+    }).remotes.find((r) => r.id === 'inspector')!;
+    const b = buildDeployPlan({
+      repoRoot: makeFixtureRepo({ inspector: { 'remoteEntry.js': 'TWO' } }),
+      cdn: CDN,
+    }).remotes.find((r) => r.id === 'inspector')!;
+
+    expect(a.integrity).not.toBe(b.integrity);
   });
 
   it('content-addresses shared-deps under <prefix>/shared-deps/<contentHash>/ including subdirs', () => {

@@ -247,7 +247,8 @@ describe('runUpdateCli — full regen', () => {
 /** A minimal valid deploy-manifest.json object (the subset the writer reads). */
 function manifestWith(
   inspectorVersion: string,
-  inspectorCdnUrl = 'https://cdn.example/mfe/inspector/abc123def456/remoteEntry.js'
+  inspectorCdnUrl = 'https://cdn.example/mfe/inspector/abc123def456/remoteEntry.js',
+  inspectorIntegrity?: string
 ) {
   return {
     schemaVersion: 1,
@@ -273,6 +274,7 @@ function manifestWith(
         key: 'mfe/inspector/abc123def456/remoteEntry.js',
         cdnUrl: inspectorCdnUrl,
         fileCount: 12,
+        ...(inspectorIntegrity !== undefined ? { integrity: inspectorIntegrity } : {}),
       },
       discover: {
         version: '3.5.0+0123456789ab',
@@ -340,6 +342,53 @@ describe('buildRegistryFromManifest', () => {
     const registry = buildRegistryFromManifest(manifestWith('3.5.0+abc123def456'), now, priorMfes);
 
     expect(registry.mfes.inspector.integrity).toBeUndefined();
+  });
+
+  it('stamps the MANIFEST integrity verbatim, even when the prior pins a different hash (Phase 12 gap fix)', () => {
+    // The deploy now computes SRI over the published bytes and writes it into the
+    // manifest. It is authoritative, so a genuinely NEW build (different content
+    // hash from the prior registry entry) gets a REAL integrity instead of the
+    // pre-Phase-12 canonical=null.
+    const priorMfes: Record<string, MfeEntry> = {
+      inspector: {
+        version: '3.5.0+OLDHASHOLDHA',
+        remoteEntry: 'http://localhost:8080/mfe/inspector/remoteEntry.js',
+        scope: 'osdMfe_inspector',
+        module: './public',
+        integrity: 'sha384-STALE',
+      },
+    };
+    const manifest = manifestWith(
+      '3.5.0+abc123def456',
+      'https://cdn.example/mfe/inspector/abc123def456/remoteEntry.js',
+      'sha384-FRESHFROMDEPLOY'
+    );
+
+    const registry = buildRegistryFromManifest(manifest, now, priorMfes);
+
+    expect(registry.mfes.inspector.integrity).toBe('sha384-FRESHFROMDEPLOY');
+    expect(validate(registry).valid).toBe(true);
+  });
+
+  it('prefers the MANIFEST integrity over a (same-version) prior integrity', () => {
+    const priorMfes: Record<string, MfeEntry> = {
+      inspector: {
+        version: '3.5.0+abc123def456',
+        remoteEntry: 'http://localhost:8080/mfe/inspector/remoteEntry.js',
+        scope: 'osdMfe_inspector',
+        module: './public',
+        integrity: 'sha384-PRIORVALUE',
+      },
+    };
+    const manifest = manifestWith(
+      '3.5.0+abc123def456',
+      'https://cdn.example/mfe/inspector/abc123def456/remoteEntry.js',
+      'sha384-MANIFESTVALUE'
+    );
+
+    const registry = buildRegistryFromManifest(manifest, now, priorMfes);
+
+    expect(registry.mfes.inspector.integrity).toBe('sha384-MANIFESTVALUE');
   });
 });
 
@@ -472,7 +521,8 @@ describe('runUpdateCli — --from-manifest', () => {
  */
 function singlePluginManifestWith(
   version: string,
-  cdnUrl = 'https://cdn.example/mfe/inspector/newhash123456/remoteEntry.js'
+  cdnUrl = 'https://cdn.example/mfe/inspector/newhash123456/remoteEntry.js',
+  integrity?: string
 ) {
   return {
     schemaVersion: 1,
@@ -493,6 +543,7 @@ function singlePluginManifestWith(
         key: 'mfe/inspector/newhash123456/remoteEntry.js',
         cdnUrl,
         fileCount: 12,
+        ...(integrity !== undefined ? { integrity } : {}),
       },
     },
   };
@@ -577,6 +628,31 @@ describe('mergeRegistryFromManifest', () => {
     const merged = mergeRegistryFromManifest(existing, manifestWith('1.0.0+abc123def456'), now);
     expect(merged.sharedDeps.url).toBe('https://cdn.example/mfe/shared-deps/3.5.0/');
     expect(merged.sharedDeps.version).toBe('3.5.0');
+  });
+
+  it('stamps the manifest SRI onto the merged entry (non-null) and leaves others unchanged (Phase 12)', () => {
+    // A per-plugin deploy of NEW content (different hash) used to DROP integrity
+    // on merge (canonical=null). With the manifest now carrying SRI, the affected
+    // entry gets a real integrity while the untouched entries stay byte-identical.
+    const existing = multiEntryRegistry();
+    const before = JSON.parse(JSON.stringify(existing)) as Registry;
+
+    const merged = mergeRegistryFromManifest(
+      existing,
+      singlePluginManifestWith(
+        '1.0.0+newhash123456',
+        'https://cdn.example/mfe/inspector/newhash123456/remoteEntry.js',
+        'sha384-MERGEDFRESH'
+      ),
+      now
+    );
+
+    // Affected entry: real (non-null) integrity from the manifest.
+    expect(merged.mfes.inspector.integrity).toBe('sha384-MERGEDFRESH');
+    // Untouched entries: byte-identical (including their own original SRI).
+    expect(merged.mfes.discover).toEqual(before.mfes.discover);
+    expect(merged.mfes.timeline).toEqual(before.mfes.timeline);
+    expect(validate(merged).valid).toBe(true);
   });
 });
 

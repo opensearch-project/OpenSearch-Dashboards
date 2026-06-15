@@ -36,6 +36,7 @@ import Fs from 'fs';
 import Path from 'path';
 
 import { ResolvedCdnConfig } from './cdn_config';
+import { computeIntegrity } from '../registry/generate';
 
 /** Module Federation exposes the plugin public entry under this module key. */
 const REMOTE_ENTRY_FILE = 'remoteEntry.js';
@@ -73,6 +74,16 @@ export interface RemotePlan {
   remoteEntryKey: string;
   /** Public CloudFront URL of the remoteEntry.js. */
   cdnUrl: string;
+  /**
+   * Subresource Integrity hash (`sha384-<base64>`) of the UNCOMPRESSED
+   * `remoteEntry.js` bytes (Phase 12 Story 1). Computed over the ORIGINAL
+   * artifact — NOT the gzipped transit temp the deploy uploads — because the
+   * browser verifies SRI against the decoded response body. Carried into the
+   * deploy manifest so the registry writer can stamp a correct integrity onto
+   * every entry, including per-plugin (`--merge`) deploys. Identical to the
+   * value the full-regen generator computes for the same bytes.
+   */
+  integrity: string;
   /** Every file under `localDir`, mapped to its S3 key. */
   files: PlannedFile[];
 }
@@ -252,6 +263,10 @@ export function buildDeployPlan(options: BuildDeployPlanOptions): DeployPlan {
     // sha256[:12] — identical to registry/generate.ts so the published path is
     // content-addressed and the registry entry can point straight at it.
     const contentHash = createHash('sha256').update(bytes).digest('hex').slice(0, 12);
+    // SRI over the SAME uncompressed bytes (Phase 12 Story 1). The deploy uploads
+    // a gzipped copy, but SRI is verified against the decoded body, so integrity
+    // is hashed here — over the original remoteEntry.js — never the gzip temp.
+    const integrity = computeIntegrity(bytes);
     const keyPrefix = joinKey(cdn.keyPrefix, id, contentHash);
     const remoteEntryKey = joinKey(keyPrefix, REMOTE_ENTRY_FILE);
 
@@ -263,6 +278,7 @@ export function buildDeployPlan(options: BuildDeployPlanOptions): DeployPlan {
       keyPrefix,
       remoteEntryKey,
       cdnUrl: joinUrl(cdn.baseUrl, remoteEntryKey),
+      integrity,
       files: planFiles(localDir, keyPrefix),
     };
   });

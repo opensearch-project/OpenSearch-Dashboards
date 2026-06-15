@@ -31,6 +31,26 @@ import { computeCompatMetadata } from './compat';
 /** Module Federation exposes the plugin public entry under this module key. */
 const EXPOSED_MODULE = './public';
 
+/**
+ * Compute the Subresource Integrity hash (`sha384-<base64>`) of an artifact's
+ * UNCOMPRESSED bytes.
+ *
+ * The browser verifies SRI against the DECODED response body, so the hash MUST
+ * be computed over the ORIGINAL (pre-gzip) artifact bytes — never the gzipped
+ * transit temp the deploy uploads (see docs/15-PHASE12-RESULTS.md threat model).
+ * This is the single source of truth for SRI computation, shared by the
+ * full-regen generator ({@link buildEntry}) and the publish-time deploy plan
+ * (`deploy/plan.ts`, Phase 12 Story 1) so both produce IDENTICAL integrity for
+ * the same bytes — the canonical registry then carries a correct integrity for
+ * every entry, including per-plugin (`--plugin`/`--merge`) deploys.
+ *
+ * @param bytes the uncompressed artifact bytes (e.g. `remoteEntry.js`)
+ * @returns the SRI string `sha384-<base64-digest>`
+ */
+export function computeIntegrity(bytes: Buffer): string {
+  return `sha384-${createHash('sha384').update(bytes).digest('base64')}`;
+}
+
 /** Default base URL for the local mock registry/CDN origin (see harness/env.sh). */
 const DEFAULT_BASE_URL = 'http://localhost:8080';
 
@@ -96,7 +116,7 @@ function buildEntry(
 ): MfeEntry {
   const bytes = Fs.readFileSync(remoteEntryPath);
   const contentHash = createHash('sha256').update(bytes).digest('hex').slice(0, 12);
-  const integrity = `sha384-${createHash('sha384').update(bytes).digest('base64')}`;
+  const integrity = computeIntegrity(bytes);
 
   return {
     version: `${osdVersion}+${contentHash}`,

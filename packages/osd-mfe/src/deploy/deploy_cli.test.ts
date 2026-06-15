@@ -19,6 +19,7 @@ import {
   CommandResult,
   DEPLOY_MANIFEST_SCHEMA_VERSION,
 } from './deploy_cli';
+import { computeIntegrity } from '../registry/generate';
 
 /** A console that captures log/error lines for assertions. */
 function captureConsole(): DeployCliConsole & { logs: string[]; errors: string[] } {
@@ -203,6 +204,11 @@ describe('runDeployCli real publish', () => {
     expect(manifest.mfes.inspector.cdnUrl).toMatch(
       /^https:\/\/cdn\.example\.net\/mfe\/inspector\/[0-9a-f]{12}\/remoteEntry\.js$/
     );
+    // Phase 12 Story 1: the manifest carries SRI integrity computed over the
+    // UNCOMPRESSED remoteEntry.js bytes (the fixture's 'INSPECTOR'), NOT the
+    // gzipped upload temp the deploy stages.
+    expect(manifest.mfes.inspector.integrity).toBe(computeIntegrity(Buffer.from('INSPECTOR')));
+    expect(manifest.mfes.inspector.integrity).toMatch(/^sha384-.+/);
     expect(manifest.sharedDeps.version).toBe('3.5.0');
     expect(manifest.sharedDeps.key).toMatch(/^mfe\/shared-deps\/[0-9a-f]{12}$/);
     expect(manifest.sharedDeps.cdnUrl).toMatch(
@@ -384,6 +390,9 @@ describe('runDeployCli --plugin (Phase 10 Story 1: single-plugin publish)', () =
     expect(manifest.mfes.inspector.cdnUrl).toMatch(
       /^https:\/\/cdn\.example\.net\/mfe\/inspector\/[0-9a-f]{12}\/remoteEntry\.js$/
     );
+    // Phase 12 Story 1: a single-plugin manifest also carries the uncompressed-
+    // bytes SRI, so a per-plugin (`--merge`) registration keeps a real integrity.
+    expect(manifest.mfes.inspector.integrity).toBe(computeIntegrity(Buffer.from('INSPECTOR')));
   });
 
   it('--plugin <id> --with-shared-deps also publishes shared-deps + includes it in the manifest', () => {

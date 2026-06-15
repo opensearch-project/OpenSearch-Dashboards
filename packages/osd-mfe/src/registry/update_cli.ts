@@ -53,9 +53,12 @@ Modes:
                          remoteEntry at its CONTENT-ADDRESSED CloudFront URL
                          (<baseUrl>/<prefix>/<id>/<hash>/remoteEntry.js) and
                          sharedDeps at the CDN shared-deps URL. Versions/scope/
-                         module (and SRI, when the current registry still pins
-                         the same content hash) are carried over — this only
-                         repoints the URLs. Data-only: no upload, no AWS call.
+                         module are carried over and SRI integrity is taken from
+                         the manifest (computed at publish time over the
+                         uncompressed bytes), falling back to the current
+                         registry's SRI only for an older manifest that carries
+                         none and still pins the same content hash. Data-only: no
+                         upload, no AWS call.
   --from-manifest --merge
                          MERGE a (typically single-plugin) manifest into the
                          EXISTING registry: patch ONLY the entries present in the
@@ -199,6 +202,15 @@ interface ManifestMfeEntry {
   contentHash: string;
   /** Public CloudFront URL of the plugin's `remoteEntry.js`. */
   cdnUrl: string;
+  /**
+   * SRI hash (`sha384-<base64>`) of the UNCOMPRESSED `remoteEntry.js` bytes the
+   * deploy published (Phase 12 Story 1). Authoritative: it is computed at
+   * publish time over the exact bytes served, so the registry writer stamps it
+   * onto the canonical entry verbatim. OPTIONAL because a manifest from an older
+   * `deploy_mfe` (pre-Phase-12) carries none — then the writer falls back to
+   * carrying the prior entry's integrity only when the content hash is unchanged.
+   */
+  integrity?: string;
 }
 
 /** The `deploy-manifest.json` fields consumed when registering a CDN revision. */
@@ -290,6 +302,11 @@ function assertValidManifest(value: unknown, manifestPath: string): DeployManife
       if (!isNonEmptyString(entry.version)) {
         errors.push(`mfes.${id}.version must be a non-empty string`);
       }
+      // `integrity` is optional (older manifests omit it); when present it must
+      // be a non-empty SRI string (Phase 12 Story 1).
+      if (entry.integrity !== undefined && !isNonEmptyString(entry.integrity)) {
+        errors.push(`mfes.${id}.integrity, when present, must be a non-empty string`);
+      }
     }
   }
 
@@ -334,12 +351,12 @@ function readExistingMfes(registryPath: string): Record<string, MfeEntry> {
  * from `priorMfes` when present, else derived to the canonical values produced
  * by {@link generateRegistry} (`scope = osdMfe_<id>`, `module = ./public`).
  *
- * `integrity` (SRI) is carried over from the current registry entry ONLY when it
- * still pins the SAME content (its `version`, i.e. `<osdVersion>+<contentHash>`,
- * equals the manifest's). Because the CDN object is byte-identical to the build
- * that produced that hash, the recorded SRI hash remains valid against the CDN
- * bytes. When the versions differ (or there is no prior entry), `integrity` is
- * omitted — it is optional in the schema (recommended in prod).
+ * `integrity` (SRI) is taken from the MANIFEST when present (authoritative —
+ * computed at publish time over the exact uncompressed bytes); otherwise it is
+ * carried over from the current registry entry ONLY when it still pins the SAME
+ * content (its `version`, i.e. `<osdVersion>+<contentHash>`, equals the
+ * manifest's). When neither is available, `integrity` is omitted — it is
+ * optional in the schema (recommended in prod). See {@link buildMfeEntry}.
  *
  * @param manifest validated deploy manifest data
  * @param now timestamp to stamp into `generatedAt`
@@ -390,9 +407,14 @@ export function buildRegistryFromManifest(
  * scope/module, carry SRI (only when the content hash is unchanged), and stamp
  * compat identically.
  *
- * `integrity` (SRI) is carried over from `prior` ONLY when it still pins the
- * SAME content (its `version` equals the manifest's): the CDN object is then
- * byte-identical to the build that produced that hash, so the recorded SRI hash
+ * `integrity` (SRI) is taken from the MANIFEST when present — it is computed at
+ * publish time over the exact (uncompressed) bytes the deploy uploaded, so it is
+ * authoritative for the CDN object and is stamped onto the canonical entry
+ * verbatim (Phase 12 Story 1). This is what lets a per-plugin (`--merge`) deploy
+ * of genuinely NEW content keep a real integrity instead of dropping it. When
+ * the manifest carries none (an older `deploy_mfe`), it is carried over from
+ * `prior` ONLY when `prior.version` equals the manifest's: the CDN object is
+ * then byte-identical to the build that produced that hash, so the recorded SRI
  * remains valid. Otherwise it is omitted (optional in the schema).
  *
  * Compat is stamped FRESH from `compatMeta` when provided (Phase 10 merge stamps
@@ -405,15 +427,19 @@ function buildMfeEntry(
   prior: MfeEntry | undefined,
   compatMeta?: CompatMetadata
 ): MfeEntry {
-  const carryIntegrity =
-    prior !== undefined && prior.version === entry.version && prior.integrity !== undefined;
+  // Prefer the manifest's publish-time integrity (authoritative for the exact
+  // CDN bytes). Fall back to the prior entry's integrity only when it still pins
+  // the SAME content (version match) — for an older manifest that carries none.
+  const integrity =
+    entry.integrity ??
+    (prior !== undefined && prior.version === entry.version ? prior.integrity : undefined);
 
   return {
     version: entry.version,
     remoteEntry: entry.cdnUrl,
     scope: prior?.scope ?? `osdMfe_${id}`,
     module: prior?.module ?? './public',
-    ...(carryIntegrity ? { integrity: prior!.integrity } : {}),
+    ...(integrity !== undefined ? { integrity } : {}),
     // Phase 9: stamp freshly-computed compat metadata when provided, else carry
     // forward whatever the prior registry recorded (so re-registering a CDN
     // revision never silently drops the contract data).
