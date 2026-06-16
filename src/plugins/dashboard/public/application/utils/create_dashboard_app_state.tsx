@@ -102,9 +102,13 @@ export const createDashboardGlobalAndAppState = ({
           const currentDashboardIdInUrl = getDashboardIdFromUrl(history.location.pathname);
           if (currentDashboardIdInUrl !== savedDashboardInstance.id) return;
 
+          // In VIEW mode, toUrlState() excludes panels from URL to keep URLs clean.
+          // When syncing URL back to state, preserve current panels if URL state doesn't include them.
+          // This prevents panels from being reset to stateDefaults after variable changes in VIEW mode.
           stateContainer.set({
             ...stateDefaults,
             ...state,
+            panels: state.panels ?? stateContainer.getState().panels,
           });
         } else {
           // TODO: This logic was ported over this but can be handled more gracefully and intentionally
@@ -172,9 +176,16 @@ export const updateStateUrl = ({
 };
 
 const toUrlState = (state: DashboardAppState): DashboardAppStateInUrl => {
+  // Only include variables in URL when they have actual content.
+  // Excluding `undefined` / empty avoids rison round-trip issues where
+  // undefined values are dropped during encoding, causing applyDiff to
+  // treat the missing key as a removal and trigger spurious dirty flags.
+  const { variables, ...stateWithoutVariables } = state;
+  const hasVariables = variables && variables.length > 0;
+
   if (state.viewMode === ViewMode.VIEW) {
-    const { panels, ...stateWithoutPanels } = state;
-    return stateWithoutPanels;
+    const { panels, ...rest } = stateWithoutVariables;
+    return hasVariables ? { ...rest, variables } : rest;
   }
-  return state;
+  return hasVariables ? { ...stateWithoutVariables, variables } : stateWithoutVariables;
 };

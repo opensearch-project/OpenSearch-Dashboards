@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { isEqual } from 'lodash';
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import {
   EuiButton,
@@ -80,9 +81,20 @@ export interface DetailedDataset extends Dataset {
 export interface DatasetSelectProps {
   onSelect: (dataset: Dataset | undefined) => void;
   supportedTypes?: string[];
-  signalType: string | null;
+  // signalType can support string, null and string[]
+  // if it is an array, it will fetch all the mentioned signal type
+  // in such case created dataset should not have signal type labeled
+  signalType: string | null | string[];
   showNonTimeFieldDatasets?: boolean;
   appName?: string;
+  /**
+   * When provided, the component operates in "controlled" mode:
+   * - The selected dataset is determined by this prop instead of `queryString.getQuery().dataset`
+   * - This avoids calling `queryString.setQuery()` which would trigger global searches
+   * - Useful when embedding DatasetSelect in contexts like Dashboard variable editors
+   *   where modifying the global query state is undesirable
+   */
+  controlledSelectedDataset?: DetailedDataset;
 }
 
 interface ViewDatasetsModalProps {
@@ -92,12 +104,10 @@ interface ViewDatasetsModalProps {
   services: IDataPluginServices;
 }
 
-const isDatasetCompatibleWithSignalType = (
+const checkDatasetCompatibleWithSignalType = (
   dataset: DetailedDataset,
-  signalType: string | null
+  signalType: string
 ): boolean => {
-  if (!signalType) return true;
-
   if (signalType === CORE_SIGNAL_TYPES.TRACES) {
     return dataset.signalType === CORE_SIGNAL_TYPES.TRACES;
   } else if (signalType === CORE_SIGNAL_TYPES.LOGS) {
@@ -106,6 +116,19 @@ const isDatasetCompatibleWithSignalType = (
     return dataset.signalType === CORE_SIGNAL_TYPES.METRICS || !dataset.signalType;
   }
   return true;
+};
+
+const isDatasetCompatibleWithSignalType = (
+  dataset: DetailedDataset,
+  signalType: string | null | string[]
+): boolean => {
+  if (!signalType) return true;
+
+  if (Array.isArray(signalType)) {
+    const result = signalType.some((type) => checkDatasetCompatibleWithSignalType(dataset, type));
+    return result;
+  }
+  return checkDatasetCompatibleWithSignalType(dataset, signalType);
 };
 
 const ViewDatasetsModal: React.FC<ViewDatasetsModalProps> = ({
@@ -142,6 +165,7 @@ const ViewDatasetsModal: React.FC<ViewDatasetsModalProps> = ({
   const handleDatasetClick = useCallback(
     (dataset: DetailedDataset) => {
       onClose();
+      // @ts-expect-error TS18048 TODO(ts-error): fixme
       application.navigateToApp('datasets', {
         path: `/patterns/${dataset.id}`,
       });
@@ -257,6 +281,7 @@ const ViewDatasetsModal: React.FC<ViewDatasetsModalProps> = ({
             onClick: () => handleDatasetClick(dataset),
             style: { cursor: 'pointer' },
           })}
+          // @ts-expect-error TS2739 TODO(ts-error): fixme
           pagination={{
             pageSize: 10,
             pageSizeOptions: [10],
@@ -275,7 +300,9 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
   supportedTypes,
   signalType,
   showNonTimeFieldDatasets = true,
+  controlledSelectedDataset,
 }) => {
+  const isControlled = controlledSelectedDataset !== undefined;
   const { services } = useOpenSearchDashboards<IDataPluginServices>();
   const isMounted = useRef(true);
   const hasCompletedInitialLoad = useRef(false);
@@ -296,8 +323,14 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
   const currentDataset = currentQuery.dataset;
 
   // Handle signal type changes (e.g., navigating from logs to traces)
+  const normalize = (value: string | string[] | null) =>
+    Array.isArray(value) ? [...new Set(value)].sort() : value;
+
   useEffect(() => {
-    const signalTypeChanged = previousSignalType.current !== signalType;
+    const signalTypeChanged = !isEqual(
+      normalize(previousSignalType.current),
+      normalize(signalType)
+    );
     if (signalTypeChanged) {
       previousSignalType.current = signalType;
       // Reset initial load flag AND clear datasets to force refetch with new signal type
@@ -306,7 +339,17 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
     }
   }, [signalType]);
 
+  // Controlled mode: sync selectedDataset from prop
   useEffect(() => {
+    if (isControlled) {
+      setSelectedDataset(controlledSelectedDataset);
+    }
+  }, [isControlled, controlledSelectedDataset]);
+
+  // Uncontrolled mode: sync selectedDataset from queryString
+  useEffect(() => {
+    if (isControlled) return; // Skip in controlled mode
+
     const updateSelectedDataset = async () => {
       if (!currentDataset) {
         setSelectedDataset(undefined);
@@ -333,15 +376,24 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
         return;
       }
 
+      // FALLBACK: Dataset not in list (e.g., from URL, saved query, or non-index-pattern type)
+      // Only fetch if initial load is complete to avoid race with fetchDatasets()
+      if (!hasCompletedInitialLoad.current) {
+        return;
+      }
+
+      // For non-index-pattern datasets (e.g., PROMETHEUS), try to enrich with DataView details
+      // Use onlyCheckCache=true for non-index-pattern types since they may not have DataViews
       const onlyCheckCache = currentDataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN;
       const dataView = await dataViews.get(currentDataset.id, onlyCheckCache);
 
-      // If dataView is not in cache (onlyCheckCache returns undefined), fallback to currentDataset
+      // If dataView is not in cache (onlyCheckCache returns undefined), use currentDataset as-is
       if (!dataView) {
         setSelectedDataset(currentDataset as DetailedDataset);
         return;
       }
 
+      // Enrich the dataset with DataView details
       const detailedDataset = {
         ...currentDataset,
         description: dataView.description,
@@ -353,15 +405,11 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
 
       if (isCompatible) {
         setSelectedDataset(detailedDataset);
-      } else {
-        // Don't clear incompatible dataset - just ignore it
-        // This handles cases where flyouts temporarily change the query dataset
-        // (e.g., trace flyout querying related logs changes dataset from traces to logs)
-        // Keep the current UI state - don't update selectedDataset
       }
     };
     updateSelectedDataset();
   }, [
+    isControlled,
     currentDataset,
     dataViews,
     datasets,
@@ -384,19 +432,26 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
 
     try {
       const datasetIds = await dataViews.getIds(true);
+      // Deduplicate IDs to prevent duplicate fetches and error notifications
+      const uniqueDatasetIds = [...new Set(datasetIds)];
       const fetchedDatasets: DetailedDataset[] = [];
 
-      for (const id of datasetIds) {
-        const dataView = await dataViews.get(id);
-        const dataset = await dataViews.convertToDataset(dataView);
+      // Fetch all DataViews in parallel using bulkGet optimization
+      const dataViewsArray = await dataViews.getMultiple(uniqueDatasetIds);
 
-        fetchedDatasets.push({
+      // Convert all DataViews to datasets in parallel
+      const datasetPromises = dataViewsArray.map(async (dataView) => {
+        const dataset = await dataViews.convertToDataset(dataView);
+        return {
           ...dataset,
           description: dataView.description,
           displayName: dataView.displayName,
           signalType: dataView.signalType,
-        });
-      }
+        };
+      });
+
+      const convertedDatasets = await Promise.all(datasetPromises);
+      fetchedDatasets.push(...convertedDatasets);
 
       // Check if we need to fetch from dataset types that do not use data views (e.g., PROMETHEUS)
       // These types have their own fetch mechanism via the type config
@@ -420,13 +475,19 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
       );
 
       const onFilter = (detailedDataset: DetailedDataset) => {
-        // Filter by signal type
-        const signalTypeMatch =
-          signalType === CORE_SIGNAL_TYPES.TRACES
-            ? detailedDataset.signalType === CORE_SIGNAL_TYPES.TRACES
-            : signalType === CORE_SIGNAL_TYPES.METRICS
-            ? detailedDataset.signalType === CORE_SIGNAL_TYPES.METRICS
-            : detailedDataset.signalType !== CORE_SIGNAL_TYPES.TRACES;
+        const types = Array.isArray(signalType) ? signalType : [signalType];
+
+        const signalTypeMatch = types.some((type) => {
+          if (type === CORE_SIGNAL_TYPES.TRACES) {
+            return detailedDataset.signalType === CORE_SIGNAL_TYPES.TRACES;
+          }
+
+          if (type === CORE_SIGNAL_TYPES.METRICS) {
+            return detailedDataset.signalType === CORE_SIGNAL_TYPES.METRICS;
+          }
+
+          return detailedDataset.signalType !== CORE_SIGNAL_TYPES.TRACES;
+        });
 
         if (!signalTypeMatch) {
           return false;
@@ -453,6 +514,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
         new Map(filteredDatasets.map((dataset) => [dataset.id, dataset])).values()
       );
 
+      // @ts-expect-error TS7034 TODO(ts-error): fixme
       let defaultDataView;
       try {
         defaultDataView = await dataViews.getDefault();
@@ -465,6 +527,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
         console.warn('[DatasetSelect] Default dataset not found, using first available:', error);
       }
       const defaultDataset =
+        // @ts-expect-error TS7005 TODO(ts-error): fixme
         deduplicatedDatasets.find((d) => d.id === defaultDataView?.id) ?? deduplicatedDatasets[0];
       // Get fresh current dataset value at execution time
       const currentlySelectedDataset = queryString.getQuery().dataset;
@@ -642,7 +705,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
                 <AdvancedSelector
                   useConfiguratorV2
                   alwaysShowDatasetFields
-                  signalType={signalType || undefined}
+                  signalType={(typeof signalType === 'string' && signalType) || undefined}
                   services={services}
                   showNonTimeFieldDatasets={showNonTimeFieldDatasets}
                   onSelect={async (query: Partial<Query>, saveDataset) => {
@@ -653,14 +716,14 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
                           await datasetService.saveDataset(
                             query.dataset,
                             services,
-                            signalType || undefined
+                            (typeof signalType === 'string' && signalType) || undefined
                           );
                         } else {
                           await datasetService.cacheDataset(
                             query.dataset,
                             services,
                             false,
-                            signalType || undefined
+                            (typeof signalType === 'string' && signalType) || undefined
                           );
                         }
                         const dataView = await data.dataViews.get(
@@ -916,7 +979,10 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
           gutterSize="s"
           className="datasetSelect__footer"
         >
-          {signalType === CORE_SIGNAL_TYPES.METRICS ? metricsFooterContent : defaultFooterContent}
+          {signalType === CORE_SIGNAL_TYPES.METRICS ||
+          (Array.isArray(signalType) && signalType.includes(CORE_SIGNAL_TYPES.METRICS))
+            ? metricsFooterContent
+            : defaultFooterContent}
         </EuiFlexGroup>
       </EuiPopoverFooter>
     </EuiPopover>

@@ -1,2 +1,0 @@
-fix:
-- Replace shallow rendering with full rendering as part of react 18 recommendation ([#11290](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11290))

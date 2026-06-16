@@ -30,8 +30,7 @@
 
 import * as Rx from 'rxjs';
 import { catchError, takeUntil, share } from 'rxjs/operators';
-import { createRoot, Root } from 'react-dom/client';
-import React from 'react';
+import { createRoot } from 'react-dom/client';
 import moment from 'moment';
 import { I18nProvider } from '@osd/i18n/react';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';

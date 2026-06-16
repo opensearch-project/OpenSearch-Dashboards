@@ -29,7 +29,7 @@
  */
 
 import { get } from 'lodash';
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useMount } from 'react-use';
 
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
@@ -84,7 +84,9 @@ function FieldParamEditor({
         defaultMessage:
           'The index pattern {indexPatternTitle} does not contain any of the following compatible field types: {fieldTypes}',
         values: {
-          indexPatternTitle: agg.getIndexPattern && agg.getIndexPattern().title,
+          indexPatternTitle:
+            agg.getIndexPattern &&
+            (agg.getIndexPattern().displayName || agg.getIndexPattern().title),
           fieldTypes: getFieldTypesString(agg),
         },
       })
@@ -111,6 +113,7 @@ function FieldParamEditor({
     }
   });
 
+  // @ts-expect-error TS7006 TODO(ts-error): fixme
   const onSearchChange = useCallback((searchValue) => setIsDirty(Boolean(searchValue)), []);
 
   return (

@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React from 'react';
+
 import { shallowWithI18nProvider } from '../../../../../../../../../test_utils/public/enzyme_helpers';
 import { StaticLookupFormatEditorFormatParams } from './static_lookup';
 import { FieldFormat } from '../../../../../../../../data/public';

@@ -3,9 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import DOMPurify from 'dompurify';
 import { DocViewTableRow } from './table_row';
+
+jest.mock('dompurify', () => ({
+  __esModule: true,
+  default: {
+    sanitize: jest.fn((input) => input.replace(/<script[^>]*>.*?<\/script>/gi, '')),
+  },
+}));
 
 // Mock child components
 jest.mock('./table_row_btn_filter_add', () => ({
@@ -151,5 +158,25 @@ describe('DocViewTableRow', () => {
 
     const valueElement = screen.getByTestId('tableDocViewRow-test_field-value');
     expect(valueElement).toHaveClass('truncate-by-height');
+  });
+
+  it('sanitizes value using DOMPurify before rendering', () => {
+    const maliciousValue = '<script>alert("xss")</script><p>Safe content</p>';
+
+    render(<DocViewTableRow {...defaultProps} value={maliciousValue} />);
+
+    expect(DOMPurify.sanitize).toHaveBeenCalledWith(maliciousValue);
+  });
+
+  it('does not render dangerous script tags in HTML output', () => {
+    const maliciousValue = '<script>alert("xss")</script><p>Safe content</p>';
+
+    render(<DocViewTableRow {...defaultProps} value={maliciousValue} />);
+
+    const valueElement = screen.getByTestId('tableDocViewRow-test_field-value');
+    const html = valueElement.innerHTML;
+    expect(html).not.toContain('<script>');
+    expect(html).not.toContain('alert("xss")');
+    expect(html).toContain('Safe content');
   });
 });

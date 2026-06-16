@@ -44,7 +44,7 @@ export const sqlSearchStrategyProvider = (
           fields: getFields(rawResponse),
         });
 
-        dataFrame.size = rawResponse.data.datarows.length;
+        dataFrame.size = rawResponse.data.datarows?.length ?? 0;
 
         if (usage) usage.trackSuccess(rawResponse.took);
 

@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { DatasetTableV2 } from './dataset_table_v2';
 import { mockManagementPlugin } from '../../../mocks';

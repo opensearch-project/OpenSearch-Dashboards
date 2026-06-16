@@ -8,16 +8,16 @@ import {
   DEFAULT_Y_2_AXIS_CONFIG,
   DEFAULT_Y_AXIS_CONFIG,
 } from '../constants';
-import { AxisRole, StandardAxes, VisColumn } from '../types';
+import { AxisColumnMappings, AxisRole, StandardAxes } from '../types';
 
 export const getAxisConfigByColumnMapping = (
-  axisColumnMappings: Partial<Record<AxisRole, VisColumn>>,
+  axisColumnMappings: AxisColumnMappings,
   standardAxes: StandardAxes[] = []
 ) => {
   const results: StandardAxes[] = [];
   Object.keys(axisColumnMappings).forEach((role) => {
     const column = axisColumnMappings[role as AxisRole];
-    if (column) {
+    if (column && column.length > 0) {
       const found = standardAxes.find((config) => config.axisRole === role);
       if (found) {
         if (role === AxisRole.X) {

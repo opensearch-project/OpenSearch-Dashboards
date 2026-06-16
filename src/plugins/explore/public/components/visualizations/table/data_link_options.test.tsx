@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { DataLinkOptions, DataLink, DataLinkModal } from './data_link_options';
@@ -118,6 +117,7 @@ describe('DataLinkOptions', () => {
     const handleChange = jest.fn();
     render(
       <DataLinkOptions
+        // @ts-expect-error TS2740 TODO(ts-error): fixme
         styleOptions={{ dataLinks: [] }}
         onStyleChange={handleChange}
         numericalColumns={numericalColumns}
@@ -150,6 +150,7 @@ describe('DataLinkOptions', () => {
 
     render(
       <DataLinkOptions
+        // @ts-expect-error TS2740 TODO(ts-error): fixme
         styleOptions={{ dataLinks: [link] }}
         onStyleChange={handleChange}
         numericalColumns={numericalColumns}
@@ -178,6 +179,7 @@ describe('DataLinkOptions', () => {
 
     render(
       <DataLinkOptions
+        // @ts-expect-error TS2740 TODO(ts-error): fixme
         styleOptions={{ dataLinks: [link] }}
         onStyleChange={handleChange}
         numericalColumns={numericalColumns}

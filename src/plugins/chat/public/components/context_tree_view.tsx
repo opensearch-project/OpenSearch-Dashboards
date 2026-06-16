@@ -8,7 +8,6 @@ import {
   EuiTreeView,
   EuiToken,
   EuiText,
-  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
   EuiBadge,

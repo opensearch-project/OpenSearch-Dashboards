@@ -105,6 +105,7 @@ export interface SearchSourceFields {
   terminate_after?: number;
   df?: IDataFrame;
   skipTimeFilter?: boolean;
+  skipFilters?: boolean;
 }
 
 export interface SearchSourceOptions {

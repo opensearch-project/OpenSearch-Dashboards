@@ -307,7 +307,6 @@ describe('indexTypeConfig', () => {
         expect.objectContaining({
           query: expect.objectContaining({
             data_source: 'datasource1',
-            expand_wildcards: 'all',
           }),
         })
       );
@@ -387,7 +386,6 @@ describe('indexTypeConfig', () => {
         expect.objectContaining({
           query: expect.objectContaining({
             data_source: 'datasource1',
-            expand_wildcards: 'all',
           }),
         })
       );
@@ -440,7 +438,6 @@ describe('indexTypeConfig', () => {
         expect.objectContaining({
           query: expect.objectContaining({
             data_source: 'datasource1',
-            expand_wildcards: 'all',
           }),
         })
       );
@@ -470,9 +467,7 @@ describe('indexTypeConfig', () => {
       expect(mockHttp.get).toHaveBeenCalledWith(
         '/internal/index-pattern-management/resolve_index/*',
         expect.objectContaining({
-          query: expect.objectContaining({
-            expand_wildcards: 'all',
-          }),
+          query: { data_source: 'datasource1' },
         })
       );
     });
@@ -511,7 +506,6 @@ describe('indexTypeConfig', () => {
         expect.objectContaining({
           query: expect.objectContaining({
             data_source: 'datasource1',
-            expand_wildcards: 'all',
           }),
         })
       );
@@ -521,7 +515,6 @@ describe('indexTypeConfig', () => {
         expect.objectContaining({
           query: expect.objectContaining({
             data_source: 'datasource1',
-            expand_wildcards: 'all',
           }),
         })
       );

@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { mount } from 'enzyme';
 import { DocViewRenderTab } from './doc_viewer_render_tab';
 import { DocViewRenderProps } from '../../doc_views/doc_views_types';

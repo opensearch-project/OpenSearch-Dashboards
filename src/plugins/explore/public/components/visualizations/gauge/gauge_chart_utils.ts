@@ -16,25 +16,6 @@ import {
 } from '../style_panel/threshold/threshold_utils';
 import { getColors, DEFAULT_GREY } from '../theme/default_colors';
 
-export function generateArcExpression(startValue: number, endValue: number, fillColor: string) {
-  return {
-    mark: {
-      type: 'arc',
-      y: { expr: 'centerY' },
-      x: { expr: 'centerX' },
-      radius: { expr: 'innerRadius * 0.98' },
-      radius2: { expr: 'innerRadius * 0.96' },
-      theta: {
-        expr: `theta_single_arc + (theta2_single_arc - theta_single_arc) * (( ${startValue} - minValue) / (maxValue - minValue))`,
-      },
-      theta2: {
-        expr: `theta_single_arc + (theta2_single_arc - theta_single_arc) * (( ${endValue} - minValue) / (maxValue - minValue))`,
-      },
-      fill: fillColor,
-    },
-  };
-}
-
 export const createGaugeSeries = ({
   styles,
   seriesFields,
@@ -56,7 +37,7 @@ export const createGaugeSeries = ({
       return;
     }
 
-    const seriesDisplayName = getSeriesDisplayName(item, Object.values(axisColumnMappings));
+    const seriesDisplayName = getSeriesDisplayName(item, Object.values(axisColumnMappings).flat());
 
     const numericalValues: number[] = [];
 
@@ -124,6 +105,7 @@ export const createGaugeSeries = ({
       z: 5,
       min: minBase,
       max: maxBase,
+      tooltip: { show: false },
       progress: {
         show: true,
         width: fontSizeFactor + 2,
@@ -175,6 +157,7 @@ export const createGaugeSeries = ({
       z: 10,
       min: minBase,
       max: maxBase,
+      tooltip: { show: false },
       itemStyle: {
         color: valueArcColor,
       },
@@ -240,11 +223,11 @@ export const createGaugeSeries = ({
               style: {
                 x: 0,
                 y: -2 * textSizeFactor * (selectedUnit?.fontScale ?? 1),
-                text: displayValue,
+                text: displayValue as string,
                 textAlign: 'center',
                 fontSize: valueFontSize,
                 fontWeight: 'bold',
-                fill: textColor,
+                fill: styles?.useThresholdColor ? textColor : getColors().text,
               },
             },
             ...(styles.showTitle

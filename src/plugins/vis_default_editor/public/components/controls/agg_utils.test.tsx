@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { FunctionComponent } from 'react';
+import { FunctionComponent } from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 
 import { IAggConfig } from 'src/plugins/data/public';

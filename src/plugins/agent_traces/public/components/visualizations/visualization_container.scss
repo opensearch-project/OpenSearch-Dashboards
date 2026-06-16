@@ -1,0 +1,62 @@
+.agentTracesVisContainer {
+  display: flex;
+  overflow-y: auto;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  flex-grow: 1;
+  border-radius: $euiSizeXS;
+}
+
+.agentTracesVisPanel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.agentTracesVisPanel__inner {
+  flex: 1 1 auto;
+  overflow: visible;
+  height: 100%;
+
+  .expExpressionRenderer__expression {
+    overflow: visible;
+
+    .visualization {
+      overflow: visible;
+    }
+  }
+
+  .visChart__container {
+    overflow: unset;
+  }
+}
+
+.agentTracesVisStyleFlexItem {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  width: 300px;
+  overflow: auto;
+
+  .agentTracesVisStylePanel {
+    overflow-y: auto;
+  }
+}
+
+.chartCustomTooltip {
+  min-width: 120px;
+
+  p {
+    display: flex;
+    margin-top: 8px;
+
+    span {
+      padding-right: 20px;
+    }
+
+    b {
+      margin-left: auto;
+      font-weight: bolder;
+    }
+  }
+}

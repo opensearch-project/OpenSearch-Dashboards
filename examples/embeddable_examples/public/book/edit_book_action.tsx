@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { OverlayStart } from 'opensearch-dashboards/public';
 import { i18n } from '@osd/i18n';
 import { BookSavedObjectAttributes, BOOK_SAVED_OBJECT } from '../../common';

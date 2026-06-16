@@ -29,7 +29,7 @@
  */
 
 import './visualize_editor.scss';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { EventEmitter } from 'events';
 
 import { VisualizeInput } from 'src/plugins/visualizations/public';

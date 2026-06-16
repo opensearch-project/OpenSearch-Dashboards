@@ -30,7 +30,7 @@
 
 import { get } from 'lodash';
 import PropTypes from 'prop-types';
-import React, { useContext } from 'react';
+import { useContext } from 'react';
 import {
   htmlIdGenerator,
   EuiCompressedFieldText,
@@ -64,8 +64,22 @@ import { TIME_RANGE_DATA_MODES, TIME_RANGE_MODE_KEY } from '../../../common/time
 import { PANEL_TYPES } from '../../../common/panel_types';
 import { isTimerangeModeEnabled } from '../lib/check_ui_restrictions';
 import { VisDataContext } from '../contexts/vis_data_context';
+import { UNSUPPORTED_ENGINE_TYPES } from '../../../../data/common';
 
 const RESTRICT_FIELDS = [OSD_FIELD_TYPES.DATE];
+
+/**
+ * Creates a filter function to exclude data sources of type AnalyticEngine
+ * @returns A filter function for data sources
+ */
+const createDataSourceFilterForAnalyticEngine = () => {
+  return (dataSource) => {
+    return (
+      !dataSource?.attributes?.dataSourceEngineType ||
+      !UNSUPPORTED_ENGINE_TYPES.includes(dataSource?.attributes?.dataSourceEngineType)
+    );
+  };
+};
 
 const validateIntervalValue = (intervalValue) => {
   const isAutoOrGteInterval = isGteInterval(intervalValue) || isAutoInterval(intervalValue);
@@ -192,6 +206,7 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
                 compressed={true}
                 removePrepend={true}
                 isClearable={false}
+                dataSourceFilter={createDataSourceFilterForAnalyticEngine()}
               />
             </EuiCompressedFormRow>
           </EuiFlexItem>

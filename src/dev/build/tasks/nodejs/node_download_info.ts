@@ -37,8 +37,6 @@ import { Config, Platform } from '../../lib';
 
 const NODE_RANGE_CACHE: { [key: string]: string } = {};
 
-export const NODE14_FALLBACK_VERSION = '14.21.3';
-
 export async function getNodeDownloadInfo(config: Config, platform: Platform) {
   const version = getRequiredVersion(config);
   const arch = platform.getNodeArch();

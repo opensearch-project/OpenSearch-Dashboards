@@ -34,7 +34,7 @@ type ExploreComponentProps = ExploreRouteProps &
 const NOOP_PAGE_CONTEXT_HOOK = (options?: any): string => '';
 
 // Component that handles page context for all Explore flavors
-const ExplorePageContextProvider: React.FC<{
+export const ExplorePageContextProvider: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
@@ -56,7 +56,7 @@ const ExplorePageContextProvider: React.FC<{
   return <>{children}</>;
 };
 
-const renderExploreFlavor = (flavor: ExploreFlavor, props: ExploreComponentProps) => {
+export const renderExploreFlavor = (flavor: ExploreFlavor, props: ExploreComponentProps) => {
   switch (flavor) {
     case ExploreFlavor.Logs:
       return <LogsPage setHeaderActionMenu={props.setHeaderActionMenu} />;
@@ -94,6 +94,7 @@ export const renderApp = (
     <Router history={history}>
       <OpenSearchDashboardsContextProvider services={services}>
         <ReduxProvider store={store}>
+          {/* @ts-expect-error TS2559 TODO(ts-error): fixme */}
           <EditorContextProvider>
             <DatasetProvider>
               <services.core.i18n.Context>

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useState, useMemo } from 'react';
+import { useCallback, useState, useMemo } from 'react';
 import { EuiPage, EuiPageBody, EuiPageContent, euiPaletteColorBlind } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { BehaviorSubject } from 'rxjs';
@@ -36,7 +36,6 @@ import { navigateToAppWithinWorkspace } from '../utils/workspace';
 import { WorkspaceCreatorForm } from './workspace_creator_form';
 import { optionIdToWorkspacePermissionModesMap } from '../workspace_form/constants';
 import { getUseCaseFeatureConfig } from '../../../../../core/public';
-import { UseCaseService } from '../../services';
 import { detectTraceData, createAutoDetectedDatasets } from '../../../../explore/public';
 
 export interface WorkspaceCreatorProps {
@@ -54,14 +53,12 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
       savedObjects,
       dataSourceManagement,
       navigationUI: { HeaderControl },
-      useCaseService,
       data: dataPlugin,
     },
   } = useOpenSearchDashboards<{
     workspaceClient: WorkspaceClient;
     dataSourceManagement?: DataSourceManagementPluginSetup;
     navigationUI: NavigationPublicPluginStart['ui'];
-    useCaseService: UseCaseService;
     data: DataPublicPluginStart;
   }>();
   const [isFormSubmitting, setIsFormSubmitting] = useState(false);
@@ -69,9 +66,7 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
   const isPermissionEnabled = application?.capabilities.workspaces.permissionEnabled;
 
   const { availableUseCases } = useFormAvailableUseCases({
-    savedObjects,
     registeredUseCases$,
-    useCaseService,
   });
 
   const location = useLocation();
@@ -183,6 +178,7 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
                   try {
                     const detection = await detectTraceData(
                       savedObjects.client,
+                      // @ts-expect-error TS2345 TODO(ts-error): fixme
                       dataPlugin.dataViews,
                       dataSourceId
                     );

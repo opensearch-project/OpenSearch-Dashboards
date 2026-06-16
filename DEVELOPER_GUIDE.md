@@ -22,6 +22,7 @@ This guide applies to all development within the OpenSearch Dashboards project a
   - [General](#general)
   - [HTML](#html)
   - [SASS files](#sass-files)
+  - [Tailwind CSS](#tailwind-css)
   - [TypeScript/JavaScript](#typescriptjavascript)
   - [React](#react)
   - [API endpoints](#api-endpoints)
@@ -270,11 +271,59 @@ $ yarn start --run-examples
 
 #### Join the discussion
 
-See the [communication guide](COMMUNICATION.md) for information on how to join our slack workspace, forum, or developer office hours.
+See the [communication guide](COMMUNICATIONS.md) for information on how to join our slack workspace, forum, or developer office hours.
 
 ## Alternative development installations
 
 Although the [getting started guide](#getting-started-guide) covers the recommended development environment setup, there are several alternatives worth being aware of.
+
+### Alternative - Run without OpenSearch (SQLite backend)
+
+You can run OpenSearch Dashboards without a running OpenSearch cluster by using the built-in SQLite storage backend. This stores saved objects (dashboards, visualizations, index patterns, etc.) in a local SQLite file instead of OpenSearch.
+
+```bash
+# Start OSD with SQLite backend (no OpenSearch needed)
+$ yarn start --savedObjects.storage.backend=sqlite
+```
+
+Metadata is stored in `data/osd-metadata.db` by default. You can customize the path:
+
+```yaml
+# opensearch_dashboards.yml
+savedObjects.storage.backend: "sqlite"
+savedObjects.storage.sqlite.path: "data/osd-metadata.db"
+```
+
+#### Resource savings
+
+|  | With OpenSearch | With SQLite |
+|--|----------------|-------------|
+| Disk space | ~1.4 GB | 4 KB |
+| Memory (RSS) | ~2-3 GB (OSD + OpenSearch JVM) | ~500 MB (OSD only) |
+| Startup time | ~30-60s | ~3s |
+| Prerequisites | Java runtime + OpenSearch binary | None |
+
+#### When to use SQLite vs OpenSearch
+
+**Works with SQLite (no OpenSearch needed):**
+- UI and frontend development — React components, pages, layouts, styling
+- Workspace features — create, edit, delete, navigate workspaces
+- Saved object CRUD — import/export, management page, copy to workspace
+- Plugin scaffolding — registering saved object types, routes, and UI
+- Application chrome — header, sidebar, breadcrumbs, home page
+- Management pages — index patterns UI, advanced settings, saved objects
+- Theming, accessibility, and i18n work
+- Unit and component tests using in-memory SQLite (`:memory:`)
+
+**Still needs OpenSearch:**
+- Data exploration (Discover) and querying actual indices
+- Visualizations with real data — charts, maps, aggregations
+- Index pattern field discovery — fetching field mappings
+- Security plugin — authentication, tenants, roles
+- Alerting, observability, and trace analytics
+- Performance testing with realistic data volumes
+
+> **Note:** The SQLite backend is a proof of concept intended for development use. It does not support multi-node deployments or full-text search. See the [design doc](docs/saved_objects/pluggable_storage_backend.md) and [RFC](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/11772) for details.
 
 ### Optional - Run OpenSearch with plugins
 
@@ -421,6 +470,22 @@ yarn build --docker
 
 ### General
 
+#### Module README files
+
+Every module or subsystem directory should include a `README.md` that explains:
+
+- What the module does and why it exists
+- Architecture or key abstractions
+- File inventory (what each file is for)
+- Usage examples or how to get started
+- Known limitations or future work
+
+**Why:** README files co-located with source code are the most universal documentation convention. They are rendered automatically on GitHub, discovered by AI coding tools (Claude, Codex, Copilot, Kiro), and stay in sync with the code they describe. When contributing a new module or making significant changes to an existing one, add or update the README.
+
+**Examples:**
+- `src/core/server/saved_objects/storage/README.md`
+- `src/core/README.md`
+
 #### Filenames
 
 All filenames should use `snake_case`.
@@ -438,7 +503,7 @@ remove it, don't simply comment it out.
 
 We are gradually moving the OpenSearch Dashboards code base over to Prettier. All TypeScript code
 and some JavaScript code (check `.eslintrc.js`) is using Prettier to format code. You
-can run `node script/eslint --fix` to fix linting issues and apply Prettier formatting.
+can run `yarn run lint:es --fix && yarn run lint:style --fix` to fix linting issues and apply Prettier formatting.
 We recommend you to enable running ESLint via your IDE.
 
 Whenever possible we are trying to use Prettier and linting over written developer guide rules.
@@ -562,6 +627,49 @@ export const Component = () => {
 ```
 
 Do not use the underscore `_` SASS file naming pattern when importing directly into a javascript file.
+
+### Tailwind CSS
+
+OpenSearch Dashboards supports [Tailwind CSS v4](https://tailwindcss.com/) inside `.scss` files. The `@osd/optimizer` build pipes SCSS through `sass-loader` → `@tailwindcss/postcss` automatically — no per-plugin Tailwind config is required.
+
+To opt in, import Tailwind into the **top** of an SCSS entry file with a plugin-scoped prefix:
+
+```scss
+// my_plugin/public/styles/my_plugin.scss
+@import "tailwindcss/theme" prefix(plg);
+@import "tailwindcss/utilities" prefix(plg);
+
+// Optional: scope preflight (CSS reset) to a plugin-specific body class with
+// [CSS @scope](https://developer.mozilla.org/en-US/docs/Web/CSS/@scope) so it
+// doesn't leak into OSD/EUI surfaces. Toggle the body class on app mount/unmount.
+@scope (body.plg-app-active) {
+  @import "tailwindcss/preflight";
+}
+
+@source "../components";
+@source "../views";
+```
+
+Then write utilities with the prefix you chose: `<div className="plg:flex plg:gap-2 plg:text-sm" />`. Use a short prefix to avoid colliding with other plugins, since utilities are emitted to a single global stylesheet.
+
+#### Conventions
+
+- **Always use a prefix, unique per plugin.** Utilities ship in a single global stylesheet, so unprefixed names collide with OUI. Prefix uniqueness matters because Tailwind namespaces `@theme` tokens by prefix, and two plugins sharing `plg` would write to the same `--plg-color-primary`.
+- **Import the modular entrypoints**, not `@import "tailwindcss"`. The full entry wraps everything in `@layer base/components/utilities`, which loses specificity to OSD's unlayered EUI styles; the modular imports emit unlayered utilities directly.
+- **`@source` directives** tell Tailwind v4 where to scan for utility classes. Point them at directories containing your `.tsx`/`.html` files.
+- **Theme tokens** (custom colors, spacing) go in an `@theme inline { ... }` block in your SCSS entry.
+
+#### Limitations
+
+Tailwind in OSD is utilities-only — several pieces of the default Tailwind experience are intentionally disabled. Be aware of:
+
+1. **Preflight (CSS reset) only partially overrides OSD styles.** `@scope` contains preflight to your surface without raising specificity, so most typed selector rules (e.g. `h1, h2, ... { font-size: inherit }`) win against the browser defaults and give you the reset. But preflight's universal-selector rules like `*, ::before, ::after { border: 0 solid }` stay at (0,0,0) and lose to OSD's typed rules (e.g., `legacy_light_theme.css` has `input { border: 1px solid }` at (0,0,1)). Where you actually want preflight's reset to land, add class-prefixed overrides like `body.plg-app-active input { border-width: 0 }` (0,1,1) to beat the typed rule. In practice this is mainly form borders.
+2. **Tailwind output is unlayered.** The modular entrypoints emit theme and utilities without `@layer` wrappers since OUI is not layered. Side effects: Tailwind plugins that register component-layer rules (`addComponents`) collide with utilities by source order (prefer utility-only plugins); variant ties (e.g., `:hover` vs `[data-state=active]`) are decided by emit order; mixing your own `@layer` rules with Tailwind output may produce unexpected precedence (prefer unlayered CSS). Resolve conflicts by (in order) plain CSS, an explicit `!important` variant, or scoping the loser.
+3. **Re-scans only on SCSS change.** Tailwind v4's `@source` scanning runs when the SCSS entry rebuilds. Adding a new `.tsx` file with arbitrary-value utilities like `plg:text-[48px]` won't emit them until the SCSS changes. Workarounds: `touch` the SCSS file or prefer theme-token utilities (`plg:text-4xl`) which are always emitted.
+
+#### Build details
+
+The pipeline lives in `packages/osd-optimizer`. SCSS is compiled with sass-embedded, then passed through `@tailwindcss/postcss` and a small `postcss.config.js` plugin.
 
 ### TypeScript/JavaScript
 

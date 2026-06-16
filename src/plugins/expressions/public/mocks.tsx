@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { ExpressionsSetup, ExpressionsStart, plugin as pluginInitializer } from '.';
 
 import { coreMock } from '../../../core/public/mocks';

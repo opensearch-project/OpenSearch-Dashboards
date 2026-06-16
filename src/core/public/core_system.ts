@@ -59,6 +59,7 @@ import { WorkspacesService } from './workspace';
 import { KeyboardShortcutService } from './keyboard_shortcut';
 import { ChatService } from './chat';
 import { TelemetryCoreService } from './telemetry';
+import { setupSessionExpiredInterceptor } from './http/session_expired_interceptor';
 
 interface Params {
   rootDomElement: HTMLElement;
@@ -176,6 +177,7 @@ export class CoreSystem {
       const http = this.http.setup({ injectedMetadata, fatalErrors: this.fatalErrorsSetup });
       const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
       const notifications = this.notifications.setup({ uiSettings });
+      setupSessionExpiredInterceptor(http, notifications);
       const workspaces = this.workspaces.setup();
       const chat = this.chat.setup();
       chat.setScreenshotPageContainerElement(this.rootDomElement);
@@ -187,7 +189,7 @@ export class CoreSystem {
       });
       const application = this.application.setup({ context, http });
       this.coreApp.setup({ application, http, injectedMetadata, notifications });
-      const chrome = this.chrome.setup({ uiSettings });
+      const chrome = this.chrome.setup({ uiSettings, injectedMetadata });
       const keyboardShortcut = this.keyboardShortcut.setup();
 
       const core: InternalCoreSetup = {

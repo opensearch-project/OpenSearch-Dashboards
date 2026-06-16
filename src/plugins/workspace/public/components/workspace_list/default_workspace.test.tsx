@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { render } from '@testing-library/react';
 import { I18nProvider } from '@osd/i18n/react';

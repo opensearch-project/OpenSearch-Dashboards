@@ -22,6 +22,8 @@ import {
   queryReducer,
   QueryState,
   UIState,
+  resultsCache,
+  clearResultsCache,
 } from '../state_management/slices';
 import { tabReducer } from '../state_management/slices/tab/tab_slice';
 import {
@@ -134,11 +136,19 @@ describe('useTabResults', () => {
     mockDefaultPrepareQuery.mockReturnValue('default-cache-key');
   });
 
+  afterEach(() => {
+    clearResultsCache();
+  });
+
   it('should return results when cache key exists', () => {
+    const cacheData = { data: 'test data' };
+    resultsCache.set('custom-cache-key', cacheData as any);
+
     const initialState: MockRootState = {
       query: { query: 'test query' },
       ui: { activeTabId: 'tab-1' },
-      results: { 'custom-cache-key': { data: 'test data' } },
+      // Metadata entry signals that results exist for this key
+      results: { 'custom-cache-key': { total: 0, elapsedMs: 0, hasResults: false } },
       tab: {
         logs: {},
         patterns: {
@@ -154,7 +164,7 @@ describe('useTabResults', () => {
     const store = createMockStore(initialState);
     const { result } = renderHookWithStore(store);
 
-    expect(result.current.results).toEqual({ data: 'test data' });
+    expect(result.current.results).toEqual(cacheData);
     expect(mockTab.prepareQuery).toHaveBeenCalledWith(
       expect.objectContaining({ query: 'test query' })
     );
@@ -164,7 +174,7 @@ describe('useTabResults', () => {
     const initialState: MockRootState = {
       query: { query: 'test query' },
       ui: { activeTabId: 'tab-1' },
-      results: { 'other-cache-key': { data: 'other data' } },
+      results: { 'other-cache-key': { total: 0, elapsedMs: 0, hasResults: false } },
       tab: {
         logs: {},
         patterns: {
@@ -180,17 +190,20 @@ describe('useTabResults', () => {
     const store = createMockStore(initialState);
     const { result } = renderHookWithStore(store);
 
-    expect(result.current.results).toBeUndefined();
+    expect(result.current.results).toBeNull();
     expect(mockTab.prepareQuery).toHaveBeenCalledWith(
       expect.objectContaining({ query: 'test query' })
     );
   });
 
   it('should use defaultPrepareQueryString when tab has no custom prepareQuery', () => {
+    const cacheData = { data: 'default data' };
+    resultsCache.set('default-cache-key', cacheData as any);
+
     const initialState: MockRootState = {
       query: { query: 'test query' },
       ui: { activeTabId: 'tab-1' },
-      results: { 'default-cache-key': { data: 'default data' } },
+      results: { 'default-cache-key': { total: 0, elapsedMs: 0, hasResults: false } },
       tab: {
         logs: {},
         patterns: {
@@ -205,7 +218,7 @@ describe('useTabResults', () => {
     const store = createMockStore(initialState);
     const { result } = renderHookWithStore(store);
 
-    expect(result.current.results).toEqual({ data: 'default data' });
+    expect(result.current.results).toEqual(cacheData);
     expect(mockDefaultPrepareQuery).toHaveBeenCalledWith(
       expect.objectContaining({ query: 'test query' })
     );

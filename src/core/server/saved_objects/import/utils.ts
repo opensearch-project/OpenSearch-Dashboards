@@ -67,7 +67,14 @@ export const updateDataSourceNameInVegaSpec = (
   let parsedSpec = parseJSONSpec(spec);
   const isJSONString = !!parsedSpec;
   if (!parsedSpec) {
-    parsedSpec = parse(spec, { keepWsc: true });
+    try {
+      parsedSpec = parse(spec, { keepWsc: true });
+    } catch (e) {
+      // If HJSON parsing fails (e.g., due to complex Vega expressions like
+      // "datum.size/domain('y')[1]" which HJSON misinterprets as unquoted strings),
+      // return the original spec unchanged rather than failing the entire import.
+      return spec;
+    }
   }
 
   const dataField = parsedSpec.data;
@@ -88,7 +95,7 @@ export const updateDataSourceNameInVegaSpec = (
         bracesSameLine: true,
         keepWsc: true,
         space: stringifiedSpacing,
-      });
+      }).replace(/\r\n/g, '\n');
 };
 
 export const updateDataSourceNameInTimeline = (

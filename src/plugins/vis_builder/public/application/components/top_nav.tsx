@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState, useRef, useMemo } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import { isEqual } from 'lodash';
 import { useParams } from 'react-router-dom';
 import { useUnmount } from 'react-use';
@@ -153,6 +153,7 @@ export const TopNav = () => {
         config={config}
         setMenuMountPoint={setHeaderActionMenu}
         indexPatterns={indexPattern ? [indexPattern] : []}
+        // @ts-expect-error TS2869 TODO(ts-upgrade): fixme
         showDatePicker={!!indexPattern?.timeFieldName ?? true}
         showSearchBar={TopNavMenuItemRenderType.IN_PORTAL}
         showSaveQuery={showSaveQuery}

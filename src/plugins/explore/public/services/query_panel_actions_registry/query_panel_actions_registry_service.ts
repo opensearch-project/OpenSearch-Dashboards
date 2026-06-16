@@ -7,8 +7,6 @@ import React from 'react';
 import { IconType } from '@elastic/eui';
 import { QueryWithQueryAsString } from '../../application/utils/languages';
 import { QueryResultStatus } from '../../application/utils/state_management/types';
-import { Dataset } from '../../../../../data/common';
-import { TimeRange } from '../../../../../data/public';
 import { ExploreServices } from '../../types';
 
 // Please update the doc when updating this

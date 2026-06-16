@@ -19,7 +19,7 @@ describe('createScatterConfig', () => {
     const config = createScatterConfig();
 
     // Verify the basic structure
-    expect(config).toHaveProperty('name', 'scatter');
+    expect(config).toHaveProperty('name', 'Scatter');
     expect(config).toHaveProperty('type', 'scatter');
     expect(config).toHaveProperty('ui.style.defaults');
     expect(config).toHaveProperty('ui.style.render');
@@ -37,9 +37,6 @@ describe('createScatterConfig', () => {
     expect(defaults.exclusive.angle).toBe(0);
     expect(defaults.exclusive.filled).toBe(true);
 
-    // Verify title
-    expect(defaults.titleOptions.show).toBe(false);
-    expect(defaults.titleOptions.titleName).toBe('');
     expect(defaults.thresholdOptions).toMatchObject({
       baseColor: '#00BD6B',
       thresholds: [],

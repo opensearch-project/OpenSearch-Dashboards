@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { getFlattenedObject } from '@osd/std';
 import { EuiCodeBlock, EuiDescriptionList, EuiSpacer } from '@elastic/eui';
 import { ShardFailure } from './shard_failure_types';

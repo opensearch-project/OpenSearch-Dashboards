@@ -435,7 +435,6 @@ module.exports = {
     {
       files: [
         'packages/osd-ui-framework/**/*.test.js',
-        'packages/osd-ui-framework/Gruntfile.js',
         'packages/osd-opensearch/src/**/*.js',
         'packages/osd-interpreter/tasks/**/*.js',
         'packages/osd-interpreter/src/plugin/**/*.js',
@@ -744,7 +743,6 @@ module.exports = {
       rules: {
         ...require('eslint-config-prettier').rules,
         ...require('eslint-config-prettier/react').rules,
-        ...require('eslint-config-prettier/@typescript-eslint').rules,
       },
     },
 

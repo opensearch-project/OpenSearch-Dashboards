@@ -5,14 +5,13 @@
 
 import { i18n } from '@osd/i18n';
 import { EuiSwitch, EuiButtonGroup, EuiFormRow } from '@elastic/eui';
-import React from 'react';
+
 import { BarGaugeChartStyle } from './bar_gauge_vis_config';
 import { StyleAccordion } from '../style_panel/style_accordion';
 
 interface BarGaugeVisOptionsProps {
   styles: BarGaugeChartStyle['exclusive'];
   onChange: (styles: BarGaugeChartStyle['exclusive']) => void;
-  isXaxisNumerical: boolean;
 }
 
 const displayModeOption = [
@@ -60,31 +59,7 @@ const valueDisplayOption = [
   },
 ];
 
-export const BarGaugeExclusiveVisOptions = ({
-  styles,
-  onChange,
-  isXaxisNumerical,
-}: BarGaugeVisOptionsProps) => {
-  const getOrientationOptions = () => {
-    const horizontalLabel = i18n.translate('explore.vis.barGauge.orientation.horizontal', {
-      defaultMessage: 'Horizontal',
-    });
-    const verticalLabel = i18n.translate('explore.vis.barGauge.orientation.vertical', {
-      defaultMessage: 'Vertical',
-    });
-
-    // When X-axis is numerical, the labels are swapped
-    const verticalOptionLabel = isXaxisNumerical ? horizontalLabel : verticalLabel;
-    const horizontalOptionLabel = isXaxisNumerical ? verticalLabel : horizontalLabel;
-
-    return [
-      { id: 'vertical', label: verticalOptionLabel },
-      { id: 'horizontal', label: horizontalOptionLabel },
-    ];
-  };
-
-  const orientationOption = getOrientationOptions();
-
+export const BarGaugeExclusiveVisOptions = ({ styles, onChange }: BarGaugeVisOptionsProps) => {
   const updateExclusiveOption = (key: keyof BarGaugeChartStyle['exclusive'], value: any) => {
     onChange({
       ...styles,
@@ -101,26 +76,6 @@ export const BarGaugeExclusiveVisOptions = ({
       initialIsOpen={true}
       data-test-subj="barGaugeExclusivePanel"
     >
-      <EuiFormRow
-        label={i18n.translate('explore.stylePanel.barGauge.exclusive.orientation', {
-          defaultMessage: 'Orientation',
-        })}
-      >
-        <EuiButtonGroup
-          legend={i18n.translate('explore.stylePanel.barGauge.exclusive.orientation', {
-            defaultMessage: 'Orientation',
-          })}
-          isFullWidth
-          options={orientationOption}
-          onChange={(optionId) => {
-            updateExclusiveOption('orientation', optionId);
-          }}
-          type="single"
-          idSelected={styles?.orientation ?? 'vertical'}
-          buttonSize="compressed"
-        />
-      </EuiFormRow>
-
       <EuiFormRow
         label={i18n.translate('explore.stylePanel.barGauge.exclusive.displayStyle', {
           defaultMessage: 'Display style',

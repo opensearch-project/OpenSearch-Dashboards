@@ -33,6 +33,7 @@ import { IRouter } from 'src/core/server';
 import { getWorkspaceState } from '../../../../../../core/server/utils';
 import { createIndexName } from '../lib/create_index_name';
 import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
+import { isAnalyticEngineDataSource } from '../../../../../data/server';
 
 const NOT_INSTALLED = 'not_installed';
 const INSTALLED = 'installed';
@@ -53,7 +54,15 @@ export const createListRoute = (router: IRouter, sampleDatasets: SampleDatasetSc
       const workspaceState = getWorkspaceState(req);
       const workspaceId = workspaceState?.requestWorkspaceId;
 
-      const registeredSampleDatasets = sampleDatasets.map((sampleDataset) => {
+      // For AnalyticEngine (Mustang) datasource, only support Sample Observability Logs (otel) and Sample web logs (logs)
+      let filteredSampleDatasets = sampleDatasets;
+      if (await isAnalyticEngineDataSource(dataSourceId, context.core.savedObjects.client)) {
+        filteredSampleDatasets = sampleDatasets.filter(
+          (dataset) => dataset.id === 'logs' || dataset.id === 'otel'
+        );
+      }
+
+      const registeredSampleDatasets = filteredSampleDatasets.map((sampleDataset) => {
         return {
           id: sampleDataset.id,
           name: sampleDataset.name,

@@ -4,7 +4,7 @@
  */
 
 import './table_vis_app.scss';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { CoreStart } from 'opensearch-dashboards/public';
 import { I18nProvider } from '@osd/i18n/react';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';

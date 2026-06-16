@@ -63,6 +63,12 @@ export const AVAILABLE_FIXTURE_INDICES = [
     mappingPath: 'cypress/fixtures/explore/traces/otel_v1_apm_span_sample_1.mapping.json',
     dataPath: 'cypress/fixtures/explore/traces/otel_v1_apm_span_sample_1.data.ndjson',
   },
+  // agent_traces directory indices
+  {
+    name: 'agent_traces_cy_test',
+    mappingPath: 'cypress/fixtures/agent_traces/agent_traces_cy_test.mapping.json',
+    dataPath: 'cypress/fixtures/agent_traces/agent_traces_cy_test.data.ndjson',
+  },
 ];
 
 // Corresponds to data_logs_small_time

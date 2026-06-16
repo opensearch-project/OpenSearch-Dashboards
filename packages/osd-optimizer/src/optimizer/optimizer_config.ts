@@ -31,14 +31,7 @@
 import Path from 'path';
 import Os from 'os';
 
-import {
-  Bundle,
-  WorkerConfig,
-  CacheableWorkerConfig,
-  ThemeTag,
-  ThemeTags,
-  parseThemeTags,
-} from '../common';
+import { Bundle, WorkerConfig, ThemeTag, ThemeTags, parseThemeTags, BundleRef } from '../common';
 
 import {
   findOpenSearchDashboardsPlatformPlugins,
@@ -61,16 +54,6 @@ function pickMaxWorkerCount(dist: boolean) {
   const maxWorkers = dist ? cpuCount - 1 : Math.ceil(cpuCount / 3);
   // ensure we always have at least two workers
   return Math.max(maxWorkers, 2);
-}
-
-function omit<T, K extends keyof T>(obj: T, keys: K[]): Omit<T, K> {
-  const result: any = {};
-  for (const [key, value] of Object.entries(obj) as any) {
-    if (!keys.includes(key)) {
-      result[key] = value;
-    }
-  }
-  return result as Omit<T, K>;
 }
 
 interface Options {
@@ -131,6 +114,8 @@ interface Options {
    *  - "k7light"
    */
   themes?: ThemeTag | '*' | ThemeTag[];
+
+  bundleRefs?: BundleRef[];
 }
 
 export interface ParsedOptions {
@@ -147,6 +132,7 @@ export interface ParsedOptions {
   inspectWorkers: boolean;
   includeCoreBundle: boolean;
   themeTags: ThemeTags;
+  bundleRefs: BundleRef[];
 }
 
 export class OptimizerConfig {
@@ -159,6 +145,7 @@ export class OptimizerConfig {
     const cache = options.cache !== false && !process.env.OSD_OPTIMIZER_NO_CACHE;
     const includeCoreBundle = !!options.includeCoreBundle;
     const filters = options.filter || [];
+    const bundleRefs = options.bundleRefs ?? [];
 
     const repoRoot = options.repoRoot;
     if (!Path.isAbsolute(repoRoot)) {
@@ -223,6 +210,7 @@ export class OptimizerConfig {
       inspectWorkers,
       includeCoreBundle,
       themeTags,
+      bundleRefs,
     };
   }
 
@@ -259,7 +247,8 @@ export class OptimizerConfig {
       options.dist,
       options.profileWebpack,
       options.themeTags,
-      readLimits()
+      readLimits(),
+      options.bundleRefs
     );
   }
 
@@ -274,29 +263,19 @@ export class OptimizerConfig {
     public readonly dist: boolean,
     public readonly profileWebpack: boolean,
     public readonly themeTags: ThemeTags,
-    public readonly limits: Limits
+    public readonly limits: Limits,
+    public readonly bundleRefs: BundleRef[]
   ) {}
 
-  getWorkerConfig(optimizerCacheKey: unknown): WorkerConfig {
+  getWorkerConfig(): WorkerConfig {
     return {
       cache: this.cache,
       dist: this.dist,
       profileWebpack: this.profileWebpack,
       repoRoot: this.repoRoot,
       watch: this.watch,
-      optimizerCacheKey,
       themeTags: this.themeTags,
       browserslistEnv: this.dist ? 'production' : process.env.BROWSERSLIST_ENV || 'dev',
     };
-  }
-
-  getCacheableWorkerConfig(): CacheableWorkerConfig {
-    return omit(this.getWorkerConfig('♻'), [
-      // these config options don't change the output of the bundles, so
-      // should not invalidate caches when they change
-      'watch',
-      'profileWebpack',
-      'cache',
-    ]);
   }
 }

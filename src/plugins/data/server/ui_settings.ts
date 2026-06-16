@@ -738,6 +738,23 @@ export function getUiSettings(
       requiresPageReload: true,
       schema: schema.boolean(),
     },
+    [UI_SETTINGS.QUERY_ENHANCEMENTS_RUNTIME_PPL_GRAMMAR]: {
+      name: i18n.translate('data.advancedSettings.query.enhancements.runtimePplGrammarTitle', {
+        defaultMessage: 'Enable runtime PPL grammar',
+      }),
+      value: true,
+      description: i18n.translate(
+        'data.advancedSettings.query.enhancements.runtimePplGrammarText',
+        {
+          defaultMessage: `
+          Use the runtime PPL grammar fetched from the data source for autocomplete and validation. When disabled, falls back to the locally compiled grammar.
+          <strong>Experimental</strong>: Requires query enhancements enabled.`,
+        }
+      ),
+      category: ['search'],
+      requiresPageReload: true,
+      schema: schema.boolean(),
+    },
     [UI_SETTINGS.QUERY_ENHANCEMENTS_SUGGEST_VALUES]: {
       name: i18n.translate('data.advancedSettings.query.enhancements.suggestValuesTitle', {
         defaultMessage: 'Allow for Value Suggestion through the enhancements APIs',

@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import * as React from 'react';
 import { createReactOverlays } from './create_react_overlays';
 import { overlayServiceMock } from '../../../../core/public/mocks';
 import { toMountPoint } from '../util';

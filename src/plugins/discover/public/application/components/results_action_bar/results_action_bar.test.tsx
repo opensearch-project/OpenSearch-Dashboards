@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { DiscoverResultsActionBar, DiscoverResultsActionBarProps } from './results_action_bar';
 import { render, screen } from '@testing-library/react';
 import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';

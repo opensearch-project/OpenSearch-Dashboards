@@ -1,6 +1,10 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "bundler",
+    "rootDir": "./src",
+    "tsBuildInfoFile": "./target/tsconfig.tsbuildinfo",
     "outDir": "target",
     "target": "ES2019",
     "declaration": true,

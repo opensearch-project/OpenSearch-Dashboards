@@ -30,7 +30,20 @@
 
 export { monaco } from './monaco';
 export { XJsonLang } from './xjson';
-export { PPLLang } from './ppl';
+export {
+  clearPPLValidationContext,
+  PPLLang,
+  revalidatePPLModel,
+  registerPPLValidationProvider,
+  resolvePPLValidationResult,
+  setPPLValidationContext,
+} from './ppl';
+export type {
+  PPLValidationContext,
+  PPLValidationProvider,
+  PPLValidationProviderRequest,
+  PPLValidationResult,
+} from './ppl';
 
 /* eslint-disable-next-line @osd/eslint/module_migration */
 import * as BarePluginApi from 'monaco-editor/esm/vs/editor/editor.api';

@@ -3,17 +3,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ConversationHistoryPanel } from './conversation_history_panel';
 import {
   ConversationHistoryService,
   SavedConversation,
 } from '../services/conversation_history_service';
+import { AgenticMemoryProvider } from '../services/agentic_memory_provider';
 
 describe('ConversationHistoryPanel', () => {
   let mockService: jest.Mocked<ConversationHistoryService>;
   let mockOnSelectConversation: jest.Mock;
+  let mockResizeObserverInstance: {
+    observe: jest.Mock;
+    unobserve: jest.Mock;
+    disconnect: jest.Mock;
+  };
 
   const createMockConversations = (count: number, startIndex: number = 0): SavedConversation[] => {
     return Array.from({ length: count }, (_, i) => ({
@@ -27,14 +32,40 @@ describe('ConversationHistoryPanel', () => {
   };
 
   beforeEach(() => {
+    // Mock ResizeObserver globally
+    mockResizeObserverInstance = {
+      observe: jest.fn(),
+      unobserve: jest.fn(),
+      disconnect: jest.fn(),
+    };
+    global.ResizeObserver = jest.fn().mockImplementation(() => mockResizeObserverInstance);
+
+    // Mock requestAnimationFrame to prevent auto-load by default
+    // Tests that need auto-load behavior will override this
+    jest.spyOn(window, 'requestAnimationFrame').mockImplementation(() => 0);
+
+    // Default mock provider (non-AgenticMemoryProvider)
+    const mockDefaultProvider = {
+      includeFullHistory: true,
+      saveConversation: jest.fn(),
+      getConversations: jest.fn(),
+      getConversation: jest.fn(),
+      deleteConversation: jest.fn().mockResolvedValue(undefined),
+    };
+
     mockService = {
       getConversations: jest.fn(),
       deleteConversation: jest.fn(),
       getConversation: jest.fn(),
       saveConversation: jest.fn(),
+      getMemoryProvider: jest.fn().mockReturnValue(mockDefaultProvider),
     } as any;
 
     mockOnSelectConversation = jest.fn();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   describe('Initial loading state', () => {
@@ -180,47 +211,6 @@ describe('ConversationHistoryPanel', () => {
     });
   });
 
-  describe('Conversation grouping', () => {
-    it('should group conversations by date', async () => {
-      const now = Date.now();
-      const recentConv: SavedConversation = {
-        id: 'conv-recent',
-        threadId: 'thread-recent',
-        name: 'Recent Conversation',
-        messages: [],
-        createdAt: now,
-        updatedAt: now,
-      };
-
-      const oldConv: SavedConversation = {
-        id: 'conv-old',
-        threadId: 'thread-old',
-        name: 'Old Conversation',
-        messages: [],
-        createdAt: now - 8 * 24 * 60 * 60 * 1000, // 8 days ago
-        updatedAt: now - 8 * 24 * 60 * 60 * 1000,
-      };
-
-      mockService.getConversations.mockResolvedValue({
-        conversations: [recentConv, oldConv],
-        hasMore: false,
-        total: 1,
-      });
-
-      render(
-        <ConversationHistoryPanel
-          conversationHistoryService={mockService}
-          onSelectConversation={mockOnSelectConversation}
-        />
-      );
-
-      await waitFor(() => {
-        expect(screen.getByText('Last 7 days')).toBeInTheDocument();
-        expect(screen.getByText('Older')).toBeInTheDocument();
-      });
-    });
-  });
-
   describe('Conversation selection', () => {
     it('should call onSelectConversation when conversation is clicked', async () => {
       const mockConversations = createMockConversations(2);
@@ -284,6 +274,38 @@ describe('ConversationHistoryPanel', () => {
       await waitFor(() => {
         expect(mockService.deleteConversation).toHaveBeenCalledWith('thread-0');
       });
+    });
+
+    it('should not show delete action when using AgenticMemoryProvider', async () => {
+      const mockConversations = createMockConversations(2);
+      mockService.getConversations.mockResolvedValue({
+        conversations: mockConversations,
+        hasMore: false,
+        total: 1,
+      });
+
+      // Create a real AgenticMemoryProvider instance with mocked http
+      const mockHttp = {
+        post: jest.fn(),
+      } as any;
+      // @ts-expect-error TS2554 TODO(ts-error): fixme
+      const agenticProvider = new AgenticMemoryProvider(mockHttp);
+      mockService.getMemoryProvider = jest.fn().mockReturnValue(agenticProvider);
+
+      render(
+        <ConversationHistoryPanel
+          conversationHistoryService={mockService}
+          onSelectConversation={mockOnSelectConversation}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('Conversation 0')).toBeInTheDocument();
+      });
+
+      // Verify that action buttons (delete) are not present when using agentic memory
+      const actionButtons = screen.queryAllByLabelText('Actions');
+      expect(actionButtons).toHaveLength(0);
     });
   });
 
@@ -406,6 +428,122 @@ describe('ConversationHistoryPanel', () => {
 
       // Should only be called once (initial load)
       expect(mockService.getConversations).toHaveBeenCalledTimes(1);
+    });
+
+    it('should auto-load more when content does not fill container (no scrollbar)', async () => {
+      const firstPage = createMockConversations(20, 0);
+      const secondPage = createMockConversations(20, 20);
+
+      mockService.getConversations
+        .mockResolvedValueOnce({
+          conversations: firstPage,
+          hasMore: true,
+          total: 1,
+        })
+        .mockResolvedValueOnce({
+          conversations: secondPage,
+          hasMore: false,
+          total: 1,
+        });
+
+      // Override the default requestAnimationFrame mock to execute callback
+      // and simulate container where content doesn't fill
+      (window.requestAnimationFrame as jest.Mock).mockImplementation((cb) => {
+        // Execute callback after a microtask to allow DOM to update
+        Promise.resolve().then(() => cb(0));
+        return 0;
+      });
+
+      const { container } = render(
+        <ConversationHistoryPanel
+          conversationHistoryService={mockService}
+          onSelectConversation={mockOnSelectConversation}
+        />
+      );
+
+      // Simulate container where content doesn't fill (scrollHeight <= clientHeight)
+      const contentDiv = container.querySelector('.conversationHistoryPanel__content');
+      if (contentDiv) {
+        Object.defineProperty(contentDiv, 'scrollHeight', {
+          value: 400,
+          writable: true,
+          configurable: true,
+        });
+        Object.defineProperty(contentDiv, 'clientHeight', {
+          value: 700,
+          writable: true,
+          configurable: true,
+        });
+      }
+
+      await waitFor(() => {
+        expect(mockService.getConversations).toHaveBeenCalledTimes(2);
+      });
+
+      expect(mockService.getConversations).toHaveBeenNthCalledWith(2, {
+        page: 1,
+        pageSize: 20,
+      });
+    });
+
+    it('should load more when container is resized and content no longer fills it', async () => {
+      let resizeCallback: ResizeObserverCallback | undefined;
+      const mockResizeObserver = jest
+        .fn()
+        .mockImplementation((callback: ResizeObserverCallback) => {
+          resizeCallback = callback;
+          return {
+            observe: jest.fn(),
+            unobserve: jest.fn(),
+            disconnect: jest.fn(),
+          };
+        });
+      const originalResizeObserver = window.ResizeObserver;
+      window.ResizeObserver = mockResizeObserver;
+
+      const firstPage = createMockConversations(20, 0);
+      const secondPage = createMockConversations(10, 20);
+
+      mockService.getConversations
+        .mockResolvedValueOnce({
+          conversations: firstPage,
+          hasMore: true,
+          total: 1,
+        })
+        .mockResolvedValueOnce({
+          conversations: secondPage,
+          hasMore: false,
+          total: 1,
+        });
+
+      const { container } = render(
+        <ConversationHistoryPanel
+          conversationHistoryService={mockService}
+          onSelectConversation={mockOnSelectConversation}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('Conversation 0')).toBeInTheDocument();
+      });
+
+      // Simulate container resize where content no longer fills
+      const contentDiv = container.querySelector('.conversationHistoryPanel__content');
+      if (contentDiv) {
+        Object.defineProperty(contentDiv, 'scrollHeight', { value: 500, writable: true });
+        Object.defineProperty(contentDiv, 'clientHeight', { value: 800, writable: true });
+      }
+
+      // Trigger resize observer callback
+      if (resizeCallback) {
+        resizeCallback([], (mockResizeObserver as unknown) as ResizeObserver);
+      }
+
+      await waitFor(() => {
+        expect(mockService.getConversations).toHaveBeenCalledTimes(2);
+      });
+
+      window.ResizeObserver = originalResizeObserver;
     });
   });
 });

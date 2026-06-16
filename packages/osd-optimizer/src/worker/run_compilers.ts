@@ -37,7 +37,7 @@ import { inspect } from 'util';
 // import webpack, { Stats } from 'webpack';
 import { rspack, Compiler, Stats } from '@rspack/core';
 import * as Rx from 'rxjs';
-import { mergeMap, map, mapTo, takeUntil, tap, finalize } from 'rxjs/operators';
+import { mergeMap, map, mapTo, takeUntil, finalize } from 'rxjs/operators';
 
 import {
   CompilerMsgs,
@@ -50,7 +50,7 @@ import {
   BundleRefs,
 } from '../common';
 import { getWebpackConfig, sassCompiler } from './webpack.config';
-import { isFailureStats, failedStatsToErrorMessage } from './webpack_helpers';
+import { isFailureStats, failedStatsToErrorMessage, isContextModule } from './webpack_helpers';
 import {
   isExternalModule,
   isNormalModule,
@@ -58,7 +58,6 @@ import {
   isConcatenatedModule,
   getModulePath,
 } from './webpack_helpers';
-import { getHashes } from '../optimizer/get_hashes';
 
 const PLUGIN_NAME = '@osd/optimizer';
 
@@ -176,7 +175,7 @@ const observeCompiler = (
           continue;
         }
 
-        if (isExternalModule(module) || isIgnoredModule(module)) {
+        if (isExternalModule(module) || isContextModule(module) || isIgnoredModule(module)) {
           continue;
         }
 
@@ -185,20 +184,12 @@ const observeCompiler = (
 
       const files = Array.from(referencedFiles).sort(ascending((p) => p));
 
-      getHashes(files)
-        .then((hashes) => {
-          bundle.cache.set({
-            bundleRefExportIds: [...new Set(bundleRefExportIds)],
-            optimizerCacheKey: workerConfig.optimizerCacheKey,
-            cacheKey: bundle.createCacheKey(files, hashes),
-            moduleCount,
-            workUnits,
-            files,
-          });
-        })
-        .catch((_err) => {
-          // If cache fails to write, it's alright to ignore and reattempt next build
-        });
+      bundle.cache.set({
+        bundleRefExportIds: [...new Set(bundleRefExportIds)],
+        moduleCount,
+        workUnits,
+        files,
+      });
 
       return compilerMsgs.compilerSuccess({
         moduleCount,

@@ -250,6 +250,8 @@ export class LegacyService implements CoreService {
       context: setupDeps.core.context,
       opensearch: {
         legacy: setupDeps.core.opensearch.legacy,
+        registerClientTransport: setupDeps.core.opensearch.registerClientTransport,
+        hasClientTransport: setupDeps.core.opensearch.hasClientTransport,
       },
       http: {
         createCookieSessionStorageFactory: setupDeps.core.http.createCookieSessionStorageFactory,

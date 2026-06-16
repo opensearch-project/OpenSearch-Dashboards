@@ -47,8 +47,8 @@ module.exports = {
   },
 
   rules: {
-    'react/jsx-uses-react': 'error',
-    'react/react-in-jsx-scope': 'error',
+    'react/jsx-uses-react': 'off',
+    'react/react-in-jsx-scope': 'off',
     'react/jsx-uses-vars': 'error',
     'react/jsx-no-undef': 'error',
     'react/jsx-pascal-case': 'error',

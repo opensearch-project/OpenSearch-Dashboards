@@ -1,3 +1,7 @@
+// ════════════════════════════════════════════════════════════════
+// ── Original styles: EuiFlyout-based nav (default when enableIconSideNav is OFF) ──
+// ════════════════════════════════════════════════════════════════
+
 .context-nav-wrapper {
   top: var(--global-banner-height, 0);
   height: calc(100% - var(--global-banner-height, 0));
@@ -144,4 +148,625 @@
     top: $ouiHeaderChildSize;
     left: 0;
   }
+}
+
+// ════════════════════════════════════════════════════════════════
+// ── Icon side nav styles (only active when enableIconSideNav is ON) ──
+// ── These styles apply to the two-div sidebar pattern (.osd-sidebar) ──
+// ════════════════════════════════════════════════════════════════
+
+$osd-sidebar-width: 270px;
+$osd-sidebar-width-collapsed: 64px;
+$osd-sidebar-transition: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+
+// Gap div (hidden — layout push handled via CSS variable on app-wrapper)
+.osd-sidebar-gap {
+  display: none;
+}
+
+// Push the main app content and header to the right of the fixed sidebar.
+// The --osd-sidebar-width CSS variable is set by CollapsibleNavGroupEnabled via JS
+// ONLY when enableIconSideNav is true.
+// No transition on margin-left — animating it forces full page relayout every frame,
+// which is very expensive on content-heavy pages (Discover, Traces).
+// The sidebar's own width transition + overflow:hidden handles the visual slide.
+// stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+.app-wrapper {
+  // stylelint-disable-next-line length-zero-no-unit
+  margin-left: var(--osd-sidebar-width, 0px);
+}
+
+#globalHeaderBars {
+  // stylelint-disable-next-line length-zero-no-unit
+  margin-left: var(--osd-sidebar-width, 0px);
+}
+
+// Fixed sidebar container
+.osd-sidebar {
+  position: fixed;
+  left: 0;
+  // stylelint-disable-next-line length-zero-no-unit
+  top: var(--global-banner-height, 0px);
+  // stylelint-disable-next-line length-zero-no-unit
+  height: calc(100vh - var(--global-banner-height, 0px));
+  width: $osd-sidebar-width;
+  z-index: $ouiZHeader - 3;
+  background-color: $euiSideNavBackgroundColor;
+  border-top-right-radius: $euiSizeL;
+  box-shadow: 1px 0 0 $euiBorderColor;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: width $osd-sidebar-transition;
+  will-change: width;
+
+  // Force GPU compositing — avoids Firefox reflow jitter on width transitions
+  transform: translateZ(0);
+  backface-visibility: hidden;
+
+  // Limit reflow scope — sidebar contents don't affect outside layout
+  contain: layout style;
+
+  &[data-state="collapsed"] {
+    width: $osd-sidebar-width-collapsed;
+  }
+}
+
+// Fixed min-height for the top panel — ensures nav item icons start at the
+// same Y offset in both collapsed and expanded states.
+$osd-sidebar-top-min-height: 116px;
+
+.osd-sidebar-top-panel {
+  flex-grow: 0;
+  flex-shrink: 0;
+  min-height: $osd-sidebar-top-min-height;
+}
+
+// Inner wrapper
+.osd-sidebar-inner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+
+  // Prevent inner content from triggering parent reflow during transition
+  contain: layout style;
+}
+
+// Nav item styles inside .osd-sidebar
+// stylelint-disable-next-line no-duplicate-selectors
+.osd-sidebar {
+  .nav-link-item {
+    padding: $euiSizeS;
+    border-radius: $euiSizeS;
+    box-shadow: none;
+    margin-bottom: 0;
+    margin-top: 0;
+
+    .nav-link-item-btn {
+      margin-bottom: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+  }
+
+  .nav-link-parent-item {
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-bottom: $euiSizeS;
+
+    > .nav-link-item-btn {
+      padding: $euiSizeS;
+      margin-bottom: $euiSizeXS;
+    }
+
+    svg {
+      display: none;
+    }
+
+    .leftNavCustomizedAccordionIcon {
+      display: inline-block;
+    }
+  }
+
+  .nav-link-item-category-button {
+    margin-bottom: $euiSizeXS;
+
+    .nav-link-item {
+      padding: $euiSizeXS $euiSizeS;
+    }
+  }
+
+  .nav-link-item-category-item {
+    margin-top: $euiSizeL;
+  }
+
+  .nav-link-fake-item {
+    margin-top: 0;
+  }
+
+  .nav-link-fake-item-button {
+    display: none;
+  }
+
+  .nav-nested-item {
+    padding: $euiSizeS 0;
+
+    &::after,
+    .nav-link-item-btn::after {
+      background-color: $euiColorDarkShade;
+    }
+
+    &:last-of-type::after {
+      height: 20px;
+    }
+  }
+
+  .left-navigation-wrapper {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .flex-1-container {
+    flex: 1;
+    min-height: 0;
+  }
+
+  .bottom-container {
+    padding: 0 $euiSizeM;
+    display: flex;
+    -ms-overflow-style: -ms-autohiding-scrollbar;
+
+    &.bottom-container-collapsed {
+      flex-direction: column;
+      align-items: center;
+      gap: $euiSize;
+      padding-top: $euiSizeS;
+      padding-bottom: $euiSizeS;
+
+      > * {
+        justify-content: center;
+      }
+    }
+
+    &.bottom-container-expanded {
+      gap: $euiSizeM;
+      padding-top: $euiSizeM;
+      padding-bottom: $euiSizeM;
+      border-top: $euiBorderThin;
+      border-color: $euiColorMediumShade;
+    }
+  }
+
+  .navGroupEnabledNavTopWrapper {
+    padding: $euiSizeXS $euiSizeS 0;
+    padding-left: $euiSizeS;
+
+    .navGroupEnabledHomeIcon {
+      margin-left: $euiSizeS;
+    }
+  }
+
+  .searchBar-wrapper {
+    padding: $euiSize;
+    padding-top: $euiSizeS;
+    background-color: transparent;
+    flex-grow: 0;
+
+    .searchInput {
+      background-color: transparentize($euiFormBackgroundColor, 0.5);
+    }
+
+    .searchInput:focus {
+      background-color: $euiFormBackgroundColor;
+    }
+  }
+
+  .searchBarIcon {
+    position: relative;
+    top: $ouiHeaderChildSize;
+    left: 0;
+  }
+}
+
+// ════════════════════════════════════════════════════════════════
+// ── Observability hardcoded nav styles ──
+// ════════════════════════════════════════════════════════════════
+
+// Cluster gap: inserted in the expanded nav before a top-level item whose
+// registration opts into `startCluster`, and before every category block.
+// Provides the "visual grouping" intended by plugins without changing
+// ordering semantics.
+.obs-nav-cluster-gap {
+  height: $euiSizeM;
+}
+
+// Cluster gap for the collapsed icon rail — same intent, just vertical space.
+.obsCollapsedNav-clusterGap {
+  height: $euiSizeM;
+}
+
+// Remove blue focus ring on mouse click — keep :focus-visible for keyboard a11y
+.obs-expanded-nav {
+  a:focus:not(:focus-visible),
+  button:focus:not(:focus-visible) {
+    outline: none !important;
+    box-shadow: none !important;
+  }
+}
+
+.obs-nav-category-toggle:focus:not(:focus-visible),
+.obs-nav-item-toggle:focus:not(:focus-visible) {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+// Monochrome icon rendering
+// App icons (dashboardApp, discoverApp, etc.) ship with two-tone SVGs.
+// EUI renders them as .ouiIcon (not .euiIcon). The secondary fill class
+// .ouiIcon__fillSecondary gets a contrasting color by default. Override both.
+.obs-nav-icon,
+.obsCollapsedNavIcon {
+  /* stylelint-disable @osd/stylelint/no_modifying_global_selectors */
+  .ouiIcon {
+    fill: currentColor;
+
+    .ouiIcon__fillSecondary {
+      fill: currentColor;
+    }
+  }
+  /* stylelint-enable @osd/stylelint/no_modifying_global_selectors */
+}
+
+// Expanded nav — align icons with collapsed state (centered in 48px strip)
+// Collapsed icon center: (48 - 28) / 2 + 14 = 24px
+// Expanded: 2px + 8px item padding + 14px icon center = 24px ✓
+// stylelint-disable-next-line no-duplicate-selectors
+.obs-expanded-nav {
+  padding: $euiSizeS 0;
+  padding-left: 2px;
+  padding-right: $euiSizeS;
+}
+
+.obs-nav-item {
+  display: block;
+  padding: $euiSizeXS $euiSizeS;
+  border-radius: $euiSizeXS;
+  text-decoration: none;
+  color: $euiTextColor;
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease;
+
+  &:hover {
+    // stylelint-disable-next-line @osd/stylelint/no_restricted_values
+    background-color: rgba($euiTextColor, 0.04);
+    color: $euiColorPrimary;
+    text-decoration: none;
+  }
+
+  &[data-active="true"] {
+    // stylelint-disable-next-line @osd/stylelint/no_restricted_values
+    background-color: rgba($euiTextColor, 0.06);
+    color: $euiTextColor;
+    font-weight: $euiFontWeightMedium;
+    position: relative;
+
+    &::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 4px;
+      bottom: 4px;
+      width: 3px;
+      background-color: $euiColorPrimary;
+      border-radius: 0 2px 2px 0;
+    }
+  }
+}
+
+// Button variant for items with custom onClick (e.g. dev tools modal)
+.obs-nav-item-button {
+  width: 100%;
+  border: none;
+  background: none;
+  text-align: left;
+  font: inherit;
+}
+
+.obs-nav-item-row {
+  min-height: 28px;
+}
+
+.obs-nav-icon {
+  // Match collapsed icon sizing (28x28 button, 16x16 icon)
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  .ouiIcon {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+// Animated chevron for collapsible items and sections (shadcn-style rotation)
+.obs-nav-chevron {
+  transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
+
+  &[data-collapsed="true"] {
+    transform: rotate(-90deg);
+  }
+}
+
+// Inline children (Alerts, Anomaly Detection)
+// Indent to align with text next to the 28px icon container + gutterSize s (8px)
+.obs-nav-children {
+  padding-left: 44px; // 8px item padding + 28px icon + 8px gutter
+  margin-top: $euiSizeXS;
+}
+
+// Smooth collapsible animation using CSS grid trick
+.obs-nav-collapsible-wrapper {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 200ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  &[data-collapsed="true"] {
+    grid-template-rows: 0fr;
+  }
+
+  > .obs-nav-collapsible-inner {
+    overflow: hidden;
+  }
+}
+
+.obs-nav-child-item {
+  display: block;
+  padding: $euiSizeXS $euiSizeS;
+  border-radius: $euiSizeXS;
+  text-decoration: none;
+  color: $euiTextSubduedColor;
+  transition: color 150ms ease, background-color 150ms ease;
+
+  &:hover {
+    color: $euiColorPrimary;
+    text-decoration: none;
+  }
+
+  &[data-active="true"] {
+    // stylelint-disable-next-line @osd/stylelint/no_restricted_values
+    background-color: rgba($euiTextColor, 0.06);
+    color: $euiTextColor;
+    font-weight: $euiFontWeightMedium;
+    position: relative;
+
+    &::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 4px;
+      bottom: 4px;
+      width: 3px;
+      background-color: $euiColorPrimary;
+      border-radius: 0 2px 2px 0;
+    }
+  }
+}
+
+// Category labels — shadcn-style: small, muted, no uppercase
+.obs-nav-category-label {
+  padding: $euiSizeM $euiSizeS $euiSizeXS;
+  color: $euiTextSubduedColor;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+// Dividers
+.obs-nav-divider {
+  margin: $euiSizeXS 0;
+}
+
+// ── Icon side nav top bar — single DOM, CSS-driven layout transitions ──
+
+.iconSideNavTop {
+  // Row 1: logo + action buttons in a horizontal row
+  .iconSideNavTop__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    white-space: nowrap;
+  }
+
+  // Action buttons (search, lock, hamburger) — inline row
+  .iconSideNavTop__actions {
+    display: flex;
+    align-items: center;
+    gap: $euiSizeXS;
+    transition: opacity $osd-sidebar-transition;
+    opacity: 1;
+  }
+
+  // Row 2: collapsed-only controls (hamburger + search stacked)
+  .iconSideNavTop__collapsedControls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: $euiSizeXS;
+    transition: opacity $osd-sidebar-transition;
+    opacity: 0;
+    height: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  // ── Expanded state ──
+  &.iconSideNavTop--expanded {
+    // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+    .iconSideNavTop__logo .ouiIcon {
+      transition: width $osd-sidebar-transition, height $osd-sidebar-transition;
+    }
+  }
+
+  // ── Collapsed state ──
+  &.iconSideNavTop--collapsed {
+    .iconSideNavTop__row {
+      justify-content: center;
+    }
+
+    .iconSideNavTop__actions {
+      opacity: 0;
+      width: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .iconSideNavTop__collapsedControls {
+      opacity: 1;
+      height: auto;
+      overflow: visible;
+      pointer-events: auto;
+    }
+
+    .navGroupEnabledHomeIcon {
+      margin-left: 0;
+    }
+  }
+}
+
+// Collapsed sidebar overrides — center content in 48px
+// stylelint-disable-next-line no-duplicate-selectors
+.osd-sidebar[data-state="collapsed"] {
+  .navGroupEnabledNavTopWrapper {
+    padding: $euiSizeXS 0;
+    padding-left: 0;
+  }
+}
+
+// Collapsible section toggle (category-level accordion)
+.obs-nav-category-toggle {
+  display: block;
+  width: 100%;
+  padding: $euiSizeM $euiSizeS $euiSizeXS;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+
+  &:hover {
+    // stylelint-disable-next-line @osd/stylelint/no_restricted_values
+    background-color: rgba($euiTextColor, 0.04);
+    border-radius: $euiSizeXS;
+  }
+
+  .obs-nav-category-label-text {
+    color: $euiTextSubduedColor;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    text-transform: none;
+  }
+}
+
+// Collapsible item toggle (item-level accordion, e.g. Anomaly Detection, Alerting)
+.obs-nav-item-toggle {
+  display: block;
+  width: 100%;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+// Iconless items inside collapsible sections (Manage Workspace children)
+// Indent to align with text of icon-bearing items: 28px icon + 8px gutter = 36px
+.obs-nav-collapsible-section .obs-nav-item-row--no-icon {
+  padding-left: 36px;
+}
+
+// Smooth show/hide for expanded ↔ collapsed nav transition.
+// Both components stay mounted; CSS handles opacity + pointer-events.
+.obs-nav-scroll-container,
+.obsCollapsedNav-wrapper {
+  transition: opacity $osd-sidebar-transition;
+  opacity: 1;
+
+  &.obs-nav-hidden {
+    opacity: 0;
+    pointer-events: none;
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+  }
+}
+
+// Wrapper for collapsed nav (keeps flex layout when visible)
+.obsCollapsedNav-wrapper {
+  flex: 1;
+  min-height: 0;
+}
+
+// Scroll container for expanded observability nav
+.obs-nav-scroll-container {
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+  padding: 0;
+}
+
+// Collapsed observability nav
+.obsCollapsedNav {
+  padding: ($euiSizeS + $euiSizeXS) 0 $euiSizeS; // 12px top to match expanded .obs-nav-item 4px padding
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  .obsCollapsedNavIcon {
+    width: 28px;
+    height: 28px;
+
+    // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+    .euiIcon {
+      width: 16px;
+      height: 16px;
+    }
+  }
+}
+
+// Popover arrow indicator (Datadog-style) — shows a small chevron on collapsed icons
+// that have a popover submenu. Arrow sits inside the icon bounding box.
+.obsCollapsedNavIcon-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  .obsCollapsedNav-popoverArrow {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 6px;
+    height: 6px;
+    color: $euiTextSubduedColor;
+    opacity: 0.5;
+    pointer-events: none;
+  }
+}
+
+.obsCollapsedNav-divider {
+  width: 24px;
+  margin: $euiSizeXS auto;
 }

@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { ComponentType } from 'react';
+import { ComponentType } from 'react';
 import { injectI18n, InjectedIntlProps } from '@osd/i18n/react';
 import { EuiCompressedFormRow } from '@elastic/eui';
 import { IndexPatternSelectProps } from 'src/plugins/data/public';
@@ -38,11 +38,17 @@ export type IndexPatternSelectFormRowUiProps = InjectedIntlProps & {
   indexPatternId: string;
   controlIndex: number;
   IndexPatternSelect: ComponentType<IndexPatternSelectProps>;
+  allowedIndexPatternIds: Set<string>;
 };
 
 function IndexPatternSelectFormRowUi(props: IndexPatternSelectFormRowUiProps) {
-  const { controlIndex, indexPatternId, intl, onChange } = props;
+  const { controlIndex, indexPatternId, intl, onChange, allowedIndexPatternIds } = props;
+
   const selectId = `indexPatternSelect-${controlIndex}`;
+  // Create filter function based on allowed index pattern IDs
+  const indexPatternFilter = (indexPattern: any) => {
+    return allowedIndexPatternIds.has(indexPattern.id);
+  };
 
   return (
     <EuiCompressedFormRow
@@ -62,6 +68,7 @@ function IndexPatternSelectFormRowUi(props: IndexPatternSelectFormRowUiProps) {
         data-test-subj={selectId}
         // TODO: supply actual savedObjectsClient here
         savedObjectsClient={{} as any}
+        indexPatternFilter={indexPatternFilter}
       />
     </EuiCompressedFormRow>
   );

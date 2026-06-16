@@ -4,7 +4,6 @@
  */
 
 import { EuiCard } from '@elastic/eui';
-import React from 'react';
 
 export interface OverviewCardProps {
   id: string;

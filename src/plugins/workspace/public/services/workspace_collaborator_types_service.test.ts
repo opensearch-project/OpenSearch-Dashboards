@@ -88,6 +88,23 @@ describe('WorkspaceCollaboratorTypesService', () => {
 
       subscription.unsubscribe();
     });
+
+    it('should support types with identitySource', () => {
+      const typesWithIdentitySource: WorkspaceCollaboratorType[] = [
+        {
+          id: 'user',
+          name: 'User',
+          buttonLabel: 'Add Users',
+          onAdd: jest.fn(),
+          identitySource: { source: 'LDAP', type: 'user' },
+        },
+      ];
+
+      service.setTypes(typesWithIdentitySource);
+
+      const types = service.getTypes$().getValue();
+      expect(types[0].identitySource).toEqual({ source: 'LDAP', type: 'user' });
+    });
   });
 
   describe('stop', () => {

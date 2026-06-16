@@ -1,5 +1,12 @@
 {
   "extends": "./tsconfig.base.json",
+  "ts-node": {
+    "compilerOptions": {
+      "ignoreDeprecations": "6.0",
+      "module": "commonjs",
+      "moduleResolution": "node10"
+    }
+  },
   "compilerOptions": {
     "tsBuildInfoFile": "./build/tsbuildinfo/opensearch-dashboards"
   },

@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import { Subscription } from 'rxjs';
 import { UiActionsStart } from 'src/plugins/ui_actions/public';
@@ -63,7 +62,6 @@ export class ContactCardEmbeddable extends Embeddable<
   ContactCardEmbeddableOutput
 > {
   private subscription: Subscription;
-  private node?: Element;
   private root: Root | null = null;
   public readonly type: string = CONTACT_CARD_EMBEDDABLE;
 
@@ -91,9 +89,10 @@ export class ContactCardEmbeddable extends Embeddable<
     });
   }
 
-  public render(node: HTMLElement) {
-    this.node = node;
-    this.root = createRoot(node);
+  public render(_node: HTMLElement) {
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
+    this._node = _node;
+    this.root = createRoot(_node);
     this.root.render(
       <ContactCardEmbeddableComponent embeddable={this} execTrigger={this.options.execAction} />
     );

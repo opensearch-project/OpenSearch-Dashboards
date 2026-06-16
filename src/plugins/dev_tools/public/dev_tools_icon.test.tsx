@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { fireEvent, render, act, waitFor } from '@testing-library/react';
 import { DevToolsIcon } from './dev_tools_icon';
 import { coreMock } from '../../../core/public/mocks';
@@ -151,6 +150,37 @@ describe('<DevToolsIcon />', () => {
         id: 'close_dev_tools_modal',
         pluginId: 'dev_tools',
       });
+    });
+  });
+
+  describe('sidecar padding', () => {
+    it('should not apply sidecar padding when sidecar is hidden even if docked right', async () => {
+      const coreStartMock = coreMock.createStart();
+      const sidecarConfig$ = coreStartMock.overlays.sidecar.getSidecarConfig$();
+
+      const { getByTestId, findByText } = render(
+        <DevToolsIcon
+          core={coreStartMock}
+          devTools={[]}
+          deps={createDepsMock()}
+          title="Dev tools title"
+        />
+      );
+
+      // Emit sidecar config with dockedMode 'right' but isHidden true
+      act(() => {
+        (sidecarConfig$ as any).next({
+          dockedMode: 'right',
+          paddingSize: 400,
+          isHidden: true,
+        });
+      });
+
+      fireEvent.click(getByTestId('openDevToolsModal'));
+      const modalContainer = await findByText('Dev tools title');
+      const modalWrapper = modalContainer.closest('[style*="margin-right"]');
+
+      expect(modalWrapper).toHaveStyle({ marginRight: '0px' });
     });
   });
 });

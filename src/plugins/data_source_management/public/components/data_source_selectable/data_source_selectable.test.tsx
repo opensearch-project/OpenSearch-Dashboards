@@ -4,8 +4,6 @@
  */
 
 import { ShallowWrapper, shallow, mount } from 'enzyme';
-// @ts-expect-error TS6133 TODO(ts-error): fixme
-import { i18n } from '@osd/i18n';
 import { SavedObjectsClientContract, UiSettingScope } from '../../../../../core/public';
 import { notificationServiceMock } from '../../../../../core/public/mocks';
 import React from 'react';
@@ -15,17 +13,6 @@ import { AuthType } from '../../types';
 import { getDataSourcesWithFieldsResponse, mockResponseForSavedObjectsCalls } from '../../mocks';
 import { render } from '@testing-library/react';
 import * as utils from '../utils';
-// @ts-expect-error TS6192 TODO(ts-error): fixme
-import {
-  // @ts-expect-error TS2305 TODO(ts-error): fixme
-  NO_DATASOURCES_CONNECTED_MESSAGE,
-  // @ts-expect-error TS2305 TODO(ts-error): fixme
-  CONNECT_DATASOURCES_MESSAGE,
-  // @ts-expect-error TS2305 TODO(ts-error): fixme
-  NO_COMPATIBLE_DATASOURCES_MESSAGE,
-  // @ts-expect-error TS2305 TODO(ts-error): fixme
-  ADD_COMPATIBLE_DATASOURCES_MESSAGE,
-} from '../constants';
 import { DataSourceSelectionService } from '../../service/data_source_selection_service';
 
 const mockGeneratedComponentId = 'component-id';
@@ -66,7 +53,14 @@ describe('DataSourceSelectable', () => {
     );
     expect(component).toMatchSnapshot();
     expect(client.find).toBeCalledWith({
-      fields: ['id', 'title', 'auth.type', 'dataSourceVersion', 'installedPlugins'],
+      fields: [
+        'id',
+        'title',
+        'auth.type',
+        'dataSourceVersion',
+        'installedPlugins',
+        'dataSourceEngineType',
+      ],
       perPage: 10000,
       type: 'data-source',
     });
@@ -87,7 +81,14 @@ describe('DataSourceSelectable', () => {
     );
     expect(component).toMatchSnapshot();
     expect(client.find).toBeCalledWith({
-      fields: ['id', 'title', 'auth.type', 'dataSourceVersion', 'installedPlugins'],
+      fields: [
+        'id',
+        'title',
+        'auth.type',
+        'dataSourceVersion',
+        'installedPlugins',
+        'dataSourceEngineType',
+      ],
       perPage: 10000,
       type: 'data-source',
     });
@@ -161,7 +162,6 @@ describe('DataSourceSelectable', () => {
     const containerInstance = container.instance();
 
     act(() => {
-      // @ts-expect-error TS2339 TODO(ts-error): fixme
       containerInstance.onChange([{ id: 'test2', label: 'test2' }]);
     });
     container.update();
@@ -188,7 +188,6 @@ describe('DataSourceSelectable', () => {
     });
 
     act(() => {
-      // @ts-expect-error TS2339 TODO(ts-error): fixme
       containerInstance.onChange([{ id: 'test2', label: 'test2', checked: 'on' }]);
     });
     container.update();
@@ -449,7 +448,6 @@ describe('DataSourceSelectable', () => {
     });
 
     act(() => {
-      // @ts-expect-error TS2339 TODO(ts-error): fixme
       containerInstance.onChange([{ id: 'test2', label: 'test2', checked: 'on' }]);
     });
     container.update();

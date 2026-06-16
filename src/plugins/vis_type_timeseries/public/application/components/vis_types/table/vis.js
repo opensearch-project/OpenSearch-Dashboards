@@ -29,7 +29,7 @@
  */
 
 import _, { isArray, last, get } from 'lodash';
-import React, { Component } from 'react';
+import { Component } from 'react';
 import PropTypes from 'prop-types';
 import { RedirectAppLinks } from '../../../../../../opensearch_dashboards_react/public';
 import { createTickFormatter } from '../../lib/tick_formatter';

@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiModal, EuiText } from '@elastic/eui';
+import { take } from 'rxjs/operators';
 import {
   ApplicationStart,
   IUiSettingsClient,
@@ -19,6 +19,7 @@ import { DASHBOARD_ADD_PANEL_TRIGGER } from '../../../dashboard/public';
 import { reactToUiComponent, toMountPoint } from '../../../opensearch_dashboards_react/public';
 import { SearchSelection } from './search_selection';
 import { DataPublicPluginStart } from '../../../data/public';
+import { EmbeddableStart } from '../../../embeddable/public';
 
 const VisualizationActionMenuItem = ({
   title,
@@ -50,10 +51,12 @@ export const createNewVisActions = (services: {
   application: ApplicationStart;
   savedObjects: SavedObjectsStart;
   data: DataPublicPluginStart;
+  embeddable: EmbeddableStart;
 }) => {
   const { types, uiActions, uiSettings, overlays, application, savedObjects, data } = services;
 
   const isLabsEnabled = uiSettings.get(VISUALIZE_ENABLE_LABS_SETTING);
+  const stateTransfer = services.embeddable.getStateTransfer();
 
   const visTypes = types.all();
   const aliasTypes = types.getAliases();
@@ -65,6 +68,28 @@ export const createNewVisActions = (services: {
       return true;
     })
     .sort((a, b) => a.title.localeCompare(b.title));
+
+  async function navigateTo(
+    appId: string,
+    path: string,
+    originatingApp?: string,
+    containerInfo?: {
+      containerId: string;
+      containerName: string;
+    }
+  ) {
+    if (originatingApp) {
+      await stateTransfer.navigateToEditor(appId, {
+        path,
+        state: {
+          originatingApp,
+          containerInfo,
+        },
+      });
+    } else {
+      await application.navigateToApp(appId, { path });
+    }
+  }
 
   allTypes.forEach((visType, i) => {
     const actionConfig = {
@@ -85,8 +110,14 @@ export const createNewVisActions = (services: {
               description={visType.promotion?.description ?? ''}
             />
           )),
-          execute: async () => {
-            application.navigateToApp(visType.aliasApp, { path: visType.aliasPath });
+          execute: async (context) => {
+            const currentAppId = await application.currentAppId$.pipe(take(1)).toPromise();
+            await navigateTo(
+              visType.aliasApp,
+              visType.aliasPath,
+              currentAppId,
+              context?.containerInfo
+            );
           },
           isCompatible: async () => {
             return !Boolean(
@@ -98,8 +129,14 @@ export const createNewVisActions = (services: {
         uiActions.addTriggerAction(DASHBOARD_ADD_PANEL_TRIGGER, {
           ...actionConfig,
           order: 10 * (visTypes.length - i),
-          execute: async () => {
-            application.navigateToApp(visType.aliasApp, { path: visType.aliasPath });
+          execute: async (context) => {
+            const currentAppId = await application.currentAppId$.pipe(take(1)).toPromise();
+            await navigateTo(
+              visType.aliasApp,
+              visType.aliasPath,
+              currentAppId,
+              context?.containerInfo
+            );
           },
         });
       }
@@ -107,12 +144,13 @@ export const createNewVisActions = (services: {
       uiActions.addTriggerAction(DASHBOARD_ADD_PANEL_TRIGGER, {
         ...actionConfig,
         execute: async () => {
+          const currentAppId = await application.currentAppId$.pipe(take(1)).toPromise();
           if (visType.requiresSearch && visType.options.showIndexSelection) {
             const dialog = overlays.openModal(
               toMountPoint(
                 <EuiModal onClose={() => dialog.close()} className="visNewVisSearchDialog">
                   <SearchSelection
-                    onSearchSelected={(searchId: string, searchType: string) => {
+                    onSearchSelected={async (searchId: string, searchType: string) => {
                       const params = [`type=${encodeURIComponent(visType.name)}`];
                       searchId = encodeURIComponent(searchId || '');
 
@@ -125,9 +163,7 @@ export const createNewVisActions = (services: {
                       }
 
                       dialog.close();
-                      application.navigateToApp('visualize', {
-                        path: `#/create?${params.join('&')}`,
-                      });
+                      await navigateTo('visualize', `#/create?${params.join('&')}`, currentAppId);
                     }}
                     visType={visType}
                     uiSettings={uiSettings}
@@ -140,9 +176,7 @@ export const createNewVisActions = (services: {
             );
           } else {
             const params = [`type=${encodeURIComponent(visType.name)}`];
-            application.navigateToApp('visualize', {
-              path: `#/create?${params.join('&')}`,
-            });
+            await navigateTo('visualize', `#/create?${params.join('&')}`, currentAppId);
           }
         },
       });

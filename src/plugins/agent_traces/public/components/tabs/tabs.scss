@@ -1,0 +1,50 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.agentTracesTabs {
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+
+  // EuiTabbedContent renders an unstyled wrapper div. Make it fill the
+  // flex container so the tab panel can take the remaining vertical space.
+  > div {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  .euiTabs {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background-color: $euiColorEmptyShade;
+    flex-shrink: 0;
+  }
+
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  [role="tabpanel"] {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  .tab-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  .euiTabs:not(.euiTabs--condensed)::before {
+    height: 0;
+  }
+}

@@ -4,7 +4,6 @@
  */
 /* eslint-disable max-classes-per-file */
 
-import React from 'react';
 import { createRoot } from 'react-dom/client';
 import type { Root } from 'react-dom/client';
 import { BehaviorSubject, Observable, ReplaySubject, Subject } from 'rxjs';

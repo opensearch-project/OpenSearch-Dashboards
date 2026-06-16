@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { EuiStepsHorizontal, EuiSpacer } from '@elastic/eui';
 
 import {

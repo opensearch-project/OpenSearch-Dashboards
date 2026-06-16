@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 import type { ChatScreenshotServiceInterface } from './screenshot_service';
 import type { Event } from './events';
 
-interface TextInputContent {
+export interface TextInputContent {
   type: 'text';
   text: string;
 }
@@ -64,6 +64,21 @@ export interface DeveloperMessage extends BaseMessage {
 export interface SystemMessage extends BaseMessage {
   role: 'system';
   content: string;
+  /**
+   * When set, this system message corresponds to a failed tool result
+   * submission for the given tool call. The UI may use this (together with
+   * `canResend`) to offer a resend affordance.
+   */
+  toolCallId?: string;
+  /**
+   * Whether the associated tool result submission can be retried by the user.
+   */
+  canResend?: boolean;
+  /**
+   * The tool result payload to resend. Stored directly on the timeline message
+   * so no external map is needed.
+   */
+  toolResult?: any;
 }
 
 /**
@@ -92,7 +107,6 @@ export interface ToolMessage {
   content: string;
   role: 'tool';
   toolCallId: string;
-  error?: string;
 }
 
 /**
@@ -116,7 +130,7 @@ export type Role = 'developer' | 'system' | 'assistant' | 'user' | 'tool';
 export interface ChatWindowState {
   isWindowOpen: boolean;
   windowMode: 'sidecar' | 'fullscreen';
-  paddingSize: number;
+  paddingSize?: number;
 }
 
 /**
@@ -131,9 +145,10 @@ export interface ChatServiceInterface {
   /**
    * Thread management - managed by core
    */
-  getThreadId$(): Observable<string>;
-  getThreadId(): string;
+  getThreadId$(): Observable<string | undefined>;
+  getThreadId(): string | undefined;
   setThreadId(threadId: string): void;
+  resetThreadId(): void;
   newThread(): void;
 
   /**
@@ -169,7 +184,8 @@ export interface ChatImplementationFunctions {
   // Message operations
   sendMessage: (
     content: string,
-    messages: Message[]
+    messages: Message[],
+    userMessage?: UserMessage
   ) => Promise<{ observable: any; userMessage: UserMessage }>;
 
   sendMessageWithWindow: (
@@ -177,10 +193,6 @@ export interface ChatImplementationFunctions {
     messages: Message[],
     options?: { clearConversation?: boolean }
   ) => Promise<{ observable: any; userMessage: UserMessage }>;
-
-  // Window operations
-  openWindow: () => Promise<void>;
-  closeWindow: () => Promise<void>;
 }
 
 /**

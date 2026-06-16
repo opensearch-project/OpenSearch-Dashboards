@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, waitFor, fireEvent, screen } from '@testing-library/react';
 import { I18nProvider } from '@osd/i18n/react';
 import { UnifiedIndexSelector } from './unified_index_selector';

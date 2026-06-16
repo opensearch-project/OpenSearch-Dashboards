@@ -31,7 +31,7 @@
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import React from 'react';
+
 import { CoreStart } from 'opensearch-dashboards/public';
 import { toMountPoint } from '../../../../opensearch_dashboards_react/public';
 

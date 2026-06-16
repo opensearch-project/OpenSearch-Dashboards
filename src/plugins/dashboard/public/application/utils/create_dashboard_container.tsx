@@ -385,6 +385,7 @@ const getDashboardInputFromAppState = (
     description: appStateData.description,
     expandedPanelId: appStateData.expandedPanelId,
     timeRestore: appStateData.timeRestore,
+    variables: appStateData.variables,
   };
 };
 
@@ -498,6 +499,11 @@ const handleDashboardContainerChanges = (
   }
   if (!isEqual(input.query, migrateLegacyQuery(appStateData.query))) {
     newAppState.query = input.query;
+  }
+  // Sync variables from container input to appState
+  if (!isEqual(input.variables, appStateData.variables)) {
+    newAppState.variables = input.variables;
+    dashboard.setIsDirty(true);
   }
 
   appState.transitions.setDashboard(newAppState);

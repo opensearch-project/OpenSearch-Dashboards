@@ -5,7 +5,6 @@
 
 import './empty_dataset_prompt.scss';
 
-import React from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 
 import { EuiPageContent, EuiSpacer, EuiText, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
@@ -48,6 +47,7 @@ export const EmptyDatasetPrompt = ({
     // Otherwise, fall back to the old CreateButton with creationOptions
     if (creationOptions) {
       return (
+        // @ts-expect-error TS2769 TODO(ts-error): fixme
         <CreateButton options={creationOptions}>
           <FormattedMessage
             id="datasetManagement.datasetTable.createBtn"

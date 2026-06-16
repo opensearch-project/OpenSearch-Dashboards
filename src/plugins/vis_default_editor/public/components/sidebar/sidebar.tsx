@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useMemo, useState, useCallback, KeyboardEventHandler, useEffect } from 'react';
+import { useMemo, useState, useCallback, KeyboardEventHandler, useEffect } from 'react';
 import { isEqual } from 'lodash';
 import { i18n } from '@osd/i18n';
 import { keys, EuiSmallButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';

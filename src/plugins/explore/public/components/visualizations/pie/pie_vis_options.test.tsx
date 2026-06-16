@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React from 'react';
+
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { PieVisStyleControls, PieVisStyleControlsProps } from './pie_vis_options';
@@ -25,20 +25,6 @@ jest.mock('@osd/i18n', () => ({
 }));
 
 // Mock child components
-jest.mock('../style_panel/axes/axes_selector', () => ({
-  AxesSelectPanel: jest.fn(({ updateVisualization, chartType, currentMapping }) => (
-    <div data-test-subj="mockAxesSelectPanel">
-      <div data-test-subj="chartType">{chartType}</div>
-      <button
-        data-test-subj="mockUpdateVisualization"
-        onClick={() => updateVisualization({ mappings: { size: 'value', color: 'category' } })}
-      >
-        Update Visualization
-      </button>
-    </div>
-  )),
-}));
-
 jest.mock('../style_panel/legend/legend', () => ({
   LegendOptionsPanel: jest.fn(({ legendOptions, onLegendOptionsChange }) => (
     <div data-test-subj="mockLegendOptionsPanel">
@@ -72,24 +58,6 @@ jest.mock('../style_panel/tooltip/tooltip', () => ({
       >
         Toggle Tooltip
       </button>
-    </div>
-  )),
-}));
-
-jest.mock('../style_panel/title/title', () => ({
-  TitleOptionsPanel: jest.fn(({ titleOptions, onShowTitleChange }) => (
-    <div data-test-subj="mockTitleOptionsPanel">
-      <button
-        data-test-subj="titleModeSwitch"
-        onClick={() => onShowTitleChange({ show: !titleOptions.show })}
-      >
-        Toggle Title
-      </button>
-      <input
-        data-test-subj="titleInput"
-        placeholder="Default title"
-        onChange={(e) => onShowTitleChange({ titleName: e.target.value })}
-      />
     </div>
   )),
 }));
@@ -193,55 +161,5 @@ describe('PieVisStyleControls', () => {
     expect(screen.queryByTestId('mockLegendOptionsPanel')).not.toBeInTheDocument();
     expect(screen.queryByTestId('mockPieExclusiveVisOptions')).not.toBeInTheDocument();
     expect(screen.queryByTestId('mockTooltipOptionsPanel')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('mockTitleOptionsPanel')).not.toBeInTheDocument();
-  });
-
-  it('updates title show option correctly', async () => {
-    const props = {
-      ...mockProps,
-      styleOptions: {
-        ...mockProps.styleOptions,
-        titleOptions: {
-          show: false,
-          titleName: '',
-        },
-      },
-    };
-
-    render(<PieVisStyleControls {...props} />);
-    await userEvent.click(screen.getByTestId('titleModeSwitch'));
-    await waitFor(() => {
-      expect(props.onStyleChange).toHaveBeenCalledWith({
-        titleOptions: {
-          ...props.styleOptions.titleOptions,
-          show: true,
-        },
-      });
-    });
-  });
-
-  it('updates title name when text is entered', async () => {
-    const props = {
-      ...mockProps,
-      styleOptions: {
-        ...mockProps.styleOptions,
-        titleOptions: {
-          show: true,
-          titleName: '',
-        },
-      },
-    };
-
-    render(<PieVisStyleControls {...props} />);
-    const titleInput = screen.getByTestId('titleInput');
-    await userEvent.type(titleInput, 'New Chart Title');
-    await waitFor(() => {
-      expect(props.onStyleChange).toHaveBeenCalledWith({
-        titleOptions: {
-          ...props.styleOptions.titleOptions,
-          titleName: 'New Chart Title',
-        },
-      });
-    });
   });
 });

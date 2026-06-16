@@ -18,7 +18,7 @@ describe('createBarGaugeConfig', () => {
     const config = createBarGaugeConfig();
 
     // Verify the basic structure
-    expect(config).toHaveProperty('name', 'bar_gauge');
+    expect(config).toHaveProperty('name', 'Bar Gauge');
     expect(config).toHaveProperty('type', 'bar_gauge');
     expect(config).toHaveProperty('ui.style.defaults');
     expect(config).toHaveProperty('ui.style.render');

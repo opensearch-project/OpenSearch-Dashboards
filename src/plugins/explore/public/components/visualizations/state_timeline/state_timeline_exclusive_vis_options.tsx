@@ -5,7 +5,7 @@
 
 import { i18n } from '@osd/i18n';
 import { EuiFormRow, EuiSwitch, EuiButtonGroup } from '@elastic/eui';
-import React from 'react';
+
 import { StateTimeLineChartStyle } from './state_timeline_config';
 import { DebouncedFieldNumber, DebouncedFieldText } from '../style_panel/utils';
 import { StyleAccordion } from '../style_panel/style_accordion';

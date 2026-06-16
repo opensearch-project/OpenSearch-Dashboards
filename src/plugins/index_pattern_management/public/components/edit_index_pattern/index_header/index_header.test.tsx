@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
 import { createOpenSearchDashboardsReactContext } from '../../../../../opensearch_dashboards_react/public';
 import { coreMock, workspacesServiceMock } from '../../../../../../core/public/mocks';
@@ -61,6 +60,7 @@ describe('IndexHeader at new home page', () => {
     });
 
     return (
+      // @ts-expect-error TS2769 TODO(ts-error): fixme
       <IntlProvider locale="en">
         <Provider>
           <IndexHeader

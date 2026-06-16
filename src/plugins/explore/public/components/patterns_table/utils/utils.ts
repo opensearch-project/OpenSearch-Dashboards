@@ -18,6 +18,7 @@ import {
 import { defaultPrepareQueryString } from '../../../application/utils/state_management/actions/query_actions';
 import { ExploreServices } from '../../../types';
 import { setPatternsField } from '../../../application/utils/state_management/slices/tab/tab_slice';
+import { resultsCache } from '../../../application/utils/state_management/slices';
 import { prepareQueryForLanguage } from '../../../application/utils/languages';
 import { escapePPLValue } from '../../../application/pages/traces/trace_details/server/ppl_request_helpers';
 
@@ -267,7 +268,6 @@ export const findDefaultPatternsField = (services: ExploreServices): string => {
 
   // Get the log tab's results from the state
   const query = state.query;
-  const results = state.results;
 
   // Get the logs tab to find its cache key
   const logsTab = services.tabRegistry.getTab('logs');
@@ -275,7 +275,7 @@ export const findDefaultPatternsField = (services: ExploreServices): string => {
 
   // Get the cache key for logs tab results
   const logsCacheKey = defaultPrepareQueryString(query);
-  const logResults = results[logsCacheKey];
+  const logResults = resultsCache.get(logsCacheKey);
 
   // Get fields
   const filteredFields = logResults?.fieldSchema?.filter((field: Partial<IFieldType>) => {

@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ToggleButtonGroup } from './toggle_button_group';
 import { DiscoverChartToggleId } from '../utils/use_persist_chart_state';

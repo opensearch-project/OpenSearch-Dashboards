@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 
 import { EuiHorizontalRule, EuiIcon, EuiPageContent, EuiSpacer, EuiText } from '@elastic/eui';

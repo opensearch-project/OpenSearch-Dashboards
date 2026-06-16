@@ -104,5 +104,48 @@ Object {
 
       expect(migrationFn(input, savedObjectMigrationContext)).toEqual(expected);
     });
+
+    test('should handle fields already stored as an array', () => {
+      const input = {
+        type: 'index-pattern',
+        attributes: {
+          title: 'test',
+          fields: [
+            {
+              name: 'customer_name',
+              type: 'string',
+              esTypes: ['text'],
+              count: 0,
+              scripted: false,
+              searchable: true,
+              aggregatable: false,
+              readFromDocValues: false,
+            },
+            {
+              name: 'customer_name.keyword',
+              type: 'string',
+              esTypes: ['keyword'],
+              count: 0,
+              scripted: false,
+              searchable: true,
+              aggregatable: true,
+              readFromDocValues: true,
+              subType: 'multi',
+              parent: 'customer_name',
+            },
+          ],
+        },
+      };
+      const expected = {
+        type: 'index-pattern',
+        attributes: {
+          title: 'test',
+          fields:
+            '[{"name":"customer_name","type":"string","esTypes":["text"],"count":0,"scripted":false,"searchable":true,"aggregatable":false,"readFromDocValues":false},{"name":"customer_name.keyword","type":"string","esTypes":["keyword"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true,"subType":{"multi":{"parent":"customer_name"}}}]',
+        },
+      };
+
+      expect(migrationFn(input, savedObjectMigrationContext)).toEqual(expected);
+    });
   });
 });

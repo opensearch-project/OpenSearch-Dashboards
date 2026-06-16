@@ -143,6 +143,11 @@ export class BundleRefs {
     return this.refs;
   }
 
+  public addRefs(refs: BundleRef[]) {
+    this.refs.push(...refs);
+    return this;
+  }
+
   public toSpecJson() {
     return JSON.stringify(this.refs);
   }

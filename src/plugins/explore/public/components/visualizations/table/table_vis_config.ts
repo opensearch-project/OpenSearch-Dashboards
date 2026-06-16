@@ -51,13 +51,14 @@ export const defaultTableChartStyles: TableChartStyle = {
 };
 
 export const createTableConfig = (): VisualizationType<'table'> => ({
-  name: 'table',
+  name: 'Table',
+  icon: 'visTable',
   type: 'table',
+  getRules: () => [],
   ui: {
     style: {
       defaults: defaultTableChartStyles,
       render: (props) => React.createElement(TableVisStyleControls, props),
     },
-    availableMappings: [],
   },
 });

@@ -42,14 +42,15 @@ export async function getIndexPatterns(
     savedObjectsClient
       .find<IIndexPattern>({
         type: 'index-pattern',
-        fields: ['title', 'type'],
+        fields: ['title', 'displayName', 'type'],
         perPage: 10000,
       })
       .then((response) =>
         response.savedObjects
           .map((pattern) => {
             const id = pattern.id;
-            const title = pattern.get('title');
+            const displayName = pattern.get('displayName');
+            const title = displayName || pattern.get('title');
             const references = pattern.references;
             const isDefault = defaultIndex === id;
 

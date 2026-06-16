@@ -5,7 +5,7 @@
 
 import { i18n } from '@osd/i18n';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { BarChartStyleOptions } from './bar_vis_config';
 import { AggregationType, TimeUnit, BucketOptions } from '../types';
 import { getAggregationType, getTimeUnits } from '../utils/collections';

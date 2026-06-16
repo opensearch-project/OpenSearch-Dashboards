@@ -393,12 +393,14 @@ export const ManageDirectQueryDataConnectionsTable = ({
           featureFlagStatus &&
           record.connectionType !== DataSourceConnectionType.OpenSearchConnection &&
           // Prometheus data-connections are shown on top level
-          record.type !== DataConnectionType.Prometheus
+          record.type !== DataConnectionType.Prometheus &&
+          record.type !== DataConnectionType.AWSPrometheus
             ? { marginLeft: '20px' }
             : {};
         if (
           record.type === DataConnectionType.SecurityLake ||
-          record.type === DataConnectionType.CloudWatch
+          record.type === DataConnectionType.CloudWatch ||
+          record.type === DataConnectionType.AWSPrometheus
         ) {
           // TODO: link to details page for security lake and cloudwatch
           return <span style={indentStyle}> {name}</span>;

@@ -35,6 +35,7 @@ export {
   QuerySuggestionGetFnArgs,
   QuerySuggestionBasic,
   QuerySuggestionField,
+  MonacoCompatibleQuerySuggestion,
 } from './providers/query_suggestion_provider';
 
 export { AutocompleteService, AutocompleteSetup, AutocompleteStart } from './autocomplete_service';

@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React, { ReactElement } from 'react';
+import { ReactElement } from 'react';
 import { shallow, ShallowWrapper } from 'enzyme';
 
 import { Table, TableProps, TableState } from './table';

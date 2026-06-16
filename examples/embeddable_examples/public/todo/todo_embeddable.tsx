@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import { Subscription } from 'rxjs';
 import {
@@ -64,7 +63,6 @@ export class TodoEmbeddable extends Embeddable<TodoInput, TodoOutput> {
   // to instantiate this kind of embeddable.
   public readonly type = TODO_EMBEDDABLE;
   private subscription: Subscription;
-  private node?: HTMLElement;
   private root: Root | null = null;
 
   constructor(initialInput: TodoInput, parent?: IContainer) {
@@ -83,7 +81,6 @@ export class TodoEmbeddable extends Embeddable<TodoInput, TodoOutput> {
       this.root.unmount();
       this.root = null;
     }
-    this.node = node;
     this.root = createRoot(node);
     this.root.render(<TodoEmbeddableComponent embeddable={this} />);
   }

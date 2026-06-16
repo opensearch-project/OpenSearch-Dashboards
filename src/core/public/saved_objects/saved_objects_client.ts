@@ -228,24 +228,42 @@ export class SavedObjectsClient {
       const queue = [...this.batchQueue];
       this.batchQueue = [];
 
+      // Deduplicate requests in the queue - if multiple requests for the same object exist,
+      // keep only the first one and resolve all duplicates with the same result
+      const deduplicatedQueue: BatchQueueEntry[] = [];
+      const seenObjects = new Map<string, BatchQueueEntry[]>();
+
+      queue.forEach((item) => {
+        const key = `${item.type}:${item.id}`;
+        if (!seenObjects.has(key)) {
+          seenObjects.set(key, [item]);
+          deduplicatedQueue.push(item);
+        } else {
+          seenObjects.get(key)!.push(item);
+        }
+      });
+
       try {
-        const objectsToFetch = getObjectsToFetch(queue);
+        const objectsToFetch = getObjectsToFetch(deduplicatedQueue);
         const { saved_objects: savedObjects } = await this.performBulkGet(objectsToFetch);
 
-        queue.forEach((queueItem) => {
+        // Resolve all requests (including duplicates) with the fetched objects
+        seenObjects.forEach((items, key) => {
           const foundObject = savedObjects.find((savedObject) => {
-            return savedObject.id === queueItem.id && savedObject.type === queueItem.type;
+            const objKey = `${savedObject.type}:${savedObject.id}`;
+            return objKey === key;
           });
 
-          if (foundObject) {
-            // multiple calls may have been requested the same object.
-            // we need to clone to avoid sharing references between the instances
-            queueItem.resolve(this.createSavedObject(cloneDeep(foundObject)));
-          } else {
-            queueItem.resolve(
-              this.createSavedObject(pick(queueItem, ['id', 'type']) as SavedObject)
-            );
-          }
+          items.forEach((queueItem) => {
+            if (foundObject) {
+              // Clone to avoid sharing references between instances
+              queueItem.resolve(this.createSavedObject(cloneDeep(foundObject)));
+            } else {
+              queueItem.resolve(
+                this.createSavedObject(pick(queueItem, ['id', 'type']) as SavedObject)
+              );
+            }
+          });
         });
       } catch (err) {
         queue.forEach((queueItem) => {
@@ -441,7 +459,8 @@ export class SavedObjectsClient {
       return Promise.reject(new Error('requires type and id'));
     }
 
-    return new Promise((resolve, reject) => {
+    // Add to batch queue - processBatchQueue will deduplicate and batch requests
+    return new Promise<SimpleSavedObject<T>>((resolve, reject) => {
       this.batchQueue.push({ type, id, resolve, reject } as BatchQueueEntry);
       this.processBatchQueue();
     });
@@ -511,9 +530,7 @@ export class SavedObjectsClient {
     return this.savedObjectsFetch(path, {
       method: 'PUT',
       body: JSON.stringify(body),
-    }).then((resp: SavedObject<T>) => {
-      return this.createSavedObject(resp);
-    });
+    }).then((resp: SavedObject<T>) => this.createSavedObject(resp));
   }
 
   /**

@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { act } from 'react';
 
 import { registerTestBed, getRandomString, TestBed } from '../shared_imports';

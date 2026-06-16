@@ -2,9 +2,9 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React from 'react';
+
 import { Provider } from 'react-redux';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import configureMockStore from 'redux-mock-store';
 import { ScatterVisStyleControls, ScatterVisStyleControlsProps } from './scatter_vis_options';
 import { VisFieldType, VisColumn, AxisRole, AxisColumnMappings, Positions } from '../types';
@@ -16,9 +16,7 @@ const mockStore = configureMockStore([]);
 const store = mockStore({
   tab: {
     visualizations: {
-      styleOptions: {
-        switchAxes: false,
-      },
+      styleOptions: {},
     },
   },
 });
@@ -153,24 +151,6 @@ jest.mock('../style_panel/legend/legend', () => {
   };
 });
 
-jest.mock('../style_panel/title/title', () => ({
-  TitleOptionsPanel: jest.fn(({ titleOptions, onShowTitleChange }) => (
-    <div data-test-subj="mockTitleOptionsPanel">
-      <button
-        data-test-subj="titleModeSwitch"
-        onClick={() => onShowTitleChange({ show: !titleOptions.show })}
-      >
-        Toggle Title
-      </button>
-      <input
-        data-test-subj="titleInput"
-        placeholder="Default title"
-        onChange={(e) => onShowTitleChange({ titleName: e.target.value })}
-      />
-    </div>
-  )),
-}));
-
 jest.mock('../style_panel/tooltip/tooltip', () => ({
   TooltipOptionsPanel: jest.fn(({ tooltipOptions, onTooltipOptionsChange }) => (
     <div data-test-subj="mockTooltipOptionsPanel">
@@ -266,7 +246,6 @@ describe('ScatterVisStyleControls (updated structure)', () => {
     expect(screen.getByTestId('mockTooltipOptionsPanel')).toBeInTheDocument();
     expect(screen.getByTestId('scatterExclusiveOptions')).toBeInTheDocument();
     expect(screen.queryByTestId('mockLegendOptionsPanel')).not.toBeInTheDocument();
-    expect(screen.getByTestId('mockTitleOptionsPanel')).toBeInTheDocument();
   });
 
   it('renders and shows legend panel when categorical color column is present', () => {
@@ -411,57 +390,6 @@ describe('ScatterVisStyleControls (updated structure)', () => {
       exclusive: {
         angle: 180,
       },
-    });
-  });
-
-  it('updates title show option correctly', async () => {
-    render(
-      <Provider store={store}>
-        <ScatterVisStyleControls {...mockProps} />
-      </Provider>
-    );
-
-    // Find the title switch and toggle it
-    const titleSwitch = screen.getByTestId('titleModeSwitch');
-    await userEvent.click(titleSwitch);
-
-    expect(mockProps.onStyleChange).toHaveBeenCalledWith({
-      titleOptions: {
-        ...mockProps.styleOptions.titleOptions,
-        show: true,
-      },
-    });
-  });
-
-  it('updates title name when text is entered', async () => {
-    // Set show to true to ensure the title field is visible
-    const props = {
-      ...mockProps,
-      styleOptions: {
-        ...mockProps.styleOptions,
-        titleOptions: {
-          show: true,
-          titleName: '',
-        },
-      },
-    };
-
-    render(
-      <Provider store={store}>
-        <ScatterVisStyleControls {...props} />
-      </Provider>
-    );
-
-    const titleInput = screen.getByPlaceholderText('Default title');
-    await userEvent.type(titleInput, 'New Chart Title');
-
-    await waitFor(() => {
-      expect(props.onStyleChange).toHaveBeenCalledWith({
-        titleOptions: {
-          ...props.styleOptions.titleOptions,
-          titleName: 'New Chart Title',
-        },
-      });
     });
   });
 

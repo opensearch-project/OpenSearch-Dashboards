@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import {
   EuiSmallButton,
   EuiCompressedFormRow,
@@ -11,6 +10,7 @@ import {
   EuiText,
   EuiSpacer,
 } from '@elastic/eui';
+import { HttpStart } from 'opensearch-dashboards/public';
 import { WorkspaceCollaborator, WorkspaceCollaboratorAccessLevel } from '../../types';
 import {
   WorkspaceCollaboratorInput,
@@ -25,21 +25,27 @@ export interface WorkspaceCollaboratorInner
 export interface WorkspaceCollaboratorsPanelProps {
   label: string;
   errors?: { [key: number]: string };
+  onErrorsChange?: (errors: { [key: number]: string }) => void;
   description?: string;
   collaborators: WorkspaceCollaboratorInner[];
   onChange: (value: WorkspaceCollaboratorInner[]) => void;
   collaboratorIdInputPlaceholder?: string;
   addAnotherButtonLabel: string;
+  identitySource?: { source: string; type: string };
+  http?: HttpStart;
 }
 
 export const WorkspaceCollaboratorsPanel = ({
   label,
   errors,
+  onErrorsChange,
   description,
   collaborators,
   addAnotherButtonLabel,
   collaboratorIdInputPlaceholder,
   onChange,
+  identitySource,
+  http,
 }: WorkspaceCollaboratorsPanelProps) => {
   const handleAddNewOne = () => {
     const nextId = Math.max(...[0, ...collaborators.map(({ id }) => id)]) + 1;
@@ -76,6 +82,18 @@ export const WorkspaceCollaboratorsPanel = ({
     onChange([...collaborators.slice(0, index), ...collaborators.slice(index + 1)]);
   };
 
+  const handleSearchError = (errorMessage: string | undefined, index: number) => {
+    const id = collaborators[index]?.id;
+    if (id === undefined) return;
+    const updated = { ...(errors ?? {}) };
+    if (errorMessage) {
+      updated[id] = errorMessage;
+    } else {
+      delete updated[id];
+    }
+    onErrorsChange?.(updated);
+  };
+
   return (
     <>
       {collaborators.length > 0 && (
@@ -108,6 +126,9 @@ export const WorkspaceCollaboratorsPanel = ({
             onDelete={handleDelete}
             collaboratorIdInputPlaceholder={collaboratorIdInputPlaceholder}
             error={errors?.[item.id]}
+            onSearchError={handleSearchError}
+            identitySource={identitySource}
+            http={http}
           />
         </EuiCompressedFormRow>
       ))}

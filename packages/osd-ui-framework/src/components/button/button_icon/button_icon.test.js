@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { render } from 'enzyme';
 
 import { ICON_TYPES, KuiButtonIcon } from './button_icon';

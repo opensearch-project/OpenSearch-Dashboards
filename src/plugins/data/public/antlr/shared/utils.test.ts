@@ -508,11 +508,7 @@ describe('fetchColumnValues', () => {
     // Verify SearchSource was created and configured correctly
     expect(mockServices.data.search.searchSource.create).toHaveBeenCalled();
     expect(mockSearchSource.setFields).toHaveBeenCalledWith({
-      index: expect.objectContaining({
-        id: 'test-index-pattern',
-        title: 'test-index',
-        timeFieldName: 'timestamp',
-      }),
+      index: mockIndexPattern,
       query: {
         query: 'source = `test-table` | top 10 `test-column`',
         language: 'PPL',

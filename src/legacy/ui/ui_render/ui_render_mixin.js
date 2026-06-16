@@ -326,7 +326,7 @@ export function uiRenderMixin(osdServer, server, config) {
       nonce,
     });
 
-    let cspHeader = http.csp.header;
+    let cspHeader = http.csp.strict ? http.csp.buildHeaderWithNonce(nonce) : http.csp.header;
     try {
       const dynamicConfigClient = dynamicConfig.getClient();
       const dynamicConfigStore = dynamicConfig.createStoreFromRequest(req);

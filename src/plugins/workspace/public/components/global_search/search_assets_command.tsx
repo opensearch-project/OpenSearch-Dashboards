@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { EuiHighlight, EuiSimplifiedBreadcrumbs } from '@elastic/eui';
 
 import type { ApplicationStart } from '../../../../../core/public';
@@ -81,31 +80,35 @@ export const searchAssets = async ({
     return [];
   }
 
-  return findResponse.saved_objects
-    .map((asset) => {
-      if (!asset.meta.title || !asset.meta.inAppUrl?.path) {
-        return null;
-      }
-      return (
-        <EuiSimplifiedBreadcrumbs
-          breadcrumbs={[
-            { text: asset.type },
-            {
-              text: <EuiHighlight search={query}>{asset.meta.title}</EuiHighlight>,
-              href: getAssetsFinalPath({
-                object: asset,
-                basePath: http.basePath,
-                currentWorkspaceId,
-                useUpdatedUX: true,
-                visibleWorkspaceIds,
-              }),
-              onClick: onAssetClick,
-            },
-          ]}
-          hideTrailingSeparator
-          responsive
-        />
-      );
-    })
-    .filter((item) => !!item);
+  return (
+    findResponse.saved_objects
+      // @ts-expect-error TS7006 TODO(ts-error): fixme
+      .map((asset) => {
+        if (!asset.meta.title || !asset.meta.inAppUrl?.path) {
+          return null;
+        }
+        return (
+          <EuiSimplifiedBreadcrumbs
+            breadcrumbs={[
+              { text: asset.type },
+              {
+                text: <EuiHighlight search={query}>{asset.meta.title}</EuiHighlight>,
+                href: getAssetsFinalPath({
+                  object: asset,
+                  basePath: http.basePath,
+                  currentWorkspaceId,
+                  useUpdatedUX: true,
+                  visibleWorkspaceIds,
+                }),
+                onClick: onAssetClick,
+              },
+            ]}
+            hideTrailingSeparator
+            responsive
+          />
+        );
+      })
+      // @ts-expect-error TS7006 TODO(ts-error): fixme
+      .filter((item) => !!item)
+  );
 };

@@ -230,6 +230,7 @@ export function createTooltipFormatter(
     if (paramsArray.length === 0) return '';
 
     const firstParam = paramsArray[0];
+    // @ts-expect-error TS7053 TODO(ts-error): fixme
     const timestamp = firstParam.value?.[0] ?? firstParam.axisValue;
     const formattedDate = moment.tz(timestamp, timeZone).format(dateFormat);
 
@@ -254,6 +255,7 @@ export function createTooltipFormatter(
     paramsArray.forEach((param: EChartsTooltipFormatterParams) => {
       const seriesName = param.seriesName || '';
       const truncatedName = escape(truncateText(seriesName, 30));
+      // @ts-expect-error TS7053 TODO(ts-error): fixme
       const value = param.value?.[1] ?? param.value;
       const color = param.color || '';
 
@@ -323,7 +325,8 @@ export function createBarSeries(
     id,
     name,
     data: data.map((d) => [d.x, d.y]),
-    barMaxWidth: 50,
+    barWidth: '94%',
+    barMaxWidth: 80,
     itemStyle: {
       color,
     },
@@ -403,7 +406,11 @@ export function createHistogramSpec(
   if (!data || data.length === 0 || !chartData.xAxisOrderedValues?.length) {
     return { xAxis: { type: 'time' }, yAxis: { type: 'value' }, series: [] };
   }
-  const { intervalOpenSearchValue, intervalOpenSearchUnit, interval } = chartData.ordered;
+  const {
+    intervalOpenSearchValue: _intervalOpenSearchValue,
+    intervalOpenSearchUnit: _intervalOpenSearchUnit,
+    interval,
+  } = chartData.ordered;
   const xInterval = interval.asMilliseconds();
 
   const xValues = chartData.xAxisOrderedValues;
@@ -521,10 +528,17 @@ export function createHistogramSpec(
       nameGap: 30,
       splitNumber: 3,
       splitLine: {
-        show: false,
+        show: true,
         lineStyle: {
           type: 'dashed',
+          opacity: 0.75,
         },
+      },
+      axisTick: {
+        show: false,
+      },
+      axisLine: {
+        show: false,
       },
       axisLabel: {
         formatter: (value: number) => {
@@ -535,6 +549,7 @@ export function createHistogramSpec(
       },
     },
     series,
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     tooltip: {
       trigger: 'axis',
       confine: true,
@@ -587,10 +602,10 @@ export function createHistogramSpec(
         }
       : { show: false },
     grid: {
-      top: 20,
+      top: 0,
       right: hasMultipleSeries ? 180 : 20,
-      bottom: 40,
-      left: 50,
+      bottom: 25,
+      left: 20,
       containLabel: false,
     },
   };

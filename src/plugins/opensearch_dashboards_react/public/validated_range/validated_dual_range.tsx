@@ -29,7 +29,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import React, { Component, ReactNode } from 'react';
+import { Component, ReactNode } from 'react';
 import { EuiFormRow, EuiDualRange } from '@elastic/eui';
 import { EuiFormRowDisplayKeys } from '@elastic/eui/src/components/form/form_row/form_row';
 import { EuiDualRangeProps } from '@elastic/eui/src/components/form/range/dual_range';

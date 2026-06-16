@@ -146,7 +146,10 @@ export class HttpServer {
       registerOnPostAuth: this.registerOnPostAuth.bind(this),
       registerOnPreResponse: this.registerOnPreResponse.bind(this),
       createCookieSessionStorageFactory: <T>(cookieOptions: SessionStorageCookieOptions<T>) =>
-        this.createCookieSessionStorageFactory(cookieOptions, config.basePath),
+        this.createCookieSessionStorageFactory(
+          cookieOptions as SessionStorageCookieOptions<T & Record<string, any>>,
+          config.basePath
+        ),
       basePath: basePathService,
       csp: config.csp,
       cspReportOnly: config.cspReportOnly,
@@ -203,7 +206,6 @@ export class HttpServer {
             // validation applied in ./http_tools#getServerOptions
             // (All NP routes are already required to specify their own validation in order to access the payload)
             validate,
-            // @ts-expect-error Types are outdated and doesn't allow `payload.multipart` to be `true`
             payload: [allow, maxBytes, output, parse, timeout?.payload].some((x) => x !== undefined)
               ? {
                   allow,
@@ -361,7 +363,7 @@ export class HttpServer {
     this.server.ext('onPreResponse', adoptToHapiOnPreResponseFormat(fn, this.log));
   }
 
-  private async createCookieSessionStorageFactory<T>(
+  private async createCookieSessionStorageFactory<T extends Record<string, any>>(
     cookieOptions: SessionStorageCookieOptions<T>,
     basePath?: string
   ) {

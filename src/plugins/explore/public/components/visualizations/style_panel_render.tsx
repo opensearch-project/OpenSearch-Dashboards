@@ -3,30 +3,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useObservable } from 'react-use';
 import { EuiSpacer } from '@elastic/eui';
 import { Observable } from 'rxjs';
 
 import { ChartTypeSelector } from './chart_type_selector';
-import {
-  ChartStylesMapping,
-  ChartType,
-  StyleOptions,
-  VisualizationType,
-} from './utils/use_visualization_types';
-import { AxisColumnMappings, RenderChartConfig } from './types';
-import { convertMappingsToStrings, convertStringsToMappings } from './visualization_builder_utils';
+import { SplitSettingsAccordion } from './split_settings_accordion';
+import { ChartStylesMapping, ChartType, StyleOptions } from './utils/use_visualization_types';
+import { AxisFieldNameMappings, RenderChartConfig } from './types';
+import { convertStringsToMappings } from './visualization_builder_utils';
 import { visualizationRegistry } from './visualization_registry';
-import { VisData } from './visualization_builder.types';
+import { SplitConfig, VisData } from './visualization_builder.types';
 import { getAxisConfigByColumnMapping } from './utils/axis';
+import { AxesSelectPanel } from './style_panel/axes/axes_selector';
 
 interface StylePanelProps<T> {
   data$: Observable<VisData | undefined>;
   config$: Observable<RenderChartConfig | undefined>;
   onStyleChange: (changes: Partial<StyleOptions>) => void;
   onChartTypeChange: (type: ChartType) => void;
-  onAxesMappingChange: (mappings: Record<string, string>) => void;
+  onAxesMappingChange: (mappings: AxisFieldNameMappings) => void;
+  onSplitConfigChange: (config: Partial<SplitConfig>) => void;
   className?: string;
 }
 
@@ -36,6 +34,7 @@ export const StylePanelRender = <T extends ChartType>({
   onStyleChange,
   onChartTypeChange,
   onAxesMappingChange,
+  onSplitConfigChange,
   className,
 }: StylePanelProps<T>) => {
   const visualizationData = useObservable(data$);
@@ -43,8 +42,8 @@ export const StylePanelRender = <T extends ChartType>({
   const axesMapping = chartConfig?.axesMapping;
 
   const updateVisualization = useCallback(
-    ({ mappings }: { mappings: AxisColumnMappings }) => {
-      onAxesMappingChange(convertMappingsToStrings(mappings));
+    ({ mappings }: { mappings: AxisFieldNameMappings }) => {
+      onAxesMappingChange(mappings);
     },
     [onAxesMappingChange]
   );
@@ -76,16 +75,8 @@ export const StylePanelRender = <T extends ChartType>({
   }
 
   const visConfig = chartConfig?.type
-    ? (visualizationRegistry.getVisualizationConfig(chartConfig?.type) as
-        | VisualizationType<T>
-        | undefined)
+    ? visualizationRegistry.getVisualization(chartConfig?.type)
     : null;
-
-  const bestMatch = visualizationRegistry.findBestMatch(
-    visualizationData.numericalColumns,
-    visualizationData.categoricalColumns,
-    visualizationData.dateColumns
-  );
 
   if (!chartConfig?.styles || !visConfig || !styleOptions) {
     return null;
@@ -99,14 +90,30 @@ export const StylePanelRender = <T extends ChartType>({
         chartType={chartConfig?.type}
       />
       <EuiSpacer size="s" />
+      <AxesSelectPanel
+        numericalColumns={visualizationData.numericalColumns}
+        categoricalColumns={visualizationData.categoricalColumns}
+        dateColumns={visualizationData.dateColumns}
+        currentMapping={axisColumnMappings}
+        updateVisualization={updateVisualization}
+        chartType={chartConfig.type}
+      />
+      {chartConfig?.type !== 'table' && (
+        <SplitSettingsAccordion
+          categoricalColumns={visualizationData.categoricalColumns}
+          numericalColumns={visualizationData.numericalColumns}
+          splitField={chartConfig?.splitField}
+          splitLayout={chartConfig?.splitLayout}
+          showSplitLabel={chartConfig?.showSplitLabel}
+          onSplitConfigChange={onSplitConfigChange}
+        />
+      )}
       {visConfig.ui.style.render({
         styleOptions: styleOptions as ChartStylesMapping[T],
         onStyleChange,
         numericalColumns: visualizationData.numericalColumns,
         categoricalColumns: visualizationData.categoricalColumns,
         dateColumns: visualizationData.dateColumns,
-        availableChartTypes: bestMatch?.rule.chartTypes,
-        selectedChartType: chartConfig.type,
         axisColumnMappings,
         updateVisualization,
       })}

@@ -367,6 +367,7 @@ export {
   QuerySuggestionGetFnArgs,
   QuerySuggestionBasic,
   QuerySuggestionField,
+  MonacoCompatibleQuerySuggestion,
   AutocompleteStart,
 } from './autocomplete';
 
@@ -463,6 +464,7 @@ export {
   SearchError,
   SearchTimeoutError,
   PainlessError,
+  AnalyticEngineError,
 } from './search';
 
 export type { SearchSource } from './search';
@@ -644,3 +646,10 @@ export {
 } from './ui/dataset_selector/configurator/schema_config';
 
 export { BaseResourceClient, ResourceClientFactory, ResourceClientCreator } from './resources';
+
+export {
+  attachPPLValidationContext,
+  attachPPLGrammarRefresh,
+  syncPPLValidationContext,
+} from './ui/query_editor/validation_context';
+export { pplGrammarCache, shouldUseRuntimeGrammar } from './antlr/opensearch_ppl/ppl_grammar_cache';

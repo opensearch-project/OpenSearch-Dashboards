@@ -50,27 +50,27 @@ const ReactStateAnnotation = Annotation.Root({
   }),
   clientContext: Annotation<any[]>({
     reducer: (x, y) => y || x,
-    default: () => undefined,
+    default: () => (undefined as unknown) as any[],
   }),
   clientTools: Annotation<any[]>({
     reducer: (x, y) => y || x,
-    default: () => undefined,
+    default: () => (undefined as unknown) as any[],
   }),
   threadId: Annotation<string>({
     reducer: (x, y) => y || x,
-    default: () => undefined,
+    default: () => (undefined as unknown) as string,
   }),
   runId: Annotation<string>({
     reducer: (x, y) => y || x,
-    default: () => undefined,
+    default: () => (undefined as unknown) as string,
   }),
   modelId: Annotation<string>({
     reducer: (x, y) => y || x,
-    default: () => undefined,
+    default: () => (undefined as unknown) as string,
   }),
   lastToolExecution: Annotation<number>({
     reducer: (x, y) => y || x,
-    default: () => undefined,
+    default: () => (undefined as unknown) as number,
   }),
 });
 

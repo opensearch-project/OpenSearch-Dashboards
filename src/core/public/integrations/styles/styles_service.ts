@@ -33,7 +33,6 @@ import { Subscription } from 'rxjs';
 import { IUiSettingsClient } from '../../ui_settings';
 import { CoreService } from '../../../types';
 import { getNonce } from '../../utils';
-// @ts-expect-error
 import disableAnimationsCss from '!!raw-loader!./disable_animations.css';
 
 interface StartDeps {
@@ -56,6 +55,7 @@ export class StylesService implements CoreService {
     document.head.appendChild(disableAnimationsStyleTag);
 
     const setDisableAnimations = (disableAnimations: boolean) => {
+      // @ts-expect-error TODO FIX ME
       disableAnimationsStyleTag.textContent = disableAnimations ? disableAnimationsCss : '';
     };
 

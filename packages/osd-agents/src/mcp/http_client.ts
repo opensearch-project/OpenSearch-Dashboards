@@ -37,7 +37,7 @@ export class HTTPMCPClient extends BaseMCPClient {
         version: '1.0.0',
       },
       {
-        capabilities: { tools: {}, sampling: {} },
+        capabilities: { sampling: {} },
       }
     );
 

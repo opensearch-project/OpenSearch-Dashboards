@@ -113,6 +113,7 @@ export const registerFindRoute = (
             const result = { ...obj };
             result.attributes.title = await getIndexPatternTitle(
               obj.attributes.title,
+              // @ts-expect-error TS2345 TODO(ts-error): fixme
               obj.references,
               getDataSource
             );

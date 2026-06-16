@@ -6,9 +6,12 @@
 import { ScatterSeriesOption } from 'echarts';
 import { getSeriesDisplayName } from '../utils/series';
 import { ScatterChartStyle } from './scatter_vis_config';
-import { BaseChartStyle, PipelineFn } from '../utils/echarts_spec';
+import { BaseChartStyle, EChartsSpecState, PipelineFn } from '../utils/echarts_spec';
 import { generateThresholdLines } from '../utils/utils';
+import { normalizeEmptyValue } from '../utils/data_transformation';
+import { getColors } from '../theme/default_colors';
 import { PointShape } from '../types';
+import { DEFAULT_GRID } from '../constants';
 
 /**
  * Maps PointShape enum values to ECharts symbol types
@@ -62,9 +65,7 @@ export const transformToMultiSeriesWithSize = (
     );
   }
 
-  const categories = [
-    ...new Set(dataRows.map((row) => String(row[colorFieldIndex] || 'undefined'))),
-  ];
+  const categories = [...new Set(dataRows.map((row) => normalizeEmptyValue(row[colorFieldIndex])))];
   const seriesData: Record<string, any[][]> = {};
   let minSize = Infinity;
   let maxSize = -Infinity;
@@ -78,9 +79,9 @@ export const transformToMultiSeriesWithSize = (
   dataRows.forEach((row) => {
     const x = row[xFieldIndex];
     const y = row[yFieldIndex];
-    const category = String(row[colorFieldIndex] || 'undefined');
+    const category = normalizeEmptyValue(row[colorFieldIndex]);
     const size = Number(row[sizeFieldIndex]);
-    if (isNaN(size) || size <= 0) return;
+    if (isNaN(size)) return;
     // Track size range
     minSize = Math.min(minSize, size);
     maxSize = Math.max(maxSize, size);
@@ -88,6 +89,12 @@ export const transformToMultiSeriesWithSize = (
     // Add point to corresponding category
     seriesData[category].push([x, y, size]);
   });
+
+  // Handle case where no valid data points were found
+  if (minSize === Infinity || maxSize === -Infinity) {
+    minSize = 0;
+    maxSize = 0;
+  }
 
   return {
     categories,
@@ -120,7 +127,7 @@ export const createScatterSeries = <T extends BaseChartStyle>({
   const series = [
     {
       type: 'scatter',
-      name: getSeriesDisplayName(yField, Object.values(axisColumnMappings)),
+      name: getSeriesDisplayName(yField, Object.values(axisColumnMappings).flat()),
       symbolSize: 8,
       symbol: mapPointShapeToEChartsSymbol(styles.exclusive?.pointShape),
       symbolRotate: styles.exclusive?.angle || 0,
@@ -181,79 +188,47 @@ export const createCategoryScatterSeries = <T extends BaseChartStyle>({
   const categories = pivotHeader.slice(1);
 
   const thresholdLines = generateThresholdLines(styles.thresholdOptions);
+  const palette = getColors().categories;
+  const sortedCategories = [...categories].map(String).sort();
 
   // Create multiple scatter series
-  const series = categories.map((category) => ({
-    name: String(category),
-    type: 'scatter',
-    symbolSize: 8,
-    symbol: mapPointShapeToEChartsSymbol(styles.exclusive?.pointShape),
-    symbolRotate: styles.exclusive?.angle || 0,
-    encode: {
-      x: xField,
-      y: category,
-    },
-    itemStyle: styles.exclusive?.filled
-      ? {
-          opacity: 0.8,
-        }
-      : {
-          opacity: 0.8,
-          color: 'transparent',
-          borderColor: 'auto',
-          borderWidth: 2,
-        },
-    emphasis: {
-      focus: 'series',
-      scale: 1.2,
-    },
-    ...thresholdLines,
-  })) as ScatterSeriesOption[];
+  const series = categories.map((category) => {
+    const name = String(category);
+    const colorIndex = sortedCategories.indexOf(name);
+    return {
+      name,
+      type: 'scatter',
+      symbolSize: 8,
+      symbol: mapPointShapeToEChartsSymbol(styles.exclusive?.pointShape),
+      symbolRotate: styles.exclusive?.angle || 0,
+      encode: {
+        x: xField,
+        y: category,
+      },
+      itemStyle: styles.exclusive?.filled
+        ? {
+            opacity: 0.8,
+            color: palette[colorIndex % palette.length],
+          }
+        : {
+            opacity: 0.8,
+            color: 'transparent',
+            borderColor: palette[colorIndex % palette.length],
+            borderWidth: 2,
+          },
+      emphasis: {
+        focus: 'series',
+        scale: 1.2,
+      },
+      ...thresholdLines,
+    };
+  }) as ScatterSeriesOption[];
 
   // Set the pivot dataset and series
   newState.transformedData = pivotDataset;
   newState.series = series;
 
   return newState;
-};
-
-/**
- * Custom spec assembly for category scatter charts with dataset support
- */
-export const assembleCategoryScatterSpec = <T extends BaseChartStyle>() => (state: any) => {
-  const { styles, axisConfig, series, transformedData } = state;
-
-  const spec = {
-    title: {
-      text: styles.titleOptions?.show ? styles.titleOptions?.titleName : undefined,
-    },
-    tooltip: {
-      trigger: 'item',
-      show: styles.tooltipOptions?.mode !== 'hidden',
-    },
-    legend: {
-      show: styles.addLegend,
-    },
-    xAxis: {
-      type: 'value',
-      name: axisConfig?.xAxisStyle?.title?.text || axisConfig?.xAxis?.name,
-      nameLocation: 'middle',
-      nameGap: 35,
-    },
-    yAxis: {
-      type: 'value',
-      name: axisConfig?.yAxisStyle?.title?.text || axisConfig?.yAxis?.name,
-      nameLocation: 'middle',
-      nameGap: 50,
-    },
-    // Use dataset for pivot data format
-    dataset: {
-      source: transformedData,
-    },
-    series,
-  };
-
-  return { ...state, spec };
 };
 
 /**
@@ -272,28 +247,15 @@ export const createSizeScatterSeries = <T extends BaseChartStyle>({
   colorField: string;
   sizeField: string;
 }): PipelineFn<T> => (state) => {
-  const { transformedData = [], axisColumnMappings } = state;
+  const { transformedData = [] } = state;
   const newState = { ...state };
 
   if (!transformedData || !Array.isArray(transformedData) || transformedData.length === 0) {
     newState.series = [];
-    // Set default visualMap for empty data
-    newState.visualMap = {
-      show: false,
-      type: 'continuous',
-      dimension: 2,
-      min: 0,
-      max: 10,
-      text: ['Max', 'Min'],
-      inRange: {
-        symbolSize: [5, 25],
-      },
-    };
     return newState;
   }
 
   const headers = transformedData[0] ?? [];
-  const sizeDimension = headers.indexOf(sizeField);
 
   // Transform data using multi-series approach
   const { categories, seriesData, sizeRange } = transformToMultiSeriesWithSize(
@@ -304,36 +266,39 @@ export const createSizeScatterSeries = <T extends BaseChartStyle>({
     sizeField
   );
 
-  const sizeAxisMapping = Object.values(axisColumnMappings).find(
-    (mapping) => mapping.column === sizeField
-  );
-  const sizeAxisName = sizeAxisMapping?.name || sizeField;
   const thresholdLines = generateThresholdLines(styles.thresholdOptions);
+  const palette = getColors().categories;
+  const sortedCategories = [...categories].map(String).sort();
 
   // Create multiple scatter series, one for each color category
   // Data format: [x, y, size] where size is at dimension 2 for visualMap
-  const series = categories.map((category) => ({
-    name: String(category),
-    type: 'scatter',
-    symbol: mapPointShapeToEChartsSymbol(styles.exclusive?.pointShape),
-    symbolRotate: styles.exclusive?.angle || 0,
-    data: seriesData[category], // [x, y, size] format
-    itemStyle: styles.exclusive?.filled
-      ? {
-          opacity: 0.7,
-        }
-      : {
-          opacity: 0.7,
-          color: 'transparent',
-          borderColor: 'auto',
-          borderWidth: 2,
-        },
-    emphasis: {
-      focus: 'series',
-      scale: 1.2,
-    },
-    ...thresholdLines,
-  })) as ScatterSeriesOption[];
+  const series = categories.map((category) => {
+    const name = String(category);
+    const colorIndex = sortedCategories.indexOf(name);
+    return {
+      name,
+      type: 'scatter',
+      symbol: mapPointShapeToEChartsSymbol(styles.exclusive?.pointShape),
+      symbolRotate: styles.exclusive?.angle || 0,
+      data: seriesData[category], // [x, y, size] format
+      itemStyle: styles.exclusive?.filled
+        ? {
+            opacity: 0.7,
+            color: palette[colorIndex % palette.length],
+          }
+        : {
+            opacity: 0.7,
+            color: 'transparent',
+            borderColor: palette[colorIndex % palette.length],
+            borderWidth: 2,
+          },
+      emphasis: {
+        focus: 'series',
+        scale: 1.2,
+      },
+      ...thresholdLines,
+    };
+  }) as ScatterSeriesOption[];
 
   // Set series and visualMap
   newState.series = series;
@@ -360,12 +325,15 @@ export const createSizeScatterSeries = <T extends BaseChartStyle>({
     }
   };
 
+  // @ts-expect-error TS2322 TODO(ts-error): fixme
   newState.visualMap = {
     show: styles.addLegend === true,
     type: 'continuous',
-    dimension: sizeDimension,
+    dimension: 2, // data type is [x, y, size] format
     min: sizeRange.min,
     max: sizeRange.max,
+    itemWidth: 15,
+    // itemHeight: 120,
     // text: [`${sizeAxisName} Max`, `${sizeAxisName} Min`],
     inRange: {
       symbolSize: [5, 25],
@@ -378,4 +346,21 @@ export const createSizeScatterSeries = <T extends BaseChartStyle>({
   };
 
   return newState;
+};
+
+export const assembleScatterSpec = <T extends BaseChartStyle>(
+  state: EChartsSpecState<T>
+): EChartsSpecState<T> => {
+  const grid = { ...DEFAULT_GRID };
+  const { visualMap, spec } = state;
+  if (visualMap && !Array.isArray(visualMap)) {
+    if (visualMap.bottom === 'bottom') {
+      grid.bottom = 70;
+    }
+    if (visualMap.right === 'right') {
+      grid.right = 50;
+    }
+  }
+
+  return { ...state, spec: { ...spec, grid } };
 };

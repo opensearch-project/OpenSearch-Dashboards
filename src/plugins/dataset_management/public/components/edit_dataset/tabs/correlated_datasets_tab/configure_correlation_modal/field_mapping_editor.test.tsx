@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
 import { IndexPatternField } from '../../../../../../../data/public';
 import { FieldMappingEditor } from './field_mapping_editor';

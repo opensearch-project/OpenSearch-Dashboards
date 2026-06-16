@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { Suspense, lazy } from 'react';
+import { Suspense, lazy } from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import { EventEmitter } from 'events';
 import { EuiErrorBoundary, EuiLoadingChart } from '@elastic/eui';

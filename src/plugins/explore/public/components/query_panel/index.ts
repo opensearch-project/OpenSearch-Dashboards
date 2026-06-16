@@ -4,3 +4,4 @@
  */
 
 export { QueryPanel } from './query_panel';
+export * from './query_panel_editor';

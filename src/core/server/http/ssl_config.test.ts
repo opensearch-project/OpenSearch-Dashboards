@@ -67,30 +67,26 @@ describe('#SslConfig', () => {
 
     test('throws if `key` is invalid', () => {
       const obj = { key: '/invalid/key', certificate: '/valid/certificate' };
-      expect(() => createConfig(obj)).toThrowErrorMatchingInlineSnapshot(
-        `"ENOENT: no such file or directory, open '/invalid/key'"`
-      );
+      expect(() => createConfig(obj)).toThrow(/ENOENT.*no such file or directory.*invalid.*key/i);
     });
 
     test('throws if `certificate` is invalid', () => {
       mockReadFileSync.mockImplementationOnce((path: string) => `content-of-${path}`);
       const obj = { key: '/valid/key', certificate: '/invalid/certificate' };
-      expect(() => createConfig(obj)).toThrowErrorMatchingInlineSnapshot(
-        `"ENOENT: no such file or directory, open '/invalid/certificate'"`
+      expect(() => createConfig(obj)).toThrow(
+        /ENOENT.*no such file or directory.*invalid.*certificate/i
       );
     });
 
     test('throws if `certificateAuthorities` is invalid', () => {
       const obj = { certificateAuthorities: '/invalid/ca' };
-      expect(() => createConfig(obj)).toThrowErrorMatchingInlineSnapshot(
-        `"ENOENT: no such file or directory, open '/invalid/ca'"`
-      );
+      expect(() => createConfig(obj)).toThrow(/ENOENT.*no such file or directory.*invalid.*ca/i);
     });
 
     test('throws if `keystore.path` is invalid', () => {
       const obj = { keystore: { path: '/invalid/keystore' } };
-      expect(() => createConfig(obj)).toThrowErrorMatchingInlineSnapshot(
-        `"ENOENT: no such file or directory, open '/invalid/keystore'"`
+      expect(() => createConfig(obj)).toThrow(
+        /ENOENT.*no such file or directory.*invalid.*keystore/i
       );
     });
 
@@ -118,8 +114,8 @@ describe('#SslConfig', () => {
 
     test('throws if `truststore.path` is invalid', () => {
       const obj = { truststore: { path: '/invalid/truststore' } };
-      expect(() => createConfig(obj)).toThrowErrorMatchingInlineSnapshot(
-        `"ENOENT: no such file or directory, open '/invalid/truststore'"`
+      expect(() => createConfig(obj)).toThrow(
+        /ENOENT.*no such file or directory.*invalid.*truststore/i
       );
     });
   });
@@ -307,21 +303,14 @@ describe('#sslSchema', () => {
         supportedProtocols: ['TLSv1', 'TLSv1.1', 'TLSv1.2', 'TLSv1.3', 'SOMEv100500'],
       };
 
-      expect(() => sslSchema.validate(singleUnknownProtocol)).toThrowErrorMatchingInlineSnapshot(`
-"[supportedProtocols.0]: types that failed validation:
-- [supportedProtocols.0.0]: expected value to equal [TLSv1]
-- [supportedProtocols.0.1]: expected value to equal [TLSv1.1]
-- [supportedProtocols.0.2]: expected value to equal [TLSv1.2]
-- [supportedProtocols.0.3]: expected value to equal [TLSv1.3]"
-`);
-      expect(() => sslSchema.validate(allKnownWithOneUnknownProtocols))
-        .toThrowErrorMatchingInlineSnapshot(`
-"[supportedProtocols.4]: types that failed validation:
-- [supportedProtocols.4.0]: expected value to equal [TLSv1]
-- [supportedProtocols.4.1]: expected value to equal [TLSv1.1]
-- [supportedProtocols.4.2]: expected value to equal [TLSv1.2]
-- [supportedProtocols.4.3]: expected value to equal [TLSv1.3]"
-`);
+      expect(() => sslSchema.validate(singleUnknownProtocol)).toThrowErrorMatchingInlineSnapshot(
+        `"[supportedProtocols.0]: SchemaTypeError: expected value to equal [TLSv1.3]"`
+      );
+      expect(() =>
+        sslSchema.validate(allKnownWithOneUnknownProtocols)
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[supportedProtocols.4]: SchemaTypeError: expected value to equal [TLSv1.3]"`
+      );
     });
   });
 

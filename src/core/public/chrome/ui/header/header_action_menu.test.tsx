@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 import { act } from 'react';
 import { BehaviorSubject } from 'rxjs';

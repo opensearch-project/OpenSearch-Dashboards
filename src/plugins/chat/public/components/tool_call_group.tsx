@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { TimelineToolCall, ToolCallRow } from './tool_call_row';
@@ -24,7 +23,8 @@ export const ToolCallGroup = ({ toolCalls }: { toolCalls: TimelineToolCall[] }) 
           </EuiFlexItem>
           <EuiFlexItem>
             {i18n.translate('chat.toolCallGroup.buttonLabel', {
-              defaultMessage: '{toolCount} tasks performed',
+              defaultMessage:
+                '{toolCount, plural, one {# task performed} other {# tasks performed}}',
               values: {
                 toolCount: toolCalls.length,
               },

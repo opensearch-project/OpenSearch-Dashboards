@@ -9,9 +9,22 @@ import { Observable, BehaviorSubject } from 'rxjs';
 import { Message } from '../../common/types';
 import { ToolDefinition } from '../../../context_provider/public';
 import { ChatServiceStart } from '../../../../core/public';
+import { AssistantActionService } from '../../../context_provider/public';
 
 // Mock AgUiAgent
 jest.mock('./ag_ui_agent');
+
+// Mock AssistantActionService singleton
+jest.mock('../../../context_provider/public', () => ({
+  AssistantActionService: {
+    getInstance: jest.fn().mockReturnValue({
+      getState$: jest
+        .fn()
+        .mockReturnValue({ subscribe: jest.fn().mockReturnValue({ unsubscribe: jest.fn() }) }),
+      hasAction: jest.fn().mockReturnValue(false),
+    }),
+  },
+}));
 
 // Mock data source management
 jest.mock('../../../data_source_management/public', () => ({
@@ -22,7 +35,7 @@ describe('ChatService', () => {
   let chatService: ChatService;
   let mockAgent: jest.Mocked<AgUiAgent>;
   let mockCoreChatService: jest.Mocked<ChatServiceStart>;
-  let mockThreadId$: BehaviorSubject<string>;
+  let mockThreadId$: BehaviorSubject<string | undefined>;
   let mockUiSettings: any;
 
   beforeEach(() => {
@@ -50,13 +63,13 @@ describe('ChatService', () => {
       writable: true,
     });
 
-    // Create mock thread ID observable with proper format
+    // Create mock thread ID observable - starts as undefined
     const generateMockThreadId = () => {
       const timestamp = Date.now();
       const randomStr = Math.random().toString(36).substring(2, 11);
       return `thread-${timestamp}-${randomStr}`;
     };
-    mockThreadId$ = new BehaviorSubject<string>(generateMockThreadId());
+    mockThreadId$ = new BehaviorSubject<string | undefined>(undefined);
 
     // Create mock window state with proper state management
     const mockWindowState$ = new BehaviorSubject({
@@ -142,6 +155,8 @@ describe('ChatService', () => {
 
   describe('getThreadId$', () => {
     it('should return an observable that emits the current thread ID', (done) => {
+      // Initialize a thread first
+      chatService.newThread();
       const threadId$ = chatService.getThreadId$();
 
       threadId$.subscribe((threadId) => {
@@ -152,11 +167,15 @@ describe('ChatService', () => {
     });
 
     it('should emit new thread ID when newThread is called', (done) => {
+      // Initialize a thread first
+      chatService.newThread();
       const threadId$ = chatService.getThreadId$();
-      const emittedValues: string[] = [];
+      const emittedValues: Array<string | undefined> = [];
 
       threadId$.subscribe((threadId) => {
-        emittedValues.push(threadId);
+        if (threadId) {
+          emittedValues.push(threadId);
+        }
 
         if (emittedValues.length === 2) {
           // Verify we got two different thread IDs
@@ -174,6 +193,8 @@ describe('ChatService', () => {
     });
 
     it('should provide consistent thread ID across multiple subscriptions', () => {
+      // Initialize a thread first
+      chatService.newThread();
       const threadId$ = chatService.getThreadId$();
       let threadId1: string | undefined;
       let threadId2: string | undefined;
@@ -258,6 +279,8 @@ describe('ChatService', () => {
 
   describe('sendMessage', () => {
     beforeEach(() => {
+      // Initialize a thread first - required for sendMessage
+      chatService.newThread();
       // Mock window.assistantContextStore
       (global as any).window = {
         assistantContextStore: {
@@ -284,6 +307,7 @@ describe('ChatService', () => {
         id: expect.stringMatching(/^msg-\d+-[a-z0-9]{9}$/),
         role: 'user',
         content: 'Hello, world!',
+        rawMessage: 'Hello, world!',
       });
 
       expect(result.observable).toBeDefined();
@@ -481,16 +505,65 @@ describe('ChatService', () => {
       expect(result.userMessage.content).toBe('User message');
       expect(Array.isArray(result.userMessage.content)).toBe(false);
     });
+
+    it('should throw error when thread ID is not set', async () => {
+      // Reset thread ID to undefined by creating a new service without calling newThread
+      const newService = new ChatService(mockUiSettings, mockCoreChatService);
+
+      // Mock getThreadId to return undefined
+      mockCoreChatService.getThreadId.mockReturnValue(undefined);
+
+      await expect(newService.sendMessage('test', [])).rejects.toThrow(
+        'Thread ID is required to send a message'
+      );
+    });
   });
 
   describe('sendToolResult', () => {
+    // Helper function to create mock MESSAGES_SNAPSHOT event with toolCalls
+    const createMockMessagesSnapshot = (toolCallId: string) => [
+      {
+        type: 'MESSAGES_SNAPSHOT',
+        timestamp: Date.now(),
+        messages: [
+          {
+            role: 'user',
+            id: 'user-msg-1',
+            content: 'Test message',
+          },
+          {
+            role: 'assistant',
+            id: 'assistant-msg-1',
+            content: 'Response with tool call',
+            toolCalls: [
+              {
+                id: toolCallId,
+                type: 'function',
+                function: {
+                  name: 'test_tool',
+                  arguments: '{}',
+                },
+              },
+            ],
+          },
+        ],
+      },
+    ];
+
     beforeEach(() => {
+      // Initialize a thread first - required for sendToolResult
+      chatService.newThread();
       (global as any).window = {
         assistantContextStore: {
           getAllContexts: jest.fn().mockReturnValue([]),
           getBackendFormattedContexts: jest.fn().mockReturnValue([]),
         },
       };
+
+      // Mock getConversation to return MESSAGES_SNAPSHOT with toolCalls (for waitForToolCallSync)
+      chatService.conversationHistoryService.getConversation = jest
+        .fn()
+        .mockImplementation(() => Promise.resolve(createMockMessagesSnapshot('tool-call-123')));
     });
 
     afterEach(() => {
@@ -504,6 +577,11 @@ describe('ChatService', () => {
       const toolCallId = 'tool-call-123';
       const result = { success: true, data: 'test result' };
       const messages: Message[] = [];
+
+      // Mock getConversation to return MESSAGES_SNAPSHOT with the specific toolCallId
+      chatService.conversationHistoryService.getConversation = jest
+        .fn()
+        .mockResolvedValue(createMockMessagesSnapshot(toolCallId));
 
       const response = await chatService.sendToolResult(toolCallId, result, messages);
 
@@ -533,6 +611,11 @@ describe('ChatService', () => {
       const mockObservable = new Observable<BaseEvent>();
       mockAgent.runAgent.mockReturnValue(mockObservable);
 
+      // Mock getConversation to return MESSAGES_SNAPSHOT with the specific toolCallId
+      chatService.conversationHistoryService.getConversation = jest
+        .fn()
+        .mockResolvedValue(createMockMessagesSnapshot('tool-123'));
+
       const response = await chatService.sendToolResult('tool-123', 'string result', []);
 
       expect(response.toolMessage.content).toBe('string result');
@@ -542,10 +625,479 @@ describe('ChatService', () => {
       const mockObservable = new Observable<BaseEvent>();
       mockAgent.runAgent.mockReturnValue(mockObservable);
 
+      // Mock getConversation to return MESSAGES_SNAPSHOT with the specific toolCallId
+      chatService.conversationHistoryService.getConversation = jest
+        .fn()
+        .mockResolvedValue(createMockMessagesSnapshot('tool-123'));
+
       const objectResult = { key: 'value', number: 42 };
       const response = await chatService.sendToolResult('tool-123', objectResult, []);
 
       expect(response.toolMessage.content).toBe(JSON.stringify(objectResult));
+    });
+
+    it('should only pass tool message when memory provider does not include full history', async () => {
+      const mockObservable = new Observable<BaseEvent>();
+      mockAgent.runAgent.mockReturnValue(mockObservable);
+
+      // Mock memory provider with includeFullHistory = false
+      mockCoreChatService.getMemoryProvider = jest
+        .fn()
+        .mockReturnValue({ includeFullHistory: false });
+
+      const toolCallId = 'tool-call-456';
+      const result = { success: true };
+      const messages: Message[] = [
+        { id: 'msg-1', role: 'user', content: 'Previous user message' },
+        { id: 'msg-2', role: 'assistant', content: 'Previous assistant message' },
+      ];
+
+      // Mock getConversation to return MESSAGES_SNAPSHOT with the specific toolCallId
+      chatService.conversationHistoryService.getConversation = jest
+        .fn()
+        .mockResolvedValue(createMockMessagesSnapshot(toolCallId));
+
+      const response = await chatService.sendToolResult(toolCallId, result, messages);
+
+      // Verify that only the tool message is passed, not the full history
+      expect(mockAgent.runAgent).toHaveBeenCalledWith(
+        {
+          threadId: expect.stringMatching(/^thread-\d+-[a-z0-9]{9}$/),
+          runId: expect.stringMatching(/^run-\d+-[a-z0-9]{9}$/),
+          messages: [response.toolMessage], // Only tool message, not [...messages, toolMessage]
+          tools: [],
+          context: [],
+          state: {},
+          forwardedProps: {},
+        },
+        undefined
+      );
+
+      // Verify the tool message structure
+      expect(response.toolMessage).toEqual({
+        id: expect.stringMatching(/^msg-\d+-[a-z0-9]{9}$/),
+        role: 'tool',
+        content: JSON.stringify(result),
+        toolCallId,
+      });
+    });
+
+    it('should wait for tool call sync when includeFullHistory is false', async () => {
+      const mockObservable = new Observable<BaseEvent>();
+      mockAgent.runAgent.mockReturnValue(mockObservable);
+
+      // Mock memory provider with includeFullHistory = false
+      mockCoreChatService.getMemoryProvider = jest
+        .fn()
+        .mockReturnValue({ includeFullHistory: false });
+
+      const toolCallId = 'tool-call-sync-test';
+
+      // Mock getConversation to return MESSAGES_SNAPSHOT with the tool call
+      chatService.conversationHistoryService.getConversation = jest
+        .fn()
+        .mockResolvedValue(createMockMessagesSnapshot(toolCallId));
+
+      const response = await chatService.sendToolResult(toolCallId, { success: true }, []);
+
+      // Verify getConversation was called to check for sync
+      expect(chatService.conversationHistoryService.getConversation).toHaveBeenCalled();
+      expect(response.toolMessage.toolCallId).toBe(toolCallId);
+    });
+
+    it('should skip waiting for tool call sync when includeFullHistory is true', async () => {
+      const mockObservable = new Observable<BaseEvent>();
+      mockAgent.runAgent.mockReturnValue(mockObservable);
+
+      // Mock memory provider with includeFullHistory = true
+      mockCoreChatService.getMemoryProvider = jest
+        .fn()
+        .mockReturnValue({ includeFullHistory: true });
+
+      const toolCallId = 'tool-call-no-sync';
+
+      // Mock getConversation - should NOT be called when includeFullHistory is true
+      chatService.conversationHistoryService.getConversation = jest.fn();
+
+      const messages: Message[] = [{ id: 'msg-1', role: 'user', content: 'Previous message' }];
+
+      const response = await chatService.sendToolResult(toolCallId, { success: true }, messages);
+
+      // Verify getConversation was NOT called since we're including full history
+      expect(chatService.conversationHistoryService.getConversation).not.toHaveBeenCalled();
+
+      // Verify full history is passed when includeFullHistory is true
+      expect(mockAgent.runAgent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          messages: [...messages, response.toolMessage],
+        }),
+        undefined
+      );
+    });
+
+    it('should retry polling when tool call result is not yet synced', async () => {
+      const mockObservable = new Observable<BaseEvent>();
+      mockAgent.runAgent.mockReturnValue(mockObservable);
+
+      // Mock memory provider with includeFullHistory = false
+      mockCoreChatService.getMemoryProvider = jest
+        .fn()
+        .mockReturnValue({ includeFullHistory: false });
+
+      const toolCallId = 'tool-call-retry-test';
+
+      // Mock getConversation to return empty first, then with the tool call in MESSAGES_SNAPSHOT
+      let callCount = 0;
+      chatService.conversationHistoryService.getConversation = jest.fn().mockImplementation(() => {
+        callCount++;
+        if (callCount < 3) {
+          // First two calls return MESSAGES_SNAPSHOT without the tool call
+          return Promise.resolve([
+            {
+              type: 'MESSAGES_SNAPSHOT',
+              timestamp: Date.now(),
+              messages: [
+                {
+                  role: 'user',
+                  id: 'user-msg-1',
+                  content: 'Test message',
+                },
+              ],
+            },
+          ]);
+        }
+        // Subsequent calls return MESSAGES_SNAPSHOT with the tool call
+        return Promise.resolve(createMockMessagesSnapshot(toolCallId));
+      });
+
+      const response = await chatService.sendToolResult(toolCallId, { success: true }, []);
+
+      // Verify getConversation was polled multiple times. We require 3
+      // consecutive synced observations before treating the tool call as
+      // stably synced, so after the first synced snapshot (call #3) two more
+      // confirming polls are needed (calls #4 and #5).
+      expect(chatService.conversationHistoryService.getConversation).toHaveBeenCalledTimes(5);
+      expect(response.toolMessage.toolCallId).toBe(toolCallId);
+    });
+    it('should skip dispatch with reason no_thread_id when thread ID is not set', async () => {
+      // Create a new service without calling newThread
+      const newService = new ChatService(mockUiSettings, mockCoreChatService);
+
+      // Mock getThreadId to return undefined
+      mockCoreChatService.getThreadId.mockReturnValue(undefined);
+
+      const response = await newService.sendToolResult('tool-123', 'result', []);
+
+      expect(response.skipped).toEqual({ reason: 'no_thread_id' });
+      expect(mockAgent.runAgent).not.toHaveBeenCalled();
+      expect(response.toolMessage).toEqual({
+        id: expect.stringMatching(/^msg-\d+-[a-z0-9]{9}$/),
+        role: 'tool',
+        content: 'result',
+        toolCallId: 'tool-123',
+      });
+    });
+
+    describe('skip branch (duplicate tool result across windows)', () => {
+      // Snapshot containing both the synced tool call and a ToolMessage with
+      // the same toolCallId — another window has already persisted the result.
+      const createSnapshotWithToolResult = (toolCallId: string) => [
+        {
+          type: 'MESSAGES_SNAPSHOT',
+          timestamp: Date.now(),
+          messages: [
+            { role: 'user', id: 'user-msg-1', content: 'Run it' },
+            {
+              role: 'assistant',
+              id: 'assistant-msg-1',
+              content: 'Running',
+              toolCalls: [
+                {
+                  id: toolCallId,
+                  type: 'function',
+                  function: { name: 'test_tool', arguments: '{}' },
+                },
+              ],
+            },
+            {
+              role: 'tool',
+              id: 'tool-msg-1',
+              content: '"already done"',
+              toolCallId,
+            },
+          ],
+        },
+      ];
+
+      beforeEach(() => {
+        mockCoreChatService.getMemoryProvider = jest
+          .fn()
+          .mockReturnValue({ includeFullHistory: false });
+      });
+
+      it('should skip dispatch and return skipped reason when tool result already exists', async () => {
+        const toolCallId = 'tool-call-duplicate';
+
+        chatService.conversationHistoryService.getConversation = jest
+          .fn()
+          .mockResolvedValue(createSnapshotWithToolResult(toolCallId));
+
+        const response = await chatService.sendToolResult(toolCallId, { ok: true }, []);
+
+        expect(mockAgent.runAgent).not.toHaveBeenCalled();
+        expect(response.skipped).toEqual({ reason: 'result_already_exists' });
+        expect(response.toolMessage).toEqual({
+          id: expect.stringMatching(/^msg-\d+-[a-z0-9]{9}$/),
+          role: 'tool',
+          content: JSON.stringify({ ok: true }),
+          toolCallId,
+        });
+      });
+
+      it('should return an observable that completes without emitting on skip', async () => {
+        const toolCallId = 'tool-call-complete-only';
+
+        chatService.conversationHistoryService.getConversation = jest
+          .fn()
+          .mockResolvedValue(createSnapshotWithToolResult(toolCallId));
+
+        const response = await chatService.sendToolResult(toolCallId, 'result', []);
+
+        const nextSpy = jest.fn();
+        const errorSpy = jest.fn();
+        const completeSpy = jest.fn();
+
+        response.observable.subscribe({
+          next: nextSpy,
+          error: errorSpy,
+          complete: completeSpy,
+        });
+
+        expect(nextSpy).not.toHaveBeenCalled();
+        expect(errorSpy).not.toHaveBeenCalled();
+        expect(completeSpy).toHaveBeenCalledTimes(1);
+        expect((chatService as any).activeRequests.size).toBe(0);
+      });
+
+      it('should short-circuit result_already_exists over synced when both are present in the same snapshot', async () => {
+        const toolCallId = 'tool-call-both-present';
+
+        chatService.conversationHistoryService.getConversation = jest
+          .fn()
+          .mockResolvedValue(createSnapshotWithToolResult(toolCallId));
+
+        const response = await chatService.sendToolResult(toolCallId, 'result', []);
+
+        expect(response.skipped).toEqual({ reason: 'result_already_exists' });
+        expect(mockAgent.runAgent).not.toHaveBeenCalled();
+      });
+
+      it('should NOT skip when snapshot contains only the synced tool call without a tool result', async () => {
+        const toolCallId = 'tool-call-synced-only';
+        const mockObservable = new Observable<BaseEvent>();
+        mockAgent.runAgent.mockReturnValue(mockObservable);
+
+        chatService.conversationHistoryService.getConversation = jest
+          .fn()
+          .mockResolvedValue(createMockMessagesSnapshot(toolCallId));
+
+        const response = await chatService.sendToolResult(toolCallId, { ok: true }, []);
+
+        expect(mockAgent.runAgent).toHaveBeenCalledTimes(1);
+        expect(response.skipped).toBeUndefined();
+      });
+    });
+
+    describe('abort signal', () => {
+      beforeEach(() => {
+        mockCoreChatService.getMemoryProvider = jest
+          .fn()
+          .mockReturnValue({ includeFullHistory: false });
+      });
+
+      it('should skip with reason aborted when signal is already aborted before dispatch', async () => {
+        const toolCallId = 'tool-call-abort-early';
+        const controller = new AbortController();
+        controller.abort();
+
+        // getConversation should not even be consulted — the early-out fires
+        // before sync polling.
+        chatService.conversationHistoryService.getConversation = jest.fn();
+
+        const response = await chatService.sendToolResult(
+          toolCallId,
+          { ok: true },
+          [],
+          controller.signal
+        );
+
+        expect(response.skipped).toEqual({ reason: 'aborted' });
+        expect(mockAgent.runAgent).not.toHaveBeenCalled();
+        expect(chatService.conversationHistoryService.getConversation).not.toHaveBeenCalled();
+        expect((chatService as any).activeRequests.size).toBe(0);
+      });
+
+      it('should skip with reason aborted when signal fires during sync polling', async () => {
+        const toolCallId = 'tool-call-abort-mid-sync';
+        const controller = new AbortController();
+
+        // Return a pending snapshot so the poller loops (no synced observation)
+        chatService.conversationHistoryService.getConversation = jest.fn().mockResolvedValue([
+          {
+            type: 'MESSAGES_SNAPSHOT',
+            timestamp: Date.now(),
+            messages: [{ role: 'user', id: 'u1', content: 'hi' }],
+          },
+        ]);
+
+        // Fire the abort shortly after the first poll resolves so the
+        // interruptible sleep can observe it.
+        setTimeout(() => controller.abort(), 5);
+
+        const response = await chatService.sendToolResult(
+          toolCallId,
+          { ok: true },
+          [],
+          controller.signal
+        );
+
+        expect(response.skipped).toEqual({ reason: 'aborted' });
+        expect(mockAgent.runAgent).not.toHaveBeenCalled();
+        expect((chatService as any).activeRequests.size).toBe(0);
+      });
+
+      it('should emit AbortError and call agent.abort when signal fires after dispatch', async () => {
+        const toolCallId = 'tool-call-abort-during-stream';
+        const controller = new AbortController();
+
+        // Minimal observable that never emits/completes so we can control
+        // lifecycle via the abort signal alone.
+        const pendingObservable = new Observable<BaseEvent>(() => {
+          // intentionally no-op — the wrapping Observable in sendToolResult
+          // owns the termination path
+          return () => {};
+        });
+        mockAgent.runAgent.mockReturnValue(pendingObservable);
+
+        chatService.conversationHistoryService.getConversation = jest
+          .fn()
+          .mockResolvedValue(createMockMessagesSnapshot(toolCallId));
+
+        const response = await chatService.sendToolResult(
+          toolCallId,
+          { ok: true },
+          [],
+          controller.signal
+        );
+
+        expect(response.skipped).toBeUndefined();
+        expect(mockAgent.runAgent).toHaveBeenCalledTimes(1);
+
+        const nextSpy = jest.fn();
+        const errorSpy = jest.fn();
+        const completeSpy = jest.fn();
+
+        response.observable.subscribe({
+          next: nextSpy,
+          error: errorSpy,
+          complete: completeSpy,
+        });
+
+        controller.abort();
+
+        expect(mockAgent.abort).toHaveBeenCalledTimes(1);
+        expect(errorSpy).toHaveBeenCalledTimes(1);
+        const emittedError = errorSpy.mock.calls[0][0];
+        expect(emittedError).toBeInstanceOf(Error);
+        expect(emittedError.name).toBe('AbortError');
+        expect(completeSpy).not.toHaveBeenCalled();
+        expect(nextSpy).not.toHaveBeenCalled();
+        expect((chatService as any).activeRequests.size).toBe(0);
+      });
+
+      it('should emit AbortError synchronously when signal is already aborted at subscribe time', async () => {
+        const toolCallId = 'tool-call-abort-at-subscribe';
+        const controller = new AbortController();
+
+        // Keep the underlying observable inert so only the abort path drives
+        // termination.
+        const pendingObservable = new Observable<BaseEvent>(() => () => {});
+        mockAgent.runAgent.mockReturnValue(pendingObservable);
+
+        chatService.conversationHistoryService.getConversation = jest
+          .fn()
+          .mockResolvedValue(createMockMessagesSnapshot(toolCallId));
+
+        const response = await chatService.sendToolResult(
+          toolCallId,
+          { ok: true },
+          [],
+          controller.signal
+        );
+
+        // Abort after dispatch but before subscribing — the subscribe path
+        // should detect the pre-aborted signal and emit AbortError immediately.
+        controller.abort();
+
+        const errorSpy = jest.fn();
+        const completeSpy = jest.fn();
+
+        response.observable.subscribe({
+          error: errorSpy,
+          complete: completeSpy,
+        });
+
+        expect(errorSpy).toHaveBeenCalledTimes(1);
+        expect(errorSpy.mock.calls[0][0].name).toBe('AbortError');
+        expect(completeSpy).not.toHaveBeenCalled();
+      });
+
+      it('should not emit twice when signal fires during an active subscription', async () => {
+        const toolCallId = 'tool-call-abort-no-double-emit';
+        const controller = new AbortController();
+
+        // Observable that emits one value, then stays open until aborted.
+        let innerEmit: ((v: BaseEvent) => void) | null = null;
+        const gatedObservable = new Observable<BaseEvent>((subscriber) => {
+          innerEmit = (v) => subscriber.next(v);
+          return () => {};
+        });
+        mockAgent.runAgent.mockReturnValue(gatedObservable);
+
+        chatService.conversationHistoryService.getConversation = jest
+          .fn()
+          .mockResolvedValue(createMockMessagesSnapshot(toolCallId));
+
+        const response = await chatService.sendToolResult(
+          toolCallId,
+          { ok: true },
+          [],
+          controller.signal
+        );
+
+        const nextSpy = jest.fn();
+        const errorSpy = jest.fn();
+        const completeSpy = jest.fn();
+
+        response.observable.subscribe({
+          next: nextSpy,
+          error: errorSpy,
+          complete: completeSpy,
+        });
+
+        // Deliver one value so the subscription is live.
+        innerEmit!({ type: 'RUN_STARTED' } as BaseEvent);
+        expect(nextSpy).toHaveBeenCalledTimes(1);
+
+        // Abort, then try to shove more values through — they should be
+        // swallowed by the `settled` guard rather than reaching the subscriber.
+        controller.abort();
+        innerEmit!({ type: 'RUN_FINISHED' } as BaseEvent);
+
+        expect(errorSpy).toHaveBeenCalledTimes(1);
+        expect(nextSpy).toHaveBeenCalledTimes(1);
+        expect(completeSpy).not.toHaveBeenCalled();
+      });
     });
   });
 
@@ -591,25 +1143,9 @@ describe('ChatService', () => {
   });
 
   describe('newThread', () => {
-    let mockSessionStorage: { [key: string]: string };
     let mockContextStore: any;
 
     beforeEach(() => {
-      // Mock sessionStorage behavior
-      mockSessionStorage = {};
-      const sessionStorageMock = {
-        getItem: jest.fn((key: string) => mockSessionStorage[key] || null),
-        setItem: jest.fn((key: string, value: string) => {
-          mockSessionStorage[key] = value;
-        }),
-        removeItem: jest.fn((key: string) => {
-          delete mockSessionStorage[key];
-        }),
-      };
-
-      // Update the global sessionStorage mock
-      (global as any).sessionStorage = sessionStorageMock;
-
       // Mock context store
       mockContextStore = {
         getAllContexts: jest.fn(() => [
@@ -634,32 +1170,6 @@ describe('ChatService', () => {
       const newThreadId = chatService.getThreadId();
       expect(newThreadId).not.toBe(originalThreadId);
       expect(newThreadId).toMatch(/^thread-\d+-[a-z0-9]{9}$/);
-    });
-
-    it('should clear current messages', () => {
-      // Set some messages
-      (chatService as any).currentMessages = [
-        { id: '1', role: 'user', content: 'test' } as Message,
-        { id: '2', role: 'assistant', content: 'response' } as Message,
-      ];
-
-      chatService.newThread();
-
-      expect((chatService as any).currentMessages).toEqual([]);
-    });
-
-    it('should clear sessionStorage', () => {
-      // Set some data in sessionStorage
-      mockSessionStorage['chat.currentState'] = JSON.stringify({
-        threadId: 'old-thread',
-        messages: [{ id: '1', role: 'user', content: 'test' }],
-      });
-
-      const removeItemSpy = (global as any).sessionStorage.removeItem;
-
-      chatService.newThread();
-
-      expect(removeItemSpy).toHaveBeenCalledWith('chat.currentState');
     });
 
     it('should clear dynamic context from global store', () => {
@@ -688,447 +1198,43 @@ describe('ChatService', () => {
     });
   });
 
-  describe('chat state persistence methods', () => {
-    let mockSessionStorage: { [key: string]: string };
+  describe('saveConversation', () => {
+    it('should throw error when thread ID is not set', async () => {
+      // Mock getThreadId to return undefined
+      mockCoreChatService.getThreadId.mockReturnValue(undefined);
 
-    beforeEach(() => {
-      // Mock sessionStorage behavior
-      mockSessionStorage = {};
-      const sessionStorageMock = {
-        getItem: jest.fn((key: string) => mockSessionStorage[key] || null),
-        setItem: jest.fn((key: string, value: string) => {
-          mockSessionStorage[key] = value;
-        }),
-        removeItem: jest.fn((key: string) => {
-          delete mockSessionStorage[key];
-        }),
-      };
+      const messages: Message[] = [{ id: 'msg-1', role: 'user', content: 'test' }];
 
-      // Update the global sessionStorage mock
-      (global as any).sessionStorage = sessionStorageMock;
+      await expect(chatService.saveConversation(messages)).rejects.toThrow(
+        'Thread ID is required to save conversation'
+      );
     });
 
-    describe('getCurrentMessages', () => {
-      it('should return current messages array', () => {
-        const testMessages = [
-          { id: '1', role: 'user', content: 'Hello' },
-          { id: '2', role: 'assistant', content: 'Hi there!' },
-        ];
-        (chatService as any).currentMessages = testMessages;
+    it('should not throw when messages array is empty', async () => {
+      // Mock getThreadId to return undefined - but it shouldn't matter for empty messages
+      mockCoreChatService.getThreadId.mockReturnValue(undefined);
 
-        const result = chatService.getCurrentMessages();
-
-        expect(result).toEqual(testMessages);
-      });
-
-      it('should return empty array when no messages', () => {
-        (chatService as any).currentMessages = [];
-
-        const result = chatService.getCurrentMessages();
-
-        expect(result).toEqual([]);
-      });
+      // Should not throw because empty messages array returns early
+      await expect(chatService.saveConversation([])).resolves.not.toThrow();
     });
 
-    describe('updateCurrentMessages', () => {
-      it('should update current messages and save to sessionStorage', () => {
-        const newMessages = [
-          { id: '1', role: 'user', content: 'Test message' },
-          { id: '2', role: 'assistant', content: 'Test response' },
-        ];
-
-        chatService.updateCurrentMessages(newMessages);
-
-        expect((chatService as any).currentMessages).toEqual(newMessages);
-
-        // Check that setItem was called with the correct key
-        expect((global as any).sessionStorage.setItem).toHaveBeenCalledWith(
-          'chat.currentState',
-          expect.any(String)
-        );
-
-        // Verify the stored JSON contains the expected data
-        const setItemCall = ((global as any).sessionStorage.setItem as jest.Mock).mock.calls[0];
-        const storedData = JSON.parse(setItemCall[1]);
-        expect(storedData.threadId).toMatch(/^thread-\d+-[a-z0-9]{9}$/);
-        expect(storedData.messages).toEqual(newMessages);
-      });
-
-      it('should handle empty messages array', () => {
-        chatService.updateCurrentMessages([]);
-
-        expect((chatService as any).currentMessages).toEqual([]);
-
-        // Check that setItem was called with the correct key
-        expect((global as any).sessionStorage.setItem).toHaveBeenCalledWith(
-          'chat.currentState',
-          expect.any(String)
-        );
-
-        // Verify the stored JSON contains the expected data
-        const setItemCall = ((global as any).sessionStorage.setItem as jest.Mock).mock.calls[0];
-        const storedData = JSON.parse(setItemCall[1]);
-        expect(storedData.threadId).toMatch(/^thread-\d+-[a-z0-9]{9}$/);
-        expect(storedData.messages).toEqual([]);
-      });
-    });
-
-    describe('saveCurrentChatStatePublic', () => {
-      it('should save current state to sessionStorage', () => {
-        const testMessages = [{ id: '1', role: 'user', content: 'test' }];
-        (chatService as any).currentMessages = testMessages;
-
-        chatService.saveCurrentChatStatePublic();
-
-        // Check that setItem was called with the correct key
-        expect((global as any).sessionStorage.setItem).toHaveBeenCalledWith(
-          'chat.currentState',
-          expect.any(String)
-        );
-
-        // Verify the stored JSON contains the expected data
-        const setItemCall = ((global as any).sessionStorage.setItem as jest.Mock).mock.calls[0];
-        const storedData = JSON.parse(setItemCall[1]);
-        expect(storedData.threadId).toMatch(/^thread-\d+-[a-z0-9]{9}$/);
-        expect(storedData.messages).toEqual(testMessages);
-      });
-
-      it('should handle sessionStorage errors gracefully', () => {
-        const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
-        ((global as any).sessionStorage.setItem as jest.Mock).mockImplementation(() => {
-          throw new Error('Storage full');
-        });
-
-        expect(() => chatService.saveCurrentChatStatePublic()).not.toThrow();
-        expect(consoleSpy).toHaveBeenCalledWith(
-          'Failed to save chat state to sessionStorage:',
-          expect.any(Error)
-        );
-
-        consoleSpy.mockRestore();
-      });
-    });
-  });
-
-  describe('window state management', () => {
-    describe('isWindowOpen', () => {
-      it('should return false by default', () => {
-        expect(chatService.isWindowOpen()).toBe(false);
-      });
-
-      it('should return updated state after setWindowState', () => {
-        chatService.setWindowState({ isWindowOpen: true });
-        expect(chatService.isWindowOpen()).toBe(true);
-
-        chatService.setWindowState({ isWindowOpen: false });
-        expect(chatService.isWindowOpen()).toBe(false);
-      });
-    });
-
-    describe('getWindowMode', () => {
-      it('should return SIDECAR by default', () => {
-        expect(chatService.getWindowMode()).toBe('sidecar');
-      });
-
-      it('should return updated mode after setWindowState', () => {
-        chatService.setWindowState({ isWindowOpen: true, windowMode: 'fullscreen' as any });
-        expect(chatService.getWindowMode()).toBe('fullscreen');
-      });
-    });
-
-    describe('getWindowState', () => {
-      it('should return complete window state', () => {
-        const state = chatService.getWindowState();
-        expect(state).toEqual({
-          isWindowOpen: false,
-          windowMode: 'sidecar',
-          paddingSize: 400,
-        });
-      });
-
-      it('should return updated state', () => {
-        chatService.setWindowState({ isWindowOpen: true, windowMode: 'fullscreen' as any });
-        const state = chatService.getWindowState();
-        expect(state).toEqual({
-          isWindowOpen: true,
-          windowMode: 'fullscreen',
-          paddingSize: 400,
-        });
-      });
-    });
-
-    describe('setWindowState', () => {
-      it('should update window open state', () => {
-        chatService.setWindowState({ isWindowOpen: true });
-        expect(chatService.isWindowOpen()).toBe(true);
-      });
-
-      it('should update window mode when provided', () => {
-        chatService.setWindowState({ isWindowOpen: true, windowMode: 'fullscreen' as any });
-        expect(chatService.getWindowMode()).toBe('fullscreen');
-      });
-
-      it('should not update mode when not provided', () => {
-        chatService.setWindowState({ isWindowOpen: true, windowMode: 'fullscreen' as any });
-        chatService.setWindowState({ isWindowOpen: false });
-        expect(chatService.getWindowMode()).toBe('fullscreen');
-      });
-
-      it('should notify listeners when state changes', () => {
-        const callback = jest.fn();
-        chatService.onWindowStateChange(callback);
-
-        chatService.setWindowState({ isWindowOpen: true });
-        expect(callback).toHaveBeenCalledWith(
-          {
-            isWindowOpen: true,
-            windowMode: 'sidecar',
-            paddingSize: 400,
-          },
-          {
-            isWindowOpen: true,
-            windowMode: false,
-            paddingSize: false,
-          }
-        );
-
-        chatService.setWindowState({ isWindowOpen: false });
-        expect(callback).toHaveBeenCalledWith(
-          {
-            isWindowOpen: false,
-            windowMode: 'sidecar',
-            paddingSize: 400,
-          },
-          {
-            isWindowOpen: true,
-            windowMode: false,
-            paddingSize: false,
-          }
-        );
-      });
-
-      it('should not notify listeners when state does not change', () => {
-        const callback = jest.fn();
-        chatService.setWindowState({ isWindowOpen: false });
-        chatService.onWindowStateChange(callback);
-        chatService.setWindowState({ isWindowOpen: false });
-        // Core service might still emit even for same values - this is implementation dependent
-        // The important thing is that the callback receives correct state
-      });
-
-      it('should notify listeners when window mode changes', () => {
-        const callback = jest.fn();
-        chatService.onWindowStateChange(callback);
-
-        // Set initial state - windowMode is already 'sidecar' by default, so only isWindowOpen changes
-        chatService.setWindowState({ isWindowOpen: true, windowMode: 'sidecar' as any });
-        expect(callback).toHaveBeenCalledWith(
-          {
-            isWindowOpen: true,
-            windowMode: 'sidecar',
-            paddingSize: 400,
-          },
-          {
-            isWindowOpen: true,
-            windowMode: false,
-            paddingSize: false,
-          }
-        );
-
-        callback.mockClear();
-
-        // Change only the mode, keep isOpen the same
-        chatService.setWindowState({ isWindowOpen: true, windowMode: 'fullscreen' as any });
-        expect(callback).toHaveBeenCalledWith(
-          {
-            isWindowOpen: true,
-            windowMode: 'fullscreen',
-            paddingSize: 400,
-          },
-          {
-            isWindowOpen: false,
-            windowMode: true,
-            paddingSize: false,
-          }
-        );
-      });
-
-      it('should not notify listeners when mode is set to same value', () => {
-        const callback = jest.fn();
-        chatService.setWindowState({ isWindowOpen: true, windowMode: 'sidecar' as any });
-
-        chatService.onWindowStateChange(callback);
-
-        // Set same mode again - behavior depends on core service implementation
-        chatService.setWindowState({ isWindowOpen: true, windowMode: 'sidecar' as any });
-        // Core service behavior for duplicate values is implementation dependent
-      });
-
-      it('should notify with complete window state', () => {
-        const callback = jest.fn();
-        chatService.onWindowStateChange(callback);
-
-        chatService.setWindowState({ isWindowOpen: true, windowMode: 'fullscreen' as any });
-
-        expect(callback).toHaveBeenCalledWith(
-          {
-            isWindowOpen: true,
-            windowMode: 'fullscreen',
-            paddingSize: 400,
-          },
-          {
-            isWindowOpen: true,
-            windowMode: true,
-            paddingSize: false,
-          }
-        );
-      });
-    });
-
-    describe('onWindowStateChange', () => {
-      it('should register callback and return unsubscribe function', () => {
-        const callback = jest.fn();
-        const unsubscribe = chatService.onWindowStateChange(callback);
-
-        chatService.setWindowState({ isWindowOpen: true });
-        expect(callback).toHaveBeenCalledWith(
-          {
-            isWindowOpen: true,
-            windowMode: 'sidecar',
-            paddingSize: 400,
-          },
-          {
-            isWindowOpen: true,
-            windowMode: false,
-            paddingSize: false,
-          }
-        );
-
-        callback.mockClear();
-        unsubscribe();
-
-        chatService.setWindowState({ isWindowOpen: false });
-        expect(callback).not.toHaveBeenCalled();
-      });
-
-      it('should support multiple listeners', () => {
-        const callback1 = jest.fn();
-        const callback2 = jest.fn();
-
-        chatService.onWindowStateChange(callback1);
-        chatService.onWindowStateChange(callback2);
-
-        chatService.setWindowState({ isWindowOpen: true });
-
-        expect(callback1).toHaveBeenCalledWith(
-          {
-            isWindowOpen: true,
-            windowMode: 'sidecar',
-            paddingSize: 400,
-          },
-          {
-            isWindowOpen: true,
-            windowMode: false,
-            paddingSize: false,
-          }
-        );
-        expect(callback2).toHaveBeenCalledWith(
-          {
-            isWindowOpen: true,
-            windowMode: 'sidecar',
-            paddingSize: 400,
-          },
-          {
-            isWindowOpen: true,
-            windowMode: false,
-            paddingSize: false,
-          }
-        );
-      });
-    });
-
-    describe('onWindowOpenRequest', () => {
-      it('should register callback and return unsubscribe function', async () => {
-        const mockInstance = {
-          sendMessage: jest.fn(),
-          startNewChat: jest.fn(),
-        };
-
-        const callback = jest.fn(() => {
-          // Set instance when callback is triggered
-          chatService.setChatWindowInstance(mockInstance as any);
-        });
-        const unsubscribe = chatService.onWindowOpenRequest(callback);
-
-        await chatService.openWindow();
-        expect(callback).toHaveBeenCalled();
-
-        callback.mockClear();
-        unsubscribe();
-
-        // After unsubscribing, calling openWindow when window is already open should just return the instance
-        const result = await chatService.openWindow();
-        expect(callback).not.toHaveBeenCalled();
-        expect(result).toBe(mockInstance);
-      });
-
-      it('should support multiple listeners', async () => {
-        const mockInstance = {
-          sendMessage: jest.fn(),
-          startNewChat: jest.fn(),
-        };
-
-        let instanceSet = false;
-        const callback1 = jest.fn(() => {
-          // Only set instance once
-          if (!instanceSet) {
-            chatService.setChatWindowInstance(mockInstance as any);
-            instanceSet = true;
-          }
-        });
-        const callback2 = jest.fn();
-
-        chatService.onWindowOpenRequest(callback1);
-        chatService.onWindowOpenRequest(callback2);
-
-        await chatService.openWindow();
-
-        expect(callback1).toHaveBeenCalled();
-        expect(callback2).toHaveBeenCalled();
-      });
-    });
-
-    describe('onWindowCloseRequest', () => {
-      it('should register callback and return unsubscribe function', async () => {
-        const callback = jest.fn();
-        const unsubscribe = chatService.onWindowCloseRequest(callback);
-
-        // Set window open first
-        chatService.setWindowState({ isWindowOpen: true });
-
-        await chatService.closeWindow();
-        expect(callback).toHaveBeenCalled();
-
-        callback.mockClear();
-        unsubscribe();
-
-        await chatService.closeWindow();
-        expect(callback).not.toHaveBeenCalled();
-      });
-
-      it('should support multiple listeners', async () => {
-        const callback1 = jest.fn();
-        const callback2 = jest.fn();
-
-        chatService.onWindowCloseRequest(callback1);
-        chatService.onWindowCloseRequest(callback2);
-
-        chatService.setWindowState({ isWindowOpen: true });
-        await chatService.closeWindow();
-
-        expect(callback1).toHaveBeenCalled();
-        expect(callback2).toHaveBeenCalled();
-      });
+    it('should save conversation when thread ID is set', async () => {
+      // Initialize a thread
+      chatService.newThread();
+
+      const messages: Message[] = [{ id: 'msg-1', role: 'user', content: 'test' }];
+
+      // Mock the saveConversation method on conversationHistoryService
+      chatService.conversationHistoryService.saveConversation = jest
+        .fn()
+        .mockResolvedValue(undefined);
+
+      await chatService.saveConversation(messages);
+
+      expect(chatService.conversationHistoryService.saveConversation).toHaveBeenCalledWith(
+        expect.stringMatching(/^thread-\d+-[a-z0-9]{9}$/),
+        messages
+      );
     });
   });
 
@@ -1159,21 +1265,20 @@ describe('ChatService', () => {
 
   describe('window control methods', () => {
     describe('openWindow', () => {
-      it('should trigger open callbacks when window is closed and return window instance', async () => {
+      it('should delegate to core service and return window instance', async () => {
         const mockInstance = {
           sendMessage: jest.fn(),
           startNewChat: jest.fn(),
         } as any;
 
-        const callback = jest.fn(() => {
-          // Simulate setting instance when window opens - do it synchronously
+        // Set up the mock to provide instance when openWindow is called
+        mockCoreChatService.openWindow = jest.fn().mockImplementation(async () => {
           chatService.setChatWindowInstance(mockInstance);
         });
-        chatService.onWindowOpenRequest(callback);
 
         const result = await chatService.openWindow();
 
-        expect(callback).toHaveBeenCalled();
+        expect(mockCoreChatService.openWindow).toHaveBeenCalled();
         expect(result).toBe(mockInstance);
       });
 
@@ -1183,7 +1288,7 @@ describe('ChatService', () => {
           startNewChat: jest.fn(),
         } as any;
         chatService.setChatWindowInstance(mockInstance);
-        chatService.setWindowState({ isWindowOpen: true });
+        mockCoreChatService.isWindowOpen = jest.fn().mockReturnValue(true);
 
         const result = await chatService.openWindow();
 
@@ -1196,40 +1301,26 @@ describe('ChatService', () => {
           startNewChat: jest.fn(),
         } as any;
 
-        const callback = jest.fn(() => {
-          // Simulate delayed instance setup
+        // Set up the mock to provide instance after a delay
+        mockCoreChatService.openWindow = jest.fn().mockImplementation(async () => {
           setTimeout(() => {
             chatService.setChatWindowInstance(mockInstance);
           }, 10);
         });
-        chatService.onWindowOpenRequest(callback);
 
         // Start openWindow (it will wait for instance)
         const result = await chatService.openWindow();
 
-        expect(callback).toHaveBeenCalled();
+        expect(mockCoreChatService.openWindow).toHaveBeenCalled();
         expect(result).toBe(mockInstance);
       });
     });
 
     describe('closeWindow', () => {
-      it('should trigger close callbacks when window is open', async () => {
-        const callback = jest.fn();
-        chatService.onWindowCloseRequest(callback);
-
-        chatService.setWindowState({ isWindowOpen: true });
+      it('should delegate to core service', async () => {
         await chatService.closeWindow();
 
-        expect(callback).toHaveBeenCalled();
-      });
-
-      it('should not trigger callbacks when window is already closed', async () => {
-        const callback = jest.fn();
-        chatService.onWindowCloseRequest(callback);
-
-        await chatService.closeWindow();
-
-        expect(callback).not.toHaveBeenCalled();
+        expect(mockCoreChatService.closeWindow).toHaveBeenCalled();
       });
     });
   });
@@ -1254,18 +1345,16 @@ describe('ChatService', () => {
         startNewChat: jest.fn(),
       };
 
-      const openCallback = jest.fn(() => {
-        // Set instance when window opens - do it synchronously
+      // Set up the mock to provide instance when openWindow is called
+      mockCoreChatService.openWindow = jest.fn().mockImplementation(async () => {
+        // Simulate the window opening and instance being set
         chatService.setChatWindowInstance(mockInstance as any);
       });
-      chatService.onWindowOpenRequest(openCallback);
-
-      const mockObservable = new Observable<BaseEvent>();
-      mockAgent.runAgent.mockReturnValue(mockObservable);
 
       await chatService.sendMessageWithWindow('test', []);
 
-      expect(openCallback).toHaveBeenCalled();
+      expect(mockCoreChatService.openWindow).toHaveBeenCalled();
+      expect(mockInstance.sendMessage).toHaveBeenCalledWith({ content: 'test', messages: [] });
     });
 
     it('should delegate to ChatWindow when instance is available and window is open', async () => {
@@ -1276,7 +1365,7 @@ describe('ChatService', () => {
       };
 
       chatService.setChatWindowInstance(mockChatWindowInstance as any);
-      chatService.setWindowState({ isWindowOpen: true });
+      mockCoreChatService.isWindowOpen = jest.fn().mockReturnValue(true);
 
       const result = await chatService.sendMessageWithWindow('test message', []);
 
@@ -1294,7 +1383,7 @@ describe('ChatService', () => {
       };
 
       chatService.setChatWindowInstance(mockChatWindowInstance as any);
-      chatService.setWindowState({ isWindowOpen: true });
+      mockCoreChatService.isWindowOpen = jest.fn().mockReturnValue(true);
 
       await chatService.sendMessageWithWindow('test', [], { clearConversation: true });
 
@@ -1302,16 +1391,13 @@ describe('ChatService', () => {
     });
 
     it('should wait for window instance when not immediately available', async () => {
-      const mockObservable = new Observable<BaseEvent>();
-      mockAgent.runAgent.mockReturnValue(mockObservable);
-
       const mockInstance = {
         sendMessage: jest.fn().mockResolvedValue(undefined),
         startNewChat: jest.fn(),
       };
 
-      // Set up callback to provide instance when window opens
-      chatService.onWindowOpenRequest(() => {
+      // Set up the mock to provide instance after a delay
+      mockCoreChatService.openWindow = jest.fn().mockImplementation(async () => {
         setTimeout(() => {
           chatService.setChatWindowInstance(mockInstance as any);
         }, 10);
@@ -1332,13 +1418,9 @@ describe('ChatService', () => {
       };
 
       chatService.setChatWindowInstance(mockChatWindowInstance as any);
-      chatService.setWindowState({ isWindowOpen: true });
-
-      const mockObservable = new Observable<BaseEvent>();
-      mockAgent.runAgent.mockReturnValue(mockObservable);
+      mockCoreChatService.isWindowOpen = jest.fn().mockReturnValue(true);
 
       // The sendMessageWithWindow will actually throw since delegation failed
-      // But let's test that it properly delegates first
       await expect(chatService.sendMessageWithWindow('test', [])).rejects.toThrow();
     });
 
@@ -1350,7 +1432,7 @@ describe('ChatService', () => {
       };
 
       chatService.setChatWindowInstance(mockChatWindowInstance as any);
-      chatService.setWindowState({ isWindowOpen: true });
+      mockCoreChatService.isWindowOpen = jest.fn().mockReturnValue(true);
 
       const result = await chatService.sendMessageWithWindow('test', []);
 
@@ -1363,6 +1445,58 @@ describe('ChatService', () => {
       });
 
       expect(completed).toBe(true);
+    });
+
+    it('should call newThread before openWindow when clearConversation is true', async () => {
+      const callOrder: string[] = [];
+
+      // Track newThread call
+      const originalNewThread = mockCoreChatService.newThread;
+      mockCoreChatService.newThread = jest.fn(() => {
+        callOrder.push('newThread');
+        originalNewThread();
+      });
+
+      const mockInstance = {
+        sendMessage: jest.fn().mockResolvedValue(undefined),
+        startNewChat: jest.fn(),
+      };
+
+      // Track openWindow call and set instance when window opens
+      const originalOpenWindow = mockCoreChatService.openWindow;
+      mockCoreChatService.openWindow = jest.fn(async () => {
+        callOrder.push('openWindow');
+        await originalOpenWindow();
+        // Set instance after window opens
+        chatService.setChatWindowInstance(mockInstance as any);
+      });
+
+      await chatService.sendMessageWithWindow('test', [], { clearConversation: true });
+
+      // Verify newThread is called before openWindow
+      expect(callOrder).toEqual(['newThread', 'openWindow']);
+    });
+
+    it('should call startNewChat on chatWindowInstance after window opens when clearConversation is true', async () => {
+      const mockStartNewChat = jest.fn();
+      const mockSendMessage = jest.fn().mockResolvedValue(undefined);
+
+      const mockInstance = {
+        sendMessage: mockSendMessage,
+        startNewChat: mockStartNewChat,
+      };
+
+      // Set up mock to provide instance when window opens
+      mockCoreChatService.openWindow = jest.fn(async () => {
+        chatService.setChatWindowInstance(mockInstance as any);
+      });
+
+      await chatService.sendMessageWithWindow('test', [], { clearConversation: true });
+
+      // Verify startNewChat was called on the window instance
+      expect(mockStartNewChat).toHaveBeenCalled();
+      // Verify sendMessage was also called after startNewChat
+      expect(mockSendMessage).toHaveBeenCalledWith({ content: 'test', messages: [] });
     });
   });
 
@@ -1493,6 +1627,327 @@ describe('ChatService', () => {
     it('should handle empty contexts array', () => {
       const result = (chatService as any).extractDataSourceIdFromPageContext([]);
       expect(result).toBeUndefined();
+    });
+  });
+
+  describe('restoreLatestConversation', () => {
+    const mockMessages = [
+      { id: 'msg-1', role: 'user', content: 'Hello' },
+      { id: 'msg-2', role: 'assistant', content: 'Hi there!' },
+    ];
+    const mockThreadId = 'thread-12345';
+    const mockSnapshotEvent = {
+      type: 'MESSAGES_SNAPSHOT',
+      messages: mockMessages,
+      timestamp: Date.now(),
+    };
+
+    it('should return events array including MESSAGES_SNAPSHOT for the latest conversation', async () => {
+      chatService.conversationHistoryService.getConversations = jest.fn().mockResolvedValue({
+        conversations: [{ threadId: mockThreadId, title: 'Test', createdAt: 0, updatedAt: 0 }],
+        total: 1,
+      });
+      chatService.conversationHistoryService.getConversation = jest
+        .fn()
+        .mockResolvedValue([mockSnapshotEvent]);
+
+      const result = await chatService.restoreLatestConversation();
+
+      expect(result).not.toBeNull();
+      expect(Array.isArray(result)).toBe(true);
+      const snapshot = result!.find((e: any) => e.type === 'MESSAGES_SNAPSHOT');
+      expect(snapshot).toBeDefined();
+      expect((snapshot as any).messages).toEqual(mockMessages);
+      expect(mockCoreChatService.setThreadId).toHaveBeenCalledWith(mockThreadId);
+    });
+
+    it('should return null and generate new thread when no conversations exist', async () => {
+      chatService.conversationHistoryService.getConversations = jest.fn().mockResolvedValue({
+        conversations: [],
+        total: 0,
+      });
+
+      const result = await chatService.restoreLatestConversation();
+
+      expect(result).toBeNull();
+      expect(mockCoreChatService.newThread).toHaveBeenCalled();
+    });
+
+    it('should return null and generate new thread when getConversation returns null', async () => {
+      chatService.conversationHistoryService.getConversations = jest.fn().mockResolvedValue({
+        conversations: [{ threadId: mockThreadId, title: 'Test', createdAt: 0, updatedAt: 0 }],
+        total: 1,
+      });
+      chatService.conversationHistoryService.getConversation = jest.fn().mockResolvedValue(null);
+
+      const result = await chatService.restoreLatestConversation();
+
+      expect(result).toBeNull();
+      expect(mockCoreChatService.newThread).toHaveBeenCalled();
+    });
+
+    it('should return null and skip restore when thread ID is already set', async () => {
+      mockCoreChatService.getThreadId.mockReturnValue('existing-thread-id');
+      chatService.conversationHistoryService.getConversations = jest.fn();
+
+      const result = await chatService.restoreLatestConversation();
+
+      expect(result).toBeNull();
+      expect(chatService.conversationHistoryService.getConversations).not.toHaveBeenCalled();
+      expect(mockCoreChatService.newThread).not.toHaveBeenCalled();
+    });
+
+    it('should inject synthetic tool call events for unfinished tool calls', async () => {
+      const mockHasAction = jest.fn((name: string) => name === 'run_cmd');
+      (AssistantActionService.getInstance().hasAction as jest.Mock).mockImplementation(
+        mockHasAction
+      );
+
+      const messagesWithUnfinished = [
+        { id: 'user-1', role: 'user', content: 'Run it' },
+        {
+          id: 'assistant-1',
+          role: 'assistant',
+          content: '',
+          toolCalls: [
+            {
+              id: 'tc-1',
+              type: 'function',
+              function: { name: 'run_cmd', arguments: '{"cmd":"ls"}' },
+            },
+          ],
+        },
+      ];
+
+      chatService.conversationHistoryService.getConversations = jest.fn().mockResolvedValue({
+        conversations: [{ threadId: mockThreadId, title: 'Test', createdAt: 0, updatedAt: 0 }],
+        total: 1,
+      });
+      chatService.conversationHistoryService.getConversation = jest
+        .fn()
+        .mockResolvedValue([
+          { type: 'MESSAGES_SNAPSHOT', messages: messagesWithUnfinished, timestamp: Date.now() },
+        ]);
+
+      const result = await chatService.restoreLatestConversation();
+
+      expect(result).not.toBeNull();
+      const types = result!.map((e: any) => e.type);
+      expect(types).toContain('TOOL_CALL_START');
+      expect(types).toContain('TOOL_CALL_ARGS');
+      expect(types).toContain('TOOL_CALL_END');
+
+      const snapshot = result!.find((e: any) => e.type === 'MESSAGES_SNAPSHOT') as any;
+      const lastMsg = snapshot.messages[snapshot.messages.length - 1];
+      expect(lastMsg.toolCalls).toHaveLength(0);
+    });
+
+    it('should not inject synthetic events for non-frontend tool calls', async () => {
+      const mockHasAction = jest.fn().mockReturnValue(false);
+      (AssistantActionService.getInstance().hasAction as jest.Mock).mockImplementation(
+        mockHasAction
+      );
+
+      const messagesWithServerTool = [
+        { id: 'user-1', role: 'user', content: 'Run it' },
+        {
+          id: 'assistant-1',
+          role: 'assistant',
+          content: '',
+          toolCalls: [
+            { id: 'tc-1', type: 'function', function: { name: 'server_tool', arguments: '{}' } },
+          ],
+        },
+      ];
+
+      chatService.conversationHistoryService.getConversations = jest.fn().mockResolvedValue({
+        conversations: [{ threadId: mockThreadId, title: 'Test', createdAt: 0, updatedAt: 0 }],
+        total: 1,
+      });
+      chatService.conversationHistoryService.getConversation = jest
+        .fn()
+        .mockResolvedValue([
+          { type: 'MESSAGES_SNAPSHOT', messages: messagesWithServerTool, timestamp: Date.now() },
+        ]);
+
+      const result = await chatService.restoreLatestConversation();
+
+      expect(result).not.toBeNull();
+      const types = result!.map((e: any) => e.type);
+      expect(types).not.toContain('TOOL_CALL_START');
+    });
+  });
+
+  describe('loadConversation', () => {
+    const mockThreadId = 'thread-load-123';
+    const mockMessages = [
+      { id: 'msg-1', role: 'user', content: 'Hello' },
+      { id: 'msg-2', role: 'assistant', content: 'Hi!' },
+    ];
+
+    it('should return events array and set thread ID', async () => {
+      chatService.conversationHistoryService.getConversation = jest
+        .fn()
+        .mockResolvedValue([
+          { type: 'MESSAGES_SNAPSHOT', messages: mockMessages, timestamp: Date.now() },
+        ]);
+
+      const result = await chatService.loadConversation(mockThreadId);
+
+      expect(result).not.toBeNull();
+      expect(Array.isArray(result)).toBe(true);
+      expect(mockCoreChatService.setThreadId).toHaveBeenCalledWith(mockThreadId);
+    });
+
+    it('should return null when getConversation returns null', async () => {
+      chatService.conversationHistoryService.getConversation = jest.fn().mockResolvedValue(null);
+
+      const result = await chatService.loadConversation(mockThreadId);
+
+      expect(result).toBeNull();
+    });
+
+    it('should inject synthetic tool call events for unfinished tool calls', async () => {
+      const mockHasAction = jest.fn((name: string) => name === 'run_cmd');
+      (AssistantActionService.getInstance().hasAction as jest.Mock).mockImplementation(
+        mockHasAction
+      );
+
+      const messagesWithUnfinished = [
+        { id: 'user-1', role: 'user', content: 'Run it' },
+        {
+          id: 'assistant-1',
+          role: 'assistant',
+          content: '',
+          toolCalls: [
+            {
+              id: 'tc-1',
+              type: 'function',
+              function: { name: 'run_cmd', arguments: '{"cmd":"ls"}' },
+            },
+          ],
+        },
+      ];
+
+      chatService.conversationHistoryService.getConversation = jest
+        .fn()
+        .mockResolvedValue([
+          { type: 'MESSAGES_SNAPSHOT', messages: messagesWithUnfinished, timestamp: Date.now() },
+        ]);
+
+      const result = await chatService.loadConversation(mockThreadId);
+
+      expect(result).not.toBeNull();
+      const types = result!.map((e: any) => e.type);
+      expect(types).toContain('TOOL_CALL_START');
+      expect(types).toContain('TOOL_CALL_ARGS');
+      expect(types).toContain('TOOL_CALL_END');
+    });
+
+    it('should inject synthetic events for each of multiple unfinished tool calls', async () => {
+      const mockHasAction = jest.fn((name: string) => name === 'cmd_a' || name === 'cmd_b');
+      (AssistantActionService.getInstance().hasAction as jest.Mock).mockImplementation(
+        mockHasAction
+      );
+
+      const messagesWithMultipleUnfinished = [
+        { id: 'user-1', role: 'user', content: 'Run two commands' },
+        {
+          id: 'assistant-1',
+          role: 'assistant',
+          content: '',
+          toolCalls: [
+            { id: 'tc-1', type: 'function', function: { name: 'cmd_a', arguments: '{"a":1}' } },
+            { id: 'tc-2', type: 'function', function: { name: 'cmd_b', arguments: '{"b":2}' } },
+          ],
+        },
+      ];
+
+      chatService.conversationHistoryService.getConversation = jest.fn().mockResolvedValue([
+        {
+          type: 'MESSAGES_SNAPSHOT',
+          messages: messagesWithMultipleUnfinished,
+          timestamp: Date.now(),
+        },
+      ]);
+
+      const result = await chatService.loadConversation(mockThreadId);
+
+      expect(result).not.toBeNull();
+      const startEvents = result!.filter((e: any) => e.type === 'TOOL_CALL_START');
+      const argsEvents = result!.filter((e: any) => e.type === 'TOOL_CALL_ARGS');
+      const endEvents = result!.filter((e: any) => e.type === 'TOOL_CALL_END');
+
+      expect(startEvents).toHaveLength(2);
+      expect(argsEvents).toHaveLength(2);
+      expect(endEvents).toHaveLength(2);
+
+      const startIds = startEvents.map((e: any) => e.toolCallId);
+      expect(startIds).toContain('tc-1');
+      expect(startIds).toContain('tc-2');
+    });
+
+    it('should not inject tool call events when all tool calls have results', async () => {
+      const mockHasAction = jest.fn((name: string) => name === 'run_cmd');
+      (AssistantActionService.getInstance().hasAction as jest.Mock).mockImplementation(
+        mockHasAction
+      );
+
+      const messagesWithFinished = [
+        { id: 'user-1', role: 'user', content: 'Run it' },
+        {
+          id: 'assistant-1',
+          role: 'assistant',
+          content: '',
+          toolCalls: [
+            { id: 'tc-1', type: 'function', function: { name: 'run_cmd', arguments: '{}' } },
+          ],
+        },
+        { id: 'tool-1', role: 'tool', content: 'done', toolCallId: 'tc-1' },
+      ];
+
+      chatService.conversationHistoryService.getConversation = jest
+        .fn()
+        .mockResolvedValue([
+          { type: 'MESSAGES_SNAPSHOT', messages: messagesWithFinished, timestamp: Date.now() },
+        ]);
+
+      const result = await chatService.loadConversation(mockThreadId);
+
+      expect(result).not.toBeNull();
+      const types = result!.map((e: any) => e.type);
+      expect(types).not.toContain('TOOL_CALL_START');
+    });
+
+    it('should not inject synthetic events for non-frontend tool calls', async () => {
+      const mockHasAction = jest.fn().mockReturnValue(false);
+      (AssistantActionService.getInstance().hasAction as jest.Mock).mockImplementation(
+        mockHasAction
+      );
+
+      const messagesWithServerTool = [
+        { id: 'user-1', role: 'user', content: 'Run it' },
+        {
+          id: 'assistant-1',
+          role: 'assistant',
+          content: '',
+          toolCalls: [
+            { id: 'tc-1', type: 'function', function: { name: 'server_tool', arguments: '{}' } },
+          ],
+        },
+      ];
+
+      chatService.conversationHistoryService.getConversation = jest
+        .fn()
+        .mockResolvedValue([
+          { type: 'MESSAGES_SNAPSHOT', messages: messagesWithServerTool, timestamp: Date.now() },
+        ]);
+
+      const result = await chatService.loadConversation(mockThreadId);
+
+      expect(result).not.toBeNull();
+      const types = result!.map((e: any) => e.type);
+      expect(types).not.toContain('TOOL_CALL_START');
     });
   });
 
@@ -1634,76 +2089,255 @@ describe('ChatService', () => {
     });
   });
 
-  describe('removeTrailingErrorMessages', () => {
-    it('should remove trailing network error messages', () => {
-      const messages = [
-        { id: '1', role: 'user', content: 'Hello' },
-        { id: '2', role: 'assistant', content: 'Hi there!' },
-        { id: 'error-123', role: 'system', content: 'Error: network error' },
-        { id: 'error-456', role: 'system', content: 'Error: network error' },
-      ];
+  describe('getAvailableDataSources', () => {
+    let mockSavedObjectsClient: any;
 
-      const result = (chatService as any).removeTrailingErrorMessages(messages);
+    beforeEach(() => {
+      mockSavedObjectsClient = {
+        find: jest.fn().mockResolvedValue({
+          savedObjects: [
+            {
+              id: 'ds-1',
+              attributes: { title: 'Beta Source', dataSourceEngineType: 'OpenSearch' },
+            },
+            {
+              id: 'ds-2',
+              attributes: { title: 'Alpha Source', dataSourceEngineType: 'OpenSearch' },
+            },
+            {
+              id: 'ds-3',
+              attributes: { title: 'Gamma AE', dataSourceEngineType: 'AnalyticEngine' },
+            },
+          ],
+        }),
+      };
+    });
+
+    it('should return sorted data sources excluding AnalyticEngine', async () => {
+      const service = new (ChatService as any)(
+        mockUiSettings,
+        mockCoreChatService,
+        undefined,
+        mockSavedObjectsClient
+      );
+
+      const result = await service.getAvailableDataSources();
 
       expect(result).toEqual([
-        { id: '1', role: 'user', content: 'Hello' },
-        { id: '2', role: 'assistant', content: 'Hi there!' },
+        { id: 'ds-2', title: 'Alpha Source' },
+        { id: 'ds-1', title: 'Beta Source' },
       ]);
     });
 
-    it('should preserve other system messages', () => {
-      const messages = [
-        { id: '1', role: 'user', content: 'Hello' },
-        { id: '2', role: 'system', content: 'Connection restored' },
-        { id: 'error-123', role: 'system', content: 'Error: network error' },
-      ];
+    it('should cache the result and not query again', async () => {
+      const service = new (ChatService as any)(
+        mockUiSettings,
+        mockCoreChatService,
+        undefined,
+        mockSavedObjectsClient
+      );
 
-      const result = (chatService as any).removeTrailingErrorMessages(messages);
+      await service.getAvailableDataSources();
+      await service.getAvailableDataSources();
 
-      expect(result).toEqual([
-        { id: '1', role: 'user', content: 'Hello' },
-        { id: '2', role: 'system', content: 'Connection restored' },
-      ]);
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledTimes(1);
     });
 
-    it('should preserve other error messages', () => {
-      const messages = [
-        { id: '1', role: 'user', content: 'Hello' },
-        { id: 'error-123', role: 'system', content: 'Error: Server timeout' },
-        { id: 'error-456', role: 'system', content: 'Error: network error' },
-      ];
+    it('should return empty array when savedObjectsClient is not set', async () => {
+      const service = new (ChatService as any)(mockUiSettings, mockCoreChatService);
 
-      const result = (chatService as any).removeTrailingErrorMessages(messages);
+      const result = await service.getAvailableDataSources();
 
-      expect(result).toEqual([
-        { id: '1', role: 'user', content: 'Hello' },
-        { id: 'error-123', role: 'system', content: 'Error: Server timeout' },
-      ]);
-    });
-
-    it('should handle empty message array', () => {
-      const result = (chatService as any).removeTrailingErrorMessages([]);
       expect(result).toEqual([]);
     });
 
-    it('should handle messages with no trailing errors', () => {
-      const messages = [
-        { id: '1', role: 'user', content: 'Hello' },
-        { id: '2', role: 'assistant', content: 'Hi there!' },
-      ];
+    it('should return empty array when find throws', async () => {
+      mockSavedObjectsClient.find.mockRejectedValue(new Error('Network error'));
+      const service = new (ChatService as any)(
+        mockUiSettings,
+        mockCoreChatService,
+        undefined,
+        mockSavedObjectsClient
+      );
 
-      const result = (chatService as any).removeTrailingErrorMessages(messages);
-      expect(result).toEqual(messages);
+      const result = await service.getAvailableDataSources();
+
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe('getCurrentDataSourceId', () => {
+    let mockSavedObjectsClient: any;
+    let mockWorkspaces: any;
+
+    beforeEach(() => {
+      mockWorkspaces = {
+        currentWorkspaceId$: { getValue: jest.fn().mockReturnValue('workspace-1') },
+      };
+
+      mockSavedObjectsClient = {
+        find: jest.fn().mockResolvedValue({
+          savedObjects: [
+            { id: 'ds-1', attributes: { title: 'Source One', dataSourceEngineType: 'OpenSearch' } },
+            { id: 'ds-2', attributes: { title: 'Source Two', dataSourceEngineType: 'OpenSearch' } },
+          ],
+        }),
+      };
     });
 
-    it('should handle all messages being network errors', () => {
-      const messages = [
-        { id: 'error-123', role: 'system', content: 'Error: network error' },
-        { id: 'error-456', role: 'system', content: 'Error: network error' },
-      ];
+    it('should return data source ID when it exists in available data sources', async () => {
+      const { getDefaultDataSourceId } = jest.requireMock('../../../data_source_management/public');
+      getDefaultDataSourceId.mockResolvedValue('ds-1');
 
-      const result = (chatService as any).removeTrailingErrorMessages(messages);
-      expect(result).toEqual([]);
+      const service = new (ChatService as any)(
+        mockUiSettings,
+        mockCoreChatService,
+        mockWorkspaces,
+        mockSavedObjectsClient
+      );
+
+      const result = await service.getCurrentDataSourceId();
+
+      expect(result).toBe('ds-1');
+    });
+
+    it('should return data source ID even if not in available data sources', async () => {
+      const { getDefaultDataSourceId } = jest.requireMock('../../../data_source_management/public');
+      getDefaultDataSourceId.mockResolvedValue('ds-invalid');
+
+      const service = new (ChatService as any)(
+        mockUiSettings,
+        mockCoreChatService,
+        mockWorkspaces,
+        mockSavedObjectsClient
+      );
+
+      const result = await service.getCurrentDataSourceId();
+
+      expect(result).toBe('ds-invalid');
+    });
+
+    it('should return data source ID even when no compatible data sources are available', async () => {
+      mockSavedObjectsClient.find.mockResolvedValue({ savedObjects: [] });
+      const { getDefaultDataSourceId } = jest.requireMock('../../../data_source_management/public');
+      getDefaultDataSourceId.mockResolvedValue('ds-1');
+
+      const service = new (ChatService as any)(
+        mockUiSettings,
+        mockCoreChatService,
+        mockWorkspaces,
+        mockSavedObjectsClient
+      );
+
+      const result = await service.getCurrentDataSourceId();
+
+      expect(result).toBe('ds-1');
+    });
+
+    it('should return cachedDataSourceId when it is valid', async () => {
+      const service = new (ChatService as any)(
+        mockUiSettings,
+        mockCoreChatService,
+        mockWorkspaces,
+        mockSavedObjectsClient
+      );
+
+      service.setDataSourceId('ds-2');
+      const result = await service.getCurrentDataSourceId();
+
+      expect(result).toBe('ds-2');
+    });
+
+    it('should return cachedDataSourceId even if not in available data sources', async () => {
+      const service = new (ChatService as any)(
+        mockUiSettings,
+        mockCoreChatService,
+        mockWorkspaces,
+        mockSavedObjectsClient
+      );
+
+      service.setDataSourceId('ds-removed');
+      const result = await service.getCurrentDataSourceId();
+
+      expect(result).toBe('ds-removed');
+    });
+
+    it('should prioritize page context data source when valid', async () => {
+      (global as any).window.assistantContextStore = {
+        getAllContexts: jest.fn().mockReturnValue([
+          {
+            categories: ['page', 'static'],
+            description: 'Page context',
+            value: { appId: 'explore', dataset: { dataSource: { id: 'ds-1' } } },
+          },
+        ]),
+      };
+
+      const service = new (ChatService as any)(
+        mockUiSettings,
+        mockCoreChatService,
+        mockWorkspaces,
+        mockSavedObjectsClient
+      );
+
+      const result = await service.getCurrentDataSourceId();
+
+      expect(result).toBe('ds-1');
+    });
+
+    it('should return page context data source even if not in available list', async () => {
+      (global as any).window.assistantContextStore = {
+        getAllContexts: jest.fn().mockReturnValue([
+          {
+            categories: ['page', 'static'],
+            description: 'Page context',
+            value: { appId: 'explore', dataset: { dataSource: { id: 'ds-not-in-workspace' } } },
+          },
+        ]),
+      };
+
+      const service = new (ChatService as any)(
+        mockUiSettings,
+        mockCoreChatService,
+        mockWorkspaces,
+        mockSavedObjectsClient
+      );
+
+      const result = await service.getCurrentDataSourceId();
+
+      expect(result).toBe('ds-not-in-workspace');
+    });
+
+    afterEach(() => {
+      delete (global as any).window.assistantContextStore;
+      jest.clearAllMocks();
+    });
+  });
+
+  describe('getUserMessage', () => {
+    it('should create a user message with content and rawMessage', () => {
+      const result = chatService.getUserMessage('hello world');
+
+      expect(result).toEqual({
+        id: expect.stringMatching(/^msg-\d+-[a-z0-9]{9}$/),
+        role: 'user',
+        content: 'hello world',
+        rawMessage: 'hello world',
+      });
+    });
+
+    it('should use provided rawMessage when given', () => {
+      const result = chatService.getUserMessage('/command output', '/command input');
+
+      expect(result.content).toBe('/command output');
+      expect(result.rawMessage).toBe('/command input');
+    });
+
+    it('should trim content', () => {
+      const result = chatService.getUserMessage('  spaced  ');
+
+      expect(result.content).toBe('spaced');
+      expect(result.rawMessage).toBe('spaced');
     });
   });
 });

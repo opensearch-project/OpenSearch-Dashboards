@@ -29,7 +29,7 @@
  */
 
 import { upperFirst, isFunction } from 'lodash';
-import React, { MouseEvent } from 'react';
+import { MouseEvent } from 'react';
 import classNames from 'classnames';
 import {
   EuiToolTip,
@@ -51,12 +51,12 @@ import {
 function TopNavMenuLegacyItem(props: TopNavMenuLegacyData) {
   function isDisabled(): boolean {
     const val = isFunction(props.disableButton) ? props.disableButton() : props.disableButton;
-    return val!;
+    return val ?? false;
   }
 
   function getTooltip(): string {
     const val = isFunction(props.tooltip) ? props.tooltip() : props.tooltip;
-    return val!;
+    return val ?? '';
   }
 
   function handleClick(e: MouseEvent<HTMLButtonElement>) {
@@ -202,8 +202,3 @@ export function TopNavMenuItem(props: TopNavMenuData) {
 
   return getComponent(true);
 }
-
-TopNavMenuItem.defaultProps = {
-  disableButton: false,
-  tooltip: '',
-};

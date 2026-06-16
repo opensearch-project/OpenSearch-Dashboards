@@ -216,6 +216,7 @@ describe('s3TypeConfig', () => {
       id: '9aa4dc80-7151-11ef-8fea-1fe2265e9c7d::mys3.default.http_logs',
       title: 'mys3.default.http_logs',
       type: 'S3',
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       dataSource: {
         id: '9aa4dc80-7151-11ef-8fea-1fe2265e9c7d',
         title: 'flint-213',

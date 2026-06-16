@@ -9,6 +9,7 @@ import { PPLWorkerProxyService } from './worker_proxy_service';
 import { getPPLLanguageAnalyzer, PPLValidationResult } from './ppl_language_analyzer';
 import { getPPLDocumentationLink } from './ppl_documentation';
 import { pplRangeFormatProvider } from './formatter';
+import { resolvePPLValidationResult } from './validation_provider';
 
 const PPL_LANGUAGE_ID = ID;
 const OWNER = 'PPL_WORKER';
@@ -129,8 +130,11 @@ const processSyntaxHighlighting = async (model: monaco.editor.IModel) => {
     // Ensure worker is set up before validation - always call setup as it has internal check
     pplWorkerProxyService.setup();
 
-    // Get validation result from worker with timeout protection
-    const validationResult = (await pplWorkerProxyService.validate(content)) as PPLValidationResult;
+    const validationResult = (await resolvePPLValidationResult(
+      model,
+      content,
+      async (query) => (await pplWorkerProxyService.validate(query)) as PPLValidationResult
+    )) as PPLValidationResult;
 
     if (validationResult.errors.length > 0) {
       // Convert errors to Monaco markers
@@ -170,6 +174,10 @@ const processSyntaxHighlighting = async (model: monaco.editor.IModel) => {
   } catch (error) {
     // Silent error handling - continue without worker-based highlighting
   }
+};
+
+export const revalidatePPLModel = async (model: monaco.editor.IModel) => {
+  await processSyntaxHighlighting(model);
 };
 
 /**

@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { mount, shallow } from 'enzyme';
 
 import { ExtendedBoundsParamEditor, Bounds } from './extended_bounds';

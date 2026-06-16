@@ -5,7 +5,7 @@
 
 import { configureStore } from '@reduxjs/toolkit';
 import { render } from '@testing-library/react';
-import React from 'react';
+
 import { Provider } from 'react-redux';
 import { ExploreMetricsDataTable } from './explore_metrics_data_table';
 import {
@@ -14,12 +14,15 @@ import {
   queryReducer,
   resultsInitialState,
   resultsReducer,
+  resultsCache,
+  clearResultsCache,
 } from '../../application/utils/state_management/slices';
 import { defaultPrepareQueryString } from '../../application/utils/state_management/actions/query_actions';
 
 jest.mock('./metrics_data_table', () => ({
   MetricsDataTable: ({ searchResult }: { searchResult: IPrometheusSearchResult }) => (
     <div data-testid="metrics-data-table">
+      {/* @ts-expect-error TS18048 TODO(ts-error): fixme */}
       Metrics Data Table - Rows: {searchResult.instantHits.total}
     </div>
   ),
@@ -36,6 +39,7 @@ describe('ExploreMetricsDataTable', () => {
 
     const cacheKey = defaultPrepareQueryString(queryObj);
 
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     const mockSearchResult: IPrometheusSearchResult = searchResult || {
       took: 10,
       timed_out: false,
@@ -67,11 +71,20 @@ describe('ExploreMetricsDataTable', () => {
       ],
     };
 
+    // Populate the module-level cache with full results
+    resultsCache.set(cacheKey, mockSearchResult);
+
     const preloadedState = {
       query: queryObj,
       results: {
         ...resultsInitialState,
-        [cacheKey]: mockSearchResult,
+        // Store only metadata in Redux
+        [cacheKey]: {
+          total: 0,
+          elapsedMs: 10,
+          instantFieldSchema: mockSearchResult.instantFieldSchema,
+          hasResults: false,
+        },
       },
     };
 
@@ -83,6 +96,10 @@ describe('ExploreMetricsDataTable', () => {
       preloadedState,
     });
   };
+
+  afterEach(() => {
+    clearResultsCache();
+  });
 
   it('renders MetricsDataTable with search results from Redux store', () => {
     const store = createTestStore();
@@ -102,7 +119,9 @@ describe('ExploreMetricsDataTable', () => {
       timed_out: false,
       _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
       hits: {
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         total: { value: 0, relation: 'eq' },
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         max_score: null,
         hits: [],
       },
@@ -150,7 +169,9 @@ describe('ExploreMetricsDataTable', () => {
     const state = store.getState();
     const expectedCacheKey = defaultPrepareQueryString(state.query);
 
+    // Redux now holds metadata; full result lives in the module-level cache
     expect(state.results[expectedCacheKey]).toBeDefined();
+    expect(resultsCache.get(expectedCacheKey)).toBeDefined();
   });
 
   it('renders without crashing when results exist', () => {

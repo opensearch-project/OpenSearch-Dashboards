@@ -7,7 +7,7 @@ import { MountPoint, StartServicesAccessor } from 'src/core/public';
 
 import { EuiPageContent } from '@elastic/eui';
 import { I18nProvider } from '@osd/i18n/react';
-import React from 'react';
+
 import { createRoot } from 'react-dom/client';
 import { Route, Router, Switch } from 'react-router-dom';
 import { DataPublicPluginStart } from 'src/plugins/data/public';

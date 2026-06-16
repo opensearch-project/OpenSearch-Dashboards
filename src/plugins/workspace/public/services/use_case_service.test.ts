@@ -100,40 +100,111 @@ describe('UseCaseService', () => {
             category: DEFAULT_APP_CATEGORIES.manageWorkspace,
             order: 100,
             title: 'Workspace details',
+            euiIconType: 'spacesApp',
           },
           {
             id: 'workspace_collaborators',
             category: DEFAULT_APP_CATEGORIES.manageWorkspace,
             order: 200,
             title: 'Collaborators',
+            euiIconType: 'users',
           },
           {
             id: 'dataSources',
             category: DEFAULT_APP_CATEGORIES.manageWorkspace,
             order: 300,
+            euiIconType: 'database',
           },
           {
             id: 'indexPatterns',
             category: DEFAULT_APP_CATEGORIES.manageWorkspace,
             order: 400,
+            euiIconType: 'indexPatternApp',
           },
           {
             id: 'datasets',
             category: DEFAULT_APP_CATEGORIES.manageWorkspace,
             order: 400,
+            euiIconType: 'indexMapping',
           },
           {
             id: 'objects',
             category: DEFAULT_APP_CATEGORIES.manageWorkspace,
             order: 500,
+            euiIconType: 'package',
           },
           {
             id: 'import_sample_data',
             category: DEFAULT_APP_CATEGORIES.manageWorkspace,
             order: 600,
             title: 'Sample data',
+            euiIconType: 'navGetStarted',
           },
         ]);
+      });
+    });
+
+    it('should register nav links with correct euiIconType values', async () => {
+      const useCaseService = new UseCaseService();
+      const coreSetup = coreMock.createSetup();
+      const navGroupMap$ = new BehaviorSubject<Record<string, NavGroupItemInMap>>({});
+      const coreStartMock = coreMock.createStart();
+      coreStartMock.application.capabilities = {
+        ...coreStartMock.application.capabilities,
+        workspaces: {
+          ...coreStartMock.application.capabilities.workspaces,
+          permissionEnabled: true,
+        },
+      };
+      coreSetup.getStartServices.mockResolvedValue([coreStartMock, {}, {}]);
+      coreStartMock.chrome.navGroup.getNavGroupsMap$.mockReturnValue(navGroupMap$);
+      useCaseService.setup(coreSetup);
+      const navGroupInfo = {
+        ...DEFAULT_NAV_GROUPS.all,
+        navLinks: [],
+      };
+      navGroupMap$.next({
+        [ALL_USE_CASE_ID]: navGroupInfo,
+      });
+      coreSetup.workspaces.currentWorkspace$.next({
+        id: ALL_USE_CASE_ID,
+        name: ALL_USE_CASE_ID,
+        features: [`use-case-${ALL_USE_CASE_ID}`],
+      });
+      await waitFor(() => {
+        expect(coreSetup.chrome.navGroup.addNavLinksToGroup).toBeCalledWith(
+          navGroupInfo,
+          expect.arrayContaining([
+            expect.objectContaining({
+              id: WORKSPACE_DETAIL_APP_ID,
+              euiIconType: 'spacesApp',
+            }),
+            expect.objectContaining({
+              id: 'workspace_collaborators',
+              euiIconType: 'users',
+            }),
+            expect.objectContaining({
+              id: 'dataSources',
+              euiIconType: 'database',
+            }),
+            expect.objectContaining({
+              id: 'indexPatterns',
+              euiIconType: 'indexPatternApp',
+            }),
+            expect.objectContaining({
+              id: 'datasets',
+              euiIconType: 'indexMapping',
+            }),
+            expect.objectContaining({
+              id: 'objects',
+              euiIconType: 'package',
+            }),
+            expect.objectContaining({
+              id: 'import_sample_data',
+              euiIconType: 'navGetStarted',
+            }),
+          ])
+        );
       });
     });
   });

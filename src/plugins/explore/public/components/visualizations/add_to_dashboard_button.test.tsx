@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, fireEvent, waitFor, screen, act } from '@testing-library/react';
 import { SaveAndAddButtonWithModal } from './add_to_dashboard_button';
 
@@ -118,6 +117,7 @@ describe('SaveAndAddButtonWithModal', () => {
     mockUseKeyboardShortcut.mockClear();
     jest.spyOn(VB, 'getVisualizationBuilder').mockReturnValue(
       new VB.VisualizationBuilder({
+        // @ts-expect-error TS2353 TODO(ts-error): fixme
         getExpressions: jest.fn(),
       })
     );

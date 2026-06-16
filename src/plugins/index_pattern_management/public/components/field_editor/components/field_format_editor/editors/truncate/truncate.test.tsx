@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { ChangeEvent } from 'react';
+import { ChangeEvent } from 'react';
 import { shallow } from 'enzyme';
 import { EuiCompressedFieldNumber } from '@elastic/eui';
 import { FieldFormat } from 'src/plugins/data/public';

@@ -32,32 +32,13 @@ import { i18n } from '@osd/i18n';
 
 import { euiPaletteColorBlind } from '@elastic/eui';
 // @ts-ignore
-import { metricsRequestHandler } from './request_handler';
-// @ts-ignore
 import { metricsRequestHandlerRaw } from './request_handler_raw';
 import { EditorController } from './application';
 // @ts-ignore
 import { PANEL_TYPES } from '../common/panel_types';
 import { VisEditor } from './application/components/vis_editor_lazy';
 import { VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
-import { getDataStart, getUISettings } from './services';
-import { CLIENT_SIDE_EVALUATION_SETTING } from '../common/constants';
-
-/**
- * Request handler wrapper that selects between client-side and server-side
- * math evaluation based on the UI setting.
- */
-// @ts-ignore
-const metricsRequestHandlerWrapper = async (params) => {
-  const config = getUISettings();
-  const useClientSideEval = config.get(CLIENT_SIDE_EVALUATION_SETTING, true);
-
-  if (useClientSideEval) {
-    return metricsRequestHandlerRaw(params);
-  } else {
-    return metricsRequestHandler(params);
-  }
-};
+import { getDataStart } from './services';
 
 export const metricsVisDefinition = {
   name: 'metrics',
@@ -112,7 +93,7 @@ export const metricsVisDefinition = {
     showFilterBar: false,
     showIndexSelection: false,
   },
-  requestHandler: metricsRequestHandlerWrapper,
+  requestHandler: metricsRequestHandlerRaw,
   getSupportedTriggers: () => {
     return [VIS_EVENT_TO_TRIGGER.applyFilter];
   },

@@ -5,7 +5,7 @@
 
 import { I18nProvider } from '@osd/i18n/react';
 import { fireEvent, render, screen } from '@testing-library/react';
-import React, { ComponentProps } from 'react';
+import { ComponentProps } from 'react';
 import { SuggestionsComponentProps } from '../../../../data/public/ui/typeahead/suggestions_component';
 import { AgentError } from '../utils';
 import { QueryAssistInput } from './query_assist_input';

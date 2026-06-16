@@ -29,7 +29,7 @@
  */
 
 import { EuiHeaderSectionItemButton } from '@elastic/eui';
-import React from 'react';
+
 import { act } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
@@ -97,6 +97,7 @@ function mockProps() {
     currentWorkspace$: new BehaviorSubject<WorkspaceObject | null>(null),
     useUpdatedHeader: false,
     globalSearchCommands$: new BehaviorSubject([]),
+    navControlsIconSideNavFooter$: new BehaviorSubject([]),
   };
 }
 

@@ -169,7 +169,8 @@ const fetchDataSources = async (client: SavedObjectsClientContract, http: HttpSe
   const remoteConnectionPromises = response.savedObjects.map(async (savedObject) => {
     if (
       savedObject?.attributes?.dataSourceEngineType === DataSourceEngineType.Elasticsearch ||
-      savedObject?.attributes?.dataSourceEngineType === DataSourceEngineType.OpenSearch
+      savedObject?.attributes?.dataSourceEngineType === DataSourceEngineType.OpenSearch ||
+      savedObject?.attributes?.dataSourceEngineType === DataSourceEngineType.AnalyticEngine
     ) {
       return getRemoteClusterConnections(savedObject.id, http).catch(() => []);
     }
@@ -232,9 +233,7 @@ interface ResolveIndexResponse {
 
 const fetchIndices = async (dataStructure: DataStructure, http: HttpSetup): Promise<string[]> => {
   try {
-    const query: any = {
-      expand_wildcards: 'all',
-    };
+    const query: any = {};
 
     if (dataStructure.id && dataStructure.id !== '') {
       query.data_source = dataStructure.id;

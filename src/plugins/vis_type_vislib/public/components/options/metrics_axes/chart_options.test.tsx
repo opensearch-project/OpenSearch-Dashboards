@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
 import { ChartOptions, ChartOptionsParams } from './chart_options';
 import { SeriesParam } from '../../../types';

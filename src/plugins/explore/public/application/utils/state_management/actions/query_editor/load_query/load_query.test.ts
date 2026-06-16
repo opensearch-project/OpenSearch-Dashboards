@@ -7,10 +7,8 @@ import { loadQueryActionCreator } from './load_query';
 import { runQueryActionCreator } from '../run_query';
 import { clearLastExecutedData } from '../../../slices';
 import { ExploreServices } from '../../../../../../types';
-import { useSetEditorTextWithQuery } from '../../../../../hooks';
 import { AppDispatch } from '../../../store';
 
-// Mock the dependencies
 jest.mock('../run_query', () => ({
   runQueryActionCreator: jest.fn(),
 }));
@@ -29,13 +27,13 @@ const mockClearLastExecutedData = clearLastExecutedData as jest.MockedFunction<
 describe('loadQueryActionCreator', () => {
   let mockDispatch: jest.MockedFunction<AppDispatch>;
   let mockServices: ExploreServices;
-  let mockSetEditorTextWithQuery: jest.MockedFunction<ReturnType<typeof useSetEditorTextWithQuery>>;
+  let mockSetEditorTextWithQuery: jest.Mock;
   const testQuery = '| where field="b"';
 
   beforeEach(() => {
     jest.clearAllMocks();
 
-    mockDispatch = jest.fn();
+    mockDispatch = jest.fn().mockResolvedValue(undefined) as jest.MockedFunction<AppDispatch>;
 
     mockServices = {
       data: {},
@@ -46,27 +44,34 @@ describe('loadQueryActionCreator', () => {
 
     mockSetEditorTextWithQuery = jest.fn();
 
-    // Mock return values
-    mockRunQueryActionCreator.mockReturnValue(jest.fn());
+    mockRunQueryActionCreator.mockReturnValue(jest.fn() as any);
     mockClearLastExecutedData.mockReturnValue({
       type: 'queryEditor/clearLastExecutedData',
       payload: undefined,
-    });
+    } as any);
   });
 
-  it('should call setEditorTextWithQuery with the provided query', () => {
+  it('should call setEditorTextWithQuery with the provided query', async () => {
     const actionCreator = loadQueryActionCreator(
       mockServices,
       mockSetEditorTextWithQuery,
       testQuery
     );
-
-    actionCreator(mockDispatch);
-
+    await actionCreator(mockDispatch);
     expect(mockSetEditorTextWithQuery).toHaveBeenCalledWith(testQuery);
   });
 
-  it('should dispatch runQueryActionCreator with services and query', () => {
+  it('should dispatch clearLastExecutedData first', async () => {
+    const actionCreator = loadQueryActionCreator(
+      mockServices,
+      mockSetEditorTextWithQuery,
+      testQuery
+    );
+    await actionCreator(mockDispatch);
+    expect(mockDispatch).toHaveBeenCalledWith(mockClearLastExecutedData());
+  });
+
+  it('should dispatch runQueryActionCreator with services and query', async () => {
     const mockRunAction = jest.fn();
     mockRunQueryActionCreator.mockReturnValue(mockRunAction);
 
@@ -75,26 +80,13 @@ describe('loadQueryActionCreator', () => {
       mockSetEditorTextWithQuery,
       testQuery
     );
-
-    actionCreator(mockDispatch);
+    await actionCreator(mockDispatch);
 
     expect(mockRunQueryActionCreator).toHaveBeenCalledWith(mockServices, testQuery);
     expect(mockDispatch).toHaveBeenCalledWith(mockRunAction);
   });
 
-  it('should dispatch clearLastExecutedData first', () => {
-    const actionCreator = loadQueryActionCreator(
-      mockServices,
-      mockSetEditorTextWithQuery,
-      testQuery
-    );
-
-    actionCreator(mockDispatch);
-
-    expect(mockDispatch).toHaveBeenCalledWith(mockClearLastExecutedData());
-  });
-
-  it('should execute actions in the correct order', () => {
+  it('should execute actions in the correct order', async () => {
     const calls: string[] = [];
     const mockRunAction = jest.fn();
     mockRunQueryActionCreator.mockReturnValue(mockRunAction);
@@ -103,8 +95,8 @@ describe('loadQueryActionCreator', () => {
       calls.push('setEditorTextWithQuery');
     });
 
-    mockDispatch.mockImplementation((action: any) => {
-      if (action.type === 'queryEditor/clearLastExecutedData') {
+    mockDispatch.mockImplementation(async (action: any) => {
+      if (action && action.type === 'queryEditor/clearLastExecutedData') {
         calls.push('clearLastExecutedData');
       } else if (typeof action === 'function') {
         calls.push('runQuery');
@@ -116,11 +108,8 @@ describe('loadQueryActionCreator', () => {
       mockSetEditorTextWithQuery,
       testQuery
     );
-
-    actionCreator(mockDispatch);
+    await actionCreator(mockDispatch);
 
     expect(calls).toEqual(['clearLastExecutedData', 'setEditorTextWithQuery', 'runQuery']);
-    expect(mockSetEditorTextWithQuery).toHaveBeenCalledWith(testQuery);
-    expect(mockRunQueryActionCreator).toHaveBeenCalledWith(mockServices, testQuery);
   });
 });

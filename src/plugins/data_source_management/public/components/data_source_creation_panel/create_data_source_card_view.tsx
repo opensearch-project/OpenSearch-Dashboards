@@ -4,7 +4,7 @@
  */
 
 import { EuiPanel, EuiCard, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiIcon } from '@elastic/eui';
-import React from 'react';
+
 import { History } from 'history';
 import s3Svg from '../direct_query_data_sources_components/icons/s3_logo.svg';
 import prometheusSvg from '../direct_query_data_sources_components/icons/prometheus_logo.svg';

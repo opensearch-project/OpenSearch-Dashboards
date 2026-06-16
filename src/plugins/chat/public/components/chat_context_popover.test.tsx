@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import { ChatContextPopover } from './chat_context_popover';
 

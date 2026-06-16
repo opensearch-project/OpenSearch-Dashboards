@@ -51,6 +51,7 @@ export const LICENSE_ALLOWLIST = [
   '(OFL-1.1 AND MIT)',
   '(Unlicense OR Apache-2.0)',
   '(WTFPL OR MIT)',
+  '(MIT OR WTFPL)',
   '0BSD',
   'AFLv2.1',
   'Apache 2.0',

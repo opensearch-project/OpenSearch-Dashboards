@@ -31,7 +31,7 @@
 import { Buffer } from 'buffer';
 import { Readable } from 'stream';
 
-import { RequestEvent, errors } from '@opensearch-project/opensearch';
+import { RequestEvent, errors, Transport } from '@opensearch-project/opensearch';
 import { TransportRequestParams, RequestBody } from '@opensearch-project/opensearch/lib/Transport';
 
 import { parseClientOptionsMock, ClientMock } from './configure_client.test.mocks';
@@ -120,6 +120,22 @@ describe('configureClient', () => {
     expect(ClientMock).toHaveBeenCalledTimes(1);
     expect(ClientMock).toHaveBeenCalledWith(parsedOptions);
     expect(client).toBe(ClientMock.mock.results[0].value);
+  });
+
+  it('injects custom transport class into client options when provided', () => {
+    const parsedOptions = {
+      nodes: ['http://localhost'],
+    };
+    parseClientOptionsMock.mockReturnValue(parsedOptions);
+
+    class CustomTransport extends Transport {}
+    configureClient(config, { logger, scoped: false, customTransport: CustomTransport });
+
+    expect(ClientMock).toHaveBeenCalledTimes(1);
+    expect(ClientMock).toHaveBeenCalledWith({
+      ...parsedOptions,
+      Transport: CustomTransport,
+    });
   });
 
   it('listens to client on `response` events', () => {

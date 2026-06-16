@@ -12,6 +12,10 @@ interface KeyboardShortcutIconProps {
   core?: CoreStart;
 }
 
+export function KeyboardShortcutListener({ core }: KeyboardShortcutIconProps) {
+  return <KeyboardShortcutHelpModal keyboardShortcutService={core?.keyboardShortcut} />;
+}
+
 export function KeyboardShortcutIcon({ core }: KeyboardShortcutIconProps) {
   const tooltipContent = i18n.translate('management.keyboardShortcut.icon.nav.title', {
     defaultMessage: 'Keyboard shortcuts',
@@ -23,6 +27,7 @@ export function KeyboardShortcutIcon({ core }: KeyboardShortcutIconProps) {
     const button = (
       <EuiButtonIcon
         {...props}
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         ref={ref}
         aria-label={tooltipContent}
         iconType="keyboardShortcut"

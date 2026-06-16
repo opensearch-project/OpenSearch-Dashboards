@@ -22,6 +22,7 @@ import {
   defaultResultsProcessor,
   defaultPrepareQueryString,
 } from '../application/utils/state_management/actions/query_actions';
+import { resultsCache } from '../application/utils/state_management/slices';
 
 export interface UseDisplayedColumnsOptions {
   /** Whether to include field counts for column filtering */
@@ -102,14 +103,16 @@ export const useDisplayedColumns = (
   const columns = useSelector(selectColumns);
   const { dataset } = useDatasetContext();
 
-  // Get processed results for field counts if needed
-  const processedResults = useSelector((state: RootState) => {
-    if (!options.includeFieldCounts) return null;
-    const query = state.query;
-    const cacheKey = defaultPrepareQueryString(query);
-    const rawResults = state.results[cacheKey];
+  const query = useSelector((state: RootState) => state.query);
+  const cacheKey = useMemo(() => defaultPrepareQueryString(query), [query]);
+  const metadata = useSelector((state: RootState) =>
+    options.includeFieldCounts ? state.results[cacheKey] : null
+  );
+  const processedResults = useMemo(() => {
+    if (!options.includeFieldCounts || !metadata) return null;
+    const rawResults = resultsCache.get(cacheKey);
     return rawResults && dataset ? defaultResultsProcessor(rawResults, dataset) : null;
-  });
+  }, [options.includeFieldCounts, metadata, cacheKey, dataset]);
 
   return useMemo(() => {
     return processDisplayedColumns(columns, dataset, uiSettings, processedResults);

@@ -157,4 +157,9 @@ export const OpenSearchEnhancements = (client: any, config: any, components: any
     method: 'POST',
     needBody: true,
   });
+
+  enhancements.pplBundle = createAction(client, components, {
+    endpoint: URI.PPL_BUNDLE,
+    method: 'GET',
+  });
 };

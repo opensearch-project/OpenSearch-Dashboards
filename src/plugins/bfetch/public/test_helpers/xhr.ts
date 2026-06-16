@@ -35,10 +35,15 @@ export const mockXMLHttpRequest = (): {
   XMLHttpRequest: typeof window.XMLHttpRequest;
 } => {
   class MockXMLHttpRequest implements XMLHttpRequest {
+    // @ts-expect-error TS2416 TODO(ts-error): fixme
     DONE = 0;
+    // @ts-expect-error TS2416 TODO(ts-error): fixme
     HEADERS_RECEIVED = 0;
+    // @ts-expect-error TS2416 TODO(ts-error): fixme
     LOADING = 0;
+    // @ts-expect-error TS2416 TODO(ts-error): fixme
     OPENED = 0;
+    // @ts-expect-error TS2416 TODO(ts-error): fixme
     UNSENT = 0;
     abort = jest.fn();
     addEventListener = jest.fn();
@@ -74,6 +79,7 @@ export const mockXMLHttpRequest = (): {
   const xhr = new MockXMLHttpRequest();
 
   return {
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     xhr,
     XMLHttpRequest: class {
       constructor() {

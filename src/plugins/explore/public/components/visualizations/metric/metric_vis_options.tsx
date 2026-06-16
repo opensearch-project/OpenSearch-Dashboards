@@ -6,13 +6,16 @@
 import React from 'react';
 import { isEmpty } from 'lodash';
 import { i18n } from '@osd/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiFormRow } from '@elastic/eui';
-import { defaultMetricChartStyles, MetricChartStyle } from './metric_vis_config';
-import { AxisRole } from '../types';
-import { DebouncedFieldNumber, DebouncedFieldText } from '../style_panel/utils';
+import { EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiFormRow, EuiSelect } from '@elastic/eui';
+import {
+  defaultMetricChartStyles,
+  MetricChartStyle,
+  TextMode,
+  ColorMode,
+} from './metric_vis_config';
+import { DebouncedFieldNumber } from '../style_panel/utils';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { StyleAccordion } from '../style_panel/style_accordion';
-import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
 import { ValueCalculationSelector } from '../style_panel/value/value_calculation_selector';
 import { PercentageSelector } from '../style_panel/percentage/percentage_selector';
 import { ThresholdPanel } from '../style_panel/threshold/threshold_panel';
@@ -26,8 +29,6 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
   numericalColumns = [],
   categoricalColumns = [],
   dateColumns = [],
-  availableChartTypes = [],
-  selectedChartType,
   axisColumnMappings,
   updateVisualization,
 }) => {
@@ -44,16 +45,6 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
-      <EuiFlexItem grow={false}>
-        <AxesSelectPanel
-          numericalColumns={numericalColumns}
-          categoricalColumns={categoricalColumns}
-          dateColumns={dateColumns}
-          currentMapping={axisColumnMappings}
-          updateVisualization={updateVisualization}
-          chartType="metric"
-        />
-      </EuiFlexItem>
       {hasMappingSelected && (
         <>
           <EuiFlexItem grow={false}>
@@ -64,15 +55,80 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
               })}
               initialIsOpen={true}
             >
-              <EuiFormRow>
-                <EuiSwitch
+              <EuiFormRow
+                label={i18n.translate('explore.vis.metric.textDisplay', {
+                  defaultMessage: 'Text display',
+                })}
+              >
+                <EuiSelect
                   compressed
-                  label={i18n.translate('explore.vis.metric.useThresholdColor', {
-                    defaultMessage: 'Use threshold colors',
-                  })}
-                  data-test-subj="useThresholdColorButton"
-                  checked={styleOptions?.useThresholdColor ?? false}
-                  onChange={(e) => updateStyleOption('useThresholdColor', e.target.checked)}
+                  options={[
+                    {
+                      value: 'value',
+                      text: i18n.translate('explore.vis.metric.textMode.value', {
+                        defaultMessage: 'Value only',
+                      }),
+                    },
+                    {
+                      value: 'name',
+                      text: i18n.translate('explore.vis.metric.textMode.name', {
+                        defaultMessage: 'Name only',
+                      }),
+                    },
+                    {
+                      value: 'value_and_name',
+                      text: i18n.translate('explore.vis.metric.textMode.valueAndName', {
+                        defaultMessage: 'Value and Name',
+                      }),
+                    },
+                    {
+                      value: 'none',
+                      text: i18n.translate('explore.vis.metric.textMode.none', {
+                        defaultMessage: 'None',
+                      }),
+                    },
+                  ]}
+                  value={styleOptions.textMode || 'value_and_name'}
+                  onChange={(e) => updateStyleOption('textMode', e.target.value as TextMode)}
+                  data-test-subj="textModeSelect"
+                />
+              </EuiFormRow>
+              <EuiFormRow
+                label={i18n.translate('explore.vis.metric.colorMode', {
+                  defaultMessage: 'Color mode',
+                })}
+              >
+                <EuiSelect
+                  compressed
+                  options={[
+                    {
+                      value: 'none',
+                      text: i18n.translate('explore.vis.metric.colorMode.none', {
+                        defaultMessage: 'None',
+                      }),
+                    },
+                    {
+                      value: 'value',
+                      text: i18n.translate('explore.vis.metric.colorMode.value', {
+                        defaultMessage: 'Value',
+                      }),
+                    },
+                    {
+                      value: 'background_gradient',
+                      text: i18n.translate('explore.vis.metric.colorMode.backgroundGradient', {
+                        defaultMessage: 'Background gradient',
+                      }),
+                    },
+                    {
+                      value: 'background_solid',
+                      text: i18n.translate('explore.vis.metric.colorMode.backgroundSolid', {
+                        defaultMessage: 'Background solid',
+                      }),
+                    },
+                  ]}
+                  value={styleOptions.colorMode || 'none'}
+                  onChange={(e) => updateStyleOption('colorMode', e.target.value as ColorMode)}
+                  data-test-subj="colorModeSelect"
                 />
               </EuiFormRow>
               <PercentageSelector
@@ -88,32 +144,17 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
               <EuiFormRow>
                 <EuiSwitch
                   compressed
-                  label={i18n.translate('explore.stylePanel.metric.title', {
-                    defaultMessage: 'Show title',
+                  label={i18n.translate('explore.vis.metric.useThresholdColor', {
+                    defaultMessage: 'Use threshold colors',
                   })}
-                  checked={styleOptions.showTitle}
-                  onChange={(e) => updateStyleOption('showTitle', e.target.checked)}
-                  data-test-subj="showTitleSwitch"
+                  data-test-subj="useThresholdColorButton"
+                  checked={styleOptions?.useThresholdColor ?? false}
+                  onChange={(e) => updateStyleOption('useThresholdColor', e.target.checked)}
                 />
               </EuiFormRow>
-
-              {styleOptions.showTitle && (
-                <EuiFormRow
-                  label={i18n.translate('explore.vis.metric.title', {
-                    defaultMessage: 'Title',
-                  })}
-                >
-                  <DebouncedFieldText
-                    value={styleOptions.title || axisColumnMappings[AxisRole.Value]?.name || ''}
-                    placeholder={i18n.translate('explore.vis.metric.title', {
-                      defaultMessage: 'Title',
-                    })}
-                    onChange={(text) => updateStyleOption('title', text)}
-                  />
-                </EuiFormRow>
-              )}
             </StyleAccordion>
           </EuiFlexItem>
+
           <EuiFlexItem>
             <StyleAccordion
               id="metricValueOptions"

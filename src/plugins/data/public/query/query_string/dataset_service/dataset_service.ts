@@ -8,6 +8,7 @@ import LRUCache from 'lru-cache';
 import { CoreStart } from 'opensearch-dashboards/public';
 import {
   CachedDataStructure,
+  DATA_STRUCTURE_META_TYPES,
   Dataset,
   DataStorage,
   DataStructure,
@@ -192,7 +193,7 @@ export class DatasetService {
           : await type?.fetchFields(dataset, services);
         const spec = {
           // Generate ID with data source prefix if data source exists, otherwise allow UUID generation
-          id: dataset.dataSource?.id ? `${dataset.dataSource.id}::${uuidv4()}` : undefined,
+          id: dataset.dataSource?.id ? `${dataset.dataSource.id}_${uuidv4()}` : undefined,
           type: dataset.type,
           displayName: dataset.displayName,
           title: dataset.title,
@@ -366,13 +367,20 @@ export class DatasetService {
       dataSource = await this.indexPatterns?.getDataSource(indexPattern.dataSourceRef?.id);
     }
 
-    const dataType = this.typesRegistry.get(DEFAULT_DATA.SET_TYPES.INDEX_PATTERN);
+    const actualType = indexPattern.type || DEFAULT_DATA.SET_TYPES.INDEX_PATTERN;
+    const dataType =
+      this.typesRegistry.get(actualType) ??
+      this.typesRegistry.get(DEFAULT_DATA.SET_TYPES.INDEX_PATTERN);
     if (dataType) {
       const dataset = dataType.toDataset([
         {
           id: indexPattern.id,
           title: indexPattern.title,
-          type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+          type: actualType,
+          meta: {
+            type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+            ...(indexPattern.displayName && { displayName: indexPattern.displayName }),
+          },
           parent: dataSource
             ? {
                 id: dataSource.id,

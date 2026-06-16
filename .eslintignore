@@ -3,6 +3,7 @@
 /.chromium
 /build
 /built_assets
+/preinstall_check.js
 /bwc_tmp
 /config/apm.dev.js
 /data

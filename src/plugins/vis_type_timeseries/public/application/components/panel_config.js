@@ -29,7 +29,7 @@
  */
 
 import PropTypes from 'prop-types';
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { TimeseriesPanelConfig as timeseries } from './panel_config/timeseries';
 import { MetricPanelConfig as metric } from './panel_config/metric';
 import { TopNPanelConfig as topN } from './panel_config/top_n';

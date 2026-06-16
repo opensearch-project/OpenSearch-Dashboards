@@ -7,7 +7,7 @@ import { searchAssets } from './search_assets_command';
 import { HttpStart } from '../../../../../core/public';
 import { coreMock } from '../../../../../core/public/mocks';
 import { SavedObjectWithMetadata } from '../../../../saved_objects_management/common';
-import { AssetType, SUPPORTED_ASSET_TYPES } from './constants';
+import { SUPPORTED_ASSET_TYPES } from './constants';
 
 describe('searchAssets', () => {
   let httpMock: jest.Mocked<HttpStart>;

@@ -133,7 +133,7 @@ const createScopedClusterClientMock = () => {
 export interface ClusterClientMock {
   asInternalUser: OpenSearchClientMock;
   asInternalUserWithLongNumeralsSupport: OpenSearchClientMock;
-  asScoped: jest.MockedFunction<() => ScopedClusterClientMock>;
+  asScoped: jest.MockedFunction<(request?: any) => ScopedClusterClientMock>;
 }
 
 const createClusterClientMock = () => {
@@ -168,7 +168,9 @@ export type MockedTransportRequestPromise<T> = TransportRequestPromise<T> & {
   abort: jest.MockedFunction<() => undefined>;
 };
 
-const createSuccessTransportRequestPromise = <T>(
+const createSuccessTransportRequestPromise = <
+  T extends Record<string, any> | undefined = Record<string, any>
+>(
   body: T,
   { statusCode = 200 }: { statusCode?: number } = {}
 ): MockedTransportRequestPromise<ApiResponse<T>> => {

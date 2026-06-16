@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React, { useState, useCallback, useEffect, Fragment, useMemo } from 'react';
+import { useState, useCallback, useEffect, Fragment, useMemo } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import {
   EuiFlexGroup,

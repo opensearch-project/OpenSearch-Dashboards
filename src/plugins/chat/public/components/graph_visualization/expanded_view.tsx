@@ -89,6 +89,7 @@ export const ExpandedView: React.FC<ExpandedViewProps> = ({
 
         <EuiModalBody style={{ padding: '16px', height: 'calc(80vh - 120px)' }}>
           <div style={{ width: '100%', height: '100%' }}>
+            {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}
             <Chart size={{ width: '100%', height: '100%' }}>
               <Settings
                 theme={[graphTheme, chartsTheme, chartsBaseTheme]}

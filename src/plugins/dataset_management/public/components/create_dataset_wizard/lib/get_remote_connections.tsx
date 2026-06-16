@@ -6,7 +6,7 @@
 import { HttpSetup } from 'src/core/public';
 import { EuiBadge, EuiText } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import React from 'react';
+
 import { DataSourceTableItem } from '../types';
 import {
   OPENSEARCH_CROSS_CLUSTER_SEARCH,

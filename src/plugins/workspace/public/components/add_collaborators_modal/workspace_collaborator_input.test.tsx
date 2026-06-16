@@ -3,8 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-import { render, fireEvent, screen } from '@testing-library/react';
+import { render, fireEvent, screen, act } from '@testing-library/react';
 import { WorkspaceCollaboratorInput } from './workspace_collaborator_input';
 
 describe('WorkspaceCollaboratorInput', () => {
@@ -45,5 +44,175 @@ describe('WorkspaceCollaboratorInput', () => {
   it('collaborator id input should be invalid when error passed', () => {
     render(<WorkspaceCollaboratorInput {...defaultProps} error="error" />);
     expect(screen.getByTestId('workspaceCollaboratorIdInput-0')).toBeInvalid();
+  });
+
+  describe('with identitySource', () => {
+    const httpMock = { get: jest.fn() };
+    const identitySource = { source: 'LDAP', type: 'user' };
+    const propsWithIdentitySource = {
+      ...defaultProps,
+      identitySource,
+      http: httpMock as any,
+    };
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('renders EuiComboBox when identitySource is provided', () => {
+      render(<WorkspaceCollaboratorInput {...propsWithIdentitySource} />);
+      expect(screen.getByRole('textbox')).toBeInTheDocument();
+      expect(screen.queryByTestId('workspaceCollaboratorIdInput-0')).not.toBeNull();
+    });
+
+    it('calls http.get on search after debounce', async () => {
+      httpMock.get.mockResolvedValue([{ id: 'user-1', name: 'Alice', alias: 'alice' }]);
+      render(<WorkspaceCollaboratorInput {...propsWithIdentitySource} />);
+      const input = screen.getByRole('textbox');
+      fireEvent.change(input, { target: { value: 'ali' } });
+
+      await act(async () => {
+        jest.advanceTimersByTime(300);
+      });
+
+      expect(httpMock.get).toHaveBeenCalledWith('/api/security/identity/_entries', {
+        query: { source: 'LDAP', type: 'user', keyword: 'ali' },
+        signal: expect.any(AbortSignal),
+      });
+    });
+
+    it('shows alias in option label when alias is present', async () => {
+      httpMock.get.mockResolvedValue([{ id: 'user-1', name: 'Alice', alias: 'alice' }]);
+      render(<WorkspaceCollaboratorInput {...propsWithIdentitySource} />);
+      const input = screen.getByRole('textbox');
+      fireEvent.change(input, { target: { value: 'ali' } });
+
+      await act(async () => {
+        jest.advanceTimersByTime(300);
+      });
+
+      expect(screen.getByTitle('Alice (alice)')).toBeInTheDocument();
+    });
+
+    it('shows only name in option label when alias is absent', async () => {
+      httpMock.get.mockResolvedValue([{ id: 'user-1', name: 'Alice' }]);
+      render(<WorkspaceCollaboratorInput {...propsWithIdentitySource} />);
+      const input = screen.getByRole('textbox');
+      fireEvent.change(input, { target: { value: 'ali' } });
+
+      await act(async () => {
+        jest.advanceTimersByTime(300);
+      });
+
+      expect(screen.getByTitle('Alice')).toBeInTheDocument();
+    });
+
+    it('clears options when search value is empty', () => {
+      render(<WorkspaceCollaboratorInput {...propsWithIdentitySource} />);
+      const input = screen.getByRole('textbox');
+      fireEvent.change(input, { target: { value: '' } });
+      jest.advanceTimersByTime(300);
+      expect(httpMock.get).not.toHaveBeenCalled();
+    });
+
+    it('handles http error gracefully', async () => {
+      httpMock.get.mockRejectedValue(new Error('Network error'));
+      render(<WorkspaceCollaboratorInput {...propsWithIdentitySource} />);
+      const input = screen.getByRole('textbox');
+      fireEvent.change(input, { target: { value: 'test' } });
+
+      await act(async () => {
+        jest.advanceTimersByTime(300);
+      });
+
+      expect(httpMock.get).toHaveBeenCalled();
+      // Should not throw, component remains functional
+    });
+
+    it('calls onSearchError with error message when http request fails', async () => {
+      const onSearchError = jest.fn();
+      httpMock.get.mockRejectedValue({ body: { message: 'Service unavailable' }, name: 'Error' });
+      render(
+        <WorkspaceCollaboratorInput {...propsWithIdentitySource} onSearchError={onSearchError} />
+      );
+      const input = screen.getByRole('textbox');
+      fireEvent.change(input, { target: { value: 'test' } });
+
+      await act(async () => {
+        jest.advanceTimersByTime(300);
+      });
+
+      expect(onSearchError).toHaveBeenCalledWith('Service unavailable', 0);
+    });
+
+    it('calls onSearchError with undefined on successful search', async () => {
+      const onSearchError = jest.fn();
+      httpMock.get.mockResolvedValue([{ id: 'user-1', name: 'Alice' }]);
+      render(
+        <WorkspaceCollaboratorInput {...propsWithIdentitySource} onSearchError={onSearchError} />
+      );
+      const input = screen.getByRole('textbox');
+      fireEvent.change(input, { target: { value: 'ali' } });
+
+      await act(async () => {
+        jest.advanceTimersByTime(300);
+      });
+
+      expect(onSearchError).toHaveBeenCalledWith(undefined, 0);
+    });
+
+    it('calls onSearchError with undefined when search value is cleared', async () => {
+      const onSearchError = jest.fn();
+      httpMock.get.mockResolvedValue([{ id: 'user-1', name: 'Alice' }]);
+      render(
+        <WorkspaceCollaboratorInput {...propsWithIdentitySource} onSearchError={onSearchError} />
+      );
+      const input = screen.getByRole('textbox');
+
+      // First trigger a search so the callback is exercised
+      fireEvent.change(input, { target: { value: 'ali' } });
+      await act(async () => {
+        jest.advanceTimersByTime(300);
+      });
+      onSearchError.mockClear();
+
+      // Now clear the search value
+      fireEvent.change(input, { target: { value: '' } });
+
+      expect(onSearchError).toHaveBeenCalledWith(undefined, 0);
+    });
+
+    it('does not call http.get when identitySource or http is missing', () => {
+      render(<WorkspaceCollaboratorInput {...defaultProps} identitySource={identitySource} />);
+      const input = screen.getByRole('textbox');
+      fireEvent.change(input, { target: { value: 'test' } });
+      jest.advanceTimersByTime(300);
+      expect(httpMock.get).not.toHaveBeenCalled();
+    });
+
+    it('aborts previous request on new search', async () => {
+      httpMock.get.mockResolvedValue([{ id: 'user-1', name: 'Alice' }]);
+      render(<WorkspaceCollaboratorInput {...propsWithIdentitySource} />);
+      const input = screen.getByRole('textbox');
+
+      fireEvent.change(input, { target: { value: 'al' } });
+      jest.advanceTimersByTime(100);
+      fireEvent.change(input, { target: { value: 'ali' } });
+
+      await act(async () => {
+        jest.advanceTimersByTime(300);
+      });
+
+      // Only the second search should have completed
+      expect(httpMock.get).toHaveBeenCalledTimes(1);
+      expect(httpMock.get).toHaveBeenCalledWith('/api/security/identity/_entries', {
+        query: { source: 'LDAP', type: 'user', keyword: 'ali' },
+        signal: expect.any(AbortSignal),
+      });
+    });
   });
 });

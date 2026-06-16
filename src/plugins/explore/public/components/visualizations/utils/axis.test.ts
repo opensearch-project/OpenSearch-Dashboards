@@ -95,7 +95,7 @@ describe('getAxisConfigByColumnMapping', () => {
   describe('with default configurations', () => {
     it('should return default X axis config when X axis column is mapped and no standardAxes provided', () => {
       const axisColumnMappings = {
-        [AxisRole.X]: mockVisColumn,
+        [AxisRole.X]: [mockVisColumn],
       };
       const result = getAxisConfigByColumnMapping(axisColumnMappings);
       expect(result).toEqual([DEFAULT_X_AXIS_CONFIG]);
@@ -103,9 +103,9 @@ describe('getAxisConfigByColumnMapping', () => {
 
     it('should return multiple default configs in correct order', () => {
       const axisColumnMappings = {
-        [AxisRole.X]: mockVisColumn,
-        [AxisRole.Y]: mockVisColumn,
-        [AxisRole.Y_SECOND]: mockVisColumn,
+        [AxisRole.X]: [mockVisColumn],
+        [AxisRole.Y]: [mockVisColumn],
+        [AxisRole.Y_SECOND]: [mockVisColumn],
       };
       const result = getAxisConfigByColumnMapping(axisColumnMappings);
       expect(result).toEqual([
@@ -119,7 +119,7 @@ describe('getAxisConfigByColumnMapping', () => {
   describe('with custom standardAxes configurations', () => {
     it('should use custom X axis config when provided in standardAxes', () => {
       const axisColumnMappings = {
-        [AxisRole.X]: mockVisColumn,
+        [AxisRole.X]: [mockVisColumn],
       };
       const standardAxes = [mockXAxisConfig];
       const result = getAxisConfigByColumnMapping(axisColumnMappings, standardAxes);
@@ -128,9 +128,9 @@ describe('getAxisConfigByColumnMapping', () => {
 
     it('should use custom configs when available and default configs when not', () => {
       const axisColumnMappings = {
-        [AxisRole.X]: mockVisColumn,
-        [AxisRole.Y]: mockVisColumn,
-        [AxisRole.Y_SECOND]: mockVisColumn,
+        [AxisRole.X]: [mockVisColumn],
+        [AxisRole.Y]: [mockVisColumn],
+        [AxisRole.Y_SECOND]: [mockVisColumn],
       };
       const standardAxes = [mockXAxisConfig]; // Only X axis has custom config
       const result = getAxisConfigByColumnMapping(axisColumnMappings, standardAxes);
@@ -145,8 +145,8 @@ describe('getAxisConfigByColumnMapping', () => {
   describe('with mixed scenarios', () => {
     it('should handle partial axis mappings with custom configs', () => {
       const axisColumnMappings = {
-        [AxisRole.X]: mockVisColumn,
-        [AxisRole.Y_SECOND]: mockVisColumn,
+        [AxisRole.X]: [mockVisColumn],
+        [AxisRole.Y_SECOND]: [mockVisColumn],
         // No Y axis mapping
       };
       const standardAxes = [mockXAxisConfig, mockY2AxisConfig];
@@ -156,7 +156,7 @@ describe('getAxisConfigByColumnMapping', () => {
 
     it('should ignore standardAxes that do not match any mapped columns', () => {
       const axisColumnMappings = {
-        [AxisRole.X]: mockVisColumn,
+        [AxisRole.X]: [mockVisColumn],
       };
       const standardAxes = [mockXAxisConfig, mockYAxisConfig, mockY2AxisConfig];
       const result = getAxisConfigByColumnMapping(axisColumnMappings, standardAxes);
@@ -165,8 +165,8 @@ describe('getAxisConfigByColumnMapping', () => {
 
     it('should handle empty standardAxes array', () => {
       const axisColumnMappings = {
-        [AxisRole.X]: mockVisColumn,
-        [AxisRole.Y]: mockVisColumn,
+        [AxisRole.X]: [mockVisColumn],
+        [AxisRole.Y]: [mockVisColumn],
       };
       const standardAxes: StandardAxes[] = [];
       const result = getAxisConfigByColumnMapping(axisColumnMappings, standardAxes);
@@ -175,7 +175,7 @@ describe('getAxisConfigByColumnMapping', () => {
 
     it('should maintain correct array positions even with sparse mappings', () => {
       const axisColumnMappings = {
-        [AxisRole.Y_SECOND]: mockVisColumn, // Only Y2 mapped
+        [AxisRole.Y_SECOND]: [mockVisColumn], // Only Y2 mapped
       };
       const result = getAxisConfigByColumnMapping(axisColumnMappings);
       expect(result).toEqual([DEFAULT_Y_2_AXIS_CONFIG]);
@@ -184,8 +184,8 @@ describe('getAxisConfigByColumnMapping', () => {
 
     it('should handle non-standard axis roles gracefully', () => {
       const axisColumnMappings = {
-        [AxisRole.COLOR]: mockVisColumn, // Non-standard axis role
-        [AxisRole.X]: mockVisColumn,
+        [AxisRole.COLOR]: [mockVisColumn], // Non-standard axis role
+        [AxisRole.X]: [mockVisColumn],
       };
       const result = getAxisConfigByColumnMapping(axisColumnMappings);
       expect(result).toEqual([DEFAULT_X_AXIS_CONFIG]);
@@ -193,9 +193,9 @@ describe('getAxisConfigByColumnMapping', () => {
 
     it('should handle undefined column values in mappings', () => {
       const axisColumnMappings = {
-        [AxisRole.X]: mockVisColumn,
+        [AxisRole.X]: [mockVisColumn],
         [AxisRole.Y]: undefined,
-        [AxisRole.Y_SECOND]: mockVisColumn,
+        [AxisRole.Y_SECOND]: [mockVisColumn],
       };
       const result = getAxisConfigByColumnMapping(axisColumnMappings);
       expect(result).toEqual([DEFAULT_X_AXIS_CONFIG, DEFAULT_Y_2_AXIS_CONFIG]);
@@ -203,7 +203,7 @@ describe('getAxisConfigByColumnMapping', () => {
 
     it('should handle standardAxes with mismatched axisRole', () => {
       const axisColumnMappings = {
-        [AxisRole.X]: mockVisColumn,
+        [AxisRole.X]: [mockVisColumn],
       };
       const mismatchedConfig: StandardAxes = {
         ...mockXAxisConfig,

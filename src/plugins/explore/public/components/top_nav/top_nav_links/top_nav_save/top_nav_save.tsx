@@ -10,7 +10,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import React from 'react';
+
 import { DataView as Dataset } from 'src/plugins/data/common';
 import { TopNavMenuIconRun, TopNavMenuIconUIData } from '../types';
 import { ExploreServices } from '../../../../types';
@@ -27,6 +27,7 @@ import { TabState } from '../../../../application/utils/state_management/slices'
 import { TabDefinition } from '../../../../services/tab_registry/tab_registry_service';
 import { saveStateToSavedObject } from '../../../../saved_explore/transforms';
 import { getVisualizationBuilder } from '../../../visualizations/visualization_builder';
+import { UrlTransformationState } from '../../../data_transformations';
 
 export const saveTopNavData: TopNavMenuIconUIData = {
   tooltip: i18n.translate('explore.topNav.saveTitle', {
@@ -64,13 +65,28 @@ export const getSaveButtonRun = (
     onTitleDuplicate,
   }: OnSaveProps): Promise<SaveResult | undefined> => {
     const visualizationBuilder = getVisualizationBuilder();
+    const transformationService = visualizationBuilder.getTransformationService();
+    const pipeline = transformationService.pipeline$.getValue();
+    const serializedPipeline: UrlTransformationState[] = pipeline.map((instance) => ({
+      definitionId: instance.definition_id,
+      config: instance.config,
+      hide: instance.hide,
+    }));
     const visConfig = visualizationBuilder.visConfig$.value;
     const axesMapping = visConfig?.axesMapping;
     const savedExploreWithState = saveStateToSavedObject(
       savedExplore,
       saveStateProps.flavorId ?? 'logs',
-      saveStateProps.tabDefinition!,
-      { axesMapping, chartType: visConfig?.type, styleOptions: visConfig?.styles },
+      saveStateProps.tabDefinition,
+      {
+        axesMapping,
+        chartType: visConfig?.type,
+        styleOptions: visConfig?.styles,
+        splitField: visConfig?.splitField,
+        splitLayout: visConfig?.splitLayout,
+        showSplitLabel: visConfig?.showSplitLabel,
+        serializedPipeline,
+      },
       saveStateProps.dataset,
       saveStateProps.activeTabId
     );

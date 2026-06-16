@@ -74,9 +74,8 @@ export async function findListItems({
     searchOptions
   );
 
-  return {
-    total,
-    hits: savedObjects.map((savedObject) => {
+  const hits = savedObjects
+    .map((savedObject) => {
       const config = extensionByType[savedObject.type];
 
       if (config) {
@@ -84,6 +83,12 @@ export async function findListItems({
       } else {
         return mapSavedObjectApiHits(savedObject);
       }
-    }),
+    })
+    // Allow `toListItem` to return null/undefined to hide an item from the list.
+    .filter((item): item is NonNullable<typeof item> => item != null);
+
+  return {
+    total: hits.length,
+    hits,
   };
 }

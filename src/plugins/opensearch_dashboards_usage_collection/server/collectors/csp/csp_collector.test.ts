@@ -47,10 +47,10 @@ describe('csp collector', () => {
   test('fetches whether strict mode is enabled', async () => {
     const collector = createCspCollector(httpMock);
 
-    expect((await collector.fetch(mockCallCluster)).strict).toEqual(false);
-
-    updateCsp({ strict: true });
     expect((await collector.fetch(mockCallCluster)).strict).toEqual(true);
+
+    updateCsp({ enable: false });
+    expect((await collector.fetch(mockCallCluster)).strict).toEqual(false);
   });
 
   test('fetches whether the legacy browser warning is enabled', async () => {
@@ -67,7 +67,7 @@ describe('csp collector', () => {
 
     expect((await collector.fetch(mockCallCluster)).rulesChangedFromDefault).toEqual(false);
 
-    updateCsp({ rules: ['not', 'default'] });
+    updateCsp({ enable: false, rules: ['not', 'default'] });
     expect((await collector.fetch(mockCallCluster)).rulesChangedFromDefault).toEqual(true);
   });
 
@@ -83,7 +83,7 @@ describe('csp collector', () => {
     expect(await collector.fetch(mockCallCluster)).toMatchInlineSnapshot(`
       Object {
         "rulesChangedFromDefault": false,
-        "strict": false,
+        "strict": true,
         "warnLegacyBrowsers": true,
       }
     `);

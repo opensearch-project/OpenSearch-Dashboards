@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
 
 import { HomeListCard, registerHomeListCardToPage } from './home_list_card';

@@ -31,7 +31,7 @@
 // @ts-expect-error TS6133 TODO(ts-error): fixme
 import { EuiListGroupItem, EuiConfirmModal, EuiIconTip } from '@elastic/eui';
 
-import React, { Fragment, useState } from 'react';
+import { Fragment, useState } from 'react';
 import classNames from 'classnames';
 import { i18n } from '@osd/i18n';
 import { SavedQuery } from '../..';

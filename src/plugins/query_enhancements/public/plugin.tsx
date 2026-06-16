@@ -27,7 +27,7 @@ import {
   QueryEnhancementsPluginStart,
   QueryEnhancementsPluginStartDependencies,
 } from './types';
-import { PPLFilterUtils } from './search/filters';
+import { PPLFilterUtils, SQLFilterUtils } from './search/filters';
 import { NaturalLanguageFilterUtils } from './search/filters/natural_language_filter_utils';
 import { PromQLSearchInterceptor } from './search/promql_search_interceptor';
 import { PrometheusResourceClient } from './resources';
@@ -107,8 +107,15 @@ export class QueryEnhancementsPlugin
       },
       showDocLinks: false,
       editor: createEditor(SingleLineInput, null, pplControls, DefaultInput),
-      editorSupportedAppNames: ['discover', 'explore'],
-      supportedAppNames: ['discover', 'data-explorer', 'explore', 'dataset_management'],
+      editorSupportedAppNames: ['discover', 'explore', 'agentTraces'],
+      supportedAppNames: [
+        'discover',
+        'data-explorer',
+        'explore',
+        'dataset_management',
+        'agentTraces',
+        'dashboard',
+      ],
       sampleQueries: [
         {
           title: i18n.translate('queryEnhancements.sampleQuery.titleContainsWind', {
@@ -152,6 +159,8 @@ export class QueryEnhancementsPlugin
     queryString.getLanguageService().registerLanguage(pplLanguageConfig);
 
     // Register SQL language configuration
+    // TODO: once analytics engine support lands, gate SQL language registration
+    // on dataset type so SQL is only exposed for Mustang-backed datasets.
     const sqlLanguageConfig: LanguageConfig = {
       id: 'SQL',
       title: 'OpenSearch SQL',
@@ -164,7 +173,19 @@ export class QueryEnhancementsPlugin
       }),
       getQueryString: (currentQuery: Query) =>
         `SELECT * FROM ${currentQuery.dataset?.title} LIMIT 10`,
-      fields: { sortable: false, filterable: false, visualizable: false },
+      addFiltersToQuery: SQLFilterUtils.addFiltersToQuery,
+      fields: {
+        sortable: false,
+        get filterable() {
+          const currentAppId = currentAppId$.getValue();
+          // SQL filters are supported in explore and dashboards. Return undefined
+          // to use the `filterable` value from field definitions.
+          if (currentAppId?.startsWith('explore/') || currentAppId === 'dashboards')
+            return undefined;
+          return false;
+        },
+        visualizable: false,
+      },
       docLink: {
         title: i18n.translate('queryEnhancements.sqlLanguage.docLink', {
           defaultMessage: 'SQL documentation',
@@ -173,8 +194,8 @@ export class QueryEnhancementsPlugin
       },
       showDocLinks: false,
       editor: createEditor(SingleLineInput, null, sqlControls, DefaultInput),
-      editorSupportedAppNames: ['discover'],
-      supportedAppNames: ['discover', 'data-explorer'],
+      editorSupportedAppNames: ['discover', 'explore', 'agentTraces'],
+      supportedAppNames: ['discover', 'data-explorer', 'explore', 'agentTraces'],
       hideDatePicker: true,
       sampleQueries: [
         {

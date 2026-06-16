@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { shallow, mount } from 'enzyme';
 import { CustomExtentsOptions, CustomExtentsOptionsProps } from './custom_extents_options';
 import { YExtents } from './y_extents';

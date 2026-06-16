@@ -3,10 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { ChatInput } from './chat_input';
-import { ChatLayoutMode } from './chat_header_button';
+import { ChatLayoutMode } from '../types';
 
 // Mock the context pills component
 jest.mock('./context_pills', () => ({
@@ -120,14 +119,14 @@ describe('ChatInput', () => {
       expect(input.value).toBe('test value');
     });
 
-    it('should disable input when streaming', () => {
+    it('should keep input enabled when streaming', () => {
       const { getByPlaceholderText } = render(<ChatInput {...defaultProps} isStreaming={true} />);
 
       const input = getByPlaceholderText('How can I help you today?') as HTMLTextAreaElement;
-      expect(input.disabled).toBe(true);
+      expect(input.disabled).toBe(false);
     });
 
-    it('should enable input when not streaming', () => {
+    it('should keep input enabled when not streaming', () => {
       const { getByPlaceholderText } = render(<ChatInput {...defaultProps} isStreaming={false} />);
 
       const input = getByPlaceholderText('How can I help you today?') as HTMLTextAreaElement;
@@ -348,6 +347,76 @@ describe('ChatInput', () => {
 
       // Should not throw when clicking with undefined callback
       expect(() => fireEvent.click(button)).not.toThrow();
+    });
+  });
+
+  describe('disabled behavior', () => {
+    it('should disable input when disabled is true', () => {
+      const { getByPlaceholderText } = render(<ChatInput {...defaultProps} disabled={true} />);
+
+      const input = getByPlaceholderText('How can I help you today?') as HTMLTextAreaElement;
+      expect(input.disabled).toBe(true);
+    });
+
+    it('should enable input when disabled is false', () => {
+      const { getByPlaceholderText } = render(<ChatInput {...defaultProps} disabled={false} />);
+
+      const input = getByPlaceholderText('How can I help you today?') as HTMLTextAreaElement;
+      expect(input.disabled).toBe(false);
+    });
+
+    it('should enable input when disabled is not provided', () => {
+      const { getByPlaceholderText } = render(<ChatInput {...defaultProps} />);
+
+      const input = getByPlaceholderText('How can I help you today?') as HTMLTextAreaElement;
+      expect(input.disabled).toBe(false);
+    });
+
+    it('should disable send button when disabled is true', () => {
+      const { getByLabelText } = render(
+        <ChatInput {...defaultProps} input="test" disabled={true} />
+      );
+
+      const button = getByLabelText('Send message') as HTMLButtonElement;
+      expect(button.disabled).toBe(true);
+    });
+
+    it('should enable send button when disabled is false and input has content', () => {
+      const { getByLabelText } = render(
+        <ChatInput {...defaultProps} input="test" disabled={false} />
+      );
+
+      const button = getByLabelText('Send message') as HTMLButtonElement;
+      expect(button.disabled).toBe(false);
+    });
+
+    it('should show custom placeholder when provided', () => {
+      const { getByPlaceholderText } = render(
+        <ChatInput {...defaultProps} disabled={true} placeholder="Waiting for confirmation..." />
+      );
+
+      expect(getByPlaceholderText('Waiting for confirmation...')).toBeTruthy();
+    });
+
+    it('should show default placeholder when none provided', () => {
+      const { getByPlaceholderText } = render(<ChatInput {...defaultProps} />);
+
+      expect(getByPlaceholderText('How can I help you today?')).toBeTruthy();
+    });
+
+    it('should transition input state when disabled changes', () => {
+      const { getByPlaceholderText, rerender } = render(
+        <ChatInput {...defaultProps} disabled={false} />
+      );
+
+      const input = getByPlaceholderText('How can I help you today?') as HTMLTextAreaElement;
+      expect(input.disabled).toBe(false);
+
+      rerender(<ChatInput {...defaultProps} disabled={true} />);
+      expect(input.disabled).toBe(true);
+
+      rerender(<ChatInput {...defaultProps} disabled={false} />);
+      expect(input.disabled).toBe(false);
     });
   });
 });

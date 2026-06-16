@@ -93,9 +93,7 @@ export class IndexPatternManagementPlugin
     core: CoreSetup<IndexPatternManagementStartDependencies, IndexPatternManagementStart>,
     dependencies: IndexPatternManagementSetupDependencies
   ) {
-    const { urlForwarding, management, dataSource, datasetManagement } = dependencies;
-    // Check if dataset management plugin is present, which indicates it's enabled
-    const isDatasetManagementEnabled = !!datasetManagement;
+    const { urlForwarding, management, dataSource } = dependencies;
 
     const opensearchDashboardsSection = management.sections.section.opensearchDashboards;
 
@@ -213,6 +211,7 @@ export class IndexPatternManagementPlugin
             id: IPM_APP_ID,
             title: sectionsHeader,
             order: 400,
+            euiIconType: 'indexPatternApp',
           },
         ]);
       }

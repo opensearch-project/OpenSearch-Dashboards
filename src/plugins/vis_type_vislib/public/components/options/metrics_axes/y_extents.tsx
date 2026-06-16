@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useEffect, useCallback } from 'react';
+import { useEffect, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 
@@ -77,6 +77,7 @@ function YExtents({ scale, setScale, setMultipleValidity }: YExtentsProps) {
   const isValid = !errors.length;
 
   const setExtents = useCallback(
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     (paramName, value) => {
       setScale(paramName, value === '' ? null : value);
     },

@@ -35,6 +35,7 @@ export const indexPatternTypeConfig: DatasetTypeConfig = {
     return {
       id: pattern.id,
       title: pattern.title,
+      ...(patternMeta?.displayName && { displayName: patternMeta.displayName }),
       type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
       timeFieldName: patternMeta?.timeFieldName,
       isRemoteDataset: pattern?.title?.includes(':') ?? false,
@@ -99,10 +100,10 @@ export const indexPatternTypeConfig: DatasetTypeConfig = {
 const fetchIndexPatterns = async (client: SavedObjectsClientContract): Promise<DataStructure[]> => {
   const resp = await client.find<IIndexPattern>({
     type: 'index-pattern',
-    fields: ['title', 'timeFieldName', 'references'],
+    fields: ['title', 'displayName', 'timeFieldName', 'references'],
     search: `*`,
-    searchFields: ['title'],
-    perPage: 100,
+    searchFields: ['title', 'displayName'],
+    perPage: 10000,
   });
 
   // Get all unique data source ids from both references and index pattern IDs
@@ -119,6 +120,14 @@ const fetchIndexPatterns = async (client: SavedObjectsClientContract): Promise<D
           // If not in references, check if the ID contains :: (namespaced format)
           if (savedObject.id.includes('::')) {
             return savedObject.id.split('::')[0];
+          }
+          // Check _ format: <dataSourceId>_<uuid> where prefix is a valid UUID
+          const uIdx = savedObject.id.indexOf('_');
+          if (uIdx > 0) {
+            const prefix = savedObject.id.substring(0, uIdx);
+            if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(prefix)) {
+              return prefix;
+            }
           }
           return undefined;
         })
@@ -146,6 +155,16 @@ const fetchIndexPatterns = async (client: SavedObjectsClientContract): Promise<D
       if (!dataSourceId && savedObject.id.includes('::')) {
         dataSourceId = savedObject.id.split('::')[0];
       }
+      // Check _ format: <dataSourceId>_<uuid> where prefix is a valid UUID
+      if (!dataSourceId) {
+        const uIdx = savedObject.id.indexOf('_');
+        if (uIdx > 0) {
+          const prefix = savedObject.id.substring(0, uIdx);
+          if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(prefix)) {
+            dataSourceId = prefix;
+          }
+        }
+      }
 
       const dataSource = dataSourceId ? dataSourceMap[dataSourceId] : undefined;
 
@@ -156,6 +175,7 @@ const fetchIndexPatterns = async (client: SavedObjectsClientContract): Promise<D
         meta: {
           type: DATA_STRUCTURE_META_TYPES.CUSTOM,
           timeFieldName: savedObject.attributes.timeFieldName,
+          displayName: savedObject.attributes.displayName,
         },
       };
 

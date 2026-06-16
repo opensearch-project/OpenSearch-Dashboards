@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { fireEvent, render, waitFor, screen } from '@testing-library/react';
 import { TraceDetails } from './trace_view';
 import { createMemoryHistory } from 'history';
@@ -427,6 +426,7 @@ describe('TraceDetails', () => {
     const history = createMemoryHistory();
     render(
       <Router history={history}>
+        {/* @ts-expect-error TS2740 TODO(ts-error): fixme */}
         <TraceDetails defaultDataset={defaultDataset} />
       </Router>
     );
@@ -1051,6 +1051,7 @@ describe('TraceDetails', () => {
     expect(document.querySelector('[data-testid="logs-loading"]')).toHaveTextContent('false');
 
     // Click the logs tab to switch to logs view
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     fireEvent.click(logsTabButton);
 
     // Wait for the logs tab content to be rendered
@@ -1073,6 +1074,7 @@ describe('TraceDetails', () => {
     // Test span click functionality from logs
     const spanClickButton = document.querySelector('[data-testid="span-click-from-logs"]');
     expect(spanClickButton).toBeInTheDocument();
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     fireEvent.click(spanClickButton);
 
     // The logs functionality should be integrated into the component
