@@ -56,6 +56,14 @@ export type { CompatAction, CompatDecision, EvaluatedRemote } from './compat_enf
 export { COMPAT_BLOCK_ROOT_ID, renderCompatBlockPage } from './compat_block_page';
 
 export {
+  CHUNK_ERROR_ROOT_ID,
+  isChunkLoadFailure,
+  renderChunkErrorSurface,
+  installChunkErrorSurface,
+} from './chunk_error_surface';
+export type { ChunkErrorDetail, ChunkErrorSurfaceDeps } from './chunk_error_surface';
+
+export {
   OVERRIDE_STORAGE_KEY,
   parseQueryOverrides,
   parseStorageOverrides,

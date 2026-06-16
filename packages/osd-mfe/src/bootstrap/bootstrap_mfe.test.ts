@@ -112,6 +112,43 @@ describe('bootstrapMfe (locked sequence)', () => {
     expect(deps.loadRemoteContainer).toHaveBeenCalledTimes(2);
   });
 
+  it('arms the lazy-chunk integrity-failure surface once, before core boot', async () => {
+    const order: string[] = [];
+    const deps: Partial<BootstrapMfeDeps> = {
+      loadScript: jest.fn(async (url: string) => {
+        if (url === SHARED_DEPS_URL) {
+          testWindow().__osdSharedDeps__ = { React: { version: '16.14.0' } };
+        }
+      }),
+      fetchImpl: ((async () => ({
+        ok: true,
+        status: 200,
+        json: async () => validRegistry(),
+      })) as unknown) as typeof fetch,
+      loadRemoteContainer: jest.fn(async () => ({
+        init: () => undefined,
+        get: () => Promise.resolve(() => ({ plugin: () => undefined })),
+      })),
+      getRemoteModuleFactory: jest.fn(async () => () => ({ plugin: () => undefined })),
+      registerPluginFactory: jest.fn(),
+      installChunkErrorSurface: jest.fn(() => {
+        order.push('installChunkErrorSurface');
+        return () => undefined;
+      }),
+      invokeCoreBootstrap: jest.fn(async () => {
+        order.push('coreBootstrap');
+      }),
+    };
+
+    await bootstrapMfe({ registryUrl: REGISTRY_URL, sharedDepsUrl: SHARED_DEPS_URL, deps });
+
+    // Installed exactly once, and BEFORE core boot so it is armed for the whole
+    // app lifetime (a chunk failure is a runtime event after mount).
+    expect(deps.installChunkErrorSurface).toHaveBeenCalledTimes(1);
+    expect(order[0]).toBe('installChunkErrorSurface');
+    expect(order.indexOf('installChunkErrorSurface')).toBeLessThan(order.indexOf('coreBootstrap'));
+  });
+
   it('loads the shared-deps dependency chunks (in order) BEFORE the entry', async () => {
     const loadOrder: string[] = [];
     const DEP_A = 'http://localhost:8080/shared-deps/osd-ui-shared-deps.@elastic.js';

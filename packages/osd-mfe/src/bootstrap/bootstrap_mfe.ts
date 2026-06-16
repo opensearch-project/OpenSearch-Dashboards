@@ -41,6 +41,7 @@ import { buildOverrideMap, OverrideStorage, parseOverrideSources } from './overr
 import { CompatPolicy } from './compat_policy';
 import { decideCompat, EvaluatedRemote } from './compat_enforcement';
 import { renderCompatBlockPage } from './compat_block_page';
+import { installChunkErrorSurface } from './chunk_error_surface';
 import { mfeWindow } from './types';
 
 // NOTE: `./inspector` is intentionally NOT imported statically here. It pulls in
@@ -93,6 +94,16 @@ export interface BootstrapMfeDeps {
    * the block); tests inject a spy.
    */
   renderBlockPage: (offenders: EvaluatedRemote[]) => void;
+  /**
+   * Install the host-side LAZY-CHUNK integrity-failure surface (Phase 12, Story 3).
+   * Registers global `unhandledrejection` + capture-phase `error` listeners that
+   * detect a chunk load/SRI failure at the dynamic-`import()` boundary inside an
+   * already-mounted remote and turn it into a visible, non-blocking error banner +
+   * telemetry — never a white screen or a silent hang. Installed ONCE, early, so it
+   * is armed for the whole app lifetime. The default installs the real surface;
+   * tests inject a spy. See {@link installChunkErrorSurface}.
+   */
+  installChunkErrorSurface: typeof installChunkErrorSurface;
 }
 
 /** Inputs to {@link bootstrapMfe}. */
@@ -190,6 +201,7 @@ function resolveDeps(overrides?: Partial<BootstrapMfeDeps>): BootstrapMfeDeps {
         });
     },
     renderBlockPage: (offenders: EvaluatedRemote[]) => renderCompatBlockPage(offenders),
+    installChunkErrorSurface,
     ...overrides,
   };
 }
@@ -251,6 +263,16 @@ export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> 
   const { registryUrl, sharedDepsUrl, sharedDepsDepUrls, allowOverride = false } = options;
   const { host, compatPolicy } = options;
   const deps = resolveDeps(options.deps);
+
+  // Arm the lazy-CHUNK integrity-failure surface BEFORE anything loads, so it is
+  // active for the entire page lifetime (Phase 12, Story 3). A remote's lazy chunks
+  // are integrity-checked by the browser (rspack SubresourceIntegrityPlugin +
+  // crossOriginLoading, see mfe_rspack_config.ts); a tampered chunk is rejected at
+  // the remote's own dynamic-`import()` site AFTER it is mounted — a RUNTIME event,
+  // not a boot-time skip. This host-side safety net catches that rejection and
+  // surfaces a visible error + telemetry instead of letting it white-screen / hang.
+  // It is purely additive (global listeners) and never affects the load sequence.
+  deps.installChunkErrorSurface();
 
   // 1. Load shared deps and seed the MF share scope (singletons). The shared-deps
   //    bundle is split, so load its dependency chunks (in order) BEFORE the entry

@@ -253,6 +253,18 @@ export function getMfeRspackConfig(options: MfeRspackConfigOptions): Configurati
       // location so dynamically-loaded chunks resolve wherever the remote is served.
       publicPath: 'auto',
       uniqueName: `osdMfe_${plugin.id}`,
+      // Subresource Integrity (Phase 12, Story 3) — defense-in-depth for LAZY CHUNKS.
+      // The Module Federation runtime injects a `<script>` for each dynamically
+      // `import()`-ed chunk at runtime. `crossOriginLoading: 'anonymous'` makes the
+      // runtime fetch those chunk scripts in CORS (anonymous) mode and emit a
+      // `crossorigin="anonymous"` attribute on the injected tag — which is REQUIRED
+      // for the browser to enforce the per-chunk `integrity` attribute the
+      // SubresourceIntegrityPlugin (below) wires into the runtime. The CDN already
+      // answers CORS (Managed-CORS-with-preflight) and the local origin sets
+      // ACAO:*, so the anonymous request succeeds. Story 2 secured the boot-time
+      // remoteEntry <script> (host-injected, integrity from the registry); this
+      // secures the chunks the remote loads itself AFTER it is mounted.
+      crossOriginLoading: 'anonymous',
       clean: true,
     },
 
@@ -284,6 +296,35 @@ export function getMfeRspackConfig(options: MfeRspackConfigOptions): Configurati
 
     plugins: [
       new rspack.experiments.VirtualModulesPlugin(crossPluginVirtualFiles),
+      // Subresource Integrity for LAZY CHUNKS (Phase 12, Story 3). rspack 1.6.4
+      // ships this natively (`rspack.experiments.SubresourceIntegrityPlugin`), so
+      // per-chunk SRI needs NO optimizer/core change and NO webpack-subresource-
+      // integrity dependency. It computes a `sha384-…` digest for every emitted
+      // chunk (over the UNCOMPRESSED bytes — the SAME representation the browser
+      // verifies the DECODED response against, and the same algorithm Story 1
+      // uses for the remoteEntry in the registry) and injects those hashes into
+      // the Module Federation runtime, which then sets `integrity` (+ the
+      // `crossorigin` from `output.crossOriginLoading` above) on each chunk
+      // <script> it loads on demand. A tampered/MITM'd chunk served at the pinned
+      // content-addressed path is then REJECTED by the browser at the dynamic
+      // `import()` site instead of executed — defense-in-depth behind the
+      // boot-time remoteEntry gate (Story 2). A chunk failure is a RUNTIME event
+      // inside an already-mounted plugin; the bootstrap's chunk-error surface
+      // (bootstrap/chunk_error_surface.ts) turns the resulting rejection into a
+      // visible error + telemetry rather than a white screen / silent hang.
+      //
+      // `enabled: 'auto'` activates SRI only for non-development (i.e. `--dist`)
+      // builds — exactly the artifacts that get published to the CDN and that the
+      // threat model (a compromised CDN serving altered bytes at a pinned path)
+      // actually protects. Dev builds are served locally and are not that threat
+      // surface, and skipping SRI there avoids any interaction with incremental/
+      // source-map dev output. `hashFuncNames: ['sha384']` matches the registry's
+      // Story-1 algorithm so the integrity story is uniform across remoteEntry and
+      // chunks.
+      new rspack.experiments.SubresourceIntegrityPlugin({
+        hashFuncNames: ['sha384'],
+        enabled: 'auto',
+      }),
       new NodePolyfillPlugin({ additionalAliases: ['process'] }),
       new rspack.DefinePlugin({
         // eslint-disable-next-line @typescript-eslint/naming-convention
