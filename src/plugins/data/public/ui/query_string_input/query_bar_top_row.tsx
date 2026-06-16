@@ -139,7 +139,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
     }),
     keys: 'r',
     execute: () => {
-      onClickSubmitButton({ preventDefault: () => { } } as React.MouseEvent<HTMLButtonElement>);
+      onClickSubmitButton({ preventDefault: () => {} } as React.MouseEvent<HTMLButtonElement>);
     },
   });
 
