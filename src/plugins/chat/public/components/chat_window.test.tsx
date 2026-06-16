@@ -84,7 +84,9 @@ describe('ChatWindow', () => {
         content,
         rawMessage: rawMessage || content,
       })),
-      getAvailableDataSources: jest.fn().mockResolvedValue([]),
+      getAvailableDataSources: jest
+        .fn()
+        .mockResolvedValue([{ id: 'mock-ds-id', title: 'Mock DS' }]),
       setDataSourceId: jest.fn(),
       conversationHistoryService: {
         getMemoryProvider: jest.fn().mockReturnValue({
@@ -810,11 +812,8 @@ describe('ChatWindow', () => {
 
   describe('data source validation on send', () => {
     it('should show unsupported message when data source is AnalyticEngine', async () => {
-      // getCurrentDataSourceId returns undefined (validation fails)
-      mockChatService.getCurrentDataSourceId.mockResolvedValue(undefined);
-      // No compatible data sources available
+      mockChatService.getCurrentDataSourceId.mockResolvedValue('ds-analytic');
       mockChatService.getAvailableDataSources.mockResolvedValue([]);
-      // But an unsupported data source exists
       mockCore.savedObjects.client.get = jest.fn().mockResolvedValue({
         attributes: { dataSourceEngineType: 'AnalyticEngine' },
       });
@@ -834,11 +833,34 @@ describe('ChatWindow', () => {
       expect(mockChatService.sendMessage).not.toHaveBeenCalled();
     });
 
+    it('should show selector when current data source is invalid but alternatives exist', async () => {
+      // Current data source is unsupported, but compatible alternatives exist
+      mockChatService.getCurrentDataSourceId.mockResolvedValue('ds-analytic');
+      mockChatService.getAvailableDataSources.mockResolvedValue([
+        { id: 'ds-good', title: 'Good Source' },
+      ]);
+
+      const ref = React.createRef<ChatWindowInstance>();
+      const { getByRole, getByText } = renderWithContext(
+        <ChatWindow ref={ref} onClose={jest.fn()} />
+      );
+
+      const input = getByRole('textbox');
+      fireEvent.change(input, { target: { value: 'hello' } });
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+
+      // Should show selector, not unsupported message
+      expect(mockChatService.sendMessage).not.toHaveBeenCalled();
+      expect(getByText('Good Source')).toBeTruthy();
+    });
+
     it('should show no data source message when no data sources exist at all', async () => {
       mockChatService.getCurrentDataSourceId.mockResolvedValue(undefined);
       mockChatService.getAvailableDataSources.mockResolvedValue([]);
-      // No unsupported data source either
-      mockCore.savedObjects.client.get = jest.fn().mockRejectedValue(new Error('Not found'));
 
       const ref = React.createRef<ChatWindowInstance>();
       const { getByRole } = renderWithContext(<ChatWindow ref={ref} onClose={jest.fn()} />);

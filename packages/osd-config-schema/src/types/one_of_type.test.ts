@@ -86,20 +86,19 @@ test('handles object', () => {
 test('handles object with wrong type', () => {
   const type = schema.oneOf([schema.object({ age: schema.number() })]);
 
-  expect(() => type.validate({ age: 'foo' })).toThrowErrorMatchingInlineSnapshot(`
-"types that failed validation:
-- [0.age]: expected value of type [number] but got [string]"
-`);
+  expect(() => type.validate({ age: 'foo' })).toThrowErrorMatchingInlineSnapshot(
+    `"[age]: expected value of type [number] but got [string]"`
+  );
 });
 
 test('includes namespace in failure', () => {
   const type = schema.oneOf([schema.object({ age: schema.number() })]);
 
-  expect(() => type.validate({ age: 'foo' }, {}, 'foo-namespace'))
-    .toThrowErrorMatchingInlineSnapshot(`
-"[foo-namespace]: types that failed validation:
-- [foo-namespace.0.age]: expected value of type [number] but got [string]"
-`);
+  expect(() =>
+    type.validate({ age: 'foo' }, {}, 'foo-namespace')
+  ).toThrowErrorMatchingInlineSnapshot(
+    `"[foo-namespace.age]: expected value of type [number] but got [string]"`
+  );
 });
 
 test('handles multiple objects with same key', () => {
@@ -128,33 +127,28 @@ test('handles maybe', () => {
 test('fails if not matching type', () => {
   const type = schema.oneOf([schema.string()]);
 
-  expect(() => type.validate(false)).toThrowErrorMatchingInlineSnapshot(`
-"types that failed validation:
-- [0]: expected value of type [string] but got [boolean]"
-`);
-  expect(() => type.validate(123)).toThrowErrorMatchingInlineSnapshot(`
-"types that failed validation:
-- [0]: expected value of type [string] but got [number]"
-`);
+  expect(() => type.validate(false)).toThrowErrorMatchingInlineSnapshot(
+    `"expected value of type [string] but got [boolean]"`
+  );
+  expect(() => type.validate(123)).toThrowErrorMatchingInlineSnapshot(
+    `"expected value of type [string] but got [number]"`
+  );
 });
 
 test('fails if not matching multiple types', () => {
   const type = schema.oneOf([schema.string(), schema.number()]);
 
-  expect(() => type.validate(false)).toThrowErrorMatchingInlineSnapshot(`
-"types that failed validation:
-- [0]: expected value of type [string] but got [boolean]
-- [1]: expected value of type [number] but got [boolean]"
-`);
+  expect(() => type.validate(false)).toThrowErrorMatchingInlineSnapshot(
+    `"SchemaTypeError: expected value of type [number] but got [boolean]"`
+  );
 });
 
 test('fails if not matching literal', () => {
   const type = schema.oneOf([schema.literal('foo')]);
 
-  expect(() => type.validate('bar')).toThrowErrorMatchingInlineSnapshot(`
-"types that failed validation:
-- [0]: expected value to equal [foo]"
-`);
+  expect(() => type.validate('bar')).toThrowErrorMatchingInlineSnapshot(
+    `"expected value to equal [foo]"`
+  );
 });
 
 test('fails if nested union type fail', () => {
@@ -163,13 +157,7 @@ test('fails if nested union type fail', () => {
     schema.oneOf([schema.oneOf([schema.object({}), schema.number()])]),
   ]);
 
-  expect(() => type.validate('aaa')).toThrowErrorMatchingInlineSnapshot(`
-"types that failed validation:
-- [0]: types that failed validation:
- - [0]: expected value of type [boolean] but got [string]
-- [1]: types that failed validation:
- - [0]: types that failed validation:
-  - [0]: could not parse object value from json input
-  - [1]: expected value of type [number] but got [string]"
-`);
+  expect(() => type.validate('aaa')).toThrowErrorMatchingInlineSnapshot(
+    `"SchemaTypeError: SchemaTypeError: expected value of type [number] but got [string]"`
+  );
 });
