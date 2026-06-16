@@ -317,8 +317,7 @@ describe('VisualizationBuilder', () => {
 
         // Multi data points won't work with metric
         builder.onDataChange({
-          numericalColumns: createMockVisColumns(2, VisFieldType.Numerical, {
-          }),
+          numericalColumns: createMockVisColumns(2, VisFieldType.Numerical),
           categoricalColumns: [],
           dateColumns: [],
           transformedData: [],
@@ -350,8 +349,7 @@ describe('VisualizationBuilder', () => {
         });
 
         builder.onDataChange({
-          numericalColumns: createMockVisColumns(2, VisFieldType.Numerical, {
-          }),
+          numericalColumns: createMockVisColumns(2, VisFieldType.Numerical),
           categoricalColumns: [],
           dateColumns: [],
           transformedData: [],
@@ -383,8 +381,7 @@ describe('VisualizationBuilder', () => {
       });
 
       builder.onDataChange({
-        numericalColumns: createMockVisColumns(2, VisFieldType.Numerical, {
-        }),
+        numericalColumns: createMockVisColumns(2, VisFieldType.Numerical),
         categoricalColumns: [],
         dateColumns: [],
         transformedData: [],
