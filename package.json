@@ -495,7 +495,7 @@
     "listr": "^0.14.1",
     "load-json-file": "^6.2.0",
     "luxon": "^3.2.1",
-    "markdown-it": "^14.1.1",
+    "markdown-it": "^14.2.0",
     "mocha": "^10.1.0",
     "mock-fs": "^4.12.0",
     "monaco-editor": "^0.52.0",
