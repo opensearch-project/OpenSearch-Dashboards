@@ -3,11 +3,6 @@
   "version": "1.0.0",
   "license": "Apache-2.0",
   "scripts": {},
-  "opensearchDashboards": {
-    "build": {
-      "intermediateBuildDirectory": "target"
-    }
-  },
   "dependencies": {
     "classnames": "^2.3.1",
     "lodash": "^4.18.0",
