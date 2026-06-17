@@ -30,7 +30,11 @@
 
 import Path from 'path';
 import Fs from 'fs';
-import { rspack } from '@rspack/core';
+// `@rspack/core` is intentionally NOT statically imported here. It is loaded
+// lazily inside `compilePluginRemote` at the moment of an actual build. See
+// `mfe_rspack_config.ts` for the rationale (avoid registering the native
+// binding's process-lifetime `CustomGC` handle just by importing this module,
+// which hangs Jest).
 import * as sass from 'sass-embedded';
 
 import { discoverUiPlugins, DiscoveredUiPlugin } from './discover_plugins';
@@ -151,6 +155,11 @@ async function compilePluginRemote(
   });
 
   await new Promise<void>((resolve, reject) => {
+    // Lazy-acquire `@rspack/core` here so merely importing this module never
+    // loads the native binding (which registers a `CustomGC` handle that hangs
+    // Jest); only an actual build pulls it in.
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { rspack } = require('@rspack/core') as typeof import('@rspack/core');
     const compiler = rspack(config);
     compiler.run((runError, stats) => {
       // Always close the compiler to release Rspack's worker threads before

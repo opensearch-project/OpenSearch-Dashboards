@@ -12,26 +12,71 @@
 /**
  * @jest-environment node
  *
- * `@rspack/core` (a native binding) needs `TextDecoder`/`TextEncoder`, which
- * neither the jsdom nor this jest node environment exposes as globals; this
- * config-shape test has no DOM needs, so it runs in the node environment and
- * polyfills the two globals (below) BEFORE `@rspack/core` is loaded.
+ * Config-shape unit test for `getMfeRspackConfig`.
+ *
+ * We MOCK `@rspack/core` on purpose. It is a native binding whose load
+ * registers a process-lifetime `CustomGC` handle that keeps Jest from exiting —
+ * which (depending on GC timing) hangs `node scripts/jest packages/osd-mfe`
+ * indefinitely and would otherwise force a blanket `--forceExit` (a band-aid
+ * that masks real handle leaks). This test only asserts that the builder wires
+ * the right config OPTIONS; the real rspack plugin behavior (actual SRI hashing
+ * + bundling) is covered end-to-end by `harness/verify_sri.js` against a real
+ * `--dist` build. Mocking keeps this a true unit test (no native bundler load)
+ * and lets Jest exit cleanly with zero open handles and no `--forceExit`.
  */
 
 import Path from 'path';
-import { TextDecoder, TextEncoder } from 'util';
 
-// Polyfill BEFORE the SUT (which statically imports @rspack/core) is loaded.
-// `util` is a static import (hoisted), but this top-level assignment runs at
-// module-evaluation time — and the SUT is pulled in lazily via dynamic import()
-// in `beforeAll` below, so @rspack/core only loads AFTER these globals exist.
-Object.assign(global, { TextDecoder, TextEncoder });
-
-let getMfeRspackConfig: typeof import('./mfe_rspack_config').getMfeRspackConfig;
-
-beforeAll(async () => {
-  ({ getMfeRspackConfig } = await import('./mfe_rspack_config'));
+// Minimal stand-ins for the rspack surface `getMfeRspackConfig` uses. Class
+// names are PRESERVED so the `constructor.name` assertions stay meaningful, and
+// each plugin records its constructor args on `.options` for option assertions.
+jest.mock('@rspack/core', () => {
+  class ResolverFactory {
+    // Deterministic resolved path so cross-plugin/core externalization virtual
+    // modules are built without touching disk or the native resolver.
+    public sync(_context: string, request: string) {
+      return { path: `/mock/resolved/${request.replace(/[^a-z]/gi, '_')}` };
+    }
+  }
+  class VirtualModulesPlugin {
+    public modules: unknown;
+    constructor(modules: unknown) {
+      this.modules = modules;
+    }
+  }
+  class SubresourceIntegrityPlugin {
+    public options: unknown;
+    constructor(options: unknown) {
+      this.options = options;
+    }
+  }
+  class DefinePlugin {
+    public definitions: unknown;
+    constructor(definitions: unknown) {
+      this.definitions = definitions;
+    }
+  }
+  class ModuleFederationPlugin {
+    public options: unknown;
+    constructor(options: unknown) {
+      this.options = options;
+    }
+  }
+  return {
+    rspack: {
+      experiments: {
+        resolver: { ResolverFactory },
+        VirtualModulesPlugin,
+        SubresourceIntegrityPlugin,
+      },
+      DefinePlugin,
+      container: { ModuleFederationPlugin },
+    },
+  };
 });
+
+// eslint-disable-next-line import/first -- must follow the jest.mock above
+import { getMfeRspackConfig } from './mfe_rspack_config';
 
 /** The OSD repo root (this file lives at packages/osd-mfe/src). */
 const REPO_ROOT = Path.resolve(__dirname, '../../..');

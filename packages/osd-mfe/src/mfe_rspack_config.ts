@@ -29,7 +29,14 @@
  */
 
 import Path from 'path';
-import { rspack, Configuration } from '@rspack/core';
+// Lazy-load `@rspack/core` at call time inside `getMfeRspackConfig` (below) —
+// not statically here. The native binding registers a process-lifetime
+// `CustomGC` handle that prevents Jest from exiting, hanging the test runner
+// whenever any test transitively imports this module (or the package barrel
+// that re-exports it). Keeping `Configuration` as a TYPE-ONLY import means
+// merely importing this module is binding-free; only an actual config build
+// pulls rspack in.
+import type { Configuration } from '@rspack/core';
 import { getSharedLoaderRules } from '@osd/utils';
 import browserslist from 'browserslist';
 
@@ -100,6 +107,14 @@ export interface MfeRspackConfigOptions {
  * `target/public` optimizer output.
  */
 export function getMfeRspackConfig(options: MfeRspackConfigOptions): Configuration {
+  // Lazy-acquire the `@rspack/core` value namespace at call time (the file-level
+  // import is type-only — see the import-block comment). This way merely
+  // importing this module never loads the native binding (which registers a
+  // process-lifetime `CustomGC` handle that hangs Jest); only an actual config
+  // build pulls rspack in. The unit test that exercises this function mocks
+  // `@rspack/core` so it stays binding-free in tests.
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { rspack } = require('@rspack/core') as typeof import('@rspack/core');
   const { plugin, repoRoot, publicEntry, sassImplementation, dist = false } = options;
   const themeGlobals = options.themeGlobals ?? DEFAULT_THEME_GLOBALS;
   const allPlugins = options.allPlugins ?? [plugin];
