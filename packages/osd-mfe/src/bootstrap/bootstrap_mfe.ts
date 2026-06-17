@@ -27,9 +27,11 @@
  */
 
 import { assertValidRegistry, Registry } from '../registry/schema';
-import { RegistryProvider } from '../registry/provider';
+import type { RegistryProvider } from '../registry/provider';
 import { resolve, OverrideMap, ResolvedRemote } from '../registry/resolve';
 import { HostEnvironment } from '../registry/compat_classifier';
+import { RegistryVerification, SignatureCheck } from '../registry/signing_common';
+import { verifyRegistrySignatureWeb } from '../registry/verify_registry_web';
 import { buildShareScope } from './share_scope';
 import { getRemoteModuleFactory, loadRemoteContainer, loadScript } from './load_remote';
 import {
@@ -104,6 +106,19 @@ export interface BootstrapMfeDeps {
    * tests inject a spy. See {@link installChunkErrorSurface}.
    */
   installChunkErrorSurface: typeof installChunkErrorSurface;
+  /**
+   * Verify the fetched registry's authenticity signature (Phase 12, Story 4).
+   * Called ONLY when a verification key is injected by the (trusted) OSD origin
+   * (`options.registryVerification`), BEFORE the registry is used to decide which
+   * remotes to load. The default is the Web Crypto HMAC verifier
+   * ({@link verifyRegistrySignatureWeb}); tests inject a deterministic spy (jsdom
+   * may lack `crypto.subtle`). A non-`ok` result makes the bootstrap fail closed
+   * (see {@link bootstrapMfe}); it NEVER loads a remote from an unverified registry.
+   */
+  verifyRegistrySignature: (
+    registry: Registry,
+    verification: RegistryVerification
+  ) => Promise<SignatureCheck>;
 }
 
 /** Inputs to {@link bootstrapMfe}. */
@@ -156,6 +171,20 @@ export interface BootstrapMfeOptions {
    * incompatible and warn-loads unknown. Optional — see {@link host}.
    */
   compatPolicy?: CompatPolicy;
+  /**
+   * Registry-authenticity verification material (Phase 12, Story 4), injected by
+   * the server (`window.__osdMfe__.registryVerification`) from
+   * `opensearchDashboards.mfe.registrySignature.*` — ONLY when a verification key
+   * is configured. When present, the bootstrap REQUIRES the fetched registry to
+   * carry a valid signature produced with this host-held key and FAILS CLOSED
+   * otherwise (the registry decides which remote code loads, so an unauthenticated
+   * one is never trusted). When absent (the default / signing off), the registry
+   * loads as before — backward compatible, like a missing per-artifact integrity.
+   * The key is delivered by the trusted OSD origin, NOT the CDN that serves the
+   * registry, so the CDN tamperer this defends against cannot forge a signature.
+   * See `../registry/signing_common.ts` for the trust/key model.
+   */
+  registryVerification?: RegistryVerification;
   /** Optional collaborator overrides (used by tests). */
   deps?: Partial<BootstrapMfeDeps>;
 }
@@ -202,6 +231,7 @@ function resolveDeps(overrides?: Partial<BootstrapMfeDeps>): BootstrapMfeDeps {
     },
     renderBlockPage: (offenders: EvaluatedRemote[]) => renderCompatBlockPage(offenders),
     installChunkErrorSurface,
+    verifyRegistrySignature: verifyRegistrySignatureWeb,
     ...overrides,
   };
 }
@@ -261,7 +291,7 @@ function inMemoryProvider(registry: Registry): RegistryProvider {
  */
 export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> {
   const { registryUrl, sharedDepsUrl, sharedDepsDepUrls, allowOverride = false } = options;
-  const { host, compatPolicy } = options;
+  const { host, compatPolicy, registryVerification } = options;
   const deps = resolveDeps(options.deps);
 
   // Arm the lazy-CHUNK integrity-failure surface BEFORE anything loads, so it is
@@ -293,6 +323,65 @@ export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> 
     throw new Error(`Failed to fetch MFE registry from ${registryUrl}: HTTP ${response.status}`);
   }
   const registry = assertValidRegistry(await response.json());
+
+  // 2a. Registry AUTHENTICITY (Phase 12, Story 4) — verify BEFORE the registry is
+  //     used to decide which remotes to load. The registry document selects WHICH
+  //     remote code each plugin loads, so an attacker who can alter the registry
+  //     bytes (a compromised CDN / MITM serving a different registry.json at the
+  //     pinned path) could redirect every plugin to arbitrary code even though the
+  //     per-artifact SRI (Stories 1–3) protects each pinned artifact. So when the
+  //     (trusted) OSD origin injected a verification key, the registry MUST carry a
+  //     valid HMAC signature produced with that host-held key; otherwise we FAIL
+  //     CLOSED and never load a remote from an unauthenticated registry. The key is
+  //     delivered by the OSD origin, NOT the CDN, so the CDN tamperer lacks it (a
+  //     bare hash served next to the registry would be theater). When no key is
+  //     injected (signing off), this is skipped and the registry loads as before.
+  //     Only fires on an ACTUAL signature failure, so a correctly-signed registry
+  //     never false-rejects.
+  if (registryVerification && registryVerification.key) {
+    const check = await deps.verifyRegistrySignature(registry, registryVerification);
+    if (!check.ok) {
+      const reason = check.reason ?? 'unknown reason';
+      // eslint-disable-next-line no-console
+      console.error(
+        `[mfe] Registry signature verification FAILED (refusing to load any micro-frontend ` +
+          `from an unauthenticated registry): ${reason}`
+      );
+
+      // Fail-closed reaction, reusing the Phase 9 env-keyed surfaces (mirrors the
+      // Story-2 integrity-failure handling):
+      //   - non-prod `block`: render the loud block page and do NOT boot core — the
+      //     app does not start with an untrusted registry (never a silent hang).
+      //   - prod `skip` / no policy: do NOT load ANY remote (we cannot trust the
+      //     document that lists them); register every advertised plugin as a DISABLED
+      //     placeholder and still boot the core shell so the app degrades visibly
+      //     rather than white-screening. No untrusted remote bytes are ever loaded.
+      const trustOffender: EvaluatedRemote = {
+        id: 'registry',
+        compatibility: 'incompatible',
+        reasons: [
+          `Registry signature verification failed: ${reason}. The served registry was ` +
+            `tampered with, is unsigned, or was signed with a different key than the configured ` +
+            `verification key (opensearchDashboards.mfe.registrySignature.verificationKey).`,
+        ],
+      };
+      if (compatPolicy?.onIncompatible === 'block') {
+        deps.renderBlockPage([trustOffender]);
+        return;
+      }
+      for (const id of Object.keys(registry.mfes)) {
+        deps.registerPluginFactory(id, createDisabledPluginModule);
+      }
+      // eslint-disable-next-line no-console
+      console.warn(
+        `[mfe] Booting the core shell with ALL ${Object.keys(registry.mfes).length} ` +
+          `micro-frontend(s) DISABLED because the registry signature did not verify ` +
+          `(compat policy = "skip"). No remote code was loaded.`
+      );
+      await deps.invokeCoreBootstrap();
+      return;
+    }
+  }
 
   // 2b. Build the dev-override map (GATED: empty unless `allowOverride`), and
   //     wrap the registry as a provider so each remote is resolved through the

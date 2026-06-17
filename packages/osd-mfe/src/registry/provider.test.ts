@@ -15,6 +15,8 @@ import Path from 'path';
 
 import { SCHEMA_VERSION, Registry } from './schema';
 import { FileRegistryProvider, RegistryFs } from './provider';
+import { signRegistry } from './signing';
+import { REGISTRY_SIGNATURE_ALGORITHM } from './signing_common';
 
 /** Build a minimal, valid registry with `inspector` pinned to `version`. */
 function registryWith(version: string): Registry {
@@ -168,5 +170,76 @@ describe('FileRegistryProvider — real file hot-reload + accessors', () => {
     Fs.writeFileSync(file, JSON.stringify({ schemaVersion: 1 }));
     const provider = new FileRegistryProvider({ path: file });
     expect(() => provider.read()).toThrow(/Invalid MFE registry/);
+  });
+});
+
+describe('FileRegistryProvider — registry signature verification (Phase 12, Story 4)', () => {
+  const KEY = { keyId: 'mfe-test-hmac-1', secret: 'server-held-secret' };
+  const VERIFICATION = {
+    algorithm: REGISTRY_SIGNATURE_ALGORITHM,
+    keyId: KEY.keyId,
+    key: KEY.secret,
+  };
+
+  /** A fake fs serving a fixed content string at a stable mtime. */
+  function fsServing(content: string): RegistryFs {
+    return {
+      statSync: () => ({ mtimeMs: 1000 }),
+      readFileSync: () => content,
+    };
+  }
+
+  it('returns a validly-signed registry when a matching verification key is configured', () => {
+    const signed = signRegistry(registryWith('3.5.0+signed'), KEY);
+    const provider = new FileRegistryProvider({
+      path: '/r.json',
+      fs: fsServing(JSON.stringify(signed)),
+      verification: VERIFICATION,
+    });
+    expect(provider.read().mfes.inspector.version).toBe('3.5.0+signed');
+  });
+
+  it('THROWS fail-closed for a TAMPERED registry (byte change after signing)', () => {
+    const signed = signRegistry(registryWith('3.5.0+signed'), KEY);
+    // Tamper: repoint the remote AFTER signing — the signature no longer matches.
+    signed.mfes.inspector.remoteEntry = 'http://evil.example.com/remoteEntry.js';
+    const provider = new FileRegistryProvider({
+      path: '/r.json',
+      fs: fsServing(JSON.stringify(signed)),
+      verification: VERIFICATION,
+    });
+    expect(() => provider.read()).toThrow(/failed signature verification/i);
+  });
+
+  it('THROWS fail-closed for an UNSIGNED registry when a key is configured', () => {
+    const unsigned = registryWith('3.5.0+unsigned');
+    const provider = new FileRegistryProvider({
+      path: '/r.json',
+      fs: fsServing(JSON.stringify(unsigned)),
+      verification: VERIFICATION,
+    });
+    expect(() => provider.read()).toThrow(/failed signature verification|no signature/i);
+  });
+
+  it('THROWS fail-closed when signed with a DIFFERENT key than configured', () => {
+    const signed = signRegistry(registryWith('3.5.0+signed'), {
+      keyId: KEY.keyId,
+      secret: 'attacker-key',
+    });
+    const provider = new FileRegistryProvider({
+      path: '/r.json',
+      fs: fsServing(JSON.stringify(signed)),
+      verification: VERIFICATION,
+    });
+    expect(() => provider.read()).toThrow(/failed signature verification/i);
+  });
+
+  it('loads an unsigned registry unchanged when NO verification key is configured (backward compat)', () => {
+    const unsigned = registryWith('3.5.0+legacy');
+    const provider = new FileRegistryProvider({
+      path: '/r.json',
+      fs: fsServing(JSON.stringify(unsigned)),
+    });
+    expect(provider.read().mfes.inspector.version).toBe('3.5.0+legacy');
   });
 });

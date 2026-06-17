@@ -1058,3 +1058,151 @@ describe('bootstrapMfe — remoteEntry SRI enforcement (Phase 12, Story 2)', () 
     consoleWarn.mockRestore();
   });
 });
+
+describe('bootstrapMfe — registry signature verification (Phase 12, Story 4)', () => {
+  const VERIFICATION = {
+    algorithm: 'HMAC-SHA256',
+    keyId: 'mfe-dev-hmac-1',
+    key: 'server-held-secret',
+  };
+  const BLOCK_POLICY = {
+    onIncompatible: 'block' as const,
+    onMissing: 'warn-load' as const,
+    strictShared: true,
+  };
+  const SKIP_POLICY = {
+    onIncompatible: 'skip' as const,
+    onMissing: 'skip' as const,
+    strictShared: true,
+  };
+
+  /** Build standard happy-path deps plus injectable signature/block spies. */
+  function makeDeps(
+    over: Partial<BootstrapMfeDeps> = {}
+  ): {
+    deps: Partial<BootstrapMfeDeps>;
+    registered: Set<string>;
+  } {
+    const registered = new Set<string>();
+    const deps: Partial<BootstrapMfeDeps> = {
+      loadScript: jest.fn(async (url: string) => {
+        if (url === SHARED_DEPS_URL) {
+          testWindow().__osdSharedDeps__ = { React: { version: '16.14.0' } };
+        }
+      }),
+      fetchImpl: ((async () => ({
+        ok: true,
+        status: 200,
+        json: async () => validRegistry(),
+      })) as unknown) as typeof fetch,
+      loadRemoteContainer: jest.fn(async () => ({
+        init: () => undefined,
+        get: () => Promise.resolve(() => ({ plugin: () => undefined })),
+      })),
+      getRemoteModuleFactory: jest.fn(async () => () => ({ plugin: () => undefined })),
+      registerPluginFactory: jest.fn((id: string) => {
+        registered.add(id);
+      }),
+      invokeCoreBootstrap: jest.fn(async () => undefined),
+      renderBlockPage: jest.fn(),
+      ...over,
+    };
+    return { deps, registered };
+  }
+
+  it('does NOT verify when no verification key is injected (signing off / backward compat)', async () => {
+    const verify = jest.fn(async () => ({ ok: true }));
+    const { deps } = makeDeps({ verifyRegistrySignature: verify });
+
+    await bootstrapMfe({ registryUrl: REGISTRY_URL, sharedDepsUrl: SHARED_DEPS_URL, deps });
+
+    expect(verify).not.toHaveBeenCalled();
+    expect(deps.loadRemoteContainer).toHaveBeenCalled();
+    expect(deps.invokeCoreBootstrap).toHaveBeenCalledTimes(1);
+  });
+
+  it('VALID signature: verifies once and boots normally (no false reject)', async () => {
+    const verify = jest.fn(async () => ({ ok: true }));
+    const { deps, registered } = makeDeps({ verifyRegistrySignature: verify });
+
+    await bootstrapMfe({
+      registryUrl: REGISTRY_URL,
+      sharedDepsUrl: SHARED_DEPS_URL,
+      registryVerification: VERIFICATION,
+      deps,
+    });
+
+    expect(verify).toHaveBeenCalledTimes(1);
+    expect(deps.renderBlockPage).not.toHaveBeenCalled();
+    expect(registered.has('inspector')).toBe(true);
+    expect(registered.has('data')).toBe(true);
+    expect(deps.loadRemoteContainer).toHaveBeenCalled();
+    expect(deps.invokeCoreBootstrap).toHaveBeenCalledTimes(1);
+  });
+
+  it('INVALID signature + block policy: renders the block page and does NOT boot core or load remotes', async () => {
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    const verify = jest.fn(async () => ({ ok: false, reason: 'signature does not match' }));
+    const { deps } = makeDeps({ verifyRegistrySignature: verify });
+
+    await bootstrapMfe({
+      registryUrl: REGISTRY_URL,
+      sharedDepsUrl: SHARED_DEPS_URL,
+      compatPolicy: BLOCK_POLICY,
+      registryVerification: VERIFICATION,
+      deps,
+    });
+
+    expect(verify).toHaveBeenCalledTimes(1);
+    expect(deps.renderBlockPage).toHaveBeenCalledTimes(1);
+    const offenders = (deps.renderBlockPage as jest.Mock).mock.calls[0][0];
+    expect(offenders[0].id).toBe('registry');
+    expect(offenders[0].reasons[0]).toMatch(/signature verification failed/i);
+    // Fail-closed: never loaded a remote, never booted core.
+    expect(deps.loadRemoteContainer).not.toHaveBeenCalled();
+    expect(deps.invokeCoreBootstrap).not.toHaveBeenCalled();
+
+    consoleError.mockRestore();
+  });
+
+  it('INVALID signature + skip policy: disables EVERY advertised plugin, boots the shell, loads NO remote', async () => {
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    const consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const verify = jest.fn(async () => ({ ok: false, reason: 'registry has no signature' }));
+    const { deps, registered } = makeDeps({ verifyRegistrySignature: verify });
+
+    await bootstrapMfe({
+      registryUrl: REGISTRY_URL,
+      sharedDepsUrl: SHARED_DEPS_URL,
+      compatPolicy: SKIP_POLICY,
+      registryVerification: VERIFICATION,
+      deps,
+    });
+
+    expect(verify).toHaveBeenCalledTimes(1);
+    expect(deps.renderBlockPage).not.toHaveBeenCalled();
+    // Every advertised plugin disabled; no remote bytes loaded; shell still boots.
+    expect(registered.has('inspector')).toBe(true);
+    expect(registered.has('data')).toBe(true);
+    expect(deps.loadRemoteContainer).not.toHaveBeenCalled();
+    expect(deps.invokeCoreBootstrap).toHaveBeenCalledTimes(1);
+
+    consoleError.mockRestore();
+    consoleWarn.mockRestore();
+  });
+
+  it('verification key present but empty string => treated as OFF (no verify call)', async () => {
+    const verify = jest.fn(async () => ({ ok: true }));
+    const { deps } = makeDeps({ verifyRegistrySignature: verify });
+
+    await bootstrapMfe({
+      registryUrl: REGISTRY_URL,
+      sharedDepsUrl: SHARED_DEPS_URL,
+      registryVerification: { ...VERIFICATION, key: '' },
+      deps,
+    });
+
+    expect(verify).not.toHaveBeenCalled();
+    expect(deps.invokeCoreBootstrap).toHaveBeenCalledTimes(1);
+  });
+});

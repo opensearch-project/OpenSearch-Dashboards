@@ -295,6 +295,17 @@ export default () =>
           onMissing: Joi.string().valid('block', 'skip', 'warn-load'),
           strictShared: Joi.boolean().default(true),
         }).default(),
+        // Phase 12 Story 4 — registry AUTHENTICITY (signing). Declared here so the
+        // LEGACY config (read by ui_render_mixin.js to inject the host-held
+        // verification material into the bootstrap) resolves
+        // `opensearchDashboards.mfe.registrySignature.*`; mirrors the new-platform
+        // schema in opensearch_dashboards_config.ts. Empty `verificationKey` (the
+        // default) => signing OFF: registry loads unverified (backward compatible).
+        registrySignature: Joi.object({
+          verificationKey: Joi.string().allow('').default(''),
+          keyId: Joi.string().default('mfe-dev-hmac-1'),
+          algorithm: Joi.string().default('HMAC-SHA256'),
+        }).default(),
       }).default(),
     }).default(),
 

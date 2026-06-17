@@ -183,6 +183,25 @@ export function uiRenderMixin(osdServer, server, config) {
           resolveMfeHostEnv(server.newPlatform.env.packageInfo.version, fromRoot('.'))
         );
 
+        // Phase 12 Story 4: registry AUTHENTICITY. When a verification key is
+        // configured, inject the host-held verification material so the browser
+        // bootstrap REQUIRES the fetched registry to carry a valid signature and
+        // fails closed otherwise. The key is delivered by THIS trusted OSD origin
+        // (not the CDN that serves the registry), which is what defeats a
+        // compromised-CDN/MITM serving altered registry bytes. When no key is
+        // configured (the default), inject `null` so signing stays OFF (the registry
+        // loads unverified, backward compatible). This whole block lives inside the
+        // mfe-enabled branch, so the no-flag served HTML is byte-for-byte unchanged.
+        const mfeRegistrySignature = config.get('opensearchDashboards.mfe.registrySignature');
+        const mfeRegistryVerification =
+          mfeRegistrySignature && mfeRegistrySignature.verificationKey
+            ? JSON.stringify({
+                algorithm: mfeRegistrySignature.algorithm,
+                keyId: mfeRegistrySignature.keyId,
+                key: mfeRegistrySignature.verificationKey,
+              })
+            : 'null';
+
         // The OSD shared-deps bundle is split: the entry (`mfeSharedDepsUrl`) only
         // assigns window.__osdSharedDeps__ once its dependency chunks
         // (UiSharedDeps.jsDepFilenames — e.g. the large `@elastic` vendor chunk)
@@ -220,6 +239,7 @@ export function uiRenderMixin(osdServer, server, config) {
               mfeAllowOverride,
               mfeCompatPolicy,
               mfeHostEnv,
+              mfeRegistryVerification,
             },
           },
           'bootstrap_mfe'

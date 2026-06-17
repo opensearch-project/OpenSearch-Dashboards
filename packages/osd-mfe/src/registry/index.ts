@@ -20,6 +20,12 @@
 export { SCHEMA_VERSION, validate, assertValidRegistry } from './schema';
 export type { Registry, MfeEntry, SharedDepsDescriptor, ValidationResult } from './schema';
 
+export { signRegistry, verifyRegistrySignature } from './signing';
+export type { RegistrySigningKey } from './signing';
+export { REGISTRY_SIGNATURE_ALGORITHM, canonicalRegistryString } from './signing_common';
+export type { RegistrySignature, RegistryVerification, SignatureCheck } from './signing_common';
+export { verifyRegistrySignatureWeb } from './verify_registry_web';
+
 export { generateRegistry } from './generate';
 export type { GenerateRegistryOptions } from './generate';
 

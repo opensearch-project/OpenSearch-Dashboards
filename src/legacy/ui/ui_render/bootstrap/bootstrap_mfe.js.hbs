@@ -76,6 +76,12 @@ if (window.__osdStrictCsp__ && window.__osdCspNotEnforced__) {
           each remote against. Raw JSON ({{{ }}} = unescaped). --}}
     compatPolicy: {{{mfeCompatPolicy}}},
     host: {{{mfeHostEnv}}},
+    {{!-- Phase 12 Story 4: registry AUTHENTICITY. The host-held HMAC verification
+          material (key + keyId + algorithm), or null when signing is off. Delivered
+          by THIS trusted OSD origin (not the CDN), so the bootstrap can verify the
+          fetched registry's signature and fail closed on a tampered/unsigned one.
+          Raw JSON ({{{ }}} = unescaped). --}}
+    registryVerification: {{{mfeRegistryVerification}}},
   };
 
   window.onload = function () {
@@ -161,6 +167,7 @@ if (window.__osdStrictCsp__ && window.__osdCspNotEnforced__) {
         allowOverride: window.__osdMfe__.allowOverride,
         compatPolicy: window.__osdMfe__.compatPolicy,
         host: window.__osdMfe__.host,
+        registryVerification: window.__osdMfe__.registryVerification,
       });
 
       load(styleSheetPaths);

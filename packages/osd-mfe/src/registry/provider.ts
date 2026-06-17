@@ -28,6 +28,8 @@
 import Fs from 'fs';
 
 import { MfeEntry, Registry, assertValidRegistry } from './schema';
+import { RegistryVerification } from './signing_common';
+import { verifyRegistrySignature } from './signing';
 
 /**
  * A source of the current MFE registry, read at serve time.
@@ -77,6 +79,18 @@ export interface FileRegistryProviderOptions {
   path?: string;
   /** Injectable filesystem (for testing). Defaults to node `fs`. */
   fs?: RegistryFs;
+  /**
+   * Optional registry-authenticity verification material (Phase 12, Story 4).
+   * When provided, every {@link FileRegistryProvider.read read} verifies the
+   * registry's HMAC signature with this host-held key BEFORE returning it, and
+   * THROWS (fail-closed) on a missing/invalid/non-matching signature — the
+   * registry decides which remote code loads, so an unauthenticated one is
+   * refused. When omitted (the default), no signature check is performed and the
+   * registry loads as before (backward compatible; the harness origin server
+   * serves the bytes key-less and the browser bootstrap does the verification on
+   * the live path). See `signing_common.ts` for the trust/key model.
+   */
+  verification?: RegistryVerification;
 }
 
 /** Internal cache slot: the validated registry plus the mtime it was read at. */
@@ -99,6 +113,7 @@ interface CacheSlot {
 export class FileRegistryProvider implements RegistryProvider {
   private readonly path: string;
   private readonly fs: RegistryFs;
+  private readonly verification?: RegistryVerification;
   private cache: CacheSlot | undefined;
 
   /**
@@ -115,6 +130,7 @@ export class FileRegistryProvider implements RegistryProvider {
     }
     this.path = path;
     this.fs = options.fs ?? Fs;
+    this.verification = options.verification;
   }
 
   /** The resolved registry file path this provider reads from. */
@@ -181,6 +197,24 @@ export class FileRegistryProvider implements RegistryProvider {
     }
 
     // Throws a descriptive Error listing every schema problem when invalid.
-    return assertValidRegistry(parsed);
+    const registry = assertValidRegistry(parsed);
+
+    // Phase 12, Story 4 — registry AUTHENTICITY (fail-closed). When a verification
+    // key is configured, the registry MUST carry a signature that verifies with it;
+    // otherwise we refuse it rather than trust a document that decides which remote
+    // code loads. Throwing here is the Node read path's fail-closed behavior
+    // (mirrors assertValidRegistry); the browser bootstrap has its own fail-closed
+    // surface on the live path. No key configured => no check (backward compatible).
+    if (this.verification) {
+      const result = verifyRegistrySignature(registry, this.verification);
+      if (!result.ok) {
+        throw new Error(
+          `FileRegistryProvider: registry at ${this.path} failed signature verification ` +
+            `(refusing to serve an unauthenticated registry): ${result.reason}`
+        );
+      }
+    }
+
+    return registry;
   }
 }

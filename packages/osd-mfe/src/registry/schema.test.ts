@@ -224,3 +224,39 @@ describe('assertValidRegistry()', () => {
     expect(() => assertValidRegistry({ schemaVersion: 1 })).toThrow(/Invalid MFE registry/);
   });
 });
+
+describe('validate() — optional signature envelope (Phase 12, Story 4)', () => {
+  it('accepts a well-formed signature', () => {
+    const registry = validRegistry();
+    (registry as { signature: unknown }).signature = {
+      algorithm: 'HMAC-SHA256',
+      keyId: 'mfe-dev-hmac-1',
+      value: 'Zm9vYmFy',
+    };
+    expect(validate(registry)).toEqual({ valid: true, errors: [] });
+  });
+
+  it('accepts a registry with NO signature (unsigned is valid)', () => {
+    expect(validate(validRegistry()).valid).toBe(true);
+  });
+
+  it('rejects a signature that is not an object', () => {
+    const registry = validRegistry();
+    (registry as { signature: unknown }).signature = 'sha384-bare-hash';
+    const result = validate(registry);
+    expect(result.valid).toBe(false);
+    expect(
+      result.errors.some((e) => e.includes('signature, when present, must be an object'))
+    ).toBe(true);
+  });
+
+  it('rejects a signature missing algorithm/keyId/value', () => {
+    const registry = validRegistry();
+    (registry as { signature: unknown }).signature = { value: '' };
+    const result = validate(registry);
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContain('signature.algorithm must be a non-empty string');
+    expect(result.errors).toContain('signature.keyId must be a non-empty string');
+    expect(result.errors).toContain('signature.value must be a non-empty (base64) string');
+  });
+});

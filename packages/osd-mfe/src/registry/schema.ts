@@ -24,6 +24,8 @@
  * later be swapped for an S3/DynamoDB/service backend) rather than `require()`d.
  */
 
+import { RegistrySignature } from './signing_common';
+
 /** Current registry schema version. Bump when the shape changes incompatibly. */
 export const SCHEMA_VERSION = 1;
 
@@ -139,6 +141,18 @@ export interface Registry {
   sharedDeps: SharedDepsDescriptor;
   /** Map of plugin id -> its MFE remote descriptor. */
   mfes: Record<string, MfeEntry>;
+  /**
+   * Optional authenticity signature over the registry (Phase 12, Story 4). When
+   * present, it is an HMAC-SHA256 MAC (`{ algorithm, keyId, value }`) computed over
+   * the CANONICAL, signature-stripped registry bytes with a key held in server
+   * config (never in this payload). It is NOT part of the signed bytes (the
+   * canonicalization removes it). A read path configured with a verification key
+   * REFUSES a registry whose signature is absent or does not match — fail-closed —
+   * because the registry decides which remote code loads (see signing_common.ts).
+   * Absent => the registry is unsigned (signing off / legacy); a key-less read path
+   * loads it as before (backward compatible, like a missing per-artifact integrity).
+   */
+  signature?: RegistrySignature;
 }
 
 /** Result of {@link validate}: `valid` plus a human-readable list of errors. */
@@ -209,7 +223,31 @@ export function validate(value: unknown): ValidationResult {
     }
   }
 
+  // `signature` is optional (absent => unsigned registry). When present it must be
+  // a well-formed envelope so a read path can verify it; a malformed envelope is a
+  // schema error (distinct from a signature MISMATCH, which the verifier reports).
+  if (value.signature !== undefined) {
+    validateSignature(value.signature, errors);
+  }
+
   return { valid: errors.length === 0, errors };
+}
+
+/** Validate the optional `signature` envelope, appending any problems to `errors`. */
+function validateSignature(value: unknown, errors: string[]): void {
+  if (!isPlainObject(value)) {
+    errors.push('signature, when present, must be an object { algorithm, keyId, value }');
+    return;
+  }
+  if (!isNonEmptyString(value.algorithm)) {
+    errors.push('signature.algorithm must be a non-empty string');
+  }
+  if (!isNonEmptyString(value.keyId)) {
+    errors.push('signature.keyId must be a non-empty string');
+  }
+  if (!isNonEmptyString(value.value)) {
+    errors.push('signature.value must be a non-empty (base64) string');
+  }
 }
 
 /** Validate a single `mfes[id]` entry, appending any problems to `errors`. */

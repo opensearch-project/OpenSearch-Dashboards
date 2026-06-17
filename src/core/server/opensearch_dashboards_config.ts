@@ -139,6 +139,28 @@ export const config = {
       // allowOverride gate is on) so a developer can repoint an MFE at a local dev
       // server. NEVER applied in production. Empty default.
       devOverrideOrigins: schema.arrayOf(schema.string(), { defaultValue: [] }),
+      // Phase 12 Story 4: registry AUTHENTICITY (signing). The registry document
+      // decides WHICH remote code each plugin loads, so it is signed with a key the
+      // CDN tamperer lacks (an HMAC secret held HERE in server config, never inside
+      // the signed payload) and the browser MFE bootstrap verifies the signature at
+      // read time, BEFORE using the registry — refusing a tampered/unsigned registry
+      // fail-closed. `verificationKey` empty (the default) => signing OFF: the
+      // registry loads unverified exactly as before (backward compatible, like a
+      // missing per-artifact integrity). When set (and mfe.enabled), the bootstrap
+      // REQUIRES a matching signature. The key is delivered to the browser by THIS
+      // trusted OSD origin (not the CDN), which is what defeats a compromised-CDN /
+      // MITM serving altered registry bytes. Key issuance/rotation/custody (and a
+      // stronger asymmetric model where the browser holds only a public key) are
+      // deferred to Phase 13. Injected only inside the mfe-enabled render branch, so
+      // the no-flag served HTML stays byte-for-byte unchanged.
+      registrySignature: schema.object({
+        // The HMAC secret used to verify the registry signature. Empty => signing off.
+        verificationKey: schema.string({ defaultValue: '' }),
+        // Identifier of the expected signing key (informational; Phase-13 rotation hook).
+        keyId: schema.string({ defaultValue: 'mfe-dev-hmac-1' }),
+        // Signature algorithm; only HMAC-SHA256 is supported today.
+        algorithm: schema.string({ defaultValue: 'HMAC-SHA256' }),
+      }),
       // Phase 9 version-compatibility POLICY. Controls how the MFE host reacts
       // when a remote is built against an incompatible OSD core / shared-singleton
       // version, or is missing the compatibility metadata. The env-keyed DEFAULTS
