@@ -176,9 +176,7 @@ export class QueryBuilder {
       preferredDataset
     );
 
-    if (queryEditorStateFromUrl?.languageType) {
-      this.updateQueryEditorState({ languageType: queryEditorStateFromUrl.languageType });
-    }
+    this.updateQueryEditorState({ languageType: languageType as SupportLanguageType });
 
     if (queryEditorStateFromUrl?.activeBottomPanelTab) {
       this.updateQueryEditorState({
