@@ -31,6 +31,11 @@ export const configSchema = schema.object({
       }),
     }),
   }),
+  // PPL linter feature flag, read at runtime via DynamicConfigService and
+  // surfaced as the queryEnhancements.pplLint capability. Disabled by default.
+  pplLint: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+  }),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;
