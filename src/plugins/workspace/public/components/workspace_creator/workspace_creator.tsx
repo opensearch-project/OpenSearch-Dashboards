@@ -193,6 +193,7 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
 
                       await createAutoDetectedDatasets(
                         savedObjects.client,
+                        dataPlugin.dataViews,
                         detection,
                         dataSourceId
                       );
