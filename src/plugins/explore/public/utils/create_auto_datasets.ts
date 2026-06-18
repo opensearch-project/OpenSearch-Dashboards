@@ -14,12 +14,7 @@ export interface CreateDatasetsResult {
   correlationId: string | null;
 }
 
-// Pre-fetch the field list ourselves before calling createAndSave. PR #11653 removed the
-// legacy write-on-read field refresh and DataViewsService.refreshFields swallows errors
-// silently — both routes can leave a brand-new index pattern with no fields, which breaks
-// the time picker / aggregations downstream. Fetching explicitly lets us:
-//   1. fail loudly if /_fields_for_wildcard isn't returning anything;
-//   2. embed the fields in the spec so the resulting saved object carries them on disk.
+// Pre-fetch the field list ourselves before saving the index pattern.
 async function fetchFieldsForPattern(
   dataViews: DataViewsContract,
   pattern: string,
@@ -76,8 +71,7 @@ async function createOrReuseDataView(
   }
 
   // Pre-fetch fields and embed them in the spec so the saved object lands with a
-  // populated field list. If the fetch fails, createAndSave still writes the pattern;
-  // refreshAndPersistFields below makes a second attempt.
+  // populated field list on disk regardless of whether refreshFields silently fails.
   const fields = await fetchFieldsForPattern(
     dataViews,
     spec.title as string,
@@ -86,8 +80,10 @@ async function createOrReuseDataView(
 
   let createdId: string | null = null;
   try {
-    const created = await dataViews.createAndSave({ ...spec, fields });
-    createdId = created.id ?? null;
+    // Skip createAndSave so it doesn't silently flip the workspace's default index pattern.
+    const dataView = await dataViews.create({ ...spec, fields }, /* skipFetchFields */ true);
+    await dataViews.createSavedObject(dataView);
+    createdId = dataView.id ?? null;
   } catch (error) {
     if (error instanceof DuplicateDataViewError) {
       const dupe = await savedObjectsClient.find({
