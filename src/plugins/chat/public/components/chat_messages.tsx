@@ -108,6 +108,7 @@ interface ChatMessagesProps {
   onFillInput?: (content: string) => void;
   onAppendInput?: (content: string) => void;
   onRemoveInput?: (content: string) => void;
+  inputValue?: string;
   startResponse?: boolean;
   threadId?: string;
   onShowHistory?: () => void;
@@ -292,6 +293,7 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
   onFillInput,
   onAppendInput,
   onRemoveInput,
+  inputValue,
   startResponse,
   threadId,
   onShowHistory,
@@ -584,6 +586,7 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
                     currentMessage={message}
                     onAppendInput={onAppendInput}
                     onRemoveInput={onRemoveInput}
+                    inputValue={inputValue}
                   />
                 )}
               </div>

@@ -628,6 +628,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             onApproveConfirmation={handleApproveConfirmation}
             onRejectConfirmation={handleRejectConfirmation}
             onFillInput={setInput}
+            inputValue={input}
             onAppendInput={(content: string) => setInput((prev) => prev ? `${prev};${content}` : content)}
             onRemoveInput={(content: string) => setInput((prev) => {
               const parts = prev.split(';').filter((p) => p.trim() !== content.trim());

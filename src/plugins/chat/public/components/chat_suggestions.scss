@@ -19,15 +19,6 @@
     }
   }
 
-  // Selected suggestion styling
-  &.chat-suggestion-bubble-panel--selected {
-    border: 1px solid $euiColorSuccess;
-
-    &:hover {
-      cursor: pointer;
-    }
-  }
-
   // Custom suggestion styling with visual distinction
   .chat-suggestion-bubble-panel--custom {
     /* stylelint-disable-next-line  @osd/stylelint/no_restricted_values */

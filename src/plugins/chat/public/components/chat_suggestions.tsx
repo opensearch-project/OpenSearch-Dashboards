@@ -34,7 +34,7 @@ const SuggestionBubble: React.FC<SuggestionBubbleProps> = ({
   onClick,
   color,
   content,
-  iconType = 'chatRight',
+  iconType = 'returnKey',
   actionType,
   selected = false,
 }: SuggestionBubbleProps) => {
@@ -88,11 +88,13 @@ export const ChatSuggestions = ({
   currentMessage,
   onAppendInput,
   onRemoveInput,
+  inputValue,
 }: {
   messages: Message[];
   currentMessage: Message;
   onAppendInput?: (content: string) => void;
   onRemoveInput?: (content: string) => void;
+  inputValue?: string;
 }) => {
   const { suggestedActionsService, chatService } = useChatContext();
 
@@ -140,7 +142,10 @@ export const ChatSuggestions = ({
     loadCustomSuggestions();
   }, [suggestedActionsService, chatService, messages, currentMessage]);
 
-  const allSuggestions = [...inlineSuggestionActions, ...customSuggestions];
+  const hasUserTypedInput =
+    !!(inputValue && inputValue.trim().length > 0) && selectedIndices.size === 0;
+  const visibleInlineSuggestions = hasUserTypedInput ? [] : inlineSuggestionActions;
+  const allSuggestions = [...visibleInlineSuggestions, ...customSuggestions];
 
   if (isLoadingCustomSuggestions || allSuggestions.length === 0) {
     return null;
@@ -150,15 +155,18 @@ export const ChatSuggestions = ({
     const isInline = suggestedAction.actionType === 'send_as_input';
 
     if (isInline) {
-      const newSelected = new Set(selectedIndices);
-      if (newSelected.has(index)) {
-        newSelected.delete(index);
+      if (selectedIndices.has(index)) {
+        setSelectedIndices(new Set());
         onRemoveInput?.(suggestedAction.message);
       } else {
-        newSelected.add(index);
+        // Deselect previous selection
+        selectedIndices.forEach((prevIndex) => {
+          const prevAction = allSuggestions[prevIndex];
+          if (prevAction) onRemoveInput?.(prevAction.message);
+        });
+        setSelectedIndices(new Set([index]));
         onAppendInput?.(suggestedAction.message);
       }
-      setSelectedIndices(newSelected);
     } else {
       suggestedAction.action();
     }
@@ -170,7 +178,7 @@ export const ChatSuggestions = ({
       style={{ paddingLeft: 8, paddingBottom: 5, overflow: 'hidden' }}
     >
       <EuiText color="subdued" size="xs" style={{ paddingLeft: 10 }}>
-        <small>Available suggestions</small>
+        <small>Follow up</small>
       </EuiText>
       <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="s">
         {allSuggestions.map((suggestedAction, i) => (
