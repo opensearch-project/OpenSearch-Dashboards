@@ -20,6 +20,28 @@
 export { SCHEMA_VERSION, validate, assertValidRegistry } from './schema';
 export type { Registry, MfeEntry, SharedDepsDescriptor, ValidationResult } from './schema';
 
+export {
+  SCHEMA_VERSION_V2,
+  validateV2,
+  assertValidV2Document,
+  migrateV1ToV2,
+  detectRegistryShape,
+  coerceToV2Document,
+} from './schema_v2';
+export type {
+  V2Document,
+  V2DefaultLayer,
+  V2Rollout,
+  V2RolloutMatch,
+  V2RolloutOverride,
+  V2TenantOverride,
+  ResolutionDimensions,
+  DetectedRegistryShape,
+} from './schema_v2';
+
+export { validateBootManifest, assertValidBootManifest } from './boot_manifest';
+export type { BootManifest, BootManifestEntry } from './boot_manifest';
+
 export { signRegistry, verifyRegistrySignature } from './signing';
 export type { RegistrySigningKey } from './signing';
 export { REGISTRY_SIGNATURE_ALGORITHM, canonicalRegistryString } from './signing_common';
