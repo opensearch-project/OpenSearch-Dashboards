@@ -77,3 +77,24 @@ export type {
 
 export { runUpdateCli, resolveRegistryPath, buildRegistryFromManifest } from './update_cli';
 export type { UpdateCliConsole } from './update_cli';
+
+export {
+  runUpdateCliV2,
+  isV2Mode,
+  parseKeyValuePairs,
+  applySetDefaultEntry,
+  applyAddRollout,
+  applyRemoveRollout,
+  applyTenantOverride,
+  applyRemoveTenantOverride,
+  applyRollback,
+  checkDependencyGraph,
+} from './update_cli_v2';
+export type {
+  UpdateCliV2Console,
+  AuditEntry,
+  AuditLog,
+  AuditOp,
+  ExternalsFile,
+  CheckDepsResult,
+} from './update_cli_v2';
