@@ -5,7 +5,10 @@
 
 import { Client } from '@opensearch-project/opensearch';
 import { Client as LegacyClient } from 'elasticsearch';
-import { ISavedObjectsRepository, SavedObjectsClientContract } from '../../../../../src/core/server';
+import {
+  ISavedObjectsRepository,
+  SavedObjectsClientContract,
+} from '../../../../../src/core/server';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../common';
 import {
   DataSourceAttributes,
