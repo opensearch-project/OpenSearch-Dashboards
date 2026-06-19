@@ -42,6 +42,9 @@ export type {
 export { validateBootManifest, assertValidBootManifest } from './boot_manifest';
 export type { BootManifest, BootManifestEntry } from './boot_manifest';
 
+export { resolveBootManifest, resolveDecisions, matchesRollout } from './resolve_v2';
+export type { ResolvedDecision, ResolvedSource } from './resolve_v2';
+
 export { signRegistry, verifyRegistrySignature } from './signing';
 export type { RegistrySigningKey } from './signing';
 export { REGISTRY_SIGNATURE_ALGORITHM, canonicalRegistryString } from './signing_common';
