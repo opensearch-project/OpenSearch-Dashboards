@@ -11,6 +11,7 @@ import {
   AppCategory,
   ApplicationStart,
   AppNavLinkStatus,
+  AppStatus,
   ChromeBreadcrumb,
   CoreStart,
   DEFAULT_APP_CATEGORIES,
@@ -526,13 +527,52 @@ export function prependWorkspaceToBreadcrumbs(
   }
 }
 
+/**
+ * Pick the landing app for a use case. Skips features that are
+ * **feature-flag-disabled** — i.e. `navLinkStatus === hidden` *and*
+ * `status === accessible`. An app gated by a feature flag is still
+ * accessible in principle, the plugin just hides the nav link to suppress
+ * the UI; an app that's transiently inaccessible (e.g. an
+ * `insideWorkspace`-only app read from outside any workspace, which the
+ * workspace plugin marks `inaccessible` and which therefore renders as
+ * `hidden` too) will become available once the user enters the workspace
+ * and must not be filtered out here.
+ *
+ * Reading both fields lets us distinguish "hidden by config" (skip) from
+ * "hidden because of where we are" (keep — it'll come back).
+ */
+export const pickUseCaseLandingAppId = (
+  features: WorkspaceUseCaseFeature[] | undefined,
+  apps: ReadonlyMap<string, PublicAppInfo> | undefined
+): string | undefined => {
+  if (!features?.length) {
+    return undefined;
+  }
+  if (!apps) {
+    return features[0].id;
+  }
+  const isFeatureFlagDisabled = (app: PublicAppInfo | undefined) =>
+    app?.navLinkStatus === AppNavLinkStatus.hidden && app?.status === AppStatus.accessible;
+  const firstSelectable = features.find((feature) => !isFeatureFlagDisabled(apps.get(feature.id)));
+  return (firstSelectable ?? features[0]).id;
+};
+
 export const getUseCaseUrl = (
   useCase: WorkspaceUseCase | undefined,
   workspaceId: string,
   application: ApplicationStart,
   http: HttpSetup
 ): string => {
-  const appId = useCase?.features?.[0]?.id || WORKSPACE_DETAIL_APP_ID;
+  let apps: ReadonlyMap<string, PublicAppInfo> | undefined;
+  // `applications$` is wrapped in `shareReplay(1)` upstream, so a
+  // synchronous subscribe-then-unsubscribe yields the current snapshot
+  // without leaking the subscription.
+  const sub = application.applications$.subscribe((value) => {
+    apps = value;
+  });
+  sub.unsubscribe();
+
+  const appId = pickUseCaseLandingAppId(useCase?.features, apps) || WORKSPACE_DETAIL_APP_ID;
   const useCaseURL = formatUrlWithWorkspaceId(
     application.getUrlForApp(appId, {
       absolute: false,

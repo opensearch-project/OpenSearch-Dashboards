@@ -10,7 +10,7 @@ import { BehaviorSubject } from 'rxjs';
 import { useLocation } from 'react-router-dom';
 
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-import { PermissionModeId } from '../../../../../core/public';
+import { PermissionModeId, PublicAppInfo } from '../../../../../core/public';
 import {
   CURRENT_USER_PLACEHOLDER,
   WORKSPACE_COLLABORATORS_APP_ID,
@@ -28,7 +28,7 @@ import { WorkspaceClient } from '../../workspace_client';
 import { DataSourceManagementPluginSetup } from '../../../../../plugins/data_source_management/public';
 import { DataPublicPluginStart } from '../../../../data/public';
 import { WorkspaceUseCase } from '../../types';
-import { getFirstUseCaseOfFeatureConfigs } from '../../utils';
+import { getFirstUseCaseOfFeatureConfigs, pickUseCaseLandingAppId } from '../../utils';
 import { useFormAvailableUseCases } from '../workspace_form/use_form_available_use_cases';
 import { NavigationPublicPluginStart } from '../../../../../plugins/navigation/public';
 import { DataSourceConnectionType } from '../../../common/types';
@@ -144,8 +144,13 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
           if (application && http) {
             const newWorkspaceId = result.result.id;
             const useCaseId = getFirstUseCaseOfFeatureConfigs(attributes.features);
-            const useCaseLandingAppId = availableUseCases?.find(({ id }) => useCaseId === id)
-              ?.features[0].id;
+            const matchedUseCase = availableUseCases?.find(({ id }) => useCaseId === id);
+            let apps: ReadonlyMap<string, PublicAppInfo> | undefined;
+            const appsSub = application.applications$.subscribe((value) => {
+              apps = value;
+            });
+            appsSub.unsubscribe();
+            const useCaseLandingAppId = pickUseCaseLandingAppId(matchedUseCase?.features, apps);
 
             // For observability workspaces, run trace detection and create datasets if found
             const isObservabilityWorkspace = useCaseId === 'observability';
