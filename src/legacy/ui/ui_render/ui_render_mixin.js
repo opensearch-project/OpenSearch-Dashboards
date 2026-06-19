@@ -43,6 +43,13 @@ import { fromRoot } from '../../../core/server/utils';
 import { resolveAllowOverride } from '../../../core/server/utils/resolve_allow_override';
 import { resolveCompatPolicy } from '../../../core/server/utils/resolve_compat_policy';
 import { resolveMfeHostEnv } from '../../../core/server/utils/resolve_mfe_host_env';
+import {
+  bucketFromCookie,
+  buildBucketSetCookie,
+  generateBucketCookieValue,
+  parseSingleCookie,
+  readMfeBootManifest,
+} from '../../../core/server/utils/mfe_boot_manifest';
 import { AppBootstrap } from './bootstrap';
 import { getApmConfig } from '../apm';
 import { applyCspModifications, buildMfeCspRules } from './utils';
@@ -132,12 +139,11 @@ export function uiRenderMixin(osdServer, server, config) {
       tags: ['api'],
       auth: authEnabled ? { mode: 'try' } : false,
     },
-    async handler(_request, h) {
+    async handler(request, h) {
       const buildHash = server.newPlatform.env.packageInfo.buildNum;
       const basePath = config.get('server.basePath');
 
       const regularBundlePath = `${basePath}/${buildHash}/bundles`;
-
       // Phase 3 MFE mode (docs/01-MFE-DESIGN.md §6). When enabled, serve a bootstrap
       // that OMITS the local plugin bundles and instead loads core.entry.js plus the
       // MFE bootstrap (which seeds the MF share scope from the origin shared-deps,
@@ -147,6 +153,60 @@ export function uiRenderMixin(osdServer, server, config) {
       // unchanged.
       const mfeEnabled = !!config.get('opensearchDashboards.mfe.enabled');
       if (mfeEnabled) {
+        // Phase 13 Story 3: registry contract + reference reader. When a
+        // registry file path is configured, the OSD server reads it (auto-
+        // migrating a v1 doc on the fly), resolves it server-side against the
+        // requesting host's dimensions (`customerId` from server config,
+        // `userBucket` from a sticky HttpOnly cookie), and INJECTS the resulting
+        // flat boot manifest into the bootstrap. The browser then consumes the
+        // manifest directly — ZERO `/registry` HTTP fetches in --mfe mode
+        // (verify_phase13 case G). When `registryPath` is empty (legacy /
+        // pre-Phase-13 deployments), this block is skipped and the bootstrap
+        // falls back to `mfeRegistryUrl` as before.
+        const mfeRegistryPath = config.get('opensearchDashboards.mfe.registryPath');
+        const mfeCustomerId = config.get('opensearchDashboards.mfe.customerId') || 'default';
+        const mfeBucketCookieName =
+          config.get('opensearchDashboards.mfe.userBucketCookieName') || '_osd_mfe_bucket';
+
+        // Cookie roundtrip: read existing bucket cookie or mint a fresh one.
+        // On a missing cookie, set it on this response so the assignment is
+        // sticky thereafter; same client => same bucket on every subsequent
+        // request, which is what makes the canary assignment deterministic.
+        let mfeBucketCookieValue = parseSingleCookie(
+          request.headers && request.headers.cookie,
+          mfeBucketCookieName
+        );
+        let mfeBucketCookieToSet = null;
+        if (!mfeBucketCookieValue) {
+          mfeBucketCookieValue = generateBucketCookieValue();
+          mfeBucketCookieToSet = buildBucketSetCookie(mfeBucketCookieName, mfeBucketCookieValue);
+        }
+        const mfeUserBucket = bucketFromCookie(mfeBucketCookieValue);
+
+        // Read + resolve the v2 (or v1, auto-migrated) registry into a flat
+        // boot manifest. Only when a path is configured — otherwise bake an
+        // empty `null` into the template and the browser falls back to the
+        // legacy fetch path.
+        let mfeBootManifestJson = 'null';
+        if (mfeRegistryPath && typeof mfeRegistryPath === 'string') {
+          try {
+            const resolved = readMfeBootManifest(mfeRegistryPath, {
+              customerId: String(mfeCustomerId),
+              userBucket: mfeUserBucket,
+            });
+            mfeBootManifestJson = JSON.stringify(resolved);
+          } catch (err) {
+            // Fail loudly server-side; the bootstrap falls back to the legacy
+            // fetch path so a misconfigured registry path doesn't white-screen
+            // the app — but the operator gets a clear log line.
+            // eslint-disable-next-line no-console
+            console.error(
+              `[mfe] Failed to read/resolve registry at ${mfeRegistryPath}; falling back to ` +
+                `the legacy registry-fetch path. Cause: ${(err && err.message) || err}`
+            );
+          }
+        }
+
         const mfeRegistryUrl = config.get('opensearchDashboards.mfe.registryUrl');
         const mfeSharedDepsUrl = config.get('opensearchDashboards.mfe.sharedDepsUrl');
         const mfeBootstrapUrl = config.get('opensearchDashboards.mfe.bootstrapUrl');
@@ -240,6 +300,10 @@ export function uiRenderMixin(osdServer, server, config) {
               mfeCompatPolicy,
               mfeHostEnv,
               mfeRegistryVerification,
+              // Phase 13 Story 3: server-resolved boot manifest. When non-`null`
+              // the bootstrap consumes this directly and skips the registry HTTP
+              // fetch (and the registry signature verify) entirely.
+              mfeBootManifest: mfeBootManifestJson,
             },
           },
           'bootstrap_mfe'
@@ -248,11 +312,19 @@ export function uiRenderMixin(osdServer, server, config) {
         const mfeBody = await mfeBootstrap.getJsFile();
         const mfeEtag = await mfeBootstrap.getJsFileHash();
 
-        return h
+        const response = h
           .response(mfeBody)
           .header('cache-control', 'must-revalidate')
           .header('content-type', 'application/javascript')
           .etag(mfeEtag);
+        if (mfeBucketCookieToSet) {
+          // Sticky HttpOnly cookie: same client gets the same bucket forever
+          // (until the cookie is cleared), so canary assignment is deterministic
+          // per browser. Future AuthN replaces this source with a per-user
+          // hash — without changing the resolution contract.
+          response.header('set-cookie', mfeBucketCookieToSet);
+        }
+        return response;
       }
 
       const kpUiPlugins = osdServer.newPlatform.__internals.uiPlugins;

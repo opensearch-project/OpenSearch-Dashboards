@@ -113,7 +113,25 @@ export const config = {
       // URL of the dynamic MFE registry document, read at serve time (GET /registry
       // on the origin). The browser MFE bootstrap fetches this per page load, so a
       // registry version edit is reflected on reload with no rebuild/restart.
+      // Phase 13 cut-over: when `registryPath` (below) is set, the OSD server
+      // reads the registry server-side and INJECTS a flat boot manifest into the
+      // bootstrap; the browser does not fetch this URL. Kept around for backward
+      // compatibility with pre-Phase-13 injected pages.
       registryUrl: schema.string({ defaultValue: '' }),
+      // Phase 13: file path to the registry document on disk (v2 shape; a v1
+      // canonical doc is auto-migrated on read). When set, the OSD server reads
+      // this on each /bootstrap.js render, resolves it server-side against the
+      // requesting host's dimensions (`customerId` + `userBucket`), and bakes
+      // the resulting flat boot manifest into the bootstrap script. The browser
+      // does NOT fetch a registry document in this mode (verify_phase13 case G).
+      registryPath: schema.string({ defaultValue: '' }),
+      // Phase 13: tenant identifier. Default `"default"` until real AuthN.
+      // Drives the `tenantOverrides[customerId]` resolution layer.
+      customerId: schema.string({ defaultValue: 'default' }),
+      // Phase 13: name of the sticky HttpOnly cookie OSD uses to derive the
+      // `userBucket` (0..99) for canary traffic-shifting. Set on first request
+      // and reused on subsequent requests so the assignment is stable per client.
+      userBucketCookieName: schema.string({ defaultValue: '_osd_mfe_bucket' }),
       // URL of the shared-deps bundle (assigns `window.__osdSharedDeps__`) served by
       // the origin's /shared-deps/.
       sharedDepsUrl: schema.string({ defaultValue: '' }),

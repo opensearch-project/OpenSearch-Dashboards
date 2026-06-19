@@ -1206,3 +1206,220 @@ describe('bootstrapMfe — registry signature verification (Phase 12, Story 4)',
     expect(deps.invokeCoreBootstrap).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('bootstrapMfe — server-resolved bootManifest (Phase 13, Story 3)', () => {
+  /** Shared minimal manifest used in this describe. */
+  function bootManifest(): import('../registry/boot_manifest').BootManifest {
+    return {
+      sharedDeps: { url: 'http://localhost:8080/shared-deps/', version: '3.5.0' },
+      mfes: [
+        {
+          id: 'inspector',
+          remoteEntry: 'http://localhost:8080/mfe/inspector/v_canary/remoteEntry.js',
+          scope: 'inspector',
+          module: './public',
+          version: '3.5.0+canary',
+          integrity: 'sha384-canary',
+        },
+        {
+          id: 'data',
+          remoteEntry: 'http://localhost:8080/mfe/data/default/remoteEntry.js',
+          scope: 'data',
+          module: './public',
+          version: '3.5.0+default',
+        },
+      ],
+    };
+  }
+
+  function makeFakeDeps(): {
+    deps: Partial<BootstrapMfeDeps>;
+    fetchImpl: jest.Mock;
+    loadedUrls: string[];
+    registered: Set<string>;
+  } {
+    const fetchImpl = jest.fn();
+    const loadedUrls: string[] = [];
+    const registered = new Set<string>();
+
+    const fakeContainer: MfeContainer = {
+      init: () => undefined,
+      get: () => Promise.resolve(() => ({ plugin: () => undefined })),
+    };
+
+    const deps: Partial<BootstrapMfeDeps> = {
+      loadScript: jest.fn(async (url: string) => {
+        if (url === SHARED_DEPS_URL) {
+          testWindow().__osdSharedDeps__ = {
+            React: { version: '16.14.0' },
+            ReactDom: { version: '16.14.0' },
+            Lodash: { VERSION: '4.17.21' },
+          };
+        }
+      }),
+      fetchImpl: (fetchImpl as unknown) as typeof fetch,
+      loadRemoteContainer: jest.fn(async (url: string) => {
+        loadedUrls.push(url);
+        return fakeContainer;
+      }),
+      getRemoteModuleFactory: jest.fn(async () => () => ({ plugin: () => undefined })),
+      registerPluginFactory: jest.fn((id: string) => {
+        registered.add(id);
+      }),
+      invokeCoreBootstrap: jest.fn(async () => undefined),
+    };
+
+    return { deps, fetchImpl, loadedUrls, registered };
+  }
+
+  it('makes ZERO registry HTTP fetches when a bootManifest is injected (case G)', async () => {
+    const { deps, fetchImpl, loadedUrls } = makeFakeDeps();
+
+    await bootstrapMfe({
+      registryUrl: REGISTRY_URL,
+      bootManifest: bootManifest(),
+      sharedDepsUrl: SHARED_DEPS_URL,
+      deps,
+    });
+
+    // The fetch impl is the only path that would touch /registry; it must NEVER
+    // fire when the manifest is injected. (verify_phase13 case G asserts the same
+    // in real Chromium via the network log.)
+    expect(fetchImpl).not.toHaveBeenCalled();
+    // Every manifest entry was loaded from its remoteEntry URL.
+    expect(loadedUrls.sort()).toEqual([
+      'http://localhost:8080/mfe/data/default/remoteEntry.js',
+      'http://localhost:8080/mfe/inspector/v_canary/remoteEntry.js',
+    ]);
+  });
+
+  it('passes manifest integrity through to loadRemoteContainer', async () => {
+    const { deps } = makeFakeDeps();
+
+    await bootstrapMfe({
+      registryUrl: REGISTRY_URL,
+      bootManifest: bootManifest(),
+      sharedDepsUrl: SHARED_DEPS_URL,
+      deps,
+    });
+
+    const calls = (deps.loadRemoteContainer as jest.Mock).mock.calls;
+    const inspectorCall = calls.find(
+      (c) => c[0] === 'http://localhost:8080/mfe/inspector/v_canary/remoteEntry.js'
+    );
+    const dataCall = calls.find((c) => c[0] === 'http://localhost:8080/mfe/data/default/remoteEntry.js');
+    expect(inspectorCall![2]).toBe('sha384-canary');
+    // No integrity on the `data` entry => undefined passed through.
+    expect(dataCall![2]).toBeUndefined();
+  });
+
+  it('boots core after registering EVERY manifest plugin', async () => {
+    const { deps, registered } = makeFakeDeps();
+
+    await bootstrapMfe({
+      registryUrl: REGISTRY_URL,
+      bootManifest: bootManifest(),
+      sharedDepsUrl: SHARED_DEPS_URL,
+      deps,
+    });
+
+    expect(registered.has('inspector')).toBe(true);
+    expect(registered.has('data')).toBe(true);
+    expect(deps.invokeCoreBootstrap).toHaveBeenCalledTimes(1);
+  });
+
+  it('throws on a malformed injected manifest (descriptive error)', async () => {
+    const { deps } = makeFakeDeps();
+    // Strip a required field — assertValidBootManifest should reject it with a
+    // path-prefixed error rather than letting bootstrap fall through to a
+    // confusing TypeError on undefined.scope.
+    const bad = bootManifest();
+    (bad.mfes[0] as { scope?: string }).scope = '';
+
+    await expect(
+      bootstrapMfe({
+        registryUrl: REGISTRY_URL,
+        bootManifest: bad,
+        sharedDepsUrl: SHARED_DEPS_URL,
+        deps,
+      })
+    ).rejects.toThrow(/Invalid MFE boot manifest/);
+  });
+
+  it('SKIPS registry signature verification when a bootManifest is present (Phase 13 trust moved server-side)', async () => {
+    const { deps } = makeFakeDeps();
+    const verify = jest.fn(async () => ({ ok: true }));
+
+    await bootstrapMfe({
+      registryUrl: REGISTRY_URL,
+      bootManifest: bootManifest(),
+      sharedDepsUrl: SHARED_DEPS_URL,
+      registryVerification: { algorithm: 'HMAC-SHA256', keyId: 'k', key: 'secret' },
+      deps: { ...deps, verifyRegistrySignature: verify },
+    });
+
+    // The signature path is for the legacy fetched-bytes path; the manifest is
+    // already-resolved-by-the-trusted-OSD-origin and carries no signature.
+    expect(verify).not.toHaveBeenCalled();
+    expect(deps.invokeCoreBootstrap).toHaveBeenCalledTimes(1);
+  });
+
+  it('Phase 9 compat classifier still runs against manifest entries (defense in depth)', async () => {
+    const { deps } = makeFakeDeps();
+
+    // The boot manifest entries deliberately omit `builtAgainst` (PRD shape:
+    // the manifest carries only what the loader needs — the resolver already
+    // pre-filtered server-side). The browser classifier therefore returns
+    // `unknown` for every manifest entry; under prod's onMissing:`skip` the
+    // entry is registered as a DISABLED placeholder and the remote is not
+    // loaded — exactly the defense-in-depth behaviour the story calls for.
+    await bootstrapMfe({
+      registryUrl: REGISTRY_URL,
+      bootManifest: bootManifest(),
+      sharedDepsUrl: SHARED_DEPS_URL,
+      host: {
+        osdVersion: '3.5.0',
+        sharedDeps: { react: '16.14.0', 'react-dom': '16.14.0' },
+      },
+      // Prod policy: skip incompatible AND skip missing-metadata.
+      compatPolicy: {
+        onIncompatible: 'skip',
+        onMissing: 'skip',
+        strictShared: true,
+      },
+      deps,
+    });
+
+    // Both manifest entries are missing `builtAgainst` => classifier returns
+    // `unknown` => onMissing:`skip` => no remote container is loaded.
+    expect(deps.loadRemoteContainer).not.toHaveBeenCalled();
+    // But every advertised id is still registered (as DISABLED placeholder)
+    // so plugin_reader resolves it.
+    expect(deps.registerPluginFactory).toHaveBeenCalledTimes(2);
+    expect(deps.invokeCoreBootstrap).toHaveBeenCalledTimes(1);
+  });
+
+  it('warn-load policy: unknown manifest entries still load (no metadata in manifest)', async () => {
+    const { deps } = makeFakeDeps();
+
+    await bootstrapMfe({
+      registryUrl: REGISTRY_URL,
+      bootManifest: bootManifest(),
+      sharedDepsUrl: SHARED_DEPS_URL,
+      host: {
+        osdVersion: '3.5.0',
+        sharedDeps: { react: '16.14.0', 'react-dom': '16.14.0' },
+      },
+      // Non-prod default: warn-load on missing metadata.
+      compatPolicy: {
+        onIncompatible: 'block',
+        onMissing: 'warn-load',
+        strictShared: true,
+      },
+      deps,
+    });
+
+    // Both entries load (warn-load tolerates missing metadata).
+    expect(deps.loadRemoteContainer).toHaveBeenCalledTimes(2);
+  });
+});

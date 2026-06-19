@@ -269,6 +269,17 @@ export default () =>
       mfe: Joi.object({
         enabled: Joi.boolean().default(false),
         registryUrl: Joi.string().allow('').default(''),
+        // Phase 13 Story 3: file path to the registry document on disk (v2 or v1
+        // canonical, auto-migrated on read). When set, the OSD server resolves the
+        // registry server-side per request and INJECTS a flat boot manifest into
+        // the bootstrap; the browser does not fetch /registry. Empty default keeps
+        // the legacy registry-fetch path active for pre-Phase-13 deployments.
+        registryPath: Joi.string().allow('').default(''),
+        // Phase 13 Story 3: tenant identifier (default `"default"` until real AuthN).
+        // Drives the `tenantOverrides[customerId]` resolution layer.
+        customerId: Joi.string().default('default'),
+        // Phase 13 Story 3: name of the sticky HttpOnly bucket cookie.
+        userBucketCookieName: Joi.string().default('_osd_mfe_bucket'),
         sharedDepsUrl: Joi.string().allow('').default(''),
         bootstrapUrl: Joi.string().allow('').default(''),
         // Non-prod security gate for dev URL-overrides (Phase 5, §7). No

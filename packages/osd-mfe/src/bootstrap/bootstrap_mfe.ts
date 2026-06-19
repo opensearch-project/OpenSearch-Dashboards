@@ -26,12 +26,13 @@
  *   4. Then run core `__osdBootstrap__()` → `CoreSystem.setup()/start()`.
  */
 
-import { assertValidRegistry, Registry } from '../registry/schema';
+import { assertValidRegistry, MfeEntry, Registry, SCHEMA_VERSION } from '../registry/schema';
 import type { RegistryProvider } from '../registry/provider';
 import { resolve, OverrideMap, ResolvedRemote } from '../registry/resolve';
 import { HostEnvironment } from '../registry/compat_classifier';
 import { RegistryVerification, SignatureCheck } from '../registry/signing_common';
 import { verifyRegistrySignatureWeb } from '../registry/verify_registry_web';
+import { BootManifest, assertValidBootManifest } from '../registry/boot_manifest';
 import { buildShareScope } from './share_scope';
 import { getRemoteModuleFactory, loadRemoteContainer, loadScript } from './load_remote';
 import {
@@ -123,8 +124,29 @@ export interface BootstrapMfeDeps {
 
 /** Inputs to {@link bootstrapMfe}. */
 export interface BootstrapMfeOptions {
-  /** URL of the registry document (serve-time, dynamic — e.g. `/registry`). */
+  /**
+   * URL of the registry document (serve-time, dynamic — e.g. `/registry`). Used
+   * ONLY when {@link bootManifest} is NOT injected (legacy / pre-Phase-13 path).
+   * In Phase 13 the OSD server resolves the registry server-side and injects a
+   * flat boot manifest, so the browser does not fetch this URL.
+   */
   registryUrl: string;
+  /**
+   * Server-resolved boot manifest (Phase 13, Story 3). When the OSD server has
+   * resolved the v2 registry against the requesting host's dimensions
+   * (`customerId`, `userBucket`) and injected the flat boot manifest at
+   * `window.__osdMfe__.bootManifest`, the bootstrap consumes it DIRECTLY and
+   * SKIPS the registry HTTP fetch + signature verification path entirely. This
+   * is the canonical Phase 13 path; the {@link registryUrl} fetch path is a
+   * legacy fallback and is intentionally kept around so older injected pages
+   * keep booting. See PRD design_spec §1: "the browser does NOT see the v2
+   * document. The OSD server reads it, resolves dimensions, produces a flat
+   * boot manifest, injects it via `<osd-injected-metadata>`."
+   *
+   * Verifier `verify_phase13.js` case G asserts that, in the canonical Phase 13
+   * path, the browser makes ZERO HTTP calls to anything matching `/registry`.
+   */
+  bootManifest?: BootManifest;
   /** URL of the shared-deps bundle that assigns `window.__osdSharedDeps__`. */
   sharedDepsUrl: string;
   /**
@@ -277,6 +299,60 @@ function inMemoryProvider(registry: Registry): RegistryProvider {
 }
 
 /**
+ * Project a server-resolved {@link BootManifest} (Phase 13, Story 3) onto the
+ * in-memory {@link Registry} shape the rest of the bootstrap consumes.
+ *
+ * The boot manifest is the FLAT projection of a v2 registry document already
+ * resolved against the requesting host's dimensions; it does NOT carry a
+ * signature, a generatedAt timestamp or unrelated layers. We synthesise a
+ * minimal, valid Registry around the flat list so the existing compat
+ * classifier, override map, factory registration and load sequence keep
+ * working unchanged.
+ *
+ * Fields:
+ *  - `schemaVersion`: pinned to the v1 SCHEMA_VERSION constant — the in-memory
+ *    Registry is just a transport here, never written or sent over the wire.
+ *  - `generatedAt`: stamped at projection time so audit logs are still
+ *    chronologically sortable; the boot manifest itself does not carry one and
+ *    the resolved doc's generatedAt was already consumed server-side.
+ *  - `mfes[id]`: per the manifest entry — `version`, `remoteEntry`, `scope`,
+ *    `module`, plus optional `integrity` (Phase 12 SRI) and `compat` (Phase 9
+ *    classifier). `builtAgainst` and `minCoreVersion` are deliberately omitted
+ *    — Phase 9 enforcement uses the projected `compat` declaration alone in
+ *    Phase 13's path, mirroring how a server-side resolver pre-filters them.
+ */
+export function registryFromBootManifest(manifest: BootManifest): Registry {
+  const mfes: Record<string, MfeEntry> = {};
+  for (const e of manifest.mfes) {
+    const entry: MfeEntry = {
+      version: e.version,
+      remoteEntry: e.remoteEntry,
+      scope: e.scope,
+      module: e.module,
+    };
+    if (e.integrity !== undefined && e.integrity.length > 0) {
+      entry.integrity = e.integrity;
+    }
+    if (e.compat !== undefined) {
+      entry.compat = {
+        minCoreVersion: e.compat.minCoreVersion,
+        compatibleCoreRange: e.compat.compatibleCoreRange,
+      };
+    }
+    mfes[e.id] = entry;
+  }
+  return {
+    // The in-memory Registry is a transport for the rest of the bootstrap; it is
+    // never serialized back out, so pinning to SCHEMA_VERSION (1) here just keeps
+    // the schema validator happy and matches the legacy fetched shape exactly.
+    schemaVersion: SCHEMA_VERSION,
+    generatedAt: new Date(0).toISOString(),
+    sharedDeps: { ...manifest.sharedDeps },
+    mfes,
+  };
+}
+
+/**
  * Boot OSD's UI from Module Federation remotes. Resolves once core boot has
  * been invoked (and, for the default core bootstrap, once it completes).
  *
@@ -291,7 +367,7 @@ function inMemoryProvider(registry: Registry): RegistryProvider {
  */
 export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> {
   const { registryUrl, sharedDepsUrl, sharedDepsDepUrls, allowOverride = false } = options;
-  const { host, compatPolicy, registryVerification } = options;
+  const { host, compatPolicy, registryVerification, bootManifest } = options;
   const deps = resolveDeps(options.deps);
 
   // Arm the lazy-CHUNK integrity-failure surface BEFORE anything loads, so it is
@@ -317,12 +393,32 @@ export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> 
   }
   const shareScope = buildShareScope(sharedDeps);
 
-  // 2. Fetch the current registry at serve time.
-  const response = await deps.fetchImpl(registryUrl, { credentials: 'omit' });
-  if (!response.ok) {
-    throw new Error(`Failed to fetch MFE registry from ${registryUrl}: HTTP ${response.status}`);
+  // 2. Get the current registry. Phase 13 (Story 3): when the OSD server has
+  //    server-side resolved the v2 registry against the requesting host's
+  //    dimensions and INJECTED a flat boot manifest, the bootstrap consumes it
+  //    DIRECTLY — no `/registry` HTTP fetch, no signature verification, no
+  //    browser-side resolve (verify_phase13 case G asserts ZERO `/registry`
+  //    fetches in --mfe mode). Otherwise (legacy / pre-Phase-13 page), fall back
+  //    to the original fetch + signature-verify path. The two paths converge on
+  //    the in-memory `Registry` shape so the rest of the load sequence (compat
+  //    classifier, override map, factory registration, allSettled load) is
+  //    identical regardless of source.
+  let registry: Registry;
+  if (bootManifest) {
+    // Validate the injected slot defensively — a malformed manifest is a
+    // corrupted server-side resolution and must abort with a descriptive error
+    // rather than fall through to a confusing TypeError on .scope/.module.
+    assertValidBootManifest(bootManifest);
+    registry = registryFromBootManifest(bootManifest);
+  } else {
+    const response = await deps.fetchImpl(registryUrl, { credentials: 'omit' });
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch MFE registry from ${registryUrl}: HTTP ${response.status}`
+      );
+    }
+    registry = assertValidRegistry(await response.json());
   }
-  const registry = assertValidRegistry(await response.json());
 
   // 2a. Registry AUTHENTICITY (Phase 12, Story 4) — verify BEFORE the registry is
   //     used to decide which remotes to load. The registry document selects WHICH
@@ -338,7 +434,15 @@ export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> 
   //     injected (signing off), this is skipped and the registry loads as before.
   //     Only fires on an ACTUAL signature failure, so a correctly-signed registry
   //     never false-rejects.
-  if (registryVerification && registryVerification.key) {
+  //
+  //     Phase 13 cut-over: when a server-resolved `bootManifest` was injected, the
+  //     trust path moved server-side (the OSD origin read the registry from disk
+  //     and produced the manifest), so there is no client-side signature to
+  //     verify here. Skip this entire block in that case — this is the canonical
+  //     Phase 13 path, and signature checks belong on a future server-side
+  //     non-browser hop, not the boot-manifest path. The HMAC primitive in
+  //     `../registry/signing.ts` stays available for that future use.
+  if (!bootManifest && registryVerification && registryVerification.key) {
     const check = await deps.verifyRegistrySignature(registry, registryVerification);
     if (!check.ok) {
       const reason = check.reason ?? 'unknown reason';

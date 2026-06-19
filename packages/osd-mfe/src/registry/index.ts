@@ -45,6 +45,13 @@ export type { BootManifest, BootManifestEntry } from './boot_manifest';
 export { resolveBootManifest, resolveDecisions, matchesRollout } from './resolve_v2';
 export type { ResolvedDecision, ResolvedSource } from './resolve_v2';
 
+export { FileRegistryReader } from './reader';
+export type {
+  RegistryReader,
+  RegistryReaderFs,
+  FileRegistryReaderOptions,
+} from './reader';
+
 export { signRegistry, verifyRegistrySignature } from './signing';
 export type { RegistrySigningKey } from './signing';
 export { REGISTRY_SIGNATURE_ALGORITHM, canonicalRegistryString } from './signing_common';
