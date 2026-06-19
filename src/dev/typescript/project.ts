@@ -31,7 +31,7 @@
 import { readFileSync } from 'fs';
 import { basename, dirname, relative, resolve } from 'path';
 
-import { IMinimatch, Minimatch } from 'minimatch';
+import { Minimatch } from 'minimatch';
 import { parseConfigFileTextToJson } from 'typescript';
 
 import { REPO_ROOT } from '@osd/utils';
@@ -55,7 +55,7 @@ function parseTsConfig(path: string) {
   return config;
 }
 
-function testMatchers(matchers: IMinimatch[], path: string) {
+function testMatchers(matchers: Minimatch[], path: string) {
   return matchers.some((matcher) => matcher.match(path));
 }
 
@@ -65,8 +65,8 @@ export class Project {
   public config: any;
   public disableTypeCheck: boolean;
 
-  private readonly include: IMinimatch[];
-  private readonly exclude: IMinimatch[];
+  private readonly include: Minimatch[];
+  private readonly exclude: Minimatch[];
 
   constructor(
     public tsConfigPath: string,
