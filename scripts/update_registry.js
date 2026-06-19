@@ -18,6 +18,7 @@ require('../src/setup_node_env');
 // so it uses `var` and avoids destructuring to satisfy the `scripts/` lint rules,
 // matching sibling scripts such as `build_mfe.js`.
 var Path = require('path');
+var Fs = require('fs');
 var pkgIndex = require('../packages/osd-mfe/src');
 var runUpdateCli = pkgIndex.runUpdateCli;
 var runUpdateCliV2 = pkgIndex.runUpdateCliV2;
@@ -35,8 +36,12 @@ try {
   // --from-manifest, --plugin patch).
   if (isV2Mode(argv)) {
     // Resolve OSD core version from package.json so the default --check-deps
-    // contractVersion is the running OSD major.minor.
-    var osdVersion = require(Path.join(repoRoot, 'package.json')).version || '0.0.0';
+    // contractVersion is the running OSD major.minor. Read via fs+JSON rather
+    // than dynamic `require()` so eslint's `import/no-dynamic-require` is happy
+    // (we know this path; static require would also work but mixes the
+    // require-cache with the data file, which we don't want for a one-shot read).
+    var osdVersion =
+      JSON.parse(Fs.readFileSync(Path.join(repoRoot, 'package.json'), 'utf8')).version || '0.0.0';
     process.exitCode = runUpdateCliV2({
       argv: argv,
       env: process.env,
@@ -56,3 +61,11 @@ try {
   console.error(error && error.stack ? error.stack : error);
   process.exitCode = 1;
 }
+
+// Force exit. Without this, Node hangs because `setup_node_env` registers the
+// `@osd/optimizer` LMDB transpilation cache, whose memory-mapped files keep
+// the event loop alive indefinitely (same handle leak as the documented OSD
+// jest exit hang — see docs/08-ROADMAP.md "OSD-wide jest exit hang"). The CLI
+// work is already complete by here (file writes are synchronous), so an
+// explicit exit is correct and safe.
+process.exit(process.exitCode || 0);

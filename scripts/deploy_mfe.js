@@ -35,3 +35,11 @@ try {
   console.error(error && error.stack ? error.stack : error);
   process.exitCode = 1;
 }
+
+// Force exit. Without this, Node hangs because `setup_node_env` registers the
+// `@osd/optimizer` LMDB transpilation cache, whose memory-mapped files keep
+// the event loop alive indefinitely (same handle leak as the documented OSD
+// jest exit hang — see docs/08-ROADMAP.md "OSD-wide jest exit hang"). The CLI
+// work (S3 uploads, manifest write) is complete by here, so explicit exit is
+// correct and safe.
+process.exit(process.exitCode || 0);
