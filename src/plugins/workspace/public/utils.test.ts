@@ -1027,6 +1027,21 @@ describe('workspace utils: pickUseCaseLandingAppId', () => {
     ]);
     expect(pickUseCaseLandingAppId([{ id: 'a' }, { id: 'b' }], apps)).toBe('a');
   });
+
+  it('treats a feature id absent from the apps map as selectable', () => {
+    // Load-bearing for the transient-load case: feature ids come from
+    // `convertNavGroupToWorkspaceUseCase` over real nav links, so an
+    // absent lookup means the apps snapshot hasn't propagated yet, not
+    // that the app is missing. Skipping such features would silently
+    // skip the entire list during early page load.
+    const apps = new Map<string, PublicAppInfo>([['known-feature-flag-off', featureFlagDisabled]]);
+    expect(
+      pickUseCaseLandingAppId(
+        [{ id: 'known-feature-flag-off' }, { id: 'not-yet-in-apps-map' }],
+        apps
+      )
+    ).toBe('not-yet-in-apps-map');
+  });
 });
 
 describe('workspace utils: getUseCaseUrl', () => {
