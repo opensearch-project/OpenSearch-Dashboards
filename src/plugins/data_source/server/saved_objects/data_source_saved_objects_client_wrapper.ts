@@ -154,7 +154,7 @@ export class DataSourceSavedObjectsClientWrapper {
     };
 
     const bulkGetWithCredentialsStripping = async <T = unknown>(
-      objects?: Array<SavedObjectsBulkGetObject>
+      objects?: SavedObjectsBulkGetObject[]
     ) => {
       const result = await wrapperOptions.client.bulkGet<T>(objects);
       return {
