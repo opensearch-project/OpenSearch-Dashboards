@@ -54,3 +54,5 @@ Copyright OpenSearch Contributors. See [NOTICE](NOTICE.txt) for details.
 [codecov-link]: https://app.codecov.io/gh/opensearch-project/OpenSearch-Dashboards
 [link-checker-badge]: https://github.com/opensearch-project/OpenSearch-Dashboards/actions/workflows/links_checker.yml/badge.svg
 [link-checker-link]: https://github.com/opensearch-project/OpenSearch-Dashboards/actions/workflows/links_checker.yml
+
+<!-- timing-experiment 2026-06-20 -->
