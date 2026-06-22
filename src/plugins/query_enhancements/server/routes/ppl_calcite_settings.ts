@@ -50,7 +50,12 @@ export function definePPLCalciteSettingsRoute(logger: Logger, router: IRouter) {
 
         return res.ok({
           body: {
-            calciteEnabled: resolveValue('plugins.calcite.enabled') !== 'false',
+            // A successful read with the key absent is definitive: include_defaults=true
+            // surfaces plugins.calcite.enabled on any Calcite-capable cluster, so its
+            // absence means there is no Calcite engine -> disabled. The catch block below
+            // deliberately returns true instead: an error can't distinguish "no plugin"
+            // from a transient failure, so it fails open. Don't reconcile the two paths.
+            calciteEnabled: resolveValue('plugins.calcite.enabled') === 'true',
             allJoinTypesAllowed: resolveValue('plugins.calcite.all_join_types.allowed') === 'true',
           },
         });

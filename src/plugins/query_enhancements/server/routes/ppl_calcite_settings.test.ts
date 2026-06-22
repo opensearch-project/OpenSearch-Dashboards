@@ -91,9 +91,32 @@ describe('definePPLCalciteSettingsRoute', () => {
       method: 'GET',
       path: EXPECTED_PATH,
     });
-    // Absent setting => calcite treated as enabled (not 'false'), join types not allowed.
+    // Absent key on a successful read = no Calcite engine = disabled; join types not allowed.
     expect(res.ok).toHaveBeenCalledWith({
-      body: { calciteEnabled: true, allJoinTypesAllowed: false },
+      body: { calciteEnabled: false, allJoinTypesAllowed: false },
+    });
+  });
+
+  it('reports calciteEnabled:false for a cluster missing plugins.calcite.enabled (no/old SQL plugin)', async () => {
+    const { handler } = captureHandler();
+
+    // include_defaults=true surfaces plugins.calcite.enabled on any Calcite-capable
+    // cluster, so a successful read with the key absent means the engine isn't there.
+    // This documents the backward-compat contract for clusters with no/old SQL plugin.
+    const requestMock = jest.fn().mockResolvedValue({ body: { defaults: {} } });
+    const context = {
+      dataSource: { opensearch: { getClient: jest.fn() } },
+      core: {
+        opensearch: { client: { asCurrentUser: { transport: { request: requestMock } } } },
+      },
+    } as any;
+    const req = { query: {} } as any;
+    const res = createResponse();
+
+    await handler()(context, req, res);
+
+    expect(res.ok).toHaveBeenCalledWith({
+      body: { calciteEnabled: false, allJoinTypesAllowed: false },
     });
   });
 

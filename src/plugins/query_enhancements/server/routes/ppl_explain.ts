@@ -23,7 +23,10 @@ export function definePPLExplainRoute(logger: Logger, router: IRouter) {
     {
       path: API.PPL_EXPLAIN,
       validate: {
-        body: schema.object({ query: schema.string({ minLength: 1 }) }),
+        // maxLength is belt-and-suspenders: OSD's server.maxPayload (1 MiB default)
+        // already bounds the body. 64 KB is 2-4x the largest realistic interactive
+        // PPL pipeline, and makes the cap explicit + independent of global config.
+        body: schema.object({ query: schema.string({ minLength: 1, maxLength: 65536 }) }),
         query: schema.object({ dataSourceId: schema.maybe(schema.string()) }),
       },
     },
