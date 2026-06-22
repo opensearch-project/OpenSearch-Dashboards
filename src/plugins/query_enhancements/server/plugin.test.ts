@@ -62,7 +62,7 @@ describe('QueryEnhancementsPlugin pplLint capability', () => {
 
   it('enables pplLint when the dynamic config flag is on', async () => {
     const { core, switcher } = setupPlugin();
-    const startContract = stubConfig(core, { pplLint: { enabled: true } });
+    const startContract = stubConfig(core, { ppl: { lint: { enabled: true } } });
 
     const result = await switcher({} as any, baseCapabilities());
 
@@ -80,7 +80,7 @@ describe('QueryEnhancementsPlugin pplLint capability', () => {
   it('passes the async local store as context when one is present', async () => {
     const { core, switcher } = setupPlugin();
     const store = new Map<string, any>([['k', 'v']]);
-    const startContract = stubConfig(core, { pplLint: { enabled: true } }, store);
+    const startContract = stubConfig(core, { ppl: { lint: { enabled: true } } }, store);
 
     await switcher({} as any, baseCapabilities());
 
@@ -92,7 +92,7 @@ describe('QueryEnhancementsPlugin pplLint capability', () => {
     const { core, switcher } = setupPlugin();
     // No store passed → getAsyncLocalStore() returns undefined. The switcher
     // must pass `undefined` rather than { asyncLocalStorageContext: undefined }.
-    const startContract = stubConfig(core, { pplLint: { enabled: true } });
+    const startContract = stubConfig(core, { ppl: { lint: { enabled: true } } });
 
     await switcher({} as any, baseCapabilities());
 
@@ -104,7 +104,7 @@ describe('QueryEnhancementsPlugin pplLint capability', () => {
     const { core, switcher } = setupPlugin();
     // Dynamic config writes are not schema-validated, so the store can hold a
     // string. Only a real boolean `true` may enable the flag.
-    stubConfig(core, { pplLint: { enabled: 'true' } } as any);
+    stubConfig(core, { ppl: { lint: { enabled: 'true' } } } as any);
 
     const result = await switcher({} as any, baseCapabilities());
 
@@ -113,7 +113,7 @@ describe('QueryEnhancementsPlugin pplLint capability', () => {
 
   it('leaves pplLint off when the dynamic config flag is false', async () => {
     const { core, switcher } = setupPlugin();
-    stubConfig(core, { pplLint: { enabled: false } });
+    stubConfig(core, { ppl: { lint: { enabled: false } } });
 
     const result = await switcher({} as any, baseCapabilities());
 

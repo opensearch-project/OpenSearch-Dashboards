@@ -31,10 +31,14 @@ export const configSchema = schema.object({
       }),
     }),
   }),
-  // PPL linter feature flag, read at runtime via DynamicConfigService and
-  // surfaced as the queryEnhancements.pplLint capability. Disabled by default.
-  pplLint: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
+  // PPL feature flags, read at runtime via DynamicConfigService. Nested as
+  // ppl.lint.enabled so future languages/features (ppl.autocomplete, sql.lint)
+  // extend the same shape. Surfaced as the flat queryEnhancements.pplLint
+  // capability. Disabled by default.
+  ppl: schema.object({
+    lint: schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
+    }),
   }),
 });
 

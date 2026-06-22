@@ -84,7 +84,7 @@ export class QueryEnhancementsPlugin
         return {
           queryEnhancements: {
             ...(capabilities.queryEnhancements || {}),
-            pplLint: config.pplLint?.enabled === true,
+            pplLint: config.ppl?.lint?.enabled === true,
           },
         };
       } catch (error) {
