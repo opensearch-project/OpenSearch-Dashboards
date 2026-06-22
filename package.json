@@ -451,7 +451,7 @@
     "jest": "^27.5.1",
     "jest-canvas-mock": "^2.5.1",
     "jest-raw-loader": "^1.0.1",
-    "jimp": "^0.22.12",
+    "jimp": "^1.6.1",
     "jquery": "^3.5.0",
     "json-stringify-pretty-compact": "1.2.0",
     "json5": "^2.2.3",
