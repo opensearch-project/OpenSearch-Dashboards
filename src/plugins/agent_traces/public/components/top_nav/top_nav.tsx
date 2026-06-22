@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { useObservable } from 'react-use';
 import { AppMountParameters } from 'opensearch-dashboards/public';
@@ -184,6 +184,43 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedAgentTraces }: Top
     const openButtonRun = getOpenButtonRun(services);
     openButtonRun({} as HTMLElement);
   }, [services]);
+
+  // The side-nav "Browse saved searches" popover action navigates here with a
+  // `_openSaved=true` marker in the URL HASH (the app keeps its route/query in
+  // the hash, so it is not in `location.search`). Open the saved-search flyout
+  // when the marker is present, re-check on hashchange (navigating within the
+  // mounted app only updates the hash), and strip the marker afterwards so a
+  // refresh doesn't reopen the flyout.
+  const openSavedHandledRef = useRef(false);
+  useEffect(() => {
+    const openIfMarked = () => {
+      // Open at most once per mount — the app re-syncs the hash from state and
+      // could otherwise re-trigger the flyout repeatedly.
+      if (openSavedHandledRef.current) return;
+      const hash = window.location.hash;
+      const qIndex = hash.indexOf('?');
+      if (qIndex === -1) return;
+      const params = new URLSearchParams(hash.slice(qIndex + 1));
+      if (params.get('_openSaved') !== 'true') return;
+
+      openSavedHandledRef.current = true;
+
+      params.delete('_openSaved');
+      const nextQuery = params.toString();
+      const nextHash = `${hash.slice(0, qIndex)}${nextQuery ? `?${nextQuery}` : ''}`;
+      window.history.replaceState(
+        window.history.state,
+        '',
+        `${window.location.pathname}${window.location.search}${nextHash}`
+      );
+
+      handleOpenShortcut();
+    };
+
+    openIfMarked();
+    window.addEventListener('hashchange', openIfMarked);
+    return () => window.removeEventListener('hashchange', openIfMarked);
+  }, [handleOpenShortcut]);
 
   const handleSaveShortcut = useCallback(() => {
     if (savedAgentTraces) {

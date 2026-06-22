@@ -152,6 +152,7 @@ export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze
     order: 7000,
     collapsible: true,
     defaultOpen: true,
+    euiIconType: 'wrench',
   },
   manage: {
     id: 'manage',
@@ -175,5 +176,9 @@ export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze
     order: 9000,
     collapsible: true,
     defaultOpen: false,
+    // Always start collapsed on a fresh page load (don't restore a prior
+    // expanded state) — it's a low-priority section.
+    alwaysUseDefaultOpen: true,
+    euiIconType: 'navQuerySets',
   },
 });

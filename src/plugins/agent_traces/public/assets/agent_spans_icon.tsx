@@ -5,21 +5,27 @@
 
 import React from 'react';
 
+/**
+ * Agent monitoring "Spans" nav icon: the OUI `visTagCloud` glyph with a small
+ * diamond AI badge overlaid in the top-right corner. Drawn entirely in
+ * `currentColor` so it inherits the nav item text color (incl. active/hover).
+ */
 export const AgentSpansIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    width="32"
-    height="32"
-    viewBox="0 0 32 32"
+    width="16"
+    height="16"
+    viewBox="0 0 16 16"
     fill="currentColor"
     {...props}
   >
-    <g transform="rotate(-90 16 16)">
-      <path d="M16 32C7.16344 32 0 24.8366 0 16 0 7.16344 7.16344 0 16 0c8.8366 0 16 7.16344 16 16h-2c0-7.73199-6.268-14-14-14C8.26801 2 2 8.26801 2 16c0 7.732 6.26801 14 14 14v2z" />
-      <path d="M27 20v12h-2V20h2zm-5 4v8h-2v-8h2zm10-2v10h-2V22h2z" />
-      <g transform="translate(16, 17)">
-        <path d="M0,-6.5 C0,-3 -3,0 -6.5,0 C-3,0 0,3 0,6.5 C0,3 3,0 6.5,0 C3,0 0,-3 0,-6.5Z" />
-      </g>
+    {/* Base: OUI visTagCloud */}
+    <path d="M1.5 9.047a.5.5 0 1 0 0 1h13a.5.5 0 0 0 0-1h-13Zm0-1h13a1.5 1.5 0 0 1 0 3h-13a1.5 1.5 0 0 1 0-3ZM10 13a.5.5 0 1 1 0 1H4a.5.5 0 1 1 0-1h6ZM8.001 2.015a.5.5 0 1 1-.002 1l-5-.015a.5.5 0 1 1 .003-1l5 .015ZM14 5a.5.5 0 1 1 0 1H6a.5.5 0 0 1 0-1h8Z" />
+    {/* AI diamond badge (top-right). A white halo lifts it off the tag lines. */}
+    <circle cx="12.6" cy="3.4" r="4" fill="var(--ouiColorEmptyShade, #fff)" />
+    <g transform="translate(12.6 3.4)">
+      <path d="M0,-3.2 L3.2,0 L0,3.2 L-3.2,0 Z" />
+      <path d="M0,-1.4 L1.4,0 L0,1.4 L-1.4,0 Z" fill="var(--ouiColorEmptyShade, #fff)" />
     </g>
   </svg>
 );

@@ -4,29 +4,78 @@
  */
 
 import React from 'react';
-import {
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiListGroup,
-  EuiListGroupItem,
-  EuiPopoverTitle,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPopoverTitle } from '@elastic/eui';
 import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
 import { ChromeNavLink } from '../../nav_links';
-import { ChromeRegistrationNavLink } from '../../nav_group';
+import { ChromeRegistrationNavLink, NavPopoverServices } from '../../nav_group';
 import { AppCategory } from '../../../../types';
 import { getOrderedLinksOrCategories, LinkItem, LinkItemType } from '../../utils';
 import { SimplePopover } from './simple_popover';
+import { NavItemPopover, NavPopoverChildItem } from './nav_item_popover';
+
+/**
+ * Build a (possibly nested) list of popover child items from nav LinkItems.
+ * A PARENT_LINK becomes a row with cascading `children`; a LINK becomes a leaf.
+ */
+/**
+ * Map a leaf link's registered navPopover actions into cascading child rows, so
+ * a leaf that has its own popover (e.g. Notebooks: "Create notebook" / "View
+ * all") still surfaces those actions when it appears inside a collapsed
+ * category's popover. Returns undefined when there are no actions or no services
+ * to run them with.
+ */
+function actionsAsChildren(
+  link: ChromeNavLink & ChromeRegistrationNavLink,
+  popoverServices?: NavPopoverServices
+): NavPopoverChildItem[] | undefined {
+  const actions = link.navPopover?.actions;
+  if (!actions || actions.length === 0 || !popoverServices) return undefined;
+  return actions.map((action) => ({
+    id: `${link.id}-${action.id}`,
+    title: action.label,
+    iconType: action.iconType,
+    onClick: () => action.onClick(popoverServices),
+  }));
+}
+
+function buildChildItems(
+  items: LinkItem[],
+  popoverServices?: NavPopoverServices
+): NavPopoverChildItem[] {
+  const result: NavPopoverChildItem[] = [];
+  for (const item of items) {
+    if (item.itemType === LinkItemType.LINK) {
+      result.push({
+        id: item.link.id,
+        title: item.link.title,
+        iconType: item.link.euiIconType,
+        // Surface a leaf's own popover actions as a nested cascade.
+        children: actionsAsChildren(item.link, popoverServices),
+      });
+    } else if (item.itemType === LinkItemType.PARENT_LINK) {
+      const children = buildChildItems(item.links, popoverServices);
+      if (item.link) {
+        result.push({
+          id: item.link.id,
+          title: item.link.title,
+          iconType: item.link.euiIconType,
+          children: children.length > 0 ? children : undefined,
+        });
+      } else {
+        result.push(...children);
+      }
+    }
+  }
+  return result;
+}
 
 export interface CollapsedSideNavProps {
   navLinks: Array<ChromeNavLink & ChromeRegistrationNavLink>;
   appId?: string;
   navigateToApp: InternalApplicationStart['navigateToApp'];
   basePath: HttpStart['basePath'];
+  popoverServices?: NavPopoverServices;
 }
 
 /**
@@ -55,32 +104,61 @@ function CollapsedLeafIcon({
   appId,
   navigateToApp,
   basePath,
+  categoryLabel,
+  popoverServices,
 }: {
   link: ChromeNavLink & ChromeRegistrationNavLink;
   appId?: string;
   navigateToApp: InternalApplicationStart['navigateToApp'];
   basePath: HttpStart['basePath'];
+  categoryLabel?: string;
+  popoverServices?: NavPopoverServices;
 }) {
   const active = link.id === appId;
   const icon = link.euiIconType || 'apps';
+  const tooltipContent = categoryLabel ? `${categoryLabel} - ${link.title}` : link.title;
 
+  const iconButton = (
+    <EuiButtonIcon
+      iconType={icon}
+      aria-label={link.title}
+      color="text"
+      display="empty"
+      href={basePath.prepend(`/app/${link.id}`)}
+      onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
+        e.preventDefault();
+        navigateToApp(link.id);
+      }}
+      className="obsCollapsedNavIcon"
+      size="m"
+      data-test-subj={`obsCollapsedIcon-${link.id}`}
+    />
+  );
+
+  // Every collapsed icon opens a popover on hover for a consistent feel. When the
+  // link has no registered actions/content, the popover is just its title (acts
+  // like a tooltip but with matching styling). The icon still navigates on click.
   return (
-    <EuiToolTip content={link.title} position="right">
-      <EuiButtonIcon
-        iconType={icon}
-        aria-label={link.title}
-        color={active ? 'primary' : 'text'}
-        display={active ? 'base' : 'empty'}
-        href={basePath.prepend(`/app/${link.id}`)}
-        onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
-          e.preventDefault();
-          navigateToApp(link.id);
-        }}
-        className="obsCollapsedNavIcon"
-        size="m"
-        data-test-subj={`obsCollapsedIcon-${link.id}`}
-      />
-    </EuiToolTip>
+    <SimplePopover
+      button={iconButton}
+      anchorPosition="rightUp"
+      panelPaddingSize="none"
+      panelClassName="obsNavPopover-panel obsNavPopover-panel--rail"
+      isActive={active}
+    >
+      {link.navPopover && popoverServices ? (
+        <NavItemPopover
+          title={link.title}
+          navPopover={link.navPopover}
+          services={popoverServices}
+          navigateToApp={navigateToApp}
+        />
+      ) : (
+        <div className="obsNavPopover obsNavPopover--titleOnly" data-test-subj="obsNavPopover">
+          <EuiPopoverTitle paddingSize="s">{tooltipContent}</EuiPopoverTitle>
+        </div>
+      )}
+    </SimplePopover>
   );
 }
 
@@ -91,67 +169,57 @@ function CollapsedParentIcon({
   linkItem,
   appId,
   navigateToApp,
+  categoryLabel,
+  popoverServices,
 }: {
   linkItem: LinkItem & { itemType: 'parentLink' };
   appId?: string;
   navigateToApp: InternalApplicationStart['navigateToApp'];
+  categoryLabel?: string;
+  popoverServices?: NavPopoverServices;
 }) {
   const active = isLinkActive(linkItem, appId);
   const parentLink = linkItem.link;
   const icon = parentLink?.euiIconType || 'apps';
   const title = parentLink?.title || '';
+  const popoverTitle = categoryLabel ? `${categoryLabel} - ${title}` : title;
 
+  // Build a (nested) list of navigable items; nested parents cascade.
+  const childItems = buildChildItems(linkItem.links, popoverServices);
+
+  // Direct click on a parent navigates to its first child.
+  const firstChildId = childItems[0]?.id;
   const button = (
     <div className="obsCollapsedNavIcon-wrapper">
       <EuiButtonIcon
         iconType={icon}
         aria-label={title}
-        color={active ? 'primary' : 'text'}
-        display={active ? 'base' : 'empty'}
+        color="text"
+        display="empty"
+        onClick={() => firstChildId && navigateToApp(firstChildId)}
         className="obsCollapsedNavIcon"
         size="m"
         data-test-subj={`obsCollapsedIcon-${parentLink?.id || 'parent'}`}
       />
-      <EuiIcon type="arrowRight" size="s" className="obsCollapsedNav-popoverArrow" />
     </div>
   );
 
-  // Flatten children into a list of navigable items
-  const childItems: Array<{ id: string; title: string }> = [];
-  for (const child of linkItem.links) {
-    if (child.itemType === LinkItemType.LINK) {
-      childItems.push({ id: child.link.id, title: child.link.title });
-    } else if (child.itemType === LinkItemType.PARENT_LINK) {
-      // Flatten nested parent links
-      if (child.link) {
-        childItems.push({ id: child.link.id, title: child.link.title });
-      }
-      for (const grandchild of child.links) {
-        if (grandchild.itemType === LinkItemType.LINK) {
-          childItems.push({ id: grandchild.link.id, title: grandchild.link.title });
-        }
-      }
-    }
-  }
-
   return (
-    <SimplePopover button={button} anchorPosition="rightUp" panelPaddingSize="s">
-      <EuiPopoverTitle paddingSize="s">{title}</EuiPopoverTitle>
-      <EuiListGroup
-        flush
-        maxWidth={240}
-        data-test-subj={`obsCollapsedPopover-${parentLink?.id || 'parent'}`}
-      >
-        {childItems.map((child) => (
-          <EuiListGroupItem
-            key={child.id}
-            label={child.title}
-            onClick={() => navigateToApp(child.id)}
-            size="s"
-            data-test-subj={`obsCollapsedPopoverItem-${child.id}`}
-          />
-        ))}
-      </EuiListGroup>
+    <SimplePopover
+      button={button}
+      anchorPosition="rightUp"
+      panelPaddingSize="none"
+      panelClassName="obsNavPopover-panel obsNavPopover-panel--rail"
+      isActive={active}
+    >
+      <NavItemPopover
+        title={popoverTitle}
+        navPopover={parentLink?.navPopover}
+        services={popoverServices}
+        navigateToApp={navigateToApp}
+        childItems={childItems}
+        appId={appId}
+      />
     </SimplePopover>
   );
 }
@@ -165,11 +233,13 @@ function CollapsedCategoryIcon({
   links,
   appId,
   navigateToApp,
+  popoverServices,
 }: {
   category: AppCategory;
   links: LinkItem[];
   appId?: string;
   navigateToApp: InternalApplicationStart['navigateToApp'];
+  popoverServices?: NavPopoverServices;
 }) {
   const active = links.some((child) => isLinkActive(child, appId));
 
@@ -178,45 +248,33 @@ function CollapsedCategoryIcon({
       <EuiButtonIcon
         iconType={category.euiIconType || 'spacesApp'}
         aria-label={category.label || ''}
-        color={active ? 'primary' : 'text'}
-        display={active ? 'base' : 'empty'}
+        color="text"
+        display="empty"
         className="obsCollapsedNavIcon"
         size="m"
         data-test-subj={`obsCollapsedIcon-${category.label}`}
       />
-      <EuiIcon type="arrowRight" size="s" className="obsCollapsedNav-popoverArrow" />
     </div>
   );
 
-  // Flatten all items + their children into a single popover list
-  const allItems: Array<{ id: string; title: string }> = [];
-  for (const item of links) {
-    if (item.itemType === LinkItemType.LINK) {
-      allItems.push({ id: item.link.id, title: item.link.title });
-    } else if (item.itemType === LinkItemType.PARENT_LINK) {
-      // Flatten: include children rather than the parent itself
-      for (const child of item.links) {
-        if (child.itemType === LinkItemType.LINK) {
-          allItems.push({ id: child.link.id, title: child.link.title });
-        }
-      }
-    }
-  }
+  // Preserve sub-section grouping: parent-links cascade into secondary popovers.
+  const childItems = buildChildItems(links, popoverServices);
 
   return (
-    <SimplePopover button={button} anchorPosition="rightUp" panelPaddingSize="s">
-      <EuiPopoverTitle paddingSize="s">{category.label}</EuiPopoverTitle>
-      <EuiListGroup flush maxWidth={240} data-test-subj={`obsCollapsedPopover-${category.label}`}>
-        {allItems.map((item) => (
-          <EuiListGroupItem
-            key={item.id}
-            label={item.title}
-            onClick={() => navigateToApp(item.id)}
-            size="s"
-            data-test-subj={`obsCollapsedPopoverItem-${item.id}`}
-          />
-        ))}
-      </EuiListGroup>
+    <SimplePopover
+      button={button}
+      anchorPosition="rightUp"
+      panelPaddingSize="none"
+      panelClassName="obsNavPopover-panel obsNavPopover-panel--rail"
+      isActive={active}
+    >
+      <NavItemPopover
+        title={category.label || ''}
+        services={popoverServices}
+        navigateToApp={navigateToApp}
+        childItems={childItems}
+        appId={appId}
+      />
     </SimplePopover>
   );
 }
@@ -231,11 +289,15 @@ function renderTopLevelItem({
   appId,
   navigateToApp,
   basePath,
+  categoryLabel,
+  popoverServices,
 }: {
   linkItem: LinkItem;
   appId?: string;
   navigateToApp: InternalApplicationStart['navigateToApp'];
   basePath: HttpStart['basePath'];
+  categoryLabel?: string;
+  popoverServices?: NavPopoverServices;
 }): React.ReactNode[] {
   // --- LINK ---
   if (linkItem.itemType === LinkItemType.LINK) {
@@ -246,6 +308,8 @@ function renderTopLevelItem({
           appId={appId}
           navigateToApp={navigateToApp}
           basePath={basePath}
+          categoryLabel={categoryLabel}
+          popoverServices={popoverServices}
         />
       </EuiFlexItem>,
     ];
@@ -255,7 +319,13 @@ function renderTopLevelItem({
   if (linkItem.itemType === LinkItemType.PARENT_LINK) {
     return [
       <EuiFlexItem key={linkItem.link?.id || 'parent'} grow={false}>
-        <CollapsedParentIcon linkItem={linkItem} appId={appId} navigateToApp={navigateToApp} />
+        <CollapsedParentIcon
+          linkItem={linkItem}
+          appId={appId}
+          navigateToApp={navigateToApp}
+          categoryLabel={categoryLabel}
+          popoverServices={popoverServices}
+        />
       </EuiFlexItem>,
     ];
   }
@@ -274,6 +344,7 @@ function renderTopLevelItem({
             links={links}
             appId={appId}
             navigateToApp={navigateToApp}
+            popoverServices={popoverServices}
           />
         </EuiFlexItem>,
       ];
@@ -286,7 +357,14 @@ function renderTopLevelItem({
 
     // Non-collapsible category: each child link item gets its own icon in the strip
     return links.flatMap((child) =>
-      renderTopLevelItem({ linkItem: child, appId, navigateToApp, basePath })
+      renderTopLevelItem({
+        linkItem: child,
+        appId,
+        navigateToApp,
+        basePath,
+        categoryLabel: category?.label,
+        popoverServices,
+      })
     );
   }
 
@@ -315,6 +393,7 @@ export function CollapsedSideNav({
   appId,
   navigateToApp,
   basePath,
+  popoverServices,
 }: CollapsedSideNavProps) {
   const linkItems = getOrderedLinksOrCategories(navLinks);
 
@@ -322,7 +401,13 @@ export function CollapsedSideNav({
   const groups: Array<{ key: string; nodes: React.ReactNode[]; startsCluster: boolean }> = [];
   for (let i = 0; i < linkItems.length; i++) {
     const item = linkItems[i];
-    const nodes = renderTopLevelItem({ linkItem: item, appId, navigateToApp, basePath });
+    const nodes = renderTopLevelItem({
+      linkItem: item,
+      appId,
+      navigateToApp,
+      basePath,
+      popoverServices,
+    });
     if (nodes.length > 0) {
       const key =
         item.itemType === LinkItemType.CATEGORY

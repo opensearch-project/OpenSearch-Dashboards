@@ -166,7 +166,10 @@ import { URL } from 'url';
 
 // @public
 export interface AppCategory {
+    alwaysUseDefaultOpen?: boolean;
     ariaLabel?: string;
+    collapsible?: boolean;
+    defaultOpen?: boolean;
     euiIconType?: string;
     id: string;
     label: string;

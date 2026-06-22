@@ -38,6 +38,7 @@ import {
   VISUALIZATION_EDITOR_APP_NAME,
 } from '../common';
 import { ConfigSchema } from '../common/config';
+import { buildExploreNavPopover, buildMetricsNavPopover } from './nav_popover';
 import { generateDocViewsUrl } from './application/legacy/discover/application/components/doc_views/generate_doc_views_url';
 import { DocViewsLinksRegistry } from './application/legacy/discover/application/doc_views_links/doc_views_links_registry';
 import {
@@ -584,18 +585,21 @@ export class ExplorePlugin
           category: undefined,
           order: 200,
           euiIconType: 'discoverApp' as const,
+          navPopover: buildExploreNavPopover(ExploreFlavor.Logs),
         },
         {
           id: `${PLUGIN_ID}/${ExploreFlavor.Traces}`,
           category: DEFAULT_APP_CATEGORIES.applicationPerformance,
           order: 100,
           euiIconType: 'apmTrace' as const,
+          navPopover: buildExploreNavPopover(ExploreFlavor.Traces),
         },
         {
           id: `${PLUGIN_ID}/${ExploreFlavor.Metrics}`,
           category: undefined,
           order: 300,
           euiIconType: 'visAreaStacked' as const,
+          navPopover: buildMetricsNavPopover(),
         },
       ]);
     } else {

@@ -284,11 +284,11 @@ describe('<CollapsibleNavGroupEnabled />', () => {
         });
         render(<CollapsibleNavGroupEnabled {...props} />);
         expect(document.documentElement.style.getPropertyValue('--osd-sidebar-width')).toBe(
-          '270px'
+          '248px'
         );
       });
 
-      it('should set CSS variable for collapsed sidebar width (64px) on desktop', () => {
+      it('should set CSS variable for collapsed sidebar width (48px) on desktop', () => {
         mockDesktopMatchMedia();
         const props = mockProps({
           currentNavGroupId: DEFAULT_NAV_GROUPS.observability.id,
@@ -296,7 +296,7 @@ describe('<CollapsibleNavGroupEnabled />', () => {
           enableIconSideNav: true,
         });
         render(<CollapsibleNavGroupEnabled {...props} />);
-        expect(document.documentElement.style.getPropertyValue('--osd-sidebar-width')).toBe('64px');
+        expect(document.documentElement.style.getPropertyValue('--osd-sidebar-width')).toBe('48px');
       });
 
       it('should clean up CSS variable on unmount', () => {
@@ -308,7 +308,7 @@ describe('<CollapsibleNavGroupEnabled />', () => {
         });
         const { unmount } = render(<CollapsibleNavGroupEnabled {...props} />);
         expect(document.documentElement.style.getPropertyValue('--osd-sidebar-width')).toBe(
-          '270px'
+          '248px'
         );
         unmount();
         expect(document.documentElement.style.getPropertyValue('--osd-sidebar-width')).toBe('');

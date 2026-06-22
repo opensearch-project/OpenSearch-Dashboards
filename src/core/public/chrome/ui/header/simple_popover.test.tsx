@@ -69,6 +69,41 @@ describe('<SimplePopover />', () => {
     expect(getByText('Popover Content')).toBeInTheDocument();
   });
 
+  it('closes when the trigger button is clicked', () => {
+    const { getByText, queryByText } = render(
+      <SimplePopover button={<span>Trigger</span>} debounceMs={100}>
+        <div>Popover Content</div>
+      </SimplePopover>
+    );
+
+    fireEvent.mouseEnter(getByText('Trigger').parentElement!);
+    expect(getByText('Popover Content')).toBeInTheDocument();
+
+    fireEvent.click(getByText('Trigger'));
+    // EuiPopover keeps the panel mounted through its close transition; flush it.
+    act(() => {
+      jest.runOnlyPendingTimers();
+    });
+    expect(queryByText('Popover Content')).toBeNull();
+  });
+
+  it('closes when content inside the panel is clicked', () => {
+    const { getByText, queryByText } = render(
+      <SimplePopover button={<span>Trigger</span>} debounceMs={100}>
+        <button type="button">Go to dashboard</button>
+      </SimplePopover>
+    );
+
+    fireEvent.mouseEnter(getByText('Trigger').parentElement!);
+    expect(getByText('Go to dashboard')).toBeInTheDocument();
+
+    fireEvent.click(getByText('Go to dashboard'));
+    act(() => {
+      jest.runOnlyPendingTimers();
+    });
+    expect(queryByText('Go to dashboard')).toBeNull();
+  });
+
   it('cleans up pending timeout on unmount', () => {
     const { getByText, unmount } = render(
       <SimplePopover button={<span>Trigger</span>} debounceMs={200}>

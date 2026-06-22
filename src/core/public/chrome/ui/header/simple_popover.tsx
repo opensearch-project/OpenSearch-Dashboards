@@ -4,12 +4,24 @@
  */
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import classNames from 'classnames';
 import { EuiPopover, EuiPopoverProps } from '@elastic/eui';
 
 interface SimplePopoverProps extends Omit<EuiPopoverProps, 'button' | 'isOpen' | 'closePopover'> {
   button: React.ReactElement;
   children: React.ReactNode;
   debounceMs?: number;
+  /**
+   * When true, the anchor wrapper fills its container (full-width nav rows).
+   * Defaults to false, where it shrinks to the trigger (icon rail).
+   */
+  fullWidthAnchor?: boolean;
+  /**
+   * When true, the anchor wrapper is marked as the current/selected item, so it
+   * can carry the persistent "active" styling (grey fill + accent bar) even when
+   * the popover is closed.
+   */
+  isActive?: boolean;
 }
 
 /**
@@ -20,6 +32,8 @@ export function SimplePopover({
   button,
   children,
   debounceMs = 150,
+  fullWidthAnchor = false,
+  isActive = false,
   ...popoverProps
 }: SimplePopoverProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -56,8 +70,28 @@ export function SimplePopover({
     scheduleClose();
   }, [scheduleClose]);
 
+  const close = useCallback(() => {
+    cancelClose();
+    setIsOpen(false);
+  }, [cancelClose]);
+
+  // Dismiss the popover when the trigger itself is clicked (e.g. a nav icon that
+  // navigates) and when any actionable element inside the panel is clicked
+  // (e.g. a flyout link). Without this the popover would linger after the click
+  // navigates away. onClickCapture is used (not onClick) so the wrapper stays a
+  // non-interactive container — the underlying button/link remains the only
+  // focusable, keyboard-operable element.
   const wrappedButton = (
-    <div onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+    <div
+      className={classNames('obsSimplePopover-anchor', {
+        'obsSimplePopover-anchor--fullWidth': fullWidthAnchor,
+        'obsSimplePopover-anchor--open': isOpen,
+        'obsSimplePopover-anchor--active': isActive,
+      })}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onClickCapture={close}
+    >
       {button}
     </div>
   );
@@ -66,10 +100,19 @@ export function SimplePopover({
     <EuiPopover
       button={wrappedButton}
       isOpen={isOpen}
-      closePopover={() => setIsOpen(false)}
+      closePopover={close}
+      // Seamless "slide from the rail" feel: no arrow and zero offset so the
+      // panel butts flush against the nav edge (Datadog-style). Overridable.
+      hasArrow={false}
+      offset={0}
+      // Hover popover: don't trap or auto-move focus, otherwise the first row
+      // gets an unwanted "selected" focus ring on open.
+      ownFocus={false}
+      initialFocus={false}
       panelProps={{
         onMouseEnter: handleMouseEnter,
         onMouseLeave: handleMouseLeave,
+        onClickCapture: close,
       }}
       {...popoverProps}
     >

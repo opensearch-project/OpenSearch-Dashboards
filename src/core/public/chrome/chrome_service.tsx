@@ -66,6 +66,7 @@ import {
   ChromeNavGroupService,
   ChromeNavGroupServiceSetupContract,
   ChromeNavGroupServiceStartContract,
+  NavPopoverServices,
 } from './nav_group';
 import {
   GlobalSearchService,
@@ -316,6 +317,16 @@ export class ChromeService {
 
     const logos = getLogos(injectedMetadata.getBranding(), http.basePath.serverBasePath);
 
+    // Services handed to a nav item's popover callbacks (actions + render) so
+    // plugins can drive actions / render contextual content without re-resolving
+    // core services.
+    const navPopoverServices: NavPopoverServices = {
+      navigateToApp: application.navigateToApp,
+      basePath: http.basePath,
+      http,
+      recentlyAccessed$: recentlyAccessed.get$(),
+    };
+
     // Add Help menu
     if (this.useUpdatedHeader) {
       navControls.registerLeftBottom({
@@ -431,6 +442,7 @@ export class ChromeService {
           currentWorkspace$={workspaces.currentWorkspace$}
           useUpdatedHeader={this.useUpdatedHeader}
           enableIconSideNav={this.enableIconSideNav}
+          navPopoverServices={navPopoverServices}
           globalSearchCommands$={globalSearch.getAllSearchCommands$()}
           globalBanner$={this.globalBanner$.pipe(takeUntil(this.stop$))}
           keyboardShortcut={keyboardShortcut}

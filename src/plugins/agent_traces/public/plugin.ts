@@ -63,6 +63,7 @@ import { abortAllActiveQueries } from './application/utils/state_management/acti
 import { setServices } from './services/services';
 import { AgentTracesIcon } from './assets/agent_traces_icon';
 import { AgentSpansIcon } from './assets/agent_spans_icon';
+import { agentTracesNavPopover, agentSpansNavPopover } from './nav_popover';
 import { SlotRegistryService } from './services/slot_registry';
 
 // Log Actions
@@ -318,6 +319,7 @@ export class AgentTracesPlugin
           category: DEFAULT_APP_CATEGORIES.agentMonitoring,
           order: 100,
           euiIconType: AgentTracesIcon,
+          navPopover: agentTracesNavPopover,
         },
         {
           id: AGENT_SPANS_NAV_ID,
@@ -325,6 +327,7 @@ export class AgentTracesPlugin
           category: DEFAULT_APP_CATEGORIES.agentMonitoring,
           order: 200,
           euiIconType: AgentSpansIcon,
+          navPopover: agentSpansNavPopover,
         },
       ]);
     }

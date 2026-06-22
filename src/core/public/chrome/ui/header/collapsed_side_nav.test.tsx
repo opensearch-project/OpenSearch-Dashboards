@@ -4,13 +4,21 @@
  */
 
 import { render, fireEvent } from '@testing-library/react';
+import { of } from 'rxjs';
 import { CollapsedSideNav, CollapsedSideNavProps } from './collapsed_side_nav';
 import { ChromeNavLink } from '../../nav_links';
-import { ChromeRegistrationNavLink } from '../../nav_group';
+import { ChromeRegistrationNavLink, NavPopoverServices } from '../../nav_group';
 import { httpServiceMock } from '../../../mocks';
 import { DEFAULT_APP_CATEGORIES } from '../../../../../core/utils';
 
 const mockBasePath = httpServiceMock.createSetupContract({ basePath: '/test' }).basePath;
+
+const makePopoverServices = (): NavPopoverServices => ({
+  navigateToApp: jest.fn(),
+  basePath: mockBasePath,
+  http: httpServiceMock.createStartContract(),
+  recentlyAccessed$: of([]),
+});
 
 type MergedNavLink = ChromeNavLink & ChromeRegistrationNavLink;
 
@@ -50,7 +58,7 @@ describe('<CollapsedSideNav />', () => {
     expect(getByTestId('obsCollapsedIcon-metrics')).toBeInTheDocument();
   });
 
-  it('highlights active link with primary color', () => {
+  it('marks the active link with the active anchor class (grey fill + accent bar)', () => {
     const navLinks = [
       makeLink({ id: 'logs', title: 'Logs', euiIconType: 'logsApp' }),
       makeLink({ id: 'metrics', title: 'Metrics', euiIconType: 'metricsApp' }),
@@ -58,8 +66,15 @@ describe('<CollapsedSideNav />', () => {
     const { getByTestId } = render(
       <CollapsedSideNav {...defaultProps} navLinks={navLinks} appId="logs" />
     );
-    const activeButton = getByTestId('obsCollapsedIcon-logs');
-    expect(activeButton.classList.toString()).toContain('primary');
+    // The selected icon's anchor wrapper carries the active treatment
+    // (full-rail grey + blue vertical accent bar), mirroring the expanded row.
+    const activeAnchor = getByTestId('obsCollapsedIcon-logs').closest('.obsSimplePopover-anchor');
+    expect(activeAnchor?.classList.toString()).toContain('obsSimplePopover-anchor--active');
+    // The non-active icon does not.
+    const inactiveAnchor = getByTestId('obsCollapsedIcon-metrics').closest(
+      '.obsSimplePopover-anchor'
+    );
+    expect(inactiveAnchor?.classList.toString()).not.toContain('obsSimplePopover-anchor--active');
   });
 
   it('navigates on leaf icon click', () => {
@@ -116,5 +131,69 @@ describe('<CollapsedSideNav />', () => {
     ];
     const { getByTestId } = render(<CollapsedSideNav {...defaultProps} navLinks={navLinks} />);
     expect(getByTestId(`obsCollapsedIcon-${category.label}`)).toBeInTheDocument();
+  });
+
+  describe('hover popover', () => {
+    it('shows the registered flyout content on hover', () => {
+      const navLinks = [
+        makeLink({
+          id: 'dashboards',
+          title: 'Dashboards',
+          euiIconType: 'dashboardApp',
+          navPopover: { render: () => <div data-test-subj="customPopover">Recent dashboards</div> },
+        }),
+      ];
+      const { getByTestId, queryByTestId } = render(
+        <CollapsedSideNav
+          {...defaultProps}
+          navLinks={navLinks}
+          popoverServices={makePopoverServices()}
+        />
+      );
+
+      expect(queryByTestId('customPopover')).not.toBeInTheDocument();
+      fireEvent.mouseEnter(getByTestId('obsCollapsedIcon-dashboards').parentElement!);
+      expect(getByTestId('customPopover')).toBeInTheDocument();
+    });
+
+    it('still navigates on direct click when a flyout is registered', () => {
+      const navigateToApp = jest.fn();
+      const navLinks = [
+        makeLink({
+          id: 'dashboards',
+          title: 'Dashboards',
+          euiIconType: 'dashboardApp',
+          navPopover: { render: () => <div>content</div> },
+        }),
+      ];
+      const { getByTestId } = render(
+        <CollapsedSideNav
+          {...defaultProps}
+          navLinks={navLinks}
+          navigateToApp={navigateToApp}
+          popoverServices={makePopoverServices()}
+        />
+      );
+      fireEvent.click(getByTestId('obsCollapsedIcon-dashboards'));
+      expect(navigateToApp).toHaveBeenCalledWith('dashboards');
+    });
+
+    it('shows a title-only popover on hover when no navPopover is registered', () => {
+      const navLinks = [makeLink({ id: 'logs', title: 'Logs', euiIconType: 'logsApp' })];
+      const { getByTestId, queryByText } = render(
+        <CollapsedSideNav
+          {...defaultProps}
+          navLinks={navLinks}
+          popoverServices={makePopoverServices()}
+        />
+      );
+      // Not shown until hovered.
+      expect(queryByText('Logs')).not.toBeInTheDocument();
+      // Every collapsed icon opens a popover on hover; with no registered actions
+      // it shows just the title (consistent styling, tooltip-like).
+      fireEvent.mouseEnter(getByTestId('obsCollapsedIcon-logs').parentElement!);
+      expect(getByTestId('obsNavPopover')).toBeInTheDocument();
+      expect(queryByText('Logs')).toBeInTheDocument();
+    });
   });
 });
