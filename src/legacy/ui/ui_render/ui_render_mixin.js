@@ -210,6 +210,14 @@ export function uiRenderMixin(osdServer, server, config) {
         const mfeRegistryUrl = config.get('opensearchDashboards.mfe.registryUrl');
         const mfeSharedDepsUrl = config.get('opensearchDashboards.mfe.sharedDepsUrl');
         const mfeBootstrapUrl = config.get('opensearchDashboards.mfe.bootstrapUrl');
+        // Phase 14 Story 1: telemetry sink URL (mfe-gated server config; empty
+        // default = OFF / silent no-op — see opensearch_dashboards_config.ts).
+        // Stringify to keep the template safe even if the value contains a
+        // single quote (would break the surrounding `'…'` literal). Empty =>
+        // the browser dispatcher is a no-op; never POSTs, never logs.
+        const mfeTelemetryEndpoint = JSON.stringify(
+          config.get('opensearchDashboards.mfe.telemetryEndpoint') || ''
+        );
 
         // Non-production security GATE for dev URL-overrides (Phase 5, §7). An
         // explicit `mfe.allowOverride` always wins; when unset it defaults to the
@@ -300,6 +308,16 @@ export function uiRenderMixin(osdServer, server, config) {
               mfeCompatPolicy,
               mfeHostEnv,
               mfeRegistryVerification,
+              // Phase 14 Story 1: telemetry sink + the two dimensions the
+              // browser stamps on every emitted event. `mfeTelemetryEndpoint`
+              // is JSON-stringified above (empty = OFF). `mfeCustomerId` is
+              // the resolved tenant id; `mfeUserBucket` the cookie-derived
+              // 0..99 canary bucket. Both flow into __osdMfe__ in the template
+              // so the bootstrap can stamp them on every load event without
+              // re-deriving server-side state.
+              mfeTelemetryEndpoint,
+              mfeCustomerId: JSON.stringify(String(mfeCustomerId)),
+              mfeUserBucket,
               // Phase 13 Story 3: server-resolved boot manifest. When non-`null`
               // the bootstrap consumes this directly and skips the registry HTTP
               // fetch (and the registry signature verify) entirely.

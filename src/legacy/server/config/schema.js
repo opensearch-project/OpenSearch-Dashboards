@@ -294,6 +294,10 @@ export default () =>
         // Extra dev-only script origins, allow-listed in CSP ONLY when allowOverride
         // is on (non-prod). Never applied in production.
         devOverrideOrigins: Joi.array().items(Joi.string()).default([]),
+        // Phase 14 Story 1 — load telemetry sink. Empty default = OFF (silent
+        // no-op): the browser bootstrap never POSTs, the load loop is unchanged.
+        // Mirrors the new-platform schema in opensearch_dashboards_config.ts.
+        telemetryEndpoint: Joi.string().allow('').default(''),
         // Phase 9 version-compatibility POLICY. Declared here so the LEGACY config
         // (read by ui_render_mixin.js) resolves `opensearchDashboards.mfe.compat.*`;
         // mirrors the new-platform schema in opensearch_dashboards_config.ts.

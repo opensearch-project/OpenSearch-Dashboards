@@ -179,6 +179,19 @@ export const config = {
         // Signature algorithm; only HMAC-SHA256 is supported today.
         algorithm: schema.string({ defaultValue: 'HMAC-SHA256' }),
       }),
+      // Phase 14 Story 1 — load telemetry sink. The browser MFE bootstrap emits
+      // one fire-and-forget structured event per remote per load attempt
+      // (success / failure / skipped) with `{id, version, status, durationMs,
+      // errorClass?, bucket, customerId, timestamp}`. This URL is the POST
+      // target. EMPTY default = telemetry OFF (silent no-op): the bootstrap
+      // never makes a network call, never logs, and the load loop is
+      // byte-for-byte unchanged. When set, the dispatcher uses
+      // `navigator.sendBeacon` (preferred) or `fetch({keepalive:true})` —
+      // either way the bootstrap NEVER awaits the POST and a failed/unreachable
+      // sink is a SILENT no-op (telemetry never blocks boot or surfaces to the
+      // user). Only injected inside the mfe-enabled render branch, so the
+      // no-flag served HTML stays byte-for-byte unchanged.
+      telemetryEndpoint: schema.string({ defaultValue: '' }),
       // Phase 9 version-compatibility POLICY. Controls how the MFE host reacts
       // when a remote is built against an incompatible OSD core / shared-singleton
       // version, or is missing the compatibility metadata. The env-keyed DEFAULTS

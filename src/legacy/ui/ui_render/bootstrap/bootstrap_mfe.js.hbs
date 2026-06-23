@@ -90,6 +90,14 @@ if (window.__osdStrictCsp__ && window.__osdCspNotEnforced__) {
           HttpOnly bucket cookie); the browser never sees the v2 doc. Raw JSON
           ({{{ }}} = unescaped). --}}
     bootManifest: {{{mfeBootManifest}}},
+    {{!-- Phase 14 Story 1: load-telemetry sink + dimensions. The endpoint is the
+          POST target for the structured load events (empty = SILENT no-op); the
+          dimensions (bucket 0..99 from the cookie hash, customerId from server
+          config) are stamped on every emitted event. All three are JSON literals
+          (numbers / strings) so they are safe to inline without extra escaping. --}}
+    telemetryEndpoint: {{{mfeTelemetryEndpoint}}},
+    customerId: {{{mfeCustomerId}}},
+    bucket: {{mfeUserBucket}},
   };
 
   window.onload = function () {
@@ -177,6 +185,12 @@ if (window.__osdStrictCsp__ && window.__osdCspNotEnforced__) {
         compatPolicy: window.__osdMfe__.compatPolicy,
         host: window.__osdMfe__.host,
         registryVerification: window.__osdMfe__.registryVerification,
+        // Phase 14 Story 1: thread the telemetry sink + dimensions through to
+        // the bootstrap so it can construct the fire-and-forget dispatcher and
+        // stamp every event with the bucket+customerId pre-partition.
+        telemetryEndpoint: window.__osdMfe__.telemetryEndpoint,
+        bucket: window.__osdMfe__.bucket,
+        customerId: window.__osdMfe__.customerId,
       });
 
       load(styleSheetPaths);

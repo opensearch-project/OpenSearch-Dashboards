@@ -1307,7 +1307,9 @@ describe('bootstrapMfe — server-resolved bootManifest (Phase 13, Story 3)', ()
     const inspectorCall = calls.find(
       (c) => c[0] === 'http://localhost:8080/mfe/inspector/v_canary/remoteEntry.js'
     );
-    const dataCall = calls.find((c) => c[0] === 'http://localhost:8080/mfe/data/default/remoteEntry.js');
+    const dataCall = calls.find(
+      (c) => c[0] === 'http://localhost:8080/mfe/data/default/remoteEntry.js'
+    );
     expect(inspectorCall![2]).toBe('sha384-canary');
     // No integrity on the `data` entry => undefined passed through.
     expect(dataCall![2]).toBeUndefined();
@@ -1421,5 +1423,368 @@ describe('bootstrapMfe — server-resolved bootManifest (Phase 13, Story 3)', ()
 
     // Both entries load (warn-load tolerates missing metadata).
     expect(deps.loadRemoteContainer).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('bootstrapMfe — load telemetry (Phase 14, Story 1)', () => {
+  // Build a configurable, ordered fake clock so durationMs assertions are
+  // deterministic. Each call advances the clock by `step` ms.
+  function fakeClock(start = 1000, step = 5) {
+    let t = start;
+    return jest.fn(() => {
+      const v = t;
+      t += step;
+      return v;
+    });
+  }
+
+  function makeRecorder() {
+    const events: Array<{
+      id: string;
+      version: string;
+      status: 'success' | 'failure' | 'skipped';
+      durationMs: number;
+      errorClass?: string;
+    }> = [];
+    const dispatcher = { emit: jest.fn((e: any) => events.push(e)) };
+    return { events, dispatcher };
+  }
+
+  function fakeContainer(): MfeContainer {
+    return {
+      init: () => undefined,
+      get: () => Promise.resolve(() => ({ plugin: () => undefined })),
+    };
+  }
+
+  it('emits one success event per loaded remote with id+version, durationMs>=0', async () => {
+    const { events, dispatcher } = makeRecorder();
+    const createDispatcher = jest.fn(() => dispatcher);
+    const now = fakeClock();
+
+    const deps: Partial<BootstrapMfeDeps> = {
+      loadScript: jest.fn(async (url: string) => {
+        if (url === SHARED_DEPS_URL) {
+          testWindow().__osdSharedDeps__ = { React: { version: '16.14.0' } };
+        }
+      }),
+      fetchImpl: ((async () => ({
+        ok: true,
+        status: 200,
+        json: async () => validRegistry(),
+      })) as unknown) as typeof fetch,
+      loadRemoteContainer: jest.fn(async () => fakeContainer()),
+      getRemoteModuleFactory: jest.fn(async () => () => ({ plugin: () => undefined })),
+      registerPluginFactory: jest.fn(),
+      invokeCoreBootstrap: jest.fn(async () => undefined),
+      createTelemetryDispatcher: createDispatcher,
+      now,
+    };
+
+    await bootstrapMfe({
+      registryUrl: REGISTRY_URL,
+      sharedDepsUrl: SHARED_DEPS_URL,
+      telemetryEndpoint: 'http://telemetry/sink',
+      bucket: 17,
+      customerId: 'acme',
+      deps,
+    });
+
+    // Dispatcher built with the right dimensions (proves bucket+customerId
+    // came from injected options, not a default).
+    expect(createDispatcher).toHaveBeenCalledTimes(1);
+    expect(createDispatcher).toHaveBeenCalledWith({
+      endpoint: 'http://telemetry/sink',
+      bucket: 17,
+      customerId: 'acme',
+    });
+
+    // One success event per remote in validRegistry().
+    const successes = events.filter((e) => e.status === 'success');
+    expect(successes).toHaveLength(2);
+    const ids = successes.map((e) => e.id).sort();
+    expect(ids).toEqual(['data', 'inspector']);
+    for (const ev of successes) {
+      expect(ev.version).toMatch(/^3\.5\.0\+/);
+      expect(typeof ev.durationMs).toBe('number');
+      expect(ev.durationMs).toBeGreaterThanOrEqual(0);
+      expect((ev as any).errorClass).toBeUndefined();
+    }
+  });
+
+  it('classifies an integrity-bearing remoteEntry load failure as sri-mismatch', async () => {
+    const { events, dispatcher } = makeRecorder();
+    const reg = validRegistry();
+    (reg.mfes.inspector as { integrity?: string }).integrity = 'sha384-aaa';
+
+    const deps: Partial<BootstrapMfeDeps> = {
+      loadScript: jest.fn(async (url: string) => {
+        if (url === SHARED_DEPS_URL) {
+          testWindow().__osdSharedDeps__ = { React: { version: '16.14.0' } };
+        }
+      }),
+      fetchImpl: ((async () => ({
+        ok: true,
+        status: 200,
+        json: async () => reg,
+      })) as unknown) as typeof fetch,
+      loadRemoteContainer: jest.fn(async (url: string, _scope: string, integrity?: string) => {
+        if (integrity) {
+          throw new Error(
+            `Failed to load script: ${url} (Subresource Integrity check failed or the script could not be fetched)`
+          );
+        }
+        return fakeContainer();
+      }),
+      getRemoteModuleFactory: jest.fn(async () => () => ({ plugin: () => undefined })),
+      registerPluginFactory: jest.fn(),
+      invokeCoreBootstrap: jest.fn(async () => undefined),
+      createTelemetryDispatcher: jest.fn(() => dispatcher),
+      now: fakeClock(),
+      // Prod skip so the SRI failure does not hard-block the test.
+    };
+
+    await bootstrapMfe({
+      registryUrl: REGISTRY_URL,
+      sharedDepsUrl: SHARED_DEPS_URL,
+      telemetryEndpoint: 'http://t/sink',
+      bucket: 0,
+      customerId: 'default',
+      compatPolicy: { onIncompatible: 'skip', onMissing: 'skip', strictShared: true },
+      deps,
+    });
+
+    const failures = events.filter((e) => e.status === 'failure');
+    const sri = failures.find((e) => e.id === 'inspector');
+    expect(sri).toBeDefined();
+    expect(sri!.errorClass).toBe('sri-mismatch');
+    // The other remote loaded fine (Phase 4 invariant): a success event for `data`.
+    expect(events.find((e) => e.id === 'data' && e.status === 'success')).toBeDefined();
+  });
+
+  it('classifies a non-integrity load failure as network', async () => {
+    const { events, dispatcher } = makeRecorder();
+    const reg = validRegistry(); // no integrity hashes
+
+    const deps: Partial<BootstrapMfeDeps> = {
+      loadScript: jest.fn(async (url: string) => {
+        if (url === SHARED_DEPS_URL) {
+          testWindow().__osdSharedDeps__ = { React: { version: '16.14.0' } };
+        }
+      }),
+      fetchImpl: ((async () => ({
+        ok: true,
+        status: 200,
+        json: async () => reg,
+      })) as unknown) as typeof fetch,
+      loadRemoteContainer: jest.fn(async (url: string, scope: string) => {
+        if (scope === 'inspector') {
+          throw new Error(`Failed to load script: ${url}`);
+        }
+        return fakeContainer();
+      }),
+      getRemoteModuleFactory: jest.fn(async () => () => ({ plugin: () => undefined })),
+      registerPluginFactory: jest.fn(),
+      invokeCoreBootstrap: jest.fn(async () => undefined),
+      createTelemetryDispatcher: jest.fn(() => dispatcher),
+      now: fakeClock(),
+    };
+
+    await bootstrapMfe({
+      registryUrl: REGISTRY_URL,
+      sharedDepsUrl: SHARED_DEPS_URL,
+      telemetryEndpoint: 'http://t/sink',
+      deps,
+    });
+
+    const ev = events.find((e) => e.id === 'inspector' && e.status === 'failure');
+    expect(ev).toBeDefined();
+    expect(ev!.errorClass).toBe('network');
+  });
+
+  it('classifies a container/factory error as mf-runtime-error', async () => {
+    const { events, dispatcher } = makeRecorder();
+
+    const deps: Partial<BootstrapMfeDeps> = {
+      loadScript: jest.fn(async (url: string) => {
+        if (url === SHARED_DEPS_URL) {
+          testWindow().__osdSharedDeps__ = { React: { version: '16.14.0' } };
+        }
+      }),
+      fetchImpl: ((async () => ({
+        ok: true,
+        status: 200,
+        json: async () => validRegistry(),
+      })) as unknown) as typeof fetch,
+      loadRemoteContainer: jest.fn(async () => fakeContainer()),
+      getRemoteModuleFactory: jest.fn(async (_c: MfeContainer, _s: ShareScope, mod: string) => {
+        if (mod === './public') {
+          throw new Error('shared module is not available for eager consumption');
+        }
+        return (() => ({ plugin: () => undefined })) as () => PluginPublicModule;
+      }),
+      registerPluginFactory: jest.fn(),
+      invokeCoreBootstrap: jest.fn(async () => undefined),
+      createTelemetryDispatcher: jest.fn(() => dispatcher),
+      now: fakeClock(),
+    };
+
+    await bootstrapMfe({
+      registryUrl: REGISTRY_URL,
+      sharedDepsUrl: SHARED_DEPS_URL,
+      telemetryEndpoint: 'http://t/sink',
+      deps,
+    });
+
+    const failures = events.filter((e) => e.status === 'failure');
+    expect(failures.length).toBeGreaterThan(0);
+    for (const ev of failures) {
+      expect(ev.errorClass).toBe('mf-runtime-error');
+    }
+  });
+
+  it('emits a skipped event with errorClass=compat-reject for compat-skipped remotes', async () => {
+    const { events, dispatcher } = makeRecorder();
+
+    const reg = validRegistry();
+    // Mark inspector as having an incompatible compat declaration.
+    (reg.mfes.inspector as any).compat = {
+      minCoreVersion: '99.0.0',
+      compatibleCoreRange: '>=99.0.0',
+    };
+    (reg.mfes.inspector as any).builtAgainst = {
+      osdVersion: '99.0.0',
+      sharedDeps: { react: '16.14.0', 'react-dom': '16.14.0' },
+    };
+
+    const deps: Partial<BootstrapMfeDeps> = {
+      loadScript: jest.fn(async (url: string) => {
+        if (url === SHARED_DEPS_URL) {
+          testWindow().__osdSharedDeps__ = { React: { version: '16.14.0' } };
+        }
+      }),
+      fetchImpl: ((async () => ({
+        ok: true,
+        status: 200,
+        json: async () => reg,
+      })) as unknown) as typeof fetch,
+      loadRemoteContainer: jest.fn(async () => fakeContainer()),
+      getRemoteModuleFactory: jest.fn(async () => () => ({ plugin: () => undefined })),
+      registerPluginFactory: jest.fn(),
+      invokeCoreBootstrap: jest.fn(async () => undefined),
+      createTelemetryDispatcher: jest.fn(() => dispatcher),
+      now: fakeClock(),
+    };
+
+    await bootstrapMfe({
+      registryUrl: REGISTRY_URL,
+      sharedDepsUrl: SHARED_DEPS_URL,
+      telemetryEndpoint: 'http://t/sink',
+      bucket: 5,
+      customerId: 'beta',
+      host: {
+        osdVersion: '3.5.0',
+        sharedDeps: { react: '16.14.0', 'react-dom': '16.14.0' },
+      },
+      // Prod-skip on incompatible; warn-load on missing metadata so the
+      // (metadata-less) `data` remote still loads and we can verify the
+      // Phase 4 invariant (one failure ≠ blocked boot).
+      compatPolicy: { onIncompatible: 'skip', onMissing: 'warn-load', strictShared: true },
+      deps,
+    });
+
+    const skip = events.find((e) => e.id === 'inspector' && e.status === 'skipped');
+    expect(skip).toBeDefined();
+    expect(skip!.errorClass).toBe('compat-reject');
+    expect(skip!.durationMs).toBe(0);
+
+    // The other remote still loaded — Phase 4 invariant preserved.
+    expect(events.find((e) => e.id === 'data' && e.status === 'success')).toBeDefined();
+  });
+
+  it('builds a SILENT no-op dispatcher when telemetryEndpoint is unset (default behaviour)', async () => {
+    const createDispatcher = jest.fn(
+      (cfg: { endpoint?: string; bucket: number; customerId: string }) => {
+        // Mirror the production silent-no-op semantics so the test exercises
+        // the same code path the bootstrap exposes.
+        if (!cfg.endpoint) {
+          return { emit: jest.fn() };
+        }
+        return { emit: jest.fn() };
+      }
+    );
+    const deps: Partial<BootstrapMfeDeps> = {
+      loadScript: jest.fn(async (url: string) => {
+        if (url === SHARED_DEPS_URL) {
+          testWindow().__osdSharedDeps__ = { React: { version: '16.14.0' } };
+        }
+      }),
+      fetchImpl: ((async () => ({
+        ok: true,
+        status: 200,
+        json: async () => validRegistry(),
+      })) as unknown) as typeof fetch,
+      loadRemoteContainer: jest.fn(async () => fakeContainer()),
+      getRemoteModuleFactory: jest.fn(async () => () => ({ plugin: () => undefined })),
+      registerPluginFactory: jest.fn(),
+      invokeCoreBootstrap: jest.fn(async () => undefined),
+      createTelemetryDispatcher: createDispatcher,
+    };
+
+    await bootstrapMfe({
+      registryUrl: REGISTRY_URL,
+      sharedDepsUrl: SHARED_DEPS_URL,
+      // telemetryEndpoint INTENTIONALLY OMITTED.
+      deps,
+    });
+
+    // Dispatcher is still constructed (the bootstrap doesn't have to know it
+    // is a no-op), but the endpoint passed through is undefined.
+    expect(createDispatcher).toHaveBeenCalledWith({
+      endpoint: undefined,
+      bucket: 0,
+      customerId: 'default',
+    });
+  });
+
+  it('a synchronous throw from telemetry.emit() does NOT abort boot (fire-and-forget defense-in-depth)', async () => {
+    const explodingDispatcher = {
+      emit: jest.fn(() => {
+        throw new Error('dispatcher exploded');
+      }),
+    };
+
+    const deps: Partial<BootstrapMfeDeps> = {
+      loadScript: jest.fn(async (url: string) => {
+        if (url === SHARED_DEPS_URL) {
+          testWindow().__osdSharedDeps__ = { React: { version: '16.14.0' } };
+        }
+      }),
+      fetchImpl: ((async () => ({
+        ok: true,
+        status: 200,
+        json: async () => validRegistry(),
+      })) as unknown) as typeof fetch,
+      loadRemoteContainer: jest.fn(async () => fakeContainer()),
+      getRemoteModuleFactory: jest.fn(async () => () => ({ plugin: () => undefined })),
+      registerPluginFactory: jest.fn(),
+      invokeCoreBootstrap: jest.fn(async () => undefined),
+      createTelemetryDispatcher: jest.fn(() => explodingDispatcher),
+    };
+
+    // Boot resolves normally even though every emit() throws synchronously.
+    await expect(
+      bootstrapMfe({
+        registryUrl: REGISTRY_URL,
+        sharedDepsUrl: SHARED_DEPS_URL,
+        telemetryEndpoint: 'http://t/sink',
+        deps,
+      })
+    ).resolves.toBeUndefined();
+
+    // Core boot still ran.
+    expect(deps.invokeCoreBootstrap).toHaveBeenCalledTimes(1);
+    // emit was attempted (so we know the swallow happened in the bootstrap).
+    expect(explodingDispatcher.emit).toHaveBeenCalled();
   });
 });

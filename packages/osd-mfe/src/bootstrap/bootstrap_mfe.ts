@@ -45,6 +45,12 @@ import { CompatPolicy } from './compat_policy';
 import { decideCompat, EvaluatedRemote } from './compat_enforcement';
 import { renderCompatBlockPage } from './compat_block_page';
 import { installChunkErrorSurface } from './chunk_error_surface';
+import {
+  MfeLoadTelemetryInput,
+  TelemetryDispatcher,
+  TelemetryDispatcherConfig,
+  createTelemetryDispatcher,
+} from './telemetry';
 import { mfeWindow } from './types';
 
 // NOTE: `./inspector` is intentionally NOT imported statically here. It pulls in
@@ -120,6 +126,22 @@ export interface BootstrapMfeDeps {
     registry: Registry,
     verification: RegistryVerification
   ) => Promise<SignatureCheck>;
+  /**
+   * Build the telemetry dispatcher (Phase 14, Story 1) for this boot. Default
+   * is {@link createTelemetryDispatcher} reading `navigator.sendBeacon` and
+   * `window.fetch`; tests inject a spy to assert per-remote emission without
+   * a real network. The dispatcher MUST be fire-and-forget — `emit()` returns
+   * synchronously, never throws, and is a SILENT no-op when the configured
+   * endpoint is absent / unreachable. The bootstrap NEVER awaits emit().
+   */
+  createTelemetryDispatcher: (config: TelemetryDispatcherConfig) => TelemetryDispatcher;
+  /**
+   * Monotonic clock for measuring per-remote durationMs (Phase 14, Story 1).
+   * Default: `performance.now()` when available (sub-ms resolution, monotonic
+   * — not affected by wall-clock skew), else `Date.now()`. Tests inject a
+   * deterministic counter so emitted `durationMs` values are stable.
+   */
+  now: () => number;
 }
 
 /** Inputs to {@link bootstrapMfe}. */
@@ -207,6 +229,31 @@ export interface BootstrapMfeOptions {
    * See `../registry/signing_common.ts` for the trust/key model.
    */
   registryVerification?: RegistryVerification;
+  /**
+   * Telemetry sink URL (Phase 14, Story 1). Resolved server-side from
+   * `opensearchDashboards.mfe.telemetryEndpoint` (mfe-gated config). When
+   * unset/empty, telemetry is a SILENT no-op — emit() never makes a network
+   * call, never logs, and the load loop is byte-for-byte unchanged. When set,
+   * the bootstrap fires (never awaits) one event per remote per load attempt
+   * via sendBeacon (preferred) or fetch (fallback). See `./telemetry.ts` for
+   * the locked event shape and dispatcher contract.
+   */
+  telemetryEndpoint?: string;
+  /**
+   * Stable canary-bucket assignment for the requesting client (0..99), stamped
+   * onto every emitted event. Comes from the server-side cookie hash
+   * (Phase 13 `bucketFromCookie`); injected at `window.__osdMfe__.bucket`. When
+   * absent, defaults to `0` so events still emit with a well-formed dimension
+   * (a tests / pre-Phase-14 page that did not inject the bucket field).
+   */
+  bucket?: number;
+  /**
+   * Tenant identifier stamped onto every emitted event. Comes from
+   * `opensearchDashboards.mfe.customerId` server config (Phase 13 — `'default'`
+   * until real AuthN); injected at `window.__osdMfe__.customerId`. When absent,
+   * defaults to `'default'` for the same reason as {@link bucket}.
+   */
+  customerId?: string;
   /** Optional collaborator overrides (used by tests). */
   deps?: Partial<BootstrapMfeDeps>;
 }
@@ -254,6 +301,13 @@ function resolveDeps(overrides?: Partial<BootstrapMfeDeps>): BootstrapMfeDeps {
     renderBlockPage: (offenders: EvaluatedRemote[]) => renderCompatBlockPage(offenders),
     installChunkErrorSurface,
     verifyRegistrySignature: verifyRegistrySignatureWeb,
+    createTelemetryDispatcher: (config) => createTelemetryDispatcher(config),
+    // Default monotonic clock: prefer `performance.now()` (sub-ms, monotonic);
+    // fall back to `Date.now()` in environments where `performance` is absent.
+    now: () =>
+      typeof performance !== 'undefined' && typeof performance.now === 'function'
+        ? performance.now()
+        : Date.now(),
     ...overrides,
   };
 }
@@ -353,6 +407,48 @@ export function registryFromBootManifest(manifest: BootManifest): Registry {
 }
 
 /**
+ * Classify a per-remote load error for telemetry (Phase 14, Story 1) — pure
+ * mapping from the error and the descriptor's integrity claim onto the
+ * locked {@link TelemetryErrorClass} taxonomy:
+ *
+ *  - `Failed to load script: …` from {@link loadScript}: the browser's
+ *    `onerror` fired on the remoteEntry <script>. With an integrity claim that
+ *    means a Subresource-Integrity mismatch OR an unfetchable artifact (the
+ *    browser does not distinguish to JS, and Phase 12 conflates them as
+ *    `sri-mismatch` for fail-closed reasoning); without it, the bytes were
+ *    simply unreachable, so it is `network`.
+ *  - `Subresource Integrity` anywhere in the message: SRI failure (defensive
+ *    against runtimes whose error wording differs).
+ *  - `Remote container "…" not found after loading …` from
+ *    {@link loadRemoteContainer}: the remoteEntry executed but didn't register
+ *    the container global. That is a Module-Federation runtime malformation,
+ *    not a bytes-tampering issue — `mf-runtime-error`.
+ *  - Any other error from container.init / container.get / factory wiring
+ *    propagates here and is also `mf-runtime-error`.
+ *  - The catch-all `unknown` is reserved for an empty/non-Error reason.
+ *
+ * @param err the rejected value from the per-remote load chain
+ * @param hasIntegrity whether the descriptor carried an SRI hash
+ */
+function classifyLoadError(
+  err: unknown,
+  hasIntegrity: boolean
+): import('./telemetry').TelemetryErrorClass {
+  const msg =
+    err instanceof Error ? `${err.name}: ${err.message}` : typeof err === 'string' ? err : '';
+  if (msg === '') {
+    return 'unknown';
+  }
+  if (/Subresource Integrity/i.test(msg)) {
+    return 'sri-mismatch';
+  }
+  if (/Failed to load script/i.test(msg)) {
+    return hasIntegrity ? 'sri-mismatch' : 'network';
+  }
+  return 'mf-runtime-error';
+}
+
+/**
  * Boot OSD's UI from Module Federation remotes. Resolves once core boot has
  * been invoked (and, for the default core bootstrap, once it completes).
  *
@@ -369,6 +465,29 @@ export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> 
   const { registryUrl, sharedDepsUrl, sharedDepsDepUrls, allowOverride = false } = options;
   const { host, compatPolicy, registryVerification, bootManifest } = options;
   const deps = resolveDeps(options.deps);
+
+  // Phase 14, Story 1: build the fire-and-forget telemetry dispatcher EARLY, with
+  // server-injected dimensions (bucket + customerId) so every emitted event is
+  // pre-partitioned for canary/baseline split downstream. Defaults make this a
+  // SILENT no-op when the endpoint is unset / empty, so the load loop is
+  // byte-for-byte unchanged when telemetry is off (the production default).
+  // The dispatcher must NEVER block boot; emit() is synchronous and swallows
+  // every transport failure. See `./telemetry.ts`.
+  const telemetry: TelemetryDispatcher = deps.createTelemetryDispatcher({
+    endpoint: options.telemetryEndpoint,
+    bucket: typeof options.bucket === 'number' ? options.bucket : 0,
+    customerId: typeof options.customerId === 'string' ? options.customerId : 'default',
+  });
+  // Helper: emit an event without ever throwing into the load loop, even if a
+  // misbehaving dispatcher synchronously throws (the contract says it must not,
+  // but defense-in-depth keeps a flaky sink from corrupting boot).
+  const fireTelemetry = (input: MfeLoadTelemetryInput): void => {
+    try {
+      telemetry.emit(input);
+    } catch {
+      // SILENT — telemetry NEVER blocks or surfaces.
+    }
+  };
 
   // Arm the lazy-CHUNK integrity-failure surface BEFORE anything loads, so it is
   // active for the entire page lifetime (Phase 12, Story 3). A remote's lazy chunks
@@ -413,9 +532,7 @@ export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> 
   } else {
     const response = await deps.fetchImpl(registryUrl, { credentials: 'omit' });
     if (!response.ok) {
-      throw new Error(
-        `Failed to fetch MFE registry from ${registryUrl}: HTTP ${response.status}`
-      );
+      throw new Error(`Failed to fetch MFE registry from ${registryUrl}: HTTP ${response.status}`);
     }
     registry = assertValidRegistry(await response.json());
   }
@@ -534,6 +651,18 @@ export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> 
     if (decision.block) {
       // HARD-BLOCK (non-prod): list every offender + reason, render the block
       // page, and abort boot. The app is intentionally NOT started.
+      // Telemetry (Phase 14, Story 1): emit one `failure` + `compat-reject`
+      // event per offender so an operator can see which remote caused the
+      // page block (sendBeacon flushes even when we replace the document).
+      for (const offender of decision.offenders) {
+        fireTelemetry({
+          id: offender.id,
+          version: registry.mfes[offender.id]?.version ?? '',
+          status: 'failure',
+          durationMs: 0,
+          errorClass: 'compat-reject',
+        });
+      }
       const offenderSummary = decision.offenders
         .map((o) => `${o.id} (${o.compatibility}): ${o.reasons.join('; ')}`)
         .join('\n  - ');
@@ -551,6 +680,17 @@ export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> 
     // boots; log a clear, per-remote reason (telemetry).
     for (const skipped of decision.skip) {
       deps.registerPluginFactory(skipped.id, createDisabledPluginModule);
+      // Telemetry (Phase 14, Story 1): a compat-skip is a `skipped` event with
+      // errorClass `compat-reject` (durationMs=0 — no load attempted). Emitted
+      // BEFORE the warn so the dispatcher fires even if the warn handler is
+      // mutated in some hostile environment.
+      fireTelemetry({
+        id: skipped.id,
+        version: registry.mfes[skipped.id]?.version ?? '',
+        status: 'skipped',
+        durationMs: 0,
+        errorClass: 'compat-reject',
+      });
       // eslint-disable-next-line no-console
       console.warn(
         `[mfe] Skipping ${skipped.compatibility} remote "${skipped.id}" and registering it as ` +
@@ -607,17 +747,54 @@ export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> 
   const results = await Promise.allSettled(
     idsToLoad.map(async (id) => {
       const descriptor = resolved.get(id)!;
-      // Pass the registry `integrity` (when present) so the remoteEntry <script>
-      // is integrity-checked by the browser (Phase 12, Story 2). An override
-      // descriptor has no integrity (its bytes differ from the registry build),
-      // so it loads without SRI — see resolve() / load_remote.loadScript().
-      const container = await deps.loadRemoteContainer(
-        descriptor.remoteEntry,
-        descriptor.scope,
-        descriptor.integrity
-      );
-      const factory = await deps.getRemoteModuleFactory(container, shareScope, descriptor.module);
-      deps.registerPluginFactory(id, factory);
+      // Phase 14, Story 1 — per-remote timing for the load-telemetry event.
+      // Captured around the WHOLE load chain (script load + share-scope wiring
+      // + factory resolution) so `durationMs` reflects what the operator cares
+      // about (end-to-end latency to "this plugin is registered"). The clock
+      // is monotonic (`performance.now()` by default) so a wall-clock skew
+      // can never produce a negative duration. Defense-in-depth: a misbehaving
+      // injected `now()` could; if it does, we clamp to 0 below.
+      const start = deps.now();
+      try {
+        // Pass the registry `integrity` (when present) so the remoteEntry <script>
+        // is integrity-checked by the browser (Phase 12, Story 2). An override
+        // descriptor has no integrity (its bytes differ from the registry build),
+        // so it loads without SRI — see resolve() / load_remote.loadScript().
+        const container = await deps.loadRemoteContainer(
+          descriptor.remoteEntry,
+          descriptor.scope,
+          descriptor.integrity
+        );
+        const factory = await deps.getRemoteModuleFactory(container, shareScope, descriptor.module);
+        deps.registerPluginFactory(id, factory);
+        // SUCCESS. Emit (non-blocking) BEFORE returning. version is taken from
+        // the registry/manifest so it survives compat-strip / boot-manifest
+        // projection unchanged. The caller (Promise.allSettled) sees the
+        // resolution, the existing flow continues unchanged.
+        fireTelemetry({
+          id,
+          version: registry.mfes[id]?.version ?? '',
+          status: 'success',
+          durationMs: Math.max(0, deps.now() - start),
+        });
+      } catch (error) {
+        // FAILURE. Classify against descriptor.integrity so a load error on an
+        // SRI-protected remote is `sri-mismatch` (Phase 12 fail-closed semantics:
+        // the browser does not distinguish "tampered" from "unfetchable" once an
+        // integrity claim is set, and we defer to the integrity-bearing label).
+        // Emit BEFORE re-throw so the existing failure-routing block (Phase 4
+        // graceful degradation / Phase 12 fail-closed) sees the event already
+        // dispatched. Re-throw so Promise.allSettled records `rejected` and the
+        // existing per-remote disable / page-block decision runs unchanged.
+        fireTelemetry({
+          id,
+          version: registry.mfes[id]?.version ?? '',
+          status: 'failure',
+          durationMs: Math.max(0, deps.now() - start),
+          errorClass: classifyLoadError(error, descriptor.integrity !== undefined),
+        });
+        throw error;
+      }
     })
   );
 

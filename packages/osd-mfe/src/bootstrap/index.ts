@@ -63,6 +63,17 @@ export {
 } from './chunk_error_surface';
 export type { ChunkErrorDetail, ChunkErrorSurfaceDeps } from './chunk_error_surface';
 
+export { createTelemetryDispatcher } from './telemetry';
+export type {
+  CreateTelemetryDispatcherDeps,
+  MfeLoadTelemetryEvent,
+  MfeLoadTelemetryInput,
+  TelemetryDispatcher,
+  TelemetryDispatcherConfig,
+  TelemetryErrorClass,
+  TelemetryStatus,
+} from './telemetry';
+
 export {
   OVERRIDE_STORAGE_KEY,
   parseQueryOverrides,
