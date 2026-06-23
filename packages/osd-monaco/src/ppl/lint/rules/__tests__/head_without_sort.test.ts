@@ -18,4 +18,16 @@ describe('head-without-sort (compiled surface)', () => {
     expect(ids('search source=logs | sort age | head 5')).not.toContain('head-without-sort'));
   it('flags a head when sort appears only after it', () =>
     expect(ids('search source=logs | head 5 | sort age')).toContain('head-without-sort'));
+  it('flags head after an order-destroying command even if sort appeared earlier', () =>
+    expect(ids('search source=logs | sort age | stats count() | head 5')).toContain(
+      'head-without-sort'
+    ));
+  it('does not flag head after sort followed by order-preserving commands', () =>
+    expect(ids('search source=logs | sort age | eval x=1 | where x>0 | head 5')).not.toContain(
+      'head-without-sort'
+    ));
+  it('flags the second head when stats appears between two heads after a sort', () =>
+    expect(ids('search source=logs | sort age | head 5 | stats count() | head 10')).toContain(
+      'head-without-sort'
+    ));
 });

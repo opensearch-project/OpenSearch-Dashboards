@@ -62,6 +62,23 @@ describe('version_filter appliesTo', () => {
     });
   });
 
+  describe('non-coerceable version', () => {
+    it('respects maxVersion via unknown-version policy', () => {
+      const rule = makeRule({ appliesTo: { maxVersion: '3.5.0' } });
+      expect(appliesTo(rule, 'main', undefined, '3.7.0')).toBe(false);
+    });
+
+    it('self-suppresses a calcite error rule', () => {
+      const rule = makeRule({ severity: 'error', appliesTo: { engine: 'calcite' } });
+      expect(appliesTo(rule, 'nightly', undefined)).toBe(false);
+    });
+
+    it('runs a plain rule without version constraints', () => {
+      const rule = makeRule({ appliesTo: {} });
+      expect(appliesTo(rule, 'main', undefined)).toBe(true);
+    });
+  });
+
   describe('undefined version policy', () => {
     it('runs a minVersion-only no-engine rule', () => {
       const rule = makeRule({ appliesTo: { minVersion: '3.4.0' } });

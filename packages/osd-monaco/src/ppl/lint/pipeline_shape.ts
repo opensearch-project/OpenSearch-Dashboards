@@ -77,7 +77,7 @@ function collectCreatedFields(
       continue;
     }
     const children = node.children ?? [];
-    for (let i = 0; i < children.length; i++) {
+    for (let i = 0; i < children.length - 1; i++) {
       const child = children[i];
       if (isTerminalNode(child) && child.getText().toLowerCase() === 'as') {
         const next = children[i + 1];

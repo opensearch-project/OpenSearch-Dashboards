@@ -9,6 +9,22 @@ import { Detector } from '../types';
 import { buildPipelineShape, collectAlternateSourceSubtrees } from '../pipeline_shape';
 import { rangeFromContext } from '../range_utils';
 
+const ORDER_PRESERVING_COMMANDS = new Set([
+  'evalCommand',
+  'whereCommand',
+  'fieldsCommand',
+  'headCommand',
+  'parseCommand',
+  'grokCommand',
+  'rexCommand',
+  'spathCommand',
+  'fillnullCommand',
+  'expandCommand',
+  'flattenCommand',
+  'patternsCommand',
+  'renameCommand',
+]);
+
 export const headWithoutSortDetector: Detector = (tree, config, _context, ruleNameToIndex) => {
   const diagnostics: Diagnostic[] = [];
   const { stages } = buildPipelineShape(tree, ruleNameToIndex);
@@ -32,6 +48,9 @@ export const headWithoutSortDetector: Detector = (tree, config, _context, ruleNa
     if (stage.command === 'sortCommand') {
       sawSort = true;
       continue;
+    }
+    if (sawSort && !ORDER_PRESERVING_COMMANDS.has(stage.command)) {
+      sawSort = false;
     }
     if (stage.command === 'headCommand') {
       if (!sawSort) {

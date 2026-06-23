@@ -248,7 +248,10 @@ const processLintHighlighting = (model: monaco.editor.IModel): void => {
       setModelHoverFacts(model, hoverFacts);
       monaco.editor.setModelMarkers(model, LINT_OWNER, markers);
     })
-    .catch(() => {});
+    .catch((e) => {
+      // eslint-disable-next-line no-console
+      if (e) console.warn('[ppl-lint] lint pipeline error:', e);
+    });
 };
 
 const scheduleLintHighlighting = (model: monaco.editor.IModel): void => {
@@ -327,6 +330,7 @@ const setupPPLSyntaxHighlighting = () => {
   return () => {
     lintDebounceTimers.forEach(clearTimeout);
     lintDebounceTimers.clear();
+    lintGenerations.clear();
     disposables.forEach((d) => d.dispose());
     pplWorkerProxyService.stop();
   };

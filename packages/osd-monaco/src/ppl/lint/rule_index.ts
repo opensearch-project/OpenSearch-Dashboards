@@ -114,14 +114,15 @@ export function collectDottedPathNodes(
   ctx: ParserRuleContext,
   ruleNameToIndex: RuleNameToIndex
 ): ParserRuleContext[] {
-  const seen = new Set<number>();
+  const seen = new Set<number | string>();
+  let fallbackId = 0;
   const result: ParserRuleContext[] = [];
   for (const ruleName of DOTTED_PATH_RULES) {
     for (const node of findAllDescendantsByRule(ctx, ruleNameToIndex, ruleName)) {
       if (node.getText().indexOf('.') === -1) {
         continue;
       }
-      const startIndex = node.start?.start ?? -1;
+      const startIndex: number | string = node.start?.start ?? `__null_${fallbackId++}`;
       if (seen.has(startIndex)) {
         continue;
       }

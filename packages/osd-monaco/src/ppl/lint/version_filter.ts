@@ -41,7 +41,7 @@ export function appliesTo(
 
   const coercedVersion = coerce(dataSourceVersion);
   if (!coercedVersion) {
-    return !isCalciteGated;
+    return appliesTo(rule, undefined, isCalcite, knownVersion);
   }
 
   if (isCalciteGated && isCalcite !== true) {
