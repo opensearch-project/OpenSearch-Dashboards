@@ -15,10 +15,10 @@ jobs:
     
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
     - name: Setup Node
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
       with:
         node-version-file: '.nvmrc'
         registry-url: 'https://registry.npmjs.org'
@@ -75,7 +75,7 @@ jobs:
         echo "Target branch: $TARGET_BRANCH"
 
     - name: Checkout target branch
-      uses: actions/checkout@v4
+      uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       with:
         ref: "${{ steps.parse_tag.outputs.target_branch }}"
 
@@ -97,7 +97,7 @@ jobs:
         echo "Updated package.json version to $NEXT_VERSION"
 
     - name: Create PR for target branch
-      uses: peter-evans/create-pull-request@v7
+      uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7
       with:
         base: ${{ env.BASE_BRANCH }}
         branch: 'create-pull-request/patch-${{ env.BASE_BRANCH }}'
