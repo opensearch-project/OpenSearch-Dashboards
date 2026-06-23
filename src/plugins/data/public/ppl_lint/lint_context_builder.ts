@@ -1,0 +1,32 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { IUiSettingsClient } from 'opensearch-dashboards/public';
+import { PPLLintContext } from '@osd/monaco';
+import { HttpSetup } from '../../../../core/public';
+import { shouldUseRuntimeGrammar } from '../antlr/opensearch_ppl/ppl_grammar_cache';
+import { buildOverridesFromSettings } from './lint_overrides';
+
+/** Dataset fields the lint context reads; structural so either editor host's dataset shape satisfies it. */
+interface LintContextDataset {
+  id?: string;
+  dataSource?: { id?: string; version?: string };
+}
+
+/** Build the {@link PPLLintContext} for the active dataset and per-rule overrides. */
+export function buildPPLLintContext(
+  dataset: LintContextDataset | undefined,
+  services: { uiSettings: IUiSettingsClient; http: HttpSetup }
+): PPLLintContext {
+  const dsId = dataset?.dataSource?.id;
+  const dsVersion = dataset?.dataSource?.version;
+  return {
+    useRuntimeGrammar: shouldUseRuntimeGrammar(dsId, dsVersion),
+    dataSourceId: dsId,
+    dataSourceVersion: dsVersion,
+    overrides: buildOverridesFromSettings(services.uiSettings),
+    http: services.http,
+  };
+}

@@ -117,6 +117,7 @@ export const UI_SETTINGS = {
   FILTERS_EDITOR_SUGGEST_VALUES: 'filterEditor:suggestValues',
   QUERY_ENHANCEMENTS_ENABLED: 'query:enhancements:enabled',
   QUERY_ENHANCEMENTS_RUNTIME_PPL_GRAMMAR: 'query:enhancements:runtimePplGrammar',
+  QUERY_ENHANCEMENTS_PPL_LINT_RULE_PREFIX: 'query:enhancements:pplLint:rule:',
   QUERY_ENHANCEMENTS_SUGGEST_VALUES: 'query:enhancements:suggestValues',
   QUERY_ENHANCEMENTS_SUGGEST_VALUES_LIMIT: 'query:enhancements:suggestValuesLimit',
   QUERY_DATAFRAME_HYDRATION_STRATEGY: 'query:dataframe:hydrationStrategy',

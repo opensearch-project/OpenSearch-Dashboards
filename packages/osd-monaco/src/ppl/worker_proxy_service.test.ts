@@ -129,6 +129,38 @@ describe('PPLWorkerProxyService', () => {
     });
   });
 
+  describe('lint', () => {
+    it('should throw error if setup not called', async () => {
+      await expect(service.lint('test')).rejects.toThrow('has not been setup');
+    });
+
+    it('forwards content and overrides to the worker over postMessage', async () => {
+      service.setup();
+
+      const overrides = { 'head-without-sort': { enabled: false } };
+      const lintPromise = service.lint('source=logs | head 5', overrides);
+
+      const messageData = mockWorker.postMessage.mock.calls[0][0];
+      expect(messageData.method).toBe('lint');
+      expect(messageData.args).toEqual(['source=logs | head 5', overrides]);
+
+      mockWorker.onmessage({ data: { id: messageData.id, result: { diagnostics: [] } } });
+      await expect(lintPromise).resolves.toEqual({ diagnostics: [] });
+    });
+
+    it('omits overrides (undefined) when none are supplied', async () => {
+      service.setup();
+
+      const lintPromise = service.lint('source=logs');
+
+      const messageData = mockWorker.postMessage.mock.calls[0][0];
+      expect(messageData.args).toEqual(['source=logs', undefined]);
+
+      mockWorker.onmessage({ data: { id: messageData.id, result: { diagnostics: [] } } });
+      await expect(lintPromise).resolves.toEqual({ diagnostics: [] });
+    });
+  });
+
   describe('stop', () => {
     it('should clean up worker resources', async () => {
       service.setup();

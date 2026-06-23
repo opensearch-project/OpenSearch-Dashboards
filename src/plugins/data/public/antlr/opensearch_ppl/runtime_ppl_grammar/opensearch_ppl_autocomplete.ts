@@ -30,6 +30,14 @@ import { pplGrammarCache, CachedGrammar } from '../ppl_grammar_cache';
 import { findCursorTokenIndex } from '../../shared/cursor';
 import { GeneralErrorListener } from '../../shared/general_error_listerner';
 import { quotesRegex } from '../../shared/constants';
+import {
+  resolveSpaceToken,
+  tokenTypeBySymbolic,
+  getRuleIndex as ruleIndex,
+  pickStartRuleIndex as pickRuntimeStartRuleIndex,
+} from '../runtime_grammar_utils';
+
+export { resolveSpaceToken };
 
 interface KeywordSuggestionDetails {
   importance: string;
@@ -130,10 +138,8 @@ interface C3FollowSetsCacheContainer {
 }
 
 /**
- * Access the internal follow-set cache from antlr4-c3's CodeCompletionCore.
- * This depends on the private `followSetsByATN` static field — if the library
- * changes its internal storage, this will safely return null (no crash, just
- * no cache isolation). Keep a focused regression test around this dependency.
+ * Access the private `followSetsByATN` cache from CodeCompletionCore.
+ * Returns null safely if the library changes its internal storage.
  */
 function getC3FollowSetsCache(): Map<string, unknown> | null {
   const maybeCache = ((CodeCompletionCore as unknown) as C3FollowSetsCacheContainer)
@@ -284,26 +290,6 @@ export function isRuntimeNoisySuggestion(sk: KeywordSuggestion): boolean {
 }
 
 /**
- * Resolve the whitespace token type from the grammar.
- * Tries WHITESPACE, SPACE, and WS in order (backend vs compiled naming).
- */
-export function resolveSpaceToken(grammar: CachedGrammar): number {
-  const dict = grammar.tokenDictionary as any;
-  const v = dict?.WHITESPACE ?? dict?.SPACE;
-  if (typeof v === 'number' && v > Token.INVALID_TYPE) return v;
-
-  // Fallback for bundles that omit tokenDictionary or use symbolic names only.
-  const WHITESPACE = tokenTypeBySymbolic(grammar, 'WHITESPACE');
-  if (WHITESPACE > Token.INVALID_TYPE) return WHITESPACE;
-  const SPACE = tokenTypeBySymbolic(grammar, 'SPACE');
-  if (SPACE > Token.INVALID_TYPE) return SPACE;
-  const WS = tokenTypeBySymbolic(grammar, 'WS');
-  if (WS > Token.INVALID_TYPE) return WS;
-
-  return Token.INVALID_TYPE;
-}
-
-/**
  * Filter backend ignoredTokens to keep only non-literal token IDs,
  * ensuring keywords/operators are never accidentally suppressed.
  */
@@ -319,14 +305,6 @@ export function getSafeRuntimeIgnoredTokens(grammar: CachedGrammar): Set<number>
   }
 
   return safe;
-}
-
-function ruleIndex(grammar: CachedGrammar, name: string): number {
-  return grammar.runtimeRuleNameToIndex.get(name) ?? INVALID_RULE_INDEX;
-}
-
-function tokenTypeBySymbolic(grammar: CachedGrammar, symName: string): number {
-  return grammar.runtimeSymbolicNameToTokenType.get(symName) ?? Token.INVALID_TYPE;
 }
 
 /**
@@ -359,44 +337,15 @@ class RuntimeCompletionContext extends ParserRuleContext {
   }
 }
 
-/**
- * Pick the start rule for C3/parsing based on query shape.
- * Pipe-first queries (`|...`) use `commands` (or backend-provided pipeStartRuleIndex)
- * so pipeline commands become reachable. Normal queries use the root rule.
- * `commands` is preferred over `subPipeline` because the leading `|` is stripped
- * before lexing, and `commands` expects input after the pipe.
- */
+/** Start-rule selector for autocomplete; enables the subPipeline fallback that validation/lint omit. */
 export function pickStartRuleIndex(query: string, grammar: CachedGrammar): number {
-  const trimmed = query.trimStart();
-  if (trimmed.startsWith('|')) {
-    // Prefer backend-declared pipe start rule if available
-    const pipeStart = grammar.pipeStartRuleIndex;
-    if (typeof pipeStart === 'number' && pipeStart >= 0) return pipeStart;
-
-    // Fallback: resolve by rule name.
-    // Prefer `commands` first — it expects input after the pipe (strip-compatible).
-    // `subPipeline` may expect the leading pipe token itself, so it's secondary.
-    const commands = grammar.parserRuleNames.indexOf('commands');
-    if (commands >= 0) return commands;
-    const subPipeline = grammar.parserRuleNames.indexOf('subPipeline');
-    if (subPipeline >= 0) return subPipeline;
-  }
-  return grammar.startRuleIndex ?? 0;
+  return pickRuntimeStartRuleIndex(query, grammar, /* includeSubPipelineFallback */ true);
 }
 
 /**
- * C3 preferred rules: rules we want as rule candidates instead of exploding
- * into many token candidates. Three categories:
- *
- * 1. **Leaf concepts** — field/table/function/literal rules that commands compose.
- * 2. **Noise suppression** — rules whose children expand to hundreds of keywords
- *    (e.g. `searchableKeyWord`, `keywordsCanBeId`).
- * 3. **Structural rules** — rules that control completion scope (e.g. `searchCommand`).
- *
- * Missing names are silently skipped, so this stays compatible across grammar
- * versions as long as equivalent concepts keep the same rule names. New commands
- * that reuse these leaf rules get completion support automatically; commands
- * that introduce new structural rules may need additions here.
+ * Rules treated as atomic candidates by C3 instead of expanding into token lists.
+ * Missing names are silently skipped (grammar-version safe). New commands that
+ * introduce structural rules may need additions here.
  */
 const PREFERRED_RULE_NAMES: readonly string[] = [
   'qualifiedName',
@@ -668,7 +617,6 @@ export function enrichRuntimeResult(
 ): OpenSearchPplAutocompleteResult {
   const spaceToken = resolveSpaceToken(grammar);
 
-  // Resolve token types and rule indices by name
   const ID = resolveToken(grammar, 'ID', 'ID');
   const SOURCE = resolveToken(grammar, 'SOURCE', 'SOURCE');
   const PIPE = resolveToken(grammar, 'PIPE', 'PIPE');
@@ -860,7 +808,6 @@ export function enrichRuntimeResult(
     }
   }
 
-  // When context is `FIELD =` (e.g. `rex field =`), force column suggestions.
   const lastToken = findLastNonSpaceTokenRT(tokenStream, cursorTokenIndex, spaceToken);
   if (lastToken?.token.type === EQUAL) {
     const previousToken = findLastNonSpaceTokenRT(tokenStream, lastToken.index, spaceToken);
@@ -870,7 +817,6 @@ export function enrichRuntimeResult(
     }
   }
 
-  // Detect quote context
   const currentToken = tokenStream?.get(cursorTokenIndex);
   const isInBackQuote = currentToken?.type === BQUOTA;
   const isInQuote = currentToken?.type === DQUOTA || currentToken?.type === SQUOTA;

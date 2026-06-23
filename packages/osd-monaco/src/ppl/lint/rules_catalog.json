@@ -1,0 +1,20 @@
+[
+  {
+    "id": "head-without-sort",
+    "detector": "head-without-sort",
+    "enabled": true,
+    "severity": "info",
+    "message": "head without a preceding sort returns nondeterministic rows.",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/head/",
+    "appliesTo": {}
+  },
+  {
+    "id": "division-by-zero",
+    "detector": "division-by-zero",
+    "enabled": true,
+    "severity": "warning",
+    "message": "Division by literal zero evaluates to null rather than raising an error.",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/functions/expressions/#arithmetic-operators",
+    "appliesTo": {}
+  }
+]

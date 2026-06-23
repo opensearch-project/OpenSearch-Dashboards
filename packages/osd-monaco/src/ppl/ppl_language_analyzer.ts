@@ -9,6 +9,11 @@ import {
   SimplifiedOpenSearchPPLParser as OpenSearchPPLParser,
 } from '@osd/antlr-grammar';
 import { PPLSyntaxErrorListener, SyntaxError } from './ppl_error_listener';
+import { LintResult } from './lint/diagnostic';
+import { runLint } from './lint/lint_runner';
+import { createCompiledRuleNameToIndex } from './lint/rule_index';
+import { PIPE_FIRST_PREFIX, remapPipeFirstColumns } from './lint/range_utils';
+import { LintRunContext } from './lint/types';
 
 export interface PPLToken {
   type: string;
@@ -37,13 +42,6 @@ export interface PPLCompletionItem {
  * Uses ANTLR generated lexer and parser for accurate language processing
  */
 export class PPLLanguageAnalyzer {
-  constructor() {
-    // ANTLR-based language analyzer initialization
-  }
-
-  /**
-   * Creates and configures ANTLR lexer and token stream from input code
-   */
   private createLexerAndTokenStream(
     code: string
   ): { lexer: OpenSearchPPLLexer; tokenStream: antlr.CommonTokenStream } {
@@ -53,31 +51,16 @@ export class PPLLanguageAnalyzer {
     return { lexer, tokenStream };
   }
 
-  /**
-   * Creates and configures ANTLR parser with error listeners
-   */
   private createParserWithErrorHandling(
     tokenStream: antlr.CommonTokenStream
-  ): {
-    parser: OpenSearchPPLParser;
-    lexerErrorListener: PPLSyntaxErrorListener;
-    parserErrorListener: PPLSyntaxErrorListener;
-  } {
+  ): { parser: OpenSearchPPLParser; parserErrorListener: PPLSyntaxErrorListener } {
     const parser = new OpenSearchPPLParser(tokenStream);
-
-    // Set up error listeners
-    const lexerErrorListener = new PPLSyntaxErrorListener();
     const parserErrorListener = new PPLSyntaxErrorListener();
-
     parser.removeErrorListeners();
     parser.addErrorListener(parserErrorListener);
-
-    return { parser, lexerErrorListener, parserErrorListener };
+    return { parser, parserErrorListener };
   }
 
-  /**
-   * Tokenize PPL code into tokens using ANTLR lexer
-   */
   tokenize(code: string): PPLToken[] {
     const tokens: PPLToken[] = [];
 
@@ -107,9 +90,6 @@ export class PPLLanguageAnalyzer {
     return tokens;
   }
 
-  /**
-   * Validate PPL code using ANTLR parser
-   */
   validate(code: string): PPLValidationResult {
     try {
       const { lexer, tokenStream } = this.createLexerAndTokenStream(code);
@@ -123,20 +103,8 @@ export class PPLLanguageAnalyzer {
 
       parser.root();
 
-      // Collect all errors from both lexer and parser
       const allErrors = [...lexerErrorListener.errors, ...parserErrorListener.errors];
-
-      if (allErrors.length > 0) {
-        return {
-          isValid: false,
-          errors: allErrors,
-        };
-      }
-
-      return {
-        isValid: true,
-        errors: [],
-      };
+      return { isValid: allErrors.length === 0, errors: allErrors };
     } catch (error) {
       // Return parsing exception as error
       return {
@@ -154,35 +122,45 @@ export class PPLLanguageAnalyzer {
     }
   }
 
-  /**
-   * Get token type name from ANTLR token type
-   */
+  lint(code: string, context?: LintRunContext): LintResult {
+    try {
+      const trimmed = code.trimStart();
+      const isPipeFirst = trimmed.startsWith('|');
+      const effectiveCode = isPipeFirst ? PIPE_FIRST_PREFIX + code : code;
+
+      const { tokenStream } = this.createLexerAndTokenStream(effectiveCode);
+      const { parser } = this.createParserWithErrorHandling(tokenStream);
+      const tree = parser.root();
+
+      const diagnostics = runLint(tree, {
+        ruleNameToIndex: createCompiledRuleNameToIndex(),
+        dataSourceVersion: context?.dataSourceVersion,
+        // Declare the surface so the field-slot shape pass defers here (on the
+        // simplified grammar `grok field=body` is already a syntax error).
+        context: { ...context, grammarSurface: 'compiled-simplified' },
+      });
+
+      if (isPipeFirst) {
+        return { diagnostics: remapPipeFirstColumns(diagnostics) };
+      }
+
+      return { diagnostics };
+    } catch {
+      return { diagnostics: [] };
+    }
+  }
+
   private getTokenTypeName(tokenType: number, lexer: OpenSearchPPLLexer): string {
-    const vocabulary = lexer.vocabulary;
-    const symbolicName = vocabulary.getSymbolicName(tokenType);
-
-    if (symbolicName) {
-      return symbolicName.toLowerCase();
-    }
-
-    const literalName = vocabulary.getLiteralName(tokenType);
-    if (literalName) {
-      return literalName.replace(/['"]/g, '');
-    }
-
+    const symbolic = lexer.vocabulary.getSymbolicName(tokenType);
+    if (symbolic) return symbolic.toLowerCase();
+    const literal = lexer.vocabulary.getLiteralName(tokenType);
+    if (literal) return literal.replace(/['"]/g, '');
     return 'unknown';
   }
 }
 
-/**
- * Singleton instance of PPL Language Analyzer
- * Provides a shared instance for efficient memory usage across the application
- */
 let pplLanguageAnalyzerInstance: PPLLanguageAnalyzer | null = null;
 
-/**
- * Get or create the singleton instance of PPL Language Analyzer
- */
 export const getPPLLanguageAnalyzer = (): PPLLanguageAnalyzer => {
   if (!pplLanguageAnalyzerInstance) {
     pplLanguageAnalyzerInstance = new PPLLanguageAnalyzer();

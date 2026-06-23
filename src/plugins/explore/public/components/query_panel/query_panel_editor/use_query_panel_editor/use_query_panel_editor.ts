@@ -4,7 +4,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { monaco, PPLValidationContext, revalidatePPLModel } from '@osd/monaco';
+import { monaco, PPLValidationContext, PPLLintContext, revalidatePPLModel } from '@osd/monaco';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@osd/i18n';
 import { DEFAULT_DATA } from '../../../../../../data/common';
@@ -36,11 +36,15 @@ import { EditorMode } from '../../../../application/utils/state_management/types
 import { useMultiQueryDecorations } from './use_multi_query_decorations';
 import { getAutocompleteContext } from '../../../../application/utils/multi_query_utils';
 import {
-  attachPPLValidationContext,
-  attachPPLGrammarRefresh,
   syncPPLValidationContext,
+  syncPPLLintContext,
+  attachPPLContexts,
+  cleanupPPLContexts,
+  PPLDetachRefs,
+  buildPPLLintContext,
   pplGrammarCache,
   shouldUseRuntimeGrammar,
+  UI_SETTINGS,
 } from '../../../../../../data/public';
 
 type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
@@ -114,19 +118,32 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
   const queryLanguageRef = useRef(queryLanguage);
   const isQueryEditorDirty = useSelector(selectIsQueryEditorDirty);
   const dataset = useSelector(selectDataset);
-  const detachValidationContextRef = useRef<(() => void) | undefined>();
-  const detachGrammarRefreshRef = useRef<(() => void) | undefined>();
+  // Ref so grammar-refresh closures always see the latest dataset.
+  const datasetRef = useRef(dataset);
+  const detachRefs = useRef<PPLDetachRefs>({
+    validationContext: { current: undefined },
+    grammarRefresh: { current: undefined },
+    lintContext: { current: undefined },
+    lintGrammarRefresh: { current: undefined },
+  });
 
   const getValidationContext = useCallback((): PPLValidationContext => {
-    const currentQuery = queryString.getQuery();
-    const dsId = currentQuery.dataset?.dataSource?.id;
-    const dsVersion = currentQuery.dataset?.dataSource?.version;
+    const ds = datasetRef.current;
+    const dsId = ds?.dataSource?.id;
+    const dsVersion = ds?.dataSource?.version;
     return {
       useRuntimeGrammar: shouldUseRuntimeGrammar(dsId, dsVersion),
       dataSourceId: dsId,
       dataSourceVersion: dsVersion,
     };
-  }, [queryString]);
+  }, []);
+
+  const getLintContext = useCallback(
+    (): PPLLintContext => buildPPLLintContext(datasetRef.current, services),
+    // buildPPLLintContext only reads services.uiSettings and services.http.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [services.uiSettings, services.http]
+  );
 
   const switchEditorMode = useLanguageSwitch();
 
@@ -143,6 +160,9 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
   useEffect(() => {
     queryLanguageRef.current = queryLanguage;
   }, [queryLanguage]);
+  useEffect(() => {
+    datasetRef.current = dataset;
+  }, [dataset]);
 
   // Sync editor text when Redux query string changes externally (e.g., language switch)
   useEffect(() => {
@@ -169,16 +189,44 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
     }
   }, [dataset?.dataSource?.id, dataset?.dataSource?.version, editorRef]);
 
-  // Cleanup validation context on unmount
-  useEffect(
-    () => () => {
-      detachValidationContextRef.current?.();
-      detachValidationContextRef.current = undefined;
-      detachGrammarRefreshRef.current?.();
-      detachGrammarRefreshRef.current = undefined;
-    },
-    []
-  );
+  // Refresh the lint context when the active dataset changes so useRuntimeGrammar
+  // and the data-source id stay in step, then revalidate the current model.
+  // Mirrors the data plugin's query editor wiring so lint behaves the same on
+  // every editor.
+  useEffect(() => {
+    syncPPLLintContext(editorRef.current, getLintContext());
+    const model = editorRef.current?.getModel();
+    if (model) {
+      void revalidatePPLModel(model);
+    }
+  }, [
+    dataset?.id,
+    dataset?.dataSource?.id,
+    dataset?.dataSource?.version,
+    editorRef,
+    getLintContext,
+  ]);
+
+  // Cleanup validation + lint context on unmount
+  useEffect(() => () => cleanupPPLContexts(detachRefs.current), []);
+
+  // Live-revalidate when a PPL lint rule setting changes in Advanced Settings.
+  // Without this, disabling a noisy rule leaves its squiggles up until the next
+  // keystroke fires the debounce (mirrors caller A in data's query_editor.tsx).
+  useEffect(() => {
+    const subscription = services.uiSettings.getUpdate$().subscribe(({ key }) => {
+      if (!key.startsWith(UI_SETTINGS.QUERY_ENHANCEMENTS_PPL_LINT_RULE_PREFIX)) {
+        return;
+      }
+      syncPPLLintContext(editorRef.current, getLintContext());
+      const model = editorRef.current?.getModel();
+      if (model) {
+        void revalidatePPLModel(model);
+      }
+    });
+    return () => subscription.unsubscribe();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [services.uiSettings]);
 
   const focusExploreQueryBar = useCallback(() => {
     editorRef.current?.focus();
@@ -332,13 +380,15 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
     (editor: IStandaloneCodeEditor) => {
       setEditorRef(editor);
 
-      // Attach PPL runtime validation context
-      detachValidationContextRef.current?.();
-      detachGrammarRefreshRef.current?.();
-      detachValidationContextRef.current = attachPPLValidationContext(editor, getValidationContext);
-      detachGrammarRefreshRef.current = attachPPLGrammarRefresh(
+      // Attach the PPL runtime validation + lint contexts (field-aware lint
+      // rules self-suppress without field metadata, which the dataset effect
+      // loads) so lint behaves here just as it does in the data plugin's query
+      // editor. Shared with that editor via attachPPLContexts.
+      attachPPLContexts(
         editor,
+        detachRefs.current,
         getValidationContext,
+        getLintContext,
         (listener) => pplGrammarCache.subscribeToGrammarUpdates(listener),
         revalidatePPLModel
       );
@@ -440,6 +490,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
       updateDecorations,
       clearDecorations,
       getValidationContext,
+      getLintContext,
     ]
   );
 

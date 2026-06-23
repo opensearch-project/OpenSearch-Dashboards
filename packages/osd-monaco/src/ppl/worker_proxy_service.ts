@@ -4,20 +4,16 @@
  */
 
 import { PPLValidationResult, PPLToken } from './ppl_language_analyzer';
+import { LintResult } from './lint/diagnostic';
+import { BundleRuleOverrides } from './lint/types';
 import { getWorker } from '../monaco_environment';
 import { WorkerLabels } from '../worker_config';
 
-/**
- * Simple worker proxy that communicates with PPL worker
- */
 export class PPLWorkerProxyService {
   private worker: Worker | undefined;
   private messageId = 0;
   private pendingMessages = new Map<number, { resolve: Function; reject: Function }>();
 
-  /**
-   * Set up the worker
-   */
   public setup() {
     if (this.worker) {
       return; // Already set up
@@ -51,31 +47,18 @@ export class PPLWorkerProxyService {
     };
   }
 
-  /**
-   * Tokenize PPL content
-   */
   public async tokenize(content: string): Promise<PPLToken[]> {
-    if (!this.worker) {
-      throw new Error('PPL Worker Proxy Service has not been setup!');
-    }
-
     return this.sendMessage('tokenize', [content]);
   }
 
-  /**
-   * Validate PPL content and get error markers
-   */
   public async validate(content: string): Promise<PPLValidationResult> {
-    if (!this.worker) {
-      throw new Error('PPL Worker Proxy Service has not been setup!');
-    }
-
     return this.sendMessage('validate', [content]);
   }
 
-  /**
-   * Stop the worker
-   */
+  public async lint(content: string, overrides?: BundleRuleOverrides): Promise<LintResult> {
+    return this.sendMessage('lint', [content, overrides]);
+  }
+
   public stop() {
     if (this.worker) {
       this.worker.terminate();
@@ -84,13 +67,10 @@ export class PPLWorkerProxyService {
     this.pendingMessages.clear();
   }
 
-  /**
-   * Send a message to the worker and wait for response
-   */
   private sendMessage(method: string, args: any[]): Promise<any> {
     return new Promise((resolve, reject) => {
       if (!this.worker) {
-        reject(new Error('Worker not available'));
+        reject(new Error('PPL Worker Proxy Service has not been setup!'));
         return;
       }
 

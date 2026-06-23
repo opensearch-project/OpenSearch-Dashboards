@@ -1,0 +1,18 @@
+{
+  "_comment": "Pinned per-rule doc-link metadata. Tier-1 (doc_links.test.ts, offline, always-on) asserts catalog<->snapshot parity, no legacy URL, and URL-shape/specificity invariants. Tier-2 (doc_links.live.test.ts, env-gated) additionally fetches `page` and checks liveness + `anchor`. `quality`: exact|close|weak|gap. `gap` rules are listed in `expectedUnpublished` and intentionally point at a page root until upstream publishes the page. `excerpt`/`contentHash` are filled by scripts/capture_doc_snapshot.ts once the live tier is wired; absent here.",
+  "expectedUnpublished": [],
+  "rules": {
+    "head-without-sort": {
+      "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/head/",
+      "page": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/head/",
+      "anchor": "",
+      "quality": "weak"
+    },
+    "division-by-zero": {
+      "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/functions/expressions/#arithmetic-operators",
+      "page": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/functions/expressions/",
+      "anchor": "arithmetic-operators",
+      "quality": "close"
+    }
+  }
+}
