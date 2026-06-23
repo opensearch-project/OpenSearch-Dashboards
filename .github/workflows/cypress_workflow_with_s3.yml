@@ -52,10 +52,10 @@ jobs:
     name: Run cypress tests (osd:ciGroup10)
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@ee0669bd1cc54295c223e0bb666b733df41de1c5 # v2
 
       - name: Setup Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@7c12f8017d5436eb855f1ed4399f037a36fbd9e8 # v2
         with:
           node-version-file: '.nvmrc'
           registry-url: 'https://registry.npmjs.org'
@@ -72,7 +72,7 @@ jobs:
         run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 12
 
       - name: Checkout FT repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@ee0669bd1cc54295c223e0bb666b733df41de1c5 # v2
         with:
           path: ${{ env.FTR_PATH }}
           repository: ${{ env.TEST_REPO }}
@@ -87,7 +87,7 @@ jobs:
           echo "DASHBOARDS_SPEC=${DASHBOARDS_SPEC}"
 
       - name: Download OpenSearch
-        uses: suisei-cn/actions-download-file@v1.4.0
+        uses: suisei-cn/actions-download-file@15306412d2c75df56b46844362b86b65235b7db1 # v1.4.0
         with:
           url: https://artifacts.opensearch.org/releases/bundle/opensearch/${{ env.LATEST_VERSION }}/opensearch-${{ env.LATEST_VERSION }}-linux-x64.tar.gz
 
@@ -112,7 +112,7 @@ jobs:
         run: npx cypress cache clear
 
       - name: Run Dashboards Cypress tests with query enhancements
-        uses: cypress-io/github-action@v6
+        uses: cypress-io/github-action@f790eee7a50d9505912f50c2095510be7de06aa7 # v6
         env:
           S3_CONNECTION_URL: ${{ secrets.S3_CONNECTION_URL }}
           S3_CONNECTION_USERNAME: ${{ secrets.S3_CONNECTION_USERNAME }}
@@ -125,14 +125,14 @@ jobs:
 
       - name: Upload Dashboards screenshots
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: dashboards-cypress-screenshots-10
           path: cypress/screenshots
           retention-days: 1
 
       - name: Upload Dashboards repo videos
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
         with:
           name: dashboards-cypress-videos-10
@@ -140,7 +140,7 @@ jobs:
           retention-days: 1
 
       - name: Upload Dashboards repo results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
         with:
           name: dashboards-cypress-results-10

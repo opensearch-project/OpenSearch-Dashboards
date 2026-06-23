@@ -13,9 +13,9 @@ jobs:
   linkchecker:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - name: Lychee Link Checker
-        uses: lycheeverse/lychee-action@v1
+        uses: lycheeverse/lychee-action@2b973e86fc7b1f6b36a93795fe2c9c6ae1118621 # v1
         with:
           fail: true
           args: --accept=200,403,429 --base . --retry-wait-time=15 --max-retries=5 --exclude-path cypress/fixtures "**/*.html" "**/*.md" "**/*.txt" "**/*.json" "**/*.js" "**/*.ts" "**/*.tsx"

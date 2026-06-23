@@ -14,9 +14,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - name: Parse changelog entries and submit request for changset creation
-        uses: BigSamu/OpenSearch_Changelog_Workflow@1.0.0-alpha1
+        uses: BigSamu/OpenSearch_Changelog_Workflow@876b13d8d58b18b130b47c86e437291b284de212 # 1.0.0-alpha1
         with:
           token: ${{secrets.GITHUB_TOKEN}}
           CHANGELOG_PR_BRIDGE_URL_DOMAIN: ${{secrets.CHANGELOG_PR_BRIDGE_URL_DOMAIN}}
