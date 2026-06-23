@@ -143,23 +143,32 @@ const ViewDatasetsModal: React.FC<ViewDatasetsModalProps> = ({
   const datasetService = queryString.getDatasetService();
 
   const filteredDatasets = useMemo(() => {
-    if (!searchQuery) return datasets;
     const lowerSearch = searchQuery.toLowerCase();
-    return datasets.filter((dataset) => {
-      const displayName = (dataset.displayName || dataset.title).toLowerCase();
-      const description = dataset.description?.toLowerCase() || '';
-      const signalType = dataset.signalType?.toLowerCase() || '';
-      const dataSourceName = dataset.dataSource?.title?.toLowerCase() || 'local cluster';
-      const indexPattern = dataset.title.toLowerCase();
+    const matched = searchQuery
+      ? datasets.filter((dataset) => {
+          const displayName = (dataset.displayName || dataset.title).toLowerCase();
+          const description = dataset.description?.toLowerCase() || '';
+          const signalType = dataset.signalType?.toLowerCase() || '';
+          const dataSourceName = dataset.dataSource?.title?.toLowerCase() || 'local cluster';
+          const indexPattern = dataset.title.toLowerCase();
 
-      return (
-        displayName.includes(lowerSearch) ||
-        description.includes(lowerSearch) ||
-        signalType.includes(lowerSearch) ||
-        dataSourceName.includes(lowerSearch) ||
-        indexPattern.includes(lowerSearch)
-      );
-    });
+          return (
+            displayName.includes(lowerSearch) ||
+            description.includes(lowerSearch) ||
+            signalType.includes(lowerSearch) ||
+            dataSourceName.includes(lowerSearch) ||
+            indexPattern.includes(lowerSearch)
+          );
+        })
+      : datasets;
+
+    // Sort alphabetically by the displayed name (displayName || title).
+    // Copy first so we don't mutate the datasets prop.
+    return [...matched].sort((a, b) =>
+      (a.displayName || a.title).localeCompare(b.displayName || b.title, undefined, {
+        sensitivity: 'base',
+      })
+    );
   }, [datasets, searchQuery]);
 
   const handleDatasetClick = useCallback(
@@ -634,6 +643,9 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
       ) : undefined,
     };
   });
+
+  // Sort options alphabetically by their displayed label (displayName || title)
+  options.sort((a, b) => a.label.localeCompare(b.label, undefined, { sensitivity: 'base' }));
 
   const handleOptionChange = useCallback(
     async (newOptions: EuiSelectableOption[]) => {

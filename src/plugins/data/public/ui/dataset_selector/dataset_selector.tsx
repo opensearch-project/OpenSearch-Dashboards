@@ -132,26 +132,32 @@ export const DatasetSelector = ({
     const buildDatasetOptions = (
       groupLabel: string,
       ds: Dataset[],
-      selectedDatasetId: string | undefined
+      selectedDatasetId: string | undefined,
+      sort: boolean = false
     ): EuiSelectableOption[] => {
-      const datasetOptions: EuiSelectableOption[] = [
-        {
-          label: groupLabel,
-          isGroupLabel: true,
-        },
-      ];
-      ds.forEach(({ id, title, type, dataSource, displayName }) => {
-        const displayLabel = displayName || title;
-        const label = dataSource ? `${dataSource.title}::${displayLabel}` : displayLabel;
-        datasetOptions.push({
-          label,
-          checked: id === selectedDatasetId ? 'on' : undefined,
-          key: id,
-          prepend: <EuiIcon type={datasetService.getType(type)!.meta.icon.type} />,
-          'data-test-subj': `datasetSelectorOption-${id}`,
-        });
-      });
-      return datasetOptions.length > 1 ? datasetOptions : [];
+      const groupLabelOption: EuiSelectableOption = {
+        label: groupLabel,
+        isGroupLabel: true,
+      };
+      const datasetOptions: EuiSelectableOption[] = ds.map(
+        ({ id, title, type, dataSource, displayName }) => {
+          const displayLabel = displayName || title;
+          const label = dataSource ? `${dataSource.title}::${displayLabel}` : displayLabel;
+          return {
+            label,
+            checked: id === selectedDatasetId ? 'on' : undefined,
+            key: id,
+            prepend: <EuiIcon type={datasetService.getType(type)!.meta.icon.type} />,
+            'data-test-subj': `datasetSelectorOption-${id}`,
+          };
+        }
+      );
+      if (sort) {
+        datasetOptions.sort((a, b) =>
+          a.label.localeCompare(b.label, undefined, { sensitivity: 'base' })
+        );
+      }
+      return datasetOptions.length > 0 ? [groupLabelOption, ...datasetOptions] : [];
     };
     const recentDatasetOptions = buildDatasetOptions(
       i18n.translate('data.dataSelector.recentDatasetsGroupLabel', {
@@ -167,7 +173,8 @@ export const DatasetSelector = ({
       indexPatterns.filter(
         (dataset) => !recentDatasets.some((recentDataset) => recentDataset.id === dataset.id)
       ),
-      selectedDataset?.id
+      selectedDataset?.id,
+      true
     );
 
     return [...recentDatasetOptions, ...indexPatternOptions];

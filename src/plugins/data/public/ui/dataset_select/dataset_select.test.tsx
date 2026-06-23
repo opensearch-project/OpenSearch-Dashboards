@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 import { coreMock } from '../../../../../core/public/mocks';
 import { DataPublicPluginStart, IDataPluginServices } from '../..';
@@ -1113,6 +1113,67 @@ describe('DatasetSelect', () => {
 
       // Verify that the modal was opened
       expect(mockCore.overlays.openModal).toHaveBeenCalled();
+    });
+
+    it('renders ViewDatasetsModal rows sorted alphabetically by display name', async () => {
+      // Return datasets in non-alphabetical fetch order so sorting is observable
+      const displayNameById: Record<string, string> = {
+        'z-id': 'Zebra',
+        'a-id': 'Apple',
+        'm-id': 'Mango',
+      };
+      mockDataViews.getIds = jest.fn().mockResolvedValue(['z-id', 'a-id', 'm-id']);
+      mockDataViews.getMultiple = jest.fn().mockImplementation((ids) =>
+        Promise.resolve(
+          ids.map((id: string) => ({
+            id,
+            title: `title-${id}`,
+            displayName: displayNameById[id],
+            timeFieldName: '@timestamp',
+          }))
+        )
+      );
+      mockDataViews.convertToDataset = jest.fn().mockImplementation((dataView) =>
+        Promise.resolve({
+          id: dataView.id,
+          title: dataView.title,
+          type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+        })
+      );
+      mockDataViews.getDefault = jest.fn().mockResolvedValue(null);
+      mockQueryService.queryString.getQuery = jest.fn().mockReturnValue({ dataset: null });
+
+      renderWithContext();
+
+      await waitFor(() => {
+        expect(mockDataViews.getIds).toHaveBeenCalled();
+      });
+
+      fireEvent.click(screen.getByTestId('datasetSelectButton'));
+      await waitFor(() => {
+        expect(screen.getByTestId('datasetSelectViewDatasetsButton')).toBeInTheDocument();
+      });
+      fireEvent.click(screen.getByTestId('datasetSelectViewDatasetsButton'));
+
+      // The modal mounts via the overlays mount point rather than this render tree,
+      // so render the captured mount point into the DOM to inspect the table rows.
+      const mountPoint = (mockCore.overlays.openModal as jest.Mock).mock.calls[0][0];
+      const container = document.createElement('div');
+      document.body.appendChild(container);
+      await act(async () => {
+        mountPoint(container);
+      });
+
+      // EuiModal portals into document.body. The "Dataset" column renders the display
+      // name inside a <strong>, so the strongs reflect the rendered row order.
+      await waitFor(() => {
+        const names = Array.from(document.body.querySelectorAll('strong')).map(
+          (el) => el.textContent
+        );
+        expect(names).toEqual(['Apple', 'Mango', 'Zebra']);
+      });
+
+      document.body.removeChild(container);
     });
   });
 
