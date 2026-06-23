@@ -112,9 +112,7 @@ const TableRowUI = ({
               key={colName}
               data-test-subj="docTableField"
               className={`osdDocTableCell ${
-                fieldInfo?.type === 'date'
-                  ? 'eui-textNoWrap'
-                  : 'eui-textBreakAll eui-textBreakWord'
+                fieldInfo?.type === 'date' ? 'eui-textNoWrap' : 'eui-textBreakAll eui-textBreakWord'
               }`}
             >
               <div className="truncate-by-height">
