@@ -18,7 +18,7 @@ const PPL_LINT_RULE_DEFAULTS: ReadonlyArray<{
   { id: 'division-by-zero', enabled: true, severity: 'warning' },
 ];
 
-/** Build per-rule uiSettings keys. Adds WORKSPACE scope when the workspace feature is on. */
+/** Build PPL lint rule uiSettings. Adds WORKSPACE scope when the workspace feature is on. */
 export function getPplLintRuleSettings(
   workspaceEnabled: boolean
 ): Record<string, UiSettingsParams<unknown>> {
@@ -26,24 +26,35 @@ export function getPplLintRuleSettings(
     ? [UiSettingScope.USER, UiSettingScope.WORKSPACE, UiSettingScope.GLOBAL]
     : [UiSettingScope.USER, UiSettingScope.GLOBAL];
 
-  return Object.fromEntries(
-    PPL_LINT_RULE_DEFAULTS.map((rule) => [
-      `${UI_SETTINGS.QUERY_ENHANCEMENTS_PPL_LINT_RULE_PREFIX}${rule.id}`,
-      {
-        name: `PPL linter rule: ${rule.id}`,
-        value: { enabled: rule.enabled, severity: rule.severity },
-        description: `Enable/disable and set the severity for the "${rule.id}" PPL lint rule.`,
-        category: ['search'],
-        scope,
-        schema: schema.object({
+  return {
+    [UI_SETTINGS.QUERY_ENHANCEMENTS_PPL_LINT_RULES]: {
+      name: 'PPL lint rules',
+      value: JSON.stringify(
+        PPL_LINT_RULE_DEFAULTS.map((rule) => ({
+          id: rule.id,
+          enabled: rule.enabled,
+          severity: rule.severity,
+        })),
+        null,
+        2
+      ),
+      type: 'json',
+      description:
+        'Configure PPL lint rules. Each entry has "id" (rule name), "enabled" (true/false), ' +
+        'and "severity" (error, warning, or info).',
+      category: ['search'],
+      scope,
+      schema: schema.arrayOf(
+        schema.object({
+          id: schema.string(),
           enabled: schema.boolean(),
           severity: schema.oneOf([
             schema.literal('error'),
             schema.literal('warning'),
             schema.literal('info'),
           ]),
-        }),
-      },
-    ])
-  );
+        })
+      ),
+    },
+  };
 }

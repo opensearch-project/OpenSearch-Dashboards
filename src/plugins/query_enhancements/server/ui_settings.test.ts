@@ -8,8 +8,9 @@ import { resolve } from 'path';
 import { UiSettingsParams } from 'opensearch-dashboards/server';
 import { getPplLintRuleSettings } from './ui_settings';
 import { UI_SETTINGS } from '../../data/common';
+// eslint-disable-next-line @osd/eslint/no-restricted-paths
+import { getValType } from '../../advanced_settings/public/management_app/lib/get_val_type';
 
-// Read catalog directly (can't import @osd/monaco server-side or cross-package into src/).
 interface BundledRule {
   id: string;
   enabled: boolean;
@@ -22,102 +23,103 @@ const bundledCatalog: BundledRule[] = JSON.parse(
   )
 );
 
-const PREFIX = UI_SETTINGS.QUERY_ENHANCEMENTS_PPL_LINT_RULE_PREFIX;
+const KEY = UI_SETTINGS.QUERY_ENHANCEMENTS_PPL_LINT_RULES;
 
-const ruleKeys = (settings: Record<string, UiSettingsParams>) =>
-  Object.keys(settings).filter((k) => k.startsWith(PREFIX));
-
-describe('query_enhancements per-rule PPL lint uiSettings', () => {
+describe('query_enhancements PPL lint rules uiSetting', () => {
   describe('registration', () => {
-    it('registers one key per bundled catalog rule, with the rule prefix', () => {
+    it('registers a single key for all lint rules', () => {
       const settings = getPplLintRuleSettings(false);
-      const keys = ruleKeys(settings);
-
-      expect(keys).toHaveLength(bundledCatalog.length);
-      for (const rule of bundledCatalog) {
-        expect(settings[`${PREFIX}${rule.id}`]).toBeDefined();
-      }
+      expect(settings[KEY]).toBeDefined();
+      expect(Object.keys(settings)).toHaveLength(1);
     });
 
-    it('mirrors the bundled catalog enabled/severity as the registered default (§5.1)', () => {
+    it('defaults to a JSON array matching the bundled catalog', () => {
       const settings = getPplLintRuleSettings(false);
-
-      for (const rule of bundledCatalog) {
-        expect(settings[`${PREFIX}${rule.id}`].value).toEqual({
-          enabled: rule.enabled,
-          severity: rule.severity,
-        });
-      }
+      const value = JSON.parse(settings[KEY].value as string);
+      expect(value).toEqual(
+        bundledCatalog.map((r) => ({ id: r.id, enabled: r.enabled, severity: r.severity }))
+      );
     });
 
-    it('does not set requiresPageReload (the editor live-revalidates, §6)', () => {
-      const settings = getPplLintRuleSettings(true);
-      for (const key of ruleKeys(settings)) {
-        expect(settings[key].requiresPageReload).toBeFalsy();
-      }
+    it('uses type=json', () => {
+      const settings = getPplLintRuleSettings(false);
+      expect((settings[KEY] as any).type).toBe('json');
     });
 
-    it('groups the rule keys under the search category', () => {
+    it('does not set requiresPageReload', () => {
       const settings = getPplLintRuleSettings(false);
-      for (const key of ruleKeys(settings)) {
-        expect(settings[key].category).toEqual(['search']);
-      }
+      expect(settings[KEY].requiresPageReload).toBeFalsy();
+    });
+
+    it('groups under the search category', () => {
+      const settings = getPplLintRuleSettings(false);
+      expect(settings[KEY].category).toEqual(['search']);
+    });
+  });
+
+  describe('Advanced Settings page compatibility', () => {
+    it('does not throw in getValType (the function that crashed the settings page)', () => {
+      const settings = getPplLintRuleSettings(false);
+      const def = settings[KEY];
+      expect(() => getValType(def as any)).not.toThrow();
+    });
+
+    it('resolves to "json" type for the settings page renderer', () => {
+      const settings = getPplLintRuleSettings(false);
+      const def = settings[KEY];
+      expect(getValType(def as any)).toBe('json');
     });
   });
 
   describe('scope', () => {
     it('registers USER + GLOBAL when the workspace feature is off', () => {
       const settings = getPplLintRuleSettings(false);
-      for (const key of ruleKeys(settings)) {
-        expect(settings[key].scope).toEqual(['user', 'global']);
-      }
+      expect(settings[KEY].scope).toEqual(['user', 'global']);
     });
 
     it('adds WORKSPACE between USER and GLOBAL when the workspace feature is on', () => {
       const settings = getPplLintRuleSettings(true);
-      for (const key of ruleKeys(settings)) {
-        expect(settings[key].scope).toEqual(['user', 'workspace', 'global']);
-      }
+      expect(settings[KEY].scope).toEqual(['user', 'workspace', 'global']);
     });
   });
 
   describe('value schema', () => {
-    const validate = (settings: Record<string, UiSettingsParams>, ruleId: string) => (
-      value: unknown
-    ) => settings[`${PREFIX}${ruleId}`].schema.validate(value);
+    const validate = (value: unknown) => getPplLintRuleSettings(false)[KEY].schema.validate(value);
 
-    it('accepts a well-formed { enabled, severity } object for every severity', () => {
-      const v = validate(getPplLintRuleSettings(false), 'division-by-zero');
-      expect(() => v({ enabled: true, severity: 'error' })).not.toThrow();
-      expect(() => v({ enabled: true, severity: 'warning' })).not.toThrow();
-      expect(() => v({ enabled: false, severity: 'info' })).not.toThrow();
+    it('accepts a well-formed array of rules', () => {
+      expect(() =>
+        validate([
+          { id: 'head-without-sort', enabled: true, severity: 'info' },
+          { id: 'division-by-zero', enabled: false, severity: 'error' },
+        ])
+      ).not.toThrow();
+    });
+
+    it('accepts an empty array', () => {
+      expect(() => validate([])).not.toThrow();
     });
 
     it('rejects an unknown severity', () => {
-      const v = validate(getPplLintRuleSettings(false), 'division-by-zero');
-      expect(() => v({ enabled: true, severity: 'critical' })).toThrow();
+      expect(() =>
+        validate([{ id: 'head-without-sort', enabled: true, severity: 'critical' }])
+      ).toThrow();
     });
 
     it('rejects a non-boolean enabled', () => {
-      const v = validate(getPplLintRuleSettings(false), 'division-by-zero');
-      expect(() => v({ enabled: 'yes', severity: 'warning' })).toThrow();
+      expect(() =>
+        validate([{ id: 'head-without-sort', enabled: 'yes', severity: 'info' }])
+      ).toThrow();
     });
 
     it('rejects a missing field', () => {
-      const v = validate(getPplLintRuleSettings(false), 'division-by-zero');
-      expect(() => v({ enabled: true })).toThrow();
-      expect(() => v({ severity: 'warning' })).toThrow();
+      expect(() => validate([{ id: 'head-without-sort', enabled: true }])).toThrow();
+      expect(() => validate([{ id: 'head-without-sort', severity: 'info' }])).toThrow();
+      expect(() => validate([{ enabled: true, severity: 'info' }])).toThrow();
     });
 
-    it('rejects an extra/unknown field', () => {
-      const v = validate(getPplLintRuleSettings(false), 'division-by-zero');
-      expect(() => v({ enabled: true, severity: 'warning', foo: 1 })).toThrow();
-    });
-
-    it('rejects a non-object value', () => {
-      const v = validate(getPplLintRuleSettings(false), 'division-by-zero');
-      expect(() => v('warning')).toThrow();
-      expect(() => v(true)).toThrow();
+    it('rejects a non-array value', () => {
+      expect(() => validate('warning')).toThrow();
+      expect(() => validate({ id: 'x', enabled: true, severity: 'info' })).toThrow();
     });
   });
 });

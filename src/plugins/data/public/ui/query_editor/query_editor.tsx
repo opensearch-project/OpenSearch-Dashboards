@@ -188,7 +188,7 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
   // Re-sync lint context immediately when a per-rule setting changes.
   useEffect(() => {
     const subscription = services.uiSettings.getUpdate$().subscribe(({ key }) => {
-      if (!key.startsWith(UI_SETTINGS.QUERY_ENHANCEMENTS_PPL_LINT_RULE_PREFIX)) {
+      if (key !== UI_SETTINGS.QUERY_ENHANCEMENTS_PPL_LINT_RULES) {
         return;
       }
       syncPPLLintContext(inputRef.current, getLintContext());

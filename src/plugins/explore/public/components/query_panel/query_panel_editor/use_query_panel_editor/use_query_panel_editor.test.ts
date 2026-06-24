@@ -75,7 +75,7 @@ jest.mock('../../../../../../data/public', () => {
       overrides: services.uiSettings ? overrides : undefined,
       http: services.http,
     })),
-    UI_SETTINGS: { QUERY_ENHANCEMENTS_PPL_LINT_RULE_PREFIX: 'query:enhancements:pplLint:rule:' },
+    UI_SETTINGS: { QUERY_ENHANCEMENTS_PPL_LINT_RULES: 'query:enhancements:pplLint:rules' },
     shouldUseRuntimeGrammar: jest.fn(() => false),
     pplGrammarCache: {
       subscribeToGrammarUpdates: jest.fn(() => jest.fn()),
@@ -1065,7 +1065,7 @@ describe('useQueryPanelEditor', () => {
       };
     });
 
-    it('re-syncs the lint context and revalidates when a pplLint:rule:* key changes', () => {
+    it('re-syncs the lint context and revalidates when the pplLint:rules key changes', () => {
       const { result } = renderHook(() => useQueryPanelEditor());
       act(() => {
         result.current.editorDidMount(mockEditor);
@@ -1074,7 +1074,7 @@ describe('useQueryPanelEditor', () => {
       (revalidatePPLModel as jest.Mock).mockClear();
 
       act(() => {
-        subscribeCallback?.({ key: 'query:enhancements:pplLint:rule:head-without-sort' });
+        subscribeCallback?.({ key: 'query:enhancements:pplLint:rules' });
       });
 
       expect(syncPPLLintContext).toHaveBeenCalledTimes(1);

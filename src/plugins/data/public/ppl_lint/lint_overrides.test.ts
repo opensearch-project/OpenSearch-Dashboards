@@ -6,7 +6,6 @@
 import { IUiSettingsClient } from 'opensearch-dashboards/public';
 import { buildOverridesFromSettings } from './lint_overrides';
 
-// Override the global @osd/monaco mock with a test catalog covering the severity floor and muting.
 jest.mock('@osd/monaco', () => ({
   getBundledCatalog: () => [
     { id: 'head-without-sort', enabled: true, severity: 'info' },
@@ -15,83 +14,87 @@ jest.mock('@osd/monaco', () => ({
   ],
 }));
 
-function makeUiSettings(stored: Record<string, unknown>): IUiSettingsClient {
+function makeUiSettings(rules: unknown): IUiSettingsClient {
   return ({
     get: (key: string, defaultOverride?: unknown) =>
-      key in stored ? stored[key] : defaultOverride,
+      key === 'query:enhancements:pplLint:rules' ? rules : defaultOverride,
   } as unknown) as IUiSettingsClient;
 }
 
-const PREFIX = 'query:enhancements:pplLint:rule:';
-
 describe('buildOverridesFromSettings', () => {
   it('returns an empty map when nothing is stored (sparse)', () => {
-    const overrides = buildOverridesFromSettings(makeUiSettings({}));
+    const overrides = buildOverridesFromSettings(makeUiSettings(undefined));
     expect(overrides).toEqual({});
   });
 
   it('omits a stored value that equals the bundled default', () => {
     const overrides = buildOverridesFromSettings(
-      makeUiSettings({
-        [`${PREFIX}head-without-sort`]: { enabled: true, severity: 'info' },
-      })
+      makeUiSettings([{ id: 'head-without-sort', enabled: true, severity: 'info' }])
     );
     expect(overrides).toEqual({});
   });
 
   it('emits only the field that differs from the default', () => {
     const overrides = buildOverridesFromSettings(
-      makeUiSettings({
-        [`${PREFIX}head-without-sort`]: { enabled: false, severity: 'info' },
-      })
+      makeUiSettings([{ id: 'head-without-sort', enabled: false, severity: 'info' }])
     );
     expect(overrides).toEqual({ 'head-without-sort': { enabled: false } });
   });
 
   it('passes through an allowed severity change', () => {
     const overrides = buildOverridesFromSettings(
-      makeUiSettings({
-        [`${PREFIX}head-without-sort`]: { enabled: true, severity: 'error' },
-      })
+      makeUiSettings([{ id: 'head-without-sort', enabled: true, severity: 'error' }])
     );
     expect(overrides).toEqual({ 'head-without-sort': { severity: 'error' } });
   });
 
   it('clamps a silent-failure rule up to its severity floor', () => {
     const overrides = buildOverridesFromSettings(
-      makeUiSettings({
-        [`${PREFIX}division-by-zero`]: { enabled: true, severity: 'info' },
-      })
+      makeUiSettings([{ id: 'division-by-zero', enabled: true, severity: 'info' }])
     );
     expect(overrides).toEqual({});
   });
 
   it('still allows disabling a silent-failure rule (floor only clamps severity)', () => {
     const overrides = buildOverridesFromSettings(
-      makeUiSettings({
-        [`${PREFIX}division-by-zero`]: { enabled: false, severity: 'info' },
-      })
+      makeUiSettings([{ id: 'division-by-zero', enabled: false, severity: 'info' }])
     );
     expect(overrides).toEqual({ 'division-by-zero': { enabled: false } });
   });
 
   it('clamps a downgrade but keeps a value at-or-above the floor', () => {
     const overrides = buildOverridesFromSettings(
-      makeUiSettings({
-        [`${PREFIX}division-by-zero`]: { enabled: true, severity: 'error' },
-      })
+      makeUiSettings([{ id: 'division-by-zero', enabled: true, severity: 'error' }])
     );
     expect(overrides).toEqual({ 'division-by-zero': { severity: 'error' } });
   });
 
   it('combines enabled + severity changes for a non-floored rule', () => {
     const overrides = buildOverridesFromSettings(
-      makeUiSettings({
-        [`${PREFIX}field-validation`]: { enabled: false, severity: 'error' },
-      })
+      makeUiSettings([{ id: 'field-validation', enabled: false, severity: 'error' }])
     );
     expect(overrides).toEqual({
       'field-validation': { enabled: false, severity: 'error' },
     });
+  });
+
+  it('handles multiple rules in one array', () => {
+    const overrides = buildOverridesFromSettings(
+      makeUiSettings([
+        { id: 'head-without-sort', enabled: false, severity: 'info' },
+        { id: 'division-by-zero', enabled: true, severity: 'error' },
+      ])
+    );
+    expect(overrides).toEqual({
+      'head-without-sort': { enabled: false },
+      'division-by-zero': { severity: 'error' },
+    });
+  });
+
+  it('ignores unknown rule ids gracefully', () => {
+    const overrides = buildOverridesFromSettings(
+      makeUiSettings([{ id: 'nonexistent-rule', enabled: false, severity: 'error' }])
+    );
+    expect(overrides).toEqual({});
   });
 });

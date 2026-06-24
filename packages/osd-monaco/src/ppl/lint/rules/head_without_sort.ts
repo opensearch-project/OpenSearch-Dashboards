@@ -57,7 +57,7 @@ export const headWithoutSortDetector: Detector = (tree, config, _context, ruleNa
         diagnostics.push({
           ruleId: config.id,
           severity: config.severity,
-          message: 'head without a preceding sort returns nondeterministic rows.',
+          message: 'Add sort before head to get stable results.',
           range: rangeFromContext(stage.node),
           docUrl: config.docUrl,
         });

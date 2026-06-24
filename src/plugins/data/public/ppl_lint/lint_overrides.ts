@@ -14,13 +14,14 @@ const MIN_SEVERITY: Record<string, LintSeverity> = {
   'division-by-zero': 'warning',
 };
 
-interface StoredRuleSetting {
+interface StoredRule {
+  id: string;
   enabled?: boolean;
   severity?: LintSeverity;
 }
 
 /**
- * Read the per-rule lint uiSettings into a {@link BundleRuleOverrides} map the
+ * Read the PPL lint rules uiSetting into a {@link BundleRuleOverrides} map the
  * lint engine merges over the bundled catalog.
  *
  * Sparse by design: a field is emitted only when it actually differs from the
@@ -31,23 +32,31 @@ interface StoredRuleSetting {
 export function buildOverridesFromSettings(uiSettings: IUiSettingsClient): BundleRuleOverrides {
   const overrides: BundleRuleOverrides = {};
 
+  const stored = uiSettings.get<StoredRule[] | undefined>(
+    UI_SETTINGS.QUERY_ENHANCEMENTS_PPL_LINT_RULES,
+    undefined
+  );
+  if (!Array.isArray(stored)) {
+    return overrides;
+  }
+
+  const storedById = new Map(stored.filter((r) => r && r.id).map((r) => [r.id, r]));
+
   for (const entry of getBundledCatalog()) {
-    const key = `${UI_SETTINGS.QUERY_ENHANCEMENTS_PPL_LINT_RULE_PREFIX}${entry.id}`;
-    const stored = uiSettings.get<StoredRuleSetting | undefined>(key, undefined);
-    if (!stored || typeof stored !== 'object') {
+    const rule = storedById.get(entry.id);
+    if (!rule) {
       continue;
     }
 
     const patch: Partial<CatalogEntry> = {};
 
-    if (typeof stored.enabled === 'boolean' && stored.enabled !== entry.enabled) {
-      patch.enabled = stored.enabled;
+    if (typeof rule.enabled === 'boolean' && rule.enabled !== entry.enabled) {
+      patch.enabled = rule.enabled;
     }
 
-    if (stored.severity) {
+    if (rule.severity) {
       const floor = MIN_SEVERITY[entry.id];
-      const effective =
-        floor && SEV_RANK[stored.severity] < SEV_RANK[floor] ? floor : stored.severity;
+      const effective = floor && SEV_RANK[rule.severity] < SEV_RANK[floor] ? floor : rule.severity;
       if (effective !== entry.severity) {
         patch.severity = effective;
       }

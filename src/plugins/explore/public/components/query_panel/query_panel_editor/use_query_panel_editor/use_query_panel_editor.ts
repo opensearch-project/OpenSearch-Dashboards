@@ -215,7 +215,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
   // keystroke fires the debounce (mirrors caller A in data's query_editor.tsx).
   useEffect(() => {
     const subscription = services.uiSettings.getUpdate$().subscribe(({ key }) => {
-      if (!key.startsWith(UI_SETTINGS.QUERY_ENHANCEMENTS_PPL_LINT_RULE_PREFIX)) {
+      if (key !== UI_SETTINGS.QUERY_ENHANCEMENTS_PPL_LINT_RULES) {
         return;
       }
       syncPPLLintContext(editorRef.current, getLintContext());

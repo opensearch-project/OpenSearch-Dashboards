@@ -21,18 +21,17 @@ export interface RuleHoverContent {
 export const ENGINE_OUTCOMES: Record<string, RuleHoverContent> = {
   'head-without-sort': {
     engineBehavior:
-      'head with no preceding sort returns nondeterministic rows: the set depends on shard assignment and segment order, and can change between identical re-runs.',
+      'Without sort, head picks rows based on shard layout and segment order — re-running the same query can return different rows.',
     failureClass: 'nondeterministic',
-    safeToIgnoreWhen:
-      'you only need any N rows (a sample), not the top N — and row order does not matter.',
+    safeToIgnoreWhen: 'you only need any N rows as a sample and row order does not matter.',
   },
   'division-by-zero': {
     engineBehavior:
-      'x / 0 evaluates to null (HTTP 200, result [[null]], type double) with no error — the null then propagates through downstream eval/stats.',
+      'x / 0 produces null (not an error) and the null propagates silently through downstream eval and stats expressions.',
     failureClass: 'silent-null',
     verifiedVersion: '3.7',
     safeToIgnoreWhen:
-      'null propagation is intentional and handled downstream (e.g. with coalesce(...)).',
+      'null propagation is intentional and handled downstream (e.g. coalesce(expr, 0)).',
   },
 };
 
