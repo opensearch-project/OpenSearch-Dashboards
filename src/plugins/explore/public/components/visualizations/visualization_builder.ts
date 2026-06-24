@@ -9,7 +9,7 @@ import { isEmpty, isEqual } from 'lodash';
 import { debounceTime, map } from 'rxjs/operators';
 
 import { ChartStyles, ChartType, StyleOptions } from './utils/use_visualization_types';
-import { isValidMapping } from './visualization_builder_utils';
+import { isValidMapping, isVisStateEqual } from './visualization_builder_utils';
 import { getServices } from '../../services/services';
 import { IOsdUrlStateStorage } from '../../../../opensearch_dashboards_utils/public';
 import { OpenSearchSearchHit } from '../../types/doc_views_types';
@@ -33,6 +33,16 @@ interface VisState {
   splitField?: string;
   splitLayout?: SplitLayout;
   showSplitLabel?: boolean;
+}
+
+export interface UrlVisState {
+  chartType?: string;
+  axesMapping?: AxisFieldNameMappings;
+  styleOptions?: StyleOptions;
+  splitField?: string;
+  splitLayout?: SplitLayout;
+  showSplitLabel?: boolean;
+  isVisDirty?: boolean;
 }
 
 interface Options {
@@ -78,6 +88,11 @@ export class VisualizationBuilder {
 
   getTransformationService() {
     return this.transformationService;
+  }
+
+  clearCachedData() {
+    this.lastRawRows = [];
+    this.lastSchema = [];
   }
 
   init() {
@@ -163,8 +178,47 @@ export class VisualizationBuilder {
         ),
       this.data$.subscribe((data) => this.onDataChange(data))
     );
+    this.startUrlChangeSync(urlStateStorage);
 
     this.setIsInitialized(true);
+  }
+
+  startUrlChangeSync(urlStateStorage: IOsdUrlStateStorage | undefined) {
+    if (!urlStateStorage) return;
+
+    let lastVisState: UrlVisState | null = urlStateStorage.get<UrlVisState>('_v');
+
+    const visSub = urlStateStorage.change$<UrlVisState>('_v').subscribe((urlVisState) => {
+      // Skip if _v hasn't actually changed (triggered by other key writes)
+      if (isEqual(urlVisState, lastVisState)) return;
+      lastVisState = urlVisState;
+
+      const currentVisConfig = this.visConfig$.value;
+      if (
+        urlVisState &&
+        urlVisState.chartType &&
+        isChartType(urlVisState.chartType) &&
+        !isVisStateEqual(urlVisState, currentVisConfig)
+      ) {
+        // Clear cached data to prevent pipeline change subscription from
+        // running handleData with stale rows before the new query executes
+        this.clearCachedData();
+        this.setVisConfig({
+          type: urlVisState.chartType as ChartType,
+          ...(urlVisState.styleOptions && { styles: urlVisState.styleOptions }),
+          ...(urlVisState.axesMapping && { axesMapping: urlVisState.axesMapping }),
+          ...(urlVisState.splitField && { splitField: urlVisState.splitField }),
+          ...(urlVisState.splitLayout && { splitLayout: urlVisState.splitLayout }),
+          ...(urlVisState.showSplitLabel !== undefined && {
+            showSplitLabel: urlVisState.showSplitLabel,
+          }),
+        });
+        if (typeof urlVisState.isVisDirty === 'boolean') {
+          this.setIsVisDirty(urlVisState.isVisDirty);
+        }
+      }
+    });
+    this.subscriptions.push(visSub);
   }
 
   setShowRawTable(on: boolean) {

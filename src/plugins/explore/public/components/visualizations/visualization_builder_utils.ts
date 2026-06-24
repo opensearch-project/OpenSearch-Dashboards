@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { isEqual } from 'lodash';
 import {
   AxisColumnMappings,
   VisColumn,
@@ -27,6 +28,7 @@ import { AreaChartStyleOptions } from './area/area_vis_config';
 import { LineChartStyleOptions } from './line/line_vis_config';
 import { GaugeChartStyleOptions } from './gauge/gauge_vis_config';
 import { HeatmapChartStyleOptions } from './heatmap/heatmap_vis_config';
+import { UrlVisState } from './visualization_builder';
 
 export const convertMappingsToStrings = (mappings: AxisColumnMappings): AxisFieldNameMappings =>
   Object.fromEntries(
@@ -244,4 +246,19 @@ export const adaptLegacyData = (config?: ChartConfig) => {
   }
 
   return transformedConfig;
+};
+
+export const isVisStateEqual = (
+  urlState: UrlVisState,
+  currentConfig: ChartConfig | undefined
+): boolean => {
+  if (!currentConfig) return false;
+  return (
+    urlState.chartType === currentConfig.type &&
+    isEqual(urlState.axesMapping, currentConfig.axesMapping) &&
+    isEqual(urlState.styleOptions, currentConfig.styles) &&
+    urlState.splitField === currentConfig.splitField &&
+    urlState.splitLayout === currentConfig.splitLayout &&
+    urlState.showSplitLabel === currentConfig.showSplitLabel
+  );
 };

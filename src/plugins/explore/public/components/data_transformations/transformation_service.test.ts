@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { TransformationService } from './transformation_service';
-import { TransformationDefinition, TransformationInstance } from './types';
+import { Subject } from 'rxjs';
+import { TransformationService, TRANSFORMATION_STATE_KEY } from './transformation_service';
+import { TransformationDefinition, TransformationInstance, UrlTransformationState } from './types';
 
 const createHit = (source: Record<string, unknown>) => ({
   _index: 'test',
@@ -288,6 +289,93 @@ describe('TransformationService', () => {
       service.pipeline$.subscribe({ complete: () => (completed = true) });
       service.destroy();
       expect(completed).toBe(true);
+    });
+  });
+
+  describe('initUrlSync - URL change listening', () => {
+    const createUrlStorage = (initialStates: UrlTransformationState[] = []) => {
+      const subject = new Subject<UrlTransformationState[]>();
+      let stored: UrlTransformationState[] = initialStates;
+      const storage = {
+        get: jest.fn((key: string) => (key === TRANSFORMATION_STATE_KEY ? stored : null)),
+        set: jest.fn((_key: string, value: UrlTransformationState[]) => {
+          stored = value;
+          return Promise.resolve(undefined);
+        }),
+        change$: jest.fn(() => subject.asObservable()),
+        cancel: jest.fn(),
+        flush: jest.fn(),
+      };
+      return { storage, subject, setStored: (v: UrlTransformationState[]) => (stored = v) };
+    };
+
+    it('skips restore when URL _t has not actually changed', () => {
+      service.registerDefinition(createMockDefinition('filter'));
+      const states: UrlTransformationState[] = [
+        { definitionId: 'filter', config: {}, hide: false },
+      ];
+      const { storage, subject, setStored } = createUrlStorage(states);
+      service.initUrlSync(storage as any);
+
+      const restoreSpy = jest.spyOn(service, 'restoreFromState');
+      setStored(states);
+      subject.next(states);
+
+      expect(restoreSpy).not.toHaveBeenCalled();
+    });
+
+    it('proceeds when URL _t actually changes', () => {
+      service.registerDefinition(createMockDefinition('filter'));
+      const initial: UrlTransformationState[] = [];
+      const { storage, subject, setStored } = createUrlStorage(initial);
+      service.initUrlSync(storage as any);
+
+      const restoreSpy = jest.spyOn(service, 'restoreFromState');
+      const newStates: UrlTransformationState[] = [
+        { definitionId: 'filter', config: {}, hide: false },
+      ];
+      setStored(newStates);
+      subject.next(newStates);
+
+      expect(restoreSpy).toHaveBeenCalledWith(newStates);
+    });
+
+    it('skips restore when URL matches current pipeline state', () => {
+      service.registerDefinition(createMockDefinition('filter'));
+      service.addInstance('filter');
+
+      const currentStates: UrlTransformationState[] = service.pipeline$.getValue().map((inst) => ({
+        definitionId: inst.definition_id,
+        config: inst.config,
+        hide: inst.hide,
+      }));
+
+      const { storage, subject, setStored } = createUrlStorage(currentStates);
+      service.initUrlSync(storage as any);
+
+      const restoreSpy = jest.spyOn(service, 'restoreFromState');
+
+      // URL changes to same logical state (simulates self-write from persistToUrl)
+      const sameStates: UrlTransformationState[] = currentStates.map((s) => ({ ...s }));
+      setStored(sameStates);
+      subject.next(sameStates);
+
+      expect(restoreSpy).not.toHaveBeenCalled();
+    });
+
+    it('clears pipeline when URL _t becomes empty', () => {
+      service.registerDefinition(createMockDefinition('filter'));
+      const initial: UrlTransformationState[] = [
+        { definitionId: 'filter', config: {}, hide: false },
+      ];
+      const { storage, subject, setStored } = createUrlStorage(initial);
+      service.initUrlSync(storage as any);
+      service.addInstance('filter');
+
+      setStored([]);
+      subject.next([]);
+
+      expect(service.pipeline$.getValue()).toHaveLength(0);
     });
   });
 });

@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { VisualizationBuilder } from './visualization_builder';
+import { Subject } from 'rxjs';
+import { VisualizationBuilder, UrlVisState } from './visualization_builder';
 import { visualizationRegistry } from './visualization_registry';
 import { VisColumn, VisFieldType } from './types';
 import { VisualizationRegistryService } from '../../services/visualization_registry_service';
@@ -53,7 +54,7 @@ describe('VisualizationBuilder', () => {
         }),
         cancel: jest.fn(),
         flush: jest.fn(),
-        change$: jest.fn(),
+        change$: jest.fn().mockReturnValue(new Subject()),
       };
       const builder = new VisualizationBuilder({
         getUrlStateStorage: () => urlStateStorageMock,
@@ -746,5 +747,106 @@ describe('showRawTable$', () => {
     expect(builder.showRawTable$.value).toBe(false);
     builder.setShowRawTable(true);
     expect(builder.showRawTable$.value).toBe(true);
+  });
+});
+
+describe('startUrlChangeSync()', () => {
+  const createUrlStorageWithSubject = (initialState: UrlVisState | null = null) => {
+    const subject = new Subject<UrlVisState | null>();
+    let stored = initialState;
+    const storage = {
+      get: jest.fn(() => stored),
+      set: jest.fn((_, value) => {
+        stored = value;
+      }),
+      change$: jest.fn(() => subject.asObservable()),
+      cancel: jest.fn(),
+      flush: jest.fn(),
+    };
+    return { storage, subject, setStored: (v: UrlVisState | null) => (stored = v) };
+  };
+
+  test('skips when _v value has not actually changed', () => {
+    const state: UrlVisState = { chartType: 'bar', axesMapping: { x: ['f1'], y: ['f2'] } };
+    const { storage, subject, setStored } = createUrlStorageWithSubject(state);
+    const builder = new VisualizationBuilder({ getUrlStateStorage: () => storage as any });
+    builder.init();
+    const spy = jest.spyOn(builder, 'setVisConfig');
+
+    // Emit change$ without changing the stored _v (simulates other key write)
+    setStored(state);
+    subject.next(state);
+
+    expect(spy).not.toHaveBeenCalled();
+  });
+
+  test('proceeds when _v value actually changes', () => {
+    const initial: UrlVisState = { chartType: 'bar', axesMapping: { x: ['f1'], y: ['f2'] } };
+    const { storage, subject, setStored } = createUrlStorageWithSubject(initial);
+    const builder = new VisualizationBuilder({ getUrlStateStorage: () => storage as any });
+    builder.init();
+    const spy = jest.spyOn(builder, 'setVisConfig');
+
+    const newState: UrlVisState = {
+      chartType: 'bar',
+      axesMapping: { x: ['f3'], y: ['f4'] },
+      styleOptions: { addLegend: false } as any,
+    };
+    setStored(newState);
+    subject.next(newState);
+
+    expect(spy).toHaveBeenCalledWith(expect.objectContaining({ type: 'bar' }));
+  });
+
+  test('skips when URL state equals current visConfig', () => {
+    const state: UrlVisState = { chartType: 'bar', axesMapping: { x: ['f1'], y: ['f2'] } };
+    const { storage, subject, setStored } = createUrlStorageWithSubject(state);
+    const builder = new VisualizationBuilder({ getUrlStateStorage: () => storage as any });
+    builder.init();
+
+    // Set visConfig to match what URL would restore
+    builder.visConfig$.next({ type: 'bar', axesMapping: { x: ['f1'], y: ['f2'] } });
+
+    const spy = jest.spyOn(builder, 'setVisConfig');
+
+    // URL changes to same value — Guard 1 passes, Guard 2 blocks
+    const sameState: UrlVisState = { chartType: 'bar', axesMapping: { x: ['f1'], y: ['f2'] } };
+    setStored(sameState);
+    subject.next(sameState);
+
+    expect(spy).not.toHaveBeenCalled();
+  });
+
+  test('clears cached data before restoring visConfig on URL change', () => {
+    const initial: UrlVisState = { chartType: 'bar', axesMapping: { x: ['f1'] } };
+    const { storage, subject, setStored } = createUrlStorageWithSubject(initial);
+    const builder = new VisualizationBuilder({ getUrlStateStorage: () => storage as any });
+    builder.init();
+    const clearSpy = jest.spyOn(builder, 'clearCachedData');
+
+    const newState: UrlVisState = { chartType: 'heatmap', axesMapping: { x: ['f2'], y: ['f3'] } };
+    setStored(newState);
+    subject.next(newState);
+
+    expect(clearSpy).toHaveBeenCalled();
+  });
+
+  test('restores isVisDirty from URL', () => {
+    const initial: UrlVisState = { chartType: 'bar', axesMapping: { x: ['f1'], y: ['f2'] } };
+    const { storage, subject, setStored } = createUrlStorageWithSubject(initial);
+    const builder = new VisualizationBuilder({ getUrlStateStorage: () => storage as any });
+    builder.init();
+    const dirtySpy = jest.spyOn(builder, 'setIsVisDirty');
+
+    const newState: UrlVisState = {
+      chartType: 'bar',
+      axesMapping: { x: ['f3'], y: ['f4'] },
+      styleOptions: { addLegend: false } as any,
+      isVisDirty: true,
+    };
+    setStored(newState);
+    subject.next(newState);
+
+    expect(dirtySpy).toHaveBeenCalledWith(true);
   });
 });

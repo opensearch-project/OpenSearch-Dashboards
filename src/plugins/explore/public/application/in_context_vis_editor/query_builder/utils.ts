@@ -29,6 +29,7 @@ import {
   IPrometheusSearchResult,
 } from '../../../application/utils/state_management/slices';
 import { AgentError, ProhibitedQueryError } from '../../../components/query_panel/utils/error';
+import { normalizeState } from '../../../application/utils/state_management/utils/state_comparison';
 
 export interface RootState {
   query: QueryState;
@@ -376,4 +377,19 @@ export const handleAgentError = (toasts: ToastsStart, error: Error) => {
       }),
     });
   }
+};
+
+export const normalizeHistoryStateForComparison = (
+  queryState: QueryState | null,
+  editorState: Partial<QueryEditorState> | null,
+  globalState: { time?: { from: string; to: string } } | null
+) => {
+  return normalizeState({
+    query: queryState?.query ?? '',
+    datasetId: queryState?.dataset?.id,
+    language: queryState?.language ?? '',
+    languageType: editorState?.languageType,
+    isQueryEditorDirty: editorState?.isQueryEditorDirty,
+    time: globalState?.time,
+  });
 };
