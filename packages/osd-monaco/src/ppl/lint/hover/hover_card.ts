@@ -18,9 +18,9 @@ export interface HoverCardInput {
 }
 
 const SEVERITY_GLYPH: Record<SeverityLabel, string> = {
-  Error: '❌', // ❌
-  Warning: '⚠️', // ⚠️
-  Info: 'ℹ️', // ℹ️
+  Error: '❌',
+  Warning: '⚠️',
+  Info: 'ℹ️',
 };
 
 const FAILURE_CLASS_EXPLAINER: Record<FailureClass, string> = {

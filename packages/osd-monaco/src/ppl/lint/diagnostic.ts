@@ -7,7 +7,7 @@ import type { HoverFacts } from './hover_facts';
 
 export type LintSeverity = 'error' | 'warning' | 'info';
 
-// Lines 1-based (ANTLR), columns 0-based (converted to Monaco 1-based in diagnostic_to_marker).
+// Lines 1-based, columns 0-based.
 export interface DiagnosticRange {
   startLine: number;
   startColumn: number;

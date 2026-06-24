@@ -147,10 +147,7 @@ export function buildPipelineShape(
   return { stages, createdFields };
 }
 
-/**
- * Subtrees whose field references belong to a different source (lookup, append
- * with inner source, subSearch, unionDataset). Pruned during field-validation.
- */
+/** Subtrees with an alternate field source, pruned during field-validation. */
 export function collectAlternateSourceSubtrees(
   tree: ParserRuleContext,
   ruleNameToIndex: RuleNameToIndex

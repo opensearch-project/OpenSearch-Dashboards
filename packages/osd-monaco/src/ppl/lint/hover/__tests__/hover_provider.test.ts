@@ -35,9 +35,7 @@ function makeMarker(overrides: Partial<Marker> = {}): Marker {
   } as unknown) as Marker;
 }
 
-// Stub getModelMarkers to return our test markers, mirroring how the lint
-// lifecycle would have published them. Returns [] for any other owner so the
-// provider's owner filter is exercised.
+// Returns test markers for the lint owner; [] for others.
 let markersByOwner: Record<string, Marker[]> = {};
 beforeEach(() => {
   markersByOwner = {};

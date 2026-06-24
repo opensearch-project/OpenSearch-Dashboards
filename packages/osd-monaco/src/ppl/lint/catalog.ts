@@ -93,7 +93,6 @@ let bundledCatalog: CatalogEntry[] | undefined;
 
 export function getBundledCatalog(): CatalogEntry[] {
   if (!bundledCatalog) {
-    // Normalize the JSON import: some bundlers wrap it in a `default` property.
     const source = Array.isArray(rawCatalog)
       ? rawCatalog
       : (rawCatalog as { default?: unknown }).default;

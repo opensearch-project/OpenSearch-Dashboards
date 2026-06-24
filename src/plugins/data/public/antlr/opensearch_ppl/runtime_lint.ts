@@ -53,7 +53,6 @@ function buildRuntimeTree(query: string, grammar: CachedGrammar): ParserRuleCont
   );
   parser.removeErrorListeners();
   parser.addErrorListener(errorListener);
-  // Unlike validation (buildParseTrees=false), the linter needs the tree.
   parser.buildParseTrees = true;
 
   try {
@@ -91,12 +90,11 @@ function lintWithGrammar(
     },
   });
 
-  // Subtract the synthetic prefix width so squiggles align with the user's text.
   const isPipeFirst = query.trimStart().startsWith('|');
   return { diagnostics: isPipeFirst ? remapPipeFirstColumns(diagnostics) : diagnostics };
 }
 
-/** Runtime lint bridge; returns null on cache miss or disabled flag, triggering the compiled fallback. */
+/** Returns null when runtime grammar is unavailable, triggering the compiled fallback. */
 export async function lintRuntimePPLQuery(
   request: PPLLintBridgeRequest
 ): Promise<LintResult | null> {

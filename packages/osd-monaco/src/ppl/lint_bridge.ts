@@ -38,7 +38,6 @@ interface PPLLintGlobalState {
   enabled: boolean;
 }
 
-// Shared via globalThis so duplicate bundles see one bridge + context map.
 const PPL_LINT_GLOBAL_STATE_KEY = '__osdPPLLintGlobalState';
 
 function getGlobalLintState(): PPLLintGlobalState {
@@ -50,8 +49,6 @@ function getGlobalLintState(): PPLLintGlobalState {
     globalScope[PPL_LINT_GLOBAL_STATE_KEY] = {
       bridge: undefined,
       contexts: new WeakMap<monaco.editor.IModel, PPLLintContext>(),
-      // Default enabled; the host (data plugin) may disable via the
-      // QUERY_ENHANCEMENTS_PPL_LINT setting (R1).
       enabled: true,
     };
   }
@@ -106,7 +103,7 @@ export async function resolvePPLLintResult(
         return runtimeResult;
       }
     } catch {
-      // Fall through to compiled fallback.
+      // fall through to compiled fallback
     }
   }
 

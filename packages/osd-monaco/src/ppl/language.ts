@@ -25,7 +25,6 @@ const PPL_LANGUAGE_ID = ID;
 const OWNER = 'PPL_WORKER';
 const LINT_DEBOUNCE_MS = 500;
 const lintDebounceTimers = new Map<string, ReturnType<typeof setTimeout>>();
-// Monotonic per-model counter: only the latest lint pass applies its markers.
 const lintGenerations = new Map<string, number>();
 
 const pplWorkerProxyService = new PPLWorkerProxyService();
@@ -99,7 +98,7 @@ const setupPPLTokenization = () => {
           }
         }
       } catch {
-        // best-effort tokenization
+        // best-effort
       }
 
       return {
@@ -159,7 +158,7 @@ const processSyntaxHighlighting = async (model: monaco.editor.IModel) => {
       monaco.editor.setModelMarkers(model, OWNER, []);
     }
   } catch {
-    // best-effort syntax highlighting
+    // best-effort
   }
 };
 
@@ -207,8 +206,7 @@ const processLintHighlighting = (model: monaco.editor.IModel): void => {
         return;
       }
       const markers = lintResult.diagnostics.map(diagnosticToMarker);
-      // Extract hoverFacts into a side table before passing markers to Monaco
-      // (MarkerService drops custom properties on rebuild).
+      // MarkerService drops custom properties, so extract hoverFacts separately.
       const hoverFacts = new Map<string, HoverFacts>();
       for (const marker of markers) {
         const withExtras = marker as monaco.editor.IMarkerData & {

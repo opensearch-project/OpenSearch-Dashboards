@@ -65,9 +65,7 @@ jest.mock('../../../../../../data/public', () => {
     cleanupPPLContexts: jest.fn(),
     syncPPLValidationContext: jest.fn(),
     syncPPLLintContext: jest.fn(),
-    // Mirrors the real buildPPLLintContext closely enough for the host tests:
-    // derives dataSourceId/version from the dataset arg and carries overrides
-    // from uiSettings. The full behavior is covered in lint_context_builder.test.ts.
+    // Simplified mock; full behavior covered in lint_context_builder.test.ts.
     buildPPLLintContext: jest.fn((dataset, services) => ({
       useRuntimeGrammar: false,
       dataSourceId: dataset?.dataSource?.id,
@@ -567,9 +565,7 @@ describe('useQueryPanelEditor', () => {
     };
 
     beforeEach(() => {
-      // The mocked selectors are `(state) => state.X`, so drive useSelector by
-      // applying each selector to a state object. selectDataset then resolves to
-      // a dataset carrying an MDS data source.
+      // Drive useSelector with a state object so selectDataset returns an MDS dataset.
       const state = {
         promptModeIsAvailable: false,
         queryLanguage: 'PPL',
@@ -579,8 +575,7 @@ describe('useQueryPanelEditor', () => {
         dataset: mdsDataset,
       };
       mockUseSelector.mockImplementation((selector) => (selector ? selector(state) : ''));
-      // ...while queryString.getQuery() returns a dataset-less query (the
-      // transient init window the stale-closure bug fired in).
+      // queryString.getQuery() returns a dataset-less query (stale-closure scenario).
       mockServices.data.query.queryString.getQuery = jest.fn(() => ({ dataset: undefined }));
       mockServices.uiSettings = {
         get: jest.fn(),
@@ -1046,9 +1041,7 @@ describe('useQueryPanelEditor', () => {
     });
   });
 
-  // B3: changing a PPL lint rule in Advanced Settings must live-revalidate the
-  // explore editor (parity with data's query_editor.tsx), instead of waiting for
-  // the next keystroke to fire the debounce.
+  // B3: rule setting change must immediately revalidate, not wait for next keystroke.
   describe('re-lints on a pplLint rule setting change (B3)', () => {
     let subscribeCallback: ((event: { key: string }) => void) | undefined;
 

@@ -284,8 +284,7 @@ class PPLGrammarCache {
         const savedObject = await savedObjectsClient.get('data-source', datasourceId);
         version = (savedObject.attributes as any)?.dataSourceVersion as string | undefined;
       } else if (!datasourceId) {
-        // Use localClusterVersion (real engine version) not /api/status (OSD version).
-        // Plain HTTP call avoids a dep cycle with data_source_management.
+        // Plain HTTP avoids dep cycle with data_source_management.
         const response = await http.get<{ version?: string }>(
           '/internal/data-source-management/localClusterVersion'
         );

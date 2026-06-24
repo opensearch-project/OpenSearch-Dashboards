@@ -87,8 +87,6 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
   const [currentAppId, setCurrentAppId] = useState<string>(''); // Add app ID state
 
   const inputRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
-  // The four PPL validation + lint detach callbacks, bundled so attach/cleanup
-  // can thread them as one unit (see attachPPLContexts / cleanupPPLContexts).
   const detachRefs = useRef<PPLDetachRefs>({
     validationContext: { current: undefined },
     grammarRefresh: { current: undefined },
@@ -169,8 +167,6 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
     }
   }, [query.dataset?.dataSource?.id, query.dataset?.dataSource?.version]);
 
-  // Refresh the lint context when the active dataset changes so useRuntimeGrammar
-  // and the data-source id stay in step, then revalidate the current model.
   useEffect(() => {
     syncPPLLintContext(inputRef.current, getLintContext());
     const model = inputRef.current?.getModel();
@@ -185,7 +181,6 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
     services.uiSettings,
   ]);
 
-  // Re-sync lint context immediately when a per-rule setting changes.
   useEffect(() => {
     const subscription = services.uiSettings.getUpdate$().subscribe(({ key }) => {
       if (key !== UI_SETTINGS.QUERY_ENHANCEMENTS_PPL_LINT_RULES) {

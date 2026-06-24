@@ -13,7 +13,6 @@ interface MonacoRange {
   endColumn: number;
 }
 
-/** Convert ANTLR 0-based columns to Monaco 1-based, clamping negatives. */
 function toMonacoRange(range: DiagnosticRange): MonacoRange {
   const startLineNumber = Math.max(1, range.startLine);
   const endLineNumber = Math.max(startLineNumber, range.endLine);

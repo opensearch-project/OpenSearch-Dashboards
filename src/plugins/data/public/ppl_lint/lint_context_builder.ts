@@ -9,7 +9,7 @@ import { HttpSetup } from '../../../../core/public';
 import { shouldUseRuntimeGrammar } from '../antlr/opensearch_ppl/ppl_grammar_cache';
 import { buildOverridesFromSettings } from './lint_overrides';
 
-/** Dataset fields the lint context reads; structural so either editor host's dataset shape satisfies it. */
+/** Subset of dataset fields needed for lint context construction. */
 interface LintContextDataset {
   id?: string;
   dataSource?: { id?: string; version?: string };

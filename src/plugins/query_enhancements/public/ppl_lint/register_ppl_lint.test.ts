@@ -37,7 +37,6 @@ describe('registerPplLint', () => {
 
     expect(mockSetPPLLintEnabled).toHaveBeenCalledWith(true);
     expect(mockRegisterPPLLintBridge).toHaveBeenCalledTimes(1);
-    // The runtime lint function from the data plugin is passed as the bridge.
     expect(mockRegisterPPLLintBridge).toHaveBeenCalledWith(expect.any(Function));
     expect(disposer).toBe(mockUnregister);
   });

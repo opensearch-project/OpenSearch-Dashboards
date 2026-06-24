@@ -67,8 +67,7 @@ describe('diagnosticToMarker', () => {
   });
 
   it('still carries the ruleId on code (plain-string form) when no doc URL is present', () => {
-    // The ruleId must reach the hover provider regardless of whether the rule
-    // has a doc link, so code is the plain-string ruleId rather than undefined.
+    // ruleId must reach hover provider even without a doc link.
     const marker = diagnosticToMarker(makeDiagnostic({ docUrl: undefined }));
     expect(marker.code).toBe('rule');
   });

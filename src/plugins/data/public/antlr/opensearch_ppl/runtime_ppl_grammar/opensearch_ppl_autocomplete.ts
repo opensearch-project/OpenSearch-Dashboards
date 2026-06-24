@@ -337,15 +337,23 @@ class RuntimeCompletionContext extends ParserRuleContext {
   }
 }
 
-/** Start-rule selector for autocomplete; enables the subPipeline fallback that validation/lint omit. */
 export function pickStartRuleIndex(query: string, grammar: CachedGrammar): number {
   return pickRuntimeStartRuleIndex(query, grammar, /* includeSubPipelineFallback */ true);
 }
 
 /**
- * Rules treated as atomic candidates by C3 instead of expanding into token lists.
- * Missing names are silently skipped (grammar-version safe). New commands that
- * introduce structural rules may need additions here.
+ * C3 preferred rules: rules we want as rule candidates instead of exploding
+ * into many token candidates. Three categories:
+ *
+ * 1. **Leaf concepts** — field/table/function/literal rules that commands compose.
+ * 2. **Noise suppression** — rules whose children expand to hundreds of keywords
+ *    (e.g. `searchableKeyWord`, `keywordsCanBeId`).
+ * 3. **Structural rules** — rules that control completion scope (e.g. `searchCommand`).
+ *
+ * Missing names are silently skipped, so this stays compatible across grammar
+ * versions as long as equivalent concepts keep the same rule names. New commands
+ * that reuse these leaf rules get completion support automatically; commands
+ * that introduce new structural rules may need additions here.
  */
 const PREFERRED_RULE_NAMES: readonly string[] = [
   'qualifiedName',

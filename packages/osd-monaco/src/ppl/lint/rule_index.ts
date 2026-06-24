@@ -8,7 +8,7 @@ import { SimplifiedOpenSearchPPLParser } from '@osd/antlr-grammar';
 
 export type RuleNameToIndex = (name: string) => number;
 
-// Duck-type guards: `instanceof` breaks across duplicate antlr4ng bundles in workers.
+// Duck-type guards (instanceof breaks across duplicate bundles in workers).
 
 export function isRuleNode(node: unknown): node is ParserRuleContext {
   return (

@@ -21,13 +21,8 @@ interface StoredRule {
 }
 
 /**
- * Read the PPL lint rules uiSetting into a {@link BundleRuleOverrides} map the
- * lint engine merges over the bundled catalog.
- *
- * Sparse by design: a field is emitted only when it actually differs from the
- * bundled default, so an unchanged rule contributes nothing and the engine
- * keeps using the catalog entry verbatim. Severity is clamped up to the
- * silent-failure floor before being emitted.
+ * Build a {@link BundleRuleOverrides} from the PPL lint rules uiSetting.
+ * Only emits fields that differ from catalog defaults; severity is clamped to MIN_SEVERITY.
  */
 export function buildOverridesFromSettings(uiSettings: IUiSettingsClient): BundleRuleOverrides {
   const overrides: BundleRuleOverrides = {};

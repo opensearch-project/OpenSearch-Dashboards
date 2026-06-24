@@ -6,7 +6,7 @@
 import semver from 'semver';
 import { CatalogEntry } from './types';
 
-/** Latest engine version the catalog was verified against. Not the OSD version. */
+/** Latest engine version the catalog was verified against. */
 export const OSD_KNOWN_VERSION = '3.7.0';
 
 function coerce(version: string): string | null {
@@ -25,7 +25,7 @@ export function appliesTo(
 
   if (dataSourceVersion === undefined) {
     if (isCalciteGated) {
-      // Can't confirm Calcite: error-severity self-suppresses, warning runs.
+      // Unknown Calcite state: suppress errors, allow warnings.
       return severity !== 'error';
     }
     if (predicate.maxVersion !== undefined) {

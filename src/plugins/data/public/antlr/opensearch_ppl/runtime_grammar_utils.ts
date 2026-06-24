@@ -6,8 +6,6 @@
 import { Token } from 'antlr4ng';
 import { CachedGrammar } from './ppl_grammar_cache';
 
-/** Shared grammar lookups so validation and lint always agree on token/rule resolution. */
-
 export function tokenTypeBySymbolic(grammar: CachedGrammar, symbolicName: string): number {
   return grammar.runtimeSymbolicNameToTokenType.get(symbolicName) ?? Token.INVALID_TYPE;
 }
@@ -16,7 +14,6 @@ export function getRuleIndex(grammar: CachedGrammar, ruleName: string): number {
   return grammar.runtimeRuleNameToIndex.get(ruleName) ?? -1;
 }
 
-/** Resolve the whitespace/space token type, checking the token dictionary first. */
 export function resolveSpaceToken(grammar: CachedGrammar): number {
   const dictionaryValue = grammar.tokenDictionary.WHITESPACE ?? grammar.tokenDictionary.SPACE;
   if (typeof dictionaryValue === 'number' && dictionaryValue > Token.INVALID_TYPE) {
@@ -31,7 +28,7 @@ export function resolveSpaceToken(grammar: CachedGrammar): number {
   return Token.INVALID_TYPE;
 }
 
-/** Pick the parser start rule index. Pipe-first queries try pipeStartRuleIndex → commands → default. */
+/** Pick the parser start rule index for the given query shape. */
 export function pickStartRuleIndex(
   query: string,
   grammar: CachedGrammar,

@@ -6,7 +6,6 @@
 import { ParserRuleContext, Token } from 'antlr4ng';
 import { Diagnostic, DiagnosticRange } from './diagnostic';
 
-/** Prefix prepended to pipe-first queries so the grammar can parse them. */
 export const PIPE_FIRST_PREFIX = 'source=t ';
 
 export function rangeFromTokens(start: Token, stop: Token): DiagnosticRange {
@@ -51,7 +50,7 @@ export function rangeWithinToken(
   };
 }
 
-/** Range spanning the entire query text. Used for diagnostics with no position info. */
+/** Fallback range spanning the entire query. */
 export function wholeQueryRange(query: string): DiagnosticRange {
   const lines = query.split('\n');
   const endLine = Math.max(1, lines.length);
@@ -75,7 +74,6 @@ export function unquote(raw: string): string {
   return raw;
 }
 
-/** Subtract the pipe-first prefix length from line-one columns. */
 export function remapPipeFirstColumns(diagnostics: Diagnostic[]): Diagnostic[] {
   const prefixLength = PIPE_FIRST_PREFIX.length;
   const shift = (range: DiagnosticRange): DiagnosticRange => ({

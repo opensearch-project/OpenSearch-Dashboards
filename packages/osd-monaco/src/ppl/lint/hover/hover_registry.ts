@@ -16,11 +16,7 @@ interface MarkerKeyParts {
   message: string;
 }
 
-/**
- * Key from fields that survive Monaco's MarkerService rebuild (position + message).
- * Lives here (not in a fix registry) because the hover-facts side table is the
- * only remaining keyed-by-marker store.
- */
+/** Key from marker fields that survive MarkerService rebuilds (position + message). */
 export function markerFixKey(marker: MarkerKeyParts): string {
   return [
     marker.startLineNumber,
@@ -35,7 +31,6 @@ interface HoverRegistryState {
   byModel: WeakMap<monaco.editor.ITextModel, Map<string, HoverFacts>>;
 }
 
-// Shared via globalThis so duplicate bundles see one table.
 const HOVER_REGISTRY_KEY = '__osdPPLLintHoverRegistry';
 
 function getState(): HoverRegistryState {

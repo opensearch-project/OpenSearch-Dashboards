@@ -189,10 +189,6 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
     }
   }, [dataset?.dataSource?.id, dataset?.dataSource?.version, editorRef]);
 
-  // Refresh the lint context when the active dataset changes so useRuntimeGrammar
-  // and the data-source id stay in step, then revalidate the current model.
-  // Mirrors the data plugin's query editor wiring so lint behaves the same on
-  // every editor.
   useEffect(() => {
     syncPPLLintContext(editorRef.current, getLintContext());
     const model = editorRef.current?.getModel();
@@ -210,9 +206,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
   // Cleanup validation + lint context on unmount
   useEffect(() => () => cleanupPPLContexts(detachRefs.current), []);
 
-  // Live-revalidate when a PPL lint rule setting changes in Advanced Settings.
-  // Without this, disabling a noisy rule leaves its squiggles up until the next
-  // keystroke fires the debounce (mirrors caller A in data's query_editor.tsx).
+  // Revalidate immediately when lint rule settings change.
   useEffect(() => {
     const subscription = services.uiSettings.getUpdate$().subscribe(({ key }) => {
       if (key !== UI_SETTINGS.QUERY_ENHANCEMENTS_PPL_LINT_RULES) {
@@ -380,10 +374,6 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
     (editor: IStandaloneCodeEditor) => {
       setEditorRef(editor);
 
-      // Attach the PPL runtime validation + lint contexts (field-aware lint
-      // rules self-suppress without field metadata, which the dataset effect
-      // loads) so lint behaves here just as it does in the data plugin's query
-      // editor. Shared with that editor via attachPPLContexts.
       attachPPLContexts(
         editor,
         detachRefs.current,
