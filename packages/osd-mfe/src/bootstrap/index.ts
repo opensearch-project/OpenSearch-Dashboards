@@ -86,6 +86,7 @@ export type { ParsedOverrides, OverrideSourcesInput, OverrideStorage } from './o
 
 export {
   INSPECTOR_ROOT_ID,
+  DISABLED_SECTION_TEST_SUBJ,
   MfeInspector,
   applyOverride,
   clearOverride,
@@ -98,3 +99,13 @@ export type {
   OverrideWritableStorage,
   MountInspectorOptions,
 } from './inspector';
+
+export {
+  DEGRADED_APP_TEST_SUBJ,
+  DEGRADED_APP_CLASS,
+  createDisabledPluginModuleWithReason,
+  createDisabledPluginRecord,
+  humanReasonFor,
+  renderDegradedAppContent,
+} from './disabled_plugin';
+export type { DisabledPluginRecord } from './disabled_plugin';

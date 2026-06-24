@@ -15,12 +15,14 @@ import { mount } from 'enzyme';
 import {
   applyOverride,
   clearOverride,
+  DISABLED_SECTION_TEST_SUBJ,
   InspectorEntry,
   InspectorEnv,
   MfeInspector,
   mountInspector,
   OverrideWritableStorage,
 } from './inspector';
+import type { DisabledPluginRecord } from './disabled_plugin';
 import { OVERRIDE_STORAGE_KEY } from './override_sources';
 
 const ENTRIES: InspectorEntry[] = [
@@ -131,6 +133,88 @@ describe('<MfeInspector />', () => {
   });
 });
 
+describe('<MfeInspector /> — Disabled plugins section (Phase 14, Story 2)', () => {
+  const DISABLED: DisabledPluginRecord[] = [
+    {
+      id: 'inspector',
+      version: '3.5.0+aaa',
+      errorClass: 'sri-mismatch',
+      humanReason: 'integrity check failed',
+    },
+    {
+      id: 'data',
+      version: '3.5.0+bbb',
+      errorClass: 'compat-reject',
+      humanReason: 'incompatible with this OSD version',
+    },
+  ];
+
+  it('renders no Disabled section when the disabled prop is omitted', () => {
+    const wrapper = mount(
+      <MfeInspector entries={ENTRIES} onApply={jest.fn()} onClear={jest.fn()} />
+    );
+    expect(wrapper.find(`[data-test-subj="${DISABLED_SECTION_TEST_SUBJ}"]`).exists()).toBe(false);
+    wrapper.unmount();
+  });
+
+  it('renders no Disabled section when the disabled prop is an empty array', () => {
+    const wrapper = mount(
+      <MfeInspector entries={ENTRIES} disabled={[]} onApply={jest.fn()} onClear={jest.fn()} />
+    );
+    expect(wrapper.find(`[data-test-subj="${DISABLED_SECTION_TEST_SUBJ}"]`).exists()).toBe(false);
+    wrapper.unmount();
+  });
+
+  it('renders the Disabled section listing each id + errorClass + humanReason', () => {
+    const wrapper = mount(
+      <MfeInspector entries={ENTRIES} disabled={DISABLED} onApply={jest.fn()} onClear={jest.fn()} />
+    );
+
+    expect(wrapper.find(`[data-test-subj="${DISABLED_SECTION_TEST_SUBJ}"]`).exists()).toBe(true);
+
+    // Per-record row + errorClass badge + humanReason are wired with stable
+    // test_subjs so verify_phase14.js can grep by attribute.
+    expect(wrapper.find('[data-test-subj="mfeInspectorDisabled-inspector"]').exists()).toBe(true);
+    expect(
+      wrapper.find('[data-test-subj="mfeInspectorDisabledClass-inspector"]').hostNodes().text()
+    ).toBe('sri-mismatch');
+    expect(
+      wrapper.find('[data-test-subj="mfeInspectorDisabledReason-inspector"]').hostNodes().text()
+    ).toBe('integrity check failed');
+
+    expect(wrapper.find('[data-test-subj="mfeInspectorDisabled-data"]').exists()).toBe(true);
+    expect(
+      wrapper.find('[data-test-subj="mfeInspectorDisabledClass-data"]').hostNodes().text()
+    ).toBe('compat-reject');
+    expect(
+      wrapper.find('[data-test-subj="mfeInspectorDisabledReason-data"]').hostNodes().text()
+    ).toBe('incompatible with this OSD version');
+
+    wrapper.unmount();
+  });
+
+  it('shows the disabled count in the section title', () => {
+    const wrapper = mount(
+      <MfeInspector entries={ENTRIES} disabled={DISABLED} onApply={jest.fn()} onClear={jest.fn()} />
+    );
+    const title = wrapper.find(`[data-test-subj="${DISABLED_SECTION_TEST_SUBJ}"] h3`).text();
+    expect(title).toContain('Disabled plugins');
+    expect(title).toContain('(2)');
+    wrapper.unmount();
+  });
+
+  it('still renders the editable plugin rows alongside the disabled section', () => {
+    // Phase 14, Story 2 is ADDITIVE: the original Inspector rows still render
+    // when there are disabled plugins.
+    const wrapper = mount(
+      <MfeInspector entries={ENTRIES} disabled={DISABLED} onApply={jest.fn()} onClear={jest.fn()} />
+    );
+    expect(wrapper.find('[data-test-subj="mfeInspectorRow-data"]').exists()).toBe(true);
+    expect(wrapper.find('[data-test-subj="mfeInspectorRow-inspector"]').exists()).toBe(true);
+    wrapper.unmount();
+  });
+});
+
 describe('applyOverride', () => {
   it('persists the override to localStorage and reloads with the query param set', () => {
     const storage = memoryStorage();
@@ -237,6 +321,34 @@ describe('mountInspector', () => {
     expect(container.parentNode).toBe(document.body);
     expect(container.querySelector('[data-test-subj="mfeInspector"]')).toBeNull();
 
+    document.body.removeChild(container);
+  });
+
+  it('threads the disabled prop into the rendered panel (Phase 14, Story 2)', () => {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+
+    const disabled: DisabledPluginRecord[] = [
+      {
+        id: 'data',
+        version: 'v',
+        errorClass: 'network',
+        humanReason: 'failed to load',
+      },
+    ];
+    const unmount = mountInspector({
+      entries: ENTRIES,
+      container,
+      env: testEnv('http://x/').env,
+      disabled,
+    });
+
+    expect(
+      container.querySelector(`[data-test-subj="${DISABLED_SECTION_TEST_SUBJ}"]`)
+    ).not.toBeNull();
+    expect(container.querySelector('[data-test-subj="mfeInspectorDisabled-data"]')).not.toBeNull();
+
+    unmount();
     document.body.removeChild(container);
   });
 });

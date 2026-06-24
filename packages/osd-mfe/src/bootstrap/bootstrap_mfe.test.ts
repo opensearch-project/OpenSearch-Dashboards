@@ -530,6 +530,170 @@ describe('bootstrapMfe — dev Inspector mount gate (Phase 5, Story 3)', () => {
 
     expect(mountInspector).not.toHaveBeenCalled();
   });
+
+  it('passes the collected disabled records as the second arg to mountInspector (Phase 14, Story 2)', async () => {
+    // Make ONE remote fail (Phase 4 graceful degradation) so a single record is
+    // collected. The mountInspector spy must receive both the resolved entries
+    // AND the disabled records — the dev panel's "Disabled plugins" section
+    // depends on this argument.
+    const { deps, mountInspector } = inspectorDeps();
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    const consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+
+    await bootstrapMfe({
+      registryUrl: REGISTRY_URL,
+      sharedDepsUrl: SHARED_DEPS_URL,
+      allowOverride: true,
+      deps: {
+        ...deps,
+        loadRemoteContainer: jest.fn(async (_remoteEntry: string, scope: string) => {
+          if (scope === 'inspector') {
+            throw new Error(`boom: ${scope}`);
+          }
+          return {
+            init: () => undefined,
+            get: () => Promise.resolve(() => ({ plugin: () => undefined })),
+          } as MfeContainer;
+        }),
+      },
+    });
+
+    expect(mountInspector).toHaveBeenCalledTimes(1);
+    const disabled = mountInspector.mock.calls[0][1] as Array<{
+      id: string;
+      version: string;
+      errorClass: string;
+      humanReason: string;
+    }>;
+    expect(Array.isArray(disabled)).toBe(true);
+    expect(disabled).toHaveLength(1);
+    expect(disabled[0].id).toBe('inspector');
+    // The thrown `Error('boom: inspector')` does not match the loadScript
+    // error wording ("Failed to load script: …") nor the SRI marker, so
+    // `classifyLoadError` routes it to `mf-runtime-error` (a Module-Federation
+    // runtime malformation, the catch-all for container.init / container.get
+    // / factory wiring throwing). The humanReason follows from the locked
+    // mapping in disabled_plugin.ts.
+    expect(disabled[0].errorClass).toBe('mf-runtime-error');
+    expect(disabled[0].humanReason).toBe('plugin runtime error');
+    expect(disabled[0].version).toBe('3.5.0+aaa');
+
+    consoleError.mockRestore();
+    consoleWarn.mockRestore();
+  });
+
+  it('passes an empty disabled array when every remote loads cleanly', async () => {
+    const { deps, mountInspector } = inspectorDeps();
+
+    await bootstrapMfe({
+      registryUrl: REGISTRY_URL,
+      sharedDepsUrl: SHARED_DEPS_URL,
+      allowOverride: true,
+      deps,
+    });
+
+    expect(mountInspector).toHaveBeenCalledTimes(1);
+    const disabled = mountInspector.mock.calls[0][1] as unknown[];
+    expect(Array.isArray(disabled)).toBe(true);
+    expect(disabled).toHaveLength(0);
+  });
+});
+
+describe('bootstrapMfe — Phase 14, Story 2 disabled-plugin registration (degraded app stub)', () => {
+  /**
+   * Drive the placeholder registered for a failed remote, then exercise its
+   * setup() against a fake core that captures `application.register` calls.
+   * Verifies the bootstrap chose `createDisabledPluginModuleWithReason` (not
+   * the bare inert placeholder) at the load-failure site, and threaded the
+   * right reason metadata through.
+   */
+  it('registers a degraded app stub for a failed remote, with the right id + humanReason', async () => {
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    const consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const factories = new Map<string, () => PluginPublicModule>();
+
+    const deps: Partial<BootstrapMfeDeps> = {
+      loadScript: jest.fn(async (url: string) => {
+        if (url === SHARED_DEPS_URL) {
+          testWindow().__osdSharedDeps__ = { React: { version: '16.14.0' } };
+        }
+      }),
+      fetchImpl: ((async () => ({
+        ok: true,
+        status: 200,
+        json: async () => validRegistry(),
+      })) as unknown) as typeof fetch,
+      loadRemoteContainer: jest.fn(async (_remoteEntry: string, scope: string) => {
+        if (scope === 'inspector') {
+          throw new Error(`boom: ${scope}`);
+        }
+        return {
+          init: () => undefined,
+          get: () => Promise.resolve(() => ({ plugin: () => undefined })),
+        } as MfeContainer;
+      }),
+      getRemoteModuleFactory: jest.fn(async () => () => ({ plugin: () => undefined })),
+      registerPluginFactory: jest.fn((id: string, factory: () => PluginPublicModule) => {
+        factories.set(id, factory);
+      }),
+      invokeCoreBootstrap: jest.fn(async () => undefined),
+    };
+
+    await bootstrapMfe({
+      registryUrl: REGISTRY_URL,
+      sharedDepsUrl: SHARED_DEPS_URL,
+      deps,
+    });
+
+    // Drive the registered placeholder for the failed plugin.
+    const mod = factories.get('inspector')!();
+    const instance = mod.plugin() as { setup: (core: unknown) => unknown };
+
+    // Fake `core` with a recording `application.register`. The placeholder
+    // must register exactly ONE app at the disabled plugin id.
+    const calls: Array<{
+      id: string;
+      title: string;
+      navLinkStatus?: number;
+      mount: (params: { element: HTMLElement }) => unknown;
+    }> = [];
+    instance.setup({
+      application: {
+        register: (app: {
+          id: string;
+          title: string;
+          navLinkStatus?: number;
+          mount: (params: { element: HTMLElement }) => unknown;
+        }) => {
+          calls.push(app);
+        },
+      },
+    });
+
+    expect(calls).toHaveLength(1);
+    expect(calls[0].id).toBe('inspector');
+    expect(calls[0].title).toContain('inspector');
+    // AppNavLinkStatus.hidden = 3 (assertion in disabled_plugin.test.ts).
+    expect(calls[0].navLinkStatus).toBe(3);
+
+    // The mount renders the degraded status component with the right humanReason.
+    // `Error('boom: inspector')` from loadRemoteContainer is classified as
+    // `mf-runtime-error` (no "Failed to load script" / "Subresource Integrity"
+    // markers), so the humanReason is "plugin runtime error" per the locked
+    // mapping in disabled_plugin.ts.
+    const element = document.createElement('div');
+    document.body.appendChild(element);
+    try {
+      calls[0].mount({ element });
+      expect(element.querySelector('[data-test-subj="mfeDegradedApp"]')).not.toBeNull();
+      expect(element.textContent).toContain('plugin runtime error');
+    } finally {
+      if (element.parentNode) element.parentNode.removeChild(element);
+    }
+
+    consoleError.mockRestore();
+    consoleWarn.mockRestore();
+  });
 });
 
 describe('bootstrapMfe — Phase 9 version-compatibility enforcement (Story 3)', () => {

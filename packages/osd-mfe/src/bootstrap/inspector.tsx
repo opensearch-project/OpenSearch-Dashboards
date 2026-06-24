@@ -51,6 +51,7 @@ import {
 } from '@elastic/eui';
 
 import { OVERRIDE_STORAGE_KEY } from './override_sources';
+import type { DisabledPluginRecord } from './disabled_plugin';
 
 /** The `localStorage` element id the inspector mounts itself into when no
  * explicit container is supplied. Stable so a hot-reload can find/replace it. */
@@ -82,13 +83,96 @@ export interface MfeInspectorProps {
   onApply: (id: string, url: string) => void;
   /** Remove the override for `id` and reload (host-provided). */
   onClear: (id: string) => void;
+  /**
+   * Optional list of plugins the bootstrap DISABLED during boot (Phase 14, Story
+   * 2 — `bootstrap_mfe.ts` collects these at every disable site: compat-skip,
+   * registry-trust skip, per-remote load failure). When non-empty, the panel
+   * renders an extra "Disabled plugins" section listing each id with its
+   * `errorClass` (machine label, for the developer) and `humanReason` (the same
+   * one-liner the user sees on `/app/<id>`). `undefined` or `[]` => the section
+   * is suppressed entirely (no banner / placeholder noise on a healthy boot).
+   */
+  disabled?: DisabledPluginRecord[];
 }
+
+/** Test_subj on the "Disabled plugins" section root — verifier hook for
+ * verify_phase14.js case F. Stable so a verifier can grep by attribute. */
+export const DISABLED_SECTION_TEST_SUBJ = 'mfeInspectorDisabledSection';
+
+/**
+ * Render the "Disabled plugins" section. Pulled out of {@link MfeInspector} so
+ * the rendered subtree (and its absence on a healthy boot) is independently
+ * testable. Returns `null` when no plugins are disabled — the inspector then
+ * shows nothing extra. The id is rendered first (the developer-facing label),
+ * the human reason next (the same one shown to the user via the degraded app
+ * stub), and the errorClass tucked into a small badge so the operator can
+ * cross-reference Phase 14 telemetry.
+ */
+const DisabledPluginsSection: React.FC<{ disabled?: DisabledPluginRecord[] }> = ({ disabled }) => {
+  if (!disabled || disabled.length === 0) {
+    return null;
+  }
+  return (
+    <div data-test-subj={DISABLED_SECTION_TEST_SUBJ}>
+      <EuiSpacer size="s" />
+      <EuiTitle size="xxs">
+        <h3>Disabled plugins ({disabled.length})</h3>
+      </EuiTitle>
+      <EuiText size="xs" color="subdued">
+        <p>
+          These plugins failed to load and are unavailable. Navigation to /app/&lt;id&gt; shows a
+          status page; healthy plugins continue to work.
+        </p>
+      </EuiText>
+      <EuiSpacer size="xs" />
+      {disabled.map((record) => (
+        <div
+          key={record.id}
+          data-test-subj={`mfeInspectorDisabled-${record.id}`}
+          style={{ marginBottom: 4 }}
+        >
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">
+                <strong>{record.id}</strong>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="warning" data-test-subj={`mfeInspectorDisabledClass-${record.id}`}>
+                {record.errorClass}
+              </EuiBadge>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText
+                size="s"
+                color="subdued"
+                data-test-subj={`mfeInspectorDisabledReason-${record.id}`}
+              >
+                {record.humanReason}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </div>
+      ))}
+      <EuiHorizontalRule margin="s" />
+    </div>
+  );
+};
 
 /**
  * The dev-only inspector panel. Renders a fixed, scrollable card in the corner
  * listing each MFE with a source badge and an editable `remoteEntry` field.
+ * Phase 14, Story 2: also renders a "Disabled plugins" section ABOVE the
+ * editable list when any remote was disabled at boot — keeping the failures
+ * visible at the top of the panel where a developer is most likely to spot
+ * them.
  */
-export const MfeInspector: React.FC<MfeInspectorProps> = ({ entries, onApply, onClear }) => {
+export const MfeInspector: React.FC<MfeInspectorProps> = ({
+  entries,
+  onApply,
+  onClear,
+  disabled,
+}) => {
   // Per-id edit buffer; an entry is only present once the user has typed into
   // that row, so untouched rows always reflect the current resolved URL.
   const [drafts, setDrafts] = useState<Record<string, string>>({});
@@ -121,6 +205,11 @@ export const MfeInspector: React.FC<MfeInspectorProps> = ({ entries, onApply, on
         </p>
       </EuiText>
       <EuiHorizontalRule margin="s" />
+
+      {/* Phase 14, Story 2 — surface every disabled plugin with its reason +
+        errorClass. Section is suppressed entirely when no plugins are disabled
+        (a healthy boot). */}
+      <DisabledPluginsSection disabled={disabled} />
 
       {entries.map((entry) => {
         const isOverridden = entry.source === 'override';
@@ -338,6 +427,12 @@ export interface MountInspectorOptions {
   container?: HTMLElement;
   /** Host environment for the apply/clear side effects (defaults to `window`). */
   env?: InspectorEnv;
+  /**
+   * Plugins the bootstrap disabled at boot (Phase 14, Story 2). Threaded
+   * through {@link MfeInspectorProps.disabled}; absent / empty => no extra
+   * section rendered.
+   */
+  disabled?: DisabledPluginRecord[];
 }
 
 /**
@@ -366,6 +461,7 @@ export function mountInspector(options: MountInspectorOptions): () => void {
   ReactDOM.render(
     <MfeInspector
       entries={options.entries}
+      disabled={options.disabled}
       onApply={(id, url) => applyOverride(id, url, env)}
       onClear={(id) => clearOverride(id, env)}
     />,

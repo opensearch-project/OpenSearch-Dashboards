@@ -35,11 +35,12 @@ import { verifyRegistrySignatureWeb } from '../registry/verify_registry_web';
 import { BootManifest, assertValidBootManifest } from '../registry/boot_manifest';
 import { buildShareScope } from './share_scope';
 import { getRemoteModuleFactory, loadRemoteContainer, loadScript } from './load_remote';
+import { invokeCoreBootstrap, registerPluginFactory } from './osd_bundles';
 import {
-  createDisabledPluginModule,
-  invokeCoreBootstrap,
-  registerPluginFactory,
-} from './osd_bundles';
+  createDisabledPluginModuleWithReason,
+  createDisabledPluginRecord,
+  DisabledPluginRecord,
+} from './disabled_plugin';
 import { buildOverrideMap, OverrideStorage, parseOverrideSources } from './override_sources';
 import { CompatPolicy } from './compat_policy';
 import { decideCompat, EvaluatedRemote } from './compat_enforcement';
@@ -49,6 +50,7 @@ import {
   MfeLoadTelemetryInput,
   TelemetryDispatcher,
   TelemetryDispatcherConfig,
+  TelemetryErrorClass,
   createTelemetryDispatcher,
 } from './telemetry';
 import { mfeWindow } from './types';
@@ -92,8 +94,14 @@ export interface BootstrapMfeDeps {
    * mounted in production. The default mounts the real React/EUI panel and
    * swallows any render failure (the inspector is a dev convenience that must
    * NEVER break app boot); tests inject a spy.
+   *
+   * Phase 14, Story 2: the inspector ALSO renders a "Disabled plugins" section
+   * when any remote was disabled (compat-skip / registry-trust skip / load
+   * failure). The bootstrap collects a {@link DisabledPluginRecord} at every
+   * disable site and passes the array here; an empty array suppresses the
+   * section entirely (no banner / placeholder noise on a healthy boot).
    */
-  mountInspector: (entries: ResolvedRemote[]) => void;
+  mountInspector: (entries: ResolvedRemote[], disabled: DisabledPluginRecord[]) => void;
   /**
    * Render the Phase 9 version-compatibility HARD-BLOCK page for the offending
    * (incompatible) remotes. Called ONLY in the non-production `block` policy when
@@ -278,7 +286,7 @@ function resolveDeps(overrides?: Partial<BootstrapMfeDeps>): BootstrapMfeDeps {
         return undefined;
       }
     },
-    mountInspector: (entries: ResolvedRemote[]) => {
+    mountInspector: (entries: ResolvedRemote[], disabled: DisabledPluginRecord[]) => {
       // Lazily load the Inspector so its react / react-dom / @elastic/eui imports
       // (externalized to window.__osdSharedDeps__ by the bootstrap build) are only
       // evaluated HERE — at mount time (step 5), AFTER step 1 has loaded shared-deps.
@@ -289,7 +297,7 @@ function resolveDeps(overrides?: Partial<BootstrapMfeDeps>): BootstrapMfeDeps {
       // single bootstrap file rather than emitting a separate async chunk.
       import(/* webpackMode: "eager" */ './inspector')
         .then(({ mountInspector: mountInspectorPanel }) => {
-          mountInspectorPanel({ entries });
+          mountInspectorPanel({ entries, disabled });
         })
         .catch((error) => {
           // The inspector is a dev-only convenience; a load/render failure must
@@ -489,6 +497,36 @@ export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> 
     }
   };
 
+  // Phase 14, Story 2: VISIBLE graceful-degradation UX. Every disable site
+  // (compat-skip / registry-trust skip / per-remote load failure) appends a
+  // {@link DisabledPluginRecord} here so the dev Inspector panel can render a
+  // "Disabled plugins" section AFTER boot, AND each placeholder registers a
+  // hidden degraded app stub at `/app/<id>` that renders a friendly status
+  // component instead of OSD's default 404 (see ./disabled_plugin.ts).
+  //
+  // Phase 4 invariant preservation: this is purely additive — the existing
+  // silent-disable mechanism (the placeholder satisfies plugin_reader so a
+  // single failed remote does NOT block core boot) is kept verbatim; we only
+  // enrich the placeholder's `setup()` with an OSD `application.register` call
+  // wrapped in defense-in-depth try/catch.
+  const disabledPlugins: DisabledPluginRecord[] = [];
+
+  /**
+   * Disable a plugin at the given id with the supplied error class. Builds
+   * the {@link DisabledPluginRecord}, registers a degraded-aware placeholder
+   * for it (`createDisabledPluginModuleWithReason` — registers the hidden
+   * `application` stub at setup time), and tracks the record so the Inspector
+   * can render its "Disabled plugins" section. Single source of truth for the
+   * three disable sites below — keeps `humanReason` consistent and the
+   * Inspector record array exhaustive.
+   */
+  const disablePlugin = (id: string, version: string, errorClass: TelemetryErrorClass): void => {
+    const record = createDisabledPluginRecord(id, version, errorClass);
+    disabledPlugins.push(record);
+    const placeholder = createDisabledPluginModuleWithReason(record);
+    deps.registerPluginFactory(id, () => placeholder);
+  };
+
   // Arm the lazy-CHUNK integrity-failure surface BEFORE anything loads, so it is
   // active for the entire page lifetime (Phase 12, Story 3). A remote's lazy chunks
   // are integrity-checked by the browser (rspack SubresourceIntegrityPlugin +
@@ -590,8 +628,16 @@ export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> 
         deps.renderBlockPage([trustOffender]);
         return;
       }
+      // Registry-trust skip (Phase 12, Story 4): an unverified registry means
+      // we cannot know which version each plugin should load, but we still
+      // satisfy plugin_reader by registering a degraded-aware placeholder for
+      // every advertised id. `version` is intentionally `''` — no specific
+      // artifact failed; the document itself is untrusted (verify_phase14
+      // surfaces this as `errorClass: 'unknown'` for now — the registry-trust
+      // taxonomy is not part of the locked Phase 14 enum and would expand the
+      // contract).
       for (const id of Object.keys(registry.mfes)) {
-        deps.registerPluginFactory(id, createDisabledPluginModule);
+        disablePlugin(id, '', 'unknown');
       }
       // eslint-disable-next-line no-console
       console.warn(
@@ -679,7 +725,12 @@ export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> 
     // skipped remote so OSD core's plugin_reader still resolves it and the app
     // boots; log a clear, per-remote reason (telemetry).
     for (const skipped of decision.skip) {
-      deps.registerPluginFactory(skipped.id, createDisabledPluginModule);
+      // Phase 14, Story 2: tracked + degraded-aware placeholder. errorClass is
+      // `compat-reject` for both incompatible and unknown remotes — Phase 9 is
+      // the single source of "this plugin should not load against this host",
+      // and the Inspector's humanReason ("incompatible with this OSD version")
+      // covers both phrasings.
+      disablePlugin(skipped.id, registry.mfes[skipped.id]?.version ?? '', 'compat-reject');
       // Telemetry (Phase 14, Story 1): a compat-skip is a `skipped` event with
       // errorClass `compat-reject` (durationMs=0 — no load attempted). Emitted
       // BEFORE the warn so the dispatcher fires even if the warn handler is
@@ -854,7 +905,15 @@ export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> 
 
       // Phase 4 graceful degradation (prod skip, no policy, or non-integrity remote).
       failedIds.push(id);
-      deps.registerPluginFactory(id, createDisabledPluginModule);
+      // Phase 14, Story 2: classify the rejection AGAIN (cheap, pure) so the
+      // disabled-plugin record carries the same `errorClass` the telemetry
+      // event already emitted in the load-loop catch-block above. Two-call
+      // path keeps the locked telemetry contract intact (telemetry is
+      // observational — see `./telemetry.ts`) while still letting the
+      // visible-UX layer reuse the same classification without coupling.
+      const errorClass = classifyLoadError(result.reason, hasIntegrity);
+      const version = registry.mfes[id]?.version ?? '';
+      disablePlugin(id, version, errorClass);
       // eslint-disable-next-line no-console
       console.error(
         `[mfe] Failed to load remote "${id}" from ${descriptor.remoteEntry}; ` +
@@ -902,7 +961,12 @@ export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> 
   //    `buildOverrides()` return an empty map. Mounted after core boot so it
   //    observes the booted app and never interferes with the locked load
   //    sequence above.
+  //
+  //    Phase 14, Story 2: pass the collected disabled records so the panel can
+  //    render its "Disabled plugins" section. The bootstrap appended a record
+  //    at every disable site (compat-skip / registry-trust skip / load failure)
+  //    above; an empty list = no failures = no extra section rendered.
   if (allowOverride) {
-    deps.mountInspector(Array.from(resolved.values()));
+    deps.mountInspector(Array.from(resolved.values()), disabledPlugins);
   }
 }
