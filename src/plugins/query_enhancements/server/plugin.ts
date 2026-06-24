@@ -106,10 +106,33 @@ export class QueryEnhancementsPlugin
     // Initialize the default query executor for prometheus
     prometheusManager.initializeDefaultQueryExecutor(client);
 
-    const pplSearchStrategy = pplSearchStrategyProvider(this.config$, this.logger, client);
+    // Read the scoped config flag that gates legacy Elasticsearch compatibility (Open Distro
+    // endpoint routing). Config observables emit synchronously on first subscribe, so this resolves
+    // before the strategies below are constructed.
+    let legacyEsCompatEnabled = false;
+    this.initializerContext.config
+      .create<ConfigSchema>()
+      .pipe(first())
+      .subscribe((cfg) => {
+        legacyEsCompatEnabled = cfg.legacyElasticsearchCompatibility?.enabled ?? false;
+      });
+
+    const pplSearchStrategy = pplSearchStrategyProvider(
+      this.config$,
+      this.logger,
+      client,
+      undefined,
+      legacyEsCompatEnabled
+    );
     const pplRawSearchStrategy = pplRawSearchStrategyProvider(this.config$, this.logger, client);
     const promqlSearchStrategy = promqlSearchStrategyProvider(this.config$, this.logger);
-    const sqlSearchStrategy = sqlSearchStrategyProvider(this.config$, this.logger, client);
+    const sqlSearchStrategy = sqlSearchStrategyProvider(
+      this.config$,
+      this.logger,
+      client,
+      undefined,
+      legacyEsCompatEnabled
+    );
     const sqlAsyncSearchStrategy = sqlAsyncSearchStrategyProvider(
       this.config$,
       this.logger,

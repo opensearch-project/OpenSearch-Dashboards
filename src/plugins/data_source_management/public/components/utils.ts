@@ -165,9 +165,12 @@ export const fetchDataSourceConnections = async (
   showRemoteOpensearchConnection: boolean = false
 ) => {
   try {
-    const directQueryConnectionsPromises = dataSources.map((ds) =>
-      getDirectQueryConnections(ds.id, http!).catch(() => [])
-    );
+    const directQueryConnectionsPromises = dataSources
+      // Direct query (`_plugins/_query/_datasources`) is an OpenSearch SQL plugin
+      // feature. Elasticsearch clusters never expose it, so skip the call for them
+      // to avoid confusing errors/log noise. Mirrors `fetchRemoteClusterConnections`.
+      .filter((ds) => ds.type !== DataSourceEngineType.Elasticsearch)
+      .map((ds) => getDirectQueryConnections(ds.id, http!).catch(() => []));
     const directQueryConnectionsResult = await Promise.all(directQueryConnectionsPromises);
     const directQueryConnections = directQueryConnectionsResult.flat();
     const localClusterConnections =

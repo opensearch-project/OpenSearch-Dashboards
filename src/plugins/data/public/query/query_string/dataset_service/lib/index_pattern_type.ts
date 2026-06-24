@@ -32,6 +32,8 @@ export const indexPatternTypeConfig: DatasetTypeConfig = {
     const pattern = path[path.length - 1];
     const patternMeta = pattern.meta as DataStructureCustomMeta;
 
+    const parentMeta = pattern.parent?.meta as DataStructureCustomMeta | undefined;
+
     return {
       id: pattern.id,
       title: pattern.title,
@@ -44,6 +46,8 @@ export const indexPatternTypeConfig: DatasetTypeConfig = {
             id: pattern.parent.id,
             title: pattern.parent.title,
             type: pattern.parent.type,
+            engineType: pattern.parent.type,
+            version: parentMeta?.dataSourceVersion ?? '',
           }
         : undefined,
     } as Dataset;
@@ -184,6 +188,12 @@ const fetchIndexPatterns = async (client: SavedObjectsClientContract): Promise<D
           id: dataSourceId!, // Since we know it exists
           title: dataSource.title,
           type: dataSource.dataSourceEngineType ?? DEFAULT_DATA.SOURCE_TYPES.OPENSEARCH,
+          // Carry the data-source version through CUSTOM meta so `toDataset` can populate
+          // `dataSource.version` for per-dataset language gating. Engine type stays in `type`.
+          meta: {
+            type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+            dataSourceVersion: dataSource.dataSourceVersion,
+          } as DataStructureCustomMeta,
         };
       }
       return indexPatternDataStructure;

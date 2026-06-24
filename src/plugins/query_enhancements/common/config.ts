@@ -7,6 +7,14 @@ import { schema, TypeOf } from '@osd/config-schema';
 
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
+  /**
+   * @experimental Gates per-dataset SQL/PPL gating for legacy Elasticsearch data sources and
+   * Open Distro endpoint routing. When disabled (default), behavior is unchanged: SQL/PPL are
+   * shown for all datasets and queries always hit the `/_plugins` endpoints.
+   */
+  legacyElasticsearchCompatibility: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+  }),
   queryAssist: schema.object({
     supportedLanguages: schema.arrayOf(
       schema.object({

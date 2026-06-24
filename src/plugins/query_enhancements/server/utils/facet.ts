@@ -15,7 +15,21 @@ export interface FacetProps {
   useJobs?: boolean;
   shimResponse?: boolean;
   requestCompression?: boolean;
+  /**
+   * When true, queries against Elasticsearch data sources are routed to the Open Distro client
+   * actions (e.g. `enhancements.pplQueryOpenDistro`). Gated by
+   * queryEnhancements.legacyElasticsearchCompatibility.enabled.
+   */
+  legacyEsCompatEnabled?: boolean;
 }
+
+const ELASTICSEARCH_ENGINE_TYPE = 'Elasticsearch';
+
+// Maps a base client action to its Open Distro equivalent for Elasticsearch data sources.
+const OPEN_DISTRO_ACTION_BY_ENDPOINT: Record<string, string> = {
+  'enhancements.pplQuery': 'enhancements.pplQueryOpenDistro',
+  'enhancements.sqlQuery': 'enhancements.sqlQueryOpenDistro',
+};
 
 export class Facet {
   private defaultClient: any;
@@ -24,6 +38,7 @@ export class Facet {
   private useJobs: boolean;
   private shimResponse: boolean;
   private requestCompression: boolean;
+  private legacyEsCompatEnabled: boolean;
 
   constructor({
     client,
@@ -32,6 +47,7 @@ export class Facet {
     useJobs = false,
     shimResponse = false,
     requestCompression = false,
+    legacyEsCompatEnabled = false,
   }: FacetProps) {
     this.defaultClient = client;
     this.logger = logger;
@@ -39,6 +55,7 @@ export class Facet {
     this.useJobs = useJobs;
     this.shimResponse = shimResponse;
     this.requestCompression = requestCompression;
+    this.legacyEsCompatEnabled = legacyEsCompatEnabled;
   }
 
   private getCompressionHeaders(): Record<string, string> {
@@ -50,10 +67,26 @@ export class Facet {
     request: any,
     endpoint: string
   ): Promise<FacetResponse> => {
+    // Declared outside the try so the catch block can log the resolved endpoint too.
+    let resolvedEndpoint = endpoint;
     try {
       const query: Query = request.body.query;
       const dataSource = query.dataset?.dataSource;
       const meta = dataSource?.meta;
+
+      // Route Elasticsearch data sources to the Open Distro endpoints. Since below-min ES languages
+      // are already hidden client-side, any ES query that reaches here is supported, so this is a
+      // straightforward "engine is Elasticsearch => Open Distro" mapping. Fail-open: unknown/missing
+      // engine types keep the default `_plugins` action.
+      if (this.legacyEsCompatEnabled) {
+        const engineType = dataSource?.engineType ?? dataSource?.type;
+        if (engineType === ELASTICSEARCH_ENGINE_TYPE && OPEN_DISTRO_ACTION_BY_ENDPOINT[endpoint]) {
+          resolvedEndpoint = OPEN_DISTRO_ACTION_BY_ENDPOINT[endpoint];
+        }
+        this.logger.info(
+          `Facet fetch: engineType=${engineType}, endpoint=${endpoint} -> ${resolvedEndpoint}`
+        );
+      }
       const { format, lang, fetchSize, queryId } = request.body;
       const compressionHeaders = this.getCompressionHeaders();
       const { highlight } = request.body;
@@ -76,13 +109,27 @@ export class Facet {
       const client = clientId
         ? context.dataSource.opensearch.legacy.getClient(clientId).callAPI
         : this.defaultClient.asScoped(request).callAsCurrentUser;
-      const queryRes = await client(endpoint, params);
+
+      // TEMP DEBUG: log the exact action + request params being sent to the cluster.
+      this.logger.info(
+        `Facet fetch CALL: action=${resolvedEndpoint}, clientId=${clientId ?? 'default'}, ` +
+          `engineType=${dataSource?.engineType ?? dataSource?.type}, ` +
+          `version=${dataSource?.version}, params=${JSON.stringify(params)}`
+      );
+
+      const queryRes = await client(resolvedEndpoint, params);
       return {
         success: true,
         data: queryRes,
       };
     } catch (err: any) {
-      this.logger.error(`Facet fetch: ${endpoint}: ${err}`);
+      // TEMP DEBUG: log the full error payload (statusCode + response body), which the default
+      // `${err}` string drops. Legacy clients put the cluster's JSON error under err.body / err.response.
+      this.logger.error(
+        `Facet fetch FAIL: action=${resolvedEndpoint}: ${err}\n` +
+          `statusCode=${err?.statusCode}\n` +
+          `body=${JSON.stringify(err?.body ?? err?.response ?? err?.data)}`
+      );
       return {
         success: false,
         data: err,

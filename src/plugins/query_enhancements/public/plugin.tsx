@@ -60,6 +60,19 @@ export class QueryEnhancementsPlugin
     const { queryString } = data.query;
     const { currentAppId$ } = this;
 
+    // When legacy Elasticsearch compatibility is enabled, declare per-engine minimum versions so
+    // SQL/PPL are gated per selected dataset (and routed to Open Distro server-side). When disabled
+    // (default), these stay undefined so the language service evaluator fail-opens — behavior is
+    // unchanged. Minimums follow the "features by engine version" matrix: SQL needs ES >= 6.5, PPL
+    // needs ES >= 7.9.
+    const legacyEsCompatEnabled = this.config.legacyElasticsearchCompatibility?.enabled;
+    const pplSupportedDataSources = legacyEsCompatEnabled
+      ? { minVersionByEngine: { Elasticsearch: '7.9.0' } }
+      : undefined;
+    const sqlSupportedDataSources = legacyEsCompatEnabled
+      ? { minVersionByEngine: { Elasticsearch: '6.5.0' } }
+      : undefined;
+
     // Define controls once for each language and register language configurations outside of `getUpdates$`
     const pplControls = [pplLanguageReference('PPL')];
     const sqlControls = [sqlLanguageReference('SQL')];
@@ -116,6 +129,7 @@ export class QueryEnhancementsPlugin
         'agentTraces',
         'dashboard',
       ],
+      supportedDataSources: pplSupportedDataSources,
       sampleQueries: [
         {
           title: i18n.translate('queryEnhancements.sampleQuery.titleContainsWind', {
@@ -158,9 +172,9 @@ export class QueryEnhancementsPlugin
     };
     queryString.getLanguageService().registerLanguage(pplLanguageConfig);
 
-    // Register SQL language configuration
-    // TODO: once analytics engine support lands, gate SQL language registration
-    // on dataset type so SQL is only exposed for Mustang-backed datasets.
+    // Register SQL language configuration. Per-dataset engine/version gating (e.g. legacy
+    // Elasticsearch below SQL's minimum) is declared via `supportedDataSources` below and applied
+    // by the language service evaluator.
     const sqlLanguageConfig: LanguageConfig = {
       id: 'SQL',
       title: 'OpenSearch SQL',
@@ -196,6 +210,7 @@ export class QueryEnhancementsPlugin
       editor: createEditor(SingleLineInput, null, sqlControls, DefaultInput),
       editorSupportedAppNames: ['discover', 'explore', 'agentTraces'],
       supportedAppNames: ['discover', 'data-explorer', 'explore', 'agentTraces'],
+      supportedDataSources: sqlSupportedDataSources,
       hideDatePicker: true,
       sampleQueries: [
         {

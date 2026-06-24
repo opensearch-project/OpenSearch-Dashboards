@@ -539,8 +539,19 @@ const executeQueryBase = async (
       histogramConfig = createHistogramConfigWithInterval(dataView, interval, services, getState);
     }
 
+    // Legacy Elasticsearch (Open Distro) PPL has no `span()`/`timechart` time-bucketing in the
+    // `stats` by-clause, so the histogram query fails to parse. Skip building it for Elasticsearch
+    // data sources and run the plain query instead (the histogram chart just won't populate).
+    const datasetEngineType = dataset?.dataSource?.engineType ?? dataset?.dataSource?.type;
+    const isElasticsearchDataset = datasetEngineType === 'Elasticsearch';
+
     let effectiveQuery = queryString;
-    if (query.language === 'PPL' && histogramConfig && isHistogramQuery) {
+    if (
+      query.language === 'PPL' &&
+      histogramConfig &&
+      isHistogramQuery &&
+      !isElasticsearchDataset
+    ) {
       effectiveQuery = buildPPLHistogramQuery(queryString, histogramConfig);
     }
 

@@ -121,8 +121,10 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
     const currentQuery = queryString.getQuery();
     const dsId = currentQuery.dataset?.dataSource?.id;
     const dsVersion = currentQuery.dataset?.dataSource?.version;
+    const dsEngineType =
+      currentQuery.dataset?.dataSource?.engineType ?? currentQuery.dataset?.dataSource?.type;
     return {
-      useRuntimeGrammar: shouldUseRuntimeGrammar(dsId, dsVersion),
+      useRuntimeGrammar: shouldUseRuntimeGrammar(dsId, dsVersion, dsEngineType),
       dataSourceId: dsId,
       dataSourceVersion: dsVersion,
     };
@@ -158,8 +160,9 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
   useEffect(() => {
     const dsId = dataset?.dataSource?.id;
     const dsVersion = dataset?.dataSource?.version;
+    const dsEngineType = dataset?.dataSource?.engineType ?? dataset?.dataSource?.type;
     syncPPLValidationContext(editorRef.current, {
-      useRuntimeGrammar: shouldUseRuntimeGrammar(dsId, dsVersion),
+      useRuntimeGrammar: shouldUseRuntimeGrammar(dsId, dsVersion, dsEngineType),
       dataSourceId: dsId,
       dataSourceVersion: dsVersion,
     });
@@ -167,7 +170,13 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
     if (model) {
       void revalidatePPLModel(model);
     }
-  }, [dataset?.dataSource?.id, dataset?.dataSource?.version, editorRef]);
+  }, [
+    dataset?.dataSource?.id,
+    dataset?.dataSource?.version,
+    dataset?.dataSource?.engineType,
+    dataset?.dataSource?.type,
+    editorRef,
+  ]);
 
   // Cleanup validation context on unmount
   useEffect(

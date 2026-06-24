@@ -74,6 +74,82 @@ describe('indexPatternTypeConfig', () => {
     });
   });
 
+  describe('toDataset engineType/version plumbing', () => {
+    test('populates engineType and version from pattern.parent and its CUSTOM meta', () => {
+      const mockPath: DataStructure[] = [
+        {
+          id: 'test-pattern',
+          title: 'Test Pattern',
+          type: 'INDEX_PATTERN',
+          meta: { timeFieldName: '@timestamp', type: DATA_STRUCTURE_META_TYPES.CUSTOM },
+          parent: {
+            id: 'datasource-es',
+            title: 'My ES Cluster',
+            type: 'Elasticsearch',
+            meta: {
+              type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+              dataSourceVersion: '7.10.2',
+            },
+          },
+        },
+      ];
+
+      const result = indexPatternTypeConfig.toDataset(mockPath);
+
+      expect(result.dataSource).toEqual({
+        id: 'datasource-es',
+        title: 'My ES Cluster',
+        type: 'Elasticsearch',
+        engineType: 'Elasticsearch',
+        version: '7.10.2',
+      });
+    });
+
+    test('defaults version to empty string when parent meta has no dataSourceVersion', () => {
+      const mockPath: DataStructure[] = [
+        {
+          id: 'test-pattern',
+          title: 'Test Pattern',
+          type: 'INDEX_PATTERN',
+          meta: { timeFieldName: '@timestamp', type: DATA_STRUCTURE_META_TYPES.CUSTOM },
+          parent: {
+            id: 'datasource-es',
+            title: 'My ES Cluster',
+            type: 'Elasticsearch',
+            meta: {
+              type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+            },
+          },
+        },
+      ];
+
+      const result = indexPatternTypeConfig.toDataset(mockPath);
+
+      expect(result.dataSource).toEqual({
+        id: 'datasource-es',
+        title: 'My ES Cluster',
+        type: 'Elasticsearch',
+        engineType: 'Elasticsearch',
+        version: '',
+      });
+    });
+
+    test('leaves dataSource undefined when pattern has no parent', () => {
+      const mockPath: DataStructure[] = [
+        {
+          id: 'test-pattern',
+          title: 'Test Pattern',
+          type: 'INDEX_PATTERN',
+          meta: { timeFieldName: '@timestamp', type: DATA_STRUCTURE_META_TYPES.CUSTOM },
+        },
+      ];
+
+      const result = indexPatternTypeConfig.toDataset(mockPath);
+
+      expect(result.dataSource).toBeUndefined();
+    });
+  });
+
   test('fetchFields returns fields from index pattern', async () => {
     const mockIndexPattern = {
       fields: [
@@ -175,6 +251,10 @@ describe('indexPatternTypeConfig', () => {
           id: 'datasource-abc',
           title: 'My Data Source',
           type: 'OpenSearch',
+          meta: {
+            type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+            dataSourceVersion: undefined,
+          },
         },
       });
     });
@@ -223,6 +303,10 @@ describe('indexPatternTypeConfig', () => {
           id: 'datasource-xyz',
           title: 'External Data Source',
           type: 'OpenSearch',
+          meta: {
+            type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+            dataSourceVersion: undefined,
+          },
         },
       });
     });
@@ -319,6 +403,10 @@ describe('indexPatternTypeConfig', () => {
         id: 'datasource-1',
         title: 'Data Source 1',
         type: 'OpenSearch',
+        meta: {
+          type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+          dataSourceVersion: undefined,
+        },
       });
 
       // Namespaced method
@@ -326,6 +414,10 @@ describe('indexPatternTypeConfig', () => {
         id: 'datasource-2',
         title: 'Data Source 2',
         type: 'OpenSearch',
+        meta: {
+          type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+          dataSourceVersion: undefined,
+        },
       });
 
       // No data source

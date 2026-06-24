@@ -173,6 +173,13 @@ export class PPLSearchInterceptor extends SearchInterceptor {
   private getAggConfig(request: IOpenSearchDashboardsSearchRequest, query: Query) {
     const { aggs } = request.params.body;
     if (!aggs || !query.dataset || !query.dataset.timeFieldName) return;
+
+    // Legacy Elasticsearch (Open Distro) PPL has no `span()` grouping expression in the `stats`
+    // by-clause (it accepts field names only), so the histogram aggregation query fails to parse.
+    // Skip emitting the agg config for Elasticsearch data sources; the main query still runs.
+    const engineType = query.dataset.dataSource?.engineType ?? query.dataset.dataSource?.type;
+    if (engineType === 'Elasticsearch') return;
+
     const aggsConfig: QueryAggConfig = {};
     const { fromDate, toDate } = formatTimePickerDate(
       this.queryService.timefilter.timefilter.getTime(),
