@@ -72,39 +72,4 @@ describe('diagnosticToMarker', () => {
     const marker = diagnosticToMarker(makeDiagnostic({ docUrl: undefined }));
     expect(marker.code).toBe('rule');
   });
-
-  describe('fix', () => {
-    const markerFix = (m: monaco.editor.IMarkerData) =>
-      (m as monaco.editor.IMarkerData & {
-        fix?: { title: string; text: string; range?: monaco.IRange };
-      }).fix;
-
-    it('omits fix when the diagnostic has none', () => {
-      expect(markerFix(diagnosticToMarker(makeDiagnostic()))).toBeUndefined();
-    });
-
-    it('copies a fix with no range (range stays undefined)', () => {
-      const marker = diagnosticToMarker(makeDiagnostic({ fix: { title: 'T', text: 'foo' } }));
-      expect(markerFix(marker)).toEqual({ title: 'T', text: 'foo', range: undefined });
-    });
-
-    it('converts an explicit fix range to Monaco coordinates', () => {
-      const marker = diagnosticToMarker(
-        makeDiagnostic({
-          fix: {
-            title: 'T',
-            text: '',
-            range: { startLine: 2, startColumn: 3, endLine: 2, endColumn: 4 },
-          },
-        })
-      );
-      // Same +1 column shift the diagnostic range gets.
-      expect(markerFix(marker)?.range).toEqual({
-        startLineNumber: 2,
-        startColumn: 4,
-        endLineNumber: 2,
-        endColumn: 5,
-      });
-    });
-  });
 });

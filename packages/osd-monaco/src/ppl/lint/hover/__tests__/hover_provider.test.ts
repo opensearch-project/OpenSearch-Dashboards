@@ -5,8 +5,12 @@
 
 import { monaco } from '../../../../monaco';
 import { LINT_MARKER_SOURCE } from '../../diagnostic_to_marker';
-import { markerFixKey, MarkerFix, setModelFixes, clearModelFixes } from '../../fix_registry';
-import { setModelHoverFacts, clearModelHoverFacts, HoverFacts } from '../hover_registry';
+import {
+  markerFixKey,
+  setModelHoverFacts,
+  clearModelHoverFacts,
+  HoverFacts,
+} from '../hover_registry';
 import { pplLintHoverProvider, LINT_OWNER } from '../hover_provider';
 
 type Marker = monaco.editor.IMarker;
@@ -43,7 +47,6 @@ beforeEach(() => {
 });
 afterEach(() => {
   jest.restoreAllMocks();
-  clearModelFixes(model);
   clearModelHoverFacts(model);
 });
 
@@ -85,7 +88,7 @@ describe('pplLintHoverProvider', () => {
     expect(hoverAt(1, 7)).toBeNull();
   });
 
-  it('includes per-instance facts and a fix preview from the side tables', () => {
+  it('includes per-instance facts from the side table', () => {
     const marker = makeMarker({
       code: { value: 'field-validation', target: monaco.Uri.parse('https://docs.example/f') },
       message: 'Unknown field "reveneu". Did you mean "revenue"?',
@@ -93,12 +96,9 @@ describe('pplLintHoverProvider', () => {
     markersByOwner[LINT_OWNER] = [marker];
     const facts: HoverFacts = { field: 'reveneu', suggestion: 'revenue' };
     setModelHoverFacts(model, new Map([[markerFixKey(marker), facts]]));
-    const fix: MarkerFix = { title: 'Replace with "revenue"', text: 'revenue' };
-    setModelFixes(model, new Map([[markerFixKey(marker), fix]]));
 
     const md = markdownOf(hoverAt(1, 7));
     expect(md).toContain('Closest known field: `revenue`');
-    expect(md).toContain('**Suggested fix** → `revenue`');
   });
 
   it('picks the innermost marker when several overlap', () => {

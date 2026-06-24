@@ -12,18 +12,14 @@ import { pplRangeFormatProvider } from './formatter';
 import { resolvePPLValidationResult } from './validation_provider';
 import { getPPLLintContext, isPPLLintEnabled, resolvePPLLintResult } from './lint_bridge';
 import { LintResult } from './lint/diagnostic';
-import { diagnosticToMarker, SYNTAX_MARKER_SOURCE } from './lint/diagnostic_to_marker';
-import { pplLintCodeActionProvider } from './lint/code_action_provider';
-import {
-  clearModelFixes,
-  clearModelSyntaxFixes,
-  markerFixKey,
-  MarkerFix,
-  setModelFixes,
-  setModelSyntaxFixes,
-} from './lint/fix_registry';
+import { diagnosticToMarker } from './lint/diagnostic_to_marker';
 import { LINT_OWNER, pplLintHoverProvider } from './lint/hover/hover_provider';
-import { clearModelHoverFacts, HoverFacts, setModelHoverFacts } from './lint/hover/hover_registry';
+import {
+  clearModelHoverFacts,
+  HoverFacts,
+  markerFixKey,
+  setModelHoverFacts,
+} from './lint/hover/hover_registry';
 
 const PPL_LANGUAGE_ID = ID;
 const OWNER = 'PPL_WORKER';
@@ -117,7 +113,6 @@ const setupPPLTokenization = () => {
 const processSyntaxHighlighting = async (model: monaco.editor.IModel) => {
   if (model.getLanguageId() !== PPL_LANGUAGE_ID) {
     monaco.editor.setModelMarkers(model, OWNER, []);
-    clearModelSyntaxFixes(model);
     return;
   }
 
@@ -133,8 +128,6 @@ const processSyntaxHighlighting = async (model: monaco.editor.IModel) => {
     )) as PPLValidationResult;
 
     if (validationResult.errors.length > 0) {
-      const syntaxFixes = new Map<string, MarkerFix>();
-
       const markers: monaco.editor.IMarkerData[] = validationResult.errors.map((error) => {
         const startLineNumber = error.line || 1;
         const endLineNumber = error.endLine || error.line || startLineNumber;
@@ -147,31 +140,22 @@ const processSyntaxHighlighting = async (model: monaco.editor.IModel) => {
         const safeEndColumn = Math.max(safeStartColumn, endColumn);
 
         const docLink = getPPLDocumentationLink(error.message);
-        const marker: monaco.editor.IMarkerData = {
+        return {
           severity: monaco.MarkerSeverity.Error,
           message: error.message,
           startLineNumber: safeStartLine,
           startColumn: safeStartColumn,
           endLineNumber: safeEndLine,
           endColumn: safeEndColumn,
-          source: SYNTAX_MARKER_SOURCE,
           code: {
             value: 'View Documentation',
             target: monaco.Uri.parse(docLink.url),
           },
         };
-
-        if (error.fix) {
-          syntaxFixes.set(markerFixKey(marker), error.fix);
-        }
-
-        return marker;
       });
 
-      setModelSyntaxFixes(model, syntaxFixes);
       monaco.editor.setModelMarkers(model, OWNER, markers);
     } else {
-      clearModelSyntaxFixes(model);
       monaco.editor.setModelMarkers(model, OWNER, []);
     }
   } catch {
@@ -190,14 +174,12 @@ const processLintHighlighting = (model: monaco.editor.IModel): void => {
 
   if (!isPPLLintEnabled()) {
     monaco.editor.setModelMarkers(model, LINT_OWNER, []);
-    clearModelFixes(model);
     clearModelHoverFacts(model);
     return;
   }
 
   if (model.getLanguageId() !== PPL_LANGUAGE_ID) {
     monaco.editor.setModelMarkers(model, LINT_OWNER, []);
-    clearModelFixes(model);
     clearModelHoverFacts(model);
     return;
   }
@@ -225,26 +207,19 @@ const processLintHighlighting = (model: monaco.editor.IModel): void => {
         return;
       }
       const markers = lintResult.diagnostics.map(diagnosticToMarker);
-      // Extract fix/hoverFacts into side tables before passing markers to Monaco
+      // Extract hoverFacts into a side table before passing markers to Monaco
       // (MarkerService drops custom properties on rebuild).
-      const fixes = new Map<string, MarkerFix>();
       const hoverFacts = new Map<string, HoverFacts>();
       for (const marker of markers) {
         const withExtras = marker as monaco.editor.IMarkerData & {
-          fix?: MarkerFix;
           hoverFacts?: HoverFacts;
         };
         const key = markerFixKey(marker);
-        if (withExtras.fix) {
-          fixes.set(key, withExtras.fix);
-          delete withExtras.fix;
-        }
         if (withExtras.hoverFacts) {
           hoverFacts.set(key, withExtras.hoverFacts);
           delete withExtras.hoverFacts;
         }
       }
-      setModelFixes(model, fixes);
       setModelHoverFacts(model, hoverFacts);
       monaco.editor.setModelMarkers(model, LINT_OWNER, markers);
     })
@@ -294,8 +269,6 @@ const setupPPLSyntaxHighlighting = () => {
         } else {
           monaco.editor.setModelMarkers(model, OWNER, []);
           monaco.editor.setModelMarkers(model, LINT_OWNER, []);
-          clearModelFixes(model);
-          clearModelSyntaxFixes(model);
           clearModelHoverFacts(model);
         }
       })
@@ -319,8 +292,6 @@ const setupPPLSyntaxHighlighting = () => {
       lintGenerations.delete(model.id);
       monaco.editor.setModelMarkers(model, OWNER, []);
       monaco.editor.setModelMarkers(model, LINT_OWNER, []);
-      clearModelFixes(model);
-      clearModelSyntaxFixes(model);
       clearModelHoverFacts(model);
     })
   );
@@ -352,11 +323,6 @@ export const registerPPLLanguage = () => {
 
   const disposeSyntaxHighlighting = setupPPLSyntaxHighlighting();
 
-  const codeActionDisposable = monaco.languages.registerCodeActionProvider(
-    PPL_LANGUAGE_ID,
-    pplLintCodeActionProvider
-  );
-
   const hoverDisposable = monaco.languages.registerHoverProvider(
     PPL_LANGUAGE_ID,
     pplLintHoverProvider
@@ -365,7 +331,6 @@ export const registerPPLLanguage = () => {
   return {
     dispose: () => {
       disposeSyntaxHighlighting();
-      codeActionDisposable.dispose();
       hoverDisposable.dispose();
     },
   };

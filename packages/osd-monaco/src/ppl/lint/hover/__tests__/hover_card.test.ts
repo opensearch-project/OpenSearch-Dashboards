@@ -56,16 +56,14 @@ describe('renderHoverCard', () => {
     expect(md).toContain('Did you mean one of: `logs_2024`, `logs_2025`?');
   });
 
-  it('renders a fix preview when fixText is present', () => {
+  it('renders a closest-field suggestion from facts', () => {
     const md = renderHoverCard({
       ruleId: 'field-validation',
       severityLabel: 'Warning',
       message: 'Unknown field "reveneu". Did you mean "revenue"?',
       content: getRuleHoverContent('field-validation'),
       facts: { field: 'reveneu', suggestion: 'revenue' },
-      fixText: 'revenue',
     });
-    expect(md).toContain('**Suggested fix** → `revenue`');
     expect(md).toContain('Closest known field: `revenue`');
   });
 

@@ -15,12 +15,6 @@ export interface DiagnosticRange {
   endColumn: number;
 }
 
-export interface DiagnosticFix {
-  title: string;
-  text: string;
-  range?: DiagnosticRange;
-}
-
 export type DiagnosticHoverFacts = HoverFacts;
 
 export interface Diagnostic {
@@ -29,7 +23,6 @@ export interface Diagnostic {
   message: string;
   range: DiagnosticRange;
   docUrl?: string;
-  fix?: DiagnosticFix;
   hoverFacts?: DiagnosticHoverFacts;
 }
 

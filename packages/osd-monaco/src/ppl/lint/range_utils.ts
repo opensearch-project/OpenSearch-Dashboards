@@ -87,8 +87,5 @@ export function remapPipeFirstColumns(diagnostics: Diagnostic[]): Diagnostic[] {
   return diagnostics.map((diagnostic) => ({
     ...diagnostic,
     range: shift(diagnostic.range),
-    fix: diagnostic.fix?.range
-      ? { ...diagnostic.fix, range: shift(diagnostic.fix.range) }
-      : diagnostic.fix,
   }));
 }

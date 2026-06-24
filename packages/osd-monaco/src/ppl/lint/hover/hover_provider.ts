@@ -5,8 +5,7 @@
 
 import { monaco } from '../../../monaco';
 import { LINT_MARKER_SOURCE } from '../diagnostic_to_marker';
-import { getModelFix, markerFixKey } from '../fix_registry';
-import { getModelHoverFacts } from './hover_registry';
+import { getModelHoverFacts, markerFixKey } from './hover_registry';
 import { getRuleHoverContent } from './engine_outcomes';
 import { renderHoverCard, SeverityLabel } from './hover_card';
 
@@ -77,7 +76,6 @@ export const pplLintHoverProvider: monaco.languages.HoverProvider = {
     const ruleId = ruleIdOf(marker);
     const key = markerFixKey(marker);
     const facts = getModelHoverFacts(model, key);
-    const fix = getModelFix(model, key);
 
     const value = renderHoverCard({
       ruleId: ruleId ?? 'ppl-lint',
@@ -86,7 +84,6 @@ export const pplLintHoverProvider: monaco.languages.HoverProvider = {
       docUrl: docUrlOf(marker),
       content: ruleId ? getRuleHoverContent(ruleId) : undefined,
       facts,
-      fixText: fix?.text,
     });
 
     return {

@@ -47,7 +47,6 @@ export {
   runLint,
   getBundledCatalog,
   createRuntimeRuleNameToIndex,
-  buildCommandSuggestion,
 } from './ppl';
 export type {
   PPLValidationContext,
@@ -57,7 +56,6 @@ export type {
   PPLLintContext,
   PPLLintBridge,
   PPLLintBridgeRequest,
-  CommandSuggestion,
   Diagnostic,
   DiagnosticRange,
   LintResult,

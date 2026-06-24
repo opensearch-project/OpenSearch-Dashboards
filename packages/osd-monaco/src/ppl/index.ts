@@ -37,8 +37,6 @@ export type {
   PPLLintBridgeRequest,
   PPLLintHttpClient,
 } from './lint_bridge';
-export { buildCommandSuggestion } from './command_suggestion';
-export type { CommandSuggestion } from './command_suggestion';
 export type { Diagnostic, DiagnosticRange, LintResult, LintSeverity } from './lint/diagnostic';
 export type { BundleRuleOverrides, CatalogEntry, LintRunContext } from './lint/types';
 export { runLint } from './lint/lint_runner';

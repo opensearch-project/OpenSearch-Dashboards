@@ -5,9 +5,31 @@
 
 import { monaco } from '../../../monaco';
 import type { HoverFacts } from '../hover_facts';
-import { markerFixKey } from '../fix_registry';
 
 export type { HoverFacts } from '../hover_facts';
+
+interface MarkerKeyParts {
+  startLineNumber: number;
+  startColumn: number;
+  endLineNumber: number;
+  endColumn: number;
+  message: string;
+}
+
+/**
+ * Key from fields that survive Monaco's MarkerService rebuild (position + message).
+ * Lives here (not in a fix registry) because the hover-facts side table is the
+ * only remaining keyed-by-marker store.
+ */
+export function markerFixKey(marker: MarkerKeyParts): string {
+  return [
+    marker.startLineNumber,
+    marker.startColumn,
+    marker.endLineNumber,
+    marker.endColumn,
+    marker.message,
+  ].join(':');
+}
 
 interface HoverRegistryState {
   byModel: WeakMap<monaco.editor.ITextModel, Map<string, HoverFacts>>;
@@ -49,5 +71,3 @@ export function getModelHoverFacts(
 export function clearModelHoverFacts(model: monaco.editor.ITextModel): void {
   getState().byModel.delete(model);
 }
-
-export { markerFixKey };

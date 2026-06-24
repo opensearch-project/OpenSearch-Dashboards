@@ -15,7 +15,6 @@ export interface HoverCardInput {
   docUrl?: string;
   content?: RuleHoverContent;
   facts?: HoverFacts;
-  fixText?: string;
 }
 
 const SEVERITY_GLYPH: Record<SeverityLabel, string> = {
@@ -101,7 +100,7 @@ function renderFactsLine(facts: HoverFacts): string | undefined {
 }
 
 export function renderHoverCard(input: HoverCardInput): string {
-  const { ruleId, severityLabel, message, docUrl, content, facts, fixText } = input;
+  const { ruleId, severityLabel, message, docUrl, content, facts } = input;
   const lines: string[] = [];
 
   lines.push(`${SEVERITY_GLYPH[severityLabel]} **${escapeInline(ruleId)}** · ${severityLabel}`);
@@ -130,11 +129,6 @@ export function renderHoverCard(input: HoverCardInput): string {
     lines.push(
       `**Why ${severityLabel.toLowerCase()}** — ${FAILURE_CLASS_EXPLAINER[content.failureClass]}`
     );
-  }
-
-  if (fixText !== undefined) {
-    lines.push('');
-    lines.push(`**Suggested fix** → ${code(fixText)}`);
   }
 
   if (content?.safeToIgnoreWhen) {
