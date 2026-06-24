@@ -311,7 +311,7 @@
     "better-sqlite3": "^12.9.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.22.9",
+    "@babel/core": "^7.29.6",
     "@babel/eslint-parser": "^7.25.0",
     "@babel/parser": "^7.22.9",
     "@babel/plugin-transform-class-static-block": "^7.24.4",
