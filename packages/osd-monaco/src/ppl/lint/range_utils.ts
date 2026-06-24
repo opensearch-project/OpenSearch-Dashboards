@@ -9,21 +9,19 @@ import { Diagnostic, DiagnosticRange } from './diagnostic';
 export const PIPE_FIRST_PREFIX = 'source=t ';
 
 export function rangeFromTokens(start: Token, stop: Token): DiagnosticRange {
-  const startLine = start.line;
-  const startColumn = start.column;
-  const stopText = stop.text ?? '';
-  const endLine = stop.line;
-  const endColumn = stop.column + stopText.length;
-  return { startLine, startColumn, endLine, endColumn };
+  return {
+    startLine: start.line,
+    startColumn: start.column,
+    endLine: stop.line,
+    endColumn: stop.column + (stop.text ?? '').length,
+  };
 }
 
 export function rangeFromContext(ctx: ParserRuleContext): DiagnosticRange {
-  const start = ctx.start;
-  const stop = ctx.stop ?? ctx.start;
-  if (!start || !stop) {
+  if (!ctx.start) {
     return { startLine: 1, startColumn: 0, endLine: 1, endColumn: 1 };
   }
-  return rangeFromTokens(start, stop);
+  return rangeFromTokens(ctx.start, ctx.stop ?? ctx.start);
 }
 
 export function rangeWithinToken(

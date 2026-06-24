@@ -123,12 +123,8 @@ export function attachPPLContexts(
 
 /** Detach all PPL validation + lint contexts and clear the refs. */
 export function cleanupPPLContexts(refs: PPLDetachRefs): void {
-  refs.validationContext.current?.();
-  refs.validationContext.current = undefined;
-  refs.grammarRefresh.current?.();
-  refs.grammarRefresh.current = undefined;
-  refs.lintContext.current?.();
-  refs.lintContext.current = undefined;
-  refs.lintGrammarRefresh.current?.();
-  refs.lintGrammarRefresh.current = undefined;
+  for (const key of Object.keys(refs) as Array<keyof PPLDetachRefs>) {
+    refs[key].current?.();
+    refs[key].current = undefined;
+  }
 }

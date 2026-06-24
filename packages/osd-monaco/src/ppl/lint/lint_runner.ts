@@ -34,9 +34,10 @@ export function mergeConfig(local: CatalogEntry, override?: Partial<CatalogEntry
 }
 
 function isContextEmpty(context: LintRunContext | undefined): boolean {
-  const noFields = !context?.fields || context.fields.size === 0;
-  const noIndices = !context?.visibleIndices || context.visibleIndices.length === 0;
-  return noFields && noIndices;
+  return (
+    (!context?.fields || context.fields.size === 0) &&
+    (!context?.visibleIndices || context.visibleIndices.length === 0)
+  );
 }
 
 export function runLint(tree: ParserRuleContext, options: RunLintOptions): Diagnostic[] {
@@ -56,19 +57,12 @@ export function runLint(tree: ParserRuleContext, options: RunLintOptions): Diagn
   for (const localConfig of catalog) {
     const config = mergeConfig(localConfig, effectiveOverrides?.[localConfig.id]);
 
-    if (!config.enabled) {
-      continue;
-    }
-
-    if (config.needsExplain) {
-      continue;
-    }
-
-    if (!appliesTo(config, dataSourceVersion, context?.isCalcite, knownVersion)) {
-      continue;
-    }
-
-    if (config.needsContext && isContextEmpty(context)) {
+    if (
+      !config.enabled ||
+      config.needsExplain ||
+      !appliesTo(config, dataSourceVersion, context?.isCalcite, knownVersion) ||
+      (config.needsContext && isContextEmpty(context))
+    ) {
       continue;
     }
 

@@ -10,8 +10,7 @@ import { CatalogEntry } from './types';
 export const OSD_KNOWN_VERSION = '3.7.0';
 
 function coerce(version: string): string | null {
-  const coerced = semver.coerce(version);
-  return coerced ? coerced.version : null;
+  return semver.coerce(version)?.version ?? null;
 }
 
 export function appliesTo(

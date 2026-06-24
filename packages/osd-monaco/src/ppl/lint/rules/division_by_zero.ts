@@ -18,10 +18,7 @@ function isZeroLiteral(raw: string): boolean {
   if (text.startsWith('+') || text.startsWith('-')) {
     text = text.slice(1).trim();
   }
-  if (!/^(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)$/.test(text)) {
-    return false;
-  }
-  return Number(text) === 0;
+  return /^(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)$/.test(text) && Number(text) === 0;
 }
 
 export const divisionByZeroDetector: Detector = (tree, config, _context, ruleNameToIndex) => {

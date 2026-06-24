@@ -171,13 +171,7 @@ const processLintHighlighting = (model: monaco.editor.IModel): void => {
   const generation = (lintGenerations.get(model.id) ?? 0) + 1;
   lintGenerations.set(model.id, generation);
 
-  if (!isPPLLintEnabled()) {
-    monaco.editor.setModelMarkers(model, LINT_OWNER, []);
-    clearModelHoverFacts(model);
-    return;
-  }
-
-  if (model.getLanguageId() !== PPL_LANGUAGE_ID) {
+  if (!isPPLLintEnabled() || model.getLanguageId() !== PPL_LANGUAGE_ID) {
     monaco.editor.setModelMarkers(model, LINT_OWNER, []);
     clearModelHoverFacts(model);
     return;

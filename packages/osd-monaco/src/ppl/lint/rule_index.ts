@@ -123,11 +123,10 @@ export function collectDottedPathNodes(
         continue;
       }
       const startIndex: number | string = node.start?.start ?? `__null_${fallbackId++}`;
-      if (seen.has(startIndex)) {
-        continue;
+      if (!seen.has(startIndex)) {
+        seen.add(startIndex);
+        result.push(node);
       }
-      seen.add(startIndex);
-      result.push(node);
     }
   }
   return result;

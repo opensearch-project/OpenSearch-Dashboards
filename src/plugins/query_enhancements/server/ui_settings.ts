@@ -29,15 +29,7 @@ export function getPplLintRuleSettings(
   return {
     [UI_SETTINGS.QUERY_ENHANCEMENTS_PPL_LINT_RULES]: {
       name: 'PPL lint rules',
-      value: JSON.stringify(
-        PPL_LINT_RULE_DEFAULTS.map((rule) => ({
-          id: rule.id,
-          enabled: rule.enabled,
-          severity: rule.severity,
-        })),
-        null,
-        2
-      ),
+      value: JSON.stringify(PPL_LINT_RULE_DEFAULTS, null, 2),
       type: 'json',
       description:
         'Configure PPL lint rules. Each entry has "id" (rule name), "enabled" (true/false), ' +

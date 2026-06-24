@@ -20,16 +20,11 @@ function isValidAppliesTo(value: unknown): value is AppliesTo {
     return false;
   }
   const candidate = value as Record<string, unknown>;
-  if (candidate.minVersion !== undefined && typeof candidate.minVersion !== 'string') {
-    return false;
-  }
-  if (candidate.maxVersion !== undefined && typeof candidate.maxVersion !== 'string') {
-    return false;
-  }
-  if (candidate.engine !== undefined && candidate.engine !== 'calcite') {
-    return false;
-  }
-  return true;
+  return (
+    (candidate.minVersion === undefined || typeof candidate.minVersion === 'string') &&
+    (candidate.maxVersion === undefined || typeof candidate.maxVersion === 'string') &&
+    (candidate.engine === undefined || candidate.engine === 'calcite')
+  );
 }
 
 export function validateCatalogEntry(value: unknown): CatalogEntry | null {

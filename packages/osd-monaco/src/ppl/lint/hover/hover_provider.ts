@@ -24,40 +24,32 @@ function severityLabel(severity: monaco.MarkerSeverity): SeverityLabel {
 
 function ruleIdOf(marker: monaco.editor.IMarker): string | undefined {
   const code = marker.code;
-  if (typeof code === 'string') {
-    return code;
-  }
-  if (code && typeof code === 'object' && typeof code.value === 'string') {
-    return code.value;
-  }
-  return undefined;
+  if (typeof code === 'string') return code;
+  return code && typeof code === 'object' && typeof code.value === 'string'
+    ? code.value
+    : undefined;
 }
 
 function docUrlOf(marker: monaco.editor.IMarker): string | undefined {
   const code = marker.code;
-  if (code && typeof code === 'object' && code.target) {
-    return code.target.toString();
-  }
-  return undefined;
+  return code && typeof code === 'object' && code.target ? code.target.toString() : undefined;
 }
 
 function markerContainsPosition(marker: monaco.editor.IMarker, position: monaco.Position): boolean {
   const { lineNumber, column } = position;
-  if (lineNumber < marker.startLineNumber || lineNumber > marker.endLineNumber) {
-    return false;
-  }
-  if (lineNumber === marker.startLineNumber && column < marker.startColumn) {
-    return false;
-  }
-  if (lineNumber === marker.endLineNumber && column > marker.endColumn) {
-    return false;
-  }
-  return true;
+  return !(
+    lineNumber < marker.startLineNumber ||
+    lineNumber > marker.endLineNumber ||
+    (lineNumber === marker.startLineNumber && column < marker.startColumn) ||
+    (lineNumber === marker.endLineNumber && column > marker.endColumn)
+  );
 }
 
 function markerSpan(marker: monaco.editor.IMarker): number {
-  const lineSpan = marker.endLineNumber - marker.startLineNumber;
-  return lineSpan * 100000 + (marker.endColumn - marker.startColumn);
+  return (
+    (marker.endLineNumber - marker.startLineNumber) * 100000 +
+    (marker.endColumn - marker.startColumn)
+  );
 }
 
 export const pplLintHoverProvider: monaco.languages.HoverProvider = {
@@ -74,17 +66,7 @@ export const pplLintHoverProvider: monaco.languages.HoverProvider = {
     const marker = markers.reduce((a, b) => (markerSpan(b) < markerSpan(a) ? b : a));
 
     const ruleId = ruleIdOf(marker);
-    const key = markerFixKey(marker);
-    const facts = getModelHoverFacts(model, key);
-
-    const value = renderHoverCard({
-      ruleId: ruleId ?? 'ppl-lint',
-      severityLabel: severityLabel(marker.severity),
-      message: marker.message,
-      docUrl: docUrlOf(marker),
-      content: ruleId ? getRuleHoverContent(ruleId) : undefined,
-      facts,
-    });
+    const facts = getModelHoverFacts(model, markerFixKey(marker));
 
     return {
       range: {
@@ -93,7 +75,19 @@ export const pplLintHoverProvider: monaco.languages.HoverProvider = {
         endLineNumber: marker.endLineNumber,
         endColumn: marker.endColumn,
       },
-      contents: [{ value, isTrusted: false }],
+      contents: [
+        {
+          value: renderHoverCard({
+            ruleId: ruleId ?? 'ppl-lint',
+            severityLabel: severityLabel(marker.severity),
+            message: marker.message,
+            docUrl: docUrlOf(marker),
+            content: ruleId ? getRuleHoverContent(ruleId) : undefined,
+            facts,
+          }),
+          isTrusted: false,
+        },
+      ],
     };
   },
 };
