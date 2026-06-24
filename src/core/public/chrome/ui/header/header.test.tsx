@@ -32,7 +32,8 @@ import { EuiHeaderSectionItemButton } from '@elastic/eui';
 
 import { act } from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mount } from 'enzyme';
+import { wrapWithIntl } from 'test_utils/enzyme_helpers';
 import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
 import { httpServiceMock } from '../../../http/http_service.mock';
 import {
@@ -134,7 +135,7 @@ describe('Header', () => {
       customNavLink$,
     };
 
-    const component = mountWithIntl(<Header {...props} />);
+    const component = mount(wrapWithIntl(<Header {...props} />));
     expect(component.find('EuiHeader').exists()).toBeFalsy();
     expect(component.find('EuiProgress').exists()).toBeTruthy();
 
@@ -160,7 +161,7 @@ describe('Header', () => {
     act(() => isLocked$.next(true));
     component.update();
     expect(component.find('EuiFlyout[aria-label="Primary"]').exists()).toBeTruthy();
-    expect(component).toMatchSnapshot();
+    expect(component.children()).toMatchSnapshot();
   });
 
   it('renders condensed header', () => {
@@ -172,7 +173,7 @@ describe('Header', () => {
       branding,
     };
 
-    const component = mountWithIntl(<Header {...props} />);
+    const component = mount(wrapWithIntl(<Header {...props} />));
 
     expect(component.find('EuiHeader.primaryHeader').exists()).toBeTruthy();
     expect(component.find('EuiHeader.expandedHeader').exists()).toBeFalsy();
@@ -185,7 +186,7 @@ describe('Header', () => {
     expect(component.find('HeaderActionMenu').exists()).toBeTruthy();
     expect(component.find('HeaderHelpMenuUI').exists()).toBeTruthy();
 
-    expect(component).toMatchSnapshot();
+    expect(component.children()).toMatchSnapshot();
   });
 
   it('renders new header when feature flag is turned on', () => {
@@ -197,7 +198,7 @@ describe('Header', () => {
       branding,
     };
 
-    const component = mountWithIntl(<Header {...props} navGroupEnabled />);
+    const component = mount(wrapWithIntl(<Header {...props} navGroupEnabled />));
 
     expect(component.find('CollapsibleNavGroupEnabled').exists()).toBeTruthy();
   });
@@ -210,9 +211,9 @@ describe('Header', () => {
       ...mockProps(),
       branding,
     };
-    const component = mountWithIntl(<Header {...props} />);
+    const component = mount(wrapWithIntl(<Header {...props} />));
     component.find(EuiHeaderSectionItemButton).first().simulate('click');
-    expect(component).toMatchSnapshot();
+    expect(component.children()).toMatchSnapshot();
   });
 
   it('renders page header with application title', () => {
@@ -227,7 +228,7 @@ describe('Header', () => {
       branding,
       useUpdatedHeader,
     };
-    const component = mountWithIntl(<Header {...props} />);
+    const component = mount(wrapWithIntl(<Header {...props} />));
     expect(component.find('[data-test-subj="headerApplicationTitle"]').exists()).toBeTruthy();
     expect(component.find('[data-test-subj="breadcrumb first"]').exists()).toBeTruthy();
     expect(component.find('[data-test-subj="headerBadgeControl"]').exists()).toBeFalsy();
@@ -239,7 +240,7 @@ describe('Header', () => {
     expect(component.find('HeaderActionMenu').exists()).toBeFalsy();
     expect(component.find('[data-test-subj="headerDescriptionControl"]').exists()).toBeTruthy();
     expect(component.find('[data-test-subj="headerBottomControl"]').exists()).toBeTruthy();
-    expect(component).toMatchSnapshot();
+    expect(component.children()).toMatchSnapshot();
   });
 
   it('renders application header without title', () => {
@@ -256,13 +257,13 @@ describe('Header', () => {
       useUpdatedHeader,
       headerVariant$,
     };
-    const component = mountWithIntl(<Header {...props} />);
+    const component = mount(wrapWithIntl(<Header {...props} />));
     expect(component.find('[data-test-subj="headerApplicationTitle"]').exists()).toBeFalsy();
     expect(component.find('[data-test-subj="breadcrumb first"]').exists()).toBeTruthy();
     expect(component.find('HeaderActionMenu').exists()).toBeFalsy();
     expect(component.find('RecentItems').exists()).toBeTruthy();
     expect(component.find('[data-test-subj="headerRightControl"]').exists()).toBeFalsy();
-    expect(component).toMatchSnapshot();
+    expect(component.children()).toMatchSnapshot();
   });
 
   it('should remember the collapse state when new nav is enabled', () => {
@@ -275,7 +276,7 @@ describe('Header', () => {
       useUpdatedHeader: true,
       onIsLockedUpdate: jest.fn(),
     };
-    const component = mountWithIntl(<Header {...props} />);
+    const component = mount(wrapWithIntl(<Header {...props} />));
     component.find(EuiHeaderSectionItemButton).first().simulate('click');
     expect(props.onIsLockedUpdate).toBeCalledWith(true);
   });
@@ -289,7 +290,7 @@ describe('Header', () => {
         }),
       };
 
-      const component = mountWithIntl(<Header {...props} />);
+      const component = mount(wrapWithIntl(<Header {...props} />));
       // Check that the header has the correct class
       expect(component.find('.headerGlobalNav--withBanner').exists()).toBeTruthy();
     });
@@ -301,7 +302,7 @@ describe('Header', () => {
         globalBanner$: new BehaviorSubject(undefined),
       };
 
-      const component = mountWithIntl(<Header {...props} />);
+      const component = mount(wrapWithIntl(<Header {...props} />));
       expect(component.find('.globalBanner').exists()).toBeFalsy();
     });
 
@@ -311,7 +312,7 @@ describe('Header', () => {
         // No globalBanner$ property
       };
 
-      const component = mountWithIntl(<Header {...props} />);
+      const component = mount(wrapWithIntl(<Header {...props} />));
       expect(component.find('.globalBanner').exists()).toBeFalsy();
     });
 
@@ -325,7 +326,7 @@ describe('Header', () => {
         }),
       };
 
-      const component = mountWithIntl(<Header {...props} />);
+      const component = mount(wrapWithIntl(<Header {...props} />));
       expect(component.find('.globalBanner').exists()).toBeTruthy();
     });
   });
@@ -346,7 +347,7 @@ describe('Header', () => {
         keyboardShortcut: mockKeyboardShortcut,
       };
 
-      mountWithIntl(<Header {...props} />);
+      mount(wrapWithIntl(<Header {...props} />));
 
       expect(mockKeyboardShortcut.useKeyboardShortcut).toHaveBeenCalledWith({
         id: 'toggle_navbar',
@@ -364,7 +365,7 @@ describe('Header', () => {
         ...mockProps(),
       };
 
-      mountWithIntl(<Header {...props} />);
+      mount(wrapWithIntl(<Header {...props} />));
 
       expect(mockKeyboardShortcut.useKeyboardShortcut).not.toHaveBeenCalled();
     });
@@ -381,7 +382,7 @@ describe('Header', () => {
         useUpdatedHeader: true,
       };
 
-      mountWithIntl(<Header {...props} />);
+      mount(wrapWithIntl(<Header {...props} />));
 
       const shortcutCall = mockKeyboardShortcut.useKeyboardShortcut.mock.calls[0][0];
       const executeFunction = shortcutCall.execute;
@@ -400,7 +401,7 @@ describe('Header', () => {
       };
 
       expect(() => {
-        mountWithIntl(<Header {...props} />);
+        mount(wrapWithIntl(<Header {...props} />));
       }).not.toThrow();
     });
   });

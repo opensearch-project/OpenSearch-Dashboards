@@ -5,10 +5,9 @@ exports[`Datasource Management: Optional Label Suffix should render normally 1`]
   className="dataSourceManagement-optionalSuffix"
 >
   – 
-  <FormattedMessage
+  <MemoizedFormattedMessage
     defaultMessage="optional"
     id="dataSourcesManagement.createDataSource.optionalText"
-    values={Object {}}
   />
 </span>
 `;

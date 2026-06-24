@@ -4,10 +4,9 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
 <div>
   <eui-text>
     <h3>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Create scripted field"
         id="datasetManagement.createHeader"
-        values={Object {}}
       />
     </h3>
   </eui-text>
@@ -104,17 +103,15 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
     </eui-compressed-form-row>
     <eui-compressed-form-row
       helpText={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Formatting allows you to control the way that specific values are displayed. It can also cause values to be completely changed and prevent highlighting in Discover from working."
           id="datasetManagement.formatLabel"
-          values={Object {}}
         />
       }
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Format"
           id="datasetManagement.formatHeader"
-          values={Object {}}
         />
       }
     >
@@ -145,10 +142,9 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
     </eui-compressed-form-row>
     <eui-compressed-form-row
       error={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Script is required"
           id="datasetManagement.scriptRequiredErrorMessage"
-          values={Object {}}
         />
       }
       fullWidth={true}
@@ -167,7 +163,7 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
       <eui-text
         size="s"
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Access fields with {code}."
           id="datasetManagement.script.accessWithLabel"
           values={
@@ -187,10 +183,9 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
           data-test-subj="scriptedFieldsHelpLink"
           onClick={[Function]}
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Get help with the syntax and preview the results of your script."
             id="datasetManagement.script.getHelpLabel"
-            values={Object {}}
           />
         </eui-link>
       </eui-text>
@@ -207,10 +202,9 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
             isLoading={false}
             onClick={[Function]}
           >
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="Create field"
               id="datasetManagement.actions.createButton"
-              values={Object {}}
             />
           </eui-small-button>
         </eui-flex-item>
@@ -221,10 +215,9 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
             data-test-subj="fieldCancelButton"
             onClick={[Function]}
           >
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="Cancel"
               id="datasetManagement.actions.cancelButton"
-              values={Object {}}
             />
           </eui-small-button-empty>
         </eui-flex-item>
@@ -241,7 +234,7 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
 <div>
   <eui-text>
     <h3>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Edit {fieldName}"
         id="datasetManagement.editHeader"
         values={
@@ -333,17 +326,15 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
     </eui-compressed-form-row>
     <eui-compressed-form-row
       helpText={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Formatting allows you to control the way that specific values are displayed. It can also cause values to be completely changed and prevent highlighting in Discover from working."
           id="datasetManagement.formatLabel"
-          values={Object {}}
         />
       }
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Format"
           id="datasetManagement.formatHeader"
-          values={Object {}}
         />
       }
     >
@@ -391,7 +382,7 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
       <eui-text
         size="s"
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Access fields with {code}."
           id="datasetManagement.script.accessWithLabel"
           values={
@@ -411,10 +402,9 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
           data-test-subj="scriptedFieldsHelpLink"
           onClick={[Function]}
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Get help with the syntax and preview the results of your script."
             id="datasetManagement.script.getHelpLabel"
-            values={Object {}}
           />
         </eui-link>
       </eui-text>
@@ -431,10 +421,9 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
             isLoading={false}
             onClick={[Function]}
           >
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="Save field"
               id="datasetManagement.actions.saveButton"
-              values={Object {}}
             />
           </eui-small-button>
         </eui-flex-item>
@@ -445,10 +434,9 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
             data-test-subj="fieldCancelButton"
             onClick={[Function]}
           >
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="Cancel"
               id="datasetManagement.actions.cancelButton"
-              values={Object {}}
             />
           </eui-small-button-empty>
         </eui-flex-item>
@@ -463,10 +451,9 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
                 color="danger"
                 onClick={[Function]}
               >
-                <FormattedMessage
+                <MemoizedFormattedMessage
                   defaultMessage="Delete"
                   id="datasetManagement.actions.deleteButton"
-                  values={Object {}}
                 />
               </eui-small-button-empty>
             </eui-flex-item>
@@ -485,10 +472,9 @@ exports[`FieldEditor should show conflict field warning 1`] = `
 <div>
   <eui-text>
     <h3>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Create scripted field"
         id="datasetManagement.createHeader"
-        values={Object {}}
       />
     </h3>
   </eui-text>
@@ -528,7 +514,7 @@ exports[`FieldEditor should show conflict field warning 1`] = `
             type="alert"
           />
            
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="{mappingConflict} You already have a field with the name {fieldName}. Naming your scripted field with the same name means you won't be able to query both fields at the same time."
             id="datasetManagement.mappingConflictLabel.mappingConflictDetail"
             values={
@@ -537,10 +523,9 @@ exports[`FieldEditor should show conflict field warning 1`] = `
                   foobar
                 </eui-code>,
                 "mappingConflict": <strong>
-                  <FormattedMessage
+                  <Memo(MemoizedFormattedMessage)
                     defaultMessage="Mapping Conflict:"
                     id="datasetManagement.mappingConflictLabel.mappingConflictLabel"
-                    values={Object {}}
                   />
                 </strong>,
               }
@@ -613,17 +598,15 @@ exports[`FieldEditor should show conflict field warning 1`] = `
     </eui-compressed-form-row>
     <eui-compressed-form-row
       helpText={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Formatting allows you to control the way that specific values are displayed. It can also cause values to be completely changed and prevent highlighting in Discover from working."
           id="datasetManagement.formatLabel"
-          values={Object {}}
         />
       }
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Format"
           id="datasetManagement.formatHeader"
-          values={Object {}}
         />
       }
     >
@@ -654,10 +637,9 @@ exports[`FieldEditor should show conflict field warning 1`] = `
     </eui-compressed-form-row>
     <eui-compressed-form-row
       error={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Script is required"
           id="datasetManagement.scriptRequiredErrorMessage"
-          values={Object {}}
         />
       }
       fullWidth={true}
@@ -676,7 +658,7 @@ exports[`FieldEditor should show conflict field warning 1`] = `
       <eui-text
         size="s"
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Access fields with {code}."
           id="datasetManagement.script.accessWithLabel"
           values={
@@ -696,10 +678,9 @@ exports[`FieldEditor should show conflict field warning 1`] = `
           data-test-subj="scriptedFieldsHelpLink"
           onClick={[Function]}
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Get help with the syntax and preview the results of your script."
             id="datasetManagement.script.getHelpLabel"
-            values={Object {}}
           />
         </eui-link>
       </eui-text>
@@ -716,10 +697,9 @@ exports[`FieldEditor should show conflict field warning 1`] = `
             isLoading={false}
             onClick={[Function]}
           >
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="Create field"
               id="datasetManagement.actions.createButton"
-              values={Object {}}
             />
           </eui-small-button>
         </eui-flex-item>
@@ -730,10 +710,9 @@ exports[`FieldEditor should show conflict field warning 1`] = `
             data-test-subj="fieldCancelButton"
             onClick={[Function]}
           >
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="Cancel"
               id="datasetManagement.actions.cancelButton"
-              values={Object {}}
             />
           </eui-small-button-empty>
         </eui-flex-item>
@@ -750,7 +729,7 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
 <div>
   <eui-text>
     <h3>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Edit {fieldName}"
         id="datasetManagement.editHeader"
         values={
@@ -798,14 +777,13 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
           />
            
           <strong>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Deprecation Warning:"
               id="datasetManagement.warningHeader"
-              values={Object {}}
             />
           </strong>
            
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="{language} is deprecated and support will be removed in the next major version of OpenSearch Dashboards and OpenSearch. We recommend using {painlessLink} for new scripted fields."
             id="datasetManagement.warningLabel.warningDetail"
             values={
@@ -816,10 +794,9 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
                 "painlessLink": <eui-link
                   target="_blank"
                 >
-                  <FormattedMessage
+                  <Memo(MemoizedFormattedMessage)
                     defaultMessage="Painless"
                     id="datasetManagement.warningLabel.painlessLinkLabel"
-                    values={Object {}}
                   />
                 </eui-link>,
               }
@@ -923,17 +900,15 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
     </eui-compressed-form-row>
     <eui-compressed-form-row
       helpText={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Formatting allows you to control the way that specific values are displayed. It can also cause values to be completely changed and prevent highlighting in Discover from working."
           id="datasetManagement.formatLabel"
-          values={Object {}}
         />
       }
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Format"
           id="datasetManagement.formatHeader"
-          values={Object {}}
         />
       }
     >
@@ -981,7 +956,7 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
       <eui-text
         size="s"
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Access fields with {code}."
           id="datasetManagement.script.accessWithLabel"
           values={
@@ -1001,10 +976,9 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
           data-test-subj="scriptedFieldsHelpLink"
           onClick={[Function]}
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Get help with the syntax and preview the results of your script."
             id="datasetManagement.script.getHelpLabel"
-            values={Object {}}
           />
         </eui-link>
       </eui-text>
@@ -1021,10 +995,9 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
             isLoading={false}
             onClick={[Function]}
           >
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="Save field"
               id="datasetManagement.actions.saveButton"
-              values={Object {}}
             />
           </eui-small-button>
         </eui-flex-item>
@@ -1035,10 +1008,9 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
             data-test-subj="fieldCancelButton"
             onClick={[Function]}
           >
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="Cancel"
               id="datasetManagement.actions.cancelButton"
-              values={Object {}}
             />
           </eui-small-button-empty>
         </eui-flex-item>
@@ -1053,10 +1025,9 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
                 color="danger"
                 onClick={[Function]}
               >
-                <FormattedMessage
+                <MemoizedFormattedMessage
                   defaultMessage="Delete"
                   id="datasetManagement.actions.deleteButton"
-                  values={Object {}}
                 />
               </eui-small-button-empty>
             </eui-flex-item>
@@ -1075,10 +1046,9 @@ exports[`FieldEditor should show multiple type field warning with a table contai
 <div>
   <eui-text>
     <h3>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Create scripted field"
         id="datasetManagement.createHeader"
-        values={Object {}}
       />
     </h3>
   </eui-text>
@@ -1118,7 +1088,7 @@ exports[`FieldEditor should show multiple type field warning with a table contai
             type="alert"
           />
            
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="{mappingConflict} You already have a field with the name {fieldName}. Naming your scripted field with the same name means you won't be able to query both fields at the same time."
             id="datasetManagement.mappingConflictLabel.mappingConflictDetail"
             values={
@@ -1127,10 +1097,9 @@ exports[`FieldEditor should show multiple type field warning with a table contai
                   foobar
                 </eui-code>,
                 "mappingConflict": <strong>
-                  <FormattedMessage
+                  <Memo(MemoizedFormattedMessage)
                     defaultMessage="Mapping Conflict:"
                     id="datasetManagement.mappingConflictLabel.mappingConflictLabel"
-                    values={Object {}}
                   />
                 </strong>,
               }
@@ -1210,17 +1179,15 @@ exports[`FieldEditor should show multiple type field warning with a table contai
         iconType="alert"
         size="s"
         title={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Field type conflict"
             id="datasetManagement.fieldTypeConflict"
-            values={Object {}}
           />
         }
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="The type of this field changes across indices. It is unavailable for many analysis functions. The indices per type are as follows:"
           id="datasetManagement.multiTypeLabelDesc"
-          values={Object {}}
         />
       </eui-call-out>
       <eui-spacer
@@ -1259,17 +1226,15 @@ exports[`FieldEditor should show multiple type field warning with a table contai
     </div>
     <eui-compressed-form-row
       helpText={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Formatting allows you to control the way that specific values are displayed. It can also cause values to be completely changed and prevent highlighting in Discover from working."
           id="datasetManagement.formatLabel"
-          values={Object {}}
         />
       }
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Format"
           id="datasetManagement.formatHeader"
-          values={Object {}}
         />
       }
     >
@@ -1300,10 +1265,9 @@ exports[`FieldEditor should show multiple type field warning with a table contai
     </eui-compressed-form-row>
     <eui-compressed-form-row
       error={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Script is required"
           id="datasetManagement.scriptRequiredErrorMessage"
-          values={Object {}}
         />
       }
       fullWidth={true}
@@ -1322,7 +1286,7 @@ exports[`FieldEditor should show multiple type field warning with a table contai
       <eui-text
         size="s"
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Access fields with {code}."
           id="datasetManagement.script.accessWithLabel"
           values={
@@ -1342,10 +1306,9 @@ exports[`FieldEditor should show multiple type field warning with a table contai
           data-test-subj="scriptedFieldsHelpLink"
           onClick={[Function]}
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Get help with the syntax and preview the results of your script."
             id="datasetManagement.script.getHelpLabel"
-            values={Object {}}
           />
         </eui-link>
       </eui-text>
@@ -1362,10 +1325,9 @@ exports[`FieldEditor should show multiple type field warning with a table contai
             isLoading={false}
             onClick={[Function]}
           >
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="Create field"
               id="datasetManagement.actions.createButton"
-              values={Object {}}
             />
           </eui-small-button>
         </eui-flex-item>
@@ -1376,10 +1338,9 @@ exports[`FieldEditor should show multiple type field warning with a table contai
             data-test-subj="fieldCancelButton"
             onClick={[Function]}
           >
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="Cancel"
               id="datasetManagement.actions.cancelButton"
-              values={Object {}}
             />
           </eui-small-button-empty>
         </eui-flex-item>

@@ -60,10 +60,9 @@ describe('NewVisHelp', () => {
         size="s"
       >
         <p>
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Start creating your visualization by selecting a type for that visualization."
             id="visualizations.newVisWizard.helpText"
-            values={Object {}}
           />
         </p>
         <p>

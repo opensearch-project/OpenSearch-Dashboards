@@ -9,14 +9,13 @@ exports[`LabelTemplateFlyout should render normally 1`] = `
   <EuiFlyoutBody>
     <EuiText>
       <h3>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Label Template"
           id="datasetManagement.labelTemplateHeader"
-          values={Object {}}
         />
       </h3>
       <p>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="If the URL in this field is large, it might be useful to provide an alternate template for the text version of the URL. This will be displayed instead of the url, but will still link to the URL. The format is a string which uses double curly brace notation {doubleCurlyBraces} to inject values. The following values can be accessed:"
           id="datasetManagement.labelTemplateLabel"
           values={
@@ -34,10 +33,9 @@ exports[`LabelTemplateFlyout should render normally 1`] = `
             value
           </EuiCode>
            — 
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="The fields value"
             id="datasetManagement.labelTemplate.valueLabel"
-            values={Object {}}
           />
         </li>
         <li>
@@ -45,18 +43,16 @@ exports[`LabelTemplateFlyout should render normally 1`] = `
             url
           </EuiCode>
            — 
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="The formatted URL"
             id="datasetManagement.labelTemplate.urlLabel"
-            values={Object {}}
           />
         </li>
       </ul>
       <h4>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Examples"
           id="datasetManagement.labelTemplate.examplesHeader"
-          values={Object {}}
         />
       </h4>
       <EuiBasicTable

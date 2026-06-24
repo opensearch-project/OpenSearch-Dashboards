@@ -29,7 +29,7 @@
  */
 
 import { PureComponent } from 'react';
-import { injectI18n, FormattedMessage, InjectedIntlProps } from '@osd/i18n/react';
+import { injectI18n, FormattedMessage, WrappedComponentProps } from '@osd/i18n/react';
 
 import {
   EuiSmallButton,
@@ -63,7 +63,7 @@ interface ControlsTabUiState {
 interface ControlsTabUiParams {
   controls: ControlParams[];
 }
-type ControlsTabUiInjectedProps = InjectedIntlProps &
+type ControlsTabUiInjectedProps = WrappedComponentProps &
   Pick<VisOptionsProps<ControlsTabUiParams>, 'vis' | 'stateParams' | 'setValue'> & {
     deps: InputControlVisDependencies;
   };

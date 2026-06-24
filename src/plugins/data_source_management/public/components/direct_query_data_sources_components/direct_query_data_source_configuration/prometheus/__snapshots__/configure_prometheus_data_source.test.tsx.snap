@@ -109,11 +109,8 @@ exports[`ConfigurePrometheusDatasourcePanel renders correctly 1`] = `
                     <FormattedMessage
                       defaultMessage="Connect to Prometheus with OpenSearch and OpenSearch Dashboards. "
                       id="dataSourcesManagement.configurePrometheusDataSource.description"
-                      values={Object {}}
                     >
-                      <span>
-                        Connect to Prometheus with OpenSearch and OpenSearch Dashboards. 
-                      </span>
+                      Connect to Prometheus with OpenSearch and OpenSearch Dashboards. 
                     </FormattedMessage>
                     <EuiLink
                       external={true}

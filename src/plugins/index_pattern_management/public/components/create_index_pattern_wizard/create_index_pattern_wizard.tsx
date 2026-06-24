@@ -236,7 +236,7 @@ export class CreateIndexPatternWizard extends Component<
           'indexPatternManagement.indexPattern.titleExistsLabel',
           {
             values: { title: emptyPattern!.title },
-            defaultMessage: "An index pattern with the title '{title}' already exists.",
+            defaultMessage: "An index pattern with the title ''{title}'' already exists.",
           }
         );
 

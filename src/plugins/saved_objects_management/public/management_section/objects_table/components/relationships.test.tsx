@@ -32,6 +32,7 @@ import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 import { httpServiceMock } from '../../../../../../core/public/mocks';
 import { Relationships, RelationshipsProps } from './relationships';
 import { render } from '@testing-library/react';
+import { I18nProvider } from '@osd/i18n/react';
 
 jest.mock('../../../lib/fetch_export_by_type_and_search', () => ({
   fetchExportByTypeAndSearch: jest.fn(),
@@ -743,7 +744,11 @@ describe('Relationships from legacy app', () => {
       useUpdatedUX: true,
     };
 
-    const { getByTestId, findByText } = render(<Relationships {...props} />);
+    const { getByTestId, findByText } = render(
+      <I18nProvider>
+        <Relationships {...props} />
+      </I18nProvider>
+    );
 
     await findByText('Type of the saved object');
 

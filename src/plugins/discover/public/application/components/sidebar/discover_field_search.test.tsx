@@ -29,12 +29,12 @@
  */
 
 import { act } from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { wrapWithIntl } from 'test_utils/enzyme_helpers';
 import { findTestSubject } from 'test_utils/helpers';
 // @ts-expect-error TS6133 TODO(ts-error): fixme
 import { DiscoverFieldSearch, NUM_FILTERS, Props } from './discover_field_search';
 import { EuiButtonGroupProps, EuiPopover } from '@elastic/eui';
-import { ReactWrapper } from 'enzyme';
+import { ReactWrapper, mount } from 'enzyme';
 
 describe('DiscoverFieldSearch', () => {
   const defaultProps = {
@@ -46,7 +46,7 @@ describe('DiscoverFieldSearch', () => {
   function mountComponent(props?: Props) {
     const compProps = props || defaultProps;
     // @ts-expect-error TS2322 TODO(ts-error): fixme
-    return mountWithIntl(<DiscoverFieldSearch {...compProps} />);
+    return mount(wrapWithIntl(<DiscoverFieldSearch {...compProps} />));
   }
 
   function findButtonGroup(component: ReactWrapper, id: string) {

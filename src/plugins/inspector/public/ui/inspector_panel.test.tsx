@@ -28,7 +28,8 @@
  * under the License.
  */
 
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mount } from 'enzyme';
+import { mountWithI18nProvider, wrapWithIntl } from 'test_utils/enzyme_helpers';
 import { InspectorPanel } from './inspector_panel';
 import { InspectorViewDescription } from '../types';
 import { Adapters } from '../../common';
@@ -72,12 +73,12 @@ describe('InspectorPanel', () => {
   });
 
   it('should render as expected', () => {
-    const component = mountWithIntl(<InspectorPanel adapters={adapters} views={views} />);
-    expect(component).toMatchSnapshot();
+    const component = mount(wrapWithIntl(<InspectorPanel adapters={adapters} views={views} />));
+    expect(component.children()).toMatchSnapshot();
   });
 
   it('should not allow updating adapters', () => {
-    const component = mountWithIntl(<InspectorPanel adapters={adapters} views={views} />);
+    const component = mountWithI18nProvider(<InspectorPanel adapters={adapters} views={views} />);
     adapters.notAllowed = {};
     expect(() => component.setProps({ adapters })).toThrow();
   });

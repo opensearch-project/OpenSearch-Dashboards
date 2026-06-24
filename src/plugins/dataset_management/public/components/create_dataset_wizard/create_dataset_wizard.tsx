@@ -209,7 +209,7 @@ export class CreateDatasetWizard extends Component<RouteComponentProps, CreateDa
       if (err instanceof DuplicateDataViewError) {
         const confirmMessage = i18n.translate('datasetManagement.dataset.titleExistsLabel', {
           values: { title: emptyPattern!.title },
-          defaultMessage: "An index pattern with the title '{title}' already exists.",
+          defaultMessage: "An index pattern with the title ''{title}'' already exists.",
         });
 
         const isConfirmed = await this.context.services.overlays.openConfirm(confirmMessage, {

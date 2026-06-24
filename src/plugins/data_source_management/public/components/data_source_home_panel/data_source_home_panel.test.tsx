@@ -12,6 +12,7 @@ import { ManageDirectQueryDataConnectionsTableWithRouter } from '../direct_query
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { getListBreadcrumbs } from '../breadcrumbs';
 import { navigationPluginMock } from 'src/plugins/navigation/public/mocks';
+import { I18nProvider } from '@osd/i18n/react';
 
 jest.mock('../../../../opensearch_dashboards_react/public');
 jest.mock('../breadcrumbs');
@@ -72,7 +73,11 @@ describe('DataSourceHomePanel', () => {
   const shallowComponent = (props = defaultProps) =>
     shallow(<DataSourceHomePanel useNewUX={false} {...props} />);
   const mountComponent = (props = defaultProps) =>
-    mount(<DataSourceHomePanel useNewUX={false} {...props} />);
+    mount(
+      <I18nProvider>
+        <DataSourceHomePanel useNewUX={false} {...props} />
+      </I18nProvider>
+    );
 
   test('renders correctly', () => {
     const wrapper = shallowComponent();

@@ -164,7 +164,7 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
               <EuiText size="s">
                 <p>
                   {i18n.translate('agentTraces.addToDashboard.notification.success.message', {
-                    defaultMessage: `Agent traces '{newTitle}' is successfully added to the dashboard.`,
+                    defaultMessage: `Agent traces ''{newTitle}'' is successfully added to the dashboard.`,
                     values: { newTitle },
                   })}
                   &nbsp;

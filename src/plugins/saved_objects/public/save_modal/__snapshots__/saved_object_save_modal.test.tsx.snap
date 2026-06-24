@@ -12,7 +12,7 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
         size="s"
       >
         <h2>
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Save {objectType}"
             id="savedObjects.saveModal.saveTitle"
             values={
@@ -39,10 +39,9 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Title"
             id="savedObjects.saveModal.titleLabel"
-            values={Object {}}
           />
         }
         labelType="label"
@@ -63,10 +62,9 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Description"
             id="savedObjects.saveModal.descriptionLabel"
-            values={Object {}}
           />
         }
         labelType="label"
@@ -84,10 +82,9 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
       data-test-subj="saveCancelButton"
       onClick={[Function]}
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Cancel"
         id="savedObjects.saveModal.cancelButtonLabel"
-        values={Object {}}
       />
     </EuiSmallButtonEmpty>
     <EuiSmallButton

@@ -28,11 +28,13 @@
  * under the License.
  */
 
-import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mount } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { findTestSubject } from 'test_utils/helpers';
 import { getDepsMock, getIndexPatternMock } from '../../test_utils';
 import { ControlsTab, ControlsTabUiProps } from './controls_tab';
 import { Vis } from '../../../../visualizations/public';
+import { I18nProvider } from '@osd/i18n/react';
 
 const indexPatternsMock = {
   get: getIndexPatternMock,
@@ -98,8 +100,14 @@ test('renders ControlsTab', () => {
 });
 
 describe('behavior', () => {
+  const ControlsTabWrapper = (customProps: Omit<ControlsTabUiProps, 'intl'>) => (
+    <I18nProvider>
+      <ControlsTab {...customProps} />
+    </I18nProvider>
+  );
+
   test('add control button', () => {
-    const component = mountWithIntl(<ControlsTab.WrappedComponent {...props} />);
+    const component = mount(<ControlsTabWrapper {...props} />);
 
     findTestSubject(component, 'inputControlEditorAddBtn').simulate('click');
 
@@ -112,7 +120,7 @@ describe('behavior', () => {
   });
 
   test('remove control button', () => {
-    const component = mountWithIntl(<ControlsTab.WrappedComponent {...props} />);
+    const component = mount(<ControlsTabWrapper {...props} />);
     findTestSubject(component, 'inputControlEditorRemoveControl0').simulate('click');
     const expectedParams = [
       'controls',
@@ -135,7 +143,7 @@ describe('behavior', () => {
   });
 
   test('move down control button', () => {
-    const component = mountWithIntl(<ControlsTab.WrappedComponent {...props} />);
+    const component = mount(<ControlsTabWrapper {...props} />);
     findTestSubject(component, 'inputControlEditorMoveDownControl0').simulate('click');
     const expectedParams = [
       'controls',
@@ -172,7 +180,7 @@ describe('behavior', () => {
   });
 
   test('move up control button', () => {
-    const component = mountWithIntl(<ControlsTab.WrappedComponent {...props} />);
+    const component = mount(<ControlsTabWrapper {...props} />);
     findTestSubject(component, 'inputControlEditorMoveUpControl1').simulate('click');
     const expectedParams = [
       'controls',

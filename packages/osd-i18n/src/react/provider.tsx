@@ -30,7 +30,7 @@
 
 import * as PropTypes from 'prop-types';
 import * as React from 'react';
-import { IntlProvider } from 'react-intl';
+import { IntlProvider, ReactIntlErrorCode } from 'react-intl';
 
 import * as i18n from '../core';
 import { PseudoLocaleWrapper } from './pseudo_locale_wrapper';
@@ -39,11 +39,16 @@ interface I18nProviderProps {
   children: React.ReactNode;
 }
 
-// Cast IntlProvider to accept children prop for React 18 compatibility
-// The old @types/react-intl doesn't include children in the props
-const TypedIntlProvider = IntlProvider as React.ComponentType<
-  React.ComponentProps<typeof IntlProvider> & { children?: React.ReactNode }
->;
+const globalRichTextElements = {
+  b: (chunks: any) => <b>{chunks}</b>,
+  code: (chunks: any) => <code>{chunks}</code>,
+  em: (chunks: any) => <em>{chunks}</em>,
+  i: (chunks: any) => <i>{chunks}</i>,
+  li: (chunks: any) => <li>{chunks}</li>,
+  p: (chunks: any) => <p>{chunks}</p>,
+  strong: (chunks: any) => <strong>{chunks}</strong>,
+  ul: (chunks: any) => <ul>{chunks}</ul>,
+};
 
 /**
  * The library uses the provider pattern to scope an i18n context to a tree
@@ -55,15 +60,25 @@ export class I18nProvider extends React.PureComponent<I18nProviderProps> {
 
   public render() {
     return (
-      <TypedIntlProvider
+      <IntlProvider
         locale={i18n.getLocale()}
         messages={i18n.getTranslation().messages}
         defaultLocale={i18n.getDefaultLocale()}
         formats={i18n.getFormats()}
         textComponent={React.Fragment}
+        defaultRichTextElements={globalRichTextElements}
+        onError={(err) => {
+          // Suppress missing translation errors, it's common for OSD
+          if (err.code === ReactIntlErrorCode.MISSING_TRANSLATION) {
+            return;
+          }
+          // Let other format errors pass through normally
+          // eslint-disable-next-line no-console
+          console.error(err);
+        }}
       >
         <PseudoLocaleWrapper>{this.props.children}</PseudoLocaleWrapper>
-      </TypedIntlProvider>
+      </IntlProvider>
     );
   }
 }

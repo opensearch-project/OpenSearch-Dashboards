@@ -250,10 +250,9 @@ exports[`Overview renders with news without solutions and without features 1`] =
     }
     showIcon={true}
     title={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="OpenSearch Dashboards"
         id="opensearchDashboardsOverview.header.title"
-        values={Object {}}
       />
     }
   />
@@ -268,10 +267,9 @@ exports[`Overview renders with news without solutions and without features 1`] =
         <h2
           id="osdOverviewApps__title"
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Explore these apps"
             id="opensearchDashboardsOverview.apps.title"
-            values={Object {}}
           />
         </h2>
       </EuiScreenReaderOnly>
@@ -1032,10 +1030,9 @@ exports[`Overview renders with news, solutions, and features 1`] = `
     }
     showIcon={true}
     title={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="OpenSearch Dashboards"
         id="opensearchDashboardsOverview.header.title"
-        values={Object {}}
       />
     }
   />
@@ -1050,10 +1047,9 @@ exports[`Overview renders with news, solutions, and features 1`] = `
         <h2
           id="osdOverviewApps__title"
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Explore these apps"
             id="opensearchDashboardsOverview.apps.title"
-            values={Object {}}
           />
         </h2>
       </EuiScreenReaderOnly>
@@ -1131,10 +1127,9 @@ exports[`Overview renders with news, solutions, and features 1`] = `
             <h2
               id="osdOverviewMore__title"
             >
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="Do more with OpenSearch"
                 id="opensearchDashboardsOverview.more.title"
-                values={Object {}}
               />
             </h2>
           </EuiTitle>
@@ -1517,10 +1512,9 @@ exports[`Overview renders with news, with solutions, and without features 1`] = 
     }
     showIcon={true}
     title={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="OpenSearch Dashboards"
         id="opensearchDashboardsOverview.header.title"
-        values={Object {}}
       />
     }
   />
@@ -1535,10 +1529,9 @@ exports[`Overview renders with news, with solutions, and without features 1`] = 
         <h2
           id="osdOverviewApps__title"
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Explore these apps"
             id="opensearchDashboardsOverview.apps.title"
-            values={Object {}}
           />
         </h2>
       </EuiScreenReaderOnly>
@@ -1616,10 +1609,9 @@ exports[`Overview renders with news, with solutions, and without features 1`] = 
             <h2
               id="osdOverviewMore__title"
             >
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="Do more with OpenSearch"
                 id="opensearchDashboardsOverview.more.title"
-                values={Object {}}
               />
             </h2>
           </EuiTitle>
@@ -2002,10 +1994,9 @@ exports[`Overview renders with news, without solutions, and with features 1`] = 
     }
     showIcon={true}
     title={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="OpenSearch Dashboards"
         id="opensearchDashboardsOverview.header.title"
-        values={Object {}}
       />
     }
   />
@@ -2020,10 +2011,9 @@ exports[`Overview renders with news, without solutions, and with features 1`] = 
         <h2
           id="osdOverviewApps__title"
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Explore these apps"
             id="opensearchDashboardsOverview.apps.title"
-            values={Object {}}
           />
         </h2>
       </EuiScreenReaderOnly>
@@ -2616,10 +2606,9 @@ exports[`Overview renders without news and features, with solutions 1`] = `
     }
     showIcon={true}
     title={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="OpenSearch Dashboards"
         id="opensearchDashboardsOverview.header.title"
-        values={Object {}}
       />
     }
   />
@@ -2634,10 +2623,9 @@ exports[`Overview renders without news and features, with solutions 1`] = `
         <h2
           id="osdOverviewApps__title"
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Explore these apps"
             id="opensearchDashboardsOverview.apps.title"
-            values={Object {}}
           />
         </h2>
       </EuiScreenReaderOnly>
@@ -2670,10 +2658,9 @@ exports[`Overview renders without news and features, with solutions 1`] = `
             <h2
               id="osdOverviewMore__title"
             >
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="Do more with OpenSearch"
                 id="opensearchDashboardsOverview.more.title"
-                values={Object {}}
               />
             </h2>
           </EuiTitle>
@@ -3280,10 +3267,9 @@ exports[`Overview renders without news and solutions, with features 1`] = `
     }
     showIcon={true}
     title={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="OpenSearch Dashboards"
         id="opensearchDashboardsOverview.header.title"
-        values={Object {}}
       />
     }
   />
@@ -3298,10 +3284,9 @@ exports[`Overview renders without news and solutions, with features 1`] = `
         <h2
           id="osdOverviewApps__title"
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Explore these apps"
             id="opensearchDashboardsOverview.apps.title"
-            values={Object {}}
           />
         </h2>
       </EuiScreenReaderOnly>
@@ -4185,10 +4170,9 @@ exports[`Overview renders without news, solutions, and features 1`] = `
     }
     showIcon={true}
     title={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="OpenSearch Dashboards"
         id="opensearchDashboardsOverview.header.title"
-        values={Object {}}
       />
     }
   />
@@ -4203,10 +4187,9 @@ exports[`Overview renders without news, solutions, and features 1`] = `
         <h2
           id="osdOverviewApps__title"
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Explore these apps"
             id="opensearchDashboardsOverview.apps.title"
-            values={Object {}}
           />
         </h2>
       </EuiScreenReaderOnly>
@@ -5202,10 +5185,9 @@ exports[`Overview renders without news, with solutions and features 1`] = `
     }
     showIcon={true}
     title={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="OpenSearch Dashboards"
         id="opensearchDashboardsOverview.header.title"
-        values={Object {}}
       />
     }
   />
@@ -5220,10 +5202,9 @@ exports[`Overview renders without news, with solutions and features 1`] = `
         <h2
           id="osdOverviewApps__title"
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Explore these apps"
             id="opensearchDashboardsOverview.apps.title"
-            values={Object {}}
           />
         </h2>
       </EuiScreenReaderOnly>
@@ -5256,10 +5237,9 @@ exports[`Overview renders without news, with solutions and features 1`] = `
             <h2
               id="osdOverviewMore__title"
             >
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="Do more with OpenSearch"
                 id="opensearchDashboardsOverview.more.title"
-                values={Object {}}
               />
             </h2>
           </EuiTitle>

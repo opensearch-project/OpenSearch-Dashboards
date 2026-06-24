@@ -9,6 +9,8 @@
  * GitHub history for details.
  */
 
+import { mount } from 'enzyme';
+
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
@@ -32,7 +34,7 @@ import { EuiCallOut } from '@elastic/eui';
 import { testSubjSelector } from '@osd/test-subj-selector';
 
 import * as Rx from 'rxjs';
-import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { wrapWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import { FatalErrorsScreen } from './fatal_errors_screen';
 
@@ -132,7 +134,7 @@ describe('FatalErrorsScreen', () => {
         window.location.hash = '/foo/bar';
         jest.spyOn(window.location, 'reload').mockImplementation(noop);
 
-        const el = mountWithIntl(<FatalErrorsScreen {...defaultProps} />);
+        const el = mount(wrapWithIntl(<FatalErrorsScreen {...defaultProps} />));
         const button = el.find('button').find(testSubjSelector('clearSession'));
         button.simulate('click');
 
@@ -147,7 +149,7 @@ describe('FatalErrorsScreen', () => {
       it('calls window.history.back()', () => {
         jest.spyOn(window.history, 'back').mockImplementation(noop);
 
-        const el = mountWithIntl(<FatalErrorsScreen {...defaultProps} />);
+        const el = mount(wrapWithIntl(<FatalErrorsScreen {...defaultProps} />));
         const button = el.find('button').find(testSubjSelector('goBack'));
         button.simulate('click');
 

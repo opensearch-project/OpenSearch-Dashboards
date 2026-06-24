@@ -12,6 +12,7 @@ import { useDatasetContext } from '../../../../application/context/dataset_conte
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { setPatternsField } from '../../../../application/utils/state_management/slices/tab/tab_slice';
 import { executeQueries } from '../../../../application/utils/state_management/actions/query_actions';
+import { I18nProvider } from '@osd/i18n/react';
 
 jest.mock('react-redux', () => ({
   useSelector: jest.fn(),
@@ -106,7 +107,11 @@ describe('PatternsSettingsPopoverContent', () => {
     });
     (useSelector as jest.Mock).mockReturnValue('field1');
 
-    render(<PatternsSettingsPopoverContent />);
+    render(
+      <I18nProvider>
+        <PatternsSettingsPopoverContent />
+      </I18nProvider>
+    );
 
     expect(screen.getByText('Patterns Field')).toBeInTheDocument();
 
@@ -137,7 +142,11 @@ describe('PatternsSettingsPopoverContent', () => {
     // Set a patterns field that doesn't exist in the options
     (useSelector as jest.Mock).mockReturnValue('nonexistent_field');
 
-    render(<PatternsSettingsPopoverContent />);
+    render(
+      <I18nProvider>
+        <PatternsSettingsPopoverContent />
+      </I18nProvider>
+    );
 
     const select = screen.getByRole('combobox');
     expect(select).toHaveValue('field1'); // Should default to first option
@@ -161,7 +170,11 @@ describe('PatternsSettingsPopoverContent', () => {
     });
     (useSelector as jest.Mock).mockReturnValue('field1');
 
-    render(<PatternsSettingsPopoverContent fieldChange={mockFieldChange} />);
+    render(
+      <I18nProvider>
+        <PatternsSettingsPopoverContent fieldChange={mockFieldChange} />
+      </I18nProvider>
+    );
 
     const select = screen.getByRole('combobox');
 
@@ -195,7 +208,11 @@ describe('PatternsSettingsPopoverContent', () => {
     });
     (useSelector as jest.Mock).mockReturnValue(undefined);
 
-    render(<PatternsSettingsPopoverContent />);
+    render(
+      <I18nProvider>
+        <PatternsSettingsPopoverContent />
+      </I18nProvider>
+    );
 
     const select = screen.getByRole('combobox');
     expect(select).toBeInTheDocument();
@@ -210,7 +227,11 @@ describe('PatternsSettingsPopoverContent', () => {
     });
     (useSelector as jest.Mock).mockReturnValue(undefined);
 
-    render(<PatternsSettingsPopoverContent />);
+    render(
+      <I18nProvider>
+        <PatternsSettingsPopoverContent />
+      </I18nProvider>
+    );
 
     const select = screen.getByRole('combobox');
     expect(select).toBeInTheDocument();
@@ -235,7 +256,11 @@ describe('PatternsSettingsPopoverContent', () => {
     });
     (useSelector as jest.Mock).mockReturnValue('field1');
 
-    render(<PatternsSettingsPopoverContent fieldChange={mockFieldChange} />);
+    render(
+      <I18nProvider>
+        <PatternsSettingsPopoverContent fieldChange={mockFieldChange} />
+      </I18nProvider>
+    );
 
     const select = screen.getByRole('combobox');
 
@@ -266,7 +291,11 @@ describe('PatternsSettingsPopoverContent', () => {
     });
     (useSelector as jest.Mock).mockReturnValue('field1');
 
-    render(<PatternsSettingsPopoverContent />);
+    render(
+      <I18nProvider>
+        <PatternsSettingsPopoverContent />
+      </I18nProvider>
+    );
 
     const select = screen.getByRole('combobox');
 

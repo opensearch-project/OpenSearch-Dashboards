@@ -203,7 +203,7 @@ export const EditIndexPattern = withRouter(
     const timeFilterHeader = i18n.translate(
       'indexPatternManagement.editIndexPattern.timeFilterHeader',
       {
-        defaultMessage: "Time field: '{timeFieldName}'",
+        defaultMessage: "Time field: ''{timeFieldName}''",
         values: { timeFieldName: indexPattern.timeFieldName },
       }
     );

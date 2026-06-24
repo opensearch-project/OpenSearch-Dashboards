@@ -29,10 +29,9 @@ exports[`Welcome page renders the Welcome screen with no telemetry disclaimer 1`
           size="l"
         >
           <h1>
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="Welcome to Page Title"
               id="home.welcomeTitle"
-              values={Object {}}
             />
           </h1>
         </EuiTitle>
@@ -92,10 +91,9 @@ exports[`Welcome page renders the Welcome screen with the telemetry disclaimer w
           size="l"
         >
           <h1>
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="Welcome to Page Title"
               id="home.welcomeTitle"
-              values={Object {}}
             />
           </h1>
         </EuiTitle>
@@ -123,32 +121,28 @@ exports[`Welcome page renders the Welcome screen with the telemetry disclaimer w
             className="euiText--small"
             color="subdued"
           >
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="To learn about how usage data helps us manage and improve our products and services, see our "
               id="home.dataManagementDisclaimerPrivacy"
-              values={Object {}}
             />
             <EuiLink
               target="_blank"
             >
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="Privacy Statement."
                 id="home.dataManagementDisclaimerPrivacyLink"
-                values={Object {}}
               />
             </EuiLink>
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage=" To start collection, "
               id="home.dataManagementEnableCollection"
-              values={Object {}}
             />
             <EuiLink
               href="rootmanagement/opensearch-dashboards/settings"
             >
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="enable usage data here."
                 id="home.dataManagementEnableCollectionLink"
-                values={Object {}}
               />
             </EuiLink>
           </EuiTextColor>
@@ -191,10 +185,9 @@ exports[`Welcome page renders the Welcome screen with the telemetry disclaimer w
           size="l"
         >
           <h1>
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="Welcome to Page Title"
               id="home.welcomeTitle"
-              values={Object {}}
             />
           </h1>
         </EuiTitle>
@@ -222,32 +215,28 @@ exports[`Welcome page renders the Welcome screen with the telemetry disclaimer w
             className="euiText--small"
             color="subdued"
           >
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="To learn about how usage data helps us manage and improve our products and services, see our "
               id="home.dataManagementDisclaimerPrivacy"
-              values={Object {}}
             />
             <EuiLink
               target="_blank"
             >
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="Privacy Statement."
                 id="home.dataManagementDisclaimerPrivacyLink"
-                values={Object {}}
               />
             </EuiLink>
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage=" To stop collection, "
               id="home.dataManagementDisableCollection"
-              values={Object {}}
             />
             <EuiLink
               href="rootmanagement/opensearch-dashboards/settings"
             >
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="disable usage data here."
                 id="home.dataManagementDisableCollectionLink"
-                values={Object {}}
               />
             </EuiLink>
           </EuiTextColor>
@@ -290,10 +279,9 @@ exports[`Welcome page renders the welcome logo with OpenSearch center mark when 
           size="l"
         >
           <h1>
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="Welcome to Page Title"
               id="home.welcomeTitle"
-              values={Object {}}
             />
           </h1>
         </EuiTitle>
@@ -356,10 +344,9 @@ exports[`Welcome page renders the welcome logo with custom branded logo when bra
           size="l"
         >
           <h1>
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="Welcome to Page Title"
               id="home.welcomeTitle"
-              values={Object {}}
             />
           </h1>
         </EuiTitle>

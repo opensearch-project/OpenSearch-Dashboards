@@ -15,13 +15,13 @@
   },
   "dependencies": {
     "@dagrejs/dagre": "^1.1.5",
-    "@osd/i18n": "1.0.0",
+    "@osd/i18n": "2.0.0",
     "@xyflow/react": "^12.8.2",
     "ramda": "^0.30.1"
   },
   "peerDependencies": {
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0"
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
     "@types/ramda": "^0.30.1"

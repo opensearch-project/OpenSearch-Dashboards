@@ -4,26 +4,24 @@ exports[`Header should render normally 1`] = `
 <EuiConfirmModal
   buttonColor="danger"
   cancelButtonText={
-    <FormattedMessage
+    <Memo(MemoizedFormattedMessage)
       defaultMessage="Cancel"
       id="indexPatternManagement.editIndexPattern.source.deleteFilter.cancelButtonLabel"
-      values={Object {}}
     />
   }
   confirmButtonDisabled={false}
   confirmButtonText={
-    <FormattedMessage
+    <Memo(MemoizedFormattedMessage)
       defaultMessage="Delete"
       id="indexPatternManagement.editIndexPattern.source.deleteFilter.deleteButtonLabel"
-      values={Object {}}
     />
   }
   defaultFocusedButton="confirm"
   onCancel={[Function]}
   onConfirm={[Function]}
   title={
-    <FormattedMessage
-      defaultMessage="Delete source filter '{value}'?"
+    <Memo(MemoizedFormattedMessage)
+      defaultMessage="Delete source filter ''{value}''?"
       id="indexPatternManagement.editIndexPattern.source.deleteSourceFilterLabel"
       values={
         Object {

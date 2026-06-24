@@ -280,7 +280,7 @@ export const getNavActions = (
       if (id) {
         toastNotifications.addSuccess({
           title: i18n.translate('visualize.topNavMenu.saveVisualization.successNotificationText', {
-            defaultMessage: `Saved '{visTitle}'`,
+            defaultMessage: `Saved ''{visTitle}''`,
             values: {
               visTitle: savedVis.title,
             },
@@ -324,7 +324,7 @@ export const getNavActions = (
       console.error(error);
       toastNotifications.addDanger({
         title: i18n.translate('visualize.topNavMenu.saveVisualization.failureNotificationText', {
-          defaultMessage: `Error on saving '{visTitle}'`,
+          defaultMessage: `Error on saving ''{visTitle}''`,
           values: {
             visTitle: savedVis.title,
           },

@@ -9,6 +9,8 @@
  * GitHub history for details.
  */
 
+import { mount } from 'enzyme';
+
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
@@ -47,7 +49,7 @@ import { testPlugin } from './test_plugin';
 import { CustomizePanelModal } from '../lib/panel/panel_header/panel_actions/customize_title/customize_panel_modal';
 import { EmbeddableStart } from '../plugin';
 import { createEmbeddablePanelMock } from '../mocks';
-import { mountWithIntl } from '../../../../test_utils/public/enzyme_helpers';
+import { wrapWithIntl } from '../../../../test_utils/public/enzyme_helpers';
 
 let api: EmbeddableStart;
 let container: Container;
@@ -97,8 +99,10 @@ beforeEach(async () => {
 });
 
 test('Value is initialized with the embeddables title', async () => {
-  const component = mountWithIntl(
-    <CustomizePanelModal embeddable={embeddable} updateTitle={() => {}} cancel={() => {}} />
+  const component = mount(
+    wrapWithIntl(
+      <CustomizePanelModal embeddable={embeddable} updateTitle={() => {}} cancel={() => {}} />
+    )
   );
 
   const inputField = findTestSubject(component, 'customEmbeddablePanelTitleInput').find('input');
@@ -108,8 +112,10 @@ test('Value is initialized with the embeddables title', async () => {
 
 test('Calls updateTitle with a new title', async () => {
   const updateTitle = jest.fn();
-  const component = mountWithIntl(
-    <CustomizePanelModal embeddable={embeddable} updateTitle={updateTitle} cancel={() => {}} />
+  const component = mount(
+    wrapWithIntl(
+      <CustomizePanelModal embeddable={embeddable} updateTitle={updateTitle} cancel={() => {}} />
+    )
   );
 
   const inputField = findTestSubject(component, 'customEmbeddablePanelTitleInput').find('input');
@@ -125,8 +131,10 @@ test('Input value shows custom title if one given', async () => {
   embeddable.updateInput({ title: 'new title' });
 
   const updateTitle = jest.fn();
-  const component = mountWithIntl(
-    <CustomizePanelModal embeddable={embeddable} updateTitle={updateTitle} cancel={() => {}} />
+  const component = mount(
+    wrapWithIntl(
+      <CustomizePanelModal embeddable={embeddable} updateTitle={updateTitle} cancel={() => {}} />
+    )
   );
 
   const inputField = findTestSubject(component, 'customEmbeddablePanelTitleInput').find('input');
@@ -139,8 +147,10 @@ test('Reset updates the input value with the default title when the embeddable h
   const updateTitle = jest.fn();
 
   embeddable.updateInput({ title: 'my custom title' });
-  const component = mountWithIntl(
-    <CustomizePanelModal embeddable={embeddable} updateTitle={updateTitle} cancel={() => {}} />
+  const component = mount(
+    wrapWithIntl(
+      <CustomizePanelModal embeddable={embeddable} updateTitle={updateTitle} cancel={() => {}} />
+    )
   );
 
   const inputField = findTestSubject(component, 'customEmbeddablePanelTitleInput').find('input');
@@ -154,8 +164,10 @@ test('Reset updates the input value with the default title when the embeddable h
 
 test('Reset updates the input with the default title when the embeddable has no title override', async () => {
   const updateTitle = jest.fn();
-  const component = mountWithIntl(
-    <CustomizePanelModal embeddable={embeddable} updateTitle={updateTitle} cancel={() => {}} />
+  const component = mount(
+    wrapWithIntl(
+      <CustomizePanelModal embeddable={embeddable} updateTitle={updateTitle} cancel={() => {}} />
+    )
   );
 
   const inputField = findTestSubject(component, 'customEmbeddablePanelTitleInput').find('input');
@@ -169,8 +181,10 @@ test('Reset updates the input with the default title when the embeddable has no 
 
 test('Reset calls updateTitle with undefined', async () => {
   const updateTitle = jest.fn();
-  const component = mountWithIntl(
-    <CustomizePanelModal embeddable={embeddable} updateTitle={updateTitle} cancel={() => {}} />
+  const component = mount(
+    wrapWithIntl(
+      <CustomizePanelModal embeddable={embeddable} updateTitle={updateTitle} cancel={() => {}} />
+    )
   );
 
   const inputField = findTestSubject(component, 'customEmbeddablePanelTitleInput').find('input');
@@ -185,8 +199,10 @@ test('Reset calls updateTitle with undefined', async () => {
 
 test('Can set title to an empty string', async () => {
   const updateTitle = jest.fn();
-  const component = mountWithIntl(
-    <CustomizePanelModal embeddable={embeddable} updateTitle={updateTitle} cancel={() => {}} />
+  const component = mount(
+    wrapWithIntl(
+      <CustomizePanelModal embeddable={embeddable} updateTitle={updateTitle} cancel={() => {}} />
+    )
   );
 
   const inputField = findTestSubject(component, 'customEmbeddablePanelTitleInput');

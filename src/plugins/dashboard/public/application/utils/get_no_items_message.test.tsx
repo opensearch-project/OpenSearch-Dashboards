@@ -4,7 +4,8 @@
  */
 
 import { getNoItemsMessage } from './get_no_items_message';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mount } from 'enzyme';
+import { wrapWithIntl } from 'test_utils/enzyme_helpers';
 import { ApplicationStart, Capabilities, PublicAppInfo } from 'opensearch-dashboards/public';
 import { EuiLink } from '@elastic/eui';
 import { RecursiveReadonly } from '@osd/utility-types';
@@ -12,9 +13,11 @@ import { Observable } from 'rxjs';
 
 describe('dashboard listing table with no item', () => {
   test('and no write controls', () => {
-    const component = mountWithIntl(getNoItemsMessage(true, jest.fn(), {} as ApplicationStart));
+    const component = mount(
+      wrapWithIntl(getNoItemsMessage(true, jest.fn(), {} as ApplicationStart))
+    );
 
-    expect(component).toMatchSnapshot();
+    expect(component.children()).toMatchSnapshot();
   });
 
   test('and with write controls', () => {
@@ -28,9 +31,9 @@ describe('dashboard listing table with no item', () => {
       currentAppId$: {} as Observable<string | undefined>,
     };
     // @ts-expect-error TS2345 TODO(ts-error): fixme
-    const component = mountWithIntl(getNoItemsMessage(false, jest.fn(), application));
+    const component = mount(wrapWithIntl(getNoItemsMessage(false, jest.fn(), application)));
 
-    expect(component).toMatchSnapshot();
+    expect(component.children()).toMatchSnapshot();
     component.find(EuiLink).simulate('click');
 
     expect(application.navigateToApp).toHaveBeenCalledWith('import_sample_data');

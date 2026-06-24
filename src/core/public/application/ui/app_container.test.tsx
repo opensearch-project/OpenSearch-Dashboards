@@ -30,7 +30,7 @@
 
 import { act } from 'react';
 import { mount } from 'enzyme';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { wrapWithIntl } from 'test_utils/enzyme_helpers';
 
 import { AppContainer } from './app_container';
 import { Mounter, AppMountParameters, AppStatus } from '../types';
@@ -86,35 +86,55 @@ describe('AppContainer', () => {
     const [waitPromise, resolvePromise] = createResolver();
     const mounter = createMounter(waitPromise);
 
-    const wrapper = mountWithIntl(
-      <AppContainer
-        appPath={`/app/${appId}`}
-        appId={appId}
-        appStatus={AppStatus.inaccessible}
-        mounter={mounter}
-        setAppLeaveHandler={setAppLeaveHandler}
-        setAppActionMenu={setAppActionMenu}
-        setAppLeftControls={setAppLeftControls}
-        setAppCenterControls={setAppCenterControls}
-        setAppRightControls={setAppRightControls}
-        setAppBadgeControls={setAppBadgeControls}
-        setAppDescriptionControls={setAppDescriptionControls}
-        setAppBottomControls={setAppBottomControls}
-        setIsMounting={setIsMounting}
-        createScopedHistory={(appPath: string) =>
-          // Create a history using the appPath as the current location
-          new ScopedHistory(createMemoryHistory({ initialEntries: [appPath] }), appPath)
-        }
-      />
+    const wrapper = mount(
+      wrapWithIntl(
+        <AppContainer
+          appPath={`/app/${appId}`}
+          appId={appId}
+          appStatus={AppStatus.inaccessible}
+          mounter={mounter}
+          setAppLeaveHandler={setAppLeaveHandler}
+          setAppActionMenu={setAppActionMenu}
+          setAppLeftControls={setAppLeftControls}
+          setAppCenterControls={setAppCenterControls}
+          setAppRightControls={setAppRightControls}
+          setAppBadgeControls={setAppBadgeControls}
+          setAppDescriptionControls={setAppDescriptionControls}
+          setAppBottomControls={setAppBottomControls}
+          setIsMounting={setIsMounting}
+          createScopedHistory={(appPath: string) =>
+            // Create a history using the appPath as the current location
+            new ScopedHistory(createMemoryHistory({ initialEntries: [appPath] }), appPath)
+          }
+        />
+      )
     );
 
     expect(wrapper.text()).toContain('Application Not Found');
 
+    // Update the AppContainer props by remounting with new props
     wrapper.setProps({
-      appId,
-      setAppLeaveHandler,
-      mounter,
-      appStatus: AppStatus.accessible,
+      children: (
+        <AppContainer
+          appPath={`/app/${appId}`}
+          appId={appId}
+          appStatus={AppStatus.accessible}
+          mounter={mounter}
+          setAppLeaveHandler={setAppLeaveHandler}
+          setAppActionMenu={setAppActionMenu}
+          setAppLeftControls={setAppLeftControls}
+          setAppCenterControls={setAppCenterControls}
+          setAppRightControls={setAppRightControls}
+          setAppBadgeControls={setAppBadgeControls}
+          setAppDescriptionControls={setAppDescriptionControls}
+          setAppBottomControls={setAppBottomControls}
+          setIsMounting={setIsMounting}
+          createScopedHistory={(appPath: string) =>
+            // Create a history using the appPath as the current location
+            new ScopedHistory(createMemoryHistory({ initialEntries: [appPath] }), appPath)
+          }
+        />
+      ),
     });
     wrapper.update();
 

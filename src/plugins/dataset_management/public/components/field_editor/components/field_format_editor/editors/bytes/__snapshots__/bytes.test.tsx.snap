@@ -14,10 +14,9 @@ exports[`BytesFormatEditor should render normally 1`] = `
           href="https://adamwdraper.github.io/Numeral-js/"
           target="_blank"
         >
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Documentation"
             id="datasetManagement.number.documentationLabel"
-            values={Object {}}
           />
            
           <EuiIcon
@@ -28,7 +27,7 @@ exports[`BytesFormatEditor should render normally 1`] = `
     }
     isInvalid={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Numeral.js format pattern (Default: {defaultPattern})"
         id="datasetManagement.number.numeralLabel"
         values={

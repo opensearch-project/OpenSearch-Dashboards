@@ -28,16 +28,23 @@
  * under the License.
  */
 
+import { mount } from 'enzyme';
 import React from 'react';
-import { mountWithIntl, shallowWithIntl, wrapWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithI18nProvider, wrapWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import TelemetryManagementSection from './telemetry_management_section';
 import { TelemetryService } from '../../../telemetry/public/services';
 import { coreMock } from '../../../../core/public/mocks';
 import { render, waitFor } from '@testing-library/react';
+import { I18nProvider } from '@osd/i18n/react';
 
 describe('TelemetryManagementSectionComponent', () => {
   const coreStart = coreMock.createStart();
   const coreSetup = coreMock.createSetup();
+  const TelemetryManagementSectionWrapper = (props: any) => (
+    <I18nProvider>
+      <TelemetryManagementSection {...props} />
+    </I18nProvider>
+  );
 
   it('renders as expected', () => {
     const onQueryMatchChange = jest.fn();
@@ -90,7 +97,7 @@ describe('TelemetryManagementSectionComponent', () => {
     });
 
     const component = render(
-      wrapWithIntl(
+      <I18nProvider>
         <React.Suspense fallback={<span>Fallback</span>}>
           <TelemetryManagementSection
             telemetryService={telemetryService}
@@ -101,7 +108,7 @@ describe('TelemetryManagementSectionComponent', () => {
             toasts={coreStart.notifications.toasts}
           />
         </React.Suspense>
-      )
+      </I18nProvider>
     );
 
     try {
@@ -111,7 +118,7 @@ describe('TelemetryManagementSectionComponent', () => {
       });
 
       component.rerender(
-        wrapWithIntl(
+        <I18nProvider>
           <React.Suspense fallback={<span>Fallback</span>}>
             <TelemetryManagementSection
               query={{ text: 'asdasdasd' }}
@@ -123,7 +130,7 @@ describe('TelemetryManagementSectionComponent', () => {
               isSecurityExampleEnabled={isSecurityExampleEnabled}
             />
           </React.Suspense>
-        )
+        </I18nProvider>
       );
       await waitFor(() => {
         expect(onQueryMatchChange).toHaveBeenCalledWith(false);
@@ -152,8 +159,8 @@ describe('TelemetryManagementSectionComponent', () => {
       http: coreSetup.http,
     });
 
-    const component = mountWithIntl(
-      <TelemetryManagementSection
+    const componentW = mount(
+      <TelemetryManagementSectionWrapper
         telemetryService={telemetryService}
         onQueryMatchChange={onQueryMatchChange}
         showAppliesSettingMessage={false}
@@ -162,22 +169,19 @@ describe('TelemetryManagementSectionComponent', () => {
         toasts={coreStart.notifications.toasts}
       />
     );
-    try {
-      expect(
-        component.setProps({ ...component.props(), query: { text: 'TeLEMetry' } }).html()
-      ).not.toBe(''); // Renders something.
-      // I can't check against snapshot because of https://github.com/facebook/jest/issues/8618
-      // expect(component).toMatchSnapshot();
 
-      // It should also render if there is no query at all.
-      expect(component.setProps({ ...component.props(), query: {} }).html()).not.toBe('');
-      expect(onQueryMatchChange).toHaveBeenCalledWith(true);
+    expect(
+      componentW.setProps({ ...componentW.props(), query: { text: 'TeLEMetry' } }).html()
+    ).not.toBe(''); // Renders something.
+    // I can't check against snapshot because of https://github.com/facebook/jest/issues/8618
+    // expect(component).toMatchSnapshot();
 
-      // Should only be called once because the second time does not change the result
-      expect(onQueryMatchChange).toHaveBeenCalledTimes(1);
-    } finally {
-      component.unmount();
-    }
+    // It should also render if there is no query at all.
+    expect(componentW.setProps({ ...componentW.props(), query: {} }).html()).not.toBe('');
+    expect(onQueryMatchChange).toHaveBeenCalledWith(true);
+
+    // Should only be called once because the second time does not change the result
+    expect(onQueryMatchChange).toHaveBeenCalledTimes(1);
   });
 
   it('renders null because allowChangingOptInStatus is false', () => {
@@ -198,8 +202,8 @@ describe('TelemetryManagementSectionComponent', () => {
       http: coreSetup.http,
     });
 
-    const component = mountWithIntl(
-      <TelemetryManagementSection
+    const componentW = mount(
+      <TelemetryManagementSectionWrapper
         telemetryService={telemetryService}
         onQueryMatchChange={onQueryMatchChange}
         showAppliesSettingMessage={true}
@@ -208,13 +212,9 @@ describe('TelemetryManagementSectionComponent', () => {
         toasts={coreStart.notifications.toasts}
       />
     );
-    try {
-      expect(component).toMatchSnapshot();
-      component.setProps({ ...component.props(), query: { text: 'TeLEMetry' } });
-      expect(onQueryMatchChange).toHaveBeenCalledWith(false);
-    } finally {
-      component.unmount();
-    }
+    expect(componentW.children().children().children()).toMatchSnapshot();
+    componentW.setProps({ ...componentW.props(), query: { text: 'TeLEMetry' } });
+    expect(onQueryMatchChange).toHaveBeenCalledWith(false);
   });
 
   it('shows the OptInExampleFlyout', () => {
@@ -235,7 +235,7 @@ describe('TelemetryManagementSectionComponent', () => {
       http: coreSetup.http,
     });
 
-    const component = mountWithIntl(
+    const component = mountWithI18nProvider(
       <TelemetryManagementSection
         telemetryService={telemetryService}
         onQueryMatchChange={onQueryMatchChange}
@@ -245,14 +245,11 @@ describe('TelemetryManagementSectionComponent', () => {
         toasts={coreStart.notifications.toasts}
       />
     );
-    try {
-      const toggleExampleComponent = component.find('FormattedMessage > EuiLink[onClick]').at(0);
-      const updatedView = toggleExampleComponent.simulate('click');
-      updatedView.find('OptInExampleFlyout');
-      updatedView.simulate('close');
-    } finally {
-      component.unmount();
-    }
+
+    const toggleExampleComponent = component.find('FormattedMessage > EuiLink[onClick]').at(0);
+    const updatedView = toggleExampleComponent.simulate('click');
+    updatedView.find('OptInExampleFlyout');
+    updatedView.simulate('close');
   });
 
   it('shows the OptInSecurityExampleFlyout', () => {
@@ -273,15 +270,17 @@ describe('TelemetryManagementSectionComponent', () => {
       http: coreSetup.http,
     });
 
-    const component = mountWithIntl(
-      <TelemetryManagementSection
-        telemetryService={telemetryService}
-        onQueryMatchChange={onQueryMatchChange}
-        showAppliesSettingMessage={false}
-        isSecurityExampleEnabled={isSecurityExampleEnabled}
-        enableSaving={true}
-        toasts={coreStart.notifications.toasts}
-      />
+    const component = mount(
+      wrapWithIntl(
+        <TelemetryManagementSection
+          telemetryService={telemetryService}
+          onQueryMatchChange={onQueryMatchChange}
+          showAppliesSettingMessage={false}
+          isSecurityExampleEnabled={isSecurityExampleEnabled}
+          enableSaving={true}
+          toasts={coreStart.notifications.toasts}
+        />
+      )
     );
     try {
       const toggleExampleComponent = component.find('FormattedMessage > EuiLink[onClick]').at(1);
@@ -311,7 +310,7 @@ describe('TelemetryManagementSectionComponent', () => {
       http: coreSetup.http,
     });
 
-    const component = mountWithIntl(
+    const component = shallowWithIntl(
       <TelemetryManagementSection
         telemetryService={telemetryService}
         onQueryMatchChange={onQueryMatchChange}
@@ -322,13 +321,9 @@ describe('TelemetryManagementSectionComponent', () => {
       />
     );
 
-    try {
-      const description = (component.instance() as TelemetryManagementSection).renderDescription();
-      expect(isSecurityExampleEnabled).toBeCalled();
-      expect(description).toMatchSnapshot();
-    } finally {
-      component.unmount();
-    }
+    const description = (component.instance() as TelemetryManagementSection).renderDescription();
+    expect(isSecurityExampleEnabled).toBeCalled();
+    expect(description).toMatchSnapshot();
   });
 
   it('toggles the OptIn button', async () => {
@@ -349,7 +344,7 @@ describe('TelemetryManagementSectionComponent', () => {
       http: coreSetup.http,
     });
 
-    const component = mountWithIntl(
+    const component = mountWithI18nProvider(
       <TelemetryManagementSection
         telemetryService={telemetryService}
         onQueryMatchChange={onQueryMatchChange}
@@ -359,23 +354,19 @@ describe('TelemetryManagementSectionComponent', () => {
         toasts={coreStart.notifications.toasts}
       />
     );
-    try {
-      const toggleOptInComponent = component.find('Field');
-      await expect(
-        toggleOptInComponent.prop<TelemetryManagementSection['toggleOptIn']>('handleChange')()
-      ).resolves.toBe(true);
-      expect((component.state() as any).enabled).toBe(true);
-      await expect(
-        toggleOptInComponent.prop<TelemetryManagementSection['toggleOptIn']>('handleChange')()
-      ).resolves.toBe(true);
-      expect((component.state() as any).enabled).toBe(false);
-      telemetryService.setOptIn = jest.fn().mockRejectedValue(Error('test-error'));
-      await expect(
-        toggleOptInComponent.prop<TelemetryManagementSection['toggleOptIn']>('handleChange')()
-      ).rejects.toStrictEqual(Error('test-error'));
-    } finally {
-      component.unmount();
-    }
+    const toggleOptInComponent = component.find('Field');
+    await expect(
+      toggleOptInComponent.prop<TelemetryManagementSection['toggleOptIn']>('handleChange')()
+    ).resolves.toBe(true);
+    expect((component.state() as any).enabled).toBe(true);
+    await expect(
+      toggleOptInComponent.prop<TelemetryManagementSection['toggleOptIn']>('handleChange')()
+    ).resolves.toBe(true);
+    expect((component.state() as any).enabled).toBe(false);
+    telemetryService.setOptIn = jest.fn().mockRejectedValue(Error('test-error'));
+    await expect(
+      toggleOptInComponent.prop<TelemetryManagementSection['toggleOptIn']>('handleChange')()
+    ).rejects.toStrictEqual(Error('test-error'));
   });
 
   it('test the wrapper (for coverage purposes)', () => {

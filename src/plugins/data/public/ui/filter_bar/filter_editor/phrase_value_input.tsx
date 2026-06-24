@@ -29,7 +29,7 @@
  */
 
 import { EuiCompressedFormRow } from '@elastic/eui';
-import { InjectedIntl, injectI18n } from '@osd/i18n/react';
+import { IntlShape, injectI18n } from '@osd/i18n/react';
 import { uniq } from 'lodash';
 
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
@@ -40,7 +40,7 @@ import { withOpenSearchDashboards } from '../../../../../opensearch_dashboards_r
 interface Props extends PhraseSuggestorProps {
   value?: string;
   onChange: (value: string | number | boolean) => void;
-  intl: InjectedIntl;
+  intl: IntlShape;
 }
 
 class PhraseValueInputUI extends PhraseSuggestorUI<Props> {

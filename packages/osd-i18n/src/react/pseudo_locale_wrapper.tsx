@@ -28,8 +28,8 @@
  * under the License.
  */
 
-import * as PropTypes from 'prop-types';
 import * as React from 'react';
+import { useIntl, RawIntlProvider, IntlShape } from 'react-intl';
 import * as i18n from '../core';
 import { isPseudoLocale, translateUsingPseudoLocale } from '../core/pseudo_locale';
 
@@ -61,30 +61,37 @@ interface PseudoLocaleWrapperProps {
 
 /**
  * If the locale is our pseudo locale (e.g. en-xa), we override the
- * intl.formatMessage function to display scrambled characters. We are
- * overriding the context rather than using injectI18n, because the
- * latter creates a new React component, which causes React diffs to
- * be inefficient in some cases, and can cause React hooks to lose
- * their state.
+ * intl.formatMessage function to display scrambled characters.
+ * This uses the modern RawIntlProvider from react-intl 6.x to wrap
+ * the intl context with a modified formatMessage function.
  */
-export class PseudoLocaleWrapper extends React.PureComponent<PseudoLocaleWrapperProps> {
-  public static propTypes = { children: PropTypes.element.isRequired };
+export const PseudoLocaleWrapper: React.FC<PseudoLocaleWrapperProps> = ({ children }) => {
+  const intl = useIntl();
 
-  public static contextTypes = {
-    intl: PropTypes.object.isRequired,
-  };
-
-  constructor(props: PseudoLocaleWrapperProps, context: any) {
-    super(props, context);
-
-    if (isPseudoLocale(i18n.getLocale())) {
-      const formatMessage = context.intl.formatMessage;
-      context.intl.formatMessage = (...args: any[]) =>
-        translateFormattedMessageUsingPseudoLocale(formatMessage(...args));
+  const wrappedIntl = React.useMemo(() => {
+    if (!isPseudoLocale(i18n.getLocale())) {
+      return intl;
     }
+
+    // Create a wrapped intl object with modified formatMessage
+    return {
+      ...intl,
+      formatMessage: ((descriptor: any, values?: any, opts?: any) => {
+        const result = intl.formatMessage(descriptor, values, opts);
+        // Only translate if result is a string (not ReactNode[])
+        if (typeof result === 'string') {
+          return translateFormattedMessageUsingPseudoLocale(result);
+        }
+        return result;
+      }) as IntlShape['formatMessage'],
+    };
+  }, [intl]);
+
+  // If pseudo locale is not enabled, just return children
+  if (!isPseudoLocale(i18n.getLocale())) {
+    return <>{children}</>;
   }
 
-  public render() {
-    return this.props.children;
-  }
-}
+  // Wrap children with RawIntlProvider to provide the modified intl context
+  return <RawIntlProvider value={wrappedIntl}>{children}</RawIntlProvider>;
+};

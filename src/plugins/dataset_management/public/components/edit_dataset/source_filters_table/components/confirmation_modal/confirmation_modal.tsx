@@ -28,7 +28,7 @@ export const DeleteFilterConfirmationModal = ({
       title={
         <FormattedMessage
           id="datasetManagement.editDataset.source.deleteSourceFilterLabel"
-          defaultMessage="Delete source filter '{value}'?"
+          defaultMessage="Delete source filter ''{value}''?"
           values={{
             value: filterToDeleteValue,
           }}

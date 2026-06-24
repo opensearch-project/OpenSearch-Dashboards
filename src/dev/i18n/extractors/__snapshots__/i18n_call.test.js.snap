@@ -34,6 +34,10 @@ message 3",
 
 exports[`dev/i18n/extractors/i18n_call throws if defaultMessage is not a string literal 1`] = `"defaultMessage value should be a string or template literal (\\"message-id\\")."`;
 
+exports[`dev/i18n/extractors/i18n_call throws if defaultMessage uses legacy escaped curly braces 1`] = `"defaultMessage contains legacy escaped curly braces (\\"message-id\\"). Use apostrophe escaping like '{foo}' instead of \\\\{foo\\\\}."`;
+
+exports[`dev/i18n/extractors/i18n_call throws if defaultMessage wraps a value reference in single apostrophes 1`] = `"\\"values\\" object contains unused properties (\\"message-id\\"): [indexPatternTitle]."`;
+
 exports[`dev/i18n/extractors/i18n_call throws if message id value is not a string literal 1`] = `"Message id should be a string literal."`;
 
 exports[`dev/i18n/extractors/i18n_call throws if properties object is not provided 1`] = `"Object with defaultMessage property is not passed to i18n() or i18n.translate() function call (\\"message-id\\")."`;

@@ -12,10 +12,9 @@ exports[`CreateDataSourcePanelHeader renders correctly 1`] = `
       size="s"
     >
       <h1>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Create Data Source"
           id="dataSourcesManagement.createDataSourcePanel.title"
-          values={Object {}}
         />
       </h1>
     </EuiText>
@@ -26,10 +25,9 @@ exports[`CreateDataSourcePanelHeader renders correctly 1`] = `
       size="s"
     >
       <p>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Select a data source type to get started."
           id="dataSourcesManagement.createDataSourcePanel.description"
-          values={Object {}}
         />
       </p>
     </EuiText>

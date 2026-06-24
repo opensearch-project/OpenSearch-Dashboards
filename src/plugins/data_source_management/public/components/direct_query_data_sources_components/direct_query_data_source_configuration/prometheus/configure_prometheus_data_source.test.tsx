@@ -9,6 +9,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { EuiTextArea } from '@elastic/eui';
 import { ConfigurePrometheusDatasourcePanel } from './configure_prometheus_data_source';
 import { AuthMethod } from '../../../constants';
+import { I18nProvider } from '@osd/i18n/react';
 
 // Mock fetchDataSources function
 jest.mock('../name_row', () => ({
@@ -103,11 +104,13 @@ jest.mock('history', () => {
 
 const mountComponent = () => {
   return mount(
-    <MemoryRouter>
-      {/* @ts-expect-error TS2739 TODO(ts-error): fixme */}
-      <ConfigurePrometheusDatasourcePanel {...defaultProps} />
-    </MemoryRouter>
-  );
+    <I18nProvider>
+      <MemoryRouter>
+        {/* @ts-expect-error TS2739 TODO(ts-error): fixme */}
+        <ConfigurePrometheusDatasourcePanel {...defaultProps} />
+      </MemoryRouter>
+    </I18nProvider>
+  ).find('MemoryRouter');
 };
 
 describe('ConfigurePrometheusDatasourcePanel', () => {

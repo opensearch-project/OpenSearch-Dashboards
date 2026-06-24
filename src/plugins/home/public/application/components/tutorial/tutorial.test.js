@@ -29,11 +29,13 @@
  */
 
 import { act } from 'react';
-import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mount } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { waitFor } from '@testing-library/react';
 
 import { Tutorial } from './tutorial';
+import { I18nProvider } from '@osd/i18n/react';
 
 jest.mock('../../opensearch_dashboards_services', () => ({
   getServices: () => ({
@@ -134,21 +136,24 @@ describe('isCloudEnabled is false', () => {
   });
 
   test('should display ON_PREM_ELASTIC_CLOUD instructions when toggle is clicked', async () => {
-    let component;
+    let componentW;
     await act(async () => {
-      component = mountWithIntl(
-        <Tutorial.WrappedComponent
-          addBasePath={addBasePath}
-          isCloudEnabled={false}
-          getTutorial={getTutorial}
-          replaceTemplateStrings={replaceTemplateStrings}
-          tutorialId={'my_testing_tutorial'}
-          bulkCreate={() => {}}
-        />
+      componentW = mount(
+        <I18nProvider>
+          <Tutorial
+            addBasePath={addBasePath}
+            isCloudEnabled={false}
+            getTutorial={getTutorial}
+            replaceTemplateStrings={replaceTemplateStrings}
+            tutorialId={'my_testing_tutorial'}
+            bulkCreate={() => {}}
+          />
+        </I18nProvider>
       );
       await loadTutorialPromise;
     });
-    component.update();
+    componentW.update();
+    const component = componentW.find('TutorialUi');
 
     // Wait for the toggle to appear after async state update
     await waitFor(() => {
@@ -177,5 +182,5 @@ test('should render ELASTIC_CLOUD instructions when isCloudEnabled is true', asy
   );
   await loadTutorialPromise;
   component.update();
-  expect(component).toMatchSnapshot(); // eslint-disable-line
+  expect(component).toMatchSnapshot();
 });

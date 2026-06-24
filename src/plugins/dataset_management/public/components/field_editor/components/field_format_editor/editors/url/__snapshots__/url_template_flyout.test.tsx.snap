@@ -9,14 +9,13 @@ exports[`UrlTemplateFlyout should render normally 1`] = `
   <EuiFlyoutBody>
     <EuiText>
       <h3>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Url Template"
           id="datasetManagement.urlTemplateHeader"
-          values={Object {}}
         />
       </h3>
       <p>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="If a field only contains part of a URL then a {strongUrlTemplate} can be used to format the value as a complete URL. The format is a string which uses double curly brace notation {doubleCurlyBraces} to inject values. The following values can be accessed:"
           id="datasetManagement.urlTemplateLabel.fieldDetail"
           values={
@@ -25,10 +24,9 @@ exports[`UrlTemplateFlyout should render normally 1`] = `
                 {{ }}
               </EuiCode>,
               "strongUrlTemplate": <strong>
-                <FormattedMessage
+                <Memo(MemoizedFormattedMessage)
                   defaultMessage="Url Template"
                   id="datasetManagement.urlTemplateLabel.strongUrlTemplateLabel"
-                  values={Object {}}
                 />
               </strong>,
             }
@@ -41,10 +39,9 @@ exports[`UrlTemplateFlyout should render normally 1`] = `
             value
           </EuiCode>
            — 
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="The URI-escaped value"
             id="datasetManagement.urlTemplate.valueLabel"
-            values={Object {}}
           />
         </li>
         <li>
@@ -52,18 +49,16 @@ exports[`UrlTemplateFlyout should render normally 1`] = `
             rawValue
           </EuiCode>
            — 
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="The unescaped value"
             id="datasetManagement.urlTemplate.rawValueLabel"
-            values={Object {}}
           />
         </li>
       </ul>
       <h4>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Examples"
           id="datasetManagement.urlTemplate.examplesHeader"
-          values={Object {}}
         />
       </h4>
       <EuiBasicTable

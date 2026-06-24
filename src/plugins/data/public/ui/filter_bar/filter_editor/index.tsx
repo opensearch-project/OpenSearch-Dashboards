@@ -46,7 +46,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@osd/i18n/react';
+import { FormattedMessage, IntlShape, injectI18n } from '@osd/i18n/react';
 import { get } from 'lodash';
 import React, { Component } from 'react';
 import { parse, stringify } from '@osd/std';
@@ -78,7 +78,7 @@ interface Props {
   indexPatterns: IIndexPattern[];
   onSubmit: (filter: Filter) => void;
   onCancel: () => void;
-  intl: InjectedIntl;
+  intl: IntlShape;
 }
 
 interface State {

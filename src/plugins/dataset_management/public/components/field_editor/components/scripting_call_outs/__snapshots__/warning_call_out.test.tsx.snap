@@ -2,7 +2,15 @@
 
 exports[`ScriptingWarningCallOut should render normally 1`] = `
 <IntlProvider
+  defaultFormats={Object {}}
+  defaultLocale="en"
+  fallbackOnEmptyString={true}
+  formats={Object {}}
   locale="en"
+  messages={Object {}}
+  onError={[Function]}
+  onWarn={[Function]}
+  textComponent={Symbol(react.fragment)}
 >
   <ScriptingWarningCallOut
     isVisible={true}
@@ -11,10 +19,9 @@ exports[`ScriptingWarningCallOut should render normally 1`] = `
       color="warning"
       iconType="alert"
       title={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Proceed with caution"
           id="datasetManagement.warningCallOutHeader"
-          values={Object {}}
         />
       }
     >
@@ -45,11 +52,8 @@ exports[`ScriptingWarningCallOut should render normally 1`] = `
             <FormattedMessage
               defaultMessage="Proceed with caution"
               id="datasetManagement.warningCallOutHeader"
-              values={Object {}}
             >
-              <span>
-                Proceed with caution
-              </span>
+              Proceed with caution
             </FormattedMessage>
           </span>
         </div>
@@ -76,10 +80,9 @@ exports[`ScriptingWarningCallOut should render normally 1`] = `
                         "scripFields": <EuiLink
                           target="_blank"
                         >
-                          <FormattedMessage
+                          <Memo(MemoizedFormattedMessage)
                             defaultMessage="script fields"
                             id="datasetManagement.warningCallOutLabel.scripFieldsLink"
-                            values={Object {}}
                           />
                            
                           <EuiIcon
@@ -89,10 +92,9 @@ exports[`ScriptingWarningCallOut should render normally 1`] = `
                         "scriptsInAggregation": <EuiLink
                           target="_blank"
                         >
-                          <FormattedMessage
+                          <Memo(MemoizedFormattedMessage)
                             defaultMessage="scripts in aggregations"
                             id="datasetManagement.warningCallOutLabel.scriptsInAggregationLink"
-                            values={Object {}}
                           />
                            
                           <EuiIcon
@@ -102,76 +104,67 @@ exports[`ScriptingWarningCallOut should render normally 1`] = `
                       }
                     }
                   >
-                    <span>
-                      Please familiarize yourself with 
-                      <EuiLink
-                        target="_blank"
+                    Please familiarize yourself with 
+                    <EuiLink
+                      key=".$.1"
+                      target="_blank"
+                    >
+                      <button
+                        className="euiLink euiLink--primary"
+                        disabled={false}
+                        type="button"
                       >
-                        <button
-                          className="euiLink euiLink--primary"
-                          disabled={false}
-                          type="button"
+                        <FormattedMessage
+                          defaultMessage="script fields"
+                          id="datasetManagement.warningCallOutLabel.scripFieldsLink"
                         >
-                          <FormattedMessage
-                            defaultMessage="script fields"
-                            id="datasetManagement.warningCallOutLabel.scripFieldsLink"
-                            values={Object {}}
-                          >
-                            <span>
-                              script fields
-                            </span>
-                          </FormattedMessage>
-                           
-                          <EuiIcon
-                            type="link"
-                          >
-                            <span
-                              data-euiicon-type="link"
-                            />
-                          </EuiIcon>
-                        </button>
-                      </EuiLink>
-                       and with 
-                      <EuiLink
-                        target="_blank"
+                          script fields
+                        </FormattedMessage>
+                         
+                        <EuiIcon
+                          type="link"
+                        >
+                          <span
+                            data-euiicon-type="link"
+                          />
+                        </EuiIcon>
+                      </button>
+                    </EuiLink>
+                     and with 
+                    <EuiLink
+                      key=".$.3"
+                      target="_blank"
+                    >
+                      <button
+                        className="euiLink euiLink--primary"
+                        disabled={false}
+                        type="button"
                       >
-                        <button
-                          className="euiLink euiLink--primary"
-                          disabled={false}
-                          type="button"
+                        <FormattedMessage
+                          defaultMessage="scripts in aggregations"
+                          id="datasetManagement.warningCallOutLabel.scriptsInAggregationLink"
                         >
-                          <FormattedMessage
-                            defaultMessage="scripts in aggregations"
-                            id="datasetManagement.warningCallOutLabel.scriptsInAggregationLink"
-                            values={Object {}}
-                          >
-                            <span>
-                              scripts in aggregations
-                            </span>
-                          </FormattedMessage>
-                           
-                          <EuiIcon
-                            type="link"
-                          >
-                            <span
-                              data-euiicon-type="link"
-                            />
-                          </EuiIcon>
-                        </button>
-                      </EuiLink>
-                       before using scripted fields.
-                    </span>
+                          scripts in aggregations
+                        </FormattedMessage>
+                         
+                        <EuiIcon
+                          type="link"
+                        >
+                          <span
+                            data-euiicon-type="link"
+                          />
+                        </EuiIcon>
+                      </button>
+                    </EuiLink>
+                     before using scripted fields.
                   </FormattedMessage>
                 </p>
                 <p>
                   <FormattedMessage
                     defaultMessage="Scripted fields can be used to display and aggregate calculated values. As such, they can be very slow, and if done incorrectly, can cause OpenSearch Dashboards to be unusable. There's no safety net here. If you make a typo, unexpected exceptions will be thrown all over the place!"
                     id="datasetManagement.warningCallOut.descriptionLabel"
-                    values={Object {}}
                   >
-                    <span>
-                      Scripted fields can be used to display and aggregate calculated values. As such, they can be very slow, and if done incorrectly, can cause OpenSearch Dashboards to be unusable. There's no safety net here. If you make a typo, unexpected exceptions will be thrown all over the place!
-                    </span>
+                    Scripted fields can be used to display and aggregate calculated values. As such, they can be very slow, and if done incorrectly, can cause OpenSearch Dashboards to be unusable. There's no safety net here. If you make a typo, unexpected exceptions will be thrown all over the place!
                   </FormattedMessage>
                 </p>
               </div>
@@ -193,7 +186,15 @@ exports[`ScriptingWarningCallOut should render normally 1`] = `
 
 exports[`ScriptingWarningCallOut should render nothing if not visible 1`] = `
 <IntlProvider
+  defaultFormats={Object {}}
+  defaultLocale="en"
+  fallbackOnEmptyString={true}
+  formats={Object {}}
   locale="en"
+  messages={Object {}}
+  onError={[Function]}
+  onWarn={[Function]}
+  textComponent={Symbol(react.fragment)}
 >
   <ScriptingWarningCallOut
     isVisible={false}

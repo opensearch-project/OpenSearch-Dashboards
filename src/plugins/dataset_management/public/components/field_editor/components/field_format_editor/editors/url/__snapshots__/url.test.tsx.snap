@@ -17,10 +17,9 @@ exports[`UrlFormatEditor should render label template help 1`] = `
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Type"
         id="datasetManagement.url.typeLabel"
-        values={Object {}}
       />
     }
     labelType="label"
@@ -56,19 +55,17 @@ exports[`UrlFormatEditor should render label template help 1`] = `
       <EuiLink
         onClick={[Function]}
       >
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="URL template help"
           id="datasetManagement.url.template.helpLinkText"
-          values={Object {}}
         />
       </EuiLink>
     }
     isInvalid={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="URL template"
         id="datasetManagement.url.urlTemplateLabel"
-        values={Object {}}
       />
     }
     labelType="label"
@@ -89,19 +86,17 @@ exports[`UrlFormatEditor should render label template help 1`] = `
       <EuiLink
         onClick={[Function]}
       >
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Label template help"
           id="datasetManagement.url.labelTemplateHelpText"
-          values={Object {}}
         />
       </EuiLink>
     }
     isInvalid={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Label template"
         id="datasetManagement.url.labelTemplateLabel"
-        values={Object {}}
       />
     }
     labelType="label"
@@ -136,10 +131,9 @@ exports[`UrlFormatEditor should render normally 1`] = `
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Type"
         id="datasetManagement.url.typeLabel"
-        values={Object {}}
       />
     }
     labelType="label"
@@ -175,19 +169,17 @@ exports[`UrlFormatEditor should render normally 1`] = `
       <EuiLink
         onClick={[Function]}
       >
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="URL template help"
           id="datasetManagement.url.template.helpLinkText"
-          values={Object {}}
         />
       </EuiLink>
     }
     isInvalid={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="URL template"
         id="datasetManagement.url.urlTemplateLabel"
-        values={Object {}}
       />
     }
     labelType="label"
@@ -208,19 +200,17 @@ exports[`UrlFormatEditor should render normally 1`] = `
       <EuiLink
         onClick={[Function]}
       >
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Label template help"
           id="datasetManagement.url.labelTemplateHelpText"
-          values={Object {}}
         />
       </EuiLink>
     }
     isInvalid={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Label template"
         id="datasetManagement.url.labelTemplateLabel"
-        values={Object {}}
       />
     }
     labelType="label"
@@ -255,10 +245,9 @@ exports[`UrlFormatEditor should render url template help 1`] = `
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Type"
         id="datasetManagement.url.typeLabel"
-        values={Object {}}
       />
     }
     labelType="label"
@@ -294,19 +283,17 @@ exports[`UrlFormatEditor should render url template help 1`] = `
       <EuiLink
         onClick={[Function]}
       >
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="URL template help"
           id="datasetManagement.url.template.helpLinkText"
-          values={Object {}}
         />
       </EuiLink>
     }
     isInvalid={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="URL template"
         id="datasetManagement.url.urlTemplateLabel"
-        values={Object {}}
       />
     }
     labelType="label"
@@ -327,19 +314,17 @@ exports[`UrlFormatEditor should render url template help 1`] = `
       <EuiLink
         onClick={[Function]}
       >
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Label template help"
           id="datasetManagement.url.labelTemplateHelpText"
-          values={Object {}}
         />
       </EuiLink>
     }
     isInvalid={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Label template"
         id="datasetManagement.url.labelTemplateLabel"
-        values={Object {}}
       />
     }
     labelType="label"
@@ -374,10 +359,9 @@ exports[`UrlFormatEditor should render width and height fields if image 1`] = `
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Type"
         id="datasetManagement.url.typeLabel"
-        values={Object {}}
       />
     }
     labelType="label"
@@ -414,19 +398,17 @@ exports[`UrlFormatEditor should render width and height fields if image 1`] = `
       <EuiLink
         onClick={[Function]}
       >
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="URL template help"
           id="datasetManagement.url.template.helpLinkText"
-          values={Object {}}
         />
       </EuiLink>
     }
     isInvalid={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="URL template"
         id="datasetManagement.url.urlTemplateLabel"
-        values={Object {}}
       />
     }
     labelType="label"
@@ -447,19 +429,17 @@ exports[`UrlFormatEditor should render width and height fields if image 1`] = `
       <EuiLink
         onClick={[Function]}
       >
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Label template help"
           id="datasetManagement.url.labelTemplateHelpText"
-          values={Object {}}
         />
       </EuiLink>
     }
     isInvalid={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Label template"
         id="datasetManagement.url.labelTemplateLabel"
-        values={Object {}}
       />
     }
     labelType="label"
@@ -477,10 +457,9 @@ exports[`UrlFormatEditor should render width and height fields if image 1`] = `
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Width"
         id="datasetManagement.url.widthLabel"
-        values={Object {}}
       />
     }
     labelType="label"
@@ -498,10 +477,9 @@ exports[`UrlFormatEditor should render width and height fields if image 1`] = `
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Height"
         id="datasetManagement.url.heightLabel"
-        values={Object {}}
       />
     }
     labelType="label"

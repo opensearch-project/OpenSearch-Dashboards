@@ -31,7 +31,7 @@
 import * as Rx from 'rxjs';
 import React, { Component, Fragment } from 'react';
 import { i18n } from '@osd/i18n';
-import { InjectedIntl, injectI18n, FormattedMessage } from '@osd/i18n/react';
+import { IntlShape, injectI18n, FormattedMessage } from '@osd/i18n/react';
 import {
   EuiButtonEmpty,
   EuiButtonEmptyProps,
@@ -120,7 +120,7 @@ export type ChromeHelpExtensionMenuLink = ExclusiveUnion<
 interface Props {
   helpExtension$: Rx.Observable<ChromeHelpExtension | undefined>;
   helpSupportUrl$: Rx.Observable<string>;
-  intl: InjectedIntl;
+  intl: IntlShape;
   opensearchDashboardsVersion: string;
   useDefaultContent?: boolean;
   opensearchDashboardsDocLink: string;
@@ -421,7 +421,9 @@ class HeaderHelpMenuUI extends Component<Props, State> {
   };
 }
 
-export const HeaderHelpMenu = injectI18n(HeaderHelpMenuUI);
+export const HeaderHelpMenu: React.ComponentType<Omit<Props, 'intl'>> = injectI18n(
+  HeaderHelpMenuUI
+);
 
 HeaderHelpMenu.defaultProps = {
   useDefaultContent: true,

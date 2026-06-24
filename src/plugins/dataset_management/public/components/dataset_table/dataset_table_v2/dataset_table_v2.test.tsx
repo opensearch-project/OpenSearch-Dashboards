@@ -10,16 +10,7 @@ import { DuplicateDataViewError } from '../../../../../data/public';
 import { MemoryRouter } from 'react-router-dom';
 import { OpenSearchDashboardsContextProvider } from '../../../../../opensearch_dashboards_react/public';
 import { scopedHistoryMock } from '../../../../../../core/public/mocks';
-
-// Mock i18n translate function
-jest.mock('@osd/i18n', () => ({
-  ...jest.requireActual('@osd/i18n'),
-  i18n: {
-    translate: jest.fn(
-      (_key: string, options: { defaultMessage: string }) => options.defaultMessage
-    ),
-  },
-}));
+import { I18nProvider } from '@osd/i18n/react';
 
 const mockGetDatasets = jest.fn();
 const mockGetDatasetCreationOptions = jest.fn();
@@ -81,11 +72,13 @@ describe('DatasetTableV2', () => {
     };
 
     return render(
-      <MemoryRouter>
-        <OpenSearchDashboardsContextProvider services={mockContext}>
-          <DatasetTableV2 {...allProps} />
-        </OpenSearchDashboardsContextProvider>
-      </MemoryRouter>
+      <I18nProvider>
+        <MemoryRouter>
+          <OpenSearchDashboardsContextProvider services={mockContext}>
+            <DatasetTableV2 {...allProps} />
+          </OpenSearchDashboardsContextProvider>
+        </MemoryRouter>
+      </I18nProvider>
     );
   };
 

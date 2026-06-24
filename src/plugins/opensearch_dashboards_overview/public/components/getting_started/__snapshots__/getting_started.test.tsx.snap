@@ -18,10 +18,9 @@ exports[`GettingStarted dark mode on 1`] = `
           <h2
             id="osdOverviewGettingStarted__title"
           >
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="Getting started with OpenSearch Dashboards"
               id="opensearchDashboardsOverview.gettingStarted.title"
-              values={Object {}}
             />
           </h2>
         </EuiTitle>
@@ -30,10 +29,9 @@ exports[`GettingStarted dark mode on 1`] = `
         />
         <EuiText>
           <p>
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="OpenSearch Dashboards empowers you to visualize your data, your way.  Start with one question, and see where the answer leads you."
               id="opensearchDashboardsOverview.gettingStarted.description"
-              values={Object {}}
             />
           </p>
         </EuiText>
@@ -174,10 +172,9 @@ exports[`GettingStarted dark mode on 1`] = `
             href="/app/management/opensearch-dashboards/indexPatterns"
             iconType="indexOpen"
           >
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="Add your data"
               id="opensearchDashboardsOverview.gettingStarted.addDataButtonLabel"
-              values={Object {}}
             />
           </EuiSmallButton>
         </RedirectAppLinks>
@@ -213,10 +210,9 @@ exports[`GettingStarted render 1`] = `
           <h2
             id="osdOverviewGettingStarted__title"
           >
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="Getting started with OpenSearch Dashboards"
               id="opensearchDashboardsOverview.gettingStarted.title"
-              values={Object {}}
             />
           </h2>
         </EuiTitle>
@@ -225,10 +221,9 @@ exports[`GettingStarted render 1`] = `
         />
         <EuiText>
           <p>
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="OpenSearch Dashboards empowers you to visualize your data, your way.  Start with one question, and see where the answer leads you."
               id="opensearchDashboardsOverview.gettingStarted.description"
-              values={Object {}}
             />
           </p>
         </EuiText>
@@ -369,10 +364,9 @@ exports[`GettingStarted render 1`] = `
             href="/app/management/opensearch-dashboards/indexPatterns"
             iconType="indexOpen"
           >
-            <FormattedMessage
+            <MemoizedFormattedMessage
               defaultMessage="Add your data"
               id="opensearchDashboardsOverview.gettingStarted.addDataButtonLabel"
-              values={Object {}}
             />
           </EuiSmallButton>
         </RedirectAppLinks>

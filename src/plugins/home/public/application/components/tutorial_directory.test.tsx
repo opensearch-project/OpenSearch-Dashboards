@@ -43,7 +43,6 @@ const setup = async ({ props, services }) => {
   };
 
   const renderResult = render(
-    // @ts-expect-error TS2769 TODO(ts-error): fixme
     <IntlProvider locale="en">
       <OpenSearchDashboardsContextProvider services={finalServices}>
         <TutorialDirectory {...makeProps()} {...props} />

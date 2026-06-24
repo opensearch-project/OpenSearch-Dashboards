@@ -9,7 +9,8 @@
  * GitHub history for details.
  */
 
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mount } from 'enzyme';
+import { wrapWithIntl } from 'test_utils/enzyme_helpers';
 // @ts-expect-error TS2306 TODO(ts-error): fixme
 import { findTestSubject } from '@elastic/eui/lib/test';
 
@@ -30,20 +31,20 @@ const provider = (type?: string, url?: string, text?: string): DashboardProvider
 };
 
 function mountComponent(props?: any) {
-  return mountWithIntl(<CreateButton {...props} />);
+  return mount(wrapWithIntl(<CreateButton {...props} />));
 }
 
 describe('create button no props', () => {
   test('renders empty when no providers given', () => {
     const component = mountComponent();
 
-    expect(component).toMatchSnapshot();
+    expect(component.children()).toMatchSnapshot();
   });
 });
 describe('create button with props', () => {
   test('renders single button when one provider given', () => {
     const component = mountComponent({ dashboardProviders: [provider()] });
-    expect(component).toMatchSnapshot();
+    expect(component.children()).toMatchSnapshot();
     const links = findTestSubject(component, 'newItemButton');
     expect(links.length).toBe(1);
   });
@@ -51,7 +52,7 @@ describe('create button with props', () => {
     const provider1 = provider('test1', 'test1', 'test1');
     const provider2 = provider('test2', 'test2', 'test2');
     const component = mountComponent({ dashboardProviders: [provider2, provider1] });
-    expect(component).toMatchSnapshot();
+    expect(component.children()).toMatchSnapshot();
     const createButtons = findTestSubject(component, 'newItemButton');
     expect(createButtons.length).toBe(0);
     const createDropdown = findTestSubject(component, 'createMenuDropdown');

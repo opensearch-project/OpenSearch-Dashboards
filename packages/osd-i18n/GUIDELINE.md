@@ -57,8 +57,8 @@ Messages can contain placeholders for embedding a value of a variable. For examp
 
 ```js
 {
-  'osd.management.editIndexPattern.scripted.deleteFieldLabel': "Delete scripted field '{fieldName}'?"
-  'osd.management.editIndexPattern.scripted.noFieldLabel': "'{indexPatternTitle}' index pattern doesn't have a scripted field called '{fieldName}'"
+  'osd.management.editIndexPattern.scripted.deleteFieldLabel': "Delete scripted field ''{fieldName}''?"
+  'osd.management.editIndexPattern.scripted.noFieldLabel': "''{indexPatternTitle}'' index pattern doesn't have a scripted field called ''{fieldName}''"
 }
 ```
 

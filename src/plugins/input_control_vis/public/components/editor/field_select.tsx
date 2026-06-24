@@ -31,7 +31,7 @@
 import _ from 'lodash';
 import { Component } from 'react';
 
-import { injectI18n, FormattedMessage, InjectedIntlProps } from '@osd/i18n/react';
+import { injectI18n, FormattedMessage, WrappedComponentProps } from '@osd/i18n/react';
 import { EuiCompressedFormRow, EuiCompressedComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
 import { IIndexPattern, IFieldType } from '../../../../data/public';
@@ -42,7 +42,7 @@ interface FieldSelectUiState {
   indexPatternId: string;
 }
 
-export type FieldSelectUiProps = InjectedIntlProps & {
+export type FieldSelectUiProps = WrappedComponentProps & {
   getIndexPattern: (indexPatternId: string) => Promise<IIndexPattern>;
   indexPatternId: string;
   onChange: (value: any) => void;

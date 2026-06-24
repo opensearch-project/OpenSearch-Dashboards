@@ -29,11 +29,13 @@
  */
 
 import React from 'react';
+import { IntlProvider } from 'react-intl';
 import type { PublicMethodsOf } from '@osd/utility-types';
 
 import { I18nService, I18nStart } from './i18n_service';
 
-const PassThroughComponent = ({ children }: { children: React.ReactNode }) => children;
+const PassThroughComponent = ({ children }: { children: React.ReactNode }) =>
+  React.createElement(IntlProvider, { locale: 'en' }, children);
 
 const createStartContractMock = () => {
   const setupContract: jest.Mocked<I18nStart> = {

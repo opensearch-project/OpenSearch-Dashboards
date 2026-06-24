@@ -46,6 +46,8 @@ export {
   traverseNodes,
   createParserErrorMessage,
   checkValuesProperty,
+  checkSingleApostropheWrappedValues,
+  checkLegacyEscapedCurlyBraces,
   extractValueReferencesFromMessage,
   extractMessageIdFromNode,
   extractMessageValueFromNode,

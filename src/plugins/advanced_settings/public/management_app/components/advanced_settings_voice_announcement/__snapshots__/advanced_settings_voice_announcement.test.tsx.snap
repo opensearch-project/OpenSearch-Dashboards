@@ -10,7 +10,7 @@ exports[`Advanced Settings: Voice Announcement should render announcement 1`] = 
     <EuiDelayRender
       delay={500}
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="You searched for {query}. There {optionLenght, plural, one {is # option} other {are # options}} in {sectionLenght, plural, one {# section} other {# sections}}"
         id="advancedSettings.voiceAnnouncement.searchResultScreenReaderMessage"
         values={
@@ -36,7 +36,7 @@ exports[`Advanced Settings: Voice Announcement should render nothing 1`] = `
     <EuiDelayRender
       delay={500}
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="There {optionLenght, plural, one {is # option} other {are # options}} in {sectionLenght, plural, one {# section} other {# sections}}"
         id="advancedSettings.voiceAnnouncement.noSearchResultScreenReaderMessage"
         values={

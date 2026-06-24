@@ -5,6 +5,7 @@ exports[`ServerStatus renders correctly for green state 2`] = `
   aria-label="Green"
   color="secondary"
   data-test-subj="serverStatusTitleBadge"
+  key=".$.1"
 >
   <EuiInnerText>
     <span
@@ -38,6 +39,7 @@ exports[`ServerStatus renders correctly for red state 2`] = `
   aria-label="Red"
   color="secondary"
   data-test-subj="serverStatusTitleBadge"
+  key=".$.1"
 >
   <EuiInnerText>
     <span

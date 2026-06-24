@@ -19,10 +19,9 @@ exports[`AddFilter should ignore strings with just spaces 1`] = `
       isDisabled={true}
       onClick={[Function]}
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Add"
         id="datasetManagement.editDataset.source.addButtonLabel"
-        values={Object {}}
       />
     </EuiSmallButton>
   </EuiFlexItem>
@@ -46,10 +45,9 @@ exports[`AddFilter should match snapshot when useUpdatedUX equal false 1`] = `
       isDisabled={true}
       onClick={[Function]}
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Add"
         id="datasetManagement.editDataset.source.addButtonLabel"
-        values={Object {}}
       />
     </EuiSmallButton>
   </EuiFlexItem>
@@ -75,10 +73,9 @@ exports[`AddFilter should render normally 1`] = `
       isDisabled={true}
       onClick={[Function]}
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Add"
         id="datasetManagement.editDataset.source.addButtonLabel"
-        values={Object {}}
       />
     </EuiSmallButton>
   </EuiFlexItem>

@@ -2,7 +2,15 @@
 
 exports[`ImportFlyout Component renders correctly 1`] = `
 <IntlProvider
+  defaultFormats={Object {}}
+  defaultLocale="en"
+  fallbackOnEmptyString={true}
+  formats={Object {}}
   locale="en"
+  messages={Object {}}
+  onError={[Function]}
+  onWarn={[Function]}
+  textComponent={Symbol(react.fragment)}
 >
   <ImportFlyout
     close={[MockFunction]}
@@ -37,11 +45,8 @@ exports[`ImportFlyout Component renders correctly 1`] = `
                   <FormattedMessage
                     defaultMessage="Import queries"
                     id="console.ImportFlyout.importQueriesTitle"
-                    values={Object {}}
                   >
-                    <span>
-                      Import queries
-                    </span>
+                    Import queries
                   </FormattedMessage>
                 </h2>
               </div>
@@ -70,10 +75,9 @@ exports[`ImportFlyout Component renders correctly 1`] = `
                       hasChildLabel={true}
                       hasEmptyLabelSpace={false}
                       label={
-                        <FormattedMessage
+                        <Memo(MemoizedFormattedMessage)
                           defaultMessage="Select a file to import"
                           id="console.ImportFlyout.selectFileToImportFormRowLabel"
-                          values={Object {}}
                         />
                       }
                       labelType="label"
@@ -98,11 +102,8 @@ exports[`ImportFlyout Component renders correctly 1`] = `
                               <FormattedMessage
                                 defaultMessage="Select a file to import"
                                 id="console.ImportFlyout.selectFileToImportFormRowLabel"
-                                values={Object {}}
                               >
-                                <span>
-                                  Select a file to import
-                                </span>
+                                Select a file to import
                               </FormattedMessage>
                             </label>
                           </EuiFormLabel>
@@ -118,10 +119,9 @@ exports[`ImportFlyout Component renders correctly 1`] = `
                             fullWidth={true}
                             id="generated-id"
                             initialPromptText={
-                              <FormattedMessage
+                              <Memo(MemoizedFormattedMessage)
                                 defaultMessage="Import"
                                 id="console.ImportFlyout.importPromptText"
-                                values={Object {}}
                               />
                             }
                             name="queryFileImport"
@@ -189,11 +189,8 @@ exports[`ImportFlyout Component renders correctly 1`] = `
                                       <FormattedMessage
                                         defaultMessage="Import"
                                         id="console.ImportFlyout.importPromptText"
-                                        values={Object {}}
                                       >
-                                        <span>
-                                          Import
-                                        </span>
+                                        Import
                                       </FormattedMessage>
                                     </div>
                                   </div>
@@ -417,11 +414,8 @@ exports[`ImportFlyout Component renders correctly 1`] = `
                               <FormattedMessage
                                 defaultMessage="Cancel"
                                 id="console.importFlyout.import.cancelButtonLabel"
-                                values={Object {}}
                               >
-                                <span>
-                                  Cancel
-                                </span>
+                                Cancel
                               </FormattedMessage>
                             </span>
                           </span>
@@ -488,11 +482,8 @@ exports[`ImportFlyout Component renders correctly 1`] = `
                                 <FormattedMessage
                                   defaultMessage="Import"
                                   id="console.importFlyout.import.confirmButtonLabel"
-                                  values={Object {}}
                                 >
-                                  <span>
-                                    Import
-                                  </span>
+                                  Import
                                 </FormattedMessage>
                               </span>
                             </span>

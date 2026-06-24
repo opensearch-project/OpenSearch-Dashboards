@@ -178,7 +178,7 @@ export const WorkspaceInitial = ({ registeredUseCases$ }: WorkspaceInitialProps)
             <EuiText size="s">
               {i18n.translate('workspace.initial.createWorkspace.describe', {
                 defaultMessage:
-                  'Collaborate on use-case based projects with workspaces. {hasWorkspace, select, true { Select a workspace to get started.} false {}}',
+                  'Collaborate on use-case based projects with workspaces. {hasWorkspace, select, true { Select a workspace to get started.} other {}}',
                 values: { hasWorkspace: workspaceList.length > 0 },
               })}
             </EuiText>

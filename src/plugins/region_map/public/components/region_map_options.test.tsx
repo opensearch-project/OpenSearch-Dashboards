@@ -4,6 +4,7 @@
  */
 
 import { RegionMapOptions } from './region_map_options';
+import { I18nProvider } from '@osd/i18n/react';
 // @ts-expect-error TS7016 TODO(ts-error): fixme
 import renderer, { act } from 'react-test-renderer';
 
@@ -35,19 +36,21 @@ describe('region_map_options', () => {
       },
     };
     const stateParams = {
-      colorSchema: {},
-      outlineWeight: {},
+      colorSchema: 'Yellow to Red',
+      outlineWeight: 1,
       wms: {},
       selectedJoinField: {
         name: 'randomId',
+        description: 'Random ID',
+        type: 'id',
       },
       selectedLayer: {
         layerId: 'name',
         fields: [
           {
             name: 'name',
+            description: 'Name',
             type: 'name',
-            property: 'name',
           },
         ],
       },
@@ -55,8 +58,12 @@ describe('region_map_options', () => {
 
     let tree;
     await act(async () => {
-      // @ts-expect-error TS2740 TODO(ts-error): fixme
-      tree = renderer.create(<RegionMapOptions stateParams={stateParams} vis={vis} {...props} />);
+      tree = renderer.create(
+        <I18nProvider>
+          {/* @ts-expect-error TS2532 TODO(ts-error): fixme */}
+          <RegionMapOptions stateParams={stateParams} vis={vis} {...props} />
+        </I18nProvider>
+      );
     });
     // @ts-expect-error TS2532 TODO(ts-error): fixme
     expect(tree.toJSON().props.id).toBe('defaultMapOption');
@@ -91,17 +98,19 @@ describe('region_map_options', () => {
       },
     };
     const stateParams = {
-      colorSchema: {},
-      outlineWeight: {},
+      colorSchema: 'Yellow to Red',
+      outlineWeight: 1,
       wms: {},
       selectedJoinField: {
         name: 'randomId',
+        description: 'Random ID',
+        type: 'id',
       },
       selectedCustomLayer: {
         fields: [
           {
             name: 'name',
-            property: 'name',
+            description: 'Name',
             type: 'name',
           },
         ],
@@ -111,8 +120,12 @@ describe('region_map_options', () => {
 
     let tree;
     await act(async () => {
-      // @ts-expect-error TS2740 TODO(ts-error): fixme
-      tree = renderer.create(<RegionMapOptions stateParams={stateParams} vis={vis} {...props} />);
+      tree = renderer.create(
+        <I18nProvider>
+          {/* @ts-expect-error TS2532 TODO(ts-error): fixme */}
+          <RegionMapOptions stateParams={stateParams} vis={vis} {...props} />
+        </I18nProvider>
+      );
     });
     // @ts-expect-error TS2532 TODO(ts-error): fixme
     expect(tree.toJSON().props.id).toBe('customMapOption');

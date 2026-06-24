@@ -26,9 +26,7 @@ exports[`<WorkspaceFatalError /> render error with callout 1`] = `
           <h2
             class="euiTitle euiTitle--medium"
           >
-            <span>
-              Something went wrong
-            </span>
+            Something went wrong
           </h2>
           <span
             class="euiTextColor euiTextColor--subdued"
@@ -40,9 +38,7 @@ exports[`<WorkspaceFatalError /> render error with callout 1`] = `
               class="euiText euiText--medium"
             >
               <p>
-                <span>
-                  The workspace you are trying to access cannot be found. Please return to the homepage and try again.
-                </span>
+                The workspace you are trying to access cannot be found. Please return to the homepage and try again.
               </p>
             </div>
           </span>
@@ -65,9 +61,7 @@ exports[`<WorkspaceFatalError /> render error with callout 1`] = `
                   <span
                     class="euiButton__text"
                   >
-                    <span>
-                      Go back to homepage
-                    </span>
+                    Go back to homepage
                   </span>
                 </span>
               </button>
@@ -125,9 +119,7 @@ exports[`<WorkspaceFatalError /> render normally 1`] = `
           <h2
             class="euiTitle euiTitle--medium"
           >
-            <span>
-              Something went wrong
-            </span>
+            Something went wrong
           </h2>
           <span
             class="euiTextColor euiTextColor--subdued"
@@ -139,9 +131,7 @@ exports[`<WorkspaceFatalError /> render normally 1`] = `
               class="euiText euiText--medium"
             >
               <p>
-                <span>
-                  The workspace you are trying to access cannot be found. Please return to the homepage and try again.
-                </span>
+                The workspace you are trying to access cannot be found. Please return to the homepage and try again.
               </p>
             </div>
           </span>
@@ -164,9 +154,7 @@ exports[`<WorkspaceFatalError /> render normally 1`] = `
                   <span
                     class="euiButton__text"
                   >
-                    <span>
-                      Go back to homepage
-                    </span>
+                    Go back to homepage
                   </span>
                 </span>
               </button>

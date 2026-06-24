@@ -10,10 +10,9 @@ exports[`DurationFormatEditor should render human readable output normally 1`] =
     hasEmptyLabelSpace={false}
     isInvalid={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Input format"
         id="datasetManagement.duration.inputFormatLabel"
-        values={Object {}}
       />
     }
     labelType="label"
@@ -40,10 +39,9 @@ exports[`DurationFormatEditor should render human readable output normally 1`] =
     hasEmptyLabelSpace={false}
     isInvalid={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Output format"
         id="datasetManagement.duration.outputFormatLabel"
-        values={Object {}}
       />
     }
     labelType="label"
@@ -122,10 +120,9 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
     hasEmptyLabelSpace={false}
     isInvalid={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Input format"
         id="datasetManagement.duration.inputFormatLabel"
-        values={Object {}}
       />
     }
     labelType="label"
@@ -152,10 +149,9 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
     hasEmptyLabelSpace={false}
     isInvalid={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Output format"
         id="datasetManagement.duration.outputFormatLabel"
-        values={Object {}}
       />
     }
     labelType="label"
@@ -187,10 +183,9 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
     hasEmptyLabelSpace={false}
     isInvalid={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Decimal places"
         id="datasetManagement.duration.decimalPlacesLabel"
-        values={Object {}}
       />
     }
     labelType="label"
@@ -214,10 +209,9 @@ exports[`DurationFormatEditor should render non-human readable output normally 1
     <EuiCompressedSwitch
       checked={false}
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Show suffix"
           id="datasetManagement.duration.showSuffixLabel"
-          values={Object {}}
         />
       }
       onChange={[Function]}

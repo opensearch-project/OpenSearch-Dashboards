@@ -12,7 +12,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
       size="s"
     >
       <h2>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Import {useUpdatedUX, select, true {assets} other {saved objects}}"
           id="savedObjectsManagement.objectsTable.flyout.importSavedObjectTitle"
           values={
@@ -33,15 +33,14 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
       data-test-subj="importSavedObjectsConflictsWarning"
       iconType="help"
       title={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Index Pattern Conflicts"
           id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsTitle"
-          values={Object {}}
         />
       }
     >
       <p>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="The following {useUpdatedUX, select, true {assets} other {saved objects}} use index patterns that do not exist. Please select the index patterns you'd like re-associated with them. You can {indexPatternLink} if necessary."
           id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsDescription"
           values={
@@ -49,10 +48,9 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
               "indexPatternLink": <EuiLink
                 href=""
               >
-                <FormattedMessage
+                <Memo(MemoizedFormattedMessage)
                   defaultMessage="create a new index pattern"
                   id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsCalloutLinkText"
-                  values={Object {}}
                 />
               </EuiLink>,
               "useUpdatedUX": undefined,
@@ -130,10 +128,9 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
           onClick={[MockFunction]}
           size="s"
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Cancel"
             id="savedObjectsManagement.objectsTable.flyout.import.cancelButtonLabel"
-            values={Object {}}
           />
         </EuiButtonEmpty>
       </EuiFlexItem>
@@ -147,10 +144,9 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
           onClick={[Function]}
           size="s"
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Confirm all changes"
             id="savedObjectsManagement.objectsTable.flyout.importSuccessful.confirmAllChangesButtonLabel"
-            values={Object {}}
           />
         </EuiButton>
       </EuiFlexItem>
@@ -283,7 +279,7 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
       size="s"
     >
       <h2>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Import {useUpdatedUX, select, true {assets} other {saved objects}}"
           id="savedObjectsManagement.objectsTable.flyout.importSavedObjectTitle"
           values={
@@ -304,18 +300,16 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
       data-test-subj="importSavedObjectsLegacyWarning"
       iconType="help"
       title={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Support for JSON files is going away"
           id="savedObjectsManagement.objectsTable.flyout.legacyFileUsedTitle"
-          values={Object {}}
         />
       }
     >
       <p>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Use our updated export to generate NDJSON files, and you'll be all set."
           id="savedObjectsManagement.objectsTable.flyout.legacyFileUsedBody"
-          values={Object {}}
         />
       </p>
     </EuiCallOut>
@@ -330,15 +324,14 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
       data-test-subj="importSavedObjectsConflictsWarning"
       iconType="help"
       title={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Index Pattern Conflicts"
           id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsTitle"
-          values={Object {}}
         />
       }
     >
       <p>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="The following {useUpdatedUX, select, true {assets} other {saved objects}} use index patterns that do not exist. Please select the index patterns you'd like re-associated with them. You can {indexPatternLink} if necessary."
           id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsDescription"
           values={
@@ -346,10 +339,9 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
               "indexPatternLink": <EuiLink
                 href=""
               >
-                <FormattedMessage
+                <Memo(MemoizedFormattedMessage)
                   defaultMessage="create a new index pattern"
                   id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsCalloutLinkText"
-                  values={Object {}}
                 />
               </EuiLink>,
               "useUpdatedUX": undefined,
@@ -438,10 +430,9 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
           onClick={[MockFunction]}
           size="s"
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Cancel"
             id="savedObjectsManagement.objectsTable.flyout.import.cancelButtonLabel"
-            values={Object {}}
           />
         </EuiButtonEmpty>
       </EuiFlexItem>
@@ -455,10 +446,9 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
           onClick={[Function]}
           size="s"
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Confirm all changes"
             id="savedObjectsManagement.objectsTable.flyout.importSuccessful.confirmAllChangesButtonLabel"
-            values={Object {}}
           />
         </EuiButton>
       </EuiFlexItem>
@@ -474,18 +464,16 @@ Array [
     data-test-subj="importSavedObjectsLegacyWarning"
     iconType="help"
     title={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Support for JSON files is going away"
         id="savedObjectsManagement.objectsTable.flyout.legacyFileUsedTitle"
-        values={Object {}}
       />
     }
   >
     <p>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Use our updated export to generate NDJSON files, and you'll be all set."
         id="savedObjectsManagement.objectsTable.flyout.legacyFileUsedBody"
-        values={Object {}}
       />
     </p>
   </EuiCallOut>,
@@ -494,15 +482,14 @@ Array [
     data-test-subj="importSavedObjectsConflictsWarning"
     iconType="help"
     title={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Index Pattern Conflicts"
         id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsTitle"
-        values={Object {}}
       />
     }
   >
     <p>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="The following {useUpdatedUX, select, true {assets} other {saved objects}} use index patterns that do not exist. Please select the index patterns you'd like re-associated with them. You can {indexPatternLink} if necessary."
         id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsDescription"
         values={
@@ -510,10 +497,9 @@ Array [
             "indexPatternLink": <EuiLink
               href=""
             >
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="create a new index pattern"
                 id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsCalloutLinkText"
-                values={Object {}}
               />
             </EuiLink>,
             "useUpdatedUX": undefined,
@@ -525,10 +511,9 @@ Array [
   <EuiCallOut
     color="danger"
     title={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Sorry, there was an error"
         id="savedObjectsManagement.objectsTable.flyout.errorCalloutTitle"
-        values={Object {}}
       />
     }
   >
@@ -553,7 +538,7 @@ exports[`Flyout should render cluster selector and import options when datasourc
       size="s"
     >
       <h2>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Import {useUpdatedUX, select, true {assets} other {saved objects}}"
           id="savedObjectsManagement.objectsTable.flyout.importSavedObjectTitle"
           values={
@@ -574,10 +559,9 @@ exports[`Flyout should render cluster selector and import options when datasourc
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Select file"
             id="savedObjectsManagement.objectsTable.flyout.selectFileToImportFormRowLabel"
-            values={Object {}}
           />
         }
         labelType="label"
@@ -588,10 +572,9 @@ exports[`Flyout should render cluster selector and import options when datasourc
           display="large"
           fullWidth={true}
           initialPromptText={
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Import"
               id="savedObjectsManagement.objectsTable.flyout.importPromptText"
-              values={Object {}}
             />
           }
           onChange={[Function]}
@@ -671,10 +654,9 @@ exports[`Flyout should render cluster selector and import options when datasourc
           onClick={[MockFunction]}
           size="s"
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Cancel"
             id="savedObjectsManagement.objectsTable.flyout.import.cancelButtonLabel"
-            values={Object {}}
           />
         </EuiButtonEmpty>
       </EuiFlexItem>
@@ -689,10 +671,9 @@ exports[`Flyout should render cluster selector and import options when datasourc
           onClick={[Function]}
           size="s"
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Import"
             id="savedObjectsManagement.objectsTable.flyout.import.confirmButtonLabel"
-            values={Object {}}
           />
         </EuiButton>
       </EuiFlexItem>
@@ -713,7 +694,7 @@ exports[`Flyout should render import step 1`] = `
       size="s"
     >
       <h2>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Import {useUpdatedUX, select, true {assets} other {saved objects}}"
           id="savedObjectsManagement.objectsTable.flyout.importSavedObjectTitle"
           values={
@@ -734,10 +715,9 @@ exports[`Flyout should render import step 1`] = `
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
         label={
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Select file"
             id="savedObjectsManagement.objectsTable.flyout.selectFileToImportFormRowLabel"
-            values={Object {}}
           />
         }
         labelType="label"
@@ -748,10 +728,9 @@ exports[`Flyout should render import step 1`] = `
           display="large"
           fullWidth={true}
           initialPromptText={
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Import"
               id="savedObjectsManagement.objectsTable.flyout.importPromptText"
-              values={Object {}}
             />
           }
           onChange={[Function]}
@@ -792,10 +771,9 @@ exports[`Flyout should render import step 1`] = `
           onClick={[MockFunction]}
           size="s"
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Cancel"
             id="savedObjectsManagement.objectsTable.flyout.import.cancelButtonLabel"
-            values={Object {}}
           />
         </EuiButtonEmpty>
       </EuiFlexItem>
@@ -810,10 +788,9 @@ exports[`Flyout should render import step 1`] = `
           onClick={[Function]}
           size="s"
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Import"
             id="savedObjectsManagement.objectsTable.flyout.import.confirmButtonLabel"
-            values={Object {}}
           />
         </EuiButton>
       </EuiFlexItem>

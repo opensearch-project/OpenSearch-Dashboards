@@ -33,7 +33,7 @@ import {
   EuiCompressedFieldText,
   EuiCompressedSelect,
 } from '@elastic/eui';
-import { InjectedIntl, injectI18n } from '@osd/i18n/react';
+import { IntlShape, injectI18n } from '@osd/i18n/react';
 import { isEmpty } from 'lodash';
 import React, { Component } from 'react';
 import { validateParams } from './lib/filter_editor_utils';
@@ -45,7 +45,7 @@ interface Props {
   onBlur?: (value: string | number | boolean) => void;
   fullWidth?: boolean;
   placeholder: string;
-  intl: InjectedIntl;
+  intl: IntlShape;
   controlOnly?: boolean;
   className?: string;
 }

@@ -9,6 +9,7 @@ import { UpdateAwsCredentialModal } from './update_aws_credential_modal';
 import { SigV4ServiceName } from '../../../../../../data_source/common/data_sources';
 import { EuiCompressedFormRow, EuiModalHeaderTitle } from '@elastic/eui';
 import { FormattedMessage } from 'react-intl';
+import { I18nProvider } from '@osd/i18n/react';
 
 describe('UpdateAwsCredentialModal', () => {
   const mockHandleUpdateAwsCredential = jest.fn();
@@ -37,7 +38,6 @@ describe('UpdateAwsCredentialModal', () => {
         <FormattedMessage
           defaultMessage="Update stored AWS credential"
           id="dataSourcesManagement.editDataSource.updateStoredAwsCredential"
-          values={{}}
         />
       </h1>
     );
@@ -54,14 +54,22 @@ describe('UpdateAwsCredentialModal', () => {
   });
 
   it('renders modal with correct region', () => {
-    const container = render(<UpdateAwsCredentialModal {...props} />);
+    const container = render(
+      <I18nProvider>
+        <UpdateAwsCredentialModal {...props} />
+      </I18nProvider>
+    );
     expect(container.getByTestId('data-source-update-credential-region')).toBeVisible();
     const text = container.getByTestId('data-source-update-credential-region');
     expect(text.textContent).toBe(props.region);
   });
 
   it('renders modal with service name select', () => {
-    const container = render(<UpdateAwsCredentialModal {...props} />);
+    const container = render(
+      <I18nProvider>
+        <UpdateAwsCredentialModal {...props} />
+      </I18nProvider>
+    );
     expect(container.getByTestId('data-source-update-credential-service-name')).toBeVisible();
   });
 });

@@ -38,6 +38,10 @@ import {
   isStringLiteral,
   isTemplateLiteral,
   isBinaryExpression,
+  isArrowFunctionExpression,
+  isFunctionExpression,
+  isTSAsExpression,
+  isTSTypeAssertion,
 } from '@babel/types';
 import fs from 'fs';
 import glob from 'glob';
@@ -221,23 +225,90 @@ export function checkValuesProperty(prefixedValuesKeys, defaultMessage, messageI
 }
 
 /**
+ * Detects value references wrapped by a single apostrophe on both sides, e.g. `'{title}'`.
+ * Valid escaped apostrophes like `''{title}''` are ignored.
+ *
+ * @param {string[]} valuesKeys array of "values" property keys
+ * @param {string} defaultMessage "defaultMessage" value
+ * @param {string} messageId message id for fail errors
+ */
+export function checkSingleApostropheWrappedValues(valuesKeys, defaultMessage, messageId) {
+  if (!valuesKeys.length || !defaultMessage.includes("'")) {
+    return;
+  }
+
+  const invalidValues = valuesKeys.filter((key) => {
+    const token = `{${key}}`;
+    let searchStart = 0;
+
+    while (searchStart < defaultMessage.length) {
+      const start = defaultMessage.indexOf(`'${token}'`, searchStart);
+
+      if (start === -1) {
+        return false;
+      }
+
+      const beforeQuote = start > 0 ? defaultMessage[start - 1] : '';
+      const afterQuoteIndex = start + token.length + 2;
+      const afterQuote =
+        afterQuoteIndex < defaultMessage.length ? defaultMessage[afterQuoteIndex] : '';
+
+      if (beforeQuote !== "'" && afterQuote !== "'") {
+        return true;
+      }
+
+      searchStart = start + 1;
+    }
+
+    return false;
+  });
+
+  if (invalidValues.length) {
+    throw createFailError(
+      `defaultMessage contains value references wrapped in single apostrophes ("${messageId}"): [${invalidValues}]. Use {key} or ''{key}'' instead.`
+    );
+  }
+}
+
+/**
+ * Detects legacy escaped curly braces, e.g. `\\{foo\\}`.
+ * In newer ICU handling these should be written with apostrophe escaping, e.g. `'{foo}'`.
+ *
+ * @param {string} defaultMessage "defaultMessage" value
+ * @param {string} messageId message id for fail errors
+ */
+export function checkLegacyEscapedCurlyBraces(defaultMessage, messageId) {
+  if (!defaultMessage.includes('\\{') && !defaultMessage.includes('\\}')) {
+    return;
+  }
+
+  if (/\\\{[^}]+\s*\\\}/.test(defaultMessage)) {
+    throw createFailError(
+      `defaultMessage contains legacy escaped curly braces ("${messageId}"). Use apostrophe escaping like '{foo}' instead of \\{foo\\}.`
+    );
+  }
+}
+
+/**
  * Extracts value references from the ICU message.
  * @param message ICU message.
  * @param messageId ICU message id
  * @returns {string[]}
  */
 export function extractValueReferencesFromMessage(message, messageId) {
+  const normalizedMessage = message.replace(/(?<!')'\{[^}]+\}'(?!')/g, '');
+
   // Skip validation if message doesn't use ICU.
-  if (!message.includes('{')) {
+  if (!normalizedMessage.includes('{')) {
     return [];
   }
 
   let messageAST;
   try {
-    messageAST = parser.parse(message);
+    messageAST = parser.parse(normalizedMessage);
   } catch (error) {
     if (error.name === 'SyntaxError') {
-      const errorWithContext = createParserErrorMessage(message, {
+      const errorWithContext = createParserErrorMessage(normalizedMessage, {
         loc: {
           line: error.location.start.line,
           column: error.location.start.column - 1,
@@ -319,13 +390,23 @@ export function extractDescriptionValueFromNode(node, messageId) {
 }
 
 export function extractValuesKeysFromNode(node, messageId) {
-  if (!isObjectExpression(node)) {
+  // Handle TypeScript type assertions (e.g., { ... } as any)
+  let objectNode = node;
+  if (isTSAsExpression(node) || isTSTypeAssertion(node)) {
+    objectNode = node.expression;
+  }
+
+  if (!isObjectExpression(objectNode)) {
     throw createFailError(`"values" value should be an object expression ("${messageId}").`);
   }
 
-  return node.properties.map((property) =>
-    isStringLiteral(property.key) ? property.key.value : property.key.name
-  );
+  return objectNode.properties
+    .filter((property) => {
+      // Filter out function values (used for rich text formatting in react-intl 6.8.0+)
+      // e.g., span: (chunks) => <span>{chunks}</span>
+      return !isArrowFunctionExpression(property.value) && !isFunctionExpression(property.value);
+    })
+    .map((property) => (isStringLiteral(property.key) ? property.key.value : property.key.name));
 }
 
 export class ErrorReporter {

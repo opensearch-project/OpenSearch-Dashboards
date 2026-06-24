@@ -28,9 +28,9 @@
  * under the License.
  */
 
-import { shallow } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { wrapWithIntl } from 'test_utils/enzyme_helpers';
 
 import { ErrorToast } from './error_toast';
 
@@ -61,7 +61,7 @@ it('renders matching snapshot', () => {
 });
 
 it('should open a modal when clicking button', () => {
-  const wrapper = mountWithIntl(render());
+  const wrapper = mount(wrapWithIntl(render()));
   expect(openModal).not.toHaveBeenCalled();
   wrapper.find('button').simulate('click');
   expect(openModal).toHaveBeenCalled();

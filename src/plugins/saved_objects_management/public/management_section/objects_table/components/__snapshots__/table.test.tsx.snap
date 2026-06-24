@@ -37,10 +37,9 @@ exports[`Table prevents saved objects from being deleted 1`] = `
           onClick={[Function]}
           title="Unable to delete saved objects"
         >
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Delete"
             id="savedObjectsManagement.objectsTable.table.deleteButtonLabel"
-            values={Object {}}
           />
         </EuiSmallButton>,
         <EuiPopover
@@ -52,10 +51,9 @@ exports[`Table prevents saved objects from being deleted 1`] = `
               isDisabled={false}
               onClick={[Function]}
             >
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="Export"
                 id="savedObjectsManagement.objectsTable.table.exportPopoverButtonLabel"
-                values={Object {}}
               />
             </EuiSmallButton>
           }
@@ -73,10 +71,9 @@ exports[`Table prevents saved objects from being deleted 1`] = `
             hasChildLabel={true}
             hasEmptyLabelSpace={false}
             label={
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="Options"
                 id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.exportOptionsLabel"
-                values={Object {}}
               />
             }
             labelType="label"
@@ -84,7 +81,7 @@ exports[`Table prevents saved objects from being deleted 1`] = `
             <EuiCompressedSwitch
               checked={true}
               label={
-                <FormattedMessage
+                <Memo(MemoizedFormattedMessage)
                   defaultMessage="Include related {useUpdatedUX, select, true {assets} other {objects}}"
                   id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
                   values={
@@ -111,10 +108,9 @@ exports[`Table prevents saved objects from being deleted 1`] = `
               iconType="exportAction"
               onClick={[Function]}
             >
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="Export"
                 id="savedObjectsManagement.objectsTable.table.exportButtonLabel"
-                values={Object {}}
               />
             </EuiSmallButton>
           </EuiCompressedFormRow>
@@ -268,10 +264,9 @@ exports[`Table should call onDuplicateSingle when show duplicate 1`] = `
             isDisabled={false}
             onClick={[Function]}
           >
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Copy to..."
               id="savedObjectsManagement.objectsTable.table.duplicateSOButtonLabel"
-              values={Object {}}
             />
           </EuiSmallButton>
         </React.Fragment>,
@@ -282,10 +277,9 @@ exports[`Table should call onDuplicateSingle when show duplicate 1`] = `
           isDisabled={false}
           onClick={[Function]}
         >
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Delete"
             id="savedObjectsManagement.objectsTable.table.deleteButtonLabel"
-            values={Object {}}
           />
         </EuiSmallButton>,
         <EuiPopover
@@ -297,10 +291,9 @@ exports[`Table should call onDuplicateSingle when show duplicate 1`] = `
               isDisabled={false}
               onClick={[Function]}
             >
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="Export"
                 id="savedObjectsManagement.objectsTable.table.exportPopoverButtonLabel"
-                values={Object {}}
               />
             </EuiSmallButton>
           }
@@ -318,10 +311,9 @@ exports[`Table should call onDuplicateSingle when show duplicate 1`] = `
             hasChildLabel={true}
             hasEmptyLabelSpace={false}
             label={
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="Options"
                 id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.exportOptionsLabel"
-                values={Object {}}
               />
             }
             labelType="label"
@@ -329,7 +321,7 @@ exports[`Table should call onDuplicateSingle when show duplicate 1`] = `
             <EuiCompressedSwitch
               checked={true}
               label={
-                <FormattedMessage
+                <Memo(MemoizedFormattedMessage)
                   defaultMessage="Include related {useUpdatedUX, select, true {assets} other {objects}}"
                   id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
                   values={
@@ -356,10 +348,9 @@ exports[`Table should call onDuplicateSingle when show duplicate 1`] = `
               iconType="exportAction"
               onClick={[Function]}
             >
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="Export"
                 id="savedObjectsManagement.objectsTable.table.exportButtonLabel"
-                values={Object {}}
               />
             </EuiSmallButton>
           </EuiCompressedFormRow>
@@ -523,10 +514,9 @@ exports[`Table should render normally 1`] = `
           isDisabled={false}
           onClick={[Function]}
         >
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Delete"
             id="savedObjectsManagement.objectsTable.table.deleteButtonLabel"
-            values={Object {}}
           />
         </EuiSmallButton>,
         <EuiPopover
@@ -538,10 +528,9 @@ exports[`Table should render normally 1`] = `
               isDisabled={false}
               onClick={[Function]}
             >
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="Export"
                 id="savedObjectsManagement.objectsTable.table.exportPopoverButtonLabel"
-                values={Object {}}
               />
             </EuiSmallButton>
           }
@@ -559,10 +548,9 @@ exports[`Table should render normally 1`] = `
             hasChildLabel={true}
             hasEmptyLabelSpace={false}
             label={
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="Options"
                 id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.exportOptionsLabel"
-                values={Object {}}
               />
             }
             labelType="label"
@@ -570,7 +558,7 @@ exports[`Table should render normally 1`] = `
             <EuiCompressedSwitch
               checked={true}
               label={
-                <FormattedMessage
+                <Memo(MemoizedFormattedMessage)
                   defaultMessage="Include related {useUpdatedUX, select, true {assets} other {objects}}"
                   id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
                   values={
@@ -597,10 +585,9 @@ exports[`Table should render normally 1`] = `
               iconType="exportAction"
               onClick={[Function]}
             >
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="Export"
                 id="savedObjectsManagement.objectsTable.table.exportButtonLabel"
-                values={Object {}}
               />
             </EuiSmallButton>
           </EuiCompressedFormRow>
@@ -768,10 +755,9 @@ exports[`Table should render normally when use updated UX 1`] = `
           isDisabled={false}
           onClick={[Function]}
         >
-          <FormattedMessage
+          <Memo(MemoizedFormattedMessage)
             defaultMessage="Delete"
             id="savedObjectsManagement.objectsTable.table.deleteButtonLabel"
-            values={Object {}}
           />
         </EuiSmallButton>,
         <EuiPopover
@@ -783,10 +769,9 @@ exports[`Table should render normally when use updated UX 1`] = `
               isDisabled={false}
               onClick={[Function]}
             >
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="Export"
                 id="savedObjectsManagement.objectsTable.table.exportPopoverButtonLabel"
-                values={Object {}}
               />
             </EuiSmallButton>
           }
@@ -804,10 +789,9 @@ exports[`Table should render normally when use updated UX 1`] = `
             hasChildLabel={true}
             hasEmptyLabelSpace={false}
             label={
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="Options"
                 id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.exportOptionsLabel"
-                values={Object {}}
               />
             }
             labelType="label"
@@ -815,7 +799,7 @@ exports[`Table should render normally when use updated UX 1`] = `
             <EuiCompressedSwitch
               checked={true}
               label={
-                <FormattedMessage
+                <Memo(MemoizedFormattedMessage)
                   defaultMessage="Include related {useUpdatedUX, select, true {assets} other {objects}}"
                   id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
                   values={
@@ -842,10 +826,9 @@ exports[`Table should render normally when use updated UX 1`] = `
               iconType="exportAction"
               onClick={[Function]}
             >
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="Export"
                 id="savedObjectsManagement.objectsTable.table.exportButtonLabel"
-                values={Object {}}
               />
             </EuiSmallButton>
           </EuiCompressedFormRow>

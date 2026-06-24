@@ -9,7 +9,7 @@ exports[`StatusMessage should render with exact matches 1`] = `
   title={
     <span>
        
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Your index pattern matches {sourceCount} {sourceCount, plural, one {source} other {sources} }."
         id="indexPatternManagement.createIndexPattern.step.status.successLabel.successDetail"
         values={
@@ -30,14 +30,14 @@ exports[`StatusMessage should render with no partial matches 1`] = `
   size="s"
   title={
     <span>
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="The index pattern you've entered doesn't match any indices. You can match {indicesLength, plural, one {your} other {any of your} } {strongIndices}, below."
         id="indexPatternManagement.createIndexPattern.step.status.notMatchLabel.notMatchDetail"
         values={
           Object {
             "indicesLength": 2,
             "strongIndices": <strong>
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="{indicesLength, plural, one {# index} other {# indices} }"
                 id="indexPatternManagement.createIndexPattern.step.status.notMatchLabel.allIndicesLabel"
                 values={
@@ -62,14 +62,14 @@ exports[`StatusMessage should render with partial matches 1`] = `
   size="s"
   title={
     <span>
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Your index pattern doesn't match any indices, but you have {strongIndices} which {matchedIndicesLength, plural, one {looks} other {look} } similar."
         id="indexPatternManagement.createIndexPattern.step.status.partialMatchLabel.partialMatchDetail"
         values={
           Object {
             "matchedIndicesLength": 1,
             "strongIndices": <strong>
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="{matchedIndicesLength, plural, one {index} other {# indices} }"
                 id="indexPatternManagement.createIndexPattern.step.status.partialMatchLabel.strongIndicesLabel"
                 values={
@@ -94,7 +94,7 @@ exports[`StatusMessage should render without a query 1`] = `
   size="s"
   title={
     <span>
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Your index pattern can match {sourceCount, plural, one {your # source} other {any of your # sources} }."
         id="indexPatternManagement.createIndexPattern.step.status.matchAnyLabel.matchAnyDetail"
         values={
@@ -115,10 +115,9 @@ exports[`StatusMessage should show that no indices exist 1`] = `
   size="s"
   title={
     <span>
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="No OpenSearch indices match your pattern."
         id="indexPatternManagement.createIndexPattern.step.status.noSystemIndicesLabel"
-        values={Object {}}
       />
     </span>
   }
@@ -132,10 +131,9 @@ exports[`StatusMessage should show that system indices exist 1`] = `
   size="s"
   title={
     <span>
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="No OpenSearch indices match your pattern."
         id="indexPatternManagement.createIndexPattern.step.status.noSystemIndicesLabel"
-        values={Object {}}
       />
     </span>
   }

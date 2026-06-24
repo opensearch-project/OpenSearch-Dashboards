@@ -35,37 +35,41 @@ exports[`Description render normally 1`] = `
             }
           }
         >
-          <span>
-            An index pattern can match a single source, for example, 
-            <EuiCode>
-              <EuiCodeBlockImpl
-                inline={true}
-              >
-                <span>
-                  <code>
-                    filebeat-4-3-22
-                  </code>
-                </span>
-              </EuiCodeBlockImpl>
-            </EuiCode>
-            , or 
-            <strong>
-              multiple
-            </strong>
-             data sources, 
-            <EuiCode>
-              <EuiCodeBlockImpl
-                inline={true}
-              >
-                <span>
-                  <code>
-                    filebeat-*
-                  </code>
-                </span>
-              </EuiCodeBlockImpl>
-            </EuiCode>
-            .
-          </span>
+          An index pattern can match a single source, for example, 
+          <EuiCode
+            key=".$.1"
+          >
+            <EuiCodeBlockImpl
+              inline={true}
+            >
+              <span>
+                <code>
+                  filebeat-4-3-22
+                </code>
+              </span>
+            </EuiCodeBlockImpl>
+          </EuiCode>
+          , or 
+          <strong
+            key=".$.3"
+          >
+            multiple
+          </strong>
+           data sources, 
+          <EuiCode
+            key=".$.5"
+          >
+            <EuiCodeBlockImpl
+              inline={true}
+            >
+              <span>
+                <code>
+                  filebeat-*
+                </code>
+              </span>
+            </EuiCodeBlockImpl>
+          </EuiCode>
+          .
         </FormattedMessage>
         <br />
         <EuiLink
@@ -80,11 +84,8 @@ exports[`Description render normally 1`] = `
             <FormattedMessage
               defaultMessage="Read documentation"
               id="indexPatternManagement.createIndexPattern.documentation"
-              values={Object {}}
             >
-              <span>
-                Read documentation
-              </span>
+              Read documentation
             </FormattedMessage>
           </button>
         </EuiLink>

@@ -17,10 +17,9 @@ exports[`AddData render 1`] = `
         <h2
           id="osdOverviewDataAdd__title"
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Ingest your data"
             id="opensearchDashboardsOverview.addData.sectionTitle"
-            values={Object {}}
           />
         </h2>
       </EuiTitle>

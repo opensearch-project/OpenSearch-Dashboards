@@ -11,10 +11,9 @@ exports[`FeedItem render 1`] = `
     <h2
       id="osdOverviewNews__title"
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="What's new"
         id="opensearchDashboardsOverview.news.title"
-        values={Object {}}
       />
     </h2>
   </EuiTitle>

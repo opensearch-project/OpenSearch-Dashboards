@@ -6,7 +6,7 @@ exports[`Header should mark the input as invalid 1`] = `
     size="s"
   >
     <h2>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Step {currentStepNumber} of {totalStepNumber}: Define an index pattern"
         id="datasetManagement.createDataset.stepHeader"
         values={
@@ -39,7 +39,7 @@ exports[`Header should mark the input as invalid 1`] = `
           hasEmptyLabelSpace={false}
           helpText={
             <React.Fragment>
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="Use an asterisk ({asterisk}) to match multiple indices."
                 id="datasetManagement.createDataset.step.dataset.allowLabel"
                 values={
@@ -51,7 +51,7 @@ exports[`Header should mark the input as invalid 1`] = `
                 }
               />
                
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="Spaces and the characters {characterList} are not allowed."
                 id="datasetManagement.createDataset.step.dataset.disallowLabel"
                 values={
@@ -66,10 +66,9 @@ exports[`Header should mark the input as invalid 1`] = `
           }
           isInvalid={true}
           label={
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Index pattern name"
               id="datasetManagement.createDataset.step.datasetLabel"
-              values={Object {}}
             />
           }
           labelType="label"
@@ -105,10 +104,9 @@ exports[`Header should mark the input as invalid 1`] = `
           isDisabled={true}
           onClick={[Function]}
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Next step"
             id="datasetManagement.createDataset.step.nextStepButton"
-            values={Object {}}
           />
         </EuiSmallButton>
       </EuiCompressedFormRow>
@@ -123,7 +121,7 @@ exports[`Header should render normally 1`] = `
     size="s"
   >
     <h2>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Step {currentStepNumber} of {totalStepNumber}: Define an index pattern"
         id="datasetManagement.createDataset.stepHeader"
         values={
@@ -152,7 +150,7 @@ exports[`Header should render normally 1`] = `
           hasEmptyLabelSpace={false}
           helpText={
             <React.Fragment>
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="Use an asterisk ({asterisk}) to match multiple indices."
                 id="datasetManagement.createDataset.step.dataset.allowLabel"
                 values={
@@ -164,7 +162,7 @@ exports[`Header should render normally 1`] = `
                 }
               />
                
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="Spaces and the characters {characterList} are not allowed."
                 id="datasetManagement.createDataset.step.dataset.disallowLabel"
                 values={
@@ -179,10 +177,9 @@ exports[`Header should render normally 1`] = `
           }
           isInvalid={false}
           label={
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Index pattern name"
               id="datasetManagement.createDataset.step.datasetLabel"
-              values={Object {}}
             />
           }
           labelType="label"
@@ -218,10 +215,9 @@ exports[`Header should render normally 1`] = `
           isDisabled={false}
           onClick={[Function]}
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Next step"
             id="datasetManagement.createDataset.step.nextStepButton"
-            values={Object {}}
           />
         </EuiSmallButton>
       </EuiCompressedFormRow>

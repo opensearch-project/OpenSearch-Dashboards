@@ -30,7 +30,8 @@
 
 import { openModal } from './shard_failure_open_modal_button.test.mocks';
 
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mount } from 'enzyme';
+import { wrapWithIntl } from 'test_utils/enzyme_helpers';
 import ShardFailureOpenModalButton from './shard_failure_open_modal_button';
 import { shardFailureRequest } from './__mocks__/shard_failure_request';
 import { shardFailureResponse } from './__mocks__/shard_failure_response';
@@ -38,12 +39,14 @@ import { findTestSubject } from 'test_utils/helpers';
 
 describe('ShardFailureOpenModalButton', () => {
   it('triggers the openModal function when "Show details" button is clicked', () => {
-    const component = mountWithIntl(
-      <ShardFailureOpenModalButton
-        request={shardFailureRequest}
-        response={shardFailureResponse}
-        title="test"
-      />
+    const component = mount(
+      wrapWithIntl(
+        <ShardFailureOpenModalButton
+          request={shardFailureRequest}
+          response={shardFailureResponse}
+          title="test"
+        />
+      )
     );
     findTestSubject(component, 'openShardFailureModalBtn').simulate('click');
     expect(openModal).toHaveBeenCalled();

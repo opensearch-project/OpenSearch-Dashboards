@@ -21,6 +21,6 @@ describe('Datasource Management: Header', () => {
       },
     });
 
-    expect(component).toMatchSnapshot();
+    expect(component.children()).toMatchSnapshot();
   });
 });

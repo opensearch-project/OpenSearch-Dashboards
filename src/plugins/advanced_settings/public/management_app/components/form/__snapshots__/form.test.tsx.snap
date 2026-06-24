@@ -23,7 +23,7 @@ exports[`Form should not render no settings message when instructed not to 1`] =
               grow={false}
             >
               <em>
-                <FormattedMessage
+                <MemoizedFormattedMessage
                   defaultMessage="Search terms are hiding {settingsCount} settings {clearSearch}"
                   id="advancedSettings.form.searchResultText"
                   values={
@@ -32,10 +32,9 @@ exports[`Form should not render no settings message when instructed not to 1`] =
                         onClick={[Function]}
                       >
                         <em>
-                          <FormattedMessage
+                          <Memo(MemoizedFormattedMessage)
                             defaultMessage="(clear search)"
                             id="advancedSettings.form.clearSearchResultText"
-                            values={Object {}}
                           />
                         </em>
                       </EuiLink>,
@@ -218,7 +217,7 @@ exports[`Form should render no settings message when there are no settings 1`] =
               grow={false}
             >
               <em>
-                <FormattedMessage
+                <MemoizedFormattedMessage
                   defaultMessage="Search terms are hiding {settingsCount} settings {clearSearch}"
                   id="advancedSettings.form.searchResultText"
                   values={
@@ -227,10 +226,9 @@ exports[`Form should render no settings message when there are no settings 1`] =
                         onClick={[Function]}
                       >
                         <em>
-                          <FormattedMessage
+                          <Memo(MemoizedFormattedMessage)
                             defaultMessage="(clear search)"
                             id="advancedSettings.form.clearSearchResultText"
-                            values={Object {}}
                           />
                         </em>
                       </EuiLink>,
@@ -413,7 +411,7 @@ exports[`Form should render normally 1`] = `
               grow={false}
             >
               <em>
-                <FormattedMessage
+                <MemoizedFormattedMessage
                   defaultMessage="Search terms are hiding {settingsCount} settings {clearSearch}"
                   id="advancedSettings.form.searchResultText"
                   values={
@@ -422,10 +420,9 @@ exports[`Form should render normally 1`] = `
                         onClick={[Function]}
                       >
                         <em>
-                          <FormattedMessage
+                          <Memo(MemoizedFormattedMessage)
                             defaultMessage="(clear search)"
                             id="advancedSettings.form.clearSearchResultText"
-                            values={Object {}}
                           />
                         </em>
                       </EuiLink>,
@@ -608,7 +605,7 @@ exports[`Form should render read-only when saving is disabled 1`] = `
               grow={false}
             >
               <em>
-                <FormattedMessage
+                <MemoizedFormattedMessage
                   defaultMessage="Search terms are hiding {settingsCount} settings {clearSearch}"
                   id="advancedSettings.form.searchResultText"
                   values={
@@ -617,10 +614,9 @@ exports[`Form should render read-only when saving is disabled 1`] = `
                         onClick={[Function]}
                       >
                         <em>
-                          <FormattedMessage
+                          <Memo(MemoizedFormattedMessage)
                             defaultMessage="(clear search)"
                             id="advancedSettings.form.clearSearchResultText"
-                            values={Object {}}
                           />
                         </em>
                       </EuiLink>,

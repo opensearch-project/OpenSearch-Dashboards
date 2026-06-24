@@ -29,11 +29,11 @@
  */
 
 import { ComponentType } from 'react';
-import { injectI18n, InjectedIntlProps } from '@osd/i18n/react';
+import { injectI18n, WrappedComponentProps } from '@osd/i18n/react';
 import { EuiCompressedFormRow } from '@elastic/eui';
 import { IndexPatternSelectProps } from 'src/plugins/data/public';
 
-export type IndexPatternSelectFormRowUiProps = InjectedIntlProps & {
+export type IndexPatternSelectFormRowUiProps = WrappedComponentProps & {
   onChange: (opt: any) => void;
   indexPatternId: string;
   controlIndex: number;

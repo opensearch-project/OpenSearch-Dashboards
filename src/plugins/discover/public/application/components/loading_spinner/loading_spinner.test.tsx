@@ -28,16 +28,17 @@
  * under the License.
  */
 
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { wrapWithIntl } from 'test_utils/enzyme_helpers';
 import { ReactWrapper } from 'enzyme';
 import { LoadingSpinner } from './loading_spinner';
 import { findTestSubject } from 'test_utils/helpers';
+import { mount } from 'enzyme';
 
 describe('loading spinner', function () {
   let component: ReactWrapper;
 
   it('LoadingSpinner renders a Searching text and a spinner', () => {
-    component = mountWithIntl(<LoadingSpinner />);
+    component = mount(wrapWithIntl(<LoadingSpinner />));
     expect(findTestSubject(component, 'loadingSpinnerText').text()).toBe('Searching');
     expect(findTestSubject(component, 'loadingSpinner').length).toBe(1);
   });

@@ -35,35 +35,24 @@
  * intl context around them.
  */
 
-import { I18nProvider, InjectedIntl, intlShape, __IntlProvider } from '@osd/i18n/react';
+import { I18nProvider, IntlShape, __IntlProvider } from '@osd/i18n/react';
 import { mount, ReactWrapper, render, shallow } from 'enzyme';
 import React, { ReactElement, ValidationMap } from 'react';
-import { IntlProvider } from 'react-intl';
+import { createIntl } from 'react-intl';
 
-// Cast IntlProvider to accept children prop for React 18 compatibility
-// The old @types/react-intl doesn't include children in the props
-const TypedIntlProvider = IntlProvider as React.ComponentType<
-  React.ComponentProps<typeof IntlProvider> & { children?: React.ReactNode }
->;
-
-// Use fake component to extract `intl` property to use in tests.
-const { intl } = (mount(
-  <I18nProvider>
-    <br />
-  </I18nProvider>
-).find('IntlProvider') as ReactWrapper<{}, {}, __IntlProvider>)
-  .instance()
-  .getChildContext();
+// Create intl instance for use in tests.
+// This replaces the legacy getChildContext() approach which doesn't exist in react-intl 6.x
+const intl = createIntl({
+  locale: 'en',
+  defaultLocale: 'en',
+  messages: {},
+});
 
 function getOptions(context = {}, childContextTypes: ValidationMap<any> = {}, props = {}) {
   return {
     context: {
       ...context,
       intl,
-    },
-    childContextTypes: {
-      ...childContextTypes,
-      intl: intlShape,
     },
     ...props,
   };
@@ -72,9 +61,7 @@ function getOptions(context = {}, childContextTypes: ValidationMap<any> = {}, pr
 /**
  * When using @osd/i18n `injectI18n` on components, props.intl is required.
  */
-export function nodeWithIntlProp<T>(
-  node: ReactElement<T>
-): ReactElement<T & { intl: InjectedIntl }> {
+export function nodeWithIntlProp<T>(node: ReactElement<T>): ReactElement<T & { intl: IntlShape }> {
   return React.cloneElement<any>(node, { intl });
 }
 
@@ -85,7 +72,12 @@ export function nodeWithIntlProp<T>(
  *  @return The wrapped IntlProvider instance
  */
 export function wrapWithIntl<T>(node: ReactElement<T>) {
-  return <TypedIntlProvider locale="en">{node}</TypedIntlProvider>;
+  return (
+    // eslint-disable-next-line react/jsx-pascal-case
+    <__IntlProvider locale="en" defaultLocale="en">
+      {node}
+    </__IntlProvider>
+  );
 }
 
 /**

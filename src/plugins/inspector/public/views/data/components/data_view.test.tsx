@@ -30,7 +30,7 @@
 
 import { getDataViewDescription } from '../index';
 import { DataAdapter } from '../../../../common/adapters/data';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithI18nProvider } from 'test_utils/enzyme_helpers';
 import { IUiSettingsClient } from '../../../../../../core/public';
 
 jest.mock('../lib/export_csv', () => ({
@@ -61,13 +61,19 @@ describe('Inspector Data View', () => {
     });
 
     it('should render loading state', () => {
-      const component = mountWithIntl(<DataView.component title="Test Data" adapters={adapters} />); // eslint-disable-line react/jsx-pascal-case
+      const component = mountWithI18nProvider(
+        // eslint-disable-next-line react/jsx-pascal-case
+        <DataView.component title="Test Data" adapters={adapters} />
+      );
 
       expect(component).toMatchSnapshot();
     });
 
     it('should render empty state', async () => {
-      const component = mountWithIntl(<DataView.component title="Test Data" adapters={adapters} />); // eslint-disable-line react/jsx-pascal-case
+      const component = mountWithI18nProvider(
+        // eslint-disable-next-line react/jsx-pascal-case
+        <DataView.component title="Test Data" adapters={adapters} />
+      );
       const tabularLoader = Promise.resolve(null);
       adapters.data.setTabularLoader(() => tabularLoader);
       await tabularLoader;

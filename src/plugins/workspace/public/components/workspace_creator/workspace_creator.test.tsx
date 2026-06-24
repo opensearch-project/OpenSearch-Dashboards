@@ -18,6 +18,7 @@ import { DataSourceEngineType } from '../../../../data_source/common/data_source
 import { DataSourceConnectionType } from '../../../common/types';
 import * as utils from '../../utils';
 import * as workspaceUtilsExports from '../utils/workspace';
+import { I18nProvider } from '@osd/i18n/react';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -353,7 +354,9 @@ describe('WorkspaceCreator', () => {
       value: 600,
     });
     const { getByTestId, getAllByText, getByText } = render(
-      <WorkspaceCreator isDashboardAdmin={true} dataSourceEnabled />
+      <I18nProvider>
+        <WorkspaceCreator isDashboardAdmin={true} dataSourceEnabled />
+      </I18nProvider>
     );
 
     // Ensure workspace create form rendered
@@ -403,7 +406,9 @@ describe('WorkspaceCreator', () => {
       value: 600,
     });
     const { getByTestId, getAllByText, getByText } = render(
-      <WorkspaceCreator isDashboardAdmin={true} dataSourceEnabled />
+      <I18nProvider>
+        <WorkspaceCreator isDashboardAdmin={true} dataSourceEnabled />
+      </I18nProvider>
     );
 
     // Ensure workspace create form rendered

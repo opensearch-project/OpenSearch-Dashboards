@@ -47,18 +47,16 @@ exports[`StepTimeField should render "Custom index pattern ID already exists" wh
     color="danger"
     iconType="cross"
     title={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Error"
         id="datasetManagement.createDataset.stepTime.error"
-        values={Object {}}
       />
     }
   >
     <p>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Custom index pattern ID already exists."
         id="datasetManagement.createDataset.stepTime.patterAlreadyExists"
-        values={Object {}}
       />
     </p>
   </EuiCallOut>
@@ -89,10 +87,9 @@ exports[`StepTimeField should render a loading state when creating the index pat
       <h3
         className="eui-textCenter"
       >
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="Creating index pattern…"
           id="datasetManagement.createDataset.stepTime.creatingLabel"
-          values={Object {}}
         />
       </h3>
     </EuiTitle>
@@ -261,10 +258,9 @@ exports[`StepTimeField should render any error message 1`] = `
     color="danger"
     iconType="cross"
     title={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Error"
         id="datasetManagement.createDataset.stepTime.error"
-        values={Object {}}
       />
     }
   >

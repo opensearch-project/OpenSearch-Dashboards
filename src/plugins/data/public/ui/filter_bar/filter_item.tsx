@@ -29,7 +29,7 @@
  */
 
 import { EuiContextMenu, EuiPopover } from '@elastic/eui';
-import { InjectedIntl } from '@osd/i18n/react';
+import { IntlShape } from '@osd/i18n/react';
 import classNames from 'classnames';
 import { MouseEvent, useState, useEffect } from 'react';
 import { IUiSettingsClient } from 'src/core/public';
@@ -55,7 +55,7 @@ interface Props {
   className?: string;
   onUpdate: (filter: Filter) => void;
   onRemove: () => void;
-  intl: InjectedIntl;
+  intl: IntlShape;
   uiSettings: IUiSettingsClient;
 }
 

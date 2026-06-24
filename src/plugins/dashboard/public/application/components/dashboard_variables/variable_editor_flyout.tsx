@@ -361,7 +361,7 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
               defaultMessage: 'Name',
             })}
             helpText={i18n.translate('dashboard.variableEditor.nameHelp', {
-              defaultMessage: 'Use this name to reference the variable: $var or $\\{var\\}',
+              defaultMessage: "Use this name to reference the variable: $var or $'{var}'",
             })}
           >
             <EuiFieldText

@@ -33,7 +33,8 @@ import sizeMe from 'react-sizeme';
 
 import { act } from 'react';
 import { waitFor } from '@testing-library/react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mount } from 'enzyme';
+import { wrapWithIntl } from 'test_utils/enzyme_helpers';
 import { skip } from 'rxjs/operators';
 import { DashboardGrid, DashboardGridProps } from './dashboard_grid';
 import { DashboardContainer, DashboardContainerOptions } from '../dashboard_container';
@@ -116,10 +117,12 @@ afterAll(() => {
 
 test('renders DashboardGrid', () => {
   const { props, options } = prepare();
-  const component = mountWithIntl(
-    <OpenSearchDashboardsContextProvider services={options}>
-      <DashboardGrid {...props} />
-    </OpenSearchDashboardsContextProvider>
+  const component = mount(
+    wrapWithIntl(
+      <OpenSearchDashboardsContextProvider services={options}>
+        <DashboardGrid {...props} />
+      </OpenSearchDashboardsContextProvider>
+    )
   );
   const panelElements = component.find('EmbeddableChildPanel');
   expect(panelElements.length).toBe(2);
@@ -127,10 +130,12 @@ test('renders DashboardGrid', () => {
 
 test('renders DashboardGrid with no visualizations', async () => {
   const { props, options } = prepare();
-  const component = mountWithIntl(
-    <OpenSearchDashboardsContextProvider services={options}>
-      <DashboardGrid {...props} />
-    </OpenSearchDashboardsContextProvider>
+  const component = mount(
+    wrapWithIntl(
+      <OpenSearchDashboardsContextProvider services={options}>
+        <DashboardGrid {...props} />
+      </OpenSearchDashboardsContextProvider>
+    )
   );
 
   // Wrap container input update in act() for React 18
@@ -147,10 +152,12 @@ test('renders DashboardGrid with no visualizations', async () => {
 
 test('DashboardGrid removes panel when removed from container', async () => {
   const { props, options } = prepare();
-  const component = mountWithIntl(
-    <OpenSearchDashboardsContextProvider services={options}>
-      <DashboardGrid {...props} />
-    </OpenSearchDashboardsContextProvider>
+  const component = mount(
+    wrapWithIntl(
+      <OpenSearchDashboardsContextProvider services={options}>
+        <DashboardGrid {...props} />
+      </OpenSearchDashboardsContextProvider>
+    )
   );
 
   const originalPanels = props.container.getInput().panels;
@@ -172,10 +179,12 @@ test('DashboardGrid removes panel when removed from container', async () => {
 
 test('DashboardGrid renders expanded panel', async () => {
   const { props, options } = prepare();
-  const component = mountWithIntl(
-    <OpenSearchDashboardsContextProvider services={options}>
-      <DashboardGrid {...props} />
-    </OpenSearchDashboardsContextProvider>
+  const component = mount(
+    wrapWithIntl(
+      <OpenSearchDashboardsContextProvider services={options}>
+        <DashboardGrid {...props} />
+      </OpenSearchDashboardsContextProvider>
+    )
   );
 
   // Wrap container input update in act() for React 18
@@ -209,10 +218,12 @@ test('DashboardGrid renders expanded panel', async () => {
 
 test('DashboardGrid unmount unsubscribes', (done) => {
   const { props, options } = prepare();
-  const component = mountWithIntl(
-    <OpenSearchDashboardsContextProvider services={options}>
-      <DashboardGrid {...props} />
-    </OpenSearchDashboardsContextProvider>
+  const component = mount(
+    wrapWithIntl(
+      <OpenSearchDashboardsContextProvider services={options}>
+        <DashboardGrid {...props} />
+      </OpenSearchDashboardsContextProvider>
+    )
   );
 
   component.unmount();

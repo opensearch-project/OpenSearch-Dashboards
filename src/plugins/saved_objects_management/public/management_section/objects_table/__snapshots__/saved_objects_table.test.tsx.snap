@@ -7,10 +7,9 @@ exports[`SavedObjectsTable delete should show a confirm modal with correct icons
 >
   <EuiModalHeader>
     <EuiModalHeaderTitle>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Delete assets"
         id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModalTitle"
-        values={Object {}}
       />
     </EuiModalHeaderTitle>
   </EuiModalHeader>
@@ -19,10 +18,9 @@ exports[`SavedObjectsTable delete should show a confirm modal with correct icons
       size="s"
     >
       <p>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="This action will delete the following assets:"
           id="savedObjectsManagement.deleteSavedObjectsConfirmModalDescription"
-          values={Object {}}
         />
       </p>
     </EuiText>
@@ -73,10 +71,9 @@ exports[`SavedObjectsTable delete should show a confirm modal with correct icons
     <EuiButtonEmpty
       onClick={[Function]}
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Cancel"
         id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.cancelButtonLabel"
-        values={Object {}}
       />
     </EuiButtonEmpty>
     <EuiButton
@@ -87,10 +84,9 @@ exports[`SavedObjectsTable delete should show a confirm modal with correct icons
       onClick={[Function]}
       type="submit"
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Delete"
         id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.deleteButtonLabel"
-        values={Object {}}
       />
     </EuiButton>
   </EuiModalFooter>
@@ -100,10 +96,9 @@ exports[`SavedObjectsTable delete should show a confirm modal with correct icons
 exports[`SavedObjectsTable delete should show a confirm modal with correct icons and tooltips 2`] = `
 <EuiModalHeader>
   <EuiModalHeaderTitle>
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="Delete assets"
       id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModalTitle"
-      values={Object {}}
     />
   </EuiModalHeaderTitle>
 </EuiModalHeader>
@@ -114,10 +109,9 @@ exports[`SavedObjectsTable delete should show a confirm modal with correct icons
   <EuiButtonEmpty
     onClick={[Function]}
   >
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="Cancel"
       id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.cancelButtonLabel"
-      values={Object {}}
     />
   </EuiButtonEmpty>
   <EuiButton
@@ -128,10 +122,9 @@ exports[`SavedObjectsTable delete should show a confirm modal with correct icons
     onClick={[Function]}
     type="submit"
   >
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="Delete"
       id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.deleteButtonLabel"
-      values={Object {}}
     />
   </EuiButton>
 </EuiModalFooter>
@@ -154,10 +147,9 @@ exports[`SavedObjectsTable delete should show error toast when failing to delete
 >
   <EuiModalHeader>
     <EuiModalHeaderTitle>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Delete assets"
         id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModalTitle"
-        values={Object {}}
       />
     </EuiModalHeaderTitle>
   </EuiModalHeader>
@@ -166,10 +158,9 @@ exports[`SavedObjectsTable delete should show error toast when failing to delete
       size="s"
     >
       <p>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="This action will delete the following assets:"
           id="savedObjectsManagement.deleteSavedObjectsConfirmModalDescription"
-          values={Object {}}
         />
       </p>
     </EuiText>
@@ -210,10 +201,9 @@ exports[`SavedObjectsTable delete should show error toast when failing to delete
     <EuiButtonEmpty
       onClick={[Function]}
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Cancel"
         id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.cancelButtonLabel"
-        values={Object {}}
       />
     </EuiButtonEmpty>
     <EuiButton
@@ -224,10 +214,9 @@ exports[`SavedObjectsTable delete should show error toast when failing to delete
       onClick={[Function]}
       type="submit"
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Delete"
         id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.deleteButtonLabel"
-        values={Object {}}
       />
     </EuiButton>
   </EuiModalFooter>
@@ -241,10 +230,9 @@ exports[`SavedObjectsTable delete should show error toast when failing to delete
 >
   <EuiModalHeader>
     <EuiModalHeaderTitle>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Delete assets"
         id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModalTitle"
-        values={Object {}}
       />
     </EuiModalHeaderTitle>
   </EuiModalHeader>
@@ -253,10 +241,9 @@ exports[`SavedObjectsTable delete should show error toast when failing to delete
       size="s"
     >
       <p>
-        <FormattedMessage
+        <MemoizedFormattedMessage
           defaultMessage="This action will delete the following assets:"
           id="savedObjectsManagement.deleteSavedObjectsConfirmModalDescription"
-          values={Object {}}
         />
       </p>
     </EuiText>
@@ -297,10 +284,9 @@ exports[`SavedObjectsTable delete should show error toast when failing to delete
     <EuiButtonEmpty
       onClick={[Function]}
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Cancel"
         id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.cancelButtonLabel"
-        values={Object {}}
       />
     </EuiButtonEmpty>
     <EuiButton
@@ -311,10 +297,9 @@ exports[`SavedObjectsTable delete should show error toast when failing to delete
       onClick={[Function]}
       type="submit"
     >
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Delete"
         id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.deleteButtonLabel"
-        values={Object {}}
       />
     </EuiButton>
   </EuiModalFooter>
@@ -990,7 +975,7 @@ exports[`SavedObjectsTable export should allow the user to choose when exporting
         size="s"
       >
         <h2>
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Export {useUpdatedUX, select, true {{filteredItemCount, plural, one{# asset} other {# assets}}} other {{filteredItemCount, plural, one{# object} other {# objects}}}}"
             id="savedObjectsManagement.objectsTable.exportObjectsConfirmModalTitle"
             values={
@@ -1012,10 +997,9 @@ exports[`SavedObjectsTable export should allow the user to choose when exporting
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Select which types to export"
           id="savedObjectsManagement.objectsTable.exportObjectsConfirmModalDescription"
-          values={Object {}}
         />
       }
       labelType="legend"
@@ -1058,7 +1042,7 @@ exports[`SavedObjectsTable export should allow the user to choose when exporting
     <EuiCompressedSwitch
       checked={true}
       label={
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="Include related {useUpdatedUX, select, true {assets} other {objects}}"
           id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
           values={
@@ -1086,10 +1070,9 @@ exports[`SavedObjectsTable export should allow the user to choose when exporting
             <EuiSmallButtonEmpty
               onClick={[Function]}
             >
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="Cancel"
                 id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.cancelButtonLabel"
-                values={Object {}}
               />
             </EuiSmallButtonEmpty>
           </EuiFlexItem>
@@ -1100,10 +1083,9 @@ exports[`SavedObjectsTable export should allow the user to choose when exporting
               fill={true}
               onClick={[Function]}
             >
-              <FormattedMessage
+              <MemoizedFormattedMessage
                 defaultMessage="Export all"
                 id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.exportAllButtonLabel"
-                values={Object {}}
               />
             </EuiSmallButton>
           </EuiFlexItem>

@@ -28,21 +28,48 @@
  * under the License.
  */
 
-import memoizeIntlConstructor from 'intl-format-cache';
 import IntlMessageFormat from 'intl-messageformat';
-import IntlRelativeFormat from 'intl-relativeformat';
 
 import { Translation } from '../translation';
 import { Formats, formats as EN_FORMATS } from './formats';
 import { hasValues, isObject, isString, mergeAll } from './helper';
 import { isPseudoLocale, translateUsingPseudoLocale } from './pseudo_locale';
 
-// Add all locale data to `IntlMessageFormat`.
-import './locales.js';
-
 const EN_LOCALE = 'en';
+const gRichTextElements = {
+  b: (chunks: any) => `<b>${chunks}</b>`,
+  code: (chunks: any) => `<code>${chunks}</code>`,
+  em: (chunks: any) => `<em>${chunks}</em>`,
+  i: (chunks: any) => `<i>${chunks}</i>`,
+  li: (chunks: any) => `<li>${chunks}</li>`,
+  p: (chunks: any) => `<p>${chunks}</p>`,
+  strong: (chunks: any) => `<strong>${chunks}</strong>`,
+  ul: (chunks: any) => `<ul>${chunks}</ul>`,
+};
 const translationsForLocale: Record<string, Translation> = {};
-const getMessageFormat = memoizeIntlConstructor(IntlMessageFormat);
+
+// Memoization cache for IntlMessageFormat instances
+const messageFormatCache = new Map<string, IntlMessageFormat>();
+
+function getMessageFormat(message: string, locale: string, formats?: Formats): IntlMessageFormat {
+  const cacheKey = `${locale}:${message}`;
+  let messageFormat = messageFormatCache.get(cacheKey);
+
+  if (!messageFormat) {
+    messageFormat = new IntlMessageFormat(message, locale, formats);
+    messageFormatCache.set(cacheKey, messageFormat);
+  }
+
+  return messageFormat;
+}
+
+/**
+ * Clears the message format cache. Primarily used for testing.
+ * @internal
+ */
+export function clearMessageFormatCache() {
+  messageFormatCache.clear();
+}
 
 /* A locale code is made of several components:
  *    * lang: The two- and three-letter lower-case language code follows the ISO 639-1 and ISO 639-2/3 standards, respectively.
@@ -57,9 +84,6 @@ const localeParser = /^(?<lang>[a-z]{2,3})(?:-(?<script>[a-z]{4}))?(?:-(?<region
 let defaultLocale = EN_LOCALE;
 let currentLocale = EN_LOCALE;
 let formats = EN_FORMATS;
-
-IntlMessageFormat.defaultLocale = defaultLocale;
-IntlRelativeFormat.defaultLocale = defaultLocale;
 
 /**
  * Returns message by the given message id.
@@ -151,8 +175,6 @@ export function setDefaultLocale(locale: string) {
   }
 
   defaultLocale = normalizeLocale(locale);
-  IntlMessageFormat.defaultLocale = defaultLocale;
-  IntlRelativeFormat.defaultLocale = defaultLocale;
 }
 
 export function getDefaultLocale() {
@@ -175,7 +197,11 @@ export function setFormats(newFormats: Formats) {
     throw new Error('[I18n] A `formats` must be a non-empty object.');
   }
 
-  formats = mergeAll(formats, newFormats);
+  formats = mergeAll(formats, newFormats) as Formats;
+
+  // Clear the message format cache since formats have changed
+  // Any cached IntlMessageFormat instances were created with old formats
+  clearMessageFormatCache();
 }
 
 /**
@@ -193,7 +219,10 @@ export function getRegisteredLocales() {
 }
 
 interface TranslateArguments {
-  values?: Record<string, string | number | boolean | Date | null | undefined>;
+  values?: Record<
+    string,
+    string | number | boolean | Date | null | undefined | ((...chunks: any[]) => string)
+  >;
   defaultMessage: string;
   description?: string;
 }
@@ -220,14 +249,19 @@ export function translate(id: string, { values = {}, defaultMessage }: Translate
 
   if (message) {
     try {
+      // IntlMessageFormat natively supports functions in values for rich text formatting
       // We should call `format` even for messages without any value references
-      // to let it handle escaped curly braces `\\{` that are the part of the text itself
+      // to let it handle escaped curly braces `'{` that are the part of the text itself
       // and not value reference boundaries.
-      const formattedMessage = getMessageFormat(message, getLocale(), getFormats()).format(values);
+      const eValues = message.includes('<') ? { ...gRichTextElements, ...values } : values;
+      const formattedMessage = getMessageFormat(message, getLocale(), getFormats()).format(eValues);
 
-      return shouldUsePseudoLocale
-        ? translateUsingPseudoLocale(formattedMessage)
-        : formattedMessage;
+      // Ensure we always return a string by converting the result
+      const messageString = Array.isArray(formattedMessage)
+        ? formattedMessage.join('')
+        : String(formattedMessage);
+
+      return shouldUsePseudoLocale ? translateUsingPseudoLocale(messageString) : messageString;
     } catch (e) {
       throw new Error(
         `[I18n] Error formatting message: "${id}" for locale: "${getLocale()}".\n${e}`
@@ -237,8 +271,11 @@ export function translate(id: string, { values = {}, defaultMessage }: Translate
 
   try {
     const msg = getMessageFormat(defaultMessage, getDefaultLocale(), getFormats());
+    const eValues = defaultMessage.includes('<') ? { ...gRichTextElements, ...values } : values;
+    const formattedDefault = msg.format(eValues);
 
-    return msg.format(values);
+    // Ensure we always return a string by converting the result
+    return Array.isArray(formattedDefault) ? formattedDefault.join('') : String(formattedDefault);
   } catch (e) {
     throw new Error(`[I18n] Error formatting the default message for: "${id}".\n${e}`);
   }

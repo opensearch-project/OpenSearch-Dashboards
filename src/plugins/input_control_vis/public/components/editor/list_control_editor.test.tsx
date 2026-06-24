@@ -33,11 +33,12 @@ import { shallow } from 'enzyme';
 
 import { findTestSubject } from 'test_utils/helpers';
 
-import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { wrapWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { getIndexPatternMock } from '../../test_utils/get_index_pattern_mock';
 import { ListControlEditor } from './list_control_editor';
 import { ControlParams } from '../../editor_utils';
 import { getDepsMock, updateComponent } from '../../test_utils';
+import { mount } from 'enzyme';
 
 const controlParamsBase: ControlParams = {
   id: '1',
@@ -229,18 +230,20 @@ describe('renders', () => {
 });
 
 test('handleOptionsChange - multiselect', async () => {
-  const component = mountWithIntl(
-    <ListControlEditor
-      deps={deps}
-      getIndexPattern={getIndexPatternMock}
-      controlIndex={0}
-      controlParams={controlParamsBase}
-      handleFieldNameChange={handleFieldNameChange}
-      handleIndexPatternChange={handleIndexPatternChange}
-      handleOptionsChange={handleOptionsChange}
-      handleParentChange={() => {}}
-      parentCandidates={[]}
-    />
+  const component = mount(
+    wrapWithIntl(
+      <ListControlEditor
+        deps={deps}
+        getIndexPattern={getIndexPatternMock}
+        controlIndex={0}
+        controlParams={controlParamsBase}
+        handleFieldNameChange={handleFieldNameChange}
+        handleIndexPatternChange={handleIndexPatternChange}
+        handleOptionsChange={handleOptionsChange}
+        handleParentChange={() => {}}
+        parentCandidates={[]}
+      />
+    )
   );
 
   await updateComponent(component);
@@ -255,18 +258,20 @@ test('handleOptionsChange - multiselect', async () => {
 });
 
 test('handleOptionsChange - size', async () => {
-  const component = mountWithIntl(
-    <ListControlEditor
-      deps={deps}
-      getIndexPattern={getIndexPatternMock}
-      controlIndex={0}
-      controlParams={controlParamsBase}
-      handleFieldNameChange={handleFieldNameChange}
-      handleIndexPatternChange={handleIndexPatternChange}
-      handleOptionsChange={handleOptionsChange}
-      handleParentChange={() => {}}
-      parentCandidates={[]}
-    />
+  const component = mount(
+    wrapWithIntl(
+      <ListControlEditor
+        deps={deps}
+        getIndexPattern={getIndexPatternMock}
+        controlIndex={0}
+        controlParams={controlParamsBase}
+        handleFieldNameChange={handleFieldNameChange}
+        handleIndexPatternChange={handleIndexPatternChange}
+        handleOptionsChange={handleOptionsChange}
+        handleParentChange={() => {}}
+        parentCandidates={[]}
+      />
+    )
   );
 
   await updateComponent(component);

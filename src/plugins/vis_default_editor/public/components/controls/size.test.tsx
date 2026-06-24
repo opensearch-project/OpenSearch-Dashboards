@@ -28,10 +28,12 @@
  * under the License.
  */
 
-import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { mount } from 'enzyme';
+import { wrapWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { EuiIconTip } from '@elastic/eui';
 import { SizeParamEditor, SizeParamEditorProps } from './size';
 import { aggParamCommonPropsMock } from './test_utils';
+import { I18nProvider } from '@osd/i18n/react';
 
 describe('SizeParamEditor', () => {
   let defaultProps: SizeParamEditorProps;
@@ -60,22 +62,31 @@ describe('SizeParamEditor', () => {
   });
 
   it('should change its validity due to passed props', () => {
-    const comp = mountWithIntl(<SizeParamEditor {...defaultProps} />);
+    const SizeParamEditorWrapper = (props: any) => (
+      <I18nProvider>
+        <SizeParamEditor {...props} />
+      </I18nProvider>
+    );
+    const compW = mount(<SizeParamEditorWrapper {...defaultProps} />);
+    let comp = compW.find('SizeParamEditor');
 
     expect(defaultProps.setValidity).toHaveBeenCalledWith(false);
     expect(comp.children().props()).toHaveProperty('isInvalid', false);
 
-    comp.setProps({ disabled: true, showValidation: true });
+    compW.setProps({ disabled: true, showValidation: true });
+    comp = compW.find('SizeParamEditor');
 
     expect(defaultProps.setValidity).toHaveBeenCalledWith(true);
     expect(comp.children().props()).toHaveProperty('isInvalid', false);
 
-    comp.setProps({ disabled: false, showValidation: true });
+    compW.setProps({ disabled: false, showValidation: true });
+    comp = compW.find('SizeParamEditor');
 
     expect(defaultProps.setValidity).toHaveBeenCalledWith(false);
     expect(comp.children().props()).toHaveProperty('isInvalid', true);
 
-    comp.setProps({ value: 2, showValidation: true });
+    compW.setProps({ value: 2, showValidation: true });
+    comp = compW.find('SizeParamEditor');
 
     expect(defaultProps.setValidity).toHaveBeenCalledWith(true);
     expect(comp.children().props()).toHaveProperty('isInvalid', false);
@@ -83,7 +94,7 @@ describe('SizeParamEditor', () => {
   });
 
   it('should set new parsed value', () => {
-    const comp = mountWithIntl(<SizeParamEditor {...defaultProps} />);
+    const comp = mount(wrapWithIntl(<SizeParamEditor {...defaultProps} />));
     const input = comp.find('[type="number"]');
     input.simulate('change', { target: { value: '3' } });
 
@@ -96,7 +107,7 @@ describe('SizeParamEditor', () => {
   });
 
   it('should call setTouched on blur', () => {
-    const comp = mountWithIntl(<SizeParamEditor {...defaultProps} />);
+    const comp = mount(wrapWithIntl(<SizeParamEditor {...defaultProps} />));
     comp.find('[type="number"]').simulate('blur');
 
     expect(defaultProps.setTouched).toHaveBeenCalledTimes(1);

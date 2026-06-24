@@ -22,7 +22,7 @@ export const DeleteScritpedFieldConfirmationModal = ({
   deleteField,
 }: DeleteScritpedFieldConfirmationModalProps) => {
   const title = i18n.translate('datasetManagement.editDataset.scripted.deleteFieldLabel', {
-    defaultMessage: "Delete scripted field '{fieldName}'?",
+    defaultMessage: "Delete scripted field ''{fieldName}''?",
     values: { fieldName: field.name },
   });
   const cancelButtonText = i18n.translate(

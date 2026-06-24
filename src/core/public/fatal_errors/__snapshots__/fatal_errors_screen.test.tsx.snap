@@ -24,20 +24,18 @@ exports[`FatalErrorsScreen rendering render matches snapshot 1`] = `
               fill={true}
               onClick={[Function]}
             >
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="Clear your session"
                 id="core.fatalErrors.clearYourSessionButtonLabel"
-                values={Object {}}
               />
             </EuiSmallButton>,
             <EuiSmallButtonEmpty
               data-test-subj="goBack"
               onClick={[Function]}
             >
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="Go back"
                 id="core.fatalErrors.goBackButtonLabel"
-                values={Object {}}
               />
             </EuiSmallButtonEmpty>,
           ]
@@ -47,10 +45,9 @@ exports[`FatalErrorsScreen rendering render matches snapshot 1`] = `
             size="s"
           >
             <p>
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="Try refreshing the page. If that doesn't work, go back to the previous page or clear your session data."
                 id="core.fatalErrors.tryRefreshingPageDescription"
-                values={Object {}}
               />
             </p>
           </EuiText>
@@ -59,10 +56,9 @@ exports[`FatalErrorsScreen rendering render matches snapshot 1`] = `
         iconType="alert"
         title={
           <h2>
-            <FormattedMessage
+            <Memo(MemoizedFormattedMessage)
               defaultMessage="Something went wrong"
               id="core.fatalErrors.somethingWentWrongTitle"
-              values={Object {}}
             />
           </h2>
         }

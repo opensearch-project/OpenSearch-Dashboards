@@ -11,7 +11,6 @@ import { QueryAssistCallOut } from './call_outs';
 type Props = ComponentProps<typeof QueryAssistCallOut>;
 
 const IntlWrapper = ({ children }: PropsWithChildren<unknown>) => (
-  // @ts-expect-error TS2769 TODO(ts-error): fixme
   <IntlProvider locale="en">{children}</IntlProvider>
 );
 

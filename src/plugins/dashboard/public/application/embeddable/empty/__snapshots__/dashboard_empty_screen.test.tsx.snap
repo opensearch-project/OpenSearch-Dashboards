@@ -32,104 +32,40 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
   }
   intl={
     Object {
+      "$t": [Function],
       "defaultFormats": Object {},
       "defaultLocale": "en",
+      "defaultRichTextElements": undefined,
+      "fallbackOnEmptyString": true,
       "formatDate": [Function],
-      "formatHTMLMessage": [Function],
+      "formatDateTimeRange": [Function],
+      "formatDateToParts": [Function],
+      "formatDisplayName": [Function],
+      "formatList": [Function],
+      "formatListToParts": [Function],
       "formatMessage": [Function],
       "formatNumber": [Function],
+      "formatNumberToParts": [Function],
       "formatPlural": [Function],
-      "formatRelative": [Function],
+      "formatRelativeTime": [Function],
       "formatTime": [Function],
-      "formats": Object {
-        "date": Object {
-          "full": Object {
-            "day": "numeric",
-            "month": "long",
-            "weekday": "long",
-            "year": "numeric",
-          },
-          "long": Object {
-            "day": "numeric",
-            "month": "long",
-            "year": "numeric",
-          },
-          "medium": Object {
-            "day": "numeric",
-            "month": "short",
-            "year": "numeric",
-          },
-          "short": Object {
-            "day": "numeric",
-            "month": "numeric",
-            "year": "2-digit",
-          },
-        },
-        "number": Object {
-          "currency": Object {
-            "style": "currency",
-          },
-          "percent": Object {
-            "style": "percent",
-          },
-        },
-        "relative": Object {
-          "days": Object {
-            "units": "day",
-          },
-          "hours": Object {
-            "units": "hour",
-          },
-          "minutes": Object {
-            "units": "minute",
-          },
-          "months": Object {
-            "units": "month",
-          },
-          "seconds": Object {
-            "units": "second",
-          },
-          "years": Object {
-            "units": "year",
-          },
-        },
-        "time": Object {
-          "full": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "long": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "medium": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-          },
-          "short": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-          },
-        },
-      },
+      "formatTimeToParts": [Function],
+      "formats": Object {},
       "formatters": Object {
         "getDateTimeFormat": [Function],
+        "getDisplayNames": [Function],
+        "getListFormat": [Function],
         "getMessageFormat": [Function],
         "getNumberFormat": [Function],
-        "getPluralFormat": [Function],
-        "getRelativeFormat": [Function],
+        "getPluralRules": [Function],
+        "getRelativeTimeFormat": [Function],
       },
       "locale": "en",
       "messages": Object {},
-      "now": [Function],
       "onError": [Function],
+      "onWarn": [Function],
       "textComponent": Symbol(react.fragment),
-      "timeZone": null,
+      "timeZone": undefined,
     }
   }
   isReadonlyMode={true}
@@ -190,7 +126,21 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
 >
   <I18nProvider>
     <IntlProvider
+      defaultFormats={Object {}}
       defaultLocale="en"
+      defaultRichTextElements={
+        Object {
+          "b": [Function],
+          "code": [Function],
+          "em": [Function],
+          "i": [Function],
+          "li": [Function],
+          "p": [Function],
+          "strong": [Function],
+          "ul": [Function],
+        }
+      }
+      fallbackOnEmptyString={true}
       formats={
         Object {
           "date": Object {
@@ -224,26 +174,6 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
               "style": "percent",
             },
           },
-          "relative": Object {
-            "days": Object {
-              "units": "day",
-            },
-            "hours": Object {
-              "units": "hour",
-            },
-            "minutes": Object {
-              "units": "minute",
-            },
-            "months": Object {
-              "units": "month",
-            },
-            "seconds": Object {
-              "units": "second",
-            },
-            "years": Object {
-              "units": "year",
-            },
-          },
           "time": Object {
             "full": Object {
               "hour": "numeric",
@@ -271,6 +201,8 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
       }
       locale="en"
       messages={Object {}}
+      onError={[Function]}
+      onWarn={[Function]}
       textComponent={Symbol(react.fragment)}
     >
       <PseudoLocaleWrapper>
@@ -403,104 +335,40 @@ exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
   }
   intl={
     Object {
+      "$t": [Function],
       "defaultFormats": Object {},
       "defaultLocale": "en",
+      "defaultRichTextElements": undefined,
+      "fallbackOnEmptyString": true,
       "formatDate": [Function],
-      "formatHTMLMessage": [Function],
+      "formatDateTimeRange": [Function],
+      "formatDateToParts": [Function],
+      "formatDisplayName": [Function],
+      "formatList": [Function],
+      "formatListToParts": [Function],
       "formatMessage": [Function],
       "formatNumber": [Function],
+      "formatNumberToParts": [Function],
       "formatPlural": [Function],
-      "formatRelative": [Function],
+      "formatRelativeTime": [Function],
       "formatTime": [Function],
-      "formats": Object {
-        "date": Object {
-          "full": Object {
-            "day": "numeric",
-            "month": "long",
-            "weekday": "long",
-            "year": "numeric",
-          },
-          "long": Object {
-            "day": "numeric",
-            "month": "long",
-            "year": "numeric",
-          },
-          "medium": Object {
-            "day": "numeric",
-            "month": "short",
-            "year": "numeric",
-          },
-          "short": Object {
-            "day": "numeric",
-            "month": "numeric",
-            "year": "2-digit",
-          },
-        },
-        "number": Object {
-          "currency": Object {
-            "style": "currency",
-          },
-          "percent": Object {
-            "style": "percent",
-          },
-        },
-        "relative": Object {
-          "days": Object {
-            "units": "day",
-          },
-          "hours": Object {
-            "units": "hour",
-          },
-          "minutes": Object {
-            "units": "minute",
-          },
-          "months": Object {
-            "units": "month",
-          },
-          "seconds": Object {
-            "units": "second",
-          },
-          "years": Object {
-            "units": "year",
-          },
-        },
-        "time": Object {
-          "full": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "long": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "medium": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-          },
-          "short": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-          },
-        },
-      },
+      "formatTimeToParts": [Function],
+      "formats": Object {},
       "formatters": Object {
         "getDateTimeFormat": [Function],
+        "getDisplayNames": [Function],
+        "getListFormat": [Function],
         "getMessageFormat": [Function],
         "getNumberFormat": [Function],
-        "getPluralFormat": [Function],
-        "getRelativeFormat": [Function],
+        "getPluralRules": [Function],
+        "getRelativeTimeFormat": [Function],
       },
       "locale": "en",
       "messages": Object {},
-      "now": [Function],
       "onError": [Function],
+      "onWarn": [Function],
       "textComponent": Symbol(react.fragment),
-      "timeZone": null,
+      "timeZone": undefined,
     }
   }
   onLinkClick={[MockFunction]}
@@ -539,7 +407,21 @@ exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
 >
   <I18nProvider>
     <IntlProvider
+      defaultFormats={Object {}}
       defaultLocale="en"
+      defaultRichTextElements={
+        Object {
+          "b": [Function],
+          "code": [Function],
+          "em": [Function],
+          "i": [Function],
+          "li": [Function],
+          "p": [Function],
+          "strong": [Function],
+          "ul": [Function],
+        }
+      }
+      fallbackOnEmptyString={true}
       formats={
         Object {
           "date": Object {
@@ -573,26 +455,6 @@ exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
               "style": "percent",
             },
           },
-          "relative": Object {
-            "days": Object {
-              "units": "day",
-            },
-            "hours": Object {
-              "units": "hour",
-            },
-            "minutes": Object {
-              "units": "minute",
-            },
-            "months": Object {
-              "units": "month",
-            },
-            "seconds": Object {
-              "units": "second",
-            },
-            "years": Object {
-              "units": "year",
-            },
-          },
           "time": Object {
             "full": Object {
               "hour": "numeric",
@@ -620,6 +482,8 @@ exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
       }
       locale="en"
       messages={Object {}}
+      onError={[Function]}
+      onWarn={[Function]}
       textComponent={Symbol(react.fragment)}
     >
       <PseudoLocaleWrapper>
@@ -785,104 +649,40 @@ exports[`DashboardEmptyScreen renders correctly without visualize paragraph 1`] 
   }
   intl={
     Object {
+      "$t": [Function],
       "defaultFormats": Object {},
       "defaultLocale": "en",
+      "defaultRichTextElements": undefined,
+      "fallbackOnEmptyString": true,
       "formatDate": [Function],
-      "formatHTMLMessage": [Function],
+      "formatDateTimeRange": [Function],
+      "formatDateToParts": [Function],
+      "formatDisplayName": [Function],
+      "formatList": [Function],
+      "formatListToParts": [Function],
       "formatMessage": [Function],
       "formatNumber": [Function],
+      "formatNumberToParts": [Function],
       "formatPlural": [Function],
-      "formatRelative": [Function],
+      "formatRelativeTime": [Function],
       "formatTime": [Function],
-      "formats": Object {
-        "date": Object {
-          "full": Object {
-            "day": "numeric",
-            "month": "long",
-            "weekday": "long",
-            "year": "numeric",
-          },
-          "long": Object {
-            "day": "numeric",
-            "month": "long",
-            "year": "numeric",
-          },
-          "medium": Object {
-            "day": "numeric",
-            "month": "short",
-            "year": "numeric",
-          },
-          "short": Object {
-            "day": "numeric",
-            "month": "numeric",
-            "year": "2-digit",
-          },
-        },
-        "number": Object {
-          "currency": Object {
-            "style": "currency",
-          },
-          "percent": Object {
-            "style": "percent",
-          },
-        },
-        "relative": Object {
-          "days": Object {
-            "units": "day",
-          },
-          "hours": Object {
-            "units": "hour",
-          },
-          "minutes": Object {
-            "units": "minute",
-          },
-          "months": Object {
-            "units": "month",
-          },
-          "seconds": Object {
-            "units": "second",
-          },
-          "years": Object {
-            "units": "year",
-          },
-        },
-        "time": Object {
-          "full": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "long": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "medium": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-          },
-          "short": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-          },
-        },
-      },
+      "formatTimeToParts": [Function],
+      "formats": Object {},
       "formatters": Object {
         "getDateTimeFormat": [Function],
+        "getDisplayNames": [Function],
+        "getListFormat": [Function],
         "getMessageFormat": [Function],
         "getNumberFormat": [Function],
-        "getPluralFormat": [Function],
-        "getRelativeFormat": [Function],
+        "getPluralRules": [Function],
+        "getRelativeTimeFormat": [Function],
       },
       "locale": "en",
       "messages": Object {},
-      "now": [Function],
       "onError": [Function],
+      "onWarn": [Function],
       "textComponent": Symbol(react.fragment),
-      "timeZone": null,
+      "timeZone": undefined,
     }
   }
   onLinkClick={[MockFunction]}
@@ -928,7 +728,21 @@ exports[`DashboardEmptyScreen renders correctly without visualize paragraph 1`] 
 >
   <I18nProvider>
     <IntlProvider
+      defaultFormats={Object {}}
       defaultLocale="en"
+      defaultRichTextElements={
+        Object {
+          "b": [Function],
+          "code": [Function],
+          "em": [Function],
+          "i": [Function],
+          "li": [Function],
+          "p": [Function],
+          "strong": [Function],
+          "ul": [Function],
+        }
+      }
+      fallbackOnEmptyString={true}
       formats={
         Object {
           "date": Object {
@@ -962,26 +776,6 @@ exports[`DashboardEmptyScreen renders correctly without visualize paragraph 1`] 
               "style": "percent",
             },
           },
-          "relative": Object {
-            "days": Object {
-              "units": "day",
-            },
-            "hours": Object {
-              "units": "hour",
-            },
-            "minutes": Object {
-              "units": "minute",
-            },
-            "months": Object {
-              "units": "month",
-            },
-            "seconds": Object {
-              "units": "second",
-            },
-            "years": Object {
-              "units": "year",
-            },
-          },
           "time": Object {
             "full": Object {
               "hour": "numeric",
@@ -1009,6 +803,8 @@ exports[`DashboardEmptyScreen renders correctly without visualize paragraph 1`] 
       }
       locale="en"
       messages={Object {}}
+      onError={[Function]}
+      onWarn={[Function]}
       textComponent={Symbol(react.fragment)}
     >
       <PseudoLocaleWrapper>

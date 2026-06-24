@@ -175,7 +175,7 @@ export const QueryRowComponent: React.FC<QueryRowProps> = React.memo(
                 {!row.query && (
                   <div className="exploreQueryPanelEditor__placeholder">
                     {i18n.translate('explore.metricsQueryPanel.codePlaceholder', {
-                      defaultMessage: 'Search using </> {language}',
+                      defaultMessage: "Search using '</>' {language}",
                       values: { language: languageTitle },
                     })}
                   </div>

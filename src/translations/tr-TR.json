@@ -279,7 +279,7 @@
     "core.ui_settings.params.pageNavigationName": "Yan gezinme stili",
     "core.ui_settings.params.storeUrlText": "URL, bazen bazı tarayıcıların işleyemeyeceği kadar büyük olabilir. Bunu engellemek için URL'nin bazı bölümlerini oturum depolama alanında saklamanın yardımcı olup olamayacağını test ediyoruz. Lütfen deneyiminizle ilgili görüşlerinizi iletin!",
     "core.ui_settings.params.storeUrlTitle": "URL'leri oturum depolama alanında sakla",
-    "core.ui_settings.params.themeVersionText": "<p>OpenSearch Dashboards'un geçerli ve sonraki sürümleri için kullanılan temalar arasında geçiş yapın. Ayarın uygulanması için sayfanın yenilenmesi gerekir.</p><p><a href=\"{href}\">{linkText}</a></p>",
+    "core.ui_settings.params.themeVersionText": "<p>OpenSearch Dashboards'un geçerli ve sonraki sürümleri için kullanılan temalar arasında geçiş yapın. Ayarın uygulanması için sayfanın yenilenmesi gerekir.</p><p><a>{linkText}</a></p>",
     "core.ui_settings.params.themeVersionTitle": "Tema sürümü",
     "core.ui.analyzeSearch.label": "Aramayı analiz et",
     "core.ui.chrome.headerGlobalNav.goHomePageIconAriaLabel": "Ana sayfaya git",

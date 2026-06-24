@@ -17,10 +17,9 @@ exports[`AddData render 1`] = `
         <h2
           id="homDataAdd__title"
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Ingest your data"
             id="home.addData.sectionTitle"
-            values={Object {}}
           />
         </h2>
       </EuiTitle>

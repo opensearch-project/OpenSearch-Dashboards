@@ -38,10 +38,12 @@ export const DatasetMetadataFields: React.FC<DatasetMetadataFieldsProps> = ({
             )}
             <span className="datasetConfigurator-optionalSuffix">
               &nbsp;&ndash;&nbsp;
-              <FormattedMessage
-                id="data.explorer.datasetSelector.advancedSelector.configurator.optionalText"
-                defaultMessage="optional"
-              />
+              <span>
+                <FormattedMessage
+                  id="data.explorer.datasetSelector.advancedSelector.configurator.optionalText"
+                  defaultMessage="optional"
+                />
+              </span>
             </span>
           </>
         }
@@ -66,10 +68,12 @@ export const DatasetMetadataFields: React.FC<DatasetMetadataFieldsProps> = ({
             )}
             <span className="datasetConfigurator-optionalSuffix">
               &nbsp;&ndash;&nbsp;
-              <FormattedMessage
-                id="data.explorer.datasetSelector.advancedSelector.configurator.optionalText"
-                defaultMessage="optional"
-              />
+              <span>
+                <FormattedMessage
+                  id="data.explorer.datasetSelector.advancedSelector.configurator.optionalText"
+                  defaultMessage="optional"
+                />
+              </span>
             </span>
           </>
         }

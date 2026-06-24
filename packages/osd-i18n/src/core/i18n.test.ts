@@ -40,6 +40,10 @@ describe('I18n engine', () => {
   });
 
   afterEach(() => {
+    // Clear the message format cache before resetting modules to prevent test pollution
+    if (i18n.clearMessageFormatCache) {
+      i18n.clearMessageFormatCache();
+    }
     // isolate modules for every test so that local module state doesn't conflict between tests
     jest.resetModules();
     jest.clearAllMocks();
@@ -293,24 +297,6 @@ describe('I18n engine', () => {
       i18n.setDefaultLocale('eN-uS');
       expect(i18n.getDefaultLocale()).toBe('en-US');
     });
-
-    test('should set "en" locale as default for IntlMessageFormat and IntlRelativeFormat', () => {
-      const IntlMessageFormat = require('intl-messageformat');
-      const IntlRelativeFormat = require('intl-relativeformat');
-
-      expect(IntlMessageFormat.defaultLocale).toBe('en');
-      expect(IntlRelativeFormat.defaultLocale).toBe('en');
-    });
-
-    test('should update defaultLocale for IntlMessageFormat and IntlRelativeFormat', () => {
-      const IntlMessageFormat = require('intl-messageformat');
-      const IntlRelativeFormat = require('intl-relativeformat');
-
-      i18n.setDefaultLocale('foo');
-
-      expect(IntlMessageFormat.defaultLocale).toBe('foo');
-      expect(IntlRelativeFormat.defaultLocale).toBe('foo');
-    });
   });
 
   describe('getDefaultLocale', () => {
@@ -342,6 +328,8 @@ describe('I18n engine', () => {
       });
 
       i18n.setFormats({
+        number: i18n.getFormats().number,
+        time: i18n.getFormats().time,
         date: {
           short: {
             month: 'short',
@@ -358,6 +346,8 @@ describe('I18n engine', () => {
       });
 
       i18n.setFormats({
+        number: i18n.getFormats().number,
+        time: i18n.getFormats().time,
         date: {
           short: {
             month: 'long',
@@ -384,6 +374,8 @@ describe('I18n engine', () => {
       const { formats } = require('./formats');
 
       i18n.setFormats({
+        date: i18n.getFormats().date,
+        time: i18n.getFormats().time,
         number: {
           currency: {
             style: 'currency',
@@ -725,6 +717,8 @@ describe('I18n engine', () => {
       i18n.init({
         locale: 'en',
         formats: {
+          date: i18n.getFormats().date,
+          time: i18n.getFormats().time,
           number: {
             usd: { style: 'currency', currency: 'USD' },
           },
@@ -740,6 +734,8 @@ describe('I18n engine', () => {
       );
 
       i18n.setFormats({
+        date: i18n.getFormats().date,
+        time: i18n.getFormats().time,
         number: {
           eur: { style: 'currency', currency: 'EUR' },
         },
@@ -758,6 +754,8 @@ describe('I18n engine', () => {
       i18n.init({
         locale: 'en',
         formats: {
+          date: i18n.getFormats().date,
+          time: i18n.getFormats().time,
           number: {
             usd: { style: 'currency', currency: 'USD' },
           },
@@ -774,6 +772,8 @@ describe('I18n engine', () => {
       ).toBe('Your total is $1,000.00');
 
       i18n.setFormats({
+        date: i18n.getFormats().date,
+        time: i18n.getFormats().time,
         number: {
           eur: { style: 'currency', currency: 'EUR' },
         },
@@ -873,6 +873,8 @@ describe('I18n engine', () => {
       i18n.init({
         locale: 'ru',
         formats: {
+          number: i18n.getFormats().number,
+          time: i18n.getFormats().time,
           date: {
             custom: {
               month: 'short',

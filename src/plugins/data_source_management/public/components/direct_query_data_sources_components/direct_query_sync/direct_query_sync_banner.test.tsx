@@ -15,6 +15,7 @@ import {
   ExternalIndexState,
 } from 'src/plugins/data_source_management/framework/types';
 import { asSyncProgress } from './sync_progress';
+import { I18nProvider } from '@osd/i18n/react';
 
 // Mock dependencies
 jest.mock('./direct_query_sync_utils', () => ({
@@ -80,13 +81,15 @@ describe('DashboardDirectQuerySyncBanner', () => {
     (fetchDirectQuerySyncInfo as jest.Mock).mockResolvedValue(null);
 
     const { container } = render(
-      <DashboardDirectQuerySyncBanner
-        http={http}
-        notifications={notifications}
-        savedObjectsClient={savedObjectsClient}
-        dashboardId="dashboard-1"
-        removeBanner={removeBanner}
-      />
+      <I18nProvider>
+        <DashboardDirectQuerySyncBanner
+          http={http}
+          notifications={notifications}
+          savedObjectsClient={savedObjectsClient}
+          dashboardId="dashboard-1"
+          removeBanner={removeBanner}
+        />
+      </I18nProvider>
     );
 
     await waitFor(() => {
@@ -121,13 +124,15 @@ describe('DashboardDirectQuerySyncBanner', () => {
     });
 
     render(
-      <DashboardDirectQuerySyncBanner
-        http={http}
-        notifications={notifications}
-        savedObjectsClient={savedObjectsClient}
-        dashboardId="dashboard-1"
-        removeBanner={removeBanner}
-      />
+      <I18nProvider>
+        <DashboardDirectQuerySyncBanner
+          http={http}
+          notifications={notifications}
+          savedObjectsClient={savedObjectsClient}
+          dashboardId="dashboard-1"
+          removeBanner={removeBanner}
+        />
+      </I18nProvider>
     );
 
     await waitFor(() => {
@@ -153,13 +158,15 @@ describe('DashboardDirectQuerySyncBanner', () => {
     (intervalAsMinutes as jest.Mock).mockReturnValue('5 minutes');
 
     render(
-      <DashboardDirectQuerySyncBanner
-        http={http}
-        notifications={notifications}
-        savedObjectsClient={savedObjectsClient}
-        dashboardId="dashboard-1"
-        removeBanner={removeBanner}
-      />
+      <I18nProvider>
+        <DashboardDirectQuerySyncBanner
+          http={http}
+          notifications={notifications}
+          savedObjectsClient={savedObjectsClient}
+          dashboardId="dashboard-1"
+          removeBanner={removeBanner}
+        />
+      </I18nProvider>
     );
 
     await waitFor(() => {
@@ -186,13 +193,15 @@ describe('DashboardDirectQuerySyncBanner', () => {
     });
 
     render(
-      <DashboardDirectQuerySyncBanner
-        http={http}
-        notifications={notifications}
-        savedObjectsClient={savedObjectsClient}
-        dashboardId="dashboard-1"
-        removeBanner={removeBanner}
-      />
+      <I18nProvider>
+        <DashboardDirectQuerySyncBanner
+          http={http}
+          notifications={notifications}
+          savedObjectsClient={savedObjectsClient}
+          dashboardId="dashboard-1"
+          removeBanner={removeBanner}
+        />
+      </I18nProvider>
     );
 
     await waitFor(() => {
@@ -222,13 +231,15 @@ describe('DashboardDirectQuerySyncBanner', () => {
     });
 
     render(
-      <DashboardDirectQuerySyncBanner
-        http={http}
-        notifications={notifications}
-        savedObjectsClient={savedObjectsClient}
-        dashboardId="dashboard-1"
-        removeBanner={removeBanner}
-      />
+      <I18nProvider>
+        <DashboardDirectQuerySyncBanner
+          http={http}
+          notifications={notifications}
+          savedObjectsClient={savedObjectsClient}
+          dashboardId="dashboard-1"
+          removeBanner={removeBanner}
+        />
+      </I18nProvider>
     );
 
     await waitFor(() => {
@@ -260,13 +271,15 @@ describe('DashboardDirectQuerySyncBanner', () => {
     });
 
     render(
-      <DashboardDirectQuerySyncBanner
-        http={http}
-        notifications={notifications}
-        savedObjectsClient={savedObjectsClient}
-        dashboardId="dashboard-1"
-        removeBanner={removeBanner}
-      />
+      <I18nProvider>
+        <DashboardDirectQuerySyncBanner
+          http={http}
+          notifications={notifications}
+          savedObjectsClient={savedObjectsClient}
+          dashboardId="dashboard-1"
+          removeBanner={removeBanner}
+        />
+      </I18nProvider>
     );
 
     await waitFor(() => {
@@ -294,13 +307,15 @@ describe('DashboardDirectQuerySyncBanner', () => {
     });
 
     render(
-      <DashboardDirectQuerySyncBanner
-        http={http}
-        notifications={notifications}
-        savedObjectsClient={savedObjectsClient}
-        dashboardId="dashboard-1"
-        removeBanner={removeBanner}
-      />
+      <I18nProvider>
+        <DashboardDirectQuerySyncBanner
+          http={http}
+          notifications={notifications}
+          savedObjectsClient={savedObjectsClient}
+          dashboardId="dashboard-1"
+          removeBanner={removeBanner}
+        />
+      </I18nProvider>
     );
 
     await waitFor(() => {
@@ -323,13 +338,15 @@ describe('DashboardDirectQuerySyncBanner', () => {
 
     const mockStartLoading = jest.fn();
     const { rerender } = render(
-      <DashboardDirectQuerySyncBanner
-        http={http}
-        notifications={notifications}
-        savedObjectsClient={savedObjectsClient}
-        dashboardId="dashboard-1"
-        removeBanner={removeBanner}
-      />
+      <I18nProvider>
+        <DashboardDirectQuerySyncBanner
+          http={http}
+          notifications={notifications}
+          savedObjectsClient={savedObjectsClient}
+          dashboardId="dashboard-1"
+          removeBanner={removeBanner}
+        />
+      </I18nProvider>
     );
 
     // Initially set loadStatus to 'initial'
@@ -350,13 +367,15 @@ describe('DashboardDirectQuerySyncBanner', () => {
     });
 
     rerender(
-      <DashboardDirectQuerySyncBanner
-        http={http}
-        notifications={notifications}
-        savedObjectsClient={savedObjectsClient}
-        dashboardId="dashboard-1"
-        removeBanner={removeBanner}
-      />
+      <I18nProvider>
+        <DashboardDirectQuerySyncBanner
+          http={http}
+          notifications={notifications}
+          savedObjectsClient={savedObjectsClient}
+          dashboardId="dashboard-1"
+          removeBanner={removeBanner}
+        />
+      </I18nProvider>
     );
 
     (useDirectQuery as jest.Mock).mockReturnValue({
@@ -365,13 +384,15 @@ describe('DashboardDirectQuerySyncBanner', () => {
     });
 
     rerender(
-      <DashboardDirectQuerySyncBanner
-        http={http}
-        notifications={notifications}
-        savedObjectsClient={savedObjectsClient}
-        dashboardId="dashboard-1"
-        removeBanner={removeBanner}
-      />
+      <I18nProvider>
+        <DashboardDirectQuerySyncBanner
+          http={http}
+          notifications={notifications}
+          savedObjectsClient={savedObjectsClient}
+          dashboardId="dashboard-1"
+          removeBanner={removeBanner}
+        />
+      </I18nProvider>
     );
 
     await waitFor(() => {

@@ -39,7 +39,6 @@ describe('DuplicateResultFlyout', () => {
 
   const DuplicateResultFlyoutComponent = (props: DuplicateResultFlyoutProps) => {
     return (
-      // @ts-expect-error TS2769 TODO(ts-error): fixme
       <IntlProvider locale="en">
         <DuplicateResultFlyout {...props} />
       </IntlProvider>

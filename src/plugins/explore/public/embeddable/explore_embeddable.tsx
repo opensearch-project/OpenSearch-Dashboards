@@ -9,6 +9,7 @@ import { merge, Subscription } from 'rxjs';
 import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import { i18n } from '@osd/i18n';
+import { I18nProvider } from '@osd/i18n/react';
 import { RequestAdapter, DataAdapter, Adapters, FormattedData } from '../../../inspector/public';
 import {
   opensearchFilters,
@@ -676,7 +677,11 @@ export class ExploreEmbeddable
   private renderComponent(node: HTMLElement, searchProps: SearchProps) {
     if (!this.searchProps || !this.root) return;
     const MemorizedExploreEmbeddableComponent = React.memo(ExploreEmbeddableComponent);
-    this.root.render(<MemorizedExploreEmbeddableComponent searchProps={searchProps} />);
+    this.root.render(
+      <I18nProvider>
+        <MemorizedExploreEmbeddableComponent searchProps={searchProps} />
+      </I18nProvider>
+    );
   }
 
   public destroy() {

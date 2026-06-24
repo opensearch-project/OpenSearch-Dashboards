@@ -31,7 +31,8 @@
 import { SavedObjectFinderCreateNew } from '../saved_object_finder_create_new';
 import { shallow } from 'enzyme';
 import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { wrapWithIntl } from 'test_utils/enzyme_helpers';
+import { mount } from 'enzyme';
 
 describe('SavedObjectFinderCreateNew', () => {
   test('renders correctly with no items', () => {
@@ -84,7 +85,7 @@ describe('SavedObjectFinderCreateNew', () => {
       );
     }
 
-    const component = mountWithIntl(<SavedObjectFinderCreateNew menuItems={items} />);
+    const component = mount(wrapWithIntl(<SavedObjectFinderCreateNew menuItems={items} />));
     let popover = component.find(EuiPopover);
     expect(popover.prop('isOpen')).toBe(false);
     const button = component.find(EuiButton);

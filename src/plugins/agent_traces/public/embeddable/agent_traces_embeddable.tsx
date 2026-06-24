@@ -8,6 +8,7 @@ import { merge, Subscription } from 'rxjs';
 import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import { i18n } from '@osd/i18n';
+import { I18nProvider } from '@osd/i18n/react';
 import { RequestAdapter, Adapters } from '../../../inspector/public';
 import {
   opensearchFilters,
@@ -371,7 +372,11 @@ export class AgentTracesEmbeddable
   private renderComponent(node: HTMLElement, searchProps: SearchProps) {
     if (!this.searchProps || !this.root) return;
     const MemorizedAgentTracesEmbeddableComponent = React.memo(AgentTracesEmbeddableComponent);
-    this.root.render(<MemorizedAgentTracesEmbeddableComponent searchProps={searchProps} />);
+    this.root.render(
+      <I18nProvider>
+        <MemorizedAgentTracesEmbeddableComponent searchProps={searchProps} />
+      </I18nProvider>
+    );
   }
 
   public destroy() {

@@ -165,7 +165,7 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
               <EuiText size="s">
                 <p>
                   {i18n.translate('explore.addToDashboard.notification.success.message', {
-                    defaultMessage: `Explore '{newTitle}' is successfully added to the dashboard.`,
+                    defaultMessage: `Explore ''{newTitle}'' is successfully added to the dashboard.`,
                     values: { newTitle },
                   })}
                   &nbsp;

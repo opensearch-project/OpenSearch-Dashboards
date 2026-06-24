@@ -74,7 +74,7 @@ export const CreateEditField = withRouter(
         'indexPatternManagement.editIndexPattern.scripted.noFieldLabel',
         {
           defaultMessage:
-            "'{indexPatternTitle}' index pattern doesn't have a scripted field called '{fieldName}'",
+            "''{indexPatternTitle}'' index pattern doesn't have a scripted field called ''{fieldName}''",
           values: { indexPatternTitle: indexPattern.getDisplayName(), fieldName },
         }
       );

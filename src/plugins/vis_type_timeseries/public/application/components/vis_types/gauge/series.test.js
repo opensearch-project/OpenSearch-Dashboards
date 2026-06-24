@@ -28,8 +28,9 @@
  * under the License.
  */
 
+import { I18nProvider } from '@osd/i18n/react';
 import { GaugeSeries } from './series';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mount } from 'enzyme';
 
 const defaultProps = {
   disableAdd: true,
@@ -42,21 +43,27 @@ const defaultProps = {
   onDelete: jest.fn(),
 };
 
+const GaugeSeriesWrapped = (props) => (
+  <I18nProvider>
+    <GaugeSeries {...props} />
+  </I18nProvider>
+);
+
 it('should disable add data', () => {
-  const wrapper = mountWithIntl(<GaugeSeries {...defaultProps} />);
+  const wrapper = mount(<GaugeSeriesWrapped {...defaultProps} />);
   const props = wrapper.props();
 
   expect(props.disableAdd).toBeTruthy();
 });
 
 it('should disable delete data', () => {
-  const wrapper = mountWithIntl(<GaugeSeries {...defaultProps} />);
+  const wrapper = mount(<GaugeSeriesWrapped {...defaultProps} />);
   const props = wrapper.props();
   expect(props.disableDelete).toBeTruthy();
 });
 
 it('should call toggleVisible function', () => {
-  const wrapper = mountWithIntl(<GaugeSeries {...defaultProps} />);
+  const wrapper = mount(<GaugeSeriesWrapped {...defaultProps} />);
   wrapper.find('EuiButtonIcon').at(0).simulate('click');
   expect(defaultProps.toggleVisible).toBeCalled();
 });

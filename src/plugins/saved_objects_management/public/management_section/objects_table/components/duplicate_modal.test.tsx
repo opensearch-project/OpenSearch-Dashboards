@@ -15,6 +15,7 @@ import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 import { WorkspaceAttribute } from 'src/core/types';
 import { render } from '@testing-library/react';
 import { WorkspaceOption } from './utils';
+import { I18nProvider } from '@osd/i18n/react';
 
 interface Props extends ShowDuplicateModalProps {
   onClose: () => void;
@@ -89,7 +90,11 @@ describe('DuplicateModal', () => {
   });
 
   it('should render normally', async () => {
-    render(<SavedObjectsDuplicateModal {...duplicateProps} />);
+    render(
+      <I18nProvider>
+        <SavedObjectsDuplicateModal {...duplicateProps} />
+      </I18nProvider>
+    );
     expect(document.children).toMatchSnapshot();
   });
 

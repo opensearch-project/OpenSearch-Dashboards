@@ -28,7 +28,8 @@
  * under the License.
  */
 
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mount } from 'enzyme';
+import { wrapWithIntl } from 'test_utils/enzyme_helpers';
 import { Agg } from './agg';
 import { FieldSelect } from './field_select';
 import { FIELDS, METRIC, SERIES, PANEL } from '../../../test_utils';
@@ -51,20 +52,22 @@ const runTest = (aggType, name, test, additionalProps = {}) => {
     const panel = { ...PANEL, series };
 
     it(name, () => {
-      const wrapper = mountWithIntl(
-        <div>
-          <Agg
-            onAdd={jest.fn()}
-            onChange={jest.fn()}
-            onDelete={jest.fn()}
-            panel={panel}
-            fields={FIELDS}
-            model={metric}
-            series={series}
-            siblings={series.metrics}
-            dragHandleProps={{}}
-          />
-        </div>
+      const wrapper = mount(
+        wrapWithIntl(
+          <div>
+            <Agg
+              onAdd={jest.fn()}
+              onChange={jest.fn()}
+              onDelete={jest.fn()}
+              panel={panel}
+              fields={FIELDS}
+              model={metric}
+              series={series}
+              siblings={series.metrics}
+              dragHandleProps={{}}
+            />
+          </div>
+        )
       );
       test(wrapper);
     });
