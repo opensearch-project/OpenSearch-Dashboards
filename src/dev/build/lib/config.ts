@@ -69,15 +69,15 @@ export class Config {
     const pkgPath = resolve(__dirname, '../../../../package.json');
     const pkg: Package = loadJsonFile.sync(pkgPath);
 
-    const nvmrcPath = resolve(__dirname, '../../../../.nvmrc');
-    const nvmrcContent = (await readFile(nvmrcPath, 'utf8'))?.trim?.();
+    const nodeVersionPath = resolve(__dirname, '../../../../.node-version');
+    const nodeVersionContent = (await readFile(nodeVersionPath, 'utf8'))?.trim?.();
 
     return new Config(
       targetAllPlatforms,
       targetPlatforms,
       pkg,
       pkg.engines.node,
-      nvmrcContent,
+      nodeVersionContent,
       dirname(pkgPath),
       await getVersionInfo({
         isRelease,
