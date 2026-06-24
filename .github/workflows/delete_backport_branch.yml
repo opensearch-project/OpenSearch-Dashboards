@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    if: startsWith(github.event.pull_request.head.ref,'backport/')
+    if: startsWith(github.event.pull_request.head.ref,'backport/') || startsWith(github.event.pull_request.head.ref,'release-chores/')
     steps:
     - name: Delete merged branch
       uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
