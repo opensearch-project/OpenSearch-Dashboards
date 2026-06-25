@@ -86,13 +86,13 @@ const SuggestionBubble: React.FC<SuggestionBubbleProps> = ({
 export const ChatSuggestions = ({
   messages,
   currentMessage,
-  onAppendInput,
+  onFillInput,
   onRemoveInput,
   inputValue,
 }: {
   messages: Message[];
   currentMessage: Message;
-  onAppendInput?: (content: string) => void;
+  onFillInput?: (content: string) => void;
   onRemoveInput?: (content: string) => void;
   inputValue?: string;
 }) => {
@@ -100,12 +100,6 @@ export const ChatSuggestions = ({
 
   const [customSuggestions, setCustomSuggestions] = useState<SuggestedActions[]>([]);
   const [isLoadingCustomSuggestions, setIsLoadingCustomSuggestions] = useState(false);
-  const [selectedMessages, setSelectedMessages] = useState<Set<string>>(new Set());
-
-  // Reset selection state when the message changes
-  useEffect(() => {
-    setSelectedMessages(new Set());
-  }, [currentMessage]);
 
   // Parse inline suggestions from the current assistant message content
   const inlineSuggestionActions: SuggestedActions[] = useMemo(() => {
@@ -147,26 +141,22 @@ export const ChatSuggestions = ({
     loadCustomSuggestions();
   }, [suggestedActionsService, chatService, messages, currentMessage]);
 
-  const hasUserTypedInput =
-    !!(inputValue && inputValue.trim().length > 0) && selectedMessages.size === 0;
-  const visibleInlineSuggestions = hasUserTypedInput ? [] : inlineSuggestionActions;
-  const allSuggestions = [...visibleInlineSuggestions, ...customSuggestions];
+  const allSuggestions = [...inlineSuggestionActions, ...customSuggestions];
 
   if (isLoadingCustomSuggestions || allSuggestions.length === 0) {
     return null;
   }
 
+  const isSuggestionSelected = (message: string) => !!inputValue && inputValue.includes(message);
+
   const handleSuggestionClick = (suggestedAction: SuggestedActions) => {
     const isInline = suggestedAction.actionType === 'send_as_input';
 
     if (isInline) {
-      if (selectedMessages.has(suggestedAction.message)) {
-        setSelectedMessages(new Set());
+      if (isSuggestionSelected(suggestedAction.message)) {
         onRemoveInput?.(suggestedAction.message);
       } else {
-        selectedMessages.forEach((msg) => onRemoveInput?.(msg));
-        setSelectedMessages(new Set([suggestedAction.message]));
-        onAppendInput?.(suggestedAction.message);
+        onFillInput?.(suggestedAction.message);
       }
     } else {
       suggestedAction.action();
@@ -188,10 +178,10 @@ export const ChatSuggestions = ({
             <EuiFlexItem grow={false}>
               <SuggestionBubble
                 onClick={() => handleSuggestionClick(suggestedAction)}
-                color={selectedMessages.has(suggestedAction.message) ? 'success' : 'default'}
+                color={isSuggestionSelected(suggestedAction.message) ? 'success' : 'default'}
                 content={suggestedAction.message}
                 actionType={suggestedAction.actionType}
-                selected={selectedMessages.has(suggestedAction.message)}
+                selected={isSuggestionSelected(suggestedAction.message)}
               />
             </EuiFlexItem>
           </div>

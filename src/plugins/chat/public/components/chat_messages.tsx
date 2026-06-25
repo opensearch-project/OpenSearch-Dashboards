@@ -115,7 +115,6 @@ interface ChatMessagesProps {
   onApproveConfirmation?: () => void;
   onRejectConfirmation?: () => void;
   onFillInput?: (content: string) => void;
-  onAppendInput?: (content: string) => void;
   onRemoveInput?: (content: string) => void;
   inputValue?: string;
   startResponse?: boolean;
@@ -302,7 +301,6 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
   onApproveConfirmation,
   onRejectConfirmation,
   onFillInput,
-  onAppendInput,
   onRemoveInput,
   inputValue,
   startResponse,
@@ -597,7 +595,7 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
                   <ChatSuggestions
                     messages={timeline}
                     currentMessage={message}
-                    onAppendInput={onAppendInput}
+                    onFillInput={onFillInput}
                     onRemoveInput={onRemoveInput}
                     inputValue={inputValue}
                   />
