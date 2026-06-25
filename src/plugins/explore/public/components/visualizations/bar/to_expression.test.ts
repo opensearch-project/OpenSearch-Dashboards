@@ -19,8 +19,6 @@ describe('bar to_expression', () => {
     name: 'Count',
     column: 'count',
     schema: VisFieldType.Numerical,
-    validValuesCount: 100,
-    uniqueValuesCount: 50,
   };
 
   const mockCategoricalColumn: VisColumn = {
@@ -28,8 +26,6 @@ describe('bar to_expression', () => {
     name: 'Category',
     column: 'category',
     schema: VisFieldType.Categorical,
-    validValuesCount: 100,
-    uniqueValuesCount: 10,
   };
 
   const mockCategoricalColumn2: VisColumn = {
@@ -37,8 +33,6 @@ describe('bar to_expression', () => {
     name: 'Category2',
     column: 'category2',
     schema: VisFieldType.Categorical,
-    validValuesCount: 100,
-    uniqueValuesCount: 10,
   };
 
   const mockDateColumn: VisColumn = {
@@ -46,8 +40,6 @@ describe('bar to_expression', () => {
     name: 'Date',
     column: 'date',
     schema: VisFieldType.Date,
-    validValuesCount: 100,
-    uniqueValuesCount: 50,
   };
 
   const mockData = [
@@ -247,8 +239,6 @@ describe('bar to_expression', () => {
       name: 'sum',
       column: 'sum',
       schema: VisFieldType.Numerical,
-      validValuesCount: 100,
-      uniqueValuesCount: 50,
     };
 
     test('creates a double numerical bar chart ECharts spec', () => {

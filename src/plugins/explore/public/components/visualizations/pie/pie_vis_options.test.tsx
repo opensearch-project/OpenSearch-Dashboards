@@ -81,8 +81,6 @@ describe('PieVisStyleControls', () => {
     name: 'value',
     schema: VisFieldType.Numerical,
     column: 'field-1',
-    validValuesCount: 1,
-    uniqueValuesCount: 1,
   };
 
   const categoricalColumn = {
@@ -90,8 +88,6 @@ describe('PieVisStyleControls', () => {
     name: 'category',
     schema: VisFieldType.Categorical,
     column: 'field-2',
-    validValuesCount: 1,
-    uniqueValuesCount: 1,
   };
 
   const mockProps: PieVisStyleControlsProps = {
