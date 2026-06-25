@@ -93,6 +93,7 @@ export const sampleDataSchema = {
   // Should provide a nice demo of OpenSearch Dashboards's functionality with the sample data set
   savedObjects: Joi.array().items(Joi.object()).required(),
   getDataSourceIntegratedSavedObjects: Joi.function().required(),
+  getWorkspaceIntegratedSavedObjects: Joi.function().required(),
   dataIndices: Joi.array().items(dataIndexSchema).required(),
 
   status: Joi.string(),

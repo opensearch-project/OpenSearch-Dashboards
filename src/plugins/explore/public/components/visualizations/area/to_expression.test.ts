@@ -27,8 +27,6 @@ describe('Area Chart to_expression', () => {
     name: 'Value',
     schema: VisFieldType.Numerical,
     column: 'value',
-    validValuesCount: 6,
-    uniqueValuesCount: 5,
   };
 
   const mockDateColumn: VisColumn = {
@@ -36,8 +34,6 @@ describe('Area Chart to_expression', () => {
     name: 'Date',
     schema: VisFieldType.Date,
     column: 'date',
-    validValuesCount: 6,
-    uniqueValuesCount: 3,
   };
 
   const mockCategoricalColumns: VisColumn[] = [
@@ -46,16 +42,12 @@ describe('Area Chart to_expression', () => {
       name: 'Category',
       schema: VisFieldType.Categorical,
       column: 'category',
-      validValuesCount: 6,
-      uniqueValuesCount: 2,
     },
     {
       id: 4,
       name: 'Category2',
       schema: VisFieldType.Categorical,
       column: 'category2',
-      validValuesCount: 6,
-      uniqueValuesCount: 2,
     },
   ];
 

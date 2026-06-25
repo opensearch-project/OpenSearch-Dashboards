@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-
+import type { EChartsOption } from 'echarts';
 import { ChartStyles } from '../visualizations/utils/use_visualization_types';
 import { ChartConfig } from './visualization_builder.types';
 
@@ -26,8 +26,6 @@ export interface VisColumn {
   name: string;
   schema: VisFieldType;
   column: string;
-  validValuesCount: number;
-  uniqueValuesCount: number;
 }
 
 export enum VisFieldType {
@@ -293,7 +291,7 @@ export interface ConnectNullValuesOption {
 }
 
 export interface RendererSpecConfig {
-  spec?: echarts.EChartsOption;
+  spec?: EChartsOption;
   name?: string;
   data: Array<Record<string, any>>;
 }

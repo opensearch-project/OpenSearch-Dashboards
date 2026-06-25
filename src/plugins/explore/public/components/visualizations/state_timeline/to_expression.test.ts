@@ -23,8 +23,6 @@ describe('State Timeline to_expression', () => {
     name: 'Time',
     schema: VisFieldType.Date,
     column: 'timestamp',
-    validValuesCount: 3,
-    uniqueValuesCount: 3,
   };
 
   const mockCateColumn1: VisColumn = {
@@ -32,8 +30,6 @@ describe('State Timeline to_expression', () => {
     name: 'Group',
     schema: VisFieldType.Categorical,
     column: 'group',
-    validValuesCount: 3,
-    uniqueValuesCount: 2,
   };
 
   const mockCateColumn2: VisColumn = {
@@ -41,8 +37,6 @@ describe('State Timeline to_expression', () => {
     name: 'Color',
     schema: VisFieldType.Categorical,
     column: 'color',
-    validValuesCount: 3,
-    uniqueValuesCount: 2,
   };
 
   const mockNumColumn: VisColumn = {
@@ -50,8 +44,6 @@ describe('State Timeline to_expression', () => {
     name: 'NumValue',
     schema: VisFieldType.Numerical,
     column: 'numValue',
-    validValuesCount: 3,
-    uniqueValuesCount: 3,
   };
 
   const mockStyles = {

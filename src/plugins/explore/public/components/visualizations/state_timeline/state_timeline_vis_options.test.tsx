@@ -18,8 +18,6 @@ const mockNumericalColumns: VisColumn[] = [
     name: 'value 1',
     schema: VisFieldType.Numerical,
     column: 'v1',
-    validValuesCount: 6,
-    uniqueValuesCount: 6,
   },
 ];
 
@@ -29,16 +27,12 @@ const mockCateColumns: VisColumn[] = [
     name: 'cate 1',
     schema: VisFieldType.Categorical,
     column: 'c1',
-    validValuesCount: 6,
-    uniqueValuesCount: 6,
   },
   {
     id: 2,
     name: 'cate 2',
     schema: VisFieldType.Categorical,
     column: 'c2',
-    validValuesCount: 6,
-    uniqueValuesCount: 6,
   },
 ];
 
@@ -48,8 +42,6 @@ const mockTimeColumns: VisColumn[] = [
     name: 'date 1',
     schema: VisFieldType.Date,
     column: 'd1',
-    validValuesCount: 6,
-    uniqueValuesCount: 6,
   },
 ];
 

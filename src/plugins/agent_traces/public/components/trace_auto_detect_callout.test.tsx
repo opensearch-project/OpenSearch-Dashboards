@@ -11,11 +11,13 @@ import { TraceAutoDetectCallout } from './trace_auto_detect_callout';
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
 import { AgentTracesServices } from '../types';
 import * as autoDetectModule from '../utils/auto_detect_trace_data';
-import * as createDatasetsModule from '../utils/create_auto_datasets';
+import * as createDatasetsModule from '../../../explore/public';
 
 // Mock the utility functions
 jest.mock('../utils/auto_detect_trace_data');
-jest.mock('../utils/create_auto_datasets');
+jest.mock('../../../explore/public', () => ({
+  createAutoDetectedDatasets: jest.fn(),
+}));
 
 // Mock the DiscoverNoIndexPatterns component
 jest.mock(
@@ -71,6 +73,13 @@ describe('TraceAutoDetectCallout', () => {
       indexPatterns: {
         getIds: jest.fn().mockResolvedValue([]),
         get: jest.fn(),
+      } as any,
+      dataViews: {
+        createAndSave: jest.fn(),
+        get: jest.fn(),
+        refreshFields: jest.fn(),
+        updateSavedObject: jest.fn(),
+        clearCache: jest.fn(),
       } as any,
     };
   });
@@ -249,6 +258,7 @@ describe('TraceAutoDetectCallout', () => {
     await waitFor(() => {
       expect(mockCreateAutoDetectedDatasets).toHaveBeenCalledWith(
         mockServices.savedObjects!.client,
+        mockServices.dataViews,
         expect.objectContaining({
           tracesDetected: true,
           logsDetected: true,

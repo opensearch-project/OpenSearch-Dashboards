@@ -10,8 +10,8 @@
     "osd:watch": "yarn build --watch"
   },
   "dependencies": {
-    "@babel/cli": "^7.22.9",
-    "@babel/core": "^7.22.9",
+    "@babel/cli": "^7.29.7",
+    "@babel/core": "^7.29.7",
     "@osd/babel-preset": "1.0.0",
     "@osd/cross-platform": "1.0.0",
     "@osd/dev-utils": "1.0.0",
@@ -26,7 +26,7 @@
     "del": "^6.1.1",
     "execa": "^4.0.2",
     "jest-diff": "^27.5.1",
-    "js-yaml": "^4.1.1",
+    "js-yaml": "^4.2.0",
     "json-stable-stringify": "^1.0.1",
     "lmdb": "^2.8.0",
     "normalize-path": "^3.0.0",

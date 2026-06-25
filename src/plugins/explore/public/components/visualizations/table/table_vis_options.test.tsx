@@ -33,8 +33,6 @@ describe('TableVisStyleControls', () => {
     name: 'Value',
     schema: VisFieldType.Numerical,
     column: 'field-1',
-    validValuesCount: 10,
-    uniqueValuesCount: 5,
   };
 
   const mockCategoricalColumn: VisColumn = {
@@ -42,8 +40,6 @@ describe('TableVisStyleControls', () => {
     name: 'Category',
     schema: VisFieldType.Categorical,
     column: 'field-2',
-    validValuesCount: 10,
-    uniqueValuesCount: 3,
   };
 
   const mockDateColumn: VisColumn = {
@@ -51,8 +47,6 @@ describe('TableVisStyleControls', () => {
     name: 'Date',
     schema: VisFieldType.Date,
     column: 'field-3',
-    validValuesCount: 10,
-    uniqueValuesCount: 10,
   };
 
   const defaultStyleOptions: TableChartStyle = {

@@ -71,16 +71,12 @@ const numericalColumns: VisColumn[] = [
     name: 'Price',
     schema: VisFieldType.Numerical,
     column: 'price',
-    validValuesCount: 100,
-    uniqueValuesCount: 100,
   },
   {
     id: 2,
     name: 'Count',
     schema: VisFieldType.Numerical,
     column: 'count',
-    validValuesCount: 100,
-    uniqueValuesCount: 100,
   },
 ];
 
@@ -90,8 +86,6 @@ const categoricalColumns: VisColumn[] = [
     name: 'Category',
     schema: VisFieldType.Categorical,
     column: 'category',
-    validValuesCount: 50,
-    uniqueValuesCount: 10,
   },
 ];
 

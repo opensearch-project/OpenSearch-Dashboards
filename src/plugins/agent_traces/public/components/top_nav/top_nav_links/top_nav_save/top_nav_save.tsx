@@ -64,8 +64,8 @@ export const getSaveButtonRun = (
   }: OnSaveProps): Promise<SaveResult | undefined> => {
     const savedAgentTracesWithState = saveStateToSavedObject(
       savedAgentTraces,
-      saveStateProps.flavorId ?? 'logs',
       saveStateProps.tabDefinition!,
+      saveStateProps.flavorId ?? 'logs',
       {},
       saveStateProps.dataset,
       saveStateProps.activeTabId

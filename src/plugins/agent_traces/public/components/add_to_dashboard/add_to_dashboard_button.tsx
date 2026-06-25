@@ -25,7 +25,6 @@ import { saveStateToSavedObject } from '../../saved_agent_traces/transforms';
 import { addToDashboard } from './add_to_dashboard';
 import { saveSavedAgentTraces } from '../../helpers/save_agent_traces';
 import { useCurrentAgentTracesId } from '../../application/utils/hooks/use_current_agent_traces_id';
-import { AgentTracesFlavor } from '../../../common';
 import { AgentTracesServices } from '../../types';
 import { getVisualizationBuilder } from '../visualizations/visualization_builder_singleton';
 import { ExecutionContextSearch } from '../../../../expressions/common';
@@ -82,7 +81,6 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
   const tabDefinition = services.tabRegistry?.getTab?.(uiState.activeTabId);
 
   const savedAgentTracesIdFromUrl = useCurrentAgentTracesId();
-  const flavorId = AgentTracesFlavor.Traces;
 
   const saveObjectsClient = savedObjects.client;
 
@@ -103,8 +101,9 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
   }: OnSaveProps) => {
     const savedAgentTracesWithState = saveStateToSavedObject(
       savedAgentTraces,
-      flavorId,
       tabDefinition!,
+      // Don't store flavor for visualization snapshot
+      undefined,
       {
         chartType: chartConfig?.type,
         axesMapping: chartConfig?.axesMapping,
