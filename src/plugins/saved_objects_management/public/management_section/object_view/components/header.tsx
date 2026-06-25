@@ -35,6 +35,7 @@ import {
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
@@ -55,6 +56,7 @@ interface HeaderProps {
   useUpdatedUX: boolean;
   navigationUI: NavigationPublicPluginStart['ui'];
   application: ApplicationStart;
+  isManaged?: boolean;
 }
 
 export const Header = ({
@@ -67,23 +69,36 @@ export const Header = ({
   useUpdatedUX,
   navigationUI: { HeaderControl },
   application,
+  isManaged,
 }: HeaderProps) => {
+  const managedDeleteTooltip = i18n.translate(
+    'savedObjectsManagement.view.managedDeleteDisabledTooltip',
+    {
+      defaultMessage:
+        'This object is managed by an automated pipeline and cannot be deleted from the UI.',
+    }
+  );
+
   return useUpdatedUX ? (
     <HeaderControl
       controls={[
-        ...(canDelete
+        ...((canDelete || isManaged)
           ? [
               {
                 controlType: 'icon',
                 iconType: 'trash',
-                ariaLabel: i18n.translate('savedObjectsManagement.view.deleteItemButtonLabel', {
-                  defaultMessage: 'Delete {title}',
-                  values: { title: type },
-                }),
-                run: onDeleteClick,
+                ariaLabel: isManaged
+                  ? managedDeleteTooltip
+                  : i18n.translate('savedObjectsManagement.view.deleteItemButtonLabel', {
+                      defaultMessage: 'Delete {title}',
+                      values: { title: type },
+                    }),
+                run: isManaged ? () => {} : onDeleteClick,
                 testId: 'savedObjectEditDelete',
                 display: 'base',
-                color: 'danger',
+                color: isManaged ? 'subdued' : 'danger',
+                isDisabled: isManaged,
+                tooltip: isManaged ? managedDeleteTooltip : undefined,
               } as TopNavControlIconData,
             ]
           : []),
@@ -147,21 +162,26 @@ export const Header = ({
               </EuiButton>
             </EuiFlexItem>
           )}
-          {canDelete && (
+          {(canDelete || isManaged) && (
             <EuiFlexItem grow={false}>
-              <EuiButton
-                color="danger"
-                size="s"
-                iconType="trash"
-                onClick={() => onDeleteClick()}
-                data-test-subj="savedObjectEditDelete"
+              <EuiToolTip
+                content={isManaged ? managedDeleteTooltip : undefined}
               >
-                <FormattedMessage
-                  id="savedObjectsManagement.view.deleteItemButtonLabel"
-                  defaultMessage="Delete {title}"
-                  values={{ title: type }}
-                />
-              </EuiButton>
+                <EuiButton
+                  color="danger"
+                  size="s"
+                  iconType="trash"
+                  onClick={() => !isManaged && onDeleteClick()}
+                  isDisabled={!!isManaged}
+                  data-test-subj="savedObjectEditDelete"
+                >
+                  <FormattedMessage
+                    id="savedObjectsManagement.view.deleteItemButtonLabel"
+                    defaultMessage="Delete {title}"
+                    values={{ title: type }}
+                  />
+                </EuiButton>
+              </EuiToolTip>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
