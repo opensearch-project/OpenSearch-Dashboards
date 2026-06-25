@@ -27,7 +27,7 @@ export const ENGINE_OUTCOMES: Record<string, RuleHoverContent> = {
   },
   'division-by-zero': {
     engineBehavior:
-      'x / 0 produces null (not an error) and the null propagates silently through downstream eval and stats expressions.',
+      'x / 0 and x % 0 produce null (not an error) and the null propagates silently through downstream eval and stats expressions.',
     failureClass: 'silent-null',
     verifiedVersion: '3.7',
     safeToIgnoreWhen:

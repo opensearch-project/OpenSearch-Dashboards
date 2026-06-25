@@ -13,7 +13,7 @@
     "detector": "division-by-zero",
     "enabled": true,
     "severity": "warning",
-    "message": "Dividing by zero returns null silently — guard with coalesce() or a conditional.",
+    "message": "Dividing or taking modulo by zero returns null silently — guard with coalesce() or a conditional.",
     "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/functions/expressions/#arithmetic-operators",
     "appliesTo": {}
   }

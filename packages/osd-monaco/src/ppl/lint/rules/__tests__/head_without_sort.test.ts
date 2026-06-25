@@ -30,4 +30,12 @@ describe('head-without-sort (compiled surface)', () => {
     expect(ids('search source=logs | sort age | head 5 | stats count() | head 10')).toContain(
       'head-without-sort'
     ));
+  it('does not let a top-level sort suppress a head inside an appendcol sub-pipeline', () =>
+    expect(
+      ids('search source=logs | sort age | appendcol [ stats count() | head 5 ]')
+    ).not.toContain('head-without-sort'));
+  it('does not let a sort inside appendcol suppress a later top-level head', () =>
+    expect(ids('search source=logs | appendcol [ sort age ] | head 5')).toContain(
+      'head-without-sort'
+    ));
 });

@@ -49,7 +49,9 @@ function getGlobalLintState(): PPLLintGlobalState {
     globalScope[PPL_LINT_GLOBAL_STATE_KEY] = {
       bridge: undefined,
       contexts: new WeakMap<monaco.editor.IModel, PPLLintContext>(),
-      enabled: true,
+      // Off by default: lint is gated by the queryEnhancements.pplLint capability
+      // (off by default). The plugin opts in via setPPLLintEnabled(true).
+      enabled: false,
     };
   }
 

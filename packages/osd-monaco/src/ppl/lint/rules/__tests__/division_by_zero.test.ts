@@ -24,8 +24,10 @@ describe('division-by-zero (compiled surface)', () => {
     expect(ids('search accounts | eval x = balance / 0.0', ctx)).toContain('division-by-zero'));
   it('does not flag division by a non-zero literal', () =>
     expect(ids('search accounts | eval x = balance / 2', ctx)).not.toContain('division-by-zero'));
-  it('does not flag modulo by zero', () =>
-    expect(ids('search accounts | eval x = balance % 0', ctx)).not.toContain('division-by-zero'));
+  it('flags modulo by zero', () =>
+    expect(ids('search accounts | eval x = balance % 0', ctx)).toContain('division-by-zero'));
+  it('does not flag modulo by a non-zero literal', () =>
+    expect(ids('search accounts | eval x = balance % 2', ctx)).not.toContain('division-by-zero'));
   it('fires even without a lint context', () =>
     expect(ids('search accounts | eval x = balance / 0')).toContain('division-by-zero'));
 });

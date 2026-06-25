@@ -144,5 +144,17 @@ describe('lintRuntimePPLQuery', () => {
         'division-by-zero'
       );
     });
+
+    it('flags modulo-by-zero', async () => {
+      expect(await runtimeIds('source=accounts | eval x = balance % 0')).toContain(
+        'division-by-zero'
+      );
+    });
+
+    it('does not let a sort inside appendcol suppress a later top-level head', async () => {
+      expect(await runtimeIds('source=accounts | appendcol [ sort age ] | head 5')).toContain(
+        'head-without-sort'
+      );
+    });
   });
 });

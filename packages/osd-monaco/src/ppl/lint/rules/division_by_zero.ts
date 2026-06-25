@@ -8,7 +8,9 @@ import { Detector } from '../types';
 import { findAllDescendantsByRule, isRuleNode, isTerminalNode } from '../rule_index';
 import { rangeFromContext } from '../range_utils';
 
-const DIVISION_OPERATOR = '/';
+// PPL groups MODULE ('%') with DIVIDE ('/') in binaryArithmetic; both return
+// null silently when the right operand is zero.
+const ZERO_DIVISOR_OPERATORS = new Set(['/', '%']);
 
 function isZeroLiteral(raw: string): boolean {
   let text = raw.trim();
@@ -29,7 +31,7 @@ export const divisionByZeroDetector: Detector = (tree, config, _context, ruleNam
     const children = node.children ?? [];
     for (let i = 0; i < children.length; i++) {
       const child = children[i];
-      if (!isTerminalNode(child) || child.getText() !== DIVISION_OPERATOR) {
+      if (!isTerminalNode(child) || !ZERO_DIVISOR_OPERATORS.has(child.getText())) {
         continue;
       }
       const divisor = children.slice(i + 1).find(isRuleNode);
@@ -37,8 +39,7 @@ export const divisionByZeroDetector: Detector = (tree, config, _context, ruleNam
         diagnostics.push({
           ruleId: config.id,
           severity: config.severity,
-          message:
-            'Dividing by zero returns null silently — guard with coalesce() or a conditional.',
+          message: config.message,
           range: rangeFromContext(divisor),
           docUrl: config.docUrl,
           hoverFacts: { literal: divisor.getText() },

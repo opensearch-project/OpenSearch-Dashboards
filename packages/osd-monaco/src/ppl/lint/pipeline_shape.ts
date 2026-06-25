@@ -164,6 +164,13 @@ export function collectAlternateSourceSubtrees(
     }
   }
 
+  // appendcol's bracketed pipeline computes an attached column; its internal row
+  // order is independent of the main pipeline, so commands inside it must not
+  // affect (or be affected by) the top-level sort/head ordering analysis.
+  for (const node of findAllDescendantsByRule(tree, ruleNameToIndex, 'appendcolCommand')) {
+    subtrees.add(node);
+  }
+
   for (const node of findAllDescendantsByRule(tree, ruleNameToIndex, 'subSearch')) {
     subtrees.add(node);
   }

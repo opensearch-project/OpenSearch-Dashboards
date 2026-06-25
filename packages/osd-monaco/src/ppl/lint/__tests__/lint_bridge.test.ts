@@ -107,6 +107,12 @@ describe('PPL lint bridge', () => {
     expect(fallback).toHaveBeenCalled();
   });
 
+  it('defaults to disabled before any opt-in', () => {
+    // Reset the shared global so the default initializer runs again.
+    delete (globalThis as any).__osdPPLLintGlobalState;
+    expect(isPPLLintEnabled()).toBe(false);
+  });
+
   it('toggles the enabled flag', () => {
     setPPLLintEnabled(false);
     expect(isPPLLintEnabled()).toBe(false);

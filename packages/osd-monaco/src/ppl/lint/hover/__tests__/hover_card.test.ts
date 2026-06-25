@@ -11,7 +11,8 @@ describe('renderHoverCard', () => {
     const md = renderHoverCard({
       ruleId: 'division-by-zero',
       severityLabel: 'Warning',
-      message: 'Dividing by zero returns null silently — guard with coalesce() or a conditional.',
+      message:
+        'Dividing or taking modulo by zero returns null silently — guard with coalesce() or a conditional.',
       docUrl:
         'https://docs.opensearch.org/latest/sql-and-ppl/ppl/functions/expressions/#arithmetic-operators',
       content: getRuleHoverContent('division-by-zero'),
@@ -19,7 +20,7 @@ describe('renderHoverCard', () => {
     });
     expect(md).toContain('**division-by-zero** · Warning');
     expect(md).toContain('**Engine behavior** —');
-    expect(md).toContain('produces null');
+    expect(md).toContain('produce null');
     expect(md).toContain('verified on OpenSearch 3.7');
     expect(md).toContain('**Why warning** —');
     expect(md).toContain('Offending value:');
