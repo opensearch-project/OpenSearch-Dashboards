@@ -60,6 +60,7 @@ import { UrlForwardingStart } from '../../url_forwarding/public';
 import { NavigationPublicPluginStart } from '../../navigation/public';
 import { DataExplorerServices } from '../../data_explorer/public';
 import { Storage } from '../../opensearch_dashboards_utils/public';
+import { ContextProviderStart } from '../../context_provider/public';
 
 export interface DiscoverServices {
   addBasePath: (path: string) => string;
@@ -86,6 +87,7 @@ export interface DiscoverServices {
   visualizations: VisualizationsStart;
   storage: Storage;
   uiActions: UiActionsStart;
+  contextProvider?: ContextProviderStart;
 }
 
 export function buildServices(
@@ -130,6 +132,7 @@ export function buildServices(
     visualizations: plugins.visualizations,
     storage,
     uiActions: plugins.uiActions,
+    contextProvider: plugins.contextProvider,
   };
 }
 
