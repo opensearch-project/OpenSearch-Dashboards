@@ -79,4 +79,89 @@ describe('<NavItemPopover />', () => {
       container.querySelector('[data-test-subj^="obsNavPopoverAction-"]')
     ).not.toBeInTheDocument();
   });
+
+  describe('active trail (itemMatchesApp recursion)', () => {
+    it('lights the parent row active when a nested child matches the current appId', () => {
+      const { getByTestId } = render(
+        <NavItemPopover
+          title="Alerting"
+          services={makeServices()}
+          navigateToApp={jest.fn()}
+          appId="destinations"
+          childItems={[
+            {
+              id: 'alerting',
+              title: 'Alerting',
+              children: [
+                { id: 'monitors', title: 'Monitors' },
+                { id: 'destinations', title: 'Destinations' },
+              ],
+            },
+          ]}
+        />
+      );
+      // The parent row carries data-active="true" because a descendant matches.
+      expect(getByTestId('obsNavPopoverItem-alerting')).toHaveAttribute('data-active', 'true');
+    });
+
+    it('lights a leaf row active when the leaf itself is the current appId', () => {
+      const { getByTestId } = render(
+        <NavItemPopover
+          title="Alerting"
+          services={makeServices()}
+          navigateToApp={jest.fn()}
+          appId="monitors"
+          childItems={[
+            { id: 'monitors', title: 'Monitors' },
+            { id: 'alerts', title: 'Alerts' },
+          ]}
+        />
+      );
+      expect(getByTestId('obsNavPopoverItem-monitors')).toHaveAttribute('data-active', 'true');
+      // A sibling leaf that is not the appId is not active.
+      expect(getByTestId('obsNavPopoverItem-alerts')).not.toHaveAttribute('data-active');
+    });
+
+    it('does not light a parent whose descendants do not match the current appId', () => {
+      const { getByTestId } = render(
+        <NavItemPopover
+          title="Alerting"
+          services={makeServices()}
+          navigateToApp={jest.fn()}
+          appId="somethingElse"
+          childItems={[
+            {
+              id: 'alerting',
+              title: 'Alerting',
+              children: [
+                { id: 'monitors', title: 'Monitors' },
+                { id: 'destinations', title: 'Destinations' },
+              ],
+            },
+          ]}
+        />
+      );
+      expect(getByTestId('obsNavPopoverItem-alerting')).not.toHaveAttribute('data-active');
+    });
+
+    it('does not navigate when clicking a parent row (only opens the secondary popover)', () => {
+      const navigateToApp = jest.fn();
+      const { getByTestId } = render(
+        <NavItemPopover
+          title="Alerting"
+          services={makeServices()}
+          navigateToApp={navigateToApp}
+          childItems={[
+            {
+              id: 'alerting',
+              title: 'Alerting',
+              children: [{ id: 'monitors', title: 'Monitors' }],
+            },
+          ]}
+        />
+      );
+      fireEvent.click(getByTestId('obsNavPopoverItem-alerting'));
+      expect(navigateToApp).not.toHaveBeenCalled();
+    });
+  });
 });

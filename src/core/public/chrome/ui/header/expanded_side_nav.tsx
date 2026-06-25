@@ -20,6 +20,15 @@ import { NavItemPopover, NavPopoverChildItem } from './nav_item_popover';
 
 type MergedNavLink = ChromeNavLink & ChromeRegistrationNavLink;
 
+/**
+ * Sentence-case a category label for display (e.g. "Agent Monitoring" ->
+ * "Agent monitoring"): keep the first character, lowercase the rest. The
+ * registered Title Case source string is left untouched.
+ */
+function toSentenceCase(label: string): string {
+  return label.charAt(0) + label.slice(1).toLowerCase();
+}
+
 export interface ExpandedSideNavProps {
   navLinks: MergedNavLink[];
   appId?: string;
@@ -302,7 +311,7 @@ function CollapsibleSection({
           )}
           <EuiFlexItem className="obs-nav-label">
             <EuiText size="xs" className="obs-nav-category-label-text">
-              {label}
+              {label ? toSentenceCase(label) : label}
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false} className="obs-nav-label">
@@ -377,7 +386,7 @@ function RenderSection({
     return (
       <>
         <EuiText size="xs" className="obs-nav-category-label">
-          {category.label}
+          {toSentenceCase(category.label)}
         </EuiText>
         {renderedItems}
       </>

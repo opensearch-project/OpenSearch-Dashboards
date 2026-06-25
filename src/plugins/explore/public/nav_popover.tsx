@@ -94,9 +94,12 @@ function RecentExploreSearches({
  * ObservabilityStack_Prometheus connection so the page opens ready to query.
  */
 const metricsHashPath = (mode?: 'query') => {
+  // Always set metricsPageMode explicitly (explore | query) so the page can
+  // toggle in BOTH directions when the user is already on Metrics — an omitted
+  // mode would leave the page on whatever mode it was last in.
   const ui = mode
     ? 'ui:(activeTabId:logs,metricsPageMode:query,showHistogram:!t)'
-    : 'ui:(activeTabId:logs,showHistogram:!t)';
+    : 'ui:(activeTabId:logs,metricsPageMode:explore,showHistogram:!t)';
   return (
     '#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))' +
     '&_q=(dataset:(dataSource:(),id:ObservabilityStack_Prometheus,language:PROMQL,' +

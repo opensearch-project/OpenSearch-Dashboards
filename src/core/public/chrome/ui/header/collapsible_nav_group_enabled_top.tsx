@@ -83,8 +83,11 @@ export const CollapsibleNavTop = ({
       hasShadow={false}
       className="navGroupEnabledNavTopWrapper"
     >
-      {/* The spacer here is used for align with the page header */}
-      <EuiSpacer size="xs" />
+      {/* Small top offset to align the logo row with the chrome page header.
+          Only for the classic nav — the icon side nav handles its own top
+          spacing via the wrapper padding so the logo lines up with the header
+          row instead of sitting ~8px lower. */}
+      {!enableIconSideNav && <EuiSpacer size="xs" />}
       {enableIconSideNav ? (
         // Icon side nav — single stable DOM tree. CSS handles collapsed vs expanded layout.
         <div
@@ -144,8 +147,8 @@ export const CollapsibleNavTop = ({
               </div>
             </div>
           </div>
-          {/* Row 2 (collapsed only): hamburger expand button + search, stacked
-              below the logo. This is the explicit control to open the full nav. */}
+          {/* Row 2 (collapsed only): expand button + search, stacked below the
+              logo. This is the explicit control to open the full nav. */}
           <div className="iconSideNavTop__collapsedControls">
             <EuiButtonIcon
               onClick={onClickExpand}

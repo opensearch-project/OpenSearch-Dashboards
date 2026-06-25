@@ -40,6 +40,13 @@ export interface NavItemPopoverProps {
   showTitle?: boolean;
 }
 
+/** Whether this item or any nested descendant matches the current app id. */
+function itemMatchesApp(item: NavPopoverChildItem, appId?: string): boolean {
+  if (!appId) return false;
+  if (item.id === appId) return true;
+  return (item.children ?? []).some((child) => itemMatchesApp(child, appId));
+}
+
 /**
  * A single row inside the popover. Leaf rows navigate on click; rows with nested
  * `children` open a secondary popover to the right on hover (cascading menu).
@@ -54,7 +61,11 @@ function ChildRow({
   appId?: string;
 }) {
   const hasChildren = !!item.children && item.children.length > 0;
-  const active = !hasChildren && !!appId && item.id === appId;
+  // Leaf rows are active when they ARE the current app; parent rows (with a
+  // cascading sub-popover) are active when any descendant is the current app, so
+  // the trail to the active page stays highlighted (e.g. Alerting → Destinations
+  // keeps "Alerting" highlighted while its sub-popover is open).
+  const active = hasChildren ? itemMatchesApp(item, appId) : !!appId && item.id === appId;
 
   const row = (
     <button

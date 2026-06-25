@@ -41,6 +41,32 @@ export const MetricsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAc
     }
   }, [savedExplore?.id, dispatch]);
 
+  // Apply the metrics page mode from the URL hash `_a.ui.metricsPageMode`. The
+  // side-nav "Query metrics" / "Explore metrics" popover actions navigate with
+  // this in the hash. On a cross-app arrival the store preloads it, but when the
+  // user is ALREADY on Metrics the navigation only updates the hash (no remount,
+  // no store reload), so we read it here and dispatch on mount + every
+  // hashchange so the tab actually switches.
+  useEffect(() => {
+    const applyModeFromUrl = () => {
+      const hash = window.location.hash;
+      const qIndex = hash.indexOf('?');
+      if (qIndex === -1) return;
+      const aParam = new URLSearchParams(hash.slice(qIndex + 1)).get('_a');
+      if (!aParam) return;
+      // _a is a rison-ish string; a substring check is enough to read the mode
+      // without pulling in a rison decoder here.
+      if (/metricsPageMode:query/.test(aParam)) {
+        dispatch(setMetricsPageMode('query'));
+      } else if (/metricsPageMode:explore/.test(aParam)) {
+        dispatch(setMetricsPageMode('explore'));
+      }
+    };
+    applyModeFromUrl();
+    window.addEventListener('hashchange', applyModeFromUrl);
+    return () => window.removeEventListener('hashchange', applyModeFromUrl);
+  }, [dispatch]);
+
   useInitialQueryExecution(services);
   useUrlStateSync(services);
   useTimefilterSubscription(services);

@@ -3,11 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@osd/i18n';
+import { useLocation } from 'react-router-dom';
 import { useObservable } from 'react-use';
 import { AppMountParameters } from 'opensearch-dashboards/public';
 import { useSelector as useNewStateSelector, useDispatch } from 'react-redux';
+import { useOpenOnUrlMarker } from '../../../../opensearch_dashboards_utils/public';
 import { useSyncQueryStateWithUrl } from '../../../../data/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { TopNavMenuItemRenderType } from '../../../../navigation/public';
@@ -188,46 +190,16 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
   }, [services]);
 
   // The side-nav "Browse saved searches" popover action navigates here with a
-  // `_openSaved=true` marker (it can't open the flyout itself — popover actions
-  // only get navigateToApp, not `overlays`). The explore app keeps its route and
-  // query state in the URL HASH (e.g. `#/?_openSaved=true&_g=...&_a=...`), so the
-  // marker lives in the hash query — NOT in `location.search` (which is the
-  // path-level query and is always empty here). Read it from the hash, and
-  // re-check on every hashchange (navigating within the already-mounted app only
-  // updates the hash, it doesn't remount TopNav). Strip the marker afterwards so
-  // a refresh or back-navigation doesn't reopen the flyout.
-  const openSavedHandledRef = useRef(false);
-  useEffect(() => {
-    const openIfMarked = () => {
-      // Open the flyout at most once per mount: the app continuously re-syncs the
-      // hash from Redux state, which can re-add the marker faster than a strip can
-      // settle — without this guard the flyout would open repeatedly.
-      if (openSavedHandledRef.current) return;
-      const hash = window.location.hash; // e.g. "#/?_openSaved=true&_g=..."
-      const qIndex = hash.indexOf('?');
-      if (qIndex === -1) return;
-      const params = new URLSearchParams(hash.slice(qIndex + 1));
-      if (params.get('_openSaved') !== 'true') return;
-
-      openSavedHandledRef.current = true;
-
-      // Strip the marker from the hash without triggering a navigation/remount.
-      params.delete('_openSaved');
-      const nextQuery = params.toString();
-      const nextHash = `${hash.slice(0, qIndex)}${nextQuery ? `?${nextQuery}` : ''}`;
-      window.history.replaceState(
-        window.history.state,
-        '',
-        `${window.location.pathname}${window.location.search}${nextHash}`
-      );
-
-      handleOpenShortcut();
-    };
-
-    openIfMarked();
-    window.addEventListener('hashchange', openIfMarked);
-    return () => window.removeEventListener('hashchange', openIfMarked);
-  }, [handleOpenShortcut]);
+  // `_openSaved=true` hash marker (it can't open the flyout itself — popover
+  // actions only get navigateToApp, not `overlays`). useOpenOnUrlMarker reads
+  // the marker, opens the flyout, and strips the marker (see its docs for the
+  // cooldown / replaceState / cross-app + same-app handling). locationKey is
+  // keyed on the react-router location so same-app (scoped-history) navigations
+  // — which update the hash without emitting a window `hashchange` — re-check.
+  const routerLocation = useLocation();
+  useOpenOnUrlMarker('_openSaved', handleOpenShortcut, {
+    locationKey: `${routerLocation.pathname}${routerLocation.search}${routerLocation.hash}`,
+  });
 
   const handleSaveShortcut = useCallback(() => {
     if (savedExplore) {

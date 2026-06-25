@@ -25,9 +25,10 @@ function RecentDashboards({ recentlyAccessed$, navigateToApp }: NavPopoverServic
   useEffect(() => {
     const sub = recentlyAccessed$.subscribe((items) => {
       const dashboardItems = items
-        .filter(
-          (item) => item.link.includes('/app/dashboards') || item.link.includes('/app/dashboard')
-        )
+        // `/app/dashboards` already contains `/app/dashboard`, so a single
+        // check covers both and avoids also matching the distinct legacy
+        // `dashboard` app id.
+        .filter((item) => item.link.includes('/app/dashboards'))
         .slice(0, 5)
         .map((item) => ({ id: item.id, title: item.label }));
       setRecentDashboards(dashboardItems);

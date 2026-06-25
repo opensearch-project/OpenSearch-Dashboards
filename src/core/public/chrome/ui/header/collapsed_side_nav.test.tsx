@@ -196,4 +196,112 @@ describe('<CollapsedSideNav />', () => {
       expect(queryByText('Logs')).toBeInTheDocument();
     });
   });
+
+  describe('actionsAsChildren (leaf actions inside a category popover)', () => {
+    const wrenchCategory = {
+      ...DEFAULT_APP_CATEGORIES.observabilityTools,
+      collapsible: true,
+      euiIconType: 'wrench' as const,
+    };
+
+    it('surfaces a leaf link navPopover actions as cascade child rows', () => {
+      const onClick = jest.fn();
+      const navLinks = [
+        makeLink({
+          id: 'notebooks',
+          title: 'Notebooks',
+          euiIconType: 'notebookApp',
+          category: wrenchCategory,
+          navPopover: {
+            actions: [
+              { id: 'create', label: 'Create notebook', onClick },
+              { id: 'viewAll', label: 'View all', onClick },
+            ],
+          },
+        }),
+      ];
+      const services = makePopoverServices();
+      const { getByTestId } = render(
+        <CollapsedSideNav {...defaultProps} navLinks={navLinks} popoverServices={services} />
+      );
+      // Open the category popover.
+      fireEvent.mouseEnter(getByTestId(`obsCollapsedIcon-${wrenchCategory.label}`).parentElement!);
+      // The leaf (Notebooks) is rendered as a parent row whose cascade children are
+      // its actions, keyed `${leafId}-${actionId}`.
+      const parentRow = getByTestId('obsNavPopoverItem-notebooks');
+      expect(parentRow).toBeInTheDocument();
+      // Open the secondary cascading popover to reveal the action rows.
+      fireEvent.mouseEnter(parentRow.parentElement!);
+      const createRow = getByTestId('obsNavPopoverItem-notebooks-create');
+      expect(createRow).toBeInTheDocument();
+      expect(getByTestId('obsNavPopoverItem-notebooks-viewAll')).toBeInTheDocument();
+      // Clicking an action row runs its onClick with the popover services.
+      fireEvent.click(createRow);
+      expect(onClick).toHaveBeenCalledWith(services);
+    });
+
+    it('does not surface a cascade arrow when popoverServices is undefined (graceful degrade)', () => {
+      const navLinks = [
+        makeLink({
+          id: 'notebooks',
+          title: 'Notebooks',
+          euiIconType: 'notebookApp',
+          category: wrenchCategory,
+          navPopover: {
+            actions: [{ id: 'create', label: 'Create notebook', onClick: jest.fn() }],
+          },
+        }),
+      ];
+      // No popoverServices passed.
+      const { getByTestId, queryByTestId } = render(
+        <CollapsedSideNav {...defaultProps} navLinks={navLinks} />
+      );
+      fireEvent.mouseEnter(getByTestId(`obsCollapsedIcon-${wrenchCategory.label}`).parentElement!);
+      const parentRow = getByTestId('obsNavPopoverItem-notebooks');
+      // Attempting to open a (non-existent) secondary popover yields no action children.
+      fireEvent.mouseEnter(parentRow.parentElement!);
+      expect(queryByTestId('obsNavPopoverItem-notebooks-create')).not.toBeInTheDocument();
+      // The leaf is just a plain navigable row; clicking navigates rather than cascading.
+      expect(queryByTestId('obsNavPopover-sub-notebooks')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('buildPopoverTitle (sentence-cased category-prefixed title)', () => {
+    it('prefixes a leaf title with its category in sentence case', () => {
+      // Non-collapsible category: each child gets its own icon, and the popover
+      // title is the category-prefixed phrase in sentence case.
+      const agentMonitoring = { id: 'agentMonitoring', label: 'Agent Monitoring' };
+      const navLinks = [
+        makeLink({
+          id: 'traces',
+          title: 'Traces',
+          euiIconType: 'apmTrace',
+          category: agentMonitoring,
+        }),
+      ];
+      const { getByTestId, getByText } = render(
+        <CollapsedSideNav
+          {...defaultProps}
+          navLinks={navLinks}
+          popoverServices={makePopoverServices()}
+        />
+      );
+      fireEvent.mouseEnter(getByTestId('obsCollapsedIcon-traces').parentElement!);
+      // "Agent Monitoring" + "Traces" -> "Agent monitoring traces"
+      expect(getByText('Agent monitoring traces')).toBeInTheDocument();
+    });
+
+    it('leaves the title unchanged when there is no category', () => {
+      const navLinks = [makeLink({ id: 'logs', title: 'Logs', euiIconType: 'logsApp' })];
+      const { getByTestId, getByText } = render(
+        <CollapsedSideNav
+          {...defaultProps}
+          navLinks={navLinks}
+          popoverServices={makePopoverServices()}
+        />
+      );
+      fireEvent.mouseEnter(getByTestId('obsCollapsedIcon-logs').parentElement!);
+      expect(getByText('Logs')).toBeInTheDocument();
+    });
+  });
 });

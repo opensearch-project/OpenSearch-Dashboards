@@ -33,23 +33,32 @@ describe('<DevToolsIcon />', () => {
     );
     expect(container).toMatchInlineSnapshot(`
       <div>
-        <span
-          class="euiToolTipAnchor"
+        <div
+          class="euiPopover euiPopover--anchorRightUp euiPopover--displayBlock"
+          offset="0"
         >
-          <button
-            aria-label="go-to-dev-tools"
-            class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
-            data-test-subj="openDevToolsModal"
-            type="button"
+          <div
+            class="euiPopover__anchor"
           >
             <span
-              aria-hidden="true"
-              class="euiButtonIcon__icon"
-              color="inherit"
-              data-euiicon-type="consoleApp"
-            />
-          </button>
-        </span>
+              class="devToolsNavAnchor"
+            >
+              <button
+                aria-label="Developer tools"
+                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                data-test-subj="openDevToolsModal"
+                type="button"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="consoleApp"
+                />
+              </button>
+            </span>
+          </div>
+        </div>
       </div>
     `);
 

@@ -159,11 +159,17 @@ $osd-sidebar-width: 248px;
 $osd-sidebar-width-collapsed: 48px;
 $osd-sidebar-transition: 300ms cubic-bezier(0.4, 0, 0.2, 1);
 
-// Shared neutral-grey tint for the hovered/open nav item AND the expanded
-// popover surface, so a hovered item and its popover read as one connected
-// block. Subtle and elegant (grey over the branded blue).
+// Shared surface for the hovered / open / active nav item AND the popover
+// panel, so a highlighted item and its popover read as one connected block.
+// Per-theme: light keeps the original subtle neutral grey (a 6% text/empty-shade
+// mix ≈ #eff2f4); dark uses the theme's "lightest shade" (#25262E over the
+// #1D1E24 panel) which has far better contrast than the same mix would in dark.
 // stylelint-disable-next-line @osd/stylelint/no_restricted_values
-$osd-nav-hover-tint: rgba($euiTextColor, 0.06);
+$osd-nav-surface: lightOrDarkTheme(
+  mix($euiTextColor, $euiColorEmptyShade, 6%),
+  $euiColorLightestShade
+);
+$osd-nav-hover-tint: $osd-nav-surface;
 
 // Subtle rounded corners (kept rounded, not angled — just gentler than the
 // EUI defaults): 3px on nav rows/items, 6px on the popover card.
@@ -330,14 +336,37 @@ $osd-sidebar-top-min-height: 116px;
 
     &.bottom-container-collapsed {
       flex-direction: column;
-      align-items: center;
-      gap: $euiSize;
-      padding-top: $euiSizeS;
-      padding-bottom: $euiSizeS;
 
+      // Stretch children to the full 48px rail width (not center) and drop the
+      // 12px side padding, so a footer control (e.g. Dev Tools) fills the rail
+      // and its hover popover anchors from the rail's right edge — flush, like
+      // the nav leaf icons. Each control centers its own button internally.
+      align-items: stretch;
+      gap: $euiSize;
+      padding: $euiSizeS 0;
+
+      // The control wrapper + its EuiPopover anchor chain default to hugging
+      // their content (~40px), which leaves the popover anchored 4px short of
+      // the rail edge. Force the chain to the full rail width so the hover
+      // popover lands flush against the rail like the nav leaf icons.
+      // Scoped to the footer control's OWN wrapper + a `.nav-controls-padding`
+      // direct child rather than a bare descendant `.euiPopover` selector, so we
+      // don't restyle arbitrary popovers a future footer control might render
+      // (e.g. a menu inside its own panel).
       > * {
+        display: flex;
         justify-content: center;
+        width: 100%;
       }
+
+      /* stylelint-disable @osd/stylelint/no_modifying_global_selectors */
+      .nav-controls-padding > .euiPopover,
+      .nav-controls-padding > .euiPopover > .euiPopover__anchor {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+      }
+      /* stylelint-enable @osd/stylelint/no_modifying_global_selectors */
     }
 
     &.bottom-container-expanded {
@@ -350,8 +379,10 @@ $osd-sidebar-top-min-height: 116px;
   }
 
   .navGroupEnabledNavTopWrapper {
-    padding: $euiSizeXS $euiSizeS 0;
-    padding-left: $euiSizeS;
+    // Pull the top row up so the logo's vertical center lines up with the
+    // chrome header's recent-items/breadcrumb row (was offset ~12px lower from
+    // the EuiPanel padding + spacer above it).
+    padding: 0 $euiSizeS;
 
     .navGroupEnabledHomeIcon {
       margin-left: $euiSizeS;
@@ -410,6 +441,24 @@ $osd-sidebar-top-min-height: 116px;
     height: 1px;
     background-color: $euiBorderColor;
   }
+}
+
+// Agent Traces/Spans badge halo: the small circle behind the AI sparkle/diamond
+// badge that punches it out from the glyph lines. Filled with the sidebar
+// background color (compiled per-theme) so it reads cleanly in light AND dark —
+// a hardcoded white halo looked wrong on the dark panel. When the badge sits on
+// a hovered/active row (which paints the surface tint), match that surface so
+// the halo blends with the row instead of showing a background-colored disc.
+.agentBadgeHalo {
+  fill: $euiSideNavBackgroundColor;
+}
+
+.obs-nav-item:hover .agentBadgeHalo,
+.obs-nav-item[data-active="true"] .agentBadgeHalo,
+.obsCollapsedNavIcon:hover .agentBadgeHalo,
+.obsSimplePopover-anchor--open .agentBadgeHalo,
+.obsSimplePopover-anchor--active .agentBadgeHalo {
+  fill: $osd-nav-surface;
 }
 
 // Remove blue focus ring on mouse click — keep :focus-visible for keyboard a11y
@@ -488,7 +537,7 @@ $osd-sidebar-top-min-height: 116px;
     // grey full-width to the rail edge (matching the hover-open treatment) so
     // the selected row reads identically to a hovered one — not a slightly
     // different translucent tint.
-    background-color: mix($euiTextColor, $euiColorEmptyShade, 6%);
+    background-color: $osd-nav-surface;
     width: calc(100% + #{$euiSizeS});
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
@@ -606,8 +655,7 @@ $osd-sidebar-top-min-height: 116px;
   }
 
   &[data-active="true"] {
-    // stylelint-disable-next-line @osd/stylelint/no_restricted_values
-    background-color: rgba($euiTextColor, 0.06);
+    background-color: $osd-nav-surface;
     color: $euiTextColor;
     font-weight: $euiFontWeightMedium;
     position: relative;
@@ -722,8 +770,9 @@ $osd-sidebar-top-min-height: 116px;
 // stylelint-disable-next-line no-duplicate-selectors
 .osd-sidebar[data-state="collapsed"] {
   .navGroupEnabledNavTopWrapper {
-    padding: $euiSizeXS 0;
-    padding-left: 0;
+    // No top padding so the logo lines up vertically with the chrome header
+    // row (the EuiSpacer above already provides a small offset).
+    padding: 0;
   }
 }
 
@@ -738,8 +787,7 @@ $osd-sidebar-top-min-height: 116px;
   text-align: left;
 
   &:hover {
-    // stylelint-disable-next-line @osd/stylelint/no_restricted_values
-    background-color: rgba($euiTextColor, 0.04);
+    background-color: $osd-nav-surface;
     border-radius: $osd-nav-radius;
   }
 
@@ -876,7 +924,7 @@ $osd-sidebar-top-min-height: 116px;
 // sliver or border line between them.
 .obs-expanded-nav .obsSimplePopover-anchor--open {
   // Same solid grey as the popover panel so the row and panel are identical.
-  background-color: mix($euiTextColor, $euiColorEmptyShade, 6%);
+  background-color: $osd-nav-surface;
 
   // The anchor is width:100% inside the nav's 8px right padding (+1px border).
   // Extend its width past that so the grey reaches the rail edge and meets the
@@ -908,7 +956,7 @@ $osd-sidebar-top-min-height: 116px;
   display: flex;
   justify-content: center;
   width: $osd-sidebar-width-collapsed;
-  background-color: mix($euiTextColor, $euiColorEmptyShade, 6%);
+  background-color: $osd-nav-surface;
 
   // Square the right edge so the grey runs cleanly into the flush popover.
   border-radius: $osd-nav-radius 0 0 $osd-nav-radius;
@@ -929,7 +977,7 @@ $osd-sidebar-top-min-height: 116px;
   display: flex;
   justify-content: center;
   width: $osd-sidebar-width-collapsed;
-  background-color: mix($euiTextColor, $euiColorEmptyShade, 6%);
+  background-color: $osd-nav-surface;
   border-radius: $osd-nav-radius 0 0 $osd-nav-radius;
 
   // Full-height accent bar (top to bottom of the grey cell) for a crisp, bold
@@ -990,7 +1038,7 @@ $osd-sidebar-top-min-height: 116px;
 
   // Match the hovered/open nav item's grey tint (baked solid) so the item and
   // its popover read as one connected block.
-  background-color: mix($euiTextColor, $euiColorEmptyShade, 6%);
+  background-color: $osd-nav-surface;
 
   // stylelint-disable-next-line @osd/stylelint/no_restricted_values
   box-shadow: 6px 8px 24px rgba($euiShadowColor, 0.18);
@@ -1114,15 +1162,28 @@ $osd-sidebar-top-min-height: 116px;
   white-space: nowrap;
 }
 
-// Secondary (cascading) popover panel: rounded on all corners (it is a
-// detached child menu, not flush to the rail) and offset so it overlaps the
-// parent panel's right edge slightly — connected, not floating with a gap.
-// stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
-.euiPopover__panel.obsNavPopover-panel--secondary {
-  border-left: $euiBorderThin;
-  border-radius: $osd-nav-popover-radius;
-  transform: translate(-2px, 0) !important;
+// Secondary (cascading) popover panel: nudge it toward the primary panel so it
+// sits flush against the primary's adjacent edge, with the seam-side corners
+// squared + that border removed so the two read as one continuous surface.
+// The seam is direction-dependent: in LTR the secondary opens to the RIGHT of
+// the primary (seam on its LEFT edge); in RTL EUI mirrors the anchor so it opens
+// to the LEFT (seam on its RIGHT edge). We therefore mirror the corner/border/
+// nudge per direction. The transform is `!important` to override EUI's inline
+// positioning transform; the small px nudge just closes EUI's default rightUp
+// gap (~3px) and overlaps ~2px so the borders merge into one seam.
+// stylelint-disable @osd/stylelint/no_modifying_global_selectors
+.euiPopover__panel.obsNavPopover-panel--secondary:not([dir="rtl"]) {
+  border-left: none;
+  border-radius: 0 $osd-nav-popover-radius $osd-nav-popover-radius 0;
+  transform: translate(-5px, 0) !important;
 }
+
+.euiPopover__panel.obsNavPopover-panel--secondary[dir="rtl"] {
+  border-right: none;
+  border-radius: $osd-nav-popover-radius 0 0 $osd-nav-popover-radius;
+  transform: translate(5px, 0) !important;
+}
+// stylelint-enable @osd/stylelint/no_modifying_global_selectors
 
 .obsNavPopover-emptyState {
   display: block;

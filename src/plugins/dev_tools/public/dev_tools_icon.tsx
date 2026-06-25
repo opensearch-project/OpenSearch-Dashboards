@@ -10,10 +10,11 @@ import {
   EuiFlexItem,
   EuiOverlayMask,
   EuiPanel,
+  EuiPopover,
+  EuiPopoverTitle,
   EuiSmallButton,
   EuiSpacer,
   EuiText,
-  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { CoreStart } from 'opensearch-dashboards/public';
@@ -38,6 +39,24 @@ export function DevToolsIcon({
   const [modalVisible, setModalVisible] = useState(false);
   const [devToolTab, setDevToolTab] = useState('');
   const [sidecarPaddingRight, setSidecarPaddingRight] = useState('0px');
+  // Hover popover (matches the icon side nav's title-only popover instead of a
+  // plain EUI tooltip, so the dev-tools footer icon reads consistently with the
+  // rest of the rail).
+  const [isLabelOpen, setIsLabelOpen] = useState(false);
+  const labelCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const openLabel = useCallback(() => {
+    if (labelCloseTimer.current) clearTimeout(labelCloseTimer.current);
+    setIsLabelOpen(true);
+  }, []);
+  const scheduleCloseLabel = useCallback(() => {
+    if (labelCloseTimer.current) clearTimeout(labelCloseTimer.current);
+    labelCloseTimer.current = setTimeout(() => setIsLabelOpen(false), 150);
+  }, []);
+  useEffect(() => () => labelCloseTimer.current && clearTimeout(labelCloseTimer.current), []);
+
+  const devToolsLabel = i18n.translate('devTools.icon.nav.title', {
+    defaultMessage: 'Developer tools',
+  });
 
   useEffect(() => {
     const subscription = core.overlays.sidecar.getSidecarConfig$().subscribe((config) => {
@@ -147,21 +166,46 @@ export function DevToolsIcon({
 
   return (
     <>
-      <EuiToolTip
-        content={i18n.translate('devTools.icon.nav.title', {
-          defaultMessage: 'Developer tools',
-        })}
+      <EuiPopover
+        anchorPosition="rightUp"
+        hasArrow={false}
+        offset={0}
+        ownFocus={false}
+        initialFocus={false}
+        panelPaddingSize="none"
+        panelClassName="obsNavPopover-panel obsNavPopover-panel--rail"
+        display="block"
+        isOpen={isLabelOpen}
+        closePopover={() => setIsLabelOpen(false)}
+        button={
+          // Match the collapsed nav icon's anchor geometry: a full-rail-width
+          // (48px) centered wrapper so EUI's rightUp popover anchors from the
+          // rail's right edge — exactly like the nav leaf icons. This lets the
+          // shared `obsNavPopover-panel--rail` calibration land the panel flush
+          // and connected (same as Topology Map), instead of floating detached.
+          <span
+            className={`devToolsNavAnchor${isLabelOpen ? ' devToolsNavAnchor--open' : ''}`}
+            onMouseEnter={openLabel}
+            onMouseLeave={scheduleCloseLabel}
+          >
+            <EuiButtonIcon
+              aria-label={devToolsLabel}
+              iconType="consoleApp"
+              data-test-subj="openDevToolsModal"
+              onClick={() => {
+                setIsLabelOpen(false);
+                setModalVisible(true);
+              }}
+              color="text"
+            />
+          </span>
+        }
+        panelProps={{ onMouseEnter: openLabel, onMouseLeave: scheduleCloseLabel }}
       >
-        <EuiButtonIcon
-          aria-label="go-to-dev-tools"
-          iconType="consoleApp"
-          data-test-subj="openDevToolsModal"
-          onClick={() => {
-            setModalVisible(true);
-          }}
-          color="text"
-        />
-      </EuiToolTip>
+        <div className="obsNavPopover obsNavPopover--titleOnly" data-test-subj="devToolsNavPopover">
+          <EuiPopoverTitle paddingSize="s">{devToolsLabel}</EuiPopoverTitle>
+        </div>
+      </EuiPopover>
       {modalVisible ? (
         /**
          * We can not use OuiModal component here because OuiModal uses OuiOverlayMask as its parent node

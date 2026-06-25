@@ -7,9 +7,6 @@ import { i18n } from '@osd/i18n';
 import { NavPopoverConfig } from '../../../core/public';
 import { AGENT_TRACES_NAV_ID, AGENT_SPANS_NAV_ID } from '../common';
 
-/** The Observability "Logs" explore app id. */
-const EXPLORE_LOGS_APP_ID = 'explore/logs';
-
 /**
  * Hash path that lands the agent-traces app on the given tab and asks it to open
  * the "Open saved search" flyout once mounted (the app honors `_openSaved=true`
@@ -25,20 +22,12 @@ const newSearchPath = (tab: 'traces' | 'spans') =>
 
 /**
  * Nav-popover config for an agent-monitoring flavor (Traces/Spans): quick
- * actions to jump to Logs, start a new search, or browse saved searches. The
- * item still navigates to the flavor on direct click.
+ * actions to start a new search or browse saved searches. The item still
+ * navigates to the flavor on direct click.
  */
 function buildAgentNavPopover(appId: string, tab: 'traces' | 'spans'): NavPopoverConfig {
   return {
     actions: [
-      {
-        id: 'logs',
-        label: i18n.translate('agentTraces.navPopover.logs', {
-          defaultMessage: 'Logs',
-        }),
-        iconType: 'discoverApp',
-        onClick: ({ navigateToApp }) => navigateToApp(EXPLORE_LOGS_APP_ID, { path: '#/' }),
-      },
       {
         id: 'newSearch',
         label: i18n.translate('agentTraces.navPopover.newSearch', {

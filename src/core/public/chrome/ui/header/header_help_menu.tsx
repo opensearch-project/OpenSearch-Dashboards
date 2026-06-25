@@ -53,6 +53,7 @@ import { combineLatest } from 'rxjs';
 import { HeaderExtension } from './header_extension';
 import { ChromeHelpExtension } from '../../chrome_service';
 import { GITHUB_CREATE_ISSUE_LINK } from '../../constants';
+import { KeyboardShortcutHelpModal, KeyboardShortcutStart } from '../../../keyboard_shortcut';
 
 /** @public */
 export type ChromeHelpExtensionMenuGitHubLink = EuiButtonEmptyProps & {
@@ -126,6 +127,11 @@ interface Props {
   opensearchDashboardsDocLink: string;
   surveyLink?: string;
   useUpdatedAppearance?: boolean;
+  /**
+   * When provided, a "Keyboard shortcuts" entry is shown in the help menu that
+   * opens the shortcut reference modal (previously a standalone footer icon).
+   */
+  keyboardShortcut?: KeyboardShortcutStart;
 }
 
 interface State {
@@ -204,8 +210,26 @@ class HeaderHelpMenuUI extends Component<Props, State> {
       opensearchDashboardsDocLink,
       surveyLink,
       useUpdatedAppearance,
+      keyboardShortcut,
     } = this.props;
     const { helpExtension, helpSupportUrl } = this.state;
+
+    // "Keyboard shortcuts" lives in the help menu (instead of a standalone
+    // footer rail icon). The modal registers its own shift+/ shortcut and opens
+    // when this entry is clicked.
+    const keyboardShortcutContent = keyboardShortcut ? (
+      <KeyboardShortcutHelpModal
+        keyboardShortcutService={keyboardShortcut}
+        trigger={
+          <EuiButtonEmpty size="xs" flush="left" iconType="keyboardShortcut">
+            <FormattedMessage
+              id="core.ui.chrome.headerGlobalNav.helpMenuKeyboardShortcuts"
+              defaultMessage="Keyboard shortcuts"
+            />
+          </EuiButtonEmpty>
+        }
+      />
+    ) : null;
 
     const defaultContent = useDefaultContent ? (
       <Fragment>
@@ -403,6 +427,12 @@ class HeaderHelpMenuUI extends Component<Props, State> {
           {defaultContent}
           {defaultContent && customContent && <EuiHorizontalRule margin="m" />}
           {customContent}
+          {keyboardShortcutContent && (
+            <>
+              {(defaultContent || customContent) && <EuiHorizontalRule margin="m" />}
+              {keyboardShortcutContent}
+            </>
+          )}
         </div>
       </EuiPopover>
     );

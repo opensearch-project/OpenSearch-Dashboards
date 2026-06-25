@@ -4,9 +4,9 @@
  */
 
 import { configureStore } from '@reduxjs/toolkit';
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import { FC } from 'react';
-import { Provider } from 'react-redux';
+import { Provider, useDispatch } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { OpenSearchSearchHit } from '../../../types/doc_views_types';
@@ -25,6 +25,16 @@ import {
 import { QueryExecutionStatus } from '../../utils/state_management/types';
 import { MetricsPage } from './metrics_page';
 import { defaultPrepareQueryString } from '../../utils/state_management/actions/query_actions';
+import { setMetricsPageMode } from '../../utils/state_management/slices/ui/ui_slice';
+import { useInitPage } from '../../../application/utils/hooks/use_page_initialization';
+
+jest.mock('react-redux', () => {
+  const actual = jest.requireActual('react-redux');
+  return {
+    ...actual,
+    useDispatch: jest.fn(),
+  };
+});
 
 jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
   useOpenSearchDashboards: jest.fn().mockReturnValue({
@@ -160,6 +170,8 @@ describe('MetricsPage', () => {
     );
   };
 
+  const mockDispatch = jest.fn();
+
   beforeEach(() => {
     const exploreServices = discoverPluginMock.createExploreServicesMock();
     const exploreServicesMock = exploreServices as jest.MaybeMockedDeep<typeof exploreServices>;
@@ -167,6 +179,7 @@ describe('MetricsPage', () => {
     (useOpenSearchDashboards as jest.Mock).mockReturnValue({
       services: exploreServicesMock,
     });
+    (useDispatch as jest.Mock).mockReturnValue(mockDispatch);
   });
 
   afterEach(() => {
@@ -212,5 +225,78 @@ describe('MetricsPage', () => {
 
     expect(screen.getByTestId('metrics-page-tabs')).toBeInTheDocument();
     expect(screen.getByTestId('top-nav')).toBeInTheDocument();
+  });
+
+  describe('applyModeFromUrl effect', () => {
+    const originalHash = window.location.hash;
+
+    const setHash = (hash: string) => {
+      window.history.replaceState(undefined, '', hash);
+    };
+
+    const renderMetricsPage = () => {
+      const store = createTestStore();
+      render(
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
+        <TestHarness store={store}>
+          <MetricsPage />
+        </TestHarness>
+      );
+    };
+
+    const setMetricsPageModeCalls = () =>
+      mockDispatch.mock.calls.filter(
+        ([action]) => action?.type === setMetricsPageMode('query').type
+      );
+
+    beforeEach(() => {
+      // Avoid the unrelated savedExplore?.id effect which also dispatches
+      // setMetricsPageMode('query') so we isolate the URL-driven behavior.
+      (useInitPage as jest.Mock).mockReturnValue({ savedExplore: undefined });
+    });
+
+    afterEach(() => {
+      setHash(originalHash);
+    });
+
+    it('dispatches setMetricsPageMode("query") when hash has metricsPageMode:query', () => {
+      setHash('#/?_a=(ui:(activeTabId:logs,metricsPageMode:query,showHistogram:!t))');
+
+      renderMetricsPage();
+
+      expect(mockDispatch).toHaveBeenCalledWith(setMetricsPageMode('query'));
+    });
+
+    it('dispatches setMetricsPageMode("explore") when hash has metricsPageMode:explore', () => {
+      setHash('#/?_a=(ui:(activeTabId:logs,metricsPageMode:explore,showHistogram:!t))');
+
+      renderMetricsPage();
+
+      expect(mockDispatch).toHaveBeenCalledWith(setMetricsPageMode('explore'));
+    });
+
+    it('does not dispatch the mode action when there is no _a / metricsPageMode token', () => {
+      setHash('#/?a=b');
+
+      renderMetricsPage();
+
+      expect(setMetricsPageModeCalls()).toHaveLength(0);
+    });
+
+    it('re-dispatches on a window hashchange with a changed metricsPageMode', () => {
+      setHash('#/?_a=(ui:(activeTabId:logs,metricsPageMode:query,showHistogram:!t))');
+
+      renderMetricsPage();
+
+      expect(mockDispatch).toHaveBeenCalledWith(setMetricsPageMode('query'));
+      mockDispatch.mockClear();
+
+      setHash('#/?_a=(ui:(activeTabId:logs,metricsPageMode:explore,showHistogram:!t))');
+      act(() => {
+        window.dispatchEvent(new HashChangeEvent('hashchange'));
+      });
+
+      expect(mockDispatch).toHaveBeenCalledWith(setMetricsPageMode('explore'));
+    });
   });
 });

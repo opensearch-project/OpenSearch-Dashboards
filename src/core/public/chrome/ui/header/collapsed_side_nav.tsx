@@ -15,9 +15,21 @@ import { SimplePopover } from './simple_popover';
 import { NavItemPopover, NavPopoverChildItem } from './nav_item_popover';
 
 /**
- * Build a (possibly nested) list of popover child items from nav LinkItems.
- * A PARENT_LINK becomes a row with cascading `children`; a LINK becomes a leaf.
+ * Build the collapsed-popover title for an item, prefixing it with its category
+ * in plain sentence format (e.g. "Agent monitoring traces", "Application
+ * performance traces") so a bare "Traces" isn't ambiguous between categories.
+ * The category label is Title Case for section headers, so lowercase all but
+ * its first character here; no hyphen between category and title.
  */
+function buildPopoverTitle(title: string, categoryLabel?: string): string {
+  if (!categoryLabel) return title;
+  // Sentence format: capitalize only the first letter of the whole phrase and
+  // lowercase the rest (e.g. "Agent Monitoring" + "Traces" -> "Agent
+  // monitoring traces"). Keeps the leading capital, drops the mid-phrase caps.
+  const phrase = `${categoryLabel} ${title}`;
+  return phrase.charAt(0) + phrase.slice(1).toLowerCase();
+}
+
 /**
  * Map a leaf link's registered navPopover actions into cascading child rows, so
  * a leaf that has its own popover (e.g. Notebooks: "Create notebook" / "View
@@ -116,7 +128,10 @@ function CollapsedLeafIcon({
 }) {
   const active = link.id === appId;
   const icon = link.euiIconType || 'apps';
-  const tooltipContent = categoryLabel ? `${categoryLabel} - ${link.title}` : link.title;
+  // Title shown in the collapsed popover, prefixed with the category in plain
+  // sentence format (e.g. "Agent monitoring traces") so a bare "Traces" isn't
+  // ambiguous between categories.
+  const popoverTitle = buildPopoverTitle(link.title, categoryLabel);
 
   const iconButton = (
     <EuiButtonIcon
@@ -148,14 +163,14 @@ function CollapsedLeafIcon({
     >
       {link.navPopover && popoverServices ? (
         <NavItemPopover
-          title={link.title}
+          title={popoverTitle}
           navPopover={link.navPopover}
           services={popoverServices}
           navigateToApp={navigateToApp}
         />
       ) : (
         <div className="obsNavPopover obsNavPopover--titleOnly" data-test-subj="obsNavPopover">
-          <EuiPopoverTitle paddingSize="s">{tooltipContent}</EuiPopoverTitle>
+          <EuiPopoverTitle paddingSize="s">{popoverTitle}</EuiPopoverTitle>
         </div>
       )}
     </SimplePopover>
@@ -182,7 +197,7 @@ function CollapsedParentIcon({
   const parentLink = linkItem.link;
   const icon = parentLink?.euiIconType || 'apps';
   const title = parentLink?.title || '';
-  const popoverTitle = categoryLabel ? `${categoryLabel} - ${title}` : title;
+  const popoverTitle = buildPopoverTitle(title, categoryLabel);
 
   // Build a (nested) list of navigable items; nested parents cascade.
   const childItems = buildChildItems(linkItem.links, popoverServices);

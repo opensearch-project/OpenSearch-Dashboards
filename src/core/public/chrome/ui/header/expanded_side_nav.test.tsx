@@ -229,6 +229,182 @@ describe('<ExpandedSideNav />', () => {
     expect(navigateToApp).toHaveBeenCalledWith('app1');
   });
 
+  describe('category label sentence-casing', () => {
+    it('sentence-cases a multi-word Title Case category label', () => {
+      const category = {
+        id: 'agentMonitoring',
+        label: 'Agent Monitoring',
+      };
+      const navLinks = [
+        makeLink({
+          id: 'agents',
+          title: 'Agents',
+          euiIconType: 'apps',
+          category,
+        }),
+      ];
+      const { getByText, queryByText } = render(
+        <ExpandedSideNav {...defaultProps} navLinks={navLinks} />
+      );
+      expect(getByText('Agent monitoring')).toBeInTheDocument();
+      // The original Title Case label should not be displayed.
+      expect(queryByText('Agent Monitoring')).not.toBeInTheDocument();
+    });
+
+    it('leaves a single-word category label unchanged', () => {
+      const category = {
+        id: 'tools',
+        label: 'Tools',
+      };
+      const navLinks = [
+        makeLink({
+          id: 'tool1',
+          title: 'Tool 1',
+          euiIconType: 'wrench',
+          category,
+        }),
+      ];
+      const { getByText } = render(<ExpandedSideNav {...defaultProps} navLinks={navLinks} />);
+      expect(getByText('Tools')).toBeInTheDocument();
+    });
+
+    it('sentence-cases collapsible category labels too', () => {
+      const category = {
+        id: 'agentMonitoring',
+        label: 'Agent Monitoring',
+        collapsible: true,
+        euiIconType: 'apps' as const,
+      };
+      const navLinks = [
+        makeLink({
+          id: 'agents',
+          title: 'Agents',
+          euiIconType: 'apps',
+          category,
+        }),
+      ];
+      const { getByText, queryByText } = render(
+        <ExpandedSideNav {...defaultProps} navLinks={navLinks} />
+      );
+      expect(getByText('Agent monitoring')).toBeInTheDocument();
+      expect(queryByText('Agent Monitoring')).not.toBeInTheDocument();
+    });
+
+    it('does NOT sentence-case nav link row titles', () => {
+      const category = {
+        id: 'agentMonitoring',
+        label: 'Agent Monitoring',
+      };
+      const navLinks = [
+        makeLink({
+          id: 'anomalyDetection',
+          title: 'Anomaly Detection',
+          euiIconType: 'apps',
+          category,
+        }),
+      ];
+      const { getByText, queryByText } = render(
+        <ExpandedSideNav {...defaultProps} navLinks={navLinks} />
+      );
+      // Link row title keeps its original Title Case.
+      expect(getByText('Anomaly Detection')).toBeInTheDocument();
+      expect(queryByText('Anomaly detection')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('collapsible category alwaysUseDefaultOpen', () => {
+    const makeStorage = (initial: Record<string, string> = {}): Storage => {
+      const store: Record<string, string> = { ...initial };
+      return {
+        getItem: (k: string) => (k in store ? store[k] : null),
+        setItem: (k: string, v: string) => {
+          store[k] = v;
+        },
+        removeItem: (k: string) => {
+          delete store[k];
+        },
+        clear: () => undefined,
+        key: () => null,
+        length: 0,
+      } as Storage;
+    };
+
+    const makeCategory = (overrides = {}) => ({
+      id: 'manageWorkspace',
+      label: 'Manage Workspace',
+      collapsible: true,
+      euiIconType: 'gear' as const,
+      defaultOpen: true,
+      alwaysUseDefaultOpen: true,
+      ...overrides,
+    });
+
+    it('ignores a stored collapsed state on first render (opens to default)', () => {
+      const category = makeCategory();
+      const navLinks = [
+        makeLink({
+          id: 'ws1',
+          title: 'Workspace 1',
+          euiIconType: 'gear',
+          category,
+        }),
+      ];
+      // Stored state says "closed" (false), but the flag forces the default (open).
+      const storage = makeStorage({ 'core.navGroup.manageWorkspace': 'false' });
+      const { container } = render(
+        <ExpandedSideNav {...defaultProps} navLinks={navLinks} storage={storage} />
+      );
+      // defaultOpen=true -> default collapsed=false, stored state ignored.
+      expect(
+        container.querySelector('.obs-nav-collapsible-wrapper')?.getAttribute('data-collapsed')
+      ).toBe('false');
+    });
+
+    it('does NOT persist to storage on toggle when alwaysUseDefaultOpen is true', () => {
+      const category = makeCategory();
+      const navLinks = [
+        makeLink({
+          id: 'ws1',
+          title: 'Workspace 1',
+          euiIconType: 'gear',
+          category,
+        }),
+      ];
+      const storage = makeStorage();
+      const setItem = jest.spyOn(storage, 'setItem');
+      const { getByTestId } = render(
+        <ExpandedSideNav {...defaultProps} navLinks={navLinks} storage={storage} />
+      );
+      fireEvent.click(getByTestId('obsNavSection-Manage Workspace'));
+      expect(setItem).not.toHaveBeenCalled();
+    });
+
+    it('still toggles within the session even though it does not persist', () => {
+      const category = makeCategory();
+      const navLinks = [
+        makeLink({
+          id: 'ws1',
+          title: 'Workspace 1',
+          euiIconType: 'gear',
+          category,
+        }),
+      ];
+      const storage = makeStorage();
+      const { getByTestId, container } = render(
+        <ExpandedSideNav {...defaultProps} navLinks={navLinks} storage={storage} />
+      );
+      // Starts open (defaultOpen=true).
+      expect(
+        container.querySelector('.obs-nav-collapsible-wrapper')?.getAttribute('data-collapsed')
+      ).toBe('false');
+      fireEvent.click(getByTestId('obsNavSection-Manage Workspace'));
+      // Toggled closed in-session.
+      expect(
+        container.querySelector('.obs-nav-collapsible-wrapper')?.getAttribute('data-collapsed')
+      ).toBe('true');
+    });
+  });
+
   describe('hover popover', () => {
     it('shows the registered content in a popover on hover', () => {
       const navLinks = [

@@ -7,7 +7,7 @@ import React from 'react';
 import { Observable } from 'rxjs';
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { ChromeRecentlyAccessedHistoryItem } from '../recently_accessed';
-import { InternalApplicationStart } from '../../application/types';
+import { ApplicationStart } from '../../application/types';
 import { HttpStart } from '../../http';
 
 /**
@@ -20,7 +20,7 @@ import { HttpStart } from '../../http';
  */
 export interface NavPopoverServices {
   /** Navigate to an application, optionally to a specific path within it. */
-  navigateToApp: InternalApplicationStart['navigateToApp'];
+  navigateToApp: ApplicationStart['navigateToApp'];
   /** Base path helper for building app URLs. */
   basePath: HttpStart['basePath'];
   /** Http client for fetching contextual data. */
@@ -43,8 +43,12 @@ export interface NavPopoverAction {
   label: string;
   /** Optional leading icon. */
   iconType?: EuiIconType | string;
-  /** Invoked when the action button is clicked. */
-  onClick: (services: NavPopoverServices) => void;
+  /**
+   * Invoked when the action button is clicked. May return a promise (e.g. a
+   * navigate-then-do-something flow); core does not currently await it, but the
+   * signature allows async handlers without an unhandled-promise lint error.
+   */
+  onClick: (services: NavPopoverServices) => void | Promise<void>;
 }
 
 /**
@@ -57,6 +61,12 @@ export interface NavPopoverAction {
 export interface NavPopoverConfig {
   /** Declarative action buttons rendered at the top of the popover. */
   actions?: NavPopoverAction[];
-  /** Custom popover content rendered below the actions. */
+  /**
+   * Custom popover content rendered below the actions. Core invokes this on
+   * every popover render with no memoization, so it MUST be cheap — return a
+   * memoized React element / component and do any data fetching inside an
+   * effect (see the recent-items lists in the explore/dashboard popovers),
+   * not synchronously here.
+   */
   render?: (services: NavPopoverServices) => React.ReactNode;
 }

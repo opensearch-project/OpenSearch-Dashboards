@@ -56,10 +56,7 @@ import {
 import { ManagementOverViewPluginSetup } from '../../management_overview/public';
 import { toMountPoint } from '../../opensearch_dashboards_react/public';
 import { SettingsIcon } from './components/settings_icon';
-import {
-  KeyboardShortcutIcon,
-  KeyboardShortcutListener,
-} from './components/keyboard_shortcut_icon';
+import { KeyboardShortcutListener } from './components/keyboard_shortcut_icon';
 import {
   fulfillRegistrationLinksToChromeNavLinks,
   LinkItemType,
@@ -345,15 +342,11 @@ export class ManagementPlugin
         ),
       });
 
-      // Always register keyboard shortcut icon if service is available
-      // The icon component will handle its own visibility based on available shortcuts
+      // The "Keyboard shortcuts" entry now lives inside the header Help menu
+      // (see header_help_menu.tsx), so we no longer register a standalone footer
+      // rail icon. We still mount a trigger-less listener so the shift+/ shortcut
+      // stays active everywhere (including when the icon side nav is collapsed).
       if (core.keyboardShortcut) {
-        core.chrome.navControls.registerLeftBottom({
-          order: 5,
-          mount: toMountPoint(React.createElement(KeyboardShortcutIcon, { core })),
-        });
-        // Mount a trigger-less listener in the icon side nav footer so the shift+/
-        // keyboard shortcut stays active even when the nav is collapsed.
         core.chrome.navControls.registerIconSideNavFooter({
           order: 5,
           mount: toMountPoint(React.createElement(KeyboardShortcutListener, { core })),

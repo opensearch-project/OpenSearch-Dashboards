@@ -278,6 +278,17 @@ export class ExplorePlugin
         storageKey: trackerStorageKey,
         navLinkUpdater$: appStateUpdater,
         toastNotifications: core.notifications.toasts,
+        // Never persist the transient `_openSaved` command marker as the app's
+        // "last URL". Otherwise navigating away and re-opening the app via its
+        // nav link would restore a URL still carrying the marker and re-open the
+        // saved-search flyout unexpectedly. Match the EXACT query param (not a
+        // loose substring) so a saved-object title / filter value that merely
+        // contains the string "_openSaved" doesn't disable URL persistence.
+        shouldTrackUrlUpdate: (hash: string) => {
+          const qIndex = hash.indexOf('?');
+          if (qIndex === -1) return true;
+          return new URLSearchParams(hash.slice(qIndex + 1)).get('_openSaved') !== 'true';
+        },
         stateParams: [
           {
             osdUrlKey: '_g',

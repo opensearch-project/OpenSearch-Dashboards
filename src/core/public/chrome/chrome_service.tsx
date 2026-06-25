@@ -300,8 +300,12 @@ export class ChromeService {
 
     const globalSearch = this.globalSearch.start();
 
+    // Track the current app id synchronously so the nav-popover navigateToApp
+    // wrapper (below) can tell same-app from cross-app navigation.
+    let currentAppId: string | undefined;
     // erase chrome fields from a previous app while switching to a next app
-    application.currentAppId$.subscribe(() => {
+    application.currentAppId$.subscribe((appId) => {
+      currentAppId = appId;
       helpExtension$.next(undefined);
       breadcrumbs$.next([]);
       badge$.next(undefined);
@@ -320,8 +324,34 @@ export class ChromeService {
     // Services handed to a nav item's popover callbacks (actions + render) so
     // plugins can drive actions / render contextual content without re-resolving
     // core services.
+    //
+    // navigateToApp is wrapped so that after a SAME-APP navigation settles we
+    // dispatch a `hashchange`. Popover actions frequently target the app the
+    // user is already on (e.g. Alerting → Routing tab, Metrics → Query mode,
+    // Logs → open-saved marker). For a same-app navigation the router does a
+    // `history.push` that updates `window.location.hash` WITHOUT emitting a
+    // window `hashchange`, so target pages that key off `hashchange` never
+    // react — the URL changes but the tab/mode/flyout doesn't. Firing the event
+    // on the next tick (after the hash is updated) gives those pages the signal
+    // they expect.
+    //
+    // Cross-app navigations are intentionally EXCLUDED: they remount the target
+    // (no missed signal), and dispatching a global `hashchange` for them would
+    // spuriously wake every unrelated `hashchange` listener in the app on each
+    // popover click.
+    const navigateToAppWithHashSignal: InternalApplicationStart['navigateToApp'] = (
+      appId,
+      options
+    ) => {
+      const isSameApp = appId === currentAppId;
+      const result = application.navigateToApp(appId, options);
+      if (isSameApp) {
+        window.setTimeout(() => window.dispatchEvent(new HashChangeEvent('hashchange')), 0);
+      }
+      return result;
+    };
     const navPopoverServices: NavPopoverServices = {
-      navigateToApp: application.navigateToApp,
+      navigateToApp: navigateToAppWithHashSignal,
       basePath: http.basePath,
       http,
       recentlyAccessed$: recentlyAccessed.get$(),
@@ -341,6 +371,7 @@ export class ChromeService {
                 opensearchDashboardsDocLink={docLinks.links.opensearchDashboards.introduction}
                 opensearchDashboardsVersion={injectedMetadata.getOpenSearchDashboardsVersion()}
                 surveyLink={injectedMetadata.getSurvey()}
+                keyboardShortcut={keyboardShortcut}
                 useUpdatedAppearance
               />
             </I18nProvider>

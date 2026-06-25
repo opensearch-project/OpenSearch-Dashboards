@@ -75,6 +75,27 @@ export function SimplePopover({
     setIsOpen(false);
   }, [cancelClose]);
 
+  // Keyboard a11y: this is a hover popover, but a keyboard-only user must still
+  // be able to reach its actions. Open it when the trigger receives focus (Tab
+  // lands on the inner button), so the panel — and the links/actions inside it —
+  // become reachable. Closing stays mouse/Escape-driven; we deliberately do NOT
+  // close on blur, because Tab moving focus from the trigger into the portaled
+  // panel blurs the wrapper and would otherwise slam the panel shut before the
+  // user can operate it.
+  const handleFocus = useCallback(() => {
+    cancelClose();
+    setIsOpen(true);
+  }, [cancelClose]);
+
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent) => {
+      if (event.key === 'Escape' && isOpen) {
+        close();
+      }
+    },
+    [isOpen, close]
+  );
+
   // Dismiss the popover when the trigger itself is clicked (e.g. a nav icon that
   // navigates) and when any actionable element inside the panel is clicked
   // (e.g. a flyout link). Without this the popover would linger after the click
@@ -90,6 +111,8 @@ export function SimplePopover({
       })}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      onFocusCapture={handleFocus}
+      onKeyDown={handleKeyDown}
       onClickCapture={close}
     >
       {button}

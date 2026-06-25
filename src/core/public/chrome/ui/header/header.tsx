@@ -560,6 +560,7 @@ export function Header({
         opensearchDashboardsDocLink={opensearchDashboardsDocLink}
         opensearchDashboardsVersion={opensearchDashboardsVersion}
         surveyLink={survey}
+        keyboardShortcut={keyboardShortcut}
       />
     </EuiHeaderSectionItem>
   );
