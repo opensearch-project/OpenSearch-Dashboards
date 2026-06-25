@@ -25,7 +25,6 @@ import { saveStateToSavedObject } from '../../saved_explore/transforms';
 import { addToDashboard } from './utils/add_to_dashboard';
 import { saveSavedExplore } from '../../helpers/save_explore';
 import { useCurrentExploreId } from '../../application/utils/hooks/use_current_explore_id';
-import { useFlavorId } from '../../../public/helpers/use_flavor_id';
 import { useSearchContext } from '../query_panel/utils/use_search_context';
 import { ExploreServices } from '../../types';
 import { getVisualizationBuilder } from './visualization_builder';
@@ -84,7 +83,6 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
   const tabDefinition = services.tabRegistry?.getTab?.(activeTabId);
 
   const savedExploreIdFromUrl = useCurrentExploreId();
-  const flavorId = useFlavorId();
 
   const saveObjectsClient = savedObjects.client;
 
@@ -104,7 +102,8 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
 
     const savedExploreWithState = saveStateToSavedObject(
       savedExplore,
-      flavorId ?? 'logs',
+      // Don't store flavor for visualization snapshot
+      undefined,
       tabDefinition,
       {
         chartType: chartConfig?.type,
