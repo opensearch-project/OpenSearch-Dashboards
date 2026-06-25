@@ -6037,10 +6037,10 @@
   resolved "https://registry.yarnpkg.com/@types/pegjs/-/pegjs-0.10.3.tgz#9e254036c6bf2254cd98caec447a1d79b6607bff"
   integrity sha512-C/ZkUNe7HONOaDHXfNTZOUzrOvOgrWdrJj1JZ3QTEPi5gOIygcjCpXyxpdJTKVvWFzbobajRbMbQY8d0WrZ6fg==
 
-"@types/pngjs@^3.4.0":
-  version "3.4.2"
-  resolved "https://registry.yarnpkg.com/@types/pngjs/-/pngjs-3.4.2.tgz#8dc49b45fbcf18a5873179e3664f049388e39ecf"
-  integrity sha512-LJVPDraJ5YFEnMHnzxTN4psdWz1M61MtaAAWPn3qnDk5fvs7BAmmQ9pd3KPlrdrvozMyne4ktanD4pg0L7x1Pw==
+"@types/pngjs@^6.0.5":
+  version "6.0.5"
+  resolved "https://registry.yarnpkg.com/@types/pngjs/-/pngjs-6.0.5.tgz#6dec2f7eb8284543ca4e423f3c09b119fa939ea3"
+  integrity sha512-0k5eKfrA83JOZPppLtS2C7OUtyNAl2wKNxfyYl9Q5g9lPkgBl/9hNyAu6HuEH2J4XmIv2znEpkDd0SaZVxW6iQ==
   dependencies:
     "@types/node" "*"
 
@@ -17029,11 +17029,6 @@ plur@^4.0.0:
   integrity sha512-4UGewrYgqDFw9vV6zNV+ADmPAUAfJPKtGvb/VdpQAx25X5f3xXdGdyOEVFwkl8Hl/tl7+xbeHqSEM+D5/TirUg==
   dependencies:
     irregular-plurals "^3.2.0"
-
-pngjs@^3.4.0:
-  version "3.4.0"
-  resolved "https://registry.yarnpkg.com/pngjs/-/pngjs-3.4.0.tgz#99ca7d725965fb655814eaf65f38f12bbdbf555f"
-  integrity sha512-NCrCHhWmnQklfH4MtJMRjZ2a8c80qXeMlQMv2uVp9ISJMTt562SbGd6n2oq0PaPgKm7Z6pL9E2UlLIhC+SHL3w==
 
 pngjs@^6.0.0:
   version "6.0.0"
