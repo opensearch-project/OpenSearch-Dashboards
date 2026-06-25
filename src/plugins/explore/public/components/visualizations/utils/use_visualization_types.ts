@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { BehaviorSubject } from 'rxjs';
 
 import { LineChartStyle, LineChartStyleOptions } from '../line/line_vis_config';
 import { PieChartStyle, PieChartStyleOptions } from '../pie/pie_vis_config';
@@ -26,6 +27,7 @@ import {
 import { BarGaugeChartStyle, BarGaugeChartStyleOptions } from '../bar_gauge/bar_gauge_vis_config';
 import { HistogramChartStyle, HistogramChartStyleOptions } from '../histogram/histogram_vis_config';
 import { TimeRange } from '../../../../../data/public';
+import { ColorMap } from './color_map';
 
 export type ChartType =
   | 'line'
@@ -82,12 +84,15 @@ export interface StyleControlsProps<T extends ChartStyles> {
   updateVisualization: (data: UpdateVisualizationProps) => void;
 }
 
-interface VisRenderProps<T extends ChartType> {
+export interface VisRenderProps<T extends ChartType> {
   transformedData: Array<Record<string, any>>;
   styleOptions: ChartStylesMapping[T];
   axisColumnMappings: AxisColumnMappings;
   timeRange?: { from: string; to: string };
   onSelectTimeRange?: (timeRange: TimeRange) => void;
+  onLegend?: (legend: ColorMap) => void;
+  legendSelected$?: BehaviorSubject<Record<string, boolean>>;
+  highlightedSeries$?: BehaviorSubject<string | undefined>;
 }
 
 export type AxisTypeMapping = Partial<Record<AxisRole, { type: VisFieldType; multi?: boolean }>>;

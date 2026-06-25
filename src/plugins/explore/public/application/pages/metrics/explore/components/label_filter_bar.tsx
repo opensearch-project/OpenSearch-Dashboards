@@ -12,7 +12,6 @@ import {
   EuiBadge,
   EuiPopover,
   EuiSmallButtonEmpty,
-  EuiIcon,
   EuiFormRow,
   EuiSuperSelect,
 } from '@elastic/eui';
@@ -113,13 +112,13 @@ export const LabelFilterPopover: React.FC<LabelFilterPopoverProps> = ({
       button={
         <EuiSmallButtonEmpty
           onClick={() => setIsOpen((v) => !v)}
+          iconType="filter"
           aria-label={i18n.translate('explore.metricsExplore.addLabelFilterAriaLabel', {
             defaultMessage: 'Add label filter',
           })}
           data-test-subj="addLabelFilter"
         >
           {i18n.translate('explore.metricsExplore.labelFilter', { defaultMessage: 'Label' })}
-          <EuiIcon type="filter" style={{ marginLeft: 4 }} />
         </EuiSmallButtonEmpty>
       }
       anchorPosition="downLeft"
@@ -220,6 +219,7 @@ interface LabelFilterBarProps {
 }
 
 export const LabelFilterBar: React.FC<LabelFilterBarProps> = ({ metric, client, onAdd }) => {
+  const { refreshCounter } = useExploration();
   const [labelNames, setLabelNames] = useState<string[]>([]);
   const [valueOptions, setValueOptions] = useState<Record<string, EuiComboBoxOptionOption[]>>({});
   const [activeName, setActiveName] = useState('');
@@ -238,10 +238,11 @@ export const LabelFilterBar: React.FC<LabelFilterBarProps> = ({ metric, client, 
           console.debug('Failed to fetch labels', e);
         }
       });
+    setValueOptions({});
     return () => {
       cancelled = true;
     };
-  }, [client, metric]);
+  }, [client, metric, refreshCounter]);
 
   const valueOptionsRef = useRef(valueOptions);
   valueOptionsRef.current = valueOptions;

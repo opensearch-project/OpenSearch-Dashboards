@@ -53,7 +53,7 @@ export function explorationReducer(state: ExplorationState, action: Action): Exp
       return {
         ...state,
         filters: state.filters.map((f, i) =>
-          i === action.index ? { ...f, enabled: f.enabled === false ? true : false } : f
+          i === action.index ? { ...f, enabled: f.enabled !== false ? false : true } : f
         ),
       };
     case 'CLEAR_FILTERS':

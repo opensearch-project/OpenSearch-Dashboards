@@ -181,6 +181,7 @@ export const buildCompletionItems = async (
     isPromptModeRef: React.MutableRefObject<boolean>;
     queryLanguage: string;
     services: ExploreServices;
+    variableNames?: string[];
   }
 ): Promise<monaco.languages.CompletionList> => {
   const {
@@ -191,6 +192,47 @@ export const buildCompletionItems = async (
     return { suggestions: [], incomplete: false };
   }
   try {
+    // Check for variable suggestions FIRST, before any context processing
+    // Variables should work across the entire editor, not just within a single query
+    const monacoSuggestions: monaco.languages.CompletionItem[] = [];
+
+    if (params.variableNames && params.variableNames.length > 0) {
+      const fullText = model.getValue();
+      const offset = model.getOffsetAt(position);
+      const textBeforeCursor = fullText.substring(0, offset);
+      const dollarMatch = textBeforeCursor.match(/\$\{?(\w*)$/);
+
+      if (dollarMatch) {
+        const fullPrefix = dollarMatch[0];
+        const varRange = new monaco.Range(
+          position.lineNumber,
+          position.column - fullPrefix.length,
+          position.lineNumber,
+          position.column
+        );
+
+        params.variableNames.forEach((name: string) => {
+          monacoSuggestions.push({
+            label: `\${${name}}`,
+            kind: monaco.languages.CompletionItemKind.Variable,
+            insertText: `\${${name}}`,
+            insertTextRules: undefined,
+            range: varRange,
+            detail: 'Dashboard variable',
+            sortText: `!${name}`,
+            documentation: {
+              value: `Reference variable **${name}** — will be replaced at query time`,
+              isTrusted: true,
+            },
+            command: {
+              id: 'editor.action.triggerSuggest',
+              title: 'Trigger Next Suggestion',
+            },
+          });
+        });
+      }
+    }
+
     // Get the effective language for autocomplete (PPL -> PPL_Simplified for explore app)
     const effectiveLanguage = getEffectiveLanguageForAutoComplete(
       params.isPromptModeRef.current ? 'AI' : params.queryLanguage,
@@ -237,25 +279,28 @@ export const buildCompletionItems = async (
 
     const filteredSuggestions = suggestions?.filter((s) => 'detail' in s) || [];
 
-    const monacoSuggestions = filteredSuggestions.map((s: any) => ({
-      label: s.text,
-      kind: s.type as monaco.languages.CompletionItemKind,
-      insertText: s.insertText ?? s.text,
-      insertTextRules: s.insertTextRules ?? undefined,
-      range: defaultRange,
-      detail: s.detail,
-      sortText: s.sortText,
-      documentation: s.documentation
-        ? {
-            value: s.documentation,
-            isTrusted: true,
-          }
-        : '',
-      command: {
-        id: 'editor.action.triggerSuggest',
-        title: 'Trigger Next Suggestion',
-      },
-    }));
+    // Add query suggestions to the list (variables were already added above)
+    filteredSuggestions.forEach((s: any) => {
+      monacoSuggestions.push({
+        label: s.text,
+        kind: s.type as monaco.languages.CompletionItemKind,
+        insertText: s.insertText ?? s.text,
+        insertTextRules: s.insertTextRules ?? undefined,
+        range: defaultRange,
+        detail: s.detail,
+        sortText: s.sortText,
+        documentation: s.documentation
+          ? {
+              value: s.documentation,
+              isTrusted: true,
+            }
+          : '',
+        command: {
+          id: 'editor.action.triggerSuggest',
+          title: 'Trigger Next Suggestion',
+        },
+      });
+    });
 
     return {
       suggestions: monacoSuggestions,

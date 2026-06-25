@@ -3,7 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { ComponentType, SVGAttributes } from 'react';
 import { BehaviorSubject, combineLatest, Observable, of, ReplaySubject, Subscription } from 'rxjs';
+import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import {
   AppCategory,
   ApplicationStart,
@@ -47,6 +49,25 @@ export interface ChromeRegistrationNavLink {
    * use addNavLinksToGroup to keep the interfaces consistent.
    */
   showInAllNavGroup?: boolean;
+
+  /**
+   * Icon type to display next to the nav link in the side navigation.
+   * Can be a built-in EUI icon name, a URL to a custom SVG, or a React SVG component
+   * (recommended for custom SVGs that should respect the current text color).
+   */
+  euiIconType?: EuiIconType | string | ComponentType<SVGAttributes<SVGElement>>;
+
+  /**
+   * Observable that emits badge values (counts, labels) to display on the nav link.
+   */
+  badge$?: Observable<number | string | undefined>;
+
+  /**
+   * When true, a visual separator/spacing is added before this nav link in the
+   * icon side navigation to distinguish it from the preceding items. Plugins
+   * can use this to create visual clusters without introducing categories.
+   */
+  startCluster?: boolean;
 }
 
 export type NavGroupItemInMap = ChromeNavGroup & {
@@ -432,7 +453,13 @@ export class ChromeNavGroupService {
             setCurrentNavGroup(navGroupId);
           }
         } else if (!navGroups) {
-          setCurrentNavGroup(undefined);
+          // Inside a workspace (single visible use case), default to that use case
+          // even if the current app isn't explicitly registered in its navLinks.
+          if (visibleUseCases.length === 1 && workspaces.currentWorkspace$.getValue()) {
+            setCurrentNavGroup(visibleUseCases[0].id);
+          } else {
+            setCurrentNavGroup(undefined);
+          }
         }
       }
     });

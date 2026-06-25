@@ -12,7 +12,6 @@ import { AxisRole } from '../types';
 import { ThresholdPanel } from '../style_panel/threshold/threshold_panel';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { StyleAccordion } from '../style_panel/style_accordion';
-import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
 import { DebouncedFieldText } from '../style_panel/utils';
 import { ValueCalculationSelector } from '../style_panel/value/value_calculation_selector';
 import { StandardOptionsPanel } from '../style_panel/standard_options/standard_options_panel';
@@ -41,16 +40,6 @@ export const GaugeVisStyleControls: React.FC<GaugeVisStyleControlsProps> = ({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
-      <EuiFlexItem grow={false}>
-        <AxesSelectPanel
-          numericalColumns={numericalColumns}
-          categoricalColumns={categoricalColumns}
-          dateColumns={dateColumns}
-          currentMapping={axisColumnMappings}
-          updateVisualization={updateVisualization}
-          chartType="gauge"
-        />
-      </EuiFlexItem>
       {hasMappingSelected && (
         <>
           <EuiFlexItem grow={false}>
@@ -89,7 +78,9 @@ export const GaugeVisStyleControls: React.FC<GaugeVisStyleControlsProps> = ({
               {styleOptions.showTitle && (
                 <EuiFormRow>
                   <DebouncedFieldText
-                    value={styleOptions.title || axisColumnMappings[AxisRole.Value]?.name || ''}
+                    value={
+                      styleOptions.title || axisColumnMappings[AxisRole.Value]?.[0]?.name || ''
+                    }
                     placeholder={i18n.translate('explore.vis.gauge.title', {
                       defaultMessage: 'Title',
                     })}

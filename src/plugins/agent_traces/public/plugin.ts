@@ -26,7 +26,13 @@ import {
   createOsdUrlTracker,
   withNotifyOnErrors,
 } from '../../opensearch_dashboards_utils/public';
-import { AgentTracesFlavor, PLUGIN_ID, PLUGIN_NAME } from '../common';
+import {
+  AgentTracesFlavor,
+  PLUGIN_ID,
+  PLUGIN_NAME,
+  AGENT_TRACES_NAV_ID,
+  AGENT_SPANS_NAV_ID,
+} from '../common';
 import {
   setDocViewsRegistry,
   setServices as setLegacyServices,
@@ -55,6 +61,8 @@ import { createAbortDataQueryAction } from './application/utils/state_management
 import { ABORT_DATA_QUERY_TRIGGER } from '../../ui_actions/public';
 import { abortAllActiveQueries } from './application/utils/state_management/actions/query_actions';
 import { setServices } from './services/services';
+import { AgentTracesIcon } from './assets/agent_traces_icon';
+import { AgentSpansIcon } from './assets/agent_spans_icon';
 import { SlotRegistryService } from './services/slot_registry';
 
 // Log Actions
@@ -70,15 +78,11 @@ export class AgentTracesPlugin
       AgentTracesSetupDependencies,
       AgentTracesStartDependencies
     > {
-  private stateUpdaterByApp: Partial<
-    Record<AgentTracesFlavor | 'agentTraces', BehaviorSubject<AppUpdater>>
-  > = {
+  private stateUpdaterByApp: Record<string, BehaviorSubject<AppUpdater>> = {
     agentTraces: new BehaviorSubject<AppUpdater>(() => ({})),
   };
 
-  private stopUrlTrackingCallbackByApp: Partial<
-    Record<AgentTracesFlavor | 'agentTraces', () => void>
-  > = {};
+  private stopUrlTrackingCallbackByApp: Record<string, () => void> = {};
   private currentHistory?: ScopedHistory;
 
   /** discover */
@@ -147,33 +151,47 @@ export class AgentTracesPlugin
       component: JsonCodeBlock,
     });
     const createAgentTracesApp = (options: Partial<App> = {}): App => {
-      const appStateUpdater = this.stateUpdaterByApp.agentTraces as BehaviorSubject<AppUpdater>;
+      const appId = options.id ?? PLUGIN_ID;
+      if (!this.stateUpdaterByApp[appId]) {
+        this.stateUpdaterByApp[appId] = new BehaviorSubject<AppUpdater>(() => ({}));
+      }
+      const appStateUpdater = this.stateUpdaterByApp[appId];
 
-      const { appMounted, appUnMounted, stop: stopUrlTracker } = createOsdUrlTracker({
-        baseUrl: core.http.basePath.prepend(`/app/${PLUGIN_ID}`),
-        defaultSubUrl: '#/',
-        storageKey: `lastUrl:${core.http.basePath.get()}:${PLUGIN_ID}`,
-        navLinkUpdater$: appStateUpdater,
-        toastNotifications: core.notifications.toasts,
-        stateParams: [
-          {
-            osdUrlKey: '_g',
-            stateUpdate$: setupDeps.data.query.state$.pipe(
-              filter(
-                (value: Record<string, unknown>) =>
-                  !!((value.changes as any)?.time || (value.changes as any)?.refreshInterval)
+      // Only the base app tracks its URL. The sub-app entry points (traces/spans)
+      // are pinned shortcuts — their defaultPath must never be overridden by a
+      // tracker restoring a previous URL, otherwise the active tab gets stuck.
+      const isBaseApp = appId === PLUGIN_ID;
+      let appMounted: () => void = () => {};
+      let appUnMounted: () => void = () => {};
+      if (isBaseApp) {
+        const tracker = createOsdUrlTracker({
+          baseUrl: core.http.basePath.prepend(`/app/${appId}`),
+          defaultSubUrl: '#/',
+          storageKey: `lastUrl:${core.http.basePath.get()}:${appId}`,
+          navLinkUpdater$: appStateUpdater,
+          toastNotifications: core.notifications.toasts,
+          stateParams: [
+            {
+              osdUrlKey: '_g',
+              stateUpdate$: setupDeps.data.query.state$.pipe(
+                filter(
+                  (value: Record<string, unknown>) =>
+                    !!((value.changes as any)?.time || (value.changes as any)?.refreshInterval)
+                ),
+                map((value: Record<string, unknown>) => ({
+                  ...(value.state as Record<string, unknown>),
+                }))
               ),
-              map((value: Record<string, unknown>) => ({
-                ...(value.state as Record<string, unknown>),
-              }))
-            ),
+            },
+          ],
+          getHistory: () => {
+            return this.currentHistory!;
           },
-        ],
-        getHistory: () => {
-          return this.currentHistory!;
-        },
-      });
-      this.stopUrlTrackingCallbackByApp.agentTraces = stopUrlTracker;
+        });
+        appMounted = tracker.appMounted;
+        appUnMounted = tracker.appUnMounted;
+        this.stopUrlTrackingCallbackByApp[appId] = tracker.stop;
+      }
 
       return {
         id: PLUGIN_ID,
@@ -271,20 +289,62 @@ export class AgentTracesPlugin
       };
     };
 
-    // Register single Agent Traces application
+    const isIconSideNav = core.chrome.getIsIconSideNavEnabled();
+
+    if (isIconSideNav) {
+      // Register sub-apps BEFORE the base app. parseAppUrl matches the first
+      // registered app whose id is a URL prefix; if we register the base
+      // first, `/app/agentTraces/traces` would match `agentTraces` instead of
+      // the `agentTraces/traces` sub-app.
+      core.application.register(
+        createAgentTracesApp({
+          id: AGENT_TRACES_NAV_ID,
+          title: 'Agent Traces',
+          defaultPath: '#/?_a=(ui:(activeTabId:traces,showHistogram:!t))',
+        })
+      );
+      core.application.register(
+        createAgentTracesApp({
+          id: AGENT_SPANS_NAV_ID,
+          title: 'Agent Spans',
+          defaultPath: '#/?_a=(ui:(activeTabId:spans,showHistogram:!t))',
+        })
+      );
+
+      core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
+        {
+          id: AGENT_TRACES_NAV_ID,
+          title: 'Traces',
+          category: DEFAULT_APP_CATEGORIES.agentMonitoring,
+          order: 100,
+          euiIconType: AgentTracesIcon,
+        },
+        {
+          id: AGENT_SPANS_NAV_ID,
+          title: 'Spans',
+          category: DEFAULT_APP_CATEGORIES.agentMonitoring,
+          order: 200,
+          euiIconType: AgentSpansIcon,
+        },
+      ]);
+    }
+
+    // Register the base Agent Traces application AFTER any sub-apps so
+    // parseAppUrl matches `/app/agentTraces/traces` to the sub-app first.
     core.application.register(createAgentTracesApp());
 
-    // Register nav links for observability and analytics workspaces
-    const navLinks = [
-      {
-        id: PLUGIN_ID,
-        category: undefined,
-        order: 300,
-      },
-    ];
-
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, navLinks);
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, navLinks);
+    if (!isIconSideNav) {
+      const navLinks = [
+        {
+          id: PLUGIN_ID,
+          category: undefined,
+          order: 300,
+          euiIconType: 'uptimeApp' as const,
+        },
+      ];
+      core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, navLinks);
+      core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, navLinks);
+    }
     this.registerEmbeddable(core, setupDeps);
 
     return {
@@ -310,18 +370,21 @@ export class AgentTracesPlugin
 
     // Update Agent Traces nav link visibility based on dynamic capabilities
     const capabilities = core.application.capabilities;
-    if (this.stateUpdaterByApp.agentTraces) {
-      this.stateUpdaterByApp.agentTraces.next((app) => {
-        if (app.id === PLUGIN_ID) {
-          return {
-            navLinkStatus: capabilities.agentTraces?.agentTracesEnabled
-              ? AppNavLinkStatus.visible
-              : AppNavLinkStatus.hidden,
-          };
+    const agentTracesNavStatus = capabilities.agentTraces?.agentTracesEnabled
+      ? AppNavLinkStatus.visible
+      : AppNavLinkStatus.hidden;
+    Object.values(this.stateUpdaterByApp).forEach((updater) => {
+      updater.next((app) => {
+        if (
+          app.id === PLUGIN_ID ||
+          app.id === AGENT_TRACES_NAV_ID ||
+          app.id === AGENT_SPANS_NAV_ID
+        ) {
+          return { navLinkStatus: agentTracesNavStatus };
         }
         return {};
       });
-    }
+    });
 
     this.initializeServices = () => {
       if (this.servicesInitialized) {

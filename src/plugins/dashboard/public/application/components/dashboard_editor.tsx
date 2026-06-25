@@ -82,7 +82,6 @@ export const DashboardEditor = () => {
     execute: handleFullScreen,
   });
 
-  const variableEnabled = localStorage.getItem('__DEVELOPMENT__.dashboard.variable.enabled');
   const [isExploreWorkspace, setIsExploreWorkspace] = useState(false);
   useEffect(() => {
     workspaces.currentWorkspace$
@@ -91,9 +90,7 @@ export const DashboardEditor = () => {
       .then((ws) => {
         const features = ws?.features;
         setIsExploreWorkspace(
-          (features &&
-            (isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.observability.id, features) ||
-              isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.all.id, features))) ??
+          (features && isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.observability.id, features)) ??
             false
         );
       });
@@ -114,14 +111,26 @@ export const DashboardEditor = () => {
               indexPatterns={indexPatterns}
               currentContainer={currentContainer}
               dashboardIdFromUrl={dashboardIdFromUrl}
+              eventEmitter={eventEmitter}
             />
             {/* Variables are only available in explore-enabled workspaces (observability / analytics) */}
-            {variableEnabled && isExploreWorkspace && currentContainer.variableService && (
+            {isExploreWorkspace && currentContainer.variableService && (
               <DashboardVariables
                 variableService={currentContainer.variableService}
                 interpolationService={currentContainer.variableInterpolationService}
                 isEditMode={currentAppState?.viewMode === ViewMode.EDIT}
                 getPanelQueries={() => currentContainer.getPanelQueries()}
+                dashboardId={savedDashboardInstance?.id}
+                onSaveDashboard={() => {
+                  // Emit event to trigger dashboard save
+                  eventEmitter.emit('triggerDashboardSave');
+                }}
+                onEnterEditMode={() => {
+                  // Switch to edit mode
+                  if (appState) {
+                    appState.transitions.set('viewMode', ViewMode.EDIT);
+                  }
+                }}
               />
             )}
           </>

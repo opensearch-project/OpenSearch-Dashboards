@@ -12,9 +12,7 @@ import {
   EuiSpacer,
   EuiButton,
   EuiTitle,
-  EuiEmptyPrompt,
-  EuiText,
-  EuiButtonEmpty,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import {
@@ -24,11 +22,13 @@ import {
   SEARCH_DEBOUNCE_MS,
   LayoutMode,
   breakdownGridStyle,
+  inferMetricType,
 } from '../types';
 import { useExploration } from '../contexts/exploration_context';
 import { MetricCard } from './metric_card';
 import { LabelFilterBadges, LabelFilterPopover } from './label_filter_bar';
 import { LoadingIndicator, ErrorCallout } from './loading_state';
+import { MetricsEmptyState } from './metrics_empty_state';
 import { useConcurrentQueries } from '../hooks/use_concurrent_queries';
 
 const PAGE_SIZE = 20;
@@ -55,15 +55,12 @@ function useSparklines(
     [client, queryGen, stepSec, filters]
   );
 
-  const { results, onVisibilityChange } = useConcurrentQueries<Array<[number, string]>>(fetchFn, [
-    client,
-    filters,
-    refreshCounter,
-    metadata,
-    stepSec,
-  ]);
+  const { results, errors, onVisibilityChange } = useConcurrentQueries<Array<[number, string]>>(
+    fetchFn,
+    [client, filters, refreshCounter, metadata, stepSec]
+  );
 
-  return { sparklines: results as SparklineMap, onVisibilityChange };
+  return { sparklines: results as SparklineMap, sparklineErrors: errors, onVisibilityChange };
 }
 
 export const MetricBrowser: React.FC = () => {
@@ -101,7 +98,8 @@ export const MetricBrowser: React.FC = () => {
         }
         setLabelNames(['job', 'instance']);
       });
-  }, [client]);
+    setLabelValues({});
+  }, [client, refreshCounter]);
 
   useEffect(() => {
     timerRef.current = setTimeout(() => setDebouncedSearch(state.search), SEARCH_DEBOUNCE_MS);
@@ -126,6 +124,7 @@ export const MetricBrowser: React.FC = () => {
   }, [client, refreshCounter]);
 
   // Fetch all metadata in a single bulk call when the client changes (datasource switch)
+  // or the time range updates — Prometheus scopes metadata to start/end.
   useEffect(() => {
     let cancelled = false;
     client
@@ -142,7 +141,7 @@ export const MetricBrowser: React.FC = () => {
     return () => {
       cancelled = true;
     };
-  }, [client]);
+  }, [client, refreshCounter]);
 
   // Backend search when debounced search term changes
   useEffect(() => {
@@ -186,7 +185,7 @@ export const MetricBrowser: React.FC = () => {
     return groups;
   }, [displayedMetrics, state.grouping]);
 
-  const { sparklines, onVisibilityChange } = useSparklines(
+  const { sparklines, sparklineErrors, onVisibilityChange } = useSparklines(
     metadata,
     client,
     queryGen,
@@ -211,6 +210,21 @@ export const MetricBrowser: React.FC = () => {
     });
   }, []);
 
+  if (!client.dataConnectionId) {
+    return (
+      <MetricsEmptyState
+        iconType="database"
+        title={i18n.translate('explore.metricsExplore.noDatasourceTitle', {
+          defaultMessage: 'Select a Prometheus data source',
+        })}
+        body={i18n.translate('explore.metricsExplore.noDatasourceBody', {
+          defaultMessage:
+            'Choose a Prometheus data source from the selector above to start exploring metrics.',
+        })}
+      />
+    );
+  }
+
   if (loading) {
     return <LoadingIndicator />;
   }
@@ -221,30 +235,14 @@ export const MetricBrowser: React.FC = () => {
 
   if (!allMetrics.length) {
     return (
-      <EuiEmptyPrompt
-        iconType="metricsApp"
-        title={
-          <h2>
-            {i18n.translate('explore.metricsExplore.emptyTitle', {
-              defaultMessage: 'Explore Your Metrics',
-            })}
-          </h2>
-        }
-        body={
-          <EuiText>
-            <p>
-              {i18n.translate('explore.metricsExplore.emptyBody', {
-                defaultMessage:
-                  'Browse, search, and drill into Prometheus metrics without writing PromQL.',
-              })}
-            </p>
-            <p>
-              {i18n.translate('explore.metricsExplore.noMetricsFound', {
-                defaultMessage: 'No metrics found. Ensure a Prometheus data source is configured.',
-              })}
-            </p>
-          </EuiText>
-        }
+      <MetricsEmptyState
+        title={i18n.translate('explore.metricsExplore.emptyTitle', {
+          defaultMessage: 'No metrics found',
+        })}
+        body={i18n.translate('explore.metricsExplore.emptyBody', {
+          defaultMessage:
+            'The selected Prometheus data source returned no metrics for the current time range. Try adjusting the time range or verify the data source is scraping targets.',
+        })}
       />
     );
   }
@@ -337,36 +335,39 @@ export const MetricBrowser: React.FC = () => {
             buttonSize="compressed"
           />
         </EuiFlexItem>
-        {selected.size > 0 && (
-          <>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                onClick={() => {
-                  const queries = Array.from(selected).map((selName) => {
-                    const type = metadata[selName]?.type || MetricType.GAUGE;
-                    return queryGen.forMetric(selName, type, stepSec, state.filters);
-                  });
-                  const multiQuery = queries.map((q) => `${q};`).join('\n');
-                  executePromQL(multiQuery);
-                }}
-                iconType="play"
-                size="s"
-              >
-                {i18n.translate('explore.metricsExplore.executeSelected', {
-                  defaultMessage: 'Run Visualization Query',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={() => setSelected(new Set())} size="s">
-                {i18n.translate('explore.metricsExplore.clearSelection', {
-                  defaultMessage: 'Clear',
-                })}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </>
-        )}
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            content={
+              selected.size === 0
+                ? i18n.translate('explore.metricsExplore.selectMetricsTooltip', {
+                    defaultMessage: 'Select one or more metrics to query',
+                  })
+                : undefined
+            }
+          >
+            <EuiButton
+              fill
+              onClick={() => {
+                const queries = Array.from(selected).map((selName) => {
+                  const type = inferMetricType(
+                    selName,
+                    metadata[selName]?.type || MetricType.UNKNOWN
+                  );
+                  return queryGen.forMetric(selName, type, stepSec, state.filters);
+                });
+                const multiQuery = queries.map((q) => `${q};`).join('\n');
+                executePromQL(multiQuery);
+              }}
+              iconType="play"
+              size="s"
+              isDisabled={selected.size === 0}
+            >
+              {i18n.translate('explore.metricsExplore.executeSelected', {
+                defaultMessage: 'Query Metrics',
+              })}
+            </EuiButton>
+          </EuiToolTip>
+        </EuiFlexItem>
       </EuiFlexGroup>
 
       <LabelFilterBadges />
@@ -389,6 +390,7 @@ export const MetricBrowser: React.FC = () => {
                   name={m}
                   metadata={metadata[m]}
                   sparkline={sparklines.get(m) ?? null}
+                  sparklineError={sparklineErrors.get(m) ?? null}
                   isSelected={selected.has(m)}
                   colorIndex={mi}
                   onToggleSelect={() => toggleSelection(m)}

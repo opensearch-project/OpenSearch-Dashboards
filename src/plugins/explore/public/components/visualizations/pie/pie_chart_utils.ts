@@ -6,6 +6,7 @@
 import { PieSeriesOption } from 'echarts';
 import { PieChartStyle } from './pie_vis_config';
 import { BaseChartStyle, PipelineFn, EChartsSpecState } from '../utils/echarts_spec';
+import { getColors } from '../theme/default_colors';
 
 export const createPieSeries = <T extends BaseChartStyle>({
   styles,
@@ -17,6 +18,23 @@ export const createPieSeries = <T extends BaseChartStyle>({
   valueField: string;
 }): PipelineFn<T> => (state: EChartsSpecState<T>) => {
   const radius = styles?.exclusive.donut ? ['50%', '70%'] : '70%';
+  const palette = getColors().categories;
+  const data: PieSeriesOption['data'] = [];
+  if (state.transformedData) {
+    const sortedNames = state.transformedData.map((d) => String(d[cateField])).sort();
+    state.transformedData.forEach((d) => {
+      const value = d[valueField];
+      const name = d[cateField];
+      const colorIndex = sortedNames.indexOf(String(name));
+      data.push({
+        name,
+        value,
+        itemStyle: {
+          color: palette[colorIndex % palette.length],
+        },
+      });
+    });
+  }
 
   let formatter = '{b}';
   if (styles?.exclusive?.showValues && styles?.exclusive?.showLabels) {
@@ -32,10 +50,7 @@ export const createPieSeries = <T extends BaseChartStyle>({
       type: 'pie',
       radius,
       avoidLabelOverlap: true,
-      encode: {
-        itemName: cateField,
-        value: valueField,
-      },
+      data,
       labelLine: {
         show: true,
       },

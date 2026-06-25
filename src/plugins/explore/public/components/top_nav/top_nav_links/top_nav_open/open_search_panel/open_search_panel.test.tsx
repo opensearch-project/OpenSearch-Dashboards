@@ -46,28 +46,42 @@ jest.mock('../../../../../../../opensearch_dashboards_react/public', () => ({
   })),
 }));
 
-// Mock SavedObjectFinderUi
+// Mock SavedObjectFinderUi and capture props
+let capturedSavedObjectMetaData: any;
 jest.mock('../../../../../../../saved_objects/public', () => ({
-  SavedObjectFinderUi: ({ onChoose }: any) => (
-    <div data-test-subj="savedObjectFinder">
-      <button
-        onClick={() => onChoose('test-search-id', 'search', null, { attributes: {} })}
-        data-test-subj="choose-search"
-      >
-        Choose Search
-      </button>
-      <button
-        onClick={() =>
-          onChoose('test-explore-id', 'explore', null, {
-            attributes: { type: 'logs' },
-          })
-        }
-        data-test-subj="choose-explore"
-      >
-        Choose Explore
-      </button>
-    </div>
-  ),
+  SavedObjectFinderUi: ({ onChoose, savedObjectMetaData }: any) => {
+    capturedSavedObjectMetaData = savedObjectMetaData;
+    return (
+      <div data-test-subj="savedObjectFinder">
+        <button
+          onClick={() => onChoose('test-search-id', 'search', null, { attributes: {} })}
+          data-test-subj="choose-search"
+        >
+          Choose Search
+        </button>
+        <button
+          onClick={() =>
+            onChoose('test-explore-id', 'explore', null, {
+              attributes: { type: 'logs' },
+            })
+          }
+          data-test-subj="choose-explore"
+        >
+          Choose Explore
+        </button>
+        <button
+          onClick={() =>
+            onChoose('test-explore-no-type', 'explore', null, {
+              attributes: {},
+            })
+          }
+          data-test-subj="choose-explore-no-type"
+        >
+          Choose Explore (No Type)
+        </button>
+      </div>
+    );
+  },
 }));
 
 describe('OpenSearchPanel', () => {
@@ -117,5 +131,71 @@ describe('OpenSearchPanel', () => {
 
     fireEvent.click(screen.getByText('Manage searches'));
     expect(mockOnClose).toHaveBeenCalled();
+  });
+
+  describe('savedObjectMetadata filtering', () => {
+    it('includes showSavedObject filter for explore type', () => {
+      render(<OpenSearchPanel onClose={mockOnClose} />);
+
+      expect(capturedSavedObjectMetaData).toBeDefined();
+      expect(capturedSavedObjectMetaData).toHaveLength(2);
+
+      const exploreMetadata = capturedSavedObjectMetaData.find(
+        (meta: any) => meta.type === 'explore'
+      );
+      expect(exploreMetadata).toBeDefined();
+      expect(exploreMetadata.showSavedObject).toBeDefined();
+      expect(typeof exploreMetadata.showSavedObject).toBe('function');
+    });
+
+    it('showSavedObject returns true for explore with type attribute', () => {
+      render(<OpenSearchPanel onClose={mockOnClose} />);
+
+      const exploreMetadata = capturedSavedObjectMetaData.find(
+        (meta: any) => meta.type === 'explore'
+      );
+
+      const savedObjectWithType = {
+        attributes: { type: 'logs' },
+      } as any;
+
+      expect(exploreMetadata.showSavedObject(savedObjectWithType)).toBe(true);
+    });
+
+    it('showSavedObject returns false for explore without type attribute', () => {
+      render(<OpenSearchPanel onClose={mockOnClose} />);
+
+      const exploreMetadata = capturedSavedObjectMetaData.find(
+        (meta: any) => meta.type === 'explore'
+      );
+
+      const savedObjectWithoutType = {
+        attributes: {},
+      } as any;
+
+      expect(exploreMetadata.showSavedObject(savedObjectWithoutType)).toBe(false);
+    });
+
+    it('showSavedObject returns false for explore with undefined attributes', () => {
+      render(<OpenSearchPanel onClose={mockOnClose} />);
+
+      const exploreMetadata = capturedSavedObjectMetaData.find(
+        (meta: any) => meta.type === 'explore'
+      );
+
+      const savedObjectWithoutAttributes = {} as any;
+
+      expect(exploreMetadata.showSavedObject(savedObjectWithoutAttributes)).toBe(false);
+    });
+
+    it('search type does not have showSavedObject filter', () => {
+      render(<OpenSearchPanel onClose={mockOnClose} />);
+
+      const searchMetadata = capturedSavedObjectMetaData.find(
+        (meta: any) => meta.type === 'search'
+      );
+      expect(searchMetadata).toBeDefined();
+      expect(searchMetadata.showSavedObject).toBeUndefined();
+    });
   });
 });

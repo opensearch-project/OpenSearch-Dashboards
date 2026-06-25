@@ -6,13 +6,13 @@
 import { renderHook } from '@testing-library/react';
 import { useInitialSaveExplore } from './use_initial_save_explore';
 import { useSavedExplore } from '../../../application/utils/hooks/use_saved_explore';
-import { useCurrentExploreId } from './use_explore_id';
+import { useCurrentExploreId } from '../../../application/utils/hooks/use_current_explore_id';
 
 jest.mock('../query_builder/query_builder', () => ({}));
 jest.mock('../../../application/utils/hooks/use_saved_explore', () => ({
   useSavedExplore: jest.fn(),
 }));
-jest.mock('./use_explore_id', () => ({
+jest.mock('../../../application/utils/hooks/use_current_explore_id', () => ({
   useCurrentExploreId: jest.fn(),
 }));
 

@@ -3,7 +3,42 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// Metrics page: allow full page scrolling instead of internal scroll regions
 .metricsPage {
-  overflow-x: hidden;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - #{$euiHeaderHeightCompensation});
+
+  // Break out of the fixed viewport height constraint from explore-layout
+  .explore-layout {
+    height: auto;
+    flex: 1;
+  }
+
+  // Break out of the fixed height and internal scroll from dscCanvas
+  .dscCanvas {
+    height: auto;
+    overflow: visible;
+  }
+
+  // Let tab containers expand naturally within page scroll
+  .tab-container {
+    height: auto;
+  }
+
+  // Fix raw table clipping - let it expand to natural height within page scroll
+  .metricsRawTable {
+    height: auto;
+    overflow: visible;
+
+    .metricsRawTable__tableContainer {
+      flex: none;
+      overflow: visible;
+    }
+  }
+
+  // Query panel should not stretch - only bottom container should grow
+  .exploreQueryPanel.exploreQueryPanel {
+    flex: none;
+  }
 }

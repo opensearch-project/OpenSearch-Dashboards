@@ -230,6 +230,28 @@ describe('MetricsRawTable', () => {
     expect(screen.getByText('20.3')).toBeInTheDocument();
   });
 
+  describe('truncation warning', () => {
+    it('shows warning when table data is truncated', () => {
+      const truncatedResult: IPrometheusSearchResult = {
+        ...mockSearchResult,
+        truncation: {
+          tableTruncated: true,
+          totalSeriesCount: 3000,
+          displayedSeriesCount: 2000,
+        },
+      };
+
+      render(<MetricsRawTable searchResult={truncatedResult} />);
+      expect(screen.getByTestId('metricsRawTableTruncationWarning')).toBeInTheDocument();
+      expect(screen.getByText(/2,000 of 3,000/)).toBeInTheDocument();
+    });
+
+    it('does not show warning when data is not truncated', () => {
+      render(<MetricsRawTable searchResult={mockSearchResult} />);
+      expect(screen.queryByTestId('metricsRawTableTruncationWarning')).not.toBeInTheDocument();
+    });
+  });
+
   describe('sorting', () => {
     const sortableSearchResult: IPrometheusSearchResult = {
       ...mockSearchResult,

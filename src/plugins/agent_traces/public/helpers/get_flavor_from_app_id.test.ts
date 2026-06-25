@@ -5,84 +5,89 @@
 
 import { of } from 'rxjs';
 import { getFlavorFromAppId, getCurrentAppId, getCurrentFlavor } from './get_flavor_from_app_id';
-import { AgentTracesFlavor } from '../../common';
+import {
+  AgentTracesFlavor,
+  PLUGIN_ID,
+  AGENT_TRACES_NAV_ID,
+  AGENT_SPANS_NAV_ID,
+} from '../../common';
 import { AgentTracesServices } from '../types';
 
-const createMockServices = (): AgentTracesServices =>
+const createMockServices = (appId: string = PLUGIN_ID): AgentTracesServices =>
   ({
     core: {
       application: {
-        currentAppId$: of('agentTraces/discover'),
+        currentAppId$: of(appId),
       },
     },
   } as AgentTracesServices);
 
 describe('getFlavorFromAppId', () => {
-  it('should extract flavor from valid app ID', () => {
-    expect(getFlavorFromAppId('agentTraces/discover')).toBe('discover');
-    expect(getFlavorFromAppId('agentTraces/visualize')).toBe('visualize');
-    expect(getFlavorFromAppId('agentTraces/dashboards')).toBe('dashboards');
+  it('returns Traces for the base plugin ID', () => {
+    expect(getFlavorFromAppId(PLUGIN_ID)).toBe(AgentTracesFlavor.Traces);
   });
 
-  it('should return null for invalid app ID formats', () => {
-    expect(getFlavorFromAppId('invalid')).toBeNull();
-    expect(getFlavorFromAppId('agentTraces')).toBe(AgentTracesFlavor.Traces);
-    expect(getFlavorFromAppId('other/flavor')).toBe('flavor');
+  it('returns Traces for the agent traces nav ID', () => {
+    expect(getFlavorFromAppId(AGENT_TRACES_NAV_ID)).toBe(AgentTracesFlavor.Traces);
   });
 
-  it('should return null for empty or undefined inputs', () => {
+  it('returns Traces for the agent spans nav ID', () => {
+    expect(getFlavorFromAppId(AGENT_SPANS_NAV_ID)).toBe(AgentTracesFlavor.Traces);
+  });
+
+  it('extracts flavor from slash-separated app ID', () => {
+    expect(getFlavorFromAppId('agentTraces/traces')).toBe(AgentTracesFlavor.Traces);
+  });
+
+  it('returns null for undefined', () => {
     expect(getFlavorFromAppId(undefined)).toBeNull();
+  });
+
+  it('returns null for empty string', () => {
     expect(getFlavorFromAppId('')).toBeNull();
   });
 
-  it('should handle edge cases', () => {
+  it('returns null for unrecognized app ID without slash', () => {
+    expect(getFlavorFromAppId('someOtherPlugin')).toBeNull();
+  });
+
+  it('extracts flavor substring for unknown slash app IDs', () => {
+    expect(getFlavorFromAppId('other/flavor')).toBe('flavor');
+  });
+
+  it('returns null when slash suffix is empty', () => {
     expect(getFlavorFromAppId('agentTraces/')).toBeNull();
-    expect(getFlavorFromAppId('agentTraces/flavor/extra')).toBe('flavor');
   });
 });
 
 describe('getCurrentAppId', () => {
-  it('should return current app ID from services', async () => {
+  it('returns current app ID from services', async () => {
     const services = createMockServices();
     const appId = await getCurrentAppId(services);
-    expect(appId).toBe('agentTraces/discover');
-  });
-
-  it('should handle different app IDs', async () => {
-    const services = {
-      core: {
-        application: {
-          currentAppId$: of('agentTraces/visualize'),
-        },
-      },
-    } as AgentTracesServices;
-
-    const appId = await getCurrentAppId(services);
-    expect(appId).toBe('agentTraces/visualize');
+    expect(appId).toBe(PLUGIN_ID);
   });
 });
 
 describe('getCurrentFlavor', () => {
-  it('should return current flavor from app ID', async () => {
-    const services = createMockServices();
+  it('returns Traces flavor for the base plugin ID', async () => {
+    const services = createMockServices(PLUGIN_ID);
     const flavor = await getCurrentFlavor(services);
-    expect(flavor).toBe('discover' as AgentTracesFlavor);
+    expect(flavor).toBe(AgentTracesFlavor.Traces);
   });
 
-  it('should return null for invalid app ID', async () => {
-    const services = {
-      core: {
-        application: {
-          currentAppId$: of('invalid'),
-        },
-      },
-    } as AgentTracesServices;
+  it('returns Traces flavor for agent spans nav ID', async () => {
+    const services = createMockServices(AGENT_SPANS_NAV_ID);
+    const flavor = await getCurrentFlavor(services);
+    expect(flavor).toBe(AgentTracesFlavor.Traces);
+  });
 
+  it('returns null for unrecognized app ID', async () => {
+    const services = createMockServices('invalid');
     const flavor = await getCurrentFlavor(services);
     expect(flavor).toBeNull();
   });
 
-  it('should return null for undefined app ID', async () => {
+  it('returns null for undefined app ID', async () => {
     const services = {
       core: {
         application: {
@@ -90,7 +95,6 @@ describe('getCurrentFlavor', () => {
         },
       },
     } as AgentTracesServices;
-
     const flavor = await getCurrentFlavor(services);
     expect(flavor).toBeNull();
   });

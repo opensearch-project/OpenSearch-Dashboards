@@ -367,6 +367,7 @@ export {
   QuerySuggestionGetFnArgs,
   QuerySuggestionBasic,
   QuerySuggestionField,
+  MonacoCompatibleQuerySuggestion,
   AutocompleteStart,
 } from './autocomplete';
 
@@ -463,6 +464,7 @@ export {
   SearchError,
   SearchTimeoutError,
   PainlessError,
+  AnalyticEngineError,
 } from './search';
 
 export type { SearchSource } from './search';

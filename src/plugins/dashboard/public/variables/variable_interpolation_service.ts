@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Variable } from './types';
+import { VariableWithState, VariableOptionType } from './types';
 
 /**
  * Variable value with metadata for interpolation
@@ -13,6 +13,7 @@ export interface VariableValue {
   value: string;
   multi?: boolean;
   values?: string[];
+  optionType?: VariableOptionType;
 }
 
 /**
@@ -32,9 +33,10 @@ export interface IVariableInterpolationService {
    * Interpolate variables in a query string
    * @param query - The query string with variable placeholders
    * @param language - The query language (e.g., 'PPL', 'PROMQL') for formatting multi-select values
+   * @param currentVarName - Optional name of the current variable (for order constraint)
    * @returns The query string with variables replaced by their values
    */
-  interpolate(query: string, language?: string): string;
+  interpolate(query: string, language?: string, currentVarName?: string): string;
 
   /**
    * Get current variable values as a key-value map
@@ -62,7 +64,7 @@ export class VariableInterpolationService implements IVariableInterpolationServi
     return /\$\{(\w+)\}|\$(\w+)/g;
   }
 
-  constructor(private readonly getVariablesFn: () => Variable[]) {}
+  constructor(private readonly getVariablesFn: () => VariableWithState[]) {}
 
   /**
    * Check if a query string contains variable placeholders
@@ -79,13 +81,21 @@ export class VariableInterpolationService implements IVariableInterpolationServi
    *
    * @param query - The query string with variable placeholders
    * @param language - The query language for formatting multi-select values
+   * @param currentVarName - Optional name of the current variable (for order constraint)
    * @example
    * // Multi-select with PPL:
    * // Query: source=logs | where service IN $service
    * // Variables: [{ name: 'service', current: 'api,web', multi: true }]
    * // Result: source=logs | where service IN ('api', 'web')
+   *
+   * @example
+   * // Partial interpolation with order constraint:
+   * // Query: $a and $b
+   * // Variables: [{ name: 'a', value: 'value-a' }, { name: 'b', value: 'value-b' }]
+   * // currentVarName: 'b'
+   * // Result: value-a and $b (only 'a' is interpolated because it comes before 'b')
    */
-  interpolate(query: string, language?: string): string {
+  interpolate(query: string, language?: string, currentVarName?: string): string {
     if (!query || typeof query !== 'string') {
       return query;
     }
@@ -93,6 +103,15 @@ export class VariableInterpolationService implements IVariableInterpolationServi
     const variables = this.getVariables();
     const valuesMap = new Map(variables.map((v) => [v.name, v]));
     const lang = (language || '').toUpperCase();
+
+    // If currentVarName is provided, only interpolate variables that come before it
+    let precedingVarNames: Set<string> | undefined;
+    if (currentVarName) {
+      const currentVarIndex = variables.findIndex((v) => v.name === currentVarName);
+      if (currentVarIndex !== -1) {
+        precedingVarNames = new Set(variables.slice(0, currentVarIndex).map((v) => v.name));
+      }
+    }
 
     return query.replace(
       VariableInterpolationService.VARIABLE_PATTERN,
@@ -105,8 +124,14 @@ export class VariableInterpolationService implements IVariableInterpolationServi
           return match;
         }
 
+        // If we have order constraints and this variable comes after current variable,
+        // keep the placeholder
+        if (precedingVarNames && !precedingVarNames.has(varName)) {
+          return match;
+        }
+
         if (variable.multi) {
-          return this.formatMultiValue(variable.values ?? [], lang);
+          return this.formatMultiValue(variable.values ?? [], lang, variable.optionType);
         }
 
         return this.escapeForLanguage(variable.value, lang);
@@ -130,7 +155,7 @@ export class VariableInterpolationService implements IVariableInterpolationServi
 
   /**
    * Get all variable values with metadata
-   * Converts from Variable[] to VariableValue[]
+   * Converts from VariableWithState[] to VariableValue[]
    */
   getVariables(): VariableValue[] {
     const variables = this.getVariablesFn();
@@ -140,17 +165,23 @@ export class VariableInterpolationService implements IVariableInterpolationServi
       value: (v.current ?? []).join(','),
       multi: v.multi,
       values: v.multi ? v.current : undefined,
+      optionType: v.optionType,
     }));
   }
 
   /**
-   * Format multi-select values based on query language
+   * Format multi-select values based on query language and option type
    *
-   * - PPL: ('value1', 'value2') — for use with IN operator
+   * - PPL string: ('value1', 'value2') — quoted for use with IN operator
+   * - PPL number/boolean: (123, 456) — unquoted
    * - PROMQL: (value1|value2)
    * - Default: value1, value2
    */
-  private formatMultiValue(values: string[], language: string): string {
+  private formatMultiValue(
+    values: string[],
+    language: string,
+    optionType?: VariableOptionType
+  ): string {
     if (values.length === 0) {
       switch (language) {
         case 'PPL':
@@ -165,7 +196,12 @@ export class VariableInterpolationService implements IVariableInterpolationServi
     switch (language) {
       case 'PPL': {
         const escaped = values.map((v) => this.escapeForLanguage(v, language));
-        return `(${escaped.map((v) => `'${v}'`).join(', ')})`;
+        if (!optionType || optionType === 'string') {
+          return `(${escaped.map((v) => `'${v}'`).join(', ')})`;
+        } else {
+          // For numbers and booleans, don't quote
+          return `(${escaped.join(', ')})`;
+        }
       }
       case 'PROMQL': {
         const escaped = values.map((v) => this.escapeForLanguage(v, language));
@@ -232,7 +268,7 @@ export class VariableInterpolationService implements IVariableInterpolationServi
  */
 export const createNoOpVariableInterpolationService = (): IVariableInterpolationService => ({
   hasVariables: () => false,
-  interpolate: (query: string) => query,
+  interpolate: (query: string, _language?: string, _currentVarName?: string) => query,
   getCurrentValues: () => ({}),
   getVariables: () => [],
 });

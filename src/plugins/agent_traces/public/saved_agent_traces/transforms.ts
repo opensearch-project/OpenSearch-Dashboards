@@ -24,8 +24,8 @@ interface VisState {
 
 export const saveStateToSavedObject = (
   obj: SavedAgentTraces,
-  flavorId: string,
   tabDefinition: TabDefinition,
+  flavorId?: string,
   visState?: VisState,
   dataset?: IndexPattern | Dataset,
   activeTabId?: string

@@ -55,6 +55,7 @@ function mockProps() {
       },
       branding: injectedMetadata.getBranding(),
       survey: injectedMetadata.getSurvey(),
+      enableIconSideNav: true,
       keyboardShortcuts: injectedMetadata.getKeyboardShortcuts(),
     },
   };

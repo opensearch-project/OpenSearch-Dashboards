@@ -197,7 +197,7 @@ Object {
                     data-test-subj="tableHeaderCell_primaryId_0"
                     role="columnheader"
                     scope="col"
-                    style="width: 30%;"
+                    style="width: 25%;"
                   >
                     <span
                       class="euiTableCellContent"
@@ -212,10 +212,28 @@ Object {
                   </th>
                   <th
                     class="euiTableHeaderCell"
-                    data-test-subj="tableHeaderCell_displayedType_1"
+                    data-test-subj="tableHeaderCell_name_1"
                     role="columnheader"
                     scope="col"
-                    style="width: 30%;"
+                    style="width: 25%;"
+                  >
+                    <span
+                      class="euiTableCellContent"
+                    >
+                      <span
+                        class="euiTableCellContent__text"
+                        title="Name"
+                      >
+                        Name
+                      </span>
+                    </span>
+                  </th>
+                  <th
+                    class="euiTableHeaderCell"
+                    data-test-subj="tableHeaderCell_displayedType_2"
+                    role="columnheader"
+                    scope="col"
+                    style="width: 25%;"
                   >
                     <span
                       class="euiTableCellContent"
@@ -230,10 +248,10 @@ Object {
                   </th>
                   <th
                     class="euiTableHeaderCell"
-                    data-test-subj="tableHeaderCell_accessLevel_2"
+                    data-test-subj="tableHeaderCell_accessLevel_3"
                     role="columnheader"
                     scope="col"
-                    style="width: 30%;"
+                    style="width: 15%;"
                   >
                     <span
                       class="euiTableCellContent"
@@ -248,7 +266,7 @@ Object {
                   </th>
                   <th
                     class="euiTableHeaderCell"
-                    data-test-subj="tableHeaderCell_Actions_3"
+                    data-test-subj="tableHeaderCell_Actions_4"
                     role="columnheader"
                     scope="col"
                     style="width: 10%;"
@@ -295,7 +313,7 @@ Object {
                   </td>
                   <td
                     class="euiTableRowCell"
-                    style="width: 30%;"
+                    style="width: 25%;"
                   >
                     <div
                       class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -314,7 +332,22 @@ Object {
                   </td>
                   <td
                     class="euiTableRowCell"
-                    style="width: 30%;"
+                    style="width: 25%;"
+                  >
+                    <div
+                      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                    >
+                      Name
+                    </div>
+                    <div
+                      class="euiTableCellContent euiTableCellContent--overflowingContent"
+                    >
+                      —
+                    </div>
+                  </td>
+                  <td
+                    class="euiTableRowCell"
+                    style="width: 25%;"
                   >
                     <div
                       class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -329,7 +362,7 @@ Object {
                   </td>
                   <td
                     class="euiTableRowCell"
-                    style="width: 30%;"
+                    style="width: 15%;"
                   >
                     <div
                       class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -407,7 +440,7 @@ Object {
                   </td>
                   <td
                     class="euiTableRowCell"
-                    style="width: 30%;"
+                    style="width: 25%;"
                   >
                     <div
                       class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -426,7 +459,22 @@ Object {
                   </td>
                   <td
                     class="euiTableRowCell"
-                    style="width: 30%;"
+                    style="width: 25%;"
+                  >
+                    <div
+                      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                    >
+                      Name
+                    </div>
+                    <div
+                      class="euiTableCellContent euiTableCellContent--overflowingContent"
+                    >
+                      —
+                    </div>
+                  </td>
+                  <td
+                    class="euiTableRowCell"
+                    style="width: 25%;"
                   >
                     <div
                       class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -441,7 +489,7 @@ Object {
                   </td>
                   <td
                     class="euiTableRowCell"
-                    style="width: 30%;"
+                    style="width: 15%;"
                   >
                     <div
                       class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -519,7 +567,7 @@ Object {
                   </td>
                   <td
                     class="euiTableRowCell"
-                    style="width: 30%;"
+                    style="width: 25%;"
                   >
                     <div
                       class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -536,7 +584,22 @@ Object {
                   </td>
                   <td
                     class="euiTableRowCell"
-                    style="width: 30%;"
+                    style="width: 25%;"
+                  >
+                    <div
+                      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                    >
+                      Name
+                    </div>
+                    <div
+                      class="euiTableCellContent euiTableCellContent--overflowingContent"
+                    >
+                      —
+                    </div>
+                  </td>
+                  <td
+                    class="euiTableRowCell"
+                    style="width: 25%;"
                   >
                     <div
                       class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -551,7 +614,7 @@ Object {
                   </td>
                   <td
                     class="euiTableRowCell"
-                    style="width: 30%;"
+                    style="width: 15%;"
                   >
                     <div
                       class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -907,7 +970,7 @@ Object {
                   data-test-subj="tableHeaderCell_primaryId_0"
                   role="columnheader"
                   scope="col"
-                  style="width: 30%;"
+                  style="width: 25%;"
                 >
                   <span
                     class="euiTableCellContent"
@@ -922,10 +985,28 @@ Object {
                 </th>
                 <th
                   class="euiTableHeaderCell"
-                  data-test-subj="tableHeaderCell_displayedType_1"
+                  data-test-subj="tableHeaderCell_name_1"
                   role="columnheader"
                   scope="col"
-                  style="width: 30%;"
+                  style="width: 25%;"
+                >
+                  <span
+                    class="euiTableCellContent"
+                  >
+                    <span
+                      class="euiTableCellContent__text"
+                      title="Name"
+                    >
+                      Name
+                    </span>
+                  </span>
+                </th>
+                <th
+                  class="euiTableHeaderCell"
+                  data-test-subj="tableHeaderCell_displayedType_2"
+                  role="columnheader"
+                  scope="col"
+                  style="width: 25%;"
                 >
                   <span
                     class="euiTableCellContent"
@@ -940,10 +1021,10 @@ Object {
                 </th>
                 <th
                   class="euiTableHeaderCell"
-                  data-test-subj="tableHeaderCell_accessLevel_2"
+                  data-test-subj="tableHeaderCell_accessLevel_3"
                   role="columnheader"
                   scope="col"
-                  style="width: 30%;"
+                  style="width: 15%;"
                 >
                   <span
                     class="euiTableCellContent"
@@ -958,7 +1039,7 @@ Object {
                 </th>
                 <th
                   class="euiTableHeaderCell"
-                  data-test-subj="tableHeaderCell_Actions_3"
+                  data-test-subj="tableHeaderCell_Actions_4"
                   role="columnheader"
                   scope="col"
                   style="width: 10%;"
@@ -1005,7 +1086,7 @@ Object {
                 </td>
                 <td
                   class="euiTableRowCell"
-                  style="width: 30%;"
+                  style="width: 25%;"
                 >
                   <div
                     class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -1024,7 +1105,22 @@ Object {
                 </td>
                 <td
                   class="euiTableRowCell"
-                  style="width: 30%;"
+                  style="width: 25%;"
+                >
+                  <div
+                    class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                  >
+                    Name
+                  </div>
+                  <div
+                    class="euiTableCellContent euiTableCellContent--overflowingContent"
+                  >
+                    —
+                  </div>
+                </td>
+                <td
+                  class="euiTableRowCell"
+                  style="width: 25%;"
                 >
                   <div
                     class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -1039,7 +1135,7 @@ Object {
                 </td>
                 <td
                   class="euiTableRowCell"
-                  style="width: 30%;"
+                  style="width: 15%;"
                 >
                   <div
                     class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -1117,7 +1213,7 @@ Object {
                 </td>
                 <td
                   class="euiTableRowCell"
-                  style="width: 30%;"
+                  style="width: 25%;"
                 >
                   <div
                     class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -1136,7 +1232,22 @@ Object {
                 </td>
                 <td
                   class="euiTableRowCell"
-                  style="width: 30%;"
+                  style="width: 25%;"
+                >
+                  <div
+                    class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                  >
+                    Name
+                  </div>
+                  <div
+                    class="euiTableCellContent euiTableCellContent--overflowingContent"
+                  >
+                    —
+                  </div>
+                </td>
+                <td
+                  class="euiTableRowCell"
+                  style="width: 25%;"
                 >
                   <div
                     class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -1151,7 +1262,7 @@ Object {
                 </td>
                 <td
                   class="euiTableRowCell"
-                  style="width: 30%;"
+                  style="width: 15%;"
                 >
                   <div
                     class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -1229,7 +1340,7 @@ Object {
                 </td>
                 <td
                   class="euiTableRowCell"
-                  style="width: 30%;"
+                  style="width: 25%;"
                 >
                   <div
                     class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -1246,7 +1357,22 @@ Object {
                 </td>
                 <td
                   class="euiTableRowCell"
-                  style="width: 30%;"
+                  style="width: 25%;"
+                >
+                  <div
+                    class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                  >
+                    Name
+                  </div>
+                  <div
+                    class="euiTableCellContent euiTableCellContent--overflowingContent"
+                  >
+                    —
+                  </div>
+                </td>
+                <td
+                  class="euiTableRowCell"
+                  style="width: 25%;"
                 >
                   <div
                     class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -1261,7 +1387,7 @@ Object {
                 </td>
                 <td
                   class="euiTableRowCell"
-                  style="width: 30%;"
+                  style="width: 15%;"
                 >
                   <div
                     class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"

@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AppNavLinkStatus, NavGroupType, PublicAppInfo } from '../../../core/public';
+import { BehaviorSubject } from 'rxjs';
+import { AppNavLinkStatus, AppStatus, NavGroupType, PublicAppInfo } from '../../../core/public';
 import {
   featureMatchesConfig,
   filterWorkspaceConfigurableApps,
@@ -12,8 +13,8 @@ import {
   getDataSourcesList,
   convertNavGroupToWorkspaceUseCase,
   isEqualWorkspaceUseCase,
+  pickUseCaseLandingAppId,
   prependWorkspaceToBreadcrumbs,
-  areAllDataSourcesOpenSearchServerless,
   mergeDataSourcesWithConnections,
   fetchDataSourceConnections,
   getUseCaseUrl,
@@ -22,10 +23,7 @@ import {
 import { WORKSPACE_USE_CASE_PREFIX, WorkspaceAvailability } from '../../../core/public';
 import { coreMock } from '../../../core/public/mocks';
 import { AssociationDataSourceModalMode } from '../common/constants';
-import {
-  SigV4ServiceName,
-  DataSourceEngineType,
-} from '../../../plugins/data_source/common/data_sources';
+import { DataSourceEngineType } from '../../../plugins/data_source/common/data_sources';
 import { createMockedRegisteredUseCases } from './mocks';
 import {
   DATA_SOURCE_SAVED_OBJECT_TYPE,
@@ -486,56 +484,6 @@ describe('workspace utils: getDataSourcesList', () => {
   it('should return empty array if no saved objects responded', async () => {
     mockedSavedObjectClient.find = jest.fn().mockResolvedValue({});
     expect(await getDataSourcesList(mockedSavedObjectClient, [])).toStrictEqual([]);
-  });
-});
-
-describe('workspace utils: getIsOnlyAllowEssentialUseCase', () => {
-  const mockedSavedObjectClient = startMock.savedObjects.client;
-
-  it('should return true when all data sources are serverless', async () => {
-    mockedSavedObjectClient.find = jest.fn().mockResolvedValue({
-      savedObjects: [
-        {
-          id: 'id1',
-          get: () => {
-            return {
-              credentials: {
-                service: SigV4ServiceName.OpenSearchServerless,
-              },
-            };
-          },
-        },
-      ],
-    });
-    expect(await areAllDataSourcesOpenSearchServerless(mockedSavedObjectClient)).toBe(true);
-  });
-
-  it('should return false when not all data sources are serverless', async () => {
-    mockedSavedObjectClient.find = jest.fn().mockResolvedValue({
-      savedObjects: [
-        {
-          id: 'id1',
-          get: () => {
-            return {
-              credentials: {
-                service: SigV4ServiceName.OpenSearchServerless,
-              },
-            };
-          },
-        },
-        {
-          id: 'id2',
-          get: () => {
-            return {
-              credentials: {
-                service: SigV4ServiceName.OpenSearch,
-              },
-            };
-          },
-        },
-      ],
-    });
-    expect(await areAllDataSourcesOpenSearchServerless(mockedSavedObjectClient)).toBe(false);
   });
 });
 
@@ -1021,6 +969,81 @@ describe('workspace utils: mergeDataSourcesWithConnections', () => {
   });
 });
 
+describe('workspace utils: pickUseCaseLandingAppId', () => {
+  const accessibleVisible = ({
+    status: AppStatus.accessible,
+    navLinkStatus: AppNavLinkStatus.default,
+  } as Partial<PublicAppInfo>) as PublicAppInfo;
+  const featureFlagDisabled = ({
+    status: AppStatus.accessible,
+    navLinkStatus: AppNavLinkStatus.hidden,
+  } as Partial<PublicAppInfo>) as PublicAppInfo;
+  const outsideWorkspaceHidden = ({
+    // Mirrors the state read on the workspace creator page for an
+    // `insideWorkspace`-only app: workspace plugin pushed `inaccessible`,
+    // some other path pushed `navLinkStatus: hidden` — both flip back
+    // once the user enters the workspace, so the picker must keep them.
+    status: AppStatus.inaccessible,
+    navLinkStatus: AppNavLinkStatus.hidden,
+  } as Partial<PublicAppInfo>) as PublicAppInfo;
+
+  it('returns undefined when the use case has no features', () => {
+    expect(pickUseCaseLandingAppId(undefined, new Map())).toBeUndefined();
+    expect(pickUseCaseLandingAppId([], new Map())).toBeUndefined();
+  });
+
+  it('falls back to features[0] when no apps snapshot is provided', () => {
+    expect(pickUseCaseLandingAppId([{ id: 'first' }, { id: 'second' }], undefined)).toBe('first');
+  });
+
+  it('skips feature-flag-disabled apps (hidden + accessible)', () => {
+    const apps = new Map<string, PublicAppInfo>([
+      ['alerting', featureFlagDisabled],
+      ['dashboards', accessibleVisible],
+    ]);
+    expect(pickUseCaseLandingAppId([{ id: 'alerting' }, { id: 'dashboards' }], apps)).toBe(
+      'dashboards'
+    );
+  });
+
+  it('keeps apps that are transiently hidden outside a workspace (hidden + inaccessible)', () => {
+    // Repro of the bug we shipped this for: workspace creator runs outside
+    // any workspace, so `insideWorkspace` apps look hidden — but we must
+    // still pick the first one as the landing target, because it'll be
+    // accessible immediately after the redirect.
+    const apps = new Map<string, PublicAppInfo>([
+      ['dashboards', outsideWorkspaceHidden],
+      ['explore/logs', outsideWorkspaceHidden],
+    ]);
+    expect(pickUseCaseLandingAppId([{ id: 'dashboards' }, { id: 'explore/logs' }], apps)).toBe(
+      'dashboards'
+    );
+  });
+
+  it('falls back to features[0] when every feature is feature-flag-disabled', () => {
+    const apps = new Map<string, PublicAppInfo>([
+      ['a', featureFlagDisabled],
+      ['b', featureFlagDisabled],
+    ]);
+    expect(pickUseCaseLandingAppId([{ id: 'a' }, { id: 'b' }], apps)).toBe('a');
+  });
+
+  it('treats a feature id absent from the apps map as selectable', () => {
+    // Load-bearing for the transient-load case: feature ids come from
+    // `convertNavGroupToWorkspaceUseCase` over real nav links, so an
+    // absent lookup means the apps snapshot hasn't propagated yet, not
+    // that the app is missing. Skipping such features would silently
+    // skip the entire list during early page load.
+    const apps = new Map<string, PublicAppInfo>([['known-feature-flag-off', featureFlagDisabled]]);
+    expect(
+      pickUseCaseLandingAppId(
+        [{ id: 'known-feature-flag-off' }, { id: 'not-yet-in-apps-map' }],
+        apps
+      )
+    ).toBe('not-yet-in-apps-map');
+  });
+});
+
 describe('workspace utils: getUseCaseUrl', () => {
   it('should get use case url', () => {
     startMock.application.getUrlForApp.mockImplementation((id) => `http://localhost/${id}`);
@@ -1032,6 +1055,32 @@ describe('workspace utils: getUseCaseUrl', () => {
     startMock.application.getUrlForApp.mockImplementation((id) => `http://localhost/${id}`);
     const url = getUseCaseUrl(undefined, 'foo', startMock.application, startMock.http);
     expect(url).toEqual('http://localhost/w/foo/workspace_detail');
+  });
+
+  it('should skip feature-flag-disabled features when picking the landing app', () => {
+    startMock.application.getUrlForApp.mockImplementation((id) => `http://localhost/${id}`);
+    (startMock.application.applications$ as BehaviorSubject<Map<string, PublicAppInfo>>).next(
+      new Map<string, PublicAppInfo>([
+        // `bar` is the first feature of `useCaseMock`. Flag it off so the
+        // picker has to fall through to the next feature.
+        [
+          'bar',
+          ({
+            status: AppStatus.accessible,
+            navLinkStatus: AppNavLinkStatus.hidden,
+          } as Partial<PublicAppInfo>) as PublicAppInfo,
+        ],
+        [
+          'baz',
+          ({
+            status: AppStatus.accessible,
+            navLinkStatus: AppNavLinkStatus.default,
+          } as Partial<PublicAppInfo>) as PublicAppInfo,
+        ],
+      ])
+    );
+    const url = getUseCaseUrl(useCaseMock, 'foo', startMock.application, startMock.http);
+    expect(url).toEqual('http://localhost/w/foo/baz');
   });
 });
 

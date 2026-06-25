@@ -10,7 +10,7 @@ import { BehaviorSubject } from 'rxjs';
 import { EditorMode } from '../../utils/state_management/types';
 import { useQueryBuilderState } from '../hooks/use_query_builder_state';
 import { useVisualizationBuilder } from '../hooks/use_visualization_builder';
-import { useCurrentExploreId } from '../hooks/use_explore_id';
+import { useCurrentExploreId } from '../../../application/utils/hooks/use_current_explore_id';
 import { useSavedExplore } from '../../utils/hooks/use_saved_explore';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 
@@ -18,7 +18,9 @@ jest.mock('../hooks/use_query_builder_state', () => ({
   useQueryBuilderState: jest.fn(),
 }));
 jest.mock('../hooks/use_visualization_builder', () => ({ useVisualizationBuilder: jest.fn() }));
-jest.mock('../hooks/use_explore_id', () => ({ useCurrentExploreId: jest.fn() }));
+jest.mock('../../../application/utils/hooks/use_current_explore_id', () => ({
+  useCurrentExploreId: jest.fn(),
+}));
 jest.mock('../../utils/hooks/use_saved_explore', () => ({ useSavedExplore: jest.fn() }));
 jest.mock('../../../components/query_panel/utils/use_search_context', () => ({
   useSearchContext: jest.fn().mockReturnValue({ query: {}, filters: [] }),
@@ -31,6 +33,26 @@ jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
 jest.mock('./save_vis_modal', () => ({
   SaveVisModal: () => <div data-test-subj="save-vis-modal">Modal</div>,
 }));
+
+jest.mock('../../../components/data_transformations', () => {
+  const mockObs = {
+    subscribe: jest.fn().mockReturnValue({ unsubscribe: jest.fn() }),
+    getValue: jest.fn().mockReturnValue([]),
+  };
+  const mockMapObs = {
+    subscribe: jest.fn().mockReturnValue({ unsubscribe: jest.fn() }),
+    getValue: jest.fn().mockReturnValue(new Map()),
+  };
+  return {
+    useTransformationService: jest.fn().mockReturnValue({
+      clearPipeline: jest.fn(),
+      pipeline$: mockObs,
+      getPipeline$: () => mockObs,
+      stageSchemas$: mockMapObs,
+    }),
+    TransformPanel: () => null,
+  };
+});
 
 jest.mock('@osd/i18n', () => ({
   i18n: {
@@ -67,6 +89,7 @@ const buildVisualizationBuilder = () => ({
   visualizationBuilderForEditor: {
     visConfig$: { value: { type: 'bar', styles: {}, axesMapping: { x: 'field' } } },
     isVisDirty$: new BehaviorSubject(false),
+    getTransformationService: jest.fn().mockReturnValue({ pipeline$: new BehaviorSubject([]) }),
   },
 });
 

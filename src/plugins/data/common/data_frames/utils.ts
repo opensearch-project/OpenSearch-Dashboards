@@ -144,6 +144,11 @@ export const convertResult = ({
     (searchResponse as any).instantFieldSchema = instantData.schema;
   }
 
+  // Pass through truncation metadata for Prometheus queries
+  if (data.meta?.truncation) {
+    (searchResponse as any).truncation = data.meta.truncation;
+  }
+
   if (data.hasOwnProperty('aggs')) {
     const dataWithAggs = data as IDataFrameWithAggs;
     if (!dataWithAggs.aggs) {

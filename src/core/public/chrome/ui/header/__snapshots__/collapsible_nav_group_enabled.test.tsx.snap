@@ -69,7 +69,7 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
               id="euiSideNavContent_generated-id"
             >
               <div
-                class="euiSideNavItem euiSideNavItem--root nav-link-item "
+                class="euiSideNavItem euiSideNavItem--root nav-link-item"
               >
                 <button
                   aria-label="link-in-all"
@@ -224,7 +224,7 @@ exports[`<CollapsibleNavGroupEnabled /> should show use case nav when current na
               id="euiSideNavContent_generated-id"
             >
               <div
-                class="euiSideNavItem euiSideNavItem--root nav-link-item "
+                class="euiSideNavItem euiSideNavItem--root nav-link-item"
               >
                 <button
                   aria-label="link-in-all"

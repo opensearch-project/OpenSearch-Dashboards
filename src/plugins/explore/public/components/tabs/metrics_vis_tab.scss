@@ -11,8 +11,14 @@
 
   &__chartTypeToggle {
     display: flex;
+    align-items: center;
     justify-content: flex-end;
+    gap: $euiSizeS;
     padding: $euiSizeXS;
+
+    [data-test-subj="seriesLimitDisclaimer"] {
+      margin-right: auto;
+    }
   }
 
   &__chartArea {
@@ -71,5 +77,29 @@
   &__rawTable {
     flex: 1 0 auto;
     min-height: 500px;
+  }
+
+  // Override custom legend defaults for metrics charts: stack one series per
+  // line with both horizontal and vertical scrolling so long Prometheus-style
+  // labels stay legible.
+  .customLegend--horizontal {
+    flex-flow: column nowrap;
+    align-items: flex-start;
+    max-height: 120px;
+    overflow: auto;
+  }
+
+  .customLegend__item {
+    flex-shrink: 0;
+  }
+
+  .customLegend--vertical .customLegend__item {
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .customLegend--vertical .customLegend__label {
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }

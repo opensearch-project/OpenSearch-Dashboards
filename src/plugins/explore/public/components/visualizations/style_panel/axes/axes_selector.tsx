@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { EuiSpacer, EuiFormRow, EuiSelectableOption } from '@elastic/eui';
 import { isEqual } from 'lodash';
 import { i18n } from '@osd/i18n';
@@ -37,9 +37,6 @@ const AXIS_SELECT_LABEL = {
   [AxisRole.COLOR]: i18n.translate('explore.visualize.axisSelectLabelColor', {
     defaultMessage: 'Color',
   }),
-  [AxisRole.FACET]: i18n.translate('explore.visualize.axisSelectLabelFacet', {
-    defaultMessage: 'Split chart by',
-  }),
   [AxisRole.SIZE]: i18n.translate('explore.visualize.axisSelectLabelSize', {
     defaultMessage: 'Size',
   }),
@@ -55,7 +52,7 @@ const AXIS_SELECT_LABEL = {
 };
 
 const getAxisLabel = (axisRole: AxisRole): string => {
-  return AXIS_SELECT_LABEL[axisRole];
+  return AXIS_SELECT_LABEL[axisRole as keyof typeof AXIS_SELECT_LABEL] ?? axisRole;
 };
 
 const isMultiAxis = (axisRole: AxisRole, mappings: AxisTypeMapping[]): boolean =>
@@ -71,6 +68,8 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
 }) => {
   const visualizationRegistry = useVisualizationRegistry();
   const [currentSelections, setCurrentSelections] = useState<AxisColumnMappings>({});
+  const chartTypeRef = useRef(chartType);
+  chartTypeRef.current = chartType;
 
   // Filter available chart mappings based on the data's column types
   // This ensures we only show mappings that are compatible with the current dataset structure
@@ -133,7 +132,7 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
       }
     });
     const ruleToUse = visualizationRegistry.findRuleByAxesMapping(
-      chartType,
+      chartTypeRef.current,
       convertMappingsToStrings(normalizedAxesSelections),
       [...numericalColumns, ...categoricalColumns, ...dateColumns]
     );
@@ -151,12 +150,10 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
   }, [
     updateVisualization,
     currentSelections,
-    remainingMappings,
     visualizationRegistry,
     numericalColumns,
     categoricalColumns,
     dateColumns,
-    chartType,
   ]);
 
   const findColumns = useMemo(

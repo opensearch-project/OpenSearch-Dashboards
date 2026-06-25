@@ -1,0 +1,324 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
+ * Flyout for creating Prometheus alert rules from the Metrics page queries.
+ * Each query row becomes a separate Cortex alerting rule, all created via
+ * POST /api/alerting/prometheus/{dsId}/rules.
+ */
+import React, { useCallback, useMemo, useState } from 'react';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiFieldNumber,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiFormRow,
+  EuiPanel,
+  EuiSelect,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
+import { i18n } from '@osd/i18n';
+
+const OPERATOR_OPTIONS = [
+  { value: '>', text: '> (greater than)' },
+  { value: '>=', text: '>= (greater or equal)' },
+  { value: '<', text: '< (less than)' },
+  { value: '<=', text: '<= (less or equal)' },
+  { value: '==', text: '== (equals)' },
+  { value: '!=', text: '!= (not equal)' },
+];
+
+const DURATION_OPTIONS = [
+  { value: '0s', text: 'Immediately (0s)' },
+  { value: '30s', text: '30 seconds' },
+  { value: '1m', text: '1 minute' },
+  { value: '2m', text: '2 minutes' },
+  { value: '5m', text: '5 minutes' },
+  { value: '10m', text: '10 minutes' },
+];
+
+const INTERVAL_OPTIONS = [
+  { value: '15s', text: '15 seconds' },
+  { value: '30s', text: '30 seconds' },
+  { value: '1m', text: '1 minute' },
+  { value: '2m', text: '2 minutes' },
+  { value: '5m', text: '5 minutes' },
+];
+
+interface RuleEntry {
+  id: string;
+  query: string;
+  name: string;
+  operator: string;
+  threshold: number;
+  forDuration: string;
+}
+
+export interface CreateMetricsRuleFlyoutProps {
+  queries: string[];
+  datasourceId: string;
+  onClose: () => void;
+  http: {
+    post: (path: string, options: { body: string }) => Promise<unknown>;
+  };
+  addToast?: (title: string, color?: 'success' | 'danger') => void;
+}
+
+export function deriveRuleName(query: string): string {
+  // Try to extract the innermost metric name, skipping PromQL function wrappers
+  // e.g., rate(http_requests_total[5m]) → http_requests_total
+  const innerMatch = query.match(/\(\s*([a-zA-Z_:][a-zA-Z0-9_:]*)/);
+  if (innerMatch) return innerMatch[1];
+  // Fallback: first identifier that's followed by { ( [ or whitespace
+  const match = query.match(/\b([a-zA-Z_:][a-zA-Z0-9_:]*)\s*[{([\s]/);
+  if (match) return match[1];
+  const simpleMatch = query.match(/^([a-zA-Z_:][a-zA-Z0-9_:]*)/);
+  if (simpleMatch) return simpleMatch[1];
+  return 'metrics_alert';
+}
+
+export const CreateMetricsRuleFlyout: React.FC<CreateMetricsRuleFlyoutProps> = ({
+  queries,
+  datasourceId,
+  onClose,
+  http,
+  addToast,
+}) => {
+  const [evaluationInterval, setEvaluationInterval] = useState('1m');
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'creating' | 'done'>('idle');
+
+  const [rules, setRules] = useState<RuleEntry[]>(() => {
+    const entries = queries
+      .filter((q) => q.trim())
+      .map((q, idx) => ({
+        id: `rule-${idx}`,
+        query: q.trim(),
+        name: deriveRuleName(q),
+        operator: '>',
+        threshold: 0,
+        forDuration: '5m',
+      }));
+    // Deduplicate names to prevent Cortex group overwrites (upsert semantics)
+    const seenNames = new Map<string, number>();
+    return entries.map((entry) => {
+      const count = seenNames.get(entry.name) || 0;
+      seenNames.set(entry.name, count + 1);
+      return count > 0 ? { ...entry, name: `${entry.name}_${count + 1}` } : entry;
+    });
+  });
+
+  const updateRule = useCallback((ruleId: string, field: keyof RuleEntry, value: unknown) => {
+    setRules((prev) => prev.map((r) => (r.id === ruleId ? { ...r, [field]: value } : r)));
+  }, []);
+
+  const isValid = useMemo(() => rules.length > 0 && rules.every((r) => r.name.trim()), [rules]);
+
+  const handleSave = useCallback(async () => {
+    if (!isValid || isSaving) return;
+    setIsSaving(true);
+    setSaveStatus('creating');
+    try {
+      for (const rule of rules) {
+        const payload = {
+          name: rule.name,
+          query: rule.query,
+          operator: rule.operator,
+          threshold: rule.threshold,
+          forDuration: rule.forDuration,
+          evaluationInterval,
+          labels: {},
+          annotations: { summary: `Alert: ${rule.name}` },
+          enabled: true,
+          groupName: rule.name,
+        };
+        await http.post(`/api/alerting/prometheus/${encodeURIComponent(datasourceId)}/rules`, {
+          body: JSON.stringify(payload),
+        });
+      }
+
+      // Success — show toast and close immediately (Cortex has eventual
+      // consistency; rules appear on the Alerting page after ~30-60s).
+      setSaveStatus('done');
+      addToast?.(
+        i18n.translate('explore.metricsRule.toast.created', {
+          defaultMessage: '{count} alert rule(s) created successfully.',
+          values: { count: rules.length },
+        }),
+        'success'
+      );
+      onClose();
+    } catch {
+      setSaveStatus('idle');
+      addToast?.(
+        i18n.translate('explore.metricsRule.toast.failed', {
+          defaultMessage: 'Failed to create alert rules',
+        }),
+        'danger'
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  }, [rules, evaluationInterval, datasourceId, http, isValid, isSaving, onClose, addToast]);
+
+  return (
+    <EuiFlyout
+      onClose={isSaving ? undefined : onClose}
+      size="l"
+      ownFocus
+      aria-labelledby="createMetricsRuleTitle"
+    >
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle size="m">
+          <h2 id="createMetricsRuleTitle">
+            {i18n.translate('explore.metricsRule.title', {
+              defaultMessage: 'Create alert rules from metrics queries',
+            })}
+          </h2>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiText size="s" color="subdued">
+          {i18n.translate('explore.metricsRule.description', {
+            defaultMessage:
+              'Each query becomes an alerting rule. Configure thresholds and conditions below.',
+          })}
+        </EuiText>
+      </EuiFlyoutHeader>
+
+      <EuiFlyoutBody>
+        <EuiPanel paddingSize="m" color="subdued">
+          <EuiTitle size="xs">
+            <h3>Evaluation Settings</h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiFlexGroup gutterSize="m">
+            <EuiFlexItem>
+              <EuiFormRow label="Evaluation interval">
+                <EuiSelect
+                  options={INTERVAL_OPTIONS}
+                  value={evaluationInterval}
+                  onChange={(e) => setEvaluationInterval(e.target.value)}
+                  compressed
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+
+        <EuiSpacer size="m" />
+
+        {rules.map((rule, idx) => (
+          <React.Fragment key={rule.id}>
+            <EuiPanel paddingSize="m">
+              <EuiTitle size="xxs">
+                <h4>Query {idx + 1}</h4>
+              </EuiTitle>
+              <EuiSpacer size="s" />
+              <EuiCallOut size="s" color="primary" iconType="editorCodeBlock">
+                <code>{rule.query}</code>
+              </EuiCallOut>
+              <EuiSpacer size="s" />
+              <EuiFlexGroup gutterSize="s" wrap>
+                <EuiFlexItem style={{ minWidth: 200 }}>
+                  <EuiFormRow label="Rule name">
+                    <EuiFieldText
+                      value={rule.name}
+                      onChange={(e) => updateRule(rule.id, 'name', e.target.value)}
+                      compressed
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+                <EuiFlexItem style={{ minWidth: 120 }}>
+                  <EuiFormRow label="Operator">
+                    <EuiSelect
+                      options={OPERATOR_OPTIONS}
+                      value={rule.operator}
+                      onChange={(e) => updateRule(rule.id, 'operator', e.target.value)}
+                      compressed
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+                <EuiFlexItem style={{ minWidth: 100 }}>
+                  <EuiFormRow label="Threshold">
+                    <EuiFieldNumber
+                      value={rule.threshold}
+                      onChange={(e) =>
+                        updateRule(
+                          rule.id,
+                          'threshold',
+                          Number.isNaN(Number.parseFloat(e.target.value))
+                            ? rule.threshold
+                            : Number.parseFloat(e.target.value)
+                        )
+                      }
+                      compressed
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+                <EuiFlexItem style={{ minWidth: 140 }}>
+                  <EuiFormRow label="For duration">
+                    <EuiSelect
+                      options={DURATION_OPTIONS}
+                      value={rule.forDuration}
+                      onChange={(e) => updateRule(rule.id, 'forDuration', e.target.value)}
+                      compressed
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
+            {idx < rules.length - 1 && <EuiSpacer size="s" />}
+          </React.Fragment>
+        ))}
+
+        {rules.length === 0 && (
+          <EuiCallOut title="No queries to create rules from" color="warning" iconType="alert">
+            <p>Add queries on the Metrics page first, then click Create alert rule.</p>
+          </EuiCallOut>
+        )}
+      </EuiFlyoutBody>
+
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty onClick={onClose}>Cancel</EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              fill
+              onClick={handleSave}
+              isLoading={saveStatus === 'creating'}
+              disabled={!isValid || saveStatus === 'done'}
+              iconType={saveStatus === 'done' ? 'check' : undefined}
+            >
+              {saveStatus === 'creating' &&
+                i18n.translate('explore.metricsRule.saveButton.creating', {
+                  defaultMessage: 'Creating in Prometheus...',
+                })}
+              {saveStatus === 'done' &&
+                i18n.translate('explore.metricsRule.saveButton.done', {
+                  defaultMessage: 'Created ✓',
+                })}
+              {saveStatus === 'idle' &&
+                i18n.translate('explore.metricsRule.saveButton', {
+                  defaultMessage: 'Create {count} rule(s)',
+                  values: { count: rules.length },
+                })}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
+    </EuiFlyout>
+  );
+};

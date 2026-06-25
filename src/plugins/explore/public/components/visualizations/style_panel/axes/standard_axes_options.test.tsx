@@ -108,16 +108,12 @@ describe('AllAxesOptions', () => {
         column: 'category',
         id: 0,
         schema: VisFieldType.Categorical,
-        validValuesCount: 1,
-        uniqueValuesCount: 1,
       },
       [AxisRole.Y]: {
         name: 'value',
         column: 'value',
         id: 1,
         schema: VisFieldType.Numerical,
-        validValuesCount: 1,
-        uniqueValuesCount: 1,
       },
     },
     showFullTimeRange: false,
@@ -328,8 +324,6 @@ describe('AllAxesOptions', () => {
         name: 'category',
         column: 'category',
         schema: VisFieldType.Categorical,
-        validValuesCount: 10,
-        uniqueValuesCount: 5,
       },
     };
 

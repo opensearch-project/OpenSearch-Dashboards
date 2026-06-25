@@ -49,6 +49,9 @@ jest.mock('../components/visualizations/table/table_vis', () => ({
 
 jest.mock('../../../visualizations/public', () => ({
   VisualizationNoResults: jest.fn(() => <div data-test-subj="mockNoResults">No results</div>),
+  VisualizationRequestError: jest.fn(({ error }) => (
+    <div data-test-subj="mockRequestError">{error}</div>
+  )),
 }));
 
 describe('ExploreEmbeddableComponent', () => {
@@ -144,5 +147,44 @@ describe('ExploreEmbeddableComponent', () => {
     render(<ExploreEmbeddableComponent searchProps={minimalProps as any} />);
 
     expect(screen.getByTestId('osdExploreContainer')).toBeInTheDocument();
+  });
+
+  test('renders error message when searchProps.error is present', () => {
+    const errorProps: SearchProps = {
+      ...mockSearchProps,
+      error: {
+        name: 'QueryError',
+        message: 'PPL query failed: syntax error',
+      },
+    };
+
+    render(<ExploreEmbeddableComponent searchProps={errorProps} />);
+
+    expect(screen.getByTestId('mockRequestError')).toBeInTheDocument();
+    expect(screen.getByTestId('mockRequestError')).toHaveTextContent(
+      'PPL query failed: syntax error'
+    );
+  });
+
+  test('shows error instead of old data when error occurs', () => {
+    const errorPropsWithOldData: SearchProps = {
+      ...mockSearchProps,
+      error: {
+        name: 'Error',
+        message: 'Failed to execute query',
+      },
+      rows: [{ _id: '1', _source: { field1: 'value1' } }],
+      tableData: {
+        rows: [{ col1: 'val1' }],
+        columns: [],
+      },
+    };
+
+    render(<ExploreEmbeddableComponent searchProps={errorPropsWithOldData} />);
+
+    // Should show error, not the table or old data
+    expect(screen.getByTestId('mockRequestError')).toBeInTheDocument();
+    expect(screen.queryByTestId('mockDataGridTable')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('mockTableVis')).not.toBeInTheDocument();
   });
 });

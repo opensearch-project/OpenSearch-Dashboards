@@ -49,6 +49,7 @@ interface StartServices {
   application: CoreStart['application'];
   overlays: CoreStart['overlays'];
   chrome: CoreStart['chrome'];
+  savedObjects: CoreStart['savedObjects'];
   notifications: CoreStart['notifications'];
   embeddable: EmbeddableStart;
   inspector: InspectorStartContract;

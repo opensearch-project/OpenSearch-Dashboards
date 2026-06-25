@@ -51,6 +51,21 @@ enum SingleVersionResolution {
   IGNORE = 'ignore',
 }
 
+// Modes that can mutate package.json/yarn.lock while reconciling conflicting
+// single-version ranges. Exported so callers (e.g. the bootstrap fast path)
+// can decide whether running validateDependencies is side-effect-free. Keep
+// this in sync with any new SingleVersionResolution values that write to
+// disk.
+const MUTATING_SINGLE_VERSION_MODES: ReadonlySet<string> = new Set([
+  SingleVersionResolution.LOOSE,
+  SingleVersionResolution.FORCE,
+  SingleVersionResolution.BRUTE_FORCE,
+]);
+
+export function isMutatingSingleVersionMode(mode: string | undefined): boolean {
+  return !!mode && MUTATING_SINGLE_VERSION_MODES.has(mode);
+}
+
 export async function validateDependencies(
   osd: OpenSearchDashboards,
   yarnLock: YarnLock,

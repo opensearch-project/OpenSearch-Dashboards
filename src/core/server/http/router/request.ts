@@ -219,7 +219,7 @@ export class OpenSearchDashboardsRequest<
       (request.app as OpenSearchDashboardsRequestState | undefined)?.requestUuid ?? uuid.v4();
 
     this.url = request.url;
-    this.headers = deepFreeze({ ...request.headers });
+    this.headers = deepFreeze({ ...request.headers }) as Headers;
     this.isSystemRequest =
       request.headers['osd-system-request'] === 'true' ||
       // Remove support for `osd-system-api` in 8.x. Used only by legacy platform.

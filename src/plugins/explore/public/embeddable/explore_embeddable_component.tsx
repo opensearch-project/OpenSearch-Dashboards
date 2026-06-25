@@ -6,7 +6,7 @@
 import { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { SearchProps } from './explore_embeddable';
-import { VisualizationNoResults } from '../../../visualizations/public';
+import { VisualizationNoResults, VisualizationRequestError } from '../../../visualizations/public';
 // TODO: refactor it to now use legacy getServices
 import {
   getDocViewsRegistry,
@@ -77,6 +77,16 @@ export const ExploreEmbeddableComponent = ({ searchProps }: ExploreEmbeddablePro
   }, [searchProps]);
 
   const getEmbeddableContent = () => {
+    if (searchProps?.error) {
+      return (
+        <EuiFlexItem>
+          <VisualizationRequestError
+            error={searchProps.error.message || searchProps.error.name || 'An error occurred'}
+          />
+        </EuiFlexItem>
+      );
+    }
+
     if (searchProps?.rows?.length === 0) {
       return (
         <EuiFlexItem>

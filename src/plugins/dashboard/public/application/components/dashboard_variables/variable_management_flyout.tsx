@@ -27,6 +27,8 @@ import {
 import { i18n } from '@osd/i18n';
 import { VariableService } from '../../../variables/variable_service';
 import { Variable, VariableType, VariableWithState } from '../../../variables/types';
+import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
+import { DashboardServices } from '../../../types';
 
 export interface VariableManagementFlyoutProps {
   variableService: VariableService;
@@ -48,8 +50,11 @@ export const VariableManagementFlyout: React.FC<VariableManagementFlyoutProps> =
   onEditVariable,
   panelQueries = [],
 }) => {
+  const { services } = useOpenSearchDashboards<DashboardServices>();
+  const { notifications } = services;
   const [variables, setVariables] = useState<VariableWithState[]>([]);
   const [deleteTarget, setDeleteTarget] = useState<Variable | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const subscription = variableService.getVariables$().subscribe((newVariables) => {
@@ -71,16 +76,33 @@ export const VariableManagementFlyout: React.FC<VariableManagementFlyoutProps> =
     setDeleteTarget(variable);
   }, []);
 
-  const confirmDelete = useCallback(() => {
+  const confirmDelete = useCallback(async () => {
     if (deleteTarget) {
-      variableService.removeVariable(deleteTarget.id);
-      setDeleteTarget(null);
+      setIsDeleting(true);
+      try {
+        await variableService.removeVariable(deleteTarget.id);
+        setDeleteTarget(null);
+        notifications.toasts.addSuccess({
+          title: i18n.translate('dashboard.variableManagement.deleteSuccess', {
+            defaultMessage: 'Variable deleted',
+          }),
+        });
+      } catch (error) {
+        notifications.toasts.addDanger({
+          title: i18n.translate('dashboard.variableManagement.deleteError', {
+            defaultMessage: 'Failed to delete variable',
+          }),
+          text: error instanceof Error ? error.message : 'Unknown error',
+        });
+      } finally {
+        setIsDeleting(false);
+      }
     }
-  }, [deleteTarget, variableService]);
+  }, [deleteTarget, variableService, notifications.toasts]);
 
   const handleToggleHide = useCallback(
     (variable: Variable) => {
-      variableService.updateVariable(variable.id, { hide: !variable.hide });
+      variableService.toggleVariableHide(variable.id);
     },
     [variableService]
   );
@@ -355,6 +377,8 @@ export const VariableManagementFlyout: React.FC<VariableManagementFlyoutProps> =
             defaultMessage: 'Delete',
           })}
           buttonColor="danger"
+          confirmButtonDisabled={isDeleting}
+          isLoading={isDeleting}
         >
           <p>
             {i18n.translate('dashboard.variableManagement.deleteConfirmBody', {

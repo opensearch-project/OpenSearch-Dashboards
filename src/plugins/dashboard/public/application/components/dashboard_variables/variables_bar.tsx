@@ -331,21 +331,24 @@ export const VariablesBar: React.FC<VariablesBarProps> = ({
       )}
       {!isCollapsed && (
         <>
-          {isEditMode && (
+          {isEditMode && variables.length > 0 && (
             <EuiFlexItem grow={false}>
-              <EuiSmallButtonEmpty
-                iconType="list"
-                iconSide="left"
-                aria-label={i18n.translate('dashboard.variables.manageVariables', {
+              <EuiToolTip
+                content={i18n.translate('dashboard.variables.manageVariables', {
                   defaultMessage: 'Manage variables',
                 })}
-                onClick={onManageVariables}
-                data-test-subj="manageVariablesButton"
               >
-                {i18n.translate('dashboard.variables.manageVariables', {
-                  defaultMessage: 'Manage variables',
-                })}
-              </EuiSmallButtonEmpty>
+                <EuiSmallButtonIcon
+                  iconType="list"
+                  aria-label={i18n.translate('dashboard.variables.manageVariables', {
+                    defaultMessage: 'Manage variables',
+                  })}
+                  onClick={onManageVariables}
+                  data-test-subj="manageVariablesButton"
+                  display="base"
+                  className="manageVariablesButton"
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           )}
           {visibleVariables.map((variable) => (

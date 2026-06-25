@@ -9,7 +9,7 @@ export { pivot } from './pivot';
 export { flatten } from './flatten';
 export { convertTo2DArray } from './convert';
 export { sortByTime } from './sort';
-export { transform, facetTransform } from './transform';
+export { transform } from './transform';
 export type { TransformFn } from './transform';
 
 // Utility functions (re-exported for convenience)

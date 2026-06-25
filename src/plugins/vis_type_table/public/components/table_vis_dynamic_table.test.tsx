@@ -372,6 +372,52 @@ describe('TableVisDynamicTable', () => {
     });
   });
 
+  // Regression test for https://github.com/opensearch-project/OpenSearch-Dashboards/issues/11453
+  it('should emit sorted rows in filterBucket so the targeted cell value is preserved', () => {
+    const tableWithFilterable: FormattedTableContext = {
+      ...mockTable,
+      formattedColumns: [
+        {
+          id: 'col1',
+          title: 'Column 1',
+          formatter: { convert: (v: any) => v } as any,
+          filterable: true,
+        },
+        {
+          id: 'col2',
+          title: 'Column 2',
+          formatter: { convert: (v: any) => v } as any,
+          filterable: false,
+        },
+      ],
+    };
+
+    // Sort descending by col2 → sorted order is [value2(20), value3(15), value1(10)]
+    const uiStateSortedDesc: TableUiState = {
+      ...mockUiState,
+      sort: { colIndex: 1, direction: 'desc' },
+    };
+
+    const { getAllByTestId } = render(
+      <TableVisDynamicTable
+        table={tableWithFilterable}
+        visConfig={mockVisConfig}
+        event={mockHandlers.event}
+        uiState={uiStateSortedDesc}
+      />
+    );
+
+    fireEvent.click(getAllByTestId('tableVisFilterForValue')[0]);
+
+    const payload = (mockHandlers.event as jest.Mock).mock.calls[0][0];
+    const { table, row, column } = payload.data.data[0];
+
+    // The first rendered row after sort-desc on col2 is value2/20; the filter
+    // event must reference that same row, not the first row of the unsorted
+    // response.
+    expect(table.rows[row][table.columns[column].id]).toBe('value2');
+  });
+
   it('should sanitize HTML content using dompurify', () => {
     const tableWithLink: FormattedTableContext = {
       ...mockTable,

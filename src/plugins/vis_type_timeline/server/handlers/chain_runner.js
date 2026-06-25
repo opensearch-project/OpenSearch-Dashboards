@@ -47,6 +47,10 @@ export default function chainRunner(tlConfig) {
   let sheet;
 
   function throwWithCell(cell, exception) {
+    // Preserve AnalyticEngineError to ensure it's handled correctly on the client
+    if (exception.name === 'AnalyticEngineError') {
+      throw exception;
+    }
     const e = new Error(exception.message);
     e.name = `Expression parse error in cell #${cell + 1}`;
     throw e;
@@ -128,8 +132,13 @@ export default function chainRunner(tlConfig) {
     } else if (!result) {
       promise = invoke('first', [link]);
     } else {
-      const args = link.arguments ? result.concat(link.arguments) : result;
-      promise = invoke(link.function, args);
+      const functionDef = tlConfig.getFunction(link.function);
+      if (functionDef.datasource) {
+        promise = invoke('first', [link]);
+      } else {
+        const args = link.arguments ? result.concat(link.arguments) : result;
+        promise = invoke(link.function, args);
+      }
     }
 
     return promise.then(function (result) {

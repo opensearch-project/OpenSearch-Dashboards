@@ -11,7 +11,7 @@ jobs:
     permissions:
       pull-requests: write
     steps:
-      - uses: aws-github-ops/github-merit-badger@v0.0.98
+      - uses: aws-github-ops/github-merit-badger@949750c3f54985fad4715e77f88942be7547f1bc # v0.0.98
         id: merit-badger
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}

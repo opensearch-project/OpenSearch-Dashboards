@@ -189,7 +189,7 @@ export const getNavActions = (
             });
           },
           containerInfo: {
-            containerId: currentContainer.id,
+            containerId: currentContainer.getInput().id,
             containerName: currentContainer.getTitle(),
           },
         });
@@ -368,7 +368,6 @@ export const getNavActions = (
 
       newStateContainer.filters = dashboard.filters;
       newStateContainer.query = dashboard.query;
-      newStateContainer.variables = dashboard.variables;
       newStateContainer.options = {
         hidePanelTitles: dashboard.options.hidePanelTitles,
         useMargins: dashboard.options.useMargins,

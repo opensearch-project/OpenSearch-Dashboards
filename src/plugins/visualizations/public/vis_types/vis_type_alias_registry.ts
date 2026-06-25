@@ -49,12 +49,17 @@ export interface VisualizationListItem {
 export interface VisualizationsAppExtension {
   docTypes: string[];
   searchFields?: string[];
+  /**
+   * Convert a saved object into a `VisualizationListItem` for display in
+   * listings. Return `null` (or `undefined`) to hide the saved object from
+   * the list — useful for gating items behind feature flags, etc.
+   */
   toListItem: (savedObject: {
     id: string;
     type: string;
     attributes: SavedObjectAttributes;
     updated_at?: string;
-  }) => VisualizationListItem;
+  }) => VisualizationListItem | null | undefined;
 }
 
 export interface VisTypeAliasPromotion {

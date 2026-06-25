@@ -10,6 +10,14 @@ import { QUERY_ENHANCEMENT_ENABLED_SETTING } from '../../../../common';
 import { DiscoverViewServices } from '../../../build_services';
 import { getIndexPatternId } from '../../helpers/get_index_pattern_id';
 import { updateIndexPattern, useSelector } from '../../utils/state_management';
+import * as discoverManifest from '../../../../opensearch_dashboards.json';
+
+// Engine types this plugin declines via its manifest's `unsupportedOSDataSourceEngineTypes`.
+// Index patterns whose backing data source matches any of these are excluded from the default
+// index pattern resolution.
+const UNSUPPORTED_ENGINE_TYPES =
+  (discoverManifest as { unsupportedOSDataSourceEngineTypes?: readonly string[] })
+    .unsupportedOSDataSourceEngineTypes ?? [];
 
 /**
  * Custom hook to fetch and manage the index pattern based on the provided services.
@@ -69,7 +77,9 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
         }
       } else if (!isQueryEnhancementEnabled) {
         if (!indexPatternIdFromState) {
-          const indexPatternList = await data.indexPatterns.getCache();
+          const indexPatternList = await data.indexPatterns.getCache({
+            excludeEngineTypes: UNSUPPORTED_ENGINE_TYPES,
+          });
           const newId = getIndexPatternId(
             '',
             // @ts-expect-error TS2345 TODO(ts-error): fixme

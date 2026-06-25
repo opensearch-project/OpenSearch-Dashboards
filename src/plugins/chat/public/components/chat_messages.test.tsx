@@ -7,7 +7,9 @@ import { render } from '@testing-library/react';
 import { ChatMessages } from './chat_messages';
 import { ChatLayoutMode } from '../types';
 import type { Message, AssistantMessage, ToolMessage, UserMessage } from '../../common/types';
+import { TOOL_EXECUTION_ERROR_PREFIX } from '../../common';
 import { convertTimelineToMessageRows } from './chat_messages';
+import { AssistantActionService, ToolCallState } from '../../../context_provider/public';
 
 // Mock the child components
 jest.mock('./message_row', () => ({
@@ -77,6 +79,58 @@ describe('ChatMessages', () => {
       );
 
       expect(container.querySelector('.chatMessages--fullscreen')).toBeTruthy();
+    });
+  });
+
+  describe('conversation history in empty state', () => {
+    it('should render starter suggestions without conversation history when services are not provided', () => {
+      const onShowHistory = jest.fn();
+      const { getByText, queryByText } = render(
+        <ChatMessages {...defaultProps} onShowHistory={onShowHistory} />
+      );
+
+      // Verify all starter suggestions are still present
+      expect(getByText('Ask questions about your data')).toBeTruthy();
+      expect(getByText('/investigate an issue')).toBeTruthy();
+      expect(getByText('Explain a concept')).toBeTruthy();
+      // RecentSessions should not render without required props
+      expect(queryByText('RECENT')).toBeNull();
+    });
+
+    it('should render RecentSessions component when all required props are provided', async () => {
+      const onShowHistory = jest.fn();
+      const onSelectConversation = jest.fn();
+      const mockConversationHistoryService = {
+        getConversations: jest.fn().mockResolvedValue({
+          conversations: [
+            {
+              id: '1',
+              threadId: 'thread-1',
+              name: 'Test conversation',
+              messages: [],
+              createdAt: Date.now(),
+              updatedAt: Date.now(),
+            },
+          ],
+          hasMore: false,
+          total: 1,
+        }),
+      };
+
+      const { findByText } = render(
+        <ChatMessages
+          {...defaultProps}
+          onShowHistory={onShowHistory}
+          conversationHistoryService={mockConversationHistoryService as any}
+          onSelectConversation={onSelectConversation}
+        />
+      );
+
+      // Verify starter suggestions are present
+      expect(await findByText('Ask questions about your data')).toBeTruthy();
+      // RecentSessions should render with required props
+      expect(await findByText('RECENT')).toBeTruthy();
+      expect(await findByText('Test conversation')).toBeTruthy();
     });
   });
 
@@ -546,11 +600,15 @@ describe('convertTimelineToMessageRows', () => {
           },
         ],
       } as AssistantMessage,
-      // No tool result - tool is running
+      // No tool result - tool is running (tracked via toolCallStates)
       { id: 'msg-3', role: 'assistant', content: 'Processing continues' } as AssistantMessage,
     ];
 
-    const result = convertTimelineToMessageRows(timeline);
+    const toolCallStates = new Map<string, ToolCallState>([
+      ['tool-1', { id: 'tool-1', name: 'search', status: 'executing', timestamp: Date.now() }],
+    ]);
+
+    const result = convertTimelineToMessageRows(timeline, toolCallStates);
 
     // Should continue processing and show all messages
     expect(result).toHaveLength(4);
@@ -653,11 +711,15 @@ describe('convertTimelineToMessageRows', () => {
           },
         ],
       } as AssistantMessage,
-      // No result for tool-2 - it's running
+      // No result for tool-2 - it's running (tracked via toolCallStates)
       { id: 'msg-4', role: 'assistant', content: 'Still processing' } as AssistantMessage,
     ];
 
-    const result = convertTimelineToMessageRows(timeline);
+    const toolCallStates = new Map<string, ToolCallState>([
+      ['tool-2', { id: 'tool-2', name: 'task2', status: 'executing', timestamp: Date.now() }],
+    ]);
+
+    const result = convertTimelineToMessageRows(timeline, toolCallStates);
 
     // Should not group when continuation has running tools, continue processing
     expect(result).toHaveLength(6);
@@ -687,6 +749,38 @@ describe('convertTimelineToMessageRows', () => {
     expect(result[5]).toMatchObject({ role: 'assistant', id: 'msg-4' });
   });
 
+  it('should treat historical tool calls with no result and no state as errors', () => {
+    // Snapshot-loaded conversation where the tool call never produced a
+    // ToolMessage and has no event-driven state — it was abandoned, not
+    // still running.
+    const timeline: Message[] = [
+      { id: 'msg-1', role: 'user', content: 'Search' } as UserMessage,
+      {
+        id: 'msg-2',
+        role: 'assistant',
+        content: 'Searching...',
+        toolCalls: [
+          {
+            id: 'tool-1',
+            type: 'function',
+            function: { name: 'search', arguments: '{}' },
+          },
+        ],
+      } as AssistantMessage,
+    ];
+
+    const result = convertTimelineToMessageRows(timeline);
+
+    expect(result).toHaveLength(3);
+    expect(result[2]).toMatchObject({ role: 'toolCall' });
+    const toolCallRow = result[2] as { role: 'toolCall'; toolCall: any };
+    expect(toolCallRow.toolCall).toMatchObject({
+      id: 'tool-1',
+      toolName: 'search',
+      status: 'error',
+    });
+  });
+
   it('should preserve error status for failed tool calls', () => {
     const timeline: Message[] = [
       { id: 'msg-1', role: 'user', content: 'Do something' } as UserMessage,
@@ -704,9 +798,8 @@ describe('convertTimelineToMessageRows', () => {
       {
         id: 'tool-result-1',
         role: 'tool',
-        content: 'Error occurred',
+        content: `${TOOL_EXECUTION_ERROR_PREFIX}Tool execution failed`,
         toolCallId: 'tool-1',
-        error: 'Tool execution failed',
       } as ToolMessage,
       { id: 'msg-3', role: 'assistant', content: 'Sorry, error' } as AssistantMessage,
     ];
@@ -718,7 +811,7 @@ describe('convertTimelineToMessageRows', () => {
     expect(toolCallGroup.toolCalls[0]).toMatchObject({
       id: 'tool-1',
       status: 'error',
-      result: 'Error occurred',
+      result: `${TOOL_EXECUTION_ERROR_PREFIX}Tool execution failed`,
     });
   });
 });
@@ -804,8 +897,26 @@ describe('share button with running tool calls', () => {
     threadId: 'thread-1',
   };
 
+  afterEach(() => {
+    // The AssistantActionService is a process-wide singleton, so stray
+    // toolCallStates from one test can bleed into the next. Drain it after
+    // every test so each case starts from a clean map.
+    const service = AssistantActionService.getInstance();
+    const ids = Array.from(service.getCurrentState().toolCallStates.keys());
+    ids.forEach((id) => service.clearToolCallState(id));
+  });
+
   it('should not pass timeline when tool calls are still running', () => {
-    // Simulate a turn where the assistant has text content but a tool call has no result yet
+    // Simulate a turn where the assistant has text content but a tool call is
+    // still executing (tracked in the event-driven toolCallStates).
+    const service = AssistantActionService.getInstance();
+    service.updateToolCallState('tc1', {
+      id: 'tc1',
+      name: 'SearchTool',
+      status: 'executing',
+      timestamp: Date.now(),
+    });
+
     const timeline: Message[] = [
       { id: '1', role: 'user', content: 'Question' } as UserMessage,
       {
@@ -816,7 +927,7 @@ describe('share button with running tool calls', () => {
           { id: 'tc1', type: 'function', function: { name: 'SearchTool', arguments: '{}' } },
         ],
       } as AssistantMessage,
-      // No ToolMessage for tc1 — tool is still running
+      // No ToolMessage for tc1 — tool is still running per toolCallStates
     ];
 
     const { getAllByTestId } = render(<ChatMessages {...defaultProps} timeline={timeline} />);

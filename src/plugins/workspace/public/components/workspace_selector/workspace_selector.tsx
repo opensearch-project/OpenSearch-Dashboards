@@ -66,48 +66,39 @@ export const WorkspaceSelector = ({ coreStart, registeredUseCases$ }: Props) => 
   };
 
   const button = currentWorkspace ? (
-    <div className="workspaceSelectorPopoverButtonContainer" data-label="Workspace">
+    <div className="workspaceSelectorPopoverButtonContainer">
       <EuiPanel
         className="workspaceSelectorPopoverButton"
         data-test-subj="workspace-selector-button"
-        paddingSize="s"
+        paddingSize="none"
         color="transparent"
         hasBorder={false}
         hasShadow={false}
         onClick={onButtonClick}
       >
-        <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" responsive={false}>
-          <EuiFlexItem>
-            <EuiFlexGroup gutterSize="s" justifyContent="flexStart" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiIcon
-                  size="l"
-                  type={getUseCase(currentWorkspace)?.icon || 'wsSelector'}
-                  color={getValidWorkspaceColor(currentWorkspace.color)}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
-                  <EuiFlexItem style={{ maxWidth: '130px' }}>
-                    <EuiText size="s" data-test-subj="workspace-selector-current-name">
-                      <h4 className="eui-textTruncate">{currentWorkspace.name}</h4>
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiText
-                      size="xs"
-                      color="subdued"
-                      data-test-subj="workspace-selector-current-title"
-                    >
-                      <small>{getUseCase(currentWorkspace)?.title}</small>
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+        <EuiFlexGroup
+          gutterSize="s"
+          justifyContent="spaceBetween"
+          alignItems="center"
+          responsive={false}
+          className="workspaceSelectorInner"
+        >
+          <EuiFlexItem grow={false}>
+            <EuiIcon
+              size="m"
+              type={getUseCase(currentWorkspace)?.icon || 'wsSelector'}
+              color={getValidWorkspaceColor(currentWorkspace.color)}
+            />
           </EuiFlexItem>
-          <EuiFlexItem grow={false} style={{ alignSelf: 'center' }}>
-            <EuiIcon type="arrowDown" size="m" />
+          <EuiFlexItem style={{ minWidth: 0 }}>
+            <EuiText size="xs" data-test-subj="workspace-selector-current-name">
+              <span className="eui-textTruncate workspaceSelectorName">
+                {currentWorkspace.name}
+              </span>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="arrowDown" size="s" color="subdued" />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>

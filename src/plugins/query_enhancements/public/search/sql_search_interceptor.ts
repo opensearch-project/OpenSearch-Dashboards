@@ -4,9 +4,9 @@
  */
 
 import { trimEnd } from 'lodash';
-import { CoreStart } from 'opensearch-dashboards/public';
-import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { ApplicationStart, CoreStart } from 'opensearch-dashboards/public';
+import { from, Observable, throwError } from 'rxjs';
+import { catchError, first, switchMap } from 'rxjs/operators';
 import {
   DataPublicPluginStart,
   IOpenSearchDashboardsSearchRequest,
@@ -15,12 +15,25 @@ import {
   SearchInterceptor,
   SearchInterceptorDeps,
 } from '../../../data/public';
-import { API, DATASET, EnhancedFetchContext, SEARCH_STRATEGY, fetch } from '../../common';
+import { formatTimePickerDate, Query } from '../../../data/common';
+import {
+  API,
+  DATASET,
+  EnhancedFetchContext,
+  formatDate,
+  SEARCH_STRATEGY,
+  fetch,
+} from '../../common';
 import { QueryEnhancementsPluginStartDependencies } from '../types';
+import { SQLFilterUtils } from './filters';
 
 export class SQLSearchInterceptor extends SearchInterceptor {
+  private static readonly filterManagerSupportedAppNames = ['dashboards'];
+  private static readonly timeFilterSupportedAppNames = ['dashboards', 'explore/logs'];
+
   protected queryService!: DataPublicPluginStart['query'];
   protected notifications!: CoreStart['notifications'];
+  private application!: ApplicationStart;
 
   constructor(deps: SearchInterceptorDeps) {
     super(deps);
@@ -28,6 +41,7 @@ export class SQLSearchInterceptor extends SearchInterceptor {
     deps.startServices.then(([coreStart, depsStart]) => {
       this.queryService = (depsStart as QueryEnhancementsPluginStartDependencies).data.query;
       this.notifications = coreStart.notifications;
+      this.application = coreStart.application;
     });
   }
 
@@ -50,11 +64,55 @@ export class SQLSearchInterceptor extends SearchInterceptor {
     const query =
       request.params?.body?.query?.queries?.[0] || this.queryService.queryString.getQuery();
 
-    return fetch(context, query).pipe(
+    return from(this.buildQuery(query, request)).pipe(
+      switchMap((finalQuery) => fetch(context, finalQuery)),
       catchError((error) => {
         return throwError(error);
       })
     );
+  }
+
+  private async buildQuery(
+    query: Query,
+    request: IOpenSearchDashboardsSearchRequest
+  ): Promise<Query> {
+    const dataset = query.dataset;
+    const appId = await this.application.currentAppId$.pipe(first()).toPromise();
+
+    let nextQuery = query;
+
+    // Apply filterManager filters (e.g. from the dashboard top filter bar) on
+    // supported apps so chip filters affect SQL results.
+    if (appId && SQLSearchInterceptor.filterManagerSupportedAppNames.includes(appId)) {
+      const filters = this.queryService.filterManager.getFilters();
+      if (filters?.length) {
+        nextQuery = {
+          ...nextQuery,
+          query: SQLFilterUtils.addFiltersToQuery(nextQuery.query, filters),
+        };
+      }
+    }
+
+    // Apply time filtering only for supported apps.
+    // Other apps (like legacy discover) handle time filtering at the search source level.
+    if (!appId || !SQLSearchInterceptor.timeFilterSupportedAppNames.includes(appId)) {
+      return nextQuery;
+    }
+
+    if (!dataset?.timeFieldName) {
+      return nextQuery;
+    }
+
+    const timeRange = this.queryService.timefilter.timefilter.getTime();
+    const { fromDate, toDate } = formatTimePickerDate(timeRange, 'YYYY-MM-DD HH:mm:ss.SSS');
+    const whereClause = `\`${dataset.timeFieldName}\` >= '${formatDate(fromDate)}' AND \`${
+      dataset.timeFieldName
+    }\` <= '${formatDate(toDate)}'`;
+
+    return {
+      ...nextQuery,
+      query: SQLFilterUtils.insertWhereClause(nextQuery.query, whereClause),
+    };
   }
 
   public search(request: IOpenSearchDashboardsSearchRequest, options: ISearchOptions) {

@@ -1,0 +1,3458 @@
+[
+  {
+    "value": "0",
+    "pattern": "0,0.[000]",
+    "locale": "en",
+    "output": "0"
+  },
+  {
+    "value": "0",
+    "pattern": "0,0.[000]%",
+    "locale": "en",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "0",
+    "pattern": "0,0.[0]b",
+    "locale": "en",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "0",
+    "pattern": "($0,0.[00])",
+    "locale": "en",
+    "output": "$0"
+  },
+  {
+    "value": "0",
+    "pattern": "0",
+    "locale": "en",
+    "output": "0"
+  },
+  {
+    "value": "0",
+    "pattern": "0,0",
+    "locale": "en",
+    "output": "0"
+  },
+  {
+    "value": "0",
+    "pattern": "0a",
+    "locale": "en",
+    "output": "0"
+  },
+  {
+    "value": "0",
+    "pattern": "0.0a",
+    "locale": "en",
+    "output": "0"
+  },
+  {
+    "value": "0",
+    "pattern": "0.00a",
+    "locale": "en",
+    "output": "0"
+  },
+  {
+    "value": "0",
+    "pattern": "+0,0",
+    "locale": "en",
+    "output": "+0"
+  },
+  {
+    "value": "0",
+    "pattern": "(0,0)",
+    "locale": "en",
+    "output": "0"
+  },
+  {
+    "value": "0",
+    "pattern": "0o",
+    "locale": "en",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "0",
+    "pattern": "0%",
+    "locale": "en",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "0",
+    "pattern": "0b",
+    "locale": "en",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "0",
+    "pattern": "0.00 b",
+    "locale": "en",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "0",
+    "pattern": "0,0.00",
+    "locale": "en",
+    "output": "0"
+  },
+  {
+    "value": "1",
+    "pattern": "0,0.[000]",
+    "locale": "en",
+    "output": "1"
+  },
+  {
+    "value": "1",
+    "pattern": "0,0.[000]%",
+    "locale": "en",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "1",
+    "pattern": "0,0.[0]b",
+    "locale": "en",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "1",
+    "pattern": "($0,0.[00])",
+    "locale": "en",
+    "output": "$1"
+  },
+  {
+    "value": "1",
+    "pattern": "0",
+    "locale": "en",
+    "output": "1"
+  },
+  {
+    "value": "1",
+    "pattern": "0,0",
+    "locale": "en",
+    "output": "1"
+  },
+  {
+    "value": "1",
+    "pattern": "0a",
+    "locale": "en",
+    "output": "1"
+  },
+  {
+    "value": "1",
+    "pattern": "0.0a",
+    "locale": "en",
+    "output": "1"
+  },
+  {
+    "value": "1",
+    "pattern": "0.00a",
+    "locale": "en",
+    "output": "1"
+  },
+  {
+    "value": "1",
+    "pattern": "+0,0",
+    "locale": "en",
+    "output": "+1"
+  },
+  {
+    "value": "1",
+    "pattern": "(0,0)",
+    "locale": "en",
+    "output": "1"
+  },
+  {
+    "value": "1",
+    "pattern": "0o",
+    "locale": "en",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "1",
+    "pattern": "0%",
+    "locale": "en",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "1",
+    "pattern": "0b",
+    "locale": "en",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "1",
+    "pattern": "0.00 b",
+    "locale": "en",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "1",
+    "pattern": "0,0.00",
+    "locale": "en",
+    "output": "1"
+  },
+  {
+    "value": "-1",
+    "pattern": "0,0.[000]",
+    "locale": "en",
+    "output": "-1"
+  },
+  {
+    "value": "-1",
+    "pattern": "0,0.[000]%",
+    "locale": "en",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "-1",
+    "pattern": "0,0.[0]b",
+    "locale": "en",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "-1",
+    "pattern": "($0,0.[00])",
+    "locale": "en",
+    "output": "($1)"
+  },
+  {
+    "value": "-1",
+    "pattern": "0",
+    "locale": "en",
+    "output": "-1"
+  },
+  {
+    "value": "-1",
+    "pattern": "0,0",
+    "locale": "en",
+    "output": "-1"
+  },
+  {
+    "value": "-1",
+    "pattern": "0a",
+    "locale": "en",
+    "output": "-1"
+  },
+  {
+    "value": "-1",
+    "pattern": "0.0a",
+    "locale": "en",
+    "output": "-1"
+  },
+  {
+    "value": "-1",
+    "pattern": "0.00a",
+    "locale": "en",
+    "output": "-1"
+  },
+  {
+    "value": "-1",
+    "pattern": "+0,0",
+    "locale": "en",
+    "output": "-1"
+  },
+  {
+    "value": "-1",
+    "pattern": "(0,0)",
+    "locale": "en",
+    "output": "(1)"
+  },
+  {
+    "value": "-1",
+    "pattern": "0o",
+    "locale": "en",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "-1",
+    "pattern": "0%",
+    "locale": "en",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "-1",
+    "pattern": "0b",
+    "locale": "en",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "-1",
+    "pattern": "0.00 b",
+    "locale": "en",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "-1",
+    "pattern": "0,0.00",
+    "locale": "en",
+    "output": "-1"
+  },
+  {
+    "value": "123",
+    "pattern": "0,0.[000]",
+    "locale": "en",
+    "output": "123"
+  },
+  {
+    "value": "123",
+    "pattern": "0,0.[000]%",
+    "locale": "en",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "123",
+    "pattern": "0,0.[0]b",
+    "locale": "en",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "123",
+    "pattern": "($0,0.[00])",
+    "locale": "en",
+    "output": "$123"
+  },
+  {
+    "value": "123",
+    "pattern": "0",
+    "locale": "en",
+    "output": "123"
+  },
+  {
+    "value": "123",
+    "pattern": "0,0",
+    "locale": "en",
+    "output": "123"
+  },
+  {
+    "value": "123",
+    "pattern": "0a",
+    "locale": "en",
+    "output": "123"
+  },
+  {
+    "value": "123",
+    "pattern": "0.0a",
+    "locale": "en",
+    "output": "123"
+  },
+  {
+    "value": "123",
+    "pattern": "0.00a",
+    "locale": "en",
+    "output": "123"
+  },
+  {
+    "value": "123",
+    "pattern": "+0,0",
+    "locale": "en",
+    "output": "+123"
+  },
+  {
+    "value": "123",
+    "pattern": "(0,0)",
+    "locale": "en",
+    "output": "123"
+  },
+  {
+    "value": "123",
+    "pattern": "0o",
+    "locale": "en",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "123",
+    "pattern": "0%",
+    "locale": "en",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "123",
+    "pattern": "0b",
+    "locale": "en",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "123",
+    "pattern": "0.00 b",
+    "locale": "en",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "123",
+    "pattern": "0,0.00",
+    "locale": "en",
+    "output": "123"
+  },
+  {
+    "value": "1000",
+    "pattern": "0,0.[000]",
+    "locale": "en",
+    "output": "1,000"
+  },
+  {
+    "value": "1000",
+    "pattern": "0,0.[000]%",
+    "locale": "en",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "1000",
+    "pattern": "0,0.[0]b",
+    "locale": "en",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "1000",
+    "pattern": "($0,0.[00])",
+    "locale": "en",
+    "output": "$1,000"
+  },
+  {
+    "value": "1000",
+    "pattern": "0",
+    "locale": "en",
+    "output": "1000"
+  },
+  {
+    "value": "1000",
+    "pattern": "0,0",
+    "locale": "en",
+    "output": "1,000"
+  },
+  {
+    "value": "1000",
+    "pattern": "0a",
+    "locale": "en",
+    "output": "1k"
+  },
+  {
+    "value": "1000",
+    "pattern": "0.0a",
+    "locale": "en",
+    "output": "1k"
+  },
+  {
+    "value": "1000",
+    "pattern": "0.00a",
+    "locale": "en",
+    "output": "1k"
+  },
+  {
+    "value": "1000",
+    "pattern": "+0,0",
+    "locale": "en",
+    "output": "+1,000"
+  },
+  {
+    "value": "1000",
+    "pattern": "(0,0)",
+    "locale": "en",
+    "output": "1,000"
+  },
+  {
+    "value": "1000",
+    "pattern": "0o",
+    "locale": "en",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "1000",
+    "pattern": "0%",
+    "locale": "en",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "1000",
+    "pattern": "0b",
+    "locale": "en",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "1000",
+    "pattern": "0.00 b",
+    "locale": "en",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "1000",
+    "pattern": "0,0.00",
+    "locale": "en",
+    "output": "1,000"
+  },
+  {
+    "value": "-1000",
+    "pattern": "0,0.[000]",
+    "locale": "en",
+    "output": "-1,000"
+  },
+  {
+    "value": "-1000",
+    "pattern": "0,0.[000]%",
+    "locale": "en",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "-1000",
+    "pattern": "0,0.[0]b",
+    "locale": "en",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "-1000",
+    "pattern": "($0,0.[00])",
+    "locale": "en",
+    "output": "($1,000)"
+  },
+  {
+    "value": "-1000",
+    "pattern": "0",
+    "locale": "en",
+    "output": "-1000"
+  },
+  {
+    "value": "-1000",
+    "pattern": "0,0",
+    "locale": "en",
+    "output": "-1,000"
+  },
+  {
+    "value": "-1000",
+    "pattern": "0a",
+    "locale": "en",
+    "output": "-1k"
+  },
+  {
+    "value": "-1000",
+    "pattern": "0.0a",
+    "locale": "en",
+    "output": "-1k"
+  },
+  {
+    "value": "-1000",
+    "pattern": "0.00a",
+    "locale": "en",
+    "output": "-1k"
+  },
+  {
+    "value": "-1000",
+    "pattern": "+0,0",
+    "locale": "en",
+    "output": "-1,000"
+  },
+  {
+    "value": "-1000",
+    "pattern": "(0,0)",
+    "locale": "en",
+    "output": "(1,000)"
+  },
+  {
+    "value": "-1000",
+    "pattern": "0o",
+    "locale": "en",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "-1000",
+    "pattern": "0%",
+    "locale": "en",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "-1000",
+    "pattern": "0b",
+    "locale": "en",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "-1000",
+    "pattern": "0.00 b",
+    "locale": "en",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "-1000",
+    "pattern": "0,0.00",
+    "locale": "en",
+    "output": "-1,000"
+  },
+  {
+    "value": "999999",
+    "pattern": "0,0.[000]",
+    "locale": "en",
+    "output": "999,999"
+  },
+  {
+    "value": "999999",
+    "pattern": "0,0.[000]%",
+    "locale": "en",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "999999",
+    "pattern": "0,0.[0]b",
+    "locale": "en",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "999999",
+    "pattern": "($0,0.[00])",
+    "locale": "en",
+    "output": "$999,999"
+  },
+  {
+    "value": "999999",
+    "pattern": "0",
+    "locale": "en",
+    "output": "999999"
+  },
+  {
+    "value": "999999",
+    "pattern": "0,0",
+    "locale": "en",
+    "output": "999,999"
+  },
+  {
+    "value": "999999",
+    "pattern": "0a",
+    "locale": "en",
+    "output": "999k"
+  },
+  {
+    "value": "999999",
+    "pattern": "0.0a",
+    "locale": "en",
+    "output": "999k"
+  },
+  {
+    "value": "999999",
+    "pattern": "0.00a",
+    "locale": "en",
+    "output": "999k"
+  },
+  {
+    "value": "999999",
+    "pattern": "+0,0",
+    "locale": "en",
+    "output": "+999,999"
+  },
+  {
+    "value": "999999",
+    "pattern": "(0,0)",
+    "locale": "en",
+    "output": "999,999"
+  },
+  {
+    "value": "999999",
+    "pattern": "0o",
+    "locale": "en",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "999999",
+    "pattern": "0%",
+    "locale": "en",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "999999",
+    "pattern": "0b",
+    "locale": "en",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "999999",
+    "pattern": "0.00 b",
+    "locale": "en",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "999999",
+    "pattern": "0,0.00",
+    "locale": "en",
+    "output": "999,999"
+  },
+  {
+    "value": "1000000",
+    "pattern": "0,0.[000]",
+    "locale": "en",
+    "output": "1,000,000"
+  },
+  {
+    "value": "1000000",
+    "pattern": "0,0.[000]%",
+    "locale": "en",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "1000000",
+    "pattern": "0,0.[0]b",
+    "locale": "en",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "1000000",
+    "pattern": "($0,0.[00])",
+    "locale": "en",
+    "output": "$1,000,000"
+  },
+  {
+    "value": "1000000",
+    "pattern": "0",
+    "locale": "en",
+    "output": "1000000"
+  },
+  {
+    "value": "1000000",
+    "pattern": "0,0",
+    "locale": "en",
+    "output": "1,000,000"
+  },
+  {
+    "value": "1000000",
+    "pattern": "0a",
+    "locale": "en",
+    "output": "1m"
+  },
+  {
+    "value": "1000000",
+    "pattern": "0.0a",
+    "locale": "en",
+    "output": "1m"
+  },
+  {
+    "value": "1000000",
+    "pattern": "0.00a",
+    "locale": "en",
+    "output": "1m"
+  },
+  {
+    "value": "1000000",
+    "pattern": "+0,0",
+    "locale": "en",
+    "output": "+1,000,000"
+  },
+  {
+    "value": "1000000",
+    "pattern": "(0,0)",
+    "locale": "en",
+    "output": "1,000,000"
+  },
+  {
+    "value": "1000000",
+    "pattern": "0o",
+    "locale": "en",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "1000000",
+    "pattern": "0%",
+    "locale": "en",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "1000000",
+    "pattern": "0b",
+    "locale": "en",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "1000000",
+    "pattern": "0.00 b",
+    "locale": "en",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "1000000",
+    "pattern": "0,0.00",
+    "locale": "en",
+    "output": "1,000,000"
+  },
+  {
+    "value": "1000000000",
+    "pattern": "0,0.[000]",
+    "locale": "en",
+    "output": "1,000,000,000"
+  },
+  {
+    "value": "1000000000",
+    "pattern": "0,0.[000]%",
+    "locale": "en",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "1000000000",
+    "pattern": "0,0.[0]b",
+    "locale": "en",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "1000000000",
+    "pattern": "($0,0.[00])",
+    "locale": "en",
+    "output": "$1,000,000,000"
+  },
+  {
+    "value": "1000000000",
+    "pattern": "0",
+    "locale": "en",
+    "output": "1000000000"
+  },
+  {
+    "value": "1000000000",
+    "pattern": "0,0",
+    "locale": "en",
+    "output": "1,000,000,000"
+  },
+  {
+    "value": "1000000000",
+    "pattern": "0a",
+    "locale": "en",
+    "output": "1b"
+  },
+  {
+    "value": "1000000000",
+    "pattern": "0.0a",
+    "locale": "en",
+    "output": "1b"
+  },
+  {
+    "value": "1000000000",
+    "pattern": "0.00a",
+    "locale": "en",
+    "output": "1b"
+  },
+  {
+    "value": "1000000000",
+    "pattern": "+0,0",
+    "locale": "en",
+    "output": "+1,000,000,000"
+  },
+  {
+    "value": "1000000000",
+    "pattern": "(0,0)",
+    "locale": "en",
+    "output": "1,000,000,000"
+  },
+  {
+    "value": "1000000000",
+    "pattern": "0o",
+    "locale": "en",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "1000000000",
+    "pattern": "0%",
+    "locale": "en",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "1000000000",
+    "pattern": "0b",
+    "locale": "en",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "1000000000",
+    "pattern": "0.00 b",
+    "locale": "en",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "1000000000",
+    "pattern": "0,0.00",
+    "locale": "en",
+    "output": "1,000,000,000"
+  },
+  {
+    "value": "1000000000000",
+    "pattern": "0,0.[000]",
+    "locale": "en",
+    "output": "1,000,000,000,000"
+  },
+  {
+    "value": "1000000000000",
+    "pattern": "0,0.[000]%",
+    "locale": "en",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "1000000000000",
+    "pattern": "0,0.[0]b",
+    "locale": "en",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "1000000000000",
+    "pattern": "($0,0.[00])",
+    "locale": "en",
+    "output": "$1,000,000,000,000"
+  },
+  {
+    "value": "1000000000000",
+    "pattern": "0",
+    "locale": "en",
+    "output": "1000000000000"
+  },
+  {
+    "value": "1000000000000",
+    "pattern": "0,0",
+    "locale": "en",
+    "output": "1,000,000,000,000"
+  },
+  {
+    "value": "1000000000000",
+    "pattern": "0a",
+    "locale": "en",
+    "output": "1t"
+  },
+  {
+    "value": "1000000000000",
+    "pattern": "0.0a",
+    "locale": "en",
+    "output": "1t"
+  },
+  {
+    "value": "1000000000000",
+    "pattern": "0.00a",
+    "locale": "en",
+    "output": "1t"
+  },
+  {
+    "value": "1000000000000",
+    "pattern": "+0,0",
+    "locale": "en",
+    "output": "+1,000,000,000,000"
+  },
+  {
+    "value": "1000000000000",
+    "pattern": "(0,0)",
+    "locale": "en",
+    "output": "1,000,000,000,000"
+  },
+  {
+    "value": "1000000000000",
+    "pattern": "0o",
+    "locale": "en",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "1000000000000",
+    "pattern": "0%",
+    "locale": "en",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "1000000000000",
+    "pattern": "0b",
+    "locale": "en",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "1000000000000",
+    "pattern": "0.00 b",
+    "locale": "en",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "1000000000000",
+    "pattern": "0,0.00",
+    "locale": "en",
+    "output": "1,000,000,000,000"
+  },
+  {
+    "value": "1234567890",
+    "pattern": "0,0.[000]",
+    "locale": "en",
+    "output": "1,234,567,890"
+  },
+  {
+    "value": "1234567890",
+    "pattern": "0,0.[000]%",
+    "locale": "en",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "1234567890",
+    "pattern": "0,0.[0]b",
+    "locale": "en",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "1234567890",
+    "pattern": "($0,0.[00])",
+    "locale": "en",
+    "output": "$1,234,567,890"
+  },
+  {
+    "value": "1234567890",
+    "pattern": "0",
+    "locale": "en",
+    "output": "1234567890"
+  },
+  {
+    "value": "1234567890",
+    "pattern": "0,0",
+    "locale": "en",
+    "output": "1,234,567,890"
+  },
+  {
+    "value": "1234567890",
+    "pattern": "0a",
+    "locale": "en",
+    "output": "1b"
+  },
+  {
+    "value": "1234567890",
+    "pattern": "0.0a",
+    "locale": "en",
+    "output": "1b"
+  },
+  {
+    "value": "1234567890",
+    "pattern": "0.00a",
+    "locale": "en",
+    "output": "1b"
+  },
+  {
+    "value": "1234567890",
+    "pattern": "+0,0",
+    "locale": "en",
+    "output": "+1,234,567,890"
+  },
+  {
+    "value": "1234567890",
+    "pattern": "(0,0)",
+    "locale": "en",
+    "output": "1,234,567,890"
+  },
+  {
+    "value": "1234567890",
+    "pattern": "0o",
+    "locale": "en",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "1234567890",
+    "pattern": "0%",
+    "locale": "en",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "1234567890",
+    "pattern": "0b",
+    "locale": "en",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "1234567890",
+    "pattern": "0.00 b",
+    "locale": "en",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "1234567890",
+    "pattern": "0,0.00",
+    "locale": "en",
+    "output": "1,234,567,890"
+  },
+  {
+    "value": "1234567890123",
+    "pattern": "0,0.[000]",
+    "locale": "en",
+    "output": "1,234,567,890,123"
+  },
+  {
+    "value": "1234567890123",
+    "pattern": "0,0.[000]%",
+    "locale": "en",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "1234567890123",
+    "pattern": "0,0.[0]b",
+    "locale": "en",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "1234567890123",
+    "pattern": "($0,0.[00])",
+    "locale": "en",
+    "output": "$1,234,567,890,123"
+  },
+  {
+    "value": "1234567890123",
+    "pattern": "0",
+    "locale": "en",
+    "output": "1234567890123"
+  },
+  {
+    "value": "1234567890123",
+    "pattern": "0,0",
+    "locale": "en",
+    "output": "1,234,567,890,123"
+  },
+  {
+    "value": "1234567890123",
+    "pattern": "0a",
+    "locale": "en",
+    "output": "1t"
+  },
+  {
+    "value": "1234567890123",
+    "pattern": "0.0a",
+    "locale": "en",
+    "output": "1t"
+  },
+  {
+    "value": "1234567890123",
+    "pattern": "0.00a",
+    "locale": "en",
+    "output": "1t"
+  },
+  {
+    "value": "1234567890123",
+    "pattern": "+0,0",
+    "locale": "en",
+    "output": "+1,234,567,890,123"
+  },
+  {
+    "value": "1234567890123",
+    "pattern": "(0,0)",
+    "locale": "en",
+    "output": "1,234,567,890,123"
+  },
+  {
+    "value": "1234567890123",
+    "pattern": "0o",
+    "locale": "en",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "1234567890123",
+    "pattern": "0%",
+    "locale": "en",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "1234567890123",
+    "pattern": "0b",
+    "locale": "en",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "1234567890123",
+    "pattern": "0.00 b",
+    "locale": "en",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "1234567890123",
+    "pattern": "0,0.00",
+    "locale": "en",
+    "output": "1,234,567,890,123"
+  },
+  {
+    "value": "9007199254740991",
+    "pattern": "0,0.[000]",
+    "locale": "en",
+    "output": "9,007,199,254,740,991"
+  },
+  {
+    "value": "9007199254740991",
+    "pattern": "0,0.[000]%",
+    "locale": "en",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "9007199254740991",
+    "pattern": "0,0.[0]b",
+    "locale": "en",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "9007199254740991",
+    "pattern": "($0,0.[00])",
+    "locale": "en",
+    "output": "$9,007,199,254,740,991"
+  },
+  {
+    "value": "9007199254740991",
+    "pattern": "0",
+    "locale": "en",
+    "output": "9007199254740991"
+  },
+  {
+    "value": "9007199254740991",
+    "pattern": "0,0",
+    "locale": "en",
+    "output": "9,007,199,254,740,991"
+  },
+  {
+    "value": "9007199254740991",
+    "pattern": "0a",
+    "locale": "en",
+    "output": "9007t"
+  },
+  {
+    "value": "9007199254740991",
+    "pattern": "0.0a",
+    "locale": "en",
+    "output": "9007t"
+  },
+  {
+    "value": "9007199254740991",
+    "pattern": "0.00a",
+    "locale": "en",
+    "output": "9007t"
+  },
+  {
+    "value": "9007199254740991",
+    "pattern": "+0,0",
+    "locale": "en",
+    "output": "+9,007,199,254,740,991"
+  },
+  {
+    "value": "9007199254740991",
+    "pattern": "(0,0)",
+    "locale": "en",
+    "output": "9,007,199,254,740,991"
+  },
+  {
+    "value": "9007199254740991",
+    "pattern": "0o",
+    "locale": "en",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "9007199254740991",
+    "pattern": "0%",
+    "locale": "en",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "9007199254740991",
+    "pattern": "0b",
+    "locale": "en",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "9007199254740991",
+    "pattern": "0.00 b",
+    "locale": "en",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "9007199254740991",
+    "pattern": "0,0.00",
+    "locale": "en",
+    "output": "9,007,199,254,740,991"
+  },
+  {
+    "value": "9007199254740992",
+    "pattern": "0,0.[000]",
+    "locale": "en",
+    "output": "9,007,199,254,740,992"
+  },
+  {
+    "value": "9007199254740992",
+    "pattern": "0,0.[000]%",
+    "locale": "en",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "9007199254740992",
+    "pattern": "0,0.[0]b",
+    "locale": "en",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "9007199254740992",
+    "pattern": "($0,0.[00])",
+    "locale": "en",
+    "output": "$9,007,199,254,740,992"
+  },
+  {
+    "value": "9007199254740992",
+    "pattern": "0",
+    "locale": "en",
+    "output": "9007199254740992"
+  },
+  {
+    "value": "9007199254740992",
+    "pattern": "0,0",
+    "locale": "en",
+    "output": "9,007,199,254,740,992"
+  },
+  {
+    "value": "9007199254740992",
+    "pattern": "0a",
+    "locale": "en",
+    "output": "9007t"
+  },
+  {
+    "value": "9007199254740992",
+    "pattern": "0.0a",
+    "locale": "en",
+    "output": "9007t"
+  },
+  {
+    "value": "9007199254740992",
+    "pattern": "0.00a",
+    "locale": "en",
+    "output": "9007t"
+  },
+  {
+    "value": "9007199254740992",
+    "pattern": "+0,0",
+    "locale": "en",
+    "output": "+9,007,199,254,740,992"
+  },
+  {
+    "value": "9007199254740992",
+    "pattern": "(0,0)",
+    "locale": "en",
+    "output": "9,007,199,254,740,992"
+  },
+  {
+    "value": "9007199254740992",
+    "pattern": "0o",
+    "locale": "en",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "9007199254740992",
+    "pattern": "0%",
+    "locale": "en",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "9007199254740992",
+    "pattern": "0b",
+    "locale": "en",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "9007199254740992",
+    "pattern": "0.00 b",
+    "locale": "en",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "9007199254740992",
+    "pattern": "0,0.00",
+    "locale": "en",
+    "output": "9,007,199,254,740,992"
+  },
+  {
+    "value": "18014398509481982",
+    "pattern": "0,0.[000]",
+    "locale": "en",
+    "output": "18,014,398,509,481,982"
+  },
+  {
+    "value": "18014398509481982",
+    "pattern": "0,0.[000]%",
+    "locale": "en",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "18014398509481982",
+    "pattern": "0,0.[0]b",
+    "locale": "en",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "18014398509481982",
+    "pattern": "($0,0.[00])",
+    "locale": "en",
+    "output": "$18,014,398,509,481,982"
+  },
+  {
+    "value": "18014398509481982",
+    "pattern": "0",
+    "locale": "en",
+    "output": "18014398509481982"
+  },
+  {
+    "value": "18014398509481982",
+    "pattern": "0,0",
+    "locale": "en",
+    "output": "18,014,398,509,481,982"
+  },
+  {
+    "value": "18014398509481982",
+    "pattern": "0a",
+    "locale": "en",
+    "output": "18014t"
+  },
+  {
+    "value": "18014398509481982",
+    "pattern": "0.0a",
+    "locale": "en",
+    "output": "18014t"
+  },
+  {
+    "value": "18014398509481982",
+    "pattern": "0.00a",
+    "locale": "en",
+    "output": "18014t"
+  },
+  {
+    "value": "18014398509481982",
+    "pattern": "+0,0",
+    "locale": "en",
+    "output": "+18,014,398,509,481,982"
+  },
+  {
+    "value": "18014398509481982",
+    "pattern": "(0,0)",
+    "locale": "en",
+    "output": "18,014,398,509,481,982"
+  },
+  {
+    "value": "18014398509481982",
+    "pattern": "0o",
+    "locale": "en",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "18014398509481982",
+    "pattern": "0%",
+    "locale": "en",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "18014398509481982",
+    "pattern": "0b",
+    "locale": "en",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "18014398509481982",
+    "pattern": "0.00 b",
+    "locale": "en",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "18014398509481982",
+    "pattern": "0,0.00",
+    "locale": "en",
+    "output": "18,014,398,509,481,982"
+  },
+  {
+    "value": "-18014398509481982",
+    "pattern": "0,0.[000]",
+    "locale": "en",
+    "output": "-18,014,398,509,481,982"
+  },
+  {
+    "value": "-18014398509481982",
+    "pattern": "0,0.[000]%",
+    "locale": "en",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "-18014398509481982",
+    "pattern": "0,0.[0]b",
+    "locale": "en",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "-18014398509481982",
+    "pattern": "($0,0.[00])",
+    "locale": "en",
+    "output": "($18,014,398,509,481,982)"
+  },
+  {
+    "value": "-18014398509481982",
+    "pattern": "0",
+    "locale": "en",
+    "output": "-18014398509481982"
+  },
+  {
+    "value": "-18014398509481982",
+    "pattern": "0,0",
+    "locale": "en",
+    "output": "-18,014,398,509,481,982"
+  },
+  {
+    "value": "-18014398509481982",
+    "pattern": "0a",
+    "locale": "en",
+    "output": "-18014t"
+  },
+  {
+    "value": "-18014398509481982",
+    "pattern": "0.0a",
+    "locale": "en",
+    "output": "-18014t"
+  },
+  {
+    "value": "-18014398509481982",
+    "pattern": "0.00a",
+    "locale": "en",
+    "output": "-18014t"
+  },
+  {
+    "value": "-18014398509481982",
+    "pattern": "+0,0",
+    "locale": "en",
+    "output": "-18,014,398,509,481,982"
+  },
+  {
+    "value": "-18014398509481982",
+    "pattern": "(0,0)",
+    "locale": "en",
+    "output": "(18,014,398,509,481,982)"
+  },
+  {
+    "value": "-18014398509481982",
+    "pattern": "0o",
+    "locale": "en",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "-18014398509481982",
+    "pattern": "0%",
+    "locale": "en",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "-18014398509481982",
+    "pattern": "0b",
+    "locale": "en",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "-18014398509481982",
+    "pattern": "0.00 b",
+    "locale": "en",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "-18014398509481982",
+    "pattern": "0,0.00",
+    "locale": "en",
+    "output": "-18,014,398,509,481,982"
+  },
+  {
+    "value": "9223372036854775807",
+    "pattern": "0,0.[000]",
+    "locale": "en",
+    "output": "9,223,372,036,854,775,807"
+  },
+  {
+    "value": "9223372036854775807",
+    "pattern": "0,0.[000]%",
+    "locale": "en",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "9223372036854775807",
+    "pattern": "0,0.[0]b",
+    "locale": "en",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "9223372036854775807",
+    "pattern": "($0,0.[00])",
+    "locale": "en",
+    "output": "$9,223,372,036,854,775,807"
+  },
+  {
+    "value": "9223372036854775807",
+    "pattern": "0",
+    "locale": "en",
+    "output": "9223372036854775807"
+  },
+  {
+    "value": "9223372036854775807",
+    "pattern": "0,0",
+    "locale": "en",
+    "output": "9,223,372,036,854,775,807"
+  },
+  {
+    "value": "9223372036854775807",
+    "pattern": "0a",
+    "locale": "en",
+    "output": "9223372t"
+  },
+  {
+    "value": "9223372036854775807",
+    "pattern": "0.0a",
+    "locale": "en",
+    "output": "9223372t"
+  },
+  {
+    "value": "9223372036854775807",
+    "pattern": "0.00a",
+    "locale": "en",
+    "output": "9223372t"
+  },
+  {
+    "value": "9223372036854775807",
+    "pattern": "+0,0",
+    "locale": "en",
+    "output": "+9,223,372,036,854,775,807"
+  },
+  {
+    "value": "9223372036854775807",
+    "pattern": "(0,0)",
+    "locale": "en",
+    "output": "9,223,372,036,854,775,807"
+  },
+  {
+    "value": "9223372036854775807",
+    "pattern": "0o",
+    "locale": "en",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "9223372036854775807",
+    "pattern": "0%",
+    "locale": "en",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "9223372036854775807",
+    "pattern": "0b",
+    "locale": "en",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "9223372036854775807",
+    "pattern": "0.00 b",
+    "locale": "en",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "9223372036854775807",
+    "pattern": "0,0.00",
+    "locale": "en",
+    "output": "9,223,372,036,854,775,807"
+  },
+  {
+    "value": "-9223372036854775808",
+    "pattern": "0,0.[000]",
+    "locale": "en",
+    "output": "-9,223,372,036,854,775,808"
+  },
+  {
+    "value": "-9223372036854775808",
+    "pattern": "0,0.[000]%",
+    "locale": "en",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "-9223372036854775808",
+    "pattern": "0,0.[0]b",
+    "locale": "en",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "-9223372036854775808",
+    "pattern": "($0,0.[00])",
+    "locale": "en",
+    "output": "($9,223,372,036,854,775,808)"
+  },
+  {
+    "value": "-9223372036854775808",
+    "pattern": "0",
+    "locale": "en",
+    "output": "-9223372036854775808"
+  },
+  {
+    "value": "-9223372036854775808",
+    "pattern": "0,0",
+    "locale": "en",
+    "output": "-9,223,372,036,854,775,808"
+  },
+  {
+    "value": "-9223372036854775808",
+    "pattern": "0a",
+    "locale": "en",
+    "output": "-9223372t"
+  },
+  {
+    "value": "-9223372036854775808",
+    "pattern": "0.0a",
+    "locale": "en",
+    "output": "-9223372t"
+  },
+  {
+    "value": "-9223372036854775808",
+    "pattern": "0.00a",
+    "locale": "en",
+    "output": "-9223372t"
+  },
+  {
+    "value": "-9223372036854775808",
+    "pattern": "+0,0",
+    "locale": "en",
+    "output": "-9,223,372,036,854,775,808"
+  },
+  {
+    "value": "-9223372036854775808",
+    "pattern": "(0,0)",
+    "locale": "en",
+    "output": "(9,223,372,036,854,775,808)"
+  },
+  {
+    "value": "-9223372036854775808",
+    "pattern": "0o",
+    "locale": "en",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "-9223372036854775808",
+    "pattern": "0%",
+    "locale": "en",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "-9223372036854775808",
+    "pattern": "0b",
+    "locale": "en",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "-9223372036854775808",
+    "pattern": "0.00 b",
+    "locale": "en",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "-9223372036854775808",
+    "pattern": "0,0.00",
+    "locale": "en",
+    "output": "-9,223,372,036,854,775,808"
+  },
+  {
+    "value": "0",
+    "pattern": "0,0.[000]",
+    "locale": "fr",
+    "output": "0"
+  },
+  {
+    "value": "0",
+    "pattern": "0,0.[000]%",
+    "locale": "fr",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "0",
+    "pattern": "0,0.[0]b",
+    "locale": "fr",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "0",
+    "pattern": "($0,0.[00])",
+    "locale": "fr",
+    "output": "€0"
+  },
+  {
+    "value": "0",
+    "pattern": "0",
+    "locale": "fr",
+    "output": "0"
+  },
+  {
+    "value": "0",
+    "pattern": "0,0",
+    "locale": "fr",
+    "output": "0"
+  },
+  {
+    "value": "0",
+    "pattern": "0a",
+    "locale": "fr",
+    "output": "0"
+  },
+  {
+    "value": "0",
+    "pattern": "0.0a",
+    "locale": "fr",
+    "output": "0"
+  },
+  {
+    "value": "0",
+    "pattern": "0.00a",
+    "locale": "fr",
+    "output": "0"
+  },
+  {
+    "value": "0",
+    "pattern": "+0,0",
+    "locale": "fr",
+    "output": "+0"
+  },
+  {
+    "value": "0",
+    "pattern": "(0,0)",
+    "locale": "fr",
+    "output": "0"
+  },
+  {
+    "value": "0",
+    "pattern": "0o",
+    "locale": "fr",
+    "output": "0e"
+  },
+  {
+    "value": "0",
+    "pattern": "0%",
+    "locale": "fr",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "0",
+    "pattern": "0b",
+    "locale": "fr",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "0",
+    "pattern": "0.00 b",
+    "locale": "fr",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "0",
+    "pattern": "0,0.00",
+    "locale": "fr",
+    "output": "0"
+  },
+  {
+    "value": "1",
+    "pattern": "0,0.[000]",
+    "locale": "fr",
+    "output": "1"
+  },
+  {
+    "value": "1",
+    "pattern": "0,0.[000]%",
+    "locale": "fr",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "1",
+    "pattern": "0,0.[0]b",
+    "locale": "fr",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "1",
+    "pattern": "($0,0.[00])",
+    "locale": "fr",
+    "output": "€1"
+  },
+  {
+    "value": "1",
+    "pattern": "0",
+    "locale": "fr",
+    "output": "1"
+  },
+  {
+    "value": "1",
+    "pattern": "0,0",
+    "locale": "fr",
+    "output": "1"
+  },
+  {
+    "value": "1",
+    "pattern": "0a",
+    "locale": "fr",
+    "output": "1"
+  },
+  {
+    "value": "1",
+    "pattern": "0.0a",
+    "locale": "fr",
+    "output": "1"
+  },
+  {
+    "value": "1",
+    "pattern": "0.00a",
+    "locale": "fr",
+    "output": "1"
+  },
+  {
+    "value": "1",
+    "pattern": "+0,0",
+    "locale": "fr",
+    "output": "+1"
+  },
+  {
+    "value": "1",
+    "pattern": "(0,0)",
+    "locale": "fr",
+    "output": "1"
+  },
+  {
+    "value": "1",
+    "pattern": "0o",
+    "locale": "fr",
+    "output": "1e"
+  },
+  {
+    "value": "1",
+    "pattern": "0%",
+    "locale": "fr",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "1",
+    "pattern": "0b",
+    "locale": "fr",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "1",
+    "pattern": "0.00 b",
+    "locale": "fr",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "1",
+    "pattern": "0,0.00",
+    "locale": "fr",
+    "output": "1"
+  },
+  {
+    "value": "-1",
+    "pattern": "0,0.[000]",
+    "locale": "fr",
+    "output": "-1"
+  },
+  {
+    "value": "-1",
+    "pattern": "0,0.[000]%",
+    "locale": "fr",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "-1",
+    "pattern": "0,0.[0]b",
+    "locale": "fr",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "-1",
+    "pattern": "($0,0.[00])",
+    "locale": "fr",
+    "output": "(€1)"
+  },
+  {
+    "value": "-1",
+    "pattern": "0",
+    "locale": "fr",
+    "output": "-1"
+  },
+  {
+    "value": "-1",
+    "pattern": "0,0",
+    "locale": "fr",
+    "output": "-1"
+  },
+  {
+    "value": "-1",
+    "pattern": "0a",
+    "locale": "fr",
+    "output": "-1"
+  },
+  {
+    "value": "-1",
+    "pattern": "0.0a",
+    "locale": "fr",
+    "output": "-1"
+  },
+  {
+    "value": "-1",
+    "pattern": "0.00a",
+    "locale": "fr",
+    "output": "-1"
+  },
+  {
+    "value": "-1",
+    "pattern": "+0,0",
+    "locale": "fr",
+    "output": "-1"
+  },
+  {
+    "value": "-1",
+    "pattern": "(0,0)",
+    "locale": "fr",
+    "output": "(1)"
+  },
+  {
+    "value": "-1",
+    "pattern": "0o",
+    "locale": "fr",
+    "output": "-1e"
+  },
+  {
+    "value": "-1",
+    "pattern": "0%",
+    "locale": "fr",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "-1",
+    "pattern": "0b",
+    "locale": "fr",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "-1",
+    "pattern": "0.00 b",
+    "locale": "fr",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "-1",
+    "pattern": "0,0.00",
+    "locale": "fr",
+    "output": "-1"
+  },
+  {
+    "value": "123",
+    "pattern": "0,0.[000]",
+    "locale": "fr",
+    "output": "123"
+  },
+  {
+    "value": "123",
+    "pattern": "0,0.[000]%",
+    "locale": "fr",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "123",
+    "pattern": "0,0.[0]b",
+    "locale": "fr",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "123",
+    "pattern": "($0,0.[00])",
+    "locale": "fr",
+    "output": "€123"
+  },
+  {
+    "value": "123",
+    "pattern": "0",
+    "locale": "fr",
+    "output": "123"
+  },
+  {
+    "value": "123",
+    "pattern": "0,0",
+    "locale": "fr",
+    "output": "123"
+  },
+  {
+    "value": "123",
+    "pattern": "0a",
+    "locale": "fr",
+    "output": "123"
+  },
+  {
+    "value": "123",
+    "pattern": "0.0a",
+    "locale": "fr",
+    "output": "123"
+  },
+  {
+    "value": "123",
+    "pattern": "0.00a",
+    "locale": "fr",
+    "output": "123"
+  },
+  {
+    "value": "123",
+    "pattern": "+0,0",
+    "locale": "fr",
+    "output": "+123"
+  },
+  {
+    "value": "123",
+    "pattern": "(0,0)",
+    "locale": "fr",
+    "output": "123"
+  },
+  {
+    "value": "123",
+    "pattern": "0o",
+    "locale": "fr",
+    "output": "123e"
+  },
+  {
+    "value": "123",
+    "pattern": "0%",
+    "locale": "fr",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "123",
+    "pattern": "0b",
+    "locale": "fr",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "123",
+    "pattern": "0.00 b",
+    "locale": "fr",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "123",
+    "pattern": "0,0.00",
+    "locale": "fr",
+    "output": "123"
+  },
+  {
+    "value": "1000",
+    "pattern": "0,0.[000]",
+    "locale": "fr",
+    "output": "1 000"
+  },
+  {
+    "value": "1000",
+    "pattern": "0,0.[000]%",
+    "locale": "fr",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "1000",
+    "pattern": "0,0.[0]b",
+    "locale": "fr",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "1000",
+    "pattern": "($0,0.[00])",
+    "locale": "fr",
+    "output": "€1 000"
+  },
+  {
+    "value": "1000",
+    "pattern": "0",
+    "locale": "fr",
+    "output": "1000"
+  },
+  {
+    "value": "1000",
+    "pattern": "0,0",
+    "locale": "fr",
+    "output": "1 000"
+  },
+  {
+    "value": "1000",
+    "pattern": "0a",
+    "locale": "fr",
+    "output": "1k"
+  },
+  {
+    "value": "1000",
+    "pattern": "0.0a",
+    "locale": "fr",
+    "output": "1k"
+  },
+  {
+    "value": "1000",
+    "pattern": "0.00a",
+    "locale": "fr",
+    "output": "1k"
+  },
+  {
+    "value": "1000",
+    "pattern": "+0,0",
+    "locale": "fr",
+    "output": "+1 000"
+  },
+  {
+    "value": "1000",
+    "pattern": "(0,0)",
+    "locale": "fr",
+    "output": "1 000"
+  },
+  {
+    "value": "1000",
+    "pattern": "0o",
+    "locale": "fr",
+    "output": "1000e"
+  },
+  {
+    "value": "1000",
+    "pattern": "0%",
+    "locale": "fr",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "1000",
+    "pattern": "0b",
+    "locale": "fr",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "1000",
+    "pattern": "0.00 b",
+    "locale": "fr",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "1000",
+    "pattern": "0,0.00",
+    "locale": "fr",
+    "output": "1 000"
+  },
+  {
+    "value": "-1000",
+    "pattern": "0,0.[000]",
+    "locale": "fr",
+    "output": "-1 000"
+  },
+  {
+    "value": "-1000",
+    "pattern": "0,0.[000]%",
+    "locale": "fr",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "-1000",
+    "pattern": "0,0.[0]b",
+    "locale": "fr",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "-1000",
+    "pattern": "($0,0.[00])",
+    "locale": "fr",
+    "output": "(€1 000)"
+  },
+  {
+    "value": "-1000",
+    "pattern": "0",
+    "locale": "fr",
+    "output": "-1000"
+  },
+  {
+    "value": "-1000",
+    "pattern": "0,0",
+    "locale": "fr",
+    "output": "-1 000"
+  },
+  {
+    "value": "-1000",
+    "pattern": "0a",
+    "locale": "fr",
+    "output": "-1k"
+  },
+  {
+    "value": "-1000",
+    "pattern": "0.0a",
+    "locale": "fr",
+    "output": "-1k"
+  },
+  {
+    "value": "-1000",
+    "pattern": "0.00a",
+    "locale": "fr",
+    "output": "-1k"
+  },
+  {
+    "value": "-1000",
+    "pattern": "+0,0",
+    "locale": "fr",
+    "output": "-1 000"
+  },
+  {
+    "value": "-1000",
+    "pattern": "(0,0)",
+    "locale": "fr",
+    "output": "(1 000)"
+  },
+  {
+    "value": "-1000",
+    "pattern": "0o",
+    "locale": "fr",
+    "output": "-1000e"
+  },
+  {
+    "value": "-1000",
+    "pattern": "0%",
+    "locale": "fr",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "-1000",
+    "pattern": "0b",
+    "locale": "fr",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "-1000",
+    "pattern": "0.00 b",
+    "locale": "fr",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "-1000",
+    "pattern": "0,0.00",
+    "locale": "fr",
+    "output": "-1 000"
+  },
+  {
+    "value": "999999",
+    "pattern": "0,0.[000]",
+    "locale": "fr",
+    "output": "999 999"
+  },
+  {
+    "value": "999999",
+    "pattern": "0,0.[000]%",
+    "locale": "fr",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "999999",
+    "pattern": "0,0.[0]b",
+    "locale": "fr",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "999999",
+    "pattern": "($0,0.[00])",
+    "locale": "fr",
+    "output": "€999 999"
+  },
+  {
+    "value": "999999",
+    "pattern": "0",
+    "locale": "fr",
+    "output": "999999"
+  },
+  {
+    "value": "999999",
+    "pattern": "0,0",
+    "locale": "fr",
+    "output": "999 999"
+  },
+  {
+    "value": "999999",
+    "pattern": "0a",
+    "locale": "fr",
+    "output": "999k"
+  },
+  {
+    "value": "999999",
+    "pattern": "0.0a",
+    "locale": "fr",
+    "output": "999k"
+  },
+  {
+    "value": "999999",
+    "pattern": "0.00a",
+    "locale": "fr",
+    "output": "999k"
+  },
+  {
+    "value": "999999",
+    "pattern": "+0,0",
+    "locale": "fr",
+    "output": "+999 999"
+  },
+  {
+    "value": "999999",
+    "pattern": "(0,0)",
+    "locale": "fr",
+    "output": "999 999"
+  },
+  {
+    "value": "999999",
+    "pattern": "0o",
+    "locale": "fr",
+    "output": "999999e"
+  },
+  {
+    "value": "999999",
+    "pattern": "0%",
+    "locale": "fr",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "999999",
+    "pattern": "0b",
+    "locale": "fr",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "999999",
+    "pattern": "0.00 b",
+    "locale": "fr",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "999999",
+    "pattern": "0,0.00",
+    "locale": "fr",
+    "output": "999 999"
+  },
+  {
+    "value": "1000000",
+    "pattern": "0,0.[000]",
+    "locale": "fr",
+    "output": "1 000 000"
+  },
+  {
+    "value": "1000000",
+    "pattern": "0,0.[000]%",
+    "locale": "fr",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "1000000",
+    "pattern": "0,0.[0]b",
+    "locale": "fr",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "1000000",
+    "pattern": "($0,0.[00])",
+    "locale": "fr",
+    "output": "€1 000 000"
+  },
+  {
+    "value": "1000000",
+    "pattern": "0",
+    "locale": "fr",
+    "output": "1000000"
+  },
+  {
+    "value": "1000000",
+    "pattern": "0,0",
+    "locale": "fr",
+    "output": "1 000 000"
+  },
+  {
+    "value": "1000000",
+    "pattern": "0a",
+    "locale": "fr",
+    "output": "1m"
+  },
+  {
+    "value": "1000000",
+    "pattern": "0.0a",
+    "locale": "fr",
+    "output": "1m"
+  },
+  {
+    "value": "1000000",
+    "pattern": "0.00a",
+    "locale": "fr",
+    "output": "1m"
+  },
+  {
+    "value": "1000000",
+    "pattern": "+0,0",
+    "locale": "fr",
+    "output": "+1 000 000"
+  },
+  {
+    "value": "1000000",
+    "pattern": "(0,0)",
+    "locale": "fr",
+    "output": "1 000 000"
+  },
+  {
+    "value": "1000000",
+    "pattern": "0o",
+    "locale": "fr",
+    "output": "1000000e"
+  },
+  {
+    "value": "1000000",
+    "pattern": "0%",
+    "locale": "fr",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "1000000",
+    "pattern": "0b",
+    "locale": "fr",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "1000000",
+    "pattern": "0.00 b",
+    "locale": "fr",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "1000000",
+    "pattern": "0,0.00",
+    "locale": "fr",
+    "output": "1 000 000"
+  },
+  {
+    "value": "1000000000",
+    "pattern": "0,0.[000]",
+    "locale": "fr",
+    "output": "1 000 000 000"
+  },
+  {
+    "value": "1000000000",
+    "pattern": "0,0.[000]%",
+    "locale": "fr",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "1000000000",
+    "pattern": "0,0.[0]b",
+    "locale": "fr",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "1000000000",
+    "pattern": "($0,0.[00])",
+    "locale": "fr",
+    "output": "€1 000 000 000"
+  },
+  {
+    "value": "1000000000",
+    "pattern": "0",
+    "locale": "fr",
+    "output": "1000000000"
+  },
+  {
+    "value": "1000000000",
+    "pattern": "0,0",
+    "locale": "fr",
+    "output": "1 000 000 000"
+  },
+  {
+    "value": "1000000000",
+    "pattern": "0a",
+    "locale": "fr",
+    "output": "1b"
+  },
+  {
+    "value": "1000000000",
+    "pattern": "0.0a",
+    "locale": "fr",
+    "output": "1b"
+  },
+  {
+    "value": "1000000000",
+    "pattern": "0.00a",
+    "locale": "fr",
+    "output": "1b"
+  },
+  {
+    "value": "1000000000",
+    "pattern": "+0,0",
+    "locale": "fr",
+    "output": "+1 000 000 000"
+  },
+  {
+    "value": "1000000000",
+    "pattern": "(0,0)",
+    "locale": "fr",
+    "output": "1 000 000 000"
+  },
+  {
+    "value": "1000000000",
+    "pattern": "0o",
+    "locale": "fr",
+    "output": "1000000000e"
+  },
+  {
+    "value": "1000000000",
+    "pattern": "0%",
+    "locale": "fr",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "1000000000",
+    "pattern": "0b",
+    "locale": "fr",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "1000000000",
+    "pattern": "0.00 b",
+    "locale": "fr",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "1000000000",
+    "pattern": "0,0.00",
+    "locale": "fr",
+    "output": "1 000 000 000"
+  },
+  {
+    "value": "1000000000000",
+    "pattern": "0,0.[000]",
+    "locale": "fr",
+    "output": "1 000 000 000 000"
+  },
+  {
+    "value": "1000000000000",
+    "pattern": "0,0.[000]%",
+    "locale": "fr",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "1000000000000",
+    "pattern": "0,0.[0]b",
+    "locale": "fr",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "1000000000000",
+    "pattern": "($0,0.[00])",
+    "locale": "fr",
+    "output": "€1 000 000 000 000"
+  },
+  {
+    "value": "1000000000000",
+    "pattern": "0",
+    "locale": "fr",
+    "output": "1000000000000"
+  },
+  {
+    "value": "1000000000000",
+    "pattern": "0,0",
+    "locale": "fr",
+    "output": "1 000 000 000 000"
+  },
+  {
+    "value": "1000000000000",
+    "pattern": "0a",
+    "locale": "fr",
+    "output": "1t"
+  },
+  {
+    "value": "1000000000000",
+    "pattern": "0.0a",
+    "locale": "fr",
+    "output": "1t"
+  },
+  {
+    "value": "1000000000000",
+    "pattern": "0.00a",
+    "locale": "fr",
+    "output": "1t"
+  },
+  {
+    "value": "1000000000000",
+    "pattern": "+0,0",
+    "locale": "fr",
+    "output": "+1 000 000 000 000"
+  },
+  {
+    "value": "1000000000000",
+    "pattern": "(0,0)",
+    "locale": "fr",
+    "output": "1 000 000 000 000"
+  },
+  {
+    "value": "1000000000000",
+    "pattern": "0o",
+    "locale": "fr",
+    "output": "1000000000000e"
+  },
+  {
+    "value": "1000000000000",
+    "pattern": "0%",
+    "locale": "fr",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "1000000000000",
+    "pattern": "0b",
+    "locale": "fr",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "1000000000000",
+    "pattern": "0.00 b",
+    "locale": "fr",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "1000000000000",
+    "pattern": "0,0.00",
+    "locale": "fr",
+    "output": "1 000 000 000 000"
+  },
+  {
+    "value": "1234567890",
+    "pattern": "0,0.[000]",
+    "locale": "fr",
+    "output": "1 234 567 890"
+  },
+  {
+    "value": "1234567890",
+    "pattern": "0,0.[000]%",
+    "locale": "fr",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "1234567890",
+    "pattern": "0,0.[0]b",
+    "locale": "fr",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "1234567890",
+    "pattern": "($0,0.[00])",
+    "locale": "fr",
+    "output": "€1 234 567 890"
+  },
+  {
+    "value": "1234567890",
+    "pattern": "0",
+    "locale": "fr",
+    "output": "1234567890"
+  },
+  {
+    "value": "1234567890",
+    "pattern": "0,0",
+    "locale": "fr",
+    "output": "1 234 567 890"
+  },
+  {
+    "value": "1234567890",
+    "pattern": "0a",
+    "locale": "fr",
+    "output": "1b"
+  },
+  {
+    "value": "1234567890",
+    "pattern": "0.0a",
+    "locale": "fr",
+    "output": "1b"
+  },
+  {
+    "value": "1234567890",
+    "pattern": "0.00a",
+    "locale": "fr",
+    "output": "1b"
+  },
+  {
+    "value": "1234567890",
+    "pattern": "+0,0",
+    "locale": "fr",
+    "output": "+1 234 567 890"
+  },
+  {
+    "value": "1234567890",
+    "pattern": "(0,0)",
+    "locale": "fr",
+    "output": "1 234 567 890"
+  },
+  {
+    "value": "1234567890",
+    "pattern": "0o",
+    "locale": "fr",
+    "output": "1234567890e"
+  },
+  {
+    "value": "1234567890",
+    "pattern": "0%",
+    "locale": "fr",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "1234567890",
+    "pattern": "0b",
+    "locale": "fr",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "1234567890",
+    "pattern": "0.00 b",
+    "locale": "fr",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "1234567890",
+    "pattern": "0,0.00",
+    "locale": "fr",
+    "output": "1 234 567 890"
+  },
+  {
+    "value": "1234567890123",
+    "pattern": "0,0.[000]",
+    "locale": "fr",
+    "output": "1 234 567 890 123"
+  },
+  {
+    "value": "1234567890123",
+    "pattern": "0,0.[000]%",
+    "locale": "fr",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "1234567890123",
+    "pattern": "0,0.[0]b",
+    "locale": "fr",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "1234567890123",
+    "pattern": "($0,0.[00])",
+    "locale": "fr",
+    "output": "€1 234 567 890 123"
+  },
+  {
+    "value": "1234567890123",
+    "pattern": "0",
+    "locale": "fr",
+    "output": "1234567890123"
+  },
+  {
+    "value": "1234567890123",
+    "pattern": "0,0",
+    "locale": "fr",
+    "output": "1 234 567 890 123"
+  },
+  {
+    "value": "1234567890123",
+    "pattern": "0a",
+    "locale": "fr",
+    "output": "1t"
+  },
+  {
+    "value": "1234567890123",
+    "pattern": "0.0a",
+    "locale": "fr",
+    "output": "1t"
+  },
+  {
+    "value": "1234567890123",
+    "pattern": "0.00a",
+    "locale": "fr",
+    "output": "1t"
+  },
+  {
+    "value": "1234567890123",
+    "pattern": "+0,0",
+    "locale": "fr",
+    "output": "+1 234 567 890 123"
+  },
+  {
+    "value": "1234567890123",
+    "pattern": "(0,0)",
+    "locale": "fr",
+    "output": "1 234 567 890 123"
+  },
+  {
+    "value": "1234567890123",
+    "pattern": "0o",
+    "locale": "fr",
+    "output": "1234567890123e"
+  },
+  {
+    "value": "1234567890123",
+    "pattern": "0%",
+    "locale": "fr",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "1234567890123",
+    "pattern": "0b",
+    "locale": "fr",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "1234567890123",
+    "pattern": "0.00 b",
+    "locale": "fr",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "1234567890123",
+    "pattern": "0,0.00",
+    "locale": "fr",
+    "output": "1 234 567 890 123"
+  },
+  {
+    "value": "9007199254740991",
+    "pattern": "0,0.[000]",
+    "locale": "fr",
+    "output": "9 007 199 254 740 991"
+  },
+  {
+    "value": "9007199254740991",
+    "pattern": "0,0.[000]%",
+    "locale": "fr",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "9007199254740991",
+    "pattern": "0,0.[0]b",
+    "locale": "fr",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "9007199254740991",
+    "pattern": "($0,0.[00])",
+    "locale": "fr",
+    "output": "€9 007 199 254 740 991"
+  },
+  {
+    "value": "9007199254740991",
+    "pattern": "0",
+    "locale": "fr",
+    "output": "9007199254740991"
+  },
+  {
+    "value": "9007199254740991",
+    "pattern": "0,0",
+    "locale": "fr",
+    "output": "9 007 199 254 740 991"
+  },
+  {
+    "value": "9007199254740991",
+    "pattern": "0a",
+    "locale": "fr",
+    "output": "9007t"
+  },
+  {
+    "value": "9007199254740991",
+    "pattern": "0.0a",
+    "locale": "fr",
+    "output": "9007t"
+  },
+  {
+    "value": "9007199254740991",
+    "pattern": "0.00a",
+    "locale": "fr",
+    "output": "9007t"
+  },
+  {
+    "value": "9007199254740991",
+    "pattern": "+0,0",
+    "locale": "fr",
+    "output": "+9 007 199 254 740 991"
+  },
+  {
+    "value": "9007199254740991",
+    "pattern": "(0,0)",
+    "locale": "fr",
+    "output": "9 007 199 254 740 991"
+  },
+  {
+    "value": "9007199254740991",
+    "pattern": "0o",
+    "locale": "fr",
+    "output": "9007199254740991e"
+  },
+  {
+    "value": "9007199254740991",
+    "pattern": "0%",
+    "locale": "fr",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "9007199254740991",
+    "pattern": "0b",
+    "locale": "fr",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "9007199254740991",
+    "pattern": "0.00 b",
+    "locale": "fr",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "9007199254740991",
+    "pattern": "0,0.00",
+    "locale": "fr",
+    "output": "9 007 199 254 740 991"
+  },
+  {
+    "value": "9007199254740992",
+    "pattern": "0,0.[000]",
+    "locale": "fr",
+    "output": "9 007 199 254 740 992"
+  },
+  {
+    "value": "9007199254740992",
+    "pattern": "0,0.[000]%",
+    "locale": "fr",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "9007199254740992",
+    "pattern": "0,0.[0]b",
+    "locale": "fr",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "9007199254740992",
+    "pattern": "($0,0.[00])",
+    "locale": "fr",
+    "output": "€9 007 199 254 740 992"
+  },
+  {
+    "value": "9007199254740992",
+    "pattern": "0",
+    "locale": "fr",
+    "output": "9007199254740992"
+  },
+  {
+    "value": "9007199254740992",
+    "pattern": "0,0",
+    "locale": "fr",
+    "output": "9 007 199 254 740 992"
+  },
+  {
+    "value": "9007199254740992",
+    "pattern": "0a",
+    "locale": "fr",
+    "output": "9007t"
+  },
+  {
+    "value": "9007199254740992",
+    "pattern": "0.0a",
+    "locale": "fr",
+    "output": "9007t"
+  },
+  {
+    "value": "9007199254740992",
+    "pattern": "0.00a",
+    "locale": "fr",
+    "output": "9007t"
+  },
+  {
+    "value": "9007199254740992",
+    "pattern": "+0,0",
+    "locale": "fr",
+    "output": "+9 007 199 254 740 992"
+  },
+  {
+    "value": "9007199254740992",
+    "pattern": "(0,0)",
+    "locale": "fr",
+    "output": "9 007 199 254 740 992"
+  },
+  {
+    "value": "9007199254740992",
+    "pattern": "0o",
+    "locale": "fr",
+    "output": "9007199254740992e"
+  },
+  {
+    "value": "9007199254740992",
+    "pattern": "0%",
+    "locale": "fr",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "9007199254740992",
+    "pattern": "0b",
+    "locale": "fr",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "9007199254740992",
+    "pattern": "0.00 b",
+    "locale": "fr",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "9007199254740992",
+    "pattern": "0,0.00",
+    "locale": "fr",
+    "output": "9 007 199 254 740 992"
+  },
+  {
+    "value": "18014398509481982",
+    "pattern": "0,0.[000]",
+    "locale": "fr",
+    "output": "18 014 398 509 481 982"
+  },
+  {
+    "value": "18014398509481982",
+    "pattern": "0,0.[000]%",
+    "locale": "fr",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "18014398509481982",
+    "pattern": "0,0.[0]b",
+    "locale": "fr",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "18014398509481982",
+    "pattern": "($0,0.[00])",
+    "locale": "fr",
+    "output": "€18 014 398 509 481 982"
+  },
+  {
+    "value": "18014398509481982",
+    "pattern": "0",
+    "locale": "fr",
+    "output": "18014398509481982"
+  },
+  {
+    "value": "18014398509481982",
+    "pattern": "0,0",
+    "locale": "fr",
+    "output": "18 014 398 509 481 982"
+  },
+  {
+    "value": "18014398509481982",
+    "pattern": "0a",
+    "locale": "fr",
+    "output": "18014t"
+  },
+  {
+    "value": "18014398509481982",
+    "pattern": "0.0a",
+    "locale": "fr",
+    "output": "18014t"
+  },
+  {
+    "value": "18014398509481982",
+    "pattern": "0.00a",
+    "locale": "fr",
+    "output": "18014t"
+  },
+  {
+    "value": "18014398509481982",
+    "pattern": "+0,0",
+    "locale": "fr",
+    "output": "+18 014 398 509 481 982"
+  },
+  {
+    "value": "18014398509481982",
+    "pattern": "(0,0)",
+    "locale": "fr",
+    "output": "18 014 398 509 481 982"
+  },
+  {
+    "value": "18014398509481982",
+    "pattern": "0o",
+    "locale": "fr",
+    "output": "18014398509481982e"
+  },
+  {
+    "value": "18014398509481982",
+    "pattern": "0%",
+    "locale": "fr",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "18014398509481982",
+    "pattern": "0b",
+    "locale": "fr",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "18014398509481982",
+    "pattern": "0.00 b",
+    "locale": "fr",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "18014398509481982",
+    "pattern": "0,0.00",
+    "locale": "fr",
+    "output": "18 014 398 509 481 982"
+  },
+  {
+    "value": "-18014398509481982",
+    "pattern": "0,0.[000]",
+    "locale": "fr",
+    "output": "-18 014 398 509 481 982"
+  },
+  {
+    "value": "-18014398509481982",
+    "pattern": "0,0.[000]%",
+    "locale": "fr",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "-18014398509481982",
+    "pattern": "0,0.[0]b",
+    "locale": "fr",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "-18014398509481982",
+    "pattern": "($0,0.[00])",
+    "locale": "fr",
+    "output": "(€18 014 398 509 481 982)"
+  },
+  {
+    "value": "-18014398509481982",
+    "pattern": "0",
+    "locale": "fr",
+    "output": "-18014398509481982"
+  },
+  {
+    "value": "-18014398509481982",
+    "pattern": "0,0",
+    "locale": "fr",
+    "output": "-18 014 398 509 481 982"
+  },
+  {
+    "value": "-18014398509481982",
+    "pattern": "0a",
+    "locale": "fr",
+    "output": "-18014t"
+  },
+  {
+    "value": "-18014398509481982",
+    "pattern": "0.0a",
+    "locale": "fr",
+    "output": "-18014t"
+  },
+  {
+    "value": "-18014398509481982",
+    "pattern": "0.00a",
+    "locale": "fr",
+    "output": "-18014t"
+  },
+  {
+    "value": "-18014398509481982",
+    "pattern": "+0,0",
+    "locale": "fr",
+    "output": "-18 014 398 509 481 982"
+  },
+  {
+    "value": "-18014398509481982",
+    "pattern": "(0,0)",
+    "locale": "fr",
+    "output": "(18 014 398 509 481 982)"
+  },
+  {
+    "value": "-18014398509481982",
+    "pattern": "0o",
+    "locale": "fr",
+    "output": "-18014398509481982e"
+  },
+  {
+    "value": "-18014398509481982",
+    "pattern": "0%",
+    "locale": "fr",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "-18014398509481982",
+    "pattern": "0b",
+    "locale": "fr",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "-18014398509481982",
+    "pattern": "0.00 b",
+    "locale": "fr",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "-18014398509481982",
+    "pattern": "0,0.00",
+    "locale": "fr",
+    "output": "-18 014 398 509 481 982"
+  },
+  {
+    "value": "9223372036854775807",
+    "pattern": "0,0.[000]",
+    "locale": "fr",
+    "output": "9 223 372 036 854 775 807"
+  },
+  {
+    "value": "9223372036854775807",
+    "pattern": "0,0.[000]%",
+    "locale": "fr",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "9223372036854775807",
+    "pattern": "0,0.[0]b",
+    "locale": "fr",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "9223372036854775807",
+    "pattern": "($0,0.[00])",
+    "locale": "fr",
+    "output": "€9 223 372 036 854 775 807"
+  },
+  {
+    "value": "9223372036854775807",
+    "pattern": "0",
+    "locale": "fr",
+    "output": "9223372036854775807"
+  },
+  {
+    "value": "9223372036854775807",
+    "pattern": "0,0",
+    "locale": "fr",
+    "output": "9 223 372 036 854 775 807"
+  },
+  {
+    "value": "9223372036854775807",
+    "pattern": "0a",
+    "locale": "fr",
+    "output": "9223372t"
+  },
+  {
+    "value": "9223372036854775807",
+    "pattern": "0.0a",
+    "locale": "fr",
+    "output": "9223372t"
+  },
+  {
+    "value": "9223372036854775807",
+    "pattern": "0.00a",
+    "locale": "fr",
+    "output": "9223372t"
+  },
+  {
+    "value": "9223372036854775807",
+    "pattern": "+0,0",
+    "locale": "fr",
+    "output": "+9 223 372 036 854 775 807"
+  },
+  {
+    "value": "9223372036854775807",
+    "pattern": "(0,0)",
+    "locale": "fr",
+    "output": "9 223 372 036 854 775 807"
+  },
+  {
+    "value": "9223372036854775807",
+    "pattern": "0o",
+    "locale": "fr",
+    "output": "9223372036854775807e"
+  },
+  {
+    "value": "9223372036854775807",
+    "pattern": "0%",
+    "locale": "fr",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "9223372036854775807",
+    "pattern": "0b",
+    "locale": "fr",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "9223372036854775807",
+    "pattern": "0.00 b",
+    "locale": "fr",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "9223372036854775807",
+    "pattern": "0,0.00",
+    "locale": "fr",
+    "output": "9 223 372 036 854 775 807"
+  },
+  {
+    "value": "-9223372036854775808",
+    "pattern": "0,0.[000]",
+    "locale": "fr",
+    "output": "-9 223 372 036 854 775 808"
+  },
+  {
+    "value": "-9223372036854775808",
+    "pattern": "0,0.[000]%",
+    "locale": "fr",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "-9223372036854775808",
+    "pattern": "0,0.[0]b",
+    "locale": "fr",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "-9223372036854775808",
+    "pattern": "($0,0.[00])",
+    "locale": "fr",
+    "output": "(€9 223 372 036 854 775 808)"
+  },
+  {
+    "value": "-9223372036854775808",
+    "pattern": "0",
+    "locale": "fr",
+    "output": "-9223372036854775808"
+  },
+  {
+    "value": "-9223372036854775808",
+    "pattern": "0,0",
+    "locale": "fr",
+    "output": "-9 223 372 036 854 775 808"
+  },
+  {
+    "value": "-9223372036854775808",
+    "pattern": "0a",
+    "locale": "fr",
+    "output": "-9223372t"
+  },
+  {
+    "value": "-9223372036854775808",
+    "pattern": "0.0a",
+    "locale": "fr",
+    "output": "-9223372t"
+  },
+  {
+    "value": "-9223372036854775808",
+    "pattern": "0.00a",
+    "locale": "fr",
+    "output": "-9223372t"
+  },
+  {
+    "value": "-9223372036854775808",
+    "pattern": "+0,0",
+    "locale": "fr",
+    "output": "-9 223 372 036 854 775 808"
+  },
+  {
+    "value": "-9223372036854775808",
+    "pattern": "(0,0)",
+    "locale": "fr",
+    "output": "(9 223 372 036 854 775 808)"
+  },
+  {
+    "value": "-9223372036854775808",
+    "pattern": "0o",
+    "locale": "fr",
+    "output": "-9223372036854775808e"
+  },
+  {
+    "value": "-9223372036854775808",
+    "pattern": "0%",
+    "locale": "fr",
+    "output": "THROW: Cannot mix BigInt and other types, use explicit conversions"
+  },
+  {
+    "value": "-9223372036854775808",
+    "pattern": "0b",
+    "locale": "fr",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "-9223372036854775808",
+    "pattern": "0.00 b",
+    "locale": "fr",
+    "output": "THROW: Cannot convert a BigInt value to a number"
+  },
+  {
+    "value": "-9223372036854775808",
+    "pattern": "0,0.00",
+    "locale": "fr",
+    "output": "-9 223 372 036 854 775 808"
+  }
+]

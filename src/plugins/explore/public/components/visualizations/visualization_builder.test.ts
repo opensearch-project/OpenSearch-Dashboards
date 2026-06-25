@@ -11,11 +11,7 @@ import { VisualizationRegistryService } from '../../services/visualization_regis
 // Register all built-in visualizations into the singleton registry
 new VisualizationRegistryService();
 
-const createMockVisColumns = (
-  size: number,
-  type: VisFieldType,
-  options = { validValuesCount: 1, uniqueValuesCount: 1 }
-) => {
+const createMockVisColumns = (size: number, type: VisFieldType) => {
   const result: VisColumn[] = [];
   for (let i = 0; i < size; i++) {
     result.push({
@@ -23,7 +19,6 @@ const createMockVisColumns = (
       name: `name-${type}-${i}`,
       schema: type,
       column: `field-${type}-${i}`,
-      ...options,
     });
   }
   return result;
@@ -187,6 +182,7 @@ describe('VisualizationBuilder', () => {
         categoricalColumns: [],
         dateColumns: [],
         transformedData: [],
+        unknownColumns: [],
       });
       builder.visConfig$.next({
         type: 'line',
@@ -222,6 +218,7 @@ describe('VisualizationBuilder', () => {
           categoricalColumns: [],
           dateColumns: [],
           transformedData: [],
+          unknownColumns: [],
         })
       ).toBe(undefined);
 
@@ -232,6 +229,7 @@ describe('VisualizationBuilder', () => {
           categoricalColumns: [],
           dateColumns: [],
           transformedData: [],
+          unknownColumns: [],
         })
       ).toBe(undefined);
 
@@ -242,6 +240,7 @@ describe('VisualizationBuilder', () => {
           categoricalColumns: [],
           dateColumns: [],
           transformedData: [],
+          unknownColumns: [],
         })
       ).toEqual({ chartType: 'metric', axesMapping: { value: 'name-numerical-0' } });
     });
@@ -269,6 +268,7 @@ describe('VisualizationBuilder', () => {
           categoricalColumns: createMockVisColumns(1, VisFieldType.Categorical),
           dateColumns: [],
           transformedData: [],
+          unknownColumns: [],
         }
       );
       // For line, the axes are x/y
@@ -299,6 +299,7 @@ describe('VisualizationBuilder', () => {
         categoricalColumns: createMockVisColumns(1, VisFieldType.Categorical),
         dateColumns: [],
         transformedData: [],
+        unknownColumns: [],
       });
       expect(setVisConfigSpy).not.toHaveBeenCalled();
     });
@@ -316,13 +317,11 @@ describe('VisualizationBuilder', () => {
 
         // Multi data points won't work with metric
         builder.onDataChange({
-          numericalColumns: createMockVisColumns(2, VisFieldType.Numerical, {
-            validValuesCount: 2,
-            uniqueValuesCount: 2,
-          }),
+          numericalColumns: createMockVisColumns(2, VisFieldType.Numerical),
           categoricalColumns: [],
           dateColumns: [],
           transformedData: [],
+          unknownColumns: [],
         });
         expect(setVisConfigSpy).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -350,13 +349,11 @@ describe('VisualizationBuilder', () => {
         });
 
         builder.onDataChange({
-          numericalColumns: createMockVisColumns(2, VisFieldType.Numerical, {
-            validValuesCount: 2,
-            uniqueValuesCount: 2,
-          }),
+          numericalColumns: createMockVisColumns(2, VisFieldType.Numerical),
           categoricalColumns: [],
           dateColumns: [],
           transformedData: [],
+          unknownColumns: [],
         });
         expect(setVisConfigSpy).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -384,13 +381,11 @@ describe('VisualizationBuilder', () => {
       });
 
       builder.onDataChange({
-        numericalColumns: createMockVisColumns(2, VisFieldType.Numerical, {
-          validValuesCount: 2,
-          uniqueValuesCount: 2,
-        }),
+        numericalColumns: createMockVisColumns(2, VisFieldType.Numerical),
         categoricalColumns: [],
         dateColumns: [],
         transformedData: [],
+        unknownColumns: [],
       });
       expect(setVisConfigSpy).toHaveBeenCalledWith(expect.objectContaining({ type: 'table' }));
     });
@@ -411,8 +406,140 @@ describe('VisualizationBuilder', () => {
         categoricalColumns: [],
         dateColumns: createMockVisColumns(1, VisFieldType.Date),
         transformedData: [],
+        unknownColumns: [],
       });
       expect(setVisConfigSpy).not.toHaveBeenCalled();
+    });
+
+    test('should try to preserve current chart type using reuseAxesMapping', () => {
+      const builder = new VisualizationBuilder({});
+      const reuseAxesMappingSpy = jest
+        .spyOn(visualizationRegistry, 'reuseAxesMapping')
+        .mockReturnValue({ x: 'name-numerical-0', y: 'name-numerical-1' });
+
+      builder.visConfig$.next({
+        type: 'line',
+        axesMapping: { x: 'name-date-0', y: 'name-numerical-0' },
+      });
+
+      builder.onDataChange({
+        numericalColumns: createMockVisColumns(2, VisFieldType.Numerical),
+        categoricalColumns: [],
+        dateColumns: [],
+        transformedData: [],
+        unknownColumns: [],
+      });
+
+      expect(reuseAxesMappingSpy).toHaveBeenCalledWith(
+        'line',
+        { x: 'name-date-0', y: 'name-numerical-0' },
+        expect.any(Array)
+      );
+      expect(builder.visConfig$.value?.type).toBe('line');
+      reuseAxesMappingSpy.mockRestore();
+    });
+
+    test('should try to create auto vis with current chart type when reuseAxesMapping fails', () => {
+      const builder = new VisualizationBuilder({});
+      jest.spyOn(visualizationRegistry, 'reuseAxesMapping').mockReturnValue(undefined);
+      const createAutoVisSpy = jest.spyOn(builder, 'createAutoVis');
+
+      builder.visConfig$.next({
+        type: 'line',
+        axesMapping: { x: 'name-date-0', y: 'name-numerical-0' },
+      });
+
+      builder.onDataChange({
+        numericalColumns: createMockVisColumns(2, VisFieldType.Numerical),
+        categoricalColumns: [],
+        dateColumns: [],
+        transformedData: [],
+        unknownColumns: [],
+      });
+
+      // Should call createAutoVis with the current chart type
+      expect(createAutoVisSpy).toHaveBeenCalledWith(expect.anything(), 'line');
+    });
+
+    test('should preserve custom styles when preserving chart type', () => {
+      const builder = new VisualizationBuilder({});
+      const customStyles = { addLegend: true, title: 'My Chart' } as any;
+      jest
+        .spyOn(visualizationRegistry, 'reuseAxesMapping')
+        .mockReturnValue({ x: 'name-numerical-0', y: 'name-numerical-1' });
+
+      builder.visConfig$.next({
+        type: 'line',
+        axesMapping: { x: 'name-date-0', y: 'name-numerical-0' },
+        styles: customStyles,
+      });
+
+      builder.onDataChange({
+        numericalColumns: createMockVisColumns(2, VisFieldType.Numerical),
+        categoricalColumns: [],
+        dateColumns: [],
+        transformedData: [],
+        unknownColumns: [],
+      });
+
+      expect(builder.visConfig$.value?.type).toBe('line');
+      expect(builder.visConfig$.value?.styles).toBe(customStyles);
+    });
+
+    test('should reset styles when falling back to any chart type', () => {
+      const builder = new VisualizationBuilder({});
+      const customStyles = { addLegend: true, title: 'My Chart' } as any;
+      jest.spyOn(visualizationRegistry, 'reuseAxesMapping').mockReturnValue(undefined);
+      jest.spyOn(builder, 'createAutoVis').mockImplementation((data, chartType) => {
+        if (chartType) return undefined; // Fail for specific chart type
+        return { chartType: 'bar', axesMapping: { x: 'field0', y: 'field1' } };
+      });
+
+      builder.visConfig$.next({
+        type: 'line',
+        axesMapping: { x: 'name-date-0', y: 'name-numerical-0' },
+        styles: customStyles,
+      });
+
+      builder.onDataChange({
+        numericalColumns: createMockVisColumns(2, VisFieldType.Numerical),
+        categoricalColumns: [],
+        dateColumns: [],
+        transformedData: [],
+        unknownColumns: [],
+      });
+
+      expect(builder.visConfig$.value?.type).toBe('bar');
+      const defaultStyles = visualizationRegistry.getVisualization('bar')?.ui.style.defaults;
+      expect(builder.visConfig$.value?.styles).toEqual(defaultStyles);
+      expect(builder.visConfig$.value?.styles).not.toBe(customStyles);
+    });
+
+    test('should preserve splitField configuration across data changes', () => {
+      const builder = new VisualizationBuilder({});
+      jest
+        .spyOn(visualizationRegistry, 'reuseAxesMapping')
+        .mockReturnValue({ x: 'name-numerical-0', y: 'name-numerical-1' });
+
+      builder.visConfig$.next({
+        type: 'line',
+        axesMapping: { x: 'name-date-0', y: 'name-numerical-0' },
+        splitField: 'category',
+        splitLayout: 'horizontal',
+        showSplitLabel: true,
+      });
+
+      builder.onDataChange({
+        numericalColumns: createMockVisColumns(2, VisFieldType.Numerical),
+        categoricalColumns: [{ name: 'category', schema: 'categorical' } as any],
+        dateColumns: [],
+        transformedData: [],
+        unknownColumns: [],
+      });
+
+      expect(builder.visConfig$.value?.splitField).toBe('category');
+      expect(builder.visConfig$.value?.splitLayout).toBe('horizontal');
+      expect(builder.visConfig$.value?.showSplitLabel).toBe(true);
     });
   });
 
@@ -428,31 +555,28 @@ describe('VisualizationBuilder', () => {
     expect(builder.data$.value).toEqual({
       categoricalColumns: [
         {
-          column: 'field-1',
+          column: 'name',
           id: 1,
           name: 'name',
           schema: 'categorical',
-          uniqueValuesCount: 1,
-          validValuesCount: 1,
         },
       ],
       dateColumns: [],
       numericalColumns: [
         {
-          column: 'field-0',
+          column: 'age',
           id: 0,
           name: 'age',
           schema: 'numerical',
-          uniqueValuesCount: 1,
-          validValuesCount: 1,
         },
       ],
       transformedData: [
         {
-          'field-0': 10,
-          'field-1': 'name',
+          age: 10,
+          name: 'name',
         },
       ],
+      unknownColumns: [],
     });
   });
 
@@ -522,6 +646,78 @@ describe('VisualizationBuilder', () => {
 
     expect(builder.data$.value).toBe(undefined);
     expect(builder.visConfig$.value).toBe(undefined);
+  });
+
+  describe('applyVisConfig()', () => {
+    test('should apply valid config and return true', () => {
+      const builder = new VisualizationBuilder({});
+      const result = (builder as any).applyVisConfig('line', { x: 'field0', y: 'field1' }, false);
+
+      expect(result).toBe(true);
+      expect(builder.visConfig$.value?.type).toBe('line');
+      expect(builder.visConfig$.value?.axesMapping).toEqual({ x: 'field0', y: 'field1' });
+    });
+
+    test('should return false for invalid chart type', () => {
+      const builder = new VisualizationBuilder({});
+      // Mock invalid chart type
+      const getVisualizationSpy = jest
+        .spyOn(visualizationRegistry, 'getVisualization')
+        .mockReturnValue(undefined);
+
+      const result = (builder as any).applyVisConfig('invalid-type', {}, false);
+
+      expect(result).toBe(false);
+      expect(builder.visConfig$.value).toBe(undefined);
+      getVisualizationSpy.mockRestore();
+    });
+
+    test('should preserve split field configuration', () => {
+      const builder = new VisualizationBuilder({});
+      builder.visConfig$.next({
+        type: 'bar',
+        splitField: 'category',
+        splitLayout: 'horizontal',
+        showSplitLabel: true,
+      });
+
+      const result = (builder as any).applyVisConfig('line', { x: 'field0', y: 'field1' }, false);
+
+      expect(result).toBe(true);
+      expect(builder.visConfig$.value?.splitField).toBe('category');
+      expect(builder.visConfig$.value?.splitLayout).toBe('horizontal');
+      expect(builder.visConfig$.value?.showSplitLabel).toBe(true);
+    });
+
+    test('should preserve styles when preserveStyles is true', () => {
+      const builder = new VisualizationBuilder({});
+      const customStyles = { addLegend: true, title: 'Custom Title' } as any;
+      builder.visConfig$.next({
+        type: 'bar',
+        styles: customStyles,
+      });
+
+      const result = (builder as any).applyVisConfig('line', { x: 'field0', y: 'field1' }, true);
+
+      expect(result).toBe(true);
+      expect(builder.visConfig$.value?.styles).toBe(customStyles);
+    });
+
+    test('should use default styles when preserveStyles is false', () => {
+      const builder = new VisualizationBuilder({});
+      const customStyles = { addLegend: true, title: 'Custom Title' } as any;
+      builder.visConfig$.next({
+        type: 'bar',
+        styles: customStyles,
+      });
+
+      const result = (builder as any).applyVisConfig('line', { x: 'field0', y: 'field1' }, false);
+      const defaultStyles = visualizationRegistry.getVisualization('line')?.ui.style.defaults;
+
+      expect(result).toBe(true);
+      expect(builder.visConfig$.value?.styles).toEqual(defaultStyles);
+      expect(builder.visConfig$.value?.styles).not.toBe(customStyles);
+    });
   });
 });
 

@@ -6,7 +6,7 @@
 import { render, screen } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import dateMath from '@elastic/datemath';
-import { VisualizationRender } from './visualization_render';
+import { VisualizationRender, CommonVisualizationRender } from './visualization_render';
 import { VisData } from './visualization_builder.types';
 import { VisFieldType, Positions, RenderChartConfig } from './types';
 import { defaultBarChartStyles } from './bar/bar_vis_config';
@@ -30,6 +30,10 @@ jest.mock('./visualization_empty_state', () => ({
   VisualizationEmptyState: jest.fn(() => (
     <div data-test-subj="visualizationEmptyState">Empty State</div>
   )),
+}));
+
+jest.mock('./custom_legend', () => ({
+  CustomLegend: jest.fn(() => <div data-test-subj="customLegend">Custom Legend</div>),
 }));
 
 jest.mock('../../services/services', () => ({
@@ -61,8 +65,6 @@ describe('VisualizationRender', () => {
         name: 'count',
         schema: VisFieldType.Numerical,
         column: 'count',
-        validValuesCount: 2,
-        uniqueValuesCount: 2,
       },
     ],
     categoricalColumns: [
@@ -71,8 +73,6 @@ describe('VisualizationRender', () => {
         name: 'field1',
         schema: VisFieldType.Categorical,
         column: 'field1',
-        validValuesCount: 2,
-        uniqueValuesCount: 2,
       },
     ],
     dateColumns: [],
@@ -194,6 +194,7 @@ describe('VisualizationRender', () => {
       numericalColumns: [],
       categoricalColumns: [],
       dateColumns: [],
+      unknownColumns: [],
     };
 
     const data$ = new BehaviorSubject<VisData | undefined>(emptyColumnsData);
@@ -234,10 +235,99 @@ describe('VisualizationRender', () => {
     const visConfig$ = new BehaviorSubject<RenderChartConfig | undefined>(mockChartConfig);
     const showRawTable$ = new BehaviorSubject<boolean>(false);
 
-    const { container } = render(
+    render(
       <VisualizationRender data$={data$} config$={visConfig$} showRawTable$={showRawTable$} />
     );
 
-    expect(container.firstChild).toBeNull();
+    expect(screen.queryByTestId('echartsRender')).not.toBeInTheDocument();
+  });
+
+  describe('custom legend visibility', () => {
+    it.each(['area', 'line', 'bar', 'pie', 'scatter', 'state_timeline'])(
+      'renders custom legend for %s chart type when addLegend is true',
+      (chartType) => {
+        const config: RenderChartConfig = {
+          type: chartType,
+          styles: {
+            ...defaultBarChartStyles,
+            addLegend: true,
+            legendPosition: Positions.BOTTOM,
+          },
+          axesMapping: { x: 'field1', y: 'count' },
+        };
+
+        const data$ = new BehaviorSubject<VisData | undefined>(mockVisData);
+        const visConfig$ = new BehaviorSubject<RenderChartConfig | undefined>(config);
+        const showRawTable$ = new BehaviorSubject<boolean>(false);
+
+        render(
+          <VisualizationRender data$={data$} config$={visConfig$} showRawTable$={showRawTable$} />
+        );
+
+        expect(screen.getByTestId('customLegend')).toBeInTheDocument();
+      }
+    );
+
+    it('does not render custom legend when addLegend is false', () => {
+      const config: RenderChartConfig = {
+        type: 'bar',
+        styles: {
+          ...defaultBarChartStyles,
+          addLegend: false,
+          legendPosition: Positions.BOTTOM,
+        },
+        axesMapping: { x: 'field1', y: 'count' },
+      };
+
+      const data$ = new BehaviorSubject<VisData | undefined>(mockVisData);
+      const visConfig$ = new BehaviorSubject<RenderChartConfig | undefined>(config);
+      const showRawTable$ = new BehaviorSubject<boolean>(false);
+
+      render(
+        <VisualizationRender data$={data$} config$={visConfig$} showRawTable$={showRawTable$} />
+      );
+
+      expect(screen.queryByTestId('customLegend')).not.toBeInTheDocument();
+    });
+
+    it('clears legend$ when chart type does not support custom legend', () => {
+      const barConfig: RenderChartConfig = {
+        type: 'bar',
+        styles: { ...defaultBarChartStyles, addLegend: true, legendPosition: Positions.BOTTOM },
+        axesMapping: { x: 'field1', y: 'count' },
+      };
+
+      const metricConfig: RenderChartConfig = {
+        type: 'metric',
+        styles: {
+          ...defaultMetricChartStyles,
+          addLegend: true,
+          legendPosition: Positions.BOTTOM,
+        },
+        axesMapping: { value: 'count' },
+      };
+
+      const { rerender } = render(
+        <CommonVisualizationRender
+          visualizationData={mockVisData}
+          visConfig={barConfig}
+          showRawTable={false}
+        />
+      );
+
+      // Legend renders for bar chart
+      expect(screen.getByTestId('customLegend')).toBeInTheDocument();
+
+      // Switch to metric — legend still renders (addLegend is true) but legend$ data is cleared
+      rerender(
+        <CommonVisualizationRender
+          visualizationData={mockVisData}
+          visConfig={metricConfig}
+          showRawTable={false}
+        />
+      );
+
+      expect(screen.getByTestId('customLegend')).toBeInTheDocument();
+    });
   });
 });

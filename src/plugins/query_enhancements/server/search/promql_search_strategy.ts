@@ -54,8 +54,6 @@ function parseTimeValue(
 
 // MAX_SERIES_TABLE: Maximum series for table display
 const MAX_SERIES_TABLE = 2000;
-// MAX_SERIES_VIZ: Maximum series for visualization. This should be lower than MAX_SERIES_TABLE
-const MAX_SERIES_VIZ = 100;
 // We'll want to re-evaluate this when we provide an affordance for step configuration
 const MAX_DATAPOINTS = DEFAULT_RESOLUTION * MAX_SERIES_TABLE;
 
@@ -269,6 +267,7 @@ function createDataFrame(
 ): IDataFrame {
   const allVizRows: Array<Record<string, unknown>> = [];
   const allLabelKeys = new Set<string>();
+  let totalSeriesCount = 0;
 
   // instantDataMap is used for table display, we only show the latest datapoint in the table.
   const instantDataMap = new Map<
@@ -288,6 +287,7 @@ function createDataFrame(
 
     const queryResult = result.response.results[datasetId];
     const series = normalizeResult(queryResult?.resultType, queryResult?.result);
+    totalSeriesCount += series.length;
 
     series.forEach((metricResult, i) => {
       if (i >= MAX_SERIES_TABLE) return;
@@ -349,7 +349,7 @@ function createDataFrame(
           existing.valuesByQuery[result.label] = Number(value);
         }
 
-        if (seriesIndex < MAX_SERIES_VIZ) {
+        if (seriesIndex < MAX_SERIES_TABLE) {
           allVizRows.push({
             Time: timeMs,
             Series: escapedSeriesName,
@@ -420,6 +420,15 @@ function createDataFrame(
       rows: allInstantRows,
     },
   };
+
+  const tableTruncated = totalSeriesCount > MAX_SERIES_TABLE;
+  if (tableTruncated || totalSeriesCount > 0) {
+    meta.truncation = {
+      tableTruncated,
+      totalSeriesCount,
+      displayedSeriesCount: Math.min(totalSeriesCount, MAX_SERIES_TABLE),
+    };
+  }
 
   if (!isSingleQuery) {
     meta.multiQuery = {

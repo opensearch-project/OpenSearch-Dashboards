@@ -271,10 +271,10 @@ export class Router implements IRouter {
   }: {
     request: Request;
     responseToolkit: ResponseToolkit;
-    handler: RequestHandlerEnhanced<P, Q, B, typeof request.method>;
+    handler: RequestHandlerEnhanced<P, Q, B, RouteMethod>;
     routeSchemas?: RouteValidator<P, Q, B>;
   }) {
-    let opensearchDashboardsRequest: OpenSearchDashboardsRequest<P, Q, B, typeof request.method>;
+    let opensearchDashboardsRequest: OpenSearchDashboardsRequest<P, Q, B, RouteMethod>;
     const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
     try {
       opensearchDashboardsRequest = OpenSearchDashboardsRequest.from(request, routeSchemas);
