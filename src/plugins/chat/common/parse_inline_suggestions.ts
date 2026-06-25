@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-const SUGGESTIONS_PATTERN = /\n?SUGGESTIONS:\s*(\[.*\])\s*$/;
+const SUGGESTIONS_PATTERN = /\n?SUGGESTIONS:\s*(\[[\s\S]*?\])\s*$/;
 
 /**
  * Parse inline suggestions from assistant response content.
@@ -47,7 +47,7 @@ export function stripInlineSuggestions(content: string): string {
     return cleanContent;
   }
   // Strip incomplete SUGGESTIONS:[ suffix during streaming
-  const incompletePattern = /\n+SUGGESTIONS:\s*\[.*$/;
+  const incompletePattern = /\n?SUGGESTIONS:\s*\[[\s\S]*$/;
   if (incompletePattern.test(content)) {
     return content.replace(incompletePattern, '').trimEnd();
   }

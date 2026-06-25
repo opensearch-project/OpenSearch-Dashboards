@@ -100,7 +100,12 @@ export const ChatSuggestions = ({
 
   const [customSuggestions, setCustomSuggestions] = useState<SuggestedActions[]>([]);
   const [isLoadingCustomSuggestions, setIsLoadingCustomSuggestions] = useState(false);
-  const [selectedIndices, setSelectedIndices] = useState<Set<number>>(new Set());
+  const [selectedMessages, setSelectedMessages] = useState<Set<string>>(new Set());
+
+  // Reset selection state when the message changes
+  useEffect(() => {
+    setSelectedMessages(new Set());
+  }, [currentMessage]);
 
   // Parse inline suggestions from the current assistant message content
   const inlineSuggestionActions: SuggestedActions[] = useMemo(() => {
@@ -143,7 +148,7 @@ export const ChatSuggestions = ({
   }, [suggestedActionsService, chatService, messages, currentMessage]);
 
   const hasUserTypedInput =
-    !!(inputValue && inputValue.trim().length > 0) && selectedIndices.size === 0;
+    !!(inputValue && inputValue.trim().length > 0) && selectedMessages.size === 0;
   const visibleInlineSuggestions = hasUserTypedInput ? [] : inlineSuggestionActions;
   const allSuggestions = [...visibleInlineSuggestions, ...customSuggestions];
 
@@ -151,20 +156,16 @@ export const ChatSuggestions = ({
     return null;
   }
 
-  const handleSuggestionClick = (index: number, suggestedAction: SuggestedActions) => {
+  const handleSuggestionClick = (suggestedAction: SuggestedActions) => {
     const isInline = suggestedAction.actionType === 'send_as_input';
 
     if (isInline) {
-      if (selectedIndices.has(index)) {
-        setSelectedIndices(new Set());
+      if (selectedMessages.has(suggestedAction.message)) {
+        setSelectedMessages(new Set());
         onRemoveInput?.(suggestedAction.message);
       } else {
-        // Deselect previous selection
-        selectedIndices.forEach((prevIndex) => {
-          const prevAction = allSuggestions[prevIndex];
-          if (prevAction) onRemoveInput?.(prevAction.message);
-        });
-        setSelectedIndices(new Set([index]));
+        selectedMessages.forEach((msg) => onRemoveInput?.(msg));
+        setSelectedMessages(new Set([suggestedAction.message]));
         onAppendInput?.(suggestedAction.message);
       }
     } else {
@@ -181,16 +182,16 @@ export const ChatSuggestions = ({
         <small>Follow up</small>
       </EuiText>
       <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="s">
-        {allSuggestions.map((suggestedAction, i) => (
-          <div key={i}>
+        {allSuggestions.map((suggestedAction) => (
+          <div key={`${suggestedAction.actionType}-${suggestedAction.message}`}>
             <EuiSpacer size="xs" />
             <EuiFlexItem grow={false}>
               <SuggestionBubble
-                onClick={() => handleSuggestionClick(i, suggestedAction)}
-                color={selectedIndices.has(i) ? 'success' : 'default'}
+                onClick={() => handleSuggestionClick(suggestedAction)}
+                color={selectedMessages.has(suggestedAction.message) ? 'success' : 'default'}
                 content={suggestedAction.message}
                 actionType={suggestedAction.actionType}
-                selected={selectedIndices.has(i)}
+                selected={selectedMessages.has(suggestedAction.message)}
               />
             </EuiFlexItem>
           </div>
