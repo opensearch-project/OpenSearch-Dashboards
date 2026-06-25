@@ -27,22 +27,33 @@ const LINT_DEBOUNCE_MS = 500;
 const lintDebounceTimers = new Map<string, ReturnType<typeof setTimeout>>();
 const lintGenerations = new Map<string, number>();
 
+// PPL worker proxy service for worker-based syntax highlighting
 const pplWorkerProxyService = new PPLWorkerProxyService();
 
+// PPL analyzer for synchronous tokenization (lazy initialization)
 let pplAnalyzer: ReturnType<typeof getPPLLanguageAnalyzer> | undefined;
 
+/**
+ * Map PPL Language Analyzer tokens to Monaco editor token classes
+ * Based on ANTLR-generated token types from OpenSearchPPLLexer
+ */
 const mapPPLTokenToMonacoTokenType = (tokenType: string): string => {
   const type = tokenType.toUpperCase();
 
+  // Use optimized Set lookups from constants
   for (const [monacoType, tokenSet] of Object.entries(PPL_TOKEN_SETS)) {
     if (tokenSet.has(type)) {
       return monacoType;
     }
   }
 
+  // Default case
   return 'identifier';
 };
 
+/**
+ * Create Monaco language configuration for PPL
+ */
 const createPPLLanguageConfiguration = (): monaco.languages.LanguageConfiguration => ({
   comments: {
     lineComment: '//',
@@ -69,6 +80,9 @@ const createPPLLanguageConfiguration = (): monaco.languages.LanguageConfiguratio
   ],
 });
 
+/**
+ * Set up synchronous tokenization for PPL
+ */
 const setupPPLTokenization = () => {
   monaco.languages.setTokensProvider(PPL_LANGUAGE_ID, {
     getInitialState: () => {
@@ -79,10 +93,13 @@ const setupPPLTokenization = () => {
       return state;
     },
     tokenize: (line: string, state: any) => {
+      // Use PPL Language Analyzer for accurate tokenization
       const tokens: monaco.languages.IToken[] = [];
 
       try {
+        // Only process if line contains potential PPL content
         if (line.trim()) {
+          // Lazy initialize the PPL analyzer only when needed
           if (!pplAnalyzer) {
             pplAnalyzer = getPPLLanguageAnalyzer();
           }
@@ -97,8 +114,8 @@ const setupPPLTokenization = () => {
             });
           }
         }
-      } catch {
-        // best-effort
+      } catch (error) {
+        // If ANTLR fails, return empty tokens
       }
 
       return {
@@ -109,8 +126,13 @@ const setupPPLTokenization = () => {
   });
 };
 
+/**
+ * Process syntax highlighting for PPL models
+ */
 const processSyntaxHighlighting = async (model: monaco.editor.IModel) => {
+  // Only process if the model is still set to PPL language
   if (model.getLanguageId() !== PPL_LANGUAGE_ID) {
+    // Clear any existing PPL markers if language changed
     monaco.editor.setModelMarkers(model, OWNER, []);
     return;
   }
@@ -118,6 +140,7 @@ const processSyntaxHighlighting = async (model: monaco.editor.IModel) => {
   try {
     const content = model.getValue();
 
+    // Ensure worker is set up before validation - always call setup as it has internal check
     pplWorkerProxyService.setup();
 
     const validationResult = (await resolvePPLValidationResult(
@@ -127,7 +150,9 @@ const processSyntaxHighlighting = async (model: monaco.editor.IModel) => {
     )) as PPLValidationResult;
 
     if (validationResult.errors.length > 0) {
+      // Convert errors to Monaco markers
       const markers: monaco.editor.IMarkerData[] = validationResult.errors.map((error) => {
+        // Map SyntaxError properties to Monaco marker properties
         const startLineNumber = error.line || 1;
         const endLineNumber = error.endLine || error.line || startLineNumber;
         const startColumn = (error.column || 0) + 1; // Monaco is 1-based, ANTLR is 0-based
@@ -146,6 +171,7 @@ const processSyntaxHighlighting = async (model: monaco.editor.IModel) => {
           startColumn: safeStartColumn,
           endLineNumber: safeEndLine,
           endColumn: safeEndColumn,
+          // Add error code for better categorization
           code: {
             value: 'View Documentation',
             target: monaco.Uri.parse(docLink.url),
@@ -155,10 +181,11 @@ const processSyntaxHighlighting = async (model: monaco.editor.IModel) => {
 
       monaco.editor.setModelMarkers(model, OWNER, markers);
     } else {
+      // Clear markers if no errors
       monaco.editor.setModelMarkers(model, OWNER, []);
     }
-  } catch {
-    // best-effort
+  } catch (error) {
+    // Silent error handling - continue without worker-based highlighting
   }
 };
 
@@ -233,6 +260,9 @@ const scheduleLintHighlighting = (model: monaco.editor.IModel): void => {
   lintDebounceTimers.set(model.id, handle);
 };
 
+/**
+ * Set up PPL document range formatting provider
+ */
 const setupPPLFormatter = () => {
   monaco.languages.registerDocumentRangeFormattingEditProvider(
     PPL_LANGUAGE_ID,
@@ -240,10 +270,14 @@ const setupPPLFormatter = () => {
   );
 };
 
+/**
+ * Set up syntax highlighting using PPL worker
+ */
 const setupPPLSyntaxHighlighting = () => {
   const disposables: monaco.IDisposable[] = [];
 
   const handleModel = (model: monaco.editor.IModel) => {
+    // Set up content change listener
     disposables.push(
       model.onDidChangeContent(async () => {
         if (model.getLanguageId() === PPL_LANGUAGE_ID) {
@@ -253,6 +287,7 @@ const setupPPLSyntaxHighlighting = () => {
       })
     );
 
+    // Set up language change listener
     disposables.push(
       model.onDidChangeLanguage(async () => {
         if (model.getLanguageId() === PPL_LANGUAGE_ID) {
@@ -266,14 +301,17 @@ const setupPPLSyntaxHighlighting = () => {
       })
     );
 
+    // Process immediately if already PPL
     if (model.getLanguageId() === PPL_LANGUAGE_ID) {
       processSyntaxHighlighting(model);
       processLintHighlighting(model);
     }
   };
 
+  // Listen for new models
   disposables.push(monaco.editor.onDidCreateModel(handleModel));
 
+  // Listen for model disposal to clear markers
   disposables.push(
     monaco.editor.onWillDisposeModel((model) => {
       const pending = lintDebounceTimers.get(model.id);
@@ -288,8 +326,10 @@ const setupPPLSyntaxHighlighting = () => {
     })
   );
 
+  // Handle existing models
   monaco.editor.getModels().forEach(handleModel);
 
+  // Return cleanup function
   return () => {
     lintDebounceTimers.forEach(clearTimeout);
     lintDebounceTimers.clear();
@@ -299,7 +339,11 @@ const setupPPLSyntaxHighlighting = () => {
   };
 };
 
+/**
+ * Register PPL language support with Monaco Editor
+ */
 export const registerPPLLanguage = () => {
+  // Register the PPL language
   monaco.languages.register({
     id: PPL_LANGUAGE_ID,
     extensions: ['.ppl'],
@@ -307,12 +351,16 @@ export const registerPPLLanguage = () => {
     mimetypes: ['application/ppl', 'text/ppl'],
   });
 
+  // Set language configuration
   monaco.languages.setLanguageConfiguration(PPL_LANGUAGE_ID, createPPLLanguageConfiguration());
 
+  // Set up synchronous tokenization
   setupPPLTokenization();
 
+  // Set up PPL formatter
   setupPPLFormatter();
 
+  // Set up syntax highlighting with worker
   const disposeSyntaxHighlighting = setupPPLSyntaxHighlighting();
 
   const hoverDisposable = monaco.languages.registerHoverProvider(
@@ -328,4 +376,5 @@ export const registerPPLLanguage = () => {
   };
 };
 
+// Auto-register PPL language support
 registerPPLLanguage();

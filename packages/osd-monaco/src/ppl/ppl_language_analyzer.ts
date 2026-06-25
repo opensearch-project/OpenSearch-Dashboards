@@ -42,6 +42,13 @@ export interface PPLCompletionItem {
  * Uses ANTLR generated lexer and parser for accurate language processing
  */
 export class PPLLanguageAnalyzer {
+  constructor() {
+    // ANTLR-based language analyzer initialization
+  }
+
+  /**
+   * Creates and configures ANTLR lexer and token stream from input code
+   */
   private createLexerAndTokenStream(
     code: string
   ): { lexer: OpenSearchPPLLexer; tokenStream: antlr.CommonTokenStream } {
@@ -51,16 +58,31 @@ export class PPLLanguageAnalyzer {
     return { lexer, tokenStream };
   }
 
+  /**
+   * Creates and configures ANTLR parser with error listeners
+   */
   private createParserWithErrorHandling(
     tokenStream: antlr.CommonTokenStream
-  ): { parser: OpenSearchPPLParser; parserErrorListener: PPLSyntaxErrorListener } {
+  ): {
+    parser: OpenSearchPPLParser;
+    lexerErrorListener: PPLSyntaxErrorListener;
+    parserErrorListener: PPLSyntaxErrorListener;
+  } {
     const parser = new OpenSearchPPLParser(tokenStream);
+
+    // Set up error listeners
+    const lexerErrorListener = new PPLSyntaxErrorListener();
     const parserErrorListener = new PPLSyntaxErrorListener();
+
     parser.removeErrorListeners();
     parser.addErrorListener(parserErrorListener);
-    return { parser, parserErrorListener };
+
+    return { parser, lexerErrorListener, parserErrorListener };
   }
 
+  /**
+   * Tokenize PPL code into tokens using ANTLR lexer
+   */
   tokenize(code: string): PPLToken[] {
     const tokens: PPLToken[] = [];
 
@@ -90,6 +112,9 @@ export class PPLLanguageAnalyzer {
     return tokens;
   }
 
+  /**
+   * Validate PPL code using ANTLR parser
+   */
   validate(code: string): PPLValidationResult {
     try {
       const { lexer, tokenStream } = this.createLexerAndTokenStream(code);
@@ -103,8 +128,20 @@ export class PPLLanguageAnalyzer {
 
       parser.root();
 
+      // Collect all errors from both lexer and parser
       const allErrors = [...lexerErrorListener.errors, ...parserErrorListener.errors];
-      return { isValid: allErrors.length === 0, errors: allErrors };
+
+      if (allErrors.length > 0) {
+        return {
+          isValid: false,
+          errors: allErrors,
+        };
+      }
+
+      return {
+        isValid: true,
+        errors: [],
+      };
     } catch (error) {
       // Return parsing exception as error
       return {
@@ -148,17 +185,35 @@ export class PPLLanguageAnalyzer {
     }
   }
 
+  /**
+   * Get token type name from ANTLR token type
+   */
   private getTokenTypeName(tokenType: number, lexer: OpenSearchPPLLexer): string {
-    const symbolic = lexer.vocabulary.getSymbolicName(tokenType);
-    if (symbolic) return symbolic.toLowerCase();
-    const literal = lexer.vocabulary.getLiteralName(tokenType);
-    if (literal) return literal.replace(/['"]/g, '');
+    const vocabulary = lexer.vocabulary;
+    const symbolicName = vocabulary.getSymbolicName(tokenType);
+
+    if (symbolicName) {
+      return symbolicName.toLowerCase();
+    }
+
+    const literalName = vocabulary.getLiteralName(tokenType);
+    if (literalName) {
+      return literalName.replace(/['"]/g, '');
+    }
+
     return 'unknown';
   }
 }
 
+/**
+ * Singleton instance of PPL Language Analyzer
+ * Provides a shared instance for efficient memory usage across the application
+ */
 let pplLanguageAnalyzerInstance: PPLLanguageAnalyzer | null = null;
 
+/**
+ * Get or create the singleton instance of PPL Language Analyzer
+ */
 export const getPPLLanguageAnalyzer = (): PPLLanguageAnalyzer => {
   if (!pplLanguageAnalyzerInstance) {
     pplLanguageAnalyzerInstance = new PPLLanguageAnalyzer();

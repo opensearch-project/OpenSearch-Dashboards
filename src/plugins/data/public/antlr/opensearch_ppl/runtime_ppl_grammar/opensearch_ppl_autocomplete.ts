@@ -138,8 +138,10 @@ interface C3FollowSetsCacheContainer {
 }
 
 /**
- * Access the private `followSetsByATN` cache from CodeCompletionCore.
- * Returns null safely if the library changes its internal storage.
+ * Access the internal follow-set cache from antlr4-c3's CodeCompletionCore.
+ * This depends on the private `followSetsByATN` static field — if the library
+ * changes its internal storage, this will safely return null (no crash, just
+ * no cache isolation). Keep a focused regression test around this dependency.
  */
 function getC3FollowSetsCache(): Map<string, unknown> | null {
   const maybeCache = ((CodeCompletionCore as unknown) as C3FollowSetsCacheContainer)
@@ -625,6 +627,7 @@ export function enrichRuntimeResult(
 ): OpenSearchPplAutocompleteResult {
   const spaceToken = resolveSpaceToken(grammar);
 
+  // Resolve token types and rule indices by name
   const ID = resolveToken(grammar, 'ID', 'ID');
   const SOURCE = resolveToken(grammar, 'SOURCE', 'SOURCE');
   const PIPE = resolveToken(grammar, 'PIPE', 'PIPE');
@@ -816,6 +819,7 @@ export function enrichRuntimeResult(
     }
   }
 
+  // When context is `FIELD =` (e.g. `rex field =`), force column suggestions.
   const lastToken = findLastNonSpaceTokenRT(tokenStream, cursorTokenIndex, spaceToken);
   if (lastToken?.token.type === EQUAL) {
     const previousToken = findLastNonSpaceTokenRT(tokenStream, lastToken.index, spaceToken);
@@ -825,6 +829,7 @@ export function enrichRuntimeResult(
     }
   }
 
+  // Detect quote context
   const currentToken = tokenStream?.get(cursorTokenIndex);
   const isInBackQuote = currentToken?.type === BQUOTA;
   const isInQuote = currentToken?.type === DQUOTA || currentToken?.type === SQUOTA;

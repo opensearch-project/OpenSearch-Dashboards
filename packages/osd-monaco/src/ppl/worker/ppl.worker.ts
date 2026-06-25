@@ -13,24 +13,36 @@ import {
 import { LintResult } from '../lint/diagnostic';
 import { BundleRuleOverrides } from '../lint/types';
 
+// Simple worker implementation that doesn't depend on Monaco's internal modules
 class PPLWorkerImpl {
-  private analyzer: PPLLanguageAnalyzer = getPPLLanguageAnalyzer();
+  private analyzer: PPLLanguageAnalyzer;
 
   async tokenize(content: string): Promise<PPLToken[]> {
+    if (!this.analyzer) {
+      this.analyzer = getPPLLanguageAnalyzer();
+    }
     return this.analyzer.tokenize(content);
   }
 
   async validate(content: string): Promise<PPLValidationResult> {
+    if (!this.analyzer) {
+      this.analyzer = getPPLLanguageAnalyzer();
+    }
     return this.analyzer.validate(content);
   }
 
   async lint(content: string, overrides?: BundleRuleOverrides): Promise<LintResult> {
+    if (!this.analyzer) {
+      this.analyzer = getPPLLanguageAnalyzer();
+    }
     return this.analyzer.lint(content, overrides ? { overrides } : undefined);
   }
 }
 
+// Initialize worker
 const worker = new PPLWorkerImpl();
 
+// Handle messages from main thread
 self.onmessage = async (e: MessageEvent) => {
   const { id, method, args } = e.data;
 
@@ -50,11 +62,13 @@ self.onmessage = async (e: MessageEvent) => {
         throw new Error(`Unknown method: ${method}`);
     }
 
+    // Send result back to main thread
     (self as any).postMessage({
       id,
       result,
     });
   } catch (error) {
+    // Send error back to main thread
     (self as any).postMessage({
       id,
       error: error instanceof Error ? error.message : String(error),

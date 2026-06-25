@@ -183,12 +183,14 @@ class PPLGrammarCache {
     datasourceId?: string,
     datasourceVersion?: string
   ): void {
+    // Check feature flag - if disabled, reset cache state but keep subscribers
     const runtimeGrammarEnabled = uiSettings?.get('query:enhancements:runtimePplGrammar') !== false;
     if (!runtimeGrammarEnabled) {
       this.reset();
       return;
     }
 
+    // Datasource changed — reset everything.
     if (datasourceId !== this.cachedDatasourceId) {
       this.reset();
       this.cachedDatasourceId = datasourceId;
@@ -203,6 +205,7 @@ class PPLGrammarCache {
       this.fetchFailed = false;
     }
 
+    // Already cached, in-flight, or recently failed — nothing to do.
     if (this.cachedGrammar || this.pendingFetch || this.fetchFailed) return;
 
     const promise = this.doWarmUp(http, savedObjectsClient, datasourceId, datasourceVersion);
@@ -258,10 +261,17 @@ class PPLGrammarCache {
       datasourceVersion
     );
     if (!this.shouldFetchFromBackend(version)) {
+      // Version unsupported or unknown — not a failure, just nothing to fetch.
+      // Don't set fetchFailed so that future warmUp calls can retry when the
+      // version becomes available (e.g. /api/status wasn't ready on page load).
       return null;
     }
     const result = await this.doFetch(http, datasourceId);
     if (!result && datasourceId === this.cachedDatasourceId) {
+      // Grammar endpoint was reachable but returned an invalid bundle, or the
+      // request itself failed — treat as a real failure to avoid hammering.
+      // Only set if datasource hasn't changed while we were fetching.
+      // Retries are allowed after RETRY_AFTER_MS elapses.
       this.fetchFailed = true;
       this.fetchFailedAt = Date.now();
     }
@@ -351,6 +361,9 @@ class PPLGrammarCache {
         runtimeRuleNameToIndex: buildRuleNameToIndex(bundle.parserRuleNames),
       };
 
+      // Only cache if the datasource hasn't changed while we were fetching.
+      // A rapid ds-1 → ds-2 switch resets cachedDatasourceId; if ds-1's fetch
+      // resolves late we must not overwrite ds-2's state.
       if (datasourceId !== this.cachedDatasourceId) {
         return null;
       }
@@ -371,7 +384,8 @@ class PPLGrammarCache {
           grammarHash: entry.grammarHash,
         });
       } catch {
-        // Don't let a failing listener break the notification loop.
+        // A failing listener must not prevent other listeners from being notified
+        // or poison the grammar fetch promise chain.
       }
     }
   }

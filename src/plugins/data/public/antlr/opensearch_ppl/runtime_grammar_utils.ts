@@ -28,7 +28,13 @@ export function resolveSpaceToken(grammar: CachedGrammar): number {
   return Token.INVALID_TYPE;
 }
 
-/** Pick the parser start rule index for the given query shape. */
+/**
+ * Pick the start rule for C3/parsing based on query shape.
+ * Pipe-first queries (`|...`) use `commands` (or backend-provided pipeStartRuleIndex)
+ * so pipeline commands become reachable. Normal queries use the root rule.
+ * `commands` is preferred over `subPipeline` because the leading `|` is stripped
+ * before lexing, and `commands` expects input after the pipe.
+ */
 export function pickStartRuleIndex(
   query: string,
   grammar: CachedGrammar,

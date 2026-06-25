@@ -45,10 +45,46 @@ export class PPLSyntaxErrorListener implements ANTLRErrorListener {
     });
   }
 
-  reportAmbiguity<T extends ATNSimulator>(): void {}
-  reportAttemptingFullContext<T extends ATNSimulator>(): void {}
-  reportContextSensitivity<T extends ATNSimulator>(): void {}
+  reportAmbiguity<T extends ATNSimulator>(
+    recognizer: Recognizer<T>,
+    dfa: any,
+    startIndex: number,
+    stopIndex: number,
+    exact: boolean,
+    ambigAlts: any,
+    configs: any
+  ): void {
+    // Optional: handle ambiguity reporting for debugging
+    // For now, we'll ignore ambiguity reports
+  }
 
+  reportAttemptingFullContext<T extends ATNSimulator>(
+    recognizer: Recognizer<T>,
+    dfa: any,
+    startIndex: number,
+    stopIndex: number,
+    conflictingAlts: any,
+    configs: any
+  ): void {
+    // Optional: handle full context attempts for debugging
+    // For now, we'll ignore these reports
+  }
+
+  reportContextSensitivity<T extends ATNSimulator>(
+    recognizer: Recognizer<T>,
+    dfa: any,
+    startIndex: number,
+    stopIndex: number,
+    prediction: number,
+    configs: any
+  ): void {
+    // Optional: handle context sensitivity reports for debugging
+    // For now, we'll ignore these reports
+  }
+
+  /**
+   * Clears all collected errors
+   */
   clear(): void {
     this.errors = [];
   }
