@@ -67,23 +67,29 @@ describe('DELETE /api/saved_objects/{type}/{id}', () => {
   });
 
   it('calls upon savedObjectClient.delete', async () => {
+    savedObjectsClient.get.mockResolvedValue({
+      type: 'index-pattern',
+      id: 'logstash-*',
+      attributes: {},
+      references: [],
+    } as any);
+
     await supertest(httpSetup.server.listener)
       .delete('/api/saved_objects/index-pattern/logstash-*')
       .expect(200);
 
-    expect(savedObjectsClient.delete).toHaveBeenCalledWith('index-pattern', 'logstash-*', {
-      force: undefined,
-    });
+    // force is not forwarded to client.delete() — it only controls lock bypass
+    expect(savedObjectsClient.delete).toHaveBeenCalledWith('index-pattern', 'logstash-*');
   });
 
-  it('can specify `force` option', async () => {
+  it('can specify `force` option to bypass managed lock', async () => {
     await supertest(httpSetup.server.listener)
       .delete('/api/saved_objects/index-pattern/logstash-*')
       .query({ force: true })
       .expect(200);
 
-    expect(savedObjectsClient.delete).toHaveBeenCalledWith('index-pattern', 'logstash-*', {
-      force: true,
-    });
+    // force=true skips the get() lock check entirely
+    expect(savedObjectsClient.get).not.toHaveBeenCalled();
+    expect(savedObjectsClient.delete).toHaveBeenCalledWith('index-pattern', 'logstash-*');
   });
 });
