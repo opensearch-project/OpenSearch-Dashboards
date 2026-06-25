@@ -30,6 +30,7 @@
 
 import { schema } from '@osd/config-schema';
 import { IRouter } from '../../http';
+import { isManagedByCode } from './managed_lock';
 
 export const registerBulkCreateRoute = (router: IRouter) => {
   router.post(
@@ -38,6 +39,7 @@ export const registerBulkCreateRoute = (router: IRouter) => {
       validate: {
         query: schema.object({
           overwrite: schema.boolean({ defaultValue: false }),
+          force: schema.boolean({ defaultValue: false }),
           workspaces: schema.maybe(
             schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
           ),
@@ -64,14 +66,63 @@ export const registerBulkCreateRoute = (router: IRouter) => {
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
-      const { overwrite } = req.query;
+      const { overwrite, force } = req.query;
       const workspaces = req.query.workspaces
         ? Array<string>().concat(req.query.workspaces)
         : undefined;
-      const result = await context.core.savedObjects.client.bulkCreate(req.body, {
+
+      // Check managed lock when overwriting — filter out locked objects and report per-item errors
+      let objectsToCreate = req.body;
+      const lockedErrors: Array<{ type: string; id: string; error: { statusCode: number; error: string; message: string } }> = [];
+
+      if (overwrite && !force) {
+        const objectsWithIds = req.body.filter((obj) => obj.id);
+        if (objectsWithIds.length > 0) {
+          const existingObjects = await context.core.savedObjects.client.bulkGet(
+            objectsWithIds.map((obj) => ({ type: obj.type, id: obj.id! }))
+          );
+          const lockedIds = new Set<string>();
+          existingObjects.saved_objects.forEach((obj) => {
+            if (!obj.error && isManagedByCode(obj.attributes as Record<string, unknown>)) {
+              lockedIds.add(`${obj.type}:${obj.id}`);
+              lockedErrors.push({
+                type: obj.type,
+                id: obj.id,
+                error: {
+                  statusCode: 409,
+                  error: 'Conflict',
+                  message: `Saved object [${obj.type}/${obj.id}] is managed by code. Use \`_bulk_apply\` or add \`?force=true\`.`,
+                },
+              });
+            }
+          });
+          if (lockedIds.size > 0) {
+            objectsToCreate = req.body.filter(
+              (obj) => !obj.id || !lockedIds.has(`${obj.type}:${obj.id}`)
+            );
+          }
+        }
+      }
+
+      const result = await context.core.savedObjects.client.bulkCreate(objectsToCreate, {
         overwrite,
         ...(workspaces ? { workspaces } : {}),
       });
+
+      // Merge locked errors into the response using the same shape as bulkCreate errors
+      if (lockedErrors.length > 0) {
+        result.saved_objects = [
+          ...result.saved_objects,
+          ...lockedErrors.map((err) => ({
+            type: err.type,
+            id: err.id,
+            error: err.error as any,
+            attributes: {},
+            references: [],
+          } as any)),
+        ];
+      }
+
       return res.ok({ body: result });
     })
   );
