@@ -4,6 +4,7 @@
  */
 
 import {
+  ISavedObjectsRepository,
   LegacyCallAPIOptions,
   OpenSearchClient,
   SavedObjectsClientContract,
@@ -31,6 +32,8 @@ export interface LegacyClientCallAPIParams {
 export interface DataSourceClientParams {
   // to fetch data source on behalf of users, caller should pass scoped saved objects client
   savedObjects: SavedObjectsClientContract;
+  // internal repository used to read encrypted credentials; bypasses the credential-stripping wrapper
+  internalSavedObjects?: ISavedObjectsRepository;
   cryptography: CryptographyServiceSetup;
   // optional when creating test client, required for normal client
   dataSourceId?: string;

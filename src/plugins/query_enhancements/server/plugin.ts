@@ -50,6 +50,49 @@ export class QueryEnhancementsPlugin
 
   public setup(core: CoreSetup, { data, dataSource }: QueryEnhancementsPluginSetupDependencies) {
     this.logger.debug('queryEnhancements: Setup');
+
+    // PPL lint capability — disabled by default until an operator enables it via
+    // the queryEnhancements.pplLint dynamic app config flag (see the switcher
+    // below). A follow-up PR will have the public plugin read
+    // capabilities.queryEnhancements.pplLint to decide whether to register the
+    // lint bridge; nothing consumes this capability yet.
+    core.capabilities.registerProvider(() => ({
+      queryEnhancements: { pplLint: false },
+    }));
+
+    // Override the default with the value from DynamicConfigService.
+    core.capabilities.registerSwitcher(async (request, capabilities) => {
+      try {
+        const dynamicConfigServiceStart = await core.dynamicConfigService.getStartService();
+        const client = dynamicConfigServiceStart.getClient();
+        const store = dynamicConfigServiceStart.getAsyncLocalStore();
+
+        // Use pluginConfigPath, NOT { name: 'queryEnhancements' }: pathToString
+        // runs _.snakeCase on `name`, turning 'queryEnhancements' into
+        // 'query_enhancements' — the wrong namespace, which would throw, be
+        // swallowed here, and leave pplLint off forever. pluginConfigPath joins
+        // verbatim and matches configPath: ['queryEnhancements'] in the manifest.
+        const config = await client.getConfig(
+          { pluginConfigPath: ['queryEnhancements'] },
+          store ? { asyncLocalStorageContext: store } : undefined
+        );
+
+        // Return only the changed subtree; recursiveApplyChanges merges it onto
+        // the resolved capabilities. `=== true` coerces explicitly — dynamic
+        // config writes are not schema-validated, so the stored value could be a
+        // non-boolean (e.g. the string 'true') that must not leak into the flag.
+        return {
+          queryEnhancements: {
+            ...(capabilities.queryEnhancements || {}),
+            pplLint: config.ppl?.lint?.enabled === true,
+          },
+        };
+      } catch (error) {
+        this.logger.error('Failed to load queryEnhancements dynamic config, using defaults', error);
+        return capabilities;
+      }
+    });
+
     const router = core.http.createRouter();
     // Register server side APIs
     const client = core.opensearch.legacy.createClient('opensearch_enhancements', {

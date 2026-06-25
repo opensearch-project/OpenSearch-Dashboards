@@ -4,7 +4,16 @@
  */
 
 import React, { useRef, useEffect, useMemo, useCallback } from 'react';
-import { EuiIcon, EuiText, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import {
+  EuiIcon,
+  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiListGroup,
+  EuiListGroupItem,
+} from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import { useObservable } from 'react-use';
 import { map } from 'rxjs/operators';
 import { ChatLayoutMode } from '../types';
@@ -114,6 +123,8 @@ interface ChatMessagesProps {
   onShowHistory?: () => void;
   conversationHistoryService?: ConversationHistoryService;
   onSelectConversation?: (conversation: SavedConversation) => void;
+  availableDataSources?: Array<{ id: string; title: string }>;
+  onDataSourceSelect?: (id: string) => void;
 }
 
 /**
@@ -299,6 +310,8 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
   onShowHistory,
   conversationHistoryService,
   onSelectConversation,
+  availableDataSources,
+  onDataSourceSelect,
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -622,6 +635,29 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
 
           return null;
         })}
+
+        {availableDataSources && availableDataSources.length > 0 && onDataSourceSelect && (
+          <div>
+            <EuiText color="subdued" size="xs">
+              <small>
+                {i18n.translate('chat.dataSourceSelection.prompt', {
+                  defaultMessage: 'Please select a data source to continue:',
+                })}
+              </small>
+            </EuiText>
+            <EuiListGroup maxWidth={false} flush gutterSize="none">
+              {availableDataSources.map((ds) => (
+                <EuiListGroupItem
+                  key={ds.id}
+                  label={ds.title}
+                  iconType="database"
+                  onClick={() => onDataSourceSelect(ds.id)}
+                  size="xs"
+                />
+              ))}
+            </EuiListGroup>
+          </div>
+        )}
 
         {isStreaming && !startResponse && (
           <div className="chatMessages__loadingIndicator">

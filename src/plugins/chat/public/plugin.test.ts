@@ -82,6 +82,7 @@ describe('ChatPlugin', () => {
         ),
       },
       workspaces: {},
+      savedObjects: { client: {} },
     };
 
     // Mock dependencies
@@ -128,7 +129,8 @@ describe('ChatPlugin', () => {
       expect(ChatService).toHaveBeenCalledWith(
         mockCoreStart.uiSettings,
         mockCoreStart.chat,
-        mockCoreStart.workspaces
+        mockCoreStart.workspaces,
+        mockCoreStart.savedObjects.client
       );
     });
 
@@ -159,7 +161,8 @@ describe('ChatPlugin', () => {
       expect(ChatService).toHaveBeenCalledWith(
         mockCoreStart.uiSettings,
         mockCoreStart.chat,
-        mockCoreStart.workspaces
+        mockCoreStart.workspaces,
+        mockCoreStart.savedObjects.client
       );
       expect(startContract.chatService).toBeInstanceOf(ChatService);
       expect(mockCoreStart.chrome.navControls.registerPrimaryHeaderRight).toHaveBeenCalled();
@@ -171,7 +174,8 @@ describe('ChatPlugin', () => {
       expect(ChatService).toHaveBeenCalledWith(
         mockCoreStart.uiSettings,
         mockCoreStart.chat,
-        mockCoreStart.workspaces
+        mockCoreStart.workspaces,
+        mockCoreStart.savedObjects.client
       );
       expect(startContract.chatService).toBeInstanceOf(ChatService);
       expect(mockCoreStart.chrome.navControls.registerPrimaryHeaderRight).toHaveBeenCalled();
@@ -234,7 +238,8 @@ describe('ChatPlugin', () => {
         expect(ChatService).toHaveBeenCalledWith(
           mockCoreStart.uiSettings,
           mockCoreStart.chat,
-          mockCoreStart.workspaces
+          mockCoreStart.workspaces,
+          mockCoreStart.savedObjects.client
         );
       });
     });
