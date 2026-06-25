@@ -23,7 +23,7 @@ export const MetricsDataTable: React.FC<MetricsDataTableProps> = ({ searchResult
   const dateFormat = services.uiSettings.get(UI_SETTINGS.DATE_FORMAT);
 
   const [visibleColumns, setVisibleColumns] = useState<string[]>([]);
-  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 50 });
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 25 });
   const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([]);
 
   const rows = searchResult?.instantHits?.hits || emptyHits;

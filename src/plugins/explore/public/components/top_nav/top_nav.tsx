@@ -5,6 +5,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@osd/i18n';
+import { useObservable } from 'react-use';
 import { AppMountParameters } from 'opensearch-dashboards/public';
 import { useSelector as useNewStateSelector, useDispatch } from 'react-redux';
 import { useSyncQueryStateWithUrl } from '../../../../data/public';
@@ -157,11 +158,12 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
         dispatch(setDateRange(payload.dateRange));
       }
 
-      const editorText = editorRef.current?.getValue() || '';
+      const editorText =
+        editorRef.current?.getValue() ?? String(queryString.getQuery().query || '');
       // @ts-expect-error TS2345 TODO(ts-error): fixme
       dispatch(onEditorRunActionCreator(services, editorText));
     },
-    [dispatch, services, editorRef]
+    [dispatch, services, editorRef, queryString]
   );
 
   const handleQueryCancel = useCallback(() => {
@@ -268,17 +270,24 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
     );
   }, [handleCustomButtonClick, shouldShowCancelButton, handleQueryCancel, isQueryRunning]);
 
+  // When chrome is hidden (e.g. `?embed=true`) the header portal isn't
+  // rendered, so render the search bar + date picker inline instead.
+  const isEmbedded = !useObservable(services.chrome.getIsVisible$(), true);
+  const datePickerMode = isEmbedded
+    ? TopNavMenuItemRenderType.IN_PLACE
+    : showDatePicker && TopNavMenuItemRenderType.IN_PORTAL;
+
   return (
     <TopNavMenu
       appName={PLUGIN_ID}
-      config={topNavLinks}
+      config={isEmbedded ? [] : topNavLinks}
       data={data}
       showSearchBar={TopNavMenuItemRenderType.IN_PLACE}
-      showDatePicker={showDatePicker && TopNavMenuItemRenderType.IN_PORTAL}
+      showDatePicker={datePickerMode}
       showSaveQuery={false}
       useDefaultBehaviors={false}
       disableTimeRangeTool={true}
-      setMenuMountPoint={setHeaderActionMenu}
+      setMenuMountPoint={isEmbedded ? undefined : setHeaderActionMenu}
       indexPatterns={dataset ? [dataset] : undefined}
       savedQueryId={undefined}
       onSavedQueryIdChange={() => {}}

@@ -4,7 +4,7 @@
  */
 
 import React, { act } from 'react';
-import { render } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
 import { ChatWindow, ChatWindowInstance } from './chat_window';
 import { coreMock } from '../../../../core/public/mocks';
 import { of } from 'rxjs';
@@ -15,13 +15,13 @@ import { SuggestedActionsService } from '../services/suggested_action';
 import { ConfirmationService } from '../services/confirmation_service';
 
 // Create mock observable before using it in mocks
-const mockObservable = of({ toolDefinitions: [], toolCallStates: {} });
+const mockObservable = of({ toolDefinitions: [], toolCallStates: new Map() });
 
 // Mock dependencies
 jest.mock('../../../context_provider/public', () => {
   const assistantActionsInstance = {
     getState$: jest.fn(() => mockObservable),
-    getCurrentState: jest.fn(() => ({ toolDefinitions: [], toolCallStates: {} })),
+    getCurrentState: jest.fn(() => ({ toolDefinitions: [], toolCallStates: new Map() })),
     getActionRenderer: jest.fn(),
   };
   return {
@@ -35,6 +35,7 @@ jest.mock('../services/chat_event_handler', () => ({
   ChatEventHandler: jest.fn().mockImplementation(() => ({
     handleEvent: jest.fn(),
     clearState: jest.fn(),
+    cancelToolResultDispatch: jest.fn(),
   })),
 }));
 
@@ -76,12 +77,22 @@ describe('ChatWindow', () => {
       abort: jest.fn(),
       setChatWindowInstance: jest.fn(),
       clearChatWindowInstance: jest.fn(),
+      getCurrentDataSourceId: jest.fn().mockResolvedValue('mock-ds-id'),
+      getUserMessage: jest.fn((content: string, rawMessage?: string) => ({
+        id: `msg-${Date.now()}`,
+        role: 'user',
+        content,
+        rawMessage: rawMessage || content,
+      })),
+      getAvailableDataSources: jest
+        .fn()
+        .mockResolvedValue([{ id: 'mock-ds-id', title: 'Mock DS' }]),
+      setDataSourceId: jest.fn(),
       conversationHistoryService: {
         getMemoryProvider: jest.fn().mockReturnValue({
           includeFullHistory: true,
         }),
       },
-      restoreLatestConversation: jest.fn().mockResolvedValue(null),
       saveConversation: jest.fn(),
       loadConversation: jest.fn(),
     } as any;
@@ -162,7 +173,8 @@ describe('ChatWindow', () => {
 
       expect(mockChatService.sendMessage).toHaveBeenCalledWith(
         'test message from ref',
-        expect.any(Array)
+        expect.any(Array),
+        expect.any(Object)
       );
     });
   });
@@ -334,47 +346,21 @@ describe('ChatWindow', () => {
   });
 
   describe('persistence integration', () => {
-    it('should restore timeline from persisted messages on mount', async () => {
-      const mockEvents = [
-        {
-          type: 'MESSAGES_SNAPSHOT',
-          messages: [
-            { id: '1', role: 'user' as const, content: 'Hello' },
-            { id: '2', role: 'assistant' as const, content: 'Hi there!' },
-          ],
-          timestamp: Date.now(),
-        },
-      ];
-      mockChatService.restoreLatestConversation.mockResolvedValue(mockEvents);
-
+    it('should start with fresh conversation on mount', async () => {
       renderWithContext(<ChatWindow onClose={jest.fn()} />);
 
-      // Wait for restoration to complete
+      // Wait for initialization to complete
       await new Promise((resolve) => setTimeout(resolve, 0));
 
-      // Should call restoreLatestConversation on mount
-      expect(mockChatService.restoreLatestConversation).toHaveBeenCalled();
-    });
-
-    it('should not restore timeline when no persisted messages exist', async () => {
-      mockChatService.restoreLatestConversation.mockResolvedValue(null);
-
-      renderWithContext(<ChatWindow onClose={jest.fn()} />);
-
-      // Wait for restoration to complete
-      await new Promise((resolve) => setTimeout(resolve, 0));
-
-      // Should call restoreLatestConversation but timeline should remain empty
-      expect(mockChatService.restoreLatestConversation).toHaveBeenCalled();
+      // Should call newThread to start fresh
+      expect(mockChatService.newThread).toHaveBeenCalled();
     });
 
     it('should sync timeline changes with ChatService for persistence', async () => {
-      mockChatService.restoreLatestConversation.mockResolvedValue(null);
-
       const ref = React.createRef<ChatWindowInstance>();
       renderWithContext(<ChatWindow ref={ref} onClose={jest.fn()} />);
 
-      // Wait for initial restoration
+      // Wait for initialization
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Clear previous calls
@@ -410,12 +396,10 @@ describe('ChatWindow', () => {
     });
 
     it('should call saveConversation on every timeline update', async () => {
-      mockChatService.restoreLatestConversation.mockResolvedValue(null);
-
       const ref = React.createRef<ChatWindowInstance>();
       renderWithContext(<ChatWindow ref={ref} onClose={jest.fn()} />);
 
-      // Wait for initial restoration
+      // Wait for initialization
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Clear previous calls
@@ -447,88 +431,6 @@ describe('ChatWindow', () => {
 
       // Should be called after timeline updates
       expect(mockChatService.saveConversation).toHaveBeenCalled();
-    });
-
-    it('should replay events including synthetic tool call events when restoring with unfinished tool calls', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const { ChatEventHandler } = require('../services/chat_event_handler');
-      const mockHandleEvent = jest.fn();
-      ChatEventHandler.mockImplementation(() => ({
-        handleEvent: mockHandleEvent,
-        clearState: jest.fn(),
-      }));
-
-      // The service returns events with synthetic TOOL_CALL_* events already injected
-      const mockEvents = [
-        {
-          type: 'MESSAGES_SNAPSHOT',
-          messages: [
-            { id: 'user-1', role: 'user' as const, content: 'Run a command' },
-            { id: 'assistant-1', role: 'assistant' as const, content: '', toolCalls: [] },
-          ],
-          timestamp: Date.now(),
-        },
-        {
-          type: 'TOOL_CALL_START',
-          toolCallId: 'tool-call-1',
-          toolCallName: 'execute_command',
-          parentMessageId: 'assistant-1',
-          timestamp: Date.now(),
-        },
-        {
-          type: 'TOOL_CALL_ARGS',
-          toolCallId: 'tool-call-1',
-          delta: '{"command": "ls -la"}',
-          timestamp: Date.now(),
-        },
-        { type: 'TOOL_CALL_END', toolCallId: 'tool-call-1', timestamp: Date.now() },
-      ];
-
-      mockChatService.restoreLatestConversation.mockResolvedValue(mockEvents);
-
-      renderWithContext(<ChatWindow onClose={jest.fn()} />);
-
-      await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 50));
-      });
-
-      expect(mockHandleEvent).toHaveBeenCalledTimes(mockEvents.length);
-      const calledTypes = mockHandleEvent.mock.calls.map((call: any) => call[0]?.type);
-      expect(calledTypes).toContain('TOOL_CALL_START');
-      expect(calledTypes).toContain('TOOL_CALL_ARGS');
-      expect(calledTypes).toContain('TOOL_CALL_END');
-    });
-
-    it('should replay all events through eventHandler when restoring', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const { ChatEventHandler } = require('../services/chat_event_handler');
-      const mockHandleEvent = jest.fn();
-      ChatEventHandler.mockImplementation(() => ({
-        handleEvent: mockHandleEvent,
-        clearState: jest.fn(),
-      }));
-
-      const mockEvents = [
-        {
-          type: 'MESSAGES_SNAPSHOT',
-          messages: [
-            { id: 'user-1', role: 'user' as const, content: 'Hello' },
-            { id: 'assistant-1', role: 'assistant' as const, content: 'Hi' },
-          ],
-          timestamp: Date.now(),
-        },
-      ];
-
-      mockChatService.restoreLatestConversation.mockResolvedValue(mockEvents);
-
-      renderWithContext(<ChatWindow onClose={jest.fn()} />);
-
-      await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 50));
-      });
-
-      expect(mockHandleEvent).toHaveBeenCalledTimes(1);
-      expect(mockHandleEvent.mock.calls[0][0].type).toBe('MESSAGES_SNAPSHOT');
     });
   });
 
@@ -570,21 +472,10 @@ describe('ChatWindow', () => {
 
   describe('message resending functionality', () => {
     it('should resend user message and truncate timeline', async () => {
-      const initialTimeline = [
-        { id: 'user-1', role: 'user' as const, content: 'First message' },
-        { id: 'assistant-1', role: 'assistant' as const, content: 'First response' },
-        { id: 'user-2', role: 'user' as const, content: 'Second message' },
-        { id: 'assistant-2', role: 'assistant' as const, content: 'Second response' },
-      ];
-
-      mockChatService.restoreLatestConversation.mockResolvedValue([
-        { type: 'MESSAGES_SNAPSHOT', messages: initialTimeline, timestamp: Date.now() },
-      ]);
-
       const ref = React.createRef<ChatWindowInstance>();
       renderWithContext(<ChatWindow ref={ref} onClose={jest.fn()} />);
 
-      // Wait for initial timeline to be set
+      // Wait for initialization
       await act(async () => {
         await new Promise((resolve) => setTimeout(resolve, 0));
       });
@@ -619,23 +510,19 @@ describe('ChatWindow', () => {
       });
 
       // Verify that sendMessage was called for the resend
-      expect(mockChatService.sendMessage).toHaveBeenCalledWith('Second message', expect.any(Array));
+      expect(mockChatService.sendMessage).toHaveBeenCalledWith(
+        'Second message',
+        expect.any(Array),
+        expect.any(Object)
+      );
       expect(resendObservable.subscribe).toHaveBeenCalled();
     });
 
     it('should not resend non-user messages', async () => {
-      const initialTimeline = [
-        { id: 'assistant-1', role: 'assistant' as const, content: 'Assistant message' },
-      ];
-
-      mockChatService.restoreLatestConversation.mockResolvedValue([
-        { type: 'MESSAGES_SNAPSHOT', messages: initialTimeline, timestamp: Date.now() },
-      ]);
-
       const ref = React.createRef<ChatWindowInstance>();
       renderWithContext(<ChatWindow ref={ref} onClose={jest.fn()} />);
 
-      // Wait for initial timeline to be set
+      // Wait for initialization
       await act(async () => {
         await new Promise((resolve) => setTimeout(resolve, 0));
       });
@@ -650,7 +537,8 @@ describe('ChatWindow', () => {
       // The UI prevents showing resend buttons for non-user messages
       expect(mockChatService.sendMessage).toHaveBeenCalledWith(
         'Assistant message',
-        expect.any(Array)
+        expect.any(Array),
+        expect.any(Object)
       );
     });
 
@@ -791,7 +679,11 @@ describe('ChatWindow', () => {
 
       // The component doesn't trim input from sendMessage method, so it will be sent
       // This is the actual behavior - only the internal input state is trimmed
-      expect(mockChatService.sendMessage).toHaveBeenCalledWith('   \n\t  ', expect.any(Array));
+      expect(mockChatService.sendMessage).toHaveBeenCalledWith(
+        '   \n\t  ',
+        expect.any(Array),
+        expect.any(Object)
+      );
     });
 
     it('should not trim input when sent via ref sendMessage', async () => {
@@ -805,7 +697,8 @@ describe('ChatWindow', () => {
       // The sendMessage method via ref doesn't trim the input
       expect(mockChatService.sendMessage).toHaveBeenCalledWith(
         '  test message  ',
-        expect.any(Array)
+        expect.any(Array),
+        expect.any(Object)
       );
     });
   });
@@ -828,6 +721,225 @@ describe('ChatWindow', () => {
       ref.current?.startNewChat();
 
       expect(mockChatService.newThread).toHaveBeenCalled();
+    });
+
+    it('should cancel ongoing streaming when starting a new chat', async () => {
+      const ref = React.createRef<ChatWindowInstance>();
+
+      const unsubscribeMock = jest.fn();
+      const streamingObservable = {
+        subscribe: jest.fn(() => ({ unsubscribe: unsubscribeMock })),
+      };
+
+      mockChatService.sendMessage.mockResolvedValue({
+        observable: streamingObservable,
+        userMessage: { id: 'user-1', content: 'test', role: 'user' },
+      });
+      mockChatService.abort = jest.fn();
+
+      renderWithContext(<ChatWindow ref={ref} onClose={jest.fn()} />);
+
+      // Start streaming by sending a message
+      await act(async () => {
+        await ref.current?.sendMessage({ content: 'test message' });
+      });
+
+      // Wait for subscription to be created
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      });
+
+      expect(streamingObservable.subscribe).toHaveBeenCalled();
+
+      // Start a new chat while streaming is active
+      await act(async () => {
+        ref.current?.startNewChat();
+      });
+
+      // Verify abort was called to stop backend streaming
+      expect(mockChatService.abort).toHaveBeenCalled();
+
+      // Verify subscription was unsubscribed
+      expect(unsubscribeMock).toHaveBeenCalled();
+
+      // Verify newThread was called to start fresh
+      expect(mockChatService.newThread).toHaveBeenCalled();
+    });
+
+    it('should clear pending data source selection on new chat', async () => {
+      // Mock no data source to trigger the prompt
+      mockChatService.getCurrentDataSourceId.mockResolvedValue(undefined);
+      mockChatService.getAvailableDataSources.mockResolvedValue([
+        { id: 'ds-1', title: 'Source One' },
+      ]);
+
+      const ref = React.createRef<ChatWindowInstance>();
+      const { getByRole } = renderWithContext(<ChatWindow ref={ref} onClose={jest.fn()} />);
+
+      // Trigger a send to show the data source prompt
+      const input = getByRole('textbox');
+      fireEvent.change(input, { target: { value: 'test message' } });
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+
+      // Start a new chat — should clear pending state
+      act(() => {
+        ref.current?.startNewChat();
+      });
+
+      // Restore data source mock so next send goes through normally
+      mockChatService.getCurrentDataSourceId.mockResolvedValue('ds-1');
+
+      // Send another message — should not re-trigger the data source prompt
+      fireEvent.change(input, { target: { value: 'second message' } });
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+
+      // sendMessage should be called for the second message (no pending state blocking)
+      expect(mockChatService.sendMessage).toHaveBeenCalledWith(
+        'second message',
+        expect.any(Array),
+        expect.any(Object)
+      );
+    });
+  });
+
+  describe('data source validation on send', () => {
+    it('should show unsupported message when data source is AnalyticEngine', async () => {
+      mockChatService.getCurrentDataSourceId.mockResolvedValue('ds-analytic');
+      mockChatService.getAvailableDataSources.mockResolvedValue([]);
+      mockCore.savedObjects.client.get = jest.fn().mockResolvedValue({
+        attributes: { dataSourceEngineType: 'AnalyticEngine' },
+      });
+
+      const ref = React.createRef<ChatWindowInstance>();
+      const { getByRole } = renderWithContext(<ChatWindow ref={ref} onClose={jest.fn()} />);
+
+      const input = getByRole('textbox');
+      fireEvent.change(input, { target: { value: 'hello' } });
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+
+      // Should not send to agent
+      expect(mockChatService.sendMessage).not.toHaveBeenCalled();
+    });
+
+    it('should show selector when current data source is invalid but alternatives exist', async () => {
+      // Current data source is unsupported, but compatible alternatives exist
+      mockChatService.getCurrentDataSourceId.mockResolvedValue('ds-analytic');
+      mockChatService.getAvailableDataSources.mockResolvedValue([
+        { id: 'ds-good', title: 'Good Source' },
+      ]);
+
+      const ref = React.createRef<ChatWindowInstance>();
+      const { getByRole, getByText } = renderWithContext(
+        <ChatWindow ref={ref} onClose={jest.fn()} />
+      );
+
+      const input = getByRole('textbox');
+      fireEvent.change(input, { target: { value: 'hello' } });
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+
+      // Should show selector, not unsupported message
+      expect(mockChatService.sendMessage).not.toHaveBeenCalled();
+      expect(getByText('Good Source')).toBeTruthy();
+    });
+
+    it('should show no data source message when no data sources exist at all', async () => {
+      mockChatService.getCurrentDataSourceId.mockResolvedValue(undefined);
+      mockChatService.getAvailableDataSources.mockResolvedValue([]);
+
+      const ref = React.createRef<ChatWindowInstance>();
+      const { getByRole } = renderWithContext(<ChatWindow ref={ref} onClose={jest.fn()} />);
+
+      const input = getByRole('textbox');
+      fireEvent.change(input, { target: { value: 'hello' } });
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+
+      // Should not send to agent
+      expect(mockChatService.sendMessage).not.toHaveBeenCalled();
+    });
+
+    it('should show data source selector when compatible data sources exist', async () => {
+      mockChatService.getCurrentDataSourceId.mockResolvedValue(undefined);
+      mockChatService.getAvailableDataSources.mockResolvedValue([
+        { id: 'ds-1', title: 'Source One' },
+        { id: 'ds-2', title: 'Source Two' },
+      ]);
+
+      const ref = React.createRef<ChatWindowInstance>();
+      const { getByRole, getByText } = renderWithContext(
+        <ChatWindow ref={ref} onClose={jest.fn()} />
+      );
+
+      const input = getByRole('textbox');
+      fireEvent.change(input, { target: { value: 'hello' } });
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+
+      // Should not send to agent yet
+      expect(mockChatService.sendMessage).not.toHaveBeenCalled();
+
+      // Data source options should be visible
+      expect(getByText('Source One')).toBeTruthy();
+      expect(getByText('Source Two')).toBeTruthy();
+    });
+
+    it('should send message after user selects a data source', async () => {
+      mockChatService.getCurrentDataSourceId.mockResolvedValue(undefined);
+      mockChatService.getAvailableDataSources.mockResolvedValue([
+        { id: 'ds-1', title: 'Source One' },
+      ]);
+
+      const ref = React.createRef<ChatWindowInstance>();
+      const { getByRole, getByText } = renderWithContext(
+        <ChatWindow ref={ref} onClose={jest.fn()} />
+      );
+
+      const input = getByRole('textbox');
+      fireEvent.change(input, { target: { value: 'hello' } });
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+
+      // After selecting, restore getCurrentDataSourceId so subscribeToMessageStream proceeds
+      mockChatService.getCurrentDataSourceId.mockResolvedValue('ds-1');
+
+      // Click the data source option
+      fireEvent.click(getByText('Source One'));
+
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+
+      expect(mockChatService.setDataSourceId).toHaveBeenCalledWith('ds-1');
+      expect(mockChatService.sendMessage).toHaveBeenCalledWith(
+        'hello',
+        expect.any(Array),
+        expect.any(Object)
+      );
     });
   });
 
@@ -855,123 +967,15 @@ describe('ChatWindow', () => {
     });
   });
 
-  describe('loading screen functionality', () => {
-    it('should display loading screen with spinner and message while restoring conversation', () => {
-      // Mock restoreLatestConversation to never resolve, keeping isRestoring true
-      mockChatService.restoreLatestConversation.mockImplementation(
-        () => new Promise(() => {}) // Never resolves
-      );
-
-      const { getByText, container } = renderWithContext(<ChatWindow onClose={jest.fn()} />);
-
-      // Should show loading spinner and message
-      expect(getByText('Loading conversation...')).toBeTruthy();
-      const spinner = container.querySelector('.euiLoadingSpinner');
-      expect(spinner).toBeTruthy();
-    });
-
-    it('should hide loading screen after successful restoration', async () => {
-      mockChatService.restoreLatestConversation.mockResolvedValue([
-        {
-          type: 'MESSAGES_SNAPSHOT',
-          messages: [{ id: '1', role: 'user', content: 'Hello' }],
-          timestamp: Date.now(),
-        },
-      ]);
-
-      const { queryByText } = renderWithContext(<ChatWindow onClose={jest.fn()} />);
-
-      // Wait for restoration to complete
-      await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 10));
-      });
-
-      // Loading screen should be hidden
-      expect(queryByText('Restoring conversation...')).toBeNull();
-    });
-
-    it('should hide loading screen when restoration returns null', async () => {
-      mockChatService.restoreLatestConversation.mockResolvedValue(null);
-
-      const { queryByText } = renderWithContext(<ChatWindow onClose={jest.fn()} />);
-
-      // Wait for restoration to complete
-      await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 10));
-      });
-
-      // Loading screen should be hidden
-      expect(queryByText('Restoring conversation...')).toBeNull();
-    });
-  });
-
-  describe('retry button functionality', () => {
-    it('should display error message and retry button when restoration fails', async () => {
-      const errorMessage = 'Network connection failed';
-      mockChatService.restoreLatestConversation.mockRejectedValue(new Error(errorMessage));
-
-      const { getByText } = renderWithContext(<ChatWindow onClose={jest.fn()} />);
-
-      // Wait for restoration to fail
-      await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 10));
-      });
-
-      // Should show error title, message, and retry button
-      expect(getByText('Failed to restore conversation')).toBeTruthy();
-      expect(getByText(errorMessage)).toBeTruthy();
-      expect(getByText('Retry')).toBeTruthy();
-    });
-
-    it('should retry restoration when retry button is clicked and clear error on success', async () => {
-      mockChatService.restoreLatestConversation
-        .mockRejectedValueOnce(new Error('First attempt failed'))
-        .mockResolvedValueOnce([
-          {
-            type: 'MESSAGES_SNAPSHOT',
-            messages: [{ id: '1', role: 'user', content: 'Hello' }],
-            timestamp: Date.now(),
-          },
-        ]);
-
-      const { getByText, queryByText } = renderWithContext(<ChatWindow onClose={jest.fn()} />);
-
-      // Wait for first restoration to fail
-      await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 10));
-      });
-
-      // Verify error is shown
-      expect(getByText('Failed to restore conversation')).toBeTruthy();
-
-      // Click retry button
-      const retryButton = getByText('Retry');
-      await act(async () => {
-        retryButton.click();
-      });
-
-      // Wait for retry to complete
-      await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 10));
-      });
-
-      // Error should be cleared and restoration should succeed
-      expect(queryByText('Failed to restore conversation')).toBeNull();
-      expect(mockChatService.restoreLatestConversation).toHaveBeenCalledTimes(2);
-    });
-  });
-
   describe('component lifecycle', () => {
-    it('should initialize with empty timeline', async () => {
-      mockChatService.restoreLatestConversation.mockResolvedValue(null);
-
+    it('should initialize with fresh conversation', async () => {
       const { container } = renderWithContext(<ChatWindow onClose={jest.fn()} />);
 
-      // Wait for restoration to complete
+      // Wait for initialization to complete
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(container).toBeTruthy();
-      expect(mockChatService.restoreLatestConversation).toHaveBeenCalled();
+      expect(mockChatService.newThread).toHaveBeenCalled();
     });
 
     it('should handle component unmount gracefully', () => {
@@ -980,7 +984,7 @@ describe('ChatWindow', () => {
       expect(() => unmount()).not.toThrow();
     });
 
-    it('should reset thread ID on unmount to avoid restore latest logic issues', () => {
+    it('should reset thread ID on unmount for clean restart', () => {
       mockCore.chat.resetThreadId = jest.fn();
 
       const { unmount } = renderWithContext(<ChatWindow onClose={jest.fn()} />);
@@ -1000,7 +1004,7 @@ describe('ChatWindow', () => {
       const mockGetState = jest.fn(() => mockObservable);
       const mockService = {
         getState$: mockGetState,
-        getCurrentState: jest.fn(() => ({ toolDefinitions: [], toolCallStates: {} })),
+        getCurrentState: jest.fn(() => ({ toolDefinitions: [], toolCallStates: new Map() })),
         getActionRenderer: jest.fn(),
       };
 
@@ -1016,109 +1020,8 @@ describe('ChatWindow', () => {
     });
   });
 
-  describe('conversation loading abort functionality', () => {
-    it('should abort ongoing restoring latest after show history click', async () => {
-      // Mock a long-running restoration that never resolves
-      mockChatService.restoreLatestConversation.mockImplementation(
-        () =>
-          new Promise((resolve) => {
-            // @ts-expect-error TS2304 TODO(ts-error): fixme
-            resolveRestore = resolve;
-          })
-      );
-
-      mockChatService.conversationHistoryService.getConversations = jest.fn().mockResolvedValue({
-        conversations: [],
-        total: 0,
-        page: 1,
-        pageSize: 10,
-      });
-
-      const { getByLabelText, queryByText, getByText } = renderWithContext(
-        <ChatWindow onClose={jest.fn()} />
-      );
-
-      // Wait a bit to ensure loading state is set
-      await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 10));
-      });
-
-      // Verify loading screen is shown
-      expect(queryByText('Loading conversation...')).toBeTruthy();
-
-      // Click the "Show conversation history" button to abort loading and show history
-      const historyButton = getByLabelText('Show conversation history');
-      await act(async () => {
-        historyButton.click();
-      });
-
-      // Wait for state updates
-      await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 10));
-      });
-
-      // Loading screen should be hidden immediately
-      expect(queryByText('Loading conversation...')).toBeNull();
-
-      // Conversation history panel should be shown instead
-      expect(getByText('All conversations')).toBeTruthy();
-
-      // Verify restoration was called but aborted
-      expect(mockChatService.restoreLatestConversation).toHaveBeenCalled();
-    });
-
-    it('should abort conversation loading when handleCloseHistory is called', async () => {
-      // Mock a long-running restoration that never resolves
-      mockChatService.restoreLatestConversation.mockImplementation(
-        () =>
-          new Promise((resolve) => {
-            // @ts-expect-error TS2304 TODO(ts-error): fixme
-            resolveRestore = resolve;
-          })
-      );
-
-      const { getByLabelText, queryByText } = renderWithContext(<ChatWindow onClose={jest.fn()} />);
-
-      // Wait a bit to ensure loading state is set
-      await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 10));
-      });
-
-      // Verify loading screen is shown
-      expect(queryByText('Loading conversation...')).toBeTruthy();
-
-      // Click the "Show conversation history" button to show history
-      const historyButton = getByLabelText('Show conversation history');
-      await act(async () => {
-        historyButton.click();
-      });
-
-      // Wait for state updates
-      await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 10));
-      });
-
-      // Now click back button to close history (which should abort loading)
-      const backButton = getByLabelText('Go back');
-      await act(async () => {
-        backButton.click();
-      });
-
-      // Wait for state updates
-      await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 10));
-      });
-
-      // Loading screen should be hidden immediately
-      expect(queryByText('Loading conversation...')).toBeNull();
-
-      // Verify restoration was called but not completed
-      expect(mockChatService.restoreLatestConversation).toHaveBeenCalled();
-    });
-
-    it('should abort loading when selecting a conversation and then closing history', async () => {
-      mockChatService.restoreLatestConversation.mockResolvedValue(null);
-
+  describe('conversation loading functionality', () => {
+    it('should load selected conversation from history', async () => {
       // Mock getConversations to return a conversation
       mockChatService.conversationHistoryService.getConversations = jest.fn().mockResolvedValue({
         conversations: [
@@ -1135,20 +1038,20 @@ describe('ChatWindow', () => {
         pageSize: 10,
       });
 
-      // Mock loadConversation to never resolve
-      mockChatService.loadConversation.mockImplementation(
-        () =>
-          new Promise((resolve) => {
-            // @ts-expect-error TS2304 TODO(ts-error): fixme
-            resolveLoad = resolve;
-          })
-      );
+      // Mock loadConversation to resolve with events
+      mockChatService.loadConversation.mockResolvedValue([
+        {
+          type: 'MESSAGES_SNAPSHOT',
+          messages: [{ id: '1', role: 'user', content: 'Hello from history' }],
+          timestamp: Date.now(),
+        },
+      ]);
 
       const { getByLabelText, getByText, queryByText } = renderWithContext(
         <ChatWindow onClose={jest.fn()} />
       );
 
-      // Wait for initial restoration to complete
+      // Wait for initialization
       await act(async () => {
         await new Promise((resolve) => setTimeout(resolve, 10));
       });
@@ -1169,34 +1072,16 @@ describe('ChatWindow', () => {
         conversationItem.click();
       });
 
-      // Wait a bit to ensure loading state is set
+      // Wait for loading to complete
       await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 10));
+        await new Promise((resolve) => setTimeout(resolve, 50));
       });
 
-      // Verify loading screen is shown
-      expect(queryByText('Loading conversation...')).toBeTruthy();
-
-      // Click back button to abort loading
-      const backButton = getByLabelText('Go back');
-      await act(async () => {
-        backButton.click();
-      });
-
-      await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 10));
-      });
-
-      // Loading screen should be hidden immediately
-      expect(queryByText('Loading conversation...')).toBeNull();
-
-      // Verify loadConversation was called but not completed
-      expect(mockChatService.loadConversation).toHaveBeenCalled();
+      // Verify loadConversation was called
+      expect(mockChatService.loadConversation).toHaveBeenCalledWith('thread-1');
     });
 
-    it('should not show error toast when loading is aborted', async () => {
-      mockChatService.restoreLatestConversation.mockResolvedValue(null);
-
+    it('should show error toast when loading conversation fails', async () => {
       mockChatService.conversationHistoryService.getConversations = jest.fn().mockResolvedValue({
         conversations: [
           {
@@ -1212,18 +1097,12 @@ describe('ChatWindow', () => {
         pageSize: 10,
       });
 
-      // Mock loadConversation to reject after a delay
-      let rejectLoad: any;
-      mockChatService.loadConversation.mockImplementation(
-        () =>
-          new Promise((resolve, reject) => {
-            rejectLoad = reject;
-          })
-      );
+      // Mock loadConversation to reject
+      mockChatService.loadConversation.mockRejectedValue(new Error('Loading failed'));
 
       const { getByLabelText, getByText } = renderWithContext(<ChatWindow onClose={jest.fn()} />);
 
-      // Wait for initial restoration
+      // Wait for initialization
       await act(async () => {
         await new Promise((resolve) => setTimeout(resolve, 10));
       });
@@ -1244,29 +1123,16 @@ describe('ChatWindow', () => {
       });
 
       await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 10));
+        await new Promise((resolve) => setTimeout(resolve, 50));
       });
 
-      // Abort by clicking back
-      const backButton = getByLabelText('Go back');
-      await act(async () => {
-        backButton.click();
-      });
-
-      // Now reject the promise (simulating error after abort)
-      await act(async () => {
-        rejectLoad(new Error('Loading failed'));
-        await new Promise((resolve) => setTimeout(resolve, 10));
-      });
-
-      // Verify no error toast was shown (since loading was aborted)
-      expect(mockCore.notifications.toasts.addWarning).not.toHaveBeenCalled();
+      // Verify error toast was shown
+      expect(mockCore.notifications.toasts.addWarning).toHaveBeenCalled();
     });
   });
 
   describe('handleSelectConversation', () => {
     beforeEach(() => {
-      mockChatService.restoreLatestConversation.mockResolvedValue(null);
       mockChatService.conversationHistoryService.getConversations = jest.fn().mockResolvedValue({
         conversations: [
           {
@@ -1280,6 +1146,13 @@ describe('ChatWindow', () => {
         total: 1,
         page: 1,
         pageSize: 10,
+      });
+
+      // Mock loadConversation to simulate setting thread ID
+      mockChatService.loadConversation = jest.fn().mockImplementation(async (threadId: string) => {
+        // Simulate the real behavior: loadConversation sets the thread ID
+        (mockChatService.getThreadId as jest.Mock).mockReturnValue(threadId);
+        return [];
       });
     });
 
@@ -1296,6 +1169,7 @@ describe('ChatWindow', () => {
       ChatEventHandler.mockImplementation(() => ({
         handleEvent: mockHandleEvent,
         clearState: mockClearState,
+        cancelToolResultDispatch: jest.fn(),
       }));
 
       const mockEvents = [
@@ -1305,7 +1179,10 @@ describe('ChatWindow', () => {
           timestamp: Date.now(),
         },
       ];
-      mockChatService.loadConversation.mockResolvedValue(mockEvents);
+      mockChatService.loadConversation.mockImplementation(async (threadId: string) => {
+        (mockChatService.getThreadId as jest.Mock).mockReturnValue(threadId);
+        return mockEvents;
+      });
 
       const { getByLabelText, getByText } = renderWithContext(<ChatWindow onClose={jest.fn()} />);
 
@@ -1344,6 +1221,7 @@ describe('ChatWindow', () => {
       ChatEventHandler.mockImplementation(() => ({
         handleEvent: mockHandleEvent,
         clearState: mockClearState,
+        cancelToolResultDispatch: jest.fn(),
       }));
 
       const mockEvents = [
@@ -1359,7 +1237,10 @@ describe('ChatWindow', () => {
           timestamp: Date.now(),
         },
       ];
-      mockChatService.loadConversation.mockResolvedValue(mockEvents);
+      mockChatService.loadConversation.mockImplementation(async (threadId: string) => {
+        (mockChatService.getThreadId as jest.Mock).mockReturnValue(threadId);
+        return mockEvents;
+      });
 
       const { getByLabelText, getByText } = renderWithContext(<ChatWindow onClose={jest.fn()} />);
 
@@ -1387,6 +1268,283 @@ describe('ChatWindow', () => {
       const calledTypes = mockHandleEvent.mock.calls.map((call: any) => call[0]?.type);
       expect(calledTypes).toContain('MESSAGES_SNAPSHOT');
       expect(calledTypes).toContain('TOOL_CALL_START');
+    });
+
+    it('should cancel ongoing streaming when switching to another conversation', async () => {
+      const ref = React.createRef<ChatWindowInstance>();
+
+      // Mock ongoing streaming
+      const unsubscribeMock = jest.fn();
+      const streamingObservable = {
+        subscribe: jest.fn(() => ({ unsubscribe: unsubscribeMock })),
+      };
+
+      mockChatService.sendMessage.mockResolvedValue({
+        observable: streamingObservable,
+        userMessage: { id: 'user-1', content: 'test', role: 'user' },
+      });
+      mockChatService.abort = jest.fn();
+
+      // Mock conversation loading
+      const mockEvents = [
+        {
+          type: 'MESSAGES_SNAPSHOT',
+          messages: [{ id: 'u1', role: 'user', content: 'Old conversation' }],
+          timestamp: Date.now(),
+        },
+      ];
+      mockChatService.loadConversation.mockImplementation(async (threadId: string) => {
+        (mockChatService.getThreadId as jest.Mock).mockReturnValue(threadId);
+        return mockEvents;
+      });
+
+      const { getByLabelText, getByText } = renderWithContext(
+        <ChatWindow ref={ref} onClose={jest.fn()} />
+      );
+
+      // Wait for initialization
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      });
+
+      // Start streaming by sending a message
+      await act(async () => {
+        await ref.current?.sendMessage({ content: 'test message' });
+      });
+
+      // Wait for subscription to be created
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      });
+
+      expect(streamingObservable.subscribe).toHaveBeenCalled();
+
+      // Open history panel and switch to another conversation while streaming
+      const historyButton = getByLabelText('Show conversation history');
+      await act(async () => {
+        historyButton.click();
+      });
+
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      });
+
+      const conversationItem = getByText('Test conversation');
+      await act(async () => {
+        conversationItem.click();
+      });
+
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      });
+
+      // Verify abort was called to stop backend streaming
+      expect(mockChatService.abort).toHaveBeenCalled();
+
+      // Verify subscription was unsubscribed
+      expect(unsubscribeMock).toHaveBeenCalled();
+
+      // Verify conversation was loaded
+      expect(mockChatService.loadConversation).toHaveBeenCalledWith('thread-1');
+    });
+
+    it('should prevent streaming events from previous conversation affecting new conversation', async () => {
+      const ref = React.createRef<ChatWindowInstance>();
+
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { ChatEventHandler } = require('../services/chat_event_handler');
+      const mockHandleEvent = jest.fn();
+      const mockClearState = jest.fn();
+      ChatEventHandler.mockImplementation(() => ({
+        handleEvent: mockHandleEvent,
+        clearState: mockClearState,
+        cancelToolResultDispatch: jest.fn(),
+      }));
+
+      // Mock ongoing streaming that continues after switch
+      let streamingCallbacks: any = null;
+      const streamingObservable = {
+        subscribe: jest.fn((callbacks: any) => {
+          streamingCallbacks = callbacks;
+          return { unsubscribe: jest.fn() };
+        }),
+      };
+
+      mockChatService.sendMessage.mockResolvedValue({
+        observable: streamingObservable,
+        userMessage: { id: 'user-1', content: 'test', role: 'user' },
+      });
+      mockChatService.abort = jest.fn();
+
+      // Mock conversation loading
+      const mockEvents = [
+        {
+          type: 'MESSAGES_SNAPSHOT',
+          messages: [{ id: 'u1', role: 'user', content: 'Old conversation' }],
+          timestamp: Date.now(),
+        },
+      ];
+      mockChatService.loadConversation.mockImplementation(async (threadId: string) => {
+        (mockChatService.getThreadId as jest.Mock).mockReturnValue(threadId);
+        return mockEvents;
+      });
+
+      const { getByLabelText, getByText } = renderWithContext(
+        <ChatWindow ref={ref} onClose={jest.fn()} />
+      );
+
+      // Wait for initialization
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      });
+
+      // Start streaming
+      await act(async () => {
+        await ref.current?.sendMessage({ content: 'test message' });
+      });
+
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      });
+
+      expect(streamingObservable.subscribe).toHaveBeenCalled();
+
+      // Track handleEvent calls before switching
+      const callsBeforeSwitch = mockHandleEvent.mock.calls.length;
+
+      // Switch to another conversation
+      const historyButton = getByLabelText('Show conversation history');
+      await act(async () => {
+        historyButton.click();
+      });
+
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      });
+
+      const conversationItem = getByText('Test conversation');
+      await act(async () => {
+        conversationItem.click();
+      });
+
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      });
+
+      // Verify clearState was called (resetting event handler state)
+      expect(mockClearState).toHaveBeenCalled();
+
+      // Try to emit events from the old streaming (simulating race condition)
+      if (streamingCallbacks) {
+        await act(async () => {
+          streamingCallbacks.next({ type: 'message', content: 'late event from old stream' });
+        });
+      }
+
+      // New conversation's events should be processed, but old streaming events should not
+      // interfere because subscription was canceled
+      const callsAfterSwitch = mockHandleEvent.mock.calls.length;
+      expect(callsAfterSwitch).toBeGreaterThan(callsBeforeSwitch);
+    });
+
+    it('should not save incomplete message when switching conversations during streaming', async () => {
+      const ref = React.createRef<ChatWindowInstance>();
+
+      // Mock streaming with partial message
+      let streamingCallbacks: any = null;
+      const streamingObservable = {
+        subscribe: jest.fn((callbacks: any) => {
+          streamingCallbacks = callbacks;
+          // Emit partial assistant message
+          setTimeout(() => {
+            callbacks.next({
+              type: 'TEXT_MESSAGE_START',
+              messageId: 'assist-1',
+              timestamp: Date.now(),
+            });
+            callbacks.next({
+              type: 'TEXT_MESSAGE_CONTENT',
+              messageId: 'assist-1',
+              delta: 'Partial response...',
+              timestamp: Date.now(),
+            });
+          }, 5);
+          return { unsubscribe: jest.fn() };
+        }),
+      };
+
+      mockChatService.sendMessage.mockResolvedValue({
+        observable: streamingObservable,
+        userMessage: { id: 'user-1', content: 'test', role: 'user' },
+      });
+
+      // Mock conversation loading
+      const mockEvents = [
+        {
+          type: 'MESSAGES_SNAPSHOT',
+          messages: [{ id: 'u1', role: 'user', content: 'Old conversation' }],
+          timestamp: Date.now(),
+        },
+      ];
+      mockChatService.loadConversation.mockImplementation(async (threadId: string) => {
+        (mockChatService.getThreadId as jest.Mock).mockReturnValue(threadId);
+        return mockEvents;
+      });
+      mockChatService.saveConversation = jest.fn();
+
+      const { getByLabelText, getByText } = renderWithContext(
+        <ChatWindow ref={ref} onClose={jest.fn()} />
+      );
+
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      });
+
+      // Start streaming
+      await act(async () => {
+        await ref.current?.sendMessage({ content: 'test message' });
+      });
+
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 20));
+      });
+
+      // Clear previous saveConversation calls
+      mockChatService.saveConversation.mockClear();
+
+      // Switch to another conversation while streaming
+      const historyButton = getByLabelText('Show conversation history');
+      await act(async () => {
+        historyButton.click();
+      });
+
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      });
+
+      const conversationItem = getByText('Test conversation');
+      await act(async () => {
+        conversationItem.click();
+      });
+
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      });
+
+      // Verify that incomplete message was NOT saved during the switch
+      // The isLoading flag should prevent saving incomplete state
+      const savedCalls = mockChatService.saveConversation.mock.calls;
+
+      // Check if any saved timeline contains the partial assistant message
+      const savedPartialMessage = savedCalls.some((call: any) => {
+        const timeline = call[0];
+        return timeline.some(
+          (msg: any) => msg.role === 'assistant' && msg.content?.includes('Partial response')
+        );
+      });
+
+      // Should NOT save the partial message during conversation switch
+      expect(savedPartialMessage).toBe(false);
     });
   });
 
@@ -1573,12 +1731,14 @@ describe('ChatWindow', () => {
       expect(mockChatService.sendMessage).toHaveBeenNthCalledWith(
         1,
         'first message',
-        expect.any(Array)
+        expect.any(Array),
+        expect.any(Object)
       );
       expect(mockChatService.sendMessage).toHaveBeenNthCalledWith(
         2,
         'second message',
-        expect.any(Array)
+        expect.any(Array),
+        expect.any(Object)
       );
     });
 
@@ -1742,6 +1902,135 @@ describe('ChatWindow', () => {
 
       // Verify chatService.abort was called
       expect(mockChatService.abort).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('hasPendingResend blocking input', () => {
+    it('should prevent sending messages when a canResend system message exists in timeline', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { ChatEventHandler } = require('../services/chat_event_handler');
+      let capturedOnTimelineUpdate: any;
+      ChatEventHandler.mockImplementation((config: any) => {
+        capturedOnTimelineUpdate = config.callbacks.onTimelineUpdate;
+        return {
+          handleEvent: jest.fn(),
+          clearState: jest.fn(),
+          cancelToolResultDispatch: jest.fn(),
+        };
+      });
+
+      const ref = React.createRef<ChatWindowInstance>();
+      renderWithContext(<ChatWindow ref={ref} onClose={jest.fn()} />);
+
+      // Inject a canResend system message into the timeline
+      await act(async () => {
+        capturedOnTimelineUpdate((prev: any[]) => [
+          ...prev,
+          {
+            id: 'timeout-msg-1',
+            role: 'system',
+            content: 'Sync timeout',
+            toolCallId: 'tool-1',
+            canResend: true,
+            toolResult: { ok: true },
+          },
+        ]);
+      });
+
+      // Try to send a message — should be blocked
+      await act(async () => {
+        await ref.current?.sendMessage({ content: 'should be blocked' });
+      });
+
+      expect(mockChatService.sendMessage).not.toHaveBeenCalled();
+    });
+
+    it('should disable the input textarea when a canResend system message exists', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { ChatEventHandler } = require('../services/chat_event_handler');
+      let capturedOnTimelineUpdate: any;
+      ChatEventHandler.mockImplementation((config: any) => {
+        capturedOnTimelineUpdate = config.callbacks.onTimelineUpdate;
+        return {
+          handleEvent: jest.fn(),
+          clearState: jest.fn(),
+          cancelToolResultDispatch: jest.fn(),
+        };
+      });
+
+      const { getByPlaceholderText } = renderWithContext(<ChatWindow onClose={jest.fn()} />);
+
+      // Inject a canResend system message
+      await act(async () => {
+        capturedOnTimelineUpdate((prev: any[]) => [
+          ...prev,
+          {
+            id: 'timeout-msg-2',
+            role: 'system',
+            content: 'Sync timeout',
+            toolCallId: 'tool-2',
+            canResend: true,
+            toolResult: { data: 'test' },
+          },
+        ]);
+      });
+
+      const input = getByPlaceholderText(
+        'Resend the tool result to continue...'
+      ) as HTMLTextAreaElement;
+      expect(input.disabled).toBe(true);
+    });
+
+    it('should re-enable input after canResend message is removed from timeline', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { ChatEventHandler } = require('../services/chat_event_handler');
+      let capturedOnTimelineUpdate: any;
+      ChatEventHandler.mockImplementation((config: any) => {
+        capturedOnTimelineUpdate = config.callbacks.onTimelineUpdate;
+        return {
+          handleEvent: jest.fn(),
+          clearState: jest.fn(),
+          cancelToolResultDispatch: jest.fn(),
+          sendToolResultToAssistant: jest.fn().mockResolvedValue(undefined),
+        };
+      });
+
+      const ref = React.createRef<ChatWindowInstance>();
+      const { getByPlaceholderText } = renderWithContext(
+        <ChatWindow ref={ref} onClose={jest.fn()} />
+      );
+
+      // Inject a canResend system message
+      await act(async () => {
+        capturedOnTimelineUpdate((prev: any[]) => [
+          ...prev,
+          {
+            id: 'timeout-msg-3',
+            role: 'system',
+            content: 'Sync timeout',
+            toolCallId: 'tool-3',
+            canResend: true,
+            toolResult: { ok: true },
+          },
+        ]);
+      });
+
+      // Verify disabled
+      const input = getByPlaceholderText(
+        'Resend the tool result to continue...'
+      ) as HTMLTextAreaElement;
+      expect(input.disabled).toBe(true);
+
+      // Remove the canResend message (simulates what handleResendToolResult does)
+      await act(async () => {
+        capturedOnTimelineUpdate((prev: any[]) =>
+          prev.filter((msg: any) => msg.id !== 'timeout-msg-3')
+        );
+      });
+
+      // Input should be re-enabled with default placeholder
+      const enabledInput = getByPlaceholderText('How can I help you today?') as HTMLTextAreaElement;
+      expect(enabledInput.disabled).toBe(false);
     });
   });
 });

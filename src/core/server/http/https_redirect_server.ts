@@ -61,6 +61,15 @@ export class HttpsRedirectServer {
     );
 
     this.server.ext('onRequest', (request: Request, responseToolkit: ResponseToolkit) => {
+      // Reject protocol-relative paths (e.g. `//attacker.com/...`). Without this
+      // check, `new URL(request.url.pathname, base)` interprets the leading `//`
+      // as the start of an authority and produces a redirect `Location` pointing
+      // at an attacker-controlled host. Hapi's WHATWG `request.url.pathname`
+      // normalizes `/\` to `//`, so a single startsWith('//') covers both forms.
+      if (request.url.pathname.startsWith('//')) {
+        return responseToolkit.response('Not Found').code(404).takeover();
+      }
+
       const redirectUrl = new URL(request.url.pathname, `https://${config.host}:${config.port}`);
       redirectUrl.search = request.url.search;
       return responseToolkit.redirect(redirectUrl.toString()).takeover();

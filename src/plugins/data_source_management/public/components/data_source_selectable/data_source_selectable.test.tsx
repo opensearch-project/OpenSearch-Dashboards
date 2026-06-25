@@ -53,7 +53,14 @@ describe('DataSourceSelectable', () => {
     );
     expect(component).toMatchSnapshot();
     expect(client.find).toBeCalledWith({
-      fields: ['id', 'title', 'auth.type', 'dataSourceVersion', 'installedPlugins'],
+      fields: [
+        'id',
+        'title',
+        'auth.type',
+        'dataSourceVersion',
+        'installedPlugins',
+        'dataSourceEngineType',
+      ],
       perPage: 10000,
       type: 'data-source',
     });
@@ -74,7 +81,14 @@ describe('DataSourceSelectable', () => {
     );
     expect(component).toMatchSnapshot();
     expect(client.find).toBeCalledWith({
-      fields: ['id', 'title', 'auth.type', 'dataSourceVersion', 'installedPlugins'],
+      fields: [
+        'id',
+        'title',
+        'auth.type',
+        'dataSourceVersion',
+        'installedPlugins',
+        'dataSourceEngineType',
+      ],
       perPage: 10000,
       type: 'data-source',
     });

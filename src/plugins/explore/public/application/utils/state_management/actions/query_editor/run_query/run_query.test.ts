@@ -39,6 +39,9 @@ jest.mock('../../../slices/query_editor/query_editor_slice', () => ({
 
 jest.mock('../../query_actions', () => ({
   executeQueries: jest.fn((args) => ({ type: 'executeQueries', payload: args })),
+  shouldSkipQueryExecution: jest.fn((q) => {
+    return typeof q.query !== 'string' || !q.query.trim();
+  }),
 }));
 
 jest.mock('../../detect_optimal_tab', () => ({

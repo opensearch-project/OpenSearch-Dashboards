@@ -490,7 +490,11 @@ export const ToolCallRow: React.FC<ToolCallRowProps> = ({
           i18n.translate('chat.toolCall.errorMessage', {
             defaultMessage: 'Error message: {errorMessage}',
             values: {
-              errorMessage: toolCall.result,
+              errorMessage:
+                toolCall.result ||
+                i18n.translate('chat.toolCall.errorNoResult', {
+                  defaultMessage: 'No results',
+                }),
             },
           })}
         {!isError && toolCall.result && isValidJSON(toolCall.result) ? (

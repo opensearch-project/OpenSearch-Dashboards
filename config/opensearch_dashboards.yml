@@ -40,6 +40,18 @@
 # It requires the application config plugin as its dependency.
 # csp_handler.enabled: true
 
+# Content Security Policy (CSP) configuration.
+# csp.enable: false
+# csp.allowedFrameAncestorSources: []
+# csp.allowedConnectSources: []
+# csp.allowedImgSources: []
+#
+# Content-Security-Policy-Report-Only settings.
+# csp-report-only.isEmitting: false
+# csp-report-only.allowedFrameAncestorSources: []
+# csp-report-only.allowedConnectSources: []
+# csp-report-only.allowedImgSources: []
+
 # The default application to load.
 # opensearchDashboards.defaultAppId: "home"
 
@@ -344,6 +356,11 @@
 # @experimental Set the value of this setting to display navigation updates, including dev tool top right navigation
 # opensearchDashboards.futureNavigation: true
 
+# Enable the icon-based left side navigation for the Observability workspace.
+# When enabled, the Observability workspace uses a compact icon rail instead of
+# the traditional collapsible flyout navigation.
+# opensearchDashboards.enableIconSideNav: true
+
 # Set the value of this setting to true to enable plugin augmentation on Dashboard
 # vis_augmenter.pluginAugmentationEnabled: true
 
@@ -426,3 +443,7 @@
 # @experimental Set the value to true to enable context provider
 # contextProvider:
 #   enabled: true
+
+# @experimental Enable legacy Elasticsearch backend compatibility.
+# This feature is currently being developed and should be used with caution in production environments.
+# backendCompatibility.enabled: false

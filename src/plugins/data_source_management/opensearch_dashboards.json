@@ -7,5 +7,6 @@
   "optionalPlugins": ["dataSource"],
   "requiredBundles": ["opensearchDashboardsReact", "dataSource", "opensearchDashboardsUtils"],
   "extraPublicDirs": ["public/components/utils"],
-  "configPath": ["data_source_management"]
+  "configPath": ["data_source_management"],
+  "supportedOSDataSourceVersions": ">=2.13.0"
 }

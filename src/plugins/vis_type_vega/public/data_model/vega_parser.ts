@@ -126,6 +126,12 @@ export class VegaParser {
     try {
       await this._parseAsync();
     } catch (err) {
+      // Let AnalyticEngine errors propagate so they surface through the unified embeddable error
+      // path (output.error.name === 'AnalyticEngineError') and render via ErrorEmbeddable, instead
+      // of being shown inline as a Vega warning.
+      if (err.name === 'AnalyticEngineError') {
+        throw err;
+      }
       // if we reject current promise, it will use the standard OpenSearch Dashboards error handling
       this.error = Utils.formatErrorToStr(err);
     }

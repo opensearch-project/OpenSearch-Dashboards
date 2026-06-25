@@ -72,6 +72,13 @@ describe('TraceAutoDetectCallout', () => {
         getIds: jest.fn().mockResolvedValue([]),
         get: jest.fn(),
       } as any,
+      dataViews: {
+        createAndSave: jest.fn(),
+        get: jest.fn(),
+        refreshFields: jest.fn(),
+        updateSavedObject: jest.fn(),
+        clearCache: jest.fn(),
+      } as any,
     };
   });
 
@@ -249,6 +256,7 @@ describe('TraceAutoDetectCallout', () => {
     await waitFor(() => {
       expect(mockCreateAutoDetectedDatasets).toHaveBeenCalledWith(
         mockServices.savedObjects!.client,
+        mockServices.dataViews,
         expect.objectContaining({
           tracesDetected: true,
           logsDetected: true,

@@ -10,15 +10,12 @@ import { EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiFormRow, EuiSelect } from '@el
 import {
   defaultMetricChartStyles,
   MetricChartStyle,
-  LayoutType,
   TextMode,
   ColorMode,
 } from './metric_vis_config';
-import { AxisRole } from '../types';
 import { DebouncedFieldNumber } from '../style_panel/utils';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { StyleAccordion } from '../style_panel/style_accordion';
-import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
 import { ValueCalculationSelector } from '../style_panel/value/value_calculation_selector';
 import { PercentageSelector } from '../style_panel/percentage/percentage_selector';
 import { ThresholdPanel } from '../style_panel/threshold/threshold_panel';
@@ -46,42 +43,8 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
   // visualization is generated in this case so we shouldn't display style option panels.
   const hasMappingSelected = !isEmpty(axisColumnMappings);
 
-  // Check if FACET axis is mapped (multi-metric mode)
-  const hasMultiMetric = axisColumnMappings?.[AxisRole.FACET] !== undefined;
-
-  const layoutOptions = [
-    {
-      value: 'auto',
-      text: i18n.translate('explore.vis.metric.layout.auto', {
-        defaultMessage: 'Auto',
-      }),
-    },
-    {
-      value: 'horizontal',
-      text: i18n.translate('explore.vis.metric.layout.horizontal', {
-        defaultMessage: 'Horizontal',
-      }),
-    },
-    {
-      value: 'vertical',
-      text: i18n.translate('explore.vis.metric.layout.vertical', {
-        defaultMessage: 'Vertical',
-      }),
-    },
-  ];
-
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
-      <EuiFlexItem grow={false}>
-        <AxesSelectPanel
-          numericalColumns={numericalColumns}
-          categoricalColumns={categoricalColumns}
-          dateColumns={dateColumns}
-          currentMapping={axisColumnMappings}
-          updateVisualization={updateVisualization}
-          chartType="metric"
-        />
-      </EuiFlexItem>
       {hasMappingSelected && (
         <>
           <EuiFlexItem grow={false}>
@@ -192,31 +155,6 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
             </StyleAccordion>
           </EuiFlexItem>
 
-          {hasMultiMetric && (
-            <EuiFlexItem grow={false}>
-              <StyleAccordion
-                id="metricLayoutSection"
-                accordionLabel={i18n.translate('explore.stylePanel.tabs.metricLayout', {
-                  defaultMessage: 'Layout',
-                })}
-                initialIsOpen={true}
-              >
-                <EuiFormRow
-                  label={i18n.translate('explore.vis.metric.layoutType', {
-                    defaultMessage: 'Layout type',
-                  })}
-                >
-                  <EuiSelect
-                    compressed
-                    options={layoutOptions}
-                    value={styleOptions.layoutType || 'auto'}
-                    onChange={(e) => updateStyleOption('layoutType', e.target.value as LayoutType)}
-                    data-test-subj="metricLayoutSelect"
-                  />
-                </EuiFormRow>
-              </StyleAccordion>
-            </EuiFlexItem>
-          )}
           <EuiFlexItem>
             <StyleAccordion
               id="metricValueOptions"

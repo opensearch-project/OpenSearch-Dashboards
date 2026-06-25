@@ -85,6 +85,7 @@ describe('createDatasetChangeMiddleware', () => {
         promptModeIsAvailable: false,
         summaryAgentIsAvailable: false,
       },
+      ui: { activeTabId: '' },
     });
 
     mockStore.dispatch = jest.fn();
@@ -107,6 +108,7 @@ describe('createDatasetChangeMiddleware', () => {
         promptModeIsAvailable: false,
         summaryAgentIsAvailable: false,
       },
+      ui: { activeTabId: '' },
     });
 
     const action = setQueryState({ query: 'source=hello', language: 'PPL' });
@@ -138,6 +140,7 @@ describe('createDatasetChangeMiddleware', () => {
         promptModeIsAvailable: false,
         summaryAgentIsAvailable: false,
       },
+      ui: { activeTabId: '' },
     });
 
     const action = setQueryWithHistory({ query: 'source=hello', language: 'PPL' });
@@ -167,6 +170,7 @@ describe('createDatasetChangeMiddleware', () => {
         promptModeIsAvailable: false,
         summaryAgentIsAvailable: false,
       },
+      ui: { activeTabId: '' },
     });
 
     await middleware(setQueryState({ query: 'source=hello', language: 'PPL' }));
@@ -195,6 +199,7 @@ describe('createDatasetChangeMiddleware', () => {
         promptModeIsAvailable: false,
         summaryAgentIsAvailable: false,
       },
+      ui: { activeTabId: '' },
     });
 
     const action = setQueryState({ query: 'source=hello', language: 'PPL' });
@@ -211,6 +216,7 @@ describe('createDatasetChangeMiddleware', () => {
         promptModeIsAvailable: false,
         summaryAgentIsAvailable: false,
       },
+      ui: { activeTabId: '' },
     });
 
     const action = setQueryState({ query: 'source=hello', language: 'PPL' });
@@ -229,6 +235,7 @@ describe('createDatasetChangeMiddleware', () => {
         promptModeIsAvailable: true, // Already true
         summaryAgentIsAvailable: false,
       },
+      ui: { activeTabId: '' },
     });
 
     const action = setQueryState({ query: 'source=hello', language: 'PPL' });
@@ -253,6 +260,7 @@ describe('createDatasetChangeMiddleware', () => {
         promptModeIsAvailable: false,
         summaryAgentIsAvailable: true, // Already true
       },
+      ui: { activeTabId: '' },
     });
 
     const action = setQueryState({ query: 'source=hello', language: 'PPL' });
@@ -272,6 +280,7 @@ describe('createDatasetChangeMiddleware', () => {
         promptModeIsAvailable: false,
         summaryAgentIsAvailable: false,
       },
+      ui: { activeTabId: '' },
     });
 
     await middleware(setQueryState({ query: 'source=hello', language: 'PPL' }));
@@ -303,6 +312,7 @@ describe('createDatasetChangeMiddleware', () => {
         promptModeIsAvailable: false,
         summaryAgentIsAvailable: false,
       },
+      ui: { activeTabId: '' },
     });
 
     await middleware(setQueryState({ query: 'source=hello', language: 'PPL' }));
@@ -332,6 +342,7 @@ describe('createDatasetChangeMiddleware', () => {
         promptModeIsAvailable: false,
         summaryAgentIsAvailable: false,
       },
+      ui: { activeTabId: '' },
     });
 
     await middleware(setQueryState({ query: 'source=hello', language: 'PPL' }));

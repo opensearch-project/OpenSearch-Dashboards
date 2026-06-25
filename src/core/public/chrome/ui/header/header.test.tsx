@@ -97,6 +97,7 @@ function mockProps() {
     currentWorkspace$: new BehaviorSubject<WorkspaceObject | null>(null),
     useUpdatedHeader: false,
     globalSearchCommands$: new BehaviorSubject([]),
+    navControlsIconSideNavFooter$: new BehaviorSubject([]),
   };
 }
 

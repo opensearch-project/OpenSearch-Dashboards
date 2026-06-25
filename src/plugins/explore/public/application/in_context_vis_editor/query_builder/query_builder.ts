@@ -38,7 +38,11 @@ import {
   handleAgentError,
 } from './utils';
 import { getServices as getExploreServices } from '../../../services/services';
-import { QUERY_BUILDER_QUERY_STATE_KEY, QUERY_EDITOR_STATE_KEY } from '../types';
+import {
+  QUERY_BUILDER_QUERY_STATE_KEY,
+  QUERY_EDITOR_STATE_KEY,
+  ActiveBottomPanelTab,
+} from '../types';
 
 // AbortControllers for active queries, keyed by query string
 // Currently only one query executing at a time
@@ -76,6 +80,7 @@ export interface QueryEditorState {
   userInitiatedQuery: boolean;
   languageType: SupportLanguageType;
   lastExecutedTranslatedQuery?: string; // last generated query
+  activeBottomPanelTab?: ActiveBottomPanelTab; // track which panel tab is active
 }
 
 export type QueryResultState = ISearchResult | undefined;
@@ -103,6 +108,7 @@ const initialQueryEditorState: QueryEditorState = {
   userInitiatedQuery: false, // user click the refresh button
   languageType: SupportLanguageType.ppl,
   lastExecutedTranslatedQuery: undefined,
+  activeBottomPanelTab: 'QUERY_TAB',
 };
 
 /**
@@ -123,17 +129,18 @@ export class QueryBuilder {
     isLoading: false,
     error: null,
   });
+  public variableNames$ = new BehaviorSubject<string[]>([]);
   private isInitialized = false;
   private editorRef: monaco.editor.IStandaloneCodeEditor | null = null;
   private subscriptions = Array<Subscription>();
   private getServices: () => ExploreServices;
   private interpolationService?: IVariableInterpolationService;
   public lastExecutedInterpolatedQuery?: string;
+  private onDatasetChangedCallback?: () => void;
 
   constructor(getServices: () => ExploreServices) {
     this.getServices = getServices;
   }
-
   async init(options?: { savedQueryState?: QueryState }) {
     if (this.isInitialized) {
       return;
@@ -169,8 +176,12 @@ export class QueryBuilder {
       preferredDataset
     );
 
-    if (queryEditorStateFromUrl?.languageType) {
-      this.updateQueryEditorState({ languageType: queryEditorStateFromUrl.languageType });
+    this.updateQueryEditorState({ languageType: languageType as SupportLanguageType });
+
+    if (queryEditorStateFromUrl?.activeBottomPanelTab) {
+      this.updateQueryEditorState({
+        activeBottomPanelTab: queryEditorStateFromUrl.activeBottomPanelTab,
+      });
     }
 
     // read isQueryEditorDirty from url to prevent losing state after reloading page
@@ -210,7 +221,11 @@ export class QueryBuilder {
     const urlSync = combineLatest([
       this.queryState$,
       this.queryEditorState$.pipe(
-        map((s) => ({ languageType: s.languageType, isQueryEditorDirty: s.isQueryEditorDirty }))
+        map((s) => ({
+          languageType: s.languageType,
+          isQueryEditorDirty: s.isQueryEditorDirty,
+          ...(s.activeBottomPanelTab ? { activeBottomPanelTab: s.activeBottomPanelTab } : {}),
+        }))
       ),
     ])
       .pipe(debounceTime(500))
@@ -280,6 +295,9 @@ export class QueryBuilder {
           // sync dataset change
           // check isLanguageChanged and isInitialized for the initial sync
           if (isDatasetChanged || isLanguageChanged || !this.isInitialized) {
+            if (isDatasetChanged && this.isInitialized) {
+              this.onDatasetChangedCallback?.();
+            }
             this.datasetView$.next({ ...this.datasetView$.getValue(), isLoading: true });
             return from(this.handleDatasetChange(newQuery.dataset));
           }
@@ -377,7 +395,8 @@ export class QueryBuilder {
           http: this.getServices().http,
           data: this.getServices().data,
         },
-        false
+        false,
+        dataset?.signalType // set data view signalType from dataset
       );
 
       // Try to get it again from cache
@@ -577,12 +596,26 @@ export class QueryBuilder {
     this.interpolationService = service;
   }
 
+  setVariableNames(names: string[]) {
+    this.variableNames$.next(names);
+  }
+
+  getVariableNames(): string[] {
+    return this.variableNames$.value;
+  }
+
   setEditorRef(editor: monaco.editor.IStandaloneCodeEditor | null) {
     this.editorRef = editor;
   }
 
   getEditorRef(): monaco.editor.IStandaloneCodeEditor | null {
     return this.editorRef;
+  }
+
+  // register a callback that fires when the dataset changes,
+  // for example, used to clear the transformation pipeline on dataset switch.
+  setOnDatasetChanged(callback: () => void) {
+    this.onDatasetChangedCallback = callback;
   }
 
   getQueryEditorState() {
@@ -597,6 +630,7 @@ export class QueryBuilder {
     this.queryState$.complete();
     this.resultState$.complete();
     this.datasetView$.complete();
+    this.variableNames$.complete();
     abortAllActiveQueries();
   }
 
@@ -615,6 +649,7 @@ export class QueryBuilder {
       isLoading: false,
       error: null,
     });
+    this.variableNames$ = new BehaviorSubject<string[]>([]);
     this.editorRef = null;
     this.isInitialized = false;
   }

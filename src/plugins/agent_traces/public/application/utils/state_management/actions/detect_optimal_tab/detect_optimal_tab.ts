@@ -27,10 +27,10 @@ export const detectAndSetOptimalTab = createAsyncThunk<
   void,
   { services: AgentTracesServices; savedTabId?: string },
   { state: RootState }
->('ui/detectAndSetOptimalTab', async ({ services }, { getState, dispatch }) => {
+>('ui/detectAndSetOptimalTab', async ({ services, savedTabId }, { getState, dispatch }) => {
   const state = getState();
   const queryString = typeof state.query.query === 'string' ? state.query.query : '';
-  const currentTabId = state.ui.activeTabId;
+  const currentTabId = state.ui.activeTabId || savedTabId;
 
   let targetTabId: string;
   if (hasStatsPipe(queryString)) {

@@ -20,6 +20,7 @@ import {
 } from '../../common/events';
 import type {
   Message,
+  SystemMessage,
   UserMessage,
 } from '../../common/types';
 import { ChatLayoutMode } from '../types';
@@ -68,17 +69,33 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   const [currentRunId, setCurrentRunId] = useState<string | null>(null);
   const [pendingConfirmation, setPendingConfirmation] = useState<ConfirmationRequest | null>(null);
   const [showHistory, setShowHistory] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [restoreError, setRestoreError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const handleSendRef = useRef<typeof handleSend>();
   const currentSubscriptionRef = useRef<any>(null);
-  const loadingAbortControllerRef = useRef<AbortController | null>(null);
+  const conversationLoadAbortControllerRef = useRef<AbortController | null>(null);
   const {screenshotFeatureEnabled,isCapturing, capturePageContainer} = usePageContainerCapture();
   const [screenshotData, setScreenshotData] = useState<{pageTitle: string, createdAt: moment.Moment} & PageContainerImageData>();
-  const [toolCallStates, setToolCallStates] = useState<Record<string, any>>({});
+  const [toolCallStates, setToolCallStates] = useState<Map<string, any>>(new Map());
   const resendAvailable = !!chatService.conversationHistoryService.getMemoryProvider().includeFullHistory;
   const [startResponse, setStartResponse] = useState(false);
-  const [isSendingToolResult, setIsSendingToolResult] = useState(false);
+  const [pendingMessage, setPendingMessage] = useState<UserMessage | null>(null);
+  const [availableDataSources, setAvailableDataSources] = useState<Array<{id: string, title: string}>>([]);
+
+  const hasActiveToolCalls = useMemo(() => {
+    if (toolCallStates instanceof Map) {
+      for (const state of toolCallStates.values()) {
+        if (state.status === 'pending' || state.status === 'executing') return true;
+      }
+    }
+    return false;
+  }, [toolCallStates]);
+  const hasActiveToolCallsRef = useRef(false);
+  hasActiveToolCallsRef.current = hasActiveToolCalls;
+
+  const hasPendingResend = useMemo(
+    () => timeline.some((msg) => msg.role === 'system' && (msg as SystemMessage).canResend),
+    [timeline]
+  );
 
   // Use ref to track streaming state synchronously for React 18 compatibility
   // React 18 batches state updates, so we need a ref for immediate checks
@@ -122,7 +139,6 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
           onTimelineUpdate: setTimeline,
           onStreamingStateChange: setIsStreaming,
           onStartResponse: setStartResponse,
-          onSendToolResultStateChange: setIsSendingToolResult,
           getTimeline: () => timelineRef.current,
         },
       }),
@@ -150,54 +166,9 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     };
   }, [eventHandler]);
 
-  // Extracted restoration logic to avoid duplication
-  const restoreConversationTimeline = useCallback(async () => {
-    // Create abort controller for this loading operation
-    const abortController = new AbortController();
-    loadingAbortControllerRef.current = abortController;
-
-    setIsLoading(true);
-    setRestoreError(null);
-
-    try {
-      // Check if aborted before starting
-      if (abortController.signal.aborted) return;
-
-      const events = await chatService.restoreLatestConversation();
-
-      // Check if aborted after async operation
-      if (abortController.signal.aborted) return;
-
-      eventHandler.clearState();
-      setIsLoading(false);
-
-      if (events) {
-        for (const event of events) {
-          if (abortController.signal.aborted) return;
-          await eventHandler.handleEvent(event);
-        }
-      }
-    } catch (error: any) {
-      // Don't show error if aborted
-      if (!abortController.signal.aborted) {
-        console.error('Error restoring conversation:', error);
-        setRestoreError(error.message || 'Failed to restore conversation');
-      }
-    } finally {
-      // Only update loading state if not aborted
-      if (!abortController.signal.aborted) {
-        setIsLoading(false);
-      }
-      // Clear the abort controller reference
-      if (loadingAbortControllerRef.current === abortController) {
-        loadingAbortControllerRef.current = null;
-      }
-    }
-  }, [chatService, eventHandler]);
-
-  // Restore timeline from latest conversation on component mount
+  // Initialize with fresh conversation on mount
   useMount(() => {
-    restoreConversationTimeline();
+    chatService.newThread();
   });
 
   // Save conversation to history whenever timeline changes
@@ -207,35 +178,53 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     }
   }, [timeline, chatService, isLoading]);
 
-  // Clear thread ID so next mount can restore the latest conversation
+  // Clear thread ID and pending data source selection on unmount
   useUnmount(() => {
-    services.core.chat.resetThreadId()
+    services.core.chat.resetThreadId();
+    setPendingMessage(null);
+    setAvailableDataSources([]);
   });
+
+  // Cache data source compatibility check to avoid network call on every message
+  const unsupportedDataSourceRef = useRef<{ dataSourceId: string; result: boolean } | null>(null);
+
+  const isUnsupportedDataSource = useCallback(async (dataSourceId: string): Promise<boolean> => {
+    try {
+      if (unsupportedDataSourceRef.current?.dataSourceId === dataSourceId) {
+        return unsupportedDataSourceRef.current.result;
+      }
+      const savedObjectsClient = services.core?.savedObjects?.client;
+      if (!savedObjectsClient) return false;
+      const ds = await savedObjectsClient.get<{ dataSourceEngineType?: string }>(
+        'data-source',
+        dataSourceId
+      );
+      const result = ds?.attributes?.dataSourceEngineType === 'AnalyticEngine';
+      unsupportedDataSourceRef.current = { dataSourceId, result };
+      return result;
+    } catch {
+      return false;
+    }
+  }, [services.core?.savedObjects?.client]);
 
   // Helper function to handle message streaming with observable subscription
   const subscribeToMessageStream = useCallback(async (
-    messageContent: string,
     messages: Message[],
-    rawMessage?: string
+    userMessage: UserMessage
   ) => {
     isStreamingRef.current = true;
     setIsStreaming(true);
     setStartResponse(false);
 
+    const content = userMessage.content as string;
+
     try {
-      const { observable, userMessage } = await chatService.sendMessage(
-        messageContent,
-        messages
+      const { observable } = await chatService.sendMessage(
+        content,
+        messages,
+        userMessage
       );
 
-      const timelineUserMessage: UserMessage = {
-        id: userMessage.id,
-        role: 'user',
-        content: userMessage.content,
-        rawMessage: Array.isArray(userMessage.content) ? undefined : rawMessage || messageContent,  // For regular messages, raw and content are the same
-      };
-
-      setTimeline((prev) => [...prev, timelineUserMessage]);
       setScreenshotData(undefined);
 
       // Subscribe to streaming response
@@ -276,10 +265,22 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     }
   }, [chatService, currentRunId, eventHandler]);
 
+  // Handler for when user selects a data source from the prompt
+  const handleDataSourceSelect = useCallback(async (id: string) => {
+    chatService.setDataSourceId(id);
+    setAvailableDataSources([]);
+    const pending = pendingMessage;
+    setPendingMessage(null);
+    if (!pending) return;
+
+    // User message already in timeline from handleSend; pass history without it
+    subscribeToMessageStream(timeline.slice(0, -1), pending);
+  }, [chatService, pendingMessage, subscribeToMessageStream, timeline]);
+
   const handleSend = async (options?: {input?: string, messages?: Message[]}) => {
     const messageContent = options?.input ?? input.trim();
     // Use ref for immediate check since React 18 batches state updates
-    if (!messageContent || isStreamingRef.current) return;
+    if (!messageContent || isStreamingRef.current || hasPendingResend) return;
 
     // Prepare additional messages for sending (but don't add to timeline yet)
     let additionalMessages = options?.messages ?? [];
@@ -289,7 +290,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         additionalMessages = [
           {
             role: 'user' as const,
-            id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+            id: chatService.generateMessageId(),
             content: [
               {
                 type: 'binary' as const,
@@ -305,18 +306,77 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     // Merge additional messages with current timeline for sending
     const messagesToSend = [...timeline, ...additionalMessages];
 
+    // Validate data source before sending
+    const currentDataSourceId = await chatService.getCurrentDataSourceId();
+
+    // 1. Check if current data source is unsupported
+    if (currentDataSourceId && (await isUnsupportedDataSource(currentDataSourceId))) {
+      const userMsg = chatService.getUserMessage(messageContent);
+      const systemMsg: SystemMessage = {
+        id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+        role: 'system',
+        content: i18n.translate('chat.dataSourceUnsupported', {
+          defaultMessage: 'The current data source does not support AI features.',
+        }),
+      };
+      setTimeline((prev) => [...prev, userMsg, systemMsg]);
+      return;
+    }
+
+    // 2. Check if current data source is valid (exists in available list)
+    const compatibleDataSources = await chatService.getAvailableDataSources();
+    const isValid = currentDataSourceId && compatibleDataSources.some((ds) => ds.id === currentDataSourceId);
+
+    if (!isValid) {
+      if (compatibleDataSources.length >= 1) {
+        // Compatible data sources exist — prompt user to pick one
+        const userMsg = chatService.getUserMessage(messageContent);
+        setPendingMessage(userMsg);
+        setAvailableDataSources(compatibleDataSources);
+        setTimeline((prev) => [...prev, userMsg]);
+        return;
+      }
+
+      // 3. No data sources associated with this workspace
+      const userMsg = chatService.getUserMessage(messageContent);
+      const infoMsg: Message = {
+        id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+        role: 'assistant',
+        content: i18n.translate('chat.noDataSourceMessage', {
+          defaultMessage: 'There are no data sources associated with this workspace. Please ask your workspace admin to associate data sources to this workspace.',
+        }),
+      };
+      setTimeline((prev) => [...prev, userMsg, infoMsg]);
+      return;
+    }
+
     // Check if this is a slash command
     const commandResult = await slashCommandRegistry.execute(messageContent);
     if (commandResult.handled) {
-      // If command was handled and returned a message, send it to the AI
+      if (commandResult.localMessage) {
+        const userMsg = chatService.getUserMessage(messageContent);
+        const role = commandResult.role ?? 'system';
+        const responseMsg: Message = {
+          id: chatService.generateMessageId(),
+          role,
+          content: commandResult.localMessage,
+          ...(role === 'system' && commandResult.title && { title: commandResult.title }),
+        };
+        setTimeline((prev) => [...prev, userMsg, responseMsg]);
+        return;
+      }
       if (commandResult.message) {
-        return subscribeToMessageStream(commandResult.message, messagesToSend, messageContent);
+        const userMsg = chatService.getUserMessage(commandResult.message, messageContent);
+        setTimeline((prev) => [...prev, userMsg]);
+        return subscribeToMessageStream(messagesToSend, userMsg);
       }
       return;
     }
 
-    // Normal message flow
-    return subscribeToMessageStream(messageContent, messagesToSend);
+    // Normal message flow — add user message to timeline then stream
+    const userMsg = chatService.getUserMessage(messageContent);
+    setTimeline((prev) => [...prev, userMsg]);
+    return subscribeToMessageStream(messagesToSend, userMsg);
   };
 
   handleSendRef.current = handleSend;
@@ -362,26 +422,29 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
     // Remove this message and everything after it from the timeline
     const truncatedTimeline = timeline.slice(0, messageIndex);
-    setTimeline(truncatedTimeline);
 
     // Clear any streaming state and input
     setInput('');
 
-    subscribeToMessageStream(textContent, [...truncatedTimeline,...additionalMessages]);
-  }, [timeline, subscribeToMessageStream, setInput, setTimeline]);
+    // Add user message back and stream
+    const userMsg = chatService.getUserMessage(textContent);
+    setTimeline([...truncatedTimeline, userMsg]);
+    subscribeToMessageStream([...truncatedTimeline,...additionalMessages], userMsg);
+  }, [timeline, subscribeToMessageStream, setInput, chatService]);
 
-  const handleNewChat = useCallback(() => {
-    chatService.newThread();
-    setTimeline([]);
-    setCurrentRunId(null);
-    setIsStreaming(false);
-    setPendingConfirmation(null);
-    confirmationService.cleanAll();
-    setShowHistory(false);
-    setRestoreError(null);
-  }, [chatService, confirmationService]);
+  const handleResendToolResult = useCallback(
+    async ({ messageId, toolCallId, toolResult }: { messageId: string; toolCallId: string; toolResult: any }) => {
+      // Avoid concurrent resends while streaming or already sending a tool result
+      if (isStreamingRef.current || hasActiveToolCallsRef.current) return;
+      // Remove the error message from timeline
+      setTimeline((prev) => prev.filter((msg) => msg.id !== messageId));
+      await eventHandler.sendToolResultToAssistant(toolCallId, toolResult);
+    },
+    [eventHandler, setTimeline]
+  );
 
-  const handleStop = useCallback(() => {
+  // Helper function to stop streaming and clean up subscriptions
+  const stopStreaming = useCallback(() => {
     // Abort the current streaming request
     chatService.abort();
     // Unsubscribe from current observable if exists
@@ -390,11 +453,32 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       currentSubscriptionRef.current = null;
     }
 
+    // Cancel any in-flight tool result dispatch
+    eventHandler.cancelToolResultDispatch();
+
     // Update streaming state (both ref and state for React 18 compatibility)
     isStreamingRef.current = false;
     setIsStreaming(false);
     setStartResponse(false);
-  }, [chatService]);
+  }, [chatService, eventHandler]);
+
+  const handleNewChat = useCallback(() => {
+    // Stop any ongoing streaming before starting a new chat
+    stopStreaming();
+
+    chatService.newThread();
+    setTimeline([]);
+    setCurrentRunId(null);
+    setPendingConfirmation(null);
+    setPendingMessage(null);
+    setAvailableDataSources([]);
+    confirmationService.cleanAll();
+    setShowHistory(false);
+  }, [chatService, confirmationService, stopStreaming]);
+
+  const handleStop = useCallback(() => {
+    stopStreaming();
+  }, [stopStreaming]);
 
   const handleApproveConfirmation = useCallback(() => {
     if (pendingConfirmation) {
@@ -448,58 +532,58 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   }, [timeline]);
 
   const handleShowHistory = useCallback(() => {
-    loadingAbortControllerRef.current?.abort();
-    setIsLoading(false);
     setShowHistory(true);
-    setRestoreError(null);
   }, []);
 
   const handleCloseHistory = useCallback(() => {
-    // Abort any ongoing loading operation
-    if (loadingAbortControllerRef.current) {
-      loadingAbortControllerRef.current.abort();
-      loadingAbortControllerRef.current = null;
-    }
-
-    // Reset loading state and show history panel
-    setIsLoading(false);
     setShowHistory(false);
   }, []);
 
   const handleSelectConversation = useCallback(async (conversation: SavedConversation) => {
-    // Create abort controller for this loading operation
+    // Stop any ongoing streaming before switching conversations
+    stopStreaming();
+    setPendingMessage(null);
+    setAvailableDataSources([]);
+
+    // Abort any ongoing conversation loading
+    if (conversationLoadAbortControllerRef.current) {
+      conversationLoadAbortControllerRef.current.abort();
+    }
+
+    // Create new abort controller for this load operation
     const abortController = new AbortController();
-    loadingAbortControllerRef.current = abortController;
+    conversationLoadAbortControllerRef.current = abortController;
 
     setIsLoading(true);
 
     try {
-      // Check if aborted before starting
-      if (abortController.signal.aborted) return;
-
       // Load the conversation and get AG-UI event array
       const events = await chatService.loadConversation(conversation.threadId);
 
-      // Check if aborted after async operation
-      if (abortController.signal.aborted) return;
+      // Check if this load was aborted (user switched to another conversation)
+      if (abortController.signal.aborted) {
+        return;
+      }
 
       if (events) {
         // Reset UI state
         eventHandler.clearState();
         setCurrentRunId(null);
-        setIsStreaming(false);
         setPendingConfirmation(null);
         confirmationService.cleanAll();
         setShowHistory(false);
         setIsLoading(false);
 
+        // Replay all events to reconstruct the conversation
         for (const event of events) {
-          if (abortController.signal.aborted) return;
+          // Check abort signal during replay
+          if (abortController.signal.aborted) {
+            return;
+          }
           await eventHandler.handleEvent(event);
         }
       }
     } catch (error: any) {
-      // Don't show error if aborted
       if (!abortController.signal.aborted) {
         toasts?.addWarning({
           title: i18n.translate('chat.window.loadConversationErrorTitle', {
@@ -514,16 +598,15 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         });
       }
     } finally {
-      // Only update loading state if not aborted
       if (!abortController.signal.aborted) {
         setIsLoading(false);
       }
-      // Clear the abort controller reference
-      if (loadingAbortControllerRef.current === abortController) {
-        loadingAbortControllerRef.current = null;
+      // Clear abort controller reference
+      if (conversationLoadAbortControllerRef.current === abortController) {
+        conversationLoadAbortControllerRef.current = null;
       }
     }
-  }, [chatService, eventHandler, confirmationService, toasts]);
+  }, [chatService, eventHandler, confirmationService, toasts, stopStreaming]);
 
   const windowInstance = useMemo<ChatWindowInstance>(() => ({
     startNewChat: () => handleNewChat(),
@@ -564,25 +647,6 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             })}
           </EuiText>
         </div>
-      ) : restoreError ? (
-        <div className="chatWindow__errorContainer">
-          <EuiText color="danger" textAlign="center">
-            <h3>
-              {i18n.translate('chat.window.restoreErrorTitle', {
-                defaultMessage: 'Failed to restore conversation',
-              })}
-            </h3>
-            <p>{restoreError}</p>
-          </EuiText>
-          <EuiButton
-            onClick={restoreConversationTimeline}
-            iconType="refresh"
-          >
-            {i18n.translate('chat.window.retryButton', {
-              defaultMessage: 'Retry',
-            })}
-          </EuiButton>
-        </div>
       ) : showHistory ? (
         <ConversationHistoryPanel
           conversationHistoryService={chatService.conversationHistoryService}
@@ -595,10 +659,16 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             timeline={timeline}
             isStreaming={isStreaming}
             onResendMessage={resendAvailable ? handleResendMessage : undefined}
+            onResendToolResult={handleResendToolResult}
             onApproveConfirmation={handleApproveConfirmation}
             onRejectConfirmation={handleRejectConfirmation}
             onFillInput={setInput}
             threadId={chatService.getThreadId()}
+            onShowHistory={handleShowHistory}
+            conversationHistoryService={chatService.conversationHistoryService}
+            onSelectConversation={handleSelectConversation}
+            availableDataSources={availableDataSources}
+            onDataSourceSelect={handleDataSourceSelect}
             {...enhancedProps}
             startResponse={startResponse}
           />
@@ -639,8 +709,26 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             input={input}
             isCapturing={isCapturing}
             isStreaming={isStreaming}
-            isSendingToolResult={isSendingToolResult}
-            pendingConfirmation={pendingConfirmation}
+            disabled={hasActiveToolCalls || hasPendingResend || !!pendingConfirmation || availableDataSources.length > 0}
+            placeholder={
+              availableDataSources.length > 0
+                ? i18n.translate('chat.input.selectDataSource', {
+                    defaultMessage: 'Select a data source to continue...',
+                  })
+                : pendingConfirmation
+                ? i18n.translate('chat.input.waitingForConfirmation', {
+                    defaultMessage: 'Waiting for confirmation...',
+                  })
+                : hasPendingResend
+                ? i18n.translate('chat.input.pendingResend', {
+                    defaultMessage: 'Resend the tool result to continue...',
+                  })
+                : hasActiveToolCalls
+                ? i18n.translate('chat.input.waitingForToolExecution', {
+                    defaultMessage: 'Waiting for tool execution...',
+                  })
+                : undefined
+            }
             onInputChange={setInput}
             onSend={handleSend}
             onStop={handleStop}

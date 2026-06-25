@@ -7,6 +7,7 @@ import { AggregationType, TimeUnit } from '../../types';
 import { inferTimeIntervals } from '../../bar/bar_chart_utils';
 import { parseUTCDate } from '../utils';
 import { aggregateValues } from './utils/aggregation';
+import { normalizeEmptyValue } from './utils/normalization';
 import { roundToTimeUnit } from './utils/time';
 import { CalculationMethod } from '../calculation';
 
@@ -113,9 +114,8 @@ export const aggregate = (options: {
       groupKey = bucket.getTime(); // Use timestamp as key for grouping
       groupValue = bucket;
     } else {
-      // Categorical grouping
-      // NOTE: this will convert undefined to "undefined" and null to "null" intentionally
-      groupKey = String(row[groupBy]);
+      // Categorical grouping — normalize empty values to '(empty)' for consistency with pivot()
+      groupKey = normalizeEmptyValue(row[groupBy]);
       groupValue = groupKey;
     }
 

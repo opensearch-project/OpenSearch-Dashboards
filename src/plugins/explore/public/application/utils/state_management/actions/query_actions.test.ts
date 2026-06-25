@@ -342,14 +342,25 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       expect(result).toBe('processed-ppl-query');
     });
 
-    it('should throw error for unsupported language', () => {
-      const unsupportedQuery: Query = {
-        query: 'SELECT * FROM table',
+    it('should pass SQL queries through unchanged', () => {
+      const sqlQuery: Query = {
+        query: 'SELECT * FROM logs WHERE status = "error"',
         language: 'SQL',
+        dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
+      };
+
+      const result = defaultPrepareQueryString(sqlQuery);
+      expect(result).toBe('SELECT * FROM logs WHERE status = "error"');
+    });
+
+    it('should throw error for unhandled language', () => {
+      const unsupportedQuery: Query = {
+        query: 'some query',
+        language: 'UNSUPPORTED_LANG' as any,
       };
 
       expect(() => defaultPrepareQueryString(unsupportedQuery)).toThrow(
-        'defaultPrepareQueryString encountered unhandled language: SQL'
+        'defaultPrepareQueryString encountered unhandled language: UNSUPPORTED_LANG'
       );
     });
 
@@ -1211,6 +1222,30 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         (call) => typeof call[0] === 'function'
       );
       expect(dispatchedThunks.length).toBeGreaterThanOrEqual(1);
+
+      const histogramActions = mockDispatch.mock.calls.filter(
+        (call) =>
+          call[0]?.type === 'query/executeHistogramQuery/pending' ||
+          call[0]?.type?.includes('executeHistogramQuery')
+      );
+      expect(histogramActions).toHaveLength(0);
+    });
+
+    it('should skip histogram query when language is SQL', async () => {
+      mockDispatch.mockClear();
+
+      const mockState = {
+        query: { query: 'SELECT * FROM logs', language: 'SQL', dataset: null },
+        ui: { activeTabId: '' },
+        results: {},
+        legacy: { interval: '1h' },
+        queryEditor: { breakdownField: undefined, queryStatusMap: {} },
+      };
+
+      mockGetState.mockReturnValue(mockState);
+
+      const thunk = executeQueries({ services: mockServices });
+      await thunk(mockDispatch, mockGetState, undefined);
 
       const histogramActions = mockDispatch.mock.calls.filter(
         (call) =>

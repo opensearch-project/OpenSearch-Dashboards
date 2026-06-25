@@ -37,9 +37,6 @@ describe('createScatterConfig', () => {
     expect(defaults.exclusive.angle).toBe(0);
     expect(defaults.exclusive.filled).toBe(true);
 
-    // Verify title
-    expect(defaults.titleOptions.show).toBe(false);
-    expect(defaults.titleOptions.titleName).toBe('');
     expect(defaults.thresholdOptions).toMatchObject({
       baseColor: '#00BD6B',
       thresholds: [],

@@ -211,6 +211,7 @@ export class IndexPatternManagementPlugin
             id: IPM_APP_ID,
             title: sectionsHeader,
             order: 400,
+            euiIconType: 'indexPatternApp',
           },
         ]);
       }

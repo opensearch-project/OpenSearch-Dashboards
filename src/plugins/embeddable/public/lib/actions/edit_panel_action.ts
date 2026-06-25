@@ -131,7 +131,7 @@ export class EditPanelAction implements Action<ActionContext> {
     if (container) {
       return {
         containerName: container.getTitle() ?? '',
-        containerId: container.id,
+        containerId: container.getInput().id,
       };
     }
   }

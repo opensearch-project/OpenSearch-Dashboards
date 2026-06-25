@@ -6,7 +6,8 @@
 import { i18n } from '@osd/i18n';
 import { LogsTab } from '../components/tabs/logs_tab';
 import { MetricsTab } from '../components/tabs/metrics_tab';
-import { MetricsRawTab } from '../components/tabs/metrics_raw_tab';
+import { MetricsExploreTab } from './pages/metrics/explore';
+import { MetricsVisTab } from '../components/tabs/metrics_vis_tab';
 import { FieldStatsTab } from '../components/tabs/field_stats_tab';
 import { TabDefinition, TabRegistryService } from '../services/tab_registry/tab_registry_service';
 import { ExploreServices } from '../types';
@@ -17,6 +18,7 @@ import {
   EXPLORE_VISUALIZATION_TAB_ID,
   EXPLORE_PATTERNS_TAB_ID,
   EXPLORE_FIELD_STATS_TAB_ID,
+  EXPLORE_METRICS_EXPLORE_TAB_ID,
   ENABLE_EXPERIMENTAL_SETTING,
   EXPLORE_STATISTICS_TAB_ID,
 } from '../../common';
@@ -47,6 +49,17 @@ export const registerBuiltInTabs = (
 
   if (registryFlavor === ExploreFlavor.Metrics) {
     tabRegistry.registerTab({
+      id: EXPLORE_METRICS_EXPLORE_TAB_ID,
+      label: i18n.translate('explore.metricsTab.exploreLabel', {
+        defaultMessage: 'Explore',
+      }),
+      flavor: [ExploreFlavor.Metrics],
+      order: 5,
+      supportedLanguages: ['PROMQL'],
+      component: MetricsExploreTab,
+    });
+
+    tabRegistry.registerTab({
       id: 'metrics',
       label: i18n.translate('explore.metricsTab.tableLabel', {
         defaultMessage: 'Table',
@@ -55,17 +68,6 @@ export const registerBuiltInTabs = (
       order: 10,
       supportedLanguages: ['PROMQL'],
       component: MetricsTab,
-    });
-
-    tabRegistry.registerTab({
-      id: 'metrics-raw',
-      label: i18n.translate('explore.metricsTab.rawLabel', {
-        defaultMessage: 'Raw',
-      }),
-      flavor: [ExploreFlavor.Metrics],
-      order: 15,
-      supportedLanguages: ['PROMQL'],
-      component: MetricsRawTab,
     });
   } else {
     // Register Logs Tab
@@ -81,7 +83,11 @@ export const registerBuiltInTabs = (
             }),
       flavor: [ExploreFlavor.Logs, ExploreFlavor.Traces],
       order: 10,
-      supportedLanguages: [EXPLORE_DEFAULT_LANGUAGE],
+      // SQL is only supported for Logs flavor, not Traces
+      supportedLanguages:
+        registryFlavor === ExploreFlavor.Logs
+          ? [EXPLORE_DEFAULT_LANGUAGE, 'SQL']
+          : [EXPLORE_DEFAULT_LANGUAGE],
       component: LogsTab,
     };
     tabRegistry.registerTab(logsTabDefinition);
@@ -184,9 +190,12 @@ export const registerBuiltInTabs = (
     }),
     flavor: [ExploreFlavor.Logs, ExploreFlavor.Metrics, ExploreFlavor.Traces],
     order: 20,
+    // SQL only for Logs, PROMQL for Metrics, PPL only for Traces
     supportedLanguages:
       registryFlavor === ExploreFlavor.Metrics
         ? [EXPLORE_DEFAULT_LANGUAGE, 'PROMQL']
+        : registryFlavor === ExploreFlavor.Logs
+        ? [EXPLORE_DEFAULT_LANGUAGE, 'SQL']
         : [EXPLORE_DEFAULT_LANGUAGE],
 
     // Prepare query based on language
@@ -195,7 +204,7 @@ export const registerBuiltInTabs = (
       return preparedQuery.query;
     },
 
-    component: VisTab,
+    component: registryFlavor === ExploreFlavor.Metrics ? MetricsVisTab : VisTab,
   });
 
   tabRegistry.registerTab({
@@ -205,7 +214,10 @@ export const registerBuiltInTabs = (
     }),
     flavor: [ExploreFlavor.Logs],
     order: 17,
-    supportedLanguages: [EXPLORE_DEFAULT_LANGUAGE],
+    supportedLanguages:
+      registryFlavor === ExploreFlavor.Logs
+        ? [EXPLORE_DEFAULT_LANGUAGE, 'SQL']
+        : [EXPLORE_DEFAULT_LANGUAGE],
 
     // Prepare query based on language
     prepareQuery: (query) => {

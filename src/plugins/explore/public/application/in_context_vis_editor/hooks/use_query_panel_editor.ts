@@ -117,6 +117,11 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
     [editorRef, setEditor]
   );
 
+  // Get variable names from queryBuilder
+  const getVariableNames = useCallback(() => {
+    return queryBuilder.variableNames$?.value || [];
+  }, [queryBuilder]);
+
   // Real autocomplete implementation using the data plugin's autocomplete service
   const provideCompletionItems = useCallback(
     async (
@@ -125,8 +130,13 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
       _: monaco.languages.CompletionContext,
       token: monaco.CancellationToken
     ): Promise<monaco.languages.CompletionList> =>
-      buildCompletionItems(model, position, _, token, { isPromptModeRef, queryLanguage, services }),
-    [isPromptModeRef, queryLanguage, services]
+      buildCompletionItems(model, position, _, token, {
+        isPromptModeRef,
+        queryLanguage,
+        services,
+        variableNames: getVariableNames(),
+      }),
+    [isPromptModeRef, queryLanguage, services, getVariableNames]
   );
 
   const suggestionProvider = useMemo(() => {
@@ -150,6 +160,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
     queryBuilder.onQueryExecutionSubmit().catch((error) => {
       services.notifications?.toasts.addError(error, {
         title: 'Query execution failed',
+        toastLifeTimeMs: 2000,
       });
     });
   }, [queryBuilder, services.notifications?.toasts]);

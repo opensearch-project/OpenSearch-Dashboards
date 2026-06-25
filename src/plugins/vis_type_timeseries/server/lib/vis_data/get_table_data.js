@@ -34,6 +34,7 @@ import { get } from 'lodash';
 import { processBucket } from './table/process_bucket';
 import { getOpenSearchQueryConfig } from './helpers/get_opensearch_query_uisettings';
 import { getIndexPatternObject } from './helpers/get_index_pattern';
+import { validateNotAnalyticEngineDataSource } from '../../../../data/server';
 
 export async function getTableData(req, panel) {
   const panelIndexPattern = panel.index_pattern;
@@ -52,6 +53,7 @@ export async function getTableData(req, panel) {
   };
 
   try {
+    await validateNotAnalyticEngineDataSource(panelDataSourceId, req.getSavedObjectsClient());
     const body = buildRequestBody(
       req,
       panel,
@@ -82,6 +84,10 @@ export async function getTableData(req, panel) {
       series: buckets.map(processBucket(panel)),
     };
   } catch (err) {
+    if (err.name === 'AnalyticEngineError') {
+      throw err;
+    }
+
     if (err.body || err.name === 'DQLSyntaxError') {
       err.response = err.body;
 

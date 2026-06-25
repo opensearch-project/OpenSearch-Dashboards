@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { IRouter, ILegacyClusterClient } from '../../../../core/server';
+import { IRouter, ILegacyClusterClient, Logger } from '../../../../core/server';
 import { registerDslRoute } from './dsl';
 import {
   registerDataConnectionsRoute,
@@ -13,6 +13,7 @@ import { registerDatasourcesRoute } from './datasources_router';
 import { registerPplRoute } from './ppl';
 import { DSLFacet } from '../services/facets/dsl_facet';
 import { PPLFacet } from '../services/facets/ppl_facet';
+import { registerLocalClusterVersionRoute } from './fetch_local_cluster_version';
 
 export function defineRoutes(router: IRouter) {
   router.get(
@@ -34,10 +35,12 @@ export function setupRoutes({
   router,
   client,
   dataSourceEnabled,
+  logger,
 }: {
   router: IRouter;
   client: ILegacyClusterClient;
   dataSourceEnabled: boolean;
+  logger: Logger;
 }) {
   registerPplRoute({ router, facet: new PPLFacet(client) });
   registerDslRoute({ router, facet: new DSLFacet(client) }, dataSourceEnabled);
@@ -51,4 +54,5 @@ export function setupRoutes({
   }
   registerDataConnectionsRoute(router, dataSourceEnabled);
   registerDatasourcesRoute(router, dataSourceEnabled);
+  registerLocalClusterVersionRoute(router, logger);
 }

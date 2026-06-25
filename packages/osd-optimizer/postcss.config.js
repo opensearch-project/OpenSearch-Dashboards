@@ -28,8 +28,54 @@
  * under the License.
  */
 
-module.exports = {
+const Path = require('path');
+
+/**
+ * Strips dependency messages from @tailwindcss/postcss.
+ *
+ * Without this, Tailwind registers every scanned .tsx as a PostCSS dependency.
+ * postcss-loader converts those into webpack file deps, causing an infinite
+ * JS to CSS to JS recompile loop. Stripping them breaks the cycle. Tailwind re-scans
+ * source files on each run anyway, so new utility classes are still picked up.
+ */
+function stripTailwindDeps() {
+  return {
+    postcssPlugin: 'postcss-strip-tailwind-deps',
+    OnceExit(_root, { result }) {
+      result.messages = result.messages.filter((msg) => msg.plugin !== '@tailwindcss/postcss');
+    },
+  };
+}
+stripTailwindDeps.postcss = true;
+
+/**
+ * Restores the space between the import URL and the `prefix(...)` directive
+ * in `@import "tailwindcss/..." prefix(xxx)` rules. Sass `style: 'compressed'`
+ * strips whitespace inside `@import` params, producing
+ * `@import"tailwindcss/theme"prefix(osd)`, which @tailwindcss/postcss does
+ * not parse — it silently skips the import and emits zero utilities.
+ */
+function normalizeTailwindImports() {
+  return {
+    postcssPlugin: 'postcss-normalize-tailwind-imports',
+    Once(root) {
+      root.walkAtRules('import', (rule) => {
+        rule.params = rule.params.replace(/("tailwindcss\/[^"]+")(prefix)/g, '$1 $2');
+      });
+    },
+  };
+}
+normalizeTailwindImports.postcss = true;
+
+module.exports = (ctx) => ({
   plugins: [
     /*require('autoprefixer')()*/
+    normalizeTailwindImports(),
+    // Safe to include unconditionally. Bails out for files without Tailwind directives.
+    // eslint-disable-next-line import/no-unresolved -- package uses `exports` field; resolver lacks support
+    require('@tailwindcss/postcss')({
+      base: ctx && ctx.file ? Path.dirname(ctx.file) : process.cwd(),
+    }),
+    stripTailwindDeps(),
   ],
-};
+});

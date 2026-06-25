@@ -15,7 +15,6 @@ import {
   WorkspacesSetup,
   DEFAULT_NAV_GROUPS,
   ALL_USE_CASE_ID,
-  UseCaseId,
 } from '../../../../core/public';
 import {
   WORKSPACE_DETAIL_APP_ID,
@@ -37,13 +36,6 @@ export interface UseCaseServiceSetupDeps {
 
 export class UseCaseService {
   private workspaceAndManageWorkspaceCategorySubscription?: Subscription;
-  private supportedUseCasesForServerlessCollections = new Set<UseCaseId>([
-    UseCaseId.ESSENTIAL_USE_CASE_ID,
-  ]);
-
-  public get supportedUseCasesForServerless(): UseCaseId[] {
-    return Array.from(this.supportedUseCasesForServerlessCollections);
-  }
 
   constructor() {}
 
@@ -86,6 +78,7 @@ export class UseCaseService {
               title: i18n.translate('workspace.settings.workspaceDetails', {
                 defaultMessage: 'Workspace details',
               }),
+              euiIconType: 'spacesApp',
             },
             ...(isPermissionEnabled
               ? [
@@ -96,6 +89,7 @@ export class UseCaseService {
                     title: i18n.translate('workspace.settings.workspaceCollaborators', {
                       defaultMessage: 'Collaborators',
                     }),
+                    euiIconType: 'users',
                   },
                 ]
               : []),
@@ -103,21 +97,25 @@ export class UseCaseService {
               id: 'dataSources',
               category: DEFAULT_APP_CATEGORIES.manageWorkspace,
               order: 300,
+              euiIconType: 'database',
             },
             {
               id: 'indexPatterns',
               category: DEFAULT_APP_CATEGORIES.manageWorkspace,
               order: 400,
+              euiIconType: 'indexPatternApp',
             },
             {
               id: 'datasets',
               category: DEFAULT_APP_CATEGORIES.manageWorkspace,
               order: 400,
+              euiIconType: 'indexMapping',
             },
             {
               id: 'objects',
               category: DEFAULT_APP_CATEGORIES.manageWorkspace,
               order: 500,
+              euiIconType: 'package',
             },
             {
               id: 'import_sample_data',
@@ -126,6 +124,7 @@ export class UseCaseService {
               title: i18n.translate('workspace.left.sampleData.label', {
                 defaultMessage: 'Sample data',
               }),
+              euiIconType: 'navGetStarted',
             },
           ]);
         }
@@ -227,8 +226,4 @@ export class UseCaseService {
   stop() {
     this.workspaceAndManageWorkspaceCategorySubscription?.unsubscribe();
   }
-
-  registerSupportedUseCasesForServerlessCollections = (useCaseIds: UseCaseId[]) => {
-    useCaseIds.forEach((id) => this.supportedUseCasesForServerlessCollections.add(id));
-  };
 }

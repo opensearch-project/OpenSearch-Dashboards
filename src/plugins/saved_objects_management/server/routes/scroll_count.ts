@@ -38,11 +38,11 @@ export const registerScrollForCountRoute = (router: IRouter) => {
       path: '/api/opensearch-dashboards/management/saved_objects/scroll/counts',
       validate: {
         body: schema.object({
-          typesToInclude: schema.arrayOf(schema.string()),
-          namespacesToInclude: schema.maybe(schema.arrayOf(schema.string())),
+          typesToInclude: schema.arrayOf(schema.string(), { maxSize: 100 }),
+          namespacesToInclude: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
           searchString: schema.maybe(schema.string()),
-          workspaces: schema.maybe(schema.arrayOf(schema.string())),
-          availableWorkspaces: schema.maybe(schema.arrayOf(schema.string())),
+          workspaces: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+          availableWorkspaces: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
         }),
       },
     },

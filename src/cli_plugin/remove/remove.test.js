@@ -32,7 +32,7 @@ import { join } from 'path';
 import { mkdir, writeFile } from 'fs/promises';
 
 import sinon from 'sinon';
-import glob from 'glob-all';
+import globby from 'globby';
 import del from 'del';
 
 import { Logger } from '../lib/logger';
@@ -87,7 +87,7 @@ describe('opensearchDashboards cli', function () {
 
       remove(settings, logger);
 
-      const files = glob.sync('**/*', { cwd: pluginDir });
+      const files = globby.sync('**/*', { onlyFiles: false, cwd: pluginDir });
       const expected = ['bar'];
       expect(files.sort()).toEqual(expected.sort());
     });

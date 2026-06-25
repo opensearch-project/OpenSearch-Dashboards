@@ -63,7 +63,7 @@ import {
   IDataFrameResponse,
   createDataFrameCache,
 } from '../../common/data_frames';
-import { getQueryService } from '../services';
+import { getQueryService, getSavedObjects } from '../services';
 import { UI_SETTINGS } from '../../common';
 
 /** @internal */
@@ -216,6 +216,22 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         loadingCount$,
       },
       df: dfService,
+      // Centralized hook so `createSearchSource` can prime the index-pattern cache
+      // for non-INDEX_PATTERN datasets (INDEXES, S3, Prometheus, etc.) that have no
+      // backing saved object. Used by Discover, the Explore embeddable factory, and
+      // any other consumer of `searchSource.create()`.
+      hydrateDataset: async (dataset) => {
+        const datasetService = getQueryService().queryString.getDatasetService();
+        await datasetService.cacheDataset(dataset, {
+          uiSettings,
+          savedObjects: getSavedObjects(),
+          notifications,
+          http,
+          // `data` is only used by cacheDataset's non-default branch (dataViews.create);
+          // the default path we hit here doesn't need it, so omit to avoid a
+          // circular reference through DataPublicPluginStart.
+        } as any);
+      },
     };
 
     return {

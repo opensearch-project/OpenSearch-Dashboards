@@ -28,8 +28,6 @@ const mockNumericalColumns: VisColumn[] = [
     name: 'value 1',
     schema: VisFieldType.Numerical,
     column: 'x1',
-    validValuesCount: 6,
-    uniqueValuesCount: 6,
   },
 ];
 const mockCategoricalColumns: VisColumn[] = [
@@ -38,14 +36,12 @@ const mockCategoricalColumns: VisColumn[] = [
     name: 'Category',
     column: 'category',
     schema: VisFieldType.Categorical,
-    validValuesCount: 100,
-    uniqueValuesCount: 10,
   },
 ];
 
 const mockAxisColumnMappings: AxisColumnMappings = {
-  [AxisRole.X]: mockCategoricalColumns[0],
-  [AxisRole.Y]: mockNumericalColumns[0],
+  [AxisRole.X]: [mockCategoricalColumns[0]],
+  [AxisRole.Y]: [mockNumericalColumns[0]],
 };
 
 jest.mock('@osd/i18n', () => ({
@@ -53,27 +49,6 @@ jest.mock('@osd/i18n', () => ({
     translate: jest.fn().mockImplementation((id, { defaultMessage }) => defaultMessage),
   },
 }));
-jest.mock('../style_panel/axes/axes_selector', () => ({
-  AxesSelectPanel: jest.fn(
-    ({
-      numericalColumns,
-      categoricalColumns,
-      dateColumns,
-      currentMapping,
-      updateVisualization,
-    }) => (
-      <div data-test-subj="mockAxesSelectPanel">
-        <button
-          data-test-subj="mockUpdateVisualization"
-          onClick={() => updateVisualization({ type: 'test' })}
-        >
-          Update Visualization
-        </button>
-      </div>
-    )
-  ),
-}));
-
 jest.mock('../style_panel/threshold/threshold_panel', () => ({
   ThresholdPanel: jest.fn(({ thresholdsOptions, onChange }) => (
     <div data-test-subj="mockThresholdOptions">
@@ -210,24 +185,6 @@ jest.mock('./bar_exclusive_vis_options', () => ({
   ),
 }));
 
-jest.mock('../style_panel/title/title', () => ({
-  TitleOptionsPanel: jest.fn(({ titleOptions, onShowTitleChange }) => (
-    <div data-test-subj="mockTitleOptionsPanel">
-      <button
-        data-test-subj="mockTitleModeSwitch"
-        onClick={() => onShowTitleChange({ show: !titleOptions.show })}
-      >
-        Toggle Title
-      </button>
-      <input
-        data-test-subj="mockTitleInput"
-        placeholder="Default title"
-        onChange={(e) => onShowTitleChange({ titleName: e.target.value })}
-      />
-    </div>
-  )),
-}));
-
 jest.mock('./bucket_options.tsx', () => ({
   BucketOptionsPanel: jest.fn(({ styles, bucketType, onChange }) => (
     <div data-test-subj="mockBucketOptionsPanel">
@@ -273,10 +230,6 @@ describe('BarVisStyleControls', () => {
   const defaultProps: BarVisStyleControlsProps = {
     styleOptions: {
       ...defaultBarChartStyles,
-      titleOptions: {
-        show: true,
-        titleName: '',
-      },
     },
     onStyleChange: jest.fn(),
     numericalColumns: mockNumericalColumns,
@@ -298,13 +251,11 @@ describe('BarVisStyleControls', () => {
     );
 
     // Check if all components are rendered
-    expect(screen.getByTestId('mockAxesSelectPanel')).toBeInTheDocument();
     expect(screen.getByTestId('allAxesOptions')).toBeInTheDocument();
     expect(screen.getByTestId('mockTooltipOptionsPanel')).toBeInTheDocument();
     expect(screen.queryByTestId('mockLegendOptionsPanel')).not.toBeInTheDocument();
     expect(screen.getByTestId('mockThresholdOptions')).toBeInTheDocument();
     expect(screen.getByTestId('mockBarExclusiveVisOptions')).toBeInTheDocument();
-    expect(screen.getByTestId('mockTitleOptionsPanel')).toBeInTheDocument();
     expect(screen.getByTestId('mockBucketOptionsPanel')).toBeInTheDocument();
   });
 
@@ -313,14 +264,14 @@ describe('BarVisStyleControls', () => {
       ...defaultProps,
       axisColumnMappings: {
         ...mockAxisColumnMappings,
-        [AxisRole.COLOR]: {
-          id: 5,
-          name: 'Color Category',
-          schema: VisFieldType.Categorical,
-          column: 'color',
-          validValuesCount: 10,
-          uniqueValuesCount: 5,
-        },
+        [AxisRole.COLOR]: [
+          {
+            id: 5,
+            name: 'Color Category',
+            schema: VisFieldType.Categorical,
+            column: 'color',
+          },
+        ],
       },
     };
 
@@ -338,22 +289,22 @@ describe('BarVisStyleControls', () => {
       ...defaultProps,
       axisColumnMappings: {
         ...mockAxisColumnMappings,
-        [AxisRole.COLOR]: {
-          id: 5,
-          name: 'Color Category',
-          schema: VisFieldType.Categorical,
-          column: 'color',
-          validValuesCount: 10,
-          uniqueValuesCount: 5,
-        },
-        [AxisRole.FACET]: {
-          id: 6,
-          name: 'Facet Category',
-          schema: VisFieldType.Categorical,
-          column: 'facet',
-          validValuesCount: 10,
-          uniqueValuesCount: 5,
-        },
+        [AxisRole.COLOR]: [
+          {
+            id: 5,
+            name: 'Color Category',
+            schema: VisFieldType.Categorical,
+            column: 'color',
+          },
+        ],
+        [AxisRole.FACET]: [
+          {
+            id: 6,
+            name: 'Facet Category',
+            schema: VisFieldType.Categorical,
+            column: 'facet',
+          },
+        ],
       },
     };
 
@@ -371,14 +322,14 @@ describe('BarVisStyleControls', () => {
       ...defaultProps,
       axisColumnMappings: {
         ...mockAxisColumnMappings,
-        [AxisRole.COLOR]: {
-          id: 5,
-          name: 'Color Category',
-          schema: VisFieldType.Categorical,
-          column: 'color',
-          validValuesCount: 10,
-          uniqueValuesCount: 5,
-        },
+        [AxisRole.COLOR]: [
+          {
+            id: 5,
+            name: 'Color Category',
+            schema: VisFieldType.Categorical,
+            column: 'color',
+          },
+        ],
       },
     };
 
@@ -489,53 +440,6 @@ describe('BarVisStyleControls', () => {
     expect(defaultProps.onStyleChange).toHaveBeenCalledWith({ useThresholdColor: true });
   });
 
-  test('updates title show option correctly', async () => {
-    render(
-      <Provider store={store}>
-        <BarVisStyleControls {...defaultProps} />
-      </Provider>
-    );
-
-    await userEvent.click(screen.getByTestId('mockTitleModeSwitch'));
-    expect(defaultProps.onStyleChange).toHaveBeenCalledWith({
-      titleOptions: {
-        ...defaultProps.styleOptions.titleOptions,
-        show: false,
-      },
-    });
-  });
-
-  test('updates title name when text is entered', async () => {
-    const props = {
-      ...defaultProps,
-      styleOptions: {
-        ...defaultProps.styleOptions,
-        titleOptions: {
-          show: true,
-          titleName: '',
-        },
-      },
-    };
-
-    render(
-      <Provider store={store}>
-        <BarVisStyleControls {...props} />
-      </Provider>
-    );
-
-    const titleInput = screen.getByTestId('mockTitleInput');
-    await userEvent.type(titleInput, 'New Chart Title');
-
-    await waitFor(() => {
-      expect(defaultProps.onStyleChange).toHaveBeenCalledWith({
-        titleOptions: {
-          ...props.styleOptions.titleOptions,
-          titleName: 'New Chart Title',
-        },
-      });
-    });
-  });
-
   test('render bucket panel with category bucket', async () => {
     const propsWithNumBucket = {
       ...defaultProps,
@@ -565,14 +469,14 @@ describe('BarVisStyleControls', () => {
       ...defaultProps,
       axisColumnMappings: {
         ...mockAxisColumnMappings,
-        x: {
-          id: 1,
-          name: 'Date X',
-          schema: VisFieldType.Date,
-          column: 'column',
-          validValuesCount: 100,
-          uniqueValuesCount: 50,
-        },
+        x: [
+          {
+            id: 1,
+            name: 'Date X',
+            schema: VisFieldType.Date,
+            column: 'column',
+          },
+        ],
       },
     };
 

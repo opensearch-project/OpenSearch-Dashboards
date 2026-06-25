@@ -34,6 +34,7 @@ import { handleErrorResponse } from './handle_error_response';
 import { getAnnotations } from './get_annotations';
 import { getOpenSearchQueryConfig } from './helpers/get_opensearch_query_uisettings';
 import { getActiveSeries } from './helpers/get_active_series';
+import { validateNotAnalyticEngineDataSource } from '../../../../data/server';
 
 export async function getSeriesData(req, panel) {
   const {
@@ -48,6 +49,7 @@ export async function getSeriesData(req, panel) {
   };
 
   try {
+    await validateNotAnalyticEngineDataSource(panelDataSourceId, req.getSavedObjectsClient());
     const bodiesPromises = getActiveSeries(panel).map((series) =>
       getSeriesRequestParams(req, panel, series, opensearchQueryConfig, capabilities)
     );

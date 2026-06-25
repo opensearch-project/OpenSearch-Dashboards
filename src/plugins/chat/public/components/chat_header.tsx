@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { EuiText, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiText, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import './chat_header.scss';
 
@@ -41,25 +41,37 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
       >
         <EuiFlexItem grow={false}>
           {showBackButton && onBack ? (
-            <EuiButtonIcon
-              iconType="arrowLeft"
-              onClick={onBack}
-              aria-label={i18n.translate('chat.header.goBackAriaLabel', {
+            <EuiToolTip
+              content={i18n.translate('chat.header.goBackTooltip', {
                 defaultMessage: 'Go back',
               })}
-              size="m"
-              color="text"
-            />
+            >
+              <EuiButtonIcon
+                iconType="arrowLeft"
+                onClick={onBack}
+                aria-label={i18n.translate('chat.header.goBackAriaLabel', {
+                  defaultMessage: 'Go back',
+                })}
+                size="m"
+                color="text"
+              />
+            </EuiToolTip>
           ) : (
-            <EuiButtonIcon
-              iconType="chatLeft"
-              onClick={onShowHistory}
-              aria-label={i18n.translate('chat.header.showHistoryAriaLabel', {
-                defaultMessage: 'Show conversation history',
+            <EuiToolTip
+              content={i18n.translate('chat.header.showHistoryTooltip', {
+                defaultMessage: 'View all conversations',
               })}
-              size="m"
-              color="text"
-            />
+            >
+              <EuiButtonIcon
+                iconType="chatLeft"
+                onClick={onShowHistory}
+                aria-label={i18n.translate('chat.header.showHistoryAriaLabel', {
+                  defaultMessage: 'Show conversation history',
+                })}
+                size="m"
+                color="text"
+              />
+            </EuiToolTip>
           )}
         </EuiFlexItem>
         {displayTitle && (
@@ -71,25 +83,37 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
         )}
       </EuiFlexGroup>
       <div className="chatHeader__buttons">
-        <EuiButtonIcon
-          iconType="documentEdit"
-          onClick={onNewChat}
-          disabled={isStreaming}
-          aria-label={i18n.translate('chat.header.newChatAriaLabel', {
-            defaultMessage: 'New chat',
+        <EuiToolTip
+          content={i18n.translate('chat.header.newChatTooltip', {
+            defaultMessage: 'Start a new conversation',
           })}
-          size="m"
-          color="text"
-        />
-        <EuiButtonIcon
-          iconType="cross"
-          onClick={onClose}
-          aria-label={i18n.translate('chat.header.closeChatAriaLabel', {
-            defaultMessage: 'Close chatbot',
+        >
+          <EuiButtonIcon
+            iconType="documentEdit"
+            onClick={onNewChat}
+            disabled={isStreaming}
+            aria-label={i18n.translate('chat.header.newChatAriaLabel', {
+              defaultMessage: 'New chat',
+            })}
+            size="m"
+            color="text"
+          />
+        </EuiToolTip>
+        <EuiToolTip
+          content={i18n.translate('chat.header.closeChatTooltip', {
+            defaultMessage: 'Close chat window',
           })}
-          size="m"
-          color="text"
-        />
+        >
+          <EuiButtonIcon
+            iconType="cross"
+            onClick={onClose}
+            aria-label={i18n.translate('chat.header.closeChatAriaLabel', {
+              defaultMessage: 'Close chatbot',
+            })}
+            size="m"
+            color="text"
+          />
+        </EuiToolTip>
       </div>
     </div>
   );

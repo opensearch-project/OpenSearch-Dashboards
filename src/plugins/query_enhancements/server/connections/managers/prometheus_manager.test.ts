@@ -389,6 +389,32 @@ describe('PrometheusManager', () => {
       });
     });
 
+    it('should handle POST request for label_values with match[] filter', async () => {
+      const mockResponse = {
+        body: {
+          status: 'success',
+          data: ['value1', 'value2'],
+        },
+      };
+      mockClient.transport.request.mockResolvedValue(mockResponse);
+
+      const postRequest = ({
+        body: {
+          connection: { id: 'prom-conn' },
+          resource: { type: 'label_values', name: 'job' },
+          content: { 'match[]': '{__name__="up"}' },
+        },
+      } as unknown) as OpenSearchDashboardsRequest;
+
+      await prometheusManager.handlePostRequest(mockContext, postRequest as any);
+
+      expect(mockClient.transport.request).toHaveBeenCalledWith({
+        path: `${URI.DIRECT_QUERY.RESOURCES}/prom-conn/api/v1/label/job/values`,
+        querystring: 'match%5B%5D=%7B__name__%3D%22up%22%7D',
+        method: 'GET',
+      });
+    });
+
     it('should handle POST request for metric metadata with metric name and time range', async () => {
       const mockResponse = {
         body: {

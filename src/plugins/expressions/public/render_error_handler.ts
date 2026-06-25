@@ -47,6 +47,7 @@ export const renderErrorHandler: RenderErrorHandlerFnType = (
     title: i18n.translate('expressions.defaultErrorRenderer.errorTitle', {
       defaultMessage: 'Error in visualisation',
     }),
+    id: error.name === 'AnalyticEngineError' ? error.name : undefined,
     toastMessage: error.message,
   });
   handlers.done();

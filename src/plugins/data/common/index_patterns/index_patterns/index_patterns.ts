@@ -54,7 +54,7 @@ import { FieldFormatsStartCommon } from '../../field_formats';
 import { UI_SETTINGS, SavedObject } from '../../../common';
 import { SavedObjectNotFound } from '../../../../opensearch_dashboards_utils/common';
 import { IndexPatternMissingIndices } from '../lib';
-import { findByTitle, getIndexPatternTitle } from '../utils';
+import { findByTitle, getDataSourceIdFromIndexPattern, getIndexPatternTitle } from '../utils';
 import { DuplicateIndexPatternError, MissingIndexPatternError } from '../errors';
 
 const indexPatternCache = createIndexPatternCache();
@@ -229,12 +229,67 @@ export class IndexPatternsService {
     }
   };
 
-  getCache = async () => {
+  getCache = async (options?: { excludeEngineTypes?: readonly string[] }) => {
     if (!this.savedObjectsCache) {
       await this.refreshSavedObjectsCache();
     }
-    return this.savedObjectsCache;
+    if (!options?.excludeEngineTypes?.length || !this.savedObjectsCache) {
+      return this.savedObjectsCache;
+    }
+    return this.applyEngineTypeFilter(this.savedObjectsCache, options.excludeEngineTypes);
   };
+
+  // Excludes saved objects whose backing data source's `dataSourceEngineType` is in
+  // `excludeEngineTypes`. Driven by the caller's `unsupportedOSDataSourceEngineTypes` manifest
+  // field (see core PluginManifest). Other consumers omit options and see everything.
+  //
+  // Uses `getDataSourceIdFromIndexPattern` so we resolve the data source id from both the
+  // modern `references` array and the legacy namespaced-id format (`<dsId>::<patternId>`).
+  private async applyEngineTypeFilter<T>(
+    savedObjects: Array<SavedObject<T>>,
+    excludeEngineTypes: readonly string[]
+  ): Promise<Array<SavedObject<T>>> {
+    const dataSourceIds = Array.from(
+      new Set(
+        savedObjects
+          // @ts-expect-error TS2339 references not typed on SavedObject<T> generic
+          .map((obj) => getDataSourceIdFromIndexPattern(obj))
+          .filter((id): id is string => Boolean(id))
+      )
+    );
+
+    if (dataSourceIds.length === 0) {
+      return savedObjects;
+    }
+
+    const blocked = new Set(excludeEngineTypes);
+    const blockedDataSourceIds = new Set<string>();
+    try {
+      const dsRes = await this.savedObjectsClient.bulkGet<DataSourceAttributes>(
+        dataSourceIds.map((id) => ({ id, type: 'data-source' }))
+      );
+      for (const ds of dsRes.savedObjects) {
+        // @ts-expect-error TS2339 error not typed on SavedObject<T> generic
+        if (ds.error) continue;
+        const engineType = ds.attributes?.dataSourceEngineType;
+        if (engineType && blocked.has(engineType)) {
+          blockedDataSourceIds.add(ds.id);
+        }
+      }
+    } catch {
+      // Bulk fetch failed — leave all index patterns alone (fail-open).
+    }
+
+    if (blockedDataSourceIds.size === 0) {
+      return savedObjects;
+    }
+
+    return savedObjects.filter((obj) => {
+      // @ts-expect-error TS2339 references not typed on SavedObject<T> generic
+      const dsId = getDataSourceIdFromIndexPattern(obj);
+      return !dsId || !blockedDataSourceIds.has(dsId);
+    });
+  }
 
   saveToCache = (id: string, indexPattern: IndexPattern) => {
     indexPatternCache.set(id, indexPattern);
