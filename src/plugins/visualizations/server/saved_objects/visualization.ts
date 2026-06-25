@@ -65,6 +65,10 @@ export const visualizationSavedObjectType: SavedObjectsType = {
       uiStateJSON: { type: 'text', index: false },
       version: { type: 'integer' },
       visState: { type: 'text', index: false },
+      labels: {
+        type: 'object',
+        dynamic: true,
+      },
     },
   },
   migrations: visualizationSavedObjectTypeMigrations,
