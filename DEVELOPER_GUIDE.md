@@ -68,6 +68,16 @@ We recommend using [Node Version Manager (nvm)](https://github.com/nvm-sh/nvm) t
 
 If it's the only version of node installed, it will automatically be set to the `default` alias. Otherwise, use `nvm list` to see all installed `node` versions, and `nvm use` to select the node version required by OpenSearch Dashboards.
 
+#### Node.js version files
+
+The project uses multiple files to manage the Node.js version for different purposes:
+
+| File | Format | Purpose | When to update |
+|------|--------|---------|----------------|
+| `.node-version` | Exact version (e.g. `22.23.0`) | Used by the build system to download Node.js binaries for release builds | Patch, minor, and major bumps |
+| `.nvmrc` | Major version only (e.g. `22`) | Used by nvm and GitHub Actions CI for development | Major version bumps only |
+| `package.json` `engines.node` | Semver range | Validates compatible Node.js versions | Major version bumps only |
+
 ### Fork and clone OpenSearch Dashboards
 
 All local development should be done in a [forked repository](https://docs.github.com/en/get-started/quickstart/fork-a-repo).
