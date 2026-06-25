@@ -105,7 +105,7 @@ describe('WorkspaceCollaboratorTable', () => {
   it('should fetch names when displayedCollaboratorTypes have identitySource', async () => {
     const httpPostMock = mockCoreStart.http.post as jest.Mock;
     httpPostMock.mockResolvedValue([
-      { id: 'admin', name: 'Admin User' },
+      { id: 'admin', name: 'Admin User', alias: 'admin_alias' },
       { id: 'group', name: 'Dev Group' },
     ]);
 
@@ -146,7 +146,9 @@ describe('WorkspaceCollaboratorTable', () => {
     });
 
     await waitFor(() => {
-      expect(getByText('Admin User')).toBeInTheDocument();
+      // User with alias shows "Name (alias)" format
+      expect(getByText('Admin User (admin_alias)')).toBeInTheDocument();
+      // Group without alias shows name only
       expect(getByText('Dev Group')).toBeInTheDocument();
     });
   });
@@ -156,6 +158,168 @@ describe('WorkspaceCollaboratorTable', () => {
     // Without identitySource, no fetch happens, name column shows mdash
     const nameCells = container.querySelectorAll('td:nth-child(3)');
     expect(nameCells.length).toBeGreaterThan(0);
+  });
+
+  it('should batch IDs in chunks of 1000 when fetching names', async () => {
+    const httpPostMock = mockCoreStart.http.post as jest.Mock;
+    httpPostMock.mockClear();
+    httpPostMock.mockResolvedValue([]);
+
+    // Create 1500 permission settings to trigger batching
+    const permissionSettings = Array.from({ length: 1500 }, (_, i) => ({
+      id: i,
+      modes: [WorkspacePermissionMode.Read, WorkspacePermissionMode.LibraryRead],
+      type: WorkspacePermissionItemType.User,
+      userId: `user-${i}`,
+    }));
+
+    const typesWithIdentitySource: WorkspaceCollaboratorType[] = [
+      {
+        id: 'user',
+        name: 'User',
+        buttonLabel: 'Add Users',
+        onAdd: async () => {},
+        getDisplayedType: ({ permissionType }) => (permissionType === 'user' ? 'User' : undefined),
+        identitySource: { source: 'LDAP', type: 'user' },
+      },
+    ];
+
+    render(
+      <Provider>
+        <WorkspaceCollaboratorTable
+          {...mockProps}
+          permissionSettings={permissionSettings}
+          displayedCollaboratorTypes={typesWithIdentitySource}
+        />
+      </Provider>
+    );
+
+    await waitFor(() => {
+      expect(httpPostMock).toHaveBeenCalledTimes(2);
+    });
+
+    const firstCallBody = JSON.parse(httpPostMock.mock.calls[0][1].body);
+    const secondCallBody = JSON.parse(httpPostMock.mock.calls[1][1].body);
+    expect(firstCallBody.ids).toHaveLength(1000);
+    expect(secondCallBody.ids).toHaveLength(500);
+  });
+
+  it('should show error toast when fetching names fails with detail', async () => {
+    const httpPostMock = mockCoreStart.http.post as jest.Mock;
+    httpPostMock.mockRejectedValue({ body: { message: 'Service unavailable' }, name: 'Error' });
+
+    const typesWithIdentitySource: WorkspaceCollaboratorType[] = [
+      {
+        id: 'user',
+        name: 'User',
+        buttonLabel: 'Add Users',
+        onAdd: async () => {},
+        getDisplayedType: ({ permissionType }) => (permissionType === 'user' ? 'User' : undefined),
+        identitySource: { source: 'LDAP', type: 'user' },
+      },
+    ];
+
+    render(
+      <Provider>
+        <WorkspaceCollaboratorTable
+          {...mockProps}
+          displayedCollaboratorTypes={typesWithIdentitySource}
+        />
+      </Provider>
+    );
+
+    await waitFor(() => {
+      expect(mockCoreStart.notifications.toasts.addDanger).toHaveBeenCalledWith(
+        'Failed to load collaborator names: Service unavailable'
+      );
+    });
+  });
+
+  it('should show generic error toast when fetching names fails without detail', async () => {
+    const httpPostMock = mockCoreStart.http.post as jest.Mock;
+    httpPostMock.mockRejectedValue(new Error('Network error'));
+
+    const typesWithIdentitySource: WorkspaceCollaboratorType[] = [
+      {
+        id: 'user',
+        name: 'User',
+        buttonLabel: 'Add Users',
+        onAdd: async () => {},
+        getDisplayedType: ({ permissionType }) => (permissionType === 'user' ? 'User' : undefined),
+        identitySource: { source: 'LDAP', type: 'user' },
+      },
+    ];
+
+    render(
+      <Provider>
+        <WorkspaceCollaboratorTable
+          {...mockProps}
+          displayedCollaboratorTypes={typesWithIdentitySource}
+        />
+      </Provider>
+    );
+
+    await waitFor(() => {
+      expect(mockCoreStart.notifications.toasts.addDanger).toHaveBeenCalledWith(
+        'Failed to load collaborator names.'
+      );
+    });
+  });
+
+  it('should not re-fetch IDs that were requested but not returned by the API', async () => {
+    const httpPostMock = mockCoreStart.http.post as jest.Mock;
+    httpPostMock.mockClear();
+    // API returns nothing for 'unknown-user' — simulating a non-existent ID
+    httpPostMock.mockResolvedValue([]);
+
+    const typesWithIdentitySource: WorkspaceCollaboratorType[] = [
+      {
+        id: 'user',
+        name: 'User',
+        buttonLabel: 'Add Users',
+        onAdd: async () => {},
+        getDisplayedType: ({ permissionType }) => (permissionType === 'user' ? 'User' : undefined),
+        identitySource: { source: 'LDAP', type: 'user' },
+      },
+    ];
+
+    const permissionSettings = [
+      {
+        id: 0,
+        modes: [WorkspacePermissionMode.Read, WorkspacePermissionMode.LibraryRead],
+        type: WorkspacePermissionItemType.User,
+        userId: 'unknown-user',
+      },
+    ];
+
+    const { rerender } = render(
+      <Provider>
+        <WorkspaceCollaboratorTable
+          {...mockProps}
+          permissionSettings={permissionSettings}
+          displayedCollaboratorTypes={typesWithIdentitySource}
+        />
+      </Provider>
+    );
+
+    await waitFor(() => expect(httpPostMock).toHaveBeenCalledTimes(1));
+
+    // Re-render with a new permissionSettings reference (same content) to trigger the effect
+    rerender(
+      <Provider>
+        <WorkspaceCollaboratorTable
+          {...mockProps}
+          permissionSettings={[...permissionSettings]}
+          displayedCollaboratorTypes={typesWithIdentitySource}
+        />
+      </Provider>
+    );
+
+    // Wait a tick to let any potential re-fetch fire
+    await act(async () => {});
+
+    // Should still be 1 — the sentinel prevents re-fetching the unresolvable ID
+    expect(httpPostMock).toHaveBeenCalledTimes(1);
   });
 
   it('should render empty state when no permission settings', () => {

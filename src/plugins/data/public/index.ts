@@ -464,6 +464,7 @@ export {
   SearchError,
   SearchTimeoutError,
   PainlessError,
+  AnalyticEngineError,
 } from './search';
 
 export type { SearchSource } from './search';

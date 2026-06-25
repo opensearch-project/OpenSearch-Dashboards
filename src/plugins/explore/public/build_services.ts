@@ -105,6 +105,7 @@ export function buildServices(
 
     // Add supportedTypes from config
     supportedTypes,
+    sqlSupportEnabled: config.sqlSupport?.enabled ?? false,
     isDatasetManagementEnabled,
     dataImporterConfig,
     dataSourceEnabled,

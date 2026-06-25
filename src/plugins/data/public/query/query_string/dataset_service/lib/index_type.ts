@@ -169,7 +169,8 @@ const fetchDataSources = async (client: SavedObjectsClientContract, http: HttpSe
   const remoteConnectionPromises = response.savedObjects.map(async (savedObject) => {
     if (
       savedObject?.attributes?.dataSourceEngineType === DataSourceEngineType.Elasticsearch ||
-      savedObject?.attributes?.dataSourceEngineType === DataSourceEngineType.OpenSearch
+      savedObject?.attributes?.dataSourceEngineType === DataSourceEngineType.OpenSearch ||
+      savedObject?.attributes?.dataSourceEngineType === DataSourceEngineType.AnalyticEngine
     ) {
       return getRemoteClusterConnections(savedObject.id, http).catch(() => []);
     }

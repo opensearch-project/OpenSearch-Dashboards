@@ -51,3 +51,14 @@ global.TextDecoder = TextDecoder;
 // but Jest's Babel transform uses the classic runtime (React.createElement)
 // to avoid issues with jest.mock() factory functions.
 global.React = require('react');
+
+// jsdom does not implement ResizeObserver. Source code that previously imported
+// from `resize-observer-polyfill` now relies on the global; provide a no-op so
+// component constructors don't throw. Individual tests can spy on this global
+// to assert observe/unobserve behavior.
+global.ResizeObserver = require('../mocks/resize_observer_mock');
+
+// jsdom does not implement IntersectionObserver. Provide a mock that immediately
+// reports elements as intersecting so lazy-loading components render in tests.
+// Tests that need fine-grained control can override window.IntersectionObserver.
+global.IntersectionObserver = require('../mocks/intersection_observer_mock');

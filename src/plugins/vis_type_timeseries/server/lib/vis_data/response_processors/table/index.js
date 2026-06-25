@@ -35,7 +35,6 @@ import { seriesAgg } from './series_agg';
 import { percentile } from './percentile';
 import { percentileRank } from './percentile_rank';
 
-import { math } from './math';
 import { dropLastBucketFn } from './drop_last_bucket';
 
 export const processors = [
@@ -43,7 +42,6 @@ export const processors = [
   percentileRank,
   stdMetric,
   stdSibling,
-  math,
   seriesAgg,
   dropLastBucketFn,
 ];

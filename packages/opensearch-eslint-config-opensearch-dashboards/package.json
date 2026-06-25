@@ -20,7 +20,7 @@
   "peerDependencies": {
     "@typescript-eslint/eslint-plugin": "^7.18.0",
     "@typescript-eslint/parser": "^7.18.0",
-    "@babel/eslint-parser": "^7.25.0",
+    "@babel/eslint-parser": "^7.29.7",
     "eslint": "^8.57.1",
     "eslint-plugin-babel": "^5.3.1",
     "eslint-plugin-ban": "^1.4.0",

@@ -307,6 +307,7 @@ describe('ChatService', () => {
         id: expect.stringMatching(/^msg-\d+-[a-z0-9]{9}$/),
         role: 'user',
         content: 'Hello, world!',
+        rawMessage: 'Hello, world!',
       });
 
       expect(result.observable).toBeDefined();
@@ -765,26 +766,36 @@ describe('ChatService', () => {
             },
           ]);
         }
-        // Third call returns MESSAGES_SNAPSHOT with the tool call
+        // Subsequent calls return MESSAGES_SNAPSHOT with the tool call
         return Promise.resolve(createMockMessagesSnapshot(toolCallId));
       });
 
       const response = await chatService.sendToolResult(toolCallId, { success: true }, []);
 
-      // Verify getConversation was called multiple times (polling)
-      expect(chatService.conversationHistoryService.getConversation).toHaveBeenCalledTimes(3);
+      // Verify getConversation was polled multiple times. We require 3
+      // consecutive synced observations before treating the tool call as
+      // stably synced, so after the first synced snapshot (call #3) two more
+      // confirming polls are needed (calls #4 and #5).
+      expect(chatService.conversationHistoryService.getConversation).toHaveBeenCalledTimes(5);
       expect(response.toolMessage.toolCallId).toBe(toolCallId);
     });
-    it('should throw error when thread ID is not set', async () => {
+    it('should skip dispatch with reason no_thread_id when thread ID is not set', async () => {
       // Create a new service without calling newThread
       const newService = new ChatService(mockUiSettings, mockCoreChatService);
 
       // Mock getThreadId to return undefined
       mockCoreChatService.getThreadId.mockReturnValue(undefined);
 
-      await expect(newService.sendToolResult('tool-123', 'result', [])).rejects.toThrow(
-        'Thread ID is required to send a tool result'
-      );
+      const response = await newService.sendToolResult('tool-123', 'result', []);
+
+      expect(response.skipped).toEqual({ reason: 'no_thread_id' });
+      expect(mockAgent.runAgent).not.toHaveBeenCalled();
+      expect(response.toolMessage).toEqual({
+        id: expect.stringMatching(/^msg-\d+-[a-z0-9]{9}$/),
+        role: 'tool',
+        content: 'result',
+        toolCallId: 'tool-123',
+      });
     });
 
     describe('skip branch (duplicate tool result across windows)', () => {
@@ -894,6 +905,198 @@ describe('ChatService', () => {
 
         expect(mockAgent.runAgent).toHaveBeenCalledTimes(1);
         expect(response.skipped).toBeUndefined();
+      });
+    });
+
+    describe('abort signal', () => {
+      beforeEach(() => {
+        mockCoreChatService.getMemoryProvider = jest
+          .fn()
+          .mockReturnValue({ includeFullHistory: false });
+      });
+
+      it('should skip with reason aborted when signal is already aborted before dispatch', async () => {
+        const toolCallId = 'tool-call-abort-early';
+        const controller = new AbortController();
+        controller.abort();
+
+        // getConversation should not even be consulted — the early-out fires
+        // before sync polling.
+        chatService.conversationHistoryService.getConversation = jest.fn();
+
+        const response = await chatService.sendToolResult(
+          toolCallId,
+          { ok: true },
+          [],
+          controller.signal
+        );
+
+        expect(response.skipped).toEqual({ reason: 'aborted' });
+        expect(mockAgent.runAgent).not.toHaveBeenCalled();
+        expect(chatService.conversationHistoryService.getConversation).not.toHaveBeenCalled();
+        expect((chatService as any).activeRequests.size).toBe(0);
+      });
+
+      it('should skip with reason aborted when signal fires during sync polling', async () => {
+        const toolCallId = 'tool-call-abort-mid-sync';
+        const controller = new AbortController();
+
+        // Return a pending snapshot so the poller loops (no synced observation)
+        chatService.conversationHistoryService.getConversation = jest.fn().mockResolvedValue([
+          {
+            type: 'MESSAGES_SNAPSHOT',
+            timestamp: Date.now(),
+            messages: [{ role: 'user', id: 'u1', content: 'hi' }],
+          },
+        ]);
+
+        // Fire the abort shortly after the first poll resolves so the
+        // interruptible sleep can observe it.
+        setTimeout(() => controller.abort(), 5);
+
+        const response = await chatService.sendToolResult(
+          toolCallId,
+          { ok: true },
+          [],
+          controller.signal
+        );
+
+        expect(response.skipped).toEqual({ reason: 'aborted' });
+        expect(mockAgent.runAgent).not.toHaveBeenCalled();
+        expect((chatService as any).activeRequests.size).toBe(0);
+      });
+
+      it('should emit AbortError and call agent.abort when signal fires after dispatch', async () => {
+        const toolCallId = 'tool-call-abort-during-stream';
+        const controller = new AbortController();
+
+        // Minimal observable that never emits/completes so we can control
+        // lifecycle via the abort signal alone.
+        const pendingObservable = new Observable<BaseEvent>(() => {
+          // intentionally no-op — the wrapping Observable in sendToolResult
+          // owns the termination path
+          return () => {};
+        });
+        mockAgent.runAgent.mockReturnValue(pendingObservable);
+
+        chatService.conversationHistoryService.getConversation = jest
+          .fn()
+          .mockResolvedValue(createMockMessagesSnapshot(toolCallId));
+
+        const response = await chatService.sendToolResult(
+          toolCallId,
+          { ok: true },
+          [],
+          controller.signal
+        );
+
+        expect(response.skipped).toBeUndefined();
+        expect(mockAgent.runAgent).toHaveBeenCalledTimes(1);
+
+        const nextSpy = jest.fn();
+        const errorSpy = jest.fn();
+        const completeSpy = jest.fn();
+
+        response.observable.subscribe({
+          next: nextSpy,
+          error: errorSpy,
+          complete: completeSpy,
+        });
+
+        controller.abort();
+
+        expect(mockAgent.abort).toHaveBeenCalledTimes(1);
+        expect(errorSpy).toHaveBeenCalledTimes(1);
+        const emittedError = errorSpy.mock.calls[0][0];
+        expect(emittedError).toBeInstanceOf(Error);
+        expect(emittedError.name).toBe('AbortError');
+        expect(completeSpy).not.toHaveBeenCalled();
+        expect(nextSpy).not.toHaveBeenCalled();
+        expect((chatService as any).activeRequests.size).toBe(0);
+      });
+
+      it('should emit AbortError synchronously when signal is already aborted at subscribe time', async () => {
+        const toolCallId = 'tool-call-abort-at-subscribe';
+        const controller = new AbortController();
+
+        // Keep the underlying observable inert so only the abort path drives
+        // termination.
+        const pendingObservable = new Observable<BaseEvent>(() => () => {});
+        mockAgent.runAgent.mockReturnValue(pendingObservable);
+
+        chatService.conversationHistoryService.getConversation = jest
+          .fn()
+          .mockResolvedValue(createMockMessagesSnapshot(toolCallId));
+
+        const response = await chatService.sendToolResult(
+          toolCallId,
+          { ok: true },
+          [],
+          controller.signal
+        );
+
+        // Abort after dispatch but before subscribing — the subscribe path
+        // should detect the pre-aborted signal and emit AbortError immediately.
+        controller.abort();
+
+        const errorSpy = jest.fn();
+        const completeSpy = jest.fn();
+
+        response.observable.subscribe({
+          error: errorSpy,
+          complete: completeSpy,
+        });
+
+        expect(errorSpy).toHaveBeenCalledTimes(1);
+        expect(errorSpy.mock.calls[0][0].name).toBe('AbortError');
+        expect(completeSpy).not.toHaveBeenCalled();
+      });
+
+      it('should not emit twice when signal fires during an active subscription', async () => {
+        const toolCallId = 'tool-call-abort-no-double-emit';
+        const controller = new AbortController();
+
+        // Observable that emits one value, then stays open until aborted.
+        let innerEmit: ((v: BaseEvent) => void) | null = null;
+        const gatedObservable = new Observable<BaseEvent>((subscriber) => {
+          innerEmit = (v) => subscriber.next(v);
+          return () => {};
+        });
+        mockAgent.runAgent.mockReturnValue(gatedObservable);
+
+        chatService.conversationHistoryService.getConversation = jest
+          .fn()
+          .mockResolvedValue(createMockMessagesSnapshot(toolCallId));
+
+        const response = await chatService.sendToolResult(
+          toolCallId,
+          { ok: true },
+          [],
+          controller.signal
+        );
+
+        const nextSpy = jest.fn();
+        const errorSpy = jest.fn();
+        const completeSpy = jest.fn();
+
+        response.observable.subscribe({
+          next: nextSpy,
+          error: errorSpy,
+          complete: completeSpy,
+        });
+
+        // Deliver one value so the subscription is live.
+        innerEmit!({ type: 'RUN_STARTED' } as BaseEvent);
+        expect(nextSpy).toHaveBeenCalledTimes(1);
+
+        // Abort, then try to shove more values through — they should be
+        // swallowed by the `settled` guard rather than reaching the subscriber.
+        controller.abort();
+        innerEmit!({ type: 'RUN_FINISHED' } as BaseEvent);
+
+        expect(errorSpy).toHaveBeenCalledTimes(1);
+        expect(nextSpy).toHaveBeenCalledTimes(1);
+        expect(completeSpy).not.toHaveBeenCalled();
       });
     });
   });
@@ -1883,6 +2086,258 @@ describe('ChatService', () => {
 
     afterEach(() => {
       jest.clearAllMocks();
+    });
+  });
+
+  describe('getAvailableDataSources', () => {
+    let mockSavedObjectsClient: any;
+
+    beforeEach(() => {
+      mockSavedObjectsClient = {
+        find: jest.fn().mockResolvedValue({
+          savedObjects: [
+            {
+              id: 'ds-1',
+              attributes: { title: 'Beta Source', dataSourceEngineType: 'OpenSearch' },
+            },
+            {
+              id: 'ds-2',
+              attributes: { title: 'Alpha Source', dataSourceEngineType: 'OpenSearch' },
+            },
+            {
+              id: 'ds-3',
+              attributes: { title: 'Gamma AE', dataSourceEngineType: 'AnalyticEngine' },
+            },
+          ],
+        }),
+      };
+    });
+
+    it('should return sorted data sources excluding AnalyticEngine', async () => {
+      const service = new (ChatService as any)(
+        mockUiSettings,
+        mockCoreChatService,
+        undefined,
+        mockSavedObjectsClient
+      );
+
+      const result = await service.getAvailableDataSources();
+
+      expect(result).toEqual([
+        { id: 'ds-2', title: 'Alpha Source' },
+        { id: 'ds-1', title: 'Beta Source' },
+      ]);
+    });
+
+    it('should cache the result and not query again', async () => {
+      const service = new (ChatService as any)(
+        mockUiSettings,
+        mockCoreChatService,
+        undefined,
+        mockSavedObjectsClient
+      );
+
+      await service.getAvailableDataSources();
+      await service.getAvailableDataSources();
+
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledTimes(1);
+    });
+
+    it('should return empty array when savedObjectsClient is not set', async () => {
+      const service = new (ChatService as any)(mockUiSettings, mockCoreChatService);
+
+      const result = await service.getAvailableDataSources();
+
+      expect(result).toEqual([]);
+    });
+
+    it('should return empty array when find throws', async () => {
+      mockSavedObjectsClient.find.mockRejectedValue(new Error('Network error'));
+      const service = new (ChatService as any)(
+        mockUiSettings,
+        mockCoreChatService,
+        undefined,
+        mockSavedObjectsClient
+      );
+
+      const result = await service.getAvailableDataSources();
+
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe('getCurrentDataSourceId', () => {
+    let mockSavedObjectsClient: any;
+    let mockWorkspaces: any;
+
+    beforeEach(() => {
+      mockWorkspaces = {
+        currentWorkspaceId$: { getValue: jest.fn().mockReturnValue('workspace-1') },
+      };
+
+      mockSavedObjectsClient = {
+        find: jest.fn().mockResolvedValue({
+          savedObjects: [
+            { id: 'ds-1', attributes: { title: 'Source One', dataSourceEngineType: 'OpenSearch' } },
+            { id: 'ds-2', attributes: { title: 'Source Two', dataSourceEngineType: 'OpenSearch' } },
+          ],
+        }),
+      };
+    });
+
+    it('should return data source ID when it exists in available data sources', async () => {
+      const { getDefaultDataSourceId } = jest.requireMock('../../../data_source_management/public');
+      getDefaultDataSourceId.mockResolvedValue('ds-1');
+
+      const service = new (ChatService as any)(
+        mockUiSettings,
+        mockCoreChatService,
+        mockWorkspaces,
+        mockSavedObjectsClient
+      );
+
+      const result = await service.getCurrentDataSourceId();
+
+      expect(result).toBe('ds-1');
+    });
+
+    it('should return data source ID even if not in available data sources', async () => {
+      const { getDefaultDataSourceId } = jest.requireMock('../../../data_source_management/public');
+      getDefaultDataSourceId.mockResolvedValue('ds-invalid');
+
+      const service = new (ChatService as any)(
+        mockUiSettings,
+        mockCoreChatService,
+        mockWorkspaces,
+        mockSavedObjectsClient
+      );
+
+      const result = await service.getCurrentDataSourceId();
+
+      expect(result).toBe('ds-invalid');
+    });
+
+    it('should return data source ID even when no compatible data sources are available', async () => {
+      mockSavedObjectsClient.find.mockResolvedValue({ savedObjects: [] });
+      const { getDefaultDataSourceId } = jest.requireMock('../../../data_source_management/public');
+      getDefaultDataSourceId.mockResolvedValue('ds-1');
+
+      const service = new (ChatService as any)(
+        mockUiSettings,
+        mockCoreChatService,
+        mockWorkspaces,
+        mockSavedObjectsClient
+      );
+
+      const result = await service.getCurrentDataSourceId();
+
+      expect(result).toBe('ds-1');
+    });
+
+    it('should return cachedDataSourceId when it is valid', async () => {
+      const service = new (ChatService as any)(
+        mockUiSettings,
+        mockCoreChatService,
+        mockWorkspaces,
+        mockSavedObjectsClient
+      );
+
+      service.setDataSourceId('ds-2');
+      const result = await service.getCurrentDataSourceId();
+
+      expect(result).toBe('ds-2');
+    });
+
+    it('should return cachedDataSourceId even if not in available data sources', async () => {
+      const service = new (ChatService as any)(
+        mockUiSettings,
+        mockCoreChatService,
+        mockWorkspaces,
+        mockSavedObjectsClient
+      );
+
+      service.setDataSourceId('ds-removed');
+      const result = await service.getCurrentDataSourceId();
+
+      expect(result).toBe('ds-removed');
+    });
+
+    it('should prioritize page context data source when valid', async () => {
+      (global as any).window.assistantContextStore = {
+        getAllContexts: jest.fn().mockReturnValue([
+          {
+            categories: ['page', 'static'],
+            description: 'Page context',
+            value: { appId: 'explore', dataset: { dataSource: { id: 'ds-1' } } },
+          },
+        ]),
+      };
+
+      const service = new (ChatService as any)(
+        mockUiSettings,
+        mockCoreChatService,
+        mockWorkspaces,
+        mockSavedObjectsClient
+      );
+
+      const result = await service.getCurrentDataSourceId();
+
+      expect(result).toBe('ds-1');
+    });
+
+    it('should return page context data source even if not in available list', async () => {
+      (global as any).window.assistantContextStore = {
+        getAllContexts: jest.fn().mockReturnValue([
+          {
+            categories: ['page', 'static'],
+            description: 'Page context',
+            value: { appId: 'explore', dataset: { dataSource: { id: 'ds-not-in-workspace' } } },
+          },
+        ]),
+      };
+
+      const service = new (ChatService as any)(
+        mockUiSettings,
+        mockCoreChatService,
+        mockWorkspaces,
+        mockSavedObjectsClient
+      );
+
+      const result = await service.getCurrentDataSourceId();
+
+      expect(result).toBe('ds-not-in-workspace');
+    });
+
+    afterEach(() => {
+      delete (global as any).window.assistantContextStore;
+      jest.clearAllMocks();
+    });
+  });
+
+  describe('getUserMessage', () => {
+    it('should create a user message with content and rawMessage', () => {
+      const result = chatService.getUserMessage('hello world');
+
+      expect(result).toEqual({
+        id: expect.stringMatching(/^msg-\d+-[a-z0-9]{9}$/),
+        role: 'user',
+        content: 'hello world',
+        rawMessage: 'hello world',
+      });
+    });
+
+    it('should use provided rawMessage when given', () => {
+      const result = chatService.getUserMessage('/command output', '/command input');
+
+      expect(result.content).toBe('/command output');
+      expect(result.rawMessage).toBe('/command input');
+    });
+
+    it('should trim content', () => {
+      const result = chatService.getUserMessage('  spaced  ');
+
+      expect(result.content).toBe('spaced');
+      expect(result.rawMessage).toBe('spaced');
     });
   });
 });

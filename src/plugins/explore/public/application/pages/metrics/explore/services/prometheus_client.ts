@@ -249,12 +249,11 @@ export class PrometheusClient {
     if (!dataView) return [];
 
     const queryState = this.services.data.query.queryString.getQuery();
-    const dataset = await this.services.data.dataViews.convertToDataset(dataView);
     const searchSource = await this.services.data.search.searchSource.create();
     searchSource.setFields({
       index: dataView,
       size: 2000,
-      query: { ...queryState, dataset, query: promql },
+      query: { ...queryState, query: promql },
       highlightAll: false,
       version: false,
     });

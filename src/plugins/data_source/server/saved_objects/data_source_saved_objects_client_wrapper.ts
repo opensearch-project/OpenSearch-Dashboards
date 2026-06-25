@@ -5,6 +5,7 @@
 
 import {
   SavedObjectsBulkCreateObject,
+  SavedObjectsBulkGetObject,
   SavedObjectsBulkResponse,
   SavedObjectsBulkUpdateObject,
   SavedObjectsBulkUpdateOptions,
@@ -12,6 +13,8 @@ import {
   SavedObjectsClientWrapperFactory,
   SavedObjectsClientWrapperOptions,
   SavedObjectsCreateOptions,
+  SavedObjectsFindOptions,
+  SavedObjectsFindResponse,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
 } from 'opensearch-dashboards/server';
@@ -123,15 +126,55 @@ export class DataSourceSavedObjectsClientWrapper {
       return await wrapperOptions.client.bulkUpdate(objects, options);
     };
 
+    const getWithCredentialsStripping = async <T = unknown>(
+      type: string,
+      id: string,
+      options?: Record<string, any>
+    ) => {
+      const result = await wrapperOptions.client.get<T>(type, id, options);
+      if (type === DATA_SOURCE_SAVED_OBJECT_TYPE) {
+        return stripCredentials(result);
+      }
+      return result;
+    };
+
+    const findWithCredentialsStripping = async <T = unknown>(
+      options: SavedObjectsFindOptions
+    ): Promise<SavedObjectsFindResponse<T>> => {
+      const result = await wrapperOptions.client.find<T>(options);
+      const types = Array.isArray(options.type) ? options.type : [options.type];
+      if (types.includes(DATA_SOURCE_SAVED_OBJECT_TYPE)) {
+        return {
+          ...result,
+          saved_objects: result.saved_objects.map((obj) =>
+            obj.type === DATA_SOURCE_SAVED_OBJECT_TYPE ? stripCredentials(obj) : obj
+          ),
+        };
+      }
+      return result;
+    };
+
+    const bulkGetWithCredentialsStripping = async <T = unknown>(
+      objects?: SavedObjectsBulkGetObject[]
+    ) => {
+      const result = await wrapperOptions.client.bulkGet<T>(objects);
+      return {
+        ...result,
+        saved_objects: result.saved_objects.map((obj) =>
+          obj.type === DATA_SOURCE_SAVED_OBJECT_TYPE ? stripCredentials(obj) : obj
+        ),
+      };
+    };
+
     return {
       ...wrapperOptions.client,
       create: createWithCredentialsEncryption,
       bulkCreate: bulkCreateWithCredentialsEncryption,
       checkConflicts: wrapperOptions.client.checkConflicts,
       delete: wrapperOptions.client.delete,
-      find: wrapperOptions.client.find,
-      bulkGet: wrapperOptions.client.bulkGet,
-      get: wrapperOptions.client.get,
+      find: findWithCredentialsStripping,
+      bulkGet: bulkGetWithCredentialsStripping,
+      get: getWithCredentialsStripping,
       update: updateWithCredentialsEncryption,
       bulkUpdate: bulkUpdateWithCredentialsEncryption,
       errors: wrapperOptions.client.errors,
@@ -259,12 +302,12 @@ export class DataSourceSavedObjectsClientWrapper {
     // @ts-expect-error TS2339 TODO(ts-error): fixme
     const { title, endpoint, auth } = attributes;
     this.validateTitle(title);
-    this.validateEndpoint(endpoint);
+    await this.validateEndpoint(endpoint);
     await this.validateAuth(auth);
   }
 
-  private validateEndpoint(endpoint: string) {
-    const validationResult = isValidURL(
+  private async validateEndpoint(endpoint: string) {
+    const validationResult = await isValidURL(
       endpoint,
       this.endpointBlockedIps,
       this.endpointAllowlistedSuffixes
@@ -530,4 +573,25 @@ export class DataSourceSavedObjectsClientWrapper {
     const authMethod = await this.getAuthenticationMethodFromRegistry(type);
     return authMethod !== undefined;
   }
+}
+
+/**
+ * Strip auth.credentials from a data source saved object before returning it
+ * through external read APIs (get / find / bulkGet). Credentials are encrypted
+ * at rest and must never be exposed to callers via the saved objects API.
+ * configureClient / configureLegacyClient retrieve credentials via an internal
+ * repository that bypasses this wrapper.
+ */
+function stripCredentials<T = unknown>(obj: any): any {
+  if (!obj?.attributes?.auth) return obj;
+  return {
+    ...obj,
+    attributes: {
+      ...obj.attributes,
+      auth: {
+        ...obj.attributes.auth,
+        credentials: undefined,
+      },
+    },
+  };
 }

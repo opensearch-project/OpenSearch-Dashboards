@@ -14,6 +14,14 @@ jest.mock('rxjs', () => ({
 
 jest.mock('../../../data/public', () => ({
   getSearchParamsFromRequest: jest.fn().mockImplementation((obj, _) => obj),
+  AnalyticEngineError: class AnalyticEngineError extends Error {
+    constructor() {
+      super(
+        'This data source uses Analytic Engine which does not support DSL queries. Use PPL-compatible features or switch to a standard OpenSearch data source.'
+      );
+      this.name = 'AnalyticEngineError';
+    }
+  },
 }));
 
 interface MockSearch {
@@ -155,5 +163,103 @@ describe('SearchAPI.findDataSourceIdbyName', () => {
   test('If dataSource is enabled and the dataSourceName is a prefix of another, ensure the prefix is only returned', async () => {
     const searchAPI = getSearchAPI(true);
     expect(await searchAPI.findDataSourceIdbyName('DataSource')).toBe('some-datasource-id');
+  });
+
+  test('If dataSource is AnalyticEngine, throw error', async () => {
+    const savedObjectsClientWithAnalyticEngine = {} as SavedObjectsClientContract;
+    savedObjectsClientWithAnalyticEngine.find = jest
+      .fn()
+      .mockImplementation((query: SavedObjectsFindOptions) => {
+        if (query.search === `"analyticEngineDataSource"`) {
+          return Promise.resolve({
+            total: 1,
+            savedObjects: [
+              {
+                id: 'ae-datasource-id',
+                attributes: {
+                  title: 'analyticEngineDataSource',
+                  dataSourceEngineType: 'AnalyticEngine',
+                },
+              },
+            ],
+          });
+        }
+        return Promise.resolve({ total: 0, savedObjects: [] });
+      });
+
+    const dependencies = {
+      savedObjectsClient: savedObjectsClientWithAnalyticEngine,
+      dataSourceEnabled: true,
+    } as SearchAPIDependencies;
+    const searchAPI = new SearchAPI(dependencies);
+
+    await expect(searchAPI.findDataSourceIdbyName('analyticEngineDataSource')).rejects.toThrow(
+      'This data source uses Analytic Engine which does not support DSL queries'
+    );
+  });
+
+  test('If dataSource is AnalyticEngine but the query is PPL, return id without throwing', async () => {
+    const savedObjectsClientWithAnalyticEngine = {} as SavedObjectsClientContract;
+    savedObjectsClientWithAnalyticEngine.find = jest
+      .fn()
+      .mockImplementation((query: SavedObjectsFindOptions) => {
+        if (query.search === `"analyticEngineDataSource"`) {
+          return Promise.resolve({
+            total: 1,
+            savedObjects: [
+              {
+                id: 'ae-datasource-id',
+                attributes: {
+                  title: 'analyticEngineDataSource',
+                  dataSourceEngineType: 'AnalyticEngine',
+                },
+              },
+            ],
+          });
+        }
+        return Promise.resolve({ total: 0, savedObjects: [] });
+      });
+
+    const dependencies = {
+      savedObjectsClient: savedObjectsClientWithAnalyticEngine,
+      dataSourceEnabled: true,
+    } as SearchAPIDependencies;
+    const searchAPI = new SearchAPI(dependencies);
+
+    // AnalyticEngine supports PPL, so a PPL query must not be blocked.
+    expect(await searchAPI.findDataSourceIdbyName('analyticEngineDataSource', true)).toBe(
+      'ae-datasource-id'
+    );
+  });
+
+  test('If dataSource is not AnalyticEngine, return id normally', async () => {
+    const savedObjectsClientWithOpenSearch = {} as SavedObjectsClientContract;
+    savedObjectsClientWithOpenSearch.find = jest
+      .fn()
+      .mockImplementation((query: SavedObjectsFindOptions) => {
+        if (query.search === `"openSearchDataSource"`) {
+          return Promise.resolve({
+            total: 1,
+            savedObjects: [
+              {
+                id: 'os-datasource-id',
+                attributes: {
+                  title: 'openSearchDataSource',
+                  dataSourceEngineType: 'OpenSearch',
+                },
+              },
+            ],
+          });
+        }
+        return Promise.resolve({ total: 0, savedObjects: [] });
+      });
+
+    const dependencies = {
+      savedObjectsClient: savedObjectsClientWithOpenSearch,
+      dataSourceEnabled: true,
+    } as SearchAPIDependencies;
+    const searchAPI = new SearchAPI(dependencies);
+
+    expect(await searchAPI.findDataSourceIdbyName('openSearchDataSource')).toBe('os-datasource-id');
   });
 });

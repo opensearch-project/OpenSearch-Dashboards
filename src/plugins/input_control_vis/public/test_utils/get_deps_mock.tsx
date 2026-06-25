@@ -56,9 +56,14 @@ export const getDepsMock = ({
               IndexPatternSelect: () => (<div />) as any,
             },
             indexPatterns: {
-              get: () => ({
+              get: (id: string) => ({
+                id,
                 fields,
               }),
+              getCache: jest.fn().mockResolvedValue([
+                { id: 'indexPattern1', title: 'Index Pattern 1' },
+                { id: 'mockIndexPattern', title: 'Mock Index Pattern' },
+              ]),
             },
           },
         },

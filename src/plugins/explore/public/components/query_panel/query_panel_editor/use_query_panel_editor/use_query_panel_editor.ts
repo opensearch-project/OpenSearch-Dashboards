@@ -144,6 +144,16 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
     queryLanguageRef.current = queryLanguage;
   }, [queryLanguage]);
 
+  // Sync editor text when Redux query string changes externally (e.g., language switch)
+  useEffect(() => {
+    if (userQueryString !== editorText) {
+      setEditorText(userQueryString);
+      editorRef.current?.setValue(userQueryString);
+    }
+    // Only react to external Redux changes, not local edits
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userQueryString]);
+
   // Sync PPL validation context when datasource changes
   useEffect(() => {
     const dsId = dataset?.dataSource?.id;
@@ -170,8 +180,12 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
     []
   );
 
+  const focusExploreQueryBar = useCallback(() => {
+    editorRef.current?.focus();
+  }, [editorRef]);
+
   keyboardShortcut?.useKeyboardShortcut({
-    id: 'focus_query_bar',
+    id: 'focus_explore_query_bar',
     pluginId: 'explore',
     name: i18n.translate('explore.queryPanelEditor.focusQueryBarShortcut', {
       defaultMessage: 'Focus query bar',
@@ -180,9 +194,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
       defaultMessage: 'Search',
     }),
     keys: '/',
-    execute: () => {
-      editorRef.current?.focus();
-    },
+    execute: focusExploreQueryBar,
   });
 
   // The 'triggerSuggestOnFocus' prop of CodeEditor only happens on mount, so I am intentionally not passing it

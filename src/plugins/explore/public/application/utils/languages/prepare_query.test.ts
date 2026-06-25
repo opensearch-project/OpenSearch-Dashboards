@@ -39,6 +39,24 @@ describe('prepareQueryForLanguage', () => {
     });
   });
 
+  describe('SQL language', () => {
+    it('should return SQL queries unchanged without calling addPPLSourceClause', () => {
+      const query: Query = {
+        query: 'SELECT * FROM logs WHERE level = "error"',
+        dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
+        language: 'SQL',
+      };
+
+      const result = prepareQueryForLanguage(query);
+
+      expect(addPPLSourceClause).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        ...query,
+        query: 'SELECT * FROM logs WHERE level = "error"',
+      });
+    });
+  });
+
   describe('Error handling', () => {
     it('should throw error when query is not a string', () => {
       const query: Query = {

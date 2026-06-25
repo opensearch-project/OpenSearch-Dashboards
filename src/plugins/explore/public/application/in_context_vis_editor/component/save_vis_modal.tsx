@@ -85,7 +85,7 @@ export const SaveVisModal: React.FC<SaveVisModalProps> = ({
             />
           }
           color="warning"
-          data-test-subj="titleDupicateWarnMsg"
+          data-test-subj="titleDuplicateWarnMsg"
         >
           <p>
             <FormattedMessage

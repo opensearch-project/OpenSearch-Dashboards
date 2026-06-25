@@ -17,7 +17,7 @@ Object {
   "csp": Object {
     "warnLegacyBrowsers": true,
   },
-  "enableIconSideNav": false,
+  "enableIconSideNav": true,
   "env": Object {
     "mode": Object {
       "dev": Any<Boolean>,
@@ -73,7 +73,7 @@ Object {
   "csp": Object {
     "warnLegacyBrowsers": true,
   },
-  "enableIconSideNav": false,
+  "enableIconSideNav": true,
   "env": Object {
     "mode": Object {
       "dev": Any<Boolean>,
@@ -129,7 +129,7 @@ Object {
   "csp": Object {
     "warnLegacyBrowsers": true,
   },
-  "enableIconSideNav": false,
+  "enableIconSideNav": true,
   "env": Object {
     "mode": Object {
       "dev": Any<Boolean>,
@@ -185,7 +185,7 @@ Object {
   "csp": Object {
     "warnLegacyBrowsers": true,
   },
-  "enableIconSideNav": false,
+  "enableIconSideNav": true,
   "env": Object {
     "mode": Object {
       "dev": Any<Boolean>,
@@ -245,7 +245,7 @@ Object {
   "csp": Object {
     "warnLegacyBrowsers": true,
   },
-  "enableIconSideNav": false,
+  "enableIconSideNav": true,
   "env": Object {
     "mode": Object {
       "dev": Any<Boolean>,
@@ -301,7 +301,7 @@ Object {
   "csp": Object {
     "warnLegacyBrowsers": true,
   },
-  "enableIconSideNav": false,
+  "enableIconSideNav": true,
   "env": Object {
     "mode": Object {
       "dev": Any<Boolean>,
@@ -357,7 +357,7 @@ Object {
   "csp": Object {
     "warnLegacyBrowsers": true,
   },
-  "enableIconSideNav": false,
+  "enableIconSideNav": true,
   "env": Object {
     "mode": Object {
       "dev": Any<Boolean>,

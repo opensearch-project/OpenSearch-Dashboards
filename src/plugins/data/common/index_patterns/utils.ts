@@ -117,3 +117,36 @@ export const concatDataSourceWithIndexPattern = (
 export const getDataSourceReference = (references: SavedObjectReference[]) => {
   return references.find((ref) => ref.type === 'data-source');
 };
+
+/**
+ * Resolve the data source id for an index pattern saved object.
+ *
+ * Two encodings are supported:
+ *   1. Modern: a `data-source` entry in the SO's `references` array.
+ *   2. Namespaced: the data source id is encoded into the index pattern's id
+ *      itself, prefixed with `<dataSourceId>::`.
+ *
+ * Returns undefined when neither encoding matches (e.g., a local-cluster
+ * index pattern with no associated data source).
+ */
+export const getDataSourceIdFromIndexPattern = (indexPattern: {
+  id: string;
+  references?: SavedObjectReference[];
+}): string | undefined => {
+  const refId = (indexPattern.references || []).find((ref) => ref.type === 'data-source')?.id;
+  if (refId) {
+    return refId;
+  }
+  if (indexPattern.id?.includes('::')) {
+    return indexPattern.id.split('::')[0];
+  }
+  // Check _ format: <dataSourceId>_<uuid> where prefix is a valid UUID
+  const uIdx = indexPattern.id?.indexOf('_');
+  if (uIdx !== undefined && uIdx > 0) {
+    const prefix = indexPattern.id.substring(0, uIdx);
+    if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(prefix)) {
+      return prefix;
+    }
+  }
+  return undefined;
+};

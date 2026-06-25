@@ -40,6 +40,8 @@ import { BackgroundPic } from '../../assets/background_pic';
 export type PermissionSetting = Pick<WorkspacePermissionSetting, 'id'> &
   Partial<WorkspacePermissionSetting>;
 
+const MAX_IDS_PER_REQUEST = 1000;
+
 // TODO: Update PermissionModeId to align with WorkspaceCollaboratorAccessLevel
 const permissionModeId2WorkspaceAccessLevelMap: {
   [key in PermissionModeId]: WorkspaceCollaboratorAccessLevel;
@@ -163,9 +165,11 @@ export const WorkspaceCollaboratorTable = ({
     overlays,
     services: { notifications, http },
   } = useOpenSearchDashboards();
-  const [idToNameMap, setIdToNameMap] = useState<Record<string, string>>({});
-  const idToNameMapRef = useRef(idToNameMap);
-  idToNameMapRef.current = idToNameMap;
+  const [idToAttributesMap, setIdToAttributesMap] = useState<
+    Record<string, { name: string; alias?: string }>
+  >({});
+  const idToAttributesMapRef = useRef(idToAttributesMap);
+  idToAttributesMapRef.current = idToAttributesMap;
 
   useEffect(() => {
     if (!http) return;
@@ -187,7 +191,7 @@ export const WorkspaceCollaboratorTable = ({
         const id =
           setting.type === WorkspacePermissionItemType.User ? setting.userId : setting.group;
         if (!id) return;
-        if (!(id in idToNameMapRef.current)) keysWithNewId.add(key);
+        if (!(id in idToAttributesMapRef.current)) keysWithNewId.add(key);
         if (!groupMap.has(key)) {
           groupMap.set(key, { ...identitySource, ids: [] });
         }
@@ -196,33 +200,54 @@ export const WorkspaceCollaboratorTable = ({
 
       if (keysWithNewId.size === 0) return;
 
-      const newMap: Record<string, string> = { ...idToNameMapRef.current };
+      const newMap: Record<string, { name: string; alias?: string }> = {
+        ...idToAttributesMapRef.current,
+      };
       await Promise.all(
         Array.from(groupMap.entries())
           .filter(([key]) => keysWithNewId.has(key))
           .map(async ([, { source, type, ids }]) => {
-            const newIds = ids.filter((id) => !(id in idToNameMapRef.current));
+            const newIds = ids.filter((id) => !(id in idToAttributesMapRef.current));
             try {
-              const resp = await http.post<Array<{ id: string; name: string }>>(
-                '/api/security/identity/_entries',
-                {
-                  body: JSON.stringify({ source, type, ids: newIds }),
-                  signal: abortController.signal,
-                }
-              );
-              resp?.forEach(({ id, name }) => {
-                newMap[id] = name;
-              });
-            } catch {
-              // silently ignore, Name column will remain empty
+              for (let i = 0; i < newIds.length; i += MAX_IDS_PER_REQUEST) {
+                const slice = newIds.slice(i, i + MAX_IDS_PER_REQUEST);
+                const resp = await http.post<Array<{ id: string; name: string; alias?: string }>>(
+                  '/api/security/identity/_entries',
+                  {
+                    body: JSON.stringify({ source, type, ids: slice }),
+                    signal: abortController.signal,
+                  }
+                );
+                resp?.forEach(({ id, name, alias }) => {
+                  newMap[id] = { name, alias };
+                });
+                // Mark requested IDs not returned by the API as sentinel to avoid re-fetching
+                slice.forEach((id) => {
+                  if (!(id in newMap)) newMap[id] = { name: '' };
+                });
+              }
+            } catch (e) {
+              if ((e as Error).name !== 'AbortError') {
+                const detail = (e as any)?.body?.message;
+                notifications?.toasts?.addDanger(
+                  detail
+                    ? i18n.translate('workspace.collaborator.table.fetchNames.errorWithDetail', {
+                        defaultMessage: 'Failed to load collaborator names: {detail}',
+                        values: { detail },
+                      })
+                    : i18n.translate('workspace.collaborator.table.fetchNames.error', {
+                        defaultMessage: 'Failed to load collaborator names.',
+                      })
+                );
+              }
             }
           })
       );
-      if (!abortController.signal.aborted) setIdToNameMap(newMap);
+      if (!abortController.signal.aborted) setIdToAttributesMap(newMap);
     };
     fetchNames();
     return () => abortController.abort();
-  }, [permissionSettings, displayedCollaboratorTypes, http]);
+  }, [permissionSettings, displayedCollaboratorTypes, http, notifications?.toasts]);
 
   const items: PermissionSettingWithAccessLevelAndDisplayedType[] = useMemo(() => {
     return permissionSettings
@@ -242,23 +267,23 @@ export const WorkspaceCollaboratorTable = ({
         };
         // Unique primary key and filter null value
         if (setting.type === WorkspacePermissionItemType.User) {
+          const entry = setting.userId ? idToAttributesMap[setting.userId] : undefined;
           return {
             ...basicSettings,
-            // Id represents the index of the permission setting in the array, will use primaryId for displayed id
             primaryId: setting.userId,
-            name: setting.userId ? idToNameMap[setting.userId] : undefined,
+            name: entry ? (entry.alias ? `${entry.name} (${entry.alias})` : entry.name) : undefined,
           };
         } else if (setting.type === WorkspacePermissionItemType.Group) {
           return {
             ...basicSettings,
             primaryId: setting.group,
-            name: setting.group ? idToNameMap[setting.group] : undefined,
+            name: setting.group ? idToAttributesMap[setting.group]?.name : undefined,
           };
         }
         return basicSettings;
       })
       .filter((item) => !(item.type === WorkspacePermissionItemType.User && item.userId === '*'));
-  }, [permissionSettings, displayedCollaboratorTypes, idToNameMap]);
+  }, [permissionSettings, displayedCollaboratorTypes, idToAttributesMap]);
 
   const adminCollaboratorsNum = useMemo(() => {
     const admins = items.filter((item) => item.accessLevel === WORKSPACE_ACCESS_LEVEL_NAMES.admin);

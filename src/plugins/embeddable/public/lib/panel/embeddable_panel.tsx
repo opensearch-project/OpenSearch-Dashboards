@@ -28,7 +28,12 @@
  * under the License.
  */
 
-import { EuiContextMenuPanelDescriptor, EuiPanel, htmlIdGenerator } from '@elastic/eui';
+import {
+  EuiContextMenuPanelDescriptor,
+  EuiPanel,
+  htmlIdGenerator,
+  EuiProgress,
+} from '@elastic/eui';
 import classNames from 'classnames';
 import React from 'react';
 import { Subscription } from 'rxjs';
@@ -251,6 +256,15 @@ export class EmbeddablePanel extends React.Component<Props, State> {
         hasBorder={this.props.hasBorder}
         hasShadow={this.props.hasShadow}
       >
+        {this.state.loading && (
+          <EuiProgress
+            data-test-subj="panelLoadingProgress"
+            size="xs"
+            color="accent"
+            position="absolute"
+            style={{ top: -1, left: 0, right: 0 }}
+          />
+        )}
         {!this.props.hideHeader && (
           <PanelHeader
             getActionContextMenuPanel={this.getActionContextMenuPanel}
@@ -276,10 +290,23 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       this.subscription.add(
         this.props.embeddable.getOutput$().subscribe(
           (output: EmbeddableOutput) => {
-            this.setState({
-              error: output.error,
-              loading: output.loading,
-            });
+            // Render ErrorEmbeddable for AnalyticEngineError.
+            if (
+              output.error &&
+              output.error.name === 'AnalyticEngineError' &&
+              this.embeddableRoot.current
+            ) {
+              const errorEmbeddable = new ErrorEmbeddable(output.error as Error, {
+                id: this.props.embeddable.id,
+              });
+              errorEmbeddable.render(this.embeddableRoot.current);
+              this.setState({ error: output.error, loading: output.loading, errorEmbeddable });
+            } else {
+              this.setState({
+                error: output.error,
+                loading: output.loading,
+              });
+            }
           },
           (error) => {
             if (this.embeddableRoot.current) {

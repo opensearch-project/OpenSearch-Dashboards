@@ -25,12 +25,12 @@ import { saveStateToSavedObject } from '../../saved_explore/transforms';
 import { addToDashboard } from './utils/add_to_dashboard';
 import { saveSavedExplore } from '../../helpers/save_explore';
 import { useCurrentExploreId } from '../../application/utils/hooks/use_current_explore_id';
-import { useFlavorId } from '../../../public/helpers/use_flavor_id';
 import { useSearchContext } from '../query_panel/utils/use_search_context';
 import { ExploreServices } from '../../types';
 import { getVisualizationBuilder } from './visualization_builder';
+import { UrlTransformationState } from '../data_transformations';
 
-interface DashboardAttributes {
+export interface DashboardAttributes {
   title?: string;
 }
 export type DashboardInterface = SimpleSavedObject<DashboardAttributes>;
@@ -38,8 +38,6 @@ export type DashboardInterface = SimpleSavedObject<DashboardAttributes>;
 export interface OnSaveProps {
   savedExplore: SavedExplore;
   newTitle: string;
-  isTitleDuplicateConfirmed: boolean;
-  onTitleDuplicate: () => void;
   mode: 'existing' | 'new';
   selectDashboard: DashboardInterface | null;
   newDashboardName: string;
@@ -52,6 +50,8 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
   const chartConfig = useObservable(visualizationBuilder.visConfig$);
 
   const searchContext = useSearchContext();
+
+  const transformationService = visualizationBuilder.getTransformationService();
 
   const handleAddToDashboard = useCallback(() => {
     setShowAddToDashboardModal(true);
@@ -83,34 +83,44 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
   const tabDefinition = services.tabRegistry?.getTab?.(activeTabId);
 
   const savedExploreIdFromUrl = useCurrentExploreId();
-  const flavorId = useFlavorId();
 
   const saveObjectsClient = savedObjects.client;
 
   const handleSave = async ({
     savedExplore,
     newTitle,
-    isTitleDuplicateConfirmed,
-    onTitleDuplicate,
     mode,
     selectDashboard,
     newDashboardName,
   }: OnSaveProps) => {
+    const pipeline = transformationService.pipeline$.getValue();
+    const serializedPipeline: UrlTransformationState[] = pipeline.map((instance) => ({
+      definitionId: instance.definition_id,
+      config: instance.config,
+      hide: instance.hide,
+    }));
+
     const savedExploreWithState = saveStateToSavedObject(
       savedExplore,
-      flavorId ?? 'logs',
+      // Don't store flavor for visualization snapshot
+      undefined,
       tabDefinition,
       {
         chartType: chartConfig?.type,
         axesMapping: chartConfig?.axesMapping,
         styleOptions: chartConfig?.styles,
+        splitField: chartConfig?.splitField,
+        splitLayout: chartConfig?.splitLayout,
+        showSplitLabel: chartConfig?.showSplitLabel,
+        serializedPipeline,
       },
       dataset
     );
 
     const saveOptions = {
-      isTitleDuplicateConfirmed,
-      onTitleDuplicate,
+      // allow user to save objects with duplicate title
+      // will display warning at modal level
+      isTitleDuplicateConfirmed: true,
     };
     try {
       // by passing newCopyOnSave as true, to ensure every time add to dashboard will create a new explore

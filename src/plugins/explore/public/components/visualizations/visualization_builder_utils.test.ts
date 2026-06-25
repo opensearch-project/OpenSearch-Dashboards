@@ -50,24 +50,18 @@ describe('visualization_container_utils', () => {
       name: 'count',
       schema: VisFieldType.Numerical,
       column: 'count',
-      validValuesCount: 100,
-      uniqueValuesCount: 50,
     },
     {
       id: 2,
       name: 'category',
       schema: VisFieldType.Categorical,
       column: 'category',
-      validValuesCount: 100,
-      uniqueValuesCount: 10,
     },
     {
       id: 3,
       name: 'timestamp',
       schema: VisFieldType.Date,
       column: 'timestamp',
-      validValuesCount: 100,
-      uniqueValuesCount: 80,
     },
   ];
 
@@ -224,8 +218,6 @@ describe('visualization_container_utils', () => {
           name: 'average',
           schema: VisFieldType.Numerical,
           column: 'average',
-          validValuesCount: 100,
-          uniqueValuesCount: 30,
         },
       ];
 
@@ -386,6 +378,61 @@ describe('visualization_container_utils', () => {
           thresholdStyle: ThresholdMode.Off,
         },
       });
+    });
+
+    it('migrates facet string in axesMapping to splitField', () => {
+      const config: ChartConfig = {
+        type: 'line',
+        styles: {} as LineChartStyleOptions,
+        axesMapping: { x: 'timestamp', y: 'bytes', facet: 'region' },
+      };
+
+      const result = adaptLegacyData(config);
+
+      expect(result?.splitField).toBe('region');
+      expect(result?.axesMapping?.facet).toBeUndefined();
+      expect(result?.axesMapping?.x).toBe('timestamp');
+      expect(result?.axesMapping?.y).toBe('bytes');
+    });
+
+    it('migrates facet array in axesMapping to splitField', () => {
+      const config: ChartConfig = {
+        type: 'bar',
+        styles: {} as BarChartStyleOptions,
+        axesMapping: { x: 'timestamp', y: 'bytes', facet: ['host'] },
+      };
+
+      const result = adaptLegacyData(config);
+
+      expect(result?.splitField).toBe('host');
+      expect(result?.axesMapping?.facet).toBeUndefined();
+    });
+
+    it('does not overwrite existing splitField when facet is present', () => {
+      const config: ChartConfig = {
+        type: 'bar',
+        styles: {} as BarChartStyleOptions,
+        axesMapping: { x: 'timestamp', y: 'bytes', facet: 'region' },
+        splitField: 'host',
+      };
+
+      const result = adaptLegacyData(config);
+
+      expect(result?.splitField).toBe('host');
+      expect(result?.axesMapping?.facet).toBe('region');
+    });
+
+    it('preserves config when no facet in axesMapping', () => {
+      const config: ChartConfig = {
+        type: 'bar',
+        styles: {} as BarChartStyleOptions,
+        axesMapping: { x: 'timestamp', y: 'bytes' },
+      };
+
+      const result = adaptLegacyData(config);
+
+      expect(result?.splitField).toBeUndefined();
+      expect(result?.axesMapping).toEqual({ x: 'timestamp', y: 'bytes' });
     });
   });
 });

@@ -16,13 +16,13 @@ import { ConfirmationService } from '../services/confirmation_service';
 import { ChatEventHandler } from '../services/chat_event_handler';
 
 // Create mock observable before using it in mocks
-const mockObservable = of({ toolDefinitions: [], toolCallStates: {} });
+const mockObservable = of({ toolDefinitions: [], toolCallStates: new Map() });
 
 // Mock dependencies
 jest.mock('../../../context_provider/public', () => {
   const assistantActionsInstance = {
     getState$: jest.fn(() => mockObservable),
-    getCurrentState: jest.fn(() => ({ toolDefinitions: [], toolCallStates: {} })),
+    getCurrentState: jest.fn(() => ({ toolDefinitions: [], toolCallStates: new Map() })),
     getActionRenderer: jest.fn(),
   };
   return {
@@ -86,6 +86,15 @@ describe('ChatWindow - Conversation Name', () => {
       getThreadId: jest.fn().mockReturnValue('mock-thread-id'),
       setChatWindowInstance: jest.fn(),
       clearChatWindowInstance: jest.fn(),
+      getUserMessage: jest.fn((content: string, rawMessage?: string) => ({
+        id: `msg-${Date.now()}`,
+        role: 'user',
+        content,
+        rawMessage: rawMessage || content,
+      })),
+      getCurrentDataSourceId: jest.fn().mockResolvedValue('mock-ds-id'),
+      getAvailableDataSources: jest.fn().mockResolvedValue([]),
+      setDataSourceId: jest.fn(),
       conversationHistoryService: {
         getMemoryProvider: jest.fn().mockReturnValue({
           includeFullHistory: true,

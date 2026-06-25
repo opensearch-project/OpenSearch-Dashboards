@@ -5,6 +5,7 @@
 
 import { VariableService } from './variable_service';
 import { Variable, VariableType, VariableSortOrder, CustomVariable, QueryVariable } from './types';
+import { VariableInterpolationService } from './variable_interpolation_service';
 
 jest.mock('./variable_query_utils', () => ({
   ...jest.requireActual('./variable_query_utils'),
@@ -328,6 +329,21 @@ describe('VariableService', () => {
       // Variables should still have both items
       expect(service.getVariables()).toHaveLength(2);
     });
+
+    it('should use empty string when removing last variable', async () => {
+      const { service, mockSavedObjectsClient } = createService(
+        [makeCustomVariable()],
+        'dashboard-123'
+      );
+      await service.removeVariable('custom-1');
+
+      expect(service.getVariables()).toHaveLength(0);
+      // Verify that empty string (not undefined) was passed to savedObjectsClient.update
+      // This ensures the variablesJSON field is cleared from the saved object
+      expect(mockSavedObjectsClient.update).toHaveBeenCalledWith('dashboard', 'dashboard-123', {
+        variablesJSON: '',
+      });
+    });
   });
 
   describe('updateVariableValue', () => {
@@ -372,6 +388,69 @@ describe('VariableService', () => {
       service.updateVariableValue('env-1', ['prod']);
       await new Promise((resolve) => setTimeout(resolve, 10));
       expect(mockExecuteQueryWithType).not.toHaveBeenCalled();
+    });
+
+    it('should only refresh variables that come after the changed variable', async () => {
+      mockExecuteQueryWithType.mockResolvedValue({
+        options: ['host-a', 'host-b'],
+        optionType: 'string',
+      });
+
+      // Variable order: varB (depends on varA), varA, varC (depends on varA)
+      const varB = makeQueryVariable({
+        id: 'var-b',
+        name: 'varB',
+        query: "source=logs | where field = '${varA}' | dedup host | fields host",
+      });
+      const varA = makeCustomVariable({ id: 'var-a', name: 'varA', current: ['value1'] });
+      const varC = makeQueryVariable({
+        id: 'var-c',
+        name: 'varC',
+        query: "source=logs | where field = '${varA}' | dedup service | fields service",
+      });
+      const { service } = createService([varB, varA, varC]);
+
+      mockExecuteQueryWithType.mockClear();
+      service.updateVariableValue('var-a', ['value2']);
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      // varC should be refreshed (after varA), but varB should not (before varA)
+      expect(mockExecuteQueryWithType).toHaveBeenCalledTimes(1);
+      const calledQuery = mockExecuteQueryWithType.mock.calls[0][1].query;
+      expect(calledQuery).toContain('varA');
+      expect(calledQuery).toContain('service'); // varC's query
+    });
+
+    it('should partially interpolate when some variables are before and some after', async () => {
+      mockExecuteQueryWithType.mockResolvedValue({
+        options: ['result-1', 'result-2'],
+        optionType: 'string',
+      });
+
+      // Variable order: varA, varC (depends on varA and varB), varB
+      const varA = makeCustomVariable({ id: 'var-a', name: 'varA', current: ['value-a'] });
+      const varC = makeQueryVariable({
+        id: 'var-c',
+        name: 'varC',
+        query: "source=logs | where fieldA = '${varA}' AND fieldB = '${varB}'",
+      });
+      const varB = makeCustomVariable({ id: 'var-b', name: 'varB', current: ['value-b'] });
+      const { service } = createService([varA, varC, varB]);
+
+      // Set up interpolation service
+      const interpolationService = new VariableInterpolationService(() =>
+        service.getVariablesWithState()
+      );
+      service.setInterpolationService(interpolationService);
+
+      mockExecuteQueryWithType.mockClear();
+      await service.refreshVariableOptions('var-c');
+
+      // varC should be refreshed with varA interpolated but varB kept as placeholder
+      expect(mockExecuteQueryWithType).toHaveBeenCalledTimes(1);
+      const calledQuery = mockExecuteQueryWithType.mock.calls[0][1].query;
+      expect(calledQuery).toContain('value-a'); // varA interpolated
+      expect(calledQuery).toContain('${varB}'); // varB kept as placeholder
     });
   });
 

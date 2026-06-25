@@ -36,6 +36,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const find = getService('find');
   const log = getService('log');
+  const testSubjects = getService('testSubjects');
+  const browser = getService('browser');
   const security = getService('security');
   const pieChart = getService('pieChart');
   const renderable = getService('renderable');
@@ -108,6 +110,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should launch sample flights data set dashboard', async () => {
         await PageObjects.home.launchSampleDashboard('flights');
         await PageObjects.header.waitUntilLoadingHasFinished();
+        const panels = await testSubjects.findAll('dashboardPanel');
+        for (const panel of panels) {
+          await panel.scrollIntoViewIfNecessary();
+        }
+        await browser.scrollTop();
         await renderable.waitForRender();
         const todayYearMonthDay = moment().format('MMM D, YYYY');
         const fromTime = `${todayYearMonthDay} @ 00:00:00.000`;
@@ -120,6 +127,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should render visualizations', async () => {
         await PageObjects.home.launchSampleDashboard('flights');
         await PageObjects.header.waitUntilLoadingHasFinished();
+        const panels = await testSubjects.findAll('dashboardPanel');
+        for (const panel of panels) {
+          await panel.scrollIntoViewIfNecessary();
+        }
         await renderable.waitForRender();
         log.debug('Checking pie charts rendered');
         await pieChart.expectPieSliceCount(4);
@@ -140,6 +151,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should launch sample logs data set dashboard', async () => {
         await PageObjects.home.launchSampleDashboard('logs');
         await PageObjects.header.waitUntilLoadingHasFinished();
+        const panels = await testSubjects.findAll('dashboardPanel');
+        for (const panel of panels) {
+          await panel.scrollIntoViewIfNecessary();
+        }
+        await browser.scrollTop();
         await renderable.waitForRender();
         const todayYearMonthDay = moment().format('MMM D, YYYY');
         const fromTime = `${todayYearMonthDay} @ 00:00:00.000`;
@@ -152,6 +168,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should launch sample ecommerce data set dashboard', async () => {
         await PageObjects.home.launchSampleDashboard('ecommerce');
         await PageObjects.header.waitUntilLoadingHasFinished();
+        const panels = await testSubjects.findAll('dashboardPanel');
+        for (const panel of panels) {
+          await panel.scrollIntoViewIfNecessary();
+        }
+        await browser.scrollTop();
         await renderable.waitForRender();
         const todayYearMonthDay = moment().format('MMM D, YYYY');
         const fromTime = `${todayYearMonthDay} @ 00:00:00.000`;

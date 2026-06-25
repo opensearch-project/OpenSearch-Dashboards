@@ -4,16 +4,28 @@
  */
 
 import React, { useRef, useEffect, useMemo, useCallback } from 'react';
-import { EuiIcon, EuiText, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import {
+  EuiIcon,
+  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiListGroup,
+  EuiListGroupItem,
+} from '@elastic/eui';
+import { i18n } from '@osd/i18n';
+import { useObservable } from 'react-use';
+import { map } from 'rxjs/operators';
 import { ChatLayoutMode } from '../types';
 import { MessageRow } from './message_row';
 import { TimelineToolCall, ToolCallRow } from './tool_call_row';
 import { ErrorRow } from './error_row';
 import type { Message, AssistantMessage, ToolMessage, ToolCall } from '../../common/types';
+import { TOOL_EXECUTION_ERROR_PREFIX } from '../../common';
 import './chat_messages.scss';
 import { ChatSuggestions } from './chat_suggestions';
 import { ToolCallGroup } from './tool_call_group';
-import { AssistantActionService } from '../../../context_provider/public';
+import { AssistantActionService, ToolCallState } from '../../../context_provider/public';
 import { RecentSessions } from './recent_sessions';
 import {
   ConversationHistoryService,
@@ -21,14 +33,43 @@ import {
 } from '../services/conversation_history_service';
 
 /**
- * Determine tool status based on tool call and result
+ * Determine tool status.
+ *
+ * Source of truth is the event-driven `toolCallStates` map maintained by
+ * `AssistantActionService` — it is updated in response to AG-UI events
+ * (TOOL_CALL_START / TOOL_CALL_END / TOOL_CALL_RESULT) and reflects the real
+ * lifecycle of the tool call.
+ *
+ * When there is no event state (e.g. historical tool calls loaded from a
+ * snapshot), status is derived from the ToolMessage in the timeline. At that
+ * point the absence of a ToolMessage means the call is abandoned — the run
+ * ended before the tool finished — not that it is still running.
+ *
+ * The chat event handler prefixes the tool result content with
+ * `TOOL_EXECUTION_ERROR_PREFIX` when a tool throws locally (see
+ * `handleToolCallEnd`). `chatService.sendToolResult` passes that string
+ * straight into the ToolMessage `content`, so detecting the prefix here
+ * lets a reloaded conversation render the tool row as an error without
+ * relying on a separate local-only ToolMessage.
  */
 function getToolStatus(
   toolCall: ToolCall,
+  toolCallStates?: Map<string, ToolCallState>,
   toolResult?: ToolMessage
 ): 'running' | 'completed' | 'error' {
-  if (!toolResult) return 'running';
-  if (toolResult.error) return 'error';
+  const state = toolCallStates?.get(toolCall.id);
+  if (state) {
+    switch (state.status) {
+      case 'complete':
+        return 'completed';
+      case 'failed':
+        return 'error';
+      default:
+        return 'running';
+    }
+  }
+  if (!toolResult) return 'error';
+  if (toolResult.content?.startsWith(TOOL_EXECUTION_ERROR_PREFIX)) return 'error';
   return 'completed';
 }
 
@@ -66,6 +107,11 @@ interface ChatMessagesProps {
   timeline: Message[];
   isStreaming: boolean;
   onResendMessage?: (message: Message) => void;
+  onResendToolResult?: (params: {
+    messageId: string;
+    toolCallId: string;
+    toolResult: any;
+  }) => Promise<void>;
   onApproveConfirmation?: () => void;
   onRejectConfirmation?: () => void;
   onFillInput?: (content: string) => void;
@@ -74,6 +120,8 @@ interface ChatMessagesProps {
   onShowHistory?: () => void;
   conversationHistoryService?: ConversationHistoryService;
   onSelectConversation?: (conversation: SavedConversation) => void;
+  availableDataSources?: Array<{ id: string; title: string }>;
+  onDataSourceSelect?: (id: string) => void;
 }
 
 /**
@@ -89,7 +137,10 @@ interface ChatMessagesProps {
  * @param timeline - Array of messages from the conversation
  * @returns Array of message rows ready for display
  */
-export const convertTimelineToMessageRows = (timeline: Message[]) => {
+export const convertTimelineToMessageRows = (
+  timeline: Message[],
+  toolCallStates?: Map<string, ToolCallState>
+) => {
   const result: Array<
     | Message
     | { role: 'toolCallGroup'; toolCalls: TimelineToolCall[] }
@@ -110,22 +161,26 @@ export const convertTimelineToMessageRows = (timeline: Message[]) => {
       type: 'tool_call' as const,
       id: toolCall.id,
       toolName: toolCall.function.name,
-      status: getToolStatus(toolCall, toolResult),
+      status: getToolStatus(toolCall, toolCallStates, toolResult),
       arguments: toolCall.function.arguments,
       result: toolResult?.content,
       timestamp: Date.now(),
     };
   };
 
-  // Helper: Check if any tool call is running
+  // Helper: Check if a tool call is still running.
+  // Only event-driven toolCallStates can indicate "running" — a missing
+  // ToolMessage on a historical (state-less) tool call means it was
+  // abandoned, not that it is currently executing.
+  const isToolRunning = (toolCall: ToolCall): boolean => {
+    const state = toolCallStates?.get(toolCall.id);
+    if (!state) return false;
+    return state.status === 'pending' || state.status === 'executing';
+  };
+
   const hasRunningTool = (toolCalls?: ToolCall[]): boolean => {
     if (!toolCalls?.length) return false;
-    return toolCalls.some((tc) => {
-      const toolResult = timeline.find(
-        (msg): msg is ToolMessage => msg.role === 'tool' && msg.toolCallId === tc.id
-      );
-      return !toolResult; // No result means still running
-    });
+    return toolCalls.some(isToolRunning);
   };
 
   // Helper: Check if tool has custom renderer
@@ -240,6 +295,7 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
   timeline,
   isStreaming,
   onResendMessage,
+  onResendToolResult,
   onApproveConfirmation,
   onRejectConfirmation,
   onFillInput,
@@ -248,11 +304,26 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
   onShowHistory,
   conversationHistoryService,
   onSelectConversation,
+  availableDataSources,
+  onDataSourceSelect,
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const userHasScrolledUp = useRef<boolean>(false);
   const isAutoScrolling = useRef<boolean>(false);
+
+  // Subscribe to the real, event-driven tool call states so the UI reflects
+  // the actual TOOL_CALL_START/END/RESULT lifecycle rather than inferring
+  // status from ToolMessage presence in the timeline.
+  const assistantActionService = useMemo(() => AssistantActionService.getInstance(), []);
+  const toolCallStates$ = useMemo(
+    () => assistantActionService.getState$().pipe(map((state) => state.toolCallStates)),
+    [assistantActionService]
+  );
+  const toolCallStates = useObservable(
+    toolCallStates$,
+    assistantActionService.getCurrentState().toolCallStates
+  );
 
   // Context is now handled by RFC hooks and context pills
   // No need for separate context display here
@@ -347,7 +418,10 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
 
   // Context is now handled by RFC hooks - no subscriptions needed
 
-  const messageRows = useMemo(() => convertTimelineToMessageRows(timeline), [timeline]);
+  const messageRows = useMemo(() => convertTimelineToMessageRows(timeline, toolCallStates), [
+    timeline,
+    toolCallStates,
+  ]);
 
   const lastAssistantMessageIndex = useMemo(
     () => messageRows.findLastIndex((message) => message.role === 'assistant'),
@@ -542,11 +616,36 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
 
           // Handle system messages as errors
           if (message.role === 'system') {
-            return <ErrorRow key={message.id} error={message} />;
+            return (
+              <ErrorRow key={message.id} error={message} onResendToolResult={onResendToolResult} />
+            );
           }
 
           return null;
         })}
+
+        {availableDataSources && availableDataSources.length > 0 && onDataSourceSelect && (
+          <div>
+            <EuiText color="subdued" size="xs">
+              <small>
+                {i18n.translate('chat.dataSourceSelection.prompt', {
+                  defaultMessage: 'Please select a data source to continue:',
+                })}
+              </small>
+            </EuiText>
+            <EuiListGroup maxWidth={false} flush gutterSize="none">
+              {availableDataSources.map((ds) => (
+                <EuiListGroupItem
+                  key={ds.id}
+                  label={ds.title}
+                  iconType="database"
+                  onClick={() => onDataSourceSelect(ds.id)}
+                  size="xs"
+                />
+              ))}
+            </EuiListGroup>
+          </div>
+        )}
 
         {isStreaming && !startResponse && (
           <div className="chatMessages__loadingIndicator">

@@ -251,6 +251,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
       <EuiFlexItem>
         <QueryStringInput
           disableAutoFocus={props.disableAutoFocus}
+          registerKeyboardShortcut={true}
           indexPatterns={props.indexPatterns!}
           prepend={props.prepend}
           query={props.query!}

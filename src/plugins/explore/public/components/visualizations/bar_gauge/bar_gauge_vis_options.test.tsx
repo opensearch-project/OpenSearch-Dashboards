@@ -14,8 +14,6 @@ const mockNumericalColumns: VisColumn[] = [
     name: 'Value',
     schema: VisFieldType.Numerical,
     column: 'value',
-    validValuesCount: 6,
-    uniqueValuesCount: 6,
   },
 ];
 const mockCategoricalColumns: VisColumn[] = [
@@ -24,8 +22,6 @@ const mockCategoricalColumns: VisColumn[] = [
     name: 'Category',
     column: 'category',
     schema: VisFieldType.Categorical,
-    validValuesCount: 100,
-    uniqueValuesCount: 10,
   },
 ];
 
@@ -110,32 +106,10 @@ jest.mock('../style_panel/standard_options/standard_options_panel', () => ({
   )),
 }));
 
-jest.mock('../style_panel/title/title', () => ({
-  TitleOptionsPanel: jest.fn(({ titleOptions, onShowTitleChange }) => (
-    <div data-test-subj="mockTitleOptionsPanel">
-      <button
-        data-test-subj="mockTitleModeSwitch"
-        onClick={() => onShowTitleChange({ show: !titleOptions.show })}
-      >
-        Toggle Title
-      </button>
-      <input
-        data-test-subj="mockTitleInput"
-        placeholder="Default title"
-        onChange={(e) => onShowTitleChange({ titleName: e.target.value })}
-      />
-    </div>
-  )),
-}));
-
 describe('BarGaugeVisStyleControls', () => {
   const defaultProps: BarGaugeVisStyleControlsProps = {
     styleOptions: {
       ...defaultBarGaugeChartStyles,
-      titleOptions: {
-        show: true,
-        titleName: '',
-      },
     },
     onStyleChange: jest.fn(),
     numericalColumns: mockNumericalColumns,
@@ -155,7 +129,6 @@ describe('BarGaugeVisStyleControls', () => {
     expect(getByTestId('mockThresholdOptions')).toBeInTheDocument();
     expect(getByTestId('mockStandardOptionsPanel')).toBeInTheDocument();
     expect(getByTestId('mockBarGaugeExclusiveVisOptions')).toBeInTheDocument();
-    expect(getByTestId('mockTitleOptionsPanel')).toBeInTheDocument();
     expect(getByTestId('mockTooltipOptionsPanel')).toBeInTheDocument();
   });
 
@@ -168,19 +141,6 @@ describe('BarGaugeVisStyleControls', () => {
       thresholdOptions: {
         ...defaultProps.styleOptions.thresholdOptions,
         thresholds: [{ value: 50, color: '#FF0000' }],
-      },
-    });
-  });
-
-  it('should call onStyleChange when title options are updated', () => {
-    const { getByTestId } = render(<BarGaugeVisStyleControls {...defaultProps} />);
-
-    fireEvent.click(getByTestId('mockTitleModeSwitch'));
-
-    expect(defaultProps.onStyleChange).toHaveBeenCalledWith({
-      titleOptions: {
-        ...defaultProps.styleOptions.titleOptions,
-        show: !defaultProps.styleOptions.titleOptions.show,
       },
     });
   });

@@ -15,6 +15,7 @@ import {
   SavedObjectsImportResponse,
   WorkspaceFindOptions,
   WorkspacePermissionMode,
+  PermissionModeId,
 } from '../../../core/public';
 import { SavedObjectPermissions, WorkspaceAttributeWithPermission } from '../../../core/types';
 import { DataSourceAssociation } from './components/data_source_association/data_source_association';
@@ -36,10 +37,15 @@ const join = (...uriComponents: Array<string | undefined>) =>
 export class WorkspaceClient implements IWorkspaceClient {
   private http: HttpSetup;
   private workspaces: WorkspacesSetup;
+  private isPermissionEnabled: boolean = false;
 
   constructor(http: HttpSetup, workspaces: WorkspacesSetup) {
     this.http = http;
     this.workspaces = workspaces;
+  }
+
+  public setPermissionEnabled(enabled: boolean) {
+    this.isPermissionEnabled = enabled;
   }
 
   /**
@@ -413,6 +419,33 @@ export class WorkspaceClient implements IWorkspaceClient {
     return {
       DataSourceAssociation,
     };
+  }
+
+  /**
+   * Refresh a workspace by fetching the latest data from the server
+   * and updating it in the workspace list, including readonly/owner flags.
+   */
+  public async refreshWorkspace(id: string): Promise<IResponse<WorkspaceAttributeWithPermission>> {
+    const resp = await this.get(id);
+    if (resp.success) {
+      const { permissionMode, ...workspaceAttributes } = resp.result;
+      const workspaceList = this.workspaces.workspaceList$.getValue();
+      this.workspaces.workspaceList$.next(
+        workspaceList.map((ws) =>
+          ws.id === id
+            ? {
+                ...ws,
+                ...workspaceAttributes,
+                readonly: this.isPermissionEnabled
+                  ? permissionMode === PermissionModeId.Read
+                  : false,
+                owner: this.isPermissionEnabled ? permissionMode === PermissionModeId.Owner : true,
+              }
+            : ws
+        )
+      );
+    }
+    return resp;
   }
 
   public stop() {

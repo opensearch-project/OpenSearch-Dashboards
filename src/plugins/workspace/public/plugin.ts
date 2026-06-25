@@ -601,8 +601,6 @@ export class WorkspacePlugin
       ui: {
         AddCollaboratorsModal,
       },
-      registerSupportedUseCasesForServerlessCollections: this.useCase
-        .registerSupportedUseCasesForServerlessCollections,
     };
   }
 
