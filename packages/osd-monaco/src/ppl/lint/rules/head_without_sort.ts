@@ -56,7 +56,7 @@ export const headWithoutSortDetector: Detector = (tree, config, _context, ruleNa
         diagnostics.push({
           ruleId: config.id,
           severity: config.severity,
-          message: 'Add sort before head to get stable results.',
+          message: config.message,
           range: rangeFromContext(stage.node),
           docUrl: config.docUrl,
         });

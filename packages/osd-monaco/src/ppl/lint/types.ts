@@ -45,6 +45,23 @@ export interface LintRunContext extends LintPayloadContext {
   grammarHash?: string;
 }
 
+/**
+ * Structured-clone-safe mirror of the lint context for passing to the compiled
+ * worker over postMessage. Sets/Maps are flattened to arrays/objects and the
+ * non-cloneable http client is omitted; the worker reconstitutes the Sets/Maps.
+ */
+export interface SerializableLintContext {
+  isCalcite?: boolean;
+  fields?: string[];
+  typeMap?: Record<string, string>;
+  disabledObjectFields?: string[];
+  visibleIndices?: string[];
+  settings?: { allJoinTypesAllowed?: boolean };
+  overrides?: BundleRuleOverrides;
+  dataSourceId?: string;
+  dataSourceVersion?: string;
+}
+
 export type Detector = (
   tree: ParserRuleContext,
   config: CatalogEntry,

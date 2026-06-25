@@ -12,6 +12,7 @@ import { pplRangeFormatProvider } from './formatter';
 import { resolvePPLValidationResult } from './validation_provider';
 import { getPPLLintContext, isPPLLintEnabled, resolvePPLLintResult } from './lint_bridge';
 import { LintResult } from './lint/diagnostic';
+import { SerializableLintContext } from './lint/types';
 import { diagnosticToMarker } from './lint/diagnostic_to_marker';
 import { LINT_OWNER, pplLintHoverProvider } from './lint/hover/hover_provider';
 import {
@@ -208,12 +209,30 @@ const processLintHighlighting = (model: monaco.editor.IModel): void => {
 
   pplWorkerProxyService.setup();
 
-  const overrides = getPPLLintContext(model)?.overrides;
+  // The compiled-worker fallback runs in a Web Worker, so the context must be
+  // structured-clone-safe: Sets/Maps are flattened and the http client (a
+  // function-bearing object) is dropped. The runtime bridge keeps the full context.
+  const lintContext = getPPLLintContext(model);
+  const workerContext: SerializableLintContext | undefined = lintContext
+    ? {
+        isCalcite: lintContext.isCalcite,
+        fields: lintContext.fields ? Array.from(lintContext.fields) : undefined,
+        typeMap: lintContext.typeMap ? Object.fromEntries(lintContext.typeMap) : undefined,
+        disabledObjectFields: lintContext.disabledObjectFields
+          ? Array.from(lintContext.disabledObjectFields)
+          : undefined,
+        visibleIndices: lintContext.visibleIndices,
+        settings: lintContext.settings,
+        overrides: lintContext.overrides,
+        dataSourceId: lintContext.dataSourceId,
+        dataSourceVersion: lintContext.dataSourceVersion,
+      }
+    : undefined;
 
   void resolvePPLLintResult(
     model,
     content,
-    async (query) => (await pplWorkerProxyService.lint(query, overrides)) as LintResult
+    async (query) => (await pplWorkerProxyService.lint(query, workerContext)) as LintResult
   )
     .then((lintResult: LintResult) => {
       if (

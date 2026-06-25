@@ -14,6 +14,12 @@ describe('head-without-sort (compiled surface)', () => {
 
   it('flags a head with no preceding sort', () =>
     expect(ids('search source=logs | head 5')).toContain('head-without-sort'));
+  it('reports the message from the rule catalog (not a hardcoded literal)', () => {
+    const diagnostic = analyzer
+      .lint('search source=logs | head 5')
+      .diagnostics.find((d) => d.ruleId === 'head-without-sort');
+    expect(diagnostic?.message).toBe('Add sort before head to get stable results.');
+  });
   it('does not flag a head preceded by sort', () =>
     expect(ids('search source=logs | sort age | head 5')).not.toContain('head-without-sort'));
   it('flags a head when sort appears only after it', () =>

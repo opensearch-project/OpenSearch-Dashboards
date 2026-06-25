@@ -5,7 +5,7 @@
 
 import { PPLValidationResult, PPLToken } from './ppl_language_analyzer';
 import { LintResult } from './lint/diagnostic';
-import { BundleRuleOverrides } from './lint/types';
+import { SerializableLintContext } from './lint/types';
 import { getWorker } from '../monaco_environment';
 import { WorkerLabels } from '../worker_config';
 
@@ -78,12 +78,12 @@ export class PPLWorkerProxyService {
   /**
    * Lint PPL content and get diagnostics
    */
-  public async lint(content: string, overrides?: BundleRuleOverrides): Promise<LintResult> {
+  public async lint(content: string, context?: SerializableLintContext): Promise<LintResult> {
     if (!this.worker) {
       throw new Error('PPL Worker Proxy Service has not been setup!');
     }
 
-    return this.sendMessage('lint', [content, overrides]);
+    return this.sendMessage('lint', [content, context]);
   }
 
   /**

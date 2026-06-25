@@ -134,21 +134,25 @@ describe('PPLWorkerProxyService', () => {
       await expect(service.lint('test')).rejects.toThrow('has not been setup');
     });
 
-    it('forwards content and overrides to the worker over postMessage', async () => {
+    it('forwards content and the serializable context to the worker over postMessage', async () => {
       service.setup();
 
-      const overrides = { 'head-without-sort': { enabled: false } };
-      const lintPromise = service.lint('source=logs | head 5', overrides);
+      const context = {
+        isCalcite: true,
+        dataSourceVersion: '3.8.0',
+        overrides: { 'head-without-sort': { enabled: false } },
+      };
+      const lintPromise = service.lint('source=logs | head 5', context);
 
       const messageData = mockWorker.postMessage.mock.calls[0][0];
       expect(messageData.method).toBe('lint');
-      expect(messageData.args).toEqual(['source=logs | head 5', overrides]);
+      expect(messageData.args).toEqual(['source=logs | head 5', context]);
 
       mockWorker.onmessage({ data: { id: messageData.id, result: { diagnostics: [] } } });
       await expect(lintPromise).resolves.toEqual({ diagnostics: [] });
     });
 
-    it('omits overrides (undefined) when none are supplied', async () => {
+    it('omits the context (undefined) when none is supplied', async () => {
       service.setup();
 
       const lintPromise = service.lint('source=logs');

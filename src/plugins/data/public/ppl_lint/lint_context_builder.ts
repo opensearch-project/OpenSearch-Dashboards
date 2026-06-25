@@ -6,7 +6,10 @@
 import { IUiSettingsClient } from 'opensearch-dashboards/public';
 import { PPLLintContext } from '@osd/monaco';
 import { HttpSetup } from '../../../../core/public';
-import { shouldUseRuntimeGrammar } from '../antlr/opensearch_ppl/ppl_grammar_cache';
+import {
+  deriveIsCalcite,
+  shouldUseRuntimeGrammar,
+} from '../antlr/opensearch_ppl/ppl_grammar_cache';
 import { buildOverridesFromSettings } from './lint_overrides';
 
 /** Subset of dataset fields needed for lint context construction. */
@@ -26,6 +29,7 @@ export function buildPPLLintContext(
     useRuntimeGrammar: shouldUseRuntimeGrammar(dsId, dsVersion),
     dataSourceId: dsId,
     dataSourceVersion: dsVersion,
+    isCalcite: deriveIsCalcite(dsVersion),
     overrides: buildOverridesFromSettings(services.uiSettings),
     http: services.http,
   };

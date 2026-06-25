@@ -11,7 +11,7 @@ import {
   PPLValidationResult,
 } from '../ppl_language_analyzer';
 import { LintResult } from '../lint/diagnostic';
-import { BundleRuleOverrides } from '../lint/types';
+import { LintRunContext, SerializableLintContext } from '../lint/types';
 
 // Simple worker implementation that doesn't depend on Monaco's internal modules
 class PPLWorkerImpl {
@@ -31,11 +31,28 @@ class PPLWorkerImpl {
     return this.analyzer.validate(content);
   }
 
-  async lint(content: string, overrides?: BundleRuleOverrides): Promise<LintResult> {
+  async lint(content: string, context?: SerializableLintContext): Promise<LintResult> {
     if (!this.analyzer) {
       this.analyzer = getPPLLanguageAnalyzer();
     }
-    return this.analyzer.lint(content, overrides ? { overrides } : undefined);
+    if (!context) {
+      return this.analyzer.lint(content);
+    }
+    // Rebuild the Sets/Maps that were flattened for structured-clone transfer.
+    const runContext: LintRunContext = {
+      isCalcite: context.isCalcite,
+      fields: context.fields ? new Set(context.fields) : undefined,
+      typeMap: context.typeMap ? new Map(Object.entries(context.typeMap)) : undefined,
+      disabledObjectFields: context.disabledObjectFields
+        ? new Set(context.disabledObjectFields)
+        : undefined,
+      visibleIndices: context.visibleIndices,
+      settings: context.settings,
+      overrides: context.overrides,
+      dataSourceId: context.dataSourceId,
+      dataSourceVersion: context.dataSourceVersion,
+    };
+    return this.analyzer.lint(content, runContext);
   }
 }
 

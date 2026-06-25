@@ -37,6 +37,10 @@ const FAILURE_CLASS_EXPLAINER: Record<FailureClass, string> = {
     'the query runs and may return data, but the command can behave differently than intended on this input — this is a heads-up, not a guaranteed outcome.',
 };
 
+// Escapes Markdown inline-formatting chars in untrusted text. ( ) # ! are intentionally
+// omitted: hover content renders with isTrusted:false (no command links), link targets are
+// built separately via encodeLinkTarget (which percent-encodes parentheses), and ! cannot
+// form an image because [ is already escaped here.
 function escapeInline(text: string): string {
   return text.replace(/([\\`*_[\]<>~|])/g, '\\$1');
 }
