@@ -274,17 +274,18 @@ export class QueryBuilder {
 
         const currentQueryState = this.queryState$.value;
         const currentEditorState = this.queryEditorState$.value;
+        const currentTime = this.getServices().data?.query?.timefilter?.timefilter?.getTime();
         const normalizedCurrent = normalizeHistoryStateForComparison(
           currentQueryState,
           currentEditorState,
-          { time: currentEditorState.dateRange }
+          { time: currentEditorState.dateRange ?? currentTime }
         );
         if (isEqual(normalizedUrl, normalizedCurrent)) return;
 
         if (urlEditorState) {
           this.updateQueryEditorState({
             ...(urlEditorState.languageType && { languageType: urlEditorState.languageType }),
-            ...(urlEditorState.isQueryEditorDirty && {
+            ...(typeof urlEditorState.isQueryEditorDirty === 'boolean' && {
               isQueryEditorDirty: urlEditorState.isQueryEditorDirty,
             }),
           });

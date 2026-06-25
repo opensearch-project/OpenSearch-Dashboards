@@ -205,13 +205,10 @@ export class VisualizationBuilder {
         this.clearCachedData();
         this.setVisConfig({
           type: urlVisState.chartType as ChartType,
-          ...(urlVisState.styleOptions && { styles: urlVisState.styleOptions }),
-          ...(urlVisState.axesMapping && { axesMapping: urlVisState.axesMapping }),
-          ...(urlVisState.splitField && { splitField: urlVisState.splitField }),
-          ...(urlVisState.splitLayout && { splitLayout: urlVisState.splitLayout }),
-          ...(urlVisState.showSplitLabel !== undefined && {
-            showSplitLabel: urlVisState.showSplitLabel,
-          }),
+          styles: urlVisState.styleOptions,
+          axesMapping: urlVisState.axesMapping,
+          splitField: urlVisState.splitField,
+          splitLayout: urlVisState.splitLayout,
         });
         if (typeof urlVisState.isVisDirty === 'boolean') {
           this.setIsVisDirty(urlVisState.isVisDirty);

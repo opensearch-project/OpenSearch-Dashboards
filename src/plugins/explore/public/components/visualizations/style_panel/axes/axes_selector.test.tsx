@@ -137,7 +137,12 @@ describe('AxesSelectPanel', () => {
     expect(screen.getByText('Y-Axis')).toBeInTheDocument();
   });
 
-  it('calls updateVisualization when valid selection is made', () => {
+  it('does not call updateVisualization on initial render with existing mapping', () => {
+    mockVisualizationRegistry.findRuleByAxesMapping.mockReturnValue({
+      id: 'rule1',
+      matchIndex: [1, 1, 0],
+    });
+
     const propsWithMapping = {
       ...defaultProps,
       currentMapping: {
@@ -145,14 +150,9 @@ describe('AxesSelectPanel', () => {
         [AxisRole.Y]: [mockNumericalColumns[0]],
       },
     };
-    mockVisualizationRegistry.findRuleByAxesMapping.mockReturnValue({
-      id: 'rule1',
-      matchIndex: [1, 1, 0],
-    });
-
     render(<AxesSelectPanel {...propsWithMapping} />);
 
-    expect(mockUpdateVisualization).toHaveBeenCalled();
+    expect(mockUpdateVisualization).not.toHaveBeenCalled();
   });
 
   it('initializes with current mapping', () => {
@@ -172,25 +172,6 @@ describe('AxesSelectPanel', () => {
 
     expect(screen.getByText('X-Axis')).toBeInTheDocument();
     expect(screen.getByText('Y-Axis')).toBeInTheDocument();
-  });
-
-  it('updates available axis options when selection changes', () => {
-    mockVisualizationRegistry.findRuleByAxesMapping.mockReturnValue({
-      id: 'rule1',
-      matchIndex: [1, 1, 0],
-    });
-
-    const propsWithMapping = {
-      ...defaultProps,
-      currentMapping: {
-        [AxisRole.X]: [mockCategoricalColumns[0]],
-        [AxisRole.Y]: [mockNumericalColumns[0]],
-      },
-    };
-
-    render(<AxesSelectPanel {...propsWithMapping} />);
-
-    expect(mockUpdateVisualization).toHaveBeenCalled();
   });
 
   it('handles multiple axis roles correctly', () => {
@@ -228,6 +209,45 @@ describe('AxesSelectPanel', () => {
 
     const placeholders = screen.getAllByText('Select a field');
     expect(placeholders.length).toBeGreaterThan(0);
+  });
+
+  describe('user interaction', () => {
+    beforeEach(() => {
+      mockVisualizationRegistry.findRuleByAxesMapping.mockReturnValue({ id: 'rule1' });
+    });
+
+    it('opens popover when selector button is clicked', () => {
+      render(
+        <AxesSelectPanel
+          {...defaultProps}
+          currentMapping={{
+            [AxisRole.X]: [mockCategoricalColumns[0]],
+          }}
+        />
+      );
+
+      const button = screen.getByRole('button', { name: 'category' });
+      fireEvent.click(button);
+
+      expect(screen.getByPlaceholderText('Filter list')).toBeInTheDocument();
+    });
+
+    it('calls updateVisualization when user removes a field', () => {
+      render(
+        <AxesSelectPanel
+          {...defaultProps}
+          currentMapping={{
+            [AxisRole.X]: [mockCategoricalColumns[0]],
+            [AxisRole.Y]: [mockNumericalColumns[0]],
+          }}
+        />
+      );
+
+      const removeButton = screen.getAllByLabelText('Remove field')[0];
+      fireEvent.click(removeButton);
+
+      expect(mockUpdateVisualization).toHaveBeenCalled();
+    });
   });
 
   describe('multi axis support', () => {

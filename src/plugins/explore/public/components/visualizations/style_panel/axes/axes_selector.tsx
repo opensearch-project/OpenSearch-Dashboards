@@ -123,59 +123,6 @@ export const AxesSelectPanel: React.FC<AxesSelectPanelProps> = ({
     Object.keys(mapping).forEach((role) => allAxisRolesFromSelection.add(role as AxisRole));
   });
 
-  // useEffect(() => {
-  //   // Current selected axis mapping
-  //   const normalizedAxesSelections: AxisColumnMappings = {};
-  //   Object.entries(currentSelections).forEach(([key, value]) => {
-  //     if (value && value.length > 0) {
-  //       normalizedAxesSelections[key as AxisRole] = value;
-  //     }
-  //   });
-  //   const ruleToUse = visualizationRegistry.findRuleByAxesMapping(
-  //     chartTypeRef.current,
-  //     convertMappingsToStrings(normalizedAxesSelections),
-  //     [...numericalColumns, ...categoricalColumns, ...dateColumns]
-  //   );
-
-  //   // If rule can be found, update visualization with the new axes mapping
-  //   // Limitation: the current implementation will only call updateVisualization() when the select
-  //   // mapping is valid and has rule mapped, which means partial selections won't trigger visualization
-  //   // updates until they form a complete valid mapping configuration.
-  //   // From the user's perspective, this means no visual feedback is provided during the selection
-  //   // process until a complete valid configuration is achieved, potentially leading to confusion
-  //   // about whether their partial selections are having any effect.
-  //   if (ruleToUse) {
-  //     updateVisualization({ mappings: convertMappingsToStrings(normalizedAxesSelections) });
-  //   }
-  // }, [
-  //   updateVisualization,
-  //   currentSelections,
-  //   visualizationRegistry,
-  //   numericalColumns,
-  //   categoricalColumns,
-  //   dateColumns,
-  // ]);
-
-  // const handleSelectionChange = useCallback((newSelections: AxisColumnMappings) => {
-  //   setCurrentSelections(newSelections);
-
-  //   const normalized: AxisColumnMappings = {};
-  //   Object.entries(newSelections).forEach(([key, value]) => {
-  //     if (value && value.length > 0) {
-  //       normalized[key as AxisRole] = value;
-  //     }
-  //   });
-
-  //   const ruleToUse = visualizationRegistry.findRuleByAxesMapping(
-  //     chartTypeRef.current,
-  //     convertMappingsToStrings(normalized),
-  //     [...numericalColumns, ...categoricalColumns, ...dateColumns]
-  //   );
-  //   if (ruleToUse) {
-  //     updateVisualization({ mappings: convertMappingsToStrings(normalized) });
-  //   }
-  // }, []);
-
   const handleSelectionChange = useCallback(
     (newSelections: AxisColumnMappings) => {
       setCurrentSelections(newSelections);
