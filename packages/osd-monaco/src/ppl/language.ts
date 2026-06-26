@@ -31,6 +31,7 @@ const OWNER = 'PPL_WORKER';
 const LINT_DEBOUNCE_MS = 500;
 const lintDebounceTimers = new Map<string, ReturnType<typeof setTimeout>>();
 const lintGenerations = new Map<string, number>();
+const syntaxGenerations = new Map<string, number>();
 
 // PPL worker proxy service for worker-based syntax highlighting
 const pplWorkerProxyService = new PPLWorkerProxyService();
@@ -143,6 +144,11 @@ const processSyntaxHighlighting = async (model: monaco.editor.IModel) => {
     return;
   }
 
+  // Stamp this run so a slower, earlier validation that resolves after a newer
+  // one cannot clobber the newer markers. Mirrors the lint path's guard.
+  const generation = (syntaxGenerations.get(model.id) ?? 0) + 1;
+  syntaxGenerations.set(model.id, generation);
+
   try {
     const content = model.getValue();
 
@@ -154,6 +160,18 @@ const processSyntaxHighlighting = async (model: monaco.editor.IModel) => {
       content,
       async (query) => (await pplWorkerProxyService.validate(query)) as PPLValidationResult
     )) as PPLValidationResult;
+
+    // Bail if a newer run started, the model was disposed, its content changed,
+    // or it is no longer PPL while we were awaiting — writing now would resurrect
+    // stale markers (and a stale command-typo fix range) over fresher state.
+    if (
+      syntaxGenerations.get(model.id) !== generation ||
+      model.isDisposed() ||
+      model.getValue() !== content ||
+      model.getLanguageId() !== PPL_LANGUAGE_ID
+    ) {
+      return;
+    }
 
     if (validationResult.errors.length > 0) {
       // A command-typo error carries a structured `fix`; collect those into the
@@ -377,6 +395,7 @@ const setupPPLSyntaxHighlighting = () => {
         lintDebounceTimers.delete(model.id);
       }
       lintGenerations.delete(model.id);
+      syntaxGenerations.delete(model.id);
       monaco.editor.setModelMarkers(model, OWNER, []);
       monaco.editor.setModelMarkers(model, LINT_OWNER, []);
       clearModelFixes(model);
@@ -393,6 +412,7 @@ const setupPPLSyntaxHighlighting = () => {
     lintDebounceTimers.forEach(clearTimeout);
     lintDebounceTimers.clear();
     lintGenerations.clear();
+    syntaxGenerations.clear();
     disposables.forEach((d) => d.dispose());
     pplWorkerProxyService.stop();
   };
