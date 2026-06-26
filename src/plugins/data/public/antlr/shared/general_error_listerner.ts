@@ -3,12 +3,25 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ANTLRErrorListener, ATNSimulator, Recognizer, Token } from 'antlr4ng';
+import {
+  ANTLRErrorListener,
+  ATNSimulator,
+  RecognitionException,
+  Recognizer,
+  Token,
+} from 'antlr4ng';
 
+import type { CommandSuggestion } from '@osd/monaco';
 import { TokenPosition, getTokenPosition } from '../shared/cursor';
 
-interface ParserSyntaxError extends TokenPosition {
+export interface ParserSyntaxError extends TokenPosition {
   message: string;
+  // Stable machine-readable identity for a recognized diagnostic. Reuses
+  // CommandSuggestion's `code` (type-only import, erased at runtime) so the PPL
+  // command-typo producer and this base error shape never drift.
+  code?: CommandSuggestion['code'];
+  // Structured quick-fix the marker builder turns into a Monaco lightbulb.
+  fix?: CommandSuggestion['fix'];
 }
 
 export class GeneralErrorListener implements ANTLRErrorListener {
@@ -25,7 +38,11 @@ export class GeneralErrorListener implements ANTLRErrorListener {
     token: S | null,
     startLine: number,
     startColumn: number,
-    message: string
+    message: string,
+    // Accepted so subclasses (e.g. PPLCommandErrorListener) can override with the
+    // full ANTLR signature and call `super.syntaxError(..., e)`. Unused here;
+    // backward-compatible for the SQL/DQL/autocomplete callers of the base class.
+    _e?: RecognitionException | null
   ): void {
     if (token) {
       const tokenPosition = getTokenPosition(token, this.whitespaceToken);

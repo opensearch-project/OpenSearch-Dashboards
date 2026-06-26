@@ -13,14 +13,18 @@ import { resolvePPLValidationResult } from './validation_provider';
 import { getPPLLintContext, isPPLLintEnabled, resolvePPLLintResult } from './lint_bridge';
 import { LintResult } from './lint/diagnostic';
 import { SerializableLintContext } from './lint/types';
-import { diagnosticToMarker } from './lint/diagnostic_to_marker';
-import { LINT_OWNER, pplLintHoverProvider } from './lint/hover/hover_provider';
+import { diagnosticToMarker, SYNTAX_MARKER_SOURCE } from './lint/diagnostic_to_marker';
+import { pplLintCodeActionProvider } from './lint/code_action_provider';
 import {
-  clearModelHoverFacts,
-  HoverFacts,
+  clearModelFixes,
+  clearModelSyntaxFixes,
+  MarkerFix,
   markerFixKey,
-  setModelHoverFacts,
-} from './lint/hover/hover_registry';
+  setModelFixes,
+  setModelSyntaxFixes,
+} from './lint/fix_registry';
+import { LINT_OWNER, pplLintHoverProvider } from './lint/hover/hover_provider';
+import { clearModelHoverFacts, HoverFacts, setModelHoverFacts } from './lint/hover/hover_registry';
 
 const PPL_LANGUAGE_ID = ID;
 const OWNER = 'PPL_WORKER';
@@ -135,6 +139,7 @@ const processSyntaxHighlighting = async (model: monaco.editor.IModel) => {
   if (model.getLanguageId() !== PPL_LANGUAGE_ID) {
     // Clear any existing PPL markers if language changed
     monaco.editor.setModelMarkers(model, OWNER, []);
+    clearModelSyntaxFixes(model);
     return;
   }
 
@@ -151,6 +156,14 @@ const processSyntaxHighlighting = async (model: monaco.editor.IModel) => {
     )) as PPLValidationResult;
 
     if (validationResult.errors.length > 0) {
+      // A command-typo error carries a structured `fix`; collect those into the
+      // syntax-fix side table (keyed by the marker fields Monaco preserves) so
+      // the code-action provider can offer a one-click lightbulb. The fix is not
+      // hung off the marker because Monaco's MarkerService rebuilds markers from
+      // a fixed field list and drops custom properties — same constraint the
+      // lint path handles via setModelFixes.
+      const syntaxFixes = new Map<string, MarkerFix>();
+
       // Convert errors to Monaco markers
       const markers: monaco.editor.IMarkerData[] = validationResult.errors.map((error) => {
         // Map SyntaxError properties to Monaco marker properties
@@ -165,24 +178,35 @@ const processSyntaxHighlighting = async (model: monaco.editor.IModel) => {
         const safeEndColumn = Math.max(safeStartColumn, endColumn);
 
         const docLink = getPPLDocumentationLink(error.message);
-        return {
+        const marker: monaco.editor.IMarkerData = {
           severity: monaco.MarkerSeverity.Error,
           message: error.message,
           startLineNumber: safeStartLine,
           startColumn: safeStartColumn,
           endLineNumber: safeEndLine,
           endColumn: safeEndColumn,
+          // Tag the channel so the code-action provider can serve syntax fixes
+          // without touching lint markers.
+          source: SYNTAX_MARKER_SOURCE,
           // Add error code for better categorization
           code: {
             value: 'View Documentation',
             target: monaco.Uri.parse(docLink.url),
           },
         };
+
+        if (error.fix) {
+          syntaxFixes.set(markerFixKey(marker), error.fix);
+        }
+
+        return marker;
       });
 
+      setModelSyntaxFixes(model, syntaxFixes);
       monaco.editor.setModelMarkers(model, OWNER, markers);
     } else {
-      // Clear markers if no errors
+      // Clear markers and any stale syntax fixes if no errors
+      clearModelSyntaxFixes(model);
       monaco.editor.setModelMarkers(model, OWNER, []);
     }
   } catch (error) {
@@ -201,6 +225,7 @@ const processLintHighlighting = (model: monaco.editor.IModel): void => {
 
   if (!isPPLLintEnabled() || model.getLanguageId() !== PPL_LANGUAGE_ID) {
     monaco.editor.setModelMarkers(model, LINT_OWNER, []);
+    clearModelFixes(model);
     clearModelHoverFacts(model);
     return;
   }
@@ -246,18 +271,29 @@ const processLintHighlighting = (model: monaco.editor.IModel): void => {
         return;
       }
       const markers = lintResult.diagnostics.map(diagnosticToMarker);
-      // MarkerService drops custom properties, so extract hoverFacts separately.
+      // Monaco's MarkerService rebuilds each marker from a fixed field list and
+      // drops the custom `fix` / `hoverFacts` properties, so they would never
+      // reach the code-action or hover providers. Capture each into a side table
+      // keyed by the fields the service preserves, then strip them off the marker
+      // before handing it over.
+      const fixes = new Map<string, MarkerFix>();
       const hoverFacts = new Map<string, HoverFacts>();
       for (const marker of markers) {
         const withExtras = marker as monaco.editor.IMarkerData & {
+          fix?: MarkerFix;
           hoverFacts?: HoverFacts;
         };
         const key = markerFixKey(marker);
+        if (withExtras.fix) {
+          fixes.set(key, withExtras.fix);
+          delete withExtras.fix;
+        }
         if (withExtras.hoverFacts) {
           hoverFacts.set(key, withExtras.hoverFacts);
           delete withExtras.hoverFacts;
         }
       }
+      setModelFixes(model, fixes);
       setModelHoverFacts(model, hoverFacts);
       monaco.editor.setModelMarkers(model, LINT_OWNER, markers);
     })
@@ -315,6 +351,8 @@ const setupPPLSyntaxHighlighting = () => {
         } else {
           monaco.editor.setModelMarkers(model, OWNER, []);
           monaco.editor.setModelMarkers(model, LINT_OWNER, []);
+          clearModelFixes(model);
+          clearModelSyntaxFixes(model);
           clearModelHoverFacts(model);
         }
       })
@@ -341,6 +379,8 @@ const setupPPLSyntaxHighlighting = () => {
       lintGenerations.delete(model.id);
       monaco.editor.setModelMarkers(model, OWNER, []);
       monaco.editor.setModelMarkers(model, LINT_OWNER, []);
+      clearModelFixes(model);
+      clearModelSyntaxFixes(model);
       clearModelHoverFacts(model);
     })
   );
@@ -382,6 +422,13 @@ export const registerPPLLanguage = () => {
   // Set up syntax highlighting with worker
   const disposeSyntaxHighlighting = setupPPLSyntaxHighlighting();
 
+  // Register the lint quick-fix code-action provider (the lightbulb). It reads
+  // the fix side tables for both the lint and syntax marker channels.
+  const codeActionDisposable = monaco.languages.registerCodeActionProvider(
+    PPL_LANGUAGE_ID,
+    pplLintCodeActionProvider
+  );
+
   const hoverDisposable = monaco.languages.registerHoverProvider(
     PPL_LANGUAGE_ID,
     pplLintHoverProvider
@@ -390,6 +437,7 @@ export const registerPPLLanguage = () => {
   return {
     dispose: () => {
       disposeSyntaxHighlighting();
+      codeActionDisposable.dispose();
       hoverDisposable.dispose();
     },
   };

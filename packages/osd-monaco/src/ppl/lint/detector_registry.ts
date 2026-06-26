@@ -6,6 +6,7 @@
 import { Detector } from './types';
 import { headWithoutSortDetector } from './rules/head_without_sort';
 import { divisionByZeroDetector } from './rules/division_by_zero';
+import { fieldValidationDetector } from './rules/field_validation';
 
 const registry = new Map<string, Detector>();
 
@@ -25,6 +26,7 @@ export function resetDetectorRegistry(): void {
 export function registerBuiltInDetectors(): void {
   registerDetector('head-without-sort', headWithoutSortDetector);
   registerDetector('division-by-zero', divisionByZeroDetector);
+  registerDetector('field-validation', fieldValidationDetector);
 }
 
 registerBuiltInDetectors();

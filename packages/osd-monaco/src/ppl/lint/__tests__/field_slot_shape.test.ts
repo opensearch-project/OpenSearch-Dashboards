@@ -1,0 +1,146 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { CharStream, CommonTokenStream, ParserRuleContext } from 'antlr4ng';
+import { OpenSearchPPLLexer, OpenSearchPPLParser } from '@osd/antlr-grammar';
+import { fieldValidationDetector } from '../rules/field_validation';
+import { createRuntimeRuleNameToIndex } from '../rule_index';
+import { CatalogEntry, LintRunContext } from '../types';
+import { Diagnostic } from '../diagnostic';
+
+// Feature B — field-slot shape validation for grok/parse/patterns.
+//
+// The shape pass fires on the runtime-bundle surface, where `grok field=body`
+// parses cleanly as a comparison (a silent misparse). The full compiled grammar
+// (`OpenSearchPPLParser`) is the in-repo proxy for that surface: it produces the
+// same `comparisonExpression`/`fieldExpression`/`literalValue` structure the
+// deserialized runtime ATN does, so building trees from it exercises the exact
+// predicate that runs in production on engines >= 3.6.
+
+const config: CatalogEntry = {
+  id: 'field-validation',
+  detector: 'field-validation',
+  enabled: true,
+  severity: 'warning',
+  message: 'Reference to an unknown field.',
+  docUrl: 'https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/fields/',
+  appliesTo: {},
+};
+
+// The full compiled grammar uses the same rule names as the runtime bundle for
+// the four rules the predicate touches, so its rule-name->index map stands in
+// for the runtime map.
+const ruleNameToIndex = createRuntimeRuleNameToIndex(
+  new Map(OpenSearchPPLParser.ruleNames.map((name, idx) => [name, idx]))
+);
+
+function buildTree(query: string): ParserRuleContext {
+  const lexer = new OpenSearchPPLLexer(CharStream.fromString(query));
+  lexer.removeErrorListeners();
+  const parser = new OpenSearchPPLParser(new CommonTokenStream(lexer));
+  parser.removeErrorListeners();
+  return parser.root();
+}
+
+function shapeDiagnostics(query: string, surface?: LintRunContext['grammarSurface']): Diagnostic[] {
+  const tree = buildTree(query);
+  const context: LintRunContext = surface ? { grammarSurface: surface } : {};
+  return fieldValidationDetector(tree, config, context, ruleNameToIndex);
+}
+
+describe('field-slot shape (runtime-bundle proxy)', () => {
+  describe('flags Splunk-style field= and other non-field expressions', () => {
+    it('flags grok field=body with an error and a remove-field= fix', () => {
+      const diags = shapeDiagnostics('source=t | grok field=body "x"', 'runtime-bundle');
+      expect(diags).toHaveLength(1);
+      expect(diags[0].ruleId).toBe('field-validation');
+      expect(diags[0].severity).toBe('error');
+      expect(diags[0].fix?.text).toBe('body');
+      expect(diags[0].message).toContain('grok');
+      expect(diags[0].message).toContain('field name');
+    });
+
+    it('flags grok field = body (spaced) the same way', () => {
+      const diags = shapeDiagnostics('source=t | grok field = body "x"', 'runtime-bundle');
+      expect(diags).toHaveLength(1);
+      expect(diags[0].fix?.text).toBe('body');
+    });
+
+    it('flags parse field=message with a fix to the bare field', () => {
+      const diags = shapeDiagnostics('source=t | parse field=message "x"', 'runtime-bundle');
+      expect(diags).toHaveLength(1);
+      expect(diags[0].severity).toBe('error');
+      expect(diags[0].fix?.text).toBe('message');
+      expect(diags[0].message).toContain('parse');
+    });
+
+    it('flags patterns field=body', () => {
+      const diags = shapeDiagnostics('source=t | patterns field=body', 'runtime-bundle');
+      expect(diags).toHaveLength(1);
+      expect(diags[0].severity).toBe('error');
+      expect(diags[0].fix?.text).toBe('body');
+      expect(diags[0].message).toContain('patterns');
+    });
+
+    it('flags a non-equality comparison but offers NO fix', () => {
+      const diags = shapeDiagnostics('source=t | grok status > 200 "x"', 'runtime-bundle');
+      expect(diags).toHaveLength(1);
+      expect(diags[0].severity).toBe('error');
+      expect(diags[0].fix).toBeUndefined();
+    });
+
+    it('flags a function-wrapped field but offers NO fix', () => {
+      const diags = shapeDiagnostics('source=t | grok upper(body) "x"', 'runtime-bundle');
+      expect(diags).toHaveLength(1);
+      expect(diags[0].fix).toBeUndefined();
+    });
+
+    it('flags a bare literal but offers NO fix', () => {
+      const diags = shapeDiagnostics('source=t | grok 200 "x"', 'runtime-bundle');
+      expect(diags).toHaveLength(1);
+      expect(diags[0].fix).toBeUndefined();
+    });
+  });
+
+  describe('does NOT flag a bare field reference', () => {
+    it('grok body', () => {
+      expect(shapeDiagnostics('source=t | grok body "x"', 'runtime-bundle')).toEqual([]);
+    });
+
+    it('grok a.b.c (dotted)', () => {
+      expect(shapeDiagnostics('source=t | grok a.b.c "x"', 'runtime-bundle')).toEqual([]);
+    });
+
+    it('patterns message', () => {
+      expect(shapeDiagnostics('source=t | patterns message', 'runtime-bundle')).toEqual([]);
+    });
+  });
+
+  describe('surface gate', () => {
+    it('defers on the compiled-simplified surface (syntax channel owns it)', () => {
+      // Even on a tree that contains the misparse, an explicit simplified
+      // surface suppresses the shape pass.
+      expect(shapeDiagnostics('source=t | grok field=body "x"', 'compiled-simplified')).toEqual([]);
+    });
+  });
+
+  describe('overlap suppression', () => {
+    it('does not co-emit an "Unknown field" existence finding for field=body', () => {
+      const tree = buildTree('source=t | grok field=body "x"');
+      // A field set that lacks both `field` and `body` would normally make the
+      // existence pass fire on each; the shape finding must swallow both.
+      const context: LintRunContext = {
+        grammarSurface: 'runtime-bundle',
+        fields: new Set<string>(['unrelated']),
+      };
+      const diags = fieldValidationDetector(tree, config, context, ruleNameToIndex);
+      const unknownFieldMessages = diags.filter((d) => d.message.startsWith('Unknown field'));
+      expect(unknownFieldMessages).toEqual([]);
+      // Exactly the one shape error survives.
+      expect(diags).toHaveLength(1);
+      expect(diags[0].severity).toBe('error');
+    });
+  });
+});
