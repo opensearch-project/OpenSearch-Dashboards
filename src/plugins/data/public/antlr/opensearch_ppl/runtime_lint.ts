@@ -79,10 +79,14 @@ function buildRuntimeTree(query: string, grammar: CachedGrammar): ParserRuleCont
   parser.buildParseTrees = true;
 
   try {
+    // Keep the tree even when the parse had errors. ANTLR's error recovery still
+    // produces a usable (partial) tree, and the lint rules are written to walk it
+    // best-effort — a semantically-valid query the runtime ATN can't fully parse
+    // (e.g. `eval x = <field> + 1`, which the engine accepts) must still be
+    // field-validated. This mirrors the compiled fallback path, which runs the
+    // rules unconditionally on whatever `root()` returns. Only a thrown exception
+    // (no tree at all) suppresses linting.
     const tree = parser.parse(startRuleIndex);
-    if (errorListener.errors.length > 0) {
-      return undefined;
-    }
     return tree ?? undefined;
   } catch {
     return undefined;
