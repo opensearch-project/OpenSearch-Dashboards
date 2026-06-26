@@ -43,4 +43,7 @@ export { runLint } from './lint/lint_runner';
 export { getBundledCatalog } from './lint/catalog';
 export { createRuntimeRuleNameToIndex } from './lint/rule_index';
 
+export { buildCommandSuggestion } from './command_suggestion';
+export type { CommandSuggestion } from './command_suggestion';
+
 export const PPLLang = { ID };

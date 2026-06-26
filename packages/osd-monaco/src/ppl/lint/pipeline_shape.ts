@@ -4,7 +4,7 @@
  */
 
 import type { ParserRuleContext, ParseTree } from 'antlr4ng';
-import { isRuleNode, findAllDescendantsByRule } from './rule_index';
+import { isRuleNode, isTerminalNode, findAllDescendantsByRule } from './rule_index';
 import { RuleNameToIndex } from './rule_index';
 
 export interface PipelineStage {
@@ -13,7 +13,10 @@ export interface PipelineStage {
 }
 
 export interface PipelineShape {
+  // Command stages in pipe (source) order.
   stages: PipelineStage[];
+  // Field names created upstream in the pipeline.
+  createdFields: Set<string>;
 }
 
 const COMMAND_RULE_NAMES = [
@@ -64,12 +67,70 @@ function buildIndexToCommandName(ruleNameToIndex: RuleNameToIndex): Map<number, 
   return map;
 }
 
+// Collect created field names from a single command node. Best-effort: it scans
+// for `... AS <name>` patterns and known LHS positions (eval clause).
+function collectCreatedFields(
+  stage: PipelineStage,
+  ruleNameToIndex: RuleNameToIndex,
+  out: Set<string>
+): void {
+  // Walk descendants looking for an `AS` terminal followed by a name node.
+  const stack: ParseTree[] = [stage.node];
+  while (stack.length > 0) {
+    const node = stack.pop()!;
+    if (!isRuleNode(node)) {
+      continue;
+    }
+    const children = node.children ?? [];
+    for (let i = 0; i < children.length; i++) {
+      const child = children[i];
+      if (isTerminalNode(child) && child.getText().toLowerCase() === 'as') {
+        const next = children[i + 1];
+        if (isRuleNode(next)) {
+          const name = next.getText();
+          if (name) {
+            out.add(name);
+          }
+        }
+      }
+    }
+
+    stack.push(...children);
+  }
+
+  // eval LHS names: evalClause's first fieldExpression child.
+  const fieldExprIdx = ruleNameToIndex('fieldExpression');
+  const evalClauseIdx = ruleNameToIndex('evalClause');
+  if (evalClauseIdx !== -1) {
+    const evalStack: ParseTree[] = [stage.node];
+    while (evalStack.length > 0) {
+      const node = evalStack.pop()!;
+      if (!isRuleNode(node)) {
+        continue;
+      }
+      if (node.ruleIndex === evalClauseIdx) {
+        const first = (node.children ?? []).find(
+          (c) => isRuleNode(c) && c.ruleIndex === fieldExprIdx
+        ) as ParserRuleContext | undefined;
+        if (first) {
+          const name = first.getText();
+          if (name) {
+            out.add(name);
+          }
+        }
+      }
+      evalStack.push(...(node.children ?? []));
+    }
+  }
+}
+
 export function buildPipelineShape(
   tree: ParserRuleContext,
   ruleNameToIndex: RuleNameToIndex
 ): PipelineShape {
   const indexToCommand = buildIndexToCommandName(ruleNameToIndex);
   const stages: PipelineStage[] = [];
+  const createdFields = new Set<string>();
 
   const visit = (node: ParseTree): void => {
     if (isRuleNode(node)) {
@@ -85,7 +146,11 @@ export function buildPipelineShape(
   };
   visit(tree);
 
-  return { stages };
+  for (const stage of stages) {
+    collectCreatedFields(stage, ruleNameToIndex, createdFields);
+  }
+
+  return { stages, createdFields };
 }
 
 /** Subtrees with an alternate field source, pruned during field-validation. */

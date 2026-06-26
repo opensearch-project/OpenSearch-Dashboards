@@ -42,6 +42,7 @@ import {
   cleanupPPLContexts,
   PPLDetachRefs,
   buildPPLLintContext,
+  LintFieldsCache,
   pplGrammarCache,
   shouldUseRuntimeGrammar,
   UI_SETTINGS,
@@ -120,6 +121,8 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
   const dataset = useSelector(selectDataset);
   // Ref so grammar-refresh closures always see the latest dataset.
   const datasetRef = useRef(dataset);
+  // Cache of index-pattern field names per dataset id for field-validation.
+  const lintFieldsRef = useRef<LintFieldsCache>({});
   const detachRefs = useRef<PPLDetachRefs>({
     validationContext: { current: undefined },
     grammarRefresh: { current: undefined },
@@ -141,8 +144,9 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
   }, []);
 
   const getLintContext = useCallback(
-    (): PPLLintContext => buildPPLLintContext(datasetRef.current, services),
-    // buildPPLLintContext only reads services.uiSettings and services.http.
+    (): PPLLintContext => buildPPLLintContext(datasetRef.current, lintFieldsRef.current, services),
+    // buildPPLLintContext only reads services.uiSettings and services.http;
+    // lintFieldsRef.current is a stable ref read at call time.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [services.uiSettings, services.http]
   );
@@ -211,6 +215,56 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
     editorRef,
     getLintContext,
   ]);
+
+  // Load index-pattern field names for the active dataset and feed them to the
+  // lint context. Field-validation self-suppresses until this resolves; the
+  // context is pushed in a single phase after the async load to avoid flicker.
+  useEffect(() => {
+    const datasetId = dataset?.id;
+    let cancelled = false;
+
+    const loadFields = async () => {
+      if (!datasetId) {
+        // No dataset: drop cached fields so field-validation self-suppresses
+        // rather than running against a previous dataset's metadata.
+        lintFieldsRef.current = {};
+      } else {
+        try {
+          // onlyCheckCache is left false: a cache-only fetch returns undefined
+          // on a miss (non-index-pattern datasets), which would throw below.
+          const indexPattern = await dataViews.get(datasetId);
+          if (cancelled || !indexPattern) {
+            return;
+          }
+          const fields = new Set<string>();
+          for (const field of indexPattern.fields ?? []) {
+            if (field?.name) {
+              fields.add(field.name);
+            }
+          }
+          lintFieldsRef.current = { datasetId, fields };
+        } catch {
+          if (cancelled) {
+            return;
+          }
+          // On failure leave fields unset so field-validation self-suppresses.
+          lintFieldsRef.current = {};
+        }
+      }
+
+      syncPPLLintContext(editorRef.current, getLintContext());
+      const model = editorRef.current?.getModel();
+      if (model) {
+        void revalidatePPLModel(model);
+      }
+    };
+
+    void loadFields();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [dataset?.id, dataViews, editorRef, getLintContext]);
 
   // Cleanup validation + lint context on unmount
   useEffect(() => () => cleanupPPLContexts(detachRefs.current), []);

@@ -58,7 +58,7 @@ describe('buildPPLLintContext', () => {
   });
 
   it('derives dataSourceId/version from the dataset and carries http + overrides', () => {
-    const ctx = buildPPLLintContext(dataset, services);
+    const ctx = buildPPLLintContext(dataset, {}, services);
     expect(ctx.dataSourceId).toBe('mds-1');
     expect(ctx.dataSourceVersion).toBe('3.8.0');
     expect(ctx.useRuntimeGrammar).toBe(true);
@@ -73,12 +73,12 @@ describe('buildPPLLintContext', () => {
       id: 'dataset-2',
       dataSource: { id: 'mds-2', version: '2.13.0' },
     };
-    const ctx = buildPPLLintContext(oldDataset, services);
+    const ctx = buildPPLLintContext(oldDataset, {}, services);
     expect(ctx.isCalcite).toBe(false);
   });
 
   it('handles an undefined dataset (no source selected)', () => {
-    const ctx = buildPPLLintContext(undefined, services);
+    const ctx = buildPPLLintContext(undefined, {}, services);
     expect(ctx.dataSourceId).toBeUndefined();
     expect(ctx.dataSourceVersion).toBeUndefined();
     expect(ctx.isCalcite).toBeUndefined();
@@ -88,7 +88,7 @@ describe('buildPPLLintContext', () => {
     mockGetResolvedVersion.mockReturnValue('3.6.0');
     const localDataset = { id: 'dataset-local', dataSource: { id: undefined } };
 
-    const ctx = buildPPLLintContext(localDataset, services);
+    const ctx = buildPPLLintContext(localDataset, {}, services);
 
     expect(mockGetResolvedVersion).toHaveBeenCalledWith(undefined);
     expect(ctx.dataSourceVersion).toBe('3.6.0');
@@ -97,7 +97,7 @@ describe('buildPPLLintContext', () => {
 
   it('uses dataset version over resolved version when both exist', () => {
     mockGetResolvedVersion.mockReturnValue('3.6.0');
-    const ctx = buildPPLLintContext(dataset, services);
+    const ctx = buildPPLLintContext(dataset, {}, services);
 
     expect(ctx.dataSourceVersion).toBe('3.8.0');
   });
@@ -105,7 +105,7 @@ describe('buildPPLLintContext', () => {
   it('injects cached calcite settings when available', () => {
     mockGetCachedSettings.mockReturnValue({ calciteEnabled: true, allJoinTypesAllowed: true });
 
-    const ctx = buildPPLLintContext(dataset, services);
+    const ctx = buildPPLLintContext(dataset, {}, services);
 
     expect(ctx.settings).toEqual({ allJoinTypesAllowed: true });
     expect(mockGetCachedSettings).toHaveBeenCalledWith('mds-1');
@@ -114,15 +114,32 @@ describe('buildPPLLintContext', () => {
   it('leaves settings undefined when no cached settings are available', () => {
     mockGetCachedSettings.mockReturnValue(undefined);
 
-    const ctx = buildPPLLintContext(dataset, services);
+    const ctx = buildPPLLintContext(dataset, {}, services);
 
     expect(ctx.settings).toBeUndefined();
   });
 
   it('suppresses disabled-join-type via settings.allJoinTypesAllowed', () => {
     mockGetCachedSettings.mockReturnValue({ calciteEnabled: true, allJoinTypesAllowed: true });
-    const ctx = buildPPLLintContext(dataset, services);
+    const ctx = buildPPLLintContext(dataset, {}, services);
 
     expect(ctx.settings?.allJoinTypesAllowed).toBe(true);
+  });
+
+  it('applies cached fields when they belong to the active dataset', () => {
+    const fields = new Set(['a', 'b']);
+    const ctx = buildPPLLintContext(dataset, { datasetId: 'dataset-1', fields }, services);
+    expect(ctx.fields).toBe(fields);
+  });
+
+  it('drops cached fields from a different dataset (self-suppress)', () => {
+    const fields = new Set(['a', 'b']);
+    const ctx = buildPPLLintContext(dataset, { datasetId: 'other-dataset', fields }, services);
+    expect(ctx.fields).toBeUndefined();
+  });
+
+  it('leaves fields undefined when the cache is empty', () => {
+    const ctx = buildPPLLintContext(dataset, {}, services);
+    expect(ctx.fields).toBeUndefined();
   });
 });

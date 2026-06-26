@@ -48,7 +48,7 @@ import {
   cleanupPPLContexts,
   PPLDetachRefs,
 } from './lint_context';
-import { buildPPLLintContext } from '../../ppl_lint/lint_context_builder';
+import { buildPPLLintContext, LintFieldsCache } from '../../ppl_lint/lint_context_builder';
 
 export interface QueryEditorProps {
   query: Query;
@@ -94,6 +94,9 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
     lintGrammarRefresh: { current: undefined },
     lintContextRefresh: { current: undefined },
   });
+  // Cache of index-pattern field names per dataset id, populated asynchronously
+  // for field-validation lint. Self-suppresses until loaded.
+  const lintFieldsRef = useRef<LintFieldsCache>({});
   const headerRef = useRef<HTMLDivElement>(null);
   const bannerRef = useRef<HTMLDivElement>(null);
   const bottomPanelRef = useRef<HTMLDivElement>(null);
@@ -145,9 +148,58 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
   };
 
   const getLintContext = (): PPLLintContext =>
-    buildPPLLintContext(queryRef.current.dataset, services);
+    buildPPLLintContext(queryRef.current.dataset, lintFieldsRef.current, services);
 
   useEffect(() => () => cleanupPPLContexts(detachRefs.current), []);
+
+  // Load index-pattern field names for the active dataset and feed them to the
+  // lint context. Field-validation self-suppresses until this resolves; we push
+  // the context in a single phase after the async load to avoid flicker.
+  useEffect(() => {
+    const datasetId = query.dataset?.id;
+    let cancelled = false;
+
+    const loadFields = async () => {
+      if (!datasetId) {
+        // No dataset: drop cached fields so field-validation self-suppresses
+        // rather than running against a previous dataset's metadata.
+        lintFieldsRef.current = {};
+      } else {
+        try {
+          const indexPattern = await getIndexPatterns().get(datasetId);
+          if (cancelled) {
+            return;
+          }
+          const fields = new Set<string>();
+          for (const field of indexPattern.fields ?? []) {
+            if (field?.name) {
+              fields.add(field.name);
+            }
+          }
+          lintFieldsRef.current = { datasetId, fields };
+        } catch {
+          // On failure leave fields unset so field-validation self-suppresses.
+          if (cancelled) {
+            return;
+          }
+          lintFieldsRef.current = {};
+        }
+      }
+
+      syncPPLLintContext(inputRef.current, getLintContext());
+      const model = inputRef.current?.getModel();
+      if (model) {
+        void revalidatePPLModel(model);
+      }
+    };
+
+    void loadFields();
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query.dataset?.id]);
 
   useEffect(() => {
     const subscription = services.application?.currentAppId$?.subscribe?.((appId) => {
