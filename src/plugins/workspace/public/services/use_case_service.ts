@@ -15,7 +15,6 @@ import {
   WorkspacesSetup,
   DEFAULT_NAV_GROUPS,
   ALL_USE_CASE_ID,
-  UseCaseId,
 } from '../../../../core/public';
 import {
   WORKSPACE_DETAIL_APP_ID,
@@ -37,13 +36,6 @@ export interface UseCaseServiceSetupDeps {
 
 export class UseCaseService {
   private workspaceAndManageWorkspaceCategorySubscription?: Subscription;
-  private supportedUseCasesForServerlessCollections = new Set<UseCaseId>([
-    UseCaseId.ESSENTIAL_USE_CASE_ID,
-  ]);
-
-  public get supportedUseCasesForServerless(): UseCaseId[] {
-    return Array.from(this.supportedUseCasesForServerlessCollections);
-  }
 
   constructor() {}
 
@@ -234,8 +226,4 @@ export class UseCaseService {
   stop() {
     this.workspaceAndManageWorkspaceCategorySubscription?.unsubscribe();
   }
-
-  registerSupportedUseCasesForServerlessCollections = (useCaseIds: UseCaseId[]) => {
-    useCaseIds.forEach((id) => this.supportedUseCasesForServerlessCollections.add(id));
-  };
 }

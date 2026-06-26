@@ -82,6 +82,7 @@ describe('ChatPlugin', () => {
         ),
       },
       workspaces: {},
+      savedObjects: { client: {} },
     };
 
     // Mock dependencies
@@ -128,7 +129,8 @@ describe('ChatPlugin', () => {
       expect(ChatService).toHaveBeenCalledWith(
         mockCoreStart.uiSettings,
         mockCoreStart.chat,
-        mockCoreStart.workspaces
+        mockCoreStart.workspaces,
+        mockCoreStart.savedObjects.client
       );
     });
 
@@ -159,7 +161,8 @@ describe('ChatPlugin', () => {
       expect(ChatService).toHaveBeenCalledWith(
         mockCoreStart.uiSettings,
         mockCoreStart.chat,
-        mockCoreStart.workspaces
+        mockCoreStart.workspaces,
+        mockCoreStart.savedObjects.client
       );
       expect(startContract.chatService).toBeInstanceOf(ChatService);
       expect(mockCoreStart.chrome.navControls.registerPrimaryHeaderRight).toHaveBeenCalled();
@@ -171,7 +174,8 @@ describe('ChatPlugin', () => {
       expect(ChatService).toHaveBeenCalledWith(
         mockCoreStart.uiSettings,
         mockCoreStart.chat,
-        mockCoreStart.workspaces
+        mockCoreStart.workspaces,
+        mockCoreStart.savedObjects.client
       );
       expect(startContract.chatService).toBeInstanceOf(ChatService);
       expect(mockCoreStart.chrome.navControls.registerPrimaryHeaderRight).toHaveBeenCalled();
@@ -234,7 +238,8 @@ describe('ChatPlugin', () => {
         expect(ChatService).toHaveBeenCalledWith(
           mockCoreStart.uiSettings,
           mockCoreStart.chat,
-          mockCoreStart.workspaces
+          mockCoreStart.workspaces,
+          mockCoreStart.savedObjects.client
         );
       });
     });
@@ -367,6 +372,13 @@ describe('ChatPlugin', () => {
       });
     });
 
+    it('should open chat window by default when no stored state exists', () => {
+      // No localStorage state set (first visit)
+      plugin.start(mockCoreStart, mockDeps);
+
+      expect(mockCoreStart.chat.setWindowState).toHaveBeenCalledWith({ isWindowOpen: true });
+    });
+
     it('should persist window state changes to localStorage', () => {
       const windowStateSubject = new BehaviorSubject({
         isWindowOpen: false,
@@ -400,8 +412,9 @@ describe('ChatPlugin', () => {
       plugin.start(mockCoreStart, mockDeps);
 
       // Should not call setWindowState with invalid data from localStorage
-      // but will be called with paddingSize from sidecar config subscription
-      expect(mockCoreStart.chat.setWindowState).toHaveBeenCalledTimes(1);
+      // but will be called with default open state + paddingSize from sidecar config subscription
+      expect(mockCoreStart.chat.setWindowState).toHaveBeenCalledTimes(2);
+      expect(mockCoreStart.chat.setWindowState).toHaveBeenCalledWith({ isWindowOpen: true });
       expect(mockCoreStart.chat.setWindowState).toHaveBeenCalledWith({ paddingSize: 400 });
     });
   });

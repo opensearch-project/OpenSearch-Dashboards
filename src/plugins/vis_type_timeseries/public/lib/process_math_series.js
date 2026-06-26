@@ -27,7 +27,7 @@
  *   // processedResponse now contains evaluated math series ready for rendering
  */
 
-import { last, first, flatten, values, startsWith } from 'lodash';
+import { last, first, flatten, values } from 'lodash';
 import { evaluate, configureMathJs } from './mathjs_wrapper';
 
 // Configure Math.js with security restrictions
@@ -128,13 +128,20 @@ export function evaluateMathExpressions(response, panel) {
   mathSeriesConfigs.forEach((seriesConfig) => {
     const mathMetric = last(seriesConfig.metrics);
 
-    // Find component metrics for this math series
-    // Component metrics have IDs like "series-1:metric-a", "series-1:metric-b"
+    // Find component metrics for this math series.
+    // Component metric series have IDs like "series-1:metric-a" (no split) or
+    // "series-1:<splitKey>:metric-a" (when the series is split by terms/filters).
     const componentSeries = panelData.series.filter((s) => s.id.startsWith(seriesConfig.id + ':'));
 
     if (componentSeries.length > 0) {
-      const evaluatedSerie = evaluateMathSeries(seriesConfig, mathMetric, componentSeries);
-      evaluatedSeries.push(evaluatedSerie);
+      // Group the component series by split bucket so a split-by-terms math series
+      // produces one evaluated series per split. Without this, a split series emits a
+      // single empty series and the visualization renders no data.
+      const splits = groupComponentSeriesBySplit(seriesConfig, mathMetric, componentSeries);
+
+      splits.forEach((split) => {
+        evaluatedSeries.push(evaluateMathSplit(seriesConfig, mathMetric, split));
+      });
 
       // Mark component series as processed
       componentSeries.forEach((s) => processedIds.add(s.id));
@@ -163,41 +170,103 @@ export function evaluateMathExpressions(response, panel) {
 }
 
 /**
- * Evaluates a single math series by combining component metrics.
- * This replicates the logic from server/lib/vis_data/response_processors/series/math.js:54-136
+ * Groups a math series' component metrics by their split bucket.
+ *
+ * The raw endpoint appends the metric id to each series id. A non-split
+ * ("everything") series has the form `${seriesId}:${metricId}`, while a series
+ * split by terms/filters has the form `${seriesId}:${splitKey}:${metricId}`.
+ * Stripping the trailing `:${metricId}` yields the split id, which we use to
+ * group the component metrics that belong to the same split bucket (one evaluated
+ * math series per split).
+ *
+ * @param {Object} seriesConfig - The series configuration from the panel
+ * @param {Object} mathMetric - The math metric definition (for variable field tokens)
+ * @param {Array} componentSeries - Component metric series for this math series
+ * @returns {Array} One entry per split: { id, label, color, metrics: { [token]: serie } }
+ */
+function groupComponentSeriesBySplit(seriesConfig, mathMetric, componentSeries) {
+  // Tokens are the possible id suffixes a component series can carry: a plain metric
+  // id (e.g. "metric-a") or a percentile-value reference used by a math variable
+  // (e.g. "metric-a[95]"). Variables are resolved by these same tokens. Longest-first
+  // so the most specific token wins.
+  const tokens = [
+    ...seriesConfig.metrics.map((m) => m.id),
+    ...(mathMetric.variables || []).map((v) => v.field),
+  ]
+    .filter((t) => typeof t === 'string' && t.length > 0)
+    .sort((a, b) => b.length - a.length);
+
+  const splitsById = new Map();
+
+  componentSeries.forEach((serie) => {
+    // Match the trailing `:${token}` to recover both the split id (everything before
+    // it) and the token under which the variable will look this series up.
+    const token = tokens.find((t) => serie.id.endsWith(`:${t}`));
+    if (!token) return;
+
+    // Everything before the `:${token}` suffix is the split id. For a non-split
+    // series this equals seriesConfig.id; for a terms/filters split it is
+    // `${seriesConfig.id}:${splitKey}`.
+    const splitId = serie.id.slice(0, serie.id.length - `:${token}`.length);
+
+    if (!splitsById.has(splitId)) {
+      splitsById.set(splitId, {
+        id: splitId,
+        label: serie.label,
+        color: serie.color,
+        metrics: {},
+      });
+    }
+    splitsById.get(splitId).metrics[token] = serie;
+  });
+
+  return Array.from(splitsById.values());
+}
+
+/**
+ * Evaluates the math expression for a single split bucket.
  *
  * @param {Object} seriesConfig - The series configuration from the panel
  * @param {Object} mathMetric - The math metric definition
- * @param {Array} componentSeries - Array of component metric series
+ * @param {Object} split - A split bucket from groupComponentSeriesBySplit
  * @returns {Object} Evaluated series with computed data
  */
-function evaluateMathSeries(seriesConfig, mathMetric, componentSeries) {
+function evaluateMathSplit(seriesConfig, mathMetric, split) {
   const decoration = getDefaultDecoration(seriesConfig);
+
+  // For a non-split ("everything") series the split id equals the series id, and we
+  // keep the configured series label/color. For a terms/filters split, each bucket
+  // carries its own label (the term value) and color.
+  const isSplit = split.id !== seriesConfig.id;
+  const label = isSplit
+    ? split.label || seriesConfig.label || 'Math'
+    : seriesConfig.label || 'Math';
+  const color = isSplit ? split.color : seriesConfig.color;
+
+  const emptySeries = {
+    id: split.id,
+    label,
+    color,
+    data: [],
+    ...decoration,
+  };
+
   if (!mathMetric.variables || mathMetric.variables.length === 0) {
-    return {
-      id: seriesConfig.id,
-      label: seriesConfig.label || 'Math',
-      data: [],
-      ...decoration,
-    };
+    return emptySeries;
   }
 
-  // Build splitData structure mapping variable names to [timestamp, value] arrays
-  // This mirrors math.js:57-70
+  // Build splitData mapping variable names to [timestamp, value] arrays. Components
+  // are keyed by the variable field (the metric id, or "${metricId}[${percentile}]"
+  // for percentile references), so each variable resolves directly to its component.
   const splitData = {};
   mathMetric.variables.forEach((variable) => {
-    const metric = seriesConfig.metrics.find((m) => startsWith(variable.field, m.id));
-    if (!metric) return;
-
-    // Find the component series for this variable
-    const componentSerie = componentSeries.find((s) => s.id === `${seriesConfig.id}:${metric.id}`);
+    const componentSerie = split.metrics[variable.field];
     if (componentSerie) {
       splitData[variable.name] = componentSerie.data;
     }
   });
 
   // Build params._all structure
-  // This mirrors math.js:73-79
   const all = Object.keys(splitData).reduce((acc, key) => {
     acc[key] = {
       values: splitData[key].map((x) => x[1]),
@@ -207,24 +276,18 @@ function evaluateMathSeries(seriesConfig, mathMetric, componentSeries) {
   }, {});
 
   // Get timestamps from first variable
-  // This mirrors math.js:83-92
   const firstVar = first(mathMetric.variables);
   if (!splitData[firstVar.name]) {
-    return {
-      id: seriesConfig.id,
-      label: seriesConfig.label || 'Math',
-      data: [],
-      ...decoration,
-    };
+    return emptySeries;
   }
 
   const timestamps = splitData[firstVar.name].map((r) => first(r));
 
-  // Get bucket size from component series metadata
-  const bucketSize = componentSeries[0].meta?.bucketSize || 0;
+  // Get bucket size from any component series metadata for this split
+  const componentForMeta = values(split.metrics)[0];
+  const bucketSize = componentForMeta?.meta?.bucketSize || 0;
 
   // Evaluate expression for each timestamp
-  // This mirrors math.js:96-128
   const data = timestamps.map((ts, index) => {
     // Build params object for this timestamp
     const params = mathMetric.variables.reduce((acc, v) => {
@@ -237,8 +300,6 @@ function evaluateMathSeries(seriesConfig, mathMetric, componentSeries) {
     if (someNull) return [ts, null];
 
     try {
-      // Evaluate expression with full context
-      // Context matches server exactly (math.js:107-114)
       const result = evaluate(mathMetric.script, {
         params: {
           ...params,
@@ -269,9 +330,9 @@ function evaluateMathSeries(seriesConfig, mathMetric, componentSeries) {
   });
 
   return {
-    id: seriesConfig.id,
-    label: seriesConfig.label || 'Math',
-    color: seriesConfig.color,
+    id: split.id,
+    label,
+    color,
     data,
     ...decoration,
   };

@@ -80,6 +80,9 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
 
     if (isValidChatWindowState(storeState)) {
       chat.setWindowState(storeState);
+    } else {
+      // First visit or no stored state — open chat by default
+      chat.setWindowState({ isWindowOpen: true });
     }
 
     this.paddingSizeSubscription = overlays.sidecar
@@ -132,7 +135,12 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
     );
 
     // Always initialize chat service - core service handles enablement
-    this.chatService = new ChatService(core.uiSettings, core.chat, core.workspaces);
+    this.chatService = new ChatService(
+      core.uiSettings,
+      core.chat,
+      core.workspaces,
+      core.savedObjects.client
+    );
 
     if (!isEnabled) {
       return {

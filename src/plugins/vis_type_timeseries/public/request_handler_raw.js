@@ -7,6 +7,8 @@ import { getTimezone, validateInterval } from './application';
 import { getUISettings, getDataStart, getCoreStart } from './services';
 import { MAX_BUCKETS_SETTING } from '../common/constants';
 import { evaluateMathExpressions } from './lib/process_math_series';
+import { applyTimeShift, applyDropLastBucket } from './lib/post_process_raw_series';
+import { AnalyticEngineError } from '../../data/public';
 
 /**
  * Request handler for TSVB visualizations with client-side math evaluation.
@@ -60,8 +62,13 @@ export const metricsRequestHandlerRaw = async ({
         }),
       });
 
-      // Evaluate math expressions client-side
-      const processedResp = evaluateMathExpressions(rawResp, visParams);
+      // Evaluate math expressions client-side, then apply the post-math processors
+      // (timeShift, dropLastBucket) in the same order the server `data` flow uses.
+      // These run AFTER math so that params._all / params._timestamp are computed
+      // from the full, un-shifted bucket set (matching the server-side mathAgg).
+      let processedResp = evaluateMathExpressions(rawResp, visParams);
+      processedResp = applyTimeShift(processedResp, visParams);
+      processedResp = applyDropLastBucket(processedResp, visParams);
 
       return {
         dateFormat,
@@ -70,6 +77,9 @@ export const metricsRequestHandlerRaw = async ({
         ...processedResp,
       };
     } catch (error) {
+      if (error?.body?.attributes?.title === 'AnalyticEngineError') {
+        throw new AnalyticEngineError();
+      }
       return Promise.reject(error);
     }
   }

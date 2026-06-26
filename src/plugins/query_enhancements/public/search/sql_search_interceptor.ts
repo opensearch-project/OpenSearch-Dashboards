@@ -29,6 +29,7 @@ import { SQLFilterUtils } from './filters';
 
 export class SQLSearchInterceptor extends SearchInterceptor {
   private static readonly filterManagerSupportedAppNames = ['dashboards'];
+  private static readonly timeFilterSupportedAppNames = ['dashboards', 'explore/logs'];
 
   protected queryService!: DataPublicPluginStart['query'];
   protected notifications!: CoreStart['notifications'];
@@ -76,13 +77,12 @@ export class SQLSearchInterceptor extends SearchInterceptor {
     request: IOpenSearchDashboardsSearchRequest
   ): Promise<Query> {
     const dataset = query.dataset;
-    const enableTimeFiltering = request.params?.body?.enableTimeFiltering;
+    const appId = await this.application.currentAppId$.pipe(first()).toPromise();
 
     let nextQuery = query;
 
     // Apply filterManager filters (e.g. from the dashboard top filter bar) on
     // supported apps so chip filters affect SQL results.
-    const appId = await this.application.currentAppId$.pipe(first()).toPromise();
     if (appId && SQLSearchInterceptor.filterManagerSupportedAppNames.includes(appId)) {
       const filters = this.queryService.filterManager.getFilters();
       if (filters?.length) {
@@ -93,8 +93,15 @@ export class SQLSearchInterceptor extends SearchInterceptor {
       }
     }
 
-    // Only apply time filtering when explicitly enabled (e.g., by Explore)
-    if (!dataset?.timeFieldName || !enableTimeFiltering) return nextQuery;
+    // Apply time filtering only for supported apps.
+    // Other apps (like legacy discover) handle time filtering at the search source level.
+    if (!appId || !SQLSearchInterceptor.timeFilterSupportedAppNames.includes(appId)) {
+      return nextQuery;
+    }
+
+    if (!dataset?.timeFieldName) {
+      return nextQuery;
+    }
 
     const timeRange = this.queryService.timefilter.timefilter.getTime();
     const { fromDate, toDate } = formatTimePickerDate(timeRange, 'YYYY-MM-DD HH:mm:ss.SSS');

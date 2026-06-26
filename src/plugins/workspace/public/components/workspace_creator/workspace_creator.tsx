@@ -28,7 +28,11 @@ import { WorkspaceClient } from '../../workspace_client';
 import { DataSourceManagementPluginSetup } from '../../../../../plugins/data_source_management/public';
 import { DataPublicPluginStart } from '../../../../data/public';
 import { WorkspaceUseCase } from '../../types';
-import { getFirstUseCaseOfFeatureConfigs } from '../../utils';
+import {
+  getApplicationsSnapshot,
+  getFirstUseCaseOfFeatureConfigs,
+  pickUseCaseLandingAppId,
+} from '../../utils';
 import { useFormAvailableUseCases } from '../workspace_form/use_form_available_use_cases';
 import { NavigationPublicPluginStart } from '../../../../../plugins/navigation/public';
 import { DataSourceConnectionType } from '../../../common/types';
@@ -36,7 +40,6 @@ import { navigateToAppWithinWorkspace } from '../utils/workspace';
 import { WorkspaceCreatorForm } from './workspace_creator_form';
 import { optionIdToWorkspacePermissionModesMap } from '../workspace_form/constants';
 import { getUseCaseFeatureConfig } from '../../../../../core/public';
-import { UseCaseService } from '../../services';
 import { detectTraceData, createAutoDetectedDatasets } from '../../../../explore/public';
 
 export interface WorkspaceCreatorProps {
@@ -54,14 +57,12 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
       savedObjects,
       dataSourceManagement,
       navigationUI: { HeaderControl },
-      useCaseService,
       data: dataPlugin,
     },
   } = useOpenSearchDashboards<{
     workspaceClient: WorkspaceClient;
     dataSourceManagement?: DataSourceManagementPluginSetup;
     navigationUI: NavigationPublicPluginStart['ui'];
-    useCaseService: UseCaseService;
     data: DataPublicPluginStart;
   }>();
   const [isFormSubmitting, setIsFormSubmitting] = useState(false);
@@ -69,9 +70,7 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
   const isPermissionEnabled = application?.capabilities.workspaces.permissionEnabled;
 
   const { availableUseCases } = useFormAvailableUseCases({
-    savedObjects,
     registeredUseCases$,
-    useCaseService,
   });
 
   const location = useLocation();
@@ -149,8 +148,9 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
           if (application && http) {
             const newWorkspaceId = result.result.id;
             const useCaseId = getFirstUseCaseOfFeatureConfigs(attributes.features);
-            const useCaseLandingAppId = availableUseCases?.find(({ id }) => useCaseId === id)
-              ?.features[0].id;
+            const matchedUseCase = availableUseCases?.find(({ id }) => useCaseId === id);
+            const apps = getApplicationsSnapshot(application);
+            const useCaseLandingAppId = pickUseCaseLandingAppId(matchedUseCase?.features, apps);
 
             // For observability workspaces, run trace detection and create datasets if found
             const isObservabilityWorkspace = useCaseId === 'observability';
@@ -198,6 +198,7 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
 
                       await createAutoDetectedDatasets(
                         savedObjects.client,
+                        dataPlugin.dataViews,
                         detection,
                         dataSourceId
                       );

@@ -63,7 +63,7 @@ export class ByteSizeType extends Type<ByteSizeValue> {
   protected handleError(
     type: string,
     { limit, message, value }: Record<string, any>,
-    path: string[]
+    path: Array<string | number>
   ) {
     switch (type) {
       case 'any.required':

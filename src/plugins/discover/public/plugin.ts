@@ -79,6 +79,7 @@ declare module '../../share/public' {
 }
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import { ExplorePluginSetup } from '../../explore/public';
+import { ContextProviderStart } from '../../context_provider/public';
 
 /**
  * @public
@@ -150,6 +151,7 @@ export interface DiscoverStartPlugins {
   urlForwarding: UrlForwardingStart;
   inspector: InspectorPublicPluginStart;
   visualizations: VisualizationsStart;
+  contextProvider?: ContextProviderStart;
 }
 
 /**

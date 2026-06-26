@@ -274,7 +274,7 @@ describe('sample data list route', () => {
     );
   });
 
-  it('filters sample datasets to only logs and otel for AnalyticEngine data source', async () => {
+  it('filters sample datasets to only logs for AnalyticEngine data source', async () => {
     const mockDataSourceId = 'analyticEngineDataSource';
     const mockClient = jest.fn().mockResolvedValueOnce(true).mockResolvedValueOnce({ count: 1 });
 
@@ -342,10 +342,11 @@ describe('sample data list route', () => {
     expect(mockSOClient.get).toHaveBeenCalledWith('data-source', mockDataSourceId);
     expect(mockResponse.ok).toBeCalled();
 
-    // Verify that only logs and otel datasets are returned
+    // Verify that only the logs dataset is returned (otel is excluded because its
+    // nested-field trace mappings cannot be created on an AnalyticEngine domain)
     const responseBody = mockResponse.ok.mock.calls[0]?.[0]?.body as any[];
-    expect(responseBody).toHaveLength(2);
-    expect(responseBody.map((ds) => ds.id).sort()).toEqual(['logs', 'otel']);
+    expect(responseBody).toHaveLength(1);
+    expect(responseBody.map((ds) => ds.id).sort()).toEqual(['logs']);
   });
 
   it('returns all sample datasets for non-AnalyticEngine data source', async () => {

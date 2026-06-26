@@ -45,7 +45,7 @@ describe('IdentitySourceService', () => {
 
       expect(() => {
         service.registerIdentitySourceHandler(sourceA, mockHandler2);
-      }).toThrow("Identity source 'sourceA' has already been registered");
+      }).toThrow("Identity source for field 'source' has already been registered");
     });
 
     it('should support registering multiple different sources', () => {
@@ -80,7 +80,7 @@ describe('IdentitySourceService', () => {
 
       expect(() => {
         service.getIdentitySourceHandler(sourceB);
-      }).toThrow("Identity source 'sourceB' has not been registered");
+      }).toThrow("Invalid input for field 'source', no matching identity source handler found");
     });
 
     it('should throw an error with the correct source name in the message', () => {
@@ -90,7 +90,55 @@ describe('IdentitySourceService', () => {
 
       expect(() => {
         service.getIdentitySourceHandler(unknownSource);
-      }).toThrow(`Identity source 'unknown-source' has not been registered`);
+      }).toThrow("Invalid input for field 'source', no matching identity source handler found");
     });
+  });
+
+  describe('prototype pollution safety', () => {
+    const prototypePollutionSources = [
+      'constructor',
+      'hasOwnProperty',
+      'toString',
+      '__proto__',
+      'valueOf',
+      '__defineGetter__',
+    ];
+
+    it.each(prototypePollutionSources)(
+      'should register and retrieve handler for reserved key "%s"',
+      (source) => {
+        const logger = loggingSystemMock.create().get();
+        const service = new IdentitySourceService(logger);
+        const mockHandler = createMockHandler();
+
+        service.registerIdentitySourceHandler(source, mockHandler);
+        expect(service.getIdentitySourceHandler(source)).toBe(mockHandler);
+      }
+    );
+
+    it.each(prototypePollutionSources)(
+      'should throw when re-registering reserved key "%s"',
+      (source) => {
+        const logger = loggingSystemMock.create().get();
+        const service = new IdentitySourceService(logger);
+
+        service.registerIdentitySourceHandler(source, createMockHandler());
+        expect(() => service.registerIdentitySourceHandler(source, createMockHandler())).toThrow(
+          `Identity source for field 'source' has already been registered`
+        );
+      }
+    );
+
+    it.each(prototypePollutionSources)(
+      'should throw when getting unregistered reserved key "%s"',
+      (source) => {
+        const logger = loggingSystemMock.create().get();
+        const service = new IdentitySourceService(logger);
+
+        expect(() => service.getIdentitySourceHandler(source)).toThrow(
+          `Invalid input for field 'source', no matching identity source handler found`
+        );
+      }
+    );
   });
 });

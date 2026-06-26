@@ -25,8 +25,6 @@ describe('Line Chart to_expression', () => {
     name: 'Date',
     schema: VisFieldType.Date,
     column: 'date',
-    validValuesCount: 3,
-    uniqueValuesCount: 3,
   };
 
   const mockNumericColumn: VisColumn = {
@@ -34,8 +32,6 @@ describe('Line Chart to_expression', () => {
     name: 'Value',
     schema: VisFieldType.Numerical,
     column: 'value',
-    validValuesCount: 3,
-    uniqueValuesCount: 3,
   };
 
   const mockNumericColumn2: VisColumn = {
@@ -43,8 +39,6 @@ describe('Line Chart to_expression', () => {
     name: 'Value2',
     schema: VisFieldType.Numerical,
     column: 'value2',
-    validValuesCount: 3,
-    uniqueValuesCount: 3,
   };
 
   const mockCategoricalColumn: VisColumn = {
@@ -52,8 +46,6 @@ describe('Line Chart to_expression', () => {
     name: 'Category',
     schema: VisFieldType.Categorical,
     column: 'category',
-    validValuesCount: 3,
-    uniqueValuesCount: 2,
   };
 
   const mockCategoricalColumn2: VisColumn = {
@@ -61,8 +53,6 @@ describe('Line Chart to_expression', () => {
     name: 'Category2',
     schema: VisFieldType.Categorical,
     column: 'category2',
-    validValuesCount: 3,
-    uniqueValuesCount: 2,
   };
 
   const mockStyles = {

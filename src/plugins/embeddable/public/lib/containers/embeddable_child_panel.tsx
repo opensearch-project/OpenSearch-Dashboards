@@ -46,11 +46,13 @@ export interface EmbeddableChildPanelProps {
 
 interface State {
   loading: boolean;
+  visible: boolean;
 }
 
 /**
  * This component can be used by embeddable containers using react to easily render children. It waits
  * for the child to be initialized, showing a loading indicator until that is complete.
+ * Panels that are not in the viewport will defer mounting the PanelComponent until they scroll into view.
  */
 
 export class EmbeddableChildPanel extends React.Component<EmbeddableChildPanelProps, State> {
@@ -58,17 +60,34 @@ export class EmbeddableChildPanel extends React.Component<EmbeddableChildPanelPr
   public mounted: boolean;
   public embeddable!: IEmbeddable | ErrorEmbeddable;
   private subscription?: Subscription;
+  private panelRef = React.createRef<HTMLDivElement>();
+  private observer?: IntersectionObserver;
 
   constructor(props: EmbeddableChildPanelProps) {
     super(props);
     this.state = {
       loading: true,
+      visible: false,
     };
 
     this.mounted = false;
   }
 
   public async componentDidMount() {
+    const el = this.panelRef.current;
+    if (el) {
+      this.observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting && this.mounted) {
+            this.observer?.disconnect();
+            this.setState({ visible: true });
+          }
+        },
+        { rootMargin: '200px' }
+      );
+      this.observer.observe(el);
+    }
+
     this.mounted = true;
     const { container } = this.props;
 
@@ -80,6 +99,7 @@ export class EmbeddableChildPanel extends React.Component<EmbeddableChildPanelPr
 
   public componentWillUnmount() {
     this.mounted = false;
+    this.observer?.disconnect();
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -88,12 +108,12 @@ export class EmbeddableChildPanel extends React.Component<EmbeddableChildPanelPr
   public render() {
     const { PanelComponent } = this.props;
     const classes = classNames('embPanel', {
-      'embPanel-isLoading': this.state.loading,
+      'embPanel-isLoading': this.state.loading || !this.state.visible,
     });
 
     return (
-      <div className={classes}>
-        {this.state.loading || !this.embeddable ? (
+      <div className={classes} ref={this.panelRef}>
+        {this.state.loading || !this.embeddable || !this.state.visible ? (
           <EuiLoadingChart size="l" mono />
         ) : (
           <PanelComponent embeddable={this.embeddable} />
