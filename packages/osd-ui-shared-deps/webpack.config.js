@@ -33,6 +33,7 @@ const Path = require('path');
 const CompressionPlugin = require('compression-webpack-plugin');
 const { REPO_ROOT } = require('@osd/utils');
 // const webpack = require('webpack');
+// eslint-disable-next-line import/no-unresolved
 const { rspack } = require('@rspack/core');
 const { getSwcLoaderConfig } = require('@osd/utils');
 

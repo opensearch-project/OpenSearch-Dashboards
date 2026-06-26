@@ -33,6 +33,7 @@ const Fs = require('fs');
 
 const { run, createFailError, CiStatsReporter } = require('@osd/dev-utils');
 // const webpack = require('webpack');
+// eslint-disable-next-line import/no-unresolved
 const { rspack } = require('@rspack/core');
 // const Stats = require('webpack/lib/Stats');
 const del = require('del');
