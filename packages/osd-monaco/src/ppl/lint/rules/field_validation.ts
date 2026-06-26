@@ -9,7 +9,6 @@ import { Diagnostic, DiagnosticRange } from '../diagnostic';
 import { CatalogEntry, Detector, LintRunContext } from '../types';
 import { buildPipelineShape, collectAlternateSourceSubtrees } from '../pipeline_shape';
 import {
-  findAllChildrenByRule,
   findAllDescendantsByRule,
   findChildByRule,
   isParserRuleContext,
@@ -86,7 +85,12 @@ function collectJoinAliases(
   const aliases = new Set<string>();
   const sideAliasNodes = findAllDescendantsByRule(tree, ruleNameToIndex, 'sideAlias');
   for (const sideAlias of sideAliasNodes) {
-    for (const qn of findAllChildrenByRule(sideAlias, ruleNameToIndex, 'qualifiedName')) {
+    // Descendant (not direct-child) search: a `sideAlias` wraps exactly one alias
+    // identifier, but the runtime grammar may nest its `qualifiedName` below an
+    // intermediate rule. Direct-children-only lookup would then return an empty
+    // alias set and false-flag every join-alias ref. `sideAlias` holds a single
+    // alias, so descending can't over-collect.
+    for (const qn of findAllDescendantsByRule(sideAlias, ruleNameToIndex, 'qualifiedName')) {
       const text = qn.getText();
       if (text) {
         aliases.add(text);
