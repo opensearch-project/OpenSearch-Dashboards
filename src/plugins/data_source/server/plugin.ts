@@ -190,6 +190,12 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
     this.internalSavedObjects = core.savedObjects.createInternalRepository([
       DATA_SOURCE_SAVED_OBJECT_TYPE,
     ]);
+    // backendCompatibility (when enabled) registers a custom Transport on core's client.
+    // Apply the same Transport to modern data-source clients so legacy ES (6.x/7.x)
+    // connections get identical request/response interception (e.g. /_resolve/index
+    // synthesis). Undefined when no Transport is registered → data-source clients are
+    // built exactly as before (no behavior change).
+    this.dataSourceService.setCustomTransport(core.opensearch.getClientTransport?.());
     return {
       getAuthenticationMethodRegistry: () => this.authMethodsRegistry,
       getCustomApiSchemaRegistry: () => this.customApiSchemaRegistry,
