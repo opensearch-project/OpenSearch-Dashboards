@@ -98,6 +98,18 @@ if (window.__osdStrictCsp__ && window.__osdCspNotEnforced__) {
     telemetryEndpoint: {{{mfeTelemetryEndpoint}}},
     customerId: {{{mfeCustomerId}}},
     bucket: {{mfeUserBucket}},
+    {{!-- Phase 16 Story 3: registry-managed orchestrator (osd_bootstrap_mfe.js).
+          When the source registry is v3 AND advertises an `orchestrator` top-
+          level field, the boot-manifest resolver projects it as
+          `{ url, integrity? }` (no `version` — that is registry-side metadata,
+          not consumed by the loader). The thin shim below loads the orchestrator
+          script from this URL with the SRI `integrity` attribute pinned
+          (Phase 12 fail-closed posture extended to the orchestrator). When
+          absent (v1/v2 registries, or v3 without the field), this is `null`
+          and the shim falls back to the server-config `mfeBootstrapUrl` —
+          backward-compat at every consumption site. Raw JSON ({{{ }}} =
+          unescaped). --}}
+    orchestrator: {{{mfeOrchestrator}}},
   };
 
   window.onload = function () {
@@ -128,11 +140,23 @@ if (window.__osdStrictCsp__ && window.__osdCspNotEnforced__) {
     }
 
     var scriptsTarget = document.querySelector('head meta[name="add-scripts-here"]')
-    function loadScript(url, cb) {
+    function loadScript(url, cb, integrity) {
       var dom = document.createElement('script');
       {{!-- NOTE: async = false is used to trigger async-download/ordered-execution as outlined here: https://www.html5rocks.com/en/tutorials/speed/script-loading/ --}}
       dom.async = false;
       dom.src = url;
+      {{!-- Phase 16 Story 3: when the caller advertises an `integrity`
+            attribute (cross-origin registry-managed asset, e.g. the
+            orchestrator from CDN with SRI), pin the SRI hash. Browsers
+            REQUIRE `crossorigin` on the <script> tag for SRI to apply to
+            a cross-origin response. The default loader path passes no
+            integrity (`undefined`), so this branch is no-op for the legacy
+            same-origin server-bundled paths — preserving byte-for-byte
+            HTML output on the no-flag path. --}}
+      if (typeof integrity === 'string' && integrity.length > 0) {
+        dom.integrity = integrity;
+        dom.crossOrigin = 'anonymous';
+      }
       dom.addEventListener('error', failure);
       dom.addEventListener('load', cb);
       document.head.insertBefore(dom, scriptsTarget);
@@ -148,7 +172,20 @@ if (window.__osdStrictCsp__ && window.__osdCspNotEnforced__) {
           }
         }
 
-        if (typeof url !== 'string') {
+        if (typeof url !== 'string' && url && typeof url === 'object' && !Array.isArray(url) && typeof url.url === 'string') {
+          {{!-- Phase 16 Story 3: an entry can be either a plain string URL
+                (legacy path, server-bundled assets — most entries) OR an
+                object `{ url, integrity? }` for a registry-managed asset
+                with SRI. We dispatch on the shape so callers can mix the
+                two in the same `load([...])` array — the orchestrator
+                takes the object form when v3 advertises it, every other
+                entry stays a string. --}}
+          if (url.url.slice(-4) === '.css') {
+            loadStyleSheet(url.url, innerCb);
+          } else {
+            loadScript(url.url, innerCb, url.integrity);
+          }
+        } else if (typeof url !== 'string') {
           load(url, innerCb);
         } else if (url.slice(-4) === '.css') {
           loadStyleSheet(url, innerCb);
@@ -159,22 +196,31 @@ if (window.__osdStrictCsp__ && window.__osdCspNotEnforced__) {
     }
 
     {{!--
-      MFE mode load sequence (LOCKED, design §6):
+      MFE mode load sequence (LOCKED, design §6; Phase 16 Story 3 extension):
         1. Load core.entry.js (server-provided) so `entry/core/public` is registered
            into the __osdBundles__ shim. Its app code does not run until
            __osdBootstrap__() is invoked, so it is safe to load before shared deps.
-        2. Load the MFE bootstrap bundle, which exposes window.__osdBootstrapMfe__.
+        2. Load the MFE bootstrap bundle (the "orchestrator"), which exposes
+           window.__osdBootstrapMfe__. Phase 16 Story 3: when the source
+           registry is v3 AND advertises an `orchestrator` field, the loader
+           uses that URL with SRI (fail-closed: a tampered orchestrator
+           refuses to execute, the chunk-error surface fires). Otherwise the
+           loader falls back to the server-config `mfeBootstrapUrl` — same
+           behavior as Phase 13.
         3. Invoke __osdBootstrapMfe__: it loads shared deps (origin) and seeds the MF
            share scope, fetches the CURRENT registry at serve time, loads every plugin
            remote and registers it as `plugin/<id>/public` in the shim, THEN runs core
            __osdBootstrap__() — so plugin_reader resolves plugins synchronously, UNCHANGED.
       NOTE: local plugin jsDependencyPaths are intentionally OMITTED in this mode.
     --}}
+    var orchestratorEntry = (window.__osdMfe__.orchestrator && typeof window.__osdMfe__.orchestrator.url === 'string')
+      ? { url: window.__osdMfe__.orchestrator.url, integrity: window.__osdMfe__.orchestrator.integrity }
+      : '{{mfeBootstrapUrl}}';
     load([
       {{#each jsDependencyPaths}}
         '{{this}}',
       {{/each}}
-      '{{mfeBootstrapUrl}}',
+      orchestratorEntry,
     ], function () {
       window.__osdBootstrapMfe__({
         registryUrl: window.__osdMfe__.registryUrl,

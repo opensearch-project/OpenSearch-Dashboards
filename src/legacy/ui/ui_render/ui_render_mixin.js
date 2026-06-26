@@ -183,11 +183,20 @@ export function uiRenderMixin(osdServer, server, config) {
         }
         const mfeUserBucket = bucketFromCookie(mfeBucketCookieValue);
 
-        // Read + resolve the v2 (or v1, auto-migrated) registry into a flat
-        // boot manifest. Only when a path is configured — otherwise bake an
-        // empty `null` into the template and the browser falls back to the
-        // legacy fetch path.
+        // Read + resolve the v2 (or v1, auto-migrated; v3 since Phase 16
+        // Story 3) registry into a flat boot manifest. Only when a path is
+        // configured — otherwise bake an empty `null` into the template and
+        // the browser falls back to the legacy fetch path.
         let mfeBootManifestJson = 'null';
+        // Phase 16 Story 3: when the source registry is v3 AND has an
+        // `orchestrator` top-level field, the boot manifest carries an
+        // `orchestrator: { url, integrity? }` descriptor (the bootstrap
+        // template renders this into __osdMfe__.orchestrator so the thin
+        // shim loads the orchestrator from the registry-advertised URL with
+        // SRI). When absent (v1/v2, or v3 without the field), the descriptor
+        // is `null` and the thin shim falls back to the server-config
+        // `mfeBootstrapUrl` — backward-compat at the consumption site.
+        let mfeOrchestratorJson = 'null';
         if (mfeRegistryPath && typeof mfeRegistryPath === 'string') {
           try {
             const resolved = readMfeBootManifest(mfeRegistryPath, {
@@ -195,6 +204,9 @@ export function uiRenderMixin(osdServer, server, config) {
               userBucket: mfeUserBucket,
             });
             mfeBootManifestJson = JSON.stringify(resolved);
+            if (resolved.orchestrator) {
+              mfeOrchestratorJson = JSON.stringify(resolved.orchestrator);
+            }
           } catch (err) {
             // Fail loudly server-side; the bootstrap falls back to the legacy
             // fetch path so a misconfigured registry path doesn't white-screen
@@ -322,6 +334,13 @@ export function uiRenderMixin(osdServer, server, config) {
               // the bootstrap consumes this directly and skips the registry HTTP
               // fetch (and the registry signature verify) entirely.
               mfeBootManifest: mfeBootManifestJson,
+              // Phase 16 Story 3: v3-only orchestrator descriptor. When
+              // non-`null` the thin shim loads the orchestrator from
+              // `__osdMfe__.orchestrator.url` (with `.integrity` for SRI);
+              // otherwise it falls back to the server-config
+              // `mfeBootstrapUrl` (backward-compat for v1/v2 registries
+              // and v3 registries without the field set).
+              mfeOrchestrator: mfeOrchestratorJson,
             },
           },
           'bootstrap_mfe'

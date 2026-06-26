@@ -20,13 +20,17 @@
  * algorithm:
  *
  *  - Read the registry file from disk + JSON.parse.
- *  - Auto-detect v1 vs v2 by `schemaVersion` (missing => v1, legacy seed).
+ *  - Auto-detect v1 / v2 / v3 by `schemaVersion` (missing => v1, legacy seed).
  *  - For v1: project to a v2 default-only document.
  *  - For v2: validate enough to safely resolve (light-touch — the authoring CLI
  *    in story 4 is the strict validator on writes).
+ *  - For v3: project the v2 substructure (Phase 13 algorithm) AND capture the
+ *    optional v3-only top-level static-asset descriptors (Phase 16 — Story 3
+ *    lights up `orchestrator`; Stories 5-7 light up `core` / `themes` /
+ *    `sharedDepsCss`).
  *  - Resolve against the requesting host's dimensions
  *    (`tenantOverrides[customerId]` > first-matching `rollouts[]` > `default`).
- *  - Return the FLAT boot manifest (`{ sharedDeps, mfes: BootManifestEntry[] }`)
+ *  - Return the FLAT boot manifest (`{ sharedDeps, mfes, orchestrator? }`)
  *    the legacy bootstrap.js handler bakes into the rendered bootstrap script.
  *
  * The implementation is INTENTIONALLY narrow: just enough to compute the boot
@@ -61,10 +65,40 @@ export interface MfeBootManifestEntry {
   compat?: { minCoreVersion: string; compatibleCoreRange: string };
 }
 
-/** The flat boot manifest the server injects into the bootstrap. */
+/**
+ * One registry-managed static asset descriptor projected out of a v3
+ * registry doc (Phase 16, Story 3+). The shape mirrors the
+ * `V3AssetDescriptor` in `@osd/mfe/registry/schema_v3` but is duplicated here
+ * because `src/` cannot import from `@osd/mfe` (same constraint that motivated
+ * this whole module's existence).
+ *
+ * `url` is required, `integrity` is OPTIONAL (same-origin dev fallback URLs
+ * legitimately have no SRI; production CDN URLs MUST set it). `version`
+ * is intentionally NOT propagated to the browser — it is registry-side
+ * metadata used by telemetry + cache-busting, not by the loader.
+ */
+export interface MfeBootAssetDescriptor {
+  url: string;
+  integrity?: string;
+}
+
+/**
+ * The flat boot manifest the server injects into the bootstrap.
+ *
+ * `sharedDeps` + `mfes` come from the v1/v2 layered substructure
+ * (Phase 13). The remaining OPTIONAL fields are populated only when the
+ * source document is v3 AND the corresponding top-level field is present
+ * (Phase 16). All v3 fields are absent on v1/v2 input — consumers MUST treat
+ * `undefined` as "fall back to the existing server-bundled path".
+ *
+ * Stories 3 / 5 / 6 / 7 populate orchestrator / core / themes /
+ * sharedDepsCss respectively.
+ */
 export interface MfeBootManifest {
   sharedDeps: { url: string; version: string };
   mfes: MfeBootManifestEntry[];
+  /** Phase 16 Story 3: `osd_bootstrap_mfe.js` from CDN with SRI. */
+  orchestrator?: MfeBootAssetDescriptor;
 }
 
 /* ------------------------------------------------------------------------- *
@@ -104,6 +138,16 @@ interface V2DocLite {
     override: { mfes: Record<string, MfeEntryLite> };
   }>;
   tenantOverrides: Record<string, { mfes: Record<string, MfeEntryLite> }>;
+  /**
+   * v3-only registry-managed asset descriptors, projected out of the source
+   * document at parse time. ALL FIELDS ABSENT when the input is v1 / v2.
+   * Phase 16 (Stories 3-7) lights these up incrementally; the field set here
+   * mirrors {@link V3DocumentTopLevel} for forward compatibility, but the
+   * server-side reader only PROJECTS what is present (no defaulting — the
+   * dev-config path injects `/bundles/...` fallbacks at the consumption
+   * site, not here, to keep this module a pure consumer).
+   */
+  orchestrator?: { url: string; integrity?: string };
 }
 
 /* ------------------------------------------------------------------------- *
@@ -132,6 +176,12 @@ function coerceToV2DocLite(parsed: unknown): V2DocLite {
     throw new Error('MFE registry document must be a JSON object');
   }
   const sv = parsed.schemaVersion;
+  if (sv === 3) {
+    // v3 extends v2 with optional GLOBAL static-asset descriptors (Phase 16
+    // Story 1). The layered substructure is byte-identical to v2; project it
+    // via the existing v2 reader, then attach the v3-only fields.
+    return projectV3(parsed);
+  }
   if (sv === 2) {
     return projectV2(parsed);
   }
@@ -141,8 +191,56 @@ function coerceToV2DocLite(parsed: unknown): V2DocLite {
   }
   throw new Error(
     `MFE registry document has an unsupported schemaVersion ${JSON.stringify(sv)} ` +
-      `(only 1 (legacy) or 2 are supported)`
+      `(only 1 (legacy), 2, or 3 are supported)`
   );
+}
+
+/**
+ * Project a v3 document into the internal V2DocLite shape, attaching the
+ * v3-only static-asset descriptors when present. Validation of the v2
+ * substructure is delegated to {@link projectV2}; v3-only fields get
+ * MINIMAL safety checks here (the strict schema validator lives in
+ * `@osd/mfe/registry/schema_v3`, used by the authoring CLI, not by this
+ * server-side reader — same "narrow reader" stance as the v2 projection).
+ */
+function projectV3(v3: Record<string, unknown>): V2DocLite {
+  const lite = projectV2(v3);
+  if (v3.orchestrator !== undefined) {
+    lite.orchestrator = coerceAssetDescriptor('orchestrator', v3.orchestrator);
+  }
+  return lite;
+}
+
+/**
+ * Light-touch coercion of a v3 asset descriptor (`{ url, version,
+ * integrity? }`) to the boot-manifest projection (`{ url, integrity? }` —
+ * `version` is dropped because it never reaches the browser loader).
+ *
+ * Validation here is intentionally minimal: enough to ensure the projected
+ * shape is well-formed; the strict schema rules (e.g. integrity MUST start
+ * with `sha384-`) are enforced by the AUTHORING CLI before the registry is
+ * deployed. A registry that reaches this server-side reader is presumed to
+ * have passed those checks.
+ */
+function coerceAssetDescriptor(field: string, raw: unknown): { url: string; integrity?: string } {
+  if (!isPlainObject(raw)) {
+    throw new Error(
+      `MFE v3 registry: \`${field}\` must be an object with { url, integrity? } (got ${typeof raw})`
+    );
+  }
+  if (typeof raw.url !== 'string' || raw.url.length === 0) {
+    throw new Error(`MFE v3 registry: \`${field}.url\` must be a non-empty string`);
+  }
+  const out: { url: string; integrity?: string } = { url: raw.url };
+  if (raw.integrity !== undefined) {
+    if (typeof raw.integrity !== 'string' || raw.integrity.length === 0) {
+      throw new Error(
+        `MFE v3 registry: \`${field}.integrity\`, when present, must be a non-empty string`
+      );
+    }
+    out.integrity = raw.integrity;
+  }
+  return out;
 }
 
 function migrateV1ToV2Lite(v1: Record<string, unknown>): V2DocLite {
@@ -189,17 +287,13 @@ function projectV2(v2: Record<string, unknown>): V2DocLite {
       throw new Error(`MFE v2 registry: rollouts[${idx}] must be an object`);
     }
     const match = isPlainObject(rule.match) ? rule.match : {};
-    const override = isPlainObject(rule.override)
-      ? rule.override
-      : { mfes: {} };
+    const override = isPlainObject(rule.override) ? rule.override : { mfes: {} };
     const overrideMfes = isPlainObject(override.mfes) ? override.mfes : {};
     return {
       id: typeof rule.id === 'string' ? rule.id : `rollout-${idx}`,
       match: {
-        userBucketLt:
-          typeof match.userBucketLt === 'number' ? match.userBucketLt : undefined,
-        userBucketGte:
-          typeof match.userBucketGte === 'number' ? match.userBucketGte : undefined,
+        userBucketLt: typeof match.userBucketLt === 'number' ? match.userBucketLt : undefined,
+        userBucketGte: typeof match.userBucketGte === 'number' ? match.userBucketGte : undefined,
         tenantId: typeof match.tenantId === 'string' ? match.tenantId : undefined,
       },
       override: { mfes: cloneMfeMap(overrideMfes) },
@@ -357,6 +451,12 @@ function resolveOnce(doc: V2DocLite, dim: MfeResolutionDimensions): MfeBootManif
   return {
     sharedDeps: { ...doc.default.sharedDeps },
     mfes: out,
+    // v3-only: when the source doc set `orchestrator`, surface it on the
+    // boot manifest so the bootstrap template can advertise it (with SRI)
+    // to the browser. Absent on v1/v2 input ⇒ consumer falls back to the
+    // server-config `bootstrapUrl` (Phase 16 Story 3, PRD §"backward-compat
+    // at every consumption site").
+    ...(doc.orchestrator ? { orchestrator: { ...doc.orchestrator } } : {}),
   };
 }
 

@@ -70,9 +70,9 @@ describe('parseSingleCookie()', () => {
 
   it('returns the named cookie value', () => {
     expect(parseSingleCookie('_osd_mfe_bucket=abc123', '_osd_mfe_bucket')).toBe('abc123');
-    expect(
-      parseSingleCookie('foo=bar; _osd_mfe_bucket=xyz; baz=qux', '_osd_mfe_bucket')
-    ).toBe('xyz');
+    expect(parseSingleCookie('foo=bar; _osd_mfe_bucket=xyz; baz=qux', '_osd_mfe_bucket')).toBe(
+      'xyz'
+    );
   });
 
   it('strips surrounding quotes', () => {
@@ -285,9 +285,7 @@ describe('readMfeBootManifest() — error paths', () => {
   it('throws on non-JSON content', () => {
     const file = tmpFile('not-json');
     try {
-      expect(() =>
-        readMfeBootManifest(file, { customerId: 'default', userBucket: 0 })
-      ).toThrow();
+      expect(() => readMfeBootManifest(file, { customerId: 'default', userBucket: 0 })).toThrow();
     } finally {
       Fs.unlinkSync(file);
     }
@@ -296,9 +294,9 @@ describe('readMfeBootManifest() — error paths', () => {
   it('throws on an unsupported schemaVersion', () => {
     const file = tmpFile(JSON.stringify({ schemaVersion: 99 }));
     try {
-      expect(() =>
-        readMfeBootManifest(file, { customerId: 'default', userBucket: 0 })
-      ).toThrow(/unsupported schemaVersion/);
+      expect(() => readMfeBootManifest(file, { customerId: 'default', userBucket: 0 })).toThrow(
+        /unsupported schemaVersion/
+      );
     } finally {
       Fs.unlinkSync(file);
     }
@@ -349,6 +347,189 @@ describe('readMfeBootManifest() — mtime caching', () => {
 
       const after = readMfeBootManifest(file, { customerId: 'default', userBucket: 0 });
       expect(after.mfes[0].version).toBe('rolled-forward');
+    } finally {
+      Fs.unlinkSync(file);
+    }
+  });
+});
+
+/* ------------------------------------------------------------------------- *
+ * Phase 16 Story 3 — v3 registry support + orchestrator descriptor
+ * ------------------------------------------------------------------------- */
+
+describe('readMfeBootManifest() — v3 path', () => {
+  const v3WithOrchestrator = {
+    schemaVersion: 3,
+    generatedAt: '2026-06-26T00:00:00.000Z',
+    default: {
+      sharedDeps: SHARED,
+      mfes: { inspector: FIXTURE_INSPECTOR_DEFAULT },
+    },
+    rollouts: [],
+    tenantOverrides: {},
+    orchestrator: {
+      url: 'https://cdn.example.com/mfe/orchestrator/deadbeef0000/osd_bootstrap_mfe.js',
+      integrity: 'sha384-orchA',
+      version: '3.5.0+orch1',
+    },
+  };
+
+  it('reads a v3 doc with orchestrator and surfaces it on the boot manifest', () => {
+    const file = tmpFile(JSON.stringify(v3WithOrchestrator));
+    try {
+      const m = readMfeBootManifest(file, { customerId: 'default', userBucket: 50 });
+      // v2 substructure still resolves identically (Phase 13 algorithm).
+      expect(m.sharedDeps).toEqual(SHARED);
+      expect(m.mfes.length).toBe(1);
+      expect(m.mfes[0].remoteEntry).toBe(FIXTURE_INSPECTOR_DEFAULT.remoteEntry);
+      // v3-only orchestrator descriptor is projected onto the manifest.
+      expect(m.orchestrator).toEqual({
+        url: 'https://cdn.example.com/mfe/orchestrator/deadbeef0000/osd_bootstrap_mfe.js',
+        integrity: 'sha384-orchA',
+      });
+      // `version` is registry-side metadata only — must NOT be propagated to
+      // the loader (browsers don't need it; the URL is content-addressed).
+      expect(((m.orchestrator as unknown) as Record<string, unknown>).version).toBeUndefined();
+    } finally {
+      Fs.unlinkSync(file);
+    }
+  });
+
+  it('reads a v3 doc with NO orchestrator field — manifest.orchestrator is absent', () => {
+    const v3NoOrch = { ...v3WithOrchestrator };
+    delete (v3NoOrch as Record<string, unknown>).orchestrator;
+    const file = tmpFile(JSON.stringify(v3NoOrch));
+    try {
+      const m = readMfeBootManifest(file, { customerId: 'default', userBucket: 50 });
+      expect(m.orchestrator).toBeUndefined();
+      expect(m.mfes.length).toBe(1);
+    } finally {
+      Fs.unlinkSync(file);
+    }
+  });
+
+  it('reads a v3 doc with orchestrator WITHOUT integrity (dev /bundles/... fallback URL)', () => {
+    const v3DevOrch = {
+      ...v3WithOrchestrator,
+      orchestrator: {
+        url: '/bundles/mfe/orchestrator/deadbeef0000/osd_bootstrap_mfe.js',
+        // intentionally no integrity — same-origin dev fallback
+        version: '3.5.0+orch1',
+      },
+    };
+    const file = tmpFile(JSON.stringify(v3DevOrch));
+    try {
+      const m = readMfeBootManifest(file, { customerId: 'default', userBucket: 50 });
+      expect(m.orchestrator).toEqual({
+        url: '/bundles/mfe/orchestrator/deadbeef0000/osd_bootstrap_mfe.js',
+      });
+      expect(m.orchestrator!.integrity).toBeUndefined();
+    } finally {
+      Fs.unlinkSync(file);
+    }
+  });
+
+  it('v3 substructure honors rollouts + tenant overrides exactly like v2', () => {
+    const v3WithCanaryAndTenant = {
+      schemaVersion: 3,
+      generatedAt: '2026-06-26T00:00:00.000Z',
+      default: { sharedDeps: SHARED, mfes: { inspector: FIXTURE_INSPECTOR_DEFAULT } },
+      rollouts: [
+        {
+          id: 'inspector-canary-5pct',
+          match: { userBucketLt: 5 },
+          override: { mfes: { inspector: FIXTURE_INSPECTOR_CANARY } },
+        },
+      ],
+      tenantOverrides: {
+        acme: { mfes: { inspector: FIXTURE_INSPECTOR_ACME } },
+      },
+      orchestrator: {
+        url: 'https://cdn.example.com/mfe/orchestrator/0000aaaa0000/osd_bootstrap_mfe.js',
+        integrity: 'sha384-orchA',
+        version: '3.5.0+orch1',
+      },
+    };
+    const file = tmpFile(JSON.stringify(v3WithCanaryAndTenant));
+    try {
+      // Phase 13 resolution algorithm is unchanged under v3.
+      const acme = readMfeBootManifest(file, { customerId: 'acme', userBucket: 2 });
+      expect(acme.mfes[0].remoteEntry).toBe(FIXTURE_INSPECTOR_ACME.remoteEntry);
+      expect(acme.orchestrator!.integrity).toBe('sha384-orchA');
+
+      const canary = readMfeBootManifest(file, { customerId: 'default', userBucket: 2 });
+      expect(canary.mfes[0].remoteEntry).toBe(FIXTURE_INSPECTOR_CANARY.remoteEntry);
+      // Orchestrator is GLOBAL — it does not vary with rollouts/tenants.
+      expect(canary.orchestrator!.url).toBe(acme.orchestrator!.url);
+    } finally {
+      Fs.unlinkSync(file);
+    }
+  });
+
+  it('throws when v3 orchestrator is not an object', () => {
+    const bad = { ...v3WithOrchestrator, orchestrator: 'not-an-object' };
+    const file = tmpFile(JSON.stringify(bad));
+    try {
+      expect(() => readMfeBootManifest(file, { customerId: 'default', userBucket: 0 })).toThrow(
+        /\`orchestrator\` must be an object/
+      );
+    } finally {
+      Fs.unlinkSync(file);
+    }
+  });
+
+  it('throws when v3 orchestrator.url is missing or empty', () => {
+    const bad = {
+      ...v3WithOrchestrator,
+      orchestrator: { integrity: 'sha384-x', version: '1' },
+    };
+    const file = tmpFile(JSON.stringify(bad));
+    try {
+      expect(() => readMfeBootManifest(file, { customerId: 'default', userBucket: 0 })).toThrow(
+        /\`orchestrator\.url\` must be a non-empty string/
+      );
+    } finally {
+      Fs.unlinkSync(file);
+    }
+  });
+
+  it('throws when v3 orchestrator.integrity is present but not a non-empty string', () => {
+    const bad = {
+      ...v3WithOrchestrator,
+      orchestrator: { url: 'https://example.com/x.js', integrity: '', version: '1' },
+    };
+    const file = tmpFile(JSON.stringify(bad));
+    try {
+      expect(() => readMfeBootManifest(file, { customerId: 'default', userBucket: 0 })).toThrow(
+        /\`orchestrator\.integrity\`, when present, must be a non-empty string/
+      );
+    } finally {
+      Fs.unlinkSync(file);
+    }
+  });
+
+  it('v1/v2 docs return manifest WITHOUT an orchestrator field (backward-compat)', () => {
+    // v1 doc — no schemaVersion path
+    const v1 = {
+      generatedAt: '2026-06-26T00:00:00.000Z',
+      sharedDeps: SHARED,
+      mfes: { inspector: FIXTURE_INSPECTOR_DEFAULT },
+    };
+    const file = tmpFile(JSON.stringify(v1));
+    try {
+      const m = readMfeBootManifest(file, { customerId: 'default', userBucket: 0 });
+      expect(m.orchestrator).toBeUndefined();
+    } finally {
+      Fs.unlinkSync(file);
+    }
+  });
+
+  it('rejects schemaVersion 99 with the updated supported-versions message', () => {
+    const file = tmpFile(JSON.stringify({ schemaVersion: 99 }));
+    try {
+      expect(() => readMfeBootManifest(file, { customerId: 'default', userBucket: 0 })).toThrow(
+        /only 1 \(legacy\), 2, or 3 are supported/
+      );
     } finally {
       Fs.unlinkSync(file);
     }
