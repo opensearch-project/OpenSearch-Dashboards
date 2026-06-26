@@ -52,11 +52,11 @@ function shapeDiagnostics(query: string, surface?: LintRunContext['grammarSurfac
 
 describe('field-slot shape (runtime-bundle proxy)', () => {
   describe('flags Splunk-style field= and other non-field expressions', () => {
-    it('flags grok field=body with an error and a remove-field= fix', () => {
+    it('flags grok field=body at the configured severity with a remove-field= fix', () => {
       const diags = shapeDiagnostics('source=t | grok field=body "x"', 'runtime-bundle');
       expect(diags).toHaveLength(1);
       expect(diags[0].ruleId).toBe('field-validation');
-      expect(diags[0].severity).toBe('error');
+      expect(diags[0].severity).toBe(config.severity);
       expect(diags[0].fix?.text).toBe('body');
       expect(diags[0].message).toContain('grok');
       expect(diags[0].message).toContain('field name');
@@ -71,7 +71,7 @@ describe('field-slot shape (runtime-bundle proxy)', () => {
     it('flags parse field=message with a fix to the bare field', () => {
       const diags = shapeDiagnostics('source=t | parse field=message "x"', 'runtime-bundle');
       expect(diags).toHaveLength(1);
-      expect(diags[0].severity).toBe('error');
+      expect(diags[0].severity).toBe(config.severity);
       expect(diags[0].fix?.text).toBe('message');
       expect(diags[0].message).toContain('parse');
     });
@@ -79,7 +79,7 @@ describe('field-slot shape (runtime-bundle proxy)', () => {
     it('flags patterns field=body', () => {
       const diags = shapeDiagnostics('source=t | patterns field=body', 'runtime-bundle');
       expect(diags).toHaveLength(1);
-      expect(diags[0].severity).toBe('error');
+      expect(diags[0].severity).toBe(config.severity);
       expect(diags[0].fix?.text).toBe('body');
       expect(diags[0].message).toContain('patterns');
     });
@@ -87,7 +87,7 @@ describe('field-slot shape (runtime-bundle proxy)', () => {
     it('flags a non-equality comparison but offers NO fix', () => {
       const diags = shapeDiagnostics('source=t | grok status > 200 "x"', 'runtime-bundle');
       expect(diags).toHaveLength(1);
-      expect(diags[0].severity).toBe('error');
+      expect(diags[0].severity).toBe(config.severity);
       expect(diags[0].fix).toBeUndefined();
     });
 
@@ -152,6 +152,37 @@ describe('field-slot shape (runtime-bundle proxy)', () => {
     });
   });
 
+  // The shape pass must emit at the rule's configured severity, not a hardcoded
+  // `error`. A rule has one catalog entry and one user-facing toggle; if a user
+  // sets field-validation to `warning`/`info`, the shape finding follows.
+  describe('honors the configured severity', () => {
+    const shapeWith = (severity: CatalogEntry['severity']): Diagnostic[] =>
+      fieldValidationDetector(
+        buildTree('source=t | grok field=body "x"'),
+        { ...config, severity },
+        { grammarSurface: 'runtime-bundle' },
+        ruleNameToIndex
+      );
+
+    it('emits warning when the rule is configured as warning', () => {
+      const diags = shapeWith('warning');
+      expect(diags).toHaveLength(1);
+      expect(diags[0].severity).toBe('warning');
+    });
+
+    it('emits info when the rule is configured as info', () => {
+      const diags = shapeWith('info');
+      expect(diags).toHaveLength(1);
+      expect(diags[0].severity).toBe('info');
+    });
+
+    it('emits error when the rule is configured as error', () => {
+      const diags = shapeWith('error');
+      expect(diags).toHaveLength(1);
+      expect(diags[0].severity).toBe('error');
+    });
+  });
+
   describe('overlap suppression', () => {
     it('does not co-emit an "Unknown field" existence finding for field=body', () => {
       const tree = buildTree('source=t | grok field=body "x"');
@@ -166,7 +197,7 @@ describe('field-slot shape (runtime-bundle proxy)', () => {
       expect(unknownFieldMessages).toEqual([]);
       // Exactly the one shape error survives.
       expect(diags).toHaveLength(1);
-      expect(diags[0].severity).toBe('error');
+      expect(diags[0].severity).toBe(config.severity);
     });
   });
 });
