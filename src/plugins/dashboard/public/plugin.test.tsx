@@ -45,7 +45,7 @@ describe('DashboardPlugin', () => {
         expect.objectContaining({
           id: 'dashboards',
           order: 100,
-          euiIconType: 'dashboardApp',
+          euiIconType: 'navDashboards',
         }),
       ])
     );
@@ -67,7 +67,7 @@ describe('DashboardPlugin', () => {
         expect.objectContaining({
           id: 'dashboards',
           order: 400,
-          euiIconType: 'dashboardApp',
+          euiIconType: 'dashboard',
         }),
       ])
     );
