@@ -99,6 +99,21 @@ describe('field-validation alternate-source suppression (compiled surface)', () 
         expect.stringContaining('Unknown field "really_unknown"'),
       ]);
     });
+
+    it('does NOT leak a field created inside append into the outer known-set', () => {
+      // `foo` is created by the eval *inside* the append's own pipeline, so it
+      // is not a column on the outer `accounts` source. A downstream reference
+      // must still be flagged — the creation must be scoped to its subtree.
+      expect(
+        fieldDiags('search accounts | append [search dept | eval foo = age] | where foo > 1')
+      ).toEqual([expect.stringContaining('Unknown field "foo"')]);
+    });
+
+    it('still treats a top-level eval field as known downstream', () => {
+      // The mirror case: a top-level eval is NOT inside an alternate source, so
+      // its created field stays in the known-set and must not be flagged.
+      expect(fieldDiags('search accounts | eval bar = age | where bar > 1')).toEqual([]);
+    });
   });
 
   describe('backtick-quoted identifiers', () => {
