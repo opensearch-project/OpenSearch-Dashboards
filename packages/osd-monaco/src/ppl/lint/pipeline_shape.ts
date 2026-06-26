@@ -150,11 +150,44 @@ export function buildPipelineShape(
   };
   visit(tree);
 
+  // Fields created inside an alternate-source subtree (`append [search ...]`,
+  // subsearch, lookup, appendcol, union) belong to that other source, not the
+  // outer pipeline — so they must not leak into the outer known-field set.
+  // `stages` is left intact (head_without_sort runs its own alt-source check on
+  // it); only the created-field collection is scoped.
+  const altSourceRoots = collectAlternateSourceSubtrees(tree, ruleNameToIndex);
   for (const stage of stages) {
-    collectCreatedFields(stage, ruleNameToIndex, createdFields);
+    if (!isInsideAltSource(stage.node, altSourceRoots)) {
+      collectCreatedFields(stage, ruleNameToIndex, createdFields);
+    }
   }
 
   return { stages, createdFields };
+}
+
+/**
+ * Walk up from `node` to the root; true if any ancestor is one of the
+ * alternate-source subtree roots from {@link collectAlternateSourceSubtrees}.
+ *
+ * Shared by two callers with different needs for the root node itself:
+ *   - `buildPipelineShape` (created-field scoping) prunes the alt-source root and
+ *     everything under it, so it walks from `node` (`excludeRoot` = false).
+ *   - `head_without_sort` (sort/head ordering) must still analyze a top-level
+ *     append/lookup as order-destroying while pruning only the stages nested in
+ *     its bracketed sub-pipeline, so it walks from `node.parent` (`excludeRoot`).
+ */
+export function isInsideAltSource(
+  node: ParserRuleContext,
+  altSourceRoots: Set<ParserRuleContext>,
+  excludeRoot = false
+): boolean {
+  let n: ParserRuleContext | null = excludeRoot ? (node.parent as ParserRuleContext | null) : node;
+  for (; n; n = n.parent as ParserRuleContext | null) {
+    if (altSourceRoots.has(n)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 /** Subtrees with an alternate field source, pruned during field-validation. */
