@@ -113,6 +113,31 @@ describe('field-validation alternate-source suppression (compiled surface)', () 
     });
   });
 
+  // The compiled-simplified grammar mis-parses `source=idx` / `index=idx` into a
+  // fieldExpression for the leading `source`/`index` keyword (the runtime grammar
+  // parses it as an excluded fromClause). Without a guard this fires a spurious
+  // "Unknown field" on EVERY source-first query against a sub-3.6 cluster — the
+  // dominant case in the editor's compiled-fallback path.
+  describe('source-first keyword is not flagged on the compiled surface', () => {
+    it('does NOT flag the `source` keyword in `source=accounts`', () => {
+      expect(fieldDiags('source=accounts | where status = 200')).toEqual([]);
+    });
+
+    it('does NOT flag the `index` keyword in `index=accounts`', () => {
+      expect(fieldDiags('index=accounts | where status = 200')).toEqual([]);
+    });
+
+    it('does NOT flag `source` with surrounding spaces', () => {
+      expect(fieldDiags('source = accounts | where status = 200')).toEqual([]);
+    });
+
+    it('STILL flags a genuinely unknown field on a source-first query', () => {
+      expect(fieldDiags('source=accounts | where nope = 1')).toEqual([
+        expect.stringContaining('Unknown field "nope"'),
+      ]);
+    });
+  });
+
   // B2: suggestField must prefer a distance-0 (case-only) match over a
   // distance-1 one seen earlier in the field set — otherwise the quick-fix
   // rewrites the user's case-typo into the *wrong* field.
