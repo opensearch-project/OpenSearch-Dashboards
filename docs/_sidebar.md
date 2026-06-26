@@ -27,6 +27,9 @@
   - Saved_objects
     - [Pluggable_storage_backend](saved_objects/pluggable_storage_backend.md)
     - [Saved_object_repository_factory_design](saved_objects/saved_object_repository_factory_design.md)
+  - Superpowers
+    - plans
+      - [2026 06 26 es68 resolve index via backend compatibility](superpowers/plans/2026-06-26-es68-resolve-index-via-backend-compatibility.md)
   - Telemetry
     - [Telemetry](telemetry/telemetry.md)
   - src
