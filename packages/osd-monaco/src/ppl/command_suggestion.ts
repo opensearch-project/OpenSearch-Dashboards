@@ -161,6 +161,13 @@ export function damerauLevenshtein(a: string, b: string, maxDistance: number): n
 export function suggestCommand(typed: string, candidates: Iterable<string>): string | undefined {
   const lower = typed.toLowerCase();
   const threshold = lower.length >= 8 ? 2 : 1;
+  // A token no longer than the edit threshold is not a typo: rewriting 100% of a
+  // 1-char token (`| a`) to reach a 2-char command (`ad`/`ml`) is a guess, not a
+  // correction. Without this floor the suggestion fires constantly while the user
+  // is mid-typing a fresh command and replaces ANTLR's real diagnostic.
+  if (lower.length <= threshold) {
+    return undefined;
+  }
   let best: string | undefined;
   let bestDistance = Infinity;
   for (const candidate of candidates) {
