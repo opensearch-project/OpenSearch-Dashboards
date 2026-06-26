@@ -126,6 +126,32 @@ describe('field-slot shape (runtime-bundle proxy)', () => {
     });
   });
 
+  // A `cast(field AS <type>)` registers `field` as cast input, never the target
+  // type, as a created field. Before the convertedDataType guard the node after
+  // the `AS` terminal (the type name) was added to createdFields, so a later
+  // reference to that type name was silently accepted. Verified on the runtime
+  // proxy where some type spellings (`date`, `ip`) lex as identifiers downstream.
+  describe('cast target type is not a created field', () => {
+    const withFields = (query: string): Diagnostic[] => {
+      const context: LintRunContext = {
+        grammarSurface: 'runtime-bundle',
+        fields: new Set<string>(['age', 'name']),
+      };
+      return fieldValidationDetector(buildTree(query), config, context, ruleNameToIndex);
+    };
+
+    it('flags a later reference to the cast TYPE name (date), not silently allowing it', () => {
+      const diags = withFields('source=t | eval y = cast(age as date) | fields date');
+      expect(diags.map((d) => d.message)).toEqual([
+        expect.stringContaining('Unknown field "date"'),
+      ]);
+    });
+
+    it('still treats the eval TARGET as a known field downstream', () => {
+      expect(withFields('source=t | eval y = cast(age as date) | fields y')).toEqual([]);
+    });
+  });
+
   describe('overlap suppression', () => {
     it('does not co-emit an "Unknown field" existence finding for field=body', () => {
       const tree = buildTree('source=t | grok field=body "x"');

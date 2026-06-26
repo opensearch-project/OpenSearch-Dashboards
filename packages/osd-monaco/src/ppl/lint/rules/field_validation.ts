@@ -47,7 +47,10 @@ const SHAPE_COMMAND_KEYWORD: Record<string, string> = {
 
 /**
  * Compute a small set of rule indices used to exclude non-field-reference
- * positions (table sources, eval LHS, etc.).
+ * positions — table sources and join structure (`fromClause`, `sideAlias`,
+ * `joinCriteria`, etc.). Created-field name slots (eval LHS, rename target) are
+ * intentionally *not* listed: those are protected via `createdFields` instead, so
+ * the eval/rename RHS is still walked and validated like any other expression.
  */
 function resolveExcludedAncestorIndices(ruleNameToIndex: RuleNameToIndex): Set<number> {
   const excluded = new Set<number>();
@@ -59,15 +62,6 @@ function resolveExcludedAncestorIndices(ruleNameToIndex: RuleNameToIndex): Set<n
     'sourceReference',
     'sideAlias',
     'joinCriteria',
-    'evalClause',
-    // The grammar rule is genuinely named `renameClasue` (sic) in both the
-    // simplified-compiled and runtime `.g4` sources, so that misspelled literal
-    // is the one that actually matches on both surfaces. The correctly-spelled
-    // `renameClause` resolves to -1 today and is kept only as forward defense:
-    // if a future grammar fixes the typo, exclusion of rename targets still
-    // holds. Listing both costs nothing — the absent one resolves to -1.
-    'renameClasue',
-    'renameClause',
   ]) {
     const idx = ruleNameToIndex(name);
     if (idx !== -1) {
@@ -211,8 +205,8 @@ function detectUnknownFields(
 
   const stack: ParseTree[] = [tree];
   while (stack.length > 0) {
-    const node = stack.pop()!;
-    if (!isParserRuleContext(node)) {
+    const node = stack.pop();
+    if (node === undefined || !isParserRuleContext(node)) {
       continue;
     }
     // Hard prune: alternate-source subtree roots (lookup / append-with-source /
