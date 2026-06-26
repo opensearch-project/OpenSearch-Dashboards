@@ -399,7 +399,10 @@ function detectFieldSlotShape(
 
       diagnostics.push({
         ruleId: config.id,
-        severity: 'error',
+        // A rule has one catalog entry and one user-facing severity toggle; the
+        // shape pass must honor it rather than forcing `error`, or a user who
+        // sets field-validation to `warning` still sees red from this pass.
+        severity: config.severity,
         message:
           `${keyword} expects a field name here, not an expression. ` +
           `PPL does not use Splunk-style "field=" syntax.`,
