@@ -39,6 +39,15 @@ export type {
   DetectedRegistryShape,
 } from './schema_v2';
 
+export {
+  SCHEMA_VERSION_V3,
+  validateV3,
+  assertValidV3Document,
+  migrateV2ToV3,
+  coerceToV3Document,
+} from './schema_v3';
+export type { V3Document, V3AssetDescriptor, V3MigrationDefaults } from './schema_v3';
+
 export { validateBootManifest, assertValidBootManifest } from './boot_manifest';
 export type { BootManifest, BootManifestEntry } from './boot_manifest';
 
@@ -46,11 +55,7 @@ export { resolveBootManifest, resolveDecisions, matchesRollout } from './resolve
 export type { ResolvedDecision, ResolvedSource } from './resolve_v2';
 
 export { FileRegistryReader } from './reader';
-export type {
-  RegistryReader,
-  RegistryReaderFs,
-  FileRegistryReaderOptions,
-} from './reader';
+export type { RegistryReader, RegistryReaderFs, FileRegistryReaderOptions } from './reader';
 
 export { signRegistry, verifyRegistrySignature } from './signing';
 export type { RegistrySigningKey } from './signing';

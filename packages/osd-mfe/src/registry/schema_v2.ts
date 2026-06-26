@@ -437,22 +437,31 @@ export function migrateV1ToV2(v1: V1Registry): V2Document {
 }
 
 /**
- * Heuristic: classify a parsed JSON value as a v1 doc, a v2 doc, or neither
- * (so the reader can pick a validator). The check looks ONLY at
- * `schemaVersion` because v1 (`SCHEMA_VERSION === 1`) and v2
- * (`SCHEMA_VERSION_V2 === 2`) share no required field names — distinguishing
- * by `schemaVersion` first avoids a confusing "both validators fail" diagnostic
- * when the doc is simply mistyped.
+ * Heuristic: classify a parsed JSON value as a v1 doc, a v2 doc, a v3 doc, or
+ * neither (so the reader can pick a validator). The check looks ONLY at
+ * `schemaVersion` because v1 (`SCHEMA_VERSION === 1`), v2
+ * (`SCHEMA_VERSION_V2 === 2`), and v3 (Phase 16, `schemaVersion === 3`) share
+ * no required field names — distinguishing by `schemaVersion` first avoids a
+ * confusing "all validators fail" diagnostic when the doc is simply mistyped.
  *
  * A v1 doc with `schemaVersion` missing (legacy seed) is also classified as
  * v1: its top-level shape (`{ schemaVersion?, generatedAt, sharedDeps, mfes }`)
  * is the v1 contract; absence of `schemaVersion` is treated as an implicit `1`.
+ *
+ * Phase 16: `'v3'` is added to the union. Existing v2-only consumers see a v3
+ * doc as something they cannot natively handle — they should either upgrade to
+ * v3-aware code OR use {@link coerceToV2Document} which downgrades a v3 doc to
+ * v2 by stripping the v3-only fields (forward-compat for the migration period).
  */
-export type DetectedRegistryShape = 'v1' | 'v2' | 'unknown';
+export type DetectedRegistryShape = 'v1' | 'v2' | 'v3' | 'unknown';
+
+/** Constant for v3's schemaVersion; lives here so v2 can detect it without a cycle into schema_v3. */
+const SCHEMA_VERSION_V3_INTERNAL = 3;
 
 export function detectRegistryShape(value: unknown): DetectedRegistryShape {
   if (!isPlainObject(value)) return 'unknown';
   const sv = value.schemaVersion;
+  if (sv === SCHEMA_VERSION_V3_INTERNAL) return 'v3';
   if (sv === SCHEMA_VERSION_V2) return 'v2';
   if (sv === V1_SCHEMA_VERSION || sv === undefined) return 'v1';
   return 'unknown';
@@ -466,21 +475,41 @@ export function detectRegistryShape(value: unknown): DetectedRegistryShape {
  * This is the SINGLE entry point a server-side reader should use to resolve
  * "give me a v2 doc, regardless of the on-disk shape". It guarantees the
  * canonical CDN registry (v1 shape) keeps loading via auto-migration.
+ *
+ * Phase 16 addition: a v3 input is DOWNGRADED to v2 by stripping the v3-only
+ * fields (core, orchestrator, themes, sharedDepsCss) and rewriting
+ * `schemaVersion` to 2. This preserves backward compatibility for v2-only
+ * consumers during the v2→v3 migration period — they continue to operate on
+ * the v2 substructure (default/rollouts/tenantOverrides + mfes) without
+ * knowing v3 fields exist. v3-aware consumers should use
+ * `coerceToV3Document` (from `./schema_v3`) instead.
  */
 export function coerceToV2Document(value: unknown): V2Document {
   const shape = detectRegistryShape(value);
   if (shape === 'v2') {
     return assertValidV2Document(value);
   }
+  if (shape === 'v3') {
+    // Downgrade: strip v3-only top-level fields and re-stamp schemaVersion.
+    // The v3 substructure for default/rollouts/tenantOverrides is identical
+    // to v2 by design, so the result is a valid v2 doc.
+    const v3 = value as Record<string, unknown>;
+    const downgraded: V2Document = {
+      schemaVersion: SCHEMA_VERSION_V2,
+      generatedAt: v3.generatedAt as string,
+      default: v3.default as V2Document['default'],
+      rollouts: (v3.rollouts as V2Document['rollouts']) ?? [],
+      tenantOverrides: (v3.tenantOverrides as V2Document['tenantOverrides']) ?? {},
+    };
+    return assertValidV2Document(downgraded);
+  }
   if (shape === 'v1') {
-    const v1 = (value as Record<string, unknown>);
+    const v1 = value as Record<string, unknown>;
     // A missing schemaVersion is treated as v1; the v1 validator REQUIRES
     // SCHEMA_VERSION === 1, so we stamp it before validating. This does NOT
     // mutate the caller's input — we work on a shallow copy.
     const stamped: unknown =
-      v1.schemaVersion === V1_SCHEMA_VERSION
-        ? v1
-        : { ...v1, schemaVersion: V1_SCHEMA_VERSION };
+      v1.schemaVersion === V1_SCHEMA_VERSION ? v1 : { ...v1, schemaVersion: V1_SCHEMA_VERSION };
     const { valid, errors } = validateV1(stamped);
     if (!valid) {
       throw new Error(
@@ -490,8 +519,8 @@ export function coerceToV2Document(value: unknown): V2Document {
     return migrateV1ToV2(stamped as V1Registry);
   }
   throw new Error(
-    `Unknown MFE registry shape: schemaVersion must be ${V1_SCHEMA_VERSION} (legacy v1) or ` +
-      `${SCHEMA_VERSION_V2} (v2). Got ${JSON.stringify(
+    `Unknown MFE registry shape: schemaVersion must be ${V1_SCHEMA_VERSION} (legacy v1), ` +
+      `${SCHEMA_VERSION_V2} (v2), or ${SCHEMA_VERSION_V3_INTERNAL} (v3). Got ${JSON.stringify(
         isPlainObject(value) ? value.schemaVersion : value
       )}.`
   );

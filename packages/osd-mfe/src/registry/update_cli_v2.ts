@@ -66,7 +66,13 @@ export type AuditOp =
   | 'remove-rollout'
   | 'set-tenant-override'
   | 'remove-tenant-override'
-  | 'rollback';
+  | 'rollback'
+  // Phase 16: forward-only schema migration. Emitted ONCE by the authoring CLI
+  // (Story 2) when it first writes a v3 doc derived from a v2 input on disk.
+  // Records the schemaVersion transition; the per-op v3 mutations
+  // (set-core/set-orchestrator/set-theme/set-shared-deps-css) are added as
+  // separate AuditOp members in Story 2 when their handlers land.
+  | 'migrate-v2-to-v3';
 
 /**
  * One audit-log entry. Appended to the sidecar `<registry>.history.json` on
@@ -108,9 +114,7 @@ function readAuditLog(historyPath: string): AuditLog {
     }
     return parsed as AuditLog;
   } catch (cause) {
-    throw new Error(
-      `Failed to read audit log at ${historyPath}: ${(cause as Error).message}`
-    );
+    throw new Error(`Failed to read audit log at ${historyPath}: ${(cause as Error).message}`);
   }
 }
 
@@ -285,9 +289,7 @@ export function applyRemoveTenantOverride(
   const next = deepClone(doc);
   const layer = next.tenantOverrides[pairs.customerId];
   if (!layer || !layer.mfes[pairs.mfeId]) {
-    throw new Error(
-      `--remove-tenant-override: no override for ${pairs.customerId}|${pairs.mfeId}`
-    );
+    throw new Error(`--remove-tenant-override: no override for ${pairs.customerId}|${pairs.mfeId}`);
   }
   const before = deepClone(layer.mfes[pairs.mfeId]);
   delete layer.mfes[pairs.mfeId];
@@ -331,9 +333,7 @@ export function applyRollback(
     }
   }
   if (!mostRecent) {
-    throw new Error(
-      `--rollback id=${id}: no audit history for "${id}" to roll back to.`
-    );
+    throw new Error(`--rollback id=${id}: no audit history for "${id}" to roll back to.`);
   }
   const target = (mostRecent.before as MfeEntry | null) ?? null;
   const next = deepClone(doc);
@@ -387,9 +387,7 @@ function readExternals(externalsDir: string, id: string): ExternalsFile | null {
     }
     return parsed as ExternalsFile;
   } catch (cause) {
-    throw new Error(
-      `Failed to read externals at ${path}: ${(cause as Error).message}`
-    );
+    throw new Error(`Failed to read externals at ${path}: ${(cause as Error).message}`);
   }
 }
 
@@ -425,10 +423,7 @@ export function checkDependencyGraph(
   for (const id of resolvedIds) {
     const ext = readExternals(externalsDir, id);
     if (!ext) continue; // No edges declared = trivially satisfiable.
-    if (
-      ext.contractVersion !== undefined &&
-      ext.contractVersion !== expectedContractVersion
-    ) {
+    if (ext.contractVersion !== undefined && ext.contractVersion !== expectedContractVersion) {
       offenders.push({
         from: id,
         to: id,
@@ -556,12 +551,9 @@ export function runUpdateCliV2(options: RunOptions): number {
     return 0;
   }
   try {
-    const registryPath =
-      readOption(argv, '--registry-path') ?? env.MFE_REGISTRY_PATH;
+    const registryPath = readOption(argv, '--registry-path') ?? env.MFE_REGISTRY_PATH;
     if (!registryPath) {
-      throw new Error(
-        'No registry path: pass --registry-path <p> or set MFE_REGISTRY_PATH.'
-      );
+      throw new Error('No registry path: pass --registry-path <p> or set MFE_REGISTRY_PATH.');
     }
     const reason = readOption(argv, '--reason');
 
@@ -620,11 +612,9 @@ export function runUpdateCliV2(options: RunOptions): number {
     // --check-deps gate (optional; rejects with non-zero exit + no write).
     if (argv.includes('--check-deps')) {
       const externalsDir =
-        readOption(argv, '--externals-dir') ??
-        Path.join(Path.dirname(registryPath), 'externals');
+        readOption(argv, '--externals-dir') ?? Path.join(Path.dirname(registryPath), 'externals');
       const expectedContractVersion =
-        readOption(argv, '--contract-version') ??
-        deriveDefaultContractVersion(osdVersion);
+        readOption(argv, '--contract-version') ?? deriveDefaultContractVersion(osdVersion);
       const check = checkDependencyGraph(result.next, externalsDir, expectedContractVersion);
       if (!check.ok) {
         out.error(
@@ -649,9 +639,7 @@ export function runUpdateCliV2(options: RunOptions): number {
     const newLog = [...log, auditEntry];
     commitOp(registryPath, prevDocBytes, result.next, newLog);
 
-    out.log(
-      `${result.op} target=${result.target} -> ${registryPath} (history appended)`
-    );
+    out.log(`${result.op} target=${result.target} -> ${registryPath} (history appended)`);
     return 0;
   } catch (error) {
     out.error(error instanceof Error ? error.message : String(error));
