@@ -344,9 +344,17 @@ export class ChromeService {
       options
     ) => {
       const isSameApp = appId === currentAppId;
+      const oldURL = window.location.href;
       const result = application.navigateToApp(appId, options);
       if (isSameApp) {
-        window.setTimeout(() => window.dispatchEvent(new HashChangeEvent('hashchange')), 0);
+        // Populate oldURL/newURL so listeners that read them behave correctly.
+        window.setTimeout(
+          () =>
+            window.dispatchEvent(
+              new HashChangeEvent('hashchange', { oldURL, newURL: window.location.href })
+            ),
+          0
+        );
       }
       return result;
     };

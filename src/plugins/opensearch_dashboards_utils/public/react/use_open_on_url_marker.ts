@@ -71,7 +71,11 @@ export function useOpenOnUrlMarker(
       const rawQuery = hash.slice(qIndex + 1);
       const nextQuery = rawQuery
         .split('&')
-        .filter((pair) => pair.split('=')[0] !== marker)
+        .filter((pair) => {
+          const eqIndex = pair.indexOf('=');
+          const key = eqIndex === -1 ? pair : pair.slice(0, eqIndex);
+          return key !== marker;
+        })
         .join('&');
       const nextHash = `${hash.slice(0, qIndex)}${nextQuery ? `?${nextQuery}` : ''}`;
       window.history.replaceState(

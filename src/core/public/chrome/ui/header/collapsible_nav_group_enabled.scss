@@ -1027,8 +1027,6 @@ $osd-sidebar-top-min-height: 116px;
 // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
 .euiPopover__panel.obsNavPopover-panel {
   border: $euiBorderThin;
-  border-left: none;
-  border-radius: 0 $osd-nav-popover-radius $osd-nav-popover-radius 0;
 
   // EUI anchors `rightUp` with the panel top ~4px above the trigger row and a
   // residual `translateX(-8px)`. Neutralize both so the panel sits flush to the
@@ -1050,6 +1048,22 @@ $osd-sidebar-top-min-height: 116px;
     display: none;
   }
 }
+
+// Seam side is direction dependent: in LTR the panel opens to the RIGHT of the
+// nav (seam on its LEFT edge); in RTL EUI mirrors it to the LEFT (seam on its
+// RIGHT edge). Drop the border and square the corners on the seam side so the
+// panel reads as one surface with the hovered row, mirrored per `dir`.
+// stylelint-disable @osd/stylelint/no_modifying_global_selectors
+.euiPopover__panel.obsNavPopover-panel:not([dir="rtl"]) {
+  border-left: none;
+  border-radius: 0 $osd-nav-popover-radius $osd-nav-popover-radius 0;
+}
+
+.euiPopover__panel.obsNavPopover-panel[dir="rtl"] {
+  border-right: none;
+  border-radius: $osd-nav-popover-radius 0 0 $osd-nav-popover-radius;
+}
+// stylelint-enable @osd/stylelint/no_modifying_global_selectors
 
 // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
 .euiPopover__panel.obsNavPopover-panel--rail {

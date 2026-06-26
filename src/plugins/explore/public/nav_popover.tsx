@@ -88,10 +88,13 @@ function RecentExploreSearches({
 }
 
 /**
- * Hash query that lands Metrics on the default Prometheus PROMQL dataset. The
- * two modes differ only by `ui.metricsPageMode` (omitted = explore/visualize
- * mode; `query` = PPL/PromQL query mode). The dataset block points at the
- * ObservabilityStack_Prometheus connection so the page opens ready to query.
+ * Hash query that lands Metrics in the requested mode. The two modes differ only
+ * by `ui.metricsPageMode` (explore = visualize mode; query = PromQL query mode).
+ *
+ * No dataset is specified: the Metrics page's own `useInitializeMetricsDataset`
+ * hook discovers and selects the first available PROMETHEUS connection on mount,
+ * so the popover stays deployment agnostic instead of targeting a specific named
+ * connection.
  */
 const metricsHashPath = (mode?: 'query') => {
   // Always set metricsPageMode explicitly (explore | query) so the page can
@@ -102,9 +105,6 @@ const metricsHashPath = (mode?: 'query') => {
     : 'ui:(activeTabId:logs,metricsPageMode:explore,showHistogram:!t)';
   return (
     '#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))' +
-    '&_q=(dataset:(dataSource:(),id:ObservabilityStack_Prometheus,language:PROMQL,' +
-    'signalType:metrics,timeFieldName:Time,title:ObservabilityStack_Prometheus,type:PROMETHEUS),' +
-    "language:PROMQL,query:'')" +
     '&_a=(legacy:(columns:!(_source),interval:auto,isDirty:!f,sort:!()),' +
     `tab:(logs:(),patterns:(usingRegexPatterns:!f)),${ui})`
   );

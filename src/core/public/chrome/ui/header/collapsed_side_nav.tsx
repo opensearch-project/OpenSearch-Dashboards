@@ -202,8 +202,11 @@ function CollapsedParentIcon({
   // Build a (nested) list of navigable items; nested parents cascade.
   const childItems = buildChildItems(linkItem.links, popoverServices);
 
-  // Direct click on a parent navigates to its first child.
+  // Direct click on a parent navigates to its first child, falling back to the
+  // parent's own id so the click is never a silent no-op when it has no
+  // navigable children.
   const firstChildId = childItems[0]?.id;
+  const navTargetId = firstChildId || parentLink?.id;
   const button = (
     <div className="obsCollapsedNavIcon-wrapper">
       <EuiButtonIcon
@@ -211,7 +214,7 @@ function CollapsedParentIcon({
         aria-label={title}
         color="text"
         display="empty"
-        onClick={() => firstChildId && navigateToApp(firstChildId)}
+        onClick={() => navTargetId && navigateToApp(navTargetId)}
         className="obsCollapsedNavIcon"
         size="m"
         data-test-subj={`obsCollapsedIcon-${parentLink?.id || 'parent'}`}
