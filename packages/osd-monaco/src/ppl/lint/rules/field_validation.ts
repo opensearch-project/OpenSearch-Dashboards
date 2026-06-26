@@ -28,6 +28,13 @@ const SHAPE_DOC_URL: Record<string, string> = {
   patternsCommand: 'https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/patterns/',
 };
 
+// `source` / `index` are the fromClause keywords. The compiled-simplified
+// grammar mis-parses `source=idx` into a fieldExpression for the `source`
+// keyword (the runtime grammar parses it as an excluded fromClause), so the
+// existence pass must skip these to avoid a false "Unknown field" on every
+// source-first query against a sub-3.6 cluster.
+const SOURCE_KEYWORDS: ReadonlySet<string> = new Set(['source', 'index']);
+
 /** Display keyword for each field-slot command, used in the shape message. */
 const SHAPE_COMMAND_KEYWORD: Record<string, string> = {
   grokCommand: 'grok',
@@ -219,6 +226,13 @@ function detectUnknownFields(
       // Normalize backtick-quoted segments per dotted part so `` `age` ``
       // matches the unquoted `age` in the field set.
       const name = raw.split('.').map(unquoteIdent).join('.');
+      // On the compiled-simplified surface, `source=idx` / `index=idx` parses the
+      // leading `source`/`index` keyword into a fieldExpression (the runtime
+      // grammar instead parses it as an excluded fromClause). Skip that keyword
+      // so sub-3.6 clusters don't get a spurious "Unknown field" on every query.
+      if (SOURCE_KEYWORDS.has(name.toLowerCase())) {
+        continue;
+      }
       const prefix = name.includes('.') ? name.split('.')[0] : null;
       // Soft skip: alias-qualified refs (`l.response` where `l` is a declared
       // join alias). Still descend into children — alias-qualified refs appear
