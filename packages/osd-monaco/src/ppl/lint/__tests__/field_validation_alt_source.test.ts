@@ -138,6 +138,44 @@ describe('field-validation alternate-source suppression (compiled surface)', () 
     });
   });
 
+  // The eval created-field *name* slot (eval LHS) is protected by createdFields,
+  // so the eval RHS must still be walked and validated like a `where` clause — a
+  // typo there is a real unknown-field bug. Previously the whole evalClause was
+  // excluded by ancestor, hiding the RHS. (Rename fields parse as
+  // `wcFieldExpression`, which the existence pass never walks, so rename-source
+  // validation is out of scope here — see field_slot_shape's cast-guard block
+  // for the createdFields side of this fix.)
+  describe('eval RHS scope', () => {
+    const scopeCtx: LintRunContext = {
+      fields: new Set<string>(['age', 'name', 'response', 'total']),
+    };
+    const scopeDiags = (code: string): string[] =>
+      analyzer
+        .lint(code, scopeCtx)
+        .diagnostics.filter((d) => d.ruleId === 'field-validation')
+        .map((d) => d.message);
+
+    it('flags an unknown field in an eval RHS, not the eval target', () => {
+      expect(scopeDiags('source=t | eval x = nonexistent + 1')).toEqual([
+        expect.stringContaining('Unknown field "nonexistent"'),
+      ]);
+    });
+
+    it('flags an unknown field in an eval RHS division', () => {
+      expect(scopeDiags('source=t | eval ratio = respose / total')).toEqual([
+        expect.stringContaining('Unknown field "respose"'),
+      ]);
+    });
+
+    it('keeps an eval target known downstream', () => {
+      expect(scopeDiags('source=t | eval x = 1 | where x > 0')).toEqual([]);
+    });
+
+    it('keeps a stats alias known downstream', () => {
+      expect(scopeDiags('source=t | stats avg(age) as avgage | where avgage > 1')).toEqual([]);
+    });
+  });
+
   // B2: suggestField must prefer a distance-0 (case-only) match over a
   // distance-1 one seen earlier in the field set — otherwise the quick-fix
   // rewrites the user's case-typo into the *wrong* field.

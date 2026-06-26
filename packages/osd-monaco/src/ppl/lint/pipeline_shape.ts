@@ -75,10 +75,14 @@ function collectCreatedFields(
   out: Set<string>
 ): void {
   // Walk descendants looking for an `AS` terminal followed by a name node.
+  // `cast(field AS int)` also has an `AS` terminal, but the node after it is the
+  // target type (a `convertedDataType`), not a created field — skip those so a
+  // type name like `int` never pollutes the known-field set.
+  const convertedTypeIdx = ruleNameToIndex('convertedDataType');
   const stack: ParseTree[] = [stage.node];
   while (stack.length > 0) {
-    const node = stack.pop()!;
-    if (!isRuleNode(node)) {
+    const node = stack.pop();
+    if (node === undefined || !isRuleNode(node)) {
       continue;
     }
     const children = node.children ?? [];
@@ -86,7 +90,7 @@ function collectCreatedFields(
       const child = children[i];
       if (isTerminalNode(child) && child.getText().toLowerCase() === 'as') {
         const next = children[i + 1];
-        if (isRuleNode(next)) {
+        if (isRuleNode(next) && next.ruleIndex !== convertedTypeIdx) {
           const name = next.getText();
           if (name) {
             out.add(name);
@@ -104,8 +108,8 @@ function collectCreatedFields(
   if (evalClauseIdx !== -1) {
     const evalStack: ParseTree[] = [stage.node];
     while (evalStack.length > 0) {
-      const node = evalStack.pop()!;
-      if (!isRuleNode(node)) {
+      const node = evalStack.pop();
+      if (node === undefined || !isRuleNode(node)) {
         continue;
       }
       if (node.ruleIndex === evalClauseIdx) {
