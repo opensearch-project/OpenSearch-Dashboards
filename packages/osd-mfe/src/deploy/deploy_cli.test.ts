@@ -465,3 +465,229 @@ describe('runDeployCli --plugin (Phase 10 Story 1: single-plugin publish)', () =
     expect(joined).toContain('shared-deps 3.5.0');
   });
 });
+
+/* ------------------------------------------------------------------------- *
+ * Phase 16 Story 2 — v3 asset deploy coverage
+ * ------------------------------------------------------------------------- */
+
+import {
+  V3_ASSET_BUILD_MANIFEST_SCHEMA_VERSION,
+  V3AssetBuildManifest,
+  V3AssetKind,
+} from '../registry/v3_asset_build';
+
+/** Stage a v3 asset under target/mfe-...; return its manifest path. */
+function writeV3StagedAsset(
+  root: string,
+  assetKind: V3AssetKind,
+  contentHash: string,
+  primaryFile: string,
+  themeName?: string
+): string {
+  let stagingDir: string;
+  if (assetKind === 'theme') {
+    stagingDir = Path.join(root, 'target', 'mfe-themes', themeName!, contentHash);
+  } else if (assetKind === 'shared-deps-css') {
+    stagingDir = Path.join(root, 'target', 'mfe-shared-deps-css', contentHash);
+  } else if (assetKind === 'orchestrator') {
+    stagingDir = Path.join(root, 'target', 'mfe-bootstrap', contentHash);
+  } else {
+    stagingDir = Path.join(root, 'target', 'mfe-core', contentHash);
+  }
+  Fs.mkdirSync(stagingDir, { recursive: true });
+  Fs.writeFileSync(Path.join(stagingDir, primaryFile), 'PAYLOAD');
+  const manifest: V3AssetBuildManifest = {
+    schemaVersion: V3_ASSET_BUILD_MANIFEST_SCHEMA_VERSION,
+    generatedAt: '2026-06-26T12:00:00.000Z',
+    assetKind,
+    ...(themeName !== undefined ? { themeName } : {}),
+    contentHash,
+    integrity: 'sha384-MOCKINTEGRITY',
+    version: `3.5.0+${contentHash}`,
+    stagingDir,
+    primaryFile,
+    files: [{ localPath: Path.join(stagingDir, primaryFile), relativePath: primaryFile }],
+  };
+  const manifestPath = Path.join(stagingDir, 'build-manifest.json');
+  Fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
+  return manifestPath;
+}
+
+describe('runDeployCli() — v3 asset publish (Phase 16 Story 2)', () => {
+  it('--core <manifest> --dry-run prints the intended key + makes ZERO AWS calls', () => {
+    const { root, env, manifestPath } = makeFixtureRepo();
+    const buildManifest = writeV3StagedAsset(root, 'core', 'corehash1234', 'core.entry.js');
+    const out = captureConsole();
+    const { run, calls } = mockExec();
+    const code = runDeployCli(['--core', buildManifest, '--dry-run'], root, {
+      env,
+      out,
+      exec: run,
+    });
+    expect(code).toBe(0);
+    expect(calls).toEqual([]); // ZERO aws/ada calls in dry-run
+    const joined = out.logs.join('\n');
+    expect(joined).toContain('v3 asset core 3.5.0+corehash1234');
+    expect(joined).toContain('s3://test-bucket/mfe/core/corehash1234/core.entry.js');
+    expect(joined).toContain('integrity: sha384-MOCKINTEGRITY');
+    // Manifest NOT touched (no --update-manifest).
+    expect(Fs.existsSync(manifestPath)).toBe(false);
+  });
+
+  it('--core <manifest> publishes + skips creds when --skip-creds (1 upload, 1 head-object call)', () => {
+    const { root, env } = makeFixtureRepo();
+    const buildManifest = writeV3StagedAsset(root, 'core', 'corehash9876', 'core.entry.js');
+    const out = captureConsole();
+    const { run, calls } = mockExec();
+    const code = runDeployCli(['--core', buildManifest, '--skip-creds'], root, {
+      env,
+      out,
+      exec: run,
+    });
+    expect(code).toBe(0);
+    // Exactly one head-object (immutability) + one s3 cp upload; no ada call.
+    expect(calls.some((c) => c.command === 'ada')).toBe(false);
+    const headCalls = calls.filter(
+      (c) => c.command === 'aws' && c.args[0] === 's3api' && c.args[1] === 'head-object'
+    );
+    expect(headCalls).toHaveLength(1);
+    const cpCalls = calls.filter(
+      (c) => c.command === 'aws' && c.args[0] === 's3' && c.args[1] === 'cp'
+    );
+    expect(cpCalls).toHaveLength(1);
+    // Upload target uses the v3 asset path.
+    expect(cpCalls[0].args.some((a) => a.includes('s3://test-bucket/mfe/core/corehash9876/'))).toBe(
+      true
+    );
+  });
+
+  it('--core <manifest> --skip-creds --update-manifest writes v3Assets.core into deploy-manifest.json', () => {
+    const { root, manifestPath, env } = makeFixtureRepo();
+    const buildManifest = writeV3StagedAsset(root, 'core', 'cmh777', 'core.entry.js');
+    const out = captureConsole();
+    const { run } = mockExec();
+    const code = runDeployCli(
+      ['--core', buildManifest, '--skip-creds', '--update-manifest'],
+      root,
+      { env, out, exec: run }
+    );
+    expect(code).toBe(0);
+    expect(Fs.existsSync(manifestPath)).toBe(true);
+    const manifest = JSON.parse(Fs.readFileSync(manifestPath, 'utf8'));
+    expect(manifest.v3Assets).toBeDefined();
+    expect(manifest.v3Assets.core).toBeDefined();
+    expect(manifest.v3Assets.core.assetKind).toBe('core');
+    expect(manifest.v3Assets.core.contentHash).toBe('cmh777');
+    expect(manifest.v3Assets.core.integrity).toBe('sha384-MOCKINTEGRITY');
+    expect(manifest.v3Assets.core.cdnUrl).toBe(
+      'https://cdn.example.net/mfe/core/cmh777/core.entry.js'
+    );
+  });
+
+  it('--theme <name> <manifest> --skip-creds --update-manifest writes v3Assets["theme:<name>"]', () => {
+    const { root, manifestPath, env } = makeFixtureRepo();
+    const buildManifest = writeV3StagedAsset(
+      root,
+      'theme',
+      'darkhh',
+      'legacy_dark_theme.css',
+      'dark'
+    );
+    const out = captureConsole();
+    const { run } = mockExec();
+    const code = runDeployCli(
+      ['--theme', 'dark', buildManifest, '--skip-creds', '--update-manifest'],
+      root,
+      { env, out, exec: run }
+    );
+    expect(code).toBe(0);
+    const manifest = JSON.parse(Fs.readFileSync(manifestPath, 'utf8'));
+    expect(manifest.v3Assets['theme:dark']).toBeDefined();
+    expect(manifest.v3Assets['theme:dark'].themeName).toBe('dark');
+    expect(manifest.v3Assets['theme:dark'].cdnUrl).toBe(
+      'https://cdn.example.net/mfe/themes/dark/darkhh/legacy_dark_theme.css'
+    );
+  });
+
+  it('--shared-deps-css preserves an existing v3Assets map on the manifest (additive)', () => {
+    const { root, manifestPath, env } = makeFixtureRepo();
+    // Seed the deploy manifest with an existing v3 entry (e.g. core was deployed earlier).
+    Fs.mkdirSync(Path.dirname(manifestPath), { recursive: true });
+    Fs.writeFileSync(
+      manifestPath,
+      JSON.stringify({
+        schemaVersion: DEPLOY_MANIFEST_SCHEMA_VERSION,
+        generatedAt: '2026-06-25T00:00:00.000Z',
+        cdn: {
+          bucket: 'test-bucket',
+          region: 'us-west-2',
+          baseUrl: 'https://cdn.example.net',
+          keyPrefix: 'mfe',
+        },
+        mfes: {},
+        v3Assets: {
+          core: {
+            assetKind: 'core',
+            contentHash: 'priorcore',
+            integrity: 'sha384-PRIOR',
+            version: '3.5.0+priorcore',
+            key: 'mfe/core/priorcore/core.entry.js',
+            cdnUrl: 'https://cdn.example.net/mfe/core/priorcore/core.entry.js',
+            fileCount: 1,
+          },
+        },
+      })
+    );
+    const buildManifest = writeV3StagedAsset(
+      root,
+      'shared-deps-css',
+      'cssh',
+      'osd-ui-shared-deps.css'
+    );
+    const out = captureConsole();
+    const { run } = mockExec();
+    const code = runDeployCli(
+      ['--shared-deps-css', buildManifest, '--skip-creds', '--update-manifest'],
+      root,
+      { env, out, exec: run }
+    );
+    expect(code).toBe(0);
+    const m = JSON.parse(Fs.readFileSync(manifestPath, 'utf8'));
+    // Pre-existing entry preserved.
+    expect(m.v3Assets.core.contentHash).toBe('priorcore');
+    // New entry added.
+    expect(m.v3Assets.sharedDepsCss).toBeDefined();
+    expect(m.v3Assets.sharedDepsCss.assetKind).toBe('shared-deps-css');
+  });
+
+  it('rejects mixing v3 asset flags with --plugin in one invocation', () => {
+    const { root, env } = makeFixtureRepo();
+    const buildManifest = writeV3StagedAsset(root, 'core', 'mix0', 'core.entry.js');
+    const out = captureConsole();
+    const { run, calls } = mockExec();
+    const code = runDeployCli(['--core', buildManifest, '--plugin', 'inspector'], root, {
+      env,
+      out,
+      exec: run,
+    });
+    expect(code).toBe(1);
+    expect(out.errors.join('\n')).toMatch(/mutually exclusive/);
+    expect(calls).toEqual([]);
+  });
+
+  it('rejects two v3 asset flags in one invocation', () => {
+    const { root, env } = makeFixtureRepo();
+    const coreM = writeV3StagedAsset(root, 'core', 'aaaaaa', 'core.entry.js');
+    const orchM = writeV3StagedAsset(root, 'orchestrator', 'bbbbbb', 'osd_bootstrap_mfe.js');
+    const out = captureConsole();
+    const { run, calls } = mockExec();
+    const code = runDeployCli(['--core', coreM, '--orchestrator', orchM, '--skip-creds'], root, {
+      env,
+      out,
+      exec: run,
+    });
+    expect(code).toBe(1);
+    expect(out.errors.join('\n')).toMatch(/Only one --core\/--orchestrator/);
+    expect(calls).toEqual([]);
+  });
+});

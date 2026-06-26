@@ -86,6 +86,7 @@ export type { UpdateCliConsole } from './update_cli';
 export {
   runUpdateCliV2,
   isV2Mode,
+  isV3AssetMode,
   parseKeyValuePairs,
   applySetDefaultEntry,
   applyAddRollout,
@@ -103,3 +104,25 @@ export type {
   ExternalsFile,
   CheckDepsResult,
 } from './update_cli_v2';
+
+export {
+  V3_ASSET_BUILD_MANIFEST_SCHEMA_VERSION,
+  stageV3Asset,
+  readV3AssetBuildManifest,
+  manifestToAssetDescriptor,
+  defaultSourcePath,
+  defaultTargetRoot,
+} from './v3_asset_build';
+export type {
+  V3AssetKind,
+  V3AssetBuildManifest,
+  StagedFile,
+  StageV3AssetOptions,
+} from './v3_asset_build';
+
+export {
+  applySetCore,
+  applySetOrchestrator,
+  applySetSharedDepsCss,
+  applySetTheme,
+} from './v3_asset_apply';

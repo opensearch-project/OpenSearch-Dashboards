@@ -49,9 +49,30 @@ import {
   V2RolloutMatch,
   assertValidV2Document,
   coerceToV2Document,
+  detectRegistryShape,
 } from './schema_v2';
 import { MfeEntry } from './schema';
 import { resolveBootManifest } from './resolve_v2';
+import {
+  V3AssetDescriptor,
+  V3Document,
+  SCHEMA_VERSION_V3,
+  assertValidV3Document,
+  coerceToV3Document,
+} from './schema_v3';
+import {
+  applySetCore,
+  applySetOrchestrator,
+  applySetSharedDepsCss,
+  applySetTheme,
+} from './v3_asset_apply';
+import {
+  V3AssetBuildManifest,
+  manifestToAssetDescriptor,
+  readV3AssetBuildManifest,
+} from './v3_asset_build';
+import { signRegistry, RegistrySigningKey } from './signing';
+import { REGISTRY_SIGNATURE_ALGORITHM } from './signing_common';
 
 /** Minimal console surface, injectable so tests can assert/silence output. */
 export interface UpdateCliV2Console {
@@ -67,12 +88,20 @@ export type AuditOp =
   | 'set-tenant-override'
   | 'remove-tenant-override'
   | 'rollback'
-  // Phase 16: forward-only schema migration. Emitted ONCE by the authoring CLI
-  // (Story 2) when it first writes a v3 doc derived from a v2 input on disk.
-  // Records the schemaVersion transition; the per-op v3 mutations
-  // (set-core/set-orchestrator/set-theme/set-shared-deps-css) are added as
-  // separate AuditOp members in Story 2 when their handlers land.
-  | 'migrate-v2-to-v3';
+  // Phase 16 Story 1: forward-only schema migration. Emitted ONCE by the
+  // authoring CLI (Story 2) when it first writes a v3 doc derived from a v1/v2
+  // input on disk. Records the schemaVersion transition; the per-op v3
+  // mutations are separate AuditOp members below.
+  | 'migrate-v2-to-v3'
+  // Phase 16 Story 2: per-op v3 mutations for the four new GLOBAL asset
+  // categories. Each carries the V3AssetDescriptor in before/after, so an
+  // operator can rollback by re-applying the prior `before` value. (Rollback
+  // for v3 assets is not implemented in Story 2 — the audit log is sufficient
+  // for now; explicit rollback is a Story 8 capstone enhancement.)
+  | 'set-core'
+  | 'set-orchestrator'
+  | 'set-shared-deps-css'
+  | 'set-theme';
 
 /**
  * One audit-log entry. Appended to the sidecar `<registry>.history.json` on
@@ -470,11 +499,17 @@ function historyPathFor(registryPath: string): string {
  * Commit a successful op: write the new doc + the new audit log atomically.
  * If the doc write succeeds but the history write fails, the doc is rolled back
  * to its pre-op content so the contract holds (atomicity: both or neither).
+ *
+ * Accepts `V2Document | V3Document` — both shapes JSON-serialize cleanly and
+ * the on-disk file is JSON, so the commit step is shape-agnostic. The CALLER
+ * (the v2 / v3 branch in {@link runUpdateCliV2}) is responsible for validating
+ * the doc shape before calling this; this step is purely a durable-write
+ * primitive.
  */
 function commitOp(
   registryPath: string,
   prevDocBytes: string,
-  newDoc: V2Document,
+  newDoc: V2Document | V3Document,
   newLog: AuditLog
 ): void {
   const historyPath = historyPathFor(registryPath);
@@ -501,7 +536,7 @@ function commitOp(
  * CLI entrypoint
  * ------------------------------------------------------------------------- */
 
-const USAGE_V2 = `Usage: node scripts/update_registry [v2 options]
+const USAGE_V2 = `Usage: node scripts/update_registry [v2/v3 options]
 
 v2 modes (Phase 13 Story 4):
   --default-entry id=<id> version=<v> url=<u> [scope=<s>] [module=<m>] [integrity=<i>]
@@ -512,11 +547,24 @@ v2 modes (Phase 13 Story 4):
   --rollback id=<mfe-id>
   --check-deps [--externals-dir <p>]
 
+v3 asset modes (Phase 16 Story 2 — registry-managed core/orchestrator/themes/shared-deps-css):
+  --update-core <build-manifest>           Set the global v3 \`core\` field.
+  --update-orchestrator <build-manifest>   Set the global v3 \`orchestrator\` field.
+  --update-shared-deps-css <build-manifest>
+                                           Set the global v3 \`sharedDepsCss\` field.
+  --update-theme <name> <build-manifest>   Set the per-theme v3 \`themes[<name>]\` entry.
+
+  Each --update-* mode AUTO-MIGRATES a v1/v2 doc to v3 forward-only (with an
+  audit entry \`migrate-v2-to-v3\`) before applying the change. v3 docs are
+  validated strictly. When \`MFE_REGISTRY_SIGNING_KEY\` is set (and
+  \`MFE_REGISTRY_KEY_ID\` for the envelope), the new doc is re-signed.
+  --cdn-base-url <u> overrides the URL prefix the descriptor is stamped with
+  (defaults to REGISTRY_BASE_URL or http://localhost:8080).
+
 Common options:
-  --registry-path <p>     v2 registry document on disk (defaults to MFE_REGISTRY_PATH).
+  --registry-path <p>     v2/v3 registry document on disk (defaults to MFE_REGISTRY_PATH).
   --reason "<text>"       Optional human-readable reason; recorded in the audit log.
-  --check-deps            Run the dependency scan-gate before writing; reject the
-                          op if the would-be resolved graph is unsatisfiable.
+  --check-deps            Run the dependency scan-gate before writing (v2 ops only).
   --externals-dir <p>     Directory of <id>.externals.json files (build-time edges).
                           Defaults to a sibling of the registry file.
   --contract-version <v>  contractVersion peers must match (default: OSD major.minor).
@@ -532,7 +580,24 @@ interface RunOptions {
   osdVersion: string;
 }
 
-/** Detect whether the argv is an v2 mode (so the dispatcher routes here). */
+/** The set of v3-asset CLI flags introduced in Phase 16 Story 2. */
+const V3_ASSET_FLAGS = [
+  '--update-core',
+  '--update-orchestrator',
+  '--update-shared-deps-css',
+  '--update-theme',
+] as const;
+
+/** Detect whether the argv is a v3-asset mode (Phase 16 Story 2). */
+export function isV3AssetMode(argv: string[]): boolean {
+  return V3_ASSET_FLAGS.some((flag) => argv.includes(flag));
+}
+
+/**
+ * Detect whether the argv is a v2 OR v3-asset mode (so the dispatcher routes
+ * here). Folded together because both modes are authored by THIS CLI; the
+ * v1-only path (full regen / --from-manifest / --plugin) lives in `update_cli.ts`.
+ */
 export function isV2Mode(argv: string[]): boolean {
   return (
     argv.includes('--default-entry') ||
@@ -540,7 +605,8 @@ export function isV2Mode(argv: string[]): boolean {
     argv.includes('--remove-rollout') ||
     argv.includes('--tenant-override') ||
     argv.includes('--remove-tenant-override') ||
-    argv.includes('--rollback')
+    argv.includes('--rollback') ||
+    isV3AssetMode(argv)
   );
 }
 
@@ -550,6 +616,14 @@ export function runUpdateCliV2(options: RunOptions): number {
     out.log(USAGE_V2);
     return 0;
   }
+
+  // Phase 16 Story 2: v3 asset modes dispatch to a separate handler. They
+  // operate on a V3Document (auto-migrating from v1/v2), not the V2Document
+  // the rest of this CLI uses, so the read+apply+commit pipeline is distinct.
+  if (isV3AssetMode(argv)) {
+    return runUpdateCliV3Asset(options);
+  }
+
   try {
     const registryPath = readOption(argv, '--registry-path') ?? env.MFE_REGISTRY_PATH;
     if (!registryPath) {
@@ -652,4 +726,259 @@ function deriveDefaultContractVersion(osdVersion: string): string {
   // the input itself so the caller still gets a deterministic value.
   const m = /^(\d+)\.(\d+)/.exec(osdVersion);
   return m ? `${m[1]}.${m[2]}` : osdVersion;
+}
+
+/* ------------------------------------------------------------------------- *
+ * Phase 16 Story 2: v3 asset modes
+ * (--update-core / --update-orchestrator / --update-theme / --update-shared-deps-css)
+ * ------------------------------------------------------------------------- */
+
+/** Default URL prefix the asset descriptor's URL is stamped against. */
+const DEFAULT_V3_ASSET_BASE_URL = 'http://localhost:8080';
+
+/**
+ * Read a `--update-<asset> <build-manifest>` option from argv. Mirrors
+ * {@link readOption} but is broken out so the caller can detect "flag absent"
+ * (return undefined) versus "flag present but value missing" (throws).
+ */
+function readManifestPathOption(argv: string[], flag: string): string | undefined {
+  const idx = argv.indexOf(flag);
+  if (idx === -1) return undefined;
+  const v = argv[idx + 1];
+  if (v === undefined || v.startsWith('--')) {
+    throw new Error(`${flag} requires a build-manifest path`);
+  }
+  return v;
+}
+
+/**
+ * Read `--update-theme <name> <build-manifest>` (two-value flag). Throws when
+ * either positional value is missing or another flag intrudes.
+ */
+function readUpdateThemeArgs(argv: string[]): { themeName: string; manifestPath: string } | null {
+  const idx = argv.indexOf('--update-theme');
+  if (idx === -1) return null;
+  const name = argv[idx + 1];
+  const manifestPath = argv[idx + 2];
+  if (name === undefined || name.startsWith('--')) {
+    throw new Error('--update-theme requires <name> <build-manifest>');
+  }
+  if (manifestPath === undefined || manifestPath.startsWith('--')) {
+    throw new Error(`--update-theme ${name} requires a build-manifest path`);
+  }
+  return { themeName: name, manifestPath };
+}
+
+/**
+ * Apply a build manifest to a v3 doc, returning the v3-asset apply result
+ * (next/before/after/target + the audit op kind). Centralised so the dispatch
+ * branch is a single switch.
+ */
+function applyV3AssetFromManifest(
+  doc: V3Document,
+  manifest: V3AssetBuildManifest,
+  baseUrl: string
+): { next: V3Document; before: unknown; after: unknown; target: string; op: AuditOp } {
+  const descriptor: V3AssetDescriptor = manifestToAssetDescriptor(manifest, baseUrl);
+  switch (manifest.assetKind) {
+    case 'core': {
+      const r = applySetCore(doc, descriptor);
+      return { ...r, op: 'set-core' };
+    }
+    case 'orchestrator': {
+      const r = applySetOrchestrator(doc, descriptor);
+      return { ...r, op: 'set-orchestrator' };
+    }
+    case 'shared-deps-css': {
+      const r = applySetSharedDepsCss(doc, descriptor);
+      return { ...r, op: 'set-shared-deps-css' };
+    }
+    case 'theme': {
+      if (!manifest.themeName) {
+        throw new Error('applyV3AssetFromManifest: theme manifest is missing themeName');
+      }
+      const r = applySetTheme(doc, manifest.themeName, descriptor);
+      return { ...r, op: 'set-theme' };
+    }
+    default: {
+      const exhaustive: never = manifest.assetKind;
+      throw new Error(`applyV3AssetFromManifest: unknown assetKind ${JSON.stringify(exhaustive)}`);
+    }
+  }
+}
+
+/**
+ * Re-sign a v3 doc when the operator has set `MFE_REGISTRY_SIGNING_KEY` (and
+ * optionally `MFE_REGISTRY_KEY_ID` for the envelope). Phase 12's `signRegistry`
+ * canonicalises by stripping `signature` and serializing with sorted keys; the
+ * canonicalisation is shape-agnostic, so signing a v3 doc works without any
+ * changes to the signer. Returns the doc unchanged when signing is not enabled.
+ */
+function maybeReSignV3(doc: V3Document, env: NodeJS.ProcessEnv): V3Document {
+  const secret = env.MFE_REGISTRY_SIGNING_KEY;
+  if (typeof secret !== 'string' || secret.length === 0) {
+    return doc;
+  }
+  const keyId =
+    typeof env.MFE_REGISTRY_KEY_ID === 'string' && env.MFE_REGISTRY_KEY_ID.length > 0
+      ? env.MFE_REGISTRY_KEY_ID
+      : 'default';
+  const key: RegistrySigningKey = {
+    keyId,
+    secret,
+    algorithm: REGISTRY_SIGNATURE_ALGORITHM,
+  };
+  // signRegistry is typed `Registry → Registry` but only manipulates the
+  // `signature` field via canonicalRegistryString (which accepts any object).
+  // Cast through unknown so the call type-checks; the runtime behaviour is
+  // shape-agnostic. We carefully re-attach the signature into the V3Document
+  // shape afterwards so the field appears on the returned object.
+  const signed = signRegistry((doc as unknown) as Parameters<typeof signRegistry>[0], key);
+  return (signed as unknown) as V3Document;
+}
+
+/**
+ * Phase 16 Story 2 — v3 asset CLI entrypoint. Routed to from
+ * {@link runUpdateCliV2} when {@link isV3AssetMode} matches.
+ *
+ * Pipeline (mirrors the v2 pipeline but operates on V3Document):
+ *  1. Read prev doc bytes, coerce to V3Document (auto-migrate v1/v2 → v3).
+ *  2. When the on-disk shape was v1 or v2, append a `migrate-v2-to-v3` audit
+ *     entry FIRST so the history records the schemaVersion transition.
+ *  3. Read the build manifest from disk; build an asset descriptor; apply.
+ *  4. Validate the would-be v3 doc strictly (assertValidV3Document).
+ *  5. Optionally re-sign (when MFE_REGISTRY_SIGNING_KEY is set).
+ *  6. Append the set-* audit entry; commit (doc + history) atomically.
+ *
+ * Returns 0 on success, 1 on validation/IO error.
+ */
+function runUpdateCliV3Asset(options: RunOptions): number {
+  const { argv, env, out, now } = options;
+  try {
+    const registryPath = readOption(argv, '--registry-path') ?? env.MFE_REGISTRY_PATH;
+    if (!registryPath) {
+      throw new Error('No registry path: pass --registry-path <p> or set MFE_REGISTRY_PATH.');
+    }
+    const reason = readOption(argv, '--reason');
+    const baseUrl =
+      readOption(argv, '--cdn-base-url') ?? env.REGISTRY_BASE_URL ?? DEFAULT_V3_ASSET_BASE_URL;
+
+    const prevDocBytes = Fs.readFileSync(registryPath, 'utf8');
+    const prevParsed = JSON.parse(prevDocBytes);
+    const prevShape = detectRegistryShape(prevParsed);
+    // Coerce — for v1/v2 input, this is the migration moment; for v3 input
+    // it's a no-op. The descriptor will be applied to the resulting v3 doc.
+    const docPreMigration = coerceToV3Document(prevParsed);
+    const log = readAuditLog(historyPathFor(registryPath));
+
+    // Resolve the manifest path + which set-* op based on the flag set.
+    const corePath = readManifestPathOption(argv, '--update-core');
+    const orchestratorPath = readManifestPathOption(argv, '--update-orchestrator');
+    const sharedDepsCssPath = readManifestPathOption(argv, '--update-shared-deps-css');
+    const themeArgs = readUpdateThemeArgs(argv);
+    const flagsSet = [corePath, orchestratorPath, sharedDepsCssPath, themeArgs].filter(
+      (v) => v !== undefined && v !== null
+    ).length;
+    if (flagsSet === 0) {
+      throw new Error('No v3 asset op specified. Try --help.');
+    }
+    if (flagsSet > 1) {
+      throw new Error(
+        'Only one --update-* flag is allowed per invocation ' +
+          '(pass them as separate calls so each gets its own audit entry).'
+      );
+    }
+
+    let manifestPath: string;
+    let expectedKind: V3AssetBuildManifest['assetKind'];
+    let expectedThemeName: string | undefined;
+    if (corePath !== undefined) {
+      manifestPath = corePath;
+      expectedKind = 'core';
+    } else if (orchestratorPath !== undefined) {
+      manifestPath = orchestratorPath;
+      expectedKind = 'orchestrator';
+    } else if (sharedDepsCssPath !== undefined) {
+      manifestPath = sharedDepsCssPath;
+      expectedKind = 'shared-deps-css';
+    } else {
+      // themeArgs is non-null by the flagsSet>=1 check.
+      manifestPath = themeArgs!.manifestPath;
+      expectedKind = 'theme';
+      expectedThemeName = themeArgs!.themeName;
+    }
+
+    const manifest = readV3AssetBuildManifest(manifestPath);
+    // Guard against an operator passing the wrong manifest to a flag (e.g.
+    // `--update-core <theme manifest>`). A mismatch here is always a CLI bug,
+    // never a registry issue.
+    if (manifest.assetKind !== expectedKind) {
+      throw new Error(
+        `${flagToString(corePath, orchestratorPath, sharedDepsCssPath, themeArgs)}: ` +
+          `manifest at ${manifestPath} has assetKind="${manifest.assetKind}", expected "${expectedKind}"`
+      );
+    }
+    if (expectedKind === 'theme' && manifest.themeName !== expectedThemeName) {
+      throw new Error(
+        `--update-theme ${expectedThemeName}: ` +
+          `manifest at ${manifestPath} has themeName="${manifest.themeName}", expected "${expectedThemeName}"`
+      );
+    }
+
+    // Apply the change in memory.
+    const applied = applyV3AssetFromManifest(docPreMigration, manifest, baseUrl);
+
+    // Validate strictly before any write — a malformed mutation must NEVER
+    // corrupt the on-disk doc.
+    assertValidV3Document(applied.next);
+
+    // Re-sign when MFE_REGISTRY_SIGNING_KEY is set (matches Phase 12's signing
+    // posture: if the registry is signed today, it stays signed after every op).
+    const signedDoc = maybeReSignV3(applied.next, env);
+
+    // Build the audit-log entries. When the on-disk shape was v1/v2, the first
+    // v3 write IS the schemaVersion migration — record it as a distinct prior
+    // audit entry so a future inspector can see the transition clearly.
+    const newEntries: AuditEntry[] = [];
+    if (prevShape === 'v1' || prevShape === 'v2') {
+      newEntries.push({
+        timestamp: now().toISOString(),
+        op: 'migrate-v2-to-v3',
+        target: `schemaVersion:${prevShape}->${SCHEMA_VERSION_V3}`,
+        before: prevShape,
+        after: SCHEMA_VERSION_V3,
+        ...(reason !== undefined ? { reason } : {}),
+      });
+    }
+    newEntries.push({
+      timestamp: now().toISOString(),
+      op: applied.op,
+      target: applied.target,
+      before: applied.before,
+      after: applied.after,
+      ...(reason !== undefined ? { reason } : {}),
+    });
+
+    const newLog = [...log, ...newEntries];
+    commitOp(registryPath, prevDocBytes, signedDoc, newLog);
+
+    out.log(`${applied.op} target=${applied.target} -> ${registryPath} (history appended)`);
+    return 0;
+  } catch (error) {
+    out.error(error instanceof Error ? error.message : String(error));
+    return 1;
+  }
+}
+
+function flagToString(
+  corePath: string | undefined,
+  orchestratorPath: string | undefined,
+  sharedDepsCssPath: string | undefined,
+  themeArgs: { themeName: string; manifestPath: string } | null
+): string {
+  if (corePath !== undefined) return '--update-core';
+  if (orchestratorPath !== undefined) return '--update-orchestrator';
+  if (sharedDepsCssPath !== undefined) return '--update-shared-deps-css';
+  if (themeArgs !== null) return `--update-theme ${themeArgs.themeName}`;
+  return '(unknown)';
 }

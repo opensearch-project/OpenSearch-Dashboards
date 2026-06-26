@@ -66,7 +66,14 @@ const fixedNow = () => FIXED_NOW;
 
 describe('parseKeyValuePairs()', () => {
   it('parses a sequence of key=value pairs until the next --flag', () => {
-    const argv = ['--default-entry', 'id=inspector', 'version=v1', 'url=https://x', '--reason', 'r'];
+    const argv = [
+      '--default-entry',
+      'id=inspector',
+      'version=v1',
+      'url=https://x',
+      '--reason',
+      'r',
+    ];
     const { pairs, nextIndex } = parseKeyValuePairs(argv, 1);
     expect(pairs).toEqual({ id: 'inspector', version: 'v1', url: 'https://x' });
     expect(argv[nextIndex]).toBe('--reason');
@@ -146,7 +153,8 @@ describe('applyAddRollout()', () => {
     const r = applyAddRollout(fixtureV2DefaultOnly(), {
       ruleId: 'c1',
       match: '{"userBucketLt":5}',
-      override: '{"mfes":{"inspector":{"version":"c","remoteEntry":"https://x","scope":"inspector","module":"./public"}}}',
+      override:
+        '{"mfes":{"inspector":{"version":"c","remoteEntry":"https://x","scope":"inspector","module":"./public"}}}',
     });
     expect(r.before).toBeNull();
     expect(r.after.id).toBe('c1');
@@ -157,12 +165,14 @@ describe('applyAddRollout()', () => {
     const r1 = applyAddRollout(fixtureV2DefaultOnly(), {
       ruleId: 'c1',
       match: '{"userBucketLt":5}',
-      override: '{"mfes":{"inspector":{"version":"c","remoteEntry":"https://x","scope":"inspector","module":"./public"}}}',
+      override:
+        '{"mfes":{"inspector":{"version":"c","remoteEntry":"https://x","scope":"inspector","module":"./public"}}}',
     });
     const r2 = applyAddRollout(r1.next, {
       ruleId: 'c1',
       match: '{"userBucketLt":10}',
-      override: '{"mfes":{"inspector":{"version":"c2","remoteEntry":"https://x","scope":"inspector","module":"./public"}}}',
+      override:
+        '{"mfes":{"inspector":{"version":"c2","remoteEntry":"https://x","scope":"inspector","module":"./public"}}}',
     });
     expect(r2.before).not.toBeNull();
     expect(r2.next.rollouts.length).toBe(1);
@@ -190,9 +200,9 @@ describe('applyRemoveRollout() / applyTenantOverride() / applyRemoveTenantOverri
   });
 
   it('throws when removing an unknown rollout', () => {
-    expect(() =>
-      applyRemoveRollout(fixtureV2DefaultOnly(), { ruleId: 'no-such' })
-    ).toThrow(/no rollout with ruleId/);
+    expect(() => applyRemoveRollout(fixtureV2DefaultOnly(), { ruleId: 'no-such' })).toThrow(
+      /no rollout with ruleId/
+    );
   });
 
   it('adds a tenant override layer', () => {
@@ -237,28 +247,22 @@ describe('applyRollback()', () => {
 
   it('restores the BEFORE value of the most recent change in the log', () => {
     const doc = fixtureV2DefaultOnly();
-    const v_a = { ...FIXTURE_INSPECTOR_DEFAULT };
-    const v_b = { ...FIXTURE_INSPECTOR_DEFAULT, version: 'v_b' };
-    doc.default.mfes.inspector = v_b;
+    const vA = { ...FIXTURE_INSPECTOR_DEFAULT };
+    const vB = { ...FIXTURE_INSPECTOR_DEFAULT, version: 'v_b' };
+    doc.default.mfes.inspector = vB;
     const log: AuditLog = [];
-    pushAuditEntry(log, 'set-default-entry', 'inspector', v_a, v_b);
+    pushAuditEntry(log, 'set-default-entry', 'inspector', vA, vB);
 
     const r = applyRollback(doc, log, 'inspector');
-    expect(r.next.default.mfes.inspector).toEqual(v_a);
-    expect(r.before).toEqual(v_b);
-    expect(r.after).toEqual(v_a);
+    expect(r.next.default.mfes.inspector).toEqual(vA);
+    expect(r.before).toEqual(vB);
+    expect(r.after).toEqual(vA);
   });
 
   it('rolls back to deletion when the prior change had before=null', () => {
     const doc = fixtureV2DefaultOnly();
     const log: AuditLog = [];
-    pushAuditEntry(
-      log,
-      'set-default-entry',
-      'inspector',
-      null,
-      doc.default.mfes.inspector
-    );
+    pushAuditEntry(log, 'set-default-entry', 'inspector', null, doc.default.mfes.inspector);
     const r = applyRollback(doc, log, 'inspector');
     expect(r.next.default.mfes.inspector).toBeUndefined();
     expect(r.after).toBeNull();
@@ -266,20 +270,20 @@ describe('applyRollback()', () => {
 
   it('round-trip: rollback after rollback restores the pre-rollback state', () => {
     const doc = fixtureV2DefaultOnly();
-    const v_a = { ...FIXTURE_INSPECTOR_DEFAULT };
-    const v_b = { ...FIXTURE_INSPECTOR_DEFAULT, version: 'v_b' };
-    doc.default.mfes.inspector = v_b;
+    const vA = { ...FIXTURE_INSPECTOR_DEFAULT };
+    const vB = { ...FIXTURE_INSPECTOR_DEFAULT, version: 'v_b' };
+    doc.default.mfes.inspector = vB;
     const log: AuditLog = [];
-    pushAuditEntry(log, 'set-default-entry', 'inspector', v_a, v_b);
+    pushAuditEntry(log, 'set-default-entry', 'inspector', vA, vB);
 
     // First rollback: B -> A.
     const r1 = applyRollback(doc, log, 'inspector');
-    pushAuditEntry(log, 'rollback', 'inspector', v_b, v_a);
+    pushAuditEntry(log, 'rollback', 'inspector', vB, vA);
 
     // Second rollback: most recent change is the rollback (before=B, after=A);
     // rolling back undoes that rollback, so we land back on B.
     const r2 = applyRollback(r1.next, log, 'inspector');
-    expect(r2.next.default.mfes.inspector).toEqual(v_b);
+    expect(r2.next.default.mfes.inspector).toEqual(vB);
   });
 
   it('throws when there is no audit history for the id', () => {
@@ -332,9 +336,7 @@ describe('checkDependencyGraph()', () => {
       });
       const r = checkDependencyGraph(fixtureV2DefaultOnly(), dir, '3.5');
       expect(r.ok).toBe(false);
-      expect(r.offenders).toEqual([
-        expect.objectContaining({ from: 'inspector', to: 'data' }),
-      ]);
+      expect(r.offenders).toEqual([expect.objectContaining({ from: 'inspector', to: 'data' })]);
     } finally {
       Fs.rmSync(dir, { recursive: true, force: true });
     }
@@ -715,6 +717,367 @@ describe('runUpdateCliV2() — end-to-end', () => {
       const doc = coerceToV2Document(readJson(t.registryPath));
       expect(doc.schemaVersion).toBe(2);
       expect(doc.default.mfes.inspector.version).toBe('v_new');
+    } finally {
+      t.cleanup();
+    }
+  });
+});
+
+/* ------------------------------------------------------------------------- *
+ * Phase 16 Story 2 — v3 asset CLI surface
+ * ------------------------------------------------------------------------- */
+
+import { isV3AssetMode } from './update_cli_v2';
+import {
+  V3_ASSET_BUILD_MANIFEST_SCHEMA_VERSION,
+  V3AssetBuildManifest,
+  V3AssetKind,
+} from './v3_asset_build';
+import { fixtureV3FullyPopulated, fixtureV3MigrationOnly } from './fixtures_v3';
+import { coerceToV3Document, SCHEMA_VERSION_V3 } from './schema_v3';
+
+describe('isV3AssetMode()', () => {
+  it('detects every v3-asset flag', () => {
+    expect(isV3AssetMode(['--update-core'])).toBe(true);
+    expect(isV3AssetMode(['--update-orchestrator'])).toBe(true);
+    expect(isV3AssetMode(['--update-shared-deps-css'])).toBe(true);
+    expect(isV3AssetMode(['--update-theme', 'light', 'm.json'])).toBe(true);
+  });
+
+  it('returns false for v2 flags', () => {
+    expect(isV3AssetMode(['--default-entry'])).toBe(false);
+    expect(isV3AssetMode(['--add-rollout'])).toBe(false);
+  });
+
+  it('isV2Mode also returns true for v3-asset flags (folded dispatcher)', () => {
+    expect(isV2Mode(['--update-core'])).toBe(true);
+    expect(isV2Mode(['--update-theme', 'dark', 'm.json'])).toBe(true);
+  });
+});
+
+/** Build manifest at `<dir>/build-manifest.json` for assetKind+themeName. */
+function writeBuildManifest(
+  dir: string,
+  assetKind: V3AssetKind,
+  contentHash: string,
+  primaryFile: string,
+  themeName?: string
+): string {
+  const stagingDir = Path.join(dir, contentHash);
+  Fs.mkdirSync(stagingDir, { recursive: true });
+  Fs.writeFileSync(Path.join(stagingDir, primaryFile), 'PAYLOAD');
+  const manifest: V3AssetBuildManifest = {
+    schemaVersion: V3_ASSET_BUILD_MANIFEST_SCHEMA_VERSION,
+    generatedAt: FIXED_NOW.toISOString(),
+    assetKind,
+    ...(themeName !== undefined ? { themeName } : {}),
+    contentHash,
+    integrity: 'sha384-MOCKINTEGRITY',
+    version: `3.5.0+${contentHash}`,
+    stagingDir,
+    primaryFile,
+    files: [{ localPath: Path.join(stagingDir, primaryFile), relativePath: primaryFile }],
+  };
+  const manifestPath = Path.join(stagingDir, 'build-manifest.json');
+  Fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
+  return manifestPath;
+}
+
+describe('runUpdateCliV2() — v3 asset modes (Phase 16 Story 2)', () => {
+  /** Setup a tmp dir with the on-disk doc at the given shape (v2 or v3). */
+  function setup(
+    shape: 'v2' | 'v3' = 'v2'
+  ): {
+    dir: string;
+    registryPath: string;
+    historyPath: string;
+    cleanup: () => void;
+  } {
+    const dir = tmpDir();
+    const registryPath = Path.join(dir, 'registry.json');
+    writeJson(registryPath, shape === 'v2' ? fixtureV2DefaultOnly() : fixtureV3MigrationOnly());
+    return {
+      dir,
+      registryPath,
+      historyPath: `${registryPath}.history.json`,
+      cleanup: () => Fs.rmSync(dir, { recursive: true, force: true }),
+    };
+  }
+
+  it('--update-core: a v2 doc auto-migrates to v3 with both migrate-v2-to-v3 and set-core audit entries', () => {
+    const t = setup('v2');
+    try {
+      const manifestPath = writeBuildManifest(t.dir, 'core', 'corehash1234', 'core.entry.js');
+      const c = silentConsole();
+      const rc = runUpdateCliV2({
+        argv: ['--update-core', manifestPath, '--registry-path', t.registryPath],
+        env: { REGISTRY_BASE_URL: 'http://localhost:8080' },
+        out: c.out,
+        now: fixedNow,
+        osdVersion: '3.5.0',
+      });
+      expect(rc).toBe(0);
+      const doc = coerceToV3Document(readJson(t.registryPath));
+      expect(doc.schemaVersion).toBe(SCHEMA_VERSION_V3);
+      expect(doc.core).toBeDefined();
+      expect(doc.core!.url).toBe('http://localhost:8080/core/corehash1234/core.entry.js');
+      expect(doc.core!.integrity).toBe('sha384-MOCKINTEGRITY');
+      expect(doc.core!.version).toBe('3.5.0+corehash1234');
+      const log = readJson(t.historyPath) as AuditLog;
+      expect(log.map((e) => e.op)).toEqual(['migrate-v2-to-v3', 'set-core']);
+      expect(log[0].target).toBe('schemaVersion:v2->3');
+      expect(log[1].target).toBe('core');
+      expect(log[1].before).toBeNull();
+    } finally {
+      t.cleanup();
+    }
+  });
+
+  it('--update-orchestrator: a v3 doc stays v3 (NO migrate-v2-to-v3 entry on re-set)', () => {
+    const t = setup('v3');
+    try {
+      const manifestPath = writeBuildManifest(
+        t.dir,
+        'orchestrator',
+        'orchhash1234',
+        'osd_bootstrap_mfe.js'
+      );
+      const c = silentConsole();
+      const rc = runUpdateCliV2({
+        argv: ['--update-orchestrator', manifestPath, '--registry-path', t.registryPath],
+        env: { REGISTRY_BASE_URL: 'http://localhost:8080' },
+        out: c.out,
+        now: fixedNow,
+        osdVersion: '3.5.0',
+      });
+      expect(rc).toBe(0);
+      const doc = coerceToV3Document(readJson(t.registryPath));
+      expect(doc.orchestrator!.url).toBe(
+        'http://localhost:8080/orchestrator/orchhash1234/osd_bootstrap_mfe.js'
+      );
+      const log = readJson(t.historyPath) as AuditLog;
+      expect(log.map((e) => e.op)).toEqual(['set-orchestrator']);
+    } finally {
+      t.cleanup();
+    }
+  });
+
+  it('--update-theme <name>: sets themes[<name>] and audit target carries the qualified key', () => {
+    const t = setup('v3');
+    try {
+      const manifestPath = writeBuildManifest(
+        t.dir,
+        'theme',
+        'lighthash1234',
+        'legacy_light_theme.css',
+        'light'
+      );
+      const c = silentConsole();
+      const rc = runUpdateCliV2({
+        argv: ['--update-theme', 'light', manifestPath, '--registry-path', t.registryPath],
+        env: { REGISTRY_BASE_URL: 'http://localhost:8080' },
+        out: c.out,
+        now: fixedNow,
+        osdVersion: '3.5.0',
+      });
+      expect(rc).toBe(0);
+      const doc = coerceToV3Document(readJson(t.registryPath));
+      expect(doc.themes!.light.url).toBe(
+        'http://localhost:8080/themes/light/lighthash1234/legacy_light_theme.css'
+      );
+      const log = readJson(t.historyPath) as AuditLog;
+      expect(log[0].op).toBe('set-theme');
+      expect(log[0].target).toBe('themes.light');
+    } finally {
+      t.cleanup();
+    }
+  });
+
+  it('--update-shared-deps-css: sets the sharedDepsCss field with the v3 audit op', () => {
+    const t = setup('v3');
+    try {
+      const manifestPath = writeBuildManifest(
+        t.dir,
+        'shared-deps-css',
+        'cssh1234',
+        'osd-ui-shared-deps.css'
+      );
+      const c = silentConsole();
+      const rc = runUpdateCliV2({
+        argv: ['--update-shared-deps-css', manifestPath, '--registry-path', t.registryPath],
+        env: { REGISTRY_BASE_URL: 'http://localhost:8080' },
+        out: c.out,
+        now: fixedNow,
+        osdVersion: '3.5.0',
+      });
+      expect(rc).toBe(0);
+      const doc = coerceToV3Document(readJson(t.registryPath));
+      expect(doc.sharedDepsCss!.url).toBe(
+        'http://localhost:8080/shared-deps/css/cssh1234/osd-ui-shared-deps.css'
+      );
+      const log = readJson(t.historyPath) as AuditLog;
+      expect(log[0].op).toBe('set-shared-deps-css');
+      expect(log[0].target).toBe('sharedDepsCss');
+    } finally {
+      t.cleanup();
+    }
+  });
+
+  it('rejects a manifest whose assetKind does not match the flag', () => {
+    const t = setup('v3');
+    try {
+      const manifestPath = writeBuildManifest(t.dir, 'core', 'wrong1234', 'core.entry.js');
+      const c = silentConsole();
+      const docBefore = readJson(t.registryPath);
+      const rc = runUpdateCliV2({
+        argv: ['--update-orchestrator', manifestPath, '--registry-path', t.registryPath],
+        env: {},
+        out: c.out,
+        now: fixedNow,
+        osdVersion: '3.5.0',
+      });
+      expect(rc).toBe(1);
+      expect(c.errors.some((e) => /assetKind="core"/.test(e))).toBe(true);
+      // Doc and history unchanged (atomicity: the doc was never written).
+      expect(readJson(t.registryPath)).toEqual(docBefore);
+      expect(Fs.existsSync(t.historyPath)).toBe(false);
+    } finally {
+      t.cleanup();
+    }
+  });
+
+  it('rejects --update-theme with a theme-name/manifest-themeName mismatch', () => {
+    const t = setup('v3');
+    try {
+      const manifestPath = writeBuildManifest(
+        t.dir,
+        'theme',
+        'lighthash',
+        'legacy_light_theme.css',
+        'light'
+      );
+      const c = silentConsole();
+      const rc = runUpdateCliV2({
+        argv: ['--update-theme', 'dark', manifestPath, '--registry-path', t.registryPath],
+        env: {},
+        out: c.out,
+        now: fixedNow,
+        osdVersion: '3.5.0',
+      });
+      expect(rc).toBe(1);
+      expect(c.errors.some((e) => /themeName="light"/.test(e))).toBe(true);
+    } finally {
+      t.cleanup();
+    }
+  });
+
+  it('rejects multiple --update-* flags in a single invocation', () => {
+    const t = setup('v3');
+    try {
+      const coreManifest = writeBuildManifest(t.dir, 'core', 'corehash', 'core.entry.js');
+      const c = silentConsole();
+      const rc = runUpdateCliV2({
+        argv: [
+          '--update-core',
+          coreManifest,
+          '--update-orchestrator',
+          coreManifest,
+          '--registry-path',
+          t.registryPath,
+        ],
+        env: {},
+        out: c.out,
+        now: fixedNow,
+        osdVersion: '3.5.0',
+      });
+      expect(rc).toBe(1);
+      expect(c.errors.some((e) => /Only one --update-\* flag/.test(e))).toBe(true);
+    } finally {
+      t.cleanup();
+    }
+  });
+
+  it('re-signs the v3 doc when MFE_REGISTRY_SIGNING_KEY is set', () => {
+    const t = setup('v3');
+    try {
+      const manifestPath = writeBuildManifest(t.dir, 'core', 'h1234', 'core.entry.js');
+      const c = silentConsole();
+      const rc = runUpdateCliV2({
+        argv: ['--update-core', manifestPath, '--registry-path', t.registryPath],
+        env: {
+          MFE_REGISTRY_SIGNING_KEY: 'secret-key-material',
+          MFE_REGISTRY_KEY_ID: 'k1',
+        },
+        out: c.out,
+        now: fixedNow,
+        osdVersion: '3.5.0',
+      });
+      expect(rc).toBe(0);
+      const docRaw = (readJson(t.registryPath) as unknown) as {
+        signature?: { algorithm: string; keyId: string; value: string };
+      };
+      expect(docRaw.signature).toBeDefined();
+      expect(docRaw.signature!.algorithm).toBe('HMAC-SHA256');
+      expect(docRaw.signature!.keyId).toBe('k1');
+      expect(typeof docRaw.signature!.value).toBe('string');
+      expect(docRaw.signature!.value.length).toBeGreaterThan(0);
+    } finally {
+      t.cleanup();
+    }
+  });
+
+  it('uses --cdn-base-url to override the URL prefix', () => {
+    const t = setup('v3');
+    try {
+      const manifestPath = writeBuildManifest(t.dir, 'core', 'aaa1234', 'core.entry.js');
+      const c = silentConsole();
+      const rc = runUpdateCliV2({
+        argv: [
+          '--update-core',
+          manifestPath,
+          '--cdn-base-url',
+          'https://prod-cdn.example.net/v3-prefix',
+          '--registry-path',
+          t.registryPath,
+        ],
+        env: {},
+        out: c.out,
+        now: fixedNow,
+        osdVersion: '3.5.0',
+      });
+      expect(rc).toBe(0);
+      const doc = coerceToV3Document(readJson(t.registryPath));
+      expect(doc.core!.url).toBe(
+        'https://prod-cdn.example.net/v3-prefix/core/aaa1234/core.entry.js'
+      );
+    } finally {
+      t.cleanup();
+    }
+  });
+
+  it('an audit-log v3 entry records the asset descriptor as `after`, with `before` capturing the prior', () => {
+    const t = setup('v3');
+    try {
+      // Seed with an existing core, then replace it.
+      const docPre = fixtureV3FullyPopulated();
+      writeJson(t.registryPath, docPre);
+      const manifestPath = writeBuildManifest(t.dir, 'core', 'newhash9', 'core.entry.js');
+      const c = silentConsole();
+      const rc = runUpdateCliV2({
+        argv: ['--update-core', manifestPath, '--registry-path', t.registryPath],
+        env: { REGISTRY_BASE_URL: 'http://localhost:8080' },
+        out: c.out,
+        now: fixedNow,
+        osdVersion: '3.5.0',
+      });
+      expect(rc).toBe(0);
+      const log = readJson(t.historyPath) as AuditLog;
+      const entry = log[log.length - 1];
+      expect(entry.op).toBe('set-core');
+      expect((entry.before as { url: string }).url).toBe(docPre.core!.url);
+      expect((entry.after as { url: string }).url).toBe(
+        'http://localhost:8080/core/newhash9/core.entry.js'
+      );
     } finally {
       t.cleanup();
     }

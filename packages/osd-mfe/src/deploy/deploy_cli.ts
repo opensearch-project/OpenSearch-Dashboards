@@ -49,6 +49,7 @@ import { spawnSync } from 'child_process';
 
 import { parseEnvFile, resolveCdnConfig, ResolvedCdnConfig } from './cdn_config';
 import { buildDeployPlan, DeployPlan, PlannedFile, RemotePlan } from './plan';
+import { V3AssetBuildManifest, readV3AssetBuildManifest } from '../registry/v3_asset_build';
 
 /** Manifest schema version; bump on incompatible shape changes. */
 export const DEPLOY_MANIFEST_SCHEMA_VERSION = 1;
@@ -92,6 +93,21 @@ Options:
   --target-mfe-dir <p> Override the built remotes dir (default <repoRoot>/target/mfe).
   --shared-deps-dir <p> Override the shared-deps dir
                        (default <repoRoot>/packages/osd-ui-shared-deps/target).
+
+v3 asset publish modes (Phase 16 Story 2 — single-asset upload from a build manifest):
+  --core <build-manifest>           Upload the staged \`core\` asset (from
+                                    target/mfe-core/<hash>/) to s3://<bucket>/<prefix>/core/<hash>/.
+  --orchestrator <build-manifest>   Upload the staged \`orchestrator\` asset to
+                                    s3://<bucket>/<prefix>/orchestrator/<hash>/.
+  --theme <name> <build-manifest>   Upload the staged \`theme\` asset to
+                                    s3://<bucket>/<prefix>/themes/<name>/<hash>/.
+  --shared-deps-css <build-manifest>
+                                    Upload the staged \`shared-deps-css\` asset to
+                                    s3://<bucket>/<prefix>/shared-deps/css/<hash>/.
+  --update-manifest                 Also append the published asset's descriptor
+                                    to the deploy manifest's new \`v3Assets\` map.
+                                    (Without this flag the deploy still uploads
+                                    but the manifest only carries plugin remotes.)
   --help, -h           Show this message`;
 
 /** Minimal console surface, injectable so tests can assert/silence output. */
@@ -165,6 +181,34 @@ export interface DeployManifest {
        * integrity instead of dropping it.
        */
       integrity: string;
+    }
+  >;
+  /**
+   * Phase 16 Story 2 — v3 GLOBAL assets published in this deploy. Each entry
+   * pairs the asset category with its published location + integrity so the
+   * registry CLI (Story 2) can stamp the v3 doc without re-reading the build
+   * manifest. Single-asset deploys (`--core`, `--orchestrator`, `--theme`,
+   * `--shared-deps-css`) populate this map; the legacy full-plugin deploy
+   * leaves it absent (the manifest still validates because the field is
+   * optional).
+   *
+   * The map is keyed by a STABLE identifier per asset:
+   *   - core:               "core"
+   *   - orchestrator:       "orchestrator"
+   *   - shared-deps-css:    "sharedDepsCss"
+   *   - theme:              "theme:<name>"  (e.g. "theme:light", "theme:dark")
+   */
+  v3Assets?: Record<
+    string,
+    {
+      assetKind: 'core' | 'orchestrator' | 'theme' | 'shared-deps-css';
+      themeName?: string;
+      contentHash: string;
+      integrity: string;
+      version: string;
+      key: string;
+      cdnUrl: string;
+      fileCount: number;
     }
   >;
 }
@@ -546,6 +590,14 @@ export function runDeployCli(argv: string[], repoRoot: string, deps: DeployCliDe
     return 0;
   }
 
+  // Phase 16 Story 2 — v3 asset deploy: a single-asset publish. Detect first
+  // so an operator deploying just one asset doesn't pay the full
+  // plugin-discovery + shared-deps cost. Mutually exclusive with the legacy
+  // plugin-deploy modes — passing both is rejected.
+  if (isV3AssetDeployMode(argv)) {
+    return runV3AssetDeploy(argv, repoRoot, { env, out, exec, fs, now });
+  }
+
   try {
     const dryRun = argv.includes('--dry-run');
     const skipCreds = argv.includes('--skip-creds');
@@ -644,6 +696,322 @@ export function runDeployCli(argv: string[], repoRoot: string, deps: DeployCliDe
     out.error(error instanceof Error ? error.message : String(error));
     out.error('');
     out.error(USAGE);
+    return 1;
+  }
+}
+
+/* ------------------------------------------------------------------------- *
+ * Phase 16 Story 2 — v3 asset deploy
+ * (--core / --orchestrator / --theme / --shared-deps-css)
+ * ------------------------------------------------------------------------- */
+
+/** The four v3-asset deploy flags. Mutually exclusive within an invocation. */
+const V3_ASSET_DEPLOY_FLAGS = ['--core', '--orchestrator', '--shared-deps-css', '--theme'] as const;
+
+/**
+ * Detect whether the argv is a v3-asset deploy mode. The legacy flags
+ * (`--plugin`, `--with-shared-deps`) are NOT in this set; mixing both surfaces
+ * in one invocation throws.
+ */
+function isV3AssetDeployMode(argv: string[]): boolean {
+  return V3_ASSET_DEPLOY_FLAGS.some((flag) => argv.includes(flag));
+}
+
+/** Read `--theme <name> <build-manifest>` (two-value flag). */
+function readV3ThemeArgs(argv: string[]): { themeName: string; manifestPath: string } | undefined {
+  const idx = argv.indexOf('--theme');
+  if (idx === -1) return undefined;
+  const name = argv[idx + 1];
+  const manifestPath = argv[idx + 2];
+  if (name === undefined || name.startsWith('--')) {
+    throw new Error('--theme requires <name> <build-manifest>');
+  }
+  if (manifestPath === undefined || manifestPath.startsWith('--')) {
+    throw new Error(`--theme ${name} requires a build-manifest path`);
+  }
+  return { themeName: name, manifestPath };
+}
+
+/** Read `--core <build-manifest>`. Returns the path or undefined. */
+function readV3SingleAssetArgs(argv: string[], flag: string): string | undefined {
+  const idx = argv.indexOf(flag);
+  if (idx === -1) return undefined;
+  const v = argv[idx + 1];
+  if (v === undefined || v.startsWith('--')) {
+    throw new Error(`${flag} requires a build-manifest path`);
+  }
+  return v;
+}
+
+/**
+ * Compose the S3 key prefix + cdnUrl path for a staged v3 asset. The path
+ * shape mirrors the harness routes so the local mock CDN (:8080) and the
+ * production CDN serve the asset under identical relative paths.
+ */
+function v3AssetPathSegment(manifest: V3AssetBuildManifest): string {
+  switch (manifest.assetKind) {
+    case 'core':
+      return `core/${manifest.contentHash}`;
+    case 'orchestrator':
+      return `orchestrator/${manifest.contentHash}`;
+    case 'shared-deps-css':
+      return `shared-deps/css/${manifest.contentHash}`;
+    case 'theme': {
+      if (!manifest.themeName) {
+        throw new Error('v3AssetPathSegment: theme manifest missing themeName');
+      }
+      return `themes/${manifest.themeName}/${manifest.contentHash}`;
+    }
+    default: {
+      const exhaustive: never = manifest.assetKind;
+      throw new Error(`v3AssetPathSegment: unknown assetKind ${JSON.stringify(exhaustive)}`);
+    }
+  }
+}
+
+/** Stable v3Assets map key (mirrors {@link DeployManifest.v3Assets}). */
+function v3AssetMapKey(manifest: V3AssetBuildManifest): string {
+  switch (manifest.assetKind) {
+    case 'core':
+      return 'core';
+    case 'orchestrator':
+      return 'orchestrator';
+    case 'shared-deps-css':
+      return 'sharedDepsCss';
+    case 'theme':
+      return `theme:${manifest.themeName}`;
+    default: {
+      const exhaustive: never = manifest.assetKind;
+      throw new Error(`v3AssetMapKey: unknown assetKind ${JSON.stringify(exhaustive)}`);
+    }
+  }
+}
+
+/** Render a label like `core` / `theme:light` for the progress output. */
+function v3AssetLabel(manifest: V3AssetBuildManifest): string {
+  return manifest.assetKind === 'theme' ? `theme:${manifest.themeName}` : manifest.assetKind;
+}
+
+/** Convert a staged file's posix `relativePath` into a {@link PlannedFile}. */
+function plannedFileFromStaged(
+  stagingDir: string,
+  relativePath: string,
+  keyPrefix: string
+): PlannedFile {
+  return {
+    localPath: Path.join(stagingDir, relativePath),
+    relativePath,
+    key: keyPrefix.length > 0 ? `${keyPrefix}/${relativePath}` : relativePath,
+  };
+}
+
+/** Read the deploy manifest from disk (or undefined when absent). */
+function readDeployManifestIfExists(
+  fs: DeployCliFs,
+  manifestPath: string
+): DeployManifest | undefined {
+  if (!fs.existsSync(manifestPath)) return undefined;
+  try {
+    const parsed = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+    return parsed as DeployManifest;
+  } catch (cause) {
+    throw new Error(
+      `Existing deploy manifest at ${manifestPath} is malformed: ${(cause as Error).message}`
+    );
+  }
+}
+
+/**
+ * Phase 16 Story 2 — v3 asset deploy entry point. Reads a build manifest,
+ * publishes its single asset to s3://<bucket>/<prefix>/<asset-path>/, and
+ * optionally appends the descriptor to the deploy manifest's `v3Assets` map
+ * (when `--update-manifest` is set).
+ *
+ * Mirrors the legacy plugin-deploy pipeline (immutability check via
+ * head-object, gzipped staging tree, single recursive `aws s3 cp`) so the v3
+ * assets get the SAME Content-Encoding + Cache-Control semantics as plugin
+ * remotes. NEVER creates infra; only writes objects.
+ */
+function runV3AssetDeploy(
+  argv: string[],
+  repoRoot: string,
+  injectables: {
+    env: NodeJS.ProcessEnv;
+    out: DeployCliConsole;
+    exec: CommandRunner;
+    fs: DeployCliFs;
+    now: Date;
+  }
+): number {
+  const { env, out, exec, fs, now } = injectables;
+  try {
+    // Reject mixing the legacy and v3 deploy modes.
+    if (argv.includes('--plugin')) {
+      throw new Error(
+        'v3 asset deploy flags (--core/--orchestrator/--theme/--shared-deps-css) ' +
+          'are mutually exclusive with --plugin. Run them as separate invocations.'
+      );
+    }
+
+    const dryRun = argv.includes('--dry-run');
+    const skipCreds = argv.includes('--skip-creds');
+    const updateManifest = argv.includes('--update-manifest');
+
+    const cdnOutputsPath = resolveCdnOutputsPath(argv, repoRoot, fs);
+    const fileEnv = loadFileEnv(cdnOutputsPath, fs);
+    const cdn = resolveCdnConfig(env, fileEnv);
+
+    // Pick the single asset to publish. Multiple flags in one invocation is a CLI bug.
+    const corePath = readV3SingleAssetArgs(argv, '--core');
+    const orchestratorPath = readV3SingleAssetArgs(argv, '--orchestrator');
+    const sharedDepsCssPath = readV3SingleAssetArgs(argv, '--shared-deps-css');
+    const themeArgs = readV3ThemeArgs(argv);
+    const setFlags = [corePath, orchestratorPath, sharedDepsCssPath, themeArgs].filter(
+      (v) => v !== undefined && v !== null
+    ).length;
+    if (setFlags === 0) {
+      throw new Error('No v3 asset deploy flag specified. Try --help.');
+    }
+    if (setFlags > 1) {
+      throw new Error(
+        'Only one --core/--orchestrator/--theme/--shared-deps-css flag is allowed per invocation.'
+      );
+    }
+
+    let manifestPath: string;
+    let expectedKind: V3AssetBuildManifest['assetKind'];
+    let expectedThemeName: string | undefined;
+    if (corePath !== undefined) {
+      manifestPath = corePath;
+      expectedKind = 'core';
+    } else if (orchestratorPath !== undefined) {
+      manifestPath = orchestratorPath;
+      expectedKind = 'orchestrator';
+    } else if (sharedDepsCssPath !== undefined) {
+      manifestPath = sharedDepsCssPath;
+      expectedKind = 'shared-deps-css';
+    } else {
+      manifestPath = themeArgs!.manifestPath;
+      expectedKind = 'theme';
+      expectedThemeName = themeArgs!.themeName;
+    }
+    const manifest = readV3AssetBuildManifest(manifestPath);
+    if (manifest.assetKind !== expectedKind) {
+      throw new Error(
+        `Manifest at ${manifestPath} has assetKind="${manifest.assetKind}", expected "${expectedKind}"`
+      );
+    }
+    if (expectedKind === 'theme' && manifest.themeName !== expectedThemeName) {
+      throw new Error(
+        `Manifest at ${manifestPath} has themeName="${manifest.themeName}", expected "${expectedThemeName}"`
+      );
+    }
+
+    // Translate the staged tree into PlannedFile shape (mirrors plugin-deploy).
+    const pathSegment = v3AssetPathSegment(manifest);
+    const keyPrefix = cdn.keyPrefix.length > 0 ? `${cdn.keyPrefix}/${pathSegment}` : pathSegment;
+    const files: PlannedFile[] = manifest.files.map((staged) =>
+      plannedFileFromStaged(manifest.stagingDir, staged.relativePath, keyPrefix)
+    );
+    const primaryFile = manifest.primaryFile;
+    const primaryKey = `${keyPrefix}/${primaryFile}`;
+    const cdnUrl = `${cdn.baseUrl.replace(/\/+$/, '')}/${primaryKey}`;
+    const label = v3AssetLabel(manifest);
+
+    if (dryRun) {
+      out.log(`[dry-run] Target bucket: s3://${cdn.bucket} (region ${cdn.region})`);
+      out.log(`[dry-run] CloudFront base: ${cdn.baseUrl}  key prefix: ${cdn.keyPrefix}`);
+      out.log(
+        `[dry-run] v3 asset ${label} ${manifest.version} (${files.length} file(s)) -> ` +
+          `s3://${cdn.bucket}/${primaryKey}`
+      );
+      out.log(`      integrity: ${manifest.integrity}`);
+      out.log(
+        '[dry-run] each .js/.css/etc. would be uploaded gzip-compressed (Content-Encoding: gzip); ' +
+          'source maps (*.map) are excluded from the public CDN.'
+      );
+      if (updateManifest) {
+        const manifestOutPath = resolveManifestPath(argv, env, repoRoot);
+        out.log(
+          `[dry-run] would update v3Assets["${v3AssetMapKey(manifest)}"] in ${manifestOutPath}`
+        );
+      } else {
+        out.log('[dry-run] --update-manifest not set; deploy manifest would NOT be updated.');
+      }
+      out.log('[dry-run] no AWS calls made; nothing was uploaded or written.');
+      return 0;
+    }
+
+    if (!skipCreds) {
+      refreshCreds(exec, env, out);
+    } else {
+      out.log('Skipping creds refresh (--skip-creds).');
+    }
+
+    out.log(
+      `Publishing v3 asset ${label} to s3://${cdn.bucket}/${cdn.keyPrefix}/ (region ${cdn.region})`
+    );
+    const outcome = publishArtifact(
+      exec,
+      cdn,
+      env,
+      out,
+      `v3:${label} ${manifest.version}`,
+      files,
+      keyPrefix,
+      primaryKey
+    );
+
+    // Optionally fold the published descriptor into the deploy manifest.
+    if (updateManifest) {
+      const manifestOutPath = resolveManifestPath(argv, env, repoRoot);
+      const existing: DeployManifest | undefined = readDeployManifestIfExists(fs, manifestOutPath);
+      const v3Entry = {
+        assetKind: manifest.assetKind,
+        ...(manifest.themeName !== undefined ? { themeName: manifest.themeName } : {}),
+        contentHash: manifest.contentHash,
+        integrity: manifest.integrity,
+        version: manifest.version,
+        key: primaryKey,
+        cdnUrl,
+        fileCount: files.length,
+      };
+      const nextV3Assets: DeployManifest['v3Assets'] = {
+        ...(existing?.v3Assets ?? {}),
+        [v3AssetMapKey(manifest)]: v3Entry,
+      };
+      const nextManifest: DeployManifest = existing
+        ? { ...existing, generatedAt: now.toISOString(), v3Assets: nextV3Assets }
+        : {
+            schemaVersion: DEPLOY_MANIFEST_SCHEMA_VERSION,
+            generatedAt: now.toISOString(),
+            cdn: {
+              bucket: cdn.bucket,
+              region: cdn.region,
+              baseUrl: cdn.baseUrl,
+              keyPrefix: cdn.keyPrefix,
+              ...(cdn.distributionId !== undefined ? { distributionId: cdn.distributionId } : {}),
+              ...(cdn.domain !== undefined ? { domain: cdn.domain } : {}),
+            },
+            mfes: {},
+            v3Assets: nextV3Assets,
+          };
+      writeManifest(fs, manifestOutPath, nextManifest);
+      out.log(
+        `Updated deploy manifest -> ${manifestOutPath} (v3Assets.${v3AssetMapKey(manifest)})`
+      );
+    }
+
+    out.log('');
+    out.log(
+      `Done: v3 asset ${label} ${outcome}. ` +
+        (updateManifest
+          ? 'Manifest updated.'
+          : 'Manifest unchanged (pass --update-manifest to record).')
+    );
+    return 0;
+  } catch (error) {
+    out.error(error instanceof Error ? error.message : String(error));
     return 1;
   }
 }
