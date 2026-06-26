@@ -15,6 +15,7 @@ import {
   RuleNameToIndex,
 } from '../rule_index';
 import { rangeFromContext } from '../range_utils';
+import { nearestWithinThreshold } from '../edit_distance';
 
 /**
  * Documentation links for the field-slot shape pass. The shape finding is about
@@ -122,60 +123,10 @@ function hasExcludedAncestor(node: ParserRuleContext, excludedIndices: Set<numbe
   return false;
 }
 
-/**
- * Levenshtein distance with an early-out: once every cell in a row exceeds
- * `maxDistance`, no later row can drop back below it, so we abort and return a
- * value `> maxDistance` to signal "too far". Bounding the work keeps the
- * per-keystroke field-suggestion sweep cheap on wide indices.
- */
-function levenshtein(a: string, b: string, maxDistance: number): number {
-  const m = a.length;
-  const n = b.length;
-  if (m === 0) return n;
-  if (n === 0) return m;
-  let prev = new Array(n + 1);
-  let curr = new Array(n + 1);
-  for (let j = 0; j <= n; j++) prev[j] = j;
-  for (let i = 1; i <= m; i++) {
-    curr[0] = i;
-    let rowMin = curr[0];
-    for (let j = 1; j <= n; j++) {
-      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
-      curr[j] = Math.min(prev[j] + 1, curr[j - 1] + 1, prev[j - 1] + cost);
-      if (curr[j] < rowMin) {
-        rowMin = curr[j];
-      }
-    }
-    if (rowMin > maxDistance) {
-      return maxDistance + 1;
-    }
-    [prev, curr] = [curr, prev];
-  }
-  return prev[n];
-}
-
 function suggestField(name: string, known: Iterable<string>): string | undefined {
   // Only suggest when reasonably close (≤ 1/3 of the name length, min 2).
   const threshold = Math.max(2, Math.floor(name.length / 3));
-  const lowerName = name.toLowerCase();
-  let best: string | undefined;
-  let bestDistance = Infinity;
-  for (const candidate of known) {
-    // A length gap alone larger than the threshold guarantees distance >
-    // threshold, so skip the DP entirely for those candidates.
-    if (Math.abs(candidate.length - name.length) > threshold) {
-      continue;
-    }
-    const distance = levenshtein(lowerName, candidate.toLowerCase(), threshold);
-    if (distance < bestDistance) {
-      bestDistance = distance;
-      best = candidate;
-      if (bestDistance === 0) {
-        break; // Identical after case-normalization; nothing can be closer.
-      }
-    }
-  }
-  return best && bestDistance <= threshold ? best : undefined;
+  return nearestWithinThreshold(name, known, threshold);
 }
 
 /**
