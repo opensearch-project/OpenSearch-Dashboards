@@ -71,33 +71,36 @@ describe('useOpenOnUrlMarker', () => {
 
     hashChangeTo('#/?_openSaved=true');
     expect(onOpen).toHaveBeenCalledTimes(1);
+    // and it was stripped
+    expect(window.location.hash).not.toContain('_openSaved');
   });
 
-  it('opens again on a genuine re-arrival (absent -> present edge)', () => {
-    setHash('#/?_openSaved=true');
-    const onOpen = jest.fn();
-    renderHook(() => useOpenOnUrlMarker('_openSaved', onOpen));
-    expect(onOpen).toHaveBeenCalledTimes(1); // opened + stripped on mount
-
-    // App settles on a marker-less hash (the stripped state).
-    hashChangeTo('#/?_g=()');
-    // Later the user clicks "Browse saved" again -> marker re-added.
-    hashChangeTo('#/?_openSaved=true');
-    expect(onOpen).toHaveBeenCalledTimes(2);
-  });
-
-  it('does NOT reopen when a stale marker reappears without an intervening absent state', () => {
-    // P0 regression: open + strip, then the app re-serializes the hash (e.g.
-    // running a query) and a stale marker momentarily reappears. Because the
-    // marker never transitioned through "absent" first, this is not a genuine
-    // new arrival and must NOT reopen the overlay.
+  it('opens again on a later hashchange that re-adds the marker (genuine re-click)', () => {
     setHash('#/?_openSaved=true');
     const onOpen = jest.fn();
     renderHook(() => useOpenOnUrlMarker('_openSaved', onOpen));
     expect(onOpen).toHaveBeenCalledTimes(1);
 
-    // Re-serialization re-adds the marker (no absent observation in between).
-    hashChangeTo('#/?_openSaved=true&_q=(query:foo)');
+    // A genuine re-click navigates back to the marker and fires a hashchange
+    // (core dispatches a synthetic one for same-app popover navigations).
+    hashChangeTo('#/?_openSaved=true');
+    expect(onOpen).toHaveBeenCalledTimes(2);
+  });
+
+  it('does NOT reopen on a silent history.replace that re-adds a stale marker', () => {
+    // P0 regression: open + strip, then the app re-serializes the hash via a
+    // silent history.replace (no `hashchange`) that re-adds a stale marker
+    // (e.g. running a query after closing the flyout). The hook does not key on
+    // the router location, so this never re-invokes the check -> no reopen.
+    setHash('#/?_openSaved=true');
+    const onOpen = jest.fn();
+    renderHook(() => useOpenOnUrlMarker('_openSaved', onOpen));
+    expect(onOpen).toHaveBeenCalledTimes(1);
+
+    // Silent re-serialization: hash updated WITHOUT a hashchange event.
+    act(() => {
+      setHash('#/?_openSaved=true&_q=(query:foo)');
+    });
     expect(onOpen).toHaveBeenCalledTimes(1);
   });
 
