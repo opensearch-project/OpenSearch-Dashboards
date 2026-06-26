@@ -663,6 +663,8 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             onApproveConfirmation={handleApproveConfirmation}
             onRejectConfirmation={handleRejectConfirmation}
             onFillInput={setInput}
+            inputValue={input}
+            onRemoveInput={(content: string) => setInput((prev) => prev.replace(content, '').trim())}
             threadId={chatService.getThreadId()}
             onShowHistory={handleShowHistory}
             conversationHistoryService={chatService.conversationHistoryService}

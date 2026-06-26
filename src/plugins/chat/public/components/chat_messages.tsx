@@ -115,6 +115,8 @@ interface ChatMessagesProps {
   onApproveConfirmation?: () => void;
   onRejectConfirmation?: () => void;
   onFillInput?: (content: string) => void;
+  onRemoveInput?: (content: string) => void;
+  inputValue?: string;
   startResponse?: boolean;
   threadId?: string;
   onShowHistory?: () => void;
@@ -299,6 +301,8 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
   onApproveConfirmation,
   onRejectConfirmation,
   onFillInput,
+  onRemoveInput,
+  inputValue,
   startResponse,
   threadId,
   onShowHistory,
@@ -588,7 +592,13 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
                 {renderAssistantContent()}
 
                 {suggestionsEnabled && lastAssistantMessageIndex === index && (
-                  <ChatSuggestions messages={timeline} currentMessage={message} />
+                  <ChatSuggestions
+                    messages={timeline}
+                    currentMessage={message}
+                    onFillInput={onFillInput}
+                    onRemoveInput={onRemoveInput}
+                    inputValue={inputValue}
+                  />
                 )}
               </div>
             );
