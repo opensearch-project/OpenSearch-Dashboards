@@ -21,7 +21,7 @@ import {
 } from './configure_client.test.mocks';
 import { OpenSearchClientPool, OpenSearchClientPoolSetup } from './client_pool';
 import { configureClient } from './configure_client';
-import { ClientOptions } from '@opensearch-project/opensearch';
+import { ClientOptions, Transport } from '@opensearch-project/opensearch';
 // eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { opensearchClientMock } from '../../../../core/server/opensearch/client/mocks';
 import { cryptographyServiceSetupMock } from '../cryptography_service.mocks';
@@ -135,6 +135,33 @@ describe('configureClient', () => {
   afterEach(() => {
     ClientMock.mockReset();
     authRegistryCredentialProviderMock.mockReset();
+  });
+
+  test('configureClient passes customTransport to the Client constructor when provided', async () => {
+    class FakeTransport {}
+    parseClientOptionsMock.mockReturnValue(clientOptions);
+    savedObjectsMock.get.mockReset();
+    savedObjectsMock.get.mockResolvedValueOnce({
+      id: DATA_SOURCE_ID,
+      type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+      attributes: {
+        ...dataSourceAttr,
+        auth: { type: AuthType.NoAuth, credentials: undefined },
+      },
+      references: [],
+    });
+
+    await configureClient(
+      {
+        ...dataSourceClientParams,
+        customTransport: (FakeTransport as unknown) as typeof Transport,
+      },
+      clientPoolSetup,
+      config,
+      logger
+    );
+
+    expect(ClientMock).toHaveBeenCalledWith(expect.objectContaining({ Transport: FakeTransport }));
   });
 
   test('configure client with auth.type == no_auth, will call new Client() to create client', async () => {
