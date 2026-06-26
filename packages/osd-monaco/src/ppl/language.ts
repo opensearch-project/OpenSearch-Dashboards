@@ -303,6 +303,19 @@ const processLintHighlighting = (model: monaco.editor.IModel): void => {
         };
         const key = markerFixKey(marker);
         if (withExtras.fix) {
+          // markerFixKey is range + message; two diagnostics that collide on that
+          // key but carry different fixes would silently last-write-wins. Today
+          // separate tables + suppressContained prevent it, so this is a latent
+          // tripwire that surfaces if a future rule introduces a real collision.
+          // The dead branch is eliminated from production bundles.
+          if (
+            process.env.NODE_ENV !== 'production' &&
+            fixes.has(key) &&
+            JSON.stringify(fixes.get(key)) !== JSON.stringify(withExtras.fix)
+          ) {
+            // eslint-disable-next-line no-console
+            console.warn('[ppl-lint] fix key collision:', key);
+          }
           fixes.set(key, withExtras.fix);
           delete withExtras.fix;
         }

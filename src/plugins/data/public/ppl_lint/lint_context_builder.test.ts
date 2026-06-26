@@ -5,7 +5,7 @@
 
 import { IUiSettingsClient } from 'opensearch-dashboards/public';
 import { HttpSetup } from '../../../../core/public';
-import { buildPPLLintContext } from './lint_context_builder';
+import { buildPPLLintContext, extractFieldNames } from './lint_context_builder';
 import { buildOverridesFromSettings } from './lint_overrides';
 import {
   pplGrammarCache,
@@ -141,5 +141,22 @@ describe('buildPPLLintContext', () => {
   it('leaves fields undefined when the cache is empty', () => {
     const ctx = buildPPLLintContext(dataset, {}, services);
     expect(ctx.fields).toBeUndefined();
+  });
+});
+
+describe('extractFieldNames', () => {
+  it('collects non-empty field names into a set', () => {
+    const ip = { fields: [{ name: 'age' }, { name: 'status' }, { name: 'age' }] };
+    expect(extractFieldNames(ip)).toEqual(new Set(['age', 'status']));
+  });
+
+  it('skips fields with no name and undefined entries', () => {
+    const ip = { fields: [{ name: 'age' }, { name: '' }, undefined, {}] };
+    expect(extractFieldNames(ip)).toEqual(new Set(['age']));
+  });
+
+  it('returns an empty set when there are no fields', () => {
+    expect(extractFieldNames({})).toEqual(new Set());
+    expect(extractFieldNames({ fields: [] })).toEqual(new Set());
   });
 });

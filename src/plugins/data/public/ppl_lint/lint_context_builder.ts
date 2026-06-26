@@ -32,6 +32,23 @@ export interface LintFieldsCache {
   fields?: Set<string>;
 }
 
+/**
+ * Collect the non-empty field names from an index pattern into a set, for the
+ * field-validation lint context. Shared by the data and explore loadFields
+ * effects so both extract names the same way.
+ */
+export function extractFieldNames(indexPattern: {
+  fields?: Array<{ name?: string } | undefined>;
+}): Set<string> {
+  const fields = new Set<string>();
+  for (const field of indexPattern.fields ?? []) {
+    if (field?.name) {
+      fields.add(field.name);
+    }
+  }
+  return fields;
+}
+
 /** Build the {@link PPLLintContext} for the active dataset and per-rule overrides. */
 export function buildPPLLintContext(
   dataset: LintContextDataset | undefined,

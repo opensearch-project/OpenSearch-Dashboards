@@ -48,7 +48,11 @@ import {
   cleanupPPLContexts,
   PPLDetachRefs,
 } from './lint_context';
-import { buildPPLLintContext, LintFieldsCache } from '../../ppl_lint/lint_context_builder';
+import {
+  buildPPLLintContext,
+  extractFieldNames,
+  LintFieldsCache,
+} from '../../ppl_lint/lint_context_builder';
 
 export interface QueryEditorProps {
   query: Query;
@@ -167,16 +171,10 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
       } else {
         try {
           const indexPattern = await getIndexPatterns().get(datasetId);
-          if (cancelled) {
+          if (cancelled || !indexPattern) {
             return;
           }
-          const fields = new Set<string>();
-          for (const field of indexPattern.fields ?? []) {
-            if (field?.name) {
-              fields.add(field.name);
-            }
-          }
-          lintFieldsRef.current = { datasetId, fields };
+          lintFieldsRef.current = { datasetId, fields: extractFieldNames(indexPattern) };
         } catch {
           // On failure leave fields unset so field-validation self-suppresses.
           if (cancelled) {
