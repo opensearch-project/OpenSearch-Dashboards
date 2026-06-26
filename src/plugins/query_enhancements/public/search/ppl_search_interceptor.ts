@@ -7,7 +7,12 @@ import { trimEnd } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { from, Observable } from 'rxjs';
 import { first, switchMap } from 'rxjs/operators';
-import { formatTimePickerDate, Query, UI_SETTINGS } from '../../../data/common';
+import {
+  formatTimePickerDate,
+  getDataSourceEngineCapabilities,
+  Query,
+  UI_SETTINGS,
+} from '../../../data/common';
 import {
   DataPublicPluginStart,
   IndexPatternsContract,
@@ -174,11 +179,11 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     const { aggs } = request.params.body;
     if (!aggs || !query.dataset || !query.dataset.timeFieldName) return;
 
-    // Legacy Elasticsearch (Open Distro) PPL has no `span()` grouping expression in the `stats`
-    // by-clause (it accepts field names only), so the histogram aggregation query fails to parse.
-    // Skip emitting the agg config for Elasticsearch data sources; the main query still runs.
+    // Some engines (e.g. legacy Elasticsearch / Open Distro) have no `span()` grouping expression in
+    // the PPL `stats` by-clause, so the histogram aggregation query fails to parse. Skip emitting the
+    // agg config for those engines; the main query still runs.
     const engineType = query.dataset.dataSource?.engineType ?? query.dataset.dataSource?.type;
-    if (engineType === 'Elasticsearch') return;
+    if (!getDataSourceEngineCapabilities(engineType).supportsPplSpan) return;
 
     const aggsConfig: QueryAggConfig = {};
     const { fromDate, toDate } = formatTimePickerDate(

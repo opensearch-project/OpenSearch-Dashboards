@@ -52,6 +52,7 @@ describe('ppl_grammar_warmup', () => {
       uiSettings,
       savedObjectsClient,
       undefined,
+      undefined,
       undefined
     );
   });
@@ -71,7 +72,8 @@ describe('ppl_grammar_warmup', () => {
       uiSettings,
       savedObjectsClient,
       'ds-1',
-      '3.6.0'
+      '3.6.0',
+      undefined
     );
   });
 
@@ -110,7 +112,8 @@ describe('ppl_grammar_warmup', () => {
       uiSettings,
       savedObjectsClient,
       'ds-2',
-      '3.6.0'
+      '3.6.0',
+      undefined
     );
   });
 
@@ -129,7 +132,8 @@ describe('ppl_grammar_warmup', () => {
       uiSettings,
       savedObjectsClient,
       'ds-old',
-      '2.17.0'
+      '2.17.0',
+      undefined
     );
   });
 
@@ -148,6 +152,7 @@ describe('ppl_grammar_warmup', () => {
       uiSettings,
       savedObjectsClient,
       'ds-unknown',
+      undefined,
       undefined
     );
   });
@@ -169,7 +174,8 @@ describe('ppl_grammar_warmup', () => {
       uiSettings,
       savedObjectsClient,
       'ds-1',
-      '3.6.0'
+      '3.6.0',
+      undefined
     );
     expect(cache.warmUp).toHaveBeenNthCalledWith(
       2,
@@ -177,7 +183,8 @@ describe('ppl_grammar_warmup', () => {
       uiSettings,
       savedObjectsClient,
       'ds-2',
-      '2.17.0'
+      '2.17.0',
+      undefined
     );
     expect(cache.warmUp).toHaveBeenNthCalledWith(
       3,
@@ -185,13 +192,15 @@ describe('ppl_grammar_warmup', () => {
       uiSettings,
       savedObjectsClient,
       'ds-3',
-      '3.7.0'
+      '3.7.0',
+      undefined
     );
     expect(cache.warmUp).toHaveBeenNthCalledWith(
       4,
       http,
       uiSettings,
       savedObjectsClient,
+      undefined,
       undefined,
       undefined
     );
@@ -219,6 +228,7 @@ describe('ppl_grammar_warmup', () => {
       http,
       uiSettings,
       savedObjectsClient,
+      undefined,
       undefined,
       undefined
     );
@@ -266,7 +276,8 @@ describe('ppl_grammar_warmup', () => {
       uiSettings,
       savedObjectsClient,
       'ds-snap',
-      '3.6.0-SNAPSHOT'
+      '3.6.0-SNAPSHOT',
+      undefined
     );
   });
 
@@ -289,7 +300,8 @@ describe('ppl_grammar_warmup', () => {
       uiSettings,
       savedObjectsClient,
       'ds-old',
-      '2.17.0'
+      '2.17.0',
+      undefined
     );
   });
 });

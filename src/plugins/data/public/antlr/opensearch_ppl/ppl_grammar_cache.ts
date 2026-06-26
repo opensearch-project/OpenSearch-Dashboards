@@ -12,6 +12,7 @@ import { ATN, ATNDeserializer, Vocabulary } from 'antlr4ng';
 import semver from 'semver';
 import { PPLGrammarBundle } from './ppl_bundle_loader';
 import { TokenDictionary } from '../opensearch_sql/table';
+import { getDataSourceEngineCapabilities } from '../../../common';
 
 const ARTIFACT_ENDPOINT = '/api/enhancements/ppl/grammar';
 
@@ -159,11 +160,12 @@ class PPLGrammarCache {
   /**
    * Returns true if version >= 3.6.0 (grammar artifact endpoint support).
    *
-   * Elasticsearch data sources never expose the `/_plugins/_ppl/_grammar` endpoint (their SQL/PPL
-   * live under Open Distro), so they always fall back to the bundled grammar regardless of version.
+   * Engines without a runtime PPL grammar endpoint (e.g. Elasticsearch / Open Distro, whose SQL/PPL
+   * live under Open Distro and expose no `/_plugins/_ppl/_grammar`) always fall back to the bundled
+   * grammar regardless of version.
    */
   shouldFetchFromBackend(version?: string, engineType?: string): boolean {
-    if (engineType === 'Elasticsearch') return false;
+    if (!getDataSourceEngineCapabilities(engineType).supportsRuntimePplGrammar) return false;
     if (!version) return false;
     const coerced = semver.coerce(version);
     return coerced ? semver.satisfies(coerced.version, '>=3.6.0') : false;
@@ -410,8 +412,9 @@ export function shouldUseRuntimeGrammar(
   dataSourceVersion?: string,
   dataSourceEngineType?: string
 ): boolean {
-  // Elasticsearch data sources have no runtime grammar endpoint — use the bundled grammar.
-  if (dataSourceEngineType === 'Elasticsearch') return false;
+  // Engines without a runtime grammar endpoint (e.g. Elasticsearch) use the bundled grammar.
+  if (!getDataSourceEngineCapabilities(dataSourceEngineType).supportsRuntimePplGrammar)
+    return false;
   if (dataSourceVersion) {
     return pplGrammarCache.shouldFetchFromBackend(dataSourceVersion, dataSourceEngineType);
   }

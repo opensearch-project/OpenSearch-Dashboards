@@ -6,7 +6,12 @@ import { i18n } from '@osd/i18n';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import moment from 'moment';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '../../../core/public';
-import { DataStorage, OSD_FIELD_TYPES } from '../../data/common';
+import { DataStorage, getDataSourceEngineCapabilities, OSD_FIELD_TYPES } from '../../data/common';
+// Type-only: DataSourceEngineType is an enum (runtime value); we use its string value directly to
+// avoid a cross-plugin runtime value-import. Keep in sync with the enum.
+import type { DataSourceEngineType } from '../../data_source/common/data_sources';
+
+const ELASTICSEARCH_ENGINE: DataSourceEngineType.Elasticsearch = 'Elasticsearch' as DataSourceEngineType.Elasticsearch;
 import {
   createEditor,
   DefaultInput,
@@ -63,15 +68,17 @@ export class QueryEnhancementsPlugin
     // When legacy Elasticsearch compatibility is enabled, declare per-engine minimum versions so
     // SQL/PPL are gated per selected dataset (and routed to Open Distro server-side). When disabled
     // (default), these stay undefined so the language service evaluator fail-opens — behavior is
-    // unchanged. Minimums follow the "features by engine version" matrix: SQL needs ES >= 6.5, PPL
-    // needs ES >= 7.9.
+    // unchanged. The minimum versions come from the centralized engine-capabilities descriptor.
     const legacyEsCompatEnabled = this.config.legacyElasticsearchCompatibility?.enabled;
-    const pplSupportedDataSources = legacyEsCompatEnabled
-      ? { minVersionByEngine: { Elasticsearch: '7.9.0' } }
-      : undefined;
-    const sqlSupportedDataSources = legacyEsCompatEnabled
-      ? { minVersionByEngine: { Elasticsearch: '6.5.0' } }
-      : undefined;
+    const esMinVersions = getDataSourceEngineCapabilities(ELASTICSEARCH_ENGINE).minLanguageVersions;
+    const pplSupportedDataSources =
+      legacyEsCompatEnabled && esMinVersions?.PPL
+        ? { minVersionByEngine: { [ELASTICSEARCH_ENGINE]: esMinVersions.PPL } }
+        : undefined;
+    const sqlSupportedDataSources =
+      legacyEsCompatEnabled && esMinVersions?.SQL
+        ? { minVersionByEngine: { [ELASTICSEARCH_ENGINE]: esMinVersions.SQL } }
+        : undefined;
 
     // Define controls once for each language and register language configurations outside of `getUpdates$`
     const pplControls = [pplLanguageReference('PPL')];

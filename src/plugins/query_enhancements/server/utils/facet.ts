@@ -6,7 +6,11 @@
 import { Logger } from 'opensearch-dashboards/server';
 import { FacetResponse, IPPLEventsDataSource, IPPLVisualizationDataSource } from '../types';
 import { shimSchemaRow, shimStats } from '.';
-import { Query } from '../../../data/common';
+import {
+  DEFAULT_ENGINE_CAPABILITIES,
+  getDataSourceEngineCapabilities,
+  Query,
+} from '../../../data/common';
 
 export interface FacetProps {
   client: any;
@@ -23,12 +27,11 @@ export interface FacetProps {
   legacyEsCompatEnabled?: boolean;
 }
 
-const ELASTICSEARCH_ENGINE_TYPE = 'Elasticsearch';
-
-// Maps a base client action to its Open Distro equivalent for Elasticsearch data sources.
-const OPEN_DISTRO_ACTION_BY_ENDPOINT: Record<string, string> = {
-  'enhancements.pplQuery': 'enhancements.pplQueryOpenDistro',
-  'enhancements.sqlQuery': 'enhancements.sqlQueryOpenDistro',
+// Maps a base (default) client action to its per-engine equivalent, derived from the centralized
+// engine-capabilities descriptor. Used to route Elasticsearch SQL/PPL to the Open Distro actions.
+const OPEN_DISTRO_ACTION_BY_DEFAULT_ACTION: Record<string, string> = {
+  [DEFAULT_ENGINE_CAPABILITIES.sqlPplEndpoints.ppl]: 'ppl',
+  [DEFAULT_ENGINE_CAPABILITIES.sqlPplEndpoints.sql]: 'sql',
 };
 
 export class Facet {
@@ -74,14 +77,16 @@ export class Facet {
       const dataSource = query.dataset?.dataSource;
       const meta = dataSource?.meta;
 
-      // Route Elasticsearch data sources to the Open Distro endpoints. Since below-min ES languages
-      // are already hidden client-side, any ES query that reaches here is supported, so this is a
-      // straightforward "engine is Elasticsearch => Open Distro" mapping. Fail-open: unknown/missing
-      // engine types keep the default `_plugins` action.
+      // Route the query to the engine's SQL/PPL client action, per the centralized engine
+      // capabilities. Since below-min languages are already hidden client-side, any query that
+      // reaches here is supported, so this is a straightforward per-engine endpoint lookup.
+      // Fail-open: unknown/missing engine types resolve to the default `_plugins` actions.
       if (this.legacyEsCompatEnabled) {
         const engineType = dataSource?.engineType ?? dataSource?.type;
-        if (engineType === ELASTICSEARCH_ENGINE_TYPE && OPEN_DISTRO_ACTION_BY_ENDPOINT[endpoint]) {
-          resolvedEndpoint = OPEN_DISTRO_ACTION_BY_ENDPOINT[endpoint];
+        const caps = getDataSourceEngineCapabilities(engineType);
+        const langKey = OPEN_DISTRO_ACTION_BY_DEFAULT_ACTION[endpoint];
+        if (caps.usesOpenDistroSqlPpl && langKey) {
+          resolvedEndpoint = caps.sqlPplEndpoints[langKey as 'ppl' | 'sql'];
         }
         this.logger.info(
           `Facet fetch: engineType=${engineType}, endpoint=${endpoint} -> ${resolvedEndpoint}`
