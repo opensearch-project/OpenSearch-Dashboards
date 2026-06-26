@@ -12,15 +12,20 @@ function setHash(hash: string) {
   window.history.replaceState(null, '', `${window.location.pathname}${hash}`);
 }
 
+/** Update the hash and fire a window hashchange, wrapped in act. */
+function hashChangeTo(hash: string) {
+  act(() => {
+    setHash(hash);
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+  });
+}
+
 describe('useOpenOnUrlMarker', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
     setHash('#/');
   });
 
   afterEach(() => {
-    jest.clearAllTimers();
-    jest.useRealTimers();
     setHash('#/');
   });
 
@@ -59,78 +64,40 @@ describe('useOpenOnUrlMarker', () => {
     expect(onOpen).not.toHaveBeenCalled();
   });
 
-  it('opens again on a window hashchange that re-adds the marker', () => {
+  it('opens on a window hashchange that adds the marker', () => {
     const onOpen = jest.fn();
     renderHook(() => useOpenOnUrlMarker('_openSaved', onOpen));
     expect(onOpen).not.toHaveBeenCalled();
 
-    // Advance past the cooldown window before the second trigger.
-    act(() => {
-      setHash('#/?_openSaved=true');
-      window.dispatchEvent(new HashChangeEvent('hashchange'));
-    });
+    hashChangeTo('#/?_openSaved=true');
     expect(onOpen).toHaveBeenCalledTimes(1);
   });
 
-  it('suppresses a re-fire within the cooldown window', () => {
+  it('opens again on a genuine re-arrival (absent -> present edge)', () => {
     setHash('#/?_openSaved=true');
     const onOpen = jest.fn();
-    renderHook(() => useOpenOnUrlMarker('_openSaved', onOpen, { cooldownMs: 500 }));
-    expect(onOpen).toHaveBeenCalledTimes(1);
+    renderHook(() => useOpenOnUrlMarker('_openSaved', onOpen));
+    expect(onOpen).toHaveBeenCalledTimes(1); // opened + stripped on mount
 
-    // The app re-adds the marker immediately (its own hash re-sync) — must NOT
-    // double-open while the cooldown is active.
-    act(() => {
-      setHash('#/?_openSaved=true');
-      window.dispatchEvent(new HashChangeEvent('hashchange'));
-    });
-    expect(onOpen).toHaveBeenCalledTimes(1);
-
-    // After the cooldown elapses, a genuine re-trigger opens again.
-    act(() => {
-      jest.advanceTimersByTime(600);
-    });
-    act(() => {
-      setHash('#/?_openSaved=true');
-      window.dispatchEvent(new HashChangeEvent('hashchange'));
-    });
+    // App settles on a marker-less hash (the stripped state).
+    hashChangeTo('#/?_g=()');
+    // Later the user clicks "Browse saved" again -> marker re-added.
+    hashChangeTo('#/?_openSaved=true');
     expect(onOpen).toHaveBeenCalledTimes(2);
   });
 
-  it('re-checks when locationKey changes (same-app navigation, no hashchange)', () => {
+  it('does NOT reopen when a stale marker reappears without an intervening absent state', () => {
+    // P0 regression: open + strip, then the app re-serializes the hash (e.g.
+    // running a query) and a stale marker momentarily reappears. Because the
+    // marker never transitioned through "absent" first, this is not a genuine
+    // new arrival and must NOT reopen the overlay.
+    setHash('#/?_openSaved=true');
     const onOpen = jest.fn();
-    const { rerender } = renderHook(
-      ({ key }) => useOpenOnUrlMarker('_openSaved', onOpen, { locationKey: key }),
-      { initialProps: { key: '#/a' } }
-    );
-    expect(onOpen).not.toHaveBeenCalled();
-
-    // Simulate a scoped-history navigation: hash updates with the marker, no
-    // window 'hashchange' fires, but the router location key changes.
-    setHash('#/?_openSaved=true');
-    rerender({ key: '#/?_openSaved=true' });
-    expect(onOpen).toHaveBeenCalledTimes(1);
-  });
-
-  it('does not latch the cooldown when the effect re-runs within the window', () => {
-    // Open once → cooldown active. Then re-run the effect (a dep changes, e.g. a
-    // new onOpen) while the cooldown timer is still pending. The cleanup must
-    // re-arm the cooldown so a later marker still opens; otherwise the flag
-    // latches true and all future opens are silently dropped.
-    setHash('#/?_openSaved=true');
-    let onOpen = jest.fn();
-    const { rerender } = renderHook(({ cb }) => useOpenOnUrlMarker('_openSaved', cb), {
-      initialProps: { cb: onOpen },
-    });
+    renderHook(() => useOpenOnUrlMarker('_openSaved', onOpen));
     expect(onOpen).toHaveBeenCalledTimes(1);
 
-    // Re-run the effect within the cooldown window (no timer advance) by passing
-    // a new callback identity, then present the marker again.
-    onOpen = jest.fn();
-    setHash('#/?_openSaved=true');
-    act(() => {
-      rerender({ cb: onOpen });
-    });
+    // Re-serialization re-adds the marker (no absent observation in between).
+    hashChangeTo('#/?_openSaved=true&_q=(query:foo)');
     expect(onOpen).toHaveBeenCalledTimes(1);
   });
 

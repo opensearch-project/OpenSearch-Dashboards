@@ -5,7 +5,6 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@osd/i18n';
-import { useLocation } from 'react-router-dom';
 import { useObservable } from 'react-use';
 import { AppMountParameters } from 'opensearch-dashboards/public';
 import { useSelector as useNewStateSelector, useDispatch } from 'react-redux';
@@ -189,15 +188,16 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedAgentTraces }: Top
 
   // The side-nav "Browse saved searches" popover action navigates here with a
   // `_openSaved=true` hash marker (popover actions only get navigateToApp, not
-  // `overlays`). useOpenOnUrlMarker reads the marker, opens the flyout, and
-  // strips it (cooldown / replaceState / cross-app + same-app handling live in
-  // the hook). locationKey is the react-router location so same-app
-  // (scoped-history) navigations — which don't emit a window `hashchange` —
-  // re-check.
-  const routerLocation = useLocation();
-  useOpenOnUrlMarker('_openSaved', handleOpenShortcut, {
-    locationKey: `${routerLocation.pathname}${routerLocation.search}${routerLocation.hash}`,
-  });
+  // `overlays`). useOpenOnUrlMarker reads the marker on mount + window
+  // `hashchange` and opens the flyout once per marker arrival (edge-triggered),
+  // then strips it.
+  //
+  // We intentionally do NOT key on the react-router location: the app
+  // re-serializes the hash via silent `history.replace` on ordinary actions
+  // (e.g. running a query), which would otherwise reopen the flyout if a stale
+  // marker reappeared. Same-app re-clicks still work because core dispatches a
+  // synthetic window `hashchange` for same-app popover navigations.
+  useOpenOnUrlMarker('_openSaved', handleOpenShortcut);
 
   const handleSaveShortcut = useCallback(() => {
     if (savedAgentTraces) {
