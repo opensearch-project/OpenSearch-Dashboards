@@ -29,12 +29,14 @@
  */
 
 import supertest from 'supertest';
+import { BehaviorSubject } from 'rxjs';
+import { ByteSizeValue } from '@osd/config-schema';
 import { REPO_ROOT } from '@osd/dev-utils';
 import { HttpService, InternalHttpServiceSetup } from '../../http';
 import { contextServiceMock } from '../../context/context_service.mock';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { Env } from '../../config';
-import { getEnvOptions } from '../../config/mocks';
+import { configServiceMock, getEnvOptions } from '../../config/mocks';
 import { CapabilitiesService, CapabilitiesSetup } from '..';
 import { createHttpServer } from '../../http/test_utils';
 import { dynamicConfigServiceMock } from '../../config/dynamic_config_service.mock';
@@ -109,6 +111,74 @@ describe('CapabilitiesService', () => {
           "workspaces": Object {},
         }
       `);
+    });
+
+    describe('request body schema bounds', () => {
+      beforeEach(async () => {
+        await server.stop();
+        const configService = configServiceMock.create();
+        configService.atPath.mockReturnValue(
+          new BehaviorSubject({
+            hosts: ['localhost'],
+            maxPayload: new ByteSizeValue(10 * 1024 * 1024),
+            autoListen: true,
+            ssl: { enabled: false },
+            compression: { enabled: true },
+            xsrf: { disableProtection: true, whitelist: [] },
+            customResponseHeaders: {},
+            requestId: { allowFromAnyIp: true, ipAllowlist: [] },
+            keepaliveTimeout: 120_000,
+            socketTimeout: 120_000,
+          } as any)
+        );
+        server = createHttpServer({ configService });
+        httpSetup = await server.setup({
+          context: contextServiceMock.createSetupContract(),
+        });
+        service = new CapabilitiesService({
+          coreId,
+          env,
+          logger: loggingSystemMock.create(),
+          configService: {} as any,
+          dynamicConfigService: dynamicConfigServiceMock.create(),
+        });
+        serviceSetup = await service.setup({ http: httpSetup });
+        await server.start({
+          dynamicConfigService: dynamicConfigServiceMock.createInternalStartContract(),
+        });
+      });
+
+      it('accepts an applications array at the maximum allowed size (1000)', async () => {
+        const applications = Array.from({ length: 1000 }, (_, i) => `app-${i}`);
+        await supertest(httpSetup.server.listener)
+          .post('/api/core/capabilities')
+          .send({ applications })
+          .expect(200);
+      });
+
+      it('rejects an applications array larger than 1000 entries', async () => {
+        const applications = Array.from({ length: 1001 }, (_, i) => `app-${i}`);
+        await supertest(httpSetup.server.listener)
+          .post('/api/core/capabilities')
+          .send({ applications })
+          .expect(400);
+      });
+
+      it('rejects an application id longer than 256 characters', async () => {
+        const tooLong = 'a'.repeat(257);
+        await supertest(httpSetup.server.listener)
+          .post('/api/core/capabilities')
+          .send({ applications: [tooLong] })
+          .expect(400);
+      });
+
+      it('accepts an application id of exactly 256 characters', async () => {
+        const maxLen = 'a'.repeat(256);
+        await supertest(httpSetup.server.listener)
+          .post('/api/core/capabilities')
+          .send({ applications: [maxLen] })
+          .expect(200);
+      });
     });
   });
 });
