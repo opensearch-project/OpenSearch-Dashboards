@@ -268,6 +268,17 @@ describe('<ExpandedSideNav />', () => {
       expect(getByText('Tools')).toBeInTheDocument();
     });
 
+    it('preserves all-caps acronym tokens in a category label', () => {
+      const category = {
+        id: 'apm',
+        label: 'APM Services',
+      };
+      const navLinks = [makeLink({ id: 'svc', title: 'Service', euiIconType: 'apps', category })];
+      const { getByText } = render(<ExpandedSideNav {...defaultProps} navLinks={navLinks} />);
+      // "APM" stays upper-case; only the non-acronym word is lowercased.
+      expect(getByText('APM services')).toBeInTheDocument();
+    });
+
     it('sentence-cases collapsible category labels too', () => {
       const category = {
         id: 'agentMonitoring',

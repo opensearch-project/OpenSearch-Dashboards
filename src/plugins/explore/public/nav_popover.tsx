@@ -44,9 +44,18 @@ function RecentExploreSearches({
   const appPath = `/app/${appId}`;
 
   useEffect(() => {
+    // Match the app path on a boundary (followed by end, `#`, `/`, or `?`) so a
+    // sibling app whose id is a superstring (e.g. `explore/logspatterns` vs
+    // `explore/logs`) doesn't surface under the wrong flavor.
+    const matchesApp = (link: string) => {
+      const i = link.indexOf(appPath);
+      if (i === -1) return false;
+      const next = link.charAt(i + appPath.length);
+      return next === '' || next === '#' || next === '/' || next === '?';
+    };
     const sub = recentlyAccessed$.subscribe((items) => {
       const matches = items
-        .filter((item) => item.link.includes(appPath))
+        .filter((item) => matchesApp(item.link))
         .slice(0, 5)
         .map((item) => {
           const hashIndex = item.link.indexOf('#');
@@ -96,13 +105,11 @@ function RecentExploreSearches({
  * so the popover stays deployment agnostic instead of targeting a specific named
  * connection.
  */
-const metricsHashPath = (mode?: 'query') => {
-  // Always set metricsPageMode explicitly (explore | query) so the page can
-  // toggle in BOTH directions when the user is already on Metrics — an omitted
-  // mode would leave the page on whatever mode it was last in.
-  const ui = mode
-    ? 'ui:(activeTabId:logs,metricsPageMode:query,showHistogram:!t)'
-    : 'ui:(activeTabId:logs,metricsPageMode:explore,showHistogram:!t)';
+const metricsHashPath = (mode: 'query' | 'explore' = 'explore') => {
+  // Always set metricsPageMode explicitly so the page can toggle in BOTH
+  // directions when the user is already on Metrics — an omitted mode would
+  // leave the page on whatever mode it was last in.
+  const ui = `ui:(activeTabId:logs,metricsPageMode:${mode},showHistogram:!t)`;
   return (
     '#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))' +
     '&_a=(legacy:(columns:!(_source),interval:auto,isDirty:!f,sort:!()),' +

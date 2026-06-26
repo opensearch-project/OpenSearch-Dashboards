@@ -23,12 +23,19 @@ function RecentDashboards({ recentlyAccessed$, navigateToApp }: NavPopoverServic
   const [recentDashboards, setRecentDashboards] = useState<DashboardItem[]>([]);
 
   useEffect(() => {
+    // Match `/app/dashboards` on a boundary (followed by end, `#`, `/`, or `?`)
+    // so the distinct legacy `dashboard` app id — and any future superstring app
+    // id — doesn't surface here.
+    const appPath = '/app/dashboards';
+    const isDashboardLink = (link: string) => {
+      const i = link.indexOf(appPath);
+      if (i === -1) return false;
+      const next = link.charAt(i + appPath.length);
+      return next === '' || next === '#' || next === '/' || next === '?';
+    };
     const sub = recentlyAccessed$.subscribe((items) => {
       const dashboardItems = items
-        // `/app/dashboards` already contains `/app/dashboard`, so a single
-        // check covers both and avoids also matching the distinct legacy
-        // `dashboard` app id.
-        .filter((item) => item.link.includes('/app/dashboards'))
+        .filter((item) => isDashboardLink(item.link))
         .slice(0, 5)
         .map((item) => ({ id: item.id, title: item.label }));
       setRecentDashboards(dashboardItems);

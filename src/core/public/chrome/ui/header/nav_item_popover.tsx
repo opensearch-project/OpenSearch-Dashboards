@@ -104,7 +104,7 @@ function ChildRow({
     >
       <div className="obsNavPopover" data-test-subj={`obsNavPopover-sub-${item.id}`}>
         <div className="obsNavPopover-content">
-          {item.children!.map((child) => (
+          {(item.children ?? []).map((child) => (
             <ChildRow key={child.id} item={child} navigateToApp={navigateToApp} appId={appId} />
           ))}
         </div>
@@ -166,7 +166,7 @@ export function NavItemPopover({
 
         {hasChildren && (
           <div className="obsNavPopover-section" data-test-subj="obsNavPopover-children">
-            {childItems!.map((item) => (
+            {(childItems ?? []).map((item) => (
               <ChildRow key={item.id} item={item} navigateToApp={navigateToApp} appId={appId} />
             ))}
           </div>

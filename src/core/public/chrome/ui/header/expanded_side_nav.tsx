@@ -21,12 +21,23 @@ import { NavItemPopover, NavPopoverChildItem } from './nav_item_popover';
 type MergedNavLink = ChromeNavLink & ChromeRegistrationNavLink;
 
 /**
- * Sentence-case a category label for display (e.g. "Agent Monitoring" ->
- * "Agent monitoring"): keep the first character, lowercase the rest. The
- * registered Title Case source string is left untouched.
+ * Sentence-case a label for display (e.g. "Agent Monitoring" -> "Agent
+ * monitoring"): capitalize the first word and lowercase the rest, but PRESERVE
+ * all-caps acronym tokens (e.g. "APM", "PPL", "ML") so they aren't mangled into
+ * "Apm"/"Ppl". The registered Title Case source string is left untouched; this
+ * only affects display.
  */
-function toSentenceCase(label: string): string {
-  return label.charAt(0) + label.slice(1).toLowerCase();
+export function toSentenceCase(label: string): string {
+  const isAcronym = (word: string) =>
+    word.length > 1 && word === word.toUpperCase() && /[A-Z]/.test(word);
+  return label
+    .split(' ')
+    .map((word, index) => {
+      if (isAcronym(word)) return word;
+      const lower = word.toLowerCase();
+      return index === 0 ? lower.charAt(0).toUpperCase() + lower.slice(1) : lower;
+    })
+    .join(' ');
 }
 
 export interface ExpandedSideNavProps {

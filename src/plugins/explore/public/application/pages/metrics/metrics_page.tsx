@@ -7,6 +7,7 @@ import '../explore_page.scss';
 import './metrics_page.scss';
 
 import React, { useEffect } from 'react';
+import rison from 'rison-node';
 import { EuiErrorBoundary, EuiPage, EuiPageBody } from '@elastic/eui';
 import { AppMountParameters, HeaderVariant } from 'opensearch-dashboards/public';
 import { useDispatch } from 'react-redux';
@@ -54,12 +55,19 @@ export const MetricsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAc
       if (qIndex === -1) return;
       const aParam = new URLSearchParams(hash.slice(qIndex + 1)).get('_a');
       if (!aParam) return;
-      // _a is a rison-ish string; a substring check is enough to read the mode
-      // without pulling in a rison decoder here.
-      if (/metricsPageMode:query/.test(aParam)) {
-        dispatch(setMetricsPageMode('query'));
-      } else if (/metricsPageMode:explore/.test(aParam)) {
-        dispatch(setMetricsPageMode('explore'));
+      // Rison-decode `_a` and read `ui.metricsPageMode` as a structured field.
+      // A substring match on the serialized blob would false-positive when the
+      // token appears inside user data (e.g. a saved query/filter value),
+      // wrongly flipping the page mode against the user's actual selection.
+      let mode: unknown;
+      try {
+        const decoded = rison.decode(aParam) as { ui?: { metricsPageMode?: unknown } };
+        mode = decoded?.ui?.metricsPageMode;
+      } catch {
+        return; // malformed _a — leave the current mode untouched
+      }
+      if (mode === 'query' || mode === 'explore') {
+        dispatch(setMetricsPageMode(mode));
       }
     };
     applyModeFromUrl();

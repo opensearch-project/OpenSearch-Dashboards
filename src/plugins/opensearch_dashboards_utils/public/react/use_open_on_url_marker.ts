@@ -92,6 +92,11 @@ export function useOpenOnUrlMarker(
     return () => {
       window.removeEventListener('hashchange', openIfMarked);
       if (cooldownTimerRef.current) clearTimeout(cooldownTimerRef.current);
+      // Re-arm the cooldown on cleanup. Otherwise, if the effect re-runs (deps
+      // change) within the cooldown window, the pending reset timer is cleared
+      // above while `cooldownRef` is still true, latching it `true` permanently
+      // and silently disabling all future opens for the session.
+      cooldownRef.current = false;
     };
     // locationKey is intentionally a dep so same-app (scoped-history)
     // navigations that don't emit a window hashchange still re-check.

@@ -13,21 +13,19 @@ import { AppCategory } from '../../../../types';
 import { getOrderedLinksOrCategories, LinkItem, LinkItemType } from '../../utils';
 import { SimplePopover } from './simple_popover';
 import { NavItemPopover, NavPopoverChildItem } from './nav_item_popover';
+import { toSentenceCase } from './expanded_side_nav';
 
 /**
  * Build the collapsed-popover title for an item, prefixing it with its category
- * in plain sentence format (e.g. "Agent monitoring traces", "Application
- * performance traces") so a bare "Traces" isn't ambiguous between categories.
- * The category label is Title Case for section headers, so lowercase all but
- * its first character here; no hyphen between category and title.
+ * in sentence format (e.g. "Agent monitoring traces", "Application performance
+ * traces") so a bare "Traces" isn't ambiguous between categories. Uses the
+ * shared {@link toSentenceCase}, which preserves all-caps acronyms (e.g. "APM
+ * traces" stays "APM traces", not "Apm traces"); no hyphen between category and
+ * title.
  */
 function buildPopoverTitle(title: string, categoryLabel?: string): string {
   if (!categoryLabel) return title;
-  // Sentence format: capitalize only the first letter of the whole phrase and
-  // lowercase the rest (e.g. "Agent Monitoring" + "Traces" -> "Agent
-  // monitoring traces"). Keeps the leading capital, drops the mid-phrase caps.
-  const phrase = `${categoryLabel} ${title}`;
-  return phrase.charAt(0) + phrase.slice(1).toLowerCase();
+  return toSentenceCase(`${categoryLabel} ${title}`);
 }
 
 /**

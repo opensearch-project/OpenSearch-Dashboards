@@ -112,6 +112,28 @@ describe('useOpenOnUrlMarker', () => {
     expect(onOpen).toHaveBeenCalledTimes(1);
   });
 
+  it('does not latch the cooldown when the effect re-runs within the window', () => {
+    // Open once → cooldown active. Then re-run the effect (a dep changes, e.g. a
+    // new onOpen) while the cooldown timer is still pending. The cleanup must
+    // re-arm the cooldown so a later marker still opens; otherwise the flag
+    // latches true and all future opens are silently dropped.
+    setHash('#/?_openSaved=true');
+    let onOpen = jest.fn();
+    const { rerender } = renderHook(({ cb }) => useOpenOnUrlMarker('_openSaved', cb), {
+      initialProps: { cb: onOpen },
+    });
+    expect(onOpen).toHaveBeenCalledTimes(1);
+
+    // Re-run the effect within the cooldown window (no timer advance) by passing
+    // a new callback identity, then present the marker again.
+    onOpen = jest.fn();
+    setHash('#/?_openSaved=true');
+    act(() => {
+      rerender({ cb: onOpen });
+    });
+    expect(onOpen).toHaveBeenCalledTimes(1);
+  });
+
   it('removes its hashchange listener on unmount', () => {
     const removeSpy = jest.spyOn(window, 'removeEventListener');
     const { unmount } = renderHook(() => useOpenOnUrlMarker('_openSaved', jest.fn()));

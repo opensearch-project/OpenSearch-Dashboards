@@ -298,5 +298,28 @@ describe('MetricsPage', () => {
 
       expect(mockDispatch).toHaveBeenCalledWith(setMetricsPageMode('explore'));
     });
+
+    it('reads ui.metricsPageMode structurally, ignoring the token inside user data', () => {
+      // The real ui mode is `explore`, but the literal `metricsPageMode:query`
+      // also appears inside a query VALUE. A substring match would wrongly flip
+      // to query; rison-decoding reads only the structured ui field.
+      setHash(
+        "#/?_a=(query:'search metricsPageMode:query here'," +
+          'ui:(activeTabId:logs,metricsPageMode:explore,showHistogram:!t))'
+      );
+
+      renderMetricsPage();
+
+      expect(mockDispatch).toHaveBeenCalledWith(setMetricsPageMode('explore'));
+      expect(mockDispatch).not.toHaveBeenCalledWith(setMetricsPageMode('query'));
+    });
+
+    it('does not dispatch a mode when _a is malformed', () => {
+      setHash('#/?_a=(ui:(this is not valid rison');
+
+      renderMetricsPage();
+
+      expect(setMetricsPageModeCalls()).toHaveLength(0);
+    });
   });
 });
