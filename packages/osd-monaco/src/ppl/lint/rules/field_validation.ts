@@ -146,7 +146,10 @@ function detectUnknownFields(
   }
 
   const { createdFields } = buildPipelineShape(tree, ruleNameToIndex);
-  const known = new Set<string>([...fields, ...createdFields]);
+  // Membership test over the two source sets rather than copying them into one
+  // merged set on every keystroke. The suggestion path (cold — only runs once a
+  // field is already unknown) materializes the union inline.
+  const isKnown = (n: string): boolean => fields.has(n) || createdFields.has(n);
   // The source/index keyword workaround is only needed on the compiled-simplified
   // surface (and the test/fallback path, which has no surface set). On the runtime
   // bundle `source=idx` parses as an excluded fromClause, so a `fieldExpression`
@@ -207,12 +210,12 @@ function detectUnknownFields(
       if (
         name &&
         !hasExcludedAncestor(node, excludedIndices) &&
-        !known.has(name) &&
-        !known.has(leaf) &&
+        !isKnown(name) &&
+        !isKnown(leaf) &&
         !seen.has(name)
       ) {
         seen.add(name);
-        const suggestion = suggestField(name, known);
+        const suggestion = suggestField(name, [...fields, ...createdFields]);
         const suffix = suggestion ? ` Did you mean "${suggestion}"?` : '';
         diagnostics.push({
           ruleId: config.id,

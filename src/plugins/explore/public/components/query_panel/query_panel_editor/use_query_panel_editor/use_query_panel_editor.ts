@@ -42,6 +42,7 @@ import {
   cleanupPPLContexts,
   PPLDetachRefs,
   buildPPLLintContext,
+  extractFieldNames,
   LintFieldsCache,
   pplGrammarCache,
   shouldUseRuntimeGrammar,
@@ -227,13 +228,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
           if (cancelled || !indexPattern) {
             return;
           }
-          const fields = new Set<string>();
-          for (const field of indexPattern.fields ?? []) {
-            if (field?.name) {
-              fields.add(field.name);
-            }
-          }
-          lintFieldsRef.current = { datasetId, fields };
+          lintFieldsRef.current = { datasetId, fields: extractFieldNames(indexPattern) };
         } catch {
           if (cancelled) {
             return;
