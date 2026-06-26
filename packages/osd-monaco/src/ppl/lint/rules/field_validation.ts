@@ -192,6 +192,12 @@ function detectUnknownFields(
 
   const { createdFields } = buildPipelineShape(tree, ruleNameToIndex);
   const known = new Set<string>([...fields, ...createdFields]);
+  // The source/index keyword workaround is only needed on the compiled-simplified
+  // surface (and the test/fallback path, which has no surface set). On the runtime
+  // bundle `source=idx` parses as an excluded fromClause, so a `fieldExpression`
+  // whose text is `source`/`index` there is a genuine field reference we must
+  // validate. Gate the skip so real fields named `source`/`index` aren't silenced.
+  const skipSourceKeywords = context.grammarSurface !== 'runtime-bundle';
   const excludedIndices = resolveExcludedAncestorIndices(ruleNameToIndex);
   const alternateSourceRoots = collectAlternateSourceSubtrees(tree, ruleNameToIndex);
   const joinAliases = collectJoinAliases(tree, ruleNameToIndex);
@@ -224,7 +230,7 @@ function detectUnknownFields(
       // leading `source`/`index` keyword into a fieldExpression (the runtime
       // grammar instead parses it as an excluded fromClause). Skip that keyword
       // so sub-3.6 clusters don't get a spurious "Unknown field" on every query.
-      if (SOURCE_KEYWORDS.has(name.toLowerCase())) {
+      if (skipSourceKeywords && SOURCE_KEYWORDS.has(name.toLowerCase())) {
         continue;
       }
       const prefix = name.includes('.') ? name.split('.')[0] : null;

@@ -183,6 +183,49 @@ describe('field-slot shape (runtime-bundle proxy)', () => {
     });
   });
 
+  // The source/index keyword skip is a compiled-simplified-grammar workaround
+  // (there `source=idx` misparses the keyword into a fieldExpression). On the
+  // runtime bundle `source=idx` is an excluded fromClause, so a fieldExpression
+  // whose text is `source`/`index` is a genuine field reference and must be
+  // validated like any other.
+  describe('source/index keyword is validated on the runtime surface', () => {
+    const withFields = (query: string, fields: string[]): Diagnostic[] =>
+      fieldValidationDetector(
+        buildTree(query),
+        config,
+        { grammarSurface: 'runtime-bundle', fields: new Set<string>(fields) },
+        ruleNameToIndex
+      );
+
+    it('flags an unknown field literally named `source`', () => {
+      expect(
+        withFields('source=t | where source = 5', ['age', 'status']).map((d) => d.message)
+      ).toEqual([expect.stringContaining('Unknown field "source"')]);
+    });
+
+    it('flags an unknown field literally named `index`', () => {
+      expect(
+        withFields('source=t | where index = 5', ['age', 'status']).map((d) => d.message)
+      ).toEqual([expect.stringContaining('Unknown field "index"')]);
+    });
+
+    it('does NOT flag `source` when it is a real field on the index', () => {
+      expect(withFields('source=t | where source = 5', ['age', 'status', 'source'])).toEqual([]);
+    });
+
+    it('keeps the skip on the compiled fallback path (no surface set)', () => {
+      // No grammarSurface = compiled/test path: the workaround stays active so a
+      // misparsed source-first keyword is not falsely flagged.
+      const diags = fieldValidationDetector(
+        buildTree('source=t | where source = 5'),
+        config,
+        { fields: new Set<string>(['age', 'status']) },
+        ruleNameToIndex
+      );
+      expect(diags).toEqual([]);
+    });
+  });
+
   describe('overlap suppression', () => {
     it('does not co-emit an "Unknown field" existence finding for field=body', () => {
       const tree = buildTree('source=t | grok field=body "x"');
