@@ -15,6 +15,7 @@ import {
   EuiSmallButton,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { CoreStart } from 'opensearch-dashboards/public';
@@ -30,11 +31,18 @@ export function DevToolsIcon({
   devTools,
   deps,
   title,
+  useRailPopover = false,
 }: {
   core: CoreStart;
   devTools: readonly DevToolApp[];
   deps: DevToolsSetupDependencies;
   title: string;
+  /**
+   * When true (the collapsed icon-side-nav rail footer), show the rail-style
+   * hover popover that connects flush to the rail. When false (the expanded
+   * footer and the classic nav), show a plain tooltip instead.
+   */
+  useRailPopover?: boolean;
 }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [devToolTab, setDevToolTab] = useState('');
@@ -164,48 +172,63 @@ export function DevToolsIcon({
     ]
   );
 
+  const devToolsButton = (
+    <EuiButtonIcon
+      aria-label={devToolsLabel}
+      iconType="consoleApp"
+      data-test-subj="openDevToolsModal"
+      onClick={() => {
+        setIsLabelOpen(false);
+        setModalVisible(true);
+      }}
+      color="text"
+    />
+  );
+
   return (
     <>
-      <EuiPopover
-        anchorPosition="rightUp"
-        hasArrow={false}
-        offset={0}
-        ownFocus={false}
-        initialFocus={false}
-        panelPaddingSize="none"
-        panelClassName="obsNavPopover-panel obsNavPopover-panel--rail"
-        display="block"
-        isOpen={isLabelOpen}
-        closePopover={() => setIsLabelOpen(false)}
-        button={
-          // Match the collapsed nav icon's anchor geometry: a full-rail-width
-          // (48px) centered wrapper so EUI's rightUp popover anchors from the
-          // rail's right edge — exactly like the nav leaf icons. This lets the
-          // shared `obsNavPopover-panel--rail` calibration land the panel flush
-          // and connected (same as Topology Map), instead of floating detached.
-          <span
-            className={`devToolsNavAnchor${isLabelOpen ? ' devToolsNavAnchor--open' : ''}`}
-            onMouseEnter={openLabel}
-            onMouseLeave={scheduleCloseLabel}
+      {useRailPopover ? (
+        <EuiPopover
+          anchorPosition="rightUp"
+          hasArrow={false}
+          offset={0}
+          ownFocus={false}
+          initialFocus={false}
+          panelPaddingSize="none"
+          panelClassName="obsNavPopover-panel obsNavPopover-panel--rail"
+          display="block"
+          isOpen={isLabelOpen}
+          closePopover={() => setIsLabelOpen(false)}
+          button={
+            // Match the collapsed nav icon's anchor geometry: a full-rail-width
+            // (48px) centered wrapper so EUI's rightUp popover anchors from the
+            // rail's right edge — exactly like the nav leaf icons. This lets the
+            // shared `obsNavPopover-panel--rail` calibration land the panel flush
+            // and connected (same as Topology Map), instead of floating detached.
+            <span
+              className={`devToolsNavAnchor${isLabelOpen ? ' devToolsNavAnchor--open' : ''}`}
+              onMouseEnter={openLabel}
+              onMouseLeave={scheduleCloseLabel}
+            >
+              {devToolsButton}
+            </span>
+          }
+          panelProps={{ onMouseEnter: openLabel, onMouseLeave: scheduleCloseLabel }}
+        >
+          <div
+            className="obsNavPopover obsNavPopover--titleOnly"
+            data-test-subj="devToolsNavPopover"
           >
-            <EuiButtonIcon
-              aria-label={devToolsLabel}
-              iconType="consoleApp"
-              data-test-subj="openDevToolsModal"
-              onClick={() => {
-                setIsLabelOpen(false);
-                setModalVisible(true);
-              }}
-              color="text"
-            />
-          </span>
-        }
-        panelProps={{ onMouseEnter: openLabel, onMouseLeave: scheduleCloseLabel }}
-      >
-        <div className="obsNavPopover obsNavPopover--titleOnly" data-test-subj="devToolsNavPopover">
-          <EuiPopoverTitle paddingSize="s">{devToolsLabel}</EuiPopoverTitle>
-        </div>
-      </EuiPopover>
+            <EuiPopoverTitle paddingSize="s">{devToolsLabel}</EuiPopoverTitle>
+          </div>
+        </EuiPopover>
+      ) : (
+        // Expanded footer + classic nav: a plain tooltip reads correctly here;
+        // the rail-flush popover is only for the collapsed icon rail.
+        <EuiToolTip content={devToolsLabel} position="right">
+          {devToolsButton}
+        </EuiToolTip>
+      )}
       {modalVisible ? (
         /**
          * We can not use OuiModal component here because OuiModal uses OuiOverlayMask as its parent node
