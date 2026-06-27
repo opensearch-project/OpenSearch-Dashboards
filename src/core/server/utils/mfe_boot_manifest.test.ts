@@ -1013,3 +1013,217 @@ describe('readMfeBootManifest() — v3 path (themes descriptor)', () => {
     }
   });
 });
+
+/* ------------------------------------------------------------------------- *
+ * Phase 16 Story 7 — v3 `sharedDepsCss` descriptor projection
+ *
+ * Same shape, same backward-compat posture as `orchestrator` / `core`: GLOBAL
+ * (does not vary by rollout / tenant), URL is required, `integrity` is
+ * OPTIONAL (same-origin dev fallback URLs legitimately have no SRI), and the
+ * registry-side `version` is metadata that never reaches the loader. Cases
+ * mirror the `core` / `themes` blocks above so a regression in any of the
+ * three v3 GLOBAL static-asset fields is caught at the same tier.
+ * ------------------------------------------------------------------------- */
+
+describe('readMfeBootManifest() — v3 path (sharedDepsCss descriptor)', () => {
+  const v3WithSharedDepsCss = {
+    schemaVersion: 3,
+    generatedAt: '2026-06-27T00:00:00.000Z',
+    default: {
+      sharedDeps: SHARED,
+      mfes: { inspector: FIXTURE_INSPECTOR_DEFAULT },
+    },
+    rollouts: [],
+    tenantOverrides: {},
+    sharedDepsCss: {
+      url: 'https://cdn.example.com/mfe/shared-deps/css/scsshash/osd-ui-shared-deps.css',
+      integrity: 'sha384-scssA',
+      version: '3.5.0+scss1',
+    },
+  };
+
+  it('reads a v3 doc with sharedDepsCss and surfaces it on the boot manifest', () => {
+    const file = tmpFile(JSON.stringify(v3WithSharedDepsCss));
+    try {
+      const m = readMfeBootManifest(file, { customerId: 'default', userBucket: 50 });
+      expect(m.sharedDeps).toEqual(SHARED);
+      expect(m.mfes.length).toBe(1);
+      expect(m.sharedDepsCss).toEqual({
+        url: 'https://cdn.example.com/mfe/shared-deps/css/scsshash/osd-ui-shared-deps.css',
+        integrity: 'sha384-scssA',
+      });
+      // `version` is registry-side metadata only — MUST NOT be propagated
+      // to the loader (same contract as orchestrator/core/themes).
+      const out = (m.sharedDepsCss as unknown) as Record<string, unknown>;
+      expect(out.version).toBeUndefined();
+    } finally {
+      Fs.unlinkSync(file);
+    }
+  });
+
+  it('reads a v3 doc with NO sharedDepsCss field — manifest.sharedDepsCss is absent', () => {
+    const v3NoScss = { ...v3WithSharedDepsCss };
+    delete (v3NoScss as Record<string, unknown>).sharedDepsCss;
+    const file = tmpFile(JSON.stringify(v3NoScss));
+    try {
+      const m = readMfeBootManifest(file, { customerId: 'default', userBucket: 50 });
+      expect(m.sharedDepsCss).toBeUndefined();
+      expect(m.mfes.length).toBe(1);
+    } finally {
+      Fs.unlinkSync(file);
+    }
+  });
+
+  it('accepts a sharedDepsCss entry WITHOUT integrity (dev fallback URL)', () => {
+    // Same dev-fallback contract as the orchestrator/core/themes: a same-
+    // origin URL legitimately has no SRI; the reader MUST accept the
+    // descriptor in both shapes.
+    const v3DevScss = {
+      ...v3WithSharedDepsCss,
+      sharedDepsCss: {
+        url: '/bundles/osd-ui-shared-deps/osd-ui-shared-deps.css',
+        version: '3.5.0+scss1',
+      },
+    };
+    const file = tmpFile(JSON.stringify(v3DevScss));
+    try {
+      const m = readMfeBootManifest(file, { customerId: 'default', userBucket: 50 });
+      expect(m.sharedDepsCss).toEqual({
+        url: '/bundles/osd-ui-shared-deps/osd-ui-shared-deps.css',
+      });
+      expect(m.sharedDepsCss!.integrity).toBeUndefined();
+    } finally {
+      Fs.unlinkSync(file);
+    }
+  });
+
+  it('sharedDepsCss is GLOBAL — does not vary across rollouts/tenant overrides', () => {
+    const v3CanaryAndTenant = {
+      schemaVersion: 3,
+      generatedAt: '2026-06-27T00:00:00.000Z',
+      default: { sharedDeps: SHARED, mfes: { inspector: FIXTURE_INSPECTOR_DEFAULT } },
+      rollouts: [
+        {
+          id: 'inspector-canary-5pct',
+          match: { userBucketLt: 5 },
+          override: { mfes: { inspector: FIXTURE_INSPECTOR_CANARY } },
+        },
+      ],
+      tenantOverrides: {
+        acme: { mfes: { inspector: FIXTURE_INSPECTOR_ACME } },
+      },
+      sharedDepsCss: {
+        url: 'https://cdn.example.com/mfe/shared-deps/css/scsshash/osd-ui-shared-deps.css',
+        integrity: 'sha384-scssA',
+        version: '3.5.0+scss1',
+      },
+    };
+    const file = tmpFile(JSON.stringify(v3CanaryAndTenant));
+    try {
+      const acme = readMfeBootManifest(file, { customerId: 'acme', userBucket: 2 });
+      expect(acme.mfes[0].remoteEntry).toBe(FIXTURE_INSPECTOR_ACME.remoteEntry);
+      const canary = readMfeBootManifest(file, { customerId: 'default', userBucket: 2 });
+      expect(canary.mfes[0].remoteEntry).toBe(FIXTURE_INSPECTOR_CANARY.remoteEntry);
+      // sharedDepsCss is GLOBAL — does not vary with rollouts/tenants.
+      expect(canary.sharedDepsCss!.url).toBe(acme.sharedDepsCss!.url);
+      expect(canary.sharedDepsCss!.integrity).toBe('sha384-scssA');
+    } finally {
+      Fs.unlinkSync(file);
+    }
+  });
+
+  it('throws when v3 sharedDepsCss is not an object', () => {
+    const bad = { ...v3WithSharedDepsCss, sharedDepsCss: 'not-an-object' };
+    const file = tmpFile(JSON.stringify(bad));
+    try {
+      expect(() => readMfeBootManifest(file, { customerId: 'default', userBucket: 0 })).toThrow(
+        /\`sharedDepsCss\` must be an object/
+      );
+    } finally {
+      Fs.unlinkSync(file);
+    }
+  });
+
+  it('throws when v3 sharedDepsCss.url is missing or empty', () => {
+    const bad = {
+      ...v3WithSharedDepsCss,
+      sharedDepsCss: { integrity: 'sha384-x', version: '1' },
+    };
+    const file = tmpFile(JSON.stringify(bad));
+    try {
+      expect(() => readMfeBootManifest(file, { customerId: 'default', userBucket: 0 })).toThrow(
+        /\`sharedDepsCss\.url\` must be a non-empty string/
+      );
+    } finally {
+      Fs.unlinkSync(file);
+    }
+  });
+
+  it('throws when v3 sharedDepsCss.integrity is present but not a non-empty string', () => {
+    const bad = {
+      ...v3WithSharedDepsCss,
+      sharedDepsCss: {
+        url: 'https://example.com/x.css',
+        integrity: '',
+        version: '1',
+      },
+    };
+    const file = tmpFile(JSON.stringify(bad));
+    try {
+      expect(() => readMfeBootManifest(file, { customerId: 'default', userBucket: 0 })).toThrow(
+        /\`sharedDepsCss\.integrity\`, when present, must be a non-empty string/
+      );
+    } finally {
+      Fs.unlinkSync(file);
+    }
+  });
+
+  it('v3 doc with orchestrator + core + themes + sharedDepsCss surfaces ALL FOUR on the manifest', () => {
+    const v3All = {
+      ...v3WithSharedDepsCss,
+      orchestrator: {
+        url: 'https://cdn.example.com/mfe/orchestrator/0000/osd_bootstrap_mfe.js',
+        integrity: 'sha384-orchA',
+        version: '3.5.0+orch1',
+      },
+      core: {
+        url: 'https://cdn.example.com/mfe/core/0000/core.entry.js',
+        integrity: 'sha384-coreA',
+        version: '3.5.0+core1',
+      },
+      themes: {
+        light: {
+          url: 'https://cdn.example.com/mfe/themes/light/lighthash/legacy_light_theme.css',
+          integrity: 'sha384-lightA',
+          version: '3.5.0+light1',
+        },
+      },
+    };
+    const file = tmpFile(JSON.stringify(v3All));
+    try {
+      const m = readMfeBootManifest(file, { customerId: 'default', userBucket: 50 });
+      expect(m.orchestrator).toBeDefined();
+      expect(m.core).toBeDefined();
+      expect(m.themes).toBeDefined();
+      expect(m.sharedDepsCss).toBeDefined();
+      expect(m.sharedDepsCss!.url).toContain('osd-ui-shared-deps.css');
+    } finally {
+      Fs.unlinkSync(file);
+    }
+  });
+
+  it('v1/v2 docs return manifest WITHOUT a sharedDepsCss field (backward-compat)', () => {
+    const v1 = {
+      generatedAt: '2026-06-27T00:00:00.000Z',
+      sharedDeps: SHARED,
+      mfes: { inspector: FIXTURE_INSPECTOR_DEFAULT },
+    };
+    const file = tmpFile(JSON.stringify(v1));
+    try {
+      const m = readMfeBootManifest(file, { customerId: 'default', userBucket: 0 });
+      expect(m.sharedDepsCss).toBeUndefined();
+    } finally {
+      Fs.unlinkSync(file);
+    }
+  });
+});

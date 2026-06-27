@@ -114,6 +114,28 @@ export interface MfeBootManifest {
    * verbatim — backward-compat at every consumption site.
    */
   themes?: Record<string, MfeBootAssetDescriptor>;
+  /**
+   * Phase 16 Story 7: `osd-ui-shared-deps.css` from CDN with SRI (the
+   * EUI/charts/typography "base" stylesheet — the always-loaded part of
+   * `@osd/ui-shared-deps`'s CSS output, NOT the per-theme variants). When
+   * present, the bootstrap_mfe thin shim's `styleSheetPaths` uses THIS URL
+   * (object form, `{ url, integrity }`) instead of the legacy
+   * `${regularBundlePath}/osd-ui-shared-deps/osd-ui-shared-deps.css`
+   * same-origin path, and the legacy bundle route refuses (404s) the file
+   * via the `mfeSharedDepsCssRefuser` predicate in
+   * `optimize_mixin.ts` / `bundles_route.ts`. Absent on v1/v2 docs (and v3
+   * docs without `sharedDepsCss`): the existing same-origin path is
+   * preserved verbatim — backward-compat at every consumption site.
+   *
+   * SINGULAR (one URL per registry, unlike `themes` which is keyed by
+   * theme name) because the base CSS doesn't vary by theme — it carries
+   * EUI/charts/typography styling that applies to all themes. The per-
+   * theme variant files (e.g. `osd-ui-shared-deps.v8.dark.css`) in the
+   * same dist directory are NOT in scope for this story and remain on
+   * this origin (their CSS is theme-specific and could be folded into
+   * `themes` in a future iteration if ever needed).
+   */
+  sharedDepsCss?: MfeBootAssetDescriptor;
 }
 
 /* ------------------------------------------------------------------------- *
@@ -174,6 +196,15 @@ interface V2DocLite {
    * themes without a server change.
    */
   themes?: Record<string, { url: string; integrity?: string }>;
+  /**
+   * Phase 16 Story 7: the base `osd-ui-shared-deps.css` bundle (singular —
+   * one URL per registry, unlike `themes`). Same shape, same backward-
+   * compat posture as `orchestrator` / `core` — absent on v1/v2 /
+   * v3-without-sharedDepsCss ⇒ consumer falls back to
+   * `${regularBundlePath}/osd-ui-shared-deps/osd-ui-shared-deps.css` (the
+   * legacy same-origin path on this server).
+   */
+  sharedDepsCss?: { url: string; integrity?: string };
 }
 
 /* ------------------------------------------------------------------------- *
@@ -254,6 +285,9 @@ function projectV3(v3: Record<string, unknown>): V2DocLite {
       );
     }
     lite.themes = themes;
+  }
+  if (v3.sharedDepsCss !== undefined) {
+    lite.sharedDepsCss = coerceAssetDescriptor('sharedDepsCss', v3.sharedDepsCss);
   }
   return lite;
 }
@@ -523,6 +557,18 @@ function resolveOnce(doc: V2DocLite, dim: MfeResolutionDimensions): MfeBootManif
     // for any theme name advertised by the registry (so a misconfigured
     // browser can never silently fall back to a same-origin copy).
     ...(doc.themes ? { themes: { ...doc.themes } } : {}),
+    // v3-only: the base `osd-ui-shared-deps.css` bundle (Phase 16 Story
+    // 7). Absent on v1/v2 input ⇒ consumer falls back to
+    // `${regularBundlePath}/osd-ui-shared-deps/osd-ui-shared-deps.css`
+    // on THIS server (the existing same-origin path). When present, the
+    // bootstrap_mfe thin shim's `styleSheetPaths` uses THIS URL with
+    // SRI (object form `{ url, integrity }`) and the legacy bundle
+    // route refuses the same path via the `mfeSharedDepsCssRefuser`
+    // predicate in `optimize_mixin.ts` (so a misconfigured browser can
+    // never silently fall back to an un-SRI'd same-origin copy). Same
+    // GLOBAL posture as orchestrator/core/themes — does not vary by
+    // rollout/tenant.
+    ...(doc.sharedDepsCss ? { sharedDepsCss: { ...doc.sharedDepsCss } } : {}),
   };
 }
 

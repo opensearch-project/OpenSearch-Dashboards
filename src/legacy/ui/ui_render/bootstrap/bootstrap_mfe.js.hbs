@@ -53,8 +53,31 @@ if (window.__osdStrictCsp__ && window.__osdCspNotEnforced__) {
   var loadingMessage = document.getElementById('osd_loading_message');
   loadingMessage.style.display = 'flex';
 
+  // Phase 16 Story 7: the FIRST `styleSheetPaths` entry — the base
+  // `osd-ui-shared-deps.css` — is conditionally replaced by a registry-
+  // managed CDN URL with SRI when the source v3 doc advertises a
+  // `sharedDepsCss` top-level field. We pre-compute the entry as either a
+  // plain string (legacy same-origin) or an object `{ url, integrity }`
+  // (CDN+SRI); the `load()` / `loadStyleSheet` chain below handles BOTH
+  // shapes (the object dispatch is the same shape used by `mfeOrchestrator`
+  // for scripts — preserving the "one entry kind per element" invariant of
+  // the loader array). The legacy bundles route on this origin 404s the
+  // same path via the `mfeSharedDepsCssRefuser` predicate in
+  // `optimize_mixin.ts` whenever this descriptor is set — so a
+  // misconfigured browser can never silently fall back to an un-SRI'd
+  // same-origin copy. On v1/v2 (or v3 without `sharedDepsCss`), the
+  // descriptor is `null` and we keep the legacy entry verbatim —
+  // byte-for-byte unchanged backward-compat.
+  var resolvedMfeSharedDepsCss = {{{mfeSharedDepsCss}}};
+  var sharedDepsCssEntry;
+  if (resolvedMfeSharedDepsCss && typeof resolvedMfeSharedDepsCss === 'object' && typeof resolvedMfeSharedDepsCss.url === 'string') {
+    sharedDepsCssEntry = { url: resolvedMfeSharedDepsCss.url, integrity: resolvedMfeSharedDepsCss.integrity };
+  } else {
+    sharedDepsCssEntry = '{{regularBundlePath}}/osd-ui-shared-deps/{{UiSharedDeps.baseCssDistFilename}}';
+  }
+
   var styleSheetPaths = [
-    '{{regularBundlePath}}/osd-ui-shared-deps/{{UiSharedDeps.baseCssDistFilename}}',
+    sharedDepsCssEntry,
     '{{regularBundlePath}}/osd-ui-shared-deps/' + themeCssDistFilenames[themeVersion][themeMode],
     '{{basePath}}/node_modules/@osd/ui-framework/dist/' + kuiCssDistFilenames[themeVersion][themeMode],
   ];
@@ -159,6 +182,22 @@ if (window.__osdStrictCsp__ && window.__osdCspNotEnforced__) {
           stays `null` and the legacy same-origin path is kept — byte-for-
           byte unchanged backward-compat. Raw JSON ({{{ }}} = unescaped). --}}
     themes: {{{mfeThemes}}},
+    {{!-- Phase 16 Story 7: registry-managed base `osd-ui-shared-deps.css`
+          (singular — one URL per registry, unlike `themes`). When the
+          source registry is v3 AND advertises a `sharedDepsCss` top-
+          level field, the boot manifest carries a `{ url, integrity? }`
+          descriptor and the thin shim's `styleSheetPaths` (above) USES
+          that URL with SRI (object form; `crossorigin="anonymous"`)
+          instead of the legacy
+          `${regularBundlePath}/osd-ui-shared-deps/osd-ui-shared-deps.css`
+          same-origin path. The legacy bundle route on this origin also
+          404s the file (the `mfeSharedDepsCssRefuser` predicate in
+          `optimize_mixin.ts`), so a misconfigured browser can never
+          silently fall back to an un-SRI'd same-origin copy. On v1/v2
+          (or v3 without the field), this stays `null` and the thin
+          shim keeps the legacy path — byte-for-byte unchanged
+          backward-compat. Raw JSON ({{{ }}} = unescaped). --}}
+    sharedDepsCss: {{{mfeSharedDepsCss}}},
   };
 
   window.onload = function () {
@@ -178,11 +217,25 @@ if (window.__osdStrictCsp__ && window.__osdCspNotEnforced__) {
     }
 
     var stylesheetTarget = document.querySelector('head meta[name="add-styles-here"]')
-    function loadStyleSheet(url, cb) {
+    function loadStyleSheet(url, cb, integrity) {
       var dom = document.createElement('link');
       dom.rel = 'stylesheet';
       dom.type = 'text/css';
       dom.href = url;
+      {{!-- Phase 16 Story 7: when the caller advertises an `integrity`
+            attribute (cross-origin registry-managed CSS, e.g. the base
+            `osd-ui-shared-deps.css` from CDN with SRI), pin the SRI
+            hash. Browsers REQUIRE `crossorigin` on the <link> tag for
+            SRI to apply to a cross-origin response. The default loader
+            path passes no integrity (`undefined`), so this branch is
+            no-op for the legacy same-origin server-bundled stylesheet
+            paths — preserving byte-for-byte HTML output on the no-flag
+            path. Symmetric with `loadScript`'s integrity branch (added
+            in Phase 16 Story 3 for the orchestrator). --}}
+      if (typeof integrity === 'string' && integrity.length > 0) {
+        dom.integrity = integrity;
+        dom.crossOrigin = 'anonymous';
+      }
       dom.addEventListener('error', failure);
       dom.addEventListener('load', cb);
       document.head.insertBefore(dom, stylesheetTarget);
@@ -222,15 +275,20 @@ if (window.__osdStrictCsp__ && window.__osdCspNotEnforced__) {
         }
 
         if (typeof url !== 'string' && url && typeof url === 'object' && !Array.isArray(url) && typeof url.url === 'string') {
-          {{!-- Phase 16 Story 3: an entry can be either a plain string URL
-                (legacy path, server-bundled assets — most entries) OR an
-                object `{ url, integrity? }` for a registry-managed asset
-                with SRI. We dispatch on the shape so callers can mix the
-                two in the same `load([...])` array — the orchestrator
-                takes the object form when v3 advertises it, every other
-                entry stays a string. --}}
+          {{!-- Phase 16 Story 3 + Story 7: an entry can be either a plain
+                string URL (legacy path, server-bundled assets — most
+                entries) OR an object `{ url, integrity? }` for a
+                registry-managed asset with SRI. We dispatch on the
+                shape so callers can mix the two in the same
+                `load([...])` array — the orchestrator (Story 3) and
+                the base shared-deps CSS (Story 7) take the object form
+                when v3 advertises them, every other entry stays a
+                string. The CSS branch passes `url.integrity` to
+                `loadStyleSheet` so the `<link>` element pins SRI +
+                `crossorigin="anonymous"` (symmetric with the script
+                branch). --}}
           if (url.url.slice(-4) === '.css') {
-            loadStyleSheet(url.url, innerCb);
+            loadStyleSheet(url.url, innerCb, url.integrity);
           } else {
             loadScript(url.url, innerCb, url.integrity);
           }

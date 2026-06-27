@@ -82,6 +82,57 @@ export const optimizeMixin = async (
     };
   })();
 
+  // Phase 16 Story 7: same shape, same fail-soft posture as the core
+  // refuser above, applied to the BASE `osd-ui-shared-deps.css` bundle.
+  // When `--mfe` is on AND the resolved v3 registry advertises a
+  // `sharedDepsCss` top-level field, the bootstrap_mfe thin shim's
+  // `styleSheetPaths` loads the base CSS from THAT CDN URL (with SRI;
+  // `crossorigin="anonymous"`) and the same artifact MUST NOT also be
+  // served by THIS server out of the legacy
+  // `/${buildHash}/bundles/osd-ui-shared-deps/osd-ui-shared-deps.css`
+  // route — otherwise the browser has two competing sources for the same
+  // bytes and the SRI gate could be silently downgraded by a stale-cache
+  // pick of the un-SRI'd same-origin copy. The refuser predicate is
+  // plumbed into `createBundlesRoute` so the osd-ui-shared-deps route
+  // 404s ONLY `osd-ui-shared-deps.css` (NOT the per-theme variant CSS
+  // files like `osd-ui-shared-deps.v8.dark.css`, nor the JS bundle
+  // `osd-ui-shared-deps.js`, nor lazy chunks — those stay on this origin
+  // and load through `__osdPublicPath__` exactly as before).
+  //
+  // Same GLOBAL projection-dimensions argument as the core refuser:
+  // `sharedDepsCss` is a v3 GLOBAL field (does not vary by tenant or
+  // canary bucket — see schema_v3.ts §"Why GLOBAL, not per-layer"), so
+  // fixed dimensions are sound. The mtime-cached read in
+  // `readMfeBootManifest` makes the per-request cost O(1) for cache
+  // hits (one stat() + a hash-map lookup).
+  //
+  // When `--mfe` is OFF, or no registry path is configured, this
+  // predicate is `undefined` and the route is byte-for-byte unchanged
+  // (no-flag :5601 / pre-Phase-16 deployments).
+  const mfeSharedDepsCssRefuser: (() => boolean) | undefined = (() => {
+    const mfeEnabled = !!config.get('opensearchDashboards.mfe.enabled');
+    if (!mfeEnabled) return undefined;
+    const mfeRegistryPath = config.get('opensearchDashboards.mfe.registryPath');
+    if (!mfeRegistryPath || typeof mfeRegistryPath !== 'string') return undefined;
+    return () => {
+      try {
+        const resolved = readMfeBootManifest(mfeRegistryPath, {
+          customerId: 'default',
+          userBucket: 0,
+        });
+        return !!resolved.sharedDepsCss;
+      } catch {
+        // Conservative fail-soft: a read/parse failure ⇒ DO NOT refuse;
+        // the legacy route still serves the same-origin copy so the
+        // app degrades to pre-Phase-16 byte-for-byte instead of
+        // 404-ing the base shared-deps CSS in a confused state. The
+        // bootstrap handler in ui_render_mixin already logs the
+        // underlying parse error.
+        return false;
+      }
+    };
+  })();
+
   server.route(
     createBundlesRoute({
       basePublicPath: config.get('server.basePath'),
@@ -89,6 +140,7 @@ export const optimizeMixin = async (
       buildHash: osdServer.newPlatform.env.packageInfo.buildNum.toString(),
       isDist: osdServer.newPlatform.env.packageInfo.dist,
       mfeCoreEntryRefuser,
+      mfeSharedDepsCssRefuser,
     })
   );
 

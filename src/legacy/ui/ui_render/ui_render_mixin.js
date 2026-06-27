@@ -247,6 +247,23 @@ export function uiRenderMixin(osdServer, server, config) {
         // Story 5's `resolvedCore` so a future refactor can lift both into
         // a single resolved-manifest map.
         let mfeThemesJson = 'null';
+        // Phase 16 Story 7: same shape, same posture for the BASE
+        // `osd-ui-shared-deps.css` bundle (singular — one URL per
+        // registry; the per-theme variant CSS files in the same dist
+        // directory are out of scope, see schema_v3.ts). When the source
+        // registry is v3 AND advertises a `sharedDepsCss` top-level
+        // field, the boot manifest carries a `{ url, integrity? }`
+        // descriptor — and the bootstrap_mfe thin shim's
+        // `styleSheetPaths` uses THAT URL (object form, SRI pinned,
+        // cross-origin) instead of the legacy
+        // `${regularBundlePath}/osd-ui-shared-deps/osd-ui-shared-deps.css`
+        // same-origin path. The legacy bundle route also 404s the
+        // file via `optimize_mixin.ts`'s `mfeSharedDepsCssRefuser` to
+        // prevent silent fall-back. When absent (v1/v2 registries, or
+        // v3 without the field), the descriptor is `null` and the
+        // thin shim keeps the legacy same-origin path — byte-for-
+        // byte unchanged backward-compat.
+        let mfeSharedDepsCssJson = 'null';
         if (mfeRegistryPath && typeof mfeRegistryPath === 'string') {
           try {
             const resolved = readMfeBootManifest(mfeRegistryPath, {
@@ -263,6 +280,9 @@ export function uiRenderMixin(osdServer, server, config) {
             }
             if (resolved.themes) {
               mfeThemesJson = JSON.stringify(resolved.themes);
+            }
+            if (resolved.sharedDepsCss) {
+              mfeSharedDepsCssJson = JSON.stringify(resolved.sharedDepsCss);
             }
           } catch (err) {
             // Fail loudly server-side; the bootstrap falls back to the legacy
@@ -439,6 +459,18 @@ export function uiRenderMixin(osdServer, server, config) {
               // `null` and the thin shim keeps the legacy entry — byte-for-
               // byte unchanged backward-compat.
               mfeThemes: mfeThemesJson,
+              // Phase 16 Story 7: v3-only base `osd-ui-shared-deps.css`
+              // descriptor (singular — one URL per registry). When
+              // non-`null`, the bootstrap_mfe thin shim's
+              // `styleSheetPaths` uses `__osdMfe__.sharedDepsCss.url`
+              // (object form, SRI pinned, `crossorigin="anonymous"`)
+              // instead of the legacy
+              // `${regularBundlePath}/osd-ui-shared-deps/osd-ui-shared-deps.css`
+              // same-origin path, and the legacy bundle route 404s the
+              // same file. On v1/v2 (or v3 without `sharedDepsCss`)
+              // this stays `null` and the thin shim keeps the legacy
+              // path — byte-for-byte unchanged backward-compat.
+              mfeSharedDepsCss: mfeSharedDepsCssJson,
             },
           },
           'bootstrap_mfe'
