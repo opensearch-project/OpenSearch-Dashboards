@@ -262,6 +262,21 @@ export interface BootstrapMfeOptions {
    * defaults to `'default'` for the same reason as {@link bucket}.
    */
   customerId?: string;
+  /**
+   * Phase 16 Story 5: registry-managed OSD core entry script (`core.entry.js`).
+   * When the server has resolved a v3 registry's `core` top-level field, it
+   * injects the descriptor here so the orchestrator loads `core.entry.js` from
+   * the CDN URL (with SRI) BEFORE invoking core boot. A tampered core fails
+   * closed: `loadScript` rejects, this Promise rejects, the chunk-error
+   * surface (armed earlier in `bootstrapMfe`) catches the unhandled rejection
+   * and renders a visible error banner — `invokeCoreBootstrap` is NEVER
+   * called, because the entire app cannot proceed on a tampered core. When
+   * absent (v1/v2 registries, or v3 without the field), the thin shim's
+   * jsDependencyPaths already pre-loaded `core.entry.js` from THIS server
+   * (the byte-for-byte legacy path) so the in-orchestrator load is skipped
+   * — backward-compat at every consumption site.
+   */
+  core?: { url: string; integrity?: string };
   /** Optional collaborator overrides (used by tests). */
   deps?: Partial<BootstrapMfeDeps>;
 }
@@ -536,6 +551,68 @@ export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> 
   // surfaces a visible error + telemetry instead of letting it white-screen / hang.
   // It is purely additive (global listeners) and never affects the load sequence.
   deps.installChunkErrorSurface();
+
+  // 0. Phase 16 Story 5: registry-managed OSD core entry (`core.entry.js`).
+  //    When the server advertised a v3 `core` descriptor, the thin shim
+  //    OMITTED the legacy `${regularBundlePath}/core/core.entry.js` preload,
+  //    so the orchestrator MUST load core from the CDN URL itself BEFORE
+  //    invoking core boot. The order mirrors the legacy thin-shim sequence:
+  //    core.entry.js loads → registers `entry/core/public` into the
+  //    __osdBundles__ shim (its `__osdBootstrap__` is NOT invoked yet) →
+  //    shared-deps + plugin remotes load (steps 1-3 below) → finally
+  //    `deps.invokeCoreBootstrap()` (step 4) calls the registered
+  //    `__osdBootstrap__`. Loading core BEFORE shared-deps is safe (and
+  //    matches the legacy ordering) because the entry script only DEFINES
+  //    into the shim at load time; it does not yet touch
+  //    `window.__osdSharedDeps__`.
+  //
+  //    FAIL-CLOSED (Phase 12 SRI posture extended to core): on SRI mismatch
+  //    or unfetchable bytes, `loadScript` rejects → bootstrapMfe's Promise
+  //    rejects → the chunk-error surface armed above catches the unhandled
+  //    rejection → visible error banner. `invokeCoreBootstrap` is NEVER
+  //    called: the entire app cannot proceed on a tampered or unreachable
+  //    core (unlike a single plugin remote, which degrades to a placeholder).
+  //
+  //    Telemetry (Phase 14 Story 1): the locked error-class taxonomy is
+  //    re-used unchanged — an integrity claim that fails is `sri-mismatch`
+  //    (Phase 12 conflates tampered bytes and unfetchable bytes under the
+  //    same fail-closed reasoning when integrity is pinned); no claim
+  //    collapses to `network`. The event id is the sentinel `'core'` so
+  //    downstream aggregators can distinguish a core failure from a plugin
+  //    failure without expanding the locked emit() shape.
+  //
+  //    Backward-compat: when `options.core` is absent (v1/v2 registry, or
+  //    a v3 doc without the `core` field), this block is a no-op — the thin
+  //    shim already pre-loaded `${regularBundlePath}/core/core.entry.js`
+  //    from THIS server (byte-for-byte legacy path), so the shim's
+  //    `entry/core/public` registration is already in place by the time
+  //    step 4 invokes `__osdBootstrap__`.
+  if (options.core) {
+    const coreLoadStart = deps.now();
+    try {
+      await deps.loadScript(options.core.url, options.core.integrity);
+    } catch (err) {
+      const errorClass: TelemetryErrorClass = options.core.integrity ? 'sri-mismatch' : 'network';
+      fireTelemetry({
+        id: 'core',
+        version: '',
+        status: 'failure',
+        durationMs: deps.now() - coreLoadStart,
+        errorClass,
+      });
+      // eslint-disable-next-line no-console
+      console.error(
+        `[mfe] Failed to load OSD core (core.entry.js) from ${options.core.url}; refusing to ` +
+          `invoke core boot. App cannot proceed on a tampered or unreachable core ` +
+          `(errorClass=${errorClass}).`,
+        err
+      );
+      // Re-throw to fail-close: bootstrapMfe's Promise rejects, the chunk-error
+      // surface catches the unhandled rejection, and the rest of the load
+      // sequence (shared-deps / plugins / invokeCoreBootstrap) is never run.
+      throw err;
+    }
+  }
 
   // 1. Load shared deps and seed the MF share scope (singletons). The shared-deps
   //    bundle is split, so load its dependency chunks (in order) BEFORE the entry

@@ -197,6 +197,30 @@ export function uiRenderMixin(osdServer, server, config) {
         // is `null` and the thin shim falls back to the server-config
         // `mfeBootstrapUrl` — backward-compat at the consumption site.
         let mfeOrchestratorJson = 'null';
+        // Phase 16 Story 5: same shape, same posture for the OSD `core`
+        // entry script. When the source registry is v3 AND has a `core`
+        // top-level field, the boot manifest carries a `core: { url,
+        // integrity? }` descriptor — and the MFE orchestrator
+        // (`bootstrapMfe()` in `packages/osd-mfe/src/bootstrap/bootstrap_mfe.ts`)
+        // loads `core.entry.js` from THAT URL with SRI BEFORE invoking core
+        // boot (a tampered core fails closed: `loadScript` rejects, the
+        // orchestrator never calls `invokeCoreBootstrap`, the failure surface
+        // fires). When absent (v1/v2 registries, or v3 without the field),
+        // the descriptor is `null` and the thin shim's jsDependencyPaths
+        // keeps the legacy `${regularBundlePath}/core/core.entry.js` entry
+        // so core loads from THIS server as today — backward-compat at the
+        // consumption site, byte-for-byte unchanged for v1/v2 deployments.
+        let mfeCoreJson = 'null';
+        // Capture the resolved v3 `core` descriptor for the
+        // jsDependencyPaths branch below — when set, the thin shim OMITS
+        // the legacy server-bundled core entry path because the orchestrator
+        // will load core from the CDN URL itself. The lazy `core.chunk.*.js`
+        // chunks stay on this server (`__osdPublicPath__.core` keeps the
+        // `${regularBundlePath}/core/` value below); only the entry script
+        // moves to CDN. This narrow scope matches Story 5 (and minimises
+        // blast radius — bundling all of core's static output is a future
+        // phase).
+        let resolvedCore = null;
         if (mfeRegistryPath && typeof mfeRegistryPath === 'string') {
           try {
             const resolved = readMfeBootManifest(mfeRegistryPath, {
@@ -206,6 +230,10 @@ export function uiRenderMixin(osdServer, server, config) {
             mfeBootManifestJson = JSON.stringify(resolved);
             if (resolved.orchestrator) {
               mfeOrchestratorJson = JSON.stringify(resolved.orchestrator);
+            }
+            if (resolved.core) {
+              mfeCoreJson = JSON.stringify(resolved.core);
+              resolvedCore = resolved.core;
             }
           } catch (err) {
             // Fail loudly server-side; the bootstrap falls back to the legacy
@@ -295,8 +323,25 @@ export function uiRenderMixin(osdServer, server, config) {
 
         // Only core is loaded locally; plugin remotes are resolved from the registry at
         // runtime. shared-deps for the share scope are loaded by the MFE bootstrap.
-        const mfeJsDependencyPaths = [`${regularBundlePath}/core/core.entry.js`];
+        // Phase 16 Story 5: when the registry advertises a `core` descriptor,
+        // the orchestrator loads `core.entry.js` from the CDN URL with SRI
+        // BEFORE invoking core boot, so the thin shim MUST NOT preload the
+        // legacy server-bundled core entry (otherwise the browser would
+        // double-fetch and the SRI-pinned CDN bytes would be racing the
+        // server bytes). On v1/v2 registries (and v3 without `core`) the
+        // legacy path is preserved verbatim — same byte-for-byte boot as
+        // pre-Story-5.
+        const mfeJsDependencyPaths = resolvedCore
+          ? []
+          : [`${regularBundlePath}/core/core.entry.js`];
 
+        // The publicPathMap is unchanged: when `core.entry.js` executes, it
+        // sets `__webpack_public_path__ = window.__osdPublicPath__.core` so
+        // its lazy chunks (`core.chunk.*.js`) load via that base. Story 5
+        // moves ONLY the entry script to the CDN; the lazy chunks stay on
+        // THIS server, so the public-path base keeps pointing at
+        // `${regularBundlePath}/core/`. (Moving the chunks too is a future
+        // phase — out of scope per Story 5 description.)
         const mfePublicPathMap = JSON.stringify({
           core: `${regularBundlePath}/core/`,
           'osd-ui-shared-deps': `${regularBundlePath}/osd-ui-shared-deps/`,
@@ -341,6 +386,16 @@ export function uiRenderMixin(osdServer, server, config) {
               // `mfeBootstrapUrl` (backward-compat for v1/v2 registries
               // and v3 registries without the field set).
               mfeOrchestrator: mfeOrchestratorJson,
+              // Phase 16 Story 5: v3-only core descriptor. When non-`null`,
+              // the MFE orchestrator (bootstrap_mfe.ts) loads
+              // `core.entry.js` from `__osdMfe__.core.url` (with
+              // `.integrity` for SRI) BEFORE invoking core boot — a
+              // tampered core fails closed (the orchestrator never calls
+              // `invokeCoreBootstrap`, the failure surface fires). On
+              // v1/v2 (or v3 without `core`) this stays `null` and the
+              // thin shim preloads `${regularBundlePath}/core/core.entry.js`
+              // from THIS server exactly as today.
+              mfeCore: mfeCoreJson,
             },
           },
           'bootstrap_mfe'

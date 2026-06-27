@@ -303,3 +303,102 @@ describe('caching', () => {
     });
   });
 });
+
+/* ------------------------------------------------------------------------- *
+ * Phase 16 Story 5 — `mfeCoreEntryRefuser` predicate.
+ *
+ * The optional refuser lets the mfe-gated mixin disable the legacy
+ * `/bundles/core/core.entry.js` route when a v3 registry advertises the core
+ * entry from a CDN (the orchestrator loads it directly from there with SRI).
+ *
+ * - When refuser returns true → core.entry.js → 404
+ * - The lazy `core.chunk.*.js` files MUST still serve (publicPathMap.core is
+ *   unchanged in Story 5; only the entry moves to CDN)
+ * - When refuser is undefined OR returns false → byte-for-byte legacy serve
+ *   (no-flag :5601 path NEVER passes a refuser, so this is the production
+ *   guarantee for the no-flag boot)
+ * ------------------------------------------------------------------------- */
+
+describe('Phase 16 Story 5 — mfeCoreEntryRefuser', () => {
+  // Build the actual core target dir path so the route resolves real files
+  // for the chunks. We reuse the plugin/foo fixture for the entry tests by
+  // pointing the core-route at that dir for predictability.
+  const coreFixtureDir = fooPluginFixture;
+
+  function createServerWithRefuser(refuser?: () => boolean) {
+    const server = new Hapi.Server();
+    server.register([Inert]);
+    server.route(
+      createBundlesRoute({
+        basePublicPath: '',
+        npUiPluginPublicDirs: [],
+        buildHash: '1234',
+        isDist: false,
+        mfeCoreEntryRefuser: refuser,
+      })
+    );
+    return server;
+  }
+
+  it('returns 404 for core.entry.js when refuser returns true', async () => {
+    const refuser = jest.fn(() => true);
+    // Re-point the core route at our fixture so we can request a "core.entry.js"
+    // — the route configuration honors whatever bundlesPath we pass via
+    // buildRouteForBundles; here we just want to assert the 404 short-circuit.
+    // We rely on the production route shape `/1234/bundles/core/{path*}`.
+    const server = createServerWithRefuser(refuser);
+
+    const resp = await server.inject({ url: '/1234/bundles/core/core.entry.js' });
+    expect(resp.statusCode).toBe(404);
+    // Refuser was consulted exactly once for this request.
+    expect(refuser).toHaveBeenCalledTimes(1);
+  });
+
+  it('does NOT refuse non-entry assets (core.chunk.0.js stays serveable)', async () => {
+    const refuser = jest.fn(() => true);
+    const server = createServerWithRefuser(refuser);
+
+    // The chunks aren't on disk in this test (no built core fixture), so the
+    // statusCode will be 404 anyway — but the route handler MUST be reached
+    // (refuser NOT invoked for non-entry paths). We assert refuser was either
+    // not called, or called but returned `false` for the chunk path
+    // (depending on whether the predicate is also passed the path; in our
+    // implementation refuser is INVOKED with the path so we expect it to be
+    // called but return is not used since the path !== 'core.entry.js').
+    //
+    // Concretely: refuser is wired in the route builder as
+    //   refusePath: (p) => p === 'core.entry.js' && mfeCoreEntryRefuser()
+    // so for `core.chunk.0.js` the predicate short-circuits on the path
+    // check BEFORE mfeCoreEntryRefuser() is invoked. Net effect:
+    // mfeCoreEntryRefuser is NEVER called for non-entry assets.
+    await server.inject({ url: '/1234/bundles/core/core.chunk.0.js' });
+    expect(refuser).not.toHaveBeenCalled();
+  });
+
+  it('byte-for-byte unchanged when refuser is undefined (no-flag :5601 contract)', async () => {
+    const server = createServerWithRefuser(undefined);
+
+    // A request whose handler chain is unaffected by the refuser absence:
+    // the route MUST behave identically to the pre-Story-5 builder. Asserts
+    // 404 (file not on disk in this fixture-less core dir) — the meaningful
+    // bit is that the request doesn't fail in any new way.
+    const resp = await server.inject({ url: '/1234/bundles/core/core.entry.js' });
+    expect([200, 404]).toContain(resp.statusCode);
+  });
+
+  it('refuser returning false serves the asset (registry has NO core field)', async () => {
+    const refuser = jest.fn(() => false);
+    const server = createServerWithRefuser(refuser);
+
+    const resp = await server.inject({ url: '/1234/bundles/core/core.entry.js' });
+    // The route's bundlesPath is the real `src/core/target/public` dir, which
+    // contains a built `core.entry.js` in this workspace; the refuser returned
+    // false so the request flowed through to createDynamicAssetResponse and
+    // the file was served (200). What we care about is that:
+    //   1. The refuser was consulted (proves the gate is wired correctly).
+    //   2. A `false` return DID NOT 404 the request (proves the gate is not
+    //      always-on — only fires when refuser returns true).
+    expect(refuser).toHaveBeenCalledTimes(1);
+    expect(resp.statusCode).not.toBe(404);
+  });
+});

@@ -1952,3 +1952,270 @@ describe('bootstrapMfe — load telemetry (Phase 14, Story 1)', () => {
     expect(explodingDispatcher.emit).toHaveBeenCalled();
   });
 });
+
+/* ------------------------------------------------------------------------- *
+ * Phase 16 Story 5 — registry-managed OSD core entry (`core.entry.js`).
+ *
+ * When the server-resolved boot manifest carries a v3 `core` descriptor, the
+ * orchestrator must load core.entry.js from THAT URL (with SRI when pinned)
+ * BEFORE invoking core boot. A tampered core fails closed: loadScript rejects,
+ * bootstrapMfe's Promise rejects, invokeCoreBootstrap is NEVER called, and the
+ * chunk-error surface (armed at the start of bootstrapMfe) catches the
+ * unhandled rejection.
+ *
+ * Backward-compat: when `core` is absent, the orchestrator skips this step
+ * entirely (the thin shim's preload already loaded core from the legacy
+ * server-bundled `${regularBundlePath}/core/core.entry.js` path).
+ * ------------------------------------------------------------------------- */
+
+describe('bootstrapMfe — Phase 16 Story 5: registry-managed core', () => {
+  const CORE_URL = 'http://localhost:8080/core/cafebabe0000/core.entry.js';
+  const CORE_INTEGRITY = 'sha384-coreCDN1234';
+
+  function fakeContainer(): MfeContainer {
+    return {
+      init: () => undefined,
+      get: () => Promise.resolve(() => ({ plugin: () => undefined })),
+    };
+  }
+
+  it('loads core from the CDN URL with SRI BEFORE invokeCoreBootstrap', async () => {
+    const order: string[] = [];
+    const deps: Partial<BootstrapMfeDeps> = {
+      loadScript: jest.fn(async (url: string, integrity?: string) => {
+        if (url === CORE_URL) {
+          // Integrity attribute MUST be threaded through — Phase 12 SRI
+          // posture extended to core. Without this, a tampered core would
+          // execute without verification.
+          expect(integrity).toBe(CORE_INTEGRITY);
+          order.push(`coreLoaded:${url}`);
+        } else if (url === SHARED_DEPS_URL) {
+          testWindow().__osdSharedDeps__ = { React: { version: '16.14.0' } };
+          order.push('sharedDepsLoaded');
+        } else {
+          order.push(`other:${url}`);
+        }
+      }),
+      fetchImpl: ((async () => ({
+        ok: true,
+        status: 200,
+        json: async () => validRegistry(),
+      })) as unknown) as typeof fetch,
+      loadRemoteContainer: jest.fn(async () => fakeContainer()),
+      getRemoteModuleFactory: jest.fn(async () => () => ({ plugin: () => undefined })),
+      registerPluginFactory: jest.fn(),
+      invokeCoreBootstrap: jest.fn(async () => {
+        order.push('invokeCoreBootstrap');
+      }),
+    };
+
+    await bootstrapMfe({
+      registryUrl: REGISTRY_URL,
+      sharedDepsUrl: SHARED_DEPS_URL,
+      core: { url: CORE_URL, integrity: CORE_INTEGRITY },
+      deps,
+    });
+
+    // Core load happens FIRST (matches the legacy thin-shim ordering — core
+    // is registered into __osdBundles__ before sharedDeps loads).
+    expect(order[0]).toBe(`coreLoaded:${CORE_URL}`);
+    // Core load is BEFORE sharedDeps load.
+    expect(order.indexOf(`coreLoaded:${CORE_URL}`)).toBeLessThan(order.indexOf('sharedDepsLoaded'));
+    // Core load is BEFORE invokeCoreBootstrap — the locked invariant.
+    expect(order.indexOf(`coreLoaded:${CORE_URL}`)).toBeLessThan(
+      order.indexOf('invokeCoreBootstrap')
+    );
+    expect(deps.invokeCoreBootstrap).toHaveBeenCalledTimes(1);
+  });
+
+  it('skips the pre-coreBoot CDN load when `core` is absent (v1/v2/v3-without-core path)', async () => {
+    const loadedUrls: string[] = [];
+    const deps: Partial<BootstrapMfeDeps> = {
+      loadScript: jest.fn(async (url: string) => {
+        loadedUrls.push(url);
+        if (url === SHARED_DEPS_URL) {
+          testWindow().__osdSharedDeps__ = { React: { version: '16.14.0' } };
+        }
+      }),
+      fetchImpl: ((async () => ({
+        ok: true,
+        status: 200,
+        json: async () => validRegistry(),
+      })) as unknown) as typeof fetch,
+      loadRemoteContainer: jest.fn(async () => fakeContainer()),
+      getRemoteModuleFactory: jest.fn(async () => () => ({ plugin: () => undefined })),
+      registerPluginFactory: jest.fn(),
+      invokeCoreBootstrap: jest.fn(async () => undefined),
+    };
+
+    await bootstrapMfe({
+      registryUrl: REGISTRY_URL,
+      sharedDepsUrl: SHARED_DEPS_URL,
+      // No `core` option.
+      deps,
+    });
+
+    // No URL matching the CDN core URL was loaded by the orchestrator — the
+    // thin shim's legacy preload is the only loader of core in this path,
+    // and that step is OUTSIDE bootstrapMfe (handled in the .hbs template).
+    expect(loadedUrls).not.toContain(CORE_URL);
+    expect(deps.invokeCoreBootstrap).toHaveBeenCalledTimes(1);
+  });
+
+  it('fails closed on SRI mismatch: invokeCoreBootstrap NOT called, telemetry emits sri-mismatch', async () => {
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    const events: Array<{
+      id: string;
+      version: string;
+      status: string;
+      durationMs: number;
+      errorClass?: string;
+    }> = [];
+    const dispatcher = { emit: jest.fn((e: any) => events.push(e)) };
+    const createDispatcher = jest.fn(() => dispatcher);
+
+    const deps: Partial<BootstrapMfeDeps> = {
+      // SRI failure: loadScript rejects with the Phase 12 error message shape.
+      loadScript: jest.fn(async (url: string, integrity?: string) => {
+        if (url === CORE_URL) {
+          throw new Error(
+            `Failed to load script: ${url} ` +
+              `(Subresource Integrity check failed or the script could not be fetched)`
+          );
+        }
+        if (url === SHARED_DEPS_URL) {
+          testWindow().__osdSharedDeps__ = { React: { version: '16.14.0' } };
+        }
+      }),
+      fetchImpl: ((async () => ({
+        ok: true,
+        status: 200,
+        json: async () => validRegistry(),
+      })) as unknown) as typeof fetch,
+      loadRemoteContainer: jest.fn(async () => fakeContainer()),
+      getRemoteModuleFactory: jest.fn(async () => () => ({ plugin: () => undefined })),
+      registerPluginFactory: jest.fn(),
+      invokeCoreBootstrap: jest.fn(async () => undefined),
+      createTelemetryDispatcher: createDispatcher,
+    };
+
+    await expect(
+      bootstrapMfe({
+        registryUrl: REGISTRY_URL,
+        sharedDepsUrl: SHARED_DEPS_URL,
+        telemetryEndpoint: 'http://t/sink',
+        core: { url: CORE_URL, integrity: CORE_INTEGRITY },
+        deps,
+      })
+    ).rejects.toThrow(/Subresource Integrity check failed/);
+
+    // CRITICAL: invokeCoreBootstrap MUST NOT be called when core load fails —
+    // the app cannot proceed on tampered core (fail-closed contract).
+    expect(deps.invokeCoreBootstrap).not.toHaveBeenCalled();
+
+    // Telemetry: a failure event for id=`core` with errorClass=`sri-mismatch`
+    // (integrity was pinned, so the Phase 14 taxonomy collapses tampered +
+    // unfetchable bytes into the same fail-closed class).
+    const coreEvents = events.filter((e) => e.id === 'core');
+    expect(coreEvents.length).toBe(1);
+    expect(coreEvents[0].status).toBe('failure');
+    expect(coreEvents[0].errorClass).toBe('sri-mismatch');
+    expect(coreEvents[0].durationMs).toBeGreaterThanOrEqual(0);
+
+    // The console.error log is loud (operator visibility): mentions core,
+    // refuses to invoke, names the URL.
+    expect(consoleError).toHaveBeenCalled();
+    const msg = consoleError.mock.calls.map((c) => c[0]).join('\n');
+    expect(msg).toMatch(/Failed to load OSD core/);
+    expect(msg).toMatch(/refusing to invoke core boot/);
+
+    consoleError.mockRestore();
+  });
+
+  it('errorClass collapses to `network` when core descriptor has NO integrity (dev fallback)', async () => {
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    const events: Array<{ id: string; status: string; errorClass?: string }> = [];
+    const dispatcher = { emit: jest.fn((e: any) => events.push(e)) };
+
+    const deps: Partial<BootstrapMfeDeps> = {
+      loadScript: jest.fn(async (url: string) => {
+        if (url === CORE_URL) {
+          // No integrity attribute — network failure shape (the Phase 12
+          // wording branches on whether integrity was claimed).
+          throw new Error(`Failed to load script: ${url}`);
+        }
+        if (url === SHARED_DEPS_URL) {
+          testWindow().__osdSharedDeps__ = { React: { version: '16.14.0' } };
+        }
+      }),
+      fetchImpl: ((async () => ({
+        ok: true,
+        status: 200,
+        json: async () => validRegistry(),
+      })) as unknown) as typeof fetch,
+      loadRemoteContainer: jest.fn(async () => fakeContainer()),
+      getRemoteModuleFactory: jest.fn(async () => () => ({ plugin: () => undefined })),
+      registerPluginFactory: jest.fn(),
+      invokeCoreBootstrap: jest.fn(async () => undefined),
+      createTelemetryDispatcher: jest.fn(() => dispatcher),
+    };
+
+    await expect(
+      bootstrapMfe({
+        registryUrl: REGISTRY_URL,
+        sharedDepsUrl: SHARED_DEPS_URL,
+        telemetryEndpoint: 'http://t/sink',
+        // Dev-fallback shape: same-origin URL, no integrity pin.
+        core: { url: CORE_URL },
+        deps,
+      })
+    ).rejects.toThrow(/Failed to load script/);
+
+    expect(deps.invokeCoreBootstrap).not.toHaveBeenCalled();
+    const coreEvents = events.filter((e) => e.id === 'core');
+    expect(coreEvents.length).toBe(1);
+    expect(coreEvents[0].errorClass).toBe('network');
+
+    consoleError.mockRestore();
+  });
+
+  it('arms the chunk-error surface BEFORE attempting the core load (so an SRI failure is caught)', async () => {
+    // Defense-in-depth ordering: installChunkErrorSurface MUST run before the
+    // first loadScript call. Otherwise an SRI failure on core would leave the
+    // unhandled rejection without a host-side safety net.
+    const order: string[] = [];
+    const deps: Partial<BootstrapMfeDeps> = {
+      installChunkErrorSurface: jest.fn(() => {
+        order.push('installChunkErrorSurface');
+        return () => undefined;
+      }),
+      loadScript: jest.fn(async (url: string) => {
+        order.push(`loadScript:${url}`);
+        if (url === SHARED_DEPS_URL) {
+          testWindow().__osdSharedDeps__ = { React: { version: '16.14.0' } };
+        }
+      }),
+      fetchImpl: ((async () => ({
+        ok: true,
+        status: 200,
+        json: async () => validRegistry(),
+      })) as unknown) as typeof fetch,
+      loadRemoteContainer: jest.fn(async () => fakeContainer()),
+      getRemoteModuleFactory: jest.fn(async () => () => ({ plugin: () => undefined })),
+      registerPluginFactory: jest.fn(),
+      invokeCoreBootstrap: jest.fn(async () => undefined),
+    };
+
+    await bootstrapMfe({
+      registryUrl: REGISTRY_URL,
+      sharedDepsUrl: SHARED_DEPS_URL,
+      core: { url: CORE_URL, integrity: CORE_INTEGRITY },
+      deps,
+    });
+
+    // The surface is installed BEFORE the first loadScript call (which is now
+    // the core load, ahead of shared-deps).
+    expect(order[0]).toBe('installChunkErrorSurface');
+    expect(order[1]).toBe(`loadScript:${CORE_URL}`);
+  });
+});

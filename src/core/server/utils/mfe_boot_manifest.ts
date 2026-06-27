@@ -99,6 +99,8 @@ export interface MfeBootManifest {
   mfes: MfeBootManifestEntry[];
   /** Phase 16 Story 3: `osd_bootstrap_mfe.js` from CDN with SRI. */
   orchestrator?: MfeBootAssetDescriptor;
+  /** Phase 16 Story 5: `core.entry.js` from CDN with SRI. */
+  core?: MfeBootAssetDescriptor;
 }
 
 /* ------------------------------------------------------------------------- *
@@ -148,6 +150,7 @@ interface V2DocLite {
    * site, not here, to keep this module a pure consumer).
    */
   orchestrator?: { url: string; integrity?: string };
+  core?: { url: string; integrity?: string };
 }
 
 /* ------------------------------------------------------------------------- *
@@ -207,6 +210,9 @@ function projectV3(v3: Record<string, unknown>): V2DocLite {
   const lite = projectV2(v3);
   if (v3.orchestrator !== undefined) {
     lite.orchestrator = coerceAssetDescriptor('orchestrator', v3.orchestrator);
+  }
+  if (v3.core !== undefined) {
+    lite.core = coerceAssetDescriptor('core', v3.core);
   }
   return lite;
 }
@@ -457,6 +463,14 @@ function resolveOnce(doc: V2DocLite, dim: MfeResolutionDimensions): MfeBootManif
     // server-config `bootstrapUrl` (Phase 16 Story 3, PRD §"backward-compat
     // at every consumption site").
     ...(doc.orchestrator ? { orchestrator: { ...doc.orchestrator } } : {}),
+    // v3-only: same shape, same backward-compat posture for the OSD core
+    // bundle (Phase 16 Story 5). Absent on v1/v2 input ⇒ consumer falls
+    // back to the legacy server-bundled `/bundles/core/core.entry.js`
+    // path. When present, the bootstrap template advertises it to the
+    // browser and the orchestrator loads it (with SRI) before invoking
+    // core boot; a tampered core fails closed (the orchestrator refuses
+    // to call `invokeCoreBootstrap`).
+    ...(doc.core ? { core: { ...doc.core } } : {}),
   };
 }
 

@@ -45,6 +45,21 @@ import { fromRoot } from '../../core/server/utils';
  *  @property {Array<{id,path}>} options.npUiPluginPublicDirs array of ids and paths that should be served for new platform plugins
  *  @property {string} options.regularBundlesPath
  *  @property {string} options.basePublicPath
+ *  @property {() => boolean} [options.mfeCoreEntryRefuser] Phase 16 Story 5
+ *    predicate: when supplied AND it returns `true` at request time, this
+ *    bundles route refuses (404) the `core.entry.js` request inside the
+ *    `/bundles/core/` route. Wired ONLY by the mfe-gated mixin (see
+ *    `optimize_mixin.ts`): when `--mfe` is on AND the resolved v3 registry
+ *    advertises a `core` descriptor, the orchestrator loads `core.entry.js`
+ *    from the CDN URL itself, so the same artifact MUST NOT also be served
+ *    from this origin (otherwise the browser would have two competing
+ *    sources for the same bytes). The lazy `core.chunk.*.js` files are
+ *    UNCHANGED — they remain on this origin and load through
+ *    `__osdPublicPath__.core` exactly as before. When the predicate is
+ *    absent OR returns `false`, the route is byte-for-byte unchanged
+ *    (the no-flag :5601 path NEVER passes a refuser, so the legacy serve
+ *    behaviour is preserved verbatim — verify_baseline 8/8 / verify_noflag
+ *    EMPTY).
  *
  *  @return Array.of({Hapi.Route})
  */
@@ -53,11 +68,13 @@ export function createBundlesRoute({
   npUiPluginPublicDirs = [],
   buildHash,
   isDist = false,
+  mfeCoreEntryRefuser,
 }: {
   basePublicPath: string;
   npUiPluginPublicDirs?: NpUiPluginPublicDirs;
   buildHash: string;
   isDist?: boolean;
+  mfeCoreEntryRefuser?: () => boolean;
 }) {
   // rather than calculate the fileHash on every request, we
   // provide a cache object to `resolveDynamicAssetResponse()` that
@@ -96,6 +113,13 @@ export function createBundlesRoute({
       bundlesPath: fromRoot(join('src', 'core', 'target', 'public')),
       fileHashCache,
       isDist,
+      // Phase 16 Story 5: refuse only `core.entry.js` (NOT the lazy
+      // `core.chunk.*.js` files) when the registry advertises a CDN `core`
+      // descriptor. The lazy chunks stay on this origin because
+      // `__osdPublicPath__.core` keeps pointing at this route's base.
+      refusePath: mfeCoreEntryRefuser
+        ? (assetPath: string) => assetPath === 'core.entry.js' && mfeCoreEntryRefuser()
+        : undefined,
     }),
   ];
 }
@@ -106,12 +130,21 @@ function buildRouteForBundles({
   bundlesPath,
   fileHashCache,
   isDist,
+  refusePath,
 }: {
   publicPath: string;
   routePath: string;
   bundlesPath: string;
   fileHashCache: FileHashCache;
   isDist: boolean;
+  /**
+   * Phase 16 Story 5: optional per-request 404 gate. When supplied, the
+   * `onPreHandler` checks it BEFORE delegating to `createDynamicAssetResponse`
+   * (and BEFORE the Inert directory handler can serve the file). Returning
+   * `true` aborts the request with `404 not found`. When absent, the route
+   * is byte-for-byte unchanged (legacy no-flag behaviour preserved verbatim).
+   */
+  refusePath?: (assetPath: string) => boolean;
 }) {
   return {
     method: 'GET',
@@ -122,6 +155,17 @@ function buildRouteForBundles({
         onPreHandler: {
           method(request: Hapi.Request, h: Hapi.ResponseToolkit) {
             const ext = extname(request.params.path);
+
+            // Phase 16 Story 5: refuse this asset path BEFORE any disk read
+            // when the mfe-gated refuser predicate says so. The check fires
+            // before `createDynamicAssetResponse` AND before the route's
+            // fallback Inert directory handler (which would otherwise
+            // happily serve the same artifact from disk). Returning
+            // h.response(...).code(404).takeover() short-circuits the
+            // request — Hapi will NOT invoke the underlying handler.
+            if (refusePath && refusePath(request.params.path)) {
+              return h.response('not found').code(404).takeover();
+            }
 
             if (ext !== '.js' && ext !== '.css') {
               return h.continue;

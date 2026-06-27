@@ -535,3 +535,204 @@ describe('readMfeBootManifest() — v3 path', () => {
     }
   });
 });
+
+/* ------------------------------------------------------------------------- *
+ * Phase 16 Story 5 — v3 `core` descriptor projection
+ *
+ * Mirrors the Story-3 orchestrator block immediately above. Both v3 fields are
+ * top-level + GLOBAL (not per-layer/rollout/tenant), so the projection +
+ * resolution behaviour is identical; the cases below confirm that contract
+ * for `core` explicitly so a regression in either field is caught here, NOT
+ * at the slower runtime tier.
+ * ------------------------------------------------------------------------- */
+
+describe('readMfeBootManifest() — v3 path (core descriptor)', () => {
+  const v3WithCore = {
+    schemaVersion: 3,
+    generatedAt: '2026-06-27T00:00:00.000Z',
+    default: {
+      sharedDeps: SHARED,
+      mfes: { inspector: FIXTURE_INSPECTOR_DEFAULT },
+    },
+    rollouts: [],
+    tenantOverrides: {},
+    core: {
+      url: 'https://cdn.example.com/mfe/core/cafebabe0000/core.entry.js',
+      integrity: 'sha384-coreA',
+      version: '3.5.0+core1',
+    },
+  };
+
+  it('reads a v3 doc with core and surfaces it on the boot manifest', () => {
+    const file = tmpFile(JSON.stringify(v3WithCore));
+    try {
+      const m = readMfeBootManifest(file, { customerId: 'default', userBucket: 50 });
+      expect(m.sharedDeps).toEqual(SHARED);
+      expect(m.mfes.length).toBe(1);
+      expect(m.core).toEqual({
+        url: 'https://cdn.example.com/mfe/core/cafebabe0000/core.entry.js',
+        integrity: 'sha384-coreA',
+      });
+      // `version` is registry-side metadata only — MUST NOT be propagated
+      // to the loader (same contract as orchestrator: the URL is content-
+      // addressed; the loader never needs a version string).
+      expect(((m.core as unknown) as Record<string, unknown>).version).toBeUndefined();
+    } finally {
+      Fs.unlinkSync(file);
+    }
+  });
+
+  it('reads a v3 doc with NO core field — manifest.core is absent', () => {
+    const v3NoCore = { ...v3WithCore };
+    delete (v3NoCore as Record<string, unknown>).core;
+    const file = tmpFile(JSON.stringify(v3NoCore));
+    try {
+      const m = readMfeBootManifest(file, { customerId: 'default', userBucket: 50 });
+      expect(m.core).toBeUndefined();
+      // Sibling fields (mfes, sharedDeps) still project correctly.
+      expect(m.mfes.length).toBe(1);
+    } finally {
+      Fs.unlinkSync(file);
+    }
+  });
+
+  it('reads a v3 doc with core WITHOUT integrity (dev /bundles/... fallback URL)', () => {
+    // Same dev-fallback contract as the orchestrator: a same-origin URL
+    // legitimately has no SRI; only the cross-origin CDN URL pins one. The
+    // reader MUST accept the descriptor in both shapes.
+    const v3DevCore = {
+      ...v3WithCore,
+      core: {
+        url: '/bundles/mfe/core/cafebabe0000/core.entry.js',
+        version: '3.5.0+core1',
+      },
+    };
+    const file = tmpFile(JSON.stringify(v3DevCore));
+    try {
+      const m = readMfeBootManifest(file, { customerId: 'default', userBucket: 50 });
+      expect(m.core).toEqual({
+        url: '/bundles/mfe/core/cafebabe0000/core.entry.js',
+      });
+      expect(m.core!.integrity).toBeUndefined();
+    } finally {
+      Fs.unlinkSync(file);
+    }
+  });
+
+  it('core is GLOBAL — does not vary across rollouts/tenant overrides', () => {
+    const v3CanaryAndTenant = {
+      schemaVersion: 3,
+      generatedAt: '2026-06-27T00:00:00.000Z',
+      default: { sharedDeps: SHARED, mfes: { inspector: FIXTURE_INSPECTOR_DEFAULT } },
+      rollouts: [
+        {
+          id: 'inspector-canary-5pct',
+          match: { userBucketLt: 5 },
+          override: { mfes: { inspector: FIXTURE_INSPECTOR_CANARY } },
+        },
+      ],
+      tenantOverrides: {
+        acme: { mfes: { inspector: FIXTURE_INSPECTOR_ACME } },
+      },
+      core: {
+        url: 'https://cdn.example.com/mfe/core/cafebabe1111/core.entry.js',
+        integrity: 'sha384-coreA',
+        version: '3.5.0+core1',
+      },
+    };
+    const file = tmpFile(JSON.stringify(v3CanaryAndTenant));
+    try {
+      const acme = readMfeBootManifest(file, { customerId: 'acme', userBucket: 2 });
+      expect(acme.mfes[0].remoteEntry).toBe(FIXTURE_INSPECTOR_ACME.remoteEntry);
+      const canary = readMfeBootManifest(file, { customerId: 'default', userBucket: 2 });
+      expect(canary.mfes[0].remoteEntry).toBe(FIXTURE_INSPECTOR_CANARY.remoteEntry);
+      // Core is GLOBAL — it does not vary with rollouts/tenants.
+      expect(canary.core!.url).toBe(acme.core!.url);
+      expect(canary.core!.integrity).toBe('sha384-coreA');
+    } finally {
+      Fs.unlinkSync(file);
+    }
+  });
+
+  it('throws when v3 core is not an object', () => {
+    const bad = { ...v3WithCore, core: 'not-an-object' };
+    const file = tmpFile(JSON.stringify(bad));
+    try {
+      expect(() => readMfeBootManifest(file, { customerId: 'default', userBucket: 0 })).toThrow(
+        /\`core\` must be an object/
+      );
+    } finally {
+      Fs.unlinkSync(file);
+    }
+  });
+
+  it('throws when v3 core.url is missing or empty', () => {
+    const bad = {
+      ...v3WithCore,
+      core: { integrity: 'sha384-x', version: '1' },
+    };
+    const file = tmpFile(JSON.stringify(bad));
+    try {
+      expect(() => readMfeBootManifest(file, { customerId: 'default', userBucket: 0 })).toThrow(
+        /\`core\.url\` must be a non-empty string/
+      );
+    } finally {
+      Fs.unlinkSync(file);
+    }
+  });
+
+  it('throws when v3 core.integrity is present but not a non-empty string', () => {
+    const bad = {
+      ...v3WithCore,
+      core: { url: 'https://example.com/core.entry.js', integrity: '', version: '1' },
+    };
+    const file = tmpFile(JSON.stringify(bad));
+    try {
+      expect(() => readMfeBootManifest(file, { customerId: 'default', userBucket: 0 })).toThrow(
+        /\`core\.integrity\`, when present, must be a non-empty string/
+      );
+    } finally {
+      Fs.unlinkSync(file);
+    }
+  });
+
+  it('v3 doc with BOTH orchestrator AND core surfaces BOTH on the manifest', () => {
+    const v3Both = {
+      ...v3WithCore,
+      orchestrator: {
+        url: 'https://cdn.example.com/mfe/orchestrator/0000/osd_bootstrap_mfe.js',
+        integrity: 'sha384-orchA',
+        version: '3.5.0+orch1',
+      },
+    };
+    const file = tmpFile(JSON.stringify(v3Both));
+    try {
+      const m = readMfeBootManifest(file, { customerId: 'default', userBucket: 50 });
+      expect(m.core).toEqual({
+        url: 'https://cdn.example.com/mfe/core/cafebabe0000/core.entry.js',
+        integrity: 'sha384-coreA',
+      });
+      expect(m.orchestrator).toEqual({
+        url: 'https://cdn.example.com/mfe/orchestrator/0000/osd_bootstrap_mfe.js',
+        integrity: 'sha384-orchA',
+      });
+    } finally {
+      Fs.unlinkSync(file);
+    }
+  });
+
+  it('v1/v2 docs return manifest WITHOUT a core field (backward-compat)', () => {
+    const v1 = {
+      generatedAt: '2026-06-27T00:00:00.000Z',
+      sharedDeps: SHARED,
+      mfes: { inspector: FIXTURE_INSPECTOR_DEFAULT },
+    };
+    const file = tmpFile(JSON.stringify(v1));
+    try {
+      const m = readMfeBootManifest(file, { customerId: 'default', userBucket: 0 });
+      expect(m.core).toBeUndefined();
+    } finally {
+      Fs.unlinkSync(file);
+    }
+  });
+});

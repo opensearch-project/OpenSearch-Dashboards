@@ -110,6 +110,19 @@ if (window.__osdStrictCsp__ && window.__osdCspNotEnforced__) {
           backward-compat at every consumption site. Raw JSON ({{{ }}} =
           unescaped). --}}
     orchestrator: {{{mfeOrchestrator}}},
+    {{!-- Phase 16 Story 5: registry-managed OSD core entry (core.entry.js).
+          When the source registry is v3 AND advertises a `core` top-level
+          field, the boot-manifest resolver projects it as
+          `{ url, integrity? }` and the thin shim below OMITS the legacy
+          `/bundles/core/core.entry.js` preload — the orchestrator (loaded
+          next) takes over and fetches core from this CDN URL with SRI
+          BEFORE invoking core boot. A tampered core fails closed: the
+          orchestrator's `loadScript` rejects, `__osdBootstrapMfe__` throws,
+          the failure() handler fires, and `invokeCoreBootstrap` is NEVER
+          called. When absent (v1/v2 registries, or v3 without the field),
+          this is `null` and the legacy preload-from-server path remains
+          byte-for-byte unchanged. Raw JSON ({{{ }}} = unescaped). --}}
+    core: {{{mfeCore}}},
   };
 
   window.onload = function () {
@@ -196,10 +209,19 @@ if (window.__osdStrictCsp__ && window.__osdCspNotEnforced__) {
     }
 
     {{!--
-      MFE mode load sequence (LOCKED, design §6; Phase 16 Story 3 extension):
+      MFE mode load sequence (LOCKED, design §6; Phase 16 Story 3 + Story 5
+      extensions):
         1. Load core.entry.js (server-provided) so `entry/core/public` is registered
            into the __osdBundles__ shim. Its app code does not run until
            __osdBootstrap__() is invoked, so it is safe to load before shared deps.
+           Phase 16 Story 5: this preload is CONDITIONAL — when the source
+           registry is v3 AND advertises a `core` field, the server omits this
+           entry from `jsDependencyPaths` and the orchestrator (loaded in step
+           2) takes over: bootstrapMfe() fetches `core.entry.js` from the CDN
+           URL with SRI BEFORE invoking core boot. A tampered core fails
+           closed in that path (the orchestrator's loadScript rejects;
+           __osdBootstrap__ is never called). Either way, by the time step 4
+           runs, `entry/core/public` is registered exactly once.
         2. Load the MFE bootstrap bundle (the "orchestrator"), which exposes
            window.__osdBootstrapMfe__. Phase 16 Story 3: when the source
            registry is v3 AND advertises an `orchestrator` field, the loader
@@ -237,6 +259,14 @@ if (window.__osdStrictCsp__ && window.__osdCspNotEnforced__) {
         telemetryEndpoint: window.__osdMfe__.telemetryEndpoint,
         bucket: window.__osdMfe__.bucket,
         customerId: window.__osdMfe__.customerId,
+        // Phase 16 Story 5: when v3 registry advertised a `core` descriptor,
+        // pass it to the orchestrator so bootstrapMfe() can load core.entry.js
+        // from the CDN URL (with SRI) BEFORE invoking core boot. When absent,
+        // the thin shim's preload above already loaded the legacy
+        // server-bundled core entry, and this option is `undefined` — the
+        // orchestrator's pre-coreBoot load is a no-op and the existing flow
+        // is byte-for-byte unchanged.
+        core: window.__osdMfe__.core,
       });
 
       load(styleSheetPaths);
