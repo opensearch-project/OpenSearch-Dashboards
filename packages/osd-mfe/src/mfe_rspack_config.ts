@@ -126,6 +126,19 @@ export function getMfeRspackConfig(options: MfeRspackConfigOptions): Configurati
   // `<id>.plugin.js`), not a lazy app chunk. Pinning the name lets `output.chunkFilename`
   // identify it reliably (rspack would otherwise name the chunk after an arbitrary
   // contained module, and the name varies per plugin / between dev and `--dist`).
+  //
+  // Phase 16, Story 4 — `<plugin>.plugin.js` is emitted as a separate file BY rspack
+  // (the MF plugin always emits exposes as their own chunk), then COLLAPSED into
+  // `remoteEntry.js` by a post-build merge step in `build_mfe_for_plugin.ts`
+  // (`mergeExposedEntryIntoRemoteEntry`). The merge concatenates the eager chunk's
+  // `webpackChunk<scope>.push([[chunkId], modules])` BEFORE the runtime's IIFE so
+  // the runtime's standard `chunkLoadingGlobal.forEach(webpackJsonpCallback)` picks
+  // up the pre-pushed entry and marks the chunk installed — `container.get('./public')`
+  // then resolves WITHOUT an additional network fetch. The rspack config below stays
+  // unchanged (the chunk is still emitted with the `<plugin>.plugin.js` name during
+  // compilation) because trying to suppress the chunk via rspack config is harder to
+  // do robustly across all 58 plugins than collapsing it post-build; per-plugin SRI,
+  // lazy-chunk SRI, and the MF runtime contract are all preserved.
   const EXPOSED_ENTRY_CHUNK_NAME = `${plugin.id}__mfe_public_entry`;
 
   // Same browser targets the optimizer transpiles for, read from the repo's
