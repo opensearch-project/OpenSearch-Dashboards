@@ -118,3 +118,65 @@ themedFontDom.innerHTML = `
 `;
 
 document.head.insertBefore(themedFontDom, fontTarget);
+
+// Phase 16 Story 6: when the server rendered a `<meta name="osd-mfe-themes">`
+// tag in the HTML head (only emitted when --mfe is on AND the resolved v3
+// registry advertises a `themes` map — see rendering_service.tsx /
+// template.tsx), parse it and append a `<link rel="stylesheet">` for the
+// active theme's CDN URL BEFORE `bootstrap.js` runs. This puts the theme CSS
+// in `<head>` early (no FOUC, no double-fetch) and pins SRI on the
+// cross-origin response (Phase 12 fail-closed posture extended to themes —
+// a tampered or mis-served theme CSS is refused by the browser's SRI gate).
+//
+// SAFETY: this block is INERT when the META is absent — `metaTag` is null,
+// the parse short-circuits, and nothing is appended to `<head>`. The
+// no-flag served HTML never contains this META (it's gated server-side by
+// `injectedMetadata.mfe?.themes`), so the no-flag path is byte-for-byte
+// unchanged at the served-bytes level; this added JS runs in both paths but
+// only TAKES EFFECT in the --mfe path with v3 themes — verify_noflag_diff
+// compares HTML, not /startup.js bytes (which already vary per-user via
+// `theme:darkMode` user setting).
+(function loadMfeTheme() {
+  var metaTag = document.querySelector('meta[name="osd-mfe-themes"]');
+  if (!metaTag) return;
+  var rawContent = metaTag.getAttribute('content') || '';
+  if (!rawContent) return;
+  var themesMap;
+  try {
+    themesMap = JSON.parse(rawContent);
+  } catch (e) {
+    // Malformed META — drop to legacy server-bundled path (the bundle
+    // route's refuser predicate also returns FALSE on a registry parse
+    // failure for the same reason, so the legacy /ui/... route serves).
+    return;
+  }
+  if (!themesMap || typeof themesMap !== 'object') return;
+  // `darkMode` was computed above out of localStorage / config defaults —
+  // 'light' or 'dark'. Themes map keys mirror that surface (`light`,
+  // `dark`, plus any future open-record theme name a deployment advertises).
+  var descriptor = themesMap[darkMode];
+  if (!descriptor || typeof descriptor.url !== 'string' || !descriptor.url) return;
+
+  var linkDom = document.createElement('link');
+  linkDom.rel = 'stylesheet';
+  linkDom.type = 'text/css';
+  linkDom.href = descriptor.url;
+  // SRI fail-closed: when the registry advertised an `integrity` value (it
+  // ALWAYS does for cross-origin CDN URLs — the authoring CLI in Story 1's
+  // schema_v3 validator enforces `sha384-…` shape), pin it on the <link>.
+  // Browsers REQUIRE `crossorigin` on the element for SRI to apply to a
+  // cross-origin response — set 'anonymous' so no credentials are sent.
+  // A tampered theme CSS → the browser refuses to apply the stylesheet,
+  // the page falls back to the inline-injected loading-screen colors above
+  // (which are independent of the legacy theme CSS), and the rest of the
+  // page renders unstyled. That's the deliberate Phase 12 fail-closed
+  // posture extended to themes.
+  if (typeof descriptor.integrity === 'string' && descriptor.integrity.length > 0) {
+    linkDom.integrity = descriptor.integrity;
+    linkDom.crossOrigin = 'anonymous';
+  }
+  // Insert BEFORE the `add-styles-here` anchor so subsequent OSD shared-deps
+  // CSS (loaded by bootstrap_mfe's styleSheetPaths) STILL wins specificity-
+  // wise. Same insertion point as the existing themed colors block.
+  document.head.insertBefore(linkDom, stylesheetTarget);
+})();

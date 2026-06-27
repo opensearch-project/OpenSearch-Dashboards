@@ -52,6 +52,7 @@ import { HttpConfigType } from '../http/http_config';
 import { SslConfig } from '../http/ssl_config';
 import { LoggerFactory } from '../logging';
 import { resolveAllowOverride } from '../utils/resolve_allow_override';
+import { readMfeBootManifest } from '../utils/mfe_boot_manifest';
 
 const DEFAULT_TITLE = 'OpenSearch Dashboards';
 
@@ -111,6 +112,42 @@ export class RenderingService {
         }
 
         const dynamicConfigStartServices = await dynamicConfig.getStartService();
+
+        // Phase 16 Story 6: project the v3 registry's `themes` field into a
+        // per-theme `{ url, integrity? }` map for the HTML head's
+        // `<meta name="osd-mfe-themes">` injection. Gated on `mfe.enabled`
+        // AND on a configured `mfe.registryPath` AND on the resolved doc
+        // actually advertising `themes` — any miss leaves `mfeThemes`
+        // undefined, which omits the field from injectedMetadata.mfe ⇒ the
+        // META isn't emitted ⇒ the legacy `/ui/legacy_<name>_theme.css`
+        // same-origin path is preserved verbatim. Themes are GLOBAL in v3
+        // (see schema_v3.ts §"Why GLOBAL, not per-layer"), so fixed
+        // dimensions are sound (the cookie-derived userBucket is NOT used
+        // by this projection — the resolver returns the same `themes`
+        // object regardless). On a parse error we fail SOFT — the legacy
+        // route still serves; the operator gets a clear log line.
+        let mfeThemes: Record<string, { url: string; integrity?: string }> | undefined;
+        if (opensearchDashboardsConfig.mfe.enabled) {
+          const registryPath = opensearchDashboardsConfig.mfe.registryPath;
+          if (registryPath && typeof registryPath === 'string') {
+            try {
+              const resolved = readMfeBootManifest(registryPath, {
+                customerId: 'default',
+                userBucket: 0,
+              });
+              if (resolved.themes) {
+                mfeThemes = resolved.themes;
+              }
+            } catch (err) {
+              // eslint-disable-next-line no-console
+              console.error(
+                `[mfe] rendering_service: failed to read/resolve registry at ${registryPath}; ` +
+                  `omitting injectedMetadata.mfe.themes (legacy /ui/legacy_<name>_theme.css ` +
+                  `path will serve instead). Cause: ${(err && (err as Error).message) || err}`
+              );
+            }
+          }
+        }
 
         const metadata: RenderingMetadata = {
           strictCsp: http.csp.strict,
@@ -192,6 +229,21 @@ export class RenderingService {
                       opensearchDashboardsConfig.mfe.allowOverride,
                       !!env.mode.dev
                     ),
+                    // Phase 16 Story 6: project the v3 registry's `themes`
+                    // map into the injected metadata so `template.tsx` can
+                    // emit `<meta name="osd-mfe-themes">` in the HTML head.
+                    // The same FAIL-SOFT contract as Story 5's bundle-route
+                    // refuser applies: if the registry can't be read or
+                    // doesn't advertise themes, the field is OMITTED, the
+                    // META isn't emitted, and the legacy
+                    // `/ui/legacy_<name>_theme.css` same-origin path is
+                    // preserved — byte-for-byte backward-compat. The mtime
+                    // cache in `mfe_boot_manifest.ts` makes the read O(1)
+                    // for cache hits, so the per-render cost is a stat()
+                    // of the registry file plus a map lookup. Themes are
+                    // GLOBAL in v3 (see schema_v3.ts §"Why GLOBAL, not
+                    // per-layer"), so fixed dimensions are sound.
+                    ...(mfeThemes !== undefined ? { themes: mfeThemes } : {}),
                   },
                 }
               : {}),

@@ -57,8 +57,28 @@ if (window.__osdStrictCsp__ && window.__osdCspNotEnforced__) {
     '{{regularBundlePath}}/osd-ui-shared-deps/{{UiSharedDeps.baseCssDistFilename}}',
     '{{regularBundlePath}}/osd-ui-shared-deps/' + themeCssDistFilenames[themeVersion][themeMode],
     '{{basePath}}/node_modules/@osd/ui-framework/dist/' + kuiCssDistFilenames[themeVersion][themeMode],
-    '{{basePath}}/ui/legacy_' + themeMode + '_theme.css',
   ];
+
+  // Phase 16 Story 6: the legacy `${basePath}/ui/legacy_<themeMode>_theme.css`
+  // entry is INCLUDED only when the registry did NOT advertise a CDN replacement
+  // for the active theme. When the server-rendered `<meta name="osd-mfe-themes">`
+  // tag carried a `themes[themeMode]` descriptor, `startup.js` ALREADY loaded the
+  // theme CSS from the CDN URL (with SRI) BEFORE this shim ran — appending the
+  // legacy entry here would cause a double-fetch + the legacy route is also 404'd
+  // by `optimize_mixin.ts`'s refuser, so the request would fail anyway.
+  //
+  // `mfeThemes` is the SERVER-RESOLVED descriptor (mirrored into
+  // `__osdMfe__.themes` below); on v1/v2 registries (or v3 without `themes`) it
+  // is `null` and the legacy entry is kept verbatim — byte-for-byte unchanged
+  // backward-compat. The `themeMode`-key check is intentional: if a deployment
+  // advertises ONLY `light` (no `dark`), and a user has dark mode selected, we
+  // still serve the legacy `legacy_dark_theme.css` from this origin (the
+  // refuser only 404s theme names the registry ACTUALLY knows; partial
+  // coverage degrades cleanly rather than blanking the page).
+  var resolvedMfeThemes = {{{mfeThemes}}};
+  if (!(resolvedMfeThemes && typeof resolvedMfeThemes === 'object' && resolvedMfeThemes[themeMode])) {
+    styleSheetPaths.push('{{basePath}}/ui/legacy_' + themeMode + '_theme.css');
+  }
 
   // MFE mode (Phase 3, see docs/01-MFE-DESIGN.md §6). The injected metadata carries the
   // serve-time registry source + shared-deps URLs that the MFE bootstrap consumes.
@@ -123,6 +143,22 @@ if (window.__osdStrictCsp__ && window.__osdCspNotEnforced__) {
           this is `null` and the legacy preload-from-server path remains
           byte-for-byte unchanged. Raw JSON ({{{ }}} = unescaped). --}}
     core: {{{mfeCore}}},
+    {{!-- Phase 16 Story 6: registry-managed per-theme CSS bundles
+          (`legacy_<name>_theme.css`). When the source registry is v3 AND
+          advertises a `themes` map, the boot-manifest resolver projects
+          it as `Record<string, { url, integrity? }>` and `startup.js`
+          (rendered by the server) ALREADY loaded the active theme via
+          `<meta name="osd-mfe-themes">` BEFORE this shim ran (with SRI;
+          cross-origin; fail-closed on tamper). The thin shim's
+          `styleSheetPaths` above OMITS its legacy
+          `${basePath}/ui/legacy_<themeMode>_theme.css` entry whenever
+          this descriptor knows about the active theme name (to avoid a
+          double-fetch — `optimize_mixin.ts`'s refuser also 404s the
+          legacy route on this origin for any theme the registry advertises).
+          When absent (v1/v2 registries, or v3 without the field), this
+          stays `null` and the legacy same-origin path is kept — byte-for-
+          byte unchanged backward-compat. Raw JSON ({{{ }}} = unescaped). --}}
+    themes: {{{mfeThemes}}},
   };
 
   window.onload = function () {

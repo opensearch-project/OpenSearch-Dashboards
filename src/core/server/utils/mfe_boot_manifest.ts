@@ -101,6 +101,19 @@ export interface MfeBootManifest {
   orchestrator?: MfeBootAssetDescriptor;
   /** Phase 16 Story 5: `core.entry.js` from CDN with SRI. */
   core?: MfeBootAssetDescriptor;
+  /**
+   * Phase 16 Story 6: per-theme CSS bundle from CDN with SRI, keyed by theme
+   * name (e.g. `light`, `dark`). When present, the server-rendered HTML head
+   * carries a `<meta name="osd-mfe-themes">` tag and `startup.js` picks the
+   * active theme (from `localStorage.uiSettings` / config defaults) and
+   * appends a `<link rel="stylesheet">` with the corresponding URL +
+   * `integrity` + `crossorigin="anonymous"` BEFORE `bootstrap.js` runs — so
+   * the legacy `/ui/legacy_<name>_theme.css` request is skipped at the source
+   * (no double-fetch). Absent on v1/v2 docs (and v3 docs without `themes`):
+   * the existing same-origin `/ui/legacy_<name>_theme.css` path is preserved
+   * verbatim — backward-compat at every consumption site.
+   */
+  themes?: Record<string, MfeBootAssetDescriptor>;
 }
 
 /* ------------------------------------------------------------------------- *
@@ -151,6 +164,16 @@ interface V2DocLite {
    */
   orchestrator?: { url: string; integrity?: string };
   core?: { url: string; integrity?: string };
+  /**
+   * Phase 16 Story 6: per-theme CSS bundle, keyed by theme name (e.g.
+   * `light`, `dark`, …). Same shape, same backward-compat posture as
+   * `orchestrator` / `core` — absent on v1/v2 / v3-without-themes ⇒ consumer
+   * falls back to `/ui/legacy_<name>_theme.css` (the legacy same-origin
+   * path). When present, the theme name set is OPEN — the schema does not
+   * enumerate `light`/`dark`/etc., so a deployment can advertise additional
+   * themes without a server change.
+   */
+  themes?: Record<string, { url: string; integrity?: string }>;
 }
 
 /* ------------------------------------------------------------------------- *
@@ -213,6 +236,24 @@ function projectV3(v3: Record<string, unknown>): V2DocLite {
   }
   if (v3.core !== undefined) {
     lite.core = coerceAssetDescriptor('core', v3.core);
+  }
+  if (v3.themes !== undefined) {
+    if (!isPlainObject(v3.themes)) {
+      throw new Error(
+        `MFE v3 registry: \`themes\`, when present, must be an object keyed by theme name (got ${typeof v3.themes})`
+      );
+    }
+    const themes: Record<string, { url: string; integrity?: string }> = {};
+    for (const themeName of Object.keys(v3.themes)) {
+      if (themeName.length === 0) {
+        throw new Error('MFE v3 registry: `themes` has an empty-string key');
+      }
+      themes[themeName] = coerceAssetDescriptor(
+        `themes.${themeName}`,
+        (v3.themes as Record<string, unknown>)[themeName]
+      );
+    }
+    lite.themes = themes;
   }
   return lite;
 }
@@ -471,6 +512,17 @@ function resolveOnce(doc: V2DocLite, dim: MfeResolutionDimensions): MfeBootManif
     // core boot; a tampered core fails closed (the orchestrator refuses
     // to call `invokeCoreBootstrap`).
     ...(doc.core ? { core: { ...doc.core } } : {}),
+    // v3-only: per-theme CSS bundles (Phase 16 Story 6). Absent on v1/v2
+    // input ⇒ consumer falls back to `/ui/legacy_<name>_theme.css` on
+    // THIS server (the existing same-origin path). When present, the
+    // server-rendered HTML head carries the resolved theme URLs as a
+    // `<meta name="osd-mfe-themes">` tag; `startup.js` selects the active
+    // theme from `localStorage.uiSettings` and creates a
+    // `<link rel="stylesheet">` with SRI BEFORE `bootstrap.js` runs, and
+    // the legacy `/ui/legacy_<name>_theme.css` route on this origin 404s
+    // for any theme name advertised by the registry (so a misconfigured
+    // browser can never silently fall back to a same-origin copy).
+    ...(doc.themes ? { themes: { ...doc.themes } } : {}),
   };
 }
 

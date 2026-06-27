@@ -221,6 +221,32 @@ export function uiRenderMixin(osdServer, server, config) {
         // blast radius — bundling all of core's static output is a future
         // phase).
         let resolvedCore = null;
+        // Phase 16 Story 6: same shape, same posture for per-theme CSS
+        // bundles (`light` / `dark` / …). When the source registry is v3
+        // AND advertises a `themes` map, the boot manifest carries a
+        // `themes: Record<string, { url, integrity? }>` descriptor — and:
+        //   - the HTML head's `<meta name="osd-mfe-themes">` (rendered by
+        //     `rendering_service.tsx`) carries the resolved URLs so
+        //     `startup.js` can pick the active theme (light/dark from
+        //     localStorage) and `appendChild(<link rel=stylesheet>)` with
+        //     SRI BEFORE `bootstrap.js` runs — no FOUC;
+        //   - the legacy `/ui/legacy_<name>_theme.css` route on this server
+        //     is REFUSED with 404 for any theme name the registry knows
+        //     (so a misconfigured browser can never silently fall back to a
+        //     same-origin copy that the SRI gate wouldn't catch);
+        //   - the bootstrap_mfe thin shim's `styleSheetPaths` OMITS the
+        //     legacy theme CSS entry because startup.js already loaded it.
+        // When absent (v1/v2 registries, or v3 without the field), the
+        // descriptor is `null`, the META isn't emitted, the legacy
+        // `/ui/...` route serves as today, and the thin shim's
+        // styleSheetPaths keeps the legacy theme CSS entry — byte-for-byte
+        // unchanged backward-compat. The JSON form goes into the bootstrap
+        // template (`__osdMfe__.themes` for the styleSheetPaths gate); the
+        // resolved-object form is currently unused inline here (rendering
+        // service handles the META injection), but kept for symmetry with
+        // Story 5's `resolvedCore` so a future refactor can lift both into
+        // a single resolved-manifest map.
+        let mfeThemesJson = 'null';
         if (mfeRegistryPath && typeof mfeRegistryPath === 'string') {
           try {
             const resolved = readMfeBootManifest(mfeRegistryPath, {
@@ -234,6 +260,9 @@ export function uiRenderMixin(osdServer, server, config) {
             if (resolved.core) {
               mfeCoreJson = JSON.stringify(resolved.core);
               resolvedCore = resolved.core;
+            }
+            if (resolved.themes) {
+              mfeThemesJson = JSON.stringify(resolved.themes);
             }
           } catch (err) {
             // Fail loudly server-side; the bootstrap falls back to the legacy
@@ -396,6 +425,20 @@ export function uiRenderMixin(osdServer, server, config) {
               // thin shim preloads `${regularBundlePath}/core/core.entry.js`
               // from THIS server exactly as today.
               mfeCore: mfeCoreJson,
+              // Phase 16 Story 6: v3-only per-theme CSS bundle descriptor.
+              // When non-`null` (a map keyed by `light` / `dark` / …),
+              // `startup.js` has ALREADY loaded the active theme from
+              // `__osdMfe__.themes[themeMode].url` (with SRI) via the
+              // `<meta name="osd-mfe-themes">` tag injected in the HTML
+              // head, BEFORE `bootstrap.js` ran. The thin shim's
+              // `styleSheetPaths` then OMITS the legacy
+              // `/ui/legacy_<themeMode>_theme.css` entry to avoid a
+              // double-fetch — the `__osdMfe__.themes` value is the
+              // server's authoritative signal that the theme is already in
+              // <head>. On v1/v2 (or v3 without `themes`) this stays
+              // `null` and the thin shim keeps the legacy entry — byte-for-
+              // byte unchanged backward-compat.
+              mfeThemes: mfeThemesJson,
             },
           },
           'bootstrap_mfe'

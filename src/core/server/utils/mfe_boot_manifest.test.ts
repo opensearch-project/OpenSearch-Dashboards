@@ -736,3 +736,280 @@ describe('readMfeBootManifest() — v3 path (core descriptor)', () => {
     }
   });
 });
+
+/* ------------------------------------------------------------------------- *
+ * Phase 16 Story 6 — v3 `themes` descriptor projection
+ *
+ * Same shape, same backward-compat posture as `orchestrator` / `core`: the
+ * field is GLOBAL (does not vary by rollout / tenant), the URL is required,
+ * `integrity` is OPTIONAL (same-origin dev fallback URLs legitimately have
+ * no SRI), and the version is registry-side metadata that never reaches the
+ * loader. Cases mirror the `core` block immediately above so a regression in
+ * either field is caught at the same tier.
+ * ------------------------------------------------------------------------- */
+
+describe('readMfeBootManifest() — v3 path (themes descriptor)', () => {
+  const v3WithThemes = {
+    schemaVersion: 3,
+    generatedAt: '2026-06-27T00:00:00.000Z',
+    default: {
+      sharedDeps: SHARED,
+      mfes: { inspector: FIXTURE_INSPECTOR_DEFAULT },
+    },
+    rollouts: [],
+    tenantOverrides: {},
+    themes: {
+      light: {
+        url: 'https://cdn.example.com/mfe/themes/light/lighthash/legacy_light_theme.css',
+        integrity: 'sha384-lightA',
+        version: '3.5.0+light1',
+      },
+      dark: {
+        url: 'https://cdn.example.com/mfe/themes/dark/darkhash/legacy_dark_theme.css',
+        integrity: 'sha384-darkA',
+        version: '3.5.0+dark1',
+      },
+    },
+  };
+
+  it('reads a v3 doc with themes and surfaces them on the boot manifest', () => {
+    const file = tmpFile(JSON.stringify(v3WithThemes));
+    try {
+      const m = readMfeBootManifest(file, { customerId: 'default', userBucket: 50 });
+      expect(m.sharedDeps).toEqual(SHARED);
+      expect(m.mfes.length).toBe(1);
+      expect(m.themes).toEqual({
+        light: {
+          url: 'https://cdn.example.com/mfe/themes/light/lighthash/legacy_light_theme.css',
+          integrity: 'sha384-lightA',
+        },
+        dark: {
+          url: 'https://cdn.example.com/mfe/themes/dark/darkhash/legacy_dark_theme.css',
+          integrity: 'sha384-darkA',
+        },
+      });
+      // `version` is registry-side metadata only — MUST NOT be propagated
+      // to the loader (same contract as orchestrator/core).
+      const lightOut = (m.themes!.light as unknown) as Record<string, unknown>;
+      expect(lightOut.version).toBeUndefined();
+    } finally {
+      Fs.unlinkSync(file);
+    }
+  });
+
+  it('reads a v3 doc with NO themes field — manifest.themes is absent', () => {
+    const v3NoThemes = { ...v3WithThemes };
+    delete (v3NoThemes as Record<string, unknown>).themes;
+    const file = tmpFile(JSON.stringify(v3NoThemes));
+    try {
+      const m = readMfeBootManifest(file, { customerId: 'default', userBucket: 50 });
+      expect(m.themes).toBeUndefined();
+      expect(m.mfes.length).toBe(1);
+    } finally {
+      Fs.unlinkSync(file);
+    }
+  });
+
+  it('accepts an open theme-name set (e.g. `high-contrast`)', () => {
+    // The v3 schema does NOT enumerate `light`/`dark` — deployments can
+    // advertise additional themes without a server change. This case
+    // confirms the projection passes through any string key.
+    const v3OpenThemes = {
+      ...v3WithThemes,
+      themes: {
+        ...v3WithThemes.themes,
+        'high-contrast': {
+          url: 'https://cdn.example.com/mfe/themes/high-contrast/hc/legacy_high-contrast_theme.css',
+          integrity: 'sha384-hcA',
+          version: '3.5.0+hc1',
+        },
+      },
+    };
+    const file = tmpFile(JSON.stringify(v3OpenThemes));
+    try {
+      const m = readMfeBootManifest(file, { customerId: 'default', userBucket: 50 });
+      expect(Object.keys(m.themes!).sort()).toEqual(['dark', 'high-contrast', 'light']);
+      expect(m.themes!['high-contrast'].url).toContain('high-contrast');
+    } finally {
+      Fs.unlinkSync(file);
+    }
+  });
+
+  it('accepts a theme entry WITHOUT integrity (dev /ui/... fallback URL)', () => {
+    // Same dev-fallback contract as the orchestrator/core: a same-origin
+    // URL legitimately has no SRI; the reader MUST accept the descriptor
+    // in both shapes.
+    const v3DevTheme = {
+      ...v3WithThemes,
+      themes: {
+        light: {
+          url: '/ui/legacy_light_theme.css',
+          version: '3.5.0+light1',
+        },
+      },
+    };
+    const file = tmpFile(JSON.stringify(v3DevTheme));
+    try {
+      const m = readMfeBootManifest(file, { customerId: 'default', userBucket: 50 });
+      expect(m.themes!.light).toEqual({ url: '/ui/legacy_light_theme.css' });
+      expect(m.themes!.light.integrity).toBeUndefined();
+    } finally {
+      Fs.unlinkSync(file);
+    }
+  });
+
+  it('themes are GLOBAL — does not vary across rollouts/tenant overrides', () => {
+    const v3CanaryAndTenant = {
+      schemaVersion: 3,
+      generatedAt: '2026-06-27T00:00:00.000Z',
+      default: { sharedDeps: SHARED, mfes: { inspector: FIXTURE_INSPECTOR_DEFAULT } },
+      rollouts: [
+        {
+          id: 'inspector-canary-5pct',
+          match: { userBucketLt: 5 },
+          override: { mfes: { inspector: FIXTURE_INSPECTOR_CANARY } },
+        },
+      ],
+      tenantOverrides: {
+        acme: { mfes: { inspector: FIXTURE_INSPECTOR_ACME } },
+      },
+      themes: {
+        light: {
+          url: 'https://cdn.example.com/mfe/themes/light/lighthash/legacy_light_theme.css',
+          integrity: 'sha384-lightA',
+          version: '3.5.0+light1',
+        },
+      },
+    };
+    const file = tmpFile(JSON.stringify(v3CanaryAndTenant));
+    try {
+      const acme = readMfeBootManifest(file, { customerId: 'acme', userBucket: 2 });
+      expect(acme.mfes[0].remoteEntry).toBe(FIXTURE_INSPECTOR_ACME.remoteEntry);
+      const canary = readMfeBootManifest(file, { customerId: 'default', userBucket: 2 });
+      expect(canary.mfes[0].remoteEntry).toBe(FIXTURE_INSPECTOR_CANARY.remoteEntry);
+      // Themes are GLOBAL — they do not vary with rollouts/tenants.
+      expect(canary.themes!.light.url).toBe(acme.themes!.light.url);
+      expect(canary.themes!.light.integrity).toBe('sha384-lightA');
+    } finally {
+      Fs.unlinkSync(file);
+    }
+  });
+
+  it('throws when v3 themes is not an object', () => {
+    const bad = { ...v3WithThemes, themes: 'not-an-object' };
+    const file = tmpFile(JSON.stringify(bad));
+    try {
+      expect(() => readMfeBootManifest(file, { customerId: 'default', userBucket: 0 })).toThrow(
+        /\`themes\`, when present, must be an object/
+      );
+    } finally {
+      Fs.unlinkSync(file);
+    }
+  });
+
+  it('throws when v3 themes has an empty-string key', () => {
+    const bad = {
+      ...v3WithThemes,
+      themes: {
+        '': {
+          url: 'https://example.com/x.css',
+          integrity: 'sha384-x',
+          version: '1',
+        },
+      },
+    };
+    const file = tmpFile(JSON.stringify(bad));
+    try {
+      expect(() => readMfeBootManifest(file, { customerId: 'default', userBucket: 0 })).toThrow(
+        /\`themes\` has an empty-string key/
+      );
+    } finally {
+      Fs.unlinkSync(file);
+    }
+  });
+
+  it('throws when a theme entry is not an object', () => {
+    const bad = { ...v3WithThemes, themes: { light: 'not-an-object' } };
+    const file = tmpFile(JSON.stringify(bad));
+    try {
+      expect(() => readMfeBootManifest(file, { customerId: 'default', userBucket: 0 })).toThrow(
+        /\`themes\.light\` must be an object/
+      );
+    } finally {
+      Fs.unlinkSync(file);
+    }
+  });
+
+  it('throws when a theme entry url is missing or empty', () => {
+    const bad = {
+      ...v3WithThemes,
+      themes: { light: { integrity: 'sha384-x', version: '1' } },
+    };
+    const file = tmpFile(JSON.stringify(bad));
+    try {
+      expect(() => readMfeBootManifest(file, { customerId: 'default', userBucket: 0 })).toThrow(
+        /\`themes\.light\.url\` must be a non-empty string/
+      );
+    } finally {
+      Fs.unlinkSync(file);
+    }
+  });
+
+  it('throws when a theme entry integrity is present but not a non-empty string', () => {
+    const bad = {
+      ...v3WithThemes,
+      themes: {
+        light: { url: 'https://example.com/x.css', integrity: '', version: '1' },
+      },
+    };
+    const file = tmpFile(JSON.stringify(bad));
+    try {
+      expect(() => readMfeBootManifest(file, { customerId: 'default', userBucket: 0 })).toThrow(
+        /\`themes\.light\.integrity\`, when present, must be a non-empty string/
+      );
+    } finally {
+      Fs.unlinkSync(file);
+    }
+  });
+
+  it('v3 doc with orchestrator + core + themes surfaces ALL THREE on the manifest', () => {
+    const v3All = {
+      ...v3WithThemes,
+      orchestrator: {
+        url: 'https://cdn.example.com/mfe/orchestrator/0000/osd_bootstrap_mfe.js',
+        integrity: 'sha384-orchA',
+        version: '3.5.0+orch1',
+      },
+      core: {
+        url: 'https://cdn.example.com/mfe/core/0000/core.entry.js',
+        integrity: 'sha384-coreA',
+        version: '3.5.0+core1',
+      },
+    };
+    const file = tmpFile(JSON.stringify(v3All));
+    try {
+      const m = readMfeBootManifest(file, { customerId: 'default', userBucket: 50 });
+      expect(m.orchestrator).toBeDefined();
+      expect(m.core).toBeDefined();
+      expect(m.themes).toBeDefined();
+      expect(Object.keys(m.themes!).sort()).toEqual(['dark', 'light']);
+    } finally {
+      Fs.unlinkSync(file);
+    }
+  });
+
+  it('v1/v2 docs return manifest WITHOUT a themes field (backward-compat)', () => {
+    const v1 = {
+      generatedAt: '2026-06-27T00:00:00.000Z',
+      sharedDeps: SHARED,
+      mfes: { inspector: FIXTURE_INSPECTOR_DEFAULT },
+    };
+    const file = tmpFile(JSON.stringify(v1));
+    try {
+      const m = readMfeBootManifest(file, { customerId: 'default', userBucket: 0 });
+      expect(m.themes).toBeUndefined();
+    } finally {
+      Fs.unlinkSync(file);
+    }
+  });
+});
