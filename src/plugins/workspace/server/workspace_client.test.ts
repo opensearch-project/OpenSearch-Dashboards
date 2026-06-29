@@ -265,6 +265,48 @@ describe('#WorkspaceClient', () => {
     );
   });
 
+  it('create# should return error if a workspace with the provided custom id already exists', async () => {
+    const client = new WorkspaceClient(coreSetup, logger);
+    await client.setup(coreSetup);
+    client?.setSavedObjects(savedObjects);
+
+    // get mock resolves by default, simulating an existing workspace with that id
+    const result = await client.create(mockRequestDetail, {
+      id: 'custom1',
+      name: mockWorkspaceName,
+      permissions: {},
+    });
+
+    expect(result).toEqual({
+      success: false,
+      error: 'workspace id has already been used, try with a different id',
+    });
+  });
+
+  it('create# should proceed normally if no workspace with the provided custom id exists', async () => {
+    const client = new WorkspaceClient(coreSetup, logger);
+    await client.setup(coreSetup);
+    client?.setSavedObjects(savedObjects);
+
+    // reset any implementation set by previous tests, then mock for name check (no duplicate)
+    find.mockReset();
+    find.mockResolvedValueOnce({ total: 0 });
+    const getMock = savedObjectClient.get as jest.Mock;
+    getMock.mockRejectedValueOnce(new Error('Not found'));
+    (savedObjectClient.create as jest.Mock).mockResolvedValueOnce({
+      id: 'custom1',
+      attributes: { name: mockWorkspaceName },
+    });
+
+    const result = await client.create(mockRequestDetail, {
+      id: 'custom1',
+      name: mockWorkspaceName,
+      permissions: {},
+    });
+
+    expect(result.success).toBe(true);
+  });
+
   it('delete# should unassign data source before deleting related saved objects', async () => {
     const client = new WorkspaceClient(coreSetup, logger);
     await client.setup(coreSetup);
