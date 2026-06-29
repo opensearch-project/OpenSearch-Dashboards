@@ -115,7 +115,7 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
       }
       setIsFormSubmitting(true);
       try {
-        const { permissionSettings, selectedDataSourceConnections, ...attributes } = data;
+        const { permissionSettings, selectedDataSourceConnections, customId, ...attributes } = data;
         const selectedDataSourceIds = (selectedDataSourceConnections ?? [])
           .filter(
             ({ connectionType }) => connectionType === DataSourceConnectionType.OpenSearchConnection
@@ -130,15 +130,18 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
           .map(({ id }) => {
             return id;
           });
-        result = await workspaceClient.create(attributes, {
-          dataSources: selectedDataSourceIds,
-          dataConnections: selectedDataConnectionIds,
-          ...(isPermissionEnabled
-            ? {
-                permissions: convertPermissionSettingsToPermissions(permissionSettings),
-              }
-            : {}),
-        });
+        result = await workspaceClient.create(
+          { ...attributes, ...(customId ? { id: customId } : {}) },
+          {
+            dataSources: selectedDataSourceIds,
+            dataConnections: selectedDataConnectionIds,
+            ...(isPermissionEnabled
+              ? {
+                  permissions: convertPermissionSettingsToPermissions(permissionSettings),
+                }
+              : {}),
+          }
+        );
         if (result?.success) {
           notifications?.toasts.addSuccess({
             title: i18n.translate('workspace.create.success', {

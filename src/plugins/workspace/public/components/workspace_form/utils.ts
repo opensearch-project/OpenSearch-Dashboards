@@ -50,6 +50,9 @@ export const getNumberOfErrors = (formErrors: WorkspaceFormErrors) => {
   if (formErrors.name) {
     numberOfErrors += 1;
   }
+  if (formErrors.customId) {
+    numberOfErrors += 1;
+  }
   if (formErrors.permissionSettings?.fields) {
     numberOfErrors += Object.keys(formErrors.permissionSettings.fields).length;
   }
@@ -218,7 +221,7 @@ export const isSelectedDataSourceConnectionsDuplicated = (
 
 export const validateWorkspaceForm = (formData: Partial<WorkspaceFormDataState>) => {
   const formErrors: WorkspaceFormErrors = {};
-  const { name, color, features, selectedDataSourceConnections } = formData;
+  const { name, customId, color, features, selectedDataSourceConnections } = formData;
   if (name && name.trim()) {
     if (!isValidFormTextInput(name)) {
       formErrors.name = {
@@ -235,6 +238,19 @@ export const validateWorkspaceForm = (formData: Partial<WorkspaceFormDataState>)
         defaultMessage: 'Name is required. Enter a name.',
       }),
     };
+  }
+  if (customId) {
+    const isShortId = /^[a-zA-Z0-9_-]{6,20}$/.test(customId);
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(customId);
+    if (!isShortId && !isUuid) {
+      formErrors.customId = {
+        code: WorkspaceFormErrorCode.InvalidWorkspaceId,
+        message: i18n.translate('workspace.form.detail.id.invalid', {
+          defaultMessage:
+            'ID is invalid. Must be a UUID or 6–20 characters using only letters, numbers, underscores, and hyphens.',
+        }),
+      };
+    }
   }
   if (!features || !features.some((featureConfig) => isUseCaseFeatureConfig(featureConfig))) {
     formErrors.features = {
