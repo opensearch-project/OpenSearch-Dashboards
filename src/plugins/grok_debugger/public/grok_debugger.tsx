@@ -32,9 +32,20 @@ interface Props {
 }
 
 const STORAGE_KEY = 'grokDebugger';
-const load = (key: string, fallback = '') =>
-  sessionStorage.getItem(`${STORAGE_KEY}.${key}`) ?? fallback;
-const save = (key: string, value: string) => sessionStorage.setItem(`${STORAGE_KEY}.${key}`, value);
+const load = (key: string, fallback = '') => {
+  try {
+    return sessionStorage.getItem(`${STORAGE_KEY}.${key}`) ?? fallback;
+  } catch {
+    return fallback;
+  }
+};
+const save = (key: string, value: string) => {
+  try {
+    sessionStorage.setItem(`${STORAGE_KEY}.${key}`, value);
+  } catch {
+    // storage unavailable, ignore
+  }
+};
 
 export const GrokDebugger = ({ http, dataSourceId }: Props) => {
   const [pattern, setPattern] = useState(() => load('pattern'));
@@ -147,9 +158,13 @@ export const GrokDebugger = ({ http, dataSourceId }: Props) => {
     setCaptureAllMatches(false);
     setResult(null);
     setError(null);
-    ['pattern', 'sampleLog', 'customPatterns', 'captureAllMatches'].forEach((k) =>
-      sessionStorage.removeItem(`${STORAGE_KEY}.${k}`)
-    );
+    try {
+      ['pattern', 'sampleLog', 'customPatterns', 'captureAllMatches'].forEach((k) =>
+        sessionStorage.removeItem(`${STORAGE_KEY}.${k}`)
+      );
+    } catch {
+      // storage unavailable, ignore
+    }
   };
 
   return (
