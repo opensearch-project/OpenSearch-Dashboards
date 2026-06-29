@@ -241,9 +241,19 @@ export const MfeInspector: React.FC<MfeInspectorProps> = ({
                   value={draftFor(entry)}
                   aria-label={`Override remoteEntry URL for ${entry.id}`}
                   data-test-subj={`mfeInspectorInput-${entry.id}`}
-                  onChange={(event) =>
-                    setDrafts((prev) => ({ ...prev, [entry.id]: event.target.value }))
-                  }
+                  onChange={(event) => {
+                    // Capture the input value SYNCHRONOUSLY before passing the
+                    // setDrafts updater function. React 16's synthetic events
+                    // are pooled — by the time the updater function runs
+                    // (during the next render), React has reused the event
+                    // object and `event.target` is null. Reading the value
+                    // inside the updater triggered:
+                    //   TypeError: Cannot read properties of null (reading 'value')
+                    // The closure-captured `value` is safe regardless of the
+                    // pooled event's state.
+                    const value = event.target.value;
+                    setDrafts((prev) => ({ ...prev, [entry.id]: value }));
+                  }}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>

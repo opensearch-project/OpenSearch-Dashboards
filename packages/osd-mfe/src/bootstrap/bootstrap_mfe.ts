@@ -376,6 +376,31 @@ function inMemoryProvider(registry: Registry): RegistryProvider {
 }
 
 /**
+ * Returns `true` when the current page URL carries `?inspect=true` — the
+ * opt-in signal a developer uses to summon the MFE Inspector panel. The
+ * panel's primary gate is `mfe.allowOverride` (server-config, default off in
+ * prod), but with `allowOverride` ON the panel previously auto-popped on every
+ * page load, which was noisy. This URL-param check turns the panel into an
+ * opt-in tool: surface it only when the developer asks for it via
+ * `<page>?inspect=true`.
+ *
+ * Defensive in two ways:
+ * - Returns `false` when `window` or `window.location` is unavailable (SSR,
+ *   non-browser tests, and any future code path that calls the bootstrap
+ *   outside a browser context).
+ * - Wraps `URLSearchParams` in try/catch so a malformed query string never
+ *   throws into the boot loop.
+ */
+function inspectorRequestedByUrl(): boolean {
+  if (typeof window === 'undefined' || !window.location) return false;
+  try {
+    return new URLSearchParams(window.location.search).get('inspect') === 'true';
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Project a server-resolved {@link BootManifest} (Phase 13, Story 3) onto the
  * in-memory {@link Registry} shape the rest of the bootstrap consumes.
  *
@@ -1045,11 +1070,18 @@ export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> 
   //    observes the booted app and never interferes with the locked load
   //    sequence above.
   //
+  //    UX: even with `allowOverride` on, the panel is opt-in via a
+  //    `?inspect=true` URL query parameter (see {@link inspectorRequestedByUrl}).
+  //    A developer who wants to use the inspector navigates to
+  //    `<page>?inspect=true`; the panel does not auto-pop on every page load.
+  //    This double-gate (server-config + URL flag) keeps the panel out of
+  //    the way for everyday dev work, surfaced only on demand.
+  //
   //    Phase 14, Story 2: pass the collected disabled records so the panel can
   //    render its "Disabled plugins" section. The bootstrap appended a record
   //    at every disable site (compat-skip / registry-trust skip / load failure)
   //    above; an empty list = no failures = no extra section rendered.
-  if (allowOverride) {
+  if (allowOverride && inspectorRequestedByUrl()) {
     deps.mountInspector(Array.from(resolved.values()), disabledPlugins);
   }
 }

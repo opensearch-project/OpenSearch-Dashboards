@@ -446,6 +446,19 @@ describe('bootstrapMfe — dev URL-override wiring (Phase 5, Story 1)', () => {
 });
 
 describe('bootstrapMfe — dev Inspector mount gate (Phase 5, Story 3)', () => {
+  // The Inspector mount is double-gated: server-config `mfe.allowOverride`
+  // PLUS a URL `?inspect=true` opt-in. The existing mount-expected tests
+  // need both gates; set the URL param in beforeEach so they don't false-
+  // negative when the URL gate is added. A separate test below asserts the
+  // gate fails closed (no mount) when the URL param is absent.
+  const ORIGINAL_HREF = '/';
+  beforeEach(() => {
+    window.history.replaceState({}, '', '/?inspect=true');
+  });
+  afterEach(() => {
+    window.history.replaceState({}, '', ORIGINAL_HREF);
+  });
+
   /** Minimal happy-path deps plus an injectable mountInspector spy. */
   function inspectorDeps(): {
     deps: Partial<BootstrapMfeDeps>;
@@ -525,6 +538,23 @@ describe('bootstrapMfe — dev Inspector mount gate (Phase 5, Story 3)', () => {
     await bootstrapMfe({
       registryUrl: REGISTRY_URL,
       sharedDepsUrl: SHARED_DEPS_URL,
+      deps,
+    });
+
+    expect(mountInspector).not.toHaveBeenCalled();
+  });
+
+  it('does NOT mount the inspector when allowOverride=true but ?inspect=true is absent (URL opt-in)', async () => {
+    // Override the URL the beforeEach set so this case has NO inspect param.
+    // Verifies the second gate: even with the server-config gate ON, the panel
+    // must be explicitly summoned via `?inspect=true` before it shows.
+    window.history.replaceState({}, '', '/');
+
+    const { deps, mountInspector } = inspectorDeps();
+    await bootstrapMfe({
+      registryUrl: REGISTRY_URL,
+      sharedDepsUrl: SHARED_DEPS_URL,
+      allowOverride: true,
       deps,
     });
 
