@@ -32,7 +32,6 @@ const Path = require('path');
 
 const CompressionPlugin = require('compression-webpack-plugin');
 const { REPO_ROOT } = require('@osd/utils');
-// const webpack = require('webpack');
 // eslint-disable-next-line import/no-unresolved
 const { rspack } = require('@rspack/core');
 const { getSwcLoaderConfig } = require('@osd/utils');
@@ -43,7 +42,7 @@ const MOMENT_SRC = require.resolve('moment/min/moment-with-locales.js');
 
 const targets = ['last 2 versions', 'ie >= 11'];
 
-exports.getWebpackConfig = ({ dev = false } = {}) => ({
+exports.getRspackConfig = ({ dev = false } = {}) => ({
   mode: dev ? 'development' : 'production',
   entry: {
     'osd-ui-shared-deps': './entry.js',
@@ -198,7 +197,7 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
   performance: {
     // NOTE: we are disabling this as those hints
     // are more tailored for the final bundles result
-    // and not for the webpack compilations performance itself
+    // and not for the rspack compilations performance itself
     hints: false,
   },
 

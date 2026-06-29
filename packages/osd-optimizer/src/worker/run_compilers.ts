@@ -34,7 +34,6 @@ import Fs from 'fs';
 import Path from 'path';
 import { inspect } from 'util';
 
-// import webpack, { Stats } from 'webpack';
 import { rspack, Compiler, Stats } from '@rspack/core';
 import * as Rx from 'rxjs';
 import { mergeMap, map, mapTo, takeUntil, finalize } from 'rxjs/operators';
@@ -49,15 +48,15 @@ import {
   parseFilePath,
   BundleRefs,
 } from '../common';
-import { getWebpackConfig, sassCompiler } from './webpack.config';
-import { isFailureStats, failedStatsToErrorMessage, isContextModule } from './webpack_helpers';
+import { getRspackConfig, sassCompiler } from './rspack.config';
+import { isFailureStats, failedStatsToErrorMessage, isContextModule } from './rspack_helpers';
 import {
   isExternalModule,
   isNormalModule,
   isIgnoredModule,
   isConcatenatedModule,
   getModulePath,
-} from './webpack_helpers';
+} from './rspack_helpers';
 
 const PLUGIN_NAME = '@osd/optimizer';
 
@@ -84,7 +83,7 @@ const observeCompiler = (
   const { beforeRun, watchRun, done } = compiler.hooks;
 
   /**
-   * Called by webpack as a single run compilation is starting
+   * Called by rspack as a single run compilation is starting
    */
   const started$ = Rx.merge(
     Rx.fromEventPattern((cb) => beforeRun.tap(PLUGIN_NAME, cb)),
@@ -92,7 +91,7 @@ const observeCompiler = (
   ).pipe(mapTo(compilerMsgs.running()));
 
   /**
-   * Called by webpack as any compilation is complete. If the
+   * Called by rspack as any compilation is complete. If the
    * needAdditionalPass property is set then another compilation
    * is about to be started, so we shouldn't send complete quite yet
    */
@@ -102,7 +101,7 @@ const observeCompiler = (
         return undefined;
       }
 
-      if (workerConfig.profileWebpack) {
+      if (workerConfig.profileRspack) {
         Fs.writeFileSync(
           Path.resolve(bundle.outputDir, 'stats.json'),
           JSON.stringify(
@@ -226,7 +225,7 @@ const observeCompiler = (
 };
 
 /**
- * Run webpack compilers
+ * Run rspack compilers
  */
 export const runCompilers = (
   workerConfig: WorkerConfig,
@@ -234,7 +233,7 @@ export const runCompilers = (
   bundleRefs: BundleRefs
 ) => {
   const multiCompiler = rspack(
-    bundles.map((def) => getWebpackConfig(def, bundleRefs, workerConfig))
+    bundles.map((def) => getRspackConfig(def, bundleRefs, workerConfig))
   );
 
   return Rx.merge(

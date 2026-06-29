@@ -38,7 +38,7 @@ import browserslist from 'browserslist';
 import * as sass from 'sass-embedded';
 
 import { Bundle, BundleRefs, WorkerConfig } from '../common';
-import { STATS_WARNINGS_FILTER } from './webpack_helpers';
+import { STATS_WARNINGS_FILTER } from './rspack_helpers';
 import { BundleDepsCheckPlugin } from './bundle_deps_check_plugin';
 
 const compilers: sass.AsyncCompiler[] = [];
@@ -74,7 +74,7 @@ export const sassCompiler = {
   },
 };
 
-export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker: WorkerConfig) {
+export function getRspackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker: WorkerConfig) {
   const targets = browserslist.loadConfig({ path: worker.repoRoot });
   const ENTRY_CREATOR = require.resolve('./entry_point_creator');
   const resolveOptions = {
@@ -341,7 +341,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
           test: /\.(j|t)sx?$/,
           exclude: [
             /* vega-lite, reactflow and some of its dependencies don't have es5 builds
-             * so we need to build from source and transpile for webpack v4
+             * so we need to build from source and transpile with SWC
              * kbn-handlebars uses modern syntax (nullish coalescing) that needs transpilation
              */
             /[\/\\]node_modules[\/\\](?!(vega(-lite|-label|-functions|-scenegraph)?|kbn-handlebars|@?reactflow)[\/\\])/,
@@ -390,7 +390,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
     performance: {
       // NOTE: we are disabling this as those hints
       // are more tailored for the final bundles result
-      // and not for the webpack compilations performance itself
+      // and not for the rspack compilations performance itself
       hints: false,
     },
     ignoreWarnings: [STATS_WARNINGS_FILTER],

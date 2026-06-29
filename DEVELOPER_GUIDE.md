@@ -904,10 +904,10 @@ define(['lodash'], function (_) {
 ```
 
 In those extremely rare cases where you're writing server-side JavaScript in a
-file that does not pass run through webpack, then use CommonJS modules.
+file that does not pass run through rspack, then use CommonJS modules.
 
 In those even rarer cases where you're writing client-side code that does not
-run through webpack, then do not use a module loader at all.
+run through rspack, then do not use a module loader at all.
 
 ##### Import only top-level modules
 

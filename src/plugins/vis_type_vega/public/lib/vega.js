@@ -30,7 +30,9 @@
 
 /* eslint-disable import/namespace */
 
-// vega-lite 6.x no longer exports from /src subpath
+// vega-lite 6.x uses package.json#exports (no `main`/`module` fields); the ESLint
+// import resolver does not support the exports map so it cannot resolve the package root.
+// eslint-disable-next-line import/no-unresolved -- vega-lite uses package.json#exports, unsupported by the ESLint resolver
 import { compile, version } from 'vega-lite';
 import * as vega from 'vega';
 import { expressionInterpreter as vegaExpressionInterpreter } from 'vega-interpreter/build/vega-interpreter.module';

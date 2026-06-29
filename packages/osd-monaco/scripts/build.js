@@ -35,7 +35,7 @@ const { run } = require('@osd/dev-utils');
 
 const TARGET_BUILD_DIR = path.resolve(__dirname, '../target');
 const ROOT_DIR = path.resolve(__dirname, '../');
-const WEBPACK_CONFIG_PATH = path.resolve(ROOT_DIR, 'webpack.config.js');
+const WEBPACK_CONFIG_PATH = path.resolve(ROOT_DIR, 'rspack.config.js');
 
 run(
   async ({ procRunner, log, flags }) => {

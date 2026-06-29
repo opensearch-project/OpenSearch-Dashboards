@@ -65,10 +65,15 @@ OptimizerConfig {
       "manifestPath": <absolute path>/packages/osd-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/nested/baz/opensearch_dashboards.json,
     },
   ],
-  "profileWebpack": false,
+  "profileRspack": false,
   "repoRoot": <absolute path>/packages/osd-optimizer/src/__fixtures__/__tmp__/mock_repo,
   "themeTags": Array [
+    "v7dark",
+    "v7light",
+    "v8dark",
     "v8light",
+    "v9dark",
+    "v9light",
   ],
   "watch": false,
 }
