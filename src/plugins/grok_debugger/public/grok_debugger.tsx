@@ -24,6 +24,7 @@ import {
   EuiText,
   EuiPanel,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import { HttpSetup } from 'src/core/public';
 
 interface Props {
@@ -131,12 +132,19 @@ export const GrokDebugger = ({ http, dataSourceId }: Props) => {
       const doc = data?.docs?.[0];
 
       if (doc?.error) {
-        const reason = doc.error?.root_cause?.[0]?.reason ?? doc.error?.reason ?? 'Unknown error';
+        const reason =
+          doc.error?.root_cause?.[0]?.reason ??
+          doc.error?.reason ??
+          i18n.translate('grokDebugger.unknownError', { defaultMessage: 'Unknown error' });
         setError(reason);
       } else if (doc?.doc?._source) {
         setResult(doc.doc._source);
       } else {
-        setError('Unexpected response format');
+        setError(
+          i18n.translate('grokDebugger.unexpectedResponse', {
+            defaultMessage: 'Unexpected response format',
+          })
+        );
       }
     } catch (e: any) {
       const reason =
@@ -144,7 +152,7 @@ export const GrokDebugger = ({ http, dataSourceId }: Props) => {
         e?.body?.error?.reason ??
         e?.body?.message ??
         e?.message ??
-        'Request failed';
+        i18n.translate('grokDebugger.requestFailed', { defaultMessage: 'Request failed' });
       setError(reason);
     } finally {
       setIsLoading(false);
@@ -184,13 +192,20 @@ export const GrokDebugger = ({ http, dataSourceId }: Props) => {
                       iconSide="right"
                       size="s"
                     >
-                      Grok documentation
+                      {i18n.translate('grokDebugger.docButton', {
+                        defaultMessage: 'Grok documentation',
+                      })}
                     </EuiButton>
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiSpacer size="m" />
                 <EuiForm>
-                  <EuiFormRow label="Sample Log" fullWidth>
+                  <EuiFormRow
+                    label={i18n.translate('grokDebugger.sampleLogLabel', {
+                      defaultMessage: 'Sample Log',
+                    })}
+                    fullWidth
+                  >
                     <EuiTextArea
                       fullWidth
                       value={sampleLog}
@@ -199,7 +214,12 @@ export const GrokDebugger = ({ http, dataSourceId }: Props) => {
                       placeholder="e.g. 127.0.0.1 198.126.12 10/Oct/2025:13:55:36 -0700 200"
                     />
                   </EuiFormRow>
-                  <EuiFormRow label="Grok Pattern" fullWidth>
+                  <EuiFormRow
+                    label={i18n.translate('grokDebugger.grokPatternLabel', {
+                      defaultMessage: 'Grok Pattern',
+                    })}
+                    fullWidth
+                  >
                     <EuiTextArea
                       fullWidth
                       value={pattern}
@@ -212,12 +232,16 @@ export const GrokDebugger = ({ http, dataSourceId }: Props) => {
                   <EuiPanel paddingSize="none" hasBorder>
                     <EuiAccordion
                       id="advanced_config"
-                      buttonContent="Advanced settings"
+                      buttonContent={i18n.translate('grokDebugger.advancedSettings', {
+                        defaultMessage: 'Advanced settings',
+                      })}
                       buttonProps={{ style: { padding: '8px 12px' } }}
                       paddingSize="m"
                     >
                       <EuiFormRow
-                        label="Custom pattern definitions"
+                        label={i18n.translate('grokDebugger.customPatternsLabel', {
+                          defaultMessage: 'Custom pattern definitions',
+                        })}
                         fullWidth
                         isInvalid={!!customPatternError}
                         error={customPatternError}
@@ -240,7 +264,9 @@ export const GrokDebugger = ({ http, dataSourceId }: Props) => {
                         <EuiToolTip content='Collects all matches of repeated patterns into an array. For example, given "192.168.1.1 10.0.0.1 172.16.0.1" and pattern "%{IP:ipAddress} %{IP:ipAddress} %{IP:ipAddress}", all three IPs are collected into the ipAddress field.'>
                           <EuiCheckbox
                             id="capture_all_matches"
-                            label="Capture all matches"
+                            label={i18n.translate('grokDebugger.captureAllMatchesLabel', {
+                              defaultMessage: 'Capture all matches',
+                            })}
                             checked={captureAllMatches}
                             onChange={(e) => setCaptureAllMatches(e.target.checked)}
                           />
@@ -258,12 +284,14 @@ export const GrokDebugger = ({ http, dataSourceId }: Props) => {
                         isLoading={isLoading}
                         isDisabled={!pattern.trim() || !sampleLog.trim()}
                       >
-                        Simulate
+                        {i18n.translate('grokDebugger.simulateButton', {
+                          defaultMessage: 'Simulate',
+                        })}
                       </EuiButton>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiButton size="s" onClick={clear}>
-                        Clear
+                        {i18n.translate('grokDebugger.clearButton', { defaultMessage: 'Clear' })}
                       </EuiButton>
                     </EuiFlexItem>
                   </EuiFlexGroup>
@@ -284,20 +312,32 @@ export const GrokDebugger = ({ http, dataSourceId }: Props) => {
                     <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
                       <EuiFlexItem grow={false}>
                         <EuiTitle size="xs">
-                          <h2>Results</h2>
+                          <h2>
+                            {i18n.translate('grokDebugger.resultsTitle', {
+                              defaultMessage: 'Results',
+                            })}
+                          </h2>
                         </EuiTitle>
                       </EuiFlexItem>
                       {result && (
                         <EuiFlexItem grow={false}>
                           <EuiText size="s" color="success">
-                            <span>✓ Pattern matched</span>
+                            <span>
+                              {i18n.translate('grokDebugger.patternMatched', {
+                                defaultMessage: '✓ Pattern matched',
+                              })}
+                            </span>
                           </EuiText>
                         </EuiFlexItem>
                       )}
                       {error && (
                         <EuiFlexItem grow={false}>
                           <EuiText size="s" color="danger">
-                            <span>✗ Pattern match failed</span>
+                            <span>
+                              {i18n.translate('grokDebugger.patternMatchFailed', {
+                                defaultMessage: '✗ Pattern match failed',
+                              })}
+                            </span>
                           </EuiText>
                         </EuiFlexItem>
                       )}
@@ -307,12 +347,21 @@ export const GrokDebugger = ({ http, dataSourceId }: Props) => {
                   <EuiPanel paddingSize="m" hasShadow={false} hasBorder={false} borderRadius="none">
                     {!result && !error && (
                       <EuiText color="subdued">
-                        <p>Run Simulate to see results.</p>
+                        <p>
+                          {i18n.translate('grokDebugger.resultsPlaceholder', {
+                            defaultMessage: 'Run Simulate to see results.',
+                          })}
+                        </p>
                       </EuiText>
                     )}
                     {error && (
                       <EuiText size="s" color="danger">
-                        <p>Correct the grok pattern or add custom pattern definitions.</p>
+                        <p>
+                          {i18n.translate('grokDebugger.errorHint', {
+                            defaultMessage:
+                              'Correct the grok pattern or add custom pattern definitions.',
+                          })}
+                        </p>
                         <p>{error}</p>
                       </EuiText>
                     )}
@@ -326,8 +375,19 @@ export const GrokDebugger = ({ http, dataSourceId }: Props) => {
                           })
                         )}
                         columns={[
-                          { field: 'field', name: 'Field', width: '30%' },
-                          { field: 'value', name: 'Value' },
+                          {
+                            field: 'field',
+                            name: i18n.translate('grokDebugger.fieldColumn', {
+                              defaultMessage: 'Field',
+                            }),
+                            width: '30%',
+                          },
+                          {
+                            field: 'value',
+                            name: i18n.translate('grokDebugger.valueColumn', {
+                              defaultMessage: 'Value',
+                            }),
+                          },
                         ]}
                       />
                     )}
