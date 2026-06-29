@@ -92,9 +92,11 @@ export const GrokDebugger = ({ http, dataSourceId }: Props) => {
     });
     if (malformed.length > 0) {
       setCustomPatternError(
-        `Malformed pattern definition on line${malformed.length > 1 ? 's' : ''} ${malformed.join(
-          ', '
-        )} — each line must be: PATTERN_NAME regex`
+        i18n.translate('grokDebugger.malformedPatternError', {
+          defaultMessage:
+            'Malformed pattern definition on line{suffix} {lines} — each line must be: PATTERN_NAME regex',
+          values: { suffix: malformed.length > 1 ? 's' : '', lines: malformed.join(', ') },
+        })
       );
       setIsLoading(false);
       return;
@@ -211,7 +213,9 @@ export const GrokDebugger = ({ http, dataSourceId }: Props) => {
                       value={sampleLog}
                       onChange={(e) => setSampleLog(e.target.value)}
                       rows={4}
-                      placeholder="e.g. 127.0.0.1 198.126.12 10/Oct/2025:13:55:36 -0700 200"
+                      placeholder={i18n.translate('grokDebugger.sampleLogPlaceholder', {
+                        defaultMessage: 'e.g. 127.0.0.1 198.126.12 10/Oct/2025:13:55:36 -0700 200',
+                      })}
                     />
                   </EuiFormRow>
                   <EuiFormRow
@@ -225,7 +229,13 @@ export const GrokDebugger = ({ http, dataSourceId }: Props) => {
                       value={pattern}
                       onChange={(e) => setPattern(e.target.value)}
                       rows={4}
-                      placeholder="e.g. %{IPORHOST:clientip} %{HTTPDATE:timestamp} %{NUMBER:response_status:int}"
+                      placeholder={i18n.translate('grokDebugger.grokPatternPlaceholder', {
+                        defaultMessage: 'e.g. {example}',
+                        values: {
+                          example:
+                            '%{IPORHOST:clientip} %{HTTPDATE:timestamp} %{NUMBER:response_status:int}',
+                        },
+                      })}
                     />
                   </EuiFormRow>
                   <EuiSpacer size="m" />
@@ -255,13 +265,22 @@ export const GrokDebugger = ({ http, dataSourceId }: Props) => {
                           }}
                           rows={4}
                           isInvalid={!!customPatternError}
-                          placeholder={
-                            'CUSTOM_PATTERN (?:[a-zA-Z0-9._-]+)\nEach line: PATTERN_NAME pattern_regex'
-                          }
+                          placeholder={i18n.translate('grokDebugger.customPatternsPlaceholder', {
+                            defaultMessage:
+                              'CUSTOM_PATTERN (?:[a-zA-Z0-9._-]+)\nEach line: PATTERN_NAME pattern_regex',
+                          })}
                         />
                       </EuiFormRow>
                       <EuiFormRow>
-                        <EuiToolTip content='Collects all matches of repeated patterns into an array. For example, given "192.168.1.1 10.0.0.1 172.16.0.1" and pattern "%{IP:ipAddress} %{IP:ipAddress} %{IP:ipAddress}", all three IPs are collected into the ipAddress field.'>
+                        <EuiToolTip
+                          content={i18n.translate('grokDebugger.captureAllMatchesTooltip', {
+                            defaultMessage:
+                              'Collects all matches of repeated patterns into an array. For example, given "192.168.1.1 10.0.0.1 172.16.0.1" and pattern "{patternExample}", all three IPs are collected into the ipAddress field.',
+                            values: {
+                              patternExample: '%{IP:ipAddress} %{IP:ipAddress} %{IP:ipAddress}',
+                            },
+                          })}
+                        >
                           <EuiCheckbox
                             id="capture_all_matches"
                             label={i18n.translate('grokDebugger.captureAllMatchesLabel', {
