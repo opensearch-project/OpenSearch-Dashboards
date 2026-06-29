@@ -15,6 +15,12 @@ export const PERMISSION_CONTROLLED_UI_SETTINGS_WRAPPER_ID = 'permission-control-
 // other wrappers, therefore the priorty can be any number and the priority of 100 is trival
 export const PERMISSION_CONTROLLED_UI_SETTINGS_WRAPPER_PRIORITY = 100;
 
+// This wrapper will be triggered before the user scope, workspace scope, and dashboard admin scope wrappers.
+// This ensures that when dealing with user-scope settings, this wrapper will not be used.
+// This is a temporary implementation.
+export const DYNAMIC_CONFIG_CONTROLLEDUI_SETTINGS_WRAPPER_ID = 'dynamic-config-control-ui-settings';
+export const DYNAMIC_CONFIG_CONTROLLEDUI_SETTINGS_WRAPPER_PRIORITY = -50;
+
 export const buildDocIdWithScope = (id: string, scope?: UiSettingScope) => {
   if (scope === UiSettingScope.USER) {
     return `${CURRENT_USER_PLACEHOLDER}_${id}`;
@@ -26,4 +32,12 @@ export const buildDocIdWithScope = (id: string, scope?: UiSettingScope) => {
     return `${CURRENT_WORKSPACE_PLACEHOLDER}_${id}`;
   }
   return id;
+};
+
+export const isGlobalScope = (docId: string | undefined) => {
+  return (
+    docId !== DASHBOARD_ADMIN_SETTINGS_ID &&
+    !docId?.startsWith(CURRENT_WORKSPACE_PLACEHOLDER) &&
+    !docId?.startsWith(CURRENT_USER_PLACEHOLDER)
+  );
 };

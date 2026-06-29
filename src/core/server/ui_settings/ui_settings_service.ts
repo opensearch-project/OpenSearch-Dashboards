@@ -31,7 +31,6 @@
 import { combineLatest, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { firstValueFrom, mapToObject } from '@osd/std';
-
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
@@ -56,12 +55,17 @@ import {
 import {
   PERMISSION_CONTROLLED_UI_SETTINGS_WRAPPER_ID,
   PERMISSION_CONTROLLED_UI_SETTINGS_WRAPPER_PRIORITY,
+  DYNAMIC_CONFIG_CONTROLLEDUI_SETTINGS_WRAPPER_ID,
+  DYNAMIC_CONFIG_CONTROLLEDUI_SETTINGS_WRAPPER_PRIORITY,
 } from './utils';
 import { getAIFeaturesSetting } from './settings/ai_features';
+import { InternalDynamicConfigServiceSetup } from '../config';
+import { DynamicConfigControlledUiSettingsWrapper } from './saved_objects/dynamic_config_controlled_ui_settings_wrapper';
 
 export interface SetupDeps {
   http: InternalHttpServiceSetup;
   savedObjects: InternalSavedObjectsServiceSetup;
+  dynamicConfig: InternalDynamicConfigServiceSetup;
 }
 
 /** @internal */
@@ -81,7 +85,11 @@ export class UiSettingsService
     ]);
   }
 
-  public async setup({ http, savedObjects }: SetupDeps): Promise<InternalUiSettingsServiceSetup> {
+  public async setup({
+    http,
+    savedObjects,
+    dynamicConfig,
+  }: SetupDeps): Promise<InternalUiSettingsServiceSetup> {
     this.log.debug('Setting up ui settings service');
 
     savedObjects.registerType(uiSettingsType);
@@ -105,10 +113,20 @@ export class UiSettingsService
       config.savedObjectsConfig.permission.enabled
     );
 
+    const dynamicConfigControlledUiSettingsWrapper = new DynamicConfigControlledUiSettingsWrapper(
+      dynamicConfig
+    );
+
     savedObjects.addClientWrapper(
       PERMISSION_CONTROLLED_UI_SETTINGS_WRAPPER_PRIORITY,
       PERMISSION_CONTROLLED_UI_SETTINGS_WRAPPER_ID,
       permissionControlledUiSettingsWrapper.wrapperFactory
+    );
+
+    savedObjects.addClientWrapper(
+      DYNAMIC_CONFIG_CONTROLLEDUI_SETTINGS_WRAPPER_PRIORITY,
+      DYNAMIC_CONFIG_CONTROLLEDUI_SETTINGS_WRAPPER_ID,
+      dynamicConfigControlledUiSettingsWrapper.wrapperFactory
     );
 
     this.register(getAIFeaturesSetting());

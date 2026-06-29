@@ -41,6 +41,7 @@ import { savedObjectsClientMock } from '../mocks';
 import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.mock';
 import { mockCoreContext } from '../core_context.mock';
 import { uiSettingsType } from './saved_objects';
+import { dynamicConfigServiceMock } from '../config/dynamic_config_service.mock';
 
 const overrides = {
   overrideBaz: 'baz',
@@ -82,7 +83,12 @@ describe('uiSettings', () => {
     );
     const httpSetup = httpServiceMock.createInternalSetupContract();
     const savedObjectsSetup = savedObjectsServiceMock.createInternalSetupContract();
-    setupDeps = { http: httpSetup, savedObjects: savedObjectsSetup };
+    const dynamicConfigService = dynamicConfigServiceMock.createInternalSetupContract();
+    setupDeps = {
+      http: httpSetup,
+      savedObjects: savedObjectsSetup,
+      dynamicConfig: dynamicConfigService,
+    };
     savedObjectsClient = savedObjectsClientMock.create();
     service = new UiSettingsService(coreContext);
     jest.spyOn(service as any, 'register');
@@ -103,7 +109,7 @@ describe('uiSettings', () => {
     it('register adminUiSettings', async () => {
       const setup = await service.setup(setupDeps);
       setup.register(adminUiSettings);
-      expect(setupDeps.savedObjects.addClientWrapper).toHaveBeenCalledTimes(1);
+      expect(setupDeps.savedObjects.addClientWrapper).toHaveBeenCalledTimes(2);
 
       expect((service as any).register).toHaveBeenCalledWith(adminUiSettings);
     });
