@@ -147,7 +147,8 @@
     "**/grunt/minimatch": "^3.1.5",
     "**/lodash-es": "^4.18.0",
     "**/lodash": "^4.18.0",
-    "**/axios": "^1.15.0"
+    "**/axios": "^1.15.0",
+    "**/serialize-javascript": "^7.0.5"
   },
   "workspaces": {
     "packages": [
