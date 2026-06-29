@@ -35,7 +35,7 @@ describe('DynamicConfigControlledUiSettingsWrapper', () => {
     });
     jest.spyOn(dynamicConfigService, 'getStartService').mockResolvedValue({
       ...dynamicConfigService.getStartService(),
-      getAsyncLocalStore: jest.fn(),
+      createStoreFromRequest: jest.fn(),
       getClient: () => ({
         getConfig: getConfigMock,
         bulkGetConfigs: jest.fn(),

@@ -67,9 +67,9 @@ export class AdvancedSettingsServerPlugin implements Plugin<object, object> {
     const globalConfig = await this.globalConfig$.pipe(first()).toPromise();
     const isPermissionControlEnabled = globalConfig.savedObjects.permission.enabled === true;
 
-    core.capabilities.registerSwitcher(async () => {
+    core.capabilities.registerSwitcher(async (requests) => {
       const dynamicConfigServiceStart = await core.dynamicConfigService.getStartService();
-      const store = dynamicConfigServiceStart.getAsyncLocalStore();
+      const store = dynamicConfigServiceStart.createStoreFromRequest(requests);
       const client = dynamicConfigServiceStart.getClient();
 
       try {

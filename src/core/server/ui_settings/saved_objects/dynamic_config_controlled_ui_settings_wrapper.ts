@@ -64,7 +64,7 @@ export class DynamicConfigControlledUiSettingsWrapper {
 
     try {
       const dynamicConfigServiceStart = await this.dynamicConfig.getStartService();
-      const store = dynamicConfigServiceStart.getAsyncLocalStore();
+      const store = dynamicConfigServiceStart.createStoreFromRequest(wrapperOptions.request);
       const client = dynamicConfigServiceStart.getClient();
 
       const dynamicConfig = await client.getConfig(
