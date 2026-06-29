@@ -345,8 +345,20 @@ export class ManagementPlugin
       // The "Keyboard shortcuts" entry now lives inside the header Help menu
       // (see header_help_menu.tsx), so we no longer register a standalone footer
       // rail icon. We still mount a trigger-less listener so the shift+/ shortcut
-      // stays active everywhere (including when the icon side nav is collapsed).
+      // stays active everywhere.
+      //
+      // The listener only keeps the shortcut registered while it is MOUNTED, so
+      // it must live in a slot that is present in every nav state. The icon side
+      // nav renders the `leftBottom` controls only when EXPANDED and the
+      // `iconSideNavFooter` controls only when COLLAPSED, so register in BOTH:
+      // leftBottom covers expanded (and the classic non-icon nav, which always
+      // renders it), iconSideNavFooter covers collapsed. Without both, expanding
+      // the icon side nav would unmount the listener and deactivate shift+/.
       if (core.keyboardShortcut) {
+        core.chrome.navControls.registerLeftBottom({
+          order: 5,
+          mount: toMountPoint(React.createElement(KeyboardShortcutListener, { core })),
+        });
         core.chrome.navControls.registerIconSideNavFooter({
           order: 5,
           mount: toMountPoint(React.createElement(KeyboardShortcutListener, { core })),
