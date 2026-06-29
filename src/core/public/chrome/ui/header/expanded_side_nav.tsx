@@ -268,7 +268,6 @@ function RenderLinkItem({
 
 function CollapsibleSection({
   label,
-  icon,
   defaultCollapsed,
   categoryId,
   storage,
@@ -276,7 +275,6 @@ function CollapsibleSection({
   children,
 }: {
   label?: string;
-  icon?: string;
   defaultCollapsed?: boolean;
   categoryId?: string;
   storage: Storage;
@@ -315,11 +313,12 @@ function CollapsibleSection({
         data-test-subj={`obsNavSection-${label}`}
       >
         <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-          {icon && (
-            <EuiFlexItem grow={false} className="obs-nav-icon">
-              <EuiIcon type={icon} size="m" color="text" />
-            </EuiFlexItem>
-          )}
+          {/*
+            No category icon in the expanded section header — the "Tools" and
+            "Manage workspace" category labels stand on their own here. The icon
+            (category.euiIconType) is still shown in the COLLAPSED rail via
+            CollapsedCategoryIcon, where it's the only affordance available.
+          */}
           <EuiFlexItem className="obs-nav-label">
             <EuiText size="xs" className="obs-nav-category-label-text">
               {label ? toSentenceCase(label) : label}
@@ -382,7 +381,6 @@ function RenderSection({
     return (
       <CollapsibleSection
         label={category.label}
-        icon={category.euiIconType as string | undefined}
         defaultCollapsed={category.defaultOpen === false}
         categoryId={category.id}
         storage={storage}
