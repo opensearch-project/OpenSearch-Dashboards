@@ -220,6 +220,11 @@ class HeaderHelpMenuUI extends Component<Props, State> {
     const keyboardShortcutContent = keyboardShortcut ? (
       <KeyboardShortcutHelpModal
         keyboardShortcutService={keyboardShortcut}
+        // The management footer listener already registers the global shift+/
+        // shortcut; this menu entry only opens the modal, so it must NOT
+        // re-register. A duplicate `show_help` registration throws and would
+        // crash the Help menu (making the ? icon vanish on click).
+        registerShortcut={false}
         trigger={
           <EuiButtonEmpty size="xs" flush="left" iconType="keyboardShortcut">
             <FormattedMessage
