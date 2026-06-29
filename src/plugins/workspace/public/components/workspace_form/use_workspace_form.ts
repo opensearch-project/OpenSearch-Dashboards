@@ -35,6 +35,15 @@ export const useWorkspaceForm = ({
 }: WorkspaceFormProps) => {
   const applications = useApplications(application);
   const [name, setName] = useState(defaultValues?.name ?? '');
+  const [customId, setCustomId] = useState(defaultValues?.customId ?? '');
+  const handleCustomIdChange = useCallback((newValue: string) => {
+    setCustomId(newValue);
+    setFormErrors((prev) => {
+      if (!prev.customId) return prev;
+      const { customId: _removed, ...rest } = prev;
+      return rest;
+    });
+  }, []);
   const [description, setDescription] = useState(defaultValues?.description);
   const [color, setColor] = useState(defaultValues?.color);
   const defaultValuesRef = useRef(defaultValues);
@@ -62,6 +71,7 @@ export const useWorkspaceForm = ({
   const formIdRef = useRef<string>();
   const getFormData = (): WorkspaceFormDataState => ({
     name,
+    customId: customId || undefined,
     description,
     features: featureConfigs,
     useCase: selectedUseCase,
@@ -101,6 +111,7 @@ export const useWorkspaceForm = ({
   const getSubmitFormData = (submitFormData: WorkspaceFormDataState) => {
     return {
       name: submitFormData.name!,
+      customId: submitFormData.customId,
       description: submitFormData.description,
       color: submitFormData.color || '#FFFFFF',
       features: submitFormData.features,
@@ -162,6 +173,7 @@ export const useWorkspaceForm = ({
   const handleResetForm = useCallback(() => {
     const resetValues = defaultValuesRef.current;
     setName(resetValues?.name ?? '');
+    setCustomId(resetValues?.customId ?? '');
     setDescription(resetValues?.description ?? '');
     setColor(resetValues?.color);
     setPermissionSettings(resetValues?.permissionSettings ?? []);
@@ -182,6 +194,7 @@ export const useWorkspaceForm = ({
     numberOfChanges,
     handleResetForm,
     setName,
+    setCustomId: handleCustomIdChange,
     setPrivacyType,
     setDescription,
     handleFormSubmit,
