@@ -12,6 +12,11 @@ interface GrokDebuggerSetupDeps {
 }
 
 export class GrokDebuggerPlugin implements Plugin<void, void> {
+  /**
+   * devTools is guaranteed to be defined here because it is listed in
+   * requiredPlugins in opensearch_dashboards.json. The platform will not
+   * call setup() unless all required plugins have successfully set up.
+   */
   public setup({ http }: CoreSetup, { devTools }: GrokDebuggerSetupDeps) {
     devTools.register({
       id: 'grok_debugger',
