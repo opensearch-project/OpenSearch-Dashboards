@@ -46,6 +46,7 @@ export const GrokDebugger = ({ http, dataSourceId }: Props) => {
   const [captureAllMatches, setCaptureAllMatches] = useState(
     () => load('captureAllMatches') === 'true'
   );
+  const [customPatternError, setCustomPatternError] = useState<string | null>(null);
 
   useEffect(() => {
     save('pattern', pattern);
@@ -66,14 +67,27 @@ export const GrokDebugger = ({ http, dataSourceId }: Props) => {
     setError(null);
 
     const patternDefinitions: Record<string, string> = {};
-    customPatterns.split('\n').forEach((line) => {
+    const malformed: number[] = [];
+    customPatterns.split('\n').forEach((line, i) => {
       const trimmed = line.trim();
       if (!trimmed) return;
-      const spaceIdx = trimmed.indexOf(' ');
-      if (spaceIdx > 0) {
-        patternDefinitions[trimmed.slice(0, spaceIdx)] = trimmed.slice(spaceIdx + 1);
+      const spaceIdx = trimmed.search(/\s/);
+      if (spaceIdx <= 0) {
+        malformed.push(i + 1);
+      } else {
+        patternDefinitions[trimmed.slice(0, spaceIdx)] = trimmed.slice(spaceIdx).trimStart();
       }
     });
+    if (malformed.length > 0) {
+      setCustomPatternError(
+        `Malformed pattern definition on line${malformed.length > 1 ? 's' : ''} ${malformed.join(
+          ', '
+        )} — each line must be: PATTERN_NAME regex`
+      );
+      setIsLoading(false);
+      return;
+    }
+    setCustomPatternError(null);
 
     const grokProcessor: Record<string, any> = {
       field: 'message',
@@ -187,12 +201,21 @@ export const GrokDebugger = ({ http, dataSourceId }: Props) => {
                       buttonProps={{ style: { padding: '8px 12px' } }}
                       paddingSize="m"
                     >
-                      <EuiFormRow label="Custom pattern definitions" fullWidth>
+                      <EuiFormRow
+                        label="Custom pattern definitions"
+                        fullWidth
+                        isInvalid={!!customPatternError}
+                        error={customPatternError}
+                      >
                         <EuiTextArea
                           fullWidth
                           value={customPatterns}
-                          onChange={(e) => setCustomPatterns(e.target.value)}
+                          onChange={(e) => {
+                            setCustomPatterns(e.target.value);
+                            setCustomPatternError(null);
+                          }}
                           rows={4}
+                          isInvalid={!!customPatternError}
                           placeholder={
                             'CUSTOM_PATTERN (?:[a-zA-Z0-9._-]+)\nEach line: PATTERN_NAME pattern_regex'
                           }
