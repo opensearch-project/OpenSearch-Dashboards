@@ -184,7 +184,7 @@ export const GrokDebugger = ({ http, dataSourceId }: Props) => {
                     <EuiAccordion
                       id="advanced_config"
                       buttonContent="Advanced settings"
-                      buttonProps={{ style: { backgroundColor: '#f5f7fa', padding: '8px 12px' } }}
+                      buttonProps={{ style: { padding: '8px 12px' } }}
                       paddingSize="m"
                     >
                       <EuiFormRow label="Custom pattern definitions" fullWidth>
@@ -236,12 +236,12 @@ export const GrokDebugger = ({ http, dataSourceId }: Props) => {
               <EuiFlexItem>
                 <EuiPanel paddingSize="none" hasBorder>
                   {/* Header bar */}
-                  <div
-                    style={{
-                      backgroundColor: '#f5f7fa',
-                      padding: '12px 16px',
-                      borderBottom: '1px solid #d3dae6',
-                    }}
+                  <EuiPanel
+                    color="subdued"
+                    paddingSize="none"
+                    hasShadow={false}
+                    borderRadius="none"
+                    style={{ padding: '12px 16px' }}
                   >
                     <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
                       <EuiFlexItem grow={false}>
@@ -264,9 +264,9 @@ export const GrokDebugger = ({ http, dataSourceId }: Props) => {
                         </EuiFlexItem>
                       )}
                     </EuiFlexGroup>
-                  </div>
+                  </EuiPanel>
                   {/* Body */}
-                  <div style={{ padding: '16px' }}>
+                  <EuiPanel paddingSize="m" hasShadow={false} hasBorder={false} borderRadius="none">
                     {!result && !error && (
                       <EuiText color="subdued">
                         <p>Run Simulate to see results.</p>
@@ -279,25 +279,21 @@ export const GrokDebugger = ({ http, dataSourceId }: Props) => {
                       </EuiText>
                     )}
                     {result && (
-                      <div style={{ ['--euiTableHeaderBackgroundColor' as any]: '#f5f7fa' }}>
-                        <style>{`.grokResultsTable thead th { background-color: #f5f7fa !important; }`}</style>
-                        <EuiBasicTable
-                          className="grokResultsTable"
-                          items={Object.entries(result as Record<string, any>).map(
-                            ([field, value]) => ({
-                              field,
-                              value:
-                                typeof value === 'object' ? JSON.stringify(value) : String(value),
-                            })
-                          )}
-                          columns={[
-                            { field: 'field', name: 'Field', width: '30%' },
-                            { field: 'value', name: 'Value' },
-                          ]}
-                        />
-                      </div>
+                      <EuiBasicTable
+                        items={Object.entries(result as Record<string, any>).map(
+                          ([field, value]) => ({
+                            field,
+                            value:
+                              typeof value === 'object' ? JSON.stringify(value) : String(value),
+                          })
+                        )}
+                        columns={[
+                          { field: 'field', name: 'Field', width: '30%' },
+                          { field: 'value', name: 'Value' },
+                        ]}
+                      />
                     )}
-                  </div>
+                  </EuiPanel>
                 </EuiPanel>
               </EuiFlexItem>
             </EuiFlexGroup>
