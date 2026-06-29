@@ -829,10 +829,16 @@ export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> 
     // UNKNOWN remotes under `warn-load` are in `decision.load`; surface a warning
     // so a missing-metadata remote is loud in non-prod without blocking. A loaded
     // remote is "unknown" exactly when its compatibility metadata is incomplete.
+    //
+    // Phase 13 design note: the boot manifest deliberately omits `builtAgainst`
+    // (see `BootManifestEntry` in `registry/boot_manifest.ts`) — server-side
+    // resolution has already used it to make the compat decision before injecting
+    // the manifest. We therefore only check `compat` here; `builtAgainst` is
+    // guaranteed to be absent in the resolved manifest by design.
     if (compatPolicy.onMissing === 'warn-load') {
       for (const id of decision.load) {
         const entry = registry.mfes[id];
-        if (!entry.builtAgainst || !entry.compat) {
+        if (!entry.compat) {
           // eslint-disable-next-line no-console
           console.warn(
             `[mfe] Loading remote "${id}" despite missing/unknown compatibility metadata ` +
