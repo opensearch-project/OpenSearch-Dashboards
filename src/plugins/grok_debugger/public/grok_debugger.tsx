@@ -7,10 +7,7 @@ import { useState } from 'react';
 import {
   EuiAccordion,
   EuiButton,
-  EuiCallOut,
   EuiCheckbox,
-  EuiCodeBlock,
-  EuiFieldText,
   EuiForm,
   EuiFormRow,
   EuiPage,
@@ -20,17 +17,21 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiText,
   EuiTextArea,
   EuiToolTip,
+  EuiTitle,
+  EuiBasicTable,
+  EuiText,
+  EuiPanel,
 } from '@elastic/eui';
 import { HttpSetup } from 'src/core/public';
 
 interface Props {
   http: HttpSetup;
+  dataSourceId?: string;
 }
 
-export const GrokDebugger = ({ http }: Props) => {
+export const GrokDebugger = ({ http, dataSourceId }: Props) => {
   const [pattern, setPattern] = useState('');
   const [sampleLog, setSampleLog] = useState('');
   const [customPatterns, setCustomPatterns] = useState('');
@@ -75,6 +76,7 @@ export const GrokDebugger = ({ http }: Props) => {
         query: {
           path: '_ingest/pipeline/_simulate',
           method: 'POST',
+          ...(dataSourceId && { dataSourceId }),
         },
         body,
         headers: { 'Content-Type': 'application/json' },
@@ -104,98 +106,178 @@ export const GrokDebugger = ({ http }: Props) => {
     }
   };
 
+  const clear = () => {
+    setSampleLog('');
+    setPattern('');
+    setCustomPatterns('');
+    setCaptureAllMatches(false);
+    setResult(null);
+    setError(null);
+  };
+
   return (
     <EuiPage>
       <EuiPageBody>
         <EuiPageContent>
           <EuiPageContentBody>
-            <EuiText>
-              <p>
-                Use the Grok Debugger to test and debug grok patterns against sample log data before
-                using them in an ingest pipeline. Enter a sample log line and a grok pattern to
-                simulate how OpenSearch would parse and extract fields from that log.
-              </p>
-            </EuiText>
-            <EuiSpacer size="m" />
-            <EuiForm>
-              <EuiFormRow label="Sample Log" fullWidth>
-                <EuiTextArea
-                  fullWidth
-                  value={sampleLog}
-                  onChange={(e) => setSampleLog(e.target.value)}
-                  rows={3}
-                  placeholder="e.g. 127.0.0.1 198.126.12 10/Oct/2025:13:55:36 -0700 200"
-                />
-              </EuiFormRow>
-              <EuiFormRow label="Grok Pattern" fullWidth>
-                <EuiFieldText
-                  fullWidth
-                  value={pattern}
-                  onChange={(e) => setPattern(e.target.value)}
-                  placeholder="e.g. %{IPORHOST:clientip} %{HTTPDATE:timestamp} %{NUMBER:response_status:int}"
-                />
-              </EuiFormRow>
-              <EuiSpacer size="m" />
-              <EuiAccordion id="advanced_config" buttonContent="Advanced settings">
-                <EuiSpacer size="s" />
-                <EuiFormRow
-                  label="Custom Patterns"
-                  helpText="One pattern per line: PATTERN_NAME pattern_regex"
-                  fullWidth
-                >
-                  <EuiTextArea
-                    fullWidth
-                    value={customPatterns}
-                    onChange={(e) => setCustomPatterns(e.target.value)}
-                    rows={4}
-                    placeholder={'e.g.\nNUMBER \\d{3,4}\nSTATUS open|closed'}
-                  />
-                </EuiFormRow>
-                <EuiFormRow>
-                  <EuiToolTip content='Collects all matches of repeated patterns into an array. For example, given "192.168.1.1 10.0.0.1 172.16.0.1" and pattern "%{IP:ipAddress} %{IP:ipAddress} %{IP:ipAddress}", all three IPs are collected into the ipAddress field.'>
-                    <EuiCheckbox
-                      id="capture_all_matches"
-                      label="Capture all matches"
-                      checked={captureAllMatches}
-                      onChange={(e) => setCaptureAllMatches(e.target.checked)}
+            <EuiFlexGroup alignItems="flexStart">
+              {/* Left panel: input form */}
+              <EuiFlexItem>
+                <EuiFlexGroup justifyContent="flexEnd">
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      href="https://docs.opensearch.org/latest/ingest-pipelines/processors/grok/"
+                      target="_blank"
+                      iconType="popout"
+                      iconSide="right"
+                      size="s"
+                    >
+                      Grok documentation
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiSpacer size="m" />
+                <EuiForm>
+                  <EuiFormRow label="Sample Log" fullWidth>
+                    <EuiTextArea
+                      fullWidth
+                      value={sampleLog}
+                      onChange={(e) => setSampleLog(e.target.value)}
+                      rows={4}
+                      placeholder="e.g. 127.0.0.1 198.126.12 10/Oct/2025:13:55:36 -0700 200"
                     />
-                  </EuiToolTip>
-                </EuiFormRow>
-              </EuiAccordion>
-              <EuiSpacer size="m" />
-              <EuiFlexGroup>
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    fill
-                    onClick={simulate}
-                    isLoading={isLoading}
-                    isDisabled={!pattern.trim() || !sampleLog.trim()}
+                  </EuiFormRow>
+                  <EuiFormRow label="Grok Pattern" fullWidth>
+                    <EuiTextArea
+                      fullWidth
+                      value={pattern}
+                      onChange={(e) => setPattern(e.target.value)}
+                      rows={4}
+                      placeholder="e.g. %{IPORHOST:clientip} %{HTTPDATE:timestamp} %{NUMBER:response_status:int}"
+                    />
+                  </EuiFormRow>
+                  <EuiSpacer size="m" />
+                  <EuiPanel paddingSize="none" hasBorder>
+                    <EuiAccordion
+                      id="advanced_config"
+                      buttonContent="Advanced settings"
+                      buttonProps={{ style: { backgroundColor: '#f5f7fa', padding: '8px 12px' } }}
+                      paddingSize="m"
+                    >
+                      <EuiFormRow label="Custom pattern definitions" fullWidth>
+                        <EuiTextArea
+                          fullWidth
+                          value={customPatterns}
+                          onChange={(e) => setCustomPatterns(e.target.value)}
+                          rows={4}
+                          placeholder={
+                            'CUSTOM_PATTERN (?:[a-zA-Z0-9._-]+)\nEach line: PATTERN_NAME pattern_regex'
+                          }
+                        />
+                      </EuiFormRow>
+                      <EuiFormRow>
+                        <EuiToolTip content='Collects all matches of repeated patterns into an array. For example, given "192.168.1.1 10.0.0.1 172.16.0.1" and pattern "%{IP:ipAddress} %{IP:ipAddress} %{IP:ipAddress}", all three IPs are collected into the ipAddress field.'>
+                          <EuiCheckbox
+                            id="capture_all_matches"
+                            label="Capture all matches"
+                            checked={captureAllMatches}
+                            onChange={(e) => setCaptureAllMatches(e.target.checked)}
+                          />
+                        </EuiToolTip>
+                      </EuiFormRow>
+                    </EuiAccordion>
+                  </EuiPanel>
+                  <EuiSpacer size="m" />
+                  <EuiFlexGroup gutterSize="s" alignItems="center">
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        fill
+                        size="s"
+                        onClick={simulate}
+                        isLoading={isLoading}
+                        isDisabled={!pattern.trim() || !sampleLog.trim()}
+                      >
+                        Simulate
+                      </EuiButton>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButton size="s" onClick={clear}>
+                        Clear
+                      </EuiButton>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiForm>
+              </EuiFlexItem>
+
+              {/* Right panel: result */}
+              <EuiFlexItem>
+                <EuiPanel paddingSize="none" hasBorder>
+                  {/* Header bar */}
+                  <div
+                    style={{
+                      backgroundColor: '#f5f7fa',
+                      padding: '12px 16px',
+                      borderBottom: '1px solid #d3dae6',
+                    }}
                   >
-                    Simulate
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiForm>
-
-            {error && (
-              <>
-                <EuiSpacer size="m" />
-                <EuiCallOut title="Pattern did not match" color="danger" iconType="alert">
-                  <p>{error}</p>
-                </EuiCallOut>
-              </>
-            )}
-
-            {result && (
-              <>
-                <EuiSpacer size="m" />
-                <EuiCallOut title="Match successful" color="success" iconType="check">
-                  <EuiCodeBlock language="json" isCopyable>
-                    {JSON.stringify(result, null, 2)}
-                  </EuiCodeBlock>
-                </EuiCallOut>
-              </>
-            )}
+                    <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        <EuiTitle size="xs">
+                          <h2>Results</h2>
+                        </EuiTitle>
+                      </EuiFlexItem>
+                      {result && (
+                        <EuiFlexItem grow={false}>
+                          <EuiText size="s" color="success">
+                            <span>✓ Pattern matched</span>
+                          </EuiText>
+                        </EuiFlexItem>
+                      )}
+                      {error && (
+                        <EuiFlexItem grow={false}>
+                          <EuiText size="s" color="danger">
+                            <span>✗ Pattern match failed</span>
+                          </EuiText>
+                        </EuiFlexItem>
+                      )}
+                    </EuiFlexGroup>
+                  </div>
+                  {/* Body */}
+                  <div style={{ padding: '16px' }}>
+                    {!result && !error && (
+                      <EuiText color="subdued">
+                        <p>Run Simulate to see results.</p>
+                      </EuiText>
+                    )}
+                    {error && (
+                      <EuiText size="s" color="danger">
+                        <p>Correct the grok pattern or add custom pattern definitions.</p>
+                        <p>{error}</p>
+                      </EuiText>
+                    )}
+                    {result && (
+                      <div style={{ ['--euiTableHeaderBackgroundColor' as any]: '#f5f7fa' }}>
+                        <style>{`.grokResultsTable thead th { background-color: #f5f7fa !important; }`}</style>
+                        <EuiBasicTable
+                          className="grokResultsTable"
+                          items={Object.entries(result as Record<string, any>).map(
+                            ([field, value]) => ({
+                              field,
+                              value:
+                                typeof value === 'object' ? JSON.stringify(value) : String(value),
+                            })
+                          )}
+                          columns={[
+                            { field: 'field', name: 'Field', width: '30%' },
+                            { field: 'value', name: 'Value' },
+                          ]}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </EuiPanel>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiPageContentBody>
         </EuiPageContent>
       </EuiPageBody>

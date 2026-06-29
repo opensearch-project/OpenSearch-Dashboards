@@ -20,13 +20,13 @@ export class GrokDebuggerPlugin implements Plugin<void, void> {
         defaultMessage: 'Grok Debugger',
       }),
       enableRouting: false,
-      mount: async ({ element }) => {
+      mount: async ({ element, dataSourceId }) => {
         const { createRoot } = await import('react-dom/client');
         const React = await import('react');
         const { GrokDebugger } = await import('./grok_debugger');
 
         const root = createRoot(element);
-        root.render(React.createElement(GrokDebugger, { http }));
+        root.render(React.createElement(GrokDebugger, { http, dataSourceId }));
         return () => root.unmount();
       },
     });

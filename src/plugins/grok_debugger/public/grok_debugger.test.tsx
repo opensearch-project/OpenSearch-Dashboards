@@ -27,6 +27,16 @@ describe('GrokDebugger', () => {
     expect(getByPlaceholderText(/127\.0\.0\.1/)).toBeInTheDocument();
     expect(getByPlaceholderText(/IPORHOST/)).toBeInTheDocument();
     expect(getByText('Simulate')).toBeInTheDocument();
+    expect(getByText('Clear')).toBeInTheDocument();
+    expect(getByText('Results')).toBeInTheDocument();
+  });
+
+  it('clears all fields when Clear is clicked', () => {
+    const utils = renderComponent();
+    fillFields(utils, '127.0.0.1', '%{IP:client}');
+    fireEvent.click(utils.getByText('Clear'));
+    expect((utils.getByPlaceholderText(/127\.0\.0\.1/) as HTMLTextAreaElement).value).toBe('');
+    expect((utils.getByPlaceholderText(/IPORHOST/) as HTMLTextAreaElement).value).toBe('');
   });
 
   it('disables Simulate button when inputs are empty', () => {
@@ -49,8 +59,9 @@ describe('GrokDebugger', () => {
     fillFields(utils, '127.0.0.1', '%{IP:client}');
     fireEvent.click(utils.getByText('Simulate'));
 
-    await utils.findByText('Match successful');
-    expect(utils.getByText(/127\.0\.0\.1/, { selector: 'code' })).toBeInTheDocument();
+    await utils.findByText('✓ Pattern matched');
+    expect(utils.getAllByText('127.0.0.1').length).toBeGreaterThan(0);
+    expect(utils.getByText('client')).toBeInTheDocument();
   });
 
   it('shows error when doc contains an error', async () => {
@@ -62,7 +73,8 @@ describe('GrokDebugger', () => {
     fillFields(utils, 'bad log', '%{IP:client}');
     fireEvent.click(utils.getByText('Simulate'));
 
-    await utils.findByText('Pattern did not match', { selector: 'p' });
+    await utils.findByText('✗ Pattern match failed');
+    expect(utils.getByText('Pattern did not match')).toBeInTheDocument();
   });
 
   it('shows error from root_cause on HTTP 400', async () => {
@@ -99,7 +111,9 @@ describe('GrokDebugger', () => {
 
     const utils = renderComponent();
     fillFields(utils, '404', '%{MYNUM:num}');
-    fireEvent.change(utils.getByPlaceholderText(/STATUS/), { target: { value: 'MYNUM \\d+' } });
+    fireEvent.change(utils.getByPlaceholderText(/CUSTOM_PATTERN/), {
+      target: { value: 'MYNUM \\d+' },
+    });
     fireEvent.click(utils.getByText('Simulate'));
 
     await waitFor(() => expect(mockHttp.post).toHaveBeenCalled());
