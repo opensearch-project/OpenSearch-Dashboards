@@ -389,7 +389,6 @@ export const normalizeHistoryStateForComparison = (
     datasetId: queryState?.dataset?.id,
     language: queryState?.language ?? '',
     languageType: editorState?.languageType,
-    isQueryEditorDirty: editorState?.isQueryEditorDirty,
     time: globalState?.time,
   });
 };

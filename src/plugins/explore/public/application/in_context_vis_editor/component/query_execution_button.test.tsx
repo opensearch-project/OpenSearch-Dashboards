@@ -21,9 +21,11 @@ jest.mock('../../../../../data/public', () => ({
   useCancelButtonTiming: jest.fn((v) => v),
 }));
 
-const buildState = (overrides: Record<string, any> = {}) => ({
+const buildState = (overrides: Record<string, any> = {}, isDirty?: boolean) => ({
+  queryBuilder: {
+    compareQueryStateChange: jest.fn().mockReturnValue(isDirty),
+  },
   queryEditorState: {
-    isQueryEditorDirty: false,
     dateRange: undefined,
     userInitiatedQuery: false,
     queryStatus: { status: QueryExecutionStatus.UNINITIALIZED },
@@ -35,7 +37,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   (isTimeRangeInvalid as jest.Mock).mockReturnValue(false);
   (useCancelButtonTiming as jest.Mock).mockImplementation((v) => v);
-  (useQueryBuilderState as jest.Mock).mockReturnValue(buildState());
+  (useQueryBuilderState as jest.Mock).mockReturnValue(buildState({}, false));
 });
 
 describe('QueryExecutionButton', () => {
@@ -52,7 +54,7 @@ describe('QueryExecutionButton', () => {
   });
 
   it('shows Update when query is dirty', () => {
-    (useQueryBuilderState as jest.Mock).mockReturnValue(buildState({ isQueryEditorDirty: true }));
+    (useQueryBuilderState as jest.Mock).mockReturnValue(buildState({}, true));
     render(<QueryExecutionButton />);
     expect(screen.getByText('Update')).toBeInTheDocument();
     const button = screen.getByTestId('exploreQueryExecutionButton');

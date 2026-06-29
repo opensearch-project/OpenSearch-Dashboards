@@ -41,7 +41,6 @@ describe('useQueryBuilderState', () => {
       promptModeIsAvailable: false,
       promptToQueryIsLoading: false,
       summaryAgentIsAvailable: false,
-      isQueryEditorDirty: false,
       userInitiatedQuery: false,
       languageType: 'PPL',
     });
@@ -115,7 +114,6 @@ describe('useQueryBuilderState', () => {
         promptModeIsAvailable: false,
         promptToQueryIsLoading: false,
         summaryAgentIsAvailable: false,
-        isQueryEditorDirty: false,
         userInitiatedQuery: false,
         languageType: 'PPL',
       });

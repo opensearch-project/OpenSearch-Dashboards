@@ -119,7 +119,6 @@ describe('DatasetSelectWidget', () => {
       expect(mockUpdateQueryState).toHaveBeenCalledWith(
         expect.objectContaining({ query: '', dataset: { id: 'ds1', type: 'INDEX_PATTERN' } })
       );
-      expect(mockUpdateQueryEditorState).toHaveBeenCalledWith({ isQueryEditorDirty: true });
       expect(mockClearEditor).toHaveBeenCalled();
     });
   });

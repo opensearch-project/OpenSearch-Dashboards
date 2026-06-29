@@ -59,11 +59,7 @@ export const ResizableQueryPanelAndVisualization = () => {
   );
   const { visualizationBuilderForEditor } = useVisualizationBuilder();
 
-  const transformServices = useTransformationService(visualizationBuilderForEditor, {
-    onPipelineChange: useCallback(() => {
-      queryBuilder.updateQueryEditorState({ isQueryEditorDirty: true });
-    }, [queryBuilder]),
-  });
+  const transformServices = useTransformationService(visualizationBuilderForEditor);
 
   useEffect(() => {
     queryBuilder.updateQueryEditorState({ activeBottomPanelTab: activeTab });

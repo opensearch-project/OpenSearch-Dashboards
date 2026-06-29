@@ -28,7 +28,7 @@ import { AreaChartStyleOptions } from './area/area_vis_config';
 import { LineChartStyleOptions } from './line/line_vis_config';
 import { GaugeChartStyleOptions } from './gauge/gauge_vis_config';
 import { HeatmapChartStyleOptions } from './heatmap/heatmap_vis_config';
-import { UrlVisState } from './visualization_builder';
+import { VisState } from './visualization_builder';
 import { normalizeState } from '../../application/utils/state_management/utils/state_comparison';
 
 export const convertMappingsToStrings = (mappings: AxisColumnMappings): AxisFieldNameMappings =>
@@ -250,7 +250,7 @@ export const adaptLegacyData = (config?: ChartConfig) => {
 };
 
 export const isVisStateEqual = (
-  urlState: UrlVisState,
+  urlState: VisState,
   currentConfig: ChartConfig | undefined
 ): boolean => {
   if (!currentConfig) return false;
