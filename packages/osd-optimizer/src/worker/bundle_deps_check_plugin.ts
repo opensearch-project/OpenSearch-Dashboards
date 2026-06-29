@@ -14,7 +14,7 @@
 /**
  * @notice
  *
- * This module was heavily inspired by the externals plugin that ships with webpack (rspack-compatible)
+ * This module was heavily inspired by the externals plugin that ships with webpack@97d58d31
  * MIT License http://www.opensource.org/licenses/mit-license.php
  * Author Tobias Koppers @sokra
  */
