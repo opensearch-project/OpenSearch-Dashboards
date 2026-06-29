@@ -54,14 +54,34 @@ export const SHARED_SINGLETONS: Readonly<Record<string, string>> = {
 };
 
 /**
- * Best-effort version label for a shared module. Many libraries expose
- * `.version` (react, react-dom, moment) or `.VERSION` (lodash); the rest fall
- * back to `'0.0.0'`. The exact value is non-critical: because the remotes mark
- * these `singleton: true`, the MF runtime uses the single host-provided copy
- * regardless of the version key (a non-satisfying `requiredVersion` only logs a
- * console warning, it does not change which instance is used).
+ * Best-effort version label for a shared module. The build-time
+ * `__versions__` map exported by `@osd/ui-shared-deps`'s entry.js is the
+ * primary source — it carries the real package.json versions, which is what
+ * the MF runtime needs to satisfy remote `requiredVersion` ranges (Issue 1
+ * from the post-Phase-16 review). For each `SHARED_SINGLETONS` global key,
+ * the host first looks at `sharedDeps.__versions__[globalKey]`. When that is
+ * absent (a sharedDeps build older than the `__versions__` change, or a
+ * mock used in tests), the function falls back to `.version` / `.VERSION` on
+ * the module itself — which works for react/react-dom/moment but not the
+ * many libraries that don't export a version property — and ultimately to
+ * `'0.0.0'`.
+ *
+ * The exact value matters: even though remotes mark these `singleton: true`
+ * (so the host instance is always used regardless), a non-satisfying
+ * `requiredVersion` triggers a console warning per remote per page load.
+ * The build-time map eliminates that warning class for the canonical case.
  */
-export function readVersion(mod: unknown): string {
+export function readVersion(
+  mod: unknown,
+  versionsMap?: Record<string, unknown>,
+  globalKey?: string
+): string {
+  if (versionsMap && globalKey) {
+    const fromMap = versionsMap[globalKey];
+    if (typeof fromMap === 'string' && fromMap.length > 0) {
+      return fromMap;
+    }
+  }
   const candidate = mod as { version?: unknown; VERSION?: unknown } | null | undefined;
   if (candidate) {
     if (typeof candidate.version === 'string' && candidate.version.length > 0) {
@@ -89,6 +109,13 @@ export function readVersion(mod: unknown): string {
  */
 export function buildShareScope(sharedDeps: Record<string, unknown>): ShareScope {
   const scope: ShareScope = {};
+  // The build-time-emitted version map (entry.js) lives on the same global.
+  // When absent (older shared-deps build, or a test mock), readVersion falls
+  // back to the legacy .version / .VERSION inspection — backward-compatible.
+  const versionsMap =
+    typeof sharedDeps.__versions__ === 'object' && sharedDeps.__versions__ !== null
+      ? (sharedDeps.__versions__ as Record<string, unknown>)
+      : undefined;
 
   for (const [pkg, globalKey] of Object.entries(SHARED_SINGLETONS)) {
     const mod = sharedDeps[globalKey];
@@ -98,7 +125,7 @@ export function buildShareScope(sharedDeps: Record<string, unknown>): ShareScope
     }
 
     scope[pkg] = {
-      [readVersion(mod)]: {
+      [readVersion(mod, versionsMap, globalKey)]: {
         // `get` returns a factory; the factory returns the live module so all
         // remotes share this exact instance (true singleton identity).
         get: () => () => mod,

@@ -65,3 +65,36 @@ export const LodashFp = require('lodash/fp');
 
 // runtime deps which don't need to be copied across all bundles
 export const TsLib = require('tslib');
+
+// Version metadata for the shared singletons, sourced from each package's
+// authoritative package.json at build time. Module Federation's runtime
+// compares the host-advertised version against each remote's required range;
+// without this map the host's `readVersion` fallback labelled every singleton
+// as "0.0.0" and the MF runtime emitted a noisy "Version 0.0.0 does not
+// satisfy ..." warning per singleton per remote per page load (Issue 1).
+//
+// The keys mirror the canonical singletons in
+// `packages/osd-mfe/src/bootstrap/share_scope.ts::SHARED_SINGLETONS`. The
+// orchestrator's `buildShareScope` reads from this object first; subpath
+// exports (RxjsOperators, ReactDomServer, OsdI18nReact, MonacoBarePluginApi,
+// LodashFp, ElasticEuiLibServices, ElasticEuiChartsTheme, Theme) and CSS-only
+// theme bundles are intentionally NOT in the map — they are not Module
+// Federation singletons and share their parent package's identity.
+export const __versions__ = Object.freeze({
+  ElasticCharts: require('@elastic/charts/package.json').version,
+  ElasticEui: require('@elastic/eui/package.json').version,
+  ElasticNumeral: require('@elastic/numeral/package.json').version,
+  Jquery: require('jquery/package.json').version,
+  Lodash: require('lodash/package.json').version,
+  Moment: require('moment/package.json').version,
+  MomentTimezone: require('moment-timezone/package.json').version,
+  OsdI18n: require('@osd/i18n/package.json').version,
+  OsdMonaco: require('@osd/monaco/package.json').version,
+  React: require('react/package.json').version,
+  ReactDom: require('react-dom/package.json').version,
+  ReactRouter: require('react-router/package.json').version, // eslint-disable-line @osd/eslint/module_migration
+  ReactRouterDom: require('react-router-dom/package.json').version,
+  Rxjs: require('rxjs/package.json').version,
+  StyledComponents: require('styled-components/package.json').version,
+  TsLib: require('tslib/package.json').version,
+});

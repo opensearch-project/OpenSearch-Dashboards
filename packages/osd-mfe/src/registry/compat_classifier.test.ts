@@ -236,13 +236,22 @@ describe('happy path — every current remote classifies COMPATIBLE against the 
   });
 
   it('all 58 canonical registry entries classify compatible', () => {
-    const raw = JSON.parse(Fs.readFileSync(CANONICAL_REGISTRY, 'utf8')) as Registry;
-    const ids = Object.keys(raw.mfes);
+    const raw = JSON.parse(Fs.readFileSync(CANONICAL_REGISTRY, 'utf8')) as
+      | Registry
+      | { default?: { mfes?: Record<string, MfeEntry> }; mfes?: Record<string, MfeEntry> };
+    // v3 registries store mfes under `.default.mfes` (layered shape); v1/v2
+    // had them at top-level `.mfes`. Read from either shape so this test
+    // stays meaningful as the canonical-registry schemaVersion evolves.
+    const mfes =
+      (raw as { default?: { mfes?: Record<string, MfeEntry> } }).default?.mfes ??
+      (raw as { mfes?: Record<string, MfeEntry> }).mfes ??
+      {};
+    const ids = Object.keys(mfes);
     expect(ids.length).toBeGreaterThan(0);
 
     const incompatible: Array<{ id: string; reasons: string[] }> = [];
     for (const id of ids) {
-      const entry: MfeEntry = raw.mfes[id];
+      const entry: MfeEntry = mfes[id];
       const result = classifyCompatibility(host, {
         builtAgainst: entry.builtAgainst,
         compat: entry.compat,
