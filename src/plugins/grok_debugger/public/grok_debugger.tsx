@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   EuiAccordion,
   EuiButton,
@@ -31,14 +31,34 @@ interface Props {
   dataSourceId?: string;
 }
 
+const STORAGE_KEY = 'grokDebugger';
+const load = (key: string, fallback = '') =>
+  sessionStorage.getItem(`${STORAGE_KEY}.${key}`) ?? fallback;
+const save = (key: string, value: string) => sessionStorage.setItem(`${STORAGE_KEY}.${key}`, value);
+
 export const GrokDebugger = ({ http, dataSourceId }: Props) => {
-  const [pattern, setPattern] = useState('');
-  const [sampleLog, setSampleLog] = useState('');
-  const [customPatterns, setCustomPatterns] = useState('');
+  const [pattern, setPattern] = useState(() => load('pattern'));
+  const [sampleLog, setSampleLog] = useState(() => load('sampleLog'));
+  const [customPatterns, setCustomPatterns] = useState(() => load('customPatterns'));
   const [result, setResult] = useState<object | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [captureAllMatches, setCaptureAllMatches] = useState(false);
+  const [captureAllMatches, setCaptureAllMatches] = useState(
+    () => load('captureAllMatches') === 'true'
+  );
+
+  useEffect(() => {
+    save('pattern', pattern);
+  }, [pattern]);
+  useEffect(() => {
+    save('sampleLog', sampleLog);
+  }, [sampleLog]);
+  useEffect(() => {
+    save('customPatterns', customPatterns);
+  }, [customPatterns]);
+  useEffect(() => {
+    save('captureAllMatches', String(captureAllMatches));
+  }, [captureAllMatches]);
 
   const simulate = async () => {
     setIsLoading(true);
@@ -113,6 +133,9 @@ export const GrokDebugger = ({ http, dataSourceId }: Props) => {
     setCaptureAllMatches(false);
     setResult(null);
     setError(null);
+    ['pattern', 'sampleLog', 'customPatterns', 'captureAllMatches'].forEach((k) =>
+      sessionStorage.removeItem(`${STORAGE_KEY}.${k}`)
+    );
   };
 
   return (
