@@ -195,7 +195,15 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
     // connections get identical request/response interception (e.g. /_resolve/index
     // synthesis). Undefined when no Transport is registered → data-source clients are
     // built exactly as before (no behavior change).
-    this.dataSourceService.setCustomTransport(core.opensearch.getClientTransport?.());
+    const __dbgTransport = core.opensearch.getClientTransport?.();
+    // eslint-disable-next-line no-console
+    console.log(
+      '[DBG es68] data_source.start: getClientTransport typeof=',
+      typeof core.opensearch.getClientTransport,
+      '| returned=',
+      __dbgTransport ? __dbgTransport.name || 'anon-class' : __dbgTransport
+    );
+    this.dataSourceService.setCustomTransport(__dbgTransport);
     return {
       getAuthenticationMethodRegistry: () => this.authMethodsRegistry,
       getCustomApiSchemaRegistry: () => this.customApiSchemaRegistry,
