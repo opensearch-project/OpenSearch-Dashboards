@@ -36,7 +36,7 @@ export function isFailureStats(stats: Stats) {
   // Log warnings if present
   if (warnings && warnings.length > 0) {
     // eslint-disable-next-line no-console
-    console.warn(`[Webpack] ${warnings.length} warning(s) found:`);
+    console.warn(`[Rspack] ${warnings.length} warning(s) found:`);
     warnings.forEach((warning, index) => {
       // eslint-disable-next-line no-console
       console.warn(`  Warning ${index + 1}: ${warning.message || warning}`);
@@ -46,7 +46,7 @@ export function isFailureStats(stats: Stats) {
   // Log errors if present
   if (errors && errors.length > 0) {
     // eslint-disable-next-line no-console
-    console.error(`[Webpack] ${errors.length} error(s) found:`);
+    console.error(`[Rspack] ${errors.length} error(s) found:`);
     errors.forEach((error, index) => {
       // eslint-disable-next-line no-console
       console.error(`  Error ${index + 1}: ${error.message || error}`);
@@ -72,7 +72,7 @@ export function failedStatsToErrorMessage(stats: Stats) {
   return `Optimizations failure.\n${details.split('\n').join('\n    ')}`;
 }
 
-export interface WebpackResolveData {
+export interface RspackResolveData {
   /** compilation context */
   context: string;
   /** full request (with loaders) */
@@ -92,7 +92,7 @@ export interface WebpackResolveData {
   /** string from source code */
   rawRequest: string;
   loaders: unknown;
-  /** absolute path to file, but probablt includes loaders in some cases */
+  /** absolute path to file, but probably includes loaders in some cases */
   resource: string;
   /** module type */
   type: string | 'javascript/auto';
@@ -113,7 +113,7 @@ interface Dependency {
 }
 
 /** used for standard js/ts modules */
-export interface WebpackNormalModule {
+export interface RspackNormalModule {
   type: string;
   /** absolute path to file on disk */
   resource: string;
@@ -124,12 +124,12 @@ export interface WebpackNormalModule {
   dependencies: Dependency[];
 }
 
-export function isNormalModule(module: any): module is WebpackNormalModule {
+export function isNormalModule(module: any): module is RspackNormalModule {
   return module?.constructor?.name === 'NormalModule';
 }
 
 /** module used for ignored code */
-export interface WebpackIgnoredModule {
+export interface RspackIgnoredModule {
   type: string;
   /** unique string to identify this module with (starts with `ignored`) */
   identifierStr: string;
@@ -138,15 +138,15 @@ export interface WebpackIgnoredModule {
 }
 
 // TODO: refactor the types here
-export function isIgnoredModule(module: any): module is WebpackIgnoredModule {
+export function isIgnoredModule(module: any): module is RspackIgnoredModule {
   return (
     (module?.constructor?.name === 'RawModule' && module.identifierStr?.startsWith('ignored ')) ||
     (module?.constructor?.name === 'Module' && module?.identifier?.().startsWith('ignored'))
   );
 }
 
-/** module replacing imports for webpack externals */
-export interface WebpackExternalModule {
+/** module replacing imports for rspack externals */
+export interface RspackExternalModule {
   type: string;
   id: string;
   /** JS used to get instance of External */
@@ -155,16 +155,16 @@ export interface WebpackExternalModule {
   userRequest: string;
 }
 
-export function isExternalModule(module: any): module is WebpackExternalModule {
+export function isExternalModule(module: any): module is RspackExternalModule {
   return module?.constructor?.name === 'ExternalModule';
 }
 
-export function isContextModule(module: any): module is WebpackExternalModule {
+export function isContextModule(module: any): module is RspackExternalModule {
   return module?.constructor?.name === 'ContextModule';
 }
 
-/** module replacing imports for webpack externals */
-export interface WebpackConcatenatedModule {
+/** module replacing imports for rspack externals */
+export interface RspackConcatenatedModule {
   type: string;
   id: number;
   dependencies: Dependency[];
@@ -172,11 +172,11 @@ export interface WebpackConcatenatedModule {
   modules: unknown[];
 }
 
-export function isConcatenatedModule(module: any): module is WebpackConcatenatedModule {
+export function isConcatenatedModule(module: any): module is RspackConcatenatedModule {
   return module?.constructor?.name === 'ConcatenatedModule';
 }
 
-export function getModulePath(module: WebpackNormalModule) {
+export function getModulePath(module: RspackNormalModule) {
   const queryIndex = module.resource.indexOf('?');
   return queryIndex === -1 ? module.resource : module.resource.slice(0, queryIndex);
 }

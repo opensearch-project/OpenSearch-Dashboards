@@ -43,7 +43,6 @@
     "comment-stripper": "^0.0.4",
     "css-loader": "^5.2.7",
     "del": "^6.1.1",
-    "loader-utils": "^2.0.4",
     "sass-embedded": "1.93.3",
     "sass-loader": "16.0.5",
     "val-loader": "^2.1.2"
