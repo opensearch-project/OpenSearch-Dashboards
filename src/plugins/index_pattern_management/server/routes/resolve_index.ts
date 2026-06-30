@@ -67,16 +67,6 @@ export function registerResolveIndexRoute(router: IRouter): void {
         ? await context.dataSource.opensearch.getClient(dataSourceId)
         : context.core.opensearch.client.asCurrentUser;
 
-      // eslint-disable-next-line no-console
-      console.log(
-        '[DBG es68] resolve_index ROUTE HIT: dataSourceId=',
-        dataSourceId,
-        '| query=',
-        req.params.query,
-        '| transportCtor=',
-        (client as any)?.transport?.constructor?.name
-      );
-
       try {
         const result = await client.transport.request({
           method: 'GET',
@@ -84,17 +74,8 @@ export function registerResolveIndexRoute(router: IRouter): void {
             queryString ? '?' + new URLSearchParams(queryString).toString() : ''
           }`,
         });
-        // eslint-disable-next-line no-console
-        console.log('[DBG es68] resolve_index SUCCESS, body=', JSON.stringify(result.body));
         return res.ok({ body: result.body });
       } catch (err: any) {
-        // eslint-disable-next-line no-console
-        console.log(
-          '[DBG es68] resolve_index ERROR: statusCode=',
-          err.statusCode,
-          '| message=',
-          err.message
-        );
         return res.customError({
           statusCode: err.statusCode || 500,
           body: {
