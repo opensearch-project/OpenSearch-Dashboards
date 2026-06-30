@@ -90,6 +90,61 @@ describe('runLint resolution loop', () => {
     ).toHaveLength(1);
   });
 
+  describe('runtimeOnly flag', () => {
+    const probe = () => {
+      registerDetector('probe', (_t, cfg) => [
+        {
+          ruleId: cfg.id,
+          severity: cfg.severity,
+          message: 'probe',
+          range: { startLine: 1, startColumn: 0, endLine: 1, endColumn: 1 },
+        },
+      ]);
+    };
+
+    it('runs a runtimeOnly rule on the runtime-bundle surface', () => {
+      probe();
+      const catalog = [makeRule({ id: 'a', detector: 'probe', runtimeOnly: true })];
+      expect(
+        runLint(fakeTree, {
+          catalog,
+          ruleNameToIndex: rni,
+          context: { grammarSurface: 'runtime-bundle' },
+        })
+      ).toHaveLength(1);
+    });
+
+    it('skips a runtimeOnly rule on the compiled-simplified fallback surface', () => {
+      probe();
+      const catalog = [makeRule({ id: 'a', detector: 'probe', runtimeOnly: true })];
+      expect(
+        runLint(fakeTree, {
+          catalog,
+          ruleNameToIndex: rni,
+          context: { grammarSurface: 'compiled-simplified' },
+        })
+      ).toEqual([]);
+    });
+
+    it('skips a runtimeOnly rule when no grammarSurface is set (safe default)', () => {
+      probe();
+      const catalog = [makeRule({ id: 'a', detector: 'probe', runtimeOnly: true })];
+      expect(runLint(fakeTree, { catalog, ruleNameToIndex: rni, context: {} })).toEqual([]);
+    });
+
+    it('runs a non-runtimeOnly rule on the compiled-simplified surface', () => {
+      probe();
+      const catalog = [makeRule({ id: 'a', detector: 'probe' })];
+      expect(
+        runLint(fakeTree, {
+          catalog,
+          ruleNameToIndex: rni,
+          context: { grammarSurface: 'compiled-simplified' },
+        })
+      ).toHaveLength(1);
+    });
+  });
+
   it('applies bundle overrides over local config', () => {
     registerDetector('ok', (_t, cfg) => [
       {

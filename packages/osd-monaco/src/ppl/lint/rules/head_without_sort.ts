@@ -9,10 +9,12 @@ import { Detector } from '../types';
 import { buildPipelineShape, collectAlternateSourceSubtrees } from '../pipeline_shape';
 import { rangeFromContext } from '../range_utils';
 
+// eventstats is intentionally excluded — its by-clause window loses sort order.
 const ORDER_PRESERVING_COMMANDS = new Set([
   'evalCommand',
   'whereCommand',
   'fieldsCommand',
+  'tableCommand',
   'headCommand',
   'parseCommand',
   'grokCommand',
@@ -23,6 +25,12 @@ const ORDER_PRESERVING_COMMANDS = new Set([
   'flattenCommand',
   'patternsCommand',
   'renameCommand',
+  'regexCommand',
+  'reverseCommand',
+  'appendcolCommand',
+  'dedupCommand',
+  'streamstatsCommand',
+  'binCommand',
 ]);
 
 export const headWithoutSortDetector: Detector = (tree, config, _context, ruleNameToIndex) => {
@@ -31,7 +39,13 @@ export const headWithoutSortDetector: Detector = (tree, config, _context, ruleNa
 
   const altRoots = collectAlternateSourceSubtrees(tree, ruleNameToIndex);
   const isInsideAltSource = (node: ParserRuleContext): boolean => {
-    for (let n: ParserRuleContext | null = node; n; n = n.parent as ParserRuleContext | null) {
+    // Walk from parent so top-level append/lookup is analyzed as order-destroying,
+    // while stages inside their bracketed sub-pipeline are still pruned.
+    for (
+      let n: ParserRuleContext | null = node.parent as ParserRuleContext | null;
+      n;
+      n = n.parent as ParserRuleContext | null
+    ) {
       if (altRoots.has(n)) {
         return true;
       }

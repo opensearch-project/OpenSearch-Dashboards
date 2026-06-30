@@ -60,6 +60,7 @@ export function runLint(tree: ParserRuleContext, options: RunLintOptions): Diagn
     if (
       !config.enabled ||
       config.needsExplain ||
+      (config.runtimeOnly && context?.grammarSurface !== 'runtime-bundle') ||
       !appliesTo(config, dataSourceVersion, context?.isCalcite, knownVersion) ||
       (config.needsContext && isContextEmpty(context))
     ) {

@@ -44,4 +44,27 @@ describe('head-without-sort (compiled surface)', () => {
     expect(ids('search source=logs | appendcol [ sort age ] | head 5')).toContain(
       'head-without-sort'
     ));
+
+  it('flags head after a top-level append (UNION ALL destroys order)', () =>
+    expect(
+      ids('search source=logs | sort age | append [ search source=other ] | head 5')
+    ).toContain('head-without-sort'));
+  it('flags head after a top-level lookup (LEFT JOIN destroys order)', () =>
+    expect(ids('search source=logs | sort age | lookup dim id | head 5')).toContain(
+      'head-without-sort'
+    ));
+
+  it('does not flag head after sort | reverse (reverse flips collation deterministically)', () =>
+    expect(ids('search source=logs | sort age | reverse | head 5')).not.toContain(
+      'head-without-sort'
+    ));
+  it('does not flag head after sort | streamstats by (streaming window preserves order)', () =>
+    expect(
+      ids('search source=logs | sort age | streamstats count() as c by category | head 5')
+    ).not.toContain('head-without-sort'));
+
+  it('flags head after sort | eventstats ... by (by-clause window loses order)', () =>
+    expect(
+      ids('search source=logs | sort age | eventstats avg(bytes) as a by category | head 5')
+    ).toContain('head-without-sort'));
 });
