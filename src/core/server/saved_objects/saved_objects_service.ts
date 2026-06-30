@@ -53,6 +53,7 @@ import {
   SavedObjectConfig,
 } from './saved_objects_config';
 import { OpenSearchDashboardsRequest, InternalHttpServiceSetup } from '../http';
+import { Capabilities } from '../capabilities';
 import { SavedObjectsClientContract, SavedObjectsType, SavedObjectStatusMeta } from './types';
 import { ISavedObjectsRepository, SavedObjectsRepository } from './service/lib/repository';
 import {
@@ -308,6 +309,7 @@ export class SavedObjectsService
 
   private migrator$ = new Subject<IOpenSearchDashboardsMigrator>();
   private typeRegistry = new SavedObjectTypeRegistry();
+  private capabilitiesResolver?: (request: OpenSearchDashboardsRequest) => Promise<Capabilities>;
   private started = false;
 
   private respositoryFactoryProvider?: SavedObjectRepositoryFactoryProvider;
@@ -322,6 +324,12 @@ export class SavedObjectsService
 
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger.get('savedobjects-service');
+  }
+
+  public setCapabilitiesResolver(
+    resolver: (request: OpenSearchDashboardsRequest) => Promise<Capabilities>
+  ) {
+    this.capabilitiesResolver = resolver;
   }
 
   public async setup(setupDeps: SavedObjectsSetupDeps): Promise<InternalSavedObjectsServiceSetup> {
@@ -371,6 +379,7 @@ export class SavedObjectsService
       logger: this.logger,
       config: this.config,
       migratorPromise: this.migrator$.pipe(first()).toPromise(),
+      getCapabilities: () => this.capabilitiesResolver,
     });
 
     return {

@@ -63,6 +63,7 @@ export async function importSavedObjectsFromStream({
   workspaces,
   dataSourceEnabled,
   isCopy,
+  canImportConfig,
 }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse> {
   let errorAccumulator: SavedObjectsImportError[] = [];
   const supportedTypes = typeRegistry.getImportableAndExportableTypes().map((type) => type.name);
@@ -74,27 +75,26 @@ export async function importSavedObjectsFromStream({
     supportedTypes,
     dataSourceId,
   });
-  const configErrors: SavedObjectsImportError[] = collectSavedObjectsResult.collectedObjects
-    .filter((obj) => obj.type === 'config')
-    .map((obj) => ({
-      error: { type: 'unsupported_type' } as SavedObjectsImportUnsupportedTypeError,
-      type: obj.type,
-      id: obj.id,
-      title: obj.id,
-      meta: { title: obj.id },
-    }));
-  if (configErrors.length > 0) {
-    return {
-      successCount: 0,
-      success: false,
-      errors: configErrors,
-    };
+  let collectedObjects = collectSavedObjectsResult.collectedObjects;
+
+  if (!canImportConfig) {
+    const configErrors: SavedObjectsImportError[] = collectedObjects
+      .filter((obj) => obj.type === 'config')
+      .map((obj) => ({
+        error: { type: 'unsupported_type' } as SavedObjectsImportUnsupportedTypeError,
+        type: obj.type,
+        id: obj.id,
+        title: obj.id,
+        meta: { title: obj.id },
+      }));
+    errorAccumulator = [...errorAccumulator, ...configErrors];
+    collectedObjects = collectedObjects.filter((obj) => obj.type !== 'config');
   }
 
   // if dataSource is not enabled, but object type is data-source, or saved object id contains datasource id
   // return unsupported type error
   if (!dataSourceEnabled) {
-    const notSupportedErrors: SavedObjectsImportError[] = collectSavedObjectsResult.collectedObjects.reduce(
+    const notSupportedErrors: SavedObjectsImportError[] = collectedObjects.reduce(
       (errors: SavedObjectsImportError[], obj) => {
         if (obj.type === 'data-source' || isSavedObjectWithDataSource(obj.id)) {
           const error: SavedObjectsImportUnsupportedTypeError = { type: 'unsupported_type' };
@@ -121,7 +121,7 @@ export async function importSavedObjectsFromStream({
 
   // Validate references
   const validateReferencesResult = await validateReferences(
-    collectSavedObjectsResult.collectedObjects,
+    collectedObjects,
     savedObjectsClient,
     namespace
   );
@@ -129,11 +129,9 @@ export async function importSavedObjectsFromStream({
 
   if (isCopy) {
     // Data sources can only be assigned to workspaces and can not be copied between workspaces.
-    collectSavedObjectsResult.collectedObjects = collectSavedObjectsResult.collectedObjects.filter(
-      (obj) => obj.type !== 'data-source'
-    );
+    collectedObjects = collectedObjects.filter((obj) => obj.type !== 'data-source');
     const validateDataSourcesResult = await validateDataSources(
-      collectSavedObjectsResult.collectedObjects,
+      collectedObjects,
       savedObjectsClient,
       errorAccumulator,
       workspaces
@@ -143,12 +141,12 @@ export async function importSavedObjectsFromStream({
 
   if (createNewCopies) {
     // randomly generated id
-    importIdMap = regenerateIds(collectSavedObjectsResult.collectedObjects, dataSourceId);
+    importIdMap = regenerateIds(collectedObjects, dataSourceId);
   } else {
     // in check conclict and override mode
     // Check single-namespace objects for conflicts in this namespace, and check multi-namespace objects for conflicts across all namespaces
     const checkConflictsParams = {
-      objects: collectSavedObjectsResult.collectedObjects,
+      objects: collectedObjects,
       savedObjectsClient,
       namespace,
       ignoreRegularConflicts: overwrite,
@@ -195,8 +193,8 @@ export async function importSavedObjectsFromStream({
   // Create objects in bulk
   const createSavedObjectsParams = {
     objects: dataSourceId
-      ? collectSavedObjectsResult.collectedObjects.filter((object) => object.type !== 'data-source')
-      : collectSavedObjectsResult.collectedObjects,
+      ? collectedObjects.filter((object) => object.type !== 'data-source')
+      : collectedObjects,
     accumulatedErrors: errorAccumulator,
     savedObjectsClient,
     importIdMap,
