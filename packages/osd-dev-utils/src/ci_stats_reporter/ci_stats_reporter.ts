@@ -132,7 +132,7 @@ export class CiStatsReporter {
           baseURL: this.config.apiUrl,
           headers: {
             Authorization: `token ${this.config.apiToken}`,
-          },
+          } as any,
           data: {
             buildId: this.config.buildId,
             metrics,

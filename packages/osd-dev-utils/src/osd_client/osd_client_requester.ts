@@ -125,7 +125,7 @@ export class OsdClientRequester {
           params: options.query,
           headers: {
             'osd-xsrf': 'osd-client',
-          },
+          } as any,
           httpsAgent: this.httpsAgent,
         });
 

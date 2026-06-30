@@ -87,9 +87,33 @@ const run = async () => {
 
   //Axios's type definition is far too advanced for OSD
   promises.push(
-    patchFile('node_modules/axios/index.d.ts', {
-      from: '[Key in Method as Lowercase<Key>]: AxiosHeaders;',
-      to: '[Key in Method]: AxiosHeaders;',
+    patchFile('node_modules/axios/index.d.ts', [
+      {
+        from: '[Key in Method as Lowercase<Key>]: AxiosHeaders;',
+        to: '[Key in Method]: AxiosHeaders;',
+      },
+      {
+        from:
+          'type CommonResponseHeaderKey = CommonResponseHeadersList | Lowercase<CommonResponseHeadersList>;',
+        to: 'type CommonResponseHeaderKey = CommonResponseHeadersList | string;',
+      },
+      {
+        from: 'export type Method = (UppercaseMethod | Lowercase<UppercaseMethod>) & {};',
+        to: 'export type Method = UppercaseMethod | string;',
+      },
+      {
+        from: '| Lowercase<UppercaseResponseEncoding>',
+        to: '| string',
+      },
+    ])
+  );
+
+  // serialize-javascript 7.x uses globalThis.crypto which is not available in
+  // webpack 4 worker contexts. Patch to use Node.js require('crypto') instead.
+  promises.push(
+    patchFile('node_modules/serialize-javascript/index.js', {
+      from: 'var bytes = crypto.getRandomValues(new Uint8Array(UID_LENGTH));',
+      to: "var bytes = require('crypto').randomBytes(UID_LENGTH);",
     })
   );
 
