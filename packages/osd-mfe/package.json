@@ -4,6 +4,11 @@
   "private": true,
   "license": "Apache-2.0",
   "main": "./target/index.js",
+  "files": [
+    "target/",
+    "index.d.ts",
+    "README.md"
+  ],
   "scripts": {
     "build": "babel src --out-dir target --copy-files --delete-dir-on-start --extensions .ts --ignore *.test.ts --source-maps=inline",
     "osd:bootstrap": "yarn build",

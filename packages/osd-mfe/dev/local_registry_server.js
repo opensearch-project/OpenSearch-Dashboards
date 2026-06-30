@@ -33,7 +33,7 @@
  *
  * Usage (standalone):
  *   source harness/env.sh
- *   node harness/registry_server.js [port]      # default port 8080
+ *   node packages/osd-mfe/dev/local_registry_server.js [port]      # default port 8080
  *   curl -s http://localhost:8080/registry
  *
  * Or import { startServer } from this module (used by verify_registry_dynamic.js).
@@ -63,7 +63,7 @@ const SHARED_DEPS_DIR = path.join(OSD_DIR, 'packages/osd-ui-shared-deps/target')
 // Built browser MFE bootstrap bundle (assigns window.__osdBootstrapMfe__) lives
 // here; this is the local "CDN" origin root for /bootstrap/*. OSD --mfe (:5602)
 // loads it cross-origin from the URL configured as
-// `opensearchDashboards.mfe.bootstrapUrl`. Produced by harness/build_mfe_bootstrap.js
+// `opensearchDashboards.mfe.bootstrapUrl`. Produced by packages/osd-mfe/dev/build_bootstrap.js
 // (Phase 3, Story 5); see docs/01-MFE-DESIGN.md §6.
 const BOOTSTRAP_DIR = path.join(OSD_DIR, 'target/mfe-bootstrap');
 
@@ -223,8 +223,42 @@ function serveFile(res, filePath, acceptEncoding) {
  * so a malformed edit surfaces as a 500 rather than serving garbage. We
  * re-serialize the validated object (2-space indent + trailing newline) to
  * mirror how update_registry writes the file.
+ *
+ * v3 schema compatibility: FileRegistryProvider validates v1-shape only.
+ * Phase 16 introduced v3 (schemaVersion: 3, layered default/rollouts/
+ * tenantOverrides, plus new global core/orchestrator/themes/sharedDepsCss
+ * fields). When the on-disk registry is v3, we read it directly and flatten
+ * to a v1-shape view for this endpoint — drops v3-only fields, lifts
+ * default.mfes and default.sharedDeps to the top, sets schemaVersion: 1.
+ * The OSD server is unaffected (it reads the v3 file via its own v3-aware
+ * reader, not via this harness endpoint).
  */
 function serveRegistry(res, options) {
+  // Step 1: v3 coercion path. Read directly, detect v3, flatten if so.
+  const registryPath =
+    (options && options.path) ||
+    process.env.MFE_REGISTRY_PATH ||
+    null;
+  if (registryPath) {
+    try {
+      const raw = JSON.parse(fs.readFileSync(registryPath, 'utf8'));
+      if (raw && raw.schemaVersion === 3) {
+        const v1View = {
+          schemaVersion: 1,
+          generatedAt: raw.generatedAt,
+          sharedDeps: (raw.default && raw.default.sharedDeps) || null,
+          mfes: (raw.default && raw.default.mfes) || {},
+        };
+        if (raw.signature) v1View.signature = raw.signature;
+        sendJson(res, 200, v1View);
+        return;
+      }
+    } catch (_) {
+      // Fall through to the legacy validating path below.
+    }
+  }
+
+  // Step 2: legacy v1 validating path via the production FileRegistryProvider.
   let registry;
   try {
     registry = getProvider(options).read();

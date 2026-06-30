@@ -33,7 +33,7 @@ case "${1:-status}" in
   reset)
     if [ -f /tmp/osd_mfe_${MFE_PORT}.pid ]; then kill "$(cat /tmp/osd_mfe_${MFE_PORT}.pid)" 2>/dev/null || true; fi
     pkill -f "opensearch_dashboards .* -p ${MFE_PORT}" 2>/dev/null || true
-    pkill -f "registry_server.js" 2>/dev/null || true
+    pkill -f "local_registry_server.js" 2>/dev/null || true
     rm -f /tmp/osd_mfe_${MFE_PORT}.pid
     echo "stopped --mfe :$MFE_PORT + origin :$ORIGIN_PORT (old-way :5601 left running)."
     ;;

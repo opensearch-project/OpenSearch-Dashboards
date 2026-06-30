@@ -60,11 +60,11 @@ set -uo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
 OSD_DIR_DERIVED="$(cd "$SCRIPT_DIR/../.." && pwd)"
 export OSD_DIR="${OSD_DIR:-$OSD_DIR_DERIVED}"
-# Resolve harness: IN-REPO copy first (scripts/ci/mfe-harness/), then workspace parent.
+# Resolve harness: IN-REPO copy first (packages/osd-mfe/dev/), then workspace parent.
 # This lets the gate run from a plain fork checkout (CI) where ../harness doesn't exist.
 if [ -z "${HARNESS_DIR:-}" ]; then
-  if [ -f "$SCRIPT_DIR/mfe_harness/env.sh" ]; then
-    HARNESS_DIR="$SCRIPT_DIR/mfe_harness"
+  if [ -f "$OSD_DIR/packages/osd-mfe/dev/env.sh" ]; then
+    HARNESS_DIR="$OSD_DIR/packages/osd-mfe/dev"
   else
     export WORKSPACE_DIR="${WORKSPACE_DIR:-$(cd "$OSD_DIR/.." && pwd)}"
     HARNESS_DIR="$WORKSPACE_DIR/harness"

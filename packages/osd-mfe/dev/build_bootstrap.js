@@ -23,7 +23,7 @@
  * output dir) and never modifies OSD source.
  *
  * Usage:
- *   source harness/env.sh && node harness/build_mfe_bootstrap.js
+ *   source packages/osd-mfe/dev/env.sh && node packages/osd-mfe/dev/build_bootstrap.js
  * Output:
  *   <OSD_DIR>/target/mfe-bootstrap/osd_bootstrap_mfe.js   (served at :8080/bootstrap/)
  */

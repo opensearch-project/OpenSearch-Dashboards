@@ -57,7 +57,7 @@ import { mfeWindow } from './types';
 
 // NOTE: `./inspector` is intentionally NOT imported statically here. It pulls in
 // react / react-dom / @elastic/eui, which the bootstrap build externalizes to the
-// `window.__osdSharedDeps__` globals (harness/build_mfe_bootstrap.js). A static
+// `window.__osdSharedDeps__` globals (packages/osd-mfe/dev/build_bootstrap.js). A static
 // import would evaluate those externals when the bootstrap bundle is first run by
 // the page (docs §6 load step 2), which is BEFORE bootstrapMfe() loads shared-deps
 // (step 1, below) — so `__osdSharedDeps__` would be undefined and the whole bundle

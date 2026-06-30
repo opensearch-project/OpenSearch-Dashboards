@@ -218,7 +218,7 @@ jobs:
       # runner to reap). Best-effort; never fails the job.
       - name: Teardown --mfe + origin
         if: always()
-        run: bash "${GITHUB_WORKSPACE}/harness/reset_env.sh" reset || true
+        run: bash "${GITHUB_WORKSPACE}/packages/osd-mfe/dev/reset_env.sh" reset || true
 
       - name: Upload harness diagnostics on failure
         if: failure()
@@ -226,9 +226,9 @@ jobs:
         with:
           name: mfe-dual-path-diagnostics
           path: |
-            harness/_story*_logs/
-            harness/shots/
-            OpenSearch-Dashboards/cypress/screenshots/
-            OpenSearch-Dashboards/cypress/videos/
+            packages/osd-mfe/dev/_story*_logs/
+            packages/osd-mfe/dev/shots/
+            cypress/screenshots/
+            cypress/videos/
           if-no-files-found: ignore
           retention-days: 1

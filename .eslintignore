@@ -37,4 +37,4 @@ cypress/fixtures
 /src/plugins/data/public/antlr/opensearch_sql/grammar/**/*
 
 # Vendored CI harness (copied from workspace-root harness, not OSD-authored code)
-/scripts/ci/mfe_harness
+/packages/osd-mfe/dev

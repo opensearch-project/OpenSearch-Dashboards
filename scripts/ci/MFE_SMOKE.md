@@ -42,7 +42,7 @@ The `--mfe` instance must already be up on `:5602`. Bring it up with either:
 
 ```bash
 # Local dev harness (loads remotes from whatever the registry points at):
-bash harness/run_osd_mfe.sh
+bash packages/osd-mfe/dev/run_osd_mfe.sh
 
 # …or the exact CI topology (builds remotes, points the registry at the LOCAL
 # origin :8080, launches :5602) and leaves it running:

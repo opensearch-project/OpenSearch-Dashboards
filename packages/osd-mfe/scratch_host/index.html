@@ -16,7 +16,7 @@
   singletons, so the host MUST seed the Module Federation share scope before it
   imports the remote — that seeding happens in ./init.js.
 
-  Asset routes (served by harness/mfe_static_server.js):
+  Asset routes (served by packages/osd-mfe/dev/local_asset_server.js):
     /shared-deps/*        -> packages/osd-ui-shared-deps/target/*  (defines __osdSharedDeps__)
     /mfe/<id>/*           -> target/mfe/<id>/*                     (the built remote)
     /mfe-host-config.js   -> generated: window.__OSD_MFE_HOST_CONFIG__ (shared roots + versions)

@@ -1,0 +1,53 @@
+{
+  "_comment": "Sample registry.json (v3 schema) demonstrating the on-disk format the local dev harness serves at /registry. The local_registry_server.js loads this file and serves it; mtime-based hot-reload means editing the file is picked up on the next request without restarting OSD. Replace the example plugins below with your real plugin entries when integrating with a real build. See packages/osd-mfe/src/registry/registry_provider.ts for the parsing logic and packages/osd-mfe/src/registry/v3_schema.proposal.md for the schema reference.",
+  "version": 3,
+  "schemaVersion": "3.0.0",
+  "default": {
+    "_comment": "The 'default' dimension is the catch-all routing slot. Every consumer falls back to this when no per-customer or per-bucket override matches. See packages/osd-mfe/src/registry/resolve.ts for the resolution order.",
+    "mfes": {
+      "example_hello": {
+        "_comment": "Minimal example: a 'hello world' plugin. Loaded eagerly on boot. integrity is sha384 of the UNCOMPRESSED remoteEntry.js bytes — see packages/osd-mfe/src/bootstrap/load_remote.ts.",
+        "version": "1.0.0+abc123def456",
+        "remoteEntry": "http://localhost:8080/mfe/example_hello/abc123def456/remoteEntry.js",
+        "scope": "osdMfe_example_hello",
+        "module": "./public",
+        "integrity": "sha384-EXAMPLE_REPLACE_WITH_REAL_HASH_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "compat": {
+          "minCoreVersion": "3.5.0",
+          "compatibleCoreRange": "3.5.x"
+        }
+      },
+      "example_lazy": {
+        "_comment": "Example showing lazy-loaded chunks. The remoteEntry.js declares an MF container that webpack will fetch lazy chunks for on demand (e.g., when navigating to a route this plugin owns).",
+        "version": "2.1.0+ffeeddccbbaa",
+        "remoteEntry": "http://localhost:8080/mfe/example_lazy/ffeeddccbbaa/remoteEntry.js",
+        "scope": "osdMfe_example_lazy",
+        "module": "./public",
+        "integrity": "sha384-EXAMPLE_REPLACE_WITH_REAL_HASH_yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy",
+        "compat": {
+          "minCoreVersion": "3.5.0",
+          "compatibleCoreRange": "3.5.x || 3.6.x"
+        },
+        "builtAgainst": {
+          "osdVersion": "3.5.0",
+          "sharedDeps": {
+            "react": "^16.14.0",
+            "react-dom": "^16.12.0"
+          }
+        }
+      },
+      "example_external_cdn": {
+        "_comment": "Example showing a plugin hosted on an external CDN instead of the local :8080 origin. For this URL to load: (a) the host must allow-list the origin via opensearchDashboards.mfe.cdnOrigin or opensearchDashboards.mfe.devOverrideOrigins in the served CSP; (b) the external CDN must serve cross-origin with appropriate CORS headers (so the browser can verify SRI).",
+        "version": "1.0.0+deadbeefcafe",
+        "remoteEntry": "https://cdn.example.com/mfe/example_external_cdn/deadbeefcafe/remoteEntry.js",
+        "scope": "osdMfe_example_external_cdn",
+        "module": "./public",
+        "integrity": "sha384-EXAMPLE_REPLACE_WITH_REAL_HASH_zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz",
+        "compat": {
+          "minCoreVersion": "3.5.0",
+          "compatibleCoreRange": "3.5.x"
+        }
+      }
+    }
+  }
+}

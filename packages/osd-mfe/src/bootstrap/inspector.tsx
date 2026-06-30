@@ -30,7 +30,7 @@
  *
  * React, react-dom and `@elastic/eui` are resolved to the host's
  * `__osdSharedDeps__` singletons via the bootstrap bundler's `externals` (see
- * harness/build_mfe_bootstrap.js), so the panel reuses the SAME React the rest
+ * packages/osd-mfe/dev/build_bootstrap.js), so the panel reuses the SAME React the rest
  * of the app uses rather than bundling a second copy.
  */
 

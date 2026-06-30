@@ -192,7 +192,7 @@ export function defaultTargetRoot(
       return Path.join(repoRoot, 'target', 'mfe-core');
     case 'orchestrator':
       // Use the same root the existing flat orchestrator bundle lands at
-      // (harness/build_mfe_bootstrap.js) so callers see both the flat path
+      // (packages/osd-mfe/dev/build_bootstrap.js) so callers see both the flat path
       // (`target/mfe-bootstrap/osd_bootstrap_mfe.js`) and the hash-versioned
       // path (`target/mfe-bootstrap/<hash>/osd_bootstrap_mfe.js`) side by side.
       return Path.join(repoRoot, 'target', 'mfe-bootstrap');

@@ -16,7 +16,7 @@
  * the Module Federation share scope. Deriving it here (rather than hardcoding in
  * the committed host) keeps the shared set in lock-step with the actual build.
  *
- * Usage (standalone, for manual browsing):  node harness/mfe_static_server.js [port] [pluginId]
+ * Usage (standalone, for manual browsing):  node packages/osd-mfe/dev/local_asset_server.js [port] [pluginId]
  * Or import { startServer } from this module (used by verify_mfe_scratch.js).
  */
 'use strict';
