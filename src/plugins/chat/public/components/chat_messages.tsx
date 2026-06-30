@@ -79,6 +79,8 @@ interface SuggestionItem {
   text: string;
   prompt?: string;
   action?: () => void;
+  /** When set, this suggestion is only shown if the named tool is registered. */
+  requiredTool?: string;
 }
 
 const STARTER_SUGGESTIONS: SuggestionItem[] = [
@@ -93,6 +95,7 @@ const STARTER_SUGGESTIONS: SuggestionItem[] = [
     iconColor: 'danger',
     text: '/investigate an issue',
     prompt: '/investigate ',
+    requiredTool: 'create_investigation',
   },
   {
     icon: 'help',
@@ -329,6 +332,29 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
     assistantActionService.getCurrentState().toolCallStates
   );
 
+  // Subscribe to tool definitions to conditionally show/hide suggestion cards
+  const toolDefinitions$ = useMemo(
+    () => assistantActionService.getState$().pipe(map((state) => state.toolDefinitions)),
+    [assistantActionService]
+  );
+  const toolDefinitions = useObservable(
+    toolDefinitions$,
+    assistantActionService.getCurrentState().toolDefinitions
+  );
+
+  // Filter starter suggestions based on tool availability
+  const visibleSuggestions = useMemo(() => {
+    return STARTER_SUGGESTIONS.filter((suggestion) => {
+      if (suggestion.requiredTool) {
+        if (!toolDefinitions) {
+          return false;
+        }
+        return toolDefinitions.some((tool) => tool.name === suggestion.requiredTool);
+      }
+      return true;
+    });
+  }, [toolDefinitions]);
+
   // Context is now handled by RFC hooks and context pills
   // No need for separate context display here
 
@@ -502,7 +528,7 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
               </EuiText>
             </div>
             <div className="chatMessages__suggestions">
-              {STARTER_SUGGESTIONS.map((suggestion, index) => (
+              {visibleSuggestions.map((suggestion, index) => (
                 <EuiPanel
                   key={index}
                   paddingSize="m"
