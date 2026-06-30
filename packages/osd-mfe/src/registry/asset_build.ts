@@ -10,7 +10,7 @@
  */
 
 /**
- * Build-side staging for the FOUR new v3 asset categories (Phase 16, Story 2).
+ * Build-side staging for the FOUR global asset categories.
  *
  * Pure library: given a source artifact on disk, content-address it
  * (`sha256[:12]` for the directory segment, `sha384` SRI for integrity), copy
@@ -18,21 +18,21 @@
  * themes/<name>,shared-deps-css}/<hash>/`, and emit a sibling
  * `build-manifest.json` describing the staged shape. The deploy CLI (Story 2)
  * reads the staging dir + manifest and uploads to the CDN; the update CLI
- * (Story 2) reads the manifest and stamps the v3 registry. The harness CDN
+ * (Story 2) reads the manifest and stamps the registry document. The harness CDN
  * (registry_server.js) serves the same staged paths so dev parity holds.
  *
  * NO runtime change — this is pure scaffolding. The staged paths are NEVER
  * referenced by the OSD boot (Stories 3-7 wire them in); the existing
  * `/bundles/...` server-hosted paths continue to serve verbatim.
  *
- * Key design choices (mirror the Phase-4 plugin-asset pipeline so v3 assets
+ * Key design choices (mirror the Phase-4 plugin-asset pipeline so global assets
  * use the same hash + SRI semantics):
  *  - `sha256(<primary-file>).slice(0, 12)` for the immutable path segment,
  *    identical to `deploy/plan.ts` per-plugin contentHash. Same input bytes
  *    yield the same directory; an unchanged build produces an idempotent stage.
  *  - `computeIntegrity(<primary-file>)` for the SRI integrity, sourced from
  *    `registry/generate.ts` (single source of truth: full-regen, per-plugin
- *    deploy, AND v3 asset staging all produce byte-identical SRI for the same
+ *    deploy, AND global asset staging all produce byte-identical SRI for the same
  *    input).
  *  - `version = <osdVersion>+<contentHash>`, matching how
  *    `generateRegistry`/`buildDeployPlan` version plugin remotes.
@@ -46,13 +46,13 @@ import Fs from 'fs';
 import Path from 'path';
 
 import { computeIntegrity } from './generate';
-import { V3AssetDescriptor } from './schema_v3';
+import { AssetDescriptor } from './schema';
 
 /** Build-manifest schema version; bump on incompatible shape changes. */
-export const V3_ASSET_BUILD_MANIFEST_SCHEMA_VERSION = 1;
+export const ASSET_BUILD_MANIFEST_SCHEMA_VERSION = 1;
 
 /** The four asset kinds Story 2 introduces. */
-export type V3AssetKind = 'core' | 'orchestrator' | 'theme' | 'shared-deps-css';
+export type AssetKind = 'core' | 'orchestrator' | 'theme' | 'shared-deps-css';
 
 /**
  * One staged file (mirrors `deploy/plan.PlannedFile` but rooted at the
@@ -67,11 +67,11 @@ export interface StagedFile {
 }
 
 /** The build-manifest.json document shape. */
-export interface V3AssetBuildManifest {
+export interface AssetBuildManifest {
   schemaVersion: number;
   generatedAt: string;
-  /** The asset category staged (see {@link V3AssetKind}). */
-  assetKind: V3AssetKind;
+  /** The asset category staged (see {@link AssetKind}). */
+  assetKind: AssetKind;
   /** Theme name when `assetKind === 'theme'`; absent otherwise. */
   themeName?: string;
   /** First 12 hex chars of `sha256(<primary-file>)`. */
@@ -88,12 +88,12 @@ export interface V3AssetBuildManifest {
   files: StagedFile[];
 }
 
-/** Options for {@link stageV3Asset}. */
-export interface StageV3AssetOptions {
+/** Options for {@link stageAsset}. */
+export interface StageAssetOptions {
   /** Absolute path to the OSD repo root (drives default target dirs). */
   repoRoot: string;
   /** The asset category to stage. */
-  assetKind: V3AssetKind;
+  assetKind: AssetKind;
   /** Required when `assetKind === 'theme'`; the theme name (`light`/`dark`/...). */
   themeName?: string;
   /**
@@ -139,7 +139,7 @@ function readOsdVersion(repoRoot: string): string {
  */
 export function defaultSourcePath(
   repoRoot: string,
-  assetKind: V3AssetKind,
+  assetKind: AssetKind,
   themeName?: string
 ): string {
   switch (assetKind) {
@@ -184,7 +184,7 @@ export function defaultSourcePath(
  */
 export function defaultTargetRoot(
   repoRoot: string,
-  assetKind: V3AssetKind,
+  assetKind: AssetKind,
   themeName?: string
 ): string {
   switch (assetKind) {
@@ -215,7 +215,7 @@ export function defaultTargetRoot(
  * The default primary filename (the file that drives the content hash + SRI).
  * For each kind this matches the source artifact's name on disk.
  */
-function defaultPrimaryFilename(assetKind: V3AssetKind, themeName?: string): string {
+function defaultPrimaryFilename(assetKind: AssetKind, themeName?: string): string {
   switch (assetKind) {
     case 'core':
       return 'core.entry.js';
@@ -237,7 +237,7 @@ function defaultPrimaryFilename(assetKind: V3AssetKind, themeName?: string): str
 }
 
 /**
- * Stage one v3 asset: content-address its primary file, copy it (and any
+ * Stage one global asset: content-address its primary file, copy it (and any
  * sibling files needed by the asset) into a hash-versioned tree, and emit
  * `<stagingDir>/build-manifest.json`. Returns the manifest in-memory so the
  * caller can pass it straight to the deploy/registry CLIs.
@@ -252,7 +252,7 @@ function defaultPrimaryFilename(assetKind: V3AssetKind, themeName?: string): str
  *
  * @throws Error when the source file is missing or unreadable
  */
-export function stageV3Asset(options: StageV3AssetOptions): V3AssetBuildManifest {
+export function stageAsset(options: StageAssetOptions): AssetBuildManifest {
   const {
     repoRoot,
     assetKind,
@@ -264,13 +264,13 @@ export function stageV3Asset(options: StageV3AssetOptions): V3AssetBuildManifest
   } = options;
 
   if (assetKind === 'theme' && (!themeName || themeName.length === 0)) {
-    throw new Error('stageV3Asset: themeName is required when assetKind="theme"');
+    throw new Error('stageAsset: themeName is required when assetKind="theme"');
   }
 
   const sourcePath = explicitSource ?? defaultSourcePath(repoRoot, assetKind, themeName);
   if (!Fs.existsSync(sourcePath)) {
     throw new Error(
-      `stageV3Asset(${assetKind}${themeName ? `:${themeName}` : ''}): ` +
+      `stageAsset(${assetKind}${themeName ? `:${themeName}` : ''}): ` +
         `source artifact not found at ${sourcePath}. ` +
         `Build it first (see docs/19-PHASE16-RESULTS.md for the per-kind build commands).`
     );
@@ -281,7 +281,7 @@ export function stageV3Asset(options: StageV3AssetOptions): V3AssetBuildManifest
   // the staged path is content-addressed and an unchanged build is a no-op.
   const contentHash = createHash('sha256').update(bytes).digest('hex').slice(0, 12);
   // SRI over the SAME uncompressed bytes — single source of truth for plugin
-  // remotes and v3 assets alike, so the registry's integrity field always
+  // remotes and global assets alike, so the registry's integrity field always
   // matches what the browser sees.
   const integrity = computeIntegrity(bytes);
   const osdVersion = explicitOsdVersion ?? readOsdVersion(repoRoot);
@@ -308,8 +308,8 @@ export function stageV3Asset(options: StageV3AssetOptions): V3AssetBuildManifest
     },
   ];
 
-  const manifest: V3AssetBuildManifest = {
-    schemaVersion: V3_ASSET_BUILD_MANIFEST_SCHEMA_VERSION,
+  const manifest: AssetBuildManifest = {
+    schemaVersion: ASSET_BUILD_MANIFEST_SCHEMA_VERSION,
     generatedAt: now.toISOString(),
     assetKind,
     ...(themeName !== undefined ? { themeName } : {}),
@@ -328,28 +328,28 @@ export function stageV3Asset(options: StageV3AssetOptions): V3AssetBuildManifest
 }
 
 /**
- * Read + validate a {@link V3AssetBuildManifest} from disk. Throws with a
+ * Read + validate a {@link AssetBuildManifest} from disk. Throws with a
  * clear message on any shape violation so a bad manifest cannot poison the
  * deploy/registry CLIs that consume it.
  */
-export function readV3AssetBuildManifest(manifestPath: string): V3AssetBuildManifest {
+export function readAssetBuildManifest(manifestPath: string): AssetBuildManifest {
   const raw = Fs.readFileSync(manifestPath, 'utf8');
   let parsed: unknown;
   try {
     parsed = JSON.parse(raw);
   } catch (cause) {
     throw new Error(
-      `readV3AssetBuildManifest(${manifestPath}): malformed JSON: ${(cause as Error).message}`
+      `readAssetBuildManifest(${manifestPath}): malformed JSON: ${(cause as Error).message}`
     );
   }
   if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
-    throw new Error(`readV3AssetBuildManifest(${manifestPath}): not an object`);
+    throw new Error(`readAssetBuildManifest(${manifestPath}): not an object`);
   }
   const obj = parsed as Record<string, unknown>;
   const errors: string[] = [];
-  if (obj.schemaVersion !== V3_ASSET_BUILD_MANIFEST_SCHEMA_VERSION) {
+  if (obj.schemaVersion !== ASSET_BUILD_MANIFEST_SCHEMA_VERSION) {
     errors.push(
-      `schemaVersion must equal ${V3_ASSET_BUILD_MANIFEST_SCHEMA_VERSION} ` +
+      `schemaVersion must equal ${ASSET_BUILD_MANIFEST_SCHEMA_VERSION} ` +
         `(got ${JSON.stringify(obj.schemaVersion)})`
     );
   }
@@ -380,14 +380,14 @@ export function readV3AssetBuildManifest(manifestPath: string): V3AssetBuildMani
   }
   if (errors.length > 0) {
     throw new Error(
-      `readV3AssetBuildManifest(${manifestPath}): invalid manifest:\n  - ${errors.join('\n  - ')}`
+      `readAssetBuildManifest(${manifestPath}): invalid manifest:\n  - ${errors.join('\n  - ')}`
     );
   }
-  return parsed as V3AssetBuildManifest;
+  return parsed as AssetBuildManifest;
 }
 
 /**
- * Convert a {@link V3AssetBuildManifest} into the {@link V3AssetDescriptor}
+ * Convert a {@link AssetBuildManifest} into the {@link AssetDescriptor}
  * that lands in the registry, given a base URL the asset is published under.
  *
  * The URL shape mirrors the harness routes (`/core/<hash>/...`,
@@ -398,9 +398,9 @@ export function readV3AssetBuildManifest(manifestPath: string): V3AssetBuildMani
  * authoritative source of the `baseUrl` it actually published to.
  */
 export function manifestToAssetDescriptor(
-  manifest: V3AssetBuildManifest,
+  manifest: AssetBuildManifest,
   baseUrl: string
-): V3AssetDescriptor {
+): AssetDescriptor {
   const normalized = baseUrl.replace(/\/+$/, '');
   let pathSegment: string;
   switch (manifest.assetKind) {

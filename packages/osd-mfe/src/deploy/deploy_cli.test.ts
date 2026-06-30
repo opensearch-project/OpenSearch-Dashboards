@@ -471,15 +471,15 @@ describe('runDeployCli --plugin (Phase 10 Story 1: single-plugin publish)', () =
  * ------------------------------------------------------------------------- */
 
 import {
-  V3_ASSET_BUILD_MANIFEST_SCHEMA_VERSION,
-  V3AssetBuildManifest,
-  V3AssetKind,
-} from '../registry/v3_asset_build';
+  ASSET_BUILD_MANIFEST_SCHEMA_VERSION,
+  AssetBuildManifest,
+  AssetKind,
+} from '../registry/asset_build';
 
 /** Stage a v3 asset under target/mfe-...; return its manifest path. */
 function writeV3StagedAsset(
   root: string,
-  assetKind: V3AssetKind,
+  assetKind: AssetKind,
   contentHash: string,
   primaryFile: string,
   themeName?: string
@@ -496,8 +496,8 @@ function writeV3StagedAsset(
   }
   Fs.mkdirSync(stagingDir, { recursive: true });
   Fs.writeFileSync(Path.join(stagingDir, primaryFile), 'PAYLOAD');
-  const manifest: V3AssetBuildManifest = {
-    schemaVersion: V3_ASSET_BUILD_MANIFEST_SCHEMA_VERSION,
+  const manifest: AssetBuildManifest = {
+    schemaVersion: ASSET_BUILD_MANIFEST_SCHEMA_VERSION,
     generatedAt: '2026-06-26T12:00:00.000Z',
     assetKind,
     ...(themeName !== undefined ? { themeName } : {}),

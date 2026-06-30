@@ -61,7 +61,7 @@ export const INSPECTOR_ROOT_ID = 'osd-mfe-inspector-root';
  * One row of the inspector: a plugin id, the effective `remoteEntry` URL it
  * loaded from, and whether that URL came from the registry/CDN or a dev
  * override. This is intentionally a structural SUBSET of
- * {@link import('../registry/resolve').ResolvedRemote} so the bootstrap can pass
+ * {@link import('../registry/dev_override').ResolvedRemote} so the bootstrap can pass
  * its already-resolved descriptors straight through.
  */
 export interface InspectorEntry {

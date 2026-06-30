@@ -13,8 +13,8 @@
  * Boot manifest — the FLAT shape the OSD server injects into the boot HTML for
  * the browser to consume in `--mfe` mode (Phase 13, Story 1).
  *
- * The browser does NOT see the v2 registry document. The server reads the v2
- * doc, runs the resolution algorithm against the requesting host's
+ * The browser does NOT see the registry document. The server reads the
+ * document, runs the resolution algorithm against the requesting host's
  * {@link ResolutionDimensions}, and injects the resulting boot manifest at
  * `__osdInjectedMetadata.mfeBoot` via the existing Phase-5
  * `<osd-injected-metadata>` channel. The browser bootstrap consumes the flat
@@ -27,13 +27,21 @@
  *   - `integrity?` — optional SRI hash (Phase 12, fail-closed when present)
  *   - `compat?` — optional host-compatibility declaration (Phase 9 classifier)
  *
- * Notably, the manifest is the FLAT projection of the v2 doc — `default` /
- * `rollouts[]` / `tenantOverrides` collapse into a single `mfes[]` once
- * dimensions are bound. See `./resolve_v2.ts` for the resolution algorithm.
+ * In addition, the manifest carries optional GLOBAL ASSET ROOTS (`core`,
+ * `orchestrator`, `sharedDepsCss`, `themes`) — direct projections of the
+ * registry document's top-level global asset fields. When set, the browser
+ * loads the asset from the advertised CDN URL with SRI; when absent, it
+ * falls back to the server-bundled `/bundles/...` path.
+ *
+ * Notably, the manifest is the FLAT projection of the layered registry doc —
+ * `default` / `rollouts[]` / `tenantOverrides` collapse into a single
+ * `mfes[]` once dimensions are bound. See `./resolve.ts` for the resolution
+ * algorithm.
  */
 
 import { CompatDeclaration, SharedDepsDescriptor } from './schema';
 import { ValidationResult } from './schema';
+import { AssetDescriptor } from './schema';
 
 /**
  * One resolved remote in the boot manifest. Field set is deliberately the
@@ -41,7 +49,7 @@ import { ValidationResult } from './schema';
  * no `signature` — those are consumed server-side or are not on this path).
  */
 export interface BootManifestEntry {
-  /** Plugin id (the v1 `mfes` key); echoed for ordering + inspector display. */
+  /** Plugin id (the `default.mfes` key); echoed for ordering + inspector display. */
   id: string;
   /** Absolute URL of the resolved `remoteEntry.js`. */
   remoteEntry: string;
@@ -58,17 +66,45 @@ export interface BootManifestEntry {
 }
 
 /**
- * The flat boot manifest. `sharedDeps` carries the same shape as v1's top-level
- * descriptor — the singletons URL/version applied to every remote.
+ * The flat boot manifest. `sharedDeps` carries the same shape as the
+ * top-level descriptor on the in-memory `Registry` — the singletons URL/version
+ * applied to every remote.
+ *
+ * The optional GLOBAL ASSET ROOTS (`core`, `orchestrator`, `sharedDepsCss`,
+ * `themes`) are direct projections of the registry document's top-level
+ * global asset fields (see `./schema.ts`). The resolver shallow-clones
+ * them onto the manifest verbatim; each is absent on the manifest exactly
+ * when it is absent on the source document, at which point browser-side
+ * consumers fall back to the server-bundled `/bundles/...` path for that
+ * asset.
  */
 export interface BootManifest {
   sharedDeps: SharedDepsDescriptor;
   mfes: BootManifestEntry[];
+  /** OSD core entry script (`core.entry.js`); absent ⇒ consumer falls back to `/bundles/core/`. */
+  core?: AssetDescriptor;
+  /** MFE bootstrap engine (`osd_bootstrap_mfe.js`); absent ⇒ consumer falls back to server-config bootstrapUrl. */
+  orchestrator?: AssetDescriptor;
+  /** `osd-ui-shared-deps.css`; absent ⇒ consumer falls back to `/bundles/osd-ui-shared-deps/`. */
+  sharedDepsCss?: AssetDescriptor;
+  /** Per-theme CSS bundle, keyed by theme name (`light`, `dark`, ...). Absent map or missing key ⇒ fallback to `/bundles/legacy_<name>_theme.css`. */
+  themes?: Record<string, AssetDescriptor>;
 }
 
 /* ------------------------------------------------------------------------- *
  * Validation
  * ------------------------------------------------------------------------- */
+
+/**
+ * SRI integrity-string prefix. Kept in sync with `schema.ts`'s
+ * `SRI_INTEGRITY_PREFIX` — both files validate the SAME shape (an
+ * {@link AssetDescriptor}), but each has its own copy because the boot
+ * manifest validator runs on the browser side and must not pull in the
+ * full registry schema validator's dependency graph just to recheck a
+ * literal string prefix. The constant is `sha384-` (Phase 12; matches
+ * the plugin `remoteEntry` SRI algorithm).
+ */
+const SRI_INTEGRITY_PREFIX = 'sha384-';
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -79,12 +115,62 @@ function isNonEmptyString(value: unknown): value is string {
 }
 
 /**
+ * Validate a single {@link AssetDescriptor} embedded under one of the boot
+ * manifest's global asset roots (`core`, `orchestrator`, `sharedDepsCss`, or
+ * a `themes[<name>]` entry), appending any problems to `errors`.
+ *
+ * Mirrors the rules `schema.ts` enforces on the same shape: non-empty
+ * `url`; non-empty `version`; when `integrity` is present, it MUST be a
+ * non-empty string starting with `"sha384-"`. The hex/base64 body itself
+ * is not checked — a malformed body would still fail the browser's SRI
+ * check fail-closed at load time, and parsing it in the manifest validator
+ * would couple the validator to an SRI parser.
+ *
+ * The boot manifest validator NEVER throws; this helper only pushes
+ * problems onto the shared error list so the caller can report every issue
+ * at once (consistent with how plugin entries are validated below).
+ */
+function validateAssetDescriptor(prefix: string, value: unknown, errors: string[]): void {
+  if (!isPlainObject(value)) {
+    errors.push(`boot manifest ${prefix} must be an object with { url, version, integrity? }`);
+    return;
+  }
+  if (!isNonEmptyString(value.url)) {
+    errors.push(`boot manifest ${prefix}.url must be a non-empty string`);
+  }
+  if (!isNonEmptyString(value.version)) {
+    errors.push(`boot manifest ${prefix}.version must be a non-empty string`);
+  }
+  if (value.integrity !== undefined) {
+    if (!isNonEmptyString(value.integrity)) {
+      errors.push(
+        `boot manifest ${prefix}.integrity, when present, must be a non-empty string starting with "${SRI_INTEGRITY_PREFIX}"`
+      );
+    } else if (!value.integrity.startsWith(SRI_INTEGRITY_PREFIX)) {
+      errors.push(
+        `boot manifest ${prefix}.integrity, when present, must start with "${SRI_INTEGRITY_PREFIX}" (got ${JSON.stringify(
+          value.integrity
+        )})`
+      );
+    }
+  }
+}
+
+/**
  * Validate an unknown value against the boot manifest shape. Used to guard the
  * injected slot on the browser side (defense in depth: the server is supposed
  * to inject a well-formed manifest, but a corrupted slot must surface as a
  * descriptive error rather than a confusing `undefined.scope` crash).
  *
- * Like the v1/v2 validators, never throws; returns every problem found.
+ * Like the registry schema validator, never throws; returns every problem found.
+ *
+ * The four optional GLOBAL ASSET ROOTS — `core`, `orchestrator`,
+ * `sharedDepsCss`, and the `themes` map's per-theme entries — are validated
+ * as {@link AssetDescriptor}s when present (non-empty url + version; optional
+ * `sha384-…` integrity). Absent fields are accepted (consumers fall back to
+ * the server-bundled path; see the interface docstring). The `themes` map
+ * itself MUST be an object when present, and every key MUST be a non-empty
+ * string (an empty theme name has no defined fallback path).
  */
 export function validateBootManifest(value: unknown): ValidationResult {
   const errors: string[] = [];
@@ -111,6 +197,36 @@ export function validateBootManifest(value: unknown): ValidationResult {
     value.mfes.forEach((entry, idx) => {
       validateBootManifestEntry(idx, entry, seenIds, errors);
     });
+  }
+
+  // Global asset roots — each is OPTIONAL on the manifest. The resolver only
+  // sets them when the source registry document had them set, and consumers
+  // fall back to the server-bundled `/bundles/...` path when absent.
+  if (value.core !== undefined) {
+    validateAssetDescriptor('core', value.core, errors);
+  }
+  if (value.orchestrator !== undefined) {
+    validateAssetDescriptor('orchestrator', value.orchestrator, errors);
+  }
+  if (value.sharedDepsCss !== undefined) {
+    validateAssetDescriptor('sharedDepsCss', value.sharedDepsCss, errors);
+  }
+  if (value.themes !== undefined) {
+    if (!isPlainObject(value.themes)) {
+      errors.push('boot manifest themes, when present, must be an object keyed by theme name');
+    } else {
+      for (const themeName of Object.keys(value.themes)) {
+        if (themeName.length === 0) {
+          errors.push('boot manifest themes contains an empty theme name (keys must be non-empty)');
+          continue;
+        }
+        validateAssetDescriptor(
+          `themes.${themeName}`,
+          (value.themes as Record<string, unknown>)[themeName],
+          errors
+        );
+      }
+    }
   }
 
   return { valid: errors.length === 0, errors };

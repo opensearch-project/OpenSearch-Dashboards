@@ -28,7 +28,7 @@
 
 import { assertValidRegistry, MfeEntry, Registry, SCHEMA_VERSION } from '../registry/schema';
 import type { RegistryProvider } from '../registry/provider';
-import { resolve, OverrideMap, ResolvedRemote } from '../registry/resolve';
+import { resolve, OverrideMap, ResolvedRemote } from '../registry/dev_override';
 import { HostEnvironment } from '../registry/compat_classifier';
 import { RegistryVerification, SignatureCheck } from '../registry/signing_common';
 import { verifyRegistrySignatureWeb } from '../registry/verify_registry_web';

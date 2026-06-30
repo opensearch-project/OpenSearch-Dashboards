@@ -10,49 +10,43 @@
  */
 
 /**
- * Public surface of the MFE registry (Phase 2).
+ * Public surface of the MFE registry.
  *
- * NOTE: this exports the schema + generation/validation LOGIC only. The registry
- * DATA file (`registry/registry.json`) is never imported from here — it is read
- * from the filesystem at serve time via the (Story 2) RegistryProvider.
+ * NOTE: this exports the schema + generation/validation LOGIC only. The
+ * registry DATA file (`registry/registry.json`) is never imported from here
+ * — it is read from the filesystem at serve time via the
+ * `FileRegistryReader`.
  */
 
-export { SCHEMA_VERSION, validate, assertValidRegistry } from './schema';
-export type { Registry, MfeEntry, SharedDepsDescriptor, ValidationResult } from './schema';
-
 export {
-  SCHEMA_VERSION_V2,
-  validateV2,
-  assertValidV2Document,
-  migrateV1ToV2,
-  detectRegistryShape,
-  coerceToV2Document,
-} from './schema_v2';
+  SCHEMA_VERSION,
+  validate,
+  validateRegistry,
+  assertValidRegistry,
+  assertValidRegistryDocument,
+} from './schema';
 export type {
-  V2Document,
-  V2DefaultLayer,
-  V2Rollout,
-  V2RolloutMatch,
-  V2RolloutOverride,
-  V2TenantOverride,
+  Registry,
+  RegistryDocument,
+  AssetDescriptor,
+  DefaultLayer,
+  Rollout,
+  RolloutMatch,
+  RolloutOverride,
+  TenantOverride,
   ResolutionDimensions,
-  DetectedRegistryShape,
-} from './schema_v2';
-
-export {
-  SCHEMA_VERSION_V3,
-  validateV3,
-  assertValidV3Document,
-  migrateV2ToV3,
-  coerceToV3Document,
-} from './schema_v3';
-export type { V3Document, V3AssetDescriptor, V3MigrationDefaults } from './schema_v3';
+  MfeEntry,
+  SharedDepsDescriptor,
+  BuiltAgainst,
+  CompatDeclaration,
+  ValidationResult,
+} from './schema';
 
 export { validateBootManifest, assertValidBootManifest } from './boot_manifest';
 export type { BootManifest, BootManifestEntry } from './boot_manifest';
 
-export { resolveBootManifest, resolveDecisions, matchesRollout } from './resolve_v2';
-export type { ResolvedDecision, ResolvedSource } from './resolve_v2';
+export { resolveBootManifest, resolveDecisions, matchesRollout } from './resolve';
+export type { ResolvedDecision, ResolvedSource } from './resolve';
 
 export { FileRegistryReader } from './reader';
 export type { RegistryReader, RegistryReaderFs, FileRegistryReaderOptions } from './reader';
@@ -69,8 +63,8 @@ export type { GenerateRegistryOptions } from './generate';
 export { FileRegistryProvider } from './provider';
 export type { RegistryProvider, RegistryFs, FileRegistryProviderOptions } from './provider';
 
-export { resolve } from './resolve';
-export type { ResolvedRemote, OverrideMap } from './resolve';
+export { resolve } from './dev_override';
+export type { ResolvedRemote, OverrideMap } from './dev_override';
 
 export { classifyCompatibility } from './compat_classifier';
 export type {
@@ -80,13 +74,11 @@ export type {
   CompatibilityResult,
 } from './compat_classifier';
 
-export { runUpdateCli, resolveRegistryPath, buildRegistryFromManifest } from './update_cli';
-export type { UpdateCliConsole } from './update_cli';
-
 export {
-  runUpdateCliV2,
-  isV2Mode,
-  isV3AssetMode,
+  runUpdateCli,
+  resolveRegistryPath,
+  buildRegistryFromManifest,
+  mergeRegistryFromManifest,
   parseKeyValuePairs,
   applySetDefaultEntry,
   applyAddRollout,
@@ -95,34 +87,27 @@ export {
   applyRemoveTenantOverride,
   applyRollback,
   checkDependencyGraph,
-} from './update_cli_v2';
+} from './update_cli';
 export type {
-  UpdateCliV2Console,
+  UpdateCliConsole,
   AuditEntry,
   AuditLog,
   AuditOp,
   ExternalsFile,
   CheckDepsResult,
-} from './update_cli_v2';
+} from './update_cli';
 
 export {
-  V3_ASSET_BUILD_MANIFEST_SCHEMA_VERSION,
-  stageV3Asset,
-  readV3AssetBuildManifest,
+  ASSET_BUILD_MANIFEST_SCHEMA_VERSION,
+  stageAsset,
+  readAssetBuildManifest,
   manifestToAssetDescriptor,
   defaultSourcePath,
   defaultTargetRoot,
-} from './v3_asset_build';
+} from './asset_build';
 export type {
-  V3AssetKind,
-  V3AssetBuildManifest,
+  AssetKind,
+  AssetBuildManifest,
   StagedFile,
-  StageV3AssetOptions,
-} from './v3_asset_build';
-
-export {
-  applySetCore,
-  applySetOrchestrator,
-  applySetSharedDepsCss,
-  applySetTheme,
-} from './v3_asset_apply';
+  StageAssetOptions,
+} from './asset_build';

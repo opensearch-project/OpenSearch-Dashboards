@@ -10,37 +10,34 @@
  */
 
 /**
- * Registry reader interface + file-backed reference implementation
- * (Phase 13, Story 3).
+ * Registry reader interface + file-backed reference implementation.
  *
- * The browser does NOT see the v2 registry document. The OSD server reads it,
+ * The browser does NOT see the registry document. The OSD server reads it,
  * RESOLVES it for the requesting host (across the {@link ResolutionDimensions}
  * dimensions), and injects the resulting flat {@link BootManifest} into the
  * boot HTML. This module is the SERVER-SIDE I/O wrapper around the pure
- * resolver from story 2.
+ * resolver.
  *
  * The {@link RegistryReader} interface is the swap point for a future
  * production registry service: a `HttpRegistryReader` (or `S3RegistryReader`,
  * `DynamoRegistryReader`) implementing the same interface plugs in without
  * any change to the OSD server code that calls `reader.resolve(dimensions)`.
  *
- * {@link FileRegistryReader} — the reference implementation — reads a v2 (or
- * v1, auto-migrated via {@link coerceToV2Document}) document from disk on
- * every call. Caching with mtime-based hot-reload mirrors the Phase 2
- * `FileRegistryProvider` so a registry edit is reflected on the very next
- * request without a restart. The auto-migration is what lets the canonical
- * CDN registry (v1 shape) keep working unchanged.
+ * {@link FileRegistryReader} — the reference implementation — reads a
+ * `schemaVersion: 1` document from disk on every call. Caching with
+ * mtime-based hot-reload mirrors the Phase 2 `FileRegistryProvider` so a
+ * registry edit is reflected on the very next request without a restart.
  */
 
 import Fs from 'fs';
 
 import { BootManifest } from './boot_manifest';
-import { resolveBootManifest } from './resolve_v2';
+import { resolveBootManifest } from './resolve';
 import {
+  RegistryDocument,
   ResolutionDimensions,
-  V2Document,
-  coerceToV2Document,
-} from './schema_v2';
+  assertValidRegistryDocument,
+} from './schema';
 
 /**
  * A source of resolved boot manifests, parameterised on the requesting host's
@@ -59,8 +56,7 @@ export interface RegistryReader {
    * backing store; implementations should cache and only refresh when the
    * source changed.
    *
-   * @throws Error if the backing store is missing, the document is invalid, or
-   *   the auto-migration fails (a malformed v1 doc is not silently coerced).
+   * @throws Error if the backing store is missing or the document is invalid.
    */
   resolve(dimensions: ResolutionDimensions): Promise<BootManifest>;
 }
@@ -79,9 +75,9 @@ export interface RegistryReaderFs {
 export interface FileRegistryReaderOptions {
   /**
    * Path to the registry document on disk. Required. The harness sets this
-   * to its `registry/registry.json` (the v1 canonical doc, auto-migrated on
-   * read); production deployments should drop the v2 doc at a stable path
-   * and re-write atomically (mv-into-place) so the mtime hot-reload works
+   * to its `registry/registry.json` (a `schemaVersion: 1` document);
+   * production deployments should drop the document at a stable path and
+   * re-write atomically (mv-into-place) so the mtime hot-reload works
    * without partial reads.
    */
   path: string;
@@ -89,21 +85,20 @@ export interface FileRegistryReaderOptions {
   fs?: RegistryReaderFs;
 }
 
-/** Internal cache slot: the validated v2 doc + the mtime it was read at. */
+/** Internal cache slot: the validated document + the mtime it was read at. */
 interface CacheSlot {
   mtimeMs: number;
-  doc: V2Document;
+  doc: RegistryDocument;
 }
 
 /**
  * File-backed {@link RegistryReader} with mtime-based hot-reload.
  *
- * The first {@link resolve} parses, validates and (if needed) auto-migrates
- * the file, remembering its `mtimeMs`. Subsequent resolves `stat` the file
- * and:
- *   - reuse the cached v2 doc when `mtimeMs` is unchanged (no re-parse,
+ * The first {@link resolve} parses, validates and caches the document,
+ * remembering its `mtimeMs`. Subsequent resolves `stat` the file and:
+ *   - reuse the cached document when `mtimeMs` is unchanged (no re-parse,
  *     ~zero cost, just a per-call run of the pure resolver),
- *   - re-read, re-validate and re-migrate when `mtimeMs` changed.
+ *   - re-read and re-validate when `mtimeMs` changed.
  *
  * The PURE resolver (`resolveBootManifest`) runs on every call regardless of
  * cache state — a different `dimensions` pair must yield a different manifest
@@ -117,7 +112,7 @@ export class FileRegistryReader implements RegistryReader {
   constructor(options: FileRegistryReaderOptions) {
     if (!options || !options.path) {
       throw new Error(
-        'FileRegistryReader: a non-empty `path` option is required (the v2/v1 registry file).'
+        'FileRegistryReader: a non-empty `path` option is required (the registry file).'
       );
     }
     this.path = options.path;
@@ -136,18 +131,18 @@ export class FileRegistryReader implements RegistryReader {
   }
 
   /**
-   * Read the v2 doc from disk (or the cached copy if mtime unchanged), running
-   * `coerceToV2Document` to auto-migrate v1 inputs. Made public-ish via the
-   * private wrapper so the read+cache logic is shared with the resolve path.
+   * Read the document from disk (or the cached copy if mtime unchanged) and
+   * validate it as `schemaVersion: 1`. Throws a descriptive Error on any
+   * filesystem, JSON, or schema-validation failure.
    */
-  private readAndCacheDoc(): V2Document {
+  private readAndCacheDoc(): RegistryDocument {
     const { mtimeMs } = this.statOrThrow();
 
     if (this.cache && this.cache.mtimeMs === mtimeMs) {
       return this.cache.doc;
     }
 
-    const doc = this.parseAndCoerce();
+    const doc = this.parseAndValidate();
     this.cache = { mtimeMs, doc };
     return doc;
   }
@@ -164,7 +159,7 @@ export class FileRegistryReader implements RegistryReader {
     }
   }
 
-  private parseAndCoerce(): V2Document {
+  private parseAndValidate(): RegistryDocument {
     let raw: string;
     try {
       raw = this.fs.readFileSync(this.path, 'utf8');
@@ -187,7 +182,10 @@ export class FileRegistryReader implements RegistryReader {
       );
     }
 
-    // Throws a descriptive Error (path-prefixed) on a malformed v1/v2 doc.
-    return coerceToV2Document(parsed);
+    // Throws a descriptive Error (path-prefixed) on a malformed document or
+    // wrong schemaVersion. The fail-closed posture is intentional: the
+    // canonical CDN registry is now `schemaVersion: 1` natively (see Story 7
+    // of the schema-collapse loop); no legacy auto-migration to fall back on.
+    return assertValidRegistryDocument(parsed);
   }
 }

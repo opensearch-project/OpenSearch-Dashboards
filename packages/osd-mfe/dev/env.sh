@@ -16,8 +16,9 @@ _HARNESS_SELF_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
 export OSD_DIR="${OSD_DIR:-$(cd "$_HARNESS_SELF_DIR/../../.." && pwd)}"
 export HARNESS_DIR="${HARNESS_DIR:-$_HARNESS_SELF_DIR}"
 
-# WORKSPACE_DIR: use parent of repo if it exists (local dev), else repo itself for CI.
-if [ -d "$OSD_DIR/../harness" ]; then
+# WORKSPACE_DIR: use parent of repo if it has a workspace-level registry/ dir
+# (local dev with the workspace layout); else repo itself for CI / plain forks.
+if [ -d "$OSD_DIR/../registry" ]; then
   export WORKSPACE_DIR="${WORKSPACE_DIR:-$(cd "$OSD_DIR/.." && pwd)}"
 else
   export WORKSPACE_DIR="${WORKSPACE_DIR:-$OSD_DIR}"

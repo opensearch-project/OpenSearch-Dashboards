@@ -9,10 +9,14 @@
  * from docs/01-MFE-DESIGN.md §5: "the server fetches the registry from a dynamic
  * service at serve time". It does two things:
  *
- *   GET /registry          -> the CURRENT registry JSON, read THROUGH the
- *                             FileRegistryProvider (so it inherits mtime-based
- *                             hot-reload: editing registry.json is reflected on
- *                             the very next request — no restart, no rebuild).
+ *   GET /registry          -> the CURRENT registry JSON, read directly from
+ *                             MFE_REGISTRY_PATH on every call (so editing the
+ *                             file is reflected on the very next request — no
+ *                             restart, no rebuild) and validated as the
+ *                             on-disk `schemaVersion: 1` `RegistryDocument`
+ *                             (layered shape: default/rollouts/
+ *                             tenantOverrides + optional global asset roots
+ *                             core/orchestrator/themes/sharedDepsCss).
  *   GET /mfe/<id>/<path>   -> the built remote artifacts under target/mfe/<id>/,
  *                             so this process doubles as the local "CDN" origin
  *                             that the registry's remoteEntry URLs point at
@@ -26,10 +30,10 @@
  * ALL responses carry permissive CORS headers and OPTIONS preflight is answered
  * with 204, because OSD --mfe (:5602) loads every artifact here cross-origin.
  *
- * Because /registry is served through the RegistryProvider interface, the exact
- * same read path the Phase 3 render will use is exercised here, and the
- * "flip a version = data edit" liveness proof (Story 6) works against a long-
- * running instance.
+ * Because /registry validates with the same schema (`assertValidRegistryDocument`)
+ * the OSD server's FileRegistryReader uses, the exact same fail-closed posture
+ * the Phase 3 render uses is exercised here, and the "flip a version = data edit"
+ * liveness proof (Story 6) works against a long-running instance.
  *
  * Usage (standalone):
  *   source harness/env.sh
@@ -127,34 +131,33 @@ function acceptsGzip(acceptEncoding) {
 }
 
 /**
- * Lazily load the FileRegistryProvider from the OSD package. We register OSD's
- * node environment first (babel auto-transpilation) so the TypeScript sources
- * under packages/osd-mfe/src can be required directly — exactly how
- * scripts/update_registry.js bootstraps. Done lazily so static-only requests do
- * not pay the transpile cost, and so a single provider instance is reused (its
- * mtime cache is what makes hot-reload cheap).
+ * Lazily load `assertValidRegistryDocument` from the OSD package. We register
+ * OSD's node environment first (babel auto-transpilation) so the TypeScript
+ * sources under packages/osd-mfe/src can be required directly — exactly how
+ * scripts/update_registry.js bootstraps. Done lazily so static-only requests
+ * do not pay the transpile cost, and so the validator is required only once.
+ *
+ * Returns the validator function for the on-disk `RegistryDocument`
+ * (layered `schemaVersion: 1` shape — default/rollouts/tenantOverrides plus
+ * the optional global asset roots: core/orchestrator/themes/sharedDepsCss).
  */
-let cachedProvider;
-function getProvider(options) {
-  const opts = options || {};
-  if (cachedProvider && !opts.path) {
-    return cachedProvider;
+let cachedAssertValid;
+function getValidator() {
+  if (cachedAssertValid) {
+    return cachedAssertValid;
   }
   // setup_node_env registers @babel/register; require it from the OSD repo so the
   // babel config resolves relative to the (in-repo) sources being transpiled.
   // eslint-disable-next-line global-require, import/no-dynamic-require
   require(path.join(OSD_DIR, 'src/setup_node_env'));
-  // Require the registry sub-barrel (packages/osd-mfe/src/registry/index.ts) — the
-  // top-level src barrel intentionally re-exports only a subset and does NOT expose
-  // FileRegistryProvider.
+  // Require the registry sub-barrel (packages/osd-mfe/src/registry/index.ts).
   // eslint-disable-next-line global-require, import/no-dynamic-require
-  const { FileRegistryProvider } = require(path.join(OSD_DIR, 'packages/osd-mfe/src/registry'));
-  // No explicit path => provider falls back to MFE_REGISTRY_PATH (set by env.sh).
-  const provider = new FileRegistryProvider(opts.path ? { path: opts.path } : {});
-  if (!opts.path) {
-    cachedProvider = provider;
-  }
-  return provider;
+  const { assertValidRegistryDocument } = require(path.join(
+    OSD_DIR,
+    'packages/osd-mfe/src/registry'
+  ));
+  cachedAssertValid = assertValidRegistryDocument;
+  return cachedAssertValid;
 }
 
 function send(res, status, body, contentType) {
@@ -218,59 +221,64 @@ function serveFile(res, filePath, acceptEncoding) {
 }
 
 /**
- * Serve GET /registry by reading THROUGH the RegistryProvider. The provider
- * re-reads the file only when its mtime changed (hot-reload) and validates it,
- * so a malformed edit surfaces as a 500 rather than serving garbage. We
- * re-serialize the validated object (2-space indent + trailing newline) to
- * mirror how update_registry writes the file.
+ * Serve GET /registry by reading the on-disk `schemaVersion: 1`
+ * `RegistryDocument` (layered shape: `default`/`rollouts`/`tenantOverrides`
+ * plus optional global asset roots `core`/`orchestrator`/`themes`/
+ * `sharedDepsCss`), validating it, and returning the doc verbatim.
  *
- * v3 schema compatibility: FileRegistryProvider validates v1-shape only.
- * Phase 16 introduced v3 (schemaVersion: 3, layered default/rollouts/
- * tenantOverrides, plus new global core/orchestrator/themes/sharedDepsCss
- * fields). When the on-disk registry is v3, we read it directly and flatten
- * to a v1-shape view for this endpoint — drops v3-only fields, lifts
- * default.mfes and default.sharedDeps to the top, sets schemaVersion: 1.
- * The OSD server is unaffected (it reads the v3 file via its own v3-aware
- * reader, not via this harness endpoint).
+ * The harness no longer projects between shapes here — the unified
+ * `schemaVersion: 1` IS the on-disk format and the same shape any registry
+ * consumer (OSD server's FileRegistryReader, the future HttpRegistryReader,
+ * tooling, this harness) sees. Hot-reload still happens transparently
+ * because every request re-reads the file (no caching layer in this
+ * harness's /registry path).
+ *
+ * On a missing / unreadable / invalid-JSON / schema-invalid file we return
+ * 500 with a structured error rather than 200'ing junk; the production
+ * read path on the OSD server is equally fail-closed (see `reader.ts`).
  */
 function serveRegistry(res, options) {
-  // Step 1: v3 coercion path. Read directly, detect v3, flatten if so.
   const registryPath =
     (options && options.path) ||
     process.env.MFE_REGISTRY_PATH ||
     null;
-  if (registryPath) {
-    try {
-      const raw = JSON.parse(fs.readFileSync(registryPath, 'utf8'));
-      if (raw && raw.schemaVersion === 3) {
-        const v1View = {
-          schemaVersion: 1,
-          generatedAt: raw.generatedAt,
-          sharedDeps: (raw.default && raw.default.sharedDeps) || null,
-          mfes: (raw.default && raw.default.mfes) || {},
-        };
-        if (raw.signature) v1View.signature = raw.signature;
-        sendJson(res, 200, v1View);
-        return;
-      }
-    } catch (_) {
-      // Fall through to the legacy validating path below.
-    }
+  if (!registryPath) {
+    sendJson(res, 500, {
+      error: 'registry_unavailable',
+      message: 'No registry path configured (set MFE_REGISTRY_PATH).',
+    });
+    return;
   }
-
-  // Step 2: legacy v1 validating path via the production FileRegistryProvider.
-  let registry;
+  let raw;
   try {
-    registry = getProvider(options).read();
+    raw = fs.readFileSync(registryPath, 'utf8');
   } catch (err) {
-    // Missing / invalid / non-JSON registry — report it instead of 200-ing junk.
+    sendJson(res, 500, {
+      error: 'registry_unavailable',
+      message: `cannot read registry at ${registryPath}: ${err && err.message ? err.message : String(err)}`,
+    });
+    return;
+  }
+  let parsed;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (err) {
+    sendJson(res, 500, {
+      error: 'registry_unavailable',
+      message: `registry at ${registryPath} is not valid JSON: ${err && err.message ? err.message : String(err)}`,
+    });
+    return;
+  }
+  try {
+    getValidator()(parsed);
+  } catch (err) {
     sendJson(res, 500, {
       error: 'registry_unavailable',
       message: err && err.message ? err.message : String(err),
     });
     return;
   }
-  sendJson(res, 200, registry);
+  sendJson(res, 200, parsed);
 }
 
 function createServer(options) {
@@ -403,7 +411,7 @@ function startServer(options) {
   });
 }
 
-module.exports = { startServer, createServer, getProvider };
+module.exports = { startServer, createServer, getValidator };
 
 // Run standalone for manual use / verify_registry_dynamic.js spawns this too.
 if (require.main === module) {

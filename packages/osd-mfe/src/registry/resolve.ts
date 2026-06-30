@@ -10,126 +10,335 @@
  */
 
 /**
- * resolve(id, overrides) — registry → remote descriptor, with the dev-override
- * hook (Phase 2, Story 3).
+ * resolveBootManifest — the PURE resolution algorithm.
  *
- * Resolution always runs against the CURRENT registry obtained from a
- * {@link RegistryProvider} (mtime hot-reload / TTL poll lives in the provider),
- * so a version flip is a pure DATA edit reflected on the very next resolve — no
- * rebuild, no restart. See docs/01-MFE-DESIGN.md §5.
+ * Given a {@link RegistryDocument} (schemaVersion: 1) and a pair of resolution
+ * dimensions (`customerId`, `userBucket`), produce the FLAT
+ * {@link BootManifest} the OSD server injects into the boot HTML for the
+ * browser to consume.
  *
- * The dev-override hook (docs/01-MFE-DESIGN.md §7) lets a single plugin be
- * repointed to a different `remoteEntry` URL (`?mfe.<id>=<url>` / inspector
- * panel). Phase 5 parses the query param / UI and enforces the non-prod
- * security gate; this module only provides the resolution CONTRACT: given an
- * override map, the override URL wins over the registry URL.
+ * Resolution is per-id over the LAYERED PLUGIN SUBSTRUCTURE
+ * (`default` / `rollouts[]` / `tenantOverrides{}`). For each plugin id present
+ * in any layer, the first source that produces an entry — applied in this
+ * STRICT precedence order — wins:
+ *
+ *   1. `tenantOverrides[customerId].mfes[id]` (specific wins)
+ *   2. The FIRST rollout in declared order whose `match` evaluates true AND
+ *      whose `override.mfes[id]` is set
+ *   3. `default.mfes[id]`
+ *
+ * The match for a single rollout rule is a logical AND across declared
+ * predicates (an empty match `{}` matches every dimension):
+ *
+ *   - `userBucketLt` (when set): `bucket < userBucketLt`
+ *   - `userBucketGte` (when set): `bucket >= userBucketGte`
+ *   - `tenantId` (when set): `customerId === tenantId`
+ *
+ * Entries whose source is the `default` layer are the steady state; rollouts
+ * never invent ids the default does not declare unless the authoring CLI
+ * explicitly added them — Phase 13 keeps the field stable so the resolver
+ * doesn't need to guard against that case.
+ *
+ * Beyond the plugin substructure, the resolver also projects four OPTIONAL
+ * GLOBAL ASSET ROOTS — `core`, `orchestrator`, `sharedDepsCss`, `themes` —
+ * from the document's top level onto the manifest's top level VERBATIM. These
+ * fields describe infrastructure (the OSD core binary, the bootstrap engine,
+ * the platform's CSS, per-theme CSS) and are not per-tenant: they are
+ * neither per-rollout nor per-tenant-overridable, so the resolver simply
+ * shallow-clones each present field onto the result for purity. Absent
+ * fields stay absent in the manifest (consumer falls back to the
+ * server-bundled `/bundles/...` path).
+ *
+ * Defensive note: an entry whose resolved source happens to be malformed
+ * (e.g. an empty remoteEntry) is dropped from the output rather than failing
+ * the whole resolve — the schema validator ({@link validateRegistry}) is the
+ * authority on shape correctness; this resolver is best-effort to keep one
+ * bad layer from breaking unrelated plugins. (`validateRegistry` is normally
+ * already invoked by the reader / authoring CLI before this function ever
+ * runs.)
+ *
+ * The function is PURE — no I/O, no clock reads, no globals. It takes only
+ * the doc + dimensions and returns a fresh boot manifest. This pure-ness is
+ * what makes the resolver trivial to unit-test without a filesystem/registry
+ * mock, and what lets a future `HttpRegistryReader` reuse the SAME function
+ * against a doc fetched over the wire.
  */
 
-import { MfeEntry } from './schema';
-import { RegistryProvider } from './provider';
+import { BootManifest, BootManifestEntry } from './boot_manifest';
+import {
+  AssetDescriptor,
+  CompatDeclaration,
+  DefaultLayer,
+  RegistryDocument,
+  ResolutionDimensions,
+  Rollout,
+  RolloutMatch,
+} from './schema';
+
+/* ------------------------------------------------------------------------- *
+ * Match predicate
+ * ------------------------------------------------------------------------- */
 
 /**
- * Dev-override map: plugin id → replacement `remoteEntry` URL.
+ * Evaluate a single rollout match against the given dimensions. An empty match
+ * (`{}`) matches every dimension — vacuous truth. A predicate whose key is
+ * absent does NOT contribute to the AND (it's "don't care", not "always
+ * false"). Bucket bounds use `>=` / `<` (half-open) so adjacent rules tile.
  *
- * This is the Phase 5 hook point. Phase 5 builds this map from the
- * `?mfe.<id>=<url>` query param / inspector panel (and gates it to non-prod);
- * Story 3 only defines how an override participates in resolution.
+ * Exposed for unit tests (the test matrix exercises every branch in isolation)
+ * and for the authoring CLI's `--check-deps` flag, which needs to reason about
+ * which rules a hypothetical dimension pair would activate when validating
+ * the resolved graph.
  */
-export type OverrideMap = Readonly<Record<string, string>>;
-
-/**
- * The resolved remote descriptor for one plugin — everything a host needs to
- * load the Module Federation container for `id`.
- */
-export interface ResolvedRemote {
-  /** Plugin id this descriptor resolves (echoed for convenience). */
-  id: string;
-  /** Effective `remoteEntry.js` URL (the override URL when one applied). */
-  remoteEntry: string;
-  /** Module Federation container scope (from the registry entry). */
-  scope: string;
-  /** Exposed module key inside the container (from the registry entry). */
-  module: string;
-  /** Content-hash-derived version label (from the registry entry). */
-  version: string;
-  /**
-   * Subresource Integrity hash, when known. Present only for a `registry`
-   * source: an override repoints the URL to a build whose bytes (and therefore
-   * hash) differ, so the registry `integrity` no longer applies and is dropped.
-   */
-  integrity?: string;
-  /** Where `remoteEntry` came from — used by the Phase 5 inspector panel. */
-  source: 'registry' | 'override';
-}
-
-/**
- * Pick a non-empty override URL for `id`, if any.
- *
- * Treats `undefined`/empty-string as "no override" so a sparse map (or a
- * cleared inspector field) is a no-op rather than an invalid URL.
- */
-function overrideUrlFor(id: string, overrides?: OverrideMap): string | undefined {
-  if (!overrides) {
-    return undefined;
+export function matchesRollout(
+  match: RolloutMatch,
+  dimensions: ResolutionDimensions
+): boolean {
+  if (match.userBucketLt !== undefined && !(dimensions.userBucket < match.userBucketLt)) {
+    return false;
   }
-  const url = overrides[id];
-  return typeof url === 'string' && url.length > 0 ? url : undefined;
+  if (match.userBucketGte !== undefined && !(dimensions.userBucket >= match.userBucketGte)) {
+    return false;
+  }
+  if (match.tenantId !== undefined && match.tenantId !== dimensions.customerId) {
+    return false;
+  }
+  return true;
+}
+
+/* ------------------------------------------------------------------------- *
+ * Per-id source lookup (precedence implementation)
+ * ------------------------------------------------------------------------- */
+
+/**
+ * The layer that supplied a resolved entry. Used for diagnostics + the
+ * authoring CLI's `--check-deps` flag which annotates the resolved graph
+ * with which layer each id came from.
+ */
+export type ResolvedSource = 'tenant' | 'rollout' | 'default';
+
+/**
+ * One per-id resolution decision, before flattening into a boot manifest. Kept
+ * separately so the authoring CLI + tests can inspect precedence (e.g.
+ * "verify acme + bucket=2 picked the tenant layer, not the canary rollout").
+ */
+export interface ResolvedDecision {
+  id: string;
+  source: ResolvedSource;
+  /** Which rollout rule supplied the entry (only when `source === 'rollout'`). */
+  rolloutId?: string;
+  entry: BootManifestEntry;
 }
 
 /**
- * Resolve a plugin id to its remote descriptor against the current registry,
- * applying the dev-override hook.
- *
- * Precedence:
- * 1. The plugin MUST exist in the current registry — its `scope`, `module` and
- *    `version` always come from the registry entry. An override only repoints
- *    the URL of a KNOWN plugin; it never invents an entry.
- * 2. When `overrides[id]` is a non-empty URL, that URL wins over the registry
- *    `remoteEntry` (and registry `integrity` is dropped — see {@link ResolvedRemote.integrity}).
- *
- * Unknown id: returns `null` (documented contract) rather than throwing, so a
- * missing optional plugin is a non-fatal "not available". An override for an
- * unknown id is ignored — there is no `scope`/`module`/`version` to build a
- * descriptor from — and `null` is still returned.
- *
- * @param provider source of the current registry (read at call time)
- * @param id plugin id to resolve (e.g. `inspector`)
- * @param overrides optional dev-override map (Phase 5 hook); override URL wins
- * @returns the resolved remote descriptor, or `null` when `id` is not in the registry
+ * Resolve a single plugin id against the registry doc + dimensions. Implements
+ * the precedence rule. Returns `null` when no layer supplied an entry for the
+ * id (defensive — the resolver doesn't synthesise data).
  */
-export function resolve(
-  provider: RegistryProvider,
+function resolveOne(
   id: string,
-  overrides?: OverrideMap
-): ResolvedRemote | null {
-  const entry: MfeEntry | undefined = provider.getMfe(id);
-  if (!entry) {
-    // Unknown id: not available. Overrides cannot synthesize a descriptor
-    // because scope/module/version are only known from the registry.
+  doc: RegistryDocument,
+  dimensions: ResolutionDimensions,
+  matchingRollouts: Rollout[]
+): ResolvedDecision | null {
+  // 1. Tenant override wins outright when present for this id.
+  const tenantLayer = doc.tenantOverrides[dimensions.customerId];
+  if (tenantLayer && tenantLayer.mfes[id] !== undefined) {
+    const entry = toBootManifestEntry(id, tenantLayer.mfes[id]);
+    if (entry) {
+      return { id, source: 'tenant', entry };
+    }
+  }
+
+  // 2. First-matching rollout (by declared order) that has the id.
+  for (const rule of matchingRollouts) {
+    const candidate = rule.override.mfes[id];
+    if (candidate !== undefined) {
+      const entry = toBootManifestEntry(id, candidate);
+      if (entry) {
+        return { id, source: 'rollout', rolloutId: rule.id, entry };
+      }
+    }
+  }
+
+  // 3. Default layer.
+  const defaultEntry = doc.default.mfes[id];
+  if (defaultEntry !== undefined) {
+    const entry = toBootManifestEntry(id, defaultEntry);
+    if (entry) {
+      return { id, source: 'default', entry };
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Project an MfeEntry (from any layer) onto the boot manifest entry shape.
+ * Stamps the passthrough fields that the loader/inspector needs (compat,
+ * integrity, version) from whichever layer supplied the source. Returns null
+ * if the entry is malformed (defensive — the validator is the authority).
+ */
+function toBootManifestEntry(
+  id: string,
+  raw: DefaultLayer['mfes'][string]
+): BootManifestEntry | null {
+  if (
+    typeof raw.remoteEntry !== 'string' ||
+    raw.remoteEntry.length === 0 ||
+    typeof raw.scope !== 'string' ||
+    raw.scope.length === 0 ||
+    typeof raw.module !== 'string' ||
+    raw.module.length === 0 ||
+    typeof raw.version !== 'string' ||
+    raw.version.length === 0
+  ) {
     return null;
   }
-
-  const overrideUrl = overrideUrlFor(id, overrides);
-  if (overrideUrl !== undefined) {
-    return {
-      id,
-      remoteEntry: overrideUrl,
-      scope: entry.scope,
-      module: entry.module,
-      version: entry.version,
-      // integrity intentionally dropped: the overridden bundle's bytes differ
-      // from the registry build, so the recorded SRI hash no longer matches.
-      source: 'override',
+  const entry: BootManifestEntry = {
+    id,
+    remoteEntry: raw.remoteEntry,
+    scope: raw.scope,
+    module: raw.module,
+    version: raw.version,
+  };
+  if (raw.integrity !== undefined && raw.integrity !== null && raw.integrity.length > 0) {
+    entry.integrity = raw.integrity;
+  }
+  if (raw.compat !== undefined) {
+    const compat: CompatDeclaration = {
+      minCoreVersion: raw.compat.minCoreVersion,
+      compatibleCoreRange: raw.compat.compatibleCoreRange,
     };
+    entry.compat = compat;
+  }
+  return entry;
+}
+
+/* ------------------------------------------------------------------------- *
+ * Public API
+ * ------------------------------------------------------------------------- */
+
+/**
+ * Compute the per-id resolution decisions for a doc + dimensions. Exposed
+ * separately from {@link resolveBootManifest} so callers (tests, authoring
+ * CLI's `--check-deps`) can inspect WHICH layer supplied each id.
+ *
+ * Iterates the ids in a stable order: every id present in `default.mfes`
+ * (insertion order) followed by any extra id that ONLY a rollout/tenant layer
+ * declares. This matches the legacy flat-shape path's behaviour (boot order =
+ * registry insertion order) and keeps the boot manifest deterministic for the
+ * same doc + dimensions.
+ */
+export function resolveDecisions(
+  doc: RegistryDocument,
+  dimensions: ResolutionDimensions
+): ResolvedDecision[] {
+  const matchingRollouts = doc.rollouts.filter((rule) => matchesRollout(rule.match, dimensions));
+
+  // Stable id order: defaults first (insertion), then the layered-only ids
+  // (rollouts in declared order, then tenant overrides), each emitted at most
+  // once. This makes the manifest order deterministic for the same inputs.
+  const seen = new Set<string>();
+  const ids: string[] = [];
+  for (const id of Object.keys(doc.default.mfes)) {
+    if (!seen.has(id)) {
+      seen.add(id);
+      ids.push(id);
+    }
+  }
+  for (const rule of matchingRollouts) {
+    for (const id of Object.keys(rule.override.mfes)) {
+      if (!seen.has(id)) {
+        seen.add(id);
+        ids.push(id);
+      }
+    }
+  }
+  const tenantLayer = doc.tenantOverrides[dimensions.customerId];
+  if (tenantLayer) {
+    for (const id of Object.keys(tenantLayer.mfes)) {
+      if (!seen.has(id)) {
+        seen.add(id);
+        ids.push(id);
+      }
+    }
   }
 
-  return {
-    id,
-    remoteEntry: entry.remoteEntry,
-    scope: entry.scope,
-    module: entry.module,
-    version: entry.version,
-    ...(entry.integrity !== undefined ? { integrity: entry.integrity } : {}),
-    source: 'registry',
+  const decisions: ResolvedDecision[] = [];
+  for (const id of ids) {
+    const decision = resolveOne(id, doc, dimensions, matchingRollouts);
+    if (decision) {
+      decisions.push(decision);
+    }
+  }
+  return decisions;
+}
+
+/**
+ * Shallow-clone an {@link AssetDescriptor} so the resolved manifest never
+ * aliases the input document (purity invariant). Drops `integrity` when it is
+ * absent on the source so the manifest is the same shape the validator
+ * accepts.
+ */
+function cloneAssetDescriptor(asset: AssetDescriptor): AssetDescriptor {
+  const out: AssetDescriptor = {
+    url: asset.url,
+    version: asset.version,
   };
+  if (asset.integrity !== undefined) {
+    out.integrity = asset.integrity;
+  }
+  return out;
+}
+
+/**
+ * Resolve a {@link RegistryDocument} down to a flat {@link BootManifest} for
+ * the given dimensions. Implements:
+ *
+ *   - precedence: `tenantOverrides[customerId]` > first-matching `rollouts[]`
+ *     > `default`
+ *   - first-match: within `rollouts[]`, declared order wins per id
+ *   - sharedDeps: ALWAYS taken from `default.sharedDeps` (singletons URL is a
+ *     baseline property of the doc, not per-layer; keeping it pinned avoids a
+ *     mid-page sharedDeps version mismatch when only some entries override)
+ *   - global asset roots: `core` / `orchestrator` / `sharedDepsCss` /
+ *     `themes` are shallow-cloned from the document onto the manifest's top
+ *     level when present, and omitted when absent
+ *
+ * @param doc a VALID registry document (caller is expected to have run
+ *   {@link validateRegistry})
+ * @param dimensions the bound dimensions for this request
+ * @returns the resolved flat boot manifest
+ */
+export function resolveBootManifest(
+  doc: RegistryDocument,
+  dimensions: ResolutionDimensions
+): BootManifest {
+  const decisions = resolveDecisions(doc, dimensions);
+  const manifest: BootManifest = {
+    sharedDeps: { ...doc.default.sharedDeps },
+    mfes: decisions.map((d) => d.entry),
+  };
+
+  // Project optional global asset roots verbatim onto the manifest top level.
+  // Each field is a shallow clone so the manifest never aliases the doc.
+  if (doc.core !== undefined) {
+    manifest.core = cloneAssetDescriptor(doc.core);
+  }
+  if (doc.orchestrator !== undefined) {
+    manifest.orchestrator = cloneAssetDescriptor(doc.orchestrator);
+  }
+  if (doc.sharedDepsCss !== undefined) {
+    manifest.sharedDepsCss = cloneAssetDescriptor(doc.sharedDepsCss);
+  }
+  if (doc.themes !== undefined) {
+    const themes: Record<string, AssetDescriptor> = {};
+    for (const themeName of Object.keys(doc.themes)) {
+      themes[themeName] = cloneAssetDescriptor(doc.themes[themeName]);
+    }
+    manifest.themes = themes;
+  }
+
+  return manifest;
 }

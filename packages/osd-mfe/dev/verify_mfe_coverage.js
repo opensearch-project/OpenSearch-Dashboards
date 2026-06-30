@@ -94,7 +94,14 @@ function pluginIdFromUrl(url) {
 
 function loadRegistry() {
   const raw = JSON.parse(fs.readFileSync(REGISTRY_PATH, 'utf8'));
-  const mfes = raw && raw.mfes ? raw.mfes : {};
+  // Registry is `schemaVersion: 1` (the unified layered shape): plugin
+  // entries live under `default.mfes` (rollouts/tenantOverrides add layered
+  // siblings, but the coverage smoke checks the BASELINE every host sees,
+  // which is exactly the default layer).
+  const mfes =
+    raw && raw.default && raw.default.mfes
+      ? raw.default.mfes
+      : {};
   // name -> remoteEntry URL, in stable (sorted) order for a tidy table.
   return Object.keys(mfes)
     .sort()

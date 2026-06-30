@@ -13,13 +13,13 @@
  * Tests for the v3 asset build/staging pipeline (Phase 16 Story 2).
  *
  * Coverage:
- *  - stageV3Asset for each kind (core, orchestrator, theme, shared-deps-css):
+ *  - stageAsset for each kind (core, orchestrator, theme, shared-deps-css):
  *    correct content hash, integrity, version, staging dir layout, build
  *    manifest emission.
  *  - Idempotency: re-staging the same source bytes yields the same hash + dir.
  *  - Determinism: a 1-byte change to the source changes the contentHash +
  *    integrity but leaves the version prefix intact.
- *  - readV3AssetBuildManifest accepts valid manifests + rejects every shape
+ *  - readAssetBuildManifest accepts valid manifests + rejects every shape
  *    violation.
  *  - manifestToAssetDescriptor builds the CDN-shaped URL for each asset kind.
  *  - defaultSourcePath + defaultTargetRoot resolve the expected paths.
@@ -32,15 +32,15 @@ import Os from 'os';
 import Path from 'path';
 
 import {
-  V3_ASSET_BUILD_MANIFEST_SCHEMA_VERSION,
-  V3AssetBuildManifest,
-  V3AssetKind,
+  ASSET_BUILD_MANIFEST_SCHEMA_VERSION,
+  AssetBuildManifest,
+  AssetKind,
   defaultSourcePath,
   defaultTargetRoot,
   manifestToAssetDescriptor,
-  readV3AssetBuildManifest,
-  stageV3Asset,
-} from './v3_asset_build';
+  readAssetBuildManifest,
+  stageAsset,
+} from './asset_build';
 import { computeIntegrity } from './generate';
 
 function tmpRepo(): { root: string; cleanup: () => void } {
@@ -55,7 +55,7 @@ function tmpRepo(): { root: string; cleanup: () => void } {
 /** Place a source file at the canonical default path for an asset kind. */
 function writeSource(
   root: string,
-  assetKind: V3AssetKind,
+  assetKind: AssetKind,
   themeName: string | undefined,
   bytes: Buffer
 ): string {
@@ -67,13 +67,13 @@ function writeSource(
 
 const FIXED_NOW = new Date('2026-06-26T12:00:00.000Z');
 
-describe('stageV3Asset() — per-kind staging', () => {
+describe('stageAsset() — per-kind staging', () => {
   it('stages a core artifact with sha256[:12] + sha384 SRI + build-manifest.json', () => {
     const { root, cleanup } = tmpRepo();
     try {
       const bytes = Buffer.from('CORE_ENTRY_PAYLOAD');
       writeSource(root, 'core', undefined, bytes);
-      const m = stageV3Asset({ repoRoot: root, assetKind: 'core', now: FIXED_NOW });
+      const m = stageAsset({ repoRoot: root, assetKind: 'core', now: FIXED_NOW });
 
       const expectedHash = createHash('sha256').update(bytes).digest('hex').slice(0, 12);
       expect(m.assetKind).toBe('core');
@@ -82,7 +82,7 @@ describe('stageV3Asset() — per-kind staging', () => {
       expect(m.version).toBe(`3.5.0+${expectedHash}`);
       expect(m.primaryFile).toBe('core.entry.js');
       expect(m.generatedAt).toBe(FIXED_NOW.toISOString());
-      expect(m.schemaVersion).toBe(V3_ASSET_BUILD_MANIFEST_SCHEMA_VERSION);
+      expect(m.schemaVersion).toBe(ASSET_BUILD_MANIFEST_SCHEMA_VERSION);
       expect(m.themeName).toBeUndefined();
 
       // Staged file present + manifest sibling written.
@@ -105,7 +105,7 @@ describe('stageV3Asset() — per-kind staging', () => {
     try {
       const bytes = Buffer.from('ORCHESTRATOR_PAYLOAD');
       writeSource(root, 'orchestrator', undefined, bytes);
-      const m = stageV3Asset({ repoRoot: root, assetKind: 'orchestrator', now: FIXED_NOW });
+      const m = stageAsset({ repoRoot: root, assetKind: 'orchestrator', now: FIXED_NOW });
       expect(m.assetKind).toBe('orchestrator');
       expect(m.primaryFile).toBe('osd_bootstrap_mfe.js');
       expect(m.stagingDir).toBe(Path.join(root, 'target', 'mfe-bootstrap', m.contentHash));
@@ -121,7 +121,7 @@ describe('stageV3Asset() — per-kind staging', () => {
     try {
       const bytes = Buffer.from('.light { color: black; }');
       writeSource(root, 'theme', 'light', bytes);
-      const m = stageV3Asset({
+      const m = stageAsset({
         repoRoot: root,
         assetKind: 'theme',
         themeName: 'light',
@@ -141,7 +141,7 @@ describe('stageV3Asset() — per-kind staging', () => {
     try {
       const bytes = Buffer.from('body { font: 14px sans-serif; }');
       writeSource(root, 'shared-deps-css', undefined, bytes);
-      const m = stageV3Asset({
+      const m = stageAsset({
         repoRoot: root,
         assetKind: 'shared-deps-css',
         now: FIXED_NOW,
@@ -158,8 +158,8 @@ describe('stageV3Asset() — per-kind staging', () => {
     const { root, cleanup } = tmpRepo();
     try {
       writeSource(root, 'core', undefined, Buffer.from('ABC123'));
-      const a = stageV3Asset({ repoRoot: root, assetKind: 'core', now: FIXED_NOW });
-      const b = stageV3Asset({ repoRoot: root, assetKind: 'core', now: FIXED_NOW });
+      const a = stageAsset({ repoRoot: root, assetKind: 'core', now: FIXED_NOW });
+      const b = stageAsset({ repoRoot: root, assetKind: 'core', now: FIXED_NOW });
       expect(b.contentHash).toBe(a.contentHash);
       expect(b.integrity).toBe(a.integrity);
       expect(b.stagingDir).toBe(a.stagingDir);
@@ -172,9 +172,9 @@ describe('stageV3Asset() — per-kind staging', () => {
     const { root, cleanup } = tmpRepo();
     try {
       writeSource(root, 'core', undefined, Buffer.from('VERSION_A'));
-      const a = stageV3Asset({ repoRoot: root, assetKind: 'core', now: FIXED_NOW });
+      const a = stageAsset({ repoRoot: root, assetKind: 'core', now: FIXED_NOW });
       writeSource(root, 'core', undefined, Buffer.from('VERSION_B'));
-      const b = stageV3Asset({ repoRoot: root, assetKind: 'core', now: FIXED_NOW });
+      const b = stageAsset({ repoRoot: root, assetKind: 'core', now: FIXED_NOW });
       expect(b.contentHash).not.toBe(a.contentHash);
       expect(b.integrity).not.toBe(a.integrity);
       expect(b.version.startsWith('3.5.0+')).toBe(true);
@@ -187,7 +187,7 @@ describe('stageV3Asset() — per-kind staging', () => {
   it('rejects an absent source artifact with a clear, remediation-friendly message', () => {
     const { root, cleanup } = tmpRepo();
     try {
-      expect(() => stageV3Asset({ repoRoot: root, assetKind: 'core', now: FIXED_NOW })).toThrow(
+      expect(() => stageAsset({ repoRoot: root, assetKind: 'core', now: FIXED_NOW })).toThrow(
         /source artifact not found/
       );
     } finally {
@@ -198,7 +198,7 @@ describe('stageV3Asset() — per-kind staging', () => {
   it('rejects a theme call without themeName', () => {
     const { root, cleanup } = tmpRepo();
     try {
-      expect(() => stageV3Asset({ repoRoot: root, assetKind: 'theme', now: FIXED_NOW })).toThrow(
+      expect(() => stageAsset({ repoRoot: root, assetKind: 'theme', now: FIXED_NOW })).toThrow(
         /themeName is required/
       );
     } finally {
@@ -212,7 +212,7 @@ describe('stageV3Asset() — per-kind staging', () => {
       const bytes = Buffer.from('OVERRIDE');
       writeSource(root, 'core', undefined, bytes);
       const altRoot = Path.join(root, 'alt-target');
-      const m = stageV3Asset({
+      const m = stageAsset({
         repoRoot: root,
         assetKind: 'core',
         targetRoot: altRoot,
@@ -229,7 +229,7 @@ describe('stageV3Asset() — per-kind staging', () => {
     try {
       const alt = Path.join(root, 'alt-source.js');
       Fs.writeFileSync(alt, Buffer.from('ALT'));
-      const m = stageV3Asset({
+      const m = stageAsset({
         repoRoot: root,
         assetKind: 'core',
         sourcePath: alt,
@@ -287,7 +287,7 @@ describe('defaultSourcePath() / defaultTargetRoot()', () => {
   });
 });
 
-describe('readV3AssetBuildManifest()', () => {
+describe('readAssetBuildManifest()', () => {
   function writeManifest(value: unknown): string {
     const dir = Fs.mkdtempSync(Path.join(Os.tmpdir(), 'osd-mfe-rm-'));
     const p = Path.join(dir, 'build-manifest.json');
@@ -296,8 +296,8 @@ describe('readV3AssetBuildManifest()', () => {
   }
 
   it('accepts a well-formed v3 asset manifest', () => {
-    const m: V3AssetBuildManifest = {
-      schemaVersion: V3_ASSET_BUILD_MANIFEST_SCHEMA_VERSION,
+    const m: AssetBuildManifest = {
+      schemaVersion: ASSET_BUILD_MANIFEST_SCHEMA_VERSION,
       generatedAt: '2026-06-26T12:00:00.000Z',
       assetKind: 'core',
       contentHash: 'abc123def456',
@@ -308,12 +308,12 @@ describe('readV3AssetBuildManifest()', () => {
       files: [{ localPath: '/tmp/whatever/core.entry.js', relativePath: 'core.entry.js' }],
     };
     const p = writeManifest(m);
-    expect(readV3AssetBuildManifest(p)).toEqual(m);
+    expect(readAssetBuildManifest(p)).toEqual(m);
   });
 
   it('rejects wrong schemaVersion', () => {
     const p = writeManifest({ schemaVersion: 99 });
-    expect(() => readV3AssetBuildManifest(p)).toThrow(/schemaVersion must equal 1/);
+    expect(() => readAssetBuildManifest(p)).toThrow(/schemaVersion must equal 1/);
   });
 
   it('rejects an unknown assetKind', () => {
@@ -328,7 +328,7 @@ describe('readV3AssetBuildManifest()', () => {
       files: [{ localPath: '/tmp/f', relativePath: 'f' }],
       generatedAt: '2026-06-26T12:00:00.000Z',
     });
-    expect(() => readV3AssetBuildManifest(p)).toThrow(/assetKind must be/);
+    expect(() => readAssetBuildManifest(p)).toThrow(/assetKind must be/);
   });
 
   it('rejects an integrity without sha384- prefix', () => {
@@ -343,7 +343,7 @@ describe('readV3AssetBuildManifest()', () => {
       files: [{ localPath: '/tmp/f', relativePath: 'f' }],
       generatedAt: '2026-06-26T12:00:00.000Z',
     });
-    expect(() => readV3AssetBuildManifest(p)).toThrow(/integrity must start with "sha384-"/);
+    expect(() => readAssetBuildManifest(p)).toThrow(/integrity must start with "sha384-"/);
   });
 
   it('rejects a theme manifest without themeName', () => {
@@ -358,7 +358,7 @@ describe('readV3AssetBuildManifest()', () => {
       files: [{ localPath: '/tmp/f', relativePath: 'f' }],
       generatedAt: '2026-06-26T12:00:00.000Z',
     });
-    expect(() => readV3AssetBuildManifest(p)).toThrow(/themeName must be a non-empty string/);
+    expect(() => readAssetBuildManifest(p)).toThrow(/themeName must be a non-empty string/);
   });
 
   it('rejects an empty files array', () => {
@@ -373,21 +373,21 @@ describe('readV3AssetBuildManifest()', () => {
       files: [],
       generatedAt: '2026-06-26T12:00:00.000Z',
     });
-    expect(() => readV3AssetBuildManifest(p)).toThrow(/files must be a non-empty array/);
+    expect(() => readAssetBuildManifest(p)).toThrow(/files must be a non-empty array/);
   });
 
   it('rejects malformed JSON with a parser-derived message', () => {
     const dir = Fs.mkdtempSync(Path.join(Os.tmpdir(), 'osd-mfe-rm-'));
     const p = Path.join(dir, 'build-manifest.json');
     Fs.writeFileSync(p, '{ not valid json');
-    expect(() => readV3AssetBuildManifest(p)).toThrow(/malformed JSON/);
+    expect(() => readAssetBuildManifest(p)).toThrow(/malformed JSON/);
   });
 });
 
 describe('manifestToAssetDescriptor()', () => {
-  function fixtureManifest(overrides: Partial<V3AssetBuildManifest> = {}): V3AssetBuildManifest {
+  function fixtureManifest(overrides: Partial<AssetBuildManifest> = {}): AssetBuildManifest {
     return {
-      schemaVersion: V3_ASSET_BUILD_MANIFEST_SCHEMA_VERSION,
+      schemaVersion: ASSET_BUILD_MANIFEST_SCHEMA_VERSION,
       generatedAt: '2026-06-26T12:00:00.000Z',
       assetKind: 'core',
       contentHash: 'abc123def456',

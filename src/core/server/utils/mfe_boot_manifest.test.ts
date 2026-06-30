@@ -131,9 +131,9 @@ describe('generateBucketCookieValue()', () => {
   });
 });
 
-describe('readMfeBootManifest() — v2 path', () => {
-  const v2DefaultOnly = {
-    schemaVersion: 2,
+describe('readMfeBootManifest()', () => {
+  const defaultOnly = {
+    schemaVersion: 1,
     generatedAt: '2026-06-19T00:00:00.000Z',
     default: {
       sharedDeps: SHARED,
@@ -143,8 +143,8 @@ describe('readMfeBootManifest() — v2 path', () => {
     tenantOverrides: {},
   };
 
-  const v2WithCanaryAndTenant = {
-    schemaVersion: 2,
+  const withCanaryAndTenant = {
+    schemaVersion: 1,
     generatedAt: '2026-06-19T00:00:00.000Z',
     default: {
       sharedDeps: SHARED,
@@ -163,7 +163,7 @@ describe('readMfeBootManifest() — v2 path', () => {
   };
 
   it('resolves default-only doc to the default manifest', () => {
-    const file = tmpFile(JSON.stringify(v2DefaultOnly));
+    const file = tmpFile(JSON.stringify(defaultOnly));
     try {
       const m = readMfeBootManifest(file, { customerId: 'default', userBucket: 50 });
       expect(m.sharedDeps).toEqual(SHARED);
@@ -175,7 +175,7 @@ describe('readMfeBootManifest() — v2 path', () => {
   });
 
   it('respects precedence: tenant > rollouts > default', () => {
-    const file = tmpFile(JSON.stringify(v2WithCanaryAndTenant));
+    const file = tmpFile(JSON.stringify(withCanaryAndTenant));
     try {
       // acme + bucket=2 (would also match canary): tenant wins.
       const acme = readMfeBootManifest(file, { customerId: 'acme', userBucket: 2 });
@@ -195,7 +195,7 @@ describe('readMfeBootManifest() — v2 path', () => {
 
   it('emits ids in default-insertion order, then layered-only ids', () => {
     const doc = {
-      schemaVersion: 2,
+      schemaVersion: 1,
       generatedAt: '2026-06-19T00:00:00.000Z',
       default: {
         sharedDeps: SHARED,
@@ -237,41 +237,6 @@ describe('readMfeBootManifest() — v2 path', () => {
   });
 });
 
-describe('readMfeBootManifest() — v1 auto-migration', () => {
-  it('reads a v1 doc and resolves to default-only', () => {
-    const v1 = {
-      schemaVersion: 1,
-      generatedAt: '2026-06-19T00:00:00.000Z',
-      sharedDeps: SHARED,
-      mfes: { inspector: FIXTURE_INSPECTOR_DEFAULT },
-    };
-    const file = tmpFile(JSON.stringify(v1));
-    try {
-      const m = readMfeBootManifest(file, { customerId: 'acme', userBucket: 2 });
-      // No rollouts/tenants in a migrated v1 doc; acme + bucket=2 still gets default.
-      expect(m.mfes[0].remoteEntry).toBe(FIXTURE_INSPECTOR_DEFAULT.remoteEntry);
-      expect(m.sharedDeps).toEqual(SHARED);
-    } finally {
-      Fs.unlinkSync(file);
-    }
-  });
-
-  it('treats a missing schemaVersion as v1 (legacy seed)', () => {
-    const v1 = {
-      generatedAt: '2026-06-19T00:00:00.000Z',
-      sharedDeps: SHARED,
-      mfes: { inspector: FIXTURE_INSPECTOR_DEFAULT },
-    };
-    const file = tmpFile(JSON.stringify(v1));
-    try {
-      const m = readMfeBootManifest(file, { customerId: 'default', userBucket: 0 });
-      expect(m.mfes[0].remoteEntry).toBe(FIXTURE_INSPECTOR_DEFAULT.remoteEntry);
-    } finally {
-      Fs.unlinkSync(file);
-    }
-  });
-});
-
 describe('readMfeBootManifest() — error paths', () => {
   it('throws on a missing file', () => {
     expect(() =>
@@ -305,14 +270,14 @@ describe('readMfeBootManifest() — error paths', () => {
 
 describe('readMfeBootManifest() — mtime caching', () => {
   it('reuses the parsed doc when mtime is unchanged across calls', () => {
-    const v2 = {
-      schemaVersion: 2,
+    const doc = {
+      schemaVersion: 1,
       generatedAt: '2026-06-19T00:00:00.000Z',
       default: { sharedDeps: SHARED, mfes: { inspector: FIXTURE_INSPECTOR_DEFAULT } },
       rollouts: [],
       tenantOverrides: {},
     };
-    const file = tmpFile(JSON.stringify(v2));
+    const file = tmpFile(JSON.stringify(doc));
     try {
       const m1 = readMfeBootManifest(file, { customerId: 'default', userBucket: 0 });
       const m2 = readMfeBootManifest(file, { customerId: 'default', userBucket: 50 });
@@ -326,7 +291,7 @@ describe('readMfeBootManifest() — mtime caching', () => {
 
   it('hot-reloads when the file is replaced (mtime advances)', async () => {
     const initial = {
-      schemaVersion: 2,
+      schemaVersion: 1,
       generatedAt: '2026-06-19T00:00:00.000Z',
       default: { sharedDeps: SHARED, mfes: { inspector: FIXTURE_INSPECTOR_DEFAULT } },
       rollouts: [],
@@ -354,12 +319,12 @@ describe('readMfeBootManifest() — mtime caching', () => {
 });
 
 /* ------------------------------------------------------------------------- *
- * Phase 16 Story 3 — v3 registry support + orchestrator descriptor
+ * schema-collapse loop — optional global asset root: orchestrator descriptor
  * ------------------------------------------------------------------------- */
 
-describe('readMfeBootManifest() — v3 path', () => {
-  const v3WithOrchestrator = {
-    schemaVersion: 3,
+describe('readMfeBootManifest() — orchestrator descriptor', () => {
+  const withOrchestrator = {
+    schemaVersion: 1,
     generatedAt: '2026-06-26T00:00:00.000Z',
     default: {
       sharedDeps: SHARED,
@@ -374,15 +339,15 @@ describe('readMfeBootManifest() — v3 path', () => {
     },
   };
 
-  it('reads a v3 doc with orchestrator and surfaces it on the boot manifest', () => {
-    const file = tmpFile(JSON.stringify(v3WithOrchestrator));
+  it('reads a schemaVersion: 1 doc with orchestrator and surfaces it on the boot manifest', () => {
+    const file = tmpFile(JSON.stringify(withOrchestrator));
     try {
       const m = readMfeBootManifest(file, { customerId: 'default', userBucket: 50 });
-      // v2 substructure still resolves identically (Phase 13 algorithm).
+      // layered substructure still resolves identically.
       expect(m.sharedDeps).toEqual(SHARED);
       expect(m.mfes.length).toBe(1);
       expect(m.mfes[0].remoteEntry).toBe(FIXTURE_INSPECTOR_DEFAULT.remoteEntry);
-      // v3-only orchestrator descriptor is projected onto the manifest.
+      // global orchestrator descriptor is projected onto the manifest.
       expect(m.orchestrator).toEqual({
         url: 'https://cdn.example.com/mfe/orchestrator/deadbeef0000/osd_bootstrap_mfe.js',
         integrity: 'sha384-orchA',
@@ -395,10 +360,10 @@ describe('readMfeBootManifest() — v3 path', () => {
     }
   });
 
-  it('reads a v3 doc with NO orchestrator field — manifest.orchestrator is absent', () => {
-    const v3NoOrch = { ...v3WithOrchestrator };
-    delete (v3NoOrch as Record<string, unknown>).orchestrator;
-    const file = tmpFile(JSON.stringify(v3NoOrch));
+  it('reads a schemaVersion: 1 doc with NO orchestrator field — manifest.orchestrator is absent', () => {
+    const noOrch = { ...withOrchestrator };
+    delete (noOrch as Record<string, unknown>).orchestrator;
+    const file = tmpFile(JSON.stringify(noOrch));
     try {
       const m = readMfeBootManifest(file, { customerId: 'default', userBucket: 50 });
       expect(m.orchestrator).toBeUndefined();
@@ -408,16 +373,16 @@ describe('readMfeBootManifest() — v3 path', () => {
     }
   });
 
-  it('reads a v3 doc with orchestrator WITHOUT integrity (dev /bundles/... fallback URL)', () => {
-    const v3DevOrch = {
-      ...v3WithOrchestrator,
+  it('reads a schemaVersion: 1 doc with orchestrator WITHOUT integrity (dev /bundles/... fallback URL)', () => {
+    const devOrch = {
+      ...withOrchestrator,
       orchestrator: {
         url: '/bundles/mfe/orchestrator/deadbeef0000/osd_bootstrap_mfe.js',
         // intentionally no integrity — same-origin dev fallback
         version: '3.5.0+orch1',
       },
     };
-    const file = tmpFile(JSON.stringify(v3DevOrch));
+    const file = tmpFile(JSON.stringify(devOrch));
     try {
       const m = readMfeBootManifest(file, { customerId: 'default', userBucket: 50 });
       expect(m.orchestrator).toEqual({
@@ -429,9 +394,9 @@ describe('readMfeBootManifest() — v3 path', () => {
     }
   });
 
-  it('v3 substructure honors rollouts + tenant overrides exactly like v2', () => {
-    const v3WithCanaryAndTenant = {
-      schemaVersion: 3,
+  it('layered substructure honors rollouts + tenant overrides exactly across rollouts and tenants', () => {
+    const withCanaryAndTenant = {
+      schemaVersion: 1,
       generatedAt: '2026-06-26T00:00:00.000Z',
       default: { sharedDeps: SHARED, mfes: { inspector: FIXTURE_INSPECTOR_DEFAULT } },
       rollouts: [
@@ -450,9 +415,9 @@ describe('readMfeBootManifest() — v3 path', () => {
         version: '3.5.0+orch1',
       },
     };
-    const file = tmpFile(JSON.stringify(v3WithCanaryAndTenant));
+    const file = tmpFile(JSON.stringify(withCanaryAndTenant));
     try {
-      // Phase 13 resolution algorithm is unchanged under v3.
+      // Tenant > rollouts > default precedence holds regardless of which optional global asset roots are present.
       const acme = readMfeBootManifest(file, { customerId: 'acme', userBucket: 2 });
       expect(acme.mfes[0].remoteEntry).toBe(FIXTURE_INSPECTOR_ACME.remoteEntry);
       expect(acme.orchestrator!.integrity).toBe('sha384-orchA');
@@ -466,8 +431,8 @@ describe('readMfeBootManifest() — v3 path', () => {
     }
   });
 
-  it('throws when v3 orchestrator is not an object', () => {
-    const bad = { ...v3WithOrchestrator, orchestrator: 'not-an-object' };
+  it('throws when orchestrator is not an object', () => {
+    const bad = { ...withOrchestrator, orchestrator: 'not-an-object' };
     const file = tmpFile(JSON.stringify(bad));
     try {
       expect(() => readMfeBootManifest(file, { customerId: 'default', userBucket: 0 })).toThrow(
@@ -478,9 +443,9 @@ describe('readMfeBootManifest() — v3 path', () => {
     }
   });
 
-  it('throws when v3 orchestrator.url is missing or empty', () => {
+  it('throws when orchestrator.url is missing or empty', () => {
     const bad = {
-      ...v3WithOrchestrator,
+      ...withOrchestrator,
       orchestrator: { integrity: 'sha384-x', version: '1' },
     };
     const file = tmpFile(JSON.stringify(bad));
@@ -493,9 +458,9 @@ describe('readMfeBootManifest() — v3 path', () => {
     }
   });
 
-  it('throws when v3 orchestrator.integrity is present but not a non-empty string', () => {
+  it('throws when orchestrator.integrity is present but not a non-empty string', () => {
     const bad = {
-      ...v3WithOrchestrator,
+      ...withOrchestrator,
       orchestrator: { url: 'https://example.com/x.js', integrity: '', version: '1' },
     };
     const file = tmpFile(JSON.stringify(bad));
@@ -508,27 +473,12 @@ describe('readMfeBootManifest() — v3 path', () => {
     }
   });
 
-  it('v1/v2 docs return manifest WITHOUT an orchestrator field (backward-compat)', () => {
-    // v1 doc — no schemaVersion path
-    const v1 = {
-      generatedAt: '2026-06-26T00:00:00.000Z',
-      sharedDeps: SHARED,
-      mfes: { inspector: FIXTURE_INSPECTOR_DEFAULT },
-    };
-    const file = tmpFile(JSON.stringify(v1));
-    try {
-      const m = readMfeBootManifest(file, { customerId: 'default', userBucket: 0 });
-      expect(m.orchestrator).toBeUndefined();
-    } finally {
-      Fs.unlinkSync(file);
-    }
-  });
 
-  it('rejects schemaVersion 99 with the updated supported-versions message', () => {
+  it('rejects schemaVersion 99 with the supported-version message', () => {
     const file = tmpFile(JSON.stringify({ schemaVersion: 99 }));
     try {
       expect(() => readMfeBootManifest(file, { customerId: 'default', userBucket: 0 })).toThrow(
-        /only 1 \(legacy\), 2, or 3 are supported/
+        /only schemaVersion: 1 is supported/
       );
     } finally {
       Fs.unlinkSync(file);
@@ -537,18 +487,18 @@ describe('readMfeBootManifest() — v3 path', () => {
 });
 
 /* ------------------------------------------------------------------------- *
- * Phase 16 Story 5 — v3 `core` descriptor projection
+ * schema-collapse loop — `core` descriptor projection
  *
- * Mirrors the Story-3 orchestrator block immediately above. Both v3 fields are
+ * Mirrors the Story-3 orchestrator block immediately above. Both global asset fields are
  * top-level + GLOBAL (not per-layer/rollout/tenant), so the projection +
  * resolution behaviour is identical; the cases below confirm that contract
  * for `core` explicitly so a regression in either field is caught here, NOT
  * at the slower runtime tier.
  * ------------------------------------------------------------------------- */
 
-describe('readMfeBootManifest() — v3 path (core descriptor)', () => {
-  const v3WithCore = {
-    schemaVersion: 3,
+describe('readMfeBootManifest() — core descriptor', () => {
+  const withCore = {
+    schemaVersion: 1,
     generatedAt: '2026-06-27T00:00:00.000Z',
     default: {
       sharedDeps: SHARED,
@@ -563,8 +513,8 @@ describe('readMfeBootManifest() — v3 path (core descriptor)', () => {
     },
   };
 
-  it('reads a v3 doc with core and surfaces it on the boot manifest', () => {
-    const file = tmpFile(JSON.stringify(v3WithCore));
+  it('reads a schemaVersion: 1 doc with core and surfaces it on the boot manifest', () => {
+    const file = tmpFile(JSON.stringify(withCore));
     try {
       const m = readMfeBootManifest(file, { customerId: 'default', userBucket: 50 });
       expect(m.sharedDeps).toEqual(SHARED);
@@ -582,10 +532,10 @@ describe('readMfeBootManifest() — v3 path (core descriptor)', () => {
     }
   });
 
-  it('reads a v3 doc with NO core field — manifest.core is absent', () => {
-    const v3NoCore = { ...v3WithCore };
-    delete (v3NoCore as Record<string, unknown>).core;
-    const file = tmpFile(JSON.stringify(v3NoCore));
+  it('reads a schemaVersion: 1 doc with NO core field — manifest.core is absent', () => {
+    const noCore = { ...withCore };
+    delete (noCore as Record<string, unknown>).core;
+    const file = tmpFile(JSON.stringify(noCore));
     try {
       const m = readMfeBootManifest(file, { customerId: 'default', userBucket: 50 });
       expect(m.core).toBeUndefined();
@@ -596,18 +546,18 @@ describe('readMfeBootManifest() — v3 path (core descriptor)', () => {
     }
   });
 
-  it('reads a v3 doc with core WITHOUT integrity (dev /bundles/... fallback URL)', () => {
+  it('reads a schemaVersion: 1 doc with core WITHOUT integrity (dev /bundles/... fallback URL)', () => {
     // Same dev-fallback contract as the orchestrator: a same-origin URL
     // legitimately has no SRI; only the cross-origin CDN URL pins one. The
     // reader MUST accept the descriptor in both shapes.
-    const v3DevCore = {
-      ...v3WithCore,
+    const devCore = {
+      ...withCore,
       core: {
         url: '/bundles/mfe/core/cafebabe0000/core.entry.js',
         version: '3.5.0+core1',
       },
     };
-    const file = tmpFile(JSON.stringify(v3DevCore));
+    const file = tmpFile(JSON.stringify(devCore));
     try {
       const m = readMfeBootManifest(file, { customerId: 'default', userBucket: 50 });
       expect(m.core).toEqual({
@@ -620,8 +570,8 @@ describe('readMfeBootManifest() — v3 path (core descriptor)', () => {
   });
 
   it('core is GLOBAL — does not vary across rollouts/tenant overrides', () => {
-    const v3CanaryAndTenant = {
-      schemaVersion: 3,
+    const canaryAndTenant = {
+      schemaVersion: 1,
       generatedAt: '2026-06-27T00:00:00.000Z',
       default: { sharedDeps: SHARED, mfes: { inspector: FIXTURE_INSPECTOR_DEFAULT } },
       rollouts: [
@@ -640,7 +590,7 @@ describe('readMfeBootManifest() — v3 path (core descriptor)', () => {
         version: '3.5.0+core1',
       },
     };
-    const file = tmpFile(JSON.stringify(v3CanaryAndTenant));
+    const file = tmpFile(JSON.stringify(canaryAndTenant));
     try {
       const acme = readMfeBootManifest(file, { customerId: 'acme', userBucket: 2 });
       expect(acme.mfes[0].remoteEntry).toBe(FIXTURE_INSPECTOR_ACME.remoteEntry);
@@ -654,8 +604,8 @@ describe('readMfeBootManifest() — v3 path (core descriptor)', () => {
     }
   });
 
-  it('throws when v3 core is not an object', () => {
-    const bad = { ...v3WithCore, core: 'not-an-object' };
+  it('throws when core is not an object', () => {
+    const bad = { ...withCore, core: 'not-an-object' };
     const file = tmpFile(JSON.stringify(bad));
     try {
       expect(() => readMfeBootManifest(file, { customerId: 'default', userBucket: 0 })).toThrow(
@@ -666,9 +616,9 @@ describe('readMfeBootManifest() — v3 path (core descriptor)', () => {
     }
   });
 
-  it('throws when v3 core.url is missing or empty', () => {
+  it('throws when core.url is missing or empty', () => {
     const bad = {
-      ...v3WithCore,
+      ...withCore,
       core: { integrity: 'sha384-x', version: '1' },
     };
     const file = tmpFile(JSON.stringify(bad));
@@ -681,9 +631,9 @@ describe('readMfeBootManifest() — v3 path (core descriptor)', () => {
     }
   });
 
-  it('throws when v3 core.integrity is present but not a non-empty string', () => {
+  it('throws when core.integrity is present but not a non-empty string', () => {
     const bad = {
-      ...v3WithCore,
+      ...withCore,
       core: { url: 'https://example.com/core.entry.js', integrity: '', version: '1' },
     };
     const file = tmpFile(JSON.stringify(bad));
@@ -696,16 +646,16 @@ describe('readMfeBootManifest() — v3 path (core descriptor)', () => {
     }
   });
 
-  it('v3 doc with BOTH orchestrator AND core surfaces BOTH on the manifest', () => {
-    const v3Both = {
-      ...v3WithCore,
+  it('schemaVersion: 1 doc with BOTH orchestrator AND core surfaces BOTH on the manifest', () => {
+    const withBothCoreAndOrchestrator = {
+      ...withCore,
       orchestrator: {
         url: 'https://cdn.example.com/mfe/orchestrator/0000/osd_bootstrap_mfe.js',
         integrity: 'sha384-orchA',
         version: '3.5.0+orch1',
       },
     };
-    const file = tmpFile(JSON.stringify(v3Both));
+    const file = tmpFile(JSON.stringify(withBothCoreAndOrchestrator));
     try {
       const m = readMfeBootManifest(file, { customerId: 'default', userBucket: 50 });
       expect(m.core).toEqual({
@@ -720,25 +670,10 @@ describe('readMfeBootManifest() — v3 path (core descriptor)', () => {
       Fs.unlinkSync(file);
     }
   });
-
-  it('v1/v2 docs return manifest WITHOUT a core field (backward-compat)', () => {
-    const v1 = {
-      generatedAt: '2026-06-27T00:00:00.000Z',
-      sharedDeps: SHARED,
-      mfes: { inspector: FIXTURE_INSPECTOR_DEFAULT },
-    };
-    const file = tmpFile(JSON.stringify(v1));
-    try {
-      const m = readMfeBootManifest(file, { customerId: 'default', userBucket: 0 });
-      expect(m.core).toBeUndefined();
-    } finally {
-      Fs.unlinkSync(file);
-    }
-  });
 });
 
 /* ------------------------------------------------------------------------- *
- * Phase 16 Story 6 — v3 `themes` descriptor projection
+ * schema-collapse loop — `themes` descriptor projection
  *
  * Same shape, same backward-compat posture as `orchestrator` / `core`: the
  * field is GLOBAL (does not vary by rollout / tenant), the URL is required,
@@ -748,9 +683,9 @@ describe('readMfeBootManifest() — v3 path (core descriptor)', () => {
  * either field is caught at the same tier.
  * ------------------------------------------------------------------------- */
 
-describe('readMfeBootManifest() — v3 path (themes descriptor)', () => {
-  const v3WithThemes = {
-    schemaVersion: 3,
+describe('readMfeBootManifest() — themes descriptor', () => {
+  const withThemes = {
+    schemaVersion: 1,
     generatedAt: '2026-06-27T00:00:00.000Z',
     default: {
       sharedDeps: SHARED,
@@ -772,8 +707,8 @@ describe('readMfeBootManifest() — v3 path (themes descriptor)', () => {
     },
   };
 
-  it('reads a v3 doc with themes and surfaces them on the boot manifest', () => {
-    const file = tmpFile(JSON.stringify(v3WithThemes));
+  it('reads a schemaVersion: 1 doc with themes and surfaces them on the boot manifest', () => {
+    const file = tmpFile(JSON.stringify(withThemes));
     try {
       const m = readMfeBootManifest(file, { customerId: 'default', userBucket: 50 });
       expect(m.sharedDeps).toEqual(SHARED);
@@ -797,10 +732,10 @@ describe('readMfeBootManifest() — v3 path (themes descriptor)', () => {
     }
   });
 
-  it('reads a v3 doc with NO themes field — manifest.themes is absent', () => {
-    const v3NoThemes = { ...v3WithThemes };
-    delete (v3NoThemes as Record<string, unknown>).themes;
-    const file = tmpFile(JSON.stringify(v3NoThemes));
+  it('reads a schemaVersion: 1 doc with NO themes field — manifest.themes is absent', () => {
+    const noThemes = { ...withThemes };
+    delete (noThemes as Record<string, unknown>).themes;
+    const file = tmpFile(JSON.stringify(noThemes));
     try {
       const m = readMfeBootManifest(file, { customerId: 'default', userBucket: 50 });
       expect(m.themes).toBeUndefined();
@@ -811,13 +746,13 @@ describe('readMfeBootManifest() — v3 path (themes descriptor)', () => {
   });
 
   it('accepts an open theme-name set (e.g. `high-contrast`)', () => {
-    // The v3 schema does NOT enumerate `light`/`dark` — deployments can
+    // The schema does NOT enumerate `light`/`dark` — deployments can
     // advertise additional themes without a server change. This case
     // confirms the projection passes through any string key.
-    const v3OpenThemes = {
-      ...v3WithThemes,
+    const openThemes = {
+      ...withThemes,
       themes: {
-        ...v3WithThemes.themes,
+        ...withThemes.themes,
         'high-contrast': {
           url: 'https://cdn.example.com/mfe/themes/high-contrast/hc/legacy_high-contrast_theme.css',
           integrity: 'sha384-hcA',
@@ -825,7 +760,7 @@ describe('readMfeBootManifest() — v3 path (themes descriptor)', () => {
         },
       },
     };
-    const file = tmpFile(JSON.stringify(v3OpenThemes));
+    const file = tmpFile(JSON.stringify(openThemes));
     try {
       const m = readMfeBootManifest(file, { customerId: 'default', userBucket: 50 });
       expect(Object.keys(m.themes!).sort()).toEqual(['dark', 'high-contrast', 'light']);
@@ -839,8 +774,8 @@ describe('readMfeBootManifest() — v3 path (themes descriptor)', () => {
     // Same dev-fallback contract as the orchestrator/core: a same-origin
     // URL legitimately has no SRI; the reader MUST accept the descriptor
     // in both shapes.
-    const v3DevTheme = {
-      ...v3WithThemes,
+    const devTheme = {
+      ...withThemes,
       themes: {
         light: {
           url: '/ui/legacy_light_theme.css',
@@ -848,7 +783,7 @@ describe('readMfeBootManifest() — v3 path (themes descriptor)', () => {
         },
       },
     };
-    const file = tmpFile(JSON.stringify(v3DevTheme));
+    const file = tmpFile(JSON.stringify(devTheme));
     try {
       const m = readMfeBootManifest(file, { customerId: 'default', userBucket: 50 });
       expect(m.themes!.light).toEqual({ url: '/ui/legacy_light_theme.css' });
@@ -859,8 +794,8 @@ describe('readMfeBootManifest() — v3 path (themes descriptor)', () => {
   });
 
   it('themes are GLOBAL — does not vary across rollouts/tenant overrides', () => {
-    const v3CanaryAndTenant = {
-      schemaVersion: 3,
+    const canaryAndTenant = {
+      schemaVersion: 1,
       generatedAt: '2026-06-27T00:00:00.000Z',
       default: { sharedDeps: SHARED, mfes: { inspector: FIXTURE_INSPECTOR_DEFAULT } },
       rollouts: [
@@ -881,7 +816,7 @@ describe('readMfeBootManifest() — v3 path (themes descriptor)', () => {
         },
       },
     };
-    const file = tmpFile(JSON.stringify(v3CanaryAndTenant));
+    const file = tmpFile(JSON.stringify(canaryAndTenant));
     try {
       const acme = readMfeBootManifest(file, { customerId: 'acme', userBucket: 2 });
       expect(acme.mfes[0].remoteEntry).toBe(FIXTURE_INSPECTOR_ACME.remoteEntry);
@@ -895,8 +830,8 @@ describe('readMfeBootManifest() — v3 path (themes descriptor)', () => {
     }
   });
 
-  it('throws when v3 themes is not an object', () => {
-    const bad = { ...v3WithThemes, themes: 'not-an-object' };
+  it('throws when themes is not an object', () => {
+    const bad = { ...withThemes, themes: 'not-an-object' };
     const file = tmpFile(JSON.stringify(bad));
     try {
       expect(() => readMfeBootManifest(file, { customerId: 'default', userBucket: 0 })).toThrow(
@@ -907,9 +842,9 @@ describe('readMfeBootManifest() — v3 path (themes descriptor)', () => {
     }
   });
 
-  it('throws when v3 themes has an empty-string key', () => {
+  it('throws when themes has an empty-string key', () => {
     const bad = {
-      ...v3WithThemes,
+      ...withThemes,
       themes: {
         '': {
           url: 'https://example.com/x.css',
@@ -929,7 +864,7 @@ describe('readMfeBootManifest() — v3 path (themes descriptor)', () => {
   });
 
   it('throws when a theme entry is not an object', () => {
-    const bad = { ...v3WithThemes, themes: { light: 'not-an-object' } };
+    const bad = { ...withThemes, themes: { light: 'not-an-object' } };
     const file = tmpFile(JSON.stringify(bad));
     try {
       expect(() => readMfeBootManifest(file, { customerId: 'default', userBucket: 0 })).toThrow(
@@ -942,7 +877,7 @@ describe('readMfeBootManifest() — v3 path (themes descriptor)', () => {
 
   it('throws when a theme entry url is missing or empty', () => {
     const bad = {
-      ...v3WithThemes,
+      ...withThemes,
       themes: { light: { integrity: 'sha384-x', version: '1' } },
     };
     const file = tmpFile(JSON.stringify(bad));
@@ -957,7 +892,7 @@ describe('readMfeBootManifest() — v3 path (themes descriptor)', () => {
 
   it('throws when a theme entry integrity is present but not a non-empty string', () => {
     const bad = {
-      ...v3WithThemes,
+      ...withThemes,
       themes: {
         light: { url: 'https://example.com/x.css', integrity: '', version: '1' },
       },
@@ -972,9 +907,9 @@ describe('readMfeBootManifest() — v3 path (themes descriptor)', () => {
     }
   });
 
-  it('v3 doc with orchestrator + core + themes surfaces ALL THREE on the manifest', () => {
-    const v3All = {
-      ...v3WithThemes,
+  it('schemaVersion: 1 doc with orchestrator + core + themes surfaces ALL THREE on the manifest', () => {
+    const withAllGlobalAssets = {
+      ...withThemes,
       orchestrator: {
         url: 'https://cdn.example.com/mfe/orchestrator/0000/osd_bootstrap_mfe.js',
         integrity: 'sha384-orchA',
@@ -986,7 +921,7 @@ describe('readMfeBootManifest() — v3 path (themes descriptor)', () => {
         version: '3.5.0+core1',
       },
     };
-    const file = tmpFile(JSON.stringify(v3All));
+    const file = tmpFile(JSON.stringify(withAllGlobalAssets));
     try {
       const m = readMfeBootManifest(file, { customerId: 'default', userBucket: 50 });
       expect(m.orchestrator).toBeDefined();
@@ -997,37 +932,24 @@ describe('readMfeBootManifest() — v3 path (themes descriptor)', () => {
       Fs.unlinkSync(file);
     }
   });
-
-  it('v1/v2 docs return manifest WITHOUT a themes field (backward-compat)', () => {
-    const v1 = {
-      generatedAt: '2026-06-27T00:00:00.000Z',
-      sharedDeps: SHARED,
-      mfes: { inspector: FIXTURE_INSPECTOR_DEFAULT },
-    };
-    const file = tmpFile(JSON.stringify(v1));
-    try {
-      const m = readMfeBootManifest(file, { customerId: 'default', userBucket: 0 });
-      expect(m.themes).toBeUndefined();
-    } finally {
-      Fs.unlinkSync(file);
-    }
-  });
 });
 
+/* themes / SHARED-DEPS-CSS / TAIL: themes describe closed above. */
+
 /* ------------------------------------------------------------------------- *
- * Phase 16 Story 7 — v3 `sharedDepsCss` descriptor projection
+ * schema-collapse loop — `sharedDepsCss` descriptor projection
  *
  * Same shape, same backward-compat posture as `orchestrator` / `core`: GLOBAL
  * (does not vary by rollout / tenant), URL is required, `integrity` is
  * OPTIONAL (same-origin dev fallback URLs legitimately have no SRI), and the
  * registry-side `version` is metadata that never reaches the loader. Cases
  * mirror the `core` / `themes` blocks above so a regression in any of the
- * three v3 GLOBAL static-asset fields is caught at the same tier.
+ * three GLOBAL static-asset fields is caught at the same tier.
  * ------------------------------------------------------------------------- */
 
-describe('readMfeBootManifest() — v3 path (sharedDepsCss descriptor)', () => {
-  const v3WithSharedDepsCss = {
-    schemaVersion: 3,
+describe('readMfeBootManifest() — sharedDepsCss descriptor', () => {
+  const withSharedDepsCss = {
+    schemaVersion: 1,
     generatedAt: '2026-06-27T00:00:00.000Z',
     default: {
       sharedDeps: SHARED,
@@ -1042,8 +964,8 @@ describe('readMfeBootManifest() — v3 path (sharedDepsCss descriptor)', () => {
     },
   };
 
-  it('reads a v3 doc with sharedDepsCss and surfaces it on the boot manifest', () => {
-    const file = tmpFile(JSON.stringify(v3WithSharedDepsCss));
+  it('reads a schemaVersion: 1 doc with sharedDepsCss and surfaces it on the boot manifest', () => {
+    const file = tmpFile(JSON.stringify(withSharedDepsCss));
     try {
       const m = readMfeBootManifest(file, { customerId: 'default', userBucket: 50 });
       expect(m.sharedDeps).toEqual(SHARED);
@@ -1061,10 +983,10 @@ describe('readMfeBootManifest() — v3 path (sharedDepsCss descriptor)', () => {
     }
   });
 
-  it('reads a v3 doc with NO sharedDepsCss field — manifest.sharedDepsCss is absent', () => {
-    const v3NoScss = { ...v3WithSharedDepsCss };
-    delete (v3NoScss as Record<string, unknown>).sharedDepsCss;
-    const file = tmpFile(JSON.stringify(v3NoScss));
+  it('reads a schemaVersion: 1 doc with NO sharedDepsCss field — manifest.sharedDepsCss is absent', () => {
+    const noScss = { ...withSharedDepsCss };
+    delete (noScss as Record<string, unknown>).sharedDepsCss;
+    const file = tmpFile(JSON.stringify(noScss));
     try {
       const m = readMfeBootManifest(file, { customerId: 'default', userBucket: 50 });
       expect(m.sharedDepsCss).toBeUndefined();
@@ -1078,14 +1000,14 @@ describe('readMfeBootManifest() — v3 path (sharedDepsCss descriptor)', () => {
     // Same dev-fallback contract as the orchestrator/core/themes: a same-
     // origin URL legitimately has no SRI; the reader MUST accept the
     // descriptor in both shapes.
-    const v3DevScss = {
-      ...v3WithSharedDepsCss,
+    const devScss = {
+      ...withSharedDepsCss,
       sharedDepsCss: {
         url: '/bundles/osd-ui-shared-deps/osd-ui-shared-deps.css',
         version: '3.5.0+scss1',
       },
     };
-    const file = tmpFile(JSON.stringify(v3DevScss));
+    const file = tmpFile(JSON.stringify(devScss));
     try {
       const m = readMfeBootManifest(file, { customerId: 'default', userBucket: 50 });
       expect(m.sharedDepsCss).toEqual({
@@ -1098,8 +1020,8 @@ describe('readMfeBootManifest() — v3 path (sharedDepsCss descriptor)', () => {
   });
 
   it('sharedDepsCss is GLOBAL — does not vary across rollouts/tenant overrides', () => {
-    const v3CanaryAndTenant = {
-      schemaVersion: 3,
+    const canaryAndTenant = {
+      schemaVersion: 1,
       generatedAt: '2026-06-27T00:00:00.000Z',
       default: { sharedDeps: SHARED, mfes: { inspector: FIXTURE_INSPECTOR_DEFAULT } },
       rollouts: [
@@ -1118,7 +1040,7 @@ describe('readMfeBootManifest() — v3 path (sharedDepsCss descriptor)', () => {
         version: '3.5.0+scss1',
       },
     };
-    const file = tmpFile(JSON.stringify(v3CanaryAndTenant));
+    const file = tmpFile(JSON.stringify(canaryAndTenant));
     try {
       const acme = readMfeBootManifest(file, { customerId: 'acme', userBucket: 2 });
       expect(acme.mfes[0].remoteEntry).toBe(FIXTURE_INSPECTOR_ACME.remoteEntry);
@@ -1132,8 +1054,8 @@ describe('readMfeBootManifest() — v3 path (sharedDepsCss descriptor)', () => {
     }
   });
 
-  it('throws when v3 sharedDepsCss is not an object', () => {
-    const bad = { ...v3WithSharedDepsCss, sharedDepsCss: 'not-an-object' };
+  it('throws when sharedDepsCss is not an object', () => {
+    const bad = { ...withSharedDepsCss, sharedDepsCss: 'not-an-object' };
     const file = tmpFile(JSON.stringify(bad));
     try {
       expect(() => readMfeBootManifest(file, { customerId: 'default', userBucket: 0 })).toThrow(
@@ -1144,9 +1066,9 @@ describe('readMfeBootManifest() — v3 path (sharedDepsCss descriptor)', () => {
     }
   });
 
-  it('throws when v3 sharedDepsCss.url is missing or empty', () => {
+  it('throws when sharedDepsCss.url is missing or empty', () => {
     const bad = {
-      ...v3WithSharedDepsCss,
+      ...withSharedDepsCss,
       sharedDepsCss: { integrity: 'sha384-x', version: '1' },
     };
     const file = tmpFile(JSON.stringify(bad));
@@ -1159,9 +1081,9 @@ describe('readMfeBootManifest() — v3 path (sharedDepsCss descriptor)', () => {
     }
   });
 
-  it('throws when v3 sharedDepsCss.integrity is present but not a non-empty string', () => {
+  it('throws when sharedDepsCss.integrity is present but not a non-empty string', () => {
     const bad = {
-      ...v3WithSharedDepsCss,
+      ...withSharedDepsCss,
       sharedDepsCss: {
         url: 'https://example.com/x.css',
         integrity: '',
@@ -1178,9 +1100,9 @@ describe('readMfeBootManifest() — v3 path (sharedDepsCss descriptor)', () => {
     }
   });
 
-  it('v3 doc with orchestrator + core + themes + sharedDepsCss surfaces ALL FOUR on the manifest', () => {
-    const v3All = {
-      ...v3WithSharedDepsCss,
+  it('schemaVersion: 1 doc with orchestrator + core + themes + sharedDepsCss surfaces ALL FOUR on the manifest', () => {
+    const withAllGlobalAssets = {
+      ...withSharedDepsCss,
       orchestrator: {
         url: 'https://cdn.example.com/mfe/orchestrator/0000/osd_bootstrap_mfe.js',
         integrity: 'sha384-orchA',
@@ -1199,7 +1121,7 @@ describe('readMfeBootManifest() — v3 path (sharedDepsCss descriptor)', () => {
         },
       },
     };
-    const file = tmpFile(JSON.stringify(v3All));
+    const file = tmpFile(JSON.stringify(withAllGlobalAssets));
     try {
       const m = readMfeBootManifest(file, { customerId: 'default', userBucket: 50 });
       expect(m.orchestrator).toBeDefined();
@@ -1207,21 +1129,6 @@ describe('readMfeBootManifest() — v3 path (sharedDepsCss descriptor)', () => {
       expect(m.themes).toBeDefined();
       expect(m.sharedDepsCss).toBeDefined();
       expect(m.sharedDepsCss!.url).toContain('osd-ui-shared-deps.css');
-    } finally {
-      Fs.unlinkSync(file);
-    }
-  });
-
-  it('v1/v2 docs return manifest WITHOUT a sharedDepsCss field (backward-compat)', () => {
-    const v1 = {
-      generatedAt: '2026-06-27T00:00:00.000Z',
-      sharedDeps: SHARED,
-      mfes: { inspector: FIXTURE_INSPECTOR_DEFAULT },
-    };
-    const file = tmpFile(JSON.stringify(v1));
-    try {
-      const m = readMfeBootManifest(file, { customerId: 'default', userBucket: 0 });
-      expect(m.sharedDepsCss).toBeUndefined();
     } finally {
       Fs.unlinkSync(file);
     }

@@ -37,7 +37,7 @@
  */
 
 import { MfeEntry } from '../registry/schema';
-import { OverrideMap } from '../registry/resolve';
+import { OverrideMap } from '../registry/dev_override';
 
 /** Query-param / storage-key prefix that marks a dev override (`?mfe.<id>=`). */
 const OVERRIDE_PREFIX = 'mfe.';

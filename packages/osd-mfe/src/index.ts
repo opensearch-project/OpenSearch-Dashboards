@@ -33,8 +33,6 @@ export {
   assertValidRegistry,
   generateRegistry,
   runUpdateCli,
-  runUpdateCliV2,
-  isV2Mode,
 } from './registry';
 export type {
   Registry,

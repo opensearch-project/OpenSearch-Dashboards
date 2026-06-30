@@ -14,11 +14,11 @@ import Path from 'path';
 import { discoverUiPlugins } from './discover_plugins';
 import { buildMfeForPlugin, buildAllMfe } from './build_mfe_for_plugin';
 import {
-  V3AssetBuildManifest,
-  V3AssetKind,
+  AssetBuildManifest,
+  AssetKind,
   defaultSourcePath,
   defaultTargetRoot,
-  stageV3Asset,
+  stageAsset,
 } from './registry';
 
 /**
@@ -211,13 +211,13 @@ function readOption(argv: string[], flag: string): string | undefined {
  */
 function stageAssetAndLog(
   repoRoot: string,
-  assetKind: V3AssetKind,
+  assetKind: AssetKind,
   themeName: string | undefined,
   sourceOverride: string | undefined,
   targetRootOverride: string | undefined
 ): number {
   try {
-    const manifest: V3AssetBuildManifest = stageV3Asset({
+    const manifest: AssetBuildManifest = stageAsset({
       repoRoot,
       assetKind,
       themeName,

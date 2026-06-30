@@ -49,7 +49,7 @@ import { spawnSync } from 'child_process';
 
 import { parseEnvFile, resolveCdnConfig, ResolvedCdnConfig } from './cdn_config';
 import { buildDeployPlan, DeployPlan, PlannedFile, RemotePlan } from './plan';
-import { V3AssetBuildManifest, readV3AssetBuildManifest } from '../registry/v3_asset_build';
+import { AssetBuildManifest, readAssetBuildManifest } from '../registry/asset_build';
 
 /** Manifest schema version; bump on incompatible shape changes. */
 export const DEPLOY_MANIFEST_SCHEMA_VERSION = 1;
@@ -748,7 +748,7 @@ function readV3SingleAssetArgs(argv: string[], flag: string): string | undefined
  * shape mirrors the harness routes so the local mock CDN (:8080) and the
  * production CDN serve the asset under identical relative paths.
  */
-function v3AssetPathSegment(manifest: V3AssetBuildManifest): string {
+function v3AssetPathSegment(manifest: AssetBuildManifest): string {
   switch (manifest.assetKind) {
     case 'core':
       return `core/${manifest.contentHash}`;
@@ -770,7 +770,7 @@ function v3AssetPathSegment(manifest: V3AssetBuildManifest): string {
 }
 
 /** Stable v3Assets map key (mirrors {@link DeployManifest.v3Assets}). */
-function v3AssetMapKey(manifest: V3AssetBuildManifest): string {
+function v3AssetMapKey(manifest: AssetBuildManifest): string {
   switch (manifest.assetKind) {
     case 'core':
       return 'core';
@@ -788,7 +788,7 @@ function v3AssetMapKey(manifest: V3AssetBuildManifest): string {
 }
 
 /** Render a label like `core` / `theme:light` for the progress output. */
-function v3AssetLabel(manifest: V3AssetBuildManifest): string {
+function v3AssetLabel(manifest: AssetBuildManifest): string {
   return manifest.assetKind === 'theme' ? `theme:${manifest.themeName}` : manifest.assetKind;
 }
 
@@ -879,7 +879,7 @@ function runV3AssetDeploy(
     }
 
     let manifestPath: string;
-    let expectedKind: V3AssetBuildManifest['assetKind'];
+    let expectedKind: AssetBuildManifest['assetKind'];
     let expectedThemeName: string | undefined;
     if (corePath !== undefined) {
       manifestPath = corePath;
@@ -895,7 +895,7 @@ function runV3AssetDeploy(
       expectedKind = 'theme';
       expectedThemeName = themeArgs!.themeName;
     }
-    const manifest = readV3AssetBuildManifest(manifestPath);
+    const manifest = readAssetBuildManifest(manifestPath);
     if (manifest.assetKind !== expectedKind) {
       throw new Error(
         `Manifest at ${manifestPath} has assetKind="${manifest.assetKind}", expected "${expectedKind}"`

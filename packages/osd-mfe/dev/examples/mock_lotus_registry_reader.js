@@ -15,6 +15,17 @@
  * the architectural seam — anyone can implement it against ANY backend (S3,
  * HTTP API, in-memory generator, …) and OSD will load plugins identically.
  *
+ * The contract (single async method):
+ *
+ *   resolve(dimensions: ResolutionDimensions): Promise<BootManifest>
+ *
+ *   - `dimensions`: `{ customerId: string, userBucket: number }` — the host's
+ *     view of WHO is requesting; lets the reader return tenant- and bucket-
+ *     scoped manifests.
+ *   - `BootManifest`: `{ sharedDeps, mfes: Array<entry>, core?, orchestrator?,
+ *     themes?, sharedDepsCss? }` — the flat, browser-facing shape OSD-MFE's
+ *     bootstrap consumes (`packages/osd-mfe/src/registry/boot_manifest.ts`).
+ *
  * This example shows the simplest non-file backend: a MOCK external registry
  * service that we imagine vends per-version metadata. Think of it as a
  * stand-in for any real-world service that you'd integrate with — corporate
@@ -23,10 +34,13 @@
  *
  * What the example shows
  * ----------------------
- * 1. The shape of `RegistryReader`: a single async `getBootManifest({dims})`
- *    method that returns a `BootManifest` (list of plugin entries).
+ * 1. The shape of `RegistryReader`: a single async `resolve(dimensions)`
+ *    method returning a `BootManifest`.
  * 2. How to translate a "registry service response" into the BootManifest
- *    shape OSD-MFE wants — the data-mapping seam.
+ *    shape OSD-MFE wants — the data-mapping seam (`mfes` is an ARRAY of
+ *    entries, each carrying its own `id`; the optional global asset roots
+ *    `core`, `orchestrator`, `themes`, `sharedDepsCss` map verbatim from
+ *    upstream metadata into the manifest).
  * 3. How to compose: dimensions (tenant id, user bucket) flow IN; manifest
  *    flows OUT; the host doesn't know what registry source produced it.
  *
@@ -40,14 +54,16 @@
  *   - Pass the resulting `LotusLikeRegistryReader` to OSD via the server-side
  *     dependency injection point (the host server reads from a configurable
  *     RegistryReader; see `packages/osd-mfe/src/registry/index.ts`).
- *   - Keep this `getBootManifest` adapter ~50-200 LOC; it's the boundary
- *     between the external service's schema and OSD's BootManifest shape.
+ *   - Keep this `resolve` adapter ~50-200 LOC; it's the boundary between the
+ *     external service's schema and OSD's BootManifest shape.
  *
  * THIS FILE HAS NO AWS DEPENDENCIES. It is a teaching example, not a
  * production reader. The "Lotus" in its name is illustrative — substitute
  * your real registry service.
  */
 'use strict';
+
+const path = require('path');
 
 // ---------------------------------------------------------------------------
 // SECTION 1: A made-up "external registry service" with an in-memory backing.
@@ -60,7 +76,7 @@ class MockExternalRegistryClient {
   constructor() {
     // Imagine these are records the registry service stores.
     // Each record: packageName -> majorVersion -> {versionAlias: versionId}
-    // and versionId -> {cdnUrl, integrity, moduleType}.
+    // and versionId -> {cdnUrl, integrity}.
     this._aliases = new Map([
       ['example/widget|1', new Map([
         ['stable', 'v1.2.3'],
@@ -76,6 +92,14 @@ class MockExternalRegistryClient {
         cdnUrl: 'https://cdn.example.com/example-widget/def456/remoteEntry.js',
         integrity: 'sha384-DEMO_CANARY_HASH_yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy',
       }],
+    ]);
+    // Tenant/bucket-scoped alias selection — a real registry would expose
+    // this as part of its query API. Here we keep it in-process so the demo
+    // is self-contained: tenant "canary-corp" gets the canary alias, every
+    // other tenant gets stable; userBucket isn't used here but flows through
+    // so the example shows the dimension surface end-to-end.
+    this._tenantAlias = new Map([
+      ['canary-corp', 'canary'],
     ]);
   }
 
@@ -98,68 +122,115 @@ class MockExternalRegistryClient {
     }
     return { ...v, versionId };
   }
+
+  /** Tenant → alias choice. Stable by default; a real registry might also
+   *  steer canary by userBucket here. */
+  pickAliasForDimensions(dimensions) {
+    return this._tenantAlias.get(dimensions.customerId) || 'stable';
+  }
 }
 
 // ---------------------------------------------------------------------------
 // SECTION 2: The RegistryReader adapter.
-//   Implements the `RegistryReader` interface OSD-MFE expects. Maps the
-//   external service's schema into BootManifest entries. THE INTEGRATION SEAM.
+//   Implements the `RegistryReader` interface OSD-MFE expects:
+//
+//     resolve(dimensions: ResolutionDimensions): Promise<BootManifest>
+//
+//   Maps the external service's schema into a BootManifest. THE INTEGRATION SEAM.
 // ---------------------------------------------------------------------------
 
 class LotusLikeRegistryReader /* implements RegistryReader */ {
   /**
    * @param {object} opts
    * @param {MockExternalRegistryClient} opts.client - registry service client
-   * @param {Array<{id: string, scope: string, module: string, package: string, majorVersion: string, alias: string, compat?: object}>} opts.plugins
+   * @param {Array<{id: string, scope: string, module: string, package: string, majorVersion: string, compat?: object}>} opts.plugins
    *   - the static "plugin to registry coords" mapping. In a real integration,
    *     this might come from a config file, a database, or be hard-coded.
+   * @param {{ sharedDeps: { url: string, version: string }, core?: object, orchestrator?: object, themes?: object, sharedDepsCss?: object }} [opts.globalAssets]
+   *   - host-level metadata the registry vends on the side: the singleton
+   *     sharedDeps bundle URL (required by BootManifest) plus the OPTIONAL
+   *     global asset roots (`core`, `orchestrator`, per-theme CSS, sharedDepsCss
+   *     bundle). Each is mirrored onto the manifest verbatim; missing fields
+   *     fall back to OSD's server-bundled `/bundles/...` path at boot time.
    */
-  constructor({ client, plugins }) {
+  constructor({ client, plugins, globalAssets }) {
     this._client = client;
     this._plugins = plugins;
+    this._globalAssets = globalAssets;
   }
 
   /**
    * The RegistryReader contract: given resolution dimensions (tenant id,
-   * user bucket, etc.), return a BootManifest of plugins the host should load.
+   * user bucket), return a `BootManifest` of plugins the host should load.
    *
-   * In a real implementation, `dims` would influence WHICH alias to query
-   * (e.g., the canary alias for users in the 1% bucket, stable for everyone
-   * else). This example always uses 'stable' for simplicity.
+   * `dimensions` influences WHICH alias to query (e.g., canary for users in
+   * the 1% bucket or the canary tenant; stable for everyone else). The
+   * registry service is the source of truth for that mapping — the host
+   * never decides on its own.
    *
-   * @param {{ dims?: { customerId?: string, userBucket?: number } }} _opts
-   * @returns {Promise<{ mfes: Record<string, BootManifestEntry> }>}
+   * @param {{ customerId: string, userBucket: number }} dimensions
+   * @returns {Promise<{ sharedDeps: object, mfes: Array<object>, core?: object, orchestrator?: object, themes?: object, sharedDepsCss?: object }>}
    */
-  async getBootManifest(_opts) {
-    const mfes = {};
+  async resolve(dimensions) {
+    const alias = this._client.pickAliasForDimensions(dimensions);
+    const mfes = [];
     for (const p of this._plugins) {
       // Step 1: resolve alias → versionId via the registry service.
       const { versionId } = await this._client.getVersionAlias(
-        p.package, p.majorVersion, p.alias);
+        p.package, p.majorVersion, alias);
       // Step 2: fetch version details (CDN URL + integrity).
       const v = await this._client.getVersion(
         p.package, p.majorVersion, versionId);
-      // Step 3: map external schema → BootManifest entry.
-      mfes[p.id] = {
+      // Step 3: map external schema → BootManifestEntry. Note `mfes` is an
+      // ARRAY (declared order = load order); each entry carries its own `id`.
+      mfes.push({
+        id: p.id,
         version: `${p.majorVersion}.${versionId}`,
         remoteEntry: v.cdnUrl,
         scope: p.scope,
         module: p.module,
         integrity: v.integrity,
         compat: p.compat,
-      };
+      });
     }
-    return { mfes };
+
+    // Project global assets into the manifest verbatim. Absent fields are
+    // omitted (not nulled) so the browser falls back to `/bundles/...`.
+    const manifest = {
+      sharedDeps: this._globalAssets.sharedDeps,
+      mfes,
+    };
+    if (this._globalAssets.core) manifest.core = this._globalAssets.core;
+    if (this._globalAssets.orchestrator) manifest.orchestrator = this._globalAssets.orchestrator;
+    if (this._globalAssets.themes) manifest.themes = this._globalAssets.themes;
+    if (this._globalAssets.sharedDepsCss) manifest.sharedDepsCss = this._globalAssets.sharedDepsCss;
+    return manifest;
   }
 }
 
 // ---------------------------------------------------------------------------
 // SECTION 3: Demo runner.
-//   Wires the adapter up and prints the BootManifest it produces. Run with
-//   `node packages/osd-mfe/dev/examples/mock_lotus_registry_reader.js`.
+//   Wires the adapter up, exercises both tenants (default → stable,
+//   canary-corp → canary), and validates the produced manifest against the
+//   REAL `assertValidBootManifest` from `packages/osd-mfe/src/registry` so a
+//   future shape change to BootManifest surfaces here as a hard failure
+//   (Story 7/8 of the schema-collapse loop — schema is now the SINGLE source
+//   of truth for the validation surface).
 // ---------------------------------------------------------------------------
 
 async function main() {
+  // Load OSD's babel-register node env so we can require the TypeScript
+  // validator directly. Same bootstrap the harness's local_registry_server.js
+  // and scripts/update_registry.js use.
+  const osdDir = path.resolve(__dirname, '../../../..');
+  // eslint-disable-next-line global-require, import/no-dynamic-require
+  require(path.join(osdDir, 'src/setup_node_env'));
+  // eslint-disable-next-line global-require, import/no-dynamic-require
+  const { assertValidBootManifest } = require(path.join(
+    osdDir,
+    'packages/osd-mfe/src/registry'
+  ));
+
   const client = new MockExternalRegistryClient();
   const reader = new LotusLikeRegistryReader({
     client,
@@ -170,21 +241,65 @@ async function main() {
         module: './public',                          // the MF exposed module path
         package: 'example/widget',                   // the external registry package
         majorVersion: '1',                           // the external registry major version
-        alias: 'stable',                             // which alias to read
         compat: {
           minCoreVersion: '3.5.0',
           compatibleCoreRange: '3.5.x',
         },
       },
     ],
+    globalAssets: {
+      sharedDeps: {
+        url: 'https://cdn.example.com/shared-deps/abc123/osd-ui-shared-deps.js',
+        version: '3.5.0+abc123',
+      },
+      core: {
+        url: 'https://cdn.example.com/core/abc123/core.entry.js',
+        integrity: 'sha384-DEMO_CORE_HASH_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+        version: '3.5.0+abc123',
+      },
+      orchestrator: {
+        url: 'https://cdn.example.com/orchestrator/abc123/osd_bootstrap_mfe.js',
+        integrity: 'sha384-DEMO_ORCH_HASH_bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+        version: '3.5.0+abc123',
+      },
+      themes: {
+        light: {
+          url: 'https://cdn.example.com/themes/light/abc123/legacy_light_theme.css',
+          integrity: 'sha384-DEMO_LIGHT_HASH_cccccccccccccccccccccccccccccccccccccccccccccccccccc',
+          version: '3.5.0+abc123',
+        },
+        dark: {
+          url: 'https://cdn.example.com/themes/dark/abc123/legacy_dark_theme.css',
+          integrity: 'sha384-DEMO_DARK_HASH_ddddddddddddddddddddddddddddddddddddddddddddddddddddd',
+          version: '3.5.0+abc123',
+        },
+      },
+      sharedDepsCss: {
+        url: 'https://cdn.example.com/shared-deps/abc123/osd-ui-shared-deps.css',
+        integrity: 'sha384-DEMO_SDCSS_HASH_eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+        version: '3.5.0+abc123',
+      },
+    },
   });
 
-  const manifest = await reader.getBootManifest({});
-  console.log('BootManifest produced by LotusLikeRegistryReader:');
-  console.log(JSON.stringify(manifest, null, 2));
-  console.log('\n^ This is exactly the shape OSD-MFE\'s FileRegistryReader would produce.');
-  console.log('  Plug this reader into OSD\'s server-side registry resolution and');
-  console.log('  the rest of the boot path (compat check, MF load, SRI verify) just works.');
+  for (const dimensions of [
+    { customerId: 'default', userBucket: 7 },     // expect stable alias -> v1.2.3
+    { customerId: 'canary-corp', userBucket: 7 }, // expect canary alias -> v1.3.0-rc.1
+  ]) {
+    const manifest = await reader.resolve(dimensions);
+    // Validate against the REAL BootManifest contract — fail-loud if drift.
+    assertValidBootManifest(manifest);
+    console.log(`BootManifest for dimensions=${JSON.stringify(dimensions)}:`);
+    console.log(JSON.stringify(manifest, null, 2));
+    console.log('');
+  }
+
+  console.log(
+    '^ Both manifests validate against assertValidBootManifest (the same\n' +
+      '  validator OSD-MFE\'s server uses to guard the browser-injected slot).\n' +
+      '  Plug this reader into OSD\'s server-side registry resolution and the\n' +
+      '  rest of the boot path (compat check, MF load, SRI verify) just works.'
+  );
 }
 
 main().catch((err) => {
