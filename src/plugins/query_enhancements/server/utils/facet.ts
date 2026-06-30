@@ -92,7 +92,14 @@ export class Facet {
           `Facet fetch: engineType=${engineType}, endpoint=${endpoint} -> ${resolvedEndpoint}`
         );
       }
-      const { format, lang, fetchSize, queryId } = request.body;
+      // `format` is nested under `query` by the client/route (`request.body.query.format`), not at
+      // the top level. Read it from there (with a top-level fallback) so the `?format=jdbc` query
+      // param actually reaches the cluster. This matters for Open Distro (`/_opendistro/_sql`),
+      // which defaults to the native `hits` response and only returns the JDBC `{schema, datarows}`
+      // shape when `format=jdbc` is sent; `/_plugins/_sql` defaults to JDBC so this was previously
+      // a no-op there.
+      const format = request.body?.query?.format ?? request.body?.format;
+      const { lang, fetchSize, queryId } = request.body;
       const compressionHeaders = this.getCompressionHeaders();
       const { highlight } = request.body;
       const params = {
@@ -107,7 +114,7 @@ export class Facet {
           ...(highlight && { highlight }),
           ...(queryId && { queryId }),
         },
-        ...(format !== 'jdbc' && { format }),
+        ...(format && { format }),
         ...(Object.keys(compressionHeaders).length > 0 && { headers: compressionHeaders }),
       };
       const clientId = dataSource?.id;
@@ -123,6 +130,21 @@ export class Facet {
       );
 
       const queryRes = await client(resolvedEndpoint, params);
+
+      // TEMP DEBUG: log the raw response shape from the cluster so we can see why results may be
+      // empty (e.g. schema/datarows present but in an unexpected shape for the shim).
+      this.logger.info(
+        `Facet fetch RESPONSE: action=${resolvedEndpoint}, ` +
+          `keys=${
+            queryRes && typeof queryRes === 'object'
+              ? Object.keys(queryRes).join(',')
+              : typeof queryRes
+          }, ` +
+          `schemaLen=${queryRes?.schema?.length}, datarowsLen=${queryRes?.datarows?.length}, ` +
+          `total=${queryRes?.total}, size=${queryRes?.size}, ` +
+          `body=${JSON.stringify(queryRes)?.slice(0, 2000)}`
+      );
+
       return {
         success: true,
         data: queryRes,
@@ -178,7 +200,9 @@ export class Facet {
       : await this.fetch(context, request, this.endpoint);
     if (response.success === false || !this.shimResponse) return response;
 
-    const { format: dataType } = request.body;
+    // `format` lives under `query` (see `fetch` above); read it from there so the shim that adds
+    // `jsonData` (used by the raw/Vega path) is selected correctly.
+    const dataType = request.body?.query?.format ?? request.body?.format;
     const shimFunctions: { [key: string]: (data: any) => any } = {
       jdbc: (data: any) => shimSchemaRow(data as IPPLEventsDataSource),
       viz: (data: any) => shimStats(data as IPPLVisualizationDataSource),

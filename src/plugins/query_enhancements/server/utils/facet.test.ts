@@ -48,6 +48,8 @@ describe('Facet', () => {
       body: {
         query: {
           query: 'test query',
+          // `format` is nested under `query` by the client/route, matching production.
+          format: 'jdbc',
           dataset: {
             dataSource: {
               id: 'test-id',
@@ -58,7 +60,6 @@ describe('Facet', () => {
             },
           },
         },
-        format: 'jdbc',
         lang: 'sql',
       },
     };
@@ -78,6 +79,7 @@ describe('Facet', () => {
           sessionId: 'test-session',
           lang: 'sql',
         },
+        format: 'jdbc',
       });
     });
 
@@ -96,6 +98,7 @@ describe('Facet', () => {
           sessionId: 'test-session',
           lang: 'sql',
         },
+        format: 'jdbc',
       });
     });
 
@@ -121,6 +124,7 @@ describe('Facet', () => {
           query: 'test query',
           lang: 'sql',
         },
+        format: 'jdbc',
       });
     });
 
@@ -136,6 +140,7 @@ describe('Facet', () => {
           query: 'test query',
           lang: 'sql',
         },
+        format: 'jdbc',
       });
     });
 
@@ -162,6 +167,29 @@ describe('Facet', () => {
         expect.stringContaining('Facet fetch FAIL: action=test-endpoint: Error: Test error')
       );
     });
+
+    it('sends format=jdbc as a query param read from body.query.format', async () => {
+      mockClient.mockResolvedValue({ result: 'success' });
+
+      await facet.describeQuery(mockContext, mockRequest);
+
+      const callArgs = mockClient.mock.calls[0][1];
+      // `format` is a top-level sibling of `body` (becomes the `?format=` query-string param).
+      expect(callArgs.format).toBe('jdbc');
+    });
+
+    it('applies the jdbc shim (adds jsonData) when body.query.format is jdbc and shimResponse is on', async () => {
+      mockClient.mockResolvedValue({
+        schema: [{ name: 'col1' }],
+        datarows: [['a'], ['b']],
+      });
+
+      const result = await facetWithShimEnabled.describeQuery(mockContext, mockRequest);
+
+      expect(result.success).toBe(true);
+      // shimSchemaRow maps datarows -> jsonData keyed by schema name.
+      expect(result.data.jsonData).toEqual([{ col1: 'a' }, { col1: 'b' }]);
+    });
   });
 
   describe('requestCompression', () => {
@@ -178,6 +206,7 @@ describe('Facet', () => {
           sessionId: 'test-session',
           lang: 'sql',
         },
+        format: 'jdbc',
         headers: { 'accept-encoding': 'gzip, deflate' },
       });
     });
@@ -195,6 +224,7 @@ describe('Facet', () => {
           sessionId: 'test-session',
           lang: 'sql',
         },
+        format: 'jdbc',
       });
       // Verify headers are not present
       const callArgs = mockClient.mock.calls[0][1];
