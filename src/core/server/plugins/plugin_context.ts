@@ -258,6 +258,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
       client: deps.opensearch.client,
       createClient: deps.opensearch.createClient,
       legacy: deps.opensearch.legacy,
+      getClientTransport: deps.opensearch.getClientTransport,
     },
     http: {
       auth: deps.http.auth,
