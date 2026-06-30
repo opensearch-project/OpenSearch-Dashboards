@@ -54,14 +54,12 @@ export const createListRoute = (router: IRouter, sampleDatasets: SampleDatasetSc
       const workspaceState = getWorkspaceState(req);
       const workspaceId = workspaceState?.requestWorkspaceId;
 
-      // For AnalyticEngine datasource, only support Sample web logs (logs). The
-      // Observability sample set (otel) is excluded because its trace index mappings use
-      // `nested` fields (events/links), which the pluggable data format rejects at index
-      // creation ("nested type is not supported with pluggable data format"), so installing
-      // it against an AnalyticEngine domain fails with an internal server error.
+      // For AnalyticEngine datasource, sample data installation is not supported because
+      // it does not support certain index mappings.
+      // Return an empty list to avoid partially broken install flows.
       let filteredSampleDatasets = sampleDatasets;
       if (await isAnalyticEngineDataSource(dataSourceId, context.core.savedObjects.client)) {
-        filteredSampleDatasets = sampleDatasets.filter((dataset) => dataset.id === 'logs');
+        filteredSampleDatasets = [];
       }
 
       const registeredSampleDatasets = filteredSampleDatasets.map((sampleDataset) => {
