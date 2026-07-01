@@ -98,6 +98,16 @@
     display: flex;
     -ms-overflow-style: -ms-autohiding-scrollbar;
 
+    // Some footer controls are mount-point-only with no rendered output (e.g. the
+    // trigger-less keyboard-shortcut listener that just keeps shift+/ active).
+    // HeaderNavControls still wraps each in a flex child, so an empty one would
+    // consume a `gap` slot and throw the icon row off-center. Hide footer items
+    // whose mounted content is empty. Scoped to our `.nav-controls-padding`
+    // wrapper (not the global EuiHeaderSectionItem).
+    .nav-controls-padding:has(> div:empty) {
+      display: none;
+    }
+
     &.bottom-container-collapsed {
       flex-direction: column;
       align-items: center;
@@ -333,6 +343,13 @@ $osd-sidebar-top-min-height: 116px;
     padding: 0 $euiSizeM;
     display: flex;
     -ms-overflow-style: -ms-autohiding-scrollbar;
+
+    // Hide mount-point-only footer controls that render nothing (e.g. the
+    // trigger-less keyboard-shortcut listener) so their empty flex slot doesn't
+    // consume a `gap` and off-center the icon row. See the matching note above.
+    .nav-controls-padding:has(> div:empty) {
+      display: none;
+    }
 
     &.bottom-container-collapsed {
       flex-direction: column;

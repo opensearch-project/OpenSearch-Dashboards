@@ -38,6 +38,8 @@ export function SimplePopover({
 }: SimplePopoverProps) {
   const [isOpen, setIsOpen] = useState(false);
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const anchorRef = useRef<HTMLDivElement | null>(null);
+  const panelRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     return () => {
@@ -46,6 +48,28 @@ export function SimplePopover({
       }
     };
   }, []);
+
+  // Dismiss on a click anywhere outside the anchor and the (portaled) panel.
+  // The hover/mouse-leave logic only closes when the pointer leaves this
+  // popover; clicking a DIFFERENT element (e.g. another rail icon that
+  // navigates) never fires mouse-leave here, so without this the panel would
+  // linger orphaned on screen after navigating away. Capture phase so it runs
+  // before the click navigates and unmounts things.
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    const handleOutsideClick = (event: MouseEvent) => {
+      const target = event.target as Node;
+      if (anchorRef.current?.contains(target)) return;
+      if (panelRef.current?.contains(target)) return;
+      if (closeTimeoutRef.current) {
+        clearTimeout(closeTimeoutRef.current);
+        closeTimeoutRef.current = null;
+      }
+      setIsOpen(false);
+    };
+    document.addEventListener('mousedown', handleOutsideClick, true);
+    return () => document.removeEventListener('mousedown', handleOutsideClick, true);
+  }, [isOpen]);
 
   const cancelClose = useCallback(() => {
     if (closeTimeoutRef.current) {
@@ -104,6 +128,7 @@ export function SimplePopover({
   // focusable, keyboard-operable element.
   const wrappedButton = (
     <div
+      ref={anchorRef}
       className={classNames('obsSimplePopover-anchor', {
         'obsSimplePopover-anchor--fullWidth': fullWidthAnchor,
         'obsSimplePopover-anchor--open': isOpen,
@@ -122,6 +147,7 @@ export function SimplePopover({
   return (
     <EuiPopover
       button={wrappedButton}
+      panelRef={(node) => (panelRef.current = node)}
       isOpen={isOpen}
       closePopover={close}
       // Seamless "slide from the rail" feel: no arrow and zero offset so the

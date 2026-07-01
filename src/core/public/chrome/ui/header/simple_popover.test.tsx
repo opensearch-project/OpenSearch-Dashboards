@@ -104,6 +104,47 @@ describe('<SimplePopover />', () => {
     expect(queryByText('Go to dashboard')).toBeNull();
   });
 
+  it('closes when clicking an element outside the anchor and panel', () => {
+    // Regression: hovering a collapsed nav icon opens its popover; clicking a
+    // DIFFERENT element (e.g. another rail icon that navigates) never fires
+    // mouse-leave on this popover, so it would linger orphaned without an
+    // outside-click dismissal.
+    const { getByText, queryByText } = render(
+      <div>
+        <SimplePopover button={<span>Trigger</span>} debounceMs={100}>
+          <div>Popover Content</div>
+        </SimplePopover>
+        <button type="button">Outside</button>
+      </div>
+    );
+
+    fireEvent.mouseEnter(getByText('Trigger').parentElement!);
+    expect(getByText('Popover Content')).toBeInTheDocument();
+
+    fireEvent.mouseDown(getByText('Outside'));
+    act(() => {
+      jest.runOnlyPendingTimers();
+    });
+    expect(queryByText('Popover Content')).toBeNull();
+  });
+
+  it('does NOT close when clicking inside the panel content', () => {
+    const { getByText } = render(
+      <SimplePopover button={<span>Trigger</span>} debounceMs={100}>
+        <div>Popover Content</div>
+      </SimplePopover>
+    );
+
+    fireEvent.mouseEnter(getByText('Trigger').parentElement!);
+    const content = getByText('Popover Content');
+    expect(content).toBeInTheDocument();
+
+    // A mousedown inside the panel must not dismiss it (only the click handler
+    // on an actionable row should).
+    fireEvent.mouseDown(content);
+    expect(getByText('Popover Content')).toBeInTheDocument();
+  });
+
   it('cleans up pending timeout on unmount', () => {
     const { getByText, unmount } = render(
       <SimplePopover button={<span>Trigger</span>} debounceMs={200}>
