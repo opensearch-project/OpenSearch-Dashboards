@@ -3,11 +3,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { Subject } from 'rxjs';
 import { renderHook } from '@testing-library/react';
 import { useTransformationService } from './use_transformation_service';
 import { TransformationService } from './transformation_service';
 import * as registerModule from './register_all_transformations';
 import { getServices } from '../../services/services';
+
+const mockUrlStateStorage = {
+  get: jest.fn().mockReturnValue([]),
+  set: jest.fn().mockResolvedValue(undefined),
+  change$: jest.fn().mockReturnValue(new Subject().asObservable()),
+  cancel: jest.fn(),
+  flush: jest.fn(),
+};
 
 jest.mock('./register_all_transformations', () => ({
   registerAllTransformations: jest.fn(),
@@ -87,10 +96,10 @@ describe('useTransformationService', () => {
   });
 
   it('initializes URL sync when osdUrlStateStorage is available', () => {
-    const mockUrlStateStorage = { get: jest.fn(), set: jest.fn() };
     mockGetServices.mockReturnValue({ osdUrlStateStorage: mockUrlStateStorage } as any);
 
     const { result } = renderHook(() => useTransformationService(mockVisualizationBuilder as any));
     expect(result.current).toBeInstanceOf(TransformationService);
+    expect(mockUrlStateStorage.change$).toHaveBeenCalled();
   });
 });

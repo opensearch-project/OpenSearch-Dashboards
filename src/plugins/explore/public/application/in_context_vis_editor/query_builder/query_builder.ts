@@ -36,6 +36,7 @@ import {
   showMissingPromptWarning,
   showMissingDatasetWarning,
   handleAgentError,
+  normalizeHistoryStateForComparison,
 } from './utils';
 import { getServices as getExploreServices } from '../../../services/services';
 import {
@@ -43,6 +44,7 @@ import {
   QUERY_EDITOR_STATE_KEY,
   ActiveBottomPanelTab,
 } from '../types';
+import { normalizeState } from '../../../application/utils/state_management/utils/state_comparison';
 
 // AbortControllers for active queries, keyed by query string
 // Currently only one query executing at a time
@@ -75,7 +77,6 @@ export interface QueryEditorState {
   promptToQueryIsLoading: boolean;
   summaryAgentIsAvailable: boolean;
 
-  isQueryEditorDirty: boolean;
   dateRange?: { from: string; to: string };
   userInitiatedQuery: boolean;
   languageType: SupportLanguageType;
@@ -103,7 +104,6 @@ const initialQueryEditorState: QueryEditorState = {
   promptModeIsAvailable: false,
   promptToQueryIsLoading: false,
   summaryAgentIsAvailable: false,
-  isQueryEditorDirty: false,
   dateRange: undefined,
   userInitiatedQuery: false, // user click the refresh button
   languageType: SupportLanguageType.ppl,
@@ -137,6 +137,7 @@ export class QueryBuilder {
   private interpolationService?: IVariableInterpolationService;
   public lastExecutedInterpolatedQuery?: string;
   private onDatasetChangedCallback?: () => void;
+  private savedState: QueryState | undefined = undefined;
 
   constructor(getServices: () => ExploreServices) {
     this.getServices = getServices;
@@ -148,6 +149,7 @@ export class QueryBuilder {
 
     let queryEditorStateFromUrl;
     let queryStateFromUrl;
+    this.savedState = options?.savedQueryState;
 
     const urlStateStorage = this.getServices().osdUrlStateStorage;
     if (urlStateStorage) {
@@ -184,17 +186,6 @@ export class QueryBuilder {
       });
     }
 
-    // read isQueryEditorDirty from url to prevent losing state after reloading page
-    // only update when isQueryEditorDirty is true
-    if (
-      queryEditorStateFromUrl?.isQueryEditorDirty &&
-      typeof queryEditorStateFromUrl?.isQueryEditorDirty === 'boolean'
-    ) {
-      this.updateQueryEditorState({
-        isQueryEditorDirty: queryEditorStateFromUrl.isQueryEditorDirty,
-      });
-    }
-
     const finalQuery = queryStateFromUrl?.query ?? options?.savedQueryState?.query ?? '';
     // apply query
     const finalQueryState = {
@@ -214,6 +205,7 @@ export class QueryBuilder {
     // start sync until dataview is ready
     await this.waitForDatasetReady();
     this.startUrlSync();
+    this.startUrlChangeSync();
     this.setIsInitialized(true);
   }
 
@@ -223,7 +215,6 @@ export class QueryBuilder {
       this.queryEditorState$.pipe(
         map((s) => ({
           languageType: s.languageType,
-          isQueryEditorDirty: s.isQueryEditorDirty,
           ...(s.activeBottomPanelTab ? { activeBottomPanelTab: s.activeBottomPanelTab } : {}),
         }))
       ),
@@ -235,6 +226,82 @@ export class QueryBuilder {
       });
 
     this.subscriptions.push(urlSync);
+  }
+
+  compareQueryStateChange(): boolean {
+    const current = normalizeState(this.queryState$.value);
+    if (!this.savedState) {
+      return current !== undefined;
+    }
+
+    return !isEqual(normalizeState(this.savedState), current);
+  }
+
+  private startUrlChangeSync() {
+    const osdUrlStateStorage = this.getServices().osdUrlStateStorage;
+    if (!osdUrlStateStorage) return;
+
+    let syncVersion = 0;
+    let lastNormalizedUrlState = normalizeHistoryStateForComparison(
+      osdUrlStateStorage.get<QueryState>(QUERY_BUILDER_QUERY_STATE_KEY),
+      osdUrlStateStorage.get<Partial<QueryEditorState>>(QUERY_EDITOR_STATE_KEY),
+      osdUrlStateStorage.get<{ time?: { from: string; to: string } }>('_g')
+    );
+
+    const sub = osdUrlStateStorage
+      .change$<QueryState>(QUERY_BUILDER_QUERY_STATE_KEY)
+      .subscribe((urlQueryState) => {
+        const urlEditorState = osdUrlStateStorage.get<Partial<QueryEditorState>>(
+          QUERY_EDITOR_STATE_KEY
+        );
+        const urlGlobalState = osdUrlStateStorage.get<{
+          time?: { from: string; to: string };
+        }>('_g');
+
+        const normalizedUrl = normalizeHistoryStateForComparison(
+          urlQueryState,
+          urlEditorState,
+          urlGlobalState
+        );
+
+        // Skip if query builder states hasn't actually changed (triggered by other key writes)
+        if (isEqual(normalizedUrl, lastNormalizedUrlState)) return;
+        lastNormalizedUrlState = normalizedUrl;
+
+        const currentQueryState = this.queryState$.value;
+        const currentEditorState = this.queryEditorState$.value;
+        const currentTime = this.getServices().data?.query?.timefilter?.timefilter?.getTime();
+        const normalizedCurrent = normalizeHistoryStateForComparison(
+          currentQueryState,
+          currentEditorState,
+          { time: currentEditorState.dateRange ?? currentTime }
+        );
+        if (isEqual(normalizedUrl, normalizedCurrent)) return;
+
+        if (urlEditorState) {
+          this.updateQueryEditorState({
+            ...(urlEditorState.languageType && { languageType: urlEditorState.languageType }),
+          });
+        }
+
+        if (urlGlobalState?.time) {
+          this.updateQueryEditorState({ dateRange: urlGlobalState.time });
+        }
+
+        // waitForDatasetReady is async — if multiple POP events arrive quickly,
+        // only the latest one should executeQuery.
+        const version = ++syncVersion;
+        this.waitForDatasetReady().then(async () => {
+          if (version !== syncVersion) return;
+          if (urlQueryState) {
+            this.updateQueryState(urlQueryState);
+            this.getEditorRef()?.setValue(urlQueryState.query);
+          }
+          this.executeQuery();
+        });
+      });
+
+    this.subscriptions.push(sub);
   }
 
   private syncToUrl(place: string, state: QueryState | Partial<QueryEditorState>) {
@@ -560,12 +627,11 @@ export class QueryBuilder {
     this.updateQueryEditorState({
       queryStatus: initialQueryStatus,
     });
+    if (this.datasetView$.value.isLoading) {
+      await this.waitForDatasetReady();
+    }
 
-    if (
-      this.datasetView$.value.isLoading ||
-      this.datasetView$.value.error ||
-      !this.datasetView$.value.dataView
-    ) {
+    if (this.datasetView$.value.error || !this.datasetView$.value.dataView) {
       return;
     }
     const currentQuery = this.queryState$.value;

@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { isEqual } from 'lodash';
 import {
   AxisColumnMappings,
   VisColumn,
@@ -27,6 +28,8 @@ import { AreaChartStyleOptions } from './area/area_vis_config';
 import { LineChartStyleOptions } from './line/line_vis_config';
 import { GaugeChartStyleOptions } from './gauge/gauge_vis_config';
 import { HeatmapChartStyleOptions } from './heatmap/heatmap_vis_config';
+import { VisState } from './visualization_builder';
+import { normalizeState } from '../../application/utils/state_management/utils/state_comparison';
 
 export const convertMappingsToStrings = (mappings: AxisColumnMappings): AxisFieldNameMappings =>
   Object.fromEntries(
@@ -244,4 +247,29 @@ export const adaptLegacyData = (config?: ChartConfig) => {
   }
 
   return transformedConfig;
+};
+
+export const isVisStateEqual = (
+  urlState: VisState,
+  currentConfig: ChartConfig | undefined
+): boolean => {
+  if (!currentConfig) return false;
+  return isEqual(
+    normalizeState({
+      chartType: urlState.chartType,
+      axesMapping: urlState.axesMapping,
+      styleOptions: urlState.styleOptions,
+      splitField: urlState.splitField,
+      splitLayout: urlState.splitLayout,
+      showSplitLabel: urlState.showSplitLabel,
+    }),
+    normalizeState({
+      chartType: currentConfig.type,
+      axesMapping: currentConfig.axesMapping,
+      styleOptions: currentConfig.styles,
+      splitField: currentConfig.splitField,
+      splitLayout: currentConfig.splitLayout,
+      showSplitLabel: currentConfig.showSplitLabel,
+    })
+  );
 };

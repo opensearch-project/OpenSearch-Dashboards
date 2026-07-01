@@ -88,8 +88,8 @@ const mockSavedExplore = {
 const buildVisualizationBuilder = () => ({
   visualizationBuilderForEditor: {
     visConfig$: { value: { type: 'bar', styles: {}, axesMapping: { x: 'field' } } },
-    isVisDirty$: new BehaviorSubject(false),
     getTransformationService: jest.fn().mockReturnValue({ pipeline$: new BehaviorSubject([]) }),
+    compareVisStateChange: jest.fn().mockReturnValue(false),
   },
 });
 
@@ -98,8 +98,10 @@ beforeEach(() => {
   (useOpenSearchDashboards as jest.Mock).mockReturnValue({ services: buildServices() });
   (useVisualizationBuilder as jest.Mock).mockReturnValue(buildVisualizationBuilder());
   (useQueryBuilderState as jest.Mock).mockReturnValue({
+    queryBuilder: {
+      compareQueryStateChange: jest.fn().mockReturnValue(false),
+    },
     queryEditorState: {
-      isQueryEditorDirty: false,
       editorMode: EditorMode.Query,
       lastExecutedTranslatedQuery: undefined,
     },
@@ -150,8 +152,10 @@ describe('SaveVisButton', () => {
     (useCurrentExploreId as jest.Mock).mockReturnValue('explore-1');
     (useSavedExplore as jest.Mock).mockReturnValue({ savedExplore: mockSavedExplore });
     (useQueryBuilderState as jest.Mock).mockReturnValue({
+      queryBuilder: {
+        compareQueryStateChange: jest.fn().mockReturnValue(true),
+      },
       queryEditorState: {
-        isQueryEditorDirty: true,
         editorMode: EditorMode.Query,
         lastExecutedTranslatedQuery: undefined,
       },

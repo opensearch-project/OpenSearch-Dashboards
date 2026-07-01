@@ -3,7 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { QueryBuilder, SupportLanguageType } from './query_builder';
+import { Subject } from 'rxjs';
+import { QueryBuilder, SupportLanguageType, QueryState, QueryEditorState } from './query_builder';
+import { QUERY_BUILDER_QUERY_STATE_KEY, QUERY_EDITOR_STATE_KEY } from '../types';
 import {
   EditorMode,
   QueryExecutionStatus,
@@ -146,6 +148,7 @@ describe('QueryBuilder', () => {
           return null;
         }),
         set: jest.fn(),
+        change$: jest.fn().mockReturnValue(new Subject()),
       } as any;
 
       await builder.init({
@@ -279,9 +282,14 @@ describe('QueryBuilder', () => {
       );
     });
 
-    it('does nothing when datasetView is loading', async () => {
+    it('waits for dataset ready when datasetView is loading then returns if no dataView', async () => {
       builder.setIsInitialized(true);
       builder.datasetView$.next({ dataView: undefined, isLoading: true, error: null });
+
+      setTimeout(() => {
+        builder.datasetView$.next({ dataView: undefined, isLoading: false, error: null });
+      }, 10);
+
       await builder.executeQuery();
       expect(builder.queryEditorState$.value.queryStatus.status).toBe(
         QueryExecutionStatus.UNINITIALIZED
@@ -647,6 +655,111 @@ describe('QueryBuilder', () => {
       expect(services.notifications.toasts.addError).toHaveBeenCalledWith(error, {
         title: 'Error switching language',
       });
+    });
+  });
+
+  describe('startUrlListening', () => {
+    beforeEach(() => {
+      (getPreloadedQueryState as jest.Mock).mockResolvedValue({
+        query: '',
+        language: 'PPL',
+        dataset: undefined,
+      });
+    });
+
+    const createUrlStorage = (
+      initialQuery: QueryState | null = null,
+      initialEditor: Partial<QueryEditorState> | null = null
+    ) => {
+      const subject = new Subject<QueryState | null>();
+      const stored: Record<string, any> = {
+        [QUERY_BUILDER_QUERY_STATE_KEY]: initialQuery,
+        [QUERY_EDITOR_STATE_KEY]: initialEditor,
+        _g: null,
+      };
+      const storage = {
+        get: jest.fn((key: string) => stored[key] ?? null),
+        set: jest.fn((key: string, value: any) => {
+          stored[key] = value;
+          return Promise.resolve(undefined);
+        }),
+        change$: jest.fn(() => subject.asObservable()),
+        cancel: jest.fn(),
+        flush: jest.fn(),
+      };
+      return { storage, subject, stored };
+    };
+
+    it('skips when URL state has not actually changed', async () => {
+      const query: QueryState = { query: 'source=logs', language: 'PPL', dataset: undefined };
+      const { storage, subject } = createUrlStorage(query);
+      services.osdUrlStateStorage = storage as any;
+      await builder.init();
+
+      const executeSpy = jest.spyOn(builder, 'executeQuery');
+
+      // Emit with same value (simulates other key writing URL)
+      subject.next(query);
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      expect(executeSpy).not.toHaveBeenCalled();
+    });
+
+    it('skips when URL state matches current in-memory state', async () => {
+      const query: QueryState = { query: 'source=logs', language: 'PPL', dataset: undefined };
+      const { storage, subject, stored } = createUrlStorage(query);
+      services.osdUrlStateStorage = storage as any;
+      await builder.init();
+
+      const executeSpy = jest.spyOn(builder, 'executeQuery');
+
+      // skip syncing when same normalized values
+      stored[QUERY_BUILDER_QUERY_STATE_KEY] = { ...query };
+      subject.next({ ...query });
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      expect(executeSpy).not.toHaveBeenCalled();
+    });
+
+    it('executes query when URL query actually changes', async () => {
+      const initial: QueryState = { query: 'source=logs', language: 'PPL', dataset: undefined };
+      const { storage, subject, stored } = createUrlStorage(initial);
+      services.osdUrlStateStorage = storage as any;
+      await builder.init();
+
+      const executeSpy = jest.spyOn(builder, 'executeQuery');
+
+      const newQuery: QueryState = { query: 'source=errors', language: 'PPL', dataset: undefined };
+      stored[QUERY_BUILDER_QUERY_STATE_KEY] = newQuery;
+      subject.next(newQuery);
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      expect(executeSpy).toHaveBeenCalled();
+    });
+
+    it('restores editor state on URL change', async () => {
+      const initial: QueryState = { query: 'source=logs', language: 'PPL', dataset: undefined };
+      const { storage, subject, stored } = createUrlStorage(initial, {
+        languageType: SupportLanguageType.ppl,
+      });
+      services.osdUrlStateStorage = storage as any;
+      await builder.init();
+
+      jest.spyOn(builder, 'executeQuery');
+      const updateEditorSpy = jest.spyOn(builder, 'updateQueryEditorState');
+
+      stored[QUERY_BUILDER_QUERY_STATE_KEY] = {
+        query: 'source=errors',
+        language: 'PPL',
+        dataset: undefined,
+      };
+      stored[QUERY_EDITOR_STATE_KEY] = { languageType: SupportLanguageType.promQL };
+      subject.next(stored[QUERY_BUILDER_QUERY_STATE_KEY]);
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      expect(updateEditorSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ languageType: SupportLanguageType.promQL })
+      );
     });
   });
 });

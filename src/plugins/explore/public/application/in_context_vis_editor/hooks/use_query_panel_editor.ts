@@ -39,7 +39,6 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
   const queryLanguage = queryState.language;
   const isPromptMode = queryEditorState.editorMode === EditorMode.Prompt;
   const promptModeIsAvailable = queryEditorState.promptModeIsAvailable;
-  const isQueryEditorDirty = queryEditorState.isQueryEditorDirty;
 
   const [editorText, setEditorText] = useState<string>(userQueryString);
   const [editorIsFocused, setEditorIsFocused] = useState(false);
@@ -220,15 +219,11 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
     (newText: string) => {
       setEditorText(newText);
 
-      if (!isQueryEditorDirty) {
-        queryBuilder.updateQueryEditorState({ isQueryEditorDirty: true });
-      }
-
       if (isPromptMode) {
         handleChangeForPromptIsTyping();
       }
     },
-    [setEditorText, isPromptMode, handleChangeForPromptIsTyping, isQueryEditorDirty, queryBuilder]
+    [setEditorText, isPromptMode, handleChangeForPromptIsTyping]
   );
 
   return {

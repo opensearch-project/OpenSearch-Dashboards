@@ -9,7 +9,7 @@ import { UIState, TabState, LegacyState, QueryState } from '../slices';
 /**
  * Normalizes state by removing undefined properties recursively
  */
-const normalizeState = <T>(obj: T): T => {
+export const normalizeState = <T>(obj: T): T => {
   if (obj === null || obj === undefined) {
     return obj;
   }

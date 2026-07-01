@@ -41,12 +41,14 @@ export function toggleTransformationHide(
   );
 }
 
+const ISO_DATE_RE = /^\d{4}-\d{1,2}-\d{1,2}([ T]\d{1,2}:\d{2}(:\d{2}(\.\d+)?)?(Z|[+-]\d{2}:?\d{2})?)?$/;
+
 // infer type for derived columns, currently can only be string, number or date
 function inferType(val: unknown): string {
   if (typeof val === 'number') {
     return Number.isInteger(val) ? 'integer' : 'double';
   }
-  if (typeof val === 'string' && val.length > 0 && !isNaN(Date.parse(val)) && isNaN(Number(val))) {
+  if (typeof val === 'string' && ISO_DATE_RE.test(val)) {
     return 'date';
   }
   if (typeof val === 'boolean') {

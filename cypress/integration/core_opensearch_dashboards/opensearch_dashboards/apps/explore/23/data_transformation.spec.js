@@ -45,6 +45,7 @@ const createBarVisualization = () => {
   cy.explore.setDataset(datasetName, DATASOURCE_NAME, 'INDEX_PATTERN');
 
   cy.explore.setQueryEditor(query);
+  cy.wait(2000);
   // Run the query
   cy.getElementByTestId('exploreQueryExecutionButton').click();
   cy.osd.waitForLoader(true);
@@ -176,11 +177,14 @@ export const runApplyDataTransformationTests = () => {
       cy.getElementByTestId('transformSelectorPanelFlyout').should('exist');
       cy.wait(500);
       cy.getElementByTestId('transformMethodCard-sort_by').should('exist').click();
+      cy.wait(3000);
 
       cy.getElementByTestId('sortBySelectButton').should('be.visible').click();
-      cy.get('[data-test-subj="sortBySelectable"]').should('be.visible');
-      cy.wait(1500);
-      cy.get('li[role="option"]').contains('category').trigger('click');
+      cy.get('[data-test-subj="sortBySelectable"]')
+        .should('be.visible')
+        .within(() => {
+          cy.get('li[role="option"]').contains('category').should('be.visible').trigger('click');
+        });
       cy.wait(1500);
 
       cy.getElementByTestId('draggable').should('have.length', 2);
