@@ -52,11 +52,10 @@ export class QueryEnhancementsPlugin
   public setup(core: CoreSetup, { data, dataSource }: QueryEnhancementsPluginSetupDependencies) {
     this.logger.debug('queryEnhancements: Setup');
 
-    // PPL lint capability — disabled by default until an operator enables it via
-    // the queryEnhancements.pplLint dynamic app config flag (see the switcher
-    // below). A follow-up PR will have the public plugin read
-    // capabilities.queryEnhancements.pplLint to decide whether to register the
-    // lint bridge; nothing consumes this capability yet.
+    // PPL lint capability — disabled by default. The public plugin reads
+    // capabilities.queryEnhancements.pplLint (see public/plugin.tsx) to decide
+    // whether to register the lint bridge. The switcher below overrides this
+    // default from DynamicConfigService.
     core.capabilities.registerProvider(() => ({
       queryEnhancements: { pplLint: false },
     }));
