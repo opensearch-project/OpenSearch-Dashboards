@@ -140,6 +140,7 @@ export type DashboardUrlGenerator = UrlGeneratorContract<typeof DASHBOARD_APP_UR
 
 export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
+  variables: { enabled: boolean };
 }
 
 interface SetupDependencies {
