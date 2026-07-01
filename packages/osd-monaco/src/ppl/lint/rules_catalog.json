@@ -1,0 +1,52 @@
+[
+  {
+    "id": "head-without-sort",
+    "detector": "head-without-sort",
+    "enabled": true,
+    "severity": "info",
+    "message": "Add sort before head to get stable results.",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/head/",
+    "appliesTo": {}
+  },
+  {
+    "id": "division-by-zero",
+    "detector": "division-by-zero",
+    "enabled": true,
+    "severity": "warning",
+    "message": "Dividing or taking modulo by zero returns null silently — guard with coalesce() or a conditional.",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/functions/expressions/#arithmetic-operators",
+    "appliesTo": {}
+  },
+  {
+    "id": "invalid-capture-group-name",
+    "detector": "invalid-capture-group-name",
+    "enabled": true,
+    "severity": "error",
+    "message": "Named capture group is invalid — Java regex requires names matching ^[A-Za-z][A-Za-z0-9]*$.",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/rex/",
+    "appliesTo": {}
+  },
+  {
+    "id": "unsupported-window-function-in-eventstats",
+    "detector": "unsupported-window-function-in-eventstats",
+    "enabled": true,
+    "severity": "error",
+    "message": "This window function is not supported in eventstats/streamstats — only row_number is available.",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/eventstats/",
+    "appliesTo": {
+      "minVersion": "3.4.0"
+    }
+  },
+  {
+    "id": "multisearch-min-subsearch",
+    "detector": "multisearch-min-subsearch",
+    "enabled": true,
+    "severity": "error",
+    "message": "multisearch requires at least two subsearches.",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/multisearch/",
+    "runtimeOnly": true,
+    "appliesTo": {
+      "minVersion": "3.4.0"
+    }
+  }
+]
