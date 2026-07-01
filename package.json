@@ -224,7 +224,7 @@
     "@smithy/protocol-http": "^5.3.8",
     "@smithy/signature-v4": "^5.3.8",
     "@types/ndjson": "^2.0.4",
-    "@types/yauzl": "^2.9.1",
+    "@types/yauzl": "^3.4.0",
     "@xyflow/react": "^12.8.2",
     "antlr4-c3": "^3.4.3",
     "antlr4ng": "^3.0.16",
@@ -296,7 +296,7 @@
     "use-sync-external-store": "^1.5.0",
     "uuid": "3.3.2",
     "whatwg-fetch": "^3.0.0",
-    "yauzl": "^2.10.0"
+    "yauzl": "^3.4.0"
   },
   "optionalDependencies": {
     "better-sqlite3": "^12.9.0"
