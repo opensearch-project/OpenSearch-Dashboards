@@ -4,7 +4,7 @@
  */
 
 import { useCallback } from 'react';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { TransformationInstance, TransformationDefinition, FieldSchema } from '../index';
@@ -173,7 +173,7 @@ export function createConvertFieldTypeTransformation(): TransformationInstance<
   ConvertFieldTypeConfig
 > {
   return {
-    instance_id: uuid.v4(),
+    instance_id: uuidv4(),
     definition_id: 'convert_field_type',
     config: { rules: [] },
     hide: false,
