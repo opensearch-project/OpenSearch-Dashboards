@@ -16,6 +16,9 @@ const PPL_LINT_RULE_DEFAULTS: ReadonlyArray<{
 }> = [
   { id: 'head-without-sort', enabled: true, severity: 'info' },
   { id: 'division-by-zero', enabled: true, severity: 'warning' },
+  { id: 'invalid-capture-group-name', enabled: true, severity: 'error' },
+  { id: 'unsupported-window-function-in-eventstats', enabled: true, severity: 'error' },
+  { id: 'multisearch-min-subsearch', enabled: true, severity: 'error' },
 ];
 
 /** Build PPL lint rule uiSettings. Adds WORKSPACE scope when the workspace feature is on. */
