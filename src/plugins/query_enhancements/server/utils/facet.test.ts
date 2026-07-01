@@ -152,7 +152,7 @@ describe('Facet', () => {
 
       expect(result).toEqual({ success: false, data: error });
       expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Facet fetch FAIL: action=test-endpoint: Error: Test error')
+        'Facet fetch: test-endpoint: Error: Test error'
       );
     });
 
@@ -164,7 +164,7 @@ describe('Facet', () => {
 
       expect(result).toEqual({ success: false, data: error });
       expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Facet fetch FAIL: action=test-endpoint: Error: Test error')
+        'Facet fetch: test-endpoint: Error: Test error'
       );
     });
 

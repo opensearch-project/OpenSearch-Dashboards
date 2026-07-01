@@ -88,9 +88,6 @@ export class Facet {
         if (caps.usesOpenDistroSqlPpl && langKey) {
           resolvedEndpoint = caps.sqlPplEndpoints[langKey as 'ppl' | 'sql'];
         }
-        this.logger.info(
-          `Facet fetch: engineType=${engineType}, endpoint=${endpoint} -> ${resolvedEndpoint}`
-        );
       }
       // `format` is nested under `query` by the client/route (`request.body.query.format`), not at
       // the top level. Read it from there (with a top-level fallback) so the `?format=jdbc` query
@@ -121,42 +118,13 @@ export class Facet {
       const client = clientId
         ? context.dataSource.opensearch.legacy.getClient(clientId).callAPI
         : this.defaultClient.asScoped(request).callAsCurrentUser;
-
-      // TEMP DEBUG: log the exact action + request params being sent to the cluster.
-      this.logger.info(
-        `Facet fetch CALL: action=${resolvedEndpoint}, clientId=${clientId ?? 'default'}, ` +
-          `engineType=${dataSource?.engineType ?? dataSource?.type}, ` +
-          `version=${dataSource?.version}, params=${JSON.stringify(params)}`
-      );
-
       const queryRes = await client(resolvedEndpoint, params);
-
-      // TEMP DEBUG: log the raw response shape from the cluster so we can see why results may be
-      // empty (e.g. schema/datarows present but in an unexpected shape for the shim).
-      this.logger.info(
-        `Facet fetch RESPONSE: action=${resolvedEndpoint}, ` +
-          `keys=${
-            queryRes && typeof queryRes === 'object'
-              ? Object.keys(queryRes).join(',')
-              : typeof queryRes
-          }, ` +
-          `schemaLen=${queryRes?.schema?.length}, datarowsLen=${queryRes?.datarows?.length}, ` +
-          `total=${queryRes?.total}, size=${queryRes?.size}, ` +
-          `body=${JSON.stringify(queryRes)?.slice(0, 2000)}`
-      );
-
       return {
         success: true,
         data: queryRes,
       };
     } catch (err: any) {
-      // TEMP DEBUG: log the full error payload (statusCode + response body), which the default
-      // `${err}` string drops. Legacy clients put the cluster's JSON error under err.body / err.response.
-      this.logger.error(
-        `Facet fetch FAIL: action=${resolvedEndpoint}: ${err}\n` +
-          `statusCode=${err?.statusCode}\n` +
-          `body=${JSON.stringify(err?.body ?? err?.response ?? err?.data)}`
-      );
+      this.logger.error(`Facet fetch: ${resolvedEndpoint}: ${err}`);
       return {
         success: false,
         data: err,
