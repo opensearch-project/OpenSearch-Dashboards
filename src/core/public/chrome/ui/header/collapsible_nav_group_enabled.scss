@@ -102,9 +102,11 @@
     // trigger-less keyboard-shortcut listener that just keeps shift+/ active).
     // HeaderNavControls still wraps each in a flex child, so an empty one would
     // consume a `gap` slot and throw the icon row off-center. Hide footer items
-    // whose mounted content is empty. Scoped to our `.nav-controls-padding`
-    // wrapper (not the global EuiHeaderSectionItem).
-    .nav-controls-padding:has(> div:empty) {
+    // whose mounted content is empty. Targets the section-item wrapper directly
+    // (the `.nav-controls-padding` class is only applied when the nav is open, so
+    // scoping to it would miss the collapsed classic footer).
+    // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+    .euiHeaderSectionItem:has(> div:empty) {
       display: none;
     }
 
@@ -347,7 +349,8 @@ $osd-sidebar-top-min-height: 116px;
     // Hide mount-point-only footer controls that render nothing (e.g. the
     // trigger-less keyboard-shortcut listener) so their empty flex slot doesn't
     // consume a `gap` and off-center the icon row. See the matching note above.
-    .nav-controls-padding:has(> div:empty) {
+    // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+    .euiHeaderSectionItem:has(> div:empty) {
       display: none;
     }
 
@@ -1082,14 +1085,29 @@ $osd-sidebar-top-min-height: 116px;
 }
 // stylelint-enable @osd/stylelint/no_modifying_global_selectors
 
+// Collapsed rail popover positioning. The open anchor fills the full 48px rail
+// width, which shifts EUI's rightUp positioning ~9px right; pull the panel back
+// so its left edge lands flush on the rail edge (no gap), +8px down so the panel
+// top aligns with the hovered icon's row (verified live: rail-edge=48, left=48).
+// ---
+// This -8px pull is only correct when EUI keeps the panel on the RIGHT of the
+// anchor (`--right`). For a control near the bottom of the rail (e.g. Dev Tools)
+// EUI has no vertical room and FLIPS the panel to open upward (`--top`),
+// positioning it from a different origin — there the -8px shoves it off-screen
+// left, detached from the rail. So scope the pull to `--right`, and push the
+// flipped `--top`/`--bottom` panel right to the rail edge (+46px) instead.
 // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
-.euiPopover__panel.obsNavPopover-panel--rail {
-  // Collapsed rail: same grey surface as expanded for consistency. The open
-  // anchor now fills the full 48px rail width, which shifts EUI's rightUp
-  // positioning ~9px right; pull the panel back so its left edge lands flush on
-  // the rail edge (no gap), and +8px down so the panel top aligns with the
-  // hovered icon's row (verified live: rail-edge=48, panel left=48).
+.euiPopover__panel.obsNavPopover-panel--rail.euiPopover__panel--right {
   transform: translate(-8px, 8px) !important;
+}
+
+// stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+.euiPopover__panel.obsNavPopover-panel--rail.euiPopover__panel--top,
+.euiPopover__panel.obsNavPopover-panel--rail.euiPopover__panel--bottom {
+  // +46px right to the rail edge, and +32px down so the panel's bottom aligns
+  // with the hovered icon's row (it sits BESIDE the icon, not floating above it
+  // with a diagonal gap). Verified live: rail-edge=48, panel overlaps icon row.
+  transform: translate(46px, 32px) !important;
 }
 
 .obsNavPopover {
