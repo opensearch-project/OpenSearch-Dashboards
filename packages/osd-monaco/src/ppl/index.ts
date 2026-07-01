@@ -22,4 +22,28 @@ export type {
 } from './validation_provider';
 export type { PPLValidationResult } from './ppl_language_analyzer';
 
+export {
+  clearPPLLintContext,
+  getPPLLintContext,
+  isPPLLintEnabled,
+  registerPPLLintBridge,
+  resolvePPLLintResult,
+  setPPLLintContext,
+  setPPLLintEnabled,
+} from './lint_bridge';
+export type {
+  PPLLintContext,
+  PPLLintBridge,
+  PPLLintBridgeRequest,
+  PPLLintHttpClient,
+} from './lint_bridge';
+export type { Diagnostic, DiagnosticRange, LintResult, LintSeverity } from './lint/diagnostic';
+export type { BundleRuleOverrides, CatalogEntry, LintRunContext } from './lint/types';
+export { runLint } from './lint/lint_runner';
+export { getBundledCatalog } from './lint/catalog';
+export { createRuntimeRuleNameToIndex } from './lint/rule_index';
+
+export { buildCommandSuggestion } from './command_suggestion';
+export type { CommandSuggestion } from './command_suggestion';
+
 export const PPLLang = { ID };

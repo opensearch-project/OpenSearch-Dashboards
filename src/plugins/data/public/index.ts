@@ -652,4 +652,13 @@ export {
   attachPPLGrammarRefresh,
   syncPPLValidationContext,
 } from './ui/query_editor/validation_context';
+export {
+  syncPPLLintContext,
+  attachPPLContexts,
+  cleanupPPLContexts,
+  PPLDetachRefs,
+} from './ui/query_editor/lint_context';
+export { buildPPLLintContext, extractFieldNames } from './ppl_lint/lint_context_builder';
+export type { LintFieldsCache } from './ppl_lint/lint_context_builder';
+export { lintRuntimePPLQuery } from './antlr/opensearch_ppl/runtime_lint';
 export { pplGrammarCache, shouldUseRuntimeGrammar } from './antlr/opensearch_ppl/ppl_grammar_cache';
