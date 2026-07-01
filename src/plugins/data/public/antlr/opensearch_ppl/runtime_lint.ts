@@ -3,11 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { LintResult, PPLLintContext, PPLLintBridgeRequest, LintRunContext } from '@osd/monaco';
-// Deep imports avoid the barrel (which pulls in Monaco ESM and is jest.mock()'d in tests).
-import { runLint } from '@osd/monaco/target/ppl/lint/lint_runner';
-import { createRuntimeRuleNameToIndex } from '@osd/monaco/target/ppl/lint/rule_index';
-import { PIPE_FIRST_PREFIX, remapPipeFirstColumns } from '@osd/monaco/target/ppl/lint/range_utils';
+// Both values and types come from the Monaco-free `@osd/monaco/ppl-lint`
+// subpath (a redirect-stub dir). It exposes only the engine, so it neither
+// pulls in Monaco ESM (which is jest.mock()'d in tests) nor couples this file
+// to the `@osd/monaco/target/...` build layout.
+import type { LintResult, LintRunContext } from '@osd/monaco/ppl-lint';
+import {
+  runLint,
+  createRuntimeRuleNameToIndex,
+  PIPE_FIRST_PREFIX,
+  remapPipeFirstColumns,
+} from '@osd/monaco/ppl-lint';
 import {
   CharStream,
   CommonTokenStream,
@@ -18,6 +24,23 @@ import {
 import { GeneralErrorListener } from '../shared/general_error_listerner';
 import { CachedGrammar, pplGrammarCache } from './ppl_grammar_cache';
 import { pickStartRuleIndex, resolveSpaceToken } from './runtime_grammar_utils';
+
+/**
+ * The lint context this runtime fallback reads. Mirrors `@osd/monaco`'s
+ * PPLLintContext minus the Monaco-only pieces (e.g. the http client), so this
+ * file needs nothing from the Monaco-laden `@osd/monaco` barrel.
+ */
+type RuntimeLintContext = LintRunContext & { useRuntimeGrammar?: boolean };
+
+/**
+ * The subset of `@osd/monaco`'s PPLLintBridgeRequest this fallback consumes.
+ * The full bridge request also carries a `monaco.editor.IModel`, which this
+ * runtime path never reads — so we narrow to a Monaco-free shape.
+ */
+interface RuntimeLintRequest {
+  content: string;
+  context?: RuntimeLintContext;
+}
 
 function buildRuntimeTree(query: string, grammar: CachedGrammar): ParserRuleContext | undefined {
   const isPipeFirst = query.trimStart().startsWith('|');
@@ -69,7 +92,7 @@ function buildRuntimeTree(query: string, grammar: CachedGrammar): ParserRuleCont
 function lintWithGrammar(
   query: string,
   grammar: CachedGrammar,
-  context: PPLLintContext | undefined
+  context: RuntimeLintContext | undefined
 ): LintResult {
   if (!query.trim()) {
     return { diagnostics: [] };
@@ -84,7 +107,7 @@ function lintWithGrammar(
     ruleNameToIndex: createRuntimeRuleNameToIndex(grammar.runtimeRuleNameToIndex),
     dataSourceVersion: context?.dataSourceVersion,
     context: {
-      ...(context as LintRunContext),
+      ...context,
       grammarSurface: 'runtime-bundle',
       grammarHash: grammar.grammarHash,
     },
@@ -95,9 +118,7 @@ function lintWithGrammar(
 }
 
 /** Returns null when runtime grammar is unavailable, triggering the compiled fallback. */
-export async function lintRuntimePPLQuery(
-  request: PPLLintBridgeRequest
-): Promise<LintResult | null> {
+export async function lintRuntimePPLQuery(request: RuntimeLintRequest): Promise<LintResult | null> {
   const { content, context } = request;
   if (!context?.useRuntimeGrammar) {
     return null;
