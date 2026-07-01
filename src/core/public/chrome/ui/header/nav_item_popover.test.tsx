@@ -71,6 +71,41 @@ describe('<NavItemPopover />', () => {
     expect(navigateToApp).toHaveBeenCalledWith('alerts');
   });
 
+  it('renders a right-aligned info icon in the title when infoTooltip is set', () => {
+    const { container, getByLabelText } = render(
+      <NavItemPopover
+        title="Alerts"
+        services={makeServices()}
+        navigateToApp={jest.fn()}
+        infoTooltip="New alerting hub — alerts, anomaly detection, and SLOs together."
+      />
+    );
+    expect(container.querySelector('.obsNavPopover-titleInfo')).toBeInTheDocument();
+    expect(
+      getByLabelText('New alerting hub — alerts, anomaly detection, and SLOs together.')
+    ).toBeInTheDocument();
+  });
+
+  it('renders no title info icon when infoTooltip is absent', () => {
+    const { container } = render(
+      <NavItemPopover title="Alerts" services={makeServices()} navigateToApp={jest.fn()} />
+    );
+    expect(container.querySelector('.obsNavPopover-titleInfo')).not.toBeInTheDocument();
+  });
+
+  it('renders no title info icon when the title is hidden (showTitle=false)', () => {
+    const { container } = render(
+      <NavItemPopover
+        title="Alerts"
+        services={makeServices()}
+        navigateToApp={jest.fn()}
+        showTitle={false}
+        infoTooltip="Some info"
+      />
+    );
+    expect(container.querySelector('.obsNavPopover-titleInfo')).not.toBeInTheDocument();
+  });
+
   it('renders no action buttons when there are no actions', () => {
     const { container } = render(
       <NavItemPopover title="Logs" services={makeServices()} navigateToApp={jest.fn()} />

@@ -165,6 +165,7 @@ function CollapsedLeafIcon({
           navPopover={link.navPopover}
           services={popoverServices}
           navigateToApp={navigateToApp}
+          infoTooltip={link.infoTooltip}
         />
       ) : (
         <div className="obsNavPopover obsNavPopover--titleOnly" data-test-subj="obsNavPopover">

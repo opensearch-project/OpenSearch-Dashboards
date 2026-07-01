@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiIcon, EuiPopoverTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiIconTip, EuiPopoverTitle } from '@elastic/eui';
 import { NavPopoverConfig, NavPopoverServices } from '../../nav_group';
 import { InternalApplicationStart } from '../../../application/types';
 import { SimplePopover } from './simple_popover';
@@ -38,6 +38,13 @@ export interface NavItemPopoverProps {
    * collapsed rail where the label is otherwise unavailable.
    */
   showTitle?: boolean;
+  /**
+   * Optional informational text. When set (and the title is shown), a
+   * right-aligned info icon is rendered in the title bar; hovering it reveals
+   * this text in a tooltip. Mirrors the info affordance on the expanded nav row
+   * so the collapsed rail's flyout carries the same context.
+   */
+  infoTooltip?: string;
 }
 
 /** Whether this item or any nested descendant matches the current app id. */
@@ -131,6 +138,7 @@ export function NavItemPopover({
   childItems,
   appId,
   showTitle = true,
+  infoTooltip,
 }: NavItemPopoverProps) {
   const actions = navPopover?.actions ?? [];
   const hasActions = actions.length > 0;
@@ -139,7 +147,27 @@ export function NavItemPopover({
 
   return (
     <div className="obsNavPopover" data-test-subj="obsNavPopover">
-      {showTitle && <EuiPopoverTitle paddingSize="s">{title}</EuiPopoverTitle>}
+      {showTitle && (
+        <EuiPopoverTitle paddingSize="s">
+          {infoTooltip ? (
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem>{title}</EuiFlexItem>
+              <EuiFlexItem grow={false} className="obsNavPopover-titleInfo">
+                <EuiIconTip
+                  type="iInCircle"
+                  size="s"
+                  color="subdued"
+                  aria-label={infoTooltip}
+                  content={infoTooltip}
+                  position="right"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ) : (
+            title
+          )}
+        </EuiPopoverTitle>
+      )}
       <div className="obsNavPopover-content">
         {hasActions && (
           <div className="obsNavPopover-section">

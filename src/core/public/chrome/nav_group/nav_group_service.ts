@@ -78,6 +78,14 @@ export interface ChromeRegistrationNavLink {
    * services ({@link NavPopoverServices}) so plugins do not re-resolve them.
    */
   navPopover?: NavPopoverConfig;
+
+  /**
+   * Optional informational text. When set, a right-aligned info icon is shown
+   * on the nav link in the expanded side navigation; hovering it reveals this
+   * text in a tooltip. Use it to explain what a newly introduced or
+   * multi-purpose destination covers (e.g. what a consolidated hub spans).
+   */
+  infoTooltip?: string;
 }
 
 export type NavGroupItemInMap = ChromeNavGroup & {

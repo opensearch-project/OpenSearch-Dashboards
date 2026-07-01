@@ -142,6 +142,33 @@ describe('<ExpandedSideNav />', () => {
     expect(container.querySelector('.obs-nav-item-row--no-icon')).toBeInTheDocument();
   });
 
+  describe('info tooltip', () => {
+    it('renders a right-aligned info icon when infoTooltip is set', () => {
+      const navLinks = [
+        makeLink({
+          id: 'alerting',
+          title: 'Alerts',
+          euiIconType: 'navAlerting',
+          infoTooltip: 'New alerting hub — alerts, anomaly detection, and SLOs together.',
+        }),
+      ];
+      const { container, getByLabelText } = render(
+        <ExpandedSideNav {...defaultProps} navLinks={navLinks} />
+      );
+      expect(container.querySelector('.obs-nav-info')).toBeInTheDocument();
+      // EuiIconTip exposes the content as the icon's aria-label.
+      expect(
+        getByLabelText('New alerting hub — alerts, anomaly detection, and SLOs together.')
+      ).toBeInTheDocument();
+    });
+
+    it('does not render an info icon when infoTooltip is absent', () => {
+      const navLinks = [makeLink({ id: 'logs', title: 'Logs', euiIconType: 'logsApp' })];
+      const { container } = render(<ExpandedSideNav {...defaultProps} navLinks={navLinks} />);
+      expect(container.querySelector('.obs-nav-info')).not.toBeInTheDocument();
+    });
+  });
+
   it('renders collapsible section for collapsible categories', () => {
     const collapsibleCategory = {
       id: 'tools',

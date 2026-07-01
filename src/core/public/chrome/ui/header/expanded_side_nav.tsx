@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiIconTip, EuiText } from '@elastic/eui';
 import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
 import { ChromeNavLink } from '../../nav_links';
@@ -103,6 +103,20 @@ function NavLeafItem({
         <EuiFlexItem className="obs-nav-label">
           <EuiText size="s">{link.title}</EuiText>
         </EuiFlexItem>
+        {link.infoTooltip && (
+          <EuiFlexItem grow={false} className="obs-nav-info">
+            <EuiIconTip
+              type="iInCircle"
+              size="s"
+              color="subdued"
+              aria-label={link.infoTooltip}
+              content={link.infoTooltip}
+              position="right"
+              // Stop the tooltip's icon from triggering navigation on the row.
+              anchorProps={{ onClick: (e: React.MouseEvent) => e.stopPropagation() }}
+            />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </a>
   );

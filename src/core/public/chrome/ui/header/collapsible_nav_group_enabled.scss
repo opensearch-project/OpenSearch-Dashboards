@@ -605,6 +605,22 @@ $osd-sidebar-top-min-height: 116px;
   transform: translateX(-8px);
 }
 
+// Right-aligned info affordance (an "i" icon with a hover tooltip). Fades out
+// with the label when the rail collapses, since only the leading icon shows
+// in the collapsed rail.
+.obs-nav-info {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  transition: opacity $osd-sidebar-transition;
+  opacity: 1;
+}
+
+.osd-sidebar[data-state="collapsed"] .obs-nav-info {
+  opacity: 0;
+  pointer-events: none;
+}
+
 .obs-nav-icon {
   // Match collapsed icon sizing (28x28 button, 16x16 icon)
   width: 28px;
