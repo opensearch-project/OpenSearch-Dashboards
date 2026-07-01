@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { Transport } from '@opensearch-project/opensearch';
 import {
   ISavedObjectsRepository,
   LegacyCallAPIOptions,
@@ -45,6 +46,9 @@ export interface DataSourceClientParams {
   request?: OpenSearchDashboardsRequest;
   // To retrieve the credentials provider for the authentication method from the registry in order to return the client.
   authRegistry?: IAuthenticationMethodRegistry;
+  // Optional custom Transport class (e.g. legacy backend compatibility) to apply to the
+  // modern client so data-source connections get the same interception as core's client.
+  customTransport?: typeof Transport;
 }
 
 export interface DataSourceCredentialsProviderOptions {

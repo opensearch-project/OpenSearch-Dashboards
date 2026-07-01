@@ -155,6 +155,7 @@ import { TasksCancelParams } from 'elasticsearch';
 import { TasksGetParams } from 'elasticsearch';
 import { TasksListParams } from 'elasticsearch';
 import { TermvectorsParams } from 'elasticsearch';
+import { Transport } from '@opensearch-project/opensearch';
 import { TransportRequestOptions } from '@opensearch-project/opensearch/lib/Transport';
 import { TransportRequestParams } from '@opensearch-project/opensearch/lib/Transport';
 import { TransportRequestPromise } from '@opensearch-project/opensearch/lib/Transport';
@@ -166,7 +167,10 @@ import { URL } from 'url';
 
 // @public
 export interface AppCategory {
+    alwaysUseDefaultOpen?: boolean;
     ariaLabel?: string;
+    collapsible?: boolean;
+    defaultOpen?: boolean;
     euiIconType?: string;
     id: string;
     label: string;
@@ -1528,18 +1532,21 @@ export const opensearchDashboardsResponseFactory: {
 
 // @public (undocumented)
 export interface OpenSearchServiceSetup {
+    hasClientTransport: () => boolean;
     // @deprecated (undocumented)
     legacy: {
         readonly config$: Observable<OpenSearchConfig>;
         readonly createClient: (type: string, clientConfig?: Partial<LegacyOpenSearchClientConfig>) => ILegacyCustomClusterClient;
         readonly client: ILegacyClusterClient;
     };
+    registerClientTransport: (TransportClass: typeof Transport) => void;
 }
 
 // @public (undocumented)
 export interface OpenSearchServiceStart {
     readonly client: IClusterClient;
     readonly createClient: (type: string, clientConfig?: Partial<OpenSearchClientConfig>) => ICustomClusterClient;
+    getClientTransport?: () => typeof Transport | undefined;
     // @deprecated (undocumented)
     legacy: {
         readonly config$: Observable<OpenSearchConfig>;

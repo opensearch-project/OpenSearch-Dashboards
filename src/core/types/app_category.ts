@@ -78,4 +78,13 @@ export interface AppCategory {
    * Only applies when `collapsible` is true.
    */
   defaultOpen?: boolean;
+
+  /**
+   * When true, the section always starts from `defaultOpen` on each page load,
+   * ignoring any persisted open/closed state. Use for low-priority sections
+   * (e.g. "Manage workspace") that should stay tucked away unless the user
+   * deliberately opens them during the current session.
+   * Only applies when `collapsible` is true.
+   */
+  alwaysUseDefaultOpen?: boolean;
 }

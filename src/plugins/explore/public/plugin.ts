@@ -38,6 +38,7 @@ import {
   VISUALIZATION_EDITOR_APP_NAME,
 } from '../common';
 import { ConfigSchema } from '../common/config';
+import { buildExploreNavPopover, buildMetricsNavPopover } from './nav_popover';
 import { generateDocViewsUrl } from './application/legacy/discover/application/components/doc_views/generate_doc_views_url';
 import { DocViewsLinksRegistry } from './application/legacy/discover/application/doc_views_links/doc_views_links_registry';
 import {
@@ -277,6 +278,17 @@ export class ExplorePlugin
         storageKey: trackerStorageKey,
         navLinkUpdater$: appStateUpdater,
         toastNotifications: core.notifications.toasts,
+        // Never persist the transient `_openSaved` command marker as the app's
+        // "last URL". Otherwise navigating away and re-opening the app via its
+        // nav link would restore a URL still carrying the marker and re-open the
+        // saved-search flyout unexpectedly. Match the EXACT query param (not a
+        // loose substring) so a saved-object title / filter value that merely
+        // contains the string "_openSaved" doesn't disable URL persistence.
+        shouldTrackUrlUpdate: (hash: string) => {
+          const qIndex = hash.indexOf('?');
+          if (qIndex === -1) return true;
+          return new URLSearchParams(hash.slice(qIndex + 1)).get('_openSaved') !== 'true';
+        },
         stateParams: [
           {
             osdUrlKey: '_g',
@@ -584,18 +596,21 @@ export class ExplorePlugin
           category: undefined,
           order: 200,
           euiIconType: 'discoverApp' as const,
+          navPopover: buildExploreNavPopover(ExploreFlavor.Logs),
         },
         {
           id: `${PLUGIN_ID}/${ExploreFlavor.Traces}`,
           category: DEFAULT_APP_CATEGORIES.applicationPerformance,
           order: 100,
           euiIconType: 'apmTrace' as const,
+          navPopover: buildExploreNavPopover(ExploreFlavor.Traces),
         },
         {
           id: `${PLUGIN_ID}/${ExploreFlavor.Metrics}`,
           category: undefined,
           order: 300,
           euiIconType: 'visAreaStacked' as const,
+          navPopover: buildMetricsNavPopover(),
         },
       ]);
     } else {

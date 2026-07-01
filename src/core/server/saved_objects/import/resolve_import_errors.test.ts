@@ -538,31 +538,49 @@ describe('#importSavedObjectsFromStream', () => {
       expect(result).toEqual({ success: false, successCount: 0, errors: expectedErrors });
     });
 
-    test('early return if resolve contains config type object', async () => {
+    test('filters out config type objects when canImportConfig is false', async () => {
       const configObj = createConfigObject();
       const options = setupOptions([
         { type: 'config', id: configObj.id, overwrite: true, replaceReferences: [] },
       ]);
       const collectedObjects = [configObj];
 
-      const errors = [
-        {
-          type: configObj.type,
-          id: configObj.id,
-          title: configObj.id,
-          meta: { title: configObj.id },
-          error: { type: 'unsupported_type' },
-        },
-      ];
       getMockFn(collectSavedObjects).mockResolvedValue({
         errors: [],
         collectedObjects,
         importIdMap: new Map(),
       });
+      getMockFn(createSavedObjects).mockResolvedValue({ errors: [], createdObjects: [] });
       const result = await resolveSavedObjectsImportErrors(options);
-      const expectedErrors = errors.map(({ type, id }) => expect.objectContaining({ type, id }));
-      expect(result).toEqual({ success: false, successCount: 0, errors: expectedErrors });
-      expect(createSavedObjects).not.toHaveBeenCalled();
+      expect(result.success).toEqual(false);
+      expect(result.successCount).toEqual(0);
+      expect(result.errors).toEqual(
+        expect.arrayContaining([expect.objectContaining({ type: 'config', id: configObj.id })])
+      );
+    });
+
+    test('allows config type objects when canImportConfig is true', async () => {
+      const configObj = createConfigObject();
+      const options = {
+        ...setupOptions([
+          { type: 'config', id: configObj.id, overwrite: true, replaceReferences: [] },
+        ]),
+        canImportConfig: true,
+      };
+      const collectedObjects = [configObj];
+
+      getMockFn(collectSavedObjects).mockResolvedValue({
+        errors: [],
+        collectedObjects,
+        importIdMap: new Map(),
+      });
+      getMockFn(createSavedObjects)
+        .mockResolvedValueOnce({ errors: [], createdObjects: [configObj] })
+        .mockResolvedValueOnce({ errors: [], createdObjects: [] });
+      const result = await resolveSavedObjectsImportErrors(options);
+      expect(result.successCount).toEqual(1);
+      expect(result.success).toEqual(true);
+      expect(createSavedObjects).toHaveBeenCalled();
     });
   });
 });

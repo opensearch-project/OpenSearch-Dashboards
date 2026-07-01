@@ -294,6 +294,9 @@ export class Server {
     });
     soStartSpan?.end();
     const capabilitiesStart = this.capabilities.start();
+    this.savedObjects.setCapabilitiesResolver((request) =>
+      capabilitiesStart.resolveCapabilities(request)
+    );
     const uiSettingsStart = await this.uiSettings.start();
     const workspaceStart = await this.workspace.start();
     const metricsStart = await this.metrics.start();

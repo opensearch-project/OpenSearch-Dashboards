@@ -12,6 +12,7 @@ import {
   DEFAULT_NAV_GROUPS,
   NavGroupItemInMap,
   NavGroupType,
+  OBSERVABILITY_USE_CASE_ID,
 } from '../../../../core/public';
 import { UseCaseService } from './use_case_service';
 import { waitFor } from '@testing-library/dom';
@@ -81,17 +82,19 @@ describe('UseCaseService', () => {
       coreSetup.getStartServices.mockResolvedValue([coreStartMock, {}, {}]);
       coreStartMock.chrome.navGroup.getNavGroupsMap$.mockReturnValue(navGroupMap$);
       useCaseService.setup(coreSetup);
+      // Use the Observability workspace so the full manage-workspace list
+      // (including the observability-only `datasets` entry) is registered.
       const navGroupInfo = {
-        ...DEFAULT_NAV_GROUPS.all,
+        ...DEFAULT_NAV_GROUPS.observability,
         navLinks: [],
       };
       navGroupMap$.next({
-        [ALL_USE_CASE_ID]: navGroupInfo,
+        [OBSERVABILITY_USE_CASE_ID]: navGroupInfo,
       });
       coreSetup.workspaces.currentWorkspace$.next({
-        id: ALL_USE_CASE_ID,
-        name: ALL_USE_CASE_ID,
-        features: [`use-case-${ALL_USE_CASE_ID}`],
+        id: OBSERVABILITY_USE_CASE_ID,
+        name: OBSERVABILITY_USE_CASE_ID,
+        features: [`use-case-${OBSERVABILITY_USE_CASE_ID}`],
       });
       await waitFor(() => {
         expect(coreSetup.chrome.navGroup.addNavLinksToGroup).toBeCalledWith(navGroupInfo, [
@@ -100,7 +103,7 @@ describe('UseCaseService', () => {
             category: DEFAULT_APP_CATEGORIES.manageWorkspace,
             order: 100,
             title: 'Workspace details',
-            euiIconType: 'spacesApp',
+            euiIconType: 'wsSelector',
           },
           {
             id: 'workspace_collaborators',
@@ -144,6 +147,38 @@ describe('UseCaseService', () => {
       });
     });
 
+    it('excludes the datasets entry for non-observability use cases', async () => {
+      const useCaseService = new UseCaseService();
+      const coreSetup = coreMock.createSetup();
+      const navGroupMap$ = new BehaviorSubject<Record<string, NavGroupItemInMap>>({});
+      const coreStartMock = coreMock.createStart();
+      coreSetup.getStartServices.mockResolvedValue([coreStartMock, {}, {}]);
+      coreStartMock.chrome.navGroup.getNavGroupsMap$.mockReturnValue(navGroupMap$);
+      useCaseService.setup(coreSetup);
+      const navGroupInfo = {
+        ...DEFAULT_NAV_GROUPS.search,
+        navLinks: [],
+      };
+      navGroupMap$.next({
+        search: navGroupInfo,
+      });
+      coreSetup.workspaces.currentWorkspace$.next({
+        id: 'search',
+        name: 'search',
+        features: ['use-case-search'],
+      });
+      await waitFor(() => {
+        expect(coreSetup.chrome.navGroup.addNavLinksToGroup).toHaveBeenCalled();
+      });
+      const registeredLinks = (coreSetup.chrome.navGroup.addNavLinksToGroup as jest.Mock).mock
+        .calls[0][1];
+      expect(registeredLinks.some((link: { id: string }) => link.id === 'datasets')).toBe(false);
+      // Other manage-workspace links are still present.
+      expect(registeredLinks.some((link: { id: string }) => link.id === 'indexPatterns')).toBe(
+        true
+      );
+    });
+
     it('should register nav links with correct euiIconType values', async () => {
       const useCaseService = new UseCaseService();
       const coreSetup = coreMock.createSetup();
@@ -160,16 +195,16 @@ describe('UseCaseService', () => {
       coreStartMock.chrome.navGroup.getNavGroupsMap$.mockReturnValue(navGroupMap$);
       useCaseService.setup(coreSetup);
       const navGroupInfo = {
-        ...DEFAULT_NAV_GROUPS.all,
+        ...DEFAULT_NAV_GROUPS.observability,
         navLinks: [],
       };
       navGroupMap$.next({
-        [ALL_USE_CASE_ID]: navGroupInfo,
+        [OBSERVABILITY_USE_CASE_ID]: navGroupInfo,
       });
       coreSetup.workspaces.currentWorkspace$.next({
-        id: ALL_USE_CASE_ID,
-        name: ALL_USE_CASE_ID,
-        features: [`use-case-${ALL_USE_CASE_ID}`],
+        id: OBSERVABILITY_USE_CASE_ID,
+        name: OBSERVABILITY_USE_CASE_ID,
+        features: [`use-case-${OBSERVABILITY_USE_CASE_ID}`],
       });
       await waitFor(() => {
         expect(coreSetup.chrome.navGroup.addNavLinksToGroup).toBeCalledWith(
@@ -177,7 +212,7 @@ describe('UseCaseService', () => {
           expect.arrayContaining([
             expect.objectContaining({
               id: WORKSPACE_DETAIL_APP_ID,
-              euiIconType: 'spacesApp',
+              euiIconType: 'wsSelector',
             }),
             expect.objectContaining({
               id: 'workspace_collaborators',
