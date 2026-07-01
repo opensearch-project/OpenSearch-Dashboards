@@ -104,7 +104,12 @@ function NavLeafItem({
           <EuiText size="s">{link.title}</EuiText>
         </EuiFlexItem>
         {link.infoTooltip && (
-          <EuiFlexItem grow={false} className="obs-nav-info">
+          <EuiFlexItem
+            grow={false}
+            className="obs-nav-info"
+            // Stop clicks on the info icon from triggering the row's navigation.
+            onClick={(e: React.MouseEvent) => e.stopPropagation()}
+          >
             <EuiIconTip
               type="iInCircle"
               size="s"
@@ -112,8 +117,6 @@ function NavLeafItem({
               aria-label={link.infoTooltip}
               content={link.infoTooltip}
               position="right"
-              // Stop the tooltip's icon from triggering navigation on the row.
-              anchorProps={{ onClick: (e: React.MouseEvent) => e.stopPropagation() }}
             />
           </EuiFlexItem>
         )}
