@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { applyCspModifications } from './utils';
+import { applyCspModifications, buildMfeCspRules } from './utils';
 
 describe('applyCspModifications', () => {
   const defaultRules = [
@@ -253,5 +253,248 @@ describe('applyCspModifications', () => {
       expect(result).toContain('*.example.com');
       expect(result).toContain('https://*.examples.com');
     });
+  });
+});
+
+describe('buildMfeCspRules', () => {
+  const baseRules = [
+    "script-src 'unsafe-eval' 'self'",
+    "worker-src blob: 'self'",
+    "style-src 'unsafe-inline' 'self'",
+  ];
+
+  it('widens script-src, worker-src, AND style-src with de-duplicated origins', () => {
+    // OSD's default csp.rules contains script-src + worker-src + style-src; ALL
+    // three are now in MFE_WIDENED_DIRECTIVES (remotes ship styles too, so
+    // style-src needs the cdnOrigin).
+    const result = buildMfeCspRules(baseRules, {
+      bootstrapUrl: 'http://localhost:8080/bootstrap/x.js',
+      sharedDepsUrl: 'http://localhost:8080/shared-deps/y.js',
+      cdnOrigin: 'https://cdn.example.net',
+    });
+    expect(result[0]).toBe(
+      "script-src 'unsafe-eval' 'self' http://localhost:8080 https://cdn.example.net"
+    );
+    expect(result[1]).toBe("worker-src blob: 'self' http://localhost:8080 https://cdn.example.net");
+    expect(result[2]).toBe(
+      "style-src 'unsafe-inline' 'self' http://localhost:8080 https://cdn.example.net"
+    );
+  });
+
+  it('ignores devOverrideOrigins when allowOverride is false', () => {
+    const result = buildMfeCspRules(baseRules, {
+      bootstrapUrl: 'http://localhost:8080/bootstrap/x.js',
+      cdnOrigin: 'https://cdn.example.net',
+      allowOverride: false,
+      devOverrideOrigins: ['http://localhost:9090'],
+    });
+    expect(result[0]).not.toContain('http://localhost:9090');
+  });
+
+  it('includes devOverrideOrigins when allowOverride is true', () => {
+    const result = buildMfeCspRules(baseRules, {
+      bootstrapUrl: 'http://localhost:8080/bootstrap/x.js',
+      cdnOrigin: 'https://cdn.example.net',
+      allowOverride: true,
+      devOverrideOrigins: ['http://localhost:9090', 'http://devbox:3000'],
+    });
+    expect(result[0]).toContain('http://localhost:9090');
+    expect(result[0]).toContain('http://devbox:3000');
+    expect(result[1]).toContain('http://localhost:9090');
+    expect(result[1]).toContain('http://devbox:3000');
+  });
+
+  it('returns rules unchanged when no origins can be derived', () => {
+    const result = buildMfeCspRules(baseRules, {});
+    expect(result).toBe(baseRules);
+  });
+
+  it('returns rules unchanged with empty options', () => {
+    const result = buildMfeCspRules(baseRules);
+    expect(result).toBe(baseRules);
+  });
+
+  it('tolerates malformed cdnOrigin and bootstrapUrl without throwing', () => {
+    expect(() =>
+      buildMfeCspRules(baseRules, {
+        bootstrapUrl: 'not a url',
+        cdnOrigin: ':::invalid',
+        sharedDepsUrl: '',
+      })
+    ).not.toThrow();
+    // A malformed cdnOrigin is rejected (not injected verbatim); a valid https
+    // origin is still allow-listed.
+    const result = buildMfeCspRules(baseRules, { cdnOrigin: 'https://cdn.example.net' });
+    expect(result[0]).toContain('https://cdn.example.net');
+  });
+
+  it('rejects a wildcard cdnOrigin (no verbatim injection into script-src)', () => {
+    const result = buildMfeCspRules(baseRules, { cdnOrigin: '*' });
+    // '*' is not a parseable origin => no origins derived => rules returned unchanged.
+    expect(result).toBe(baseRules);
+    expect(result[0]).not.toContain('*');
+  });
+
+  it('rejects a bare hostname cdnOrigin (scheme required)', () => {
+    const result = buildMfeCspRules(baseRules, { cdnOrigin: 'cdn.example.com' });
+    expect(result).toBe(baseRules);
+    expect(result[0]).not.toContain('cdn.example.com');
+  });
+
+  it('rejects a non-http(s) cdnOrigin scheme', () => {
+    const result = buildMfeCspRules(baseRules, { cdnOrigin: 'ftp://cdn.example.net' });
+    expect(result).toBe(baseRules);
+    expect(result[0]).not.toContain('ftp://');
+  });
+
+  it('still allow-lists a valid https cdnOrigin alongside a rejected one', () => {
+    // A valid bootstrap origin is added; the wildcard cdnOrigin is dropped.
+    const result = buildMfeCspRules(baseRules, {
+      bootstrapUrl: 'https://bootstrap.example.net/b.js',
+      cdnOrigin: '*',
+    });
+    expect(result[0]).toContain('https://bootstrap.example.net');
+    expect(result[0]).not.toContain('*');
+  });
+
+  it('rejects a wildcard devOverrideOrigin even when allowOverride is true', () => {
+    const result = buildMfeCspRules(baseRules, {
+      cdnOrigin: 'https://cdn.example.net',
+      allowOverride: true,
+      devOverrideOrigins: ['*', 'http://localhost:9090'],
+    });
+    // The wildcard is dropped; the valid http origin is still allow-listed.
+    expect(result[0]).not.toContain(' *');
+    expect(result[0]).toContain('http://localhost:9090');
+    expect(result[0]).toContain('https://cdn.example.net');
+  });
+
+  it('does not duplicate an origin already present in a rule', () => {
+    const rulesWithOrigin = ["script-src 'self' http://localhost:8080", "worker-src blob: 'self'"];
+    const result = buildMfeCspRules(rulesWithOrigin, {
+      bootstrapUrl: 'http://localhost:8080/bootstrap/x.js',
+      cdnOrigin: 'https://cdn.example.net',
+    });
+    // http://localhost:8080 should NOT be duplicated in script-src
+    const tokens = result[0].split(/\s+/);
+    const count = tokens.filter((t) => t === 'http://localhost:8080').length;
+    expect(count).toBe(1);
+    // but cdn should be added
+    expect(result[0]).toContain('https://cdn.example.net');
+    // worker-src gets both
+    expect(result[1]).toContain('http://localhost:8080');
+    expect(result[1]).toContain('https://cdn.example.net');
+  });
+
+  it('handles non-string rules gracefully', () => {
+    const mixedRules = ["script-src 'self'", null, undefined, 42];
+    const result = buildMfeCspRules(mixedRules, {
+      cdnOrigin: 'https://cdn.example.net',
+    });
+    expect(result[0]).toContain('https://cdn.example.net');
+    expect(result[1]).toBe(null);
+    expect(result[2]).toBe(undefined);
+    expect(result[3]).toBe(42);
+  });
+
+  // -------------------------------------------------------------------------
+  // Extend the widened set beyond script-src/worker-src (style-src, font-src,
+  // connect-src for real remote-shipped assets)
+  // -------------------------------------------------------------------------
+
+  it('widens style-src when present in the base rules', () => {
+    // OSD's default carries `style-src 'unsafe-inline' 'self'` — the widened
+    // set adds the cdnOrigin so cross-origin <link rel=stylesheet>/<style>
+    // from a remote can render.
+    const result = buildMfeCspRules(baseRules, { cdnOrigin: 'https://cdn.example.net' });
+    expect(result[2]).toBe("style-src 'unsafe-inline' 'self' https://cdn.example.net");
+  });
+
+  it('widens font-src when an explicit font-src directive is present', () => {
+    // A deployment that opts into a stricter base CSP (one that names font-src
+    // explicitly) gets the cdnOrigin auto-allow-listed for @font-face URLs.
+    const rulesWithFont = [...baseRules, "font-src 'self'"];
+    const result = buildMfeCspRules(rulesWithFont, {
+      cdnOrigin: 'https://cdn.example.net',
+    });
+    const fontRule = result.find((r) => typeof r === 'string' && r.startsWith('font-src'));
+    expect(fontRule).toBe("font-src 'self' https://cdn.example.net");
+  });
+
+  it('widens connect-src when an explicit connect-src directive is present', () => {
+    // Same forward-compatibility for `fetch()` / XHR / WebSocket calls a remote
+    // opens back to its own CDN origin.
+    const rulesWithConnect = [...baseRules, "connect-src 'self'"];
+    const result = buildMfeCspRules(rulesWithConnect, {
+      cdnOrigin: 'https://cdn.example.net',
+    });
+    const connectRule = result.find((r) => typeof r === 'string' && r.startsWith('connect-src'));
+    expect(connectRule).toBe("connect-src 'self' https://cdn.example.net");
+  });
+
+  it('widens script-src-elem and style-src-elem when those *-elem variants are present', () => {
+    const rulesWithElem = [
+      "script-src 'self'",
+      "script-src-elem 'self'",
+      "style-src 'self'",
+      "style-src-elem 'self'",
+    ];
+    const result = buildMfeCspRules(rulesWithElem, {
+      cdnOrigin: 'https://cdn.example.net',
+    });
+    const scriptElem = result.find((r) => typeof r === 'string' && r.startsWith('script-src-elem'));
+    const styleElem = result.find((r) => typeof r === 'string' && r.startsWith('style-src-elem'));
+    expect(scriptElem).toBe("script-src-elem 'self' https://cdn.example.net");
+    expect(styleElem).toBe("style-src-elem 'self' https://cdn.example.net");
+  });
+
+  it('NEVER introduces a new directive when font-src / connect-src are absent (no tightening)', () => {
+    // OSD's default csp.rules does NOT specify font-src or connect-src — which
+    // CSP treats as unrestricted (no `default-src` either). If we emitted a
+    // brand-new `font-src <cdnOrigin>` we would tighten the policy from "any
+    // origin OK" to "ONLY the CDN OK" and break OSD's own same-origin font/
+    // fetch loads. Verify those directives stay UNSPECIFIED.
+    const result = buildMfeCspRules(baseRules, {
+      cdnOrigin: 'https://cdn.example.net',
+      bootstrapUrl: 'http://localhost:8080/bootstrap/x.js',
+    });
+    // No new font-src / connect-src directive is appended.
+    const fontRule = result.find((r) => typeof r === 'string' && r.startsWith('font-src'));
+    const connectRule = result.find((r) => typeof r === 'string' && r.startsWith('connect-src'));
+    expect(fontRule).toBeUndefined();
+    expect(connectRule).toBeUndefined();
+    // And the array length is unchanged (we widened existing entries; we didn't
+    // append).
+    expect(result.length).toBe(baseRules.length);
+  });
+
+  it('widens style-src consistently with script-src (off-allow-list origin still rejected)', () => {
+    // The widened style-src lists ONLY the configured cdnOrigin (+ self/inline);
+    // an attacker origin that is not in the allow-list cannot inject styles.
+    const result = buildMfeCspRules(baseRules, { cdnOrigin: 'https://cdn.example.net' });
+    expect(result[2]).toContain('https://cdn.example.net');
+    expect(result[2]).not.toContain('https://attacker.example.com');
+  });
+
+  it('honors devOverrideOrigins on style-src when allowOverride is true', () => {
+    // Symmetric with script-src/worker-src — a dev who points an MFE at a
+    // local dev server gets that origin allow-listed for styles too.
+    const result = buildMfeCspRules(baseRules, {
+      cdnOrigin: 'https://cdn.example.net',
+      allowOverride: true,
+      devOverrideOrigins: ['http://localhost:9090'],
+    });
+    expect(result[2]).toContain('http://localhost:9090');
+    expect(result[2]).toContain('https://cdn.example.net');
+  });
+
+  it('drops devOverrideOrigins from style-src when allowOverride is false (prod)', () => {
+    const result = buildMfeCspRules(baseRules, {
+      cdnOrigin: 'https://cdn.example.net',
+      allowOverride: false,
+      devOverrideOrigins: ['http://localhost:9090'],
+    });
+    expect(result[2]).not.toContain('http://localhost:9090');
+    expect(result[2]).toContain('https://cdn.example.net');
   });
 });

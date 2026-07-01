@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<!--
+  SPDX-License-Identifier: Apache-2.0
+
+  The OpenSearch Contributors require contributions made to
+  this file be licensed under the Apache-2.0 license or a
+  compatible open source license.
+
+  Scratch Module Federation host for the OSD MFE pilot.
+
+  This is a minimal, dependency-free host used to prove that a UI plugin built
+  as a Module Federation remote (see scripts/build_mfe --plugin <id>) can be
+  loaded standalone while CONSUMING the OSD shared dependencies (react, react-dom,
+  @elastic/eui, ...) from `window.__osdSharedDeps__` instead of bundling its own
+  copies. The remote is built with `import: false` (consume-only) shared
+  singletons, so the host MUST seed the Module Federation share scope before it
+  imports the remote — that seeding happens in ./init.js.
+
+  Asset routes (served by packages/osd-mfe/dev/local_asset_server.js):
+    /shared-deps/*        -> packages/osd-ui-shared-deps/target/*  (defines __osdSharedDeps__)
+    /mfe/<id>/*           -> target/mfe/<id>/*                     (the built remote)
+    /mfe-host-config.js   -> generated: window.__OSD_MFE_HOST_CONFIG__ (shared roots + versions)
+    /init.js              -> packages/osd-mfe/scratch_host/init.js
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OSD MFE scratch host — pilot remote</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        margin: 24px;
+        color: #1a1c21;
+      }
+      #status {
+        padding: 12px 16px;
+        border-radius: 6px;
+        border: 1px solid #d3dae6;
+        background: #f5f7fa;
+        white-space: pre-wrap;
+        font-size: 14px;
+      }
+      #status.ok {
+        border-color: #00bfb3;
+        background: #e6f9f7;
+      }
+      #status.fail {
+        border-color: #bd271e;
+        background: #f8e9e9;
+      }
+    </style>
+    <script>
+      // Public path for the shared-deps bundle's lazy chunks (e.g. monaco). The
+      // osd-ui-shared-deps entry sets `__webpack_public_path__` from this map,
+      // so it MUST be defined before the bundle loads. See
+      // packages/osd-ui-shared-deps/public_path_module_creator.js.
+      window.__osdPublicPath__ = { 'osd-ui-shared-deps': '/shared-deps/' };
+      window.__webpack_nonce__ = window.__webpack_nonce__ || '';
+    </script>
+    <!--
+      Order matters:
+      1. The @elastic split chunk must load before the main shared-deps bundle
+         (osd-ui-shared-deps lists it in jsDepFilenames).
+      2. The main shared-deps bundle defines window.__osdSharedDeps__.
+      3. The generated host config exposes the shared roots + their versions.
+      4. The pilot remote container (defines window.<pluginId>, e.g. window.inspector).
+    -->
+    <script src="/shared-deps/osd-ui-shared-deps.@elastic.js"></script>
+    <script src="/shared-deps/osd-ui-shared-deps.js"></script>
+    <script src="/mfe-host-config.js"></script>
+    <script src="/mfe/inspector/remoteEntry.js"></script>
+  </head>
+  <body>
+    <h1>OSD Module Federation — scratch host</h1>
+    <div id="status">Loading pilot remote…</div>
+    <!-- Seeds the MF share scope from __osdSharedDeps__, then imports the remote. -->
+    <script src="/init.js"></script>
+  </body>
+</html>

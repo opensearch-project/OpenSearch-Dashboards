@@ -260,6 +260,68 @@ export default () =>
       keyboardShortcuts: Joi.object({
         enabled: Joi.boolean().default(false),
       }),
+      // Phase 3 MFE mode (docs/01-MFE-DESIGN.md §6). Declared here so the LEGACY
+      // config (read by src/legacy/ui/ui_render/ui_render_mixin.js via
+      // `config.get('opensearchDashboards.mfe.*')`) resolves these keys; it mirrors
+      // the new-platform schema in src/core/server/opensearch_dashboards_config.ts.
+      // OFF by default: without `--mfe`, `enabled` is false so the render branch is
+      // skipped and the served bootstrap/HTML are byte-for-byte unchanged.
+      mfe: Joi.object({
+        enabled: Joi.boolean().default(false),
+        registryUrl: Joi.string().allow('').default(''),
+        // Phase 13 Story 3: file path to the registry document on disk (v2 or v1
+        // canonical, auto-migrated on read). When set, the OSD server resolves the
+        // registry server-side per request and INJECTS a flat boot manifest into
+        // the bootstrap; the browser does not fetch /registry. Empty default keeps
+        // the legacy registry-fetch path active for pre-Phase-13 deployments.
+        registryPath: Joi.string().allow('').default(''),
+        // Phase 13 Story 3: tenant identifier (default `"default"` until real AuthN).
+        // Drives the `tenantOverrides[customerId]` resolution layer.
+        customerId: Joi.string().default('default'),
+        // Phase 13 Story 3: name of the sticky HttpOnly bucket cookie.
+        userBucketCookieName: Joi.string().default('_osd_mfe_bucket'),
+        sharedDepsUrl: Joi.string().allow('').default(''),
+        bootstrapUrl: Joi.string().allow('').default(''),
+        // Non-prod security gate for dev URL-overrides (Phase 5, §7). No
+        // `.default()` so an unset value resolves to undefined and the effective
+        // gate defaults to dev mode at injection time (dev => true, prod => false,
+        // see resolveAllowOverride); an explicit boolean always wins.
+        allowOverride: Joi.boolean(),
+        // CDN origin for plugin remoteEntry.js + chunks; allow-listed in the served
+        // CSP script-src/worker-src in MFE mode (with the bootstrap/shared-deps script
+        // origins). Empty default => no CSP change. Mirrors the new-platform schema.
+        cdnOrigin: Joi.string().allow('').default(''),
+        // Extra dev-only script origins, allow-listed in CSP ONLY when allowOverride
+        // is on (non-prod). Never applied in production.
+        devOverrideOrigins: Joi.array().items(Joi.string()).default([]),
+        // Phase 14 Story 1 — load telemetry sink. Empty default = OFF (silent
+        // no-op): the browser bootstrap never POSTs, the load loop is unchanged.
+        // Mirrors the new-platform schema in opensearch_dashboards_config.ts.
+        telemetryEndpoint: Joi.string().allow('').default(''),
+        // Phase 9 version-compatibility POLICY. Declared here so the LEGACY config
+        // (read by ui_render_mixin.js) resolves `opensearchDashboards.mfe.compat.*`;
+        // mirrors the new-platform schema in opensearch_dashboards_config.ts.
+        // onIncompatible/onMissing have NO `.default()` so an unset value resolves to
+        // undefined and the effective policy tracks dev mode at injection time
+        // (resolveCompatPolicy: non-prod => block/warn-load, prod => skip/skip); an
+        // explicit value always wins. strictShared defaults to true.
+        compat: Joi.object({
+          onIncompatible: Joi.string().valid('block', 'skip'),
+          onMissing: Joi.string().valid('block', 'skip', 'warn-load'),
+          strictShared: Joi.boolean().default(true),
+        }).default(),
+        // Phase 12 Story 4 — registry AUTHENTICITY (signing). Declared here so the
+        // LEGACY config (read by ui_render_mixin.js to inject the host-held
+        // verification material into the bootstrap) resolves
+        // `opensearchDashboards.mfe.registrySignature.*`; mirrors the new-platform
+        // schema in opensearch_dashboards_config.ts. Empty `verificationKey` (the
+        // default) => signing OFF: registry loads unverified (backward compatible).
+        registrySignature: Joi.object({
+          verificationKey: Joi.string().allow('').default(''),
+          keyId: Joi.string().default('mfe-dev-hmac-1'),
+          algorithm: Joi.string().default('HMAC-SHA256'),
+        }).default(),
+      }).default(),
     }).default(),
 
     savedObjects: HANDLED_IN_NEW_PLATFORM,

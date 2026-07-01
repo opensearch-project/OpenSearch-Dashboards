@@ -79,6 +79,40 @@ export interface RenderingMetadata {
     keyboardShortcuts: {
       enabled: boolean;
     };
+    /**
+     * Present ONLY in MFE mode (`opensearchDashboards.mfe.enabled`). Carries the
+     * serve-time registry source + shared-deps URLs so the browser MFE bootstrap
+     * can load plugin remotes instead of the locally-bundled plugin scripts.
+     * Absent (and therefore omitted from the serialized metadata) when MFE mode is
+     * off, keeping the non-MFE HTML byte-for-byte unchanged. See docs/01-MFE-DESIGN.md §6.
+     */
+    mfe?: {
+      registryUrl: string;
+      sharedDepsUrl: string;
+      /**
+       * Non-production security GATE for dev URL-overrides (Phase 5, §7). When
+       * false (the production default), runtime overrides are ignored and the
+       * dev-only inspector is NOT mounted. An explicit `mfe.allowOverride` config
+       * wins; otherwise this defaults to the server's dev mode.
+       */
+      allowOverride: boolean;
+      /**
+       * Phase 16 Story 6: per-theme CSS bundles resolved out of a v3 registry
+       * doc (when the source document advertises `themes`), keyed by theme
+       * name (e.g. `light` / `dark` / …). Each entry carries the CDN URL +
+       * optional SRI integrity (`sha384-…`). When set, `template.tsx` emits a
+       * `<meta name="osd-mfe-themes" content="{...}">` tag in the HTML head;
+       * `startup.js` reads that tag, picks the active theme (from
+       * `localStorage.uiSettings.theme:darkMode`) and creates the matching
+       * `<link rel="stylesheet" href=… integrity=… crossorigin="anonymous">`
+       * BEFORE `bootstrap.js` runs — so the theme CSS is in `<head>` by the
+       * time the bootstrap shim parses (no FOUC, no double-fetch). Absent
+       * when the registry doesn't advertise themes (or when MFE is off) ⇒
+       * the META is not emitted and the legacy
+       * `/ui/legacy_<name>_theme.css` same-origin path is preserved.
+       */
+      themes?: Record<string, { url: string; integrity?: string }>;
+    };
   };
 }
 

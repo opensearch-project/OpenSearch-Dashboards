@@ -1,0 +1,451 @@
+/*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The OpenSearch Contributors require contributions made to
+ * this file be licensed under the Apache-2.0 license or a
+ * compatible open source license.
+ *
+ * Any modifications Copyright OpenSearch Contributors. See
+ * GitHub history for details.
+ */
+
+/**
+ * Tests for the unified MFE registry schema (`schemaVersion: 1`).
+ *
+ * Coverage axes:
+ *  - validateRegistry acceptance: fully populated, no global fields, partial
+ *    global fields, layered substructure (canary + tenant override) combined
+ *    with global fields, asset descriptor without integrity (same-origin
+ *    fallback), empty themes record.
+ *  - validateRegistry rejection: non-object input, wrong schemaVersion,
+ *    malformed integrity prefix, empty integrity, empty url, missing version,
+ *    themes not an object, malformed theme integrity, invalid substructure.
+ *  - assertValidRegistryDocument throws with a path-prefixed error message.
+ *  - The SCHEMA_VERSION constant resolves to `1`.
+ */
+
+import {
+  SCHEMA_VERSION,
+  validate,
+  validateRegistry,
+  assertValidRegistry,
+  assertValidRegistryDocument,
+  Registry,
+} from './schema';
+import {
+  FIXTURE_CORE_ASSET,
+  FIXTURE_ORCHESTRATOR_ASSET,
+  FIXTURE_SHARED_DEPS_CSS_ASSET,
+  FIXTURE_THEME_LIGHT_ASSET,
+  FIXTURE_THEME_DARK_ASSET,
+  fixtureRegistryDefaultOnly,
+  fixtureRegistryFullyPopulated,
+  fixtureRegistryPartiallyPopulated,
+  fixtureRegistryWithBadIntegrity,
+  fixtureRegistryWithCanaryAndTenantAndGlobals,
+} from './fixtures';
+
+/* ------------------------------------------------------------------------- *
+ * Tests
+ * ------------------------------------------------------------------------- */
+
+describe('MFE registry schema — validateRegistry() acceptance', () => {
+  it('accepts a fully-populated document (all four global fields set)', () => {
+    expect(validateRegistry(fixtureRegistryFullyPopulated())).toEqual({
+      valid: true,
+      errors: [],
+    });
+  });
+
+  it('accepts a document with no global asset fields (all four absent)', () => {
+    expect(validateRegistry(fixtureRegistryDefaultOnly())).toEqual({
+      valid: true,
+      errors: [],
+    });
+  });
+
+  it('accepts a partially-populated document (only core + orchestrator set)', () => {
+    const doc = fixtureRegistryPartiallyPopulated();
+    expect(doc.sharedDepsCss).toBeUndefined();
+    expect(doc.themes).toBeUndefined();
+    expect(validateRegistry(doc).valid).toBe(true);
+  });
+
+  it('accepts a document layering canary + tenant on top of global fields', () => {
+    expect(validateRegistry(fixtureRegistryWithCanaryAndTenantAndGlobals()).valid).toBe(true);
+  });
+
+  it('accepts an asset descriptor WITHOUT integrity (same-origin fallback URL)', () => {
+    const doc = fixtureRegistryDefaultOnly();
+    doc.core = {
+      url: '/bundles/core/core.entry.js',
+      version: '3.5.0-dev',
+      // integrity omitted on purpose
+    };
+    expect(validateRegistry(doc).valid).toBe(true);
+  });
+
+  it('accepts an empty themes record', () => {
+    const doc = fixtureRegistryFullyPopulated();
+    doc.themes = {};
+    expect(validateRegistry(doc).valid).toBe(true);
+  });
+});
+
+describe('MFE registry schema — validateRegistry() rejection', () => {
+  it.each([null, undefined, 42, 'nope', []])('rejects non-object input: %p', (input) => {
+    const result = validateRegistry(input);
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContain('MFE registry must be an object');
+  });
+
+  it('rejects a document declaring a non-1 schemaVersion', () => {
+    const doc = fixtureRegistryDefaultOnly();
+    const tampered = { ...doc, schemaVersion: 2 };
+    const result = validateRegistry(tampered);
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.includes(`schemaVersion must equal ${SCHEMA_VERSION}`))).toBe(
+      true
+    );
+  });
+
+  it('rejects malformed integrity (sha256- not allowed)', () => {
+    const result = validateRegistry(fixtureRegistryWithBadIntegrity());
+    expect(result.valid).toBe(false);
+    expect(
+      result.errors.some((e) => e.includes('core.integrity') && e.includes('sha384-'))
+    ).toBe(true);
+  });
+
+  it('rejects empty-string integrity on core', () => {
+    const doc = fixtureRegistryFullyPopulated();
+    doc.core = { ...FIXTURE_CORE_ASSET, integrity: '' };
+    const result = validateRegistry(doc);
+    expect(result.valid).toBe(false);
+    expect(
+      result.errors.some((e) => e.includes('core.integrity') && e.includes('non-empty'))
+    ).toBe(true);
+  });
+
+  it('rejects orchestrator with empty url', () => {
+    const doc = fixtureRegistryFullyPopulated();
+    doc.orchestrator = { ...FIXTURE_ORCHESTRATOR_ASSET, url: '' };
+    const result = validateRegistry(doc);
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.includes('orchestrator.url'))).toBe(true);
+  });
+
+  it('rejects sharedDepsCss missing version', () => {
+    const doc = fixtureRegistryFullyPopulated();
+    doc.sharedDepsCss = {
+      url: FIXTURE_SHARED_DEPS_CSS_ASSET.url,
+      integrity: FIXTURE_SHARED_DEPS_CSS_ASSET.integrity,
+    } as never;
+    const result = validateRegistry(doc);
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.includes('sharedDepsCss.version'))).toBe(true);
+  });
+
+  it('rejects themes that is not an object (array supplied)', () => {
+    const doc = fixtureRegistryFullyPopulated();
+    ((doc as unknown) as { themes: unknown }).themes = [];
+    const result = validateRegistry(doc);
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.includes('themes'))).toBe(true);
+  });
+
+  it('rejects a theme entry with malformed integrity', () => {
+    const doc = fixtureRegistryFullyPopulated();
+    doc.themes = {
+      light: { ...FIXTURE_THEME_LIGHT_ASSET, integrity: 'NOT-sha384-bogus' },
+      dark: { ...FIXTURE_THEME_DARK_ASSET },
+    };
+    const result = validateRegistry(doc);
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.includes('themes.light.integrity'))).toBe(true);
+  });
+
+  it('assertValidRegistryDocument throws on rejection with a path-prefixed message', () => {
+    expect(() => assertValidRegistryDocument(fixtureRegistryWithBadIntegrity())).toThrow(
+      /core\.integrity/
+    );
+  });
+
+  it('propagates substructure rejection (default.mfes empty entry)', () => {
+    const doc = fixtureRegistryFullyPopulated();
+    (doc.default.mfes as Record<string, unknown>).invalid = {
+      // Missing required plugin MfeEntry fields.
+      version: '',
+    };
+    const result = validateRegistry(doc);
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.includes('default.mfes.invalid'))).toBe(true);
+  });
+});
+
+describe('SCHEMA_VERSION constant', () => {
+  it('equals 1', () => {
+    expect(SCHEMA_VERSION).toBe(1);
+  });
+});
+
+/* ------------------------------------------------------------------------- *
+ * Flat in-memory `Registry` shape — validate / assertValidRegistry tests.
+ *
+ * The bootstrap layer (browser-side) materialises the server-injected
+ * `BootManifest` into the flat `Registry` shape for plugin loading. Even
+ * though this shape never appears on disk, its validators guard the
+ * in-memory contract the bootstrap depends on, so the tests live here next
+ * to `validateRegistry`/`assertValidRegistryDocument` (which guard the
+ * on-disk layered shape).
+ * ------------------------------------------------------------------------- */
+
+/** A minimal, valid flat in-memory Registry used as the base for mutation. */
+function flatRegistry(): Registry {
+  return {
+    schemaVersion: SCHEMA_VERSION,
+    generatedAt: '2026-06-08T00:00:00.000Z',
+    sharedDeps: {
+      url: 'http://localhost:8080/shared-deps/',
+      version: '3.5.0',
+    },
+    mfes: {
+      inspector: {
+        version: '3.5.0+abc123def456',
+        remoteEntry: 'http://localhost:8080/mfe/inspector/remoteEntry.js',
+        scope: 'inspector',
+        module: './public',
+        integrity: 'sha384-deadbeef',
+      },
+    },
+  };
+}
+
+describe('Registry (flat in-memory) — validate()', () => {
+  it('accepts a well-formed flat registry', () => {
+    const result = validate(flatRegistry());
+    expect(result.valid).toBe(true);
+    expect(result.errors).toEqual([]);
+  });
+
+  it('accepts an entry without the optional integrity field', () => {
+    const registry = flatRegistry();
+    delete registry.mfes.inspector.integrity;
+    expect(validate(registry).valid).toBe(true);
+  });
+
+  it.each([null, undefined, 42, 'nope', []])('rejects non-object input: %p', (input) => {
+    const result = validate(input);
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContain('registry must be an object');
+  });
+
+  it('rejects a wrong schemaVersion', () => {
+    const registry = { ...flatRegistry(), schemaVersion: 999 };
+    const result = validate(registry);
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.includes('schemaVersion'))).toBe(true);
+  });
+
+  it('rejects a missing/unparseable generatedAt', () => {
+    const bad = { ...flatRegistry(), generatedAt: 'not-a-date' };
+    const result = validate(bad);
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.includes('generatedAt'))).toBe(true);
+  });
+
+  it('rejects a missing sharedDeps', () => {
+    const registry = flatRegistry();
+    // Intentionally remove a required field to exercise the guard.
+    const { sharedDeps, ...withoutShared } = registry;
+    const result = validate(withoutShared);
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.includes('sharedDeps'))).toBe(true);
+  });
+
+  it('rejects an empty mfes map', () => {
+    const registry = { ...flatRegistry(), mfes: {} };
+    const result = validate(registry);
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContain('mfes must contain at least one entry');
+  });
+
+  it('reports the specific field for an incomplete mfe entry', () => {
+    const registry = flatRegistry();
+    // Remove required fields from the entry.
+    registry.mfes.inspector = {
+      version: '3.5.0+abc',
+      // missing remoteEntry/scope/module
+    } as Registry['mfes'][string];
+    const result = validate(registry);
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContain('mfes.inspector.remoteEntry must be a non-empty string');
+    expect(result.errors).toContain('mfes.inspector.scope must be a non-empty string');
+    expect(result.errors).toContain('mfes.inspector.module must be a non-empty string');
+  });
+
+  it('rejects a non-string integrity when present', () => {
+    const registry = flatRegistry();
+    (registry.mfes.inspector as { integrity: unknown }).integrity = 123;
+    const result = validate(registry);
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.includes('integrity'))).toBe(true);
+  });
+
+  it('accepts an entry with a string minCoreVersion (compat seed)', () => {
+    const registry = flatRegistry();
+    registry.mfes.inspector.minCoreVersion = '3.5.0';
+    expect(validate(registry).valid).toBe(true);
+  });
+
+  it('accepts a null minCoreVersion (no constraint)', () => {
+    const registry = flatRegistry();
+    registry.mfes.inspector.minCoreVersion = null;
+    expect(validate(registry).valid).toBe(true);
+  });
+
+  it('accepts an entry without the optional minCoreVersion field', () => {
+    const registry = flatRegistry();
+    delete registry.mfes.inspector.minCoreVersion;
+    expect(validate(registry).valid).toBe(true);
+  });
+
+  it('rejects a non-string, non-null minCoreVersion when present', () => {
+    const registry = flatRegistry();
+    (registry.mfes.inspector as { minCoreVersion: unknown }).minCoreVersion = 42;
+    const result = validate(registry);
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.includes('minCoreVersion'))).toBe(true);
+  });
+
+  describe('builtAgainst + compat metadata', () => {
+    it('accepts an entry with well-formed builtAgainst + compat', () => {
+      const registry = flatRegistry();
+      registry.mfes.inspector.builtAgainst = {
+        osdVersion: '3.5.0',
+        sharedDeps: { react: '^16.14.0', 'react-dom': '^16.12.0' },
+      };
+      registry.mfes.inspector.compat = {
+        minCoreVersion: '3.5.0',
+        compatibleCoreRange: '3.5.x',
+      };
+      expect(validate(registry).valid).toBe(true);
+    });
+
+    it('accepts an entry without builtAgainst/compat (legacy/unknown)', () => {
+      const registry = flatRegistry();
+      delete registry.mfes.inspector.builtAgainst;
+      delete registry.mfes.inspector.compat;
+      expect(validate(registry).valid).toBe(true);
+    });
+
+    it('accepts an empty builtAgainst.sharedDeps map', () => {
+      const registry = flatRegistry();
+      registry.mfes.inspector.builtAgainst = { osdVersion: '3.5.0', sharedDeps: {} };
+      expect(validate(registry).valid).toBe(true);
+    });
+
+    it('rejects builtAgainst without a string osdVersion', () => {
+      const registry = flatRegistry();
+      registry.mfes.inspector.builtAgainst = {
+        sharedDeps: {},
+      } as Registry['mfes'][string]['builtAgainst'];
+      const result = validate(registry);
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain(
+        'mfes.inspector.builtAgainst.osdVersion must be a non-empty string'
+      );
+    });
+
+    it('rejects builtAgainst.sharedDeps with a non-string version', () => {
+      const registry = flatRegistry();
+      registry.mfes.inspector.builtAgainst = {
+        osdVersion: '3.5.0',
+        sharedDeps: ({ react: 123 } as unknown) as Record<string, string>,
+      };
+      const result = validate(registry);
+      expect(result.valid).toBe(false);
+      expect(result.errors.some((e) => e.includes('builtAgainst.sharedDeps.react'))).toBe(true);
+    });
+
+    it('rejects a builtAgainst that is not an object', () => {
+      const registry = flatRegistry();
+      (registry.mfes.inspector as { builtAgainst: unknown }).builtAgainst = 'nope';
+      const result = validate(registry);
+      expect(result.valid).toBe(false);
+      expect(
+        result.errors.some((e) => e.includes('builtAgainst, when present, must be an object'))
+      ).toBe(true);
+    });
+
+    it('rejects compat missing minCoreVersion / compatibleCoreRange', () => {
+      const registry = flatRegistry();
+      registry.mfes.inspector.compat = {} as Registry['mfes'][string]['compat'];
+      const result = validate(registry);
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain(
+        'mfes.inspector.compat.minCoreVersion must be a non-empty string'
+      );
+      expect(result.errors).toContain(
+        'mfes.inspector.compat.compatibleCoreRange must be a non-empty string'
+      );
+    });
+
+    it('rejects a compat that is not an object', () => {
+      const registry = flatRegistry();
+      (registry.mfes.inspector as { compat: unknown }).compat = 42;
+      const result = validate(registry);
+      expect(result.valid).toBe(false);
+      expect(result.errors.some((e) => e.includes('compat, when present, must be an object'))).toBe(
+        true
+      );
+    });
+  });
+});
+
+describe('Registry (flat in-memory) — assertValidRegistry()', () => {
+  it('returns the registry when valid', () => {
+    const registry = flatRegistry();
+    expect(assertValidRegistry(registry)).toBe(registry);
+  });
+
+  it('throws listing the problems when invalid', () => {
+    expect(() => assertValidRegistry({ schemaVersion: 1 })).toThrow(/Invalid MFE registry/);
+  });
+});
+
+describe('Registry (flat in-memory) — optional signature envelope', () => {
+  it('accepts a well-formed signature', () => {
+    const registry = flatRegistry();
+    (registry as { signature: unknown }).signature = {
+      algorithm: 'HMAC-SHA256',
+      keyId: 'mfe-dev-hmac-1',
+      value: 'Zm9vYmFy',
+    };
+    expect(validate(registry)).toEqual({ valid: true, errors: [] });
+  });
+
+  it('accepts a registry with NO signature (unsigned is valid)', () => {
+    expect(validate(flatRegistry()).valid).toBe(true);
+  });
+
+  it('rejects a signature that is not an object', () => {
+    const registry = flatRegistry();
+    (registry as { signature: unknown }).signature = 'sha384-bare-hash';
+    const result = validate(registry);
+    expect(result.valid).toBe(false);
+    expect(
+      result.errors.some((e) => e.includes('signature, when present, must be an object'))
+    ).toBe(true);
+  });
+
+  it('rejects a signature missing algorithm/keyId/value', () => {
+    const registry = flatRegistry();
+    (registry as { signature: unknown }).signature = { value: '' };
+    const result = validate(registry);
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContain('signature.algorithm must be a non-empty string');
+    expect(result.errors).toContain('signature.keyId must be a non-empty string');
+    expect(result.errors).toContain('signature.value must be a non-empty (base64) string');
+  });
+});

@@ -137,6 +137,7 @@
     - [Osd expect](../packages/osd-expect/README.md)
     - [Osd i18n](../packages/osd-i18n/README.md)
     - [Osd logging](../packages/osd-logging/README.md)
+    - [Osd mfe](../packages/osd-mfe/README.md)
     - [Osd monaco](../packages/osd-monaco/README.md)
     - [Osd opensearch](../packages/osd-opensearch/README.md)
     - [Osd optimizer](../packages/osd-optimizer/README.md)
@@ -213,6 +214,8 @@
     - [Opensearch dashboards.release notes 3.4.0](../release-notes/opensearch-dashboards.release-notes-3.4.0.md)
     - [Opensearch dashboards.release notes 3.5.0](../release-notes/opensearch-dashboards.release-notes-3.5.0.md)
   - scripts
+    - ci
+      - [MFE_SMOKE](../scripts/ci/MFE_SMOKE.md)
     - [README](../scripts/README.md)
   - [DOCS_README](DOCS_README.md)
   - [Theme](theme.md)

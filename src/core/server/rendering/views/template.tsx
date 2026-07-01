@@ -137,6 +137,29 @@ export const Template: FunctionComponent<Props> = ({
         <Fonts url={uiPublicUrl} nonce={nonce} />
         <meta name="add-fonts-here" />
 
+        {/*
+          Phase 16 Story 6: when MFE is enabled AND the resolved v3 registry
+          advertises per-theme CSS bundles, emit a `<meta name="osd-mfe-themes">`
+          tag carrying the resolved map (`{ <name>: { url, integrity? } }`).
+          `startup.js` reads this tag IMMEDIATELY after it executes — BEFORE
+          `bootstrap.js` runs — picks the active theme (from
+          `localStorage.uiSettings.theme:darkMode`, with the same fallbacks
+          the existing startup.js uses), and appends a `<link rel="stylesheet"
+          href=… integrity=… crossorigin="anonymous">` to `<head>`. By the
+          time bootstrap_mfe's `styleSheetPaths` resolves, the theme CSS is
+          already in `<head>` (no FOUC, no double-fetch). The bootstrap shim
+          OMITS its legacy `${basePath}/ui/legacy_<name>_theme.css` entry
+          when `window.__osdMfe__.themes` is set, and the legacy `/ui/...`
+          route on this origin is 404'd by `optimize_mixin.ts` for any theme
+          name the registry knows. Absent ⇒ this META is NOT emitted ⇒ the
+          legacy same-origin path is preserved verbatim (no-flag :5601 stays
+          byte-for-byte unchanged because the `mfe` branch above never
+          fires off-flag).
+        */}
+        {injectedMetadata.mfe?.themes && (
+          <meta name="osd-mfe-themes" content={JSON.stringify(injectedMetadata.mfe.themes)} />
+        )}
+
         <script src={startupScriptUrl} />
       </head>
       <body>

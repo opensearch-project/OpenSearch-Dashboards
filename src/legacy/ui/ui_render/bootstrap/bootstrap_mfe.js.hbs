@@ -1,0 +1,369 @@
+var osdCsp = JSON.parse(document.querySelector('osd-csp').getAttribute('data'));
+window.__osdStrictCsp__ = osdCsp.strictCsp;
+window.__osdPublicPath__ = {{publicPathMap}};
+window.__osdBundles__ = {{osdBundlesLoaderSource}}
+window.__webpack_nonce__ = (function() {
+  var meta = document.querySelector('meta[name="csp-nonce"]');
+  return meta ? meta.getAttribute('content') : '';
+})();
+
+// Intercept dynamically created style elements to add CSP nonce
+// This handles third-party libraries (like nano-css from react-use, brace/ace editor)
+// that create style elements without using webpack's style-loader nonce mechanism
+(function() {
+  if (!window.__webpack_nonce__) return;
+
+  var nonce = window.__webpack_nonce__;
+
+  // Patch document.createElement
+  var originalCreateElement = document.createElement.bind(document);
+  document.createElement = function(tagName, options) {
+    var element = originalCreateElement(tagName, options);
+    if (tagName.toLowerCase() === 'style') {
+      element.setAttribute('nonce', nonce);
+    }
+    return element;
+  };
+
+  // Patch document.createElementNS (used by brace/ace editor)
+  var originalCreateElementNS = document.createElementNS.bind(document);
+  document.createElementNS = function(namespaceURI, qualifiedName) {
+    var element = originalCreateElementNS(namespaceURI, qualifiedName);
+    if (qualifiedName.toLowerCase() === 'style') {
+      element.setAttribute('nonce', nonce);
+    }
+    return element;
+  };
+})();
+
+if (window.__osdStrictCsp__ && window.__osdCspNotEnforced__) {
+  var legacyBrowserError = document.getElementById('osd_legacy_browser_error');
+  legacyBrowserError.style.display = 'flex';
+} else {
+  var themeCssDistFilenames = {{THEME_CSS_DIST_FILENAMES}};
+  var kuiCssDistFilenames = {{KUI_CSS_DIST_FILENAMES}};
+
+  var isDarkMode = window.__osdThemeTag__.endsWith('dark');
+  var themeMode = isDarkMode ? 'dark' : 'light';
+  var themeVersion = window.__osdThemeTag__.replace(/(light|dark)$/, '');
+  if (!themeCssDistFilenames[themeVersion]) {
+    themeVersion = 'v8'; // this default should only be needed by tests
+  }
+
+  var loadingMessage = document.getElementById('osd_loading_message');
+  loadingMessage.style.display = 'flex';
+
+  // Phase 16 Story 7: the FIRST `styleSheetPaths` entry — the base
+  // `osd-ui-shared-deps.css` — is conditionally replaced by a registry-
+  // managed CDN URL with SRI when the source v3 doc advertises a
+  // `sharedDepsCss` top-level field. We pre-compute the entry as either a
+  // plain string (legacy same-origin) or an object `{ url, integrity }`
+  // (CDN+SRI); the `load()` / `loadStyleSheet` chain below handles BOTH
+  // shapes (the object dispatch is the same shape used by `mfeOrchestrator`
+  // for scripts — preserving the "one entry kind per element" invariant of
+  // the loader array). The legacy bundles route on this origin 404s the
+  // same path via the `mfeSharedDepsCssRefuser` predicate in
+  // `optimize_mixin.ts` whenever this descriptor is set — so a
+  // misconfigured browser can never silently fall back to an un-SRI'd
+  // same-origin copy. On v1/v2 (or v3 without `sharedDepsCss`), the
+  // descriptor is `null` and we keep the legacy entry verbatim —
+  // byte-for-byte unchanged backward-compat.
+  var resolvedMfeSharedDepsCss = {{{mfeSharedDepsCss}}};
+  var sharedDepsCssEntry;
+  if (resolvedMfeSharedDepsCss && typeof resolvedMfeSharedDepsCss === 'object' && typeof resolvedMfeSharedDepsCss.url === 'string') {
+    sharedDepsCssEntry = { url: resolvedMfeSharedDepsCss.url, integrity: resolvedMfeSharedDepsCss.integrity };
+  } else {
+    sharedDepsCssEntry = '{{regularBundlePath}}/osd-ui-shared-deps/{{UiSharedDeps.baseCssDistFilename}}';
+  }
+
+  var styleSheetPaths = [
+    sharedDepsCssEntry,
+    '{{regularBundlePath}}/osd-ui-shared-deps/' + themeCssDistFilenames[themeVersion][themeMode],
+    '{{basePath}}/node_modules/@osd/ui-framework/dist/' + kuiCssDistFilenames[themeVersion][themeMode],
+  ];
+
+  // Phase 16 Story 6: the legacy `${basePath}/ui/legacy_<themeMode>_theme.css`
+  // entry is INCLUDED only when the registry did NOT advertise a CDN replacement
+  // for the active theme. When the server-rendered `<meta name="osd-mfe-themes">`
+  // tag carried a `themes[themeMode]` descriptor, `startup.js` ALREADY loaded the
+  // theme CSS from the CDN URL (with SRI) BEFORE this shim ran — appending the
+  // legacy entry here would cause a double-fetch + the legacy route is also 404'd
+  // by `optimize_mixin.ts`'s refuser, so the request would fail anyway.
+  //
+  // `mfeThemes` is the SERVER-RESOLVED descriptor (mirrored into
+  // `__osdMfe__.themes` below); on v1/v2 registries (or v3 without `themes`) it
+  // is `null` and the legacy entry is kept verbatim — byte-for-byte unchanged
+  // backward-compat. The `themeMode`-key check is intentional: if a deployment
+  // advertises ONLY `light` (no `dark`), and a user has dark mode selected, we
+  // still serve the legacy `legacy_dark_theme.css` from this origin (the
+  // refuser only 404s theme names the registry ACTUALLY knows; partial
+  // coverage degrades cleanly rather than blanking the page).
+  var resolvedMfeThemes = {{{mfeThemes}}};
+  if (!(resolvedMfeThemes && typeof resolvedMfeThemes === 'object' && resolvedMfeThemes[themeMode])) {
+    styleSheetPaths.push('{{basePath}}/ui/legacy_' + themeMode + '_theme.css');
+  }
+
+  // MFE mode (Phase 3, see docs/01-MFE-DESIGN.md §6). The injected metadata carries the
+  // serve-time registry source + shared-deps URLs that the MFE bootstrap consumes.
+  window.__osdMfe__ = {
+    registryUrl: '{{mfeRegistryUrl}}',
+    sharedDepsUrl: '{{mfeSharedDepsUrl}}',
+    sharedDepsDepUrls: {{{mfeSharedDepsDepUrls}}},
+    {{!-- Non-prod security gate (§7): a boolean injected by the server. When
+          false (production default), the bootstrap IGNORES every override
+          source so no override URL can load arbitrary remote code. --}}
+    allowOverride: {{mfeAllowOverride}},
+    {{!-- Phase 9 version-compatibility contract: the resolved env-keyed policy
+          (onIncompatible/onMissing/strictShared) and the running host environment
+          (OSD core version + shared-singleton ranges) the bootstrap classifies
+          each remote against. Raw JSON ({{{ }}} = unescaped). --}}
+    compatPolicy: {{{mfeCompatPolicy}}},
+    host: {{{mfeHostEnv}}},
+    {{!-- Phase 12 Story 4: registry AUTHENTICITY. The host-held HMAC verification
+          material (key + keyId + algorithm), or null when signing is off. Delivered
+          by THIS trusted OSD origin (not the CDN), so the bootstrap can verify the
+          fetched registry's signature and fail closed on a tampered/unsigned one.
+          Raw JSON ({{{ }}} = unescaped). --}}
+    registryVerification: {{{mfeRegistryVerification}}},
+    {{!-- Phase 13 Story 3: server-resolved boot manifest. When non-null, the
+          bootstrap consumes it DIRECTLY and skips the /registry HTTP fetch +
+          signature verification path entirely (verify_phase13 case G). The
+          server has already resolved the v2 registry against this request's
+          dimensions (customerId from server config; userBucket from the sticky
+          HttpOnly bucket cookie); the browser never sees the v2 doc. Raw JSON
+          ({{{ }}} = unescaped). --}}
+    bootManifest: {{{mfeBootManifest}}},
+    {{!-- Phase 14 Story 1: load-telemetry sink + dimensions. The endpoint is the
+          POST target for the structured load events (empty = SILENT no-op); the
+          dimensions (bucket 0..99 from the cookie hash, customerId from server
+          config) are stamped on every emitted event. All three are JSON literals
+          (numbers / strings) so they are safe to inline without extra escaping. --}}
+    telemetryEndpoint: {{{mfeTelemetryEndpoint}}},
+    customerId: {{{mfeCustomerId}}},
+    bucket: {{mfeUserBucket}},
+    {{!-- Phase 16 Story 3: registry-managed orchestrator (osd_bootstrap_mfe.js).
+          When the source registry is v3 AND advertises an `orchestrator` top-
+          level field, the boot-manifest resolver projects it as
+          `{ url, integrity? }` (no `version` — that is registry-side metadata,
+          not consumed by the loader). The thin shim below loads the orchestrator
+          script from this URL with the SRI `integrity` attribute pinned
+          (Phase 12 fail-closed posture extended to the orchestrator). When
+          absent (v1/v2 registries, or v3 without the field), this is `null`
+          and the shim falls back to the server-config `mfeBootstrapUrl` —
+          backward-compat at every consumption site. Raw JSON ({{{ }}} =
+          unescaped). --}}
+    orchestrator: {{{mfeOrchestrator}}},
+    {{!-- Phase 16 Story 5: registry-managed OSD core entry (core.entry.js).
+          When the source registry is v3 AND advertises a `core` top-level
+          field, the boot-manifest resolver projects it as
+          `{ url, integrity? }` and the thin shim below OMITS the legacy
+          `/bundles/core/core.entry.js` preload — the orchestrator (loaded
+          next) takes over and fetches core from this CDN URL with SRI
+          BEFORE invoking core boot. A tampered core fails closed: the
+          orchestrator's `loadScript` rejects, `__osdBootstrapMfe__` throws,
+          the failure() handler fires, and `invokeCoreBootstrap` is NEVER
+          called. When absent (v1/v2 registries, or v3 without the field),
+          this is `null` and the legacy preload-from-server path remains
+          byte-for-byte unchanged. Raw JSON ({{{ }}} = unescaped). --}}
+    core: {{{mfeCore}}},
+    {{!-- Phase 16 Story 6: registry-managed per-theme CSS bundles
+          (`legacy_<name>_theme.css`). When the source registry is v3 AND
+          advertises a `themes` map, the boot-manifest resolver projects
+          it as `Record<string, { url, integrity? }>` and `startup.js`
+          (rendered by the server) ALREADY loaded the active theme via
+          `<meta name="osd-mfe-themes">` BEFORE this shim ran (with SRI;
+          cross-origin; fail-closed on tamper). The thin shim's
+          `styleSheetPaths` above OMITS its legacy
+          `${basePath}/ui/legacy_<themeMode>_theme.css` entry whenever
+          this descriptor knows about the active theme name (to avoid a
+          double-fetch — `optimize_mixin.ts`'s refuser also 404s the
+          legacy route on this origin for any theme the registry advertises).
+          When absent (v1/v2 registries, or v3 without the field), this
+          stays `null` and the legacy same-origin path is kept — byte-for-
+          byte unchanged backward-compat. Raw JSON ({{{ }}} = unescaped). --}}
+    themes: {{{mfeThemes}}},
+    {{!-- Phase 16 Story 7: registry-managed base `osd-ui-shared-deps.css`
+          (singular — one URL per registry, unlike `themes`). When the
+          source registry is v3 AND advertises a `sharedDepsCss` top-
+          level field, the boot manifest carries a `{ url, integrity? }`
+          descriptor and the thin shim's `styleSheetPaths` (above) USES
+          that URL with SRI (object form; `crossorigin="anonymous"`)
+          instead of the legacy
+          `${regularBundlePath}/osd-ui-shared-deps/osd-ui-shared-deps.css`
+          same-origin path. The legacy bundle route on this origin also
+          404s the file (the `mfeSharedDepsCssRefuser` predicate in
+          `optimize_mixin.ts`), so a misconfigured browser can never
+          silently fall back to an un-SRI'd same-origin copy. On v1/v2
+          (or v3 without the field), this stays `null` and the thin
+          shim keeps the legacy path — byte-for-byte unchanged
+          backward-compat. Raw JSON ({{{ }}} = unescaped). --}}
+    sharedDepsCss: {{{mfeSharedDepsCss}}},
+  };
+
+  window.onload = function () {
+    function failure() {
+      // make subsequent calls to failure() noop
+      failure = function () {};
+
+      var err = document.createElement('h1');
+      err.style['color'] = 'white';
+      err.style['font-family'] = 'monospace';
+      err.style['text-align'] = 'center';
+      err.style['background'] = '#F44336';
+      err.style['padding'] = '25px';
+      err.innerText = document.querySelector('[data-error-message]').dataset.errorMessage;
+
+      document.body.innerHTML = err.outerHTML;
+    }
+
+    var stylesheetTarget = document.querySelector('head meta[name="add-styles-here"]')
+    function loadStyleSheet(url, cb, integrity) {
+      var dom = document.createElement('link');
+      dom.rel = 'stylesheet';
+      dom.type = 'text/css';
+      dom.href = url;
+      {{!-- Phase 16 Story 7: when the caller advertises an `integrity`
+            attribute (cross-origin registry-managed CSS, e.g. the base
+            `osd-ui-shared-deps.css` from CDN with SRI), pin the SRI
+            hash. Browsers REQUIRE `crossorigin` on the <link> tag for
+            SRI to apply to a cross-origin response. The default loader
+            path passes no integrity (`undefined`), so this branch is
+            no-op for the legacy same-origin server-bundled stylesheet
+            paths — preserving byte-for-byte HTML output on the no-flag
+            path. Symmetric with `loadScript`'s integrity branch (added
+            in Phase 16 Story 3 for the orchestrator). --}}
+      if (typeof integrity === 'string' && integrity.length > 0) {
+        dom.integrity = integrity;
+        dom.crossOrigin = 'anonymous';
+      }
+      dom.addEventListener('error', failure);
+      dom.addEventListener('load', cb);
+      document.head.insertBefore(dom, stylesheetTarget);
+    }
+
+    var scriptsTarget = document.querySelector('head meta[name="add-scripts-here"]')
+    function loadScript(url, cb, integrity) {
+      var dom = document.createElement('script');
+      {{!-- NOTE: async = false is used to trigger async-download/ordered-execution as outlined here: https://www.html5rocks.com/en/tutorials/speed/script-loading/ --}}
+      dom.async = false;
+      dom.src = url;
+      {{!-- Phase 16 Story 3: when the caller advertises an `integrity`
+            attribute (cross-origin registry-managed asset, e.g. the
+            orchestrator from CDN with SRI), pin the SRI hash. Browsers
+            REQUIRE `crossorigin` on the <script> tag for SRI to apply to
+            a cross-origin response. The default loader path passes no
+            integrity (`undefined`), so this branch is no-op for the legacy
+            same-origin server-bundled paths — preserving byte-for-byte
+            HTML output on the no-flag path. --}}
+      if (typeof integrity === 'string' && integrity.length > 0) {
+        dom.integrity = integrity;
+        dom.crossOrigin = 'anonymous';
+      }
+      dom.addEventListener('error', failure);
+      dom.addEventListener('load', cb);
+      document.head.insertBefore(dom, scriptsTarget);
+    }
+
+    function load(urls, cb) {
+      var pending = urls.length;
+      urls.forEach(function (url) {
+        var innerCb = function () {
+          pending = pending - 1;
+          if (pending === 0 && typeof cb === 'function') {
+            cb();
+          }
+        }
+
+        if (typeof url !== 'string' && url && typeof url === 'object' && !Array.isArray(url) && typeof url.url === 'string') {
+          {{!-- Phase 16 Story 3 + Story 7: an entry can be either a plain
+                string URL (legacy path, server-bundled assets — most
+                entries) OR an object `{ url, integrity? }` for a
+                registry-managed asset with SRI. We dispatch on the
+                shape so callers can mix the two in the same
+                `load([...])` array — the orchestrator (Story 3) and
+                the base shared-deps CSS (Story 7) take the object form
+                when v3 advertises them, every other entry stays a
+                string. The CSS branch passes `url.integrity` to
+                `loadStyleSheet` so the `<link>` element pins SRI +
+                `crossorigin="anonymous"` (symmetric with the script
+                branch). --}}
+          if (url.url.slice(-4) === '.css') {
+            loadStyleSheet(url.url, innerCb, url.integrity);
+          } else {
+            loadScript(url.url, innerCb, url.integrity);
+          }
+        } else if (typeof url !== 'string') {
+          load(url, innerCb);
+        } else if (url.slice(-4) === '.css') {
+          loadStyleSheet(url, innerCb);
+        } else {
+          loadScript(url, innerCb);
+        }
+      });
+    }
+
+    {{!--
+      MFE mode load sequence (LOCKED, design §6; Phase 16 Story 3 + Story 5
+      extensions):
+        1. Load core.entry.js (server-provided) so `entry/core/public` is registered
+           into the __osdBundles__ shim. Its app code does not run until
+           __osdBootstrap__() is invoked, so it is safe to load before shared deps.
+           Phase 16 Story 5: this preload is CONDITIONAL — when the source
+           registry is v3 AND advertises a `core` field, the server omits this
+           entry from `jsDependencyPaths` and the orchestrator (loaded in step
+           2) takes over: bootstrapMfe() fetches `core.entry.js` from the CDN
+           URL with SRI BEFORE invoking core boot. A tampered core fails
+           closed in that path (the orchestrator's loadScript rejects;
+           __osdBootstrap__ is never called). Either way, by the time step 4
+           runs, `entry/core/public` is registered exactly once.
+        2. Load the MFE bootstrap bundle (the "orchestrator"), which exposes
+           window.__osdBootstrapMfe__. Phase 16 Story 3: when the source
+           registry is v3 AND advertises an `orchestrator` field, the loader
+           uses that URL with SRI (fail-closed: a tampered orchestrator
+           refuses to execute, the chunk-error surface fires). Otherwise the
+           loader falls back to the server-config `mfeBootstrapUrl` — same
+           behavior as Phase 13.
+        3. Invoke __osdBootstrapMfe__: it loads shared deps (origin) and seeds the MF
+           share scope, fetches the CURRENT registry at serve time, loads every plugin
+           remote and registers it as `plugin/<id>/public` in the shim, THEN runs core
+           __osdBootstrap__() — so plugin_reader resolves plugins synchronously, UNCHANGED.
+      NOTE: local plugin jsDependencyPaths are intentionally OMITTED in this mode.
+    --}}
+    var orchestratorEntry = (window.__osdMfe__.orchestrator && typeof window.__osdMfe__.orchestrator.url === 'string')
+      ? { url: window.__osdMfe__.orchestrator.url, integrity: window.__osdMfe__.orchestrator.integrity }
+      : '{{mfeBootstrapUrl}}';
+    load([
+      {{#each jsDependencyPaths}}
+        '{{this}}',
+      {{/each}}
+      orchestratorEntry,
+    ], function () {
+      window.__osdBootstrapMfe__({
+        registryUrl: window.__osdMfe__.registryUrl,
+        bootManifest: window.__osdMfe__.bootManifest,
+        sharedDepsUrl: window.__osdMfe__.sharedDepsUrl,
+        sharedDepsDepUrls: window.__osdMfe__.sharedDepsDepUrls,
+        allowOverride: window.__osdMfe__.allowOverride,
+        compatPolicy: window.__osdMfe__.compatPolicy,
+        host: window.__osdMfe__.host,
+        registryVerification: window.__osdMfe__.registryVerification,
+        // Phase 14 Story 1: thread the telemetry sink + dimensions through to
+        // the bootstrap so it can construct the fire-and-forget dispatcher and
+        // stamp every event with the bucket+customerId pre-partition.
+        telemetryEndpoint: window.__osdMfe__.telemetryEndpoint,
+        bucket: window.__osdMfe__.bucket,
+        customerId: window.__osdMfe__.customerId,
+        // Phase 16 Story 5: when v3 registry advertised a `core` descriptor,
+        // pass it to the orchestrator so bootstrapMfe() can load core.entry.js
+        // from the CDN URL (with SRI) BEFORE invoking core boot. When absent,
+        // the thin shim's preload above already loaded the legacy
+        // server-bundled core entry, and this option is `undefined` — the
+        // orchestrator's pre-coreBoot load is a no-op and the existing flow
+        // is byte-for-byte unchanged.
+        core: window.__osdMfe__.core,
+      });
+
+      load(styleSheetPaths);
+    });
+  }
+}

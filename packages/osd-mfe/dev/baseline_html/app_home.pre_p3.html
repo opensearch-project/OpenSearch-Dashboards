@@ -1,0 +1,630 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/><meta name="viewport" content="width=device-width"/><meta name="csp-nonce" content="H2qVsCfJeEzXhbUu3wOJvg=="/><title>OpenSearch Dashboards</title><link rel="apple-touch-icon" sizes="180x180" href="/ui/favicons/apple-touch-icon.png"/><link rel="icon" type="image/png" sizes="32x32" href="/ui/favicons/favicon-32x32.png"/><link rel="icon" type="image/png" sizes="16x16" href="/ui/favicons/favicon-16x16.png"/><link rel="manifest" href="/ui/favicons/manifest.json"/><link rel="mask-icon" color="#003553" href="/ui/favicons/safari-pinned-tab.svg"/><link rel="shortcut icon" href="/ui/favicons/favicon.ico"/><meta name="msapplication-config" content="/ui/favicons/browserconfig.xml"/><style nonce="H2qVsCfJeEzXhbUu3wOJvg==">
+          *, *:before, *:after {
+            box-sizing: border-box;
+          }
+
+          html, body, div, span, svg {
+            margin: 0;
+            padding: 0;
+            border: none;
+            vertical-align: baseline;
+          }
+
+          body, html {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            display: block;
+          }
+
+          {/* used on loading page */}
+          .osdWelcomeView {
+            line-height: 1.5;
+            height: 100%;
+            display: -webkit-box;
+            display: -webkit-flex;
+            display: -ms-flexbox;
+            display: flex;
+            -webkit-box-flex: 1;
+            -webkit-flex: 1 0 auto;
+                -ms-flex: 1 0 auto;
+                    flex: 1 0 auto;
+            -webkit-box-orient: vertical;
+            -webkit-box-direction: normal;
+            -webkit-flex-direction: column;
+                -ms-flex-direction: column;
+                    flex-direction: column;
+            -webkit-box-align: center;
+            -webkit-align-items: center;
+                -ms-flex-align: center;
+                    align-items: center;
+            -webkit-box-pack: center;
+            -webkit-justify-content: center;
+                -ms-flex-pack: center;
+                    justify-content: center;
+          }
+
+          .legacyBrowserErrorLogo {
+            height: 64px;
+          }
+
+          .osdWelcomeTitle {
+            font-size: 20px;
+            margin: 16px 0;
+            animation: fadeIn 1s ease-in-out;
+            animation-fill-mode: forwards;
+            opacity: 0;
+            animation-delay: 1.0s;
+          }
+
+          .osdWelcomeText {
+            display: inline-block;
+            font-size: 14px;
+            line-height: 40px !important;
+            height: 40px !important;
+          }
+
+          .osdLoaderWrap {
+            text-align: center;
+            line-height: 1;
+            text-align: center;
+            letter-spacing: -.005em;
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+            font-kerning: normal;
+            font-weight: 400;
+          }
+
+          .osdLoaderWrap svg {
+            width: 64px;
+            height: 64px;
+            margin: auto;
+            line-height: 1;
+          }
+
+          .osdLoader path {
+            stroke: white;
+          }
+
+          .osdProgress {
+            display: inline-block;
+            position: relative;
+            width: 32px;
+            height: 4px;
+            overflow: hidden;
+            line-height: 1;
+          }
+
+          .osdProgress:before {
+            position: absolute;
+            content: '';
+            height: 4px;
+            width: 100%;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            transform: scaleX(0) translateX(0%);
+            animation: osdProgress 1s cubic-bezier(.694, .0482, .335, 1) infinite;
+          }
+
+          .loadingLogoContainer {
+            height: 80px;
+            padding: 8px;
+          }
+
+          .loadingLogo {
+            height: 100%;
+            max-width: 100%;
+          }
+
+          .darkOnly, .lightOnly {
+            display: none;
+          }
+
+          @keyframes osdProgress {
+            0% {
+              transform: scaleX(1) translateX(-100%);
+            }
+
+            100% {
+              transform: scaleX(1) translateX(100%);
+            }
+          }
+        </style><meta name="add-styles-here"/><meta name="add-scripts-here"/><style nonce="H2qVsCfJeEzXhbUu3wOJvg==">
+        
+        @font-face {
+          font-family: 'Inter UI';
+          font-style: normal;
+          font-weight: 100;
+          src: url('/ui/fonts/inter_ui/Inter-UI-Thin-BETA.woff2') format('woff2'), url('/ui/fonts/inter_ui/Inter-UI-Thin-BETA.woff') format('woff');
+          
+        }
+
+        @font-face {
+          font-family: 'Inter UI';
+          font-style: italic;
+          font-weight: 100;
+          src: url('/ui/fonts/inter_ui/Inter-UI-ThinItalic-BETA.woff2') format('woff2'), url('/ui/fonts/inter_ui/Inter-UI-ThinItalic-BETA.woff') format('woff');
+          
+        }
+
+        @font-face {
+          font-family: 'Inter UI';
+          font-style: normal;
+          font-weight: 200;
+          src: url('/ui/fonts/inter_ui/Inter-UI-ExtraLight-BETA.woff2') format('woff2'), url('/ui/fonts/inter_ui/Inter-UI-ExtraLight-BETA.woff') format('woff');
+          
+        }
+
+        @font-face {
+          font-family: 'Inter UI';
+          font-style: italic;
+          font-weight: 200;
+          src: url('/ui/fonts/inter_ui/Inter-UI-ExtraLightItalic-BETA.woff2') format('woff2'), url('/ui/fonts/inter_ui/Inter-UI-ExtraLightItalic-BETA.woff') format('woff');
+          
+        }
+
+        @font-face {
+          font-family: 'Inter UI';
+          font-style: normal;
+          font-weight: 300;
+          src: url('/ui/fonts/inter_ui/Inter-UI-Light-BETA.woff2') format('woff2'), url('/ui/fonts/inter_ui/Inter-UI-Light-BETA.woff') format('woff');
+          
+        }
+
+        @font-face {
+          font-family: 'Inter UI';
+          font-style: italic;
+          font-weight: 300;
+          src: url('/ui/fonts/inter_ui/Inter-UI-LightItalic-BETA.woff2') format('woff2'), url('/ui/fonts/inter_ui/Inter-UI-LightItalic-BETA.woff') format('woff');
+          
+        }
+
+        @font-face {
+          font-family: 'Inter UI';
+          font-style: normal;
+          font-weight: 400;
+          src: url('/ui/fonts/inter_ui/Inter-UI-Regular.woff2') format('woff2'), url('/ui/fonts/inter_ui/Inter-UI-Regular.woff') format('woff');
+          
+        }
+
+        @font-face {
+          font-family: 'Inter UI';
+          font-style: italic;
+          font-weight: 400;
+          src: url('/ui/fonts/inter_ui/Inter-UI-Italic.woff2') format('woff2'), url('/ui/fonts/inter_ui/Inter-UI-Italic.woff') format('woff');
+          
+        }
+
+        @font-face {
+          font-family: 'Inter UI';
+          font-style: normal;
+          font-weight: 500;
+          src: url('/ui/fonts/inter_ui/Inter-UI-Medium.woff2') format('woff2'), url('/ui/fonts/inter_ui/Inter-UI-Medium.woff') format('woff');
+          
+        }
+
+        @font-face {
+          font-family: 'Inter UI';
+          font-style: italic;
+          font-weight: 500;
+          src: url('/ui/fonts/inter_ui/Inter-UI-MediumItalic.woff2') format('woff2'), url('/ui/fonts/inter_ui/Inter-UI-MediumItalic.woff') format('woff');
+          
+        }
+
+        @font-face {
+          font-family: 'Inter UI';
+          font-style: normal;
+          font-weight: 600;
+          src: url('/ui/fonts/inter_ui/Inter-UI-SemiBold.woff2') format('woff2'), url('/ui/fonts/inter_ui/Inter-UI-SemiBold.woff') format('woff');
+          
+        }
+
+        @font-face {
+          font-family: 'Inter UI';
+          font-style: italic;
+          font-weight: 600;
+          src: url('/ui/fonts/inter_ui/Inter-UI-SemiBoldItalic.woff2') format('woff2'), url('/ui/fonts/inter_ui/Inter-UI-SemiBoldItalic.woff') format('woff');
+          
+        }
+
+        @font-face {
+          font-family: 'Inter UI';
+          font-style: normal;
+          font-weight: 700;
+          src: url('/ui/fonts/inter_ui/Inter-UI-Bold.woff2') format('woff2'), url('/ui/fonts/inter_ui/Inter-UI-Bold.woff') format('woff');
+          
+        }
+
+        @font-face {
+          font-family: 'Inter UI';
+          font-style: italic;
+          font-weight: 700;
+          src: url('/ui/fonts/inter_ui/Inter-UI-BoldItalic.woff2') format('woff2'), url('/ui/fonts/inter_ui/Inter-UI-BoldItalic.woff') format('woff');
+          
+        }
+
+        @font-face {
+          font-family: 'Inter UI';
+          font-style: normal;
+          font-weight: 800;
+          src: url('/ui/fonts/inter_ui/Inter-UI-ExtraBold.woff2') format('woff2'), url('/ui/fonts/inter_ui/Inter-UI-ExtraBold.woff') format('woff');
+          
+        }
+
+        @font-face {
+          font-family: 'Inter UI';
+          font-style: italic;
+          font-weight: 800;
+          src: url('/ui/fonts/inter_ui/Inter-UI-ExtraBoldItalic.woff2') format('woff2'), url('/ui/fonts/inter_ui/Inter-UI-ExtraBoldItalic.woff') format('woff');
+          
+        }
+
+        @font-face {
+          font-family: 'Inter UI';
+          font-style: normal;
+          font-weight: 900;
+          src: url('/ui/fonts/inter_ui/Inter-UI-Black.woff2') format('woff2'), url('/ui/fonts/inter_ui/Inter-UI-Black.woff') format('woff');
+          
+        }
+
+        @font-face {
+          font-family: 'Inter UI';
+          font-style: italic;
+          font-weight: 900;
+          src: url('/ui/fonts/inter_ui/Inter-UI-BlackItalic.woff2') format('woff2'), url('/ui/fonts/inter_ui/Inter-UI-BlackItalic.woff') format('woff');
+          
+        }
+
+        @font-face {
+          font-family: 'Source Sans 3';
+          font-style: normal;
+          font-weight: 200;
+          src: url('/ui/fonts/source_sans_3/SourceSans3-ExtraLight.ttf.woff2') format('woff2'), url('/ui/fonts/source_sans_3/SourceSans3-ExtraLight.otf.woff') format('woff');
+          
+        }
+
+        @font-face {
+          font-family: 'Source Sans 3';
+          font-style: italic;
+          font-weight: 200;
+          src: url('/ui/fonts/source_sans_3/SourceSans3-ExtraLightIt.ttf.woff2') format('woff2'), url('/ui/fonts/source_sans_3/SourceSans3-ExtraLightIt.otf.woff') format('woff');
+          
+        }
+
+        @font-face {
+          font-family: 'Source Sans 3';
+          font-style: normal;
+          font-weight: 300;
+          src: url('/ui/fonts/source_sans_3/SourceSans3-Light.ttf.woff2') format('woff2'), url('/ui/fonts/source_sans_3/SourceSans3-Light.otf.woff') format('woff');
+          
+        }
+
+        @font-face {
+          font-family: 'Source Sans 3';
+          font-style: italic;
+          font-weight: 300;
+          src: url('/ui/fonts/source_sans_3/SourceSans3-LightIt.ttf.woff2') format('woff2'), url('/ui/fonts/source_sans_3/SourceSans3-LightIt.otf.woff') format('woff');
+          
+        }
+
+        @font-face {
+          font-family: 'Source Sans 3';
+          font-style: normal;
+          font-weight: 400;
+          src: url('/ui/fonts/source_sans_3/SourceSans3-Regular.ttf.woff2') format('woff2'), url('/ui/fonts/source_sans_3/SourceSans3-Regular.otf.woff') format('woff');
+          
+        }
+
+        @font-face {
+          font-family: 'Source Sans 3';
+          font-style: italic;
+          font-weight: 400;
+          src: url('/ui/fonts/source_sans_3/SourceSans3-It.ttf.woff2') format('woff2'), url('/ui/fonts/source_sans_3/SourceSans3-It.otf.woff') format('woff');
+          
+        }
+
+        @font-face {
+          font-family: 'Source Sans 3';
+          font-style: normal;
+          font-weight: 600;
+          src: url('/ui/fonts/source_sans_3/SourceSans3-Semibold.ttf.woff2') format('woff2'), url('/ui/fonts/source_sans_3/SourceSans3-Semibold.otf.woff') format('woff');
+          
+        }
+
+        @font-face {
+          font-family: 'Source Sans 3';
+          font-style: italic;
+          font-weight: 600;
+          src: url('/ui/fonts/source_sans_3/SourceSans3-SemiboldIt.ttf.woff2') format('woff2'), url('/ui/fonts/source_sans_3/SourceSans3-SemiboldIt.otf.woff') format('woff');
+          
+        }
+
+        @font-face {
+          font-family: 'Source Sans 3';
+          font-style: normal;
+          font-weight: 700;
+          src: url('/ui/fonts/source_sans_3/SourceSans3-Bold.ttf.woff2') format('woff2'), url('/ui/fonts/source_sans_3/SourceSans3-Bold.otf.woff') format('woff');
+          
+        }
+
+        @font-face {
+          font-family: 'Source Sans 3';
+          font-style: italic;
+          font-weight: 700;
+          src: url('/ui/fonts/source_sans_3/SourceSans3-BoldIt.ttf.woff2') format('woff2'), url('/ui/fonts/source_sans_3/SourceSans3-BoldIt.otf.woff') format('woff');
+          
+        }
+
+        @font-face {
+          font-family: 'Source Sans 3';
+          font-style: normal;
+          font-weight: 900;
+          src: url('/ui/fonts/source_sans_3/SourceSans3-Black.ttf.woff2') format('woff2'), url('/ui/fonts/source_sans_3/SourceSans3-Black.otf.woff') format('woff');
+          
+        }
+
+        @font-face {
+          font-family: 'Source Sans 3';
+          font-style: italic;
+          font-weight: 900;
+          src: url('/ui/fonts/source_sans_3/SourceSans3-BlackIt.ttf.woff2') format('woff2'), url('/ui/fonts/source_sans_3/SourceSans3-BlackIt.otf.woff') format('woff');
+          
+        }
+
+        @font-face {
+          font-family: 'Roboto Mono';
+          font-style: normal;
+          font-weight: 400;
+          src: local('Roboto Mono'), local('RobotoMono-Regular'), url('/ui/fonts/roboto_mono/RobotoMono-Regular.ttf') format('woff2');
+          unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+        }
+
+        @font-face {
+          font-family: 'Roboto Mono';
+          font-style: italic;
+          font-weight: 400;
+          src: local('Roboto Mono Italic'), local('RobotoMono-Italic'), url('/ui/fonts/roboto_mono/RobotoMono-Italic.ttf') format('ttf');
+          unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+        }
+
+        @font-face {
+          font-family: 'Roboto Mono';
+          font-style: normal;
+          font-weight: 700;
+          src: local('Roboto Mono Bold'), local('RobotoMono-Bold'), url('/ui/fonts/roboto_mono/RobotoMono-Bold.ttf') format('woff2');
+          unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+        }
+
+        @font-face {
+          font-family: 'Roboto Mono';
+          font-style: italic;
+          font-weight: 700;
+          src: local('Roboto Mono Bold Italic'), local('RobotoMono-BoldItalic'), url('/ui/fonts/roboto_mono/RobotoMono-BoldItalic.ttf') format('woff2');
+          unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+        }
+
+        @font-face {
+          font-family: 'Source Code Pro';
+          font-style: normal;
+          font-weight: 200;
+          src: url('/ui/fonts/source_code_pro/SourceCodePro-ExtraLight.ttf.woff2') format('woff2'), url('/ui/fonts/source_code_pro/SourceCodePro-ExtraLight.otf.woff') format('woff');
+          
+        }
+
+        @font-face {
+          font-family: 'Source Code Pro';
+          font-style: italic;
+          font-weight: 200;
+          src: url('/ui/fonts/source_code_pro/SourceCodePro-ExtraLightIt.ttf.woff2') format('woff2'), url('/ui/fonts/source_code_pro/SourceCodePro-ExtraLightIt.otf.woff') format('woff');
+          
+        }
+
+        @font-face {
+          font-family: 'Source Code Pro';
+          font-style: normal;
+          font-weight: 300;
+          src: url('/ui/fonts/source_code_pro/SourceCodePro-Light.ttf.woff2') format('woff2'), url('/ui/fonts/source_code_pro/SourceCodePro-Light.otf.woff') format('woff');
+          
+        }
+
+        @font-face {
+          font-family: 'Source Code Pro';
+          font-style: italic;
+          font-weight: 300;
+          src: url('/ui/fonts/source_code_pro/SourceCodePro-LightIt.ttf.woff2') format('woff2'), url('/ui/fonts/source_code_pro/SourceCodePro-LightIt.otf.woff') format('woff');
+          
+        }
+
+        @font-face {
+          font-family: 'Source Code Pro';
+          font-style: normal;
+          font-weight: 400;
+          src: url('/ui/fonts/source_code_pro/SourceCodePro-Regular.ttf.woff2') format('woff2'), url('/ui/fonts/source_code_pro/SourceCodePro-Regular.otf.woff') format('woff');
+          
+        }
+
+        @font-face {
+          font-family: 'Source Code Pro';
+          font-style: italic;
+          font-weight: 400;
+          src: url('/ui/fonts/source_code_pro/SourceCodePro-It.ttf.woff2') format('woff2'), url('/ui/fonts/source_code_pro/SourceCodePro-It.otf.woff') format('woff');
+          
+        }
+
+        @font-face {
+          font-family: 'Source Code Pro';
+          font-style: normal;
+          font-weight: 500;
+          src: url('/ui/fonts/source_code_pro/SourceCodePro-Medium.ttf.woff2') format('woff2'), url('/ui/fonts/source_code_pro/SourceCodePro-Medium.otf.woff') format('woff');
+          
+        }
+
+        @font-face {
+          font-family: 'Source Code Pro';
+          font-style: italic;
+          font-weight: 500;
+          src: url('/ui/fonts/source_code_pro/SourceCodePro-MediumIt.ttf.woff2') format('woff2'), url('/ui/fonts/source_code_pro/SourceCodePro-MediumIt.otf.woff') format('woff');
+          
+        }
+
+        @font-face {
+          font-family: 'Source Code Pro';
+          font-style: normal;
+          font-weight: 600;
+          src: url('/ui/fonts/source_code_pro/SourceCodePro-Semibold.ttf.woff2') format('woff2'), url('/ui/fonts/source_code_pro/SourceCodePro-Semibold.otf.woff') format('woff');
+          
+        }
+
+        @font-face {
+          font-family: 'Source Code Pro';
+          font-style: italic;
+          font-weight: 600;
+          src: url('/ui/fonts/source_code_pro/SourceCodePro-SemiboldIt.ttf.woff2') format('woff2'), url('/ui/fonts/source_code_pro/SourceCodePro-SemiboldIt.otf.woff') format('woff');
+          
+        }
+
+        @font-face {
+          font-family: 'Source Code Pro';
+          font-style: normal;
+          font-weight: 700;
+          src: url('/ui/fonts/source_code_pro/SourceCodePro-Bold.ttf.woff2') format('woff2'), url('/ui/fonts/source_code_pro/SourceCodePro-Bold.otf.woff') format('woff');
+          
+        }
+
+        @font-face {
+          font-family: 'Source Code Pro';
+          font-style: italic;
+          font-weight: 700;
+          src: url('/ui/fonts/source_code_pro/SourceCodePro-BoldIt.ttf.woff2') format('woff2'), url('/ui/fonts/source_code_pro/SourceCodePro-BoldIt.otf.woff') format('woff');
+          
+        }
+
+        @font-face {
+          font-family: 'Source Code Pro';
+          font-style: normal;
+          font-weight: 900;
+          src: url('/ui/fonts/source_code_pro/SourceCodePro-Black.ttf.woff2') format('woff2'), url('/ui/fonts/source_code_pro/SourceCodePro-Black.otf.woff') format('woff');
+          
+        }
+
+        @font-face {
+          font-family: 'Source Code Pro';
+          font-style: italic;
+          font-weight: 900;
+          src: url('/ui/fonts/source_code_pro/SourceCodePro-BlackIt.ttf.woff2') format('woff2'), url('/ui/fonts/source_code_pro/SourceCodePro-BlackIt.otf.woff') format('woff');
+          
+        }
+
+        @font-face {
+          font-family: 'Rubik';
+          font-style: normal;
+          font-weight: 300;
+          src: url('/ui/fonts/rubik/static/Rubik-Light.woff2') format('woff2');
+          
+        }
+
+        @font-face {
+          font-family: 'Rubik';
+          font-style: italic;
+          font-weight: 300;
+          src: url('/ui/fonts/rubik/static/Rubik-LightItalic.woff2') format('woff2');
+          
+        }
+
+        @font-face {
+          font-family: 'Rubik';
+          font-style: normal;
+          font-weight: 400;
+          src: url('/ui/fonts/rubik/static/Rubik-Regular.woff2') format('woff2');
+          
+        }
+
+        @font-face {
+          font-family: 'Rubik';
+          font-style: italic;
+          font-weight: 400;
+          src: url('/ui/fonts/rubik/static/Rubik-Italic.woff2') format('woff2');
+          
+        }
+
+        @font-face {
+          font-family: 'Rubik';
+          font-style: normal;
+          font-weight: 500;
+          src: url('/ui/fonts/rubik/static/Rubik-Medium.woff2') format('woff2');
+          
+        }
+
+        @font-face {
+          font-family: 'Rubik';
+          font-style: italic;
+          font-weight: 500;
+          src: url('/ui/fonts/rubik/static/Rubik-MediumItalic.woff2') format('woff2');
+          
+        }
+
+        @font-face {
+          font-family: 'Rubik';
+          font-style: normal;
+          font-weight: 600;
+          src: url('/ui/fonts/rubik/static/Rubik-SemiBold.woff2') format('woff2');
+          
+        }
+
+        @font-face {
+          font-family: 'Rubik';
+          font-style: italic;
+          font-weight: 600;
+          src: url('/ui/fonts/rubik/static/Rubik-SemiBoldItalic.woff2') format('woff2');
+          
+        }
+
+        @font-face {
+          font-family: 'Rubik';
+          font-style: normal;
+          font-weight: 700;
+          src: url('/ui/fonts/rubik/static/Rubik-Bold.woff2') format('woff2');
+          
+        }
+
+        @font-face {
+          font-family: 'Rubik';
+          font-style: italic;
+          font-weight: 700;
+          src: url('/ui/fonts/rubik/static/Rubik-BoldItalic.woff2') format('woff2');
+          
+        }
+
+        @font-face {
+          font-family: 'Rubik';
+          font-style: normal;
+          font-weight: 800;
+          src: url('/ui/fonts/rubik/static/Rubik-ExtraBold.woff2') format('woff2');
+          
+        }
+
+        @font-face {
+          font-family: 'Rubik';
+          font-style: italic;
+          font-weight: 800;
+          src: url('/ui/fonts/rubik/static/Rubik-ExtraBoldItalic.woff2') format('woff2');
+          
+        }
+
+        @font-face {
+          font-family: 'Rubik';
+          font-style: normal;
+          font-weight: 900;
+          src: url('/ui/fonts/rubik/static/Rubik-Black.woff2') format('woff2');
+          
+        }
+
+        @font-face {
+          font-family: 'Rubik';
+          font-style: italic;
+          font-weight: 900;
+          src: url('/ui/fonts/rubik/static/Rubik-BlackItalic.woff2') format('woff2');
+          
+        }
+      </style><meta name="add-fonts-here"/><script src="/startup.js"></script></head><body><osd-csp data="{&quot;strictCsp&quot;:false}"></osd-csp><osd-injected-metadata data="{&quot;version&quot;:&quot;3.5.0&quot;,&quot;buildNumber&quot;:9007199254740991,&quot;branch&quot;:&quot;main&quot;,&quot;basePath&quot;:&quot;&quot;,&quot;serverBasePath&quot;:&quot;&quot;,&quot;env&quot;:{&quot;mode&quot;:{&quot;dev&quot;:true,&quot;name&quot;:&quot;development&quot;,&quot;prod&quot;:false},&quot;packageInfo&quot;:{&quot;branch&quot;:&quot;main&quot;,&quot;buildNum&quot;:9007199254740991,&quot;buildSha&quot;:&quot;XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX&quot;,&quot;version&quot;:&quot;3.5.0&quot;,&quot;dist&quot;:false}},&quot;anonymousStatusPage&quot;:false,&quot;i18n&quot;:{&quot;translationsUrl&quot;:&quot;/translations/en.json&quot;},&quot;csp&quot;:{&quot;warnLegacyBrowsers&quot;:true},&quot;vars&quot;:{&quot;apmConfig&quot;:null},&quot;uiPlugins&quot;:[{&quot;id&quot;:&quot;usageCollection&quot;,&quot;plugin&quot;:{&quot;id&quot;:&quot;usageCollection&quot;,&quot;configPath&quot;:[&quot;usageCollection&quot;],&quot;requiredPlugins&quot;:[],&quot;optionalPlugins&quot;:[],&quot;requiredBundles&quot;:[&quot;opensearchDashboardsUtils&quot;],&quot;requiredEnginePlugins&quot;:{}},&quot;config&quot;:{&quot;uiMetric&quot;:{&quot;enabled&quot;:false,&quot;debug&quot;:true,&quot;batchingIntervalInS&quot;:60}}},{&quot;id&quot;:&quot;opensearchDashboardsLegacy&quot;,&quot;plugin&quot;:{&quot;id&quot;:&quot;opensearchDashboardsLegacy&quot;,&quot;configPath&quot;:&quot;opensearch_dashboards_legacy&quot;,&quot;requiredPlugins&quot;:[],&quot;optionalPlugins&quot;:[],&quot;requiredBundles&quot;:[],&quot;requiredEnginePlugins&quot;:{}},&quot;config&quot;:{&quot;defaultAppId&quot;:&quot;home&quot;}},{&quot;id&quot;:&quot;urlForwarding&quot;,&quot;plugin&quot;:{&quot;id&quot;:&quot;urlForwarding&quot;,&quot;configPath&quot;:&quot;url_forwarding&quot;,&quot;requiredPlugins&quot;:[&quot;opensearchDashboardsLegacy&quot;],&quot;optionalPlugins&quot;:[],&quot;requiredBundles&quot;:[],&quot;requiredEnginePlugins&quot;:{}},&quot;config&quot;:{}},{&quot;id&quot;:&quot;mapsLegacy&quot;,&quot;plugin&quot;:{&quot;id&quot;:&quot;mapsLegacy&quot;,&quot;configPath&quot;:[&quot;map&quot;],&quot;requiredPlugins&quot;:[],&quot;optionalPlugins&quot;:[],&quot;requiredBundles&quot;:[&quot;opensearchDashboardsReact&quot;,&quot;charts&quot;],&quot;requiredEnginePlugins&quot;:{}},&quot;config&quot;:{&quot;includeOpenSearchMapsService&quot;:true,&quot;proxyOpenSearchMapsServiceInMaps&quot;:false,&quot;showRegionDeniedWarning&quot;:false,&quot;tilemap&quot;:{&quot;options&quot;:{&quot;attribution&quot;:&quot;&quot;,&quot;minZoom&quot;:0,&quot;maxZoom&quot;:10}},&quot;regionmap&quot;:{&quot;includeOpenSearchMapsService&quot;:true,&quot;layers&quot;:[]},&quot;manifestServiceUrl&quot;:&quot;&quot;,&quot;opensearchManifestServiceUrl&quot;:&quot;https://maps.opensearch.org/manifest&quot;,&quot;emsFileApiUrl&quot;:&quot;https://vectors.maps.opensearch.org&quot;,&quot;emsTileApiUrl&quot;:&quot;https://tiles.maps.opensearch.org&quot;,&quot;emsLandingPageUrl&quot;:&quot;https://maps.opensearch.org&quot;,&quot;emsFontLibraryUrl&quot;:&quot;https://tiles.maps.opensearch.org/fonts/{fontstack}/{range}.pbf&quot;,&quot;emsTileLayerId&quot;:{&quot;bright&quot;:&quot;road_map&quot;,&quot;desaturated&quot;:&quot;road_map_desaturated&quot;,&quot;dark&quot;:&quot;dark_map&quot;}}},{&quot;id&quot;:&quot;visDefaultEditor&quot;,&quot;plugin&quot;:{&quot;id&quot;:&quot;visDefaultEditor&quot;,&quot;configPath&quot;:&quot;vis_default_editor&quot;,&quot;requiredPlugins&quot;:[],&quot;optionalPlugins&quot;:[],&quot;requiredBundles&quot;:[&quot;opensearchDashboardsUtils&quot;,&quot;opensearchDashboardsReact&quot;,&quot;data&quot;],&quot;requiredEnginePlugins&quot;:{}},&quot;config&quot;:{}},{&quot;id&quot;:&quot;uiActions&quot;,&quot;plugin&quot;:{&quot;id&quot;:&quot;uiActions&quot;,&quot;configPath&quot;:&quot;ui_actions&quot;,&quot;requiredPlugins&quot;:[],&quot;optionalPlugins&quot;:[],&quot;requiredBundles&quot;:[&quot;opensearchDashboardsUtils&quot;,&quot;opensearchDashboardsReact&quot;],&quot;requiredEnginePlugins&quot;:{}},&quot;config&quot;:{}},{&quot;id&quot;:&quot;share&quot;,&quot;plugin&quot;:{&quot;id&quot;:&quot;share&quot;,&quot;configPath&quot;:&quot;share&quot;,&quot;requiredPlugins&quot;:[],&quot;optionalPlugins&quot;:[],&quot;requiredBundles&quot;:[&quot;opensearchDashboardsUtils&quot;],&quot;requiredEnginePlugins&quot;:{}},&quot;config&quot;:{}},{&quot;id&quot;:&quot;opensearchUiShared&quot;,&quot;plugin&quot;:{&quot;id&quot;:&quot;opensearchUiShared&quot;,&quot;configPath&quot;:&quot;opensearch_ui_shared&quot;,&quot;requiredPlugins&quot;:[],&quot;optionalPlugins&quot;:[],&quot;requiredBundles&quot;:[&quot;data&quot;],&quot;requiredEnginePlugins&quot;:{}},&quot;config&quot;:{}},{&quot;id&quot;:&quot;opensearchDashboardsUtils&quot;,&quot;plugin&quot;:{&quot;id&quot;:&quot;opensearchDashboardsUtils&quot;,&quot;configPath&quot;:&quot;opensearch_dashboards_utils&quot;,&quot;requiredPlugins&quot;:[],&quot;optionalPlugins&quot;:[],&quot;requiredBundles&quot;:[],&quot;requiredEnginePlugins&quot;:{}},&quot;config&quot;:{}},{&quot;id&quot;:&quot;opensearchDashboardsReact&quot;,&quot;plugin&quot;:{&quot;id&quot;:&quot;opensearchDashboardsReact&quot;,&quot;configPath&quot;:&quot;opensearch_dashboards_react&quot;,&quot;requiredPlugins&quot;:[],&quot;optionalPlugins&quot;:[],&quot;requiredBundles&quot;:[&quot;opensearchDashboardsUtils&quot;],&quot;requiredEnginePlugins&quot;:{}},&quot;config&quot;:{}},{&quot;id&quot;:&quot;inspector&quot;,&quot;plugin&quot;:{&quot;id&quot;:&quot;inspector&quot;,&quot;configPath&quot;:&quot;inspector&quot;,&quot;requiredPlugins&quot;:[],&quot;optionalPlugins&quot;:[],&quot;requiredBundles&quot;:[&quot;opensearchDashboardsReact&quot;],&quot;requiredEnginePlugins&quot;:{}},&quot;config&quot;:{}},{&quot;id&quot;:&quot;embeddable&quot;,&quot;plugin&quot;:{&quot;id&quot;:&quot;embeddable&quot;,&quot;configPath&quot;:&quot;embeddable&quot;,&quot;requiredPlugins&quot;:[&quot;inspector&quot;,&quot;uiActions&quot;],&quot;optionalPlugins&quot;:[],&quot;requiredBundles&quot;:[&quot;savedObjects&quot;,&quot;opensearchDashboardsReact&quot;,&quot;opensearchDashboardsUtils&quot;],&quot;requiredEnginePlugins&quot;:{}},&quot;config&quot;:{}},{&quot;id&quot;:&quot;contentManagement&quot;,&quot;plugin&quot;:{&quot;id&quot;:&quot;contentManagement&quot;,&quot;configPath&quot;:&quot;content_management&quot;,&quot;requiredPlugins&quot;:[&quot;embeddable&quot;],&quot;optionalPlugins&quot;:[],&quot;requiredBundles&quot;:[],&quot;requiredEnginePlugins&quot;:{}},&quot;config&quot;:{}},{&quot;id&quot;:&quot;expressions&quot;,&quot;plugin&quot;:{&quot;id&quot;:&quot;expressions&quot;,&quot;configPath&quot;:&quot;expressions&quot;,&quot;requiredPlugins&quot;:[],&quot;optionalPlugins&quot;:[],&quot;requiredBundles&quot;:[&quot;opensearchDashboardsUtils&quot;,&quot;inspector&quot;,&quot;data&quot;],&quot;requiredEnginePlugins&quot;:{}},&quot;config&quot;:{}},{&quot;id&quot;:&quot;data&quot;,&quot;plugin&quot;:{&quot;id&quot;:&quot;data&quot;,&quot;configPath&quot;:&quot;data&quot;,&quot;requiredPlugins&quot;:[&quot;expressions&quot;,&quot;uiActions&quot;],&quot;optionalPlugins&quot;:[&quot;usageCollection&quot;],&quot;requiredBundles&quot;:[&quot;usageCollection&quot;,&quot;opensearchDashboardsUtils&quot;,&quot;opensearchDashboardsReact&quot;,&quot;inspector&quot;,&quot;dataSource&quot;],&quot;requiredEnginePlugins&quot;:{}},&quot;config&quot;:{&quot;enhancements&quot;:{&quot;supportedAppNames&quot;:[&quot;discover&quot;]},&quot;autocomplete&quot;:{&quot;querySuggestions&quot;:{&quot;enabled&quot;:true},&quot;valueSuggestions&quot;:{&quot;enabled&quot;:true}},&quot;search&quot;:{&quot;aggs&quot;:{&quot;shardDelay&quot;:{&quot;enabled&quot;:false}},&quot;usageTelemetry&quot;:{&quot;enabled&quot;:false}},&quot;savedQueriesNewUI&quot;:{&quot;enabled&quot;:false}}},{&quot;id&quot;:&quot;savedObjects&quot;,&quot;plugin&quot;:{&quot;id&quot;:&quot;savedObjects&quot;,&quot;configPath&quot;:&quot;saved_objects&quot;,&quot;requiredPlugins&quot;:[&quot;data&quot;],&quot;optionalPlugins&quot;:[],&quot;requiredBundles&quot;:[&quot;opensearchDashboardsUtils&quot;,&quot;opensearchDashboardsReact&quot;],&quot;requiredEnginePlugins&quot;:{}},&quot;config&quot;:{}},{&quot;id&quot;:&quot;queryEnhancements&quot;,&quot;plugin&quot;:{&quot;id&quot;:&quot;queryEnhancements&quot;,&quot;configPath&quot;:[&quot;queryEnhancements&quot;],&quot;requiredPlugins&quot;:[&quot;data&quot;,&quot;opensearchDashboardsReact&quot;,&quot;opensearchDashboardsUtils&quot;,&quot;savedObjects&quot;,&quot;uiActions&quot;],&quot;optionalPlugins&quot;:[&quot;usageCollection&quot;],&quot;requiredBundles&quot;:[],&quot;requiredEnginePlugins&quot;:{}},&quot;config&quot;:{&quot;queryAssist&quot;:{&quot;supportedLanguages&quot;:[{&quot;language&quot;:&quot;PPL&quot;,&quot;agentConfig&quot;:&quot;os_query_assist_ppl&quot;,&quot;timeRangeParserAgentConfig&quot;:&quot;os_query_time_range_parser&quot;}],&quot;summary&quot;:{&quot;enabled&quot;:false,&quot;branding&quot;:{&quot;label&quot;:&quot;&quot;}}}}},{&quot;id&quot;:&quot;navigation&quot;,&quot;plugin&quot;:{&quot;id&quot;:&quot;navigation&quot;,&quot;configPath&quot;:&quot;navigation&quot;,&quot;requiredPlugins&quot;:[&quot;data&quot;],&quot;optionalPlugins&quot;:[],&quot;requiredBundles&quot;:[&quot;opensearchDashboardsReact&quot;,&quot;dataSourceManagement&quot;],&quot;requiredEnginePlugins&quot;:{}},&quot;config&quot;:{}},{&quot;id&quot;:&quot;home&quot;,&quot;plugin&quot;:{&quot;id&quot;:&quot;home&quot;,&quot;configPath&quot;:&quot;home&quot;,&quot;requiredPlugins&quot;:[&quot;data&quot;,&quot;urlForwarding&quot;,&quot;savedObjects&quot;,&quot;contentManagement&quot;,&quot;navigation&quot;],&quot;optionalPlugins&quot;:[&quot;usageCollection&quot;],&quot;requiredBundles&quot;:[&quot;opensearchDashboardsReact&quot;,&quot;dataSourceManagement&quot;],&quot;requiredEnginePlugins&quot;:{}},&quot;config&quot;:{&quot;disableWelcomeScreen&quot;:false,&quot;disableExperienceModal&quot;:false}},{&quot;id&quot;:&quot;dashboard&quot;,&quot;plugin&quot;:{&quot;id&quot;:&quot;dashboard&quot;,&quot;configPath&quot;:&quot;dashboard&quot;,&quot;requiredPlugins&quot;:[&quot;data&quot;,&quot;embeddable&quot;,&quot;inspector&quot;,&quot;opensearchDashboardsLegacy&quot;,&quot;urlForwarding&quot;,&quot;navigation&quot;,&quot;uiActions&quot;,&quot;savedObjects&quot;],&quot;optionalPlugins&quot;:[&quot;home&quot;,&quot;share&quot;,&quot;usageCollection&quot;],&quot;requiredBundles&quot;:[&quot;opensearchDashboardsUtils&quot;,&quot;opensearchDashboardsReact&quot;,&quot;home&quot;],&quot;requiredEnginePlugins&quot;:{}},&quot;config&quot;:{&quot;allowByValueEmbeddables&quot;:false}},{&quot;id&quot;:&quot;visualizations&quot;,&quot;plugin&quot;:{&quot;id&quot;:&quot;visualizations&quot;,&quot;configPath&quot;:&quot;visualizations&quot;,&quot;requiredPlugins&quot;:[&quot;data&quot;,&quot;expressions&quot;,&quot;uiActions&quot;,&quot;embeddable&quot;,&quot;inspector&quot;,&quot;dashboard&quot;],&quot;optionalPlugins&quot;:[&quot;usageCollection&quot;],&quot;requiredBundles&quot;:[&quot;opensearchDashboardsUtils&quot;,&quot;discover&quot;,&quot;savedObjects&quot;,&quot;visAugmenter&quot;,&quot;opensearchDashboardsReact&quot;],&quot;requiredEnginePlugins&quot;:{}},&quot;config&quot;:{}},{&quot;id&quot;:&quot;regionMap&quot;,&quot;plugin&quot;:{&quot;id&quot;:&quot;regionMap&quot;,&quot;configPath&quot;:[&quot;map&quot;,&quot;regionmap&quot;],&quot;requiredPlugins&quot;:[&quot;visualizations&quot;,&quot;expressions&quot;,&quot;mapsLegacy&quot;,&quot;opensearchDashboardsLegacy&quot;,&quot;data&quot;,&quot;share&quot;,&quot;opensearchDashboardsReact&quot;],&quot;optionalPlugins&quot;:[],&quot;requiredBundles&quot;:[&quot;opensearchDashboardsUtils&quot;,&quot;charts&quot;,&quot;visDefaultEditor&quot;],&quot;requiredEnginePlugins&quot;:{}},&quot;config&quot;:{&quot;includeOpenSearchMapsService&quot;:true,&quot;layers&quot;:[]}},{&quot;id&quot;:&quot;visTypeVega&quot;,&quot;plugin&quot;:{&quot;id&quot;:&quot;visTypeVega&quot;,&quot;configPath&quot;:&quot;vis_type_vega&quot;,&quot;requiredPlugins&quot;:[&quot;data&quot;,&quot;visualizations&quot;,&quot;mapsLegacy&quot;,&quot;expressions&quot;,&quot;inspector&quot;,&quot;uiActions&quot;],&quot;optionalPlugins&quot;:[&quot;home&quot;,&quot;usageCollection&quot;],&quot;requiredBundles&quot;:[&quot;opensearchDashboardsUtils&quot;,&quot;opensearchDashboardsReact&quot;,&quot;visDefaultEditor&quot;,&quot;visAugmenter&quot;],&quot;requiredEnginePlugins&quot;:{}},&quot;config&quot;:{&quot;enabled&quot;:true,&quot;enableExternalUrls&quot;:false,&quot;exposeDebugObjectToWindow&quot;:true}},{&quot;id&quot;:&quot;visTypeTimeline&quot;,&quot;plugin&quot;:{&quot;id&quot;:&quot;visTypeTimeline&quot;,&quot;configPath&quot;:&quot;vis_type_timeline&quot;,&quot;requiredPlugins&quot;:[&quot;visualizations&quot;,&quot;data&quot;,&quot;expressions&quot;],&quot;optionalPlugins&quot;:[],&quot;requiredBundles&quot;:[&quot;opensearchDashboardsUtils&quot;,&quot;opensearchDashboardsReact&quot;,&quot;visDefaultEditor&quot;],&quot;requiredEnginePlugins&quot;:{}},&quot;config&quot;:{&quot;enabled&quot;:true}},{&quot;id&quot;:&quot;visTypeTable&quot;,&quot;plugin&quot;:{&quot;id&quot;:&quot;visTypeTable&quot;,&quot;configPath&quot;:&quot;vis_type_table&quot;,&quot;requiredPlugins&quot;:[&quot;expressions&quot;,&quot;visualizations&quot;,&quot;data&quot;],&quot;optionalPlugins&quot;:[],&quot;requiredBundles&quot;:[&quot;opensearchDashboardsUtils&quot;,&quot;opensearchDashboardsReact&quot;,&quot;share&quot;,&quot;charts&quot;,&quot;visDefaultEditor&quot;],&quot;requiredEnginePlugins&quot;:{}},&quot;config&quot;:{&quot;enabled&quot;:true}},{&quot;id&quot;:&quot;visTypeMarkdown&quot;,&quot;plugin&quot;:{&quot;id&quot;:&quot;visTypeMarkdown&quot;,&quot;configPath&quot;:&quot;vis_type_markdown&quot;,&quot;requiredPlugins&quot;:[&quot;expressions&quot;,&quot;visualizations&quot;],&quot;optionalPlugins&quot;:[],&quot;requiredBundles&quot;:[&quot;opensearchDashboardsReact&quot;,&quot;charts&quot;,&quot;visualizations&quot;,&quot;expressions&quot;,&quot;visDefaultEditor&quot;],&quot;requiredEnginePlugins&quot;:{}},&quot;config&quot;:{&quot;enabled&quot;:true}},{&quot;id&quot;:&quot;visBuilder&quot;,&quot;plugin&quot;:{&quot;id&quot;:&quot;visBuilder&quot;,&quot;configPath&quot;:&quot;vis_builder&quot;,&quot;requiredPlugins&quot;:[&quot;dashboard&quot;,&quot;data&quot;,&quot;embeddable&quot;,&quot;expressions&quot;,&quot;navigation&quot;,&quot;savedObjects&quot;,&quot;visualizations&quot;,&quot;uiActions&quot;],&quot;optionalPlugins&quot;:[],&quot;requiredBundles&quot;:[&quot;charts&quot;,&quot;opensearchDashboardsReact&quot;,&quot;opensearchDashboardsUtils&quot;,&quot;visDefaultEditor&quot;,&quot;visTypeVislib&quot;],&quot;requiredEnginePlugins&quot;:{}},&quot;config&quot;:{&quot;enabled&quot;:true}},{&quot;id&quot;:&quot;visAugmenter&quot;,&quot;plugin&quot;:{&quot;id&quot;:&quot;visAugmenter&quot;,&quot;configPath&quot;:&quot;vis_augmenter&quot;,&quot;requiredPlugins&quot;:[&quot;data&quot;,&quot;savedObjects&quot;,&quot;opensearchDashboardsUtils&quot;,&quot;expressions&quot;,&quot;visualizations&quot;,&quot;uiActions&quot;,&quot;embeddable&quot;],&quot;optionalPlugins&quot;:[],&quot;requiredBundles&quot;:[&quot;opensearchDashboardsReact&quot;,&quot;savedObjectsManagement&quot;],&quot;requiredEnginePlugins&quot;:{}},&quot;config&quot;:{&quot;pluginAugmentationEnabled&quot;:true}},{&quot;id&quot;:&quot;tileMap&quot;,&quot;plugin&quot;:{&quot;id&quot;:&quot;tileMap&quot;,&quot;configPath&quot;:[&quot;map&quot;,&quot;tilemap&quot;],&quot;requiredPlugins&quot;:[&quot;visualizations&quot;,&quot;expressions&quot;,&quot;mapsLegacy&quot;,&quot;opensearchDashboardsLegacy&quot;,&quot;data&quot;,&quot;share&quot;],&quot;optionalPlugins&quot;:[],&quot;requiredBundles&quot;:[&quot;opensearchDashboardsUtils&quot;,&quot;charts&quot;,&quot;visDefaultEditor&quot;],&quot;requiredEnginePlugins&quot;:{}},&quot;config&quot;:{&quot;options&quot;:{&quot;attribution&quot;:&quot;&quot;,&quot;minZoom&quot;:0,&quot;maxZoom&quot;:10}}},{&quot;id&quot;:&quot;inputControlVis&quot;,&quot;plugin&quot;:{&quot;id&quot;:&quot;inputControlVis&quot;,&quot;configPath&quot;:&quot;input_control_vis&quot;,&quot;requiredPlugins&quot;:[&quot;data&quot;,&quot;expressions&quot;,&quot;visualizations&quot;,&quot;visDefaultEditor&quot;],&quot;optionalPlugins&quot;:[],&quot;requiredBundles&quot;:[&quot;opensearchDashboardsReact&quot;],&quot;requiredEnginePlugins&quot;:{}},&quot;config&quot;:{&quot;enabled&quot;:true}},{&quot;id&quot;:&quot;visualize&quot;,&quot;plugin&quot;:{&quot;id&quot;:&quot;visualize&quot;,&quot;configPath&quot;:&quot;visualize&quot;,&quot;requiredPlugins&quot;:[&quot;data&quot;,&quot;urlForwarding&quot;,&quot;navigation&quot;,&quot;savedObjects&quot;,&quot;visualizations&quot;,&quot;embeddable&quot;,&quot;dashboard&quot;,&quot;uiActions&quot;],&quot;optionalPlugins&quot;:[&quot;home&quot;,&quot;share&quot;],&quot;requiredBundles&quot;:[&quot;opensearchDashboardsUtils&quot;,&quot;opensearchDashboardsReact&quot;,&quot;home&quot;,&quot;discover&quot;,&quot;visDefaultEditor&quot;,&quot;savedObjectsManagement&quot;],&quot;requiredEnginePlugins&quot;:{}},&quot;config&quot;:{}},{&quot;id&quot;:&quot;apmOss&quot;,&quot;plugin&quot;:{&quot;id&quot;:&quot;apmOss&quot;,&quot;configPath&quot;:[&quot;apm_oss&quot;],&quot;requiredPlugins&quot;:[&quot;home&quot;],&quot;optionalPlugins&quot;:[],&quot;requiredBundles&quot;:[],&quot;requiredEnginePlugins&quot;:{}},&quot;config&quot;:{&quot;enabled&quot;:true,&quot;transactionIndices&quot;:&quot;apm-*&quot;,&quot;spanIndices&quot;:&quot;apm-*&quot;,&quot;errorIndices&quot;:&quot;apm-*&quot;,&quot;metricsIndices&quot;:&quot;apm-*&quot;,&quot;sourcemapIndices&quot;:&quot;apm-*&quot;,&quot;onboardingIndices&quot;:&quot;apm-*&quot;,&quot;indexPattern&quot;:&quot;apm-*&quot;}},{&quot;id&quot;:&quot;opensearchDashboardsOverview&quot;,&quot;plugin&quot;:{&quot;id&quot;:&quot;opensearchDashboardsOverview&quot;,&quot;configPath&quot;:&quot;opensearch_dashboards_overview&quot;,&quot;requiredPlugins&quot;:[&quot;navigation&quot;,&quot;data&quot;,&quot;home&quot;],&quot;optionalPlugins&quot;:[],&quot;requiredBundles&quot;:[&quot;opensearchDashboardsReact&quot;],&quot;requiredEnginePlugins&quot;:{}},&quot;config&quot;:{}},{&quot;id&quot;:&quot;managementOverview&quot;,&quot;plugin&quot;:{&quot;id&quot;:&quot;managementOverview&quot;,&quot;configPath&quot;:&quot;management_overview&quot;,&quot;requiredPlugins&quot;:[&quot;navigation&quot;],&quot;optionalPlugins&quot;:[&quot;home&quot;],&quot;requiredBundles&quot;:[&quot;home&quot;],&quot;requiredEnginePlugins&quot;:{}},&quot;config&quot;:{}},{&quot;id&quot;:&quot;management&quot;,&quot;plugin&quot;:{&quot;id&quot;:&quot;management&quot;,&quot;configPath&quot;:&quot;management&quot;,&quot;requiredPlugins&quot;:[&quot;navigation&quot;],&quot;optionalPlugins&quot;:[&quot;home&quot;,&quot;managementOverview&quot;],&quot;requiredBundles&quot;:[&quot;opensearchDashboardsReact&quot;,&quot;opensearchDashboardsUtils&quot;],&quot;requiredEnginePlugins&quot;:{}},&quot;config&quot;:{}},{&quot;id&quot;:&quot;indexPatternManagement&quot;,&quot;plugin&quot;:{&quot;id&quot;:&quot;indexPatternManagement&quot;,&quot;configPath&quot;:&quot;index_pattern_management&quot;,&quot;requiredPlugins&quot;:[&quot;management&quot;,&quot;navigation&quot;,&quot;data&quot;,&quot;urlForwarding&quot;],&quot;optionalPlugins&quot;:[],&quot;requiredBundles&quot;:[&quot;opensearchDashboardsReact&quot;,&quot;opensearchDashboardsUtils&quot;],&quot;requiredEnginePlugins&quot;:{}},&quot;config&quot;:{}},{&quot;id&quot;:&quot;dataSourceManagement&quot;,&quot;plugin&quot;:{&quot;id&quot;:&quot;dataSourceManagement&quot;,&quot;configPath&quot;:[&quot;data_source_management&quot;],&quot;requiredPlugins&quot;:[&quot;navigation&quot;,&quot;management&quot;,&quot;indexPatternManagement&quot;],&quot;optionalPlugins&quot;:[],&quot;requiredBundles&quot;:[&quot;opensearchDashboardsReact&quot;,&quot;dataSource&quot;,&quot;opensearchDashboardsUtils&quot;],&quot;requiredEnginePlugins&quot;:{}},&quot;config&quot;:{&quot;manageableBy&quot;:&quot;all&quot;,&quot;dataSourceAdmin&quot;:{&quot;groups&quot;:[]},&quot;directQuerySyncEnabled&quot;:false}},{&quot;id&quot;:&quot;devTools&quot;,&quot;plugin&quot;:{&quot;id&quot;:&quot;devTools&quot;,&quot;configPath&quot;:&quot;dev_tools&quot;,&quot;requiredPlugins&quot;:[&quot;urlForwarding&quot;,&quot;uiActions&quot;],&quot;optionalPlugins&quot;:[&quot;managementOverview&quot;,&quot;dataSourceManagement&quot;],&quot;requiredBundles&quot;:[&quot;opensearchDashboardsReact&quot;],&quot;requiredEnginePlugins&quot;:{}},&quot;config&quot;:{}},{&quot;id&quot;:&quot;console&quot;,&quot;plugin&quot;:{&quot;id&quot;:&quot;console&quot;,&quot;configPath&quot;:&quot;console&quot;,&quot;requiredPlugins&quot;:[&quot;devTools&quot;,&quot;data&quot;],&quot;optionalPlugins&quot;:[&quot;usageCollection&quot;,&quot;home&quot;],&quot;requiredBundles&quot;:[&quot;opensearchUiShared&quot;,&quot;opensearchDashboardsReact&quot;,&quot;opensearchDashboardsUtils&quot;,&quot;home&quot;],&quot;requiredEnginePlugins&quot;:{}},&quot;config&quot;:{&quot;enabled&quot;:true,&quot;proxyFilter&quot;:[&quot;.*&quot;],&quot;ssl&quot;:{&quot;verify&quot;:false},&quot;proxyConfig&quot;:[]}},{&quot;id&quot;:&quot;advancedSettings&quot;,&quot;plugin&quot;:{&quot;id&quot;:&quot;advancedSettings&quot;,&quot;configPath&quot;:&quot;advanced_settings&quot;,&quot;requiredPlugins&quot;:[&quot;management&quot;,&quot;navigation&quot;,&quot;contentManagement&quot;],&quot;optionalPlugins&quot;:[&quot;home&quot;],&quot;requiredBundles&quot;:[&quot;opensearchDashboardsReact&quot;,&quot;home&quot;],&quot;requiredEnginePlugins&quot;:{}},&quot;config&quot;:{}},{&quot;id&quot;:&quot;dataExplorer&quot;,&quot;plugin&quot;:{&quot;id&quot;:&quot;dataExplorer&quot;,&quot;configPath&quot;:&quot;data_explorer&quot;,&quot;requiredPlugins&quot;:[&quot;data&quot;,&quot;navigation&quot;,&quot;embeddable&quot;,&quot;expressions&quot;,&quot;usageCollection&quot;],&quot;optionalPlugins&quot;:[],&quot;requiredBundles&quot;:[&quot;opensearchDashboardsReact&quot;,&quot;opensearchDashboardsUtils&quot;],&quot;requiredEnginePlugins&quot;:{}},&quot;config&quot;:{}},{&quot;id&quot;:&quot;charts&quot;,&quot;plugin&quot;:{&quot;id&quot;:&quot;charts&quot;,&quot;configPath&quot;:&quot;charts&quot;,&quot;requiredPlugins&quot;:[],&quot;optionalPlugins&quot;:[],&quot;requiredBundles&quot;:[&quot;visDefaultEditor&quot;],&quot;requiredEnginePlugins&quot;:{}},&quot;config&quot;:{}},{&quot;id&quot;:&quot;visTypeVislib&quot;,&quot;plugin&quot;:{&quot;id&quot;:&quot;visTypeVislib&quot;,&quot;configPath&quot;:&quot;vis_type_vislib&quot;,&quot;requiredPlugins&quot;:[&quot;charts&quot;,&quot;data&quot;,&quot;expressions&quot;,&quot;visualizations&quot;,&quot;opensearchDashboardsLegacy&quot;,&quot;visTypeVega&quot;],&quot;optionalPlugins&quot;:[],&quot;requiredBundles&quot;:[&quot;opensearchDashboardsUtils&quot;,&quot;visDefaultEditor&quot;,&quot;visAugmenter&quot;],&quot;requiredEnginePlugins&quot;:{}},&quot;config&quot;:{&quot;enabled&quot;:true}},{&quot;id&quot;:&quot;visTypeTimeseries&quot;,&quot;plugin&quot;:{&quot;id&quot;:&quot;visTypeTimeseries&quot;,&quot;configPath&quot;:&quot;vis_type_timeseries&quot;,&quot;requiredPlugins&quot;:[&quot;charts&quot;,&quot;data&quot;,&quot;expressions&quot;,&quot;visualizations&quot;],&quot;optionalPlugins&quot;:[&quot;usageCollection&quot;,&quot;dataSourceManagement&quot;],&quot;requiredBundles&quot;:[&quot;opensearchDashboardsUtils&quot;,&quot;opensearchDashboardsReact&quot;],&quot;requiredEnginePlugins&quot;:{}},&quot;config&quot;:{&quot;enabled&quot;:true,&quot;chartResolution&quot;:150,&quot;minimumBucketSize&quot;:10}},{&quot;id&quot;:&quot;visTypeTagcloud&quot;,&quot;plugin&quot;:{&quot;id&quot;:&quot;visTypeTagcloud&quot;,&quot;configPath&quot;:&quot;vis_type_tagcloud&quot;,&quot;requiredPlugins&quot;:[&quot;data&quot;,&quot;expressions&quot;,&quot;visualizations&quot;,&quot;charts&quot;],&quot;optionalPlugins&quot;:[],&quot;requiredBundles&quot;:[&quot;opensearchDashboardsUtils&quot;,&quot;opensearchDashboardsReact&quot;,&quot;visDefaultEditor&quot;],&quot;requiredEnginePlugins&quot;:{}},&quot;config&quot;:{&quot;enabled&quot;:true}},{&quot;id&quot;:&quot;visTypeMetric&quot;,&quot;plugin&quot;:{&quot;id&quot;:&quot;visTypeMetric&quot;,&quot;configPath&quot;:&quot;vis_type_metric&quot;,&quot;requiredPlugins&quot;:[&quot;data&quot;,&quot;visualizations&quot;,&quot;charts&quot;,&quot;expressions&quot;],&quot;optionalPlugins&quot;:[],&quot;requiredBundles&quot;:[&quot;opensearchDashboardsUtils&quot;,&quot;visDefaultEditor&quot;],&quot;requiredEnginePlugins&quot;:{}},&quot;config&quot;:{&quot;enabled&quot;:true}},{&quot;id&quot;:&quot;discover&quot;,&quot;plugin&quot;:{&quot;id&quot;:&quot;discover&quot;,&quot;configPath&quot;:&quot;discover&quot;,&quot;requiredPlugins&quot;:[&quot;charts&quot;,&quot;data&quot;,&quot;dataExplorer&quot;,&quot;embeddable&quot;,&quot;inspector&quot;,&quot;opensearchDashboardsLegacy&quot;,&quot;urlForwarding&quot;,&quot;navigation&quot;,&quot;uiActions&quot;,&quot;visualizations&quot;,&quot;usageCollection&quot;],&quot;optionalPlugins&quot;:[&quot;home&quot;,&quot;share&quot;],&quot;requiredBundles&quot;:[&quot;home&quot;,&quot;opensearchDashboardsUtils&quot;,&quot;savedObjects&quot;,&quot;opensearchDashboardsReact&quot;],&quot;requiredEnginePlugins&quot;:{}},&quot;config&quot;:{}},{&quot;id&quot;:&quot;savedObjectsManagement&quot;,&quot;plugin&quot;:{&quot;id&quot;:&quot;savedObjectsManagement&quot;,&quot;configPath&quot;:&quot;saved_objects_management&quot;,&quot;requiredPlugins&quot;:[&quot;management&quot;,&quot;data&quot;,&quot;uiActions&quot;,&quot;navigation&quot;],&quot;optionalPlugins&quot;:[&quot;dashboard&quot;,&quot;visualizations&quot;,&quot;discover&quot;,&quot;home&quot;,&quot;visBuilder&quot;,&quot;visAugmenter&quot;,&quot;dataSourceManagement&quot;,&quot;contentManagement&quot;],&quot;requiredBundles&quot;:[&quot;opensearchDashboardsReact&quot;,&quot;home&quot;,&quot;contentManagement&quot;,&quot;opensearchDashboardsUtils&quot;],&quot;requiredEnginePlugins&quot;:{}},&quot;config&quot;:{}},{&quot;id&quot;:&quot;bfetch&quot;,&quot;plugin&quot;:{&quot;id&quot;:&quot;bfetch&quot;,&quot;configPath&quot;:&quot;bfetch&quot;,&quot;requiredPlugins&quot;:[],&quot;optionalPlugins&quot;:[],&quot;requiredBundles&quot;:[&quot;opensearchDashboardsUtils&quot;],&quot;requiredEnginePlugins&quot;:{}},&quot;config&quot;:{}}],&quot;legacyMetadata&quot;:{&quot;uiSettings&quot;:{&quot;defaults&quot;:{&quot;accessibility:disableAnimations&quot;:{&quot;name&quot;:&quot;Disable Animations&quot;,&quot;value&quot;:false,&quot;description&quot;:&quot;Turn off all unnecessary animations in the OpenSearch Dashboards UI. Refresh the page to apply the changes.&quot;,&quot;category&quot;:[&quot;appearance&quot;],&quot;requiresPageReload&quot;:true},&quot;dateFormat&quot;:{&quot;name&quot;:&quot;Date format&quot;,&quot;value&quot;:&quot;MMM D, YYYY @ HH:mm:ss.SSS&quot;,&quot;description&quot;:&quot;When displaying a pretty formatted date, use this &lt;a href=\&quot;https://momentjs.com/docs/#/displaying/format/\&quot; target=\&quot;_blank\&quot; rel=\&quot;noopener noreferrer\&quot;&gt;format&lt;/a&gt;&quot;},&quot;dateFormat:tz&quot;:{&quot;name&quot;:&quot;Timezone for date formatting&quot;,&quot;value&quot;:&quot;Browser&quot;,&quot;description&quot;:&quot;Which timezone should be used. \&quot;Browser\&quot; will use the timezone detected by your browser.&quot;,&quot;type&quot;:&quot;select&quot;,&quot;options&quot;:[&quot;Browser&quot;,&quot;Africa/Abidjan&quot;,&quot;Africa/Accra&quot;,&quot;Africa/Addis_Ababa&quot;,&quot;Africa/Algiers&quot;,&quot;Africa/Asmara&quot;,&quot;Africa/Asmera&quot;,&quot;Africa/Bamako&quot;,&quot;Africa/Bangui&quot;,&quot;Africa/Banjul&quot;,&quot;Africa/Bissau&quot;,&quot;Africa/Blantyre&quot;,&quot;Africa/Brazzaville&quot;,&quot;Africa/Bujumbura&quot;,&quot;Africa/Cairo&quot;,&quot;Africa/Casablanca&quot;,&quot;Africa/Ceuta&quot;,&quot;Africa/Conakry&quot;,&quot;Africa/Dakar&quot;,&quot;Africa/Dar_es_Salaam&quot;,&quot;Africa/Djibouti&quot;,&quot;Africa/Douala&quot;,&quot;Africa/El_Aaiun&quot;,&quot;Africa/Freetown&quot;,&quot;Africa/Gaborone&quot;,&quot;Africa/Harare&quot;,&quot;Africa/Johannesburg&quot;,&quot;Africa/Juba&quot;,&quot;Africa/Kampala&quot;,&quot;Africa/Khartoum&quot;,&quot;Africa/Kigali&quot;,&quot;Africa/Kinshasa&quot;,&quot;Africa/Lagos&quot;,&quot;Africa/Libreville&quot;,&quot;Africa/Lome&quot;,&quot;Africa/Luanda&quot;,&quot;Africa/Lubumbashi&quot;,&quot;Africa/Lusaka&quot;,&quot;Africa/Malabo&quot;,&quot;Africa/Maputo&quot;,&quot;Africa/Maseru&quot;,&quot;Africa/Mbabane&quot;,&quot;Africa/Mogadishu&quot;,&quot;Africa/Monrovia&quot;,&quot;Africa/Nairobi&quot;,&quot;Africa/Ndjamena&quot;,&quot;Africa/Niamey&quot;,&quot;Africa/Nouakchott&quot;,&quot;Africa/Ouagadougou&quot;,&quot;Africa/Porto-Novo&quot;,&quot;Africa/Sao_Tome&quot;,&quot;Africa/Timbuktu&quot;,&quot;Africa/Tripoli&quot;,&quot;Africa/Tunis&quot;,&quot;Africa/Windhoek&quot;,&quot;America/Adak&quot;,&quot;America/Anchorage&quot;,&quot;America/Anguilla&quot;,&quot;America/Antigua&quot;,&quot;America/Araguaina&quot;,&quot;America/Argentina/Buenos_Aires&quot;,&quot;America/Argentina/Catamarca&quot;,&quot;America/Argentina/ComodRivadavia&quot;,&quot;America/Argentina/Cordoba&quot;,&quot;America/Argentina/Jujuy&quot;,&quot;America/Argentina/La_Rioja&quot;,&quot;America/Argentina/Mendoza&quot;,&quot;America/Argentina/Rio_Gallegos&quot;,&quot;America/Argentina/Salta&quot;,&quot;America/Argentina/San_Juan&quot;,&quot;America/Argentina/San_Luis&quot;,&quot;America/Argentina/Tucuman&quot;,&quot;America/Argentina/Ushuaia&quot;,&quot;America/Aruba&quot;,&quot;America/Asuncion&quot;,&quot;America/Atikokan&quot;,&quot;America/Atka&quot;,&quot;America/Bahia&quot;,&quot;America/Bahia_Banderas&quot;,&quot;America/Barbados&quot;,&quot;America/Belem&quot;,&quot;America/Belize&quot;,&quot;America/Blanc-Sablon&quot;,&quot;America/Boa_Vista&quot;,&quot;America/Bogota&quot;,&quot;America/Boise&quot;,&quot;America/Buenos_Aires&quot;,&quot;America/Cambridge_Bay&quot;,&quot;America/Campo_Grande&quot;,&quot;America/Cancun&quot;,&quot;America/Caracas&quot;,&quot;America/Catamarca&quot;,&quot;America/Cayenne&quot;,&quot;America/Cayman&quot;,&quot;America/Chicago&quot;,&quot;America/Chihuahua&quot;,&quot;America/Coral_Harbour&quot;,&quot;America/Cordoba&quot;,&quot;America/Costa_Rica&quot;,&quot;America/Creston&quot;,&quot;America/Cuiaba&quot;,&quot;America/Curacao&quot;,&quot;America/Danmarkshavn&quot;,&quot;America/Dawson&quot;,&quot;America/Dawson_Creek&quot;,&quot;America/Denver&quot;,&quot;America/Detroit&quot;,&quot;America/Dominica&quot;,&quot;America/Edmonton&quot;,&quot;America/Eirunepe&quot;,&quot;America/El_Salvador&quot;,&quot;America/Ensenada&quot;,&quot;America/Fort_Nelson&quot;,&quot;America/Fort_Wayne&quot;,&quot;America/Fortaleza&quot;,&quot;America/Glace_Bay&quot;,&quot;America/Godthab&quot;,&quot;America/Goose_Bay&quot;,&quot;America/Grand_Turk&quot;,&quot;America/Grenada&quot;,&quot;America/Guadeloupe&quot;,&quot;America/Guatemala&quot;,&quot;America/Guayaquil&quot;,&quot;America/Guyana&quot;,&quot;America/Halifax&quot;,&quot;America/Havana&quot;,&quot;America/Hermosillo&quot;,&quot;America/Indiana/Indianapolis&quot;,&quot;America/Indiana/Knox&quot;,&quot;America/Indiana/Marengo&quot;,&quot;America/Indiana/Petersburg&quot;,&quot;America/Indiana/Tell_City&quot;,&quot;America/Indiana/Vevay&quot;,&quot;America/Indiana/Vincennes&quot;,&quot;America/Indiana/Winamac&quot;,&quot;America/Indianapolis&quot;,&quot;America/Inuvik&quot;,&quot;America/Iqaluit&quot;,&quot;America/Jamaica&quot;,&quot;America/Jujuy&quot;,&quot;America/Juneau&quot;,&quot;America/Kentucky/Louisville&quot;,&quot;America/Kentucky/Monticello&quot;,&quot;America/Knox_IN&quot;,&quot;America/Kralendijk&quot;,&quot;America/La_Paz&quot;,&quot;America/Lima&quot;,&quot;America/Los_Angeles&quot;,&quot;America/Louisville&quot;,&quot;America/Lower_Princes&quot;,&quot;America/Maceio&quot;,&quot;America/Managua&quot;,&quot;America/Manaus&quot;,&quot;America/Marigot&quot;,&quot;America/Martinique&quot;,&quot;America/Matamoros&quot;,&quot;America/Mazatlan&quot;,&quot;America/Mendoza&quot;,&quot;America/Menominee&quot;,&quot;America/Merida&quot;,&quot;America/Metlakatla&quot;,&quot;America/Mexico_City&quot;,&quot;America/Miquelon&quot;,&quot;America/Moncton&quot;,&quot;America/Monterrey&quot;,&quot;America/Montevideo&quot;,&quot;America/Montreal&quot;,&quot;America/Montserrat&quot;,&quot;America/Nassau&quot;,&quot;America/New_York&quot;,&quot;America/Nipigon&quot;,&quot;America/Nome&quot;,&quot;America/Noronha&quot;,&quot;America/North_Dakota/Beulah&quot;,&quot;America/North_Dakota/Center&quot;,&quot;America/North_Dakota/New_Salem&quot;,&quot;America/Ojinaga&quot;,&quot;America/Panama&quot;,&quot;America/Pangnirtung&quot;,&quot;America/Paramaribo&quot;,&quot;America/Phoenix&quot;,&quot;America/Port-au-Prince&quot;,&quot;America/Port_of_Spain&quot;,&quot;America/Porto_Acre&quot;,&quot;America/Porto_Velho&quot;,&quot;America/Puerto_Rico&quot;,&quot;America/Punta_Arenas&quot;,&quot;America/Rainy_River&quot;,&quot;America/Rankin_Inlet&quot;,&quot;America/Recife&quot;,&quot;America/Regina&quot;,&quot;America/Resolute&quot;,&quot;America/Rio_Branco&quot;,&quot;America/Rosario&quot;,&quot;America/Santa_Isabel&quot;,&quot;America/Santarem&quot;,&quot;America/Santiago&quot;,&quot;America/Santo_Domingo&quot;,&quot;America/Sao_Paulo&quot;,&quot;America/Scoresbysund&quot;,&quot;America/Shiprock&quot;,&quot;America/Sitka&quot;,&quot;America/St_Barthelemy&quot;,&quot;America/St_Johns&quot;,&quot;America/St_Kitts&quot;,&quot;America/St_Lucia&quot;,&quot;America/St_Thomas&quot;,&quot;America/St_Vincent&quot;,&quot;America/Swift_Current&quot;,&quot;America/Tegucigalpa&quot;,&quot;America/Thule&quot;,&quot;America/Thunder_Bay&quot;,&quot;America/Tijuana&quot;,&quot;America/Toronto&quot;,&quot;America/Tortola&quot;,&quot;America/Vancouver&quot;,&quot;America/Virgin&quot;,&quot;America/Whitehorse&quot;,&quot;America/Winnipeg&quot;,&quot;America/Yakutat&quot;,&quot;America/Yellowknife&quot;,&quot;Antarctica/Casey&quot;,&quot;Antarctica/Davis&quot;,&quot;Antarctica/DumontDUrville&quot;,&quot;Antarctica/Macquarie&quot;,&quot;Antarctica/Mawson&quot;,&quot;Antarctica/McMurdo&quot;,&quot;Antarctica/Palmer&quot;,&quot;Antarctica/Rothera&quot;,&quot;Antarctica/South_Pole&quot;,&quot;Antarctica/Syowa&quot;,&quot;Antarctica/Troll&quot;,&quot;Antarctica/Vostok&quot;,&quot;Arctic/Longyearbyen&quot;,&quot;Asia/Aden&quot;,&quot;Asia/Almaty&quot;,&quot;Asia/Amman&quot;,&quot;Asia/Anadyr&quot;,&quot;Asia/Aqtau&quot;,&quot;Asia/Aqtobe&quot;,&quot;Asia/Ashgabat&quot;,&quot;Asia/Ashkhabad&quot;,&quot;Asia/Atyrau&quot;,&quot;Asia/Baghdad&quot;,&quot;Asia/Bahrain&quot;,&quot;Asia/Baku&quot;,&quot;Asia/Bangkok&quot;,&quot;Asia/Barnaul&quot;,&quot;Asia/Beirut&quot;,&quot;Asia/Bishkek&quot;,&quot;Asia/Brunei&quot;,&quot;Asia/Calcutta&quot;,&quot;Asia/Chita&quot;,&quot;Asia/Choibalsan&quot;,&quot;Asia/Chongqing&quot;,&quot;Asia/Chungking&quot;,&quot;Asia/Colombo&quot;,&quot;Asia/Dacca&quot;,&quot;Asia/Damascus&quot;,&quot;Asia/Dhaka&quot;,&quot;Asia/Dili&quot;,&quot;Asia/Dubai&quot;,&quot;Asia/Dushanbe&quot;,&quot;Asia/Famagusta&quot;,&quot;Asia/Gaza&quot;,&quot;Asia/Harbin&quot;,&quot;Asia/Hebron&quot;,&quot;Asia/Ho_Chi_Minh&quot;,&quot;Asia/Hong_Kong&quot;,&quot;Asia/Hovd&quot;,&quot;Asia/Irkutsk&quot;,&quot;Asia/Istanbul&quot;,&quot;Asia/Jakarta&quot;,&quot;Asia/Jayapura&quot;,&quot;Asia/Jerusalem&quot;,&quot;Asia/Kabul&quot;,&quot;Asia/Kamchatka&quot;,&quot;Asia/Karachi&quot;,&quot;Asia/Kashgar&quot;,&quot;Asia/Kathmandu&quot;,&quot;Asia/Katmandu&quot;,&quot;Asia/Khandyga&quot;,&quot;Asia/Kolkata&quot;,&quot;Asia/Krasnoyarsk&quot;,&quot;Asia/Kuala_Lumpur&quot;,&quot;Asia/Kuching&quot;,&quot;Asia/Kuwait&quot;,&quot;Asia/Macao&quot;,&quot;Asia/Macau&quot;,&quot;Asia/Magadan&quot;,&quot;Asia/Makassar&quot;,&quot;Asia/Manila&quot;,&quot;Asia/Muscat&quot;,&quot;Asia/Nicosia&quot;,&quot;Asia/Novokuznetsk&quot;,&quot;Asia/Novosibirsk&quot;,&quot;Asia/Omsk&quot;,&quot;Asia/Oral&quot;,&quot;Asia/Phnom_Penh&quot;,&quot;Asia/Pontianak&quot;,&quot;Asia/Pyongyang&quot;,&quot;Asia/Qatar&quot;,&quot;Asia/Qostanay&quot;,&quot;Asia/Qyzylorda&quot;,&quot;Asia/Rangoon&quot;,&quot;Asia/Riyadh&quot;,&quot;Asia/Saigon&quot;,&quot;Asia/Sakhalin&quot;,&quot;Asia/Samarkand&quot;,&quot;Asia/Seoul&quot;,&quot;Asia/Shanghai&quot;,&quot;Asia/Singapore&quot;,&quot;Asia/Srednekolymsk&quot;,&quot;Asia/Taipei&quot;,&quot;Asia/Tashkent&quot;,&quot;Asia/Tbilisi&quot;,&quot;Asia/Tehran&quot;,&quot;Asia/Tel_Aviv&quot;,&quot;Asia/Thimbu&quot;,&quot;Asia/Thimphu&quot;,&quot;Asia/Tokyo&quot;,&quot;Asia/Tomsk&quot;,&quot;Asia/Ujung_Pandang&quot;,&quot;Asia/Ulaanbaatar&quot;,&quot;Asia/Ulan_Bator&quot;,&quot;Asia/Urumqi&quot;,&quot;Asia/Ust-Nera&quot;,&quot;Asia/Vientiane&quot;,&quot;Asia/Vladivostok&quot;,&quot;Asia/Yakutsk&quot;,&quot;Asia/Yangon&quot;,&quot;Asia/Yekaterinburg&quot;,&quot;Asia/Yerevan&quot;,&quot;Atlantic/Azores&quot;,&quot;Atlantic/Bermuda&quot;,&quot;Atlantic/Canary&quot;,&quot;Atlantic/Cape_Verde&quot;,&quot;Atlantic/Faeroe&quot;,&quot;Atlantic/Faroe&quot;,&quot;Atlantic/Jan_Mayen&quot;,&quot;Atlantic/Madeira&quot;,&quot;Atlantic/Reykjavik&quot;,&quot;Atlantic/South_Georgia&quot;,&quot;Atlantic/St_Helena&quot;,&quot;Atlantic/Stanley&quot;,&quot;Australia/ACT&quot;,&quot;Australia/Adelaide&quot;,&quot;Australia/Brisbane&quot;,&quot;Australia/Broken_Hill&quot;,&quot;Australia/Canberra&quot;,&quot;Australia/Currie&quot;,&quot;Australia/Darwin&quot;,&quot;Australia/Eucla&quot;,&quot;Australia/Hobart&quot;,&quot;Australia/LHI&quot;,&quot;Australia/Lindeman&quot;,&quot;Australia/Lord_Howe&quot;,&quot;Australia/Melbourne&quot;,&quot;Australia/NSW&quot;,&quot;Australia/North&quot;,&quot;Australia/Perth&quot;,&quot;Australia/Queensland&quot;,&quot;Australia/South&quot;,&quot;Australia/Sydney&quot;,&quot;Australia/Tasmania&quot;,&quot;Australia/Victoria&quot;,&quot;Australia/West&quot;,&quot;Australia/Yancowinna&quot;,&quot;Brazil/Acre&quot;,&quot;Brazil/DeNoronha&quot;,&quot;Brazil/East&quot;,&quot;Brazil/West&quot;,&quot;CET&quot;,&quot;CST6CDT&quot;,&quot;Canada/Atlantic&quot;,&quot;Canada/Central&quot;,&quot;Canada/Eastern&quot;,&quot;Canada/Mountain&quot;,&quot;Canada/Newfoundland&quot;,&quot;Canada/Pacific&quot;,&quot;Canada/Saskatchewan&quot;,&quot;Canada/Yukon&quot;,&quot;Chile/Continental&quot;,&quot;Chile/EasterIsland&quot;,&quot;Cuba&quot;,&quot;EET&quot;,&quot;EST5EDT&quot;,&quot;Egypt&quot;,&quot;Eire&quot;,&quot;Etc/GMT&quot;,&quot;Etc/GMT+0&quot;,&quot;Etc/GMT+1&quot;,&quot;Etc/GMT+10&quot;,&quot;Etc/GMT+11&quot;,&quot;Etc/GMT+12&quot;,&quot;Etc/GMT+2&quot;,&quot;Etc/GMT+3&quot;,&quot;Etc/GMT+4&quot;,&quot;Etc/GMT+5&quot;,&quot;Etc/GMT+6&quot;,&quot;Etc/GMT+7&quot;,&quot;Etc/GMT+8&quot;,&quot;Etc/GMT+9&quot;,&quot;Etc/GMT-0&quot;,&quot;Etc/GMT-1&quot;,&quot;Etc/GMT-10&quot;,&quot;Etc/GMT-11&quot;,&quot;Etc/GMT-12&quot;,&quot;Etc/GMT-13&quot;,&quot;Etc/GMT-14&quot;,&quot;Etc/GMT-2&quot;,&quot;Etc/GMT-3&quot;,&quot;Etc/GMT-4&quot;,&quot;Etc/GMT-5&quot;,&quot;Etc/GMT-6&quot;,&quot;Etc/GMT-7&quot;,&quot;Etc/GMT-8&quot;,&quot;Etc/GMT-9&quot;,&quot;Etc/GMT0&quot;,&quot;Etc/Greenwich&quot;,&quot;Etc/UCT&quot;,&quot;Etc/UTC&quot;,&quot;Etc/Universal&quot;,&quot;Etc/Zulu&quot;,&quot;Europe/Amsterdam&quot;,&quot;Europe/Andorra&quot;,&quot;Europe/Astrakhan&quot;,&quot;Europe/Athens&quot;,&quot;Europe/Belfast&quot;,&quot;Europe/Belgrade&quot;,&quot;Europe/Berlin&quot;,&quot;Europe/Bratislava&quot;,&quot;Europe/Brussels&quot;,&quot;Europe/Bucharest&quot;,&quot;Europe/Budapest&quot;,&quot;Europe/Busingen&quot;,&quot;Europe/Chisinau&quot;,&quot;Europe/Copenhagen&quot;,&quot;Europe/Dublin&quot;,&quot;Europe/Gibraltar&quot;,&quot;Europe/Guernsey&quot;,&quot;Europe/Helsinki&quot;,&quot;Europe/Isle_of_Man&quot;,&quot;Europe/Istanbul&quot;,&quot;Europe/Jersey&quot;,&quot;Europe/Kaliningrad&quot;,&quot;Europe/Kiev&quot;,&quot;Europe/Kirov&quot;,&quot;Europe/Kyiv&quot;,&quot;Europe/Lisbon&quot;,&quot;Europe/Ljubljana&quot;,&quot;Europe/London&quot;,&quot;Europe/Luxembourg&quot;,&quot;Europe/Madrid&quot;,&quot;Europe/Malta&quot;,&quot;Europe/Mariehamn&quot;,&quot;Europe/Minsk&quot;,&quot;Europe/Monaco&quot;,&quot;Europe/Moscow&quot;,&quot;Europe/Nicosia&quot;,&quot;Europe/Oslo&quot;,&quot;Europe/Paris&quot;,&quot;Europe/Podgorica&quot;,&quot;Europe/Prague&quot;,&quot;Europe/Riga&quot;,&quot;Europe/Rome&quot;,&quot;Europe/Samara&quot;,&quot;Europe/San_Marino&quot;,&quot;Europe/Sarajevo&quot;,&quot;Europe/Saratov&quot;,&quot;Europe/Simferopol&quot;,&quot;Europe/Skopje&quot;,&quot;Europe/Sofia&quot;,&quot;Europe/Stockholm&quot;,&quot;Europe/Tallinn&quot;,&quot;Europe/Tirane&quot;,&quot;Europe/Tiraspol&quot;,&quot;Europe/Ulyanovsk&quot;,&quot;Europe/Uzhgorod&quot;,&quot;Europe/Vaduz&quot;,&quot;Europe/Vatican&quot;,&quot;Europe/Vienna&quot;,&quot;Europe/Vilnius&quot;,&quot;Europe/Volgograd&quot;,&quot;Europe/Warsaw&quot;,&quot;Europe/Zagreb&quot;,&quot;Europe/Zaporozhye&quot;,&quot;Europe/Zurich&quot;,&quot;GB&quot;,&quot;GB-Eire&quot;,&quot;GMT&quot;,&quot;GMT+0&quot;,&quot;GMT-0&quot;,&quot;GMT0&quot;,&quot;Greenwich&quot;,&quot;Hongkong&quot;,&quot;Iceland&quot;,&quot;Indian/Antananarivo&quot;,&quot;Indian/Chagos&quot;,&quot;Indian/Christmas&quot;,&quot;Indian/Cocos&quot;,&quot;Indian/Comoro&quot;,&quot;Indian/Kerguelen&quot;,&quot;Indian/Mahe&quot;,&quot;Indian/Maldives&quot;,&quot;Indian/Mauritius&quot;,&quot;Indian/Mayotte&quot;,&quot;Indian/Reunion&quot;,&quot;Iran&quot;,&quot;Israel&quot;,&quot;Jamaica&quot;,&quot;Japan&quot;,&quot;Kwajalein&quot;,&quot;Libya&quot;,&quot;MET&quot;,&quot;MST7MDT&quot;,&quot;Mexico/BajaNorte&quot;,&quot;Mexico/BajaSur&quot;,&quot;Mexico/General&quot;,&quot;NZ&quot;,&quot;NZ-CHAT&quot;,&quot;Navajo&quot;,&quot;PRC&quot;,&quot;PST8PDT&quot;,&quot;Pacific/Apia&quot;,&quot;Pacific/Auckland&quot;,&quot;Pacific/Bougainville&quot;,&quot;Pacific/Chatham&quot;,&quot;Pacific/Chuuk&quot;,&quot;Pacific/Easter&quot;,&quot;Pacific/Efate&quot;,&quot;Pacific/Enderbury&quot;,&quot;Pacific/Fakaofo&quot;,&quot;Pacific/Fiji&quot;,&quot;Pacific/Funafuti&quot;,&quot;Pacific/Galapagos&quot;,&quot;Pacific/Gambier&quot;,&quot;Pacific/Guadalcanal&quot;,&quot;Pacific/Guam&quot;,&quot;Pacific/Honolulu&quot;,&quot;Pacific/Johnston&quot;,&quot;Pacific/Kanton&quot;,&quot;Pacific/Kiritimati&quot;,&quot;Pacific/Kosrae&quot;,&quot;Pacific/Kwajalein&quot;,&quot;Pacific/Majuro&quot;,&quot;Pacific/Marquesas&quot;,&quot;Pacific/Midway&quot;,&quot;Pacific/Nauru&quot;,&quot;Pacific/Niue&quot;,&quot;Pacific/Norfolk&quot;,&quot;Pacific/Noumea&quot;,&quot;Pacific/Pago_Pago&quot;,&quot;Pacific/Palau&quot;,&quot;Pacific/Pitcairn&quot;,&quot;Pacific/Pohnpei&quot;,&quot;Pacific/Ponape&quot;,&quot;Pacific/Port_Moresby&quot;,&quot;Pacific/Rarotonga&quot;,&quot;Pacific/Saipan&quot;,&quot;Pacific/Samoa&quot;,&quot;Pacific/Tahiti&quot;,&quot;Pacific/Tarawa&quot;,&quot;Pacific/Tongatapu&quot;,&quot;Pacific/Truk&quot;,&quot;Pacific/Wake&quot;,&quot;Pacific/Wallis&quot;,&quot;Pacific/Yap&quot;,&quot;Poland&quot;,&quot;Portugal&quot;,&quot;ROK&quot;,&quot;Singapore&quot;,&quot;Turkey&quot;,&quot;UCT&quot;,&quot;US/Alaska&quot;,&quot;US/Aleutian&quot;,&quot;US/Arizona&quot;,&quot;US/Central&quot;,&quot;US/East-Indiana&quot;,&quot;US/Eastern&quot;,&quot;US/Hawaii&quot;,&quot;US/Indiana-Starke&quot;,&quot;US/Michigan&quot;,&quot;US/Mountain&quot;,&quot;US/Pacific&quot;,&quot;US/Samoa&quot;,&quot;UTC&quot;,&quot;Universal&quot;,&quot;W-SU&quot;,&quot;WET&quot;,&quot;Zulu&quot;],&quot;requiresPageReload&quot;:true},&quot;dateFormat:scaled&quot;:{&quot;name&quot;:&quot;Scaled date format&quot;,&quot;type&quot;:&quot;json&quot;,&quot;value&quot;:&quot;[\n  [\&quot;\&quot;, \&quot;HH:mm:ss.SSS\&quot;],\n  [\&quot;PT1S\&quot;, \&quot;HH:mm:ss\&quot;],\n  [\&quot;PT1M\&quot;, \&quot;HH:mm\&quot;],\n  [\&quot;PT1H\&quot;, \&quot;YYYY-MM-DD HH:mm\&quot;],\n  [\&quot;P1DT\&quot;, \&quot;YYYY-MM-DD\&quot;],\n  [\&quot;P1YT\&quot;, \&quot;YYYY\&quot;]\n]&quot;,&quot;description&quot;:&quot;Values that define the format used in situations where time-based data is rendered in order, and formatted timestamps should adapt to the interval between measurements. Keys are &lt;a href=\&quot;https://en.wikipedia.org/wiki/ISO_8601#Time_intervals\&quot; target=\&quot;_blank\&quot; rel=\&quot;noopener noreferrer\&quot;&gt;ISO8601 intervals&lt;/a&gt;.&quot;},&quot;dateFormat:dow&quot;:{&quot;name&quot;:&quot;Day of week&quot;,&quot;value&quot;:&quot;Sunday&quot;,&quot;description&quot;:&quot;What day should weeks start on?&quot;,&quot;type&quot;:&quot;select&quot;,&quot;options&quot;:[&quot;Sunday&quot;,&quot;Monday&quot;,&quot;Tuesday&quot;,&quot;Wednesday&quot;,&quot;Thursday&quot;,&quot;Friday&quot;,&quot;Saturday&quot;]},&quot;dateNanosFormat&quot;:{&quot;name&quot;:&quot;Date with nanoseconds format&quot;,&quot;value&quot;:&quot;MMM D, YYYY @ HH:mm:ss.SSSSSSSSS&quot;,&quot;description&quot;:&quot;Used for the &lt;a href=\&quot;https://opensearch.org/docs/latest/opensearch/units/\&quot; target=\&quot;_blank\&quot; rel=\&quot;noopener noreferrer\&quot;&gt;date_nanos&lt;/a&gt; datatype of OpenSearch&quot;},&quot;truncate:maxHeight&quot;:{&quot;name&quot;:&quot;Maximum table cell height&quot;,&quot;value&quot;:115,&quot;description&quot;:&quot;The maximum height that a cell in a table should occupy. Set to 0 to disable truncation&quot;},&quot;buildNum&quot;:{&quot;readonly&quot;:true},&quot;defaultRoute&quot;:{&quot;name&quot;:&quot;Default route&quot;,&quot;value&quot;:&quot;/app/home&quot;,&quot;description&quot;:&quot;This setting specifies the default route when opening OpenSearch Dashboards, You can use this setting to modify the landing page when opening OpenSearch Dashboards, The route must be a relative URL.&quot;},&quot;pageNavigation&quot;:{&quot;name&quot;:&quot;Side nav style&quot;,&quot;value&quot;:&quot;modern&quot;,&quot;description&quot;:&quot;Change the style of navigation&quot;,&quot;type&quot;:&quot;select&quot;,&quot;options&quot;:[&quot;modern&quot;,&quot;legacy&quot;],&quot;optionLabels&quot;:{&quot;modern&quot;:&quot;Modern&quot;,&quot;legacy&quot;:&quot;Legacy&quot;},&quot;category&quot;:[&quot;appearance&quot;]},&quot;notifications:banner&quot;:{&quot;name&quot;:&quot;Custom banner notification&quot;,&quot;value&quot;:&quot;&quot;,&quot;type&quot;:&quot;markdown&quot;,&quot;description&quot;:&quot;A custom banner intended for temporary notices to all users. &lt;a href=\&quot;https://help.github.com/articles/basic-writing-and-formatting-syntax/\&quot;\n            target=\&quot;_blank\&quot; rel=\&quot;noopener noreferrer\&quot;&gt;Markdown supported&lt;/a&gt;.&quot;,&quot;category&quot;:[&quot;notifications&quot;]},&quot;notifications:lifetime:banner&quot;:{&quot;name&quot;:&quot;Banner notification lifetime&quot;,&quot;value&quot;:3000000,&quot;description&quot;:&quot;The time in milliseconds which a banner notification will be displayed on-screen for. Setting to Infinity will disable the countdown.&quot;,&quot;type&quot;:&quot;number&quot;,&quot;category&quot;:[&quot;notifications&quot;]},&quot;notifications:lifetime:error&quot;:{&quot;name&quot;:&quot;Error notification lifetime&quot;,&quot;value&quot;:300000,&quot;description&quot;:&quot;The time in milliseconds which an error notification will be displayed on-screen for. Setting to Infinity will disable.&quot;,&quot;type&quot;:&quot;number&quot;,&quot;category&quot;:[&quot;notifications&quot;]},&quot;notifications:lifetime:warning&quot;:{&quot;name&quot;:&quot;Warning notification lifetime&quot;,&quot;value&quot;:10000,&quot;description&quot;:&quot;The time in milliseconds which a warning notification will be displayed on-screen for. Setting to Infinity will disable.&quot;,&quot;type&quot;:&quot;number&quot;,&quot;category&quot;:[&quot;notifications&quot;]},&quot;notifications:lifetime:info&quot;:{&quot;name&quot;:&quot;Info notification lifetime&quot;,&quot;value&quot;:5000,&quot;description&quot;:&quot;The time in milliseconds which an information notification will be displayed on-screen for. Setting to Infinity will disable.&quot;,&quot;type&quot;:&quot;number&quot;,&quot;category&quot;:[&quot;notifications&quot;]},&quot;theme:enableUserControl&quot;:{&quot;name&quot;:&quot;Enable user control&quot;,&quot;value&quot;:false,&quot;description&quot;:&quot;Enable users to control theming and dark or light mode via \&quot;Appearance\&quot; control in top navigation. When true, those settings can no longer be set globally by administrators.&quot;,&quot;requiresPageReload&quot;:true,&quot;category&quot;:[&quot;appearance&quot;],&quot;type&quot;:&quot;boolean&quot;},&quot;theme:darkMode&quot;:{&quot;name&quot;:&quot;Dark mode&quot;,&quot;value&quot;:false,&quot;description&quot;:&quot;Enable a dark mode for the OpenSearch Dashboards UI. A page refresh is required for the setting to be applied.&quot;,&quot;requiresPageReload&quot;:true,&quot;preferBrowserSetting&quot;:true,&quot;category&quot;:[&quot;appearance&quot;],&quot;type&quot;:&quot;boolean&quot;},&quot;theme:version&quot;:{&quot;name&quot;:&quot;Theme version&quot;,&quot;value&quot;:&quot;Next (preview)&quot;,&quot;type&quot;:&quot;select&quot;,&quot;options&quot;:[&quot;v7&quot;,&quot;Next (preview)&quot;,&quot;v9&quot;],&quot;optionLabels&quot;:{&quot;v7&quot;:&quot;v7&quot;,&quot;v8&quot;:&quot;Next (preview)&quot;,&quot;v9&quot;:&quot;v9 (preview)&quot;},&quot;description&quot;:&quot;&lt;p&gt;Switch between the themes used for the current and next versions of OpenSearch Dashboards. A page refresh is required for the setting to be applied.&lt;/p&gt;&lt;p&gt;&lt;a href=\&quot;https://forum.opensearch.org/t/feedback-on-dark-mode-experience/15725\&quot;&gt;Theme feedback&lt;/a&gt;&lt;/p&gt;&quot;,&quot;requiresPageReload&quot;:true,&quot;preferBrowserSetting&quot;:true,&quot;category&quot;:[&quot;appearance&quot;]},&quot;state:storeInSessionStorage&quot;:{&quot;name&quot;:&quot;Store URLs in session storage&quot;,&quot;value&quot;:false,&quot;description&quot;:&quot;The URL can sometimes grow to be too large for some browsers to handle. To counter-act this we are testing if storing parts of the URL in session storage could help. Please let us know how it goes!&quot;},&quot;enableAIFeatures&quot;:{&quot;name&quot;:&quot;Enable AI features&quot;,&quot;value&quot;:true,&quot;description&quot;:&quot;The setting to enable all AI-powered features in OpenSearch Dashboards.&quot;,&quot;requiresPageReload&quot;:true,&quot;scope&quot;:&quot;dashboard_admin&quot;},&quot;visualization:tileMap:maxPrecision&quot;:{&quot;name&quot;:&quot;Maximum tile map precision&quot;,&quot;value&quot;:7,&quot;description&quot;:&quot;The maximum geoHash precision displayed on tile maps: 7 is high, 10 is very high, 12 is the max. &lt;a href=\&quot;https://opensearch.org/docs/latest/aggregations/bucket/geohash-grid/\&quot;\n            target=\&quot;_blank\&quot; rel=\&quot;noopener noreferrer\&quot;&gt;Explanation of cell dimensions&lt;/a&gt;&quot;,&quot;category&quot;:[&quot;visualization&quot;]},&quot;visualization:tileMap:WMSdefaults&quot;:{&quot;name&quot;:&quot;Default WMS properties&quot;,&quot;value&quot;:&quot;{\n  \&quot;enabled\&quot;: false,\n  \&quot;url\&quot;: \&quot;\&quot;,\n  \&quot;options\&quot;: {\n    \&quot;version\&quot;: \&quot;\&quot;,\n    \&quot;layers\&quot;: \&quot;\&quot;,\n    \&quot;format\&quot;: \&quot;image/png\&quot;,\n    \&quot;transparent\&quot;: true,\n    \&quot;attribution\&quot;: \&quot;\&quot;,\n    \&quot;styles\&quot;: \&quot;\&quot;\n  }\n}&quot;,&quot;type&quot;:&quot;json&quot;,&quot;description&quot;:&quot;Default &lt;a href=\&quot;https://leafletjs.com/reference.html#tilelayer-wms\&quot; target=\&quot;_blank\&quot; rel=\&quot;noopener noreferrer\&quot;&gt;properties&lt;/a&gt; for the WMS map server support in the coordinate map&quot;,&quot;category&quot;:[&quot;visualization&quot;]},&quot;csv:separator&quot;:{&quot;name&quot;:&quot;CSV separator&quot;,&quot;value&quot;:&quot;,&quot;,&quot;description&quot;:&quot;Separate exported values with this string&quot;},&quot;csv:quoteValues&quot;:{&quot;name&quot;:&quot;Quote CSV values&quot;,&quot;value&quot;:true,&quot;description&quot;:&quot;Should values be quoted in csv exports?&quot;},&quot;metaFields&quot;:{&quot;name&quot;:&quot;Meta fields&quot;,&quot;value&quot;:[&quot;_source&quot;,&quot;_id&quot;,&quot;_type&quot;,&quot;_index&quot;,&quot;_score&quot;],&quot;description&quot;:&quot;Fields that exist outside of _source to merge into our document when displaying it&quot;},&quot;doc_table:highlight&quot;:{&quot;name&quot;:&quot;Highlight results&quot;,&quot;value&quot;:true,&quot;description&quot;:&quot;Highlight results in Discover and Saved Searches Dashboard. Highlighting makes requests slow when working on big documents.&quot;,&quot;category&quot;:[&quot;discover&quot;]},&quot;query:queryString:options&quot;:{&quot;name&quot;:&quot;Query string options&quot;,&quot;value&quot;:&quot;{ \&quot;analyze_wildcard\&quot;: true }&quot;,&quot;description&quot;:&quot;&lt;a href=\&quot;https://opensearch.org/docs/latest/opensearch/query-dsl/index/\&quot; target=\&quot;_blank\&quot; rel=\&quot;noopener noreferrer\&quot;&gt;Options&lt;/a&gt; for the lucene query string parser. Is only used when \&quot;Query language\&quot; is set to Lucene.&quot;,&quot;type&quot;:&quot;json&quot;},&quot;query:allowLeadingWildcards&quot;:{&quot;name&quot;:&quot;Allow leading wildcards in query&quot;,&quot;value&quot;:true,&quot;description&quot;:&quot;When set, * is allowed as the first character in a query clause. Currently only applies when experimental query features are enabled in the query bar. To disallow leading wildcards in basic lucene queries, use query:queryString:options.&quot;},&quot;search:queryLanguage&quot;:{&quot;name&quot;:&quot;Query language&quot;,&quot;value&quot;:&quot;kuery&quot;,&quot;description&quot;:&quot;Query language used by the query bar. DQL is a new language built specifically for OpenSearch Dashboards.&quot;,&quot;type&quot;:&quot;select&quot;,&quot;options&quot;:[&quot;lucene&quot;,&quot;kuery&quot;],&quot;optionLabels&quot;:{&quot;lucene&quot;:&quot;Lucene&quot;,&quot;kuery&quot;:&quot;DQL&quot;}},&quot;sort:options&quot;:{&quot;name&quot;:&quot;Sort options&quot;,&quot;value&quot;:&quot;{ \&quot;unmapped_type\&quot;: \&quot;boolean\&quot; }&quot;,&quot;description&quot;:&quot;&lt;a href=\&quot;https://opensearch.org/docs/latest/opensearch/ux/#sort-results\&quot; target=\&quot;_blank\&quot; rel=\&quot;noopener noreferrer\&quot;&gt;Options&lt;/a&gt; for the OpenSearch sort parameter&quot;,&quot;type&quot;:&quot;json&quot;},&quot;defaultIndex&quot;:{&quot;name&quot;:&quot;Default index&quot;,&quot;value&quot;:null,&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;The index to access if no index is set&quot;,&quot;scope&quot;:&quot;global&quot;},&quot;courier:ignoreFilterIfFieldNotInIndex&quot;:{&quot;name&quot;:&quot;Ignore filter(s)&quot;,&quot;value&quot;:false,&quot;description&quot;:&quot;This configuration enhances support for dashboards containing visualizations accessing dissimilar indexes. When disabled, all filters are applied to all visualizations. When enabled, filter(s) will be ignored for a visualization when the visualization&#x27;s index does not contain the filtering field.&quot;,&quot;category&quot;:[&quot;search&quot;]},&quot;courier:setRequestPreference&quot;:{&quot;name&quot;:&quot;Request preference&quot;,&quot;value&quot;:&quot;sessionId&quot;,&quot;options&quot;:[&quot;sessionId&quot;,&quot;custom&quot;,&quot;none&quot;],&quot;optionLabels&quot;:{&quot;sessionId&quot;:&quot;Session ID&quot;,&quot;custom&quot;:&quot;Custom&quot;,&quot;none&quot;:&quot;None&quot;},&quot;type&quot;:&quot;select&quot;,&quot;description&quot;:&quot;Allows you to set which shards handle your search requests.\n          &lt;ul&gt;\n            &lt;li&gt;&lt;strong&gt;Session ID:&lt;/strong&gt; restricts operations to execute all search requests on the same shards.\n              This has the benefit of reusing shard caches across requests.&lt;/li&gt;\n            &lt;li&gt;&lt;strong&gt;Custom:&lt;/strong&gt; allows you to define a your own preference.\n              Use &lt;strong&gt;&#x27;courier:customRequestPreference&#x27;&lt;/strong&gt; to customize your preference value.&lt;/li&gt;\n            &lt;li&gt;&lt;strong&gt;None:&lt;/strong&gt; means do not set a preference.\n              This might provide better performance because requests can be spread across all shard copies.\n              However, results might be inconsistent because different shards might be in different refresh states.&lt;/li&gt;\n          &lt;/ul&gt;&quot;,&quot;category&quot;:[&quot;search&quot;]},&quot;courier:customRequestPreference&quot;:{&quot;name&quot;:&quot;Custom request preference&quot;,&quot;value&quot;:&quot;_local&quot;,&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;&lt;a href=\&quot;https://opensearch.org/docs/latest/opensearch/popular-api\&quot; target=\&quot;_blank\&quot; rel=\&quot;noopener noreferrer\&quot;&gt;Request Preference&lt;/a&gt; used when &lt;strong&gt;courier:setRequestPreference&lt;/strong&gt; is set to \&quot;custom\&quot;.&quot;,&quot;category&quot;:[&quot;search&quot;]},&quot;courier:maxConcurrentShardRequests&quot;:{&quot;name&quot;:&quot;Max Concurrent Shard Requests&quot;,&quot;value&quot;:0,&quot;type&quot;:&quot;number&quot;,&quot;description&quot;:&quot;Controls the &lt;a href=\&quot;https://opensearch.org/docs/latest/opensearch/query-dsl/full-text/#multi-match\&quot;\n            target=\&quot;_blank\&quot; rel=\&quot;noopener noreferrer\&quot; &gt;max_concurrent_shard_requests&lt;/a&gt; setting used for _msearch requests sent by OpenSearch Dashboards. Set to 0 to disable this config and use the OpenSearch default.&quot;,&quot;category&quot;:[&quot;search&quot;]},&quot;courier:batchSearches&quot;:{&quot;name&quot;:&quot;Batch concurrent searches&quot;,&quot;value&quot;:false,&quot;type&quot;:&quot;boolean&quot;,&quot;description&quot;:&quot;When disabled, dashboard panels will load individually, and search requests will terminate when users navigate\n           away or update the query. When enabled, dashboard panels will load together when all of the data is loaded, and\n           searches will not terminate.&quot;,&quot;category&quot;:[&quot;search&quot;]},&quot;search:includeFrozen&quot;:{&quot;name&quot;:&quot;Search in frozen indices&quot;,&quot;description&quot;:&quot;Will include &lt;a href=\&quot;https://opensearch.org/docs/latest/opensearch/index-data\&quot;\n        target=\&quot;_blank\&quot; rel=\&quot;noopener noreferrer\&quot;&gt;frozen indices&lt;/a&gt; in results if enabled. Searching through frozen indices\n        might increase the search time.&quot;,&quot;value&quot;:false,&quot;category&quot;:[&quot;search&quot;]},&quot;histogram:barTarget&quot;:{&quot;name&quot;:&quot;Target bars&quot;,&quot;value&quot;:50,&quot;description&quot;:&quot;Attempt to generate around this many bars when using \&quot;auto\&quot; interval in date histograms&quot;},&quot;histogram:maxBars&quot;:{&quot;name&quot;:&quot;Maximum bars&quot;,&quot;value&quot;:100,&quot;description&quot;:&quot;Never show more than this many bars in date histograms, scale values if needed&quot;},&quot;history:limit&quot;:{&quot;name&quot;:&quot;History limit&quot;,&quot;value&quot;:10,&quot;description&quot;:&quot;In fields that have history (e.g. query inputs), show this many recent values&quot;},&quot;shortDots:enable&quot;:{&quot;name&quot;:&quot;Shorten fields&quot;,&quot;value&quot;:false,&quot;description&quot;:&quot;Shorten long fields, for example, instead of foo.bar.baz, show f.b.baz&quot;},&quot;format:defaultTypeMap&quot;:{&quot;name&quot;:&quot;Field type format name&quot;,&quot;value&quot;:&quot;{\n  \&quot;ip\&quot;: { \&quot;id\&quot;: \&quot;ip\&quot;, \&quot;params\&quot;: {} },\n  \&quot;date\&quot;: { \&quot;id\&quot;: \&quot;date\&quot;, \&quot;params\&quot;: {} },\n  \&quot;date_nanos\&quot;: { \&quot;id\&quot;: \&quot;date_nanos\&quot;, \&quot;params\&quot;: {}, \&quot;opensearch\&quot;: true },\n  \&quot;number\&quot;: { \&quot;id\&quot;: \&quot;number\&quot;, \&quot;params\&quot;: {} },\n  \&quot;boolean\&quot;: { \&quot;id\&quot;: \&quot;boolean\&quot;, \&quot;params\&quot;: {} },\n  \&quot;_source\&quot;: { \&quot;id\&quot;: \&quot;_source\&quot;, \&quot;params\&quot;: {} },\n  \&quot;_default_\&quot;: { \&quot;id\&quot;: \&quot;string\&quot;, \&quot;params\&quot;: {} }\n}&quot;,&quot;type&quot;:&quot;json&quot;,&quot;description&quot;:&quot;Map of the format name to use by default for each field type. \&quot;_default_\&quot; is used if the field type is not mentioned explicitly&quot;},&quot;format:number:defaultPattern&quot;:{&quot;name&quot;:&quot;Number format&quot;,&quot;value&quot;:&quot;0,0.[000]&quot;,&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;Default &lt;a href=\&quot;http://numeraljs.com/\&quot; target=\&quot;_blank\&quot; rel=\&quot;noopener noreferrer\&quot;&gt;numeral format&lt;/a&gt; for the \&quot;number\&quot; format&quot;},&quot;format:percent:defaultPattern&quot;:{&quot;name&quot;:&quot;Percent format&quot;,&quot;value&quot;:&quot;0,0.[000]%&quot;,&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;Default &lt;a href=\&quot;http://numeraljs.com/\&quot; target=\&quot;_blank\&quot; rel=\&quot;noopener noreferrer\&quot;&gt;numeral format&lt;/a&gt; for the \&quot;percent\&quot; format&quot;},&quot;format:bytes:defaultPattern&quot;:{&quot;name&quot;:&quot;Bytes format&quot;,&quot;value&quot;:&quot;0,0.[0]b&quot;,&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;Default &lt;a href=\&quot;http://numeraljs.com/\&quot; target=\&quot;_blank\&quot; rel=\&quot;noopener noreferrer\&quot;&gt;numeral format&lt;/a&gt; for the \&quot;bytes\&quot; format&quot;},&quot;format:currency:defaultPattern&quot;:{&quot;name&quot;:&quot;Currency format&quot;,&quot;value&quot;:&quot;($0,0.[00])&quot;,&quot;type&quot;:&quot;string&quot;,&quot;description&quot;:&quot;Default &lt;a href=\&quot;http://numeraljs.com/\&quot; target=\&quot;_blank\&quot; rel=\&quot;noopener noreferrer\&quot;&gt;numeral format&lt;/a&gt; for the \&quot;currency\&quot; format&quot;},&quot;format:number:defaultLocale&quot;:{&quot;name&quot;:&quot;Formatting locale&quot;,&quot;value&quot;:&quot;en&quot;,&quot;type&quot;:&quot;select&quot;,&quot;options&quot;:[&quot;en&quot;,&quot;be-nl&quot;,&quot;chs&quot;,&quot;cs&quot;,&quot;da-dk&quot;,&quot;de-ch&quot;,&quot;de&quot;,&quot;en-gb&quot;,&quot;es-ES&quot;,&quot;es&quot;,&quot;et&quot;,&quot;fi&quot;,&quot;fr-CA&quot;,&quot;fr-ch&quot;,&quot;fr&quot;,&quot;hu&quot;,&quot;it&quot;,&quot;ja&quot;,&quot;nl-nl&quot;,&quot;pl&quot;,&quot;pt-br&quot;,&quot;pt-pt&quot;,&quot;ru-UA&quot;,&quot;ru&quot;,&quot;sk&quot;,&quot;th&quot;,&quot;tr&quot;,&quot;uk-UA&quot;],&quot;optionLabels&quot;:{&quot;be-nl&quot;:&quot;Dutch (Belgium)&quot;,&quot;chs&quot;:&quot;Simplified Chinese&quot;,&quot;cs&quot;:&quot;Czech&quot;,&quot;da-dk&quot;:&quot;Danish (Denmark)&quot;,&quot;de-ch&quot;:&quot;German (Switzerland)&quot;,&quot;de&quot;:&quot;German&quot;,&quot;en-gb&quot;:&quot;English (UK)&quot;,&quot;es-ES&quot;:&quot;Spanish (Spain)&quot;,&quot;es&quot;:&quot;Spanish&quot;,&quot;et&quot;:&quot;Estonian&quot;,&quot;fi&quot;:&quot;Finnish&quot;,&quot;fr-CA&quot;:&quot;French (Canada)&quot;,&quot;fr-ch&quot;:&quot;French (Switzerland)&quot;,&quot;fr&quot;:&quot;French&quot;,&quot;hu&quot;:&quot;Hungarian&quot;,&quot;it&quot;:&quot;Italian&quot;,&quot;ja&quot;:&quot;Japanese&quot;,&quot;nl-nl&quot;:&quot;Dutch (Netherlands)&quot;,&quot;pl&quot;:&quot;Polish&quot;,&quot;pt-br&quot;:&quot;Portuguese (Brazil)&quot;,&quot;pt-pt&quot;:&quot;Portuguese&quot;,&quot;ru-UA&quot;:&quot;Russian (Ukraine)&quot;,&quot;ru&quot;:&quot;Russian&quot;,&quot;sk&quot;:&quot;Slovak&quot;,&quot;th&quot;:&quot;Thai&quot;,&quot;tr&quot;:&quot;Turkish&quot;,&quot;uk-UA&quot;:&quot;Ukrainian&quot;},&quot;description&quot;:&quot;&lt;a href=\&quot;http://numeraljs.com/\&quot; target=\&quot;_blank\&quot; rel=\&quot;noopener noreferrer\&quot;&gt;Numeral language&lt;/a&gt; locale&quot;},&quot;data:withLongNumerals&quot;:{&quot;name&quot;:&quot;Extend Numeric Precision&quot;,&quot;value&quot;:true,&quot;description&quot;:&quot;Turn on for precise handling of extremely large numbers. Turn off to optimize performance when high precision for large values isn&#x27;t required.&quot;},&quot;timepicker:refreshIntervalDefaults&quot;:{&quot;name&quot;:&quot;Time filter refresh interval&quot;,&quot;value&quot;:&quot;{\n  \&quot;pause\&quot;: false,\n  \&quot;value\&quot;: 0\n}&quot;,&quot;type&quot;:&quot;json&quot;,&quot;description&quot;:&quot;The timefilter&#x27;s default refresh interval. The \&quot;value\&quot; needs to be specified in milliseconds.&quot;,&quot;requiresPageReload&quot;:true},&quot;timepicker:timeDefaults&quot;:{&quot;name&quot;:&quot;Time filter defaults&quot;,&quot;value&quot;:&quot;{\n  \&quot;from\&quot;: \&quot;now-15m\&quot;,\n  \&quot;to\&quot;: \&quot;now\&quot;\n}&quot;,&quot;type&quot;:&quot;json&quot;,&quot;description&quot;:&quot;The timefilter selection to use when OpenSearch Dashboards is started without one&quot;,&quot;requiresPageReload&quot;:true},&quot;timepicker:quickRanges&quot;:{&quot;name&quot;:&quot;Time filter quick ranges&quot;,&quot;value&quot;:&quot;[\n  {\n    \&quot;from\&quot;: \&quot;now/d\&quot;,\n    \&quot;to\&quot;: \&quot;now/d\&quot;,\n    \&quot;display\&quot;: \&quot;Today\&quot;\n  },\n  {\n    \&quot;from\&quot;: \&quot;now/w\&quot;,\n    \&quot;to\&quot;: \&quot;now/w\&quot;,\n    \&quot;display\&quot;: \&quot;This week\&quot;\n  },\n  {\n    \&quot;from\&quot;: \&quot;now-15m\&quot;,\n    \&quot;to\&quot;: \&quot;now\&quot;,\n    \&quot;display\&quot;: \&quot;Last 15 minutes\&quot;\n  },\n  {\n    \&quot;from\&quot;: \&quot;now-30m\&quot;,\n    \&quot;to\&quot;: \&quot;now\&quot;,\n    \&quot;display\&quot;: \&quot;Last 30 minutes\&quot;\n  },\n  {\n    \&quot;from\&quot;: \&quot;now-1h\&quot;,\n    \&quot;to\&quot;: \&quot;now\&quot;,\n    \&quot;display\&quot;: \&quot;Last 1 hour\&quot;\n  },\n  {\n    \&quot;from\&quot;: \&quot;now-24h\&quot;,\n    \&quot;to\&quot;: \&quot;now\&quot;,\n    \&quot;display\&quot;: \&quot;Last 24 hours\&quot;\n  },\n  {\n    \&quot;from\&quot;: \&quot;now-7d\&quot;,\n    \&quot;to\&quot;: \&quot;now\&quot;,\n    \&quot;display\&quot;: \&quot;Last 7 days\&quot;\n  },\n  {\n    \&quot;from\&quot;: \&quot;now-30d\&quot;,\n    \&quot;to\&quot;: \&quot;now\&quot;,\n    \&quot;display\&quot;: \&quot;Last 30 days\&quot;\n  },\n  {\n    \&quot;from\&quot;: \&quot;now-90d\&quot;,\n    \&quot;to\&quot;: \&quot;now\&quot;,\n    \&quot;display\&quot;: \&quot;Last 90 days\&quot;\n  },\n  {\n    \&quot;from\&quot;: \&quot;now-1y\&quot;,\n    \&quot;to\&quot;: \&quot;now\&quot;,\n    \&quot;display\&quot;: \&quot;Last 1 year\&quot;\n  }\n]&quot;,&quot;type&quot;:&quot;json&quot;,&quot;description&quot;:&quot;The list of ranges to show in the Quick section of the time filter. This should be an array of objects, with each object containing \&quot;from\&quot;, \&quot;to\&quot; (see &lt;a href=\&quot;https://opensearch.org/docs/latest/opensearch/units\&quot;\n            target=\&quot;_blank\&quot; rel=\&quot;noopener noreferrer\&quot;&gt;accepted formats&lt;/a&gt;), and \&quot;display\&quot; (the title to be displayed).&quot;},&quot;indexPattern:placeholder&quot;:{&quot;name&quot;:&quot;Index pattern placeholder&quot;,&quot;value&quot;:&quot;&quot;,&quot;description&quot;:&quot;The placeholder for the \&quot;Index pattern name\&quot; field in \&quot;Management &gt; Index Patterns &gt; Create Index Pattern\&quot;.&quot;},&quot;filters:pinnedByDefault&quot;:{&quot;name&quot;:&quot;Pin filters by default&quot;,&quot;value&quot;:false,&quot;description&quot;:&quot;Whether the filters should have a global state (be pinned) by default&quot;},&quot;filterEditor:suggestValues&quot;:{&quot;name&quot;:&quot;Filter editor suggest values&quot;,&quot;value&quot;:true,&quot;description&quot;:&quot;Set this property to false to prevent the filter editor from suggesting values for fields.&quot;},&quot;query:enhancements:enabled&quot;:{&quot;name&quot;:&quot;Enable query enhancements&quot;,&quot;value&quot;:false,&quot;description&quot;:&quot;\n          &lt;strong&gt;Experimental&lt;/strong&gt;:\n          Allows users to query data using enhancements where available. If disabled,\n          only querying and querying languages that are considered production-ready are available to the user.&quot;,&quot;category&quot;:[&quot;search&quot;],&quot;requiresPageReload&quot;:true},&quot;query:enhancements:suggestValues&quot;:{&quot;name&quot;:&quot;Allow for Value Suggestion through the enhancements APIs&quot;,&quot;value&quot;:true,&quot;description&quot;:&quot;\n          Value Suggestion will be done through a SQL query to the enhancements APIs, sorted by the most frequent options\n          &lt;strong&gt;Experimental&lt;/strong&gt;: Requires query enhancements enabled.&quot;,&quot;category&quot;:[&quot;search&quot;],&quot;requiresPageReload&quot;:true},&quot;query:enhancements:suggestValuesLimit&quot;:{&quot;name&quot;:&quot;Enhancements Value Suggestion Limit&quot;,&quot;value&quot;:200,&quot;description&quot;:&quot;\n          The limit on number of values fetched\n          &lt;strong&gt;Experimental&lt;/strong&gt;: Requires query enhancements enabled.&quot;,&quot;category&quot;:[&quot;search&quot;],&quot;requiresPageReload&quot;:true},&quot;query:dataframe:hydrationStrategy&quot;:{&quot;name&quot;:&quot;Data frame hydration strategy&quot;,&quot;value&quot;:&quot;perSource&quot;,&quot;options&quot;:[&quot;perSource&quot;,&quot;perQuery&quot;],&quot;optionLabels&quot;:{&quot;perSource&quot;:&quot;On data source change&quot;,&quot;perQuery&quot;:&quot;Per query&quot;,&quot;perResponse&quot;:&quot;Per response&quot;,&quot;advanced&quot;:&quot;Advanced&quot;},&quot;type&quot;:&quot;select&quot;,&quot;description&quot;:&quot;Allows you to set how often the data frame schema is updated.\n          &lt;ul&gt;\n            &lt;li&gt;&lt;strong&gt;On data source change:&lt;/strong&gt; hydrates the schema when the data source changes.\n              For example, any time the index pattern is change the data frame schema is hydrated.&lt;/li&gt;\n            &lt;li&gt;&lt;strong&gt;Per query:&lt;/strong&gt; hydrates the schema per query to the data source.\n              Could be expensive, but ensures the schema of the data frame fits the result set.&lt;/li&gt;\n            &lt;li&gt;&lt;strong&gt;Per response:&lt;/strong&gt; hydrates the schema if the data source returns a schema.\n              &lt;strong&gt;Not Implemented&lt;/strong&gt;.&lt;/li&gt;\n            &lt;li&gt;&lt;strong&gt;Advanced:&lt;/strong&gt; hydrates the schema in intervals. If the schema hasn&#x27;t changed the interval increases.\n              If the schema has changed the interval resets. &lt;strong&gt;Not Implemented&lt;/strong&gt;.&lt;/li&gt;\n          &lt;/ul&gt;\n          &lt;strong&gt;Experimental&lt;/strong&gt;: Requires query enhancements enabled.&quot;,&quot;category&quot;:[&quot;search&quot;]},&quot;search:queryLanguageBlocklist&quot;:{&quot;name&quot;:&quot;Additional query languages blocklist&quot;,&quot;value&quot;:[&quot;none&quot;],&quot;description&quot;:&quot;Additional languages that are blocked from being used in the query editor.\n         &lt;strong&gt;Note&lt;/strong&gt;: DQL and Lucene will not be blocked even if set.&quot;},&quot;search:includeAllFields&quot;:{&quot;name&quot;:&quot;Include all fields in search request&quot;,&quot;value&quot;:false,&quot;description&quot;:&quot;\n        &lt;strong&gt;Experimental&lt;/strong&gt;:\n        Adds the &lt;code&gt;\&quot;fields\&quot;: [\&quot;*\&quot;]&lt;/code&gt; property to search request body&quot;,&quot;category&quot;:[&quot;search&quot;]},&quot;search:maxRecentDatasets&quot;:{&quot;name&quot;:&quot;Maximum datasets in recents list&quot;,&quot;value&quot;:4,&quot;type&quot;:&quot;number&quot;,&quot;category&quot;:[&quot;search&quot;]},&quot;savedObjects:perPage&quot;:{&quot;name&quot;:&quot;Objects per page&quot;,&quot;value&quot;:20,&quot;type&quot;:&quot;number&quot;,&quot;description&quot;:&quot;Number of objects to show per page in the load dialog&quot;},&quot;savedObjects:listingLimit&quot;:{&quot;name&quot;:&quot;Objects listing limit&quot;,&quot;type&quot;:&quot;number&quot;,&quot;value&quot;:1000,&quot;description&quot;:&quot;Number of objects to fetch for the listing pages&quot;},&quot;home:useNewHomePage&quot;:{&quot;name&quot;:&quot;Use New Home Page&quot;,&quot;value&quot;:false,&quot;description&quot;:&quot;Try the new home page&quot;,&quot;requiresPageReload&quot;:true},&quot;searchWorkspace:dismissGetStarted&quot;:{&quot;value&quot;:false,&quot;description&quot;:&quot;Dismiss get started section on search overview page&quot;,&quot;scope&quot;:&quot;user&quot;},&quot;visualize:enableLabs&quot;:{&quot;name&quot;:&quot;Enable experimental visualizations&quot;,&quot;value&quot;:true,&quot;description&quot;:&quot;Allows users to create, view, and edit experimental visualizations. If disabled,\n            only visualizations that are considered production-ready are available to the user.&quot;,&quot;category&quot;:[&quot;visualization&quot;]},&quot;visualize:disableBucketAgg&quot;:{&quot;name&quot;:&quot;Disable visualizations bucket aggregation types&quot;,&quot;value&quot;:[],&quot;description&quot;:&quot;A comma-separated list of bucket aggregations&#x27; names. e.g. significant_terms, terms.\n            Deactivates the specified bucket aggregations from visualizations.&quot;,&quot;category&quot;:[&quot;visualization&quot;]},&quot;visualization:regionmap:showWarnings&quot;:{&quot;name&quot;:&quot;Show region map warning&quot;,&quot;value&quot;:true,&quot;description&quot;:&quot;Whether the region map shows a warning when terms cannot be joined to a shape on the map.&quot;,&quot;category&quot;:[&quot;visualization&quot;]},&quot;visualization:regionmap:customVectorMapMaxSize&quot;:{&quot;name&quot;:&quot;Custom vector map size&quot;,&quot;value&quot;:1000,&quot;description&quot;:&quot;The maximum number of features to load from custom vector map. A higher number might have negative impact on browser rendering performance.&quot;,&quot;category&quot;:[&quot;visualization&quot;]},&quot;timeline:es.timefield&quot;:{&quot;name&quot;:&quot;Time field&quot;,&quot;value&quot;:&quot;@timestamp&quot;,&quot;description&quot;:&quot;Default field containing a timestamp when using .opensearch()&quot;,&quot;category&quot;:[&quot;timeline&quot;]},&quot;timeline:es.default_index&quot;:{&quot;name&quot;:&quot;Default index&quot;,&quot;value&quot;:&quot;_all&quot;,&quot;description&quot;:&quot;Default opensearch index to search with .opensearch()&quot;,&quot;category&quot;:[&quot;timeline&quot;]},&quot;timeline:target_buckets&quot;:{&quot;name&quot;:&quot;Target buckets&quot;,&quot;value&quot;:200,&quot;description&quot;:&quot;The number of buckets to shoot for when using auto intervals&quot;,&quot;category&quot;:[&quot;timeline&quot;]},&quot;timeline:max_buckets&quot;:{&quot;name&quot;:&quot;Maximum buckets&quot;,&quot;value&quot;:2000,&quot;description&quot;:&quot;The maximum number of buckets a single datasource can return&quot;,&quot;category&quot;:[&quot;timeline&quot;]},&quot;timeline:min_interval&quot;:{&quot;name&quot;:&quot;Minimum interval&quot;,&quot;value&quot;:&quot;1ms&quot;,&quot;description&quot;:&quot;The smallest interval that will be calculated when using \&quot;auto\&quot;&quot;,&quot;category&quot;:[&quot;timeline&quot;]},&quot;timeline:graphite.url&quot;:{&quot;name&quot;:&quot;Graphite URL&quot;,&quot;value&quot;:null,&quot;description&quot;:&quot;&lt;em&gt;[experimental]&lt;/em&gt; The URL of your graphite host&quot;,&quot;category&quot;:[&quot;timeline&quot;]},&quot;timeline:quandl.key&quot;:{&quot;name&quot;:&quot;Quandl key&quot;,&quot;value&quot;:&quot;someKeyHere&quot;,&quot;description&quot;:&quot;&lt;em&gt;[experimental]&lt;/em&gt; Your API key from www.quandl.com&quot;,&quot;category&quot;:[&quot;timeline&quot;]},&quot;visbuilder:enableVega&quot;:{&quot;name&quot;:&quot;Enable vega transformation in visbuilder&quot;,&quot;value&quot;:false,&quot;description&quot;:&quot;Allow visbuilder to render visualizations via vega.&quot;,&quot;requiresPageReload&quot;:true,&quot;category&quot;:[&quot;visbuilder&quot;]},&quot;visualization:enablePluginAugmentation&quot;:{&quot;name&quot;:&quot;Enable plugin augmentation&quot;,&quot;value&quot;:true,&quot;description&quot;:&quot;Plugin functionality can be accessed from line chart visualizations&quot;,&quot;category&quot;:[&quot;visualization&quot;]},&quot;visualization:enablePluginAugmentation.maxPluginObjects&quot;:{&quot;name&quot;:&quot;Max number of associated augmentations&quot;,&quot;value&quot;:10,&quot;description&quot;:&quot;Associating more than 10 plugin resources per visualization can lead to performance issues and increase the cost of running clusters.&quot;,&quot;category&quot;:[&quot;visualization&quot;]},&quot;visualization:colorMapping&quot;:{&quot;name&quot;:&quot;Color mapping&quot;,&quot;value&quot;:&quot;{\&quot;Count\&quot;:\&quot;#54B399\&quot;}&quot;,&quot;type&quot;:&quot;json&quot;,&quot;description&quot;:&quot;Maps values to specified colors within visualizations&quot;,&quot;category&quot;:[&quot;visualization&quot;]},&quot;visualization:dimmingOpacity&quot;:{&quot;name&quot;:&quot;Dimming opacity&quot;,&quot;value&quot;:0.5,&quot;type&quot;:&quot;number&quot;,&quot;description&quot;:&quot;The opacity of the chart items that are dimmed when highlighting another element of the chart. The lower this number, the more the highlighted element will stand out. This must be a number between 0 and 1.&quot;,&quot;category&quot;:[&quot;visualization&quot;]},&quot;visualization:heatmap:maxBuckets&quot;:{&quot;name&quot;:&quot;Heatmap maximum buckets&quot;,&quot;value&quot;:50,&quot;type&quot;:&quot;number&quot;,&quot;description&quot;:&quot;The maximum number of buckets a single datasource can return. A higher number might have negative impact on browser rendering performance&quot;,&quot;category&quot;:[&quot;visualization&quot;]},&quot;metrics:max_buckets&quot;:{&quot;name&quot;:&quot;Maximum buckets&quot;,&quot;value&quot;:2000,&quot;description&quot;:&quot;The maximum number of buckets a single datasource can return&quot;},&quot;metrics:clientSideEvaluation&quot;:{&quot;name&quot;:&quot;TSVB client-side math evaluation&quot;,&quot;value&quot;:true,&quot;description&quot;:&quot;Enable client-side evaluation of math expressions in TSVB. When enabled, math calculations are performed in the browser rather than on the server, reducing server load. Disable to use legacy server-side evaluation.&quot;,&quot;category&quot;:[&quot;visualization&quot;],&quot;requiresPageReload&quot;:true},&quot;defaultColumns&quot;:{&quot;name&quot;:&quot;Default columns&quot;,&quot;value&quot;:[&quot;_source&quot;],&quot;description&quot;:&quot;Columns displayed by default in the Discovery tab&quot;,&quot;category&quot;:[&quot;discover&quot;]},&quot;discover:sampleSize&quot;:{&quot;name&quot;:&quot;Number of rows&quot;,&quot;value&quot;:500,&quot;description&quot;:&quot;The number of rows to show in the table&quot;,&quot;category&quot;:[&quot;discover&quot;]},&quot;discover:aggs:terms:size&quot;:{&quot;name&quot;:&quot;Number of terms&quot;,&quot;value&quot;:20,&quot;type&quot;:&quot;number&quot;,&quot;description&quot;:&quot;Determines how many terms will be visualized when clicking the \&quot;visualize\&quot; button, in the field drop downs, in the discover sidebar.&quot;,&quot;category&quot;:[&quot;discover&quot;]},&quot;discover:sort:defaultOrder&quot;:{&quot;name&quot;:&quot;Default sort direction&quot;,&quot;value&quot;:&quot;desc&quot;,&quot;options&quot;:[&quot;desc&quot;,&quot;asc&quot;],&quot;optionLabels&quot;:{&quot;desc&quot;:&quot;Descending&quot;,&quot;asc&quot;:&quot;Ascending&quot;},&quot;type&quot;:&quot;select&quot;,&quot;description&quot;:&quot;Controls the default sort direction for time based index patterns in the Discover app.&quot;,&quot;category&quot;:[&quot;discover&quot;]},&quot;discover:searchOnPageLoad&quot;:{&quot;name&quot;:&quot;Search on page load&quot;,&quot;value&quot;:true,&quot;type&quot;:&quot;boolean&quot;,&quot;description&quot;:&quot;Controls whether a search is executed when Discover first loads. This setting does not have an effect when loading a saved search.&quot;,&quot;category&quot;:[&quot;discover&quot;]},&quot;doc_table:hideTimeColumn&quot;:{&quot;name&quot;:&quot;Hide &#x27;Time&#x27; column&quot;,&quot;value&quot;:false,&quot;description&quot;:&quot;Hide the &#x27;Time&#x27; column in Discover and in all Saved Searches on Dashboards.&quot;,&quot;category&quot;:[&quot;discover&quot;]},&quot;fields:popularLimit&quot;:{&quot;name&quot;:&quot;Popular fields limit&quot;,&quot;value&quot;:10,&quot;description&quot;:&quot;The top N most popular fields to show&quot;},&quot;context:defaultSize&quot;:{&quot;name&quot;:&quot;Context size&quot;,&quot;value&quot;:5,&quot;description&quot;:&quot;The number of surrounding entries to show in the context view&quot;,&quot;category&quot;:[&quot;discover&quot;]},&quot;context:step&quot;:{&quot;name&quot;:&quot;Context size step&quot;,&quot;value&quot;:5,&quot;description&quot;:&quot;The step size to increment or decrement the context size by&quot;,&quot;category&quot;:[&quot;discover&quot;]},&quot;context:tieBreakerFields&quot;:{&quot;name&quot;:&quot;Tie breaker fields&quot;,&quot;value&quot;:[&quot;_doc&quot;],&quot;description&quot;:&quot;A comma-separated list of fields to use for tie-breaking between documents that have the same timestamp value. From this list the first field that is present and sortable in the current index pattern is used.&quot;,&quot;category&quot;:[&quot;discover&quot;]},&quot;discover:modifyColumnsOnSwitch&quot;:{&quot;name&quot;:&quot;Modify columns when changing index patterns&quot;,&quot;value&quot;:true,&quot;description&quot;:&quot;Remove columns that not available in the new index pattern.&quot;,&quot;category&quot;:[&quot;discover&quot;]}},&quot;user&quot;:{&quot;buildNum&quot;:{&quot;userValue&quot;:9007199254740991},&quot;visbuilder:enableVega&quot;:{&quot;userValue&quot;:true},&quot;defaultIndex&quot;:{&quot;userValue&quot;:&quot;e4c8c070-2a09-11f1-979e-2b85b36f105e::1774637485-thxr9r&quot;}}}},&quot;branding&quot;:{&quot;assetFolderUrl&quot;:&quot;/ui/default_branding&quot;,&quot;logo&quot;:{},&quot;mark&quot;:{},&quot;loadingLogo&quot;:{},&quot;applicationTitle&quot;:&quot;OpenSearch Dashboards&quot;,&quot;useExpandedHeader&quot;:true},&quot;survey&quot;:&quot;https://survey.opensearch.org&quot;,&quot;keyboardShortcuts&quot;:{&quot;enabled&quot;:true}}"></osd-injected-metadata><div class="osdWelcomeView" id="osd_loading_message" style="display:none" data-test-subj="osdLoadingMessage"><div class="osdLoaderWrap" data-test-subj="loadingLogo"><div class="loadingLogoContainer"><img class="loadingLogo darkOnly" src="/ui/logos/opensearch_spinner_on_dark.svg" alt="OpenSearch Dashboards logo" data-test-subj="defaultLogo" data-test-image-url="/ui/logos/opensearch_spinner_on_dark.svg" loading="eager"/><img class="loadingLogo lightOnly" src="/ui/logos/opensearch_spinner_on_light.svg" alt="OpenSearch Dashboards logo" data-test-subj="defaultLogo" data-test-image-url="/ui/logos/opensearch_spinner_on_light.svg" loading="eager"/></div><div class="osdWelcomeText" data-error-message="OpenSearch Dashboards did not load properly. Check the server output for more information.">Loading OpenSearch Dashboards</div></div></div><div class="osdWelcomeView" id="osd_legacy_browser_error" style="display:none"><img data-test-subj="default logo" data-test-image-url="/ui/logos/opensearch_mark_on_dark.svg" src="/ui/logos/opensearch_mark_on_dark.svg" alt="OpenSearch Dashboards logo" class="legacyBrowserErrorLogo darkOnly"/><img data-test-subj="default logo" data-test-image-url="/ui/logos/opensearch_mark_on_light.svg" src="/ui/logos/opensearch_mark_on_light.svg" alt="OpenSearch Dashboards logo" class="legacyBrowserErrorLogo lightOnly"/><h2 class="osdWelcomeTitle">Please upgrade your browser</h2><div class="osdWelcomeText">This OpenSearch installation has strict security requirements enabled that your current browser does not meet.</div></div><script src="/bootstrap.js"></script></body></html>

@@ -1,0 +1,434 @@
+/*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Standalone MOCK dynamic-registry HTTP service.
+ *
+ * This is a plain node `http` server in the dev harness — it is intentionally
+ * NOT an OSD route. Keeping the mock decoupled keeps the local dev origin
+ * additive. The service mimics the production model from
+ * `packages/osd-mfe/README.md`: "the server fetches the registry from a dynamic
+ * service at serve time". It does two things:
+ * service at serve time". It does two things:
+ *
+ *   GET /registry          -> the CURRENT registry JSON, read directly from
+ *                             MFE_REGISTRY_PATH on every call (so editing the
+ *                             file is reflected on the very next request — no
+ *                             restart, no rebuild) and validated as the
+ *                             on-disk `schemaVersion: 1` `RegistryDocument`
+ *                             (layered shape: default/rollouts/
+ *                             tenantOverrides + optional global asset roots
+ *                             core/orchestrator/themes/sharedDepsCss).
+ *   GET /mfe/<id>/<path>   -> the built remote artifacts under target/mfe/<id>/,
+ *                             so this process doubles as the local "CDN" origin
+ *                             that the registry's remoteEntry URLs point at
+ *                             (REGISTRY_BASE_URL defaults to http://localhost:8080).
+ *   GET /shared-deps/<path> -> the built shared-deps bundles under
+ *                             packages/osd-ui-shared-deps/target/, which the MFE
+ *                             bootstrap loads cross-origin to seed the MF share
+ *                             scope before core boot (docs §6, step 1).
+ *   GET /  (and /health)   -> a tiny human/JSON index describing the endpoints.
+ *
+ * ALL responses carry permissive CORS headers and OPTIONS preflight is answered
+ * with 204, because OSD --mfe (:5602) loads every artifact here cross-origin.
+ *
+ * Because /registry validates with the same schema (`assertValidRegistryDocument`)
+ * the OSD server's FileRegistryReader uses, the exact same fail-closed posture
+ * the server render uses is exercised here, and the "flip a version = data
+ * edit" liveness proof works against a long-running instance.
+ *
+ * Usage (standalone):
+ *   source harness/env.sh
+ *   node packages/osd-mfe/dev/local_registry_server.js [port]      # default port 8080
+ *   curl -s http://localhost:8080/registry
+ *
+ * Or import { startServer } from this module (used by verify_registry_dynamic.js).
+ */
+'use strict';
+
+const http = require('http');
+const fs = require('fs');
+const path = require('path');
+const zlib = require('zlib');
+
+// The OSD repo root holds both the TS RegistryProvider and the built artifacts.
+const WORKSPACE_DIR = process.env.WORKSPACE_DIR || path.resolve(__dirname, '../../..');
+const OSD_DIR =
+  process.env.OSD_DIR ||
+  WORKSPACE_DIR;
+
+// Built MF remotes live here; this is the local "CDN" origin root for /mfe/*.
+const MFE_DIR = path.join(OSD_DIR, 'target/mfe');
+
+// Built shared-deps bundles (react, react-dom, @elastic/eui, …) live here; this
+// is the local "CDN" origin root for /shared-deps/*. The MFE bootstrap on :5602
+// loads these cross-origin to seed the Module Federation share scope BEFORE core
+// boot (see packages/osd-mfe/README.md).
+const SHARED_DEPS_DIR = path.join(OSD_DIR, 'packages/osd-ui-shared-deps/target');
+
+// Built browser MFE bootstrap bundle (assigns window.__osdBootstrapMfe__) lives
+// here; this is the local "CDN" origin root for /bootstrap/*. OSD --mfe (:5602)
+// loads it cross-origin from the URL configured as
+// `opensearchDashboards.mfe.bootstrapUrl`. Produced by
+// packages/osd-mfe/dev/build_bootstrap.js; see packages/osd-mfe/README.md.
+const BOOTSTRAP_DIR = path.join(OSD_DIR, 'target/mfe-bootstrap');
+
+// CORS headers applied to EVERY response. :5602 (OSD --mfe) loads the registry,
+// the plugin remotes (/mfe/*), and the shared deps (/shared-deps/*) cross-origin
+// from :8080, so the browser requires Access-Control-Allow-Origin on all of them
+// (and a positive preflight answer for any request the browser deems non-simple).
+// This is a local test origin, so a permissive `*` is intentional and sufficient.
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, HEAD, OPTIONS',
+  'Access-Control-Allow-Headers': '*',
+  'Access-Control-Max-Age': '86400',
+};
+
+// Default listen port matches REGISTRY_BASE_URL (http://localhost:8080), so the
+// remoteEntry URLs baked into the registry data resolve against THIS server.
+const DEFAULT_PORT = Number(process.env.REGISTRY_SERVER_PORT) || 8080;
+
+const MIME = {
+  '.html': 'text/html; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8',
+  '.mjs': 'text/javascript; charset=utf-8',
+  '.cjs': 'text/javascript; charset=utf-8',
+  '.json': 'application/json; charset=utf-8',
+  '.map': 'application/json; charset=utf-8',
+  '.css': 'text/css; charset=utf-8',
+  '.svg': 'image/svg+xml',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.gif': 'image/gif',
+  '.ico': 'image/x-icon',
+  '.woff': 'font/woff',
+  '.woff2': 'font/woff2',
+  '.ttf': 'font/ttf',
+  '.eot': 'application/vnd.ms-fontobject',
+  '.txt': 'text/plain; charset=utf-8',
+};
+
+// Text asset extensions worth compressing on the wire. The MFE remotes are
+// (post-`--dist`, with CSS inlined via style-loader) effectively all `.js`; the
+// shared-deps bundle adds `.css`. Mirrors the pre-compressed CDN
+// deploy so the local origin (:8080) and the CDN behave the same on the wire.
+// Already-compressed binaries (fonts, png) are served as-is.
+const COMPRESSIBLE_EXTENSIONS = new Set([
+  '.js',
+  '.mjs',
+  '.cjs',
+  '.css',
+  '.json',
+  '.map',
+  '.svg',
+  '.html',
+  '.txt',
+]);
+
+/** True when the client's Accept-Encoding header advertises gzip. */
+function acceptsGzip(acceptEncoding) {
+  return /(^|,)\s*gzip\s*(;|,|$)/i.test(String(acceptEncoding || ''));
+}
+
+/**
+ * Lazily load `assertValidRegistryDocument` from the OSD package. We register
+ * OSD's node environment first (babel auto-transpilation) so the TypeScript
+ * sources under packages/osd-mfe/src can be required directly — exactly how
+ * scripts/update_registry.js bootstraps. Done lazily so static-only requests
+ * do not pay the transpile cost, and so the validator is required only once.
+ *
+ * Returns the validator function for the on-disk `RegistryDocument`
+ * (layered `schemaVersion: 1` shape — default/rollouts/tenantOverrides plus
+ * the optional global asset roots: core/orchestrator/themes/sharedDepsCss).
+ */
+let cachedAssertValid;
+function getValidator() {
+  if (cachedAssertValid) {
+    return cachedAssertValid;
+  }
+  // setup_node_env registers @babel/register; require it from the OSD repo so the
+  // babel config resolves relative to the (in-repo) sources being transpiled.
+  // eslint-disable-next-line global-require, import/no-dynamic-require
+  require(path.join(OSD_DIR, 'src/setup_node_env'));
+  // Require the registry sub-barrel (packages/osd-mfe/src/registry/index.ts).
+  // eslint-disable-next-line global-require, import/no-dynamic-require
+  const { assertValidRegistryDocument } = require(path.join(
+    OSD_DIR,
+    'packages/osd-mfe/src/registry'
+  ));
+  cachedAssertValid = assertValidRegistryDocument;
+  return cachedAssertValid;
+}
+
+function send(res, status, body, contentType) {
+  res.writeHead(status, {
+    'Content-Type': contentType || 'text/plain; charset=utf-8',
+    // Never cache: the whole point is that edits are reflected immediately.
+    'Cache-Control': 'no-store',
+    // CORS on every response: :5602 loads from this origin cross-origin.
+    ...CORS_HEADERS,
+  });
+  res.end(body);
+}
+
+function sendJson(res, status, value) {
+  send(res, status, JSON.stringify(value, null, 2) + '\n', MIME['.json']);
+}
+
+/** Safely resolve a request path under a root, rejecting traversal escapes. */
+function resolveUnder(root, relPath) {
+  const resolved = path.normalize(path.join(root, relPath));
+  if (resolved !== root && !resolved.startsWith(root + path.sep)) {
+    return null;
+  }
+  return resolved;
+}
+
+function serveFile(res, filePath, acceptEncoding) {
+  fs.readFile(filePath, (err, data) => {
+    if (err) {
+      send(res, 404, 'Not found: ' + filePath);
+      return;
+    }
+    const ext = path.extname(filePath).toLowerCase();
+    const contentType = MIME[ext] || 'application/octet-stream';
+    // Compress text assets when the client advertises gzip. `Vary:
+    // Accept-Encoding` keeps any intermediary cache correct for clients that do
+    // not. This makes the local origin match the pre-compressed CDN on the wire.
+    if (COMPRESSIBLE_EXTENSIONS.has(ext) && acceptsGzip(acceptEncoding)) {
+      const body = zlib.gzipSync(data);
+      res.writeHead(200, {
+        'Content-Type': contentType,
+        'Content-Encoding': 'gzip',
+        Vary: 'Accept-Encoding',
+        // Never cache: the whole point is that edits are reflected immediately.
+        'Cache-Control': 'no-store',
+        ...CORS_HEADERS,
+      });
+      res.end(body);
+      return;
+    }
+    res.writeHead(200, {
+      'Content-Type': contentType,
+      // Advertise that the representation varies by encoding even when we serve
+      // identity, so a shared cache never hands a gzip body to a non-gzip client.
+      Vary: 'Accept-Encoding',
+      'Cache-Control': 'no-store',
+      ...CORS_HEADERS,
+    });
+    res.end(data);
+  });
+}
+
+/**
+ * Serve GET /registry by reading the on-disk `schemaVersion: 1`
+ * `RegistryDocument` (layered shape: `default`/`rollouts`/`tenantOverrides`
+ * plus optional global asset roots `core`/`orchestrator`/`themes`/
+ * `sharedDepsCss`), validating it, and returning the doc verbatim.
+ *
+ * The harness no longer projects between shapes here — the unified
+ * `schemaVersion: 1` IS the on-disk format and the same shape any registry
+ * consumer (OSD server's FileRegistryReader, the future HttpRegistryReader,
+ * tooling, this harness) sees. Hot-reload still happens transparently
+ * because every request re-reads the file (no caching layer in this
+ * harness's /registry path).
+ *
+ * On a missing / unreadable / invalid-JSON / schema-invalid file we return
+ * 500 with a structured error rather than 200'ing junk; the production
+ * read path on the OSD server is equally fail-closed (see `reader.ts`).
+ */
+function serveRegistry(res, options) {
+  const registryPath =
+    (options && options.path) ||
+    process.env.MFE_REGISTRY_PATH ||
+    null;
+  if (!registryPath) {
+    sendJson(res, 500, {
+      error: 'registry_unavailable',
+      message: 'No registry path configured (set MFE_REGISTRY_PATH).',
+    });
+    return;
+  }
+  let raw;
+  try {
+    raw = fs.readFileSync(registryPath, 'utf8');
+  } catch (err) {
+    sendJson(res, 500, {
+      error: 'registry_unavailable',
+      message: `cannot read registry at ${registryPath}: ${err && err.message ? err.message : String(err)}`,
+    });
+    return;
+  }
+  let parsed;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (err) {
+    sendJson(res, 500, {
+      error: 'registry_unavailable',
+      message: `registry at ${registryPath} is not valid JSON: ${err && err.message ? err.message : String(err)}`,
+    });
+    return;
+  }
+  try {
+    getValidator()(parsed);
+  } catch (err) {
+    sendJson(res, 500, {
+      error: 'registry_unavailable',
+      message: err && err.message ? err.message : String(err),
+    });
+    return;
+  }
+  sendJson(res, 200, parsed);
+}
+
+function createServer(options) {
+  const opts = options || {};
+  return http.createServer((req, res) => {
+    let pathname;
+    try {
+      pathname = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);
+    } catch (e) {
+      send(res, 400, 'Bad request');
+      return;
+    }
+
+    // CORS preflight: browsers send OPTIONS for cross-origin requests they deem
+    // non-simple. Answer it BEFORE the GET/HEAD gate below so the actual request
+    // (GET) is allowed to proceed. 204 No Content + the CORS headers (added by
+    // send) is the standard positive preflight response.
+    if (req.method === 'OPTIONS') {
+      send(res, 204, '');
+      return;
+    }
+
+    // Only GET/HEAD are meaningful for a read-only mock origin.
+    if (req.method !== 'GET' && req.method !== 'HEAD') {
+      send(res, 405, 'Method not allowed: ' + req.method);
+      return;
+    }
+
+    // Client's advertised content codings; static asset routes below use it to
+    // decide whether to gzip text bodies (transit compression).
+    const acceptEncoding = req.headers['accept-encoding'];
+
+    if (pathname === '/' || pathname === '/health') {
+      sendJson(res, 200, {
+        service: 'osd-mfe-mock-registry',
+        endpoints: {
+          registry: '/registry',
+          artifacts: '/mfe/<pluginId>/remoteEntry.js',
+          sharedDeps: '/shared-deps/osd-ui-shared-deps.js',
+          bootstrap: '/bootstrap/osd_bootstrap_mfe.js',
+          health: '/health',
+        },
+        registryPath: opts.path || process.env.MFE_REGISTRY_PATH || '(MFE_REGISTRY_PATH unset)',
+        mfeDir: MFE_DIR,
+        sharedDepsDir: SHARED_DEPS_DIR,
+        bootstrapDir: BOOTSTRAP_DIR,
+      });
+      return;
+    }
+
+    if (pathname === '/favicon.ico') {
+      send(res, 204, '');
+      return;
+    }
+
+    // The dynamic registry document (read through the provider; hot-reloads).
+    if (pathname === '/registry') {
+      serveRegistry(res, opts);
+      return;
+    }
+
+    // Static "CDN" origin for the built remotes the registry URLs point at.
+    if (pathname.startsWith('/mfe/')) {
+      const target = resolveUnder(MFE_DIR, pathname.slice('/mfe/'.length));
+      if (!target) {
+        send(res, 403, 'Forbidden');
+        return;
+      }
+      serveFile(res, target, acceptEncoding);
+      return;
+    }
+
+    // Static "CDN" origin for the shared-deps bundles. The MFE bootstrap loads
+    // these (e.g. /shared-deps/osd-ui-shared-deps.js) cross-origin to seed the MF
+    // share scope before core boot. Mapped to packages/osd-ui-shared-deps/target/.
+    if (pathname.startsWith('/shared-deps/')) {
+      const target = resolveUnder(SHARED_DEPS_DIR, pathname.slice('/shared-deps/'.length));
+      if (!target) {
+        send(res, 403, 'Forbidden');
+        return;
+      }
+      serveFile(res, target, acceptEncoding);
+      return;
+    }
+
+    // Static "CDN" origin for the browser MFE bootstrap bundle. OSD --mfe loads
+    // this (e.g. /bootstrap/osd_bootstrap_mfe.js) cross-origin; it assigns
+    // window.__osdBootstrapMfe__, which the served shell invokes to seed the share
+    // scope, load remotes, and drive core boot. Mapped to target/mfe-bootstrap/.
+    if (pathname.startsWith('/bootstrap/')) {
+      const target = resolveUnder(BOOTSTRAP_DIR, pathname.slice('/bootstrap/'.length));
+      if (!target) {
+        send(res, 403, 'Forbidden');
+        return;
+      }
+      serveFile(res, target, acceptEncoding);
+      return;
+    }
+
+    send(res, 404, 'Not found: ' + pathname);
+  });
+}
+
+/**
+ * Start the mock registry server. Binds to 127.0.0.1 only (local test harness).
+ *
+ * @param {{ port?: number, path?: string }} [options]
+ *   port: listen port (default REGISTRY_SERVER_PORT env or 8080)
+ *   path: explicit registry file path (default MFE_REGISTRY_PATH env)
+ * @returns {Promise<{server: http.Server, port: number, url: string, close: () => Promise<void>}>}
+ */
+function startServer(options) {
+  const opts = options || {};
+  const port = typeof opts.port === 'number' ? opts.port : DEFAULT_PORT;
+  return new Promise((resolve, reject) => {
+    const server = createServer({ path: opts.path });
+    server.on('error', reject);
+    server.listen(port, '127.0.0.1', () => {
+      const actualPort = server.address().port;
+      resolve({
+        server,
+        port: actualPort,
+        url: 'http://127.0.0.1:' + actualPort,
+        close: () =>
+          new Promise((res) => {
+            server.close(() => res());
+          }),
+      });
+    });
+  });
+}
+
+module.exports = { startServer, createServer, getValidator };
+
+// Run standalone for manual use / verify_registry_dynamic.js spawns this too.
+if (require.main === module) {
+  const port = Number(process.argv[2]) || DEFAULT_PORT;
+  startServer({ port })
+    .then((s) => {
+      // eslint-disable-next-line no-console
+      console.log(
+        'MFE mock registry server: ' +
+          s.url +
+          '  (GET /registry, GET /mfe/<id>/remoteEntry.js)'
+      );
+    })
+    .catch((err) => {
+      // eslint-disable-next-line no-console
+      console.error('Failed to start registry server:', err);
+      process.exit(1);
+    });
+}

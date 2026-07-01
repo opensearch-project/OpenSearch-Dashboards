@@ -35,3 +35,6 @@ cypress/fixtures
 # antlr overrides
 /src/plugins/data/public/antlr/opensearch_sql/.generated/*
 /src/plugins/data/public/antlr/opensearch_sql/grammar/**/*
+
+# Vendored CI harness (copied from workspace-root harness, not OSD-authored code)
+/packages/osd-mfe/dev
