@@ -265,17 +265,81 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     }
   }, [chatService, currentRunId, eventHandler]);
 
-  // Handler for when user selects a data source from the prompt
-  const handleDataSourceSelect = useCallback(async (id: string) => {
-    chatService.setDataSourceId(id);
-    setAvailableDataSources([]);
-    const pending = pendingMessage;
-    setPendingMessage(null);
-    if (!pending) return;
+  /**
+   * Execute a slash command and update the timeline accordingly.
+   * @param messageContent - The raw user input (e.g. "/search-relevance query")
+   * @param messagesToSend - The message history (excluding the user message) to pass to subscribeToMessageStream
+   * @param pendingUserMessage - The user message already in the timeline (data source selection flow).
+   *   When provided, it is replaced (by id) with the resolved command message; otherwise a fresh
+   *   user message is inserted.
+   * @returns true if the command was handled, false otherwise
+   */
+  const executeSlashCommand = useCallback(
+    async (
+      messageContent: string,
+      messagesToSend: Message[],
+      pendingUserMessage?: UserMessage
+    ): Promise<boolean> => {
+      const commandResult = await slashCommandRegistry.execute(messageContent);
+      if (!commandResult.handled) return false;
 
-    // User message already in timeline from handleSend; pass history without it
-    subscribeToMessageStream(timeline.slice(0, -1), pending);
-  }, [chatService, pendingMessage, subscribeToMessageStream, timeline]);
+      if (commandResult.localMessage) {
+        const role = commandResult.role ?? 'system';
+        const responseMsg: Message = {
+          id: chatService.generateMessageId(),
+          role,
+          content: commandResult.localMessage,
+          ...(role === 'system' && commandResult.title && { title: commandResult.title }),
+        };
+        if (pendingUserMessage) {
+          // User message already in timeline (data source selection flow) — append response
+          setTimeline((prev) => [...prev, responseMsg]);
+        } else {
+          const userMsg = chatService.getUserMessage(messageContent);
+          setTimeline((prev) => [...prev, userMsg, responseMsg]);
+        }
+        setScreenshotData(undefined);
+        return true;
+      }
+      if (commandResult.message) {
+        const userMsg = chatService.getUserMessage(commandResult.message, messageContent);
+        if (pendingUserMessage) {
+          // Replace the pending user message (by id) with the resolved command message
+          setTimeline((prev) =>
+            prev.map((msg) => (msg.id === pendingUserMessage.id ? userMsg : msg))
+          );
+        } else {
+          setTimeline((prev) => [...prev, userMsg]);
+        }
+        subscribeToMessageStream(messagesToSend, userMsg);
+        return true;
+      }
+      return true;
+    },
+    [chatService, subscribeToMessageStream]
+  );
+
+  // Handler for when user selects a data source from the prompt
+  const handleDataSourceSelect = useCallback(
+    async (id: string) => {
+      chatService.setDataSourceId(id);
+      setAvailableDataSources([]);
+      const pending = pendingMessage;
+      setPendingMessage(null);
+      if (!pending) return;
+
+      const messageContent = typeof pending.content === 'string' ? pending.content : '';
+      const historyMessages = timeline.slice(0, -1);
+
+      // Pending user message is already in the timeline — replace it if a slash command
+      const handled = await executeSlashCommand(messageContent, historyMessages, pending);
+      if (handled) return;
+
+      // Normal message: user message already in timeline, just stream
+      subscribeToMessageStream(historyMessages, pending);
+    },
+    [chatService, pendingMessage, executeSlashCommand, subscribeToMessageStream, timeline]
+  );
 
   const handleSend = async (options?: {input?: string, messages?: Message[]}) => {
     const messageContent = options?.input ?? input.trim();
@@ -329,7 +393,9 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
     if (!isValid) {
       if (compatibleDataSources.length >= 1) {
-        // Compatible data sources exist — prompt user to pick one
+        // Compatible data sources exist — prompt user to pick one.
+        // The user message is added to the timeline now so it stays visible while the
+        // selector is shown; handleDataSourceSelect replaces it once a source is chosen.
         const userMsg = chatService.getUserMessage(messageContent);
         setPendingMessage(userMsg);
         setAvailableDataSources(compatibleDataSources);
@@ -351,27 +417,8 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     }
 
     // Check if this is a slash command
-    const commandResult = await slashCommandRegistry.execute(messageContent);
-    if (commandResult.handled) {
-      if (commandResult.localMessage) {
-        const userMsg = chatService.getUserMessage(messageContent);
-        const role = commandResult.role ?? 'system';
-        const responseMsg: Message = {
-          id: chatService.generateMessageId(),
-          role,
-          content: commandResult.localMessage,
-          ...(role === 'system' && commandResult.title && { title: commandResult.title }),
-        };
-        setTimeline((prev) => [...prev, userMsg, responseMsg]);
-        return;
-      }
-      if (commandResult.message) {
-        const userMsg = chatService.getUserMessage(commandResult.message, messageContent);
-        setTimeline((prev) => [...prev, userMsg]);
-        return subscribeToMessageStream(messagesToSend, userMsg);
-      }
-      return;
-    }
+    const handled = await executeSlashCommand(messageContent, messagesToSend);
+    if (handled) return;
 
     // Normal message flow — add user message to timeline then stream
     const userMsg = chatService.getUserMessage(messageContent);
