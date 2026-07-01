@@ -12,7 +12,7 @@
 /**
  * Resolve the EFFECTIVE value of the `opensearchDashboards.mfe.allowOverride`
  * security gate from the (optional) server config value and the server's
- * dev/prod mode (Phase 5, Story 2; Phase 6 hardening — de-duplicated).
+ * dev/prod mode (dev URL override gate — de-duplicated core mirror).
  *
  * This is the single source of truth used by BOTH server-side render paths:
  *  - `RenderingService` (`src/core/server/rendering/rendering_service.tsx`), which
@@ -25,9 +25,9 @@
  * server cannot import (`@osd/mfe` is not a dependency of `src/`). Keeping this
  * one core helper ensures the gate's default is specified in exactly one place.
  *
- * SECURITY (docs/01-MFE-DESIGN.md §7): dev URL-overrides let arbitrary remote
- * code load, so the gate is honored ONLY in non-production. The default is
- * therefore tied to the server's dev mode:
+ * SECURITY: dev URL-overrides let arbitrary remote code load, so the gate is
+ * honored ONLY in non-production. The default is therefore tied to the
+ * server's dev mode:
  *  - `configured` explicitly set (a boolean) ALWAYS wins (operators can force it
  *    on or off in any mode).
  *  - `configured` unset (`undefined`) falls back to `dev`, so the gate is ON in

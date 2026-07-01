@@ -327,7 +327,7 @@ describe('bootstrapMfe (locked sequence)', () => {
   });
 });
 
-describe('bootstrapMfe — dev URL-override wiring (Phase 5, Story 1)', () => {
+describe('bootstrapMfe — dev URL-override wiring', () => {
   const REGISTRY_INSPECTOR_URL = 'http://localhost:8080/mfe/inspector/remoteEntry.js';
   const REGISTRY_DATA_URL = 'http://localhost:8080/mfe/data/remoteEntry.js';
   const OVERRIDE_INSPECTOR_URL = 'http://localhost:5601/mfe/inspector/remoteEntry.js';
@@ -445,7 +445,7 @@ describe('bootstrapMfe — dev URL-override wiring (Phase 5, Story 1)', () => {
   });
 });
 
-describe('bootstrapMfe — dev Inspector mount gate (Phase 5, Story 3)', () => {
+describe('bootstrapMfe — dev Inspector mount gate', () => {
   // The Inspector mount is double-gated: server-config `mfe.allowOverride`
   // PLUS a URL `?inspect=true` opt-in. The existing mount-expected tests
   // need both gates; set the URL param in beforeEach so they don't false-
@@ -561,8 +561,8 @@ describe('bootstrapMfe — dev Inspector mount gate (Phase 5, Story 3)', () => {
     expect(mountInspector).not.toHaveBeenCalled();
   });
 
-  it('passes the collected disabled records as the second arg to mountInspector (Phase 14, Story 2)', async () => {
-    // Make ONE remote fail (Phase 4 graceful degradation) so a single record is
+  it('passes the collected disabled records as the second arg to mountInspector', async () => {
+    // Make ONE remote fail (graceful degradation) so a single record is
     // collected. The mountInspector spy must receive both the resolved entries
     // AND the disabled records — the dev panel's "Disabled plugins" section
     // depends on this argument.
@@ -629,7 +629,7 @@ describe('bootstrapMfe — dev Inspector mount gate (Phase 5, Story 3)', () => {
   });
 });
 
-describe('bootstrapMfe — Phase 14, Story 2 disabled-plugin registration (degraded app stub)', () => {
+describe('bootstrapMfe — disabled-plugin registration (degraded app stub)', () => {
   /**
    * Drive the placeholder registered for a failed remote, then exercise its
    * setup() against a fake core that captures `application.register` calls.
@@ -726,7 +726,7 @@ describe('bootstrapMfe — Phase 14, Story 2 disabled-plugin registration (degra
   });
 });
 
-describe('bootstrapMfe — Phase 9 version-compatibility enforcement (Story 3)', () => {
+describe('bootstrapMfe — version-compatibility enforcement', () => {
   const HOST = {
     osdVersion: '3.5.0',
     sharedDeps: { react: '^16.14.0', 'react-dom': '^16.14.0' },
@@ -759,7 +759,7 @@ describe('bootstrapMfe — Phase 9 version-compatibility enforcement (Story 3)',
   };
 
   /**
-   * A registry whose entries carry Phase 9 compat metadata. `good` is compatible;
+   * A registry whose entries carry compat metadata. `good` is compatible;
    * `bad` is given `meta` (incompatible or unknown). The `bad` entry has NO
    * builtAgainst/compat when `meta` is `{}` (the UNKNOWN case).
    */
@@ -972,7 +972,7 @@ describe('bootstrapMfe — Phase 9 version-compatibility enforcement (Story 3)',
   });
 });
 
-describe('bootstrapMfe — remoteEntry SRI enforcement (Phase 12, Story 2)', () => {
+describe('bootstrapMfe — remoteEntry SRI enforcement', () => {
   const HOST = {
     osdVersion: '3.5.0',
     sharedDeps: { react: '^16.14.0', 'react-dom': '^16.14.0' },
@@ -1000,7 +1000,7 @@ describe('bootstrapMfe — remoteEntry SRI enforcement (Phase 12, Story 2)', () 
   const INSPECTOR_INTEGRITY = 'sha384-INSPECTOR';
   const DATA_INTEGRITY = 'sha384-DATA';
 
-  /** A registry whose entries carry an `integrity` hash (the Story 1 output). */
+  /** A registry whose entries carry an `integrity` hash. */
   function registryWithIntegrity() {
     return {
       schemaVersion: 1,
@@ -1175,13 +1175,13 @@ describe('bootstrapMfe — remoteEntry SRI enforcement (Phase 12, Story 2)', () 
     consoleWarn.mockRestore();
   });
 
-  it('a NON-integrity remote failure stays graceful (Phase 4) even under DEV block policy', async () => {
+  it('a NON-integrity remote failure stays graceful even under DEV block policy', async () => {
     const consoleError = jest.spyOn(console, 'error').mockImplementation(() => undefined);
     const consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
 
-    // Registry WITHOUT integrity on the failing entry (e.g. an override-style or
-    // pre-Story-1 entry): a load failure cannot be an SRI violation, so it must
-    // keep Phase 4 graceful degradation rather than hard-blocking.
+    // Registry WITHOUT integrity on the failing entry (e.g. an override-style
+    // or pre-SRI entry): a load failure cannot be an SRI violation, so it must
+    // keep graceful degradation rather than hard-blocking.
     const registered = new Map<string, () => PluginPublicModule>();
     const renderBlockPage = jest.fn();
     const invokeCoreBootstrap = jest.fn(async () => undefined);
@@ -1243,7 +1243,7 @@ describe('bootstrapMfe — remoteEntry SRI enforcement (Phase 12, Story 2)', () 
     });
 
     // No integrity claim => no hard block; the failed remote is disabled and the
-    // app still boots (Phase 4 graceful degradation preserved).
+    // app still boots (graceful degradation preserved).
     expect(renderBlockPage).not.toHaveBeenCalled();
     expect(registered.has('inspector')).toBe(true);
     expect(invokeCoreBootstrap).toHaveBeenCalledTimes(1);
@@ -1253,7 +1253,7 @@ describe('bootstrapMfe — remoteEntry SRI enforcement (Phase 12, Story 2)', () 
   });
 });
 
-describe('bootstrapMfe — registry signature verification (Phase 12, Story 4)', () => {
+describe('bootstrapMfe — registry signature verification', () => {
   const VERIFICATION = {
     algorithm: 'HMAC-SHA256',
     keyId: 'mfe-dev-hmac-1',
@@ -1401,7 +1401,7 @@ describe('bootstrapMfe — registry signature verification (Phase 12, Story 4)',
   });
 });
 
-describe('bootstrapMfe — server-resolved bootManifest (Phase 13, Story 3)', () => {
+describe('bootstrapMfe — server-resolved bootManifest', () => {
   /** Shared minimal manifest used in this describe. */
   function bootManifest(): import('../registry/boot_manifest').BootManifest {
     return {
@@ -1542,7 +1542,7 @@ describe('bootstrapMfe — server-resolved bootManifest (Phase 13, Story 3)', ()
     ).rejects.toThrow(/Invalid MFE boot manifest/);
   });
 
-  it('SKIPS registry signature verification when a bootManifest is present (Phase 13 trust moved server-side)', async () => {
+  it('SKIPS registry signature verification when a bootManifest is present (trust moved server-side)', async () => {
     const { deps } = makeFakeDeps();
     const verify = jest.fn(async () => ({ ok: true }));
 
@@ -1560,7 +1560,7 @@ describe('bootstrapMfe — server-resolved bootManifest (Phase 13, Story 3)', ()
     expect(deps.invokeCoreBootstrap).toHaveBeenCalledTimes(1);
   });
 
-  it('Phase 9 compat classifier still runs against manifest entries (defense in depth)', async () => {
+  it('compat classifier still runs against manifest entries (defense in depth)', async () => {
     const { deps } = makeFakeDeps();
 
     // The boot manifest entries deliberately omit `builtAgainst` (PRD shape:
@@ -1620,7 +1620,7 @@ describe('bootstrapMfe — server-resolved bootManifest (Phase 13, Story 3)', ()
   });
 });
 
-describe('bootstrapMfe — load telemetry (Phase 14, Story 1)', () => {
+describe('bootstrapMfe — load telemetry', () => {
   // Build a configurable, ordered fake clock so durationMs assertions are
   // deterministic. Each call advances the clock by `step` ms.
   function fakeClock(start = 1000, step = 5) {
@@ -1752,7 +1752,8 @@ describe('bootstrapMfe — load telemetry (Phase 14, Story 1)', () => {
     const sri = failures.find((e) => e.id === 'inspector');
     expect(sri).toBeDefined();
     expect(sri!.errorClass).toBe('sri-mismatch');
-    // The other remote loaded fine (Phase 4 invariant): a success event for `data`.
+    // The other remote loaded fine (single-failure-isolation invariant): a
+    // success event for `data`.
     expect(events.find((e) => e.id === 'data' && e.status === 'success')).toBeDefined();
   });
 
@@ -1882,7 +1883,7 @@ describe('bootstrapMfe — load telemetry (Phase 14, Story 1)', () => {
       },
       // Prod-skip on incompatible; warn-load on missing metadata so the
       // (metadata-less) `data` remote still loads and we can verify the
-      // Phase 4 invariant (one failure ≠ blocked boot).
+      // single-failure-isolation invariant (one failure ≠ blocked boot).
       compatPolicy: { onIncompatible: 'skip', onMissing: 'warn-load', strictShared: true },
       deps,
     });
@@ -1892,7 +1893,7 @@ describe('bootstrapMfe — load telemetry (Phase 14, Story 1)', () => {
     expect(skip!.errorClass).toBe('compat-reject');
     expect(skip!.durationMs).toBe(0);
 
-    // The other remote still loaded — Phase 4 invariant preserved.
+    // The other remote still loaded — single-failure-isolation invariant preserved.
     expect(events.find((e) => e.id === 'data' && e.status === 'success')).toBeDefined();
   });
 
@@ -1984,21 +1985,21 @@ describe('bootstrapMfe — load telemetry (Phase 14, Story 1)', () => {
 });
 
 /* ------------------------------------------------------------------------- *
- * Phase 16 Story 5 — registry-managed OSD core entry (`core.entry.js`).
+ * Registry-managed OSD core entry (`core.entry.js`).
  *
- * When the server-resolved boot manifest carries a v3 `core` descriptor, the
- * orchestrator must load core.entry.js from THAT URL (with SRI when pinned)
- * BEFORE invoking core boot. A tampered core fails closed: loadScript rejects,
- * bootstrapMfe's Promise rejects, invokeCoreBootstrap is NEVER called, and the
- * chunk-error surface (armed at the start of bootstrapMfe) catches the
- * unhandled rejection.
+ * When the server-resolved boot manifest carries a `core` global-asset
+ * descriptor, the orchestrator must load core.entry.js from THAT URL (with
+ * SRI when pinned) BEFORE invoking core boot. A tampered core fails closed:
+ * loadScript rejects, bootstrapMfe's Promise rejects, invokeCoreBootstrap is
+ * NEVER called, and the chunk-error surface (armed at the start of
+ * bootstrapMfe) catches the unhandled rejection.
  *
  * Backward-compat: when `core` is absent, the orchestrator skips this step
  * entirely (the thin shim's preload already loaded core from the legacy
  * server-bundled `${regularBundlePath}/core/core.entry.js` path).
  * ------------------------------------------------------------------------- */
 
-describe('bootstrapMfe — Phase 16 Story 5: registry-managed core', () => {
+describe('bootstrapMfe — registry-managed core', () => {
   const CORE_URL = 'http://localhost:8080/core/cafebabe0000/core.entry.js';
   const CORE_INTEGRITY = 'sha384-coreCDN1234';
 
@@ -2014,9 +2015,9 @@ describe('bootstrapMfe — Phase 16 Story 5: registry-managed core', () => {
     const deps: Partial<BootstrapMfeDeps> = {
       loadScript: jest.fn(async (url: string, integrity?: string) => {
         if (url === CORE_URL) {
-          // Integrity attribute MUST be threaded through — Phase 12 SRI
-          // posture extended to core. Without this, a tampered core would
-          // execute without verification.
+          // Integrity attribute MUST be threaded through — SRI posture
+          // extended to core. Without this, a tampered core would execute
+          // without verification.
           expect(integrity).toBe(CORE_INTEGRITY);
           order.push(`coreLoaded:${url}`);
         } else if (url === SHARED_DEPS_URL) {
@@ -2105,7 +2106,7 @@ describe('bootstrapMfe — Phase 16 Story 5: registry-managed core', () => {
     const createDispatcher = jest.fn(() => dispatcher);
 
     const deps: Partial<BootstrapMfeDeps> = {
-      // SRI failure: loadScript rejects with the Phase 12 error message shape.
+      // SRI failure: loadScript rejects with the SRI-failure error shape.
       loadScript: jest.fn(async (url: string, integrity?: string) => {
         if (url === CORE_URL) {
           throw new Error(
@@ -2144,7 +2145,7 @@ describe('bootstrapMfe — Phase 16 Story 5: registry-managed core', () => {
     expect(deps.invokeCoreBootstrap).not.toHaveBeenCalled();
 
     // Telemetry: a failure event for id=`core` with errorClass=`sri-mismatch`
-    // (integrity was pinned, so the Phase 14 taxonomy collapses tampered +
+    // (integrity was pinned, so the telemetry taxonomy collapses tampered +
     // unfetchable bytes into the same fail-closed class).
     const coreEvents = events.filter((e) => e.id === 'core');
     expect(coreEvents.length).toBe(1);
@@ -2170,7 +2171,7 @@ describe('bootstrapMfe — Phase 16 Story 5: registry-managed core', () => {
     const deps: Partial<BootstrapMfeDeps> = {
       loadScript: jest.fn(async (url: string) => {
         if (url === CORE_URL) {
-          // No integrity attribute — network failure shape (the Phase 12
+          // No integrity attribute — network failure shape (the SRI-error
           // wording branches on whether integrity was claimed).
           throw new Error(`Failed to load script: ${url}`);
         }

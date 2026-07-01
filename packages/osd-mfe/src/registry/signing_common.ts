@@ -10,13 +10,13 @@
  */
 
 /**
- * Registry authenticity — PURE, platform-agnostic core (Phase 12, Story 4).
+ * Registry authenticity — PURE, platform-agnostic core.
  *
  * The registry document decides WHICH remote code each plugin loads, so an
  * attacker who can alter the registry bytes (a compromised CDN / MITM serving a
  * different registry.json at the pinned path) can redirect every plugin to
- * arbitrary code — even though the per-artifact SRI (Stories 1–3) protects each
- * pinned artifact. A bare hash served NEXT TO the registry is THEATER: a tamperer
+ * arbitrary code — even though the per-artifact SRI protects each pinned
+ * artifact. A bare hash served NEXT TO the registry is THEATER: a tamperer
  * recomputes it. So we sign the registry with a KEY the tamperer lacks and verify
  * that signature at read time, BEFORE the registry is used (see `signing.ts` for
  * the Node signer/verifier and `verify_registry_web.ts` for the browser verifier).
@@ -29,20 +29,21 @@
  * modules; keeping the canonicalization here guarantees the signer (Node) and the
  * verifiers (Node + browser) all hash byte-for-byte IDENTICAL input.
  *
- * Trust / key model (documented in full in docs/15-PHASE12-RESULTS.md):
+ * Trust / key model:
  *  - The verification key is held in SERVER CONFIG (never inside the signed
  *    payload) and delivered to the browser by the TRUSTED OSD origin — NOT by the
  *    CDN that serves the registry. The CDN tamperer therefore cannot forge a
  *    signature, which is exactly the threat this defends against.
  *  - Key issuance / rotation / custody (and the stronger asymmetric model where the
- *    browser holds only a PUBLIC key) are deferred to Phase 13 (a governed service).
+ *    browser holds only a PUBLIC key) are the natural next step, deferred to a
+ *    governed key-management service.
  */
 
 /**
  * The only signature algorithm currently supported: an HMAC-SHA256 MAC over the
  * {@link canonicalRegistryString canonical} registry bytes. HMAC uses a symmetric
- * server-held secret (the key the CDN tamperer lacks). Phase 13 may add an
- * asymmetric algorithm so the browser holds only a public key.
+ * server-held secret (the key the CDN tamperer lacks). A future asymmetric
+ * algorithm can be added so the browser holds only a public key.
  */
 export const REGISTRY_SIGNATURE_ALGORITHM = 'HMAC-SHA256';
 

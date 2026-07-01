@@ -10,7 +10,7 @@
  */
 
 /**
- * Browser bundle entry for MFE mode (Phase 3, Story 4).
+ * Browser bundle entry for MFE mode.
  *
  * The server render branch (`opensearchDashboards.mfe.enabled`) emits a bootstrap
  * (src/legacy/ui/ui_render/bootstrap/bootstrap_mfe.js.hbs) that loads this bundle
@@ -19,7 +19,7 @@
  * This module is the side-effecting entry that assigns that global; the actual
  * orchestration lives in {@link bootstrapMfe}. It is built into a self-contained
  * browser bundle and served at the configured `opensearchDashboards.mfe.bootstrapUrl`
- * (wired up in the launch harness — Story 5). It is intentionally NOT re-exported
+ * (wired up in the launch harness). It is intentionally NOT re-exported
  * from the node `src/index.ts` barrel.
  */
 

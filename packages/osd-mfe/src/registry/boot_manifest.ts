@@ -11,21 +11,21 @@
 
 /**
  * Boot manifest — the FLAT shape the OSD server injects into the boot HTML for
- * the browser to consume in `--mfe` mode (Phase 13, Story 1).
+ * the browser to consume in `--mfe` mode (server-side per-tenant resolution).
  *
  * The browser does NOT see the registry document. The server reads the
  * document, runs the resolution algorithm against the requesting host's
  * {@link ResolutionDimensions}, and injects the resulting boot manifest at
- * `__osdInjectedMetadata.mfeBoot` via the existing Phase-5
+ * `__osdInjectedMetadata.mfeBoot` via the existing
  * `<osd-injected-metadata>` channel. The browser bootstrap consumes the flat
- * `mfes[]` list directly — no second registry HTTP fetch (verifier case G).
+ * `mfes[]` list directly — no second registry HTTP fetch.
  *
  * The manifest carries ONLY what the loader needs to instantiate each remote:
  *   - `id` — for ordering and inspector panel display
  *   - `remoteEntry`, `scope`, `module` — Module Federation triple
- *   - `version` — for inspector / Phase 9 compat / debugging
- *   - `integrity?` — optional SRI hash (Phase 12, fail-closed when present)
- *   - `compat?` — optional host-compatibility declaration (Phase 9 classifier)
+ *   - `version` — for inspector / compat checks / debugging
+ *   - `integrity?` — optional SRI hash (fail-closed when present)
+ *   - `compat?` — optional host-compatibility declaration (classifier input)
  *
  * In addition, the manifest carries optional GLOBAL ASSET ROOTS (`core`,
  * `orchestrator`, `sharedDepsCss`, `themes`) — direct projections of the
@@ -59,9 +59,9 @@ export interface BootManifestEntry {
   module: string;
   /** Content-hash-derived version label of the resolved entry. */
   version: string;
-  /** Optional SRI hash (`sha384-…`) — recommended in prod (Phase 12). */
+  /** Optional SRI hash (`sha384-…`) — recommended in prod (fail-closed when present). */
   integrity?: string;
-  /** Optional host-compatibility declaration (Phase 9 classifier input). */
+  /** Optional host-compatibility declaration (compat classifier input). */
   compat?: CompatDeclaration;
 }
 
@@ -101,8 +101,8 @@ export interface BootManifest {
  * {@link AssetDescriptor}), but each has its own copy because the boot
  * manifest validator runs on the browser side and must not pull in the
  * full registry schema validator's dependency graph just to recheck a
- * literal string prefix. The constant is `sha384-` (Phase 12; matches
- * the plugin `remoteEntry` SRI algorithm).
+ * literal string prefix. The constant is `sha384-` (matches the plugin
+ * `remoteEntry` SRI algorithm).
  */
 const SRI_INTEGRITY_PREFIX = 'sha384-';
 

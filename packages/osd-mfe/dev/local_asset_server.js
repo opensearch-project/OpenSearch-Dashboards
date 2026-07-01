@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Tiny static file server for the OSD MFE scratch host (Phase 1, Story 4).
+ * Tiny static file server for the OSD MFE scratch host.
  *
  * Serves three roots plus one generated config endpoint:
  *   /                     -> packages/osd-mfe/scratch_host/index.html

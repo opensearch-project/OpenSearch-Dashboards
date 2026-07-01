@@ -10,16 +10,15 @@
  */
 
 /**
- * Module Federation share-scope seeding from `window.__osdSharedDeps__`
- * (Phase 3, Story 3).
+ * Module Federation share-scope seeding from `window.__osdSharedDeps__`.
  *
  * The MFE remotes declare these packages as MF `shared` singletons with
  * `import: false` (consume-only — they bundle NO fallback copy). Therefore the
  * host page MUST provide each one in the share scope BEFORE any remote loads,
  * or the remote fails at runtime. The shared instances come from the
  * `@osd/ui-shared-deps` bundle, which assigns them onto `window.__osdSharedDeps__`
- * under capitalised global keys. See docs/01-MFE-DESIGN.md §6 and
- * packages/osd-ui-shared-deps/index.js (the externals map).
+ * under capitalised global keys. See `packages/osd-mfe/README.md` and
+ * `packages/osd-ui-shared-deps/index.js` (the externals map).
  */
 
 import { ShareScope } from './types';

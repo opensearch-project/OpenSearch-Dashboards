@@ -10,8 +10,8 @@
  */
 
 /**
- * Phase 12, Story 2 — Subresource Integrity (SRI) on the injected remoteEntry
- * <script>. These tests assert the DOM contract of {@link loadScript} /
+ * Subresource Integrity (SRI) tests on the injected remoteEntry <script>.
+ * These tests assert the DOM contract of {@link loadScript} /
  * {@link loadRemoteContainer}: when an `integrity` hash is supplied the element
  * carries `integrity` + `crossorigin="anonymous"` (so the browser integrity-checks
  * the script and rejects tampered bytes); when it is absent neither attribute is
@@ -43,7 +43,7 @@ function captureAppendedScript(): {
   void original;
 }
 
-describe('loadScript — Subresource Integrity (Phase 12, Story 2)', () => {
+describe('loadScript — Subresource Integrity', () => {
   it('sets integrity + crossorigin="anonymous" when an integrity hash is supplied', async () => {
     const { scripts, restore } = captureAppendedScript();
     try {
@@ -106,7 +106,7 @@ describe('loadScript — Subresource Integrity (Phase 12, Story 2)', () => {
   });
 });
 
-describe('loadRemoteContainer — integrity passthrough (Phase 12, Story 2)', () => {
+describe('loadRemoteContainer — integrity passthrough', () => {
   afterEach(() => {
     delete (mfeWindow() as Record<string, unknown>).widget;
   });

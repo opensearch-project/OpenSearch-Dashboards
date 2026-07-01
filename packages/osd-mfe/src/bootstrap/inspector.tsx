@@ -10,23 +10,24 @@
  */
 
 /**
- * Dev-only MFE Inspector panel (Phase 5, Story 3).
+ * Dev-only MFE Inspector panel.
  *
  * A small React/EUI panel that lists every micro-frontend, shows where its
  * `remoteEntry` was resolved FROM (the registry/CDN vs a dev override), and
  * gives the developer an input to repoint a single plugin at a local dev server
  * (or any other URL). Applying an override persists it (query param +
  * `localStorage`) and reloads so the new URL takes effect on the next boot. See
- * docs/01-MFE-DESIGN.md §7.
+ * `packages/osd-mfe/README.md` for the dev URL override gate design.
  *
- * SECURITY (the crux of Phase 5): the inspector is a SOURCE of overrides, and
- * overrides let arbitrary remote code load into OSD. It is therefore mounted
- * ONLY when the non-production `mfe.allowOverride` gate is on — the bootstrap
- * (see `bootstrap_mfe.ts`) calls {@link mountInspector} exclusively inside the
- * `allowOverride` branch, so in production the panel is never rendered and the
- * override sources it writes (`localStorage` / the query param) are ignored by
- * the gated parser regardless. This module performs NO gating itself; it trusts
- * its caller to honor the gate, exactly like `override_sources.ts`.
+ * SECURITY (the crux of the dev URL override gate): the inspector is a SOURCE
+ * of overrides, and overrides let arbitrary remote code load into OSD. It is
+ * therefore mounted ONLY when the non-production `mfe.allowOverride` gate is
+ * on — the bootstrap (see `bootstrap_mfe.ts`) calls {@link mountInspector}
+ * exclusively inside the `allowOverride` branch, so in production the panel
+ * is never rendered and the override sources it writes (`localStorage` / the
+ * query param) are ignored by the gated parser regardless. This module
+ * performs NO gating itself; it trusts its caller to honor the gate, exactly
+ * like `override_sources.ts`.
  *
  * React, react-dom and `@elastic/eui` are resolved to the host's
  * `__osdSharedDeps__` singletons via the bootstrap bundler's `externals` (see
@@ -84,8 +85,8 @@ export interface MfeInspectorProps {
   /** Remove the override for `id` and reload (host-provided). */
   onClear: (id: string) => void;
   /**
-   * Optional list of plugins the bootstrap DISABLED during boot (Phase 14, Story
-   * 2 — `bootstrap_mfe.ts` collects these at every disable site: compat-skip,
+   * Optional list of plugins the bootstrap DISABLED during boot
+   * (`bootstrap_mfe.ts` collects these at every disable site: compat-skip,
    * registry-trust skip, per-remote load failure). When non-empty, the panel
    * renders an extra "Disabled plugins" section listing each id with its
    * `errorClass` (machine label, for the developer) and `humanReason` (the same
@@ -95,8 +96,8 @@ export interface MfeInspectorProps {
   disabled?: DisabledPluginRecord[];
 }
 
-/** Test_subj on the "Disabled plugins" section root — verifier hook for
- * verify_phase14.js case F. Stable so a verifier can grep by attribute. */
+/** Test_subj on the "Disabled plugins" section root — verifier hook. Stable
+ * so a verifier can grep by attribute. */
 export const DISABLED_SECTION_TEST_SUBJ = 'mfeInspectorDisabledSection';
 
 /**
@@ -106,7 +107,7 @@ export const DISABLED_SECTION_TEST_SUBJ = 'mfeInspectorDisabledSection';
  * shows nothing extra. The id is rendered first (the developer-facing label),
  * the human reason next (the same one shown to the user via the degraded app
  * stub), and the errorClass tucked into a small badge so the operator can
- * cross-reference Phase 14 telemetry.
+ * cross-reference the corresponding telemetry event.
  */
 const DisabledPluginsSection: React.FC<{ disabled?: DisabledPluginRecord[] }> = ({ disabled }) => {
   if (!disabled || disabled.length === 0) {
@@ -162,10 +163,9 @@ const DisabledPluginsSection: React.FC<{ disabled?: DisabledPluginRecord[] }> = 
 /**
  * The dev-only inspector panel. Renders a fixed, scrollable card in the corner
  * listing each MFE with a source badge and an editable `remoteEntry` field.
- * Phase 14, Story 2: also renders a "Disabled plugins" section ABOVE the
- * editable list when any remote was disabled at boot — keeping the failures
- * visible at the top of the panel where a developer is most likely to spot
- * them.
+ * Also renders a "Disabled plugins" section ABOVE the editable list when any
+ * remote was disabled at boot — keeping the failures visible at the top of the
+ * panel where a developer is most likely to spot them.
  */
 export const MfeInspector: React.FC<MfeInspectorProps> = ({
   entries,
@@ -206,9 +206,9 @@ export const MfeInspector: React.FC<MfeInspectorProps> = ({
       </EuiText>
       <EuiHorizontalRule margin="s" />
 
-      {/* Phase 14, Story 2 — surface every disabled plugin with its reason +
-        errorClass. Section is suppressed entirely when no plugins are disabled
-        (a healthy boot). */}
+      {/* Visible-degradation UX — surface every disabled plugin with its
+        reason + errorClass. Section is suppressed entirely when no plugins
+        are disabled (a healthy boot). */}
       <DisabledPluginsSection disabled={disabled} />
 
       {entries.map((entry) => {
@@ -438,9 +438,9 @@ export interface MountInspectorOptions {
   /** Host environment for the apply/clear side effects (defaults to `window`). */
   env?: InspectorEnv;
   /**
-   * Plugins the bootstrap disabled at boot (Phase 14, Story 2). Threaded
-   * through {@link MfeInspectorProps.disabled}; absent / empty => no extra
-   * section rendered.
+   * Plugins the bootstrap disabled at boot. Threaded through
+   * {@link MfeInspectorProps.disabled}; absent / empty => no extra section
+   * rendered.
    */
   disabled?: DisabledPluginRecord[];
 }

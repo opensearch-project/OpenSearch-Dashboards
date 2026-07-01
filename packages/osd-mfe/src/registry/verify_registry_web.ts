@@ -10,14 +10,14 @@
  */
 
 /**
- * Registry authenticity — BROWSER verifier (Phase 12, Story 4).
+ * Registry authenticity — BROWSER verifier.
  *
- * This is the verifier that runs on the LIVE :5602 path: the MFE bootstrap fetches
- * the registry from the origin/CDN and, when a verification key is injected by the
- * (trusted) OSD origin, calls this BEFORE using the registry to decide which
- * remotes to load. It verifies the HMAC-SHA256 signature with the host-held key
- * using the Web Crypto API (`crypto.subtle`), so it pulls NO Node builtin and is
- * safe to bundle into the `web`-target bootstrap.
+ * This is the verifier that runs on the LIVE MFE boot path: the MFE bootstrap
+ * fetches the registry from the origin/CDN and, when a verification key is
+ * injected by the (trusted) OSD origin, calls this BEFORE using the registry to
+ * decide which remotes to load. It verifies the HMAC-SHA256 signature with the
+ * host-held key using the Web Crypto API (`crypto.subtle`), so it pulls NO Node
+ * builtin and is safe to bundle into the `web`-target bootstrap.
  *
  * The canonical serialization (which strips the `signature` field) is shared with
  * the Node signer/verifier via `signing_common.ts`, so the browser hashes byte-for

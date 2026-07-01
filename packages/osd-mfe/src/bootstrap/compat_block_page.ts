@@ -10,7 +10,7 @@
  */
 
 /**
- * Phase 9 version-compatibility HARD-BLOCK page (Story 3).
+ * Version-compatibility HARD-BLOCK page.
  *
  * In non-production, the locked policy HARD-BLOCKS the whole page when any remote
  * is INCOMPATIBLE (`onIncompatible: 'block'`, the dev default) instead of booting

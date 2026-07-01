@@ -173,7 +173,7 @@ describe('FileRegistryProvider — real file hot-reload + accessors', () => {
   });
 });
 
-describe('FileRegistryProvider — registry signature verification (Phase 12, Story 4)', () => {
+describe('FileRegistryProvider — registry signature verification', () => {
   const KEY = { keyId: 'mfe-test-hmac-1', secret: 'server-held-secret' };
   const VERIFICATION = {
     algorithm: REGISTRY_SIGNATURE_ALGORITHM,

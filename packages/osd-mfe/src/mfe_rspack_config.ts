@@ -127,12 +127,13 @@ export function getMfeRspackConfig(options: MfeRspackConfigOptions): Configurati
   // identify it reliably (rspack would otherwise name the chunk after an arbitrary
   // contained module, and the name varies per plugin / between dev and `--dist`).
   //
-  // Phase 16, Story 4 — `<plugin>.plugin.js` is emitted as a separate file BY rspack
-  // (the MF plugin always emits exposes as their own chunk), then COLLAPSED into
+  // `<plugin>.plugin.js` is emitted as a separate file BY rspack (the MF
+  // plugin always emits exposes as their own chunk), then COLLAPSED into
   // `remoteEntry.js` by a post-build merge step in `build_mfe_for_plugin.ts`
-  // (`mergeExposedEntryIntoRemoteEntry`). The merge concatenates the eager chunk's
-  // `webpackChunk<scope>.push([[chunkId], modules])` BEFORE the runtime's IIFE so
-  // the runtime's standard `chunkLoadingGlobal.forEach(webpackJsonpCallback)` picks
+  // (`mergeExposedEntryIntoRemoteEntry`). The merge concatenates the eager
+  // chunk's `webpackChunk<scope>.push([[chunkId], modules])` BEFORE the
+  // runtime's IIFE so the runtime's standard
+  // `chunkLoadingGlobal.forEach(webpackJsonpCallback)` picks
   // up the pre-pushed entry and marks the chunk installed — `container.get('./public')`
   // then resolves WITHOUT an additional network fetch. The rspack config below stays
   // unchanged (the chunk is still emitted with the `<plugin>.plugin.js` name during
@@ -260,7 +261,7 @@ export function getMfeRspackConfig(options: MfeRspackConfigOptions): Configurati
       // ENTRY — the MFE analogue of the optimizer's eager `<id>.plugin.js` — and NOT
       // a lazy, navigation-loaded app chunk. Native OSD names eager plugin entries
       // `<id>.plugin.js` and lazy app chunks `<id>.chunk.<id>.js`; the lazy-loading
-      // regression (Phase 11) was that the MFE emitted the eager exposed entry with
+      // regression was that the MFE emitted the eager exposed entry with
       // the `.chunk.` infix, so it both looked like — and was measured as — a deferred
       // app chunk being loaded at boot. Name the exposed-entry chunk as the eager
       // plugin entry, and keep every genuinely dynamic-`import()`'d chunk (doc views,
@@ -281,7 +282,7 @@ export function getMfeRspackConfig(options: MfeRspackConfigOptions): Configurati
       // location so dynamically-loaded chunks resolve wherever the remote is served.
       publicPath: 'auto',
       uniqueName: `osdMfe_${plugin.id}`,
-      // Subresource Integrity (Phase 12, Story 3) — defense-in-depth for LAZY CHUNKS.
+      // Subresource Integrity — defense-in-depth for LAZY CHUNKS.
       // The Module Federation runtime injects a `<script>` for each dynamically
       // `import()`-ed chunk at runtime. `crossOriginLoading: 'anonymous'` makes the
       // runtime fetch those chunk scripts in CORS (anonymous) mode and emit a
@@ -289,7 +290,7 @@ export function getMfeRspackConfig(options: MfeRspackConfigOptions): Configurati
       // for the browser to enforce the per-chunk `integrity` attribute the
       // SubresourceIntegrityPlugin (below) wires into the runtime. The CDN already
       // answers CORS (Managed-CORS-with-preflight) and the local origin sets
-      // ACAO:*, so the anonymous request succeeds. Story 2 secured the boot-time
+      // ACAO:*, so the anonymous request succeeds. The boot-time gate secures the
       // remoteEntry <script> (host-injected, integrity from the registry); this
       // secures the chunks the remote loads itself AFTER it is mounted.
       crossOriginLoading: 'anonymous',
@@ -324,20 +325,22 @@ export function getMfeRspackConfig(options: MfeRspackConfigOptions): Configurati
 
     plugins: [
       new rspack.experiments.VirtualModulesPlugin(crossPluginVirtualFiles),
-      // Subresource Integrity for LAZY CHUNKS (Phase 12, Story 3). rspack 1.6.4
-      // ships this natively (`rspack.experiments.SubresourceIntegrityPlugin`), so
-      // per-chunk SRI needs NO optimizer/core change and NO webpack-subresource-
-      // integrity dependency. It computes a `sha384-…` digest for every emitted
-      // chunk (over the UNCOMPRESSED bytes — the SAME representation the browser
-      // verifies the DECODED response against, and the same algorithm Story 1
-      // uses for the remoteEntry in the registry) and injects those hashes into
-      // the Module Federation runtime, which then sets `integrity` (+ the
-      // `crossorigin` from `output.crossOriginLoading` above) on each chunk
-      // <script> it loads on demand. A tampered/MITM'd chunk served at the pinned
-      // content-addressed path is then REJECTED by the browser at the dynamic
-      // `import()` site instead of executed — defense-in-depth behind the
-      // boot-time remoteEntry gate (Story 2). A chunk failure is a RUNTIME event
-      // inside an already-mounted plugin; the bootstrap's chunk-error surface
+      // Subresource Integrity for LAZY CHUNKS. rspack 1.6.4 ships this
+      // natively (`rspack.experiments.SubresourceIntegrityPlugin`), so
+      // per-chunk SRI needs NO optimizer/core change and NO
+      // webpack-subresource-integrity dependency. It computes a `sha384-…`
+      // digest for every emitted chunk (over the UNCOMPRESSED bytes — the
+      // SAME representation the browser verifies the DECODED response
+      // against, and the same algorithm the registry generator uses for the
+      // remoteEntry) and injects those hashes into the Module Federation
+      // runtime, which then sets `integrity` (+ the `crossorigin` from
+      // `output.crossOriginLoading` above) on each chunk <script> it loads
+      // on demand. A tampered/MITM'd chunk served at the pinned
+      // content-addressed path is then REJECTED by the browser at the
+      // dynamic `import()` site instead of executed — defense-in-depth
+      // behind the boot-time remoteEntry gate. A chunk failure is a RUNTIME
+      // event inside an already-mounted plugin; the bootstrap's
+      // chunk-error surface
       // (bootstrap/chunk_error_surface.ts) turns the resulting rejection into a
       // visible error + telemetry rather than a white screen / silent hang.
       //
@@ -373,11 +376,12 @@ export function getMfeRspackConfig(options: MfeRspackConfigOptions): Configurati
         // reads the matching `window[scope]`.
         name: `osdMfe_${plugin.id}`,
         filename: 'remoteEntry.js',
-        // Expose the plugin's public entry as `./public`, matching the design's
-        // registry `module: "./public"` convention (see docs/01-MFE-DESIGN.md). The
-        // object form pins the exposed module's chunk NAME so `output.chunkFilename`
-        // can reliably emit it as the eager plugin entry (`<id>.plugin.js`) rather than
-        // a `.chunk.` (the Phase 11 lazy-loading fix) — see EXPOSED_ENTRY_CHUNK_NAME.
+        // Expose the plugin's public entry as `./public`, matching the
+        // registry `module: "./public"` convention (see
+        // `packages/osd-mfe/README.md`). The object form pins the exposed
+        // module's chunk NAME so `output.chunkFilename` can reliably emit it
+        // as the eager plugin entry (`<id>.plugin.js`) rather than a
+        // `.chunk.` (the lazy-loading fix) — see EXPOSED_ENTRY_CHUNK_NAME.
         exposes: {
           './public': {
             import: publicEntry,

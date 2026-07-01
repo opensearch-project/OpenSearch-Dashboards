@@ -40,7 +40,7 @@ else
 fi
 export REGISTRY_BASE_URL="${REGISTRY_BASE_URL:-http://localhost:8080}"
 
-# Phase 3 MFE-aware rendering: second OSD instance launched with --mfe
+# MFE-aware rendering: second OSD instance launched with --mfe
 export MFE_OSD_PORT="${MFE_OSD_PORT:-5602}"
 export MFE_OSD_URL="${MFE_OSD_URL:-http://localhost:5602}"
 

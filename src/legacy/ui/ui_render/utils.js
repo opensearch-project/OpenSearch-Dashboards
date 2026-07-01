@@ -79,13 +79,13 @@ const MFE_WIDENED_DIRECTIVES = new Set([
   // a worker fetched from the CDN would be blocked; widening lets remotes ship
   // their own worker code.
   'worker-src',
-  // Phase 12 Story 5: extend the allow-list to the directives real remotes use
-  // beyond just <script> and Worker. EUI / Monaco / theme styling, web fonts,
-  // and runtime fetch()/XHR/WebSocket calls a remote may issue back to its
-  // origin. We only widen these when they ALREADY exist in the base rules — we
-  // never introduce a new directive, because that would TIGHTEN a policy that
-  // was previously open (an unspecified directive with no `default-src` allows
-  // any origin), and the threat model forbids tightening OSD's default CSP.
+  // Extend the allow-list to the directives real remotes use beyond just
+  // <script> and Worker: EUI / Monaco / theme styling, web fonts, and runtime
+  // fetch()/XHR/WebSocket calls a remote may issue back to its origin. We only
+  // widen these when they ALREADY exist in the base rules — we never introduce
+  // a new directive, because that would TIGHTEN a policy that was previously
+  // open (an unspecified directive with no `default-src` allows any origin),
+  // and the threat model forbids tightening OSD's default CSP.
   // - style-src: cross-origin <link rel=stylesheet> + <style> elements bundled
   //   by remotes (CSS-in-JS still goes through 'unsafe-inline').
   // - style-src-elem: companion to style-src for <style>/<link> elements only.
@@ -133,8 +133,8 @@ function mfeOriginOf(url) {
 
 /**
  * Widens the CSP MFE-relevant directives with the cross-origin MFE script /
- * style / font / connect origins (Phase 5 — docs/01-MFE-DESIGN.md §6/§7;
- * extended in Phase 12 Story 5).
+ * style / font / connect origins (dev URL override gate + broadened CSP
+ * allow-list for real remote assets).
  *
  * In MFE mode (`opensearchDashboards.mfe.enabled`) the bootstrap bundle, the
  * shared-deps bundle, every plugin `remoteEntry.js` / chunk, the lazy-loaded

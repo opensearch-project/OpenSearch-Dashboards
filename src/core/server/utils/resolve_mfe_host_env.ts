@@ -10,9 +10,9 @@
  */
 
 /**
- * Resolve the running HOST environment for the Phase 9 version-compatibility
- * contract (Story 3): the OSD core version + the shared-singleton semver ranges
- * the host provides. The server injects this into the MFE bootstrap page
+ * Resolve the running HOST environment for the version-compatibility contract:
+ * the OSD core version + the shared-singleton semver ranges the host provides.
+ * The server injects this into the MFE bootstrap page
  * (`window.__osdMfe__.host`) so the browser classifier can compare each remote's
  * recorded `builtAgainst`/`compat` metadata against the host.
  *
@@ -28,9 +28,8 @@
  *
  * Because the host ranges are derived identically to the remotes' `builtAgainst`
  * ranges, in the happy path (every remote built from one tree) the host SATISFIES
- * every remote and all classify COMPATIBLE; independent deploys (Phase 10) /
- * the skew simulation (Phase 9 Story 4) make them diverge and the classifier
- * detects it.
+ * every remote and all classify COMPATIBLE; incremental deploys and skew
+ * simulation scenarios make them diverge and the classifier detects it.
  */
 
 import Path from 'path';

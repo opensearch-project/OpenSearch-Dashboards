@@ -10,7 +10,7 @@
  */
 
 /**
- * Phase 9 compatibility CLASSIFIER (Story 2).
+ * Compat CLASSIFIER — the pure runtime evaluator of the compat contract.
  *
  * A PURE, side-effect-free evaluator that the host uses (in resolve()/bootstrap)
  * to decide whether a remote may be loaded. Given the running host environment
@@ -23,7 +23,7 @@
  *  - `unknown`      — the remote's metadata is missing/incomplete, so we cannot
  *                     decide (legacy remotes built before the contract existed).
  *
- * COMPATIBILITY AXES (locked — docs/01-MFE-DESIGN.md / prd.json):
+ * COMPATIBILITY AXES (locked — see `packages/osd-mfe/README.md`):
  *  1. OSD core: the running core version must fall within the remote's declared
  *     `compat.compatibleCoreRange` (defaults to "same major.minor", e.g. `3.5.x`)
  *     AND be at or above `compat.minCoreVersion`. A major/minor mismatch or a
@@ -35,10 +35,10 @@
  *     silently mismatched singleton).
  *
  * This module performs NO enforcement and reads NO policy: it only labels the
- * technical compatibility. Story 3 (bootstrap) maps the label + reasons onto the
- * env-keyed POLICY (dev block / prod skip, `strictShared`, …). To let that
- * policy honor `strictShared` without re-deriving anything, the result also
- * flags WHICH axis failed ({@link CompatibilityResult.coreMismatch} /
+ * technical compatibility. The bootstrap policy layer maps the label + reasons
+ * onto the env-keyed POLICY (dev block / prod skip, `strictShared`, …). To let
+ * that policy honor `strictShared` without re-deriving anything, the result
+ * also flags WHICH axis failed ({@link CompatibilityResult.coreMismatch} /
  * {@link CompatibilityResult.sharedMismatch}).
  *
  * Determinism: the classifier only inspects its arguments and `semver`; the same
@@ -56,8 +56,9 @@ export type Compatibility = 'compatible' | 'incompatible' | 'unknown';
 
 /**
  * The running host environment a remote is classified against — the left-hand
- * side of the contract. Story 3 builds this from the live core version and the
- * shared-singleton versions the host serves; the classifier treats it as data.
+ * side of the contract. The bootstrap policy layer builds this from the live
+ * core version and the shared-singleton versions the host serves; the
+ * classifier treats it as data.
  */
 export interface HostEnvironment {
   /** The running OSD core version (semver string, e.g. `"3.5.0"`). */
@@ -73,7 +74,7 @@ export interface HostEnvironment {
 
 /**
  * The remote-side compatibility metadata the classifier consumes. This is the
- * subset of {@link import('./schema').MfeEntry} produced by the Phase 9 contract
+ * subset of {@link import('./schema').MfeEntry} produced by the compat contract
  * (`./compat.ts`). Both fields are optional: a remote missing EITHER is treated
  * as {@link Compatibility} `unknown` (incomplete contract).
  */
@@ -91,8 +92,8 @@ export interface CompatibilityResult {
   /**
    * Human-readable explanations. Empty when `compatible`; one entry per failed
    * check when `incompatible`; a single "missing metadata" note when `unknown`.
-   * Story 3 surfaces these as the offender reasons (dev block list / prod skip
-   * telemetry).
+   * The bootstrap policy layer surfaces these as the offender reasons (dev
+   * block list / prod skip telemetry).
    */
   reasons: string[];
   /** True when an OSD-core axis check failed (drives nothing here; for policy). */

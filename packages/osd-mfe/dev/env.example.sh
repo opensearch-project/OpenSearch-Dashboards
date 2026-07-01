@@ -67,7 +67,7 @@
 # export MFE_REGISTRY_PATH=
 
 # ---------------------------------------------------------------------------
-# OPTIONAL: compat policy override (Phase 9)
+# OPTIONAL: compat policy override
 # ---------------------------------------------------------------------------
 
 # Override the dev-default "block on incompatible / warn on missing" compat
@@ -78,7 +78,7 @@
 # export MFE_COMPAT_ON_MISSING=skip           # warn-load | skip
 
 # ---------------------------------------------------------------------------
-# OPTIONAL: dev URL override gate (Phase 5)
+# OPTIONAL: dev URL override gate
 # ---------------------------------------------------------------------------
 
 # Default in --dev: true (developers can use ?mfe.<id>=<url> URL params to
@@ -87,7 +87,7 @@
 # export MFE_ALLOW_OVERRIDE=false
 
 # ---------------------------------------------------------------------------
-# OPTIONAL: registry signing (Phase 12)
+# OPTIONAL: registry signing
 # ---------------------------------------------------------------------------
 
 # Public key (PEM file path) used to verify the registry signature when the
@@ -97,10 +97,10 @@
 # export MFE_REGISTRY_SIG_KEY_ID=my-key-2026
 
 # ---------------------------------------------------------------------------
-# OPTIONAL: tenant routing (Phase 13)
+# OPTIONAL: tenant routing (server-side per-tenant resolution)
 # ---------------------------------------------------------------------------
 
-# The customer / tenant identifier used by Phase 13 per-tenant resolution.
+# The customer / tenant identifier used for per-tenant resolution.
 # Default: "default".
 #
 # export MFE_CUSTOMER_ID=tenant-acme
@@ -111,7 +111,7 @@
 # export MFE_USER_BUCKET_COOKIE_NAME=_my_bucket_cookie
 
 # ---------------------------------------------------------------------------
-# OPTIONAL: telemetry (Phase 14)
+# OPTIONAL: telemetry
 # ---------------------------------------------------------------------------
 
 # URL the bootstrap POSTs telemetry events to via Beacon API. Default: unset

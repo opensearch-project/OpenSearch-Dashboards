@@ -10,11 +10,11 @@
  */
 
 /**
- * RegistryProvider (Phase 2, Story 2).
+ * RegistryProvider — the read-side of the dynamic registry.
  *
  * The registry is DYNAMIC DATA read at serve time — never a code constant. This
  * module defines the {@link RegistryProvider} interface that decouples callers
- * (`resolve()`, the Phase 3 render path, the harness mock service) from the
+ * (`resolve()`, the server-side render path, the harness mock service) from the
  * backing store, plus a file-backed implementation with **mtime-based
  * hot-reload**: each {@link RegistryProvider.read} re-reads the file ONLY when
  * its modification time changed, and serves a cached, validated copy otherwise.
@@ -22,7 +22,7 @@
  * Because the backing store sits behind the interface, the same callers can
  * later be pointed at an S3 object / DynamoDB / HTTP registry service (with a
  * TTL/poll cadence) without any code change on their side. See
- * docs/01-MFE-DESIGN.md §5 ("Registry is DYNAMIC — data, not code").
+ * `packages/osd-mfe/README.md` — "Registry is DYNAMIC — data, not code".
  */
 
 import Fs from 'fs';
@@ -80,12 +80,12 @@ export interface FileRegistryProviderOptions {
   /** Injectable filesystem (for testing). Defaults to node `fs`. */
   fs?: RegistryFs;
   /**
-   * Optional registry-authenticity verification material (Phase 12, Story 4).
-   * When provided, every {@link FileRegistryProvider.read read} verifies the
-   * registry's HMAC signature with this host-held key BEFORE returning it, and
-   * THROWS (fail-closed) on a missing/invalid/non-matching signature — the
-   * registry decides which remote code loads, so an unauthenticated one is
-   * refused. When omitted (the default), no signature check is performed and the
+   * Optional registry-authenticity verification material. When provided,
+   * every {@link FileRegistryProvider.read read} verifies the registry's HMAC
+   * signature with this host-held key BEFORE returning it, and THROWS
+   * (fail-closed) on a missing/invalid/non-matching signature — the registry
+   * decides which remote code loads, so an unauthenticated one is refused.
+   * When omitted (the default), no signature check is performed and the
    * registry loads as before (backward compatible; the harness origin server
    * serves the bytes key-less and the browser bootstrap does the verification on
    * the live path). See `signing_common.ts` for the trust/key model.
@@ -199,12 +199,13 @@ export class FileRegistryProvider implements RegistryProvider {
     // Throws a descriptive Error listing every schema problem when invalid.
     const registry = assertValidRegistry(parsed);
 
-    // Phase 12, Story 4 — registry AUTHENTICITY (fail-closed). When a verification
-    // key is configured, the registry MUST carry a signature that verifies with it;
-    // otherwise we refuse it rather than trust a document that decides which remote
-    // code loads. Throwing here is the Node read path's fail-closed behavior
-    // (mirrors assertValidRegistry); the browser bootstrap has its own fail-closed
-    // surface on the live path. No key configured => no check (backward compatible).
+    // Registry AUTHENTICITY (fail-closed). When a verification key is
+    // configured, the registry MUST carry a signature that verifies with it;
+    // otherwise we refuse it rather than trust a document that decides which
+    // remote code loads. Throwing here is the Node read path's fail-closed
+    // behavior (mirrors assertValidRegistry); the browser bootstrap has its
+    // own fail-closed surface on the live path. No key configured => no check
+    // (backward compatible).
     if (this.verification) {
       const result = verifyRegistrySignature(registry, this.verification);
       if (!result.ok) {

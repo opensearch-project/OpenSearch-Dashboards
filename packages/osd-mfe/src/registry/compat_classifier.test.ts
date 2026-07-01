@@ -216,10 +216,10 @@ describe('classifyCompatibility — determinism', () => {
 });
 
 describe('happy path — every current remote classifies COMPATIBLE against the host', () => {
-  // The running host is exactly what the one-tree build produced (Story 1
-  // computeCompatMetadata): same OSD version + a provided singleton version that
-  // satisfies each required range (its minimum). This mirrors the real bootstrap
-  // host that Story 3 will inject.
+  // The running host is exactly what the one-tree build produced
+  // (computeCompatMetadata): same OSD version + a provided singleton version
+  // that satisfies each required range (its minimum). This mirrors the real
+  // bootstrap host that the bootstrap policy layer will inject.
   const meta = computeCompatMetadata(REPO_ROOT);
   const host: HostEnvironment = {
     osdVersion: meta.builtAgainst.osdVersion,

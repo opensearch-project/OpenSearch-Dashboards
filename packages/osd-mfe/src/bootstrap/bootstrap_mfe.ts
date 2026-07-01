@@ -10,8 +10,8 @@
  */
 
 /**
- * The MFE bootstrap orchestrator (Phase 3, Story 3) — the LOCKED sequence from
- * docs/01-MFE-DESIGN.md §6.
+ * The MFE bootstrap orchestrator — the LOCKED sequence from
+ * `packages/osd-mfe/README.md`.
  *
  * Module Federation remote loading is ASYNC, but `plugin_reader.ts` reads
  * `window.__osdBundles__` SYNCHRONOUSLY during `CoreSystem` start. So this
@@ -59,7 +59,8 @@ import { mfeWindow } from './types';
 // react / react-dom / @elastic/eui, which the bootstrap build externalizes to the
 // `window.__osdSharedDeps__` globals (packages/osd-mfe/dev/build_bootstrap.js). A static
 // import would evaluate those externals when the bootstrap bundle is first run by
-// the page (docs §6 load step 2), which is BEFORE bootstrapMfe() loads shared-deps
+// the page (see the load-step sequence in the header comment), which is BEFORE
+// bootstrapMfe() loads shared-deps
 // (step 1, below) — so `__osdSharedDeps__` would be undefined and the whole bundle
 // would throw `ReferenceError`, never assigning window.__osdBootstrapMfe__. Instead
 // the default `mountInspector` dep below lazily `import()`s it at mount time (step 5),
@@ -88,14 +89,14 @@ export interface BootstrapMfeDeps {
    */
   readOverrideStorage: () => OverrideStorage | undefined;
   /**
-   * Mount the dev-only Inspector panel (Phase 5, Story 3) for the resolved
+   * Mount the dev-only Inspector panel for the resolved
    * remotes. The bootstrap calls this ONLY when the non-production
    * `allowOverride` gate is on (see {@link bootstrapMfe}), so the panel is never
    * mounted in production. The default mounts the real React/EUI panel and
    * swallows any render failure (the inspector is a dev convenience that must
    * NEVER break app boot); tests inject a spy.
    *
-   * Phase 14, Story 2: the inspector ALSO renders a "Disabled plugins" section
+   * Visible degradation: the inspector ALSO renders a "Disabled plugins" section
    * when any remote was disabled (compat-skip / registry-trust skip / load
    * failure). The bootstrap collects a {@link DisabledPluginRecord} at every
    * disable site and passes the array here; an empty array suppresses the
@@ -103,7 +104,7 @@ export interface BootstrapMfeDeps {
    */
   mountInspector: (entries: ResolvedRemote[], disabled: DisabledPluginRecord[]) => void;
   /**
-   * Render the Phase 9 version-compatibility HARD-BLOCK page for the offending
+   * Render the version-compatibility HARD-BLOCK page for the offending
    * (incompatible) remotes. Called ONLY in the non-production `block` policy when
    * at least one remote is incompatible: the bootstrap renders this and does NOT
    * boot core. The default replaces the document body with a plain-DOM error
@@ -112,7 +113,7 @@ export interface BootstrapMfeDeps {
    */
   renderBlockPage: (offenders: EvaluatedRemote[]) => void;
   /**
-   * Install the host-side LAZY-CHUNK integrity-failure surface (Phase 12, Story 3).
+   * Install the host-side LAZY-CHUNK integrity-failure surface.
    * Registers global `unhandledrejection` + capture-phase `error` listeners that
    * detect a chunk load/SRI failure at the dynamic-`import()` boundary inside an
    * already-mounted remote and turn it into a visible, non-blocking error banner +
@@ -122,7 +123,7 @@ export interface BootstrapMfeDeps {
    */
   installChunkErrorSurface: typeof installChunkErrorSurface;
   /**
-   * Verify the fetched registry's authenticity signature (Phase 12, Story 4).
+   * Verify the fetched registry's authenticity signature.
    * Called ONLY when a verification key is injected by the (trusted) OSD origin
    * (`options.registryVerification`), BEFORE the registry is used to decide which
    * remotes to load. The default is the Web Crypto HMAC verifier
@@ -135,7 +136,7 @@ export interface BootstrapMfeDeps {
     verification: RegistryVerification
   ) => Promise<SignatureCheck>;
   /**
-   * Build the telemetry dispatcher (Phase 14, Story 1) for this boot. Default
+   * Build the fire-and-forget telemetry dispatcher for this boot. Default
    * is {@link createTelemetryDispatcher} reading `navigator.sendBeacon` and
    * `window.fetch`; tests inject a spy to assert per-remote emission without
    * a real network. The dispatcher MUST be fire-and-forget — `emit()` returns
@@ -144,7 +145,7 @@ export interface BootstrapMfeDeps {
    */
   createTelemetryDispatcher: (config: TelemetryDispatcherConfig) => TelemetryDispatcher;
   /**
-   * Monotonic clock for measuring per-remote durationMs (Phase 14, Story 1).
+   * Monotonic clock for measuring per-remote durationMs.
    * Default: `performance.now()` when available (sub-ms resolution, monotonic
    * — not affected by wall-clock skew), else `Date.now()`. Tests inject a
    * deterministic counter so emitted `durationMs` values are stable.
@@ -156,25 +157,26 @@ export interface BootstrapMfeDeps {
 export interface BootstrapMfeOptions {
   /**
    * URL of the registry document (serve-time, dynamic — e.g. `/registry`). Used
-   * ONLY when {@link bootManifest} is NOT injected (legacy / pre-Phase-13 path).
-   * In Phase 13 the OSD server resolves the registry server-side and injects a
-   * flat boot manifest, so the browser does not fetch this URL.
+   * ONLY when {@link bootManifest} is NOT injected (legacy fallback path).
+   * With server-side per-tenant resolution the OSD server resolves the registry
+   * server-side and injects a flat boot manifest, so the browser does not fetch
+   * this URL.
    */
   registryUrl: string;
   /**
-   * Server-resolved boot manifest (Phase 13, Story 3). When the OSD server has
-   * resolved the v2 registry against the requesting host's dimensions
+   * Server-resolved boot manifest. When the OSD server has resolved the
+   * layered registry against the requesting host's dimensions
    * (`customerId`, `userBucket`) and injected the flat boot manifest at
    * `window.__osdMfe__.bootManifest`, the bootstrap consumes it DIRECTLY and
    * SKIPS the registry HTTP fetch + signature verification path entirely. This
-   * is the canonical Phase 13 path; the {@link registryUrl} fetch path is a
-   * legacy fallback and is intentionally kept around so older injected pages
-   * keep booting. See PRD design_spec §1: "the browser does NOT see the v2
-   * document. The OSD server reads it, resolves dimensions, produces a flat
-   * boot manifest, injects it via `<osd-injected-metadata>`."
+   * is the canonical server-side-resolution path; the {@link registryUrl} fetch
+   * path is a legacy fallback and is intentionally kept around so older injected
+   * pages keep booting. The browser does NOT see the layered document — the OSD
+   * server reads it, resolves dimensions, produces a flat boot manifest, and
+   * injects it via `<osd-injected-metadata>`.
    *
-   * Verifier `verify_phase13.js` case G asserts that, in the canonical Phase 13
-   * path, the browser makes ZERO HTTP calls to anything matching `/registry`.
+   * Invariant: in the canonical server-resolution path, the browser makes ZERO
+   * HTTP calls to anything matching `/registry` (see the dual-path CI gate).
    */
   bootManifest?: BootManifest;
   /** URL of the shared-deps bundle that assigns `window.__osdSharedDeps__`. */
@@ -190,17 +192,17 @@ export interface BootstrapMfeOptions {
   sharedDepsDepUrls?: string[];
   /**
    * The non-production security GATE for dev URL-overrides
-   * (`mfe.allowOverride`, docs/01-MFE-DESIGN.md §7). When `false` (the DEFAULT,
-   * and the only value in production), ALL override sources — query param,
-   * inspector, `localStorage` — are IGNORED and every plugin loads from the
-   * registry/CDN. Phase 5, Story 2 wires the real config value (injected into
-   * the page, default off in prod) into this option; Story 1 only plumbs it,
-   * with a safe default of `false` so no override URL can load while the gate
-   * is off.
+   * (`mfe.allowOverride`, see `packages/osd-mfe/README.md`). When `false` (the
+   * DEFAULT, and the only value in production), ALL override sources — query
+   * param, inspector, `localStorage` — are IGNORED and every plugin loads from
+   * the registry/CDN. The dev URL override gate wires the real config value
+   * (injected into the page, default off in prod) into this option; this option
+   * only plumbs it, with a safe default of `false` so no override URL can load
+   * while the gate is off.
    */
   allowOverride?: boolean;
   /**
-   * The running HOST environment (Phase 9 compatibility contract): the OSD core
+   * The running HOST environment (compat contract): the OSD core
    * version + the shared-singleton versions the host actually provides. Injected
    * by the server (`window.__osdMfe__.host`, computed by
    * `src/core/server/utils/resolve_mfe_host_env.ts`) from the SAME sources the
@@ -211,11 +213,11 @@ export interface BootstrapMfeOptions {
    *
    * Optional: when absent (or `compatPolicy` is absent), compatibility
    * enforcement is DISABLED and every remote loads as before (used by tests / a
-   * pre-Phase-9 injected page).
+   * pre-compat page).
    */
   host?: HostEnvironment;
   /**
-   * The resolved, env-keyed version-compatibility POLICY (Phase 9). Injected by
+   * The resolved, env-keyed version-compatibility POLICY. Injected by
    * the server (`window.__osdMfe__.compatPolicy`, resolved by
    * `resolveCompatPolicy` from `opensearchDashboards.mfe.compat.*` + the server's
    * dev/prod mode). Drives how each non-compatible remote is handled: prod skips
@@ -224,8 +226,8 @@ export interface BootstrapMfeOptions {
    */
   compatPolicy?: CompatPolicy;
   /**
-   * Registry-authenticity verification material (Phase 12, Story 4), injected by
-   * the server (`window.__osdMfe__.registryVerification`) from
+   * Registry-authenticity verification material, injected by the server
+   * (`window.__osdMfe__.registryVerification`) from
    * `opensearchDashboards.mfe.registrySignature.*` — ONLY when a verification key
    * is configured. When present, the bootstrap REQUIRES the fetched registry to
    * carry a valid signature produced with this host-held key and FAILS CLOSED
@@ -238,7 +240,7 @@ export interface BootstrapMfeOptions {
    */
   registryVerification?: RegistryVerification;
   /**
-   * Telemetry sink URL (Phase 14, Story 1). Resolved server-side from
+   * Telemetry sink URL. Resolved server-side from
    * `opensearchDashboards.mfe.telemetryEndpoint` (mfe-gated config). When
    * unset/empty, telemetry is a SILENT no-op — emit() never makes a network
    * call, never logs, and the load loop is byte-for-byte unchanged. When set,
@@ -250,31 +252,31 @@ export interface BootstrapMfeOptions {
   /**
    * Stable canary-bucket assignment for the requesting client (0..99), stamped
    * onto every emitted event. Comes from the server-side cookie hash
-   * (Phase 13 `bucketFromCookie`); injected at `window.__osdMfe__.bucket`. When
+   * (`bucketFromCookie`); injected at `window.__osdMfe__.bucket`. When
    * absent, defaults to `0` so events still emit with a well-formed dimension
-   * (a tests / pre-Phase-14 page that did not inject the bucket field).
+   * (a test / pre-telemetry page that did not inject the bucket field).
    */
   bucket?: number;
   /**
    * Tenant identifier stamped onto every emitted event. Comes from
-   * `opensearchDashboards.mfe.customerId` server config (Phase 13 — `'default'`
-   * until real AuthN); injected at `window.__osdMfe__.customerId`. When absent,
-   * defaults to `'default'` for the same reason as {@link bucket}.
+   * `opensearchDashboards.mfe.customerId` server config (`'default'` until real
+   * AuthN); injected at `window.__osdMfe__.customerId`. When absent, defaults
+   * to `'default'` for the same reason as {@link bucket}.
    */
   customerId?: string;
   /**
-   * Phase 16 Story 5: registry-managed OSD core entry script (`core.entry.js`).
-   * When the server has resolved a v3 registry's `core` top-level field, it
+   * Registry-managed OSD core entry script (`core.entry.js`), a global asset
+   * root. When the server has resolved a registry's `core` top-level field, it
    * injects the descriptor here so the orchestrator loads `core.entry.js` from
    * the CDN URL (with SRI) BEFORE invoking core boot. A tampered core fails
    * closed: `loadScript` rejects, this Promise rejects, the chunk-error
    * surface (armed earlier in `bootstrapMfe`) catches the unhandled rejection
    * and renders a visible error banner — `invokeCoreBootstrap` is NEVER
    * called, because the entire app cannot proceed on a tampered core. When
-   * absent (v1/v2 registries, or v3 without the field), the thin shim's
-   * jsDependencyPaths already pre-loaded `core.entry.js` from THIS server
-   * (the byte-for-byte legacy path) so the in-orchestrator load is skipped
-   * — backward-compat at every consumption site.
+   * absent (no `core` global asset), the thin shim's jsDependencyPaths already
+   * pre-loaded `core.entry.js` from THIS server (the byte-for-byte legacy path)
+   * so the in-orchestrator load is skipped — backward-compat at every
+   * consumption site.
    */
   core?: { url: string; integrity?: string };
   /** Optional collaborator overrides (used by tests). */
@@ -339,11 +341,11 @@ function resolveDeps(overrides?: Partial<BootstrapMfeDeps>): BootstrapMfeDeps {
  * Build the dev-override {@link OverrideMap} for the current registry, GATED by
  * the non-production `allowOverride` flag.
  *
- * SECURITY (docs/01-MFE-DESIGN.md §7): when the gate is off (production, the
- * default), this returns an EMPTY map so `resolve()` always yields the
- * registry/CDN URL and no override source can load arbitrary remote code. When
- * the gate is on (dev), query-param and `localStorage` sources are parsed and
- * expanded against the registry entries.
+ * SECURITY (see the dev URL override gate in `packages/osd-mfe/README.md`):
+ * when the gate is off (production, the default), this returns an EMPTY map so
+ * `resolve()` always yields the registry/CDN URL and no override source can
+ * load arbitrary remote code. When the gate is on (dev), query-param and
+ * `localStorage` sources are parsed and expanded against the registry entries.
  */
 function buildOverrides(
   allowOverride: boolean,
@@ -401,10 +403,10 @@ function inspectorRequestedByUrl(): boolean {
 }
 
 /**
- * Project a server-resolved {@link BootManifest} (Phase 13, Story 3) onto the
+ * Project a server-resolved {@link BootManifest} onto the
  * in-memory {@link Registry} shape the rest of the bootstrap consumes.
  *
- * The boot manifest is the FLAT projection of a v2 registry document already
+ * The boot manifest is the FLAT projection of a layered registry document already
  * resolved against the requesting host's dimensions; it does NOT carry a
  * signature, a generatedAt timestamp or unrelated layers. We synthesise a
  * minimal, valid Registry around the flat list so the existing compat
@@ -412,16 +414,17 @@ function inspectorRequestedByUrl(): boolean {
  * working unchanged.
  *
  * Fields:
- *  - `schemaVersion`: pinned to the v1 SCHEMA_VERSION constant — the in-memory
+ *  - `schemaVersion`: pinned to the SCHEMA_VERSION constant — the in-memory
  *    Registry is just a transport here, never written or sent over the wire.
  *  - `generatedAt`: stamped at projection time so audit logs are still
  *    chronologically sortable; the boot manifest itself does not carry one and
  *    the resolved doc's generatedAt was already consumed server-side.
  *  - `mfes[id]`: per the manifest entry — `version`, `remoteEntry`, `scope`,
- *    `module`, plus optional `integrity` (Phase 12 SRI) and `compat` (Phase 9
- *    classifier). `builtAgainst` and `minCoreVersion` are deliberately omitted
- *    — Phase 9 enforcement uses the projected `compat` declaration alone in
- *    Phase 13's path, mirroring how a server-side resolver pre-filters them.
+ *    `module`, plus optional `integrity` (SRI) and `compat` (classifier input).
+ *    `builtAgainst` and `minCoreVersion` are deliberately omitted — compat
+ *    enforcement uses the projected `compat` declaration alone on the
+ *    server-resolution path, mirroring how a server-side resolver pre-filters
+ *    them.
  */
 export function registryFromBootManifest(manifest: BootManifest): Registry {
   const mfes: Record<string, MfeEntry> = {};
@@ -455,16 +458,16 @@ export function registryFromBootManifest(manifest: BootManifest): Registry {
 }
 
 /**
- * Classify a per-remote load error for telemetry (Phase 14, Story 1) — pure
+ * Classify a per-remote load error for telemetry — pure
  * mapping from the error and the descriptor's integrity claim onto the
  * locked {@link TelemetryErrorClass} taxonomy:
  *
  *  - `Failed to load script: …` from {@link loadScript}: the browser's
  *    `onerror` fired on the remoteEntry <script>. With an integrity claim that
  *    means a Subresource-Integrity mismatch OR an unfetchable artifact (the
- *    browser does not distinguish to JS, and Phase 12 conflates them as
- *    `sri-mismatch` for fail-closed reasoning); without it, the bytes were
- *    simply unreachable, so it is `network`.
+ *    browser does not distinguish to JS, and the SRI fail-closed contract
+ *    conflates them as `sri-mismatch` for fail-closed reasoning); without it,
+ *    the bytes were simply unreachable, so it is `network`.
  *  - `Subresource Integrity` anywhere in the message: SRI failure (defensive
  *    against runtimes whose error wording differs).
  *  - `Remote container "…" not found after loading …` from
@@ -500,10 +503,10 @@ function classifyLoadError(
  * Boot OSD's UI from Module Federation remotes. Resolves once core boot has
  * been invoked (and, for the default core bootstrap, once it completes).
  *
- * Individual remote-load failures are tolerated (Phase 4, Story 5): a remote
- * that cannot be loaded is logged and registered as a DISABLED placeholder
- * (so OSD core's plugin_reader still resolves it) rather than aborting boot.
- * Only the fatal prerequisites still throw.
+ * Individual remote-load failures are tolerated by graceful degradation: a
+ * remote that cannot be loaded is logged and registered as a DISABLED
+ * placeholder (so OSD core's plugin_reader still resolves it) rather than
+ * aborting boot. Only the fatal prerequisites still throw.
  *
  * @throws if shared deps are unavailable, the registry fetch fails, or the
  *   registry is invalid. A single remote that cannot be loaded is logged and
@@ -514,7 +517,7 @@ export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> 
   const { host, compatPolicy, registryVerification, bootManifest } = options;
   const deps = resolveDeps(options.deps);
 
-  // Phase 14, Story 1: build the fire-and-forget telemetry dispatcher EARLY, with
+  // Build the fire-and-forget telemetry dispatcher EARLY, with
   // server-injected dimensions (bucket + customerId) so every emitted event is
   // pre-partitioned for canary/baseline split downstream. Defaults make this a
   // SILENT no-op when the endpoint is unset / empty, so the load loop is
@@ -537,14 +540,14 @@ export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> 
     }
   };
 
-  // Phase 14, Story 2: VISIBLE graceful-degradation UX. Every disable site
+  // VISIBLE graceful-degradation UX. Every disable site
   // (compat-skip / registry-trust skip / per-remote load failure) appends a
   // {@link DisabledPluginRecord} here so the dev Inspector panel can render a
   // "Disabled plugins" section AFTER boot, AND each placeholder registers a
   // hidden degraded app stub at `/app/<id>` that renders a friendly status
   // component instead of OSD's default 404 (see ./disabled_plugin.ts).
   //
-  // Phase 4 invariant preservation: this is purely additive — the existing
+  // Single-failure isolation invariant: this is purely additive — the existing
   // silent-disable mechanism (the placeholder satisfies plugin_reader so a
   // single failed remote does NOT block core boot) is kept verbatim; we only
   // enrich the placeholder's `setup()` with an OSD `application.register` call
@@ -568,8 +571,9 @@ export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> 
   };
 
   // Arm the lazy-CHUNK integrity-failure surface BEFORE anything loads, so it is
-  // active for the entire page lifetime (Phase 12, Story 3). A remote's lazy chunks
-  // are integrity-checked by the browser (rspack SubresourceIntegrityPlugin +
+  // Arm the lazy-CHUNK integrity-failure surface BEFORE anything loads, so it is
+  // active for the entire page lifetime. A remote's lazy chunks are
+  // integrity-checked by the browser (rspack SubresourceIntegrityPlugin +
   // crossOriginLoading, see mfe_rspack_config.ts); a tampered chunk is rejected at
   // the remote's own dynamic-`import()` site AFTER it is mounted — a RUNTIME event,
   // not a boot-time skip. This host-side safety net catches that rejection and
@@ -577,11 +581,11 @@ export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> 
   // It is purely additive (global listeners) and never affects the load sequence.
   deps.installChunkErrorSurface();
 
-  // 0. Phase 16 Story 5: registry-managed OSD core entry (`core.entry.js`).
-  //    When the server advertised a v3 `core` descriptor, the thin shim
-  //    OMITTED the legacy `${regularBundlePath}/core/core.entry.js` preload,
-  //    so the orchestrator MUST load core from the CDN URL itself BEFORE
-  //    invoking core boot. The order mirrors the legacy thin-shim sequence:
+  // 0. Registry-managed OSD core entry (`core.entry.js`). When the server
+  //    advertised a `core` global-asset descriptor, the thin shim OMITTED the
+  //    legacy `${regularBundlePath}/core/core.entry.js` preload, so the
+  //    orchestrator MUST load core from the CDN URL itself BEFORE invoking
+  //    core boot. The order mirrors the legacy thin-shim sequence:
   //    core.entry.js loads → registers `entry/core/public` into the
   //    __osdBundles__ shim (its `__osdBootstrap__` is NOT invoked yet) →
   //    shared-deps + plugin remotes load (steps 1-3 below) → finally
@@ -591,27 +595,27 @@ export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> 
   //    into the shim at load time; it does not yet touch
   //    `window.__osdSharedDeps__`.
   //
-  //    FAIL-CLOSED (Phase 12 SRI posture extended to core): on SRI mismatch
+  //    FAIL-CLOSED (SRI posture extended to core): on SRI mismatch
   //    or unfetchable bytes, `loadScript` rejects → bootstrapMfe's Promise
   //    rejects → the chunk-error surface armed above catches the unhandled
   //    rejection → visible error banner. `invokeCoreBootstrap` is NEVER
   //    called: the entire app cannot proceed on a tampered or unreachable
   //    core (unlike a single plugin remote, which degrades to a placeholder).
   //
-  //    Telemetry (Phase 14 Story 1): the locked error-class taxonomy is
+  //    Telemetry: the locked error-class taxonomy is
   //    re-used unchanged — an integrity claim that fails is `sri-mismatch`
-  //    (Phase 12 conflates tampered bytes and unfetchable bytes under the
-  //    same fail-closed reasoning when integrity is pinned); no claim
-  //    collapses to `network`. The event id is the sentinel `'core'` so
-  //    downstream aggregators can distinguish a core failure from a plugin
-  //    failure without expanding the locked emit() shape.
+  //    (the SRI fail-closed contract conflates tampered bytes and unfetchable
+  //    bytes when integrity is pinned); no claim collapses to `network`. The
+  //    event id is the sentinel `'core'` so downstream aggregators can
+  //    distinguish a core failure from a plugin failure without expanding the
+  //    locked emit() shape.
   //
-  //    Backward-compat: when `options.core` is absent (v1/v2 registry, or
-  //    a v3 doc without the `core` field), this block is a no-op — the thin
-  //    shim already pre-loaded `${regularBundlePath}/core/core.entry.js`
-  //    from THIS server (byte-for-byte legacy path), so the shim's
-  //    `entry/core/public` registration is already in place by the time
-  //    step 4 invokes `__osdBootstrap__`.
+  //    Backward-compat: when `options.core` is absent (no `core` global asset
+  //    advertised), this block is a no-op — the thin shim already pre-loaded
+  //    `${regularBundlePath}/core/core.entry.js` from THIS server
+  //    (byte-for-byte legacy path), so the shim's `entry/core/public`
+  //    registration is already in place by the time step 4 invokes
+  //    `__osdBootstrap__`.
   if (options.core) {
     const coreLoadStart = deps.now();
     try {
@@ -652,16 +656,16 @@ export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> 
   }
   const shareScope = buildShareScope(sharedDeps);
 
-  // 2. Get the current registry. Phase 13 (Story 3): when the OSD server has
-  //    server-side resolved the v2 registry against the requesting host's
-  //    dimensions and INJECTED a flat boot manifest, the bootstrap consumes it
-  //    DIRECTLY — no `/registry` HTTP fetch, no signature verification, no
-  //    browser-side resolve (verify_phase13 case G asserts ZERO `/registry`
-  //    fetches in --mfe mode). Otherwise (legacy / pre-Phase-13 page), fall back
-  //    to the original fetch + signature-verify path. The two paths converge on
-  //    the in-memory `Registry` shape so the rest of the load sequence (compat
-  //    classifier, override map, factory registration, allSettled load) is
-  //    identical regardless of source.
+  // 2. Get the current registry. Server-resolution path: when the OSD server
+  //    has server-side resolved the layered registry against the requesting
+  //    host's dimensions and INJECTED a flat boot manifest, the bootstrap
+  //    consumes it DIRECTLY — no `/registry` HTTP fetch, no signature
+  //    verification, no browser-side resolve (the dual-path CI gate asserts
+  //    ZERO `/registry` fetches in --mfe mode). Otherwise (legacy fallback),
+  //    fall back to the original fetch + signature-verify path. The two paths
+  //    converge on the in-memory `Registry` shape so the rest of the load
+  //    sequence (compat classifier, override map, factory registration,
+  //    allSettled load) is identical regardless of source.
   let registry: Registry;
   if (bootManifest) {
     // Validate the injected slot defensively — a malformed manifest is a
@@ -677,28 +681,29 @@ export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> 
     registry = assertValidRegistry(await response.json());
   }
 
-  // 2a. Registry AUTHENTICITY (Phase 12, Story 4) — verify BEFORE the registry is
-  //     used to decide which remotes to load. The registry document selects WHICH
-  //     remote code each plugin loads, so an attacker who can alter the registry
-  //     bytes (a compromised CDN / MITM serving a different registry.json at the
-  //     pinned path) could redirect every plugin to arbitrary code even though the
-  //     per-artifact SRI (Stories 1–3) protects each pinned artifact. So when the
-  //     (trusted) OSD origin injected a verification key, the registry MUST carry a
-  //     valid HMAC signature produced with that host-held key; otherwise we FAIL
-  //     CLOSED and never load a remote from an unauthenticated registry. The key is
-  //     delivered by the OSD origin, NOT the CDN, so the CDN tamperer lacks it (a
-  //     bare hash served next to the registry would be theater). When no key is
-  //     injected (signing off), this is skipped and the registry loads as before.
-  //     Only fires on an ACTUAL signature failure, so a correctly-signed registry
-  //     never false-rejects.
+  // 2a. Registry AUTHENTICITY — verify BEFORE the registry is used to decide
+  //     which remotes to load. The registry document selects WHICH remote code
+  //     each plugin loads, so an attacker who can alter the registry bytes (a
+  //     compromised CDN / MITM serving a different registry.json at the pinned
+  //     path) could redirect every plugin to arbitrary code even though the
+  //     per-artifact SRI protects each pinned artifact. So when the (trusted)
+  //     OSD origin injected a verification key, the registry MUST carry a
+  //     valid HMAC signature produced with that host-held key; otherwise we
+  //     FAIL CLOSED and never load a remote from an unauthenticated registry.
+  //     The key is delivered by the OSD origin, NOT the CDN, so the CDN
+  //     tamperer lacks it (a bare hash served next to the registry would be
+  //     theater). When no key is injected (signing off), this is skipped and
+  //     the registry loads as before. Only fires on an ACTUAL signature
+  //     failure, so a correctly-signed registry never false-rejects.
   //
-  //     Phase 13 cut-over: when a server-resolved `bootManifest` was injected, the
-  //     trust path moved server-side (the OSD origin read the registry from disk
-  //     and produced the manifest), so there is no client-side signature to
-  //     verify here. Skip this entire block in that case — this is the canonical
-  //     Phase 13 path, and signature checks belong on a future server-side
-  //     non-browser hop, not the boot-manifest path. The HMAC primitive in
-  //     `../registry/signing.ts` stays available for that future use.
+  //     Server-resolution cut-over: when a server-resolved `bootManifest` was
+  //     injected, the trust path moved server-side (the OSD origin read the
+  //     registry from disk and produced the manifest), so there is no
+  //     client-side signature to verify here. Skip this entire block in that
+  //     case — this is the canonical server-resolution path, and signature
+  //     checks belong on a future server-side non-browser hop, not the
+  //     boot-manifest path. The HMAC primitive in `../registry/signing.ts`
+  //     stays available for that future use.
   if (!bootManifest && registryVerification && registryVerification.key) {
     const check = await deps.verifyRegistrySignature(registry, registryVerification);
     if (!check.ok) {
@@ -709,8 +714,8 @@ export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> 
           `from an unauthenticated registry): ${reason}`
       );
 
-      // Fail-closed reaction, reusing the Phase 9 env-keyed surfaces (mirrors the
-      // Story-2 integrity-failure handling):
+      // Fail-closed reaction, reusing the env-keyed surfaces (mirrors the
+      // integrity-failure handling):
       //   - non-prod `block`: render the loud block page and do NOT boot core — the
       //     app does not start with an untrusted registry (never a silent hang).
       //   - prod `skip` / no policy: do NOT load ANY remote (we cannot trust the
@@ -730,14 +735,13 @@ export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> 
         deps.renderBlockPage([trustOffender]);
         return;
       }
-      // Registry-trust skip (Phase 12, Story 4): an unverified registry means
-      // we cannot know which version each plugin should load, but we still
-      // satisfy plugin_reader by registering a degraded-aware placeholder for
-      // every advertised id. `version` is intentionally `''` — no specific
-      // artifact failed; the document itself is untrusted (verify_phase14
-      // surfaces this as `errorClass: 'unknown'` for now — the registry-trust
-      // taxonomy is not part of the locked Phase 14 enum and would expand the
-      // contract).
+      // Registry-trust skip: an unverified registry means we cannot know which
+      // version each plugin should load, but we still satisfy plugin_reader by
+      // registering a degraded-aware placeholder for every advertised id.
+      // `version` is intentionally `''` — no specific artifact failed; the
+      // document itself is untrusted (telemetry surfaces this as
+      // `errorClass: 'unknown'` for now — the registry-trust taxonomy is not
+      // part of the locked telemetry-event enum and would expand the contract).
       for (const id of Object.keys(registry.mfes)) {
         disablePlugin(id, '', 'unknown');
       }
@@ -755,7 +759,8 @@ export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> 
   // 2b. Build the dev-override map (GATED: empty unless `allowOverride`), and
   //     wrap the registry as a provider so each remote is resolved through the
   //     shared `resolve()` contract — an overridden id yields the override URL,
-  //     everything else the registry/CDN URL. See docs/01-MFE-DESIGN.md §7.
+  //     everything else the registry/CDN URL. See the dev URL override gate
+  //     section in `packages/osd-mfe/README.md`.
   const overrides = buildOverrides(allowOverride, registry, deps);
   const provider = inMemoryProvider(registry);
 
@@ -767,24 +772,24 @@ export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> 
   //    concurrently, so eager evaluation here would hit an unregistered peer).
   //    All remotes share the SAME share scope object, so singletons stay single.
   //
-  //    Graceful degradation (Phase 4, Story 5): we use Promise.allSettled rather
-  //    than Promise.all so a single failed or missing remote (e.g. one unreachable
-  //    CDN object among the 58) does NOT abort the whole app boot. Each remote that
+  //    Graceful degradation: we use Promise.allSettled rather than Promise.all
+  //    so a single failed or missing remote (e.g. one unreachable CDN object
+  //    among the 58) does NOT abort the whole app boot. Each remote that
   //    fails is logged and registered as a DISABLED placeholder (see below) so that
   //    OSD core's plugin_reader still finds a definition for it and the remaining
   //    plugins boot normally. A plugin that hard-depends on a failed peer's exports
   //    may still surface its own error, but a leaf/optional plugin degrades cleanly.
   const ids = Object.keys(registry.mfes);
 
-  // 2c. Phase 9 version-compatibility ENFORCEMENT (Story 3). When the host
-  //     environment + policy are injected (always, behind --mfe), classify each
-  //     remote against the running host and apply the locked, env-keyed policy
-  //     BEFORE loading anything:
+  // 2c. Version-compatibility ENFORCEMENT. When the host environment + policy
+  //     are injected (always, behind --mfe), classify each remote against the
+  //     running host and apply the locked, env-keyed policy BEFORE loading
+  //     anything:
   //       - NON-PROD `block`: any INCOMPATIBLE remote is an offender => render a
   //         loud block page listing offenders + reasons and do NOT boot the app
   //         (no white-screen, no half-booted app).
   //       - PROD `skip`: INCOMPATIBLE / UNKNOWN remotes are skipped — registered
-  //         as a DISABLED placeholder (reusing Phase 4 graceful degradation) with
+  //         as a DISABLED placeholder (reusing graceful degradation) with
   //         a clear console reason, and the app still boots from the rest.
   //       - UNKNOWN under `warn-load` (non-prod default): a warning is logged and
   //         the remote loads normally.
@@ -799,9 +804,9 @@ export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> 
     if (decision.block) {
       // HARD-BLOCK (non-prod): list every offender + reason, render the block
       // page, and abort boot. The app is intentionally NOT started.
-      // Telemetry (Phase 14, Story 1): emit one `failure` + `compat-reject`
-      // event per offender so an operator can see which remote caused the
-      // page block (sendBeacon flushes even when we replace the document).
+      // Telemetry: emit one `failure` + `compat-reject` event per offender so
+      // an operator can see which remote caused the page block (sendBeacon
+      // flushes even when we replace the document).
       for (const offender of decision.offenders) {
         fireTelemetry({
           id: offender.id,
@@ -827,16 +832,16 @@ export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> 
     // skipped remote so OSD core's plugin_reader still resolves it and the app
     // boots; log a clear, per-remote reason (telemetry).
     for (const skipped of decision.skip) {
-      // Phase 14, Story 2: tracked + degraded-aware placeholder. errorClass is
-      // `compat-reject` for both incompatible and unknown remotes — Phase 9 is
+      // Tracked + degraded-aware placeholder. errorClass is `compat-reject`
+      // for both incompatible and unknown remotes — compat classification is
       // the single source of "this plugin should not load against this host",
       // and the Inspector's humanReason ("incompatible with this OSD version")
       // covers both phrasings.
       disablePlugin(skipped.id, registry.mfes[skipped.id]?.version ?? '', 'compat-reject');
-      // Telemetry (Phase 14, Story 1): a compat-skip is a `skipped` event with
-      // errorClass `compat-reject` (durationMs=0 — no load attempted). Emitted
-      // BEFORE the warn so the dispatcher fires even if the warn handler is
-      // mutated in some hostile environment.
+      // Telemetry: a compat-skip is a `skipped` event with errorClass
+      // `compat-reject` (durationMs=0 — no load attempted). Emitted BEFORE the
+      // warn so the dispatcher fires even if the warn handler is mutated in
+      // some hostile environment.
       fireTelemetry({
         id: skipped.id,
         version: registry.mfes[skipped.id]?.version ?? '',
@@ -855,7 +860,7 @@ export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> 
     // so a missing-metadata remote is loud in non-prod without blocking. A loaded
     // remote is "unknown" exactly when its compatibility metadata is incomplete.
     //
-    // Phase 13 design note: the boot manifest deliberately omits `builtAgainst`
+    // Design note: the boot manifest deliberately omits `builtAgainst`
     // (see `BootManifestEntry` in `registry/boot_manifest.ts`) — server-side
     // resolution has already used it to make the compat decision before injecting
     // the manifest. We therefore only check `compat` here; `builtAgainst` is
@@ -885,13 +890,14 @@ export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> 
   //    would hit an unregistered peer). All remotes share the SAME share scope
   //    object, so singletons stay single.
   //
-  //    Graceful degradation (Phase 4, Story 5): we use Promise.allSettled rather
-  //    than Promise.all so a single failed or missing remote (e.g. one unreachable
-  //    CDN object among the 58) does NOT abort the whole app boot. Each remote that
-  //    fails is logged and registered as a DISABLED placeholder (see below) so that
-  //    OSD core's plugin_reader still finds a definition for it and the remaining
-  //    plugins boot normally. A plugin that hard-depends on a failed peer's exports
-  //    may still surface its own error, but a leaf/optional plugin degrades cleanly.
+  //    Graceful degradation: we use Promise.allSettled rather than Promise.all
+  //    so a single failed or missing remote (e.g. one unreachable CDN object
+  //    among the 58) does NOT abort the whole app boot. Each remote that fails
+  //    is logged and registered as a DISABLED placeholder (see below) so that
+  //    OSD core's plugin_reader still finds a definition for it and the
+  //    remaining plugins boot normally. A plugin that hard-depends on a failed
+  //    peer's exports may still surface its own error, but a leaf/optional
+  //    plugin degrades cleanly.
   //
   // Pre-resolve each id (override URL wins over registry) so both the loader and
   // the failure log below reference the EFFECTIVE remoteEntry. ids come from the
@@ -906,7 +912,7 @@ export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> 
   const results = await Promise.allSettled(
     idsToLoad.map(async (id) => {
       const descriptor = resolved.get(id)!;
-      // Phase 14, Story 1 — per-remote timing for the load-telemetry event.
+      // Per-remote timing for the load-telemetry event.
       // Captured around the WHOLE load chain (script load + share-scope wiring
       // + factory resolution) so `durationMs` reflects what the operator cares
       // about (end-to-end latency to "this plugin is registered"). The clock
@@ -916,9 +922,9 @@ export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> 
       const start = deps.now();
       try {
         // Pass the registry `integrity` (when present) so the remoteEntry <script>
-        // is integrity-checked by the browser (Phase 12, Story 2). An override
-        // descriptor has no integrity (its bytes differ from the registry build),
-        // so it loads without SRI — see resolve() / load_remote.loadScript().
+        // is integrity-checked by the browser (SRI). An override descriptor has
+        // no integrity (its bytes differ from the registry build), so it loads
+        // without SRI — see resolve() / load_remote.loadScript().
         const container = await deps.loadRemoteContainer(
           descriptor.remoteEntry,
           descriptor.scope,
@@ -938,13 +944,13 @@ export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> 
         });
       } catch (error) {
         // FAILURE. Classify against descriptor.integrity so a load error on an
-        // SRI-protected remote is `sri-mismatch` (Phase 12 fail-closed semantics:
+        // SRI-protected remote is `sri-mismatch` (SRI fail-closed semantics:
         // the browser does not distinguish "tampered" from "unfetchable" once an
         // integrity claim is set, and we defer to the integrity-bearing label).
-        // Emit BEFORE re-throw so the existing failure-routing block (Phase 4
-        // graceful degradation / Phase 12 fail-closed) sees the event already
-        // dispatched. Re-throw so Promise.allSettled records `rejected` and the
-        // existing per-remote disable / page-block decision runs unchanged.
+        // Emit BEFORE re-throw so the existing failure-routing block (graceful
+        // degradation / SRI fail-closed) sees the event already dispatched.
+        // Re-throw so Promise.allSettled records `rejected` and the existing
+        // per-remote disable / page-block decision runs unchanged.
         fireTelemetry({
           id,
           version: registry.mfes[id]?.version ?? '',
@@ -959,23 +965,23 @@ export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> 
 
   // Report each remote that failed and decide how to handle it.
   //
-  // Phase 4 graceful degradation (the DEFAULT): a remote that cannot be loaded is
+  // Graceful degradation (the DEFAULT): a remote that cannot be loaded is
   // logged and registered as a DISABLED placeholder so OSD core's plugin_reader
   // (UNCHANGED) still finds a definition for every plugin in the server-injected
   // list and core boot is NOT aborted. The failed plugin is effectively disabled;
   // the rest of the app still boots.
   //
-  // Phase 12, Story 2 — SRI FAIL-CLOSED: a remote that carries an `integrity`
-  // hash and FAILS to load is a potential Subresource-Integrity violation (the
-  // browser refused to execute bytes that did not match the pinned hash — a
-  // compromised CDN / MITM, or simply unavailable bytes). We route that through
-  // the SAME Phase 9 env-keyed policy as a version incompatibility:
+  // SRI FAIL-CLOSED: a remote that carries an `integrity` hash and FAILS to load
+  // is a potential Subresource-Integrity violation (the browser refused to
+  // execute bytes that did not match the pinned hash — a compromised CDN / MITM,
+  // or simply unavailable bytes). We route that through the SAME env-keyed
+  // policy as a version incompatibility:
   //   - dev / non-prod (`onIncompatible: 'block'`) => treat it as a page OFFENDER
   //     and HARD-BLOCK (loud block page, core does NOT boot — never run a
   //     half-verified app);
   //   - prod (`onIncompatible: 'skip'`, or no policy injected) => SKIP it (the
   //     disabled placeholder above), so the app still boots from the rest.
-  // A remote WITHOUT integrity (e.g. a dev override) keeps pure Phase 4 graceful
+  // A remote WITHOUT integrity (e.g. a dev override) keeps pure graceful
   // degradation regardless of env — there is no integrity claim to have violated,
   // so a load failure cannot be an SRI failure. Because this only fires on an
   // actual load `error`, a CORRECT artifact never triggers it (no false rejects).
@@ -1011,14 +1017,14 @@ export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> 
         return;
       }
 
-      // Phase 4 graceful degradation (prod skip, no policy, or non-integrity remote).
+      // Graceful degradation (prod skip, no policy, or non-integrity remote).
       failedIds.push(id);
-      // Phase 14, Story 2: classify the rejection AGAIN (cheap, pure) so the
-      // disabled-plugin record carries the same `errorClass` the telemetry
-      // event already emitted in the load-loop catch-block above. Two-call
-      // path keeps the locked telemetry contract intact (telemetry is
-      // observational — see `./telemetry.ts`) while still letting the
-      // visible-UX layer reuse the same classification without coupling.
+      // Classify the rejection AGAIN (cheap, pure) so the disabled-plugin
+      // record carries the same `errorClass` the telemetry event already
+      // emitted in the load-loop catch-block above. Two-call path keeps the
+      // locked telemetry contract intact (telemetry is observational — see
+      // `./telemetry.ts`) while still letting the visible-UX layer reuse the
+      // same classification without coupling.
       const errorClass = classifyLoadError(result.reason, hasIntegrity);
       const version = registry.mfes[id]?.version ?? '';
       disablePlugin(id, version, errorClass);
@@ -1033,7 +1039,7 @@ export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> 
 
   // FAIL-CLOSED (dev block): if any integrity-protected remote failed its SRI
   // check, render the loud block page and do NOT boot core. This reuses the same
-  // hard-block surface as a Phase 9 version incompatibility — never a white screen
+  // hard-block surface as a version incompatibility — never a white screen
   // or a silent hang.
   if (integrityOffenders.length > 0) {
     const offenderSummary = integrityOffenders
@@ -1061,9 +1067,9 @@ export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> 
   //    evaluating each plugin factory (and any peer factories it pulls in) lazily.
   await deps.invokeCoreBootstrap();
 
-  // 5. Dev-only Inspector panel (Phase 5, Story 3), GATED by the non-production
-  //    `allowOverride` flag. It lists each MFE with its resolved source
-  //    (registry/CDN vs override) and lets a developer repoint a single remote.
+  // 5. Dev-only Inspector panel, GATED by the non-production `allowOverride`
+  //    flag. It lists each MFE with its resolved source (registry/CDN vs
+  //    override) and lets a developer repoint a single remote.
   //    SECURITY: mounting is inside the `allowOverride` branch, so in production
   //    (gate off) the panel is NEVER rendered — the same boundary that makes
   //    `buildOverrides()` return an empty map. Mounted after core boot so it
@@ -1077,10 +1083,11 @@ export async function bootstrapMfe(options: BootstrapMfeOptions): Promise<void> 
   //    This double-gate (server-config + URL flag) keeps the panel out of
   //    the way for everyday dev work, surfaced only on demand.
   //
-  //    Phase 14, Story 2: pass the collected disabled records so the panel can
-  //    render its "Disabled plugins" section. The bootstrap appended a record
-  //    at every disable site (compat-skip / registry-trust skip / load failure)
-  //    above; an empty list = no failures = no extra section rendered.
+  //    Visible degradation: pass the collected disabled records so the panel
+  //    can render its "Disabled plugins" section. The bootstrap appended a
+  //    record at every disable site (compat-skip / registry-trust skip /
+  //    load failure) above; an empty list = no failures = no extra section
+  //    rendered.
   if (allowOverride && inspectorRequestedByUrl()) {
     deps.mountInspector(Array.from(resolved.values()), disabledPlugins);
   }

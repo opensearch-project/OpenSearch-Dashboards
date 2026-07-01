@@ -10,12 +10,12 @@
  */
 
 /**
- * Loading Module Federation remote containers in the browser (Phase 3, Story 3).
+ * Loading Module Federation remote containers in the browser.
  *
  * A remote's `remoteEntry.js`, once executed, registers a container global on
  * `window[scope]`. We then seed the container's share scope (once) and resolve
  * the exposed `./public` module to the plugin's public exports. See
- * docs/01-MFE-DESIGN.md §6.
+ * `packages/osd-mfe/README.md` for the boot pipeline.
  */
 
 import { MfeContainer, PluginPublicModule, ShareScope, mfeWindow } from './types';
@@ -26,7 +26,7 @@ import { MfeContainer, PluginPublicModule, ShareScope, mfeWindow } from './types
  * `async = false` preserves execution order for scripts appended in sequence;
  * the bootstrap awaits each load explicitly regardless.
  *
- * Subresource Integrity (Phase 12, Story 2): when an `integrity` hash is supplied
+ * Subresource Integrity: when an `integrity` hash is supplied
  * (`sha384-…`, from the registry entry), it is set on the element together with
  * `crossorigin="anonymous"` so the browser verifies the DECODED (uncompressed)
  * response bytes against the hash and REFUSES to execute a tampered/MITM'd script

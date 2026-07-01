@@ -10,7 +10,7 @@
  */
 
 /**
- * Browser-side registry-signature verifier (Phase 12, Story 4).
+ * Browser-side registry-signature verifier.
  *
  * `verify_registry_web.ts` runs in the browser MFE bootstrap and verifies the
  * fetched registry's HMAC signature with the host-injected key BEFORE the

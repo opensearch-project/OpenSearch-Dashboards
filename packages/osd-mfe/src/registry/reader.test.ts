@@ -290,7 +290,7 @@ describe('FileRegistryReader — error paths', () => {
   it('throws on a legacy v1-shaped doc (no auto-migration)', async () => {
     // The previous reader auto-migrated v1 to v2; the new reader is strict on
     // schemaVersion: 1 and rejects the v1 top-level `mfes` shape. The canonical
-    // CDN registry is now `schemaVersion: 1` natively (Story 7).
+    // CDN registry is `schemaVersion: 1` natively.
     const legacyV1 = {
       schemaVersion: 1, // shaped like v1, NOT the new layered schemaVersion: 1
       generatedAt: '2026-06-19T00:00:00.000Z',

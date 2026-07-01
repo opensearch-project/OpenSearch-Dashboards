@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Build the browser MFE bootstrap bundle (Phase 3, Story 5).
+ * Build the browser MFE bootstrap bundle.
  *
  * `packages/osd-mfe/src/bootstrap/browser_entry.ts` is a side-effecting browser
  * entry that assigns `window.__osdBootstrapMfe__ = bootstrapMfe`. The server's
@@ -9,7 +9,8 @@
  * loads this bundle from `opensearchDashboards.mfe.bootstrapUrl` and then calls
  * `window.__osdBootstrapMfe__({ registryUrl, sharedDepsUrl })` — which seeds the
  * MF share scope, fetches the registry at serve time, loads every plugin remote
- * into the `__osdBundles__` shim, and finally drives core boot (docs §6).
+ * into the `__osdBundles__` shim, and finally drives core boot (see
+ * `packages/osd-mfe/README.md`).
  *
  * The bootstrap is PLAIN host code (NOT a Module Federation container): it drives
  * `container.init()/get()` manually, so it has no MF/runtime config — it is just
@@ -45,8 +46,8 @@ const browserslist = require(Path.join(OSD_DIR, 'node_modules/browserslist'));
 // The @osd/ui-shared-deps externals map (specifier -> `__osdSharedDeps__.X`
 // global). The bootstrap is PLAIN host code (not a Module Federation container),
 // so any npm runtime dep it pulls in — e.g. react / react-dom / @elastic/eui used
-// by the dev Inspector panel (Phase 5, Story 3) — must be externalized to the
-// host's shared-deps singletons here rather than bundled (which would duplicate
+// by the dev Inspector panel — must be externalized to the host's shared-deps
+// singletons here rather than bundled (which would duplicate
 // React and bloat the bundle). These externals are accessed ONLY by ./inspector,
 // which bootstrap_mfe.ts lazily import()s at mount time — AFTER the bootstrap has
 // loaded the shared-deps script — so the __osdSharedDeps__ globals exist before any

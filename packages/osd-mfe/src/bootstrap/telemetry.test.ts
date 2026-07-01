@@ -75,7 +75,7 @@ function buildDeps(
   };
 }
 
-describe('createTelemetryDispatcher (Phase 14, Story 1)', () => {
+describe('createTelemetryDispatcher', () => {
   describe('event shape (locked spec)', () => {
     it('stamps id/version/status/durationMs from input + bucket/customerId/timestamp from config', () => {
       const { deps, fetchCalls } = buildDeps();

@@ -10,22 +10,22 @@
  */
 
 /**
- * Dev URL-override SOURCE parsing (Phase 5, Story 1).
+ * Dev URL-override SOURCE parsing.
  *
  * Turns the developer-facing override SOURCES — the `?mfe.<id>=<url>` /
  * `?mfe.all=<baseUrl>` query params and an optional `localStorage` entry — into
  * the {@link OverrideMap} consumed by `resolve()` (see
  * `../registry/resolve.ts`) so a single plugin can be repointed at a local dev
  * server while the rest still load from the registry/CDN. See
- * docs/01-MFE-DESIGN.md §7.
+ * `packages/osd-mfe/README.md` for the dev URL override gate design.
  *
  * SECURITY: this module only PARSES sources; it does NOT decide whether they
  * apply. The non-production security gate (`mfe.allowOverride`) is enforced by
- * the bootstrap (Phase 5, Story 2): in production every override source is
- * ignored regardless of what this parser returns. Parsing here is therefore
- * deliberately side-effect free and gate-agnostic.
+ * the bootstrap: in production every override source is ignored regardless of
+ * what this parser returns. Parsing here is therefore deliberately side-effect
+ * free and gate-agnostic.
  *
- * Two override SHAPES are supported, mirroring §7:
+ * Two override SHAPES are supported:
  *  - per-plugin: `?mfe.<id>=<url>` → that plugin's full `remoteEntry` URL, OR
  *  - base/origin: `?mfe.all=<baseUrl>` → every plugin's `remoteEntry` rewritten
  *    to `baseUrl`'s origin (and base path), keeping the registry path so the
@@ -256,14 +256,14 @@ export function buildOverrideMap(
 
 /**
  * Resolve the EFFECTIVE value of the `mfe.allowOverride` security gate from the
- * (optional) server config value and the server's dev/prod mode (Phase 5,
- * Story 2). This is the canonical, unit-tested specification of the gate's
- * default; the server injection sites mirror this exact expression inline (they
- * cannot import `@osd/mfe`, which is not a dependency of `src/`).
+ * (optional) server config value and the server's dev/prod mode. This is the
+ * canonical, unit-tested specification of the gate's default; the server
+ * injection sites mirror this exact expression inline (they cannot import
+ * `@osd/mfe`, which is not a dependency of `src/`).
  *
- * SECURITY (docs/01-MFE-DESIGN.md §7): dev URL-overrides let arbitrary remote
- * code load, so the gate is honored ONLY in non-production. The default is
- * therefore tied to the server's dev mode:
+ * SECURITY: dev URL-overrides let arbitrary remote code load, so the gate is
+ * honored ONLY in non-production. The default is therefore tied to the
+ * server's dev mode:
  *  - `configured` explicitly set (a boolean) ALWAYS wins (operators can force it
  *    on or off in any mode).
  *  - `configured` unset (`undefined`) falls back to `dev`, so the gate is ON in

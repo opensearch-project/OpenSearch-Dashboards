@@ -10,7 +10,7 @@
  */
 
 /**
- * Phase 9 version-compatibility ENFORCEMENT (Story 3) — the PURE policy mapper.
+ * Version-compatibility ENFORCEMENT — the PURE policy mapper.
  *
  * The classifier (`../registry/compat_classifier`) labels each remote
  * `compatible | incompatible | unknown` against the host, with reasons and
@@ -21,7 +21,7 @@
  * returned {@link CompatDecision} to drive loading; the actual DOM/side-effects
  * live elsewhere so this stays pure & deterministic (easy to unit test).
  *
- * LOCKED policy matrix (docs/01-MFE-DESIGN.md / prd.json), all config-overridable:
+ * LOCKED policy matrix (see `packages/osd-mfe/README.md`), all config-overridable:
  *  - INCOMPATIBLE (known): `onIncompatible` = `block` (non-prod default) => offender
  *    (hard-block the page); `skip` (prod default) => disable the plugin, keep booting.
  *  - MISSING/UNKNOWN metadata: `onMissing` = `warn-load` (non-prod default) => load

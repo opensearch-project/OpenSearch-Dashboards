@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
-# MFE dual-path gate (Phase 8) — ADDITIVE, credential-free.
+# MFE dual-path gate — ADDITIVE, credential-free.
 #
 # Enforces the micro-frontend dual-path invariant on every change to the MFE
 # branch WITHOUT any cloud credentials:

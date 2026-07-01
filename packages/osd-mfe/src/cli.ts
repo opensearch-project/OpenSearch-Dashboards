@@ -22,9 +22,9 @@ import {
 } from './registry';
 
 /**
- * The pilot UI plugin (mirrors `pilot_plugin` in the loop's prd.json). It is the
- * Phase 1 vertical-slice deliverable and MUST always build cleanly, so a failure
- * to build it during `--all` is treated as a hard error (non-zero exit).
+ * The pilot UI plugin — the vertical-slice deliverable that MUST always build
+ * cleanly, so a failure to build it during `--all` is treated as a hard error
+ * (non-zero exit).
  */
 const PILOT_PLUGIN_ID = 'inspector';
 
@@ -43,7 +43,7 @@ Commands:
                     build is development (unminified + source maps). Combine with
                     --plugin/--all (e.g. "--all --dist").
 
-v3 asset staging (Phase 16 Story 2 — registry-managed core/orchestrator/themes/shared-deps-css):
+Global asset staging (registry-managed core/orchestrator/themes/shared-deps-css):
   --core                       Stage \`<repoRoot>/src/core/target/public/core.entry.js\`
                                into target/mfe-core/<hash>/.
   --orchestrator               Stage \`<repoRoot>/target/mfe-bootstrap/osd_bootstrap_mfe.js\`
@@ -201,13 +201,12 @@ function readOption(argv: string[], flag: string): string | undefined {
 }
 
 /**
- * Phase 16 Story 2 — stage one v3 asset category and print a one-line summary.
+ * Stage one global-asset category and print a one-line summary.
  *
  * Each invocation is a side-effecting copy of an existing build artifact into
  * a content-addressed staging tree (`target/mfe-{core,bootstrap,themes/<name>,
  * shared-deps-css}/<hash>/`) and emits a sibling `build-manifest.json`.
- * Reusable from the deploy CLI (Story 2) and from `update_registry.js`
- * (Story 2).
+ * Reusable from the deploy CLI and from `update_registry.js`.
  */
 function stageAssetAndLog(
   repoRoot: string,
@@ -242,8 +241,8 @@ function stageAssetAndLog(
 }
 
 /**
- * Entry point for the `build_mfe` CLI. Implements `--list` (Story 1),
- * `--plugin <id>` (Story 2), and `--all` (Story 5).
+ * Entry point for the `build_mfe` CLI. Implements `--list`,
+ * `--plugin <id>`, `--all`, and the global-asset staging modes.
  *
  * The `--plugin` and `--all` paths run asynchronous Rspack builds, so this
  * returns a `Promise<number>` for those commands and a synchronous `number`
@@ -265,9 +264,9 @@ export function runCli(argv: string[], repoRoot: string): number | Promise<numbe
     return 0;
   }
 
-  // Phase 16 Story 2 — v3 asset staging. Mutually exclusive with the plugin
-  // build modes (an invocation that mixes them is a CLI bug; the first matching
-  // mode wins, but we explicitly route v3 assets first so a stray --dist on a
+  // Global-asset staging. Mutually exclusive with the plugin build modes (an
+  // invocation that mixes them is a CLI bug; the first matching mode wins,
+  // but we explicitly route global assets first so a stray --dist on a
   // --core invocation is harmless).
   if (argv.includes('--core')) {
     return stageAssetAndLog(

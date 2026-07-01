@@ -133,7 +133,7 @@ describe('<MfeInspector />', () => {
   });
 });
 
-describe('<MfeInspector /> — Disabled plugins section (Phase 14, Story 2)', () => {
+describe('<MfeInspector /> — Disabled plugins section', () => {
   const DISABLED: DisabledPluginRecord[] = [
     {
       id: 'inspector',
@@ -173,7 +173,7 @@ describe('<MfeInspector /> — Disabled plugins section (Phase 14, Story 2)', ()
     expect(wrapper.find(`[data-test-subj="${DISABLED_SECTION_TEST_SUBJ}"]`).exists()).toBe(true);
 
     // Per-record row + errorClass badge + humanReason are wired with stable
-    // test_subjs so verify_phase14.js can grep by attribute.
+    // test_subjs so a verifier can grep by attribute.
     expect(wrapper.find('[data-test-subj="mfeInspectorDisabled-inspector"]').exists()).toBe(true);
     expect(
       wrapper.find('[data-test-subj="mfeInspectorDisabledClass-inspector"]').hostNodes().text()
@@ -204,8 +204,8 @@ describe('<MfeInspector /> — Disabled plugins section (Phase 14, Story 2)', ()
   });
 
   it('still renders the editable plugin rows alongside the disabled section', () => {
-    // Phase 14, Story 2 is ADDITIVE: the original Inspector rows still render
-    // when there are disabled plugins.
+    // The disabled-plugin surface is ADDITIVE: the original Inspector rows
+    // still render when there are disabled plugins.
     const wrapper = mount(
       <MfeInspector entries={ENTRIES} disabled={DISABLED} onApply={jest.fn()} onClear={jest.fn()} />
     );
@@ -324,7 +324,7 @@ describe('mountInspector', () => {
     document.body.removeChild(container);
   });
 
-  it('threads the disabled prop into the rendered panel (Phase 14, Story 2)', () => {
+  it('threads the disabled prop into the rendered panel', () => {
     const container = document.createElement('div');
     document.body.appendChild(container);
 

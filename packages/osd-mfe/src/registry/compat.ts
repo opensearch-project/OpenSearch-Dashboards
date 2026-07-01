@@ -10,7 +10,7 @@
  */
 
 /**
- * Phase 9 compatibility CONTRACT — generation-time DATA (Story 1).
+ * Compat CONTRACT — generation-time DATA.
  *
  * Computes the `builtAgainst` + `compat` metadata stamped into every registry
  * entry, deterministically and from the SAME sources the build itself uses, so
@@ -26,8 +26,8 @@
  *    `compatibleCoreRange = <major>.<minor>.x`), the locked OSD-core axis.
  *
  * This module is PURE/deterministic given a repo root: it only READS files and
- * RETURNS data. No enforcement happens here — Story 2 (classifier) and Story 3
- * (bootstrap policy) consume this data; Story 1 just produces it.
+ * RETURNS data. No enforcement happens here — the compat classifier and the
+ * bootstrap policy layer consume this data; this module just produces it.
  */
 
 import Fs from 'fs';

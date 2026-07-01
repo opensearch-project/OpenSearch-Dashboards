@@ -1,15 +1,14 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Phase 3, Story 6 — NO-FLAG HTML INVARIANT GATE.
+ * NO-FLAG HTML INVARIANT GATE.
  *
- * HARD INVARIANT for Phase 3: WITHOUT `--mfe`, the served HTML + behaviour are
+ * HARD INVARIANT: WITHOUT `--mfe`, the served HTML + behaviour are
  * byte-for-byte unchanged. This gate captures the CURRENT old-way :5601
- * /app/home shell and compares it to the pre-Phase-3 reference captured before
- * any render-touching change (harness/baseline_html/app_home.pre_p3.html).
+ * /app/home shell and compares it to the pre-MFE-render reference captured
+ * before any render-touching change (dev/baseline_html/app_home.pre_p3.html).
  *
- * Two volatile, change-INDEPENDENT sources of noise are normalised (documented
- * in progress.txt for Story 4):
+ * Two volatile, change-INDEPENDENT sources of noise are normalised:
  *   1. the per-request CSP `nonce="..."` (regenerated every render); and
  *   2. the non-deterministic ITERATION ORDER of the injectedMetadata
  *      `uiPlugins` array and `uiSettings.defaults` keys across server restarts
@@ -208,7 +207,7 @@ async function main() {
       (failures === 0 ? 'EMPTY' : 'NON-EMPTY') +
       ' (' +
       (failures === 0
-        ? 'WITHOUT --mfe served HTML is unchanged vs pre-Phase-3 reference'
+        ? 'WITHOUT --mfe served HTML is unchanged vs the no-flag baseline'
         : failures + ' difference(s) detected')
       + ')'
   );

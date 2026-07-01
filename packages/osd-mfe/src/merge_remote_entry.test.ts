@@ -12,15 +12,15 @@
 /**
  * @jest-environment node
  *
- * Phase 16, Story 4 — unit tests for {@link mergeExposedEntryIntoRemoteEntry},
- * the post-build step that collapses each plugin's `<id>.plugin.js` exposed
- * chunk INTO its `remoteEntry.js`, halving the boot-time plugin fetch count
- * (~116 → ~58 across 58 plugins). End-to-end browser proof of the merged
- * runtime semantics (the chunk's modules survive the runtime takeover of
+ * Unit tests for {@link mergeExposedEntryIntoRemoteEntry}, the post-build
+ * step that collapses each plugin's `<id>.plugin.js` exposed chunk INTO its
+ * `remoteEntry.js`, halving the boot-time plugin fetch count (~116 → ~58
+ * across 58 plugins). End-to-end browser proof of the merged runtime
+ * semantics (the chunk's modules survive the runtime takeover of
  * `webpackChunkosdMfe_<id>` and `container.get('./public')` resolves with no
- * additional fetch) is in `harness/verify_mfe_coverage.js` /
- * `harness/measure_lazy.js` against a real `--dist` build; this file proves
- * the FILE-SHAPE invariants the runtime contract depends on.
+ * additional fetch) is in `packages/osd-mfe/dev/verify_mfe_coverage.js` /
+ * `packages/osd-mfe/dev/measure_lazy.js` against a real `--dist` build; this
+ * file proves the FILE-SHAPE invariants the runtime contract depends on.
  *
  * The merge helper is pure (filesystem-only), so these tests use a real tmp
  * directory and exercise the actual `fs` reads/writes — no mocks.
@@ -62,7 +62,7 @@ function remoteEntryContent(pluginId: string): string {
   );
 }
 
-describe('mergeExposedEntryIntoRemoteEntry (Phase 16, Story 4)', () => {
+describe('mergeExposedEntryIntoRemoteEntry', () => {
   let tmpDir: string;
 
   beforeEach(() => {
@@ -162,9 +162,10 @@ describe('mergeExposedEntryIntoRemoteEntry (Phase 16, Story 4)', () => {
     expect(Fs.existsSync(Path.join(tmpDir, `${pluginId}.plugin.js.map`))).toBe(false);
   });
 
-  it('leaves lazy `<id>.chunk.*.js` files untouched (Phase 11 lazy-loading shape preserved)', () => {
-    // Phase 11 isolated lazy navigation chunks (`<id>.chunk.<source>.js`) from
-    // the eager exposed entry. Story 4 must NOT collapse those — they remain
+  it('leaves lazy `<id>.chunk.*.js` files untouched (lazy-loading shape preserved)', () => {
+    // Isolated lazy navigation chunks (`<id>.chunk.<source>.js`) are kept
+    // SEPARATE from the eager exposed entry. The merge must NOT collapse
+    // those — they remain
     // separate per-chunk SRI-pinned files the MF runtime fetches on demand.
     const pluginId = 'data';
     Fs.writeFileSync(Path.join(tmpDir, `${pluginId}.plugin.js`), 'chunk;');

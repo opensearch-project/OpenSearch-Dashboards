@@ -24,9 +24,9 @@ export type {
 } from './build_mfe_for_plugin';
 export { runCli } from './cli';
 
-// Registry (Phase 2): schema, validation, and generation logic. The registry
-// DATA file lives outside the source tree (workspace-root registry/registry.json)
-// and is read at serve time — never imported as a code constant.
+// Registry: schema, validation, and generation logic. The registry
+// DATA file lives outside the source tree (registry/registry.json) and is read
+// at serve time — never imported as a code constant.
 export {
   SCHEMA_VERSION,
   validate,
@@ -42,7 +42,7 @@ export type {
   GenerateRegistryOptions,
 } from './registry';
 
-// Deploy (Phase 4): publish-only CDN deploy logic. Reads the provisioned CDN
+// Deploy: publish-only CDN deploy logic. Reads the provisioned CDN
 // location from the environment (never hardcoded), publishes artifacts to
 // immutable versioned keys, and emits the deploy manifest. Never creates infra.
 export { runDeployCli, buildDeployPlan, resolveCdnConfig, parseEnvFile } from './deploy';

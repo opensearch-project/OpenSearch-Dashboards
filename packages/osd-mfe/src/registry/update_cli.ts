@@ -56,10 +56,10 @@
  *   When `MFE_REGISTRY_SIGNING_KEY` is set (and optionally
  *   `MFE_REGISTRY_KEY_ID`), each global-asset write is re-signed by the
  *   {@link signRegistry} primitive so a signed registry stays signed after
- *   every op. Layered authoring ops do NOT re-sign — the existing Phase 12
- *   posture is that signatures travel via the publish pipeline (full regen +
- *   sign), not via per-edit re-signing. The CLI follows that established
- *   division.
+ *   every op. Layered authoring ops do NOT re-sign — the established
+ *   registry-authenticity posture is that signatures travel via the publish
+ *   pipeline (full regen + sign), not via per-edit re-signing. The CLI follows
+ *   that established division.
  *
  *   `--check-deps` builds the inter-plugin dependency graph from the
  *   BUILD-TIME externals data (the actual `__osdBundles__.get(…)` value-edges
@@ -339,8 +339,8 @@ function hasAny(argv: string[], flags: ReadonlyArray<string>): boolean {
  * empty `rollouts`/`tenantOverrides` arrays.
  *
  * Used by the full-regen path (`generateRegistry` still produces the flat
- * shape — it predates the schema collapse and was not rewritten for Story 5
- * since the lift is trivial and keeps that module's contract narrow).
+ * shape — it predates the unified schema and was not rewritten because the
+ * lift is trivial and keeps that module's contract narrow).
  */
 function liftFlatRegistryToDocument(
   flat: ReturnType<typeof generateRegistry>,
@@ -398,7 +398,7 @@ function patchEntry(
     scope: existing.scope,
     module: existing.module,
     // `integrity` deliberately omitted — see the docstring above.
-    // Carry forward the Phase 9 compatibility metadata: it describes what the
+    // Carry forward the compat metadata: it describes what the
     // remote was built against and does not change when an operator repoints a
     // URL or relabels a version.
     ...(existing.builtAgainst !== undefined ? { builtAgainst: existing.builtAgainst } : {}),
@@ -587,7 +587,7 @@ function readExistingDefaultMfes(registryPath: string): Record<string, MfeEntry>
  * @param manifest validated deploy manifest data
  * @param now timestamp to stamp into `generatedAt`
  * @param priorMfes the current registry's `default.mfes` (pass `{}` when none)
- * @param compatMeta Phase 9 compatibility metadata to stamp onto every entry.
+ * @param compatMeta compat metadata to stamp onto every entry.
  *   Optional: when omitted, entries carry no compat data (treated as UNKNOWN
  *   by the classifier).
  * @returns an in-memory registry document (validate + write it separately)
@@ -1259,10 +1259,10 @@ const DEFAULT_ASSET_BASE_URL = 'http://localhost:8080';
 /**
  * Re-sign a registry document when the operator has set
  * `MFE_REGISTRY_SIGNING_KEY` (and optionally `MFE_REGISTRY_KEY_ID` for the
- * envelope). Phase 12's `signRegistry` canonicalises by stripping `signature`
- * and serializing with sorted keys; the canonicalisation is shape-agnostic,
- * so signing works against the layered + global-asset shape verbatim. Returns
- * the doc unchanged when signing is not enabled.
+ * envelope). The `signRegistry` primitive canonicalises by stripping
+ * `signature` and serializing with sorted keys; the canonicalisation is
+ * shape-agnostic, so signing works against the layered + global-asset shape
+ * verbatim. Returns the doc unchanged when signing is not enabled.
  */
 function maybeReSign(doc: RegistryDocument, env: NodeJS.ProcessEnv): RegistryDocument {
   const secret = env.MFE_REGISTRY_SIGNING_KEY;
@@ -1423,7 +1423,7 @@ function runGlobalAssetBranch(
     // corrupt the on-disk doc.
     assertValidRegistryDocument(applied.next);
 
-    // Re-sign when MFE_REGISTRY_SIGNING_KEY is set (matches Phase 12's signing
+    // Re-sign when MFE_REGISTRY_SIGNING_KEY is set (matches the registry-authenticity
     // posture: if the registry is signed today, it stays signed after every op).
     const signedDoc = maybeReSign(applied.next, env);
 

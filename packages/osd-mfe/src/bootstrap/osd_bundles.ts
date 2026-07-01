@@ -11,15 +11,16 @@
 
 /**
  * Bridging remote-loaded plugins into the `__osdBundles__` shim, and triggering
- * core boot (Phase 3, Story 3).
+ * core boot.
  *
  * `src/core/public/plugins/plugin_reader.ts` (UNCHANGED) reads
  * `window.__osdBundles__` SYNCHRONOUSLY during `CoreSystem` start, looking up
  * `plugin/<id>/public` and expecting `get(key)` to return an object whose
  * `.plugin` is a function. The shim's `define(key, thunk)` stores a thunk that
  * `get(key)` later calls, so we register a plugin by defining a thunk that
- * returns the already-loaded remote module. See docs/01-MFE-DESIGN.md §6 and
- * src/legacy/ui/ui_render/bootstrap/osd_bundles_loader_source.js.
+ * returns the already-loaded remote module. See
+ * `packages/osd-mfe/README.md` and
+ * `src/legacy/ui/ui_render/bootstrap/osd_bundles_loader_source.js`.
  */
 
 import { CoreEntryModule, PluginPublicModule, mfeWindow } from './types';
@@ -64,7 +65,7 @@ export function isPluginRegistered(id: string): boolean {
 
 /**
  * Build an INERT, no-op plugin module for a remote that FAILED to load
- * (Phase 4, Story 5 — graceful degradation).
+ * (graceful degradation).
  *
  * OSD core's `plugin_reader.read()`
  * (src/core/public/plugins/plugin_reader.ts, UNCHANGED) iterates the

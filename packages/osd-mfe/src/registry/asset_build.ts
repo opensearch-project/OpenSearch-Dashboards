@@ -16,16 +16,16 @@
  * (`sha256[:12]` for the directory segment, `sha384` SRI for integrity), copy
  * it into a hash-versioned staging tree under `target/mfe-{core,bootstrap,
  * themes/<name>,shared-deps-css}/<hash>/`, and emit a sibling
- * `build-manifest.json` describing the staged shape. The deploy CLI (Story 2)
- * reads the staging dir + manifest and uploads to the CDN; the update CLI
- * (Story 2) reads the manifest and stamps the registry document. The harness CDN
+ * `build-manifest.json` describing the staged shape. The deploy CLI reads the
+ * staging dir + manifest and uploads to the CDN; the update CLI reads the
+ * manifest and stamps the registry document. The harness CDN
  * (registry_server.js) serves the same staged paths so dev parity holds.
  *
- * NO runtime change — this is pure scaffolding. The staged paths are NEVER
- * referenced by the OSD boot (Stories 3-7 wire them in); the existing
- * `/bundles/...` server-hosted paths continue to serve verbatim.
+ * NO runtime change from staging itself — the staged paths are consumed by the
+ * `--mfe` boot; the plain OSD boot's `/bundles/...` server-hosted paths
+ * continue to serve verbatim.
  *
- * Key design choices (mirror the Phase-4 plugin-asset pipeline so global assets
+ * Key design choices (mirror the per-plugin asset pipeline so global assets
  * use the same hash + SRI semantics):
  *  - `sha256(<primary-file>).slice(0, 12)` for the immutable path segment,
  *    identical to `deploy/plan.ts` per-plugin contentHash. Same input bytes
@@ -51,7 +51,7 @@ import { AssetDescriptor } from './schema';
 /** Build-manifest schema version; bump on incompatible shape changes. */
 export const ASSET_BUILD_MANIFEST_SCHEMA_VERSION = 1;
 
-/** The four asset kinds Story 2 introduces. */
+/** The four asset kinds this pipeline stages. */
 export type AssetKind = 'core' | 'orchestrator' | 'theme' | 'shared-deps-css';
 
 /**
@@ -272,7 +272,7 @@ export function stageAsset(options: StageAssetOptions): AssetBuildManifest {
     throw new Error(
       `stageAsset(${assetKind}${themeName ? `:${themeName}` : ''}): ` +
         `source artifact not found at ${sourcePath}. ` +
-        `Build it first (see docs/19-PHASE16-RESULTS.md for the per-kind build commands).`
+        `Build it first (see the per-kind build commands in packages/osd-mfe/README.md).`
     );
   }
 
@@ -297,10 +297,10 @@ export function stageAsset(options: StageAssetOptions): AssetBuildManifest {
   Fs.writeFileSync(primaryStagedPath, bytes);
 
   // Only one staged file per asset for now. The shape (StagedFile[]) is kept
-  // plural for forward compatibility with Story 6's font/asset CSS-referenced
-  // siblings, should they prove necessary — if Story 6 needs to ship a theme
-  // CSS alongside font files, this is where they get added without changing
-  // the manifest shape.
+  // plural for forward compatibility with theme CSS-referenced sibling files
+  // (fonts, images) should they prove necessary — a theme that needs to ship
+  // font sidecars alongside its CSS can add them here without changing the
+  // manifest shape.
   const files: StagedFile[] = [
     {
       localPath: primaryStagedPath,

@@ -1,12 +1,13 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Standalone MOCK dynamic-registry HTTP service (Phase 2, Story 5).
+ * Standalone MOCK dynamic-registry HTTP service.
  *
- * This is a plain node `http` server in the harness — it is intentionally NOT an
- * OSD route. Wiring the registry into OSD's HTML render is Phase 3; keeping the
- * mock decoupled keeps Phase 2 additive. The service mimics the production model
- * from docs/01-MFE-DESIGN.md §5: "the server fetches the registry from a dynamic
+ * This is a plain node `http` server in the dev harness — it is intentionally
+ * NOT an OSD route. Keeping the mock decoupled keeps the local dev origin
+ * additive. The service mimics the production model from
+ * `packages/osd-mfe/README.md`: "the server fetches the registry from a dynamic
+ * service at serve time". It does two things:
  * service at serve time". It does two things:
  *
  *   GET /registry          -> the CURRENT registry JSON, read directly from
@@ -32,8 +33,8 @@
  *
  * Because /registry validates with the same schema (`assertValidRegistryDocument`)
  * the OSD server's FileRegistryReader uses, the exact same fail-closed posture
- * the Phase 3 render uses is exercised here, and the "flip a version = data edit"
- * liveness proof (Story 6) works against a long-running instance.
+ * the server render uses is exercised here, and the "flip a version = data
+ * edit" liveness proof works against a long-running instance.
  *
  * Usage (standalone):
  *   source harness/env.sh
@@ -61,14 +62,14 @@ const MFE_DIR = path.join(OSD_DIR, 'target/mfe');
 // Built shared-deps bundles (react, react-dom, @elastic/eui, …) live here; this
 // is the local "CDN" origin root for /shared-deps/*. The MFE bootstrap on :5602
 // loads these cross-origin to seed the Module Federation share scope BEFORE core
-// boot (see docs/01-MFE-DESIGN.md §6, step 1).
+// boot (see packages/osd-mfe/README.md).
 const SHARED_DEPS_DIR = path.join(OSD_DIR, 'packages/osd-ui-shared-deps/target');
 
 // Built browser MFE bootstrap bundle (assigns window.__osdBootstrapMfe__) lives
 // here; this is the local "CDN" origin root for /bootstrap/*. OSD --mfe (:5602)
 // loads it cross-origin from the URL configured as
-// `opensearchDashboards.mfe.bootstrapUrl`. Produced by packages/osd-mfe/dev/build_bootstrap.js
-// (Phase 3, Story 5); see docs/01-MFE-DESIGN.md §6.
+// `opensearchDashboards.mfe.bootstrapUrl`. Produced by
+// packages/osd-mfe/dev/build_bootstrap.js; see packages/osd-mfe/README.md.
 const BOOTSTRAP_DIR = path.join(OSD_DIR, 'target/mfe-bootstrap');
 
 // CORS headers applied to EVERY response. :5602 (OSD --mfe) loads the registry,
@@ -110,7 +111,7 @@ const MIME = {
 
 // Text asset extensions worth compressing on the wire. The MFE remotes are
 // (post-`--dist`, with CSS inlined via style-loader) effectively all `.js`; the
-// shared-deps bundle adds `.css`. Mirrors the Phase 7 Story 4 pre-compressed CDN
+// shared-deps bundle adds `.css`. Mirrors the pre-compressed CDN
 // deploy so the local origin (:8080) and the CDN behave the same on the wire.
 // Already-compressed binaries (fonts, png) are served as-is.
 const COMPRESSIBLE_EXTENSIONS = new Set([
@@ -308,7 +309,7 @@ function createServer(options) {
     }
 
     // Client's advertised content codings; static asset routes below use it to
-    // decide whether to gzip text bodies (Phase 7 Story 4 transit compression).
+    // decide whether to gzip text bodies (transit compression).
     const acceptEncoding = req.headers['accept-encoding'];
 
     if (pathname === '/' || pathname === '/health') {

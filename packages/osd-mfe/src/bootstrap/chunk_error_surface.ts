@@ -10,29 +10,30 @@
  */
 
 /**
- * Lazy-CHUNK Subresource-Integrity failure surface (Phase 12, Story 3).
+ * Lazy-CHUNK Subresource-Integrity failure surface.
  *
- * THE THREAT-MODEL LAYER, AND WHY IT IS DIFFERENT FROM STORY 2.
+ * THE THREAT-MODEL LAYER, AND WHY IT IS DIFFERENT FROM THE BOOT-TIME GATE.
  *
- *  - Story 2 secures the BOOT-TIME gate: the host bootstrap injects each remote's
- *    `remoteEntry.js` <script> with `integrity` (from the registry) + `crossorigin`,
- *    so a tampered remoteEntry is rejected BEFORE the app boots and is routed
- *    fail-closed through the Phase 9 env policy (dev block / prod skip). At that
- *    point nothing has mounted, so replacing the page (block) or disabling the
- *    plugin (skip) is the right surface.
+ *  - The BOOT-TIME gate secures the initial load: the host bootstrap injects
+ *    each remote's `remoteEntry.js` <script> with `integrity` (from the
+ *    registry) + `crossorigin`, so a tampered remoteEntry is rejected BEFORE
+ *    the app boots and is routed fail-closed through the env-keyed compat
+ *    policy (dev block / prod skip). At that point nothing has mounted, so
+ *    replacing the page (block) or disabling the plugin (skip) is the right
+ *    surface.
  *
- *  - Story 3 secures the LAZY CHUNKS a remote loads ITSELF, on demand, AFTER it is
- *    already mounted (the external-plugin spike showed real remotes ship them —
- *    e.g. Monaco editors, doc views). The rspack `SubresourceIntegrityPlugin` +
- *    `output.crossOriginLoading: 'anonymous'` (see mfe_rspack_config.ts) make the
- *    Module Federation runtime set `integrity` on each chunk <script> it injects,
- *    so the browser REFUSES to execute a tampered chunk. But that refusal happens
- *    at the dynamic `import()` site inside running plugin code — it is a RUNTIME
- *    event, NOT a boot-time decision. We cannot wrap the remote's own `import()`
- *    calls (their code; and we must not touch the optimizer / plugin_reader), and
- *    blanking the page would destroy an already-working app. So the correct surface
- *    is a NON-BLOCKING, visible runtime error + telemetry — never a white screen or
- *    a silent hang.
+ *  - This module secures the LAZY CHUNKS a remote loads ITSELF, on demand,
+ *    AFTER it is already mounted (real remotes ship them — e.g. Monaco
+ *    editors, doc views). The rspack `SubresourceIntegrityPlugin` +
+ *    `output.crossOriginLoading: 'anonymous'` (see mfe_rspack_config.ts) make
+ *    the Module Federation runtime set `integrity` on each chunk <script> it
+ *    injects, so the browser REFUSES to execute a tampered chunk. But that
+ *    refusal happens at the dynamic `import()` site inside running plugin
+ *    code — it is a RUNTIME event, NOT a boot-time decision. We cannot wrap
+ *    the remote's own `import()` calls (their code; and we must not touch
+ *    the optimizer / plugin_reader), and blanking the page would destroy an
+ *    already-working app. So the correct surface is a NON-BLOCKING, visible
+ *    runtime error + telemetry — never a white screen or a silent hang.
  *
  * HOW THE FAILURE REACHES US. When a chunk <script> fails its integrity check the
  * browser fires an `error` event on that element, and the MF/webpack runtime turns
@@ -42,8 +43,8 @@
  * (the resource `error` event in the capture phase — resource errors do not bubble
  * — and `unhandledrejection`) as a host-side safety net at the import() boundary,
  * filter to genuine chunk-load/integrity failures, render a dismissible banner, and
- * emit structured telemetry. This is defense-in-depth: the boot gate (Story 2) is
- * the primary control; this makes a post-boot violation loud and diagnosable.
+ * emit structured telemetry. This is defense-in-depth: the boot gate is the
+ * primary control; this makes a post-boot violation loud and diagnosable.
  *
  * Rendering is intentionally PLAIN DOM (no React / EUI): a chunk-integrity failure
  * may itself involve the shared singletons, and the surface must work regardless of

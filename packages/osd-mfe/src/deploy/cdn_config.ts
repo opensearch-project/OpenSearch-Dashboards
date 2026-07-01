@@ -10,15 +10,14 @@
  */
 
 /**
- * Resolve the PRE-PROVISIONED CDN location for the publish-only deploy (Phase 4,
- * Story 1).
+ * Resolve the PRE-PROVISIONED CDN location for the publish-only deploy.
  *
  * The S3 bucket + CloudFront distribution are provisioned SEPARATELY
  * (`harness/provision_cdn.sh` / future CDK). The deploy command never creates or
  * mutates infra — it only needs to know WHERE to publish. That location is read
  * from the environment (the harness `env.sh` sources `harness/cdn_outputs.env`
  * into `process.env`), with a direct parse of `cdn_outputs.env` as a fallback so
- * the values are NEVER hardcoded in source. See docs/01-MFE-DESIGN.md §6.
+ * the values are NEVER hardcoded in source. See `packages/osd-mfe/README.md`.
  */
 
 /** The provisioned CDN coordinates the deploy publishes artifacts to. */

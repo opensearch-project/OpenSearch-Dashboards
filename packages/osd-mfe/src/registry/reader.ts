@@ -25,7 +25,7 @@
  *
  * {@link FileRegistryReader} — the reference implementation — reads a
  * `schemaVersion: 1` document from disk on every call. Caching with
- * mtime-based hot-reload mirrors the Phase 2 `FileRegistryProvider` so a
+ * mtime-based hot-reload mirrors the `FileRegistryProvider` so a
  * registry edit is reflected on the very next request without a restart.
  */
 
@@ -184,8 +184,8 @@ export class FileRegistryReader implements RegistryReader {
 
     // Throws a descriptive Error (path-prefixed) on a malformed document or
     // wrong schemaVersion. The fail-closed posture is intentional: the
-    // canonical CDN registry is now `schemaVersion: 1` natively (see Story 7
-    // of the schema-collapse loop); no legacy auto-migration to fall back on.
+    // canonical CDN registry is `schemaVersion: 1` natively; no legacy
+    // auto-migration to fall back on.
     return assertValidRegistryDocument(parsed);
   }
 }

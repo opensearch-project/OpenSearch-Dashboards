@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-# Phase 8, Story 2 — PORTABLE, CREDENTIAL-FREE DUAL-PATH CI GATE.
+# PORTABLE, CREDENTIAL-FREE DUAL-PATH CI GATE.
 #
 # Single entrypoint that proves the dual-path invariant on every change WITHOUT
 # any cloud credentials:

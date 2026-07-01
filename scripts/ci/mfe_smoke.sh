@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-# Phase 8, Story 4 — MFE SMOKE runner (Cypress) against the `--mfe` instance.
+# MFE SMOKE runner (Cypress) against the `--mfe` instance.
 #
 # Runs a SMALL, representative Cypress smoke subset against the OSD instance
 # booted with `--mfe` (default :5602), proving >= 2 core apps (discover +

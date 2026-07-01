@@ -10,7 +10,7 @@
  */
 
 /**
- * Registry authenticity — NODE signer + verifier (Phase 12, Story 4).
+ * Registry authenticity — NODE signer + verifier.
  *
  * This module uses Node's `crypto` and is therefore NODE-ONLY: it is imported by
  * the signing tool, by {@link FileRegistryProvider} (server-side read-time
@@ -38,8 +38,8 @@ import {
 
 /**
  * The signing key material (server-held secret). `keyId` is recorded in the
- * envelope for Phase-13 rotation; `secret` is the HMAC key; `algorithm` defaults
- * to {@link REGISTRY_SIGNATURE_ALGORITHM}.
+ * envelope for future key rotation; `secret` is the HMAC key; `algorithm`
+ * defaults to {@link REGISTRY_SIGNATURE_ALGORITHM}.
  */
 export interface RegistrySigningKey {
   /** Key identifier recorded in the signature envelope (rotation hook). */
@@ -61,8 +61,9 @@ function hmac(secret: string, registry: Registry): Buffer {
  * Sign a registry: return a COPY carrying a `signature` envelope computed over the
  * canonical (signature-stripped) bytes. Any pre-existing signature is replaced.
  *
- * Production key issuance/custody is deferred to Phase 13 (a governed service);
- * this is the library primitive the (future) publish path and the harness use.
+ * Production key issuance/custody is a future concern (a governed
+ * key-management service); this is the library primitive the (future) publish
+ * path and the harness use.
  *
  * @param registry the registry to sign
  * @param key the signing key material

@@ -122,8 +122,8 @@ function createSassImplementation(sassCompiler: sass.AsyncCompiler) {
 }
 
 /**
- * Phase 16, Story 4 — re-export of {@link mergeExposedEntryIntoRemoteEntry}
- * so callers (and the unit test) can pull the post-build helper from either
+ * Re-export of {@link mergeExposedEntryIntoRemoteEntry} so callers (and the
+ * unit test) can pull the post-build helper from either
  * `./build_mfe_for_plugin` (the public surface of this build module) or
  * `./merge_remote_entry` (the pure, sass-free implementation). The pure
  * module is testable WITHOUT pulling in `sass-embedded`'s transitive
@@ -201,12 +201,13 @@ async function compilePluginRemote(
     });
   });
 
-  // Phase 16, Story 4 — collapse the exposed `./public` chunk (`<id>.plugin.js`)
-  // into `remoteEntry.js` and delete the standalone chunk, so each plugin is a
-  // SINGLE network fetch at boot (was two). See {@link mergeExposedEntryIntoRemoteEntry}
-  // for the chunk-loading semantics + edge handling. Architecturally lossless;
-  // per-plugin SRI naturally pins the merged bytes via the existing
-  // `generate.ts` / `deploy/plan.ts` hash-on-disk path (no consumer change).
+  // Collapse the exposed `./public` chunk (`<id>.plugin.js`) into
+  // `remoteEntry.js` and delete the standalone chunk, so each plugin is a
+  // SINGLE network fetch at boot (was two). See
+  // {@link mergeExposedEntryIntoRemoteEntry} for the chunk-loading semantics
+  // + edge handling. Architecturally lossless; per-plugin SRI naturally pins
+  // the merged bytes via the existing `generate.ts` / `deploy/plan.ts`
+  // hash-on-disk path (no consumer change).
   mergeExposedEntryIntoRemoteEntry(outputDir, plugin.id);
 
   return {

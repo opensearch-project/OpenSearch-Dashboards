@@ -438,7 +438,7 @@ describe('resolveBootManifest() — case 6: multi-rollout, first-match wins', ()
 });
 
 /* ------------------------------------------------------------------------- *
- * resolveBootManifest — global asset projection (Story 3 of schema-collapse)
+ * resolveBootManifest — global asset projection
  * ------------------------------------------------------------------------- */
 
 describe('resolveBootManifest() — global asset projection', () => {

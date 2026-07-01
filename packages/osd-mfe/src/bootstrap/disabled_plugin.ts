@@ -10,11 +10,11 @@
  */
 
 /**
- * VISIBLE graceful-degradation UX (Phase 14, Story 2) — enrich Phase 4's silent
+ * VISIBLE graceful-degradation UX — enrich the silent
  * `createDisabledPluginModule` placeholder with REASON metadata and a
  * user-facing surface, WITHOUT replacing the silent-disable mechanism.
  *
- * THE LOCKED INVARIANT this module preserves (Phase 4): a single failed remote
+ * THE LOCKED INVARIANT this module preserves: a single failed remote
  * does NOT block core boot or other plugins. The disabled placeholder still
  * satisfies `plugin_reader.read()`'s contract (a `.plugin` function whose
  * instance has `setup`/`start`/`stop`); we simply extend `setup()` to register
@@ -22,7 +22,8 @@
  * friendly status component instead of OSD's default 404. The plugin's own
  * lifecycle is still inert (no peer registrations, no nav entry).
  *
- * Two surfaces compose this story (both mfe-gated; no-flag path unchanged):
+ * Two surfaces compose the visible-degradation UX (both mfe-gated; no-flag
+ * path unchanged):
  *
  *  1. The degraded app stub (this file) — registers an `application` with id
  *     equal to the disabled plugin id, with `navLinkStatus: hidden` so it does
@@ -37,10 +38,10 @@
  *     section listing every {id, errorClass, humanReason} when any are
  *     disabled. Wired by the bootstrap when it collects records here.
  *
- * The reason taxonomy (`errorClass`) is the SAME one Phase 14 Story 1's
- * telemetry uses — see ./telemetry.ts. The `humanReason` mapping below is the
- * single source of truth for what an end-user (and the inspector / verifier)
- * sees per failure mode.
+ * The reason taxonomy (`errorClass`) is the SAME one the load telemetry uses —
+ * see ./telemetry.ts. The `humanReason` mapping below is the single source of
+ * truth for what an end-user (and the inspector / verifier) sees per failure
+ * mode.
  */
 
 import { TelemetryErrorClass } from './telemetry';
@@ -58,7 +59,7 @@ import type { PluginPublicModule } from './types';
  *  - `version`: the registry/manifest-resolved version label of the rejected
  *    artifact. May be `''` for the registry-trust skip path (every plugin is
  *    refused but no specific artifact failed).
- *  - `errorClass`: the locked Phase 14 taxonomy member.
+ *  - `errorClass`: the locked telemetry taxonomy member.
  *  - `humanReason`: the {@link humanReasonFor} mapping for `errorClass`. Stored
  *    on the record so callers don't need to re-derive it; equality with the
  *    mapping is enforced by `createDisabledPluginRecord`.
@@ -76,8 +77,8 @@ export interface DisabledPluginRecord {
  * compile error here, never a silent fallthrough. The strings are intentionally
  * SHORT and end-user-readable: they appear inline in the Inspector panel and
  * inside the degraded app stub, both visible to the developer/operator (and,
- * in the stub case, to the user). Keep them stable — `verify_phase14.js`
- * cases E + F assert exact values.
+ * in the stub case, to the user). Keep them stable — telemetry/degradation
+ * verifiers assert exact values.
  */
 const HUMAN_REASON: { readonly [K in TelemetryErrorClass]: string } = {
   'sri-mismatch': 'integrity check failed',
@@ -88,7 +89,7 @@ const HUMAN_REASON: { readonly [K in TelemetryErrorClass]: string } = {
 };
 
 /**
- * Map a Phase 14 telemetry `errorClass` to the user-facing one-liner shown in
+ * Map a telemetry `errorClass` to the user-facing one-liner shown in
  * the degraded app stub + the dev Inspector panel. EXHAUSTIVE by the type
  * system: an unhandled future class would fail the index lookup, so the
  * compile-time check enforces the contract.
@@ -141,8 +142,8 @@ export const DEGRADED_APP_CLASS = 'osdMfeDegradedApp';
  *   </div>
  *
  * The `role="alert"` is recoverable a11y so screen readers announce the
- * change-of-state on navigation; the explicit `data-test-subj` lets
- * verify_phase14.js case E grep the rendered DOM by attribute.
+ * change-of-state on navigation; the explicit `data-test-subj` lets a verifier
+ * grep the rendered DOM by attribute.
  *
  * @param element host-supplied mount target (must be empty when called)
  * @param record  the record built by the bootstrap for this disabled plugin
@@ -213,9 +214,9 @@ interface MinimalApplicationSetup {
 /**
  * The minimal `CoreSetup` shape the disabled placeholder reads. Everything is
  * optional so the module gracefully no-ops if invoked under a future core
- * surface that no longer carries `application.register` (defense — Phase 4
- * invariant: the placeholder must NEVER block boot, even if the surrounding
- * core surface drifts).
+ * surface that no longer carries `application.register` (defense in depth —
+ * the single-failure-isolation invariant is that the placeholder must NEVER
+ * block boot, even if the surrounding core surface drifts).
  */
 interface MinimalCoreSetup {
   application?: MinimalApplicationSetup;
@@ -230,7 +231,7 @@ const APP_NAV_LINK_STATUS_HIDDEN = 3;
 
 /**
  * Build the disabled-plugin placeholder module for the given record. The result
- * is shape-compatible with Phase 4's {@link createDisabledPluginModule} (so the
+ * is shape-compatible with the silent-disable placeholder (so the
  * `__osdBundles__` shim still resolves a `.plugin` function whose instance has
  * `setup`/`start`/`stop`), but `setup()` ALSO registers a hidden degraded app
  * stub at the disabled plugin's id. Direct navigation to `/app/<id>` then hits
@@ -239,14 +240,15 @@ const APP_NAV_LINK_STATUS_HIDDEN = 3;
  *
  * Defensive choices, in order of priority:
  *
- *  - Phase 4 INVARIANT: NEVER throw out of setup/start/stop. The whole body of
- *    `setup()` is wrapped in try/catch; if `core.application.register` is
- *    absent, faulty, or rejects our payload, we silently fall through to the
- *    inert no-op. A failed remote must not break the rest of the app, ever.
+ *  - Single-failure-isolation INVARIANT: NEVER throw out of setup/start/stop.
+ *    The whole body of `setup()` is wrapped in try/catch; if
+ *    `core.application.register` is absent, faulty, or rejects our payload,
+ *    we silently fall through to the inert no-op. A failed remote must not
+ *    break the rest of the app, ever.
  *
  *  - `navLinkStatus: hidden` (3) — keep the disabled plugin OUT of the side
  *    nav. The user only sees the degraded surface when they navigate directly
- *    to `/app/<id>` (Story 2 spec: "NOT a banner, NOT a nav-bar element").
+ *    to `/app/<id>` ("NOT a banner, NOT a nav-bar element").
  *
  *  - `mount` returns a cleanup function that detaches our DOM children when
  *    the user navigates away — the contract `application.register` documents.
@@ -300,7 +302,8 @@ export function createDisabledPluginModuleWithReason(
           // `register` rejected our payload (a future core may tighten the
           // schema). Silent — the placeholder still satisfies plugin_reader
           // (the .plugin instance below has setup/start/stop), so the app
-          // boots without the degraded stub. Phase 4 invariant preserved.
+          // boots without the degraded stub. Single-failure-isolation
+          // invariant preserved.
         }
         return {};
       },

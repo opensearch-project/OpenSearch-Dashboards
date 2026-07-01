@@ -91,7 +91,7 @@ function buildConfig() {
   });
 }
 
-describe('getMfeRspackConfig — lazy-chunk Subresource Integrity (Phase 12, Story 3)', () => {
+describe('getMfeRspackConfig — lazy-chunk Subresource Integrity', () => {
   it('sets output.crossOriginLoading to "anonymous" so chunk SRI is enforceable', () => {
     const config = buildConfig();
     // crossorigin on the runtime-injected chunk <script> is REQUIRED for the
@@ -121,12 +121,12 @@ describe('getMfeRspackConfig — lazy-chunk Subresource Integrity (Phase 12, Sto
 
     expect(sri).toBeDefined();
     const hashFuncNames = sri!.options?.hashFuncNames ?? sri!._args?.[0]?.hashFuncNames;
-    // sha384 matches the registry/remoteEntry integrity algorithm (Story 1/2), so
+    // sha384 matches the registry/remoteEntry integrity algorithm, so
     // the integrity story is uniform across remoteEntry and lazy chunks.
     expect(hashFuncNames).toContain('sha384');
   });
 
-  it('keeps lazy chunks split (Phase 11) — the exposed entry is the eager plugin entry', () => {
+  it('keeps lazy chunks split — the exposed entry is the eager plugin entry', () => {
     const config = buildConfig();
     // splitChunks stays disabled (the eager entry is a single file) and genuinely
     // dynamic import()'d chunks keep the `.chunk.` infix so they load on navigation

@@ -11,13 +11,12 @@
 
 /**
  * Resolve the EFFECTIVE `opensearchDashboards.mfe.compat.*` version-compatibility
- * policy from the (optional) server config values and the server's dev/prod mode
- * (Phase 9, Story 1 — config surface).
+ * policy from the (optional) server config values and the server's dev/prod mode.
  *
  * This is the core-side mirror of the canonical browser-side `resolveCompatPolicy`
  * in `@osd/mfe` (`packages/osd-mfe/src/bootstrap/compat_policy.ts`), which the
  * server cannot import (`@osd/mfe` is not a dependency of `src/`). The server uses
- * this to compute the policy it injects into the page (Story 3); keeping both in
+ * this to compute the policy it injects into the page; keeping both in
  * lockstep means the env-keyed defaults are specified once per side, exactly as
  * `resolveAllowOverride` is mirrored for the `allowOverride` gate.
  *

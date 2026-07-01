@@ -121,7 +121,7 @@ export interface SharedDepsDescriptor {
 }
 
 /**
- * What a remote was BUILT AGAINST (Phase 9 compatibility contract). This is
+ * What a remote was BUILT AGAINST (compat contract). This is
  * the left-hand side of the compatibility axis: the OSD core version and the
  * shared-singleton semver ranges the remote's bundle expects from the host.
  *
@@ -146,10 +146,10 @@ export interface BuiltAgainst {
 }
 
 /**
- * The remote's HOST-COMPATIBILITY declaration (Phase 9 compatibility
- * contract): the range of OSD core versions it declares itself compatible
- * with. This is the right-hand side of the OSD-core axis — the classifier
- * checks the running core version against it.
+ * The remote's HOST-COMPATIBILITY declaration (compat contract): the range of
+ * OSD core versions it declares itself compatible with. This is the right-hand
+ * side of the OSD-core axis — the classifier checks the running core version
+ * against it.
  *
  * Defaults are derived from {@link BuiltAgainst.osdVersion} at generation
  * time: `minCoreVersion = "<major>.<minor>.0"` and
@@ -193,7 +193,7 @@ export interface MfeEntry {
    */
   minCoreVersion?: string | null;
   /**
-   * What this remote was BUILT AGAINST (Phase 9). DATA populated at
+   * What this remote was BUILT AGAINST. DATA populated at
    * generation time (see {@link BuiltAgainst}). Optional/absent on legacy
    * entries — a missing `builtAgainst` is treated as UNKNOWN metadata by the
    * classifier, which the env policy then handles (non-prod warn+load, prod
@@ -201,7 +201,7 @@ export interface MfeEntry {
    */
   builtAgainst?: BuiltAgainst;
   /**
-   * The remote's host-compatibility declaration (Phase 9). DATA populated at
+   * The remote's host-compatibility declaration. DATA populated at
    * generation time (see {@link CompatDeclaration}); defaults derive from
    * `builtAgainst.osdVersion`. Optional/absent on legacy entries (UNKNOWN).
    */
@@ -220,9 +220,10 @@ export interface MfeEntry {
 
 /**
  * The flat in-memory registry shape used by the bootstrap layer after the
- * server-resolved `BootManifest` is materialised. Phase 2 stored this shape
- * on disk as well; today the on-disk format is the layered
- * {@link RegistryDocument} and the flat shape exists only in memory.
+ * server-resolved `BootManifest` is materialised. Earlier iterations of the
+ * dynamic registry stored this shape on disk as well; today the on-disk format
+ * is the layered {@link RegistryDocument} and the flat shape exists only in
+ * memory.
  */
 export interface Registry {
   /** Schema version; must equal {@link SCHEMA_VERSION}. */
@@ -234,8 +235,8 @@ export interface Registry {
   /** Map of plugin id -> its MFE remote descriptor. */
   mfes: Record<string, MfeEntry>;
   /**
-   * Optional authenticity signature over the registry (Phase 12 Story 4).
-   * Present on the legacy CDN flat-shape registry used by the bootstrap
+   * Optional authenticity signature over the registry (registry authenticity
+   * envelope). Present on the CDN flat-shape registry used by the bootstrap
    * verifier; absent on in-memory registries materialised from a server-
    * injected boot manifest. See `./signing_common.ts` for the envelope and
    * canonicalisation contract.

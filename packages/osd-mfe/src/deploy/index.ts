@@ -10,13 +10,13 @@
  */
 
 /**
- * Public surface of the MFE CDN deploy (Phase 4, Story 1).
+ * Public surface of the MFE CDN deploy.
  *
  * Exposes the publish-only deploy LOGIC: resolving the provisioned CDN location,
  * building the immutable versioned deploy plan, and the CLI orchestrator. The
  * artifacts and the deploy manifest DATA file are read/written from the
  * filesystem at run time — never imported as code constants. The deploy never
- * creates or mutates infra. See docs/01-MFE-DESIGN.md §6.
+ * creates or mutates infra. See `packages/osd-mfe/README.md`.
  */
 
 export { parseEnvFile, resolveCdnConfig } from './cdn_config';

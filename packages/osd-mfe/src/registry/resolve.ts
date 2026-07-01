@@ -36,8 +36,8 @@
  *
  * Entries whose source is the `default` layer are the steady state; rollouts
  * never invent ids the default does not declare unless the authoring CLI
- * explicitly added them — Phase 13 keeps the field stable so the resolver
- * doesn't need to guard against that case.
+ * explicitly added them — the server-side resolver keeps the field stable so
+ * the resolver doesn't need to guard against that case.
  *
  * Beyond the plugin substructure, the resolver also projects four OPTIONAL
  * GLOBAL ASSET ROOTS — `core`, `orchestrator`, `sharedDepsCss`, `themes` —

@@ -10,9 +10,9 @@
  */
 
 /**
- * Phase 16, Story 4 — post-build step that collapses a plugin's exposed
- * `./public` Module Federation chunk (`<pluginId>.plugin.js`) INTO its
- * container (`remoteEntry.js`), then deletes the standalone chunk. Run AFTER
+ * Post-build step that collapses a plugin's exposed `./public` Module
+ * Federation chunk (`<pluginId>.plugin.js`) INTO its container
+ * (`remoteEntry.js`), then deletes the standalone chunk. Run AFTER
  * `rspack.compiler.run()` completes successfully (see
  * `build_mfe_for_plugin.ts` → `compilePluginRemote`).
  *
@@ -29,15 +29,15 @@
  * a generic "exposes are async chunks" reason that doesn't apply here. Merging
  * them is architecturally lossless:
  *   - Per-plugin SRI: the registry pins ONE hash over the merged `remoteEntry.js`
- *     (Phase 12 Story 1, unchanged code path — `registry/generate.ts` and
- *     `deploy/plan.ts` both already content-address by `sha256(remoteEntry.js)`
- *     and SRI-hash the same bytes).
- *   - Lazy CHUNK SRI (Phase 12 Story 3): `<id>.chunk.*.js` files are untouched
- *     — they remain separately emitted with per-chunk integrity injected into
- *     the runtime by rspack's SubresourceIntegrityPlugin.
- *   - Telemetry error classes (Phase 14): unchanged — `sri-mismatch` /
- *     `network-failure` / `mf-runtime-error` are about FETCH semantics, not
- *     about whether the runtime + module are in one file or two.
+ *     (unchanged code path — `registry/generate.ts` and `deploy/plan.ts` both
+ *     already content-address by `sha256(remoteEntry.js)` and SRI-hash the same
+ *     bytes).
+ *   - Lazy CHUNK SRI: `<id>.chunk.*.js` files are untouched — they remain
+ *     separately emitted with per-chunk integrity injected into the runtime
+ *     by rspack's SubresourceIntegrityPlugin.
+ *   - Telemetry error classes: unchanged — `sri-mismatch` / `network-failure`
+ *     / `mf-runtime-error` are about FETCH semantics, not about whether the
+ *     runtime + module are in one file or two.
  *   - CDN cache impact: neutral — content-hash-versioned URLs change whenever
  *     the bytes change, with or without the merge.
  *

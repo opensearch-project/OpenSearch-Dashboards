@@ -265,8 +265,8 @@ describe('buildMfeCspRules', () => {
 
   it('widens script-src, worker-src, AND style-src with de-duplicated origins', () => {
     // OSD's default csp.rules contains script-src + worker-src + style-src; ALL
-    // three are now in MFE_WIDENED_DIRECTIVES (Phase 12 Story 5 — remotes ship
-    // styles too, so style-src needs the cdnOrigin).
+    // three are now in MFE_WIDENED_DIRECTIVES (remotes ship styles too, so
+    // style-src needs the cdnOrigin).
     const result = buildMfeCspRules(baseRules, {
       bootstrapUrl: 'http://localhost:8080/bootstrap/x.js',
       sharedDepsUrl: 'http://localhost:8080/shared-deps/y.js',
@@ -398,13 +398,14 @@ describe('buildMfeCspRules', () => {
   });
 
   // -------------------------------------------------------------------------
-  // Phase 12 Story 5 — extend the widened set beyond script-src/worker-src
+  // Extend the widened set beyond script-src/worker-src (style-src, font-src,
+  // connect-src for real remote-shipped assets)
   // -------------------------------------------------------------------------
 
-  it('widens style-src when present in the base rules (Phase 12 Story 5)', () => {
-    // OSD's default carries `style-src 'unsafe-inline' 'self'` — Phase 12
-    // adds the cdnOrigin so cross-origin <link rel=stylesheet>/<style> from a
-    // remote can render.
+  it('widens style-src when present in the base rules', () => {
+    // OSD's default carries `style-src 'unsafe-inline' 'self'` — the widened
+    // set adds the cdnOrigin so cross-origin <link rel=stylesheet>/<style>
+    // from a remote can render.
     const result = buildMfeCspRules(baseRules, { cdnOrigin: 'https://cdn.example.net' });
     expect(result[2]).toBe("style-src 'unsafe-inline' 'self' https://cdn.example.net");
   });

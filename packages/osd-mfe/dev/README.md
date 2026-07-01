@@ -107,9 +107,9 @@ See `env.example.sh` for the full annotated list. The most common:
 | `MFE_COMPAT_ON_INCOMPATIBLE` | Compat policy override (`block` \| `skip`) | dev default: `block` |
 | `MFE_COMPAT_ON_MISSING` | Compat policy override (`warn-load` \| `skip`) | dev default: `warn-load` |
 | `MFE_ALLOW_OVERRIDE` | URL-override gate (`true` \| `false`) | dev default: `true` |
-| `MFE_CUSTOMER_ID` | Tenant id for Phase 13 routing | `default` |
+| `MFE_CUSTOMER_ID` | Tenant id for server-side per-tenant resolution | `default` |
 | `MFE_USER_BUCKET_COOKIE_NAME` | Sticky bucket cookie name | `_osd_mfe_bucket` |
-| `MFE_TELEMETRY_ENDPOINT` | URL for Phase 14 Beacon events | unset (disabled) |
+| `MFE_TELEMETRY_ENDPOINT` | URL for load-telemetry Beacon events | unset (disabled) |
 | `FORCE_RESTART` | Kill existing `:5602` process before launching | `0` |
 
 ---
@@ -195,7 +195,12 @@ Stops the local origin and any harness-managed processes. Leaves `:5601`
 
 ## Where to read next
 
-- **Architecture overview**: `docs/01-MFE-DESIGN.md` in the repo root.
+- **Architecture overview**: `packages/osd-mfe/README.md`.
+- **Subsystem docs**:
+  - `packages/osd-mfe/src/registry/README.md` — registry schema, resolution,
+    authoring CLI, signing.
+  - `packages/osd-mfe/src/bootstrap/README.md` — the browser load pipeline,
+    SRI, compat policy, telemetry, inspector.
+  - `packages/osd-mfe/src/deploy/README.md` — CDN publish + deploy manifest
+    contract.
 - **Production source**: `packages/osd-mfe/src/` (registry, bootstrap, deploy).
-- **Phase results**: `docs/02-PHASE1-RESULTS.md` ... `docs/19-PHASE16-RESULTS.md`
-  walk through the architecture's design + verification phase by phase.

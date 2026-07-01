@@ -144,24 +144,23 @@ export function uiRenderMixin(osdServer, server, config) {
       const basePath = config.get('server.basePath');
 
       const regularBundlePath = `${basePath}/${buildHash}/bundles`;
-      // Phase 3 MFE mode (docs/01-MFE-DESIGN.md §6). When enabled, serve a bootstrap
-      // that OMITS the local plugin bundles and instead loads core.entry.js plus the
-      // MFE bootstrap (which seeds the MF share scope from the origin shared-deps,
-      // fetches the registry at serve time, loads each plugin remote, and registers it
-      // into the __osdBundles__ shim before invoking core boot). Without the flag this
-      // branch is skipped entirely, so the default bootstrap below is byte-for-byte
-      // unchanged.
+      // MFE mode. When enabled, serve a bootstrap that OMITS the local plugin
+      // bundles and instead loads core.entry.js plus the MFE bootstrap (which
+      // seeds the MF share scope from the origin shared-deps, fetches the
+      // registry at serve time, loads each plugin remote, and registers it
+      // into the __osdBundles__ shim before invoking core boot). Without the
+      // flag this branch is skipped entirely, so the default bootstrap below
+      // is byte-for-byte unchanged.
       const mfeEnabled = !!config.get('opensearchDashboards.mfe.enabled');
       if (mfeEnabled) {
-        // Phase 13 Story 3: registry contract + reference reader. When a
-        // registry file path is configured, the OSD server reads it (auto-
-        // migrating a v1 doc on the fly), resolves it server-side against the
-        // requesting host's dimensions (`customerId` from server config,
-        // `userBucket` from a sticky HttpOnly cookie), and INJECTS the resulting
-        // flat boot manifest into the bootstrap. The browser then consumes the
-        // manifest directly — ZERO `/registry` HTTP fetches in --mfe mode
-        // (verify_phase13 case G). When `registryPath` is empty (legacy /
-        // pre-Phase-13 deployments), this block is skipped and the bootstrap
+        // Registry contract + reference reader. When a registry file path is
+        // configured, the OSD server reads it, resolves it server-side
+        // against the requesting host's dimensions (`customerId` from server
+        // config, `userBucket` from a sticky HttpOnly cookie), and INJECTS
+        // the resulting flat boot manifest into the bootstrap. The browser
+        // then consumes the manifest directly — ZERO `/registry` HTTP
+        // fetches in --mfe mode (asserted by the dual-path CI gate). When
+        // `registryPath` is empty, this block is skipped and the bootstrap
         // falls back to `mfeRegistryUrl` as before.
         const mfeRegistryPath = config.get('opensearchDashboards.mfe.registryPath');
         const mfeCustomerId = config.get('opensearchDashboards.mfe.customerId') || 'default';
@@ -183,79 +182,75 @@ export function uiRenderMixin(osdServer, server, config) {
         }
         const mfeUserBucket = bucketFromCookie(mfeBucketCookieValue);
 
-        // Read + resolve the v2 (or v1, auto-migrated; v3 since Phase 16
-        // Story 3) registry into a flat boot manifest. Only when a path is
-        // configured — otherwise bake an empty `null` into the template and
-        // the browser falls back to the legacy fetch path.
+        // Read + resolve the registry (schemaVersion: 1) into a flat boot
+        // manifest. Only when a path is configured — otherwise bake an empty
+        // `null` into the template and the browser falls back to the fetch
+        // path.
         let mfeBootManifestJson = 'null';
-        // Phase 16 Story 3: when the source registry is v3 AND has an
-        // `orchestrator` top-level field, the boot manifest carries an
+        // Registry-managed orchestrator: when the source registry advertises
+        // an `orchestrator` top-level field, the boot manifest carries an
         // `orchestrator: { url, integrity? }` descriptor (the bootstrap
         // template renders this into __osdMfe__.orchestrator so the thin
         // shim loads the orchestrator from the registry-advertised URL with
-        // SRI). When absent (v1/v2, or v3 without the field), the descriptor
-        // is `null` and the thin shim falls back to the server-config
-        // `mfeBootstrapUrl` — backward-compat at the consumption site.
+        // SRI). When absent, the descriptor is `null` and the thin shim
+        // falls back to the server-config `mfeBootstrapUrl` — backward-compat
+        // at the consumption site.
         let mfeOrchestratorJson = 'null';
-        // Phase 16 Story 5: same shape, same posture for the OSD `core`
-        // entry script. When the source registry is v3 AND has a `core`
-        // top-level field, the boot manifest carries a `core: { url,
-        // integrity? }` descriptor — and the MFE orchestrator
+        // Registry-managed core: same shape, same posture for the OSD `core`
+        // entry script. When the source registry has a `core` top-level
+        // field, the boot manifest carries a `core: { url, integrity? }`
+        // descriptor — and the MFE orchestrator
         // (`bootstrapMfe()` in `packages/osd-mfe/src/bootstrap/bootstrap_mfe.ts`)
         // loads `core.entry.js` from THAT URL with SRI BEFORE invoking core
         // boot (a tampered core fails closed: `loadScript` rejects, the
         // orchestrator never calls `invokeCoreBootstrap`, the failure surface
-        // fires). When absent (v1/v2 registries, or v3 without the field),
-        // the descriptor is `null` and the thin shim's jsDependencyPaths
-        // keeps the legacy `${regularBundlePath}/core/core.entry.js` entry
-        // so core loads from THIS server as today — backward-compat at the
-        // consumption site, byte-for-byte unchanged for v1/v2 deployments.
+        // fires). When absent, the descriptor is `null` and the thin shim's
+        // jsDependencyPaths keeps the `${regularBundlePath}/core/core.entry.js`
+        // entry so core loads from THIS server as today — backward-compat at
+        // the consumption site, byte-for-byte unchanged for deployments
+        // without a registry-managed core.
         let mfeCoreJson = 'null';
-        // Capture the resolved v3 `core` descriptor for the
-        // jsDependencyPaths branch below — when set, the thin shim OMITS
-        // the legacy server-bundled core entry path because the orchestrator
-        // will load core from the CDN URL itself. The lazy `core.chunk.*.js`
-        // chunks stay on this server (`__osdPublicPath__.core` keeps the
-        // `${regularBundlePath}/core/` value below); only the entry script
-        // moves to CDN. This narrow scope matches Story 5 (and minimises
-        // blast radius — bundling all of core's static output is a future
-        // phase).
+        // Capture the resolved `core` descriptor for the jsDependencyPaths
+        // branch below — when set, the thin shim OMITS the server-bundled
+        // core entry path because the orchestrator will load core from the
+        // CDN URL itself. The lazy `core.chunk.*.js` chunks stay on this
+        // server (`__osdPublicPath__.core` keeps the `${regularBundlePath}/core/`
+        // value below); only the entry script moves to CDN. Moving the chunks
+        // too is a future refinement — bundling all of core's static output
+        // is out of scope for this narrow surface.
         let resolvedCore = null;
-        // Phase 16 Story 6: same shape, same posture for per-theme CSS
-        // bundles (`light` / `dark` / …). When the source registry is v3
-        // AND advertises a `themes` map, the boot manifest carries a
-        // `themes: Record<string, { url, integrity? }>` descriptor — and:
+        // Registry-managed per-theme CSS bundles (`light` / `dark` / …).
+        // When the source registry advertises a `themes` map, the boot
+        // manifest carries a `themes: Record<string, { url, integrity? }>`
+        // descriptor — and:
         //   - the HTML head's `<meta name="osd-mfe-themes">` (rendered by
         //     `rendering_service.tsx`) carries the resolved URLs so
         //     `startup.js` can pick the active theme (light/dark from
         //     localStorage) and `appendChild(<link rel=stylesheet>)` with
         //     SRI BEFORE `bootstrap.js` runs — no FOUC;
-        //   - the legacy `/ui/legacy_<name>_theme.css` route on this server
-        //     is REFUSED with 404 for any theme name the registry knows
-        //     (so a misconfigured browser can never silently fall back to a
+        //   - the `/ui/legacy_<name>_theme.css` route on this server is
+        //     REFUSED with 404 for any theme name the registry knows (so a
+        //     misconfigured browser can never silently fall back to a
         //     same-origin copy that the SRI gate wouldn't catch);
         //   - the bootstrap_mfe thin shim's `styleSheetPaths` OMITS the
         //     legacy theme CSS entry because startup.js already loaded it.
-        // When absent (v1/v2 registries, or v3 without the field), the
-        // descriptor is `null`, the META isn't emitted, the legacy
-        // `/ui/...` route serves as today, and the thin shim's
+        // When absent, the descriptor is `null`, the META isn't emitted,
+        // the `/ui/...` route serves as today, and the thin shim's
         // styleSheetPaths keeps the legacy theme CSS entry — byte-for-byte
         // unchanged backward-compat. The JSON form goes into the bootstrap
         // template (`__osdMfe__.themes` for the styleSheetPaths gate); the
         // resolved-object form is currently unused inline here (rendering
         // service handles the META injection), but kept for symmetry with
-        // Story 5's `resolvedCore` so a future refactor can lift both into
-        // a single resolved-manifest map.
+        // `resolvedCore` so a future refactor can lift both into a single
+        // resolved-manifest map.
         let mfeThemesJson = 'null';
-        // Phase 16 Story 7: same shape, same posture for the BASE
-        // `osd-ui-shared-deps.css` bundle (singular — one URL per
-        // registry; the per-theme variant CSS files in the same dist
-        // directory are out of scope, see schema_v3.ts). When the source
-        // registry is v3 AND advertises a `sharedDepsCss` top-level
-        // field, the boot manifest carries a `{ url, integrity? }`
-        // descriptor — and the bootstrap_mfe thin shim's
-        // `styleSheetPaths` uses THAT URL (object form, SRI pinned,
-        // cross-origin) instead of the legacy
+        // Registry-managed BASE `osd-ui-shared-deps.css` bundle (singular —
+        // one URL per registry; per-theme variant CSS files in the same dist
+        // directory are out of scope, see schema.ts). When the source
+        // registry advertises a `sharedDepsCss` top-level field, the boot
+        // manifest carries a `{ url, integrity? }` descriptor — and the
+        // bootstrap_mfe thin shim's `styleSheetPaths` uses THAT URL (object
+        // form, SRI pinned, cross-origin) instead of the legacy
         // `${regularBundlePath}/osd-ui-shared-deps/osd-ui-shared-deps.css`
         // same-origin path. The legacy bundle route also 404s the
         // file via `optimize_mixin.ts`'s `mfeSharedDepsCssRefuser` to
@@ -299,29 +294,29 @@ export function uiRenderMixin(osdServer, server, config) {
         const mfeRegistryUrl = config.get('opensearchDashboards.mfe.registryUrl');
         const mfeSharedDepsUrl = config.get('opensearchDashboards.mfe.sharedDepsUrl');
         const mfeBootstrapUrl = config.get('opensearchDashboards.mfe.bootstrapUrl');
-        // Phase 14 Story 1: telemetry sink URL (mfe-gated server config; empty
-        // default = OFF / silent no-op — see opensearch_dashboards_config.ts).
-        // Stringify to keep the template safe even if the value contains a
-        // single quote (would break the surrounding `'…'` literal). Empty =>
-        // the browser dispatcher is a no-op; never POSTs, never logs.
+        // Telemetry sink URL (mfe-gated server config; empty default = OFF /
+        // silent no-op — see opensearch_dashboards_config.ts). Stringify to
+        // keep the template safe even if the value contains a single quote
+        // (would break the surrounding `'…'` literal). Empty => the browser
+        // dispatcher is a no-op; never POSTs, never logs.
         const mfeTelemetryEndpoint = JSON.stringify(
           config.get('opensearchDashboards.mfe.telemetryEndpoint') || ''
         );
 
-        // Non-production security GATE for dev URL-overrides (Phase 5, §7). An
-        // explicit `mfe.allowOverride` always wins; when unset it defaults to the
-        // server's dev mode (dev => true, prod => false) so arbitrary remote code
-        // can never load via an override in production. Uses the shared core
-        // resolveAllowOverride() helper (mirrors the canonical one in @osd/mfe,
-        // which is not a dependency of src/).
+        // Non-production security GATE for dev URL-overrides. An explicit
+        // `mfe.allowOverride` always wins; when unset it defaults to the
+        // server's dev mode (dev => true, prod => false) so arbitrary remote
+        // code can never load via an override in production. Uses the shared
+        // core resolveAllowOverride() helper (mirrors the canonical one in
+        // @osd/mfe, which is not a dependency of src/).
         const mfeAllowOverride = resolveAllowOverride(
           config.get('opensearchDashboards.mfe.allowOverride'),
           !!server.newPlatform.env.mode.dev
         );
 
-        // Phase 9 version-compatibility contract. Resolve the EFFECTIVE env-keyed
-        // compat POLICY (onIncompatible/onMissing default dev=block|warn-load vs
-        // prod=skip; strictShared default true; explicit config always wins) and
+        // Compat contract. Resolve the EFFECTIVE env-keyed compat POLICY
+        // (onIncompatible/onMissing default dev=block|warn-load vs prod=skip;
+        // strictShared default true; explicit config always wins) and
         // the running HOST environment (OSD core version + the shared-singleton
         // ranges the host provides), and inject BOTH into the page so the browser
         // bootstrap can classify each remote against the host and enforce the
@@ -340,15 +335,16 @@ export function uiRenderMixin(osdServer, server, config) {
           resolveMfeHostEnv(server.newPlatform.env.packageInfo.version, fromRoot('.'))
         );
 
-        // Phase 12 Story 4: registry AUTHENTICITY. When a verification key is
-        // configured, inject the host-held verification material so the browser
-        // bootstrap REQUIRES the fetched registry to carry a valid signature and
-        // fails closed otherwise. The key is delivered by THIS trusted OSD origin
-        // (not the CDN that serves the registry), which is what defeats a
-        // compromised-CDN/MITM serving altered registry bytes. When no key is
-        // configured (the default), inject `null` so signing stays OFF (the registry
-        // loads unverified, backward compatible). This whole block lives inside the
-        // mfe-enabled branch, so the no-flag served HTML is byte-for-byte unchanged.
+        // Registry AUTHENTICITY. When a verification key is configured,
+        // inject the host-held verification material so the browser
+        // bootstrap REQUIRES the fetched registry to carry a valid signature
+        // and fails closed otherwise. The key is delivered by THIS trusted
+        // OSD origin (not the CDN that serves the registry), which is what
+        // defeats a compromised-CDN/MITM serving altered registry bytes.
+        // When no key is configured (the default), inject `null` so signing
+        // stays OFF (the registry loads unverified, backward compatible).
+        // This whole block lives inside the mfe-enabled branch, so the
+        // no-flag served HTML is byte-for-byte unchanged.
         const mfeRegistrySignature = config.get('opensearchDashboards.mfe.registrySignature');
         const mfeRegistryVerification =
           mfeRegistrySignature && mfeRegistrySignature.verificationKey
@@ -372,25 +368,23 @@ export function uiRenderMixin(osdServer, server, config) {
 
         // Only core is loaded locally; plugin remotes are resolved from the registry at
         // runtime. shared-deps for the share scope are loaded by the MFE bootstrap.
-        // Phase 16 Story 5: when the registry advertises a `core` descriptor,
-        // the orchestrator loads `core.entry.js` from the CDN URL with SRI
-        // BEFORE invoking core boot, so the thin shim MUST NOT preload the
-        // legacy server-bundled core entry (otherwise the browser would
-        // double-fetch and the SRI-pinned CDN bytes would be racing the
-        // server bytes). On v1/v2 registries (and v3 without `core`) the
-        // legacy path is preserved verbatim — same byte-for-byte boot as
-        // pre-Story-5.
+        // When the registry advertises a `core` descriptor, the orchestrator loads
+        // `core.entry.js` from the CDN URL with SRI BEFORE invoking core boot, so
+        // the thin shim MUST NOT preload the server-bundled core entry (otherwise
+        // the browser would double-fetch and the SRI-pinned CDN bytes would race
+        // the server bytes). Without a registry-managed core the path is preserved
+        // verbatim — same byte-for-byte boot as before this global-asset was added.
         const mfeJsDependencyPaths = resolvedCore
           ? []
           : [`${regularBundlePath}/core/core.entry.js`];
 
         // The publicPathMap is unchanged: when `core.entry.js` executes, it
         // sets `__webpack_public_path__ = window.__osdPublicPath__.core` so
-        // its lazy chunks (`core.chunk.*.js`) load via that base. Story 5
+        // its lazy chunks (`core.chunk.*.js`) load via that base. This
         // moves ONLY the entry script to the CDN; the lazy chunks stay on
         // THIS server, so the public-path base keeps pointing at
         // `${regularBundlePath}/core/`. (Moving the chunks too is a future
-        // phase — out of scope per Story 5 description.)
+        // refinement — out of scope for this narrow surface.)
         const mfePublicPathMap = JSON.stringify({
           core: `${regularBundlePath}/core/`,
           'osd-ui-shared-deps': `${regularBundlePath}/osd-ui-shared-deps/`,
@@ -414,9 +408,9 @@ export function uiRenderMixin(osdServer, server, config) {
               mfeCompatPolicy,
               mfeHostEnv,
               mfeRegistryVerification,
-              // Phase 14 Story 1: telemetry sink + the two dimensions the
-              // browser stamps on every emitted event. `mfeTelemetryEndpoint`
-              // is JSON-stringified above (empty = OFF). `mfeCustomerId` is
+              // Telemetry sink + the two dimensions the browser stamps on
+              // every emitted event. `mfeTelemetryEndpoint` is
+              // JSON-stringified above (empty = OFF). `mfeCustomerId` is
               // the resolved tenant id; `mfeUserBucket` the cookie-derived
               // 0..99 canary bucket. Both flow into __osdMfe__ in the template
               // so the bootstrap can stamp them on every load event without
@@ -424,29 +418,28 @@ export function uiRenderMixin(osdServer, server, config) {
               mfeTelemetryEndpoint,
               mfeCustomerId: JSON.stringify(String(mfeCustomerId)),
               mfeUserBucket,
-              // Phase 13 Story 3: server-resolved boot manifest. When non-`null`
-              // the bootstrap consumes this directly and skips the registry HTTP
-              // fetch (and the registry signature verify) entirely.
+              // Server-resolved boot manifest. When non-`null` the bootstrap
+              // consumes this directly and skips the registry HTTP fetch (and
+              // the registry signature verify) entirely.
               mfeBootManifest: mfeBootManifestJson,
-              // Phase 16 Story 3: v3-only orchestrator descriptor. When
-              // non-`null` the thin shim loads the orchestrator from
+              // Registry-managed orchestrator descriptor. When non-`null` the
+              // thin shim loads the orchestrator from
               // `__osdMfe__.orchestrator.url` (with `.integrity` for SRI);
-              // otherwise it falls back to the server-config
-              // `mfeBootstrapUrl` (backward-compat for v1/v2 registries
-              // and v3 registries without the field set).
+              // otherwise it falls back to the server-config `mfeBootstrapUrl`
+              // (backward-compat when the registry has no `orchestrator`
+              // field).
               mfeOrchestrator: mfeOrchestratorJson,
-              // Phase 16 Story 5: v3-only core descriptor. When non-`null`,
-              // the MFE orchestrator (bootstrap_mfe.ts) loads
-              // `core.entry.js` from `__osdMfe__.core.url` (with
-              // `.integrity` for SRI) BEFORE invoking core boot — a
-              // tampered core fails closed (the orchestrator never calls
-              // `invokeCoreBootstrap`, the failure surface fires). On
-              // v1/v2 (or v3 without `core`) this stays `null` and the
-              // thin shim preloads `${regularBundlePath}/core/core.entry.js`
-              // from THIS server exactly as today.
+              // Registry-managed core descriptor. When non-`null`, the MFE
+              // orchestrator (bootstrap_mfe.ts) loads `core.entry.js` from
+              // `__osdMfe__.core.url` (with `.integrity` for SRI) BEFORE
+              // invoking core boot — a tampered core fails closed (the
+              // orchestrator never calls `invokeCoreBootstrap`, the failure
+              // surface fires). When absent this stays `null` and the thin
+              // shim preloads `${regularBundlePath}/core/core.entry.js` from
+              // THIS server exactly as before.
               mfeCore: mfeCoreJson,
-              // Phase 16 Story 6: v3-only per-theme CSS bundle descriptor.
-              // When non-`null` (a map keyed by `light` / `dark` / …),
+              // Registry-managed per-theme CSS bundle descriptor. When
+              // non-`null` (a map keyed by `light` / `dark` / …),
               // `startup.js` has ALREADY loaded the active theme from
               // `__osdMfe__.themes[themeMode].url` (with SRI) via the
               // `<meta name="osd-mfe-themes">` tag injected in the HTML
@@ -455,21 +448,19 @@ export function uiRenderMixin(osdServer, server, config) {
               // `/ui/legacy_<themeMode>_theme.css` entry to avoid a
               // double-fetch — the `__osdMfe__.themes` value is the
               // server's authoritative signal that the theme is already in
-              // <head>. On v1/v2 (or v3 without `themes`) this stays
-              // `null` and the thin shim keeps the legacy entry — byte-for-
-              // byte unchanged backward-compat.
+              // <head>. When absent this stays `null` and the thin shim
+              // keeps the legacy entry — byte-for-byte unchanged
+              // backward-compat.
               mfeThemes: mfeThemesJson,
-              // Phase 16 Story 7: v3-only base `osd-ui-shared-deps.css`
-              // descriptor (singular — one URL per registry). When
-              // non-`null`, the bootstrap_mfe thin shim's
-              // `styleSheetPaths` uses `__osdMfe__.sharedDepsCss.url`
-              // (object form, SRI pinned, `crossorigin="anonymous"`)
-              // instead of the legacy
+              // Registry-managed base `osd-ui-shared-deps.css` descriptor
+              // (singular — one URL per registry). When non-`null`, the
+              // bootstrap_mfe thin shim's `styleSheetPaths` uses
+              // `__osdMfe__.sharedDepsCss.url` (object form, SRI pinned,
+              // `crossorigin="anonymous"`) instead of the
               // `${regularBundlePath}/osd-ui-shared-deps/osd-ui-shared-deps.css`
-              // same-origin path, and the legacy bundle route 404s the
-              // same file. On v1/v2 (or v3 without `sharedDepsCss`)
-              // this stays `null` and the thin shim keeps the legacy
-              // path — byte-for-byte unchanged backward-compat.
+              // same-origin path, and the bundle route 404s the same file.
+              // When absent this stays `null` and the thin shim keeps the
+              // same-origin path — byte-for-byte unchanged backward-compat.
               mfeSharedDepsCss: mfeSharedDepsCssJson,
             },
           },
@@ -686,13 +677,14 @@ export function uiRenderMixin(osdServer, server, config) {
       nonce,
     });
 
-    // Phase 5 (docs/01-MFE-DESIGN.md §6/§7): in MFE mode, widen the served CSP
-    // script-src/worker-src to the configured MFE origins (the CDN serving plugin
-    // remoteEntry.js + chunks, plus the bootstrap/shared-deps script origins; and,
-    // ONLY in non-prod when the allowOverride gate is on, the dev-override origins)
-    // so the cross-origin MFE scripts can load. This is the SHIPPED-config
-    // replacement for the old harness temp-yaml csp.rules hack. Without --mfe
-    // (mfe.enabled false) the base rules/header are byte-for-byte unchanged.
+    // In MFE mode, widen the served CSP script-src/worker-src to the
+    // configured MFE origins (the CDN serving plugin remoteEntry.js + chunks,
+    // plus the bootstrap/shared-deps script origins; and, ONLY in non-prod
+    // when the allowOverride gate is on, the dev-override origins) so the
+    // cross-origin MFE scripts can load. This is the SHIPPED-config
+    // replacement for the older harness temp-yaml csp.rules hack. Without
+    // --mfe (mfe.enabled false) the base rules/header are byte-for-byte
+    // unchanged.
     const mfeCspEnabled = !!config.get('opensearchDashboards.mfe.enabled');
     let cspRules = http.csp.rules;
     let cspHeader = http.csp.header;

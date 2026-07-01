@@ -81,10 +81,10 @@ describe('buildDeployPlan', () => {
   });
 
   it('computes SRI integrity over the UNCOMPRESSED remoteEntry.js bytes (not the gzip temp)', () => {
-    // Phase 12 Story 1: SRI is verified by the browser against the DECODED body,
-    // so integrity MUST be sha384 of the original bytes — never the gzipped
-    // upload. Prove the plan's integrity equals the hash of the pre-gzip artifact
-    // and is DISTINCT from the hash of the gzipped bytes.
+    // SRI is verified by the browser against the DECODED body, so integrity
+    // MUST be sha384 of the original bytes — never the gzipped upload. Prove
+    // the plan's integrity equals the hash of the pre-gzip artifact and is
+    // DISTINCT from the hash of the gzipped bytes.
     const root = makeFixtureRepo({ inspector: { 'remoteEntry.js': 'INSPECTOR' } });
 
     const plan = buildDeployPlan({ repoRoot: root, cdn: CDN });

@@ -10,8 +10,7 @@
  */
 
 /**
- * Build the IMMUTABLE, versioned deploy plan for the publish-only CDN deploy
- * (Phase 4, Story 1).
+ * Build the IMMUTABLE, versioned deploy plan for the publish-only CDN deploy.
  *
  * This is a PURE library function: it reads the built artifacts under
  * `target/mfe/<id>/` and `packages/osd-ui-shared-deps/target/`, content-addresses
@@ -26,9 +25,9 @@
  * entry can point straight at it. Artifacts therefore land at immutable paths
  * `<prefix>/<id>/<contentHash>/...` and are never overwritten in place; the
  * shared-deps bundle is likewise content-addressed by its entry file and lands
- * at `<prefix>/shared-deps/<contentHash>/...` (Phase 7 Story 4 — so a compressed
- * (re)publish ADDS a fresh immutable path rather than overwriting the in-use
- * uncompressed one). See docs/01-MFE-DESIGN.md §6.
+ * at `<prefix>/shared-deps/<contentHash>/...` (pre-compressed transit — so a
+ * compressed (re)publish ADDS a fresh immutable path rather than overwriting the
+ * in-use uncompressed one). See `packages/osd-mfe/README.md`.
  */
 
 import { createHash } from 'crypto';
@@ -76,12 +75,12 @@ export interface RemotePlan {
   cdnUrl: string;
   /**
    * Subresource Integrity hash (`sha384-<base64>`) of the UNCOMPRESSED
-   * `remoteEntry.js` bytes (Phase 12 Story 1). Computed over the ORIGINAL
-   * artifact — NOT the gzipped transit temp the deploy uploads — because the
-   * browser verifies SRI against the decoded response body. Carried into the
-   * deploy manifest so the registry writer can stamp a correct integrity onto
-   * every entry, including per-plugin (`--merge`) deploys. Identical to the
-   * value the full-regen generator computes for the same bytes.
+   * `remoteEntry.js` bytes. Computed over the ORIGINAL artifact — NOT the
+   * gzipped transit temp the deploy uploads — because the browser verifies
+   * SRI against the decoded response body. Carried into the deploy manifest
+   * so the registry writer can stamp a correct integrity onto every entry,
+   * including per-plugin (`--merge`) deploys. Identical to the value the
+   * full-regen generator computes for the same bytes.
    */
   integrity: string;
   /** Every file under `localDir`, mapped to its S3 key. */
@@ -114,8 +113,8 @@ export interface DeployPlan {
   remotes: RemotePlan[];
   /**
    * The shared-deps publish plan, or `undefined` when shared-deps were
-   * intentionally excluded (Phase 10 Story 1: a single-plugin publish skips
-   * shared-deps by default — see {@link BuildDeployPlanOptions.includeSharedDeps}).
+   * intentionally excluded (a single-plugin publish skips shared-deps by
+   * default — see {@link BuildDeployPlanOptions.includeSharedDeps}).
    */
   sharedDeps?: SharedDepsPlan;
 }
@@ -133,15 +132,15 @@ export interface BuildDeployPlanOptions {
   /** Built shared-deps directory; defaults to `<repoRoot>/packages/osd-ui-shared-deps/target`. */
   sharedDepsDir?: string;
   /**
-   * Phase 10 Story 1 — single-plugin publish. When set, the plan includes ONLY
-   * this plugin's content-addressed remote (the other built remotes are
-   * ignored). Throws when the plugin has no built remote under `targetMfeDir`.
+   * Single-plugin publish. When set, the plan includes ONLY this plugin's
+   * content-addressed remote (the other built remotes are ignored). Throws
+   * when the plugin has no built remote under `targetMfeDir`.
    */
   pluginId?: string;
   /**
-   * Phase 10 Story 1 — whether to include the shared-deps publish plan. Defaults
-   * to `true` so the full deploy is unchanged. A single-plugin publish passes
-   * `false` so it never touches shared-deps unless explicitly asked.
+   * Whether to include the shared-deps publish plan. Defaults to `true` so
+   * the full deploy is unchanged. A single-plugin publish passes `false` so
+   * it never touches shared-deps unless explicitly asked.
    */
   includeSharedDeps?: boolean;
 }
@@ -241,8 +240,8 @@ export function buildDeployPlan(options: BuildDeployPlanOptions): DeployPlan {
     );
   }
 
-  // Phase 10 Story 1 — single-plugin publish: narrow the plan to exactly one
-  // built remote. The plugin must already be built (build_mfe --plugin <id>).
+  // Single-plugin publish: narrow the plan to exactly one built remote. The
+  // plugin must already be built (build_mfe --plugin <id>).
   let selectedIds = ids;
   if (options.pluginId !== undefined) {
     if (!ids.includes(options.pluginId)) {
@@ -263,9 +262,9 @@ export function buildDeployPlan(options: BuildDeployPlanOptions): DeployPlan {
     // sha256[:12] — identical to registry/generate.ts so the published path is
     // content-addressed and the registry entry can point straight at it.
     const contentHash = createHash('sha256').update(bytes).digest('hex').slice(0, 12);
-    // SRI over the SAME uncompressed bytes (Phase 12 Story 1). The deploy uploads
-    // a gzipped copy, but SRI is verified against the decoded body, so integrity
-    // is hashed here — over the original remoteEntry.js — never the gzip temp.
+    // SRI over the SAME uncompressed bytes. The deploy uploads a gzipped copy,
+    // but SRI is verified against the decoded body, so integrity is hashed
+    // here — over the original remoteEntry.js — never the gzip temp.
     const integrity = computeIntegrity(bytes);
     const keyPrefix = joinKey(cdn.keyPrefix, id, contentHash);
     const remoteEntryKey = joinKey(keyPrefix, REMOTE_ENTRY_FILE);
@@ -283,8 +282,8 @@ export function buildDeployPlan(options: BuildDeployPlanOptions): DeployPlan {
     };
   });
 
-  // Phase 10 Story 1 — a single-plugin publish skips shared-deps by default
-  // (includeSharedDeps=false); the full deploy (default true) is unchanged.
+  // A single-plugin publish skips shared-deps by default (includeSharedDeps=false);
+  // the full deploy (default true) is unchanged.
   const includeSharedDeps = options.includeSharedDeps ?? true;
   if (!includeSharedDeps) {
     return { osdVersion, cdn, remotes, sharedDeps: undefined };

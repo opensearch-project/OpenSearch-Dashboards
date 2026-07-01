@@ -10,12 +10,13 @@
  */
 
 /**
- * Per-plugin LOAD TELEMETRY (Phase 14, Story 1) — the structured event shape
- * emitted by the browser bootstrap for every remote it attempts to load, plus
- * the FIRE-AND-FORGET sink that POSTs each event to the configured telemetry
+ * Per-plugin LOAD TELEMETRY — the structured event shape emitted by the
+ * browser bootstrap for every remote it attempts to load, plus the
+ * FIRE-AND-FORGET sink that POSTs each event to the configured telemetry
  * endpoint.
  *
- * LOCKED architectural decisions (prd.json design_spec — DO NOT relax):
+ * LOCKED architectural decisions (see `packages/osd-mfe/README.md` — DO NOT
+ * relax):
  *
  * 1. Fire-and-forget. The bootstrap NEVER awaits this dispatcher; the
  *    dispatcher NEVER throws. A misconfigured / absent / unreachable endpoint
@@ -49,9 +50,9 @@
 
 /**
  * Outcome status for one remote load attempt. Mirrors the locked event-shape
- * enum (prd.json design_spec §3) and the three branches the bootstrap takes
- * per remote: a successful load, a failed load, or a load that was never
- * attempted (e.g. a Phase 9 compat-skip / a Phase 12 registry-trust skip).
+ * enum and the three branches the bootstrap takes per remote: a successful
+ * load, a failed load, or a load that was never attempted (e.g. a compat-skip
+ * / a registry-trust skip).
  */
 export type TelemetryStatus = 'success' | 'failure' | 'skipped';
 
@@ -59,15 +60,15 @@ export type TelemetryStatus = 'success' | 'failure' | 'skipped';
  * Cause taxonomy attached to a non-success event. Open-ended at the value
  * level (string-literal union — extensible by adding members), but every
  * caller MUST map a known cause to one of these so downstream dashboards can
- * partition cleanly. The five members cover every Phase 4/9/12/13 failure
- * source the bootstrap routes today:
+ * partition cleanly. The five members cover every failure source the
+ * bootstrap routes today:
  *
  *  - `sri-mismatch`: the browser refused to execute a remoteEntry whose bytes
- *    did not match the registry-pinned SRI hash (Phase 12, Story 2 — handled
- *    fail-closed in dev/block, prod/skip; either way the remote did not run).
+ *    did not match the registry-pinned SRI hash (handled fail-closed in
+ *    dev/block, prod/skip; either way the remote did not run).
  *  - `network`: a remote whose bytes could not be fetched at all
  *    (no integrity claim, just an unreachable script).
- *  - `compat-reject`: the Phase 9 host-version classifier said the remote is
+ *  - `compat-reject`: the host-version classifier said the remote is
  *    incompatible / unknown and the resolved compat policy decided to skip
  *    (or block; the page-block path emits an offender event per remote).
  *  - `mf-runtime-error`: a Module-Federation-level failure AFTER the script
@@ -85,11 +86,10 @@ export type TelemetryErrorClass =
   | 'unknown';
 
 /**
- * The locked event-shape (prd.json design_spec §3). Every field is a
- * primitive; `errorClass` is optional and present ONLY on non-success events.
- * `bucket` (0..99) and `customerId` are stamped from the server-injected
- * dimensions so events from a single client are pre-partitioned for
- * canary-vs-baseline split downstream.
+ * The locked event-shape. Every field is a primitive; `errorClass` is
+ * optional and present ONLY on non-success events. `bucket` (0..99) and
+ * `customerId` are stamped from the server-injected dimensions so events from
+ * a single client are pre-partitioned for canary-vs-baseline split downstream.
  */
 export interface MfeLoadTelemetryEvent {
   /** Plugin id (matches the registry key + the boot-manifest `id`). */
@@ -116,13 +116,13 @@ export interface MfeLoadTelemetryEvent {
   errorClass?: TelemetryErrorClass;
   /**
    * Stable canary-bucket assignment for the requesting client (0..99). Comes
-   * from the server-side cookie hash (Phase 13 `bucketFromCookie`); the same
-   * value `verify_phase13.js` case F documents.
+   * from the server-side cookie hash (`bucketFromCookie`); the same
+   * value the dual-path CI gate documents.
    */
   bucket: number;
   /**
    * Tenant identifier. Comes from `opensearchDashboards.mfe.customerId` in
-   * server config (Phase 13 — `'default'` until real AuthN). Stamped here so
+   * server config (`'default'` until real AuthN). Stamped here so
    * downstream consumers can partition without joining to another stream.
    */
   customerId: string;

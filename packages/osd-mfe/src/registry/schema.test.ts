@@ -318,7 +318,7 @@ describe('Registry (flat in-memory) — validate()', () => {
     expect(result.errors.some((e) => e.includes('minCoreVersion'))).toBe(true);
   });
 
-  describe('builtAgainst + compat metadata (Phase 9)', () => {
+  describe('builtAgainst + compat metadata', () => {
     it('accepts an entry with well-formed builtAgainst + compat', () => {
       const registry = flatRegistry();
       registry.mfes.inspector.builtAgainst = {

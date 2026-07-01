@@ -10,13 +10,13 @@
  */
 
 /**
- * Registry generation: scan the Phase 1 Module Federation artifacts under
+ * Registry generation: scan the built Module Federation artifacts under
  * `target/mfe/<id>/remoteEntry.js` and build a {@link Registry} whose versions
  * are DATA derived from the artifacts (`<osdVersion>+<contentHash>`), never
- * hardcoded. See docs/01-MFE-DESIGN.md §5.
+ * hardcoded. See `packages/osd-mfe/README.md` for the dynamic-registry design.
  *
- * This is a pure library function (no CLI, no process.exit). Story 4 wraps it in
- * `scripts/update_registry.js`; Story 1 uses it to produce the seed
+ * This is a pure library function (no CLI, no process.exit). The CLI wrapper
+ * `scripts/update_registry.js` invokes it to produce/refresh the seed
  * `registry/registry.json`. It only READS the built artifacts and RETURNS data —
  * it does not touch the registry file or any OSD source.
  */
@@ -37,12 +37,11 @@ const EXPOSED_MODULE = './public';
  *
  * The browser verifies SRI against the DECODED response body, so the hash MUST
  * be computed over the ORIGINAL (pre-gzip) artifact bytes — never the gzipped
- * transit temp the deploy uploads (see docs/15-PHASE12-RESULTS.md threat model).
- * This is the single source of truth for SRI computation, shared by the
- * full-regen generator ({@link buildEntry}) and the publish-time deploy plan
- * (`deploy/plan.ts`, Phase 12 Story 1) so both produce IDENTICAL integrity for
- * the same bytes — the canonical registry then carries a correct integrity for
- * every entry, including per-plugin (`--plugin`/`--merge`) deploys.
+ * transit temp the deploy uploads. This is the single source of truth for SRI
+ * computation, shared by the full-regen generator ({@link buildEntry}) and the
+ * publish-time deploy plan (`deploy/plan.ts`) so both produce IDENTICAL
+ * integrity for the same bytes — the canonical registry then carries a correct
+ * integrity for every entry, including per-plugin (`--plugin`/`--merge`) deploys.
  *
  * @param bytes the uncompressed artifact bytes (e.g. `remoteEntry.js`)
  * @returns the SRI string `sha384-<base64-digest>`
@@ -153,7 +152,7 @@ export function generateRegistry(options: GenerateRegistryOptions): Registry {
     );
   }
 
-  // Phase 9 compatibility contract: every remote is built from one tree, so the
+  // Compat contract: every remote is built from one tree, so the
   // builtAgainst/compat metadata is identical for every entry — compute it once
   // (reusing the already-resolved osdVersion) and stamp it onto each entry.
   const { builtAgainst, compat } = computeCompatMetadata(repoRoot, osdVersion);

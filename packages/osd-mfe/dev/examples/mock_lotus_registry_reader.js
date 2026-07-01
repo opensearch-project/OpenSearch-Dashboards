@@ -214,8 +214,8 @@ class LotusLikeRegistryReader /* implements RegistryReader */ {
 //   canary-corp → canary), and validates the produced manifest against the
 //   REAL `assertValidBootManifest` from `packages/osd-mfe/src/registry` so a
 //   future shape change to BootManifest surfaces here as a hard failure
-//   (Story 7/8 of the schema-collapse loop — schema is now the SINGLE source
-//   of truth for the validation surface).
+//   (the unified schema is the SINGLE source of truth for the validation
+//   surface).
 // ---------------------------------------------------------------------------
 
 async function main() {

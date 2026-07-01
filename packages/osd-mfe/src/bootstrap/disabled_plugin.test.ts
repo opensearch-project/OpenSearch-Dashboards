@@ -163,7 +163,7 @@ describe('createDisabledPluginModuleWithReason — plugin_reader contract', () =
     expect(typeof instance.stop).toBe('function');
 
     // setup with a missing core (no application) and start return empty contracts
-    // and never throw — the Phase 4 invariant.
+    // and never throw — the single-failure-isolation invariant.
     expect(() => instance.setup(undefined)).not.toThrow();
     expect(instance.setup(undefined)).toEqual({});
     expect(instance.start()).toEqual({});
@@ -208,9 +208,9 @@ describe('createDisabledPluginModuleWithReason — degraded app stub registratio
     expect(calls).toHaveLength(1);
     expect(calls[0].id).toBe('inspector');
     expect(calls[0].title).toBe('inspector (unavailable)');
-    // 3 = AppNavLinkStatus.hidden (asserted matches the OSD enum below). Story 2
-    // spec: "NOT a banner, NOT a nav-bar element" — the hidden status keeps the
-    // user from seeing this app in the side nav.
+    // 3 = AppNavLinkStatus.hidden (asserted matches the OSD enum below). The
+    // "NOT a banner, NOT a nav-bar element" contract: the hidden status keeps
+    // the user from seeing this app in the side nav.
     expect(calls[0].navLinkStatus).toBe(3);
   });
 
@@ -242,7 +242,7 @@ describe('createDisabledPluginModuleWithReason — degraded app stub registratio
     }
   });
 
-  it('silently no-ops when core has no application (preserving Phase 4 invariant)', () => {
+  it('silently no-ops when core has no application (preserving the single-failure-isolation invariant)', () => {
     const instance = (createDisabledPluginModuleWithReason(record()).plugin() as unknown) as {
       setup: (c: unknown) => unknown;
     };

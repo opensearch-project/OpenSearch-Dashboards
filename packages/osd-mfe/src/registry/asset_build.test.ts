@@ -10,7 +10,7 @@
  */
 
 /**
- * Tests for the v3 asset build/staging pipeline (Phase 16 Story 2).
+ * Tests for the v3 asset build/staging pipeline (global asset staging).
  *
  * Coverage:
  *  - stageAsset for each kind (core, orchestrator, theme, shared-deps-css):

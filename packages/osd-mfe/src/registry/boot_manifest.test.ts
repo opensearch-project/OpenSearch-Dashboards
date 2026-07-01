@@ -52,7 +52,7 @@ describe('boot manifest — validateBootManifest() acceptance', () => {
     expect(validateBootManifest(m).valid).toBe(true);
   });
 
-  it('accepts an entry with a well-formed compat block (Phase 9 carry-forward)', () => {
+  it('accepts an entry with a well-formed compat block (compat carry-forward)', () => {
     const m = validManifest();
     m.mfes[0].compat = { minCoreVersion: '3.5.0', compatibleCoreRange: '3.5.x' };
     expect(validateBootManifest(m).valid).toBe(true);

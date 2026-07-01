@@ -10,11 +10,11 @@
  */
 
 /**
- * Public surface of the browser MFE bootstrap (Phase 3, Story 3).
+ * Public surface of the browser MFE bootstrap.
  *
  * This is the BROWSER entry for MFE mode and is intentionally NOT re-exported
  * from the package's node `src/index.ts` (which serves the build/registry CLIs).
- * The Phase 3 server render branch loads this as a script in `--mfe` mode only.
+ * The server render branch loads this as a script in `--mfe` mode only.
  */
 
 export {

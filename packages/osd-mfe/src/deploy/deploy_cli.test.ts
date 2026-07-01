@@ -162,7 +162,7 @@ describe('runDeployCli real publish', () => {
     expect(cps[0].args).toEqual(
       expect.arrayContaining(['s3', 'cp', '--recursive', '--content-encoding', 'gzip', '--region'])
     );
-    // every artifact upload is marked gzip (pre-compressed transit, Phase 7 Story 4)
+    // every artifact upload is marked gzip (pre-compressed transit)
     expect(cps.every((c) => c.args.includes('--content-encoding') && c.args.includes('gzip'))).toBe(
       true
     );
@@ -204,7 +204,7 @@ describe('runDeployCli real publish', () => {
     expect(manifest.mfes.inspector.cdnUrl).toMatch(
       /^https:\/\/cdn\.example\.net\/mfe\/inspector\/[0-9a-f]{12}\/remoteEntry\.js$/
     );
-    // Phase 12 Story 1: the manifest carries SRI integrity computed over the
+    // The manifest carries SRI integrity computed over the
     // UNCOMPRESSED remoteEntry.js bytes (the fixture's 'INSPECTOR'), NOT the
     // gzipped upload temp the deploy stages.
     expect(manifest.mfes.inspector.integrity).toBe(computeIntegrity(Buffer.from('INSPECTOR')));
@@ -322,7 +322,7 @@ describe('runDeployCli real publish', () => {
   });
 });
 
-/** Add a second built remote to an existing fixture repo (Phase 10 Story 1). */
+/** Add a second built remote to an existing fixture repo. */
 function addRemote(root: string, id: string, files: Record<string, string>): void {
   const dir = Path.join(root, 'target', 'mfe', id);
   Fs.mkdirSync(dir, { recursive: true });
@@ -331,7 +331,7 @@ function addRemote(root: string, id: string, files: Record<string, string>): voi
   }
 }
 
-describe('runDeployCli --plugin (Phase 10 Story 1: single-plugin publish)', () => {
+describe('runDeployCli --plugin (single-plugin publish)', () => {
   it('--plugin <id> --dry-run plans ONLY that remote, skips shared-deps, makes ZERO calls', () => {
     const { root, manifestPath, env } = makeFixtureRepo();
     // A second built remote that MUST be excluded from a single-plugin plan.
@@ -390,8 +390,8 @@ describe('runDeployCli --plugin (Phase 10 Story 1: single-plugin publish)', () =
     expect(manifest.mfes.inspector.cdnUrl).toMatch(
       /^https:\/\/cdn\.example\.net\/mfe\/inspector\/[0-9a-f]{12}\/remoteEntry\.js$/
     );
-    // Phase 12 Story 1: a single-plugin manifest also carries the uncompressed-
-    // bytes SRI, so a per-plugin (`--merge`) registration keeps a real integrity.
+    // A single-plugin manifest also carries the uncompressed-bytes SRI, so a
+    // per-plugin (`--merge`) registration keeps a real integrity.
     expect(manifest.mfes.inspector.integrity).toBe(computeIntegrity(Buffer.from('INSPECTOR')));
   });
 
@@ -467,7 +467,7 @@ describe('runDeployCli --plugin (Phase 10 Story 1: single-plugin publish)', () =
 });
 
 /* ------------------------------------------------------------------------- *
- * Phase 16 Story 2 — v3 asset deploy coverage
+ * Global asset (core/orchestrator/theme/shared-deps-css) deploy coverage
  * ------------------------------------------------------------------------- */
 
 import {
@@ -513,7 +513,7 @@ function writeV3StagedAsset(
   return manifestPath;
 }
 
-describe('runDeployCli() — v3 asset publish (Phase 16 Story 2)', () => {
+describe('runDeployCli() — global asset publish', () => {
   it('--core <manifest> --dry-run prints the intended key + makes ZERO AWS calls', () => {
     const { root, env, manifestPath } = makeFixtureRepo();
     const buildManifest = writeV3StagedAsset(root, 'core', 'corehash1234', 'core.entry.js');

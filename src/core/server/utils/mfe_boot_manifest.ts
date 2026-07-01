@@ -582,7 +582,8 @@ export function parseSingleCookie(
  *
  * Note: not `Secure` because the dev harness runs over HTTP. Production
  * deployments should serve OSD over HTTPS and add `Secure` via a proxy /
- * future config knob (out of scope for Phase 13).
+ * future config knob (out of scope for the current server-side per-tenant
+ * resolution work).
  */
 export function buildBucketSetCookie(name: string, value: string): string {
   const oneYearSeconds = 365 * 24 * 60 * 60;

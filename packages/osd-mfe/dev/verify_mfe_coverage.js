@@ -1,11 +1,11 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Phase 6, Story 3 — FULL COVERAGE proof for the OSD `--mfe` instance (:5602).
+ * FULL COVERAGE proof for the OSD `--mfe` instance (:5602).
  *
- * The Phase-3/4 render verifiers (verify_mfe_render.js / verify_mfe_cdn.js) prove
- * a representative subset: 4 core pages + ">=1 remoteEntry loaded". This script
- * proves the STRONGER, exhaustive Phase-6 claim required to close the project:
+ * The dual-path verifiers (verify_mfe_render.js / verify_mfe_cdn.js) prove
+ * a representative subset: 4 core pages + ">=1 remoteEntry loaded". This
+ * script proves the STRONGER, exhaustive claim:
  *
  *   1. ALL listed core app pages render in `--mfe` mode with ZERO page errors:
  *        home, discover, dashboards, visualize, dev_tools, management,

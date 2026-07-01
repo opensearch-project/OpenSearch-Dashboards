@@ -11,18 +11,19 @@
 
 /**
  * resolve(id, overrides) — registry → remote descriptor, with the dev-override
- * hook (Phase 2, Story 3).
+ * hook.
  *
  * Resolution always runs against the CURRENT registry obtained from a
  * {@link RegistryProvider} (mtime hot-reload / TTL poll lives in the provider),
  * so a version flip is a pure DATA edit reflected on the very next resolve — no
- * rebuild, no restart. See docs/01-MFE-DESIGN.md §5.
+ * rebuild, no restart. See `packages/osd-mfe/README.md` for the dynamic-registry
+ * design rationale.
  *
- * The dev-override hook (docs/01-MFE-DESIGN.md §7) lets a single plugin be
- * repointed to a different `remoteEntry` URL (`?mfe.<id>=<url>` / inspector
- * panel). Phase 5 parses the query param / UI and enforces the non-prod
- * security gate; this module only provides the resolution CONTRACT: given an
- * override map, the override URL wins over the registry URL.
+ * The dev-override hook lets a single plugin be repointed to a different
+ * `remoteEntry` URL (`?mfe.<id>=<url>` / inspector panel). The dev URL override
+ * gate parses the query param / UI and enforces the non-prod security gate;
+ * this module only provides the resolution CONTRACT: given an override map,
+ * the override URL wins over the registry URL.
  *
  * NOTE: this per-id, browser-side dev-override resolver was historically the
  * sole occupant of `./resolve.ts`. The schema-collapse loop repurposes
@@ -37,9 +38,9 @@ import { RegistryProvider } from './provider';
 /**
  * Dev-override map: plugin id → replacement `remoteEntry` URL.
  *
- * This is the Phase 5 hook point. Phase 5 builds this map from the
- * `?mfe.<id>=<url>` query param / inspector panel (and gates it to non-prod);
- * Story 3 only defines how an override participates in resolution.
+ * This is the hook point for the dev URL override gate. That gate builds this
+ * map from the `?mfe.<id>=<url>` query param / inspector panel (and gates it to
+ * non-prod); this module only defines how an override participates in resolution.
  */
 export type OverrideMap = Readonly<Record<string, string>>;
 
@@ -64,7 +65,7 @@ export interface ResolvedRemote {
    * hash) differ, so the registry `integrity` no longer applies and is dropped.
    */
   integrity?: string;
-  /** Where `remoteEntry` came from — used by the Phase 5 inspector panel. */
+  /** Where `remoteEntry` came from — used by the inspector panel. */
   source: 'registry' | 'override';
 }
 
@@ -100,7 +101,7 @@ function overrideUrlFor(id: string, overrides?: OverrideMap): string | undefined
  *
  * @param provider source of the current registry (read at call time)
  * @param id plugin id to resolve (e.g. `inspector`)
- * @param overrides optional dev-override map (Phase 5 hook); override URL wins
+ * @param overrides optional dev-override map (dev URL override hook); override URL wins
  * @returns the resolved remote descriptor, or `null` when `id` is not in the registry
  */
 export function resolve(

@@ -11,7 +11,7 @@
 
 import { resolveCompatPolicy } from './compat_policy';
 
-describe('resolveCompatPolicy (Phase 9 env-keyed compatibility policy defaults)', () => {
+describe('resolveCompatPolicy (env-keyed compat policy defaults)', () => {
   describe('env-keyed defaults when unset', () => {
     it('non-prod (dev=true): block incompatible, warn-load unknown, strict singletons', () => {
       expect(resolveCompatPolicy(undefined, true)).toEqual({

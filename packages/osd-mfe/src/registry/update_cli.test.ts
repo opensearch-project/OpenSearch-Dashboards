@@ -244,7 +244,7 @@ function manifestWith(
   };
 }
 
-/** A single-plugin deploy-manifest (Phase 10 `deploy_mfe --plugin <id>`). */
+/** A single-plugin deploy-manifest (per-plugin `deploy_mfe --plugin <id>`). */
 function singlePluginManifestWith(
   version: string,
   cdnUrl = 'https://cdn.example/mfe/inspector/newhash123456/remoteEntry.js',
@@ -1381,7 +1381,7 @@ describe('runUpdateCli — layered authoring (end-to-end)', () => {
 });
 
 /* ------------------------------------------------------------------------- *
- * runUpdateCli — global-asset writers (Phase 16 Story 2 inherited)
+ * runUpdateCli — global-asset writers
  * ------------------------------------------------------------------------- */
 
 describe('runUpdateCli — global-asset writers', () => {

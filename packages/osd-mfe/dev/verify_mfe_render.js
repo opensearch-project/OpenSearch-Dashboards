@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * MFE end-to-end render proof (Phase 3, Story 5).
+ * MFE end-to-end render proof.
  *
  * Loads the OSD `--mfe` instance on :5602 in headless Chromium (Playwright) and
  * proves the UI actually boots from Module Federation remotes served by the

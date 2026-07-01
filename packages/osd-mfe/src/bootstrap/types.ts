@@ -10,13 +10,14 @@
  */
 
 /**
- * Browser-runtime contracts for the MFE bootstrap (Phase 3, Story 3).
+ * Browser-runtime contracts for the MFE bootstrap.
  *
  * These types describe the globals the bootstrap touches at runtime — the
  * Module Federation share scope, a loaded remote container, the `__osdBundles__`
  * shim that `plugin_reader.ts` reads synchronously, and the shared-deps global —
  * so the bootstrap can be written and unit-tested without `any`/casts beyond a
- * single `window` narrowing. See docs/01-MFE-DESIGN.md §6.
+ * single `window` narrowing. See `packages/osd-mfe/README.md` for the boot
+ * pipeline.
  */
 
 /**

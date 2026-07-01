@@ -198,8 +198,9 @@ describe('buildOverrideMap (expand parsed overrides against the registry)', () =
 
 describe('resolveAllowOverride (the non-prod security gate default)', () => {
   it('defaults the gate OFF in production (unset config, dev=false)', () => {
-    // SECURITY: the crux of Phase 5 — with no explicit config, production must
-    // resolve to false so every override source is ignored.
+    // SECURITY: the crux of the dev URL override gate — with no explicit
+    // config, production must resolve to false so every override source is
+    // ignored.
     expect(resolveAllowOverride(undefined, false)).toBe(false);
   });
 

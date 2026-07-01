@@ -10,7 +10,7 @@
  */
 
 /**
- * `deploy_mfe` CLI logic (Phase 4, Story 1).
+ * `deploy_mfe` CLI logic.
  *
  * Publishes the built Module Federation remotes + the shared-deps bundle to the
  * PRE-PROVISIONED CDN (S3 bucket + CloudFront created separately by
@@ -29,14 +29,14 @@
  * It MUST NEVER create or mutate infra: the ONLY AWS subcommands it runs are
  * `aws s3api head-object` (read, immutability check) and `aws s3 cp --recursive`
  * (object upload). It never calls create-bucket, create-distribution,
- * put-bucket-policy or put-public-access-block. See docs/01-MFE-DESIGN.md §6.
+ * put-bucket-policy or put-public-access-block. See `packages/osd-mfe/README.md`.
  *
- * Phase 7 Story 4 — pre-compressed transit: before uploading, each artifact is
- * staged into a temp directory where every publishable file is gzip-compressed
- * (filenames preserved) and source maps (`*.map`) are EXCLUDED so they never
- * reach the public CDN. The staged tree is uploaded with `Content-Encoding:
- * gzip`, so CloudFront serves the already-compressed bytes through regardless of
- * its on-the-fly auto-compress size cap (this is what fixes the 27.8MB
+ * Pre-compressed transit: before uploading, each artifact is staged into a temp
+ * directory where every publishable file is gzip-compressed (filenames
+ * preserved) and source maps (`*.map`) are EXCLUDED so they never reach the
+ * public CDN. The staged tree is uploaded with `Content-Encoding: gzip`, so
+ * CloudFront serves the already-compressed bytes through regardless of its
+ * on-the-fly auto-compress size cap (this is what fixes the 27.8MB
  * shared-deps). `aws s3 cp` still infers each object's Content-Type from its
  * preserved filename extension.
  */
@@ -56,10 +56,10 @@ export const DEPLOY_MANIFEST_SCHEMA_VERSION = 1;
 
 /**
  * File extensions that are NEVER published to the public CDN. Source maps stay
- * private (Phase 7 Story 4 / docs §6): they would expose original sources and
- * needlessly bloat the bucket. The `--dist` build emits no maps for the remotes,
- * but the optimizer-built shared-deps dir still contains `.map` siblings, so the
- * upload layer enforces the exclusion regardless of how the inputs were built.
+ * private: they would expose original sources and needlessly bloat the bucket.
+ * The `--dist` build emits no maps for the remotes, but the optimizer-built
+ * shared-deps dir still contains `.map` siblings, so the upload layer enforces
+ * the exclusion regardless of how the inputs were built.
  */
 const NON_PUBLISHABLE_EXTENSIONS = new Set(['.map']);
 
@@ -94,7 +94,7 @@ Options:
   --shared-deps-dir <p> Override the shared-deps dir
                        (default <repoRoot>/packages/osd-ui-shared-deps/target).
 
-v3 asset publish modes (Phase 16 Story 2 — single-asset upload from a build manifest):
+Global asset publish modes (single-asset upload from a build manifest):
   --core <build-manifest>           Upload the staged \`core\` asset (from
                                     target/mfe-core/<hash>/) to s3://<bucket>/<prefix>/core/<hash>/.
   --orchestrator <build-manifest>   Upload the staged \`orchestrator\` asset to
@@ -105,7 +105,7 @@ v3 asset publish modes (Phase 16 Story 2 — single-asset upload from a build ma
                                     Upload the staged \`shared-deps-css\` asset to
                                     s3://<bucket>/<prefix>/shared-deps/css/<hash>/.
   --update-manifest                 Also append the published asset's descriptor
-                                    to the deploy manifest's new \`v3Assets\` map.
+                                    to the deploy manifest's new \`globalAssets\` map.
                                     (Without this flag the deploy still uploads
                                     but the manifest only carries plugin remotes.)
   --help, -h           Show this message`;
@@ -173,24 +173,23 @@ export interface DeployManifest {
       cdnUrl: string;
       fileCount: number;
       /**
-       * SRI hash (`sha384-<base64>`) of the UNCOMPRESSED `remoteEntry.js` bytes
-       * (Phase 12 Story 1). Hashed over the original artifact, NOT the gzipped
-       * upload temp, so the browser (which verifies SRI against the decoded
-       * body) accepts the CDN-served bytes. The registry writer stamps this onto
-       * the canonical entry so per-plugin (`--merge`) deploys keep a real
-       * integrity instead of dropping it.
+       * SRI hash (`sha384-<base64>`) of the UNCOMPRESSED `remoteEntry.js` bytes.
+       * Hashed over the original artifact, NOT the gzipped upload temp, so the
+       * browser (which verifies SRI against the decoded body) accepts the
+       * CDN-served bytes. The registry writer stamps this onto the canonical
+       * entry so per-plugin (`--merge`) deploys keep a real integrity instead
+       * of dropping it.
        */
       integrity: string;
     }
   >;
   /**
-   * Phase 16 Story 2 — v3 GLOBAL assets published in this deploy. Each entry
-   * pairs the asset category with its published location + integrity so the
-   * registry CLI (Story 2) can stamp the v3 doc without re-reading the build
-   * manifest. Single-asset deploys (`--core`, `--orchestrator`, `--theme`,
-   * `--shared-deps-css`) populate this map; the legacy full-plugin deploy
-   * leaves it absent (the manifest still validates because the field is
-   * optional).
+   * GLOBAL assets published in this deploy. Each entry pairs the asset
+   * category with its published location + integrity so the registry CLI can
+   * stamp the doc without re-reading the build manifest. Single-asset deploys
+   * (`--core`, `--orchestrator`, `--theme`, `--shared-deps-css`) populate
+   * this map; the legacy full-plugin deploy leaves it absent (the manifest
+   * still validates because the field is optional).
    *
    * The map is keyed by a STABLE identifier per asset:
    *   - core:               "core"
@@ -310,8 +309,8 @@ function loadFileEnv(path: string | undefined, fs: DeployCliFs): Record<string, 
  * running `ada credentials serve`), the ada refresh is skipped automatically
  * because the SDK will use container credentials instead.
  *
- * @throws Error when required env vars are missing or `ada` exits non-zero. Per
- *   the loop rules we STOP rather than work around a creds failure.
+ * @throws Error when required env vars are missing or `ada` exits non-zero.
+ *   We STOP rather than work around a creds failure.
  */
 function refreshCreds(exec: CommandRunner, env: NodeJS.ProcessEnv, out: DeployCliConsole): void {
   if (env.AWS_CONTAINER_CREDENTIALS_FULL_URI) {
@@ -464,8 +463,8 @@ function buildManifest(plan: DeployPlan, now: Date): DeployManifest {
       key: remote.remoteEntryKey,
       cdnUrl: remote.cdnUrl,
       fileCount: remote.files.length,
-      // SRI over the uncompressed remoteEntry.js (Phase 12 Story 1) — carried so
-      // the registry writer can stamp a correct integrity onto every entry.
+      // SRI over the uncompressed remoteEntry.js — carried so the registry
+      // writer can stamp a correct integrity onto every entry.
       integrity: remote.integrity,
     };
   }
@@ -481,8 +480,8 @@ function buildManifest(plan: DeployPlan, now: Date): DeployManifest {
       ...(plan.cdn.domain !== undefined ? { domain: plan.cdn.domain } : {}),
     },
     // Shared-deps is omitted from the manifest when a single-plugin publish
-    // skipped it (Phase 10 Story 1) so the manifest describes exactly what was
-    // published — a single-entry manifest carries no shared-deps key.
+    // skipped it so the manifest describes exactly what was published — a
+    // single-entry manifest carries no shared-deps key.
     ...(plan.sharedDeps !== undefined
       ? {
           sharedDeps: {
@@ -515,8 +514,8 @@ function printDryRun(plan: DeployPlan, manifestPath: string, out: DeployCliConso
       `  ${remote.id}  ${remote.version}  (${remote.files.length} file(s)) -> ` +
         `s3://${plan.cdn.bucket}/${remote.remoteEntryKey}`
     );
-    // SRI over the uncompressed remoteEntry.js (Phase 12 Story 1): shown here so
-    // a dry-run proves the manifest will carry a real integrity for every entry.
+    // SRI over the uncompressed remoteEntry.js: shown here so a dry-run
+    // proves the manifest will carry a real integrity for every entry.
     out.log(`      integrity: ${remote.integrity}`);
   }
   out.log('');
@@ -590,10 +589,10 @@ export function runDeployCli(argv: string[], repoRoot: string, deps: DeployCliDe
     return 0;
   }
 
-  // Phase 16 Story 2 — v3 asset deploy: a single-asset publish. Detect first
-  // so an operator deploying just one asset doesn't pay the full
-  // plugin-discovery + shared-deps cost. Mutually exclusive with the legacy
-  // plugin-deploy modes — passing both is rejected.
+  // Global asset deploy: a single-asset publish. Detect first so an operator
+  // deploying just one asset doesn't pay the full plugin-discovery +
+  // shared-deps cost. Mutually exclusive with the plugin-deploy modes —
+  // passing both is rejected.
   if (isV3AssetDeployMode(argv)) {
     return runV3AssetDeploy(argv, repoRoot, { env, out, exec, fs, now });
   }
@@ -611,10 +610,10 @@ export function runDeployCli(argv: string[], repoRoot: string, deps: DeployCliDe
       cdn,
       targetMfeDir: readOption(argv, '--target-mfe-dir'),
       sharedDepsDir: readOption(argv, '--shared-deps-dir'),
-      // Phase 10 Story 1 — single-plugin publish: when --plugin <id> is given,
-      // plan ONLY that remote and skip shared-deps unless --with-shared-deps is
-      // also passed. Absent --plugin, the full deploy (all remotes + shared-deps)
-      // is unchanged.
+      // Single-plugin publish: when --plugin <id> is given, plan ONLY that
+      // remote and skip shared-deps unless --with-shared-deps is also passed.
+      // Absent --plugin, the full deploy (all remotes + shared-deps) is
+      // unchanged.
       pluginId: readOption(argv, '--plugin'),
       includeSharedDeps:
         readOption(argv, '--plugin') === undefined ? true : argv.includes('--with-shared-deps'),
@@ -701,15 +700,15 @@ export function runDeployCli(argv: string[], repoRoot: string, deps: DeployCliDe
 }
 
 /* ------------------------------------------------------------------------- *
- * Phase 16 Story 2 — v3 asset deploy
+ * Global asset deploy
  * (--core / --orchestrator / --theme / --shared-deps-css)
  * ------------------------------------------------------------------------- */
 
-/** The four v3-asset deploy flags. Mutually exclusive within an invocation. */
+/** The four global-asset deploy flags. Mutually exclusive within an invocation. */
 const V3_ASSET_DEPLOY_FLAGS = ['--core', '--orchestrator', '--shared-deps-css', '--theme'] as const;
 
 /**
- * Detect whether the argv is a v3-asset deploy mode. The legacy flags
+ * Detect whether the argv is a global-asset deploy mode. The plugin-mode flags
  * (`--plugin`, `--with-shared-deps`) are NOT in this set; mixing both surfaces
  * in one invocation throws.
  */
@@ -822,13 +821,13 @@ function readDeployManifestIfExists(
 }
 
 /**
- * Phase 16 Story 2 — v3 asset deploy entry point. Reads a build manifest,
- * publishes its single asset to s3://<bucket>/<prefix>/<asset-path>/, and
- * optionally appends the descriptor to the deploy manifest's `v3Assets` map
- * (when `--update-manifest` is set).
+ * Global asset deploy entry point. Reads a build manifest, publishes its
+ * single asset to s3://<bucket>/<prefix>/<asset-path>/, and optionally
+ * appends the descriptor to the deploy manifest's `globalAssets` map (when
+ * `--update-manifest` is set).
  *
- * Mirrors the legacy plugin-deploy pipeline (immutability check via
- * head-object, gzipped staging tree, single recursive `aws s3 cp`) so the v3
+ * Mirrors the plugin-deploy pipeline (immutability check via head-object,
+ * gzipped staging tree, single recursive `aws s3 cp`) so the global-asset
  * assets get the SAME Content-Encoding + Cache-Control semantics as plugin
  * remotes. NEVER creates infra; only writes objects.
  */

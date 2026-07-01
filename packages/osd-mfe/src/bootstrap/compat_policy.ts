@@ -10,10 +10,10 @@
  */
 
 /**
- * Phase 9 version-compatibility POLICY (Story 1 — config surface only).
+ * Version-compatibility POLICY (config surface only).
  *
- * Defines the locked, env-keyed policy matrix that the bootstrap (Story 3) will
- * apply once the classifier (Story 2) labels each remote
+ * Defines the locked, env-keyed policy matrix that the bootstrap will
+ * apply once the classifier labels each remote
  * compatible | incompatible | unknown. This module only RESOLVES the effective
  * policy from the (optional) server config + the server's dev/prod mode — it
  * performs no classification and no enforcement.
@@ -23,7 +23,7 @@
  * core mirror `src/core/server/utils/resolve_compat_policy.ts`. Keeping the
  * default in one helper means the policy's env-keyed behavior is specified once.
  *
- * LOCKED policy matrix (docs/01-MFE-DESIGN.md / prd.json):
+ * LOCKED policy matrix (see `packages/osd-mfe/README.md`):
  *  - INCOMPATIBLE (known): non-prod => `block` the page; prod => `skip` the plugin.
  *  - MISSING/UNKNOWN metadata: non-prod => `warn-load`; prod => `skip`.
  *  - SHARED SINGLETONS: `strictShared` defaults to `true` (never silently run a
