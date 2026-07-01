@@ -4,8 +4,14 @@
  */
 
 import type { ParserRuleContext, ParseTree } from 'antlr4ng';
-import { isRuleNode, isTerminalNode, findAllDescendantsByRule } from './rule_index';
+import {
+  isRuleNode,
+  isTerminalNode,
+  findAllDescendantsByRule,
+  findChildByRule,
+} from './rule_index';
 import { RuleNameToIndex } from './rule_index';
+import { extractCreatedFieldNames } from './pattern_fields';
 
 export interface PipelineStage {
   command: string;
@@ -67,6 +73,45 @@ function buildIndexToCommandName(ruleNameToIndex: RuleNameToIndex): Map<number, 
   return map;
 }
 
+// Default output field name `patterns` uses when NEW_FIELD is omitted.
+const PATTERNS_DEFAULT_FIELD = 'patterns_field';
+
+// `patterns` also emits a companion `tokens` struct column alongside its main
+// output field (confirmed against the live Calcite 2.19 engine). Register it so
+// a downstream reference to `tokens` isn't false-flagged.
+const PATTERNS_TOKENS_FIELD = 'tokens';
+
+function unquote(raw: string): string {
+  return raw.length >= 2 && /^['"]/.test(raw) && raw[0] === raw[raw.length - 1]
+    ? raw.slice(1, -1)
+    : raw;
+}
+
+/**
+ * Value of a named-slot parameter: find the terminal matching `keyword`, then
+ * return the text of the first rule-node sibling after it. Used to read
+ * `NEW_FIELD = <literal>` (patterns) and `OUTPUT = <expr>` (spath).
+ */
+function findSlotValueAfterKeyword(node: ParserRuleContext, keyword: string): string | undefined {
+  const stack: ParseTree[] = [node];
+  while (stack.length > 0) {
+    const n = stack.pop()!;
+    if (!isRuleNode(n)) continue;
+    const children = n.children ?? [];
+    for (let i = 0; i < children.length; i++) {
+      const c = children[i];
+      if (isTerminalNode(c) && c.getText().toUpperCase() === keyword) {
+        for (let j = i + 1; j < children.length; j++) {
+          const v = children[j];
+          if (isRuleNode(v)) return v.getText();
+        }
+      }
+    }
+    stack.push(...children);
+  }
+  return undefined;
+}
+
 // Collect created field names from a single command node. Best-effort: it scans
 // for `... AS <name>` patterns and known LHS positions (eval clause).
 function collectCreatedFields(
@@ -124,6 +169,65 @@ function collectCreatedFields(
         }
       }
       evalStack.push(...(node.children ?? []));
+    }
+  }
+
+  // (a) Capture-pattern extraction: grok / parse / rex. The created names live
+  // inside the pattern string literal, which the AS/eval scans never descend
+  // into. grok/parse type the pattern as the last stringLiteral in the command;
+  // rex has a single stringLiteral (its pattern). Picking the last-starting
+  // literal is correct for all three.
+  if (
+    stage.command === 'grokCommand' ||
+    stage.command === 'parseCommand' ||
+    stage.command === 'rexCommand'
+  ) {
+    const literals = findAllDescendantsByRule(stage.node, ruleNameToIndex, 'stringLiteral');
+    let pattern: ParserRuleContext | undefined;
+    for (const lit of literals) {
+      if (!pattern || (lit.start?.start ?? -1) > (pattern.start?.start ?? -1)) {
+        pattern = lit;
+      }
+    }
+    if (pattern) {
+      for (const name of extractCreatedFieldNames(pattern.getText())) {
+        out.add(name);
+      }
+    }
+  }
+
+  // (b) Named-slot extraction: patterns. Engine versions disagree on the output
+  // name: the Calcite 2.19 engine honors `NEW_FIELD='x'` (output column `x`) and
+  // also emits a companion `tokens` struct; the 3.6 runtime engine ignores
+  // NEW_FIELD entirely and always names the column `patterns_field` (no
+  // `tokens`). Both behaviors were confirmed live. Since over-registering a
+  // created field only risks missing a rare typo while under-registering causes
+  // a false "unknown field" flag, register the union: the explicit NEW_FIELD
+  // name (when present), the default `patterns_field`, and `tokens`.
+  if (stage.command === 'patternsCommand') {
+    const newFieldLit = findSlotValueAfterKeyword(stage.node, 'NEW_FIELD');
+    if (newFieldLit) {
+      out.add(unquote(newFieldLit));
+    }
+    out.add(PATTERNS_DEFAULT_FIELD);
+    out.add(PATTERNS_TOKENS_FIELD);
+  }
+
+  // (c) Named-slot extraction: spath. Each spathParameter either names its
+  // output via `OUTPUT = <name>` or, absent that, derives the field from the
+  // indexable path text. `INPUT` is deliberately left unregistered so the
+  // source field is still validated.
+  if (stage.command === 'spathCommand') {
+    for (const param of findAllDescendantsByRule(stage.node, ruleNameToIndex, 'spathParameter')) {
+      const output = findSlotValueAfterKeyword(param, 'OUTPUT');
+      if (output) {
+        out.add(unquote(output));
+        continue;
+      }
+      const path = findChildByRule(param, ruleNameToIndex, 'indexablePath');
+      if (path) {
+        out.add(path.getText());
+      }
     }
   }
 }
