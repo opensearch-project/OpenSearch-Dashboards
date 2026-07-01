@@ -59,25 +59,22 @@ export class PPLLanguageAnalyzer {
   }
 
   /**
-   * Creates and configures ANTLR parser with error listeners
+   * Creates and configures ANTLR parser with a parser error listener
    */
   private createParserWithErrorHandling(
     tokenStream: antlr.CommonTokenStream
   ): {
     parser: OpenSearchPPLParser;
-    lexerErrorListener: PPLSyntaxErrorListener;
     parserErrorListener: PPLSyntaxErrorListener;
   } {
     const parser = new OpenSearchPPLParser(tokenStream);
 
-    // Set up error listeners
-    const lexerErrorListener = new PPLSyntaxErrorListener();
     const parserErrorListener = new PPLSyntaxErrorListener();
 
     parser.removeErrorListeners();
     parser.addErrorListener(parserErrorListener);
 
-    return { parser, lexerErrorListener, parserErrorListener };
+    return { parser, parserErrorListener };
   }
 
   /**
