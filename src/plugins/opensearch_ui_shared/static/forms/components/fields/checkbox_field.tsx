@@ -29,7 +29,7 @@
  */
 
 import { EuiCompressedFormRow, EuiCompressedCheckbox } from '@elastic/eui';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
 

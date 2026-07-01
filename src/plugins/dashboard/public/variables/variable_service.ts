@@ -5,7 +5,7 @@
 
 import { isEqual } from 'lodash';
 import { Observable, BehaviorSubject, combineLatest } from 'rxjs';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { distinctUntilChanged, map } from 'rxjs/operators';
 import { DataPublicPluginStart } from '../../../data/public';
 import { SavedObjectsClientContract } from '../../../../core/public';
@@ -520,7 +520,7 @@ export class VariableService {
   }
 
   private generateId(): string {
-    return uuid.v4();
+    return uuidv4();
   }
 
   /**
