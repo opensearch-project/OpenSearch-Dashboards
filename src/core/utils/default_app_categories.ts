@@ -147,12 +147,12 @@ export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze
   observabilityTools: {
     id: 'observabilityTools',
     label: i18n.translate('core.ui.observabilityTools.label', {
-      defaultMessage: 'Tools',
+      defaultMessage: 'More',
     }),
     order: 7000,
     collapsible: true,
     defaultOpen: true,
-    euiIconType: 'wrench',
+    euiIconType: 'navQuerySets',
   },
   manage: {
     id: 'manage',

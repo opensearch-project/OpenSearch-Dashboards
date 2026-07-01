@@ -275,6 +275,37 @@ describe('<CollapsibleNavGroupEnabled />', () => {
         expect(getByTestId('obsCollapsedNav')).toBeInTheDocument();
       });
 
+      it('excludes the "Manage workspace" category from the nav body', () => {
+        // "Manage workspace" links now live in the footer (ManageWorkspaceMenu),
+        // not the nav body — so the body must not render that category section.
+        const navGroupWithManage = {
+          ...DEFAULT_NAV_GROUPS.observability,
+          navLinks: [
+            { id: 'link-in-observability', title: 'link-in-observability' },
+            {
+              id: 'manage-link',
+              title: 'manage-link',
+              category: DEFAULT_APP_CATEGORIES.manageWorkspace,
+            },
+          ],
+        };
+        const props = mockProps({
+          currentNavGroupId: DEFAULT_NAV_GROUPS.observability.id,
+          isNavOpen: true,
+          enableIconSideNav: true,
+          navGroupsMap: {
+            [DEFAULT_NAV_GROUPS.observability.id]: navGroupWithManage,
+          },
+          navLinks: [{ id: 'manage-link', title: 'manage-link', baseUrl: '', href: '' }],
+        });
+        const { queryByTestId, queryByText } = render(<CollapsibleNavGroupEnabled {...props} />);
+        // No manageWorkspace section in the body; the manage link itself is absent.
+        expect(
+          queryByTestId(`obsNavSection-${DEFAULT_APP_CATEGORIES.manageWorkspace!.label}`)
+        ).toBeNull();
+        expect(queryByText('manage-link')).toBeNull();
+      });
+
       it('should set CSS variable for expanded sidebar width on desktop', () => {
         mockDesktopMatchMedia();
         const props = mockProps({

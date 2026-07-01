@@ -44,7 +44,7 @@ import {
   ContentManagementPluginStart,
   ESSENTIAL_OVERVIEW_PAGE_ID,
 } from '../../../plugins/content_management/public';
-import { WorkspaceMenu } from './components/workspace_menu/workspace_menu';
+import { ManageWorkspaceMenu } from './components/manage_workspace_menu/manage_workspace_menu';
 import { getWorkspaceColumn } from './components/workspace_column';
 import { DataSourceManagementPluginSetup } from '../../../plugins/data_source_management/public';
 import { DataPublicPluginStart } from '../../../plugins/data/public';
@@ -641,14 +641,22 @@ export class WorkspacePlugin
       this.addWorkspaceToBreadcrumbs(core);
     } else {
       /**
-       * Register workspace dropdown selector on the left navigation bottom
+       * Register the "Manage workspace" menu on the left navigation bottom. This
+       * replaces the former workspace switcher button — switching/creating
+       * workspaces lives in the always-present top-of-nav workspace selector,
+       * while this footer entry-point opens a popover of the manage-workspace
+       * apps (Workspace details, Collaborators, Data sources, etc.).
+       *
+       * Registered only in the `leftBottom` slot — the expanded footer (and the
+       * classic nav). This matches the button it replaces, which was never in the
+       * collapsed icon rail. The collapsed rail stays slim; manage-workspace is a
+       * low-frequency action reachable by expanding the nav.
        */
       core.chrome.navControls.registerLeftBottom({
         order: 2,
         mount: toMountPoint(
-          React.createElement(WorkspaceMenu, {
+          React.createElement(ManageWorkspaceMenu, {
             coreStart: core,
-            registeredUseCases$: this.registeredUseCases$,
           })
         ),
       });

@@ -133,6 +133,17 @@ describe('<CollapsedSideNav />', () => {
     expect(getByTestId(`obsCollapsedIcon-${category.label}`)).toBeInTheDocument();
   });
 
+  it('renders the observabilityTools ("More") category with the navQuerySets rail icon', () => {
+    // The category renamed from "Tools" to "More" with the navQuerySets icon; the
+    // collapsed rail reads both the label (for the test-subj) and euiIconType.
+    const category = DEFAULT_APP_CATEGORIES.observabilityTools!;
+    const navLinks = [makeLink({ id: 'tool1', title: 'Tool 1', category })];
+    const { getByTestId } = render(<CollapsedSideNav {...defaultProps} navLinks={navLinks} />);
+    const button = getByTestId('obsCollapsedIcon-More');
+    expect(button).toBeInTheDocument();
+    expect(button.querySelector('[data-euiicon-type="navQuerySets"]')).toBeInTheDocument();
+  });
+
   describe('hover popover', () => {
     it('shows the registered flyout content on hover', () => {
       const navLinks = [

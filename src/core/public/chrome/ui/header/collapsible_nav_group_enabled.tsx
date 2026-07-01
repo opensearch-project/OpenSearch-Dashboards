@@ -197,7 +197,14 @@ export function CollapsibleNavGroupEnabled({
       navLinksResult.push(...getSystemNavGroups());
     }
 
-    return fulfillRegistrationLinksToChromeNavLinks(navLinksResult, navLinks);
+    // The "Manage workspace" category is no longer rendered inside the nav body —
+    // it now lives in the footer (ManageWorkspaceMenu). Filter its links out here
+    // so they're excluded from both the expanded and collapsed side-nav trees.
+    // The underlying apps stay registered (and navigable from the footer popover
+    // or a direct URL); we only drop them from the body rendering.
+    return fulfillRegistrationLinksToChromeNavLinks(navLinksResult, navLinks).filter(
+      (link) => link.category?.id !== DEFAULT_APP_CATEGORIES.manageWorkspace.id
+    );
   }, [navLinks, navGroupsMap, currentNavGroupId, shouldAppendManageCategory]);
 
   const width = useMemo(() => {

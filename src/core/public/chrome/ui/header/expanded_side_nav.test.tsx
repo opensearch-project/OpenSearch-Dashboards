@@ -99,8 +99,13 @@ describe('<ExpandedSideNav />', () => {
         category: DEFAULT_APP_CATEGORIES.observabilityTools,
       }),
     ];
-    const { getByText } = render(<ExpandedSideNav {...defaultProps} navLinks={navLinks} />);
-    expect(getByText(DEFAULT_APP_CATEGORIES.observabilityTools!.label)).toBeInTheDocument();
+    const { getByText, getByTestId } = render(
+      <ExpandedSideNav {...defaultProps} navLinks={navLinks} />
+    );
+    // The observabilityTools category was renamed "Tools" → "More".
+    expect(DEFAULT_APP_CATEGORIES.observabilityTools!.label).toBe('More');
+    expect(getByText('More')).toBeInTheDocument();
+    expect(getByTestId('obsNavSection-More')).toBeInTheDocument();
   });
 
   it('renders cluster gap before categories', () => {
