@@ -38,7 +38,9 @@ import { useEffect } from 'react';
 export function useOpenOnUrlMarker(marker: string, onOpen: () => void) {
   useEffect(() => {
     const openIfMarked = () => {
-      const hash = window.location.hash; // e.g. "#/?_openSaved=true&_g=..."
+      // Default to '' so the hook is safe under partial `window.location` mocks
+      // (some component tests stub `window.location` without a `hash`).
+      const hash = window.location.hash || ''; // e.g. "#/?_openSaved=true&_g=..."
       const qIndex = hash.indexOf('?');
       if (qIndex === -1) return;
       if (new URLSearchParams(hash.slice(qIndex + 1)).get(marker) !== 'true') return;
