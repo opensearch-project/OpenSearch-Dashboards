@@ -155,7 +155,6 @@
     "**/js-yaml": "^4.2.0",
     "**/qs": "^6.15.2",
     "**/body-parser": "^2.2.1",
-    "**/@tootallnate/once": "^3.0.1",
     "**/fast-xml-parser": "^5.7.0",
     "**/engine.io/ws": "^8.20.1",
     "**/mime-db": "^1.54.0",
