@@ -226,6 +226,15 @@ export interface PluginManifest {
    * engines are added.
    */
   readonly unsupportedOSDataSourceEngineTypes?: readonly string[];
+
+  /**
+   * Specifies minimum data source engine versions required by this plugin. Data sources whose
+   * engine version is below the declared minimum for their engine type will be hidden from
+   * selectors in this plugin's context.
+   *
+   * Keyed by engine type (e.g. "Elasticsearch"), value is a semver minimum (e.g. "7.9.0").
+   */
+  readonly minDataSourceEngineVersions?: Readonly<Record<string, string>>;
 }
 
 /**

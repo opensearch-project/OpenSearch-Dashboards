@@ -120,12 +120,29 @@ export const indexTypeConfig: DatasetTypeConfig = {
 
       default: {
         const dataSources = await fetchDataSources(services.savedObjects.client, services.http);
-        // enrich dataSources with remoteConnections
+        const datasetService = services.data.query.queryString.getDatasetService();
+        const filteredDataSources = dataSources.filter((ds) => {
+          const meta = ds.meta as DataStructureCustomMeta | undefined;
+          if (!meta?.dataSourceEngineType && !meta?.dataSourceVersion) return true;
+          const fakeDataset: Dataset = {
+            id: ds.id,
+            title: ds.title,
+            type: DEFAULT_DATA.SET_TYPES.INDEX,
+            dataSource: {
+              id: ds.id,
+              title: ds.title,
+              type: meta.dataSourceEngineType ?? '',
+              engineType: meta.dataSourceEngineType,
+              version: meta.dataSourceVersion ?? '',
+            },
+          };
+          return datasetService.isDatasetAllowed(fakeDataset, services.appName);
+        });
         return {
           ...dataStructure,
           columnHeader: 'Data sources',
           hasNext: true,
-          children: dataSources,
+          children: filteredDataSources,
         };
       }
     }

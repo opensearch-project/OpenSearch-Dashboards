@@ -68,7 +68,7 @@ export class LanguageService {
   /**
    * Determines whether a language is supported for the currently selected dataset, based on the
    * dataset's data-source engine type and version against the language's declared
-   * {@link LanguageConfig.supportedDataSources}.
+   * `LanguageConfig.supportedDataSources`.
    *
    * Fail-open by design: returns `true` whenever applicability cannot be conclusively determined,
    * so unknown/missing engine types, blank or unparseable versions, datasets without a data source,
