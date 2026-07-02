@@ -15,6 +15,7 @@ import {
   WorkspacesSetup,
   DEFAULT_NAV_GROUPS,
   ALL_USE_CASE_ID,
+  OBSERVABILITY_USE_CASE_ID,
 } from '../../../../core/public';
 import {
   WORKSPACE_DETAIL_APP_ID,
@@ -78,7 +79,7 @@ export class UseCaseService {
               title: i18n.translate('workspace.settings.workspaceDetails', {
                 defaultMessage: 'Workspace details',
               }),
-              euiIconType: 'spacesApp',
+              euiIconType: 'wsSelector',
             },
             ...(isPermissionEnabled
               ? [
@@ -105,12 +106,18 @@ export class UseCaseService {
               order: 400,
               euiIconType: 'indexPatternApp',
             },
-            {
-              id: 'datasets',
-              category: DEFAULT_APP_CATEGORIES.manageWorkspace,
-              order: 400,
-              euiIconType: 'indexMapping',
-            },
+            // Datasets management only applies to the Observability workspace; do
+            // not surface it under "Manage workspace" for other use cases.
+            ...(navGroupInfo.id === OBSERVABILITY_USE_CASE_ID
+              ? [
+                  {
+                    id: 'datasets',
+                    category: DEFAULT_APP_CATEGORIES.manageWorkspace,
+                    order: 400,
+                    euiIconType: 'indexMapping',
+                  },
+                ]
+              : []),
             {
               id: 'objects',
               category: DEFAULT_APP_CATEGORIES.manageWorkspace,

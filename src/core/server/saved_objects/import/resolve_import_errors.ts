@@ -63,6 +63,7 @@ export async function resolveSavedObjectsImportErrors({
   dataSourceId,
   dataSourceTitle,
   workspaces,
+  canImportConfig,
 }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse> {
   // throw a BadRequest error if we see invalid retries
   validateRetries(retries);
@@ -74,32 +75,28 @@ export async function resolveSavedObjectsImportErrors({
   const filter = createObjectsFilter(retries);
 
   // Get the objects to resolve errors
-  const { errors: collectorErrors, collectedObjects: objectsToResolve } = await collectSavedObjects(
-    {
-      readStream,
-      objectLimit,
-      filter,
-      supportedTypes,
-      dataSourceId,
-    }
-  );
+  const { errors: collectorErrors, collectedObjects } = await collectSavedObjects({
+    readStream,
+    objectLimit,
+    filter,
+    supportedTypes,
+    dataSourceId,
+  });
   errorAccumulator = [...errorAccumulator, ...collectorErrors];
+  let objectsToResolve = collectedObjects;
 
-  const configErrors: SavedObjectsImportError[] = objectsToResolve
-    .filter((obj) => obj.type === 'config')
-    .map((obj) => ({
-      error: { type: 'unsupported_type' } as SavedObjectsImportUnsupportedTypeError,
-      type: obj.type,
-      id: obj.id,
-      title: obj.id,
-      meta: { title: obj.id },
-    }));
-  if (configErrors.length > 0) {
-    return {
-      successCount: 0,
-      success: false,
-      errors: configErrors,
-    };
+  if (!canImportConfig) {
+    const configErrors: SavedObjectsImportError[] = objectsToResolve
+      .filter((obj) => obj.type === 'config')
+      .map((obj) => ({
+        error: { type: 'unsupported_type' } as SavedObjectsImportUnsupportedTypeError,
+        type: obj.type,
+        id: obj.id,
+        title: obj.id,
+        meta: { title: obj.id },
+      }));
+    errorAccumulator = [...errorAccumulator, ...configErrors];
+    objectsToResolve = objectsToResolve.filter((obj) => obj.type !== 'config');
   }
 
   // Create a map of references to replace for each object to avoid iterating through

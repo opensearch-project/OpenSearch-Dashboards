@@ -68,7 +68,7 @@
     "start:docker": "scripts/use_node scripts/opensearch_dashboards --dev --opensearch.hosts=$OPENSEARCH_HOSTS --opensearch.ignoreVersionMismatch=true --server.host=$SERVER_HOST",
     "start:security": "scripts/use_node scripts/opensearch_dashboards --dev --security",
     "start:enhancements": "scripts/use_node scripts/opensearch_dashboards --dev --uiSettings.overrides['query:enhancements:enabled']=true --uiSettings.overrides['home:useNewHomePage']=true ",
-    "start:explore": "scripts/use_node scripts/opensearch_dashboards --dev --explore.enabled=true --explore.discoverTraces.enabled=true --explore.discoverMetrics.enabled=true --explore.agentTraces.enabled=true --uiSettings.overrides['query:enhancements:enabled']=true --uiSettings.overrides['home:useNewHomePage']=true --data_source.enabled=true --opensearchDashboards.branding.useExpandedHeader=false --opensearch.ignoreVersionMismatch=true --opensearchDashboards.keyboardShortcuts.enabled=true --csp.warnLegacyBrowsers=false --datasetManagement.enabled=true",
+    "start:explore": "scripts/use_node scripts/opensearch_dashboards --dev --explore.enabled=true --explore.discoverTraces.enabled=true --explore.discoverMetrics.enabled=true --explore.agentTraces.enabled=true --uiSettings.overrides['query:enhancements:enabled']=true --uiSettings.overrides['home:useNewHomePage']=true --data_source.enabled=true --opensearchDashboards.branding.useExpandedHeader=false --opensearch.ignoreVersionMismatch=true --opensearchDashboards.keyboardShortcuts.enabled=true --csp.warnLegacyBrowsers=false --datasetManagement.enabled=true --dashboard.variables.enabled=true",
     "debug": "scripts/use_node --nolazy --inspect scripts/opensearch_dashboards --dev",
     "debug-break": "scripts/use_node --nolazy --inspect-brk scripts/opensearch_dashboards --dev",
     "lint": "yarn run lint:es && yarn run lint:style",
@@ -224,7 +224,7 @@
     "@smithy/protocol-http": "^5.3.8",
     "@smithy/signature-v4": "^5.3.8",
     "@types/ndjson": "^2.0.4",
-    "@types/yauzl": "^2.9.1",
+    "@types/yauzl": "^3.4.0",
     "@xyflow/react": "^12.8.2",
     "antlr4-c3": "^3.4.3",
     "antlr4ng": "^3.0.16",
@@ -296,7 +296,7 @@
     "use-sync-external-store": "^1.5.0",
     "uuid": "3.3.2",
     "whatwg-fetch": "^3.0.0",
-    "yauzl": "^2.10.0"
+    "yauzl": "^3.4.0"
   },
   "optionalDependencies": {
     "better-sqlite3": "^12.9.0"

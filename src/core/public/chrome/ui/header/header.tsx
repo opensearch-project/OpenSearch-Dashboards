@@ -73,7 +73,11 @@ import {
   ChromeHelpExtension,
   ChromeGlobalBanner,
 } from '../../chrome_service';
-import { ChromeNavGroupServiceStartContract, NavGroupItemInMap } from '../../nav_group';
+import {
+  ChromeNavGroupServiceStartContract,
+  NavGroupItemInMap,
+  NavPopoverServices,
+} from '../../nav_group';
 import { OnIsLockedUpdate } from './';
 import { CollapsibleNav } from './collapsible_nav';
 import { CollapsibleNavGroupEnabled } from './collapsible_nav_group_enabled';
@@ -134,6 +138,7 @@ export interface HeaderProps {
   currentWorkspace$: WorkspacesStart['currentWorkspace$'];
   useUpdatedHeader?: boolean;
   enableIconSideNav?: boolean;
+  navPopoverServices?: NavPopoverServices;
   globalBanner$?: Observable<ChromeGlobalBanner | undefined>;
   keyboardShortcut?: KeyboardShortcutStart;
   globalSearchCommands$: Observable<GlobalSearchCommand[]>;
@@ -555,6 +560,7 @@ export function Header({
         opensearchDashboardsDocLink={opensearchDashboardsDocLink}
         opensearchDashboardsVersion={opensearchDashboardsVersion}
         surveyLink={survey}
+        keyboardShortcut={keyboardShortcut}
       />
     </EuiHeaderSectionItem>
   );
@@ -751,6 +757,7 @@ export function Header({
             currentWorkspace$={observables.currentWorkspace$}
             globalSearchCommands$={observables.globalSearchCommands$}
             enableIconSideNav={enableIconSideNav}
+            navPopoverServices={observables.navPopoverServices}
             isLocked={isLocked}
             onIsLockedUpdate={onIsLockedUpdate}
             openNav={() => setIsNavOpen(true)}

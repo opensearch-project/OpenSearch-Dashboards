@@ -635,3 +635,59 @@ describe('stop', () => {
     ).resolves.toBe(undefined);
   });
 });
+
+describe('navPopoverServices.navigateToApp hashchange wrapper', () => {
+  // navPopoverServices is not part of the public start() contract; it is passed
+  // into the Header component. We reach it by shallow-rendering the header and
+  // reading the prop, then drive its wrapped navigateToApp.
+  const getNavPopoverServices = async () => {
+    const startDeps = defaultStartDeps([new FakeApp('appA'), new FakeApp('appB')]);
+    const { chrome } = await start({ startDeps });
+    const header = shallow(React.createElement(() => chrome.getHeaderComponent()));
+    const navPopoverServices = header.prop('navPopoverServices') as {
+      navigateToApp: (appId: string, options?: unknown) => unknown;
+    };
+    return { navPopoverServices, startDeps };
+  };
+
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.clearAllTimers();
+    jest.useRealTimers();
+  });
+
+  it('dispatches a window hashchange for same-app navigation', async () => {
+    const { navPopoverServices, startDeps } = await getNavPopoverServices();
+    // Establish the current app id as appA.
+    startDeps.application.navigateToApp('appA');
+
+    const hashChangeSpy = jest.fn();
+    window.addEventListener('hashchange', hashChangeSpy);
+
+    navPopoverServices.navigateToApp('appA');
+    expect(hashChangeSpy).not.toHaveBeenCalled();
+
+    jest.advanceTimersByTime(0);
+    expect(hashChangeSpy).toHaveBeenCalledTimes(1);
+
+    window.removeEventListener('hashchange', hashChangeSpy);
+  });
+
+  it('does not dispatch a window hashchange for cross-app navigation', async () => {
+    const { navPopoverServices, startDeps } = await getNavPopoverServices();
+    // Establish the current app id as appA.
+    startDeps.application.navigateToApp('appA');
+
+    const hashChangeSpy = jest.fn();
+    window.addEventListener('hashchange', hashChangeSpy);
+
+    navPopoverServices.navigateToApp('appB');
+    jest.advanceTimersByTime(0);
+    expect(hashChangeSpy).not.toHaveBeenCalled();
+
+    window.removeEventListener('hashchange', hashChangeSpy);
+  });
+});
