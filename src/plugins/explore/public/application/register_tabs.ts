@@ -28,6 +28,7 @@ import {
   brainPatternQuery,
   findDefaultPatternsField,
   regexPatternQuery,
+  sqlPatternQuery,
 } from '../components/patterns_table/utils/utils';
 import { setUsingRegexPatterns } from './utils/state_management/slices/tab/tab_slice';
 import { executeTabQuery } from './utils/state_management/actions/query_actions';
@@ -102,7 +103,7 @@ export const registerBuiltInTabs = (
       }),
       flavor: [ExploreFlavor.Logs],
       order: 15,
-      supportedLanguages: [EXPLORE_DEFAULT_LANGUAGE],
+      supportedLanguages: [EXPLORE_DEFAULT_LANGUAGE, 'SQL'],
 
       prepareQuery: (query) => {
         const state = services.store.getState();
@@ -122,6 +123,12 @@ export const registerBuiltInTabs = (
             // column mapping. Return no query instead.
             return '';
           }
+        }
+
+        // SQL only supports the simple/regex method (REPLACE-based); the PPL
+        // `patterns` command and its brain method are not available in SQL.
+        if (query.language === 'SQL') {
+          return sqlPatternQuery(preparedQuery.query, patternsField);
         }
 
         if (state.tab.patterns.usingRegexPatterns)
