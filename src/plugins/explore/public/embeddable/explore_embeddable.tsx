@@ -206,8 +206,14 @@ export class ExploreEmbeddable
           this.updateHandler(this.searchProps, true);
         }
       });
+    // Must include output$ here: when a panel title is edited, the base Embeddable.onResetInput()
+    // fires input$.next() (which triggers handleTitleVariables correctly) but then immediately
+    // overwrites the output title with the raw un-interpolated input.title via getPanelTitle().
+    // Subscribing to output$ ensures handleTitleVariables re-applies variable interpolation
+    // after that overwrite. The isEqual guard in updateOutput() prevents infinite loops.
     this.titleVariableSubscription = merge(
       this.getInput$(),
+      this.getOutput$(),
       dashboardContainer.variableService.getVariables$()
     ).subscribe(this.handleTitleVariables);
   }
