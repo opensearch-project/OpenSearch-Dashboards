@@ -32,6 +32,9 @@ jest.mock('../../../../services', () => {
         getLanguageService: () => ({
           getQueryEditorExtensionMap: jest.fn().mockReturnValue({}),
         }),
+        getDatasetService: () => ({
+          isDatasetAllowed: jest.fn().mockReturnValue(true),
+        }),
       },
     }),
   };

@@ -17,7 +17,7 @@ import {
   Dataset,
 } from '../../../../../common';
 import { DatasetTypeConfig } from '../types';
-import { getIndexPatterns } from '../../../../services';
+import { getIndexPatterns, getQueryService } from '../../../../services';
 import {
   getRemoteClusterConnections,
   getRemoteClusterIndices,
@@ -120,7 +120,7 @@ export const indexTypeConfig: DatasetTypeConfig = {
 
       default: {
         const dataSources = await fetchDataSources(services.savedObjects.client, services.http);
-        const datasetService = services.data.query.queryString.getDatasetService();
+        const datasetService = getQueryService().queryString.getDatasetService();
         const filteredDataSources = dataSources.filter((ds) => {
           const meta = ds.meta as DataStructureCustomMeta | undefined;
           if (!meta?.dataSourceEngineType && !meta?.dataSourceVersion) return true;

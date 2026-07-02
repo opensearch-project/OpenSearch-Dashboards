@@ -48,7 +48,10 @@ export class QueryEnhancementsPlugin
     this.config$ = initializerContext.config.legacy.globalConfig$;
   }
 
-  public setup(core: CoreSetup, { data, dataSource }: QueryEnhancementsPluginSetupDependencies) {
+  public async setup(
+    core: CoreSetup,
+    { data, dataSource }: QueryEnhancementsPluginSetupDependencies
+  ) {
     this.logger.debug('queryEnhancements: Setup');
 
     // PPL lint capability — disabled by default until an operator enables it via
@@ -107,15 +110,14 @@ export class QueryEnhancementsPlugin
     prometheusManager.initializeDefaultQueryExecutor(client);
 
     // Read the scoped config flag that gates legacy Elasticsearch compatibility (Open Distro
-    // endpoint routing). Config observables emit synchronously on first subscribe, so this resolves
-    // before the strategies below are constructed.
-    let legacyEsCompatEnabled = false;
-    this.initializerContext.config
+    // endpoint routing). Await the first emission so the strategies below are always constructed
+    // with the resolved value rather than relying on synchronous observable emission.
+    const queryEnhancementsConfig = await this.initializerContext.config
       .create<ConfigSchema>()
       .pipe(first())
-      .subscribe((cfg) => {
-        legacyEsCompatEnabled = cfg.legacyElasticsearchCompatibility?.enabled ?? false;
-      });
+      .toPromise();
+    const legacyEsCompatEnabled =
+      queryEnhancementsConfig.legacyElasticsearchCompatibility?.enabled ?? false;
 
     const pplSearchStrategy = pplSearchStrategyProvider(
       this.config$,
