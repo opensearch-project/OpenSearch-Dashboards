@@ -101,64 +101,69 @@ const PatternsContainerContent = ({
   );
 
   const logsTotal = histogramResults?.hits.total || 0;
-  const hits = useMemo(() => {
+
+  // SQL patterns come back as unaliased columns ([pattern, COUNT(*), MIN(sample)] by
+  // position) rather than the PPL field names, and the sample is a scalar rather than
+  // PPL's take(field, 1) array. Normalize both shapes into { pattern, count, sample }.
+  const isSqlPatterns = originalQuery?.language === 'SQL';
+  const patternRows = useMemo(() => {
     const rawHits = patternResults?.hits?.hits || [];
+    const schema = (patternResults as any)?.fieldSchema || [];
 
-    // Filter out rows where any required field is null
-    return rawHits.filter((row: any) => {
-      if (!row || !row._source) return false;
+    return rawHits
+      .map((row: any) => {
+        const source = row?._source;
+        if (!source) return null;
 
-      const source = row._source;
+        let pattern;
+        let count;
+        let sample;
 
-      // If ANY required field is null/undefined, reject the entire row
-      if (
-        source[PATTERNS_FIELD] == null ||
-        source[COUNT_FIELD] == null ||
-        source[SAMPLE_FIELD] == null
-      ) {
-        return false;
-      }
+        if (isSqlPatterns) {
+          const patternKey = schema[0]?.name ?? 'pattern';
+          const countKey = schema[1]?.name ?? 'COUNT(*)';
+          const sampleKey = schema[2]?.name ?? 'MIN(sample)';
+          pattern = source[patternKey];
+          count = source[countKey];
+          sample = source[sampleKey];
+        } else {
+          pattern = source[PATTERNS_FIELD];
+          count = source[COUNT_FIELD];
+          // PPL sample is an array (take(field, 1))
+          sample = Array.isArray(source[SAMPLE_FIELD]) ? source[SAMPLE_FIELD][0] : undefined;
+        }
 
-      // For SAMPLE_FIELD, also check if it's an array with a non-null first element
-      if (
-        !Array.isArray(source[SAMPLE_FIELD]) ||
-        source[SAMPLE_FIELD].length === 0 ||
-        source[SAMPLE_FIELD][0] == null
-      ) {
-        return false;
-      }
-
-      return true;
-    });
-  }, [patternResults?.hits.hits]);
+        if (pattern == null || count == null || sample == null) return null;
+        return { pattern, count, sample };
+      })
+      .filter(Boolean) as Array<{ pattern: string; count: number; sample: string }>;
+  }, [patternResults, isSqlPatterns]);
 
   const items: PatternItem[] = useMemo(
     () =>
-      hits?.map((row: any) => ({
+      patternRows.map((row) => ({
         // not including null check for logs total, the table will handle errors and we want to
         //    display the other information if it can appear fine
-        ratio: row._source[COUNT_FIELD] / logsTotal,
-        count: row._source[COUNT_FIELD],
-        // SAMPLE_FIELD needs [0] because the sample will be an array, but we're showing a 'sample' so 0th is fine
-        sample: row._source[SAMPLE_FIELD][0],
-        highlightedSample: usingRegexPatterns
-          ? undefined
-          : highlightLogUsingPattern(
-              row._source[SAMPLE_FIELD][0],
-              row._source[PATTERNS_FIELD],
-              isDarkMode
-            ),
-        pattern: row._source[PATTERNS_FIELD],
+        ratio: row.count / logsTotal,
+        count: row.count,
+        sample: row.sample,
+        // SQL uses the simple (regex) method, whose punctuation-only anchors make the
+        // token highlighter mis-align — same reason PPL's usingRegexPatterns path skips it.
+        highlightedSample:
+          isSqlPatterns || usingRegexPatterns
+            ? undefined
+            : highlightLogUsingPattern(row.sample, row.pattern, isDarkMode),
+        pattern: row.pattern,
       })),
-    [hits, logsTotal, usingRegexPatterns, isDarkMode]
+    [patternRows, logsTotal, usingRegexPatterns, isSqlPatterns, isDarkMode]
   );
 
   // Notify parent of filtered count change (optional callback)
   useEffect(() => {
-    if (onFilteredCountChange && hits) {
-      onFilteredCountChange(hits.length);
+    if (onFilteredCountChange) {
+      onFilteredCountChange(patternRows.length);
     }
-  }, [hits, onFilteredCountChange]);
+  }, [patternRows, onFilteredCountChange]);
 
   if (status?.status === QueryExecutionStatus.LOADING) {
     return (
@@ -186,21 +191,17 @@ const PatternsContainerContent = ({
     );
   }
 
-  const hit = hits?.[0];
-  if (!hit) {
+  if (!patternRows.length) {
+    // If rows came back but none matched the expected pattern columns, the response schema
+    // is unexpected; otherwise there is simply nothing to display.
+    const rawHits = patternResults?.hits?.hits || [];
+    if (rawHits.length > 0) {
+      const title = i18n.translate('explore.patterns.schemaUnexpected', {
+        defaultMessage: 'Expected schema not found',
+      });
+      return <EuiCallOut title={title} color="danger" iconType="alert" />;
+    }
     return null;
-  }
-
-  // Check if the hit has all required fields in hit._source
-  const requiredFields = [COUNT_FIELD, SAMPLE_FIELD, PATTERNS_FIELD];
-  const hasAllRequiredFields = requiredFields.every((field) => field in hit._source);
-
-  if (!hasAllRequiredFields) {
-    // doesn't match normal fields or calcite fields
-    const title = i18n.translate('explore.patterns.schemaUnexpected', {
-      defaultMessage: 'Expected schema not found',
-    });
-    return <EuiCallOut title={title} color="danger" iconType="alert" />;
   }
 
   return (
