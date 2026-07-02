@@ -4,7 +4,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { BehaviorSubject, Subject, merge } from 'rxjs';
 import { debounceTime, filter, pairwise } from 'rxjs/operators';
 import { i18n } from '@osd/i18n';
@@ -159,7 +159,7 @@ export const useSearch = (services: DiscoverViewServices) => {
     abortController: undefined,
   });
 
-  const actionId = useRef(`ACTION_ABORT_DATA_QUERY_${uuid.v4()}`);
+  const actionId = useRef(`ACTION_ABORT_DATA_QUERY_${uuidv4()}`);
 
   const inspectorAdapters = {
     requests: new RequestAdapter(),

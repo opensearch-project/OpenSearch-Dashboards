@@ -4,7 +4,7 @@
  */
 
 import { useCallback } from 'react';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { EuiAccordion, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { get } from 'lodash';
@@ -199,7 +199,7 @@ const GroupByEditor = ({
 
 export function createGroupByTransformation(): TransformationInstance<GroupByConfig> {
   return {
-    instance_id: uuid.v4(),
+    instance_id: uuidv4(),
     definition_id: 'group_by',
     config: {
       groupByField: undefined,
