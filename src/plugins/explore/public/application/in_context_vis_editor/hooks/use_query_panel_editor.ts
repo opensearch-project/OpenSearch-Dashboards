@@ -4,7 +4,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { monaco } from '@osd/monaco';
+import { monaco, PPLValidationContext, revalidatePPLModel } from '@osd/monaco';
 import { i18n } from '@osd/i18n';
 
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
@@ -25,6 +25,8 @@ import {
 import { EditorMode } from '../../../application/utils/state_management/types';
 import { useEditorOperations } from './use_editor_operations';
 import { useQueryBuilderState } from './use_query_builder_state';
+
+import { syncPPLValidationContext, shouldUseRuntimeGrammar } from '../../../../../data/public';
 
 type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
 
@@ -59,6 +61,21 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
   const queryLanguageRef = useRef(queryLanguage);
 
   const { switchEditorMode, setEditorRef: setEditor } = useEditorOperations();
+  const detachValidationContextRef = useRef<(() => void) | undefined>();
+  const detachGrammarRefreshRef = useRef<(() => void) | undefined>();
+
+  const dataset = queryState.dataset;
+
+  const getValidationContext = useCallback((): PPLValidationContext => {
+    const currentQuery = services.data.query.queryString.getQuery();
+    const dsId = currentQuery.dataset?.dataSource?.id;
+    const dsVersion = currentQuery.dataset?.dataSource?.version;
+    return {
+      useRuntimeGrammar: shouldUseRuntimeGrammar(dsId, dsVersion),
+      dataSourceId: dsId,
+      dataSourceVersion: dsVersion,
+    };
+  }, [services.data.query.queryString]);
 
   // Keep the refs updated with latest context
   useEffect(() => {
@@ -73,6 +90,33 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
   useEffect(() => {
     queryLanguageRef.current = queryLanguage;
   }, [queryLanguage]);
+
+  // Sync PPL validation context when datasource changes
+  useEffect(() => {
+    const editor = editorRef.current;
+    const dsId = dataset?.dataSource?.id;
+    const dsVersion = dataset?.dataSource?.version;
+    syncPPLValidationContext(editor, {
+      useRuntimeGrammar: shouldUseRuntimeGrammar(dsId, dsVersion),
+      dataSourceId: dsId,
+      dataSourceVersion: dsVersion,
+    });
+    const model = editor?.getModel();
+    if (model) {
+      void revalidatePPLModel(model);
+    }
+  }, [dataset?.dataSource?.id, dataset?.dataSource?.version, editorRef]);
+
+  // Cleanup validation context on unmount
+  useEffect(
+    () => () => {
+      detachValidationContextRef.current?.();
+      detachValidationContextRef.current = undefined;
+      detachGrammarRefreshRef.current?.();
+      detachGrammarRefreshRef.current = undefined;
+    },
+    []
+  );
 
   keyboardShortcut?.useKeyboardShortcut({
     id: 'focus_query_bar',
@@ -174,6 +218,8 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
           isPromptModeRef,
           editorTextRef,
           queryLanguageRef,
+          detachValidationContextRef,
+          detachGrammarRefreshRef,
         },
         {
           setEditorRef,
@@ -182,7 +228,8 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
           switchEditorMode,
           updateDecorations,
           clearDecorations,
-        }
+        },
+        getValidationContext
       ),
     [
       setEditorRef,
@@ -191,6 +238,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
       setEditorIsFocused,
       updateDecorations,
       clearDecorations,
+      getValidationContext,
     ]
   );
 
