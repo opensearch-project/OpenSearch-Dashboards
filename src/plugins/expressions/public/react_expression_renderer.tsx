@@ -140,7 +140,10 @@ export const ReactExpressionRenderer = ({
             ...defaultState,
             isEmpty: false,
           }));
-        })
+        }),
+      expressionLoaderRef.current.data$.subscribe(() => {
+        setState((prevState) => ({ ...prevState, isLoading: false }));
+      })
     );
 
     return () => {
