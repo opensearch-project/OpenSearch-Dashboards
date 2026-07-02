@@ -112,9 +112,7 @@ const TableRowUI = ({
               key={colName}
               data-test-subj="docTableField"
               className={`osdDocTableCell ${
-                indexPattern.timeFieldName === colName
-                  ? 'eui-textNoWrap'
-                  : 'eui-textBreakAll eui-textBreakWord'
+                fieldInfo?.type === 'date' ? 'eui-textNoWrap' : 'eui-textBreakAll eui-textBreakWord'
               }`}
             >
               <div className="truncate-by-height">
@@ -130,7 +128,7 @@ const TableRowUI = ({
             key={colName}
             columnId={colName}
             onFilter={onFilter}
-            isTimeField={indexPattern.timeFieldName === colName}
+            isTimeField={fieldInfo?.type === 'date'}
             fieldMapping={fieldMapping}
             sanitizedCellValue={sanitizedCellValue}
           />
