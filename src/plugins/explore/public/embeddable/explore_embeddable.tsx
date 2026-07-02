@@ -64,7 +64,6 @@ import { CommonVisualizationRender } from '../components/visualizations/visualiz
 import { RenderChartConfig } from '../components/visualizations/types';
 import {
   TransformationService,
-  UrlTransformationState,
   registerAllTransformations,
 } from '../components/data_transformations';
 
@@ -124,6 +123,7 @@ export class ExploreEmbeddable
   private filtersSearchSource?: ISearchSource;
   private subscription: Subscription;
   private autoRefreshFetchSubscription?: Subscription;
+  private titleVariableSubscription?: Subscription;
   public readonly type = EXPLORE_EMBEDDABLE_TYPE;
   private panelTitle: string = '';
   private filterManager: FilterManager;
@@ -180,6 +180,7 @@ export class ExploreEmbeddable
       requests: new RequestAdapter(),
       data: new DataAdapter(),
     };
+    const dashboardContainer = (parent as unknown) as DashboardContainer;
 
     // Initialize transformation service
     this.transformationService = new TransformationService();
@@ -205,6 +206,16 @@ export class ExploreEmbeddable
           this.updateHandler(this.searchProps, true);
         }
       });
+    // Must include output$ here: when a panel title is edited, the base Embeddable.onResetInput()
+    // fires input$.next() (which triggers handleTitleVariables correctly) but then immediately
+    // overwrites the output title with the raw un-interpolated input.title via getPanelTitle().
+    // Subscribing to output$ ensures handleTitleVariables re-applies variable interpolation
+    // after that overwrite. The isEqual guard in updateOutput() prevents infinite loops.
+    this.titleVariableSubscription = merge(
+      this.getInput$(),
+      this.getOutput$(),
+      dashboardContainer.variableService.getVariables$()
+    ).subscribe(this.handleTitleVariables);
   }
 
   // initialize transformation pipeline from saved explore
@@ -222,6 +233,17 @@ export class ExploreEmbeddable
       // skip failed pipeline, no transformations applied
     }
   }
+
+  private handleTitleVariables = () => {
+    let panelTitle = this.output.title ?? '';
+    if (this.input.title && this.interpolationService.hasVariables(this.input.title)) {
+      panelTitle = this.interpolationService.interpolate(this.input.title);
+    } else if (this.interpolationService.hasVariables(this.savedExplore.title)) {
+      panelTitle = this.interpolationService.interpolate(this.savedExplore.title);
+    }
+    this.updateOutput({ title: panelTitle });
+    this.panelTitle = panelTitle;
+  };
 
   /**
    * Initialize variable interpolation service and subscription
@@ -692,6 +714,10 @@ export class ExploreEmbeddable
     // Cleanup variable subscription
     if (this.variableSubscription) {
       this.variableSubscription.unsubscribe();
+    }
+
+    if (this.titleVariableSubscription) {
+      this.titleVariableSubscription.unsubscribe();
     }
 
     // Cleanup transformation service
