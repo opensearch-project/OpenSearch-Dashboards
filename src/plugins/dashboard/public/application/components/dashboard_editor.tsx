@@ -124,7 +124,7 @@ export const DashboardEditor = () => {
                 variableService={currentContainer.variableService}
                 interpolationService={currentContainer.variableInterpolationService}
                 isEditMode={currentAppState?.viewMode === ViewMode.EDIT}
-                getPanelQueries={() => currentContainer.getPanelQueries()}
+                getPanels={() => currentContainer.getPanels()}
                 dashboardId={savedDashboardInstance?.id}
                 onSaveDashboard={() => {
                   // Emit event to trigger dashboard save
