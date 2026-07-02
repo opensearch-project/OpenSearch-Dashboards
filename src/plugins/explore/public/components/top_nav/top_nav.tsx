@@ -8,6 +8,7 @@ import { i18n } from '@osd/i18n';
 import { useObservable } from 'react-use';
 import { AppMountParameters } from 'opensearch-dashboards/public';
 import { useSelector as useNewStateSelector, useDispatch } from 'react-redux';
+import { useOpenOnUrlMarker } from '../../../../opensearch_dashboards_utils/public';
 import { useSyncQueryStateWithUrl } from '../../../../data/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { TopNavMenuItemRenderType } from '../../../../navigation/public';
@@ -186,6 +187,20 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
     const openButtonRun = getOpenButtonRun(services);
     openButtonRun({} as HTMLElement);
   }, [services]);
+
+  // The side-nav "Browse saved searches" popover action navigates here with a
+  // `_openSaved=true` hash marker (it can't open the flyout itself — popover
+  // actions only get navigateToApp, not `overlays`). useOpenOnUrlMarker reads
+  // the marker on mount + window `hashchange` and opens the flyout once per
+  // marker arrival (edge-triggered), then strips it.
+  //
+  // We intentionally do NOT key on the react-router location here. The app
+  // re-serializes the hash via silent `history.replace` on ordinary actions
+  // (e.g. running a query), which would otherwise re-trigger the check and
+  // reopen the flyout if a stale marker momentarily reappeared. Same-app
+  // re-clicks of the popover action are still handled: core dispatches a
+  // synthetic window `hashchange` for same-app popover navigations.
+  useOpenOnUrlMarker('_openSaved', handleOpenShortcut);
 
   const handleSaveShortcut = useCallback(() => {
     if (savedExplore) {

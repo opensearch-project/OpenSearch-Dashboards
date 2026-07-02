@@ -221,6 +221,10 @@ export const WorkspaceCollaboratorTable = ({
                 resp?.forEach(({ id, name, alias }) => {
                   newMap[id] = { name, alias };
                 });
+                // Mark requested IDs not returned by the API as sentinel to avoid re-fetching
+                slice.forEach((id) => {
+                  if (!(id in newMap)) newMap[id] = { name: '' };
+                });
               }
             } catch (e) {
               if ((e as Error).name !== 'AbortError') {

@@ -78,6 +78,8 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   const [toolCallStates, setToolCallStates] = useState<Map<string, any>>(new Map());
   const resendAvailable = !!chatService.conversationHistoryService.getMemoryProvider().includeFullHistory;
   const [startResponse, setStartResponse] = useState(false);
+  const [pendingMessage, setPendingMessage] = useState<UserMessage | null>(null);
+  const [availableDataSources, setAvailableDataSources] = useState<Array<{id: string, title: string}>>([]);
 
   const hasActiveToolCalls = useMemo(() => {
     if (toolCallStates instanceof Map) {
@@ -176,19 +178,18 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     }
   }, [timeline, chatService, isLoading]);
 
-  // Clear thread ID on unmount to start fresh next time
+  // Clear thread ID and pending data source selection on unmount
   useUnmount(() => {
-    services.core.chat.resetThreadId()
+    services.core.chat.resetThreadId();
+    setPendingMessage(null);
+    setAvailableDataSources([]);
   });
 
   // Cache data source compatibility check to avoid network call on every message
-  const unsupportedDataSourceRef = useRef<{ dataSourceId: string | undefined; result: boolean } | null>(null);
+  const unsupportedDataSourceRef = useRef<{ dataSourceId: string; result: boolean } | null>(null);
 
-  const isUnsupportedDataSource = useCallback(async (): Promise<boolean> => {
+  const isUnsupportedDataSource = useCallback(async (dataSourceId: string): Promise<boolean> => {
     try {
-      const dataSourceId = await chatService.getCurrentDataSourceId();
-      if (!dataSourceId) return false;
-      // Return cached result if data source hasn't changed
       if (unsupportedDataSourceRef.current?.dataSourceId === dataSourceId) {
         return unsupportedDataSourceRef.current.result;
       }
@@ -202,54 +203,28 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       unsupportedDataSourceRef.current = { dataSourceId, result };
       return result;
     } catch {
-      // Fail-open: transient errors should not block AI features
       return false;
     }
-  }, [chatService, services.core?.savedObjects?.client]);
+  }, [services.core?.savedObjects?.client]);
 
   // Helper function to handle message streaming with observable subscription
   const subscribeToMessageStream = useCallback(async (
-    messageContent: string,
     messages: Message[],
-    rawMessage?: string
+    userMessage: UserMessage
   ) => {
-    // Block AI features for unsupported data sources
-    if (await isUnsupportedDataSource()) {
-      const userMsg: UserMessage = {
-        id: chatService.generateMessageId(),
-        role: 'user',
-        content: messageContent,
-        rawMessage: rawMessage || messageContent,
-      };
-      const systemMsg: SystemMessage = {
-        id: chatService.generateMessageId(),
-        role: 'system',
-        content: i18n.translate('chat.dataSourceUnsupported', {
-          defaultMessage: 'The current data source does not support AI features.',
-        }),
-      };
-      setTimeline((prev) => [...prev, userMsg, systemMsg]);
-      return;
-    }
-
     isStreamingRef.current = true;
     setIsStreaming(true);
     setStartResponse(false);
 
+    const content = userMessage.content as string;
+
     try {
-      const { observable, userMessage } = await chatService.sendMessage(
-        messageContent,
-        messages
+      const { observable } = await chatService.sendMessage(
+        content,
+        messages,
+        userMessage
       );
 
-      const timelineUserMessage: UserMessage = {
-        id: userMessage.id,
-        role: 'user',
-        content: userMessage.content,
-        rawMessage: Array.isArray(userMessage.content) ? undefined : rawMessage || messageContent,  // For regular messages, raw and content are the same
-      };
-
-      setTimeline((prev) => [...prev, timelineUserMessage]);
       setScreenshotData(undefined);
 
       // Subscribe to streaming response
@@ -288,7 +263,83 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       setIsStreaming(false);
       currentSubscriptionRef.current = null;
     }
-  }, [chatService, currentRunId, eventHandler, isUnsupportedDataSource]);
+  }, [chatService, currentRunId, eventHandler]);
+
+  /**
+   * Execute a slash command and update the timeline accordingly.
+   * @param messageContent - The raw user input (e.g. "/search-relevance query")
+   * @param messagesToSend - The message history (excluding the user message) to pass to subscribeToMessageStream
+   * @param pendingUserMessage - The user message already in the timeline (data source selection flow).
+   *   When provided, it is replaced (by id) with the resolved command message; otherwise a fresh
+   *   user message is inserted.
+   * @returns true if the command was handled, false otherwise
+   */
+  const executeSlashCommand = useCallback(
+    async (
+      messageContent: string,
+      messagesToSend: Message[],
+      pendingUserMessage?: UserMessage
+    ): Promise<boolean> => {
+      const commandResult = await slashCommandRegistry.execute(messageContent);
+      if (!commandResult.handled) return false;
+
+      if (commandResult.localMessage) {
+        const role = commandResult.role ?? 'system';
+        const responseMsg: Message = {
+          id: chatService.generateMessageId(),
+          role,
+          content: commandResult.localMessage,
+          ...(role === 'system' && commandResult.title && { title: commandResult.title }),
+        };
+        if (pendingUserMessage) {
+          // User message already in timeline (data source selection flow) — append response
+          setTimeline((prev) => [...prev, responseMsg]);
+        } else {
+          const userMsg = chatService.getUserMessage(messageContent);
+          setTimeline((prev) => [...prev, userMsg, responseMsg]);
+        }
+        setScreenshotData(undefined);
+        return true;
+      }
+      if (commandResult.message) {
+        const userMsg = chatService.getUserMessage(commandResult.message, messageContent);
+        if (pendingUserMessage) {
+          // Replace the pending user message (by id) with the resolved command message
+          setTimeline((prev) =>
+            prev.map((msg) => (msg.id === pendingUserMessage.id ? userMsg : msg))
+          );
+        } else {
+          setTimeline((prev) => [...prev, userMsg]);
+        }
+        subscribeToMessageStream(messagesToSend, userMsg);
+        return true;
+      }
+      return true;
+    },
+    [chatService, subscribeToMessageStream]
+  );
+
+  // Handler for when user selects a data source from the prompt
+  const handleDataSourceSelect = useCallback(
+    async (id: string) => {
+      chatService.setDataSourceId(id);
+      setAvailableDataSources([]);
+      const pending = pendingMessage;
+      setPendingMessage(null);
+      if (!pending) return;
+
+      const messageContent = typeof pending.content === 'string' ? pending.content : '';
+      const historyMessages = timeline.slice(0, -1);
+
+      // Pending user message is already in the timeline — replace it if a slash command
+      const handled = await executeSlashCommand(messageContent, historyMessages, pending);
+      if (handled) return;
+
+      // Normal message: user message already in timeline, just stream
+      subscribeToMessageStream(historyMessages, pending);
+    },
+    [chatService, pendingMessage, executeSlashCommand, subscribeToMessageStream, timeline]
+  );
 
   const handleSend = async (options?: {input?: string, messages?: Message[]}) => {
     const messageContent = options?.input ?? input.trim();
@@ -319,35 +370,60 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     // Merge additional messages with current timeline for sending
     const messagesToSend = [...timeline, ...additionalMessages];
 
-    // Check if this is a slash command
-    const commandResult = await slashCommandRegistry.execute(messageContent);
-    if (commandResult.handled) {
-      if (commandResult.localMessage) {
-        const userMsg: UserMessage = {
-          id: chatService.generateMessageId(),
-          role: 'user',
-          content: messageContent,
-          rawMessage: messageContent,
-        };
-        const role = commandResult.role ?? 'system';
-        const responseMsg: Message = {
-          id: chatService.generateMessageId(),
-          role,
-          content: commandResult.localMessage,
-          ...(role === 'system' && commandResult.title && { title: commandResult.title }),
-        };
-        setTimeline((prev) => [...prev, userMsg, responseMsg]);
-        return;
-      }
-      // If command was handled and returned a message, send it to the AI
-      if (commandResult.message) {
-        return subscribeToMessageStream(commandResult.message, messagesToSend, messageContent);
-      }
+    // Validate data source before sending
+    const currentDataSourceId = await chatService.getCurrentDataSourceId();
+
+    // 1. Check if current data source is unsupported
+    if (currentDataSourceId && (await isUnsupportedDataSource(currentDataSourceId))) {
+      const userMsg = chatService.getUserMessage(messageContent);
+      const systemMsg: SystemMessage = {
+        id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+        role: 'system',
+        content: i18n.translate('chat.dataSourceUnsupported', {
+          defaultMessage: 'The current data source does not support AI features.',
+        }),
+      };
+      setTimeline((prev) => [...prev, userMsg, systemMsg]);
       return;
     }
 
-    // Normal message flow
-    return subscribeToMessageStream(messageContent, messagesToSend);
+    // 2. Check if current data source is valid (exists in available list)
+    const compatibleDataSources = await chatService.getAvailableDataSources();
+    const isValid = currentDataSourceId && compatibleDataSources.some((ds) => ds.id === currentDataSourceId);
+
+    if (!isValid) {
+      if (compatibleDataSources.length >= 1) {
+        // Compatible data sources exist — prompt user to pick one.
+        // The user message is added to the timeline now so it stays visible while the
+        // selector is shown; handleDataSourceSelect replaces it once a source is chosen.
+        const userMsg = chatService.getUserMessage(messageContent);
+        setPendingMessage(userMsg);
+        setAvailableDataSources(compatibleDataSources);
+        setTimeline((prev) => [...prev, userMsg]);
+        return;
+      }
+
+      // 3. No data sources associated with this workspace
+      const userMsg = chatService.getUserMessage(messageContent);
+      const infoMsg: Message = {
+        id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+        role: 'assistant',
+        content: i18n.translate('chat.noDataSourceMessage', {
+          defaultMessage: 'There are no data sources associated with this workspace. Please ask your workspace admin to associate data sources to this workspace.',
+        }),
+      };
+      setTimeline((prev) => [...prev, userMsg, infoMsg]);
+      return;
+    }
+
+    // Check if this is a slash command
+    const handled = await executeSlashCommand(messageContent, messagesToSend);
+    if (handled) return;
+
+    // Normal message flow — add user message to timeline then stream
+    const userMsg = chatService.getUserMessage(messageContent);
+    setTimeline((prev) => [...prev, userMsg]);
+    return subscribeToMessageStream(messagesToSend, userMsg);
   };
 
   handleSendRef.current = handleSend;
@@ -393,13 +469,15 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
     // Remove this message and everything after it from the timeline
     const truncatedTimeline = timeline.slice(0, messageIndex);
-    setTimeline(truncatedTimeline);
 
     // Clear any streaming state and input
     setInput('');
 
-    subscribeToMessageStream(textContent, [...truncatedTimeline,...additionalMessages]);
-  }, [timeline, subscribeToMessageStream, setInput, setTimeline]);
+    // Add user message back and stream
+    const userMsg = chatService.getUserMessage(textContent);
+    setTimeline([...truncatedTimeline, userMsg]);
+    subscribeToMessageStream([...truncatedTimeline,...additionalMessages], userMsg);
+  }, [timeline, subscribeToMessageStream, setInput, chatService]);
 
   const handleResendToolResult = useCallback(
     async ({ messageId, toolCallId, toolResult }: { messageId: string; toolCallId: string; toolResult: any }) => {
@@ -439,6 +517,8 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     setTimeline([]);
     setCurrentRunId(null);
     setPendingConfirmation(null);
+    setPendingMessage(null);
+    setAvailableDataSources([]);
     confirmationService.cleanAll();
     setShowHistory(false);
   }, [chatService, confirmationService, stopStreaming]);
@@ -509,6 +589,8 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   const handleSelectConversation = useCallback(async (conversation: SavedConversation) => {
     // Stop any ongoing streaming before switching conversations
     stopStreaming();
+    setPendingMessage(null);
+    setAvailableDataSources([]);
 
     // Abort any ongoing conversation loading
     if (conversationLoadAbortControllerRef.current) {
@@ -628,10 +710,14 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             onApproveConfirmation={handleApproveConfirmation}
             onRejectConfirmation={handleRejectConfirmation}
             onFillInput={setInput}
+            inputValue={input}
+            onRemoveInput={(content: string) => setInput((prev) => prev.replace(content, '').trim())}
             threadId={chatService.getThreadId()}
             onShowHistory={handleShowHistory}
             conversationHistoryService={chatService.conversationHistoryService}
             onSelectConversation={handleSelectConversation}
+            availableDataSources={availableDataSources}
+            onDataSourceSelect={handleDataSourceSelect}
             {...enhancedProps}
             startResponse={startResponse}
           />
@@ -672,9 +758,13 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             input={input}
             isCapturing={isCapturing}
             isStreaming={isStreaming}
-            disabled={hasActiveToolCalls || hasPendingResend || !!pendingConfirmation}
+            disabled={hasActiveToolCalls || hasPendingResend || !!pendingConfirmation || availableDataSources.length > 0}
             placeholder={
-              pendingConfirmation
+              availableDataSources.length > 0
+                ? i18n.translate('chat.input.selectDataSource', {
+                    defaultMessage: 'Select a data source to continue...',
+                  })
+                : pendingConfirmation
                 ? i18n.translate('chat.input.waitingForConfirmation', {
                     defaultMessage: 'Waiting for confirmation...',
                   })

@@ -34,7 +34,7 @@ interface VisState {
 
 export const saveStateToSavedObject = (
   obj: SavedExplore,
-  flavorId: string,
+  flavorId?: string,
   tabDefinition?: TabDefinition,
   visState?: VisState,
   dataset?: IndexPattern | Dataset,

@@ -17,6 +17,7 @@ export interface SlashCommand {
 
 class SlashCommandRegistry {
   private commands: Map<string, SlashCommand> = new Map();
+  private listeners: Set<() => void> = new Set();
 
   register(command: SlashCommand) {
     if (this.commands.has(command.command)) {
@@ -25,10 +26,21 @@ class SlashCommandRegistry {
       return;
     }
     this.commands.set(command.command, command);
+    this.notifyListeners();
   }
 
   unregister(commandName: string) {
     this.commands.delete(commandName);
+    this.notifyListeners();
+  }
+
+  onChange(listener: () => void): () => void {
+    this.listeners.add(listener);
+    return () => this.listeners.delete(listener);
+  }
+
+  private notifyListeners() {
+    this.listeners.forEach((fn) => fn());
   }
 
   get(commandName: string): SlashCommand | undefined {

@@ -266,6 +266,62 @@ describe('WorkspaceCollaboratorTable', () => {
     });
   });
 
+  it('should not re-fetch IDs that were requested but not returned by the API', async () => {
+    const httpPostMock = mockCoreStart.http.post as jest.Mock;
+    httpPostMock.mockClear();
+    // API returns nothing for 'unknown-user' — simulating a non-existent ID
+    httpPostMock.mockResolvedValue([]);
+
+    const typesWithIdentitySource: WorkspaceCollaboratorType[] = [
+      {
+        id: 'user',
+        name: 'User',
+        buttonLabel: 'Add Users',
+        onAdd: async () => {},
+        getDisplayedType: ({ permissionType }) => (permissionType === 'user' ? 'User' : undefined),
+        identitySource: { source: 'LDAP', type: 'user' },
+      },
+    ];
+
+    const permissionSettings = [
+      {
+        id: 0,
+        modes: [WorkspacePermissionMode.Read, WorkspacePermissionMode.LibraryRead],
+        type: WorkspacePermissionItemType.User,
+        userId: 'unknown-user',
+      },
+    ];
+
+    const { rerender } = render(
+      <Provider>
+        <WorkspaceCollaboratorTable
+          {...mockProps}
+          permissionSettings={permissionSettings}
+          displayedCollaboratorTypes={typesWithIdentitySource}
+        />
+      </Provider>
+    );
+
+    await waitFor(() => expect(httpPostMock).toHaveBeenCalledTimes(1));
+
+    // Re-render with a new permissionSettings reference (same content) to trigger the effect
+    rerender(
+      <Provider>
+        <WorkspaceCollaboratorTable
+          {...mockProps}
+          permissionSettings={[...permissionSettings]}
+          displayedCollaboratorTypes={typesWithIdentitySource}
+        />
+      </Provider>
+    );
+
+    // Wait a tick to let any potential re-fetch fire
+    await act(async () => {});
+
+    // Should still be 1 — the sentinel prevents re-fetching the unresolvable ID
+    expect(httpPostMock).toHaveBeenCalledTimes(1);
+  });
+
   it('should render empty state when no permission settings', () => {
     const permissionSettings: any[] = [];
 

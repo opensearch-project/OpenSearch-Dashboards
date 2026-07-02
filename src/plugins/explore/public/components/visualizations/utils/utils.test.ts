@@ -13,8 +13,6 @@ describe('applyAxisStyling', () => {
     name: 'X Value',
     schema: VisFieldType.Numerical,
     column: 'x',
-    validValuesCount: 6,
-    uniqueValuesCount: 6,
   };
 
   const defaultAxisStyle = {
@@ -131,8 +129,6 @@ describe('getSchemaByAxis', () => {
     id: 1,
     name: 'Test Axis',
     column: 'test',
-    validValuesCount: 10,
-    uniqueValuesCount: 10,
   };
 
   it('returns quantitative for Numerical schema', () => {

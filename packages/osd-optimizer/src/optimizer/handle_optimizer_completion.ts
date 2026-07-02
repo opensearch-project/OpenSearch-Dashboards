@@ -56,7 +56,7 @@ export function handleOptimizerCompletion(config: OptimizerConfig) {
           }
 
           if (prevState?.phase === 'issue') {
-            throw createFailError('webpack issue');
+            throw createFailError('rspack issue');
           }
 
           throw new Error(`optimizer unexpectedly exit in phase "${prevState?.phase}"`);

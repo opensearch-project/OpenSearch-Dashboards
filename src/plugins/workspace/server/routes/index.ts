@@ -20,7 +20,11 @@ import { IWorkspaceClientImpl, WorkspaceAttributeWithPermission } from '../types
 import { SavedObjectsPermissionControlContract } from '../permission_control/client';
 import { registerDuplicateRoute } from './duplicate';
 import { getPermissionMode, transferCurrentUserInPermissions } from '../utils';
-import { validateWorkspaceColor } from '../../common/utils';
+import {
+  validateWorkspaceColor,
+  getInvalidWorkspacePermissionsError,
+  normalizeWorkspacePermissions,
+} from '../../common/utils';
 import { getUseCaseFeatureConfig } from '../../../../core/server';
 
 export const WORKSPACES_API_BASE_URL = '/api/workspaces';
@@ -222,12 +226,19 @@ export function registerRoutes({
         dataConnections?: string[];
       } = attributes;
 
+      // Reject permission combinations that do not map to a recognized
+      // collaborator access level (read only, read and write, or admin).
       if (isPermissionControlEnabled) {
-        createPayload.permissions = settings.permissions;
+        const invalidPermissionsError = getInvalidWorkspacePermissionsError(settings.permissions);
+        if (invalidPermissionsError) {
+          return res.badRequest({ body: invalidPermissionsError });
+        }
+        const normalizedPermissions = normalizeWorkspacePermissions(settings.permissions);
+        createPayload.permissions = normalizedPermissions;
         if (!!principals?.users?.length) {
           const currentUserId = principals.users[0];
           const acl = new ACL(
-            transferCurrentUserInPermissions(currentUserId, settings.permissions)
+            transferCurrentUserInPermissions(currentUserId, normalizedPermissions)
           );
           createPayload.permissions = acl.getPermissions();
         }
@@ -262,6 +273,15 @@ export function registerRoutes({
       const { id } = req.params;
       const { attributes, settings } = req.body;
 
+      // Reject permission combinations that do not map to a recognized
+      // collaborator access level (read only, read and write, or admin).
+      if (isPermissionControlEnabled) {
+        const invalidPermissionsError = getInvalidWorkspacePermissionsError(settings.permissions);
+        if (invalidPermissionsError) {
+          return res.badRequest({ body: invalidPermissionsError });
+        }
+      }
+
       const result = await client.update(
         {
           request: req,
@@ -269,7 +289,9 @@ export function registerRoutes({
         id,
         {
           ...attributes,
-          ...(isPermissionControlEnabled ? { permissions: settings.permissions } : {}),
+          ...(isPermissionControlEnabled
+            ? { permissions: normalizeWorkspacePermissions(settings.permissions) }
+            : {}),
           ...{ dataSources: settings.dataSources },
           ...{ dataConnections: settings.dataConnections },
         }

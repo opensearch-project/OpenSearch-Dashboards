@@ -104,6 +104,7 @@ const createSavedObjectsServiceMock = () => {
     setup: jest.fn(),
     start: jest.fn(),
     stop: jest.fn(),
+    setCapabilitiesResolver: jest.fn(),
   };
 
   mocked.setup.mockResolvedValue(createInternalSetupContractMock());

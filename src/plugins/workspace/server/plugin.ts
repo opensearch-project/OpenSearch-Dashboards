@@ -176,6 +176,21 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
     core.http.registerOnPostAuth(async (request, response, toolkit) => {
       const path = request.url.pathname;
       if (path === '/') {
+        // initialize coreStart and uiSettingsClient first to allow access to defaultRoute
+        const [coreStart] = await core.getStartServices();
+        const uiSettingsClient = coreStart.uiSettings.asScopedToClient(
+          coreStart.savedObjects.getScopedClient(request)
+        );
+
+        // check if defaultRoute is configured (and not the default home page)
+        // has to be handled here instead of core_app.ts as this method registers
+        // a middleware hook, which overrides registerDefaultRoutes in core_app.ts
+        const defaultRoute = await uiSettingsClient.get<string>('defaultRoute');
+        if (defaultRoute && defaultRoute !== '/app/home') {
+          // skips the middleware and allow registerDefaultRoutes to take effect
+          return toolkit.next();
+        }
+
         const workspaceListResponse = await this.client?.list(
           { request },
           { page: 1, perPage: 100 }
@@ -192,10 +207,6 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
               },
             });
           }
-          const [coreStart] = await core.getStartServices();
-          const uiSettingsClient = coreStart.uiSettings.asScopedToClient(
-            coreStart.savedObjects.getScopedClient(request)
-          );
           const defaultWorkspaceId = await uiSettingsClient.get(DEFAULT_WORKSPACE);
           const defaultWorkspace = workspaceList.find(
             (workspace) => workspace.id === defaultWorkspaceId

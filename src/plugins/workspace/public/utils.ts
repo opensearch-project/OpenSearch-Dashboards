@@ -11,6 +11,7 @@ import {
   AppCategory,
   ApplicationStart,
   AppNavLinkStatus,
+  AppStatus,
   ChromeBreadcrumb,
   CoreStart,
   DEFAULT_APP_CATEGORIES,
@@ -526,13 +527,71 @@ export function prependWorkspaceToBreadcrumbs(
   }
 }
 
+/**
+ * Read the current value of `application.applications$` synchronously.
+ *
+ * Load-bearing assumption: `applications$` is wrapped in `shareReplay(1)`
+ * upstream (see `application_service.tsx`), so subscribing then immediately
+ * unsubscribing emits the latest cached value without leaking the
+ * subscription. If a future refactor drops `shareReplay`, this returns
+ * `undefined` instead of throwing — callers that branch on snapshot
+ * presence (e.g. `pickUseCaseLandingAppId`) will silently regress to
+ * pre-fix behavior. Keep this helper as the single source of truth so the
+ * regression has one place to surface rather than many.
+ */
+export const getApplicationsSnapshot = (
+  application: ApplicationStart
+): ReadonlyMap<string, PublicAppInfo> | undefined => {
+  let apps: ReadonlyMap<string, PublicAppInfo> | undefined;
+  const sub = application.applications$.subscribe((value) => {
+    apps = value;
+  });
+  sub.unsubscribe();
+  return apps;
+};
+
+/**
+ * Pick the landing app for a use case. Skips features that are
+ * **feature-flag-disabled** — i.e. `navLinkStatus === hidden` *and*
+ * `status === accessible`. An app gated by a feature flag is still
+ * accessible in principle, the plugin just hides the nav link to suppress
+ * the UI; an app that's transiently inaccessible (e.g. an
+ * `insideWorkspace`-only app read from outside any workspace, which the
+ * workspace plugin marks `inaccessible` and which therefore renders as
+ * `hidden` too) will become available once the user enters the workspace
+ * and must not be filtered out here.
+ *
+ * Reading both fields lets us distinguish "hidden by config" (skip) from
+ * "hidden because of where we are" (keep — it'll come back). A feature id
+ * with no entry in `apps` is treated as selectable: feature ids come from
+ * `convertNavGroupToWorkspaceUseCase` over real registered nav links, so
+ * an absent lookup means the applications snapshot hasn't propagated yet,
+ * not that the app doesn't exist.
+ */
+export const pickUseCaseLandingAppId = (
+  features: WorkspaceUseCaseFeature[] | undefined,
+  apps: ReadonlyMap<string, PublicAppInfo> | undefined
+): string | undefined => {
+  if (!features?.length) {
+    return undefined;
+  }
+  if (!apps) {
+    return features[0].id;
+  }
+  const isFeatureFlagDisabled = (app: PublicAppInfo | undefined) =>
+    app?.navLinkStatus === AppNavLinkStatus.hidden && app?.status === AppStatus.accessible;
+  const firstSelectable = features.find((feature) => !isFeatureFlagDisabled(apps.get(feature.id)));
+  return (firstSelectable ?? features[0]).id;
+};
+
 export const getUseCaseUrl = (
   useCase: WorkspaceUseCase | undefined,
   workspaceId: string,
   application: ApplicationStart,
   http: HttpSetup
 ): string => {
-  const appId = useCase?.features?.[0]?.id || WORKSPACE_DETAIL_APP_ID;
+  const apps = getApplicationsSnapshot(application);
+  const appId = pickUseCaseLandingAppId(useCase?.features, apps) || WORKSPACE_DETAIL_APP_ID;
   const useCaseURL = formatUrlWithWorkspaceId(
     application.getUrlForApp(appId, {
       absolute: false,
