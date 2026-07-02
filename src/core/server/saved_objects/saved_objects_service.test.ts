@@ -171,6 +171,10 @@ describe('SavedObjectsService', () => {
         const soService = new SavedObjectsService(coreContext);
         const setup = await soService.setup(createSetupDeps());
 
+        // setup() now registers an internal sentinel type. Baseline the
+        // register count before the user-visible registerType call.
+        const baselineCalls = typeRegistryInstanceMock.registerType.mock.calls.length;
+
         const type = {
           name: 'someType',
           hidden: false,
@@ -179,8 +183,8 @@ describe('SavedObjectsService', () => {
         };
         setup.registerType(type);
 
-        expect(typeRegistryInstanceMock.registerType).toHaveBeenCalledTimes(1);
-        expect(typeRegistryInstanceMock.registerType).toHaveBeenCalledWith(type);
+        expect(typeRegistryInstanceMock.registerType).toHaveBeenCalledTimes(baselineCalls + 1);
+        expect(typeRegistryInstanceMock.registerType).toHaveBeenLastCalledWith(type);
       });
     });
 
