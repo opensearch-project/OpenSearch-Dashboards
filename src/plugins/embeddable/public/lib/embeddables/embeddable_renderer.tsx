@@ -41,8 +41,7 @@ import { ErrorEmbeddable, isErrorEmbeddable } from './error_embeddable';
  * In case when factory is used, then input is required, because it will be used as initial input to create an embeddable object
  */
 export type EmbeddableRendererProps<I extends EmbeddableInput> =
-  | EmbeddableRendererPropsWithEmbeddable<I>
-  | EmbeddableRendererWithFactory<I>;
+  EmbeddableRendererPropsWithEmbeddable<I> | EmbeddableRendererWithFactory<I>;
 
 interface EmbeddableRendererPropsWithEmbeddable<I extends EmbeddableInput> {
   input?: I;

@@ -91,7 +91,7 @@ export class WorkspaceUiSettingsClientWrapper {
 
         try {
           configObject = await wrapperOptions.client.get<T>('config', normalizeDocId, options);
-        } catch (e) {
+        } catch {
           // make global config nullable when getting workspace settings
         }
 
@@ -105,7 +105,7 @@ export class WorkspaceUiSettingsClientWrapper {
             WORKSPACE_TYPE,
             requestWorkspaceId
           );
-        } catch (e) {
+        } catch {
           this.logger.error(`Unable to get workspaceObject with id: ${requestWorkspaceId}`);
         }
 
@@ -118,10 +118,13 @@ export class WorkspaceUiSettingsClientWrapper {
               .concat(config.scope || [])
               .includes(UiSettingScope.WORKSPACE)
           )
-          .reduce((acc, [key, config]) => {
-            acc[key] = config.value;
-            return acc;
-          }, {} as Record<string, any>);
+          .reduce(
+            (acc, [key, config]) => {
+              acc[key] = config.value;
+              return acc;
+            },
+            {} as Record<string, any>
+          );
 
         const workspaceSettings = workspaceObject?.attributes?.uiSettings || {};
 
@@ -159,7 +162,7 @@ export class WorkspaceUiSettingsClientWrapper {
 
         try {
           configObject = await wrapperOptions.client.get<T>('config', configDocId, options);
-        } catch (e) {
+        } catch {
           // make global config nullable when updating workspace settings
         }
 

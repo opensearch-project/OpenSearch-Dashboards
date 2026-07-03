@@ -49,9 +49,7 @@ const rootDir = '../../..';
  * non A to Z character.
  */
 const rootGroups = [
-  [
-    /* CI Group 0 is left empty to make numbering natural */
-  ],
+  [/* CI Group 0 is left empty to make numbering natural */],
   [
     // CI Group 1 (roughly 280 files)
     '<rootDir>/src/plugins/[v-z]', // plugins v-u

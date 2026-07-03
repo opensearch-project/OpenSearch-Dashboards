@@ -263,7 +263,7 @@ const extensions: Extension[] = [
             return { value: parsed };
           }
           return { errors: [helpers.error('object.base', { value: parsed })] };
-        } catch (e) {
+        } catch {
           return { errors: [helpers.error('object.parse')] };
         }
       }
@@ -297,7 +297,7 @@ const extensions: Extension[] = [
             return { value: new Map(Object.entries(parsed)) };
           }
           return { errors: [helpers.error('map.base')] };
-        } catch (e) {
+        } catch {
           return { errors: [helpers.error('map.parse')] };
         }
       }
@@ -327,10 +327,10 @@ const extensions: Extension[] = [
               return helpers.error('map.key', { entryKey, reason: keyError });
             }
 
-            const {
-              value: validatedEntryValue,
-              error: valueError,
-            } = args.value.validate(entryValue, { presence: 'required' });
+            const { value: validatedEntryValue, error: valueError } = args.value.validate(
+              entryValue,
+              { presence: 'required' }
+            );
 
             if (valueError) {
               return helpers.error('map.value', { entryKey, reason: valueError });
@@ -365,7 +365,7 @@ const extensions: Extension[] = [
             return { value: parsed };
           }
           return { errors: [helpers.error('record.base', { value: parsed })] };
-        } catch (e) {
+        } catch {
           return { errors: [helpers.error('record.parse')] };
         }
       }
@@ -395,10 +395,10 @@ const extensions: Extension[] = [
               return helpers.error('record.key', { entryKey, reason: keyError });
             }
 
-            const {
-              value: validatedEntryValue,
-              error: valueError,
-            } = args.value.validate(entryValue, { presence: 'required' });
+            const { value: validatedEntryValue, error: valueError } = args.value.validate(
+              entryValue,
+              { presence: 'required' }
+            );
 
             if (valueError) {
               return helpers.error('record.value', { entryKey, reason: valueError });
@@ -431,7 +431,7 @@ const extensions: Extension[] = [
             return { value: parsed };
           }
           return { errors: [helpers.error('array.base', { value: parsed })] };
-        } catch (e) {
+        } catch {
           return { errors: [helpers.error('array.parse')] };
         }
       }
@@ -460,4 +460,4 @@ export type JoiRoot = Joi.Root & {
 /**
  * @internal
  */
-export const internals = (Joi.extend(...extensions) as unknown) as JoiRoot;
+export const internals = Joi.extend(...extensions) as unknown as JoiRoot;

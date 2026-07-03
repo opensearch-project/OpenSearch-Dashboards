@@ -40,12 +40,7 @@ const uiSlice = createSlice({
   },
 });
 
-export const {
-  setActiveTab,
-  setUiState,
-  setShowHistogram,
-  setWrapCellText,
-  setMetricsPageMode,
-} = uiSlice.actions;
+export const { setActiveTab, setUiState, setShowHistogram, setWrapCellText, setMetricsPageMode } =
+  uiSlice.actions;
 export const uiReducer = uiSlice.reducer;
 export const uiInitialState = uiSlice.getInitialState();

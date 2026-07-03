@@ -79,7 +79,8 @@ interface AgentTracesEmbeddableConfig {
 
 export class AgentTracesEmbeddable
   extends Embeddable<AgentTracesInput, AgentTracesOutput>
-  implements IEmbeddable<AgentTracesInput, AgentTracesOutput> {
+  implements IEmbeddable<AgentTracesInput, AgentTracesOutput>
+{
   private abortController?: AbortController;
   private readonly savedAgentTraces: SavedAgentTraces;
   private inspectorAdaptors: Adapters;

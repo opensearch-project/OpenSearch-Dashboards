@@ -50,13 +50,13 @@ describe('Data Source Service', () => {
   });
 
   describe('setCustomTransport()', () => {
-    const clientParams = ({
+    const clientParams = {
       dataSourceId: 'test-data-source-id',
-    } as unknown) as DataSourceClientParams;
+    } as unknown as DataSourceClientParams;
 
     test('forwards the registered custom Transport to configureClient', async () => {
       class FakeTransport {}
-      const fakeTransport = (FakeTransport as unknown) as typeof Transport;
+      const fakeTransport = FakeTransport as unknown as typeof Transport;
 
       const { getDataSourceClient } = await service.setup(config);
       service.setCustomTransport(fakeTransport);

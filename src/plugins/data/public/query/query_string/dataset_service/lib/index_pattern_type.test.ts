@@ -200,7 +200,7 @@ describe('indexPatternTypeConfig', () => {
     });
 
     test('should extract data source from references array (traditional method)', async () => {
-      const client = ({
+      const client = {
         find: jest.fn().mockResolvedValue({
           savedObjects: [
             {
@@ -223,7 +223,7 @@ describe('indexPatternTypeConfig', () => {
             },
           ],
         }),
-      } as unknown) as SavedObjectsClientContract;
+      } as unknown as SavedObjectsClientContract;
 
       // @ts-expect-error - Partial mock for testing
       const result = await indexPatternTypeConfig.fetch({ savedObjects: { client } }, []);
@@ -260,7 +260,7 @@ describe('indexPatternTypeConfig', () => {
     });
 
     test('should extract data source from namespaced ID when references are empty', async () => {
-      const client = ({
+      const client = {
         find: jest.fn().mockResolvedValue({
           savedObjects: [
             {
@@ -283,7 +283,7 @@ describe('indexPatternTypeConfig', () => {
             },
           ],
         }),
-      } as unknown) as SavedObjectsClientContract;
+      } as unknown as SavedObjectsClientContract;
 
       // @ts-expect-error - Partial mock for testing
       const result = await indexPatternTypeConfig.fetch({ savedObjects: { client } }, []);
@@ -312,7 +312,7 @@ describe('indexPatternTypeConfig', () => {
     });
 
     test('should handle index patterns without data source', async () => {
-      const client = ({
+      const client = {
         find: jest.fn().mockResolvedValue({
           savedObjects: [
             {
@@ -327,7 +327,7 @@ describe('indexPatternTypeConfig', () => {
           ],
         }),
         bulkGet: jest.fn().mockResolvedValue({ savedObjects: [] }),
-      } as unknown) as SavedObjectsClientContract;
+      } as unknown as SavedObjectsClientContract;
 
       // @ts-expect-error - Partial mock for testing
       const result = await indexPatternTypeConfig.fetch({ savedObjects: { client } }, []);
@@ -349,7 +349,7 @@ describe('indexPatternTypeConfig', () => {
     });
 
     test('should handle mixed scenarios with both traditional and namespaced methods', async () => {
-      const client = ({
+      const client = {
         find: jest.fn().mockResolvedValue({
           savedObjects: [
             {
@@ -386,7 +386,7 @@ describe('indexPatternTypeConfig', () => {
             },
           ],
         }),
-      } as unknown) as SavedObjectsClientContract;
+      } as unknown as SavedObjectsClientContract;
 
       // @ts-expect-error - Partial mock for testing
       const result = await indexPatternTypeConfig.fetch({ savedObjects: { client } }, []);

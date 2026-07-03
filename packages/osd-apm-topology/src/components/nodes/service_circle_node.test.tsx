@@ -57,7 +57,7 @@ describe('ServiceCircleNode', () => {
       zIndex: 0,
       positionAbsoluteX: 0,
       positionAbsoluteY: 0,
-    } as any);
+    }) as any;
 
   it('renders title and subtitle', () => {
     render(<ServiceCircleNode {...createNodeProps()} />);

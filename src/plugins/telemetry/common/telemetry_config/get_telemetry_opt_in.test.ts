@@ -159,11 +159,8 @@ function getCallGetTelemetryOptInParams(
 }
 
 function callGetTelemetryOptIn(params: CallGetTelemetryOptInParams) {
-  const {
-    currentOpenSearchDashboardsVersion,
-    configTelemetryOptIn,
-    allowChangingOptInStatus,
-  } = params;
+  const { currentOpenSearchDashboardsVersion, configTelemetryOptIn, allowChangingOptInStatus } =
+    params;
   const telemetrySavedObject = getMockTelemetrySavedObject(params);
   return getTelemetryOptIn({
     currentOpenSearchDashboardsVersion,

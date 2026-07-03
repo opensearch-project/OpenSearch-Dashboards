@@ -263,24 +263,27 @@ export class ChromeNavGroupService {
       .pipe(takeUntil(this.stop$))
       .pipe(
         map(([navGroupsMap, navLinks]) => {
-          return Object.keys(navGroupsMap).reduce((sortedNavGroupsMap, navGroupId) => {
-            const navGroup = navGroupsMap[navGroupId];
-            if (navGroupId === ALL_USE_CASE_ID) {
-              sortedNavGroupsMap[navGroupId] = {
-                ...navGroup,
-                navLinks: this.sortNavGroupNavLinks(
-                  this.getNavLinksForAllUseCase(navGroupsMap, navLinks),
-                  navLinks
-                ),
-              };
-            } else {
-              sortedNavGroupsMap[navGroupId] = {
-                ...navGroup,
-                navLinks: this.sortNavGroupNavLinks(navGroup.navLinks, navLinks),
-              };
-            }
-            return sortedNavGroupsMap;
-          }, {} as Record<string, NavGroupItemInMap>);
+          return Object.keys(navGroupsMap).reduce(
+            (sortedNavGroupsMap, navGroupId) => {
+              const navGroup = navGroupsMap[navGroupId];
+              if (navGroupId === ALL_USE_CASE_ID) {
+                sortedNavGroupsMap[navGroupId] = {
+                  ...navGroup,
+                  navLinks: this.sortNavGroupNavLinks(
+                    this.getNavLinksForAllUseCase(navGroupsMap, navLinks),
+                    navLinks
+                  ),
+                };
+              } else {
+                sortedNavGroupsMap[navGroupId] = {
+                  ...navGroup,
+                  navLinks: this.sortNavGroupNavLinks(navGroup.navLinks, navLinks),
+                };
+              }
+              return sortedNavGroupsMap;
+            },
+            {} as Record<string, NavGroupItemInMap>
+          );
         })
       );
   }

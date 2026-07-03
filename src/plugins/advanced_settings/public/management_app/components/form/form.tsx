@@ -190,7 +190,7 @@ export class Form extends PureComponent<FormProps> {
       if (requiresReload) {
         this.renderPageReloadToast();
       }
-    } catch (e) {
+    } catch {
       this.props.toasts.addDanger(
         i18n.translate('advancedSettings.form.saveErrorMessage', {
           defaultMessage: 'Unable to save',
@@ -397,7 +397,7 @@ export class Form extends PureComponent<FormProps> {
       );
 
       return createPortal(bottomBar, document.getElementById('app-wrapper')!);
-    } catch (e) {
+    } catch {
       return null;
     }
   };

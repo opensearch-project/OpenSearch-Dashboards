@@ -8,10 +8,10 @@ import { ConfirmationService } from './confirmation_service';
 import { AssistantActionService } from '../../../context_provider/public';
 
 // Mock AssistantActionService
-const mockAssistantActionService = ({
+const mockAssistantActionService = {
   executeAction: jest.fn(),
   isUserConfirmRequired: jest.fn(),
-} as unknown) as jest.Mocked<AssistantActionService>;
+} as unknown as jest.Mocked<AssistantActionService>;
 
 describe('ToolExecutor', () => {
   let toolExecutor: ToolExecutor;

@@ -15,11 +15,11 @@ describe('LanguageService', () => {
 
   beforeEach(() => {
     mockSearchInterceptor = {} as jest.Mocked<ISearchInterceptor>;
-    mockStorage = ({
+    mockStorage = {
       get: jest.fn(),
       set: jest.fn(),
       remove: jest.fn(),
-    } as unknown) as jest.Mocked<DataStorage>;
+    } as unknown as jest.Mocked<DataStorage>;
 
     service = new LanguageService(mockSearchInterceptor, mockStorage);
   });
@@ -158,21 +158,21 @@ describe('LanguageService', () => {
     const makeLanguage = (
       supportedDataSources?: LanguageConfig['supportedDataSources']
     ): LanguageConfig =>
-      (({
+      ({
         id: 'TEST',
         title: 'Test',
         search: {} as any,
         getQueryString: jest.fn(),
         editor: {} as any,
         supportedDataSources,
-      } as unknown) as LanguageConfig);
+      }) as unknown as LanguageConfig;
 
     // Mirrors the declared minimums: SQL >= 6.5, PPL >= 7.9 on Elasticsearch.
     const sqlLanguage = makeLanguage({ minVersionByEngine: { Elasticsearch: '6.5.0' } });
     const pplLanguage = makeLanguage({ minVersionByEngine: { Elasticsearch: '7.9.0' } });
 
     const datasetWith = (dataSource?: Record<string, any>) =>
-      ({ id: 'd', title: 'd', type: 'INDEX_PATTERN', dataSource } as any);
+      ({ id: 'd', title: 'd', type: 'INDEX_PATTERN', dataSource }) as any;
 
     it('returns true when the language declares no supportedDataSources', () => {
       const lang = makeLanguage(undefined);

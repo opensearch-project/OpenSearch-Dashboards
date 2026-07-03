@@ -75,7 +75,7 @@ export class DynamicConfigControlledUiSettingsWrapper {
       // 1. when globalScopeEditable is false, only dashboard admin can edit global settings
       // 2. when globalScopeEditable is true(default), both dashboard admin and non-admin users can edit global settings
       return dynamicConfig.globalScopeEditable.enabled;
-    } catch (e) {
+    } catch {
       throw new Error(
         i18n.translate('core.dynamic.config.controlled.ui.settings.read.invalidate', {
           defaultMessage: 'Unable to read dynamic config',

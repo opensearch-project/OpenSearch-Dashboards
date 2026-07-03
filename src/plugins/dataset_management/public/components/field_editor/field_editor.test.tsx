@@ -94,21 +94,21 @@ describe('FieldEditor', () => {
 
   const mockContext = mockManagementPlugin.createDatasetManagmentContext();
   mockContext.data.fieldFormats.getDefaultType = jest.fn(
-    () => (({} as unknown) as FieldFormatInstanceType)
+    () => ({}) as unknown as FieldFormatInstanceType
   );
   mockContext.data.fieldFormats.getByFieldType = jest.fn((fieldType) => {
     if (fieldType === 'number') {
-      return [({} as unknown) as FieldFormatInstanceType];
+      return [{} as unknown as FieldFormatInstanceType];
     } else {
       return [];
     }
   });
 
   beforeEach(() => {
-    dataset = ({
+    dataset = {
       fields,
       getFormatterForField: () => ({ params: () => ({}) }),
-    } as unknown) as DataView;
+    } as unknown as DataView;
   });
 
   it('should render create new scripted field correctly', async () => {
@@ -116,7 +116,7 @@ describe('FieldEditor', () => {
       FieldEditor,
       {
         dataset,
-        spec: (field as unknown) as IndexPatternField,
+        spec: field as unknown as IndexPatternField,
         services,
       },
       mockContext
@@ -133,19 +133,19 @@ describe('FieldEditor', () => {
       name: 'test',
       script: 'doc.test.value',
     };
-    fieldList.push((testField as unknown) as IndexPatternField);
+    fieldList.push(testField as unknown as IndexPatternField);
     dataset.fields.getByName = (name) => {
       const flds = {
         [testField.name]: testField,
       };
-      return (flds[name] as unknown) as IndexPatternField;
+      return flds[name] as unknown as IndexPatternField;
     };
 
     const component = createComponentWithContext<FieldEdiorProps>(
       FieldEditor,
       {
         dataset,
-        spec: (testField as unknown) as IndexPatternField,
+        spec: testField as unknown as IndexPatternField,
         services,
       },
       mockContext
@@ -163,19 +163,19 @@ describe('FieldEditor', () => {
       script: 'doc.test.value',
       lang: 'testlang',
     };
-    fieldList.push((testField as unknown) as IndexPatternField);
+    fieldList.push(testField as unknown as IndexPatternField);
     dataset.fields.getByName = (name) => {
       const flds = {
         [testField.name]: testField,
       };
-      return (flds[name] as unknown) as IndexPatternField;
+      return flds[name] as unknown as IndexPatternField;
     };
 
     const component = createComponentWithContext<FieldEdiorProps>(
       FieldEditor,
       {
         dataset,
-        spec: (testField as unknown) as IndexPatternField,
+        spec: testField as unknown as IndexPatternField,
         services,
       },
       mockContext
@@ -192,7 +192,7 @@ describe('FieldEditor', () => {
       FieldEditor,
       {
         dataset,
-        spec: (testField as unknown) as IndexPatternField,
+        spec: testField as unknown as IndexPatternField,
         services,
       },
       mockContext
@@ -217,7 +217,7 @@ describe('FieldEditor', () => {
       FieldEditor,
       {
         dataset,
-        spec: (testField as unknown) as IndexPatternField,
+        spec: testField as unknown as IndexPatternField,
         services,
       },
       mockContext

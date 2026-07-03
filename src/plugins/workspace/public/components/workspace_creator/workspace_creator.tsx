@@ -204,7 +204,7 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
                       );
                       datasetsCreatedCount++;
                     }
-                  } catch (error) {
+                  } catch {
                     // Continue with other data sources even if one fails
                   }
                 }
@@ -223,7 +223,7 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
                         : undefined,
                   });
                 }
-              } catch (error) {
+              } catch {
                 // Don't block workspace creation if trace detection fails
               } finally {
                 // Clear the workspace context to prevent subsequent operations from targeting the new workspace

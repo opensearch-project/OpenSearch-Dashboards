@@ -46,7 +46,7 @@ export const BreakdownFieldSelector: React.FC<BreakdownFieldSelectorProps> = ({ 
       ? breakdownQueryStatus.error.message.details || 'Breakdown query failed'
       : undefined;
 
-  const availableFields = ((dataset?.fields?.getAll() || []) as unknown) as DataViewField[];
+  const availableFields = (dataset?.fields?.getAll() || []) as unknown as DataViewField[];
   const stringFields = availableFields.filter(
     (field) =>
       field.type === 'string' &&

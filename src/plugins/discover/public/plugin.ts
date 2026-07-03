@@ -158,8 +158,12 @@ export interface DiscoverStartPlugins {
  * Contains Discover, one of the oldest parts of OpenSearch Dashboards
  * Discover provides embeddables for Dashboards
  */
-export class DiscoverPlugin
-  implements Plugin<DiscoverSetup, DiscoverStart, DiscoverSetupPlugins, DiscoverStartPlugins> {
+export class DiscoverPlugin implements Plugin<
+  DiscoverSetup,
+  DiscoverStart,
+  DiscoverSetupPlugins,
+  DiscoverStartPlugins
+> {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));

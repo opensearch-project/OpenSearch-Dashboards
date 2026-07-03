@@ -4,12 +4,7 @@
  */
 
 export type FailureClass =
-  | 'silent-null'
-  | 'silent-empty'
-  | 'engine-throw'
-  | 'nondeterministic'
-  | 'fallback'
-  | 'advisory';
+  'silent-null' | 'silent-empty' | 'engine-throw' | 'nondeterministic' | 'fallback' | 'advisory';
 
 export interface RuleHoverContent {
   engineBehavior: string;

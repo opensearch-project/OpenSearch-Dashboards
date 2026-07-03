@@ -48,7 +48,7 @@ function buildRuntimeTree(query: string, grammar: CachedGrammar): ParserRuleCont
 
   const spaceToken = resolveSpaceToken(grammar);
   const startRuleIndex = isPipeFirst
-    ? grammar.startRuleIndex ?? 0
+    ? (grammar.startRuleIndex ?? 0)
     : pickStartRuleIndex(query, grammar);
   const errorListener = new GeneralErrorListener(spaceToken);
 

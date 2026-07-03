@@ -30,11 +30,12 @@ export function registerNonMdsDataConnectionsRoute(router: IRouter) {
     async (context, request, response): Promise<any> => {
       try {
         // @ts-expect-error TS2339 TODO(ts-error): fixme
-        const dataConnectionsresponse = await context.opensearch_data_source_management.dataSourceManagementClient
-          .asScoped(request)
-          .callAsCurrentUser('ppl.getDataConnectionById', {
-            dataconnection: request.params.name,
-          });
+        const dataConnectionsresponse =
+          await context.opensearch_data_source_management.dataSourceManagementClient
+            .asScoped(request)
+            .callAsCurrentUser('ppl.getDataConnectionById', {
+              dataconnection: request.params.name,
+            });
         return response.ok({
           body: dataConnectionsresponse,
         });
@@ -60,11 +61,12 @@ export function registerNonMdsDataConnectionsRoute(router: IRouter) {
     async (context, request, response): Promise<any> => {
       try {
         // @ts-expect-error TS2339 TODO(ts-error): fixme
-        const dataConnectionsresponse = await context.opensearch_data_source_management.dataSourceManagementClient
-          .asScoped(request)
-          .callAsCurrentUser('ppl.deleteDataConnection', {
-            dataconnection: request.params.name,
-          });
+        const dataConnectionsresponse =
+          await context.opensearch_data_source_management.dataSourceManagementClient
+            .asScoped(request)
+            .callAsCurrentUser('ppl.deleteDataConnection', {
+              dataconnection: request.params.name,
+            });
         return response.ok({
           body: dataConnectionsresponse,
         });
@@ -91,14 +93,15 @@ export function registerNonMdsDataConnectionsRoute(router: IRouter) {
     async (context, request, response): Promise<any> => {
       try {
         // @ts-expect-error TS2339 TODO(ts-error): fixme
-        const dataConnectionsresponse = await context.opensearch_data_source_management.dataSourceManagementClient
-          .asScoped(request)
-          .callAsCurrentUser('ppl.modifyDataConnection', {
-            body: {
-              name: request.body.name,
-              allowedRoles: request.body.allowedRoles,
-            },
-          });
+        const dataConnectionsresponse =
+          await context.opensearch_data_source_management.dataSourceManagementClient
+            .asScoped(request)
+            .callAsCurrentUser('ppl.modifyDataConnection', {
+              body: {
+                name: request.body.name,
+                allowedRoles: request.body.allowedRoles,
+              },
+            });
         return response.ok({
           body: dataConnectionsresponse,
         });
@@ -125,14 +128,15 @@ export function registerNonMdsDataConnectionsRoute(router: IRouter) {
     async (context, request, response): Promise<any> => {
       try {
         // @ts-expect-error TS2339 TODO(ts-error): fixme
-        const dataConnectionsresponse = await context.opensearch_data_source_management.dataSourceManagementClient
-          .asScoped(request)
-          .callAsCurrentUser('ppl.modifyDataConnection', {
-            body: {
-              name: request.body.name,
-              status: request.body.status,
-            },
-          });
+        const dataConnectionsresponse =
+          await context.opensearch_data_source_management.dataSourceManagementClient
+            .asScoped(request)
+            .callAsCurrentUser('ppl.modifyDataConnection', {
+              body: {
+                name: request.body.name,
+                status: request.body.status,
+              },
+            });
         return response.ok({
           body: dataConnectionsresponse,
         });
@@ -154,9 +158,10 @@ export function registerNonMdsDataConnectionsRoute(router: IRouter) {
     async (context, request, response): Promise<any> => {
       try {
         // @ts-expect-error TS2339 TODO(ts-error): fixme
-        const dataConnectionsresponse = await context.opensearch_data_source_management.dataSourceManagementClient
-          .asScoped(request)
-          .callAsCurrentUser('ppl.getDataConnections');
+        const dataConnectionsresponse =
+          await context.opensearch_data_source_management.dataSourceManagementClient
+            .asScoped(request)
+            .callAsCurrentUser('ppl.getDataConnections');
         return response.ok({
           body: dataConnectionsresponse,
         });
@@ -191,9 +196,10 @@ export function registerDataConnectionsRoute(router: IRouter, dataSourceEnabled:
     ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
       try {
         // @ts-expect-error TS2339 TODO(ts-error): fixme
-        const client = context.opensearch_data_source_management.dataSourceManagementClient.asScoped(
-          request
-        ).callAsCurrentUser;
+        const client =
+          context.opensearch_data_source_management.dataSourceManagementClient.asScoped(
+            request
+          ).callAsCurrentUser;
 
         const dataConnectionsresponse = await client('ppl.createDataSource', {
           body: {
@@ -240,9 +246,10 @@ export function registerDataConnectionsRoute(router: IRouter, dataSourceEnabled:
           });
         } else {
           // @ts-expect-error TS2339 TODO(ts-error): fixme
-          dataConnectionsresponse = await context.opensearch_data_source_management.dataSourceManagementClient
-            .asScoped(request)
-            .callAsCurrentUser('ppl.getDataConnections');
+          dataConnectionsresponse =
+            await context.opensearch_data_source_management.dataSourceManagementClient
+              .asScoped(request)
+              .callAsCurrentUser('ppl.getDataConnections');
         }
         return response.ok({
           body: dataConnectionsresponse,
@@ -285,11 +292,12 @@ export function registerDataConnectionsRoute(router: IRouter, dataSourceEnabled:
           });
         } else {
           // @ts-expect-error TS2339 TODO(ts-error): fixme
-          dataConnectionsresponse = await context.opensearch_data_source_management.dataSourceManagementClient
-            .asScoped(request)
-            .callAsCurrentUser('ppl.getDataConnectionById', {
-              dataconnection: request.params.name,
-            });
+          dataConnectionsresponse =
+            await context.opensearch_data_source_management.dataSourceManagementClient
+              .asScoped(request)
+              .callAsCurrentUser('ppl.getDataConnectionById', {
+                dataconnection: request.params.name,
+              });
         }
         return response.ok({
           body: dataConnectionsresponse,
@@ -331,11 +339,12 @@ export function registerDataConnectionsRoute(router: IRouter, dataSourceEnabled:
           });
         } else {
           // @ts-expect-error TS2339 TODO(ts-error): fixme
-          const dataConnectionsresponse = await context.opensearch_data_source_management.dataSourceManagementClient
-            .asScoped(request)
-            .callAsCurrentUser('ppl.deleteDataConnection', {
-              dataconnection: request.params.name,
-            });
+          const dataConnectionsresponse =
+            await context.opensearch_data_source_management.dataSourceManagementClient
+              .asScoped(request)
+              .callAsCurrentUser('ppl.deleteDataConnection', {
+                dataconnection: request.params.name,
+              });
           if (!dataSourceEnabled) {
             return response.ok({
               body: dataConnectionsresponse,

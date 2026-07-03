@@ -17,12 +17,12 @@ describe('Facet', () => {
 
   beforeEach(() => {
     mockClient = jest.fn();
-    mockLogger = ({
+    mockLogger = {
       error: jest.fn(),
       info: jest.fn(),
       debug: jest.fn(),
       warn: jest.fn(),
-    } as unknown) as jest.Mocked<Logger>;
+    } as unknown as jest.Mocked<Logger>;
 
     const props: FacetProps = {
       client: { asScoped: jest.fn().mockReturnValue({ callAsCurrentUser: mockClient }) },

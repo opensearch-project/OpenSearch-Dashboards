@@ -32,7 +32,7 @@ const timebasedDatasetId = getRandomizedDatasetId();
 const nontimebasedDatasetId = getRandomizedDatasetId();
 
 const noIndexPatterns = 5; // Determines the no of index patterns that should be in the dropdown for filtering test case
-// eslint-disable-next-line no-loop-func
+
 export const runSimpleDatasetSelectorTests = () => {
   before(() => {
     cy.osd.setupEnvAndGetDataSource(DATASOURCE_NAME);
@@ -145,9 +145,8 @@ export const runSimpleDatasetSelectorTests = () => {
 
       for (let i = 1; i <= noIndexPatterns; i++) {
         const currentDatasetId = getRandomizedDatasetId();
-        // eslint-disable-next-line no-loop-func
+
         cy.get('@DATASOURCE_ID').then((datasourceId) => {
-          // eslint-disable-next-line no-loop-func
           cy.get(`@${workspaceName}:WORKSPACE_ID`).then((workspaceId) => {
             cy.osd.createDatasetByEndpoint(
               currentDatasetId,

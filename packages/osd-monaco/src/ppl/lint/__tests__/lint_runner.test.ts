@@ -8,7 +8,7 @@ import { runLint } from '../lint_runner';
 import { registerDetector, resetDetectorRegistry } from '../detector_registry';
 import { CatalogEntry } from '../types';
 
-const fakeTree = ({} as unknown) as ParserRuleContext;
+const fakeTree = {} as unknown as ParserRuleContext;
 const rni = () => -1;
 
 function makeRule(overrides: Partial<CatalogEntry>): CatalogEntry {

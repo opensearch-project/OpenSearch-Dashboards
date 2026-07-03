@@ -137,9 +137,7 @@ export interface IWorkspaceClient {
    * @property {string array} permissionModes
    * @returns A find result with workspaces matching the specified search.
    */
-  list(
-    options?: WorkspaceFindOptions
-  ): Promise<
+  list(options?: WorkspaceFindOptions): Promise<
     IWorkspaceResponse<{
       workspaces: WorkspaceAttributeWithPermission[];
       total: number;

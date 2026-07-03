@@ -42,7 +42,7 @@ if (!existsSync(optimizerCliPath)) {
       stdio: 'inherit',
       cwd: path.resolve(__dirname, '..'),
     });
-  } catch (error) {
+  } catch {
     console.error('Failed to build @osd/optimizer package');
     process.exit(1);
   }

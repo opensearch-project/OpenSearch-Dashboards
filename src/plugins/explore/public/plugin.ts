@@ -94,14 +94,12 @@ import {
   EXECUTE_PPL_QUERY_TOOL_DEFINITION,
 } from './components/query_panel/actions/ppl_execute_query_action';
 
-export class ExplorePlugin
-  implements
-    Plugin<
-      ExplorePluginSetup,
-      ExplorePluginStart,
-      ExploreSetupDependencies,
-      ExploreStartDependencies
-    > {
+export class ExplorePlugin implements Plugin<
+  ExplorePluginSetup,
+  ExplorePluginStart,
+  ExploreSetupDependencies,
+  ExploreStartDependencies
+> {
   private stateUpdaterByApp: Partial<
     Record<ExploreFlavor | 'explore', BehaviorSubject<AppUpdater>>
   > = {
@@ -274,7 +272,11 @@ export class ExplorePlugin
       const flavorSuffix = flavor ? `/${flavor}` : '';
       const trackerBaseUrl = core.http.basePath.prepend(`/app/${PLUGIN_ID}${flavorSuffix}`);
       const trackerStorageKey = `lastUrl:${core.http.basePath.get()}:${PLUGIN_ID}${flavorSuffix}`;
-      const { appMounted, appUnMounted, stop: stopUrlTracker } = createOsdUrlTracker({
+      const {
+        appMounted,
+        appUnMounted,
+        stop: stopUrlTracker,
+      } = createOsdUrlTracker({
         baseUrl: trackerBaseUrl,
         defaultSubUrl: '#/',
         storageKey: trackerStorageKey,
@@ -358,9 +360,8 @@ export class ExplorePlugin
           // Check if this is a context or doc route (following discover pattern)
           const path = window.location.hash;
           if (path.startsWith('#/context') || path.startsWith('#/doc')) {
-            const { renderDocView } = await import(
-              './application/legacy/discover/application/components/doc_views'
-            );
+            const { renderDocView } =
+              await import('./application/legacy/discover/application/components/doc_views');
             const unmount = renderDocView(params.element);
             return () => {
               unmount();
@@ -434,7 +435,11 @@ export class ExplorePlugin
     };
 
     const createExploreVisualizationEditorApp = () => {
-      const { appMounted, appUnMounted, stop: stopUrlTracker } = createOsdUrlTracker({
+      const {
+        appMounted,
+        appUnMounted,
+        stop: stopUrlTracker,
+      } = createOsdUrlTracker({
         baseUrl: core.http.basePath.prepend(`/app/${VISUALIZATION_EDITOR_APP_ID}`),
         defaultSubUrl: '#/',
         storageKey: `lastUrl:${core.http.basePath.get()}:${VISUALIZATION_EDITOR_APP_ID}`,
@@ -672,9 +677,11 @@ export class ExplorePlugin
     // Register a dataset filter based on minDataSourceEngineVersions from the manifest.
     // This hides data sources whose engine version is below the declared minimum (e.g.
     // Elasticsearch < 7.9.0 which lacks PPL support required by Explore).
-    const minVersions = (exploreManifest as {
-      minDataSourceEngineVersions?: Record<string, string>;
-    }).minDataSourceEngineVersions;
+    const minVersions = (
+      exploreManifest as {
+        minDataSourceEngineVersions?: Record<string, string>;
+      }
+    ).minDataSourceEngineVersions;
     if (minVersions) {
       const datasetService = plugins.data.query.queryString.getDatasetService();
       datasetService.registerDatasetFilter(PLUGIN_ID, (dataset) => {
@@ -861,7 +868,7 @@ export class ExplorePlugin
               iconType = chart.icon;
               chartName = chart.name;
             }
-          } catch (e) {
+          } catch {
             iconType = '';
           }
 

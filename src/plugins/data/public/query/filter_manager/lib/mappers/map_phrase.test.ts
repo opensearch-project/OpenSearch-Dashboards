@@ -65,7 +65,7 @@ describe('filter manager utilities', () => {
     });
 
     test('should return the key and value for scripted phrase filters with value 0', () => {
-      const filter = ({
+      const filter = {
         meta: { index: 'logstash-*', field: 'script_number' },
         script: {
           script: {
@@ -75,7 +75,7 @@ describe('filter manager utilities', () => {
               'boolean compare(Supplier s, def v) {return s.get() == v;}compare(() -> { doc["bytes"].value }, params.value);',
           },
         },
-      } as unknown) as PhraseFilter;
+      } as unknown as PhraseFilter;
 
       const result = mapPhrase(filter);
 
@@ -89,7 +89,7 @@ describe('filter manager utilities', () => {
     });
 
     test('should return the key and value for scripted phrase filters with value false', () => {
-      const filter = ({
+      const filter = {
         meta: { index: 'logstash-*', field: 'script_boolean' },
         script: {
           script: {
@@ -99,7 +99,7 @@ describe('filter manager utilities', () => {
               'boolean compare(Supplier s, def v) {return s.get() == v;}compare(() -> { doc["is_active"].value }, params.value);',
           },
         },
-      } as unknown) as PhraseFilter;
+      } as unknown as PhraseFilter;
 
       const result = mapPhrase(filter);
 
@@ -113,7 +113,7 @@ describe('filter manager utilities', () => {
     });
 
     test('should return the key and value for scripted phrase filters with empty string value', () => {
-      const filter = ({
+      const filter = {
         meta: { index: 'logstash-*', field: 'script_string' },
         script: {
           script: {
@@ -123,7 +123,7 @@ describe('filter manager utilities', () => {
               'boolean compare(Supplier s, def v) {return s.get() == v;}compare(() -> { doc["status"].value }, params.value);',
           },
         },
-      } as unknown) as PhraseFilter;
+      } as unknown as PhraseFilter;
 
       const result = mapPhrase(filter);
 

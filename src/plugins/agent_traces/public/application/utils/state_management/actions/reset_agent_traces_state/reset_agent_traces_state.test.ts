@@ -50,17 +50,17 @@ describe('resetAgentTracesStateActionCreator', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (getPreloadedState as jest.Mock).mockResolvedValue(preloadedState);
-    ((setUiState as unknown) as jest.Mock).mockReturnValue({ type: 'SET_UI' });
-    ((setResultsState as unknown) as jest.Mock).mockReturnValue({ type: 'SET_RESULTS' });
-    ((setTabState as unknown) as jest.Mock).mockReturnValue({ type: 'SET_TAB' });
-    ((setLegacyState as unknown) as jest.Mock).mockReturnValue({ type: 'SET_LEGACY' });
-    ((setQueryState as unknown) as jest.Mock).mockReturnValue({ type: 'SET_QUERY' });
-    ((setQueryEditorState as unknown) as jest.Mock).mockReturnValue({ type: 'SET_QUERY_EDITOR' });
-    ((setOverallQueryStatus as unknown) as jest.Mock).mockReturnValue({
+    (setUiState as unknown as jest.Mock).mockReturnValue({ type: 'SET_UI' });
+    (setResultsState as unknown as jest.Mock).mockReturnValue({ type: 'SET_RESULTS' });
+    (setTabState as unknown as jest.Mock).mockReturnValue({ type: 'SET_TAB' });
+    (setLegacyState as unknown as jest.Mock).mockReturnValue({ type: 'SET_LEGACY' });
+    (setQueryState as unknown as jest.Mock).mockReturnValue({ type: 'SET_QUERY' });
+    (setQueryEditorState as unknown as jest.Mock).mockReturnValue({ type: 'SET_QUERY_EDITOR' });
+    (setOverallQueryStatus as unknown as jest.Mock).mockReturnValue({
       type: 'SET_OVERALL_QUERY_STATUS',
     });
-    ((executeQueries as unknown) as jest.Mock).mockReturnValue({ type: 'EXECUTE_QUERIES' });
-    ((detectAndSetOptimalTab as unknown) as jest.Mock).mockReturnValue({
+    (executeQueries as unknown as jest.Mock).mockReturnValue({ type: 'EXECUTE_QUERIES' });
+    (detectAndSetOptimalTab as unknown as jest.Mock).mockReturnValue({
       type: 'DETECT_OPTIMAL_TAB',
     });
   });

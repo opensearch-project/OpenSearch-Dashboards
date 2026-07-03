@@ -189,7 +189,7 @@ export interface DashboardStart {
     V extends EmbeddableInput & { [ATTRIBUTE_SERVICE_KEY]: A } = EmbeddableInput & {
       [ATTRIBUTE_SERVICE_KEY]: A;
     },
-    R extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
+    R extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput,
   >(
     type: string,
     options: AttributeServiceOptions<A>
@@ -207,8 +207,12 @@ declare module '../../../plugins/ui_actions/public' {
   }
 }
 
-export class DashboardPlugin
-  implements Plugin<DashboardSetup, DashboardStart, SetupDependencies, StartDependencies> {
+export class DashboardPlugin implements Plugin<
+  DashboardSetup,
+  DashboardStart,
+  SetupDependencies,
+  StartDependencies
+> {
   constructor(private initializerContext: PluginInitializerContext) {}
 
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
@@ -227,9 +231,8 @@ export class DashboardPlugin
     // bootstrap UI Actions
     bootstrap(uiActions);
 
-    this.dashboardFeatureFlagConfig = this.initializerContext.config.get<
-      DashboardFeatureFlagConfig
-    >();
+    this.dashboardFeatureFlagConfig =
+      this.initializerContext.config.get<DashboardFeatureFlagConfig>();
     const expandPanelAction = new ExpandPanelAction();
     uiActions.registerAction(expandPanelAction);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, expandPanelAction.id);

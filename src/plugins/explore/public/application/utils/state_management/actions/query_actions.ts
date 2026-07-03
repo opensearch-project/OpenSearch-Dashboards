@@ -182,7 +182,7 @@ const updateFieldTopQueryValues = (hits: any[], dataset: DataView): void => {
         const topValues = result.buckets.map((bucket) => String(bucket.value));
         fieldUpdates.push({ field, topValues });
       }
-    } catch (error) {
+    } catch {
       // Silently continue on field processing errors
     }
   });

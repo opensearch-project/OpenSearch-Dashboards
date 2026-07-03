@@ -49,7 +49,7 @@ export const createEnsureDefaultDataView = (
           isDefaultDataViewReferenceValid = !(
             result.error?.statusCode === 403 || result.error?.statusCode === 404
           );
-        } catch (e) {
+        } catch {
           // The logic below for updating the default index pattern only handles cases where the data source is not found or the user lacks access permissions
           // For other unexpected errors, we simply return to prevent infinite loops when updating the default index pattern.
           return;
@@ -84,7 +84,7 @@ export const createEnsureDefaultDataView = (
               }
             });
           }
-        } catch (e) {
+        } catch {
           return;
         }
       } else {

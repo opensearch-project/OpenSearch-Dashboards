@@ -154,7 +154,7 @@ describe('configureClient', () => {
     await configureClient(
       {
         ...dataSourceClientParams,
-        customTransport: (FakeTransport as unknown) as typeof Transport,
+        customTransport: FakeTransport as unknown as typeof Transport,
       },
       clientPoolSetup,
       config,

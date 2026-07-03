@@ -79,9 +79,8 @@ const globalStateContainer = createStateContainer<GlobalState, GlobalStateAction
 const GlobalStateHelpers = createStateContainerReactHelpers<typeof globalStateContainer>();
 
 const container = createStateContainer<TodoState, TodoActions>(defaultState, pureTransitions);
-const { Provider, connect, useTransitions, useState } = createStateContainerReactHelpers<
-  typeof container
->();
+const { Provider, connect, useTransitions, useState } =
+  createStateContainerReactHelpers<typeof container>();
 
 interface TodoAppProps {
   filter: 'completed' | 'not-completed' | null;
@@ -226,9 +225,8 @@ export const TodoAppPage: React.FC<{
       initialAppUrl.current
     );
     const globalStateFromCurrentUrl = osdUrlStateStorage.get<GlobalState>(globalStateKey);
-    const globalStateFromSessionStorage = sessionStorageStateStorage.get<GlobalState>(
-      globalStateKey
-    );
+    const globalStateFromSessionStorage =
+      sessionStorageStateStorage.get<GlobalState>(globalStateKey);
 
     const initialGlobalState: GlobalState = {
       ...defaultGlobalState,

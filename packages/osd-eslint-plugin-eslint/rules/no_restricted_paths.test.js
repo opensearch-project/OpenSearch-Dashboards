@@ -9,7 +9,6 @@
  * GitHub history for details.
  */
 
-/* eslint-disable-line @osd/eslint/require-license-header */
 /*
  * This product uses import/no-restricted-paths which is available under a
  * "MIT" license.

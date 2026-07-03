@@ -82,10 +82,10 @@ export class ClonePanelAction implements ActionByType<typeof ACTION_CLONE_PANEL>
   public async isCompatible({ embeddable }: ClonePanelActionContext) {
     return Boolean(
       !isErrorEmbeddable(embeddable) &&
-        embeddable.getInput()?.viewMode !== ViewMode.VIEW &&
-        embeddable.getRoot() &&
-        embeddable.getRoot().isContainer &&
-        embeddable.getRoot().type === DASHBOARD_CONTAINER_TYPE
+      embeddable.getInput()?.viewMode !== ViewMode.VIEW &&
+      embeddable.getRoot() &&
+      embeddable.getRoot().isContainer &&
+      embeddable.getRoot().type === DASHBOARD_CONTAINER_TYPE
     );
   }
 

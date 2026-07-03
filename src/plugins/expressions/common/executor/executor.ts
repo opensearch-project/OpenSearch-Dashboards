@@ -175,7 +175,7 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
   public async run<
     Input,
     Output,
-    ExtraContext extends Record<string, unknown> = Record<string, unknown>
+    ExtraContext extends Record<string, unknown> = Record<string, unknown>,
   >(ast: string | ExpressionAstExpression, input: Input, context?: ExtraContext) {
     const execution = this.createExecution(ast, context);
     execution.start(input);
@@ -185,7 +185,7 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
   public createExecution<
     ExtraContext extends Record<string, unknown> = Record<string, unknown>,
     Input = unknown,
-    Output = unknown
+    Output = unknown,
   >(
     ast: string | ExpressionAstExpression,
     context: ExtraContext = {} as ExtraContext,

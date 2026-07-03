@@ -57,9 +57,9 @@ describe('Field', () => {
     ],
   };
 
-  const agg = ({
+  const agg = {
     getIndexPattern: jest.fn(() => indexPattern),
-  } as unknown) as IAggConfig;
+  } as unknown as IAggConfig;
 
   describe('constructor', () => {
     it('it is an instance of BaseParamType', () => {

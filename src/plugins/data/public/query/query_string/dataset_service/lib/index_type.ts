@@ -312,7 +312,7 @@ const fetchIndices = async (dataStructure: DataStructure, http: HttpSetup): Prom
     }
 
     return indices.sort();
-  } catch (error) {
+  } catch {
     return [];
   }
 };

@@ -14,8 +14,10 @@ import { createRoot } from 'react-dom/client';
 import { Router, Switch, Route, Link } from 'react-router-dom';
 import { CoreSetup, Plugin } from 'opensearch-dashboards/public';
 
-export class DashboardListingTestPlugin
-  implements Plugin<DashboardListingTestPluginSetup, DashboardListingTestPluginStart> {
+export class DashboardListingTestPlugin implements Plugin<
+  DashboardListingTestPluginSetup,
+  DashboardListingTestPluginStart
+> {
   public setup(core: CoreSetup, setupDeps: SetupDependencies) {
     const ID = 'dashboard_listing_test_plugin';
     const BASE_URL = core.http.basePath.prepend(`/app/${ID}#`);

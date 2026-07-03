@@ -54,10 +54,10 @@ describe('SQLFilterUtils', () => {
     it('skips filters that produce no predicate', () => {
       const query = 'SELECT * FROM test_index';
       // No `key`/field — toPredicate returns undefined.
-      const filterWithoutField = ({
+      const filterWithoutField = {
         meta: { disabled: false, negate: false, type: 'phrase', params: { query: 'x' } },
         query: {},
-      } as unknown) as Filter;
+      } as unknown as Filter;
 
       const result = SQLFilterUtils.addFiltersToQuery(query, [filterWithoutField]);
       expect(result).toBe(query);

@@ -33,10 +33,10 @@ function createMockCoreStart(overrides?: {
   const breadcrumbs$ = new BehaviorSubject<Array<{ text: string }>>(overrides?.breadcrumbs || []);
 
   return {
-    coreStart: ({
+    coreStart: {
       application: { currentAppId$, applications$ },
       chrome: { getBreadcrumbs$: () => breadcrumbs$ },
-    } as unknown) as CoreStart,
+    } as unknown as CoreStart,
     currentAppId$,
     applications$,
     breadcrumbs$,

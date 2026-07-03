@@ -32,10 +32,10 @@ describe('getNewButtonRun', () => {
 
     const dispatch = jest.fn();
     const mockPush = jest.fn();
-    const services = ({
+    const services = {
       store: { dispatch },
       scopedHistory: { push: mockPush },
-    } as unknown) as ExploreServices;
+    } as unknown as ExploreServices;
     const clearEditors = jest.fn();
 
     const run = getNewButtonRun(services, clearEditors);
@@ -53,10 +53,10 @@ describe('getNewButtonRun', () => {
     jest.spyOn(VB, 'getVisualizationBuilder').mockReturnValue(visBuilder);
 
     const dispatch = jest.fn();
-    const services = ({
+    const services = {
       store: { dispatch },
       scopedHistory: undefined,
-    } as unknown) as ExploreServices;
+    } as unknown as ExploreServices;
     const clearEditors = jest.fn();
 
     const run = getNewButtonRun(services, clearEditors);

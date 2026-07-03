@@ -58,14 +58,12 @@ export type TodoRefEmbeddableFactory = EmbeddableFactory<
   TodoSavedObjectAttributes
 >;
 
-export class TodoRefEmbeddableFactoryDefinition
-  implements
-    EmbeddableFactoryDefinition<
-      TodoRefInput,
-      TodoRefOutput,
-      TodoRefEmbeddable,
-      TodoSavedObjectAttributes
-    > {
+export class TodoRefEmbeddableFactoryDefinition implements EmbeddableFactoryDefinition<
+  TodoRefInput,
+  TodoRefOutput,
+  TodoRefEmbeddable,
+  TodoSavedObjectAttributes
+> {
   public readonly type = TODO_REF_EMBEDDABLE;
   public readonly savedObjectMetaData = {
     name: 'Todo',

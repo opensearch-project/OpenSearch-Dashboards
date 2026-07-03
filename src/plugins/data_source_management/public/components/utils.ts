@@ -186,7 +186,7 @@ export const fetchDataSourceConnections = async (
       remoteClusterConnections,
       localClusterConnections
     );
-  } catch (error) {
+  } catch {
     notifications?.toasts.addDanger(
       i18n.translate('dataSourcesManagement.fetchDataSourceConnections', {
         defaultMessage: 'Cannot fetch data sources',
@@ -519,7 +519,7 @@ export const isValidUrl = (endpoint: string) => {
   try {
     const url = new URL(endpoint);
     return Boolean(url) && (url.protocol === 'http:' || url.protocol === 'https:');
-  } catch (e) {
+  } catch {
     return false;
   }
 };
@@ -587,31 +587,27 @@ export const dataSourceOptionGroupLabel = deepFreeze<Readonly<DataSourceOptionGr
 });
 
 export const [getApplication, setApplication] = createGetterSetter<ApplicationStart>('Application');
-export const [getUiSettings, setUiSettings] = createGetterSetter<CoreStart['uiSettings']>(
-  'UiSettings'
-);
-export const [getWorkspaces, setWorkspaces] = createGetterSetter<CoreStart['workspaces']>(
-  'Workspaces'
-);
+export const [getUiSettings, setUiSettings] =
+  createGetterSetter<CoreStart['uiSettings']>('UiSettings');
+export const [getWorkspaces, setWorkspaces] =
+  createGetterSetter<CoreStart['workspaces']>('Workspaces');
 
 export interface HideLocalCluster {
   enabled: boolean;
 }
 
-export const [getHideLocalCluster, setHideLocalCluster] = createGetterSetter<HideLocalCluster>(
-  'HideLocalCluster'
-);
+export const [getHideLocalCluster, setHideLocalCluster] =
+  createGetterSetter<HideLocalCluster>('HideLocalCluster');
 
 // This will maintain an unified data source selection instance among components and export it to other plugin.
-const [getDataSourceSelectionInstance, setDataSourceSelection] = createGetterSetter<
-  DataSourceSelectionService
->('DataSourceSelectionService');
+const [getDataSourceSelectionInstance, setDataSourceSelection] =
+  createGetterSetter<DataSourceSelectionService>('DataSourceSelectionService');
 
 const getDataSourceSelection = () => {
   try {
     // Usually set will be executed in the setup of DSM.
     return getDataSourceSelectionInstance();
-  } catch (e) {
+  } catch {
     // Since createGetterSetter doesn't support default value and will throw error if not found.
     // As dataSourceSelection isn't main part of data selector, will use a default to fallback safely.
     return defaultDataSourceSelection;

@@ -40,7 +40,7 @@ module.exports = {
       files: ['**/*.js'],
       parser: require.resolve('@babel/eslint-parser'),
 
-      plugins: ['mocha', 'babel', 'import', 'no-unsanitized', 'prefer-object-spread'],
+      plugins: ['mocha', 'import', 'no-unsanitized'],
 
       settings: {
         'import/resolver': {
@@ -128,7 +128,7 @@ module.exports = {
         'import/no-duplicates': 'error',
         'import/no-dynamic-require': 'error',
 
-        'prefer-object-spread/prefer-object-spread': 'error',
+        'prefer-object-spread': 'error',
       },
     },
   ],

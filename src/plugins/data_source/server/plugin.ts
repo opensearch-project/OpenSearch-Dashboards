@@ -73,9 +73,8 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
       },
     };
 
-    const cryptographyServiceSetup: CryptographyServiceSetup = this.cryptographyService.setup(
-      config
-    );
+    const cryptographyServiceSetup: CryptographyServiceSetup =
+      this.cryptographyService.setup(config);
 
     const authRegistryPromise = core.getStartServices().then(([, , selfStart]) => {
       const dataSourcePluginStart = selfStart as DataSourcePluginStart;
