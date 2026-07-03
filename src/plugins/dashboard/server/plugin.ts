@@ -28,6 +28,7 @@
  * under the License.
  */
 
+import { first } from 'rxjs/operators';
 import {
   PluginInitializerContext,
   CoreSetup,
@@ -36,22 +37,31 @@ import {
   Logger,
 } from '../../../core/server';
 
-import { dashboardSavedObjectType } from './saved_objects';
+import { getDashboardSavedObjectType } from './saved_objects';
 import { capabilitiesProvider } from './capabilities_provider';
 
 import { DashboardPluginSetup, DashboardPluginStart } from './types';
+import { ConfigSchema } from '../config';
 
 export class DashboardPlugin implements Plugin<DashboardPluginSetup, DashboardPluginStart> {
   private readonly logger: Logger;
+  private readonly initializerContext: PluginInitializerContext;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
+    this.initializerContext = initializerContext;
   }
 
-  public setup(core: CoreSetup) {
+  public async setup(core: CoreSetup) {
     this.logger.debug('dashboard: Setup');
 
-    core.savedObjects.registerType(dashboardSavedObjectType);
+    const { variables } = await this.initializerContext.config
+      .create<ConfigSchema>()
+      .pipe(first())
+      .toPromise();
+    // Only register the `variablesJSON` mapping field when the Variables feature
+    // is enabled. When disabled, the field is absent.
+    core.savedObjects.registerType(getDashboardSavedObjectType(variables.enabled));
     core.capabilities.registerProvider(capabilitiesProvider);
     core.capabilities.registerSwitcher(async (request, capabilites) => {
       return await core.security.readonlyService().hideForReadonly(request, capabilites, {

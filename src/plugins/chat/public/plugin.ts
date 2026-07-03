@@ -80,9 +80,6 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
 
     if (isValidChatWindowState(storeState)) {
       chat.setWindowState(storeState);
-    } else {
-      // First visit or no stored state — open chat by default
-      chat.setWindowState({ isWindowOpen: true });
     }
 
     this.paddingSizeSubscription = overlays.sidecar
