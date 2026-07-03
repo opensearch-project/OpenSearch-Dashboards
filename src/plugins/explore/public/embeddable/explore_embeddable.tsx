@@ -180,8 +180,6 @@ export class ExploreEmbeddable
       requests: new RequestAdapter(),
       data: new DataAdapter(),
     };
-    const dashboardContainer = (parent as unknown) as DashboardContainer;
-
     // Initialize transformation service
     this.transformationService = new TransformationService();
     registerAllTransformations(this.transformationService);
@@ -211,11 +209,14 @@ export class ExploreEmbeddable
     // overwrites the output title with the raw un-interpolated input.title via getPanelTitle().
     // Subscribing to output$ ensures handleTitleVariables re-applies variable interpolation
     // after that overwrite. The isEqual guard in updateOutput() prevents infinite loops.
-    this.titleVariableSubscription = merge(
-      this.getInput$(),
-      this.getOutput$(),
-      dashboardContainer.variableService.getVariables$()
-    ).subscribe(this.handleTitleVariables);
+    if (parent && 'variableService' in parent) {
+      const dashboardContainer = (parent as unknown) as DashboardContainer;
+      this.titleVariableSubscription = merge(
+        this.getInput$(),
+        this.getOutput$(),
+        dashboardContainer.variableService.getVariables$()
+      ).subscribe(this.handleTitleVariables);
+    }
   }
 
   // initialize transformation pipeline from saved explore
