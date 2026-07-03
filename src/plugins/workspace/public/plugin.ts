@@ -96,8 +96,12 @@ export interface WorkspacePluginStartDeps {
   data: DataPublicPluginStart;
 }
 
-export class WorkspacePlugin
-  implements Plugin<WorkspacePluginSetup, {}, WorkspacePluginSetupDeps, WorkspacePluginStartDeps> {
+export class WorkspacePlugin implements Plugin<
+  WorkspacePluginSetup,
+  {},
+  WorkspacePluginSetupDeps,
+  WorkspacePluginStartDeps
+> {
   private coreStart?: CoreStart;
   private currentWorkspaceSubscription?: Subscription;
   private breadcrumbsSubscription?: Subscription;

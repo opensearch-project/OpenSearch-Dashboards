@@ -32,7 +32,10 @@ import util from 'util';
 import { OsdClient, ToolingLog } from '@osd/dev-utils';
 
 export class Role {
-  constructor(private log: ToolingLog, private opensearchDashboardsServer: OsdClient) {}
+  constructor(
+    private log: ToolingLog,
+    private opensearchDashboardsServer: OsdClient
+  ) {}
 
   public async create(name: string, role: any) {
     this.log.debug(`creating role ${name}`);

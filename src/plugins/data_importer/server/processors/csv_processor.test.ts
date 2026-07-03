@@ -28,7 +28,7 @@ describe('CSVProcessor', () => {
           const testValidity = await processor.validateText(rawStringArray.join(''), { delimiter });
           expect(testValidity).toBe(false);
           // eslint-disable-next-line no-empty
-        } catch (e) {}
+        } catch {}
       }
     );
   });

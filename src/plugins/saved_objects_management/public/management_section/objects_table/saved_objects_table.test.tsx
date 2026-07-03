@@ -108,9 +108,9 @@ describe('SavedObjectsTable', () => {
   let workspaces: ReturnType<typeof workspacesServiceMock.createStartContract>;
 
   const shallowRender = (overrides: Partial<SavedObjectsTableProps> = {}) => {
-    return (shallowWithI18nProvider(
+    return shallowWithI18nProvider(
       <SavedObjectsTable {...defaultProps} {...overrides} />
-    ) as unknown) as ShallowWrapper<
+    ) as unknown as ShallowWrapper<
       SavedObjectsTableProps,
       SavedObjectsTableState,
       SavedObjectsTable

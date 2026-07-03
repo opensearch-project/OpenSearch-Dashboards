@@ -77,7 +77,7 @@ function getHasMatch(search?: string, savedAttributes?: TodoSavedObjectAttribute
   if (!savedAttributes) return false;
   return Boolean(
     (savedAttributes.task && savedAttributes.task.match(search)) ||
-      (savedAttributes.title && savedAttributes.title.match(search))
+    (savedAttributes.title && savedAttributes.title.match(search))
   );
 }
 

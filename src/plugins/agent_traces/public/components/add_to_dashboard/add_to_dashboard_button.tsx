@@ -107,7 +107,7 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
       {
         chartType: chartConfig?.type,
         axesMapping: chartConfig?.axesMapping,
-        styleOptions: (chartConfig?.styles as unknown) as Record<string, unknown> | undefined,
+        styleOptions: chartConfig?.styles as unknown as Record<string, unknown> | undefined,
       },
       dataset
     );

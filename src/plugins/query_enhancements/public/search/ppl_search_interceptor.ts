@@ -53,7 +53,9 @@ export class PPLSearchInterceptor extends SearchInterceptor {
       this.queryService = (depsStart as QueryEnhancementsPluginStartDependencies).data.query;
       this.aggsService = (depsStart as QueryEnhancementsPluginStartDependencies).data.search.aggs;
       this.uiSettings = coreStart.uiSettings;
-      this.indexPatterns = (depsStart as QueryEnhancementsPluginStartDependencies).data.indexPatterns;
+      this.indexPatterns = (
+        depsStart as QueryEnhancementsPluginStartDependencies
+      ).data.indexPatterns;
     });
   }
 

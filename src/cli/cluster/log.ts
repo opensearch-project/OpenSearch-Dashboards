@@ -31,7 +31,10 @@
 import Chalk from 'chalk';
 
 export class Log {
-  constructor(private readonly quiet: boolean, private readonly silent: boolean) {}
+  constructor(
+    private readonly quiet: boolean,
+    private readonly silent: boolean
+  ) {}
 
   good(label: string, ...args: any[]) {
     if (this.quiet || this.silent) {

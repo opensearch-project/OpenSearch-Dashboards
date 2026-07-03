@@ -12,7 +12,7 @@ export const extractUserName = (request: OpenSearchDashboardsRequest, core?: Cor
     if (principals && principals.users?.length) {
       return principals.users[0];
     }
-  } catch (error) {
+  } catch {
     return undefined;
   }
 };

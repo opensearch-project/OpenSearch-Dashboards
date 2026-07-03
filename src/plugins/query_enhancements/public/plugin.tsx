@@ -16,7 +16,8 @@ import {
 // avoid a cross-plugin runtime value-import. Keep in sync with the enum.
 import type { DataSourceEngineType } from '../../data_source/common/data_sources';
 
-const ELASTICSEARCH_ENGINE: DataSourceEngineType.Elasticsearch = 'Elasticsearch' as DataSourceEngineType.Elasticsearch;
+const ELASTICSEARCH_ENGINE: DataSourceEngineType.Elasticsearch =
+  'Elasticsearch' as DataSourceEngineType.Elasticsearch;
 import {
   createEditor,
   DefaultInput,
@@ -43,14 +44,12 @@ import { PromQLSearchInterceptor } from './search/promql_search_interceptor';
 import { PrometheusResourceClient } from './resources';
 import { registerPplLint } from './ppl_lint/register_ppl_lint';
 
-export class QueryEnhancementsPlugin
-  implements
-    Plugin<
-      QueryEnhancementsPluginSetup,
-      QueryEnhancementsPluginStart,
-      QueryEnhancementsPluginSetupDependencies,
-      QueryEnhancementsPluginStartDependencies
-    > {
+export class QueryEnhancementsPlugin implements Plugin<
+  QueryEnhancementsPluginSetup,
+  QueryEnhancementsPluginStart,
+  QueryEnhancementsPluginSetupDependencies,
+  QueryEnhancementsPluginStartDependencies
+> {
   private readonly storage: DataStorage;
   private readonly config: ConfigSchema;
   private isQuerySummaryCollapsed$ = new BehaviorSubject<boolean>(false);

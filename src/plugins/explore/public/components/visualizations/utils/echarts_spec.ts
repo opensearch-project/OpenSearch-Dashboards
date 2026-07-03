@@ -79,8 +79,9 @@ interface EChartsSpecInput<T extends BaseChartStyle = BaseChartStyle> {
 /**
  * State object that flows through the pipeline
  */
-export interface EChartsSpecState<T extends BaseChartStyle = BaseChartStyle>
-  extends EChartsSpecInput<T> {
+export interface EChartsSpecState<
+  T extends BaseChartStyle = BaseChartStyle,
+> extends EChartsSpecInput<T> {
   // Built incrementally
   // TODO: avoid any
   transformedData?: any[];
@@ -138,37 +139,39 @@ export function getAxisType(axis: Axis | Axis[] | undefined): 'category' | 'valu
 /**
  * Create base configuration (tooltip)
  */
-export const createBaseConfig = <T extends BaseChartStyle>({
-  addTrigger = true,
-  legend,
-}: {
-  addTrigger?: boolean;
-  legend?: EChartsOption['legend'];
-} = {}) => (state: EChartsSpecState<T>): EChartsSpecState<T> => {
-  const { styles, axisConfig } = state;
+export const createBaseConfig =
+  <T extends BaseChartStyle>({
+    addTrigger = true,
+    legend,
+  }: {
+    addTrigger?: boolean;
+    legend?: EChartsOption['legend'];
+  } = {}) =>
+  (state: EChartsSpecState<T>): EChartsSpecState<T> => {
+    const { styles, axisConfig } = state;
 
-  const baseConfig = {
-    tooltip: {
-      extraCssText: `overflow: auto; max-height: 50%; max-width: 80%;`,
-      enterable: true, // for y direction overflow
-      confine: true, // for x direction
-      show: styles.tooltipOptions?.mode !== 'hidden',
-      ...(axisConfig && addTrigger && { trigger: 'axis' as const }),
-      axisPointer: { type: 'shadow' as const },
-    },
-    legend: {
-      show: false,
-      type: 'scroll',
-      ...legend,
-      ...(styles?.legendPosition === Positions.LEFT || styles?.legendPosition === Positions.RIGHT
-        ? { orient: 'vertical' as const }
-        : {}),
-      [String(styles?.legendPosition ?? Positions.BOTTOM)]: 10, // distance between legend and the corresponding orientation edge side of the container
-    },
+    const baseConfig = {
+      tooltip: {
+        extraCssText: `overflow: auto; max-height: 50%; max-width: 80%;`,
+        enterable: true, // for y direction overflow
+        confine: true, // for x direction
+        show: styles.tooltipOptions?.mode !== 'hidden',
+        ...(axisConfig && addTrigger && { trigger: 'axis' as const }),
+        axisPointer: { type: 'shadow' as const },
+      },
+      legend: {
+        show: false,
+        type: 'scroll',
+        ...legend,
+        ...(styles?.legendPosition === Positions.LEFT || styles?.legendPosition === Positions.RIGHT
+          ? { orient: 'vertical' as const }
+          : {}),
+        [String(styles?.legendPosition ?? Positions.BOTTOM)]: 10, // distance between legend and the corresponding orientation edge side of the container
+      },
+    };
+
+    return { ...state, baseConfig };
   };
-
-  return { ...state, baseConfig };
-};
 
 /**
  * Build axis configurations
@@ -305,46 +308,44 @@ export const applyAxisStyling = ({
   return echartsAxisConfig;
 };
 
-export const buildVisMap = ({
-  seriesFields,
-}: {
-  seriesFields: (headers?: string[]) => string[];
-}) => (state: EChartsSpecState) => {
-  const { styles, transformedData = [] } = state;
+export const buildVisMap =
+  ({ seriesFields }: { seriesFields: (headers?: string[]) => string[] }) =>
+  (state: EChartsSpecState) => {
+    const { styles, transformedData = [] } = state;
 
-  if (!styles.useThresholdColor) return state;
+    if (!styles.useThresholdColor) return state;
 
-  const completeThreshold =
-    styles.thresholdOptions && styles?.thresholdOptions.thresholds
-      ? [
-          { value: 0, color: styles.thresholdOptions.baseColor } as Threshold,
-          ...styles.thresholdOptions.thresholds,
-        ]
-      : [];
+    const completeThreshold =
+      styles.thresholdOptions && styles?.thresholdOptions.thresholds
+        ? [
+            { value: 0, color: styles.thresholdOptions.baseColor } as Threshold,
+            ...styles.thresholdOptions.thresholds,
+          ]
+        : [];
 
-  const convertedThresholds = convertThresholds(completeThreshold);
-  const pieces = convertedThresholds.map((t) => ({
-    gte: t.min,
-    lt: t.max,
-    color: t.color,
-  }));
+    const convertedThresholds = convertThresholds(completeThreshold);
+    const pieces = convertedThresholds.map((t) => ({
+      gte: t.min,
+      lt: t.max,
+      color: t.color,
+    }));
 
-  const visualMap = seriesFields(transformedData[0]).map((c: string, index: number) => {
-    const originalIndex = transformedData[0]?.indexOf(c);
+    const visualMap = seriesFields(transformedData[0]).map((c: string, index: number) => {
+      const originalIndex = transformedData[0]?.indexOf(c);
+      return {
+        type: 'piecewise',
+        show: false,
+        seriesIndex: index,
+        dimension: originalIndex,
+        pieces,
+      };
+    });
+
     return {
-      type: 'piecewise',
-      show: false,
-      seriesIndex: index,
-      dimension: originalIndex,
-      pieces,
+      ...state,
+      visualMap,
     };
-  });
-
-  return {
-    ...state,
-    visualMap,
   };
-};
 
 /**
  * Apply time range to axis if showFullTimeRange is enabled
@@ -422,50 +423,50 @@ export const applyTimeRange = <T extends BaseChartStyle>(
  * Read-only: does not assign colors. Each series builder must set itemStyle.color explicitly.
  * For scatter unfilled mode (color: 'transparent'), uses borderColor instead.
  */
-export const collectLegend = <T extends BaseChartStyle>(
-  onLegend?: (legend: ColorMap) => void
-): PipelineFn<T> => (state) => {
-  const { series } = state;
-  if (!series || !onLegend) return state;
+export const collectLegend =
+  <T extends BaseChartStyle>(onLegend?: (legend: ColorMap) => void): PipelineFn<T> =>
+  (state) => {
+    const { series } = state;
+    if (!series || !onLegend) return state;
 
-  const legend: ColorMap = {};
-  series.forEach((s) => {
-    const name = typeof s.name === 'string' ? s.name : undefined;
-    if (!name) return;
-    const itemStyle = 'itemStyle' in s ? s.itemStyle : undefined;
-    const color = itemStyle?.color;
-    const legendColor = !color || color === 'transparent' ? itemStyle?.borderColor : color;
-    if (legendColor && typeof legendColor === 'string') {
-      legend[name] = legendColor;
-    }
-  });
+    const legend: ColorMap = {};
+    series.forEach((s) => {
+      const name = typeof s.name === 'string' ? s.name : undefined;
+      if (!name) return;
+      const itemStyle = 'itemStyle' in s ? s.itemStyle : undefined;
+      const color = itemStyle?.color;
+      const legendColor = !color || color === 'transparent' ? itemStyle?.borderColor : color;
+      if (legendColor && typeof legendColor === 'string') {
+        legend[name] = legendColor;
+      }
+    });
 
-  onLegend(legend);
+    onLegend(legend);
 
-  return state;
-};
+    return state;
+  };
 
 /**
  * Collect legend data for pie charts from the series data items.
  * Pie assigns colors per data item (not per series), so we read from series[0].data.
  */
-export const collectPieLegend = <T extends BaseChartStyle>(
-  onLegend?: (legend: ColorMap) => void
-): PipelineFn<T> => (state) => {
-  const { series } = state;
-  if (!series || !onLegend) return state;
+export const collectPieLegend =
+  <T extends BaseChartStyle>(onLegend?: (legend: ColorMap) => void): PipelineFn<T> =>
+  (state) => {
+    const { series } = state;
+    if (!series || !onLegend) return state;
 
-  const legend: ColorMap = {};
-  const pieSeries = series[0] as any;
-  if (pieSeries?.data) {
-    pieSeries.data.forEach((item: any) => {
-      if (item?.name && item?.itemStyle?.color) {
-        legend[item.name] = item.itemStyle.color;
-      }
-    });
-  }
+    const legend: ColorMap = {};
+    const pieSeries = series[0] as any;
+    if (pieSeries?.data) {
+      pieSeries.data.forEach((item: any) => {
+        if (item?.name && item?.itemStyle?.color) {
+          legend[item.name] = item.itemStyle.color;
+        }
+      });
+    }
 
-  onLegend(legend);
+    onLegend(legend);
 
-  return state;
-};
+    return state;
+  };

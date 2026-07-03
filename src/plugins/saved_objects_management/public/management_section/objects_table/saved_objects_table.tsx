@@ -178,10 +178,13 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   constructor(props: SavedObjectsTableProps) {
     super(props);
 
-    const typeCounts = props.allowedTypes.reduce((typeToCountMap, type) => {
-      typeToCountMap[type] = 0;
-      return typeToCountMap;
-    }, {} as Record<string, number>);
+    const typeCounts = props.allowedTypes.reduce(
+      (typeToCountMap, type) => {
+        typeToCountMap[type] = 0;
+        return typeToCountMap;
+      },
+      {} as Record<string, number>
+    );
 
     this.state = {
       totalCount: 0,
@@ -793,7 +796,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         targetWorkspace,
         targetWorkspaceName,
       });
-    } catch (e) {
+    } catch {
       showErrorNotification();
     } finally {
       this.hideDuplicateModal();

@@ -239,7 +239,7 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
         isDisabled={(() => {
           try {
             return !getUiSettings().get('query:enhancements:enabled');
-          } catch (e) {
+          } catch {
             return false;
           }
         })()}

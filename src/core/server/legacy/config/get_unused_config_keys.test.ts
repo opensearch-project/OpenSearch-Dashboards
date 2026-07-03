@@ -39,7 +39,7 @@ describe('getUnusedConfigKeys', () => {
   const getConfig = (values: LegacyVars = {}): LegacyConfig =>
     ({
       get: () => values as any,
-    } as LegacyConfig);
+    }) as LegacyConfig;
 
   describe('not using core or plugin specs', () => {
     it('should return an empty list for empty parameters', async () => {

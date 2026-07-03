@@ -46,12 +46,13 @@ import { isSavedObjectEmbeddableInput } from '../embeddables/saved_object_embedd
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
 export abstract class Container<
-    TChildInput extends Partial<EmbeddableInput> = {},
-    TContainerInput extends ContainerInput<TChildInput> = ContainerInput<TChildInput>,
-    TContainerOutput extends ContainerOutput = ContainerOutput
-  >
+  TChildInput extends Partial<EmbeddableInput> = {},
+  TContainerInput extends ContainerInput<TChildInput> = ContainerInput<TChildInput>,
+  TContainerOutput extends ContainerOutput = ContainerOutput,
+>
   extends Embeddable<TContainerInput, TContainerOutput>
-  implements IContainer<TChildInput, TContainerInput, TContainerOutput> {
+  implements IContainer<TChildInput, TContainerInput, TContainerOutput>
+{
   public readonly isContainer: boolean = true;
   protected readonly children: {
     [key: string]: IEmbeddable<any, any> | ErrorEmbeddable;
@@ -98,7 +99,7 @@ export abstract class Container<
   public async addNewEmbeddable<
     EEI extends EmbeddableInput = EmbeddableInput,
     EEO extends EmbeddableOutput = EmbeddableOutput,
-    E extends IEmbeddable<EEI, EEO> = IEmbeddable<EEI, EEO>
+    E extends IEmbeddable<EEI, EEO> = IEmbeddable<EEI, EEO>,
   >(type: string, explicitInput: Partial<EEI>): Promise<E | ErrorEmbeddable> {
     const factory = this.getFactory(type) as EmbeddableFactory<EEI, EEO, E> | undefined;
 
@@ -150,13 +151,13 @@ export abstract class Container<
       explicitFiltered[key] = explicitInput[key];
     });
 
-    return ({
+    return {
       ...containerInput,
       ...explicitFiltered,
       // Typescript has difficulties with inferring this type but it is accurate with all
       // tests I tried. Could probably be revisted with future releases of TS to see if
       // it can accurately infer the type.
-    } as unknown) as TEmbeddableInput;
+    } as unknown as TEmbeddableInput;
   }
 
   public destroy() {
@@ -195,7 +196,7 @@ export abstract class Container<
 
   protected createNewPanelState<
     TEmbeddableInput extends EmbeddableInput,
-    TEmbeddable extends IEmbeddable<TEmbeddableInput, any>
+    TEmbeddable extends IEmbeddable<TEmbeddableInput, any>,
   >(
     factory: EmbeddableFactory<TEmbeddableInput, any, TEmbeddable>,
     partial: Partial<TEmbeddableInput> = {}
@@ -236,7 +237,7 @@ export abstract class Container<
 
   private async createAndSaveEmbeddable<
     TEmbeddableInput extends EmbeddableInput = EmbeddableInput,
-    TEmbeddable extends IEmbeddable<TEmbeddableInput> = IEmbeddable<TEmbeddableInput>
+    TEmbeddable extends IEmbeddable<TEmbeddableInput> = IEmbeddable<TEmbeddableInput>,
   >(type: string, panelState: PanelState) {
     this.updateInput({
       panels: {
@@ -250,9 +251,8 @@ export abstract class Container<
 
   private createNewExplicitEmbeddableInput<
     TEmbeddableInput extends EmbeddableInput = EmbeddableInput,
-    TEmbeddable extends IEmbeddable<TEmbeddableInput, EmbeddableOutput> = IEmbeddable<
-      TEmbeddableInput
-    >
+    TEmbeddable extends IEmbeddable<TEmbeddableInput, EmbeddableOutput> =
+      IEmbeddable<TEmbeddableInput>,
   >(
     id: string,
     factory: EmbeddableFactory<TEmbeddableInput, any, TEmbeddable>,

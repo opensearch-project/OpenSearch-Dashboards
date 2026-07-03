@@ -30,8 +30,10 @@ jest.mock(
 describe('TraceAutoDetectCallout', () => {
   const mockCore = coreMock.createStart();
   let mockServices: Partial<AgentTracesServices>;
-  const mockDetectTraceDataAcrossDataSources = autoDetectModule.detectTraceDataAcrossDataSources as jest.Mock;
-  const mockCreateAutoDetectedDatasets = createDatasetsModule.createAutoDetectedDatasets as jest.Mock;
+  const mockDetectTraceDataAcrossDataSources =
+    autoDetectModule.detectTraceDataAcrossDataSources as jest.Mock;
+  const mockCreateAutoDetectedDatasets =
+    createDatasetsModule.createAutoDetectedDatasets as jest.Mock;
 
   // Setup localStorage mock
   const localStorageMock = (() => {

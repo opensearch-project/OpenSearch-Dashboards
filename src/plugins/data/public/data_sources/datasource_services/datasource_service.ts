@@ -92,17 +92,20 @@ export class DataSourceService {
         }
 
         // Apply filter
-        return Object.entries(dataSources).reduce((acc, [id, dataSource]) => {
-          const matchesId = !filter.ids || filter.ids.includes(id);
-          const matchesName = !filter.names || filter.names.includes(dataSource.getName());
-          const matchesType = !filter.types || filter.types.includes(dataSource.getType());
+        return Object.entries(dataSources).reduce(
+          (acc, [id, dataSource]) => {
+            const matchesId = !filter.ids || filter.ids.includes(id);
+            const matchesName = !filter.names || filter.names.includes(dataSource.getName());
+            const matchesType = !filter.types || filter.types.includes(dataSource.getType());
 
-          if (matchesId && matchesName && matchesType) {
-            acc[id] = dataSource;
-          }
+            if (matchesId && matchesName && matchesType) {
+              acc[id] = dataSource;
+            }
 
-          return acc;
-        }, {} as Record<string, DataSource>);
+            return acc;
+          },
+          {} as Record<string, DataSource>
+        );
       })
     );
   }
@@ -128,7 +131,7 @@ export class DataSourceService {
     Object.values(this.dataSourceFetchers).forEach((fetch) => {
       try {
         fetch(); // Directly call the synchronous fetch function
-      } catch (error) {
+      } catch {
         // Handle fetch errors or take corrective actions here
         // TO-DO: Add error handling, maybe collect errors and show them in UI
       }

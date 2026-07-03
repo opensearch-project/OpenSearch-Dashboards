@@ -67,7 +67,7 @@ export class QueryStringManager {
           this.currentAppId = appId;
         });
       }
-    } catch (error) {
+    } catch {
       // eslint-disable-next-line no-console
       console.warn('Could not subscribe to application.currentAppId$');
     }

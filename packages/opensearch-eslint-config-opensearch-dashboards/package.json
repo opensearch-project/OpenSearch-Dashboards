@@ -2,7 +2,7 @@
   "name": "@elastic/eslint-config-kibana",
   "version": "0.15.0",
   "description": "The eslint config used by the opensearch dashboards team",
-  "main": ".eslintrc.js",
+  "main": "eslint.config.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/opensearch-project/OpenSearch-Dashboards.git"
@@ -18,20 +18,17 @@
   },
   "homepage": "https://github.com/opensearch-project/OpenSearch-Dashboards/tree/main/packages/opensearch-eslint-config-opensearch-dashboards",
   "peerDependencies": {
-    "@typescript-eslint/eslint-plugin": "^7.18.0",
-    "@typescript-eslint/parser": "^7.18.0",
+    "@typescript-eslint/eslint-plugin": "^8.58.0",
+    "@typescript-eslint/parser": "^8.58.0",
     "@babel/eslint-parser": "^7.29.7",
-    "eslint": "^8.57.1",
-    "eslint-plugin-babel": "^5.3.1",
-    "eslint-plugin-ban": "^1.4.0",
-    "eslint-plugin-jsx-a11y": "^6.2.3",
-    "eslint-plugin-eslint-comments": "^3.2.0",
-    "eslint-plugin-import": "^2.25.4",
-    "eslint-plugin-jest": "^26.1.1",
-    "eslint-plugin-mocha": "^6.2.2",
-    "eslint-plugin-no-unsanitized": "^3.0.2",
-    "eslint-plugin-prefer-object-spread": "^1.2.1",
-    "eslint-plugin-react": "^7.17.0",
-    "eslint-plugin-react-hooks": "^4.0.4"
+    "@eslint-community/eslint-plugin-eslint-comments": "^4.7.2",
+    "eslint": "^9.39.4",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-jest": "^28.14.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-mocha": "^10.5.0",
+    "eslint-plugin-no-unsanitized": "^4.1.5",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0"
   }
 }

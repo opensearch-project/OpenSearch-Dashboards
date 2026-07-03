@@ -169,9 +169,7 @@ const ConvertFieldTypeEditor = ({
   );
 };
 
-export function createConvertFieldTypeTransformation(): TransformationInstance<
-  ConvertFieldTypeConfig
-> {
+export function createConvertFieldTypeTransformation(): TransformationInstance<ConvertFieldTypeConfig> {
   return {
     instance_id: uuidv4(),
     definition_id: 'convert_field_type',
@@ -219,15 +217,16 @@ export function createConvertFieldTypeTransformation(): TransformationInstance<
   };
 }
 
-export const convertFieldTypeTransformationDefinition: TransformationDefinition<ConvertFieldTypeConfig> = {
-  id: 'convert_field_type',
-  type: 'transform',
-  label: i18n.translate('explore.transformations.convertFieldType.label', {
-    defaultMessage: 'Convert Field Type',
-  }),
-  description: i18n.translate('explore.transformations.convertFieldType.description', {
-    defaultMessage: 'Convert field values to a different type (string, number, boolean, date)',
-  }),
-  iconType: 'inputOutput',
-  createInstance: createConvertFieldTypeTransformation,
-};
+export const convertFieldTypeTransformationDefinition: TransformationDefinition<ConvertFieldTypeConfig> =
+  {
+    id: 'convert_field_type',
+    type: 'transform',
+    label: i18n.translate('explore.transformations.convertFieldType.label', {
+      defaultMessage: 'Convert Field Type',
+    }),
+    description: i18n.translate('explore.transformations.convertFieldType.description', {
+      defaultMessage: 'Convert field values to a different type (string, number, boolean, date)',
+    }),
+    iconType: 'inputOutput',
+    createInstance: createConvertFieldTypeTransformation,
+  };

@@ -7,7 +7,7 @@
     "devOnly": true
   },
   "peerDependencies": {
-    "eslint": "^8.57.1",
+    "eslint": "^9.39.4",
     "@babel/eslint-parser": "^7.29.7"
   },
   "dependencies": {

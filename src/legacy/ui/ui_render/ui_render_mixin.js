@@ -339,7 +339,7 @@ export function uiRenderMixin(osdServer, server, config) {
       if (modifications && modifications.length > 0) {
         cspHeader = applyCspModifications(http.csp.rules, modifications);
       }
-    } catch (e) {
+    } catch {
       // Fall back to default CSP header on error
     }
 
@@ -358,7 +358,7 @@ export function uiRenderMixin(osdServer, server, config) {
       );
       cspReportOnlyIsEmitting =
         cspReportOnlyDynamicConfig.isEmitting ?? http.cspReportOnly.isEmitting;
-    } catch (e) {
+    } catch {
       cspReportOnlyIsEmitting = http.cspReportOnly.isEmitting;
     }
 

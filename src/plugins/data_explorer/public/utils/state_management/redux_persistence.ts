@@ -65,7 +65,7 @@ export const persistReduxState = (root: RootState, services: DataExplorerService
     services.osdUrlStateStorage.set<RootState>('_a', root, {
       replace: true,
     });
-  } catch (err) {
+  } catch {
     return;
   }
 };

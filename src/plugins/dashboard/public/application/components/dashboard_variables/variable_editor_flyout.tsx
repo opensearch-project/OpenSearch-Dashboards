@@ -96,7 +96,7 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
     existingVariable?.type === VariableType.Query ? existingVariable.language : 'PPL'
   );
   const [dataset, setDataset] = useState<any>(
-    existingVariable?.type === VariableType.Query ? existingVariable.dataset ?? null : null
+    existingVariable?.type === VariableType.Query ? (existingVariable.dataset ?? null) : null
   );
   const [customValues, setCustomValues] = useState<Array<{ label: string }>>(
     existingVariable?.type === VariableType.Custom
@@ -109,10 +109,12 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
     existingVariable?.sort || VariableSortOrder.Disabled
   );
   const [regex, setRegex] = useState(
-    existingVariable?.type === VariableType.Query ? existingVariable.regex ?? '' : ''
+    existingVariable?.type === VariableType.Query ? (existingVariable.regex ?? '') : ''
   );
   const [useTimeFilter, setUseTimeFilter] = useState(
-    existingVariable?.type === VariableType.Query ? existingVariable.useTimeFilter ?? false : false
+    existingVariable?.type === VariableType.Query
+      ? (existingVariable.useTimeFilter ?? false)
+      : false
   );
 
   const [isSaving, setIsSaving] = useState(false);

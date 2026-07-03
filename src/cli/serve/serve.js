@@ -271,7 +271,7 @@ export default function (program) {
         if (statSync(osdDevConfig).isFile()) {
           opts.config.push(osdDevConfig);
         }
-      } catch (err) {
+      } catch {
         // ignore, opensearch_dashboards.dev.yml does not exist
       }
     }

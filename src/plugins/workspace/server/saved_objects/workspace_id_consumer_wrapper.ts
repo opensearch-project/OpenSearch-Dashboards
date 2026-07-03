@@ -247,7 +247,10 @@ export class WorkspaceIdConsumerWrapper {
     };
   };
 
-  constructor(private readonly workspaceClient: IWorkspaceClientImpl, logger: Logger) {
+  constructor(
+    private readonly workspaceClient: IWorkspaceClientImpl,
+    logger: Logger
+  ) {
     this.logger = logger;
   }
 }

@@ -40,12 +40,10 @@ export const [getFormatService, setFormatService] = createGetterSetter<
   DataPublicPluginStart['fieldFormats']
 >('vislib data.fieldFormats');
 
-export const [getQueryService, setQueryService] = createGetterSetter<
-  DataPublicPluginStart['query']
->('Query');
+export const [getQueryService, setQueryService] =
+  createGetterSetter<DataPublicPluginStart['query']>('Query');
 
 export const [getShareService, setShareService] = createGetterSetter<SharePluginStart>('Share');
 
-export const [getOpenSearchDashboardsLegacy, setOpenSearchDashboardsLegacy] = createGetterSetter<
-  OpenSearchDashboardsLegacyStart
->('OpenSearchDashboardsLegacy');
+export const [getOpenSearchDashboardsLegacy, setOpenSearchDashboardsLegacy] =
+  createGetterSetter<OpenSearchDashboardsLegacyStart>('OpenSearchDashboardsLegacy');

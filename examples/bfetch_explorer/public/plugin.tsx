@@ -74,8 +74,7 @@ export class BfetchExplorerPlugin implements Plugin {
       links: [
         {
           label: 'README',
-          href:
-            'https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/src/plugins/bfetch/README.md',
+          href: 'https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/src/plugins/bfetch/README.md',
           iconType: 'logoGithub',
           size: 's',
           target: '_blank',

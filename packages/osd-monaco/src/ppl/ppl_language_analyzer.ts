@@ -49,9 +49,10 @@ export class PPLLanguageAnalyzer {
   /**
    * Creates and configures ANTLR lexer and token stream from input code
    */
-  private createLexerAndTokenStream(
-    code: string
-  ): { lexer: OpenSearchPPLLexer; tokenStream: antlr.CommonTokenStream } {
+  private createLexerAndTokenStream(code: string): {
+    lexer: OpenSearchPPLLexer;
+    tokenStream: antlr.CommonTokenStream;
+  } {
     const inputStream = antlr.CharStream.fromString(code);
     const lexer = new OpenSearchPPLLexer(inputStream);
     const tokenStream = new antlr.CommonTokenStream(lexer);
@@ -61,9 +62,7 @@ export class PPLLanguageAnalyzer {
   /**
    * Creates and configures ANTLR parser with a parser error listener
    */
-  private createParserWithErrorHandling(
-    tokenStream: antlr.CommonTokenStream
-  ): {
+  private createParserWithErrorHandling(tokenStream: antlr.CommonTokenStream): {
     parser: OpenSearchPPLParser;
     parserErrorListener: PPLSyntaxErrorListener;
   } {
@@ -102,7 +101,7 @@ export class PPLLanguageAnalyzer {
           });
         }
       }
-    } catch (error) {
+    } catch {
       // Silent error handling for tokenization issues
     }
 

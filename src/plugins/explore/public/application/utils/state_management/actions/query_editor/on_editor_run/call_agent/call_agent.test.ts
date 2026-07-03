@@ -77,7 +77,7 @@ describe('callAgentActionCreator', () => {
 
     mockDispatch = jest.fn();
 
-    mockServices = ({
+    mockServices = {
       data: {
         query: {
           queryString: {
@@ -105,7 +105,7 @@ describe('callAgentActionCreator', () => {
           addError: jest.fn(),
         },
       },
-    } as unknown) as ExploreServices;
+    } as unknown as ExploreServices;
 
     // Mock return values for action creators
     mockSetPromptToQueryIsLoading.mockReturnValue({

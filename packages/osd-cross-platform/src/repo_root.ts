@@ -76,10 +76,8 @@ const findOpenSearchDashboardsPackageJson = () => {
   }
 };
 
-const {
-  opensearchDashboardsDir,
-  opensearchDashboardsPkgJson,
-} = findOpenSearchDashboardsPackageJson();
+const { opensearchDashboardsDir, opensearchDashboardsPkgJson } =
+  findOpenSearchDashboardsPackageJson();
 
 export const REPO_ROOT = resolveToFullPathSync(opensearchDashboardsDir);
 export const REPO_ROOT_8_3 = resolveToShortPathSync(opensearchDashboardsDir);

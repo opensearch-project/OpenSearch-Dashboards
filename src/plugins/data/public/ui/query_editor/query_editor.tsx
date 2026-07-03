@@ -206,17 +206,15 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
   }, [services.uiSettings]);
 
   const renderQueryEditorExtensions = () => {
-    if (
-      !(
-        headerRef.current &&
-        bannerRef.current &&
-        queryControlsContainer.current &&
-        bottomPanelRef.current &&
-        query.language &&
-        extensionMap &&
-        Object.keys(extensionMap).length > 0
-      )
-    ) {
+    if (!(
+      headerRef.current &&
+      bannerRef.current &&
+      queryControlsContainer.current &&
+      bottomPanelRef.current &&
+      query.language &&
+      extensionMap &&
+      Object.keys(extensionMap).length > 0
+    )) {
       return null;
     }
     return (
