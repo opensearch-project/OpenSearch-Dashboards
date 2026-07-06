@@ -12,6 +12,7 @@ import { ATN, ATNDeserializer, Vocabulary } from 'antlr4ng';
 import semver from 'semver';
 import { PPLGrammarBundle } from './ppl_bundle_loader';
 import { TokenDictionary } from '../opensearch_sql/table';
+import { getDataSourceEngineCapabilities } from '../../../common';
 
 const ARTIFACT_ENDPOINT = '/api/enhancements/ppl/grammar';
 
@@ -158,8 +159,13 @@ class PPLGrammarCache {
 
   /**
    * Returns true if version >= 3.6.0 (grammar artifact endpoint support).
+   *
+   * Engines without a runtime PPL grammar endpoint (e.g. Elasticsearch / Open Distro, whose SQL/PPL
+   * live under Open Distro and expose no `/_plugins/_ppl/_grammar`) always fall back to the bundled
+   * grammar regardless of version.
    */
-  shouldFetchFromBackend(version?: string): boolean {
+  shouldFetchFromBackend(version?: string, engineType?: string): boolean {
+    if (!getDataSourceEngineCapabilities(engineType).supportsRuntimePplGrammar) return false;
     if (!version) return false;
     const coerced = semver.coerce(version);
     return coerced ? semver.satisfies(coerced.version, '>=3.6.0') : false;
@@ -181,7 +187,8 @@ class PPLGrammarCache {
     uiSettings: IUiSettingsClient | undefined,
     savedObjectsClient?: SavedObjectsClientContract,
     datasourceId?: string,
-    datasourceVersion?: string
+    datasourceVersion?: string,
+    datasourceEngineType?: string
   ): void {
     // Check feature flag - if disabled, reset cache state but keep subscribers
     const runtimeGrammarEnabled = uiSettings?.get('query:enhancements:runtimePplGrammar') !== false;
@@ -208,7 +215,13 @@ class PPLGrammarCache {
     // Already cached, in-flight, or recently failed — nothing to do.
     if (this.cachedGrammar || this.pendingFetch || this.fetchFailed) return;
 
-    const promise = this.doWarmUp(http, savedObjectsClient, datasourceId, datasourceVersion);
+    const promise = this.doWarmUp(
+      http,
+      savedObjectsClient,
+      datasourceId,
+      datasourceVersion,
+      datasourceEngineType
+    );
     this.pendingFetch = promise;
 
     promise
@@ -252,7 +265,8 @@ class PPLGrammarCache {
     http: HttpSetup,
     savedObjectsClient: SavedObjectsClientContract | undefined,
     datasourceId?: string,
-    datasourceVersion?: string
+    datasourceVersion?: string,
+    datasourceEngineType?: string
   ): Promise<CachedGrammar | null> {
     const version = await this.resolveVersion(
       http,
@@ -260,7 +274,7 @@ class PPLGrammarCache {
       datasourceId,
       datasourceVersion
     );
-    if (!this.shouldFetchFromBackend(version)) {
+    if (!this.shouldFetchFromBackend(version, datasourceEngineType)) {
       // Version unsupported or unknown — not a failure, just nothing to fetch.
       // Don't set fetchFailed so that future warmUp calls can retry when the
       // version becomes available (e.g. /api/status wasn't ready on page load).
@@ -395,10 +409,14 @@ export const pplGrammarCache = new PPLGrammarCache();
 
 export function shouldUseRuntimeGrammar(
   _dataSourceId?: string,
-  dataSourceVersion?: string
+  dataSourceVersion?: string,
+  dataSourceEngineType?: string
 ): boolean {
+  // Engines without a runtime grammar endpoint (e.g. Elasticsearch) use the bundled grammar.
+  if (!getDataSourceEngineCapabilities(dataSourceEngineType).supportsRuntimePplGrammar)
+    return false;
   if (dataSourceVersion) {
-    return pplGrammarCache.shouldFetchFromBackend(dataSourceVersion);
+    return pplGrammarCache.shouldFetchFromBackend(dataSourceVersion, dataSourceEngineType);
   }
   return true;
 }

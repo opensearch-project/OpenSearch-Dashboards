@@ -10,7 +10,8 @@ jest.mock('@ag-ui/client', () => ({
 }));
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { Subject } from 'rxjs';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import { LanguageToggle } from './language_toggle';
@@ -42,6 +43,12 @@ const mockGetTab = jest.fn();
 const mockGetQuery = jest.fn(() => ({ dataset: undefined }));
 const mockSetUserQueryLanguage = jest.fn();
 const mockSetQuery = jest.fn();
+const mockIsLanguageSupportedForDataset = jest.fn();
+// Default getUpdates$ subscription is a no-op so existing tests are unaffected.
+const mockUnsubscribe = jest.fn();
+let mockGetUpdates$ = jest.fn(() => ({
+  subscribe: () => ({ unsubscribe: mockUnsubscribe }),
+}));
 let mockSqlSupportEnabled = true;
 jest.mock('../../../../services/services', () => ({
   getServices: () => ({
@@ -55,9 +62,11 @@ jest.mock('../../../../services/services', () => ({
           getLanguageService: () => ({
             getLanguage: mockGetLanguage,
             setUserQueryLanguage: mockSetUserQueryLanguage,
+            isLanguageSupportedForDataset: mockIsLanguageSupportedForDataset,
           }),
           getQuery: mockGetQuery,
           setQuery: mockSetQuery,
+          getUpdates$: () => mockGetUpdates$(),
         },
       },
     },
@@ -143,6 +152,14 @@ describe('LanguageToggle', () => {
     mockGetLanguage.mockReturnValue({ title: 'PPL' });
     mockGetTab.mockReturnValue({ supportedLanguages: ['PPL'] });
     mockSqlSupportEnabled = true;
+    mockGetQuery.mockReturnValue({ dataset: undefined });
+    // By default every language is supported for the current dataset so existing
+    // tests are unaffected by the per-dataset gating.
+    mockIsLanguageSupportedForDataset.mockReturnValue(true);
+    // Default getUpdates$ subscription is a no-op (does not re-run the effect).
+    mockGetUpdates$ = jest.fn(() => ({
+      subscribe: () => ({ unsubscribe: mockUnsubscribe }),
+    }));
   });
 
   it('renders the language toggle button', () => {
@@ -436,6 +453,117 @@ describe('LanguageToggle', () => {
         expect(screen.getByTestId('queryPanelFooterLanguageToggle-PPL')).toBeInTheDocument();
       });
       expect(screen.queryByTestId('queryPanelFooterLanguageToggle-SQL')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Per-Dataset Language Gating', () => {
+    it('should EXCLUDE SQL and PPL when the dataset does not support them (e.g. Elasticsearch below min version)', async () => {
+      mockSqlSupportEnabled = true;
+      mockGetTab.mockReturnValue({ supportedLanguages: ['PPL', 'SQL'] });
+      mockGetLanguage.mockImplementation((lang: string) => ({ title: lang }));
+      // Simulate a legacy Elasticsearch dataset that supports neither SQL nor PPL.
+      mockGetQuery.mockReturnValue({ dataset: { id: 'es-legacy', type: 'INDEX_PATTERN' } });
+      mockIsLanguageSupportedForDataset.mockImplementation((langConfig: { title: string }) => {
+        return langConfig.title !== 'SQL' && langConfig.title !== 'PPL';
+      });
+
+      renderWithProvider(<LanguageToggle />);
+      const button = screen.getByTestId('queryPanelFooterLanguageToggle');
+      fireEvent.click(button);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('queryPanelFooterLanguageToggle-AI')).toBeInTheDocument();
+      });
+      expect(screen.queryByTestId('queryPanelFooterLanguageToggle-SQL')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('queryPanelFooterLanguageToggle-PPL')).not.toBeInTheDocument();
+    });
+
+    it('should keep a language whose config is not resolved (getLanguage returns undefined)', async () => {
+      mockSqlSupportEnabled = true;
+      mockGetTab.mockReturnValue({ supportedLanguages: ['PPL'] });
+      // No language config -> gating must not drop the language.
+      mockGetLanguage.mockReturnValue(undefined);
+      mockGetQuery.mockReturnValue({ dataset: { id: 'es-legacy', type: 'INDEX_PATTERN' } });
+      // Even though this would return false, it should never be consulted for an
+      // unresolved language config.
+      mockIsLanguageSupportedForDataset.mockReturnValue(false);
+
+      renderWithProvider(<LanguageToggle />);
+      const button = screen.getByTestId('queryPanelFooterLanguageToggle');
+      fireEvent.click(button);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('queryPanelFooterLanguageToggle-PPL')).toBeInTheDocument();
+      });
+    });
+
+    it('should keep SQL/PPL when the dataset supports them', async () => {
+      mockSqlSupportEnabled = true;
+      mockGetTab.mockReturnValue({ supportedLanguages: ['PPL', 'SQL'] });
+      mockGetLanguage.mockImplementation((lang: string) => ({ title: lang }));
+      mockGetQuery.mockReturnValue({ dataset: { id: 'os-cluster', type: 'INDEX_PATTERN' } });
+      mockIsLanguageSupportedForDataset.mockReturnValue(true);
+
+      renderWithProvider(<LanguageToggle />);
+      const button = screen.getByTestId('queryPanelFooterLanguageToggle');
+      fireEvent.click(button);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('queryPanelFooterLanguageToggle-SQL')).toBeInTheDocument();
+      });
+      expect(screen.getByTestId('queryPanelFooterLanguageToggle-PPL')).toBeInTheDocument();
+    });
+
+    it('should HIDE SQL via feature flag independently of dataset gating', async () => {
+      mockSqlSupportEnabled = false;
+      mockGetTab.mockReturnValue({ supportedLanguages: ['PPL', 'SQL'] });
+      mockGetLanguage.mockImplementation((lang: string) => ({ title: lang }));
+      mockGetQuery.mockReturnValue({ dataset: { id: 'os-cluster', type: 'INDEX_PATTERN' } });
+      // Dataset would allow SQL, but the feature flag must still filter it out.
+      mockIsLanguageSupportedForDataset.mockReturnValue(true);
+
+      renderWithProvider(<LanguageToggle />);
+      const button = screen.getByTestId('queryPanelFooterLanguageToggle');
+      fireEvent.click(button);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('queryPanelFooterLanguageToggle-PPL')).toBeInTheDocument();
+      });
+      expect(screen.queryByTestId('queryPanelFooterLanguageToggle-SQL')).not.toBeInTheDocument();
+    });
+
+    it('should re-run the language gating when queryString emits an update', async () => {
+      mockSqlSupportEnabled = true;
+      mockGetTab.mockReturnValue({ supportedLanguages: ['PPL', 'SQL'] });
+      mockGetLanguage.mockImplementation((lang: string) => ({ title: lang }));
+      mockGetQuery.mockReturnValue({ dataset: { id: 'os-cluster', type: 'INDEX_PATTERN' } });
+      // Wire a real Subject so emitting re-runs updateSupportedLanguages.
+      const updates$ = new Subject<void>();
+      mockGetUpdates$ = jest.fn(() => updates$);
+
+      // Initially every language is supported.
+      mockIsLanguageSupportedForDataset.mockReturnValue(true);
+
+      renderWithProvider(<LanguageToggle />);
+      const button = screen.getByTestId('queryPanelFooterLanguageToggle');
+      fireEvent.click(button);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('queryPanelFooterLanguageToggle-SQL')).toBeInTheDocument();
+      });
+
+      // Switch the dataset to one that no longer supports SQL, then emit an update.
+      mockIsLanguageSupportedForDataset.mockImplementation((langConfig: { title: string }) => {
+        return langConfig.title !== 'SQL';
+      });
+      act(() => {
+        updates$.next();
+      });
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('queryPanelFooterLanguageToggle-SQL')).not.toBeInTheDocument();
+      });
+      expect(screen.getByTestId('queryPanelFooterLanguageToggle-PPL')).toBeInTheDocument();
     });
   });
 });

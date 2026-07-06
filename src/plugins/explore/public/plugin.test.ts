@@ -142,6 +142,9 @@ describe('ExplorePlugin', () => {
           },
           queryString: {
             clearQuery: jest.fn(),
+            getDatasetService: jest.fn().mockReturnValue({
+              registerDatasetFilter: jest.fn(),
+            }),
           },
         },
       } as unknown) as DataPublicPluginStart,

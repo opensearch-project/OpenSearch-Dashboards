@@ -64,13 +64,14 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
         return;
       }
 
-      // Build new options including app support check
+      // Build new options including app support check and per-dataset engine/version gating
       const newOptions = languageService
         .getLanguages()
         .filter(
           (lang) =>
             languages.includes(lang.id) &&
-            (!props.appName || lang.editorSupportedAppNames?.includes(props.appName))
+            (!props.appName || lang.editorSupportedAppNames?.includes(props.appName)) &&
+            languageService.isLanguageSupportedForDataset(lang, dataset)
         )
         .map(mapExternalLanguageToOptions)
         .sort((a, b) => a.label.localeCompare(b.label));

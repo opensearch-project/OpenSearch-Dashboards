@@ -49,7 +49,10 @@ export class QueryEnhancementsPlugin
     this.config$ = initializerContext.config.legacy.globalConfig$;
   }
 
-  public setup(core: CoreSetup, { data, dataSource }: QueryEnhancementsPluginSetupDependencies) {
+  public async setup(
+    core: CoreSetup,
+    { data, dataSource }: QueryEnhancementsPluginSetupDependencies
+  ) {
     this.logger.debug('queryEnhancements: Setup');
 
     // PPL lint capability — disabled by default. The public plugin reads
@@ -108,10 +111,32 @@ export class QueryEnhancementsPlugin
     // Initialize the default query executor for prometheus
     prometheusManager.initializeDefaultQueryExecutor(client);
 
-    const pplSearchStrategy = pplSearchStrategyProvider(this.config$, this.logger, client);
+    // Read the scoped config flag that gates legacy Elasticsearch compatibility (Open Distro
+    // endpoint routing). Await the first emission so the strategies below are always constructed
+    // with the resolved value rather than relying on synchronous observable emission.
+    const queryEnhancementsConfig = await this.initializerContext.config
+      .create<ConfigSchema>()
+      .pipe(first())
+      .toPromise();
+    const legacyEsCompatEnabled =
+      queryEnhancementsConfig.legacyElasticsearchCompatibility?.enabled ?? false;
+
+    const pplSearchStrategy = pplSearchStrategyProvider(
+      this.config$,
+      this.logger,
+      client,
+      undefined,
+      legacyEsCompatEnabled
+    );
     const pplRawSearchStrategy = pplRawSearchStrategyProvider(this.config$, this.logger, client);
     const promqlSearchStrategy = promqlSearchStrategyProvider(this.config$, this.logger);
-    const sqlSearchStrategy = sqlSearchStrategyProvider(this.config$, this.logger, client);
+    const sqlSearchStrategy = sqlSearchStrategyProvider(
+      this.config$,
+      this.logger,
+      client,
+      undefined,
+      legacyEsCompatEnabled
+    );
     const sqlAsyncSearchStrategy = sqlAsyncSearchStrategyProvider(
       this.config$,
       this.logger,
