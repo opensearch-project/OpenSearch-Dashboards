@@ -10,11 +10,34 @@ import { coreMock } from '../../../../../core/public/mocks';
 import { CoreStart, DEFAULT_APP_CATEGORIES, WorkspaceObject } from '../../../../../core/public';
 import { WorkspaceUseCase } from '../../types';
 
+// `var` (not const) so it is hoisted above the hoisted jest.mock factory that
+// references it; the `mock` prefix is what allows the factory reference.
+// eslint-disable-next-line no-var
+var mockTourStepSpy = jest.fn();
+
 // The embedded workspace switcher pulls in recent-workspace + moment machinery
 // that isn't relevant here; stub it so we only assert that it is rendered.
 jest.mock('../workspace_selector/workspace_selector', () => ({
   WorkspaceSelector: () => <div data-test-subj="mockWorkspaceSelector" />,
 }));
+
+// Spy on EuiTourStep props (to assert focus behavior, which jsdom can't observe)
+// while still rendering the anchored children + the footer action button.
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  return {
+    ...actual,
+    EuiTourStep: (props: any) => {
+      mockTourStepSpy(props);
+      return (
+        <>
+          {props.children}
+          {props.isStepOpen ? props.footerAction : null}
+        </>
+      );
+    },
+  };
+});
 
 const manageCategory = DEFAULT_APP_CATEGORIES.manageWorkspace;
 
@@ -77,6 +100,7 @@ const renderMenu = (core: CoreStart) =>
 
 describe('<ManageWorkspaceMenu />', () => {
   beforeEach(() => {
+    mockTourStepSpy.mockClear();
     // Default: tour already dismissed so it doesn't interfere with popover tests.
     localStorage.setItem('workspace.manageWorkspaceMoved.tourDismissed', 'true');
   });
@@ -114,14 +138,17 @@ describe('<ManageWorkspaceMenu />', () => {
     expect(queryByTestId('manageWorkspaceMenuItem-allWorkspaces')).not.toBeInTheDocument();
   });
 
-  it('shows the switcher even outside a workspace (no manage links)', () => {
-    // Outside a workspace: no current nav group, no current workspace.
+  it('shows the workspace picker directly (no switcher row) when there are no manage links', () => {
+    // Outside a workspace (e.g. settings page): no current nav group / workspace.
     const { getByTestId, queryByTestId } = renderMenu(
       buildCore({ currentNavGroup: undefined, currentWorkspace: null })
     );
     fireEvent.click(getByTestId('manageWorkspaceMenuButton'));
 
-    expect(getByTestId('manageWorkspaceMenuSelector')).toBeInTheDocument();
+    // Picker is rendered directly in the popover — no "Select a workspace" row
+    // (the switcher row that would open a second popover).
+    expect(getByTestId('manageWorkspaceMenuPicker')).toBeInTheDocument();
+    expect(queryByTestId('manageWorkspaceMenuSelector')).not.toBeInTheDocument();
     // No manage-workspace rows when outside a workspace.
     expect(queryByTestId('manageWorkspaceMenuItem-workspace_detail')).not.toBeInTheDocument();
   });
@@ -177,6 +204,17 @@ describe('<ManageWorkspaceMenu />', () => {
       fireEvent.click(getByTestId('manageWorkspaceMenuButton'));
 
       expect(localStorage.getItem('workspace.manageWorkspaceMoved.tourDismissed')).toBe('true');
+    });
+
+    it('renders the tour without stealing focus (ownFocus=false)', () => {
+      localStorage.clear();
+      renderMenu(buildCore());
+      // The tour must not trap keyboard focus, otherwise page-level shortcuts
+      // (shift+/, g-d, ...) are swallowed on first visit. jsdom cannot observe
+      // the focus trap directly, so assert the prop passed to EuiTourStep.
+      const tourCall = mockTourStepSpy.mock.calls.find(([props]) => props.isStepOpen);
+      expect(tourCall).toBeDefined();
+      expect(tourCall![0].ownFocus).toBe(false);
     });
   });
 });

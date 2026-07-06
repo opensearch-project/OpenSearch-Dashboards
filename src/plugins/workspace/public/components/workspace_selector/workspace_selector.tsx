@@ -50,9 +50,22 @@ interface Props {
    * rather than a large primary button.
    */
   flush?: boolean;
+  /**
+   * Render only the picker content (search + workspace list + Manage/Create),
+   * with no trigger button and no popover wrapper. Used when a parent popover
+   * already provides the container (e.g. the footer "Manage workspace" menu on
+   * pages with no manage-workspace links) so the picker shows directly instead
+   * of a redundant popover-in-a-popover.
+   */
+  inline?: boolean;
 }
 
-export const WorkspaceSelector = ({ coreStart, registeredUseCases$, flush = false }: Props) => {
+export const WorkspaceSelector = ({
+  coreStart,
+  registeredUseCases$,
+  flush = false,
+  inline = false,
+}: Props) => {
   const [isPopoverOpen, setPopover] = useState(false);
   const currentWorkspace = useObservable(coreStart.workspaces.currentWorkspace$, null);
   const availableUseCases = useObservable(registeredUseCases$, []);
@@ -107,7 +120,9 @@ export const WorkspaceSelector = ({ coreStart, registeredUseCases$, flush = fals
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiIcon type="arrowDown" size="s" color="subdued" />
+          {/* The flush picker opens to the right, so point the chevron toward it
+              (submenu-style disclosure) rather than down. */}
+          <EuiIcon type="arrowRight" size="s" color="subdued" />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
@@ -157,74 +172,91 @@ export const WorkspaceSelector = ({ coreStart, registeredUseCases$, flush = fals
 
   const button = flush ? flushButton : defaultButton;
 
+  // The picker body (search + workspace list + Manage/Create). Shared between the
+  // popover (default/flush) and the inline variant, which renders it directly
+  // without a trigger button or nested popover.
+  const pickerContent = (
+    <EuiFlexGroup direction="column" alignItems="center" gutterSize="none">
+      <EuiFlexItem>
+        <EuiPanel
+          paddingSize="none"
+          hasBorder={false}
+          hasShadow={false}
+          color="transparent"
+          // set the width fixed to achieve text truncation
+          style={{ height: '40vh', width: '310px' }}
+        >
+          <WorkspacePickerContent
+            coreStart={coreStart}
+            registeredUseCases$={registeredUseCases$}
+            onClickWorkspace={() => setPopover(false)}
+            isInTwoLines={false}
+          />
+        </EuiPanel>
+      </EuiFlexItem>
+
+      {isDashboardAdmin && (
+        <EuiFlexItem className="eui-fullWidth">
+          <EuiHorizontalRule size="full" margin="none" />
+          <EuiSpacer size="s" />
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem grow={false} className="eui-textLeft">
+              <EuiButtonEmpty
+                color="primary"
+                size="xs"
+                data-test-subj="workspace-menu-manage-button"
+                onClick={() => {
+                  closePopover();
+                  coreStart.application.navigateToApp(WORKSPACE_LIST_APP_ID);
+                }}
+              >
+                <EuiText size="s">{manageWorkspacesButton}</EuiText>
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false} className="eui-textRight">
+              <EuiButtonEmpty
+                color="primary"
+                size="xs"
+                iconType="plus"
+                key={WORKSPACE_CREATE_APP_ID}
+                data-test-subj="workspace-menu-create-workspace-button"
+                onClick={() => {
+                  closePopover();
+                  coreStart.application.navigateToApp(WORKSPACE_CREATE_APP_ID);
+                }}
+              >
+                <EuiText size="s">{createWorkspaceButton}</EuiText>
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
+  );
+
+  // Inline: render just the picker content (no trigger, no popover) so a parent
+  // popover (e.g. the footer "Manage workspace" menu on pages with no manage
+  // links) can show the picker directly without a redundant popover-in-popover.
+  if (inline) {
+    return pickerContent;
+  }
+
   return (
     <EuiPopover
       button={button}
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       panelPaddingSize="s"
-      anchorPosition="downLeft"
+      // In the flush (footer) context the trigger sits at the very bottom of the
+      // nav with no room below, so open the picker to the right. In the nav
+      // header, keep the original downward dropdown.
+      anchorPosition={flush ? 'rightUp' : 'downLeft'}
       repositionOnScroll={true}
       display="block"
       className="eui-fullWidth"
     >
-      <EuiFlexGroup direction="column" alignItems="center" gutterSize="none">
-        <EuiFlexItem>
-          <EuiPanel
-            paddingSize="none"
-            hasBorder={false}
-            hasShadow={false}
-            color="transparent"
-            // set the width fixed to achieve text truncation
-            style={{ height: '40vh', width: '310px' }}
-          >
-            <WorkspacePickerContent
-              coreStart={coreStart}
-              registeredUseCases$={registeredUseCases$}
-              onClickWorkspace={() => setPopover(false)}
-              isInTwoLines={false}
-            />
-          </EuiPanel>
-        </EuiFlexItem>
-
-        {isDashboardAdmin && (
-          <EuiFlexItem className="eui-fullWidth">
-            <EuiHorizontalRule size="full" margin="none" />
-            <EuiSpacer size="s" />
-            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-              <EuiFlexItem grow={false} className="eui-textLeft">
-                <EuiButtonEmpty
-                  color="primary"
-                  size="xs"
-                  data-test-subj="workspace-menu-manage-button"
-                  onClick={() => {
-                    closePopover();
-                    coreStart.application.navigateToApp(WORKSPACE_LIST_APP_ID);
-                  }}
-                >
-                  <EuiText size="s">{manageWorkspacesButton}</EuiText>
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-
-              <EuiFlexItem grow={false} className="eui-textRight">
-                <EuiButtonEmpty
-                  color="primary"
-                  size="xs"
-                  iconType="plus"
-                  key={WORKSPACE_CREATE_APP_ID}
-                  data-test-subj="workspace-menu-create-workspace-button"
-                  onClick={() => {
-                    closePopover();
-                    coreStart.application.navigateToApp(WORKSPACE_CREATE_APP_ID);
-                  }}
-                >
-                  <EuiText size="s">{createWorkspaceButton}</EuiText>
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+      {pickerContent}
     </EuiPopover>
   );
 };

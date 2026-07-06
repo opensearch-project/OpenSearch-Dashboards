@@ -157,6 +157,12 @@ export const ManageWorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) =
       step={1}
       stepsTotal={1}
       anchorPosition="rightUp"
+      // Do not steal keyboard focus: this is a passive first-visit hint, not a
+      // modal. With ownFocus (the EuiPopover default) the tour panel traps focus
+      // on mount and swallows page-level keyboard shortcuts (e.g. shift+/ for the
+      // shortcuts help modal, g-d/g-b navigation). Matches the other icon side
+      // nav popovers, which all render with ownFocus={false}.
+      ownFocus={false}
       subtitle={i18n.translate('workspace.manageWorkspaceMenu.tour.subtitle', {
         defaultMessage: "What's new",
       })}
@@ -186,20 +192,31 @@ export const ManageWorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) =
       >
         <div data-test-subj="manageWorkspaceMenuPopover" style={{ width: 320 }}>
           <EuiPopoverTitle paddingSize="s">{label}</EuiPopoverTitle>
-          {/* The exact workspace switcher used at the top of the nav header,
-              rendered flush so it matches the manage-workspace menu rows. */}
-          <div data-test-subj="manageWorkspaceMenuSelector">
-            <WorkspaceSelector
-              coreStart={coreStart}
-              registeredUseCases$={registeredUseCases$}
-              flush
-            />
-          </div>
-          {manageMenuItems.length > 0 && (
+          {manageMenuItems.length > 0 ? (
             <>
+              {/* Inside a workspace: the switcher row (flush WorkspaceSelector)
+                  sits above the manage-workspace links. */}
+              <div data-test-subj="manageWorkspaceMenuSelector">
+                <WorkspaceSelector
+                  coreStart={coreStart}
+                  registeredUseCases$={registeredUseCases$}
+                  flush
+                />
+              </div>
               <EuiHorizontalRule margin="none" />
               <EuiContextMenuPanel items={manageMenuItems} />
             </>
+          ) : (
+            // No manage links (e.g. settings/admin page): show the workspace
+            // picker directly in this popover — no intermediate "Select a
+            // workspace" row that would open a second popover.
+            <div data-test-subj="manageWorkspaceMenuPicker">
+              <WorkspaceSelector
+                coreStart={coreStart}
+                registeredUseCases$={registeredUseCases$}
+                inline
+              />
+            </div>
           )}
         </div>
       </EuiPopover>
