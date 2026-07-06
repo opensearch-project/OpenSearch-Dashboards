@@ -124,6 +124,17 @@ function collectCreatedFields(
   // target type (a `convertedDataType`), not a created field — skip those so a
   // type name like `int` never pollutes the known-field set.
   const convertedTypeIdx = ruleNameToIndex('convertedDataType');
+  // Not every `AS` introduces a field. `join departments AS d` binds `d` as a
+  // *table* alias (the `AS` sits under `tableSourceClause`), not a column on the
+  // outer source. Registering it would silently expand the known-field set and
+  // could mask a real unknown-field warning on a downstream field named `d`.
+  // Skip an `AS` whose immediate container is a table/source-alias context —
+  // the same vocabulary field_validation excludes from the existence pass.
+  const aliasContextIdx = new Set(
+    ['tableSourceClause', 'tableSource', 'tableQualifiedName', 'sourceReference', 'sideAlias']
+      .map(ruleNameToIndex)
+      .filter((idx) => idx !== -1)
+  );
   const stack: ParseTree[] = [stage.node];
   while (stack.length > 0) {
     const node = stack.pop();
@@ -131,11 +142,14 @@ function collectCreatedFields(
       continue;
     }
     const children = node.children ?? [];
+    // A table/source-alias `AS` (join alias) names a table, not a field — skip
+    // the whole container so its alias never enters the created-field set.
+    const isAliasContext = aliasContextIdx.has(node.ruleIndex);
     for (let i = 0; i < children.length; i++) {
       const child = children[i];
       if (isTerminalNode(child) && child.getText().toLowerCase() === 'as') {
         const next = children[i + 1];
-        if (isRuleNode(next) && next.ruleIndex !== convertedTypeIdx) {
+        if (isRuleNode(next) && next.ruleIndex !== convertedTypeIdx && !isAliasContext) {
           const name = next.getText();
           if (name) {
             out.add(name);

@@ -238,7 +238,10 @@ function offendingFollowsPipe<T extends ATNSimulator>(
 ): boolean {
   const tokenIndex = offendingSymbol?.tokenIndex;
   const stream = recognizer.inputStream;
-  if (tokenIndex == null || tokenIndex <= 0 || !stream) {
+  // `tokenIndex` is a valid stream index in practice, but a token synthesized
+  // during error recovery can carry an out-of-range index; the upper bound keeps
+  // the `stream.get(i)` lookback in range regardless.
+  if (tokenIndex == null || tokenIndex <= 0 || !stream || tokenIndex > stream.size) {
     return false;
   }
   for (let i = tokenIndex - 1; i >= 0; i--) {

@@ -39,6 +39,10 @@ export function damerauLevenshtein(a: string, b: string, maxDistance: number): n
     if (rowMin > maxDistance) {
       return maxDistance + 1;
     }
+    // Rotate the three rolling rows: the two-back row is done, so it becomes the
+    // next iteration's scratch `curr` (fully overwritten — `curr[0]` is reset at
+    // the top of the loop, `curr[1..n]` in the inner loop). `prev` must hold the
+    // row just completed here, which is `curr`, so the order matters.
     const spare = prevPrev;
     prevPrev = prev;
     prev = curr;

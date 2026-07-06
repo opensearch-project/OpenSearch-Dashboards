@@ -68,6 +68,15 @@ describe('field-validation alternate-source suppression (compiled surface)', () 
         )
       ).toEqual([expect.stringContaining('Unknown field "x.response"')]);
     });
+
+    it('does NOT register a join TABLE alias as a created field', () => {
+      // `join departments AS d` binds `d` as a table alias, not a column on the
+      // outer `accounts` source. It must not enter the known-field set, so a
+      // downstream reference to a *field* `d` is still flagged.
+      expect(fieldDiags('search accounts | join departments AS d | where d > 1')).toEqual([
+        expect.stringContaining('Unknown field "d"'),
+      ]);
+    });
   });
 
   describe('alternate-source subtrees', () => {
