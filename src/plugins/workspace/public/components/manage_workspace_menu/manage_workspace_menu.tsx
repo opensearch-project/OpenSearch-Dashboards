@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -77,12 +77,8 @@ export const ManageWorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) =
   const [isTourDismissed, setIsTourDismissed] = useState(() =>
     Boolean(localStorage.getItem(MANAGE_WORKSPACE_TOUR_STORAGE_KEY))
   );
-  const [isTourOpen, setIsTourOpen] = useState(false);
-  useEffect(() => {
-    if (!isTourDismissed) {
-      setIsTourOpen(true);
-    }
-  }, [isTourDismissed]);
+  // Derived: the first-visit tour is open whenever it hasn't been dismissed.
+  const isTourOpen = !isTourDismissed;
 
   const label = i18n.translate('workspace.manageWorkspaceMenu.title', {
     defaultMessage: 'Manage workspace',
@@ -100,7 +96,6 @@ export const ManageWorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) =
   const dismissTour = useCallback(() => {
     localStorage.setItem(MANAGE_WORKSPACE_TOUR_STORAGE_KEY, 'true');
     setIsTourDismissed(true);
-    setIsTourOpen(false);
   }, []);
 
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
