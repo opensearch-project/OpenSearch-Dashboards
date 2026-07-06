@@ -144,6 +144,7 @@ export default {
   rootDir,
   roots,
   moduleNameMapper: {
+    '^uuid$': '<rootDir>/node_modules/uuid/dist/cjs/index.js',
     '@elastic/eui$': '<rootDir>/node_modules/@elastic/eui/test-env',
     '@elastic/eui/lib/(.*)?': '<rootDir>/node_modules/@elastic/eui/test-env/$1',
     '@opensearch-project/opensearch/aws':
@@ -198,7 +199,7 @@ export default {
   transformIgnorePatterns: [
     // ignore all node_modules except those which require babel transforms to handle dynamic import()
     // since ESM modules are not natively supported in Jest yet (https://github.com/facebook/jest/issues/4842)
-    '[/\\\\]node_modules(?![\\/\\\\](monaco-editor|react-monaco-editor|weak-lru-cache|ordered-binary|d3-[^/\\\\]+|axios|@smithy|@aws-crypto|@aws-sdk|uuid|@xyflow|@dagrejs|classcat|internmap|delaunator|robust-predicates|ramda))[/\\\\].+\\.js$',
+    '[/\\\\]node_modules(?![\\/\\\\](monaco-editor|react-monaco-editor|weak-lru-cache|ordered-binary|d3-[^/\\\\]+|axios|@smithy|@aws-crypto|@aws-sdk|@xyflow|@dagrejs|classcat|internmap|delaunator|robust-predicates|ramda))[/\\\\].+\\.js$',
     'packages/osd-pm/dist/index.js',
   ],
   snapshotSerializers: [

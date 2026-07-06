@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { EuiFormRow, EuiButtonGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { get } from 'lodash';
@@ -82,7 +82,7 @@ const SortByEditor = ({
 
 export function createSortByTransformation(): TransformationInstance<SortByConfig> {
   return {
-    instance_id: uuid.v4(),
+    instance_id: uuidv4(),
     definition_id: 'sort_by',
     config: {
       field: undefined,

@@ -4,7 +4,7 @@
  */
 
 import { useCallback } from 'react';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { EuiFormRow, EuiSelect, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { get } from 'lodash';
@@ -117,7 +117,7 @@ const FilterEditor = ({
 
 export function createFilterTransformation(): TransformationInstance<FilterConfig> {
   return {
-    instance_id: uuid.v4(),
+    instance_id: uuidv4(),
     definition_id: 'filter',
     config: {
       field: undefined,

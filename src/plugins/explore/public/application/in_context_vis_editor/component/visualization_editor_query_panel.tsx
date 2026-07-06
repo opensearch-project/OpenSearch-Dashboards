@@ -30,6 +30,8 @@ export const QueryPanel = ({
       borderRadius="none"
       className="visualizationEditorTabPanel"
       style={{ height: '100%' }}
+      hasBorder={false}
+      hasShadow={false}
     >
       <QueryPanelWidgets />
       <div className="exploreQueryPanel__editorsWrapper">

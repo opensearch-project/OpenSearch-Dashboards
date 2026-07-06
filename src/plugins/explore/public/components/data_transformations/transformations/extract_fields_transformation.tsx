@@ -4,7 +4,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { get } from 'lodash';
@@ -136,7 +136,7 @@ const ExtractFieldsEditor = ({
 
 export function createExtractFieldsTransformation(): TransformationInstance<ExtractFieldsConfig> {
   return {
-    instance_id: uuid.v4(),
+    instance_id: uuidv4(),
     definition_id: 'extract_fields',
     config: {
       field: undefined,
