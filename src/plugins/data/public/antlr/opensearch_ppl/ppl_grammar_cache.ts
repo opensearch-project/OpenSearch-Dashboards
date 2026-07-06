@@ -420,3 +420,19 @@ export function shouldUseRuntimeGrammar(
   }
   return true;
 }
+
+/**
+ * Derive whether a data source runs the Calcite engine from its version.
+ * Returns true for >= 3.3.0, false below 3.3.0, undefined when unknown.
+ * Cannot detect an administratively-disabled Calcite on a >= 3.3.0 cluster.
+ */
+export function deriveIsCalcite(dataSourceVersion?: string): boolean | undefined {
+  if (!dataSourceVersion) {
+    return undefined;
+  }
+  const coerced = semver.coerce(dataSourceVersion);
+  if (!coerced) {
+    return undefined;
+  }
+  return semver.gte(coerced.version, '3.3.0');
+}

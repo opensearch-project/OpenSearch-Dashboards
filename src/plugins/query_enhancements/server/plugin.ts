@@ -36,6 +36,7 @@ import { resourceManagerService } from './connections/resource_manager_service';
 import { queryManagerService } from './connections/query_manager_service';
 import { BaseConnectionManager } from './connections/managers/base_connection_manager';
 import { prometheusManager } from './connections/managers/prometheus_manager';
+import { getPplLintRuleSettings } from './ui_settings';
 
 export class QueryEnhancementsPlugin
   implements Plugin<QueryEnhancementsPluginSetup, QueryEnhancementsPluginStart> {
@@ -54,11 +55,10 @@ export class QueryEnhancementsPlugin
   ) {
     this.logger.debug('queryEnhancements: Setup');
 
-    // PPL lint capability — disabled by default until an operator enables it via
-    // the queryEnhancements.pplLint dynamic app config flag (see the switcher
-    // below). A follow-up PR will have the public plugin read
-    // capabilities.queryEnhancements.pplLint to decide whether to register the
-    // lint bridge; nothing consumes this capability yet.
+    // PPL lint capability — disabled by default. The public plugin reads
+    // capabilities.queryEnhancements.pplLint (see public/plugin.tsx) to decide
+    // whether to register the lint bridge. The switcher below overrides this
+    // default from DynamicConfigService.
     core.capabilities.registerProvider(() => ({
       queryEnhancements: { pplLint: false },
     }));
@@ -95,6 +95,8 @@ export class QueryEnhancementsPlugin
         return capabilities;
       }
     });
+
+    core.uiSettings.register(getPplLintRuleSettings(core.workspace.isWorkspaceEnabled()));
 
     const router = core.http.createRouter();
     // Register server side APIs

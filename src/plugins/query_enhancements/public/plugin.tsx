@@ -6,7 +6,12 @@ import { i18n } from '@osd/i18n';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import moment from 'moment';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '../../../core/public';
-import { DataStorage, getDataSourceEngineCapabilities, OSD_FIELD_TYPES } from '../../data/common';
+import {
+  DataStorage,
+  getDataSourceEngineCapabilities,
+  OSD_FIELD_TYPES,
+  UI_SETTINGS,
+} from '../../data/common';
 // Type-only: DataSourceEngineType is an enum (runtime value); we use its string value directly to
 // avoid a cross-plugin runtime value-import. Keep in sync with the enum.
 import type { DataSourceEngineType } from '../../data_source/common/data_sources';
@@ -36,6 +41,7 @@ import { PPLFilterUtils, SQLFilterUtils } from './search/filters';
 import { NaturalLanguageFilterUtils } from './search/filters/natural_language_filter_utils';
 import { PromQLSearchInterceptor } from './search/promql_search_interceptor';
 import { PrometheusResourceClient } from './resources';
+import { registerPplLint } from './ppl_lint/register_ppl_lint';
 
 export class QueryEnhancementsPlugin
   implements
@@ -52,6 +58,7 @@ export class QueryEnhancementsPlugin
   private isSummaryAgentAvailable$ = new BehaviorSubject<boolean>(false);
   private currentAppId$ = new BehaviorSubject<string | undefined>(undefined);
   private appIdSubscription?: Subscription;
+  private unregisterPplLintBridge?: () => void;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ConfigSchema>();
@@ -356,10 +363,17 @@ export class QueryEnhancementsPlugin
       this.currentAppId$.next(appId);
     });
 
+    const lintEnabled = !!core.application.capabilities.queryEnhancements?.pplLint;
+    const runtimeGrammarEnabled =
+      core.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_RUNTIME_PPL_GRAMMAR, true) !== false;
+    this.unregisterPplLintBridge = registerPplLint(lintEnabled, runtimeGrammarEnabled);
+
     return {};
   }
 
   public stop() {
+    this.unregisterPplLintBridge?.();
+    this.unregisterPplLintBridge = undefined;
     if (this.appIdSubscription) {
       this.appIdSubscription.unsubscribe();
     }
