@@ -3,7 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { registerPPLLintBridge, setPPLLintEnabled } from '@osd/monaco';
+import {
+  PPLLintTelemetryEvent,
+  registerPPLLintBridge,
+  registerPPLLintTelemetry,
+  setPPLLintEnabled,
+} from '@osd/monaco';
 import {
   DataPublicPluginStart,
   explainQueryPreparer,
@@ -16,6 +21,7 @@ interface RegisterPplLintServices {
   data: DataPublicPluginStart;
   uiSettings: IUiSettingsClient;
   getAppId: () => string | undefined;
+  telemetrySink?: (event: PPLLintTelemetryEvent) => void;
 }
 
 /**
@@ -27,7 +33,14 @@ interface RegisterPplLintServices {
  * Always returns a disposer, even when no bridge was registered: the engine flag
  * lives on `globalThis` and outlives the plugin, so a caller that only got a
  * disposer in the bridge case had no way to turn lint back off on teardown. The
- * disposer tears down the bridge and preparer and disables the engine.
+ * disposer tears down the bridge, preparer, and telemetry sink and disables the
+ * engine.
+ *
+ * When a `telemetrySink` is supplied and lint is enabled, feature-usage events
+ * (diagnostic shown, hover shown, quick-fix offered/clicked) are forwarded to it.
+ * Telemetry is registered whenever lint is enabled, not only when the runtime
+ * grammar is available, because the compiled-worker fallback still produces those
+ * interactions.
  */
 export function registerPplLint(
   enabled: boolean,
@@ -36,6 +49,11 @@ export function registerPplLint(
 ): () => void {
   setPPLLintEnabled(enabled);
 
+  const unregisterTelemetry =
+    enabled && services.telemetrySink
+      ? registerPPLLintTelemetry(services.telemetrySink)
+      : undefined;
+
   const bridgeActive = enabled && runtimeGrammarEnabled;
   const unregisterBridge = bridgeActive ? registerPPLLintBridge(lintRuntimePPLQuery) : undefined;
   const unregisterPreparer = bridgeActive
@@ -43,6 +61,7 @@ export function registerPplLint(
     : undefined;
 
   return () => {
+    unregisterTelemetry?.();
     unregisterBridge?.();
     unregisterPreparer?.();
     setPPLLintEnabled(false);

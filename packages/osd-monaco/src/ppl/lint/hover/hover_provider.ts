@@ -10,6 +10,11 @@ import { getModelFix } from '../fix_registry';
 import { renderHoverCard, SeverityLabel } from './hover_card';
 import { collectPPLDiagnosticActions, DiagnosticAction } from '../diagnostic_action';
 import { getCatalogEntryById } from '../catalog';
+import {
+  emitPPLLintTelemetry,
+  PPL_LINT_TELEMETRY_EVENTS,
+  shouldEmitHoverShown,
+} from '../telemetry';
 
 // Restrict command ids so a contributor can't reshape the `command:` URI to smuggle a different command/args.
 const SAFE_COMMAND_ID = /^[\w.-]+$/;
@@ -80,7 +85,8 @@ export const pplLintHoverProvider: monaco.languages.HoverProvider = {
     const marker = markers.reduce((a, b) => (markerSpan(b) < markerSpan(a) ? b : a));
 
     const ruleId = ruleIdOf(marker);
-    const fix = getModelFix(model, markerFixKey(marker));
+    const key = markerFixKey(marker);
+    const fix = getModelFix(model, key);
 
     const entry = ruleId ? getCatalogEntryById(ruleId) : undefined;
     const contributedActions = renderContributedActions(
@@ -107,6 +113,18 @@ export const pplLintHoverProvider: monaco.languages.HoverProvider = {
     ];
     if (contributedActions) {
       contents.push(contributedActions);
+    }
+
+    // Feature-usage telemetry: the user hovered a lint marker and a card is
+    // being returned. Emitted only on the card-returned path (not the null/no-
+    // marker branch above), and deduped per marker per lint pass so Monaco's
+    // per-character re-invocation of provideHover counts one hover, not mouse
+    // travel across the marker. No-ops until the host registers a sink.
+    if (shouldEmitHoverShown(model, key)) {
+      emitPPLLintTelemetry({
+        name: PPL_LINT_TELEMETRY_EVENTS.HOVER_SHOWN,
+        data: { rule: ruleId },
+      });
     }
 
     return {

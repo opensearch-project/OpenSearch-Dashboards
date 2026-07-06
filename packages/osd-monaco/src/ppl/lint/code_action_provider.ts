@@ -8,6 +8,12 @@ import { LINT_MARKER_SOURCE, ruleIdOf, SYNTAX_MARKER_SOURCE } from './diagnostic
 import { getModelFix, getModelSyntaxFix, markerFixKey, MarkerFix } from './fix_registry';
 import { collectPPLDiagnosticActions } from './diagnostic_action';
 import { getCatalogEntryById } from './catalog';
+import {
+  emitPPLLintTelemetry,
+  PPL_LINT_QUICKFIX_COMMAND_ID,
+  PPL_LINT_TELEMETRY_EVENTS,
+  shouldEmitQuickfixOffered,
+} from './telemetry';
 
 // Code-action provider that surfaces quick-fixes for PPL markers on two
 // channels: lint diagnostics (`ppl-lint`, owner PPL_LINT) and syntax errors
@@ -32,7 +38,8 @@ export const pplLintCodeActionProvider: monaco.languages.CodeActionProvider = {
     for (const marker of context.markers) {
       const key = markerFixKey(marker);
       let fix: MarkerFix | undefined;
-      if (marker.source === LINT_MARKER_SOURCE) {
+      const isLintMarker = marker.source === LINT_MARKER_SOURCE;
+      if (isLintMarker) {
         fix = getModelFix(model, key);
       } else if (marker.source === SYNTAX_MARKER_SOURCE) {
         fix = getModelSyntaxFix(model, key);
@@ -96,14 +103,40 @@ export const pplLintCodeActionProvider: monaco.languages.CodeActionProvider = {
         versionId: undefined,
       };
 
-      actions.push({
+      const action: monaco.languages.CodeAction = {
         title: fix.title,
         diagnostics: [marker],
         kind: 'quickfix',
         edit: {
           edits: [textEdit],
         },
-      });
+      };
+
+      // Lint quick-fixes carry a telemetry command so a `quickfix_clicked` event
+      // can be recorded when the fix is invoked. Monaco applies the edit before
+      // running the command, so the fix behavior is unchanged. Only the lint
+      // channel is instrumented; the syntax-error command-typo fix is not part
+      // of the lint feature-usage metrics.
+      if (isLintMarker) {
+        const rule = ruleIdOf(marker);
+        action.command = {
+          id: PPL_LINT_QUICKFIX_COMMAND_ID,
+          title: fix.title,
+          arguments: [{ rule }],
+        };
+        // Deduped per marker per lint pass: Monaco auto-triggers
+        // provideCodeActions on every cursor move over a marker, so emitting on
+        // each call would count caret ticks, not offers. `key` is the marker's
+        // canonical identity (position + message).
+        if (shouldEmitQuickfixOffered(model, key)) {
+          emitPPLLintTelemetry({
+            name: PPL_LINT_TELEMETRY_EVENTS.QUICKFIX_OFFERED,
+            data: { rule },
+          });
+        }
+      }
+
+      actions.push(action);
     }
 
     return {

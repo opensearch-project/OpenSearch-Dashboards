@@ -38,6 +38,8 @@ export type {
   PPLLintHttpClient,
   PrepareExplainQuery,
 } from './lint_bridge';
+export { registerPPLLintTelemetry } from './lint/telemetry';
+export type { PPLLintTelemetryEvent } from './lint/telemetry';
 export type { Diagnostic, DiagnosticRange, LintResult, LintSeverity } from './lint/diagnostic';
 export type { BundleRuleOverrides, CatalogEntry, LintRunContext } from './lint/types';
 export { runLint } from './lint/lint_runner';

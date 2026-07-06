@@ -15,6 +15,13 @@ import {
   setModelSyntaxFixes,
 } from '../fix_registry';
 import { registerPPLDiagnosticActionContributor } from '../diagnostic_action';
+import {
+  PPLLintTelemetryEvent,
+  PPL_LINT_QUICKFIX_COMMAND_ID,
+  PPL_LINT_TELEMETRY_EVENTS,
+  registerPPLLintTelemetry,
+  resetPPLLintTelemetryDedup,
+} from '../telemetry';
 
 type LintMarker = monaco.editor.IMarkerData;
 
@@ -242,6 +249,84 @@ describe('pplLintCodeActionProvider', () => {
 
     it('produces no action for a syntax marker without a registered fix', () => {
       expect(provide([syntaxMarker()])).toHaveLength(0);
+    });
+  });
+
+  describe('telemetry', () => {
+    let events: PPLLintTelemetryEvent[];
+    beforeEach(() => {
+      events = [];
+      registerPPLLintTelemetry((event) => events.push(event));
+      // Dedup is per-model and persists across provideCodeActions calls; reset
+      // it so each test starts from a fresh lint pass on the shared model.
+      resetPPLLintTelemetryDedup(model);
+    });
+    afterEach(() => {
+      registerPPLLintTelemetry(undefined);
+      clearModelSyntaxFixes(model);
+      resetPPLLintTelemetryDedup(model);
+    });
+
+    it('emits quickfix_offered and attaches the click command for a lint fix', () => {
+      const marker = makeMarker({ code: 'division-by-zero' });
+      seedFix(marker, { title: 'Replace with "1"', text: '1' });
+      const actions = provide([marker]);
+
+      expect(actions).toHaveLength(1);
+      expect(events).toEqual([
+        { name: PPL_LINT_TELEMETRY_EVENTS.QUICKFIX_OFFERED, data: { rule: 'division-by-zero' } },
+      ]);
+      // The action carries a command so a click can be recorded; Monaco applies
+      // the edit first, then runs the command.
+      expect(actions[0].command).toEqual({
+        id: PPL_LINT_QUICKFIX_COMMAND_ID,
+        title: 'Replace with "1"',
+        arguments: [{ rule: 'division-by-zero' }],
+      });
+    });
+
+    it('reads the rule id from the object-form code as well', () => {
+      const marker = makeMarker({
+        code: { value: 'agg-on-text', target: monaco.Uri.parse('https://docs.example/a') },
+      });
+      seedFix(marker, { title: 'fix', text: 'x' });
+      provide([marker]);
+      expect(events).toEqual([
+        { name: PPL_LINT_TELEMETRY_EVENTS.QUICKFIX_OFFERED, data: { rule: 'agg-on-text' } },
+      ]);
+    });
+
+    it('does not emit or attach a command for a syntax-channel fix', () => {
+      const marker = makeMarker({ source: SYNTAX_MARKER_SOURCE });
+      const fixes = new Map<string, MarkerFix>();
+      fixes.set(markerFixKey(marker), { title: 'Replace with "where"', text: 'where' });
+      setModelSyntaxFixes(model, fixes);
+
+      const actions = provide([marker]);
+      expect(actions).toHaveLength(1);
+      expect(actions[0].command).toBeUndefined();
+      expect(events).toHaveLength(0);
+    });
+
+    it('emits quickfix_offered once per marker across repeated provider calls in a pass', () => {
+      const marker = makeMarker({ code: 'division-by-zero' });
+      seedFix(marker, { title: 'fix', text: 'x' });
+      // Monaco auto-fires provideCodeActions on every cursor move; three calls
+      // for the same fix must count as one offer, while still returning the
+      // action every time so the fix stays available.
+      expect(provide([marker])).toHaveLength(1);
+      expect(provide([marker])).toHaveLength(1);
+      expect(provide([marker])).toHaveLength(1);
+      expect(events).toHaveLength(1);
+    });
+
+    it('counts quickfix_offered again after a new lint pass resets the dedup', () => {
+      const marker = makeMarker({ code: 'division-by-zero' });
+      seedFix(marker, { title: 'fix', text: 'x' });
+      provide([marker]);
+      resetPPLLintTelemetryDedup(model); // simulates a fresh marker set
+      provide([marker]);
+      expect(events).toHaveLength(2);
     });
   });
 });

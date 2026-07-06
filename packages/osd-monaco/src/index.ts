@@ -49,6 +49,7 @@ export {
   getBundledCatalog,
   createRuntimeRuleNameToIndex,
   buildCommandSuggestion,
+  registerPPLLintTelemetry,
 } from './ppl';
 export type {
   PPLValidationContext,
@@ -67,6 +68,7 @@ export type {
   CatalogEntry,
   LintRunContext,
   CommandSuggestion,
+  PPLLintTelemetryEvent,
 } from './ppl';
 
 /* eslint-disable-next-line @osd/eslint/module_migration */

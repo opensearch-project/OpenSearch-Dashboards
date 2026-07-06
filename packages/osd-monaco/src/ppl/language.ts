@@ -33,6 +33,12 @@ import {
 } from './lint/fix_registry';
 import { LINT_OWNER, pplLintHoverProvider } from './lint/hover/hover_provider';
 import { clearModelHoverFacts, HoverFacts, setModelHoverFacts } from './lint/hover/hover_registry';
+import {
+  emitPPLLintTelemetry,
+  PPL_LINT_QUICKFIX_COMMAND_ID,
+  PPL_LINT_TELEMETRY_EVENTS,
+  resetPPLLintTelemetryDedup,
+} from './lint/telemetry';
 
 const PPL_LANGUAGE_ID = ID;
 const OWNER = 'PPL_WORKER';
@@ -341,6 +347,27 @@ const processLintHighlighting = (model: monaco.editor.IModel): void => {
         generation,
         lintResult.diagnostics
       );
+
+      // A new marker set is a fresh opportunity: re-arm the per-pass hover /
+      // quick-fix-offered dedup so interactions with this pass's markers count
+      // again (they were deduped within the previous pass).
+      resetPPLLintTelemetryDedup(model);
+
+      // Feature-usage telemetry: one `diagnostic_shown` per distinct rule that
+      // produced a marker this pass, so a query with three findings of the same
+      // rule counts once. Emitted after the markers are applied so it reflects
+      // what the user actually sees. No-ops until the host registers a sink.
+      const rulesShown = new Set<string>();
+      for (const diagnostic of lintResult.diagnostics) {
+        if (rulesShown.has(diagnostic.ruleId)) {
+          continue;
+        }
+        rulesShown.add(diagnostic.ruleId);
+        emitPPLLintTelemetry({
+          name: PPL_LINT_TELEMETRY_EVENTS.DIAGNOSTIC_SHOWN,
+          data: { rule: diagnostic.ruleId },
+        });
+      }
     })
     .catch((e) => {
       // eslint-disable-next-line no-console
@@ -596,6 +623,7 @@ const setupPPLSyntaxHighlighting = () => {
           clearModelFixes(model);
           clearModelSyntaxFixes(model);
           clearModelHoverFacts(model);
+          resetPPLLintTelemetryDedup(model);
         }
       })
     );
@@ -626,6 +654,7 @@ const setupPPLSyntaxHighlighting = () => {
       clearModelFixes(model);
       clearModelSyntaxFixes(model);
       clearModelHoverFacts(model);
+      resetPPLLintTelemetryDedup(model);
     })
   );
 
@@ -681,11 +710,26 @@ export const registerPPLLanguage = () => {
     pplLintHoverProvider
   );
 
+  // Register the command dispatched when a lint quick-fix is invoked. The
+  // quick-fix action carries both an `edit` and this `command`; Monaco applies
+  // the edit first, then runs the command, so recording here captures a genuine
+  // "user clicked the fix" signal. The rule id rides on the command arguments.
+  const quickfixCommandDisposable = monaco.editor.registerCommand(
+    PPL_LINT_QUICKFIX_COMMAND_ID,
+    (_accessor, args?: { rule?: string }) => {
+      emitPPLLintTelemetry({
+        name: PPL_LINT_TELEMETRY_EVENTS.QUICKFIX_CLICKED,
+        data: { rule: args?.rule },
+      });
+    }
+  );
+
   return {
     dispose: () => {
       disposeSyntaxHighlighting();
       codeActionDisposable.dispose();
       hoverDisposable.dispose();
+      quickfixCommandDisposable.dispose();
     },
   };
 };
