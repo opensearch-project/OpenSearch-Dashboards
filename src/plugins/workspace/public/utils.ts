@@ -646,8 +646,15 @@ export const fetchDataSourceConnections = async (
       mode === AssociationDataSourceModalMode.DirectQueryConnections
         ? await fetchDataSourceConnectionsByDataSourceIds(
             // Only data source saved object type needs to fetch data source connections, data connection type object not.
+            // Direct query (`_plugins/_query/_datasources`) is an OpenSearch SQL plugin
+            // feature; Elasticsearch clusters never expose it, so skip those to avoid
+            // confusing errors/log noise. Mirrors `fetchRemoteClusterConnections`.
             dataSources
-              .filter((ds) => ds.type === DATA_SOURCE_SAVED_OBJECT_TYPE)
+              .filter(
+                (ds) =>
+                  ds.type === DATA_SOURCE_SAVED_OBJECT_TYPE &&
+                  ds.dataSourceEngineType !== DataSourceEngineType.Elasticsearch
+              )
               .map((ds) => ds.id),
             http
           )

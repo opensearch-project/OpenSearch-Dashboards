@@ -48,6 +48,7 @@ describe('DatasetSelect', () => {
       },
     }),
     cacheDataset: jest.fn(),
+    isDatasetAllowed: jest.fn().mockReturnValue(true),
   });
 
   // Setup dataViews service
@@ -241,6 +242,7 @@ describe('DatasetSelect', () => {
     mockQueryService.queryString.getDatasetService = jest.fn().mockReturnValue({
       getType: mockGetTypeRestricted,
       cacheDataset: jest.fn(),
+      isDatasetAllowed: jest.fn().mockReturnValue(true),
     });
 
     // Mock a dataset with the restricted type
@@ -289,6 +291,7 @@ describe('DatasetSelect', () => {
     mockQueryService.queryString.getDatasetService = jest.fn().mockReturnValue({
       getType: mockGetTypeAll,
       cacheDataset: jest.fn(),
+      isDatasetAllowed: jest.fn().mockReturnValue(true),
     });
 
     mockDataViews.getIds = jest.fn().mockResolvedValue(['all-apps-id']);
@@ -351,6 +354,7 @@ describe('DatasetSelect', () => {
     mockQueryService.queryString.getDatasetService = jest.fn().mockReturnValue({
       getType: mockGetTypeMetrics,
       cacheDataset: jest.fn(),
+      isDatasetAllowed: jest.fn().mockReturnValue(true),
     });
 
     // Create two datasets: one with metrics signal type, one with logs
@@ -904,6 +908,7 @@ describe('DatasetSelect', () => {
       mockQueryService.queryString.getDatasetService = jest.fn().mockReturnValue({
         getType: mockGetType,
         cacheDataset: jest.fn(),
+        isDatasetAllowed: jest.fn().mockReturnValue(true),
       });
 
       mockDataViews.getIds = jest.fn().mockResolvedValue(['with-time-id', 'no-time-id']);
@@ -990,6 +995,7 @@ describe('DatasetSelect', () => {
       mockQueryService.queryString.getDatasetService = jest.fn().mockReturnValue({
         getType: mockGetType,
         cacheDataset: jest.fn(),
+        isDatasetAllowed: jest.fn().mockReturnValue(true),
       });
 
       mockDataViews.getIds = jest.fn().mockResolvedValue(['with-time-id', 'no-time-id']);

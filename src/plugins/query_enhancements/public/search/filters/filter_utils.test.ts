@@ -294,7 +294,7 @@ describe('getTimeFilterCommand', () => {
 
     const result = FilterUtils.getTimeFilterWhereClause('timestamp', timeRange);
     expect(result).toBe(
-      "WHERE `timestamp` >= '2023-01-01 00:00:00.000' AND `timestamp` <= '2023-01-02 00:00:00.000'"
+      "WHERE `timestamp` >= TIMESTAMP('2023-01-01 00:00:00.000') AND `timestamp` <= TIMESTAMP('2023-01-02 00:00:00.000')"
     );
   });
 });
