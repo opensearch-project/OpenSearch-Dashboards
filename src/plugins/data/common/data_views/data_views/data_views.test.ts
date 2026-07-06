@@ -615,4 +615,51 @@ describe('DataViews', () => {
       );
     });
   });
+
+  describe('convertToDataset', () => {
+    // A plain IndexPattern (no `toDataset` method) whose `dataSourceRef` is the raw saved-object
+    // reference: `type` is the saved-object type ('data-source'), not the engine type, and there is
+    // no version. This mirrors what `IndexPatternsService.get()` returns.
+    const indexPatternWithRawRef = {
+      id: 'ip-1',
+      title: 'kibana_sample_data_ecommerce*',
+      type: undefined,
+      timeFieldName: 'order_date',
+      dataSourceRef: { id: 'ds-1', type: 'data-source', name: 'dataSource' },
+    } as any;
+
+    it('resolves the real engine type and version by fetching the data-source saved object', async () => {
+      savedObjectsClient.get = jest.fn().mockResolvedValue({
+        id: 'ds-1',
+        attributes: {
+          title: 'escluster-710',
+          dataSourceEngineType: 'Elasticsearch',
+          dataSourceVersion: '7.10.2',
+        },
+      });
+
+      const dataset = await dataViews.convertToDataset(indexPatternWithRawRef);
+
+      expect(savedObjectsClient.get).toHaveBeenCalledWith('data-source', 'ds-1');
+      expect(dataset.dataSource).toEqual({
+        id: 'ds-1',
+        title: 'escluster-710',
+        type: 'Elasticsearch',
+        version: '7.10.2',
+      });
+    });
+
+    it('falls back to the reference values when the data-source fetch fails', async () => {
+      savedObjectsClient.get = jest.fn().mockRejectedValue(new Error('not found'));
+
+      const dataset = await dataViews.convertToDataset(indexPatternWithRawRef);
+
+      expect(dataset.dataSource).toEqual({
+        id: 'ds-1',
+        title: 'dataSource',
+        type: 'data-source',
+        version: '',
+      });
+    });
+  });
 });
