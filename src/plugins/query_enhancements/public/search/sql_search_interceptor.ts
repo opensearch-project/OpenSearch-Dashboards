@@ -105,9 +105,14 @@ export class SQLSearchInterceptor extends SearchInterceptor {
 
     const timeRange = this.queryService.timefilter.timefilter.getTime();
     const { fromDate, toDate } = formatTimePickerDate(timeRange, 'YYYY-MM-DD HH:mm:ss.SSS');
-    const whereClause = `\`${dataset.timeFieldName}\` >= '${formatDate(fromDate)}' AND \`${
-      dataset.timeFieldName
-    }\` <= '${formatDate(toDate)}'`;
+    // Wrap the time literals in `TIMESTAMP('...')` rather than emitting bare string literals.
+    // Modern OpenSearch SQL implicitly coerces a string to a timestamp for `field >= '<string>'`,
+    // but legacy Elasticsearch (Open Distro) SQL does not and rejects it with a [TIMESTAMP,STRING]
+    // type error. `TIMESTAMP('...')` is accepted by both engines, so this form is portable across
+    // all data sources.
+    const whereClause = `\`${dataset.timeFieldName}\` >= TIMESTAMP('${formatDate(
+      fromDate
+    )}') AND \`${dataset.timeFieldName}\` <= TIMESTAMP('${formatDate(toDate)}')`;
 
     return {
       ...nextQuery,

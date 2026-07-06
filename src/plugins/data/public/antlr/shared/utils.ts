@@ -18,7 +18,12 @@ import { ParsingSubject } from './types';
 import { quotesRegex, SuggestionItemDetailsTags } from './constants';
 import { IndexPattern, IndexPatternField } from '../../index_patterns';
 import { IDataPluginServices } from '../../types';
-import { DEFAULT_DATA, IFieldType, UI_SETTINGS } from '../../../common';
+import {
+  DEFAULT_DATA,
+  getDataSourceEngineCapabilities,
+  IFieldType,
+  UI_SETTINGS,
+} from '../../../common';
 import { MonacoCompatibleQuerySuggestion } from '../../autocomplete/providers/query_suggestion_provider';
 import { getDataViews } from '../../services';
 
@@ -159,6 +164,20 @@ export const fetchColumnValues = async (
   return fieldInOsd?.spec.suggestions?.values ?? [];
 };
 
+const buildColumnValueQuery = (
+  table: string,
+  column: string,
+  limit: number,
+  language: 'PPL' | 'SQL'
+): string => {
+  if (language === 'SQL') {
+    return `SELECT ${escapeIdentifier(column)} FROM ${escapeIdentifier(
+      table
+    )} GROUP BY ${escapeIdentifier(column)} ORDER BY COUNT(*) DESC LIMIT ${limit}`;
+  }
+  return `source = ${escapeIdentifier(table)} | top ${limit} ${escapeIdentifier(column)}`;
+};
+
 // Non-blocking async function to update field values in background
 const updateFieldValuesAsync = async (
   table: string,
@@ -186,12 +205,22 @@ const updateFieldValuesAsync = async (
 
     const dataset = await getDataViews().convertToDataset(indexPattern);
 
+    const engineType = dataset.dataSource?.engineType ?? dataset.dataSource?.type;
+    const caps = getDataSourceEngineCapabilities(engineType);
+
+    if (caps.columnValueSuggestionLanguage === 'none') {
+      return;
+    }
+
+    const language = caps.columnValueSuggestionLanguage;
+    const queryString = buildColumnValueQuery(table, column, limit, language);
+
     const searchSource = await services.data.search.searchSource.create();
     searchSource.setFields({
       index: indexPattern,
       query: {
-        query: `source = ${escapeIdentifier(table)} | top ${limit} ${escapeIdentifier(column)}`,
-        language: 'PPL',
+        query: queryString,
+        language,
         dataset,
       },
       skipTimeFilter,
