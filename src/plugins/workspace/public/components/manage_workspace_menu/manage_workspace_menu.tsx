@@ -3,16 +3,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
+  EuiHorizontalRule,
   EuiPopover,
   EuiPopoverTitle,
+  EuiText,
   EuiToolTip,
+  EuiTourStep,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
+import { BehaviorSubject } from 'rxjs';
 import { useObservable } from 'react-use';
 import {
   CoreStart,
@@ -20,30 +25,39 @@ import {
   fulfillRegistrationLinksToChromeNavLinks,
   getSortedNavLinks,
 } from '../../../../../core/public';
+import { WorkspaceUseCase } from '../../types';
+import { WorkspaceSelector } from '../workspace_selector/workspace_selector';
 
 interface Props {
   coreStart: CoreStart;
+  registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
 }
 
+// One-time first-visit tour flag: teaches users that workspace management was
+// re-grouped into this footer icon (the function of the footer button changed,
+// and the icon is easy to miss). Persisted in localStorage so it shows once.
+const MANAGE_WORKSPACE_TOUR_STORAGE_KEY = 'workspace.manageWorkspaceMoved.tourDismissed';
+
 /**
- * Footer entry-point for the "Manage workspace" apps (Workspace details,
- * Collaborators, Data sources, Index patterns, Datasets, Saved objects, Sample
- * data). These links are registered into the `manageWorkspace` category by the
- * workspace use-case service; they used to render as a collapsible section in
- * the nav body, but now live here in the footer. Clicking the button opens a
- * popover listing the links; clicking a link navigates to that app.
+ * Footer entry-point for workspace controls. Opens a popover that combines, top
+ * to bottom:
+ *  - the workspace switcher — the exact `WorkspaceSelector` used at the top of
+ *    the nav header, so switching/creating workspaces behaves identically here;
+ *  - the "Manage workspace" apps (Workspace details, Collaborators, Data
+ *    sources, Index patterns, Datasets, Assets, Sample data), registered into
+ *    the `manageWorkspace` category and filtered in here.
+ *
+ * This replaces both the old body-nav manage-workspace category AND the former
+ * footer workspace switcher: switching lives in the embedded `WorkspaceSelector`,
+ * so workspace navigation is reachable from the footer even when the user is
+ * outside any workspace (where the top-of-nav selector is not mounted).
  *
  * Uses standard EUI popover + context-menu components (not the icon side nav's
  * bespoke popover styling), because the workspace plugin renders in every
  * workspace while the icon side nav is enabled only in the Observability
  * workspace — this component must not depend on icon-nav-only styles.
- *
- * Registered only in the expanded footer / classic nav (not the collapsed icon
- * rail), matching the workspace button it replaced. Workspace switching/creation
- * is intentionally NOT here — the always-present top-of-nav workspace selector
- * owns that.
  */
-export const ManageWorkspaceMenu = ({ coreStart }: Props) => {
+export const ManageWorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
   const { chrome, application } = coreStart;
 
   // `getCurrentNavGroup$()` / `getNavLinks$()` return a NEW observable instance on
@@ -60,6 +74,16 @@ export const ManageWorkspaceMenu = ({ coreStart }: Props) => {
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
+  const [isTourDismissed, setIsTourDismissed] = useState(() =>
+    Boolean(localStorage.getItem(MANAGE_WORKSPACE_TOUR_STORAGE_KEY))
+  );
+  const [isTourOpen, setIsTourOpen] = useState(false);
+  useEffect(() => {
+    if (!isTourDismissed) {
+      setIsTourOpen(true);
+    }
+  }, [isTourDismissed]);
+
   const label = i18n.translate('workspace.manageWorkspaceMenu.title', {
     defaultMessage: 'Manage workspace',
   });
@@ -73,7 +97,19 @@ export const ManageWorkspaceMenu = ({ coreStart }: Props) => {
     return getSortedNavLinks(fulfilled);
   }, [currentNavGroup, navLinks]);
 
+  const dismissTour = useCallback(() => {
+    localStorage.setItem(MANAGE_WORKSPACE_TOUR_STORAGE_KEY, 'true');
+    setIsTourDismissed(true);
+    setIsTourOpen(false);
+  }, []);
+
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
+
+  const openPopover = useCallback(() => {
+    setIsPopoverOpen((open) => !open);
+    // Finding the icon is the whole point of the tour — once opened, retire it.
+    dismissTour();
+  }, [dismissTour]);
 
   const triggerButton = (
     <EuiToolTip content={label} position="right">
@@ -82,12 +118,12 @@ export const ManageWorkspaceMenu = ({ coreStart }: Props) => {
         color="text"
         aria-label={label}
         data-test-subj="manageWorkspaceMenuButton"
-        onClick={() => setIsPopoverOpen((open) => !open)}
+        onClick={openPopover}
       />
     </EuiToolTip>
   );
 
-  const menuItems = manageLinks.map((link) => (
+  const manageMenuItems = manageLinks.map((link) => (
     <EuiContextMenuItem
       key={link.id}
       icon={link.euiIconType}
@@ -104,17 +140,69 @@ export const ManageWorkspaceMenu = ({ coreStart }: Props) => {
   ));
 
   return (
-    <EuiPopover
-      anchorPosition="upCenter"
-      panelPaddingSize="none"
-      isOpen={isPopoverOpen}
-      closePopover={closePopover}
-      button={triggerButton}
+    <EuiTourStep
+      content={
+        <EuiText size="s">
+          <p style={{ maxWidth: 260 }}>
+            {i18n.translate('workspace.manageWorkspaceMenu.tour.content', {
+              defaultMessage:
+                'Workspace details, data sources, index patterns and more are now grouped here.',
+            })}
+          </p>
+        </EuiText>
+      }
+      isStepOpen={isTourOpen && !isPopoverOpen}
+      minWidth={260}
+      onFinish={dismissTour}
+      step={1}
+      stepsTotal={1}
+      anchorPosition="rightUp"
+      subtitle={i18n.translate('workspace.manageWorkspaceMenu.tour.subtitle', {
+        defaultMessage: "What's new",
+      })}
+      title={i18n.translate('workspace.manageWorkspaceMenu.tour.title', {
+        defaultMessage: 'Workspace management moved',
+      })}
+      footerAction={
+        <EuiButtonEmpty
+          size="xs"
+          color="text"
+          flush="right"
+          data-test-subj="manageWorkspaceTourDismiss"
+          onClick={dismissTour}
+        >
+          {i18n.translate('workspace.manageWorkspaceMenu.tour.dismiss', {
+            defaultMessage: 'Got it',
+          })}
+        </EuiButtonEmpty>
+      }
     >
-      <div data-test-subj="manageWorkspaceMenuPopover">
-        <EuiPopoverTitle paddingSize="s">{label}</EuiPopoverTitle>
-        <EuiContextMenuPanel items={menuItems} />
-      </div>
-    </EuiPopover>
+      <EuiPopover
+        anchorPosition="upCenter"
+        panelPaddingSize="none"
+        isOpen={isPopoverOpen}
+        closePopover={closePopover}
+        button={triggerButton}
+      >
+        <div data-test-subj="manageWorkspaceMenuPopover" style={{ width: 320 }}>
+          <EuiPopoverTitle paddingSize="s">{label}</EuiPopoverTitle>
+          {/* The exact workspace switcher used at the top of the nav header,
+              rendered flush so it matches the manage-workspace menu rows. */}
+          <div data-test-subj="manageWorkspaceMenuSelector">
+            <WorkspaceSelector
+              coreStart={coreStart}
+              registeredUseCases$={registeredUseCases$}
+              flush
+            />
+          </div>
+          {manageMenuItems.length > 0 && (
+            <>
+              <EuiHorizontalRule margin="none" />
+              <EuiContextMenuPanel items={manageMenuItems} />
+            </>
+          )}
+        </div>
+      </EuiPopover>
+    </EuiTourStep>
   );
 };

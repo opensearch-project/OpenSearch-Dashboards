@@ -41,9 +41,18 @@ const getValidWorkspaceColor = (color?: string) =>
 interface Props {
   coreStart: CoreStart;
   registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
+  /**
+   * Render the trigger as a flush, full-width menu row (icon + name + chevron)
+   * instead of the default nav-header panel button. Used when the selector is
+   * embedded inside a context-menu-style popover (e.g. the footer "Manage
+   * workspace" menu) so it visually matches the sibling menu rows. The
+   * outside-a-workspace state renders the same flat row ("Select a workspace")
+   * rather than a large primary button.
+   */
+  flush?: boolean;
 }
 
-export const WorkspaceSelector = ({ coreStart, registeredUseCases$ }: Props) => {
+export const WorkspaceSelector = ({ coreStart, registeredUseCases$, flush = false }: Props) => {
   const [isPopoverOpen, setPopover] = useState(false);
   const currentWorkspace = useObservable(coreStart.workspaces.currentWorkspace$, null);
   const availableUseCases = useObservable(registeredUseCases$, []);
@@ -65,7 +74,46 @@ export const WorkspaceSelector = ({ coreStart, registeredUseCases$ }: Props) => 
     setPopover(false);
   };
 
-  const button = currentWorkspace ? (
+  const selectWorkspaceLabel = i18n.translate('workspace.menu.selectWorkspace', {
+    defaultMessage: 'Select a workspace',
+  });
+
+  // Flush variant: a flat, full-width menu row for both the in-workspace and
+  // outside-a-workspace states, so it matches the context-menu rows it sits
+  // alongside when embedded in a popover.
+  const flushButton = (
+    <EuiPanel
+      className="workspaceSelectorFlushButton"
+      data-test-subj="workspace-selector-button"
+      paddingSize="s"
+      color="transparent"
+      hasBorder={false}
+      hasShadow={false}
+      onClick={onButtonClick}
+    >
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiIcon
+            size="m"
+            type={(currentWorkspace && getUseCase(currentWorkspace)?.icon) || 'wsSelector'}
+            color={getValidWorkspaceColor(currentWorkspace?.color)}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem style={{ minWidth: 0 }}>
+          <EuiText size="s" data-test-subj="workspace-selector-current-name">
+            <span className="eui-textTruncate">
+              {currentWorkspace ? currentWorkspace.name : selectWorkspaceLabel}
+            </span>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="arrowDown" size="s" color="subdued" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
+  );
+
+  const defaultButton = currentWorkspace ? (
     <div className="workspaceSelectorPopoverButtonContainer">
       <EuiPanel
         className="workspaceSelectorPopoverButton"
@@ -106,6 +154,8 @@ export const WorkspaceSelector = ({ coreStart, registeredUseCases$ }: Props) => 
   ) : (
     <EuiButton onClick={onButtonClick}>Select a Workspace</EuiButton>
   );
+
+  const button = flush ? flushButton : defaultButton;
 
   return (
     <EuiPopover
