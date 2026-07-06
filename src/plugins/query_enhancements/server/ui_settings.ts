@@ -19,6 +19,10 @@ const PPL_LINT_RULE_DEFAULTS: ReadonlyArray<{
   { id: 'invalid-capture-group-name', enabled: true, severity: 'error' },
   { id: 'unsupported-window-function-in-eventstats', enabled: true, severity: 'error' },
   { id: 'multisearch-min-subsearch', enabled: true, severity: 'error' },
+  { id: 'disabled-join-type', enabled: true, severity: 'warning' },
+  { id: 'dedup-consecutive-unsupported', enabled: true, severity: 'warning' },
+  { id: 'union-min-datasets', enabled: true, severity: 'error' },
+  { id: 'replace-wildcard-asymmetry', enabled: true, severity: 'error' },
 ];
 
 /** Build PPL lint rule uiSettings. Adds WORKSPACE scope when the workspace feature is on. */

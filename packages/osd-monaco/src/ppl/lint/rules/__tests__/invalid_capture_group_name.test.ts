@@ -65,4 +65,34 @@ describe('invalid-capture-group-name (compiled surface)', () => {
       expect(d?.fix).toBeUndefined();
     });
   });
+
+  describe('range offsets (measured from the token, quotes included)', () => {
+    it('points the diagnostic at the group name, not one column to the left', () => {
+      const q = 'source=logs | rex field=msg "(?<bad-name>\\\\d+)"';
+      const expectedCol = q.indexOf('bad-name');
+      const d = diag(q);
+      expect(d?.range.startLine).toBe(1);
+      expect(d?.range.startColumn).toBe(expectedCol);
+      expect(d?.range.endColumn).toBe(expectedCol + 'bad-name'.length);
+    });
+
+    it('points the delete-P fix at the P character', () => {
+      const q = 'source=logs | rex field=msg "(?P<name>\\\\d+)"';
+      const expectedCol = q.indexOf('P');
+      const d = diag(q);
+      expect(d?.fix?.range?.startColumn).toBe(expectedCol);
+      expect(d?.fix?.range?.endColumn).toBe(expectedCol + 1);
+    });
+  });
+
+  describe('empty group name', () => {
+    it('flags "(?<>...)" with a dedicated message and no fix', () => {
+      const d = diag('source=logs | rex field=msg "(?<>\\\\d+)"');
+      expect(d).toBeDefined();
+      expect(d?.message).toBe(
+        'Named capture group is missing a name; add one matching ^[A-Za-z][A-Za-z0-9]*$.'
+      );
+      expect(d?.fix).toBeUndefined();
+    });
+  });
 });

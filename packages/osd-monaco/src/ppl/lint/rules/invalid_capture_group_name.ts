@@ -16,7 +16,9 @@ function sanitizeGroupName(name: string): string | undefined {
   return VALID_GROUP_NAME.test(cleaned) ? cleaned : undefined;
 }
 
-const CAPTURE_GROUP_OPENER = /\(\?(P?)<([^>]*)>/g;
+// Pattern source only — a fresh RegExp is built per call so the stateful
+// `lastIndex` of a shared global regex can never leak between invocations.
+const CAPTURE_GROUP_OPENER_SOURCE = '\\(\\?(P?)<([^>]*)>';
 
 const REGEX_COMMAND_RULES = ['rexExpr', 'parseCommand', 'grokCommand'];
 
@@ -29,10 +31,10 @@ interface ExtractedGroup {
 
 function extractGroups(literalRaw: string): ExtractedGroup[] {
   const groups: ExtractedGroup[] = [];
-  CAPTURE_GROUP_OPENER.lastIndex = 0;
+  const opener = new RegExp(CAPTURE_GROUP_OPENER_SOURCE, 'g');
   let match: RegExpExecArray | null;
 
-  while ((match = CAPTURE_GROUP_OPENER.exec(literalRaw)) !== null) {
+  while ((match = opener.exec(literalRaw)) !== null) {
     const isPythonOpener = match[1] === 'P';
     const name = match[2];
     const openerStart = match.index;
@@ -117,6 +119,17 @@ export const invalidCaptureGroupNameDetector: Detector = (
       }
 
       if (!VALID_GROUP_NAME.test(group.name)) {
+        if (group.name.length === 0) {
+          diagnostics.push({
+            ruleId: config.id,
+            severity: config.severity,
+            message:
+              'Named capture group is missing a name; add one matching ^[A-Za-z][A-Za-z0-9]*$.',
+            range,
+            docUrl: config.docUrl,
+          });
+          continue;
+        }
         const fixed = sanitizeGroupName(group.name);
         diagnostics.push({
           ruleId: config.id,
