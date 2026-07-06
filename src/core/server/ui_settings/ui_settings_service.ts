@@ -55,12 +55,10 @@ import {
 import {
   PERMISSION_CONTROLLED_UI_SETTINGS_WRAPPER_ID,
   PERMISSION_CONTROLLED_UI_SETTINGS_WRAPPER_PRIORITY,
-  DYNAMIC_CONFIG_CONTROLLEDUI_SETTINGS_WRAPPER_ID,
-  DYNAMIC_CONFIG_CONTROLLEDUI_SETTINGS_WRAPPER_PRIORITY,
 } from './utils';
 import { getAIFeaturesSetting } from './settings/ai_features';
 import { InternalDynamicConfigServiceSetup } from '../config';
-import { DynamicConfigControlledUiSettingsWrapper } from './saved_objects/dynamic_config_controlled_ui_settings_wrapper';
+import { getGlobalSettingControlSetting } from './settings/global_setting_control';
 
 export interface SetupDeps {
   http: InternalHttpServiceSetup;
@@ -77,6 +75,7 @@ export class UiSettingsService implements CoreService<
   private readonly config$: Observable<[UiSettingsConfigType, SavedObjectsConfigType]>;
   private readonly uiSettingsDefaults = new Map<string, UiSettingsParams>();
   private overrides: Record<string, any> = {};
+  private permissionControlEnabled = false;
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('ui-settings-service');
@@ -111,25 +110,22 @@ export class UiSettingsService implements CoreService<
     // Use uiSettings.defaults from the config file
     this.validateAndUpdateConfiguredDefaults(config.uiSettingsConfig.defaults);
 
-    const permissionControlledUiSettingsWrapper = new PermissionControlledUiSettingsWrapper(
-      config.savedObjectsConfig.permission.enabled
-    );
+    this.permissionControlEnabled = config.savedObjectsConfig.permission.enabled;
+    // The dashboard-admin concept only exists when saved-objects permission control is
+    // enabled. Without it there is no admin scope, so we skip both the admin-only
+    // client wrapper and the admin "restrict global settings" toggle entirely.
+    if (this.permissionControlEnabled) {
+      const permissionControlledUiSettingsWrapper = new PermissionControlledUiSettingsWrapper(
+        dynamicConfig
+      );
+      savedObjects.addClientWrapper(
+        PERMISSION_CONTROLLED_UI_SETTINGS_WRAPPER_PRIORITY,
+        PERMISSION_CONTROLLED_UI_SETTINGS_WRAPPER_ID,
+        permissionControlledUiSettingsWrapper.wrapperFactory
+      );
 
-    const dynamicConfigControlledUiSettingsWrapper = new DynamicConfigControlledUiSettingsWrapper(
-      dynamicConfig
-    );
-
-    savedObjects.addClientWrapper(
-      PERMISSION_CONTROLLED_UI_SETTINGS_WRAPPER_PRIORITY,
-      PERMISSION_CONTROLLED_UI_SETTINGS_WRAPPER_ID,
-      permissionControlledUiSettingsWrapper.wrapperFactory
-    );
-
-    savedObjects.addClientWrapper(
-      DYNAMIC_CONFIG_CONTROLLEDUI_SETTINGS_WRAPPER_PRIORITY,
-      DYNAMIC_CONFIG_CONTROLLEDUI_SETTINGS_WRAPPER_ID,
-      dynamicConfigControlledUiSettingsWrapper.wrapperFactory
-    );
+      this.register(getGlobalSettingControlSetting());
+    }
 
     this.register(getAIFeaturesSetting());
 
@@ -162,6 +158,7 @@ export class UiSettingsService implements CoreService<
         defaults: mapToObject(this.uiSettingsDefaults),
         overrides: this.overrides,
         log: this.log,
+        permissionControlEnabled: this.permissionControlEnabled,
       });
   }
 

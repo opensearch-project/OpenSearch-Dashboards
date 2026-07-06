@@ -51,9 +51,9 @@ import {
   AppNavLinkStatus,
   WorkspaceAvailability,
   AppStatus,
+  UiSettingScope,
 } from '../../../core/public';
 import { getScopedBreadcrumbs } from '../../opensearch_dashboards_react/public';
-import { setupUserSettingsPage } from './management_app/user_settings';
 
 const component = new ComponentRegistry();
 
@@ -66,6 +66,8 @@ const titleInGroup = i18n.translate('advancedSettings.applicationSettingsLabel',
 });
 
 const USER_SETTINGS_APPID = 'user_settings';
+const WORKSPACE_SETTINGS_APPID = 'workspace_settings';
+
 export class AdvancedSettingsPlugin implements Plugin<
   AdvancedSettingsSetup,
   AdvancedSettingsStart,
@@ -76,7 +78,7 @@ export class AdvancedSettingsPlugin implements Plugin<
 
   public setup(
     core: CoreSetup<AdvancedSettingsPluginStart>,
-    { management, home, contentManagement: contentManagementSetup }: AdvancedSettingsPluginSetup
+    { management, home }: AdvancedSettingsPluginSetup
   ) {
     const opensearchDashboardsSection = management.sections.section.opensearchDashboards;
 
@@ -129,8 +131,6 @@ export class AdvancedSettingsPlugin implements Plugin<
     ]);
 
     if (core.chrome.navGroup.getNavGroupEnabled()) {
-      setupUserSettingsPage(contentManagementSetup);
-
       const userSettingTitle = i18n.translate('advancedSettings.userSettingsLabel', {
         defaultMessage: 'User settings',
       });
@@ -139,19 +139,28 @@ export class AdvancedSettingsPlugin implements Plugin<
         id: USER_SETTINGS_APPID,
         title: userSettingTitle,
         updater$: this.appUpdater$,
-        navLinkStatus: core.chrome.navGroup.getNavGroupEnabled()
-          ? AppNavLinkStatus.visible
-          : AppNavLinkStatus.hidden,
+        navLinkStatus: AppNavLinkStatus.visible,
         workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
         description: i18n.translate('advancedSettings.userSettings.description', {
           defaultMessage: 'Configure your personal preferences.',
         }),
         mount: async (params: AppMountParameters) => {
-          const { renderUserSettingsApp } =
-            await import('./management_app/mount_management_section');
-          const [coreStart, { contentManagement, navigation }] = await core.getStartServices();
-
-          return renderUserSettingsApp(params, { ...coreStart, contentManagement, navigation });
+          const { mountManagementSection } = await import(
+            './management_app/mount_management_section'
+          );
+          const [coreStart] = await core.getStartServices();
+          return mountManagementSection(
+            core.getStartServices,
+            {
+              ...params,
+              basePath: core.http.basePath.get(),
+              setBreadcrumbs: (breadCrumbs) =>
+                coreStart.chrome.setBreadcrumbs(getScopedBreadcrumbs(breadCrumbs, params.history)),
+              wrapInPage: true,
+            },
+            component.start,
+            UiSettingScope.USER
+          );
         },
       });
 
@@ -161,6 +170,39 @@ export class AdvancedSettingsPlugin implements Plugin<
           order: 101, // just right after application settings which order is 100
         },
       ]);
+
+      const workspaceSettingTitle = i18n.translate('advancedSettings.workspaceSettingsLabel', {
+        defaultMessage: 'Workspace settings',
+      });
+
+      core.application.register({
+        id: WORKSPACE_SETTINGS_APPID,
+        title: workspaceSettingTitle,
+        updater$: this.appUpdater$,
+        navLinkStatus: AppNavLinkStatus.visible,
+        workspaceAvailability: WorkspaceAvailability.insideWorkspace,
+        description: i18n.translate('advancedSettings.workspaceSettings.description', {
+          defaultMessage: 'Configure settings that apply to everyone in this workspace.',
+        }),
+        mount: async (params: AppMountParameters) => {
+          const { mountManagementSection } = await import(
+            './management_app/mount_management_section'
+          );
+          const [coreStart] = await core.getStartServices();
+          return mountManagementSection(
+            core.getStartServices,
+            {
+              ...params,
+              basePath: core.http.basePath.get(),
+              setBreadcrumbs: (breadCrumbs) =>
+                coreStart.chrome.setBreadcrumbs(getScopedBreadcrumbs(breadCrumbs, params.history)),
+              wrapInPage: true,
+            },
+            component.start,
+            UiSettingScope.WORKSPACE
+          );
+        },
+      });
     }
 
     if (home) {
@@ -190,11 +232,18 @@ export class AdvancedSettingsPlugin implements Plugin<
     }
 
     this.appUpdater$.next((app) => {
-      const userSettingsEnabled = core.application.capabilities.userSettings?.enabled;
       if (app.id === USER_SETTINGS_APPID) {
+        const userSettingsEnabled = core.application.capabilities.userSettings?.enabled;
         return {
           status: userSettingsEnabled ? AppStatus.accessible : AppStatus.inaccessible,
           navLinkStatus: userSettingsEnabled ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden,
+        };
+      }
+      if (app.id === WORKSPACE_SETTINGS_APPID) {
+        const workspaceEnabled = !!core.application.capabilities.workspaces?.enabled;
+        return {
+          status: workspaceEnabled ? AppStatus.accessible : AppStatus.inaccessible,
+          navLinkStatus: workspaceEnabled ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden,
         };
       }
     });

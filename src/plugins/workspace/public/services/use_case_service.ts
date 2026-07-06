@@ -133,6 +133,15 @@ export class UseCaseService {
               }),
               euiIconType: 'navGetStarted',
             },
+            {
+              id: 'workspace_settings',
+              category: DEFAULT_APP_CATEGORIES.manageWorkspace,
+              order: 700,
+              title: i18n.translate('workspace.left.settings.label', {
+                defaultMessage: 'Settings',
+              }),
+              euiIconType: 'gear',
+            },
           ]);
         }
       });

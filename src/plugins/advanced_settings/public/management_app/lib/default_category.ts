@@ -29,3 +29,9 @@
  */
 
 export const DEFAULT_CATEGORY = 'general';
+
+/**
+ * Category for dashboard-admin-only settings. Pinned to the top of the settings
+ * list, ahead of the default "general" category.
+ */
+export const ADMIN_CATEGORY = 'admin';

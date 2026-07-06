@@ -143,6 +143,13 @@ describe('UseCaseService', () => {
             title: 'Sample data',
             euiIconType: 'navGetStarted',
           },
+          {
+            id: 'workspace_settings',
+            category: DEFAULT_APP_CATEGORIES.manageWorkspace,
+            order: 700,
+            title: 'Settings',
+            euiIconType: 'gear',
+          },
         ]);
       });
     });
@@ -237,6 +244,10 @@ describe('UseCaseService', () => {
             expect.objectContaining({
               id: 'import_sample_data',
               euiIconType: 'navGetStarted',
+            }),
+            expect.objectContaining({
+              id: 'workspace_settings',
+              euiIconType: 'gear',
             }),
           ])
         );
