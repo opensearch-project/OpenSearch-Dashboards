@@ -367,9 +367,10 @@ function detectFieldSlotShape(
         // shape pass must honor it rather than forcing `error`, or a user who
         // sets field-validation to `warning` still sees red from this pass.
         severity: config.severity,
-        message:
-          `${keyword} expects a field name here, not an expression. ` +
-          `PPL does not use Splunk-style "field=" syntax.`,
+        // The message is deliberately generic: this pass flags any non-bare-field
+        // shape (literal, arithmetic, or any comparison — not only `field=`), so a
+        // Splunk-specific message would misdescribe the `... > 1` / `... = x` cases.
+        message: `${keyword} expects a field name here, not an expression.`,
         range: rangeFromContext(expression),
         docUrl: SHAPE_DOC_URL[commandName] ?? config.docUrl,
         hoverFacts: { field: expression.getText() },

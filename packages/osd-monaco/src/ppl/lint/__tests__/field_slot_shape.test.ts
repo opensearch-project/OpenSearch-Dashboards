@@ -60,6 +60,10 @@ describe('field-slot shape (runtime-bundle proxy)', () => {
       expect(diags[0].fix?.text).toBe('body');
       expect(diags[0].message).toContain('grok');
       expect(diags[0].message).toContain('field name');
+      // The message is deliberately generic — this pass flags any non-bare-field
+      // shape (`> 1`, `= x`, literals, arithmetic), not only Splunk `field=` — so
+      // it must not claim a Splunk-specific cause.
+      expect(diags[0].message).not.toContain('Splunk');
     });
 
     it('flags grok field = body (spaced) the same way', () => {

@@ -91,7 +91,7 @@
     "id": "field-validation",
     "detector": "field-validation",
     "enabled": true,
-    "severity": "warning",
+    "severity": "error",
     "message": "Reference to an unknown field.",
     "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/fields/",
     "appliesTo": {}
