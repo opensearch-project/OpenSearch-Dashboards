@@ -6,7 +6,7 @@
 import { IUiSettingsClient } from 'opensearch-dashboards/public';
 import { HttpSetup } from '../../../../core/public';
 import { buildPPLLintContext, extractFieldNames } from './lint_context_builder';
-import { buildOverridesFromSettings } from './lint_overrides';
+import { buildOverridesFromSettings, isCommandSuggestionEnabled } from './lint_overrides';
 import {
   pplGrammarCache,
   shouldUseRuntimeGrammar,
@@ -15,6 +15,7 @@ import { calciteSettingsCache } from './calcite_settings_cache';
 
 jest.mock('./lint_overrides', () => ({
   buildOverridesFromSettings: jest.fn(),
+  isCommandSuggestionEnabled: jest.fn(),
 }));
 jest.mock('../antlr/opensearch_ppl/ppl_grammar_cache', () => {
   const actual = jest.requireActual('../antlr/opensearch_ppl/ppl_grammar_cache');
@@ -34,6 +35,7 @@ jest.mock('./calcite_settings_cache', () => ({
 }));
 
 const mockBuildOverrides = buildOverridesFromSettings as jest.Mock;
+const mockIsCommandSuggestionEnabled = isCommandSuggestionEnabled as jest.Mock;
 const mockShouldUseRuntimeGrammar = shouldUseRuntimeGrammar as jest.Mock;
 const mockGetResolvedVersion = pplGrammarCache.getResolvedVersion as jest.Mock;
 const mockGetCachedSettings = calciteSettingsCache.getCached as jest.Mock;
@@ -55,6 +57,7 @@ describe('buildPPLLintContext', () => {
     mockBuildOverrides.mockReturnValue({ 'some-rule': { enabled: false } });
     mockGetResolvedVersion.mockReturnValue(undefined);
     mockGetCachedSettings.mockReturnValue(undefined);
+    mockIsCommandSuggestionEnabled.mockReturnValue(true);
   });
 
   it('derives dataSourceId/version from the dataset and carries http + overrides', () => {
@@ -66,6 +69,13 @@ describe('buildPPLLintContext', () => {
     expect(ctx.http).toBe(services.http);
     expect(ctx.overrides).toEqual({ 'some-rule': { enabled: false } });
     expect(mockBuildOverrides).toHaveBeenCalledWith(services.uiSettings);
+  });
+
+  it('carries the command-suggestion toggle read from uiSettings', () => {
+    mockIsCommandSuggestionEnabled.mockReturnValue(false);
+    const ctx = buildPPLLintContext(dataset, {}, services);
+    expect(ctx.commandSuggestionEnabled).toBe(false);
+    expect(mockIsCommandSuggestionEnabled).toHaveBeenCalledWith(services.uiSettings);
   });
 
   it('marks isCalcite false for a pre-3.3.0 data source', () => {

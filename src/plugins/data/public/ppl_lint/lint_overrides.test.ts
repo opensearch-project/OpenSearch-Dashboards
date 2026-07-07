@@ -4,7 +4,7 @@
  */
 
 import { IUiSettingsClient } from 'opensearch-dashboards/public';
-import { buildOverridesFromSettings } from './lint_overrides';
+import { buildOverridesFromSettings, isCommandSuggestionEnabled } from './lint_overrides';
 
 jest.mock('@osd/monaco', () => ({
   getBundledCatalog: () => [
@@ -96,5 +96,40 @@ describe('buildOverridesFromSettings', () => {
       makeUiSettings([{ id: 'nonexistent-rule', enabled: false, severity: 'error' }])
     );
     expect(overrides).toEqual({});
+  });
+
+  it('does not treat command-suggestion as a catalog override', () => {
+    // command-suggestion is a syntax-channel toggle, not a catalog rule, so it
+    // must not leak into the bundle rule overrides.
+    const overrides = buildOverridesFromSettings(
+      makeUiSettings([{ id: 'command-suggestion', enabled: false }])
+    );
+    expect(overrides).toEqual({});
+  });
+});
+
+describe('isCommandSuggestionEnabled', () => {
+  it('defaults to enabled when the setting is unset', () => {
+    expect(isCommandSuggestionEnabled(makeUiSettings(undefined))).toBe(true);
+  });
+
+  it('defaults to enabled when the entry is absent from the array', () => {
+    expect(
+      isCommandSuggestionEnabled(
+        makeUiSettings([{ id: 'field-validation', enabled: true, severity: 'error' }])
+      )
+    ).toBe(true);
+  });
+
+  it('returns false only when the entry is explicitly disabled', () => {
+    expect(
+      isCommandSuggestionEnabled(makeUiSettings([{ id: 'command-suggestion', enabled: false }]))
+    ).toBe(false);
+  });
+
+  it('returns true when the entry is explicitly enabled', () => {
+    expect(
+      isCommandSuggestionEnabled(makeUiSettings([{ id: 'command-suggestion', enabled: true }]))
+    ).toBe(true);
   });
 });

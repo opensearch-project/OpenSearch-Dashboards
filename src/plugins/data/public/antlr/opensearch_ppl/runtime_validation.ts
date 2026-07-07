@@ -189,6 +189,9 @@ function validateWithGrammar(query: string, grammar: CachedGrammar): PPLValidati
       // builder. Absent on ordinary syntax errors.
       ...(error.code ? { code: error.code } : {}),
       ...(error.fix ? { fix: error.fix } : {}),
+      // Preserve ANTLR's raw message so the marker builder can revert the friendly
+      // rewrite when command suggestions are disabled.
+      ...(error.rawMessage ? { rawMessage: error.rawMessage } : {}),
     })),
   };
 

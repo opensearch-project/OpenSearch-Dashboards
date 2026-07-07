@@ -182,6 +182,13 @@ const processSyntaxHighlighting = async (model: monaco.editor.IModel) => {
       // lint path handles via setModelFixes.
       const syntaxFixes = new Map<string, MarkerFix>();
 
+      // Command-typo suggestion is a UX layer on the syntax channel, toggleable
+      // via the same PPL-lint rules uiSetting (id `command-suggestion`). When it
+      // is disabled we revert the friendly rewrite: use ANTLR's raw message and
+      // drop the quick-fix, leaving the plain syntax error. Defaults to enabled
+      // when the flag is unset (no context / older config).
+      const commandSuggestionEnabled = getPPLLintContext(model)?.commandSuggestionEnabled !== false;
+
       // Convert errors to Monaco markers
       const markers: monaco.editor.IMarkerData[] = validationResult.errors.map((error) => {
         // Map SyntaxError properties to Monaco marker properties
@@ -195,10 +202,19 @@ const processSyntaxHighlighting = async (model: monaco.editor.IModel) => {
         const safeStartColumn = Math.max(1, startColumn);
         const safeEndColumn = Math.max(safeStartColumn, endColumn);
 
-        const docLink = getPPLDocumentationLink(error.message);
+        // A command-typo error is rewritten + carries a fix + keeps rawMessage.
+        // When suggestions are off, fall back to the raw ANTLR message and no fix.
+        const isSuppressedSuggestion =
+          !commandSuggestionEnabled && error.code === 'UNKNOWN_COMMAND';
+        const effectiveMessage = isSuppressedSuggestion
+          ? error.rawMessage ?? error.message
+          : error.message;
+        const effectiveFix = isSuppressedSuggestion ? undefined : error.fix;
+
+        const docLink = getPPLDocumentationLink(effectiveMessage);
         const marker: monaco.editor.IMarkerData = {
           severity: monaco.MarkerSeverity.Error,
-          message: error.message,
+          message: effectiveMessage,
           startLineNumber: safeStartLine,
           startColumn: safeStartColumn,
           endLineNumber: safeEndLine,
@@ -213,8 +229,8 @@ const processSyntaxHighlighting = async (model: monaco.editor.IModel) => {
           },
         };
 
-        if (error.fix) {
-          syntaxFixes.set(markerFixKey(marker), error.fix);
+        if (effectiveFix) {
+          syntaxFixes.set(markerFixKey(marker), effectiveFix);
         }
 
         return marker;

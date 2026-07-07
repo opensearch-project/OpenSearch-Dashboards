@@ -11,7 +11,10 @@ import { UI_SETTINGS } from '../../data/common';
 const PPL_LINT_RULE_DEFAULTS: ReadonlyArray<{
   id: string;
   enabled: boolean;
-  severity: 'error' | 'warning' | 'info';
+  // Tree-walking lint rules carry a severity. The command-typo suggestion is a
+  // syntax-channel UX toggle (rewrites a syntax error into "Did you mean ...?"),
+  // so it has no configurable severity — it always rides the syntax error's own.
+  severity?: 'error' | 'warning' | 'info';
 }> = [
   { id: 'head-without-sort', enabled: true, severity: 'info' },
   { id: 'division-by-zero', enabled: true, severity: 'warning' },
@@ -22,6 +25,7 @@ const PPL_LINT_RULE_DEFAULTS: ReadonlyArray<{
   { id: 'union-min-datasets', enabled: true, severity: 'error' },
   { id: 'replace-wildcard-asymmetry', enabled: true, severity: 'error' },
   { id: 'field-validation', enabled: true, severity: 'error' },
+  { id: 'command-suggestion', enabled: true },
 ];
 
 /** Build PPL lint rule uiSettings. Adds WORKSPACE scope when the workspace feature is on. */
@@ -39,18 +43,22 @@ export function getPplLintRuleSettings(
       type: 'json',
       description:
         'Configure PPL lint rules. Each entry has "id" (rule name), "enabled" (true/false), ' +
-        'and "severity" (error, warning, or info).',
+        'and an optional "severity" (error, warning, or info). The "command-suggestion" ' +
+        'entry toggles the command-typo "Did you mean ...?" hint and takes no severity.',
       category: ['search'],
       scope,
       schema: schema.arrayOf(
         schema.object({
           id: schema.string(),
           enabled: schema.boolean(),
-          severity: schema.oneOf([
-            schema.literal('error'),
-            schema.literal('warning'),
-            schema.literal('info'),
-          ]),
+          // Optional: the command-suggestion toggle carries no severity.
+          severity: schema.maybe(
+            schema.oneOf([
+              schema.literal('error'),
+              schema.literal('warning'),
+              schema.literal('info'),
+            ])
+          ),
         })
       ),
     },

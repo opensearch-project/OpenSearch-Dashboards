@@ -22,6 +22,10 @@ export interface ParserSyntaxError extends TokenPosition {
   code?: CommandSuggestion['code'];
   // Structured quick-fix the marker builder turns into a Monaco lightbulb.
   fix?: CommandSuggestion['fix'];
+  // ANTLR's original message, kept only when `message` was replaced by a
+  // command-typo suggestion, so a consumer can revert when the command-suggestion
+  // feature is off. Absent for un-rewritten errors.
+  rawMessage?: string;
 }
 
 export class GeneralErrorListener implements ANTLRErrorListener {

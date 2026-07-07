@@ -36,6 +36,11 @@ export interface LintPayloadContext {
   visibleIndices?: string[];
   settings?: { allJoinTypesAllowed?: boolean };
   overrides?: BundleRuleOverrides;
+  // Whether the command-typo suggestion (a syntax-channel UX layer, not a lint
+  // rule) is enabled. Undefined means enabled; only `false` turns it off. Carried
+  // on the lint context because the syntax marker builder reads it alongside the
+  // lint config, though it does not affect any tree-walking lint rule.
+  commandSuggestionEnabled?: boolean;
 }
 
 export interface LintRunContext extends LintPayloadContext {

@@ -64,3 +64,28 @@ export function buildOverridesFromSettings(uiSettings: IUiSettingsClient): Bundl
 
   return overrides;
 }
+
+/**
+ * The id under which the command-typo suggestion is toggled in the PPL lint
+ * rules uiSetting. It is not a tree-walking lint catalog rule (it rewrites a
+ * syntax error), so it is read separately from {@link buildOverridesFromSettings}
+ * rather than iterated over the catalog.
+ */
+export const COMMAND_SUGGESTION_RULE_ID = 'command-suggestion';
+
+/**
+ * Read whether the command-typo suggestion is enabled from the PPL lint rules
+ * uiSetting. Defaults to `true` when the entry is absent or the setting is unset,
+ * preserving the pre-toggle behavior; only an explicit `enabled: false` turns it off.
+ */
+export function isCommandSuggestionEnabled(uiSettings: IUiSettingsClient): boolean {
+  const stored = uiSettings.get<StoredRule[] | undefined>(
+    UI_SETTINGS.QUERY_ENHANCEMENTS_PPL_LINT_RULES,
+    undefined
+  );
+  if (!Array.isArray(stored)) {
+    return true;
+  }
+  const entry = stored.find((r) => r && r.id === COMMAND_SUGGESTION_RULE_ID);
+  return entry?.enabled !== false;
+}

@@ -34,12 +34,14 @@ export class PPLCommandErrorListener extends GeneralErrorListener {
     super.syntaxError(recognizer, token, startLine, startColumn, suggestion?.message ?? message, e);
 
     // The base class just pushed the error; attach the structured identity and
-    // fix to it so the marker builder can render a lightbulb.
+    // fix to it so the marker builder can render a lightbulb. Keep ANTLR's raw
+    // message too, so a consumer can revert when command suggestions are off.
     if (suggestion) {
       const last = this.errors[this.errors.length - 1];
       if (last) {
         last.code = suggestion.code;
         last.fix = suggestion.fix;
+        last.rawMessage = message;
       }
     }
   }
