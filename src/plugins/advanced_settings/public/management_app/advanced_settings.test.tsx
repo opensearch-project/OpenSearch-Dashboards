@@ -76,7 +76,7 @@ jest.mock('./components/search', () => ({
 interface MockConfigOptions {
   // Extra settings merged into getAll(), e.g. ones carrying an explicit scope.
   extraSettings?: Record<string, any>;
-  // User-provided values returned by getUserProvidedForScope(), keyed by scope.
+  // User-provided values returned by getAllUserProvidedWithScope(), keyed by scope.
   userProvidedForScope?: Partial<Record<UiSettingScope, Record<string, UserProvidedValues>>>;
 }
 
@@ -227,7 +227,7 @@ function mockConfig(options: MockConfigOptions = {}) {
   const setMock = jest.fn((key: string, value: any, scope?: UiSettingScope) =>
     Promise.resolve(true)
   );
-  const getUserProvidedForScopeMock = jest.fn((scope: UiSettingScope) =>
+  const getAllUserProvidedWithScopeMock = jest.fn((scope: UiSettingScope) =>
     Promise.resolve(options.userProvidedForScope?.[scope] ?? {})
   );
 
@@ -258,7 +258,7 @@ function mockConfig(options: MockConfigOptions = {}) {
     getAll,
     getUserProvidedWithScope: ((key) =>
       Promise.resolve(config.getAll()[key])) as IUiSettingsClient['getUserProvidedWithScope'],
-    getUserProvidedForScope: getUserProvidedForScopeMock as IUiSettingsClient['getUserProvidedForScope'],
+    getAllUserProvidedWithScope: getAllUserProvidedWithScopeMock as IUiSettingsClient['getAllUserProvidedWithScope'],
     getDefault: jest.fn() as IUiSettingsClient['getDefault'],
   };
   return {
@@ -400,6 +400,7 @@ describe('AdvancedSettings', () => {
         useUpdatedUX={false}
         navigationUI={navigationUI}
         application={applicationWithCapabilities({
+          advancedSettings: { permissionControlEnabled: true },
           globalScopeEditable: { enabled: false },
           dashboards: { isDashboardAdmin: false },
         })}
@@ -434,10 +435,36 @@ describe('AdvancedSettings', () => {
     ).toMatchObject({ isPermissionControlled: false });
   });
 
+  it('does not restrict global settings when permission control is disabled, even if globalScopeEditable is false', async () => {
+    // Regression: without permission control there is no dashboard-admin concept, so the
+    // legacy globalScopeEditable=false must not lock global settings for everyone.
+    const component = await mountAndLoad(
+      <AdvancedSettingsComponent
+        queryText="test:isPermissionControlled:string"
+        enableSaving={true}
+        toasts={notificationServiceMock.createStartContract().toasts}
+        dockLinks={docLinksServiceMock.createStartContract().links}
+        uiSettings={mockConfig().core.uiSettings}
+        componentRegistry={new ComponentRegistry().start}
+        useUpdatedUX={false}
+        navigationUI={navigationUI}
+        application={applicationWithCapabilities({
+          advancedSettings: { permissionControlEnabled: false },
+          globalScopeEditable: { enabled: false },
+          dashboards: { isDashboardAdmin: false },
+        })}
+      />
+    );
+
+    expect(
+      findSetting(component, 'test:isPermissionControlled:string').prop('setting')
+    ).toMatchObject({ isPermissionControlled: false });
+  });
+
   it('should show the load error state when fetching scoped values fails', async () => {
     const uiSettings = mockConfig().core.uiSettings;
-    uiSettings.getUserProvidedForScope = (() =>
-      Promise.reject(new Error('boom'))) as IUiSettingsClient['getUserProvidedForScope'];
+    uiSettings.getAllUserProvidedWithScope = (() =>
+      Promise.reject(new Error('boom'))) as IUiSettingsClient['getAllUserProvidedWithScope'];
 
     const component = await mountAndLoad(
       <AdvancedSettingsComponent
@@ -526,7 +553,7 @@ describe('AdvancedSettings', () => {
         />
       );
 
-      const scopesRead = (core.uiSettings.getUserProvidedForScope as jest.Mock).mock.calls.map(
+      const scopesRead = (core.uiSettings.getAllUserProvidedWithScope as jest.Mock).mock.calls.map(
         ([scope]) => scope
       );
       expect(scopesRead).toContain(UiSettingScope.GLOBAL);
@@ -544,7 +571,7 @@ describe('AdvancedSettings', () => {
         />
       );
 
-      const scopesRead = (core.uiSettings.getUserProvidedForScope as jest.Mock).mock.calls.map(
+      const scopesRead = (core.uiSettings.getAllUserProvidedWithScope as jest.Mock).mock.calls.map(
         ([scope]) => scope
       );
       expect(scopesRead).toEqual([UiSettingScope.GLOBAL]);
@@ -563,9 +590,8 @@ describe('AdvancedSettings', () => {
           />
         );
 
-        const scopesRead = (core.uiSettings.getUserProvidedForScope as jest.Mock).mock.calls.map(
-          ([scope]) => scope
-        );
+        const scopesRead = (core.uiSettings
+          .getAllUserProvidedWithScope as jest.Mock).mock.calls.map(([scope]) => scope);
         expect(scopesRead).toContain(pageScope);
         expect(scopesRead).toContain(UiSettingScope.GLOBAL);
       });
@@ -740,13 +766,15 @@ describe('AdvancedSettings', () => {
           queryText=""
           uiSettings={core.uiSettings}
           application={applicationWithCapabilities({
+            advancedSettings: { permissionControlEnabled: true },
             globalScopeEditable: { enabled: false },
             dashboards: { isDashboardAdmin: true },
           })}
         />
       );
 
-      // globalScopeEditable.enabled === false => restrictGlobalToAdmins is true.
+      // permission control on + globalScopeEditable.enabled === false =>
+      // restrictGlobalToAdmins is true.
       expect(findSetting(component, ENABLE_GLOBAL_SETTING_CONTROL).prop('setting')).toMatchObject({
         value: true,
       });
@@ -766,6 +794,7 @@ describe('AdvancedSettings', () => {
           queryText=""
           uiSettings={core.uiSettings}
           application={applicationWithCapabilities({
+            advancedSettings: { permissionControlEnabled: true },
             // Legacy flag says restrict, but the explicit stored toggle says don't.
             globalScopeEditable: { enabled: false },
             dashboards: { isDashboardAdmin: true },

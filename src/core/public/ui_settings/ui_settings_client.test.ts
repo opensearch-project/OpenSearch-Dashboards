@@ -644,7 +644,7 @@ describe('preferBrowserSetting merge', () => {
   });
 });
 
-describe('#getUserProvidedForScope', () => {
+describe('#getAllUserProvidedWithScope', () => {
   function setupScoped(perScopeSettings: Partial<Record<UiSettingScope | 'default', any>> = {}) {
     const makeApi = (settings: any): UiSettingsApi =>
       ({
@@ -679,7 +679,7 @@ describe('#getUserProvidedForScope', () => {
       [UiSettingScope.GLOBAL]: { settings: { 'theme:darkMode': { userValue: false } } },
     });
 
-    const result = await client.getUserProvidedForScope(UiSettingScope.USER);
+    const result = await client.getAllUserProvidedWithScope(UiSettingScope.USER);
 
     expect(result).toEqual(userSettings);
     // Only the USER scope's API should have been queried.
@@ -690,7 +690,7 @@ describe('#getUserProvidedForScope', () => {
   it('queries each scope through its dedicated API', async () => {
     const { client, uiSettingApis } = setupScoped();
 
-    await client.getUserProvidedForScope(UiSettingScope.WORKSPACE);
+    await client.getAllUserProvidedWithScope(UiSettingScope.WORKSPACE);
 
     expect(uiSettingApis[UiSettingScope.WORKSPACE].getAll).toHaveBeenCalledTimes(1);
     expect(uiSettingApis[UiSettingScope.USER].getAll).not.toHaveBeenCalled();
@@ -699,12 +699,12 @@ describe('#getUserProvidedForScope', () => {
 
   it('returns an empty object when the response has no settings', async () => {
     const { client } = setupScoped({ [UiSettingScope.USER]: { settings: undefined } });
-    await expect(client.getUserProvidedForScope(UiSettingScope.USER)).resolves.toEqual({});
+    await expect(client.getAllUserProvidedWithScope(UiSettingScope.USER)).resolves.toEqual({});
   });
 
   it('returns an empty object when the response itself is undefined', async () => {
     const { client } = setupScoped({ [UiSettingScope.USER]: undefined });
-    await expect(client.getUserProvidedForScope(UiSettingScope.USER)).resolves.toEqual({});
+    await expect(client.getAllUserProvidedWithScope(UiSettingScope.USER)).resolves.toEqual({});
   });
 
   it('falls back to the default API for a scope with no dedicated API', async () => {
@@ -712,7 +712,7 @@ describe('#getUserProvidedForScope', () => {
     const adminSettings = { 'admin:setting': { userValue: 'x' } };
     const { client, uiSettingApis } = setupScoped({ default: { settings: adminSettings } });
 
-    const result = await client.getUserProvidedForScope(UiSettingScope.DASHBOARD_ADMIN);
+    const result = await client.getAllUserProvidedWithScope(UiSettingScope.DASHBOARD_ADMIN);
 
     expect(result).toEqual(adminSettings);
     expect(uiSettingApis.default.getAll).toHaveBeenCalledTimes(1);

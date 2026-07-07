@@ -450,11 +450,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
       "get": [Function],
       "get$": [Function],
       "getAll": [Function],
-      "getDefault": [MockFunction],
-      "getSaved$": [Function],
-      "getUpdate$": [Function],
-      "getUpdateErrors$": [Function],
-      "getUserProvidedForScope": [MockFunction] {
+      "getAllUserProvidedWithScope": [MockFunction] {
         "calls": Array [
           Array [
             "global",
@@ -467,6 +463,10 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
           },
         ],
       },
+      "getDefault": [MockFunction],
+      "getSaved$": [Function],
+      "getUpdate$": [Function],
+      "getUpdateErrors$": [Function],
       "getUserProvidedWithScope": [Function],
       "isCustom": [Function],
       "isDeclared": [Function],

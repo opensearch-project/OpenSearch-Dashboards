@@ -162,7 +162,7 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
       });
   }
 
-  async getUserProvidedForScope(
+  async getAllUserProvidedWithScope(
     scope: UiSettingScope
   ): Promise<Record<string, UserProvidedValues>> {
     const response = await this.selectedApi(scope).getAll();

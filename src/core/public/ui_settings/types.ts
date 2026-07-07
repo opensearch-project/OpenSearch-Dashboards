@@ -62,7 +62,9 @@ export interface IUiSettingsClient {
   /**
    * Asynchronously fetches all user-provided values for a single scope.
    */
-  getUserProvidedForScope: (scope: UiSettingScope) => Promise<Record<string, UserProvidedValues>>;
+  getAllUserProvidedWithScope: (
+    scope: UiSettingScope
+  ) => Promise<Record<string, UserProvidedValues>>;
 
   /**
    * Gets an observable of the current value for a config key, and all updates to that config

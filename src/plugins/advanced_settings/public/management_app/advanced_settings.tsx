@@ -150,13 +150,13 @@ export class AdvancedSettingsComponent extends Component<
         // This page's own scope layer(s) — drives the displayed value and provenance.
         Promise.all(
           getPageScopes(scope, permissionControlEnabled).map(async (s) => {
-            Object.assign(merged, await uiSettings.getUserProvidedForScope(s));
+            Object.assign(merged, await uiSettings.getAllUserProvidedWithScope(s));
           })
         ),
         // On a scoped page, also read the GLOBAL layer so a setting with no value in
         // this scope can show the effective value it inherits.
         isScopedPage
-          ? uiSettings.getUserProvidedForScope(UiSettingScope.GLOBAL)
+          ? uiSettings.getAllUserProvidedWithScope(UiSettingScope.GLOBAL)
           : Promise.resolve({} as Record<string, UserProvidedValues>),
       ]);
 
@@ -244,19 +244,23 @@ export class AdvancedSettingsComponent extends Component<
   mapConfig(config: IUiSettingsClient) {
     const all = config.getAll();
     const userSettingsEnabled = config.get('theme:enableUserControl');
-    const isDashboardAdmin = !!this.props.application.capabilities.dashboards?.isDashboardAdmin;
+    const isDashboardAdmin =
+      this.props.application.capabilities.dashboards?.isDashboardAdmin !== false;
     const pageScope = this.props.scope;
     // Values stored in this page's own scope(s).
     const pageScopeValues = this.scopedUserProvided;
 
     // Effective "restrict global settings to admins" flag: an explicit admin toggle
     // is the source of truth, else fall back to the legacy globalScopeEditable.
+    const permissionControlEnabled = !!this.props.application.capabilities.advancedSettings
+      ?.permissionControlEnabled;
     const adminToggleValue = pageScopeValues[ENABLE_GLOBAL_SETTING_CONTROL]?.userValue;
     const globalScopeEditable = this.props.application.capabilities.globalScopeEditable?.enabled as
       | boolean
       | undefined;
     const restrictGlobalToAdmins =
-      adminToggleValue !== undefined ? !!adminToggleValue : globalScopeEditable === false;
+      permissionControlEnabled &&
+      (adminToggleValue !== undefined ? !!adminToggleValue : globalScopeEditable === false);
 
     // A setting belongs on a page when its registered scope matches: the Application
     // page shows GLOBAL/DASHBOARD_ADMIN (unscoped counts as GLOBAL); a scoped page
