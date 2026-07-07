@@ -59,7 +59,12 @@ function provide(markers: LintMarker[]) {
 // Pull the single text edit out of a code action for assertions.
 function editOf(action: monaco.languages.CodeAction) {
   const edit = (action.edit as any).edits[0];
-  return { range: edit.textEdit.range, text: edit.textEdit.text, resource: edit.resource };
+  return {
+    range: edit.textEdit.range,
+    text: edit.textEdit.text,
+    resource: edit.resource,
+    versionId: edit.versionId,
+  };
 }
 
 describe('pplLintCodeActionProvider', () => {
@@ -102,6 +107,18 @@ describe('pplLintCodeActionProvider', () => {
     const edit = editOf(actions[0]);
     expect(edit.text).toBe('');
     expect(edit.range).toEqual(fixRange);
+  });
+
+  it('does NOT pin the edit to a model versionId', () => {
+    // A captured versionId makes Monaco's bulk-edit service reject the edit once
+    // the model has changed since the action was computed ("model changed in the
+    // meantime") — which silently kills the quick-fix in the live editor, where
+    // debounced re-lint/re-tokenize bump the version between compute and click.
+    const marker = makeMarker();
+    seedFix(marker, { title: 'Replace with "foo"', text: 'foo' });
+    const actions = provide([marker]);
+    expect(actions).toHaveLength(1);
+    expect(editOf(actions[0]).versionId).toBeUndefined();
   });
 
   it('emits one action per fixable marker, skipping markers with no registered fix', () => {

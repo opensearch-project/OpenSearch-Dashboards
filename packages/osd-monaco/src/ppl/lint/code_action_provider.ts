@@ -58,7 +58,14 @@ export const pplLintCodeActionProvider: monaco.languages.CodeActionProvider = {
           range: editRange,
           text: fix.text,
         },
-        versionId: model.getVersionId(),
+        // Intentionally omit versionId. Monaco's bulk-edit service rejects an
+        // edit whose captured versionId no longer matches the model ("model
+        // changed in the meantime"), and in the live editor the version advances
+        // between the moment the code action is computed and the moment the user
+        // clicks it (debounced re-lint, re-tokenize, autocomplete all bump it) —
+        // so a captured versionId makes the quick-fix silently do nothing. The
+        // fix range is absolute, so applying it without the version guard is safe.
+        versionId: undefined,
       };
 
       actions.push({
