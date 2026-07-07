@@ -18,15 +18,6 @@
     "appliesTo": {}
   },
   {
-    "id": "invalid-capture-group-name",
-    "detector": "invalid-capture-group-name",
-    "enabled": true,
-    "severity": "error",
-    "message": "Named capture group is invalid — Java regex requires names matching ^[A-Za-z][A-Za-z0-9]*$.",
-    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/rex/",
-    "appliesTo": {}
-  },
-  {
     "id": "unsupported-window-function-in-eventstats",
     "detector": "unsupported-window-function-in-eventstats",
     "enabled": true,

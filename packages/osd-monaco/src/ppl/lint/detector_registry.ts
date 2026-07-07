@@ -6,7 +6,6 @@
 import { Detector } from './types';
 import { headWithoutSortDetector } from './rules/head_without_sort';
 import { divisionByZeroDetector } from './rules/division_by_zero';
-import { invalidCaptureGroupNameDetector } from './rules/invalid_capture_group_name';
 import { unsupportedWindowFunctionDetector } from './rules/unsupported_window_function';
 import { multisearchMinSubsearchDetector } from './rules/multisearch_min_subsearch';
 import { disabledJoinTypeDetector } from './rules/disabled_join_type';
@@ -32,7 +31,6 @@ export function resetDetectorRegistry(): void {
 export function registerBuiltInDetectors(): void {
   registerDetector('head-without-sort', headWithoutSortDetector);
   registerDetector('division-by-zero', divisionByZeroDetector);
-  registerDetector('invalid-capture-group-name', invalidCaptureGroupNameDetector);
   registerDetector('unsupported-window-function-in-eventstats', unsupportedWindowFunctionDetector);
   registerDetector('multisearch-min-subsearch', multisearchMinSubsearchDetector);
   registerDetector('disabled-join-type', disabledJoinTypeDetector);
