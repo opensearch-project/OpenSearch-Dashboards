@@ -27,6 +27,14 @@ export interface SqlPplEndpointActions {
 }
 
 /**
+ * Which language to use for autocomplete column-value suggestions (the `top N column` query).
+ * - `'PPL'`: uses `source = <table> | top <n> <column>` (OpenSearch default).
+ * - `'SQL'`: uses `SELECT <column> FROM <table> GROUP BY <column> ORDER BY COUNT(*) DESC LIMIT <n>`.
+ * - `'none'`: column-value suggestions are disabled for this engine (e.g. engine too old).
+ */
+export type ColumnValueSuggestionLanguage = 'PPL' | 'SQL' | 'none';
+
+/**
  * Comprehensive, declarative description of what a data-source engine supports. Centralizes the
  * per-engine behavior that used to be scattered as inline `=== 'Elasticsearch'` checks, so adding
  * support for another engine means filling in one entry with full context.
@@ -49,6 +57,8 @@ export interface DataSourceEngineCapabilities {
   supportsRuntimePplGrammar: boolean;
   /** Client-action endpoints the server Facet should use to run PPL/SQL for this engine. */
   sqlPplEndpoints: SqlPplEndpointActions;
+  /** Which language the autocomplete column-value fetcher should use for this engine. */
+  columnValueSuggestionLanguage: ColumnValueSuggestionLanguage;
 }
 
 /** Default capabilities (historical OpenSearch behavior) for engines without an explicit entry. */
@@ -57,6 +67,7 @@ export const DEFAULT_ENGINE_CAPABILITIES: DataSourceEngineCapabilities = {
   supportsPplSpan: true,
   supportsRuntimePplGrammar: true,
   sqlPplEndpoints: { ppl: 'enhancements.pplQuery', sql: 'enhancements.sqlQuery' },
+  columnValueSuggestionLanguage: 'PPL',
 };
 
 /**
@@ -76,6 +87,7 @@ const ENGINE_CAPABILITIES: Partial<Record<string, DataSourceEngineCapabilities>>
       ppl: 'enhancements.pplQueryOpenDistro',
       sql: 'enhancements.sqlQueryOpenDistro',
     },
+    columnValueSuggestionLanguage: 'SQL',
   },
   [ENGINE.OpenSearch]: { ...DEFAULT_ENGINE_CAPABILITIES },
 };

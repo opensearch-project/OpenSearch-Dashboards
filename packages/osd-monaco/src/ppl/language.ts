@@ -10,9 +10,23 @@ import { getPPLLanguageAnalyzer, PPLValidationResult } from './ppl_language_anal
 import { getPPLDocumentationLink } from './ppl_documentation';
 import { pplRangeFormatProvider } from './formatter';
 import { resolvePPLValidationResult } from './validation_provider';
+import { getPPLLintContext, isPPLLintEnabled, resolvePPLLintResult } from './lint_bridge';
+import { LintResult } from './lint/diagnostic';
+import { SerializableLintContext } from './lint/types';
+import { diagnosticToMarker } from './lint/diagnostic_to_marker';
+import { LINT_OWNER, pplLintHoverProvider } from './lint/hover/hover_provider';
+import {
+  clearModelHoverFacts,
+  HoverFacts,
+  markerFixKey,
+  setModelHoverFacts,
+} from './lint/hover/hover_registry';
 
 const PPL_LANGUAGE_ID = ID;
 const OWNER = 'PPL_WORKER';
+const LINT_DEBOUNCE_MS = 500;
+const lintDebounceTimers = new Map<string, ReturnType<typeof setTimeout>>();
+const lintGenerations = new Map<string, number>();
 
 // PPL worker proxy service for worker-based syntax highlighting
 const pplWorkerProxyService = new PPLWorkerProxyService();
@@ -178,6 +192,91 @@ const processSyntaxHighlighting = async (model: monaco.editor.IModel) => {
 
 export const revalidatePPLModel = async (model: monaco.editor.IModel) => {
   await processSyntaxHighlighting(model);
+  processLintHighlighting(model);
+};
+
+const processLintHighlighting = (model: monaco.editor.IModel): void => {
+  const generation = (lintGenerations.get(model.id) ?? 0) + 1;
+  lintGenerations.set(model.id, generation);
+
+  if (!isPPLLintEnabled() || model.getLanguageId() !== PPL_LANGUAGE_ID) {
+    monaco.editor.setModelMarkers(model, LINT_OWNER, []);
+    clearModelHoverFacts(model);
+    return;
+  }
+
+  const content = model.getValue();
+
+  pplWorkerProxyService.setup();
+
+  // The compiled-worker fallback runs in a Web Worker, so the context must be
+  // structured-clone-safe: Sets/Maps are flattened and the http client (a
+  // function-bearing object) is dropped. The runtime bridge keeps the full context.
+  const lintContext = getPPLLintContext(model);
+  const workerContext: SerializableLintContext | undefined = lintContext
+    ? {
+        isCalcite: lintContext.isCalcite,
+        fields: lintContext.fields ? Array.from(lintContext.fields) : undefined,
+        typeMap: lintContext.typeMap ? Object.fromEntries(lintContext.typeMap) : undefined,
+        disabledObjectFields: lintContext.disabledObjectFields
+          ? Array.from(lintContext.disabledObjectFields)
+          : undefined,
+        visibleIndices: lintContext.visibleIndices,
+        settings: lintContext.settings,
+        overrides: lintContext.overrides,
+        dataSourceId: lintContext.dataSourceId,
+        dataSourceVersion: lintContext.dataSourceVersion,
+      }
+    : undefined;
+
+  void resolvePPLLintResult(
+    model,
+    content,
+    async (query) => (await pplWorkerProxyService.lint(query, workerContext)) as LintResult
+  )
+    .then((lintResult: LintResult) => {
+      if (
+        lintGenerations.get(model.id) !== generation ||
+        model.isDisposed() ||
+        model.getValue() !== content
+      ) {
+        return;
+      }
+      if (model.getLanguageId() !== PPL_LANGUAGE_ID) {
+        return;
+      }
+      const markers = lintResult.diagnostics.map(diagnosticToMarker);
+      // MarkerService drops custom properties, so extract hoverFacts separately.
+      const hoverFacts = new Map<string, HoverFacts>();
+      for (const marker of markers) {
+        const withExtras = marker as monaco.editor.IMarkerData & {
+          hoverFacts?: HoverFacts;
+        };
+        const key = markerFixKey(marker);
+        if (withExtras.hoverFacts) {
+          hoverFacts.set(key, withExtras.hoverFacts);
+          delete withExtras.hoverFacts;
+        }
+      }
+      setModelHoverFacts(model, hoverFacts);
+      monaco.editor.setModelMarkers(model, LINT_OWNER, markers);
+    })
+    .catch((e) => {
+      // eslint-disable-next-line no-console
+      if (e) console.warn('[ppl-lint] lint pipeline error:', e);
+    });
+};
+
+const scheduleLintHighlighting = (model: monaco.editor.IModel): void => {
+  const existing = lintDebounceTimers.get(model.id);
+  if (existing !== undefined) {
+    clearTimeout(existing);
+  }
+  const handle = setTimeout(() => {
+    lintDebounceTimers.delete(model.id);
+    processLintHighlighting(model);
+  }, LINT_DEBOUNCE_MS);
+  lintDebounceTimers.set(model.id, handle);
 };
 
 /**
@@ -202,6 +301,7 @@ const setupPPLSyntaxHighlighting = () => {
       model.onDidChangeContent(async () => {
         if (model.getLanguageId() === PPL_LANGUAGE_ID) {
           await processSyntaxHighlighting(model);
+          scheduleLintHighlighting(model);
         }
       })
     );
@@ -211,8 +311,11 @@ const setupPPLSyntaxHighlighting = () => {
       model.onDidChangeLanguage(async () => {
         if (model.getLanguageId() === PPL_LANGUAGE_ID) {
           await processSyntaxHighlighting(model);
+          processLintHighlighting(model);
         } else {
           monaco.editor.setModelMarkers(model, OWNER, []);
+          monaco.editor.setModelMarkers(model, LINT_OWNER, []);
+          clearModelHoverFacts(model);
         }
       })
     );
@@ -220,6 +323,7 @@ const setupPPLSyntaxHighlighting = () => {
     // Process immediately if already PPL
     if (model.getLanguageId() === PPL_LANGUAGE_ID) {
       processSyntaxHighlighting(model);
+      processLintHighlighting(model);
     }
   };
 
@@ -229,7 +333,15 @@ const setupPPLSyntaxHighlighting = () => {
   // Listen for model disposal to clear markers
   disposables.push(
     monaco.editor.onWillDisposeModel((model) => {
+      const pending = lintDebounceTimers.get(model.id);
+      if (pending !== undefined) {
+        clearTimeout(pending);
+        lintDebounceTimers.delete(model.id);
+      }
+      lintGenerations.delete(model.id);
       monaco.editor.setModelMarkers(model, OWNER, []);
+      monaco.editor.setModelMarkers(model, LINT_OWNER, []);
+      clearModelHoverFacts(model);
     })
   );
 
@@ -238,6 +350,9 @@ const setupPPLSyntaxHighlighting = () => {
 
   // Return cleanup function
   return () => {
+    lintDebounceTimers.forEach(clearTimeout);
+    lintDebounceTimers.clear();
+    lintGenerations.clear();
     disposables.forEach((d) => d.dispose());
     pplWorkerProxyService.stop();
   };
@@ -267,9 +382,15 @@ export const registerPPLLanguage = () => {
   // Set up syntax highlighting with worker
   const disposeSyntaxHighlighting = setupPPLSyntaxHighlighting();
 
+  const hoverDisposable = monaco.languages.registerHoverProvider(
+    PPL_LANGUAGE_ID,
+    pplLintHoverProvider
+  );
+
   return {
     dispose: () => {
       disposeSyntaxHighlighting();
+      hoverDisposable.dispose();
     },
   };
 };

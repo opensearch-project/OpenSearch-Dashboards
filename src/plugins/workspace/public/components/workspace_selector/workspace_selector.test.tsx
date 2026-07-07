@@ -222,4 +222,46 @@ describe('<WorkspaceSelector />', () => {
     expect(screen.queryByText(/manage/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/create workspaces/i)).toBeNull();
   });
+
+  describe('flush variant', () => {
+    const FlushComponent = () => (
+      <I18nProvider>
+        {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}
+        <WorkspaceSelector
+          coreStart={coreStartMock}
+          registeredUseCases$={registeredUseCases$}
+          flush
+        />
+      </I18nProvider>
+    );
+
+    it('renders the flat trigger showing the current workspace name', () => {
+      render(<FlushComponent />);
+      const button = screen.getByTestId('workspace-selector-button');
+      expect(button).toBeInTheDocument();
+      expect(button).toHaveClass('workspaceSelectorFlushButton');
+      expect(screen.getByTestId('workspace-selector-current-name')).toHaveTextContent(
+        'workspace 3'
+      );
+    });
+
+    it('opens the same picker popover on click', () => {
+      coreStartMock.workspaces.workspaceList$.next([
+        { id: 'workspace-1', name: 'workspace 1', features: [] },
+      ]);
+      render(<FlushComponent />);
+      fireEvent.click(screen.getByTestId('workspace-selector-button'));
+      expect(screen.getByText('workspace 1')).toBeInTheDocument();
+    });
+
+    it('shows "Select a workspace" as a flat row when outside a workspace', () => {
+      coreStartMock.workspaces.currentWorkspace$ = new BehaviorSubject<WorkspaceObject | null>(
+        null
+      );
+      render(<FlushComponent />);
+      const button = screen.getByTestId('workspace-selector-button');
+      expect(button).toHaveClass('workspaceSelectorFlushButton');
+      expect(screen.getByText(/select a workspace/i)).toBeInTheDocument();
+    });
+  });
 });

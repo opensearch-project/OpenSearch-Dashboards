@@ -813,14 +813,40 @@ export class DataViewsService {
       displayName: dataView.displayName,
       description: dataView.description,
       ...(dataView.dataSourceRef?.id && {
-        dataSource: {
-          id: dataView.dataSourceRef.id,
-          title: dataView.dataSourceRef.name || dataView.dataSourceRef.id,
-          type: dataView.dataSourceRef.type || DEFAULT_DATA.SOURCE_TYPES.OPENSEARCH,
-          version: dataView.dataSourceRef.version || '',
-        },
+        dataSource: await this.resolveDataSourceForDataset(dataView.dataSourceRef),
       }),
     };
+  }
+
+  /**
+   * Resolve the {@link Dataset} `dataSource` from an IndexPattern's `dataSourceRef`.
+   *
+   * An IndexPattern's `dataSourceRef` is the raw saved-object reference, so its `type` is the
+   * saved-object type (`'data-source'`) rather than the engine type (e.g. `'Elasticsearch'`), and
+   * it carries no version. Consumers that route by engine (SQL/PPL endpoint selection in
+   * `query_enhancements`) need the real `dataSourceEngineType`/`dataSourceVersion`, so we fetch the
+   * data-source saved object to populate them — mirroring `DataView.toDataset()`. Falls back to the
+   * reference's own values (or OpenSearch defaults) if the fetch fails.
+   */
+  private async resolveDataSourceForDataset(
+    dataSourceRef: NonNullable<IndexPattern['dataSourceRef']>
+  ): Promise<Dataset['dataSource']> {
+    try {
+      const { attributes } = await this.getDataSource(dataSourceRef.id);
+      return {
+        id: dataSourceRef.id,
+        title: attributes.title || dataSourceRef.name || dataSourceRef.id,
+        type: attributes.dataSourceEngineType || DEFAULT_DATA.SOURCE_TYPES.OPENSEARCH,
+        version: attributes.dataSourceVersion || '',
+      };
+    } catch (error) {
+      return {
+        id: dataSourceRef.id,
+        title: dataSourceRef.name || dataSourceRef.id,
+        type: dataSourceRef.type || DEFAULT_DATA.SOURCE_TYPES.OPENSEARCH,
+        version: dataSourceRef.version || '',
+      };
+    }
   }
 }
 

@@ -657,6 +657,7 @@ export class WorkspacePlugin
         mount: toMountPoint(
           React.createElement(ManageWorkspaceMenu, {
             coreStart: core,
+            registeredUseCases$: this.registeredUseCases$,
           })
         ),
       });

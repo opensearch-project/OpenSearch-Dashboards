@@ -10,6 +10,8 @@ import {
   PPLToken,
   PPLValidationResult,
 } from '../ppl_language_analyzer';
+import { LintResult } from '../lint/diagnostic';
+import { LintRunContext, SerializableLintContext } from '../lint/types';
 
 // Simple worker implementation that doesn't depend on Monaco's internal modules
 class PPLWorkerImpl {
@@ -28,6 +30,30 @@ class PPLWorkerImpl {
     }
     return this.analyzer.validate(content);
   }
+
+  async lint(content: string, context?: SerializableLintContext): Promise<LintResult> {
+    if (!this.analyzer) {
+      this.analyzer = getPPLLanguageAnalyzer();
+    }
+    if (!context) {
+      return this.analyzer.lint(content);
+    }
+    // Rebuild the Sets/Maps that were flattened for structured-clone transfer.
+    const runContext: LintRunContext = {
+      isCalcite: context.isCalcite,
+      fields: context.fields ? new Set(context.fields) : undefined,
+      typeMap: context.typeMap ? new Map(Object.entries(context.typeMap)) : undefined,
+      disabledObjectFields: context.disabledObjectFields
+        ? new Set(context.disabledObjectFields)
+        : undefined,
+      visibleIndices: context.visibleIndices,
+      settings: context.settings,
+      overrides: context.overrides,
+      dataSourceId: context.dataSourceId,
+      dataSourceVersion: context.dataSourceVersion,
+    };
+    return this.analyzer.lint(content, runContext);
+  }
 }
 
 // Initialize worker
@@ -45,6 +71,9 @@ self.onmessage = async (e: MessageEvent) => {
         break;
       case 'validate':
         result = await worker.validate(args[0]);
+        break;
+      case 'lint':
+        result = await worker.lint(args[0], args[1]);
         break;
       default:
         throw new Error(`Unknown method: ${method}`);

@@ -249,6 +249,15 @@ export const runSideBarTests = () => {
       },
     };
 
+    // Suppress the one-time "Workspace management moved" footer tour: on a fresh
+    // browser it auto-opens an EuiTour popover whose header overlays the discover
+    // sidebar fields, tripping the field-visibility assertions. Registered at
+    // describe scope so it re-seeds on every page load — note afterEach clears
+    // localStorage, so seeding once is not enough.
+    Cypress.on('window:before:load', (win) => {
+      win.localStorage.setItem('workspace.manageWorkspaceMoved.tourDismissed', 'true');
+    });
+
     before(() => {
       cy.osd.setupEnvAndGetDataSource(DATASOURCE_NAME);
 
