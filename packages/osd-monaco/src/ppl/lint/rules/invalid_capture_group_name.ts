@@ -120,12 +120,18 @@ export const invalidCaptureGroupNameDetector: Detector = (
 
       if (!VALID_GROUP_NAME.test(group.name)) {
         if (group.name.length === 0) {
+          // For an empty name the name offset sits on the closing `>`; widen the
+          // range one column left so it spans the whole empty `<>` pair.
+          const emptyRange =
+            literalToken && group.nameOffsetInLiteral > 0
+              ? rangeWithinToken(literalToken, group.nameOffsetInLiteral - 1, 2)
+              : range;
           diagnostics.push({
             ruleId: config.id,
             severity: config.severity,
             message:
               'Named capture group is missing a name; add one matching ^[A-Za-z][A-Za-z0-9]*$.',
-            range,
+            range: emptyRange,
             docUrl: config.docUrl,
           });
           continue;

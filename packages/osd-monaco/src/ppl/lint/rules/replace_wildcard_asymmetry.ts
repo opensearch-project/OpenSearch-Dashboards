@@ -54,6 +54,10 @@ export const replaceWildcardAsymmetryDetector: Detector = (
     if (literals.length < 2) {
       continue;
     }
+    // getText() returns the raw literal, so countUnescapedWildcards sees escapes
+    // exactly as written in the query (e.g. `\*` stays escaped, `\\*` is a real
+    // wildcard) — the same view the user sees in the editor, which is what we
+    // want to lint against.
     const patternText = unquote(literals[0].getText());
     const replacementText = unquote(literals[1].getText());
     const patternCount = countUnescapedWildcards(patternText);

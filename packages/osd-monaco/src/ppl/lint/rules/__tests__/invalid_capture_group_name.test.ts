@@ -38,6 +38,17 @@ describe('invalid-capture-group-name (compiled surface)', () => {
     );
   });
 
+  it('does not flag grok semantic names with typed/dashed forms', () => {
+    // Grok %{...} syntax never matches the (?<name>) opener scan, so grok-legal
+    // names (typed captures, dashes) must not be treated as Java group names.
+    expect(ids('source=logs | grok msg "%{NUMBER:duration:int}"')).not.toContain(
+      'invalid-capture-group-name'
+    );
+    expect(ids('source=logs | grok msg "%{DATA:my-field}"')).not.toContain(
+      'invalid-capture-group-name'
+    );
+  });
+
   describe('quick fixes', () => {
     it('offers a delete-P fix for the Python opener', () => {
       const d = diag('source=logs | rex field=msg "(?P<name>\\\\d+)"');
@@ -87,12 +98,17 @@ describe('invalid-capture-group-name (compiled surface)', () => {
 
   describe('empty group name', () => {
     it('flags "(?<>...)" with a dedicated message and no fix', () => {
-      const d = diag('source=logs | rex field=msg "(?<>\\\\d+)"');
+      const q = 'source=logs | rex field=msg "(?<>\\\\d+)"';
+      const d = diag(q);
       expect(d).toBeDefined();
       expect(d?.message).toBe(
         'Named capture group is missing a name; add one matching ^[A-Za-z][A-Za-z0-9]*$.'
       );
       expect(d?.fix).toBeUndefined();
+      // Range spans the whole empty "<>" pair, not just the closing ">".
+      const ltCol = q.indexOf('(?<') + 2;
+      expect(d?.range.startColumn).toBe(ltCol);
+      expect(d?.range.endColumn).toBe(ltCol + 2);
     });
   });
 });
