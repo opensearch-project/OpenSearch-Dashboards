@@ -74,10 +74,10 @@ it('generates a plugin', async () => {
   expect(paths.sort((a, b) => a.localeCompare(b))).toMatchInlineSnapshot(`
     Array [
       <absolute path>/plugins/.gitignore,
-      <absolute path>/plugins/foo/eslint.config.js,
       <absolute path>/plugins/foo/.gitignore,
       <absolute path>/plugins/foo/.i18nrc.json,
       <absolute path>/plugins/foo/common/index.ts,
+      <absolute path>/plugins/foo/eslint.config.js,
       <absolute path>/plugins/foo/opensearch_dashboards.json,
       <absolute path>/plugins/foo/package.json,
       <absolute path>/plugins/foo/public/application.tsx,
@@ -114,10 +114,10 @@ it('generates a plugin without UI', async () => {
   expect(paths.sort((a, b) => a.localeCompare(b))).toMatchInlineSnapshot(`
     Array [
       <absolute path>/plugins/.gitignore,
-      <absolute path>/plugins/bar/eslint.config.js,
       <absolute path>/plugins/bar/.gitignore,
       <absolute path>/plugins/bar/.i18nrc.json,
       <absolute path>/plugins/bar/common/index.ts,
+      <absolute path>/plugins/bar/eslint.config.js,
       <absolute path>/plugins/bar/opensearch_dashboards.json,
       <absolute path>/plugins/bar/package.json,
       <absolute path>/plugins/bar/README.md,
@@ -147,10 +147,10 @@ it('generates a plugin without server plugin', async () => {
   expect(paths.sort((a, b) => a.localeCompare(b))).toMatchInlineSnapshot(`
     Array [
       <absolute path>/plugins/.gitignore,
-      <absolute path>/plugins/baz/eslint.config.js,
       <absolute path>/plugins/baz/.gitignore,
       <absolute path>/plugins/baz/.i18nrc.json,
       <absolute path>/plugins/baz/common/index.ts,
+      <absolute path>/plugins/baz/eslint.config.js,
       <absolute path>/plugins/baz/opensearch_dashboards.json,
       <absolute path>/plugins/baz/package.json,
       <absolute path>/plugins/baz/public/application.tsx,
