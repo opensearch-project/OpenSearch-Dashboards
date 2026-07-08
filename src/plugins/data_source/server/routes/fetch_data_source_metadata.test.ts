@@ -14,7 +14,6 @@ import { DataSourceServiceSetup } from '../../server/data_source_service';
 import { CryptographyServiceSetup } from '../cryptography_service';
 import { registerFetchDataSourceMetaDataRoute } from './fetch_data_source_metadata';
 import { AuthType } from '../../common/data_sources';
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { opensearchClientMock } from '../../../../../src/core/server/opensearch/client/mocks';
 import { dynamicConfigServiceMock } from '../../../../../src/core/server/mocks';
 

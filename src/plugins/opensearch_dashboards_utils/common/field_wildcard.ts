@@ -31,6 +31,7 @@
 import { escapeRegExp, memoize } from 'lodash';
 
 // @internal
+// eslint-disable-next-line @typescript-eslint/no-shadow
 export const makeRegEx = memoize(function makeRegEx(glob: string) {
   const globRegex = glob.split('*').map(escapeRegExp).join('.*');
   return new RegExp(`^${globRegex}$`);

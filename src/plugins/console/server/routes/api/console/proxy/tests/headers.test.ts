@@ -36,7 +36,6 @@ import {
   IScopedClusterClient,
   opensearchDashboardsResponseFactory,
 } from '../../../../../../../../core/server';
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { ensureRawRequest } from '../../../../../../../../core/server/http/router/request';
 import { getProxyRouteHandlerDeps } from './mocks';
 import expect from '@osd/expect';

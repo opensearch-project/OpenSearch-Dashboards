@@ -32,14 +32,9 @@ import { OpenSearchDashboardsRequest, RequestHandler } from 'opensearch-dashboar
 import { trimStart } from 'lodash';
 import { Readable } from 'stream';
 import { stringify } from '@osd/std';
-
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { ensureRawRequest } from '../../../../../../../core/server/http/router';
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { isResponseError } from '../../../../../../../core/server/opensearch/client/errors';
-
 import { RouteDependencies } from '../../../';
-
 import { Body, Query } from './validation_config';
 import { buildBufferedBody } from './utils';
 

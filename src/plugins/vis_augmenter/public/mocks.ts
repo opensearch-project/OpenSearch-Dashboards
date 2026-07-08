@@ -6,7 +6,6 @@
 import { get } from 'lodash';
 import { VisualizeEmbeddable, Vis } from '../../visualizations/public';
 import { ErrorEmbeddable } from '../../embeddable/public';
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { timefilterServiceMock } from '../../data/public/query/timefilter/timefilter_service.mock';
 import { EventVisEmbeddableItem } from './view_events_flyout';
 import {

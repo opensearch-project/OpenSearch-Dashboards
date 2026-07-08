@@ -27,7 +27,6 @@ import {
   getAccelerationName,
   onDiscoverIconClick,
 } from './acceleration_utils';
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { OpenSearchDashboardsResponse } from '../../../../../../core/server/http/router';
 import { DSL_BASE } from '../../../../framework/utils/shared';
 import { getUiSettings } from '../../utils';

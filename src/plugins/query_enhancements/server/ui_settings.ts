@@ -5,7 +5,6 @@
 
 import { schema } from '@osd/config-schema';
 import { UiSettingsParams } from 'opensearch-dashboards/server';
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { UiSettingScope } from '../../../core/server/ui_settings/types';
 import { UI_SETTINGS } from '../../data/common';
 

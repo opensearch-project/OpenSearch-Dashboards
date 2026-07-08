@@ -27,8 +27,6 @@ import { DataSourceService, DataSourceServiceSetup } from './data_source_service
 import { dataConnection, dataSource, DataSourceSavedObjectsClientWrapper } from './saved_objects';
 import { AuthenticationMethod, DataSourcePluginSetup, DataSourcePluginStart } from './types';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../common';
-
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { ensureRawRequest } from '../../../../src/core/server/http/router';
 import { createDataSourceError } from './lib/error';
 import { registerTestConnectionRoute } from './routes/test_connection';

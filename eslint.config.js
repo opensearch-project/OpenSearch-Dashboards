@@ -89,7 +89,9 @@ const SAFER_LODASH_SET_DEFINITELYTYPED_HEADER = `
 `;
 
 const allMochaRulesOff = {};
-Object.keys(require('eslint-plugin-mocha').rules).forEach((k) => {
+const _mochaPlugin = require('eslint-plugin-mocha');
+const _mochaRules = (_mochaPlugin.default || _mochaPlugin).rules || {};
+Object.keys(_mochaRules).forEach((k) => {
   allMochaRulesOff['mocha/' + k] = 'off';
 });
 
@@ -399,7 +401,7 @@ module.exports = defineConfig([
     settings: {
       'import/core-modules': ['plugins'],
 
-      'import/resolver': {
+      'import-x/resolver': {
         '@osd/eslint-import-resolver-opensearch-dashboards': {
           forceNode: false,
           rootPackageName: 'opensearch-dashboards',
@@ -506,7 +508,6 @@ module.exports = defineConfig([
   },
   {
     files: [
-      '**/eslint.config.js',
       'packages/osd-eslint-import-resolver-opensearch-dashboards/**/*.js',
       'packages/osd-eslint-plugin-eslint/**/*',
     ],
