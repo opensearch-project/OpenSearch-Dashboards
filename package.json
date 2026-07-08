@@ -447,8 +447,6 @@
     "enzyme-to-json": "^3.5.0",
     "@eslint-community/eslint-plugin-eslint-comments": "^4.7.2",
     "@eslint/compat": "^1.4.1",
-    "@eslint/eslintrc": "^3.3.5",
-    "@eslint/js": "^9.39.4",
     "eslint": "^9.39.4",
     "eslint-config-prettier": "^9.1.2",
     "eslint-plugin-cypress": "^3.6.0",
