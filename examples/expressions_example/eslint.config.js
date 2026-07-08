@@ -5,20 +5,18 @@
 
 const { defineConfig } = require('eslint/config');
 
-const js = require('@eslint/js');
-
-const { FlatCompat } = require('@eslint/eslintrc');
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-  recommendedConfig: js.configs.recommended,
-  allConfig: js.configs.all,
-});
+const kibanaConfig = require('@elastic/eslint-config-kibana/eslint.config.js');
+const euiPlugin = require('@elastic/eslint-plugin-eui');
 
 module.exports = defineConfig([
+  ...kibanaConfig,
   {
-    extends: compat.extends('@elastic/eslint-config-kibana', 'plugin:@elastic/eui/recommended'),
-
+    plugins: {
+      '@elastic/eui': euiPlugin,
+    },
+    rules: euiPlugin.configs.recommended.rules,
+  },
+  {
     rules: {
       '@osd/eslint/require-license-header': 'off',
     },
