@@ -26,7 +26,8 @@
       "src/plugins/data/public/ui/query_editor/_query_editor.scss",
       "src/plugins/data/public/ui/dataset_selector/_dataset_selector.scss",
       "src/plugins/explore/public/components/data_table/table_cell/table_source_cell.scss",
-      "src/plugins/explore/public/application/pages/metrics/promql_builder/promql_builder.scss"
+      "src/plugins/explore/public/application/pages/metrics/promql_builder/promql_builder.scss",
+      "src/plugins/chat/public/components/tool_result_renderer.scss"
     ]
   },
   "/\\.explore/": {

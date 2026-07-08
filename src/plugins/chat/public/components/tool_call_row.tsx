@@ -23,6 +23,7 @@ import {
   AssistantActionContextValue,
 } from '../../../context_provider/public';
 import { GraphVisualization } from './graph_visualization';
+import { ToolResultRenderer } from './tool_result_renderer';
 import './tool_call_row.scss';
 
 export interface TimelineToolCall {
@@ -497,20 +498,7 @@ export const ToolCallRow: React.FC<ToolCallRowProps> = ({
                 }),
             },
           })}
-        {!isError && toolCall.result && isValidJSON(toolCall.result) ? (
-          <EuiCodeBlock
-            language="json"
-            paddingSize="none"
-            fontSize="s"
-            transparentBackground
-            overflowHeight={200}
-            isCopyable
-          >
-            {toolCall.result}
-          </EuiCodeBlock>
-        ) : (
-          toolCall.result
-        )}
+        {!isError && toolCall.result && <ToolResultRenderer result={toolCall.result} />}
       </EuiPanel>
     </EuiAccordion>
   );
