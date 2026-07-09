@@ -136,16 +136,45 @@ describe('buildPPLLintContext', () => {
     expect(ctx.settings?.allJoinTypesAllowed).toBe(true);
   });
 
-  it('applies cached fields when they belong to the active dataset', () => {
+  it('applies cached fields when dataset id and data source id both match', () => {
     const fields = new Set(['a', 'b']);
-    const ctx = buildPPLLintContext(dataset, { datasetId: 'dataset-1', fields }, services);
+    const ctx = buildPPLLintContext(
+      dataset,
+      { datasetId: 'dataset-1', dataSourceId: 'mds-1', fields },
+      services
+    );
     expect(ctx.fields).toBe(fields);
+  });
+
+  it('drops cached fields when dataset id matches but data source id differs', () => {
+    const fields = new Set(['a', 'b']);
+    const ctx = buildPPLLintContext(
+      dataset,
+      { datasetId: 'dataset-1', dataSourceId: 'other-mds', fields },
+      services
+    );
+    expect(ctx.fields).toBeUndefined();
   });
 
   it('drops cached fields from a different dataset (self-suppress)', () => {
     const fields = new Set(['a', 'b']);
-    const ctx = buildPPLLintContext(dataset, { datasetId: 'other-dataset', fields }, services);
+    const ctx = buildPPLLintContext(
+      dataset,
+      { datasetId: 'other-dataset', dataSourceId: 'mds-1', fields },
+      services
+    );
     expect(ctx.fields).toBeUndefined();
+  });
+
+  it('matches when both cache and dataset have no data source (local cluster)', () => {
+    const localDataset = { id: 'local-1' };
+    const fields = new Set(['x']);
+    const ctx = buildPPLLintContext(
+      localDataset,
+      { datasetId: 'local-1', dataSourceId: undefined, fields },
+      services
+    );
+    expect(ctx.fields).toBe(fields);
   });
 
   it('leaves fields undefined when the cache is empty', () => {

@@ -222,6 +222,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
   // context is pushed in a single phase after the async load to avoid flicker.
   useEffect(() => {
     const datasetId = dataset?.id;
+    const dataSourceId = dataset?.dataSource?.id;
     let cancelled = false;
 
     const loadFields = async () => {
@@ -237,7 +238,11 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
           if (cancelled || !indexPattern) {
             return;
           }
-          lintFieldsRef.current = { datasetId, fields: extractFieldNames(indexPattern) };
+          lintFieldsRef.current = {
+            datasetId,
+            dataSourceId,
+            fields: extractFieldNames(indexPattern),
+          };
         } catch {
           if (cancelled) {
             return;
@@ -259,7 +264,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
     return () => {
       cancelled = true;
     };
-  }, [dataset?.id, dataViews, editorRef, getLintContext]);
+  }, [dataset?.id, dataset?.dataSource?.id, dataViews, editorRef, getLintContext]);
 
   // Cleanup validation + lint context on unmount
   useEffect(() => () => cleanupPPLContexts(detachRefs.current), []);

@@ -185,9 +185,11 @@ const processSyntaxHighlighting = async (model: monaco.editor.IModel) => {
       // Command-typo suggestion is a UX layer on the syntax channel, toggleable
       // via the same PPL-lint rules uiSetting (id `command-suggestion`). When it
       // is disabled we revert the friendly rewrite: use ANTLR's raw message and
-      // drop the quick-fix, leaving the plain syntax error. Defaults to enabled
-      // when the flag is unset (no context / older config).
-      const commandSuggestionEnabled = getPPLLintContext(model)?.commandSuggestionEnabled !== false;
+      // drop the quick-fix, leaving the plain syntax error. The feature is also
+      // gated on the global PPL-lint capability: when lint is off, no suggestion
+      // enhancements fire (the raw syntax error still shows).
+      const commandSuggestionEnabled =
+        isPPLLintEnabled() && getPPLLintContext(model)?.commandSuggestionEnabled !== false;
 
       // Convert errors to Monaco markers
       const markers: monaco.editor.IMarkerData[] = validationResult.errors.map((error) => {

@@ -161,6 +161,7 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
   // the context in a single phase after the async load to avoid flicker.
   useEffect(() => {
     const datasetId = query.dataset?.id;
+    const dataSourceId = query.dataset?.dataSource?.id;
     let cancelled = false;
 
     const loadFields = async () => {
@@ -174,7 +175,11 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
           if (cancelled || !indexPattern) {
             return;
           }
-          lintFieldsRef.current = { datasetId, fields: extractFieldNames(indexPattern) };
+          lintFieldsRef.current = {
+            datasetId,
+            dataSourceId,
+            fields: extractFieldNames(indexPattern),
+          };
         } catch {
           // On failure leave fields unset so field-validation self-suppresses.
           if (cancelled) {
@@ -197,7 +202,7 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query.dataset?.id]);
+  }, [query.dataset?.id, query.dataset?.dataSource?.id]);
 
   useEffect(() => {
     const subscription = services.application?.currentAppId$?.subscribe?.((appId) => {

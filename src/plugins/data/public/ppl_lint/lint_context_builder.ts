@@ -24,11 +24,12 @@ interface LintContextDataset {
  * Host-maintained cache of the index-pattern field names for the active
  * dataset, used by field-validation. The host refreshes it on dataset change
  * (see the loadFields effect in query_editor / use_query_panel_editor) and
- * stamps the dataset id it belongs to, so a stale cache from a previous dataset
- * is never applied to the current one.
+ * stamps the dataset + data source ids it belongs to, so a stale cache from a
+ * previous dataset or data source is never applied to the current one.
  */
 export interface LintFieldsCache {
   datasetId?: string;
+  dataSourceId?: string;
   fields?: Set<string>;
 }
 
@@ -64,9 +65,11 @@ export function buildPPLLintContext(
 
   const cachedSettings = calciteSettingsCache.getCached(dsId);
 
-  // Only apply cached fields when they belong to the active dataset; otherwise
-  // leave them undefined so field-validation self-suppresses (no false unknowns).
-  const cacheMatchesDataset = lintFields.datasetId === dataset?.id;
+  // Only apply cached fields when they belong to the active dataset AND data
+  // source; otherwise leave them undefined so field-validation self-suppresses
+  // (no false unknowns from a stale source).
+  const cacheMatchesDataset =
+    lintFields.datasetId === dataset?.id && lintFields.dataSourceId === dsId;
 
   return {
     useRuntimeGrammar: shouldUseRuntimeGrammar(dsId, effectiveVersion),

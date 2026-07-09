@@ -9,6 +9,7 @@ import type { PPLValidationResult } from './ppl_language_analyzer';
 const mockValidateFallback = jest.fn();
 const mockSetModelMarkers = jest.fn();
 let mockLintContext: { commandSuggestionEnabled?: boolean } | undefined;
+let mockLintEnabled = true;
 
 jest.mock('../monaco', () => ({
   monaco: {
@@ -43,12 +44,14 @@ jest.mock('./validation_provider', () => ({
   ) => fallback(content),
 }));
 
-// Lint pass disabled so only the syntax channel writes markers; the syntax gate
-// reads getPPLLintContext for the command-suggestion toggle.
+// Lint pass disabled via mockLintEnabled so only the syntax channel writes
+// markers; the syntax gate reads isPPLLintEnabled + getPPLLintContext for the
+// command-suggestion toggle. mockLintEnabled defaults to true so per-context
+// toggle tests exercise the normal enabled path; the global-gate test flips it.
 jest.mock('./lint_bridge', () => ({
-  isPPLLintEnabled: () => false,
+  isPPLLintEnabled: () => mockLintEnabled,
   getPPLLintContext: () => mockLintContext,
-  resolvePPLLintResult: jest.fn(),
+  resolvePPLLintResult: () => Promise.resolve({ diagnostics: [] }),
 }));
 
 jest.mock('./worker_proxy_service', () => ({
@@ -113,6 +116,7 @@ describe('processSyntaxHighlighting — command-suggestion toggle', () => {
     mockSetModelMarkers.mockClear();
     mockValidateFallback.mockReset();
     mockLintContext = undefined;
+    mockLintEnabled = true;
   });
 
   it('keeps the friendly message + fix when the toggle is enabled (default)', async () => {
@@ -148,7 +152,7 @@ describe('processSyntaxHighlighting — command-suggestion toggle', () => {
     expect(getModelSyntaxFix(model, markerFixKey(markers[0]))).toBeUndefined();
   });
 
-  it('defaults to enabled when no context is present', async () => {
+  it('defaults to enabled when no context is present (lint globally on)', async () => {
     mockLintContext = undefined;
     mockValidateFallback.mockResolvedValueOnce(commandTypoResult());
     const model = makeModel('c3');
@@ -158,5 +162,20 @@ describe('processSyntaxHighlighting — command-suggestion toggle', () => {
 
     const markers = lastSyntaxMarkers();
     expect(markers[0].message).toBe('Unknown command "wherre". Did you mean "where"?');
+  });
+
+  it('suppresses the friendly rewrite when the global lint capability is off', async () => {
+    mockLintEnabled = false;
+    mockLintContext = { commandSuggestionEnabled: true };
+    mockValidateFallback.mockResolvedValueOnce(commandTypoResult());
+    const model = makeModel('c4');
+
+    await revalidatePPLModel(model);
+    await flush();
+
+    const markers = lastSyntaxMarkers();
+    expect(markers).toHaveLength(1);
+    expect(markers[0].message).toBe("mismatched input 'wherre' expecting {WHERE, FIELDS}");
+    expect(getModelSyntaxFix(model, markerFixKey(markers[0]))).toBeUndefined();
   });
 });
