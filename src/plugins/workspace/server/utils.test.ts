@@ -95,6 +95,46 @@ describe('workspace utils', () => {
     expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(true);
   });
 
+  it('should handle configUsers as a string instead of array', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    const groups: string[] = [];
+    const users: string[] = ['user1'];
+    const configGroups: string[] = [];
+    const configUsers = ('user1' as unknown) as string[];
+    updateDashboardAdminStateForRequest(mockRequest, groups, users, configGroups, configUsers);
+    expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(true);
+  });
+
+  it('should handle configGroups as a string instead of array', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    const groups: string[] = ['admin_group'];
+    const users: string[] = [];
+    const configGroups = ('admin_group' as unknown) as string[];
+    const configUsers: string[] = [];
+    updateDashboardAdminStateForRequest(mockRequest, groups, users, configGroups, configUsers);
+    expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(true);
+  });
+
+  it('should handle configUsers as wildcard string instead of array', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    const groups: string[] = [];
+    const users: string[] = ['user1'];
+    const configGroups: string[] = [];
+    const configUsers = (OSD_ADMIN_WILDCARD_MATCH_ALL as unknown) as string[];
+    updateDashboardAdminStateForRequest(mockRequest, groups, users, configGroups, configUsers);
+    expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(true);
+  });
+
+  it('should not grant admin when configUsers string is a substring match', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    const groups: string[] = [];
+    const users: string[] = ['a'];
+    const configGroups: string[] = [];
+    const configUsers = ('admin' as unknown) as string[];
+    updateDashboardAdminStateForRequest(mockRequest, groups, users, configGroups, configUsers);
+    expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(false);
+  });
+
   it('should transfer current user placeholder in permissions', () => {
     expect(transferCurrentUserInPermissions('foo', undefined)).toBeUndefined();
     expect(
