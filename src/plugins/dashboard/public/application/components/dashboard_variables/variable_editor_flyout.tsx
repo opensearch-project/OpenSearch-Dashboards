@@ -19,11 +19,15 @@ import {
   EuiSuperSelect,
   EuiSmallButton,
   EuiSmallButtonEmpty,
-  EuiComboBox,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { VariableType, Variable, VariableSortOrder } from '../../../variables/types';
+import {
+  VariableType,
+  Variable,
+  VariableSortOrder,
+  VariableOption,
+} from '../../../variables/types';
 import { VariableQueryPanel } from './query_panel/variable_query_panel';
 import { IVariableInterpolationService } from '../../../variables/variable_interpolation_service';
 
@@ -78,6 +82,18 @@ const variableTypeOptions = [
   },
 ];
 
+interface CustomOptionRow {
+  value: string;
+  label: string;
+}
+
+const normalizeCustomOptionForEditor = (option: VariableOption): CustomOptionRow => {
+  if (typeof option === 'string') {
+    return { value: option, label: '' };
+  }
+  return { value: option.value, label: option.label ?? '' };
+};
+
 export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
   onClose,
   onSave,
@@ -98,9 +114,9 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
   const [dataset, setDataset] = useState<any>(
     existingVariable?.type === VariableType.Query ? (existingVariable.dataset ?? null) : null
   );
-  const [customValues, setCustomValues] = useState<Array<{ label: string }>>(
+  const [customValues, setCustomValues] = useState<CustomOptionRow[]>(
     existingVariable?.type === VariableType.Custom
-      ? (existingVariable.customOptions ?? []).map((v: string) => ({ label: v }))
+      ? (existingVariable.customOptions ?? []).map(normalizeCustomOptionForEditor)
       : []
   );
   const [multi, setMulti] = useState(existingVariable?.multi || false);
@@ -115,6 +131,12 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
     existingVariable?.type === VariableType.Query
       ? (existingVariable.useTimeFilter ?? false)
       : false
+  );
+  const [valueField, setValueField] = useState(
+    existingVariable?.type === VariableType.Query ? existingVariable.valueField ?? '' : ''
+  );
+  const [labelField, setLabelField] = useState(
+    existingVariable?.type === VariableType.Query ? existingVariable.labelField ?? '' : ''
   );
 
   const [isSaving, setIsSaving] = useState(false);
@@ -254,6 +276,28 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
       return false;
     }
 
+    if (type === VariableType.Custom) {
+      const trimmedValues = customValues.map((customValue) => customValue.value.trim());
+      if (trimmedValues.some((customValue) => !customValue)) {
+        setError(
+          i18n.translate('dashboard.variableEditor.customValueRequired', {
+            defaultMessage: 'Custom option values cannot be empty',
+          })
+        );
+        return false;
+      }
+
+      const uniqueValues = new Set(trimmedValues);
+      if (uniqueValues.size !== trimmedValues.length) {
+        setError(
+          i18n.translate('dashboard.variableEditor.customValueDuplicate', {
+            defaultMessage: 'Custom option values must be unique',
+          })
+        );
+        return false;
+      }
+    }
+
     setError(null);
     return true;
   }, [name, label, type, query, customValues, existingVariables, existingVariable, isPreviewValid]);
@@ -277,12 +321,21 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
         query: query.trim(),
         language,
         dataset: dataset || undefined,
+        valueField: valueField || undefined,
+        labelField: labelField || undefined,
         regex: regex.trim() || undefined,
         useTimeFilter,
       });
     } else if (type === VariableType.Custom) {
       Object.assign(variableConfig, {
-        customOptions: customValues.map((v) => v.label),
+        customOptions: customValues.map((customValue) => {
+          const value = customValue.value.trim();
+          const optionLabel = customValue.label.trim();
+          return {
+            value,
+            ...(optionLabel ? { label: optionLabel } : {}),
+          };
+        }),
       });
     }
 
@@ -297,6 +350,8 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
     language,
     dataset,
     useTimeFilter,
+    valueField,
+    labelField,
     customValues,
     multi,
     includeAll,
@@ -447,6 +502,10 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
               onRegexChange={setRegex}
               useTimeFilter={useTimeFilter}
               onUseTimeFilterChange={setUseTimeFilter}
+              valueField={valueField}
+              onValueFieldChange={setValueField}
+              labelField={labelField}
+              onLabelFieldChange={setLabelField}
               onPreviewValidationChange={setIsPreviewValid}
               currentVariableName={name}
             />
@@ -460,22 +519,109 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
                 })}
                 helpText={i18n.translate('dashboard.variableEditor.customOptionsHelp', {
                   defaultMessage:
-                    'Type a option and press Enter to add it. Maximum 100 options will be displayed.',
+                    'Add value and optional label pairs. Maximum 100 options will be displayed.',
                 })}
               >
-                <EuiComboBox
-                  selectedOptions={customValues}
-                  onChange={setCustomValues}
-                  onCreateOption={(value) => {
-                    const trimmed = value.trim();
-                    if (trimmed && !customValues.some((v) => v.label === trimmed)) {
-                      setCustomValues([...customValues, { label: trimmed }]);
-                    }
-                  }}
-                  placeholder="Type and press Enter..."
+                <EuiFlexGroup
+                  direction="column"
+                  gutterSize="s"
                   data-test-subj="variableEditorCustomValues"
-                  compressed
-                />
+                >
+                  <EuiFlexItem>
+                    <EuiFlexGroup gutterSize="s" responsive={false}>
+                      <EuiFlexItem>
+                        <EuiText size="xs" color="subdued">
+                          {i18n.translate('dashboard.variableEditor.customOptionValueHeader', {
+                            defaultMessage: 'Value',
+                          })}
+                        </EuiText>
+                      </EuiFlexItem>
+                      <EuiFlexItem>
+                        <EuiText size="xs" color="subdued">
+                          {i18n.translate('dashboard.variableEditor.customOptionLabelHeader', {
+                            defaultMessage: 'Label',
+                          })}
+                        </EuiText>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false} style={{ width: 32 }} />
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                  {customValues.map((customValue, index) => (
+                    <EuiFlexItem key={index}>
+                      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                        <EuiFlexItem>
+                          <EuiFieldText
+                            value={customValue.value}
+                            onChange={(e) => {
+                              const nextCustomValues = [...customValues];
+                              nextCustomValues[index] = {
+                                ...customValue,
+                                value: e.target.value,
+                              };
+                              setCustomValues(nextCustomValues);
+                            }}
+                            aria-label={i18n.translate(
+                              'dashboard.variableEditor.customOptionValueAriaLabel',
+                              {
+                                defaultMessage: 'Custom option value',
+                              }
+                            )}
+                            data-test-subj={`variableEditorCustomValue-${index}`}
+                            compressed
+                          />
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <EuiFieldText
+                            value={customValue.label}
+                            onChange={(e) => {
+                              const nextCustomValues = [...customValues];
+                              nextCustomValues[index] = {
+                                ...customValue,
+                                label: e.target.value,
+                              };
+                              setCustomValues(nextCustomValues);
+                            }}
+                            aria-label={i18n.translate(
+                              'dashboard.variableEditor.customOptionLabelAriaLabel',
+                              {
+                                defaultMessage: 'Custom option label',
+                              }
+                            )}
+                            data-test-subj={`variableEditorCustomLabel-${index}`}
+                            compressed
+                          />
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiButtonIcon
+                            iconType="trash"
+                            color="danger"
+                            aria-label={i18n.translate(
+                              'dashboard.variableEditor.deleteCustomOption',
+                              {
+                                defaultMessage: 'Delete custom option',
+                              }
+                            )}
+                            onClick={() =>
+                              setCustomValues(customValues.filter((_, i) => i !== index))
+                            }
+                            data-test-subj={`variableEditorDeleteCustomOption-${index}`}
+                          />
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiFlexItem>
+                  ))}
+                  <EuiFlexItem grow={false}>
+                    <EuiSmallButtonEmpty
+                      iconType="plusInCircle"
+                      onClick={() => setCustomValues([...customValues, { value: '', label: '' }])}
+                      data-test-subj="variableEditorAddCustomOption"
+                    >
+                      {i18n.translate('dashboard.variableEditor.addCustomOption', {
+                        defaultMessage: 'Add option',
+                      })}
+                    </EuiSmallButtonEmpty>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiFormRow>
               {customValues.length > 100 && (
                 <EuiCallOut
