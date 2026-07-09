@@ -135,6 +135,20 @@ describe('workspace utils', () => {
     expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(false);
   });
 
+  it('should not crash when configUsers or configGroups is null or undefined', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    const groups: string[] = [];
+    const users: string[] = ['user1'];
+    updateDashboardAdminStateForRequest(
+      mockRequest,
+      groups,
+      users,
+      (null as unknown) as string[],
+      (undefined as unknown) as string[]
+    );
+    expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(false);
+  });
+
   it('should transfer current user placeholder in permissions', () => {
     expect(transferCurrentUserInPermissions('foo', undefined)).toBeUndefined();
     expect(
