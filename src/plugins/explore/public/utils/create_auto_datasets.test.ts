@@ -12,7 +12,7 @@ describe('createAutoDetectedDatasets', () => {
   let mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
   let mockDataViews: jest.Mocked<DataViewsContract>;
 
-  const makeDataView = (id: string) => ({ id, title: '' }) as any;
+  const makeDataView = (id: string) => ({ id, title: '' } as any);
 
   beforeEach(() => {
     mockSavedObjectsClient = {

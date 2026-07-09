@@ -62,12 +62,12 @@ export type ActionExecutionContext<Context extends BaseContext = BaseContext> = 
  * or an ActionExecutionContext<Context> to get access to {@link ActionExecutionMeta} params
  */
 export type ActionDefinitionContext<Context extends BaseContext = BaseContext> =
-  Context | ActionExecutionContext<Context>;
+  | Context
+  | ActionExecutionContext<Context>;
 
 // @ts-expect-error TS2430 TODO(ts-error): fixme
-export interface Action<Context extends BaseContext = {}, T = ActionType> extends Partial<
-  Presentable<ActionExecutionContext<Context>>
-> {
+export interface Action<Context extends BaseContext = {}, T = ActionType>
+  extends Partial<Presentable<ActionExecutionContext<Context>>> {
   /**
    * Determined the order when there is more than one action matched to a trigger.
    * Higher numbers are displayed first.
@@ -134,9 +134,8 @@ export interface Action<Context extends BaseContext = {}, T = ActionType> extend
 /**
  * A convenience interface used to register an action.
  */
-export interface ActionDefinition<Context extends BaseContext = {}> extends Partial<
-  Presentable<ActionDefinitionContext<Context>>
-> {
+export interface ActionDefinition<Context extends BaseContext = {}>
+  extends Partial<Presentable<ActionDefinitionContext<Context>>> {
   /**
    * ID of the action that uniquely identifies this action in the actions registry.
    */

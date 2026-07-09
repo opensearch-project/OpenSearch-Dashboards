@@ -33,7 +33,7 @@ export type UrlGeneratorId = string;
 export interface UrlGeneratorState<
   S extends {},
   I extends string | undefined = undefined,
-  MS extends {} | undefined = undefined,
+  MS extends {} | undefined = undefined
 > {
   State: S;
   MigratedId?: I;
@@ -53,7 +53,9 @@ export interface UrlGeneratorsDefinition<Id extends UrlGeneratorId> {
   id: Id;
   createUrl?: (state: UrlGeneratorStateMapping[Id]['State']) => Promise<string>;
   isDeprecated?: boolean;
-  migrate?: (state: UrlGeneratorStateMapping[Id]['State']) => Promise<{
+  migrate?: (
+    state: UrlGeneratorStateMapping[Id]['State']
+  ) => Promise<{
     state: UrlGeneratorStateMapping[Id]['MigratedState'];
     id: UrlGeneratorStateMapping[Id]['MigratedId'];
   }>;

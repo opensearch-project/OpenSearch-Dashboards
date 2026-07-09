@@ -25,38 +25,39 @@ import { useClearEditors } from '../../../../hooks';
  * Redux Thunk for resetting the Agent Traces state to its preloaded state.
  * This is useful for resetting the application to a known state, such as when clicking on the "new search" button.
  */
-export const resetAgentTracesStateActionCreator =
-  (services: AgentTracesServices, clearEditors: ReturnType<typeof useClearEditors>) =>
-  async (dispatch: AppDispatch, getState: () => RootState) => {
-    const currentDataset = getState().query?.dataset;
-    const state = await getPreloadedState(services, currentDataset);
+export const resetAgentTracesStateActionCreator = (
+  services: AgentTracesServices,
+  clearEditors: ReturnType<typeof useClearEditors>
+) => async (dispatch: AppDispatch, getState: () => RootState) => {
+  const currentDataset = getState().query?.dataset;
+  const state = await getPreloadedState(services, currentDataset);
 
-    clearEditors();
-    dispatch(setUiState(state.ui));
-    dispatch(setResultsState(state.results));
-    dispatch(setTabState(state.tab));
-    dispatch(setLegacyState(state.legacy));
-    dispatch(setQueryState(state.query));
-    dispatch(setQueryEditorState(state.queryEditor));
+  clearEditors();
+  dispatch(setUiState(state.ui));
+  dispatch(setResultsState(state.results));
+  dispatch(setTabState(state.tab));
+  dispatch(setLegacyState(state.legacy));
+  dispatch(setQueryState(state.query));
+  dispatch(setQueryEditorState(state.queryEditor));
 
-    // Initialize default sort so the cache key from executeQueries matches
-    // what useTabResults computes after the tab components re-render.
-    const timeFieldName = state.query.dataset?.timeFieldName;
-    if (timeFieldName) {
-      dispatch(setSort([[timeFieldName, 'desc']]));
-    }
+  // Initialize default sort so the cache key from executeQueries matches
+  // what useTabResults computes after the tab components re-render.
+  const timeFieldName = state.query.dataset?.timeFieldName;
+  if (timeFieldName) {
+    dispatch(setSort([[timeFieldName, 'desc']]));
+  }
 
-    // Set overall status to LOADING so the table shows a loading indicator
-    // instead of the empty state while the query executes.
-    dispatch(
-      setOverallQueryStatus({
-        status: QueryExecutionStatus.LOADING,
-        startTime: Date.now(),
-        elapsedMs: undefined,
-        error: undefined,
-      })
-    );
+  // Set overall status to LOADING so the table shows a loading indicator
+  // instead of the empty state while the query executes.
+  dispatch(
+    setOverallQueryStatus({
+      status: QueryExecutionStatus.LOADING,
+      startTime: Date.now(),
+      elapsedMs: undefined,
+      error: undefined,
+    })
+  );
 
-    await dispatch(executeQueries({ services }));
-    dispatch(detectAndSetOptimalTab({ services }));
-  };
+  await dispatch(executeQueries({ services }));
+  dispatch(detectAndSetOptimalTab({ services }));
+};

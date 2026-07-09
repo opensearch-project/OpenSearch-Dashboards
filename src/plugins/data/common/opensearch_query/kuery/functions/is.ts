@@ -102,7 +102,7 @@ export function toOpenSearchQuery(
   // keep things familiar for now.
   if (fields && fields.length === 0) {
     fields.push({
-      name: ast.toOpenSearchQuery(fullFieldNameArg) as unknown as string,
+      name: (ast.toOpenSearchQuery(fullFieldNameArg) as unknown) as string,
       scripted: false,
       type: '',
     });
@@ -110,7 +110,7 @@ export function toOpenSearchQuery(
 
   const isExistsQuery = valueArg.type === 'wildcard' && (value as any) === '*';
   const isAllFieldsQuery =
-    (fullFieldNameArg.type === 'wildcard' && (fieldName as unknown as string) === '*') ||
+    (fullFieldNameArg.type === 'wildcard' && ((fieldName as unknown) as string) === '*') ||
     (fields && indexPattern && fields.length === indexPattern.fields.length);
   const isMatchAllQuery = isExistsQuery && isAllFieldsQuery;
 

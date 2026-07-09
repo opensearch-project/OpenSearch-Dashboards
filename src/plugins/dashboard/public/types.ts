@@ -68,7 +68,13 @@ export interface DashboardCapabilities {
 
 // TODO: Replace Saved object interfaces by the ones Core will provide when it is ready.
 export type SavedObjectAttribute =
-  string | number | boolean | null | undefined | SavedObjectAttributes | SavedObjectAttributes[];
+  | string
+  | number
+  | boolean
+  | null
+  | undefined
+  | SavedObjectAttributes
+  | SavedObjectAttributes[];
 
 export interface SimpleSavedObject<T extends SavedObjectAttributes> {
   attributes: T;

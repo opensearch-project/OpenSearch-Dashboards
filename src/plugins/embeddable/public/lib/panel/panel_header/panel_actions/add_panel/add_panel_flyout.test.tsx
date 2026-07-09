@@ -65,7 +65,7 @@ test('createNewEmbeddable() add embeddable to container', async () => {
     ({
       firstName: 'foo',
       lastName: 'bar',
-    }) as any;
+    } as any);
   setup.registerEmbeddableFactory(CONTACT_CARD_EMBEDDABLE, contactCardEmbeddableFactory);
   const start = doStart();
   const getEmbeddableFactory = start.getEmbeddableFactory;
@@ -115,7 +115,7 @@ test('selecting embeddable in "Create new ..." list calls createNewEmbeddable()'
     ({
       firstName: 'foo',
       lastName: 'bar',
-    }) as any;
+    } as any);
 
   setup.registerEmbeddableFactory(CONTACT_CARD_EMBEDDABLE, contactCardEmbeddableFactory);
   const start = doStart();

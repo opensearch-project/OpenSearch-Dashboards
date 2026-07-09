@@ -616,9 +616,9 @@ const Actions = ({
     services: { notifications },
   } = useOpenSearchDashboards();
 
-  const accessLevelOptions = (
-    Object.keys(WORKSPACE_ACCESS_LEVEL_NAMES) as WorkspaceCollaboratorAccessLevel[]
-  ).map((level) => ({
+  const accessLevelOptions = (Object.keys(
+    WORKSPACE_ACCESS_LEVEL_NAMES
+  ) as WorkspaceCollaboratorAccessLevel[]).map((level) => ({
     name: WORKSPACE_ACCESS_LEVEL_NAMES[level],
     onClick: () => {
       setIsPopoverOpen(false);
@@ -667,7 +667,7 @@ const Actions = ({
     icon: '',
   }));
 
-  const panelItems = [
+  const panelItems = ([
     {
       id: 0,
       items: [
@@ -720,7 +720,7 @@ const Actions = ({
       }),
       items: accessLevelOptions,
     },
-  ] as unknown as EuiContextMenuPanelDescriptor[];
+  ] as unknown) as EuiContextMenuPanelDescriptor[];
 
   const button = isTableAction ? (
     <EuiButtonIcon

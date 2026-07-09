@@ -53,8 +53,9 @@ const overrideSavedObjectId = (savedObject: SavedObject, idGenerator: (id: strin
           });
         }
         // @ts-expect-error TS2571 TODO(ts-error): fixme
-        savedObject.attributes.kibanaSavedObjectMeta.searchSourceJSON =
-          JSON.stringify(searchSource);
+        savedObject.attributes.kibanaSavedObjectMeta.searchSourceJSON = JSON.stringify(
+          searchSource
+        );
       }
     }
 

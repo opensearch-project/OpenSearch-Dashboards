@@ -288,8 +288,7 @@ export const generateNextPermissionSettingsId = (permissionSettings: Array<{ id:
 };
 
 interface PermissionSettingLike
-  extends
-    Omit<Partial<WorkspaceUserPermissionSetting>, 'type'>,
+  extends Omit<Partial<WorkspaceUserPermissionSetting>, 'type'>,
     Omit<Partial<WorkspaceUserGroupPermissionSetting>, 'type'> {
   type?: string;
 }

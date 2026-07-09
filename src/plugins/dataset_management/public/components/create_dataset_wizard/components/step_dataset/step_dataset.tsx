@@ -131,12 +131,13 @@ export class StepDataset extends Component<StepDatasetProps, StepDatasetState> {
   }
 
   fetchExistingDatasets = async () => {
-    const { savedObjects } =
-      await this.context.services.savedObjects.client.find<DataViewAttributes>({
-        type: 'index-pattern',
-        fields: ['title'],
-        perPage: 10000,
-      });
+    const { savedObjects } = await this.context.services.savedObjects.client.find<
+      DataViewAttributes
+    >({
+      type: 'index-pattern',
+      fields: ['title'],
+      perPage: 10000,
+    });
 
     const existingDatasets = savedObjects.map((obj) =>
       obj && obj.attributes && validateDataSourceReference(obj, this.props.dataSourceRef?.id)

@@ -68,9 +68,9 @@ describe('QueryStringManager', () => {
     sessionStorage = new DataStorage(window.sessionStorage, 'opensearchDashboards.');
     sessionStorage.clear();
 
-    mockSearchInterceptor = {
+    mockSearchInterceptor = ({
       search: jest.fn(),
-    } as unknown as jest.Mocked<ISearchInterceptor>;
+    } as unknown) as jest.Mocked<ISearchInterceptor>;
 
     const uiSettings = coreMock.createSetup().uiSettings;
 

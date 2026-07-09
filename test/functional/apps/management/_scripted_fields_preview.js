@@ -61,8 +61,9 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should display script results when script is valid', async function () {
-      const scriptResults =
-        await PageObjects.settings.executeScriptedField(`doc['bytes'].value * 2`);
+      const scriptResults = await PageObjects.settings.executeScriptedField(
+        `doc['bytes'].value * 2`
+      );
       expect(scriptResults.replace(/\s/g, '')).to.contain('"myScriptedField":[6196');
     });
 

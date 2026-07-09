@@ -63,10 +63,10 @@ export class VisualizationRegistry {
           type === VisFieldType.Categorical
             ? categoricalCols
             : type === VisFieldType.Numerical
-              ? numCols
-              : type === VisFieldType.Date
-                ? dateCols
-                : undefined;
+            ? numCols
+            : type === VisFieldType.Date
+            ? dateCols
+            : undefined;
 
         if (!pool || pool.length === 0) {
           failed = true;
@@ -435,10 +435,10 @@ export class VisualizationRegistry {
         entry.type === VisFieldType.Numerical
           ? 'numerical'
           : entry.type === VisFieldType.Categorical
-            ? 'categorical'
-            : entry.type === VisFieldType.Date
-              ? 'date'
-              : undefined;
+          ? 'categorical'
+          : entry.type === VisFieldType.Date
+          ? 'date'
+          : undefined;
       if (!key) continue;
       if (entry.multi) {
         result[key].hasMulti = true;

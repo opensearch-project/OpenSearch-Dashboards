@@ -138,8 +138,9 @@ export const Configurator = ({
 
     let connectedDataSource;
     if (dataset.dataSource?.id) {
-      const connectedDataSourceSavedObj: any =
-        await indexedViewsService.getConnectedDataSource(dataset);
+      const connectedDataSourceSavedObj: any = await indexedViewsService.getConnectedDataSource(
+        dataset
+      );
       if (connectedDataSourceSavedObj) {
         connectedDataSource = {
           id: connectedDataSourceSavedObj.id,

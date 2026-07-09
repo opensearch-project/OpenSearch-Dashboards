@@ -53,15 +53,12 @@ export async function findListItems({
   const extensions = visTypes
     .map((v) => v.appExtensions?.visualizations)
     .filter(Boolean) as VisualizationsAppExtension[];
-  const extensionByType = extensions.reduce(
-    (acc, m) => {
-      return m!.docTypes.reduce((_acc, type) => {
-        acc[type] = m;
-        return acc;
-      }, acc);
-    },
-    {} as { [visType: string]: VisualizationsAppExtension }
-  );
+  const extensionByType = extensions.reduce((acc, m) => {
+    return m!.docTypes.reduce((_acc, type) => {
+      acc[type] = m;
+      return acc;
+    }, acc);
+  }, {} as { [visType: string]: VisualizationsAppExtension });
   const searchOption = (field: string, ...defaults: string[]) =>
     _(extensions).map(field).concat(defaults).compact().flatten().uniq().value() as string[];
   const searchOptions = {
@@ -73,8 +70,9 @@ export async function findListItems({
     defaultSearchOperator: 'AND' as 'AND',
   };
 
-  const { total, savedObjects } =
-    await savedObjectsClient.find<SavedObjectAttributes>(searchOptions);
+  const { total, savedObjects } = await savedObjectsClient.find<SavedObjectAttributes>(
+    searchOptions
+  );
 
   const hits = savedObjects
     .map((savedObject) => {

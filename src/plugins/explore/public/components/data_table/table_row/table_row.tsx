@@ -56,10 +56,9 @@ export const TableRowUI = ({
 }: TableRowProps) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const [isExpanded, setIsExpanded] = useState(false);
-  const handleExpanding = useCallback(
-    () => setIsExpanded((prevState) => !prevState),
-    [setIsExpanded]
-  );
+  const handleExpanding = useCallback(() => setIsExpanded((prevState) => !prevState), [
+    setIsExpanded,
+  ]);
 
   const expandedContext = useMemo(() => {
     if (!isExpanded) return null;

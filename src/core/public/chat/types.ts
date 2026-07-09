@@ -113,7 +113,11 @@ export interface ToolMessage {
  * Discriminated union of all message types
  */
 export type Message =
-  DeveloperMessage | SystemMessage | AssistantMessage | UserMessage | ToolMessage;
+  | DeveloperMessage
+  | SystemMessage
+  | AssistantMessage
+  | UserMessage
+  | ToolMessage;
 
 /**
  * Valid message role types

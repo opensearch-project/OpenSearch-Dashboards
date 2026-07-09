@@ -372,7 +372,7 @@ describe('fetchColumnValues', () => {
 
   const createMockIndexPattern = (fieldType: string, hasField: boolean = true) => {
     const mockField = hasField
-      ? ({
+      ? (({
           type: fieldType,
           isSuggestionAvailable: jest.fn().mockReturnValue(fieldType === 'number' ? false : true),
           spec: {
@@ -381,23 +381,23 @@ describe('fetchColumnValues', () => {
               topAggValues: undefined,
             },
           },
-        } as unknown as IndexPatternField)
+        } as unknown) as IndexPatternField)
       : undefined;
 
-    return {
+    return ({
       id: 'test-index',
       fields: {
         getByName: jest.fn().mockReturnValue(mockField),
       },
-    } as unknown as IndexPattern;
+    } as unknown) as IndexPattern;
   };
 
   beforeEach(() => {
-    mockHttp = {
+    mockHttp = ({
       fetch: jest.fn(),
-    } as unknown as HttpSetup;
+    } as unknown) as HttpSetup;
 
-    mockUiSettings = {
+    mockUiSettings = ({
       get: jest.fn().mockImplementation((setting) => {
         if (setting === UI_SETTINGS.QUERY_ENHANCEMENTS_SUGGEST_VALUES) {
           return true;
@@ -406,7 +406,7 @@ describe('fetchColumnValues', () => {
           return 10;
         }
       }),
-    } as unknown as IUiSettingsClient;
+    } as unknown) as IUiSettingsClient;
 
     // Mock SearchSource
     mockSearchSource = {
@@ -422,15 +422,15 @@ describe('fetchColumnValues', () => {
       }),
     };
 
-    mockServices = {
+    mockServices = ({
       http: mockHttp,
       uiSettings: mockUiSettings,
-      data: {
-        query: {
-          queryString: {
+      data: ({
+        query: ({
+          queryString: ({
             getQuery: jest.fn().mockReturnValue({ dataset: { dataSource: { id: 'test-id' } } }),
-          } as unknown as QueryStringContract,
-        } as unknown as IQueryStart,
+          } as unknown) as QueryStringContract,
+        } as unknown) as IQueryStart,
         search: {
           searchSource: {
             create: jest.fn().mockResolvedValue(mockSearchSource),
@@ -442,8 +442,8 @@ describe('fetchColumnValues', () => {
         dataViews: {
           saveToCache: jest.fn(),
         } as unknown,
-      } as unknown as DataPublicPluginStart,
-    } as unknown as IDataPluginServices;
+      } as unknown) as DataPublicPluginStart,
+    } as unknown) as IDataPluginServices;
   });
 
   it('should return boolean values for boolean fields', async () => {
@@ -556,18 +556,18 @@ describe('fetchColumnValues', () => {
   });
 
   it('should return empty array when field is not suggestion available', async () => {
-    const mockField = {
+    const mockField = ({
       type: 'string',
       isSuggestionAvailable: jest.fn().mockReturnValue(false),
       spec: { suggestions: {} },
-    } as unknown as IndexPatternField;
+    } as unknown) as IndexPatternField;
 
-    const mockIndexPattern = {
+    const mockIndexPattern = ({
       id: 'test-index',
       fields: {
         getByName: jest.fn().mockReturnValue(mockField),
       },
-    } as unknown as IndexPattern;
+    } as unknown) as IndexPattern;
 
     const result = await fetchColumnValues(
       'test-table',
@@ -581,7 +581,7 @@ describe('fetchColumnValues', () => {
   });
 
   it('should use cached autoCompleteValues when available', async () => {
-    const mockField = {
+    const mockField = ({
       type: 'string',
       isSuggestionAvailable: jest.fn().mockReturnValue(true),
       spec: {
@@ -589,14 +589,14 @@ describe('fetchColumnValues', () => {
           values: ['cached1', 'cached2'],
         },
       },
-    } as unknown as IndexPatternField;
+    } as unknown) as IndexPatternField;
 
-    const mockIndexPattern = {
+    const mockIndexPattern = ({
       id: 'test-index',
       fields: {
         getByName: jest.fn().mockReturnValue(mockField),
       },
-    } as unknown as IndexPattern;
+    } as unknown) as IndexPattern;
 
     const result = await fetchColumnValues(
       'test-table',
@@ -612,7 +612,7 @@ describe('fetchColumnValues', () => {
   });
 
   it('should use topAggValues and trigger background update when available', async () => {
-    const mockField = {
+    const mockField = ({
       type: 'string',
       isSuggestionAvailable: jest.fn().mockReturnValue(true),
       spec: {
@@ -620,14 +620,14 @@ describe('fetchColumnValues', () => {
           topValues: ['top1', 'top2'],
         },
       },
-    } as unknown as IndexPatternField;
+    } as unknown) as IndexPatternField;
 
-    const mockIndexPattern = {
+    const mockIndexPattern = ({
       id: 'test-index',
       fields: {
         getByName: jest.fn().mockReturnValue(mockField),
       },
-    } as unknown as IndexPattern;
+    } as unknown) as IndexPattern;
 
     const result = await fetchColumnValues(
       'test-table',
@@ -669,7 +669,7 @@ describe('fetchColumnValues', () => {
   });
 
   it('should update field suggestions after successful fetch', async () => {
-    const mockField = {
+    const mockField = ({
       type: 'string',
       isSuggestionAvailable: jest.fn().mockReturnValue(true),
       spec: {
@@ -678,14 +678,14 @@ describe('fetchColumnValues', () => {
           topAggValues: undefined,
         },
       },
-    } as unknown as IndexPatternField;
+    } as unknown) as IndexPatternField;
 
-    const mockIndexPattern = {
+    const mockIndexPattern = ({
       id: 'test-index',
       fields: {
         getByName: jest.fn().mockReturnValue(mockField),
       },
-    } as unknown as IndexPattern;
+    } as unknown) as IndexPattern;
 
     await fetchColumnValues(
       'test-table',

@@ -127,12 +127,12 @@ export const getTopNavConfig = (
       tooltip: !!saveDisabledReason
         ? saveDisabledReason
         : savedVisBuilderVis?.id && originatingApp
-          ? i18n.translate('visBuilder.topNavMenu.saveAsVisualizationAsButtonLabel', {
-              defaultMessage: 'Save as',
-            })
-          : i18n.translate('visBuilder.topNavMenu.saveVisualizationButtonLabel', {
-              defaultMessage: 'Save',
-            }),
+        ? i18n.translate('visBuilder.topNavMenu.saveAsVisualizationAsButtonLabel', {
+            defaultMessage: 'Save as',
+          })
+        : i18n.translate('visBuilder.topNavMenu.saveVisualizationButtonLabel', {
+            defaultMessage: 'Save',
+          }),
       ariaLabel: i18n.translate('visBuilder.topNavMenu.saveVisualizationAsButtonLabel', {
         defaultMessage: 'Save',
       }),

@@ -402,8 +402,13 @@ export class VisualizationBuilder {
       rows,
       schema
     );
-    const { transformedData, numericalColumns, categoricalColumns, dateColumns, unknownColumns } =
-      normalizeResultRows(transformedRows, finalSchema);
+    const {
+      transformedData,
+      numericalColumns,
+      categoricalColumns,
+      dateColumns,
+      unknownColumns,
+    } = normalizeResultRows(transformedRows, finalSchema);
 
     this.data$.next({
       transformedData,

@@ -64,8 +64,14 @@ export interface DiscoverSidebarProps {
 }
 
 export function DiscoverSidebar(props: DiscoverSidebarProps) {
-  const { columns, fieldCounts, hits, selectedDataSet, isEnhancementsEnabledOverride, onCollapse } =
-    props;
+  const {
+    columns,
+    fieldCounts,
+    hits,
+    selectedDataSet,
+    isEnhancementsEnabledOverride,
+    onCollapse,
+  } = props;
   const [fieldFilterState, setFieldFilterState] = useState(getDefaultFieldFilter());
   const flavorId = useFlavorId();
   const shortDotsEnabled = useMemo(() => {

@@ -137,10 +137,9 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
     );
   }, [savedSearch?.title]);
 
-  const showDatePicker = useMemo(
-    () => (indexPattern ? indexPattern.isTimeBased() : false),
-    [indexPattern]
-  );
+  const showDatePicker = useMemo(() => (indexPattern ? indexPattern.isTimeBased() : false), [
+    indexPattern,
+  ]);
 
   const updateSavedQueryId = (newSavedQueryId: string | undefined) => {
     dispatch(setSavedQuery(newSavedQueryId));

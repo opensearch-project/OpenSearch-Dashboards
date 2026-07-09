@@ -59,7 +59,7 @@ export const getVegaInspectorView = (dependencies: VegaInspectorViewDependencies
         <VegaDataInspector {...(props as VegaDataInspectorProps)}> </VegaDataInspector>
       </OpenSearchDashboardsContextProvider>
     ),
-  }) as InspectorViewDescription;
+  } as InspectorViewDescription);
 
 export const createInspectorAdapters = (): VegaInspectorAdapters => ({
   requests: new RequestAdapter(),

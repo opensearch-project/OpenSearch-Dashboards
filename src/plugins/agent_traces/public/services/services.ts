@@ -6,5 +6,6 @@
 import { createGetterSetter } from '../../../opensearch_dashboards_utils/public';
 import { AgentTracesServices } from '../types';
 
-export const [getServices, setServices] =
-  createGetterSetter<AgentTracesServices>('AgentTracesServices');
+export const [getServices, setServices] = createGetterSetter<AgentTracesServices>(
+  'AgentTracesServices'
+);

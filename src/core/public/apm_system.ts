@@ -33,8 +33,7 @@ import { modifyUrl } from '@osd/std';
 import type { InternalApplicationStart } from './application';
 
 /** "GET protocol://hostname:port/pathname" */
-const HTTP_REQUEST_TRANSACTION_NAME_REGEX =
-  /^(GET|POST|PUT|HEAD|PATCH|DELETE|OPTIONS|CONNECT|TRACE)\s(.*)$/;
+const HTTP_REQUEST_TRANSACTION_NAME_REGEX = /^(GET|POST|PUT|HEAD|PATCH|DELETE|OPTIONS|CONNECT|TRACE)\s(.*)$/;
 
 /**
  * This is the entry point used to boot the frontend when serving a application
@@ -57,10 +56,7 @@ export class ApmSystem {
    * `apmConfig` would be populated with relevant APM RUM agent
    * configuration if server is started with elastic.apm.* config.
    */
-  constructor(
-    private readonly apmConfig?: ApmConfig,
-    private readonly basePath = ''
-  ) {
+  constructor(private readonly apmConfig?: ApmConfig, private readonly basePath = '') {
     this.enabled = apmConfig != null && !!apmConfig.active;
   }
 

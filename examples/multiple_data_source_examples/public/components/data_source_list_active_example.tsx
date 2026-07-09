@@ -39,8 +39,9 @@ export const DataSourceListActiveExample = ({
   dataSourceManagement,
   uiSettings,
 }: DataSourceListActiveExampleProps) => {
-  const DataSourceMenu =
-    dataSourceManagement.ui.getDataSourceMenu<DataSourceAggregatedViewConfig>();
+  const DataSourceMenu = dataSourceManagement.ui.getDataSourceMenu<
+    DataSourceAggregatedViewConfig
+  >();
   const data: ComponentProp[] = [
     {
       name: 'savedObjects',

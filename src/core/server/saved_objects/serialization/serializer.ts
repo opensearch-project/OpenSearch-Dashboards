@@ -61,8 +61,8 @@ export class SavedObjectsSerializer {
       namespace && this.registry.isSingleNamespace(type) ? `${namespace}:` : '';
     return Boolean(
       type &&
-      rawDoc._id.startsWith(`${namespacePrefix}${type}:`) &&
-      rawDoc._source.hasOwnProperty(type)
+        rawDoc._id.startsWith(`${namespacePrefix}${type}:`) &&
+        rawDoc._source.hasOwnProperty(type)
     );
   }
 

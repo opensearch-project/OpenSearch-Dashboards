@@ -131,7 +131,7 @@ describe('ppl_request_helpers', () => {
   });
 
   describe('executePPLQuery', () => {
-    const mockDataService = {
+    const mockDataService = ({
       query: {
         queryString: {
           setQuery: jest.fn(),
@@ -140,7 +140,7 @@ describe('ppl_request_helpers', () => {
       search: {
         search: jest.fn(),
       },
-    } as unknown as DataPublicPluginStart;
+    } as unknown) as DataPublicPluginStart;
 
     const mockRequest = buildPPLQueryRequest(createMockDataset(), 'source = test-index');
 
@@ -218,7 +218,7 @@ describe('ppl_request_helpers', () => {
   });
 
   describe('PPLService', () => {
-    const mockDataService = {
+    const mockDataService = ({
       query: {
         queryString: {
           setQuery: jest.fn(),
@@ -227,7 +227,7 @@ describe('ppl_request_helpers', () => {
       search: {
         search: jest.fn(),
       },
-    } as unknown as DataPublicPluginStart;
+    } as unknown) as DataPublicPluginStart;
 
     let pplService: PPLService;
 

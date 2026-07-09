@@ -698,7 +698,8 @@ export class ChatEventHandler {
     let observable: Observable<ChatEvent>;
     let toolMessage: ToolMessage;
     let skipped:
-      { reason: 'result_already_exists' | 'sync_timeout' | 'no_thread_id' | 'aborted' } | undefined;
+      | { reason: 'result_already_exists' | 'sync_timeout' | 'no_thread_id' | 'aborted' }
+      | undefined;
 
     try {
       // Notify that we're starting to send tool result

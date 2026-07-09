@@ -47,10 +47,9 @@ const mockedGetPromptModeIsAvailable = getPromptModeIsAvailable as jest.MockedFu
 const mockedGetSummaryAgentIsAvailable = getSummaryAgentIsAvailable as jest.MockedFunction<
   typeof getSummaryAgentIsAvailable
 >;
-const mockedResetLegacyStateActionCreator =
-  resetLegacyStateActions.resetLegacyStateActionCreator as jest.MockedFunction<
-    typeof resetLegacyStateActions.resetLegacyStateActionCreator
-  >;
+const mockedResetLegacyStateActionCreator = resetLegacyStateActions.resetLegacyStateActionCreator as jest.MockedFunction<
+  typeof resetLegacyStateActions.resetLegacyStateActionCreator
+>;
 
 describe('createDatasetChangeMiddleware', () => {
   let mockServices: ReturnType<typeof createMockExploreServices>;

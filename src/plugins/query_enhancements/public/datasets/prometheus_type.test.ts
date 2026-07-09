@@ -15,9 +15,9 @@ import { DATASET } from '../../common';
 import { prometheusTypeConfig } from './prometheus_type';
 
 describe('prometheusTypeConfig', () => {
-  const mockSavedObjectsClient = {
+  const mockSavedObjectsClient = ({
     find: jest.fn(),
-  } as unknown as SavedObjectsClientContract;
+  } as unknown) as SavedObjectsClientContract;
   const mockServices = {
     savedObjects: { client: mockSavedObjectsClient },
   };

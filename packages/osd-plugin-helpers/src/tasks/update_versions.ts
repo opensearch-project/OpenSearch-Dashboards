@@ -87,10 +87,10 @@ function updateObject({ original, updates }: ObjectUpdateContext) {
     if (key in original) {
       // If both are objects, merge them
       if (updates[key] === 'object' && typeof original[key] === 'object') {
-        updateObject({
+        updateObject(({
           original: original[key],
           updates: updates[key],
-        } as unknown as ObjectUpdateContext);
+        } as unknown) as ObjectUpdateContext);
         // If the updated value is falsy, skip it
       } else if (updates[key]) {
         original[key] = updates[key];

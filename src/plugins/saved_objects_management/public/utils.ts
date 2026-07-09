@@ -8,7 +8,7 @@ import { formatUrlWithWorkspaceId } from '../../../core/public/utils';
 import { SavedObjectWithMetadata } from './types';
 
 export function formatWorkspaceIdParams<
-  T extends { workspaces?: string[] | null; availableWorkspaces?: string[] | null },
+  T extends { workspaces?: string[] | null; availableWorkspaces?: string[] | null }
 >(obj: T): T | Omit<T, 'workspaces' | 'availableWorkspaces'> {
   const { workspaces, availableWorkspaces, ...others } = obj;
   if (workspaces || (availableWorkspaces && availableWorkspaces.length)) {

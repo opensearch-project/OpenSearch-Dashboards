@@ -26,7 +26,7 @@ afterAll(() => {
 const makeConfig = () =>
   ({
     resolveFromTarget: (...sub: string[]) => Path.resolve(TMP, ...sub),
-  }) as any;
+  } as any);
 
 it('writes both sha1 and sha256 sidecar files whose contents match the artifact', async () => {
   const artifacts = [

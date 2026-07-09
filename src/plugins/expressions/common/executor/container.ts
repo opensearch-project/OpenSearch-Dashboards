@@ -71,17 +71,15 @@ export interface ExecutorPureSelectors {
 export const pureSelectors: ExecutorPureSelectors = {
   getFunction: (state) => (id) => state.functions[id] || null,
   getType: (state) => (id) => state.types[id] || null,
-  getContext:
-    ({ context }) =>
-    () =>
-      context,
+  getContext: ({ context }) => () => context,
 };
 
-export type ExecutorContainer<Context extends Record<string, unknown> = Record<string, unknown>> =
-  StateContainer<ExecutorState<Context>, ExecutorPureTransitions, ExecutorPureSelectors>;
+export type ExecutorContainer<
+  Context extends Record<string, unknown> = Record<string, unknown>
+> = StateContainer<ExecutorState<Context>, ExecutorPureTransitions, ExecutorPureSelectors>;
 
 export const createExecutorContainer = <
-  Context extends Record<string, unknown> = Record<string, unknown>,
+  Context extends Record<string, unknown> = Record<string, unknown>
 >(
   state: ExecutorState<Context> = defaultState
 ): ExecutorContainer<Context> => {

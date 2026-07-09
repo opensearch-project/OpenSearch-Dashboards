@@ -40,13 +40,17 @@ export function ContextApp({
 }: Props) {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const { uiSettings } = services;
-  const defaultStepSize = useMemo(
-    () => parseInt(uiSettings.get(CONTEXT_STEP_SETTING), 10),
-    [uiSettings]
-  );
+  const defaultStepSize = useMemo(() => parseInt(uiSettings.get(CONTEXT_STEP_SETTING), 10), [
+    uiSettings,
+  ]);
   const { columns, predecessorCount, successorCount } = appState;
-  const { anchorStatus, predecessorsStatus, successorsStatus, predecessors, successors } =
-    contextQueryState;
+  const {
+    anchorStatus,
+    predecessorsStatus,
+    successorsStatus,
+    predecessors,
+    successors,
+  } = contextQueryState;
   const isAnchorLoading =
     anchorStatus.value === LOADING_STATUS.LOADING ||
     anchorStatus.value === LOADING_STATUS.UNINITIALIZED;

@@ -33,16 +33,14 @@ import { SecureContextOptions } from 'tls';
 import { ConsoleServerPlugin } from './plugin';
 
 /** @public */
-export type ConsoleSetup =
-  ReturnType<ConsoleServerPlugin['setup']> extends Promise<infer U>
-    ? U
-    : ReturnType<ConsoleServerPlugin['setup']>;
+export type ConsoleSetup = ReturnType<ConsoleServerPlugin['setup']> extends Promise<infer U>
+  ? U
+  : ReturnType<ConsoleServerPlugin['setup']>;
 
 /** @public */
-export type ConsoleStart =
-  ReturnType<ConsoleServerPlugin['start']> extends Promise<infer U>
-    ? U
-    : ReturnType<ConsoleServerPlugin['start']>;
+export type ConsoleStart = ReturnType<ConsoleServerPlugin['start']> extends Promise<infer U>
+  ? U
+  : ReturnType<ConsoleServerPlugin['start']>;
 
 /** @internal */
 export interface OpenSearchConfigForProxy {

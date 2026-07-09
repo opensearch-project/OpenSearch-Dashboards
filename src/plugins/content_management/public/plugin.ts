@@ -21,12 +21,14 @@ import { CARD_EMBEDDABLE } from './components/card_container/card_embeddable';
 import { CardEmbeddableFactoryDefinition } from './components/card_container/card_embeddable_factory';
 import { renderPage } from './app';
 
-export class ContentManagementPublicPlugin implements Plugin<
-  ContentManagementPluginSetup,
-  ContentManagementPluginStart,
-  {},
-  ContentManagementPluginStartDependencies
-> {
+export class ContentManagementPublicPlugin
+  implements
+    Plugin<
+      ContentManagementPluginSetup,
+      ContentManagementPluginStart,
+      {},
+      ContentManagementPluginStartDependencies
+    > {
   private readonly contentManagementService = new ContentManagementService();
 
   // @ts-expect-error TS6138 TODO(ts-error): fixme

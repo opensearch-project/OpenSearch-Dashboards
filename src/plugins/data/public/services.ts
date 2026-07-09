@@ -35,34 +35,41 @@ import { IndexPatternsContract } from './index_patterns';
 import { DataViewsContract } from './data_views';
 import { DataPublicPluginStart } from './types';
 
-export const [getNotifications, setNotifications] =
-  createGetterSetter<NotificationsStart>('Notifications');
+export const [getNotifications, setNotifications] = createGetterSetter<NotificationsStart>(
+  'Notifications'
+);
 
-export const [getUiSettings, setUiSettings] =
-  createGetterSetter<CoreStart['uiSettings']>('UiSettings');
+export const [getUiSettings, setUiSettings] = createGetterSetter<CoreStart['uiSettings']>(
+  'UiSettings'
+);
 
-export const [getFieldFormats, setFieldFormats] =
-  createGetterSetter<FieldFormatsStart>('FieldFormats');
+export const [getFieldFormats, setFieldFormats] = createGetterSetter<FieldFormatsStart>(
+  'FieldFormats'
+);
 
 export const [getOverlays, setOverlays] = createGetterSetter<CoreStart['overlays']>('Overlays');
 
 export const [getDataViews, setDataViews] = createGetterSetter<DataViewsContract>('DataViews');
 
-export const [getIndexPatterns, setIndexPatterns] =
-  createGetterSetter<IndexPatternsContract>('IndexPatterns');
+export const [getIndexPatterns, setIndexPatterns] = createGetterSetter<IndexPatternsContract>(
+  'IndexPatterns'
+);
 
-export const [getQueryService, setQueryService] =
-  createGetterSetter<DataPublicPluginStart['query']>('Query');
+export const [getQueryService, setQueryService] = createGetterSetter<
+  DataPublicPluginStart['query']
+>('Query');
 
-export const [getSearchService, setSearchService] =
-  createGetterSetter<DataPublicPluginStart['search']>('Search');
+export const [getSearchService, setSearchService] = createGetterSetter<
+  DataPublicPluginStart['search']
+>('Search');
 
 export const [getUiService, setUiService] = createGetterSetter<DataPublicPluginStart['ui']>('Ui');
 
 export const [getApplication, setApplication] = createGetterSetter<ApplicationStart>('Application');
 
-export const [getSavedObjects, setSavedObjects] =
-  createGetterSetter<CoreStart['savedObjects']>('SavedObjects');
+export const [getSavedObjects, setSavedObjects] = createGetterSetter<CoreStart['savedObjects']>(
+  'SavedObjects'
+);
 
 let useNewSavedQueriesUI = false;
 

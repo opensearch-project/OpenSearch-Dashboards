@@ -15,10 +15,8 @@ export interface BackendCompatibilityPluginStart {
   getBackendInfo: () => BackendInfo | undefined;
 }
 
-export class BackendCompatibilityPlugin implements Plugin<
-  BackendCompatibilityPluginSetup,
-  BackendCompatibilityPluginStart
-> {
+export class BackendCompatibilityPlugin
+  implements Plugin<BackendCompatibilityPluginSetup, BackendCompatibilityPluginStart> {
   private readonly logger: Logger;
   private readonly initializerContext: PluginInitializerContext;
 

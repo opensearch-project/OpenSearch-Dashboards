@@ -44,7 +44,7 @@ function getPanelTitle(input: EmbeddableInput, output: EmbeddableOutput) {
 
 export abstract class Embeddable<
   TEmbeddableInput extends EmbeddableInput = EmbeddableInput,
-  TEmbeddableOutput extends EmbeddableOutput = EmbeddableOutput,
+  TEmbeddableOutput extends EmbeddableOutput = EmbeddableOutput
 > implements IEmbeddable<TEmbeddableInput, TEmbeddableOutput> {
   static runtimeId: number = 0;
 

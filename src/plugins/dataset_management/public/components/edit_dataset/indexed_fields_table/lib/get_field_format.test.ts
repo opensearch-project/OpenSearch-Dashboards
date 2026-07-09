@@ -6,7 +6,7 @@
 import { IDataset } from '../../../../../../data/public';
 import { getFieldFormat } from './get_field_format';
 
-const dataset = {
+const dataset = ({
   fieldFormatMap: {
     Elastic: {
       type: {
@@ -14,7 +14,7 @@ const dataset = {
       },
     },
   },
-} as unknown as IDataset;
+} as unknown) as IDataset;
 
 describe('getFieldFormat', () => {
   test('should handle no arguments', () => {

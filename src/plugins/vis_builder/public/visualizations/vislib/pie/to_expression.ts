@@ -28,8 +28,14 @@ export const toExpression = async (
     true,
     searchContext
   );
-  const { addLegend, addTooltip, showMetricsAtAllLevels, isDonut, legendPosition, type } =
-    styleState;
+  const {
+    addLegend,
+    addTooltip,
+    showMetricsAtAllLevels,
+    isDonut,
+    legendPosition,
+    type,
+  } = styleState;
   const vis = await createVis(type, aggConfigs, indexPattern, searchContext);
   const params = getPipelineParams();
   const schemas = getVisSchemas(vis, {

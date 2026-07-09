@@ -13,7 +13,9 @@ import { configureClient } from './client/configure_client';
 export interface DataSourceServiceSetup {
   getDataSourceClient: (params: DataSourceClientParams) => Promise<OpenSearchClient>;
 
-  getDataSourceLegacyClient: (params: DataSourceClientParams) => {
+  getDataSourceLegacyClient: (
+    params: DataSourceClientParams
+  ) => {
     callAPI: (
       endpoint: string,
       clientParams?: Record<string, any>,

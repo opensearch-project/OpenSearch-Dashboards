@@ -60,11 +60,9 @@ export function diagnosticToMarker(diagnostic: Diagnostic): monaco.editor.IMarke
   }
 
   if (diagnostic.hoverFacts) {
-    (
-      marker as monaco.editor.IMarkerData & {
-        hoverFacts?: DiagnosticHoverFacts;
-      }
-    ).hoverFacts = diagnostic.hoverFacts;
+    (marker as monaco.editor.IMarkerData & {
+      hoverFacts?: DiagnosticHoverFacts;
+    }).hoverFacts = diagnostic.hoverFacts;
   }
 
   return marker;

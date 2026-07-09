@@ -66,7 +66,7 @@ describe('findPrecedingQuestion', () => {
 
   it('should return empty text for user message with empty array content', () => {
     const timeline: Message[] = [
-      { id: 'u1', role: 'user', content: [] } as unknown as UserMessage,
+      ({ id: 'u1', role: 'user', content: [] } as unknown) as UserMessage,
       { id: 'a1', role: 'assistant', content: 'Answer' } as AssistantMessage,
     ];
     expect(findPrecedingQuestion(timeline, 1)).toEqual({ text: '' });

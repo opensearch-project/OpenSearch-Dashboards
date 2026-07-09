@@ -97,7 +97,7 @@ describe('#importSavedObjectsFromStream', () => {
 
   let readStream: Readable;
   const objectLimit = 10;
-  const overwrite = Symbol() as unknown as boolean;
+  const overwrite = (Symbol() as unknown) as boolean;
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
   let typeRegistry: jest.Mocked<ISavedObjectTypeRegistry>;
   const namespace = 'some-namespace';
@@ -118,7 +118,7 @@ describe('#importSavedObjectsFromStream', () => {
         ({
           // other attributes aren't needed for the purposes of injecting metadata
           management: { icon: `${type}-icon` },
-        }) as any
+        } as any)
     );
     return {
       readStream,

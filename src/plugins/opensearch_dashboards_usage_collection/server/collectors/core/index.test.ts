@@ -48,7 +48,7 @@ describe('telemetry_core', () => {
 
   const callCluster = jest.fn().mockImplementation(() => ({}));
   const coreUsageDataStart = coreUsageDataServiceMock.createStartContract();
-  const getCoreUsageDataReturnValue = Symbol('core telemetry') as any as CoreUsageData;
+  const getCoreUsageDataReturnValue = (Symbol('core telemetry') as any) as CoreUsageData;
   coreUsageDataStart.getCoreUsageData.mockResolvedValue(getCoreUsageDataReturnValue);
 
   beforeAll(() => registerCoreUsageCollector(usageCollectionMock, () => coreUsageDataStart));

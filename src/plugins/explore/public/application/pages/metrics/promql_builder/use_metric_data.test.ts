@@ -8,14 +8,14 @@ import { useMetricData } from './use_metric_data';
 import { PrometheusClient } from '../explore/services/prometheus_client';
 
 function makeClient(overrides: Partial<jest.Mocked<PrometheusClient>> = {}) {
-  return {
+  return ({
     getMetricNames: jest.fn().mockResolvedValue([]),
     searchMetricNames: jest.fn().mockResolvedValue([]),
     getSeries: jest.fn().mockResolvedValue([]),
     getLabelsForMetric: jest.fn().mockResolvedValue([]),
     getLabelValues: jest.fn().mockResolvedValue([]),
     ...overrides,
-  } as unknown as jest.Mocked<PrometheusClient>;
+  } as unknown) as jest.Mocked<PrometheusClient>;
 }
 
 describe('useMetricData label fetching', () => {

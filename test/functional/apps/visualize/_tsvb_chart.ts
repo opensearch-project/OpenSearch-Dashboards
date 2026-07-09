@@ -213,8 +213,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         log.debug('Go back in browser history');
         await browser.goBack();
-        const isTermsSelected =
-          await PageObjects.visualBuilder.checkSelectedMetricsGroupByValue('Terms');
+        const isTermsSelected = await PageObjects.visualBuilder.checkSelectedMetricsGroupByValue(
+          'Terms'
+        );
         expect(isTermsSelected).to.be(true);
 
         log.debug('Go back in browser history');

@@ -45,8 +45,9 @@ export interface DatasetManagmentContext {
   storage: DataStorage;
 }
 
-export type DatasetManagmentContextValue =
-  OpenSearchDashboardsReactContextValue<DatasetManagmentContext>;
+export type DatasetManagmentContextValue = OpenSearchDashboardsReactContextValue<
+  DatasetManagmentContext
+>;
 
 export enum MlCardState {
   HIDDEN,

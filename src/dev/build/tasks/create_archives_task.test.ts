@@ -67,7 +67,7 @@ const makeConfig = (platforms: Platform[], isRelease = false) =>
     getBuildSha: () => 'abc',
     // Needed by CiStatsReporter.fromEnv path; our mock ignores this anyway.
     getRepoInfo: () => ({}),
-  }) as any;
+  } as any);
 
 const makeBuild = () =>
   ({
@@ -77,7 +77,7 @@ const makeBuild = () =>
         ? Path.resolve(TEST_OUT, `${p.getNodeArch()}.zip`)
         : Path.resolve(TEST_OUT, `${p.getNodeArch()}.tar.gz`),
     getName: () => 'opensearch-dashboards',
-  }) as any;
+  } as any);
 
 const log = {
   info: () => {},

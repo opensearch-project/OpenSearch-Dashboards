@@ -54,11 +54,9 @@ export function createCollectorFetch({
   getSavedObjectsClient,
 }: TelemetryPluginUsageCollectorOptions) {
   return async function fetchUsageStats(): Promise<TelemetryUsageStats> {
-    const {
-      sendUsageFrom,
-      allowChangingOptInStatus,
-      optIn = null,
-    } = await config$.pipe(take(1)).toPromise();
+    const { sendUsageFrom, allowChangingOptInStatus, optIn = null } = await config$
+      .pipe(take(1))
+      .toPromise();
     const configTelemetrySendUsageFrom = sendUsageFrom;
     const configTelemetryOptIn = optIn;
 

@@ -31,11 +31,11 @@ describe('Token Dictionary and Ignored Tokens', () => {
 describe('processVisitedRules', () => {
   // createTokenStream takes a list of 'tokens' defined only by its type or an actual object to be returned as the Token
   const createTokenStream = (list: Array<number | { type: number; text: string }>) =>
-    ({
+    (({
       get: jest.fn((num: number) =>
         typeof list[num] === 'number' ? { type: list[num] } : list[num]
       ),
-    }) as unknown as TokenStream;
+    } as unknown) as TokenStream);
 
   it('should set the correct suggestions based on the rules visited', () => {
     const mockRules = new Map();
@@ -319,9 +319,9 @@ describe('getParseTree', () => {
       selectStatement: jest.fn().mockReturnValue('selectTree'),
     };
 
-    expect((mockParser as unknown as OpenSearchSQLParser).selectStatement()).toBe('selectTree');
-    expect(getParseTree(mockParser as unknown as OpenSearchSQLParser, 'from')).toBe('fromTree');
-    expect(getParseTree(mockParser as unknown as OpenSearchSQLParser)).toBe('rootTree');
+    expect(((mockParser as unknown) as OpenSearchSQLParser).selectStatement()).toBe('selectTree');
+    expect(getParseTree((mockParser as unknown) as OpenSearchSQLParser, 'from')).toBe('fromTree');
+    expect(getParseTree((mockParser as unknown) as OpenSearchSQLParser)).toBe('rootTree');
   });
 
   it('should return root parse tree if no type is provided', () => {
@@ -329,7 +329,7 @@ describe('getParseTree', () => {
       root: jest.fn().mockReturnValue('rootTree'),
     };
 
-    expect(getParseTree(mockParser as unknown as OpenSearchSQLParser)).toBe('rootTree');
+    expect(getParseTree((mockParser as unknown) as OpenSearchSQLParser)).toBe('rootTree');
     expect(mockParser.root).toHaveBeenCalled();
   });
 });
@@ -338,7 +338,7 @@ describe('enrichAutocompleteResult', () => {
   it('should correctly enrich the autocomplete result with additional suggestions', () => {
     const baseResult = { errors: [], suggestKeywords: [] };
     const rules = new Map();
-    const tokenStream = null as unknown as TokenStream;
+    const tokenStream = (null as unknown) as TokenStream;
     const cursorTokenIndex = 0;
     const cursor = { line: 1, column: 1 };
     const query = 'SELECT * FROM table';
@@ -346,7 +346,7 @@ describe('enrichAutocompleteResult', () => {
     const result = enrichAutocompleteResult(
       baseResult,
       rules,
-      tokenStream as unknown as TokenStream,
+      (tokenStream as unknown) as TokenStream,
       cursorTokenIndex,
       cursor,
       query
@@ -359,9 +359,9 @@ describe('enrichAutocompleteResult', () => {
   it('should handle suggestions for columns and templates', () => {
     const baseResult = { errors: [], suggestKeywords: [] };
     const rules = new Map();
-    const tokenStream = {
+    const tokenStream = ({
       getText: jest.fn().mockReturnValue('column_name'),
-    } as unknown as TokenStream;
+    } as unknown) as TokenStream;
     const cursorTokenIndex = 0;
     const cursor = { line: 1, column: 1 };
     const query = 'SELECT column_name FROM table';
@@ -369,7 +369,7 @@ describe('enrichAutocompleteResult', () => {
     const result = enrichAutocompleteResult(
       baseResult,
       rules,
-      tokenStream as unknown as TokenStream,
+      (tokenStream as unknown) as TokenStream,
       cursorTokenIndex,
       cursor,
       query
@@ -382,7 +382,7 @@ describe('enrichAutocompleteResult', () => {
   it('should handle errors gracefully and return base result', () => {
     const baseResult = { errors: [], suggestKeywords: [] };
     const rules = new Map();
-    const tokenStream = null as unknown as TokenStream;
+    const tokenStream = (null as unknown) as TokenStream;
     const cursorTokenIndex = 0;
     const cursor = { line: 1, column: 1 };
     const query = 'SELECT * FROM table';
@@ -392,7 +392,7 @@ describe('enrichAutocompleteResult', () => {
     const result = enrichAutocompleteResult(
       baseResult,
       rules,
-      tokenStream as unknown as TokenStream,
+      (tokenStream as unknown) as TokenStream,
       cursorTokenIndex,
       cursor,
       query

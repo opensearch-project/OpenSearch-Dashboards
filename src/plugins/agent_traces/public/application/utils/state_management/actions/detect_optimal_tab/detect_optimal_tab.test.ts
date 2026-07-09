@@ -30,12 +30,12 @@ describe('detectAndSetOptimalTab', () => {
   const mockPrepareQuery = jest.fn();
 
   const createMockServices = () =>
-    ({
+    (({
       tabRegistry: {
         getTab: jest.fn().mockReturnValue({ prepareQuery: mockPrepareQuery }),
         getAllTabs: jest.fn().mockReturnValue([]),
       },
-    }) as any as AgentTracesServices;
+    } as any) as AgentTracesServices);
 
   const createMockState = (
     queryString: string,
@@ -148,12 +148,12 @@ describe('detectAndSetOptimalTab', () => {
   });
 
   it('handles tab without prepareQuery', async () => {
-    const services = {
+    const services = ({
       tabRegistry: {
         getTab: jest.fn().mockReturnValue({ id: AGENT_TRACES_TRACES_TAB_ID }),
         getAllTabs: jest.fn().mockReturnValue([]),
       },
-    } as any as AgentTracesServices;
+    } as any) as AgentTracesServices;
     mockGetState.mockReturnValue(createMockState(''));
 
     const thunk = detectAndSetOptimalTab({ services });

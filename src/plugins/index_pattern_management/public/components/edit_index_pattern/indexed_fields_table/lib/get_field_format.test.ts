@@ -31,7 +31,7 @@
 import { IIndexPattern } from '../../../../../../data/public';
 import { getFieldFormat } from './get_field_format';
 
-const indexPattern = {
+const indexPattern = ({
   fieldFormatMap: {
     Elastic: {
       type: {
@@ -39,7 +39,7 @@ const indexPattern = {
       },
     },
   },
-} as unknown as IIndexPattern;
+} as unknown) as IIndexPattern;
 
 describe('getFieldFormat', () => {
   test('should handle no arguments', () => {

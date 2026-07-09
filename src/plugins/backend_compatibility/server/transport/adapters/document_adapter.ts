@@ -27,8 +27,8 @@ export function translateBulkRequest(params: any, backend: BackendInfo): any {
   const source = Array.isArray(params.bulkBody)
     ? params.bulkBody
     : Array.isArray(params.body)
-      ? params.body
-      : null;
+    ? params.body
+    : null;
   if (!source) return params;
 
   const transformed = source.map((item: any) => {

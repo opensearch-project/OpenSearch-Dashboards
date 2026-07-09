@@ -57,10 +57,7 @@ export const createInputControlVisController = (deps: InputControlVisDependencie
     timeFilterSubscription: Subscription;
     visParams?: VisParams;
 
-    constructor(
-      public el: Element,
-      public vis: ExprVis
-    ) {
+    constructor(public el: Element, public vis: ExprVis) {
       this.controls = [];
 
       this.queryBarUpdateHandler = this.updateControlsFromOsd.bind(this);

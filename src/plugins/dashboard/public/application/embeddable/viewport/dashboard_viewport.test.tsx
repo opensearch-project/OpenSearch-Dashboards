@@ -54,7 +54,9 @@ let dashboardContainer: DashboardContainer | undefined;
 
 const ExitFullScreenButton = () => <div data-test-subj="exitFullScreenModeText">EXIT</div>;
 
-function getProps(props?: Partial<DashboardViewportProps>): {
+function getProps(
+  props?: Partial<DashboardViewportProps>
+): {
   props: DashboardViewportProps;
   options: DashboardContainerOptions;
 } {

@@ -77,12 +77,14 @@ const sectionsHeader = i18n.translate('indexPatternManagement.indexPattern.secti
  */
 const IPM_APP_ID = 'indexPatterns';
 
-export class IndexPatternManagementPlugin implements Plugin<
-  IndexPatternManagementSetup,
-  IndexPatternManagementStart,
-  IndexPatternManagementSetupDependencies,
-  IndexPatternManagementStartDependencies
-> {
+export class IndexPatternManagementPlugin
+  implements
+    Plugin<
+      IndexPatternManagementSetup,
+      IndexPatternManagementStart,
+      IndexPatternManagementSetupDependencies,
+      IndexPatternManagementStartDependencies
+    > {
   private readonly indexPatternManagementService = new IndexPatternManagementService();
 
   constructor(initializerContext: PluginInitializerContext) {}

@@ -151,8 +151,9 @@ export class QueryBuilder {
 
     const urlStateStorage = this.getServices().osdUrlStateStorage;
     if (urlStateStorage) {
-      queryEditorStateFromUrl =
-        urlStateStorage?.get<Partial<QueryEditorState>>(QUERY_EDITOR_STATE_KEY);
+      queryEditorStateFromUrl = urlStateStorage?.get<Partial<QueryEditorState>>(
+        QUERY_EDITOR_STATE_KEY
+      );
       queryStateFromUrl = urlStateStorage?.get<QueryState>(QUERY_BUILDER_QUERY_STATE_KEY);
     }
 

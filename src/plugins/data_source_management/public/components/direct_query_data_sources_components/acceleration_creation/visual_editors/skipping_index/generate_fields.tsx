@@ -40,12 +40,11 @@ export const GenerateFields = ({
   notifications,
 }: GenerateFieldsProps) => {
   const [isGenerateRun, setIsGenerateRun] = useState(false);
-  const {
-    loadStatus,
-    startLoading,
-    stopLoading: _stopLoading,
-    pollingResult,
-  } = useDirectQuery(http, notifications, dataSourceMDSId);
+  const { loadStatus, startLoading, stopLoading: _stopLoading, pollingResult } = useDirectQuery(
+    http,
+    notifications,
+    dataSourceMDSId
+  );
   const [replaceDefinitionModal, setReplaceDefinitionModal] = useState(<></>);
 
   const mapToDataTableFields = (fieldName: string) => {

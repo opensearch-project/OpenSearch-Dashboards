@@ -58,10 +58,7 @@ export class UiSettingsApi {
   private sendInProgress = false;
   private readonly loadingCount$ = new BehaviorSubject(0);
 
-  constructor(
-    private readonly http: HttpSetup,
-    private readonly scope?: UiSettingScope
-  ) {}
+  constructor(private readonly http: HttpSetup, private readonly scope?: UiSettingScope) {}
 
   /**
    * Adds a key+value that will be sent to the server ASAP. If a request is

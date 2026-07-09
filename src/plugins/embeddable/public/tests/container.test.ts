@@ -308,14 +308,19 @@ test('Container view mode change propagates to children', async () => {
 });
 
 test(`Container updates its state when a child's input is updated`, async () => {
-  const { container, embeddable, start, coreStart, uiActions } =
-    await creatHelloWorldContainerAndEmbeddable(
-      { id: 'hello', panels: {}, viewMode: ViewMode.VIEW },
-      {
-        id: '123',
-        firstName: 'Susy',
-      }
-    );
+  const {
+    container,
+    embeddable,
+    start,
+    coreStart,
+    uiActions,
+  } = await creatHelloWorldContainerAndEmbeddable(
+    { id: 'hello', panels: {}, viewMode: ViewMode.VIEW },
+    {
+      id: '123',
+      firstName: 'Susy',
+    }
+  );
 
   expect(isErrorEmbeddable(embeddable)).toBe(false);
 

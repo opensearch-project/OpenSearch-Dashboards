@@ -81,10 +81,7 @@ export interface PatternLayoutConfigType {
  */
 export class PatternLayout implements Layout {
   public static configSchema = patternLayoutSchema;
-  constructor(
-    private readonly pattern = DEFAULT_PATTERN,
-    private readonly highlight = false
-  ) {}
+  constructor(private readonly pattern = DEFAULT_PATTERN, private readonly highlight = false) {}
 
   /**
    * Formats `LogRecord` into a string based on the specified `pattern` and `highlighting` options.

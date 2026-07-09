@@ -155,14 +155,11 @@ export class UiSettingsClient implements IUiSettingsClient {
   async getAll<T = any>(scope?: UiSettingScope) {
     const raw = await this.getRaw(scope);
 
-    return Object.keys(raw).reduce(
-      (all, key) => {
-        const item = raw[key];
-        all[key] = ('userValue' in item ? item.userValue : item.value) as T;
-        return all;
-      },
-      {} as Record<string, T>
-    );
+    return Object.keys(raw).reduce((all, key) => {
+      const item = raw[key];
+      all[key] = ('userValue' in item ? item.userValue : item.value) as T;
+      return all;
+    }, {} as Record<string, T>);
   }
 
   async getUserProvided<T = unknown>(
@@ -464,8 +461,11 @@ export class UiSettingsClient implements IUiSettingsClient {
   }
 
   private isIgnorableError(error: Error, ignore401Errors: boolean) {
-    const { isForbiddenError, isOpenSearchUnavailableError, isNotAuthorizedError } =
-      this.savedObjectsClient.errors;
+    const {
+      isForbiddenError,
+      isOpenSearchUnavailableError,
+      isNotAuthorizedError,
+    } = this.savedObjectsClient.errors;
 
     return (
       isForbiddenError(error) ||

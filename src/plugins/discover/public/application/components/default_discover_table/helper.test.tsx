@@ -15,10 +15,10 @@ describe('getLegacyDisplayedColumns', () => {
   let indexPattern: IndexPattern;
 
   beforeEach(() => {
-    indexPattern = {
+    indexPattern = ({
       getFieldByName: mockGetFieldByName,
       timeFieldName: 'timestamp',
-    } as unknown as IndexPattern;
+    } as unknown) as IndexPattern;
     mockGetFieldByName.mockReset();
     mockedGetOsdFieldOverrides.mockReset();
   });

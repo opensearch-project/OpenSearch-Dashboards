@@ -57,14 +57,17 @@ export function setServices(newServices: ExploreServices) {
 export const setUiActions = (pluginUiActions: UiActionsStart) => (uiActions = pluginUiActions);
 export const getUiActions = () => uiActions;
 
-export const [getHeaderActionMenuMounter, setHeaderActionMenuMounter] =
-  createGetterSetter<AppMountParameters['setHeaderActionMenu']>('headerActionMenuMounter');
+export const [getHeaderActionMenuMounter, setHeaderActionMenuMounter] = createGetterSetter<
+  AppMountParameters['setHeaderActionMenu']
+>('headerActionMenuMounter');
 
-export const [getDocViewsRegistry, setDocViewsRegistry] =
-  createGetterSetter<DocViewsRegistry>('DocViewsRegistry');
+export const [getDocViewsRegistry, setDocViewsRegistry] = createGetterSetter<DocViewsRegistry>(
+  'DocViewsRegistry'
+);
 
-export const [getDocViewsLinksRegistry, setDocViewsLinksRegistry] =
-  createGetterSetter<DocViewsLinksRegistry>('DocViewsLinksRegistry');
+export const [getDocViewsLinksRegistry, setDocViewsLinksRegistry] = createGetterSetter<
+  DocViewsLinksRegistry
+>('DocViewsLinksRegistry');
 
 /**
  * Makes sure discover and context are using one instance of history.
@@ -84,8 +87,9 @@ export const syncHistoryLocations = () => {
   return h;
 };
 
-export const [getScopedHistory, setScopedHistory] =
-  createGetterSetter<ScopedHistory>('scopedHistory');
+export const [getScopedHistory, setScopedHistory] = createGetterSetter<ScopedHistory>(
+  'scopedHistory'
+);
 
 export const { getRequestInspectorStats, getResponseInspectorStats, tabifyAggResponse } = search;
 export { unhashUrl, redirectWhenMissing } from '../../../../../opensearch_dashboards_utils/public';

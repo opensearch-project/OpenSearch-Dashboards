@@ -35,60 +35,58 @@ export const replaceNullWithZero = (
 /**
  * Create area series configuration for ECharts
  */
-export const createAreaSeries =
-  <T extends BaseChartStyle>({
-    styles,
-    seriesFields,
-    categoryField,
-    stack,
-  }: {
-    styles: AreaChartStyle;
-    seriesFields: string[] | ((headers?: string[]) => string[]);
-    categoryField: string;
-    stack?: boolean;
-  }): PipelineFn<T> =>
-  (state) => {
-    const { transformedData = [], axisColumnMappings } = state;
-    const palette = getColors().categories;
-    const newState = { ...state };
+export const createAreaSeries = <T extends BaseChartStyle>({
+  styles,
+  seriesFields,
+  categoryField,
+  stack,
+}: {
+  styles: AreaChartStyle;
+  seriesFields: string[] | ((headers?: string[]) => string[]);
+  categoryField: string;
+  stack?: boolean;
+}): PipelineFn<T> => (state) => {
+  const { transformedData = [], axisColumnMappings } = state;
+  const palette = getColors().categories;
+  const newState = { ...state };
 
-    if (!Array.isArray(seriesFields)) {
-      seriesFields = seriesFields(transformedData[0]);
-    }
+  if (!Array.isArray(seriesFields)) {
+    seriesFields = seriesFields(transformedData[0]);
+  }
 
-    const allColumns = Object.values(axisColumnMappings).flat();
-    const sortedNames = seriesFields.map((f) => getSeriesDisplayName(f, allColumns)).sort();
+  const allColumns = Object.values(axisColumnMappings).flat();
+  const sortedNames = seriesFields.map((f) => getSeriesDisplayName(f, allColumns)).sort();
 
-    const thresholdLines = generateThresholdLines(styles.thresholdOptions);
-    const series = seriesFields?.map((item: string, index: number) => {
-      const name = getSeriesDisplayName(item, allColumns);
-      const colorIndex = sortedNames.indexOf(name);
+  const thresholdLines = generateThresholdLines(styles.thresholdOptions);
+  const series = seriesFields?.map((item: string, index: number) => {
+    const name = getSeriesDisplayName(item, allColumns);
+    const colorIndex = sortedNames.indexOf(name);
 
-      return {
-        name,
-        type: 'line',
-        showSymbol: false,
-        connectNulls: true,
-        stack: stack ? 'Total' : undefined,
-        areaStyle: {
-          opacity: styles.areaOpacity || DEFAULT_OPACITY,
-        },
-        smooth: true,
-        encode: {
-          x: categoryField,
-          y: item,
-        },
-        emphasis: {
-          focus: 'self',
-        },
-        itemStyle: {
-          color: palette[colorIndex % palette.length],
-        },
-        ...(index === 0 && thresholdLines),
-      };
-    });
+    return {
+      name,
+      type: 'line',
+      showSymbol: false,
+      connectNulls: true,
+      stack: stack ? 'Total' : undefined,
+      areaStyle: {
+        opacity: styles.areaOpacity || DEFAULT_OPACITY,
+      },
+      smooth: true,
+      encode: {
+        x: categoryField,
+        y: item,
+      },
+      emphasis: {
+        focus: 'self',
+      },
+      itemStyle: {
+        color: palette[colorIndex % palette.length],
+      },
+      ...(index === 0 && thresholdLines),
+    };
+  });
 
-    newState.series = series as LineSeriesOption[];
+  newState.series = series as LineSeriesOption[];
 
-    return newState;
-  };
+  return newState;
+};

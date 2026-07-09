@@ -51,8 +51,9 @@ export const DataSourceFilterGroup: React.FC<DataSourceFilterGroupProps> = ({
   defaultDataSource,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [selectionToggleSelectedId, setSelectionToggleSelectedId] =
-    useState<SelectionToggleOptionIds>('select_all');
+  const [selectionToggleSelectedId, setSelectionToggleSelectedId] = useState<
+    SelectionToggleOptionIds
+  >('select_all');
 
   const onButtonClick = () => {
     setIsPopoverOpen(!isPopoverOpen);

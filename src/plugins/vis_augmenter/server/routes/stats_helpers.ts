@@ -26,21 +26,23 @@ export const getAugmentVisSavedObjects = async (
   savedObjectsClient: SavedObjectsClientContract,
   perPage: number
 ): Promise<SavedObjectsFindResponse<AugmentVisSavedObjectAttributes>> => {
-  const augmentVisSavedObjects: SavedObjectsFindResponse<AugmentVisSavedObjectAttributes> =
-    await savedObjectsClient?.find({
+  const augmentVisSavedObjects: SavedObjectsFindResponse<AugmentVisSavedObjectAttributes> = await savedObjectsClient?.find(
+    {
       type: 'augment-vis',
       perPage,
-    });
+    }
+  );
   // If there are more than perPage of objs, we need to make additional requests
   if (augmentVisSavedObjects.total > perPage) {
     const iterations = Math.ceil(augmentVisSavedObjects.total / perPage);
     for (let i = 1; i < iterations; i++) {
-      const augmentVisSavedObjectsPage: SavedObjectsFindResponse<AugmentVisSavedObjectAttributes> =
-        await savedObjectsClient?.find({
+      const augmentVisSavedObjectsPage: SavedObjectsFindResponse<AugmentVisSavedObjectAttributes> = await savedObjectsClient?.find(
+        {
           type: 'augment-vis',
           perPage,
           page: i + 1,
-        });
+        }
+      );
       augmentVisSavedObjects.saved_objects = [
         ...augmentVisSavedObjects.saved_objects,
         ...augmentVisSavedObjectsPage.saved_objects,

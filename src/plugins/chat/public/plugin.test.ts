@@ -189,9 +189,8 @@ describe('ChatPlugin', () => {
       plugin.start(mockCoreStart, mockDeps);
 
       // Get the mount function that was registered
-      const registerCall = (
-        mockCoreStart.chrome.navControls.registerPrimaryHeaderRight as jest.Mock
-      ).mock.calls[0];
+      const registerCall = (mockCoreStart.chrome.navControls
+        .registerPrimaryHeaderRight as jest.Mock).mock.calls[0];
       mountFunction = registerCall[0].mount;
     });
 
@@ -250,9 +249,8 @@ describe('ChatPlugin', () => {
     it('should pass correct props to ChatHeaderButton', () => {
       plugin.start(mockCoreStart, mockDeps);
 
-      const registerCall = (
-        mockCoreStart.chrome.navControls.registerPrimaryHeaderRight as jest.Mock
-      ).mock.calls[0];
+      const registerCall = (mockCoreStart.chrome.navControls
+        .registerPrimaryHeaderRight as jest.Mock).mock.calls[0];
       const mountFunction = registerCall[0].mount;
       const mockElement = document.createElement('div');
 

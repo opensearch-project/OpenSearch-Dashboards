@@ -72,12 +72,14 @@ export interface DataPluginSetupDependencies {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DataPluginStartDependencies {}
 
-export class DataServerPlugin implements Plugin<
-  DataPluginSetup,
-  DataPluginStart,
-  DataPluginSetupDependencies,
-  DataPluginStartDependencies
-> {
+export class DataServerPlugin
+  implements
+    Plugin<
+      DataPluginSetup,
+      DataPluginStart,
+      DataPluginSetupDependencies,
+      DataPluginStartDependencies
+    > {
   private readonly searchService: SearchService;
   private readonly scriptsService: ScriptsService;
   private readonly dqlTelemetryService: DqlTelemetryService;

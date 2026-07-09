@@ -13,17 +13,17 @@ jest.mock('../../../../framework/hooks/direct_query_hook', () => ({
   useDirectQuery: jest.fn(),
 }));
 
-const mockHttp: HttpStart = {
+const mockHttp: HttpStart = ({
   get: jest.fn(),
   post: jest.fn(),
-} as unknown as HttpStart;
+} as unknown) as HttpStart;
 
-const mockNotifications: NotificationsStart = {
+const mockNotifications: NotificationsStart = ({
   toasts: {
     addSuccess: jest.fn(),
     addDanger: jest.fn(),
   },
-} as unknown as NotificationsStart;
+} as unknown) as NotificationsStart;
 
 const mockAcceleration: CachedAcceleration = {
   flintIndexName: 'flint_index',

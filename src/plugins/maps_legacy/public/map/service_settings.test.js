@@ -192,7 +192,8 @@ describe('service_settings (FKA tile_map test)', function () {
           {
             id: 'road_map',
             name: 'Road Map - Bright',
-            url: 'https://tiles.foobar/raster/styles/osm-bright/{z}/{x}/{y}.png?opensearch_tile_service_tos=agree&my_app_name=opensearch-dashboards&my_app_version=1.2.3',
+            url:
+              'https://tiles.foobar/raster/styles/osm-bright/{z}/{x}/{y}.png?opensearch_tile_service_tos=agree&my_app_name=opensearch-dashboards&my_app_version=1.2.3',
             minZoom: 0,
             maxZoom: 10,
             attribution:

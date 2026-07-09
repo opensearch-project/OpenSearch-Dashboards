@@ -195,8 +195,8 @@ export const registerBuiltInTabs = (
       registryFlavor === ExploreFlavor.Metrics
         ? [EXPLORE_DEFAULT_LANGUAGE, 'PROMQL']
         : registryFlavor === ExploreFlavor.Logs
-          ? [EXPLORE_DEFAULT_LANGUAGE, 'SQL']
-          : [EXPLORE_DEFAULT_LANGUAGE],
+        ? [EXPLORE_DEFAULT_LANGUAGE, 'SQL']
+        : [EXPLORE_DEFAULT_LANGUAGE],
 
     // Prepare query based on language
     prepareQuery: (query) => {

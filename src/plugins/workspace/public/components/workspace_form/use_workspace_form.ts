@@ -41,10 +41,9 @@ export const useWorkspaceForm = ({
   const [isEditing, setIsEditing] = useState(false);
 
   const [featureConfigs, setFeatureConfigs] = useState<string[]>(defaultValues?.features ?? []);
-  const selectedUseCase = useMemo(
-    () => getFirstUseCaseOfFeatureConfigs(featureConfigs),
-    [featureConfigs]
-  );
+  const selectedUseCase = useMemo(() => getFirstUseCaseOfFeatureConfigs(featureConfigs), [
+    featureConfigs,
+  ]);
   const [permissionSettings, setPermissionSettings] = useState<
     WorkspaceFormDataState['permissionSettings']
   >(defaultValues?.permissionSettings ?? []);
@@ -77,10 +76,9 @@ export const useWorkspaceForm = ({
     ? getNumberOfChanges(formData, defaultValuesRef.current)
     : 0;
 
-  const privacyType = useMemo(
-    () => convertPermissionsToPrivacyType(permissionSettings),
-    [permissionSettings]
-  );
+  const privacyType = useMemo(() => convertPermissionsToPrivacyType(permissionSettings), [
+    permissionSettings,
+  ]);
 
   if (!formIdRef.current) {
     formIdRef.current = workspaceHtmlIdGenerator();

@@ -50,7 +50,7 @@ const setup = (
   );
 };
 
-const mockDataSourceManagementSetup = {} as unknown as DataSourceManagementPluginSetup;
+const mockDataSourceManagementSetup = ({} as unknown) as DataSourceManagementPluginSetup;
 
 describe('WorkspaceForm', () => {
   it('should enable data source panel for dashboard admin and when data source is enabled', () => {

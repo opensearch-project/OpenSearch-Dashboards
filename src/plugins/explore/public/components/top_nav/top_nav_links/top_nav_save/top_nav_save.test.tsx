@@ -22,13 +22,13 @@ jest.mock('../../../../../../saved_objects/public', () => ({
   showSaveModal: jest.fn(),
 }));
 
-const mockServices = {
+const mockServices = ({
   core: {
     i18n: {
       Context: React.Fragment,
     },
   },
-} as unknown as ExploreServices;
+} as unknown) as ExploreServices;
 
 const mockSearchContext: ExecutionContextSearch = {
   query: { query: 'test', language: 'PPL' },
@@ -57,7 +57,7 @@ const mockSaveStateProps = {
   activeTabId: 'logs',
 };
 
-const mockSavedExplore = {
+const mockSavedExplore = ({
   id: 'test-id',
   title: 'Test Explore',
   type: 'logs',
@@ -70,7 +70,7 @@ const mockSavedExplore = {
   isSaved: jest.fn(() => true),
   getFullPath: jest.fn(),
   getOpenSearchType: jest.fn(),
-} as unknown as SavedExplore;
+} as unknown) as SavedExplore;
 
 describe('top_nav_save', () => {
   beforeEach(() => {

@@ -103,5 +103,5 @@ export async function fetchHitsInInterval(
     .fetch();
 
   // TODO: There's a difference in the definition of SearchResponse and OpenSearchHitRecord
-  return (response.hits?.hits as unknown as OpenSearchHitRecord[]) || [];
+  return ((response.hits?.hits as unknown) as OpenSearchHitRecord[]) || [];
 }

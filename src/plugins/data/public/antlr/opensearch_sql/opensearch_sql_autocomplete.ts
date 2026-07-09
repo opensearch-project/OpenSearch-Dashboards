@@ -88,8 +88,7 @@ const rulesToVisit = new Set([
 
 class OpenSearchSqlSymbolTableVisitor
   extends OpenSearchSQLParserVisitor<{}>
-  implements ISymbolTableVisitor
-{
+  implements ISymbolTableVisitor {
   symbolTable: c3.SymbolTable;
   scope: c3.ScopedSymbol;
 

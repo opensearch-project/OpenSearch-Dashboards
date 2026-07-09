@@ -78,12 +78,14 @@ export interface VisTypeTimelinePluginStart {
 }
 
 /** @internal */
-export class TimelineVisPlugin implements Plugin<
-  void,
-  VisTypeTimelinePluginStart,
-  TimelineVisSetupDependencies,
-  TimelineVisStartDependencies
-> {
+export class TimelineVisPlugin
+  implements
+    Plugin<
+      void,
+      VisTypeTimelinePluginStart,
+      TimelineVisSetupDependencies,
+      TimelineVisStartDependencies
+    > {
   constructor(public initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
   public setup(

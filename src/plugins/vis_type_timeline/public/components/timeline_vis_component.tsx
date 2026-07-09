@@ -328,9 +328,9 @@ function TimelineVisComponent({
             legendValueNumbers.eq(i).empty();
           } else {
             let label = y.toFixed(precision);
-            const formatter = (series.yaxis as unknown as Axis).tickFormatter;
+            const formatter = ((series.yaxis as unknown) as Axis).tickFormatter;
             if (formatter) {
-              label = formatter(Number(label), series.yaxis as unknown as Axis);
+              label = formatter(Number(label), (series.yaxis as unknown) as Axis);
             }
             legendValueNumbers.eq(i).text(`(${label})`);
           }
@@ -441,10 +441,9 @@ function TimelineVisComponent({
     }
   }, [chartElem, plotHoverHandler]);
 
-  const title: string = useMemo(
-    () => last(compact(map(seriesList.list, '_title'))) || '',
-    [seriesList.list]
-  );
+  const title: string = useMemo(() => last(compact(map(seriesList.list, '_title'))) || '', [
+    seriesList.list,
+  ]);
 
   return (
     <div ref={elementRef} className="timChart">

@@ -30,10 +30,9 @@ export function filterColumns(
     return columns.length > 0 ? columns : ['_source'];
   }
   // if true, we keep columns that exist in the new index pattern
-  const fieldsName = (
-    fieldCounts
-      ? getIndexPatternFieldList(indexPattern, fieldCounts)
-      : indexPattern?.fields.getAll() || []
+  const fieldsName = (fieldCounts
+    ? getIndexPatternFieldList(indexPattern, fieldCounts)
+    : indexPattern?.fields.getAll() || []
   ).map((fld) => fld.name);
 
   // combine columns and defaultColumns without duplicates

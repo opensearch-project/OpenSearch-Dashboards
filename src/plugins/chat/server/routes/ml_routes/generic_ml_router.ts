@@ -239,7 +239,7 @@ export class GenericMLRouter implements MLAgentRouter {
           mlResponse.headers['content-encoding'] || mlResponse.headers['Content-Encoding'];
         const encHeader = Array.isArray(contentEncoding)
           ? contentEncoding.join(',')
-          : (contentEncoding ?? '');
+          : contentEncoding ?? '';
         const encodings = encHeader
           .toLowerCase()
           .split(',')

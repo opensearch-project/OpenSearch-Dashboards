@@ -12,9 +12,9 @@ describe('TimeRangeToolRegistration', () => {
   let mockUseAssistantAction: jest.Mock;
 
   beforeEach(() => {
-    mockTimefilter = {
+    mockTimefilter = ({
       setTime: jest.fn(),
-    } as unknown as jest.Mocked<TimefilterContract>;
+    } as unknown) as jest.Mocked<TimefilterContract>;
     mockUseAssistantAction = jest.fn();
   });
 

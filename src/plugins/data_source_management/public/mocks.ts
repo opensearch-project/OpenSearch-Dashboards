@@ -36,11 +36,13 @@ import { ConfigSchema } from '../config';
 
 export const mockInitializerContext = {
   config: {
-    get: jest.fn((): ConfigSchema => ({
-      manageableBy: 'all',
-      dataSourceAdmin: { groups: [] as string[] },
-      directQuerySyncEnabled: false,
-    })),
+    get: jest.fn(
+      (): ConfigSchema => ({
+        manageableBy: 'all',
+        dataSourceAdmin: { groups: [] as string[] },
+        directQuerySyncEnabled: false,
+      })
+    ),
   },
 };
 
@@ -164,8 +166,15 @@ export const docLinks = {
 export const authenticationMethodRegistry = new AuthenticationMethodRegistry();
 
 const createDataSourceManagementContext = () => {
-  const { chrome, application, savedObjects, uiSettings, notifications, overlays, workspaces } =
-    coreMock.createStart();
+  const {
+    chrome,
+    application,
+    savedObjects,
+    uiSettings,
+    notifications,
+    overlays,
+    workspaces,
+  } = coreMock.createStart();
   const { http } = coreMock.createSetup();
 
   return {
@@ -1108,7 +1117,8 @@ checkpoint_location = 's3://test/'
 export const mockDatasourcesQuery = {
   data: {
     ok: true,
-    resp: '[{  "name": "my_glue",  "description": "",  "connector": "S3GLUE",  "allowedRoles": [],  "properties": {      "glue.indexstore.opensearch.uri": "",      "glue.indexstore.opensearch.region": ""  }}]',
+    resp:
+      '[{  "name": "my_glue",  "description": "",  "connector": "S3GLUE",  "allowedRoles": [],  "properties": {      "glue.indexstore.opensearch.uri": "",      "glue.indexstore.opensearch.region": ""  }}]',
   },
 };
 

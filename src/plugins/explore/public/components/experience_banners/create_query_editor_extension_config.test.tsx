@@ -27,22 +27,22 @@ const dataExplorerObservable = new Observable((subscriber) => {
 });
 const mockNavigateToApp = jest.fn();
 
-const coreMockWithExploreId = {
+const coreMockWithExploreId = ({
   workspaces: {
     currentWorkspace$,
   },
   getStartServices: async () => [
     { application: { currentAppId$: exploreObservable, navigateToApp: mockNavigateToApp } },
   ],
-} as unknown as CoreSetup<ExploreStartDependencies, ExplorePluginStart>;
-const coreMockWithDataExplorerId = {
+} as unknown) as CoreSetup<ExploreStartDependencies, ExplorePluginStart>;
+const coreMockWithDataExplorerId = ({
   workspaces: {
     currentWorkspace$,
   },
   getStartServices: async () => [
     { application: { currentAppId$: dataExplorerObservable, navigateToApp: mockNavigateToApp } },
   ],
-} as unknown as CoreSetup<ExploreStartDependencies, ExplorePluginStart>;
+} as unknown) as CoreSetup<ExploreStartDependencies, ExplorePluginStart>;
 
 describe('createQueryEditorExtensionConfig', () => {
   it('returns the correct id and order', () => {

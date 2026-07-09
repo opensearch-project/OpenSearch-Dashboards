@@ -54,9 +54,8 @@ interface Params {
   useHash: boolean;
 }
 
-export class AgentTracesUrlGenerator implements UrlGeneratorsDefinition<
-  typeof AGENT_TRACES_APP_URL_GENERATOR
-> {
+export class AgentTracesUrlGenerator
+  implements UrlGeneratorsDefinition<typeof AGENT_TRACES_APP_URL_GENERATOR> {
   constructor(private readonly params: Params) {}
 
   public readonly id = AGENT_TRACES_APP_URL_GENERATOR;

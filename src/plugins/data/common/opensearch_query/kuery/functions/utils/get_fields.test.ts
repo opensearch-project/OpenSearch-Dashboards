@@ -40,9 +40,9 @@ describe('getFields', () => {
   let indexPattern: IIndexPattern;
 
   beforeEach(() => {
-    indexPattern = {
+    indexPattern = ({
       fields,
-    } as unknown as IIndexPattern;
+    } as unknown) as IIndexPattern;
   });
 
   describe('field names without a wildcard', () => {

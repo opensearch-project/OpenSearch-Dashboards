@@ -46,11 +46,11 @@ const { createStateContainer, syncState } = jest.requireMock(
   '../../../../opensearch_dashboards_utils/public'
 );
 
-const osdUrlStateStorage = {
+const osdUrlStateStorage = ({
   set: jest.fn(),
   get: jest.fn(() => ({ linked: false })),
   flush: jest.fn().mockReturnValue(true),
-} as unknown as IOsdUrlStateStorage;
+} as unknown) as IOsdUrlStateStorage;
 
 describe('createDashboardGlobalAndAppState', () => {
   const mockServices = createDashboardServicesMock();
@@ -64,13 +64,16 @@ describe('createDashboardGlobalAndAppState', () => {
     getFilters: () => {},
   } as SavedObjectDashboard;
 
-  const { stateContainer, stopStateSync, stopSyncingQueryServiceStateWithUrl } =
-    createDashboardGlobalAndAppState({
-      stateDefaults: dashboardAppStateStub,
-      osdUrlStateStorage,
-      services: mockServices,
-      savedDashboardInstance,
-    });
+  const {
+    stateContainer,
+    stopStateSync,
+    stopSyncingQueryServiceStateWithUrl,
+  } = createDashboardGlobalAndAppState({
+    stateDefaults: dashboardAppStateStub,
+    osdUrlStateStorage,
+    services: mockServices,
+    savedDashboardInstance,
+  });
   const transitions = createStateContainer.mock.calls[0][1];
 
   test('should initialize dashboard app state', () => {

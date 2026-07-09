@@ -20,7 +20,7 @@ export const createMockResponse = (
     type: 'basic',
     url: '',
     clone: jest.fn(),
-    body: jest.fn() as unknown as ReadableStream,
+    body: (jest.fn() as unknown) as ReadableStream,
     bodyUsed: true,
     arrayBuffer: jest.fn(),
     blob: jest.fn(),
@@ -37,8 +37,8 @@ export const createMockHttpResponse = (
   body: any
 ): HttpResponse<any> => {
   return {
-    fetchOptions: jest.fn() as unknown as Readonly<HttpFetchOptionsWithPath>,
-    request: jest.fn() as unknown as Readonly<Request>,
+    fetchOptions: (jest.fn() as unknown) as Readonly<HttpFetchOptionsWithPath>,
+    request: (jest.fn() as unknown) as Readonly<Request>,
     response: createMockResponse(statusCode, statusText, headers),
     body,
   };

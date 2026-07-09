@@ -29,11 +29,11 @@ describe('Token Dictionary and Ignored Tokens', () => {
 describe('processVisitedRules', () => {
   // createTokenStream takes a list of 'tokens' defined only by its type or an actual object to be returned as the Token
   const createTokenStream = (list: Array<number | { type: number; text: string }>) =>
-    ({
+    (({
       get: jest.fn((num: number) =>
         typeof list[num] === 'number' ? { type: list[num] } : list[num]
       ),
-    }) as unknown as TokenStream;
+    } as unknown) as TokenStream);
 
   it('should set the correct suggestions based on the rules visited', () => {
     const mockRules = new Map();
@@ -183,7 +183,7 @@ describe('getParseTree', () => {
       fromClause: jest.fn().mockReturnValue('fromTree'),
     };
 
-    expect(getParseTree(mockParser as unknown as OpenSearchPPLParser, 'from')).toBe('fromTree');
+    expect(getParseTree((mockParser as unknown) as OpenSearchPPLParser, 'from')).toBe('fromTree');
   });
 
   it('should return root parse tree if no type is provided', () => {
@@ -191,7 +191,7 @@ describe('getParseTree', () => {
       root: jest.fn().mockReturnValue('rootTree'),
     };
 
-    expect(getParseTree(mockParser as unknown as OpenSearchPPLParser)).toBe('rootTree');
+    expect(getParseTree((mockParser as unknown) as OpenSearchPPLParser)).toBe('rootTree');
     expect(mockParser.root).toHaveBeenCalled();
   });
 });
@@ -208,7 +208,7 @@ describe('enrichAutocompleteResult', () => {
     const result = enrichAutocompleteResult(
       baseResult,
       rules,
-      tokenStream as unknown as TokenStream,
+      (tokenStream as unknown) as TokenStream,
       cursorTokenIndex,
       cursor,
       query
@@ -231,7 +231,7 @@ describe('enrichAutocompleteResult', () => {
     const result = enrichAutocompleteResult(
       baseResult,
       rules,
-      tokenStream as unknown as TokenStream,
+      (tokenStream as unknown) as TokenStream,
       cursorTokenIndex,
       cursor,
       query

@@ -18,10 +18,9 @@ import useObservable from 'react-use/lib/useObservable';
  */
 export const useObservableValue = <T>(observableValue$: Observable<T>, initialValue?: T) => {
   const initialValueRef = useRef(initialValue ? { value: initialValue } : undefined);
-  const observable$ = useMemo(
-    () => observableValue$.pipe(map((value) => ({ value }))),
-    [observableValue$]
-  );
+  const observable$ = useMemo(() => observableValue$.pipe(map((value) => ({ value }))), [
+    observableValue$,
+  ]);
   const observableValue = useObservable(observable$, initialValueRef.current);
 
   return observableValue?.value;

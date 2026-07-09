@@ -67,156 +67,154 @@ const buildVisualMap = (visualMap: any, styles: HeatmapChartStyle, numericalValu
   const { min, max } = styles.exclusive.percentageMode
     ? { min: 0, max: 1 }
     : styles.exclusive.scaleToDataBounds
-      ? { min: Math.min(...numericalValues), max: Math.max(...numericalValues) }
-      : inferMinMaxByIQR(numericalValues);
+    ? { min: Math.min(...numericalValues), max: Math.max(...numericalValues) }
+    : inferMinMaxByIQR(numericalValues);
 
   return { min, max, ...baseStyle };
 };
 
-export const createHeatmapSeries =
-  <T extends BaseChartStyle>({
-    styles,
-    categoryFields,
-    seriesField,
-  }: {
-    styles: HeatmapChartStyle;
-    categoryFields: string[];
-    seriesField: string;
-  }): PipelineFn<T> =>
-  (state) => {
-    const { transformedData = [], visualMap, axisColumnMappings } = state;
+export const createHeatmapSeries = <T extends BaseChartStyle>({
+  styles,
+  categoryFields,
+  seriesField,
+}: {
+  styles: HeatmapChartStyle;
+  categoryFields: string[];
+  seriesField: string;
+}): PipelineFn<T> => (state) => {
+  const { transformedData = [], visualMap, axisColumnMappings } = state;
 
-    const seriesIndex = transformedData[0].indexOf(seriesField);
+  const seriesIndex = transformedData[0].indexOf(seriesField);
 
-    if (seriesIndex < 0) {
-      throw new Error(`Series field not found in transformed data: ${seriesField}`);
-    }
+  if (seriesIndex < 0) {
+    throw new Error(`Series field not found in transformed data: ${seriesField}`);
+  }
 
-    const newState = { ...state };
+  const newState = { ...state };
 
-    const numericalValues: number[] = [];
+  const numericalValues: number[] = [];
 
-    const logSource = (rawSource: any[]) =>
-      rawSource.map((row, i) => {
-        if (i === 0) return row;
-        const newRow = [...row];
+  const logSource = (rawSource: any[]) =>
+    rawSource.map((row, i) => {
+      if (i === 0) return row;
+      const newRow = [...row];
 
-        const v = Number(newRow[seriesIndex] ?? 0);
-        newRow[seriesIndex] = v > 0 ? Math.log10(v) : null; // ensure mathematically correct
+      const v = Number(newRow[seriesIndex] ?? 0);
+      newRow[seriesIndex] = v > 0 ? Math.log10(v) : null; // ensure mathematically correct
 
-        return newRow;
-      });
+      return newRow;
+    });
 
-    const sqrtSource = (rawSource: any[]) =>
-      rawSource.map((row, i) => {
-        if (i === 0) return row;
-        const newRow = [...row];
-        const v = newRow[seriesIndex];
-        newRow[seriesIndex] = v != null && v >= 0 ? Math.sqrt(Number(v)) : null; // invalid result will not be shown in charts
-        return newRow;
-      });
+  const sqrtSource = (rawSource: any[]) =>
+    rawSource.map((row, i) => {
+      if (i === 0) return row;
+      const newRow = [...row];
+      const v = newRow[seriesIndex];
+      newRow[seriesIndex] = v != null && v >= 0 ? Math.sqrt(Number(v)) : null; // invalid result will not be shown in charts
+      return newRow;
+    });
 
-    let newTransformedData: Array<Array<string | number | null>> = [...transformedData];
-    if (styles.exclusive.colorScaleType === ScaleType.LOG) {
-      newTransformedData = logSource(transformedData);
-    } else if (styles.exclusive.colorScaleType === ScaleType.SQRT) {
-      newTransformedData = sqrtSource(transformedData);
-    }
+  let newTransformedData: Array<Array<string | number | null>> = [...transformedData];
+  if (styles.exclusive.colorScaleType === ScaleType.LOG) {
+    newTransformedData = logSource(transformedData);
+  } else if (styles.exclusive.colorScaleType === ScaleType.SQRT) {
+    newTransformedData = sqrtSource(transformedData);
+  }
 
-    if (styles.exclusive.percentageMode) {
-      const maxValue = Math.max(
-        ...newTransformedData
-          .slice(1)
-          .filter((row) => row[seriesIndex] !== null)
-          .map((row) => Number(row[seriesIndex]))
-      );
-      newTransformedData = [...newTransformedData].map((row, i) => {
-        if (i === 0) return row;
-        const newRow = [...row];
-        newRow[seriesIndex] =
-          maxValue === 0 || row[seriesIndex] === null
-            ? row[seriesIndex]
-            : Number(row[seriesIndex]) / maxValue;
-        return newRow;
-      });
-    }
+  if (styles.exclusive.percentageMode) {
+    const maxValue = Math.max(
+      ...newTransformedData
+        .slice(1)
+        .filter((row) => row[seriesIndex] !== null)
+        .map((row) => Number(row[seriesIndex]))
+    );
+    newTransformedData = [...newTransformedData].map((row, i) => {
+      if (i === 0) return row;
+      const newRow = [...row];
+      newRow[seriesIndex] =
+        maxValue === 0 || row[seriesIndex] === null
+          ? row[seriesIndex]
+          : Number(row[seriesIndex]) / maxValue;
+      return newRow;
+    });
+  }
 
-    for (let i = 1; i < newTransformedData.length; i++) {
-      if (newTransformedData[i][seriesIndex] !== null)
-        numericalValues.push(Number(newTransformedData[i][seriesIndex])); // numericalValues is used for building visual map
-    }
+  for (let i = 1; i < newTransformedData.length; i++) {
+    if (newTransformedData[i][seriesIndex] !== null)
+      numericalValues.push(Number(newTransformedData[i][seriesIndex])); // numericalValues is used for building visual map
+  }
 
-    const series: HeatmapSeriesOption[] = [
-      {
-        type: 'heatmap',
-        emphasis: {
-          itemStyle: {
-            shadowBlur: 10,
-          },
-        },
-        animation: false,
-        label: {
-          show: styles.exclusive.label.show,
-          ...(styles.exclusive.label.overwriteColor && {
-            color: styles.exclusive.label.color ?? 'white',
-          }),
-          ...(styles.exclusive.label.rotate && { rotate: 45 }),
-          formatter: (params: any) => {
-            const v = Array.isArray(params.value) ? params.value[seriesIndex] : params.value;
-            return typeof v === 'number' ? v.toFixed(2) : v; // trim to 2 decimals
-          },
-        },
-        tooltip: {
-          formatter: (params) => {
-            if (!params.value || !Array.isArray(params.value)) {
-              return '';
-            }
-
-            const seriesDisplayName = getSeriesDisplayName(
-              seriesField,
-              Object.values(axisColumnMappings).flat()
-            );
-
-            const categoryDisplayName = getSeriesDisplayName(
-              categoryFields[0],
-              Object.values(axisColumnMappings).flat()
-            );
-
-            const categoryDisplayName2 = getSeriesDisplayName(
-              categoryFields[1],
-              Object.values(axisColumnMappings).flat()
-            );
-
-            const categoryIndex = transformedData[0].indexOf(categoryFields[0]);
-            const category2Index = transformedData[0].indexOf(categoryFields[1]);
-
-            const message = `<strong>${categoryDisplayName}</strong>: ${
-              params.value[categoryIndex] ?? ''
-            }<br/><strong>${categoryDisplayName2}</strong>: ${
-              params.value[category2Index] ?? ''
-            }<br/><strong>${seriesDisplayName}</strong>: ${params.value[seriesIndex] ?? ''}`;
-
-            return DOMPurify.sanitize(message);
-          },
-        },
+  const series: HeatmapSeriesOption[] = [
+    {
+      type: 'heatmap',
+      emphasis: {
         itemStyle: {
-          borderWidth: 0.5,
-          borderColor: DEFAULT_GREY,
-        },
-        encode: {
-          x: categoryFields[0],
-          y: categoryFields[1],
-          tooltip: [...categoryFields, seriesField],
+          shadowBlur: 10,
         },
       },
-    ];
+      animation: false,
+      label: {
+        show: styles.exclusive.label.show,
+        ...(styles.exclusive.label.overwriteColor && {
+          color: styles.exclusive.label.color ?? 'white',
+        }),
+        ...(styles.exclusive.label.rotate && { rotate: 45 }),
+        formatter: (params: any) => {
+          const v = Array.isArray(params.value) ? params.value[seriesIndex] : params.value;
+          return typeof v === 'number' ? v.toFixed(2) : v; // trim to 2 decimals
+        },
+      },
+      tooltip: {
+        formatter: (params) => {
+          if (!params.value || !Array.isArray(params.value)) {
+            return '';
+          }
 
-    newState.visualMap = buildVisualMap(visualMap, styles, numericalValues);
-    newState.transformedData = newTransformedData;
-    newState.series = series as HeatmapSeriesOption[];
+          const seriesDisplayName = getSeriesDisplayName(
+            seriesField,
+            Object.values(axisColumnMappings).flat()
+          );
 
-    return newState;
-  };
+          const categoryDisplayName = getSeriesDisplayName(
+            categoryFields[0],
+            Object.values(axisColumnMappings).flat()
+          );
+
+          const categoryDisplayName2 = getSeriesDisplayName(
+            categoryFields[1],
+            Object.values(axisColumnMappings).flat()
+          );
+
+          const categoryIndex = transformedData[0].indexOf(categoryFields[0]);
+          const category2Index = transformedData[0].indexOf(categoryFields[1]);
+
+          const message = `<strong>${categoryDisplayName}</strong>: ${
+            params.value[categoryIndex] ?? ''
+          }<br/><strong>${categoryDisplayName2}</strong>: ${
+            params.value[category2Index] ?? ''
+          }<br/><strong>${seriesDisplayName}</strong>: ${params.value[seriesIndex] ?? ''}`;
+
+          return DOMPurify.sanitize(message);
+        },
+      },
+      itemStyle: {
+        borderWidth: 0.5,
+        borderColor: DEFAULT_GREY,
+      },
+      encode: {
+        x: categoryFields[0],
+        y: categoryFields[1],
+        tooltip: [...categoryFields, seriesField],
+      },
+    },
+  ];
+
+  newState.visualMap = buildVisualMap(visualMap, styles, numericalValues);
+  newState.transformedData = newTransformedData;
+  newState.series = series as HeatmapSeriesOption[];
+
+  return newState;
+};
 
 function generateGradientScheme(startHex: string, endHex: string, n: number) {
   const start = hexToRgb(startHex);

@@ -9,10 +9,7 @@ import { IPPLEventsDataSource, IPPLVisualizationDataSource } from '../common/typ
 type PPLResponse = IPPLEventsDataSource & IPPLVisualizationDataSource;
 
 export class PPLDataSource {
-  constructor(
-    private pplDataSource: PPLResponse,
-    private dataType: string
-  ) {
+  constructor(private pplDataSource: PPLResponse, private dataType: string) {
     if (this.dataType === 'jdbc') {
       this.addSchemaRowMapping();
     } else if (this.dataType === 'viz') {

@@ -73,11 +73,9 @@ interface StorageData {
 
 describe('OnPreRouting', () => {
   it('supports registering a request interceptor', async () => {
-    const {
-      registerOnPreRouting,
-      server: innerServer,
-      createRouter,
-    } = await server.setup(setupDeps);
+    const { registerOnPreRouting, server: innerServer, createRouter } = await server.setup(
+      setupDeps
+    );
     const router = createRouter('/');
 
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: 'ok' }));
@@ -100,11 +98,9 @@ describe('OnPreRouting', () => {
   });
 
   it('supports request forwarding to specified url', async () => {
-    const {
-      registerOnPreRouting,
-      server: innerServer,
-      createRouter,
-    } = await server.setup(setupDeps);
+    const { registerOnPreRouting, server: innerServer, createRouter } = await server.setup(
+      setupDeps
+    );
     const router = createRouter('/');
 
     router.get({ path: '/initial', validate: false }, (context, req, res) =>
@@ -136,11 +132,9 @@ describe('OnPreRouting', () => {
   });
 
   it('supports redirection from the interceptor', async () => {
-    const {
-      registerOnPreRouting,
-      server: innerServer,
-      createRouter,
-    } = await server.setup(setupDeps);
+    const { registerOnPreRouting, server: innerServer, createRouter } = await server.setup(
+      setupDeps
+    );
     const router = createRouter('/');
 
     const redirectUrl = '/redirectUrl';
@@ -161,11 +155,9 @@ describe('OnPreRouting', () => {
   });
 
   it('supports rejecting request and adjusting response headers', async () => {
-    const {
-      registerOnPreRouting,
-      server: innerServer,
-      createRouter,
-    } = await server.setup(setupDeps);
+    const { registerOnPreRouting, server: innerServer, createRouter } = await server.setup(
+      setupDeps
+    );
     const router = createRouter('/');
 
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
@@ -185,11 +177,9 @@ describe('OnPreRouting', () => {
   });
 
   it('does not expose error details if interceptor throws', async () => {
-    const {
-      registerOnPreRouting,
-      server: innerServer,
-      createRouter,
-    } = await server.setup(setupDeps);
+    const { registerOnPreRouting, server: innerServer, createRouter } = await server.setup(
+      setupDeps
+    );
     const router = createRouter('/');
 
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
@@ -212,16 +202,14 @@ describe('OnPreRouting', () => {
   });
 
   it('returns internal error if interceptor returns unexpected result', async () => {
-    const {
-      registerOnPreRouting,
-      server: innerServer,
-      createRouter,
-    } = await server.setup(setupDeps);
+    const { registerOnPreRouting, server: innerServer, createRouter } = await server.setup(
+      setupDeps
+    );
     const router = createRouter('/');
 
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
 
-    registerOnPreRouting((req, res, t) => ({}) as any);
+    registerOnPreRouting((req, res, t) => ({} as any));
     await server.start({ dynamicConfigService });
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
@@ -237,11 +225,9 @@ describe('OnPreRouting', () => {
   });
 
   it(`doesn't share request object between interceptors`, async () => {
-    const {
-      registerOnPreRouting,
-      server: innerServer,
-      createRouter,
-    } = await server.setup(setupDeps);
+    const { registerOnPreRouting, server: innerServer, createRouter } = await server.setup(
+      setupDeps
+    );
     const router = createRouter('/');
 
     registerOnPreRouting((req, res, t) => {
@@ -361,7 +347,7 @@ describe('OnPreAuth', () => {
 
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
 
-    registerOnPreAuth((req, res, t) => ({}) as any);
+    registerOnPreAuth((req, res, t) => ({} as any));
     await server.start({ dynamicConfigService });
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
@@ -527,7 +513,7 @@ describe('OnPostAuth', () => {
     const router = createRouter('/');
 
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
-    registerOnPostAuth((req, res, t) => ({}) as any);
+    registerOnPostAuth((req, res, t) => ({} as any));
     await server.start({ dynamicConfigService });
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
@@ -771,8 +757,9 @@ describe('Auth', () => {
 
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
 
-    const sessionStorageFactory =
-      await createCookieSessionStorageFactory<StorageData>(cookieOptions);
+    const sessionStorageFactory = await createCookieSessionStorageFactory<StorageData>(
+      cookieOptions
+    );
     registerAuth((req, res, toolkit) => {
       const user = { id: '42' };
       const sessionStorage = sessionStorageFactory.asScoped(req);
@@ -808,8 +795,9 @@ describe('Auth', () => {
     } = await server.setup(setupDeps);
     const router = createRouter('/');
 
-    const sessionStorageFactory =
-      await createCookieSessionStorageFactory<StorageData>(cookieOptions);
+    const sessionStorageFactory = await createCookieSessionStorageFactory<StorageData>(
+      cookieOptions
+    );
     registerAuth((req, res, toolkit) => {
       const user = { id: '42' };
       const sessionStorage = sessionStorageFactory.asScoped(req);
@@ -1055,7 +1043,7 @@ describe('Auth', () => {
     const router = createRouter('/');
 
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
-    registerOnPostAuth((req, res, t) => ({}) as any);
+    registerOnPostAuth((req, res, t) => ({} as any));
     await server.start({ dynamicConfigService });
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
@@ -1132,11 +1120,9 @@ describe('Auth', () => {
 
 describe('OnPreResponse', () => {
   it('supports registering response interceptors', async () => {
-    const {
-      registerOnPreResponse,
-      server: innerServer,
-      createRouter,
-    } = await server.setup(setupDeps);
+    const { registerOnPreResponse, server: innerServer, createRouter } = await server.setup(
+      setupDeps
+    );
     const router = createRouter('/');
 
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: 'ok' }));
@@ -1159,11 +1145,9 @@ describe('OnPreResponse', () => {
   });
 
   it('supports additional headers attachments', async () => {
-    const {
-      registerOnPreResponse,
-      server: innerServer,
-      createRouter,
-    } = await server.setup(setupDeps);
+    const { registerOnPreResponse, server: innerServer, createRouter } = await server.setup(
+      setupDeps
+    );
     const router = createRouter('/');
 
     router.get({ path: '/', validate: false }, (context, req, res) =>
@@ -1190,11 +1174,9 @@ describe('OnPreResponse', () => {
   });
 
   it('logs a warning if interceptor rewrites response header', async () => {
-    const {
-      registerOnPreResponse,
-      server: innerServer,
-      createRouter,
-    } = await server.setup(setupDeps);
+    const { registerOnPreResponse, server: innerServer, createRouter } = await server.setup(
+      setupDeps
+    );
     const router = createRouter('/');
 
     router.get({ path: '/', validate: false }, (context, req, res) =>
@@ -1221,11 +1203,9 @@ describe('OnPreResponse', () => {
   });
 
   it("doesn't expose error details if interceptor throws", async () => {
-    const {
-      registerOnPreResponse,
-      server: innerServer,
-      createRouter,
-    } = await server.setup(setupDeps);
+    const { registerOnPreResponse, server: innerServer, createRouter } = await server.setup(
+      setupDeps
+    );
     const router = createRouter('/');
 
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok(undefined));
@@ -1247,15 +1227,13 @@ describe('OnPreResponse', () => {
   });
 
   it('returns internal error if interceptor returns unexpected result', async () => {
-    const {
-      registerOnPreResponse,
-      server: innerServer,
-      createRouter,
-    } = await server.setup(setupDeps);
+    const { registerOnPreResponse, server: innerServer, createRouter } = await server.setup(
+      setupDeps
+    );
     const router = createRouter('/');
 
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
-    registerOnPreResponse((req, res, t) => ({}) as any);
+    registerOnPreResponse((req, res, t) => ({} as any));
     await server.start({ dynamicConfigService });
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
@@ -1271,11 +1249,9 @@ describe('OnPreResponse', () => {
   });
 
   it('cannot change response statusCode', async () => {
-    const {
-      registerOnPreResponse,
-      server: innerServer,
-      createRouter,
-    } = await server.setup(setupDeps);
+    const { registerOnPreResponse, server: innerServer, createRouter } = await server.setup(
+      setupDeps
+    );
     const router = createRouter('/');
 
     registerOnPreResponse((req, res, t) => {
@@ -1291,11 +1267,9 @@ describe('OnPreResponse', () => {
   });
 
   it('has no access to request body', async () => {
-    const {
-      registerOnPreResponse,
-      server: innerServer,
-      createRouter,
-    } = await server.setup(setupDeps);
+    const { registerOnPreResponse, server: innerServer, createRouter } = await server.setup(
+      setupDeps
+    );
     const router = createRouter('/');
     let requestBody = null;
     registerOnPreResponse((req, res, t) => {
@@ -1328,11 +1302,9 @@ describe('OnPreResponse', () => {
   });
 
   it('supports rendering a different response body', async () => {
-    const {
-      registerOnPreResponse,
-      server: innerServer,
-      createRouter,
-    } = await server.setup(setupDeps);
+    const { registerOnPreResponse, server: innerServer, createRouter } = await server.setup(
+      setupDeps
+    );
     const router = createRouter('/');
 
     router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -1356,11 +1328,9 @@ describe('OnPreResponse', () => {
   });
 
   it('supports rendering a different response body + headers', async () => {
-    const {
-      registerOnPreResponse,
-      server: innerServer,
-      createRouter,
-    } = await server.setup(setupDeps);
+    const { registerOnPreResponse, server: innerServer, createRouter } = await server.setup(
+      setupDeps
+    );
     const router = createRouter('/');
 
     router.get({ path: '/', validate: false }, (context, req, res) => {

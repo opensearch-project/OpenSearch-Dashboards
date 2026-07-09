@@ -14,10 +14,8 @@ import {
 import { DataExplorerPluginSetup, DataExplorerPluginStart } from './types';
 import { defineRoutes } from './routes';
 
-export class DataExplorerPlugin implements Plugin<
-  DataExplorerPluginSetup,
-  DataExplorerPluginStart
-> {
+export class DataExplorerPlugin
+  implements Plugin<DataExplorerPluginSetup, DataExplorerPluginStart> {
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {

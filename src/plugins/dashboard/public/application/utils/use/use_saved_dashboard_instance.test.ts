@@ -31,7 +31,7 @@ describe('useSavedDashboardInstance', () => {
     mockServices = createDashboardServicesMock();
     isChromeVisible = true;
     dashboardIdFromUrl = '1234';
-    savedDashboardInstance = {
+    savedDashboardInstance = ({
       ...dashboardAppStateStub,
       ...{
         getQuery: () => dashboardAppStateStub.query,
@@ -40,7 +40,7 @@ describe('useSavedDashboardInstance', () => {
         getFullPath: () => `/${dashboardIdFromUrl}`,
         getOpenSearchType: () => 'dashboard',
       },
-    } as unknown as SavedObjectDashboard;
+    } as unknown) as SavedObjectDashboard;
     dashboard = new Dashboard(convertToSerializedDashboard(savedDashboardInstance));
     getDashboardInstance.mockImplementation(() => ({
       savedDashboard: savedDashboardInstance,

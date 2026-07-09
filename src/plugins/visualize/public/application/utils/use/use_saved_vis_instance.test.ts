@@ -72,9 +72,8 @@ jest.mock('../../../../../vis_default_editor/public', () => ({
 }));
 jest.mock('../../../../../opensearch_dashboards_utils/public');
 
-const mockGetVisualizationInstance = jest.requireMock(
-  '../get_visualization_instance'
-).getVisualizationInstance;
+const mockGetVisualizationInstance = jest.requireMock('../get_visualization_instance')
+  .getVisualizationInstance;
 
 describe('useSavedVisInstance', () => {
   const coreStartMock = coreMock.createStart();
@@ -83,7 +82,7 @@ describe('useSavedVisInstance', () => {
   const eventEmitter = new EventEmitter();
 
   beforeEach(() => {
-    mockServices = {
+    mockServices = ({
       ...coreStartMock,
       toastNotifications,
       history: {
@@ -104,7 +103,7 @@ describe('useSavedVisInstance', () => {
           { name: 'gauge' },
         ]),
       },
-    } as unknown as VisualizeServices;
+    } as unknown) as VisualizeServices;
 
     mockDefaultEditorControllerDestroy.mockClear();
     mockEmbeddableHandlerDestroy.mockClear();

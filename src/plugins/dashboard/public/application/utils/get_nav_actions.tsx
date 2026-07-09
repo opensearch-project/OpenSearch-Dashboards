@@ -303,7 +303,7 @@ export const getNavActions = (
         return (
           <EuiCompressedCheckboxGroup
             options={checkboxes}
-            idToSelectedMap={urlParamsSelectedMap as unknown as EuiCheckboxGroupIdToSelectedMap}
+            idToSelectedMap={(urlParamsSelectedMap as unknown) as EuiCheckboxGroupIdToSelectedMap}
             onChange={handleChange}
             legend={{
               children: i18n.translate('dashboard.embedUrlParamExtension.include', {

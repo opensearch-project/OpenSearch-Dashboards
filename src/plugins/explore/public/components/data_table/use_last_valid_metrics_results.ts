@@ -32,5 +32,5 @@ export function useLastValidPrometheusResult(): IPrometheusSearchResult | null {
   const effectiveKey = hasCurrentResults ? cacheKey : lastValidKeyRef.current;
 
   const hasMetadata = useSelector((state: RootState) => !!state.results[effectiveKey]);
-  return hasMetadata ? ((resultsCache.get(effectiveKey) as IPrometheusSearchResult) ?? null) : null;
+  return hasMetadata ? (resultsCache.get(effectiveKey) as IPrometheusSearchResult) ?? null : null;
 }

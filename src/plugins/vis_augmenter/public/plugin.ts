@@ -40,12 +40,9 @@ export interface VisAugmenterStartDeps {
   visualizations: VisualizationsStart;
 }
 
-export class VisAugmenterPlugin implements Plugin<
-  VisAugmenterSetup,
-  VisAugmenterStart,
-  VisAugmenterSetupDeps,
-  VisAugmenterStartDeps
-> {
+export class VisAugmenterPlugin
+  implements
+    Plugin<VisAugmenterSetup, VisAugmenterStart, VisAugmenterSetupDeps, VisAugmenterStartDeps> {
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(

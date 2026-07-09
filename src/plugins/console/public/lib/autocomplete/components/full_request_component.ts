@@ -33,11 +33,7 @@ import { SharedComponent } from './shared_component';
 
 export class FullRequestComponent extends ConstantComponent {
   readonly name: string;
-  constructor(
-    name: string,
-    parent: SharedComponent,
-    private readonly template: string
-  ) {
+  constructor(name: string, parent: SharedComponent, private readonly template: string) {
     super(name, parent);
     this.name = name;
   }

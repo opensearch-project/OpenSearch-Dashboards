@@ -47,8 +47,7 @@ describe('DatasetTableV2', () => {
     mockGetDatasetCreationOptions.mockResolvedValue([]);
     mockGetIndices.mockResolvedValue([]);
 
-    mockContext.datasetManagementStart.creation.getDatasetCreationOptions =
-      mockGetDatasetCreationOptions;
+    mockContext.datasetManagementStart.creation.getDatasetCreationOptions = mockGetDatasetCreationOptions;
     mockContext.datasetManagementStart.columns = {
       getAll: jest.fn().mockReturnValue([]),
     };

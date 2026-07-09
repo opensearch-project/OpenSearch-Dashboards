@@ -49,7 +49,7 @@ describe('AssociatedObjectsTab utils', () => {
   describe('redirectToDiscoverWithDataSrc', () => {
     it('navigates to the explorer with the correct state', () => {
       const mockNavigateToApp = jest.fn();
-      const application = { navigateToApp: mockNavigateToApp } as unknown as ApplicationStart;
+      const application = ({ navigateToApp: mockNavigateToApp } as unknown) as ApplicationStart;
 
       redirectToDiscoverWithDataSrc(
         'testDataSource',
@@ -60,7 +60,8 @@ describe('AssociatedObjectsTab utils', () => {
       );
 
       expect(mockNavigateToApp).toHaveBeenCalledWith('data-explorer', {
-        path: "discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(view:discover))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_q=(filters:!(),query:(dataset:(dataSource:(id:'testMDSID',meta:(name:testDataSource,type:CUSTOM),title:'',type:DATA_SOURCE),id:'testMDSID::testDataSource.testDatabase.testTable',title:testDataSource.testDatabase.testTable,type:S3),language:SQL,query:'SELECT%20*%20FROM%20testDataSource.testDatabase.testTable%20LIMIT%2010'))",
+        path:
+          "discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(view:discover))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_q=(filters:!(),query:(dataset:(dataSource:(id:'testMDSID',meta:(name:testDataSource,type:CUSTOM),title:'',type:DATA_SOURCE),id:'testMDSID::testDataSource.testDatabase.testTable',title:testDataSource.testDatabase.testTable,type:S3),language:SQL,query:'SELECT%20*%20FROM%20testDataSource.testDatabase.testTable%20LIMIT%2010'))",
       });
     });
   });
@@ -68,12 +69,13 @@ describe('AssociatedObjectsTab utils', () => {
   describe('redirectToDiscoverOSIdx', () => {
     it('navigates to the explorer with the correct state', () => {
       const mockNavigateToApp = jest.fn();
-      const application = { navigateToApp: mockNavigateToApp } as unknown as ApplicationStart;
+      const application = ({ navigateToApp: mockNavigateToApp } as unknown) as ApplicationStart;
 
       redirectToDiscoverOSIdx('testIndex', 'testMDSId', application);
 
       expect(mockNavigateToApp).toHaveBeenCalledWith('data-explorer', {
-        path: "discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(view:discover))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_q=(filters:!(),query:(dataset:(dataSource:(id:'testMDSId',title:'',type:DATA_SOURCE),id:'testMDSId::testIndex',title:testIndex,type:INDEXES),language:SQL,query:'SELECT%20*%20FROM%20testIndex%20LIMIT%2010'))",
+        path:
+          "discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(view:discover))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_q=(filters:!(),query:(dataset:(dataSource:(id:'testMDSId',title:'',type:DATA_SOURCE),id:'testMDSId::testIndex',title:testIndex,type:INDEXES),language:SQL,query:'SELECT%20*%20FROM%20testIndex%20LIMIT%2010'))",
       });
     });
   });
@@ -82,7 +84,7 @@ describe('AssociatedObjectsTab utils', () => {
     it('navigates to the explorer with the correct state', () => {
       const mockNavigateToApp = jest.fn();
       // @ts-expect-error TS6133 TODO(ts-error): fixme
-      const application = { navigateToApp: mockNavigateToApp } as unknown as ApplicationStart;
+      const application = ({ navigateToApp: mockNavigateToApp } as unknown) as ApplicationStart;
 
       // TODO: test when redirection to discover accepts only datasource
       // redirectToExplorerS3('testDataSource', application);

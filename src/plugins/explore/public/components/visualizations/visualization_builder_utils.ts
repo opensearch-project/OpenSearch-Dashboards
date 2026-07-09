@@ -166,7 +166,10 @@ export const adaptLegacyData = (config?: ChartConfig) => {
     transformedConfig.type === 'area'
   ) {
     const styles = config.styles as
-      BarChartStyleOptions | LineChartStyleOptions | AreaChartStyleOptions | undefined;
+      | BarChartStyleOptions
+      | LineChartStyleOptions
+      | AreaChartStyleOptions
+      | undefined;
     const { thresholdOptions, thresholdLines } = styles || {};
     if (thresholdLines && !thresholdOptions) {
       const thresholds = transformThresholdLinesToThreshold(thresholdLines);
@@ -211,7 +214,8 @@ export const adaptLegacyData = (config?: ChartConfig) => {
   if (transformedConfig.type === 'line' || transformedConfig.type === 'area') {
     const standardAxes: StandardAxes[] = [];
     const { valueAxes, categoryAxes } = transformedConfig.styles as
-      AreaChartStyleOptions | LineChartStyleOptions;
+      | AreaChartStyleOptions
+      | LineChartStyleOptions;
     if (categoryAxes || valueAxes) {
       transformedConfig = {
         ...transformedConfig,

@@ -103,8 +103,10 @@ export function SavedQueryManagementComponent({
         requestGotCancelled = true;
       };
 
-      const { total: savedQueryCount, queries: savedQueryItems } =
-        await savedQueryService.findSavedQueries('', perPage, activePage + 1);
+      const {
+        total: savedQueryCount,
+        queries: savedQueryItems,
+      } = await savedQueryService.findSavedQueries('', perPage, activePage + 1);
 
       if (requestGotCancelled) return;
 

@@ -33,12 +33,12 @@ jest.mock('./span_detail_tables', () => ({
 }));
 
 // Mock chrome observable
-const mockChrome = {
+const mockChrome = ({
   getIsNavDrawerLocked$: () => ({
     subscribe: jest.fn(),
     unsubscribe: jest.fn(),
   }),
-} as unknown as ChromeStart;
+} as unknown) as ChromeStart;
 
 // Mock useObservable
 jest.mock('react-use/lib/useObservable', () => jest.fn(() => false));

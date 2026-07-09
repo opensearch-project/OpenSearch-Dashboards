@@ -58,8 +58,8 @@ export const AccelerationDetailsTab = ({
     mappings?.data?.[acceleration.flintIndexName]?.mappings?._meta?.options.incremental_refresh;
   const refreshTime = showRefreshTime
     ? // @ts-expect-error TS2339 TODO(ts-error): fixme
-      (mappings?.data?.[acceleration.flintIndexName]?.mappings?._meta?.options.refresh_interval ??
-      '-')
+      mappings?.data?.[acceleration.flintIndexName]?.mappings?._meta?.options.refresh_interval ??
+      '-'
     : '-';
   const creationDate = new Date(
     // @ts-expect-error TS2339 TODO(ts-error): fixme

@@ -77,7 +77,9 @@ export interface DataSourcePluginRequestContext {
   opensearch: {
     getClient: (dataSourceId: string) => Promise<OpenSearchClient>;
     legacy: {
-      getClient: (dataSourceId: string) => {
+      getClient: (
+        dataSourceId: string
+      ) => {
         callAPI: (
           endpoint: string,
           clientParams: Record<string, any>,

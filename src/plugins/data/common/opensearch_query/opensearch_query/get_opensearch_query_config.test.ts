@@ -33,7 +33,7 @@ import { getOpenSearchQueryConfig } from './get_opensearch_query_config';
 import { IUiSettingsClient } from 'opensearch-dashboards/public';
 import { UI_SETTINGS } from '../..';
 
-const config = {
+const config = ({
   get(item: string) {
     return get(config, item);
   },
@@ -49,7 +49,7 @@ const config = {
   'dateFormat:tz': {
     dateFormatTZ: 'Browser',
   },
-} as unknown as IUiSettingsClient;
+} as unknown) as IUiSettingsClient;
 
 describe('getOpenSearchQueryConfig', () => {
   test('should return the parameters of an OpenSearch query config requested', () => {

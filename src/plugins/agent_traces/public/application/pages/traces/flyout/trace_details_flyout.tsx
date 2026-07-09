@@ -116,10 +116,10 @@ export const TraceDetailsFlyout: React.FC<TraceDetailsProps> = ({
     setExpandedNodes(allExpandable);
   }, [traceTreeData]);
 
-  const timelineVisibleSpans = useMemo(
-    () => flattenVisibleNodes(traceTreeData, expandedNodes),
-    [traceTreeData, expandedNodes]
-  );
+  const timelineVisibleSpans = useMemo(() => flattenVisibleNodes(traceTreeData, expandedNodes), [
+    traceTreeData,
+    expandedNodes,
+  ]);
 
   const timelineRange = useMemo(() => calculateTimelineRange(traceTreeData), [traceTreeData]);
 

@@ -26,10 +26,8 @@ import {
 import { defineRoutes } from './routes';
 import { OpenSearchConfigurationClient } from './opensearch_config_client';
 
-export class ApplicationConfigPlugin implements Plugin<
-  ApplicationConfigPluginSetup,
-  ApplicationConfigPluginStart
-> {
+export class ApplicationConfigPlugin
+  implements Plugin<ApplicationConfigPluginSetup, ApplicationConfigPluginStart> {
   private readonly logger: Logger;
   private readonly config$: Observable<SharedGlobalConfig>;
 

@@ -57,8 +57,8 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
       // Get supported languages
       const languages = !dataset
         ? languageService.getLanguages().map((l) => l.id)
-        : (queryString.getDatasetService().getType(dataset.type)?.supportedLanguages(dataset) ??
-          null);
+        : queryString.getDatasetService().getType(dataset.type)?.supportedLanguages(dataset) ??
+          null;
 
       if (!languages) {
         return;

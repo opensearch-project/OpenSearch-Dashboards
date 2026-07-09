@@ -63,14 +63,16 @@ export class RoutingExamplePlugin implements Plugin<{}, {}, SetupDeps, {}> {
       links: [
         {
           label: 'IRouter',
-          href: 'https://github.com/opensearch-project/OpenSearch-Dashboards/blob/master/docs/development/core/server/opensearch-dashboards-plugin-core-server.irouter.md',
+          href:
+            'https://github.com/opensearch-project/OpenSearch-Dashboards/blob/master/docs/development/core/server/opensearch-dashboards-plugin-core-server.irouter.md',
           iconType: 'logoGithub',
           target: '_blank',
           size: 's',
         },
         {
           label: 'HttpHandler (core.http.fetch)',
-          href: 'https://github.com/opensearch-project/OpenSearch-Dashboards/blob/master/docs/development/core/public/opensearch-dashboards-plugin-core-public.httphandler.md',
+          href:
+            'https://github.com/opensearch-project/OpenSearch-Dashboards/blob/master/docs/development/core/public/opensearch-dashboards-plugin-core-public.httphandler.md',
           iconType: 'logoGithub',
           target: '_blank',
           size: 's',

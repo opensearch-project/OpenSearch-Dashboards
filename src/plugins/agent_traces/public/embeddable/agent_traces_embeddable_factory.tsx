@@ -30,11 +30,9 @@ interface StartServices {
   isEditable: () => boolean;
 }
 
-export class AgentTracesEmbeddableFactory implements EmbeddableFactoryDefinition<
-  AgentTracesInput,
-  AgentTracesOutput,
-  AgentTracesEmbeddable
-> {
+export class AgentTracesEmbeddableFactory
+  implements
+    EmbeddableFactoryDefinition<AgentTracesInput, AgentTracesOutput, AgentTracesEmbeddable> {
   public readonly type = AGENT_TRACES_EMBEDDABLE_TYPE;
   public readonly savedObjectMetaData = {
     name: i18n.translate('agentTraces.savedAgentTraces.savedObjectName', {
@@ -79,8 +77,9 @@ export class AgentTracesEmbeddableFactory implements EmbeddableFactoryDefinition
       }
       const indexPattern = savedObject.searchSource.getField('index');
       const { executeTriggerActions } = await this.getStartServices();
-      const { AgentTracesEmbeddable: AgentTracesEmbeddableClass } =
-        await import('./agent_traces_embeddable');
+      const { AgentTracesEmbeddable: AgentTracesEmbeddableClass } = await import(
+        './agent_traces_embeddable'
+      );
       const flavor = savedObject.type ?? AgentTracesFlavor.Traces;
       const editUrl = services.addBasePath(`/app/agentTraces/${flavor}/${url}`);
 
@@ -140,8 +139,9 @@ export class AgentTracesEmbeddableFactory implements EmbeddableFactoryDefinition
       } as SavedAgentTraces;
 
       const { executeTriggerActions } = await this.getStartServices();
-      const { AgentTracesEmbeddable: AgentTracesEmbeddableClass } =
-        await import('./agent_traces_embeddable');
+      const { AgentTracesEmbeddable: AgentTracesEmbeddableClass } = await import(
+        './agent_traces_embeddable'
+      );
       const flavor = savedAgentTraces.type;
 
       return new AgentTracesEmbeddableClass(

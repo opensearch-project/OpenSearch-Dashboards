@@ -448,10 +448,10 @@ const ChatMessagesComponent: React.FC<ChatMessagesProps> = ({
 
   // Context is now handled by RFC hooks - no subscriptions needed
 
-  const messageRows = useMemo(
-    () => convertTimelineToMessageRows(timeline, toolCallStates),
-    [timeline, toolCallStates]
-  );
+  const messageRows = useMemo(() => convertTimelineToMessageRows(timeline, toolCallStates), [
+    timeline,
+    toolCallStates,
+  ]);
 
   const lastAssistantMessageIndex = useMemo(
     () => messageRows.findLastIndex((message) => message.role === 'assistant'),

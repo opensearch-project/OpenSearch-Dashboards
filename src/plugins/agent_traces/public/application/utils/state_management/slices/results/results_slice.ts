@@ -40,7 +40,11 @@ const resultsSlice = createSlice({
   },
 });
 
-export const { setResultsState, setResults, clearResults, clearResultsByKey } =
-  resultsSlice.actions;
+export const {
+  setResultsState,
+  setResults,
+  clearResults,
+  clearResultsByKey,
+} = resultsSlice.actions;
 export const resultsReducer = resultsSlice.reducer;
 export const resultsInitialState = resultsSlice.getInitialState();

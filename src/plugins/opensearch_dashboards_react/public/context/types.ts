@@ -36,7 +36,7 @@ import { OpenSearchDashboardsReactNotifications } from '../notifications';
 export type OpenSearchDashboardsServices = Partial<CoreStart>;
 
 export interface OpenSearchDashboardsReactContextValue<
-  Services extends OpenSearchDashboardsServices,
+  Services extends OpenSearchDashboardsServices
 > {
   readonly services: Services;
   readonly overlays: OpenSearchDashboardsReactOverlays;

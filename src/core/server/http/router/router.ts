@@ -230,24 +230,25 @@ export class Router implements IRouter {
     private readonly log: Logger,
     private readonly enhanceWithContext: ContextEnhancer<any, any, any, any>
   ) {
-    const buildMethod =
-      <Method extends RouteMethod>(method: Method) =>
-      <P, Q, B>(route: RouteConfig<P, Q, B, Method>, handler: RequestHandler<P, Q, B, Method>) => {
-        const routeSchemas = routeSchemasFromRouteConfig(route, method);
+    const buildMethod = <Method extends RouteMethod>(method: Method) => <P, Q, B>(
+      route: RouteConfig<P, Q, B, Method>,
+      handler: RequestHandler<P, Q, B, Method>
+    ) => {
+      const routeSchemas = routeSchemasFromRouteConfig(route, method);
 
-        this.routes.push({
-          handler: async (req, responseToolkit) =>
-            await this.handle({
-              routeSchemas,
-              request: req,
-              responseToolkit,
-              handler: this.enhanceWithContext(handler),
-            }),
-          method,
-          path: getRouteFullPath(this.routerPath, route.path),
-          options: validOptions(method, route),
-        });
-      };
+      this.routes.push({
+        handler: async (req, responseToolkit) =>
+          await this.handle({
+            routeSchemas,
+            request: req,
+            responseToolkit,
+            handler: this.enhanceWithContext(handler),
+          }),
+        method,
+        path: getRouteFullPath(this.routerPath, route.path),
+        options: validOptions(method, route),
+      });
+    };
 
     this.get = buildMethod('get');
     this.post = buildMethod('post');
@@ -369,7 +370,7 @@ export type RequestHandler<
   Q = unknown,
   B = unknown,
   Method extends RouteMethod = any,
-  ResponseFactory extends OpenSearchDashboardsResponseFactory = OpenSearchDashboardsResponseFactory,
+  ResponseFactory extends OpenSearchDashboardsResponseFactory = OpenSearchDashboardsResponseFactory
 > = (
   context: RequestHandlerContext,
   request: OpenSearchDashboardsRequest<P, Q, B, Method>,
@@ -394,7 +395,7 @@ export type RequestHandlerWrapper = <
   Q,
   B,
   Method extends RouteMethod = any,
-  ResponseFactory extends OpenSearchDashboardsResponseFactory = OpenSearchDashboardsResponseFactory,
+  ResponseFactory extends OpenSearchDashboardsResponseFactory = OpenSearchDashboardsResponseFactory
 >(
   handler: RequestHandler<P, Q, B, Method, ResponseFactory>
 ) => RequestHandler<P, Q, B, Method, ResponseFactory>;

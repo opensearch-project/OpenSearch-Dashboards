@@ -36,10 +36,12 @@ describe('usePageContext', () => {
     // Mock window.location
     delete (window as any).location;
     (window as any).location = {
-      href: 'http://localhost:5601/app/explore#/?_g=(time:(from:now-15m,to:now))&_a=(query:(language:PPL,query:"source=logs"))&_q=(dataset:(id:logs-*,title:logs-*,type:index-pattern))',
+      href:
+        'http://localhost:5601/app/explore#/?_g=(time:(from:now-15m,to:now))&_a=(query:(language:PPL,query:"source=logs"))&_q=(dataset:(id:logs-*,title:logs-*,type:index-pattern))',
       pathname: '/app/explore',
       search: '',
-      hash: '#/?_g=(time:(from:now-15m,to:now))&_a=(query:(language:PPL,query:"source=logs"))&_q=(dataset:(id:logs-*,title:logs-*,type:index-pattern))',
+      hash:
+        '#/?_g=(time:(from:now-15m,to:now))&_a=(query:(language:PPL,query:"source=logs"))&_q=(dataset:(id:logs-*,title:logs-*,type:index-pattern))',
     };
 
     // Mock window.history
@@ -54,7 +56,8 @@ describe('usePageContext', () => {
       href: url,
       pathname: '/app/explore',
       search: '',
-      hash: '#/?_g=(time:(from:now-15m,to:now))&_a=(query:(language:PPL,query:"source=logs"))&_q=(dataset:(id:logs-*,title:logs-*,type:index-pattern))',
+      hash:
+        '#/?_g=(time:(from:now-15m,to:now))&_a=(query:(language:PPL,query:"source=logs"))&_q=(dataset:(id:logs-*,title:logs-*,type:index-pattern))',
       searchParams: new URLSearchParams(),
     }));
 

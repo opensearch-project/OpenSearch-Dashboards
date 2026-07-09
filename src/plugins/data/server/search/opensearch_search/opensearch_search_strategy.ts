@@ -65,8 +65,11 @@ export const opensearchSearchStrategyProvider = (
       }
 
       // ignoreThrottled & dataFrameHydrationStrategy is not supported by default
-      const { ignoreThrottled, dataFrameHydrationStrategy, ...defaultParams } =
-        await getDefaultSearchParams(uiSettingsClient);
+      const {
+        ignoreThrottled,
+        dataFrameHydrationStrategy,
+        ...defaultParams
+      } = await getDefaultSearchParams(uiSettingsClient);
 
       const params = toSnakeCase({
         ...defaultParams,

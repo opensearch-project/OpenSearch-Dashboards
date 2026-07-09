@@ -465,20 +465,22 @@ describe('NewsfeedApiDriver', () => {
 
 describe('getApi', () => {
   const mockHttpGet = jest.fn();
-  let httpMock = {
+  let httpMock = ({
     fetch: mockHttpGet,
-  } as unknown as HttpSetup;
-  const getHttpMockWithItems =
-    (mockApiItems: ApiItem[]) => (arg1: string, arg2: { method: string }) => {
-      if (
-        arg1 === 'http://fakenews.co/opensearch-dashboards-test/v6.8.2.json' &&
-        arg2.method &&
-        arg2.method === 'GET'
-      ) {
-        return Promise.resolve({ items: mockApiItems });
-      }
-      return Promise.reject('wrong args!');
-    };
+  } as unknown) as HttpSetup;
+  const getHttpMockWithItems = (mockApiItems: ApiItem[]) => (
+    arg1: string,
+    arg2: { method: string }
+  ) => {
+    if (
+      arg1 === 'http://fakenews.co/opensearch-dashboards-test/v6.8.2.json' &&
+      arg2.method &&
+      arg2.method === 'GET'
+    ) {
+      return Promise.resolve({ items: mockApiItems });
+    }
+    return Promise.reject('wrong args!');
+  };
   let configMock: NewsfeedPluginBrowserConfig;
 
   afterEach(() => {
@@ -494,9 +496,9 @@ describe('getApi', () => {
       mainInterval: moment.duration(86400000),
       fetchInterval: moment.duration(86400000),
     };
-    httpMock = {
+    httpMock = ({
       fetch: mockHttpGet,
-    } as unknown as HttpSetup;
+    } as unknown) as HttpSetup;
   });
 
   it('creates a result', (done) => {

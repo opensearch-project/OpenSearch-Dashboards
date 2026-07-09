@@ -78,7 +78,7 @@ const mockGetServices = () =>
         }),
       },
     },
-  }) as any;
+  } as any);
 
 jest.mock('../../utils/get_prompt_mode_is_available', () => ({
   getPromptModeIsAvailable: jest.fn(),

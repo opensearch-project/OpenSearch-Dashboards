@@ -33,8 +33,12 @@ const exactIndices = [
 
 describe('getMatchedIndices', () => {
   it('should return all indices', () => {
-    const { allIndices, exactMatchedIndices, partialMatchedIndices, visibleIndices } =
-      getMatchedIndices(indices, partialIndices, exactIndices, true);
+    const {
+      allIndices,
+      exactMatchedIndices,
+      partialMatchedIndices,
+      visibleIndices,
+    } = getMatchedIndices(indices, partialIndices, exactIndices, true);
 
     expect(allIndices).toEqual([
       { name: 'opensearch-dashboards', tags },
@@ -63,8 +67,12 @@ describe('getMatchedIndices', () => {
   });
 
   it('should return all indices except for system indices', () => {
-    const { allIndices, exactMatchedIndices, partialMatchedIndices, visibleIndices } =
-      getMatchedIndices(indices, partialIndices, exactIndices, false);
+    const {
+      allIndices,
+      exactMatchedIndices,
+      partialMatchedIndices,
+      visibleIndices,
+    } = getMatchedIndices(indices, partialIndices, exactIndices, false);
 
     expect(allIndices).toEqual([
       { name: 'opensearch-dashboards', tags },

@@ -366,8 +366,8 @@ function RenderSection({
         child.itemType === LinkItemType.LINK
           ? child.link.id
           : child.itemType === LinkItemType.PARENT_LINK
-            ? child.link?.id || `parent-${idx}`
-            : `item-${idx}`
+          ? child.link?.id || `parent-${idx}`
+          : `item-${idx}`
       }
       item={child}
       appId={appId}
@@ -456,8 +456,8 @@ function itemStartsCluster(item: LinkItem): boolean {
     item.itemType === LinkItemType.LINK
       ? item.link
       : item.itemType === LinkItemType.PARENT_LINK
-        ? item.link
-        : undefined;
+      ? item.link
+      : undefined;
   return Boolean((link as ChromeRegistrationNavLink | undefined)?.startCluster);
 }
 

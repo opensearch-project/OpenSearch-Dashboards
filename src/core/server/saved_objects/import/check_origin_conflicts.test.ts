@@ -51,7 +51,7 @@ const createObject = (type: string, id: string, originId?: string): SavedObjectT
   type,
   id,
   attributes: { title: `Title for ${type}:${id}` },
-  references: Symbol() as unknown as SavedObjectReference[],
+  references: (Symbol() as unknown) as SavedObjectReference[],
   ...(originId && { originId }),
 });
 
@@ -65,7 +65,7 @@ beforeEach(() => {
 describe('#checkOriginConflicts', () => {
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
   let typeRegistry: jest.Mocked<ISavedObjectTypeRegistry>;
-  let find: (typeof savedObjectsClient)['find'];
+  let find: typeof savedObjectsClient['find'];
 
   const getResultMock = (...objects: SavedObjectType[]) => ({
     page: 1,

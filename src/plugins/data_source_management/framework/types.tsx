@@ -400,4 +400,5 @@ export type ParsedIntegrationAsset =
   | { type: 'query'; workflows?: string[]; query: string; language: string };
 
 export type Result<T, E = Error> =
-  { ok: true; value: T; error?: undefined } | { ok: false; error: E; value?: undefined };
+  | { ok: true; value: T; error?: undefined }
+  | { ok: false; error: E; value?: undefined };

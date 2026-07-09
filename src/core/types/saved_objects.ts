@@ -35,7 +35,12 @@ import { Permissions } from '../server/saved_objects/permission_control/acl';
  * @public
  */
 export type SavedObjectAttributeSingle =
-  string | number | boolean | null | undefined | SavedObjectAttributes;
+  | string
+  | number
+  | boolean
+  | null
+  | undefined
+  | SavedObjectAttributes;
 
 /**
  * Type definition for a Saved Object attribute value

@@ -237,7 +237,7 @@ describe('LogRotator', () => {
             }
           }),
           close: jest.fn(),
-        }) as any
+        } as any)
     );
 
     await logRotator.start();
@@ -264,7 +264,7 @@ describe('LogRotator', () => {
             }
           }),
           close: jest.fn(),
-        }) as any
+        } as any)
     );
 
     await logRotator.start();

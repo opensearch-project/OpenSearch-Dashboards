@@ -223,9 +223,9 @@ describe('Range filter builder', () => {
 });
 
 describe('getRangeFilterField', function () {
-  const indexPattern: IIndexPattern = {
+  const indexPattern: IIndexPattern = ({
     fields,
-  } as unknown as IIndexPattern;
+  } as unknown) as IIndexPattern;
 
   test('should return the name of the field a range query is targeting', () => {
     const field = indexPattern.fields.find((patternField) => patternField.name === 'bytes');

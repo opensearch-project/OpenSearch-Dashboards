@@ -55,7 +55,7 @@ describe('Agents helper functions', () => {
 
   it('handles not found errors', async () => {
     mockedTransport.mockRejectedValueOnce(
-      new ResponseError({
+      new ResponseError(({
         body: {
           error: {
             root_cause: [
@@ -70,7 +70,7 @@ describe('Agents helper functions', () => {
           status: 404,
         },
         statusCode: 404,
-      } as unknown as ApiResponse)
+      } as unknown) as ApiResponse)
     );
     await expect(
       getAgentIdByConfig(client, 'test agent')

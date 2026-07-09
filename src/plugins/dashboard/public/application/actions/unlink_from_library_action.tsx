@@ -76,12 +76,12 @@ export class UnlinkFromLibraryAction implements ActionByType<typeof ACTION_UNLIN
   public async isCompatible({ embeddable }: UnlinkFromLibraryActionContext) {
     return Boolean(
       !isErrorEmbeddable(embeddable) &&
-      embeddable.getInput()?.viewMode !== ViewMode.VIEW &&
-      embeddable.getRoot() &&
-      embeddable.getRoot().isContainer &&
-      embeddable.getRoot().type === DASHBOARD_CONTAINER_TYPE &&
-      isReferenceOrValueEmbeddable(embeddable) &&
-      embeddable.inputIsRefType(embeddable.getInput())
+        embeddable.getInput()?.viewMode !== ViewMode.VIEW &&
+        embeddable.getRoot() &&
+        embeddable.getRoot().isContainer &&
+        embeddable.getRoot().type === DASHBOARD_CONTAINER_TYPE &&
+        isReferenceOrValueEmbeddable(embeddable) &&
+        embeddable.inputIsRefType(embeddable.getInput())
     );
   }
 

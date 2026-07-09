@@ -17,10 +17,8 @@ import { ContextProviderServerPluginSetup, ContextProviderServerPluginStart } fr
  * @experimental
  * Context Provider plugin for React hooks-based context capture system. This plugin is experimental and will change in future releases.
  */
-export class ContextProviderServerPlugin implements Plugin<
-  ContextProviderServerPluginSetup,
-  ContextProviderServerPluginStart
-> {
+export class ContextProviderServerPlugin
+  implements Plugin<ContextProviderServerPluginSetup, ContextProviderServerPluginStart> {
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {

@@ -85,7 +85,7 @@ describe('usePPLExecuteQueryAction', () => {
           [TEST_CACHE_KEY]: { status, error },
         },
       },
-    }) as any;
+    } as any);
 
   beforeEach(() => {
     mockDispatch.mockClear();

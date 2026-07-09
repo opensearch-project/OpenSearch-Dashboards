@@ -35,10 +35,9 @@ export const TableCellTypeOptions: React.FC<TableCellTypeOptionsProps> = ({
   onStyleChange,
   numericalColumns = [],
 }) => {
-  const currentCellTypes: CellTypeConfig[] = useMemo(
-    () => styleOptions.cellTypes || [],
-    [styleOptions.cellTypes]
-  );
+  const currentCellTypes: CellTypeConfig[] = useMemo(() => styleOptions.cellTypes || [], [
+    styleOptions.cellTypes,
+  ]);
 
   const handleCellTypeFieldChange = useCallback(
     (index: number, value: string) => {

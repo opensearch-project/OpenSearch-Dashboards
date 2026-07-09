@@ -29,8 +29,8 @@ describe('ResourceClientFactory', () => {
     });
 
     it('should allow registering multiple client creators', () => {
-      const mockClient1 = { id: 1 } as unknown as BaseResourceClient;
-      const mockClient2 = { id: 2 } as unknown as BaseResourceClient;
+      const mockClient1 = ({ id: 1 } as unknown) as BaseResourceClient;
+      const mockClient2 = ({ id: 2 } as unknown) as BaseResourceClient;
       const mockCreator1: ResourceClientCreator = jest.fn().mockReturnValue(mockClient1);
       const mockCreator2: ResourceClientCreator = jest.fn().mockReturnValue(mockClient2);
 
@@ -63,8 +63,8 @@ describe('ResourceClientFactory', () => {
     });
 
     it('should create new clients for different connection types', () => {
-      const mockClient1 = { id: 1 } as unknown as BaseResourceClient;
-      const mockClient2 = { id: 2 } as unknown as BaseResourceClient;
+      const mockClient1 = ({ id: 1 } as unknown) as BaseResourceClient;
+      const mockClient2 = ({ id: 2 } as unknown) as BaseResourceClient;
       const mockCreator1: ResourceClientCreator = jest.fn().mockReturnValue(mockClient1);
       const mockCreator2: ResourceClientCreator = jest.fn().mockReturnValue(mockClient2);
 

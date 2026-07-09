@@ -130,9 +130,9 @@ const getSuggestionsAtPos = async (query: string, endPos: number) => {
     selectionStart: 0, // not relevant
     services: {
       appName: 'discover',
-      data: {
+      data: ({
         autocomplete: { getValueSuggestions: mockValueSuggestions },
-      } as unknown as DataPublicPluginStart,
+      } as unknown) as DataPublicPluginStart,
     } as IDataPluginServices,
   });
 };

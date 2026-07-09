@@ -43,10 +43,10 @@ export function shouldSuggestTemplates(query: string, cursor: CursorPosition): b
 
   return Boolean(
     cursorIndex === 0 ||
-    // First keyword in statement
-    !currentStatementBeforeCursor.match(multipleKeywordsRegex) ||
-    // Explain statement
-    currentStatementBeforeCursor.match(explainRegex)
+      // First keyword in statement
+      !currentStatementBeforeCursor.match(multipleKeywordsRegex) ||
+      // Explain statement
+      currentStatementBeforeCursor.match(explainRegex)
   );
 }
 

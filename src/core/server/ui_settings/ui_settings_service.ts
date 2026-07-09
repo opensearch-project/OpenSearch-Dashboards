@@ -69,10 +69,8 @@ export interface SetupDeps {
 }
 
 /** @internal */
-export class UiSettingsService implements CoreService<
-  InternalUiSettingsServiceSetup,
-  InternalUiSettingsServiceStart
-> {
+export class UiSettingsService
+  implements CoreService<InternalUiSettingsServiceSetup, InternalUiSettingsServiceStart> {
   private readonly log: Logger;
   private readonly config$: Observable<[UiSettingsConfigType, SavedObjectsConfigType]>;
   private readonly uiSettingsDefaults = new Map<string, UiSettingsParams>();

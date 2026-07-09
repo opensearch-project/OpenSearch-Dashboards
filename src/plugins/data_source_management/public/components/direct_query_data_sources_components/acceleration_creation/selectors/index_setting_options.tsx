@@ -81,8 +81,9 @@ export const IndexSettingOptions = ({
     },
   ];
 
-  const [refreshTypeSelected, setRefreshTypeSelected] =
-    useState<AccelerationRefreshType>('autoInterval');
+  const [refreshTypeSelected, setRefreshTypeSelected] = useState<AccelerationRefreshType>(
+    'autoInterval'
+  );
   const [refreshWindow, setRefreshWindow] = useState(15);
   const [refreshInterval, setRefreshInterval] = useState(
     ACCELERATION_REFRESH_TIME_INTERVAL[0].value

@@ -216,8 +216,8 @@ export function Header({
   const isNavOpen = enableIconSideNav
     ? isLocked || isTempExpanded
     : useUpdatedHeader
-      ? isLocked
-      : isNavOpenState;
+    ? isLocked
+    : isNavOpenState;
 
   const setIsNavOpen = useCallback(
     (value: boolean) => {

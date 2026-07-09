@@ -44,10 +44,9 @@ import { ChartTypes } from '../../../utils/collections';
 function PointSeriesOptions(props: ValidationVisOptionsProps<BasicVislibParams>) {
   const { stateParams, setValue, vis } = props;
 
-  const currentChartTypes = useMemo(
-    () => uniq(stateParams.seriesParams.map(({ type }) => type)),
-    [stateParams.seriesParams]
-  );
+  const currentChartTypes = useMemo(() => uniq(stateParams.seriesParams.map(({ type }) => type)), [
+    stateParams.seriesParams,
+  ]);
 
   return (
     <>

@@ -271,8 +271,14 @@ export class CreateDatasetWizard extends Component<RouteComponentProps, CreateDa
   }
 
   renderContent() {
-    const { allIndices, isInitiallyLoadingIndices, step, dataset, dataSourceRef, docLinks } =
-      this.state;
+    const {
+      allIndices,
+      isInitiallyLoadingIndices,
+      step,
+      dataset,
+      dataSourceRef,
+      docLinks,
+    } = this.state;
 
     const stepInfo = {
       totalStepNumber: this.totalSteps,
@@ -294,7 +300,7 @@ export class CreateDatasetWizard extends Component<RouteComponentProps, CreateDa
       <HeaderControl
         controls={[
           {
-            description: (
+            description: ((
               <FormattedMessage
                 id="datasetManagement.createDataset.description"
                 defaultMessage="An index pattern can match a single source, for example, {single}, or {multiple} data sources, {star}."
@@ -304,7 +310,7 @@ export class CreateDatasetWizard extends Component<RouteComponentProps, CreateDa
                   star: <EuiCode>filebeat-*</EuiCode>,
                 }}
               />
-            ) as unknown as string,
+            ) as unknown) as string,
             links: [
               {
                 href: docLinks.links.noDocumentation.indexPatterns.introduction,

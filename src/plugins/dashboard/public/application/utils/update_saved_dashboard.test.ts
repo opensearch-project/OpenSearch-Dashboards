@@ -9,22 +9,22 @@ import { DashboardAppState } from '../../types';
 import { Dashboard } from '../../dashboard';
 
 const createServices = () => {
-  const savedDashboard = {
+  const savedDashboard = ({
     searchSource: {
       setField: jest.fn(),
     },
-  } as unknown as SavedObjectDashboard;
+  } as unknown) as SavedObjectDashboard;
 
   const timeFilter = {
     getTime: jest.fn(() => ({ from: 'now-15m', to: 'now' })),
     getRefreshInterval: jest.fn(() => ({ pause: true, value: 0 })),
   } as any;
 
-  const dashboard = {
+  const dashboard = ({
     setState: jest.fn(),
-  } as unknown as Dashboard;
+  } as unknown) as Dashboard;
 
-  const baseAppState = {
+  const baseAppState = ({
     title: 'My dashboard',
     description: '',
     timeRestore: false,
@@ -32,7 +32,7 @@ const createServices = () => {
     options: {},
     query: { query: '', language: 'kuery' },
     filters: [],
-  } as unknown as DashboardAppState;
+  } as unknown) as DashboardAppState;
 
   return { savedDashboard, timeFilter, dashboard, baseAppState };
 };
@@ -62,7 +62,7 @@ describe('updateSavedDashboard - variablesJSON', () => {
 
     updateSavedDashboard(
       savedDashboard,
-      { ...baseAppState, variables } as unknown as DashboardAppState,
+      ({ ...baseAppState, variables } as unknown) as DashboardAppState,
       timeFilter,
       dashboard
     );

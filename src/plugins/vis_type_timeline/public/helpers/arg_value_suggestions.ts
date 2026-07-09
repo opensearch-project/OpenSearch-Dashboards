@@ -191,7 +191,7 @@ export function getArgValueSuggestions() {
      */
     hasDynamicSuggestionsForArgument: <T extends keyof typeof customHandlers>(
       functionName: T,
-      argName: keyof (typeof customHandlers)[T]
+      argName: keyof typeof customHandlers[T]
     ) => {
       return customHandlers[functionName] && customHandlers[functionName][argName];
     },
@@ -205,7 +205,7 @@ export function getArgValueSuggestions() {
      */
     getDynamicSuggestionsForArgument: async <T extends keyof typeof customHandlers>(
       functionName: T,
-      argName: keyof (typeof customHandlers)[T],
+      argName: keyof typeof customHandlers[T],
       functionArgs: FunctionArg[],
       partialInput = ''
     ) => {

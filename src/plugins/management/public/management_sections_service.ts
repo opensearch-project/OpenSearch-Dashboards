@@ -47,8 +47,9 @@ import {
 } from './types';
 import { createGetterSetter } from '../../opensearch_dashboards_utils/public';
 
-const [getSectionsServiceStartPrivate, setSectionsServiceStartPrivate] =
-  createGetterSetter<ManagementSectionsStartPrivate>('SectionsServiceStartPrivate');
+const [getSectionsServiceStartPrivate, setSectionsServiceStartPrivate] = createGetterSetter<
+  ManagementSectionsStartPrivate
+>('SectionsServiceStartPrivate');
 
 /**
  * The management capabilities has `opensearchDashboards` as the key

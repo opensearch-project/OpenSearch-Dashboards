@@ -144,13 +144,13 @@ describe('CreateDatasetWizard', () => {
     });
     const clear = jest.fn();
     mockContext.data.dataViews.clearCache = clear;
-    const dataset = {
+    const dataset = ({
       id: '1',
       title: 'my-fake-index-pattern',
       timeFieldName: 'timestamp',
       fields: [],
       _fetchFields: jest.fn(),
-    } as unknown as DataView;
+    } as unknown) as DataView;
     mockContext.data.dataViews.createAndSave = newDatasetAndSave;
     mockContext.data.dataViews.setDefault = jest.fn();
 

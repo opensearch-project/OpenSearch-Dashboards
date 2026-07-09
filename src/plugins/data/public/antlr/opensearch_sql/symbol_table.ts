@@ -21,18 +21,15 @@ export class TableSymbol extends c3.TypedSymbol {
 }
 
 export function getUniqueTableSuggestions(symbols: TableSymbol[] = []): Table[] {
-  const suggestionsMap = symbols.reduce(
-    (acc, table) => {
-      const aliases = acc[table.name] ?? new Set();
-      if (table.alias) {
-        aliases.add(table.alias);
-      }
+  const suggestionsMap = symbols.reduce((acc, table) => {
+    const aliases = acc[table.name] ?? new Set();
+    if (table.alias) {
+      aliases.add(table.alias);
+    }
 
-      acc[table.name] = aliases;
-      return acc;
-    },
-    {} as Record<string, Set<string>>
-  );
+    acc[table.name] = aliases;
+    return acc;
+  }, {} as Record<string, Set<string>>);
   return Object.keys(suggestionsMap).reduce((acc, tableName) => {
     const aliases = suggestionsMap[tableName] as Set<string>;
     if (aliases.size > 0) {

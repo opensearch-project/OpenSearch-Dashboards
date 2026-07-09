@@ -83,8 +83,9 @@ export function getServices() {
     httpServerMock.createOpenSearchDashboardsRequest()
   );
 
-  const uiSettings =
-    osdServer.newPlatform.start.core.uiSettings.asScopedToClient(savedObjectsClient);
+  const uiSettings = osdServer.newPlatform.start.core.uiSettings.asScopedToClient(
+    savedObjectsClient
+  );
 
   services = {
     osdServer,

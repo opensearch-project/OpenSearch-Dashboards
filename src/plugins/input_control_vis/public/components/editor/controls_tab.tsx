@@ -236,7 +236,6 @@ class ControlsTabUi extends PureComponent<ControlsTabUiProps, ControlsTabUiState
 
 export const ControlsTab = injectI18n(ControlsTabUi);
 
-export const getControlsTab =
-  (deps: InputControlVisDependencies) => (props: Omit<ControlsTabUiProps, 'core'>) => (
-    <ControlsTab {...props} deps={deps} />
-  );
+export const getControlsTab = (deps: InputControlVisDependencies) => (
+  props: Omit<ControlsTabUiProps, 'core'>
+) => <ControlsTab {...props} deps={deps} />;

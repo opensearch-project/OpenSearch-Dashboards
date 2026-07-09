@@ -44,8 +44,9 @@ export const useInitialContainerContext = () => {
             parsed.variables.length > 0
           ) {
             // Read variable values from URL
-            const urlVariableValues =
-              osdUrlStateStorage?.get<Record<string, string[]>>(VARIABLE_VALUES_URL_KEY);
+            const urlVariableValues = osdUrlStateStorage?.get<Record<string, string[]>>(
+              VARIABLE_VALUES_URL_KEY
+            );
 
             const variablesWithValues = parsed.variables.map((variable: Variable) => {
               // Validate URL variable values

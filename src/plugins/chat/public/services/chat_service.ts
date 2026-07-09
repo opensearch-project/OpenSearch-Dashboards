@@ -613,8 +613,8 @@ export class ChatService {
     }));
 
     // Send the tool result back to the agent with full conversation history
-    const includeFullHistory =
-      this.conversationHistoryService.getMemoryProvider().includeFullHistory;
+    const includeFullHistory = this.conversationHistoryService.getMemoryProvider()
+      .includeFullHistory;
     const mappedMessages = includeFullHistory ? [...messages, toolMessage] : [toolMessage];
 
     const threadId = this.getThreadId();

@@ -47,58 +47,56 @@ export interface SaveStateProps {
   activeTabId: string;
 }
 
-export const getSaveButtonRun =
-  (
-    services: AgentTracesServices,
-    startSyncingQueryStateWithUrl: () => void,
-    searchContext: ExecutionContextSearch,
-    saveStateProps: SaveStateProps,
-    savedAgentTraces?: SavedAgentTraces
-  ): TopNavMenuIconRun =>
-  () => {
-    if (!savedAgentTraces) return;
+export const getSaveButtonRun = (
+  services: AgentTracesServices,
+  startSyncingQueryStateWithUrl: () => void,
+  searchContext: ExecutionContextSearch,
+  saveStateProps: SaveStateProps,
+  savedAgentTraces?: SavedAgentTraces
+): TopNavMenuIconRun => () => {
+  if (!savedAgentTraces) return;
 
-    const onSave = async ({
-      newTitle,
-      newCopyOnSave,
-      isTitleDuplicateConfirmed,
-      onTitleDuplicate,
-    }: OnSaveProps): Promise<SaveResult | undefined> => {
-      const savedAgentTracesWithState = saveStateToSavedObject(
-        savedAgentTraces,
-        saveStateProps.tabDefinition!,
-        saveStateProps.flavorId ?? 'logs',
-        {},
-        saveStateProps.dataset,
-        saveStateProps.activeTabId
-      );
-      const result = await saveSavedAgentTraces({
-        savedAgentTraces: savedAgentTracesWithState,
-        newTitle,
-        saveOptions: { isTitleDuplicateConfirmed, onTitleDuplicate },
-        searchContext,
-        services,
-        startSyncingQueryStateWithUrl,
-        openAfterSave: true,
-        newCopyOnSave,
-      });
-
-      return result;
-    };
-    const saveModal = (
-      <SavedObjectSaveModal
-        onSave={onSave}
-        onClose={() => {}}
-        title={savedAgentTraces.title ?? ''}
-        showCopyOnSave={!!savedAgentTraces.id}
-        // TODO: Does this need to be type "agentTraces"?
-        objectType="discover"
-        description={i18n.translate('agentTraces.localMenu.saveSaveSearchDescription', {
-          defaultMessage:
-            'Save your Discover search so you can use it in visualizations and dashboards',
-        })}
-        showDescription={false}
-      />
+  const onSave = async ({
+    newTitle,
+    newCopyOnSave,
+    isTitleDuplicateConfirmed,
+    onTitleDuplicate,
+  }: OnSaveProps): Promise<SaveResult | undefined> => {
+    const savedAgentTracesWithState = saveStateToSavedObject(
+      savedAgentTraces,
+      saveStateProps.tabDefinition!,
+      saveStateProps.flavorId ?? 'logs',
+      {},
+      saveStateProps.dataset,
+      saveStateProps.activeTabId
     );
-    showSaveModal(saveModal, services.core.i18n.Context);
+    const result = await saveSavedAgentTraces({
+      savedAgentTraces: savedAgentTracesWithState,
+      newTitle,
+      saveOptions: { isTitleDuplicateConfirmed, onTitleDuplicate },
+      searchContext,
+      services,
+      startSyncingQueryStateWithUrl,
+      openAfterSave: true,
+      newCopyOnSave,
+    });
+
+    return result;
   };
+  const saveModal = (
+    <SavedObjectSaveModal
+      onSave={onSave}
+      onClose={() => {}}
+      title={savedAgentTraces.title ?? ''}
+      showCopyOnSave={!!savedAgentTraces.id}
+      // TODO: Does this need to be type "agentTraces"?
+      objectType="discover"
+      description={i18n.translate('agentTraces.localMenu.saveSaveSearchDescription', {
+        defaultMessage:
+          'Save your Discover search so you can use it in visualizations and dashboards',
+      })}
+      showDescription={false}
+    />
+  );
+  showSaveModal(saveModal, services.core.i18n.Context);
+};

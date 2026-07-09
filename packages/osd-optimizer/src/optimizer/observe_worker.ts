@@ -178,18 +178,22 @@ export function observeWorker(
         bundles,
       }),
       observeStdio$(proc.stdout!).pipe(
-        map((line): WorkerStdio => ({
-          type: 'worker stdio',
-          line,
-          stream: 'stdout',
-        }))
+        map(
+          (line): WorkerStdio => ({
+            type: 'worker stdio',
+            line,
+            stream: 'stdout',
+          })
+        )
       ),
       observeStdio$(proc.stderr!).pipe(
-        map((line): WorkerStdio => ({
-          type: 'worker stdio',
-          line,
-          stream: 'stderr',
-        }))
+        map(
+          (line): WorkerStdio => ({
+            type: 'worker stdio',
+            line,
+            stream: 'stderr',
+          })
+        )
       ),
       Rx.fromEvent<[unknown]>(proc, 'message')
         .pipe(

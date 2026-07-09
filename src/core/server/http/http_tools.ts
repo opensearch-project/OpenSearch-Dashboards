@@ -194,9 +194,9 @@ export function getRequestId(request: Request, options: HttpConfig['requestId'])
     // socket may be undefined in integration tests that connect via the http listener directly
     (request.raw.req.socket?.remoteAddress &&
       options.ipAllowlist.includes(request.raw.req.socket.remoteAddress))
-    ? ((Array.isArray(request.headers['x-opaque-id'])
+    ? (Array.isArray(request.headers['x-opaque-id'])
         ? request.headers['x-opaque-id'][0]
-        : request.headers['x-opaque-id']) ?? uuidv4())
+        : request.headers['x-opaque-id']) ?? uuidv4()
     : uuidv4();
 }
 

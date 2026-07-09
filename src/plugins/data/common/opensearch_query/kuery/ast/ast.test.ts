@@ -43,9 +43,9 @@ describe('kuery AST API', () => {
   let indexPattern: IIndexPattern;
 
   beforeEach(() => {
-    indexPattern = {
+    indexPattern = ({
       fields,
-    } as unknown as IIndexPattern;
+    } as unknown) as IIndexPattern;
   });
 
   describe('fromKueryExpression', () => {
@@ -376,7 +376,7 @@ describe('kuery AST API', () => {
         indexPattern
       );
 
-      expect(toOpenSearchQuery(null as unknown as KueryNode, undefined)).toEqual(expected);
+      expect(toOpenSearchQuery((null as unknown) as KueryNode, undefined)).toEqual(expected);
 
       const noTypeNode = nodeTypes.function.buildNode('exists', 'foo');
 

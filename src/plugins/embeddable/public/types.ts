@@ -45,15 +45,13 @@ import {
 export type EmbeddableFactoryRegistry = Map<string, EmbeddableFactory>;
 export type EnhancementsRegistry = Map<string, EnhancementRegistryItem>;
 
-export interface EnhancementRegistryDefinition<
-  P extends SerializableState = SerializableState,
-> extends PersistableStateDefinition<P> {
+export interface EnhancementRegistryDefinition<P extends SerializableState = SerializableState>
+  extends PersistableStateDefinition<P> {
   id: string;
 }
 
-export interface EnhancementRegistryItem<
-  P extends SerializableState = SerializableState,
-> extends PersistableState<P> {
+export interface EnhancementRegistryItem<P extends SerializableState = SerializableState>
+  extends PersistableState<P> {
   id: string;
 }
 
@@ -61,7 +59,7 @@ export type EmbeddableFactoryProvider = <
   I extends EmbeddableInput = EmbeddableInput,
   O extends EmbeddableOutput = EmbeddableOutput,
   E extends IEmbeddable<I, O> = IEmbeddable<I, O>,
-  T extends SavedObjectAttributes = SavedObjectAttributes,
+  T extends SavedObjectAttributes = SavedObjectAttributes
 >(
   def: EmbeddableFactoryDefinition<I, O, E, T>
 ) => EmbeddableFactory<I, O, E, T>;

@@ -31,8 +31,7 @@
 import { opensearchServiceMock } from '../../opensearch/opensearch_service.mock';
 
 export const MockLegacyScopedClusterClient = jest.fn();
-export const legacyClusterClientInstanceMock =
-  opensearchServiceMock.createLegacyScopedClusterClient();
+export const legacyClusterClientInstanceMock = opensearchServiceMock.createLegacyScopedClusterClient();
 jest.doMock('../../opensearch/legacy/scoped_cluster_client', () => ({
   LegacyScopedClusterClient: MockLegacyScopedClusterClient.mockImplementation(
     () => legacyClusterClientInstanceMock

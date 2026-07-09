@@ -32,10 +32,7 @@ import util from 'util';
 import { OsdClient, ToolingLog } from '@osd/dev-utils';
 
 export class User {
-  constructor(
-    private log: ToolingLog,
-    private osdClient: OsdClient
-  ) {}
+  constructor(private log: ToolingLog, private osdClient: OsdClient) {}
 
   public async create(username: string, user: any) {
     this.log.debug(`creating user ${username}`);

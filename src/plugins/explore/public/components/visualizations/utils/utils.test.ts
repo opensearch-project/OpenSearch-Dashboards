@@ -155,7 +155,7 @@ describe('getSchemaByAxis', () => {
 
 describe('mergeStyles', () => {
   it('should return a copy of dest when source is undefined', () => {
-    const dest = { color: 'red', size: 10 } as unknown as ChartStyles;
+    const dest = ({ color: 'red', size: 10 } as unknown) as ChartStyles;
     const result = mergeStyles(dest, undefined);
 
     // Result should equal dest but not be the same object
@@ -164,8 +164,8 @@ describe('mergeStyles', () => {
   });
 
   it('should merge top-level properties', () => {
-    const dest = { color: 'red', size: 10 } as unknown as ChartStyles;
-    const source = { color: 'blue', weight: 'bold' } as unknown as StyleOptions;
+    const dest = ({ color: 'red', size: 10 } as unknown) as ChartStyles;
+    const source = ({ color: 'blue', weight: 'bold' } as unknown) as StyleOptions;
     const result = mergeStyles(dest, source);
 
     expect(result).toEqual({
@@ -176,20 +176,20 @@ describe('mergeStyles', () => {
   });
 
   it('should merge nested objects by replacing properties', () => {
-    const dest = {
+    const dest = ({
       font: {
         family: 'Arial',
         size: 12,
         style: 'normal',
       },
-    } as unknown as ChartStyles;
+    } as unknown) as ChartStyles;
 
-    const source = {
+    const source = ({
       font: {
         size: 14,
         weight: 'bold',
       },
-    } as unknown as StyleOptions;
+    } as unknown) as StyleOptions;
 
     const result = mergeStyles(dest, source);
 
@@ -205,13 +205,13 @@ describe('mergeStyles', () => {
   });
 
   it('should replace arrays instead of merging them', () => {
-    const dest = {
+    const dest = ({
       colors: ['red', 'green', 'blue'],
-    } as unknown as ChartStyles;
+    } as unknown) as ChartStyles;
 
-    const source = {
+    const source = ({
       colors: ['yellow', 'purple'],
-    } as unknown as StyleOptions;
+    } as unknown) as StyleOptions;
 
     const result = mergeStyles(dest, source);
 
@@ -222,7 +222,7 @@ describe('mergeStyles', () => {
   });
 
   it('should handle complex nested structures', () => {
-    const dest = {
+    const dest = ({
       title: 'Chart',
       axes: {
         x: {
@@ -244,9 +244,9 @@ describe('mergeStyles', () => {
         show: true,
         position: 'right',
       },
-    } as unknown as ChartStyles;
+    } as unknown) as ChartStyles;
 
-    const source = {
+    const source = ({
       title: 'Updated Chart',
       axes: {
         x: {
@@ -261,7 +261,7 @@ describe('mergeStyles', () => {
       legend: {
         position: 'bottom',
       },
-    } as unknown as StyleOptions;
+    } as unknown) as StyleOptions;
 
     const result = mergeStyles(dest, source);
 
@@ -291,15 +291,15 @@ describe('mergeStyles', () => {
   });
 
   it('should handle null values', () => {
-    const dest = {
+    const dest = ({
       title: 'Chart',
       subtitle: 'Subtitle',
-    } as unknown as ChartStyles;
+    } as unknown) as ChartStyles;
 
-    const source = {
+    const source = ({
       title: null,
       description: 'Description',
-    } as unknown as StyleOptions;
+    } as unknown) as StyleOptions;
 
     const result = mergeStyles(dest, source);
 
@@ -311,17 +311,17 @@ describe('mergeStyles', () => {
   });
 
   it('should handle empty objects', () => {
-    const dest = {
+    const dest = ({
       title: 'Chart',
       config: {
         showGrid: true,
         showLabels: true,
       },
-    } as unknown as ChartStyles;
+    } as unknown) as ChartStyles;
 
-    const source = {
+    const source = ({
       config: {},
-    } as unknown as StyleOptions;
+    } as unknown) as StyleOptions;
 
     const result = mergeStyles(dest, source);
 
@@ -336,15 +336,15 @@ describe('mergeStyles', () => {
   });
 
   it('should not override with undefined values in source', () => {
-    const dest = {
+    const dest = ({
       title: 'Chart',
       subtitle: 'Subtitle',
-    } as unknown as ChartStyles;
+    } as unknown) as ChartStyles;
 
-    const source = {
+    const source = ({
       title: undefined,
       description: 'Description',
-    } as unknown as StyleOptions;
+    } as unknown) as StyleOptions;
 
     const result = mergeStyles(dest, source);
 

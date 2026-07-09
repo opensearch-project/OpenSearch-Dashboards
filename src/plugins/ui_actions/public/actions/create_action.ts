@@ -33,10 +33,8 @@ import { ActionByType } from './action';
 import { ActionType } from '../types';
 import { ActionDefinition } from './action';
 
-interface ActionDefinitionByType<T extends ActionType> extends Omit<
-  ActionDefinition<ActionContextMapping[T]>,
-  'id'
-> {
+interface ActionDefinitionByType<T extends ActionType>
+  extends Omit<ActionDefinition<ActionContextMapping[T]>, 'id'> {
   id?: string;
 }
 

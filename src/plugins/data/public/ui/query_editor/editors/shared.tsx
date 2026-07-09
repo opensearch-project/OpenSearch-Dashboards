@@ -41,7 +41,7 @@ export interface EditorInstance<TCollapsed, TExpanded, TBody> {
 export function createEditor<
   TCollapsed extends React.JSX.IntrinsicAttributes,
   TExpanded extends React.JSX.IntrinsicAttributes,
-  TBody extends React.JSX.IntrinsicAttributes,
+  TBody extends React.JSX.IntrinsicAttributes
 >(
   collapsed: CollapsedComponent<TCollapsed>,
   expanded: ExpandedComponent<TExpanded>,

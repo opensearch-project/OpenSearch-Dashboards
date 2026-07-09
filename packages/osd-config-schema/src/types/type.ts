@@ -69,7 +69,7 @@ export abstract class Type<V> {
     }
 
     if (options.validate) {
-      schema = (schema as unknown as OsdSchema).osdCustom(options.validate);
+      schema = ((schema as unknown) as OsdSchema).osdCustom(options.validate);
     }
 
     // Attach generic error handler only if it hasn't been attached yet since

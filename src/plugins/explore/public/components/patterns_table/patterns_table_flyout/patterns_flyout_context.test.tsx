@@ -13,8 +13,12 @@ jest.mock('../utils/utils', () => ({
 }));
 
 const TestComponent: React.FC = () => {
-  const { isFlyoutOpen, patternsFlyoutData, openPatternsTableFlyout, closePatternsTableFlyout } =
-    usePatternsFlyoutContext();
+  const {
+    isFlyoutOpen,
+    patternsFlyoutData,
+    openPatternsTableFlyout,
+    closePatternsTableFlyout,
+  } = usePatternsFlyoutContext();
 
   const validRecord: PatternsFlyoutRecord = {
     pattern: 'test-pattern',

@@ -19,10 +19,8 @@ interface StartServices {
 }
 
 export type CardContainerFactory = EmbeddableFactory<CardContainerInput, ContainerOutput>;
-export class CardContainerFactoryDefinition implements EmbeddableFactoryDefinition<
-  CardContainerInput,
-  ContainerOutput
-> {
+export class CardContainerFactoryDefinition
+  implements EmbeddableFactoryDefinition<CardContainerInput, ContainerOutput> {
   public readonly type = CARD_CONTAINER;
   public readonly isContainerType = true;
 

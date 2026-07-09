@@ -17,7 +17,7 @@ import { Diagnostic } from '../diagnostic';
 
 // Minimal Token stand-in: range helpers only read line, column, and text.
 const token = (line: number, column: number, text: string): Token =>
-  ({ line, column, text }) as unknown as Token;
+  (({ line, column, text } as unknown) as Token);
 
 describe('range_utils', () => {
   describe('rangeFromTokens', () => {
@@ -34,10 +34,10 @@ describe('range_utils', () => {
 
   describe('rangeFromContext', () => {
     it('uses the context start and stop tokens', () => {
-      const ctx = {
+      const ctx = ({
         start: token(1, 2, 'ab'),
         stop: token(1, 5, 'cde'),
-      } as unknown as ParserRuleContext;
+      } as unknown) as ParserRuleContext;
       expect(rangeFromContext(ctx)).toEqual({
         startLine: 1,
         startColumn: 2,
@@ -47,7 +47,7 @@ describe('range_utils', () => {
     });
 
     it('falls back to the start token when stop is missing', () => {
-      const ctx = { start: token(3, 4, 'ab'), stop: null } as unknown as ParserRuleContext;
+      const ctx = ({ start: token(3, 4, 'ab'), stop: null } as unknown) as ParserRuleContext;
       expect(rangeFromContext(ctx)).toEqual({
         startLine: 3,
         startColumn: 4,
@@ -57,7 +57,7 @@ describe('range_utils', () => {
     });
 
     it('returns a 1x1 placeholder when the context has no start token', () => {
-      const ctx = { start: null } as unknown as ParserRuleContext;
+      const ctx = ({ start: null } as unknown) as ParserRuleContext;
       expect(rangeFromContext(ctx)).toEqual({
         startLine: 1,
         startColumn: 0,

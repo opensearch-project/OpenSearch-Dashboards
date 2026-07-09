@@ -26,9 +26,9 @@ describe('Security router', () => {
       getIdentityEntriesByIds: jest.fn(),
     };
 
-    identitySourceService = {
+    identitySourceService = ({
       getIdentitySourceHandler: jest.fn().mockReturnValue(mockHandler),
-    } as unknown as jest.Mocked<IdentitySourceService>;
+    } as unknown) as jest.Mocked<IdentitySourceService>;
     registerRoutes({ router, identitySourceService });
   });
 

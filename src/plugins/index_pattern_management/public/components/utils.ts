@@ -54,9 +54,10 @@ export async function getIndexPatterns(
             const references = pattern.references;
             const isDefault = defaultIndex === id;
 
-            const tags = (
-              indexPatternManagementStart as IndexPatternManagementStart
-            ).list.getIndexPatternTags(pattern, isDefault);
+            const tags = (indexPatternManagementStart as IndexPatternManagementStart).list.getIndexPatternTags(
+              pattern,
+              isDefault
+            );
             const reference = Array.isArray(references) ? references[0] : undefined;
             const referenceId = reference?.id;
 

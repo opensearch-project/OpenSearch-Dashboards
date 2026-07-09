@@ -80,7 +80,8 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
 
   private readonly isLabsEnabled: boolean;
   private readonly trackUiMetric:
-    ((type: UiStatsMetricType, eventNames: string | string[], count?: number) => void) | undefined;
+    | ((type: UiStatsMetricType, eventNames: string | string[], count?: number) => void)
+    | undefined;
 
   constructor(props: TypeSelectionProps) {
     super(props);

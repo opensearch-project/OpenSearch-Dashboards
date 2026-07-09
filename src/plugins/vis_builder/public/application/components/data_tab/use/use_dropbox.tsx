@@ -52,21 +52,23 @@ export const useDropbox = (props: UseDropboxProps): DropboxProps => {
     },
   } = useOpenSearchDashboards<VisBuilderServices>();
 
-  const dropboxAggs = useMemo(
-    () => aggs.filter((agg) => agg.schema === schema.name),
-    [aggs, schema.name]
-  );
+  const dropboxAggs = useMemo(() => aggs.filter((agg) => agg.schema === schema.name), [
+    aggs,
+    schema.name,
+  ]);
 
   const displayFields: DropboxDisplay[] = useMemo(
     () =>
-      dropboxAggs?.map((agg): DropboxDisplay => {
-        // For timeseries aggregations that have timeinterval set as auto, the current timerange is required to calculate the label accurately
-        agg.aggConfigs.setTimeRange(timeRange);
-        return {
-          id: agg.id,
-          label: agg.makeLabel(),
-        };
-      }) ?? [],
+      dropboxAggs?.map(
+        (agg): DropboxDisplay => {
+          // For timeseries aggregations that have timeinterval set as auto, the current timerange is required to calculate the label accurately
+          agg.aggConfigs.setTimeRange(timeRange);
+          return {
+            id: agg.id,
+            label: agg.makeLabel(),
+          };
+        }
+      ) ?? [],
     [dropboxAggs, timeRange]
   );
 

@@ -227,8 +227,8 @@ export const AllAxesOptions: FC<AllAxesOptionsProps> = ({
                             axis.labels.rotate === 0
                               ? 'horizontal'
                               : axis.labels.rotate === -90
-                                ? 'vertical'
-                                : 'angled'
+                              ? 'vertical'
+                              : 'angled'
                           }
                           onChange={(e) => {
                             let rotationValue = 0;

@@ -28,10 +28,8 @@ export interface VisAugmenterPluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface VisAugmenterPluginStart {}
 
-export class VisAugmenterPlugin implements Plugin<
-  VisAugmenterPluginSetup,
-  VisAugmenterPluginStart
-> {
+export class VisAugmenterPlugin
+  implements Plugin<VisAugmenterPluginSetup, VisAugmenterPluginStart> {
   private readonly logger: Logger;
   private readonly config$: Observable<VisAugmenterPluginConfigType>;
 

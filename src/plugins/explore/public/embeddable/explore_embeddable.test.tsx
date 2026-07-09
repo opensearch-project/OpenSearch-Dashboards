@@ -569,8 +569,9 @@ describe('ExploreEmbeddable', () => {
   });
 
   test('fetch handles empty data by skipping visualization processing', async () => {
-    const mockNormalizeResultRows =
-      await import('../components/visualizations/utils/normalize_result_rows');
+    const mockNormalizeResultRows = await import(
+      '../components/visualizations/utils/normalize_result_rows'
+    );
     jest.spyOn(mockNormalizeResultRows, 'normalizeResultRows').mockReturnValueOnce({
       transformedData: [],
       numericalColumns: [],
@@ -595,8 +596,9 @@ describe('ExploreEmbeddable', () => {
   test('calls setTabularLoader with correct columns and rows when visualization data exists', async () => {
     const mockGetByName = jest.fn().mockReturnValue({ name: 'price' });
 
-    const mockNormalizeResultRows =
-      await import('../components/visualizations/utils/normalize_result_rows');
+    const mockNormalizeResultRows = await import(
+      '../components/visualizations/utils/normalize_result_rows'
+    );
     jest.spyOn(mockNormalizeResultRows, 'normalizeResultRows').mockReturnValueOnce({
       transformedData: [{ price: 10, category: 'A', date: '2024-01-01' }],
       numericalColumns: [{ name: 'price', column: 'price' } as any],
@@ -647,8 +649,9 @@ describe('ExploreEmbeddable', () => {
       if (field === 'query') return { query: 'test', language: 'PPL' };
     });
 
-    const mockNormalizeResultRows =
-      await import('../components/visualizations/utils/normalize_result_rows');
+    const mockNormalizeResultRows = await import(
+      '../components/visualizations/utils/normalize_result_rows'
+    );
     jest.spyOn(mockNormalizeResultRows, 'normalizeResultRows').mockReturnValueOnce({
       transformedData: [{ price: 42 }],
       numericalColumns: [{ name: 'price', column: 'price' } as any],

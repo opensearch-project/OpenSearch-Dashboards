@@ -182,8 +182,9 @@ export async function resolveSavedObjectsImportErrors({
       dataSourceTitle,
       workspaces,
     };
-    const { createdObjects, errors: bulkCreateErrors } =
-      await createSavedObjects(createSavedObjectsParams);
+    const { createdObjects, errors: bulkCreateErrors } = await createSavedObjects(
+      createSavedObjectsParams
+    );
     errorAccumulator = [...errorAccumulator, ...bulkCreateErrors];
     successCount += createdObjects.length;
     successResults = [

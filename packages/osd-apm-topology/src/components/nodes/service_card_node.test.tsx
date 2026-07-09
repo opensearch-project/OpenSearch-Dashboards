@@ -47,7 +47,7 @@ describe('ServiceCardNode', () => {
       zIndex: 0,
       positionAbsoluteX: 0,
       positionAbsoluteY: 0,
-    }) as any;
+    } as any);
 
   it('renders title and subtitle', () => {
     render(<ServiceCardNode {...createNodeProps()} />);

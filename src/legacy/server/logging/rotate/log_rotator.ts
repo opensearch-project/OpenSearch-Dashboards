@@ -276,8 +276,9 @@ export class LogRotator {
     const foundRotatedFiles = await this._readRotatedFilesMetadata();
 
     // delete number of rotated files exceeding the keepFiles limit setting
-    const rotatedFiles: string[] =
-      await this._deleteFoundRotatedFilesAboveKeepFilesLimit(foundRotatedFiles);
+    const rotatedFiles: string[] = await this._deleteFoundRotatedFilesAboveKeepFilesLimit(
+      foundRotatedFiles
+    );
 
     // delete last file
     await this._deleteLastRotatedFile(rotatedFiles);

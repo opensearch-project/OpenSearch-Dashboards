@@ -50,7 +50,7 @@ describe('AskAIVisualizeEmbeddableAction', () => {
     };
 
     // Mock embeddable
-    mockEmbeddable = {
+    mockEmbeddable = ({
       id: 'test-embeddable-id',
       getTitle: jest.fn().mockReturnValue('Test Visualization'),
       type: 'visualization',
@@ -77,7 +77,7 @@ describe('AskAIVisualizeEmbeddableAction', () => {
       },
       domNode: document.createElement('div'),
       getOutput: jest.fn().mockReturnValue({ usesUnsupportedEngineDataSource: false }),
-    } as unknown as VisualizeEmbeddable;
+    } as unknown) as VisualizeEmbeddable;
 
     // Create action instance
     mockIndexPatterns = {
@@ -104,10 +104,10 @@ describe('AskAIVisualizeEmbeddableAction', () => {
 
   describe('isCompatible', () => {
     const withOutput = (usesUnsupportedEngineDataSource?: boolean) =>
-      ({
+      (({
         ...mockEmbeddable,
         getOutput: jest.fn().mockReturnValue({ usesUnsupportedEngineDataSource }),
-      }) as unknown as VisualizeEmbeddable;
+      } as unknown) as VisualizeEmbeddable);
 
     it('should return true when the data source engine is supported', async () => {
       const result = await action.isCompatible({ embeddable: withOutput(false) });
@@ -161,12 +161,12 @@ describe('AskAIVisualizeEmbeddableAction', () => {
 
     describe('input controls (resolved via index-pattern cache, not the render-error flag)', () => {
       const buildInputControlEmbeddable = (indexPattern: string) =>
-        ({
+        (({
           ...mockEmbeddable,
           vis: { type: { name: 'input_control_vis' }, params: { controls: [{ indexPattern }] } },
           // Output flag is irrelevant for input controls; ensure it isn't read.
           getOutput: jest.fn().mockReturnValue({ usesUnsupportedEngineDataSource: undefined }),
-        }) as unknown as VisualizeEmbeddable;
+        } as unknown) as VisualizeEmbeddable);
 
       it('should hide when a control index pattern is AnalyticEngine-backed', async () => {
         // 'ae-ip' is intentionally excluded from the engine-filtered cache.

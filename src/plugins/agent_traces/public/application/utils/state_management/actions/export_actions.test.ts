@@ -187,7 +187,7 @@ describe('export_actions', () => {
 
     it('should use tab prepareQuery when available', () => {
       const mockPrepareQuery = jest.fn().mockReturnValue('PREPARED QUERY');
-      (mockServices.tabRegistry.getTab as any as jest.MockedFunction<any>).mockReturnValue({
+      ((mockServices.tabRegistry.getTab as any) as jest.MockedFunction<any>).mockReturnValue({
         prepareQuery: mockPrepareQuery,
       });
 
@@ -240,9 +240,9 @@ describe('export_actions', () => {
     });
 
     it('should handle CSV escaping for string values', () => {
-      (
-        (mockServices.data.indexPatterns as any).flattenHit as jest.MockedFunction<any>
-      ).mockReturnValue({
+      ((mockServices.data.indexPatterns as any).flattenHit as jest.MockedFunction<
+        any
+      >).mockReturnValue({
         field1: 'value with "quotes"',
         field2: 'normal value',
       });
@@ -294,13 +294,12 @@ describe('export_actions', () => {
         }),
       };
 
-      (
-        mockServices.data.search.searchSource.create as any as jest.MockedFunction<any>
-      ).mockResolvedValue(mockSearchSource);
-      (
-        mockServices.data.query.timefilter.timefilter
-          .createFilter as any as jest.MockedFunction<any>
-      ).mockReturnValue({
+      ((mockServices.data.search.searchSource.create as any) as jest.MockedFunction<
+        any
+      >).mockResolvedValue(mockSearchSource);
+      ((mockServices.data.query.timefilter.timefilter.createFilter as any) as jest.MockedFunction<
+        any
+      >).mockReturnValue({
         range: { '@timestamp': { gte: 'now-1d', lte: 'now' } },
       });
     });
@@ -347,7 +346,7 @@ describe('export_actions', () => {
         dataset: undefined,
       });
 
-      (mockServices.tabRegistry.getTab as any as jest.MockedFunction<any>).mockReturnValue({
+      ((mockServices.tabRegistry.getTab as any) as jest.MockedFunction<any>).mockReturnValue({
         prepareQuery: mockPrepareQuery,
       });
 
@@ -384,10 +383,9 @@ describe('export_actions', () => {
     });
 
     it('should handle null time filter', async () => {
-      (
-        mockServices.data.query.timefilter.timefilter
-          .createFilter as any as jest.MockedFunction<any>
-      ).mockReturnValue(null);
+      ((mockServices.data.query.timefilter.timefilter.createFilter as any) as jest.MockedFunction<
+        any
+      >).mockReturnValue(null);
 
       const action = exportMaxSizeCsv({ services: mockServices });
       await action(mockDispatch, mockGetState);

@@ -43,8 +43,9 @@ export type ISearch = (
 
 export type ISearchGeneric = <
   SearchStrategyRequest extends IOpenSearchDashboardsSearchRequest = IOpenSearchSearchRequest,
-  SearchStrategyResponse extends IOpenSearchDashboardsSearchResponse | IDataFrameResponse =
-    IOpenSearchSearchResponse,
+  SearchStrategyResponse extends
+    | IOpenSearchDashboardsSearchResponse
+    | IDataFrameResponse = IOpenSearchSearchResponse
 >(
   request: SearchStrategyRequest,
   options?: ISearchOptions

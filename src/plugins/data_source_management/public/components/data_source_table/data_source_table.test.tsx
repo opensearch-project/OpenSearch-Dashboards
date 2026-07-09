@@ -48,7 +48,7 @@ describe('DataSourceTable', () => {
   };
   const uiSettings = mockedContext.uiSettings;
   let component: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
-  const history = scopedHistoryMock.create() as unknown as ScopedHistory;
+  const history = (scopedHistoryMock.create() as unknown) as ScopedHistory;
   describe('should get datasources failed', () => {
     beforeEach(async () => {
       spyOn(utils, 'getDataSources').and.returnValue(Promise.reject());
@@ -57,8 +57,8 @@ describe('DataSourceTable', () => {
           wrapWithIntl(
             <DataSourceTable
               history={history}
-              location={{} as unknown as RouteComponentProps['location']}
-              match={{} as unknown as RouteComponentProps['match']}
+              location={({} as unknown) as RouteComponentProps['location']}
+              match={({} as unknown) as RouteComponentProps['match']}
             />
           ),
           {
@@ -87,8 +87,8 @@ describe('DataSourceTable', () => {
           wrapWithIntl(
             <DataSourceTable
               history={history}
-              location={{} as unknown as RouteComponentProps['location']}
-              match={{} as unknown as RouteComponentProps['match']}
+              location={({} as unknown) as RouteComponentProps['location']}
+              match={({} as unknown) as RouteComponentProps['match']}
             />
           ),
           {
@@ -205,8 +205,8 @@ describe('DataSourceTable', () => {
           wrapWithIntl(
             <DataSourceTable
               history={history}
-              location={{} as unknown as RouteComponentProps['location']}
-              match={{} as unknown as RouteComponentProps['match']}
+              location={({} as unknown) as RouteComponentProps['location']}
+              match={({} as unknown) as RouteComponentProps['match']}
             />
           ),
           {
@@ -238,8 +238,8 @@ describe('DataSourceTable', () => {
           wrapWithIntl(
             <DataSourceTable
               history={history}
-              location={{} as unknown as RouteComponentProps['location']}
-              match={{} as unknown as RouteComponentProps['match']}
+              location={({} as unknown) as RouteComponentProps['location']}
+              match={({} as unknown) as RouteComponentProps['match']}
             />
           ),
           {
@@ -279,8 +279,8 @@ describe('DataSourceTable', () => {
           wrapWithIntl(
             <DataSourceTable
               history={history}
-              location={{} as unknown as RouteComponentProps['location']}
-              match={{} as unknown as RouteComponentProps['match']}
+              location={({} as unknown) as RouteComponentProps['location']}
+              match={({} as unknown) as RouteComponentProps['match']}
             />
           ),
           {
@@ -328,8 +328,8 @@ describe('DataSourceTable', () => {
           wrapWithIntl(
             <DataSourceTable
               history={history}
-              location={{} as unknown as RouteComponentProps['location']}
-              match={{} as unknown as RouteComponentProps['match']}
+              location={({} as unknown) as RouteComponentProps['location']}
+              match={({} as unknown) as RouteComponentProps['match']}
             />
           ),
           {
@@ -373,8 +373,8 @@ describe('DataSourceTable', () => {
           wrapWithIntl(
             <DataSourceTable
               history={history}
-              location={{} as unknown as RouteComponentProps['location']}
-              match={{} as unknown as RouteComponentProps['match']}
+              location={({} as unknown) as RouteComponentProps['location']}
+              match={({} as unknown) as RouteComponentProps['match']}
             />
           ),
           {
@@ -419,8 +419,8 @@ describe('DataSourceTable', () => {
           wrapWithIntl(
             <DataSourceTable
               history={history}
-              location={{} as unknown as RouteComponentProps['location']}
-              match={{} as unknown as RouteComponentProps['match']}
+              location={({} as unknown) as RouteComponentProps['location']}
+              match={({} as unknown) as RouteComponentProps['match']}
             />
           ),
           {
@@ -464,8 +464,8 @@ describe('DataSourceTable', () => {
           wrapWithIntl(
             <DataSourceTable
               history={history}
-              location={{} as unknown as RouteComponentProps['location']}
-              match={{} as unknown as RouteComponentProps['match']}
+              location={({} as unknown) as RouteComponentProps['location']}
+              match={({} as unknown) as RouteComponentProps['match']}
             />
           ),
           {
@@ -504,8 +504,8 @@ describe('DataSourceTable', () => {
           wrapWithIntl(
             <DataSourceTable
               history={history}
-              location={{} as unknown as RouteComponentProps['location']}
-              match={{} as unknown as RouteComponentProps['match']}
+              location={({} as unknown) as RouteComponentProps['location']}
+              match={({} as unknown) as RouteComponentProps['match']}
             />
           ),
           {
@@ -548,8 +548,8 @@ describe('DataSourceTable', () => {
           wrapWithIntl(
             <DataSourceTable
               history={history}
-              location={{} as unknown as RouteComponentProps['location']}
-              match={{} as unknown as RouteComponentProps['match']}
+              location={({} as unknown) as RouteComponentProps['location']}
+              match={({} as unknown) as RouteComponentProps['match']}
             />
           ),
           {
@@ -589,8 +589,8 @@ describe('DataSourceTable', () => {
           wrapWithIntl(
             <DataSourceTable
               history={history}
-              location={{} as unknown as RouteComponentProps['location']}
-              match={{} as unknown as RouteComponentProps['match']}
+              location={({} as unknown) as RouteComponentProps['location']}
+              match={({} as unknown) as RouteComponentProps['match']}
             />
           ),
           {

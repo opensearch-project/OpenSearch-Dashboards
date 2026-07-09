@@ -74,10 +74,7 @@ interface MigrateResponse {
 }
 
 export class OsdClientSavedObjects {
-  constructor(
-    private readonly log: ToolingLog,
-    private readonly requester: OsdClientRequester
-  ) {}
+  constructor(private readonly log: ToolingLog, private readonly requester: OsdClientRequester) {}
 
   /**
    * Run the saved objects migration

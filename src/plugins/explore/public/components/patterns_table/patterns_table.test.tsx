@@ -164,13 +164,13 @@ describe('PatternsTable', () => {
         },
         // @ts-expect-error TS2741 TODO(ts-error): fixme
         {
-          sample: null as unknown as string,
+          sample: (null as unknown) as string,
           ratio: 0.1,
           count: 100,
         },
         // @ts-expect-error TS2741 TODO(ts-error): fixme
         {
-          sample: undefined as unknown as string,
+          sample: (undefined as unknown) as string,
           ratio: 0.05,
           count: 50,
         },

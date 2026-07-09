@@ -37,14 +37,15 @@ export type CapabilitiesResolver = (
   applications: string[]
 ) => Promise<Capabilities>;
 
-export const getCapabilitiesResolver =
-  (
-    capabilities: () => Capabilities,
-    switchers: () => CapabilitiesSwitcher[]
-  ): CapabilitiesResolver =>
-  async (request: OpenSearchDashboardsRequest, applications: string[]): Promise<Capabilities> => {
-    return resolveCapabilities(capabilities(), switchers(), request, applications);
-  };
+export const getCapabilitiesResolver = (
+  capabilities: () => Capabilities,
+  switchers: () => CapabilitiesSwitcher[]
+): CapabilitiesResolver => async (
+  request: OpenSearchDashboardsRequest,
+  applications: string[]
+): Promise<Capabilities> => {
+  return resolveCapabilities(capabilities(), switchers(), request, applications);
+};
 
 export const resolveCapabilities = async (
   capabilities: Capabilities,
@@ -66,7 +67,7 @@ export const resolveCapabilities = async (
 
 function recursiveApplyChanges<
   TDestination extends Record<string, any>,
-  TSource extends Record<string, any>,
+  TSource extends Record<string, any>
 >(destination: TDestination, source: TSource): TDestination {
   const result = {} as Record<string, any>;
   for (const key of Object.keys(destination)) {

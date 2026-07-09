@@ -67,14 +67,13 @@ function getHasMatch(search?: string, savedAttributes?: BookSavedObjectAttribute
   if (!savedAttributes) return false;
   return Boolean(
     (savedAttributes.author && savedAttributes.author.match(search)) ||
-    (savedAttributes.title && savedAttributes.title.match(search))
+      (savedAttributes.title && savedAttributes.title.match(search))
   );
 }
 
 export class BookEmbeddable
   extends Embeddable<BookEmbeddableInput, BookEmbeddableOutput>
-  implements ReferenceOrValueEmbeddable<BookByValueInput, BookByReferenceInput>
-{
+  implements ReferenceOrValueEmbeddable<BookByValueInput, BookByReferenceInput> {
   public readonly type = BOOK_EMBEDDABLE;
   private subscription: Subscription;
   private root: Root | null = null;

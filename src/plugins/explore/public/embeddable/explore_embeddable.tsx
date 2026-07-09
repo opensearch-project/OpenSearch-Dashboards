@@ -115,8 +115,7 @@ interface ExploreEmbeddableConfig {
 
 export class ExploreEmbeddable
   extends Embeddable<ExploreInput, ExploreOutput>
-  implements IEmbeddable<ExploreInput, ExploreOutput>
-{
+  implements IEmbeddable<ExploreInput, ExploreOutput> {
   private abortController?: AbortController;
   private readonly savedExplore: SavedExplore;
   private inspectorAdaptors: Adapters;
@@ -138,8 +137,7 @@ export class ExploreEmbeddable
   private root?: Root;
 
   // Variable interpolation support
-  private interpolationService: IVariableInterpolationService =
-    createNoOpVariableInterpolationService();
+  private interpolationService: IVariableInterpolationService = createNoOpVariableInterpolationService();
   private variableSubscription?: Subscription;
   public originalQuery?: string;
   private lastInterpolatedQuery?: string;
@@ -212,7 +210,7 @@ export class ExploreEmbeddable
     // Subscribing to output$ ensures handleTitleVariables re-applies variable interpolation
     // after that overwrite. The isEqual guard in updateOutput() prevents infinite loops.
     if (parent && 'variableService' in parent) {
-      const dashboardContainer = parent as unknown as DashboardContainer;
+      const dashboardContainer = (parent as unknown) as DashboardContainer;
       this.titleVariableSubscription = merge(
         this.getInput$(),
         this.getOutput$(),
@@ -257,7 +255,7 @@ export class ExploreEmbeddable
     this.interpolationService = createNoOpVariableInterpolationService();
 
     if (parent && 'variableInterpolationService' in parent) {
-      const dashboardContainer = parent as unknown as DashboardContainer;
+      const dashboardContainer = (parent as unknown) as DashboardContainer;
       this.interpolationService = dashboardContainer.variableInterpolationService;
 
       if ('variableService' in dashboardContainer) {
@@ -558,8 +556,12 @@ export class ExploreEmbeddable
     this.searchProps.activeTab = uiState.activeTab;
     this.searchProps.styleOptions = visualization.params;
     if (uiState.activeTab !== 'logs' && visualizationData) {
-      const { numericalColumns, categoricalColumns, dateColumns, unknownColumns } =
-        visualizationData;
+      const {
+        numericalColumns,
+        categoricalColumns,
+        dateColumns,
+        unknownColumns,
+      } = visualizationData;
       const allColumns = [
         ...(numericalColumns ?? []),
         ...(categoricalColumns ?? []),

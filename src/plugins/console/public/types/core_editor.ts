@@ -34,7 +34,11 @@ import { Token } from './token';
 type MarkerRef = any;
 
 export type EditorEvent =
-  'tokenizerUpdate' | 'changeCursor' | 'changeScrollTop' | 'change' | 'changeSelection';
+  | 'tokenizerUpdate'
+  | 'changeCursor'
+  | 'changeScrollTop'
+  | 'change'
+  | 'changeSelection';
 
 export type AutoCompleterFunction = (
   pos: Position,

@@ -102,7 +102,10 @@ export type TopNavMenuSwitchData = TopNavMenuCommonData & {
 };
 
 export type TopNavMenuData =
-  TopNavMenuLegacyData | TopNavMenuButtonData | TopNavMenuIconData | TopNavMenuSwitchData;
+  | TopNavMenuLegacyData
+  | TopNavMenuButtonData
+  | TopNavMenuIconData
+  | TopNavMenuSwitchData;
 
 export type RegisteredTopNavMenuData = TopNavMenuData & {
   appName?: string;

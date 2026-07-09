@@ -68,7 +68,10 @@ export interface CreateDataSourceState {
   auth: {
     type: AuthType | string;
     credentials:
-      UsernamePasswordTypedContent | SigV4Content | { [key: string]: string } | undefined;
+      | UsernamePasswordTypedContent
+      | SigV4Content
+      | { [key: string]: string }
+      | undefined;
   };
 }
 
@@ -372,8 +375,9 @@ export class CreateDataSourceForm extends React.Component<
   };
 
   getCredentialFormFromRegistry = (authType: string) => {
-    const registeredAuthMethod =
-      this.authenticationMethodRegistry.getAuthenticationMethod(authType);
+    const registeredAuthMethod = this.authenticationMethodRegistry.getAuthenticationMethod(
+      authType
+    );
     const authCredentialForm = registeredAuthMethod?.credentialForm;
 
     if (authCredentialForm !== undefined) {

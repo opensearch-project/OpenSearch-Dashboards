@@ -173,16 +173,15 @@ export function createExtractFieldsTransformation(): TransformationInstance<Extr
   };
 }
 
-export const extractFieldsTransformationDefinition: TransformationDefinition<ExtractFieldsConfig> =
-  {
-    id: 'extract_fields',
-    type: 'transform',
-    label: i18n.translate('explore.transformations.extractFields.label', {
-      defaultMessage: 'Extract Fields',
-    }),
-    description: i18n.translate('explore.transformations.extractFields.description', {
-      defaultMessage: 'Flatten a nested object or JSON string field into top-level columns',
-    }),
-    iconType: 'unlink',
-    createInstance: createExtractFieldsTransformation,
-  };
+export const extractFieldsTransformationDefinition: TransformationDefinition<ExtractFieldsConfig> = {
+  id: 'extract_fields',
+  type: 'transform',
+  label: i18n.translate('explore.transformations.extractFields.label', {
+    defaultMessage: 'Extract Fields',
+  }),
+  description: i18n.translate('explore.transformations.extractFields.description', {
+    defaultMessage: 'Flatten a nested object or JSON string field into top-level columns',
+  }),
+  iconType: 'unlink',
+  createInstance: createExtractFieldsTransformation,
+};

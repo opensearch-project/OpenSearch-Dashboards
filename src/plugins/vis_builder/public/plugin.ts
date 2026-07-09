@@ -59,12 +59,14 @@ import { opensearchFilters } from '../../data/public';
 import { createRawDataVisFn } from './visualizations/vega/utils/expression_helper';
 import { VISBUILDER_ENABLE_VEGA_SETTING } from '../common/constants';
 
-export class VisBuilderPlugin implements Plugin<
-  VisBuilderSetup,
-  VisBuilderStart,
-  VisBuilderPluginSetupDependencies,
-  VisBuilderPluginStartDependencies
-> {
+export class VisBuilderPlugin
+  implements
+    Plugin<
+      VisBuilderSetup,
+      VisBuilderStart,
+      VisBuilderPluginSetupDependencies,
+      VisBuilderPluginStartDependencies
+    > {
   private typeService = new TypeService();
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private stopUrlTracking?: () => void;
@@ -76,11 +78,7 @@ export class VisBuilderPlugin implements Plugin<
     core: CoreSetup<VisBuilderPluginStartDependencies, VisBuilderStart>,
     { embeddable, visualizations, data, expressions: exp }: VisBuilderPluginSetupDependencies
   ) {
-    const {
-      appMounted,
-      appUnMounted,
-      stop: stopUrlTracker,
-    } = createOsdUrlTracker({
+    const { appMounted, appUnMounted, stop: stopUrlTracker } = createOsdUrlTracker({
       baseUrl: core.http.basePath.prepend(`/app/${PLUGIN_ID}`),
       defaultSubUrl: '#/',
       storageKey: `lastUrl:${core.http.basePath.get()}:${PLUGIN_ID}`,

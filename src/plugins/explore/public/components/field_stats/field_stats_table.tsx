@@ -37,10 +37,10 @@ export const FieldStatsTable: React.FC<FieldStatsTableProps> = ({
   const [sortField, setSortField] = useState<keyof FieldStatsItem>('name');
   const [sortDirection, setSortDirection] = useState<Direction>('asc');
 
-  const columns = useMemo(
-    () => getFieldStatsColumns({ expandedRows, onRowExpand }),
-    [expandedRows, onRowExpand]
-  );
+  const columns = useMemo(() => getFieldStatsColumns({ expandedRows, onRowExpand }), [
+    expandedRows,
+    onRowExpand,
+  ]);
 
   const itemIdToExpandedRowMap = useMemo(() => {
     const map: Record<string, ReactNode> = {};

@@ -78,7 +78,7 @@ describe('useEditorUpdates', () => {
 
   beforeEach(() => {
     unsubscribeStateUpdatesMock = jest.fn();
-    appState = {
+    appState = ({
       getState: jest.fn(() => dashboardAppStateStub),
       subscribe: jest.fn(() => unsubscribeStateUpdatesMock),
       transitions: {
@@ -86,15 +86,15 @@ describe('useEditorUpdates', () => {
         setOption: jest.fn(),
         setDashboard: jest.fn(),
       },
-    } as unknown as DashboardAppStateContainer;
-    savedDashboardInstance = {
+    } as unknown) as DashboardAppStateContainer;
+    savedDashboardInstance = ({
       ...dashboardAppStateStub,
       ...{
         getQuery: () => dashboardAppStateStub.query,
         getFilters: () => dashboardAppStateStub.filters,
         optionsJSON: JSON.stringify(dashboardAppStateStub.options),
       },
-    } as unknown as SavedObjectDashboard;
+    } as unknown) as SavedObjectDashboard;
     dashboard = new Dashboard(convertToSerializedDashboard(savedDashboardInstance));
   });
 

@@ -22,17 +22,15 @@ export const newTopNavData: TopNavMenuIconUIData = {
   controlType: 'icon',
 };
 
-export const getNewButtonRun =
-  (
-    services: ExploreServices,
-    clearEditors: ReturnType<typeof useClearEditors>
-  ): TopNavMenuIconRun =>
-  () => {
-    const visBuilder = getVisualizationBuilder();
-    visBuilder.clearUrl();
-    services.store.dispatch(resetExploreStateActionCreator(services, clearEditors));
+export const getNewButtonRun = (
+  services: ExploreServices,
+  clearEditors: ReturnType<typeof useClearEditors>
+): TopNavMenuIconRun => () => {
+  const visBuilder = getVisualizationBuilder();
+  visBuilder.clearUrl();
+  services.store.dispatch(resetExploreStateActionCreator(services, clearEditors));
 
-    if (services.scopedHistory) {
-      services.scopedHistory.push('/');
-    }
-  };
+  if (services.scopedHistory) {
+    services.scopedHistory.push('/');
+  }
+};

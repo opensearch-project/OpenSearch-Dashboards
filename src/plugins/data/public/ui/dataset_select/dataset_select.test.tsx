@@ -97,13 +97,13 @@ describe('DatasetSelect', () => {
     notifications: mockCore.notifications,
     http: mockCore.http,
     storage: {} as DataStorage,
-    data: {
+    data: ({
       ...mockDataStartContract,
       dataViews: mockDataViews,
       query: {
         queryString: mockQueryService.queryString,
       },
-    } as unknown as DataPublicPluginStart,
+    } as unknown) as DataPublicPluginStart,
     overlays: mockCore.overlays,
     application: mockCore.application,
   };

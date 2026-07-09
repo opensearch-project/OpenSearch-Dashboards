@@ -95,8 +95,12 @@ describe('PatternsFlyoutEventTable', () => {
     jest.clearAllMocks();
 
     (useSelector as jest.Mock).mockImplementation((selector) => {
-      const { selectDataset, selectQuery, selectPatternsField, selectUsingRegexPatterns } =
-        jest.requireActual('../../../application/utils/state_management/selectors');
+      const {
+        selectDataset,
+        selectQuery,
+        selectPatternsField,
+        selectUsingRegexPatterns,
+      } = jest.requireActual('../../../application/utils/state_management/selectors');
 
       if (selector === selectDataset) return mockDataset;
       if (selector === selectQuery) return mockQuery;
@@ -275,8 +279,12 @@ describe('PatternsFlyoutEventTable', () => {
     mockServices.data.search.searchSource.create.mockResolvedValue(mockSearchSourceInstance);
 
     (useSelector as jest.Mock).mockImplementation((selector) => {
-      const { selectDataset, selectQuery, selectPatternsField, selectUsingRegexPatterns } =
-        jest.requireActual('../../../application/utils/state_management/selectors');
+      const {
+        selectDataset,
+        selectQuery,
+        selectPatternsField,
+        selectUsingRegexPatterns,
+      } = jest.requireActual('../../../application/utils/state_management/selectors');
 
       if (selector === selectDataset) return mockDatasetWithoutTimeField;
       if (selector === selectQuery) return mockQuery;

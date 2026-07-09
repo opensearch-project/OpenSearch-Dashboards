@@ -46,11 +46,11 @@ import { I18nProvider } from '@osd/i18n/react';
 import { IOsdUrlStateStorage } from 'src/plugins/opensearch_dashboards_utils/public';
 
 function wrapDashboardListingInContext(mockServices: any) {
-  const osdUrlStateStorage = {
+  const osdUrlStateStorage = ({
     set: jest.fn(),
     get: jest.fn(() => ({ linked: false })),
     flush: jest.fn(),
-  } as unknown as IOsdUrlStateStorage;
+  } as unknown) as IOsdUrlStateStorage;
   const services = {
     ...mockServices,
     osdUrlStateStorage,

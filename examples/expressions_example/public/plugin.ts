@@ -28,10 +28,8 @@ import {
   quickFormRenderer,
 } from '../common/expression_functions';
 
-export class ExpressionsExamplePlugin implements Plugin<
-  ExpressionsExamplePluginSetup,
-  ExpressionsExamplePluginStart
-> {
+export class ExpressionsExamplePlugin
+  implements Plugin<ExpressionsExamplePluginSetup, ExpressionsExamplePluginStart> {
   public setup(
     core: CoreSetup,
     { expressions, developerExamples }: ExpressionsExampleSetupDependencies
@@ -74,7 +72,8 @@ export class ExpressionsExamplePlugin implements Plugin<
       links: [
         {
           label: 'README',
-          href: 'https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/src/plugins/expressions/README.md',
+          href:
+            'https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/src/plugins/expressions/README.md',
           iconType: 'logoGithub',
           target: '_blank',
           size: 's',

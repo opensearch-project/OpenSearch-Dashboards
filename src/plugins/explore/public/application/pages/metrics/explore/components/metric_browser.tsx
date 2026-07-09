@@ -64,8 +64,15 @@ function useSparklines(
 }
 
 export const MetricBrowser: React.FC = () => {
-  const { state, dispatch, client, queryGen, stepSec, executePromQL, refreshCounter } =
-    useExploration();
+  const {
+    state,
+    dispatch,
+    client,
+    queryGen,
+    stepSec,
+    executePromQL,
+    refreshCounter,
+  } = useExploration();
   const [allMetrics, setAllMetrics] = useState<string[]>([]);
   const [metadata, setMetadata] = useState<Record<string, MetricMetadata>>({});
   const [loading, setLoading] = useState(true);

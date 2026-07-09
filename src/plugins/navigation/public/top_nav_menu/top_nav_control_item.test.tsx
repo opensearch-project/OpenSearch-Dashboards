@@ -106,9 +106,9 @@ describe('TopNavControlItem', () => {
   });
 
   it('calls run function on button click', () => {
-    const mockEvent = {
-      currentTarget: document.createElement('button'),
-    } as React.MouseEvent<HTMLButtonElement>;
+    const mockEvent = { currentTarget: document.createElement('button') } as React.MouseEvent<
+      HTMLButtonElement
+    >;
     // @ts-expect-error TS2322 TODO(ts-error): fixme
     const wrapper: ShallowWrapper = shallowWithIntl(<TopNavControlItem {...buttonProps} />);
     wrapper.find(EuiButton).simulate('click', mockEvent);

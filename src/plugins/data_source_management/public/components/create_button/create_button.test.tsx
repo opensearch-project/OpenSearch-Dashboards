@@ -12,7 +12,7 @@ import { ScopedHistory } from 'opensearch-dashboards/public';
 const createButtonIdentifier = `[data-test-subj="createDataSourceButton"]`;
 
 describe('CreateButton', () => {
-  const history = scopedHistoryMock.create() as unknown as ScopedHistory;
+  const history = (scopedHistoryMock.create() as unknown) as ScopedHistory;
   const dataTestSubj = 'createDataSourceButton';
   let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
 

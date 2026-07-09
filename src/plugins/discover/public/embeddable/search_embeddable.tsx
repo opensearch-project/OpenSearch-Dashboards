@@ -102,8 +102,7 @@ interface SearchEmbeddableConfig {
 
 export class SearchEmbeddable
   extends Embeddable<SearchInput, SearchOutput>
-  implements ISearchEmbeddable
-{
+  implements ISearchEmbeddable {
   private readonly savedSearch: SavedSearch;
   private inspectorAdaptors: Adapters;
   private searchProps?: SearchProps;

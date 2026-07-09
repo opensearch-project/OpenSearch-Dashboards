@@ -73,8 +73,9 @@ export const siblingPipelineAggHelper = {
           orderAgg.id = agg.id + '-bucket';
           return orderAgg;
         },
-        modifyAggConfigOnSearchRequestStart:
-          forwardModifyAggConfigOnSearchRequestStart('customBucket'),
+        modifyAggConfigOnSearchRequestStart: forwardModifyAggConfigOnSearchRequestStart(
+          'customBucket'
+        ),
         write: () => {},
       },
       {
@@ -87,8 +88,9 @@ export const siblingPipelineAggHelper = {
           orderAgg.id = agg.id + '-metric';
           return orderAgg;
         },
-        modifyAggConfigOnSearchRequestStart:
-          forwardModifyAggConfigOnSearchRequestStart('customMetric'),
+        modifyAggConfigOnSearchRequestStart: forwardModifyAggConfigOnSearchRequestStart(
+          'customMetric'
+        ),
         write: siblingPipelineAggWriter,
       },
     ] as Array<MetricAggParam<IMetricAggConfig>>;

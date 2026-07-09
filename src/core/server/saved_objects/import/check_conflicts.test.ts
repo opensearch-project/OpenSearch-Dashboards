@@ -45,7 +45,7 @@ const createObject = (type: string, id: string): SavedObjectType => ({
   type,
   id,
   attributes: { title: 'some-title' },
-  references: Symbol() as unknown as SavedObjectReference[],
+  references: (Symbol() as unknown) as SavedObjectReference[],
 });
 
 const getResultMock = {
@@ -78,7 +78,7 @@ const obj4Error = getResultMock.invalidType(obj4.type, obj4.id);
 
 describe('#checkConflicts', () => {
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
-  let socCheckConflicts: (typeof savedObjectsClient)['checkConflicts'];
+  let socCheckConflicts: typeof savedObjectsClient['checkConflicts'];
 
   const setupParams = (partial: {
     objects: SavedObjectType[];

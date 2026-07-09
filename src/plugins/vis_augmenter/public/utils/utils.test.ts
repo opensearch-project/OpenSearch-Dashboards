@@ -46,7 +46,7 @@ describe('utils', () => {
   });
   describe('isEligibleForVisLayers', () => {
     it('vis is ineligible with invalid non-line type', async () => {
-      const vis = {
+      const vis = ({
         params: {
           type: 'not-line',
           seriesParams: [],
@@ -59,7 +59,7 @@ describe('utils', () => {
         data: {
           aggs: VALID_AGGS,
         },
-      } as unknown as Vis;
+      } as unknown) as Vis;
       expect(isEligibleForVisLayers(vis)).toEqual(false);
     });
     it('vis is ineligible with no date_histogram', async () => {
@@ -78,7 +78,7 @@ describe('utils', () => {
       const invalidAggs = new AggConfigs(STUB_INDEX_PATTERN_WITH_FIELDS, invalidConfigStates, {
         typesRegistry: TYPES_REGISTRY,
       });
-      const vis = {
+      const vis = ({
         params: {
           type: 'line',
           seriesParams: [],
@@ -86,7 +86,7 @@ describe('utils', () => {
         data: {
           invalidAggs,
         },
-      } as unknown as Vis;
+      } as unknown) as Vis;
       expect(isEligibleForVisLayers(vis)).toEqual(false);
     });
     it('vis is ineligible with invalid aggs counts', async () => {
@@ -102,7 +102,7 @@ describe('utils', () => {
       const invalidAggs = new AggConfigs(STUB_INDEX_PATTERN_WITH_FIELDS, invalidConfigStates, {
         typesRegistry: TYPES_REGISTRY,
       });
-      const vis = {
+      const vis = ({
         params: {
           type: 'line',
           seriesParams: [],
@@ -110,7 +110,7 @@ describe('utils', () => {
         data: {
           invalidAggs,
         },
-      } as unknown as Vis;
+      } as unknown) as Vis;
       expect(isEligibleForVisLayers(vis)).toEqual(false);
     });
     it('vis is ineligible with no metric aggs', async () => {
@@ -124,7 +124,7 @@ describe('utils', () => {
       const invalidAggs = new AggConfigs(STUB_INDEX_PATTERN_WITH_FIELDS, invalidConfigStates, {
         typesRegistry: TYPES_REGISTRY,
       });
-      const vis = {
+      const vis = ({
         params: {
           type: 'line',
           seriesParams: [],
@@ -132,11 +132,11 @@ describe('utils', () => {
         data: {
           invalidAggs,
         },
-      } as unknown as Vis;
+      } as unknown) as Vis;
       expect(isEligibleForVisLayers(vis)).toEqual(false);
     });
     it('vis is ineligible with series param is not line type', async () => {
-      const vis = {
+      const vis = ({
         params: {
           type: 'line',
           seriesParams: [
@@ -153,11 +153,11 @@ describe('utils', () => {
         data: {
           aggs: VALID_AGGS,
         },
-      } as unknown as Vis;
+      } as unknown) as Vis;
       expect(isEligibleForVisLayers(vis)).toEqual(false);
     });
     it('vis is ineligible with series param not all being line type', async () => {
-      const vis = {
+      const vis = ({
         params: {
           type: 'line',
           seriesParams: [
@@ -177,7 +177,7 @@ describe('utils', () => {
         data: {
           aggs: VALID_AGGS,
         },
-      } as unknown as Vis;
+      } as unknown) as Vis;
       expect(isEligibleForVisLayers(vis)).toEqual(false);
     });
     it('vis is ineligible with invalid x-axis due to no segment aggregation', async () => {
@@ -198,7 +198,7 @@ describe('utils', () => {
       const badAggs = new AggConfigs(STUB_INDEX_PATTERN_WITH_FIELDS, badConfigStates, {
         typesRegistry: TYPES_REGISTRY,
       });
-      const invalidVis = {
+      const invalidVis = ({
         params: {
           type: 'line',
           seriesParams: [
@@ -215,11 +215,11 @@ describe('utils', () => {
         data: {
           badAggs,
         },
-      } as unknown as Vis;
+      } as unknown) as Vis;
       expect(isEligibleForVisLayers(invalidVis)).toEqual(false);
     });
     it('vis is ineligible with xaxis not on bottom', async () => {
-      const invalidVis = {
+      const invalidVis = ({
         params: {
           type: 'line',
           seriesParams: [
@@ -236,11 +236,11 @@ describe('utils', () => {
         data: {
           aggs: VALID_AGGS,
         },
-      } as unknown as Vis;
+      } as unknown) as Vis;
       expect(isEligibleForVisLayers(invalidVis)).toEqual(false);
     });
     it('vis is ineligible with no seriesParams', async () => {
-      const invalidVis = {
+      const invalidVis = ({
         params: {
           type: 'pie',
           categoryAxes: [
@@ -252,7 +252,7 @@ describe('utils', () => {
         data: {
           aggs: VALID_AGGS,
         },
-      } as unknown as Vis;
+      } as unknown) as Vis;
       expect(isEligibleForVisLayers(invalidVis)).toEqual(false);
     });
     it('vis is ineligible with valid type and disabled setting', async () => {

@@ -395,10 +395,9 @@ export const runSideBarTests = () => {
           cy.getElementByTestId('typeSelect').select('string');
           sideBar.verifyNumberOfActiveFilters(2);
 
-          const intersectionAggregatableStringTypeSidebarFields =
-            sidebarFields.aggregatableFields.unnested
-              .concat(sidebarFields.aggregatableFields.nested)
-              .filter((field) => sidebarFields.stringTypeFields.includes(field));
+          const intersectionAggregatableStringTypeSidebarFields = sidebarFields.aggregatableFields.unnested
+            .concat(sidebarFields.aggregatableFields.nested)
+            .filter((field) => sidebarFields.stringTypeFields.includes(field));
           intersectionAggregatableStringTypeSidebarFields.forEach((fieldName) => {
             cy.getElementByTestId(`field-${fieldName}`).should('be.visible');
           });

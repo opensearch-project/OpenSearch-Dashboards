@@ -24,12 +24,12 @@ export const createDataExplorerServicesMock = () => {
     data: dataMock,
     osdUrlStateStorage: osdUrlStateStorageMock,
     embeddable: embeddableMock,
-    scopedHistory: scopedHistoryMock.create() as unknown as ScopedHistory,
+    scopedHistory: (scopedHistoryMock.create() as unknown) as ScopedHistory,
     viewRegistry: {
       get: jest.fn(),
       all: jest.fn(() => []),
     },
   };
 
-  return dataExplorerServicesMock as unknown as jest.Mocked<DataExplorerServices>;
+  return (dataExplorerServicesMock as unknown) as jest.Mocked<DataExplorerServices>;
 };

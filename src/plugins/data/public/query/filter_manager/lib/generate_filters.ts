@@ -94,13 +94,11 @@ export function generateFilters(
   index: string
 ): Filter[] {
   values = Array.isArray(values) ? values : [values];
-  const fieldObj = (
-    _.isObject(field)
-      ? field
-      : {
-          name: field,
-        }
-  ) as IFieldType;
+  const fieldObj = (_.isObject(field)
+    ? field
+    : {
+        name: field,
+      }) as IFieldType;
   const fieldName = fieldObj.name;
   const newFilters: Filter[] = [];
   const appFilters = filterManager.getAppFilters();

@@ -44,7 +44,7 @@ export interface Plugin<
   TSetup = void,
   TStart = void,
   TPluginsSetup extends object = object,
-  TPluginsStart extends object = object,
+  TPluginsStart extends object = object
 > {
   setup(core: CoreSetup<TPluginsStart, TStart>, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
   start(core: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart>;
@@ -61,7 +61,7 @@ export type PluginInitializer<
   TSetup,
   TStart,
   TPluginsSetup extends object = object,
-  TPluginsStart extends object = object,
+  TPluginsStart extends object = object
 > = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
 /**
@@ -74,7 +74,7 @@ export class PluginWrapper<
   TSetup = unknown,
   TStart = unknown,
   TPluginsSetup extends object = object,
-  TPluginsStart extends object = object,
+  TPluginsStart extends object = object
 > {
   public readonly name: DiscoveredPlugin['id'];
   public readonly configPath: DiscoveredPlugin['configPath'];

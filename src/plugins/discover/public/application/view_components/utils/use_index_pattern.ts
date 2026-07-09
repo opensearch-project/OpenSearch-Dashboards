@@ -45,10 +45,9 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
     [uiSettings]
   );
 
-  const fetchIndexPatternDetails = useCallback(
-    (id: string) => data.indexPatterns.get(id),
-    [data.indexPatterns]
-  );
+  const fetchIndexPatternDetails = useCallback((id: string) => data.indexPatterns.get(id), [
+    data.indexPatterns,
+  ]);
 
   useEffect(() => {
     let isMounted = true;

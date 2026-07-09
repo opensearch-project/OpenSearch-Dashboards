@@ -20,12 +20,14 @@ import { AssistantActionService } from './services/assistant_action_service';
  * @experimental
  * Context Provider plugin for React hooks-based context capture system. This plugin is experimental and will change in future releases.
  */
-export class ContextProviderPlugin implements Plugin<
-  ContextProviderSetup,
-  ContextProviderStart,
-  ContextProviderSetupDeps,
-  ContextProviderStartDeps
-> {
+export class ContextProviderPlugin
+  implements
+    Plugin<
+      ContextProviderSetup,
+      ContextProviderStart,
+      ContextProviderSetupDeps,
+      ContextProviderStartDeps
+    > {
   private contextCaptureService?: ContextCaptureService;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {}

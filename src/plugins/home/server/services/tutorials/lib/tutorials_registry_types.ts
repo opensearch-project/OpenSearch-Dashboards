@@ -120,7 +120,9 @@ export interface TutorialContext {
   [key: string]: unknown;
 }
 export type TutorialProvider = (context: TutorialContext) => TutorialSchema;
-export type TutorialContextFactory = (req: OpenSearchDashboardsRequest) => {
+export type TutorialContextFactory = (
+  req: OpenSearchDashboardsRequest
+) => {
   [key: string]: unknown;
 };
 export type ScopedTutorialContextFactory = (...args: any[]) => any;

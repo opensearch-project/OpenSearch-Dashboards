@@ -37,7 +37,9 @@ describe('OsCgroupMetricsCollector', () => {
 
   it('returns empty object when no cgroup file present', async () => {
     mockFs({
-      '/proc/self': {/** empty directory */},
+      '/proc/self': {
+        /** empty directory */
+      },
     });
 
     const logger = loggerMock.create();

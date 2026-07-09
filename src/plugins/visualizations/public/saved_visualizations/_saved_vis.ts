@@ -123,7 +123,7 @@ export function createSavedVisClass(services: SavedObjectOpenSearchDashboardsSer
           version: 1,
         },
         afterOpenSearchResp: async (savedObject: SavedObject) => {
-          const savedVis = savedObject as any as ISavedVis;
+          const savedVis = (savedObject as any) as ISavedVis;
           savedVis.visState = await updateOldState(savedVis.visState);
           if (savedVis.searchSourceFields?.index) {
             await services.indexPatterns.get(savedVis.searchSourceFields.index as any);
@@ -131,7 +131,7 @@ export function createSavedVisClass(services: SavedObjectOpenSearchDashboardsSer
           if (savedVis.savedSearchId) {
             await savedSearch.get(savedVis.savedSearchId);
           }
-          return savedVis as any as SavedObject;
+          return (savedVis as any) as SavedObject;
         },
       });
       this.showInRecentlyAccessed = true;

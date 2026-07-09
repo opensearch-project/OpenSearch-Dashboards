@@ -54,9 +54,8 @@ interface Params {
   useHash: boolean;
 }
 
-export class ExploreUrlGenerator implements UrlGeneratorsDefinition<
-  typeof EXPLORE_APP_URL_GENERATOR
-> {
+export class ExploreUrlGenerator
+  implements UrlGeneratorsDefinition<typeof EXPLORE_APP_URL_GENERATOR> {
   constructor(private readonly params: Params) {}
 
   public readonly id = EXPLORE_APP_URL_GENERATOR;

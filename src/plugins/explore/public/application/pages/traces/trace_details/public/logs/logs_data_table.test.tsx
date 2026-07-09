@@ -381,7 +381,7 @@ describe('LogsDataTable', () => {
             timestamp: `2023-01-01T10:${String(index).padStart(2, '0')}:00Z`,
             message: `Log message ${index}`,
             level: 'info',
-          }) as any
+          } as any)
       );
 
       render(<LogsDataTable {...defaultProps} logs={manyLogs} compactMode={true} />);

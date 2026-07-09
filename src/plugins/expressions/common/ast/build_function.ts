@@ -43,20 +43,22 @@ import { format } from './format';
 
 // Infers the types from an ExpressionFunctionDefinition.
 // @internal
-export type InferFunctionDefinition<FnDef extends AnyExpressionFunctionDefinition> =
-  FnDef extends ExpressionFunctionDefinition<
-    infer Name,
-    infer Input,
-    infer Arguments,
-    infer Output,
-    infer Context
-  >
-    ? { name: Name; input: Input; arguments: Arguments; output: Output; context: Context }
-    : never;
+export type InferFunctionDefinition<
+  FnDef extends AnyExpressionFunctionDefinition
+> = FnDef extends ExpressionFunctionDefinition<
+  infer Name,
+  infer Input,
+  infer Arguments,
+  infer Output,
+  infer Context
+>
+  ? { name: Name; input: Input; arguments: Arguments; output: Output; context: Context }
+  : never;
 
 // Shortcut for inferring args from a function definition.
-type FunctionArgs<FnDef extends AnyExpressionFunctionDefinition> =
-  InferFunctionDefinition<FnDef>['arguments'];
+type FunctionArgs<FnDef extends AnyExpressionFunctionDefinition> = InferFunctionDefinition<
+  FnDef
+>['arguments'];
 
 // Gets a list of possible arg names for a given function.
 type FunctionArgName<FnDef extends AnyExpressionFunctionDefinition> = {
@@ -75,7 +77,7 @@ interface FunctionBuilderArguments<FnDef extends AnyExpressionFunctionDefinition
 }
 
 export interface ExpressionAstFunctionBuilder<
-  FnDef extends AnyExpressionFunctionDefinition = AnyExpressionFunctionDefinition,
+  FnDef extends AnyExpressionFunctionDefinition = AnyExpressionFunctionDefinition
 > {
   /**
    * Used to identify expression function builder objects.
@@ -170,7 +172,7 @@ export interface ExpressionAstFunctionBuilder<
  * @return `this`
  */
 export function buildExpressionFunction<
-  FnDef extends AnyExpressionFunctionDefinition = AnyExpressionFunctionDefinition,
+  FnDef extends AnyExpressionFunctionDefinition = AnyExpressionFunctionDefinition
 >(
   fnName: InferFunctionDefinition<FnDef>['name'],
   /**
@@ -182,7 +184,9 @@ export function buildExpressionFunction<
    */
   initialArgs: {
     [K in keyof FunctionArgs<FnDef>]:
-      FunctionArgs<FnDef>[K] | ExpressionAstExpressionBuilder | ExpressionAstExpressionBuilder[];
+      | FunctionArgs<FnDef>[K]
+      | ExpressionAstExpressionBuilder
+      | ExpressionAstExpressionBuilder[];
   }
 ): ExpressionAstFunctionBuilder<FnDef> {
   const args = Object.entries(initialArgs).reduce((acc, [key, value]) => {

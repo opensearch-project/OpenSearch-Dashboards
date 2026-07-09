@@ -71,12 +71,8 @@ interface ManagementSetupDependencies {
 interface ManagementStartDependencies {
   navigation: NavigationPublicPluginStart;
 }
-export class ManagementPlugin implements Plugin<
-  ManagementSetup,
-  ManagementStart,
-  {},
-  ManagementStartDependencies
-> {
+export class ManagementPlugin
+  implements Plugin<ManagementSetup, ManagementStart, {}, ManagementStartDependencies> {
   private readonly managementSections = new ManagementSectionsService();
 
   private readonly appUpdater = new BehaviorSubject<AppUpdater>(() => ({}));

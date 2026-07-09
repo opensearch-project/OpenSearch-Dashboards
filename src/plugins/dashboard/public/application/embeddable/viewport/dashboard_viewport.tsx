@@ -62,8 +62,14 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
   private mounted: boolean = false;
   constructor(props: DashboardViewportProps) {
     super(props);
-    const { isFullScreenMode, panels, useMargins, title, isEmbeddedExternally, isEmptyState } =
-      this.props.container.getInput();
+    const {
+      isFullScreenMode,
+      panels,
+      useMargins,
+      title,
+      isEmbeddedExternally,
+      isEmptyState,
+    } = this.props.container.getInput();
 
     this.state = {
       isFullScreenMode,
@@ -131,8 +137,14 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
 
   private renderContainerScreen() {
     const { container, PanelComponent } = this.props;
-    const { isEmbeddedExternally, isFullScreenMode, panels, title, description, useMargins } =
-      this.state;
+    const {
+      isEmbeddedExternally,
+      isFullScreenMode,
+      panels,
+      title,
+      description,
+      useMargins,
+    } = this.state;
     return (
       <div
         data-shared-items-count={Object.values(panels).length}

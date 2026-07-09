@@ -42,7 +42,7 @@ const simpleSavedObjectToSavedObject = <T>(simpleSavedObject: SimpleSavedObject)
   ({
     version: simpleSavedObject._version,
     ...omit(simpleSavedObject, '_version'),
-  }) as any;
+  } as any);
 
 export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommon {
   private savedObjectClient: SOClient;

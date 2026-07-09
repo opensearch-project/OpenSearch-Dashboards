@@ -52,8 +52,9 @@ export interface ISearchSetup {
    */
   registerSearchStrategy: <
     SearchStrategyRequest extends IOpenSearchDashboardsSearchRequest = IOpenSearchSearchRequest,
-    SearchStrategyResponse extends IOpenSearchDashboardsSearchResponse | IDataFrameResponse =
-      IOpenSearchSearchResponse,
+    SearchStrategyResponse extends
+      | IOpenSearchDashboardsSearchResponse
+      | IDataFrameResponse = IOpenSearchSearchResponse
   >(
     name: string,
     strategy: ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>
@@ -74,7 +75,7 @@ export interface ISearchStart<
   SearchStrategyRequest extends IOpenSearchDashboardsSearchRequest = IOpenSearchSearchRequest & {
     rawRequest?: OpenSearchDashboardsRequest;
   },
-  SearchStrategyResponse extends IOpenSearchDashboardsSearchResponse = IOpenSearchSearchResponse,
+  SearchStrategyResponse extends IOpenSearchDashboardsSearchResponse = IOpenSearchSearchResponse
 > {
   aggs: AggsStart;
   /**
@@ -100,8 +101,9 @@ export interface ISearchStart<
  */
 export interface ISearchStrategy<
   SearchStrategyRequest extends IOpenSearchDashboardsSearchRequest = IOpenSearchSearchRequest,
-  SearchStrategyResponse extends IOpenSearchDashboardsSearchResponse | IDataFrameResponse =
-    IOpenSearchSearchResponse,
+  SearchStrategyResponse extends
+    | IOpenSearchDashboardsSearchResponse
+    | IDataFrameResponse = IOpenSearchSearchResponse
 > {
   search: (
     context: RequestHandlerContext,

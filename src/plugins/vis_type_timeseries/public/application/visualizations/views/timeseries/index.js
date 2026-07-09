@@ -61,10 +61,7 @@ const generateAnnotationData = (values, formatter) =>
     }),
   }));
 
-const decorateFormatter =
-  (formatter) =>
-  ({ value }) =>
-    formatter(value);
+const decorateFormatter = (formatter) => ({ value }) => formatter(value);
 
 const handleCursorUpdate = (cursor) => {
   eventBus.trigger(ACTIVE_CURSOR, cursor);

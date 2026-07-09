@@ -43,11 +43,13 @@ import { DataSourcePluginSetup } from '../../data_source/public';
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
 
-export const [getFieldFormats, setFieldFormats] =
-  createGetterSetter<DataPublicPluginStart['fieldFormats']>('FieldFormats');
+export const [getFieldFormats, setFieldFormats] = createGetterSetter<
+  DataPublicPluginStart['fieldFormats']
+>('FieldFormats');
 
-export const [getSavedObjectsClient, setSavedObjectsClient] =
-  createGetterSetter<SavedObjectsStart>('SavedObjectsClient');
+export const [getSavedObjectsClient, setSavedObjectsClient] = createGetterSetter<SavedObjectsStart>(
+  'SavedObjectsClient'
+);
 
 export const [getCoreStart, setCoreStart] = createGetterSetter<CoreStart>('CoreStart');
 
@@ -55,8 +57,9 @@ export const [getDataStart, setDataStart] = createGetterSetter<DataPublicPluginS
 
 export const [getI18n, setI18n] = createGetterSetter<I18nStart>('I18n');
 
-export const [getChartsSetup, setChartsSetup] =
-  createGetterSetter<ChartsPluginSetup>('ChartsPluginSetup');
+export const [getChartsSetup, setChartsSetup] = createGetterSetter<ChartsPluginSetup>(
+  'ChartsPluginSetup'
+);
 
 export const [getDataSourceSetup, setDataSourceSetup] = createGetterSetter<{
   dataSource: DataSourcePluginSetup | undefined;
@@ -66,5 +69,6 @@ export const [getDataSourceManagementSetup, setDataSourceManagementSetup] = crea
   dataSourceManagement: DataSourceManagementPluginSetup | undefined;
 }>('DataSourceManagementSetup');
 
-export const [getNotifications, setNotifications] =
-  createGetterSetter<NotificationsStart>('Notifications');
+export const [getNotifications, setNotifications] = createGetterSetter<NotificationsStart>(
+  'Notifications'
+);

@@ -49,76 +49,74 @@ export interface SaveStateProps {
   activeTabId: string;
 }
 
-export const getSaveButtonRun =
-  (
-    services: ExploreServices,
-    startSyncingQueryStateWithUrl: () => void,
-    searchContext: ExecutionContextSearch,
-    saveStateProps: SaveStateProps,
-    savedExplore?: SavedExplore
-  ): TopNavMenuIconRun =>
-  () => {
-    if (!savedExplore) return;
+export const getSaveButtonRun = (
+  services: ExploreServices,
+  startSyncingQueryStateWithUrl: () => void,
+  searchContext: ExecutionContextSearch,
+  saveStateProps: SaveStateProps,
+  savedExplore?: SavedExplore
+): TopNavMenuIconRun => () => {
+  if (!savedExplore) return;
 
-    const onSave = async ({
-      newTitle,
-      newCopyOnSave,
-      isTitleDuplicateConfirmed,
-      onTitleDuplicate,
-    }: OnSaveProps): Promise<SaveResult | undefined> => {
-      const visualizationBuilder = getVisualizationBuilder();
-      const transformationService = visualizationBuilder.getTransformationService();
-      const pipeline = transformationService.pipeline$.getValue();
-      const serializedPipeline: UrlTransformationState[] = pipeline.map((instance) => ({
-        definitionId: instance.definition_id,
-        config: instance.config,
-        hide: instance.hide,
-      }));
-      const visConfig = visualizationBuilder.visConfig$.value;
-      const axesMapping = visConfig?.axesMapping;
-      const savedExploreWithState = saveStateToSavedObject(
-        savedExplore,
-        saveStateProps.flavorId ?? 'logs',
-        saveStateProps.tabDefinition,
-        {
-          axesMapping,
-          chartType: visConfig?.type,
-          styleOptions: visConfig?.styles,
-          splitField: visConfig?.splitField,
-          splitLayout: visConfig?.splitLayout,
-          showSplitLabel: visConfig?.showSplitLabel,
-          serializedPipeline,
-        },
-        saveStateProps.dataset,
-        saveStateProps.activeTabId
-      );
-      const result = await saveSavedExplore({
-        savedExplore: savedExploreWithState,
-        newTitle,
-        saveOptions: { isTitleDuplicateConfirmed, onTitleDuplicate },
-        searchContext,
-        services,
-        startSyncingQueryStateWithUrl,
-        openAfterSave: true,
-        newCopyOnSave,
-      });
-
-      return result;
-    };
-    const saveModal = (
-      <SavedObjectSaveModal
-        onSave={onSave}
-        onClose={() => {}}
-        title={savedExplore.title ?? ''}
-        showCopyOnSave={!!savedExplore.id}
-        // TODO: Does this need to be type "explore"?
-        objectType="discover"
-        description={i18n.translate('explore.localMenu.saveSaveSearchDescription', {
-          defaultMessage:
-            'Save your Discover search so you can use it in visualizations and dashboards',
-        })}
-        showDescription={false}
-      />
+  const onSave = async ({
+    newTitle,
+    newCopyOnSave,
+    isTitleDuplicateConfirmed,
+    onTitleDuplicate,
+  }: OnSaveProps): Promise<SaveResult | undefined> => {
+    const visualizationBuilder = getVisualizationBuilder();
+    const transformationService = visualizationBuilder.getTransformationService();
+    const pipeline = transformationService.pipeline$.getValue();
+    const serializedPipeline: UrlTransformationState[] = pipeline.map((instance) => ({
+      definitionId: instance.definition_id,
+      config: instance.config,
+      hide: instance.hide,
+    }));
+    const visConfig = visualizationBuilder.visConfig$.value;
+    const axesMapping = visConfig?.axesMapping;
+    const savedExploreWithState = saveStateToSavedObject(
+      savedExplore,
+      saveStateProps.flavorId ?? 'logs',
+      saveStateProps.tabDefinition,
+      {
+        axesMapping,
+        chartType: visConfig?.type,
+        styleOptions: visConfig?.styles,
+        splitField: visConfig?.splitField,
+        splitLayout: visConfig?.splitLayout,
+        showSplitLabel: visConfig?.showSplitLabel,
+        serializedPipeline,
+      },
+      saveStateProps.dataset,
+      saveStateProps.activeTabId
     );
-    showSaveModal(saveModal, services.core.i18n.Context);
+    const result = await saveSavedExplore({
+      savedExplore: savedExploreWithState,
+      newTitle,
+      saveOptions: { isTitleDuplicateConfirmed, onTitleDuplicate },
+      searchContext,
+      services,
+      startSyncingQueryStateWithUrl,
+      openAfterSave: true,
+      newCopyOnSave,
+    });
+
+    return result;
   };
+  const saveModal = (
+    <SavedObjectSaveModal
+      onSave={onSave}
+      onClose={() => {}}
+      title={savedExplore.title ?? ''}
+      showCopyOnSave={!!savedExplore.id}
+      // TODO: Does this need to be type "explore"?
+      objectType="discover"
+      description={i18n.translate('explore.localMenu.saveSaveSearchDescription', {
+        defaultMessage:
+          'Save your Discover search so you can use it in visualizations and dashboards',
+      })}
+      showDescription={false}
+    />
+  );
+  showSaveModal(saveModal, services.core.i18n.Context);
+};

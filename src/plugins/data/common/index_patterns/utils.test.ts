@@ -20,7 +20,7 @@ import {
 
 describe('test validateDataSourceReference', () => {
   const getIndexPatternSavedObjectMock = (mockedFields: any = {}) =>
-    ({ ...mockedFields }) as SavedObject<IndexPatternSavedObjectAttrs>;
+    ({ ...mockedFields } as SavedObject<IndexPatternSavedObjectAttrs>);
   let indexPatternSavedObjectMock;
   const dataSourceId = 'fakeDataSourceId';
 

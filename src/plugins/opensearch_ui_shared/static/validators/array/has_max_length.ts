@@ -28,7 +28,4 @@
  * under the License.
  */
 
-export const hasMaxLengthArray =
-  (length = 5) =>
-  (value: any[]): boolean =>
-    value.length <= length;
+export const hasMaxLengthArray = (length = 5) => (value: any[]): boolean => value.length <= length;

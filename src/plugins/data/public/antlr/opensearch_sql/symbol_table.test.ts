@@ -54,13 +54,13 @@ describe('getUniqueTableSuggestions', () => {
 
 describe('getTablesFromSymbolTable', () => {
   it('should return table suggestions from the symbol table', () => {
-    const mockVisitor = {
+    const mockVisitor = ({
       symbolTable: {
         getNestedSymbolsOfTypeSync: jest
           .fn()
           .mockReturnValue([new TableSymbol('table1', 'alias1'), new TableSymbol('table2')]),
       },
-    } as unknown as SymbolTableVisitor;
+    } as unknown) as SymbolTableVisitor;
 
     const tables = getTablesFromSymbolTable(mockVisitor);
     expect(tables).toEqual([{ name: 'table1', alias: 'alias1' }, { name: 'table2' }]);
@@ -78,13 +78,13 @@ describe('ColumnAliasSymbol', () => {
 
 describe('getColumnAliasesFromSymbolTable', () => {
   it('should return column alias suggestions from the symbol table', () => {
-    const mockVisitor = {
+    const mockVisitor = ({
       symbolTable: {
         getNestedSymbolsOfTypeSync: jest
           .fn()
           .mockReturnValue([new ColumnAliasSymbol('alias1'), new ColumnAliasSymbol('alias2')]),
       },
-    } as unknown as SymbolTableVisitor;
+    } as unknown) as SymbolTableVisitor;
 
     const aliases = getColumnAliasesFromSymbolTable(mockVisitor);
     expect(aliases).toEqual([{ name: 'alias1' }, { name: 'alias2' }]);

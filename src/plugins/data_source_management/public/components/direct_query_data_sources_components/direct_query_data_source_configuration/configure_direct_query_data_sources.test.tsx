@@ -73,7 +73,7 @@ jest.mock('react', () => ({
 }));
 
 describe('ConfigureDirectQueryDataSourceWithRouter', () => {
-  const mockNotifications = { toasts: mockToasts } as unknown as NotificationsStart;
+  const mockNotifications = ({ toasts: mockToasts } as unknown) as NotificationsStart;
   const mockLocation = { pathname: '', search: '', state: '', hash: '' };
   const mockMatch = { params: { type: 'AmazonS3AWSGlue' }, isExact: true, path: '', url: '' };
   const mockHistory = createMemoryHistory();

@@ -46,7 +46,7 @@ const methods = [
   'updateByQuery',
 ] as const;
 
-type MethodName = (typeof methods)[number];
+type MethodName = typeof methods[number];
 
 export type RepositoryOpenSearchClient = Pick<OpenSearchClient, MethodName>;
 

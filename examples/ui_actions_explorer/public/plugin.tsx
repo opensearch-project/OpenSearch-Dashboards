@@ -73,12 +73,8 @@ declare module '../../../src/plugins/ui_actions/public' {
   }
 }
 
-export class UiActionsExplorerPlugin implements Plugin<
-  void,
-  void,
-  {},
-  UiActionsExplorerPluginStart
-> {
+export class UiActionsExplorerPlugin
+  implements Plugin<void, void, {}, UiActionsExplorerPluginStart> {
   public setup(
     core: CoreSetup<UiActionsExplorerStartDependencies>,
     deps: UiActionsExplorerPluginSetup
@@ -132,7 +128,8 @@ export class UiActionsExplorerPlugin implements Plugin<
       links: [
         {
           label: 'README',
-          href: 'https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/src/plugins/ui_actions/README.md',
+          href:
+            'https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/src/plugins/ui_actions/README.md',
           iconType: 'logoGithub',
           size: 's',
           target: '_blank',

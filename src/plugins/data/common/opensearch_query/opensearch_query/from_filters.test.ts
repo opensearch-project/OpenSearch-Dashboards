@@ -34,9 +34,9 @@ import { ExistsFilter, Filter, MatchAllFilter } from '../filters';
 import { fields } from '../../index_patterns/mocks';
 
 describe('build query', () => {
-  const indexPattern: IIndexPattern = {
+  const indexPattern: IIndexPattern = ({
     fields,
-  } as unknown as IIndexPattern;
+  } as unknown) as IIndexPattern;
 
   describe('buildQueryFromFilters', () => {
     test('should return the parameters of an OpenSearch bool query', () => {
@@ -82,7 +82,7 @@ describe('build query', () => {
     });
 
     test('should remove falsy filters', () => {
-      const filters = [null, undefined] as unknown as Filter[];
+      const filters = ([null, undefined] as unknown) as Filter[];
       const result = buildQueryFromFilters(filters, indexPattern, false);
 
       expect(result.must_not).toEqual([]);

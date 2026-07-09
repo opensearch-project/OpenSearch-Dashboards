@@ -30,8 +30,9 @@
 
 import * as Rx from 'rxjs';
 
-export type GetArgsType<T extends LifecycleEvent<any>> =
-  T extends LifecycleEvent<infer X> ? X : never;
+export type GetArgsType<T extends LifecycleEvent<any>> = T extends LifecycleEvent<infer X>
+  ? X
+  : never;
 
 export class LifecycleEvent<Args extends readonly any[]> {
   private readonly handlers: Array<(...args: Args) => Promise<void> | void> = [];

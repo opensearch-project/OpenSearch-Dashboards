@@ -144,7 +144,8 @@ interface C3FollowSetsCacheContainer {
  * no cache isolation). Keep a focused regression test around this dependency.
  */
 function getC3FollowSetsCache(): Map<string, unknown> | null {
-  const maybeCache = (CodeCompletionCore as unknown as C3FollowSetsCacheContainer).followSetsByATN;
+  const maybeCache = ((CodeCompletionCore as unknown) as C3FollowSetsCacheContainer)
+    .followSetsByATN;
   return maybeCache instanceof Map ? maybeCache : null;
 }
 
@@ -326,10 +327,7 @@ function resolveToken(grammar: CachedGrammar, symbolicName: string, dictKey?: st
  * Subclasses ParserRuleContext to override the getter-only ruleIndex.
  */
 class RuntimeCompletionContext extends ParserRuleContext {
-  constructor(
-    private readonly syntheticRuleIndex: number,
-    startToken?: Token
-  ) {
+  constructor(private readonly syntheticRuleIndex: number, startToken?: Token) {
     super(null, -1);
     if (startToken) {
       (this as any).start = startToken;

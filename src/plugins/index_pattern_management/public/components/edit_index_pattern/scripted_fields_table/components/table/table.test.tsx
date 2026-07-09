@@ -34,7 +34,7 @@ import { Table } from '../table';
 import { ScriptedFieldItem } from '../../types';
 import { IIndexPattern } from 'src/plugins/data/public';
 
-const getIndexPatternMock = (mockedFields: any = {}) => ({ ...mockedFields }) as IIndexPattern;
+const getIndexPatternMock = (mockedFields: any = {}) => ({ ...mockedFields } as IIndexPattern);
 
 const items: ScriptedFieldItem[] = [{ name: '1', lang: 'Elastic', script: '' }];
 

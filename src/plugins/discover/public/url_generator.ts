@@ -89,9 +89,8 @@ interface Params {
   useHash: boolean;
 }
 
-export class DiscoverUrlGenerator implements UrlGeneratorsDefinition<
-  typeof DISCOVER_APP_URL_GENERATOR
-> {
+export class DiscoverUrlGenerator
+  implements UrlGeneratorsDefinition<typeof DISCOVER_APP_URL_GENERATOR> {
   constructor(private readonly params: Params) {}
 
   public readonly id = DISCOVER_APP_URL_GENERATOR;

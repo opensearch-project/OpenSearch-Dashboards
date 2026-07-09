@@ -17,10 +17,8 @@ import {
   COLLABORATOR_ID_INPUT_LABEL_ID,
 } from './workspace_collaborator_input';
 
-export interface WorkspaceCollaboratorInner extends Pick<
-  WorkspaceCollaborator,
-  'collaboratorId' | 'accessLevel'
-> {
+export interface WorkspaceCollaboratorInner
+  extends Pick<WorkspaceCollaborator, 'collaboratorId' | 'accessLevel'> {
   id: number;
 }
 

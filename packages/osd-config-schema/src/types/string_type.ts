@@ -47,7 +47,7 @@ export class StringType extends Type<string> {
     let schema =
       options.hostname === true
         ? internals.string().hostname()
-        : (internals.any() as unknown as OsdSchema).osdCustom((value: any) => {
+        : ((internals.any() as unknown) as OsdSchema).osdCustom((value: any) => {
             if (typeof value !== 'string') {
               return `expected value of type [string] but got [${typeDetect(value)}]`;
             }
@@ -55,7 +55,7 @@ export class StringType extends Type<string> {
 
     if (options.minLength !== undefined || options.maxLength !== undefined || options.validate) {
       const { minLength, maxLength, validate: userValidate } = options;
-      schema = (schema as unknown as OsdSchema).osdCustom((value: any) => {
+      schema = ((schema as unknown) as OsdSchema).osdCustom((value: any) => {
         if (minLength !== undefined && value.length < minLength) {
           return `value has length [${value.length}] but it must have a minimum length of [${minLength}].`;
         }

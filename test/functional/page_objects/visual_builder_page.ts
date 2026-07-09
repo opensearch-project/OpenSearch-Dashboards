@@ -40,7 +40,14 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
   const PageObjects = getPageObjects(['common', 'header', 'visualize', 'timePicker', 'visChart']);
 
   type Duration =
-    'Milliseconds' | 'Seconds' | 'Minutes' | 'Hours' | 'Days' | 'Weeks' | 'Months' | 'Years';
+    | 'Milliseconds'
+    | 'Seconds'
+    | 'Minutes'
+    | 'Hours'
+    | 'Days'
+    | 'Weeks'
+    | 'Months'
+    | 'Years';
 
   type FromDuration = Duration | 'Picoseconds' | 'Nanoseconds' | 'Microseconds';
   type ToDuration = Duration | 'Human readable';

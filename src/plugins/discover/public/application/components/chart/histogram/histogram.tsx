@@ -164,18 +164,16 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
     this.props.timefilterUpdateHandler({ from, to });
   };
 
-  public onElementClick =
-    (xInterval: number): ElementClickListener =>
-    ([elementData]) => {
-      const startRange = (elementData as XYChartElementEvent)[0].x;
+  public onElementClick = (xInterval: number): ElementClickListener => ([elementData]) => {
+    const startRange = (elementData as XYChartElementEvent)[0].x;
 
-      const range = {
-        from: startRange,
-        to: startRange + xInterval,
-      };
-
-      this.props.timefilterUpdateHandler(range);
+    const range = {
+      from: startRange,
+      to: startRange + xInterval,
     };
+
+    this.props.timefilterUpdateHandler(range);
+  };
 
   public formatXValue = (val: string) => {
     const xAxisFormat = this.props.chartData.xAxisFormat.params!.pattern;
@@ -183,42 +181,42 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
     return moment(val).format(xAxisFormat);
   };
 
-  public renderBarTooltip =
-    (xInterval: number, domainStart: number, domainEnd: number) =>
-    (headerData: TooltipValue): JSX.Element | string => {
-      const headerDataValue = headerData.value;
-      const formattedValue = this.formatXValue(headerDataValue);
+  public renderBarTooltip = (xInterval: number, domainStart: number, domainEnd: number) => (
+    headerData: TooltipValue
+  ): JSX.Element | string => {
+    const headerDataValue = headerData.value;
+    const formattedValue = this.formatXValue(headerDataValue);
 
-      const partialDataText = i18n.translate('discover.histogram.partialData.bucketTooltipText', {
-        defaultMessage:
-          'The selected time range does not include this entire bucket, it may contain partial data.',
-      });
+    const partialDataText = i18n.translate('discover.histogram.partialData.bucketTooltipText', {
+      defaultMessage:
+        'The selected time range does not include this entire bucket, it may contain partial data.',
+    });
 
-      if (headerDataValue < domainStart || headerDataValue + xInterval > domainEnd) {
-        return (
-          <React.Fragment>
-            <EuiFlexGroup
-              alignItems="center"
-              className="dscHistogram__header--partial"
-              data-test-subj="dscHistogramHeader"
-              responsive={false}
-              gutterSize="xs"
-            >
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="iInCircle" />
-              </EuiFlexItem>
-              <EuiFlexItem>{partialDataText}</EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="xs" />
-            <EuiText size="s">
-              <p>{formattedValue}</p>
-            </EuiText>
-          </React.Fragment>
-        );
-      }
+    if (headerDataValue < domainStart || headerDataValue + xInterval > domainEnd) {
+      return (
+        <React.Fragment>
+          <EuiFlexGroup
+            alignItems="center"
+            className="dscHistogram__header--partial"
+            data-test-subj="dscHistogramHeader"
+            responsive={false}
+            gutterSize="xs"
+          >
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="iInCircle" />
+            </EuiFlexItem>
+            <EuiFlexItem>{partialDataText}</EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="xs" />
+          <EuiText size="s">
+            <p>{formattedValue}</p>
+          </EuiText>
+        </React.Fragment>
+      );
+    }
 
-      return formattedValue;
-    };
+    return formattedValue;
+  };
 
   public render() {
     const { chartData, services } = this.props;

@@ -39,9 +39,9 @@ describe('getFullFieldNameNode', function () {
   let indexPattern: IIndexPattern;
 
   beforeEach(() => {
-    indexPattern = {
+    indexPattern = ({
       fields,
-    } as unknown as IIndexPattern;
+    } as unknown) as IIndexPattern;
   });
 
   test('should return unchanged name node if no nested path is passed in', () => {

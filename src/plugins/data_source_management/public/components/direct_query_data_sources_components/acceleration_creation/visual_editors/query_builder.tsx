@@ -121,8 +121,13 @@ const buildCoveringIndexColumns = (coveringIndexQueryData: string[]) => {
  * )
  */
 export const coveringIndexQueryBuilder = (accelerationformData: CreateAccelerationForm) => {
-  const { dataSource, database, dataTable, accelerationIndexName, coveringIndexQueryData } =
-    accelerationformData;
+  const {
+    dataSource,
+    database,
+    dataTable,
+    accelerationIndexName,
+    coveringIndexQueryData,
+  } = accelerationformData;
 
   const codeQuery = `CREATE INDEX ${accelerationIndexName}
 ON ${dataSource}.${database}.${dataTable} (
@@ -174,8 +179,13 @@ const buildTumbleValue = (GroupByTumbleValue: GroupByTumbleType) => {
  * )
  */
 export const materializedQueryViewBuilder = (accelerationformData: CreateAccelerationForm) => {
-  const { dataSource, database, dataTable, accelerationIndexName, materializedViewQueryData } =
-    accelerationformData;
+  const {
+    dataSource,
+    database,
+    dataTable,
+    accelerationIndexName,
+    materializedViewQueryData,
+  } = accelerationformData;
 
   const codeQuery = `CREATE MATERIALIZED VIEW ${dataSource}.${database}.${accelerationIndexName}
 AS SELECT

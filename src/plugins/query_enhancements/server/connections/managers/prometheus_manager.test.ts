@@ -20,7 +20,7 @@ describe('PrometheusManager', () => {
       },
     };
 
-    mockContext = {
+    mockContext = ({
       core: {
         opensearch: {
           client: {
@@ -28,9 +28,9 @@ describe('PrometheusManager', () => {
           },
         },
       },
-    } as unknown as RequestHandlerContext;
+    } as unknown) as RequestHandlerContext;
 
-    mockRequest = {} as unknown as OpenSearchDashboardsRequest;
+    mockRequest = ({} as unknown) as OpenSearchDashboardsRequest;
   });
 
   describe('getResources', () => {
@@ -295,12 +295,12 @@ describe('PrometheusManager', () => {
       };
       mockClient.transport.request.mockResolvedValue(mockResponse);
 
-      const postRequest = {
+      const postRequest = ({
         body: {
           connection: { id: 'prom-conn' },
           resource: { type: 'labels', name: undefined },
         },
-      } as unknown as OpenSearchDashboardsRequest;
+      } as unknown) as OpenSearchDashboardsRequest;
 
       const result = await prometheusManager.handlePostRequest(mockContext, postRequest as any);
 
@@ -321,12 +321,12 @@ describe('PrometheusManager', () => {
       };
       mockClient.transport.request.mockResolvedValue(mockResponse);
 
-      const postRequest = {
+      const postRequest = ({
         body: {
           connection: { id: 'prom-conn' },
           resource: { type: 'label_values', name: 'job' },
         },
-      } as unknown as OpenSearchDashboardsRequest;
+      } as unknown) as OpenSearchDashboardsRequest;
 
       await prometheusManager.handlePostRequest(mockContext, postRequest as any);
 
@@ -346,13 +346,13 @@ describe('PrometheusManager', () => {
       };
       mockClient.transport.request.mockResolvedValue(mockResponse);
 
-      const postRequest = {
+      const postRequest = ({
         body: {
           connection: { id: 'prom-conn' },
           resource: { type: 'labels', name: undefined },
           content: { start: 1638316800, end: 1638320400 },
         },
-      } as unknown as OpenSearchDashboardsRequest;
+      } as unknown) as OpenSearchDashboardsRequest;
 
       await prometheusManager.handlePostRequest(mockContext, postRequest as any);
 
@@ -372,13 +372,13 @@ describe('PrometheusManager', () => {
       };
       mockClient.transport.request.mockResolvedValue(mockResponse);
 
-      const postRequest = {
+      const postRequest = ({
         body: {
           connection: { id: 'prom-conn' },
           resource: { type: 'labels', name: 'node_cpu_seconds_total' },
           content: { start: 1638316800, end: 1638320400 },
         },
-      } as unknown as OpenSearchDashboardsRequest;
+      } as unknown) as OpenSearchDashboardsRequest;
 
       await prometheusManager.handlePostRequest(mockContext, postRequest as any);
 
@@ -398,13 +398,13 @@ describe('PrometheusManager', () => {
       };
       mockClient.transport.request.mockResolvedValue(mockResponse);
 
-      const postRequest = {
+      const postRequest = ({
         body: {
           connection: { id: 'prom-conn' },
           resource: { type: 'label_values', name: 'job' },
           content: { 'match[]': '{__name__="up"}' },
         },
-      } as unknown as OpenSearchDashboardsRequest;
+      } as unknown) as OpenSearchDashboardsRequest;
 
       await prometheusManager.handlePostRequest(mockContext, postRequest as any);
 
@@ -424,13 +424,13 @@ describe('PrometheusManager', () => {
       };
       mockClient.transport.request.mockResolvedValue(mockResponse);
 
-      const postRequest = {
+      const postRequest = ({
         body: {
           connection: { id: 'prom-conn' },
           resource: { type: 'metric_metadata', name: 'up' },
           content: { start: 1638316800, end: 1638320400 },
         },
-      } as unknown as OpenSearchDashboardsRequest;
+      } as unknown) as OpenSearchDashboardsRequest;
 
       await prometheusManager.handlePostRequest(mockContext, postRequest as any);
 

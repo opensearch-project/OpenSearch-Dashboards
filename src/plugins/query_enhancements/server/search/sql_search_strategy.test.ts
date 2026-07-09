@@ -26,13 +26,13 @@ describe('sqlSearchStrategyProvider', () => {
   let logger: Logger;
   let client: ILegacyClusterClient;
   let usage: SearchUsage;
-  const emptyRequestHandlerContext = {} as unknown as RequestHandlerContext;
+  const emptyRequestHandlerContext = ({} as unknown) as RequestHandlerContext;
 
   beforeEach(() => {
     config$ = of({} as SharedGlobalConfig);
-    logger = {
+    logger = ({
       error: jest.fn(),
-    } as unknown as Logger;
+    } as unknown) as Logger;
     client = {} as ILegacyClusterClient;
     usage = {
       trackSuccess: jest.fn(),
@@ -61,9 +61,9 @@ describe('sqlSearchStrategyProvider', () => {
       },
       took: 100,
     };
-    const mockFacet = {
+    const mockFacet = ({
       describeQuery: jest.fn().mockResolvedValue(mockResponse),
-    } as unknown as facet.Facet;
+    } as unknown) as facet.Facet;
     jest.spyOn(facet, 'Facet').mockImplementation(() => mockFacet);
     (utils.getFields as jest.Mock).mockReturnValue([
       { name: 'field1', type: 'long' },
@@ -73,9 +73,9 @@ describe('sqlSearchStrategyProvider', () => {
     const strategy = sqlSearchStrategyProvider(config$, logger, client, usage);
     const result = await strategy.search(
       emptyRequestHandlerContext,
-      {
+      ({
         body: { query: { query: 'SELECT * FROM table', dataset: { id: 'test-dataset' } } },
-      } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
+      } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
       {}
     );
 
@@ -104,18 +104,18 @@ describe('sqlSearchStrategyProvider', () => {
       data: { cause: 'Query failed' },
       took: 50,
     };
-    const mockFacet = {
+    const mockFacet = ({
       describeQuery: jest.fn().mockResolvedValue(mockResponse),
-    } as unknown as facet.Facet;
+    } as unknown) as facet.Facet;
     jest.spyOn(facet, 'Facet').mockImplementation(() => mockFacet);
 
     const strategy = sqlSearchStrategyProvider(config$, logger, client, usage);
     await expect(
       strategy.search(
         emptyRequestHandlerContext,
-        {
+        ({
           body: { query: { query: 'SELECT * FROM table' } },
-        } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
+        } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
         {}
       )
     ).rejects.toThrow();
@@ -123,18 +123,18 @@ describe('sqlSearchStrategyProvider', () => {
 
   it('should handle exceptions', async () => {
     const mockError = new Error('Something went wrong');
-    const mockFacet = {
+    const mockFacet = ({
       describeQuery: jest.fn().mockRejectedValue(mockError),
-    } as unknown as facet.Facet;
+    } as unknown) as facet.Facet;
     jest.spyOn(facet, 'Facet').mockImplementation(() => mockFacet);
 
     const strategy = sqlSearchStrategyProvider(config$, logger, client, usage);
     await expect(
       strategy.search(
         emptyRequestHandlerContext,
-        {
+        ({
           body: { query: { query: 'SELECT * FROM table' } },
-        } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
+        } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
         {}
       )
     ).rejects.toThrow(mockError);
@@ -144,18 +144,18 @@ describe('sqlSearchStrategyProvider', () => {
 
   it('should throw error when describeQuery success is false', async () => {
     const mockError = new Error('Something went wrong');
-    const mockFacet = {
+    const mockFacet = ({
       describeQuery: jest.fn().mockResolvedValue({ success: false, data: mockError }),
-    } as unknown as facet.Facet;
+    } as unknown) as facet.Facet;
     jest.spyOn(facet, 'Facet').mockImplementation(() => mockFacet);
 
     const strategy = sqlSearchStrategyProvider(config$, logger, client, usage);
     await expect(
       strategy.search(
         emptyRequestHandlerContext,
-        {
+        ({
           body: { query: { query: 'SELECT * FROM table' } },
-        } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
+        } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
         {}
       )
     ).rejects.toThrowError();
@@ -175,9 +175,9 @@ describe('sqlSearchStrategyProvider', () => {
       },
       took: 10,
     };
-    const mockFacet = {
+    const mockFacet = ({
       describeQuery: jest.fn().mockResolvedValue(mockResponse),
-    } as unknown as facet.Facet;
+    } as unknown) as facet.Facet;
     jest.spyOn(facet, 'Facet').mockImplementation(() => mockFacet);
     (utils.getFields as jest.Mock).mockReturnValue([
       { name: 'field1', type: 'long' },
@@ -187,9 +187,9 @@ describe('sqlSearchStrategyProvider', () => {
     const strategy = sqlSearchStrategyProvider(config$, logger, client, usage);
     const result = await strategy.search(
       emptyRequestHandlerContext,
-      {
+      ({
         body: { query: { query: 'SELECT * FROM empty_table', dataset: { id: 'empty-dataset' } } },
-      } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
+      } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
       {}
     );
 

@@ -47,12 +47,8 @@ export interface SavedObjectsStartDeps {
   data: DataPublicPluginStart;
 }
 
-export class SavedObjectsPublicPlugin implements Plugin<
-  void,
-  SavedObjectsStart,
-  object,
-  SavedObjectsStartDeps
-> {
+export class SavedObjectsPublicPlugin
+  implements Plugin<void, SavedObjectsStart, object, SavedObjectsStartDeps> {
   public setup() {}
   public start(core: CoreStart, { data }: SavedObjectsStartDeps) {
     return {

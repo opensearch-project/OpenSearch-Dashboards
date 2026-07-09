@@ -76,7 +76,8 @@ type DeeplyMockedKeys<T> = {
   [P in keyof T]: T[P] extends (...args: any[]) => any
     ? jest.MockInstance<ReturnType<T[P]>, Parameters<T[P]>>
     : DeeplyMockedKeys<T[P]>;
-} & T;
+} &
+  T;
 
 type Writable<T> = {
   -readonly [K in keyof T]: T[K];

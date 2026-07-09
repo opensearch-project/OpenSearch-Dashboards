@@ -40,7 +40,7 @@ export function createPromQLSuggestionProvider(
           datasetType: currentDataset.type,
           position,
           // ExploreServices storage type incompatible with IDataPluginServices.DataStorage
-          services: services as unknown as IDataPluginServices,
+          services: (services as unknown) as IDataPluginServices,
         });
         const wordUntil = model.getWordUntilPosition(position);
         const range = new monaco.Range(

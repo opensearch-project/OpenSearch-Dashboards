@@ -113,8 +113,8 @@ describe('useVariables', () => {
 
     (useOpenSearchDashboards as jest.Mock).mockReturnValue({ services: mockServices });
     (useQueryBuilderState as jest.Mock).mockReturnValue({ queryBuilder: mockQueryBuilder });
-    (VariableService as unknown as jest.Mock).mockImplementation(() => mockVariableService);
-    (VariableInterpolationService as unknown as jest.Mock).mockImplementation(
+    ((VariableService as unknown) as jest.Mock).mockImplementation(() => mockVariableService);
+    ((VariableInterpolationService as unknown) as jest.Mock).mockImplementation(
       () => mockInterpolationService
     );
     (createNoOpVariableInterpolationService as jest.Mock).mockReturnValue({

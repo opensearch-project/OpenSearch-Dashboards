@@ -65,7 +65,7 @@ describe('UrlFormatEditor', () => {
     const component = shallow(
       <UrlFormatEditor
         fieldType={fieldType}
-        format={format as unknown as FieldFormat}
+        format={(format as unknown) as FieldFormat}
         formatParams={formatParams}
         onChange={onChange}
         onError={onError}
@@ -79,7 +79,7 @@ describe('UrlFormatEditor', () => {
     const component = shallow(
       <UrlFormatEditor
         fieldType={fieldType}
-        format={format as unknown as FieldFormat}
+        format={(format as unknown) as FieldFormat}
         formatParams={formatParams}
         onChange={onChange}
         onError={onError}
@@ -95,7 +95,7 @@ describe('UrlFormatEditor', () => {
     const component = shallow(
       <UrlFormatEditor
         fieldType={fieldType}
-        format={format as unknown as FieldFormat}
+        format={(format as unknown) as FieldFormat}
         formatParams={formatParams}
         onChange={onChange}
         onError={onError}
@@ -111,7 +111,7 @@ describe('UrlFormatEditor', () => {
     const component = shallow(
       <UrlFormatEditor
         fieldType={fieldType}
-        format={format as unknown as FieldFormat}
+        format={(format as unknown) as FieldFormat}
         formatParams={{ ...formatParams, type: 'img' }}
         onChange={onChange}
         onError={onError}

@@ -117,8 +117,10 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
   }, [featureFlagStatus, dataSourceMDSId, setHeaderActionMenu, savedObjects.client, notifications]);
 
   // Cache loader hook
-  const { loadStatus: databasesLoadStatus, startLoading: startLoadingDatabases } =
-    useLoadDatabasesToCache(http, notifications);
+  const {
+    loadStatus: databasesLoadStatus,
+    startLoading: startLoadingDatabases,
+  } = useLoadDatabasesToCache(http, notifications);
 
   const { loadStatus: tablesLoadStatus, startLoading: startLoadingTables } = useLoadTablesToCache(
     http,
@@ -127,8 +129,10 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
 
   const [selectedDatabase, setSelectedDatabase] = useState<string>('');
 
-  const { loadStatus: accelerationsLoadStatus, startLoading: startLoadingAccelerations } =
-    useLoadAccelerationsToCache(http, notifications);
+  const {
+    loadStatus: accelerationsLoadStatus,
+    startLoading: startLoadingAccelerations,
+  } = useLoadAccelerationsToCache(http, notifications);
 
   const cacheLoadingHooks = {
     databasesLoadStatus,
@@ -466,7 +470,7 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
           properties={datasourceDetails.properties}
           allowedRoles={datasourceDetails.allowedRoles}
           key={JSON.stringify(datasourceDetails.allowedRoles)}
-          dataSourceMDSId={featureFlagStatus ? (dataSourceMDSId ?? '') : ''}
+          dataSourceMDSId={featureFlagStatus ? dataSourceMDSId ?? '' : ''}
         />
       ),
     },
@@ -488,7 +492,7 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
                 http={http}
                 notifications={notifications}
                 application={application}
-                dataSourceMDSId={featureFlagStatus ? (dataSourceMDSId ?? undefined) : undefined}
+                dataSourceMDSId={featureFlagStatus ? dataSourceMDSId ?? undefined : undefined}
               />
             ),
           },
@@ -503,7 +507,7 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
                 http={http}
                 notifications={notifications}
                 featureFlagStatus={featureFlagStatus}
-                dataSourceMDSId={featureFlagStatus ? (dataSourceMDSId ?? undefined) : undefined}
+                dataSourceMDSId={featureFlagStatus ? dataSourceMDSId ?? undefined : undefined}
                 application={application}
               />
             ),
@@ -519,9 +523,7 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
                 datasourceName={datasourceDetails.name}
                 refreshInstances={refreshInstances}
                 http={http}
-                selectedDataSourceId={
-                  featureFlagStatus ? (dataSourceMDSId ?? undefined) : undefined
-                }
+                selectedDataSourceId={featureFlagStatus ? dataSourceMDSId ?? undefined : undefined}
                 selectedClusterName={clusterTitle}
               />
             ),

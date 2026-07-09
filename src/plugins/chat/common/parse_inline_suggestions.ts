@@ -9,10 +9,9 @@ const SUGGESTIONS_PATTERN = /\n?SUGGESTIONS:\s*(\[[\s\S]*?\])\s*$/;
  * Parse inline suggestions from assistant response content.
  * Matches a trailing line like: SUGGESTIONS:["action1","action2"]
  */
-export function parseInlineSuggestions(content: string): {
-  cleanContent: string;
-  suggestions: string[];
-} {
+export function parseInlineSuggestions(
+  content: string
+): { cleanContent: string; suggestions: string[] } {
   if (!content) {
     return { cleanContent: content, suggestions: [] };
   }

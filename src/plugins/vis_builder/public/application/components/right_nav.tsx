@@ -36,10 +36,9 @@ export const RightNavUI = () => {
   const StyleSection = ui.containerConfig.style.render;
 
   const { activeVisualization } = useTypedSelector((state) => state.visualization);
-  const aggConfigParams = useMemo(
-    () => activeVisualization?.aggConfigParams ?? [],
-    [activeVisualization]
-  );
+  const aggConfigParams = useMemo(() => activeVisualization?.aggConfigParams ?? [], [
+    activeVisualization,
+  ]);
 
   const handleVisTypeChange = useCallback(
     // @ts-expect-error TS7006 TODO(ts-upgrade): fixme

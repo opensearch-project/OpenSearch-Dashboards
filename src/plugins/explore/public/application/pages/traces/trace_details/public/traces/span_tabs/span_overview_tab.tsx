@@ -121,8 +121,16 @@ export const SpanOverviewTab: React.FC<SpanOverviewTabProps> = ({
     );
   }
 
-  const { spanId, operation, duration, startTime, hasError, httpMethod, httpUrl, httpStatusCode } =
-    spanData;
+  const {
+    spanId,
+    operation,
+    duration,
+    startTime,
+    hasError,
+    httpMethod,
+    httpUrl,
+    httpStatusCode,
+  } = spanData;
 
   return (
     <div>

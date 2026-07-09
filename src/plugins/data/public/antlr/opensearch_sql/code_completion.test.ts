@@ -60,12 +60,12 @@ describe('sql code_completion', () => {
     it('should return empty array when required parameters are missing', async () => {
       const result = await getSuggestions({
         query: '',
-        indexPattern: null as unknown as IndexPattern,
+        indexPattern: (null as unknown) as IndexPattern,
         position: mockPosition,
         language: 'SQL',
         selectionStart: 0,
         selectionEnd: 0,
-        services: null as unknown as IDataPluginServices,
+        services: (null as unknown) as IDataPluginServices,
       });
 
       expect(result).toEqual([]);

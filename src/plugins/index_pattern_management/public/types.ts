@@ -67,8 +67,9 @@ export interface IndexPatternManagmentContext {
   workspaces: WorkspacesStart;
 }
 
-export type IndexPatternManagmentContextValue =
-  OpenSearchDashboardsReactContextValue<IndexPatternManagmentContext>;
+export type IndexPatternManagmentContextValue = OpenSearchDashboardsReactContextValue<
+  IndexPatternManagmentContext
+>;
 
 export enum MlCardState {
   HIDDEN,

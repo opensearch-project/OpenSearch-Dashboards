@@ -17,7 +17,7 @@ global.TextDecoder = TextDecoder as typeof global.TextDecoder;
 window.URL.createObjectURL = () => '';
 HTMLCanvasElement.prototype.getContext = () => '' as any;
 Element.prototype.scrollIntoView = jest.fn();
-window.IntersectionObserver = class IntersectionObserver {
+window.IntersectionObserver = (class IntersectionObserver {
   constructor() {}
 
   disconnect() {
@@ -35,7 +35,7 @@ window.IntersectionObserver = class IntersectionObserver {
   unobserve() {
     return null;
   }
-} as unknown as typeof window.IntersectionObserver;
+} as unknown) as typeof window.IntersectionObserver;
 
 jest.mock('@elastic/eui/lib/components/form/form_row/make_id', () => () => 'random-id');
 

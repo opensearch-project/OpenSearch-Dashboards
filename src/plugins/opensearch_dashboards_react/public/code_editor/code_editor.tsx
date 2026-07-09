@@ -148,8 +148,8 @@ export class CodeEditor extends React.Component<Props, {}> {
           ? DARK_THEME
           : LIGHT_THEME
         : this.props.useDarkTheme
-          ? DEFAULT_DARK_THEME
-          : DEAFULT_LIGHT_THEME
+        ? DEFAULT_DARK_THEME
+        : DEAFULT_LIGHT_THEME
     );
   };
 

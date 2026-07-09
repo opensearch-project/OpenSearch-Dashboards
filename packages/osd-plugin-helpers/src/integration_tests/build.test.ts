@@ -85,8 +85,7 @@ async function extractZip(archive: string, targetDir: string): Promise<void> {
 }
 
 const processProcOutput = (all: string | undefined) => {
-  const regexp =
-    /\n\s*\(node:\d+\)\s*\[DEP0180\] DeprecationWarning: fs.Stats constructor is deprecated.\n\s*\(Use `node --trace-deprecation ...` to show where the warning was created\)/;
+  const regexp = /\n\s*\(node:\d+\)\s*\[DEP0180\] DeprecationWarning: fs.Stats constructor is deprecated.\n\s*\(Use `node --trace-deprecation ...` to show where the warning was created\)/;
   return all?.replace(regexp, '');
 };
 

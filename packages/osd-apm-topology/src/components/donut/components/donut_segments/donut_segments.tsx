@@ -17,8 +17,14 @@ interface DonutSegmentsProps {
 }
 
 export const DonutSegments = memo(({ diameter, segments, fill, stroke }: DonutSegmentsProps) => {
-  const { center, radius, backgroundStrokeWidth, segmentStrokeWidth, getArcLength, circumference } =
-    useCircleDimensions(diameter);
+  const {
+    center,
+    radius,
+    backgroundStrokeWidth,
+    segmentStrokeWidth,
+    getArcLength,
+    circumference,
+  } = useCircleDimensions(diameter);
 
   return (
     <>

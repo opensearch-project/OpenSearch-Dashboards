@@ -22,7 +22,7 @@ const createObject = (type: string, id: string): SavedObjectType => ({
   type,
   id,
   attributes: { title: 'some-title' },
-  references: Symbol() as unknown as SavedObjectReference[],
+  references: (Symbol() as unknown) as SavedObjectReference[],
 });
 
 const createVegaVisualizationObject = (id: string): SavedObjectType => {

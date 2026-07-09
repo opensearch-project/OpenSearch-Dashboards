@@ -106,10 +106,7 @@ export class HttpServer {
   private readonly authRequestHeaders: AuthHeadersStorage;
   private readonly authResponseHeaders: AuthHeadersStorage;
 
-  constructor(
-    private readonly logger: LoggerFactory,
-    private readonly name: string
-  ) {
+  constructor(private readonly logger: LoggerFactory, private readonly name: string) {
     this.authState = new AuthStateStorage(() => this.authRegistered);
     this.authRequestHeaders = new AuthHeadersStorage();
     this.authResponseHeaders = new AuthHeadersStorage();

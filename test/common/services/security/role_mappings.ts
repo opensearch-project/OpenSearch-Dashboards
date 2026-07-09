@@ -32,10 +32,7 @@ import util from 'util';
 import { OsdClient, ToolingLog } from '@osd/dev-utils';
 
 export class RoleMappings {
-  constructor(
-    private log: ToolingLog,
-    private osdClient: OsdClient
-  ) {}
+  constructor(private log: ToolingLog, private osdClient: OsdClient) {}
 
   public async getAll() {
     this.log.debug(`Getting role mappings`);

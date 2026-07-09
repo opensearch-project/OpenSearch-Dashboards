@@ -298,10 +298,8 @@ export interface SavedObjectsStartDeps {
   pluginsInitialized?: boolean;
 }
 
-export class SavedObjectsService implements CoreService<
-  InternalSavedObjectsServiceSetup,
-  InternalSavedObjectsServiceStart
-> {
+export class SavedObjectsService
+  implements CoreService<InternalSavedObjectsServiceSetup, InternalSavedObjectsServiceStart> {
   private logger: Logger;
 
   private setupDeps?: SavedObjectsSetupDeps;

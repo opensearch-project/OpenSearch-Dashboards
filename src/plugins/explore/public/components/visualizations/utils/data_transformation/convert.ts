@@ -15,16 +15,16 @@
  * Output (no headers): [['name', 'age', 'height'], ['foo', 10, 100], ['bar', 15, 130]]
  * Output (with headers): [['name', 'age'], ['foo', 10], ['bar', 15]]
  */
-export const convertTo2DArray =
-  (headers?: string[]) =>
-  (data: Array<Record<string, any>>): Array<string[] | any[]> => {
-    if (data.length === 0) return [];
+export const convertTo2DArray = (headers?: string[]) => (
+  data: Array<Record<string, any>>
+): Array<string[] | any[]> => {
+  if (data.length === 0) return [];
 
-    // Use provided headers or extract from first object
-    const columnHeaders = headers || Object.keys(data[0]);
+  // Use provided headers or extract from first object
+  const columnHeaders = headers || Object.keys(data[0]);
 
-    // Create data rows
-    const rows = data.map((obj) => columnHeaders.map((key) => obj[key]));
+  // Create data rows
+  const rows = data.map((obj) => columnHeaders.map((key) => obj[key]));
 
-    return [columnHeaders, ...rows];
-  };
+  return [columnHeaders, ...rows];
+};

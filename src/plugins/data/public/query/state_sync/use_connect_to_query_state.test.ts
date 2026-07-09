@@ -73,9 +73,9 @@ describe('use_connect_storage_to_query_state', () => {
       application: startMock.application,
       notifications: startMock.notifications,
     });
-    indexPatternsMock = {
+    indexPatternsMock = ({
       get: jest.fn(),
-    } as unknown as IndexPatternsService;
+    } as unknown) as IndexPatternsService;
 
     queryString = queryServiceStart.queryString;
     queryChangeTriggered = jest.fn();

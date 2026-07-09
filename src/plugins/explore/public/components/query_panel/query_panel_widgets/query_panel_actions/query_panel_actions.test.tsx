@@ -55,7 +55,7 @@ const buildAction = (
     getLabel: () => `label-${id}`,
     onClick: jest.fn(),
     ...overrides,
-  }) as QueryPanelActionConfig;
+  } as QueryPanelActionConfig);
 
 describe('QueryPanelActions', () => {
   let mockRegistry: jest.Mocked<QueryPanelActionsRegistryService>;

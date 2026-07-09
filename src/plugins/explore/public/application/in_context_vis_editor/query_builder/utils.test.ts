@@ -160,7 +160,7 @@ const buildServices = () =>
     },
     uiSettings: { get: jest.fn().mockResolvedValue(false) },
     notifications: { toasts: { addError: jest.fn() } },
-  }) as any;
+  } as any);
 
 describe('resolveDatasetByLanguage', () => {
   it('returns existing dataset when signal type is compatible', async () => {

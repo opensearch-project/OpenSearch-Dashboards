@@ -105,10 +105,7 @@ export class CiStatsReporter {
     return new CiStatsReporter(parseConfig(log), log);
   }
 
-  constructor(
-    private config: Config | undefined,
-    private log: ToolingLog
-  ) {}
+  constructor(private config: Config | undefined, private log: ToolingLog) {}
 
   isEnabled() {
     return !!this.config;

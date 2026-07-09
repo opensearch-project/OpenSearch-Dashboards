@@ -28,10 +28,8 @@ export interface ManagementOverViewPluginSetup {
 export interface ManagementOverViewPluginStart {}
 
 /** @public */
-export class ManagementOverViewPlugin implements Plugin<
-  ManagementOverViewPluginSetup,
-  ManagementOverViewPluginStart
-> {
+export class ManagementOverViewPlugin
+  implements Plugin<ManagementOverViewPluginSetup, ManagementOverViewPluginStart> {
   private readonly overviewApps = new Map<string, OverviewApp>();
 
   private getSortedOverviewApps(): OverviewApp[] {

@@ -53,12 +53,14 @@ const sectionsHeader = i18n.translate('datasetManagement.dataset.sectionsHeader'
  */
 const DM_APP_ID = 'datasets';
 
-export class DatasetManagementPlugin implements Plugin<
-  DatasetManagementSetup,
-  DatasetManagementStart,
-  DatasetManagementSetupDependencies,
-  DatasetManagementStartDependencies
-> {
+export class DatasetManagementPlugin
+  implements
+    Plugin<
+      DatasetManagementSetup,
+      DatasetManagementStart,
+      DatasetManagementSetupDependencies,
+      DatasetManagementStartDependencies
+    > {
   private readonly datasetManagementService = new DatasetManagementService();
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private workspaceSubscription?: Subscription;

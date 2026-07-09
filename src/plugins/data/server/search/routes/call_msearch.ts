@@ -81,8 +81,11 @@ export function getCallMsearchWithOpenSearchClient(
     const timeout = getShardTimeout(config);
 
     // trackTotalHits and dataFrameHydrationStrategy is not supported by msearch
-    const { trackTotalHits, dataFrameHydrationStrategy, ...defaultParams } =
-      await getDefaultSearchParams(uiSettings);
+    const {
+      trackTotalHits,
+      dataFrameHydrationStrategy,
+      ...defaultParams
+    } = await getDefaultSearchParams(uiSettings);
 
     const body = convertRequestBody(params.body, timeout);
 

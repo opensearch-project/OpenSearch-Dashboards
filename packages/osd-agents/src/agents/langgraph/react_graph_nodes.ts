@@ -311,8 +311,15 @@ export class ReactGraphNodes {
   async executeToolsNode(
     state: ReactAgentState
   ): Promise<Partial<ReactAgentState> | Record<string, any>> {
-    const { toolCalls, streamingCallbacks, messages, clientState, clientContext, threadId, runId } =
-      state;
+    const {
+      toolCalls,
+      streamingCallbacks,
+      messages,
+      clientState,
+      clientContext,
+      threadId,
+      runId,
+    } = state;
 
     // Safety check: reject tool execution at max iterations
     // This is a defensive check in case the model ignores the system prompt instruction

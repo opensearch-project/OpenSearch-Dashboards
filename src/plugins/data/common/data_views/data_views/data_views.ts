@@ -455,8 +455,8 @@ export class DataViewsService {
     const parsedFields: DataViewFieldSpec[] = Array.isArray(fields)
       ? fields
       : fields
-        ? JSON.parse(fields)
-        : [];
+      ? JSON.parse(fields)
+      : [];
     const parsedSchemaMappings = schemaMappings ? JSON.parse(schemaMappings) : undefined;
     const dataSourceRef = Array.isArray(references) ? references[0] : undefined;
 

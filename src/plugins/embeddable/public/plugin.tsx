@@ -84,7 +84,7 @@ export interface EmbeddableSetup {
   registerEmbeddableFactory: <
     I extends EmbeddableInput,
     O extends EmbeddableOutput,
-    E extends IEmbeddable<I, O> = IEmbeddable<I, O>,
+    E extends IEmbeddable<I, O> = IEmbeddable<I, O>
   >(
     id: string,
     factory: EmbeddableFactoryDefinition<I, O, E>
@@ -98,7 +98,7 @@ export interface EmbeddableStart extends PersistableState<EmbeddableInput> {
   getEmbeddableFactory: <
     I extends EmbeddableInput = EmbeddableInput,
     O extends EmbeddableOutput = EmbeddableOutput,
-    E extends IEmbeddable<I, O> = IEmbeddable<I, O>,
+    E extends IEmbeddable<I, O> = IEmbeddable<I, O>
   >(
     embeddableFactoryId: string
   ) => EmbeddableFactory<I, O, E> | undefined;
@@ -116,8 +116,10 @@ export type EmbeddablePanelHOC = React.FC<{
 }>;
 
 export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
-  private readonly embeddableFactoryDefinitions: Map<string, EmbeddableFactoryDefinition> =
-    new Map();
+  private readonly embeddableFactoryDefinitions: Map<
+    string,
+    EmbeddableFactoryDefinition
+  > = new Map();
   private readonly embeddableFactories: EmbeddableFactoryRegistry = new Map();
   private readonly enhancements: EnhancementsRegistry = new Map();
   private customEmbeddableFactoryProvider?: EmbeddableFactoryProvider;
@@ -169,40 +171,38 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     );
     this.isRegistryReady = true;
 
-    const getEmbeddablePanelHoc =
-      (stateTransfer?: EmbeddableStateTransfer) =>
-      ({
-        embeddable,
-        hideHeader,
-        hasBorder,
-        hasShadow,
-      }: {
-        embeddable: IEmbeddable;
-        hideHeader?: boolean;
-        hasBorder?: boolean;
-        hasShadow?: boolean;
-      }) => (
-        <EmbeddablePanel
-          hideHeader={hideHeader}
-          hasBorder={hasBorder}
-          hasShadow={hasShadow}
-          embeddable={embeddable}
-          stateTransfer={stateTransfer ? stateTransfer : this.outgoingOnlyStateTransfer}
-          getActions={uiActions.getTriggerCompatibleActions}
-          getEmbeddableFactory={this.getEmbeddableFactory}
-          getAllEmbeddableFactories={this.getEmbeddableFactories}
-          overlays={core.overlays}
-          notifications={core.notifications}
-          application={core.application}
-          inspector={inspector}
-          SavedObjectFinder={getSavedObjectFinder(
-            core.savedObjects,
-            core.uiSettings,
-            data,
-            core.application
-          )}
-        />
-      );
+    const getEmbeddablePanelHoc = (stateTransfer?: EmbeddableStateTransfer) => ({
+      embeddable,
+      hideHeader,
+      hasBorder,
+      hasShadow,
+    }: {
+      embeddable: IEmbeddable;
+      hideHeader?: boolean;
+      hasBorder?: boolean;
+      hasShadow?: boolean;
+    }) => (
+      <EmbeddablePanel
+        hideHeader={hideHeader}
+        hasBorder={hasBorder}
+        hasShadow={hasShadow}
+        embeddable={embeddable}
+        stateTransfer={stateTransfer ? stateTransfer : this.outgoingOnlyStateTransfer}
+        getActions={uiActions.getTriggerCompatibleActions}
+        getEmbeddableFactory={this.getEmbeddableFactory}
+        getAllEmbeddableFactories={this.getEmbeddableFactories}
+        overlays={core.overlays}
+        notifications={core.notifications}
+        application={core.application}
+        inspector={inspector}
+        SavedObjectFinder={getSavedObjectFinder(
+          core.savedObjects,
+          core.uiSettings,
+          data,
+          core.application
+        )}
+      />
+    );
 
     return {
       getEmbeddableFactory: this.getEmbeddableFactory,
@@ -331,7 +331,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
   private registerEmbeddableFactory = <
     I extends EmbeddableInput = EmbeddableInput,
     O extends EmbeddableOutput = EmbeddableOutput,
-    E extends IEmbeddable<I, O> = IEmbeddable<I, O>,
+    E extends IEmbeddable<I, O> = IEmbeddable<I, O>
   >(
     embeddableFactoryId: string,
     factory: EmbeddableFactoryDefinition<I, O, E>
@@ -351,7 +351,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
   private getEmbeddableFactory = <
     I extends EmbeddableInput = EmbeddableInput,
     O extends EmbeddableOutput = EmbeddableOutput,
-    E extends IEmbeddable<I, O> = IEmbeddable<I, O>,
+    E extends IEmbeddable<I, O> = IEmbeddable<I, O>
   >(
     embeddableFactoryId: string
   ): EmbeddableFactory<I, O, E> => {

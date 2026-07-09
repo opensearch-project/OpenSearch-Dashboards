@@ -116,12 +116,14 @@ export interface StartDependencies {
   navigation: NavigationPublicPluginStart;
 }
 
-export class SavedObjectsManagementPlugin implements Plugin<
-  SavedObjectsManagementPluginSetup,
-  SavedObjectsManagementPluginStart,
-  SetupDependencies,
-  StartDependencies
-> {
+export class SavedObjectsManagementPlugin
+  implements
+    Plugin<
+      SavedObjectsManagementPluginSetup,
+      SavedObjectsManagementPluginStart,
+      SetupDependencies,
+      StartDependencies
+    > {
   private actionService = new SavedObjectsManagementActionService();
   private columnService = new SavedObjectsManagementColumnService();
   private namespaceService = new SavedObjectsManagementNamespaceService();

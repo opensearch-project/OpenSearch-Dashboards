@@ -38,7 +38,7 @@ const FACET_FIELDS = [
   'status.code',
 ] as const;
 
-function isFacetedField(fieldName: string): fieldName is (typeof FACET_FIELDS)[number] {
+function isFacetedField(fieldName: string): fieldName is typeof FACET_FIELDS[number] {
   // Remove invisiable char
   const normalizedFieldName = fieldName.replace(/[\u200b-\u200f\uFEFF]/g, '');
   return (FACET_FIELDS as readonly string[]).includes(normalizedFieldName);

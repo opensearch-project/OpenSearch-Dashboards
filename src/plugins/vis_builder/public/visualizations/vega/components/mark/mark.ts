@@ -8,7 +8,15 @@ import { AxisFormats } from '../utils/types';
 import { buildAxes } from '../axes';
 
 export type VegaMarkType =
-  'line' | 'rect' | 'area' | 'symbol' | 'bar' | 'point' | 'circle' | 'square' | 'group';
+  | 'line'
+  | 'rect'
+  | 'area'
+  | 'symbol'
+  | 'bar'
+  | 'point'
+  | 'circle'
+  | 'square'
+  | 'group';
 
 export interface VegaMark {
   type: VegaMarkType;

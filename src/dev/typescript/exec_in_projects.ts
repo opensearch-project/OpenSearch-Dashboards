@@ -38,10 +38,7 @@ import Listr from 'listr';
 import { Project } from './project';
 
 class ProjectFailure {
-  constructor(
-    public project: Project,
-    public error: execa.ExecaError
-  ) {}
+  constructor(public project: Project, public error: execa.ExecaError) {}
 }
 
 export function execInProjects(

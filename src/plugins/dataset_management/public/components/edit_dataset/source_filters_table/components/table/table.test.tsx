@@ -13,14 +13,15 @@ import { SourceFiltersTableFilter } from '../../types';
 const dataset = {} as DataView;
 const items: SourceFiltersTableFilter[] = [{ value: 'tim*', clientId: '' }];
 
-const getDatasetMock = (mockedFields: any = {}) => ({ ...mockedFields }) as DataView;
+const getDatasetMock = (mockedFields: any = {}) => ({ ...mockedFields } as DataView);
 
 const getTableColumnRender = (
   component: ShallowWrapper<TableProps, TableState, Table>,
   index: number = 0
 ) => {
-  const columns =
-    component.prop<Array<EuiTableFieldDataColumnType<SourceFiltersTableFilter>>>('columns');
+  const columns = component.prop<Array<EuiTableFieldDataColumnType<SourceFiltersTableFilter>>>(
+    'columns'
+  );
   return {
     render: columns[index].render as (...args: any) => ReactElement,
   };

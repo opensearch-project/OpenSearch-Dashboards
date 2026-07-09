@@ -15,12 +15,12 @@ import { pplLintHoverProvider, LINT_OWNER } from '../hover_provider';
 
 type Marker = monaco.editor.IMarker;
 
-const model = {
+const model = ({
   uri: monaco.Uri.parse('inmemory://model/q.ppl'),
-} as unknown as monaco.editor.ITextModel;
+} as unknown) as monaco.editor.ITextModel;
 
 function makeMarker(overrides: Partial<Marker> = {}): Marker {
-  return {
+  return ({
     owner: LINT_OWNER,
     resource: model.uri,
     severity: monaco.MarkerSeverity.Warning,
@@ -32,7 +32,7 @@ function makeMarker(overrides: Partial<Marker> = {}): Marker {
     source: LINT_MARKER_SOURCE,
     code: { value: 'division-by-zero', target: monaco.Uri.parse('https://docs.example/x') },
     ...overrides,
-  } as unknown as Marker;
+  } as unknown) as Marker;
 }
 
 // Returns test markers for the lint owner; [] for others.
@@ -52,7 +52,7 @@ function hoverAt(line: number, column: number) {
   return pplLintHoverProvider.provideHover!(
     model,
     new monaco.Position(line, column),
-    { isCancellationRequested: false } as unknown as monaco.CancellationToken,
+    ({ isCancellationRequested: false } as unknown) as monaco.CancellationToken,
     undefined
   ) as monaco.languages.Hover | null;
 }

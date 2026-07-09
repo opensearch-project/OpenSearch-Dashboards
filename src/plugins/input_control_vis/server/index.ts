@@ -57,10 +57,8 @@ export const plugin = (initializerContext: PluginInitializerContext) => ({
           .toPromise();
         return response.ok({
           body: {
-            autocompleteTimeout:
-              legacyConfig.opensearchDashboards.autocompleteTimeout.asMilliseconds(),
-            autocompleteTerminateAfter:
-              legacyConfig.opensearchDashboards.autocompleteTerminateAfter.asMilliseconds(),
+            autocompleteTimeout: legacyConfig.opensearchDashboards.autocompleteTimeout.asMilliseconds(),
+            autocompleteTerminateAfter: legacyConfig.opensearchDashboards.autocompleteTerminateAfter.asMilliseconds(),
           },
         });
       }

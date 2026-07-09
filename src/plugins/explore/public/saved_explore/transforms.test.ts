@@ -7,14 +7,14 @@ import { saveStateToSavedObject } from './transforms';
 import { SavedExplore } from '../types/saved_explore_types';
 
 const createMockSavedExplore = (): SavedExplore =>
-  ({
+  (({
     title: 'test',
     description: '',
     type: '',
     visualization: '',
     uiState: '',
     version: 0,
-  }) as unknown as SavedExplore;
+  } as unknown) as SavedExplore);
 
 describe('saveStateToSavedObject', () => {
   describe('activeTab in uiState', () => {

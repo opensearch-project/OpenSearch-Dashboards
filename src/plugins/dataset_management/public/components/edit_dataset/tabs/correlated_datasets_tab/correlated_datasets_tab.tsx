@@ -25,8 +25,9 @@ export const CorrelatedDatasetsTab: React.FC<CorrelatedDatasetsTabProps> = ({
   dataset,
   onCountChange,
 }) => {
-  const { savedObjects, notifications } =
-    useOpenSearchDashboards<DatasetManagmentContext>().services;
+  const { savedObjects, notifications } = useOpenSearchDashboards<
+    DatasetManagmentContext
+  >().services;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCorrelation, setEditingCorrelation] = useState<CorrelationSavedObject | null>(null);
 

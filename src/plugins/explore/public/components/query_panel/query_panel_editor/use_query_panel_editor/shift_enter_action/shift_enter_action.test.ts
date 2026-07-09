@@ -31,7 +31,7 @@ describe('getShiftEnterAction', () => {
           startColumn: startCol,
           endLineNumber: endLine,
           endColumn: endCol,
-        }) as any
+        } as any)
     );
   });
 

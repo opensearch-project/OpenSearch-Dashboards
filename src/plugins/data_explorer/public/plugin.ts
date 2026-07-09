@@ -34,12 +34,14 @@ import { opensearchFilters } from '../../data/public';
 import { setUsageCollector } from './services';
 import { WorkspaceAvailability } from '../../../../src/core/public';
 
-export class DataExplorerPlugin implements Plugin<
-  DataExplorerPluginSetup,
-  DataExplorerPluginStart,
-  DataExplorerPluginSetupDependencies,
-  DataExplorerPluginStartDependencies
-> {
+export class DataExplorerPlugin
+  implements
+    Plugin<
+      DataExplorerPluginSetup,
+      DataExplorerPluginStart,
+      DataExplorerPluginSetupDependencies,
+      DataExplorerPluginStartDependencies
+    > {
   private viewService = new ViewService();
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private stopUrlTracking?: () => void;
@@ -52,11 +54,7 @@ export class DataExplorerPlugin implements Plugin<
     const viewService = this.viewService;
 
     setUsageCollector(usageCollection);
-    const {
-      appMounted,
-      appUnMounted,
-      stop: stopUrlTracker,
-    } = createOsdUrlTracker({
+    const { appMounted, appUnMounted, stop: stopUrlTracker } = createOsdUrlTracker({
       baseUrl: core.http.basePath.prepend(`/app/${PLUGIN_ID}`),
       defaultSubUrl: '#/',
       storageKey: `lastUrl:${core.http.basePath.get()}:${PLUGIN_ID}`,

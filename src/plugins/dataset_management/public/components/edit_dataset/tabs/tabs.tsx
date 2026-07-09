@@ -60,8 +60,9 @@ const filterPlaceholder = i18n.translate('datasetManagement.editDataset.fields.f
 });
 
 export function Tabs({ dataset, saveDataset, fields, history, location }: TabsProps) {
-  const { uiSettings, datasetManagementStart, docLinks, savedObjects } =
-    useOpenSearchDashboards<DatasetManagmentContext>().services;
+  const { uiSettings, datasetManagementStart, docLinks, savedObjects } = useOpenSearchDashboards<
+    DatasetManagmentContext
+  >().services;
   const [fieldFilter, setFieldFilter] = useState<string>('');
   const [indexedFieldTypeFilter, setIndexedFieldTypeFilter] = useState<string>('');
   const [scriptedFieldLanguageFilter, setScriptedFieldLanguageFilter] = useState<string>('');
@@ -282,11 +283,15 @@ export function Tabs({ dataset, saveDataset, fields, history, location }: TabsPr
   const [selectedTabId, setSelectedTabId] = useState(euiTabs[0].id);
 
   useEffect(() => {
-    const { startSyncingState, stopSyncingState, setCurrentTab, getCurrentTab } =
-      createEditDatasetPageStateContainer({
-        useHashedUrl: uiSettings.get('state:storeInSessionStorage'),
-        defaultTab: TAB_INDEXED_FIELDS,
-      });
+    const {
+      startSyncingState,
+      stopSyncingState,
+      setCurrentTab,
+      getCurrentTab,
+    } = createEditDatasetPageStateContainer({
+      useHashedUrl: uiSettings.get('state:storeInSessionStorage'),
+      defaultTab: TAB_INDEXED_FIELDS,
+    });
 
     startSyncingState();
     setSyncingStateFunc({

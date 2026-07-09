@@ -41,10 +41,7 @@ export class DisabledLabEmbeddable extends Embeddable<VisualizeInput, Embeddable
   private root?: Root;
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
 
-  constructor(
-    private readonly title: string,
-    initialInput: VisualizeInput
-  ) {
+  constructor(private readonly title: string, initialInput: VisualizeInput) {
     super(initialInput, { title });
   }
 

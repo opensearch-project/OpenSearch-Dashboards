@@ -37,29 +37,29 @@ import { UiComponent, UiComponentInstance } from '../../../opensearch_dashboards
  *
  * @param ReactComp A React component.
  */
-export const reactToUiComponent =
-  <Props extends object>(ReactComp: ComponentType<Props>): UiComponent<Props> =>
-  () => {
-    let root: Root | null = null;
+export const reactToUiComponent = <Props extends object>(
+  ReactComp: ComponentType<Props>
+): UiComponent<Props> => () => {
+  let root: Root | null = null;
 
-    const render: UiComponentInstance<Props>['render'] = (el, props) => {
-      if (!root) {
-        root = createRoot(el);
-      }
-      root.render(h(ReactComp, props));
-    };
-
-    const unmount: UiComponentInstance<Props>['unmount'] = () => {
-      if (root) {
-        root.unmount();
-        root = null;
-      }
-    };
-
-    const comp: UiComponentInstance<Props> = {
-      render,
-      unmount,
-    };
-
-    return comp;
+  const render: UiComponentInstance<Props>['render'] = (el, props) => {
+    if (!root) {
+      root = createRoot(el);
+    }
+    root.render(h(ReactComp, props));
   };
+
+  const unmount: UiComponentInstance<Props>['unmount'] = () => {
+    if (root) {
+      root.unmount();
+      root = null;
+    }
+  };
+
+  const comp: UiComponentInstance<Props> = {
+    render,
+    unmount,
+  };
+
+  return comp;
+};

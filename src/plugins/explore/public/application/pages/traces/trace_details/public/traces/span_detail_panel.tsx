@@ -30,8 +30,14 @@ export function SpanDetailPanel(props: {
   servicesInOrder?: string[];
   isFlyoutPanel?: boolean;
 }) {
-  const { chrome, spanFilters, setSpanFiltersWithStorage, payloadData, onSpanSelect, colorMap } =
-    props;
+  const {
+    chrome,
+    spanFilters,
+    setSpanFiltersWithStorage,
+    payloadData,
+    onSpanSelect,
+    colorMap,
+  } = props;
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [availableWidth, setAvailableWidth] = useState<number>(

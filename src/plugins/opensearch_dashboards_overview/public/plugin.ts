@@ -53,12 +53,14 @@ import { PLUGIN_ID, PLUGIN_NAME, PLUGIN_PATH, PLUGIN_ICON } from '../common';
 /** @public */
 export type OverviewPluginBranding = Branding;
 
-export class OpenSearchDashboardsOverviewPlugin implements Plugin<
-  OpenSearchDashboardsOverviewPluginSetup,
-  OpenSearchDashboardsOverviewPluginStart,
-  AppPluginSetupDependencies,
-  AppPluginStartDependencies
-> {
+export class OpenSearchDashboardsOverviewPlugin
+  implements
+    Plugin<
+      OpenSearchDashboardsOverviewPluginSetup,
+      OpenSearchDashboardsOverviewPluginStart,
+      AppPluginSetupDependencies,
+      AppPluginStartDependencies
+    > {
   public setup(
     core: CoreSetup<AppPluginStartDependencies>,
     { home }: AppPluginSetupDependencies

@@ -44,18 +44,21 @@ export const [getData, setData] = createGetterSetter<DataPublicPluginStart>('Dat
 export const [getDataSourceEnabled, setDataSourceEnabled] = createGetterSetter<{
   enabled: boolean;
 }>('DataSource');
-export const [getSavedObjectsClient, setSavedObjectsClient] =
-  createGetterSetter<SavedObjectsStart>('SavedObjects');
+export const [getSavedObjectsClient, setSavedObjectsClient] = createGetterSetter<SavedObjectsStart>(
+  'SavedObjects'
+);
 
-export const [getNotifications, setNotifications] =
-  createGetterSetter<NotificationsStart>('Notifications');
+export const [getNotifications, setNotifications] = createGetterSetter<NotificationsStart>(
+  'Notifications'
+);
 
 export const [getUiActions, setUiActions] = createGetterSetter<UiActionsStart>('UIActions');
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
 
-export const [getInjectedMetadata, setInjectedMetadata] =
-  createGetterSetter<CoreStart['injectedMetadata']>('InjectedMetadata');
+export const [getInjectedMetadata, setInjectedMetadata] = createGetterSetter<
+  CoreStart['injectedMetadata']
+>('InjectedMetadata');
 
 export const [getInjectedVars, setInjectedVars] = createGetterSetter<{
   enableExternalUrls: boolean;
@@ -63,8 +66,9 @@ export const [getInjectedVars, setInjectedVars] = createGetterSetter<{
   emsTileLayerId: unknown;
 }>('InjectedVars');
 
-export const [getMapsLegacyConfig, setMapsLegacyConfig] =
-  createGetterSetter<MapsLegacyConfig>('MapsLegacyConfig');
+export const [getMapsLegacyConfig, setMapsLegacyConfig] = createGetterSetter<MapsLegacyConfig>(
+  'MapsLegacyConfig'
+);
 
 export const getEnableExternalUrls = () => getInjectedVars().enableExternalUrls;
 export const getExposeDebugObjectToWindow = () => getInjectedVars().exposeDebugObjectToWindow;

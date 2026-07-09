@@ -83,9 +83,8 @@ const defaultMockProps = {
   loadingCount$: new BehaviorSubject(0),
 };
 
-jest
-  .spyOn(defaultMockProps.http, 'get')
-  .mockImplementation((url): Promise<SavedObjectWithMetadata> => {
+jest.spyOn(defaultMockProps.http, 'get').mockImplementation(
+  (url): Promise<SavedObjectWithMetadata> => {
     if (typeof url === 'string') {
       if ((url as string).includes('6ef856c0-5f86-11ef-b7df-1bb1cf26ce5b')) {
         return Promise.resolve(savedObjectsFromServer[0]);
@@ -94,7 +93,8 @@ jest
       }
     }
     return Promise.reject(new Error('Invalid URL'));
-  });
+  }
+);
 
 describe('Recent items', () => {
   it('should render base element normally', () => {

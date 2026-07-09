@@ -36,8 +36,10 @@ export const registerServices = async (
   registry: ISavedObjectsManagementServiceRegistry,
   getStartServices: StartServicesAccessor<StartDependencies, SavedObjectsManagementPluginStart>
 ) => {
-  const [, { home, dashboard, explore, visualizations, visAugmenter, discover, visBuilder }] =
-    await getStartServices();
+  const [
+    ,
+    { home, dashboard, explore, visualizations, visAugmenter, discover, visBuilder },
+  ] = await getStartServices();
 
   if (home) {
     registry.register({

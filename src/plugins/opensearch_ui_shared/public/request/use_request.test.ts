@@ -144,8 +144,12 @@ describe('useRequest hook', () => {
       });
 
       it('surfaces body-shaped errors from requests', async () => {
-        const { setupErrorWithBodyRequest, completeRequest, hookResult, getErrorWithBodyResponse } =
-          helpers;
+        const {
+          setupErrorWithBodyRequest,
+          completeRequest,
+          hookResult,
+          getErrorWithBodyResponse,
+        } = helpers;
 
         setupErrorWithBodyRequest();
         await completeRequest();

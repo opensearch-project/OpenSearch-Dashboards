@@ -70,8 +70,9 @@ export const parentPipelineAggHelper = {
           metricAgg.id = termsAgg.id + '-metric';
           return metricAgg;
         },
-        modifyAggConfigOnSearchRequestStart:
-          forwardModifyAggConfigOnSearchRequestStart('customMetric'),
+        modifyAggConfigOnSearchRequestStart: forwardModifyAggConfigOnSearchRequestStart(
+          'customMetric'
+        ),
         write: noop,
       },
       {

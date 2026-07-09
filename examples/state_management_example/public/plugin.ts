@@ -19,10 +19,8 @@ interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;
 }
 
-export class StateManagementExamplePlugin implements Plugin<
-  StateManagementExamplePluginSetup,
-  StateManagementExamplePluginStart
-> {
+export class StateManagementExamplePlugin
+  implements Plugin<StateManagementExamplePluginSetup, StateManagementExamplePluginStart> {
   public setup(core: CoreSetup, { developerExamples }: SetupDeps) {
     // Register an application into the side navigation menu
     // Initialize Observable-based counter (original approach)

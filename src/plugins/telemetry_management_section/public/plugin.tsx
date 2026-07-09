@@ -54,7 +54,8 @@ export interface TelemetryManagementSectionPluginSetup {
   toggleSecuritySolutionExample: (enabled: boolean) => void;
 }
 
-export class TelemetryManagementSectionPlugin implements Plugin<TelemetryManagementSectionPluginSetup> {
+export class TelemetryManagementSectionPlugin
+  implements Plugin<TelemetryManagementSectionPluginSetup> {
   private showSecuritySolutionExample = false;
   private shouldShowSecuritySolutionExample = () => {
     return this.showSecuritySolutionExample;

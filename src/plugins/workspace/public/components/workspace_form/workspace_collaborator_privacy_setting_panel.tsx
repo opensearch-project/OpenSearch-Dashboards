@@ -55,10 +55,9 @@ export const WorkspaceCollaboratorPrivacySettingPanel = ({
     WorkspacePrivacyItemType.PrivateToCollaborators
   );
 
-  const privacyType = useMemo(
-    () => convertPermissionsToPrivacyType(permissionSettings),
-    [permissionSettings]
-  );
+  const privacyType = useMemo(() => convertPermissionsToPrivacyType(permissionSettings), [
+    permissionSettings,
+  ]);
 
   const handleModalOpen = () => {
     setSelectedPrivacyType(privacyType);

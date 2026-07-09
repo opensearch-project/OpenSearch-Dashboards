@@ -127,102 +127,92 @@ import { normalizeEmptyValue } from './utils/normalization';
  * //   { time: '<time2>', type1: null, type2: 2 }
  * // ]
  */
-export const pivot =
-  (options: {
-    groupBy: string;
-    pivot: string;
-    field: string;
-    aggregationType?: AggregationType;
-    timeUnit?: TimeUnit;
-  }) =>
-  (data: Array<Record<string, any>>): Array<Record<string, any>> => {
-    const { groupBy, pivot: pivotField, field, aggregationType, timeUnit } = options;
+export const pivot = (options: {
+  groupBy: string;
+  pivot: string;
+  field: string;
+  aggregationType?: AggregationType;
+  timeUnit?: TimeUnit;
+}) => (data: Array<Record<string, any>>): Array<Record<string, any>> => {
+  const { groupBy, pivot: pivotField, field, aggregationType, timeUnit } = options;
 
-    // Extract unique pivot values for column headers, normalizing empty values
-    const pivotValues = Array.from(
-      new Set(data.map((item) => normalizeEmptyValue(item[pivotField])))
-    );
+  // Extract unique pivot values for column headers, normalizing empty values
+  const pivotValues = Array.from(
+    new Set(data.map((item) => normalizeEmptyValue(item[pivotField])))
+  );
 
-    // Determine if this is time-based grouping
-    const isTimeBased = timeUnit !== undefined;
+  // Determine if this is time-based grouping
+  const isTimeBased = timeUnit !== undefined;
 
-    // Infer time unit if AUTO
-    const effectiveTimeUnit = isTimeBased
-      ? timeUnit === TimeUnit.AUTO
-        ? inferTimeIntervals(data, groupBy)
-        : timeUnit
-      : undefined;
+  // Infer time unit if AUTO
+  const effectiveTimeUnit = isTimeBased
+    ? timeUnit === TimeUnit.AUTO
+      ? inferTimeIntervals(data, groupBy)
+      : timeUnit
+    : undefined;
 
-    // Group data by groupBy and pivot fields
-    const grouped = data.reduce(
-      (acc, row) => {
-        let groupKey: string | number;
-        let groupValue: string | Date;
+  // Group data by groupBy and pivot fields
+  const grouped = data.reduce((acc, row) => {
+    let groupKey: string | number;
+    let groupValue: string | Date;
 
-        if (isTimeBased && effectiveTimeUnit) {
-          // Time-based grouping
-          const timestamp = parseUTCDate(row[groupBy]);
+    if (isTimeBased && effectiveTimeUnit) {
+      // Time-based grouping
+      const timestamp = parseUTCDate(row[groupBy]);
 
-          // Skip invalid dates
-          if (isNaN(timestamp.getTime())) {
-            return acc;
-          }
-
-          // Round to time bucket
-          const bucket = roundToTimeUnit(timestamp, effectiveTimeUnit);
-          groupKey = bucket.getTime(); // Use timestamp as key for grouping
-          groupValue = bucket;
-        } else {
-          // Categorical grouping
-          groupKey = String(row[groupBy]);
-          groupValue = row[groupBy];
-        }
-
-        const pivotKey = normalizeEmptyValue(row[pivotField]);
-        const value = Number(row[field]);
-
-        if (isNaN(value)) return acc;
-
-        if (!acc[groupKey]) {
-          acc[groupKey] = { groupValue, pivotData: {} };
-        }
-        acc[groupKey].pivotData[pivotKey] ??= [];
-        acc[groupKey].pivotData[pivotKey].push(value);
-
+      // Skip invalid dates
+      if (isNaN(timestamp.getTime())) {
         return acc;
-      },
-      {} as Record<
-        string | number,
-        { groupValue: string | Date; pivotData: Record<string, number[]> }
-      >
-    );
+      }
 
-    // Convert to array of objects with pivoted columns
-
-    let result = Object.values(grouped).map(({ groupValue, pivotData: pd }) => {
-      const row: Record<string, any> = { [groupBy]: groupValue };
-
-      // Add a column for each pivot value
-      pivotValues.forEach((pv) => {
-        if (aggregationType) {
-          // Apply aggregation function to the values
-          row[pv] = aggregateValues(aggregationType, pd[pv]) ?? null;
-        } else {
-          // No aggregation: preserve values as-is (array or null)
-          const values = pd[pv] ?? null;
-          // If single value array, unwrap to scalar
-          row[pv] = Array.isArray(values) && values.length === 1 ? values[0] : values;
-        }
-      });
-
-      return row;
-    });
-    // Sort by time if time-based
-    if (isTimeBased) {
-      result = result.sort(
-        (a, b) => (a[groupBy] as Date).getTime() - (b[groupBy] as Date).getTime()
-      );
+      // Round to time bucket
+      const bucket = roundToTimeUnit(timestamp, effectiveTimeUnit);
+      groupKey = bucket.getTime(); // Use timestamp as key for grouping
+      groupValue = bucket;
+    } else {
+      // Categorical grouping
+      groupKey = String(row[groupBy]);
+      groupValue = row[groupBy];
     }
 
-    return result;
-  };
+    const pivotKey = normalizeEmptyValue(row[pivotField]);
+    const value = Number(row[field]);
+
+    if (isNaN(value)) return acc;
+
+    if (!acc[groupKey]) {
+      acc[groupKey] = { groupValue, pivotData: {} };
+    }
+    acc[groupKey].pivotData[pivotKey] ??= [];
+    acc[groupKey].pivotData[pivotKey].push(value);
+
+    return acc;
+  }, {} as Record<string | number, { groupValue: string | Date; pivotData: Record<string, number[]> }>);
+
+  // Convert to array of objects with pivoted columns
+
+  let result = Object.values(grouped).map(({ groupValue, pivotData: pd }) => {
+    const row: Record<string, any> = { [groupBy]: groupValue };
+
+    // Add a column for each pivot value
+    pivotValues.forEach((pv) => {
+      if (aggregationType) {
+        // Apply aggregation function to the values
+        row[pv] = aggregateValues(aggregationType, pd[pv]) ?? null;
+      } else {
+        // No aggregation: preserve values as-is (array or null)
+        const values = pd[pv] ?? null;
+        // If single value array, unwrap to scalar
+        row[pv] = Array.isArray(values) && values.length === 1 ? values[0] : values;
+      }
+    });
+
+    return row;
+  });
+  // Sort by time if time-based
+  if (isTimeBased) {
+    result = result.sort((a, b) => (a[groupBy] as Date).getTime() - (b[groupBy] as Date).getTime());
+  }
+
+  return result;
+};

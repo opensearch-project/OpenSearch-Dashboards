@@ -68,10 +68,11 @@ export const TraceFlyoutProvider: React.FC<{ children: React.ReactNode }> = ({ c
     []
   );
 
-  const value = useMemo(
-    () => ({ openFlyout, closeFlyout, updateFlyoutFullTree }),
-    [openFlyout, closeFlyout, updateFlyoutFullTree]
-  );
+  const value = useMemo(() => ({ openFlyout, closeFlyout, updateFlyoutFullTree }), [
+    openFlyout,
+    closeFlyout,
+    updateFlyoutFullTree,
+  ]);
 
   return (
     <TraceFlyoutContext.Provider value={value}>

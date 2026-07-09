@@ -24,10 +24,8 @@ export interface DataImporterPluginSetupDeps {
   dataSource?: DataSourcePluginSetup;
 }
 
-export class DataImporterPlugin implements Plugin<
-  DataImporterPluginSetup,
-  DataImporterPluginStart
-> {
+export class DataImporterPlugin
+  implements Plugin<DataImporterPluginSetup, DataImporterPluginStart> {
   private readonly fileProcessors: FileProcessorService = new FileProcessorService();
   private config: TypeOf<typeof configSchema> | undefined;
 

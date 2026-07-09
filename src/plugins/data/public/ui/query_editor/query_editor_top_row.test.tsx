@@ -191,10 +191,10 @@ describe('QueryEditorTopRow', () => {
       language: 'test-language',
     };
     dataPlugin.query.queryString.getQuery = jest.fn().mockReturnValue(query);
-    datasetService.getType.mockReturnValue({
+    datasetService.getType.mockReturnValue(({
       meta: { supportsTimeFilter: true },
       languageOverrides: { 'test-language': { hideDatePicker: false } },
-    } as unknown as DatasetTypeConfig);
+    } as unknown) as DatasetTypeConfig);
 
     const { container } = render(
       wrapQueryEditorTopRowInContext({

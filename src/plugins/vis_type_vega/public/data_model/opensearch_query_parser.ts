@@ -253,7 +253,7 @@ export class OpenSearchQueryParser {
     if (obj && typeof obj === 'object') {
       if (Array.isArray(obj)) {
         // For arrays, replace MUST_CLAUSE and MUST_NOT_CLAUSE string elements
-        for (let pos = 0; pos < obj.length;) {
+        for (let pos = 0; pos < obj.length; ) {
           const item = obj[pos];
           if (
             isQuery &&

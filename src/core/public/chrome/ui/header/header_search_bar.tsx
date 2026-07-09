@@ -212,22 +212,17 @@ export const HeaderSearchBar = ({ globalSearchCommands, panel, onSearchResultCli
           .filter((result) => result.status === 'fulfilled')
           .map(
             (result) =>
-              (
-                result as PromiseFulfilledResult<{
-                  items: ReactNode[];
-                  type: SearchCommandKeyTypes;
-                }>
-              ).value
+              (result as PromiseFulfilledResult<{
+                items: ReactNode[];
+                type: SearchCommandKeyTypes;
+              }>).value
           )
-          .reduce(
-            (acc, { items, type }) => {
-              return {
-                ...acc,
-                [type]: (acc[type] || []).concat(items),
-              };
-            },
-            {} as Record<SearchCommandKeyTypes, ReactNode[]>
-          );
+          .reduce((acc, { items, type }) => {
+            return {
+              ...acc,
+              [type]: (acc[type] || []).concat(items),
+            };
+          }, {} as Record<SearchCommandKeyTypes, ReactNode[]>);
         const sections = Object.entries(searchResults).map(([key, items]) => {
           const sectionHeader = SearchCommandTypes[key as SearchCommandKeyTypes].description;
           return resultSection(items, key !== 'ACTIONS' ? sectionHeader : undefined);

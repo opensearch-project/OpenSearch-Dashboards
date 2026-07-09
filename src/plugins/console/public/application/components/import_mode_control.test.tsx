@@ -48,9 +48,9 @@ describe('ImportModeControl Component', () => {
   });
 
   it('should display the correct labels for radio options', () => {
-    const componentProps = component
+    const componentProps = (component
       .find(radioGroupIdentifier)
-      .props() as unknown as EuiRadioGroupProps;
+      .props() as unknown) as EuiRadioGroupProps;
 
     // Check if the labels for radio options are displayed correctly
     const radioOptions = componentProps.options;

@@ -135,8 +135,9 @@ class TestDataGenerator {
     const doc = {
       category: this.categories[Math.floor((index * this.categoryCount) / this.docCount)],
       // Remove for some indices to create a unique field. Test for modifyColumnsOnSwitch.
-      unique_category:
-        this.uniqueCategories[Math.floor((index * this.uniqueCategoriesCount) / this.docCount)],
+      unique_category: this.uniqueCategories[
+        Math.floor((index * this.uniqueCategoriesCount) / this.docCount)
+      ],
       status_code: faker.helpers.arrayElement(this.statusCodes),
       response_time: faker.datatype.float({ min: 0.1, max: 5.0, precision: 0.01 }),
       bytes_transferred: faker.datatype.number({ min: 100, max: 10000 }),

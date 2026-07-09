@@ -31,7 +31,7 @@
 import { SavedObjectMigrationContext } from 'opensearch-dashboards/server';
 import { indexPatternSavedObjectTypeMigrations } from './index_pattern_migrations';
 
-const savedObjectMigrationContext = null as unknown as SavedObjectMigrationContext;
+const savedObjectMigrationContext = (null as unknown) as SavedObjectMigrationContext;
 
 describe('migration index-pattern', () => {
   describe('6.5.0', () => {

@@ -12,14 +12,12 @@ import { clearLastExecutedData } from '../../../slices';
 /**
  * This is called when you need to load a query, it runs the loaded query
  */
-export const loadQueryActionCreator =
-  (
-    services: AgentTracesServices,
-    setEditorTextWithQuery: ReturnType<typeof useSetEditorTextWithQuery>,
-    query: string
-  ) =>
-  (dispatch: AppDispatch) => {
-    dispatch(clearLastExecutedData());
-    setEditorTextWithQuery(query);
-    return dispatch(runQueryActionCreator(services, query));
-  };
+export const loadQueryActionCreator = (
+  services: AgentTracesServices,
+  setEditorTextWithQuery: ReturnType<typeof useSetEditorTextWithQuery>,
+  query: string
+) => (dispatch: AppDispatch) => {
+  dispatch(clearLastExecutedData());
+  setEditorTextWithQuery(query);
+  return dispatch(runQueryActionCreator(services, query));
+};

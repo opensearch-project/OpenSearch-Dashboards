@@ -52,59 +52,59 @@ interface Options {
 /**
  * Create bar series configuration
  */
-export const createBarSeries =
-  <T extends BaseChartStyle>(options: Options): PipelineFn<T> =>
-  (state) => {
-    const { styles, categoryField, categoryEncode = 'x', seriesEncode = 'y' } = options;
-    let seriesFields = options.seriesFields;
+export const createBarSeries = <T extends BaseChartStyle>(options: Options): PipelineFn<T> => (
+  state
+) => {
+  const { styles, categoryField, categoryEncode = 'x', seriesEncode = 'y' } = options;
+  let seriesFields = options.seriesFields;
 
-    const { axisColumnMappings, transformedData = [] } = state;
-    const palette = getColors().categories;
-    const newState = { ...state };
+  const { axisColumnMappings, transformedData = [] } = state;
+  const palette = getColors().categories;
+  const newState = { ...state };
 
-    if (!Array.isArray(seriesFields)) {
-      seriesFields = seriesFields(transformedData[0]);
-    }
+  if (!Array.isArray(seriesFields)) {
+    seriesFields = seriesFields(transformedData[0]);
+  }
 
-    const allColumns = Object.values(axisColumnMappings).flat();
-    const sortedNames = seriesFields.map((f) => getSeriesDisplayName(f, allColumns)).sort();
+  const allColumns = Object.values(axisColumnMappings).flat();
+  const sortedNames = seriesFields.map((f) => getSeriesDisplayName(f, allColumns)).sort();
 
-    const thresholdLines = generateThresholdLines(options.styles?.thresholdOptions);
+  const thresholdLines = generateThresholdLines(options.styles?.thresholdOptions);
 
-    let barWidth: string | undefined;
-    if (styles.barSizeMode === 'manual') {
-      barWidth = `${(styles.barWidth || 0.7) * 100}%`;
-    }
+  let barWidth: string | undefined;
+  if (styles.barSizeMode === 'manual') {
+    barWidth = `${(styles.barWidth || 0.7) * 100}%`;
+  }
 
-    const series = seriesFields.map((seriesField, index) => {
-      const name = getSeriesDisplayName(seriesField, allColumns);
-      const colorIndex = sortedNames.indexOf(name);
-      const seriesConfig = {
-        type: 'bar',
-        emphasis: {
-          focus: 'self',
-        },
-        name,
-        encode: {
-          [categoryEncode]: categoryField,
-          [seriesEncode]: seriesField,
-        },
-        barWidth,
-        ...(index === 0 && thresholdLines),
-        itemStyle: {
-          color: palette[colorIndex % palette.length],
-          ...(styles?.showBarBorder && {
-            borderWidth: styles.barBorderWidth,
-            borderColor: styles.barBorderColor,
-          }),
-        },
-        // Apply stack configuration based on stackMode
-        ...('stackMode' in styles && styles.stackMode === 'total' && { stack: 'total' }),
-      };
+  const series = seriesFields.map((seriesField, index) => {
+    const name = getSeriesDisplayName(seriesField, allColumns);
+    const colorIndex = sortedNames.indexOf(name);
+    const seriesConfig = {
+      type: 'bar',
+      emphasis: {
+        focus: 'self',
+      },
+      name,
+      encode: {
+        [categoryEncode]: categoryField,
+        [seriesEncode]: seriesField,
+      },
+      barWidth,
+      ...(index === 0 && thresholdLines),
+      itemStyle: {
+        color: palette[colorIndex % palette.length],
+        ...(styles?.showBarBorder && {
+          borderWidth: styles.barBorderWidth,
+          borderColor: styles.barBorderColor,
+        }),
+      },
+      // Apply stack configuration based on stackMode
+      ...('stackMode' in styles && styles.stackMode === 'total' && { stack: 'total' }),
+    };
 
-      return seriesConfig as BarSeriesOption;
-    }) as BarSeriesOption[];
-    newState.series = series;
+    return seriesConfig as BarSeriesOption;
+  }) as BarSeriesOption[];
+  newState.series = series;
 
-    return newState;
-  };
+  return newState;
+};

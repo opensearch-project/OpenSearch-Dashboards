@@ -34,18 +34,18 @@ describe('useDirectQuery', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    httpMock = {
+    httpMock = ({
       get: jest.fn(),
       post: jest.fn(),
-    } as unknown as jest.Mocked<HttpStart>;
+    } as unknown) as jest.Mocked<HttpStart>;
 
-    notificationsMock = {
+    notificationsMock = ({
       toasts: {
         addError: jest.fn(),
         addWarning: jest.fn(),
         addSuccess: jest.fn(),
       },
-    } as unknown as jest.Mocked<NotificationsStart>;
+    } as unknown) as jest.Mocked<NotificationsStart>;
 
     startPollingMock = jest.fn();
     stopLoadingMock = jest.fn();

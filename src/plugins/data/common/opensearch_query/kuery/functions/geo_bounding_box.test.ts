@@ -52,9 +52,9 @@ describe('kuery functions', () => {
     let indexPattern: IIndexPattern;
 
     beforeEach(() => {
-      indexPattern = {
+      indexPattern = ({
         fields,
-      } as unknown as IIndexPattern;
+      } as unknown) as IIndexPattern;
     });
 
     describe('buildNodeParams', () => {

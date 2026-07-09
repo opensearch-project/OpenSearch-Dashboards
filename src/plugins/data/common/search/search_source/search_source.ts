@@ -146,8 +146,9 @@ export interface SearchSourceDependencies extends FetchHandlers {
   // search options required here and returning a promise instead of observable.
   search: <
     SearchStrategyRequest extends IOpenSearchDashboardsSearchRequest = IOpenSearchSearchRequest,
-    SearchStrategyResponse extends IOpenSearchDashboardsSearchResponse | IDataFrameResponse =
-      IOpenSearchSearchResponse,
+    SearchStrategyResponse extends
+      | IOpenSearchDashboardsSearchResponse
+      | IDataFrameResponse = IOpenSearchSearchResponse
   >(
     request: SearchStrategyRequest,
     options: ISearchOptions

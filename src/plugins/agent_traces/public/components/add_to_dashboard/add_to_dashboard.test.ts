@@ -35,7 +35,7 @@ const createMockDashboardService = (dashboard: ReturnType<typeof createMockDashb
     getSavedDashboardLoader: () => ({
       get: jest.fn().mockResolvedValue(dashboard),
     }),
-  }) as any;
+  } as any);
 
 describe('addToDashboard', () => {
   const obj = { id: 'agent-traces-1', type: 'agentTraces' };

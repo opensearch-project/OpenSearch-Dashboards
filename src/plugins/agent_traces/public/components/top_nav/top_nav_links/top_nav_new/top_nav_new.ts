@@ -21,15 +21,13 @@ export const newTopNavData: TopNavMenuIconUIData = {
   controlType: 'icon',
 };
 
-export const getNewButtonRun =
-  (
-    services: AgentTracesServices,
-    clearEditors: ReturnType<typeof useClearEditors>
-  ): TopNavMenuIconRun =>
-  () => {
-    services.store.dispatch(resetAgentTracesStateActionCreator(services, clearEditors));
+export const getNewButtonRun = (
+  services: AgentTracesServices,
+  clearEditors: ReturnType<typeof useClearEditors>
+): TopNavMenuIconRun => () => {
+  services.store.dispatch(resetAgentTracesStateActionCreator(services, clearEditors));
 
-    if (services.scopedHistory) {
-      services.scopedHistory.push('/');
-    }
-  };
+  if (services.scopedHistory) {
+    services.scopedHistory.push('/');
+  }
+};

@@ -76,7 +76,7 @@ const createStartContract = (isEnhancementsEnabled: boolean = false): Start => {
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
     query: queryStartMock,
     ui: uiServiceMock.createStartContract(),
-    indexPatterns: {
+    indexPatterns: ({
       find: jest.fn((search) => [{ id: search, title: search }]),
       createField: jest.fn(() => {}),
       createFieldList: jest.fn(() => []),
@@ -119,8 +119,8 @@ const createStartContract = (isEnhancementsEnabled: boolean = false): Start => {
         type: 'INDEX_PATTERN',
       }),
       saveToCache: jest.fn(),
-    } as unknown as IndexPatternsContract,
-    dataViews: {
+    } as unknown) as IndexPatternsContract,
+    dataViews: ({
       find: jest.fn((search) => [{ id: search, title: search }]),
       createField: jest.fn(() => {}),
       createFieldList: jest.fn(() => []),
@@ -156,7 +156,7 @@ const createStartContract = (isEnhancementsEnabled: boolean = false): Start => {
       }),
       saveToCache: jest.fn(),
       convertToDataset: jest.fn(),
-    } as unknown as DataViewsContract,
+    } as unknown) as DataViewsContract,
     dataSources: dataSourceServiceMock.createStartContract(),
   };
 };

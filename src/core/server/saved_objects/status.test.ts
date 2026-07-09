@@ -133,7 +133,10 @@ describe('calculateStatus$', () => {
     });
     it('is degraded after migrations have ran', async () => {
       await expect(
-        calculateStatus$(of<any>([{ status: 'skipped' }]), openSearchStatus$)
+        calculateStatus$(
+          of<any>([{ status: 'skipped' }]),
+          openSearchStatus$
+        )
           .pipe(take(2))
           .toPromise()
       ).resolves.toEqual({

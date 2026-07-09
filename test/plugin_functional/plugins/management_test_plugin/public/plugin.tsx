@@ -34,10 +34,8 @@ import { Router, Switch, Route, Link } from 'react-router-dom';
 import { CoreSetup, Plugin } from 'opensearch-dashboards/public';
 import { ManagementSetup } from '../../../../../src/plugins/management/public';
 
-export class ManagementTestPlugin implements Plugin<
-  ManagementTestPluginSetup,
-  ManagementTestPluginStart
-> {
+export class ManagementTestPlugin
+  implements Plugin<ManagementTestPluginSetup, ManagementTestPluginStart> {
   public setup(core: CoreSetup, { management }: { management: ManagementSetup }) {
     const testSection = management.sections.section.data;
 

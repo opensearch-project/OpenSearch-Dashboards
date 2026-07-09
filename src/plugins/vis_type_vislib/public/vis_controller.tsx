@@ -55,10 +55,7 @@ export const createVislibVisController = (deps: VisTypeVislibDependencies) => {
     legendEl: HTMLDivElement;
     vislibVis: any;
 
-    constructor(
-      public el: Element,
-      public vis: ExprVis
-    ) {
+    constructor(public el: Element, public vis: ExprVis) {
       this.el = el;
       this.vis = vis;
       this.unmount = null;

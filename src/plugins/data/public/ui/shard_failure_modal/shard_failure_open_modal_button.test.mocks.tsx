@@ -33,6 +33,6 @@ import { OverlayStart } from 'opensearch-dashboards/public';
 
 export const openModal = jest.fn();
 
-setOverlays({
+setOverlays(({
   openModal,
-} as unknown as OverlayStart);
+} as unknown) as OverlayStart);

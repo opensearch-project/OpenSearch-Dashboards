@@ -150,11 +150,13 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
     permittedSavedObjectedClient = osd.coreStart.savedObjects.getScopedClient(permittedRequest, {
       includedHiddenTypes: ['workspace'],
     });
-    notPermittedSavedObjectedClient =
-      osd.coreStart.savedObjects.getScopedClient(notPermittedRequest);
+    notPermittedSavedObjectedClient = osd.coreStart.savedObjects.getScopedClient(
+      notPermittedRequest
+    );
     updateWorkspaceState(dashboardAdminRequest, { isDashboardAdmin: true });
-    dashboardAdminSavedObjectedClient =
-      osd.coreStart.savedObjects.getScopedClient(dashboardAdminRequest);
+    dashboardAdminSavedObjectedClient = osd.coreStart.savedObjects.getScopedClient(
+      dashboardAdminRequest
+    );
   });
 
   afterAll(async () => {

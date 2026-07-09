@@ -31,4 +31,4 @@ export const createMockExploreServices = (
       },
     },
     ...overrides,
-  }) as ExploreServices;
+  } as ExploreServices);

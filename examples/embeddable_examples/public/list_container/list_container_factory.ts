@@ -43,10 +43,8 @@ interface StartServices {
 }
 
 export type ListContainerFactory = EmbeddableFactory<ContainerInput, ContainerOutput>;
-export class ListContainerFactoryDefinition implements EmbeddableFactoryDefinition<
-  ContainerInput,
-  ContainerOutput
-> {
+export class ListContainerFactoryDefinition
+  implements EmbeddableFactoryDefinition<ContainerInput, ContainerOutput> {
   public readonly type = LIST_CONTAINER;
   public readonly isContainerType = true;
 

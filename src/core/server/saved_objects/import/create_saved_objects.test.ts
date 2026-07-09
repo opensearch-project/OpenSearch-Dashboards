@@ -216,7 +216,7 @@ const importIdMap = new Map([
 
 describe('#createSavedObjects', () => {
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
-  let bulkCreate: (typeof savedObjectsClient)['bulkCreate'];
+  let bulkCreate: typeof savedObjectsClient['bulkCreate'];
 
   /**
    * Creates an options object to be used as an argument for createSavedObjects
@@ -281,7 +281,7 @@ describe('#createSavedObjects', () => {
     }),
     conflict: (type: string, id: string) => {
       const error = SavedObjectsErrorHelpers.createConflictError(type, id).output.payload;
-      return { type, id, error } as unknown as SavedObject;
+      return ({ type, id, error } as unknown) as SavedObject;
     },
     unresolvableConflict: (type: string, id: string) => {
       const conflictMock = getResultMock.conflict(type, id);
@@ -519,7 +519,7 @@ describe('#createSavedObjects', () => {
   };
 
   const testBulkCreateOptions = async (namespace?: string) => {
-    const overwrite = Symbol() as unknown as boolean;
+    const overwrite = (Symbol() as unknown) as boolean;
     const options = setupParams({ objects: objs, namespace, overwrite });
     setupMockResults(options);
 
@@ -533,7 +533,7 @@ describe('#createSavedObjects', () => {
     dataSourceId?: string,
     dataSourceTitle?: string
   ) => {
-    const overwrite = Symbol() as unknown as boolean;
+    const overwrite = (Symbol() as unknown) as boolean;
     const options = setupParams({
       objects: dataSourceObjs,
       namespace,

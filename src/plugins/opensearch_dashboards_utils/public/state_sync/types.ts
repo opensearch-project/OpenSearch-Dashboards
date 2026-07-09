@@ -40,9 +40,8 @@ import { IStateStorage } from './state_sync_state_storage';
  * State container will be notified about about storage becoming empty with null passed in.
  * @public
  */
-export interface INullableBaseStateContainer<
-  State extends BaseState,
-> extends BaseStateContainer<State> {
+export interface INullableBaseStateContainer<State extends BaseState>
+  extends BaseStateContainer<State> {
   set: (state: State | null) => void;
 }
 
@@ -54,7 +53,7 @@ export interface INullableBaseStateContainer<
  */
 export interface IStateSyncConfig<
   State extends BaseState,
-  StateStorage extends IStateStorage = IStateStorage,
+  StateStorage extends IStateStorage = IStateStorage
 > {
   /**
    * Storage key to use for syncing,

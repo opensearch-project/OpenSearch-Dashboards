@@ -33,21 +33,21 @@ import { popularizeField } from './popularize_field';
 
 describe('Popularize field', () => {
   test('returns undefined if index pattern lacks id', async () => {
-    const indexPattern = {} as unknown as IndexPattern;
+    const indexPattern = ({} as unknown) as IndexPattern;
     const fieldName = '@timestamp';
-    const indexPatternsService = {} as unknown as IndexPatternsService;
+    const indexPatternsService = ({} as unknown) as IndexPatternsService;
     const result = await popularizeField(indexPattern, fieldName, indexPatternsService);
     expect(result).toBeUndefined();
   });
 
   test('returns undefined if field not found', async () => {
-    const indexPattern = {
+    const indexPattern = ({
       fields: {
         getByName: () => {},
       },
-    } as unknown as IndexPattern;
+    } as unknown) as IndexPattern;
     const fieldName = '@timestamp';
-    const indexPatternsService = {} as unknown as IndexPatternsService;
+    const indexPatternsService = ({} as unknown) as IndexPatternsService;
     const result = await popularizeField(indexPattern, fieldName, indexPatternsService);
     expect(result).toBeUndefined();
   });
@@ -56,16 +56,16 @@ describe('Popularize field', () => {
     const field = {
       count: 0,
     };
-    const indexPattern = {
+    const indexPattern = ({
       id: 'id',
       fields: {
         getByName: () => field,
       },
-    } as unknown as IndexPattern;
+    } as unknown) as IndexPattern;
     const fieldName = '@timestamp';
-    const indexPatternsService = {
+    const indexPatternsService = ({
       updateSavedObject: async () => {},
-    } as unknown as IndexPatternsService;
+    } as unknown) as IndexPatternsService;
     const result = await popularizeField(indexPattern, fieldName, indexPatternsService);
     expect(result).toBeUndefined();
     expect(field.count).toEqual(1);
@@ -75,18 +75,18 @@ describe('Popularize field', () => {
     const field = {
       count: 0,
     };
-    const indexPattern = {
+    const indexPattern = ({
       id: 'id',
       fields: {
         getByName: () => field,
       },
-    } as unknown as IndexPattern;
+    } as unknown) as IndexPattern;
     const fieldName = '@timestamp';
-    const indexPatternsService = {
+    const indexPatternsService = ({
       updateSavedObject: async () => {
         throw new Error('unknown error');
       },
-    } as unknown as IndexPatternsService;
+    } as unknown) as IndexPatternsService;
     const result = await popularizeField(indexPattern, fieldName, indexPatternsService);
     expect(result).toBeUndefined();
   });

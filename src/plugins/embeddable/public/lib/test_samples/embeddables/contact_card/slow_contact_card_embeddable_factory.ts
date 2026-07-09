@@ -38,7 +38,8 @@ interface SlowContactCardEmbeddableFactoryOptions {
   loadTickCount?: number;
 }
 
-export class SlowContactCardEmbeddableFactory implements EmbeddableFactoryDefinition<ContactCardEmbeddableInput> {
+export class SlowContactCardEmbeddableFactory
+  implements EmbeddableFactoryDefinition<ContactCardEmbeddableInput> {
   private loadTickCount = 0;
   public readonly type = CONTACT_CARD_EMBEDDABLE;
 

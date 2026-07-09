@@ -16,13 +16,13 @@ import { DataView, dataViews, OSD_FIELD_TYPES, fieldList } from '..';
 import { getFieldFormatsRegistry } from '../test_utils';
 import { setFieldFormats } from '../services';
 
-setFieldFormats({
+setFieldFormats(({
   getDefaultInstance: () =>
     ({
       getConverterFor: () => (value: any) => value,
       convert: (value: any) => JSON.stringify(value),
-    }) as FieldFormatImpl,
-} as unknown as FieldFormatsStart);
+    } as FieldFormatImpl),
+} as unknown) as FieldFormatsStart);
 
 export function getStubDataView(
   pattern: string,
@@ -31,7 +31,7 @@ export function getStubDataView(
   fields: FieldSpec[] | IFieldType[],
   core: CoreSetup
 ): DataView {
-  return new StubDataView(pattern, getConfig, timeField, fields, core) as unknown as DataView;
+  return (new StubDataView(pattern, getConfig, timeField, fields, core) as unknown) as DataView;
 }
 
 export class StubDataView {
@@ -80,9 +80,9 @@ export class StubDataView {
     this.fieldFormatMap = {};
 
     this.getComputedFields = DataView.prototype.getComputedFields.bind(this);
-    this.flattenHit = dataViews.flattenHitWrapper(this as unknown as DataView, this.metaFields);
+    this.flattenHit = dataViews.flattenHitWrapper((this as unknown) as DataView, this.metaFields);
     this.formatHit = dataViews.formatHitProvider(
-      this as unknown as DataView,
+      (this as unknown) as DataView,
       registeredFieldFormats.getDefaultInstance(OSD_FIELD_TYPES.STRING)
     );
     this.fieldsFetcher = { apiClient: { baseUrl: '' } };

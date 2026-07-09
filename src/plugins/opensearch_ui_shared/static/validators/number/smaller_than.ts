@@ -28,7 +28,5 @@
  * under the License.
  */
 
-export const isNumberSmallerThan =
-  (than: number, allowEquality = false) =>
-  (value: number) =>
-    allowEquality ? value <= than : value < than;
+export const isNumberSmallerThan = (than: number, allowEquality = false) => (value: number) =>
+  allowEquality ? value <= than : value < than;

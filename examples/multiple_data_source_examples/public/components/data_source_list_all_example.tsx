@@ -39,8 +39,9 @@ export const DataSourceListAllExample = ({
   dataSourceManagement,
   uiSettings,
 }: DataSourceListAllExampleProps) => {
-  const DataSourceMenu =
-    dataSourceManagement.ui.getDataSourceMenu<DataSourceAggregatedViewConfig>();
+  const DataSourceMenu = dataSourceManagement.ui.getDataSourceMenu<
+    DataSourceAggregatedViewConfig
+  >();
 
   const data: ComponentProp[] = [
     {

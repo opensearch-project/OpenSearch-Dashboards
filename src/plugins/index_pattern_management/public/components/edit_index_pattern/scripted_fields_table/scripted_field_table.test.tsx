@@ -61,7 +61,7 @@ const helpers = {
   getRouteHref: () => '#',
 };
 
-const getIndexPatternMock = (mockedFields: any = {}) => ({ ...mockedFields }) as IIndexPattern;
+const getIndexPatternMock = (mockedFields: any = {}) => ({ ...mockedFields } as IIndexPattern);
 
 describe('ScriptedFieldsTable', () => {
   let indexPattern: IndexPattern;
@@ -193,10 +193,10 @@ describe('ScriptedFieldsTable', () => {
     const component = shallow<ScriptedFieldsTable>(
       <ScriptedFieldsTable
         indexPattern={
-          {
+          ({
             ...indexPattern,
             removeScriptedField,
-          } as unknown as IndexPattern
+          } as unknown) as IndexPattern
         }
         helpers={helpers}
         painlessDocLink={'painlessDoc'}

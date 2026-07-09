@@ -18,9 +18,9 @@ import {
 } from '../../../lib/opensearch/http_response.mock';
 
 const dummyArgs: OpenSearchRequestArgs = {
-  http: {
+  http: ({
     post: jest.fn(),
-  } as unknown as HttpSetup,
+  } as unknown) as HttpSetup,
   requests: [
     {
       method: 'GET',
@@ -168,7 +168,7 @@ describe('test sendRequestToOpenSearch', () => {
     const mockHttpError: HttpFetchError = new HttpFetchError(
       'error message',
       'name',
-      jest.fn as unknown as Request,
+      (jest.fn as unknown) as Request,
       createMockResponse(500, 'Server Error', [['Content-Type', 'application/json, utf-8']]),
       { errorMsg: 'message' }
     );
@@ -183,7 +183,7 @@ describe('test sendRequestToOpenSearch', () => {
     const mockHttpError: HttpFetchError = new HttpFetchError(
       'error message',
       'name',
-      jest.fn as unknown as Request,
+      (jest.fn as unknown) as Request,
       createMockResponse(500, 'Server Error', [['Content-Type', 'text/plain']]),
       'error message'
     );
@@ -198,7 +198,7 @@ describe('test sendRequestToOpenSearch', () => {
     const mockHttpError: HttpFetchError = new HttpFetchError(
       'error message',
       'name',
-      jest.fn as unknown as Request,
+      (jest.fn as unknown) as Request,
       undefined,
       'error message'
     );

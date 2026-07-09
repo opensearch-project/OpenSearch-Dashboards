@@ -89,7 +89,7 @@ describe('telemetry_application_usage', () => {
         ({
           saved_objects: [],
           total: 0,
-        }) as any
+        } as any)
     );
     getUsageCollector.mockImplementation(() => savedObjectClient);
 

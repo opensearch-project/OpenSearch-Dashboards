@@ -74,7 +74,8 @@ const mockedSavedObjects = [
         visState: JSON.stringify({
           type: 'vega',
           params: {
-            spec: '{"$schema": "https://vega.github.io/schema/vega/v3.json" \n "config": { "kibana" : { "type": "map" }} }',
+            spec:
+              '{"$schema": "https://vega.github.io/schema/vega/v3.json" \n "config": { "kibana" : { "type": "map" }} }',
           },
         }),
       },
@@ -88,7 +89,7 @@ const getMockCallCluster = (hits?: unknown[]) =>
 describe('Vega visualization usage collector', () => {
   const configMock = of({ opensearchDashboards: { index: '' } });
   const usageCollector = getUsageCollector(configMock, {
-    home: {
+    home: ({
       sampleData: {
         getSampleDatasets: jest.fn().mockReturnValue([
           {
@@ -109,7 +110,7 @@ describe('Vega visualization usage collector', () => {
           },
         ]),
       },
-    } as unknown as HomeServerPluginSetup,
+    } as unknown) as HomeServerPluginSetup,
   });
 
   test('Should fit the shape', () => {

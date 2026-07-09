@@ -57,7 +57,7 @@ const createAbortErrorValue = () =>
   });
 
 export interface ExecutionParams<
-  ExtraContext extends Record<string, unknown> = Record<string, unknown>,
+  ExtraContext extends Record<string, unknown> = Record<string, unknown>
 > {
   executor: Executor<any>;
   ast?: ExpressionAstExpression;
@@ -83,7 +83,7 @@ export class Execution<
   Output = unknown,
   InspectorAdapters extends Adapters = ExtraContext['inspectorAdapters'] extends object
     ? ExtraContext['inspectorAdapters']
-    : DefaultInspectorAdapters,
+    : DefaultInspectorAdapters
 > {
   /**
    * Dynamic state of the execution.
@@ -135,8 +135,12 @@ export class Execution<
    * Contract is a public representation of `Execution` instances. Contract we
    * can return to other plugins for their consumption.
    */
-  public readonly contract: ExecutionContract<ExtraContext, Input, Output, InspectorAdapters> =
-    new ExecutionContract<ExtraContext, Input, Output, InspectorAdapters>(this);
+  public readonly contract: ExecutionContract<
+    ExtraContext,
+    Input,
+    Output,
+    InspectorAdapters
+  > = new ExecutionContract<ExtraContext, Input, Output, InspectorAdapters>(this);
 
   public readonly expression: string;
 
@@ -355,12 +359,9 @@ export class Execution<
 
     // Check for missing required arguments.
     for (const argDef of Object.values(argDefs)) {
-      const {
-        aliases,
-        default: argDefault,
-        name: argName,
-        required,
-      } = argDef as ArgumentType<any> & { name: string };
+      const { aliases, default: argDefault, name: argName, required } = argDef as ArgumentType<
+        any
+      > & { name: string };
       if (
         typeof argDefault !== 'undefined' ||
         !required ||

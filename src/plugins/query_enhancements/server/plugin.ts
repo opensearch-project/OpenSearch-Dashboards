@@ -38,10 +38,8 @@ import { BaseConnectionManager } from './connections/managers/base_connection_ma
 import { prometheusManager } from './connections/managers/prometheus_manager';
 import { getPplLintRuleSettings } from './ui_settings';
 
-export class QueryEnhancementsPlugin implements Plugin<
-  QueryEnhancementsPluginSetup,
-  QueryEnhancementsPluginStart
-> {
+export class QueryEnhancementsPlugin
+  implements Plugin<QueryEnhancementsPluginSetup, QueryEnhancementsPluginStart> {
   private readonly logger: Logger;
   private readonly config$: Observable<SharedGlobalConfig>;
   private capabilitiesResolver?: (request: OpenSearchDashboardsRequest) => Promise<Capabilities>;

@@ -8,15 +8,17 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { showDeleteDetailsModal } from './show_delete_details_modal'; // Correct import path
 import { WorkspaceAttribute, OverlayRef } from 'opensearch-dashboards/public'; // Import OverlayRef
 
-const mockOpenModal = jest.fn((node: React.ReactNode): OverlayRef => {
-  const close = jest.fn();
-  const modalInstance: OverlayRef = {
-    close,
-    onClose: Promise.resolve(),
-  };
+const mockOpenModal = jest.fn(
+  (node: React.ReactNode): OverlayRef => {
+    const close = jest.fn();
+    const modalInstance: OverlayRef = {
+      close,
+      onClose: Promise.resolve(),
+    };
 
-  return modalInstance;
-});
+    return modalInstance;
+  }
+);
 
 describe('showDeleteDetailsModal', () => {
   let modalClose: () => void;

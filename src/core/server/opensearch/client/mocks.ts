@@ -110,7 +110,7 @@ const createInternalClientMock = (withLongNumeralsSupport = false): DeeplyMocked
 export type OpenSearchClientMock = DeeplyMockedKeys<OpenSearchClient>;
 
 const createClientMock = (withLongNumeralsSupport = false): OpenSearchClientMock =>
-  createInternalClientMock(withLongNumeralsSupport) as unknown as OpenSearchClientMock;
+  (createInternalClientMock(withLongNumeralsSupport) as unknown) as OpenSearchClientMock;
 
 export interface ScopedClusterClientMock {
   asInternalUser: OpenSearchClientMock;
@@ -169,7 +169,7 @@ export type MockedTransportRequestPromise<T> = TransportRequestPromise<T> & {
 };
 
 const createSuccessTransportRequestPromise = <
-  T extends Record<string, any> | undefined = Record<string, any>,
+  T extends Record<string, any> | undefined = Record<string, any>
 >(
   body: T,
   { statusCode = 200 }: { statusCode?: number } = {}

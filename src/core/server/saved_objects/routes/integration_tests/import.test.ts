@@ -75,7 +75,7 @@ describe(`POST ${URL}`, () => {
     handlerContext.savedObjects.typeRegistry.getType.mockImplementation(
       (type: string) =>
         // other attributes aren't needed for the purposes of injecting metadata
-        ({ management: { icon: `${type}-icon` } }) as any
+        ({ management: { icon: `${type}-icon` } } as any)
     );
 
     savedObjectsClient = handlerContext.savedObjects.client;
@@ -598,7 +598,7 @@ describe(`POST ${URL}`, () => {
           [...allowedTypes, 'config'].map(createExportableType)
         );
         handlerContext.savedObjects.typeRegistry.getType.mockImplementation(
-          (type: string) => ({ management: { icon: `${type}-icon` } }) as any
+          (type: string) => ({ management: { icon: `${type}-icon` } } as any)
         );
         savedObjectsClient = handlerContext.savedObjects.client;
         savedObjectsClient.find.mockResolvedValue(emptyResponse);
@@ -635,7 +635,7 @@ describe(`POST ${URL}`, () => {
           [...allowedTypes, 'config'].map(createExportableType)
         );
         handlerContext.savedObjects.typeRegistry.getType.mockImplementation(
-          (type: string) => ({ management: { icon: `${type}-icon` } }) as any
+          (type: string) => ({ management: { icon: `${type}-icon` } } as any)
         );
         savedObjectsClient = handlerContext.savedObjects.client;
         savedObjectsClient.find.mockResolvedValue(emptyResponse);

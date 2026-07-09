@@ -26,36 +26,34 @@ export interface UseDiscoverDownloadCsvProps {
   onError(): void;
 }
 
-export const formatRowsForCsv =
-  ({
-    displayedColumnNames,
-    indexPattern,
-  }: {
-    displayedColumnNames: string[];
-    indexPattern: IndexPattern;
-  }) =>
-  (row: OpenSearchSearchHit) => {
-    return displayedColumnNames.map((colName) => {
-      const fieldInfo = indexPattern.fields.getByName(colName);
+export const formatRowsForCsv = ({
+  displayedColumnNames,
+  indexPattern,
+}: {
+  displayedColumnNames: string[];
+  indexPattern: IndexPattern;
+}) => (row: OpenSearchSearchHit) => {
+  return displayedColumnNames.map((colName) => {
+    const fieldInfo = indexPattern.fields.getByName(colName);
 
-      if (typeof row === 'undefined') {
-        return '';
-      }
+    if (typeof row === 'undefined') {
+      return '';
+    }
 
-      if (fieldInfo?.type === '_source') {
-        const formattedRow = indexPattern.formatHit(row, 'text');
-        return JSON.stringify(formattedRow);
-      }
+    if (fieldInfo?.type === '_source') {
+      const formattedRow = indexPattern.formatHit(row, 'text');
+      return JSON.stringify(formattedRow);
+    }
 
-      const formattedValue = indexPattern.formatField(row, colName, 'text');
+    const formattedValue = indexPattern.formatField(row, colName, 'text');
 
-      if (typeof formattedValue === 'undefined') {
-        return '';
-      }
+    if (typeof formattedValue === 'undefined') {
+      return '';
+    }
 
-      return formattedValue;
-    });
-  };
+    return formattedValue;
+  });
+};
 
 export const saveDataAsCsv = (csvData: string) => {
   const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8' });

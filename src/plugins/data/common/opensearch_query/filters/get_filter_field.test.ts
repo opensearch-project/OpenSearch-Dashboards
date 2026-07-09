@@ -35,10 +35,10 @@ import { IIndexPattern } from '../../index_patterns';
 import { fields } from '../../index_patterns/fields/fields.mocks';
 
 describe('getFilterField', function () {
-  const indexPattern: IIndexPattern = {
+  const indexPattern: IIndexPattern = ({
     id: 'logstash-*',
     fields,
-  } as unknown as IIndexPattern;
+  } as unknown) as IIndexPattern;
 
   it('should return the field name from known filter types that target a specific field', () => {
     const field = indexPattern.fields.find((patternField) => patternField.name === 'extension');

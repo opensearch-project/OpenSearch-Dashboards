@@ -55,7 +55,11 @@ const tabSlice = createSlice({
   },
 });
 
-export const { setTabState, setPatternsField, setUsingRegexPatterns, setMetricsExploreState } =
-  tabSlice.actions;
+export const {
+  setTabState,
+  setPatternsField,
+  setUsingRegexPatterns,
+  setMetricsExploreState,
+} = tabSlice.actions;
 
 export const tabReducer = tabSlice.reducer;

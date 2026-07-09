@@ -106,253 +106,247 @@ export const transformToMultiSeriesWithSize = (
 /**
  * Create basic scatter series configuration for ECharts
  */
-export const createScatterSeries =
-  <T extends BaseChartStyle>({
-    styles,
-    xField,
-    yField,
-  }: {
-    styles: ScatterChartStyle;
-    xField: string;
-    yField: string;
-  }): PipelineFn<T> =>
-  (state) => {
-    const { transformedData = [], axisColumnMappings } = state;
-    const newState = { ...state };
+export const createScatterSeries = <T extends BaseChartStyle>({
+  styles,
+  xField,
+  yField,
+}: {
+  styles: ScatterChartStyle;
+  xField: string;
+  yField: string;
+}): PipelineFn<T> => (state) => {
+  const { transformedData = [], axisColumnMappings } = state;
+  const newState = { ...state };
 
-    if (!transformedData || !Array.isArray(transformedData) || transformedData.length === 0) {
-      newState.series = [];
-      return newState;
-    }
-
-    const thresholdLines = generateThresholdLines(styles.thresholdOptions);
-    const series = [
-      {
-        type: 'scatter',
-        name: getSeriesDisplayName(yField, Object.values(axisColumnMappings).flat()),
-        symbolSize: 8,
-        symbol: mapPointShapeToEChartsSymbol(styles.exclusive?.pointShape),
-        symbolRotate: styles.exclusive?.angle || 0,
-        itemStyle: styles.exclusive?.filled
-          ? {
-              opacity: 0.8,
-            }
-          : {
-              opacity: 0.8,
-              color: 'transparent',
-              borderColor: 'auto',
-              borderWidth: 2,
-            },
-        encode: {
-          x: xField,
-          y: yField,
-        },
-        emphasis: {
-          focus: 'self',
-          scale: 1.2,
-        },
-        ...thresholdLines,
-      },
-    ] as ScatterSeriesOption[];
-
-    newState.series = series;
+  if (!transformedData || !Array.isArray(transformedData) || transformedData.length === 0) {
+    newState.series = [];
     return newState;
-  };
+  }
+
+  const thresholdLines = generateThresholdLines(styles.thresholdOptions);
+  const series = [
+    {
+      type: 'scatter',
+      name: getSeriesDisplayName(yField, Object.values(axisColumnMappings).flat()),
+      symbolSize: 8,
+      symbol: mapPointShapeToEChartsSymbol(styles.exclusive?.pointShape),
+      symbolRotate: styles.exclusive?.angle || 0,
+      itemStyle: styles.exclusive?.filled
+        ? {
+            opacity: 0.8,
+          }
+        : {
+            opacity: 0.8,
+            color: 'transparent',
+            borderColor: 'auto',
+            borderWidth: 2,
+          },
+      encode: {
+        x: xField,
+        y: yField,
+      },
+      emphasis: {
+        focus: 'self',
+        scale: 1.2,
+      },
+      ...thresholdLines,
+    },
+  ] as ScatterSeriesOption[];
+
+  newState.series = series;
+  return newState;
+};
 
 /**
  * Create category scatter series with multiple series (one per category)
  * Expects data already in pivot format: ['x', 'A', 'B', 'C', ...] from the universal pivot function
  */
-export const createCategoryScatterSeries =
-  <T extends BaseChartStyle>({
-    styles,
-    xField,
-    yField,
-    colorField,
-  }: {
-    styles: ScatterChartStyle;
-    xField: string;
-    yField: string;
-    colorField: string;
-  }): PipelineFn<T> =>
-  (state) => {
-    const { transformedData = [] } = state;
-    const newState = { ...state };
+export const createCategoryScatterSeries = <T extends BaseChartStyle>({
+  styles,
+  xField,
+  yField,
+  colorField,
+}: {
+  styles: ScatterChartStyle;
+  xField: string;
+  yField: string;
+  colorField: string;
+}): PipelineFn<T> => (state) => {
+  const { transformedData = [] } = state;
+  const newState = { ...state };
 
-    if (!transformedData || !Array.isArray(transformedData) || transformedData.length === 0) {
-      newState.series = [];
-      return newState;
-    }
-
-    // Data is already in pivot format from the pipe: ['x', 'A', 'B', 'C', ...]
-    const pivotDataset = transformedData;
-    const pivotHeader = pivotDataset[0] as string[];
-
-    // Extract categories (skip the first column which is xField)
-    const categories = pivotHeader.slice(1);
-
-    const thresholdLines = generateThresholdLines(styles.thresholdOptions);
-    const palette = getColors().categories;
-    const sortedCategories = [...categories].map(String).sort();
-
-    // Create multiple scatter series
-    const series = categories.map((category) => {
-      const name = String(category);
-      const colorIndex = sortedCategories.indexOf(name);
-      return {
-        name,
-        type: 'scatter',
-        symbolSize: 8,
-        symbol: mapPointShapeToEChartsSymbol(styles.exclusive?.pointShape),
-        symbolRotate: styles.exclusive?.angle || 0,
-        encode: {
-          x: xField,
-          y: category,
-        },
-        itemStyle: styles.exclusive?.filled
-          ? {
-              opacity: 0.8,
-              color: palette[colorIndex % palette.length],
-            }
-          : {
-              opacity: 0.8,
-              color: 'transparent',
-              borderColor: palette[colorIndex % palette.length],
-              borderWidth: 2,
-            },
-        emphasis: {
-          focus: 'series',
-          scale: 1.2,
-        },
-        ...thresholdLines,
-      };
-    }) as ScatterSeriesOption[];
-
-    // Set the pivot dataset and series
-    newState.transformedData = pivotDataset;
-    newState.series = series;
-
+  if (!transformedData || !Array.isArray(transformedData) || transformedData.length === 0) {
+    newState.series = [];
     return newState;
-  };
+  }
+
+  // Data is already in pivot format from the pipe: ['x', 'A', 'B', 'C', ...]
+  const pivotDataset = transformedData;
+  const pivotHeader = pivotDataset[0] as string[];
+
+  // Extract categories (skip the first column which is xField)
+  const categories = pivotHeader.slice(1);
+
+  const thresholdLines = generateThresholdLines(styles.thresholdOptions);
+  const palette = getColors().categories;
+  const sortedCategories = [...categories].map(String).sort();
+
+  // Create multiple scatter series
+  const series = categories.map((category) => {
+    const name = String(category);
+    const colorIndex = sortedCategories.indexOf(name);
+    return {
+      name,
+      type: 'scatter',
+      symbolSize: 8,
+      symbol: mapPointShapeToEChartsSymbol(styles.exclusive?.pointShape),
+      symbolRotate: styles.exclusive?.angle || 0,
+      encode: {
+        x: xField,
+        y: category,
+      },
+      itemStyle: styles.exclusive?.filled
+        ? {
+            opacity: 0.8,
+            color: palette[colorIndex % palette.length],
+          }
+        : {
+            opacity: 0.8,
+            color: 'transparent',
+            borderColor: palette[colorIndex % palette.length],
+            borderWidth: 2,
+          },
+      emphasis: {
+        focus: 'series',
+        scale: 1.2,
+      },
+      ...thresholdLines,
+    };
+  }) as ScatterSeriesOption[];
+
+  // Set the pivot dataset and series
+  newState.transformedData = pivotDataset;
+  newState.series = series;
+
+  return newState;
+};
 
 /**
  * Create scatter series with both color and size encoding
  */
-export const createSizeScatterSeries =
-  <T extends BaseChartStyle>({
-    styles,
+export const createSizeScatterSeries = <T extends BaseChartStyle>({
+  styles,
+  xField,
+  yField,
+  colorField,
+  sizeField,
+}: {
+  styles: ScatterChartStyle;
+  xField: string;
+  yField: string;
+  colorField: string;
+  sizeField: string;
+}): PipelineFn<T> => (state) => {
+  const { transformedData = [] } = state;
+  const newState = { ...state };
+
+  if (!transformedData || !Array.isArray(transformedData) || transformedData.length === 0) {
+    newState.series = [];
+    return newState;
+  }
+
+  const headers = transformedData[0] ?? [];
+
+  // Transform data using multi-series approach
+  const { categories, seriesData, sizeRange } = transformToMultiSeriesWithSize(
+    transformedData,
     xField,
     yField,
     colorField,
-    sizeField,
-  }: {
-    styles: ScatterChartStyle;
-    xField: string;
-    yField: string;
-    colorField: string;
-    sizeField: string;
-  }): PipelineFn<T> =>
-  (state) => {
-    const { transformedData = [] } = state;
-    const newState = { ...state };
+    sizeField
+  );
 
-    if (!transformedData || !Array.isArray(transformedData) || transformedData.length === 0) {
-      newState.series = [];
-      return newState;
+  const thresholdLines = generateThresholdLines(styles.thresholdOptions);
+  const palette = getColors().categories;
+  const sortedCategories = [...categories].map(String).sort();
+
+  // Create multiple scatter series, one for each color category
+  // Data format: [x, y, size] where size is at dimension 2 for visualMap
+  const series = categories.map((category) => {
+    const name = String(category);
+    const colorIndex = sortedCategories.indexOf(name);
+    return {
+      name,
+      type: 'scatter',
+      symbol: mapPointShapeToEChartsSymbol(styles.exclusive?.pointShape),
+      symbolRotate: styles.exclusive?.angle || 0,
+      data: seriesData[category], // [x, y, size] format
+      itemStyle: styles.exclusive?.filled
+        ? {
+            opacity: 0.7,
+            color: palette[colorIndex % palette.length],
+          }
+        : {
+            opacity: 0.7,
+            color: 'transparent',
+            borderColor: palette[colorIndex % palette.length],
+            borderWidth: 2,
+          },
+      emphasis: {
+        focus: 'series',
+        scale: 1.2,
+      },
+      ...thresholdLines,
+    };
+  }) as ScatterSeriesOption[];
+
+  // Set series and visualMap
+  newState.series = series;
+
+  // Position visualMap according to legendPosition (same as color legend)
+  const legendPosition = styles.legendPosition || 'bottom';
+
+  const getVisualMapConfig = () => {
+    switch (legendPosition) {
+      case 'left':
+      case 'top':
+      case 'bottom':
+        return {
+          orient: 'vertical',
+          right: 'right',
+          top: 'middle',
+        };
+      case 'right':
+        return {
+          orient: 'horizontal',
+          bottom: 'bottom',
+          left: 'middle',
+        };
     }
-
-    const headers = transformedData[0] ?? [];
-
-    // Transform data using multi-series approach
-    const { categories, seriesData, sizeRange } = transformToMultiSeriesWithSize(
-      transformedData,
-      xField,
-      yField,
-      colorField,
-      sizeField
-    );
-
-    const thresholdLines = generateThresholdLines(styles.thresholdOptions);
-    const palette = getColors().categories;
-    const sortedCategories = [...categories].map(String).sort();
-
-    // Create multiple scatter series, one for each color category
-    // Data format: [x, y, size] where size is at dimension 2 for visualMap
-    const series = categories.map((category) => {
-      const name = String(category);
-      const colorIndex = sortedCategories.indexOf(name);
-      return {
-        name,
-        type: 'scatter',
-        symbol: mapPointShapeToEChartsSymbol(styles.exclusive?.pointShape),
-        symbolRotate: styles.exclusive?.angle || 0,
-        data: seriesData[category], // [x, y, size] format
-        itemStyle: styles.exclusive?.filled
-          ? {
-              opacity: 0.7,
-              color: palette[colorIndex % palette.length],
-            }
-          : {
-              opacity: 0.7,
-              color: 'transparent',
-              borderColor: palette[colorIndex % palette.length],
-              borderWidth: 2,
-            },
-        emphasis: {
-          focus: 'series',
-          scale: 1.2,
-        },
-        ...thresholdLines,
-      };
-    }) as ScatterSeriesOption[];
-
-    // Set series and visualMap
-    newState.series = series;
-
-    // Position visualMap according to legendPosition (same as color legend)
-    const legendPosition = styles.legendPosition || 'bottom';
-
-    const getVisualMapConfig = () => {
-      switch (legendPosition) {
-        case 'left':
-        case 'top':
-        case 'bottom':
-          return {
-            orient: 'vertical',
-            right: 'right',
-            top: 'middle',
-          };
-        case 'right':
-          return {
-            orient: 'horizontal',
-            bottom: 'bottom',
-            left: 'middle',
-          };
-      }
-    };
-
-    // @ts-expect-error TS2322 TODO(ts-error): fixme
-    newState.visualMap = {
-      show: styles.addLegend === true,
-      type: 'continuous',
-      dimension: 2, // data type is [x, y, size] format
-      min: sizeRange.min,
-      max: sizeRange.max,
-      itemWidth: 15,
-      // itemHeight: 120,
-      // text: [`${sizeAxisName} Max`, `${sizeAxisName} Min`],
-      inRange: {
-        symbolSize: [5, 25],
-      },
-      outOfRange: {
-        symbolSize: [5, 25],
-        color: ['rgba(255,255,255,0.4)'],
-      },
-      ...getVisualMapConfig(),
-    };
-
-    return newState;
   };
+
+  // @ts-expect-error TS2322 TODO(ts-error): fixme
+  newState.visualMap = {
+    show: styles.addLegend === true,
+    type: 'continuous',
+    dimension: 2, // data type is [x, y, size] format
+    min: sizeRange.min,
+    max: sizeRange.max,
+    itemWidth: 15,
+    // itemHeight: 120,
+    // text: [`${sizeAxisName} Max`, `${sizeAxisName} Min`],
+    inRange: {
+      symbolSize: [5, 25],
+    },
+    outOfRange: {
+      symbolSize: [5, 25],
+      color: ['rgba(255,255,255,0.4)'],
+    },
+    ...getVisualMapConfig(),
+  };
+
+  return newState;
+};
 
 export const assembleScatterSpec = <T extends BaseChartStyle>(
   state: EChartsSpecState<T>

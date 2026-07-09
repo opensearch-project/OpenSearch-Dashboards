@@ -22,14 +22,14 @@ const createFieldsFetcher = jest.fn().mockImplementation(() => ({
 const fieldFormats = fieldFormatsMock;
 let object: any = {};
 
-const indexPatternsMock = {
+const indexPatternsMock = ({
   clearCache: jest.fn(),
   get: jest.fn().mockImplementation((id, onlyCheckCache) => {
     return onlyCheckCache ? null : Promise.resolve(null);
   }),
   getByTitle: jest.fn(),
   saveToCache: jest.fn(),
-} as unknown as IndexPatternsService;
+} as unknown) as IndexPatternsService;
 
 function setDocsourcePayload(id: string | null, providedPayload: any) {
   object = defaults(providedPayload || {}, stubbedSavedObjectIndexPattern(id));
@@ -76,11 +76,11 @@ describe('DataViews', () => {
 
     dataViews = new DataViewsService({
       patterns: indexPatternsMock,
-      uiSettings: {
+      uiSettings: ({
         get: uiSettingsGet,
         getAll: () => {},
-      } as any as DataViewUiSettingsCommon,
-      savedObjectsClient: savedObjectsClient as unknown as DataViewSavedObjectsClientCommon,
+      } as any) as DataViewUiSettingsCommon,
+      savedObjectsClient: (savedObjectsClient as unknown) as DataViewSavedObjectsClientCommon,
       apiClient: createFieldsFetcher(),
       fieldFormats,
       onNotification: () => {},
@@ -361,24 +361,24 @@ describe('DataViews', () => {
 
     const plainIndexPattern = { id: 'test-id', title: 'test-*' }; // no toDataset
 
-    const properDataView = {
+    const properDataView = ({
       id: 'test-id',
       title: 'test-*',
       toDataset: jest.fn(),
-    } as unknown as DataView;
+    } as unknown) as DataView;
 
     test('get() bypasses cache when cached entry is a plain IndexPattern', async () => {
-      const localPatternsMock = {
+      const localPatternsMock = ({
         clearCache: jest.fn(),
         get: jest.fn().mockResolvedValue(plainIndexPattern),
         getByTitle: jest.fn(),
         saveToCache: jest.fn(),
-      } as unknown as IndexPatternsService;
+      } as unknown) as IndexPatternsService;
 
       const localDataViews = new DataViewsService({
         patterns: localPatternsMock,
         uiSettings: { get: jest.fn().mockResolvedValue(false), getAll: () => {} } as any,
-        savedObjectsClient: savedObjectsClient as unknown as DataViewSavedObjectsClientCommon,
+        savedObjectsClient: (savedObjectsClient as unknown) as DataViewSavedObjectsClientCommon,
         apiClient: createFieldsFetcher(),
         fieldFormats,
         onNotification: () => {},
@@ -401,17 +401,17 @@ describe('DataViews', () => {
     });
 
     test('get() with onlyCheckCache returns undefined when cached entry is a plain IndexPattern', async () => {
-      const localPatternsMock = {
+      const localPatternsMock = ({
         clearCache: jest.fn(),
         get: jest.fn().mockResolvedValue(plainIndexPattern),
         getByTitle: jest.fn(),
         saveToCache: jest.fn(),
-      } as unknown as IndexPatternsService;
+      } as unknown) as IndexPatternsService;
 
       const localDataViews = new DataViewsService({
         patterns: localPatternsMock,
         uiSettings: { get: jest.fn().mockResolvedValue(false), getAll: () => {} } as any,
-        savedObjectsClient: savedObjectsClient as unknown as DataViewSavedObjectsClientCommon,
+        savedObjectsClient: (savedObjectsClient as unknown) as DataViewSavedObjectsClientCommon,
         apiClient: createFieldsFetcher(),
         fieldFormats,
         onNotification: () => {},
@@ -427,17 +427,17 @@ describe('DataViews', () => {
     });
 
     test('get() uses cache when entry is a proper DataView', async () => {
-      const localPatternsMock = {
+      const localPatternsMock = ({
         clearCache: jest.fn(),
         get: jest.fn().mockResolvedValue(properDataView),
         getByTitle: jest.fn(),
         saveToCache: jest.fn(),
-      } as unknown as IndexPatternsService;
+      } as unknown) as IndexPatternsService;
 
       const localDataViews = new DataViewsService({
         patterns: localPatternsMock,
         uiSettings: { get: jest.fn().mockResolvedValue(false), getAll: () => {} } as any,
-        savedObjectsClient: savedObjectsClient as unknown as DataViewSavedObjectsClientCommon,
+        savedObjectsClient: (savedObjectsClient as unknown) as DataViewSavedObjectsClientCommon,
         apiClient: createFieldsFetcher(),
         fieldFormats,
         onNotification: () => {},
@@ -453,17 +453,17 @@ describe('DataViews', () => {
     });
 
     test('getMultiple() bypasses cache when cached entry is a plain IndexPattern', async () => {
-      const localPatternsMock = {
+      const localPatternsMock = ({
         clearCache: jest.fn(),
         get: jest.fn().mockResolvedValue(plainIndexPattern),
         getByTitle: jest.fn(),
         saveToCache: jest.fn(),
-      } as unknown as IndexPatternsService;
+      } as unknown) as IndexPatternsService;
 
       const localDataViews = new DataViewsService({
         patterns: localPatternsMock,
         uiSettings: { get: jest.fn().mockResolvedValue(false), getAll: () => {} } as any,
-        savedObjectsClient: savedObjectsClient as unknown as DataViewSavedObjectsClientCommon,
+        savedObjectsClient: (savedObjectsClient as unknown) as DataViewSavedObjectsClientCommon,
         apiClient: createFieldsFetcher(),
         fieldFormats,
         onNotification: () => {},
@@ -492,17 +492,17 @@ describe('DataViews', () => {
     });
 
     test('getMultiple() uses cache when entry is a proper DataView', async () => {
-      const localPatternsMock = {
+      const localPatternsMock = ({
         clearCache: jest.fn(),
         get: jest.fn().mockResolvedValue(properDataView),
         getByTitle: jest.fn(),
         saveToCache: jest.fn(),
-      } as unknown as IndexPatternsService;
+      } as unknown) as IndexPatternsService;
 
       const localDataViews = new DataViewsService({
         patterns: localPatternsMock,
         uiSettings: { get: jest.fn().mockResolvedValue(false), getAll: () => {} } as any,
-        savedObjectsClient: savedObjectsClient as unknown as DataViewSavedObjectsClientCommon,
+        savedObjectsClient: (savedObjectsClient as unknown) as DataViewSavedObjectsClientCommon,
         apiClient: createFieldsFetcher(),
         fieldFormats,
         onNotification: () => {},
@@ -520,17 +520,17 @@ describe('DataViews', () => {
     });
 
     test('getMultiple() skips not-found saved objects instead of throwing', async () => {
-      const localPatternsMock = {
+      const localPatternsMock = ({
         clearCache: jest.fn(),
         get: jest.fn().mockResolvedValue(undefined),
         getByTitle: jest.fn(),
         saveToCache: jest.fn(),
-      } as unknown as IndexPatternsService;
+      } as unknown) as IndexPatternsService;
 
       const localDataViews = new DataViewsService({
         patterns: localPatternsMock,
         uiSettings: { get: jest.fn().mockResolvedValue(false), getAll: () => {} } as any,
-        savedObjectsClient: savedObjectsClient as unknown as DataViewSavedObjectsClientCommon,
+        savedObjectsClient: (savedObjectsClient as unknown) as DataViewSavedObjectsClientCommon,
         apiClient: createFieldsFetcher(),
         fieldFormats,
         onNotification: () => {},
@@ -567,17 +567,17 @@ describe('DataViews', () => {
 
     test('getMultiple() skips objects that throw during processing without breaking others', async () => {
       const onErrorMock = jest.fn();
-      const localPatternsMock = {
+      const localPatternsMock = ({
         clearCache: jest.fn(),
         get: jest.fn().mockResolvedValue(undefined),
         getByTitle: jest.fn(),
         saveToCache: jest.fn(),
-      } as unknown as IndexPatternsService;
+      } as unknown) as IndexPatternsService;
 
       const localDataViews = new DataViewsService({
         patterns: localPatternsMock,
         uiSettings: { get: jest.fn().mockResolvedValue(false), getAll: () => {} } as any,
-        savedObjectsClient: savedObjectsClient as unknown as DataViewSavedObjectsClientCommon,
+        savedObjectsClient: (savedObjectsClient as unknown) as DataViewSavedObjectsClientCommon,
         apiClient: createFieldsFetcher(),
         fieldFormats,
         onNotification: () => {},

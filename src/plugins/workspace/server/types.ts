@@ -168,7 +168,8 @@ export interface WorkspacePluginSetup {
 }
 
 export type WorkspaceAuthResult =
-  { authorized: true } | { authorized: false; unauthorizedWorkspaces: string[] };
+  | { authorized: true }
+  | { authorized: false; unauthorizedWorkspaces: string[] };
 
 export interface WorkspacePluginStart {
   client: IWorkspaceClientImpl;

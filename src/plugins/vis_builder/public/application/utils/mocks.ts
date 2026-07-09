@@ -40,7 +40,7 @@ export const createVisBuilderServicesMock = () => {
     i18n: i18nContextMock,
     data: indexPatternMock,
     embeddable: embeddableMock,
-    scopedHistory: scopedHistoryMock.create() as unknown as ScopedHistory,
+    scopedHistory: (scopedHistoryMock.create() as unknown) as ScopedHistory,
     osdUrlStateStorage: osdUrlStateStorageMock,
     types: {
       all: () => [
@@ -59,5 +59,5 @@ export const createVisBuilderServicesMock = () => {
     },
   };
 
-  return visBuilderServicesMock as unknown as jest.Mocked<VisBuilderServices>;
+  return (visBuilderServicesMock as unknown) as jest.Mocked<VisBuilderServices>;
 };

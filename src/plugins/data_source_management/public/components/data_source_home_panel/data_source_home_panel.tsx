@@ -38,8 +38,9 @@ export const DataSourceHomePanel: React.FC<DataSourceHomePanelProps> = ({
   useNewUX,
   ...props
 }) => {
-  const { setBreadcrumbs, application, workspaces, docLinks, navigation } =
-    useOpenSearchDashboards<DataSourceManagementContext>().services;
+  const { setBreadcrumbs, application, workspaces, docLinks, navigation } = useOpenSearchDashboards<
+    DataSourceManagementContext
+  >().services;
 
   const defaultTabId = featureFlagStatus
     ? 'manageOpensearchDataSources'

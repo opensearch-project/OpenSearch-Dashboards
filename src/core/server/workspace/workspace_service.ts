@@ -19,10 +19,8 @@ export interface InternalWorkspaceServiceStart {
 }
 
 /** @internal */
-export class WorkspaceService implements CoreService<
-  InternalWorkspaceServiceSetup,
-  InternalWorkspaceServiceStart
-> {
+export class WorkspaceService
+  implements CoreService<InternalWorkspaceServiceSetup, InternalWorkspaceServiceStart> {
   private readonly log: Logger;
   private readonly config$: Observable<{ enabled: boolean }>;
 

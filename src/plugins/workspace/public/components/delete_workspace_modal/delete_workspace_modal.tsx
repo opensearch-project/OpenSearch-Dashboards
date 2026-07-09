@@ -127,9 +127,7 @@ export function DeleteWorkspaceModal(props: DeleteWorkspaceModalProps) {
                 {i18n.translate('workspace.delete.failed.name', {
                   defaultMessage: 'Failed workspace name ',
                 })}
-                {failedWorksapces
-                  .map((selectedWorkspace) => selectedWorkspace.name)
-                  .join(', ')}{' '}
+                {failedWorksapces.map((selectedWorkspace) => selectedWorkspace.name).join(', ')}{' '}
               </div>
               <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
                 <EuiFlexItem grow={false}>

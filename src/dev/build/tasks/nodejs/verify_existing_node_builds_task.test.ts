@@ -43,8 +43,9 @@ jest.mock('../../lib/fs');
 jest.mock('../../lib/get_build_number');
 
 const { getNodeShasums } = jest.requireMock('./node_shasums');
-const { getNodeDownloadInfo, getLatestNodeVersion, getRequiredVersion } =
-  jest.requireMock('./node_download_info');
+const { getNodeDownloadInfo, getLatestNodeVersion, getRequiredVersion } = jest.requireMock(
+  './node_download_info'
+);
 const { getFileHash } = jest.requireMock('../../lib/fs');
 
 const log = new ToolingLog();

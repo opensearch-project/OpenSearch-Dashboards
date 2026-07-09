@@ -140,21 +140,18 @@ async function readControlGroups() {
   return data
     .toString()
     .split(/\n/)
-    .reduce(
-      (acc, line) => {
-        const matches = line.match(CONTROL_GROUP_RE);
+    .reduce((acc, line) => {
+      const matches = line.match(CONTROL_GROUP_RE);
 
-        if (matches !== null) {
-          const controllers = matches[1].split(CONTROLLER_SEPARATOR_RE);
-          controllers.forEach((controller) => {
-            acc[controller] = matches[2];
-          });
-        }
+      if (matches !== null) {
+        const controllers = matches[1].split(CONTROLLER_SEPARATOR_RE);
+        controllers.forEach((controller) => {
+          acc[controller] = matches[2];
+        });
+      }
 
-        return acc;
-      },
-      {} as Record<string, string>
-    );
+      return acc;
+    }, {} as Record<string, string>);
 }
 
 async function fileContentsToInteger(path: string) {

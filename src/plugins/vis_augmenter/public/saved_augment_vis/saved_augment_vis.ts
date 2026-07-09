@@ -15,7 +15,8 @@ import { getUISettings } from '../services';
 import { AugmentVisSavedObjectAttributes, PLUGIN_AUGMENTATION_ENABLE_SETTING } from '../../common';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SavedObjectOpenSearchDashboardsServicesWithAugmentVis extends SavedObjectOpenSearchDashboardsServices {}
+export interface SavedObjectOpenSearchDashboardsServicesWithAugmentVis
+  extends SavedObjectOpenSearchDashboardsServices {}
 export type SavedAugmentVisLoader = ReturnType<typeof createSavedAugmentVisLoader>;
 
 export class SavedObjectLoaderAugmentVis extends SavedObjectLoader {

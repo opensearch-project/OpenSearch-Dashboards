@@ -86,12 +86,9 @@ describe('Options', () => {
       });
 
       it('Authenticated user has access to a route', async () => {
-        const {
-          server: innerServer,
-          createRouter,
-          registerAuth,
-          auth,
-        } = await server.setup(setupDeps);
+        const { server: innerServer, createRouter, registerAuth, auth } = await server.setup(
+          setupDeps
+        );
         const router = createRouter('/');
 
         registerAuth((req, res, toolkit) => {
@@ -116,12 +113,9 @@ describe('Options', () => {
       });
 
       it('User with no credentials can access a route', async () => {
-        const {
-          server: innerServer,
-          createRouter,
-          registerAuth,
-          auth,
-        } = await server.setup(setupDeps);
+        const { server: innerServer, createRouter, registerAuth, auth } = await server.setup(
+          setupDeps
+        );
         const router = createRouter('/');
 
         registerAuth((req, res, toolkit) => toolkit.notHandled());
@@ -160,12 +154,9 @@ describe('Options', () => {
       });
 
       it('does not redirect user and allows access to a resource', async () => {
-        const {
-          server: innerServer,
-          createRouter,
-          registerAuth,
-          auth,
-        } = await server.setup(setupDeps);
+        const { server: innerServer, createRouter, registerAuth, auth } = await server.setup(
+          setupDeps
+        );
         const router = createRouter('/');
 
         registerAuth((req, res, toolkit) =>
@@ -217,12 +208,9 @@ describe('Options', () => {
       });
 
       it('Authenticated user has access to a route', async () => {
-        const {
-          server: innerServer,
-          createRouter,
-          registerAuth,
-          auth,
-        } = await server.setup(setupDeps);
+        const { server: innerServer, createRouter, registerAuth, auth } = await server.setup(
+          setupDeps
+        );
         const router = createRouter('/');
 
         registerAuth((req, res, toolkit) => {
@@ -300,12 +288,9 @@ describe('Options', () => {
 
     describe('false', () => {
       it('does not try to authenticate a user', async () => {
-        const {
-          server: innerServer,
-          createRouter,
-          registerAuth,
-          auth,
-        } = await server.setup(setupDeps);
+        const { server: innerServer, createRouter, registerAuth, auth } = await server.setup(
+          setupDeps
+        );
         const router = createRouter('/');
 
         const authHook = jest.fn();
@@ -340,14 +325,14 @@ describe('Options', () => {
           if (i < body.length) {
             request.write(body[i++]);
           } else {
-            clearInterval(intervalId as unknown as NodeJS.Timeout);
+            clearInterval((intervalId as unknown) as NodeJS.Timeout);
             request.end((err, res) => {
               resolve(res);
             });
           }
         }, interval);
         request.on('error', (err) => {
-          clearInterval(intervalId as unknown as NodeJS.Timeout);
+          clearInterval((intervalId as unknown) as NodeJS.Timeout);
           reject(err);
         });
       });

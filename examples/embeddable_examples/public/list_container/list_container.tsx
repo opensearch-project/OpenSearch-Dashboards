@@ -42,10 +42,7 @@ export class ListContainer extends Container<{}, ContainerInput> {
   public readonly type = LIST_CONTAINER;
   private root: Root | null = null;
 
-  constructor(
-    input: ContainerInput,
-    private embeddableServices: EmbeddableStart
-  ) {
+  constructor(input: ContainerInput, private embeddableServices: EmbeddableStart) {
     super(input, { embeddableLoaded: {} }, embeddableServices.getEmbeddableFactory);
   }
 

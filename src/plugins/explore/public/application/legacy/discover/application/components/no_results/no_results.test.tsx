@@ -7,13 +7,13 @@ import { render, screen } from '@testing-library/react';
 import { DiscoverNoResults } from './no_results';
 
 const makeDeps = () => {
-  const savedQuery = {
+  const savedQuery = ({
     findSavedQueries: jest.fn().mockResolvedValue({ queries: [] }),
-  } as unknown as any;
-  const queryString = {
+  } as unknown) as any;
+  const queryString = ({
     getLanguageService: jest.fn().mockReturnValue({ getLanguage: () => undefined }),
     getDatasetService: jest.fn().mockReturnValue({ getType: () => undefined }),
-  } as unknown as any;
+  } as unknown) as any;
   return { queryString, savedQuery };
 };
 

@@ -36,7 +36,11 @@ import {
 } from './compiler_messages';
 
 export type WorkerMsg =
-  CompilerRunningMsg | CompilerIssueMsg | CompilerSuccessMsg | CompilerErrorMsg | WorkerErrorMsg;
+  | CompilerRunningMsg
+  | CompilerIssueMsg
+  | CompilerSuccessMsg
+  | CompilerErrorMsg
+  | WorkerErrorMsg;
 
 /**
  * Message sent when the worker encounters an error that it can't

@@ -49,7 +49,7 @@ describe('#WorkspaceClient', () => {
   const find = jest.fn();
   const addToWorkspaces = jest.fn();
   const deleteFromWorkspaces = jest.fn();
-  const savedObjectClient = {
+  const savedObjectClient = ({
     find,
     addToWorkspaces,
     deleteFromWorkspaces,
@@ -59,19 +59,19 @@ describe('#WorkspaceClient', () => {
         name: mockWorkspaceName,
       },
     }),
-  } as unknown as SavedObjectsClientContract;
-  const savedObjects = {
+  } as unknown) as SavedObjectsClientContract;
+  const savedObjects = ({
     ...coreSetup.savedObjects,
     getScopedClient: () => savedObjectClient,
-  } as unknown as SavedObjectsServiceStart;
+  } as unknown) as SavedObjectsServiceStart;
 
   const uiSettings = uiSettingsServiceMock.createStartContract();
 
-  const mockRequestDetail = {
+  const mockRequestDetail = ({
     request: httpServerMock.createOpenSearchDashboardsRequest(),
     context: coreMock.createRequestHandlerContext(),
     logger: {},
-  } as unknown as IRequestDetail;
+  } as unknown) as IRequestDetail;
 
   it('create# should not call addToWorkspaces if no data sources and no data connections passed', async () => {
     const client = new WorkspaceClient(coreSetup, logger);

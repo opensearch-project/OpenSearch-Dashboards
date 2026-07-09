@@ -63,8 +63,10 @@ export async function mountManagementSection(
   params: ManagementAppMountParams & { wrapInPage?: boolean },
   componentRegistry: ComponentRegistry['start']
 ) {
-  const [{ uiSettings, notifications, docLinks, application, chrome }, { navigation }] =
-    await getStartServices();
+  const [
+    { uiSettings, notifications, docLinks, application, chrome },
+    { navigation },
+  ] = await getStartServices();
 
   // @ts-expect-error TS2532 TODO(ts-error): fixme
   const canSave = application.capabilities.advancedSettings.save as boolean;

@@ -40,7 +40,7 @@ export const mockAttributeService = <
   V extends EmbeddableInput & { [ATTRIBUTE_SERVICE_KEY]: A } = EmbeddableInput & {
     [ATTRIBUTE_SERVICE_KEY]: A;
   },
-  R extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput,
+  R extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
 >(
   type: string,
   options: AttributeServiceOptions<A>,

@@ -55,13 +55,13 @@ const createEvent = ({
   defaultPrevented?: boolean;
   modifierKey?: boolean;
 }): MouseEvent<HTMLElement> => {
-  return {
+  return ({
     target,
     button,
     defaultPrevented,
     ctrlKey: modifierKey,
     preventDefault: jest.fn(),
-  } as unknown as MouseEvent<HTMLElement>;
+  } as unknown) as MouseEvent<HTMLElement>;
 };
 
 describe('createNavigateToUrlClickHandler', () => {

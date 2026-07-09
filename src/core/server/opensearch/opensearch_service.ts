@@ -58,10 +58,8 @@ export interface StartDeps {
 }
 
 /** @internal */
-export class OpenSearchService implements CoreService<
-  InternalOpenSearchServiceSetup,
-  InternalOpenSearchServiceStart
-> {
+export class OpenSearchService
+  implements CoreService<InternalOpenSearchServiceSetup, InternalOpenSearchServiceStart> {
   private readonly log: Logger;
   private readonly config$: Observable<OpenSearchConfig>;
   private auditorFactory?: AuditorFactory;

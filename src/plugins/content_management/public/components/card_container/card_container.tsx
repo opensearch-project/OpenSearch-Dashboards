@@ -14,10 +14,7 @@ export class CardContainer extends Container<{}, CardContainerInput> {
   public readonly type = CARD_CONTAINER;
   private root?: Root;
 
-  constructor(
-    input: CardContainerInput,
-    private embeddableServices: EmbeddableStart
-  ) {
+  constructor(input: CardContainerInput, private embeddableServices: EmbeddableStart) {
     super(input, { embeddableLoaded: {} }, embeddableServices.getEmbeddableFactory);
   }
 

@@ -16,8 +16,8 @@ export function shimSchemaRow(response: IPPLEventsDataSource) {
           typeof item === 'object'
             ? JSON.stringify(item)
             : typeof item === 'boolean'
-              ? item.toString()
-              : item;
+            ? item.toString()
+            : item;
         record[cur.name] = value;
       }
       return record;

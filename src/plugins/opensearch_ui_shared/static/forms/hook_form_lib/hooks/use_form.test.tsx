@@ -261,9 +261,9 @@ describe('useForm() hook', () => {
         setInputValue('usernameField', 'John');
       });
 
-      [{ data, isValid }] = onFormData.mock.calls[
-        onFormData.mock.calls.length - 1
-      ] as Parameters<OnUpdateHandler>;
+      [{ data, isValid }] = onFormData.mock.calls[onFormData.mock.calls.length - 1] as Parameters<
+        OnUpdateHandler
+      >;
 
       expect(data.raw).toEqual({ 'user.name': 'John' });
       expect(data.format()).toEqual({ user: { name: 'John' } });
@@ -310,9 +310,9 @@ describe('useForm() hook', () => {
 
       expect(onFormData.mock.calls.length).toBe(1);
 
-      const [{ data }] = onFormData.mock.calls[
-        onFormData.mock.calls.length - 1
-      ] as Parameters<OnUpdateHandler>;
+      const [{ data }] = onFormData.mock.calls[onFormData.mock.calls.length - 1] as Parameters<
+        OnUpdateHandler
+      >;
 
       expect(data.raw).toEqual({
         title: defaultValue.title,

@@ -42,7 +42,7 @@ export const createMockServices = (): ExploreServices =>
         },
       },
     },
-  }) as any;
+  } as any);
 
 export const createMockDataset = (overrides: Partial<Dataset> = {}): Dataset => ({
   id: 'test-dataset-id',

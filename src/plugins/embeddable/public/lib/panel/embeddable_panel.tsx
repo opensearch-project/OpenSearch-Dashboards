@@ -73,10 +73,8 @@ const sortByOrderField = (
   { order: orderB }: { order?: number }
 ) => (orderB || 0) - (orderA || 0);
 
-const removeById =
-  (disabledActions: string[]) =>
-  ({ id }: { id: string }) =>
-    disabledActions.indexOf(id) === -1;
+const removeById = (disabledActions: string[]) => ({ id }: { id: string }) =>
+  disabledActions.indexOf(id) === -1;
 
 interface Props {
   embeddable: IEmbeddable<EmbeddableInput, EmbeddableOutput>;

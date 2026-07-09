@@ -15,7 +15,7 @@ const normalizeState = <T>(obj: T): T => {
   }
 
   if (Array.isArray(obj)) {
-    return obj.map(normalizeState) as unknown as T;
+    return (obj.map(normalizeState) as unknown) as T;
   }
 
   if (typeof obj === 'object') {

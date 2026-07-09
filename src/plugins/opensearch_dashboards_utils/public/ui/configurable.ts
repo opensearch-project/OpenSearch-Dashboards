@@ -36,7 +36,7 @@ import { SerializableState } from '../../common';
  */
 export interface Configurable<
   Config extends SerializableState = SerializableState,
-  Context = object,
+  Context = object
 > {
   /**
    * Create default config for this item, used when item is created for the first time.
@@ -59,7 +59,7 @@ export interface Configurable<
  */
 export interface CollectConfigProps<
   Config extends SerializableState = SerializableState,
-  Context = object,
+  Context = object
 > {
   /**
    * Current (latest) config of the item.

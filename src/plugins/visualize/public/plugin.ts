@@ -94,12 +94,9 @@ export interface VisualizePluginSetupDependencies {
   uiActions: UiActionsSetup;
 }
 
-export class VisualizePlugin implements Plugin<
-  void,
-  void,
-  VisualizePluginSetupDependencies,
-  VisualizePluginStartDependencies
-> {
+export class VisualizePlugin
+  implements
+    Plugin<void, void, VisualizePluginSetupDependencies, VisualizePluginStartDependencies> {
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private stopUrlTracking: (() => void) | undefined = undefined;
   private currentHistory: ScopedHistory | undefined = undefined;

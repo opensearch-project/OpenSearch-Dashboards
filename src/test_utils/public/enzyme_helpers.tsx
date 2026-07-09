@@ -47,13 +47,11 @@ const TypedIntlProvider = IntlProvider as React.ComponentType<
 >;
 
 // Use fake component to extract `intl` property to use in tests.
-const { intl } = (
-  mount(
-    <I18nProvider>
-      <br />
-    </I18nProvider>
-  ).find('IntlProvider') as ReactWrapper<{}, {}, __IntlProvider>
-)
+const { intl } = (mount(
+  <I18nProvider>
+    <br />
+  </I18nProvider>
+).find('IntlProvider') as ReactWrapper<{}, {}, __IntlProvider>)
   .instance()
   .getChildContext();
 
@@ -110,7 +108,7 @@ export function shallowWithIntl<T>(
 ): ReactWrapper<any, any> {
   const options = getOptions(context, childContextTypes, props);
 
-  return shallow(nodeWithIntlProp(node), options) as unknown as ReactWrapper<any, any>;
+  return (shallow(nodeWithIntlProp(node), options) as unknown) as ReactWrapper<any, any>;
 }
 
 /**
@@ -133,7 +131,7 @@ export function mountWithIntl<T>(
 ): ReactWrapper<any, any> {
   const options = getOptions(context, childContextTypes, props);
 
-  return mount(nodeWithIntlProp(node), options) as unknown as ReactWrapper<any, any>;
+  return (mount(nodeWithIntlProp(node), options) as unknown) as ReactWrapper<any, any>;
 }
 
 /**

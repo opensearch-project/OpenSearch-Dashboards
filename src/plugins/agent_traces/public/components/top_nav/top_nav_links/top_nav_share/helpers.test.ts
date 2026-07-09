@@ -57,7 +57,7 @@ describe('helpers', () => {
   });
 
   describe('getSharingData', () => {
-    const mockSearchSource = {
+    const mockSearchSource = ({
       createCopy: jest.fn(() => ({
         getField: jest.fn((field) => {
           if (field === 'index') {
@@ -77,7 +77,7 @@ describe('helpers', () => {
         setField: jest.fn(),
       })),
       getSearchRequestBody: jest.fn(() => Promise.resolve({ query: { match_all: {} } })),
-    } as unknown as ISearchSource;
+    } as unknown) as ISearchSource;
 
     const mockState: LegacyState = {
       columns: ['field1', 'field2'],
@@ -89,7 +89,7 @@ describe('helpers', () => {
       lineCount: undefined,
     };
 
-    const mockServices = {
+    const mockServices = ({
       uiSettings: {
         get: jest.fn((setting, defaultValue) => {
           if (setting === 'doc:hideTimeColumn') return false;
@@ -97,7 +97,7 @@ describe('helpers', () => {
           return defaultValue;
         }),
       },
-    } as unknown as AgentTracesServices;
+    } as unknown) as AgentTracesServices;
 
     beforeEach(() => {
       jest.clearAllMocks();

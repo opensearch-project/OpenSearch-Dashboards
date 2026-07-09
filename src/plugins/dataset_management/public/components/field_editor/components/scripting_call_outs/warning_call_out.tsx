@@ -16,9 +16,8 @@ export interface ScriptingWarningCallOutProps {
 }
 
 export const ScriptingWarningCallOut = ({ isVisible = false }: ScriptingWarningCallOutProps) => {
-  const docLinksScriptedFields =
-    useOpenSearchDashboards<DatasetManagmentContext>().services.docLinks?.links.noDocumentation
-      .scriptedFields;
+  const docLinksScriptedFields = useOpenSearchDashboards<DatasetManagmentContext>().services
+    .docLinks?.links.noDocumentation.scriptedFields;
   return isVisible ? (
     <Fragment>
       <EuiCallOut

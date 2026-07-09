@@ -42,7 +42,7 @@ let props: ControlsTabUiProps;
 beforeEach(() => {
   props = {
     deps: getDepsMock(),
-    vis: {
+    vis: ({
       API: {
         indexPatterns: indexPatternsMock,
       },
@@ -56,7 +56,7 @@ beforeEach(() => {
         requiresSearch: false,
         hidden: false,
       },
-    } as unknown as Vis,
+    } as unknown) as Vis,
     stateParams: {
       controls: [
         {

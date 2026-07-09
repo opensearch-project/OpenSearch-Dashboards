@@ -81,4 +81,4 @@ export const createMockRootState = (overrides?: Partial<RootState>): RootState =
       status: 'UNINITIALIZED',
     },
     ...overrides,
-  }) as RootState;
+  } as RootState);

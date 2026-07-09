@@ -116,7 +116,7 @@ export const DatasetTable = ({ canSave, history }: Props) => {
   }, [history.push, datasets.length, datasetManagementStart, uiSettings, savedObjects.client]);
 
   const removeAliases = (item: MatchedItem) =>
-    !(item as unknown as ResolveIndexResponseItemAlias).indices;
+    !((item as unknown) as ResolveIndexResponseItemAlias).indices;
 
   const searchClient = data.search.search;
 

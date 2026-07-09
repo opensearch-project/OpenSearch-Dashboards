@@ -63,13 +63,16 @@ export const useDashboardAppAndGlobalState = ({
         usageCollection
       );
 
-      const { stateContainer, stopStateSync, stopSyncingQueryServiceStateWithUrl } =
-        createDashboardGlobalAndAppState({
-          stateDefaults,
-          osdUrlStateStorage,
-          services,
-          savedDashboardInstance,
-        });
+      const {
+        stateContainer,
+        stopStateSync,
+        stopSyncingQueryServiceStateWithUrl,
+      } = createDashboardGlobalAndAppState({
+        stateDefaults,
+        osdUrlStateStorage,
+        services,
+        savedDashboardInstance,
+      });
 
       const {
         filterManager,

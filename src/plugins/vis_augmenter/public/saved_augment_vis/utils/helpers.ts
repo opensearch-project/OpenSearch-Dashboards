@@ -52,5 +52,5 @@ export const createAugmentVisSavedObject = async (
       }
     });
 
-  return await loader.get(AugmentVis as any as Record<string, unknown>);
+  return await loader.get((AugmentVis as any) as Record<string, unknown>);
 };

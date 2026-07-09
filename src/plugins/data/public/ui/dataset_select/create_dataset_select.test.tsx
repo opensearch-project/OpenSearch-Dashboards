@@ -50,12 +50,12 @@ jest.mock('../../../../opensearch_dashboards_react/public', () => {
 describe('createDatasetSelect', () => {
   const core = coreMock.createStart();
   const mockData = dataPluginMock.createStartContract();
-  const mockStorage = {
+  const mockStorage = ({
     get: jest.fn(),
     set: jest.fn(),
     remove: jest.fn(),
     clear: jest.fn(),
-  } as unknown as DataStorage;
+  } as unknown) as DataStorage;
 
   const mockOnSelect = jest.fn();
   const mockAppName = 'testApp';

@@ -57,12 +57,8 @@ describe('ClusterClient', () => {
   let getAuthHeaders: jest.MockedFunction<GetAuthHeaders>;
   let internalClient: ReturnType<typeof opensearchClientMock.createInternalClient>;
   let scopedClient: ReturnType<typeof opensearchClientMock.createInternalClient>;
-  let internalClientWithLongNumeralsSupport: ReturnType<
-    typeof opensearchClientMock.createInternalClient
-  >;
-  let scopedClientWithLongNumeralsSupport: ReturnType<
-    typeof opensearchClientMock.createInternalClient
-  >;
+  let internalClientWithLongNumeralsSupport: ReturnType<typeof opensearchClientMock.createInternalClient>;
+  let scopedClientWithLongNumeralsSupport: ReturnType<typeof opensearchClientMock.createInternalClient>;
 
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();

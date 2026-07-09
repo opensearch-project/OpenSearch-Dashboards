@@ -17,9 +17,9 @@ describe('useFlyoutResize', () => {
     const { result } = renderHook(() => useFlyoutResize());
 
     act(() => {
-      result.current.handleFlyoutMouseDown({
+      result.current.handleFlyoutMouseDown(({
         preventDefault: jest.fn(),
-      } as unknown as React.MouseEvent);
+      } as unknown) as React.MouseEvent);
     });
 
     expect(result.current.isResizingFlyout).toBe(true);

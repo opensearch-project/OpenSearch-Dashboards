@@ -12,10 +12,10 @@ export interface Props {
 
 export const usePagination = ({ rowCount, pageSizeLimit }: Props) => {
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 100 });
-  const pageCount = useMemo(
-    () => Math.ceil(rowCount / pagination.pageSize),
-    [rowCount, pagination]
-  );
+  const pageCount = useMemo(() => Math.ceil(rowCount / pagination.pageSize), [
+    rowCount,
+    pagination,
+  ]);
 
   const pageSizeOptions = generatePageSizeOptions(pageSizeLimit);
 

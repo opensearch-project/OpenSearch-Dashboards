@@ -170,7 +170,7 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
     const dataStart = dataPluginMock.createStartContract();
 
     it('calls toExpression on vis_type if it exists', async () => {
-      const vis = {
+      const vis = ({
         getState: () => {},
         isHierarchical: () => false,
         data: {
@@ -186,7 +186,7 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
         type: {
           toExpressionAst: () => parseExpression('test'),
         },
-      } as unknown as Vis;
+      } as unknown) as Vis;
       const expression = await buildPipeline(vis, {
         timefilter: dataStart.query.timefilter.timefilter,
       });

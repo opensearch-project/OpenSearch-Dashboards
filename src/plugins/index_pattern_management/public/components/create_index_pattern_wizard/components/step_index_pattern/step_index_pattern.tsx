@@ -158,12 +158,13 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
   }
 
   fetchExistingIndexPatterns = async () => {
-    const { savedObjects } =
-      await this.context.services.savedObjects.client.find<IndexPatternAttributes>({
-        type: 'index-pattern',
-        fields: ['title'],
-        perPage: 10000,
-      });
+    const { savedObjects } = await this.context.services.savedObjects.client.find<
+      IndexPatternAttributes
+    >({
+      type: 'index-pattern',
+      fields: ['title'],
+      perPage: 10000,
+    });
 
     const existingIndexPatterns = savedObjects.map((obj) =>
       obj && obj.attributes && validateDataSourceReference(obj, this.props.dataSourceRef?.id)

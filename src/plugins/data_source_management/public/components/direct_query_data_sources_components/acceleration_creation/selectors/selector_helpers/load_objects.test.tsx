@@ -17,13 +17,13 @@ import {
 
 jest.mock('../../../../../../framework/catalog_cache/cache_loader');
 
-const mockHttp: HttpStart = {} as unknown as HttpStart;
-const mockNotifications: NotificationsStart = {
+const mockHttp: HttpStart = ({} as unknown) as HttpStart;
+const mockNotifications: NotificationsStart = ({
   toasts: {
     addWarning: jest.fn(),
     addDanger: jest.fn(),
   },
-} as unknown as NotificationsStart;
+} as unknown) as NotificationsStart;
 
 const defaultProps = {
   dataSourceName: 'test_source',

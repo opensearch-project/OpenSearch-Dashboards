@@ -38,11 +38,11 @@ export class UsageCollector<T = unknown, U = { usage: { [key: string]: T } }> ex
   protected defaultFormatterForBulkUpload(result: T) {
     return {
       type: OPENSEARCH_DASHBOARDS_STATS_TYPE,
-      payload: {
+      payload: ({
         usage: {
           [this.type]: result,
         },
-      } as unknown as U,
+      } as unknown) as U,
     };
   }
 }

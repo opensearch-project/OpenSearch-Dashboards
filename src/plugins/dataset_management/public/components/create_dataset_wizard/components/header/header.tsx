@@ -24,8 +24,8 @@ export const Header = ({
   isBeta?: boolean;
   docLinks: DocLinksStart;
 }) => {
-  const changeTitle =
-    useOpenSearchDashboards<DatasetManagmentContext>().services.chrome.docTitle.change;
+  const changeTitle = useOpenSearchDashboards<DatasetManagmentContext>().services.chrome.docTitle
+    .change;
   const createDatasetHeader = i18n.translate('datasetManagement.createDatasetHeader', {
     defaultMessage: 'Create {datasetName}',
     values: { datasetName },

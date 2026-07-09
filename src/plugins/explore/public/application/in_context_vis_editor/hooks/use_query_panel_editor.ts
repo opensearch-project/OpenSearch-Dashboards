@@ -140,12 +140,13 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
   );
 
   const suggestionProvider = useMemo(() => {
-    const languageTriggerCharacters =
-      services?.data?.autocomplete?.getTriggerCharacters(queryLanguage);
+    const languageTriggerCharacters = services?.data?.autocomplete?.getTriggerCharacters(
+      queryLanguage
+    );
     return {
       triggerCharacters: isPromptMode
         ? ['=']
-        : (languageTriggerCharacters ?? DEFAULT_TRIGGER_CHARACTERS),
+        : languageTriggerCharacters ?? DEFAULT_TRIGGER_CHARACTERS,
       provideCompletionItems,
     };
   }, [isPromptMode, provideCompletionItems, queryLanguage, services]);

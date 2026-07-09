@@ -34,10 +34,10 @@ import { buildPhraseFilter, buildQueryFilter } from '../filters';
 import { IFieldType, IIndexPattern } from '../../index_patterns';
 
 describe('handleNestedFilter', function () {
-  const indexPattern: IIndexPattern = {
+  const indexPattern: IIndexPattern = ({
     id: 'logstash-*',
     fields,
-  } as unknown as IIndexPattern;
+  } as unknown) as IIndexPattern;
 
   it("should return the filter's query wrapped in nested query if the target field is nested", () => {
     const field = getField('nestedField.child');

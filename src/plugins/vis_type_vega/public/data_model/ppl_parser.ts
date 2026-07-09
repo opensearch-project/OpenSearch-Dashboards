@@ -20,10 +20,7 @@ const getRequestName = (request: PPLQueryRequest, index: number) =>
   });
 
 export class PPLQueryParser {
-  constructor(
-    private readonly timeCache: TimeCache,
-    private readonly searchAPI: SearchAPI
-  ) {
+  constructor(private readonly timeCache: TimeCache, private readonly searchAPI: SearchAPI) {
     this.searchAPI = searchAPI;
   }
 

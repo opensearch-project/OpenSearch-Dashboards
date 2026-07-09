@@ -43,7 +43,7 @@ import { AggParamType } from './param_types/agg';
 
 export interface AggTypeConfig<
   TAggConfig extends AggConfig = AggConfig,
-  TParam extends AggParamType<TAggConfig> = AggParamType<TAggConfig>,
+  TParam extends AggParamType<TAggConfig> = AggParamType<TAggConfig>
 > {
   name: string;
   title: string;
@@ -78,7 +78,7 @@ export type IAggType = AggType;
 
 export class AggType<
   TAggConfig extends AggConfig = AggConfig,
-  TParam extends AggParamType<TAggConfig> = AggParamType<TAggConfig>,
+  TParam extends AggParamType<TAggConfig> = AggParamType<TAggConfig>
 > {
   /**
    * the unique, unchanging, name that we have assigned this aggType

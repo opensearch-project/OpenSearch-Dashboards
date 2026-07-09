@@ -66,7 +66,7 @@ describe('promql code_completion', () => {
 
     const mockTimeRange = { from: 'now-15m', to: 'now' };
 
-    const mockServices = {
+    const mockServices = ({
       appName: 'test-app',
       data: {
         resourceClientFactory: {
@@ -80,7 +80,7 @@ describe('promql code_completion', () => {
           },
         },
       },
-    } as unknown as IDataPluginServices;
+    } as unknown) as IDataPluginServices;
 
     const mockPosition = {
       lineNumber: 1,
@@ -137,12 +137,12 @@ describe('promql code_completion', () => {
     it('should return empty array when required parameters are missing', async () => {
       const result = await getSuggestions({
         query: '',
-        indexPattern: null as unknown as IndexPattern,
+        indexPattern: (null as unknown) as IndexPattern,
         position: mockPosition,
         language: 'SQL',
         selectionStart: 0,
         selectionEnd: 0,
-        services: null as unknown as IDataPluginServices,
+        services: (null as unknown) as IDataPluginServices,
       });
 
       expect(result).toEqual([]);

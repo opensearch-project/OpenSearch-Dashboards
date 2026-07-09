@@ -215,7 +215,7 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
             ...timeFields.map((timeField: TimeFieldConfig) => ({
               text: timeField.display,
               value: timeField.fieldName,
-              disabled: (timeFields as unknown as TimeFieldConfig).isDisabled,
+              disabled: ((timeFields as unknown) as TimeFieldConfig).isDisabled,
             })),
           ]
         : [];

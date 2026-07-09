@@ -193,7 +193,8 @@ export function defineRoutes(
   logger: Logger,
   agUiUrl?: string,
   getCapabilitiesResolver?: () =>
-    ((request: OpenSearchDashboardsRequest) => Promise<Capabilities>) | undefined,
+    | ((request: OpenSearchDashboardsRequest) => Promise<Capabilities>)
+    | undefined,
   mlCommonsAgentId?: string,
   observabilityAgentId?: string,
   forwardCredentials?: boolean,

@@ -66,10 +66,8 @@ export interface StartDeps {
 }
 
 /** @internal */
-export class HttpService implements CoreService<
-  InternalHttpServiceSetup,
-  InternalHttpServiceStart
-> {
+export class HttpService
+  implements CoreService<InternalHttpServiceSetup, InternalHttpServiceStart> {
   private readonly httpServer: HttpServer;
   private readonly httpsRedirectServer: HttpsRedirectServer;
   private readonly config$: Observable<HttpConfig>;

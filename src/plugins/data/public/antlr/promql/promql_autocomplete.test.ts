@@ -30,11 +30,11 @@ describe('Token Dictionary and Ignored Tokens', () => {
 describe('processVisitedRules', () => {
   // createTokenStream takes a list of 'tokens' defined only by its type or an actual object to be returned as the Token
   const createTokenStream = (list: Array<number | { type: number; text: string }>) =>
-    ({
+    (({
       get: jest.fn((num: number) =>
         typeof list[num] === 'number' ? { type: list[num] } : list[num]
       ),
-    }) as unknown as TokenStream;
+    } as unknown) as TokenStream);
 
   it('should set the correct suggestions based on the rules visited', () => {
     const mockRules = new Map();
@@ -138,7 +138,7 @@ describe('getParseTree', () => {
       expression: jest.fn().mockReturnValue('expressionTree'),
     };
 
-    expect(getParseTree(mockParser as unknown as PromQLParser)).toBe('expressionTree');
+    expect(getParseTree((mockParser as unknown) as PromQLParser)).toBe('expressionTree');
     expect(mockParser.expression).toHaveBeenCalled();
   });
 });
@@ -149,7 +149,7 @@ describe('enrichAutocompleteResult', () => {
     const rules: c3.CandidatesCollection['rules'] = new Map([
       [17, { startTokenIndex: 0, ruleList: [] }],
     ]);
-    const tokenStream = null as unknown as TokenStream;
+    const tokenStream = (null as unknown) as TokenStream;
     const cursorTokenIndex = 0;
     const cursor = { line: 1, column: 1 };
 
@@ -164,11 +164,11 @@ describe('enrichAutocompleteResult', () => {
     const result = enrichAutocompleteResult(
       baseResult,
       rules,
-      tokenStream as unknown as TokenStream,
+      (tokenStream as unknown) as TokenStream,
       cursorTokenIndex,
       cursor,
-      undefined as unknown as string,
-      undefined as unknown as ParseTree
+      (undefined as unknown) as string,
+      (undefined as unknown) as ParseTree
     );
 
     expect(result.suggestLabelValues).toEqual({
@@ -181,7 +181,7 @@ describe('enrichAutocompleteResult', () => {
   it('should handle errors gracefully and return base result', () => {
     const baseResult = { errors: [], suggestKeywords: [] };
     const rules = new Map();
-    const tokenStream = null as unknown as TokenStream;
+    const tokenStream = (null as unknown) as TokenStream;
     const cursorTokenIndex = 0;
     const cursor = { line: 1, column: 1 };
 
@@ -190,11 +190,11 @@ describe('enrichAutocompleteResult', () => {
     const result = enrichAutocompleteResult(
       baseResult,
       rules,
-      tokenStream as unknown as TokenStream,
+      (tokenStream as unknown) as TokenStream,
       cursorTokenIndex,
       cursor,
-      undefined as unknown as string,
-      undefined as unknown as ParseTree
+      (undefined as unknown) as string,
+      (undefined as unknown) as ParseTree
     );
 
     expect(result).toMatchObject(baseResult);

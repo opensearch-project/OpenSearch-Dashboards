@@ -31,7 +31,9 @@
 import { ExpressionValue, ExpressionValueError } from '../expression_types';
 
 export type ExpressionAstNode =
-  ExpressionAstExpression | ExpressionAstFunction | ExpressionAstArgument;
+  | ExpressionAstExpression
+  | ExpressionAstFunction
+  | ExpressionAstArgument;
 
 export interface ExpressionAstExpression {
   type: 'expression';

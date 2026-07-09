@@ -49,10 +49,8 @@ export type SearchableListContainerFactory = EmbeddableFactory<
   SearchableContainerInput,
   ContainerOutput
 >;
-export class SearchableListContainerFactoryDefinition implements EmbeddableFactoryDefinition<
-  SearchableContainerInput,
-  ContainerOutput
-> {
+export class SearchableListContainerFactoryDefinition
+  implements EmbeddableFactoryDefinition<SearchableContainerInput, ContainerOutput> {
   public readonly type = SEARCHABLE_LIST_CONTAINER;
   public readonly isContainerType = true;
 

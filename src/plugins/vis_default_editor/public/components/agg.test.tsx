@@ -62,7 +62,7 @@ describe('DefaultEditorAgg component', () => {
       agg: {
         id: '1',
         brandNew: true,
-        getIndexPattern: () => ({}) as IndexPattern,
+        getIndexPattern: () => ({} as IndexPattern),
         schema: 'metric',
         title: 'Metrics',
         params: {},
@@ -270,10 +270,9 @@ describe('DefaultEditorAgg component', () => {
       expect(compHistogram.find(DefaultEditorAggParams).props()).toHaveProperty('disabledParams', [
         'min_doc_count',
       ]);
-      expect(compDateHistogram.find(DefaultEditorAggParams).props()).toHaveProperty(
-        'disabledParams',
-        ['min_doc_count']
-      );
+      expect(
+        compDateHistogram.find(DefaultEditorAggParams).props()
+      ).toHaveProperty('disabledParams', ['min_doc_count']);
     });
 
     it('should set error when agg is not histogram or date_histogram', () => {

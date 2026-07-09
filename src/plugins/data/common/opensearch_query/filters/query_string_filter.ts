@@ -52,4 +52,4 @@ export const buildQueryFilter = (query: QueryStringFilter['query'], index: strin
       index,
       alias,
     },
-  }) as QueryStringFilter;
+  } as QueryStringFilter);

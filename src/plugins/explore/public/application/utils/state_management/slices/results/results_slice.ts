@@ -52,7 +52,7 @@ const extractMetadata = (result: ISearchResult): ResultMetadata => ({
   total:
     typeof result.hits?.total === 'number'
       ? result.hits.total
-      : ((result.hits?.total as any)?.value ?? 0),
+      : (result.hits?.total as any)?.value ?? 0,
   elapsedMs: result.elapsedMs,
   fieldSchema: result.fieldSchema,
   instantFieldSchema: (result as IPrometheusSearchResult).instantFieldSchema,

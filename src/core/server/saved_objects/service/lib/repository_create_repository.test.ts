@@ -78,8 +78,9 @@ describe('SavedObjectsRepository#createRepository', () => {
   });
 
   const migrator = mockOpenSearchDashboardsMigrator.create({ types: typeRegistry.getAllTypes() });
-  const RepositoryConstructor =
-    SavedObjectsRepository as unknown as jest.Mock<SavedObjectsRepository>;
+  const RepositoryConstructor = (SavedObjectsRepository as unknown) as jest.Mock<
+    SavedObjectsRepository
+  >;
 
   beforeEach(() => {
     RepositoryConstructor.mockClear();
@@ -88,7 +89,7 @@ describe('SavedObjectsRepository#createRepository', () => {
   it('should not allow a repository with an undefined type', () => {
     try {
       originalRepository.createRepository(
-        migrator as unknown as OpenSearchDashboardsMigrator,
+        (migrator as unknown) as OpenSearchDashboardsMigrator,
         typeRegistry,
         '.opensearch_dashboards_test',
         callAdminCluster,
@@ -103,7 +104,7 @@ describe('SavedObjectsRepository#createRepository', () => {
 
   it('should create a repository without hidden types', () => {
     const repository = originalRepository.createRepository(
-      migrator as unknown as OpenSearchDashboardsMigrator,
+      (migrator as unknown) as OpenSearchDashboardsMigrator,
       typeRegistry,
       '.opensearch_dashboards_test',
       callAdminCluster,
@@ -121,7 +122,7 @@ describe('SavedObjectsRepository#createRepository', () => {
 
   it('should create a repository with a unique list of hidden types', () => {
     const repository = originalRepository.createRepository(
-      migrator as unknown as OpenSearchDashboardsMigrator,
+      (migrator as unknown) as OpenSearchDashboardsMigrator,
       typeRegistry,
       '.opensearch_dashboards_test',
       callAdminCluster,

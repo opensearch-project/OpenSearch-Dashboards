@@ -22,7 +22,7 @@ jest.mock('./application/legacy/discover/opensearch_dashboards_services', () => 
 }));
 
 const createMockPlugins = (): ExploreStartDependencies =>
-  ({
+  (({
     data: {
       indexPatterns: {},
       search: {},
@@ -44,7 +44,7 @@ const createMockPlugins = (): ExploreStartDependencies =>
     embeddable: {},
     expressions: {},
     dashboard: {},
-  }) as unknown as ExploreStartDependencies;
+  } as unknown) as ExploreStartDependencies);
 
 const createMockInitializerContext = (sqlSupportEnabled: boolean) => ({
   config: {

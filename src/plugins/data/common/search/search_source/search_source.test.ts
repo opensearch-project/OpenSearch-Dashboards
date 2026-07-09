@@ -47,27 +47,27 @@ const getComputedFields = () => ({
 const mockSource = { excludes: ['foo-*'] };
 const mockSource2 = { excludes: ['bar-*'] };
 
-const indexPattern = {
+const indexPattern = ({
   title: 'foo',
   getComputedFields,
   getSourceFiltering: () => mockSource,
-} as unknown as IndexPattern;
+} as unknown) as IndexPattern;
 
-const indexPattern2 = {
+const indexPattern2 = ({
   title: 'foo',
   getComputedFields,
   getSourceFiltering: () => mockSource2,
-} as unknown as IndexPattern;
+} as unknown) as IndexPattern;
 
 const dataSourceId = 'dataSourceId';
-const indexPattern3 = {
+const indexPattern3 = ({
   dataSourceRef: {
     id: dataSourceId,
     type: 'dataSource',
   },
   getComputedFields,
   getSourceFiltering: () => mockSource,
-} as unknown as IndexPattern;
+} as unknown) as IndexPattern;
 
 describe('SearchSource', () => {
   let mockSearchMethod: any;

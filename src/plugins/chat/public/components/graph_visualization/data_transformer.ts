@@ -235,7 +235,9 @@ export function transformPrometheusData(data: PrometheusData): NormalizedSeries[
  * @param data - Input data to validate
  * @returns Object indicating data type and validity
  */
-export function validateInputData(data: any): {
+export function validateInputData(
+  data: any
+): {
   isValid: boolean;
   type: 'simple' | 'prometheus' | 'unknown';
   error?: string;
@@ -363,7 +365,9 @@ export function transformGraphData(args: GraphTimeseriesDataArgs): Transformatio
  * @param series - Array of normalized series
  * @returns Statistics about the data
  */
-export function getDataStatistics(series: NormalizedSeries[]): {
+export function getDataStatistics(
+  series: NormalizedSeries[]
+): {
   totalSeries: number;
   totalDataPoints: number;
   timeRange: { start: Date | null; end: Date | null };

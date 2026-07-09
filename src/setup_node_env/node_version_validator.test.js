@@ -80,8 +80,7 @@ const allPossibleOperators = [
 ];
 
 // Regex pattern to parse test titles which gets used to create new versions
-const testTitleMatcher =
-  /(?:(major|minor|patch)\s+(upgrade|downgrade)|(higher|lower)\s+(major|minor|patch))/g;
+const testTitleMatcher = /(?:(major|minor|patch)\s+(upgrade|downgrade)|(higher|lower)\s+(major|minor|patch))/g;
 const testTitleChanges = {
   upgrade: 1,
   downgrade: -1,

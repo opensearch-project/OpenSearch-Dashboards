@@ -1119,9 +1119,8 @@ describe('ChatWindow', () => {
       };
 
       // Mock the AssistantActionService.getInstance to return our mock
-      const AssistantActionService = jest.requireMock(
-        '../../../context_provider/public'
-      ).AssistantActionService;
+      const AssistantActionService = jest.requireMock('../../../context_provider/public')
+        .AssistantActionService;
       AssistantActionService.getInstance = jest.fn(() => mockService);
 
       renderWithContext(<ChatWindow onClose={jest.fn()} />);

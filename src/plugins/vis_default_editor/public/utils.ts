@@ -53,26 +53,23 @@ export type ComboBoxGroupedOptions<T> = Array<GroupOrOption<T>>;
 export function groupAndSortBy<
   T extends Record<TGroupBy | TLabelName, string>,
   TGroupBy extends string = 'type',
-  TLabelName extends string = 'title',
+  TLabelName extends string = 'title'
 >(objects: T[], groupBy: TGroupBy, labelName: TLabelName): ComboBoxGroupedOptions<T> {
-  const groupedOptions = objects.reduce(
-    (array, obj) => {
-      const group = array.find((element) => element.label === obj[groupBy]);
-      const option = {
-        label: obj[labelName],
-        target: obj,
-      };
+  const groupedOptions = objects.reduce((array, obj) => {
+    const group = array.find((element) => element.label === obj[groupBy]);
+    const option = {
+      label: obj[labelName],
+      target: obj,
+    };
 
-      if (group && group.options) {
-        group.options.push(option);
-      } else {
-        array.push({ label: obj[groupBy], options: [option] });
-      }
+    if (group && group.options) {
+      group.options.push(option);
+    } else {
+      array.push({ label: obj[groupBy], options: [option] });
+    }
 
-      return array;
-    },
-    [] as Array<ComboBoxGroupedOption<T>>
-  );
+    return array;
+  }, [] as Array<ComboBoxGroupedOption<T>>);
 
   groupedOptions.sort(sortByLabel);
 

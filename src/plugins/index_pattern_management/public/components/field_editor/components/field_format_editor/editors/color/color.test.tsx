@@ -53,7 +53,7 @@ describe('ColorFormatEditor', () => {
     const component = shallowWithI18nProvider(
       <ColorFormatEditor
         fieldType={fieldType}
-        format={format as unknown as FieldFormat}
+        format={(format as unknown) as FieldFormat}
         formatParams={formatParams}
         onChange={onChange}
         onError={onError}
@@ -67,7 +67,7 @@ describe('ColorFormatEditor', () => {
     const component = shallowWithI18nProvider(
       <ColorFormatEditor
         fieldType={'number'}
-        format={format as unknown as FieldFormat}
+        format={(format as unknown) as FieldFormat}
         formatParams={formatParams}
         onChange={onChange}
         onError={onError}
@@ -81,7 +81,7 @@ describe('ColorFormatEditor', () => {
     const component = shallowWithI18nProvider(
       <ColorFormatEditor
         fieldType={fieldType}
-        format={format as unknown as FieldFormat}
+        format={(format as unknown) as FieldFormat}
         formatParams={{ colors: [...formatParams.colors, ...formatParams.colors] }}
         onChange={onChange}
         onError={onError}
