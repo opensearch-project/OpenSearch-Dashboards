@@ -26,7 +26,7 @@ import { TimeRange } from '../../../../data/common';
 import { ITransformationService } from '../data_transformations/types';
 import { createNoOpTransformationService } from '../data_transformations/transformation_service';
 
-interface VisState {
+export interface VisState {
   styleOptions?: StyleOptions;
   chartType?: string;
   axesMapping?: AxisFieldNameMappings;
@@ -80,12 +80,12 @@ export class VisualizationBuilder {
     return this.transformationService;
   }
 
-  init() {
+  init(initState?: VisState) {
     if (this.isInitialized) {
       return;
     }
 
-    let state: VisState = {};
+    let state: VisState = { ...initState };
 
     // Read state from url
     const urlStateStorage = this.getUrlStateStorage?.();

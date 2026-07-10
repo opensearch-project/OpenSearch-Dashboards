@@ -213,9 +213,11 @@ export const adaptLegacyData = (config?: ChartConfig) => {
 
   if (transformedConfig.type === 'line' || transformedConfig.type === 'area') {
     const standardAxes: StandardAxes[] = [];
-    const { valueAxes, categoryAxes } = transformedConfig.styles as
+    const styles = transformedConfig.styles as
       | AreaChartStyleOptions
-      | LineChartStyleOptions;
+      | LineChartStyleOptions
+      | undefined;
+    const { valueAxes, categoryAxes } = styles || {};
     if (categoryAxes || valueAxes) {
       transformedConfig = {
         ...transformedConfig,

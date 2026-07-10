@@ -19,6 +19,14 @@ jest.mock('react-redux', () => ({
   useSelector: jest.fn(),
 }));
 
+jest.mock('../../application/utils/hooks/use_current_explore_id', () => ({
+  useCurrentExploreId: jest.fn(() => undefined),
+}));
+
+jest.mock('../../application/utils/hooks/use_saved_explore', () => ({
+  useSavedExplore: jest.fn(() => ({ savedExplore: undefined })),
+}));
+
 jest.mock('../../application/utils/hooks/use_tab_results', () => ({
   useTabResults: jest.fn(() => ({
     results: {
