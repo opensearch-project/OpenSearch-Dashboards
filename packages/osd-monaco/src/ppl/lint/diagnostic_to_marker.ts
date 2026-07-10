@@ -70,9 +70,11 @@ export function diagnosticToMarker(diagnostic: Diagnostic): monaco.editor.IMarke
   // does not survive Monaco's MarkerService rebuild; language.ts moves it into
   // the fix side table before calling setModelMarkers.
   if (diagnostic.fix) {
-    (marker as monaco.editor.IMarkerData & {
-      fix?: { title: string; text: string; range?: MonacoRange };
-    }).fix = {
+    (
+      marker as monaco.editor.IMarkerData & {
+        fix?: { title: string; text: string; range?: MonacoRange };
+      }
+    ).fix = {
       title: diagnostic.fix.title,
       text: diagnostic.fix.text,
       range: diagnostic.fix.range ? toMonacoRange(diagnostic.fix.range) : undefined,

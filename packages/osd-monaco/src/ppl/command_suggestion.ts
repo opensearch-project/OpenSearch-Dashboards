@@ -150,7 +150,7 @@ const KEYWORD_SYMBOLIC_RE = /^[A-Z][A-Z0-9]*$/;
 function isParser<T extends ATNSimulator>(
   recognizer: Recognizer<T>
 ): recognizer is Recognizer<T> & Parser {
-  return typeof ((recognizer as unknown) as Parser).getExpectedTokens === 'function';
+  return typeof (recognizer as unknown as Parser).getExpectedTokens === 'function';
 }
 
 /**
@@ -310,8 +310,8 @@ export function buildCommandSuggestion<S extends Token, T extends ATNSimulator>(
     followSetCommands && followSetCommands.size > 0
       ? followSetCommands
       : offendingFollowsPipe(recognizer, offendingSymbol)
-      ? validCommands
-      : undefined;
+        ? validCommands
+        : undefined;
 
   if (!candidates || candidates.size === 0) {
     return undefined; // not a command position.

@@ -17,10 +17,10 @@ import {
 
 type LintMarker = monaco.editor.IMarkerData;
 
-const model = ({
+const model = {
   uri: monaco.Uri.parse('inmemory://model/q.ppl'),
   getVersionId: () => 1,
-} as unknown) as monaco.editor.ITextModel;
+} as unknown as monaco.editor.ITextModel;
 
 function makeMarker(overrides: Partial<LintMarker> = {}): LintMarker {
   return {
@@ -48,10 +48,10 @@ function provide(markers: LintMarker[]) {
     model,
     {} as monaco.Range,
     { markers, only: undefined, trigger: 1 } as monaco.languages.CodeActionContext,
-    ({
+    {
       isCancellationRequested: false,
       onCancellationRequested: () => ({ dispose() {} }),
-    } as unknown) as monaco.CancellationToken
+    } as unknown as monaco.CancellationToken
   ) as monaco.languages.CodeActionList;
   return result.actions;
 }

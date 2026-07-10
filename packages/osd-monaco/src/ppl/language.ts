@@ -209,7 +209,7 @@ const processSyntaxHighlighting = async (model: monaco.editor.IModel) => {
         const isSuppressedSuggestion =
           !commandSuggestionEnabled && error.code === 'UNKNOWN_COMMAND';
         const effectiveMessage = isSuppressedSuggestion
-          ? error.rawMessage ?? error.message
+          ? (error.rawMessage ?? error.message)
           : error.message;
         const effectiveFix = isSuppressedSuggestion ? undefined : error.fix;
 

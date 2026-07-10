@@ -121,7 +121,7 @@ describe('buildCommandSuggestion via PPLLanguageAnalyzer.validate (compiled path
     // offending symbol also bails. Exercise the direct guards.
     expect(
       buildCommandSuggestion(
-        ({ vocabulary: { getSymbolicName: () => null } } as unknown) as any,
+        { vocabulary: { getSymbolicName: () => null } } as unknown as any,
         null,
         null
       )
