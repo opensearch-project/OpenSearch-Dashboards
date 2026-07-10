@@ -40,13 +40,13 @@ export const updateDashboardAdminStateForRequest = (
   const normalizedConfigUsers = Array.isArray(configUsers)
     ? configUsers
     : configUsers
-    ? [configUsers]
-    : [];
+      ? [configUsers]
+      : [];
   const normalizedConfigGroups = Array.isArray(configGroups)
     ? configGroups
     : configGroups
-    ? [configGroups]
-    : [];
+      ? [configGroups]
+      : [];
   // If the security plugin is not installed, login defaults to OSD Admin
   if (!groups.length && !users.length) {
     return updateWorkspaceState(request, { isDashboardAdmin: true });
