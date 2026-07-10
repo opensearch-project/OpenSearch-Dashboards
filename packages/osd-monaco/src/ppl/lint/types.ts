@@ -46,6 +46,13 @@ export interface LintPayloadContext {
 export interface LintRunContext extends LintPayloadContext {
   dataSourceId?: string;
   dataSourceVersion?: string;
+  /**
+   * Original source text, used by detectors that need a narrow text-side
+   * fallback on the compiled grammar surface (e.g. field-validation's field-slot
+   * shape pass, which cannot read `grok field=body` off the simplified parse
+   * tree). Set by `PPLLanguageAnalyzer.lint`; absent on the runtime bridge path.
+   */
+  sourceText?: string;
   grammarSurface?: 'compiled-simplified' | 'runtime-bundle';
   grammarHash?: string;
 }

@@ -123,9 +123,22 @@ describe('field-slot shape (runtime-bundle proxy)', () => {
   });
 
   describe('surface gate', () => {
-    it('defers on the compiled-simplified surface (syntax channel owns it)', () => {
-      // Even on a tree that contains the misparse, an explicit simplified
-      // surface suppresses the shape pass.
+    it('uses source text on the compiled-simplified surface', () => {
+      const query = 'source=t | grok field=body "x"';
+      const tree = buildTree(query);
+      const diags = fieldValidationDetector(
+        tree,
+        config,
+        { grammarSurface: 'compiled-simplified', sourceText: query },
+        ruleNameToIndex
+      );
+
+      expect(diags).toHaveLength(1);
+      expect(diags[0].severity).toBe(config.severity);
+      expect(diags[0].fix?.text).toBe('body');
+    });
+
+    it('self-suppresses on compiled-simplified when source text is absent', () => {
       expect(shapeDiagnostics('source=t | grok field=body "x"', 'compiled-simplified')).toEqual([]);
     });
   });

@@ -6,6 +6,7 @@
 import type { ParserRuleContext, ParseTree } from 'antlr4ng';
 import { isRuleNode } from '../rule_index';
 import { Diagnostic, DiagnosticRange } from '../diagnostic';
+import { findCompiledFieldSlotShapeMatches } from '../field_slot_shape_text';
 import { CatalogEntry, Detector, LintRunContext } from '../types';
 import { buildPipelineShape, collectAlternateSourceSubtrees } from '../pipeline_shape';
 import {
@@ -383,6 +384,44 @@ function detectFieldSlotShape(
 }
 
 /**
+ * Compiled-surface counterpart to `detectFieldSlotShape`. On the simplified
+ * grammar `grok field=body` error-recovers and can't be recognized off the
+ * parse tree, so scan the raw source text for exactly that one backend-accepted
+ * typo. Fires only when `sourceText` is present (the analyzer sets it).
+ */
+function detectCompiledFieldSlotShape(
+  sourceText: string | undefined,
+  config: CatalogEntry
+): Diagnostic[] {
+  if (!sourceText) {
+    return [];
+  }
+
+  return findCompiledFieldSlotShapeMatches(sourceText).map((match) => ({
+    ruleId: config.id,
+    // Honor the rule's single severity toggle (catalog default is `error`),
+    // matching the runtime shape pass — not a hard-coded `error` — so a user who
+    // downgrades field-validation to `warning` sees it consistently on both
+    // grammar surfaces.
+    severity: config.severity,
+    // Same generic wording as the runtime shape pass. It flags any non-bare-field
+    // shape, so it avoids a Splunk-specific message.
+    message: `${match.keyword} expects a field name here, not an expression.`,
+    range: match.range,
+    docUrl: SHAPE_DOC_URL[match.commandName] ?? config.docUrl,
+    hoverFacts: { field: match.expressionText },
+    ...(match.replacement
+      ? {
+          fix: {
+            title: `Remove "field=" (use "${match.replacement}")`,
+            text: match.replacement,
+          },
+        }
+      : {}),
+  }));
+}
+
+/**
  * Does `inner` fall entirely within `outer` (same or tighter span)? Used to drop
  * an existence finding that the shape pass already covers — e.g. on
  * `grok field=body`, the existence pass would otherwise also flag the misparsed
@@ -428,13 +467,14 @@ function suppressContained(
  * PASS 3 suppresses an existence finding the shape pass already covers.
  */
 export const fieldValidationDetector: Detector = (tree, config, context, ruleNameToIndex) => {
-  // PASS 1 — shape. Needs no field list. Defer on the simplified surface (its
-  // error-recovery makes `field=` a syntax error already); the implicit
-  // zero-structure check in `detectFieldSlotShape` is the fallback for callers
-  // that don't declare a surface.
+  // PASS 1 — shape. Needs no field list. On the runtime bundle read it off the
+  // parse tree; on the compiled-simplified surface the same input error-recovers
+  // and can't be read off the tree, so scan the source text for the one
+  // backend-accepted `field=` typo instead. Callers that declare no surface
+  // (unit tests, older callers) fall through to the tree-based pass.
   const shapeDiagnostics =
     context.grammarSurface === 'compiled-simplified'
-      ? []
+      ? detectCompiledFieldSlotShape(context.sourceText, config)
       : detectFieldSlotShape(tree, config, ruleNameToIndex);
 
   // PASS 2 — existence (self-gates on empty fields).
