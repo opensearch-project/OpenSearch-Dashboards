@@ -532,6 +532,11 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       // Stop any ongoing streaming before starting a new chat
       stopStreaming();
 
+      // Clear all event handler state (pending tool calls, assistant messages,
+      // and toolCallStates) so stale pending/executing entries from the previous
+      // run do not keep the input disabled in the new conversation.
+      eventHandler.clearState();
+
       chatService.newThread();
       setTimeline([]);
       setCurrentRunId(null);
@@ -540,7 +545,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       setAvailableDataSources([]);
       confirmationService.cleanAll();
       setShowHistory(false);
-    }, [chatService, confirmationService, stopStreaming]);
+    }, [chatService, confirmationService, eventHandler, stopStreaming]);
 
     const handleStop = useCallback(() => {
       stopStreaming();
