@@ -17,18 +17,27 @@ const PKG = require('../../package.json');
 
 const babelParser = require('@babel/eslint-parser');
 const tsParser = require('@typescript-eslint/parser');
-const tsPlugin = require('@typescript-eslint/eslint-plugin');
-const eslintCommentsPlugin = require('@eslint-community/eslint-plugin-eslint-comments');
-const importPlugin = require('eslint-plugin-import-x');
-const jestPlugin = require('eslint-plugin-jest');
-const jsxA11yPlugin = require('eslint-plugin-jsx-a11y');
-const _mochaRaw = require('eslint-plugin-mocha');
-const mochaPlugin = _mochaRaw.default || _mochaRaw;
-const noUnsanitizedPlugin = require('eslint-plugin-no-unsanitized');
-const reactPlugin = require('eslint-plugin-react');
-const reactHooksPlugin = require('eslint-plugin-react-hooks');
-const prettierPlugin = require('eslint-plugin-prettier');
-const osdEslintPlugin = require('@osd/eslint-plugin-eslint');
+
+// Plugin instances live in a single module (plugins.js) so they are registered
+// in exactly one place. `globalPluginRegistration` is an unscoped config object
+// that registers every plugin up front: because it is the first entry in the
+// exported array below, any config object that a consumer appends can reference
+// any plugin's rules (`@typescript-eslint/*`, `jest/*`, `react-hooks/*`,
+// `@osd/eslint/*`, ...) regardless of its `files` scope, without re-registering.
+const {
+  globalPluginRegistration,
+  tsPlugin,
+  eslintCommentsPlugin,
+  importPlugin,
+  jestPlugin,
+  jsxA11yPlugin,
+  mochaPlugin,
+  noUnsanitizedPlugin,
+  reactPlugin,
+  reactHooksPlugin,
+  prettierPlugin,
+  osdEslintPlugin,
+} = require('./plugins');
 
 const RESTRICTED_GLOBALS = require('./restricted_globals');
 const RESTRICTED_MODULES = { paths: ['gulp-util'] };
@@ -43,6 +52,11 @@ const reactVersion = semver.valid(semver.coerce(PKG.dependencies.react));
 const allowedNameRegexp = '^(UNSAFE_|_{1,3})|_{1,3}$';
 
 module.exports = defineConfig([
+  // ── Global plugin registration (must stay first) ──────────────────────────
+  // Registers every plugin in one unscoped object so downstream rule references
+  // resolve at any file scope. See plugins.js.
+  globalPluginRegistration,
+
   // ── JavaScript files ────────────────────────────────────────────────────
   {
     files: ['**/*.js'],
