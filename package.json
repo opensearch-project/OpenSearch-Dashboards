@@ -114,6 +114,7 @@
     "osd:ciGroup22Explore": "echo \"cypress/integration/core_opensearch_dashboards/opensearch_dashboards/apps/explore/22/*.spec.js\"",
     "osd:ciGroup23Explore": "echo \"cypress/integration/core_opensearch_dashboards/opensearch_dashboards/apps/explore/23/*.spec.js\"",
     "osd:ciGroupS3Explore": "echo \"cypress/integration/core_opensearch_dashboards/opensearch_dashboards/apps/explore/s3_tests/*.spec.js\"",
+    "osd:ciGroupDashboards": "echo \"cypress/integration/core_opensearch_dashboards/opensearch_dashboards/apps/dashboards/*.spec.js\"",
     "osd:ciGroup1Observability": "echo \"cypress/integration/core_opensearch_dashboards/opensearch_dashboards/apps/observability/1/*.spec.js\"",
     "osd:ciGroup2Observability": "echo \"cypress/integration/core_opensearch_dashboards/opensearch_dashboards/apps/observability/2/*.spec.js\"",
     "generate:grammars": "yarn workspace @osd/antlr-grammar generate:all",
