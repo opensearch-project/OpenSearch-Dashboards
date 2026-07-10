@@ -27,7 +27,7 @@ import {
 import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
 import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
-import { stringify } from 'query-string';
+import qs from 'query-string';
 import rison from 'rison-node';
 import { lazy } from 'react';
 import { DataPublicPluginStart, DataPublicPluginSetup, opensearchFilters } from '../../data/public';
@@ -220,7 +220,7 @@ export class DiscoverPlugin implements Plugin<
           queryString.getLanguageService().getLanguage(queryString.getQuery().language)
             ?.showDocLinks ?? undefined;
 
-        const hash = stringify(
+        const hash = qs.stringify(
           url.encodeQuery({
             _g: rison.encode({
               filters: globalFilters || [],
