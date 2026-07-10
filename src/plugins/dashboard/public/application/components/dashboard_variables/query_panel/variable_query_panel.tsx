@@ -200,9 +200,10 @@ export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
     [previewOptionsResult.options, regex]
   );
 
-  const previewOptions = useMemo(() => filteredPreviewOptions.slice(0, MAX_PREVIEW_OPTIONS), [
-    filteredPreviewOptions,
-  ]);
+  const previewOptions = useMemo(
+    () => filteredPreviewOptions.slice(0, MAX_PREVIEW_OPTIONS),
+    [filteredPreviewOptions]
+  );
 
   const isTruncated = filteredPreviewOptions.length > MAX_PREVIEW_OPTIONS;
   const selectedValueField = valueField || availableFields[0];

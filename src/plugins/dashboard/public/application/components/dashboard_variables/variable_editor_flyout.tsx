@@ -133,10 +133,10 @@ export const VariableEditorFlyout: React.FC<VariableEditorFlyoutProps> = ({
       : false
   );
   const [valueField, setValueField] = useState(
-    existingVariable?.type === VariableType.Query ? existingVariable.valueField ?? '' : ''
+    existingVariable?.type === VariableType.Query ? (existingVariable.valueField ?? '') : ''
   );
   const [labelField, setLabelField] = useState(
-    existingVariable?.type === VariableType.Query ? existingVariable.labelField ?? '' : ''
+    existingVariable?.type === VariableType.Query ? (existingVariable.labelField ?? '') : ''
   );
 
   const [isSaving, setIsSaving] = useState(false);
