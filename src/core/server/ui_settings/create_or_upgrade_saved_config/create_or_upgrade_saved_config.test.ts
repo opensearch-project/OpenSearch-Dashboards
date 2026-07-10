@@ -55,7 +55,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
           type,
           id: options.id,
           version: 'foo',
-        } as any)
+        }) as any
     );
 
     async function run(options = {}) {

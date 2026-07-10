@@ -46,7 +46,7 @@ describe('AgentCardNode', () => {
       zIndex: 0,
       positionAbsoluteX: 0,
       positionAbsoluteY: 0,
-    } as any);
+    }) as any;
 
   it('renders title', () => {
     render(<AgentCardNode {...createNodeProps()} />);

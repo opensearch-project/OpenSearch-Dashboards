@@ -43,7 +43,7 @@ export const useDatasetFields = (
         const filteredDateFields = fields?.filter((field) => field.type === 'date') || [];
         setDateFields(filteredDateFields);
         setAllFields(fields || []);
-      } catch (error) {
+      } catch {
         // Handle error silently, reset fields
         setDateFields([]);
         setAllFields([]);

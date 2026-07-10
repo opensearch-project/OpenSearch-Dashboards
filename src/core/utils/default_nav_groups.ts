@@ -108,7 +108,5 @@ const defaultNavGroups = {
 } as const;
 
 /** @internal */
-export const DEFAULT_NAV_GROUPS: Record<
-  keyof typeof defaultNavGroups,
-  ChromeNavGroup
-> = Object.freeze(defaultNavGroups);
+export const DEFAULT_NAV_GROUPS: Record<keyof typeof defaultNavGroups, ChromeNavGroup> =
+  Object.freeze(defaultNavGroups);

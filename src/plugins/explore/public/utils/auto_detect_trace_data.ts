@@ -61,7 +61,7 @@ export async function detectTraceData(
         continue;
       }
     }
-  } catch (error) {
+  } catch {
     // If loading fails, continue with detection
   }
 
@@ -85,7 +85,7 @@ export async function detectTraceData(
       result.tracePattern = 'otel-v1-apm-span*';
       result.traceTimeField = 'endTime';
     }
-  } catch (error) {
+  } catch {
     // No matching indices found, continue
   }
 
@@ -109,7 +109,7 @@ export async function detectTraceData(
       result.logPattern = 'logs-otel-v1*';
       result.logTimeField = 'time';
     }
-  } catch (error) {
+  } catch {
     // No matching indices found
   }
 
@@ -152,12 +152,12 @@ export async function detectTraceDataAcrossDataSources(
           };
           results.push(detectionWithSource);
         }
-      } catch (error) {
+      } catch {
         // Skip this datasource if detection fails
         continue;
       }
     }
-  } catch (error) {
+  } catch {
     // If fetching data sources fails, fall through
   }
 
@@ -179,7 +179,7 @@ export async function detectTraceDataAcrossDataSources(
         };
         results.push(detectionWithSource);
       }
-    } catch (error) {
+    } catch {
       // Continue if local cluster check fails
     }
   }

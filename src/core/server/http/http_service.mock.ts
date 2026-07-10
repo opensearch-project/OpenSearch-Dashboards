@@ -93,7 +93,7 @@ const createAuthMock = () => {
 const createInternalSetupContractMock = () => {
   const mock: InternalHttpServiceSetupMock = {
     // we can mock other hapi server methods when we need it
-    server: ({
+    server: {
       name: 'http-server-test',
       version: 'opensearchDashboards',
       route: jest.fn(),
@@ -102,7 +102,7 @@ const createInternalSetupContractMock = () => {
       config: jest.fn().mockReturnValue(configMock.create()),
       ext: jest.fn(),
       // @ts-expect-error it thinks that `Server` isn't a `Construtable`
-    } as unknown) as jest.MockedClass<Server>,
+    } as unknown as jest.MockedClass<Server>,
     createCookieSessionStorageFactory: jest.fn(),
     registerOnPreRouting: jest.fn(),
     registerOnPreAuth: jest.fn(),

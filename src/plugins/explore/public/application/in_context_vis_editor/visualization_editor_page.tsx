@@ -64,13 +64,8 @@ export const VisualizationEditorPage = ({
 
   const [initialized, setInitialized] = useState(false);
 
-  const {
-    savedExplore,
-    savedQueryState,
-    savedVisConfig,
-    error,
-    isLoading,
-  } = useInitialSaveExplore();
+  const { savedExplore, savedQueryState, savedVisConfig, error, isLoading } =
+    useInitialSaveExplore();
 
   useEffect(() => {
     const init = async () => {

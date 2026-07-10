@@ -61,7 +61,7 @@ function findFile(paths: string[]) {
     try {
       accessSync(configPath, constants.R_OK);
       return true;
-    } catch (e) {
+    } catch {
       // Check the next path
     }
   });

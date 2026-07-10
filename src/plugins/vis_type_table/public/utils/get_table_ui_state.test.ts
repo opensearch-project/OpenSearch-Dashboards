@@ -12,11 +12,11 @@ describe('getTableUIState', () => {
   let tableUiState: TableUiState;
 
   beforeEach(() => {
-    uiState = ({
+    uiState = {
       get: jest.fn(),
       set: jest.fn(),
       emit: jest.fn(),
-    } as unknown) as PersistedState;
+    } as unknown as PersistedState;
     tableUiState = getTableUIState(uiState);
   });
 

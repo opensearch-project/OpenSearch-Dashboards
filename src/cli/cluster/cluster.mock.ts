@@ -28,8 +28,6 @@
  * under the License.
  */
 
-/* eslint-env jest */
-
 // eslint-disable-next-line max-classes-per-file
 import { EventEmitter } from 'events';
 import { assign, random } from 'lodash';

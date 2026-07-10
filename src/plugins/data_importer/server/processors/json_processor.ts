@@ -15,7 +15,7 @@ export class JSONProcessor implements IFileProcessor {
     try {
       const obj = JSON.parse(text);
       return obj && typeof obj === 'object' && isValidObject(obj);
-    } catch (e) {
+    } catch {
       return false;
     }
   }
@@ -34,7 +34,7 @@ export class JSONProcessor implements IFileProcessor {
           body: doc,
         });
         resolve(true);
-      } catch (e) {
+      } catch {
         resolve(false);
       }
     });

@@ -1,31 +1,19 @@
 # opensearch-eslint-config-opensearch-dashboards
 
-The eslint config used by the opensearch dashboards team
+The ESLint flat config used by the OpenSearch Dashboards team.
 
 ## Usage
 
-To use this eslint config, just install the peer dependencies and reference it
-in your `.eslintrc`:
+Install the peer dependencies listed in `package.json`, then spread this config
+into your `eslint.config.js`:
 
-```javascript
-{
-  extends: [
-    '@elastic/eslint-config-kibana'
-  ]
-}
+```js
+const osdConfig = require('@elastic/eslint-config-kibana');
+
+module.exports = [
+  ...osdConfig,
+  // your project-specific overrides
+];
 ```
 
-## Optional jest config
-
-If the project uses the [jest test runner](https://jestjs.io),
-the `@elastic/eslint-config-kibana/jest` config can be extended as well to use
-`eslint-plugin-jest` and add settings specific to it:
-
-```javascript
-{
-  extends: [
-    '@elastic/eslint-config-kibana',
-    '@elastic/eslint-config-kibana/jest'
-  ]
-}
-```
+Requires ESLint 10+ (flat config format).

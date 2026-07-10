@@ -241,7 +241,7 @@ const updateFieldValuesAsync = async (
       // Save the updated IndexPattern to cache
       getDataViews().saveToCache(indexPattern.id!, indexPattern as any);
     }
-  } catch (error) {
+  } catch {
     // Silently failing here not blocking the user
   }
 };
@@ -306,7 +306,7 @@ export const formatAvailableFieldsToSuggestions = (
 const singleParseQuery = <
   A extends AutocompleteResultBase,
   L extends LexerType,
-  P extends ParserType
+  P extends ParserType,
 >({
   Lexer,
   Parser,
@@ -342,7 +342,7 @@ const singleParseQuery = <
 
   const { tokens, rules } = core.collectCandidates(
     cursorTokenIndex,
-    (parseTree as unknown) as ParserRuleContext
+    parseTree as unknown as ParserRuleContext
   );
 
   tokens.forEach((producerRules, tokenType) => {
@@ -380,7 +380,7 @@ const singleParseQuery = <
 export const parseQuery = <
   A extends AutocompleteResultBase,
   L extends LexerType,
-  P extends ParserType
+  P extends ParserType,
 >({
   Lexer,
   Parser,
@@ -469,10 +469,10 @@ export const parseQuery = <
         case 'object':
           if (Array.isArray(value)) {
             const combined = [
-              ...(((result[field as keyof A] as unknown) as any[]) ?? []),
-              ...(((nextResult[field as keyof A] as unknown) as any[]) ?? []),
+              ...((result[field as keyof A] as unknown as any[]) ?? []),
+              ...((nextResult[field as keyof A] as unknown as any[]) ?? []),
             ];
-            ((result[field as keyof A] as unknown) as any[]) = combined.filter(
+            (result[field as keyof A] as unknown as any[]) = combined.filter(
               (item, index, self) => index === self.findIndex((other) => other.id === item.id)
             );
           }

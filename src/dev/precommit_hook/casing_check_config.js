@@ -55,6 +55,7 @@ export const IGNORE_FILE_GLOBS = [
   '.ci/pipeline-library/**/*',
   'release-notes/*',
   '**/antlr/**/.generated/**/*',
+  'packages/osd-antlr-grammar/src/**/.generated/**/*',
 
   // filename must match language code which requires capital letters
   '**/translations/*.json',

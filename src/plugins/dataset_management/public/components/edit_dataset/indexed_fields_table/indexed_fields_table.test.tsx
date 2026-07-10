@@ -27,13 +27,13 @@ const helpers = {
   getFieldInfo: () => [],
 };
 
-const dataset = ({
+const dataset = {
   getNonScriptedFields: () => fields,
-} as unknown) as DataView;
+} as unknown as DataView;
 
 const mockFieldToIndexPatternField = (spec: Record<string, string | boolean | undefined>) => {
   return new IndexPatternField(
-    (spec as unknown) as IndexPatternField['spec'],
+    spec as unknown as IndexPatternField['spec'],
     spec.displayName as string
   );
 };

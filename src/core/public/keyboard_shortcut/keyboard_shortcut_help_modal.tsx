@@ -43,21 +43,23 @@ const capitalizeFirstLetter = (str: string): string => {
 };
 
 const groupShortcutsByCategory = (shortcuts: ShortcutItem[]): Record<string, ShortcutItem[]> => {
-  return shortcuts.reduce((groups, shortcut) => {
-    const category = capitalizeFirstLetter(shortcut.category);
-    if (!groups[category]) {
-      groups[category] = [];
-    }
-    groups[category].push(shortcut);
-    return groups;
-  }, {} as Record<string, ShortcutItem[]>);
+  return shortcuts.reduce(
+    (groups, shortcut) => {
+      const category = capitalizeFirstLetter(shortcut.category);
+      if (!groups[category]) {
+        groups[category] = [];
+      }
+      groups[category].push(shortcut);
+      return groups;
+    },
+    {} as Record<string, ShortcutItem[]>
+  );
 };
 
 interface KeyboardShortcutHelpModalProps {
   trigger?: React.ReactElement;
   keyboardShortcutService?:
-    | KeyboardShortcutService
-    | { getAllShortcuts: () => ShortcutDefinition[] };
+    KeyboardShortcutService | { getAllShortcuts: () => ShortcutDefinition[] };
   /**
    * Whether this instance registers the global `shift+/` shortcut to open the
    * modal. Defaults to true. Set false when another always-mounted instance

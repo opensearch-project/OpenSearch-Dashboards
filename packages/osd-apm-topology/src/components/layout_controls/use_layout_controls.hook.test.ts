@@ -78,7 +78,7 @@ describe('useLayoutControls', () => {
 
   it('should handle layout change correctly', () => {
     const { result } = renderHook(() => useLayoutControls());
-    const mockEvent = ({ stopPropagation: jest.fn() } as unknown) as React.MouseEvent;
+    const mockEvent = { stopPropagation: jest.fn() } as unknown as React.MouseEvent;
 
     act(() => {
       result.current.onLayoutChange(mockEvent);
@@ -95,7 +95,7 @@ describe('useLayoutControls', () => {
 
   it('should expand all nodes and edges correctly', () => {
     const { result } = renderHook(() => useLayoutControls());
-    const mockEvent = ({ stopPropagation: jest.fn() } as unknown) as React.MouseEvent;
+    const mockEvent = { stopPropagation: jest.fn() } as unknown as React.MouseEvent;
 
     act(() => {
       result.current.onExpandAll(mockEvent);

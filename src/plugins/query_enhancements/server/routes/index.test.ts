@@ -17,8 +17,8 @@ describe('coerceStatusCode', () => {
   });
 
   it('should return 503 when input is undefined or null', () => {
-    expect(coerceStatusCode((undefined as unknown) as number)).toBe(503);
-    expect(coerceStatusCode((null as unknown) as number)).toBe(503);
+    expect(coerceStatusCode(undefined as unknown as number)).toBe(503);
+    expect(coerceStatusCode(null as unknown as number)).toBe(503);
   });
 });
 

@@ -89,11 +89,11 @@ describe('IndexPatterns', () => {
     uiSettingsGet.mockReturnValue(Promise.resolve(false));
 
     indexPatterns = new IndexPatternsService({
-      uiSettings: ({
+      uiSettings: {
         get: uiSettingsGet,
         getAll: () => {},
-      } as any) as UiSettingsCommon,
-      savedObjectsClient: (savedObjectsClient as unknown) as SavedObjectsClientCommon,
+      } as any as UiSettingsCommon,
+      savedObjectsClient: savedObjectsClient as unknown as SavedObjectsClientCommon,
       apiClient: createFieldsFetcher(),
       fieldFormats,
       onNotification: () => {},

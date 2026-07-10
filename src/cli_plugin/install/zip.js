@@ -112,7 +112,6 @@ export async function extractArchive(archive, targetDir, stripPrefix) {
       await pipeline(
         readStream,
         createWriteStream(fileName, {
-          // eslint-disable-next-line no-bitwise
           mode: entry.externalFileAttributes >>> 16,
         })
       );

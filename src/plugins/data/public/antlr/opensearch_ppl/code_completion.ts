@@ -232,7 +232,7 @@ export const getDefaultSuggestions = async ({
     }
 
     return finalSuggestions;
-  } catch (e) {
+  } catch {
     return [];
   }
 };
@@ -645,7 +645,7 @@ export const getSimplifiedPPLSuggestions = async ({
       }
     }
     return Array.from(seen.values());
-  } catch (e) {
+  } catch {
     return [];
   }
 };

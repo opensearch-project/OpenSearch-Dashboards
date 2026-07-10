@@ -28,6 +28,6 @@ node_modules
 
 # Optional REPL history
 .node_repl_history
-.eslintrc.json
+eslint.config.json
 
 yarn.lock

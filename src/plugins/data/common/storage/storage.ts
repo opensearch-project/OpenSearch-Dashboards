@@ -12,7 +12,10 @@ export enum StorageKeys {
 
 type IStorageEngine = typeof window.localStorage;
 export class DataStorage {
-  constructor(private readonly engine: IStorageEngine, private readonly prefix: string) {}
+  constructor(
+    private readonly engine: IStorageEngine,
+    private readonly prefix: string
+  ) {}
 
   encode(val: any) {
     return stringify(val);

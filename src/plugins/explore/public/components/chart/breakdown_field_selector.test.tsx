@@ -45,11 +45,11 @@ jest.mock('../../application/utils/state_management/actions/query_actions', () =
 }));
 
 describe('BreakdownFieldSelector', () => {
-  const mockServices = ({
+  const mockServices = {
     uiSettings: {
       get: jest.fn(),
     },
-  } as unknown) as ExploreServices;
+  } as unknown as ExploreServices;
 
   const createMockStore = (breakdownField?: string, queryStatusMap = {}) => {
     return configureStore({

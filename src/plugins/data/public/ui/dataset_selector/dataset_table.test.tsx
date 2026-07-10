@@ -41,18 +41,18 @@ describe('DataSetTable', () => {
     appName: 'testApp',
     uiSettings: {} as CoreStart['uiSettings'],
     savedObjects: {} as CoreStart['savedObjects'],
-    notifications: ({
+    notifications: {
       toasts: {
         addSuccess: jest.fn(),
         addError: jest.fn(),
       },
-    } as unknown) as CoreStart['notifications'],
+    } as unknown as CoreStart['notifications'],
     http: {} as CoreStart['http'],
     storage: {} as DataStorage,
     data: {} as DataPublicPluginStart,
-    overlays: ({
+    overlays: {
       openModal: jest.fn(),
-    } as unknown) as CoreStart['overlays'],
+    } as unknown as CoreStart['overlays'],
   };
 
   const mockProps: ComponentProps<typeof DatasetTable> = {

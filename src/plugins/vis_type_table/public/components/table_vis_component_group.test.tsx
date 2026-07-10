@@ -42,7 +42,7 @@ describe('TableVisApp', () => {
     const { container, queryAllByText } = render(
       <TableVisComponentGroup
         tableGroups={[]}
-        visConfig={({} as unknown) as TableVisConfig}
+        visConfig={{} as unknown as TableVisConfig}
         event={jest.fn()}
         // @ts-expect-error TS2741 TODO(ts-error): fixme
         uiState={tableUiStateMock}
@@ -56,7 +56,7 @@ describe('TableVisApp', () => {
     const { container, queryAllByText } = render(
       <TableVisComponentGroup
         tableGroups={[table1, table2]}
-        visConfig={({} as unknown) as TableVisConfig}
+        visConfig={{} as unknown as TableVisConfig}
         event={jest.fn()}
         // @ts-expect-error TS2322 TODO(ts-error): fixme
         uiState={tableUiStateMock}

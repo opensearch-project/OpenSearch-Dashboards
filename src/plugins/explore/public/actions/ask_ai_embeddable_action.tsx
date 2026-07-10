@@ -65,8 +65,8 @@ export class AskAIEmbeddableAction implements Action<EmbeddableContext> {
     }
     // Check if the embeddable's data source is AnalyticEngine
     const visEmbeddable = embeddable as DiscoverVisualizationEmbeddable;
-    const dsType = visEmbeddable.savedExplore?.searchSource?.getFields()?.query?.dataset?.dataSource
-      ?.type;
+    const dsType =
+      visEmbeddable.savedExplore?.searchSource?.getFields()?.query?.dataset?.dataSource?.type;
     if (dsType === 'AnalyticEngine') return false;
     return true;
   }

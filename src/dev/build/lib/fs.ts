@@ -71,7 +71,7 @@ export function isFileAccessible(path: string) {
   try {
     fs.accessSync(path);
     return true;
-  } catch (e) {
+  } catch {
     return false;
   }
 }
@@ -268,7 +268,6 @@ export async function getFileHash(path: string, algo: string) {
   const readStream = fs.createReadStream(path);
   await new Promise((res, rej) => {
     readStream
-      // @ts-expect-error TS2345 TODO(ts-upgrade): fixme
       .on('data', (chunk) => hash.update(chunk))
       .on('error', rej)
       .on('end', res);
@@ -289,7 +288,6 @@ export async function getFileHashes<A extends string>(
   const readStream = fs.createReadStream(path);
   await new Promise((res, rej) => {
     readStream
-      // @ts-expect-error TS2345 TODO(ts-upgrade): fixme — matches getFileHash pattern
       .on('data', (chunk) => hashes.forEach((h) => h.update(chunk)))
       .on('error', rej)
       .on('end', res);
@@ -311,7 +309,6 @@ export async function untar(source: string, destination: string, extractOptions 
   await pipelineAsync(
     fs.createReadStream(source),
     createGunzip(),
-    // @ts-expect-error TS2769 TODO(ts-upgrade): fixme
     tar.extract({
       ...extractOptions,
       cwd: destination,

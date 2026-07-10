@@ -48,9 +48,10 @@ export type RegionMapOptionsProps = {
 
 function RegionMapOptions(props: RegionMapOptionsProps) {
   const customVectorLayers = props.vis.type.editorConfig.collections.customVectorLayers;
-  const customVectorLayerOptions = useMemo(() => customVectorLayers.map(mapLayerForOption), [
-    customVectorLayers,
-  ]);
+  const customVectorLayerOptions = useMemo(
+    () => customVectorLayers.map(mapLayerForOption),
+    [customVectorLayers]
+  );
 
   if (customVectorLayerOptions.length === 0) {
     return (

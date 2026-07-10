@@ -83,8 +83,8 @@ const FieldSelector: React.FC<{
   const filteredFields = isTimestamp
     ? fields.filter((field) => TIME_FIELD_TYPES.includes(field.type))
     : isStringField
-    ? fields.filter((field) => STRING_FIELD_TYPES.includes(field.type))
-    : fields;
+      ? fields.filter((field) => STRING_FIELD_TYPES.includes(field.type))
+      : fields;
 
   const options: Array<EuiComboBoxOptionOption<string>> = filteredFields.map((field) => ({
     label: field.name,
@@ -178,7 +178,7 @@ export const FieldMappingEditor: React.FC<FieldMappingEditorProps> = ({
               const attributes = savedObject.attributes as any;
               // Use displayName if available, fallback to title
               datasetTitle = attributes.displayName || attributes.title || dataView.title;
-            } catch (err) {
+            } catch {
               // If fetch fails, use dataView.title
             }
 

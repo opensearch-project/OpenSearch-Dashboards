@@ -851,15 +851,15 @@ describe('generateOboToken', () => {
   let mockTransportRequest: jest.Mock;
 
   beforeEach(() => {
-    mockLogger = ({
+    mockLogger = {
       info: jest.fn(),
       warn: jest.fn(),
       error: jest.fn(),
-    } as unknown) as Logger;
+    } as unknown as Logger;
 
     mockTransportRequest = jest.fn();
 
-    mockContext = ({
+    mockContext = {
       core: {
         opensearch: {
           client: {
@@ -871,7 +871,7 @@ describe('generateOboToken', () => {
           },
         },
       },
-    } as unknown) as RequestHandlerContext;
+    } as unknown as RequestHandlerContext;
   });
 
   it('should return OBO token and duration on successful generation', async () => {
@@ -966,16 +966,16 @@ describe('getValidOboToken', () => {
   let mockTransportRequest: jest.Mock;
 
   beforeEach(() => {
-    mockLogger = ({
+    mockLogger = {
       info: jest.fn(),
       warn: jest.fn(),
       error: jest.fn(),
       debug: jest.fn(),
-    } as unknown) as Logger;
+    } as unknown as Logger;
 
     mockTransportRequest = jest.fn();
 
-    mockContext = ({
+    mockContext = {
       core: {
         opensearch: {
           client: {
@@ -987,7 +987,7 @@ describe('getValidOboToken', () => {
           },
         },
       },
-    } as unknown) as RequestHandlerContext;
+    } as unknown as RequestHandlerContext;
   });
 
   it('should mint a new token when cache is empty', async () => {

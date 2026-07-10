@@ -31,8 +31,11 @@ interface StartServices {
   isEditable: () => boolean;
 }
 
-export class ExploreEmbeddableFactory
-  implements EmbeddableFactoryDefinition<ExploreInput, ExploreOutput, ExploreEmbeddable> {
+export class ExploreEmbeddableFactory implements EmbeddableFactoryDefinition<
+  ExploreInput,
+  ExploreOutput,
+  ExploreEmbeddable
+> {
   public readonly type = EXPLORE_EMBEDDABLE_TYPE;
   public readonly savedObjectMetaData = {
     name: i18n.translate('explore.savedExplore.savedObjectName', {
@@ -50,7 +53,7 @@ export class ExploreEmbeddableFactory
         if (chart) {
           iconType = chart.icon;
         }
-      } catch (e) {
+      } catch {
         iconType = '';
       }
       return iconType;

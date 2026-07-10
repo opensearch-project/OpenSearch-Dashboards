@@ -215,7 +215,7 @@ export class UseCaseService {
                       title: configurableApps.find((app) => app.id === featureId)?.title,
                       id: featureId,
                     })),
-                  } as WorkspaceUseCase)
+                  }) as WorkspaceUseCase
               )
               .concat({
                 ...DEFAULT_NAV_GROUPS.all,

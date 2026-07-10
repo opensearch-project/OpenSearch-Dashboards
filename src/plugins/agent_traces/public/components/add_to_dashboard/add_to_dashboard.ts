@@ -47,7 +47,7 @@ export const addToDashboard = async (
   try {
     dashboard = await loader.get(options.existingDashboardId);
     panels = JSON.parse(dashboard.panelsJSON || '[]');
-  } catch (error) {
+  } catch {
     throw new Error('Fail to get dashboard');
   }
 

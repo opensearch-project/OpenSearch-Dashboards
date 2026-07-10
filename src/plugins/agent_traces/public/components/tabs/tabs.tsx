@@ -66,10 +66,10 @@ export const AgentTracesTabs = () => {
     [filteredTabs]
   );
 
-  const selectedTab = useMemo(() => tabs.find((tab) => tab.id === activeTabId) ?? tabs[0], [
-    tabs,
-    activeTabId,
-  ]);
+  const selectedTab = useMemo(
+    () => tabs.find((tab) => tab.id === activeTabId) ?? tabs[0],
+    [tabs, activeTabId]
+  );
 
   const onTabClick = useCallback(
     (tab: EuiTabbedContentTab) => {

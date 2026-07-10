@@ -330,9 +330,17 @@ export const MetricDetail: React.FC = () => {
     [client, queryGen, state.metric, metricType, stepSec, state.filters]
   );
 
-  const { results: breakdowns, errors: breakdownErrors, onVisibilityChange } = useConcurrentQueries<
-    LabelBreakdownData
-  >(breakdownFetch, [client, state.filters, refreshCounter, selectedLabelName, loading]);
+  const {
+    results: breakdowns,
+    errors: breakdownErrors,
+    onVisibilityChange,
+  } = useConcurrentQueries<LabelBreakdownData>(breakdownFetch, [
+    client,
+    state.filters,
+    refreshCounter,
+    selectedLabelName,
+    loading,
+  ]);
 
   const labelOptions = useMemo(() => labels.map((l) => ({ label: l.name })), [labels]);
 

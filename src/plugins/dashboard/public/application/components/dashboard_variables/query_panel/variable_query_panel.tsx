@@ -280,7 +280,7 @@ export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
         }
 
         return { suggestions: monacoSuggestions, incomplete: false };
-      } catch (e) {
+      } catch {
         return { suggestions: [], incomplete: false };
       }
     },
