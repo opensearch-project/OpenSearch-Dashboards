@@ -45,6 +45,7 @@ const createBarVisualization = () => {
   cy.explore.setDataset(datasetName, DATASOURCE_NAME, 'INDEX_PATTERN');
 
   cy.explore.setQueryEditor(query);
+  cy.wait(2000);
   // Run the query
   cy.getElementByTestId('exploreQueryExecutionButton').click();
   cy.osd.waitForLoader(true);

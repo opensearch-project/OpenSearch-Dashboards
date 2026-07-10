@@ -42,8 +42,6 @@ export const DatasetSelectWidget = () => {
             dataset: undefined,
           });
 
-          queryBuilder.updateQueryEditorState({ isQueryEditorDirty: true });
-
           clearEditor();
           return;
         }
@@ -54,7 +52,6 @@ export const DatasetSelectWidget = () => {
           query: EMPTY_QUERY.QUERY,
           dataset,
         });
-        queryBuilder.updateQueryEditorState({ isQueryEditorDirty: true });
 
         clearEditor();
       } catch (error) {

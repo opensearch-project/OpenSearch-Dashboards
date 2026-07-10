@@ -46,7 +46,7 @@ const saveButtonText = i18n.translate('explore.topNav.saveVisButton.save', {
 });
 
 export const SaveVisButton = () => {
-  const { queryEditorState, datasetView } = useQueryBuilderState();
+  const { queryBuilder, queryEditorState, datasetView } = useQueryBuilderState();
   const { visualizationBuilderForEditor: visualizationBuilder } = useVisualizationBuilder();
   const visConfig = visualizationBuilder.visConfig$.value;
   const transformationService = visualizationBuilder.getTransformationService();
@@ -61,8 +61,8 @@ export const SaveVisButton = () => {
   const stateTransfer = embeddable.getStateTransfer();
   const [showModal, setShowModal] = useState(false);
 
-  const isQueryEditorDirty = queryEditorState.isQueryEditorDirty;
-  const isVisDirty = useObservable(visualizationBuilder.isVisDirty$);
+  const isQueryEditorDirty = queryBuilder.compareQueryStateChange();
+  const isVisDirty = visualizationBuilder.compareVisStateChange(savedExplore);
   const isPromptMode = queryEditorState.editorMode === EditorMode.Prompt;
 
   // directly read from url storage

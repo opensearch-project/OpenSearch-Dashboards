@@ -207,6 +207,37 @@ export class TransformationService implements ITransformationService {
       .subscribe((pipeline) => {
         this.persistToUrl(pipeline);
       });
+
+    // 3.subscribe to URL back/forward navigation and restore pipeline
+    let lastUrlTransformState: UrlTransformationState[] =
+      urlStateStorage.get<UrlTransformationState[]>(TRANSFORMATION_STATE_KEY) ?? [];
+
+    const urlChangeSub = urlStateStorage
+      .change$<UrlTransformationState[]>(TRANSFORMATION_STATE_KEY)
+      .subscribe(() => {
+        const urlStates =
+          urlStateStorage.get<UrlTransformationState[]>(TRANSFORMATION_STATE_KEY) ?? [];
+
+        // URL _t hasn't actually changed (triggered by other key writes)
+        if (isEqual(urlStates, lastUrlTransformState)) return;
+        lastUrlTransformState = urlStates;
+
+        const currentStates: UrlTransformationState[] = this.pipeline$
+          .getValue()
+          .map((instance) => ({
+            definitionId: instance.definition_id,
+            config: instance.config,
+            hide: instance.hide,
+          }));
+        if (isEqual(urlStates, currentStates)) return;
+
+        if (urlStates.length > 0) {
+          this.restoreFromState(urlStates);
+        } else {
+          this.pipeline$.next([]);
+        }
+      });
+    this.urlSyncSubscription.add(urlChangeSub);
   }
 
   private restoreFromUrl(): void {

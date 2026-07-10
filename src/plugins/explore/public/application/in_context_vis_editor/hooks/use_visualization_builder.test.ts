@@ -21,9 +21,7 @@ jest.mock('../../../components/visualizations/visualization_builder', () => ({
     visConfig$: { value: undefined },
     data$: { value: undefined },
     showRawTable$: { value: false },
-    isVisDirty$: { value: false },
     setShowRawTable: jest.fn(),
-    setIsVisDirty: jest.fn(),
     onChartTypeChange: jest.fn(),
     updateStyles: jest.fn(),
     setAxesMapping: jest.fn(),
@@ -80,7 +78,6 @@ describe('useVisualizationBuilder', () => {
       expect(result.current.visualizationBuilderForEditor).toHaveProperty('visConfig$');
       expect(result.current.visualizationBuilderForEditor).toHaveProperty('data$');
       expect(result.current.visualizationBuilderForEditor).toHaveProperty('showRawTable$');
-      expect(result.current.visualizationBuilderForEditor).toHaveProperty('isVisDirty$');
     });
   });
 });

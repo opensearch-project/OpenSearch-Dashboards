@@ -9,7 +9,8 @@ import { isEmpty, isEqual } from 'lodash';
 import { debounceTime, map } from 'rxjs/operators';
 
 import { ChartStyles, ChartType, StyleOptions } from './utils/use_visualization_types';
-import { isValidMapping } from './visualization_builder_utils';
+import { isValidMapping, isVisStateEqual } from './visualization_builder_utils';
+import { normalizeState } from '../../application/utils/state_management/utils/state_comparison';
 import { getServices } from '../../services/services';
 import { IOsdUrlStateStorage } from '../../../../opensearch_dashboards_utils/public';
 import { OpenSearchSearchHit } from '../../types/doc_views_types';
@@ -25,8 +26,9 @@ import { AxisFieldNameMappings, RenderChartConfig } from './types';
 import { TimeRange } from '../../../../data/common';
 import { ITransformationService } from '../data_transformations/types';
 import { createNoOpTransformationService } from '../data_transformations/transformation_service';
+import { SavedExplore } from '../../saved_explore';
 
-interface VisState {
+export interface VisState {
   styleOptions?: StyleOptions;
   chartType?: string;
   axesMapping?: AxisFieldNameMappings;
@@ -39,18 +41,22 @@ interface Options {
   getUrlStateStorage?: () => IOsdUrlStateStorage | undefined;
 }
 
+interface RawData {
+  rows: OpenSearchSearchHit[];
+  schema: Array<{ type?: string; name?: string }>;
+}
+
 export class VisualizationBuilder {
   private isInitialized = false;
   private getUrlStateStorage: Options['getUrlStateStorage'];
   private subscriptions = Array<Subscription>();
   private transformationService: ITransformationService = createNoOpTransformationService();
-  private lastRawRows: Array<OpenSearchSearchHit<unknown>> = [];
-  private lastSchema: Array<{ type?: string; name?: string }> = [];
+  private rawData$ = new BehaviorSubject<RawData | undefined>(undefined);
+  private hasTransformationService = false;
 
   visConfig$ = new BehaviorSubject<ChartConfig | undefined>(undefined);
   data$ = new BehaviorSubject<VisData | undefined>(undefined);
   showRawTable$ = new BehaviorSubject<boolean>(false);
-  isVisDirty$ = new BehaviorSubject<boolean>(false);
 
   constructor({ getUrlStateStorage }: Options) {
     if (getUrlStateStorage) {
@@ -60,14 +66,19 @@ export class VisualizationBuilder {
 
   setTransformationService(service: ITransformationService) {
     this.transformationService = service;
+    this.hasTransformationService = true;
 
-    // subscribe pipeline change first
+    // subscribe to rawData and pipeline changes
     this.subscriptions.push(
-      service.getPipeline$().subscribe(() => {
-        if (this.lastRawRows.length > 0) {
-          this.handleData(this.lastRawRows, this.lastSchema);
-        }
-      })
+      combineLatest([this.rawData$, this.transformationService.getPipeline$()])
+        .pipe(
+          map(([rawData]) => {
+            if (!rawData) return undefined;
+            const { rows, finalSchema } = service.applyPipeline(rawData.rows, rawData.schema);
+            return normalizeResultRows(rows, finalSchema);
+          })
+        )
+        .subscribe((result) => this.data$.next(result))
     );
 
     // restore saved dataTransformations once
@@ -90,15 +101,11 @@ export class VisualizationBuilder {
     // Read state from url
     const urlStateStorage = this.getUrlStateStorage?.();
     if (urlStateStorage) {
-      const urlState = urlStateStorage.get<VisState & { isVisDirty: boolean }>('_v');
+      const urlState = urlStateStorage.get<VisState>('_v');
 
       if (urlState) {
-        const { isVisDirty, ...visState } = urlState;
+        const { ...visState } = urlState;
         state = { ...state, ...visState };
-
-        // sync url isVisDirty state to visualization builder
-        // this is to track user's modification after reloading page
-        if (typeof isVisDirty === 'boolean' && isVisDirty) this.isVisDirty$.next(isVisDirty);
       }
     }
 
@@ -146,33 +153,56 @@ export class VisualizationBuilder {
 
     // Subscribe to visualization state updates and sync the state to url
     this.subscriptions.push(
-      combineLatest([this.visConfig$, this.isVisDirty$])
-        .pipe(debounceTime(500))
-        .subscribe(([visConfig, isVisDirty]) =>
-          this.syncToUrl(
-            {
-              chartType: visConfig?.type,
-              axesMapping: visConfig?.axesMapping,
-              styleOptions: visConfig?.styles,
-              splitField: visConfig?.splitField,
-              splitLayout: visConfig?.splitLayout,
-              showSplitLabel: visConfig?.showSplitLabel,
-            },
-            isVisDirty
-          )
-        ),
+      this.visConfig$.pipe(debounceTime(500)).subscribe((visConfig) =>
+        this.syncToUrl({
+          chartType: visConfig?.type,
+          axesMapping: visConfig?.axesMapping,
+          styleOptions: visConfig?.styles,
+          splitField: visConfig?.splitField,
+          splitLayout: visConfig?.splitLayout,
+          showSplitLabel: visConfig?.showSplitLabel,
+        })
+      ),
       this.data$.subscribe((data) => this.onDataChange(data))
     );
+    this.startUrlChangeSync(urlStateStorage);
 
     this.setIsInitialized(true);
   }
 
-  setShowRawTable(on: boolean) {
-    this.showRawTable$.next(on);
+  startUrlChangeSync(urlStateStorage: IOsdUrlStateStorage | undefined) {
+    if (!urlStateStorage) return;
+
+    let lastVisState: VisState | null = urlStateStorage.get<VisState>('_v');
+
+    const visSub = urlStateStorage.change$<VisState>('_v').subscribe((urlVisState) => {
+      // Skip if _v hasn't actually changed (triggered by other key writes)
+      if (isEqual(urlVisState, lastVisState)) return;
+      lastVisState = urlVisState;
+      const currentVisConfig = this.visConfig$.value;
+      if (
+        urlVisState &&
+        urlVisState.chartType &&
+        isChartType(urlVisState.chartType) &&
+        !isVisStateEqual(urlVisState, currentVisConfig)
+      ) {
+        // Clear data so pipeline changes don't emit stale results
+        this.clearData();
+        // running handleData with stale rows before the new query executes
+        this.setVisConfig({
+          type: urlVisState.chartType as ChartType,
+          styles: urlVisState.styleOptions,
+          axesMapping: urlVisState.axesMapping,
+          splitField: urlVisState.splitField,
+          splitLayout: urlVisState.splitLayout,
+        });
+      }
+    });
+    this.subscriptions.push(visSub);
   }
 
-  setIsVisDirty(on: boolean) {
-    this.isVisDirty$.next(on);
+  setShowRawTable(on: boolean) {
+    this.showRawTable$.next(on);
   }
 
   setIsInitialized(isInitialized: boolean) {
@@ -393,30 +423,29 @@ export class VisualizationBuilder {
     rows: Array<OpenSearchSearchHit<T>>,
     schema: Array<{ type?: string; name?: string }>
   ) {
-    // when the pipeline changes, we need to re-apply the new pipeline against the previous raw data
-    // cache the reference
-    this.lastRawRows = rows;
-    this.lastSchema = schema;
+    if (!this.hasTransformationService) {
+      const {
+        transformedData,
+        numericalColumns,
+        categoricalColumns,
+        dateColumns,
+        unknownColumns,
+      } = normalizeResultRows(rows, schema);
 
-    const { rows: transformedRows, finalSchema } = this.transformationService.applyPipeline(
-      rows,
-      schema
-    );
-    const {
-      transformedData,
-      numericalColumns,
-      categoricalColumns,
-      dateColumns,
-      unknownColumns,
-    } = normalizeResultRows(transformedRows, finalSchema);
+      this.data$.next({
+        transformedData,
+        numericalColumns,
+        categoricalColumns,
+        dateColumns,
+        unknownColumns,
+      });
+    } else {
+      this.rawData$.next({ rows, schema });
+    }
+  }
 
-    this.data$.next({
-      transformedData,
-      numericalColumns,
-      categoricalColumns,
-      dateColumns,
-      unknownColumns,
-    });
+  clearData() {
+    this.rawData$.next(undefined);
   }
 
   updateStyles(styles?: Partial<StyleOptions>) {
@@ -425,7 +454,6 @@ export class VisualizationBuilder {
       return;
     }
     if (currentVisConfig.styles) {
-      this.setIsVisDirty(true);
       this.visConfig$.next({
         ...currentVisConfig,
         styles: { ...currentVisConfig.styles, ...styles },
@@ -440,7 +468,6 @@ export class VisualizationBuilder {
 
   setCurrentChartType(chartType?: ChartType) {
     if (this.visConfig$.value?.type !== chartType) {
-      this.setIsVisDirty(true);
       this.onChartTypeChange(chartType);
     }
   }
@@ -451,7 +478,6 @@ export class VisualizationBuilder {
       config &&
       !isEqual(this.normalizeMapping(config.axesMapping), this.normalizeMapping(mapping))
     ) {
-      this.setIsVisDirty(true);
       this.visConfig$.next({ ...config, axesMapping: mapping });
     }
   }
@@ -485,8 +511,56 @@ export class VisualizationBuilder {
       if (!isValid) return;
     }
 
-    this.setIsVisDirty(true);
     this.visConfig$.next({ ...config, ...splitConfig });
+  }
+
+  compareVisStateChange(savedExplore?: SavedExplore): boolean {
+    const visConfig = this.visConfig$.value;
+
+    if (!savedExplore?.visualization) {
+      return visConfig !== undefined;
+    }
+
+    let savedVis: {
+      chartType?: string;
+      params?: StyleOptions;
+      axesMapping?: AxisFieldNameMappings;
+      splitField?: string;
+      splitLayout?: string;
+      showSplitLabel?: boolean;
+      dataTransformations?: unknown[];
+    };
+    try {
+      savedVis = JSON.parse(savedExplore.visualization);
+    } catch {
+      return visConfig !== undefined;
+    }
+
+    const savedConfig = normalizeState({
+      type: savedVis.chartType,
+      styles: savedVis.params,
+      axesMapping: savedVis.axesMapping,
+      splitField: savedVis.splitField,
+      splitLayout: savedVis.splitLayout,
+      showSplitLabel: savedVis.showSplitLabel,
+      dataTransformations: savedVis.dataTransformations,
+    });
+
+    const currentConfig = normalizeState({
+      type: visConfig?.type,
+      styles: visConfig?.styles,
+      axesMapping: visConfig?.axesMapping,
+      splitField: visConfig?.splitField,
+      splitLayout: visConfig?.splitLayout,
+      showSplitLabel: visConfig?.showSplitLabel,
+      dataTransformations: this.transformationService.pipeline$.getValue().map((instance) => ({
+        definitionId: instance.definition_id,
+        config: instance.config,
+        hide: instance.hide,
+      })),
+    });
+
+    return !isEqual(savedConfig, currentConfig);
   }
 
   /**
@@ -507,11 +581,11 @@ export class VisualizationBuilder {
     }
   }
 
-  syncToUrl(visState: VisState, isVisDirty?: boolean) {
+  syncToUrl(visState: VisState) {
     const urlStateStorage = this.getUrlStateStorage?.();
 
     if (urlStateStorage) {
-      urlStateStorage.set('_v', { ...visState, isVisDirty }, { replace: true });
+      urlStateStorage.set('_v', { ...visState }, { replace: true });
     }
   }
 
@@ -522,7 +596,6 @@ export class VisualizationBuilder {
     this.visConfig$.complete();
     this.data$.complete();
     this.showRawTable$.complete();
-    this.isVisDirty$.complete();
   }
 
   reset(): void {
@@ -531,11 +604,10 @@ export class VisualizationBuilder {
     this.visConfig$ = new BehaviorSubject<ChartConfig | undefined>(undefined);
     this.data$ = new BehaviorSubject<VisData | undefined>(undefined);
     this.showRawTable$ = new BehaviorSubject<boolean>(false);
-    this.isVisDirty$ = new BehaviorSubject<boolean>(false);
     this.transformationService = createNoOpTransformationService();
-    this.lastRawRows = [];
-    this.lastSchema = [];
+    this.hasTransformationService = false;
     this.isInitialized = false;
+    this.rawData$ = new BehaviorSubject<RawData | undefined>(undefined);
   }
 
   clearUrl() {

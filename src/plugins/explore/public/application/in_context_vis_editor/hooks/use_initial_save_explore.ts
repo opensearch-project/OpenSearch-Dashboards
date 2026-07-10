@@ -28,7 +28,6 @@ export const useInitialSaveExplore = () => {
     if (!savedExplore?.visualization) return undefined;
     try {
       const parsedVisualization = JSON.parse(savedExplore.visualization);
-
       return parsedVisualization;
     } catch {
       return undefined;

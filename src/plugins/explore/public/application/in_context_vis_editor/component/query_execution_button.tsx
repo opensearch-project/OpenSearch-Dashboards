@@ -23,8 +23,8 @@ export const QueryExecutionButton: React.FC<QueryExecutionButtonProps> = ({
   onClick,
   onCancel,
 }) => {
-  const { queryEditorState } = useQueryBuilderState();
-  const isQueryEditorDirty = queryEditorState.isQueryEditorDirty;
+  const { queryEditorState, queryBuilder } = useQueryBuilderState();
+  const isQueryEditorDirty = queryBuilder.compareQueryStateChange();
   const dateRange = queryEditorState.dateRange;
 
   const shouldShowCancelButtonState =
