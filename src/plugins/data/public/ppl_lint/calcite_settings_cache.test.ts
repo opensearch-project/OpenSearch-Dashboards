@@ -17,9 +17,9 @@ describe('calciteSettingsCache', () => {
 
   beforeEach(() => {
     calciteSettingsCache.dispose();
-    http = ({
+    http = {
       get: jest.fn(),
-    } as unknown) as jest.Mocked<HttpSetup>;
+    } as unknown as jest.Mocked<HttpSetup>;
   });
 
   afterEach(() => {

@@ -29,33 +29,33 @@ const RULE_INDICES: Record<string, number> = {
 const ruleNameToIndex = (name: string) => RULE_INDICES[name] ?? -1;
 
 function makeTerminal(text: string): TerminalNode {
-  return ({
+  return {
     symbol: { start: 0, stop: text.length - 1, line: 1, column: 0 },
     getText: () => text,
-  } as unknown) as TerminalNode;
+  } as unknown as TerminalNode;
 }
 
 function makeRuleNode(
   ruleName: string,
   children: Array<ParserRuleContext | TerminalNode> = []
 ): ParserRuleContext {
-  return ({
+  return {
     ruleIndex: RULE_INDICES[ruleName],
     children,
     start: { start: 0, stop: 0, line: 1, column: 0 },
     stop: { start: 0, stop: 0, line: 1, column: 10 },
     getText: () => children.map((c) => (c as any).getText?.() ?? '').join(''),
-  } as unknown) as ParserRuleContext;
+  } as unknown as ParserRuleContext;
 }
 
 function makeRoot(children: ParserRuleContext[]): ParserRuleContext {
-  return ({
+  return {
     ruleIndex: 0,
     children,
     start: { start: 0, stop: 0, line: 1, column: 0 },
     stop: { start: 0, stop: 0, line: 1, column: 20 },
     getText: () => '',
-  } as unknown) as ParserRuleContext;
+  } as unknown as ParserRuleContext;
 }
 
 const makeConfig = (id: string): CatalogEntry => ({
