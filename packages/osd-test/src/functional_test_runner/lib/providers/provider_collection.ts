@@ -38,7 +38,10 @@ import { createVerboseInstance } from './verbose_instance';
 export class ProviderCollection {
   private readonly instances = new Map();
 
-  constructor(private readonly log: ToolingLog, private readonly providers: Providers) {}
+  constructor(
+    private readonly log: ToolingLog,
+    private readonly providers: Providers
+  ) {}
 
   public getService = (name: string) => this.getInstance('Service', name);
 

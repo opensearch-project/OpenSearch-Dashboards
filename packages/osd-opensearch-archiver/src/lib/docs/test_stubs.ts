@@ -41,7 +41,7 @@ export const createStubStats = (): Stats =>
   ({
     indexedDoc: sinon.stub(),
     archivedDoc: sinon.stub(),
-  } as any);
+  }) as any;
 
 export const createPersonDocRecords = (n: number) =>
   times(n, () => ({

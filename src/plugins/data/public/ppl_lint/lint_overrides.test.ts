@@ -15,10 +15,10 @@ jest.mock('@osd/monaco', () => ({
 }));
 
 function makeUiSettings(rules: unknown): IUiSettingsClient {
-  return ({
+  return {
     get: (key: string, defaultOverride?: unknown) =>
       key === 'query:enhancements:pplLint:rules' ? rules : defaultOverride,
-  } as unknown) as IUiSettingsClient;
+  } as unknown as IUiSettingsClient;
 }
 
 describe('buildOverridesFromSettings', () => {

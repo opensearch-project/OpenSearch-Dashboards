@@ -8,7 +8,7 @@ import { resolve } from 'path';
 import { UiSettingsParams } from 'opensearch-dashboards/server';
 import { getPplLintRuleSettings } from './ui_settings';
 import { UI_SETTINGS } from '../../data/common';
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
+
 import { getValType } from '../../advanced_settings/public/management_app/lib/get_val_type';
 
 interface BundledRule {

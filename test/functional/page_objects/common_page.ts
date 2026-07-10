@@ -98,13 +98,8 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
     }
 
     private async navigate(navigateProps: NavigateProps) {
-      const {
-        appConfig,
-        ensureCurrentUrl,
-        shouldLoginIfPrompted,
-        useActualUrl,
-        insertTimestamp,
-      } = navigateProps;
+      const { appConfig, ensureCurrentUrl, shouldLoginIfPrompted, useActualUrl, insertTimestamp } =
+        navigateProps;
       const appUrl = getUrl.noAuth(config.get('servers.opensearchDashboards.fullURL'), appConfig);
 
       await retry.try(async () => {

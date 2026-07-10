@@ -75,7 +75,7 @@ describe('helpers', function () {
         },
       ],
     } as PointInTimeEventsVisLayer;
-    const invalidVisLayer = ({
+    const invalidVisLayer = {
       type: 'something-invalid',
       originPlugin: 'test-plugin',
       pluginResource: {
@@ -84,7 +84,7 @@ describe('helpers', function () {
         name: 'test-resource-name',
         urlPath: 'test-resource-url-path',
       },
-    } as unknown) as VisLayer;
+    } as unknown as VisLayer;
 
     it('updates config with just a valid Vislayer', function () {
       const baseConfig = {

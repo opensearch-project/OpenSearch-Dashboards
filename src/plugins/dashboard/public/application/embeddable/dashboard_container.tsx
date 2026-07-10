@@ -119,9 +119,8 @@ export interface DashboardContainerOptions {
   savedObjects?: CoreStart['savedObjects'];
 }
 
-export type DashboardReactContextValue = OpenSearchDashboardsReactContextValue<
-  DashboardContainerOptions
->;
+export type DashboardReactContextValue =
+  OpenSearchDashboardsReactContextValue<DashboardContainerOptions>;
 export type DashboardReactContext = OpenSearchDashboardsReactContext<DashboardContainerOptions>;
 
 export class DashboardContainer extends Container<InheritedChildInput, DashboardContainerInput> {
@@ -129,8 +128,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
   public renderEmpty?: undefined | (() => React.ReactNode);
   public updateAppStateUrl?:
-    | undefined
-    | (({ replace, pathname }: { replace: boolean; pathname?: string }) => void);
+    undefined | (({ replace, pathname }: { replace: boolean; pathname?: string }) => void);
 
   private embeddablePanel: EmbeddableStart['EmbeddablePanel'];
   private readonly logos: Logos;
@@ -232,7 +230,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
   protected createNewPanelState<
     TEmbeddableInput extends EmbeddableInput,
-    TEmbeddable extends IEmbeddable<TEmbeddableInput, any>
+    TEmbeddable extends IEmbeddable<TEmbeddableInput, any>,
   >(
     factory: EmbeddableFactory<TEmbeddableInput, any, TEmbeddable>,
     partial: Partial<TEmbeddableInput> = {}
@@ -308,7 +306,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   public async addOrUpdateEmbeddable<
     EEI extends EmbeddableInput = EmbeddableInput,
     EEO extends EmbeddableOutput = EmbeddableOutput,
-    E extends IEmbeddable<EEI, EEO> = IEmbeddable<EEI, EEO>
+    E extends IEmbeddable<EEI, EEO> = IEmbeddable<EEI, EEO>,
   >(type: string, explicitInput: Partial<EEI>, embeddableId?: string) {
     const idToReplace = embeddableId || explicitInput.id;
     if (idToReplace && this.input.panels[idToReplace]) {

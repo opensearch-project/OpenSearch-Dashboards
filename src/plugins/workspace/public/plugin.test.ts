@@ -140,7 +140,7 @@ describe('Workspace plugin', () => {
           location: {
             href: 'http://localhost/w/workspaceId/app',
           },
-        } as any)
+        }) as any
     );
     workspaceClientMock.enterWorkspace.mockResolvedValueOnce({
       success: true,
@@ -283,7 +283,7 @@ describe('Workspace plugin', () => {
           location: {
             href: 'http://localhost/w/workspaceId/app',
           },
-        } as any)
+        }) as any
     );
 
     const setupMock = coreMock.createSetup();
@@ -319,7 +319,7 @@ describe('Workspace plugin', () => {
           location: {
             href: 'http://localhost/w/workspaceId/app',
           },
-        } as any)
+        }) as any
     );
     workspaceClientMock.enterWorkspace.mockResolvedValue({
       success: true,
@@ -351,7 +351,7 @@ describe('Workspace plugin', () => {
           location: {
             href: 'http://localhost/w/workspaceId/app',
           },
-        } as any)
+        }) as any
     );
 
     const workspacePlugin = new WorkspacePlugin();

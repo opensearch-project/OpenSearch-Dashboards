@@ -154,7 +154,7 @@ export function createTileMapTypeDefinition(dependencies) {
       try {
         const serviceSettings = await getServiceSettings();
         tmsLayers = await serviceSettings.getTMSServices();
-      } catch (e) {
+      } catch {
         return vis;
       }
 

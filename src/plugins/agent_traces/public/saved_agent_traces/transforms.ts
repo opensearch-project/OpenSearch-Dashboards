@@ -51,8 +51,10 @@ export const saveStateToSavedObject = (
   return obj;
 };
 
-export interface AgentTracesSavedVis
-  extends Pick<SavedAgentTracesAttributes, 'title' | 'description'> {
+export interface AgentTracesSavedVis extends Pick<
+  SavedAgentTracesAttributes,
+  'title' | 'description'
+> {
   id?: string;
   state: AgentTracesState;
   searchSourceFields?: Record<string, unknown>;
@@ -77,7 +79,7 @@ export const getStateFromSavedObject = (obj: SavedAgentTracesAttributes): AgentT
         query: queryState,
       },
     };
-  } catch (error) {
+  } catch {
     throw new InvalidJSONProperty(
       i18n.translate('agentTraces.getStateFromSavedObject.genericJSONError', {
         defaultMessage:
@@ -102,7 +104,7 @@ export const getLegacyPropertiesFromSavedObject = (savedAgentTraces: SavedAgentT
       columns: legacyState.columns || [],
       sort: legacyState.sort || [],
     };
-  } catch (error) {
+  } catch {
     return {
       columns: [],
       sort: [],
@@ -127,7 +129,7 @@ export const updateLegacyPropertiesInSavedObject = (
 
     savedAgentTraces.legacyState = JSON.stringify(updatedLegacyState);
     return savedAgentTraces;
-  } catch (error) {
+  } catch {
     return savedAgentTraces;
   }
 };

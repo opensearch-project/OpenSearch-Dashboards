@@ -176,7 +176,7 @@ export class ExpressionsService {
   public readonly run = <
     Input,
     Output,
-    ExtraContext extends Record<string, unknown> = Record<string, unknown>
+    ExtraContext extends Record<string, unknown> = Record<string, unknown>,
   >(
     ast: string | ExpressionAstExpression,
     input: Input,
@@ -238,7 +238,7 @@ export class ExpressionsService {
   public readonly execute = <
     Input = unknown,
     Output = unknown,
-    ExtraContext extends Record<string, unknown> = Record<string, unknown>
+    ExtraContext extends Record<string, unknown> = Record<string, unknown>,
   >(
     ast: string | ExpressionAstExpression,
     // This any is for legacy reasons.

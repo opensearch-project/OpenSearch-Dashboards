@@ -11,12 +11,12 @@ import {
   setModelHoverFacts,
 } from '../hover_registry';
 
-const modelA = ({
+const modelA = {
   uri: monaco.Uri.parse('inmemory://model/a.ppl'),
-} as unknown) as monaco.editor.ITextModel;
-const modelB = ({
+} as unknown as monaco.editor.ITextModel;
+const modelB = {
   uri: monaco.Uri.parse('inmemory://model/b.ppl'),
-} as unknown) as monaco.editor.ITextModel;
+} as unknown as monaco.editor.ITextModel;
 
 function facts(entries: Array<[string, HoverFacts]>): Map<string, HoverFacts> {
   return new Map(entries);

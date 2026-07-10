@@ -145,7 +145,7 @@ export type SymbolTableVisitor = ISymbolTableVisitor & AbstractParseTreeVisitor<
 export interface AutocompleteData<
   A extends AutocompleteResultBase,
   L extends LexerType,
-  P extends ParserType
+  P extends ParserType,
 > {
   Lexer: LexerConstructor<L>;
   Parser: ParserConstructor<P>;

@@ -66,14 +66,12 @@ const titleInGroup = i18n.translate('advancedSettings.applicationSettingsLabel',
 });
 
 const USER_SETTINGS_APPID = 'user_settings';
-export class AdvancedSettingsPlugin
-  implements
-    Plugin<
-      AdvancedSettingsSetup,
-      AdvancedSettingsStart,
-      AdvancedSettingsPluginSetup,
-      AdvancedSettingsPluginStart
-    > {
+export class AdvancedSettingsPlugin implements Plugin<
+  AdvancedSettingsSetup,
+  AdvancedSettingsStart,
+  AdvancedSettingsPluginSetup,
+  AdvancedSettingsPluginStart
+> {
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => undefined);
 
   public setup(
@@ -87,9 +85,8 @@ export class AdvancedSettingsPlugin
       title,
       order: 3,
       async mount(params) {
-        const { mountManagementSection } = await import(
-          './management_app/mount_management_section'
-        );
+        const { mountManagementSection } =
+          await import('./management_app/mount_management_section');
         return mountManagementSection(core.getStartServices, params, component.start);
       },
     });
@@ -105,9 +102,8 @@ export class AdvancedSettingsPlugin
         defaultMessage: 'Customize the appearance and behavior of OpenSearch Dashboards.',
       }),
       mount: async (params: AppMountParameters) => {
-        const { mountManagementSection } = await import(
-          './management_app/mount_management_section'
-        );
+        const { mountManagementSection } =
+          await import('./management_app/mount_management_section');
         const [coreStart] = await core.getStartServices();
 
         return mountManagementSection(
@@ -151,9 +147,8 @@ export class AdvancedSettingsPlugin
           defaultMessage: 'Configure your personal preferences.',
         }),
         mount: async (params: AppMountParameters) => {
-          const { renderUserSettingsApp } = await import(
-            './management_app/mount_management_section'
-          );
+          const { renderUserSettingsApp } =
+            await import('./management_app/mount_management_section');
           const [coreStart, { contentManagement, navigation }] = await core.getStartServices();
 
           return renderUserSettingsApp(params, { ...coreStart, contentManagement, navigation });

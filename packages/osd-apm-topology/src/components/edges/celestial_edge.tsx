@@ -25,18 +25,18 @@ export const CelestialEdge: React.FC<EdgeProps> = (props) => {
     edgeStyle.type === 'dotted'
       ? '2 4'
       : edgeStyle.type === 'dashed' || edgeStyle.dashed
-      ? '8 4'
-      : undefined;
+        ? '8 4'
+        : undefined;
 
   // Resolve animation class: animationType takes precedence over animated
   const animClass =
     edgeStyle.animationType === 'flow'
       ? 'celEdge--flow'
       : edgeStyle.animationType === 'pulse'
-      ? 'celEdge--pulse'
-      : edgeStyle.animated
-      ? 'celEdge--flow'
-      : '';
+        ? 'celEdge--pulse'
+        : edgeStyle.animated
+          ? 'celEdge--flow'
+          : '';
 
   const labelStyleProps = edgeStyle.labelStyle
     ? {

@@ -83,9 +83,8 @@ export function registerValueSuggestionsRoute(
       try {
         let result;
         if (dataSourceId) {
-          const dataSourceClient = await context.dataSource.opensearch.legacy.getClient(
-            dataSourceId
-          );
+          const dataSourceClient =
+            await context.dataSource.opensearch.legacy.getClient(dataSourceId);
           result = await dataSourceClient.callAPI('search', { index, body }, { signal });
         } else {
           result = await client.callAsCurrentUser('search', { index, body }, { signal });

@@ -109,7 +109,7 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
         dynamicConfigStore ? { asyncLocalStorageContext: dynamicConfigStore } : undefined
       );
       cspReportOnlyIsEmitting = cspReportOnlyDynamicConfig?.isEmitting ?? cspReportOnly.isEmitting;
-    } catch (e) {
+    } catch {
       cspReportOnlyIsEmitting = cspReportOnly.isEmitting;
     }
 
@@ -137,7 +137,7 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
       if (modifications && modifications.length > 0) {
         modifiedCspHeader = applyCspModifications(modifiedCspHeader.split('; '), modifications);
       }
-    } catch (e) {
+    } catch {
       // Fall back to default CSP header on error
     }
 

@@ -11,9 +11,9 @@ import {
 import { createPplGrammarWarmupHandler } from './ppl_grammar_warmup';
 
 describe('ppl_grammar_warmup', () => {
-  const http = ({} as unknown) as HttpSetup;
-  const uiSettings = ({ get: jest.fn().mockReturnValue(true) } as unknown) as IUiSettingsClient;
-  const savedObjectsClient = ({} as unknown) as SavedObjectsClientContract;
+  const http = {} as unknown as HttpSetup;
+  const uiSettings = { get: jest.fn().mockReturnValue(true) } as unknown as IUiSettingsClient;
+  const savedObjectsClient = {} as unknown as SavedObjectsClientContract;
 
   const createCacheMock = () => ({
     warmUp: jest.fn(),

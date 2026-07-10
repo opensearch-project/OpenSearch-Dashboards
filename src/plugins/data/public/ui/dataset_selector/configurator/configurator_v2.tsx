@@ -86,11 +86,11 @@ export const ConfiguratorV2 = ({
   );
 
   // Fetch fields using custom hook
-  const { allFields, dateFields, loading: timeFieldsLoading } = useDatasetFields(
-    baseDataset,
-    datasetType,
-    supportsTimeFilter
-  );
+  const {
+    allFields,
+    dateFields,
+    loading: timeFieldsLoading,
+  } = useDatasetFields(baseDataset, datasetType, supportsTimeFilter);
 
   // Constants
   const noTimeFilter = i18n.translate(

@@ -49,9 +49,7 @@ const rootDir = '../../..';
  * non A to Z character.
  */
 const rootGroups = [
-  [
-    /* CI Group 0 is left empty to make numbering natural */
-  ],
+  [/* CI Group 0 is left empty to make numbering natural */],
   [
     // CI Group 1 (roughly 280 files)
     '<rootDir>/src/plugins/[v-z]', // plugins v-u
@@ -144,6 +142,13 @@ export default {
   rootDir,
   roots,
   moduleNameMapper: {
+    // @eslint/* packages ship with `"main"` pointing at their ESM build, which
+    // Jest (CommonJS mode) cannot parse.  Redirect each one to its CJS build.
+    '^@eslint/plugin-kit$': '<rootDir>/node_modules/@eslint/plugin-kit/dist/cjs/index.cjs',
+    '^@eslint/config-array$': '<rootDir>/node_modules/@eslint/config-array/dist/cjs/index.cjs',
+    '^@eslint/config-helpers$': '<rootDir>/node_modules/@eslint/config-helpers/dist/cjs/index.cjs',
+    '^@eslint/object-schema$': '<rootDir>/node_modules/@eslint/object-schema/dist/cjs/index.cjs',
+    '^@eslint/compat$': '<rootDir>/node_modules/@eslint/compat/dist/cjs/index.cjs',
     '^uuid$': '<rootDir>/node_modules/uuid/dist/cjs/index.js',
     '@elastic/eui$': '<rootDir>/node_modules/@elastic/eui/test-env',
     '@elastic/eui/lib/(.*)?': '<rootDir>/node_modules/@elastic/eui/test-env/$1',
@@ -188,6 +193,11 @@ export default {
     '<rootDir>/packages/osd-ui-framework/(dist)/',
     '<rootDir>/packages/osd-pm/dist/',
     `${RESERVED_DIR_JEST_INTEGRATION_TESTS}/`,
+    // current jest-runtime 27.x doesn't handle ESM module @babel/eslint-parser with import.meta
+    // remove these excludes after jest-runtime upgrade
+    '<rootDir>/packages/osd-eslint-plugin-eslint/rules/disallow_license_headers.test.js',
+    '<rootDir>/packages/osd-eslint-plugin-eslint/rules/require_license_header.test.js',
+    '<rootDir>/packages/osd-eslint-plugin-eslint/rules/no_restricted_paths.test.js',
   ],
   // angular is not compatible with the default circus runner
   testRunner: 'jest-jasmine2',

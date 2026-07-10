@@ -4,8 +4,7 @@
  */
 
 export type SlashCommandResult =
-  | string
-  | { localMessage: string; title?: string; role?: 'system' | 'assistant' };
+  string | { localMessage: string; title?: string; role?: 'system' | 'assistant' };
 
 export interface SlashCommand {
   command: string;
@@ -58,9 +57,7 @@ class SlashCommandRegistry {
     return this.getAll().filter((cmd) => cmd.command.toLowerCase().startsWith(query));
   }
 
-  async execute(
-    input: string
-  ): Promise<{
+  async execute(input: string): Promise<{
     handled: boolean;
     message?: string;
     localMessage?: string;

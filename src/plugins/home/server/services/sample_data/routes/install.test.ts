@@ -79,7 +79,7 @@ describe('sample data install route', () => {
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
     const handler = mockRouter.post.mock.calls[0][1];
 
-    await handler((mockContext as unknown) as RequestHandlerContext, mockRequest, mockResponse);
+    await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
 
     expect(mockClient.mock.calls[1][1].body.settings).toMatchObject({
       index: { number_of_shards: 1, auto_expand_replicas: '0-1' },
@@ -152,7 +152,7 @@ describe('sample data install route', () => {
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
     const handler = mockRouter.post.mock.calls[0][1];
 
-    await handler((mockContext as unknown) as RequestHandlerContext, mockRequest, mockResponse);
+    await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
 
     expect(mockClient.mock.calls[1][1].body.settings).toMatchObject({
       index: { number_of_shards: 1 },
@@ -218,7 +218,7 @@ describe('sample data install route', () => {
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
     const handler = mockRouter.post.mock.calls[0][1];
 
-    await handler((mockContext as unknown) as RequestHandlerContext, mockRequest, mockResponse);
+    await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
 
     expect(mockClient.mock.calls[1][1].body.settings).toMatchObject({
       index: { number_of_shards: 1 },
@@ -288,7 +288,7 @@ describe('sample data install route', () => {
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
     const handler = mockRouter.post.mock.calls[0][1];
 
-    await handler((mockContext as unknown) as RequestHandlerContext, mockRequest, mockResponse);
+    await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
 
     expect(mockResponse.forbidden).toBeCalled();
     expect(mockResponse.forbidden.mock.calls[0][0]).toMatchObject({
@@ -344,7 +344,7 @@ describe('sample data install route', () => {
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
     const handler = mockRouter.post.mock.calls[0][1];
 
-    await handler((mockContext as unknown) as RequestHandlerContext, mockRequest, mockResponse);
+    await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
 
     expect(mockResponse.internalError).toBeCalled();
     expect(mockResponse.internalError.mock.calls[0][0]).toMatchObject({

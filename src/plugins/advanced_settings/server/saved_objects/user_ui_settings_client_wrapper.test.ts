@@ -5,7 +5,6 @@
 
 import { httpServerMock, savedObjectsClientMock, coreMock } from '../../../../core/server/mocks';
 import { UserUISettingsClientWrapper } from './user_ui_settings_client_wrapper';
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { loggerMock } from '../../../../core/server/logging/logger.mock';
 import { CURRENT_USER_PLACEHOLDER } from '../../../../core/server';
 

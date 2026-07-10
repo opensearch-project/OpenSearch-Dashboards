@@ -85,9 +85,7 @@ function extractValues(value: unknown): string[] {
  *   }
  * }
  */
-export function parseResponseToOptionsWithType(
-  response: any
-): {
+export function parseResponseToOptionsWithType(response: any): {
   options: string[];
   optionType?: VariableOptionType;
 } {

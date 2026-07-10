@@ -84,7 +84,7 @@ const buildCore = (
   // rather than falling back to the default nav group.
   const currentNavGroup = 'currentNavGroup' in opts ? opts.currentNavGroup : (navGroup as any);
   const currentWorkspace = 'currentWorkspace' in opts ? opts.currentWorkspace! : null;
-  const core = (coreMock.createStart() as unknown) as CoreStart;
+  const core = coreMock.createStart() as unknown as CoreStart;
   core.chrome.navGroup.getCurrentNavGroup$ = jest.fn(
     () => new BehaviorSubject(currentNavGroup)
   ) as any;

@@ -240,14 +240,14 @@ describe('ChatMessages', () => {
 
     it('should render assistant messages with array content', () => {
       const timeline: Message[] = [
-        ({
+        {
           id: '1',
           role: 'assistant',
           content: [
             { type: 'text', text: 'First part' },
             { type: 'text', text: 'Second part' },
           ],
-        } as unknown) as AssistantMessage, // Force type casting for the corner case.
+        } as unknown as AssistantMessage, // Force type casting for the corner case.
       ];
 
       const { getAllByTestId } = render(<ChatMessages {...defaultProps} timeline={timeline} />);
@@ -296,7 +296,7 @@ describe('ChatMessages', () => {
     it('should not render assistant message with null/undefined content', () => {
       const timeline: Message[] = [
         { id: '1', role: 'user', content: 'Hello' },
-        ({ id: '2', role: 'assistant', content: undefined } as unknown) as AssistantMessage,
+        { id: '2', role: 'assistant', content: undefined } as unknown as AssistantMessage,
       ];
 
       const { getAllByTestId } = render(<ChatMessages {...defaultProps} timeline={timeline} />);
@@ -308,7 +308,7 @@ describe('ChatMessages', () => {
     it('should handle assistant message with empty array content', () => {
       const timeline: Message[] = [
         { id: '1', role: 'user', content: 'Hello' },
-        ({ id: '2', role: 'assistant', content: [] } as unknown) as AssistantMessage,
+        { id: '2', role: 'assistant', content: [] } as unknown as AssistantMessage,
       ];
 
       const { getAllByTestId } = render(<ChatMessages {...defaultProps} timeline={timeline} />);

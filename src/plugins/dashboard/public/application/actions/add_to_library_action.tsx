@@ -76,12 +76,12 @@ export class AddToLibraryAction implements ActionByType<typeof ACTION_ADD_TO_LIB
   public async isCompatible({ embeddable }: AddToLibraryActionContext) {
     return Boolean(
       !isErrorEmbeddable(embeddable) &&
-        embeddable.getInput()?.viewMode !== ViewMode.VIEW &&
-        embeddable.getRoot() &&
-        embeddable.getRoot().isContainer &&
-        embeddable.getRoot().type === DASHBOARD_CONTAINER_TYPE &&
-        isReferenceOrValueEmbeddable(embeddable) &&
-        !embeddable.inputIsRefType(embeddable.getInput())
+      embeddable.getInput()?.viewMode !== ViewMode.VIEW &&
+      embeddable.getRoot() &&
+      embeddable.getRoot().isContainer &&
+      embeddable.getRoot().type === DASHBOARD_CONTAINER_TYPE &&
+      isReferenceOrValueEmbeddable(embeddable) &&
+      !embeddable.inputIsRefType(embeddable.getInput())
     );
   }
 

@@ -119,19 +119,19 @@ export const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> 
                 'prometheus.uri': storeURI,
               }
             : authMethod === 'basicauth'
-            ? {
-                'prometheus.uri': storeURI,
-                'prometheus.auth.type': authMethod,
-                'prometheus.auth.username': username,
-                'prometheus.auth.password': password,
-              }
-            : {
-                'prometheus.uri': storeURI,
-                'prometheus.auth.type': authMethod,
-                'prometheus.auth.access_key': accessKey,
-                'prometheus.auth.secret_key': secretKey,
-                'prometheus.auth.region': region,
-              };
+              ? {
+                  'prometheus.uri': storeURI,
+                  'prometheus.auth.type': authMethod,
+                  'prometheus.auth.username': username,
+                  'prometheus.auth.password': password,
+                }
+              : {
+                  'prometheus.uri': storeURI,
+                  'prometheus.auth.type': authMethod,
+                  'prometheus.auth.access_key': accessKey,
+                  'prometheus.auth.secret_key': secretKey,
+                  'prometheus.auth.region': region,
+                };
         response = http!.post(`${DATACONNECTIONS_BASE}`, {
           body: JSON.stringify({
             name,

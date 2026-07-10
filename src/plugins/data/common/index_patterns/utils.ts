@@ -94,7 +94,7 @@ export const getIndexPatternTitle = async (
         error,
       } = await getDataSource(dataSourceId);
       dataSourceTitle = error ? dataSourceId : title;
-    } catch (e) {
+    } catch {
       // use datasource id as title when failing to fetch datasource
       dataSourceTitle = dataSourceId;
     }

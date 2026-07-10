@@ -58,7 +58,7 @@ const renderFallbackGraphTool = ({
         if (parsedResult.success && parsedResult.graphData) {
           return parsedResult;
         }
-      } catch (error) {
+      } catch {
         // Not JSON, continue
       }
     }
@@ -219,7 +219,7 @@ const renderFallbackGraphTool = ({
           </div>
         );
       }
-    } catch (error) {
+    } catch {
       // Failed to parse graph result, show error state
       return (
         <div className="toolCallRow">
@@ -293,7 +293,7 @@ const getCustomizedRenderOptions = ({
   if (!result && toolCall.result) {
     try {
       result = JSON.parse(toolCall.result);
-    } catch (error) {
+    } catch {
       // Not JSON, use as is
       result = toolCall.result;
     }
@@ -302,7 +302,7 @@ const getCustomizedRenderOptions = ({
   if (!args && toolCall.arguments) {
     try {
       args = JSON.parse(toolCall.arguments);
-    } catch (error) {
+    } catch {
       // Not JSON, use as is
       args = toolCall.arguments;
     }
@@ -335,7 +335,7 @@ const isValidJSON = (content: string) => {
   try {
     JSON.parse(content);
     return true;
-  } catch (error) {
+  } catch {
     return false;
   }
 };

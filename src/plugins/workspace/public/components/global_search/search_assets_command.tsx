@@ -76,7 +76,7 @@ export const searchAssets = async ({
         signal: abortSignal,
       }
     );
-  } catch (e) {
+  } catch {
     return [];
   }
 

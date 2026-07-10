@@ -112,7 +112,7 @@ export class PluginsStatusService {
             (depName) =>
               [depName, this.pluginStatuses.get(depName) ?? this.getDerivedStatus$(depName)] as [
                 PluginName,
-                Observable<ServiceStatus>
+                Observable<ServiceStatus>,
               ]
           )
           .map(([pName, status$]) =>

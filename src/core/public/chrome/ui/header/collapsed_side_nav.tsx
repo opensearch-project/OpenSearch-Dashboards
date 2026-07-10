@@ -399,8 +399,8 @@ function shouldStartCluster(item: LinkItem): boolean {
     item.itemType === LinkItemType.LINK
       ? item.link
       : item.itemType === LinkItemType.PARENT_LINK
-      ? item.link
-      : undefined;
+        ? item.link
+        : undefined;
   return Boolean((link as ChromeRegistrationNavLink | undefined)?.startCluster);
 }
 
@@ -429,10 +429,10 @@ export function CollapsedSideNav({
         item.itemType === LinkItemType.CATEGORY
           ? item.category?.id || `category-${i}`
           : item.itemType === LinkItemType.PARENT_LINK
-          ? item.link?.id || `parent-${i}`
-          : item.itemType === LinkItemType.LINK
-          ? item.link.id
-          : `item-${i}`;
+            ? item.link?.id || `parent-${i}`
+            : item.itemType === LinkItemType.LINK
+              ? item.link.id
+              : `item-${i}`;
       groups.push({ key, nodes, startsCluster: shouldStartCluster(item) });
     }
   }

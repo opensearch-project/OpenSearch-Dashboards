@@ -637,7 +637,7 @@ export class WorkspaceSavedObjectsClientWrapper {
                 if (clientCallAuditor?.isAsyncClientCallsBalanced()) {
                   ACLAuditor?.checkout(checkoutInfo);
                 }
-              } catch (e) {
+              } catch {
                 if (clientCallAuditor?.isAsyncClientCallsBalanced()) {
                   ACLAuditor?.checkout();
                 }
