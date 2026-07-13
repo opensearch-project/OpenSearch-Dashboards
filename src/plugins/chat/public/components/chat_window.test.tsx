@@ -769,6 +769,27 @@ describe('ChatWindow', () => {
       expect(mockChatService.newThread).toHaveBeenCalled();
     });
 
+    it('should clear event handler state on new chat to prevent stale tool calls from disabling input', () => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { ChatEventHandler } = require('../services/chat_event_handler');
+      const mockClearState = jest.fn();
+      ChatEventHandler.mockImplementation(() => ({
+        handleEvent: jest.fn(),
+        clearState: mockClearState,
+        cancelToolResultDispatch: jest.fn(),
+      }));
+
+      const ref = React.createRef<ChatWindowInstance>();
+      renderWithContext(<ChatWindow ref={ref} onClose={jest.fn()} />);
+
+      act(() => {
+        ref.current?.startNewChat();
+      });
+
+      // clearState must be called to drain stale toolCallStates
+      expect(mockClearState).toHaveBeenCalled();
+    });
+
     it('should clear pending data source selection on new chat', async () => {
       // Mock no data source to trigger the prompt
       mockChatService.getCurrentDataSourceId.mockResolvedValue(undefined);
