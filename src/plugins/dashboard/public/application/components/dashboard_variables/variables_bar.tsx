@@ -43,6 +43,8 @@ interface ValueSelectorProps {
 }
 
 const ALL_OPTION_VALUE = '__all__';
+// EuiSelectable emits display labels on change, so namespaced keys carry the stored values.
+const OPTION_VALUE_KEY_PREFIX = '__value:';
 
 const ValueSelector: React.FC<ValueSelectorProps> = ({ variable, onValuesChange }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -57,7 +59,8 @@ const ValueSelector: React.FC<ValueSelectorProps> = ({ variable, onValuesChange 
   const isAllSelected = useMemo(() => {
     if (!variable.includeAll || !variable.multi) return false;
     return (
-      variable.options.length > 0 && variable.options.every((opt) => selectedValues.includes(opt))
+      variable.options.length > 0 &&
+      variable.options.every((option) => selectedValues.includes(option.value))
     );
   }, [variable.includeAll, variable.multi, variable.options, selectedValues]);
 
@@ -73,10 +76,11 @@ const ValueSelector: React.FC<ValueSelectorProps> = ({ variable, onValuesChange 
       });
     }
 
-    variable.options.forEach((opt) => {
+    variable.options.forEach((option) => {
       options.push({
-        label: opt,
-        checked: selectedValues.includes(opt) ? 'on' : undefined,
+        label: option.label || option.value,
+        key: `${OPTION_VALUE_KEY_PREFIX}${option.value}`,
+        checked: selectedValues.includes(option.value) ? 'on' : undefined,
       });
     });
 
@@ -92,7 +96,10 @@ const ValueSelector: React.FC<ValueSelectorProps> = ({ variable, onValuesChange 
       if (variable.includeAll && variable.multi && allOption) {
         if (allIsChecked && !isAllSelected) {
           // "All" was just checked → select all real options
-          onValuesChange(variable.id, [...variable.options]);
+          onValuesChange(
+            variable.id,
+            variable.options.map((option) => option.value)
+          );
           return;
         } else if (!allIsChecked && isAllSelected) {
           // "All" was just unchecked → deselect all
@@ -104,7 +111,11 @@ const ValueSelector: React.FC<ValueSelectorProps> = ({ variable, onValuesChange 
       // Normal selection: filter out the "All" pseudo-option
       const values = newOptions
         .filter((opt) => opt.checked === 'on' && opt.key !== ALL_OPTION_VALUE)
-        .map((opt) => opt.label);
+        .map((opt) =>
+          typeof opt.key === 'string' && opt.key.startsWith(OPTION_VALUE_KEY_PREFIX)
+            ? opt.key.slice(OPTION_VALUE_KEY_PREFIX.length)
+            : opt.label
+        );
       onValuesChange(variable.id, values);
 
       // Close popover after selection for single-select mode
@@ -124,7 +135,10 @@ const ValueSelector: React.FC<ValueSelectorProps> = ({ variable, onValuesChange 
 
   // Calculate popover width based on longest option label
   const popoverWidth = useMemo(() => {
-    const longestLength = variable.options.reduce((max, opt) => Math.max(max, opt.length), 0);
+    const longestLength = variable.options.reduce((max, option) => {
+      const displayText = option.label || option.value;
+      return Math.max(max, displayText.length);
+    }, 0);
     // ~8px per char + 60px for checkbox/padding/scrollbar
     return Math.max(300, Math.min(longestLength * 8 + 60, 700));
   }, [variable.options]);
@@ -144,7 +158,8 @@ const ValueSelector: React.FC<ValueSelectorProps> = ({ variable, onValuesChange 
       return i18n.translate('dashboard.variables.allSelected', { defaultMessage: 'All' });
     }
     if (selectedValues.length > 0) {
-      return selectedValues[0];
+      const selectedOption = variable.options.find((option) => option.value === selectedValues[0]);
+      return selectedOption?.label || selectedValues[0];
     }
     if (variable.options.length === 0) {
       return i18n.translate('dashboard.variables.displayNoOptions', {
