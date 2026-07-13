@@ -32,6 +32,10 @@ import {
   filterVariableOptionsByRegex,
   VariableQueryResult,
 } from '../../../../variables/variable_query_utils';
+import {
+  buildVariableOptionDisplayTextMap,
+  getVariableOptionDisplayText,
+} from '../../../../variables/variable_option_display_utils';
 import { IVariableInterpolationService } from '../../../../variables/variable_interpolation_service';
 import { NormalizedVariableOption } from '../../../../variables/types';
 import { getEffectiveLanguageForAutoComplete } from '../../../../../../data/public';
@@ -203,6 +207,10 @@ export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
   const previewOptions = useMemo(
     () => filteredPreviewOptions.slice(0, MAX_PREVIEW_OPTIONS),
     [filteredPreviewOptions]
+  );
+  const previewOptionDisplayTextMap = useMemo(
+    () => buildVariableOptionDisplayTextMap(previewOptions),
+    [previewOptions]
   );
 
   const isTruncated = filteredPreviewOptions.length > MAX_PREVIEW_OPTIONS;
@@ -759,7 +767,9 @@ export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
                   <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
                     {previewOptions.map((option) => (
                       <EuiFlexItem key={option.value} grow={false}>
-                        <EuiBadge color="hollow">{option.label || option.value}</EuiBadge>
+                        <EuiBadge color="hollow">
+                          {getVariableOptionDisplayText(option, previewOptionDisplayTextMap)}
+                        </EuiBadge>
                       </EuiFlexItem>
                     ))}
                   </EuiFlexGroup>
