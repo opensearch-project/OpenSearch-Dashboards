@@ -39,7 +39,7 @@ import { Env } from '../config';
 
 const env = Env.createDefault(REPO_ROOT, getEnvOptions());
 
-let mockConsoleError: jest.Spied;
+let mockConsoleError: jest.SpyInstance;
 
 beforeEach(() => {
   jest.spyOn(global.process, 'exit').mockReturnValue(undefined as never);

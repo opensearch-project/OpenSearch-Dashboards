@@ -39,7 +39,7 @@ jest.mock('./get_non_unique_entries');
 const getMockFn = <T extends (...args: any[]) => any, U>(fn: (...args: Parameters<T>) => U) =>
   fn as jest.MockedFunction<(...args: Parameters<T>) => U>;
 
-let limitStreamPush: jest.Spied;
+let limitStreamPush: jest.SpyInstance;
 
 beforeEach(() => {
   jest.clearAllMocks();

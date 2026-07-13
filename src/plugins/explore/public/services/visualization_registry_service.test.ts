@@ -9,8 +9,8 @@ import { VisualizationType } from '../components/visualizations/utils/use_visual
 
 describe('VisualizationRegistryService', () => {
   let service: VisualizationRegistryService;
-  let mockRegisterVisualization: jest.Spied;
-  let mockGetVisualization: jest.Spied;
+  let mockRegisterVisualization: jest.SpyInstance;
+  let mockGetVisualization: jest.SpyInstance;
 
   const createMockVisualization = (type: string): VisualizationType<any> =>
     ({

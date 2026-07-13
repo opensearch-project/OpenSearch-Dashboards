@@ -36,7 +36,7 @@ describe('create data source selector', () => {
       fullWidth: false,
     };
     const dataSourceSelection = new DataSourceSelectionService();
-    spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
+    jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
 
     const TestComponent = createDataSourceSelector(
       uiSettings,
@@ -69,7 +69,7 @@ describe('create data source selector', () => {
       fullWidth: false,
     };
     const dataSourceSelection = new DataSourceSelectionService();
-    spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
+    jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
 
     const TestComponent = createDataSourceSelector(
       uiSettings,

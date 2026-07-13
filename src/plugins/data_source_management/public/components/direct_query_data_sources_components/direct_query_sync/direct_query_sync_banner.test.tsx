@@ -35,9 +35,6 @@ jest.mock('../../../constants', () => ({
   intervalAsMinutes: jest.fn(),
 }));
 
-// Mock window.location.reload via spy (jsdom 26: location is non-configurable, spy on the method instead).
-const reloadSpy = jest.spyOn(window.location, 'reload').mockImplementation(jest.fn());
-
 // Mock Date.prototype.toLocaleString to ensure consistent date formatting
 const mockDateString = '6/30/2021, 5:00:00 PM';
 jest.spyOn(Date.prototype, 'toLocaleString').mockReturnValue(mockDateString);
@@ -48,6 +45,19 @@ describe('DashboardDirectQuerySyncBanner', () => {
   let savedObjectsClient: ReturnType<typeof savedObjectsServiceMock.createStartContract>['client'];
   let removeBanner: jest.Mock;
 
+  // Mock window.location.reload via spy. Must be created in beforeAll so that
+  // jest-location-mock's beforeAll hook has already replaced window.location with its
+  // configurable proxy before we attempt to spy on it.
+  let reloadSpy: jest.SpyInstance;
+
+  beforeAll(() => {
+    reloadSpy = jest.spyOn(window.location, 'reload').mockImplementation(jest.fn());
+  });
+
+  afterAll(() => {
+    reloadSpy.mockRestore();
+  });
+
   beforeEach(() => {
     http = httpServiceMock.createStartContract();
     notifications = notificationServiceMock.createStartContract();
@@ -56,6 +66,7 @@ describe('DashboardDirectQuerySyncBanner', () => {
 
     // Clear mocks before each test
     jest.clearAllMocks();
+    reloadSpy.mockClear();
 
     // Mock Date.now for consistent time calculations
     jest.spyOn(Date, 'now').mockReturnValue(new Date('2025-05-23T15:16:00.000Z').getTime());

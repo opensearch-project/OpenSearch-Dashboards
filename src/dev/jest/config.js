@@ -188,6 +188,7 @@ export default {
     '<rootDir>/src/dev/jest/setup/enzyme.js',
   ],
   setupFilesAfterEnv: [
+    'jest-location-mock',
     '<rootDir>/src/dev/jest/setup/mocks.js',
     '<rootDir>/src/dev/jest/setup/react_testing_library.js',
     '<rootDir>/src/dev/jest/setup/monaco_mock.js',

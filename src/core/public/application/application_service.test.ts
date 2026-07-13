@@ -964,8 +964,8 @@ describe('#start()', () => {
 });
 
 describe('#stop()', () => {
-  let addListenerSpy: jest.Spied;
-  let removeListenerSpy: jest.Spied;
+  let addListenerSpy: jest.SpyInstance;
+  let removeListenerSpy: jest.SpyInstance;
 
   beforeEach(() => {
     addListenerSpy = jest.spyOn(window, 'addEventListener');

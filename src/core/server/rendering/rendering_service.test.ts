@@ -52,7 +52,7 @@ jest.mock('@osd/i18n', () => {
   };
 });
 
-const i18nLoaderMock = jest.mocked(i18nLoader, true);
+const i18nLoaderMock = jest.mocked(i18nLoader, { shallow: true });
 
 import { httpServerMock } from '../http/http_server.mocks';
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';

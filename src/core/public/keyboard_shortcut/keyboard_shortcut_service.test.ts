@@ -152,7 +152,7 @@ describe('KeyboardShortcutService', () => {
   });
 
   describe('Real-Time Conflict Detection', () => {
-    let consoleWarnSpy: jest.Spied;
+    let consoleWarnSpy: jest.SpyInstance;
 
     beforeEach(() => {
       consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
@@ -384,7 +384,7 @@ describe('KeyboardShortcutService', () => {
   });
 
   describe('Error Handling', () => {
-    let consoleErrorSpy: jest.Spied;
+    let consoleErrorSpy: jest.SpyInstance;
 
     beforeEach(() => {
       consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();

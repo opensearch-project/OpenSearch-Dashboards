@@ -35,7 +35,7 @@ describe('DataSourceMultiSelectable', () => {
       find: jest.fn().mockResolvedValue([]),
     } as any;
     mockResponseForSavedObjectsCalls(client, 'find', getDataSourcesWithFieldsResponse);
-    spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
+    jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
   });
 
   it('should render normally with local cluster not hidden', async () => {

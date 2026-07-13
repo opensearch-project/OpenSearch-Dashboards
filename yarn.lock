@@ -2969,6 +2969,11 @@
   resolved "https://registry.yarnpkg.com/@istanbuljs/schema/-/schema-0.1.6.tgz#8dc9afa2ac1506cb1a58f89940f1c124446c8df3"
   integrity sha512-+Sg6GCR/wy1oSmQDFq4LQDAhm3ETKnorxN+y5nbLULOR3P0c14f2Wurzj3/xqPXtasLFfHd5iRFQ7AJt4KH2cw==
 
+"@jedmao/location@^3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@jedmao/location/-/location-3.0.0.tgz#f2b24e937386f95252f3a1fefbf7ca2e0a4b87e9"
+  integrity sha512-p7mzNlgJbCioUYLUEKds3cQG4CHONVFJNYqMe6ocEtENCL/jYmMo1Q3ApwsMmU+L0ZkaDJEyv4HokaByLoPwlQ==
+
 "@jest/console@30.4.1":
   version "30.4.1"
   resolved "https://registry.yarnpkg.com/@jest/console/-/console-30.4.1.tgz#e57725678c3fcc9f7e5597e691e454fee4ce0939"
@@ -13548,6 +13553,13 @@ jest-leak-detector@30.4.1:
   dependencies:
     "@jest/get-type" "30.1.0"
     pretty-format "30.4.1"
+
+jest-location-mock@^4.0.1:
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/jest-location-mock/-/jest-location-mock-4.0.1.tgz#f35080c75202e5da5ae3409721d302e0cd531ce7"
+  integrity sha512-8nYPNUw4laD4S1t77JFUtNit5lyjpCzG1sZzPS4wsz7mw/8JxX4XBtKR35SY8hdVIeJuSUBrDMKPvtmSuErcLw==
+  dependencies:
+    "@jedmao/location" "^3.0.0"
 
 jest-matcher-utils@30.4.1:
   version "30.4.1"

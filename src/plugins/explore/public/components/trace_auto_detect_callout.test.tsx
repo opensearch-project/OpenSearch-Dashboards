@@ -56,8 +56,18 @@ describe('TraceAutoDetectCallout', () => {
     configurable: true,
   });
 
-  // Mock window.location.reload via spy (jsdom 26: location is non-configurable, spy on the method instead).
-  const reloadSpy = jest.spyOn(window.location, 'reload').mockImplementation(jest.fn());
+  // Mock window.location.reload via spy. Must be created in beforeAll so that
+  // jest-location-mock's beforeAll hook has already replaced window.location with its
+  // configurable proxy before we attempt to spy on it.
+  let reloadSpy: jest.SpyInstance;
+
+  beforeAll(() => {
+    reloadSpy = jest.spyOn(window.location, 'reload').mockImplementation(jest.fn());
+  });
+
+  afterAll(() => {
+    reloadSpy.mockRestore();
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();

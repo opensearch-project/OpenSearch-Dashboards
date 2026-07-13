@@ -36,7 +36,7 @@ describe('DataSourceSelectable', () => {
       find: jest.fn().mockResolvedValue([]),
     } as any;
     mockResponseForSavedObjectsCalls(client, 'find', getDataSourcesWithFieldsResponse);
-    spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
+    jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
   });
 
   it('should render normally when local cluster is not hidden', () => {
@@ -140,7 +140,7 @@ describe('DataSourceSelectable', () => {
 
   it('should invoke the onSelectedDataSource callback when state changes', async () => {
     const onSelectedDataSource = jest.fn();
-    spyOn(utils, 'getDefaultDataSource').and.returnValue([{ id: 'test2', label: 'test2' }]);
+    jest.spyOn(utils, 'getDefaultDataSource').mockReturnValue([{ id: 'test2', label: 'test2' }]);
     let container: any;
     await act(async () => {
       container = mount(
@@ -414,7 +414,7 @@ describe('DataSourceSelectable', () => {
 
   it('should render nothing when no default option or activeOption', async () => {
     const onSelectedDataSource = jest.fn();
-    spyOn(utils, 'getDefaultDataSource').and.returnValue(undefined);
+    jest.spyOn(utils, 'getDefaultDataSource').mockReturnValue(undefined);
     let container: any;
     await act(async () => {
       container = mount(
@@ -529,7 +529,7 @@ describe('DataSourceSelectable', () => {
   );
 
   it('should call dataSourceSelection selectDataSource when selecting', async () => {
-    spyOn(utils, 'getDefaultDataSource').and.returnValue([{ id: 'test2', label: 'test2' }]);
+    jest.spyOn(utils, 'getDefaultDataSource').mockReturnValue([{ id: 'test2', label: 'test2' }]);
     const dataSourceSelectionMock = new DataSourceSelectionService();
     const componentId = 'component-id';
     const selectedOptions = [{ id: 'test2', label: 'test2' }];

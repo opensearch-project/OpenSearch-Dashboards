@@ -52,11 +52,11 @@ function normalizeLegacyPlatformLogging(input: string) {
   return replaceTimestamp(stripColors(input));
 }
 
-export function getPlatformLogsFromMock(logMock: jest.Spied<string, string[]>) {
+export function getPlatformLogsFromMock(logMock: jest.SpyInstance<string, string[]>) {
   return logMock.mock.calls.map(([message]) => message).map(normalizePlatformLogging);
 }
 
-export function getLegacyPlatformLogsFromMock(stdoutMock: jest.Spied<string, Buffer[]>) {
+export function getLegacyPlatformLogsFromMock(stdoutMock: jest.SpyInstance<string, Buffer[]>) {
   return stdoutMock.mock.calls
     .map(([message]) => message)
     .map(String)

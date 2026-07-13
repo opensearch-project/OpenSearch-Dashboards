@@ -471,6 +471,7 @@
     "jest": "^30.4.2",
     "jest-canvas-mock": "2.5.8",
     "jest-environment-jsdom": "^30.4.1",
+    "jest-location-mock": "^4.0.1",
     "jest-raw-loader": "^1.0.1",
     "jimp": "^1.6.1",
     "jquery": "^3.5.0",

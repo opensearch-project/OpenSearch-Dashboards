@@ -29,7 +29,7 @@ describe('useDirectQuery', () => {
   let fetchMock: jest.Mock;
   let fetchWithJobIdMock: jest.Mock;
   // @ts-expect-error TS6133 TODO(ts-error): fixme
-  let usePollingMock: jest.Spied;
+  let usePollingMock: jest.SpyInstance;
 
   beforeEach(() => {
     jest.clearAllMocks();

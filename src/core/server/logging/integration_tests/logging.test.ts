@@ -66,7 +66,7 @@ function createRoot() {
 describe('logging service', () => {
   describe('logs according to context hierarchy', () => {
     let root: ReturnType<typeof createRoot>;
-    let mockConsoleLog: jest.Spied;
+    let mockConsoleLog: jest.SpyInstance;
     beforeAll(async () => {
       mockConsoleLog = jest.spyOn(global.console, 'log');
       root = createRoot();
@@ -159,7 +159,7 @@ describe('logging service', () => {
 
     let root: ReturnType<typeof createRoot>;
     let setup: InternalCoreSetup;
-    let mockConsoleLog: jest.Spied;
+    let mockConsoleLog: jest.SpyInstance;
     const loggingConfig$ = new Subject<LoggerContextConfigInput>();
     const setContextConfig = (enable: boolean) =>
       enable ? loggingConfig$.next(CUSTOM_LOGGING_CONFIG) : loggingConfig$.next({});

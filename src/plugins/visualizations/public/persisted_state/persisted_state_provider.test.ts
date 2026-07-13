@@ -255,7 +255,7 @@ describe('Persisted State Provider', () => {
 
   describe('events', () => {
     let persistedState: PersistedState;
-    let emitSpy: jest.Spied;
+    let emitSpy: jest.SpyInstance;
 
     const getByType = (type: string): any[] => {
       return emitSpy.mock.calls.filter(([callType]) => callType === type);

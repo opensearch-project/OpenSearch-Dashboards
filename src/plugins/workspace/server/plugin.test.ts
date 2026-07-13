@@ -613,8 +613,8 @@ describe('Workspace server plugin', () => {
     let setupMock: ReturnType<typeof coreMock.createSetup>;
     let startMock: ReturnType<typeof coreMock.createStart>;
     let workspaceStart: any;
-    let clientGetSpy: jest.Spied;
-    let getPrincipalsSpy: jest.Spied;
+    let clientGetSpy: jest.SpyInstance;
+    let getPrincipalsSpy: jest.SpyInstance;
 
     beforeEach(async () => {
       setupMock = coreMock.createSetup();

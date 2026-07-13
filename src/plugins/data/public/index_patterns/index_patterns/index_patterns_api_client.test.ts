@@ -32,7 +32,7 @@ import { http } from './index_patterns_api_client.test.mock';
 import { IndexPatternsApiClient } from './index_patterns_api_client';
 
 describe('IndexPatternsApiClient', () => {
-  let fetchSpy: jest.Spied;
+  let fetchSpy: jest.SpyInstance;
   let indexPatternsApiClient: IndexPatternsApiClient;
 
   beforeEach(() => {

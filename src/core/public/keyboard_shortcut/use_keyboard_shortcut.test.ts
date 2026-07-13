@@ -10,7 +10,7 @@ import { KeyboardShortcutService } from './keyboard_shortcut_service';
 describe('useKeyboardShortcut', () => {
   let mockKeyboardShortcutService: jest.Mocked<KeyboardShortcutService>;
   let mockShortcut: ShortcutDefinition;
-  let consoleWarnSpy: jest.Spied;
+  let consoleWarnSpy: jest.SpyInstance;
 
   beforeEach(() => {
     mockKeyboardShortcutService = {
