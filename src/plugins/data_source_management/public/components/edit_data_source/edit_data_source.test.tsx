@@ -71,7 +71,7 @@ describe('Datasource Management: Edit Datasource Wizard', () => {
     test('should NOT render normally', () => {
       expect(utils.getDataSources).not.toHaveBeenCalled();
       expect(utils.getDataSourceById).toHaveBeenCalled();
-      expect(history.push).toBeCalledWith('');
+      expect(history.push).toHaveBeenCalledWith('');
     });
   });
 
@@ -118,7 +118,7 @@ describe('Datasource Management: Edit Datasource Wizard', () => {
         );
       });
       expect(utils.updateDataSourceById).toHaveBeenCalled();
-      expect(history.push).toBeCalledWith('');
+      expect(history.push).toHaveBeenCalledWith('');
     });
     test('should fail to update datasource', async () => {
       spyOn(utils, 'updateDataSourceById').and.returnValue(new Error(''));
@@ -170,7 +170,7 @@ describe('Datasource Management: Edit Datasource Wizard', () => {
         );
       });
       expect(utils.deleteDataSourceById).toHaveBeenCalled();
-      expect(history.push).toBeCalledWith('');
+      expect(history.push).toHaveBeenCalledWith('');
       expect(utils.setFirstDataSourceAsDefault).toHaveBeenCalled();
     });
     test('should fail to delete datasource', async () => {

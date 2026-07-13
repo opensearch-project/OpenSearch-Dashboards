@@ -94,7 +94,7 @@ describe('quandl', function () {
   });
 
   it('should throw an error is passed an unsupported interval', function () {
-    return expect(invoke(fn, [], { time: { interval: '2d' } })).rejects.toThrowError();
+    return expect(invoke(fn, [], { time: { interval: '2d' } })).rejects.toThrow();
   });
 
   it('should use the configured API key when talking to quandl', function () {

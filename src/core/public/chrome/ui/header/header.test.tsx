@@ -277,7 +277,7 @@ describe('Header', () => {
     };
     const component = mountWithIntl(<Header {...props} />);
     component.find(EuiHeaderSectionItemButton).first().simulate('click');
-    expect(props.onIsLockedUpdate).toBeCalledWith(true);
+    expect(props.onIsLockedUpdate).toHaveBeenCalledWith(true);
   });
 
   describe('banner plugin integration', () => {

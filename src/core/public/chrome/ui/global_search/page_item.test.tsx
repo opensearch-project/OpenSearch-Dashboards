@@ -190,7 +190,7 @@ describe('PageItem', () => {
     expect(getByText('Overview')).toBeInTheDocument();
 
     fireEvent.click(getByTestId('global-search-item-sa_overview'));
-    expect(application.navigateToApp).toBeCalledWith('sa_overview');
+    expect(application.navigateToApp).toHaveBeenCalledWith('sa_overview');
   });
 
   it('click on the item will navigate to correctly page for data source out of workspace', () => {
@@ -255,6 +255,6 @@ describe('PageItem', () => {
     expect(getByText('Data source')).toBeInTheDocument();
 
     fireEvent.click(getByTestId('global-search-item-data_source'));
-    expect(application.navigateToApp).toBeCalledWith('data_source');
+    expect(application.navigateToApp).toHaveBeenCalledWith('data_source');
   });
 });

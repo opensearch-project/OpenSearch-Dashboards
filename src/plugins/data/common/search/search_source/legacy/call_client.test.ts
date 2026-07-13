@@ -75,7 +75,7 @@ describe('callClient', () => {
 
     callClient(searchRequests, [], handlers);
 
-    expect(defaultSearchStrategy.search).toBeCalled();
+    expect(defaultSearchStrategy.search).toHaveBeenCalled();
     expect((defaultSearchStrategy.search as any).mock.calls[0][0]).toEqual({
       searchRequests,
       ...handlers,
@@ -97,11 +97,11 @@ describe('callClient', () => {
     const responses = callClient(searchRequests, [], handlers);
     await Promise.all(responses);
 
-    expect(handleResponse).toBeCalledTimes(2);
-    expect(handleResponse).toBeCalledWith(searchRequests[0], {
+    expect(handleResponse).toHaveBeenCalledTimes(2);
+    expect(handleResponse).toHaveBeenCalledWith(searchRequests[0], {
       id: searchRequests[0]._searchStrategyId,
     });
-    expect(handleResponse).toBeCalledWith(searchRequests[1], {
+    expect(handleResponse).toHaveBeenCalledWith(searchRequests[1], {
       id: searchRequests[1]._searchStrategyId,
     });
   });
@@ -118,7 +118,7 @@ describe('callClient', () => {
     callClient(searchRequests, requestOptions, handlers);
     abortController.abort();
 
-    expect(mockAbortFn).toBeCalled();
+    expect(mockAbortFn).toHaveBeenCalled();
     // expect(mockAbortFns[1]).not.toBeCalled();
   });
 });

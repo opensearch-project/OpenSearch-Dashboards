@@ -846,10 +846,10 @@ describe('#start()', () => {
       });
       await navigateToApp('app1');
 
-      expect(window.location.assign).toBeCalledWith('/base-path/app/app1');
+      expect(window.location.assign).toHaveBeenCalledWith('/base-path/app/app1');
       await navigateToApp('app2');
       // assign should not be called
-      expect(window.location.assign).toBeCalledTimes(1);
+      expect(window.location.assign).toHaveBeenCalledTimes(1);
       // @ts-expect-error TODO FIX ME
       window.location = originalLocation;
     });
@@ -972,8 +972,8 @@ describe('#start()', () => {
 });
 
 describe('#stop()', () => {
-  let addListenerSpy: jest.SpyInstance;
-  let removeListenerSpy: jest.SpyInstance;
+  let addListenerSpy: jest.Spied;
+  let removeListenerSpy: jest.Spied;
 
   beforeEach(() => {
     addListenerSpy = jest.spyOn(window, 'addEventListener');

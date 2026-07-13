@@ -70,7 +70,7 @@ describe('<TutorialDirectory />', () => {
 
     // @ts-expect-error TS2345 TODO(ts-error): fixme
     await setup({ services: currentService });
-    expect(currentService.chrome.setBreadcrumbs).toBeCalledWith([
+    expect(currentService.chrome.setBreadcrumbs).toHaveBeenCalledWith([
       {
         href: '#/',
         text: 'Home',
@@ -89,7 +89,7 @@ describe('<TutorialDirectory />', () => {
       props: { withoutHomeBreadCrumb: true },
       services: currentService,
     });
-    expect(currentService.chrome.setBreadcrumbs).toBeCalledWith([
+    expect(currentService.chrome.setBreadcrumbs).toHaveBeenCalledWith([
       {
         text: 'Add data',
       },
@@ -106,7 +106,7 @@ describe('<TutorialDirectory />', () => {
       props: { withoutHomeBreadCrumb: true },
       services: currentService,
     });
-    expect(currentService.chrome.setBreadcrumbs).toBeCalledWith([
+    expect(currentService.chrome.setBreadcrumbs).toHaveBeenCalledWith([
       {
         text: 'Sample data',
       },

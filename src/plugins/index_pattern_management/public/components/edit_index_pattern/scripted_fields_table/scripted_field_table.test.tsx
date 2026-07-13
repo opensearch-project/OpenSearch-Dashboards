@@ -61,7 +61,10 @@ const helpers = {
   getRouteHref: () => '#',
 };
 
-const getIndexPatternMock = (mockedFields: any = {}) => ({ ...mockedFields }) as IIndexPattern;
+const getIndexPatternMock = (mockedFields: any = {}) =>
+  ({
+    ...mockedFields,
+  }) as IIndexPattern;
 
 describe('ScriptedFieldsTable', () => {
   let indexPattern: IndexPattern;
@@ -212,6 +215,6 @@ describe('ScriptedFieldsTable', () => {
     await component.instance().deleteField();
     await component.update();
 
-    expect(removeScriptedField).toBeCalled();
+    expect(removeScriptedField).toHaveBeenCalled();
   });
 });

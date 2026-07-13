@@ -1358,7 +1358,7 @@ describe('setup contract', () => {
       const create = async () => await createCookieSessionStorageFactory(cookieOptions);
 
       await create();
-      expect(create()).rejects.toThrowError('A cookieSessionStorageFactory was already created');
+      expect(create()).rejects.toThrow('A cookieSessionStorageFactory was already created');
     });
 
     it('does not throw if called after stop', async () => {

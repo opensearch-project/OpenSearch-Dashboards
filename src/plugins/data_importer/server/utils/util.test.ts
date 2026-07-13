@@ -32,7 +32,7 @@ describe('util', () => {
       const dataSourceEnabled = true;
       const dataSourceId = 'foo';
       const client = await decideClient(dataSourceEnabled, mockContext, dataSourceId);
-      expect(mockContext.dataSource.opensearch.getClient).toBeCalledWith(dataSourceId);
+      expect(mockContext.dataSource.opensearch.getClient).toHaveBeenCalledWith(dataSourceId);
       expect(client).toMatchObject({});
     });
 
@@ -118,11 +118,11 @@ describe('util', () => {
         if (throwsError) {
           expect(() => {
             validateFileTypes(configEnabledFileTypes, fileProcessorService);
-          }).toThrowError();
+          }).toThrow();
         } else {
           expect(() => {
             validateFileTypes(configEnabledFileTypes, fileProcessorService);
-          }).not.toThrowError();
+          }).not.toThrow();
         }
       }
     );

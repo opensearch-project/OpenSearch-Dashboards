@@ -62,7 +62,7 @@ describe('Datasource Management: Create Datasource Wizard', () => {
         );
       });
       expect(utils.createSingleDataSource).toHaveBeenCalled();
-      expect(history.push).toBeCalledWith('');
+      expect(history.push).toHaveBeenCalledWith('');
       expect(utils.handleSetDefaultDatasource).toHaveBeenCalled();
     });
 
@@ -108,7 +108,7 @@ describe('Datasource Management: Create Datasource Wizard', () => {
         await component.find(formIdentifier).first().prop('handleCancel')();
       });
 
-      expect(history.push).toBeCalledWith('/create');
+      expect(history.push).toHaveBeenCalledWith('/create');
     });
   });
 
@@ -137,7 +137,7 @@ describe('Datasource Management: Create Datasource Wizard', () => {
     });
 
     test('should not render component and go back to listing page', () => {
-      expect(history.push).toBeCalledWith('');
+      expect(history.push).toHaveBeenCalledWith('');
     });
   });
 });

@@ -908,7 +908,7 @@ describe('I18n engine', () => {
   });
 
   describe('load', () => {
-    let mockFetch: jest.SpyInstance;
+    let mockFetch: jest.Spied;
     let originalWindow: any;
 
     beforeEach(() => {

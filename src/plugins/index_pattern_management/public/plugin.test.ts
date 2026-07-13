@@ -25,9 +25,9 @@ describe('DiscoverPlugin', () => {
         management: managementPluginMock.createSetupContract(),
       })
     ).not.toThrow();
-    expect(setupMock.application.register).toBeCalledTimes(1);
+    expect(setupMock.application.register).toHaveBeenCalledTimes(1);
     waitFor(() => {
-      expect(setupMock.chrome.navGroup.addNavLinksToGroup).toBeCalledTimes(1);
+      expect(setupMock.chrome.navGroup.addNavLinksToGroup).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -56,8 +56,8 @@ describe('DiscoverPlugin', () => {
 
     await applicationRegistration.mount({} as ManagementAppMountParams);
 
-    expect(startMock.application.getUrlForApp).toBeCalledWith('indexPatterns');
-    expect(startMock.application.navigateToUrl).toBeCalledWith(
+    expect(startMock.application.getUrlForApp).toHaveBeenCalledWith('indexPatterns');
+    expect(startMock.application.navigateToUrl).toHaveBeenCalledWith(
       'http://localhost/app/indexPatterns'
     );
   });

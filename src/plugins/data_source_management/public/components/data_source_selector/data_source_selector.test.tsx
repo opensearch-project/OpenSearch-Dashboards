@@ -51,7 +51,7 @@ describe('DataSourceSelector', () => {
       />
     );
     expect(component).toMatchSnapshot();
-    expect(client.find).toBeCalledWith({
+    expect(client.find).toHaveBeenCalledWith({
       fields: [
         'id',
         'title',
@@ -63,7 +63,7 @@ describe('DataSourceSelector', () => {
       perPage: 10000,
       type: 'data-source',
     });
-    expect(toasts.addWarning).toBeCalledTimes(0);
+    expect(toasts.addWarning).toHaveBeenCalledTimes(0);
   });
 
   it('should render normally with local cluster is hidden', () => {
@@ -79,7 +79,7 @@ describe('DataSourceSelector', () => {
       />
     );
     expect(component).toMatchSnapshot();
-    expect(client.find).toBeCalledWith({
+    expect(client.find).toHaveBeenCalledWith({
       fields: [
         'id',
         'title',
@@ -91,7 +91,7 @@ describe('DataSourceSelector', () => {
       perPage: 10000,
       type: 'data-source',
     });
-    expect(toasts.addWarning).toBeCalledTimes(0);
+    expect(toasts.addWarning).toHaveBeenCalledTimes(0);
   });
 });
 
@@ -134,7 +134,7 @@ describe('DataSourceSelector: check dataSource options', () => {
     component.instance().componentDidMount!();
     await nextTick();
     expect(component).toMatchSnapshot();
-    expect(toasts.addWarning).toBeCalledTimes(0);
+    expect(toasts.addWarning).toHaveBeenCalledTimes(0);
   });
 
   it('should hide prepend if removePrepend is true', async () => {
@@ -154,7 +154,7 @@ describe('DataSourceSelector: check dataSource options', () => {
     component.instance().componentDidMount!();
     await nextTick();
     expect(component).toMatchSnapshot();
-    expect(toasts.addWarning).toBeCalledTimes(0);
+    expect(toasts.addWarning).toHaveBeenCalledTimes(0);
   });
 
   it('should show custom placeholder text if configured', async () => {
@@ -174,7 +174,7 @@ describe('DataSourceSelector: check dataSource options', () => {
     component.instance().componentDidMount!();
     await nextTick();
     expect(component).toMatchSnapshot();
-    expect(toasts.addWarning).toBeCalledTimes(0);
+    expect(toasts.addWarning).toHaveBeenCalledTimes(0);
   });
 
   it('should filter options if configured', async () => {
@@ -194,7 +194,7 @@ describe('DataSourceSelector: check dataSource options', () => {
     component.instance().componentDidMount!();
     await nextTick();
     expect(component).toMatchSnapshot();
-    expect(toasts.addWarning).toBeCalledTimes(0);
+    expect(toasts.addWarning).toHaveBeenCalledTimes(0);
   });
 
   it('should return empty options if filter out all options and hide local cluster', async () => {
@@ -234,7 +234,10 @@ describe('DataSourceSelector: check dataSource options', () => {
     component.instance().componentDidMount!();
     await nextTick();
     expect(component).toMatchSnapshot();
-    expect(uiSettings.getUserProvidedWithScope).toBeCalledWith('defaultDataSource', 'workspace');
+    expect(uiSettings.getUserProvidedWithScope).toHaveBeenCalledWith(
+      'defaultDataSource',
+      'workspace'
+    );
   });
 
   it('should not render options with default badge when id does not matches defaultDataSource', () => {
@@ -387,7 +390,7 @@ describe('DataSourceSelector: check defaultOption behavior', () => {
     await nextTick();
     const euiComboBox = component.find(EuiComboBox);
     expect(euiComboBox.prop('selectedOptions')).toEqual(expect.arrayContaining([]));
-    expect(toasts.addWarning).toBeCalled();
+    expect(toasts.addWarning).toHaveBeenCalled();
   });
 
   // When defaultOption is []
@@ -477,7 +480,7 @@ describe('DataSourceSelector: check defaultOption behavior', () => {
     await nextTick();
     const euiComboBox = component.find(EuiComboBox);
     expect(euiComboBox.prop('selectedOptions')).toEqual(expect.arrayContaining([]));
-    expect(toasts.addWarning).toBeCalled();
+    expect(toasts.addWarning).toHaveBeenCalled();
   });
 
   it.each([
@@ -517,7 +520,7 @@ describe('DataSourceSelector: check defaultOption behavior', () => {
     await nextTick();
     const euiComboBox = component.find(EuiComboBox);
     expect(euiComboBox.prop('selectedOptions')).toEqual(expect.arrayContaining([]));
-    expect(toasts.addWarning).toBeCalled();
+    expect(toasts.addWarning).toHaveBeenCalled();
   });
 
   it.each([
@@ -565,9 +568,9 @@ describe('DataSourceSelector: check defaultOption behavior', () => {
       const euiComboBox = component.find(EuiComboBox);
       expect(euiComboBox.prop('selectedOptions')).toEqual(expect.arrayContaining(selectedOption));
       if (error) {
-        expect(toasts.addWarning).toBeCalled();
+        expect(toasts.addWarning).toHaveBeenCalled();
       } else {
-        expect(toasts.addWarning).toBeCalledTimes(0);
+        expect(toasts.addWarning).toHaveBeenCalledTimes(0);
       }
     }
   );

@@ -220,7 +220,7 @@ describe('#set', () => {
 
   it('stores a value in a previously unknown client key', () => {
     const { client } = setup();
-    expect(() => client.set('unrecognizedProperty', 'somevalue')).not.toThrowError();
+    expect(() => client.set('unrecognizedProperty', 'somevalue')).not.toThrow();
     expect(client.get('unrecognizedProperty')).toBe('somevalue');
   });
 
@@ -265,7 +265,7 @@ describe('#set', () => {
   it('should not throw error if the key does not exist', async () => {
     const { client } = setup();
 
-    await expect(client.set('not_exist', UiSettingScope.GLOBAL)).resolves.not.toThrowError();
+    await expect(client.set('not_exist', UiSettingScope.GLOBAL)).resolves.not.toThrow();
   });
 
   it('should not compare the old in the cache with new value if a scope is provided', async () => {
@@ -348,7 +348,7 @@ describe('#remove', () => {
   it('should not throw error if the key does not exist', () => {
     const { client } = setup();
 
-    expect(() => client.remove('not_exist')).not.toThrowError();
+    expect(() => client.remove('not_exist')).not.toThrow();
   });
 });
 

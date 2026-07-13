@@ -133,7 +133,7 @@ describe('OpenSearch search strategy', () => {
 
     await opensearchSearch.search(mockContext as unknown as RequestHandlerContext, { params });
 
-    expect(mockOpenSearchApiCaller).toBeCalled();
+    expect(mockOpenSearchApiCaller).toHaveBeenCalled();
     expect(mockOpenSearchApiCaller.mock.calls[0][0]).toEqual({
       ...params,
       ignore_unavailable: true,
@@ -147,7 +147,7 @@ describe('OpenSearch search strategy', () => {
 
     await opensearchSearch.search(mockContext as unknown as RequestHandlerContext, { params });
 
-    expect(mockOpenSearchApiCaller).toBeCalled();
+    expect(mockOpenSearchApiCaller).toHaveBeenCalled();
     expect(mockOpenSearchApiCaller.mock.calls[0][0]).toEqual({
       ...params,
       track_total_hits: true,
@@ -197,8 +197,8 @@ describe('OpenSearch search strategy', () => {
       }
     );
 
-    expect(mockDataSourceApiCaller).toBeCalled();
-    expect(mockOpenSearchApiCaller).not.toBeCalled();
+    expect(mockDataSourceApiCaller).toHaveBeenCalled();
+    expect(mockOpenSearchApiCaller).not.toHaveBeenCalled();
   });
 
   it('dataSource enabled, config host exist, send request without dataSourceId should get default client', async () => {
@@ -229,8 +229,8 @@ describe('OpenSearch search strategy', () => {
         mockDataSourceEnabledContext as unknown as RequestHandlerContext,
         testRequest
       );
-      expect(mockOpenSearchApiCaller).toBeCalled();
-      expect(mockDataSourceApiCaller).not.toBeCalled();
+      expect(mockOpenSearchApiCaller).toHaveBeenCalled();
+      expect(mockDataSourceApiCaller).not.toHaveBeenCalled();
     });
   });
 
@@ -283,8 +283,8 @@ describe('OpenSearch search strategy', () => {
     await opensearchSearch.search(mockContext as unknown as RequestHandlerContext, {
       dataSourceId,
     });
-    expect(mockOpenSearchApiCaller).toBeCalled();
-    expect(mockDataSourceApiCaller).not.toBeCalled();
+    expect(mockOpenSearchApiCaller).toHaveBeenCalled();
+    expect(mockDataSourceApiCaller).not.toHaveBeenCalled();
   });
 
   it('dataSource disabled, send request without dataSourceId should get default client', async () => {
@@ -296,8 +296,8 @@ describe('OpenSearch search strategy', () => {
       await opensearchSearch.search(mockContext as unknown as RequestHandlerContext, {
         dataSourceId: testDataSourceId,
       });
-      expect(mockOpenSearchApiCaller).toBeCalled();
-      expect(mockDataSourceApiCaller).not.toBeCalled();
+      expect(mockOpenSearchApiCaller).toHaveBeenCalled();
+      expect(mockDataSourceApiCaller).not.toHaveBeenCalled();
     }
   });
 
@@ -318,9 +318,9 @@ describe('OpenSearch search strategy', () => {
       await opensearchSearch.search(mockContext as unknown as RequestHandlerContext, {
         dataSourceId: testDataSourceId,
       });
-      expect(mockOpenSearchApiCallerWithLongNumeralsSupport).toBeCalled();
-      expect(mockOpenSearchApiCaller).not.toBeCalled();
-      expect(mockDataSourceApiCaller).not.toBeCalled();
+      expect(mockOpenSearchApiCallerWithLongNumeralsSupport).toHaveBeenCalled();
+      expect(mockOpenSearchApiCaller).not.toHaveBeenCalled();
+      expect(mockDataSourceApiCaller).not.toHaveBeenCalled();
     }
   });
 });

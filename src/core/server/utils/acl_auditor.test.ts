@@ -46,6 +46,6 @@ describe('#ACLAuditor', () => {
       mockedLogger.error.mock.calls[0][0].toString().startsWith('[ACLCounterCheckoutFailed]')
     ).toEqual(true);
     ACLAuditorInstance?.checkout();
-    expect(mockedLogger.error).toBeCalledTimes(1);
+    expect(mockedLogger.error).toHaveBeenCalledTimes(1);
   });
 });

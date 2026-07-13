@@ -86,7 +86,7 @@ describe('sample data install route', () => {
     });
 
     // expect(mockClient).toBeCalledTimes(2);
-    expect(mockResponse.ok).toBeCalled();
+    expect(mockResponse.ok).toHaveBeenCalled();
     expect(mockResponse.ok.mock.calls[0][0]).toMatchObject({
       body: {
         opensearchIndicesCreated: { opensearch_dashboards_sample_data_flights: 13059 },
@@ -158,7 +158,7 @@ describe('sample data install route', () => {
       index: { number_of_shards: 1 },
     });
 
-    expect(mockResponse.ok).toBeCalled();
+    expect(mockResponse.ok).toHaveBeenCalled();
     expect(mockResponse.ok.mock.calls[0][0]).toMatchObject({
       body: {
         opensearchIndicesCreated: { opensearch_dashboards_sample_data_flights: 13059 },
@@ -224,7 +224,7 @@ describe('sample data install route', () => {
       index: { number_of_shards: 1 },
     });
 
-    expect(mockResponse.ok).toBeCalled();
+    expect(mockResponse.ok).toHaveBeenCalled();
     expect(mockResponse.ok.mock.calls[0][0]).toMatchObject({
       body: {
         opensearchIndicesCreated: { opensearch_dashboards_sample_data_flights: 13059 },
@@ -290,7 +290,7 @@ describe('sample data install route', () => {
 
     await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
 
-    expect(mockResponse.forbidden).toBeCalled();
+    expect(mockResponse.forbidden).toHaveBeenCalled();
     expect(mockResponse.forbidden.mock.calls[0][0]).toMatchObject({
       body: expect.stringContaining('Invalid workspace permission'),
     });
@@ -346,7 +346,7 @@ describe('sample data install route', () => {
 
     await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
 
-    expect(mockResponse.internalError).toBeCalled();
+    expect(mockResponse.internalError).toHaveBeenCalled();
     expect(mockResponse.internalError.mock.calls[0][0]).toMatchObject({
       body: expect.stringContaining('Unknown error'),
     });

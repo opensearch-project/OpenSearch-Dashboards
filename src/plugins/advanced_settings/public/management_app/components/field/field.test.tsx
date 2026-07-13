@@ -395,7 +395,7 @@ describe('Field', () => {
 
         it('should be able to change value and cancel', async () => {
           (component.instance() as Field).onImageChange([userValue] as unknown as FileList);
-          expect(handleChange).toBeCalled();
+          expect(handleChange).toHaveBeenCalled();
           await wrapper.setProps({
             unsavedChanges: {
               value: userValue,
@@ -407,7 +407,7 @@ describe('Field', () => {
             },
           });
           await (component.instance() as Field).cancelChangeImage();
-          expect(clearChange).toBeCalledWith(setting.name);
+          expect(clearChange).toHaveBeenCalledWith(setting.name);
           wrapper.update();
         });
 
@@ -421,13 +421,13 @@ describe('Field', () => {
           await (component.instance() as Field).onImageChange([
             newUserValue,
           ] as unknown as FileList);
-          expect(handleChange).toBeCalled();
+          expect(handleChange).toHaveBeenCalled();
         });
 
         it('should be able to reset to default value', async () => {
           const updated = wrapper.update();
           findTestSubject(updated, `advancedSetting-resetField-${setting.name}`).simulate('click');
-          expect(handleChange).toBeCalledWith(setting.name, {
+          expect(handleChange).toHaveBeenCalledWith(setting.name, {
             value: getEditableValue(setting.type, setting.defVal),
             changeImage: true,
           });
@@ -440,7 +440,7 @@ describe('Field', () => {
 
         it('should be able to change value', async () => {
           (component.instance() as Field).onCodeEditorChange(userValue as UiSettingsType);
-          expect(handleChange).toBeCalledWith(setting.name, { value: userValue });
+          expect(handleChange).toHaveBeenCalledWith(setting.name, { value: userValue });
           await wrapper.setProps({
             setting: {
               ...(component.instance() as Field).props.setting,
@@ -453,7 +453,7 @@ describe('Field', () => {
         it('should be able to reset to default value', async () => {
           const updated = wrapper.update();
           findTestSubject(updated, `advancedSetting-resetField-${setting.name}`).simulate('click');
-          expect(handleChange).toBeCalledWith(setting.name, {
+          expect(handleChange).toHaveBeenCalledWith(setting.name, {
             value: getEditableValue(setting.type, setting.defVal),
           });
         });
@@ -462,7 +462,7 @@ describe('Field', () => {
           it('should be able to clear value and have empty object populate', async () => {
             await (component.instance() as Field).onCodeEditorChange('' as UiSettingsType);
             wrapper.update();
-            expect(handleChange).toBeCalledWith(setting.name, { value: setting.defVal });
+            expect(handleChange).toHaveBeenCalledWith(setting.name, { value: setting.defVal });
           });
         }
       });
@@ -481,7 +481,7 @@ describe('Field', () => {
               error: (setting.validation as StringValidation).message,
               isInvalid: true,
             };
-            expect(handleChange).toBeCalledWith(setting.name, expectedUnsavedChanges);
+            expect(handleChange).toHaveBeenCalledWith(setting.name, expectedUnsavedChanges);
             wrapper.setProps({ unsavedChanges: expectedUnsavedChanges });
             const updated = wrapper.update();
             const errorMessage = updated.find('.euiFormErrorText').text();
@@ -492,7 +492,7 @@ describe('Field', () => {
         it('should be able to change value', async () => {
           await (component.instance() as Field).onFieldChange(fieldUserValue);
           const updated = wrapper.update();
-          expect(handleChange).toBeCalledWith(setting.name, { value: fieldUserValue });
+          expect(handleChange).toHaveBeenCalledWith(setting.name, { value: fieldUserValue });
           updated.setProps({ unsavedChanges: { value: fieldUserValue } });
           const currentValue = getFieldSettingValue(updated, setting.name, type);
           expect(currentValue).toEqual(fieldUserValue);
@@ -506,7 +506,7 @@ describe('Field', () => {
           const updated = wrapper.update();
           findTestSubject(updated, `advancedSetting-resetField-${setting.name}`).simulate('click');
           const expectedEditableValue = getEditableValue(setting.type, setting.defVal);
-          expect(handleChange).toBeCalledWith(setting.name, {
+          expect(handleChange).toHaveBeenCalledWith(setting.name, {
             value: expectedEditableValue,
           });
           updated.setProps({ unsavedChanges: { value: expectedEditableValue } });

@@ -111,7 +111,7 @@ describe('importFile()', () => {
         formData.append('mapping', JSON.stringify(mapping));
       }
 
-      expect(httpMock.post).toBeCalledWith('/api/data_importer/_import_file', {
+      expect(httpMock.post).toHaveBeenCalledWith('/api/data_importer/_import_file', {
         query: {
           indexName,
           delimiter,

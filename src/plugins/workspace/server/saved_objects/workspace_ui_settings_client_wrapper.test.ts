@@ -306,7 +306,7 @@ describe('WorkspaceUiSettingsClientWrapper', () => {
       },
       {}
     );
-    expect(logger.warn).toBeCalledWith(
+    expect(logger.warn).toHaveBeenCalledWith(
       'Deprecation warning: updating workspace settings through global scope will no longer be supported.'
     );
   });

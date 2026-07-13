@@ -90,7 +90,7 @@ describe('fetchSoon', () => {
 
     fetchSoon(request, options, { getConfig } as FetchHandlers);
 
-    expect(callClient).toBeCalled();
+    expect(callClient).toHaveBeenCalled();
   });
 
   test('should delay by 50ms if config is set to batch searches', () => {
@@ -100,11 +100,11 @@ describe('fetchSoon', () => {
 
     fetchSoon(request, options, { getConfig } as FetchHandlers);
 
-    expect(callClient).not.toBeCalled();
+    expect(callClient).not.toHaveBeenCalled();
     jest.advanceTimersByTime(0);
-    expect(callClient).not.toBeCalled();
+    expect(callClient).not.toHaveBeenCalled();
     jest.advanceTimersByTime(50);
-    expect(callClient).toBeCalled();
+    expect(callClient).toHaveBeenCalled();
   });
 
   test('should send a batch of requests to callClient', () => {
@@ -117,7 +117,7 @@ describe('fetchSoon', () => {
     });
 
     jest.advanceTimersByTime(50);
-    expect(callClient).toBeCalledTimes(1);
+    expect(callClient).toHaveBeenCalledTimes(1);
     expect((callClient as jest.Mock).mock.calls[0][0]).toEqual(requests);
     expect((callClient as jest.Mock).mock.calls[0][1]).toEqual(options);
   });
@@ -136,7 +136,7 @@ describe('fetchSoon', () => {
     });
 
     jest.advanceTimersByTime(50);
-    expect(callClient).toBeCalledTimes(2);
+    expect(callClient).toHaveBeenCalledTimes(2);
     expect((callClient as jest.Mock).mock.calls[0]).toEqual(
       expect.arrayContaining([
         [{ foo: 1 }, { foo: 3 }],
@@ -177,12 +177,12 @@ describe('fetchSoon', () => {
       fetchSoon(request, {}, { getConfig } as FetchHandlers);
     });
 
-    expect(callClient).toBeCalledTimes(1);
+    expect(callClient).toHaveBeenCalledTimes(1);
     expect((callClient as jest.Mock).mock.calls[0][0]).toEqual(firstBatch);
 
     jest.advanceTimersByTime(50);
 
-    expect(callClient).toBeCalledTimes(2);
+    expect(callClient).toHaveBeenCalledTimes(2);
     expect((callClient as jest.Mock).mock.calls[1][0]).toEqual(secondBatch);
   });
 });

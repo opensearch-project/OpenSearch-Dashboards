@@ -41,7 +41,7 @@ describe('DataSourceView', () => {
       />
     );
     expect(component).toMatchSnapshot();
-    expect(toasts.addWarning).toBeCalledTimes(0);
+    expect(toasts.addWarning).toHaveBeenCalledTimes(0);
   });
 
   it('When selected option is local cluster and hide local Cluster is true, should return error', async () => {
@@ -66,7 +66,7 @@ describe('DataSourceView', () => {
     wrapper.update();
 
     expect(wrapper).toMatchSnapshot();
-    expect(onSelectedDataSources).toBeCalledWith([]);
+    expect(onSelectedDataSources).toHaveBeenCalledWith([]);
   });
   it('Should return error when provided datasource has been filtered out', async () => {
     let wrapper!: ReactWrapper;
@@ -114,8 +114,8 @@ describe('DataSourceView', () => {
     wrapper.update();
 
     expect(wrapper).toMatchSnapshot();
-    expect(toasts.addWarning).toBeCalledTimes(0);
-    expect(utils.getDataSourceById).toBeCalledTimes(1);
+    expect(toasts.addWarning).toHaveBeenCalledTimes(0);
+    expect(utils.getDataSourceById).toHaveBeenCalledTimes(1);
   });
   it('should call getDataSourceById when only pass id with no label', async () => {
     spyOn(utils, 'getDataSourceById').and.returnValue([{ id: 'test1', label: 'test1' }]);
@@ -137,8 +137,8 @@ describe('DataSourceView', () => {
     wrapper.update();
 
     expect(wrapper).toMatchSnapshot();
-    expect(utils.getDataSourceById).toBeCalledTimes(1);
-    expect(toasts.addWarning).toBeCalledTimes(0);
+    expect(utils.getDataSourceById).toHaveBeenCalledTimes(1);
+    expect(toasts.addWarning).toHaveBeenCalledTimes(0);
   });
   it('should call notification warning when there is data source fetch error', async () => {
     spyOn(utils, 'getDataSourceById').and.throwError('Data source is not available');
@@ -160,8 +160,8 @@ describe('DataSourceView', () => {
 
     wrapper.update();
     expect(wrapper).toMatchSnapshot();
-    expect(toasts.add).toBeCalledTimes(1);
-    expect(utils.getDataSourceById).toBeCalledTimes(1);
+    expect(toasts.add).toHaveBeenCalledTimes(1);
+    expect(utils.getDataSourceById).toHaveBeenCalledTimes(1);
   });
 
   it('should show popover when click on data source view button', async () => {
@@ -203,6 +203,6 @@ describe('DataSourceView', () => {
     });
 
     wrapper.update();
-    expect(onSelectedDataSource).toBeCalledWith([]);
+    expect(onSelectedDataSource).toHaveBeenCalledWith([]);
   });
 });

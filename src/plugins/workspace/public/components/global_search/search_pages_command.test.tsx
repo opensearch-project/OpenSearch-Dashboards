@@ -172,7 +172,7 @@ describe('<workspaceSearchPagesCommand />', () => {
       id: 'test',
     });
 
-    expect(coreStartMock.application.navigateToApp).toBeCalledWith('test');
+    expect(coreStartMock.application.navigateToApp).toHaveBeenCalledWith('test');
   });
 
   it('search click callback with system link should use window assign correctly', async () => {
@@ -200,8 +200,8 @@ describe('<workspaceSearchPagesCommand />', () => {
       id: 'test',
     });
 
-    expect(coreStartMock.application.navigateToApp).not.toBeCalled();
-    expect(window.location.assign).toBeCalledWith(testUrl);
+    expect(coreStartMock.application.navigateToApp).not.toHaveBeenCalled();
+    expect(window.location.assign).toHaveBeenCalledWith(testUrl);
   });
 
   it('search click callback with system link and basePath should use window assign correctly', async () => {
@@ -234,8 +234,8 @@ describe('<workspaceSearchPagesCommand />', () => {
       id: 'test',
     });
 
-    expect(coreStartMock.application.navigateToApp).not.toBeCalled();
-    expect(window.location.assign).toBeCalledWith(testUrl);
+    expect(coreStartMock.application.navigateToApp).not.toHaveBeenCalled();
+    expect(window.location.assign).toHaveBeenCalledWith(testUrl);
 
     // @ts-expect-error TS2341, TS2540 TODO(ts-error): fixme
     coreStartMock.http.basePath.basePath = originalBasePath;

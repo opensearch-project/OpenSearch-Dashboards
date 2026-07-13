@@ -104,7 +104,7 @@ describe('Agents helper functions', () => {
       configName: 'new_agent',
       body: { parameters: { param1: 'value1' } },
     });
-    expect(mockedTransport).toBeCalledWith(
+    expect(mockedTransport).toHaveBeenCalledWith(
       expect.objectContaining({ path: '/_plugins/_ml/agents/new-id/_execute' }),
       expect.anything()
     );
@@ -127,7 +127,7 @@ describe('Agents helper functions', () => {
       configName: 'new_agent',
       body: { parameters: { param1: 'value1' } },
     });
-    expect(mockedTransport).toBeCalledWith(
+    expect(mockedTransport).toHaveBeenCalledWith(
       expect.objectContaining({ path: '/_plugins/_ml/agents/new-id/_execute' }),
       expect.anything()
     );

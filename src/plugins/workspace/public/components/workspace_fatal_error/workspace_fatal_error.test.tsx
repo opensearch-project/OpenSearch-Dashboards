@@ -63,7 +63,7 @@ describe('<WorkspaceFatalError />', () => {
     fireEvent.click(getByText('Go back to homepage'));
     await waitFor(
       () => {
-        expect(setHrefSpy).toBeCalledTimes(1);
+        expect(setHrefSpy).toHaveBeenCalledTimes(1);
       },
       {
         container: document.body,

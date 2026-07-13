@@ -39,7 +39,7 @@ import { Env } from '../config';
 
 const env = Env.createDefault(REPO_ROOT, getEnvOptions());
 
-let mockConsoleError: jest.SpyInstance;
+let mockConsoleError: jest.Spied;
 
 beforeEach(() => {
   jest.spyOn(global.process, 'exit').mockReturnValue(undefined as never);
@@ -138,7 +138,7 @@ test('fails and stops services if server setup fails', async () => {
   expect(logger.stop).not.toHaveBeenCalled();
   expect(mockServer.stop).not.toHaveBeenCalled();
 
-  await expect(root.setup()).rejects.toThrowError('server failed');
+  await expect(root.setup()).rejects.toThrow('server failed');
 
   expect(mockOnShutdown).toHaveBeenCalledTimes(1);
   expect(mockOnShutdown).toHaveBeenCalledWith(serverError);
@@ -159,7 +159,7 @@ test('fails and stops services if initial logger upgrade fails', async () => {
   expect(logger.stop).not.toHaveBeenCalled();
   expect(mockServer.setup).not.toHaveBeenCalled();
 
-  await expect(root.setup()).rejects.toThrowError('logging config upgrade failed');
+  await expect(root.setup()).rejects.toThrow('logging config upgrade failed');
 
   expect(mockOnShutdown).toHaveBeenCalledTimes(1);
   expect(mockOnShutdown).toHaveBeenCalledWith(loggingUpgradeError);

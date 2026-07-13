@@ -118,7 +118,7 @@ describe('OptimizerConfig::parseOptions()', () => {
       dist: true,
     });
 
-    expect(parseThemeTags).toBeCalledWith('*');
+    expect(parseThemeTags).toHaveBeenCalledWith('*');
   });
 
   it('defaults to OSD_OPTIMIZER_THEMES when dist = false', () => {
@@ -129,7 +129,7 @@ describe('OptimizerConfig::parseOptions()', () => {
       dist: false,
     });
 
-    expect(parseThemeTags).toBeCalledWith('foo');
+    expect(parseThemeTags).toHaveBeenCalledWith('foo');
   });
 
   it('applies defaults if opensearch-dashboards-extra path does not exist', () => {

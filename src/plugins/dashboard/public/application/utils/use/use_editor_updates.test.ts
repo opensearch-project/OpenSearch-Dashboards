@@ -124,7 +124,7 @@ describe('useEditorUpdates', () => {
         })
       );
 
-      expect(mockServices.chrome.setBreadcrumbs).not.toBeCalled();
+      expect(mockServices.chrome.setBreadcrumbs).not.toHaveBeenCalled();
     });
 
     test('should not update if currentAppState is not ready ', () => {
@@ -137,7 +137,7 @@ describe('useEditorUpdates', () => {
         })
       );
 
-      expect(mockServices.chrome.setBreadcrumbs).not.toBeCalled();
+      expect(mockServices.chrome.setBreadcrumbs).not.toHaveBeenCalled();
     });
 
     test('should not update if dashboard is not ready ', () => {
@@ -149,7 +149,7 @@ describe('useEditorUpdates', () => {
         })
       );
 
-      expect(mockServices.chrome.setBreadcrumbs).not.toBeCalled();
+      expect(mockServices.chrome.setBreadcrumbs).not.toHaveBeenCalled();
     });
 
     // Uses id set by data source to determine if it is a saved object or not
@@ -174,8 +174,10 @@ describe('useEditorUpdates', () => {
         dashboard.isDirty
       );
 
-      expect(mockServices.chrome.setBreadcrumbs).toBeCalledWith(breadcrumbs);
-      expect(mockServices.chrome.docTitle.change).toBeCalledWith(savedDashboardInstance.title);
+      expect(mockServices.chrome.setBreadcrumbs).toHaveBeenCalledWith(breadcrumbs);
+      expect(mockServices.chrome.docTitle.change).toHaveBeenCalledWith(
+        savedDashboardInstance.title
+      );
     });
 
     test('should update for new dashboard if saved object does not exist', () => {
@@ -196,8 +198,8 @@ describe('useEditorUpdates', () => {
         dashboard.isDirty
       );
 
-      expect(mockServices.chrome.setBreadcrumbs).toBeCalledWith(breadcrumbs);
-      expect(mockServices.chrome.docTitle.change).not.toBeCalled();
+      expect(mockServices.chrome.setBreadcrumbs).toHaveBeenCalledWith(breadcrumbs);
+      expect(mockServices.chrome.docTitle.change).not.toHaveBeenCalled();
     });
   });
 

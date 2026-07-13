@@ -371,6 +371,6 @@ describe('calculateBounds', () => {
     };
 
     stubNowTime('not_a_parsable_date');
-    expect(() => timefilter.calculateBounds(timeRange)).toThrowError();
+    expect(() => timefilter.calculateBounds(timeRange)).toThrow();
   });
 });

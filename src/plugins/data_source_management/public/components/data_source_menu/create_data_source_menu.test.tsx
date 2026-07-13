@@ -62,7 +62,7 @@ describe('create data source menu', () => {
 
     const component = render(<TestComponent {...props} />);
     expect(component).toMatchSnapshot();
-    expect(client.find).toBeCalledWith({
+    expect(client.find).toHaveBeenCalledWith({
       fields: [
         'id',
         'title',
@@ -74,7 +74,7 @@ describe('create data source menu', () => {
       perPage: 10000,
       type: 'data-source',
     });
-    expect(notifications.toasts.addWarning).toBeCalledTimes(0);
+    expect(notifications.toasts.addWarning).toHaveBeenCalledTimes(0);
   });
 
   it('should ignore props.hideLocalCluster, and show local cluster when data_source.hideLocalCluster is set to false', async () => {
@@ -104,7 +104,7 @@ describe('create data source menu', () => {
     });
 
     expect(component).toMatchSnapshot();
-    expect(client.find).toBeCalledWith({
+    expect(client.find).toHaveBeenCalledWith({
       fields: [
         'id',
         'title',
@@ -116,7 +116,7 @@ describe('create data source menu', () => {
       perPage: 10000,
       type: 'data-source',
     });
-    expect(notifications.toasts.add).toBeCalledTimes(2);
+    expect(notifications.toasts.add).toHaveBeenCalledTimes(2);
   });
 });
 
@@ -188,7 +188,7 @@ describe('when setMenuMountPoint is provided', () => {
 
     await refresh();
     expect(component).toMatchSnapshot();
-    expect(client.find).toBeCalledWith({
+    expect(client.find).toHaveBeenCalledWith({
       fields: [
         'id',
         'title',
@@ -200,7 +200,7 @@ describe('when setMenuMountPoint is provided', () => {
       perPage: 10000,
       type: 'data-source',
     });
-    expect(notifications.toasts.addWarning).toBeCalledTimes(0);
-    expect(setMountPoint).toBeCalledTimes(1);
+    expect(notifications.toasts.addWarning).toHaveBeenCalledTimes(0);
+    expect(setMountPoint).toHaveBeenCalledTimes(1);
   });
 });

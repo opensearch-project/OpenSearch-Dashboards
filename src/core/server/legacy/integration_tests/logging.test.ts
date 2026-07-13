@@ -70,8 +70,8 @@ function createRoot(legacyLoggingConfig: LegacyLoggingConfig = {}) {
 }
 
 describe('logging service', () => {
-  let mockConsoleLog: jest.SpyInstance;
-  let mockStdout: jest.SpyInstance;
+  let mockConsoleLog: jest.Spied;
+  let mockStdout: jest.Spied;
 
   beforeAll(async () => {
     mockConsoleLog = jest.spyOn(global.console, 'log');

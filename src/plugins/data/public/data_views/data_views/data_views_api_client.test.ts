@@ -7,7 +7,7 @@ import { http } from './data_views_api_client.test.mock';
 import { DataViewsApiClient } from './data_views_api_client';
 
 describe('DataViewsApiClient', () => {
-  let fetchSpy: jest.SpyInstance;
+  let fetchSpy: jest.Spied;
   let dataViewsApiClient: DataViewsApiClient;
 
   beforeEach(() => {

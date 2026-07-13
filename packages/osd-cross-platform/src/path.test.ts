@@ -109,9 +109,9 @@ describe('Cross Platform', () => {
     });
 
     describe('on platforms other than Windows', () => {
-      let mockPathNormalize: jest.SpyInstance<string, [p: string]>;
-      let mockPathResolve: jest.SpyInstance<string, string[]>;
-      let mockFSRealPathSync: jest.SpyInstance<string>;
+      let mockPathNormalize: jest.Spied<string, [p: string]>;
+      let mockPathResolve: jest.Spied<string, string[]>;
+      let mockFSRealPathSync: jest.Spied<string>;
 
       beforeAll(() => {
         Object.defineProperty(process, 'platform', {
@@ -123,7 +123,7 @@ describe('Cross Platform', () => {
         mockPathResolve = jest.spyOn(path, 'resolve').mockReturnValue(dummyPOSIXPath);
         mockFSRealPathSync = jest
           .spyOn(fs, 'realpathSync')
-          .mockReturnValue(dummyPOSIXPath) as jest.SpyInstance<string>;
+          .mockReturnValue(dummyPOSIXPath) as jest.Spied<string>;
       });
 
       afterAll(() => {
@@ -143,7 +143,7 @@ describe('Cross Platform', () => {
 
     describe('standardize', () => {
       describe('on Windows', () => {
-        let mockPathNormalize: jest.SpyInstance<string, [p: string]>;
+        let mockPathNormalize: jest.Spied<string, [p: string]>;
 
         beforeAll(() => {
           Object.defineProperty(process, 'platform', {
@@ -178,7 +178,7 @@ describe('Cross Platform', () => {
       });
 
       describe('on POSIX-compatible platforms', () => {
-        let mockPathNormalize: jest.SpyInstance<string, [p: string]>;
+        let mockPathNormalize: jest.Spied<string, [p: string]>;
 
         beforeAll(() => {
           Object.defineProperty(process, 'platform', {

@@ -35,7 +35,7 @@ describe('scroll_count route schema validation', () => {
 
   it('rejects typesToInclude exceeding 100 elements', () => {
     const input = { typesToInclude: Array(101).fill('dashboard') };
-    expect(() => bodySchema.validate(input)).toThrowError(/cannot be greater than \[100\]/);
+    expect(() => bodySchema.validate(input)).toThrow(/cannot be greater than \[100\]/);
   });
 
   it('rejects namespacesToInclude exceeding 100 elements', () => {
@@ -43,7 +43,7 @@ describe('scroll_count route schema validation', () => {
       typesToInclude: ['dashboard'],
       namespacesToInclude: Array(101).fill('ns'),
     };
-    expect(() => bodySchema.validate(input)).toThrowError(/cannot be greater than \[100\]/);
+    expect(() => bodySchema.validate(input)).toThrow(/cannot be greater than \[100\]/);
   });
 
   it('rejects workspaces exceeding 100 elements', () => {
@@ -51,7 +51,7 @@ describe('scroll_count route schema validation', () => {
       typesToInclude: ['dashboard'],
       workspaces: Array(101).fill('ws'),
     };
-    expect(() => bodySchema.validate(input)).toThrowError(/cannot be greater than \[100\]/);
+    expect(() => bodySchema.validate(input)).toThrow(/cannot be greater than \[100\]/);
   });
 
   it('rejects availableWorkspaces exceeding 100 elements', () => {
@@ -59,6 +59,6 @@ describe('scroll_count route schema validation', () => {
       typesToInclude: ['dashboard'],
       availableWorkspaces: Array(101).fill('ws'),
     };
-    expect(() => bodySchema.validate(input)).toThrowError(/cannot be greater than \[100\]/);
+    expect(() => bodySchema.validate(input)).toThrow(/cannot be greater than \[100\]/);
   });
 });

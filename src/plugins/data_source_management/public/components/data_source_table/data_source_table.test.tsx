@@ -306,7 +306,7 @@ describe('DataSourceTable', () => {
         .find('[data-test-subj="dataSourcesManagement-dataSourceTable-setAsDefaultButton"]')
         .first()
         .simulate('click');
-      expect(uiSettings.set).toBeCalledWith(
+      expect(uiSettings.set).toHaveBeenCalledWith(
         DEFAULT_DATA_SOURCE_UI_SETTINGS_ID,
         'alpha-test',
         UiSettingScope.WORKSPACE

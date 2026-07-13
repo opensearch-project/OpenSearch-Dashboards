@@ -779,7 +779,7 @@ describe('#getQueryParams', () => {
             registry,
             namespaces: [],
           })
-        ).toThrowError('cannot specify empty namespaces array');
+        ).toThrow('cannot specify empty namespaces array');
       });
     });
   });

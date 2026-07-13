@@ -77,7 +77,7 @@ describe('PermissionControlledUiSettingsWrapper', () => {
     it('should pass through non-config type requests', async () => {
       const wrapperClient = buildWrapperInstance();
       await wrapperClient.get('dashboard', 'test-id');
-      expect(mockedClient.get).toBeCalledWith('dashboard', 'test-id');
+      expect(mockedClient.get).toHaveBeenCalledWith('dashboard', 'test-id');
     });
 
     it('should handle regular config requests', async () => {
@@ -92,7 +92,7 @@ describe('PermissionControlledUiSettingsWrapper', () => {
 
       const result = await wrapperClient.get('config', '3.0.0');
 
-      expect(mockedClient.get).toBeCalledWith('config', '3.0.0');
+      expect(mockedClient.get).toHaveBeenCalledWith('config', '3.0.0');
       expect(result).toEqual(mockResponse);
     });
 
@@ -108,7 +108,7 @@ describe('PermissionControlledUiSettingsWrapper', () => {
 
       const result = await wrapperClient.get('config', DASHBOARD_ADMIN_SETTINGS_ID);
 
-      expect(mockedClient.get).toBeCalledWith('config', DASHBOARD_ADMIN_SETTINGS_ID);
+      expect(mockedClient.get).toHaveBeenCalledWith('config', DASHBOARD_ADMIN_SETTINGS_ID);
       expect(result).toEqual(adminSettings);
     });
 
@@ -132,14 +132,14 @@ describe('PermissionControlledUiSettingsWrapper', () => {
       const wrapperClient = buildWrapperInstance();
       const attributes = { title: 'Test Dashboard' };
       await wrapperClient.create('dashboard', attributes);
-      expect(mockedClient.create).toBeCalledWith('dashboard', attributes, {});
+      expect(mockedClient.create).toHaveBeenCalledWith('dashboard', attributes, {});
     });
 
     it('should pass through regular config requests', async () => {
       const wrapperClient = buildWrapperInstance();
       const attributes = { 'regular.setting': 'value' };
       await wrapperClient.create('config', attributes);
-      expect(mockedClient.create).toBeCalledWith('config', attributes, {});
+      expect(mockedClient.create).toHaveBeenCalledWith('config', attributes, {});
     });
 
     it('should create admin settings when user is dashboard admin', async () => {
@@ -156,7 +156,7 @@ describe('PermissionControlledUiSettingsWrapper', () => {
 
       await wrapperClient.create('config', attributes, { id: DASHBOARD_ADMIN_SETTINGS_ID });
 
-      expect(mockedClient.create).toBeCalledWith('config', attributes, {
+      expect(mockedClient.create).toHaveBeenCalledWith('config', attributes, {
         id: DASHBOARD_ADMIN_SETTINGS_ID,
         overwrite: true,
         permissions: expect.any(Object),
@@ -180,7 +180,7 @@ describe('PermissionControlledUiSettingsWrapper', () => {
 
       await wrapperClient.create('config', attributes, { id: DASHBOARD_ADMIN_SETTINGS_ID });
 
-      expect(mockedClient.create).toBeCalledWith('config', attributes, {
+      expect(mockedClient.create).toHaveBeenCalledWith('config', attributes, {
         id: DASHBOARD_ADMIN_SETTINGS_ID,
         overwrite: true,
         permissions: { read: { users: ['*'] } },
@@ -197,14 +197,14 @@ describe('PermissionControlledUiSettingsWrapper', () => {
       const wrapperClient = buildWrapperInstance();
       const attributes = { title: 'Updated Dashboard' };
       await wrapperClient.update('dashboard', 'test-id', attributes);
-      expect(mockedClient.update).toBeCalledWith('dashboard', 'test-id', attributes, {});
+      expect(mockedClient.update).toHaveBeenCalledWith('dashboard', 'test-id', attributes, {});
     });
 
     it('should pass through regular config requests', async () => {
       const wrapperClient = buildWrapperInstance();
       const attributes = { 'regular.setting': 'updated_value' };
       await wrapperClient.update('config', '3.0.0', attributes);
-      expect(mockedClient.update).toBeCalledWith('config', '3.0.0', attributes, {});
+      expect(mockedClient.update).toHaveBeenCalledWith('config', '3.0.0', attributes, {});
     });
 
     it('should update admin settings when user is dashboard admin', async () => {
@@ -221,7 +221,7 @@ describe('PermissionControlledUiSettingsWrapper', () => {
 
       await wrapperClient.update('config', DASHBOARD_ADMIN_SETTINGS_ID, attributes);
 
-      expect(mockedClient.update).toBeCalledWith(
+      expect(mockedClient.update).toHaveBeenCalledWith(
         'config',
         DASHBOARD_ADMIN_SETTINGS_ID,
         attributes,
@@ -242,7 +242,7 @@ describe('PermissionControlledUiSettingsWrapper', () => {
 
       await wrapperClient.update('config', DASHBOARD_ADMIN_SETTINGS_ID, attributes);
 
-      expect(mockedClient.create).toBeCalledWith('config', attributes, {
+      expect(mockedClient.create).toHaveBeenCalledWith('config', attributes, {
         id: DASHBOARD_ADMIN_SETTINGS_ID,
         overwrite: true,
         permissions: expect.any(Object),
@@ -263,7 +263,7 @@ describe('PermissionControlledUiSettingsWrapper', () => {
 
       await wrapperClient.bulkCreate(objects);
 
-      expect(mockedClient.bulkCreate).toBeCalledWith(objects, undefined);
+      expect(mockedClient.bulkCreate).toHaveBeenCalledWith(objects, undefined);
     });
 
     it('should throw error when trying to bulk create with admin settings ID', async () => {
@@ -310,7 +310,7 @@ describe('PermissionControlledUiSettingsWrapper', () => {
 
       await wrapperClient.bulkUpdate(objects);
 
-      expect(mockedClient.bulkUpdate).toBeCalledWith(objects, undefined);
+      expect(mockedClient.bulkUpdate).toHaveBeenCalledWith(objects, undefined);
     });
 
     it('should throw error when trying to bulk update admin settings', async () => {

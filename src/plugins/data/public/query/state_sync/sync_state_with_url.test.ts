@@ -199,7 +199,7 @@ describe('sync_query_state_with_url', () => {
     history.push(pathWithFilter);
     history.push(pathWithFilter);
 
-    expect(filterManagerChangeTriggered).not.toBeCalled();
+    expect(filterManagerChangeTriggered).not.toHaveBeenCalled();
     stop();
   });
 
@@ -208,7 +208,7 @@ describe('sync_query_state_with_url', () => {
     filterManager.setFilters([gF, aF]);
     const spy = jest.spyOn(osdUrlStateStorage, 'set');
     filterManager.setFilters([gF]); // global filters didn't change
-    expect(spy).not.toBeCalled();
+    expect(spy).not.toHaveBeenCalled();
     stop();
   });
 });

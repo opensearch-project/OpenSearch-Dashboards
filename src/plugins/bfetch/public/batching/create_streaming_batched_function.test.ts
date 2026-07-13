@@ -57,7 +57,7 @@ const setup = () => {
     xhr,
     promise,
     stream,
-  })) as unknown as jest.SpyInstance & typeof fetchStreamingReal;
+  })) as unknown as jest.Spied & typeof fetchStreamingReal;
 
   return {
     fetchStreaming,
