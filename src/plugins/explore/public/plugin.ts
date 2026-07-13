@@ -657,6 +657,23 @@ export class ExplorePlugin
       setExpressionLoader(plugins.expressions.ExpressionLoader);
     }
 
+    // Remove 'explore' from SQL supportedAppNames when SQL support is disabled
+    const sqlSupportEnabled =
+      this.initializerContext.config.get<ConfigSchema>().sqlSupport?.enabled ?? false;
+    if (!sqlSupportEnabled) {
+      const sqlConfig = plugins.data.query.queryString?.getLanguageService?.()?.getLanguage('SQL');
+      if (sqlConfig?.supportedAppNames) {
+        sqlConfig.supportedAppNames = sqlConfig.supportedAppNames.filter(
+          (name) => name !== 'explore'
+        );
+      }
+      if (sqlConfig?.editorSupportedAppNames) {
+        sqlConfig.editorSupportedAppNames = sqlConfig.editorSupportedAppNames.filter(
+          (name) => name !== 'explore'
+        );
+      }
+    }
+
     // Control nav link visibility based on dynamic capabilities
     const capabilities = core.application.capabilities;
 
