@@ -1,19 +1,15 @@
-const { defineConfig } = require("eslint/config");
+const osdConfig = require("@elastic/eslint-config-kibana");
+const { eui } = require("@elastic/eslint-config-kibana/extras");
 
-const kibanaConfig = require("@elastic/eslint-config-kibana/eslint.config.js");
-const euiPlugin = require("@elastic/eslint-plugin-eui");
-
-module.exports = defineConfig([
-    ...kibanaConfig,
-    {
-        plugins: {
-            "@elastic/eui": euiPlugin,
-        },
-        rules: euiPlugin.configs.recommended.rules,
-    },
+// Spread the shared OpenSearch Dashboards flat config, then append overrides.
+// No need to require or register ESLint plugins — the shared config does that.
+// See packages/opensearch-eslint-config-opensearch-dashboards/README.md.
+module.exports = [
+    ...osdConfig,
+    ...eui,
     {
         rules: {
             "@osd/eslint/require-license-header": "off",
         },
     },
-]);
+];
