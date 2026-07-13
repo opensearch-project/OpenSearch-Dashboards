@@ -80,11 +80,11 @@ describe('uiSettings', () => {
 
   beforeEach(() => {
     const coreContext = mockCoreContext.create();
-    coreContext.configService.atPath.mockReturnValue(
-      new BehaviorSubject({ overrides, permission })
-    );
+    coreContext.configService.atPath.mockReturnValue(new BehaviorSubject({ overrides }));
     const httpSetup = httpServiceMock.createInternalSetupContract();
     const savedObjectsSetup = savedObjectsServiceMock.createInternalSetupContract();
+    // Saved objects is the source of truth for the permission control flag.
+    savedObjectsSetup.getPermissionControlEnabled.mockReturnValue(permission.enabled);
     const dynamicConfigService = dynamicConfigServiceMock.createInternalSetupContract();
     setupDeps = {
       http: httpSetup,
@@ -149,12 +149,11 @@ describe('uiSettings', () => {
     });
 
     describe('permission control', () => {
-      // Builds a service whose config reports the given permission.enabled value.
+      // Builds a service where saved objects reports the given permission control state.
       const setupWithPermission = async (enabled: boolean) => {
         const coreContext = mockCoreContext.create();
-        coreContext.configService.atPath.mockReturnValue(
-          new BehaviorSubject({ overrides, permission: { enabled } })
-        );
+        coreContext.configService.atPath.mockReturnValue(new BehaviorSubject({ overrides }));
+        (setupDeps.savedObjects.getPermissionControlEnabled as jest.Mock).mockReturnValue(enabled);
         const customizedService = new UiSettingsService(coreContext);
         const registerSpy = jest.spyOn(customizedService as any, 'register');
         await customizedService.setup(setupDeps);

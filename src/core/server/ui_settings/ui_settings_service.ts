@@ -28,8 +28,7 @@
  * under the License.
  */
 
-import { combineLatest, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 import { firstValueFrom, mapToObject } from '@osd/std';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
@@ -48,10 +47,6 @@ import { uiSettingsType } from './saved_objects';
 import { registerRoutes } from './routes';
 import { getCoreSettings } from './settings';
 import { PermissionControlledUiSettingsWrapper } from './saved_objects/permission_controlled_ui_settings_wrapper';
-import {
-  savedObjectsConfig as savedObjectsDefinition,
-  SavedObjectsConfigType,
-} from '../saved_objects/saved_objects_config';
 import {
   PERMISSION_CONTROLLED_UI_SETTINGS_WRAPPER_ID,
   PERMISSION_CONTROLLED_UI_SETTINGS_WRAPPER_PRIORITY,
@@ -72,7 +67,7 @@ export class UiSettingsService implements CoreService<
   InternalUiSettingsServiceStart
 > {
   private readonly log: Logger;
-  private readonly config$: Observable<[UiSettingsConfigType, SavedObjectsConfigType]>;
+  private readonly config$: Observable<UiSettingsConfigType>;
   private readonly uiSettingsDefaults = new Map<string, UiSettingsParams>();
   private overrides: Record<string, any> = {};
   private permissionControlEnabled = false;
@@ -81,10 +76,7 @@ export class UiSettingsService implements CoreService<
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('ui-settings-service');
 
-    this.config$ = combineLatest([
-      coreContext.configService.atPath<UiSettingsConfigType>(uiConfigDefinition.path),
-      coreContext.configService.atPath<SavedObjectsConfigType>(savedObjectsDefinition.path),
-    ]);
+    this.config$ = coreContext.configService.atPath<UiSettingsConfigType>(uiConfigDefinition.path);
   }
 
   public async setup({
@@ -98,20 +90,14 @@ export class UiSettingsService implements CoreService<
     registerRoutes(http.createRouter(''));
     this.register(getCoreSettings());
 
-    const config = await firstValueFrom(
-      this.config$.pipe(
-        map(([uiSettingsConfig, savedObjectsConfig]) => {
-          return { uiSettingsConfig, savedObjectsConfig };
-        })
-      )
-    );
+    const uiSettingsConfig = await firstValueFrom(this.config$);
 
-    this.overrides = config.uiSettingsConfig.overrides || {};
+    this.overrides = uiSettingsConfig.overrides || {};
 
     // Use uiSettings.defaults from the config file
-    this.validateAndUpdateConfiguredDefaults(config.uiSettingsConfig.defaults);
+    this.validateAndUpdateConfiguredDefaults(uiSettingsConfig.defaults);
 
-    this.permissionControlEnabled = config.savedObjectsConfig.permission.enabled;
+    this.permissionControlEnabled = savedObjects.getPermissionControlEnabled();
     // The dashboard-admin concept only exists when saved-objects permission control is
     // enabled. Without it there is no admin scope, so we skip both the admin-only
     // client wrapper and the admin "restrict global settings" toggle entirely.
