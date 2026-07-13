@@ -8,7 +8,8 @@ import { NormalizedVariableOption } from './types';
 const getBaseDisplayText = (option: NormalizedVariableOption): string =>
   option.label?.trim() || option.value;
 
-const hasDisplayLabel = (option: NormalizedVariableOption): boolean => Boolean(option.label?.trim());
+const hasDisplayLabel = (option: NormalizedVariableOption): boolean =>
+  Boolean(option.label?.trim());
 
 export const buildVariableOptionDisplayTextMap = (
   options: NormalizedVariableOption[]
