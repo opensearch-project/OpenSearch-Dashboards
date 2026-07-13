@@ -28,7 +28,11 @@ import { WorkspaceClient } from '../../workspace_client';
 import { DataSourceManagementPluginSetup } from '../../../../../plugins/data_source_management/public';
 import { DataPublicPluginStart } from '../../../../data/public';
 import { WorkspaceUseCase } from '../../types';
-import { getFirstUseCaseOfFeatureConfigs } from '../../utils';
+import {
+  getApplicationsSnapshot,
+  getFirstUseCaseOfFeatureConfigs,
+  pickUseCaseLandingAppId,
+} from '../../utils';
 import { useFormAvailableUseCases } from '../workspace_form/use_form_available_use_cases';
 import { NavigationPublicPluginStart } from '../../../../../plugins/navigation/public';
 import { DataSourceConnectionType } from '../../../common/types';
@@ -144,8 +148,9 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
           if (application && http) {
             const newWorkspaceId = result.result.id;
             const useCaseId = getFirstUseCaseOfFeatureConfigs(attributes.features);
-            const useCaseLandingAppId = availableUseCases?.find(({ id }) => useCaseId === id)
-              ?.features[0].id;
+            const matchedUseCase = availableUseCases?.find(({ id }) => useCaseId === id);
+            const apps = getApplicationsSnapshot(application);
+            const useCaseLandingAppId = pickUseCaseLandingAppId(matchedUseCase?.features, apps);
 
             // For observability workspaces, run trace detection and create datasets if found
             const isObservabilityWorkspace = useCaseId === 'observability';
@@ -193,12 +198,13 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
 
                       await createAutoDetectedDatasets(
                         savedObjects.client,
+                        dataPlugin.dataViews,
                         detection,
                         dataSourceId
                       );
                       datasetsCreatedCount++;
                     }
-                  } catch (error) {
+                  } catch {
                     // Continue with other data sources even if one fails
                   }
                 }
@@ -217,7 +223,7 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
                         : undefined,
                   });
                 }
-              } catch (error) {
+              } catch {
                 // Don't block workspace creation if trace detection fails
               } finally {
                 // Clear the workspace context to prevent subsequent operations from targeting the new workspace

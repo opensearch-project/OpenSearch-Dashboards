@@ -31,7 +31,7 @@ export const getPreloadedState = async ({
   if (!isQueryEnhancementEnabled) {
     try {
       defaultIndexPattern = await data.indexPatterns.getDefault();
-    } catch (error) {
+    } catch {
       defaultIndexPattern = undefined;
     }
   } else {

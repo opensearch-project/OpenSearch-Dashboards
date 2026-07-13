@@ -30,7 +30,7 @@
 
 import { omit } from 'lodash';
 import type { opensearchtypes } from '@opensearch-project/opensearch';
-import uuid from 'uuid';
+import { v1 as uuidv1 } from 'uuid';
 import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { OpenSearchClient, DeleteDocumentResponse } from '../../../opensearch/';
 import { getRootPropertiesObjects, IndexMapping } from '../../mappings';
@@ -361,7 +361,7 @@ export class SavedObjectsRepository {
       const method = object.id && overwrite ? 'index' : 'create';
       const requiresNamespacesCheck = object.id && this._registry.isMultiNamespace(object.type);
 
-      if (object.id == null) object.id = uuid.v1();
+      if (object.id == null) object.id = uuidv1();
 
       return {
         tag: 'Right' as 'Right',
@@ -376,11 +376,17 @@ export class SavedObjectsRepository {
     const bulkGetDocs = expectedResults
       .filter(isRight)
       .filter(({ value }) => value.opensearchRequestIndex !== undefined)
-      .map(({ value: { object: { type, id } } }) => ({
-        _id: this._serializer.generateRawId(namespace, type, id),
-        _index: this.getIndexForType(type),
-        _source: ['type', 'namespaces'],
-      }));
+      .map(
+        ({
+          value: {
+            object: { type, id },
+          },
+        }) => ({
+          _id: this._serializer.generateRawId(namespace, type, id),
+          _index: this.getIndexForType(type),
+          _source: ['type', 'namespaces'],
+        })
+      );
     const bulkGetResponse = bulkGetDocs.length
       ? await this.client.mget(
           {
@@ -989,11 +995,11 @@ export class SavedObjectsRepository {
         const doc = bulkGetResponse?.body.docs[opensearchRequestIndex];
 
         if (!doc?.found || !this.rawDocExistsInNamespace(doc, namespace)) {
-          return ({
+          return {
             id,
             type,
             error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)),
-          } as any) as SavedObject<T>;
+          } as any as SavedObject<T>;
         }
 
         return getSavedObjectFromSource(this._registry, type, id, doc);
@@ -1441,14 +1447,8 @@ export class SavedObjectsRepository {
           return expectedBulkGetResult;
         }
 
-        const {
-          opensearchRequestIndex,
-          id,
-          type,
-          version,
-          documentToSave,
-          objectNamespace,
-        } = expectedBulkGetResult.value;
+        const { opensearchRequestIndex, id, type, version, documentToSave, objectNamespace } =
+          expectedBulkGetResult.value;
 
         let namespaces;
         let versionProperties;
@@ -1521,19 +1521,17 @@ export class SavedObjectsRepository {
           return expectedResult.error as any;
         }
 
-        const {
-          type,
-          id,
-          namespaces,
-          documentToSave,
-          opensearchRequestIndex,
-        } = expectedResult.value;
+        const { type, id, namespaces, documentToSave, opensearchRequestIndex } =
+          expectedResult.value;
         const response = bulkUpdateResponse?.body.items[opensearchRequestIndex] ?? {};
         // When a bulk update operation is completed, any fields specified in `_sourceIncludes` will be found in the "get" value of the
         // returned object. We need to retrieve the `originId` if it exists so we can return it to the consumer.
-        const { error, _seq_no: seqNo, _primary_term: primaryTerm, get } = Object.values(
-          response
-        )[0] as any;
+        const {
+          error,
+          _seq_no: seqNo,
+          _primary_term: primaryTerm,
+          get,
+        } = Object.values(response)[0] as any;
 
         const {
           [type]: attributes,

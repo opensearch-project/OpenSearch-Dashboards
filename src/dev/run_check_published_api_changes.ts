@@ -221,7 +221,7 @@ async function run(folder: string, { opts }: { opts: Options }): Promise<boolean
 
 (async () => {
   const extraFlags: string[] = [];
-  const opts = (getopts(process.argv.slice(2), {
+  const opts = getopts(process.argv.slice(2), {
     boolean: ['accept', 'docs', 'help'],
     string: ['filter'],
     default: {
@@ -232,7 +232,7 @@ async function run(folder: string, { opts }: { opts: Options }): Promise<boolean
       extraFlags.push(name);
       return false;
     },
-  }) as any) as Options;
+  }) as any as Options;
 
   if (extraFlags.length > 0) {
     for (const flag of extraFlags) {

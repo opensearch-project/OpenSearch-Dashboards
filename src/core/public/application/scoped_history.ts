@@ -53,8 +53,9 @@ import {
  *
  * @public
  */
-export class ScopedHistory<HistoryLocationState = unknown>
-  implements History<HistoryLocationState> {
+export class ScopedHistory<
+  HistoryLocationState = unknown,
+> implements History<HistoryLocationState> {
   /**
    * Tracks whether or not the user has left this history's scope. All methods throw errors if called after scope has
    * been left.
@@ -74,7 +75,10 @@ export class ScopedHistory<HistoryLocationState = unknown>
    */
   private currentLocationKeyIndex: number = 0;
 
-  constructor(private readonly parentHistory: History, private readonly basePath: string) {
+  constructor(
+    private readonly parentHistory: History,
+    private readonly basePath: string
+  ) {
     const parentPath = this.parentHistory.location.pathname;
     if (!parentPath.startsWith(basePath)) {
       throw new Error(

@@ -4,6 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
+import semver from 'semver';
 import { stringify } from 'query-string';
 import rison from 'rison-node';
 import { BehaviorSubject } from 'rxjs';
@@ -38,6 +39,8 @@ import {
   VISUALIZATION_EDITOR_APP_NAME,
 } from '../common';
 import { ConfigSchema } from '../common/config';
+import { buildExploreNavPopover, buildMetricsNavPopover } from './nav_popover';
+import * as exploreManifest from '../opensearch_dashboards.json';
 import { generateDocViewsUrl } from './application/legacy/discover/application/components/doc_views/generate_doc_views_url';
 import { DocViewsLinksRegistry } from './application/legacy/discover/application/doc_views_links/doc_views_links_registry';
 import {
@@ -91,14 +94,12 @@ import {
   EXECUTE_PPL_QUERY_TOOL_DEFINITION,
 } from './components/query_panel/actions/ppl_execute_query_action';
 
-export class ExplorePlugin
-  implements
-    Plugin<
-      ExplorePluginSetup,
-      ExplorePluginStart,
-      ExploreSetupDependencies,
-      ExploreStartDependencies
-    > {
+export class ExplorePlugin implements Plugin<
+  ExplorePluginSetup,
+  ExplorePluginStart,
+  ExploreSetupDependencies,
+  ExploreStartDependencies
+> {
   private stateUpdaterByApp: Partial<
     Record<ExploreFlavor | 'explore', BehaviorSubject<AppUpdater>>
   > = {
@@ -271,12 +272,27 @@ export class ExplorePlugin
       const flavorSuffix = flavor ? `/${flavor}` : '';
       const trackerBaseUrl = core.http.basePath.prepend(`/app/${PLUGIN_ID}${flavorSuffix}`);
       const trackerStorageKey = `lastUrl:${core.http.basePath.get()}:${PLUGIN_ID}${flavorSuffix}`;
-      const { appMounted, appUnMounted, stop: stopUrlTracker } = createOsdUrlTracker({
+      const {
+        appMounted,
+        appUnMounted,
+        stop: stopUrlTracker,
+      } = createOsdUrlTracker({
         baseUrl: trackerBaseUrl,
         defaultSubUrl: '#/',
         storageKey: trackerStorageKey,
         navLinkUpdater$: appStateUpdater,
         toastNotifications: core.notifications.toasts,
+        // Never persist the transient `_openSaved` command marker as the app's
+        // "last URL". Otherwise navigating away and re-opening the app via its
+        // nav link would restore a URL still carrying the marker and re-open the
+        // saved-search flyout unexpectedly. Match the EXACT query param (not a
+        // loose substring) so a saved-object title / filter value that merely
+        // contains the string "_openSaved" doesn't disable URL persistence.
+        shouldTrackUrlUpdate: (hash: string) => {
+          const qIndex = hash.indexOf('?');
+          if (qIndex === -1) return true;
+          return new URLSearchParams(hash.slice(qIndex + 1)).get('_openSaved') !== 'true';
+        },
         stateParams: [
           {
             osdUrlKey: '_g',
@@ -344,9 +360,8 @@ export class ExplorePlugin
           // Check if this is a context or doc route (following discover pattern)
           const path = window.location.hash;
           if (path.startsWith('#/context') || path.startsWith('#/doc')) {
-            const { renderDocView } = await import(
-              './application/legacy/discover/application/components/doc_views'
-            );
+            const { renderDocView } =
+              await import('./application/legacy/discover/application/components/doc_views');
             const unmount = renderDocView(params.element);
             return () => {
               unmount();
@@ -420,7 +435,11 @@ export class ExplorePlugin
     };
 
     const createExploreVisualizationEditorApp = () => {
-      const { appMounted, appUnMounted, stop: stopUrlTracker } = createOsdUrlTracker({
+      const {
+        appMounted,
+        appUnMounted,
+        stop: stopUrlTracker,
+      } = createOsdUrlTracker({
         baseUrl: core.http.basePath.prepend(`/app/${VISUALIZATION_EDITOR_APP_ID}`),
         defaultSubUrl: '#/',
         storageKey: `lastUrl:${core.http.basePath.get()}:${VISUALIZATION_EDITOR_APP_ID}`,
@@ -584,18 +603,21 @@ export class ExplorePlugin
           category: undefined,
           order: 200,
           euiIconType: 'discoverApp' as const,
+          navPopover: buildExploreNavPopover(ExploreFlavor.Logs),
         },
         {
           id: `${PLUGIN_ID}/${ExploreFlavor.Traces}`,
           category: DEFAULT_APP_CATEGORIES.applicationPerformance,
           order: 100,
           euiIconType: 'apmTrace' as const,
+          navPopover: buildExploreNavPopover(ExploreFlavor.Traces),
         },
         {
           id: `${PLUGIN_ID}/${ExploreFlavor.Metrics}`,
           category: undefined,
           order: 300,
           euiIconType: 'visAreaStacked' as const,
+          navPopover: buildMetricsNavPopover(),
         },
       ]);
     } else {
@@ -651,6 +673,27 @@ export class ExplorePlugin
     setUiActions(plugins.uiActions);
     setDashboard(plugins.dashboard);
     const opensearchDashboardsVersion = this.initializerContext.env.packageInfo.version;
+
+    // Register a dataset filter based on minDataSourceEngineVersions from the manifest.
+    // This hides data sources whose engine version is below the declared minimum (e.g.
+    // Elasticsearch < 7.9.0 which lacks PPL support required by Explore).
+    const minVersions = (
+      exploreManifest as {
+        minDataSourceEngineVersions?: Record<string, string>;
+      }
+    ).minDataSourceEngineVersions;
+    if (minVersions) {
+      const datasetService = plugins.data.query.queryString.getDatasetService();
+      datasetService.registerDatasetFilter(PLUGIN_ID, (dataset) => {
+        const engine = dataset.dataSource?.engineType ?? dataset.dataSource?.type;
+        if (!engine) return true;
+        const minVersion = minVersions[engine];
+        if (!minVersion) return true;
+        const coerced = semver.coerce(dataset.dataSource?.version);
+        if (!coerced) return true;
+        return semver.gte(coerced.version, minVersion);
+      });
+    }
     setDashboardVersion({ version: opensearchDashboardsVersion });
 
     if (plugins.expressions) {
@@ -842,7 +885,7 @@ export class ExplorePlugin
               iconType = chart.icon;
               chartName = chart.name;
             }
-          } catch (e) {
+          } catch {
             iconType = '';
           }
 

@@ -25,14 +25,17 @@ jest.mock('../../services', () => {
     getLanguages: () => [
       { id: 'lucene', title: 'Lucene' },
       { id: 'kuery', title: 'DQL' },
+      { id: 'SQL', title: 'SQL' },
+      { id: 'PPL', title: 'PPL' },
     ],
     getUserQueryLanguageBlocklist: () => [],
     setUserQueryLanguage: jest.fn(),
+    isLanguageSupportedForDataset: jest.fn(() => true),
   };
 
   const datasetService = {
-    getTypes: () => [{ supportedLanguages: () => ['kuery', 'lucene'] }],
-    getType: () => ({ supportedLanguages: () => ['kuery', 'lucene'] }),
+    getTypes: () => [{ supportedLanguages: () => ['kuery', 'lucene', 'SQL', 'PPL'] }],
+    getType: () => ({ supportedLanguages: () => ['kuery', 'lucene', 'SQL', 'PPL'] }),
     addRecentDataset: jest.fn(),
   };
 
@@ -70,6 +73,16 @@ describe('LanguageSelector', () => {
     );
   }
 
+  beforeEach(() => {
+    // Reset the per-dataset support evaluator to its fail-open default before each test
+    const languageService = jest
+      .requireMock('../../services')
+      .getQueryService()
+      .queryString.getLanguageService();
+    languageService.isLanguageSupportedForDataset.mockReset();
+    languageService.isLanguageSupportedForDataset.mockImplementation(() => true);
+  });
+
   it('should select lucene if language is lucene', () => {
     // Update the mock query value before mounting
     const getQueryService = jest.requireMock('../../services').getQueryService;
@@ -101,5 +114,104 @@ describe('LanguageSelector', () => {
       })
     );
     expect(component).toMatchSnapshot();
+  });
+
+  const getRenderedLanguageLabels = (component: ReturnType<typeof mountWithIntl>) => {
+    // The menu items live inside the EuiPopover, which only renders its children
+    // once it is open, so click the trigger button first.
+    component
+      .find('[data-test-subj="queryEditorLanguageSelector"]')
+      .hostNodes()
+      .first()
+      .simulate('click');
+    component.update();
+
+    return component
+      .find('[data-test-subj="languageSelectorMenuItem"]')
+      .hostNodes()
+      .map((node) => node.text());
+  };
+
+  it('should exclude languages that are not supported for the selected dataset', () => {
+    const services = jest.requireMock('../../services');
+    const getQueryService = services.getQueryService;
+    const languageService = getQueryService().queryString.getLanguageService();
+
+    // Dataset backed by an Elasticsearch source below a language's min version.
+    const dataset = {
+      id: 'es-below-min',
+      title: 'es-below-min',
+      type: 'INDEX_PATTERN',
+      dataSource: {
+        id: 'es-source',
+        title: 'es-source',
+        type: 'OpenSearch',
+        engineType: 'Elasticsearch',
+        version: '6.8.0',
+      },
+    };
+
+    getQueryService().queryString.getQuery.mockReturnValue({
+      query: '',
+      language: 'kuery',
+      dataset,
+    });
+
+    // SQL and PPL are gated out for this Elasticsearch-below-min dataset.
+    languageService.isLanguageSupportedForDataset.mockImplementation(
+      (lang: { id: string }) => lang.id !== 'SQL' && lang.id !== 'PPL'
+    );
+
+    const component = mountWithIntl(
+      wrapInContext({
+        onSelectLanguage: jest.fn(),
+      })
+    );
+
+    const labels = getRenderedLanguageLabels(component);
+    expect(labels).toEqual(expect.arrayContaining(['DQL', 'Lucene']));
+    expect(labels).not.toContain('SQL');
+    expect(labels).not.toContain('PPL');
+    expect(languageService.isLanguageSupportedForDataset).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'SQL' }),
+      dataset
+    );
+  });
+
+  it('should keep all supported languages when the dataset supports them (evaluator returns true)', () => {
+    const services = jest.requireMock('../../services');
+    const getQueryService = services.getQueryService;
+    const languageService = getQueryService().queryString.getLanguageService();
+
+    // OpenSearch dataset at/above any min version — evaluator returns true for all.
+    const dataset = {
+      id: 'os-source-dataset',
+      title: 'os-source-dataset',
+      type: 'INDEX_PATTERN',
+      dataSource: {
+        id: 'os-source',
+        title: 'os-source',
+        type: 'OpenSearch',
+        engineType: 'OpenSearch',
+        version: '2.11.0',
+      },
+    };
+
+    getQueryService().queryString.getQuery.mockReturnValue({
+      query: '',
+      language: 'kuery',
+      dataset,
+    });
+
+    languageService.isLanguageSupportedForDataset.mockImplementation(() => true);
+
+    const component = mountWithIntl(
+      wrapInContext({
+        onSelectLanguage: jest.fn(),
+      })
+    );
+
+    const labels = getRenderedLanguageLabels(component);
+    expect(labels).toEqual(expect.arrayContaining(['DQL', 'Lucene', 'SQL', 'PPL']));
   });
 });

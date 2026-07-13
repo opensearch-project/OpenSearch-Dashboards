@@ -17,7 +17,7 @@ const makeCustomVar = (overrides: Partial<CustomVariableWithState> = {}): Variab
   type: VariableType.Custom,
   current: ['api'],
   customOptions: ['api', 'web', 'worker'],
-  options: ['api', 'web', 'worker'],
+  options: [{ value: 'api' }, { value: 'web' }, { value: 'worker' }],
   ...overrides,
 });
 
@@ -28,7 +28,7 @@ const makeMultiVar = (overrides: Partial<CustomVariableWithState> = {}): Variabl
   current: ['us-east', 'us-west'],
   multi: true,
   customOptions: ['us-east', 'us-west', 'eu-west'],
-  options: ['us-east', 'us-west', 'eu-west'],
+  options: [{ value: 'us-east' }, { value: 'us-west' }, { value: 'eu-west' }],
   ...overrides,
 });
 

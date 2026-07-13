@@ -160,7 +160,7 @@ export class Field extends PureComponent<FieldProps> {
         newUnsavedValue = value.trim() || (isJsonArray ? '[]' : '{}');
         try {
           JSON.parse(newUnsavedValue);
-        } catch (e) {
+        } catch {
           errorParams = {
             error: i18n.translate('advancedSettings.field.codeEditorSyntaxErrorMessage', {
               defaultMessage: 'Invalid JSON syntax',
@@ -258,7 +258,7 @@ export class Field extends PureComponent<FieldProps> {
         value: base64Image,
         ...errorParams,
       });
-    } catch (err) {
+    } catch {
       this.props.toasts.addDanger(
         i18n.translate('advancedSettings.field.imageChangeErrorMessage', {
           defaultMessage: 'Image could not be saved',
@@ -314,6 +314,9 @@ export class Field extends PureComponent<FieldProps> {
       defVal,
       ariaName,
     } = setting;
+
+    const disableField =
+      loading || isOverridden || isPermissionControlled || preferBrowserSetting || !enableSaving;
     const a11yProps: { [key: string]: string } = ariaDescribedBy
       ? {
           'aria-label': ariaName,
@@ -339,13 +342,7 @@ export class Field extends PureComponent<FieldProps> {
             }
             checked={!!currentValue}
             onChange={this.onFieldChangeSwitch}
-            disabled={
-              loading ||
-              isOverridden ||
-              isPermissionControlled ||
-              preferBrowserSetting ||
-              !enableSaving
-            }
+            disabled={disableField}
             data-test-subj={`advancedSetting-editField-${name}`}
             {...a11yProps}
           />
@@ -408,13 +405,7 @@ export class Field extends PureComponent<FieldProps> {
             })}
             onChange={this.onFieldChangeEvent}
             isLoading={loading}
-            disabled={
-              loading ||
-              isOverridden ||
-              isPermissionControlled ||
-              preferBrowserSetting ||
-              !enableSaving
-            }
+            disabled={disableField}
             fullWidth
             data-test-subj={`advancedSetting-editField-${name}`}
           />
@@ -426,13 +417,7 @@ export class Field extends PureComponent<FieldProps> {
             value={currentValue}
             onChange={this.onFieldChangeEvent}
             isLoading={loading}
-            disabled={
-              loading ||
-              isOverridden ||
-              isPermissionControlled ||
-              preferBrowserSetting ||
-              !enableSaving
-            }
+            disabled={disableField}
             fullWidth
             data-test-subj={`advancedSetting-editField-${name}`}
           />
@@ -444,13 +429,7 @@ export class Field extends PureComponent<FieldProps> {
             value={currentValue}
             onChange={this.onFieldChangeEvent}
             isLoading={loading}
-            disabled={
-              loading ||
-              isOverridden ||
-              isPermissionControlled ||
-              preferBrowserSetting ||
-              !enableSaving
-            }
+            disabled={disableField}
             fullWidth
             data-test-subj={`advancedSetting-editField-${name}`}
           />

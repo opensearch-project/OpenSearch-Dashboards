@@ -70,7 +70,7 @@ it('errors if the optimizer completes in phase "issue"', async () => {
 
   await expect(
     allValuesFrom(update$.pipe(handleOptimizerCompletion(config())))
-  ).rejects.toThrowErrorMatchingInlineSnapshot(`"webpack issue"`);
+  ).rejects.toThrowErrorMatchingInlineSnapshot(`"rspack issue"`);
 });
 
 it('errors if the optimizer completes in phase "initializing"', async () => {

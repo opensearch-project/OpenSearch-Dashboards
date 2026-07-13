@@ -46,8 +46,11 @@ interface StartServices {
   isEditable: () => boolean;
 }
 
-export class SearchEmbeddableFactory
-  implements EmbeddableFactoryDefinition<SearchInput, SearchOutput, SearchEmbeddable> {
+export class SearchEmbeddableFactory implements EmbeddableFactoryDefinition<
+  SearchInput,
+  SearchOutput,
+  SearchEmbeddable
+> {
   public readonly type = SEARCH_EMBEDDABLE_TYPE;
   public readonly savedObjectMetaData = {
     name: i18n.translate('discover.savedSearch.savedObjectName', {

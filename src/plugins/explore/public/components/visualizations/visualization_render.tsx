@@ -77,8 +77,10 @@ export const CommonVisualizationRender = ({
 
   const timeRange = useMemo(() => {
     return {
-      from: from ? dateMath.parse(from)?.format('YYYY-MM-DDTHH:mm:ss.SSSZ') ?? '' : '',
-      to: to ? dateMath.parse(to, { roundUp: true })?.format('YYYY-MM-DDTHH:mm:ss.SSSZ') ?? '' : '',
+      from: from ? (dateMath.parse(from)?.format('YYYY-MM-DDTHH:mm:ss.SSSZ') ?? '') : '',
+      to: to
+        ? (dateMath.parse(to, { roundUp: true })?.format('YYYY-MM-DDTHH:mm:ss.SSSZ') ?? '')
+        : '',
     };
   }, [from, to]);
 

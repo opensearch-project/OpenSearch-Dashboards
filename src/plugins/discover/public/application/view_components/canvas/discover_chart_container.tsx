@@ -18,9 +18,10 @@ export const DiscoverChartContainer = ({ hits, bucketInterval, chartData }: Sear
   const { indexPattern } = useDiscoverContext();
   const isEnhancementsEnabled = uiSettings.get(QUERY_ENHANCEMENT_ENABLED_SETTING);
 
-  const isTimeBased = useMemo(() => (indexPattern ? indexPattern.isTimeBased() : false), [
-    indexPattern,
-  ]);
+  const isTimeBased = useMemo(
+    () => (indexPattern ? indexPattern.isTimeBased() : false),
+    [indexPattern]
+  );
 
   if (!hits || !isTimeBased) return null;
 

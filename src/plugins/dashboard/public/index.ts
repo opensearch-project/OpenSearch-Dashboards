@@ -73,6 +73,8 @@ export {
   VariableSortOrder,
   QueryVariable,
   CustomVariable,
+  VariableOption,
+  NormalizedVariableOption,
   VariableWithState,
   VariableState,
 } from './variables/types';

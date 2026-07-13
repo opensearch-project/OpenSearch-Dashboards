@@ -77,8 +77,8 @@ export const CelestialCard = (props: CelestialCardProps) => {
                   health?.breached
                     ? 'osd:hover:border-status-breached-hover'
                     : color
-                    ? ''
-                    : 'osd:hover:border-status-default-hover'
+                      ? ''
+                      : 'osd:hover:border-status-default-hover'
                 }
                 ${
                   isSelected

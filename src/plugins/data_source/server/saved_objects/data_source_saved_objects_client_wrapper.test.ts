@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import {
   httpServerMock,
   savedObjectsClientMock,
@@ -37,9 +37,8 @@ describe('DataSourceSavedObjectsClientWrapper', () => {
     credentialProvider: jest.fn(),
   };
   jest.mock('../auth_registry');
-  const { AuthenticationMethodRegistry: authenticationMethodRegistry } = jest.requireActual(
-    '../auth_registry'
-  );
+  const { AuthenticationMethodRegistry: authenticationMethodRegistry } =
+    jest.requireActual('../auth_registry');
   const authRegistry = new authenticationMethodRegistry();
   authRegistry.registerAuthenticationMethod(customAuthMethod);
 
@@ -137,8 +136,8 @@ describe('DataSourceSavedObjectsClientWrapper', () => {
     });
 
     it('should create data source when auth type is SigV4', async () => {
-      const accessKey = uuid();
-      const secretKey = uuid();
+      const accessKey = uuidv4();
+      const secretKey = uuidv4();
       const region = 'us-east-1';
       const service = 'es';
       const encryptedAccessKey = `encrypted_${accessKey}`;

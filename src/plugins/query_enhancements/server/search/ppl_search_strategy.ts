@@ -24,7 +24,8 @@ export const pplSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
   logger: Logger,
   client: ILegacyClusterClient,
-  usage?: SearchUsage
+  usage?: SearchUsage,
+  legacyEsCompatEnabled: boolean = false
 ): ISearchStrategy<IOpenSearchDashboardsSearchRequest, IDataFrameResponse> => {
   const pplFacet = new Facet({
     client,
@@ -33,6 +34,7 @@ export const pplSearchStrategyProvider = (
     useJobs: false,
     shimResponse: true,
     requestCompression: true,
+    legacyEsCompatEnabled,
   });
 
   return {

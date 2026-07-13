@@ -34,19 +34,29 @@ export const updateDashboardAdminStateForRequest = (
   request: OpenSearchDashboardsRequest,
   groups: string[],
   users: string[],
-  configGroups: string[],
-  configUsers: string[]
+  configGroups: string | string[],
+  configUsers: string | string[]
 ) => {
+  const normalizedConfigUsers = Array.isArray(configUsers)
+    ? configUsers
+    : configUsers
+      ? [configUsers]
+      : [];
+  const normalizedConfigGroups = Array.isArray(configGroups)
+    ? configGroups
+    : configGroups
+      ? [configGroups]
+      : [];
   // If the security plugin is not installed, login defaults to OSD Admin
   if (!groups.length && !users.length) {
     return updateWorkspaceState(request, { isDashboardAdmin: true });
   }
   // If user config contains wildcard characters '*', login defaults to OSD Admin
-  if (configUsers.includes(OSD_ADMIN_WILDCARD_MATCH_ALL)) {
+  if (normalizedConfigUsers.includes(OSD_ADMIN_WILDCARD_MATCH_ALL)) {
     return updateWorkspaceState(request, { isDashboardAdmin: true });
   }
-  const groupMatchAny = groups.some((group) => configGroups.includes(group));
-  const userMatchAny = users.some((user) => configUsers.includes(user));
+  const groupMatchAny = groups.some((group) => normalizedConfigGroups.includes(group));
+  const userMatchAny = users.some((user) => normalizedConfigUsers.includes(user));
   return updateWorkspaceState(request, {
     isDashboardAdmin: groupMatchAny || userMatchAny,
   });

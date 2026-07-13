@@ -69,7 +69,7 @@ describe('sample data list route', () => {
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
     const handler = mockRouter.get.mock.calls[0][1];
 
-    await handler((mockContext as unknown) as RequestHandlerContext, mockRequest, mockResponse);
+    await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
 
     expect(mockClient).toBeCalledTimes(2);
     expect(mockResponse.ok).toBeCalled();
@@ -138,7 +138,7 @@ describe('sample data list route', () => {
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
     const handler = mockRouter.get.mock.calls[0][1];
 
-    await handler((mockContext as unknown) as RequestHandlerContext, mockRequest, mockResponse);
+    await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
 
     expect(mockClient).toBeCalledTimes(2);
     expect(mockResponse.ok).toBeCalled();
@@ -190,7 +190,7 @@ describe('sample data list route', () => {
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
     const handler = mockRouter.get.mock.calls[0][1];
 
-    await handler((mockContext as unknown) as RequestHandlerContext, mockRequest, mockResponse);
+    await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
 
     expect(mockClient).toBeCalledTimes(2);
     expect(mockResponse.ok).toBeCalled();
@@ -263,7 +263,7 @@ describe('sample data list route', () => {
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
     const handler = mockRouter.get.mock.calls[0][1];
 
-    await handler((mockContext as unknown) as RequestHandlerContext, mockRequest, mockResponse);
+    await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
 
     expect(mockClient).toBeCalledTimes(2);
     expect(mockResponse.ok).toBeCalled();
@@ -274,9 +274,9 @@ describe('sample data list route', () => {
     );
   });
 
-  it('filters sample datasets to only logs and otel for AnalyticEngine data source', async () => {
+  it('returns empty sample datasets for AnalyticEngine data source', async () => {
     const mockDataSourceId = 'analyticEngineDataSource';
-    const mockClient = jest.fn().mockResolvedValueOnce(true).mockResolvedValueOnce({ count: 1 });
+    const mockClient = jest.fn();
 
     // Mock data source with AnalyticEngine engine type
     const mockDataSourceResponse = {
@@ -288,22 +288,8 @@ describe('sample data list route', () => {
       },
     };
 
-    const mockSOClientGetResponse = {
-      saved_objects: [
-        {
-          type: 'dashboard',
-          id: `${mockDataSourceId}_90943e30-9a47-11e8-b64d-95841ca0b247`,
-          namespaces: ['default'],
-          attributes: { title: 'dashboard' },
-        },
-      ],
-    };
-
     const mockSOClient = {
-      get: jest
-        .fn()
-        .mockResolvedValueOnce(mockDataSourceResponse)
-        .mockResolvedValue(mockSOClientGetResponse),
+      get: jest.fn().mockResolvedValueOnce(mockDataSourceResponse),
     };
 
     const mockContext = {
@@ -337,15 +323,17 @@ describe('sample data list route', () => {
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
     const handler = mockRouter.get.mock.calls[0][1];
 
-    await handler((mockContext as unknown) as RequestHandlerContext, mockRequest, mockResponse);
+    await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
 
     expect(mockSOClient.get).toHaveBeenCalledWith('data-source', mockDataSourceId);
     expect(mockResponse.ok).toBeCalled();
 
-    // Verify that only logs and otel datasets are returned
+    // Verify that no datasets are returned for AnalyticEngine — sample data installation
+    // is not supported because its pluggable data format rejects certain index mappings.
     const responseBody = mockResponse.ok.mock.calls[0]?.[0]?.body as any[];
-    expect(responseBody).toHaveLength(2);
-    expect(responseBody.map((ds) => ds.id).sort()).toEqual(['logs', 'otel']);
+    expect(responseBody).toHaveLength(0);
+    // Verify no index or dashboard checks were made since the list is empty
+    expect(mockClient).not.toHaveBeenCalled();
   });
 
   it('returns all sample datasets for non-AnalyticEngine data source', async () => {
@@ -411,7 +399,7 @@ describe('sample data list route', () => {
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
     const handler = mockRouter.get.mock.calls[0][1];
 
-    await handler((mockContext as unknown) as RequestHandlerContext, mockRequest, mockResponse);
+    await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
 
     expect(mockSOClient.get).toHaveBeenCalledWith('data-source', mockDataSourceId);
     expect(mockResponse.ok).toBeCalled();
@@ -466,7 +454,7 @@ describe('sample data list route', () => {
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
     const handler = mockRouter.get.mock.calls[0][1];
 
-    await handler((mockContext as unknown) as RequestHandlerContext, mockRequest, mockResponse);
+    await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
 
     expect(mockResponse.ok).toBeCalled();
 

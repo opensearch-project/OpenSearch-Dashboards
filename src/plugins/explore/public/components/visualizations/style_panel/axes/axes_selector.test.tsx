@@ -41,16 +41,12 @@ describe('AxesSelectPanel', () => {
       name: 'count',
       schema: VisFieldType.Numerical,
       column: 'count',
-      validValuesCount: 100,
-      uniqueValuesCount: 50,
     },
     {
       id: 2,
       name: 'price',
       schema: VisFieldType.Numerical,
       column: 'price',
-      validValuesCount: 100,
-      uniqueValuesCount: 60,
     },
   ];
 
@@ -60,8 +56,6 @@ describe('AxesSelectPanel', () => {
       name: 'category',
       schema: VisFieldType.Categorical,
       column: 'category',
-      validValuesCount: 100,
-      uniqueValuesCount: 10,
     },
   ];
 
@@ -71,8 +65,6 @@ describe('AxesSelectPanel', () => {
       name: 'timestamp',
       schema: VisFieldType.Date,
       column: 'timestamp',
-      validValuesCount: 100,
-      uniqueValuesCount: 80,
     },
   ];
 

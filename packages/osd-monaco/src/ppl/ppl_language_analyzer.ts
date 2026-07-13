@@ -9,6 +9,11 @@ import {
   SimplifiedOpenSearchPPLParser as OpenSearchPPLParser,
 } from '@osd/antlr-grammar';
 import { PPLSyntaxErrorListener, SyntaxError } from './ppl_error_listener';
+import { LintResult } from './lint/diagnostic';
+import { runLint } from './lint/lint_runner';
+import { createCompiledRuleNameToIndex } from './lint/rule_index';
+import { PIPE_FIRST_PREFIX, remapPipeFirstColumns } from './lint/range_utils';
+import { LintRunContext } from './lint/types';
 
 export interface PPLToken {
   type: string;
@@ -44,9 +49,10 @@ export class PPLLanguageAnalyzer {
   /**
    * Creates and configures ANTLR lexer and token stream from input code
    */
-  private createLexerAndTokenStream(
-    code: string
-  ): { lexer: OpenSearchPPLLexer; tokenStream: antlr.CommonTokenStream } {
+  private createLexerAndTokenStream(code: string): {
+    lexer: OpenSearchPPLLexer;
+    tokenStream: antlr.CommonTokenStream;
+  } {
     const inputStream = antlr.CharStream.fromString(code);
     const lexer = new OpenSearchPPLLexer(inputStream);
     const tokenStream = new antlr.CommonTokenStream(lexer);
@@ -54,25 +60,20 @@ export class PPLLanguageAnalyzer {
   }
 
   /**
-   * Creates and configures ANTLR parser with error listeners
+   * Creates and configures ANTLR parser with a parser error listener
    */
-  private createParserWithErrorHandling(
-    tokenStream: antlr.CommonTokenStream
-  ): {
+  private createParserWithErrorHandling(tokenStream: antlr.CommonTokenStream): {
     parser: OpenSearchPPLParser;
-    lexerErrorListener: PPLSyntaxErrorListener;
     parserErrorListener: PPLSyntaxErrorListener;
   } {
     const parser = new OpenSearchPPLParser(tokenStream);
 
-    // Set up error listeners
-    const lexerErrorListener = new PPLSyntaxErrorListener();
     const parserErrorListener = new PPLSyntaxErrorListener();
 
     parser.removeErrorListeners();
     parser.addErrorListener(parserErrorListener);
 
-    return { parser, lexerErrorListener, parserErrorListener };
+    return { parser, parserErrorListener };
   }
 
   /**
@@ -100,7 +101,7 @@ export class PPLLanguageAnalyzer {
           });
         }
       }
-    } catch (error) {
+    } catch {
       // Silent error handling for tokenization issues
     }
 
@@ -151,6 +152,32 @@ export class PPLLanguageAnalyzer {
           },
         ],
       };
+    }
+  }
+
+  lint(code: string, context?: LintRunContext): LintResult {
+    try {
+      const trimmed = code.trimStart();
+      const isPipeFirst = trimmed.startsWith('|');
+      const effectiveCode = isPipeFirst ? PIPE_FIRST_PREFIX + code : code;
+
+      const { tokenStream } = this.createLexerAndTokenStream(effectiveCode);
+      const { parser } = this.createParserWithErrorHandling(tokenStream);
+      const tree = parser.root();
+
+      const diagnostics = runLint(tree, {
+        ruleNameToIndex: createCompiledRuleNameToIndex(),
+        dataSourceVersion: context?.dataSourceVersion,
+        context: { ...context, grammarSurface: 'compiled-simplified' },
+      });
+
+      if (isPipeFirst) {
+        return { diagnostics: remapPipeFirstColumns(diagnostics) };
+      }
+
+      return { diagnostics };
+    } catch {
+      return { diagnostics: [] };
     }
   }
 

@@ -76,7 +76,7 @@ export class Keystore {
       decipher.setAuthTag(tag);
 
       return decipher.update(text, 'binary', 'utf8') + decipher.final('utf8');
-    } catch (e) {
+    } catch {
       throw new errors.UnableToReadKeystore();
     }
   }

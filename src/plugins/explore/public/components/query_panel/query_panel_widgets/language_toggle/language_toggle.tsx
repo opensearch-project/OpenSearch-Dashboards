@@ -80,7 +80,7 @@ export const LanguageToggle = () => {
       // Get the default query string for the new language
       // SQL needs a base query (SELECT * FROM ...) to be valid; PPL works with empty
       const newQueryString =
-        newLanguage === 'PPL' ? '' : langConfig?.getQueryString?.(currentQuery) ?? '';
+        newLanguage === 'PPL' ? '' : (langConfig?.getQueryString?.(currentQuery) ?? '');
 
       queryString.setQuery({ query: newQueryString, language: newLanguage, dataset });
       languageSvc.setUserQueryLanguage(newLanguage);
@@ -103,13 +103,16 @@ export const LanguageToggle = () => {
 
   // Get supported languages for the active tab
   useEffect(() => {
+    const services = getServices();
+    const queryString = services.data.query.queryString;
+    const languageSvc = queryString.getLanguageService();
+
     const updateSupportedLanguages = () => {
       if (!activeTabId) {
         // Don't update if active tab isn't set yet
         return;
       }
 
-      const services = getServices();
       const activeTab = services.tabRegistry?.getTab(activeTabId);
 
       let tabSupportedLanguages: string[];
@@ -124,10 +127,28 @@ export const LanguageToggle = () => {
         tabSupportedLanguages = tabSupportedLanguages.filter((lang) => lang !== 'SQL');
       }
 
+      // Apply per-dataset engine/version gating (e.g. hide SQL/PPL for legacy Elasticsearch
+      // data sources below the language's minimum version).
+      const dataset = queryString.getQuery().dataset;
+      tabSupportedLanguages = tabSupportedLanguages.filter((langId) => {
+        const langConfig = languageSvc.getLanguage(langId);
+        return !langConfig || languageSvc.isLanguageSupportedForDataset(langConfig, dataset);
+      });
+
       setSupportedLanguages(tabSupportedLanguages);
     };
 
     updateSupportedLanguages();
+
+    // Re-run when the dataset (or other query state) changes, since gating depends on the
+    // selected dataset's data source.
+    const subscription = queryString.getUpdates$().subscribe(() => {
+      updateSupportedLanguages();
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [activeTabId]);
 
   const badgeLabel = isPromptMode ? promptOptionText : languageTitle;

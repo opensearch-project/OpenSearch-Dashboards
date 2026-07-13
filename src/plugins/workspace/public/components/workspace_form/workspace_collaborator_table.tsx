@@ -221,6 +221,10 @@ export const WorkspaceCollaboratorTable = ({
                 resp?.forEach(({ id, name, alias }) => {
                   newMap[id] = { name, alias };
                 });
+                // Mark requested IDs not returned by the API as sentinel to avoid re-fetching
+                slice.forEach((id) => {
+                  if (!(id in newMap)) newMap[id] = { name: '' };
+                });
               }
             } catch (e) {
               if ((e as Error).name !== 'AbortError') {
@@ -612,9 +616,9 @@ const Actions = ({
     services: { notifications },
   } = useOpenSearchDashboards();
 
-  const accessLevelOptions = (Object.keys(
-    WORKSPACE_ACCESS_LEVEL_NAMES
-  ) as WorkspaceCollaboratorAccessLevel[]).map((level) => ({
+  const accessLevelOptions = (
+    Object.keys(WORKSPACE_ACCESS_LEVEL_NAMES) as WorkspaceCollaboratorAccessLevel[]
+  ).map((level) => ({
     name: WORKSPACE_ACCESS_LEVEL_NAMES[level],
     onClick: () => {
       setIsPopoverOpen(false);
@@ -663,7 +667,7 @@ const Actions = ({
     icon: '',
   }));
 
-  const panelItems = ([
+  const panelItems = [
     {
       id: 0,
       items: [
@@ -716,7 +720,7 @@ const Actions = ({
       }),
       items: accessLevelOptions,
     },
-  ] as unknown) as EuiContextMenuPanelDescriptor[];
+  ] as unknown as EuiContextMenuPanelDescriptor[];
 
   const button = isTableAction ? (
     <EuiButtonIcon

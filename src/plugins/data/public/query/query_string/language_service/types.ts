@@ -66,6 +66,13 @@ export interface LanguageConfig {
   };
   editorSupportedAppNames?: string[];
   supportedAppNames?: string[];
+  /**
+   * Per-engine minimum data-source version (semver) for which this language is supported.
+   * Keyed by engine type (e.g. `Elasticsearch`). If an engine has no entry here, the language
+   * is always supported for that engine (fail-open). Used by
+   * {@link LanguageService.isLanguageSupportedForDataset} to gate languages per selected dataset.
+   */
+  supportedDataSources?: { minVersionByEngine?: Record<string, string> };
   hideDatePicker?: boolean;
   sampleQueries?: SampleQuery[];
   addFiltersToQuery?: (query: string, filters: Filter[]) => string;

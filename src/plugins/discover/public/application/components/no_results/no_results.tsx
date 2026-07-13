@@ -183,7 +183,7 @@ export const DiscoverNoResults = ({ queryString, query, savedQuery, timeFieldNam
         setSavedQueries(
           savedQueryItems.filter((sq) => query?.language === sq.attributes.query.language)
         );
-      } catch (error) {
+      } catch {
         setSavedQueries([]);
       }
     };
@@ -195,8 +195,9 @@ export const DiscoverNoResults = ({ queryString, query, savedQuery, timeFieldNam
     // Samples for the language
     const newSampleQueries: any = [];
     if (query?.language) {
-      const languageSampleQueries = queryString.getLanguageService()?.getLanguage(query.language)
-        ?.sampleQueries;
+      const languageSampleQueries = queryString
+        .getLanguageService()
+        ?.getLanguage(query.language)?.sampleQueries;
       if (Array.isArray(languageSampleQueries)) {
         newSampleQueries.push(...languageSampleQueries);
       }

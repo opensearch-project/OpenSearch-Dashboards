@@ -21,6 +21,7 @@ import {
   ChromeNavGroupServiceStartContract,
   ChromeRegistrationNavLink,
   NavGroupItemInMap,
+  NavPopoverServices,
 } from '../../nav_group';
 import { fulfillRegistrationLinksToChromeNavLinks, getVisibleUseCases, sortBy } from '../../utils';
 import { ALL_USE_CASE_ID, DEFAULT_APP_CATEGORIES } from '../../../../../core/utils';
@@ -54,6 +55,7 @@ export interface CollapsibleNavGroupEnabledProps {
   currentWorkspace$: WorkspacesStart['currentWorkspace$'];
   globalSearchCommands$: Rx.Observable<GlobalSearchCommand[]>;
   enableIconSideNav?: boolean;
+  navPopoverServices?: NavPopoverServices;
   isLocked?: boolean;
   onIsLockedUpdate?: (isLocked: boolean) => void;
   openNav?: () => void;
@@ -64,13 +66,13 @@ const titleForSeeAll = i18n.translate('core.ui.primaryNav.seeAllLabel', {
 });
 
 enum NavWidth {
-  Expanded = 270,
+  Expanded = 248,
   // Width used by the classic EuiFlyout-push nav (flag OFF or non-observability workspaces).
   // The Collapsed width is aligned with the hamburger icon on the top left navigation.
   Collapsed = 48,
-  // Width used by the icon side nav in the observability workspace — wider so
-  // the larger (size="l") icons + bigger hit targets feel comfortable.
-  IconSideNavCollapsed = 64,
+  // Width used by the icon side nav in the observability workspace — a slim icon
+  // rail (matches the SCSS $osd-sidebar-width-collapsed) for a sleek modern look.
+  IconSideNavCollapsed = 48,
 }
 
 export function CollapsibleNavGroupEnabled({
@@ -86,6 +88,7 @@ export function CollapsibleNavGroupEnabled({
   capabilities,
   collapsibleNavHeaderRender,
   enableIconSideNav,
+  navPopoverServices,
   isLocked,
   onIsLockedUpdate,
   openNav,
@@ -194,7 +197,14 @@ export function CollapsibleNavGroupEnabled({
       navLinksResult.push(...getSystemNavGroups());
     }
 
-    return fulfillRegistrationLinksToChromeNavLinks(navLinksResult, navLinks);
+    // The "Manage workspace" category is no longer rendered inside the nav body —
+    // it now lives in the footer (ManageWorkspaceMenu). Filter its links out here
+    // so they're excluded from both the expanded and collapsed side-nav trees.
+    // The underlying apps stay registered (and navigable from the footer popover
+    // or a direct URL); we only drop them from the body rendering.
+    return fulfillRegistrationLinksToChromeNavLinks(navLinksResult, navLinks).filter(
+      (link) => link.category?.id !== DEFAULT_APP_CATEGORIES.manageWorkspace.id
+    );
   }, [navLinks, navGroupsMap, currentNavGroupId, shouldAppendManageCategory]);
 
   const width = useMemo(() => {
@@ -377,6 +387,7 @@ export function CollapsibleNavGroupEnabled({
           appId={appId}
           navigateToApp={navigateToApp}
           basePath={basePath}
+          popoverServices={navPopoverServices}
         />
       </div>
       <div className={classNames('obsCollapsedNav-wrapper', { 'obs-nav-hidden': isNavOpen })}>
@@ -385,6 +396,7 @@ export function CollapsibleNavGroupEnabled({
           appId={appId}
           navigateToApp={navigateToApp}
           basePath={basePath}
+          popoverServices={navPopoverServices}
         />
       </div>
       {isNavOpen ? (
@@ -486,6 +498,7 @@ export function CollapsibleNavGroupEnabled({
             appId={appId}
             navigateToApp={navigateToApp}
             basePath={basePath}
+            popoverServices={navPopoverServices}
           />
         </EuiPanel>
         <div

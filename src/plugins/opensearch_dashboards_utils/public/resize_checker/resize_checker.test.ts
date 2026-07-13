@@ -62,18 +62,19 @@ class MockElement {
 }
 
 beforeAll(() => {
-  jest
-    .spyOn(global, 'ResizeObserver')
-    .mockImplementation(function (this: ResizeObserver, callback: ResizeObserverCallback) {
-      this.observe = (el: Element) => {
-        ((el as unknown) as MockElement).addEventListener('resize', callback as any);
-      };
-      this.disconnect = () => {};
-      this.unobserve = (el: Element) => {
-        ((el as unknown) as MockElement).removeEventListener('resize', callback as any);
-      };
-      return this;
-    });
+  jest.spyOn(global, 'ResizeObserver').mockImplementation(function (
+    this: ResizeObserver,
+    callback: ResizeObserverCallback
+  ) {
+    this.observe = (el: Element) => {
+      (el as unknown as MockElement).addEventListener('resize', callback as any);
+    };
+    this.disconnect = () => {};
+    this.unobserve = (el: Element) => {
+      (el as unknown as MockElement).removeEventListener('resize', callback as any);
+    };
+    return this;
+  });
 });
 
 afterAll(() => {

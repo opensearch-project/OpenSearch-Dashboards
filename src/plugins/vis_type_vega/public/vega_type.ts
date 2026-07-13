@@ -82,7 +82,7 @@ export const createVegaTypeDefinition = (
         const spec = parse(visParams.spec, { legacyRoot: false, keepWsc: true });
 
         return extractIndexPatternsFromSpec(spec as VegaSpec);
-      } catch (e) {
+      } catch {
         // spec is invalid
       }
       return [];

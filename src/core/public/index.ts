@@ -73,6 +73,9 @@ import {
   RightNavigationButtonProps,
   ChromeRegistrationNavLink,
   ChromeNavGroupUpdater,
+  NavPopoverServices,
+  NavPopoverAction,
+  NavPopoverConfig,
   PersistedLog,
   NavGroupItemInMap,
   fulfillRegistrationLinksToChromeNavLinks,
@@ -309,7 +312,7 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
  */
 export type StartServicesAccessor<
   TPluginsStart extends object = object,
-  TStart = unknown
+  TStart = unknown,
 > = () => Promise<[CoreStart, TPluginsStart, TStart]>;
 
 /**
@@ -410,6 +413,9 @@ export {
   RightNavigationButtonProps,
   ChromeRegistrationNavLink,
   ChromeNavGroupUpdater,
+  NavPopoverServices,
+  NavPopoverAction,
+  NavPopoverConfig,
   PersistedLog,
   NavGroupItemInMap,
   fulfillRegistrationLinksToChromeNavLinks,

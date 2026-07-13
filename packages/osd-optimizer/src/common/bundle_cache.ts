@@ -68,7 +68,7 @@ export class BundleCache {
       let partialCache: Partial<State>;
       try {
         partialCache = JSON.parse(json || DEFAULT_STATE_JSON);
-      } catch (error) {
+      } catch {
         partialCache = {};
       }
 

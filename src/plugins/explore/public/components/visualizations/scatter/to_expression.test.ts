@@ -24,24 +24,18 @@ describe('Scatter Chart to_expression', () => {
       name: 'X Value',
       schema: VisFieldType.Numerical,
       column: 'x',
-      validValuesCount: 3,
-      uniqueValuesCount: 3,
     },
     {
       id: 2,
       name: 'Y Value',
       schema: VisFieldType.Numerical,
       column: 'y',
-      validValuesCount: 3,
-      uniqueValuesCount: 3,
     },
     {
       id: 3,
       name: 'Size',
       schema: VisFieldType.Numerical,
       column: 'size',
-      validValuesCount: 3,
-      uniqueValuesCount: 3,
     },
   ];
 
@@ -50,8 +44,6 @@ describe('Scatter Chart to_expression', () => {
     name: 'Category',
     schema: VisFieldType.Categorical,
     column: 'category',
-    validValuesCount: 3,
-    uniqueValuesCount: 2,
   };
 
   const mockStyles: ScatterChartStyle = {

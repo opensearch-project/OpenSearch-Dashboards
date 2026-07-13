@@ -176,6 +176,10 @@ export const updateStateUrl = ({
 };
 
 const toUrlState = (state: DashboardAppState): DashboardAppStateInUrl => {
+  // TODO: Store only variable current-value overrides in the URL instead of
+  // serializing full variable definitions. The full definitions belong in
+  // variablesJSON; URL state should stay compact while preserving shareable
+  // variable selections.
   // Only include variables in URL when they have actual content.
   // Excluding `undefined` / empty avoids rison round-trip issues where
   // undefined values are dropped during encoding, causing applyDiff to

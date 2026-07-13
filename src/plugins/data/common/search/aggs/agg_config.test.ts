@@ -73,10 +73,10 @@ describe('AggConfig', () => {
     indexPattern = {
       id: '1234',
       title: 'logstash-*',
-      fields: ({
+      fields: {
         getByName: (name: string) => fields.find((f) => f.name === name),
         filter: () => fields,
-      } as unknown) as IndexPattern['fields'],
+      } as unknown as IndexPattern['fields'],
       getFormatterForField: (field: IndexPatternField) => ({
         toJSON: () => ({}),
       }),
@@ -223,7 +223,7 @@ describe('AggConfig', () => {
 
     it('fails when the list is not defined', () => {
       expect(() => {
-        AggConfig.nextId((undefined as unknown) as IAggConfig[]);
+        AggConfig.nextId(undefined as unknown as IAggConfig[]);
       }).toThrowError();
     });
   });
@@ -728,7 +728,7 @@ describe('AggConfig', () => {
     });
 
     it('empty label if the type is not defined', () => {
-      aggConfig.type = (undefined as unknown) as AggType;
+      aggConfig.type = undefined as unknown as AggType;
       const label = aggConfig.makeLabel();
       expect(label).toBe('');
     });

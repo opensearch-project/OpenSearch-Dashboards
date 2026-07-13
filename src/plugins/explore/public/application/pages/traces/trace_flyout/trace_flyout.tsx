@@ -23,6 +23,8 @@ export const TraceFlyout: React.FC = () => {
   return (
     <EuiFlyout data-test-subj="traceFlyout" onClose={closeTraceFlyout} ownFocus={false}>
       <TraceDetails
+        // Remount when the selected trace/span changes so re-selection updates the flyout.
+        key={`${dataset.id}:${flyoutData.traceId}:${flyoutData.spanId}`}
         isFlyout={true}
         defaultDataset={dataset}
         defaultTraceId={flyoutData.traceId}

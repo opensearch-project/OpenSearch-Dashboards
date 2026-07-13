@@ -69,7 +69,7 @@ export const updateDataSourceNameInVegaSpec = (
   if (!parsedSpec) {
     try {
       parsedSpec = parse(spec, { keepWsc: true });
-    } catch (e) {
+    } catch {
       // If HJSON parsing fails (e.g., due to complex Vega expressions like
       // "datum.size/domain('y')[1]" which HJSON misinterprets as unquoted strings),
       // return the original spec unchanged rather than failing the entire import.
@@ -184,7 +184,7 @@ const parseJSONSpec = (spec: string) => {
     if (jsonSpec && typeof jsonSpec === 'object') {
       return jsonSpec;
     }
-  } catch (e) {
+  } catch {
     return undefined;
   }
 

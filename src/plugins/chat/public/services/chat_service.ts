@@ -14,6 +14,7 @@ import {
   UiSettingScope,
   ChatServiceStart,
   WorkspacesStart,
+  SavedObjectsClientContract,
   Event,
   EventType,
   MessagesSnapshotEvent,
@@ -23,6 +24,11 @@ import {
 } from '../../../../core/public';
 import { getDefaultDataSourceId } from '../../../data_source_management/public';
 import { ConversationHistoryService } from './conversation_history_service';
+
+export interface DataSourceInfo {
+  id: string;
+  title: string;
+}
 
 export interface ChatState {
   messages: Message[];
@@ -44,6 +50,7 @@ export class ChatService {
   private uiSettings: IUiSettingsClient;
   private coreChatService?: ChatServiceStart;
   private workspaces?: WorkspacesStart;
+  private savedObjectsClient?: SavedObjectsClientContract;
 
   // ChatWindow instance for delegating sendMessage calls to proper timeline management
   private chatWindowInstance: ChatWindowInstance | null = null;
@@ -55,8 +62,11 @@ export class ChatService {
   // Subscription to assistant action service for tool updates
   private toolSubscription?: Subscription;
 
-  // Cache for datasourceId to avoid repeated lookups
+  // Data source explicitly selected by user in this session
   private cachedDataSourceId?: string;
+
+  // Cached available data sources for the current workspace
+  private cachedAvailableDataSources?: DataSourceInfo[];
 
   // Conversation history service
   public conversationHistoryService: ConversationHistoryService;
@@ -64,13 +74,15 @@ export class ChatService {
   constructor(
     uiSettings: IUiSettingsClient,
     coreChatService?: ChatServiceStart,
-    workspaces?: WorkspacesStart
+    workspaces?: WorkspacesStart,
+    savedObjectsClient?: SavedObjectsClientContract
   ) {
     // No need to pass URL anymore - agent will use the proxy endpoint
     this.agent = new AgUiAgent();
     this.uiSettings = uiSettings;
     this.coreChatService = coreChatService;
     this.workspaces = workspaces;
+    this.savedObjectsClient = savedObjectsClient;
 
     // Initialize conversation history service
     if (!coreChatService) {
@@ -303,8 +315,7 @@ export class ChatService {
   }
 
   /**
-   * Get the current cached data source ID
-   * Returns the datasourceId that was last retrieved
+   * Get the current data source ID from all resolution sources.
    */
   public async getCurrentDataSourceId(): Promise<string | undefined> {
     return (
@@ -316,7 +327,8 @@ export class ChatService {
 
   public async sendMessage(
     content: string,
-    messages: Message[]
+    messages: Message[],
+    userMessage?: UserMessage
   ): Promise<{
     observable: any;
     userMessage: UserMessage;
@@ -325,33 +337,28 @@ export class ChatService {
 
     this.addActiveRequest(requestId);
 
-    // Check if the last message in the array is a user message with array content
-    // If so, append the text to the existing content array (for multimodal messages)
-    let userMessage: UserMessage;
-    const lastMessage = messages.length > 0 ? messages[messages.length - 1] : null;
-    const hasArrayContent = lastMessage?.role === 'user' && Array.isArray(lastMessage.content);
+    // Use provided user message or create one
+    if (!userMessage) {
+      const lastMessage = messages.length > 0 ? messages[messages.length - 1] : null;
+      const hasArrayContent = lastMessage?.role === 'user' && Array.isArray(lastMessage.content);
 
-    if (hasArrayContent && lastMessage) {
-      // Remove the last message from the array since we'll merge it with the new message
-      messages = messages.slice(0, -1);
+      if (hasArrayContent && lastMessage) {
+        // Remove the last message from the array since we'll merge it with the new message
+        messages = messages.slice(0, -1);
 
-      // Append text to the existing content array (preserves order from caller)
-      userMessage = {
-        ...lastMessage,
-        id: this.generateMessageId(),
-        content: [...(lastMessage.content as any[]), { type: 'text', text: content.trim() }],
-      };
-    } else {
-      // No array content, create a simple text message
-      userMessage = {
-        id: this.generateMessageId(),
-        role: 'user',
-        content: content.trim(),
-      };
+        // Append text to the existing content array (preserves order from caller)
+        userMessage = {
+          ...lastMessage,
+          id: this.generateMessageId(),
+          content: [...(lastMessage.content as any[]), { type: 'text', text: content.trim() }],
+        };
+      } else {
+        userMessage = this.getUserMessage(content);
+      }
     }
 
     // Get workspace-aware data source ID
-    const dataSourceId = await this.getWorkspaceAwareDataSourceId();
+    const dataSourceId = await this.getCurrentDataSourceId();
 
     // Get all contexts from the assistant context store (static + dynamic)
     const contextStore = (window as any).assistantContextStore;
@@ -606,8 +613,8 @@ export class ChatService {
     }));
 
     // Send the tool result back to the agent with full conversation history
-    const includeFullHistory = this.conversationHistoryService.getMemoryProvider()
-      .includeFullHistory;
+    const includeFullHistory =
+      this.conversationHistoryService.getMemoryProvider().includeFullHistory;
     const mappedMessages = includeFullHistory ? [...messages, toolMessage] : [toolMessage];
 
     const threadId = this.getThreadId();
@@ -749,6 +756,10 @@ export class ChatService {
       throw new Error('Core chat service not available');
     }
     this.coreChatService.newThread();
+
+    // Clear data source selection and cache for new session
+    this.cachedDataSourceId = undefined;
+    this.cachedAvailableDataSources = undefined;
 
     // Clear dynamic context from global store for fresh chat session
     this.clearDynamicContextFromStore();
@@ -911,6 +922,52 @@ export class ChatService {
     }
 
     return this.injectUnfinishedToolCallEvents(events);
+  }
+
+  /**
+   * Create a user message for timeline display
+   */
+  public getUserMessage(content: string, rawMessage?: string): UserMessage {
+    return {
+      id: this.generateMessageId(),
+      role: 'user',
+      content: content.trim(),
+      rawMessage: rawMessage || content.trim(),
+    };
+  }
+
+  /**
+   * Explicitly set the data source ID (e.g., after user selection)
+   */
+  public setDataSourceId(id: string): void {
+    this.cachedDataSourceId = id;
+  }
+
+  /**
+   * Get all available data sources, excluding incompatible ones (e.g. AnalyticEngine)
+   */
+  public async getAvailableDataSources(): Promise<DataSourceInfo[]> {
+    if (this.cachedAvailableDataSources) return this.cachedAvailableDataSources;
+    if (!this.savedObjectsClient) return [];
+
+    try {
+      const response = await this.savedObjectsClient.find<{
+        title: string;
+        dataSourceEngineType?: string;
+      }>({
+        type: 'data-source',
+        fields: ['title', 'dataSourceEngineType'],
+        perPage: 100,
+      });
+
+      this.cachedAvailableDataSources = (response?.savedObjects || [])
+        .filter((ds) => ds.attributes?.dataSourceEngineType !== 'AnalyticEngine')
+        .map((ds) => ({ id: ds.id, title: ds.attributes?.title || ds.id }))
+        .sort((a, b) => a.title.toLowerCase().localeCompare(b.title.toLowerCase()));
+      return this.cachedAvailableDataSources;
+    } catch {
+      return [];
+    }
   }
 
   /**

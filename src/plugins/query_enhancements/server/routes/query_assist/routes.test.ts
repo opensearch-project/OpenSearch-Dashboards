@@ -6,7 +6,7 @@
 import supertest from 'supertest';
 import { setupServer } from '../../../../../core/server/test_utils';
 import { loggingSystemMock } from '../../../../../core/server/mocks';
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
+
 import { opensearchClientMock } from '../../../../../core/server/opensearch/client/mocks';
 import { registerQueryAssistRoutes } from './routes';
 import { API } from '../../../common';

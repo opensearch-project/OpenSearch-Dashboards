@@ -88,9 +88,10 @@ describe('QueryPanelWidgets', () => {
     } as any;
 
     // Mock useOpenSearchDashboards
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    mockUseOpenSearchDashboards = require('../../../../../opensearch_dashboards_react/public')
-      .useOpenSearchDashboards;
+
+    mockUseOpenSearchDashboards =
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      require('../../../../../opensearch_dashboards_react/public').useOpenSearchDashboards;
     mockUseOpenSearchDashboards.mockReturnValue({
       services: {
         queryPanelActionsRegistry: mockQueryPanelActionsRegistry,

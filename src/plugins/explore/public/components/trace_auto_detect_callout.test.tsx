@@ -28,8 +28,10 @@ jest.mock(
 describe('TraceAutoDetectCallout', () => {
   const mockCore = coreMock.createStart();
   let mockServices: Partial<ExploreServices>;
-  const mockDetectTraceDataAcrossDataSources = autoDetectModule.detectTraceDataAcrossDataSources as jest.Mock;
-  const mockCreateAutoDetectedDatasets = createDatasetsModule.createAutoDetectedDatasets as jest.Mock;
+  const mockDetectTraceDataAcrossDataSources =
+    autoDetectModule.detectTraceDataAcrossDataSources as jest.Mock;
+  const mockCreateAutoDetectedDatasets =
+    createDatasetsModule.createAutoDetectedDatasets as jest.Mock;
 
   // Setup localStorage mock
   const localStorageMock = (() => {
@@ -71,6 +73,13 @@ describe('TraceAutoDetectCallout', () => {
       indexPatterns: {
         getIds: jest.fn().mockResolvedValue([]),
         get: jest.fn(),
+      } as any,
+      dataViews: {
+        createAndSave: jest.fn(),
+        get: jest.fn(),
+        refreshFields: jest.fn(),
+        updateSavedObject: jest.fn(),
+        clearCache: jest.fn(),
       } as any,
     };
   });
@@ -249,6 +258,7 @@ describe('TraceAutoDetectCallout', () => {
     await waitFor(() => {
       expect(mockCreateAutoDetectedDatasets).toHaveBeenCalledWith(
         mockServices.savedObjects!.client,
+        mockServices.dataViews,
         expect.objectContaining({
           tracesDetected: true,
           logsDetected: true,

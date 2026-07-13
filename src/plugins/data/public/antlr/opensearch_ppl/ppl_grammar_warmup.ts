@@ -16,6 +16,8 @@ interface QueryLike {
     dataSource?: {
       id?: string;
       version?: string;
+      engineType?: string;
+      type?: string;
     };
   };
 }
@@ -46,11 +48,20 @@ export function createPplGrammarWarmupHandler(
 
     const datasourceId = query.dataset.dataSource?.id;
     const datasourceVersion = query.dataset.dataSource?.version;
+    const datasourceEngineType =
+      query.dataset.dataSource?.engineType ?? query.dataset.dataSource?.type;
 
     // Always forward to warmUp so the cache can detect feature flag changes,
-    // datasource changes, and clear stale entries. The version gate (>= 3.6)
-    // lives inside the cache's doWarmUp — unsupported versions won't trigger
-    // a network fetch.
-    grammarCache.warmUp(http, uiSettings, savedObjectsClient, datasourceId, datasourceVersion);
+    // datasource changes, and clear stale entries. The version gate (>= 3.6) and the
+    // Elasticsearch short-circuit live inside the cache's doWarmUp — unsupported versions and
+    // Elasticsearch engines won't trigger a network fetch.
+    grammarCache.warmUp(
+      http,
+      uiSettings,
+      savedObjectsClient,
+      datasourceId,
+      datasourceVersion,
+      datasourceEngineType
+    );
   };
 }

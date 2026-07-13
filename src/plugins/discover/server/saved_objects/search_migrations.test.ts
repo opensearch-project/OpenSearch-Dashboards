@@ -31,7 +31,7 @@
 import { SavedObjectMigrationContext } from 'opensearch-dashboards/server';
 import { searchMigrations } from './search_migrations';
 
-const savedObjectMigrationContext = (null as unknown) as SavedObjectMigrationContext;
+const savedObjectMigrationContext = null as unknown as SavedObjectMigrationContext;
 
 const testMigrateMatchAllQuery = (migrationFn: Function) => {
   it('should migrate obsolete match_all query', () => {

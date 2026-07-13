@@ -167,7 +167,6 @@ class TutorialDirectoryUi extends React.Component {
     });
 
     this.setState({
-      // eslint-disable-line react/no-did-mount-set-state
       tutorialCards: tutorialCards,
     });
   }

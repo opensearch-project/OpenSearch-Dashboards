@@ -29,34 +29,33 @@ const frozenLabel = i18n.translate('datasetManagement.frozenLabel', {
   defaultMessage: 'Frozen',
 });
 
-export const searchResponseToArray = (
-  getIndexTags: DatasetCreationConfig['getIndexTags'],
-  showAllIndices: boolean
-) => (response: IOpenSearchSearchResponse<any>) => {
-  const { rawResponse } = response;
-  if (!rawResponse.aggregations) {
-    return [];
-  } else {
-    return rawResponse.aggregations.indices.buckets
-      .map((bucket: { key: string }) => {
-        return bucket.key;
-      })
-      .filter((indexName: string) => {
-        if (showAllIndices) {
-          return true;
-        } else {
-          return !indexName.startsWith('.');
-        }
-      })
-      .map((indexName: string) => {
-        return {
-          name: indexName,
-          tags: getIndexTags(indexName),
-          item: {},
-        };
-      });
-  }
-};
+export const searchResponseToArray =
+  (getIndexTags: DatasetCreationConfig['getIndexTags'], showAllIndices: boolean) =>
+  (response: IOpenSearchSearchResponse<any>) => {
+    const { rawResponse } = response;
+    if (!rawResponse.aggregations) {
+      return [];
+    } else {
+      return rawResponse.aggregations.indices.buckets
+        .map((bucket: { key: string }) => {
+          return bucket.key;
+        })
+        .filter((indexName: string) => {
+          if (showAllIndices) {
+            return true;
+          } else {
+            return !indexName.startsWith('.');
+          }
+        })
+        .map((indexName: string) => {
+          return {
+            name: indexName,
+            tags: getIndexTags(indexName),
+            item: {},
+          };
+        });
+    }
+  };
 
 export const getIndicesViaSearch = async ({
   getIndexTags,
@@ -113,10 +112,13 @@ export const getIndicesViaResolve = async ({
  */
 
 export const dedupeMatchedItems = (matchedA: MatchedItem[], matchedB: MatchedItem[]) => {
-  const mergedMatchedItems = matchedA.reduce((col, item) => {
-    col[item.name] = item;
-    return col;
-  }, {} as Record<string, MatchedItem>);
+  const mergedMatchedItems = matchedA.reduce(
+    (col, item) => {
+      col[item.name] = item;
+      return col;
+    },
+    {} as Record<string, MatchedItem>
+  );
 
   matchedB.reduce((col, item) => {
     col[item.name] = item;

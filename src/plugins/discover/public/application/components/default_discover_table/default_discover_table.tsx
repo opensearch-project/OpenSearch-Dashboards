@@ -101,6 +101,7 @@ const DefaultDiscoverTableUI = ({
   const [sentinelElement, setSentinelElement] = useState<HTMLDivElement>();
   // `tableElement` is used for first auto-sizing and then fixing column widths
   const [tableElement, setTableElement] = useState<HTMLTableElement>();
+  const [tableContainerWidth, setTableContainerWidth] = useState<number>();
   // Both need callback refs since the elements aren't set on the first render.
   const sentinelRef = useCallback((node: HTMLDivElement | null) => {
     if (node !== null) {
@@ -112,6 +113,27 @@ const DefaultDiscoverTableUI = ({
       setTableElement(el);
     }
   }, []);
+
+  useEffect(() => {
+    const tableContainer = tableElement?.parentElement;
+
+    if (!tableContainer || typeof ResizeObserver === 'undefined') {
+      return;
+    }
+
+    setTableContainerWidth(Math.round(tableContainer.getBoundingClientRect().width));
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (entry) {
+        setTableContainerWidth(Math.round(entry.contentRect.width));
+      }
+    });
+
+    resizeObserver.observe(tableContainer);
+
+    return () => resizeObserver.disconnect();
+  }, [tableElement]);
 
   useEffect(() => {
     if (sentinelElement && !showPagination) {
@@ -226,7 +248,7 @@ const DefaultDiscoverTableUI = ({
     }
 
     return () => cancelAnimationFrame(tableLayoutRequestFrameRef.current);
-  }, [columns, tableElement, indexOfRenderedData, timeFromFirstRow]);
+  }, [columns, tableElement, indexOfRenderedData, tableContainerWidth, timeFromFirstRow]);
 
   return (
     indexPattern && (

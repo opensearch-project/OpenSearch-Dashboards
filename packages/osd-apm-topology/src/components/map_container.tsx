@@ -123,12 +123,14 @@ export const MapContainer: React.FC<MapContainerProps> = ({
 }) => {
   const { viewLock } = useCelestialStateContext();
   const reactFlowInstance = useReactFlow();
-  const mergedNodeTypes = useMemo(() => ({ ...defaultNodeTypes, ...consumerNodeTypes }), [
-    consumerNodeTypes,
-  ]);
-  const mergedEdgeTypes = useMemo(() => ({ ...defaultEdgeTypes, ...consumerEdgeTypes }), [
-    consumerEdgeTypes,
-  ]);
+  const mergedNodeTypes = useMemo(
+    () => ({ ...defaultNodeTypes, ...consumerNodeTypes }),
+    [consumerNodeTypes]
+  );
+  const mergedEdgeTypes = useMemo(
+    () => ({ ...defaultEdgeTypes, ...consumerEdgeTypes }),
+    [consumerEdgeTypes]
+  );
   const resolvedEdges = useMemo(() => resolveEdgeMarkers(edges), [edges]);
 
   const renderLegend = () => {

@@ -44,6 +44,8 @@ export const API = {
   },
   PPL_CANCEL: `${BASE_API}/ppl/cancel`,
   PPL_GRAMMAR: `${BASE_API}/ppl/grammar`,
+  PPL_CALCITE_SETTINGS: `${BASE_API}/ppl/calcite_settings`,
+  PPL_EXPLAIN: `${BASE_API}/ppl/explain`,
   AGENT_API: {
     CONFIG_EXISTS: `${BASE_API_ASSISTANT}/agent_config/_exists`,
   },
@@ -52,6 +54,10 @@ export const API = {
 export const URI = {
   PPL: '/_plugins/_ppl',
   SQL: '/_plugins/_sql',
+  // Open Distro endpoints used for legacy Elasticsearch data sources (SQL/PPL live here on ES
+  // domains that support them) when legacyElasticsearchCompatibility is enabled.
+  PPL_OPENDISTRO: '/_opendistro/_ppl',
+  SQL_OPENDISTRO: '/_opendistro/_sql',
   ASYNC_QUERY: '/_plugins/_async_query',
   DIRECT_QUERY: {
     QUERY: '/_plugins/_directquery/_query',

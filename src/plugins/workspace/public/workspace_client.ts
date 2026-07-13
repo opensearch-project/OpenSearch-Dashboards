@@ -270,7 +270,7 @@ export class WorkspaceClient implements IWorkspaceClient {
           result.fail += 1;
           result.failedIds.push(id);
         }
-      } catch (error) {
+      } catch {
         result.fail += 1;
         result.failedIds.push(id);
       }
@@ -295,9 +295,7 @@ export class WorkspaceClient implements IWorkspaceClient {
    * @property {string array} permissionModes
    * @returns A find result with workspaces matching the specified search.
    */
-  public list(
-    options?: WorkspaceFindOptions
-  ): Promise<
+  public list(options?: WorkspaceFindOptions): Promise<
     IResponse<{
       workspaces: WorkspaceAttributeWithPermission[];
       total: number;

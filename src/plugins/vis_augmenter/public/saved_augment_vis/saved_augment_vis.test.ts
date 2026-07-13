@@ -206,9 +206,9 @@ describe('SavedObjectLoaderAugmentVis', () => {
     uiSettingsMock.get.mockImplementation((key: string) => {
       return key !== PLUGIN_AUGMENTATION_ENABLE_SETTING;
     });
-    const loader = createSavedAugmentVisLoader(({
+    const loader = createSavedAugmentVisLoader({
       savedObjectsClient: getMockAugmentVisSavedObjectClient([]),
-    } as unknown) as SavedObjectOpenSearchDashboardsServicesWithAugmentVis);
+    } as unknown as SavedObjectOpenSearchDashboardsServicesWithAugmentVis);
     try {
       await loader.find();
     } catch (e) {
@@ -222,9 +222,9 @@ describe('SavedObjectLoaderAugmentVis', () => {
     uiSettingsMock.get.mockImplementation((key: string) => {
       return key !== PLUGIN_AUGMENTATION_ENABLE_SETTING;
     });
-    const loader = createSavedAugmentVisLoader(({
+    const loader = createSavedAugmentVisLoader({
       savedObjectsClient: getMockAugmentVisSavedObjectClient([]),
-    } as unknown) as SavedObjectOpenSearchDashboardsServicesWithAugmentVis);
+    } as unknown as SavedObjectOpenSearchDashboardsServicesWithAugmentVis);
     try {
       await loader.findAll();
     } catch (e) {
@@ -238,9 +238,9 @@ describe('SavedObjectLoaderAugmentVis', () => {
     uiSettingsMock.get.mockImplementation((key: string) => {
       return key !== PLUGIN_AUGMENTATION_ENABLE_SETTING;
     });
-    const loader = createSavedAugmentVisLoader(({
+    const loader = createSavedAugmentVisLoader({
       savedObjectsClient: getMockAugmentVisSavedObjectClient([]),
-    } as unknown) as SavedObjectOpenSearchDashboardsServicesWithAugmentVis);
+    } as unknown as SavedObjectOpenSearchDashboardsServicesWithAugmentVis);
     try {
       await loader.get();
     } catch (e) {

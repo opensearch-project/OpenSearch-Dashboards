@@ -62,12 +62,19 @@ export interface VariableQueryParams {
   };
 }
 
+export interface NormalizedVariableOption {
+  value: string;
+  label?: string;
+}
+
+export type VariableOption = string | NormalizedVariableOption;
+
 /**
  * Custom type variable - manually defined options
  */
 export interface CustomVariable extends VariableMeta {
   type: VariableType.Custom;
-  customOptions: string[];
+  customOptions: VariableOption[];
 }
 
 /**
@@ -75,6 +82,10 @@ export interface CustomVariable extends VariableMeta {
  */
 export interface QueryVariable extends VariableMeta, VariableQueryParams {
   type: VariableType.Query;
+  /** Field used as the option value. Defaults to the first returned field when unset. */
+  valueField?: string;
+  /** Optional field used as the option display label. */
+  labelField?: string;
   /** Regex filter — only options matching this pattern are shown */
   regex?: string;
   /** Whether to refresh options based on time range changes (default: false) */
@@ -97,7 +108,7 @@ export type VariableOptionType = 'string' | 'number' | 'boolean';
  * Managed in-memory by VariableService.
  */
 export interface VariableState {
-  options: string[];
+  options: NormalizedVariableOption[];
   optionType?: VariableOptionType; // Type of options for query variables (from response schema)
   loading?: boolean;
   error?: string;

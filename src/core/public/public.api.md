@@ -66,7 +66,10 @@ export interface App<HistoryLocationState = unknown> {
 
 // @public
 export interface AppCategory {
+    alwaysUseDefaultOpen?: boolean;
     ariaLabel?: string;
+    collapsible?: boolean;
+    defaultOpen?: boolean;
     euiIconType?: string;
     id: string;
     label: string;

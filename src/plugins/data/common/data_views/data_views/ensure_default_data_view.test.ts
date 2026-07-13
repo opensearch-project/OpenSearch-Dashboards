@@ -33,11 +33,11 @@ describe('ensureDefaultDataView', () => {
       delete: jest.fn(),
     };
 
-    indexPatterns = ({
+    indexPatterns = {
       getIds: jest.fn(),
       get: jest.fn(),
       getDataSource: jest.fn(),
-    } as unknown) as jest.Mocked<DataViewsContract>;
+    } as unknown as jest.Mocked<DataViewsContract>;
   });
 
   test('should return early if canUpdateUiSetting is false', async () => {

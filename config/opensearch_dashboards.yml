@@ -446,4 +446,9 @@
 
 # @experimental Enable legacy Elasticsearch backend compatibility.
 # This feature is currently being developed and should be used with caution in production environments.
-# backendCompatibility.enabled: false
+# backend_compatibility.enabled: false
+
+# @experimental Gate SQL/PPL per selected dataset for legacy Elasticsearch data sources and route
+# those queries to the Open Distro endpoints. When disabled (default), SQL/PPL are shown for all
+# datasets and queries always use the /_plugins endpoints.
+# queryEnhancements.legacyElasticsearchCompatibility.enabled: false

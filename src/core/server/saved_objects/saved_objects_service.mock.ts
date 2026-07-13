@@ -66,9 +66,8 @@ const createStartContractMock = (typeRegistry?: jest.Mocked<ISavedObjectTypeRegi
 };
 
 const createInternalStartContractMock = (typeRegistry?: jest.Mocked<ISavedObjectTypeRegistry>) => {
-  const internalStartContract: jest.Mocked<InternalSavedObjectsServiceStart> = createStartContractMock(
-    typeRegistry
-  );
+  const internalStartContract: jest.Mocked<InternalSavedObjectsServiceStart> =
+    createStartContractMock(typeRegistry);
 
   return internalStartContract;
 };
@@ -104,6 +103,7 @@ const createSavedObjectsServiceMock = () => {
     setup: jest.fn(),
     start: jest.fn(),
     stop: jest.fn(),
+    setCapabilitiesResolver: jest.fn(),
   };
 
   mocked.setup.mockResolvedValue(createInternalSetupContractMock());

@@ -4,7 +4,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { monaco, PPLValidationContext, revalidatePPLModel } from '@osd/monaco';
+import { monaco, PPLValidationContext, PPLLintContext, revalidatePPLModel } from '@osd/monaco';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@osd/i18n';
 import { DEFAULT_DATA } from '../../../../../../data/common';
@@ -36,11 +36,15 @@ import { EditorMode } from '../../../../application/utils/state_management/types
 import { useMultiQueryDecorations } from './use_multi_query_decorations';
 import { getAutocompleteContext } from '../../../../application/utils/multi_query_utils';
 import {
-  attachPPLValidationContext,
-  attachPPLGrammarRefresh,
   syncPPLValidationContext,
+  syncPPLLintContext,
+  attachPPLContexts,
+  cleanupPPLContexts,
+  PPLDetachRefs,
+  buildPPLLintContext,
   pplGrammarCache,
   shouldUseRuntimeGrammar,
+  UI_SETTINGS,
 } from '../../../../../../data/public';
 
 type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
@@ -114,19 +118,33 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
   const queryLanguageRef = useRef(queryLanguage);
   const isQueryEditorDirty = useSelector(selectIsQueryEditorDirty);
   const dataset = useSelector(selectDataset);
-  const detachValidationContextRef = useRef<(() => void) | undefined>();
-  const detachGrammarRefreshRef = useRef<(() => void) | undefined>();
+  // Ref so grammar-refresh closures always see the latest dataset.
+  const datasetRef = useRef(dataset);
+  const detachRefs = useRef<PPLDetachRefs>({
+    validationContext: { current: undefined },
+    grammarRefresh: { current: undefined },
+    lintContext: { current: undefined },
+    lintGrammarRefresh: { current: undefined },
+  });
 
   const getValidationContext = useCallback((): PPLValidationContext => {
-    const currentQuery = queryString.getQuery();
-    const dsId = currentQuery.dataset?.dataSource?.id;
-    const dsVersion = currentQuery.dataset?.dataSource?.version;
+    const ds = datasetRef.current;
+    const dsId = ds?.dataSource?.id;
+    const dsVersion = ds?.dataSource?.version;
+    const dsEngineType = ds?.dataSource?.engineType ?? ds?.dataSource?.type;
     return {
-      useRuntimeGrammar: shouldUseRuntimeGrammar(dsId, dsVersion),
+      useRuntimeGrammar: shouldUseRuntimeGrammar(dsId, dsVersion, dsEngineType),
       dataSourceId: dsId,
       dataSourceVersion: dsVersion,
     };
-  }, [queryString]);
+  }, []);
+
+  const getLintContext = useCallback(
+    (): PPLLintContext => buildPPLLintContext(datasetRef.current, services),
+    // buildPPLLintContext only reads services.uiSettings and services.http.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [services.uiSettings, services.http]
+  );
 
   const switchEditorMode = useLanguageSwitch();
 
@@ -143,6 +161,9 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
   useEffect(() => {
     queryLanguageRef.current = queryLanguage;
   }, [queryLanguage]);
+  useEffect(() => {
+    datasetRef.current = dataset;
+  }, [dataset]);
 
   // Sync editor text when Redux query string changes externally (e.g., language switch)
   useEffect(() => {
@@ -158,8 +179,9 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
   useEffect(() => {
     const dsId = dataset?.dataSource?.id;
     const dsVersion = dataset?.dataSource?.version;
+    const dsEngineType = dataset?.dataSource?.engineType ?? dataset?.dataSource?.type;
     syncPPLValidationContext(editorRef.current, {
-      useRuntimeGrammar: shouldUseRuntimeGrammar(dsId, dsVersion),
+      useRuntimeGrammar: shouldUseRuntimeGrammar(dsId, dsVersion, dsEngineType),
       dataSourceId: dsId,
       dataSourceVersion: dsVersion,
     });
@@ -167,21 +189,53 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
     if (model) {
       void revalidatePPLModel(model);
     }
-  }, [dataset?.dataSource?.id, dataset?.dataSource?.version, editorRef]);
+  }, [
+    dataset?.dataSource?.id,
+    dataset?.dataSource?.version,
+    dataset?.dataSource?.engineType,
+    dataset?.dataSource?.type,
+    editorRef,
+  ]);
 
-  // Cleanup validation context on unmount
-  useEffect(
-    () => () => {
-      detachValidationContextRef.current?.();
-      detachValidationContextRef.current = undefined;
-      detachGrammarRefreshRef.current?.();
-      detachGrammarRefreshRef.current = undefined;
-    },
-    []
-  );
+  useEffect(() => {
+    syncPPLLintContext(editorRef.current, getLintContext());
+    const model = editorRef.current?.getModel();
+    if (model) {
+      void revalidatePPLModel(model);
+    }
+  }, [
+    dataset?.id,
+    dataset?.dataSource?.id,
+    dataset?.dataSource?.version,
+    editorRef,
+    getLintContext,
+  ]);
+
+  // Cleanup validation + lint context on unmount
+  useEffect(() => () => cleanupPPLContexts(detachRefs.current), []);
+
+  // Revalidate immediately when lint rule settings change.
+  useEffect(() => {
+    const subscription = services.uiSettings.getUpdate$().subscribe(({ key }) => {
+      if (key !== UI_SETTINGS.QUERY_ENHANCEMENTS_PPL_LINT_RULES) {
+        return;
+      }
+      syncPPLLintContext(editorRef.current, getLintContext());
+      const model = editorRef.current?.getModel();
+      if (model) {
+        void revalidatePPLModel(model);
+      }
+    });
+    return () => subscription.unsubscribe();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [services.uiSettings]);
+
+  const focusExploreQueryBar = useCallback(() => {
+    editorRef.current?.focus();
+  }, [editorRef]);
 
   keyboardShortcut?.useKeyboardShortcut({
-    id: 'focus_query_bar',
+    id: 'focus_explore_query_bar',
     pluginId: 'explore',
     name: i18n.translate('explore.queryPanelEditor.focusQueryBarShortcut', {
       defaultMessage: 'Focus query bar',
@@ -190,9 +244,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
       defaultMessage: 'Search',
     }),
     keys: '/',
-    execute: () => {
-      editorRef.current?.focus();
-    },
+    execute: focusExploreQueryBar,
   });
 
   // The 'triggerSuggestOnFocus' prop of CodeEditor only happens on mount, so I am intentionally not passing it
@@ -310,13 +362,12 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
   );
 
   const suggestionProvider = useMemo(() => {
-    const languageTriggerCharacters = services?.data?.autocomplete?.getTriggerCharacters(
-      queryLanguage
-    );
+    const languageTriggerCharacters =
+      services?.data?.autocomplete?.getTriggerCharacters(queryLanguage);
     return {
       triggerCharacters: isPromptMode
         ? ['=']
-        : languageTriggerCharacters ?? DEFAULT_TRIGGER_CHARACTERS,
+        : (languageTriggerCharacters ?? DEFAULT_TRIGGER_CHARACTERS),
       provideCompletionItems,
     };
   }, [isPromptMode, provideCompletionItems, queryLanguage, services]);
@@ -330,13 +381,11 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
     (editor: IStandaloneCodeEditor) => {
       setEditorRef(editor);
 
-      // Attach PPL runtime validation context
-      detachValidationContextRef.current?.();
-      detachGrammarRefreshRef.current?.();
-      detachValidationContextRef.current = attachPPLValidationContext(editor, getValidationContext);
-      detachGrammarRefreshRef.current = attachPPLGrammarRefresh(
+      attachPPLContexts(
         editor,
+        detachRefs.current,
         getValidationContext,
+        getLintContext,
         (listener) => pplGrammarCache.subscribeToGrammarUpdates(listener),
         revalidatePPLModel
       );
@@ -438,6 +487,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
       updateDecorations,
       clearDecorations,
       getValidationContext,
+      getLintContext,
     ]
   );
 

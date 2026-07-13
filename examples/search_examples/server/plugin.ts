@@ -45,14 +45,12 @@ import {
 import { mySearchStrategyProvider } from './my_strategy';
 import { registerRoutes } from './routes';
 
-export class SearchExamplesPlugin
-  implements
-    Plugin<
-      SearchExamplesPluginSetup,
-      SearchExamplesPluginStart,
-      SearchExamplesPluginSetupDeps,
-      SearchExamplesPluginStartDeps
-    > {
+export class SearchExamplesPlugin implements Plugin<
+  SearchExamplesPluginSetup,
+  SearchExamplesPluginStart,
+  SearchExamplesPluginSetupDeps,
+  SearchExamplesPluginStartDeps
+> {
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {

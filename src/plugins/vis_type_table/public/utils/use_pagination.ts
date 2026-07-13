@@ -17,9 +17,10 @@ export const usePagination = (visParams: TableVisParams, nRow: number) => {
     [setPagination]
   );
   // @ts-expect-error TS7006 TODO(ts-error): fixme
-  const onChangePage = useCallback((pageIndex) => setPagination((p) => ({ ...p, pageIndex })), [
-    setPagination,
-  ]);
+  const onChangePage = useCallback(
+    (pageIndex) => setPagination((p) => ({ ...p, pageIndex })),
+    [setPagination]
+  );
 
   useEffect(() => {
     const perPage = Math.min(visParams.perPage || 0, nRow);

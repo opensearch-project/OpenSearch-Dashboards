@@ -18,7 +18,7 @@ describe('PrometheusConnectionClient', () => {
       },
     };
 
-    mockContext = ({
+    mockContext = {
       core: {
         opensearch: {
           client: {
@@ -26,9 +26,9 @@ describe('PrometheusConnectionClient', () => {
           },
         },
       },
-    } as unknown) as RequestHandlerContext;
+    } as unknown as RequestHandlerContext;
 
-    mockRequest = ({} as unknown) as OpenSearchDashboardsRequest;
+    mockRequest = {} as unknown as OpenSearchDashboardsRequest;
   });
 
   describe('getResources', () => {
