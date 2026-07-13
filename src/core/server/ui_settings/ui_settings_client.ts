@@ -190,9 +190,12 @@ export class UiSettingsClient implements IUiSettingsClient {
       // Otherwise, read from all scopes and merge.
       const scopeValue = key ? this.defaults[key]?.scope : undefined;
       const keyScopes = scopeValue ? (Array.isArray(scopeValue) ? scopeValue : [scopeValue]) : null;
-      const scopesToRead = (keyScopes
-        ? UiSettingScopeReadOptions.filter((opt) => keyScopes.includes(opt.scope as UiSettingScope))
-        : UiSettingScopeReadOptions
+      const scopesToRead = (
+        keyScopes
+          ? UiSettingScopeReadOptions.filter((opt) =>
+              keyScopes.includes(opt.scope as UiSettingScope)
+            )
+          : UiSettingScopeReadOptions
       ).filter(
         (opt) => this.permissionControlEnabled || opt.scope !== UiSettingScope.DASHBOARD_ADMIN
       );

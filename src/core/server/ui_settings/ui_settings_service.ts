@@ -76,6 +76,7 @@ export class UiSettingsService implements CoreService<
   private readonly uiSettingsDefaults = new Map<string, UiSettingsParams>();
   private overrides: Record<string, any> = {};
   private permissionControlEnabled = false;
+  private permissionControlledUiSettingsWrapper?: PermissionControlledUiSettingsWrapper;
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('ui-settings-service');
@@ -115,13 +116,13 @@ export class UiSettingsService implements CoreService<
     // enabled. Without it there is no admin scope, so we skip both the admin-only
     // client wrapper and the admin "restrict global settings" toggle entirely.
     if (this.permissionControlEnabled) {
-      const permissionControlledUiSettingsWrapper = new PermissionControlledUiSettingsWrapper(
+      this.permissionControlledUiSettingsWrapper = new PermissionControlledUiSettingsWrapper(
         dynamicConfig
       );
       savedObjects.addClientWrapper(
         PERMISSION_CONTROLLED_UI_SETTINGS_WRAPPER_PRIORITY,
         PERMISSION_CONTROLLED_UI_SETTINGS_WRAPPER_ID,
-        permissionControlledUiSettingsWrapper.wrapperFactory
+        this.permissionControlledUiSettingsWrapper.wrapperFactory
       );
 
       this.register(getGlobalSettingControlSetting());
@@ -138,8 +139,11 @@ export class UiSettingsService implements CoreService<
     this.validatesDefinitions();
     this.validatesOverrides();
 
+    const asScopedToClient = this.getScopedClientFactory();
+    this.permissionControlledUiSettingsWrapper?.setAsScopedUiSettingsClient(asScopedToClient);
+
     return {
-      asScopedToClient: this.getScopedClientFactory(),
+      asScopedToClient,
     };
   }
 

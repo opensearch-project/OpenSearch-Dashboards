@@ -21,6 +21,7 @@ import { getWorkspaceState } from '../../../server/utils';
 import { DASHBOARD_ADMIN_SETTINGS_ID, isGlobalScope } from '../utils';
 import { ENABLE_GLOBAL_SETTING_CONTROL } from '../../../utils/constants';
 import { InternalDynamicConfigServiceSetup } from '../../config';
+import { UiSettingScope, InternalUiSettingsServiceStart } from '../types';
 
 /**
  * Wrapper for admin UI settings that enforces permission controls
@@ -28,11 +29,18 @@ import { InternalDynamicConfigServiceSetup } from '../../config';
  */
 export class PermissionControlledUiSettingsWrapper {
   private aclInstance?: ACL;
+  private asScopedUiSettingsClient?: InternalUiSettingsServiceStart['asScopedToClient'];
 
   /**
    * @param dynamicConfig
    */
   constructor(private readonly dynamicConfig: InternalDynamicConfigServiceSetup) {}
+
+  public setAsScopedUiSettingsClient(
+    asScopedToClient: InternalUiSettingsServiceStart['asScopedToClient']
+  ) {
+    this.asScopedUiSettingsClient = asScopedToClient;
+  }
 
   public wrapperFactory: SavedObjectsClientWrapperFactory = (wrapperOptions) => {
     // Reads the legacy `uiSettings.globalScopeEditable` dynamic config.
@@ -64,25 +72,15 @@ export class PermissionControlledUiSettingsWrapper {
         return false;
       }
 
-      let adminConfigAttributes: Record<string, unknown> | undefined;
-      try {
-        // The toggle lives in the admin-scoped config doc, which is readable by
-        // all users (ACL grants read to '*'). `get` is unwrapped here, so no recursion.
-        const adminConfig = await wrapperOptions.client.get<Record<string, unknown>>(
-          'config',
-          DASHBOARD_ADMIN_SETTINGS_ID
-        );
-        adminConfigAttributes = adminConfig.attributes;
-      } catch (error) {
-        // No admin config doc yet means the toggle has never been set by an admin.
-        if (!SavedObjectsErrorHelpers.isNotFoundError(error)) {
-          throw error;
-        }
+      let adminProvided: Record<string, { userValue?: unknown }> = {};
+      if (this.asScopedUiSettingsClient) {
+        const uiSettingsClient = this.asScopedUiSettingsClient(wrapperOptions.client);
+        adminProvided = await uiSettingsClient.getUserProvided(UiSettingScope.DASHBOARD_ADMIN);
       }
 
       // Admin explicitly set the toggle through the UI → it is the source of truth.
-      if (adminConfigAttributes && ENABLE_GLOBAL_SETTING_CONTROL in adminConfigAttributes) {
-        return adminConfigAttributes[ENABLE_GLOBAL_SETTING_CONTROL] === true;
+      if (ENABLE_GLOBAL_SETTING_CONTROL in adminProvided) {
+        return adminProvided[ENABLE_GLOBAL_SETTING_CONTROL].userValue === true;
       }
 
       // Otherwise honour the legacy dynamic config (backward compatibility).

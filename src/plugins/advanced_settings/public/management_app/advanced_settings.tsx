@@ -140,8 +140,8 @@ export class AdvancedSettingsComponent extends Component<
   fetchScopedValues = async () => {
     const { uiSettings, scope, application } = this.props;
     const isScopedPage = scope !== undefined && scope !== UiSettingScope.GLOBAL;
-    const permissionControlEnabled = !!application.capabilities.advancedSettings
-      ?.permissionControlEnabled;
+    const permissionControlEnabled =
+      !!application.capabilities.advancedSettings?.permissionControlEnabled;
 
     const merged: Record<string, UserProvidedValues> = {};
 
@@ -252,12 +252,11 @@ export class AdvancedSettingsComponent extends Component<
 
     // Effective "restrict global settings to admins" flag: an explicit admin toggle
     // is the source of truth, else fall back to the legacy globalScopeEditable.
-    const permissionControlEnabled = !!this.props.application.capabilities.advancedSettings
-      ?.permissionControlEnabled;
+    const permissionControlEnabled =
+      !!this.props.application.capabilities.advancedSettings?.permissionControlEnabled;
     const adminToggleValue = pageScopeValues[ENABLE_GLOBAL_SETTING_CONTROL]?.userValue;
     const globalScopeEditable = this.props.application.capabilities.globalScopeEditable?.enabled as
-      | boolean
-      | undefined;
+      boolean | undefined;
     const restrictGlobalToAdmins =
       permissionControlEnabled &&
       (adminToggleValue !== undefined ? !!adminToggleValue : globalScopeEditable === false);
@@ -288,7 +287,7 @@ export class AdvancedSettingsComponent extends Component<
         // , else the code default.
         let displayedValue = hasStoredValue
           ? pageScopeValue.userValue
-          : inheritedValue ?? undefined;
+          : (inheritedValue ?? undefined);
         // The global-control toggle has no stored value until an admin sets it; show
         // its effective (dynamic-config-derived) value so an upgraded deployment
         // reflects the pre-existing state instead of the code default (off).

@@ -145,9 +145,8 @@ export class AdvancedSettingsPlugin implements Plugin<
           defaultMessage: 'Configure your personal preferences.',
         }),
         mount: async (params: AppMountParameters) => {
-          const { mountManagementSection } = await import(
-            './management_app/mount_management_section'
-          );
+          const { mountManagementSection } =
+            await import('./management_app/mount_management_section');
           const [coreStart] = await core.getStartServices();
           return mountManagementSection(
             core.getStartServices,
@@ -185,9 +184,8 @@ export class AdvancedSettingsPlugin implements Plugin<
           defaultMessage: 'Configure settings that apply to everyone in this workspace.',
         }),
         mount: async (params: AppMountParameters) => {
-          const { mountManagementSection } = await import(
-            './management_app/mount_management_section'
-          );
+          const { mountManagementSection } =
+            await import('./management_app/mount_management_section');
           const [coreStart] = await core.getStartServices();
           return mountManagementSection(
             core.getStartServices,

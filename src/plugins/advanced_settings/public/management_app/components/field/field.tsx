@@ -130,7 +130,7 @@ export class Field extends PureComponent<FieldProps> {
     this.props.handleChange(this.props.setting.name, unsavedChanges);
   };
 
-  inheritsFromApplication() {
+  canInheritFromApplication() {
     const { setting } = this.props;
     if (setting.isUserProvided === undefined) return false; // not a scoped page
     return toScopeArray(setting.scope).includes(UiSettingScope.GLOBAL);
@@ -513,7 +513,7 @@ export class Field extends PureComponent<FieldProps> {
     }
 
     const canUpdateSetting = this.props.enableSaving;
-    const resetLink = this.inheritsFromApplication()
+    const resetLink = this.canInheritFromApplication()
       ? this.renderUseApplicationValueLink(setting)
       : this.renderResetToDefaultLink(setting);
     const imageLink = this.renderChangeImageLink(setting);
@@ -605,7 +605,7 @@ export class Field extends PureComponent<FieldProps> {
   }
 
   renderSourceBadge(setting: FieldSetting) {
-    if (!this.inheritsFromApplication() || this.props.unsavedChanges) return null;
+    if (!this.canInheritFromApplication() || this.props.unsavedChanges) return null;
 
     const { isUserProvided } = setting;
     if (isUserProvided) {
@@ -650,7 +650,7 @@ export class Field extends PureComponent<FieldProps> {
    */
   renderOverrideHint() {
     const { unsavedChanges } = this.props;
-    if (!this.inheritsFromApplication() || !unsavedChanges) return null;
+    if (!this.canInheritFromApplication() || !unsavedChanges) return null;
 
     const message = unsavedChanges.clearToInherit
       ? i18n.translate('advancedSettings.field.willInheritApplicationText', {

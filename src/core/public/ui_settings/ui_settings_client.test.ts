@@ -650,7 +650,7 @@ describe('#getAllUserProvidedWithScope', () => {
       ({
         batchSet: jest.fn(() => ({ settings: {} })),
         getAll: jest.fn(() => Promise.resolve(settings)),
-      } as any);
+      }) as any;
 
     const uiSettingApis: { default: UiSettingsApi; [scope: string]: UiSettingsApi } = {
       default: makeApi(perScopeSettings.default ?? { settings: {} }),

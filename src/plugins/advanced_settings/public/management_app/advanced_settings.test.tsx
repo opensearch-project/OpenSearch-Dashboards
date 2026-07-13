@@ -258,7 +258,8 @@ function mockConfig(options: MockConfigOptions = {}) {
     getAll,
     getUserProvidedWithScope: ((key) =>
       Promise.resolve(config.getAll()[key])) as IUiSettingsClient['getUserProvidedWithScope'],
-    getAllUserProvidedWithScope: getAllUserProvidedWithScopeMock as IUiSettingsClient['getAllUserProvidedWithScope'],
+    getAllUserProvidedWithScope:
+      getAllUserProvidedWithScopeMock as IUiSettingsClient['getAllUserProvidedWithScope'],
     getDefault: jest.fn() as IUiSettingsClient['getDefault'],
   };
   return {
@@ -590,8 +591,9 @@ describe('AdvancedSettings', () => {
           />
         );
 
-        const scopesRead = (core.uiSettings
-          .getAllUserProvidedWithScope as jest.Mock).mock.calls.map(([scope]) => scope);
+        const scopesRead = (
+          core.uiSettings.getAllUserProvidedWithScope as jest.Mock
+        ).mock.calls.map(([scope]) => scope);
         expect(scopesRead).toContain(pageScope);
         expect(scopesRead).toContain(UiSettingScope.GLOBAL);
       });

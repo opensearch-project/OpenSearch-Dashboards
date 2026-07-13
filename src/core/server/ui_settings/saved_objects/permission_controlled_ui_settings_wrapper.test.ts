@@ -34,12 +34,32 @@ describe('PermissionControlledUiSettingsWrapper', () => {
   // Helper to build wrapper instance. The wrapper is only ever registered when
   // permission control is enabled, so the only knob tests need is whether the current
   // request's user is a dashboard admin.
-  const buildWrapperInstance = (isDashboardAdmin = true) => {
+  // adminToggle controls what the admin-scoped ui settings client reports for the
+  // ENABLE_GLOBAL_SETTING_CONTROL key: 'on'/'off' = admin explicitly set it, 'unset' =
+  // never set (so the gate falls back to the legacy dynamic config).
+  const buildWrapperInstance = (
+    isDashboardAdmin = true,
+    adminToggle: 'on' | 'off' | 'unset' = 'unset'
+  ) => {
     const wrapperInstance = new PermissionControlledUiSettingsWrapper(
       dynamicConfigServiceMock.createInternalSetupContract()
     );
     // Set isDashboardAdmin property on request
     (requestMock as any).isDashboardAdmin = isDashboardAdmin;
+
+    // Stub the ui settings client the wrapper reads the admin toggle through.
+    const uiSettingsClientMock = {
+      getUserProvided: jest
+        .fn()
+        .mockResolvedValue(
+          adminToggle === 'unset'
+            ? {}
+            : { enableGlobalSettingControl: { userValue: adminToggle === 'on' } }
+        ),
+    };
+    wrapperInstance.setAsScopedUiSettingsClient(
+      jest.fn().mockReturnValue(uiSettingsClientMock) as any
+    );
 
     const wrapperClient = wrapperInstance.wrapperFactory({
       client: mockedClient,
@@ -316,38 +336,18 @@ describe('PermissionControlledUiSettingsWrapper', () => {
       jest.clearAllMocks();
     });
 
-    // Make the admin-scoped config doc report the toggle as on/off/missing.
-    const mockToggle = (state: 'on' | 'off' | 'missing') => {
-      // clearAllMocks() resets call records but not implementations, so reset the
-      // write mocks to plain success here (a prior test may have set them to throw).
+    // clearAllMocks() resets call records but not implementations, so reset the write
+    // mocks to plain success (a prior test may have set them to throw).
+    const resetWriteMocks = () => {
       mockedClient.update.mockReset();
       mockedClient.create.mockReset();
       mockedClient.bulkUpdate.mockReset();
       mockedClient.bulkCreate.mockReset();
-      mockedClient.get.mockImplementation((type: string, id: string) => {
-        if (type === 'config' && id === DASHBOARD_ADMIN_SETTINGS_ID) {
-          if (state === 'missing') {
-            return Promise.reject(
-              SavedObjectsErrorHelpers.createGenericNotFoundError(
-                'config',
-                DASHBOARD_ADMIN_SETTINGS_ID
-              )
-            );
-          }
-          return Promise.resolve({
-            id: DASHBOARD_ADMIN_SETTINGS_ID,
-            type: 'config',
-            attributes: { enableGlobalSettingControl: state === 'on' },
-            references: [],
-          });
-        }
-        return Promise.resolve({ id, type, attributes: {}, references: [] });
-      });
     };
 
     it('blocks a non-admin from updating the global config doc when the toggle is on', async () => {
-      mockToggle('on');
-      const wrapperClient = buildWrapperInstance(false);
+      resetWriteMocks();
+      const wrapperClient = buildWrapperInstance(false, 'on');
 
       await expect(
         wrapperClient.update('config', VERSION, { 'some.setting': 'value' })
@@ -356,8 +356,8 @@ describe('PermissionControlledUiSettingsWrapper', () => {
     });
 
     it('blocks a non-admin from creating the global config doc when the toggle is on', async () => {
-      mockToggle('on');
-      const wrapperClient = buildWrapperInstance(false);
+      resetWriteMocks();
+      const wrapperClient = buildWrapperInstance(false, 'on');
 
       await expect(
         wrapperClient.create('config', { 'some.setting': 'value' }, { id: VERSION })
@@ -366,8 +366,8 @@ describe('PermissionControlledUiSettingsWrapper', () => {
     });
 
     it('allows a dashboard admin to update the global config doc when the toggle is on', async () => {
-      mockToggle('on');
-      const wrapperClient = buildWrapperInstance();
+      resetWriteMocks();
+      const wrapperClient = buildWrapperInstance(true, 'on');
 
       await wrapperClient.update('config', VERSION, { 'some.setting': 'value' });
       expect(mockedClient.update).toBeCalledWith(
@@ -379,8 +379,8 @@ describe('PermissionControlledUiSettingsWrapper', () => {
     });
 
     it('allows a non-admin to update the global config doc when the toggle is off', async () => {
-      mockToggle('off');
-      const wrapperClient = buildWrapperInstance(false);
+      resetWriteMocks();
+      const wrapperClient = buildWrapperInstance(false, 'off');
 
       await wrapperClient.update('config', VERSION, { 'some.setting': 'value' });
       expect(mockedClient.update).toBeCalledWith(
@@ -391,9 +391,9 @@ describe('PermissionControlledUiSettingsWrapper', () => {
       );
     });
 
-    it('allows a non-admin write when the admin config doc does not exist', async () => {
-      mockToggle('missing');
-      const wrapperClient = buildWrapperInstance(false);
+    it('allows a non-admin write when the admin toggle was never set (legacy fallback allows)', async () => {
+      resetWriteMocks();
+      const wrapperClient = buildWrapperInstance(false, 'unset');
 
       await wrapperClient.update('config', VERSION, { 'some.setting': 'value' });
       expect(mockedClient.update).toBeCalled();
@@ -405,8 +405,8 @@ describe('PermissionControlledUiSettingsWrapper', () => {
     // (<current_user>_ / <current_workspace>_). This wrapper must therefore run before
     // the user/workspace wrappers that strip those prefixes (see its wrapper priority).
     it('does not gate a user-scoped config update even when the toggle is on', async () => {
-      mockToggle('on');
-      const wrapperClient = buildWrapperInstance(false);
+      resetWriteMocks();
+      const wrapperClient = buildWrapperInstance(false, 'on');
 
       const userScopedId = `${CURRENT_USER_PLACEHOLDER}_${VERSION}`;
       await wrapperClient.update('config', userScopedId, { 'some.setting': 'value' });
@@ -419,8 +419,8 @@ describe('PermissionControlledUiSettingsWrapper', () => {
     });
 
     it('does not gate a workspace-scoped config update even when the toggle is on', async () => {
-      mockToggle('on');
-      const wrapperClient = buildWrapperInstance(false);
+      resetWriteMocks();
+      const wrapperClient = buildWrapperInstance(false, 'on');
 
       const workspaceScopedId = `${CURRENT_WORKSPACE_PLACEHOLDER}_${VERSION}`;
       await wrapperClient.update('config', workspaceScopedId, { 'some.setting': 'value' });
@@ -433,8 +433,8 @@ describe('PermissionControlledUiSettingsWrapper', () => {
     });
 
     it('does not gate a user-scoped config create even when the toggle is on', async () => {
-      mockToggle('on');
-      const wrapperClient = buildWrapperInstance(false);
+      resetWriteMocks();
+      const wrapperClient = buildWrapperInstance(false, 'on');
 
       const userScopedId = `${CURRENT_USER_PLACEHOLDER}_${VERSION}`;
       await wrapperClient.create('config', { 'some.setting': 'value' }, { id: userScopedId });
@@ -446,8 +446,8 @@ describe('PermissionControlledUiSettingsWrapper', () => {
     });
 
     it('does not gate a user-scoped config bulkUpdate even when the toggle is on', async () => {
-      mockToggle('on');
-      const wrapperClient = buildWrapperInstance(false);
+      resetWriteMocks();
+      const wrapperClient = buildWrapperInstance(false, 'on');
 
       const userScopedId = `${CURRENT_USER_PLACEHOLDER}_${VERSION}`;
       await wrapperClient.bulkUpdate([
@@ -457,8 +457,8 @@ describe('PermissionControlledUiSettingsWrapper', () => {
     });
 
     it('does not gate a workspace-scoped config bulkCreate even when the toggle is on', async () => {
-      mockToggle('on');
-      const wrapperClient = buildWrapperInstance(false);
+      resetWriteMocks();
+      const wrapperClient = buildWrapperInstance(false, 'on');
 
       const workspaceScopedId = `${CURRENT_WORKSPACE_PLACEHOLDER}_${VERSION}`;
       await wrapperClient.bulkCreate([
@@ -468,8 +468,8 @@ describe('PermissionControlledUiSettingsWrapper', () => {
     });
 
     it('blocks a non-admin bulkUpdate that targets the global config doc', async () => {
-      mockToggle('on');
-      const wrapperClient = buildWrapperInstance(false);
+      resetWriteMocks();
+      const wrapperClient = buildWrapperInstance(false, 'on');
 
       await expect(
         wrapperClient.bulkUpdate([

@@ -83,12 +83,12 @@ export async function mountManagementSection(
         defaultMessage: 'User settings',
       })
     : isWorkspaceScope
-    ? i18n.translate('advancedSettings.workspaceSettingsLabel', {
-        defaultMessage: 'Workspace settings',
-      })
-    : i18n.translate('advancedSettings.newHeader.pageTitle', {
-        defaultMessage: 'Application settings',
-      });
+      ? i18n.translate('advancedSettings.workspaceSettingsLabel', {
+          defaultMessage: 'Workspace settings',
+        })
+      : i18n.translate('advancedSettings.newHeader.pageTitle', {
+          defaultMessage: 'Application settings',
+        });
 
   const useUpdatedUX = uiSettings.get('home:useNewHomePage');
   // If new navigation is off, this will be rendered as breadcrumb. If is on, this will be rendered as title.
