@@ -742,105 +742,37 @@ describe('OptimizerConfig::create()', () => {
       }
     `);
 
-    expect(findOpenSearchDashboardsPlatformPlugins.mock).toMatchInlineSnapshot(`
-      Object {
-        "calls": Array [
-          Array [
-            Symbol(parsed plugin scan dirs),
-            Symbol(parsed plugin paths),
-          ],
-        ],
-        "contexts": Array [
-          [Window],
-        ],
-        "instances": Array [
-          [Window],
-        ],
-        "invocationCallOrder": Array [
-          39,
-        ],
-        "lastCall": Array [
-          Symbol(parsed plugin scan dirs),
-          Symbol(parsed plugin paths),
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": Symbol(new platform plugins),
-          },
-        ],
-      }
-    `);
+    // Capture the symbol values that were passed to and returned from each mock.
+    // Asserting .mock.calls/.mock.results avoids serializing [Window] contexts/instances,
+    // which causes RangeError: Invalid string length in Jest 30 / pretty-format.
+    const parsedOptions = (OptimizerConfig.parseOptions as jest.Mock).mock.results[0].value;
 
-    expect(filterById.mock).toMatchInlineSnapshot(`
-      Object {
-        "calls": Array [
-          Array [
-            Array [],
-            Array [
-              Symbol(bundle1),
-              Symbol(bundle2),
-            ],
-          ],
-        ],
-        "contexts": Array [
-          [Window],
-        ],
-        "instances": Array [
-          [Window],
-        ],
-        "invocationCallOrder": Array [
-          41,
-        ],
-        "lastCall": Array [
-          Array [],
-          Array [
-            Symbol(bundle1),
-            Symbol(bundle2),
-          ],
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": Symbol(filtered bundles),
-          },
-        ],
-      }
-    `);
+    expect(findOpenSearchDashboardsPlatformPlugins).toHaveBeenCalledTimes(1);
+    expect(findOpenSearchDashboardsPlatformPlugins.mock.calls[0]).toEqual([
+      parsedOptions.pluginScanDirs,
+      parsedOptions.pluginPaths,
+    ]);
+    expect(findOpenSearchDashboardsPlatformPlugins.mock.results[0]).toEqual({
+      type: 'return',
+      value: config.plugins,
+    });
 
-    expect(getPluginBundles.mock).toMatchInlineSnapshot(`
-      Object {
-        "calls": Array [
-          Array [
-            Symbol(new platform plugins),
-            Symbol(parsed repo root),
-            Symbol(parsed output root),
-          ],
-        ],
-        "contexts": Array [
-          [Window],
-        ],
-        "instances": Array [
-          [Window],
-        ],
-        "invocationCallOrder": Array [
-          40,
-        ],
-        "lastCall": Array [
-          Symbol(new platform plugins),
-          Symbol(parsed repo root),
-          Symbol(parsed output root),
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": Array [
-              Symbol(bundle1),
-              Symbol(bundle2),
-            ],
-          },
-        ],
-      }
-    `);
+    expect(getPluginBundles).toHaveBeenCalledTimes(1);
+    expect(getPluginBundles.mock.calls[0]).toEqual([
+      config.plugins,
+      parsedOptions.repoRoot,
+      parsedOptions.outputRoot,
+    ]);
+    expect(getPluginBundles.mock.results[0].type).toBe('return');
+
+    expect(filterById).toHaveBeenCalledTimes(1);
+    expect(filterById.mock.calls[0]).toEqual([
+      parsedOptions.filters,
+      getPluginBundles.mock.results[0].value,
+    ]);
+    expect(filterById.mock.results[0]).toEqual({
+      type: 'return',
+      value: config.bundles,
+    });
   });
 });

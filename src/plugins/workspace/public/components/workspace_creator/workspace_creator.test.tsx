@@ -502,7 +502,8 @@ describe('WorkspaceCreator', () => {
     await waitFor(() => {
       // Workspace was created successfully; the redirect to the landing page follows.
       expect(workspaceClientCreate).toHaveBeenCalledWith(
-        expect.objectContaining({ name: 'test workspace name' })
+        expect.objectContaining({ name: 'test workspace name' }),
+        expect.anything()
       );
     });
   });
@@ -551,7 +552,8 @@ describe('WorkspaceCreator', () => {
     await waitFor(() => {
       // Workspace was created successfully; the redirect to the landing page follows.
       expect(workspaceClientCreate).toHaveBeenCalledWith(
-        expect.objectContaining({ name: 'test workspace name' })
+        expect.objectContaining({ name: 'test workspace name' }),
+        expect.anything()
       );
     });
   });

@@ -61,10 +61,7 @@ it('rejects if source path is not absolute', async () => {
       destination: __dirname,
     })
   ).rejects.toThrowErrorMatchingInlineSnapshot(
-    `
-"Please use absolute paths to keep things explicit. You probably want to use \`build.resolvePath()\` or \`config.resolveFromRepo()\`.
-Cause: Please use absolute paths to keep things explicit. You probably want to use \`build.resolvePath()\` or \`config.resolveFromRepo()\`."
-`
+    `"Please use absolute paths to keep things explicit. You probably want to use \`build.resolvePath()\` or \`config.resolveFromRepo()\`."`
   );
 });
 
@@ -75,10 +72,7 @@ it('rejects if destination path is not absolute', async () => {
       destination: 'foo/bar',
     })
   ).rejects.toThrowErrorMatchingInlineSnapshot(
-    `
-"Please use absolute paths to keep things explicit. You probably want to use \`build.resolvePath()\` or \`config.resolveFromRepo()\`.
-Cause: Please use absolute paths to keep things explicit. You probably want to use \`build.resolvePath()\` or \`config.resolveFromRepo()\`."
-`
+    `"Please use absolute paths to keep things explicit. You probably want to use \`build.resolvePath()\` or \`config.resolveFromRepo()\`."`
   );
 });
 
@@ -89,10 +83,7 @@ it('rejects if neither path is absolute', async () => {
       destination: 'foo/bar',
     })
   ).rejects.toThrowErrorMatchingInlineSnapshot(
-    `
-"Please use absolute paths to keep things explicit. You probably want to use \`build.resolvePath()\` or \`config.resolveFromRepo()\`.
-Cause: Please use absolute paths to keep things explicit. You probably want to use \`build.resolvePath()\` or \`config.resolveFromRepo()\`."
-`
+    `"Please use absolute paths to keep things explicit. You probably want to use \`build.resolvePath()\` or \`config.resolveFromRepo()\`."`
   );
 });
 

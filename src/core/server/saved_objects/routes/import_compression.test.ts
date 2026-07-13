@@ -1,3 +1,10 @@
+/**
+ * @jest-environment node
+ *
+ * Run with:
+ *   npx jest --config src/core/server/saved_objects/routes/jest.config.compression.js src/core/server/saved_objects/routes/import_compression.test.ts
+ */
+
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -7,13 +14,6 @@
  *
  * Any modifications Copyright OpenSearch Contributors. See
  * GitHub history for details.
- */
-
-/**
- * @jest-environment node
- *
- * Run with:
- *   npx jest --config src/core/server/saved_objects/routes/jest.config.compression.js src/core/server/saved_objects/routes/import_compression.test.ts
  */
 
 // Unit test for the onPreAuth guard in routes/index.ts that blocks

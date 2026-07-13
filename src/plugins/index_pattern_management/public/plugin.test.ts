@@ -58,7 +58,7 @@ describe('DiscoverPlugin', () => {
 
     expect(startMock.application.getUrlForApp).toHaveBeenCalledWith('indexPatterns');
     expect(startMock.application.navigateToUrl).toHaveBeenCalledWith(
-      'http://localhost/app/indexPatterns'
+      'http://localhost:5601/app/indexPatterns'
     );
   });
 });

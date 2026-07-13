@@ -140,7 +140,7 @@ describe('getOnSave', () => {
     );
     const onSaveResult = await onSave(onSaveProps);
     expect(onSaveResult?.id).toBe('2');
-    expect(dispatch).toBeCalledTimes(0);
+    expect(dispatch).toHaveBeenCalledTimes(0);
   });
 
   test('edit an exising visBuilder from dashboard', async () => {
@@ -157,7 +157,7 @@ describe('getOnSave', () => {
     );
     const onSaveResult = await onSave(onSaveProps);
     expect(onSaveResult?.id).toBe('1');
-    expect(mockServices.application.navigateToApp).toBeCalledTimes(1);
+    expect(mockServices.application.navigateToApp).toHaveBeenCalledTimes(1);
     expect(savedVisBuilderVis.description).toBe('new description after editing');
   });
 });

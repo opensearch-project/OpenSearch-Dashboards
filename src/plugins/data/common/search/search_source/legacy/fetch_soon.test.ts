@@ -73,8 +73,7 @@ jest.mock('./call_client', () => ({
 
 describe('fetchSoon', () => {
   beforeEach(() => {
-    // @ts-expect-error TS2559 TODO(ts-error): fixme
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers();
     (callClient as jest.Mock).mockClear();
   });
 
@@ -150,18 +149,16 @@ describe('fetchSoon', () => {
     );
   });
 
-  test('should return the response to the corresponding call for multiple batched requests', (done) => {
+  test('should return the response to the corresponding call for multiple batched requests', async () => {
     const getConfig = getConfigStub({ [UI_SETTINGS.COURIER_BATCH_SEARCHES]: true });
     const requests = [{ _mockResponseId: 'foo' }, { _mockResponseId: 'bar' }];
 
     const promises = requests.map((request) =>
       fetchSoon(request, {}, { getConfig } as FetchHandlers)
     );
-    jest.advanceTimersByTime(50);
-    Promise.all(promises).then((results) => {
-      expect(results).toEqual([mockResponses.foo, mockResponses.bar]);
-      done();
-    });
+    await jest.runAllTimersAsync();
+    const results = await Promise.all(promises);
+    expect(results).toEqual([mockResponses.foo, mockResponses.bar]);
   });
 
   test('should wait for the previous batch to start before starting a new batch', () => {

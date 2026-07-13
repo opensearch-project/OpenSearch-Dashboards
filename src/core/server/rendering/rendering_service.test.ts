@@ -1,6 +1,4 @@
-/**
- * @jest-environment node
- */
+/** @jest-environment node */
 
 /*
  * Copyright OpenSearch Contributors

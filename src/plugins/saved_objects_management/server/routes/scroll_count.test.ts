@@ -1,3 +1,5 @@
+/** @jest-environment node */
+
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -7,10 +9,6 @@
  *
  * Any modifications Copyright OpenSearch Contributors. See
  * GitHub history for details.
- */
-
-/**
- * @jest-environment node
  */
 
 import { schema } from '@osd/config-schema';

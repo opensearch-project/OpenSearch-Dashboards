@@ -123,7 +123,7 @@ describe('sync_query_state_with_url', () => {
     filterManagerChangeTriggered = jest.fn();
     filterManagerChangeSub = filterManager.getUpdates$().subscribe(filterManagerChangeTriggered);
 
-    window.location.href = '/';
+    window.location.href = 'http://localhost:5601/';
     history = createBrowserHistory();
     osdUrlStateStorage = createOsdUrlStateStorage({ useHash: false, history });
 

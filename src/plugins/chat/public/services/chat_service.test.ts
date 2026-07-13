@@ -2080,6 +2080,7 @@ describe('ChatService', () => {
 
     afterEach(() => {
       jest.clearAllMocks();
+      delete (global as any).window.assistantContextStore;
     });
   });
 

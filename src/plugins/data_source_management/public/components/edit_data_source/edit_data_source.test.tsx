@@ -107,6 +107,10 @@ describe('Datasource Management: Edit Datasource Wizard', () => {
       component.update();
     });
 
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
     test('should render normally', () => {
       expect(component.find(notFoundIdentifier).exists()).toBe(false);
       expect(utils.getDataSources).toHaveBeenCalled();

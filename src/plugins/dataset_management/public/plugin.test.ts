@@ -63,7 +63,7 @@ describe('DiscoverPlugin', () => {
 
     expect(startMock.application.getUrlForApp).toHaveBeenCalledWith('datasets');
     expect(startMock.application.navigateToUrl).toHaveBeenCalledWith(
-      'http://localhost/app/datasets'
+      'http://localhost:5601/app/datasets'
     );
   });
 

@@ -133,15 +133,7 @@ describe('Workspace plugin', () => {
   });
 
   it('#setup should register registerCollapsibleNavHeader when enter a workspace', async () => {
-    const windowSpy = jest.spyOn(window, 'window', 'get');
-    windowSpy.mockImplementation(
-      () =>
-        ({
-          location: {
-            href: 'http://localhost/w/workspaceId/app',
-          },
-        }) as any
-    );
+    window.history.pushState({}, '', '/w/workspaceId/app');
     workspaceClientMock.enterWorkspace.mockResolvedValueOnce({
       success: true,
       result: null,
@@ -158,7 +150,7 @@ describe('Workspace plugin', () => {
     const startMock = coreMock.createStart();
     await workspacePlugin.start(startMock, getMockDependencies());
     expect(collapsibleNavHeaderImplementation()).not.toEqual(null);
-    windowSpy.mockRestore();
+    window.history.pushState({}, '', '/');
   });
 
   it('#setup should register workspace essential use case when new home is disabled', async () => {
@@ -276,15 +268,7 @@ describe('Workspace plugin', () => {
   });
 
   it('#start should handle fatal error when workspace is stale', async () => {
-    const windowSpy = jest.spyOn(window, 'window', 'get');
-    windowSpy.mockImplementation(
-      () =>
-        ({
-          location: {
-            href: 'http://localhost/w/workspaceId/app',
-          },
-        }) as any
-    );
+    window.history.pushState({}, '', '/w/workspaceId/app');
 
     const setupMock = coreMock.createSetup();
 
@@ -308,19 +292,11 @@ describe('Workspace plugin', () => {
         error: 'Cannot find current workspace since it is stale',
       },
     });
-    windowSpy.mockRestore();
+    window.history.pushState({}, '', '/');
   });
 
   it('#start when workspace id is in url and enterWorkspace return success', async () => {
-    const windowSpy = jest.spyOn(window, 'window', 'get');
-    windowSpy.mockImplementation(
-      () =>
-        ({
-          location: {
-            href: 'http://localhost/w/workspaceId/app',
-          },
-        }) as any
-    );
+    window.history.pushState({}, '', '/w/workspaceId/app');
     workspaceClientMock.enterWorkspace.mockResolvedValue({
       success: true,
       result: null,
@@ -340,19 +316,11 @@ describe('Workspace plugin', () => {
     startMock.workspaces.initialized$.next(true);
 
     expect(startMock.application.navigateToApp).toHaveBeenCalledWith(WORKSPACE_DETAIL_APP_ID);
-    windowSpy.mockRestore();
+    window.history.pushState({}, '', '/');
   });
 
   it('#start when workspace id is in url and enterWorkspace return error', async () => {
-    const windowSpy = jest.spyOn(window, 'window', 'get');
-    windowSpy.mockImplementation(
-      () =>
-        ({
-          location: {
-            href: 'http://localhost/w/workspaceId/app',
-          },
-        }) as any
-    );
+    window.history.pushState({}, '', '/w/workspaceId/app');
 
     const workspacePlugin = new WorkspacePlugin();
 
@@ -376,7 +344,7 @@ describe('Workspace plugin', () => {
       },
     });
 
-    windowSpy.mockRestore();
+    window.history.pushState({}, '', '/');
   });
 
   it('#start add workspace detail page to breadcrumbs when start', async () => {

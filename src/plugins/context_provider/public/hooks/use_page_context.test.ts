@@ -292,34 +292,36 @@ describe('usePageContext', () => {
       expect(mockUseDynamicContext).toHaveBeenCalled();
     });
 
-    it('should handle pushState calls', () => {
+    it('should handle pushState calls', async () => {
       renderHook(() => usePageContext());
 
       // Clear initial call
       mockUseDynamicContext.mockClear();
 
-      // Simulate pushState call
-      window.history.pushState({}, '', '/new-path');
+      // Simulate pushState call and flush microtasks queued by queueMicrotask
+      await act(async () => {
+        window.history.pushState({}, '', '/new-path');
+        // Yield to the microtask queue
+        await Promise.resolve();
+      });
 
-      // Use setTimeout to wait for microtask
-      setTimeout(() => {
-        expect(mockUseDynamicContext).toHaveBeenCalled();
-      }, 0);
+      expect(mockUseDynamicContext).toHaveBeenCalled();
     });
 
-    it('should handle replaceState calls', () => {
+    it('should handle replaceState calls', async () => {
       renderHook(() => usePageContext());
 
       // Clear initial call
       mockUseDynamicContext.mockClear();
 
-      // Simulate replaceState call
-      window.history.replaceState({}, '', '/new-path');
+      // Simulate replaceState call and flush microtasks queued by queueMicrotask
+      await act(async () => {
+        window.history.replaceState({}, '', '/new-path');
+        // Yield to the microtask queue
+        await Promise.resolve();
+      });
 
-      // Use setTimeout to wait for microtask
-      setTimeout(() => {
-        expect(mockUseDynamicContext).toHaveBeenCalled();
-      }, 0);
+      expect(mockUseDynamicContext).toHaveBeenCalled();
     });
   });
 

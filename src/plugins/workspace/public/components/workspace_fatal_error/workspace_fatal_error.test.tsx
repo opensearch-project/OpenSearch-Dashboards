@@ -33,8 +33,12 @@ describe('<WorkspaceFatalError />', () => {
   });
 
   it('click go back to homepage', async () => {
-    window.history.pushState({}, '', '/');
     const coreStartMock = coreMock.createStart();
+    // Replace prepend with a jest.fn() that returns an absolute URL so that
+    // window.location.href = prepend('/') doesn't throw "Invalid URL" in jsdom 26.
+    const prependMock = jest.fn().mockReturnValue('http://localhost:5601/');
+    coreStartMock.http.basePath.prepend = prependMock;
+
     const { getByText } = render(
       // @ts-expect-error TS2769 TODO(ts-error): fixme
       <IntlProvider locale="en">
@@ -51,7 +55,7 @@ describe('<WorkspaceFatalError />', () => {
     );
     fireEvent.click(getByText('Go back to homepage'));
     await waitFor(() => {
-      expect(coreStartMock.http.basePath.prepend).toHaveBeenCalledWith('/', expect.anything());
+      expect(prependMock).toHaveBeenCalledWith('/', expect.anything());
     });
   });
 });

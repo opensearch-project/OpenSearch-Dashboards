@@ -200,7 +200,7 @@ describe('state_sync', () => {
     beforeEach(() => {
       container.set(defaultState);
 
-      window.location.href = '/';
+      window.location.href = 'http://localhost:5601/';
       sessionStorage = new StubBrowserStorage();
       sessionStorageSyncStrategy = createSessionStorageStateStorage(sessionStorage);
       history = createBrowserHistory();

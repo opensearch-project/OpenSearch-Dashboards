@@ -209,8 +209,8 @@ export default {
     '<rootDir>/packages/osd-ui-framework/(dist)/',
     '<rootDir>/packages/osd-pm/dist/',
     `${RESERVED_DIR_JEST_INTEGRATION_TESTS}/`,
-    // current jest-runtime 27.x doesn't handle ESM module @babel/eslint-parser with import.meta
-    // remove these excludes after jest-runtime upgrade
+    // Jest's require(ESM) requires Node v24.9+ for synchronous vm module APIs
+    // remove these excludes after node upgrade
     '<rootDir>/packages/osd-eslint-plugin-eslint/rules/disallow_license_headers.test.js',
     '<rootDir>/packages/osd-eslint-plugin-eslint/rules/require_license_header.test.js',
     '<rootDir>/packages/osd-eslint-plugin-eslint/rules/no_restricted_paths.test.js',

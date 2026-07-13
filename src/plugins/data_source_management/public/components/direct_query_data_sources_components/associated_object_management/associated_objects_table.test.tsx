@@ -4,7 +4,7 @@
  */
 
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import '@testing-library/jest-dom/extend-expect';
+import '@testing-library/jest-dom';
 import { AssociatedObjectsTable } from './associated_objects_table';
 // @ts-expect-error TS7016 TODO(ts-error): fixme
 import renderer from 'react-test-renderer';

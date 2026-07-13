@@ -63,6 +63,13 @@ jest.mock('@elastic/eui/lib/services/react', () => {
   };
 });
 
+// jest-location-mock uses process.env.HOST as the base URL for its window.location mock.
+// Set it to match testEnvironmentOptions.url so window.location.origin is 'http://localhost:5601'
+// in all jsdom tests, consistent with the rest of the suite.
+if (typeof window !== 'undefined') {
+  process.env.HOST = 'http://localhost:5601';
+}
+
 // The following mocks rely on `window` which only exists in jsdom (browser) environments.
 // Tests using `@jest-environment node` do not have a `window` global, so guard here.
 if (typeof window !== 'undefined') {
