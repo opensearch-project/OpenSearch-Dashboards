@@ -704,16 +704,19 @@ export class ExplorePlugin implements Plugin<
     const sqlSupportEnabled =
       this.initializerContext.config.get<ConfigSchema>().sqlSupport?.enabled ?? false;
     if (!sqlSupportEnabled) {
-      const sqlConfig = plugins.data.query.queryString?.getLanguageService?.()?.getLanguage('SQL');
-      if (sqlConfig?.supportedAppNames) {
-        sqlConfig.supportedAppNames = sqlConfig.supportedAppNames.filter(
-          (name) => name !== 'explore'
-        );
-      }
-      if (sqlConfig?.editorSupportedAppNames) {
-        sqlConfig.editorSupportedAppNames = sqlConfig.editorSupportedAppNames.filter(
-          (name) => name !== 'explore'
-        );
+      const languageService = plugins.data.query.queryString?.getLanguageService?.();
+      const sqlConfig = languageService?.getLanguage('SQL');
+      if (sqlConfig) {
+        const updated = {
+          ...sqlConfig,
+          supportedAppNames: (sqlConfig.supportedAppNames ?? []).filter(
+            (name) => name !== 'explore'
+          ),
+          editorSupportedAppNames: (sqlConfig.editorSupportedAppNames ?? []).filter(
+            (name) => name !== 'explore'
+          ),
+        };
+        languageService?.registerLanguage?.(updated);
       }
     }
 
