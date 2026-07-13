@@ -35,12 +35,8 @@ jest.mock('../../../constants', () => ({
   intervalAsMinutes: jest.fn(),
 }));
 
-// Mock window.location.reload
-const mockReload = jest.fn();
-Object.defineProperty(window, 'location', {
-  value: { reload: mockReload },
-  writable: true,
-});
+// Mock window.location.reload via spy (jsdom 26: location is non-configurable, spy on the method instead).
+const reloadSpy = jest.spyOn(window.location, 'reload').mockImplementation(jest.fn());
 
 // Mock Date.prototype.toLocaleString to ensure consistent date formatting
 const mockDateString = '6/30/2021, 5:00:00 PM';
@@ -375,7 +371,7 @@ describe('DashboardDirectQuerySyncBanner', () => {
     );
 
     await waitFor(() => {
-      expect(mockReload).toHaveBeenCalled();
+      expect(reloadSpy).toHaveBeenCalled();
     });
   });
 });

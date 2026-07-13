@@ -41,7 +41,11 @@ const sessionStorageMock = (() => {
   };
 })();
 
-Object.defineProperty(window, 'sessionStorage', { value: sessionStorageMock });
+Object.defineProperty(window, 'sessionStorage', {
+  value: sessionStorageMock,
+  writable: true,
+  configurable: true,
+});
 
 describe('CatalogCacheManager', () => {
   beforeEach(() => {

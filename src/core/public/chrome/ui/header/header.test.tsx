@@ -105,6 +105,8 @@ describe('Header', () => {
   beforeAll(() => {
     Object.defineProperty(window, 'localStorage', {
       value: new StubBrowserStorage(),
+      writable: true,
+      configurable: true,
     });
   });
 

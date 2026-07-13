@@ -23,16 +23,8 @@ jest.mock('moment', () => {
 });
 
 describe('url_builder', () => {
-  const mockLocation = {
-    origin: 'https://example.com',
-    pathname: '/app/explore',
-  };
-
   beforeEach(() => {
-    Object.defineProperty(window, 'location', {
-      value: mockLocation,
-      writable: true,
-    });
+    window.history.pushState({}, '', 'https://example.com/app/explore');
   });
 
   describe('buildExploreLogsUrl', () => {
@@ -81,7 +73,7 @@ describe('url_builder', () => {
     });
 
     it('should handle custom base path', () => {
-      mockLocation.pathname = '/custom-base/app/explore';
+      window.history.pushState({}, '', 'https://example.com/custom-base/app/explore');
 
       const params = {
         traceId: 'test-trace-id',

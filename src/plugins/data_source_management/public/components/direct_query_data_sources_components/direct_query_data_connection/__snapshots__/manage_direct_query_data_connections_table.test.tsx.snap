@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`ManageDirectQueryDataConnectionsTable fetch security lake, cloudwatch, and AWS Prometheus direct query connections should render empty table 1`] = `
 <IntlProvider

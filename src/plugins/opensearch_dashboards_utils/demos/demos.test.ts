@@ -49,7 +49,7 @@ describe('demos', () => {
   describe('state sync', () => {
     test('url sync demo works', async () => {
       expect(await urlSyncResult).toMatchInlineSnapshot(
-        `"http://localhost/#?_s=(todos:!((completed:!f,id:0,text:'Learning%20state%20containers'),(completed:!f,id:2,text:test)))"`
+        `"http://localhost:5601/#?_s=(todos:!((completed:!f,id:0,text:'Learning%20state%20containers'),(completed:!f,id:2,text:test)))"`
       );
     });
   });

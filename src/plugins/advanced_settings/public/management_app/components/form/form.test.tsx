@@ -61,6 +61,7 @@ beforeAll(() => {
       },
     },
     writable: true,
+    configurable: true,
   });
 });
 

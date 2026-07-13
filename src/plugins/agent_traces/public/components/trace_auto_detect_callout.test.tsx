@@ -54,19 +54,17 @@ describe('TraceAutoDetectCallout', () => {
 
   Object.defineProperty(window, 'localStorage', {
     value: localStorageMock,
+    writable: true,
+    configurable: true,
   });
 
-  // Mock window.location.reload
-  const mockReload = jest.fn();
-  Object.defineProperty(window, 'location', {
-    value: { reload: mockReload },
-    writable: true,
-  });
+  // Mock window.location.reload via spy (jsdom 26: location is non-configurable, spy on the method instead).
+  const reloadSpy = jest.spyOn(window.location, 'reload').mockImplementation(jest.fn());
 
   beforeEach(() => {
     jest.clearAllMocks();
     localStorageMock.clear();
-    mockReload.mockClear();
+    reloadSpy.mockClear();
 
     // Setup mock services
     mockServices = {
@@ -308,7 +306,7 @@ describe('TraceAutoDetectCallout', () => {
     // Wait for the setTimeout (1500ms in component) to complete
     await waitFor(
       () => {
-        expect(mockReload).toHaveBeenCalled();
+        expect(reloadSpy).toHaveBeenCalled();
       },
       { timeout: 3000 }
     );

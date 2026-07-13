@@ -87,11 +87,8 @@ describe('NewVisModal', () => {
   const uiSettings: any = { get: settingsGet };
 
   beforeAll(() => {
-    Object.defineProperty(window, 'location', {
-      value: {
-        assign: jest.fn(),
-      },
-    });
+    // jsdom 26: spy on location.assign rather than replacing the location object.
+    jest.spyOn(window.location, 'assign').mockImplementation(jest.fn());
   });
 
   beforeEach(() => {

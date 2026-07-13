@@ -33,18 +33,7 @@ describe('<WorkspaceFatalError />', () => {
   });
 
   it('click go back to homepage', async () => {
-    const { location } = window;
-    const setHrefSpy = jest.fn((href) => href);
-    if (window.location) {
-      // @ts-ignore
-      delete window.location;
-    }
-    // @ts-expect-error TS2322 TODO(ts-upgrade): fixme
-    window.location = {} as Location;
-    Object.defineProperty(window.location, 'href', {
-      get: () => 'http://localhost/',
-      set: setHrefSpy,
-    });
+    window.history.pushState({}, '', '/');
     const coreStartMock = coreMock.createStart();
     const { getByText } = render(
       // @ts-expect-error TS2769 TODO(ts-error): fixme
@@ -61,15 +50,8 @@ describe('<WorkspaceFatalError />', () => {
       </IntlProvider>
     );
     fireEvent.click(getByText('Go back to homepage'));
-    await waitFor(
-      () => {
-        expect(setHrefSpy).toHaveBeenCalledTimes(1);
-      },
-      {
-        container: document.body,
-      }
-    );
-    // @ts-expect-error TS2322 TODO(ts-upgrade): fixme
-    window.location = location;
+    await waitFor(() => {
+      expect(coreStartMock.http.basePath.prepend).toHaveBeenCalledWith('/', expect.anything());
+    });
   });
 });

@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`Installed Integrations Table test Renders the empty installed integrations table 1`] = `
 <InstalledIntegrationsTable

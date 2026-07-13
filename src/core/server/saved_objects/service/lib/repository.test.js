@@ -2082,7 +2082,7 @@ describe('SavedObjectsRepository', () => {
         await createSuccess(type, attributes);
         expect(client.create).toHaveBeenCalledWith(
           expect.objectContaining({
-            id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
+            id: expect.stringMatching(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
           }),
           expect.anything()
         );

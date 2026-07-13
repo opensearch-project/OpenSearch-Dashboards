@@ -37,18 +37,9 @@ describe('PageItem', () => {
   const coreStartMock = coreMock.createStart();
   const { application } = coreStartMock;
 
-  const assignMock = jest.fn();
-
-  // Mock window.location.assign
-  Object.defineProperty(window, 'location', {
-    value: {
-      assign: assignMock,
-    },
-    writable: true,
-  });
-
-  beforeEach(() => {
+  afterEach(() => {
     jest.clearAllMocks();
+    window.history.pushState({}, '', '/');
   });
 
   it('renders the page item correctly', () => {
@@ -217,7 +208,7 @@ describe('PageItem', () => {
           return breadcrumbs;
         }}
         callback={() => {
-          window.location.assign('http://localhost:5601/app/data_source');
+          window.history.pushState({}, '', '/app/data_source');
         }}
       />
     );
@@ -227,7 +218,7 @@ describe('PageItem', () => {
 
     fireEvent.click(getByTestId('global-search-item-data_source'));
     expect(application.navigateToApp).not.toHaveBeenCalled();
-    expect(assignMock).toHaveBeenCalledWith('http://localhost:5601/app/data_source');
+    expect(window.location.pathname).toBe('/app/data_source');
   });
 
   it('click on the item will navigate to correctly page for data source in a workspace', () => {

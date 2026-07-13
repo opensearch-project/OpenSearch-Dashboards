@@ -750,6 +750,9 @@ describe('OptimizerConfig::create()', () => {
             Symbol(parsed plugin paths),
           ],
         ],
+        "contexts": Array [
+          [Window],
+        ],
         "instances": Array [
           [Window],
         ],
@@ -779,6 +782,9 @@ describe('OptimizerConfig::create()', () => {
               Symbol(bundle2),
             ],
           ],
+        ],
+        "contexts": Array [
+          [Window],
         ],
         "instances": Array [
           [Window],
@@ -810,6 +816,9 @@ describe('OptimizerConfig::create()', () => {
             Symbol(parsed repo root),
             Symbol(parsed output root),
           ],
+        ],
+        "contexts": Array [
+          [Window],
         ],
         "instances": Array [
           [Window],

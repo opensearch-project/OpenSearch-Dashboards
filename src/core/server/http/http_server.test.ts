@@ -785,7 +785,7 @@ test('returns server and connection options on start', async () => {
 
 test('throws an error if starts without set up', async () => {
   await expect(server.start(dynamicConfigService)).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"Http server is not setup up yet"`
+    '"Http server is not setup up yet"'
   );
 });
 

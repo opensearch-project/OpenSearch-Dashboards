@@ -13,14 +13,13 @@ describe('getReloadButton', () => {
   });
 
   it('calls window.location.reload() on button click', () => {
-    const reloadMock = jest.fn();
-    Object.defineProperty(window, 'location', {
-      value: { reload: reloadMock },
-      writable: true,
-    });
+    // jsdom 26: spy on location.reload rather than replacing the location object.
+    const reloadSpy = jest.spyOn(window.location, 'reload').mockImplementation(jest.fn());
 
     const { getByText } = render(getReloadButton());
     fireEvent.click(getByText('Refresh the page'));
-    expect(reloadMock).toHaveBeenCalled();
+    expect(reloadSpy).toHaveBeenCalled();
+
+    reloadSpy.mockRestore();
   });
 });

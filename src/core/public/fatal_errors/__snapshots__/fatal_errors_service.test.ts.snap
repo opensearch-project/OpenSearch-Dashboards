@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`#add() deletes all children of rootDomElement and renders <FatalErrorScreen /> into it: fatal error screen component 1`] = `Array []`;
 

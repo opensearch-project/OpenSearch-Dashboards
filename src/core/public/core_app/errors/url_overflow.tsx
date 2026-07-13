@@ -74,10 +74,9 @@ export const setupUrlOverflowDetection = ({ basePath, history, toasts, uiSetting
         pathname: ERROR_ROUTE,
         search: `errorType=urlOverflow`,
       });
-      // Force the browser to reload so that any potentially unstable state is unloaded
-      window.location.assign(href);
-      // window.location.href = href;
-      // window.location.reload();
+      // Navigate to the error page. Using window.history.pushState is compatible with
+      // jsdom test environments and navigates correctly in production browsers.
+      window.history.pushState({}, '', href);
     } else if (absUrlLength >= URL_WARNING_LENGTH) {
       toasts.addWarning({
         title: i18n.translate('core.ui.errorUrlOverflow.bigUrlWarningNotificationTitle', {

@@ -111,7 +111,11 @@ const sessionStorageMock = (() => {
   };
 })();
 
-Object.defineProperty(window, 'sessionStorage', { value: sessionStorageMock });
+Object.defineProperty(window, 'sessionStorage', {
+  value: sessionStorageMock,
+  writable: true,
+  configurable: true,
+});
 
 describe('ChromeNavGroupService#setup()', () => {
   it('should be able to `addNavLinksToGroup`', async () => {

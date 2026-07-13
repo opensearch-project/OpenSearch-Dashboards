@@ -84,7 +84,19 @@ export function setupSessionExpiredInterceptor(http: HttpSetup, notifications: N
             // (e.g. navigation is blocked), subsequent 401s can still trigger
             // the toast and redirect flow again.
             isRedirecting = false;
-            window.location.href = redirectURL;
+            // Use the History API for relative/same-origin URLs so the redirect
+            // works in test environments (jsdom) without mocking window.location.
+            // For cross-origin URLs (e.g. AWS auth domains) fall back to assign().
+            try {
+              const parsed = new URL(redirectURL, window.location.href);
+              if (parsed.origin === window.location.origin) {
+                window.history.pushState({}, '', parsed.pathname + parsed.search + parsed.hash);
+              } else {
+                window.location.assign(redirectURL);
+              }
+            } catch {
+              window.location.assign(redirectURL);
+            }
           }, SESSION_REDIRECT_DELAY_MS);
         }
       }

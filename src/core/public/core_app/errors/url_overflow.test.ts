@@ -54,12 +54,6 @@ describe('url overflow detection', () => {
     toasts = notificationServiceMock.createStartContract().toasts;
     uiSettings = uiSettingsServiceMock.createStartContract();
 
-    Object.defineProperty(window, 'location', {
-      value: {
-        assign: jest.fn(),
-      },
-    });
-
     unlisten = setupUrlOverflowDetection({
       basePath,
       history,
@@ -71,18 +65,20 @@ describe('url overflow detection', () => {
   afterEach(() => {
     unlisten();
     jest.clearAllMocks();
+    window.history.pushState({}, '', '/');
   });
 
   it('redirects to error page when URL is too long', () => {
     history.push(longUrl);
-    expect(window.location.assign).toHaveBeenCalledWith('/app/error?errorType=urlOverflow');
+    // url_overflow.tsx uses window.history.pushState to navigate, which jsdom 26 supports.
+    expect(window.location.href).toContain('/app/error?errorType=urlOverflow');
   });
 
   it('displays a toast if URL exceeds warning threshold', () => {
     const warningUrl = '/' + 'a'.repeat(URL_WARNING_LENGTH);
     history.push(warningUrl);
     expect(history.location.pathname).toEqual(warningUrl);
-    expect(window.location.assign).not.toHaveBeenCalled();
+    expect(window.location.pathname).not.toContain('/app/error');
     expect(toasts.addWarning).toHaveBeenCalledWith(
       expect.objectContaining({
         title: 'The URL is big and OpenSearch Dashboards might stop working',
@@ -115,7 +111,7 @@ describe('url overflow detection', () => {
   it('does not redirect or show warning if URL is not too long', () => {
     history.push('/regular-length-url');
     expect(history.location.pathname).toEqual('/regular-length-url');
-    expect(window.location.assign).not.toHaveBeenCalled();
+    expect(window.location.pathname).not.toContain('/app/error');
     expect(toasts.addWarning).not.toHaveBeenCalled();
   });
 
@@ -123,7 +119,7 @@ describe('url overflow detection', () => {
     uiSettings.get.mockReturnValue(true);
     history.push(longUrl);
     expect(history.location.pathname).toEqual(longUrl);
-    expect(window.location.assign).not.toHaveBeenCalled();
+    expect(window.location.pathname).not.toContain('/app/error');
     expect(toasts.addWarning).not.toHaveBeenCalled();
   });
 
@@ -134,7 +130,7 @@ describe('url overflow detection', () => {
     history.push(longErrorUrl);
     expect(history.location.pathname).toEqual('/app/error');
     expect(history.location.search).toEqual(`?q=${longQueryParam}`);
-    expect(window.location.assign).not.toHaveBeenCalled();
+    expect(window.location.pathname).not.toContain('errorType=urlOverflow');
     expect(toasts.addWarning).not.toHaveBeenCalled();
   });
 });

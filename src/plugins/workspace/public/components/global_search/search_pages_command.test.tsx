@@ -176,12 +176,7 @@ describe('<workspaceSearchPagesCommand />', () => {
   });
 
   it('search click callback with system link should use window assign correctly', async () => {
-    const mockAssign = jest.fn();
-
-    Object.defineProperty(window, 'location', {
-      value: { assign: mockAssign },
-      writable: true,
-    });
+    const assignSpy = jest.spyOn(window.location, 'assign').mockImplementation(jest.fn());
 
     const testUrl = 'http://localhost:5601/test';
 
@@ -201,21 +196,18 @@ describe('<workspaceSearchPagesCommand />', () => {
     });
 
     expect(coreStartMock.application.navigateToApp).not.toHaveBeenCalled();
-    expect(window.location.assign).toHaveBeenCalledWith(testUrl);
+    expect(assignSpy).toHaveBeenCalledWith(testUrl);
+
+    assignSpy.mockRestore();
   });
 
   it('search click callback with system link and basePath should use window assign correctly', async () => {
-    const mockAssign = jest.fn();
+    const assignSpy = jest.spyOn(window.location, 'assign').mockImplementation(jest.fn());
 
     const originalBasePath = coreStartMock.http.basePath;
     const basePath = '/foo';
     // @ts-expect-error TS2341, TS2540 TODO(ts-error): fixme
     coreStartMock.http.basePath.basePath = basePath;
-
-    Object.defineProperty(window, 'location', {
-      value: { assign: mockAssign },
-      writable: true,
-    });
 
     const testUrl = `http://localhost:5601${basePath}/app/test`;
 
@@ -235,8 +227,9 @@ describe('<workspaceSearchPagesCommand />', () => {
     });
 
     expect(coreStartMock.application.navigateToApp).not.toHaveBeenCalled();
-    expect(window.location.assign).toHaveBeenCalledWith(testUrl);
+    expect(assignSpy).toHaveBeenCalledWith(testUrl);
 
+    assignSpy.mockRestore();
     // @ts-expect-error TS2341, TS2540 TODO(ts-error): fixme
     coreStartMock.http.basePath.basePath = originalBasePath;
   });

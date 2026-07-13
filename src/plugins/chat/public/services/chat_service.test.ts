@@ -57,12 +57,6 @@ describe('ChatService', () => {
       writable: true,
     });
 
-    // Set up global window mock for context store
-    Object.defineProperty(global, 'window', {
-      value: {},
-      writable: true,
-    });
-
     // Create mock thread ID observable - starts as undefined
     const generateMockThreadId = () => {
       const timestamp = Date.now();

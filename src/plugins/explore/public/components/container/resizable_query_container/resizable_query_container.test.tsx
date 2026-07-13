@@ -104,19 +104,31 @@ describe('ResizableQueryContainer', () => {
   });
 
   it('computes initial size based on viewport height', () => {
-    Object.defineProperty(window, 'innerHeight', { value: 768, writable: true });
+    Object.defineProperty(window, 'innerHeight', {
+      value: 768,
+      writable: true,
+      configurable: true,
+    });
     // 82 / 768 * 100 ≈ 10.68%
     expect(getInitialQueryPanelSize()).toBeCloseTo(10.68, 0);
   });
 
   it('clamps initial size to minimum 5%', () => {
-    Object.defineProperty(window, 'innerHeight', { value: 2000, writable: true });
+    Object.defineProperty(window, 'innerHeight', {
+      value: 2000,
+      writable: true,
+      configurable: true,
+    });
     // 82 / 2000 * 100 = 4.1%, clamped to 5%
     expect(getInitialQueryPanelSize()).toBe(5);
   });
 
   it('clamps initial size to maximum 15%', () => {
-    Object.defineProperty(window, 'innerHeight', { value: 200, writable: true });
+    Object.defineProperty(window, 'innerHeight', {
+      value: 200,
+      writable: true,
+      configurable: true,
+    });
     // 82 / 200 * 100 = 41%, clamped to 15%
     expect(getInitialQueryPanelSize()).toBe(15);
   });

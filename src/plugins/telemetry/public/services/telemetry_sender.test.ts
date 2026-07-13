@@ -41,6 +41,8 @@ const mockLocalStorage = new LocalStorageMock();
 const originalLocalStorage = window.localStorage;
 Object.defineProperty(window, 'localStorage', {
   value: mockLocalStorage,
+  writable: true,
+  configurable: true,
 });
 
 describe('TelemetrySender', () => {
@@ -51,6 +53,8 @@ describe('TelemetrySender', () => {
   afterAll(() =>
     Object.defineProperty(window, 'localStorage', {
       value: originalLocalStorage,
+      writable: true,
+      configurable: true,
     })
   );
 

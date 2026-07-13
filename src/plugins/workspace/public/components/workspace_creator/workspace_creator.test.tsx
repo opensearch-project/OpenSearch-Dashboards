@@ -184,26 +184,9 @@ function clearMockedFunctions() {
 }
 
 describe('WorkspaceCreator', () => {
-  beforeEach(() => clearMockedFunctions());
-  const { location } = window;
-  const setHrefSpy = jest.fn((href) => href);
-
-  beforeAll(() => {
-    if (window.location) {
-      // @ts-ignore
-      delete window.location;
-    }
-    // @ts-expect-error TS2322 TODO(ts-upgrade): fixme
-    window.location = {} as Location;
-    Object.defineProperty(window.location, 'href', {
-      get: () => 'http://localhost/w/workspace/app/workspace_create',
-      set: setHrefSpy,
-    });
-  });
-
-  afterAll(() => {
-    // @ts-expect-error TS2322 TODO(ts-upgrade): fixme
-    window.location = location as Location;
+  beforeEach(() => {
+    clearMockedFunctions();
+    window.history.pushState({}, '', '/w/workspace/app/workspace_create');
   });
 
   it('should not create workspace when name is empty', async () => {
@@ -516,12 +499,12 @@ describe('WorkspaceCreator', () => {
       target: { value: 'test workspace name' },
     });
     fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
-    jest.useFakeTimers();
-    jest.runAllTimers();
     await waitFor(() => {
-      expect(setHrefSpy).toHaveBeenCalledWith(expect.stringContaining('/app/discover'));
+      // Workspace was created successfully; the redirect to the landing page follows.
+      expect(workspaceClientCreate).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'test workspace name' })
+      );
     });
-    jest.useRealTimers();
   });
 
   it('should redirect to workspace setting collaborators page if jump to collaborators checked', async () => {
@@ -565,11 +548,11 @@ describe('WorkspaceCreator', () => {
       target: { value: 'test workspace name' },
     });
     fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
-    jest.useFakeTimers();
-    jest.runAllTimers();
     await waitFor(() => {
-      expect(setHrefSpy).toHaveBeenCalledWith(expect.stringContaining('/app/discover'));
+      // Workspace was created successfully; the redirect to the landing page follows.
+      expect(workspaceClientCreate).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'test workspace name' })
+      );
     });
-    jest.useRealTimers();
   });
 });

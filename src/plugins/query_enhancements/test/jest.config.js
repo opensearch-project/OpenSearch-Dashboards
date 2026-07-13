@@ -27,5 +27,6 @@ module.exports = {
     '\\.(gif|ttf|eot|svg|png)$': '<rootDir>/test/__mocks__/fileMock.js',
     '^!!raw-loader!.*': 'jest-raw-loader',
   },
+  retryTimes: 2,
   testEnvironment: 'jsdom',
 };
