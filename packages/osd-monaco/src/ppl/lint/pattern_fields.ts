@@ -3,7 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-const CAPTURE_GROUP_OPENER = /\(\?P?<([^>]*)>/g;
+// Matches named capture groups: (?<name>) and (?P<name>). The name charset
+// (letter followed by alphanumerics) excludes lookbehind openers (?<=...) and
+// (?<!...) by construction, so `lastIndex` never skips a real group after one
+// — a greedy `[^>]*` opener would consume across a preceding lookbehind and
+// drop the real group, wrongly flagging its created field as unknown.
+const CAPTURE_GROUP_OPENER = /\(\?P?<([A-Za-z][A-Za-z0-9]*)>/g;
 
 // Only names the engine would accept. A name that fails this test never
 // becomes a runtime field — registering it would mask a real downstream typo.

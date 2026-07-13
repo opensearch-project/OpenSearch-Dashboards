@@ -91,6 +91,25 @@ describe('buildOverridesFromSettings', () => {
     });
   });
 
+  it('ignores an unknown severity on a non-floored rule (no patch)', () => {
+    // 'critical' is not a real level; with a missing membership check the junk
+    // value would leak straight into the override.
+    const overrides = buildOverridesFromSettings(
+      makeUiSettings([{ id: 'head-without-sort', enabled: true, severity: 'critical' as never }])
+    );
+    expect(overrides).toEqual({});
+  });
+
+  it('ignores an unknown severity on a floored rule without bypassing the floor', () => {
+    // Regression: an unknown severity makes SEV_RANK[...] undefined, so the floor
+    // comparison is false — without the membership check 'critical' would slip
+    // past the division-by-zero floor instead of being dropped.
+    const overrides = buildOverridesFromSettings(
+      makeUiSettings([{ id: 'division-by-zero', enabled: true, severity: 'critical' as never }])
+    );
+    expect(overrides).toEqual({});
+  });
+
   it('ignores unknown rule ids gracefully', () => {
     const overrides = buildOverridesFromSettings(
       makeUiSettings([{ id: 'nonexistent-rule', enabled: false, severity: 'error' }])

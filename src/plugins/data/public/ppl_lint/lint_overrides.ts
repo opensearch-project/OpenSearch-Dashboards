@@ -49,7 +49,10 @@ export function buildOverridesFromSettings(uiSettings: IUiSettingsClient): Bundl
       patch.enabled = rule.enabled;
     }
 
-    if (rule.severity) {
+    // Ignore severities that aren't real levels (reachable via the raw uiSettings
+    // API): an unknown value makes SEV_RANK[...] undefined, so the floor comparison
+    // is false and the junk value would slip past the MIN_SEVERITY clamp.
+    if (rule.severity && rule.severity in SEV_RANK) {
       const floor = MIN_SEVERITY[entry.id];
       const effective = floor && SEV_RANK[rule.severity] < SEV_RANK[floor] ? floor : rule.severity;
       if (effective !== entry.severity) {

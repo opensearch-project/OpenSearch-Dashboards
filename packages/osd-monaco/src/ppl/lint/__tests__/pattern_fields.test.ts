@@ -67,6 +67,17 @@ describe('extractCreatedFieldNames', () => {
         extractCreatedFieldNames('"(?<year>\\\\d{4})-(?<month>\\\\d{2})-(?<day>\\\\d{2})"')
       ).toEqual(['year', 'month', 'day']);
     });
+
+    it('extracts the named group even when a lookbehind precedes it', () => {
+      // A greedy `[^>]*` opener would consume across the `(?<=...)` lookbehind and
+      // never match the real group, dropping `username` and wrongly flagging the
+      // field it creates as unknown downstream.
+      expect(extractCreatedFieldNames('"(?<=user_)(?<username>\\\\w+)"')).toEqual(['username']);
+    });
+
+    it('ignores lookbehind and negative-lookbehind openers (not capture groups)', () => {
+      expect(extractCreatedFieldNames('"(?<=foo)(?<!bar)baz"')).toEqual([]);
+    });
   });
 
   describe('mixed grok + Java group in same string (should not happen in practice)', () => {
