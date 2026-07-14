@@ -700,21 +700,21 @@ export class ExplorePlugin implements Plugin<
       setExpressionLoader(plugins.expressions.ExpressionLoader);
     }
 
-    // Remove 'explore' from SQL supportedAppNames when SQL support is disabled
+    // Add 'explore' to SQL's supported apps only when SQL support is enabled. SQL is registered
+    // by query_enhancements (in setup) without 'explore'; explore opts in here (in start, after
+    // registration) when the flag is on.
     const sqlSupportEnabled =
       this.initializerContext.config.get<ConfigSchema>().sqlSupport?.enabled ?? false;
-    if (!sqlSupportEnabled) {
+    if (sqlSupportEnabled) {
       const languageService = plugins.data.query.queryString?.getLanguageService?.();
       const sqlConfig = languageService?.getLanguage('SQL');
       if (sqlConfig) {
+        const addExploreApp = (names: string[] = []) =>
+          names.includes('explore') ? names : [...names, 'explore'];
         const updated = {
           ...sqlConfig,
-          supportedAppNames: (sqlConfig.supportedAppNames ?? []).filter(
-            (name) => name !== 'explore'
-          ),
-          editorSupportedAppNames: (sqlConfig.editorSupportedAppNames ?? []).filter(
-            (name) => name !== 'explore'
-          ),
+          supportedAppNames: addExploreApp(sqlConfig.supportedAppNames),
+          editorSupportedAppNames: addExploreApp(sqlConfig.editorSupportedAppNames),
         };
         languageService?.registerLanguage?.(updated);
       }
