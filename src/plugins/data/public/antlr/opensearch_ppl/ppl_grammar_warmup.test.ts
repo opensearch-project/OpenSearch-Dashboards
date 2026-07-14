@@ -334,6 +334,31 @@ describe('ppl_grammar_warmup', () => {
 
       expect(settingsCache.warmUp).not.toHaveBeenCalled();
     });
+
+    it('warms settings even when the runtimePplGrammar uiSetting is disabled', () => {
+      // The compiled-surface `disabled-join-type` rule reads `allJoinTypesAllowed`
+      // to suppress warnings, so the settings cache must warm regardless of the
+      // runtime-grammar flag. The grammar cache itself self-gates on the flag.
+      const grammarCache = createCacheMock();
+      const settingsCache = createSettingsCacheMock();
+      const disabledUiSettings = {
+        get: jest.fn().mockReturnValue(false),
+      } as unknown as IUiSettingsClient;
+      const handler = createPplGrammarWarmupHandler(
+        http,
+        disabledUiSettings,
+        savedObjectsClient,
+        grammarCache,
+        settingsCache
+      );
+
+      handler({
+        language: 'PPL',
+        dataset: { dataSource: { id: 'ds-1', version: '3.8.0' } },
+      });
+
+      expect(settingsCache.warmUp).toHaveBeenCalledWith(http, 'ds-1');
+    });
   });
 
   it('should handle SNAPSHOT versions from dataset', () => {

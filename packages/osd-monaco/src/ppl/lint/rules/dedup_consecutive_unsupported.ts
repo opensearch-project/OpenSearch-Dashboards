@@ -45,8 +45,7 @@ export const dedupConsecutiveUnsupportedDetector: Detector = (
       diagnostics.push({
         ruleId: config.id,
         severity: config.severity,
-        message:
-          'dedup consecutive=true is not natively supported on Calcite; the query relies on engine fallback.',
+        message: config.message,
         range: rangeFromContext(command),
         docUrl: config.docUrl,
       });

@@ -21,6 +21,15 @@ describe('dedup-consecutive-unsupported (Calcite-gated warning)', () => {
     );
   });
 
+  it('reports the catalog message (not a hardcoded literal)', () => {
+    const diagnostic = analyzer
+      .lint('source=a | dedup 1 status consecutive=true', calcite)
+      .diagnostics.find((d) => d.ruleId === 'dedup-consecutive-unsupported');
+    expect(diagnostic?.message).toBe(
+      'dedup consecutive=true is not natively supported on Calcite and relies on engine fallback.'
+    );
+  });
+
   it('does not flag consecutive=false', () => {
     expect(ids('source=a | dedup 1 status consecutive=false', calcite)).not.toContain(
       'dedup-consecutive-unsupported'

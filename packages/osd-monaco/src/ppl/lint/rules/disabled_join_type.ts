@@ -7,6 +7,7 @@ import type { ParserRuleContext, TerminalNode } from 'antlr4ng';
 import { Diagnostic } from '../diagnostic';
 import { Detector } from '../types';
 import {
+  findAllChildrenByRule,
   findAllDescendantsByRule,
   findChildByRule,
   isTerminalNode,
@@ -46,8 +47,18 @@ function detectJoinTypeKeyword(
     }
   }
 
-  const joinTypeNodes = findAllDescendantsByRule(joinCommand, ruleNameToIndex, 'joinType');
-  for (const joinTypeNode of joinTypeNodes) {
+  // Read `joinType` only from this join's OWN direct `joinOption` children. A
+  // descendant search would also reach the `joinType` of a join nested inside a
+  // subsearch (`join type=inner b [ ... | join type=cross c ]`), reporting the
+  // nested keyword twice and masking the outer join's own type. Every legitimate
+  // `type=<kw>` is a direct `joinOption` of its own `joinCommand`, and nested
+  // joins are enumerated separately by the caller's `joinCommand` walk.
+  const joinOptions = findAllChildrenByRule(joinCommand, ruleNameToIndex, 'joinOption');
+  for (const joinOption of joinOptions) {
+    const joinTypeNode = findChildByRule(joinOption, ruleNameToIndex, 'joinType');
+    if (!joinTypeNode) {
+      continue;
+    }
     for (const tok of directTokenTexts(joinTypeNode)) {
       if (DISABLED_JOIN_KEYWORDS.has(tok)) {
         return { keyword: tok, node: joinTypeNode };
@@ -72,9 +83,10 @@ export const disabledJoinTypeDetector: Detector = (tree, config, context, ruleNa
       diagnostics.push({
         ruleId: config.id,
         severity: config.severity,
-        message: `Join type "${detected.keyword}" is disabled by default (set plugins.calcite.all_join_types.allowed to enable).`,
+        message: config.message,
         range: rangeFromContext(detected.node),
         docUrl: config.docUrl,
+        hoverFacts: { joinType: detected.keyword },
       });
     }
   }

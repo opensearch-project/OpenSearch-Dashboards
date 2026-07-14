@@ -15,6 +15,8 @@ import type { CatalogEntry, LintRunContext } from '../../types';
 // ruleIndex (number) against a ruleNameToIndex function.
 
 const RULE_INDICES: Record<string, number> = {
+  pplCommands: 1,
+  commands: 2,
   unionCommand: 100,
   unionDataset: 101,
   multisearchCommand: 200,
@@ -24,6 +26,7 @@ const RULE_INDICES: Record<string, number> = {
   joinCommand: 400,
   joinType: 401,
   sqlLikeJoinType: 402,
+  joinOption: 403,
 };
 
 const ruleNameToIndex = (name: string) => RULE_INDICES[name] ?? -1;
@@ -58,6 +61,14 @@ function makeRoot(children: ParserRuleContext[]): ParserRuleContext {
   } as unknown as ParserRuleContext;
 }
 
+/** Wire each child's `.parent` to `parent` so parent-rule discrimination works. */
+function setParent(parent: ParserRuleContext, ...children: ParserRuleContext[]): ParserRuleContext {
+  for (const child of children) {
+    (child as { parent?: ParserRuleContext }).parent = parent;
+  }
+  return parent;
+}
+
 const makeConfig = (id: string): CatalogEntry => ({
   id,
   detector: id,
@@ -73,21 +84,37 @@ describe('runtime-only rules: positive-path (detector fires on matching tree)', 
     const config = makeConfig('union-min-datasets');
     const context: LintRunContext = { isCalcite: true, grammarSurface: 'runtime-bundle' };
 
-    it('fires when union has fewer than 2 datasets', () => {
+    it('fires when a query-initial union has fewer than 2 datasets', () => {
       const unionCmd = makeRuleNode('unionCommand', [makeRuleNode('unionDataset')]);
-      const tree = makeRoot([unionCmd]);
+      const pplCommands = setParent(makeRuleNode('pplCommands', [unionCmd]), unionCmd);
+      const tree = makeRoot([pplCommands]);
 
       const diags = unionMinDatasetsDetector(tree, config, context, ruleNameToIndex);
       expect(diags).toHaveLength(1);
       expect(diags[0].ruleId).toBe('union-min-datasets');
+      // Reads config.message rather than a hardcoded literal.
+      expect(diags[0].message).toBe(config.message);
     });
 
-    it('does not fire when union has 2+ datasets', () => {
+    it('does not fire on a mid-pipeline union with a single explicit dataset', () => {
+      // `... | union [subsearch]` — the upstream pipeline is the implicit first
+      // dataset, so a lone explicit unionDataset is valid. The union node's parent
+      // is `commands`, not `pplCommands`.
+      const unionCmd = makeRuleNode('unionCommand', [makeRuleNode('unionDataset')]);
+      const commands = setParent(makeRuleNode('commands', [unionCmd]), unionCmd);
+      const tree = makeRoot([commands]);
+
+      const diags = unionMinDatasetsDetector(tree, config, context, ruleNameToIndex);
+      expect(diags).toHaveLength(0);
+    });
+
+    it('does not fire when a query-initial union has 2+ datasets', () => {
       const unionCmd = makeRuleNode('unionCommand', [
         makeRuleNode('unionDataset'),
         makeRuleNode('unionDataset'),
       ]);
-      const tree = makeRoot([unionCmd]);
+      const pplCommands = setParent(makeRuleNode('pplCommands', [unionCmd]), unionCmd);
+      const tree = makeRoot([pplCommands]);
 
       const diags = unionMinDatasetsDetector(tree, config, context, ruleNameToIndex);
       expect(diags).toHaveLength(0);
@@ -95,7 +122,8 @@ describe('runtime-only rules: positive-path (detector fires on matching tree)', 
 
     it('does not fire when isCalcite is false', () => {
       const unionCmd = makeRuleNode('unionCommand', [makeRuleNode('unionDataset')]);
-      const tree = makeRoot([unionCmd]);
+      const pplCommands = setParent(makeRuleNode('pplCommands', [unionCmd]), unionCmd);
+      const tree = makeRoot([pplCommands]);
 
       const diags = unionMinDatasetsDetector(
         tree,
@@ -118,6 +146,7 @@ describe('runtime-only rules: positive-path (detector fires on matching tree)', 
       const diags = multisearchMinSubsearchDetector(tree, config, context, ruleNameToIndex);
       expect(diags).toHaveLength(1);
       expect(diags[0].ruleId).toBe('multisearch-min-subsearch');
+      expect(diags[0].message).toBe(config.message);
     });
 
     it('does not fire when multisearch has 2+ subsearches', () => {
@@ -145,6 +174,8 @@ describe('runtime-only rules: positive-path (detector fires on matching tree)', 
       const diags = replaceWildcardAsymmetryDetector(tree, config, context, ruleNameToIndex);
       expect(diags).toHaveLength(1);
       expect(diags[0].ruleId).toBe('replace-wildcard-asymmetry');
+      expect(diags[0].message).toBe(config.message);
+      expect(diags[0].hoverFacts).toEqual({ patternWildcards: 2, replacementWildcards: 1 });
     });
 
     it('does not fire on symmetric wildcard counts', () => {
@@ -186,21 +217,27 @@ describe('runtime-only rules: positive-path (detector fires on matching tree)', 
   describe('disabled-join-type (positive suppression via settings)', () => {
     const config = makeConfig('disabled-join-type');
 
+    // `type=<kw>` lives under a `joinOption` child of the join, matching the
+    // real grammar (`joinCommand : JOIN (joinOption)* ...`, `joinOption : TYPE
+    // EQUAL joinType`).
+    const makeJoinWithType = (keyword: string): ParserRuleContext => {
+      const joinType = makeRuleNode('joinType', [makeTerminal(keyword)]);
+      const joinOption = makeRuleNode('joinOption', [makeTerminal('type'), joinType]);
+      return makeRuleNode('joinCommand', [joinOption]);
+    };
+
     it('fires for cross join type when allJoinTypesAllowed is false', () => {
-      const joinType = makeRuleNode('joinType', [makeTerminal('cross')]);
-      const joinCmd = makeRuleNode('joinCommand', [joinType]);
-      const tree = makeRoot([joinCmd]);
+      const tree = makeRoot([makeJoinWithType('cross')]);
       const context: LintRunContext = { settings: { allJoinTypesAllowed: false } };
 
       const diags = disabledJoinTypeDetector(tree, config, context, ruleNameToIndex);
       expect(diags).toHaveLength(1);
       expect(diags[0].ruleId).toBe('disabled-join-type');
+      expect(diags[0].hoverFacts).toEqual({ joinType: 'cross' });
     });
 
     it('suppresses when allJoinTypesAllowed is true (end-to-end settings wiring)', () => {
-      const joinType = makeRuleNode('joinType', [makeTerminal('cross')]);
-      const joinCmd = makeRuleNode('joinCommand', [joinType]);
-      const tree = makeRoot([joinCmd]);
+      const tree = makeRoot([makeJoinWithType('cross')]);
       const context: LintRunContext = { settings: { allJoinTypesAllowed: true } };
 
       const diags = disabledJoinTypeDetector(tree, config, context, ruleNameToIndex);
@@ -208,13 +245,29 @@ describe('runtime-only rules: positive-path (detector fires on matching tree)', 
     });
 
     it('does not flag inner join', () => {
-      const joinType = makeRuleNode('joinType', [makeTerminal('inner')]);
-      const joinCmd = makeRuleNode('joinCommand', [joinType]);
-      const tree = makeRoot([joinCmd]);
+      const tree = makeRoot([makeJoinWithType('inner')]);
       const context: LintRunContext = {};
 
       const diags = disabledJoinTypeDetector(tree, config, context, ruleNameToIndex);
       expect(diags).toHaveLength(0);
+    });
+
+    it('reports the nested join exactly once and does not mask the outer type', () => {
+      // Outer `join type=full b [ ... | join type=cross d ]`: the outer join's own
+      // `full` must be reported, and the nested `cross` must be reported exactly
+      // once (not duplicated, not masking the outer). Modeled as two separate
+      // joinCommand nodes, the inner nested under the outer via a subSearch.
+      const innerJoin = makeJoinWithType('cross');
+      const subSearch = makeRuleNode('subSearch', [innerJoin]);
+      const outerJoinType = makeRuleNode('joinType', [makeTerminal('full')]);
+      const outerJoinOption = makeRuleNode('joinOption', [makeTerminal('type'), outerJoinType]);
+      const outerJoin = makeRuleNode('joinCommand', [outerJoinOption, subSearch]);
+      const tree = makeRoot([outerJoin]);
+      const context: LintRunContext = {};
+
+      const diags = disabledJoinTypeDetector(tree, config, context, ruleNameToIndex);
+      const keywords = diags.map((d) => d.hoverFacts?.joinType).sort();
+      expect(keywords).toEqual(['cross', 'full']);
     });
   });
 });

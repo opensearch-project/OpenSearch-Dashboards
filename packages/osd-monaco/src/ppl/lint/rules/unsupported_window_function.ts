@@ -68,9 +68,10 @@ export const unsupportedWindowFunctionDetector: Detector = (
         diagnostics.push({
           ruleId: config.id,
           severity: config.severity,
-          message: `Window function "${fn.name}" is not supported in eventstats/streamstats. Only row_number is supported.`,
+          message: config.message,
           range: rangeFromContext(fn.node),
           docUrl: config.docUrl,
+          hoverFacts: { windowFunction: fn.name },
         });
       }
     }

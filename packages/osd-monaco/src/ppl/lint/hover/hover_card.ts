@@ -100,6 +100,18 @@ function renderFactsLine(facts: HoverFacts): string | undefined {
     return `Offending value: ${code(facts.literal)}.`;
   }
 
+  if (facts.joinType !== undefined) {
+    return `Join type ${code(facts.joinType)}.`;
+  }
+
+  if (facts.windowFunction !== undefined) {
+    return `Window function ${code(facts.windowFunction)}.`;
+  }
+
+  if (facts.patternWildcards !== undefined && facts.replacementWildcards !== undefined) {
+    return `Pattern has ${facts.patternWildcards} wildcard(s), replacement has ${facts.replacementWildcards}.`;
+  }
+
   return undefined;
 }
 

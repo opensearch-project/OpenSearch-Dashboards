@@ -23,7 +23,7 @@ export const multisearchMinSubsearchDetector: Detector = (
       diagnostics.push({
         ruleId: config.id,
         severity: config.severity,
-        message: 'multisearch requires at least two subsearches.',
+        message: config.message,
         range: rangeFromContext(command),
         docUrl: config.docUrl,
       });

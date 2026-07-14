@@ -67,9 +67,10 @@ export const replaceWildcardAsymmetryDetector: Detector = (
       diagnostics.push({
         ruleId: config.id,
         severity: config.severity,
-        message: `replace wildcard counts are asymmetric: pattern has ${patternCount}, replacement has ${replacementCount}.`,
+        message: config.message,
         range: rangeFromContext(pair),
         docUrl: config.docUrl,
+        hoverFacts: { patternWildcards: patternCount, replacementWildcards: replacementCount },
       });
     }
   }
