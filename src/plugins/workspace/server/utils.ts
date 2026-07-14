@@ -40,12 +40,18 @@ export const updateDashboardAdminStateForRequest = (
   const normalizedConfigUsers = Array.isArray(configUsers)
     ? configUsers
     : configUsers
-      ? [configUsers]
+      ? configUsers
+          .trim()
+          .split(/[\s,]+/)
+          .filter(Boolean)
       : [];
   const normalizedConfigGroups = Array.isArray(configGroups)
     ? configGroups
     : configGroups
-      ? [configGroups]
+      ? configGroups
+          .trim()
+          .split(/[\s,]+/)
+          .filter(Boolean)
       : [];
   // If the security plugin is not installed, login defaults to OSD Admin
   if (!groups.length && !users.length) {
