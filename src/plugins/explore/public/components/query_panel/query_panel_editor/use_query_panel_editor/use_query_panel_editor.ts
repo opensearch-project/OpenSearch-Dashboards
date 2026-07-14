@@ -125,6 +125,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
     grammarRefresh: { current: undefined },
     lintContext: { current: undefined },
     lintGrammarRefresh: { current: undefined },
+    lintContextRefresh: { current: undefined },
   });
 
   const getValidationContext = useCallback((): PPLValidationContext => {
@@ -387,7 +388,8 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
         getValidationContext,
         getLintContext,
         (listener) => pplGrammarCache.subscribeToGrammarUpdates(listener),
-        revalidatePPLModel
+        revalidatePPLModel,
+        (listener) => pplGrammarCache.subscribeToVersionResolved(listener)
       );
 
       // Revalidate immediately so any initial content that was validated before

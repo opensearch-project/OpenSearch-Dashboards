@@ -150,6 +150,10 @@ class PPLGrammarCache {
     (event: { dataSourceId?: string; grammarHash: string }) => void
   > = new Set();
 
+  private versionResolvedListeners: Set<
+    (event: { dataSourceId?: string; version: string }) => void
+  > = new Set();
+
   private cachedDatasourceId: string | undefined;
   private cachedVersion: string | undefined;
   private cachedGrammar: CachedGrammar | null = null;
@@ -174,6 +178,16 @@ class PPLGrammarCache {
   getCachedGrammar(datasourceId?: string): CachedGrammar | null {
     if (datasourceId !== this.cachedDatasourceId) return null;
     return this.cachedGrammar;
+  }
+
+  /**
+   * Returns the resolved version string for the given datasource, or undefined
+   * if the version has not been resolved yet. This provides a synchronous fallback
+   * for contexts where `dataset.dataSource.version` is unavailable (e.g. local cluster).
+   */
+  getResolvedVersion(datasourceId?: string): string | undefined {
+    if (datasourceId !== this.cachedDatasourceId) return undefined;
+    return this.cachedVersion;
   }
 
   /**
@@ -246,10 +260,11 @@ class PPLGrammarCache {
     this.fetchFailedAt = 0;
   }
 
-  /** Reset all cache state AND unregister all grammar-update listeners. */
+  /** Reset all cache state AND unregister all listeners. */
   dispose(): void {
     this.reset();
     this.grammarUpdateListeners.clear();
+    this.versionResolvedListeners.clear();
   }
 
   subscribeToGrammarUpdates(
@@ -258,6 +273,15 @@ class PPLGrammarCache {
     this.grammarUpdateListeners.add(listener);
     return () => {
       this.grammarUpdateListeners.delete(listener);
+    };
+  }
+
+  subscribeToVersionResolved(
+    listener: (event: { dataSourceId?: string; version: string }) => void
+  ): () => void {
+    this.versionResolvedListeners.add(listener);
+    return () => {
+      this.versionResolvedListeners.delete(listener);
     };
   }
 
@@ -314,6 +338,7 @@ class PPLGrammarCache {
       }
       if (version) {
         this.cachedVersion = version;
+        this.notifyVersionResolved(datasourceId, version);
       }
       return version;
     } catch {
@@ -400,6 +425,16 @@ class PPLGrammarCache {
       } catch {
         // A failing listener must not prevent other listeners from being notified
         // or poison the grammar fetch promise chain.
+      }
+    }
+  }
+
+  private notifyVersionResolved(datasourceId: string | undefined, version: string): void {
+    for (const listener of this.versionResolvedListeners) {
+      try {
+        listener({ dataSourceId: datasourceId, version });
+      } catch {
+        // A failing listener must not prevent other listeners from being notified.
       }
     }
   }

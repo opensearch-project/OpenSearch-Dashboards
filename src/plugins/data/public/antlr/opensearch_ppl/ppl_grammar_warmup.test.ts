@@ -262,6 +262,105 @@ describe('ppl_grammar_warmup', () => {
     expect(cache.warmUp).not.toHaveBeenCalled();
   });
 
+  describe('calcite settings warmup', () => {
+    const createSettingsCacheMock = () => ({ warmUp: jest.fn() });
+
+    it('should warm calcite settings alongside grammar cache', () => {
+      const grammarCache = createCacheMock();
+      const settingsCache = createSettingsCacheMock();
+      const handler = createPplGrammarWarmupHandler(
+        http,
+        uiSettings,
+        savedObjectsClient,
+        grammarCache,
+        settingsCache
+      );
+
+      handler({
+        language: 'PPL',
+        dataset: { dataSource: { id: 'ds-1', version: '3.8.0' } },
+      });
+
+      expect(settingsCache.warmUp).toHaveBeenCalledWith(http, 'ds-1');
+    });
+
+    it('should warm calcite settings for local cluster', () => {
+      const grammarCache = createCacheMock();
+      const settingsCache = createSettingsCacheMock();
+      const handler = createPplGrammarWarmupHandler(
+        http,
+        uiSettings,
+        savedObjectsClient,
+        grammarCache,
+        settingsCache
+      );
+
+      handler({ language: 'PPL', dataset: {} });
+
+      expect(settingsCache.warmUp).toHaveBeenCalledWith(http, undefined);
+    });
+
+    it('should not warm settings when language is not PPL', () => {
+      const grammarCache = createCacheMock();
+      const settingsCache = createSettingsCacheMock();
+      const handler = createPplGrammarWarmupHandler(
+        http,
+        uiSettings,
+        savedObjectsClient,
+        grammarCache,
+        settingsCache
+      );
+
+      handler({
+        language: 'SQL',
+        dataset: { dataSource: { id: 'ds-1', version: '3.8.0' } },
+      });
+
+      expect(settingsCache.warmUp).not.toHaveBeenCalled();
+    });
+
+    it('should not warm settings when no dataset is selected', () => {
+      const grammarCache = createCacheMock();
+      const settingsCache = createSettingsCacheMock();
+      const handler = createPplGrammarWarmupHandler(
+        http,
+        uiSettings,
+        savedObjectsClient,
+        grammarCache,
+        settingsCache
+      );
+
+      handler({ language: 'PPL' });
+
+      expect(settingsCache.warmUp).not.toHaveBeenCalled();
+    });
+
+    it('warms settings even when the runtimePplGrammar uiSetting is disabled', () => {
+      // The compiled-surface `disabled-join-type` rule reads `allJoinTypesAllowed`
+      // to suppress warnings, so the settings cache must warm regardless of the
+      // runtime-grammar flag. The grammar cache itself self-gates on the flag.
+      const grammarCache = createCacheMock();
+      const settingsCache = createSettingsCacheMock();
+      const disabledUiSettings = {
+        get: jest.fn().mockReturnValue(false),
+      } as unknown as IUiSettingsClient;
+      const handler = createPplGrammarWarmupHandler(
+        http,
+        disabledUiSettings,
+        savedObjectsClient,
+        grammarCache,
+        settingsCache
+      );
+
+      handler({
+        language: 'PPL',
+        dataset: { dataSource: { id: 'ds-1', version: '3.8.0' } },
+      });
+
+      expect(settingsCache.warmUp).toHaveBeenCalledWith(http, 'ds-1');
+    });
+  });
+
   it('should handle SNAPSHOT versions from dataset', () => {
     const cache = createCacheMock();
     const handler = createPplGrammarWarmupHandler(http, uiSettings, savedObjectsClient, cache);
