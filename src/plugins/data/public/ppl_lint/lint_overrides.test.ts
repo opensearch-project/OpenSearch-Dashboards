@@ -10,7 +10,7 @@ jest.mock('@osd/monaco', () => ({
   getBundledCatalog: () => [
     { id: 'head-without-sort', enabled: true, severity: 'info' },
     { id: 'division-by-zero', enabled: true, severity: 'warning' },
-    { id: 'field-validation', enabled: true, severity: 'warning' },
+    { id: 'field-validation', enabled: true, severity: 'error' },
   ],
 }));
 
@@ -70,11 +70,13 @@ describe('buildOverridesFromSettings', () => {
   });
 
   it('combines enabled + severity changes for a non-floored rule', () => {
+    // field-validation's catalog default is `error`, so a downgrade to `warning`
+    // is the severity change here (there is no MIN_SEVERITY floor on this rule).
     const overrides = buildOverridesFromSettings(
-      makeUiSettings([{ id: 'field-validation', enabled: false, severity: 'error' }])
+      makeUiSettings([{ id: 'field-validation', enabled: false, severity: 'warning' }])
     );
     expect(overrides).toEqual({
-      'field-validation': { enabled: false, severity: 'error' },
+      'field-validation': { enabled: false, severity: 'warning' },
     });
   });
 

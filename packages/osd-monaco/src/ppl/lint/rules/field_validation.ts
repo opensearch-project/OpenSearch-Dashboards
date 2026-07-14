@@ -8,7 +8,11 @@ import { isRuleNode } from '../rule_index';
 import { Diagnostic, DiagnosticRange } from '../diagnostic';
 import { findCompiledFieldSlotShapeMatches } from '../field_slot_shape_text';
 import { CatalogEntry, Detector, LintRunContext } from '../types';
-import { buildPipelineShape, collectAlternateSourceSubtrees } from '../pipeline_shape';
+import {
+  buildPipelineShape,
+  collectAlternateSourceSubtrees,
+  normalizeFieldName,
+} from '../pipeline_shape';
 import {
   findAllDescendantsByRule,
   findChildByRule,
@@ -93,24 +97,15 @@ function collectJoinAliases(
     // alias set and false-flag every join-alias ref. `sideAlias` holds a single
     // alias, so descending can't over-collect.
     for (const qn of findAllDescendantsByRule(sideAlias, ruleNameToIndex, 'qualifiedName')) {
-      const text = qn.getText();
+      // Normalize so a backtick-quoted alias declaration (`` left=`l` ``) matches
+      // a bare `l.response` reference downstream, mirroring the reference side.
+      const text = normalizeFieldName(qn.getText());
       if (text) {
         aliases.add(text);
       }
     }
   }
   return aliases;
-}
-
-/**
- * Strip a single pair of enclosing backticks from one dotted segment so a
- * backtick-quoted identifier (`` `age` ``) matches the unquoted name in the
- * field set. Applied per segment, so `` a.`b` `` normalizes to `a.b`.
- */
-function unquoteIdent(segment: string): string {
-  return segment.startsWith('`') && segment.endsWith('`') && segment.length >= 2
-    ? segment.slice(1, -1)
-    : segment;
 }
 
 function hasExcludedAncestor(node: ParserRuleContext, excludedIndices: Set<number>): boolean {
@@ -183,8 +178,9 @@ function detectUnknownFields(
     if (node.ruleIndex === fieldExprIdx) {
       const raw = node.getText();
       // Normalize backtick-quoted segments per dotted part so `` `age` ``
-      // matches the unquoted `age` in the field set.
-      const name = raw.split('.').map(unquoteIdent).join('.');
+      // matches the unquoted `age` in the field set. Shares the exact helper the
+      // created-field registration uses, so the two sides can never drift.
+      const name = normalizeFieldName(raw);
       // On the compiled-simplified surface, `source=idx` / `index=idx` parses the
       // leading `source`/`index` keyword into a fieldExpression (the runtime
       // grammar instead parses it as an excluded fromClause). Skip that keyword
@@ -439,10 +435,10 @@ function rangeContains(outer: DiagnosticRange, inner: DiagnosticRange): boolean 
 }
 
 /**
- * PASS 3 — internal overlap suppression. Drop any existence (warning) finding
- * whose range is contained within a shape (error) finding's range, so a single
- * `grok field=body` surfaces one actionable error rather than a confusing
- * error + "Unknown field 'field'" pair. Shape findings are always kept.
+ * PASS 3 — internal overlap suppression. Drop any existence finding whose range
+ * is contained within a shape finding's range, so a single `grok field=body`
+ * surfaces one actionable diagnostic rather than a confusing shape finding +
+ * "Unknown field 'field'" pair. Shape findings are always kept.
  */
 function suppressContained(
   shapeDiagnostics: Diagnostic[],
@@ -458,12 +454,15 @@ function suppressContained(
 }
 
 /**
- * field-validation is a merged detector with two independent passes:
+ * field-validation is a merged detector with two independent passes. Both emit
+ * at the rule's single configured severity (catalog default `error`, honored via
+ * `config.severity` at every emit site and user-overridable through the per-rule
+ * uiSetting):
  *  - PASS 1 (shape): grok/parse/patterns field-slot must be a bare field, not a
- *    Splunk-style `field=` expression. Emits `error`. Deferred on the simplified
- *    grammar surface, where the same input is already a syntax error.
- *  - PASS 2 (existence): a referenced field must exist on the source. Emits
- *    `warning` (the catalog nominal). Self-gates on an empty field list.
+ *    Splunk-style `field=` expression. Deferred on the simplified grammar
+ *    surface, where the same input is already a syntax error.
+ *  - PASS 2 (existence): a referenced field must exist on the source. Self-gates
+ *    on an empty field list.
  * PASS 3 suppresses an existence finding the shape pass already covers.
  */
 export const fieldValidationDetector: Detector = (tree, config, context, ruleNameToIndex) => {

@@ -88,6 +88,38 @@ function unquote(raw: string): string {
 }
 
 /**
+ * Normalize a created/derived field name so it matches how references are
+ * written. Strips one enclosing quote pair per dotted segment, where a "quote"
+ * is a backtick, single, or double quote (`` `total` `` → `total`,
+ * `` a.`b` `` → `a.b`, `'years'` → `years`).
+ *
+ * This MUST stay identical to the reference-side normalization in
+ * field_validation, which routes `fieldExpression` text through this same
+ * helper — otherwise a created `` `total` `` registered here would never match a
+ * bare `total` reference and field-validation would false-flag valid queries.
+ * References can only be backtick-quoted, so the single/double-quote stripping
+ * is one-directional: it rescues created names written as `` as 'years' ``
+ * without changing how any reference is interpreted.
+ *
+ * Known limitation (symmetric on both sides, pre-existing): a quoted segment
+ * containing a literal dot (`` `a.b` ``) is mis-split before the strip, so it is
+ * normalized as two segments. A complete fix would unquote a fully-enclosed
+ * token before splitting.
+ */
+export function normalizeFieldName(raw: string): string {
+  return raw
+    .split('.')
+    .map((seg) =>
+      seg.length >= 2 &&
+      (seg[0] === '`' || seg[0] === "'" || seg[0] === '"') &&
+      seg[0] === seg[seg.length - 1]
+        ? seg.slice(1, -1)
+        : seg
+    )
+    .join('.');
+}
+
+/**
  * Value of a named-slot parameter: find the terminal matching `keyword`, then
  * return the text of the first rule-node sibling after it. Used to read
  * `NEW_FIELD = <literal>` (patterns) and `OUTPUT = <expr>` (spath).
@@ -150,7 +182,7 @@ function collectCreatedFields(
       if (isTerminalNode(child) && child.getText().toLowerCase() === 'as') {
         const next = children[i + 1];
         if (isRuleNode(next) && next.ruleIndex !== convertedTypeIdx && !isAliasContext) {
-          const name = next.getText();
+          const name = normalizeFieldName(next.getText());
           if (name) {
             out.add(name);
           }
@@ -176,7 +208,7 @@ function collectCreatedFields(
           (c) => isRuleNode(c) && c.ruleIndex === fieldExprIdx
         ) as ParserRuleContext | undefined;
         if (first) {
-          const name = first.getText();
+          const name = normalizeFieldName(first.getText());
           if (name) {
             out.add(name);
           }
@@ -235,12 +267,17 @@ function collectCreatedFields(
     for (const param of findAllDescendantsByRule(stage.node, ruleNameToIndex, 'spathParameter')) {
       const output = findSlotValueAfterKeyword(param, 'OUTPUT');
       if (output) {
-        out.add(unquote(output));
+        // OUTPUT is either a `'`/`"`-wrapped string literal or a bare/backtick
+        // ident. Strip exactly one enclosing pair per form so it matches a bare
+        // downstream reference — never both, or a name with embedded quotes
+        // (`output="'x'"`) would over-strip and no longer match `` `'x'` ``.
+        const first = output[0];
+        out.add(first === "'" || first === '"' ? unquote(output) : normalizeFieldName(output));
         continue;
       }
       const path = findChildByRule(param, ruleNameToIndex, 'indexablePath');
       if (path) {
-        out.add(path.getText());
+        out.add(normalizeFieldName(path.getText()));
       }
     }
   }

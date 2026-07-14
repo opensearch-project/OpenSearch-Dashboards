@@ -137,6 +137,59 @@ describe('field-validation alternate-source suppression (compiled surface)', () 
     });
   });
 
+  // Created/derived field NAME slots (eval LHS, stats/rename AS aliases, spath
+  // OUTPUT, join side aliases) previously stored the raw `getText()` — backticks
+  // included — while references normalized them away, so a valid query that both
+  // creates and references a backtick-quoted field was false-flagged. Both sides
+  // now route through the shared `normalizeFieldName` helper.
+  describe('backtick-quoted created-field names (Joshua #1)', () => {
+    it('does NOT flag a backtick-quoted eval target referenced downstream', () => {
+      expect(fieldDiags('source=t | eval `total` = age * 2 | where `total` > 100')).toEqual([]);
+    });
+
+    it('does NOT flag a backtick-quoted stats alias referenced downstream', () => {
+      expect(fieldDiags('search accounts | stats count() as `cnt` | where `cnt` > 0')).toEqual([]);
+    });
+
+    it('does NOT flag a backtick-created field referenced without backticks', () => {
+      expect(fieldDiags('source=t | eval `total` = age * 2 | where total > 100')).toEqual([]);
+    });
+
+    it('does NOT flag a bare-created field referenced with backticks', () => {
+      expect(fieldDiags('source=t | eval total = age * 2 | where `total` > 100')).toEqual([]);
+    });
+
+    it('does NOT flag a backtick-quoted rename target referenced downstream', () => {
+      expect(fieldDiags('search accounts | rename age as `years` | where years > 1')).toEqual([]);
+    });
+
+    it('does NOT flag a backtick-quoted join side alias referenced downstream', () => {
+      expect(
+        fieldDiags(
+          'search accounts | join left=`l` right=r on l.id = r.id departments | where l.response = 200'
+        )
+      ).toEqual([]);
+    });
+
+    it('does NOT flag a backtick-quoted spath OUTPUT referenced downstream', () => {
+      expect(
+        fieldDiags('search accounts | spath input=name output=`parsed` | where parsed = "x"')
+      ).toEqual([]);
+    });
+
+    it('STILL flags a genuine typo alongside a backtick-created field', () => {
+      expect(fieldDiags('source=t | eval `total` = age * 2 | where totalz > 0')).toEqual([
+        expect.stringContaining('Unknown field "totalz"'),
+      ]);
+    });
+
+    it('suggests the normalized created name, not the backtick-quoted form', () => {
+      expect(fieldDiags('search accounts | stats count() as `cnt` | where cntx > 0')).toEqual([
+        'Unknown field "cntx". Did you mean "cnt"?',
+      ]);
+    });
+  });
+
   // The compiled-simplified grammar mis-parses `source=idx` / `index=idx` into a
   // fieldExpression for the leading `source`/`index` keyword (the runtime grammar
   // parses it as an excluded fromClause). Without a guard this fires a spurious
