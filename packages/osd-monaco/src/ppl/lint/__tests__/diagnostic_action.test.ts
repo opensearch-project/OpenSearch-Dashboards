@@ -11,7 +11,12 @@ import {
 } from '../diagnostic_action';
 
 const ctx: DiagnosticActionContext = {
-  marker: { startLineNumber: 1, startColumn: 1, endLineNumber: 1, endColumn: 5 } as monaco.editor.IMarker,
+  marker: {
+    startLineNumber: 1,
+    startColumn: 1,
+    endLineNumber: 1,
+    endColumn: 5,
+  } as monaco.editor.IMarker,
   model: {} as monaco.editor.ITextModel,
   ruleId: 'agg-on-text',
   aiFixable: true,
@@ -48,7 +53,9 @@ describe('PPL diagnostic-action contributor registry', () => {
     const d1 = registerPPLDiagnosticActionContributor(() => [{ title: 'a', commandId: 'c1' }]);
     const d2 = registerPPLDiagnosticActionContributor(() => [{ title: 'b', commandId: 'c2' }]);
 
-    const titles = collectPPLDiagnosticActions(ctx).map((a) => a.title).sort();
+    const titles = collectPPLDiagnosticActions(ctx)
+      .map((a) => a.title)
+      .sort();
     expect(titles).toEqual(['a', 'b']);
 
     d1();

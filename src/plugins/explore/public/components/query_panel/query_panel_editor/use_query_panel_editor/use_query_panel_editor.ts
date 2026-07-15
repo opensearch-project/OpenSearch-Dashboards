@@ -270,7 +270,15 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
     return () => {
       cancelled = true;
     };
-  }, [dataset?.id, dataset?.dataSource?.id, dataset?.type, dataViews, editorRef, getLintContext]);
+  }, [
+    dataset?.id,
+    dataset?.dataSource?.id,
+    dataset?.type,
+    dataset?.title,
+    dataViews,
+    editorRef,
+    getLintContext,
+  ]);
 
   // Cleanup validation + lint context on unmount
   useEffect(() => () => cleanupPPLContexts(detachRefs.current), []);

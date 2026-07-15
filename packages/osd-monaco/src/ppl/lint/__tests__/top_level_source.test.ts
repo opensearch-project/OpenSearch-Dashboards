@@ -35,7 +35,11 @@ describe('isPipeFirstQuery', () => {
 
 describe('classifyTopLevelSource', () => {
   it('classifies a single concrete source', () => {
-    const result = classifyTopLevelSource(parse('source=logs | head 5'), ruleNameToIndex, 'source=logs | head 5');
+    const result = classifyTopLevelSource(
+      parse('source=logs | head 5'),
+      ruleNameToIndex,
+      'source=logs | head 5'
+    );
     expect(result.kind).toBe('single-table');
     if (result.kind === 'single-table') {
       expect(result.value).toBe('logs');

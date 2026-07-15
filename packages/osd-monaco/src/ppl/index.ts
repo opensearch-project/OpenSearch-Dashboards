@@ -44,16 +44,8 @@ export { getBundledCatalog } from './lint/catalog';
 export { createRuntimeRuleNameToIndex } from './lint/rule_index';
 
 // Neutral lint extension points (inert until a feature registers into them).
-export {
-  registerPPLLintEventSink,
-  emitPPLLintEvent,
-} from './lint/events';
-export type {
-  PPLLintEvent,
-  PPLLintEventSink,
-  PPLLintEventType,
-  PPLLintLayer,
-} from './lint/events';
+export { registerPPLLintEventSink, emitPPLLintEvent } from './lint/events';
+export type { PPLLintEvent, PPLLintEventSink, PPLLintEventType, PPLLintLayer } from './lint/events';
 export {
   registerPPLDiagnosticActionContributor,
   collectPPLDiagnosticActions,

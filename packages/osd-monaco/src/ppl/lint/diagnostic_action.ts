@@ -88,9 +88,7 @@ export function registerPPLDiagnosticActionContributor(
  * a contributor that throws is skipped so one bad contributor cannot break the
  * lightbulb for the others. Returns an empty array when nothing is contributed.
  */
-export function collectPPLDiagnosticActions(
-  context: DiagnosticActionContext
-): DiagnosticAction[] {
+export function collectPPLDiagnosticActions(context: DiagnosticActionContext): DiagnosticAction[] {
   const { contributors } = getContributorState();
   if (contributors.size === 0) {
     return [];

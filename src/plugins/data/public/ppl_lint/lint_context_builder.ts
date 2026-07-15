@@ -65,9 +65,10 @@ export function extractFieldNames(indexPattern: IndexPatternLike): Set<string> {
  * types is omitted from the map (but still present in `fields`), so a type-aware
  * rule self-suppresses on it rather than acting on an arbitrary type.
  */
-export function extractFieldMetadata(
-  indexPattern: IndexPatternLike
-): { fields: Set<string>; typeMap: Map<string, string> } {
+export function extractFieldMetadata(indexPattern: IndexPatternLike): {
+  fields: Set<string>;
+  typeMap: Map<string, string>;
+} {
   const fields = new Set<string>();
   // Track the distinct types seen per name; collapse to one only if unambiguous.
   const seenTypes = new Map<string, Set<string>>();
@@ -124,7 +125,9 @@ export function buildPPLLintContext(
   // backend reported; fall back to the version heuristic only when settings are
   // not cached yet. `deriveIsCalcite` alone cannot see an administratively
   // disabled Calcite on a >= 3.3 cluster, so the cached value wins when present.
-  const isCalcite = cachedSettings ? cachedSettings.calciteEnabled : deriveIsCalcite(effectiveVersion);
+  const isCalcite = cachedSettings
+    ? cachedSettings.calciteEnabled
+    : deriveIsCalcite(effectiveVersion);
 
   return {
     useRuntimeGrammar: shouldUseRuntimeGrammar(dsId, effectiveVersion, engineType),

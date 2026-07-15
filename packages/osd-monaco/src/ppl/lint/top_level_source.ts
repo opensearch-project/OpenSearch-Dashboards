@@ -71,7 +71,11 @@ function collectTopLevelSources(
 
   // Runtime surface: fromClause → tableSource.
   for (const fromClause of findAllDescendantsByRule(tree, ruleNameToIndex, 'fromClause')) {
-    for (const tableSource of findAllDescendantsByRule(fromClause, ruleNameToIndex, 'tableSource')) {
+    for (const tableSource of findAllDescendantsByRule(
+      fromClause,
+      ruleNameToIndex,
+      'tableSource'
+    )) {
       const value = normalizeSource(tableSource.getText());
       if (value) {
         sources.push({ value, node: tableSource });

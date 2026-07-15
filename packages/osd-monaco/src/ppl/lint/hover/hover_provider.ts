@@ -17,9 +17,7 @@ import { getCatalogEntryById } from '../catalog';
  * untrusted: only these fully-controlled links (fixed titles, JSON-encoded args)
  * live in the trusted block. Returns undefined when nothing is contributed.
  */
-function renderContributedActions(
-  actions: DiagnosticAction[]
-): monaco.IMarkdownString | undefined {
+function renderContributedActions(actions: DiagnosticAction[]): monaco.IMarkdownString | undefined {
   if (actions.length === 0) {
     return undefined;
   }
