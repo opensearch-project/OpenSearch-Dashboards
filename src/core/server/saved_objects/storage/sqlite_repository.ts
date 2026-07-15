@@ -65,7 +65,7 @@ interface BetterSqlite3Statement {
 let Database: any;
 try {
   Database = require('better-sqlite3');
-} catch (e) {
+} catch {
   // optional dependency
 }
 

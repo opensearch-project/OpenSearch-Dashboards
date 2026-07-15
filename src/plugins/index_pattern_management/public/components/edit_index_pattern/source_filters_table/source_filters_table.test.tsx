@@ -62,7 +62,7 @@ const getIndexPatternMock = (mockedFields: any = {}) =>
   ({
     sourceFilters: [{ value: 'time*' }, { value: 'nam*' }, { value: 'age*' }],
     ...mockedFields,
-  } as IndexPattern);
+  }) as IndexPattern;
 
 describe('SourceFiltersTable', () => {
   test('should render normally', () => {

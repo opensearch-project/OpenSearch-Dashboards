@@ -28,8 +28,6 @@
  * under the License.
  */
 
-/* eslint-env jest */
-
 /**
  * READ THIS BEFORE ADDING NEW MOCKS TO THIS FILE!
  *

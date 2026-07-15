@@ -5,7 +5,6 @@
 
 import { schema } from '@osd/config-schema';
 import { UiSettingsParams } from 'opensearch-dashboards/server';
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { UiSettingScope } from '../../../core/server/ui_settings/types';
 import { UI_SETTINGS } from '../../data/common';
 
@@ -16,6 +15,12 @@ const PPL_LINT_RULE_DEFAULTS: ReadonlyArray<{
 }> = [
   { id: 'head-without-sort', enabled: true, severity: 'info' },
   { id: 'division-by-zero', enabled: true, severity: 'warning' },
+  { id: 'unsupported-window-function-in-eventstats', enabled: true, severity: 'error' },
+  { id: 'multisearch-min-subsearch', enabled: true, severity: 'error' },
+  { id: 'disabled-join-type', enabled: true, severity: 'warning' },
+  { id: 'dedup-consecutive-unsupported', enabled: true, severity: 'warning' },
+  { id: 'union-min-datasets', enabled: true, severity: 'error' },
+  { id: 'replace-wildcard-asymmetry', enabled: true, severity: 'error' },
 ];
 
 /** Build PPL lint rule uiSettings. Adds WORKSPACE scope when the workspace feature is on. */

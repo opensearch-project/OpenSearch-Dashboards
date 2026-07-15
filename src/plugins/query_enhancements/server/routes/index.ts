@@ -129,7 +129,7 @@ export function defineSearchStrategyRouteProvider(logger: Logger, router: IRoute
           let error;
           try {
             error = JSON.parse(err.message);
-          } catch (e) {
+          } catch {
             error = err;
           }
           return res.custom({

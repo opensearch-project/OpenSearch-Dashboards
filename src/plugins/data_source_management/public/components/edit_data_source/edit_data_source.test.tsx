@@ -41,7 +41,7 @@ describe('Datasource Management: Edit Datasource Wizard', () => {
   mockedContext.authenticationMethodRegistry.registerAuthenticationMethod(sigV4AuthMethod);
 
   let component: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
-  const history = (scopedHistoryMock.create() as unknown) as ScopedHistory;
+  const history = scopedHistoryMock.create() as unknown as ScopedHistory;
 
   describe('should fail to load resources', () => {
     beforeEach(async () => {
@@ -52,7 +52,7 @@ describe('Datasource Management: Edit Datasource Wizard', () => {
           wrapWithIntl(
             <EditDataSource
               history={history}
-              location={({} as unknown) as RouteComponentProps['location']}
+              location={{} as unknown as RouteComponentProps['location']}
               match={{ params: { id: 'test1' }, isExact: true, path: '', url: '' }}
             />
           ),
@@ -87,7 +87,7 @@ describe('Datasource Management: Edit Datasource Wizard', () => {
           wrapWithIntl(
             <EditDataSource
               history={history}
-              location={({} as unknown) as RouteComponentProps['location']}
+              location={{} as unknown as RouteComponentProps['location']}
               match={{ params: { id: 'test1' }, isExact: true, path: '', url: '' }}
             />
           ),

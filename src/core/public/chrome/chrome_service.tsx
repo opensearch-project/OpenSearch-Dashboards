@@ -210,8 +210,7 @@ export class ChromeService {
           map(
             (applications) =>
               (appId && applications.has(appId) && applications.get(appId)!.headerVariant) as
-                | HeaderVariant
-                | undefined
+                HeaderVariant | undefined
           )
         )
       )

@@ -204,9 +204,7 @@ export interface DataStructureCustomMeta {
  * Union type for DataStructureMeta
  */
 export type DataStructureMeta =
-  | DataStructureFeatureMeta
-  | DataStructureDataTypeMeta
-  | DataStructureCustomMeta;
+  DataStructureFeatureMeta | DataStructureDataTypeMeta | DataStructureCustomMeta;
 
 /**
  * Represents a cached version of DataStructure with string references instead of object references.

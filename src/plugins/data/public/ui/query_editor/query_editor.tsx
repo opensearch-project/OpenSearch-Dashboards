@@ -92,6 +92,7 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
     grammarRefresh: { current: undefined },
     lintContext: { current: undefined },
     lintGrammarRefresh: { current: undefined },
+    lintContextRefresh: { current: undefined },
   });
   const headerRef = useRef<HTMLDivElement>(null);
   const bannerRef = useRef<HTMLDivElement>(null);
@@ -206,17 +207,15 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
   }, [services.uiSettings]);
 
   const renderQueryEditorExtensions = () => {
-    if (
-      !(
-        headerRef.current &&
-        bannerRef.current &&
-        queryControlsContainer.current &&
-        bottomPanelRef.current &&
-        query.language &&
-        extensionMap &&
-        Object.keys(extensionMap).length > 0
-      )
-    ) {
+    if (!(
+      headerRef.current &&
+      bannerRef.current &&
+      queryControlsContainer.current &&
+      bottomPanelRef.current &&
+      query.language &&
+      extensionMap &&
+      Object.keys(extensionMap).length > 0
+    )) {
       return null;
     }
     return (
@@ -422,7 +421,8 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
         getValidationContext,
         getLintContext,
         (listener) => pplGrammarCache.subscribeToGrammarUpdates(listener),
-        revalidatePPLModel
+        revalidatePPLModel,
+        (listener) => pplGrammarCache.subscribeToVersionResolved(listener)
       );
       const editorModel = editor.getModel();
       if (editorModel) {
@@ -496,7 +496,8 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
         getValidationContext,
         getLintContext,
         (listener) => pplGrammarCache.subscribeToGrammarUpdates(listener),
-        revalidatePPLModel
+        revalidatePPLModel,
+        (listener) => pplGrammarCache.subscribeToVersionResolved(listener)
       );
       const singleLineModel = editor.getModel();
       if (singleLineModel) {

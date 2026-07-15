@@ -51,7 +51,7 @@ export const parseTimestampMs = (ts: unknown): number => {
 
     const ms = date.getTime();
     return isNaN(ms) ? 0 : ms;
-  } catch (error) {
+  } catch {
     return 0;
   }
 };

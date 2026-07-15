@@ -33,7 +33,7 @@ import { findTestSubject } from 'test_utils/helpers';
 import { DocViewTable } from './table';
 import { indexPatterns, IndexPattern } from '../../../../../../../../data/public';
 
-const indexPattern = ({
+const indexPattern = {
   fields: {
     getAll: () => [
       {
@@ -71,7 +71,7 @@ const indexPattern = ({
   metaFields: ['_index', '_score'],
   flattenHit: undefined,
   formatHit: jest.fn((hit) => hit._source),
-} as unknown) as IndexPattern;
+} as unknown as IndexPattern;
 
 indexPattern.fields.getByName = (name: string) => {
   return indexPattern.fields.getAll().find((field) => field.name === name);
@@ -167,12 +167,14 @@ describe('DocViewTable at Discover', () => {
       expect(rowComponent.length).toBe(1);
     });
 
-    ([
-      'addInclusiveFilterButton',
-      'collapseBtn',
-      'toggleColumnButton',
-      'underscoreWarning',
-    ] as const).forEach((element) => {
+    (
+      [
+        'addInclusiveFilterButton',
+        'collapseBtn',
+        'toggleColumnButton',
+        'underscoreWarning',
+      ] as const
+    ).forEach((element) => {
       const elementExist = check[element];
 
       if (typeof elementExist === 'boolean') {

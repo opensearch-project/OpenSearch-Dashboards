@@ -193,8 +193,7 @@ export function defineRoutes(
   logger: Logger,
   agUiUrl?: string,
   getCapabilitiesResolver?: () =>
-    | ((request: OpenSearchDashboardsRequest) => Promise<Capabilities>)
-    | undefined,
+    ((request: OpenSearchDashboardsRequest) => Promise<Capabilities>) | undefined,
   mlCommonsAgentId?: string,
   observabilityAgentId?: string,
   forwardCredentials?: boolean,
@@ -321,6 +320,24 @@ export function defineRoutes(
         // Inject server-side system prompt if present
         injectSystemPrompt(request.body.messages, request.body.forwardedProps?.queryAssistLanguage);
 
+        // When an AG-UI endpoint is configured, it always takes precedence.
+        // ML Commons routing is never used in this case, regardless of
+        // capabilities or configured agent IDs.
+        if (agUiUrl) {
+          // Get a valid OBO token (cached or freshly minted) when credential forwarding is enabled
+          let oboToken: string | undefined;
+          if (forwardCredentials) {
+            const httpAuth = getHttpAuth?.();
+            const principals = httpAuth ? getPrincipalsFromRequest(request, httpAuth) : undefined;
+            const username = principals?.users?.[0];
+            oboToken = await getValidOboToken(context, logger, agUiUrl, username);
+          }
+
+          // Forward to AG-UI capable endpoint.
+          return await forwardToAgUI(agUiUrl, request, response, dataSourceId, logger, oboToken);
+        }
+
+        // No AG-UI endpoint configured — fall back to ML Commons routing.
         // Check if ML Commons agentic features are enabled via capabilities
         const capabilitiesResolver = getCapabilitiesResolver?.();
         const capabilities = capabilitiesResolver ? await capabilitiesResolver(request) : undefined;
@@ -345,27 +362,14 @@ export function defineRoutes(
           );
         }
 
-        if (!agUiUrl) {
-          return response.customError({
-            statusCode: 503,
-            body: {
-              message:
-                'No AI agent available: ML Commons agent not enabled and AG-UI URL not configured',
-            },
-          });
-        }
-
-        // Get a valid OBO token (cached or freshly minted) when credential forwarding is enabled
-        let oboToken: string | undefined;
-        if (forwardCredentials) {
-          const httpAuth = getHttpAuth?.();
-          const principals = httpAuth ? getPrincipalsFromRequest(request, httpAuth) : undefined;
-          const username = principals?.users?.[0];
-          oboToken = await getValidOboToken(context, logger, agUiUrl, username);
-        }
-
-        // Forward to AG-UI capable endpoint. This is the default router.
-        return await forwardToAgUI(agUiUrl, request, response, dataSourceId, logger, oboToken);
+        // Neither AG-UI nor ML Commons is available.
+        return response.customError({
+          statusCode: 503,
+          body: {
+            message:
+              'No AI agent available: AG-UI URL not configured and ML Commons agent not enabled',
+          },
+        });
       } catch (error) {
         logger.error(`AI agent routing error: ${error}`);
         return response.customError({

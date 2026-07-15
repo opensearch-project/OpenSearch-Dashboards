@@ -44,7 +44,7 @@ const ExploreDataTableComponent = () => {
   // metadata subscribes to Redux for reactivity; full hits are read from resultsCache.
   // The cache is guaranteed to be populated before this selector fires (see store.ts middleware).
   const metadata = useSelector((state: RootState) => state.results[cacheKey]);
-  const rawResults = metadata ? resultsCache.get(cacheKey) ?? null : null;
+  const rawResults = metadata ? (resultsCache.get(cacheKey) ?? null) : null;
   const rows = rawResults?.hits?.hits || [];
 
   const flavorId = useFlavorId();

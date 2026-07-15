@@ -122,9 +122,10 @@ export const useTraceMetrics = (tracesLoaded: boolean): UseTraceMetricsResult =>
   const [error, setError] = useState<string | null>(null);
   const [refreshCounter, setRefreshCounter] = useState(0);
 
-  const pplService = useMemo(() => (services.data ? new PPLService(services.data) : undefined), [
-    services.data,
-  ]);
+  const pplService = useMemo(
+    () => (services.data ? new PPLService(services.data) : undefined),
+    [services.data]
+  );
 
   const fetchMetrics = useCallback(async () => {
     if (!pplService || !datasetParam || !tracesLoaded || !baseQueryString || !sourceOnlyQueryString)

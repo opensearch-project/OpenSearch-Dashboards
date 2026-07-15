@@ -66,13 +66,13 @@ describe('useVisualizeAppState', () => {
   connectToQueryState.mockImplementation(() => stopSyncingAppFiltersMock);
 
   const eventEmitter = new EventEmitter();
-  const savedVisInstance = ({
+  const savedVisInstance = {
     vis: {
       setState: jest.fn().mockResolvedValue({}),
     },
     savedVis: {},
     embeddableHandler: {},
-  } as unknown) as SavedVisInstance;
+  } as unknown as SavedVisInstance;
   let mockServices: jest.Mocked<VisualizeServices>;
 
   beforeEach(() => {

@@ -31,13 +31,13 @@
 import { fromStreamingXhr } from './from_streaming_xhr';
 
 const createXhr = (): XMLHttpRequest =>
-  (({
+  ({
     onprogress: () => {},
     onreadystatechange: () => {},
     readyState: 0,
     responseText: '',
     status: 0,
-  } as unknown) as XMLHttpRequest);
+  }) as unknown as XMLHttpRequest;
 
 test('returns observable', () => {
   const xhr = createXhr();

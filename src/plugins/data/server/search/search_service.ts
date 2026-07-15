@@ -273,9 +273,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   private registerSearchStrategy = <
     SearchStrategyRequest extends IOpenSearchDashboardsSearchRequest = IOpenSearchSearchRequest,
-    SearchStrategyResponse extends
-      | IOpenSearchDashboardsSearchResponse
-      | IDataFrameResponse = IOpenSearchSearchResponse
+    SearchStrategyResponse extends IOpenSearchDashboardsSearchResponse | IDataFrameResponse =
+      IOpenSearchSearchResponse,
   >(
     name: string,
     strategy: ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>
@@ -285,9 +284,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   private search = <
     SearchStrategyRequest extends IOpenSearchDashboardsSearchRequest = IOpenSearchSearchRequest,
-    SearchStrategyResponse extends
-      | IOpenSearchDashboardsSearchResponse
-      | IDataFrameResponse = IOpenSearchSearchResponse
+    SearchStrategyResponse extends IOpenSearchDashboardsSearchResponse | IDataFrameResponse =
+      IOpenSearchSearchResponse,
   >(
     context: RequestHandlerContext,
     searchRequest: SearchStrategyRequest,
@@ -300,9 +298,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   private getSearchStrategy = <
     SearchStrategyRequest extends IOpenSearchDashboardsSearchRequest = IOpenSearchSearchRequest,
-    SearchStrategyResponse extends
-      | IOpenSearchDashboardsSearchResponse
-      | IDataFrameResponse = IOpenSearchSearchResponse
+    SearchStrategyResponse extends IOpenSearchDashboardsSearchResponse | IDataFrameResponse =
+      IOpenSearchSearchResponse,
   >(
     name: string
   ): ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse> => {

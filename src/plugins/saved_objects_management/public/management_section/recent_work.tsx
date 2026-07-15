@@ -89,7 +89,7 @@ const bulkGetDetail = (
               references: [],
               meta: {},
               updated_at: '',
-            } as SavedObjectWithMetadata)
+            }) as SavedObjectWithMetadata
         )
     )
   );

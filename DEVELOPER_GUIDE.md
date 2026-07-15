@@ -512,7 +512,7 @@ remove it, don't simply comment it out.
 #### Prettier and linting
 
 We are gradually moving the OpenSearch Dashboards code base over to Prettier. All TypeScript code
-and some JavaScript code (check `.eslintrc.js`) is using Prettier to format code. You
+and some JavaScript code (check `eslint.config.js`) is using Prettier to format code. You
 can run `yarn run lint:es --fix && yarn run lint:style --fix` to fix linting issues and apply Prettier formatting.
 We recommend you to enable running ESLint via your IDE.
 
@@ -733,7 +733,7 @@ less likely to introduce bugs in the future due to insufficient types.
 
 If you’re not having `any` in your plugin or are starting a new plugin, you should enable the
 [`@typescript-eslint/no-explicit-any`](https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-explicit-any.md)
-linting rule for your plugin via the [`.eslintrc.js`](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/master/.eslintrc.js) config.
+linting rule for your plugin via the [`eslint.config.js`](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/master/eslint.config.js) config.
 
 #### Avoid non-null assertions
 
@@ -752,7 +752,7 @@ assertion would now wrongly disable proper type checking for us.
 
 If you’re not using non-null assertions in your plugin or are starting a new plugin, consider enabling the
 [`@typescript-eslint/no-non-null-assertion`](https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/eslint-plugin/docs/rules/no-non-null-assertion.md)
-linting rule for you plugin in the [`.eslintrc.js`](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/.eslintrc.js) config.
+linting rule for you plugin in the [`eslint.config.js`](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/eslint.config.js) config.
 
 #### Return/throw early from functions
 

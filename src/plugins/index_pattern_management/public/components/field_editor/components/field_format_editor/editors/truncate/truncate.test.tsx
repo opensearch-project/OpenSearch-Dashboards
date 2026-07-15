@@ -62,7 +62,7 @@ describe('TruncateFormatEditor', () => {
     const component = shallow(
       <TruncateFormatEditor
         fieldType={fieldType}
-        format={(format as unknown) as FieldFormat}
+        format={format as unknown as FieldFormat}
         formatParams={formatParams}
         onChange={onChange}
         onError={onError}
@@ -75,7 +75,7 @@ describe('TruncateFormatEditor', () => {
     const component = shallow(
       <TruncateFormatEditor
         fieldType={fieldType}
-        format={(format as unknown) as FieldFormat}
+        format={format as unknown as FieldFormat}
         formatParams={formatParams}
         onChange={onChange}
         onError={onError}
@@ -91,7 +91,7 @@ describe('TruncateFormatEditor', () => {
       },
     };
 
-    await input!.invoke('onChange')!((changeEvent as unknown) as ChangeEvent<HTMLInputElement>);
+    await input!.invoke('onChange')!(changeEvent as unknown as ChangeEvent<HTMLInputElement>);
 
     expect(onError).toBeCalledWith(changeEvent.target.validationMessage);
     expect(onChange).not.toBeCalled();
@@ -101,7 +101,7 @@ describe('TruncateFormatEditor', () => {
     const component = shallow(
       <TruncateFormatEditor
         fieldType={fieldType}
-        format={(format as unknown) as FieldFormat}
+        format={format as unknown as FieldFormat}
         formatParams={formatParams}
         onChange={onChange}
         onError={onError}
@@ -117,7 +117,7 @@ describe('TruncateFormatEditor', () => {
       },
     };
     onError.mockClear();
-    await input!.invoke('onChange')!((changeEvent as unknown) as ChangeEvent<HTMLInputElement>);
+    await input!.invoke('onChange')!(changeEvent as unknown as ChangeEvent<HTMLInputElement>);
     expect(onError).not.toBeCalled();
     expect(onChange).toBeCalledWith({ fieldLength: 123 });
   });

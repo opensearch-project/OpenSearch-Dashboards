@@ -20,7 +20,7 @@ const createMockServices = (appId: string = PLUGIN_ID): AgentTracesServices =>
         currentAppId$: of(appId),
       },
     },
-  } as AgentTracesServices);
+  }) as AgentTracesServices;
 
 describe('getFlavorFromAppId', () => {
   it('returns Traces for the base plugin ID', () => {

@@ -28,8 +28,6 @@
  * under the License.
  */
 
-/* eslint-disable import/namespace */
-
 // vega-lite 6.x uses package.json#exports (no `main`/`module` fields); the ESLint
 // import resolver does not support the exports map so it cannot resolve the package root.
 // eslint-disable-next-line import/no-unresolved -- vega-lite uses package.json#exports, unsupported by the ESLint resolver

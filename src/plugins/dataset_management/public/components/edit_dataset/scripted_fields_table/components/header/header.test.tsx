@@ -14,9 +14,9 @@ describe('Header', () => {
     const component = renderWithIntl(
       <Header.WrappedComponent
         datasetId="test"
-        history={(scopedHistoryMock.create() as unknown) as ScopedHistory}
-        location={({} as unknown) as RouteComponentProps['location']}
-        match={({} as unknown) as RouteComponentProps['match']}
+        history={scopedHistoryMock.create() as unknown as ScopedHistory}
+        location={{} as unknown as RouteComponentProps['location']}
+        match={{} as unknown as RouteComponentProps['match']}
         useUpdatedUX
       />
     );
@@ -28,9 +28,9 @@ describe('Header', () => {
     const component = renderWithIntl(
       <Header.WrappedComponent
         datasetId="test"
-        history={(scopedHistoryMock.create() as unknown) as ScopedHistory}
-        location={({} as unknown) as RouteComponentProps['location']}
-        match={({} as unknown) as RouteComponentProps['match']}
+        history={scopedHistoryMock.create() as unknown as ScopedHistory}
+        location={{} as unknown as RouteComponentProps['location']}
+        match={{} as unknown as RouteComponentProps['match']}
         useUpdatedUX={false}
       />
     );

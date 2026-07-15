@@ -200,7 +200,7 @@ export class RenderingService {
         passphrase: sslConfig.keyPassphrase,
         rejectUnauthorized: false,
       });
-    } catch (e) {
+    } catch {
       this.logger.get('branding').error('HTTP agent failed to setup for SSL.');
     }
   }

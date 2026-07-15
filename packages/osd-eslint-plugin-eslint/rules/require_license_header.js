@@ -111,7 +111,7 @@ module.exports = {
 
         if (!licenses || !licenses.length) return;
 
-        const sourceCode = context.getSourceCode();
+        const sourceCode = context.sourceCode;
         const comment = sourceCode
           .getAllComments()
           .find((node) =>

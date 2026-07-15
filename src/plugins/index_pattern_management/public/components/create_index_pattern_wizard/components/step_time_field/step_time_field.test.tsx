@@ -146,16 +146,16 @@ describe('StepTimeField', () => {
 
     // If the value is undefined, that means the user selected the
     // `I don't want to use a Time filter` option
-    (component.instance() as StepTimeField).onTimeFieldChanged(({
+    (component.instance() as StepTimeField).onTimeFieldChanged({
       target: { value: undefined },
-    } as unknown) as React.ChangeEvent<HTMLSelectElement>);
+    } as unknown as React.ChangeEvent<HTMLSelectElement>);
     expect(component.state('timeFieldSet')).toBe(true);
 
     // If the value is an empty string, that means the user selected
     // an invalid selection (like the empty selection or the `-----`)
-    (component.instance() as StepTimeField).onTimeFieldChanged(({
+    (component.instance() as StepTimeField).onTimeFieldChanged({
       target: { value: '' },
-    } as unknown) as React.ChangeEvent<HTMLSelectElement>);
+    } as unknown as React.ChangeEvent<HTMLSelectElement>);
     expect(component.state('timeFieldSet')).toBe(false);
   });
 
@@ -178,9 +178,9 @@ describe('StepTimeField', () => {
       ],
     });
 
-    (component.instance() as StepTimeField).onTimeFieldChanged(({
+    (component.instance() as StepTimeField).onTimeFieldChanged({
       target: { value: '' },
-    } as unknown) as React.ChangeEvent<HTMLSelectElement>);
+    } as unknown as React.ChangeEvent<HTMLSelectElement>);
     component.update();
 
     expect(component.find('ActionButtons')).toMatchSnapshot();
@@ -205,9 +205,9 @@ describe('StepTimeField', () => {
       ],
     });
 
-    (component.instance() as StepTimeField).onTimeFieldChanged(({
+    (component.instance() as StepTimeField).onTimeFieldChanged({
       target: { value: undefined },
-    } as unknown) as React.ChangeEvent<HTMLSelectElement>);
+    } as unknown as React.ChangeEvent<HTMLSelectElement>);
     component.update();
 
     expect(component.find('ActionButtons')).toMatchSnapshot();
@@ -342,9 +342,9 @@ describe('StepTimeField', () => {
 
     expect((component.state() as any).timeFields).toHaveLength(3);
 
-    (component.instance() as StepTimeField).onTimeFieldChanged(({
+    (component.instance() as StepTimeField).onTimeFieldChanged({
       target: { value: undefined },
-    } as unknown) as React.ChangeEvent<HTMLSelectElement>);
+    } as unknown as React.ChangeEvent<HTMLSelectElement>);
 
     await (component.instance() as StepTimeField).createIndexPattern();
 

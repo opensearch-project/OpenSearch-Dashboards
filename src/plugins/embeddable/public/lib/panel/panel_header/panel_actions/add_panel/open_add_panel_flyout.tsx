@@ -43,14 +43,8 @@ export async function openAddPanelFlyout(options: {
   notifications: NotificationsStart;
   SavedObjectFinder: React.ComponentType<any>;
 }) {
-  const {
-    embeddable,
-    getFactory,
-    getAllFactories,
-    overlays,
-    notifications,
-    SavedObjectFinder,
-  } = options;
+  const { embeddable, getFactory, getAllFactories, overlays, notifications, SavedObjectFinder } =
+    options;
   const flyoutSession = overlays.openFlyout(
     toMountPoint(
       <AddPanelFlyout

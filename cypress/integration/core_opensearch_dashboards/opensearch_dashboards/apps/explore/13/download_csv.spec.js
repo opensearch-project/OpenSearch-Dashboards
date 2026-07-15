@@ -58,7 +58,6 @@ const runDownloadCsvTests = () => {
       it(`should be able to download Visible option with default rows for ${config.saveName}`, () => {
         prepareDiscoverPageForDownload(config, workspaceName);
 
-        // eslint-disable-next-line no-loop-func
         downloadCsvAndVerify('Visible', (csvString) => {
           const { data } = Papa.parse(csvString);
           cy.wrap(data).should(
@@ -78,7 +77,6 @@ const runDownloadCsvTests = () => {
         // select some fields
         toggleFieldsForCsvDownload();
 
-        // eslint-disable-next-line no-loop-func
         downloadCsvAndVerify('Visible', (csvString) => {
           const { data } = Papa.parse(csvString);
           cy.wrap(data).should(

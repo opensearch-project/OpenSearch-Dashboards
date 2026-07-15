@@ -28,8 +28,6 @@
  * under the License.
  */
 
-/* eslint-disable import/namespace */
-
 import $ from 'jquery';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
@@ -190,7 +188,6 @@ export class VegaBaseView {
 
   createViewConfig() {
     const config = {
-      // eslint-disable-next-line import/namespace
       logLevel: vega.Warn, // note: eslint has a false positive here
       renderer: this._parser.renderer,
       expr: vegaExpressionInterpreter,

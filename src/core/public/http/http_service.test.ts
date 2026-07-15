@@ -91,7 +91,7 @@ describe('#setup()', () => {
           location: {
             href: 'http://localhost/base_path/w/workspaceId/app',
           },
-        } as any)
+        }) as any
     );
     const injectedMetadata = injectedMetadataServiceMock.createSetupContract();
     injectedMetadata.getBasePath.mockReturnValue('/base_path');

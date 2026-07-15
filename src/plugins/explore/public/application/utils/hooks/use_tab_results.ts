@@ -38,7 +38,7 @@ export const useTabResults = () => {
   const status = useSelector((state: RootState) => selectQueryStatusMapByKey(state, cacheKey));
 
   return {
-    results: metadata ? resultsCache.get(cacheKey) ?? null : null,
+    results: metadata ? (resultsCache.get(cacheKey) ?? null) : null,
     status,
   };
 };

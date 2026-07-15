@@ -69,7 +69,7 @@ describe('SearchAPI.search', () => {
   test('If MDS is disabled and there is no datasource, return params without datasource id', async () => {
     const searchAPI = getSearchAPI(false);
     const requests = [{ name: 'example-id' }];
-    const fetchParams = ((await searchAPI.search(requests)) as unknown) as MockSearch[];
+    const fetchParams = (await searchAPI.search(requests)) as unknown as MockSearch[];
     expect(fetchParams[0].params).toBe(requests[0]);
     expect(fetchParams[0].hasOwnProperty('dataSourceId')).toBe(false);
   });
@@ -83,7 +83,7 @@ describe('SearchAPI.search', () => {
   test('If MDS is enabled and there is no datasource, return params without datasource id', async () => {
     const searchAPI = getSearchAPI(true);
     const requests = [{ name: 'example-id' }];
-    const fetchParams = ((await searchAPI.search(requests)) as unknown) as MockSearch[];
+    const fetchParams = (await searchAPI.search(requests)) as unknown as MockSearch[];
     expect(fetchParams[0].params).toBe(requests[0]);
     expect(fetchParams[0].hasOwnProperty('dataSourceId')).toBe(false);
   });
@@ -91,7 +91,7 @@ describe('SearchAPI.search', () => {
   test('If MDS is enabled and there is a datasource, return params with datasource id', async () => {
     const searchAPI = getSearchAPI(true);
     const requests = [{ name: 'example-id', data_source_name: 'exampleName' }];
-    const fetchParams = ((await searchAPI.search(requests)) as unknown) as MockSearch[];
+    const fetchParams = (await searchAPI.search(requests)) as unknown as MockSearch[];
     expect(fetchParams[0].hasOwnProperty('params')).toBe(true);
     expect(fetchParams[0].dataSourceId).toBe('some-id');
   });

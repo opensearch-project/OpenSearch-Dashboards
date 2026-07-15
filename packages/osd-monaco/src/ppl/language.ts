@@ -115,7 +115,7 @@ const setupPPLTokenization = () => {
             });
           }
         }
-      } catch (error) {
+      } catch {
         // If ANTLR fails, return empty tokens
       }
 
@@ -185,7 +185,7 @@ const processSyntaxHighlighting = async (model: monaco.editor.IModel) => {
       // Clear markers if no errors
       monaco.editor.setModelMarkers(model, OWNER, []);
     }
-  } catch (error) {
+  } catch {
     // Silent error handling - continue without worker-based highlighting
   }
 };

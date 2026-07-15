@@ -121,7 +121,7 @@ export const createDashboardContainer = async ({
 
       return dashboardContainerEmbeddable;
     }
-  } catch (error) {
+  } catch {
     services.toastNotifications.addWarning({
       title: i18n.translate('dashboard.createDashboard.failedToLoadErrorMessage', {
         defaultMessage: 'Failed to load the dashboard',
@@ -414,9 +414,11 @@ const getChangesForContainerStateFromAppState = (
   Object.keys(containerInput).forEach((key) => {
     if (key === 'filters') return;
     const containerValue = (containerInput as { [key: string]: unknown })[key];
-    const appStateValue = ((appStateDashboardInput as unknown) as {
-      [key: string]: unknown;
-    })[key];
+    const appStateValue = (
+      appStateDashboardInput as unknown as {
+        [key: string]: unknown;
+      }
+    )[key];
     if (!isEqual(containerValue, appStateValue)) {
       (differences as { [key: string]: unknown })[key] = appStateValue;
     }

@@ -45,7 +45,7 @@ function setupMockCallCluster(
   optCount: { optInCount?: number; optOutCount?: number } | null,
   language: string | undefined | null
 ) {
-  callCluster = (jest.fn((method, params) => {
+  callCluster = jest.fn((method, params) => {
     if (params && 'id' in params && params.id === 'dql-telemetry:dql-telemetry') {
       if (optCount === null) {
         return Promise.resolve({
@@ -90,7 +90,7 @@ function setupMockCallCluster(
     }
 
     throw new Error('invalid call');
-  }) as unknown) as LegacyAPICaller;
+  }) as unknown as LegacyAPICaller;
 }
 
 describe('makeDQLUsageCollector', () => {

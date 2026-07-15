@@ -187,7 +187,7 @@ export class OptimizerConfig {
 
     const maxWorkerCount = process.env.OSD_OPTIMIZER_MAX_WORKERS
       ? parseInt(process.env.OSD_OPTIMIZER_MAX_WORKERS, 10)
-      : options.maxWorkerCount ?? pickMaxWorkerCount(dist);
+      : (options.maxWorkerCount ?? pickMaxWorkerCount(dist));
     if (typeof maxWorkerCount !== 'number' || !Number.isFinite(maxWorkerCount)) {
       throw new TypeError('worker count must be a number');
     }

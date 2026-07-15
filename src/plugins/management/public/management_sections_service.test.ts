@@ -135,6 +135,7 @@ describe('ManagementService', () => {
       setup.section.opensearchDashboards.apps.find((app) => app.id === 'dataSources')?.enabled
     ).toBe(false);
 
-    DEFAULT_MANAGEMENT_CAPABILITIES.management.opensearchDashboards.dataSources = originalDataSourcesCapability;
+    DEFAULT_MANAGEMENT_CAPABILITIES.management.opensearchDashboards.dataSources =
+      originalDataSourcesCapability;
   });
 });

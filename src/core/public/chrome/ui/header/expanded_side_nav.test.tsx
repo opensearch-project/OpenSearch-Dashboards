@@ -29,7 +29,7 @@ const makeLink = (partial: Partial<MergedNavLink>): MergedNavLink =>
     baseUrl: '',
     href: '',
     ...partial,
-  } as MergedNavLink);
+  }) as MergedNavLink;
 
 describe('<ExpandedSideNav />', () => {
   const defaultProps: ExpandedSideNavProps = {

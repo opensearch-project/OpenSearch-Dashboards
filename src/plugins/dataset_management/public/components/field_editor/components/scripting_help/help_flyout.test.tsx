@@ -26,7 +26,7 @@ describe('ScriptingHelpFlyout', () => {
         isVisible={true}
         dataset={indexPatternMock}
         lang="painless"
-        executeScript={((() => {}) as unknown) as ExecuteScript}
+        executeScript={(() => {}) as unknown as ExecuteScript}
         onClose={() => {}}
       />
     );
@@ -40,7 +40,7 @@ describe('ScriptingHelpFlyout', () => {
         isVisible={true}
         dataset={indexPatternMock}
         lang="painless"
-        executeScript={((() => {}) as unknown) as ExecuteScript}
+        executeScript={(() => {}) as unknown as ExecuteScript}
         onClose={() => {}}
       />
     );

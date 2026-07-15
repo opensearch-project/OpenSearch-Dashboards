@@ -98,14 +98,13 @@ function generateOne(grammar) {
   const output = wrap(parserSource);
   fs.mkdirSync(path.dirname(destPath), { recursive: true });
   fs.writeFileSync(destPath, output, 'utf8');
-  // eslint-disable-next-line no-console
+
   console.log(`  ${grammar.name}: ${grammar.src} -> ${grammar.dest}`);
 }
 
-// eslint-disable-next-line no-console
 console.log('Generating PEG parsers...');
 for (const grammar of GRAMMARS) {
   generateOne(grammar);
 }
-// eslint-disable-next-line no-console
+
 console.log('Done.');

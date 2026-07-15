@@ -26,18 +26,18 @@ describe('DataSourceSelectable', () => {
 
   beforeEach(() => {
     dataSourcesMock = [
-      ({
+      {
         getDataSet: jest.fn().mockResolvedValue([]),
         getType: jest.fn().mockReturnValue('DEFAULT_INDEX_PATTERNS'),
         getName: jest.fn().mockReturnValue('SomeName'),
         getMetadata: jest.fn().mockReturnValue(defaultDataSourceMetadata),
-      } as unknown) as DataSource,
-      ({
+      } as unknown as DataSource,
+      {
         getDataSet: jest.fn().mockResolvedValue([]),
         getType: jest.fn().mockReturnValue('s3glue'),
         getName: jest.fn().mockReturnValue('Amazon S3'),
         getMetadata: jest.fn().mockReturnValue(s3DataSourceMetadata),
-      } as unknown) as DataSource,
+      } as unknown as DataSource,
     ];
 
     dataSourceOptionListMock = [];
@@ -117,12 +117,12 @@ describe('DataSourceSelectable', () => {
     render(
       <DataSourceSelectable
         dataSources={[
-          ({
+          {
             getDataSet: jest.fn().mockResolvedValue([]),
             getType: jest.fn().mockReturnValue('DEFAULT_INDEX_PATTERNS'),
             getName: jest.fn().mockReturnValue('Index patterns'),
             getMetadata: jest.fn().mockReturnValue(defaultDataSourceMetadata),
-          } as unknown) as DataSource,
+          } as unknown as DataSource,
         ]}
         dataSourceOptionList={mockDataSourceOptionList}
         selectedSources={selectedSourcesMock}
@@ -169,12 +169,12 @@ describe('DataSourceSelectable', () => {
     render(
       <DataSourceSelectable
         dataSources={[
-          ({
+          {
             getDataSet: jest.fn().mockResolvedValue([]),
             getType: jest.fn().mockReturnValue('s3glue'),
             getName: jest.fn().mockReturnValue(S3_GLUE_DATA_SOURCE_DISPLAY_NAME),
             getMetadata: jest.fn().mockReturnValue(s3DataSourceMetadata),
-          } as unknown) as DataSource,
+          } as unknown as DataSource,
         ]}
         dataSourceOptionList={mockDataSourceOptionList}
         selectedSources={selectedSourcesMock}
@@ -221,12 +221,12 @@ describe('DataSourceSelectable', () => {
     render(
       <DataSourceSelectable
         dataSources={[
-          ({
+          {
             getDataSet: jest.fn().mockResolvedValue([]),
             getType: jest.fn().mockReturnValue(DEFAULT_DATA_SOURCE_TYPE),
             getName: jest.fn().mockReturnValue(DEFAULT_DATA_SOURCE_DISPLAY_NAME),
             getMetadata: jest.fn().mockReturnValue(defaultDataSourceMetadata),
-          } as unknown) as DataSource,
+          } as unknown as DataSource,
         ]}
         dataSourceOptionList={mockDataSourceOptionListWithDuplicates}
         selectedSources={selectedSourcesMock}

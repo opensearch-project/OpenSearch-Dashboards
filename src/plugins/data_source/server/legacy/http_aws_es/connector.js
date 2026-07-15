@@ -35,6 +35,7 @@ class HttpAmazonESConnector extends HttpConnector {
   async request(params, cb) {
     const reqParams = this.makeReqParams(params);
     let cancelled = false;
+    // eslint-disable-next-line no-undef
     const controller = new AbortController();
 
     const cancel = () => {

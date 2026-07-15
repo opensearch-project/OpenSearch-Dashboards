@@ -42,6 +42,8 @@ import {
   EuiScreenReaderOnly,
   EuiCodeEditor,
   EuiDescribedFormGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiCompressedFieldNumber,
   EuiCompressedFieldText,
   EuiCompressedFilePicker,
@@ -59,9 +61,10 @@ import {
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { FieldSetting, FieldState } from '../../types';
-import { isDefaultValue } from '../../lib';
+import { isDefaultValue, toScopeArray } from '../../lib';
 import {
   UiSettingsType,
+  UiSettingScope,
   ImageValidation,
   StringValidationRegex,
   DocLinksStart,
@@ -77,6 +80,7 @@ interface FieldProps {
   clearChange?: (name: string) => void;
   unsavedChanges?: FieldState;
   loading?: boolean;
+  pageScope?: UiSettingScope;
 }
 
 export const getEditableValue = (
@@ -126,6 +130,12 @@ export class Field extends PureComponent<FieldProps> {
     this.props.handleChange(this.props.setting.name, unsavedChanges);
   };
 
+  canInheritFromApplication() {
+    const { setting } = this.props;
+    if (setting.isUserProvided === undefined) return false; // not a scoped page
+    return toScopeArray(setting.scope).includes(UiSettingScope.GLOBAL);
+  }
+
   resetField = () => {
     const { type, defVal } = this.props.setting;
     if (type === 'image') {
@@ -136,6 +146,28 @@ export class Field extends PureComponent<FieldProps> {
       });
     }
     return this.handleChange({ value: getEditableValue(type, defVal) });
+  };
+
+  // "Use Application value" on a scoped (USER/WORKSPACE) page: clears the value stored
+  // in this scope so the setting inherits from the Application (global) scope again.
+  // clearToInherit tells the form to persist null regardless of the control's current
+  // value (a toggle/select can never represent "no value" on its own).
+  useApplicationValue = () => {
+    const { type, defVal, inheritedValue } = this.props.setting;
+    // Preview the value that will actually take effect after clearing this scope:
+    // the inherited Application (global) value, or the code default when the global
+    // scope has no stored value of its own.
+    const previewValue =
+      inheritedValue !== undefined && inheritedValue !== null ? inheritedValue : defVal;
+    if (type === 'image') {
+      this.cancelChangeImage();
+      return this.handleChange({
+        value: getEditableValue(type, previewValue),
+        changeImage: true,
+        clearToInherit: true,
+      });
+    }
+    return this.handleChange({ value: getEditableValue(type, previewValue), clearToInherit: true });
   };
 
   componentDidUpdate(prevProps: FieldProps) {
@@ -160,7 +192,7 @@ export class Field extends PureComponent<FieldProps> {
         newUnsavedValue = value.trim() || (isJsonArray ? '[]' : '{}');
         try {
           JSON.parse(newUnsavedValue);
-        } catch (e) {
+        } catch {
           errorParams = {
             error: i18n.translate('advancedSettings.field.codeEditorSyntaxErrorMessage', {
               defaultMessage: 'Invalid JSON syntax',
@@ -258,7 +290,7 @@ export class Field extends PureComponent<FieldProps> {
         value: base64Image,
         ...errorParams,
       });
-    } catch (err) {
+    } catch {
       this.props.toasts.addDanger(
         i18n.translate('advancedSettings.field.imageChangeErrorMessage', {
           defaultMessage: 'Image could not be saved',
@@ -438,7 +470,16 @@ export class Field extends PureComponent<FieldProps> {
   }
 
   renderLabel(setting: FieldSetting) {
-    return setting.name;
+    const sourceBadge = this.renderSourceBadge(setting);
+    if (!sourceBadge) {
+      return setting.name;
+    }
+    return (
+      <span>
+        {setting.name}
+        {sourceBadge}
+      </span>
+    );
   }
 
   renderHelpText(setting: FieldSetting) {
@@ -472,15 +513,19 @@ export class Field extends PureComponent<FieldProps> {
     }
 
     const canUpdateSetting = this.props.enableSaving;
-    const defaultLink = this.renderResetToDefaultLink(setting);
+    const resetLink = this.canInheritFromApplication()
+      ? this.renderUseApplicationValueLink(setting)
+      : this.renderResetToDefaultLink(setting);
     const imageLink = this.renderChangeImageLink(setting);
+    const overrideHint = this.renderOverrideHint();
 
-    if (canUpdateSetting && (defaultLink || imageLink)) {
+    if (canUpdateSetting && (resetLink || imageLink || overrideHint)) {
       return (
-        <span>
-          {defaultLink}
-          {imageLink}
-        </span>
+        <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
+          {overrideHint && <EuiFlexItem grow={false}>{overrideHint}</EuiFlexItem>}
+          {resetLink && <EuiFlexItem grow={false}>{resetLink}</EuiFlexItem>}
+          {imageLink && <EuiFlexItem grow={false}>{imageLink}</EuiFlexItem>}
+        </EuiFlexGroup>
       );
     }
 
@@ -536,6 +581,89 @@ export class Field extends PureComponent<FieldProps> {
           ''
         )}
       </h3>
+    );
+  }
+
+  // Human-readable name for the scope of the page this field is rendered on. Used to
+  // tell the user that the shown value is their own scope's value (e.g. "User" vs
+  // "Workspace") rather than a generic "Customized".
+  getPageScopeLabel() {
+    switch (this.props.pageScope) {
+      case UiSettingScope.USER:
+        return i18n.translate('advancedSettings.field.scopeLabel.user', {
+          defaultMessage: 'User',
+        });
+      case UiSettingScope.WORKSPACE:
+        return i18n.translate('advancedSettings.field.scopeLabel.workspace', {
+          defaultMessage: 'Workspace',
+        });
+      default:
+        return i18n.translate('advancedSettings.field.scopeLabel.customized', {
+          defaultMessage: 'Customized',
+        });
+    }
+  }
+
+  renderSourceBadge(setting: FieldSetting) {
+    if (!this.canInheritFromApplication() || this.props.unsavedChanges) return null;
+
+    const { isUserProvided } = setting;
+    if (isUserProvided) {
+      const scopeLabel = this.getPageScopeLabel();
+      return (
+        <EuiToolTip
+          content={i18n.translate('advancedSettings.field.badge.customizedTooltip', {
+            defaultMessage:
+              'This {scopeLabel} value overrides the Application settings value. Use "Use Application value" to go back to inheriting it.',
+            values: { scopeLabel },
+          })}
+        >
+          <EuiBadge iconType="check" className="mgtAdvancedSettings__fieldLabelSourceBadge">
+            {i18n.translate('advancedSettings.field.badge.customized', {
+              defaultMessage: '{scopeLabel} value',
+              values: { scopeLabel },
+            })}
+          </EuiBadge>
+        </EuiToolTip>
+      );
+    }
+
+    return (
+      <EuiToolTip
+        content={i18n.translate('advancedSettings.field.badge.fromApplicationTooltip', {
+          defaultMessage:
+            'This setting inherits its value from the Application settings. Change it to set a value here.',
+        })}
+      >
+        <EuiBadge iconType="globe" className="mgtAdvancedSettings__fieldLabelSourceBadge">
+          {i18n.translate('advancedSettings.field.badge.fromApplication', {
+            defaultMessage: 'Application',
+          })}
+        </EuiBadge>
+      </EuiToolTip>
+    );
+  }
+
+  /**
+   * Inline hint shown on a scoped page while the user has an unsaved change that will
+   * override the inherited Application value.
+   */
+  renderOverrideHint() {
+    const { unsavedChanges } = this.props;
+    if (!this.canInheritFromApplication() || !unsavedChanges) return null;
+
+    const message = unsavedChanges.clearToInherit
+      ? i18n.translate('advancedSettings.field.willInheritApplicationText', {
+          defaultMessage: 'This setting will inherit from Application settings.',
+        })
+      : i18n.translate('advancedSettings.field.willOverrideApplicationText', {
+          defaultMessage: 'This setting will override Application settings.',
+        });
+
+    return (
+      <EuiText size="xs" color="subdued" data-test-subj="advancedSetting-overrideHint">
+        {message}
+      </EuiText>
     );
   }
 
@@ -666,7 +794,30 @@ export class Field extends PureComponent<FieldProps> {
             defaultMessage="Reset to default"
           />
         </EuiLink>
-        &nbsp;&nbsp;&nbsp;
+      </span>
+    );
+  }
+
+  renderUseApplicationValueLink(setting: FieldSetting) {
+    const { ariaName, name, isUserProvided } = setting;
+    if (!isUserProvided || this.props.loading || this.props.unsavedChanges) {
+      return;
+    }
+    return (
+      <span>
+        <EuiLink
+          aria-label={i18n.translate('advancedSettings.field.useApplicationValueLinkAriaLabel', {
+            defaultMessage: 'Use Application value for {ariaName}',
+            values: { ariaName },
+          })}
+          onClick={this.useApplicationValue}
+          data-test-subj={`advancedSetting-useApplicationValue-${name}`}
+        >
+          <FormattedMessage
+            id="advancedSettings.field.useApplicationValueLinkText"
+            defaultMessage="Use Application value"
+          />
+        </EuiLink>
       </span>
     );
   }

@@ -67,7 +67,7 @@ const catchAndWarn = jest.fn(async (asyncFn) => await asyncFn);
 const mockContext = mockManagementPlugin.createIndexPatternManagmentContext();
 
 mockContext.savedObjects.client.find = async () =>
-  Promise.resolve(({ savedObjects: [] } as unknown) as SavedObjectsFindResponsePublic<any>);
+  Promise.resolve({ savedObjects: [] } as unknown as SavedObjectsFindResponsePublic<any>);
 mockContext.uiSettings.get.mockReturnValue('');
 
 describe('StepIndexPattern', () => {

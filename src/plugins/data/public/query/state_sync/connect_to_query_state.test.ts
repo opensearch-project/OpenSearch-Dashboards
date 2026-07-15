@@ -137,9 +137,9 @@ describe('connect_storage_to_query_state', () => {
       application: startMock.application,
       notifications: startMock.notifications,
     });
-    indexPatternsMock = ({
+    indexPatternsMock = {
       get: jest.fn(),
-    } as unknown) as IndexPatternsService;
+    } as unknown as IndexPatternsService;
 
     queryString = queryServiceStart.queryString;
     queryChangeTriggered = jest.fn();
@@ -357,9 +357,9 @@ describe('connect_to_global_state', () => {
     });
     filterManager = queryServiceStart.filterManager;
     timeFilter = queryServiceStart.timefilter.timefilter;
-    indexPatternsMock = ({
+    indexPatternsMock = {
       get: jest.fn(),
-    } as unknown) as IndexPatternsService;
+    } as unknown as IndexPatternsService;
 
     globalState = createStateContainer({});
     globalStateChangeTriggered = jest.fn();
@@ -602,9 +602,9 @@ describe('connect_to_app_state', () => {
       application: startMock.application,
     });
     filterManager = queryServiceStart.filterManager;
-    indexPatternsMock = ({
+    indexPatternsMock = {
       get: jest.fn(),
-    } as unknown) as IndexPatternsService;
+    } as unknown as IndexPatternsService;
 
     appState = createStateContainer({});
     appStateChangeTriggered = jest.fn();
@@ -793,9 +793,9 @@ describe('filters with different state', () => {
       application: startMock.application,
     });
     filterManager = queryServiceStart.filterManager;
-    indexPatternsMock = ({
+    indexPatternsMock = {
       get: jest.fn(),
-    } as unknown) as IndexPatternsService;
+    } as unknown as IndexPatternsService;
 
     state = createStateContainer({});
     stateChangeTriggered = jest.fn();

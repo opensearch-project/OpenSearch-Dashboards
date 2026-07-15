@@ -112,7 +112,7 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
       // There may be calls to saved objects client before user get authenticated, need to add a try catch here as `getPrincipalsFromRequest` will throw error when user is not authenticated.
       try {
         ({ groups = [], users = [] } = this.permissionControl!.getPrincipalsFromRequest(request));
-      } catch (e) {
+      } catch {
         return toolkit.next();
       }
       // Get config from dynamic service client.
@@ -329,9 +329,6 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
     this.workspaceConflictControl?.setSerializer(core.savedObjects.createSerializer());
     this.workspaceSavedObjectsClientWrapper?.setScopedClient(core.savedObjects.getScopedClient);
     this.workspaceUiSettingsClientWrapper?.setScopedClient(core.savedObjects.getScopedClient);
-    this.workspaceUiSettingsClientWrapper?.setAsScopedUISettingsClient(
-      core.uiSettings.asScopedToClient
-    );
 
     return {
       client: this.client as IWorkspaceClientImpl,
@@ -385,8 +382,8 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
           const hasAccess = isReadOnly
             ? true
             : permissions
-            ? new ACL(permissions).hasPermission(permissionModes, principals)
-            : false;
+              ? new ACL(permissions).hasPermission(permissionModes, principals)
+              : false;
 
           this.logger.debug(
             `Workspace authorization: workspace=${workspaceId}, modes=${permissionModes.join(

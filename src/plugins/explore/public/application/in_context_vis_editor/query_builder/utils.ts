@@ -65,7 +65,7 @@ export const resolveDatasetByLanguage = async (
       if (isSignalTypeCompatible(effectiveSignalType, requiredSignalType)) {
         return existingDataset;
       }
-    } catch (error) {
+    } catch {
       // Dataset no longer exists or validation failed
       // Silently continue to fetch a new dataset if validation fails
       // This is expected behavior when datasets are incompatible with current flavor

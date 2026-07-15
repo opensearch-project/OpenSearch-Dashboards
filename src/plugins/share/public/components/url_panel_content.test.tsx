@@ -101,9 +101,9 @@ describe('share url panel content', () => {
         />
       );
       await act(async () => {
-        component.find(EuiCompressedSwitch).prop('onChange')!(({
+        component.find(EuiCompressedSwitch).prop('onChange')!({
           target: { checked: true },
-        } as unknown) as EuiSwitchEvent);
+        } as unknown as EuiSwitchEvent);
       });
       expect(shortenUrlMock).toHaveBeenCalledWith(
         'http://localhost:5601/app/myapp#/?_g=()&_a=()',
@@ -196,9 +196,9 @@ describe('share url panel content', () => {
         />
       );
       await act(async () => {
-        component.find(EuiCompressedSwitch).prop('onChange')!(({
+        component.find(EuiCompressedSwitch).prop('onChange')!({
           target: { checked: true },
-        } as unknown) as EuiSwitchEvent);
+        } as unknown as EuiSwitchEvent);
       });
       expect(shortenUrlMock).toHaveBeenCalledWith(
         'http://localhost:5601/app/myapp#/?embed=true&_g=()&_a=()',

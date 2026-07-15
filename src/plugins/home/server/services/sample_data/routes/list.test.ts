@@ -69,7 +69,7 @@ describe('sample data list route', () => {
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
     const handler = mockRouter.get.mock.calls[0][1];
 
-    await handler((mockContext as unknown) as RequestHandlerContext, mockRequest, mockResponse);
+    await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
 
     expect(mockClient).toBeCalledTimes(2);
     expect(mockResponse.ok).toBeCalled();
@@ -138,7 +138,7 @@ describe('sample data list route', () => {
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
     const handler = mockRouter.get.mock.calls[0][1];
 
-    await handler((mockContext as unknown) as RequestHandlerContext, mockRequest, mockResponse);
+    await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
 
     expect(mockClient).toBeCalledTimes(2);
     expect(mockResponse.ok).toBeCalled();
@@ -190,7 +190,7 @@ describe('sample data list route', () => {
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
     const handler = mockRouter.get.mock.calls[0][1];
 
-    await handler((mockContext as unknown) as RequestHandlerContext, mockRequest, mockResponse);
+    await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
 
     expect(mockClient).toBeCalledTimes(2);
     expect(mockResponse.ok).toBeCalled();
@@ -263,7 +263,7 @@ describe('sample data list route', () => {
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
     const handler = mockRouter.get.mock.calls[0][1];
 
-    await handler((mockContext as unknown) as RequestHandlerContext, mockRequest, mockResponse);
+    await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
 
     expect(mockClient).toBeCalledTimes(2);
     expect(mockResponse.ok).toBeCalled();
@@ -323,7 +323,7 @@ describe('sample data list route', () => {
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
     const handler = mockRouter.get.mock.calls[0][1];
 
-    await handler((mockContext as unknown) as RequestHandlerContext, mockRequest, mockResponse);
+    await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
 
     expect(mockSOClient.get).toHaveBeenCalledWith('data-source', mockDataSourceId);
     expect(mockResponse.ok).toBeCalled();
@@ -399,7 +399,7 @@ describe('sample data list route', () => {
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
     const handler = mockRouter.get.mock.calls[0][1];
 
-    await handler((mockContext as unknown) as RequestHandlerContext, mockRequest, mockResponse);
+    await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
 
     expect(mockSOClient.get).toHaveBeenCalledWith('data-source', mockDataSourceId);
     expect(mockResponse.ok).toBeCalled();
@@ -454,7 +454,7 @@ describe('sample data list route', () => {
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
     const handler = mockRouter.get.mock.calls[0][1];
 
-    await handler((mockContext as unknown) as RequestHandlerContext, mockRequest, mockResponse);
+    await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
 
     expect(mockResponse.ok).toBeCalled();
 

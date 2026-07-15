@@ -71,14 +71,12 @@ import { logActionRegistry } from './services/log_action_registry';
 import { createAskAiAction } from './actions/ask_ai_action';
 import { importDataActionConfig } from './actions/import_data_action';
 
-export class AgentTracesPlugin
-  implements
-    Plugin<
-      AgentTracesPluginSetup,
-      AgentTracesPluginStart,
-      AgentTracesSetupDependencies,
-      AgentTracesStartDependencies
-    > {
+export class AgentTracesPlugin implements Plugin<
+  AgentTracesPluginSetup,
+  AgentTracesPluginStart,
+  AgentTracesSetupDependencies,
+  AgentTracesStartDependencies
+> {
   private stateUpdaterByApp: Record<string, BehaviorSubject<AppUpdater>> = {
     agentTraces: new BehaviorSubject<AppUpdater>(() => ({})),
   };
@@ -210,9 +208,8 @@ export class AgentTracesPlugin
 
           // Get start services
           const { core: coreStart, plugins: pluginsStart } = await this.initializeServices();
-          const isAgentTracesEnabledWorkspace = await this.getIsAgentTracesEnabledWorkspace(
-            coreStart
-          );
+          const isAgentTracesEnabledWorkspace =
+            await this.getIsAgentTracesEnabledWorkspace(coreStart);
 
           // Only show in observability-enabled workspaces
           if (!isAgentTracesEnabledWorkspace) {

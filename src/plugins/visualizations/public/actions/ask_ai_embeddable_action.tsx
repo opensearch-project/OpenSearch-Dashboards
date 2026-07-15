@@ -63,9 +63,11 @@ export class AskAIVisualizeEmbeddableAction implements Action<EmbeddableContext>
   public async isCompatible({ embeddable }: EmbeddableContext) {
     // Check if this is a visualization embeddable and if context provider is available
     const hasContextProvider = this.contextProvider !== undefined;
-    if (
-      !(embeddable.type === 'visualization' && hasContextProvider && this.core.chat.isAvailable())
-    ) {
+    if (!(
+      embeddable.type === 'visualization' &&
+      hasContextProvider &&
+      this.core.chat.isAvailable()
+    )) {
       return false;
     }
 

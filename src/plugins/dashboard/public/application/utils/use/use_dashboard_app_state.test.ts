@@ -42,14 +42,14 @@ describe('useDashboardAppAndGlobalState', () => {
   connectToQueryState.mockImplementation(() => stopSyncingAppFiltersMock);
 
   const eventEmitter = new EventEmitter();
-  const savedDashboardInstance = ({
+  const savedDashboardInstance = {
     ...dashboardAppStateStub,
     ...{
       getQuery: () => dashboardAppStateStub.query,
       getFilters: () => dashboardAppStateStub.filters,
       optionsJSON: JSON.stringify(dashboardAppStateStub.options),
     },
-  } as unknown) as SavedObjectDashboard;
+  } as unknown as SavedObjectDashboard;
   const dashboard = new Dashboard(convertToSerializedDashboard(savedDashboardInstance));
 
   let mockServices: jest.Mocked<DashboardServices>;

@@ -59,9 +59,8 @@ export const createNumericalStateTimeline = (
   const yCol = axisColumnMappings[AxisRole.Y];
   const colorCol = axisColumnMappings[AxisRole.COLOR];
 
-  const { valueMappings, rangeMappings, disconnectThreshold, connectThreshold } = normalizeConfig(
-    styleOptions
-  );
+  const { valueMappings, rangeMappings, disconnectThreshold, connectThreshold } =
+    normalizeConfig(styleOptions);
 
   const completeThreshold = [
     { value: 0, color: styleOptions.thresholdOptions.baseColor } as Threshold,
@@ -222,9 +221,8 @@ export const createSingleNumericalStateTimeline = (
   const xCol = axisColumnMappings[AxisRole.X];
   const colorCol = axisColumnMappings[AxisRole.COLOR];
 
-  const { valueMappings, rangeMappings, disconnectThreshold, connectThreshold } = normalizeConfig(
-    styleOptions
-  );
+  const { valueMappings, rangeMappings, disconnectThreshold, connectThreshold } =
+    normalizeConfig(styleOptions);
   const completeThreshold = [
     { value: 0, color: styleOptions.thresholdOptions.baseColor } as Threshold,
     ...(styleOptions.thresholdOptions.thresholds || []),

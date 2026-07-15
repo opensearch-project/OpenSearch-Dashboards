@@ -63,8 +63,7 @@ export interface OpenSearchDashboardsRequestState extends RequestApplicationStat
  * @public
  */
 export type OpenSearchDashboardsRequestRouteOptions<Method extends RouteMethod> = Method extends
-  | 'get'
-  | 'options'
+  'get' | 'options'
   ? Required<Omit<RouteConfigOptions<Method>, 'body'>>
   : Required<RouteConfigOptions<Method>>;
 
@@ -114,7 +113,7 @@ export class OpenSearchDashboardsRequest<
   Params = unknown,
   Query = unknown,
   Body = unknown,
-  Method extends RouteMethod = any
+  Method extends RouteMethod = any,
 > {
   /**
    * Factory for creating requests. Validates the request before creating an
@@ -254,13 +253,18 @@ export class OpenSearchDashboardsRequest<
 
   private getRouteInfo(request: Request): OpenSearchDashboardsRequestRoute<Method> {
     const method = request.method as Method;
-    const { parse, maxBytes, allow, output, timeout: payloadTimeout } =
-      request.route.settings.payload || {};
+    const {
+      parse,
+      maxBytes,
+      allow,
+      output,
+      timeout: payloadTimeout,
+    } = request.route.settings.payload || {};
 
     // net.Socket#timeout isn't documented, yet, and isn't part of the types... https://github.com/nodejs/node/pull/34543
     // the socket is also undefined when using @hapi/shot, or when a "fake request" is used
     const socketTimeout = (request.raw.req.socket as any)?.timeout;
-    const options = ({
+    const options = {
       authRequired: this.getAuthRequired(request),
       // some places in LP call OpenSearchDashboardsRequest.from(request) manually. remove fallback to true before v8
       xsrfRequired:
@@ -276,9 +280,9 @@ export class OpenSearchDashboardsRequest<
             parse,
             maxBytes,
             accepts: allow,
-            output: output as typeof validBodyOutput[number], // We do not support all the HAPI-supported outputs and TS complains
+            output: output as (typeof validBodyOutput)[number], // We do not support all the HAPI-supported outputs and TS complains
           },
-    } as unknown) as OpenSearchDashboardsRequestRouteOptions<Method>; // TS does not understand this is OK so I'm enforced to do this enforced casting
+    } as unknown as OpenSearchDashboardsRequestRouteOptions<Method>; // TS does not understand this is OK so I'm enforced to do this enforced casting
 
     return {
       path: request.path,

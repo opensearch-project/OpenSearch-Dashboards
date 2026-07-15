@@ -80,7 +80,7 @@ export const LanguageToggle = () => {
       // Get the default query string for the new language
       // SQL needs a base query (SELECT * FROM ...) to be valid; PPL works with empty
       const newQueryString =
-        newLanguage === 'PPL' ? '' : langConfig?.getQueryString?.(currentQuery) ?? '';
+        newLanguage === 'PPL' ? '' : (langConfig?.getQueryString?.(currentQuery) ?? '');
 
       queryString.setQuery({ query: newQueryString, language: newLanguage, dataset });
       languageSvc.setUserQueryLanguage(newLanguage);
