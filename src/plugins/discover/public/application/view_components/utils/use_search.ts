@@ -103,6 +103,7 @@ export interface SearchData {
     elapsedMs?: number;
     startTime?: number;
   };
+  actualError?: string;
 }
 
 export type SearchRefetch = 'refetch' | undefined;
@@ -398,11 +399,12 @@ export const useSearch = (services: DiscoverViewServices) => {
 
       const queryLanguage = data.query.queryString.getQuery().language;
       if (queryLanguage === 'kuery' || queryLanguage === 'lucene') {
+        const actualError = extractQueryError(error?.body || error);
         data$.next({
           status: ResultStatus.NO_RESULTS,
           rows: [],
+          actualError,
         });
-        const actualError = extractQueryError(error?.body || error);
         queryComplete$.next({
           data: data$.getValue(),
           query: ranQuery,

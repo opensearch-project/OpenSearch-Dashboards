@@ -4,14 +4,16 @@
  */
 
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { TopNav } from './top_nav';
 import { ViewProps } from '../../../../../data_explorer/public';
 import { DiscoverTable } from './discover_table';
 import { DiscoverChartContainer } from './discover_chart_container';
 import { useDiscoverContext } from '../context';
 import { ResultStatus, SearchData } from '../utils/use_search';
+import { extractQueryError } from '../utils/format_error';
 import { DiscoverNoResults } from '../../components/no_results/no_results';
+import { AskErrorButton } from '../../components/ask_error_button/ask_error_button';
 import { DiscoverNoIndexPatterns } from '../../components/no_index_patterns/no_index_patterns';
 import { DiscoverUninitialized } from '../../components/uninitialized/uninitialized';
 import { LoadingSpinner } from '../../components/loading_spinner/loading_spinner';
@@ -142,6 +144,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, optionalRef }: Vie
               query={data.query.queryString.getQuery()}
               savedQuery={data.query.savedQueries}
               timeFieldName={timeField}
+              getQueryError={() => data$.getValue().actualError}
             />
           )}
           {fetchState.status === ResultStatus.UNINITIALIZED && (
@@ -149,7 +152,25 @@ export default function DiscoverCanvas({ setHeaderActionMenu, optionalRef }: Vie
           )}
           {fetchState.status === ResultStatus.LOADING && !rows?.length && <LoadingSpinner />}
           {fetchState.status === ResultStatus.ERROR && !rows?.length && (
-            <DiscoverUninitialized onRefresh={() => refetch$.next()} />
+            <DiscoverUninitialized
+              onRefresh={() => refetch$.next()}
+              getQueryError={() => extractQueryError(data$.getValue().queryStatus?.body?.error)}
+            />
+          )}
+          {fetchState.status === ResultStatus.ERROR && !!rows?.length && (
+            <>
+              <EuiCallOut
+                color="danger"
+                iconType="alert"
+                size="s"
+                data-test-subj="discoverErrorWithResults"
+              >
+                <AskErrorButton
+                  getError={() => extractQueryError(data$.getValue().queryStatus?.body?.error)}
+                />
+              </EuiCallOut>
+              <EuiSpacer size="s" />
+            </>
           )}
           {(fetchState.status === ResultStatus.READY ||
             (fetchState.status === ResultStatus.LOADING && !!rows?.length) ||
