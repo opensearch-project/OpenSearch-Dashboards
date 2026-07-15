@@ -119,6 +119,5 @@ describe('callClient', () => {
     abortController.abort();
 
     expect(mockAbortFn).toHaveBeenCalled();
-    // expect(mockAbortFns[1]).not.toBeCalled();
   });
 });

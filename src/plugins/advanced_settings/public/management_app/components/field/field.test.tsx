@@ -588,7 +588,7 @@ describe('Field', () => {
         'click'
       );
 
-      expect(handleChange).toBeCalledWith('my:scoped:setting', {
+      expect(handleChange).toHaveBeenCalledWith('my:scoped:setting', {
         value: 'global-value',
         clearToInherit: true,
       });
@@ -601,7 +601,7 @@ describe('Field', () => {
         'click'
       );
 
-      expect(handleChange).toBeCalledWith('my:scoped:setting', {
+      expect(handleChange).toHaveBeenCalledWith('my:scoped:setting', {
         value: 'code-default',
         clearToInherit: true,
       });

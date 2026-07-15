@@ -85,7 +85,6 @@ describe('sample data install route', () => {
       index: { number_of_shards: 1, auto_expand_replicas: '0-1' },
     });
 
-    // expect(mockClient).toBeCalledTimes(2);
     expect(mockResponse.ok).toHaveBeenCalled();
     expect(mockResponse.ok.mock.calls[0][0]).toMatchObject({
       body: {
