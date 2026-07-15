@@ -8,11 +8,8 @@ import { isRuleNode } from '../rule_index';
 import { Diagnostic, DiagnosticRange } from '../diagnostic';
 import { findCompiledFieldSlotShapeMatches } from '../field_slot_shape_text';
 import { CatalogEntry, Detector, LintRunContext } from '../types';
-import {
-  buildPipelineShape,
-  collectAlternateSourceSubtrees,
-  normalizeFieldName,
-} from '../pipeline_shape';
+import { buildPipelineShape, collectAlternateSourceSubtrees } from '../pipeline_shape';
+import { normalizeFieldName, parseFieldPath } from '../field_path';
 import {
   findAllDescendantsByRule,
   findChildByRule,
@@ -188,7 +185,12 @@ function detectUnknownFields(
       if (skipSourceKeywords && SOURCE_KEYWORDS.has(name.toLowerCase())) {
         continue;
       }
-      const prefix = name.includes('.') ? name.split('.')[0] : null;
+      // Root segment for the join-alias and leaf checks. Parse the raw reference
+      // so a quoted-dot path (`` `a.b` ``) stays a single segment named `a.b`
+      // instead of being mis-split into root `a`; only a genuinely multi-segment
+      // path (`l.response`) carries a leading root.
+      const parsed = parseFieldPath(raw);
+      const prefix = parsed && parsed.segments.length > 1 ? parsed.segments[0] : null;
       // Soft skip: alias-qualified refs (`l.response` where `l` is a declared
       // join alias). Still descend into children — alias-qualified refs appear
       // in downstream pipeline stages outside the alternate-source regions.
