@@ -142,6 +142,9 @@ export default {
   rootDir,
   roots,
   moduleNameMapper: {
+    // query-string v9 is pure ESM; this shim restores the default-import shape
+    // (`import qs from 'query-string'`) under Jest's CJS transform.
+    '^query-string$': '<rootDir>/src/dev/jest/mocks/query_string_mock.js',
     // @eslint/* packages ship with `"main"` pointing at their ESM build, which
     // Jest (CommonJS mode) cannot parse.  Redirect each one to its CJS build.
     '^@eslint/plugin-kit$': '<rootDir>/node_modules/@eslint/plugin-kit/dist/cjs/index.cjs',
@@ -215,7 +218,7 @@ export default {
   transformIgnorePatterns: [
     // ignore all node_modules except those which require babel transforms to handle dynamic import()
     // since ESM modules are not natively supported in Jest yet (https://github.com/facebook/jest/issues/4842)
-    '[/\\\\]node_modules(?![\\/\\\\](monaco-editor|react-monaco-editor|weak-lru-cache|ordered-binary|d3-[^/\\\\]+|axios|@smithy|@aws-crypto|@aws-sdk|@xyflow|@dagrejs|classcat|internmap|delaunator|robust-predicates|ramda))[/\\\\].+\\.js$',
+    '[/\\\\]node_modules(?![\\/\\\\](monaco-editor|react-monaco-editor|weak-lru-cache|ordered-binary|d3-[^/\\\\]+|axios|@smithy|@aws-crypto|@aws-sdk|@xyflow|@dagrejs|classcat|internmap|delaunator|robust-predicates|ramda|query-string|decode-uri-component|filter-obj|split-on-first))[/\\\\].+\\.js$',
     'packages/osd-pm/dist/index.js',
   ],
   snapshotSerializers: [

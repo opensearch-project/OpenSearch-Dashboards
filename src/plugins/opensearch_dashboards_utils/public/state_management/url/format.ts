@@ -29,7 +29,8 @@
  */
 
 import { format as formatUrl } from 'url';
-import { stringify, ParsedQuery } from 'query-string';
+import qs from 'query-string';
+import type { ParsedQuery } from 'query-string';
 import { parseUrl, parseUrlHash } from './parse';
 import { url as urlUtils } from '../../../common';
 
@@ -40,7 +41,7 @@ export function replaceUrlQuery(
   const url = parseUrl(rawUrl);
   // @ts-expect-error
   const newQuery = queryReplacer(url.query || {});
-  const searchQueryString = stringify(urlUtils.encodeQuery(newQuery), {
+  const searchQueryString = qs.stringify(urlUtils.encodeQuery(newQuery), {
     sort: false,
     encode: false,
   });
@@ -59,7 +60,7 @@ export function replaceUrlHashQuery(
   const hash = parseUrlHash(rawUrl);
   // @ts-expect-error
   const newQuery = queryReplacer(hash?.query || {});
-  const searchQueryString = stringify(urlUtils.encodeQuery(newQuery), {
+  const searchQueryString = qs.stringify(urlUtils.encodeQuery(newQuery), {
     sort: false,
     encode: false,
   });
