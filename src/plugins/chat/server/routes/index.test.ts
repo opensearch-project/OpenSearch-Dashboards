@@ -142,7 +142,7 @@ describe('Chat Proxy Routes', () => {
       expect(response.body).toEqual({
         statusCode: 503,
         error: 'Service Unavailable',
-        message: 'No AI agent available: ML Commons agent not enabled and AG-UI URL not configured',
+        message: 'No AI agent available: AG-UI URL not configured and ML Commons agent not enabled',
       });
 
       // Verify fetch was not called
@@ -261,8 +261,8 @@ describe('Chat Proxy Routes', () => {
     });
 
     describe('Generic ML Integration', () => {
-      it('should fallback to AG-UI when agenticFeaturesEnabled is true but ML context is not available', async () => {
-        // Enable agentic features but no ML context available
+      it('should always route to AG-UI when agUiUrl is configured, even if agenticFeaturesEnabled is true', async () => {
+        // Enable agentic features, but AG-UI must still take precedence
         mockCapabilitiesResolver.mockResolvedValue({
           investigation: {
             agenticFeaturesEnabled: true,
@@ -291,10 +291,11 @@ describe('Chat Proxy Routes', () => {
           .send(validRequest)
           .expect(200);
 
-        // Verify capabilities were checked
-        expect(mockCapabilitiesResolver).toHaveBeenCalled();
+        // When agUiUrl is configured, ML Commons routing is bypassed entirely,
+        // so capabilities are never resolved.
+        expect(mockCapabilitiesResolver).not.toHaveBeenCalled();
 
-        // Verify AG-UI was called as fallback
+        // Verify AG-UI was called
         expect(mockFetch).toHaveBeenCalledWith('http://test-agui:3000', {
           method: 'POST',
           headers: {
@@ -305,14 +306,13 @@ describe('Chat Proxy Routes', () => {
         });
       });
 
-      it('should fallback to AG-UI when agenticFeaturesEnabled is true but ML client is disabled', async () => {
-        // Enable agentic features but disable ML client
+      it('should always route to AG-UI when agUiUrl is configured, regardless of ML client availability', async () => {
+        // Enable agentic features; AG-UI still wins
         mockCapabilitiesResolver.mockResolvedValue({
           investigation: {
             agenticFeaturesEnabled: true,
           },
         });
-        // ML client disabled via missing context ML client
 
         // Mock successful AG-UI response
         mockFetch.mockResolvedValue({
@@ -336,10 +336,10 @@ describe('Chat Proxy Routes', () => {
           .send(validRequest)
           .expect(200);
 
-        // Verify capabilities were checked
-        expect(mockCapabilitiesResolver).toHaveBeenCalled();
+        // ML Commons routing bypassed — capabilities not resolved
+        expect(mockCapabilitiesResolver).not.toHaveBeenCalled();
 
-        // Verify AG-UI was called as fallback
+        // Verify AG-UI was called
         expect(mockFetch).toHaveBeenCalledWith('http://test-agui:3000', {
           method: 'POST',
           headers: {
@@ -350,7 +350,7 @@ describe('Chat Proxy Routes', () => {
         });
       });
 
-      it('should fallback to AG-UI when agenticFeaturesEnabled is false', async () => {
+      it('should route to AG-UI when agUiUrl is configured and agenticFeaturesEnabled is false', async () => {
         // Disable agentic features
         mockCapabilitiesResolver.mockResolvedValue({
           investigation: {
@@ -380,15 +380,15 @@ describe('Chat Proxy Routes', () => {
           .send(validRequest)
           .expect(200);
 
-        // Verify capabilities were checked
-        expect(mockCapabilitiesResolver).toHaveBeenCalled();
+        // ML Commons routing bypassed — capabilities not resolved
+        expect(mockCapabilitiesResolver).not.toHaveBeenCalled();
 
         // Verify AG-UI was called
         expect(mockFetch).toHaveBeenCalled();
       });
 
-      it('should return 503 when ML Commons agent ID is not configured', async () => {
-        // Enable agentic features
+      it('should return 503 when neither AG-UI nor ML Commons is available', async () => {
+        // Enable agentic features but provide no AG-UI URL and no ML router
         mockCapabilitiesResolver.mockResolvedValue({
           investigation: {
             agenticFeaturesEnabled: true,
@@ -407,14 +407,14 @@ describe('Chat Proxy Routes', () => {
           .expect(503);
 
         expect(response.body.message).toContain(
-          'No AI agent available: ML Commons agent not enabled and AG-UI URL not configured'
+          'No AI agent available: AG-UI URL not configured and ML Commons agent not enabled'
         );
 
-        // Verify AG-UI was not called since ML router handled the error
+        // Verify AG-UI was not called
         expect(mockFetch).not.toHaveBeenCalled();
       });
 
-      it('should fallback to AG-UI when capabilities resolver is not available', async () => {
+      it('should route to AG-UI when agUiUrl is configured and no capabilities resolver is available', async () => {
         // Mock successful AG-UI response
         mockFetch.mockResolvedValue({
           ok: true,
@@ -437,7 +437,7 @@ describe('Chat Proxy Routes', () => {
           .send(validRequest)
           .expect(200);
 
-        // Verify AG-UI was called as fallback
+        // Verify AG-UI was called
         expect(mockFetch).toHaveBeenCalled();
       });
     });

@@ -2470,6 +2470,7 @@ export class SavedObjectsSerializer {
 export interface SavedObjectsServiceSetup {
     addClientWrapper: (priority: number, id: string, factory: SavedObjectsClientWrapperFactory) => void;
     getImportExportObjectLimit: () => number;
+    getPermissionControlEnabled: () => boolean;
     registerType: (type: SavedObjectsType) => void;
     setClientFactoryProvider: (clientFactoryProvider: SavedObjectsClientFactoryProvider) => void;
 }

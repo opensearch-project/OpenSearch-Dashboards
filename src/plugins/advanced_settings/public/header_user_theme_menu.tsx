@@ -100,7 +100,7 @@ export const HeaderUserThemeMenu = () => {
       window.localStorage.removeItem('useBrowserColorScheme');
     }
     // TODO: only set changed
-    await Promise.all(pendingActions);
+    await Promise.allSettled(pendingActions);
     window.location.reload();
   };
 

@@ -15,14 +15,14 @@
     "@babel/preset-react": "^7.29.7",
     "@babel/preset-typescript": "^7.29.7",
     "babel-plugin-add-module-exports": "^1.0.4",
-    "babel-plugin-module-resolver": "^5.0.1",
+    "babel-plugin-module-resolver": "^5.0.3",
     "babel-plugin-styled-components": "^2.0.2",
     "babel-plugin-transform-react-remove-prop-types": "^0.4.24",
-    "browserslist": "^4.21.10",
+    "browserslist": "^4.28.5",
     "react-is": "^18.2.0",
     "styled-components": "^5.3.9"
   },
   "devDependencies": {
-    "@types/browserslist": "^4.15.0"
+    "@types/browserslist": "^4.15.4"
   }
 }
