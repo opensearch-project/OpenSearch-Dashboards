@@ -23,6 +23,10 @@ import {
 import { i18n } from '@osd/i18n';
 import { VariableService } from '../../../variables/variable_service';
 import { VariableWithState } from '../../../variables/types';
+import {
+  buildVariableOptionDisplayTextMap,
+  getVariableOptionDisplayText,
+} from '../../../variables/variable_option_display_utils';
 import './variable_selector.scss';
 
 export interface VariablesBarProps {
@@ -64,6 +68,11 @@ const ValueSelector: React.FC<ValueSelectorProps> = ({ variable, onValuesChange 
     );
   }, [variable.includeAll, variable.multi, variable.options, selectedValues]);
 
+  const optionDisplayTextMap = useMemo(
+    () => buildVariableOptionDisplayTextMap(variable.options),
+    [variable.options]
+  );
+
   // Convert to EuiSelectable options format, prepend "All" if enabled
   const selectableOptions: EuiSelectableOption[] = useMemo(() => {
     const options: EuiSelectableOption[] = [];
@@ -78,14 +87,21 @@ const ValueSelector: React.FC<ValueSelectorProps> = ({ variable, onValuesChange 
 
     variable.options.forEach((option) => {
       options.push({
-        label: option.label || option.value,
+        label: getVariableOptionDisplayText(option, optionDisplayTextMap),
         key: `${OPTION_VALUE_KEY_PREFIX}${option.value}`,
         checked: selectedValues.includes(option.value) ? 'on' : undefined,
       });
     });
 
     return options;
-  }, [variable.options, variable.includeAll, variable.multi, selectedValues, isAllSelected]);
+  }, [
+    variable.options,
+    variable.includeAll,
+    variable.multi,
+    selectedValues,
+    isAllSelected,
+    optionDisplayTextMap,
+  ]);
 
   const handleChange = useCallback(
     (newOptions: EuiSelectableOption[]) => {
@@ -136,12 +152,12 @@ const ValueSelector: React.FC<ValueSelectorProps> = ({ variable, onValuesChange 
   // Calculate popover width based on longest option label
   const popoverWidth = useMemo(() => {
     const longestLength = variable.options.reduce((max, option) => {
-      const displayText = option.label || option.value;
+      const displayText = getVariableOptionDisplayText(option, optionDisplayTextMap);
       return Math.max(max, displayText.length);
     }, 0);
     // ~8px per char + 60px for checkbox/padding/scrollbar
     return Math.max(300, Math.min(longestLength * 8 + 60, 700));
-  }, [variable.options]);
+  }, [variable.options, optionDisplayTextMap]);
 
   const isLoading = !!variable.loading;
   const isError = !!variable.error;
@@ -159,7 +175,9 @@ const ValueSelector: React.FC<ValueSelectorProps> = ({ variable, onValuesChange 
     }
     if (selectedValues.length > 0) {
       const selectedOption = variable.options.find((option) => option.value === selectedValues[0]);
-      return selectedOption?.label || selectedValues[0];
+      return selectedOption
+        ? getVariableOptionDisplayText(selectedOption, optionDisplayTextMap)
+        : selectedValues[0];
     }
     if (variable.options.length === 0) {
       return i18n.translate('dashboard.variables.displayNoOptions', {
