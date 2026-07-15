@@ -98,6 +98,15 @@ describe('utils/osd_field_types', () => {
 
       expect(castTo).toBe('unknown');
     });
+
+    test('casts range field types correctly', () => {
+      expect(castOpenSearchToOsdFieldTypeName(OPENSEARCH_FIELD_TYPES.INTEGER_RANGE)).toBe('number');
+      expect(castOpenSearchToOsdFieldTypeName(OPENSEARCH_FIELD_TYPES.FLOAT_RANGE)).toBe('number');
+      expect(castOpenSearchToOsdFieldTypeName(OPENSEARCH_FIELD_TYPES.LONG_RANGE)).toBe('number');
+      expect(castOpenSearchToOsdFieldTypeName(OPENSEARCH_FIELD_TYPES.DOUBLE_RANGE)).toBe('number');
+      expect(castOpenSearchToOsdFieldTypeName(OPENSEARCH_FIELD_TYPES.DATE_RANGE)).toBe('date');
+      expect(castOpenSearchToOsdFieldTypeName(OPENSEARCH_FIELD_TYPES.IP_RANGE)).toBe('ip');
+    });
   });
 
   describe('getOsdTypeNames()', () => {
