@@ -119,6 +119,15 @@ describe('buildOverridesFromSettings', () => {
     expect(overrides).toEqual({});
   });
 
+  it('ignores a prototype-chain name as severity (hasOwnProperty, not `in`)', () => {
+    // 'toString' resolves on SEV_RANK's prototype, so a plain `severity in SEV_RANK`
+    // check would treat it as a valid level; the own-property guard rejects it.
+    const overrides = buildOverridesFromSettings(
+      makeUiSettings([{ id: 'head-without-sort', enabled: true, severity: 'toString' as never }])
+    );
+    expect(overrides).toEqual({});
+  });
+
   it('does not treat command-suggestion as a catalog override', () => {
     // command-suggestion is a syntax-channel toggle, not a catalog rule, so it
     // must not leak into the bundle rule overrides.

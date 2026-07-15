@@ -9,6 +9,15 @@ import { UI_SETTINGS } from '../../common';
 
 const SEV_RANK: Record<LintSeverity, number> = { info: 0, warning: 1, error: 2 };
 
+/**
+ * Narrowing, prototype-safe check that a stored severity is a real level. Uses an
+ * own-property test (not `in`), so an inherited name like `toString` is rejected,
+ * and narrows the type so `SEV_RANK[value]` indexes safely.
+ */
+function isLintSeverity(value: string): value is LintSeverity {
+  return Object.prototype.hasOwnProperty.call(SEV_RANK, value);
+}
+
 /** Per-rule severity floors. Users may disable these but may not downgrade below the floor. */
 const MIN_SEVERITY: Record<string, LintSeverity> = {
   'division-by-zero': 'warning',
@@ -51,8 +60,9 @@ export function buildOverridesFromSettings(uiSettings: IUiSettingsClient): Bundl
 
     // Ignore severities that aren't real levels (reachable via the raw uiSettings
     // API): an unknown value makes SEV_RANK[...] undefined, so the floor comparison
-    // is false and the junk value would slip past the MIN_SEVERITY clamp.
-    if (rule.severity && rule.severity in SEV_RANK) {
+    // is false and the junk value would slip past the MIN_SEVERITY clamp. The guard
+    // rejects inherited names like `toString` and narrows the type for indexing.
+    if (rule.severity && isLintSeverity(rule.severity)) {
       const floor = MIN_SEVERITY[entry.id];
       const effective = floor && SEV_RANK[rule.severity] < SEV_RANK[floor] ? floor : rule.severity;
       if (effective !== entry.severity) {
