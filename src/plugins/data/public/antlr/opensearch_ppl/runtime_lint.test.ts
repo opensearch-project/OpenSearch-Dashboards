@@ -156,6 +156,34 @@ describe('lintRuntimePPLQuery', () => {
         'head-without-sort'
       );
     });
+
+    // PR A type-aware rules must fire on the runtime surface too — they read the
+    // forwarded typeMap the same way the compiled path does.
+    it('flags agg-on-text on a text field via the forwarded typeMap', async () => {
+      expect(await runtimeIds('source=accounts | stats avg(firstname)')).toContain('agg-on-text');
+    });
+
+    it('does not flag agg-on-text on a numeric field', async () => {
+      expect(await runtimeIds('source=accounts | stats avg(balance)')).not.toContain('agg-on-text');
+    });
+
+    it('flags type-mismatch-numeric on a numeric-field vs non-numeric string', async () => {
+      expect(await runtimeIds('source=accounts | where age = "thirty"')).toContain(
+        'type-mismatch-numeric'
+      );
+    });
+
+    it('does not flag type-mismatch-numeric on a coercible quoted number', async () => {
+      expect(await runtimeIds('source=accounts | where age = "32"')).not.toContain(
+        'type-mismatch-numeric'
+      );
+    });
+
+    it('flags flat-object-subfield on a flat_object reference', async () => {
+      expect(await runtimeIds('source=accounts | fields attributes.http')).toContain(
+        'flat-object-subfield'
+      );
+    });
   });
 
   // Lint is best-effort: a query the runtime grammar cannot fully parse still
