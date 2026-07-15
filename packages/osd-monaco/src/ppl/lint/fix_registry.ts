@@ -28,6 +28,11 @@ interface MarkerKeyParts {
   endLineNumber: number;
   endColumn: number;
   message: string;
+  // The rule id, carried on the marker's `code` field (a plain string, or a
+  // `{ value, target }` link when the diagnostic has a doc URL). Included in the
+  // key so two diagnostics that share a range and message but come from
+  // different rules cannot collide on one fix.
+  code?: string | { value?: string };
 }
 
 interface FixRegistryState {
@@ -61,14 +66,20 @@ function getState(): FixRegistryState {
 }
 
 // Stable key correlating a stored fix with a marker after the marker has
-// round-tripped through Monaco's MarkerService (position + message survive).
+// round-tripped through Monaco's MarkerService (position + message + code
+// survive). The rule id is folded in so two diagnostics that collide on
+// range + message but carry different fixes get distinct keys instead of
+// silently last-write-wins.
 export function markerFixKey(marker: MarkerKeyParts): string {
+  const code = marker.code;
+  const ruleId = typeof code === 'string' ? code : (code?.value ?? '');
   return [
     marker.startLineNumber,
     marker.startColumn,
     marker.endLineNumber,
     marker.endColumn,
     marker.message,
+    ruleId,
   ].join(':');
 }
 

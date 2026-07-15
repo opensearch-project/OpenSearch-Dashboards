@@ -301,7 +301,8 @@ class PPLGrammarCache {
     if (!this.shouldFetchFromBackend(version, datasourceEngineType)) {
       // Version unsupported or unknown — not a failure, just nothing to fetch.
       // Don't set fetchFailed so that future warmUp calls can retry when the
-      // version becomes available (e.g. /api/status wasn't ready on page load).
+      // version becomes available (e.g. the local cluster version route wasn't
+      // ready on page load).
       return null;
     }
     const result = await this.doFetch(http, datasourceId);
@@ -332,9 +333,20 @@ class PPLGrammarCache {
         const savedObject = await savedObjectsClient.get('data-source', datasourceId);
         version = (savedObject.attributes as any)?.dataSourceVersion as string | undefined;
       } else if (!datasourceId) {
-        // Local cluster — read OSD server version from /api/status.
-        const response = await http.get<{ version?: { number?: string } }>('/api/status');
-        version = response?.version?.number;
+        // Local cluster — read the real OpenSearch engine version, not the OSD
+        // server version. The grammar endpoint and the `>=3.6.0` gate are
+        // cluster-side concerns, so /api/status (the OSD package version) is the
+        // wrong source. Reuse data_source_management's localClusterVersion route,
+        // which calls the core OpenSearch client's info(). This is intentionally a
+        // plain runtime HTTP call rather than a declared plugin dependency —
+        // declaring one would create a cycle (data_source_management ->
+        // indexPatternManagement/navigation -> data). The route always responds
+        // 200 ({ version: '' } on failure), so a missing route or empty string
+        // simply yields no version and we fall back to the compiled grammar.
+        const response = await http.get<{ version?: string }>(
+          '/internal/data-source-management/localClusterVersion'
+        );
+        version = response?.version || undefined;
       }
       if (version) {
         this.cachedVersion = version;
