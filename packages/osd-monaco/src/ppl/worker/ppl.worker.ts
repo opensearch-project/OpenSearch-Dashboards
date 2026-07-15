@@ -51,6 +51,8 @@ class PPLWorkerImpl {
       overrides: context.overrides,
       dataSourceId: context.dataSourceId,
       dataSourceVersion: context.dataSourceVersion,
+      selectedSourcePattern: context.selectedSourcePattern,
+      engineType: context.engineType,
     };
     return this.analyzer.lint(content, runContext);
   }

@@ -8,6 +8,29 @@ import { LINT_MARKER_SOURCE } from '../diagnostic_to_marker';
 import { getModelHoverFacts, markerFixKey } from './hover_registry';
 import { getRuleHoverContent } from './engine_outcomes';
 import { renderHoverCard, SeverityLabel } from './hover_card';
+import { collectPPLDiagnosticActions, DiagnosticAction } from '../diagnostic_action';
+import { getCatalogEntryById } from '../catalog';
+
+/**
+ * Render contributed actions (e.g. an AI fix) as Monaco command links. This is
+ * returned as a SEPARATE, trusted content part so the main hover card can stay
+ * untrusted: only these fully-controlled links (fixed titles, JSON-encoded args)
+ * live in the trusted block. Returns undefined when nothing is contributed.
+ */
+function renderContributedActions(
+  actions: DiagnosticAction[]
+): monaco.IMarkdownString | undefined {
+  if (actions.length === 0) {
+    return undefined;
+  }
+  const links = actions
+    .map((action) => {
+      const args = encodeURIComponent(JSON.stringify(action.args ?? []));
+      return `[${action.title}](command:${action.commandId}?${args})`;
+    })
+    .join(' &nbsp;·&nbsp; ');
+  return { value: links, isTrusted: true };
+}
 
 export const LINT_OWNER = 'PPL_LINT';
 
@@ -68,6 +91,34 @@ export const pplLintHoverProvider: monaco.languages.HoverProvider = {
     const ruleId = ruleIdOf(marker);
     const facts = getModelHoverFacts(model, markerFixKey(marker));
 
+    const entry = ruleId ? getCatalogEntryById(ruleId) : undefined;
+    const contributedActions = renderContributedActions(
+      collectPPLDiagnosticActions({
+        marker,
+        model,
+        ruleId,
+        aiFixable: entry?.aiFixable,
+        needsExplain: entry?.needsExplain,
+      })
+    );
+
+    const contents: monaco.IMarkdownString[] = [
+      {
+        value: renderHoverCard({
+          ruleId: ruleId ?? 'ppl-lint',
+          severityLabel: severityLabel(marker.severity),
+          message: marker.message,
+          docUrl: docUrlOf(marker),
+          content: ruleId ? getRuleHoverContent(ruleId) : undefined,
+          facts,
+        }),
+        isTrusted: false,
+      },
+    ];
+    if (contributedActions) {
+      contents.push(contributedActions);
+    }
+
     return {
       range: {
         startLineNumber: marker.startLineNumber,
@@ -75,19 +126,7 @@ export const pplLintHoverProvider: monaco.languages.HoverProvider = {
         endLineNumber: marker.endLineNumber,
         endColumn: marker.endColumn,
       },
-      contents: [
-        {
-          value: renderHoverCard({
-            ruleId: ruleId ?? 'ppl-lint',
-            severityLabel: severityLabel(marker.severity),
-            message: marker.message,
-            docUrl: docUrlOf(marker),
-            content: ruleId ? getRuleHoverContent(ruleId) : undefined,
-            facts,
-          }),
-          isTrusted: false,
-        },
-      ],
+      contents,
     };
   },
 };

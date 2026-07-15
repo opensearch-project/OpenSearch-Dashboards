@@ -43,6 +43,29 @@ export { runLint } from './lint/lint_runner';
 export { getBundledCatalog } from './lint/catalog';
 export { createRuntimeRuleNameToIndex } from './lint/rule_index';
 
+// Neutral lint extension points (inert until a feature registers into them).
+export {
+  registerPPLLintEventSink,
+  emitPPLLintEvent,
+} from './lint/events';
+export type {
+  PPLLintEvent,
+  PPLLintEventSink,
+  PPLLintEventType,
+  PPLLintLayer,
+} from './lint/events';
+export {
+  registerPPLDiagnosticActionContributor,
+  collectPPLDiagnosticActions,
+} from './lint/diagnostic_action';
+export type {
+  DiagnosticAction,
+  DiagnosticActionContext,
+  PPLDiagnosticActionContributor,
+} from './lint/diagnostic_action';
+export { classifyTopLevelSource, isPipeFirstQuery } from './lint/top_level_source';
+export type { TopLevelSource } from './lint/top_level_source';
+
 export { buildCommandSuggestion } from './command_suggestion';
 export type { CommandSuggestion } from './command_suggestion';
 

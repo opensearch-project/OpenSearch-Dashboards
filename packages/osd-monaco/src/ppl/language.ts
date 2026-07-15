@@ -287,6 +287,8 @@ const processLintHighlighting = (model: monaco.editor.IModel): void => {
         overrides: lintContext.overrides,
         dataSourceId: lintContext.dataSourceId,
         dataSourceVersion: lintContext.dataSourceVersion,
+        selectedSourcePattern: lintContext.selectedSourcePattern,
+        engineType: lintContext.engineType,
       }
     : undefined;
 

@@ -6,6 +6,19 @@
 import { monaco } from '../../monaco';
 import { LINT_MARKER_SOURCE, SYNTAX_MARKER_SOURCE } from './diagnostic_to_marker';
 import { getModelFix, getModelSyntaxFix, markerFixKey, MarkerFix } from './fix_registry';
+import { collectPPLDiagnosticActions } from './diagnostic_action';
+import { getCatalogEntryById } from './catalog';
+
+/** Resolve a marker's catalog rule id from its `code` field (string or link). */
+function ruleIdOfMarker(marker: monaco.editor.IMarkerData): string | undefined {
+  const { code } = marker;
+  if (typeof code === 'string') {
+    return code;
+  }
+  return code && typeof code === 'object' && typeof code.value === 'string'
+    ? code.value
+    : undefined;
+}
 
 // Code-action provider that surfaces quick-fixes for PPL markers on two
 // channels: lint diagnostics (`ppl-lint`, owner PPL_LINT) and syntax errors
@@ -36,6 +49,33 @@ export const pplLintCodeActionProvider: monaco.languages.CodeActionProvider = {
         fix = getModelSyntaxFix(model, key);
       } else {
         continue;
+      }
+
+      // Contributed actions (e.g. an AI-assisted fix) are offered on lint
+      // markers regardless of whether a deterministic fix exists. They read only
+      // neutral, catalog-owned metadata, so no rule module is imported here.
+      if (marker.source === LINT_MARKER_SOURCE) {
+        const ruleId = ruleIdOfMarker(marker);
+        const entry = ruleId ? getCatalogEntryById(ruleId) : undefined;
+        const contributed = collectPPLDiagnosticActions({
+          marker,
+          model,
+          ruleId,
+          aiFixable: entry?.aiFixable,
+          needsExplain: entry?.needsExplain,
+        });
+        for (const action of contributed) {
+          actions.push({
+            title: action.title,
+            diagnostics: [marker],
+            kind: 'quickfix',
+            command: {
+              id: action.commandId,
+              title: action.title,
+              arguments: action.args,
+            },
+          });
+        }
       }
 
       if (!fix) {

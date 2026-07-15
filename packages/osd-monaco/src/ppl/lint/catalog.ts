@@ -95,3 +95,17 @@ export function getBundledCatalog(): CatalogEntry[] {
   }
   return bundledCatalog;
 }
+
+let bundledCatalogById: Map<string, CatalogEntry> | undefined;
+
+/**
+ * Look up a bundled catalog entry by rule id. Used by the marker providers to
+ * read neutral, catalog-owned metadata (e.g. `aiFixable`, `needsExplain`) for a
+ * marker without importing any rule module. Returns undefined for an unknown id.
+ */
+export function getCatalogEntryById(ruleId: string): CatalogEntry | undefined {
+  if (!bundledCatalogById) {
+    bundledCatalogById = new Map(getBundledCatalog().map((entry) => [entry.id, entry]));
+  }
+  return bundledCatalogById.get(ruleId);
+}
