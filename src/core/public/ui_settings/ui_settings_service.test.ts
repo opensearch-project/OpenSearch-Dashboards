@@ -34,6 +34,7 @@ import { httpServiceMock } from '../http/http_service.mock';
 import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
 import { UiSettingsService } from './ui_settings_service';
 import { UiSettingsApi } from './ui_settings_api';
+import { UiSettingScope } from '../../server/ui_settings/types';
 import { of } from 'rxjs';
 
 jest.mock('./ui_settings_api');
@@ -75,13 +76,20 @@ describe('UiSettingsService', () => {
   });
 
   describe('#setup', () => {
-    it('creates all UiSettingsApi instances and registers loadingCount$', () => {
+    it('creates a UiSettingsApi instance per scope plus a default, and registers loadingCount$', () => {
       const service = new UiSettingsService();
       const addLoadingCountSourceSpy = jest.spyOn(defaultDeps.http, 'addLoadingCountSource');
 
       const client = service.setup(defaultDeps);
 
-      expect(UiSettingsApi).toHaveBeenCalledTimes(4); // GLOBAL, WORKSPACE, USER, and no specific scope
+      // One scope-less "default" API plus one dedicated API per scope
+      // (WORKSPACE, USER, GLOBAL, DASHBOARD_ADMIN).
+      expect(UiSettingsApi).toHaveBeenCalledTimes(5);
+      expect(UiSettingsApi).toHaveBeenCalledWith(httpSetup);
+      expect(UiSettingsApi).toHaveBeenCalledWith(httpSetup, UiSettingScope.WORKSPACE);
+      expect(UiSettingsApi).toHaveBeenCalledWith(httpSetup, UiSettingScope.USER);
+      expect(UiSettingsApi).toHaveBeenCalledWith(httpSetup, UiSettingScope.GLOBAL);
+      expect(UiSettingsApi).toHaveBeenCalledWith(httpSetup, UiSettingScope.DASHBOARD_ADMIN);
       expect(addLoadingCountSourceSpy).toHaveBeenCalledTimes(1);
       expect(client).toBeDefined();
     });

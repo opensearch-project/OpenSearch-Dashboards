@@ -78,11 +78,13 @@ const createSetupContractMock = () => {
     addClientWrapper: jest.fn(),
     registerType: jest.fn(),
     getImportExportObjectLimit: jest.fn(),
+    getPermissionControlEnabled: jest.fn(),
     setRepositoryFactoryProvider: jest.fn(),
     setStatus: jest.fn(),
   };
 
   setupContract.getImportExportObjectLimit.mockReturnValue(100);
+  setupContract.getPermissionControlEnabled.mockReturnValue(false);
 
   return setupContract;
 };
