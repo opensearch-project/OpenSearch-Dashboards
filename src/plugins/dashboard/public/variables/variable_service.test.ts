@@ -713,6 +713,32 @@ describe('VariableService', () => {
       expect(withState[0].options).toEqual([{ value: 'prod-api', label: 'Staging label' }]);
     });
 
+    it('should extract query option values and labels with regex capture groups', async () => {
+      mockExecuteVariableQuery.mockResolvedValue({
+        rows: [
+          { service: 'env=prod,label=Production' },
+          { service: 'env=dev,label=Development' },
+        ],
+        fields: ['service'],
+        fieldTypes: { service: 'string' },
+      });
+      const { service } = createService([
+        makeQueryVariable({
+          current: undefined,
+          regex: '^env=(?<value>[^,]+),label=(?<label>.+)$',
+        }),
+      ]);
+
+      await service.refreshVariableOptions('query-1');
+
+      const withState = service.getVariablesWithState();
+      expect(withState[0].options).toEqual([
+        { value: 'prod', label: 'Production' },
+        { value: 'dev', label: 'Development' },
+      ]);
+      expect(service.getVariables()[0].current).toEqual(['prod']);
+    });
+
     it('should set error state on fetch failure', async () => {
       mockExecuteVariableQuery.mockRejectedValue(new Error('Network error'));
       const { service } = createService([makeQueryVariable()]);
