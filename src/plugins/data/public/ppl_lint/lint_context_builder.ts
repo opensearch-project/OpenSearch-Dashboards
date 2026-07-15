@@ -17,7 +17,7 @@ import { calciteSettingsCache } from './calcite_settings_cache';
 /** Subset of dataset fields needed for lint context construction. */
 interface LintContextDataset {
   id?: string;
-  dataSource?: { id?: string; version?: string };
+  dataSource?: { id?: string; version?: string; engineType?: string; type?: string };
 }
 
 /**
@@ -31,6 +31,7 @@ export interface LintFieldsCache {
   datasetId?: string;
   dataSourceId?: string;
   fields?: Set<string>;
+  typeMap?: Map<string, string>;
 }
 
 /**
@@ -50,6 +51,48 @@ export function extractFieldNames(indexPattern: {
   return fields;
 }
 
+/**
+ * Derive an unambiguous field-name → esType map from an index pattern, for the
+ * type-aware lint rules (agg-on-text, expand-on-non-array, flat-object-subfield,
+ * type-mismatch-numeric). Runs in the same effect that already loads the index
+ * pattern, so it adds no request.
+ *
+ * A wildcard data view can back a single field name with conflicting mappings
+ * across indices (`['long', 'keyword']`), so this aggregates every entry for a
+ * name first and only keeps the field when exactly one unique non-empty type
+ * remains. Ambiguous or empty mappings are omitted, so a type-aware rule sees no
+ * entry and self-suppresses rather than guessing. Dotted names are preserved
+ * exactly; query references are canonicalized through `parseFieldPath` at lookup.
+ */
+export function extractFieldTypeMap(indexPattern: {
+  fields?: Array<{ name?: string; esTypes?: string[] } | undefined>;
+}): Map<string, string> {
+  const typesByName = new Map<string, Set<string>>();
+  for (const field of indexPattern.fields ?? []) {
+    if (!field?.name) {
+      continue;
+    }
+    let types = typesByName.get(field.name);
+    if (!types) {
+      types = new Set<string>();
+      typesByName.set(field.name, types);
+    }
+    for (const type of field.esTypes ?? []) {
+      if (type) {
+        types.add(type);
+      }
+    }
+  }
+
+  const result = new Map<string, string>();
+  for (const [name, types] of typesByName) {
+    if (types.size === 1) {
+      result.set(name, [...types][0]);
+    }
+  }
+  return result;
+}
+
 /** Build the {@link PPLLintContext} for the active dataset and per-rule overrides. */
 export function buildPPLLintContext(
   dataset: LintContextDataset | undefined,
@@ -58,6 +101,7 @@ export function buildPPLLintContext(
 ): PPLLintContext {
   const dsId = dataset?.dataSource?.id;
   const dsVersion = dataset?.dataSource?.version;
+  const dsEngineType = dataset?.dataSource?.engineType ?? dataset?.dataSource?.type;
 
   // Fallback to the grammar cache's resolved version when the dataset metadata
   // does not carry a version (common on local-cluster datasets).
@@ -71,12 +115,22 @@ export function buildPPLLintContext(
   const cacheMatchesDataset =
     lintFields.datasetId === dataset?.id && lintFields.dataSourceId === dsId;
 
+  // Prefer the cluster's actual Calcite setting when the settings fetch has
+  // resolved: `deriveIsCalcite` only reads the semver (>= 3.3.0), which cannot
+  // detect an administratively-disabled Calcite on a new-enough cluster. Fall
+  // back to the version heuristic until the cache warms up.
+  const isCalcite =
+    cachedSettings !== undefined
+      ? cachedSettings.calciteEnabled
+      : deriveIsCalcite(effectiveVersion);
+
   return {
-    useRuntimeGrammar: shouldUseRuntimeGrammar(dsId, effectiveVersion),
+    useRuntimeGrammar: shouldUseRuntimeGrammar(dsId, effectiveVersion, dsEngineType),
     dataSourceId: dsId,
     dataSourceVersion: effectiveVersion,
-    isCalcite: deriveIsCalcite(effectiveVersion),
+    isCalcite,
     fields: cacheMatchesDataset ? lintFields.fields : undefined,
+    typeMap: cacheMatchesDataset ? lintFields.typeMap : undefined,
     settings: cachedSettings
       ? { allJoinTypesAllowed: cachedSettings.allJoinTypesAllowed }
       : undefined,

@@ -5,7 +5,11 @@
 
 import { IUiSettingsClient } from 'opensearch-dashboards/public';
 import { HttpSetup } from '../../../../core/public';
-import { buildPPLLintContext, extractFieldNames } from './lint_context_builder';
+import {
+  buildPPLLintContext,
+  extractFieldNames,
+  extractFieldTypeMap,
+} from './lint_context_builder';
 import { buildOverridesFromSettings, isCommandSuggestionEnabled } from './lint_overrides';
 import {
   pplGrammarCache,
@@ -181,6 +185,73 @@ describe('buildPPLLintContext', () => {
     const ctx = buildPPLLintContext(dataset, {}, services);
     expect(ctx.fields).toBeUndefined();
   });
+
+  it('applies the cached typeMap when dataset id and data source id both match', () => {
+    const typeMap = new Map([['age', 'long']]);
+    const ctx = buildPPLLintContext(
+      dataset,
+      { datasetId: 'dataset-1', dataSourceId: 'mds-1', typeMap },
+      services
+    );
+    expect(ctx.typeMap).toBe(typeMap);
+  });
+
+  it('drops the cached typeMap when the data source id differs (no stale types)', () => {
+    const typeMap = new Map([['age', 'long']]);
+    const ctx = buildPPLLintContext(
+      dataset,
+      { datasetId: 'dataset-1', dataSourceId: 'other-mds', typeMap },
+      services
+    );
+    expect(ctx.typeMap).toBeUndefined();
+  });
+
+  it('drops the cached typeMap from a different dataset', () => {
+    const typeMap = new Map([['age', 'long']]);
+    const ctx = buildPPLLintContext(
+      dataset,
+      { datasetId: 'other-dataset', dataSourceId: 'mds-1', typeMap },
+      services
+    );
+    expect(ctx.typeMap).toBeUndefined();
+  });
+
+  it('leaves typeMap undefined when the cache is empty', () => {
+    const ctx = buildPPLLintContext(dataset, {}, services);
+    expect(ctx.typeMap).toBeUndefined();
+  });
+
+  it('forwards the data source engine type to shouldUseRuntimeGrammar (engineType wins over type)', () => {
+    const engineDataset = {
+      id: 'dataset-1',
+      dataSource: { id: 'mds-1', version: '3.8.0', engineType: 'OpenSearch', type: 'DATA_SOURCE' },
+    };
+    buildPPLLintContext(engineDataset, {}, services);
+    expect(mockShouldUseRuntimeGrammar).toHaveBeenCalledWith('mds-1', '3.8.0', 'OpenSearch');
+  });
+
+  it('falls back to dataSource.type when engineType is absent', () => {
+    const typeDataset = {
+      id: 'dataset-1',
+      dataSource: { id: 'mds-1', version: '3.8.0', type: 'Elasticsearch' },
+    };
+    buildPPLLintContext(typeDataset, {}, services);
+    expect(mockShouldUseRuntimeGrammar).toHaveBeenCalledWith('mds-1', '3.8.0', 'Elasticsearch');
+  });
+
+  it('uses the cluster calciteEnabled setting over the version heuristic when cached', () => {
+    // A >= 3.3.0 cluster with Calcite administratively disabled: the semver
+    // heuristic would say true, but the resolved cluster setting is authoritative.
+    mockGetCachedSettings.mockReturnValue({ calciteEnabled: false, allJoinTypesAllowed: false });
+    const ctx = buildPPLLintContext(dataset, {}, services);
+    expect(ctx.isCalcite).toBe(false);
+  });
+
+  it('falls back to the version heuristic for isCalcite until settings resolve', () => {
+    mockGetCachedSettings.mockReturnValue(undefined);
+    const ctx = buildPPLLintContext(dataset, {}, services);
+    expect(ctx.isCalcite).toBe(true);
+  });
 });
 
 describe('extractFieldNames', () => {
@@ -197,5 +268,60 @@ describe('extractFieldNames', () => {
   it('returns an empty set when there are no fields', () => {
     expect(extractFieldNames({})).toEqual(new Set());
     expect(extractFieldNames({ fields: [] })).toEqual(new Set());
+  });
+});
+
+describe('extractFieldTypeMap', () => {
+  it('maps a field with exactly one esType', () => {
+    const ip = { fields: [{ name: 'age', esTypes: ['long'] }] };
+    expect(extractFieldTypeMap(ip)).toEqual(new Map([['age', 'long']]));
+  });
+
+  it('unions duplicate entries carrying the same single type', () => {
+    const ip = {
+      fields: [
+        { name: 'age', esTypes: ['long'] },
+        { name: 'age', esTypes: ['long'] },
+      ],
+    };
+    expect(extractFieldTypeMap(ip)).toEqual(new Map([['age', 'long']]));
+  });
+
+  it('omits a field with conflicting types across backing indices', () => {
+    const ip = {
+      fields: [
+        { name: 'mixed', esTypes: ['long'] },
+        { name: 'mixed', esTypes: ['keyword'] },
+      ],
+    };
+    expect(extractFieldTypeMap(ip).has('mixed')).toBe(false);
+  });
+
+  it('omits a wildcard field whose single entry carries conflicting types', () => {
+    const ip = { fields: [{ name: 'mixed', esTypes: ['long', 'keyword'] }] };
+    expect(extractFieldTypeMap(ip).has('mixed')).toBe(false);
+  });
+
+  it('skips fields with no name, no esTypes, or empty type strings', () => {
+    const ip = {
+      fields: [
+        { name: '', esTypes: ['long'] },
+        undefined,
+        { name: 'noTypes' },
+        { name: 'empty', esTypes: [''] },
+        { name: 'good', esTypes: ['double'] },
+      ],
+    };
+    expect(extractFieldTypeMap(ip)).toEqual(new Map([['good', 'double']]));
+  });
+
+  it('preserves dotted field names exactly', () => {
+    const ip = { fields: [{ name: 'a.b.c', esTypes: ['keyword'] }] };
+    expect(extractFieldTypeMap(ip).get('a.b.c')).toBe('keyword');
+  });
+
+  it('returns an empty map when there are no fields', () => {
+    expect(extractFieldTypeMap({})).toEqual(new Map());
+    expect(extractFieldTypeMap({ fields: [] })).toEqual(new Map());
   });
 });

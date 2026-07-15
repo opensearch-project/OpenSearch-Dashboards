@@ -158,6 +158,8 @@ import {
   attachPPLContexts,
   buildPPLLintContext,
   syncPPLLintContext,
+  extractFieldNames,
+  extractFieldTypeMap,
 } from '../../../../../../data/public';
 import { onEditorRunActionCreator } from '../../../../application/utils/state_management/actions/query_editor';
 import { setEditorMode } from '../../../../application/utils/state_management/slices';
@@ -619,6 +621,68 @@ describe('useQueryPanelEditor', () => {
     it('getLintContext includes overrides built from uiSettings', () => {
       const ctx = captureContexts().getLintContext();
       expect(ctx.overrides).toEqual({ 'some-rule': { enabled: false } });
+    });
+
+    describe('loadFields effect caches field names and the type map', () => {
+      const indexPattern = {
+        id: 'ds-dataset',
+        fields: [
+          { name: 'age', esTypes: ['long'] },
+          { name: 'name', esTypes: ['text'] },
+        ],
+      };
+
+      beforeEach(() => {
+        (extractFieldNames as jest.Mock).mockReturnValue(new Set(['age', 'name']));
+        (extractFieldTypeMap as jest.Mock).mockReturnValue(
+          new Map([
+            ['age', 'long'],
+            ['name', 'text'],
+          ])
+        );
+        mockServices.data.dataViews = {
+          get: jest.fn().mockResolvedValue(indexPattern),
+        };
+      });
+
+      const lastLintFieldsCache = async () => {
+        const { result } = renderHook(() => useQueryPanelEditor());
+        await act(async () => {
+          result.current.editorDidMount(mockEditor);
+          // Let the async loadFields effect resolve.
+          await Promise.resolve();
+          await Promise.resolve();
+        });
+        const calls = (buildPPLLintContext as jest.Mock).mock.calls;
+        return calls[calls.length - 1][1];
+      };
+
+      it('extracts both the field names and the type map from the index pattern', async () => {
+        await lastLintFieldsCache();
+        expect(extractFieldNames).toHaveBeenCalledWith(indexPattern);
+        expect(extractFieldTypeMap).toHaveBeenCalledWith(indexPattern);
+      });
+
+      it('caches the type map keyed by dataset and data source id', async () => {
+        const cache = await lastLintFieldsCache();
+        expect(cache.datasetId).toBe('ds-dataset');
+        expect(cache.dataSourceId).toBe('mds-1');
+        expect(cache.typeMap).toEqual(
+          new Map([
+            ['age', 'long'],
+            ['name', 'text'],
+          ])
+        );
+      });
+
+      it('does not carry a stale type map when the field load fails', async () => {
+        mockServices.data.dataViews = {
+          get: jest.fn().mockRejectedValue(new Error('load failed')),
+        };
+        const cache = await lastLintFieldsCache();
+        expect(cache.typeMap).toBeUndefined();
+        expect(cache.fields).toBeUndefined();
+      });
     });
   });
 

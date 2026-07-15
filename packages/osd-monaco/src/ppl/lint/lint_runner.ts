@@ -36,6 +36,7 @@ export function mergeConfig(local: CatalogEntry, override?: Partial<CatalogEntry
 function isContextEmpty(context: LintRunContext | undefined): boolean {
   return (
     (!context?.fields || context.fields.size === 0) &&
+    (!context?.typeMap || context.typeMap.size === 0) &&
     (!context?.visibleIndices || context.visibleIndices.length === 0)
   );
 }

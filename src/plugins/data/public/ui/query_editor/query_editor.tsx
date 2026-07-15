@@ -51,6 +51,7 @@ import {
 import {
   buildPPLLintContext,
   extractFieldNames,
+  extractFieldTypeMap,
   LintFieldsCache,
 } from '../../ppl_lint/lint_context_builder';
 
@@ -179,6 +180,7 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
             datasetId,
             dataSourceId,
             fields: extractFieldNames(indexPattern),
+            typeMap: extractFieldTypeMap(indexPattern),
           };
         } catch {
           // On failure leave fields unset so field-validation self-suppresses.

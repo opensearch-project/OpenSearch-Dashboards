@@ -43,6 +43,7 @@ import {
   PPLDetachRefs,
   buildPPLLintContext,
   extractFieldNames,
+  extractFieldTypeMap,
   LintFieldsCache,
   pplGrammarCache,
   shouldUseRuntimeGrammar,
@@ -242,6 +243,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
             datasetId,
             dataSourceId,
             fields: extractFieldNames(indexPattern),
+            typeMap: extractFieldTypeMap(indexPattern),
           };
         } catch {
           if (cancelled) {
