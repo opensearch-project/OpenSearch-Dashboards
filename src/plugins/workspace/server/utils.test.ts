@@ -135,6 +135,66 @@ describe('workspace utils', () => {
     expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(false);
   });
 
+  it('should split configUsers string by comma', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    const groups: string[] = [];
+    const users: string[] = ['user2'];
+    const configGroups: string[] = [];
+    const configUsers = 'user1,user2' as unknown as string[];
+    updateDashboardAdminStateForRequest(mockRequest, groups, users, configGroups, configUsers);
+    expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(true);
+  });
+
+  it('should split configUsers string by space', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    const groups: string[] = [];
+    const users: string[] = ['user2'];
+    const configGroups: string[] = [];
+    const configUsers = 'user1 user2' as unknown as string[];
+    updateDashboardAdminStateForRequest(mockRequest, groups, users, configGroups, configUsers);
+    expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(true);
+  });
+
+  it('should split configGroups string by comma', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    const groups: string[] = ['group2'];
+    const users: string[] = [];
+    const configGroups = 'group1,group2' as unknown as string[];
+    const configUsers: string[] = [];
+    updateDashboardAdminStateForRequest(mockRequest, groups, users, configGroups, configUsers);
+    expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(true);
+  });
+
+  it('should split configGroups string by space', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    const groups: string[] = ['group2'];
+    const users: string[] = [];
+    const configGroups = 'group1 group2' as unknown as string[];
+    const configUsers: string[] = [];
+    updateDashboardAdminStateForRequest(mockRequest, groups, users, configGroups, configUsers);
+    expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(true);
+  });
+
+  it('should split configUsers string by tab', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    const groups: string[] = [];
+    const users: string[] = ['user2'];
+    const configGroups: string[] = [];
+    const configUsers = 'user1\tuser2' as unknown as string[];
+    updateDashboardAdminStateForRequest(mockRequest, groups, users, configGroups, configUsers);
+    expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(true);
+  });
+
+  it('should split configGroups string by tab', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    const groups: string[] = ['group2'];
+    const users: string[] = [];
+    const configGroups = 'group1\tgroup2' as unknown as string[];
+    const configUsers: string[] = [];
+    updateDashboardAdminStateForRequest(mockRequest, groups, users, configGroups, configUsers);
+    expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(true);
+  });
+
   it('should not crash when configUsers or configGroups is null or undefined', () => {
     const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
     const groups: string[] = [];
