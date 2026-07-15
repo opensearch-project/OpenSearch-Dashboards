@@ -28,8 +28,12 @@ interface QueryAssistInputProps {
   dependencies: QueryEditorExtensionDependencies;
 }
 
+const NOOP_DYNAMIC_CONTEXT_HOOK = (_options?: any): string => '';
+
 export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
   const { services } = useOpenSearchDashboards<IDataPluginServices>();
+  const useDynamicContext =
+    (services as any).contextProvider?.hooks?.useDynamicContext ?? NOOP_DYNAMIC_CONTEXT_HOOK;
   const queryString = services.data.query.queryString;
   const inputRef = useRef<HTMLInputElement>(null);
   const storage = getStorage();
@@ -47,7 +51,25 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
   );
   const selectedIndex = selectedDataset?.title;
   const previousQuestionRef = useRef<string>();
-  const { updateQueryState } = useQueryAssist();
+  const { queryState, updateQueryState } = useQueryAssist();
+
+  const naturalLanguageContextActive = !!queryState?.question;
+
+  useDynamicContext(
+    naturalLanguageContextActive
+      ? {
+          id: 'query-assist-natural-language-prompt',
+          description:
+            'The natural language question the user asked and the query generated from it with a standalone AI assist',
+          value: {
+            naturalLanguageQuestion: queryState.question,
+            generatedQuery: queryState.generatedQuery,
+          },
+          label: 'Natural language question',
+          categories: ['page', 'dynamic'],
+        }
+      : null
+  );
 
   useEffect(() => {
     const subscription = queryString.getUpdates$().subscribe((query) => {
