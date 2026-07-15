@@ -51,6 +51,7 @@ export interface UiSettingsServiceOptions {
   overrides?: Record<string, any>;
   defaults?: Record<string, UiSettingsParams>;
   log: Logger;
+  permissionControlEnabled?: boolean;
 }
 
 interface ReadOptions {
@@ -114,9 +115,19 @@ export class UiSettingsClient implements IUiSettingsClient {
   private readonly workspaceLevelSettingsKeys: string[] = [];
   private readonly globalLevelSettingsKeys: string[] = [];
   private readonly adminUiSettingsKeys: string[] = [];
+  private readonly permissionControlEnabled: boolean;
 
   constructor(options: UiSettingsServiceOptions) {
-    const { type, id, buildNum, savedObjectsClient, log, defaults = {}, overrides = {} } = options;
+    const {
+      type,
+      id,
+      buildNum,
+      savedObjectsClient,
+      log,
+      defaults = {},
+      overrides = {},
+      permissionControlEnabled = false,
+    } = options;
 
     this.type = type;
     this.id = id;
@@ -125,6 +136,7 @@ export class UiSettingsClient implements IUiSettingsClient {
     this.defaults = defaults;
     this.overrides = overrides;
     this.log = log;
+    this.permissionControlEnabled = permissionControlEnabled;
     this.groupSettingsKeys(this.defaults);
   }
 
@@ -178,9 +190,15 @@ export class UiSettingsClient implements IUiSettingsClient {
       // Otherwise, read from all scopes and merge.
       const scopeValue = key ? this.defaults[key]?.scope : undefined;
       const keyScopes = scopeValue ? (Array.isArray(scopeValue) ? scopeValue : [scopeValue]) : null;
-      const scopesToRead = keyScopes
-        ? UiSettingScopeReadOptions.filter((opt) => keyScopes.includes(opt.scope as UiSettingScope))
-        : UiSettingScopeReadOptions;
+      const scopesToRead = (
+        keyScopes
+          ? UiSettingScopeReadOptions.filter((opt) =>
+              keyScopes.includes(opt.scope as UiSettingScope)
+            )
+          : UiSettingScopeReadOptions
+      ).filter(
+        (opt) => this.permissionControlEnabled || opt.scope !== UiSettingScope.DASHBOARD_ADMIN
+      );
 
       for (const readOptions of scopesToRead) {
         userProvided = { ...userProvided, ...this.onReadHook<T>(await this.read(readOptions)) };

@@ -33,18 +33,16 @@ import { Router, Switch, Route } from 'react-router-dom';
 
 import { i18n } from '@osd/i18n';
 import { I18nProvider } from '@osd/i18n/react';
-import { AppMountParameters, CoreStart, StartServicesAccessor } from 'src/core/public';
+import { StartServicesAccessor } from 'src/core/public';
 
 import { EuiPageContent } from '@elastic/eui';
-import { ContentManagementPluginStart } from '../../../content_management/public';
 import { AdvancedSettings } from './advanced_settings';
 import { ManagementAppMountParams } from '../../../management/public';
 import { ComponentRegistry } from '../types';
 import { NavigationPublicPluginStart } from '../../../navigation/public';
-import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
+import { UiSettingScope } from '../../../../core/public';
 
 import './index.scss';
-import { UserSettingsApp } from './user_settings';
 
 const readOnlyBadge = {
   text: i18n.translate('advancedSettings.badge.readOnly.text', {
@@ -61,7 +59,8 @@ export async function mountManagementSection(
     navigation: NavigationPublicPluginStart;
   }>,
   params: ManagementAppMountParams & { wrapInPage?: boolean },
-  componentRegistry: ComponentRegistry['start']
+  componentRegistry: ComponentRegistry['start'],
+  scope?: UiSettingScope
 ) {
   const [{ uiSettings, notifications, docLinks, application, chrome }, { navigation }] =
     await getStartServices();
@@ -73,12 +72,23 @@ export async function mountManagementSection(
     chrome.setBadge(readOnlyBadge);
   }
 
+  const isUserScope = scope === UiSettingScope.USER;
+  const isWorkspaceScope = scope === UiSettingScope.WORKSPACE;
+
   const title = i18n.translate('advancedSettings.advancedSettingsLabel', {
     defaultMessage: 'Advanced settings',
   });
-  const newUXTitle = i18n.translate('advancedSettings.newHeader.pageTitle', {
-    defaultMessage: 'Application settings',
-  });
+  const newUXTitle = isUserScope
+    ? i18n.translate('advancedSettings.userSettingsLabel', {
+        defaultMessage: 'User settings',
+      })
+    : isWorkspaceScope
+      ? i18n.translate('advancedSettings.workspaceSettingsLabel', {
+          defaultMessage: 'Workspace settings',
+        })
+      : i18n.translate('advancedSettings.newHeader.pageTitle', {
+          defaultMessage: 'Application settings',
+        });
 
   const useUpdatedUX = uiSettings.get('home:useNewHomePage');
   // If new navigation is off, this will be rendered as breadcrumb. If is on, this will be rendered as title.
@@ -98,6 +108,7 @@ export async function mountManagementSection(
             useUpdatedUX={useUpdatedUX}
             navigationUI={navigation.ui}
             application={application}
+            scope={scope}
           />
         </Route>
       </Switch>
@@ -132,22 +143,3 @@ export async function mountManagementSection(
     root.unmount();
   };
 }
-
-export const renderUserSettingsApp = async (
-  { element }: AppMountParameters,
-  services: CoreStart & {
-    contentManagement: ContentManagementPluginStart;
-    navigation: NavigationPublicPluginStart;
-  }
-) => {
-  const root = createRoot(element);
-  root.render(
-    <OpenSearchDashboardsContextProvider services={services}>
-      <UserSettingsApp />
-    </OpenSearchDashboardsContextProvider>
-  );
-
-  return () => {
-    root.unmount();
-  };
-};

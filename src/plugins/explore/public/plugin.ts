@@ -5,7 +5,7 @@
 
 import { i18n } from '@osd/i18n';
 import semver from 'semver';
-import { stringify } from 'query-string';
+import qs from 'query-string';
 import rison from 'rison-node';
 import { BehaviorSubject } from 'rxjs';
 import { filter, map, take } from 'rxjs/operators';
@@ -209,7 +209,7 @@ export class ExplorePlugin implements Plugin<
 
         // Note: Explore uses Redux for filter management, not filterManager
         // So we don't include filter state in URLs for context links
-        const hash = stringify(
+        const hash = qs.stringify(
           url.encodeQuery({
             _g: rison.encode({}), // No global filters (explore uses Redux)
             _a: rison.encode({

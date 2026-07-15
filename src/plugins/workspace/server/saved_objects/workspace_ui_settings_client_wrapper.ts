@@ -18,9 +18,6 @@ import {
   SavedObjectsErrorHelpers,
   CURRENT_WORKSPACE_PLACEHOLDER,
   PluginInitializerContext,
-  UiSettingsServiceStart,
-  IUiSettingsClient,
-  UiSettingScope,
 } from '../../../../core/server';
 import { WORKSPACE_UI_SETTINGS_CLIENT_WRAPPER_ID } from '../../common/constants';
 import { Logger } from '../../../../core/server';
@@ -35,7 +32,6 @@ export class WorkspaceUiSettingsClientWrapper {
     private readonly env: PluginInitializerContext['env']
   ) {}
   private getScopedClient?: SavedObjectsServiceStart['getScopedClient'];
-  private asScopedUISettingsClient?: UiSettingsServiceStart['asScopedToClient'];
 
   /**
    * WORKSPACE_TYPE is a hidden type, regular saved object client won't return hidden types.
@@ -49,16 +45,8 @@ export class WorkspaceUiSettingsClientWrapper {
     }) as SavedObjectsClientContract;
   }
 
-  private getUISettingsClient(savedObjectClient: SavedObjectsClientContract) {
-    return this.asScopedUISettingsClient?.(savedObjectClient) as IUiSettingsClient;
-  }
-
   public setScopedClient(getScopedClient: SavedObjectsServiceStart['getScopedClient']) {
     this.getScopedClient = getScopedClient;
-  }
-
-  public setAsScopedUISettingsClient(asScopedToClient: UiSettingsServiceStart['asScopedToClient']) {
-    this.asScopedUISettingsClient = asScopedToClient;
   }
 
   public wrapperFactory: SavedObjectsClientWrapperFactory = (wrapperOptions) => {
@@ -109,27 +97,17 @@ export class WorkspaceUiSettingsClientWrapper {
           this.logger.error(`Unable to get workspaceObject with id: ${requestWorkspaceId}`);
         }
 
-        const UISettingsClient = this.getUISettingsClient(workspaceTypeEnabledClient);
-        const registeredConfigs = UISettingsClient.getRegistered();
+        // Only surface settings actually stored in this workspace; defaults come from
+        // the global/defaults layer during the merge in UiSettingsClient.
+        const workspaceSettings: Record<string, any> = {
+          ...(workspaceObject?.attributes?.uiSettings || {}),
+        };
 
-        const workspaceScopeConfigDefaults = Object.entries(registeredConfigs)
-          .filter(([, config]) =>
-            Array<UiSettingScope>()
-              .concat(config.scope || [])
-              .includes(UiSettingScope.WORKSPACE)
-          )
-          .reduce(
-            (acc, [key, config]) => {
-              acc[key] = config.value;
-              return acc;
-            },
-            {} as Record<string, any>
-          );
-
-        const workspaceSettings = workspaceObject?.attributes?.uiSettings || {};
-
-        Object.entries(workspaceScopeConfigDefaults).forEach(([key, value]) => {
-          workspaceSettings[key] = workspaceSettings[key] || value;
+        // A cleared setting is stored as null; drop it so it inherits from global.
+        Object.keys(workspaceSettings).forEach((key) => {
+          if (workspaceSettings[key] === null) {
+            delete workspaceSettings[key];
+          }
         });
 
         configObject.attributes = workspaceSettings as T;

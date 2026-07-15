@@ -32,7 +32,7 @@ import { I18nProvider } from '@osd/i18n/react';
 import { shallowWithI18nProvider, mountWithI18nProvider } from 'test_utils/enzyme_helpers';
 import { mount, ReactWrapper } from 'enzyme';
 import { FieldSetting } from '../../types';
-import { UiSettingsType, StringValidation } from '../../../../../../core/public';
+import { UiSettingsType, StringValidation, UiSettingScope } from '../../../../../../core/public';
 import { notificationServiceMock, docLinksServiceMock } from '../../../../../../core/public/mocks';
 
 import { findTestSubject } from 'test_utils/helpers';
@@ -515,5 +515,116 @@ describe('Field', () => {
         });
       });
     }
+  });
+
+  describe('scoped settings behavior', () => {
+    // A GLOBAL+USER setting: it can inherit from the Application (global) scope.
+    const scopedSetting: FieldSetting = {
+      name: 'my:scoped:setting',
+      ariaName: 'my scoped setting',
+      displayName: 'My scoped setting',
+      description: 'A scoped setting',
+      type: 'string' as UiSettingsType,
+      value: 'user-value',
+      defVal: 'code-default',
+      scope: [UiSettingScope.GLOBAL, UiSettingScope.USER],
+      isCustom: false,
+      isOverridden: false,
+      isPermissionControlled: false,
+      ...defaults,
+    };
+
+    const renderField = (overrides: Partial<FieldSetting>, props: Record<string, any> = {}) =>
+      mountWithI18nProvider(
+        <Field
+          setting={{ ...scopedSetting, ...overrides }}
+          handleChange={handleChange}
+          enableSaving={true}
+          dockLinks={docLinksServiceMock.createStartContract().links}
+          toasts={notificationServiceMock.createStartContract().toasts}
+          pageScope={UiSettingScope.USER}
+          {...props}
+        />
+      );
+
+    beforeEach(() => handleChange.mockClear());
+
+    it('does not show a source badge on the Application page (isUserProvided undefined)', () => {
+      const wrapper = mountWithI18nProvider(
+        <Field
+          setting={{ ...scopedSetting, isUserProvided: undefined }}
+          handleChange={handleChange}
+          enableSaving={true}
+          dockLinks={docLinksServiceMock.createStartContract().links}
+          toasts={notificationServiceMock.createStartContract().toasts}
+        />
+      );
+      expect(wrapper.find('EuiBadge').exists()).toBe(false);
+    });
+
+    it('shows the scope-named badge and "Use Application value" link when the scope has its own value', () => {
+      const wrapper = renderField({ isUserProvided: true, inheritedValue: 'global-value' });
+
+      // Badge names the scope ("User value") rather than a generic "Customized".
+      expect(wrapper.find('EuiBadge').text()).toContain('User value');
+      expect(
+        findTestSubject(wrapper, `advancedSetting-useApplicationValue-my:scoped:setting`).exists()
+      ).toBe(true);
+    });
+
+    it('shows the "Application" badge and no reset link when inheriting', () => {
+      const wrapper = renderField({ isUserProvided: false });
+
+      expect(wrapper.find('EuiBadge').text()).toContain('Application');
+      expect(
+        findTestSubject(wrapper, `advancedSetting-useApplicationValue-my:scoped:setting`).exists()
+      ).toBe(false);
+    });
+
+    it('clicking "Use Application value" fires clearToInherit with the inherited value preview', () => {
+      const wrapper = renderField({ isUserProvided: true, inheritedValue: 'global-value' });
+
+      findTestSubject(wrapper, `advancedSetting-useApplicationValue-my:scoped:setting`).simulate(
+        'click'
+      );
+
+      expect(handleChange).toBeCalledWith('my:scoped:setting', {
+        value: 'global-value',
+        clearToInherit: true,
+      });
+    });
+
+    it('previews the code default when the global scope has no inherited value', () => {
+      const wrapper = renderField({ isUserProvided: true, inheritedValue: undefined });
+
+      findTestSubject(wrapper, `advancedSetting-useApplicationValue-my:scoped:setting`).simulate(
+        'click'
+      );
+
+      expect(handleChange).toBeCalledWith('my:scoped:setting', {
+        value: 'code-default',
+        clearToInherit: true,
+      });
+    });
+
+    it('shows an override hint while there is a pending change', () => {
+      const wrapper = renderField(
+        { isUserProvided: false },
+        { unsavedChanges: { value: 'new-value' } }
+      );
+      expect(findTestSubject(wrapper, 'advancedSetting-overrideHint').text()).toContain(
+        'will override Application settings'
+      );
+    });
+
+    it('shows an inherit hint while a clearToInherit change is pending', () => {
+      const wrapper = renderField(
+        { isUserProvided: true, inheritedValue: 'global-value' },
+        { unsavedChanges: { value: 'global-value', clearToInherit: true } }
+      );
+      expect(findTestSubject(wrapper, 'advancedSetting-overrideHint').text()).toContain(
+        'will inherit from Application settings'
+      );
+    });
   });
 });

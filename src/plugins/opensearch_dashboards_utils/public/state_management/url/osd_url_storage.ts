@@ -29,7 +29,7 @@
  */
 
 import { format as formatUrl } from 'url';
-import { stringify } from 'query-string';
+import qs from 'query-string';
 import { createBrowserHistory, History } from 'history';
 import { decodeState, encodeState } from '../state_encoder';
 import { getCurrentUrl, parseUrl, parseUrlHash } from './parse';
@@ -276,12 +276,15 @@ export function getRelativeToHistoryPath(absoluteUrl: string, history: History):
   return formatUrl({
     pathname: stripBasename(parsedUrl.pathname),
     // @ts-expect-error
-    search: stringify(urlUtils.encodeQuery(parsedUrl.query), { sort: false, encode: false }),
+    search: qs.stringify(urlUtils.encodeQuery(parsedUrl.query), { sort: false, encode: false }),
     hash: parsedHash
       ? formatUrl({
           pathname: parsedHash.pathname,
           // @ts-expect-error
-          search: stringify(urlUtils.encodeQuery(parsedHash.query), { sort: false, encode: false }),
+          search: qs.stringify(urlUtils.encodeQuery(parsedHash.query), {
+            sort: false,
+            encode: false,
+          }),
         })
       : parsedUrl.hash,
   });

@@ -31,7 +31,7 @@
 import { Request } from '@hapi/hapi';
 import { merge } from 'lodash';
 import { Socket } from 'net';
-import { stringify } from 'query-string';
+import qs from 'query-string';
 
 import { schema } from '@osd/config-schema';
 
@@ -86,7 +86,7 @@ function createOpenSearchDashboardsRequestMock<P = any, Q = any, B = any>({
   },
   auth = { isAuthenticated: true },
 }: RequestFixtureOptions<P, Q, B> = {}) {
-  const queryString = stringify(query, { sort: false });
+  const queryString = qs.stringify(query, { sort: false });
   const url = new URL(`${path}${queryString ? `?${queryString}` : ''}`, 'http://localhost');
 
   return OpenSearchDashboardsRequest.from<P, Q, B>(

@@ -30,7 +30,7 @@
 
 import { schema } from '@osd/config-schema';
 import { i18n } from '@osd/i18n';
-import { UiSettingsParams } from '../../../types';
+import { UiSettingScope, UiSettingsParams } from '../../../types';
 
 export const getAccessibilitySettings = (): Record<string, UiSettingsParams> => {
   return {
@@ -46,6 +46,7 @@ export const getAccessibilitySettings = (): Record<string, UiSettingsParams> => 
       category: ['appearance'],
       requiresPageReload: true,
       schema: schema.boolean(),
+      scope: [UiSettingScope.USER, UiSettingScope.GLOBAL],
     },
   };
 };

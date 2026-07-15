@@ -40,6 +40,7 @@ const createSetupContractMock = () => {
     get: jest.fn(),
     get$: jest.fn(),
     getUserProvidedWithScope: jest.fn(),
+    getAllUserProvidedWithScope: jest.fn(),
     set: jest.fn(),
     remove: jest.fn(),
     isDeclared: jest.fn(),
@@ -56,6 +57,7 @@ const createSetupContractMock = () => {
   setupContract.getSaved$.mockReturnValue(new Rx.Subject<any>());
   setupContract.getUpdateErrors$.mockReturnValue(new Rx.Subject<any>());
   setupContract.getAll.mockReturnValue({});
+  setupContract.getAllUserProvidedWithScope.mockResolvedValue({});
 
   return setupContract;
 };

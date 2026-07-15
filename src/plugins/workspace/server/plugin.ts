@@ -329,9 +329,6 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
     this.workspaceConflictControl?.setSerializer(core.savedObjects.createSerializer());
     this.workspaceSavedObjectsClientWrapper?.setScopedClient(core.savedObjects.getScopedClient);
     this.workspaceUiSettingsClientWrapper?.setScopedClient(core.savedObjects.getScopedClient);
-    this.workspaceUiSettingsClientWrapper?.setAsScopedUISettingsClient(
-      core.uiSettings.asScopedToClient
-    );
 
     return {
       client: this.client as IWorkspaceClientImpl,
