@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { NavPopoverConfig, NavPopoverServices } from '../../../core/public';
-import { PLUGIN_ID, ExploreFlavor } from '../common';
+import { PLUGIN_ID, ExploreFlavor, LOGS_DRILLDOWN_APP_ID } from '../common';
 
 interface RecentItem {
   id: string;
@@ -180,6 +180,21 @@ export function buildExploreNavPopover(flavor: ExploreFlavor): NavPopoverConfig 
         iconType: 'folderOpen',
         onClick: ({ navigateToApp }) => navigateToApp(appId, { path: OPEN_SAVED_PATH }),
       },
+      // Logs-only: the onboarding drilldown canvas lives here (a Logs action), NOT as its own
+      // top-level side-nav item.
+      ...(flavor === ExploreFlavor.Logs
+        ? [
+            {
+              id: 'logsDrilldown',
+              label: i18n.translate('explore.navPopover.logsDrilldown', {
+                defaultMessage: 'Logs drilldown',
+              }),
+              iconType: 'inspect',
+              onClick: ({ navigateToApp }: NavPopoverServices) =>
+                navigateToApp(LOGS_DRILLDOWN_APP_ID, { path: '#/' }),
+            },
+          ]
+        : []),
     ],
     render: (services) => <RecentExploreSearches flavor={flavor} {...services} />,
   };

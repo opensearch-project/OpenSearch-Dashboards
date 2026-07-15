@@ -40,6 +40,8 @@ export const DatasetExplorer = ({
   setPath,
   onNext,
   onCancel,
+  initialSelectedItems,
+  initialDataSourceId,
 }: {
   services: IDataPluginServices;
   queryString: QueryStringContract;
@@ -47,6 +49,11 @@ export const DatasetExplorer = ({
   setPath: (path: DataStructure[]) => void;
   onNext: (dataset: BaseDataset) => void;
   onCancel: () => void;
+  /** Index/pattern names to pre-select in a custom creator (e.g. the INDEX creator). Opt-in. */
+  initialSelectedItems?: string[];
+  /** When auto-selecting the data-source level, prefer this data source id (MDS) instead of the
+   * first child. Opt-in; default undefined = today's "select first" behavior. */
+  initialDataSourceId?: string;
 }) => {
   const uiSettings = services.uiSettings;
   const [explorerDataset, setExplorerDataset] = useState<BaseDataset | undefined>(undefined);
@@ -107,13 +114,19 @@ export const DatasetExplorer = ({
 
     // Auto-select if there's exactly one child, OR if we're at data source level (always select first)
     if (current.children.length === 1 || isDataSourceLevel) {
-      const firstChild = current.children[0];
+      // At the data-source level, prefer the caller-provided data source (MDS) when it's present in
+      // the children; otherwise keep the existing "first child" behavior.
+      const preferred =
+        isDataSourceLevel && initialDataSourceId
+          ? current.children.find((child) => child.id === initialDataSourceId)
+          : undefined;
+      const chosenChild = preferred ?? current.children[0];
       // Mark this level as auto-selected
       setAutoSelectionDone((prev) => new Set([...prev, currentIndex]));
       // Automatically select it
-      selectDataStructure(firstChild, path.slice(0, currentIndex + 1));
+      selectDataStructure(chosenChild, path.slice(0, currentIndex + 1));
     }
-  }, [path, loading, autoSelectionDone, selectDataStructure]);
+  }, [path, loading, autoSelectionDone, selectDataStructure, initialDataSourceId]);
 
   // Skip first column if it only has one child (auto-selected)
   const shouldSkipFirstColumn = path.length > 0 && path[0].children?.length === 1;
@@ -231,6 +244,7 @@ export const DatasetExplorer = ({
                     services={services}
                     // @ts-ignore custom component can have their own fetch options
                     fetchDataStructure={fetchNextDataStructure}
+                    initialSelectedItems={initialSelectedItems}
                   />
                 ) : current.multiSelect ? (
                   <DatasetTable

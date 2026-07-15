@@ -56,6 +56,13 @@ export interface DataStructureCreatorProps<FetchOptions = unknown> {
     dataType: string,
     options?: FetchOptions
   ) => Promise<DataStructure>;
+  /**
+   * Optional index/pattern names to pre-select when the creator first mounts (backward-compatible;
+   * default undefined = today's behavior of an empty selection). Lets a caller open the selector at
+   * step 1 with the clicked index/pattern already staged. Comma-joined titles are split into items;
+   * any title containing `*` is treated as a wildcard.
+   */
+  initialSelectedItems?: string[];
 }
 
 /**

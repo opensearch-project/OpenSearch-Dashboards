@@ -1,0 +1,319 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.logsDrilldown {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: $euiSize;
+
+  &__toolbar {
+    flex-shrink: 0;
+  }
+
+  &__toolbarDs {
+    min-width: 220px;
+    max-width: 320px;
+  }
+
+  &__toolbarTime {
+    min-width: 260px;
+  }
+}
+
+// --- Rows (Grafana-drilldown) view ---
+// A recessed "terminal" surface for the log streams — the distinctive Grafana texture, but
+// theme-aware: the code-block background is a light grey in the light theme and ink-dark in the
+// dark theme, so severity tokens stay legible in both. All widths are constrained (min-width:0 +
+// fixed histogram px) so the chart and nowrap log lines can never blow the card out horizontally.
+.logsExploreRows {
+  display: block;
+  width: 100%;
+  min-width: 0;
+
+  &__section {
+    margin: $euiSizeM 0 $euiSizeXS;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  // The collapsed "N indexes with no recent data" drawer at the bottom of the list.
+  &__deadGroup {
+    margin-top: $euiSizeM;
+    border-top: $euiBorderThin;
+    padding-top: $euiSizeXS;
+  }
+}
+
+// Compact one-row treatment for the empty / no-recent / error states and the dead-group rows.
+// Panel renders with paddingSize="none"; we set our own tight padding so these read as dense
+// one-line list rows rather than cards.
+.logsDrilldownCompactRow {
+  margin-bottom: $euiSizeXS;
+  padding: $euiSizeXS $euiSizeS;
+
+  &__name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__meta {
+    white-space: nowrap;
+  }
+
+  // Tint the row border to match its tone (default keeps the plain panel border).
+  &--danger {
+    border-color: $euiColorDanger;
+  }
+
+  &--warning {
+    border-color: $euiColorWarning;
+  }
+}
+
+.logStreamCard {
+  width: 100%;
+  min-width: 0;
+  margin-bottom: $euiSizeS;
+
+  &__name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    // Reset the EuiText default margins so the name aligns with the header buttons.
+    p,
+    span {
+      margin-bottom: 0;
+    }
+  }
+
+  &__body {
+    margin-top: $euiSizeS;
+  }
+
+  // Histogram + logs sit side by side; both must be allowed to shrink below content width.
+  &__split {
+    min-width: 0;
+  }
+
+  &__histCol {
+    // Fixed-width histogram column so the chart's intrinsic size can't stretch the row.
+    flex: 0 0 360px;
+    max-width: 360px;
+    min-width: 0;
+  }
+
+  &__logCol {
+    min-width: 0; // critical: lets the nowrap log lines ellipsize instead of overflowing.
+  }
+
+  &__histWrap {
+    min-width: 0;
+  }
+
+  // ECharts renders the bars + its own axes/tooltip/brush inside here.
+  &__histogram {
+    width: 100%;
+    min-width: 0;
+  }
+
+  // Header time control (#4): sits at the right of the header.
+  &__timeControl {
+    min-width: 0;
+  }
+
+  // Index health dot in the header — EuiHealth with an empty label renders as a bare status dot.
+  &__health {
+    display: flex;
+    align-items: center;
+  }
+
+  // Compressed time-field control in the header — uniform across single/multi-timestamp cards
+  // (disabled, non-interactive when there's only one date field).
+  &__timeSelect {
+    max-width: 180px;
+  }
+
+  // Muted placeholder when the histogram query errors (keeps the column height stable).
+  &__histEmpty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border: $euiBorderThin;
+    border-radius: $euiBorderRadius;
+  }
+
+  // Compact legend row of severity chips + humanized totals, sitting under the chart.
+  &__legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $euiSizeXS $euiSizeS;
+    margin-top: $euiSizeXS;
+  }
+
+  &__legendRow {
+    white-space: nowrap;
+  }
+
+  &__legendName {
+    text-transform: capitalize;
+  }
+
+  // Crossed-clock affordance for no-time-field indexes.
+  &__noTimeIcon {
+    // A slash overlay via a pseudo-element would need a wrapper; the tooltip carries the meaning,
+    // so a muted clock icon + "No time field" text is enough. Kept subdued.
+    vertical-align: text-bottom;
+  }
+
+  // The raw log stream: transparent (uses the card/container bg, not a recessed surface — #5).
+  // Grafana-style (#6): horizontal scroll for long lines (they don't wrap/truncate), vertical scroll
+  // for overflow. Height matches the histogram column so the two columns' bottoms align (#7).
+  &__logs {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch; // each line stretches to the widest line's width (full scroll content)
+    overflow-y: auto;
+    overflow-x: auto;
+    min-width: 0;
+    background: transparent;
+    padding: 0;
+  }
+
+  &__empty {
+    padding: $euiSizeS;
+    color: $euiTextSubduedColor;
+  }
+
+  // Loading skeletons (shimmer) — reserved to the final content heights so there's no layout shift.
+  &__skeletonHist,
+  &__skeletonLogs {
+    min-width: 0;
+  }
+
+  &__skeletonHist {
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    padding: 0 2px;
+  }
+
+  &__skeletonBar {
+    flex: 1 1 auto;
+    border-radius: 2px 2px 0 0;
+    animation: logsDrilldownShimmer 1.4s ease-in-out infinite;
+    background: transparentize($euiColorMediumShade, 0.6);
+  }
+
+  &__skeletonLogs {
+    display: flex;
+    flex-direction: column;
+    gap: $euiSizeS;
+    padding: $euiSizeXS 0;
+  }
+
+  &__skeletonLine {
+    height: 8px;
+    border-radius: 2px;
+    animation: logsDrilldownShimmer 1.4s ease-in-out infinite;
+    background: transparentize($euiColorMediumShade, 0.6);
+  }
+}
+
+@keyframes logsDrilldownShimmer {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+
+  50% {
+    opacity: 0.75;
+  }
+}
+
+.logsExploreLogLine {
+  @include euiCodeFont;
+
+  // inline-flex + min-width:100% so the row (and its hover background) stretches to the FULL
+  // scrollable content width, not just the visible viewport — otherwise the highlight cuts off
+  // when the log stream is scrolled horizontally (#6).
+  display: inline-flex;
+  min-width: 100%;
+  width: max-content;
+  align-items: baseline;
+  gap: $euiSizeS;
+  font-size: 11px;
+  line-height: 1.7;
+  padding: 1px $euiSizeS;
+  color: $euiTextColor;
+
+  // Per-line hover highlight (#6). transition kept short so scanning feels responsive.
+  transition: background-color 80ms ease-in;
+
+  &:hover {
+    background-color: $euiColorLightestShade;
+  }
+
+  // Card view (#6): one line, no wrap — long lines extend and the stream scrolls horizontally
+  // (instead of ellipsizing), so the whole record is readable by scrolling right.
+  &--truncated {
+    white-space: nowrap;
+
+    .logsExploreLogLine__body {
+      white-space: nowrap;
+    }
+  }
+
+  &:not(&--truncated) {
+    align-items: flex-start;
+
+    .logsExploreLogLine__body {
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+  }
+
+  &__ts {
+    color: $euiTextSubduedColor;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  // Level token color is set inline from the single severity color map (severity.ts).
+  &__level {
+    font-weight: $euiFontWeightBold;
+    flex-shrink: 0;
+    width: 42px;
+    text-align: left;
+  }
+
+  &__body {
+    flex: 1 1 auto;
+    min-width: 0;
+    color: $euiTextColor;
+  }
+
+  // Dim the key names inside the body so the values stand out (Grafana texture).
+  &__body b {
+    color: $euiTextSubduedColor;
+    font-weight: $euiFontWeightRegular;
+  }
+}
+
+.logsExplorePreview {
+  // On-brand SVG illustration for the empty state — depicts the payoff (a card with a histogram +
+  // log lines) instead of a blank box.
+  &__illustration {
+    display: block;
+    width: 320px;
+    max-width: 90%;
+    height: auto;
+    margin: 0 auto;
+  }
+}
