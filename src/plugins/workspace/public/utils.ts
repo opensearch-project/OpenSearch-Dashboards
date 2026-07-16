@@ -509,7 +509,16 @@ export function prependWorkspaceToBreadcrumbs(
       onClick: () => {
         if (useCase) {
           const allNavGroups = navGroupsMap[useCase];
-          core.application.navigateToApp(allNavGroups?.navLinks[0].id);
+          // Mirror the post-create redirect and `getUseCaseUrl`: skip
+          // feature-flag-disabled nav links (registered but hidden, e.g.
+          // alerting when `observability.alertManager.enabled` is false)
+          // instead of blindly landing on `navLinks[0]`. Falls back to the
+          // first nav link when no snapshot is available or none qualify.
+          const apps = getApplicationsSnapshot(core.application);
+          const landingAppId = pickUseCaseLandingAppId(allNavGroups?.navLinks, apps);
+          if (landingAppId) {
+            core.application.navigateToApp(landingAppId);
+          }
         }
       },
     };
