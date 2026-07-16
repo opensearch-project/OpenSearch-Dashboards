@@ -195,7 +195,7 @@ const ChipValuePopover: React.FC<{
 
   const placeholder = multi
     ? i18n.translate('explore.pplBuilder.filterValuesPlaceholder', {
-        defaultMessage: 'value, value…',
+        defaultMessage: 'values',
       })
     : i18n.translate('explore.pplBuilder.filterValuePlaceholder', { defaultMessage: 'value' });
   const display = values.length > 0 ? values.join(', ') : placeholder;
@@ -266,7 +266,9 @@ const ChipTextInput: React.FC<{
     placeholder={placeholder}
     inputMode={inputMode}
     onChange={(e) => onChange(e.target.value)}
-    style={{ width: inputWidth(value || placeholder, 12, 32, 320, CHIP_MONO_FONT) }}
+    // Grow with the content; the `max-width: 100%` on `.plqWhereChip__range` keeps
+    // it inside the (wrapping) Where box, so no hard pixel cap is needed here.
+    style={{ width: inputWidth(value || placeholder, 12, 32, 4000, CHIP_MONO_FONT) }}
     aria-label={ariaLabel}
     data-test-subj={dataTestSubj}
   />
@@ -454,6 +456,7 @@ export const WhereRow: React.FC<WhereRowProps> = ({
 
   return (
     <ControlGroup
+      className="plqGroup--wrap"
       label={i18n.translate('explore.pplBuilder.where', { defaultMessage: 'Where' })}
       dataTestSubj="pplBuilderWhere"
     >
