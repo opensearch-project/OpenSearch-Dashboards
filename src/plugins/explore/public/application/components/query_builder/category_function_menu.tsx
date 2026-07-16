@@ -43,6 +43,8 @@ export interface RootMenuItem {
   onClick: () => void;
   /** Optional description, rendered under the name like a category item. */
   description?: string;
+  /** Optional test subject applied to the rendered menu row. */
+  dataTestSubj?: string;
 }
 
 interface CategoryFunctionMenuProps {
@@ -110,6 +112,7 @@ export const CategoryFunctionMenu: React.FC<CategoryFunctionMenuProps> = ({
         items: [
           ...(extraRootItems ?? []).map((item) => ({
             name: itemLabel(item.name, item.description),
+            'data-test-subj': item.dataTestSubj,
             onClick: () => {
               item.onClick();
               setIsOpen(false);

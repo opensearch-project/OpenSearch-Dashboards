@@ -43,6 +43,7 @@ export const AddMetricMenu: React.FC<AddMetricMenuProps> = ({
       AGG_FUNCTIONS.map((agg) => ({
         name: agg.label,
         description: agg.description,
+        dataTestSubj: `pplBuilderAddAggregationOption-${agg.id}`,
         onClick: () => onAdd(agg.id),
       })),
     [onAdd]
