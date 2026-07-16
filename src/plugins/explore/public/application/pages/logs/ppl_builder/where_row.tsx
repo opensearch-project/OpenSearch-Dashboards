@@ -41,6 +41,13 @@ interface WhereRowProps {
  */
 const fieldSuggestsValues = (fieldType?: string): boolean => !fieldType || fieldType === 'string';
 
+// The chip value/range inputs render in the builder's monospace token font (see
+// `plqWhereChip__range`), so measure their auto-grow width against that same font
+// — measuring with the default proportional font under-sizes the box and clips
+// wide values (e.g. long numbers), whereas the combobox trigger is a content-sized
+// button that grows freely.
+const CHIP_MONO_FONT = '11.5px "Source Code Pro", Consolas, Menlo, Courier, monospace';
+
 /**
  * The field-picker popover shared by the empty-state ghost "＋ Where" and the
  * inline "＋" add-condition button — the same {@link SearchPopoverMenu} shell used
@@ -259,7 +266,7 @@ const ChipTextInput: React.FC<{
     placeholder={placeholder}
     inputMode={inputMode}
     onChange={(e) => onChange(e.target.value)}
-    style={{ width: inputWidth(value || placeholder, 12, 32, 120) }}
+    style={{ width: inputWidth(value || placeholder, 12, 32, 320, CHIP_MONO_FONT) }}
     aria-label={ariaLabel}
     data-test-subj={dataTestSubj}
   />
