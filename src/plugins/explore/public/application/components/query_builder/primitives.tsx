@@ -76,8 +76,6 @@ export const GhostAddButton: React.FC<GhostAddButtonProps> = ({
   </EuiButtonEmpty>
 );
 
-export const Separator: React.FC = () => <div className="plqSep" />;
-
 interface FieldPillProps {
   label: string;
   onRemove: () => void;

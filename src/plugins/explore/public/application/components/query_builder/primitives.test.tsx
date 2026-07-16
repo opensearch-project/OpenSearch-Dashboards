@@ -4,7 +4,7 @@
  */
 
 import { render, screen, fireEvent } from '@testing-library/react';
-import { ControlGroup, RemoveButton, GhostAddButton, Separator, FieldPill } from './primitives';
+import { ControlGroup, RemoveButton, GhostAddButton, FieldPill } from './primitives';
 
 describe('ControlGroup', () => {
   it('renders children, the floating label, and the data-test-subj', () => {
@@ -70,13 +70,6 @@ describe('GhostAddButton', () => {
     expect(btn).toHaveTextContent('Add sort');
     fireEvent.click(btn);
     expect(onClick).toHaveBeenCalledTimes(1);
-  });
-});
-
-describe('Separator', () => {
-  it('renders a plqSep element', () => {
-    const { container } = render(<Separator />);
-    expect(container.querySelector('.plqSep')).toBeInTheDocument();
   });
 });
 

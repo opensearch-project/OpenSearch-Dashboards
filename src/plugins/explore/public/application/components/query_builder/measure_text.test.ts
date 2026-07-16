@@ -30,22 +30,6 @@ describe('measure_text — with a working 2d canvas context', () => {
     getContextSpy.mockRestore();
   });
 
-  it('comboBoxWidth adds ~80 chrome padding and clamps to [200, 700]', () => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { comboBoxWidth } = require('./measure_text');
-    // short text -> below the 200 floor -> clamped up to 200
-    expect(comboBoxWidth('a')).toBe(200);
-    // medium text: 15 chars * 10 = 150 measured + 80 = 230
-    expect(comboBoxWidth('123456789012345')).toBe(230);
-  });
-
-  it('comboBoxWidth clamps very long text to the 700 ceiling', () => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { comboBoxWidth } = require('./measure_text');
-    const long = 'x'.repeat(100); // 1000 + 80 way over 700
-    expect(comboBoxWidth(long)).toBe(700);
-  });
-
   it('inputWidth uses defaults (padding 16, min 50, max 200)', () => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { inputWidth } = require('./measure_text');
@@ -73,8 +57,8 @@ describe('measure_text — with a working 2d canvas context', () => {
     const measureSpy = jest.spyOn(ctx, 'measureText');
     getContextSpy.mockImplementation(() => ctx);
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { comboBoxWidth } = require('./measure_text');
-    comboBoxWidth('hello');
+    const { inputWidth } = require('./measure_text');
+    inputWidth('hello');
     expect(ctx.font).toContain('Rubik');
     expect(measureSpy).toHaveBeenCalledWith('hello');
   });
@@ -96,10 +80,8 @@ describe('measure_text — when getContext returns null (fallback path)', () => 
 
   it('falls back to text.length * 8 for measurement', () => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { inputWidth, comboBoxWidth } = require('./measure_text');
+    const { inputWidth } = require('./measure_text');
     // 'abcdef' -> 6 * 8 = 48 + 16 = 64
     expect(inputWidth('abcdef')).toBe(64);
-    // comboBox: 6 * 8 = 48 + 80 = 128 -> clamped up to 200
-    expect(comboBoxWidth('abcdef')).toBe(200);
   });
 });

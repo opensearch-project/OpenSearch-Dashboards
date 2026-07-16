@@ -16,10 +16,6 @@ const measureCanvas = (() => {
   };
 })();
 
-export function comboBoxWidth(text: string): number {
-  return Math.min(Math.max(measureCanvas(text) + 80, 200), 700);
-}
-
 export function inputWidth(
   text: string,
   padding = 16,

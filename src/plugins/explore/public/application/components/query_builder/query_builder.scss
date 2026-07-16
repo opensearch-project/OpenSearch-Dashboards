@@ -550,14 +550,6 @@ $plqControlHeight: 36px;
   flex-shrink: 0;
 }
 
-.plqSep {
-  width: 1px;
-  align-self: stretch;
-  margin: 0 2px;
-  background: $plqBorder;
-  flex-shrink: 0;
-}
-
 .plqParamInput {
   height: 20px;
   padding: 0 4px;
@@ -620,6 +612,20 @@ $plqControlHeight: 36px;
     padding: 10px;
     font-size: 12px;
     color: $plqSub;
+  }
+
+  &__labeled {
+    display: block;
+  }
+
+  &__desc {
+    display: block;
+    // stylelint-disable-next-line @osd/stylelint/no_restricted_properties
+    font-family: $euiFontFamily;
+    font-size: 11px;
+    font-weight: normal;
+    color: $plqSub;
+    white-space: normal;
   }
 }
 

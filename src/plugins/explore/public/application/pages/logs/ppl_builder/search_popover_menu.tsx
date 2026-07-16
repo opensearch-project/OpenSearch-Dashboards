@@ -16,6 +16,7 @@ import {
 export interface SearchMenuOption {
   key: string;
   label: React.ReactNode;
+  description?: React.ReactNode;
   filterText?: string;
   group?: string;
   selected?: boolean;
@@ -123,7 +124,14 @@ export const SearchPopoverMenu: React.FC<SearchPopoverMenuProps> = ({
             />
           )
         )}
-        {option.label}
+        {option.description != null ? (
+          <span className="plqFnPopover__labeled">
+            <strong>{option.label}</strong>
+            <span className="plqFnPopover__desc">{option.description}</span>
+          </span>
+        ) : (
+          option.label
+        )}
         {option.hint != null && <span className="plqFieldOption__hint">{option.hint}</span>}
       </button>
     );

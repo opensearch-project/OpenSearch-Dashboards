@@ -6,7 +6,21 @@
 import React from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { CodeToggleIcon } from './icons';
+
+const CodeToggleIcon: React.FC = () => (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 16 16"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M5.5 4 2 8l3.5 4M10.5 4 14 8l-3.5 4" />
+  </svg>
+);
 
 interface ModeToggleButtonProps {
   isCode: boolean;
