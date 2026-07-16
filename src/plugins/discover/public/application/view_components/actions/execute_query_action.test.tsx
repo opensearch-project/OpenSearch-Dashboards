@@ -3,8 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-import { render } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
 import { BehaviorSubject, Subject } from 'rxjs';
 
 // Mock use_search to avoid pulling in its heavy dependency graph. Only the
@@ -133,12 +132,15 @@ describe('useExecuteQueryAction', () => {
     expect(registerAssistantAction).not.toHaveBeenCalled();
   });
 
-  it('registers an enabled action on mount', () => {
+  it('registers an enabled action with requiresConfirmation + a custom renderer', () => {
     const { registered } = setup();
     const real = getRealAction(registered);
     expect(real).toBeDefined();
     expect(real.name).toBe('execute_dsl_ppl_query');
     expect(typeof real.handler).toBe('function');
+    expect(real.requiresConfirmation).toBe(true);
+    expect(real.useCustomRenderer).toBe(true);
+    expect(typeof real.render).toBe('function');
   });
 
   it('restores the disabled action on unmount', () => {
@@ -146,6 +148,184 @@ describe('useExecuteQueryAction', () => {
     unmount();
     const last = registered[registered.length - 1];
     expect(last.available).toBe('disabled');
+  });
+
+  describe('render - inline language switch prompt + default UI passthrough', () => {
+    it('auto-approves and still shows the default UI when language is unchanged', () => {
+      const { registered } = setup();
+      const action = getRealAction(registered);
+      const onApprove = jest.fn();
+      const onReject = jest.fn();
+      const renderDefault = jest.fn(() => <div>DEFAULT_UI</div>);
+
+      const { getByText } = render(
+        action.render({
+          status: 'executing',
+          args: { query: 'response >= 400', language: 'kuery' },
+          onApprove,
+          onReject,
+          renderDefault,
+        })
+      );
+
+      expect(onApprove).toHaveBeenCalledTimes(1);
+      expect(onReject).not.toHaveBeenCalled();
+      // No prompt UI, but the default (running/accordion) UI is still shown.
+      expect(getByText('DEFAULT_UI')).toBeTruthy();
+    });
+
+    it('auto-approves when language is omitted (defaults to current)', () => {
+      const { registered } = setup();
+      const action = getRealAction(registered);
+      const onApprove = jest.fn();
+      const renderDefault = jest.fn(() => <div>DEFAULT_UI</div>);
+
+      render(
+        action.render({
+          status: 'executing',
+          args: { query: 'response >= 400' },
+          onApprove,
+          renderDefault,
+        })
+      );
+
+      expect(onApprove).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not auto-approve while args are still streaming in, but still shows default UI', () => {
+      const { registered } = setup();
+      const action = getRealAction(registered);
+      const onApprove = jest.fn();
+      const renderDefault = jest.fn(() => <div>DEFAULT_UI</div>);
+
+      const { getByText } = render(
+        action.render({
+          status: 'executing',
+          args: undefined,
+          onApprove,
+          renderDefault,
+        })
+      );
+
+      expect(onApprove).not.toHaveBeenCalled();
+      expect(getByText('DEFAULT_UI')).toBeTruthy();
+    });
+
+    it('shows inline approve/reject buttons when switching to a different language, hiding the default running UI', () => {
+      const { registered } = setup();
+      const action = getRealAction(registered);
+      const onApprove = jest.fn();
+      const onReject = jest.fn();
+      const renderDefault = jest.fn(() => <div>DEFAULT_UI</div>);
+
+      const { getByText, queryByText } = render(
+        action.render({
+          status: 'executing',
+          args: { query: 'source=logs', language: 'PPL' },
+          onApprove,
+          onReject,
+          renderDefault,
+        })
+      );
+
+      expect(onApprove).not.toHaveBeenCalled();
+      expect(getByText(/switch the query language/i)).toBeTruthy();
+      expect(getByText('Switch to PPL')).toBeTruthy();
+      expect(getByText('Keep DQL')).toBeTruthy();
+      // The default running indicator is hidden while nothing has been
+      // approved yet -- showing "Running..." above an unanswered question
+      // would be misleading.
+      expect(renderDefault).not.toHaveBeenCalled();
+      expect(queryByText('DEFAULT_UI')).toBeNull();
+    });
+
+    it('calls onApprove and immediately shows the default UI once the switch button is clicked', () => {
+      const { registered } = setup();
+      const action = getRealAction(registered);
+      const onApprove = jest.fn();
+      const onReject = jest.fn();
+      const renderDefault = jest.fn(() => <div>DEFAULT_UI</div>);
+
+      const { getByText, queryByText } = render(
+        action.render({
+          status: 'executing',
+          args: { query: 'source=logs', language: 'PPL' },
+          onApprove,
+          onReject,
+          renderDefault,
+        })
+      );
+
+      fireEvent.click(getByText('Switch to PPL'));
+
+      expect(onApprove).toHaveBeenCalledTimes(1);
+      // Prompt disappears and the default UI takes over immediately,
+      // without waiting for the parent to re-render with new args/status.
+      expect(queryByText(/switch the query language/i)).toBeNull();
+      expect(getByText('DEFAULT_UI')).toBeTruthy();
+    });
+
+    it('calls onReject and immediately shows the default UI once the keep button is clicked', () => {
+      const { registered } = setup();
+      const action = getRealAction(registered);
+      const onApprove = jest.fn();
+      const onReject = jest.fn();
+      const renderDefault = jest.fn(() => <div>DEFAULT_UI</div>);
+
+      const { getByText, queryByText } = render(
+        action.render({
+          status: 'executing',
+          args: { query: 'source=logs', language: 'PPL' },
+          onApprove,
+          onReject,
+          renderDefault,
+        })
+      );
+
+      fireEvent.click(getByText('Keep DQL'));
+
+      expect(onReject).toHaveBeenCalledTimes(1);
+      expect(queryByText(/switch the query language/i)).toBeNull();
+      expect(getByText('DEFAULT_UI')).toBeTruthy();
+    });
+
+    it('delegates entirely to renderDefault once complete, with no prompt', () => {
+      const { registered } = setup();
+      const action = getRealAction(registered);
+      const renderDefault = jest.fn(() => <div>DEFAULT_RESULT_UI</div>);
+
+      const { getByText, queryByText } = render(
+        action.render({
+          status: 'complete',
+          args: { query: 'response >= 400', language: 'kuery' },
+          result: { success: true, message: 'Query executed successfully.' },
+          renderDefault,
+        })
+      );
+
+      expect(renderDefault).toHaveBeenCalledTimes(1);
+      expect(getByText('DEFAULT_RESULT_UI')).toBeTruthy();
+      expect(queryByText(/switch the query language/i)).toBeNull();
+    });
+
+    it('delegates entirely to renderDefault once failed, with no prompt', () => {
+      const { registered } = setup();
+      const action = getRealAction(registered);
+      const renderDefault = jest.fn(() => <div>DEFAULT_ERROR_UI</div>);
+
+      const { getByText, queryByText } = render(
+        action.render({
+          status: 'failed',
+          args: { query: 'bad', language: 'PPL' },
+          result: { success: false, message: 'Query execution failed: boom' },
+          renderDefault,
+        })
+      );
+
+      expect(renderDefault).toHaveBeenCalledTimes(1);
+      expect(getByText('DEFAULT_ERROR_UI')).toBeTruthy();
+      expect(queryByText(/switch the query language/i)).toBeNull();
+    });
   });
 
   it('sets query + time range, forces a refetch, and reports success on READY', async () => {

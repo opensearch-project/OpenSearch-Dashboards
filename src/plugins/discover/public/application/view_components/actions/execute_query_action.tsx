@@ -3,9 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { useEffect, useState, ReactNode } from 'react';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { useMount, useUnmount } from 'react-use';
 import { of } from 'rxjs';
 import { catchError, filter, first, timeout } from 'rxjs/operators';
+import { RenderProps } from '../../../../../context_provider/public';
 import { DiscoverServices } from '../../../build_services';
 import {
   DataSubject,
@@ -15,6 +18,14 @@ import {
   ResultStatus,
 } from '../utils/use_search';
 import { extractQueryError } from '../utils/format_error';
+
+// Language key to display name mapping
+const LANGUAGE_DISPLAY_NAMES: Record<string, string> = {
+  kuery: 'DQL',
+  lucene: 'Lucene',
+  PPL: 'PPL',
+  SQL: 'OpenSearch SQL',
+};
 
 // Shared tool definition for the classic Discover execute_query action.
 export const EXECUTE_QUERY_TOOL_DEFINITION = {
@@ -56,6 +67,96 @@ export const EXECUTE_QUERY_TOOL_DEFINITION = {
   },
 };
 
+/**
+ * Inline confirmation shown in the chat window only while a language
+ * switch is pending. Auto-approves as soon as we can tell the requested
+ * language matches the current one (or was omitted) -- the framework
+ * still runs the standard confirmation handshake for every call because
+ * `requiresConfirmation` is a static per-action flag, but this component
+ * resolves it immediately with no visible prompt for the common case.
+ *
+ * While a real switch is awaiting the user's choice, the default running
+ * indicator (via `renderDefault`) is hidden -- the tool hasn't been
+ * approved yet, so showing "Running..." above an unanswered question is
+ * misleading. As soon as the user responds (or there's nothing to
+ * confirm), `renderDefault()` takes over so Parameters/Result look
+ * identical to any other tool.
+ */
+function ExecuteQueryToolCallContent({
+  currentLanguage,
+  requestedLanguage,
+  argsAvailable,
+  onApprove,
+  onReject,
+  renderDefault,
+}: {
+  currentLanguage: string;
+  requestedLanguage: string;
+  argsAvailable: boolean;
+  onApprove?: () => void;
+  onReject?: () => void;
+  renderDefault?: () => ReactNode;
+}) {
+  const [responded, setResponded] = useState(false);
+
+  const isSameLanguage =
+    argsAvailable &&
+    (!requestedLanguage || requestedLanguage.toLowerCase() === currentLanguage.toLowerCase());
+
+  // Auto-approve as soon as we can confirm the language is not changing.
+  // Re-fires when `onApprove` gets a fresh identity (i.e. once the
+  // framework's confirmation request actually exists), so this correctly
+  // resolves even if the very first render happens before that.
+  useEffect(() => {
+    if (isSameLanguage && onApprove) {
+      onApprove();
+    }
+  }, [isSameLanguage, onApprove]);
+
+  const showPrompt = argsAvailable && !isSameLanguage && !responded;
+
+  if (!showPrompt) {
+    return renderDefault ? <>{renderDefault()}</> : null;
+  }
+
+  const handleApprove = () => {
+    setResponded(true);
+    onApprove?.();
+  };
+
+  const handleReject = () => {
+    setResponded(true);
+    onReject?.();
+  };
+
+  const currentDisplayName = LANGUAGE_DISPLAY_NAMES[currentLanguage] || currentLanguage;
+  const requestedDisplayName = LANGUAGE_DISPLAY_NAMES[requestedLanguage] || requestedLanguage;
+
+  return (
+    <div>
+      <EuiText size="s">
+        <p>
+          The assistant wants to switch the query language from{' '}
+          <strong>{currentDisplayName}</strong> to <strong>{requestedDisplayName}</strong>. Do you
+          want to proceed?
+        </p>
+      </EuiText>
+      <EuiFlexGroup gutterSize="s" style={{ marginTop: '8px' }}>
+        <EuiFlexItem grow={false}>
+          <EuiButton size="s" fill onClick={handleApprove}>
+            Switch to {requestedDisplayName}
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton size="s" color="text" onClick={handleReject}>
+            Keep {currentDisplayName}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </div>
+  );
+}
+
 // Helper function to register the disabled version of the action
 export function registerDisabledExecuteQueryAction(
   registerAction: (action: any) => void | undefined
@@ -93,6 +194,31 @@ export function useExecuteQueryAction(
 
     registerAction({
       ...EXECUTE_QUERY_TOOL_DEFINITION,
+      requiresConfirmation: true,
+      useCustomRenderer: true,
+      render: (props: RenderProps) => {
+        // Once the tool call has settled, defer entirely to the default
+        // presentation (running spinner already passed; now the
+        // Parameters/Result accordion) -- same as any other tool.
+        if (props.status === 'complete' || props.status === 'failed') {
+          return props.renderDefault ? props.renderDefault() : null;
+        }
+
+        const currentQuery = services.data.query.queryString.getQuery();
+        const currentLanguage = currentQuery.language || 'kuery';
+        const requestedLanguage = props.args?.language || '';
+
+        return (
+          <ExecuteQueryToolCallContent
+            currentLanguage={currentLanguage}
+            requestedLanguage={requestedLanguage}
+            argsAvailable={!!props.args}
+            onApprove={props.onApprove}
+            onReject={props.onReject}
+            renderDefault={props.renderDefault}
+          />
+        );
+      },
       handler: async (args: any) => {
         try {
           const { queryString, timefilter } = services.data.query;
