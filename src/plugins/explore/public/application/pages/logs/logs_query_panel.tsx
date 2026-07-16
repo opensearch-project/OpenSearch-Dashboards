@@ -29,6 +29,15 @@ import { ModeToggleButton } from './ppl_builder/mode_toggle_button';
 import { LogsBuilderMode } from './logs_query_panel_mode';
 import '../../../components/query_panel/query_panel.scss';
 
+// Normalize before the "did the user edit the code?" comparison in
+// handleModeChange. buildPPL emits a single line with LF and no trailing
+// newline, but Monaco can hand text back with a different EOL (\r\n) or a
+// trailing newline depending on its config. Comparing raw would then treat an
+// untouched round-trip as an edit and fall into the lossy parsePPL path,
+// silently dropping partial work (fieldless metrics, `auto` spans, stale
+// sorts). Whitespace/EOL differences aren't semantic edits, so fold them out.
+const normalizeQueryText = (text: string) => text.replace(/\r\n?/g, '\n').trim();
+
 /**
  * Logs query panel with a PPL visual builder / code toggle. Gated behind the
  * `logsQueryBuilder` explore dynamic feature flag (surfaced as the
@@ -228,7 +237,7 @@ export const LogsQueryPanel: React.FC = () => {
       // didn't edit it — restore the preserved state verbatim rather than the
       // reduced parse of it, so partial work isn't lost on a there-and-back trip.
       const preserved = preservedBuilderRef.current;
-      if (preserved && preserved.query === text) {
+      if (preserved && normalizeQueryText(preserved.query) === normalizeQueryText(text)) {
         builderQueryRef.current = text;
         reseedBuilder(preserved.state);
         setMode('builder');

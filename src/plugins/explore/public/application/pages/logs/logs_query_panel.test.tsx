@@ -225,6 +225,22 @@ describe('LogsQueryPanel', () => {
     expect(initial.aggregations).toEqual([{ id: 'ag-partial', fn: 'avg' }]);
   });
 
+  it('preserves partial work when Monaco returns the same query with a trailing newline / CRLF', () => {
+    renderPanel('service="web-store"');
+    fireEvent.click(screen.getByTestId('stub-add-partial-metric'));
+    fireEvent.click(screen.getByTestId('stub-switch-to-code'));
+
+    // Monaco can hand the text back with a different EOL or a trailing newline
+    // even when the user didn't edit it. That must NOT be treated as an edit:
+    // the preserved snapshot (with the fieldless metric) should still be
+    // restored rather than falling into the lossy re-parse.
+    mockEditorText.current = 'service="web-store"\r\n';
+    fireEvent.click(screen.getByTestId('pplBuilderModeToggle'));
+
+    const initial = JSON.parse(screen.getByTestId('stub-initial-state').textContent || '{}');
+    expect(initial.aggregations).toEqual([{ id: 'ag-partial', fn: 'avg' }]);
+  });
+
   it('re-parses (dropping partial work) when the code was edited before switching back', () => {
     renderPanel('service="web-store"');
     fireEvent.click(screen.getByTestId('stub-add-partial-metric'));
