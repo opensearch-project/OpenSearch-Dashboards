@@ -103,6 +103,9 @@ export enum OSD_FIELD_TYPES {
   OBJECT = 'object',
   NESTED = 'nested',
   HISTOGRAM = 'histogram',
+  NUMBER_RANGE = 'number_range',
+  DATE_RANGE = 'date_range',
+  IP_RANGE = 'ip_range',
 }
 
 // Types from opensearch-project/sql/docs/user/ppl/general/datatypes.md
