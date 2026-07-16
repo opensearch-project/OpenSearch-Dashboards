@@ -25,9 +25,7 @@ import { useDatasetContext } from '../../../context';
 interface PPLBuilderProps {
   initialState?: PPLBuilderState;
   onQueryChange: (query: string, state: PPLBuilderState) => void;
-  /** Switch to code mode (the `</>` toggle in the search row). */
   onSwitchToCode?: () => void;
-  /** Execute the query (Cmd/Ctrl+Enter), mirroring the code-mode editor. */
   onRun?: () => void;
 }
 
@@ -58,9 +56,6 @@ export const PPLBuilder: React.FC<PPLBuilderProps> = ({
   } = useFieldData();
 
   const deriveAutoInterval = useCallback((): string => {
-    // Use the fully-resolved DataView (with timeFieldName + fields) so
-    // createAggConfigs succeeds and the interval actually adapts to the range.
-    // The lightweight queryString descriptor lacks these and forces the fallback.
     if (!dataset?.timeFieldName) return '1m';
     try {
       const configs = createHistogramConfigs(
@@ -78,15 +73,8 @@ export const PPLBuilder: React.FC<PPLBuilderProps> = ({
     }
   }, [services, dataset]);
 
-  // Memoized for the cosmetic "every {interval}" hint/tooltip so typing in the
-  // search box doesn't rebuild the histogram configs on every keystroke. The
-  // live `addSpan` path still calls deriveAutoInterval() to capture the current
-  // time range at click time.
   const autoInterval = useMemo(() => deriveAutoInterval(), [deriveAutoInterval]);
 
-  // The builder emits a source-less query (just the search expression + stats).
-  // The `source = <index>` clause is the dataset's concern — hidden from the UI
-  // and prepended by the execution layer when the query runs.
   const query = useMemo(() => buildPPL(state), [state]);
 
   const onQueryChangeRef = useRef(onQueryChange);
@@ -104,15 +92,8 @@ export const PPLBuilder: React.FC<PPLBuilderProps> = ({
 
   const hasAggregation = state.aggregations.length > 0;
 
-  // Candidate sort columns. When the query aggregates, sort targets an output
-  // column (metrics + group-by fields, via `sortableColumns`); otherwise sort
-  // applies to raw rows, so offer the dataset's sortable fields (excluding
-  // `.keyword` multi-fields, which the PPL engine rejects as a sort target).
-  // Recomputed from state so it tracks metric/group-by edits.
   const sortColumns = useMemo(
     () => (hasAggregation ? sortableColumns(state) : sortableFieldNames),
-    // sortableColumns reads only aggregations + group-by fields, so recompute
-    // when those change — not on unrelated state edits (e.g. search keystrokes).
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [hasAggregation, state.aggregations, state.groupBy.fields, sortableFieldNames]
   );
@@ -124,10 +105,6 @@ export const PPLBuilder: React.FC<PPLBuilderProps> = ({
     });
   };
 
-  // Cmd/Ctrl+Enter runs the query from anywhere in the builder — the Monaco
-  // search box binds it as an editor action, but the EUI form controls
-  // (comboboxes, buttons) need this root-level handler to catch the same
-  // shortcut. Mirrors the code-mode editor's run keybinding.
   const onKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {

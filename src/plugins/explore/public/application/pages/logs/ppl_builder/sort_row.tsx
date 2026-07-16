@@ -12,14 +12,7 @@ import { Sort } from './types';
 import { ControlGroup, GhostAddButton, RemoveButton } from '../../../components/query_builder';
 
 interface SortRowProps {
-  /** The current sort, or undefined when the query is unsorted. */
   sort?: Sort;
-  /**
-   * Candidate sort columns: the aggregated query's output columns (metrics +
-   * group-by fields) when the query aggregates, otherwise the dataset's fields
-   * for sorting raw search rows. Offered as combobox suggestions; any value may
-   * still be typed since sort is a free pipe operation.
-   */
   columns: string[];
   dispatch: React.Dispatch<BuilderAction>;
 }
@@ -27,14 +20,6 @@ interface SortRowProps {
 const DESC = 'desc';
 const ASC = 'asc';
 
-/**
- * The builder's sort control — its own top-level pipe operation (`… | sort
- * -\`count()\``), a sibling of the aggregation rather than part of the grouping.
- * Pick one column and a direction. It applies to an aggregated result (sorting
- * by an output column) or to raw search rows (sorting by any field), so it is
- * offered independently of whether the query aggregates. Collapses to an "Add
- * sort" affordance when unsorted, mirroring the empty-state "Add metric" button.
- */
 export const SortRow: React.FC<SortRowProps> = ({ sort, columns, dispatch }) => {
   if (!sort) {
     return (

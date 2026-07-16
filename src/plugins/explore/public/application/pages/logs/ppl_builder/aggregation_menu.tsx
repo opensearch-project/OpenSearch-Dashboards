@@ -11,20 +11,11 @@ import { AGG_FUNCTIONS } from './operations';
 import { SearchPopoverMenu, SearchMenuOption } from './search_popover_menu';
 
 interface AggregationMenuProps {
-  /** Currently selected aggregation. */
   value: AggFn;
-  /** Called with the chosen aggregation when the user picks one. */
   onChange: (fn: AggFn) => void;
   dataTestSubj?: string;
 }
 
-/**
- * The aggregation ("Show") selector for a metric row, rendered as a search-first
- * popover (the shared {@link SearchPopoverMenu}) rather than a plain dropdown.
- * The trigger shows the selected aggregation label with a caret; opening it
- * reveals a filterable flat list of aggregations. The list is flat (no
- * categories) since the aggregation catalog is short and uncategorized.
- */
 export const AggregationMenu: React.FC<AggregationMenuProps> = ({
   value,
   onChange,

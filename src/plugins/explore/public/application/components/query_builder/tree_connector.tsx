@@ -6,21 +6,6 @@
 import React from 'react';
 import { euiThemeVars } from '@osd/ui-shared-deps/theme';
 
-/**
- * Wraps a child with a tree connector from its parent: a vertical line dropping
- * from the parent row above and a horizontal branch at the child's connect
- * point, forming an "L" so nested rows read as an indented tree. Shared by the
- * logs PPL and metrics PromQL visual builders.
- *
- * depth: indentation level (each level shifts right by LEVEL_INDENT px).
- * isLast: when true the vertical line stops at the branch instead of continuing
- *   down to the next sibling — giving the "L" join for the last/only child.
- * anchorY: fixed pixel offset for the horizontal branch (defaults to 50%), used
- *   when the child's connect point isn't its vertical center.
- * topReach: how far the vertical line reaches up past this row's top edge.
- *   Defaults to LEVEL_GAP (line starts at the parent row's bottom edge); pass a
- *   larger value to also clear the parent control's own bottom padding.
- */
 const LEVEL_GAP = 12;
 const LEVEL_INDENT = 24;
 

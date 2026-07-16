@@ -16,10 +16,6 @@ const measureCanvas = (() => {
   };
 })();
 
-/**
- * Returns a minWidth style value that fits the displayed text (selected value or placeholder).
- * Adds padding for the combo box chrome (icon, borders, etc).
- */
 export function comboBoxWidth(text: string): number {
   return Math.min(Math.max(measureCanvas(text) + 80, 200), 700);
 }

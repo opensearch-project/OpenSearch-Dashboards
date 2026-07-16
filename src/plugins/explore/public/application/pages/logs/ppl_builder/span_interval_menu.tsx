@@ -9,25 +9,14 @@ import { EuiIcon } from '@elastic/eui';
 import { SearchPopoverMenu, SearchMenuOption } from './search_popover_menu';
 
 interface SpanIntervalMenuProps {
-  /** Current interval token, e.g. `1h`, `30s`. */
   interval: string;
-  /** Called with the chosen (or typed) interval. */
   onChange: (interval: string) => void;
-  /** Marks the trigger as invalid (unparseable interval). */
   isInvalid?: boolean;
   dataTestSubj?: string;
 }
 
 const COMMON_INTERVALS = ['1m', '5m', '30m', '1h', '12h', '1d'];
 
-/**
- * The time-bucket interval control inside the "every" chip: a search-first
- * popover (the shared {@link SearchPopoverMenu}) offering common intervals while
- * still accepting a custom value. The trigger shows the current interval in
- * monospace so the chip reads `every 1h`; opening it reveals the preset list.
- * Typing filters the presets and, on Enter, applies the typed value verbatim so
- * any valid `span(...)` interval round-trips.
- */
 export const SpanIntervalMenu: React.FC<SpanIntervalMenuProps> = ({
   interval,
   onChange,

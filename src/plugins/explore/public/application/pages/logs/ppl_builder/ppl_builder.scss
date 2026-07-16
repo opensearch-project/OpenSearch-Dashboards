@@ -3,11 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// Visual builder for the logs PPL query. The shared design system (the flat
-// gray box, floating-label groups, flat chips, unified ✕, and the search-first
-// popover styling) lives in the query_builder component partial and is imported
-// below. This file carries only the logs-specific control: the Monaco-backed
-// "Search for" box, which the metrics builder has no analog for.
 @import "../../../components/query_builder/query_builder";
 
 .plqSearchBoxWrap {
@@ -15,8 +10,6 @@
   min-width: 200px;
 }
 
-// The search box hosts a single-line Monaco editor; give it a flat form-control
-// look matching the mock's `.search-input`.
 .plqSearchBoxEditor {
   position: relative;
   width: 100%;
@@ -30,17 +23,8 @@
     border-color: $plqHoverBorder;
   }
 
-  // Placeholder hint shown while the search box is empty. Positioned to align
-  // with Monaco's first character (matching the editor's font size / padding)
-  // and made non-interactive so clicks fall through to the editor.
   &__placeholder {
     position: absolute;
-
-    // The placeholder is rendered before the Monaco editor in DOM order, so it
-    // shares the box's stacking context but paints first — Monaco's own layers
-    // (`.view-line` etc.) would otherwise cover it and the hint would never be
-    // visible once Monaco mounts. A z-index lifts it back above the (empty)
-    // editor surface.
     z-index: 1;
     top: 7px;
     left: 10px;
@@ -59,23 +43,14 @@
     border-radius: $plqRadius;
   }
 
-  // Let the wrapper's white show through Monaco's surfaces so the inside is a
-  // single flat color rather than a near-white editor inset in a gray frame.
   .monaco-editor,
   .monaco-editor-background,
   .monaco-editor .margin {
     background: transparent;
   }
 
-  // Monaco draws its own blue focus outline; the wrapper provides the border, so
-  // suppress Monaco's to avoid a doubled ring.
   .monaco-editor,
   .monaco-editor.focused {
     outline: none;
   }
-
-  // Syntax highlighting for the search expression comes from the shared PPL
-  // Monaco tokenizer + editor theme (see SearchBox: the box registers PPL
-  // tokenization on its restricted language, so fields/strings/keywords/functions
-  // color exactly as they do in code mode). No bespoke token styles here.
 }

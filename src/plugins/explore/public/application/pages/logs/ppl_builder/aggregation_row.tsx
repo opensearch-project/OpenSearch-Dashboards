@@ -17,21 +17,11 @@ import { inputWidth, ControlGroup, RemoveButton } from '../../../components/quer
 interface AggregationRowProps {
   agg: Aggregation;
   idx: number;
-  /** Numeric-only field names, for aggregations that require a number. */
   numericFieldOptions: string[];
-  /** Any aggregatable field, for aggregations that accept non-numeric fields. */
   anyFieldOptions: string[];
   dispatch: React.Dispatch<BuilderAction>;
 }
 
-/**
- * One scalar function applied to the aggregation's field (e.g. `round 2`),
- * rendered as a blue chip: the function name in primary text, an editable inline
- * param, and its own ✕ to unwrap. The chip's fill distinguishes it from the
- * neutral group-by chip. Functions render to the RIGHT of the field, so the row
- * reads left-to-right as application order (`field → round → abs` =
- * `abs(round(field))`), matching the innermost-first compile order.
- */
 const FunctionPill: React.FC<{
   fn: ScalarCall;
   aggIdx: number;
@@ -80,13 +70,6 @@ const FunctionPill: React.FC<{
   );
 };
 
-/**
- * One aggregation "Show" group: `Show <fn> of <field>` — the "Show Count
- * of all logs" control. Count needs no field; other fns aggregate over a field,
- * and percentile adds a numeric percentile input. When the group has a field, a
- * `ƒx` trigger wraps it in scalar functions (e.g. avg(round(latency))). The
- * group reads `Show <fn> <field> <fn-chips…> ƒx ✕`.
- */
 export const AggregationRow: React.FC<AggregationRowProps> = ({
   agg,
   idx,
@@ -131,9 +114,6 @@ export const AggregationRow: React.FC<AggregationRowProps> = ({
           min={0}
           max={100}
           onChange={(e) => {
-            // Clamp to the PPL-valid percentile range: the engine rejects a
-            // percentile outside [0,100] with a 500, and `min`/`max` alone don't
-            // stop a typed out-of-range value from reaching the query.
             const raw = Number(e.target.value);
             const percentile = Number.isNaN(raw) ? 95 : Math.min(Math.max(raw, 0), 100);
             dispatch({ type: 'SET_AGGREGATION', index: idx, agg: { percentile } });

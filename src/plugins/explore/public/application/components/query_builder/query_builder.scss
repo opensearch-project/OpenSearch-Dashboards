@@ -3,67 +3,23 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// Shared design system for the explore visual query builders (logs PPL builder
-// and metrics PromQL builder). The design deliberately departs from the default
-// OUI control chrome: a flat, code-editor-dense look inside a single gray box,
-// with 2px "flat" radius on every control (the rounded pills read as bulky),
-// floating labels on the control borders (without a separate labels row), and
-// one unified 16px ✕ for every removable thing. Values are taken straight from
-// OUI light so the box sits naturally in the panel.
-// Source of truth: ppl_query_builder_fix_prototype.html.
-// Both builders @import this partial for the `plq*` tokens and rules, then add
-// only their own builder-specific controls (the logs Monaco search box; the
-// metrics label-value popover, suggested badges, and query preview strip). The
-// `plq` prefix reads as "plugin query builder" — the classes are builder-neutral.
-
-// Palette. The exact OUI-light values the mock was drawn against map 1:1 to
-// these OUI variables, so they're used directly — and being OUI vars they also
-// flip correctly under the dark theme. The remaining tints are the mock's
-// bespoke OUI-adjacent shades with no exact OUI variable; the mock was only ever
-// drawn against light, so each is wrapped in `lightOrDarkTheme()` to keep the
-// prototype's exact light hex while supplying an adaptive dark-theme counterpart
-// (derived from the theme-aware OUI shades so it tracks whichever dark palette is
-// active). The stylelint disable keeps the prototype's exact hex (matching the
-// precedent in language_toggle.scss), since approximating the light values via
-// mix() drifts a level or two off the design.
-$plqInk: $euiTextColor; // #343741 (light) / near-white (dark)
-$plqSub: $euiColorDarkShade; // #69707D
-$plqBorder: $euiBorderColor; // #D3DAE6
-$plqPrimary: $euiColorPrimary; // #006BB4
-// The box sits a hair off pure white — lighter than OUI's lightest shade so it
-// reads as a faint tint rather than a solid gray panel. Both operands are
-// theme-aware OUI shades, so this resolves to a faint dark panel under the dark
-// theme without any explicit branching.
+$plqInk: $euiTextColor;
+$plqSub: $euiColorDarkShade;
+$plqBorder: $euiBorderColor;
+$plqPrimary: $euiColorPrimary;
 $plqBoxBg: mix($euiColorEmptyShade, $euiColorLightestShade, 55%);
-$plqCtlBg: $euiColorEmptyShade; // #FFF (light) / dark panel (dark)
-$plqHoverBorder: $euiColorMediumShade; // #98A2B3
+$plqCtlBg: $euiColorEmptyShade;
+$plqHoverBorder: $euiColorMediumShade;
 /* stylelint-disable @osd/stylelint/no_restricted_values */
-// Neutral chrome (soft border, label chip, chip fill, ✕/trigger hover). Light:
-// the mock's exact hex. Dark: OUI's light shade lifts the chip a step above the
-// panel bg so it stays legible. The hover fill is a subtle shift off the chip
-// fill — in light mode a hair lighter, but in dark mode it must go *darker*
-// (shade), not lighter: the text flips near-white, so a lighter hover would
-// close in on the text (a mid-shade hover drops text contrast below ~2:1). A
-// darker hover keeps ~5.8:1 text contrast while staying distinct from the fill.
 $plqBorderSoft: lightOrDarkTheme(#e6ebf2, $euiColorLightShade);
 $plqLabelChip: lightOrDarkTheme(#e9edf3, $euiColorLightShade);
 $plqChipBg: lightOrDarkTheme(#eef1f6, $euiColorLightShade);
 $plqXHover: lightOrDarkTheme(#dce2ea, shade($euiColorLightShade, 40%));
-
-// Soft primary fill (active icon buttons, popover item hover). tintOrShade gives
-// the mock's pale-blue tint under light and a matching dark-blue shade under
-// dark — its light value is within ~1 unit of the prototype's #e6f1fa.
 $plqPrimarySoft: tintOrShade($euiColorPrimary, 90%, 70%);
 $plqFnText: lightOrDarkTheme(#00538c, $euiColorPrimary);
-
-// String-literal value text in the Where chips (matching the search box's
-// quoted-string token). Light: the mock's purple. Dark: a lightened purple so it
-// stays legible on the dark chip fill.
 $plqStr: lightOrDarkTheme(#8737a8, #c98fd8);
 /* stylelint-enable @osd/stylelint/no_restricted_values */
-$plqRadius: 2px; // flat, code-style radius inside the builder
-// Every control shares one height, matching the single-line Monaco search editor
-// so the whole builder reads as one aligned band of controls.
+$plqRadius: 2px;
 $plqControlHeight: 36px;
 
 .plqBuilder {
@@ -84,7 +40,6 @@ $plqControlHeight: 36px;
   }
 }
 
-// The builder row wraps below narrow widths instead of scrolling.
 .plqRow--builder {
   flex-wrap: wrap;
 }
@@ -115,14 +70,8 @@ $plqControlHeight: 36px;
   padding: 0 8px;
   height: $plqControlHeight;
 
-  // The Where box can hold many filter chips; let them wrap onto multiple rows
-  // instead of overflowing off the right edge. Vertical padding + auto height
-  // keep the wrapped rows evenly spaced within the box.
   &--wrap {
     flex-wrap: wrap;
-
-    // Never exceed the builder row (panel) width: cap the box so its chips wrap
-    // onto new rows instead of stretching it past the panel and scrolling.
     max-width: 100%;
     min-width: 0;
     height: auto;
@@ -138,9 +87,6 @@ $plqControlHeight: 36px;
     left: 8px;
     z-index: 1;
     padding: 0 4px;
-
-    // Straddles the box border which sits on the gray box background: gradient
-    // from the box bg (above the border) to white (below it).
     background: linear-gradient(180deg, $plqBoxBg 45%, $plqCtlBg 55%);
     font-size: 10px;
     line-height: 12px;
@@ -150,10 +96,6 @@ $plqControlHeight: 36px;
     user-select: none;
   }
 
-  // Neutralize EUI's compressed control chrome (border/shadow/background/height)
-  // so the inner select/combobox/field reads as the mock's bare control inside
-  // the floating-label box. `!important` because EUI's own compressed rules
-  // otherwise keep the input wrap at its default height and border.
   .euiFormControlLayout,
   .euiFormControlLayout__childrenWrapper,
   .euiComboBox-isOpen .euiFormControlLayout,
@@ -169,8 +111,6 @@ $plqControlHeight: 36px;
     height: auto !important;
   }
 
-  // The sort-direction SuperSelect (Desc / Asc) reads as bare text like the
-  // adjacent controls — no separate inner box.
   .euiSuperSelectControl {
     padding-left: 0;
     line-height: 20px;
@@ -178,10 +118,6 @@ $plqControlHeight: 36px;
     color: $plqInk;
   }
 
-  // The aggregation ("Show") selector trigger: a bare text + caret button that
-  // opens the search-first aggregation popover (mirroring the `ƒx` menu). It
-  // reads as plain text inside the floating-label box, matching the metric field
-  // pill beside it, with no control chrome of its own.
   .plqAggTrigger {
     display: inline-flex;
     align-items: center;
@@ -200,14 +136,10 @@ $plqControlHeight: 36px;
       color: $plqSub;
     }
 
-    // No selection yet: the placeholder label reads as muted UI text, not a
-    // chosen value.
     &__label--placeholder {
       color: $plqSub;
     }
 
-    // Whole trigger is one button; only the caret tints on hover/focus so the
-    // value text stays neutral.
     &:hover &__caret,
     &:focus &__caret {
       color: $plqPrimary;
@@ -218,29 +150,18 @@ $plqControlHeight: 36px;
     }
   }
 
-  // Center combobox pills within the shrunk wrap. Keep right padding so the
-  // absolute-positioned dropdown caret has room — zeroing all padding makes the
-  // last pill's ✕ overlap the caret. `flex-wrap: nowrap` keeps every pill on the
-  // control's baseline (EUI wraps by default, which drops later pills a row and
-  // leaves them looking lower than the first).
   .euiComboBox__inputWrap {
     padding: 0 22px 0 0 !important;
     align-items: center;
     flex-wrap: nowrap;
   }
 
-  // The single-select field value (e.g. `memory`) renders as a plain-text pill;
-  // EUI sizes it at 14px/22px with a top-only margin, so it reads larger and sits
-  // higher than the neighboring "Show"/"Sum" select. Match the select's metrics
-  // (12.5px, centered) so the field value aligns with the aggregation name.
   .euiComboBoxPill--plainText {
     margin: 0;
     font-size: 12.5px;
     line-height: 20px;
   }
 
-  // The inline icon buttons (✕, ƒx, add-field) inside a group sit flush to the
-  // group height without their own border/background.
   .euiButtonIcon {
     height: 20px;
     width: 20px;
@@ -253,7 +174,6 @@ $plqControlHeight: 36px;
   flex-wrap: wrap;
   gap: 4px;
 
-  // The caret shares the unified small-icon sizing; it opens the picker.
   &__caret.euiButtonIcon {
     width: 16px;
     height: 16px;
@@ -262,8 +182,6 @@ $plqControlHeight: 36px;
   }
 }
 
-// One selected group-by field: a flat gray pill matching the scalar-function
-// chip (neutral chip fill, black monospace text, its own ✕ to remove).
 .plqPill {
   display: inline-flex;
   align-items: center;
@@ -274,7 +192,6 @@ $plqControlHeight: 36px;
   color: $plqInk;
   border-radius: $plqRadius;
 
-  // Static field name — not interactive (only the ✕ and the caret act).
   &__label {
     padding: 0;
     // stylelint-disable-next-line @osd/stylelint/no_restricted_properties
@@ -286,10 +203,6 @@ $plqControlHeight: 36px;
   }
 }
 
-// The remove ✕ inside a chip-sized pill (group-by field, scalar function). Sized
-// down from the standalone `.plqX` so the glyph sits proportionate to the 18px
-// pill rather than filling it — EUI's `size="s"` renders a 16px cross regardless
-// of the button box, so the inner svg is shrunk too.
 .plqPillX.euiButtonIcon {
   width: 12px;
   height: 12px;
@@ -306,10 +219,6 @@ $plqControlHeight: 36px;
   display: inline-flex;
   align-items: center;
   gap: 4px;
-
-  // Match the group-by field pill (.plqPill) exactly — same 18px height, left
-  // padding, fill and radius — so the "every" chip sits at the same size and
-  // baseline as the `clientip` chip beside it rather than reading taller.
   height: 18px;
   padding: 0 2px 0 8px;
   background: $plqChipBg;
@@ -323,8 +232,6 @@ $plqControlHeight: 36px;
     color: $plqInk;
   }
 
-  // The natural-language label ("every") reads as plain UI text, not code — but
-  // matches the field pill's 11.5px/18px so the chip aligns with `clientip`.
   &__nat {
     font-size: 11.5px;
     line-height: 18px;
@@ -332,10 +239,6 @@ $plqControlHeight: 36px;
     cursor: default;
   }
 
-  // The inline interval trigger blends into the chip fill so `every 1h` reads as
-  // one flat token. It's a button (opening the interval popover) with the value
-  // text (monospace, matching the field pill) and a small caret, laid out inline
-  // within the pill's 18px height.
   &__param {
     display: inline-flex;
     align-items: center;
@@ -356,16 +259,11 @@ $plqControlHeight: 36px;
     }
   }
 
-  // The caret on the interval trigger reads as a muted affordance next to the
-  // monospace value, matching the field/aggregation triggers.
   &__caret {
     color: $plqSub;
   }
 }
 
-// A scalar function applied to the aggregation field (e.g. `round 2`): a gray
-// chip with an editable inline param and its own ✕ to unwrap, matching the
-// neutral group-by field pill.
 .plqFn {
   display: inline-flex;
   align-items: center;
@@ -385,8 +283,6 @@ $plqControlHeight: 36px;
     cursor: default;
   }
 
-  // Param input blends into the chip fill; the value matches the plain-text
-  // function name against the neutral chip.
   &__param.euiFieldText,
   &__param {
     height: 18px;
@@ -451,8 +347,6 @@ $plqControlHeight: 36px;
   color: $plqPrimary;
 }
 
-// The ƒx "wrap in function" trigger: a compact borderless italic glyph inside
-// the metric group.
 .plqFxBtn.euiButtonIcon {
   width: 20px;
   height: 20px;
@@ -502,9 +396,6 @@ $plqControlHeight: 36px;
   flex: 1 1 12px;
 }
 
-// The empty-state "Where" wrapper: just holds the ghost "＋ Where" affordance
-// (and its field-picker popover) inline on the builder row. Once a filter exists
-// the section becomes a floating-label `.plqGroup` box holding `.plqWhereChip`s.
 .plqWhere {
   display: inline-flex;
   align-items: center;
@@ -516,10 +407,6 @@ $plqControlHeight: 36px;
   }
 }
 
-// One inline-editable filter condition inside the Where box: field name (mono),
-// a bare operator <select>, adaptive value input(s), and its own ✕ — matching the
-// group-by field pill's height/fill so the chips align with the rest of the row.
-// The whole chip is one flat token; only its ✕ and the value text carry accent.
 .plqWhereChip {
   display: inline-flex;
   align-items: center;
@@ -529,15 +416,9 @@ $plqControlHeight: 36px;
   background: $plqChipBg;
   color: $plqInk;
   border-radius: $plqRadius;
-
-  // Never let a chip exceed the (wrapping) Where box: the value grows freely up
-  // to the box edge, then ellipsis-truncates — matching the Discover filter pill.
   max-width: 100%;
   min-width: 0;
 
-  // Field picker trigger: a bare button (code-style name + caret) that opens the
-  // same field popover as "＋ Where", blended into the chip fill like the operator
-  // trigger and tinting on hover/focus to signal it's clickable.
   &__field {
     display: inline-flex;
     align-items: center;
@@ -563,10 +444,6 @@ $plqControlHeight: 36px;
     }
   }
 
-  // Operator picker trigger: a bare button blended into the chip fill (no
-  // control chrome), showing the terse symbol + a caret that opens the operator
-  // popover. Monospace to match the field/value tokens; padded on both sides so
-  // the symbol has breathing room and the whole token sizes to its content.
   &__op {
     display: inline-flex;
     align-items: center;
@@ -591,17 +468,10 @@ $plqControlHeight: 36px;
     }
   }
 
-  // Value picker trigger: a bare button that opens the value-suggestion popover.
-  // The value text reads as a string literal (purple, matching the search box's
-  // tok-str) to signal it's the user-entered datum, and is monospace like the
-  // field. Sizes to its content with a trailing caret.
   &__val {
     display: inline-flex;
     align-items: center;
     gap: 2px;
-
-    // Let the trigger shrink below its content so the value text can
-    // ellipsis-truncate rather than push the chip past the box edge.
     min-width: 0;
     height: 18px;
     padding: 0 4px;
@@ -618,8 +488,6 @@ $plqControlHeight: 36px;
     }
   }
 
-  // The value text inside the trigger — purple string-literal token. Grows with
-  // its content, then ellipsis-truncates when the chip hits the box edge.
   &__valText {
     // stylelint-disable-next-line @osd/stylelint/no_restricted_properties
     font-family: $euiCodeFontFamily;
@@ -632,14 +500,10 @@ $plqControlHeight: 36px;
     color: $plqStr;
   }
 
-  // Placeholder state (no value yet) reads as muted UI text, not a literal.
   &__val--empty &__valText {
     color: $plqSub;
   }
 
-  // The `(empty)` marker standing in for an empty-string term — reads as muted,
-  // italic UI text (not a purple code literal) so it's clearly a placeholder
-  // value rather than the characters `(empty)`. Used in the chip and popover row.
   &__emptyVal {
     // stylelint-disable-next-line @osd/stylelint/no_restricted_properties
     font-family: $euiFontFamily;
@@ -647,16 +511,11 @@ $plqControlHeight: 36px;
     color: $plqSub;
   }
 
-  // The caret on the operator / value triggers reads as a muted affordance.
   &__caret {
     color: $plqSub;
   }
 
-  // Editable range bound input(s): a bare numeric input blended into the chip
-  // fill, purple like the value literal, monospace like the field.
   &__range {
-    // Grows with its content (via the measured inline width) but never past the
-    // box edge; flex may shrink it below that so the chip stays inside the box.
     max-width: 100%;
     min-width: 0;
     height: 18px;
@@ -675,7 +534,6 @@ $plqControlHeight: 36px;
     }
   }
 
-  // The "and" joiner between range bounds reads as plain UI text, not code.
   &__nat {
     font-size: 11.5px;
     line-height: 18px;
@@ -692,7 +550,6 @@ $plqControlHeight: 36px;
   flex-shrink: 0;
 }
 
-// A thin separator between inner controls of a group (e.g. Sort column | dir).
 .plqSep {
   width: 1px;
   align-self: stretch;
@@ -701,10 +558,6 @@ $plqControlHeight: 36px;
   flex-shrink: 0;
 }
 
-// A bare inline param input inside a `.plqGroup` (e.g. the metric range `5m`, an
-// operation's quantile arg). It's a plain `<input>` — not an EUI field — so the
-// group's EUI-chrome neutralization doesn't reach it; style it directly to blend
-// into the group as flat monospace text sized to its content.
 .plqParamInput {
   height: 20px;
   padding: 0 4px;
@@ -731,7 +584,6 @@ $plqControlHeight: 36px;
     padding-bottom: 4px;
   }
 
-  // Uppercase category header (Math / String / Date & time).
   &__group {
     padding: 8px 10px 3px;
     font-size: 10px;
@@ -741,8 +593,6 @@ $plqControlHeight: 36px;
     color: $plqSub;
   }
 
-  // One selectable function, rendered as a full-width monospace row that
-  // primary-tints on hover/focus (matching the mock's `.pitem`).
   &__item {
     display: block;
     width: 100%;
@@ -755,9 +605,6 @@ $plqControlHeight: 36px;
     font-size: 12.5px;
     color: $plqInk;
     cursor: pointer;
-
-    // Long values (paths, URLs) wrap onto multiple lines instead of forcing
-    // the list to scroll horizontally.
     overflow-wrap: anywhere;
     word-break: break-word;
 
@@ -776,9 +623,6 @@ $plqControlHeight: 36px;
   }
 }
 
-// A field option in the search popover: the shared flat monospace row plus a
-// leading check that marks the selected fields (multi-select group-by). The
-// check keeps its slot when hidden so labels stay aligned.
 .plqFieldOption {
   display: flex;
   align-items: center;
@@ -793,9 +637,6 @@ $plqControlHeight: 36px;
     }
   }
 
-  // The muted trailing hint on the "over time" row (e.g. "every 1h") — plain UI
-  // font, sub color, so it reads as a subtitle beside the natural-language label
-  // rather than part of it.
   &__hint {
     // stylelint-disable-next-line @osd/stylelint/no_restricted_properties
     font-family: $euiFontFamily;

@@ -20,46 +20,19 @@ import {
 
 interface WhereRowProps {
   filters: WhereFilter[];
-  /** Field names offered in the "add filter" field picker. */
   fieldNames: string[];
-  /**
-   * The (OSD-normalized) type of a field — decides which operators apply and
-   * whether the value editor suggests values or is a plain typed input.
-   */
   getFieldType: (field: string) => string | undefined;
-  /** Async value suggestions for a field (best-effort; empty on failure). */
   getValues: (field: string) => Promise<string[]>;
   dispatch: React.Dispatch<BuilderAction>;
 }
 
-/**
- * Whether a field's value editor offers autocomplete suggestions. Mirrors the
- * data plugin's filter editor, which only suggests for `string` fields (via their
- * aggregatable keyword sibling); numeric/date/ip/boolean fields take a plain typed
- * input. An unknown type (field absent from the mapping) is treated as string so
- * suggestions stay available.
- */
 const fieldSuggestsValues = (fieldType?: string): boolean => !fieldType || fieldType === 'string';
 
-// The chip value/range inputs render in the builder's monospace token font (see
-// `plqWhereChip__range`), so measure their auto-grow width against that same font
-// — measuring with the default proportional font under-sizes the box and clips
-// wide values (e.g. long numbers), whereas the combobox trigger is a content-sized
-// button that grows freely.
 const CHIP_MONO_FONT = '11.5px "Source Code Pro", Consolas, Menlo, Courier, monospace';
 
-// An empty-string term is a real value (fields can index `""`), but it renders as
-// nothing — an invisible popover row and a blank gap in the chip's `a, , b` join.
-// Surface it as a visible marker instead so it reads as a deliberate choice.
 const emptyValueLabel = () =>
   i18n.translate('explore.pplBuilder.filterEmptyValue', { defaultMessage: '(empty)' });
 
-/**
- * The bare inline trigger shared by a chip's field, operator, and value pickers:
- * a label (the field name, operator symbol, or current value) plus the dropdown
- * caret. Each picker differs only in its class names and label text, so they all
- * render through this one button.
- */
 const ChipCaretButton: React.FC<
   {
     className: string;
@@ -70,8 +43,6 @@ const ChipCaretButton: React.FC<
     onClick: () => void;
   } & React.ButtonHTMLAttributes<HTMLButtonElement>
 > = ({ className, labelClassName, label, ariaLabel, dataTestSubj, onClick, ...rest }) => (
-  // `...rest` forwards the props EuiToolTip clones onto its child (onFocus/onBlur,
-  // aria-describedby) when the field trigger is wrapped in a tooltip.
   <button
     type="button"
     className={className}
@@ -85,22 +56,11 @@ const ChipCaretButton: React.FC<
   </button>
 );
 
-/**
- * The field-picker popover shared by the empty-state ghost "＋ Where" and the
- * inline "＋" add-condition button — the same {@link SearchPopoverMenu} shell used
- * by the aggregation / group-by / sort pickers ("one popover, three uses"). It
- * lists fields grouped nowhere (flat, searchable); picking one appends a fresh
- * `field is …` filter the user then completes inline.
- */
 const AddFilterMenu: React.FC<{
   fieldNames: string[];
   onPick: (field: string) => void;
   anchor: (toggle: () => void) => React.ReactElement;
 }> = ({ fieldNames, onPick, anchor }) => {
-  // Callers pass a fresh `onPick` closure each render, so hold it in a ref and
-  // build the (potentially large) field-option list only when `fieldNames`
-  // actually changes — otherwise every keystroke in any chip rebuilds every
-  // menu's options and re-runs the popover's internal filter.
   const onPickRef = useRef(onPick);
   onPickRef.current = onPick;
   const options: SearchMenuOption[] = useMemo(
@@ -129,15 +89,6 @@ const AddFilterMenu: React.FC<{
   );
 };
 
-/**
- * The operator picker: a bare inline trigger (the terse symbol, e.g. `=`, `in`,
- * `between`) that opens the shared search popover listing the operators that apply
- * to the field's type — mirroring Discover's `getOperatorOptions` gating, so
- * `is between` only shows for numeric/date/ip fields and `is one of` is hidden for
- * boolean. Reusing {@link SearchPopoverMenu} keeps it consistent with the builder's
- * other pickers, and the text trigger sizes to the current operator so `=` stays
- * tight while `not between` gets the room it needs.
- */
 const OperatorPopover: React.FC<{
   filter: WhereFilter;
   index: number;
@@ -182,15 +133,6 @@ const OperatorPopover: React.FC<{
   );
 };
 
-/**
- * A value editor for the one/many arities of a *suggestable* (string) field: a
- * bare inline trigger showing the current value(s) that opens the shared search
- * popover of value suggestions (fetched lazily via {@link WhereRowProps.getValues}),
- * with `allowCreate` so a value not in the list can still be typed in. Single-value
- * operators replace the value on select; the one-of forms keep the popover open and
- * toggle each value. When `suggest` is false (a numeric/date one-of) the popover is
- * a free-entry combobox with no fetched suggestions, matching the data plugin.
- */
 const ChipValuePopover: React.FC<{
   field: string;
   values: string[];
@@ -202,9 +144,6 @@ const ChipValuePopover: React.FC<{
 }> = ({ field, values, multi, index, suggest, getValues, onChange }) => {
   const [suggestions, setSuggestions] = useState<string[]>([]);
 
-  // Reset stale suggestions when the field changes so a reopen refetches for the
-  // new field. Clean up on unmount so a late `getValues` resolve can't set state
-  // on an unmounted chip.
   const liveRef = useRef(true);
   useEffect(() => {
     setSuggestions([]);
@@ -216,10 +155,6 @@ const ChipValuePopover: React.FC<{
     };
   }, []);
 
-  // Fetch value suggestions lazily, only when the popover is actually opened —
-  // not on mount. A round-tripped query can materialize several string filters,
-  // and fetching every one's suggestions up front fires that many backend terms
-  // requests the user may never look at.
   const loadSuggestions = () => {
     if (!suggest) return;
     getValues(field).then(
@@ -244,8 +179,6 @@ const ChipValuePopover: React.FC<{
     key: value,
     label:
       value === '' ? <span className="plqWhereChip__emptyVal">{emptyValueLabel()}</span> : value,
-    // Keep the empty-string row reachable by search: without a filterText it would
-    // fall back to `key` (also empty) and match only the empty query.
     filterText: value === '' ? emptyValueLabel() : value,
     selected: values.includes(value),
     onSelect: () => toggleValue(value),
@@ -257,8 +190,6 @@ const ChipValuePopover: React.FC<{
         defaultMessage: 'values',
       })
     : i18n.translate('explore.pplBuilder.filterValuePlaceholder', { defaultMessage: 'value' });
-  // Render the selected value(s), showing an empty-string term as a muted `(empty)`
-  // marker so it isn't a blank gap in the `a, , b` join.
   const display =
     values.length > 0
       ? values.map((value, i) => (
@@ -318,12 +249,6 @@ const ChipValuePopover: React.FC<{
   );
 };
 
-/**
- * A bare inline `<input>` for a single value, sized to its content — used for the
- * one-value operators on a non-suggestable field (numeric/date/ip/boolean) and for
- * each bound of a range. Plain text like the data plugin's typed value input; the
- * value literal reads purple/monospace to match the suggestion trigger's text.
- */
 const ChipTextInput: React.FC<{
   value: string;
   placeholder: string;
@@ -338,24 +263,12 @@ const ChipTextInput: React.FC<{
     placeholder={placeholder}
     inputMode={inputMode}
     onChange={(e) => onChange(e.target.value)}
-    // Grow with the content; the `max-width: 100%` on `.plqWhereChip__range` keeps
-    // it inside the (wrapping) Where box, so no hard pixel cap is needed here.
     style={{ width: inputWidth(value || placeholder, 12, 32, 4000, CHIP_MONO_FONT) }}
     aria-label={ariaLabel}
     data-test-subj={dataTestSubj}
   />
 );
 
-/**
- * The adaptive value editor inside a chip. The shape maps onto the operator's
- * arity (see {@link operatorArity}) and the field's type, mirroring the data
- * plugin's filter editor:
- * - `none` (exists/not) → nothing.
- * - `range` (between) → a from/to pair of plain typed inputs.
- * - `many` (one-of) → a suggestion/free-entry combobox popover.
- * - `one` (is/is not) → a suggestion popover for a string field, or a plain typed
- *   input for a numeric/date/ip/boolean field (no combobox).
- */
 const ChipValues: React.FC<{
   filter: WhereFilter;
   index: number;
@@ -399,7 +312,6 @@ const ChipValues: React.FC<{
     );
   }
 
-  // Single value on a non-suggestable field: a plain typed input, not a combobox.
   if (arity === 'one' && !fieldSuggestsValues(fieldType)) {
     return (
       <ChipTextInput
@@ -431,14 +343,6 @@ const ChipValues: React.FC<{
   );
 };
 
-/**
- * One structured filter as an inline-editable chip: the field name (monospace),
- * an operator picker, the adaptive value editor, and its own ✕. Editing any part
- * dispatches `SET_FILTER` so the PPL regenerates live — no editor popover, matching
- * the v5 builder mock where a chip *is* the editor. Changing the operator across
- * arities (e.g. `is` → `is between`) clears the values so a stale single value
- * can't leak into a range/none input, mirroring the Discover filter editor.
- */
 const WhereChip: React.FC<{
   filter: WhereFilter;
   index: number;
@@ -457,9 +361,6 @@ const WhereChip: React.FC<{
         defaultMessage: 'Finish this condition',
       });
 
-  // Changing the field resets the operator and value: the new field may be a
-  // different type whose operators/value editor differ, so a stale operator or
-  // value can't carry over (mirrors the arity reset on an operator change).
   const setField = (field: string) => {
     if (field === filter.field) return;
     dispatch({ type: 'SET_FILTER', index, filter: { field, operator: 'is', values: [] } });
@@ -512,15 +413,6 @@ const WhereChip: React.FC<{
   );
 };
 
-/**
- * The builder's "Where" section, matching the v5 mock: when there are no filters
- * it is a single ghost "＋ Where" affordance (opening the field picker); once a
- * filter exists it becomes a `Where`-labeled control box holding one inline-
- * editable {@link WhereChip} per condition (AND'd), with an inline dashed "＋" to
- * add more. Removing the last chip collapses back to the ghost — like Sort,
- * unlike the group-by box which keeps an "everything" default. Filters compile to
- * `| where` pipe stages (see `buildPPL`) and round-trip via `parsePPL`.
- */
 export const WhereRow: React.FC<WhereRowProps> = ({
   filters,
   fieldNames,

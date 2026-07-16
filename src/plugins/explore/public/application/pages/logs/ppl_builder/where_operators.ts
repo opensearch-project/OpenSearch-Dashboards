@@ -6,39 +6,16 @@
 import { i18n } from '@osd/i18n';
 import { WhereOperator } from './types';
 
-/**
- * How many value inputs an operator's chip renders:
- * - `none`  — no value (exists / does not exist)
- * - `one`   — a single value (is / is not)
- * - `many`  — a comma-joined list of values (is one of / is not one of)
- * - `range` — two bounds, from/to (is between / is not between)
- */
 export type OperatorArity = 'none' | 'one' | 'many' | 'range';
 
 export interface OperatorDef {
   value: WhereOperator;
-  /** Full label shown in the operator menu (e.g. "is one of"). */
   label: string;
-  /**
-   * Terse label shown inside the compact inline chip select. Kept short so the
-   * chip stays dense (matching the mock's `= != > <` operator width); the full
-   * label lives in the dropdown options and the chip tooltip.
-   */
   shortLabel: string;
   arity: OperatorArity;
-  /**
-   * The (OSD-normalized) field types this operator applies to; `undefined` means
-   * every type. Mirrors the `fieldTypes` gating on the data plugin's
-   * `FILTER_OPERATORS` (see `getOperatorOptions`) so the builder's operator menu
-   * offers the same operators Discover's filter editor does for a given field —
-   * e.g. `is between` only for number/date/ip, `is one of` not for boolean.
-   */
   fieldTypes?: string[];
 }
 
-// Field types that accept the list / range operators, matching the data plugin's
-// filter editor. `is one of` / `is not one of` exclude boolean; the between forms
-// are numeric/temporal/ip only.
 const LIST_FIELD_TYPES = ['string', 'number', 'date', 'ip', 'geo_point', 'geo_shape'];
 const RANGE_FIELD_TYPES = ['number', 'date', 'ip'];
 
@@ -118,13 +95,6 @@ export const OPERATOR_DEF_MAP: Record<WhereOperator, OperatorDef> = OPERATOR_DEF
 export const operatorArity = (operator: WhereOperator): OperatorArity =>
   OPERATOR_DEF_MAP[operator].arity;
 
-/**
- * The operators offered for a field of the given (OSD-normalized) type, mirroring
- * the data plugin's `getOperatorOptions`: an operator applies when it has no
- * `fieldTypes` restriction or the field's type is in it. An unknown/absent type
- * (the field isn't in the dataset's mapping) falls back to `string`, the most
- * permissive filterable type, so every operator stays available.
- */
 export function operatorsForFieldType(fieldType?: string): OperatorDef[] {
   const type = fieldType || 'string';
   return OPERATOR_DEFS.filter((def) => !def.fieldTypes || def.fieldTypes.includes(type));

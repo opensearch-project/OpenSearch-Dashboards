@@ -132,12 +132,6 @@ export function builderReducer(state: PPLBuilderState, action: BuilderAction): P
   }
 }
 
-/**
- * Wrap a field expression in its ordered scalar-function chain, innermost first.
- * `functions: [round, abs]` on `latency` -> `abs(round(latency))`. Extra params
- * (e.g. round's decimals) are appended after the wrapped expression. Blank
- * trailing params are dropped so `round(latency)` (no decimals) stays clean.
- */
 function applyFunctions(fieldExpr: string, functions?: ScalarCall[]): string {
   let expr = fieldExpr;
   for (const fn of functions ?? []) {
@@ -172,31 +166,16 @@ function compileGroupBy(groupBy: GroupBy): string {
   return parts.join(', ');
 }
 
-/**
- * The output columns of an aggregated query, in display order — the columns a
- * `sort` can target. Metrics come first (their compiled expression, e.g.
- * `count()` / `avg(bytes)` — the exact header PPL emits), then the group-by
- * fields; the time `span` is intentionally omitted (sorting by the time bucket
- * is what the histogram's x-axis already does). Returns `[]` when the query
- * doesn't aggregate, since there's nothing meaningful to sort.
- */
 export function sortableColumns(state: PPLBuilderState): string[] {
   if (state.aggregations.length === 0) return [];
   const metrics = state.aggregations.map(compileAggregation).filter((c): c is string => c !== null);
   return [...metrics, ...state.groupBy.fields.filter(Boolean)];
 }
 
-/**
- * A sort column that is an aggregation expression (`count()`, `avg(bytes)`)
- * isn't a bare identifier, so PPL's `sort` can only accept it back-quoted — the
- * whole expression read as one column name (which is how it appears in the
- * result header). A plain group-by field is a valid identifier and stays bare.
- */
 function quoteSortColumn(column: string): string {
   return /[()]/.test(column) ? `\`${column}\`` : column;
 }
 
-/** Compile the trailing `| sort` clause, or null when it targets no column. */
 function compileSort(sort: Sort | undefined): string | null {
   const column = sort?.column?.trim();
   if (!column) return null;
@@ -204,14 +183,6 @@ function compileSort(sort: Sort | undefined): string | null {
   return `sort ${prefix}${quoteSortColumn(column)}`;
 }
 
-/**
- * Compile the sort stage only when it targets a valid column. Sort is an
- * independent pipe operation: it can follow a `stats` (sorting the aggregated
- * output) or a bare search (sorting raw rows). When the query aggregates the
- * sort may only reference a produced output column — a stale reference (its
- * metric/field was removed) is dropped rather than emitting an invalid column.
- * Without aggregation any field is a valid sort key.
- */
 function compileValidSort(state: PPLBuilderState): string | null {
   if (!state.sort?.column?.trim()) return null;
   if (state.aggregations.length > 0 && !sortableColumns(state).includes(state.sort.column)) {
@@ -220,20 +191,10 @@ function compileValidSort(state: PPLBuilderState): string | null {
   return compileSort(state.sort);
 }
 
-/**
- * Back-quote a field name, dropping any `.keyword` multi-field suffix. The PPL
- * engine appends `.keyword` itself when needed, and `FilterUtils.toPredicate`
- * strips it too, so this keeps our emitted predicate byte-identical to the one a
- * sidebar-added filter produces.
- */
 function whereField(field: string): string {
   return `\`${field.replace(/\.keyword$/, '')}\``;
 }
 
-// A bare numeric literal is emitted unquoted (matching how `toPredicate` renders
-// a numeric phrase value); anything else is quoted as a PPL string literal with
-// `'` escaped to `''`. Emitting numerics bare keeps builder output identical to
-// the sidebar's `| where` command so the two round-trip and dedupe cleanly.
 const NUMERIC_LITERAL_RE = /^-?\d+(\.\d+)?$/;
 
 function whereValue(value: string): string {
@@ -242,13 +203,6 @@ function whereValue(value: string): string {
   return `'${trimmed.replace(/'/g, "''")}'`;
 }
 
-/**
- * Compile one structured filter to a PPL `where` predicate, or null when it is
- * incomplete (missing field or required values) so it is skipped — the same way
- * a fieldless metric is dropped rather than emitting invalid PPL. The emitted
- * shapes mirror `FilterUtils.toPredicate` exactly so a filter added via the
- * field sidebar round-trips into the same chip.
- */
 export function compileWhereFilter(filter: WhereFilter): string | null {
   const field = filter.field?.trim();
   if (!field) return null;
@@ -293,24 +247,11 @@ export function compileWhereFilter(filter: WhereFilter): string | null {
   }
 }
 
-/**
- * Serialize builder state to a **source-less** PPL query — just the user's
- * search expression plus any trailing `| stats … by …`. The leading
- * `source = <index>` clause is deliberately omitted: it is the dataset's
- * concern, hidden from the builder UI, and prepended automatically by the
- * execution layer (`addPPLSourceClause`) when the query is run. This keeps the
- * builder preview and the Code editor showing only what the user typed
- * (e.g. `event.dataset=sample_web_logs`), mirroring how a user types in Code
- * mode.
- */
 export function buildPPL(state: PPLBuilderState): string {
   const searchExpr = (state.searchExpression || '').trim();
 
   const parts: string[] = searchExpr ? [searchExpr] : [];
 
-  // Structured filters come right after the search expression and before any
-  // stats, each as its own `where` pipe stage — matching where the field-sidebar
-  // filter action (`PPLFilterUtils`) inserts them (position 1, after source).
   for (const filter of state.filters) {
     const predicate = compileWhereFilter(filter);
     if (predicate) parts.push(`where ${predicate}`);
@@ -334,9 +275,6 @@ export function buildPPL(state: PPLBuilderState): string {
   const sortClause = compileValidSort(state);
   if (sortClause) parts.push(sortClause);
 
-  // A stats clause with no leading search expression must start with a pipe so
-  // that the auto-prepended source clause produces valid PPL
-  // (`source = <index> | stats …`, not `source = <index> stats …`).
   if (parts.length > 0 && !searchExpr) {
     return `| ${parts.join(' | ')}`;
   }

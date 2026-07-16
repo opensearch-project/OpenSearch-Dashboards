@@ -9,28 +9,11 @@ import { AggFn } from './types';
 export interface AggDef {
   id: AggFn;
   label: string;
-  /**
-   * Short explanation of the aggregation, shown under the label in the "Add
-   * metric" menu (plain string, matching the scalar-function descriptions).
-   */
   description: string;
-  /** Whether the aggregation operates on a field (count does not). */
   needsField: boolean;
-  /**
-   * Whether the aggregation only makes sense over a numeric field (avg, sum,
-   * variance, …). When true the field picker is restricted to numeric fields;
-   * when false any aggregatable field is offered (min/max, distinct_count, …).
-   * Undefined implies "any" (e.g. count needs no field).
-   */
   numericOnly?: boolean;
 }
 
-/**
- * PPL `stats` aggregation catalog, populated ONLY with aggregations the builder
- * can both compile and round-trip through `parsePPL`. Each entry maps to a PPL
- * aggregation function (`compileAggregation` in build_ppl.ts turns `id` into the
- * emitted call).
- */
 export const AGG_FUNCTIONS: AggDef[] = [
   {
     id: 'count',
@@ -134,20 +117,11 @@ export const AGG_FN_MAP: Record<AggFn, AggDef> = AGG_FUNCTIONS.reduce(
   {} as Record<AggFn, AggDef>
 );
 
-/**
- * A scalar (row-level) function that can wrap an aggregation's field expression,
- * e.g. `avg(round(latency, 1))`. The wrapped expression is always the FIRST
- * argument; `params`/`paramNames` describe the *additional* positional args.
- * `id` is emitted verbatim as the PPL function name (compiled in build_ppl.ts,
- * round-tripped in parse_ppl.ts).
- */
 export interface ScalarFnDef {
   id: string;
   name: string;
   description: string;
-  /** Default values for the extra args beyond the wrapped expression. */
   params: string[];
-  /** Placeholder/label per extra arg. */
   paramNames?: string[];
 }
 
@@ -156,18 +130,6 @@ export interface ScalarFnCategory {
   items: ScalarFnDef[];
 }
 
-/**
- * Catalog of scalar functions grouped by category, mirroring the metric
- * explorer's `OPERATION_CATEGORIES`. Only single-expression-input functions are
- * listed (the wrapped field is the first argument); extra numeric/string args
- * are captured via `params`. Multi-field functions (e.g. `atan2(y, x)`,
- * `concat(a, b)`) are intentionally omitted because the builder wraps exactly
- * one field expression.
- *
- * Function descriptions are plain strings (not i18n), matching the metric
- * explorer's `OPERATION_CATEGORIES`; only the category and param labels are
- * translated.
- */
 export const SCALAR_FN_CATEGORIES: ScalarFnCategory[] = [
   {
     name: i18n.translate('explore.pplBuilder.scalarCategory.math', { defaultMessage: 'Math' }),
@@ -270,5 +232,4 @@ export const SCALAR_FN_MAP: Record<string, ScalarFnDef> = SCALAR_FN_CATEGORIES.r
   {} as Record<string, ScalarFnDef>
 );
 
-/** All scalar-function ids the builder recognizes (used by parse_ppl.ts). */
 export const SCALAR_FN_IDS = new Set<string>(Object.keys(SCALAR_FN_MAP));

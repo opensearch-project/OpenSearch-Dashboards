@@ -13,49 +13,19 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-/**
- * One selectable row in the popover list.
- *
- * Filtering matches the user's query against {@link filterText} (falling back to
- * the row's `key`), so a row whose visible label is a React node still filters on
- * plain text. Rows are rendered in the order given; when consecutive rows carry a
- * different {@link group} a section header is drawn, so grouping is expressed
- * purely by ordering + the `group` field (a menu with no groups renders a flat
- * list). The first row surviving the filter is what the Enter shortcut applies,
- * so lead with the most-common option (e.g. the "over time" entry).
- */
 export interface SearchMenuOption {
-  /** Unique key (React key + default filter text). */
   key: string;
-  /** Rendered row content. */
   label: React.ReactNode;
-  /** Text the search query filters against (defaults to `key`). */
   filterText?: string;
-  /** Section header this row falls under; omit for an ungrouped row. */
   group?: string;
-  /** Whether this row is currently selected (shows a check in a checkable menu). */
   selected?: boolean;
-  /**
-   * Fixed leading icon (e.g. `clock`, `plus`) shown in place of the check — used
-   * by the special "over time" / "create" rows. In a checkable menu a row
-   * without this gets the check slot; without it in a plain menu there is no icon.
-   */
   leadingIcon?: string;
-  /** Muted trailing hint (e.g. the "every 1h" subtitle on the over-time row). */
   hint?: React.ReactNode;
-  /** When set, the row is wrapped in a tooltip revealing the real syntax. */
   tooltip?: string;
   onSelect: () => void;
   dataTestSubj?: string;
 }
 
-/**
- * The pieces of the trigger, returned by {@link SearchPopoverMenuProps.trigger}.
- * `anchor` becomes the popover's `button` — keep it to just the dropdown
- * caret/icon so the panel's beak lines up under it rather than the middle of a
- * wide control. `leading` (a label or pills) renders before the popover, and
- * `wrapperClassName` styles the row that holds both.
- */
 export interface TriggerParts {
   anchor: React.ReactElement;
   leading?: React.ReactNode;
@@ -63,50 +33,21 @@ export interface TriggerParts {
 }
 
 interface SearchPopoverMenuProps {
-  /** The selectable rows (already ordered; grouping derives from `group`). */
   options: SearchMenuOption[];
-  /**
-   * Builds the trigger from a toggle handler. Return just an `anchor` for a
-   * single-button trigger (ƒx glyph, interval chip), or add `leading` +
-   * `wrapperClassName` for a label/pills-plus-caret trigger.
-   */
   trigger: (toggle: () => void) => TriggerParts;
-  /**
-   * Reserve a leading check column (marking `selected` rows) and render each row
-   * as a `plqFieldOption`. Off for the flat aggregation / function lists.
-   */
   checkable?: boolean;
-  /**
-   * When set, typing a value that matches no option exactly offers a "create"
-   * row (and Enter on an otherwise-empty result applies it). Used to accept
-   * arbitrary field names / custom intervals.
-   */
   allowCreate?: {
     onCreate: (value: string) => void;
     dataTestSubj?: string;
   };
-  /** Keep the popover open after a selection (multi-select); defaults to closing. */
   keepOpenOnSelect?: boolean;
-  /** Fired when the popover transitions to open — for lazily loading its options. */
   onOpen?: () => void;
   searchPlaceholder: string;
   emptyMessage: string;
-  /** Anchor side; defaults to `downLeft` so the panel hangs from the left edge. */
   anchorPosition?: EuiPopoverProps['anchorPosition'];
-  /** data-test-subj for the search box (`${x}-search`). */
   searchDataTestSubj?: string;
 }
 
-/**
- * The shared search-first popover menu behind the logs PPL builder's controls —
- * the "Show" aggregation picker, the `ƒx` function menu, the group-by / sort
- * field pickers, and the time-interval combobox. It owns the popover, the
- * open/search state, the filter + Enter-applies-first / Esc-closes keyboard
- * shortcuts, and the grouped, optionally checkable list with an optional
- * create-new row. Each consumer supplies its option data and its own trigger
- * shape (see {@link SearchPopoverMenuProps.trigger}); the trigger's caret is the
- * popover anchor so every menu's beak lines up under its dropdown icon.
- */
 export const SearchPopoverMenu: React.FC<SearchPopoverMenuProps> = ({
   options,
   trigger,
