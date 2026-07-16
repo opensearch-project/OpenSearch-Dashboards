@@ -11,6 +11,8 @@ jest.mock('@osd/monaco', () => ({
     { id: 'head-without-sort', enabled: true, severity: 'info' },
     { id: 'division-by-zero', enabled: true, severity: 'warning' },
     { id: 'field-validation', enabled: true, severity: 'error' },
+    { id: 'agg-on-text', enabled: true, severity: 'warning' },
+    { id: 'type-mismatch-numeric', enabled: true, severity: 'warning' },
   ],
 }));
 
@@ -108,6 +110,36 @@ describe('buildOverridesFromSettings', () => {
     // past the division-by-zero floor instead of being dropped.
     const overrides = buildOverridesFromSettings(
       makeUiSettings([{ id: 'division-by-zero', enabled: true, severity: 'critical' as never }])
+    );
+    expect(overrides).toEqual({});
+  });
+
+  it('clamps agg-on-text up to its warning floor (info downgrade blocked)', () => {
+    const overrides = buildOverridesFromSettings(
+      makeUiSettings([{ id: 'agg-on-text', enabled: true, severity: 'info' }])
+    );
+    expect(overrides).toEqual({});
+  });
+
+  it('clamps type-mismatch-numeric up to its warning floor (info downgrade blocked)', () => {
+    const overrides = buildOverridesFromSettings(
+      makeUiSettings([{ id: 'type-mismatch-numeric', enabled: true, severity: 'info' }])
+    );
+    expect(overrides).toEqual({});
+  });
+
+  it('still allows disabling a floored PR A rule', () => {
+    const overrides = buildOverridesFromSettings(
+      makeUiSettings([{ id: 'agg-on-text', enabled: false, severity: 'info' }])
+    );
+    expect(overrides).toEqual({ 'agg-on-text': { enabled: false } });
+  });
+
+  it('rejects an inherited Object property name as a severity (own-property check)', () => {
+    // 'toString' is `in SEV_RANK` via the prototype chain, but is not an own
+    // property, so the own-property guard must drop it rather than clamp/pass it.
+    const overrides = buildOverridesFromSettings(
+      makeUiSettings([{ id: 'agg-on-text', enabled: true, severity: 'toString' as never }])
     );
     expect(overrides).toEqual({});
   });

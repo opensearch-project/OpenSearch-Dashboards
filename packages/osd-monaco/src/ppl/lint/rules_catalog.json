@@ -95,5 +95,54 @@
     "message": "Reference to an unknown field.",
     "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/fields/",
     "appliesTo": {}
+  },
+  {
+    "id": "invalid-capture-group-name",
+    "detector": "invalid-capture-group-name",
+    "enabled": true,
+    "severity": "error",
+    "message": "Invalid regex capture-group name. Java named groups must match ^[A-Za-z][A-Za-z0-9]*$ and use the (?<name>) syntax, not (?P<name>).",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/rex/",
+    "appliesTo": {}
+  },
+  {
+    "id": "agg-on-text",
+    "detector": "agg-on-text",
+    "enabled": true,
+    "severity": "warning",
+    "message": "Numeric aggregation on a text/keyword field returns null rather than a numeric result.",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/stats/",
+    "needsContext": true,
+    "appliesTo": {}
+  },
+  {
+    "id": "expand-on-non-array",
+    "detector": "expand-on-non-array",
+    "enabled": false,
+    "severity": "warning",
+    "message": "expand target is not a nested/object field; mappings do not record primitive array cardinality, so verify the field holds multiple values.",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/expand/",
+    "needsContext": true,
+    "appliesTo": {}
+  },
+  {
+    "id": "flat-object-subfield",
+    "detector": "flat-object-subfield",
+    "enabled": true,
+    "severity": "error",
+    "message": "flat_object fields and their subfields cannot be referenced in a PPL expression; their values are only retrievable at the document level.",
+    "docUrl": "https://docs.opensearch.org/latest/field-types/supported-field-types/object-fields/",
+    "needsContext": true,
+    "appliesTo": {}
+  },
+  {
+    "id": "type-mismatch-numeric",
+    "detector": "type-mismatch-numeric",
+    "enabled": true,
+    "severity": "warning",
+    "message": "Comparing a numeric field to a non-numeric string literal matches no documents (returns 0 rows, no error).",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/functions/expressions/#comparison-operators",
+    "needsContext": true,
+    "appliesTo": {}
   }
 ]

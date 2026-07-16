@@ -21,6 +21,8 @@ function isLintSeverity(value: string): value is LintSeverity {
 /** Per-rule severity floors. Users may disable these but may not downgrade below the floor. */
 const MIN_SEVERITY: Record<string, LintSeverity> = {
   'division-by-zero': 'warning',
+  'agg-on-text': 'warning',
+  'type-mismatch-numeric': 'warning',
 };
 
 interface StoredRule {

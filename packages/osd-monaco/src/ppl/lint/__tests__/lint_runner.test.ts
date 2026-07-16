@@ -90,6 +90,35 @@ describe('runLint resolution loop', () => {
     ).toHaveLength(1);
   });
 
+  it('satisfies needsContext with a non-empty typeMap alone (no field set)', () => {
+    registerDetector('ctx', (_t, cfg) => [
+      {
+        ruleId: cfg.id,
+        severity: cfg.severity,
+        message: 'x',
+        range: { startLine: 1, startColumn: 0, endLine: 1, endColumn: 1 },
+      },
+    ]);
+    const catalog = [makeRule({ id: 'a', detector: 'ctx', needsContext: true })];
+
+    // An empty typeMap is still "empty context" and gates the rule out.
+    expect(
+      runLint(fakeTree, {
+        catalog,
+        ruleNameToIndex: rni,
+        context: { typeMap: new Map() },
+      })
+    ).toEqual([]);
+    // A populated typeMap alone lets the type-aware rules run.
+    expect(
+      runLint(fakeTree, {
+        catalog,
+        ruleNameToIndex: rni,
+        context: { typeMap: new Map([['age', 'long']]) },
+      })
+    ).toHaveLength(1);
+  });
+
   describe('runtimeOnly flag', () => {
     const probe = () => {
       registerDetector('probe', (_t, cfg) => [

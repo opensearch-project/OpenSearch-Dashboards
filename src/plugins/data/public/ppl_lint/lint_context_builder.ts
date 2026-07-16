@@ -60,10 +60,13 @@ export function extractFieldNames(indexPattern: IndexPatternLike): Set<string> {
  *
  * A field can appear more than once across a data view (e.g. multi-field
  * mappings surface `text` and `keyword` under related names, and merged index
- * patterns can carry conflicting types). The type map keeps a field only when
- * every entry for that name agrees on one `esType`; a field with conflicting
- * types is omitted from the map (but still present in `fields`), so a type-aware
- * rule self-suppresses on it rather than acting on an arbitrary type.
+ * patterns can carry conflicting types), and a single wildcard-backed field can
+ * itself carry more than one `esType` (`['long', 'keyword']`) when its backing
+ * indices disagree. The type map keeps a field only when every entry for that
+ * name — across all of its `esTypes` — agrees on one type; a field with
+ * conflicting types is omitted from the map (but still present in `fields`), so
+ * a type-aware rule self-suppresses on it rather than acting on an arbitrary
+ * type.
  */
 export function extractFieldMetadata(indexPattern: IndexPatternLike): {
   fields: Set<string>;
@@ -78,12 +81,13 @@ export function extractFieldMetadata(indexPattern: IndexPatternLike): {
       continue;
     }
     fields.add(field.name);
-    const esType = field.esTypes?.[0];
-    if (esType) {
-      const set = seenTypes.get(field.name) ?? new Set<string>();
-      set.add(esType);
-      seenTypes.set(field.name, set);
+    const set = seenTypes.get(field.name) ?? new Set<string>();
+    for (const esType of field.esTypes ?? []) {
+      if (esType) {
+        set.add(esType);
+      }
     }
+    seenTypes.set(field.name, set);
   }
 
   const typeMap = new Map<string, string>();
