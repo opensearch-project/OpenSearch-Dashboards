@@ -637,6 +637,16 @@ $plqControlHeight: 36px;
     color: $plqSub;
   }
 
+  // The `(empty)` marker standing in for an empty-string term — reads as muted,
+  // italic UI text (not a purple code literal) so it's clearly a placeholder
+  // value rather than the characters `(empty)`. Used in the chip and popover row.
+  &__emptyVal {
+    // stylelint-disable-next-line @osd/stylelint/no_restricted_properties
+    font-family: $euiFontFamily;
+    font-style: italic;
+    color: $plqSub;
+  }
+
   // The caret on the operator / value triggers reads as a muted affordance.
   &__caret {
     color: $plqSub;

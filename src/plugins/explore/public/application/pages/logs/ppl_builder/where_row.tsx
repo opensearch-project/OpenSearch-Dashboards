@@ -48,6 +48,12 @@ const fieldSuggestsValues = (fieldType?: string): boolean => !fieldType || field
 // button that grows freely.
 const CHIP_MONO_FONT = '11.5px "Source Code Pro", Consolas, Menlo, Courier, monospace';
 
+// An empty-string term is a real value (fields can index `""`), but it renders as
+// nothing — an invisible popover row and a blank gap in the chip's `a, , b` join.
+// Surface it as a visible marker instead so it reads as a deliberate choice.
+const emptyValueLabel = () =>
+  i18n.translate('explore.pplBuilder.filterEmptyValue', { defaultMessage: '(empty)' });
+
 /**
  * The bare inline trigger shared by a chip's field, operator, and value pickers:
  * a label (the field name, operator symbol, or current value) plus the dropdown
@@ -236,7 +242,11 @@ const ChipValuePopover: React.FC<{
 
   const options: SearchMenuOption[] = suggestions.map((value) => ({
     key: value,
-    label: value,
+    label:
+      value === '' ? <span className="plqWhereChip__emptyVal">{emptyValueLabel()}</span> : value,
+    // Keep the empty-string row reachable by search: without a filterText it would
+    // fall back to `key` (also empty) and match only the empty query.
+    filterText: value === '' ? emptyValueLabel() : value,
     selected: values.includes(value),
     onSelect: () => toggleValue(value),
     dataTestSubj: `pplBuilderFilterValueOption-${index}-${value}`,
@@ -247,7 +257,21 @@ const ChipValuePopover: React.FC<{
         defaultMessage: 'values',
       })
     : i18n.translate('explore.pplBuilder.filterValuePlaceholder', { defaultMessage: 'value' });
-  const display = values.length > 0 ? values.join(', ') : placeholder;
+  // Render the selected value(s), showing an empty-string term as a muted `(empty)`
+  // marker so it isn't a blank gap in the `a, , b` join.
+  const display =
+    values.length > 0
+      ? values.map((value, i) => (
+          <React.Fragment key={i}>
+            {i > 0 && ', '}
+            {value === '' ? (
+              <span className="plqWhereChip__emptyVal">{emptyValueLabel()}</span>
+            ) : (
+              value
+            )}
+          </React.Fragment>
+        ))
+      : placeholder;
   const triggerSubj = multi ? `pplBuilderFilterValues-${index}` : `pplBuilderFilterValue-${index}`;
 
   return (

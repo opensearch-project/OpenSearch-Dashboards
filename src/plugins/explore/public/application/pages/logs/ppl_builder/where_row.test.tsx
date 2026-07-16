@@ -191,6 +191,27 @@ describe('WhereRow', () => {
     });
   });
 
+  it('shows an empty-string term as a muted "(empty)" marker in the chip and popover', async () => {
+    const getValues = jest.fn().mockResolvedValue(['', 'auth']);
+    render(
+      <WhereRow
+        filters={[{ id: 'f1', field: 'service', operator: 'is_one_of', values: ['', 'auth'] }]}
+        fieldNames={fieldNames}
+        getFieldType={stringType}
+        getValues={getValues}
+        dispatch={jest.fn()}
+      />
+    );
+    // The chip renders the empty term as "(empty)" rather than a blank gap.
+    const trigger = screen.getByTestId('pplBuilderFilterValues-0');
+    expect(trigger).toHaveTextContent('(empty), auth');
+
+    // The suggestion for the empty term is reachable and labeled "(empty)".
+    fireEvent.click(trigger);
+    const emptyOption = await screen.findByTestId('pplBuilderFilterValueOption-0-');
+    expect(emptyOption).toHaveTextContent('(empty)');
+  });
+
   it('changes the field from the chip and resets the operator and value', () => {
     const { dispatch } = renderRow([
       { id: 'f1', field: 'response', operator: 'is_between', values: ['1', '9'] },
