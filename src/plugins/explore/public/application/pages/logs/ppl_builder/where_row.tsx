@@ -3,12 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import classNames from 'classnames';
 import { i18n } from '@osd/i18n';
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { BuilderAction, compileWhereFilter } from './build_ppl';
 import { WhereFilter, WhereOperator } from './types';
-import { OPERATOR_DEFS, operatorArity } from './where_operators';
+import { OPERATOR_DEFS, OPERATOR_DEF_MAP, operatorArity } from './where_operators';
 import { SearchPopoverMenu, SearchMenuOption } from './search_popover_menu';
 import {
   ControlGroup,
@@ -21,7 +22,7 @@ interface WhereRowProps {
   filters: WhereFilter[];
   /** Field names offered in the "add filter" field picker. */
   fieldNames: string[];
-  /** Async value suggestions for a field (best-effort; unused for now). */
+  /** Async value suggestions for a field (best-effort; empty on failure). */
   getValues: (field: string) => Promise<string[]>;
   dispatch: React.Dispatch<BuilderAction>;
 }
@@ -60,8 +61,162 @@ const AddFilterMenu: React.FC<{
   );
 };
 
-/** A bare inline `<input>` inside a where chip, sized to its content. */
-const ChipValueInput: React.FC<{
+/**
+ * The operator picker: a bare inline trigger (the terse symbol, e.g. `=`, `in`,
+ * `between`) that opens the shared search popover listing all operators by their
+ * full label. Reusing {@link SearchPopoverMenu} keeps it consistent with the
+ * builder's other pickers, and the text trigger sizes to the current operator so
+ * `=` stays tight while `not between` gets the room it needs.
+ */
+const OperatorPopover: React.FC<{
+  filter: WhereFilter;
+  index: number;
+  onChange: (operator: WhereOperator) => void;
+}> = ({ filter, index, onChange }) => {
+  const current = OPERATOR_DEF_MAP[filter.operator];
+  const options: SearchMenuOption[] = OPERATOR_DEFS.map((def) => ({
+    key: def.value,
+    label: def.label,
+    filterText: `${def.label} ${def.shortLabel}`,
+    selected: def.value === filter.operator,
+    onSelect: () => onChange(def.value),
+    dataTestSubj: `pplBuilderFilterOperatorOption-${def.value}-${index}`,
+  }));
+  return (
+    <SearchPopoverMenu
+      options={options}
+      checkable
+      searchPlaceholder={i18n.translate('explore.pplBuilder.filterOperatorSearch', {
+        defaultMessage: 'Operator…',
+      })}
+      emptyMessage={i18n.translate('explore.pplBuilder.noMatchingOperator', {
+        defaultMessage: 'No matching operator',
+      })}
+      searchDataTestSubj={`pplBuilderFilterOperator-${index}-search`}
+      trigger={(toggle) => ({
+        anchor: (
+          <button
+            type="button"
+            className="plqWhereChip__op"
+            onClick={toggle}
+            aria-label={i18n.translate('explore.pplBuilder.filterOperatorFor', {
+              defaultMessage: 'Operator for {field}',
+              values: { field: filter.field },
+            })}
+            data-test-subj={`pplBuilderFilterOperator-${index}`}
+          >
+            <span>{current.shortLabel}</span>
+            <EuiIcon type="arrowDown" size="s" className="plqWhereChip__caret" />
+          </button>
+        ),
+      })}
+    />
+  );
+};
+
+/**
+ * A value editor for the one/many arities: a bare inline trigger showing the
+ * current value(s) that opens the shared search popover of value suggestions
+ * (fetched lazily via {@link WhereRowProps.getValues}), with `allowCreate` so a
+ * value not in the list can still be typed in. Single-value operators replace the
+ * value on select; the one-of forms keep the popover open and toggle each value.
+ */
+const ChipValuePopover: React.FC<{
+  field: string;
+  values: string[];
+  multi: boolean;
+  index: number;
+  getValues: (field: string) => Promise<string[]>;
+  onChange: (values: string[]) => void;
+}> = ({ field, values, multi, index, getValues, onChange }) => {
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+
+  useEffect(() => {
+    let live = true;
+    getValues(field).then(
+      (vals) => {
+        if (live) setSuggestions(vals);
+      },
+      () => {
+        if (live) setSuggestions([]);
+      }
+    );
+    return () => {
+      live = false;
+    };
+  }, [field, getValues]);
+
+  const toggleValue = (value: string) => {
+    if (!multi) {
+      onChange([value]);
+      return;
+    }
+    onChange(values.includes(value) ? values.filter((v) => v !== value) : [...values, value]);
+  };
+
+  const options: SearchMenuOption[] = suggestions.map((value) => ({
+    key: value,
+    label: value,
+    selected: values.includes(value),
+    onSelect: () => toggleValue(value),
+    dataTestSubj: `pplBuilderFilterValueOption-${index}-${value}`,
+  }));
+
+  const placeholder = multi
+    ? i18n.translate('explore.pplBuilder.filterValuesPlaceholder', {
+        defaultMessage: 'value, value…',
+      })
+    : i18n.translate('explore.pplBuilder.filterValuePlaceholder', { defaultMessage: 'value' });
+  const display = values.length > 0 ? values.join(', ') : placeholder;
+  const triggerSubj = multi ? `pplBuilderFilterValues-${index}` : `pplBuilderFilterValue-${index}`;
+
+  return (
+    <SearchPopoverMenu
+      options={options}
+      checkable={multi}
+      keepOpenOnSelect={multi}
+      allowCreate={{
+        onCreate: (value) => {
+          if (!multi) {
+            onChange([value]);
+          } else if (!values.includes(value)) {
+            onChange([...values, value]);
+          }
+        },
+        dataTestSubj: `pplBuilderFilterValueCreate-${index}`,
+      }}
+      searchPlaceholder={i18n.translate('explore.pplBuilder.filterValueSearch', {
+        defaultMessage: 'Value…',
+      })}
+      emptyMessage={i18n.translate('explore.pplBuilder.filterNoValues', {
+        defaultMessage: 'Type a value',
+      })}
+      searchDataTestSubj={`${triggerSubj}-search`}
+      trigger={(toggle) => ({
+        anchor: (
+          <button
+            type="button"
+            className={classNames('plqWhereChip__val', {
+              'plqWhereChip__val--empty': values.length === 0,
+            })}
+            onClick={toggle}
+            aria-label={i18n.translate('explore.pplBuilder.filterValueFor', {
+              defaultMessage: 'Value for {field}',
+              values: { field },
+            })}
+            data-test-subj={triggerSubj}
+          >
+            <span className="plqWhereChip__valText">{display}</span>
+            <EuiIcon type="arrowDown" size="s" className="plqWhereChip__caret" />
+          </button>
+        ),
+      })}
+    />
+  );
+};
+
+/** A bare inline numeric `<input>` for a range bound, sized to its content. */
+const RangeInput: React.FC<{
   value: string;
   placeholder: string;
   ariaLabel: string;
@@ -69,27 +224,28 @@ const ChipValueInput: React.FC<{
   dataTestSubj: string;
 }> = ({ value, placeholder, ariaLabel, onChange, dataTestSubj }) => (
   <input
-    className="plqWhereChip__val"
+    className="plqWhereChip__range"
     value={value}
     placeholder={placeholder}
     onChange={(e) => onChange(e.target.value)}
-    style={{ width: inputWidth(value || placeholder, 12, 40, 200) }}
+    style={{ width: inputWidth(value || placeholder, 12, 32, 120) }}
     aria-label={ariaLabel}
     data-test-subj={dataTestSubj}
   />
 );
 
 /**
- * The adaptive value editor inside a chip: nothing for exists/not_exists, one
- * input for is/is_not, a comma-separated input for the one-of forms, and a
- * from/to pair for the between forms. Each shape maps 1:1 onto the operator's
+ * The adaptive value editor inside a chip: nothing for exists/not_exists, a
+ * suggestion popover for is/is_not and the one-of forms, and a from/to pair of
+ * numeric inputs for the between forms. Each shape maps 1:1 onto the operator's
  * arity (see {@link operatorArity}) and writes straight back into `values`.
  */
 const ChipValues: React.FC<{
   filter: WhereFilter;
   index: number;
+  getValues: (field: string) => Promise<string[]>;
   onChange: (values: string[]) => void;
-}> = ({ filter, index, onChange }) => {
+}> = ({ filter, index, getValues, onChange }) => {
   const arity = operatorArity(filter.operator);
 
   if (arity === 'none') return null;
@@ -97,7 +253,7 @@ const ChipValues: React.FC<{
   if (arity === 'range') {
     return (
       <>
-        <ChipValueInput
+        <RangeInput
           value={filter.values[0] ?? ''}
           placeholder={i18n.translate('explore.pplBuilder.filterFrom', { defaultMessage: 'from' })}
           ariaLabel={i18n.translate('explore.pplBuilder.filterFromValue', {
@@ -109,7 +265,7 @@ const ChipValues: React.FC<{
         <span className="plqWhereChip__nat">
           {i18n.translate('explore.pplBuilder.filterAnd', { defaultMessage: 'and' })}
         </span>
-        <ChipValueInput
+        <RangeInput
           value={filter.values[1] ?? ''}
           placeholder={i18n.translate('explore.pplBuilder.filterTo', { defaultMessage: 'to' })}
           ariaLabel={i18n.translate('explore.pplBuilder.filterToValue', {
@@ -122,47 +278,22 @@ const ChipValues: React.FC<{
     );
   }
 
-  if (arity === 'many') {
-    // A single inline input holding the comma-separated list; splitting on save
-    // keeps the chip dense while still accepting several values.
-    return (
-      <ChipValueInput
-        value={filter.values.join(', ')}
-        placeholder={i18n.translate('explore.pplBuilder.filterValuesPlaceholder', {
-          defaultMessage: 'value, value…',
-        })}
-        ariaLabel={i18n.translate('explore.pplBuilder.filterValues', { defaultMessage: 'Values' })}
-        onChange={(v) =>
-          onChange(
-            v
-              .split(',')
-              .map((s) => s.trim())
-              .filter(Boolean)
-          )
-        }
-        dataTestSubj={`pplBuilderFilterValues-${index}`}
-      />
-    );
-  }
-
-  // one
   return (
-    <ChipValueInput
-      value={filter.values[0] ?? ''}
-      placeholder={i18n.translate('explore.pplBuilder.filterValuePlaceholder', {
-        defaultMessage: 'value',
-      })}
-      ariaLabel={i18n.translate('explore.pplBuilder.filterValue', { defaultMessage: 'Value' })}
-      onChange={(v) => onChange([v])}
-      dataTestSubj={`pplBuilderFilterValue-${index}`}
+    <ChipValuePopover
+      field={filter.field}
+      values={filter.values}
+      multi={arity === 'many'}
+      index={index}
+      getValues={getValues}
+      onChange={onChange}
     />
   );
 };
 
 /**
  * One structured filter as an inline-editable chip: the field name (monospace),
- * an operator `<select>`, the adaptive value input(s), and its own ✕. Editing any
- * part dispatches `SET_FILTER` so the PPL regenerates live — no popover, matching
+ * an operator picker, the adaptive value editor, and its own ✕. Editing any part
+ * dispatches `SET_FILTER` so the PPL regenerates live — no editor popover, matching
  * the v5 builder mock where a chip *is* the editor. Changing the operator across
  * arities (e.g. `is` → `is between`) clears the values so a stale single value
  * can't leak into a range/none input, mirroring the Discover filter editor.
@@ -170,8 +301,9 @@ const ChipValues: React.FC<{
 const WhereChip: React.FC<{
   filter: WhereFilter;
   index: number;
+  getValues: (field: string) => Promise<string[]>;
   dispatch: React.Dispatch<BuilderAction>;
-}> = ({ filter, index, dispatch }) => {
+}> = ({ filter, index, getValues, dispatch }) => {
   const predicate = compileWhereFilter(filter);
   const tooltip = predicate
     ? i18n.translate('explore.pplBuilder.filterChipTooltip', {
@@ -194,31 +326,8 @@ const WhereChip: React.FC<{
       <EuiToolTip content={tooltip} position="top">
         <span className="plqWhereChip__field">{filter.field}</span>
       </EuiToolTip>
-      {/*
-        A bare native <select> keeps the operator picker dense inside the chip
-        (matching the v5 builder mock). onChange is the correct, accessible
-        handler for a <select> — the value commits on keyboard or mouse select
-        alike; onBlur (what the deprecated jsx-a11y/no-onchange rule prefers)
-        would instead break single-click mouse selection.
-      */}
-      {/* eslint-disable-next-line jsx-a11y/no-onchange */}
-      <select
-        className="plqWhereChip__op"
-        value={filter.operator}
-        onChange={(e) => setOperator(e.target.value as WhereOperator)}
-        aria-label={i18n.translate('explore.pplBuilder.filterOperatorFor', {
-          defaultMessage: 'Operator for {field}',
-          values: { field: filter.field },
-        })}
-        data-test-subj={`pplBuilderFilterOperator-${index}`}
-      >
-        {OPERATOR_DEFS.map((def) => (
-          <option key={def.value} value={def.value}>
-            {def.shortLabel}
-          </option>
-        ))}
-      </select>
-      <ChipValues filter={filter} index={index} onChange={setValues} />
+      <OperatorPopover filter={filter} index={index} onChange={setOperator} />
+      <ChipValues filter={filter} index={index} getValues={getValues} onChange={setValues} />
       <RemoveButton
         variant="chip"
         ariaLabel={i18n.translate('explore.pplBuilder.removeFilter', {
@@ -241,7 +350,7 @@ const WhereChip: React.FC<{
  * unlike the group-by box which keeps an "everything" default. Filters compile to
  * `| where` pipe stages (see `buildPPL`) and round-trip via `parsePPL`.
  */
-export const WhereRow: React.FC<WhereRowProps> = ({ filters, fieldNames, dispatch }) => {
+export const WhereRow: React.FC<WhereRowProps> = ({ filters, fieldNames, getValues, dispatch }) => {
   const addFilter = (field: string) =>
     dispatch({ type: 'ADD_FILTER', filter: { field, operator: 'is', values: [] } });
 
@@ -269,7 +378,13 @@ export const WhereRow: React.FC<WhereRowProps> = ({ filters, fieldNames, dispatc
       dataTestSubj="pplBuilderWhere"
     >
       {filters.map((filter, index) => (
-        <WhereChip key={filter.id} filter={filter} index={index} dispatch={dispatch} />
+        <WhereChip
+          key={filter.id}
+          filter={filter}
+          index={index}
+          getValues={getValues}
+          dispatch={dispatch}
+        />
       ))}
       <AddFilterMenu
         fieldNames={fieldNames}

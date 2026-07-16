@@ -44,11 +44,6 @@ $plqRadius: 2px; // flat, code-style radius inside the builder
 // so the whole builder reads as one aligned band of controls.
 $plqControlHeight: 36px;
 
-// The shared dropdown caret drawn as an inline SVG data URI (muted $plqSub
-// stroke, #69707D), used as the background of the bare `<select>` controls that
-// blend into the builder chrome (e.g. the where-chip operator picker).
-$plqCaretSvg: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 16 16'%3E%3Cpath d='M4 6l4 4 4-4' fill='none' stroke='%2369707D' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-
 .plqBuilder {
   background: $plqBoxBg;
   border: 1px solid $plqBorderSoft;
@@ -500,29 +495,80 @@ $plqCaretSvg: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.o
     user-select: none;
   }
 
-  // Operator picker: a bare <select> blended into the chip fill (no control
-  // chrome), with the shared caret. Monospace to match the field/value tokens.
+  // Operator picker trigger: a bare button blended into the chip fill (no
+  // control chrome), showing the terse symbol + a caret that opens the operator
+  // popover. Monospace to match the field/value tokens; padded on both sides so
+  // the symbol has breathing room and the whole token sizes to its content.
   &__op {
-    appearance: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
     height: 18px;
-
-    // Room on the right for the caret SVG so the operator text doesn't overlap it.
-    padding: 0 12px 0 0;
+    padding: 0 4px;
     border: none;
     outline: none;
-    background: transparent $plqCaretSvg no-repeat right center;
+    background: transparent;
     // stylelint-disable-next-line @osd/stylelint/no_restricted_properties
     font-family: $euiCodeFontFamily;
     font-size: 11.5px;
     line-height: 18px;
     color: $plqInk;
     cursor: pointer;
+    white-space: nowrap;
+
+    &:hover,
+    &:focus {
+      background: $plqXHover;
+      border-radius: $plqRadius;
+    }
   }
 
-  // Editable value input(s): blend into the chip fill; the value reads as a
-  // string literal (purple, matching the search box's tok-str) to signal it's
-  // the user-entered datum, and is monospace like the field.
+  // Value picker trigger: a bare button that opens the value-suggestion popover.
+  // The value text reads as a string literal (purple, matching the search box's
+  // tok-str) to signal it's the user-entered datum, and is monospace like the
+  // field. Sizes to its content with a trailing caret.
   &__val {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    height: 18px;
+    padding: 0 4px;
+    border: none;
+    outline: none;
+    background: transparent;
+    cursor: pointer;
+    white-space: nowrap;
+
+    &:hover,
+    &:focus {
+      background: $plqXHover;
+      border-radius: $plqRadius;
+    }
+  }
+
+  // The value text inside the trigger — purple string-literal token.
+  &__valText {
+    // stylelint-disable-next-line @osd/stylelint/no_restricted_properties
+    font-family: $euiCodeFontFamily;
+    font-size: 11.5px;
+    line-height: 18px;
+    /* stylelint-disable-next-line @osd/stylelint/no_restricted_values */
+    color: #8737a8;
+  }
+
+  // Placeholder state (no value yet) reads as muted UI text, not a literal.
+  &__val--empty &__valText {
+    color: $plqSub;
+  }
+
+  // The caret on the operator / value triggers reads as a muted affordance.
+  &__caret {
+    color: $plqSub;
+  }
+
+  // Editable range bound input(s): a bare numeric input blended into the chip
+  // fill, purple like the value literal, monospace like the field.
+  &__range {
     height: 18px;
     padding: 0 2px;
     border: none;

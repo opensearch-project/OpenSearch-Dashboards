@@ -163,8 +163,6 @@ export const PPLBuilder: React.FC<PPLBuilderProps> = ({
           dispatch={dispatch}
         />
 
-        <span className="plqDivider" />
-
         <span className="plqRow__label">
           {i18n.translate('explore.pplBuilder.groupInto', { defaultMessage: 'Group into' })}
         </span>
