@@ -181,12 +181,13 @@ export const SearchBox: React.FC<SearchBoxProps> = ({
             // has no whitespace but is still a string, so an unquoted
             // `host=www.opensearch.org` is invalid PPL — it must be
             // `host='www.opensearch.org'`. Quote everything that isn't a plain
-            // number/boolean, using single quotes (PPL's string delimiter) and
-            // escaping any embedded backslashes/quotes.
+            // number/boolean, using single quotes (PPL's string delimiter) with
+            // embedded `'` escaped as `''` — matching `build_ppl`'s `whereValue`
+            // and the parser's `unquoteValue`, so builder output stays consistent
+            // with the field-sidebar filter path.
             const isNumeric = v.trim() !== '' && v === v.trim() && Number.isFinite(Number(v));
             const isBoolean = v === 'true' || v === 'false';
-            const insert =
-              isNumeric || isBoolean ? v : `'${v.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
+            const insert = isNumeric || isBoolean ? v : `'${v.replace(/'/g, "''")}'`;
             suggestions.push({
               label: v,
               kind: monaco.languages.CompletionItemKind.Value,
