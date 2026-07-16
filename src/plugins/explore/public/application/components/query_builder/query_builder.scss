@@ -44,6 +44,11 @@ $plqRadius: 2px; // flat, code-style radius inside the builder
 // so the whole builder reads as one aligned band of controls.
 $plqControlHeight: 36px;
 
+// The shared dropdown caret drawn as an inline SVG data URI (muted $plqSub
+// stroke, #69707D), used as the background of the bare `<select>` controls that
+// blend into the builder chrome (e.g. the where-chip operator picker).
+$plqCaretSvg: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 16 16'%3E%3Cpath d='M4 6l4 4 4-4' fill='none' stroke='%2369707D' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+
 .plqBuilder {
   background: $plqBoxBg;
   border: 1px solid $plqBorderSoft;
@@ -457,14 +462,91 @@ $plqControlHeight: 36px;
   flex: 1 1 12px;
 }
 
-// The "where" section: its label, filter chips, and the "Add filter" button laid
-// out as one inline-flex group so they align on the builder row like the group-by
-// controls (which the shared `.plqPill` chip styling already matches).
+// The empty-state "Where" wrapper: just holds the ghost "＋ Where" affordance
+// (and its field-picker popover) inline on the builder row. Once a filter exists
+// the section becomes a floating-label `.plqGroup` box holding `.plqWhereChip`s.
 .plqWhere {
   display: inline-flex;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 6px;
+
+  &__add.euiButtonIcon {
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+  }
+}
+
+// One inline-editable filter condition inside the Where box: field name (mono),
+// a bare operator <select>, adaptive value input(s), and its own ✕ — matching the
+// group-by field pill's height/fill so the chips align with the rest of the row.
+// The whole chip is one flat token; only its ✕ and the value text carry accent.
+.plqWhereChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 18px;
+  padding: 0 2px 0 8px;
+  background: $plqChipBg;
+  color: $plqInk;
+  border-radius: $plqRadius;
+
+  // Static field name — code-style, not interactive (the select/inputs/✕ act).
+  &__field {
+    // stylelint-disable-next-line @osd/stylelint/no_restricted_properties
+    font-family: $euiCodeFontFamily;
+    font-size: 11.5px;
+    line-height: 18px;
+    color: $plqInk;
+    user-select: none;
+  }
+
+  // Operator picker: a bare <select> blended into the chip fill (no control
+  // chrome), with the shared caret. Monospace to match the field/value tokens.
+  &__op {
+    appearance: none;
+    height: 18px;
+
+    // Room on the right for the caret SVG so the operator text doesn't overlap it.
+    padding: 0 12px 0 0;
+    border: none;
+    outline: none;
+    background: transparent $plqCaretSvg no-repeat right center;
+    // stylelint-disable-next-line @osd/stylelint/no_restricted_properties
+    font-family: $euiCodeFontFamily;
+    font-size: 11.5px;
+    line-height: 18px;
+    color: $plqInk;
+    cursor: pointer;
+  }
+
+  // Editable value input(s): blend into the chip fill; the value reads as a
+  // string literal (purple, matching the search box's tok-str) to signal it's
+  // the user-entered datum, and is monospace like the field.
+  &__val {
+    height: 18px;
+    padding: 0 2px;
+    border: none;
+    outline: none;
+    background: transparent;
+    // stylelint-disable-next-line @osd/stylelint/no_restricted_properties
+    font-family: $euiCodeFontFamily;
+    font-size: 11.5px;
+    line-height: 18px;
+    /* stylelint-disable-next-line @osd/stylelint/no_restricted_values */
+    color: #8737a8;
+
+    &::placeholder {
+      color: $plqSub;
+    }
+  }
+
+  // The "and" joiner between range bounds reads as plain UI text, not code.
+  &__nat {
+    font-size: 11.5px;
+    line-height: 18px;
+    color: $plqSub;
+    user-select: none;
+  }
 }
 
 .plqDivider {

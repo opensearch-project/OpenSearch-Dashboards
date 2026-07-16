@@ -12,6 +12,6 @@ export { parsePPL } from './parse_ppl';
 export type { PPLParseResult } from './parse_ppl';
 export { PPLBuilder } from './ppl_builder';
 export { WhereRow } from './where_row';
-export { FilterEditorPopover, filterChipLabel } from './filter_editor_popover';
-export type { FilterDraft } from './filter_editor_popover';
+export { filterChipLabel, OPERATOR_DEFS, operatorArity } from './where_operators';
+export type { OperatorDef, OperatorArity } from './where_operators';
 export { SearchBox, PPL_SEARCH_LANGUAGE_ID } from './search_box';

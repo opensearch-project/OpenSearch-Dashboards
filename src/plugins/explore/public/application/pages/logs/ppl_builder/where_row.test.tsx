@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { WhereRow } from './where_row';
 import { WhereFilter } from './types';
 
@@ -19,20 +19,103 @@ const renderRow = (filters: WhereFilter[] = []) => {
 };
 
 describe('WhereRow', () => {
-  it('renders the "where" label and an Add filter affordance when empty', () => {
+  it('renders a ghost "Where" affordance when empty', () => {
     renderRow([]);
-    expect(screen.getByText('where')).toBeInTheDocument();
     expect(screen.getByTestId('pplBuilderAddFilter')).toBeInTheDocument();
+    expect(screen.getByText('Where')).toBeInTheDocument();
   });
 
-  it('renders a chip per filter with a human-readable label', () => {
+  it('opens the field picker from the ghost and adds a filter on field pick', () => {
+    const { dispatch } = renderRow([]);
+    fireEvent.click(screen.getByTestId('pplBuilderAddFilter'));
+
+    // Pick a field from the popover list — a fresh `is` filter is appended.
+    fireEvent.click(screen.getByTestId('pplBuilderFilterFieldOption-response'));
+    expect(dispatch).toHaveBeenCalledWith({
+      type: 'ADD_FILTER',
+      filter: { field: 'response', operator: 'is', values: [] },
+    });
+  });
+
+  it('renders an inline-editable chip per filter with the field and a value input', () => {
     renderRow([
       { id: 'f1', field: 'response', operator: 'is', values: ['200'] },
       { id: 'f2', field: 'service', operator: 'exists', values: [] },
     ]);
     expect(screen.getByTestId('pplBuilderFilterChip-0')).toBeInTheDocument();
-    expect(screen.getByText('response is 200')).toBeInTheDocument();
-    expect(screen.getByText('service exists')).toBeInTheDocument();
+    expect(screen.getByTestId('pplBuilderFilterChip-1')).toBeInTheDocument();
+    // The `is` chip exposes an editable single value; `exists` has none.
+    expect((screen.getByTestId('pplBuilderFilterValue-0') as HTMLInputElement).value).toBe('200');
+    expect(screen.queryByTestId('pplBuilderFilterValue-1')).not.toBeInTheDocument();
+  });
+
+  it('edits the value inline via SET_FILTER', () => {
+    const { dispatch } = renderRow([
+      { id: 'f1', field: 'response', operator: 'is', values: ['200'] },
+    ]);
+    fireEvent.change(screen.getByTestId('pplBuilderFilterValue-0'), { target: { value: '500' } });
+    expect(dispatch).toHaveBeenCalledWith({
+      type: 'SET_FILTER',
+      index: 0,
+      filter: { values: ['500'] },
+    });
+  });
+
+  it('changes the operator inline and preserves the value within the same arity', () => {
+    const { dispatch } = renderRow([
+      { id: 'f1', field: 'response', operator: 'is', values: ['200'] },
+    ]);
+    fireEvent.change(screen.getByTestId('pplBuilderFilterOperator-0'), {
+      target: { value: 'is_not' },
+    });
+    // is and is_not share arity `one`, so the value carries over.
+    expect(dispatch).toHaveBeenCalledWith({
+      type: 'SET_FILTER',
+      index: 0,
+      filter: { operator: 'is_not', values: ['200'] },
+    });
+  });
+
+  it('clears the value when the operator changes arity (is → is between)', () => {
+    const { dispatch } = renderRow([
+      { id: 'f1', field: 'response', operator: 'is', values: ['200'] },
+    ]);
+    fireEvent.change(screen.getByTestId('pplBuilderFilterOperator-0'), {
+      target: { value: 'is_between' },
+    });
+    expect(dispatch).toHaveBeenCalledWith({
+      type: 'SET_FILTER',
+      index: 0,
+      filter: { operator: 'is_between', values: [] },
+    });
+  });
+
+  it('renders two range inputs for a between filter and writes both bounds', () => {
+    const { dispatch } = renderRow([
+      { id: 'f1', field: 'bytes', operator: 'is_between', values: ['1', '9'] },
+    ]);
+    expect((screen.getByTestId('pplBuilderFilterRangeFrom-0') as HTMLInputElement).value).toBe('1');
+    expect((screen.getByTestId('pplBuilderFilterRangeTo-0') as HTMLInputElement).value).toBe('9');
+    fireEvent.change(screen.getByTestId('pplBuilderFilterRangeTo-0'), { target: { value: '99' } });
+    expect(dispatch).toHaveBeenCalledWith({
+      type: 'SET_FILTER',
+      index: 0,
+      filter: { values: ['1', '99'] },
+    });
+  });
+
+  it('splits a comma-separated list for the one-of operator', () => {
+    const { dispatch } = renderRow([
+      { id: 'f1', field: 'response', operator: 'is_one_of', values: ['200'] },
+    ]);
+    fireEvent.change(screen.getByTestId('pplBuilderFilterValues-0'), {
+      target: { value: '200, 404, 500' },
+    });
+    expect(dispatch).toHaveBeenCalledWith({
+      type: 'SET_FILTER',
+      index: 0,
+      filter: { values: ['200', '404', '500'] },
+    });
   });
 
   it('removes a filter via the chip ✕', () => {
@@ -43,82 +126,15 @@ describe('WhereRow', () => {
     expect(dispatch).toHaveBeenCalledWith({ type: 'REMOVE_FILTER', index: 0 });
   });
 
-  it('opens the editor from Add filter and dispatches ADD_FILTER on save', async () => {
-    const { dispatch } = renderRow([]);
-    fireEvent.click(screen.getByTestId('pplBuilderAddFilter'));
-
-    // Field combobox — type a field and pick it.
-    const editor = await screen.findByTestId('pplBuilderFilterField');
-    const fieldInput = editor.querySelector('input');
-    fireEvent.change(fieldInput!, { target: { value: 'response' } });
-    fireEvent.keyDown(fieldInput!, { key: 'Enter', code: 'Enter' });
-
-    // Value combobox — enter a value.
-    const values = await screen.findByTestId('pplBuilderFilterValues');
-    const valueInput = values.querySelector('input');
-    fireEvent.change(valueInput!, { target: { value: '200' } });
-    fireEvent.keyDown(valueInput!, { key: 'Enter', code: 'Enter' });
-
-    fireEvent.click(screen.getByTestId('pplBuilderFilterSave'));
-
-    await waitFor(() =>
-      expect(dispatch).toHaveBeenCalledWith(
-        expect.objectContaining({
-          type: 'ADD_FILTER',
-          filter: expect.objectContaining({
-            field: 'response',
-            operator: 'is',
-            values: ['200'],
-          }),
-        })
-      )
-    );
-  });
-
-  it('clears operator and values when the field changes (like Discover)', async () => {
-    const { dispatch } = renderRow([
-      { id: 'f1', field: 'response', operator: 'is_not', values: ['200'] },
-    ]);
-    fireEvent.click(screen.getByTestId('pplBuilderFilterChipButton-0'));
-
-    // Switch the field — the editor should reset the operator to the default
-    // `is` and drop the previously chosen value ('200').
-    const editor = await screen.findByTestId('pplBuilderFilterField');
-    const fieldInput = editor.querySelector('input');
-    fireEvent.change(fieldInput!, { target: { value: 'service' } });
-    fireEvent.keyDown(fieldInput!, { key: 'Enter', code: 'Enter' });
-
-    // Enter a fresh value for the new field.
-    const values = await screen.findByTestId('pplBuilderFilterValues');
-    const valueInput = values.querySelector('input');
-    fireEvent.change(valueInput!, { target: { value: 'web' } });
-    fireEvent.keyDown(valueInput!, { key: 'Enter', code: 'Enter' });
-
-    fireEvent.click(screen.getByTestId('pplBuilderFilterSave'));
-    await waitFor(() =>
-      expect(dispatch).toHaveBeenCalledWith(
-        expect.objectContaining({
-          type: 'SET_FILTER',
-          index: 0,
-          // operator reset to the default `is`; the stale '200' is gone.
-          filter: expect.objectContaining({ field: 'service', operator: 'is', values: ['web'] }),
-        })
-      )
-    );
-  });
-
-  it('opens the editor from a chip and dispatches SET_FILTER on update', async () => {
+  it('adds a second condition via the inline ＋ when filters exist', () => {
     const { dispatch } = renderRow([
       { id: 'f1', field: 'response', operator: 'is', values: ['200'] },
     ]);
-    fireEvent.click(screen.getByTestId('pplBuilderFilterChipButton-0'));
-    // The editor opens pre-populated; just save to confirm the edit path fires.
-    const save = await screen.findByTestId('pplBuilderFilterSave');
-    fireEvent.click(save);
-    await waitFor(() =>
-      expect(dispatch).toHaveBeenCalledWith(
-        expect.objectContaining({ type: 'SET_FILTER', index: 0 })
-      )
-    );
+    fireEvent.click(screen.getByTestId('pplBuilderAddFilterCondition'));
+    fireEvent.click(screen.getByTestId('pplBuilderFilterFieldOption-service'));
+    expect(dispatch).toHaveBeenCalledWith({
+      type: 'ADD_FILTER',
+      filter: { field: 'service', operator: 'is', values: [] },
+    });
   });
 });
