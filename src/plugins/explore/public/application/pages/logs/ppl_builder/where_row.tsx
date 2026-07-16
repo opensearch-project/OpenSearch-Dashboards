@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import classNames from 'classnames';
 import { i18n } from '@osd/i18n';
 import { EuiButtonIcon, EuiIcon, EuiToolTip } from '@elastic/eui';
@@ -49,6 +49,37 @@ const fieldSuggestsValues = (fieldType?: string): boolean => !fieldType || field
 const CHIP_MONO_FONT = '11.5px "Source Code Pro", Consolas, Menlo, Courier, monospace';
 
 /**
+ * The bare inline trigger shared by a chip's field, operator, and value pickers:
+ * a label (the field name, operator symbol, or current value) plus the dropdown
+ * caret. Each picker differs only in its class names and label text, so they all
+ * render through this one button.
+ */
+const ChipCaretButton: React.FC<
+  {
+    className: string;
+    labelClassName?: string;
+    label: React.ReactNode;
+    ariaLabel: string;
+    dataTestSubj: string;
+    onClick: () => void;
+  } & React.ButtonHTMLAttributes<HTMLButtonElement>
+> = ({ className, labelClassName, label, ariaLabel, dataTestSubj, onClick, ...rest }) => (
+  // `...rest` forwards the props EuiToolTip clones onto its child (onFocus/onBlur,
+  // aria-describedby) when the field trigger is wrapped in a tooltip.
+  <button
+    type="button"
+    className={className}
+    onClick={onClick}
+    aria-label={ariaLabel}
+    data-test-subj={dataTestSubj}
+    {...rest}
+  >
+    <span className={labelClassName}>{label}</span>
+    <EuiIcon type="arrowDown" size="s" className="plqWhereChip__caret" />
+  </button>
+);
+
+/**
  * The field-picker popover shared by the empty-state ghost "＋ Where" and the
  * inline "＋" add-condition button — the same {@link SearchPopoverMenu} shell used
  * by the aggregation / group-by / sort pickers ("one popover, three uses"). It
@@ -60,12 +91,22 @@ const AddFilterMenu: React.FC<{
   onPick: (field: string) => void;
   anchor: (toggle: () => void) => React.ReactElement;
 }> = ({ fieldNames, onPick, anchor }) => {
-  const options: SearchMenuOption[] = fieldNames.map((field) => ({
-    key: field,
-    label: field,
-    onSelect: () => onPick(field),
-    dataTestSubj: `pplBuilderFilterFieldOption-${field}`,
-  }));
+  // Callers pass a fresh `onPick` closure each render, so hold it in a ref and
+  // build the (potentially large) field-option list only when `fieldNames`
+  // actually changes — otherwise every keystroke in any chip rebuilds every
+  // menu's options and re-runs the popover's internal filter.
+  const onPickRef = useRef(onPick);
+  onPickRef.current = onPick;
+  const options: SearchMenuOption[] = useMemo(
+    () =>
+      fieldNames.map((field) => ({
+        key: field,
+        label: field,
+        onSelect: () => onPickRef.current(field),
+        dataTestSubj: `pplBuilderFilterFieldOption-${field}`,
+      })),
+    [fieldNames]
+  );
   return (
     <SearchPopoverMenu
       options={options}
@@ -119,19 +160,16 @@ const OperatorPopover: React.FC<{
       searchDataTestSubj={`pplBuilderFilterOperator-${index}-search`}
       trigger={(toggle) => ({
         anchor: (
-          <button
-            type="button"
+          <ChipCaretButton
             className="plqWhereChip__op"
-            onClick={toggle}
-            aria-label={i18n.translate('explore.pplBuilder.filterOperatorFor', {
+            label={current.shortLabel}
+            ariaLabel={i18n.translate('explore.pplBuilder.filterOperatorFor', {
               defaultMessage: 'Operator for {field}',
               values: { field: filter.field },
             })}
-            data-test-subj={`pplBuilderFilterOperator-${index}`}
-          >
-            <span>{current.shortLabel}</span>
-            <EuiIcon type="arrowDown" size="s" className="plqWhereChip__caret" />
-          </button>
+            dataTestSubj={`pplBuilderFilterOperator-${index}`}
+            onClick={toggle}
+          />
         ),
       })}
     />
@@ -158,24 +196,35 @@ const ChipValuePopover: React.FC<{
 }> = ({ field, values, multi, index, suggest, getValues, onChange }) => {
   const [suggestions, setSuggestions] = useState<string[]>([]);
 
+  // Reset stale suggestions when the field changes so a reopen refetches for the
+  // new field. Clean up on unmount so a late `getValues` resolve can't set state
+  // on an unmounted chip.
+  const liveRef = useRef(true);
   useEffect(() => {
-    if (!suggest) {
-      setSuggestions([]);
-      return;
-    }
-    let live = true;
+    setSuggestions([]);
+  }, [field]);
+  useEffect(() => {
+    liveRef.current = true;
+    return () => {
+      liveRef.current = false;
+    };
+  }, []);
+
+  // Fetch value suggestions lazily, only when the popover is actually opened —
+  // not on mount. A round-tripped query can materialize several string filters,
+  // and fetching every one's suggestions up front fires that many backend terms
+  // requests the user may never look at.
+  const loadSuggestions = () => {
+    if (!suggest) return;
     getValues(field).then(
       (vals) => {
-        if (live) setSuggestions(vals);
+        if (liveRef.current) setSuggestions(vals);
       },
       () => {
-        if (live) setSuggestions([]);
+        if (liveRef.current) setSuggestions([]);
       }
     );
-    return () => {
-      live = false;
-    };
-  }, [field, suggest, getValues]);
+  };
 
   const toggleValue = (value: string) => {
     if (!multi) {
@@ -206,6 +255,7 @@ const ChipValuePopover: React.FC<{
       options={options}
       checkable={multi}
       keepOpenOnSelect={multi}
+      onOpen={loadSuggestions}
       allowCreate={{
         onCreate: (value) => {
           if (!multi) {
@@ -225,21 +275,19 @@ const ChipValuePopover: React.FC<{
       searchDataTestSubj={`${triggerSubj}-search`}
       trigger={(toggle) => ({
         anchor: (
-          <button
-            type="button"
+          <ChipCaretButton
             className={classNames('plqWhereChip__val', {
               'plqWhereChip__val--empty': values.length === 0,
             })}
-            onClick={toggle}
-            aria-label={i18n.translate('explore.pplBuilder.filterValueFor', {
+            labelClassName="plqWhereChip__valText"
+            label={display}
+            ariaLabel={i18n.translate('explore.pplBuilder.filterValueFor', {
               defaultMessage: 'Value for {field}',
               values: { field },
             })}
-            data-test-subj={triggerSubj}
-          >
-            <span className="plqWhereChip__valText">{display}</span>
-            <EuiIcon type="arrowDown" size="s" className="plqWhereChip__caret" />
-          </button>
+            dataTestSubj={triggerSubj}
+            onClick={toggle}
+          />
         ),
       })}
     />
@@ -406,19 +454,16 @@ const WhereChip: React.FC<{
         onPick={setField}
         anchor={(toggle) => (
           <EuiToolTip content={tooltip} position="top">
-            <button
-              type="button"
+            <ChipCaretButton
               className="plqWhereChip__field"
-              onClick={toggle}
-              aria-label={i18n.translate('explore.pplBuilder.filterFieldFor', {
+              label={filter.field}
+              ariaLabel={i18n.translate('explore.pplBuilder.filterFieldFor', {
                 defaultMessage: 'Field for filter {index}',
                 values: { index: index + 1 },
               })}
-              data-test-subj={`pplBuilderFilterField-${index}`}
-            >
-              <span>{filter.field}</span>
-              <EuiIcon type="arrowDown" size="s" className="plqWhereChip__caret" />
-            </button>
+              dataTestSubj={`pplBuilderFilterField-${index}`}
+              onClick={toggle}
+            />
           </EuiToolTip>
         )}
       />

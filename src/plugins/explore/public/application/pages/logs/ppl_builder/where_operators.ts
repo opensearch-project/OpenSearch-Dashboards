@@ -4,7 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { WhereFilter, WhereOperator } from './types';
+import { WhereOperator } from './types';
 
 /**
  * How many value inputs an operator's chip renders:
@@ -128,20 +128,4 @@ export const operatorArity = (operator: WhereOperator): OperatorArity =>
 export function operatorsForFieldType(fieldType?: string): OperatorDef[] {
   const type = fieldType || 'string';
   return OPERATOR_DEFS.filter((def) => !def.fieldTypes || def.fieldTypes.includes(type));
-}
-
-/**
- * Human-readable one-line label for a filter, e.g. `status is one of 200, 404`
- * or `service exists`. Used for tooltips/aria and any text summary of a chip.
- */
-export function filterChipLabel(filter: WhereFilter): string {
-  const def = OPERATOR_DEF_MAP[filter.operator];
-  const opLabel = def?.label ?? filter.operator;
-  const arity = def?.arity;
-  if (arity === 'none') return `${filter.field} ${opLabel}`;
-  if (arity === 'range') {
-    const [gte, lt] = filter.values;
-    return `${filter.field} ${opLabel} ${gte ?? ''} – ${lt ?? ''}`.trim();
-  }
-  return `${filter.field} ${opLabel} ${filter.values.filter(Boolean).join(', ')}`.trim();
 }

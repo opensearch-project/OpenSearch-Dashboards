@@ -87,6 +87,8 @@ interface SearchPopoverMenuProps {
   };
   /** Keep the popover open after a selection (multi-select); defaults to closing. */
   keepOpenOnSelect?: boolean;
+  /** Fired when the popover transitions to open — for lazily loading its options. */
+  onOpen?: () => void;
   searchPlaceholder: string;
   emptyMessage: string;
   /** Anchor side; defaults to `downLeft` so the panel hangs from the left edge. */
@@ -111,6 +113,7 @@ export const SearchPopoverMenu: React.FC<SearchPopoverMenuProps> = ({
   checkable,
   allowCreate,
   keepOpenOnSelect,
+  onOpen,
   searchPlaceholder,
   emptyMessage,
   anchorPosition = 'downLeft',
@@ -124,7 +127,11 @@ export const SearchPopoverMenu: React.FC<SearchPopoverMenuProps> = ({
     setIsOpen(false);
     setSearch('');
   };
-  const toggleOpen = () => setIsOpen((o) => !o);
+  const toggleOpen = () =>
+    setIsOpen((o) => {
+      if (!o) onOpen?.();
+      return !o;
+    });
 
   const selectOption = (option: SearchMenuOption) => {
     option.onSelect();
