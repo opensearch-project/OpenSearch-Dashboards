@@ -292,9 +292,7 @@ function buildRegexOption(
   if (groups?.value !== undefined || groups?.label !== undefined || groups?.text !== undefined) {
     const value = getNonEmptyCapture(groups.value) ?? option.value;
     const label =
-      getNonEmptyLabelCapture(groups.label) ??
-      getNonEmptyLabelCapture(groups.text) ??
-      option.label;
+      getNonEmptyLabelCapture(groups.label) ?? getNonEmptyLabelCapture(groups.text) ?? option.label;
 
     return {
       value,

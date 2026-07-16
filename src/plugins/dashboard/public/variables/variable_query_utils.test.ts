@@ -278,9 +278,7 @@ describe('applyRegexToVariableOptions', () => {
       { value: 'env=dev,label=Development' },
     ];
 
-    expect(
-      applyRegexToVariableOptions(encodedOptions, '^env=([^,]+),label=(.+)$')
-    ).toEqual([
+    expect(applyRegexToVariableOptions(encodedOptions, '^env=([^,]+),label=(.+)$')).toEqual([
       { value: 'prod', label: 'Production' },
       { value: 'dev', label: 'Development' },
     ]);
@@ -293,10 +291,7 @@ describe('applyRegexToVariableOptions', () => {
     ];
 
     expect(
-      applyRegexToVariableOptions(
-        encodedOptions,
-        '^env=(?<value>[^,]+),label=(?<label>.+)$'
-      )
+      applyRegexToVariableOptions(encodedOptions, '^env=(?<value>[^,]+),label=(?<label>.+)$')
     ).toEqual([
       { value: 'prod', label: 'Production' },
       { value: 'dev', label: 'Development' },
@@ -324,10 +319,7 @@ describe('applyRegexToVariableOptions', () => {
   it('should deduplicate extracted values', () => {
     expect(
       applyRegexToVariableOptions(
-        [
-          { value: 'env=prod,source=a' },
-          { value: 'env=prod,source=b', label: 'Production' },
-        ],
+        [{ value: 'env=prod,source=a' }, { value: 'env=prod,source=b', label: 'Production' }],
         '^env=([^,]+)'
       )
     ).toEqual([{ value: 'prod', label: 'Production' }]);

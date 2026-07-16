@@ -715,10 +715,7 @@ describe('VariableService', () => {
 
     it('should extract query option values and labels with regex capture groups', async () => {
       mockExecuteVariableQuery.mockResolvedValue({
-        rows: [
-          { service: 'env=prod,label=Production' },
-          { service: 'env=dev,label=Development' },
-        ],
+        rows: [{ service: 'env=prod,label=Production' }, { service: 'env=dev,label=Development' }],
         fields: ['service'],
         fieldTypes: { service: 'string' },
       });
