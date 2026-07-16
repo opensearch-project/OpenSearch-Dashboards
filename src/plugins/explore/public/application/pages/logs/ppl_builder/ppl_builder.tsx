@@ -53,6 +53,7 @@ export const PPLBuilder: React.FC<PPLBuilderProps> = ({
     numericFieldNames,
     groupByFieldNames,
     timeFieldName,
+    getFieldType,
     getValues,
   } = useFieldData();
 
@@ -159,6 +160,7 @@ export const PPLBuilder: React.FC<PPLBuilderProps> = ({
         <WhereRow
           filters={state.filters}
           fieldNames={fieldNames}
+          getFieldType={getFieldType}
           getValues={getValues}
           dispatch={dispatch}
         />

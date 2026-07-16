@@ -70,6 +70,24 @@ export const useFieldData = () => {
 
   const timeFieldName = useMemo(() => (dataset as any)?.timeFieldName || '@timestamp', [dataset]);
 
+  // The (OSD-normalized) type of a field by name, for the Where filter editor:
+  // it decides which operators apply (mirroring Discover's type gating) and
+  // whether the value input suggests values or is a plain typed box. Falls back
+  // to the `.keyword` sibling's type when only that is present.
+  const fieldTypeByName = useMemo<Record<string, string | undefined>>(() => {
+    const map: Record<string, string | undefined> = {};
+    fields.forEach((f) => {
+      map[f.name] = f.type;
+    });
+    return map;
+  }, [fields]);
+
+  const getFieldType = useCallback(
+    (fieldName: string): string | undefined =>
+      fieldTypeByName[fieldName] ?? fieldTypeByName[`${fieldName}.keyword`],
+    [fieldTypeByName]
+  );
+
   // Group-by field options: every field EXCEPT date-typed ones. Grouping by a
   // raw timestamp is a code-mode operation — in the builder, time grouping is
   // the "over time" entry (a `span(…)` on the dataset's designated time field),
@@ -117,6 +135,7 @@ export const useFieldData = () => {
     numericFieldNames,
     groupByFieldNames,
     timeFieldName,
+    getFieldType,
     getValues,
   };
 };
