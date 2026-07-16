@@ -75,6 +75,38 @@ describe('WhereRow', () => {
     );
   });
 
+  it('clears operator and values when the field changes (like Discover)', async () => {
+    const { dispatch } = renderRow([
+      { id: 'f1', field: 'response', operator: 'is_not', values: ['200'] },
+    ]);
+    fireEvent.click(screen.getByTestId('pplBuilderFilterChipButton-0'));
+
+    // Switch the field — the editor should reset the operator to the default
+    // `is` and drop the previously chosen value ('200').
+    const editor = await screen.findByTestId('pplBuilderFilterField');
+    const fieldInput = editor.querySelector('input');
+    fireEvent.change(fieldInput!, { target: { value: 'service' } });
+    fireEvent.keyDown(fieldInput!, { key: 'Enter', code: 'Enter' });
+
+    // Enter a fresh value for the new field.
+    const values = await screen.findByTestId('pplBuilderFilterValues');
+    const valueInput = values.querySelector('input');
+    fireEvent.change(valueInput!, { target: { value: 'web' } });
+    fireEvent.keyDown(valueInput!, { key: 'Enter', code: 'Enter' });
+
+    fireEvent.click(screen.getByTestId('pplBuilderFilterSave'));
+    await waitFor(() =>
+      expect(dispatch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'SET_FILTER',
+          index: 0,
+          // operator reset to the default `is`; the stale '200' is gone.
+          filter: expect.objectContaining({ field: 'service', operator: 'is', values: ['web'] }),
+        })
+      )
+    );
+  });
+
   it('opens the editor from a chip and dispatches SET_FILTER on update', async () => {
     const { dispatch } = renderRow([
       { id: 'f1', field: 'response', operator: 'is', values: ['200'] },

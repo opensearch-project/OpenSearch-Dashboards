@@ -163,6 +163,21 @@ export const FilterEditorPopover: React.FC<FilterEditorPopoverProps> = ({
     };
   }, [isOpen, field, getValues]);
 
+  // Changing the field clears the operator and values, mirroring Discover's
+  // filter editor (`onFieldChange` resets operator + params) — a value picked
+  // for the old field rarely makes sense for the new one, and stale suggestions
+  // would otherwise linger until the async reload lands.
+  const handleFieldChange = useCallback(
+    (nextField: string) => {
+      if (nextField === field) return;
+      setField(nextField);
+      setOperator('is');
+      setValues([]);
+      setSuggestions([]);
+    },
+    [field]
+  );
+
   const arity = OPERATOR_ARITY[operator];
 
   const fieldOptions = useMemo(() => fieldNames.map(toOption), [fieldNames]);
@@ -302,8 +317,10 @@ export const FilterEditorPopover: React.FC<FilterEditorPopoverProps> = ({
                   singleSelection={{ asPlainText: true }}
                   options={fieldOptions}
                   selectedOptions={field ? [toOption(field)] : []}
-                  onChange={(opts) => setField(opts.length ? (opts[0].value ?? opts[0].label) : '')}
-                  onCreateOption={(searchValue) => setField(searchValue.trim())}
+                  onChange={(opts) =>
+                    handleFieldChange(opts.length ? (opts[0].value ?? opts[0].label) : '')
+                  }
+                  onCreateOption={(searchValue) => handleFieldChange(searchValue.trim())}
                   placeholder={i18n.translate('explore.pplBuilder.filterFieldPlaceholder', {
                     defaultMessage: 'Select a field',
                   })}
