@@ -80,7 +80,7 @@ export class DataSourceConnectionValidator {
       }
 
       return dataSourceInfo;
-    } catch (e) {
+    } catch {
       // return default dataSourceInfo instead of throwing exception in case info() api call fails
       return dataSourceInfo;
     }
@@ -103,7 +103,7 @@ export class DataSourceConnectionValidator {
       });
       const pluggable = response?.body?.persistent?.cluster?.pluggable;
       return pluggable?.dataformat === 'composite' && pluggable?.['dataformat.enabled'] === 'true';
-    } catch (e) {
+    } catch {
       return false;
     }
   }
@@ -134,7 +134,7 @@ export class DataSourceConnectionValidator {
         });
 
       return installedPlugins;
-    } catch (e) {
+    } catch {
       // return empty installedPlugins instead of throwing exception in case cat.plugins() api call fails
       return installedPlugins;
     }

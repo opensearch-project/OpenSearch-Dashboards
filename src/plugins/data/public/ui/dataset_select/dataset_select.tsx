@@ -504,7 +504,11 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
           !typeConfig?.meta?.supportedAppNames ||
           typeConfig.meta.supportedAppNames.includes(services.appName);
 
-        return appNameMatch;
+        if (!appNameMatch) return false;
+
+        if (!datasetService.isDatasetAllowed(detailedDataset, services.appName)) return false;
+
+        return true;
       };
 
       const filteredDatasets = fetchedDatasets.filter(onFilter);

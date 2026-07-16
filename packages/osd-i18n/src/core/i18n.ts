@@ -52,7 +52,8 @@ const getMessageFormat = memoizeIntlConstructor(IntlMessageFormat);
  * Ref: https://www.rfc-editor.org/rfc/rfc5646.txt
  * Note: While case carries no distinction with locale codes, proper formatting is recommended.
  */
-const localeParser = /^(?<lang>[a-z]{2,3})(?:-(?<script>[a-z]{4}))?(?:-(?<region>[a-z]{2}|[0-9]{3}))?(?:[_@\-].*)?$/i;
+const localeParser =
+  /^(?<lang>[a-z]{2,3})(?:-(?<script>[a-z]{4}))?(?:-(?<region>[a-z]{2}|[0-9]{3}))?(?:[_@\-].*)?$/i;
 
 let defaultLocale = EN_LOCALE;
 let currentLocale = EN_LOCALE;

@@ -38,13 +38,13 @@ import { IndexPattern, indexPatterns, OSD_FIELD_TYPES, fieldList } from '../';
 import { getFieldFormatsRegistry } from '../test_utils';
 import { setFieldFormats } from '../services';
 
-setFieldFormats(({
+setFieldFormats({
   getDefaultInstance: () =>
     ({
       getConverterFor: () => (value: any) => value,
       convert: (value: any) => JSON.stringify(value),
-    } as FieldFormatImpl),
-} as unknown) as FieldFormatsStart);
+    }) as FieldFormatImpl,
+} as unknown as FieldFormatsStart);
 
 export function getStubIndexPattern(
   pattern: string,
@@ -53,13 +53,13 @@ export function getStubIndexPattern(
   fields: FieldSpec[] | IFieldType[],
   core: CoreSetup
 ): IndexPattern {
-  return (new StubIndexPattern(
+  return new StubIndexPattern(
     pattern,
     getConfig,
     timeField,
     fields,
     core
-  ) as unknown) as IndexPattern;
+  ) as unknown as IndexPattern;
 }
 
 export class StubIndexPattern {
@@ -109,11 +109,11 @@ export class StubIndexPattern {
 
     this.getComputedFields = IndexPattern.prototype.getComputedFields.bind(this);
     this.flattenHit = indexPatterns.flattenHitWrapper(
-      (this as unknown) as IndexPattern,
+      this as unknown as IndexPattern,
       this.metaFields
     );
     this.formatHit = indexPatterns.formatHitProvider(
-      (this as unknown) as IndexPattern,
+      this as unknown as IndexPattern,
       registeredFieldFormats.getDefaultInstance(OSD_FIELD_TYPES.STRING)
     );
     this.fieldsFetcher = { apiClient: { baseUrl: '' } };

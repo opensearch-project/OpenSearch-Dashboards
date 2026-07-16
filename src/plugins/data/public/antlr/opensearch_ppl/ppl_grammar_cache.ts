@@ -12,6 +12,7 @@ import { ATN, ATNDeserializer, Vocabulary } from 'antlr4ng';
 import semver from 'semver';
 import { PPLGrammarBundle } from './ppl_bundle_loader';
 import { TokenDictionary } from '../opensearch_sql/table';
+import { getDataSourceEngineCapabilities } from '../../../common';
 
 const ARTIFACT_ENDPOINT = '/api/enhancements/ppl/grammar';
 
@@ -149,6 +150,10 @@ class PPLGrammarCache {
     (event: { dataSourceId?: string; grammarHash: string }) => void
   > = new Set();
 
+  private versionResolvedListeners: Set<
+    (event: { dataSourceId?: string; version: string }) => void
+  > = new Set();
+
   private cachedDatasourceId: string | undefined;
   private cachedVersion: string | undefined;
   private cachedGrammar: CachedGrammar | null = null;
@@ -158,8 +163,13 @@ class PPLGrammarCache {
 
   /**
    * Returns true if version >= 3.6.0 (grammar artifact endpoint support).
+   *
+   * Engines without a runtime PPL grammar endpoint (e.g. Elasticsearch / Open Distro, whose SQL/PPL
+   * live under Open Distro and expose no `/_plugins/_ppl/_grammar`) always fall back to the bundled
+   * grammar regardless of version.
    */
-  shouldFetchFromBackend(version?: string): boolean {
+  shouldFetchFromBackend(version?: string, engineType?: string): boolean {
+    if (!getDataSourceEngineCapabilities(engineType).supportsRuntimePplGrammar) return false;
     if (!version) return false;
     const coerced = semver.coerce(version);
     return coerced ? semver.satisfies(coerced.version, '>=3.6.0') : false;
@@ -168,6 +178,16 @@ class PPLGrammarCache {
   getCachedGrammar(datasourceId?: string): CachedGrammar | null {
     if (datasourceId !== this.cachedDatasourceId) return null;
     return this.cachedGrammar;
+  }
+
+  /**
+   * Returns the resolved version string for the given datasource, or undefined
+   * if the version has not been resolved yet. This provides a synchronous fallback
+   * for contexts where `dataset.dataSource.version` is unavailable (e.g. local cluster).
+   */
+  getResolvedVersion(datasourceId?: string): string | undefined {
+    if (datasourceId !== this.cachedDatasourceId) return undefined;
+    return this.cachedVersion;
   }
 
   /**
@@ -181,7 +201,8 @@ class PPLGrammarCache {
     uiSettings: IUiSettingsClient | undefined,
     savedObjectsClient?: SavedObjectsClientContract,
     datasourceId?: string,
-    datasourceVersion?: string
+    datasourceVersion?: string,
+    datasourceEngineType?: string
   ): void {
     // Check feature flag - if disabled, reset cache state but keep subscribers
     const runtimeGrammarEnabled = uiSettings?.get('query:enhancements:runtimePplGrammar') !== false;
@@ -208,7 +229,13 @@ class PPLGrammarCache {
     // Already cached, in-flight, or recently failed — nothing to do.
     if (this.cachedGrammar || this.pendingFetch || this.fetchFailed) return;
 
-    const promise = this.doWarmUp(http, savedObjectsClient, datasourceId, datasourceVersion);
+    const promise = this.doWarmUp(
+      http,
+      savedObjectsClient,
+      datasourceId,
+      datasourceVersion,
+      datasourceEngineType
+    );
     this.pendingFetch = promise;
 
     promise
@@ -233,10 +260,11 @@ class PPLGrammarCache {
     this.fetchFailedAt = 0;
   }
 
-  /** Reset all cache state AND unregister all grammar-update listeners. */
+  /** Reset all cache state AND unregister all listeners. */
   dispose(): void {
     this.reset();
     this.grammarUpdateListeners.clear();
+    this.versionResolvedListeners.clear();
   }
 
   subscribeToGrammarUpdates(
@@ -248,11 +276,21 @@ class PPLGrammarCache {
     };
   }
 
+  subscribeToVersionResolved(
+    listener: (event: { dataSourceId?: string; version: string }) => void
+  ): () => void {
+    this.versionResolvedListeners.add(listener);
+    return () => {
+      this.versionResolvedListeners.delete(listener);
+    };
+  }
+
   private async doWarmUp(
     http: HttpSetup,
     savedObjectsClient: SavedObjectsClientContract | undefined,
     datasourceId?: string,
-    datasourceVersion?: string
+    datasourceVersion?: string,
+    datasourceEngineType?: string
   ): Promise<CachedGrammar | null> {
     const version = await this.resolveVersion(
       http,
@@ -260,7 +298,7 @@ class PPLGrammarCache {
       datasourceId,
       datasourceVersion
     );
-    if (!this.shouldFetchFromBackend(version)) {
+    if (!this.shouldFetchFromBackend(version, datasourceEngineType)) {
       // Version unsupported or unknown — not a failure, just nothing to fetch.
       // Don't set fetchFailed so that future warmUp calls can retry when the
       // version becomes available (e.g. /api/status wasn't ready on page load).
@@ -300,6 +338,7 @@ class PPLGrammarCache {
       }
       if (version) {
         this.cachedVersion = version;
+        this.notifyVersionResolved(datasourceId, version);
       }
       return version;
     } catch {
@@ -389,16 +428,46 @@ class PPLGrammarCache {
       }
     }
   }
+
+  private notifyVersionResolved(datasourceId: string | undefined, version: string): void {
+    for (const listener of this.versionResolvedListeners) {
+      try {
+        listener({ dataSourceId: datasourceId, version });
+      } catch {
+        // A failing listener must not prevent other listeners from being notified.
+      }
+    }
+  }
 }
 
 export const pplGrammarCache = new PPLGrammarCache();
 
 export function shouldUseRuntimeGrammar(
   _dataSourceId?: string,
-  dataSourceVersion?: string
+  dataSourceVersion?: string,
+  dataSourceEngineType?: string
 ): boolean {
+  // Engines without a runtime grammar endpoint (e.g. Elasticsearch) use the bundled grammar.
+  if (!getDataSourceEngineCapabilities(dataSourceEngineType).supportsRuntimePplGrammar)
+    return false;
   if (dataSourceVersion) {
-    return pplGrammarCache.shouldFetchFromBackend(dataSourceVersion);
+    return pplGrammarCache.shouldFetchFromBackend(dataSourceVersion, dataSourceEngineType);
   }
   return true;
+}
+
+/**
+ * Derive whether a data source runs the Calcite engine from its version.
+ * Returns true for >= 3.3.0, false below 3.3.0, undefined when unknown.
+ * Cannot detect an administratively-disabled Calcite on a >= 3.3.0 cluster.
+ */
+export function deriveIsCalcite(dataSourceVersion?: string): boolean | undefined {
+  if (!dataSourceVersion) {
+    return undefined;
+  }
+  const coerced = semver.coerce(dataSourceVersion);
+  if (!coerced) {
+    return undefined;
+  }
+  return semver.gte(coerced.version, '3.3.0');
 }

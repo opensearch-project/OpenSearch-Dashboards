@@ -66,7 +66,10 @@ export class PrometheusClient {
   private activeControllers = new Set<AbortController>();
   private aborted = false;
 
-  constructor(private services: ExploreServices, public readonly dataConnectionId: string) {}
+  constructor(
+    private services: ExploreServices,
+    public readonly dataConnectionId: string
+  ) {}
 
   abort(): void {
     this.aborted = true;
@@ -84,9 +87,8 @@ export class PrometheusClient {
   }
 
   private getResourceClient(): PrometheusResourceClientLike {
-    const rc = this.services.data.resourceClientFactory.get<PrometheusResourceClientLike>(
-      'prometheus'
-    );
+    const rc =
+      this.services.data.resourceClientFactory.get<PrometheusResourceClientLike>('prometheus');
     if (!rc) throw new Error('Prometheus resource client is not registered');
     return rc;
   }
@@ -265,7 +267,7 @@ export class PrometheusClient {
 
     try {
       const rawResults = await searchSource.fetch({ abortSignal: controller.signal });
-      const hits = ((rawResults?.hits?.hits ?? []) as unknown) as PrometheusSearchHit[];
+      const hits = (rawResults?.hits?.hits ?? []) as unknown as PrometheusSearchHit[];
       const result = this.transformHitsToSeries(hits);
       if (!this.aborted && !controller.signal.aborted) {
         this.dataCache.set(cacheKey, result);

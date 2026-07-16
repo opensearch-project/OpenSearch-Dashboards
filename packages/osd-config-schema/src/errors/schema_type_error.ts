@@ -31,7 +31,10 @@
 import { SchemaError } from '.';
 
 export class SchemaTypeError extends SchemaError {
-  constructor(error: Error | string, public readonly path: Array<string | number>) {
+  constructor(
+    error: Error | string,
+    public readonly path: Array<string | number>
+  ) {
     super(typeof error === 'string' ? error : error.message);
 
     // Set the prototype explicitly, see:

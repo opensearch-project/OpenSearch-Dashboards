@@ -2,10 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { coreMock } from '../../../../core/server/mocks';
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { RequestHandlerContext } from '../../../../core/server';
 import { IOpenSearchSearchRequest } from '../../../data/common';
 import { decideClient, decideLegacyClient } from './decide_client';

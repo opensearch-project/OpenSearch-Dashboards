@@ -88,10 +88,10 @@ const mergeRecordsWithColor = (
     typeof valueMapping !== 'object' && valueMapping !== undefined
       ? String(valueMapping)
       : valueMapping?.type === 'value'
-      ? valueMapping?.value
-      : valueMapping?.type === 'range'
-      ? `[${valueMapping?.range?.min},${valueMapping?.range?.max ?? '∞'})`
-      : '_unmatched_';
+        ? valueMapping?.value
+        : valueMapping?.type === 'range'
+          ? `[${valueMapping?.range?.min},${valueMapping?.range?.max ?? '∞'})`
+          : '_unmatched_';
 
   return {
     ...records[0],
@@ -120,95 +120,97 @@ export const convertThresholdsToValueMappings = (thresholds: Threshold[]): Value
  * Merges consecutive data points by a field that fall within the same numerical range.
  */
 
-export const mergeDataCore = ({
-  timestampField,
-  groupField,
-  mappingField,
-  rangeMappings = [],
-  valueMappings = [],
-  disconnectThreshold,
-  connectThreshold,
-  useThresholdColor,
-  useValueMappingColor,
-}: {
-  timestampField?: string;
-  groupField?: string;
-  mappingField?: string;
-  rangeMappings?: ValueMapping[];
-  valueMappings?: ValueMapping[];
-  disconnectThreshold?: string;
-  connectThreshold?: string;
-  useThresholdColor?: boolean;
-  useValueMappingColor?: boolean;
-}) => (data: Array<Record<string, any>>): Array<Record<string, any>> => {
-  if (!timestampField || !mappingField) return data;
+export const mergeDataCore =
+  ({
+    timestampField,
+    groupField,
+    mappingField,
+    rangeMappings = [],
+    valueMappings = [],
+    disconnectThreshold,
+    connectThreshold,
+    useThresholdColor,
+    useValueMappingColor,
+  }: {
+    timestampField?: string;
+    groupField?: string;
+    mappingField?: string;
+    rangeMappings?: ValueMapping[];
+    valueMappings?: ValueMapping[];
+    disconnectThreshold?: string;
+    connectThreshold?: string;
+    useThresholdColor?: boolean;
+    useValueMappingColor?: boolean;
+  }) =>
+  (data: Array<Record<string, any>>): Array<Record<string, any>> => {
+    if (!timestampField || !mappingField) return data;
 
-  const mergedMappings = [...valueMappings, ...rangeMappings];
+    const mergedMappings = [...valueMappings, ...rangeMappings];
 
-  const findMatch = (value: string) => {
-    if (!useThresholdColor && !useValueMappingColor) return String(value);
-    return mergedMappings.find((v) => {
-      if (v.type === 'range') {
-        const numberValue = Number(value);
-        return (
-          v.range?.min !== undefined &&
-          numberValue >= v.range.min &&
-          numberValue < (v.range.max ?? Infinity)
-        );
-      } else {
-        return v.value === `${value}`;
-      }
-    });
-  };
+    const findMatch = (value: string) => {
+      if (!useThresholdColor && !useValueMappingColor) return String(value);
+      return mergedMappings.find((v) => {
+        if (v.type === 'range') {
+          const numberValue = Number(value);
+          return (
+            v.range?.min !== undefined &&
+            numberValue >= v.range.min &&
+            numberValue < (v.range.max ?? Infinity)
+          );
+        } else {
+          return v.value === `${value}`;
+        }
+      });
+    };
 
-  if (groupField) {
-    const merged = mergeByGroup({
-      sorted: data,
-      groupField,
-      valueField: mappingField,
-      timestampField,
-      disconnectThreshold,
-      connectThreshold,
-      findTarget: findMatch,
-      mergeFn: mergeRecordsWithColor,
-    });
-
-    return merged;
-  } else {
-    const merged: Array<Record<string, any>> = [];
-
-    const buffer: Array<Record<string, any>> = [];
-    let currentValue: ValueMapping | undefined;
-
-    const storeState = { buffer, currentValue };
-
-    mergeInAGroup({
-      sorted: data,
-      timestampField,
-      valueField: mappingField,
-      disconnectThreshold,
-      connectThreshold,
-      merged,
-      storeState,
-      findTarget: findMatch,
-      mergeFn: mergeRecordsWithColor,
-    });
-
-    // Merge any remaining buffered entries, no need to pass nextTime
-    const finalData = storeState.buffer.pop();
-    if (storeState.buffer.length > 0) {
-      const rec = mergeRecordsWithColor(
-        buffer,
+    if (groupField) {
+      const merged = mergeByGroup({
+        sorted: data,
+        groupField,
+        valueField: mappingField,
         timestampField,
-        finalData?.[timestampField],
-        storeState.currentValue
-      );
-      merged.push(rec);
-    }
+        disconnectThreshold,
+        connectThreshold,
+        findTarget: findMatch,
+        mergeFn: mergeRecordsWithColor,
+      });
 
-    return merged;
-  }
-};
+      return merged;
+    } else {
+      const merged: Array<Record<string, any>> = [];
+
+      const buffer: Array<Record<string, any>> = [];
+      let currentValue: ValueMapping | undefined;
+
+      const storeState = { buffer, currentValue };
+
+      mergeInAGroup({
+        sorted: data,
+        timestampField,
+        valueField: mappingField,
+        disconnectThreshold,
+        connectThreshold,
+        merged,
+        storeState,
+        findTarget: findMatch,
+        mergeFn: mergeRecordsWithColor,
+      });
+
+      // Merge any remaining buffered entries, no need to pass nextTime
+      const finalData = storeState.buffer.pop();
+      if (storeState.buffer.length > 0) {
+        const rec = mergeRecordsWithColor(
+          buffer,
+          timestampField,
+          finalData?.[timestampField],
+          storeState.currentValue
+        );
+        merged.push(rec);
+      }
+
+      return merged;
+    }
+  };
 
 export const groupByMergedLabel = (fn: TransformFn) => (data: Array<Record<string, any>>) => {
   const result = new Map<string, Array<Record<string, any>>>();
@@ -384,156 +386,155 @@ function decideSeriesStyle(mapping: { label: any; color: any; displayText: any }
   return mapping.label === '_unmatched_' ? 'lightgrey' : resolveColor(mapping.color);
 }
 
-const renderSingleStateTimeLineItem = (styles: StateTimeLineChartStyle, displayText?: string) => (
-  params: any,
-  api: any
-) => {
-  const y = 5; // a fake y
-  const start = api.coord([+new Date(api.value('start')), y]);
-  const end = api.coord([+new Date(api.value('end')), y]);
-  const height = api.size([0, 1])[1] * 5 * (styles.exclusive.rowHeight ?? 0.8);
-  return {
-    type: 'group',
-    children: [
-      {
-        type: 'rect',
-        shape: {
-          x: start[0],
-          y: start[1] - height / 2,
-          width: end[0] - start[0],
-          height,
-        },
-        z2: 5,
-        style: {
-          ...api.style(),
-        },
-      },
-      ...(styles.exclusive.showValues
-        ? [
-            {
-              type: 'text',
-              z2: 10,
-              style: {
-                text: displayText,
-                font: '10px sans-serif',
-              },
-              // position text in the center of the rect
-              x: (start[0] + end[0]) / 2,
-              y: start[1],
-            },
-          ]
-        : []),
-    ],
-  };
-};
-
-const renderItem = (styles: StateTimeLineChartStyle, groupField: string, displayText?: string) => (
-  params: any,
-  api: any
-) => {
-  const y = api.value(groupField);
-  const start = api.coord([+new Date(api.value('start')), y]);
-  const end = api.coord([+new Date(api.value('end')), y]);
-  const height = api.size([0, 1])[1] * (styles.exclusive.rowHeight ?? 0.8);
-  // api.size([0, 1])[1] meaning:
-  // How many pixels tall is 1 unit on the Y axis in the current chart scale
-  return {
-    type: 'group',
-    children: [
-      {
-        type: 'rect',
-        shape: {
-          x: start[0],
-          y: start[1] - height / 2,
-          width: end[0] - start[0],
-          height,
-        },
-        z2: 5,
-        style: {
-          ...api.style(),
-        },
-      },
-
-      // TODO style display text
-      ...(styles.exclusive.showValues
-        ? [
-            {
-              type: 'text',
-              z2: 10,
-              style: {
-                text: displayText,
-                font: '10px sans-serif',
-              },
-              // position text in the center of the rect
-              x: (start[0] + end[0]) / 2,
-              y: start[1],
-            },
-          ]
-        : []),
-    ],
-  };
-};
-
-export const createStateTimeLineSpec = <T extends BaseChartStyle>({
-  styles,
-  groupField,
-}: {
-  styles: StateTimeLineChartStyle;
-  groupField?: string;
-}): PipelineFn<T> => (state) => {
-  const { transformedData, yAxisConfig } = state;
-  const newState = { ...state };
-  const mergeLabelCombo: Array<{ label: any; color: any; displayText: any }> = [];
-
-  // Transform data into serval datasets based on color mapping
-  // Structure: [{ source: [headers, ...dataRows] }, { source: [headers, ...dataRows] }, ...]
-  // Headers: [originalFields..., "start", "end", "mergedCount", "duration", "mergedColor", "mergedLabel", "displayText"]
-  // Get mergedLabel/mergedColor/displayText combination for styling
-  transformedData?.forEach((row) => {
-    const mergeLabelIndex = row[0].indexOf('mergedLabel');
-    const mergedColorIndex = row[0].indexOf('mergedColor');
-    const displayTextIndex = row[0].indexOf('displayText');
-    mergeLabelCombo.push({
-      label: row[1][mergeLabelIndex],
-      color: row[1][mergedColorIndex],
-      displayText: row[1][displayTextIndex],
-    });
-  });
-
-  if (!groupField) {
-    const newyAxisConfig = { ...yAxisConfig };
-    newyAxisConfig.min = 0;
-    newyAxisConfig.max = 10;
-    newyAxisConfig.axisTick = { show: false };
-    newyAxisConfig.axisLabel = { show: false };
-    newyAxisConfig.splitLine = { show: false };
-    newState.yAxisConfig = newyAxisConfig;
-  }
-
-  const palette = getColors().categories;
-  const sortedNames = mergeLabelCombo.map((m) => m.displayText || m.label).sort();
-  const allSeries = mergeLabelCombo.map((mapping, index: number) => {
-    const name = mapping.displayText || mapping.label;
-    const colorIndex = sortedNames.indexOf(name);
+const renderSingleStateTimeLineItem =
+  (styles: StateTimeLineChartStyle, displayText?: string) => (params: any, api: any) => {
+    const y = 5; // a fake y
+    const start = api.coord([+new Date(api.value('start')), y]);
+    const end = api.coord([+new Date(api.value('end')), y]);
+    const height = api.size([0, 1])[1] * 5 * (styles.exclusive.rowHeight ?? 0.8);
     return {
-      name,
-      type: 'custom',
-      renderItem: groupField
-        ? renderItem(styles, groupField, mapping.displayText)
-        : renderSingleStateTimeLineItem(styles, mapping.displayText),
-      datasetIndex: index,
-      itemStyle: {
-        color: decideSeriesStyle(mapping) || palette[colorIndex % palette.length],
-      },
-      encode: {
-        x: ['start', 'end'],
-        ...(groupField && { y: groupField }),
-        tooltip: ['start', 'end', 'duration', 'mergedCount'],
-      },
+      type: 'group',
+      children: [
+        {
+          type: 'rect',
+          shape: {
+            x: start[0],
+            y: start[1] - height / 2,
+            width: end[0] - start[0],
+            height,
+          },
+          z2: 5,
+          style: {
+            ...api.style(),
+          },
+        },
+        ...(styles.exclusive.showValues
+          ? [
+              {
+                type: 'text',
+                z2: 10,
+                style: {
+                  text: displayText,
+                  font: '10px sans-serif',
+                },
+                // position text in the center of the rect
+                x: (start[0] + end[0]) / 2,
+                y: start[1],
+              },
+            ]
+          : []),
+      ],
     };
-  });
+  };
 
-  newState.series = allSeries?.flat() as any;
+const renderItem =
+  (styles: StateTimeLineChartStyle, groupField: string, displayText?: string) =>
+  (params: any, api: any) => {
+    const y = api.value(groupField);
+    const start = api.coord([+new Date(api.value('start')), y]);
+    const end = api.coord([+new Date(api.value('end')), y]);
+    const height = api.size([0, 1])[1] * (styles.exclusive.rowHeight ?? 0.8);
+    // api.size([0, 1])[1] meaning:
+    // How many pixels tall is 1 unit on the Y axis in the current chart scale
+    return {
+      type: 'group',
+      children: [
+        {
+          type: 'rect',
+          shape: {
+            x: start[0],
+            y: start[1] - height / 2,
+            width: end[0] - start[0],
+            height,
+          },
+          z2: 5,
+          style: {
+            ...api.style(),
+          },
+        },
 
-  return newState;
-};
+        // TODO style display text
+        ...(styles.exclusive.showValues
+          ? [
+              {
+                type: 'text',
+                z2: 10,
+                style: {
+                  text: displayText,
+                  font: '10px sans-serif',
+                },
+                // position text in the center of the rect
+                x: (start[0] + end[0]) / 2,
+                y: start[1],
+              },
+            ]
+          : []),
+      ],
+    };
+  };
+
+export const createStateTimeLineSpec =
+  <T extends BaseChartStyle>({
+    styles,
+    groupField,
+  }: {
+    styles: StateTimeLineChartStyle;
+    groupField?: string;
+  }): PipelineFn<T> =>
+  (state) => {
+    const { transformedData, yAxisConfig } = state;
+    const newState = { ...state };
+    const mergeLabelCombo: Array<{ label: any; color: any; displayText: any }> = [];
+
+    // Transform data into serval datasets based on color mapping
+    // Structure: [{ source: [headers, ...dataRows] }, { source: [headers, ...dataRows] }, ...]
+    // Headers: [originalFields..., "start", "end", "mergedCount", "duration", "mergedColor", "mergedLabel", "displayText"]
+    // Get mergedLabel/mergedColor/displayText combination for styling
+    transformedData?.forEach((row) => {
+      const mergeLabelIndex = row[0].indexOf('mergedLabel');
+      const mergedColorIndex = row[0].indexOf('mergedColor');
+      const displayTextIndex = row[0].indexOf('displayText');
+      mergeLabelCombo.push({
+        label: row[1][mergeLabelIndex],
+        color: row[1][mergedColorIndex],
+        displayText: row[1][displayTextIndex],
+      });
+    });
+
+    if (!groupField) {
+      const newyAxisConfig = { ...yAxisConfig };
+      newyAxisConfig.min = 0;
+      newyAxisConfig.max = 10;
+      newyAxisConfig.axisTick = { show: false };
+      newyAxisConfig.axisLabel = { show: false };
+      newyAxisConfig.splitLine = { show: false };
+      newState.yAxisConfig = newyAxisConfig;
+    }
+
+    const palette = getColors().categories;
+    const sortedNames = mergeLabelCombo.map((m) => m.displayText || m.label).sort();
+    const allSeries = mergeLabelCombo.map((mapping, index: number) => {
+      const name = mapping.displayText || mapping.label;
+      const colorIndex = sortedNames.indexOf(name);
+      return {
+        name,
+        type: 'custom',
+        renderItem: groupField
+          ? renderItem(styles, groupField, mapping.displayText)
+          : renderSingleStateTimeLineItem(styles, mapping.displayText),
+        datasetIndex: index,
+        itemStyle: {
+          color: decideSeriesStyle(mapping) || palette[colorIndex % palette.length],
+        },
+        encode: {
+          x: ['start', 'end'],
+          ...(groupField && { y: groupField }),
+          tooltip: ['start', 'end', 'duration', 'mergedCount'],
+        },
+      };
+    });
+
+    newState.series = allSeries?.flat() as any;
+
+    return newState;
+  };

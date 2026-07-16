@@ -68,7 +68,7 @@ const mockMockErrorRenderFunction = jest.fn(
 const getHandledError = () => {
   try {
     return mockMockErrorRenderFunction.mock.calls[0][1];
-  } catch (e) {
+  } catch {
     return null;
   }
 };

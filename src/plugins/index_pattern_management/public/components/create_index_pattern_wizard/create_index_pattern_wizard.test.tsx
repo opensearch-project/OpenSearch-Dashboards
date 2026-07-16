@@ -169,13 +169,13 @@ describe('CreateIndexPatternWizard', () => {
     });
     const clear = jest.fn();
     mockContext.data.indexPatterns.clearCache = clear;
-    const indexPattern = ({
+    const indexPattern = {
       id: '1',
       title: 'my-fake-index-pattern',
       timeFieldName: 'timestamp',
       fields: [],
       _fetchFields: jest.fn(),
-    } as unknown) as IndexPattern;
+    } as unknown as IndexPattern;
     mockContext.data.indexPatterns.createAndSave = newIndexPatternAndSave;
     mockContext.data.indexPatterns.setDefault = jest.fn();
 

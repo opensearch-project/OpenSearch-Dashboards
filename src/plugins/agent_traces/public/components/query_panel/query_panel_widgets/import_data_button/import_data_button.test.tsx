@@ -166,7 +166,7 @@ describe('Import Data Action', () => {
     const props: FlyoutComponentProps = {
       closeFlyout: mockCloseFlyout,
       dependencies: mockDependencies,
-      services: (customServices as unknown) as AgentTracesServices,
+      services: customServices as unknown as AgentTracesServices,
     };
 
     render(<ImportDataModal {...props} />);

@@ -47,7 +47,7 @@ export async function checkConfigNamespacePrefix(
   if (failOnNotFound === false) {
     try {
       await accessAsync(resolve(configPath));
-    } catch (ex) {
+    } catch {
       // If the file doesn't exist, return silently
       return;
     }
@@ -69,7 +69,7 @@ export async function assignConfigFromPath(
   if (failOnNotFound === false) {
     try {
       await accessAsync(resolve(configPath));
-    } catch (ex) {
+    } catch {
       // If the file doesn't exist, return the untouched config
       return config;
     }

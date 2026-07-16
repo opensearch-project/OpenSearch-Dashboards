@@ -81,7 +81,7 @@ export const AssociatedObjectsDetailsFlyout = ({
         isDisabled={(() => {
           try {
             return !getUiSettings().get('query:enhancements:enabled');
-          } catch (e) {
+          } catch {
             return false;
           }
         })()}

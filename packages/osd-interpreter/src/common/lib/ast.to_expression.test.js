@@ -76,7 +76,6 @@ describe('ast toExpression', () => {
           ],
         };
 
-        // eslint-disable-next-line no-loop-func
         validate(astObject);
       }
     });

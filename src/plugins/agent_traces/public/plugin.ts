@@ -63,6 +63,7 @@ import { abortAllActiveQueries } from './application/utils/state_management/acti
 import { setServices } from './services/services';
 import { AgentTracesIcon } from './assets/agent_traces_icon';
 import { AgentSpansIcon } from './assets/agent_spans_icon';
+import { agentTracesNavPopover, agentSpansNavPopover } from './nav_popover';
 import { SlotRegistryService } from './services/slot_registry';
 
 // Log Actions
@@ -70,14 +71,12 @@ import { logActionRegistry } from './services/log_action_registry';
 import { createAskAiAction } from './actions/ask_ai_action';
 import { importDataActionConfig } from './actions/import_data_action';
 
-export class AgentTracesPlugin
-  implements
-    Plugin<
-      AgentTracesPluginSetup,
-      AgentTracesPluginStart,
-      AgentTracesSetupDependencies,
-      AgentTracesStartDependencies
-    > {
+export class AgentTracesPlugin implements Plugin<
+  AgentTracesPluginSetup,
+  AgentTracesPluginStart,
+  AgentTracesSetupDependencies,
+  AgentTracesStartDependencies
+> {
   private stateUpdaterByApp: Record<string, BehaviorSubject<AppUpdater>> = {
     agentTraces: new BehaviorSubject<AppUpdater>(() => ({})),
   };
@@ -209,9 +208,8 @@ export class AgentTracesPlugin
 
           // Get start services
           const { core: coreStart, plugins: pluginsStart } = await this.initializeServices();
-          const isAgentTracesEnabledWorkspace = await this.getIsAgentTracesEnabledWorkspace(
-            coreStart
-          );
+          const isAgentTracesEnabledWorkspace =
+            await this.getIsAgentTracesEnabledWorkspace(coreStart);
 
           // Only show in observability-enabled workspaces
           if (!isAgentTracesEnabledWorkspace) {
@@ -318,6 +316,7 @@ export class AgentTracesPlugin
           category: DEFAULT_APP_CATEGORIES.agentMonitoring,
           order: 100,
           euiIconType: AgentTracesIcon,
+          navPopover: agentTracesNavPopover,
         },
         {
           id: AGENT_SPANS_NAV_ID,
@@ -325,6 +324,7 @@ export class AgentTracesPlugin
           category: DEFAULT_APP_CATEGORIES.agentMonitoring,
           order: 200,
           euiIconType: AgentSpansIcon,
+          navPopover: agentSpansNavPopover,
         },
       ]);
     }

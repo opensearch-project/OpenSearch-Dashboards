@@ -66,4 +66,4 @@ oop.inherits(ScriptMode, TextMode);
   this.autoOutdent = function (state, doc, row) {
     this.$outdent.autoOutdent(doc, row);
   };
-}.call(ScriptMode.prototype));
+}).call(ScriptMode.prototype);

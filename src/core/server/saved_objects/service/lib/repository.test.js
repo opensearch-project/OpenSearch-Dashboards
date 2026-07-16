@@ -171,7 +171,7 @@ describe('SavedObjectsRepository', () => {
     { type, id, references, namespace: objectNamespace, originId, permissions, workspaces },
     namespace
   ) => {
-    const namespaceId = objectNamespace === 'default' ? undefined : objectNamespace ?? namespace;
+    const namespaceId = objectNamespace === 'default' ? undefined : (objectNamespace ?? namespace);
     return {
       // NOTE: OpenSearch returns more fields (_index, _type) but the SavedObjectsRepository method ignores these
       found: true,

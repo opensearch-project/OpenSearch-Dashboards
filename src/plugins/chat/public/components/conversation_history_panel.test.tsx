@@ -536,7 +536,7 @@ describe('ConversationHistoryPanel', () => {
 
       // Trigger resize observer callback
       if (resizeCallback) {
-        resizeCallback([], (mockResizeObserver as unknown) as ResizeObserver);
+        resizeCallback([], mockResizeObserver as unknown as ResizeObserver);
       }
 
       await waitFor(() => {

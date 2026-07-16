@@ -69,8 +69,7 @@ export class AccessLinksExplorerPlugin implements Plugin<void, void, SetupDeps, 
       links: [
         {
           label: 'README',
-          href:
-            'https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/src/plugins/share/public/url_generators/README.md',
+          href: 'https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/src/plugins/share/public/url_generators/README.md',
           iconType: 'logoGithub',
           size: 's',
           target: '_blank',

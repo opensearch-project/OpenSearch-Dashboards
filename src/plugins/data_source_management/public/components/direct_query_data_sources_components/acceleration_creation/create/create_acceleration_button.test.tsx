@@ -23,12 +23,12 @@ jest.mock('../visual_editors/query_builder', () => ({
 
 describe('CreateAccelerationButton', () => {
   const mockHttp: HttpStart = {} as HttpStart;
-  const mockNotifications = ({
+  const mockNotifications = {
     toasts: {
       addSuccess: jest.fn(),
       addDanger: jest.fn(),
     },
-  } as unknown) as NotificationsStart;
+  } as unknown as NotificationsStart;
 
   const mockFormData: CreateAccelerationForm = {
     dataSource: 'test_source',

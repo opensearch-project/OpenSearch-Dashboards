@@ -34,7 +34,8 @@ import { VisParams } from '../types';
 import { VisType, VisTypeOptions } from './types';
 
 interface CommonBaseVisTypeOptions<TVisParams>
-  extends Pick<
+  extends
+    Pick<
       VisType<TVisParams>,
       | 'description'
       | 'editor'
@@ -69,8 +70,7 @@ interface VisualizationBaseVisTypeOptions<TVisParams> extends CommonBaseVisTypeO
 }
 
 export type BaseVisTypeOptions<TVisParams = VisParams> =
-  | ExpressionBaseVisTypeOptions<TVisParams>
-  | VisualizationBaseVisTypeOptions<TVisParams>;
+  ExpressionBaseVisTypeOptions<TVisParams> | VisualizationBaseVisTypeOptions<TVisParams>;
 
 const defaultOptions: VisTypeOptions = {
   showTimePicker: true,

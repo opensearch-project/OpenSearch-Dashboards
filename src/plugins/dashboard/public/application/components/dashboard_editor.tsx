@@ -27,6 +27,10 @@ export const DashboardEditor = () => {
   const { id: dashboardIdFromUrl } = useParams<{ id: string }>();
   const { services } = useOpenSearchDashboards<DashboardServices>();
   const { chrome, uiSettings, keyboardShortcut, workspaces } = services;
+  // Master switch for the Dashboard Variables feature (dashboard.variables.enabled, default false).
+  const variablesEnabled =
+    services.pluginInitializerContext.config.get<{ variables?: { enabled?: boolean } }>()?.variables
+      ?.enabled ?? false;
   const { setHeaderVariant } = chrome;
   const isChromeVisible = useChromeVisibility({ chrome });
   const [eventEmitter] = useState(new EventEmitter());
@@ -113,8 +117,9 @@ export const DashboardEditor = () => {
               dashboardIdFromUrl={dashboardIdFromUrl}
               eventEmitter={eventEmitter}
             />
-            {/* Variables are only available in explore-enabled workspaces (observability / analytics) */}
-            {isExploreWorkspace && currentContainer.variableService && (
+            {/* Variables are only available when the feature flag is enabled and in
+                observability workspaces */}
+            {variablesEnabled && isExploreWorkspace && currentContainer.variableService && (
               <DashboardVariables
                 variableService={currentContainer.variableService}
                 interpolationService={currentContainer.variableInterpolationService}

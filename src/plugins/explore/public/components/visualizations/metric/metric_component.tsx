@@ -258,9 +258,10 @@ export const MetricChartRender: React.FC<MetricChartRenderProps> = ({
   axisColumnMappings,
   spec: rawSpec,
 }) => {
-  const s = useMemo(() => (rawSpec ? (Array.isArray(rawSpec) ? rawSpec[0] : rawSpec) : undefined), [
-    rawSpec,
-  ]);
+  const s = useMemo(
+    () => (rawSpec ? (Array.isArray(rawSpec) ? rawSpec[0] : rawSpec) : undefined),
+    [rawSpec]
+  );
   const data = useMemo(() => s?.data ?? [], [s]);
   const spec = s?.spec;
   const name = s?.name ?? '';

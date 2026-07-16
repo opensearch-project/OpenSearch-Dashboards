@@ -141,8 +141,8 @@ describe('TelemetrySender', () => {
     });
 
     describe('sendIfDue', () => {
-      let originalFetch: typeof window['fetch'];
-      let mockFetch: jest.Mock<typeof window['fetch']>;
+      let originalFetch: (typeof window)['fetch'];
+      let mockFetch: jest.Mock<(typeof window)['fetch']>;
 
       beforeAll(() => {
         originalFetch = window.fetch;
@@ -257,8 +257,8 @@ describe('TelemetrySender', () => {
     });
   });
   describe('startChecking', () => {
-    let originalSetInterval: typeof window['setInterval'];
-    let mockSetInterval: jest.Mock<typeof window['setInterval']>;
+    let originalSetInterval: (typeof window)['setInterval'];
+    let mockSetInterval: jest.Mock<(typeof window)['setInterval']>;
 
     beforeAll(() => {
       originalSetInterval = window.setInterval;

@@ -26,7 +26,7 @@ const createMock = () => {
     })),
     getHeroSectionTypes: jest.fn(() => []),
     getSectionTypes: jest.fn(() => []),
-    getSavedHomepageLoader: jest.fn(() => ({ get: jest.fn() } as any)),
+    getSavedHomepageLoader: jest.fn(() => ({ get: jest.fn() }) as any),
   };
 
   service.setup.mockImplementation(createSetupMock);

@@ -15,6 +15,15 @@ export const runKeyboardShortcutTests = () => {
     let workspaceId;
     const endpoint = Cypress.config('baseUrl') || 'http://localhost:5601';
 
+    // Suppress the one-time "Workspace management moved" footer tour: on a fresh
+    // browser it auto-opens an EuiTour popover that overlays other UI — here it
+    // covers the workspace-creator data-source button during the `before` hook.
+    // Registered at describe scope (not in a hook) so it is active for the
+    // `before` hook's page loads too, seeding the dismissed flag pre-load.
+    Cypress.on('window:before:load', (win) => {
+      win.localStorage.setItem('workspace.manageWorkspaceMoved.tourDismissed', 'true');
+    });
+
     before(() => {
       if (PATHS.SECONDARY_ENGINE) {
         cy.osd.addDataSource({

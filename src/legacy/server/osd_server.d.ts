@@ -29,7 +29,6 @@
  */
 
 import { Server } from '@hapi/hapi';
-
 import {
   CoreSetup,
   CoreStart,
@@ -38,10 +37,7 @@ import {
   PackageInfo,
   LegacyServiceSetupDeps,
 } from '../../core/server';
-
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { LegacyConfig } from '../../core/server/legacy';
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { UiPlugins } from '../../core/server/plugins';
 
 // lot of legacy code was assuming this type only had these two methods

@@ -153,7 +153,7 @@ describe('OptimizerConfig::parseOptions()', () => {
           <absolute path>/plugins,
           <absolute path>/opensearch-dashboards-extra,
         ],
-        "profileWebpack": false,
+        "profileRspack": false,
         "repoRoot": <absolute path>,
         "themeTags": undefined,
         "watch": false,
@@ -181,7 +181,7 @@ describe('OptimizerConfig::parseOptions()', () => {
           <absolute path>/plugins,
           <absolute path>/opensearch-dashboards-extra,
         ],
-        "profileWebpack": false,
+        "profileRspack": false,
         "repoRoot": <absolute path>,
         "themeTags": undefined,
         "watch": false,
@@ -210,7 +210,7 @@ describe('OptimizerConfig::parseOptions()', () => {
           <absolute path>/examples,
           <absolute path>/opensearch-dashboards-extra,
         ],
-        "profileWebpack": false,
+        "profileRspack": false,
         "repoRoot": <absolute path>,
         "themeTags": undefined,
         "watch": false,
@@ -237,7 +237,7 @@ describe('OptimizerConfig::parseOptions()', () => {
           <absolute path>/plugins,
           <absolute path>/opensearch-dashboards-extra,
         ],
-        "profileWebpack": false,
+        "profileRspack": false,
         "repoRoot": <absolute path>,
         "themeTags": undefined,
         "watch": false,
@@ -264,7 +264,7 @@ describe('OptimizerConfig::parseOptions()', () => {
           <absolute path>/x/y/z,
           "/outside/of/repo",
         ],
-        "profileWebpack": false,
+        "profileRspack": false,
         "repoRoot": <absolute path>,
         "themeTags": undefined,
         "watch": false,
@@ -289,7 +289,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "outputRoot": <absolute path>,
         "pluginPaths": Array [],
         "pluginScanDirs": Array [],
-        "profileWebpack": false,
+        "profileRspack": false,
         "repoRoot": <absolute path>,
         "themeTags": undefined,
         "watch": false,
@@ -314,7 +314,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "outputRoot": <absolute path>,
         "pluginPaths": Array [],
         "pluginScanDirs": Array [],
-        "profileWebpack": false,
+        "profileRspack": false,
         "repoRoot": <absolute path>,
         "themeTags": undefined,
         "watch": false,
@@ -339,7 +339,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "outputRoot": <absolute path>,
         "pluginPaths": Array [],
         "pluginScanDirs": Array [],
-        "profileWebpack": false,
+        "profileRspack": false,
         "repoRoot": <absolute path>,
         "themeTags": undefined,
         "watch": false,
@@ -365,7 +365,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "outputRoot": <absolute path>,
         "pluginPaths": Array [],
         "pluginScanDirs": Array [],
-        "profileWebpack": false,
+        "profileRspack": false,
         "repoRoot": <absolute path>,
         "themeTags": undefined,
         "watch": false,
@@ -391,7 +391,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "outputRoot": <absolute path>,
         "pluginPaths": Array [],
         "pluginScanDirs": Array [],
-        "profileWebpack": false,
+        "profileRspack": false,
         "repoRoot": <absolute path>,
         "themeTags": undefined,
         "watch": false,
@@ -421,7 +421,7 @@ describe('OptimizerConfig::parseOptions()', () => {
           <absolute path>/plugins,
           <absolute path>/opensearch-dashboards-extra,
         ],
-        "profileWebpack": false,
+        "profileRspack": false,
         "repoRoot": <absolute path>,
         "themeTags": undefined,
         "watch": false,
@@ -449,7 +449,7 @@ describe('OptimizerConfig::parseOptions()', () => {
           <absolute path>/plugins,
           <absolute path>/opensearch-dashboards-extra,
         ],
-        "profileWebpack": false,
+        "profileRspack": false,
         "repoRoot": <absolute path>,
         "themeTags": undefined,
         "watch": false,
@@ -478,7 +478,7 @@ describe('OptimizerConfig::parseOptions()', () => {
           <absolute path>/examples,
           <absolute path>/opensearch-dashboards-extra,
         ],
-        "profileWebpack": false,
+        "profileRspack": false,
         "repoRoot": <absolute path>,
         "themeTags": undefined,
         "watch": false,
@@ -505,7 +505,7 @@ describe('OptimizerConfig::parseOptions()', () => {
           <absolute path>/plugins,
           <absolute path>/opensearch-dashboards-extra,
         ],
-        "profileWebpack": false,
+        "profileRspack": false,
         "repoRoot": <absolute path>,
         "themeTags": undefined,
         "watch": false,
@@ -532,7 +532,7 @@ describe('OptimizerConfig::parseOptions()', () => {
           <absolute path>/x/y/z,
           "/outside/of/repo",
         ],
-        "profileWebpack": false,
+        "profileRspack": false,
         "repoRoot": <absolute path>,
         "themeTags": undefined,
         "watch": false,
@@ -557,7 +557,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "outputRoot": <absolute path>,
         "pluginPaths": Array [],
         "pluginScanDirs": Array [],
-        "profileWebpack": false,
+        "profileRspack": false,
         "repoRoot": <absolute path>,
         "themeTags": undefined,
         "watch": false,
@@ -582,7 +582,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "outputRoot": <absolute path>,
         "pluginPaths": Array [],
         "pluginScanDirs": Array [],
-        "profileWebpack": false,
+        "profileRspack": false,
         "repoRoot": <absolute path>,
         "themeTags": undefined,
         "watch": false,
@@ -607,7 +607,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "outputRoot": <absolute path>,
         "pluginPaths": Array [],
         "pluginScanDirs": Array [],
-        "profileWebpack": false,
+        "profileRspack": false,
         "repoRoot": <absolute path>,
         "themeTags": undefined,
         "watch": false,
@@ -633,7 +633,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "outputRoot": <absolute path>,
         "pluginPaths": Array [],
         "pluginScanDirs": Array [],
-        "profileWebpack": false,
+        "profileRspack": false,
         "repoRoot": <absolute path>,
         "themeTags": undefined,
         "watch": false,
@@ -659,7 +659,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "outputRoot": <absolute path>,
         "pluginPaths": Array [],
         "pluginScanDirs": Array [],
-        "profileWebpack": false,
+        "profileRspack": false,
         "repoRoot": <absolute path>,
         "themeTags": undefined,
         "watch": false,
@@ -674,8 +674,9 @@ describe('OptimizerConfig::parseOptions()', () => {
  * and just making sure that the arguments are coming from where we expect
  */
 describe('OptimizerConfig::create()', () => {
-  const assignBundlesToWorkers: jest.Mock = jest.requireMock('./assign_bundles_to_workers.ts')
-    .assignBundlesToWorkers;
+  const assignBundlesToWorkers: jest.Mock = jest.requireMock(
+    './assign_bundles_to_workers.ts'
+  ).assignBundlesToWorkers;
   const findOpenSearchDashboardsPlatformPlugins: jest.Mock = jest.requireMock(
     './opensearch_dashboards_platform_plugins.ts'
   ).findOpenSearchDashboardsPlatformPlugins;
@@ -697,24 +698,26 @@ describe('OptimizerConfig::create()', () => {
     filterById.mockReturnValue(Symbol('filtered bundles'));
     readLimits.mockReturnValue(Symbol('limits'));
 
-    jest.spyOn(OptimizerConfig, 'parseOptions').mockImplementation((): {
-      [key in keyof ParsedOptions]: any;
-    } => ({
-      cache: Symbol('parsed cache'),
-      dist: Symbol('parsed dist'),
-      maxWorkerCount: Symbol('parsed max worker count'),
-      pluginPaths: Symbol('parsed plugin paths'),
-      pluginScanDirs: Symbol('parsed plugin scan dirs'),
-      repoRoot: Symbol('parsed repo root'),
-      outputRoot: Symbol('parsed output root'),
-      watch: Symbol('parsed watch'),
-      themeTags: Symbol('theme tags'),
-      inspectWorkers: Symbol('parsed inspect workers'),
-      profileWebpack: Symbol('parsed profile webpack'),
-      filters: [],
-      includeCoreBundle: false,
-      bundleRefs: Symbol('bundle refs'),
-    }));
+    jest.spyOn(OptimizerConfig, 'parseOptions').mockImplementation(
+      (): {
+        [key in keyof ParsedOptions]: any;
+      } => ({
+        cache: Symbol('parsed cache'),
+        dist: Symbol('parsed dist'),
+        maxWorkerCount: Symbol('parsed max worker count'),
+        pluginPaths: Symbol('parsed plugin paths'),
+        pluginScanDirs: Symbol('parsed plugin scan dirs'),
+        repoRoot: Symbol('parsed repo root'),
+        outputRoot: Symbol('parsed output root'),
+        watch: Symbol('parsed watch'),
+        themeTags: Symbol('theme tags'),
+        inspectWorkers: Symbol('parsed inspect workers'),
+        profileRspack: Symbol('parsed profile rspack'),
+        filters: [],
+        includeCoreBundle: false,
+        bundleRefs: Symbol('bundle refs'),
+      })
+    );
   });
 
   it('passes parsed options to findOpenSearchDashboardsPlatformPlugins, getBundles, and assignBundlesToWorkers', () => {
@@ -732,7 +735,7 @@ describe('OptimizerConfig::create()', () => {
         "limits": Symbol(limits),
         "maxWorkerCount": Symbol(parsed max worker count),
         "plugins": Symbol(new platform plugins),
-        "profileWebpack": Symbol(parsed profile webpack),
+        "profileRspack": Symbol(parsed profile rspack),
         "repoRoot": Symbol(parsed repo root),
         "themeTags": Symbol(theme tags),
         "watch": Symbol(parsed watch),

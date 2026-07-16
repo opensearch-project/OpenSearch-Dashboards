@@ -22,6 +22,6 @@ export const useHistogramResults = () => {
   const metadata = useSelector((state: RootState) => (cacheKey ? state.results[cacheKey] : null));
 
   return {
-    results: metadata ? resultsCache.get(cacheKey) ?? null : null,
+    results: metadata ? (resultsCache.get(cacheKey) ?? null) : null,
   };
 };

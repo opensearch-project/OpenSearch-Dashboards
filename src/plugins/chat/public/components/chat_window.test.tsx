@@ -84,6 +84,9 @@ describe('ChatWindow', () => {
         content,
         rawMessage: rawMessage || content,
       })),
+      generateMessageId: jest.fn(
+        () => `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`
+      ),
       getAvailableDataSources: jest
         .fn()
         .mockResolvedValue([{ id: 'mock-ds-id', title: 'Mock DS' }]),
@@ -766,6 +769,27 @@ describe('ChatWindow', () => {
       expect(mockChatService.newThread).toHaveBeenCalled();
     });
 
+    it('should clear event handler state on new chat to prevent stale tool calls from disabling input', () => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { ChatEventHandler } = require('../services/chat_event_handler');
+      const mockClearState = jest.fn();
+      ChatEventHandler.mockImplementation(() => ({
+        handleEvent: jest.fn(),
+        clearState: mockClearState,
+        cancelToolResultDispatch: jest.fn(),
+      }));
+
+      const ref = React.createRef<ChatWindowInstance>();
+      renderWithContext(<ChatWindow ref={ref} onClose={jest.fn()} />);
+
+      act(() => {
+        ref.current?.startNewChat();
+      });
+
+      // clearState must be called to drain stale toolCallStates
+      expect(mockClearState).toHaveBeenCalled();
+    });
+
     it('should clear pending data source selection on new chat', async () => {
       // Mock no data source to trigger the prompt
       mockChatService.getCurrentDataSourceId.mockResolvedValue(undefined);
@@ -941,6 +965,113 @@ describe('ChatWindow', () => {
         expect.any(Object)
       );
     });
+
+    it('should execute slash command after user selects a data source', async () => {
+      // Register a slash command for this test
+      const { slashCommandRegistry } = jest.requireActual('../services/slash_commands');
+      const mockHandler = jest.fn().mockReturnValue('resolved command message');
+      slashCommandRegistry.register({
+        command: 'test-cmd',
+        description: 'Test command',
+        handler: mockHandler,
+      });
+
+      mockChatService.getCurrentDataSourceId.mockResolvedValue(undefined);
+      mockChatService.getAvailableDataSources.mockResolvedValue([
+        { id: 'ds-1', title: 'Source One' },
+      ]);
+
+      const ref = React.createRef<ChatWindowInstance>();
+      const { getByRole, getByText } = renderWithContext(
+        <ChatWindow ref={ref} onClose={jest.fn()} />
+      );
+
+      // Type a slash command and send
+      const input = getByRole('textbox');
+      fireEvent.change(input, { target: { value: '/test-cmd some args' } });
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+
+      // Data source selector should be shown
+      expect(getByText('Source One')).toBeTruthy();
+      // Command should NOT have been executed yet
+      expect(mockHandler).not.toHaveBeenCalled();
+
+      // Select the data source
+      fireEvent.click(getByText('Source One'));
+
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+
+      // After data source selection, the slash command should be executed
+      expect(mockChatService.setDataSourceId).toHaveBeenCalledWith('ds-1');
+      expect(mockHandler).toHaveBeenCalledWith('some args');
+      // The command returns a message to send to the agent
+      expect(mockChatService.sendMessage).toHaveBeenCalledWith(
+        'resolved command message',
+        expect.any(Array),
+        expect.any(Object)
+      );
+
+      // Clean up registered command
+      slashCommandRegistry.unregister('test-cmd');
+    });
+
+    it('should handle local-only slash command after data source selection', async () => {
+      // Register a slash command that returns a local message
+      const { slashCommandRegistry } = jest.requireActual('../services/slash_commands');
+      const mockHandler = jest.fn().mockReturnValue({
+        localMessage: 'Local response from command',
+        title: 'Command Result',
+      });
+      slashCommandRegistry.register({
+        command: 'local-cmd',
+        description: 'Local command',
+        handler: mockHandler,
+      });
+
+      mockChatService.getCurrentDataSourceId.mockResolvedValue(undefined);
+      mockChatService.getAvailableDataSources.mockResolvedValue([
+        { id: 'ds-1', title: 'Source One' },
+      ]);
+
+      const ref = React.createRef<ChatWindowInstance>();
+      const { getByRole, getByText } = renderWithContext(
+        <ChatWindow ref={ref} onClose={jest.fn()} />
+      );
+
+      // Type a local slash command and send (include trailing space to bypass autocomplete menu)
+      const input = getByRole('textbox');
+      fireEvent.change(input, { target: { value: '/local-cmd ' } });
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+
+      // Data source selector should be shown
+      expect(getByText('Source One')).toBeTruthy();
+
+      // Select the data source
+      fireEvent.click(getByText('Source One'));
+
+      await act(async () => {
+        await new Promise((r) => setTimeout(r, 0));
+      });
+
+      // After data source selection, the slash command should be executed locally
+      expect(mockChatService.setDataSourceId).toHaveBeenCalledWith('ds-1');
+      expect(mockHandler).toHaveBeenCalled();
+      // Should NOT send to the agent since it's a local command
+      expect(mockChatService.sendMessage).not.toHaveBeenCalled();
+
+      // Clean up registered command
+      slashCommandRegistry.unregister('local-cmd');
+    });
   });
 
   describe('error handling', () => {
@@ -1009,8 +1140,9 @@ describe('ChatWindow', () => {
       };
 
       // Mock the AssistantActionService.getInstance to return our mock
-      const AssistantActionService = jest.requireMock('../../../context_provider/public')
-        .AssistantActionService;
+      const AssistantActionService = jest.requireMock(
+        '../../../context_provider/public'
+      ).AssistantActionService;
       AssistantActionService.getInstance = jest.fn(() => mockService);
 
       renderWithContext(<ChatWindow onClose={jest.fn()} />);

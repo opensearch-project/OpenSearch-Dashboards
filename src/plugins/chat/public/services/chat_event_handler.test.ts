@@ -24,20 +24,20 @@ const mockGetCurrentState = jest.fn().mockReturnValue({
 });
 
 // Mock dependencies
-const mockAssistantActionService = ({
+const mockAssistantActionService = {
   updateToolCallState: jest.fn(),
   executeAction: jest.fn(),
   hasAction: jest.fn().mockReturnValue(true),
   getCurrentState: mockGetCurrentState,
   isUserConfirmRequired: jest.fn().mockReturnValue(false),
   clearAllToolCallStates: jest.fn(),
-} as unknown) as jest.Mocked<AssistantActionService>;
+} as unknown as jest.Mocked<AssistantActionService>;
 
-const mockChatService = ({
+const mockChatService = {
   sendToolResult: jest.fn(),
   getCurrentDataSourceId: jest.fn().mockReturnValue(undefined),
   resetConnection: jest.fn(),
-} as unknown) as jest.Mocked<ChatService>;
+} as unknown as jest.Mocked<ChatService>;
 
 const mockConfirmationService = {
   requestConfirmation: jest.fn().mockResolvedValue({ approved: true }),

@@ -49,9 +49,7 @@ const rootDir = '../../..';
  * non A to Z character.
  */
 const rootGroups = [
-  [
-    /* CI Group 0 is left empty to make numbering natural */
-  ],
+  [/* CI Group 0 is left empty to make numbering natural */],
   [
     // CI Group 1 (roughly 280 files)
     '<rootDir>/src/plugins/[v-z]', // plugins v-u
@@ -144,6 +142,17 @@ export default {
   rootDir,
   roots,
   moduleNameMapper: {
+    // query-string v9 is pure ESM; this shim restores the default-import shape
+    // (`import qs from 'query-string'`) under Jest's CJS transform.
+    '^query-string$': '<rootDir>/src/dev/jest/mocks/query_string_mock.js',
+    // @eslint/* packages ship with `"main"` pointing at their ESM build, which
+    // Jest (CommonJS mode) cannot parse.  Redirect each one to its CJS build.
+    '^@eslint/plugin-kit$': '<rootDir>/node_modules/@eslint/plugin-kit/dist/cjs/index.cjs',
+    '^@eslint/config-array$': '<rootDir>/node_modules/@eslint/config-array/dist/cjs/index.cjs',
+    '^@eslint/config-helpers$': '<rootDir>/node_modules/@eslint/config-helpers/dist/cjs/index.cjs',
+    '^@eslint/object-schema$': '<rootDir>/node_modules/@eslint/object-schema/dist/cjs/index.cjs',
+    '^@eslint/compat$': '<rootDir>/node_modules/@eslint/compat/dist/cjs/index.cjs',
+    '^uuid$': '<rootDir>/node_modules/uuid/dist/cjs/index.js',
     '@elastic/eui$': '<rootDir>/node_modules/@elastic/eui/test-env',
     '@elastic/eui/lib/(.*)?': '<rootDir>/node_modules/@elastic/eui/test-env/$1',
     '@opensearch-project/opensearch/aws':
@@ -151,6 +160,12 @@ export default {
     '@opensearch-project/opensearch/lib/(.*)':
       '<rootDir>/node_modules/@opensearch-project/opensearch/lib/$1',
     '@hapi/hoek/(?!lib/)(.*)': '<rootDir>/node_modules/@hapi/hoek/lib/$1',
+    // The `@osd/monaco` barrel is globally jest.mock()'d (monaco-editor breaks in
+    // jsdom), but the `@osd/monaco/ppl-lint` subpath is a Monaco-free engine
+    // stub that resolves to `target/`, which `modulePathIgnorePatterns` blocks —
+    // so it can't resolve in tests without a build. Map it to its source barrel,
+    // which depends only on antlr4ng/@osd/antlr-grammar/semver (no monaco-editor).
+    '^@osd/monaco/ppl-lint$': '<rootDir>/packages/osd-monaco/src/ppl/lint/index.ts',
     '^src/plugins/(.*)': '<rootDir>/src/plugins/$1',
     '^test_utils/(.*)': '<rootDir>/src/test_utils/public/$1',
     '^fixtures/(.*)': '<rootDir>/src/fixtures/$1',
@@ -187,6 +202,11 @@ export default {
     '<rootDir>/packages/osd-ui-framework/(dist)/',
     '<rootDir>/packages/osd-pm/dist/',
     `${RESERVED_DIR_JEST_INTEGRATION_TESTS}/`,
+    // current jest-runtime 27.x doesn't handle ESM module @babel/eslint-parser with import.meta
+    // remove these excludes after jest-runtime upgrade
+    '<rootDir>/packages/osd-eslint-plugin-eslint/rules/disallow_license_headers.test.js',
+    '<rootDir>/packages/osd-eslint-plugin-eslint/rules/require_license_header.test.js',
+    '<rootDir>/packages/osd-eslint-plugin-eslint/rules/no_restricted_paths.test.js',
   ],
   // angular is not compatible with the default circus runner
   testRunner: 'jest-jasmine2',
@@ -198,7 +218,7 @@ export default {
   transformIgnorePatterns: [
     // ignore all node_modules except those which require babel transforms to handle dynamic import()
     // since ESM modules are not natively supported in Jest yet (https://github.com/facebook/jest/issues/4842)
-    '[/\\\\]node_modules(?![\\/\\\\](monaco-editor|react-monaco-editor|weak-lru-cache|ordered-binary|d3-[^/\\\\]+|axios|@smithy|@aws-crypto|@aws-sdk|uuid|@xyflow|@dagrejs|classcat|internmap|delaunator|robust-predicates|ramda))[/\\\\].+\\.js$',
+    '[/\\\\]node_modules(?![\\/\\\\](monaco-editor|react-monaco-editor|weak-lru-cache|ordered-binary|d3-[^/\\\\]+|axios|@smithy|@aws-crypto|@aws-sdk|@xyflow|@dagrejs|classcat|internmap|delaunator|robust-predicates|ramda|query-string|decode-uri-component|filter-obj|split-on-first))[/\\\\].+\\.js$',
     'packages/osd-pm/dist/index.js',
   ],
   snapshotSerializers: [

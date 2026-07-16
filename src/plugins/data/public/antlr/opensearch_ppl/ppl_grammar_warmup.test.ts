@@ -11,9 +11,9 @@ import {
 import { createPplGrammarWarmupHandler } from './ppl_grammar_warmup';
 
 describe('ppl_grammar_warmup', () => {
-  const http = ({} as unknown) as HttpSetup;
-  const uiSettings = ({ get: jest.fn().mockReturnValue(true) } as unknown) as IUiSettingsClient;
-  const savedObjectsClient = ({} as unknown) as SavedObjectsClientContract;
+  const http = {} as unknown as HttpSetup;
+  const uiSettings = { get: jest.fn().mockReturnValue(true) } as unknown as IUiSettingsClient;
+  const savedObjectsClient = {} as unknown as SavedObjectsClientContract;
 
   const createCacheMock = () => ({
     warmUp: jest.fn(),
@@ -52,6 +52,7 @@ describe('ppl_grammar_warmup', () => {
       uiSettings,
       savedObjectsClient,
       undefined,
+      undefined,
       undefined
     );
   });
@@ -71,7 +72,8 @@ describe('ppl_grammar_warmup', () => {
       uiSettings,
       savedObjectsClient,
       'ds-1',
-      '3.6.0'
+      '3.6.0',
+      undefined
     );
   });
 
@@ -110,7 +112,8 @@ describe('ppl_grammar_warmup', () => {
       uiSettings,
       savedObjectsClient,
       'ds-2',
-      '3.6.0'
+      '3.6.0',
+      undefined
     );
   });
 
@@ -129,7 +132,8 @@ describe('ppl_grammar_warmup', () => {
       uiSettings,
       savedObjectsClient,
       'ds-old',
-      '2.17.0'
+      '2.17.0',
+      undefined
     );
   });
 
@@ -148,6 +152,7 @@ describe('ppl_grammar_warmup', () => {
       uiSettings,
       savedObjectsClient,
       'ds-unknown',
+      undefined,
       undefined
     );
   });
@@ -169,7 +174,8 @@ describe('ppl_grammar_warmup', () => {
       uiSettings,
       savedObjectsClient,
       'ds-1',
-      '3.6.0'
+      '3.6.0',
+      undefined
     );
     expect(cache.warmUp).toHaveBeenNthCalledWith(
       2,
@@ -177,7 +183,8 @@ describe('ppl_grammar_warmup', () => {
       uiSettings,
       savedObjectsClient,
       'ds-2',
-      '2.17.0'
+      '2.17.0',
+      undefined
     );
     expect(cache.warmUp).toHaveBeenNthCalledWith(
       3,
@@ -185,13 +192,15 @@ describe('ppl_grammar_warmup', () => {
       uiSettings,
       savedObjectsClient,
       'ds-3',
-      '3.7.0'
+      '3.7.0',
+      undefined
     );
     expect(cache.warmUp).toHaveBeenNthCalledWith(
       4,
       http,
       uiSettings,
       savedObjectsClient,
+      undefined,
       undefined,
       undefined
     );
@@ -219,6 +228,7 @@ describe('ppl_grammar_warmup', () => {
       http,
       uiSettings,
       savedObjectsClient,
+      undefined,
       undefined,
       undefined
     );
@@ -252,6 +262,105 @@ describe('ppl_grammar_warmup', () => {
     expect(cache.warmUp).not.toHaveBeenCalled();
   });
 
+  describe('calcite settings warmup', () => {
+    const createSettingsCacheMock = () => ({ warmUp: jest.fn() });
+
+    it('should warm calcite settings alongside grammar cache', () => {
+      const grammarCache = createCacheMock();
+      const settingsCache = createSettingsCacheMock();
+      const handler = createPplGrammarWarmupHandler(
+        http,
+        uiSettings,
+        savedObjectsClient,
+        grammarCache,
+        settingsCache
+      );
+
+      handler({
+        language: 'PPL',
+        dataset: { dataSource: { id: 'ds-1', version: '3.8.0' } },
+      });
+
+      expect(settingsCache.warmUp).toHaveBeenCalledWith(http, 'ds-1');
+    });
+
+    it('should warm calcite settings for local cluster', () => {
+      const grammarCache = createCacheMock();
+      const settingsCache = createSettingsCacheMock();
+      const handler = createPplGrammarWarmupHandler(
+        http,
+        uiSettings,
+        savedObjectsClient,
+        grammarCache,
+        settingsCache
+      );
+
+      handler({ language: 'PPL', dataset: {} });
+
+      expect(settingsCache.warmUp).toHaveBeenCalledWith(http, undefined);
+    });
+
+    it('should not warm settings when language is not PPL', () => {
+      const grammarCache = createCacheMock();
+      const settingsCache = createSettingsCacheMock();
+      const handler = createPplGrammarWarmupHandler(
+        http,
+        uiSettings,
+        savedObjectsClient,
+        grammarCache,
+        settingsCache
+      );
+
+      handler({
+        language: 'SQL',
+        dataset: { dataSource: { id: 'ds-1', version: '3.8.0' } },
+      });
+
+      expect(settingsCache.warmUp).not.toHaveBeenCalled();
+    });
+
+    it('should not warm settings when no dataset is selected', () => {
+      const grammarCache = createCacheMock();
+      const settingsCache = createSettingsCacheMock();
+      const handler = createPplGrammarWarmupHandler(
+        http,
+        uiSettings,
+        savedObjectsClient,
+        grammarCache,
+        settingsCache
+      );
+
+      handler({ language: 'PPL' });
+
+      expect(settingsCache.warmUp).not.toHaveBeenCalled();
+    });
+
+    it('warms settings even when the runtimePplGrammar uiSetting is disabled', () => {
+      // The compiled-surface `disabled-join-type` rule reads `allJoinTypesAllowed`
+      // to suppress warnings, so the settings cache must warm regardless of the
+      // runtime-grammar flag. The grammar cache itself self-gates on the flag.
+      const grammarCache = createCacheMock();
+      const settingsCache = createSettingsCacheMock();
+      const disabledUiSettings = {
+        get: jest.fn().mockReturnValue(false),
+      } as unknown as IUiSettingsClient;
+      const handler = createPplGrammarWarmupHandler(
+        http,
+        disabledUiSettings,
+        savedObjectsClient,
+        grammarCache,
+        settingsCache
+      );
+
+      handler({
+        language: 'PPL',
+        dataset: { dataSource: { id: 'ds-1', version: '3.8.0' } },
+      });
+
+      expect(settingsCache.warmUp).toHaveBeenCalledWith(http, 'ds-1');
+    });
+  });
+
   it('should handle SNAPSHOT versions from dataset', () => {
     const cache = createCacheMock();
     const handler = createPplGrammarWarmupHandler(http, uiSettings, savedObjectsClient, cache);
@@ -266,7 +375,8 @@ describe('ppl_grammar_warmup', () => {
       uiSettings,
       savedObjectsClient,
       'ds-snap',
-      '3.6.0-SNAPSHOT'
+      '3.6.0-SNAPSHOT',
+      undefined
     );
   });
 
@@ -289,7 +399,8 @@ describe('ppl_grammar_warmup', () => {
       uiSettings,
       savedObjectsClient,
       'ds-old',
-      '2.17.0'
+      '2.17.0',
+      undefined
     );
   });
 });

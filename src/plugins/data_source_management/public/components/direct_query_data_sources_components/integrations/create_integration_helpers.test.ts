@@ -273,10 +273,10 @@ describe('fetchIntegrationMappings', () => {
 });
 
 describe('doExistingDataSourceValidation', () => {
-  const mockHttp = ({
+  const mockHttp = {
     post: jest.fn(),
     get: jest.fn(),
-  } as unknown) as HttpStart;
+  } as unknown as HttpStart;
 
   it('Catches and returns checkDataSourceName errors', async () => {
     (checkDataSourceName as jest.Mock).mockReturnValue({

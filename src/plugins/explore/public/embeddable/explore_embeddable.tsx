@@ -64,7 +64,6 @@ import { CommonVisualizationRender } from '../components/visualizations/visualiz
 import { RenderChartConfig } from '../components/visualizations/types';
 import {
   TransformationService,
-  UrlTransformationState,
   registerAllTransformations,
 } from '../components/data_transformations';
 
@@ -116,7 +115,8 @@ interface ExploreEmbeddableConfig {
 
 export class ExploreEmbeddable
   extends Embeddable<ExploreInput, ExploreOutput>
-  implements IEmbeddable<ExploreInput, ExploreOutput> {
+  implements IEmbeddable<ExploreInput, ExploreOutput>
+{
   private abortController?: AbortController;
   private readonly savedExplore: SavedExplore;
   private inspectorAdaptors: Adapters;
@@ -124,6 +124,7 @@ export class ExploreEmbeddable
   private filtersSearchSource?: ISearchSource;
   private subscription: Subscription;
   private autoRefreshFetchSubscription?: Subscription;
+  private titleVariableSubscription?: Subscription;
   public readonly type = EXPLORE_EMBEDDABLE_TYPE;
   private panelTitle: string = '';
   private filterManager: FilterManager;
@@ -137,7 +138,8 @@ export class ExploreEmbeddable
   private root?: Root;
 
   // Variable interpolation support
-  private interpolationService: IVariableInterpolationService = createNoOpVariableInterpolationService();
+  private interpolationService: IVariableInterpolationService =
+    createNoOpVariableInterpolationService();
   private variableSubscription?: Subscription;
   public originalQuery?: string;
   private lastInterpolatedQuery?: string;
@@ -180,7 +182,6 @@ export class ExploreEmbeddable
       requests: new RequestAdapter(),
       data: new DataAdapter(),
     };
-
     // Initialize transformation service
     this.transformationService = new TransformationService();
     registerAllTransformations(this.transformationService);
@@ -205,6 +206,19 @@ export class ExploreEmbeddable
           this.updateHandler(this.searchProps, true);
         }
       });
+    // Must include output$ here: when a panel title is edited, the base Embeddable.onResetInput()
+    // fires input$.next() (which triggers handleTitleVariables correctly) but then immediately
+    // overwrites the output title with the raw un-interpolated input.title via getPanelTitle().
+    // Subscribing to output$ ensures handleTitleVariables re-applies variable interpolation
+    // after that overwrite. The isEqual guard in updateOutput() prevents infinite loops.
+    if (parent && 'variableService' in parent) {
+      const dashboardContainer = parent as unknown as DashboardContainer;
+      this.titleVariableSubscription = merge(
+        this.getInput$(),
+        this.getOutput$(),
+        dashboardContainer.variableService.getVariables$()
+      ).subscribe(this.handleTitleVariables);
+    }
   }
 
   // initialize transformation pipeline from saved explore
@@ -223,6 +237,17 @@ export class ExploreEmbeddable
     }
   }
 
+  private handleTitleVariables = () => {
+    let panelTitle = this.output.title ?? '';
+    if (this.input.title && this.interpolationService.hasVariables(this.input.title)) {
+      panelTitle = this.interpolationService.interpolate(this.input.title);
+    } else if (this.interpolationService.hasVariables(this.savedExplore.title)) {
+      panelTitle = this.interpolationService.interpolate(this.savedExplore.title);
+    }
+    this.updateOutput({ title: panelTitle });
+    this.panelTitle = panelTitle;
+  };
+
   /**
    * Initialize variable interpolation service and subscription
    * Variables are managed by the parent DashboardContainer
@@ -232,7 +257,7 @@ export class ExploreEmbeddable
     this.interpolationService = createNoOpVariableInterpolationService();
 
     if (parent && 'variableInterpolationService' in parent) {
-      const dashboardContainer = (parent as unknown) as DashboardContainer;
+      const dashboardContainer = parent as unknown as DashboardContainer;
       this.interpolationService = dashboardContainer.variableInterpolationService;
 
       if ('variableService' in dashboardContainer) {
@@ -533,12 +558,8 @@ export class ExploreEmbeddable
     this.searchProps.activeTab = uiState.activeTab;
     this.searchProps.styleOptions = visualization.params;
     if (uiState.activeTab !== 'logs' && visualizationData) {
-      const {
-        numericalColumns,
-        categoricalColumns,
-        dateColumns,
-        unknownColumns,
-      } = visualizationData;
+      const { numericalColumns, categoricalColumns, dateColumns, unknownColumns } =
+        visualizationData;
       const allColumns = [
         ...(numericalColumns ?? []),
         ...(categoricalColumns ?? []),
@@ -692,6 +713,10 @@ export class ExploreEmbeddable
     // Cleanup variable subscription
     if (this.variableSubscription) {
       this.variableSubscription.unsubscribe();
+    }
+
+    if (this.titleVariableSubscription) {
+      this.titleVariableSubscription.unsubscribe();
     }
 
     // Cleanup transformation service

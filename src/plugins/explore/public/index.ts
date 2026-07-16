@@ -10,6 +10,10 @@ import { ExplorePlugin } from './plugin';
 
 export { SavedExplore, SavedExploreLoader, createSavedExploreLoader } from './saved_explore';
 
+// PPL query utilities for use by other plugins
+export { addPPLSourceClause } from './application/utils/languages/ppl/get_query_string_with_source';
+export type { QueryWithQueryAsString } from './application/utils/languages/types';
+
 export function plugin(initializerContext: PluginInitializerContext) {
   return new ExplorePlugin(initializerContext);
 }

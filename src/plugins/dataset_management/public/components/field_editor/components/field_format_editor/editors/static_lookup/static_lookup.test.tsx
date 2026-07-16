@@ -29,7 +29,7 @@ describe('StaticLookupFormatEditor', () => {
     const component = shallowWithI18nProvider(
       <StaticLookupFormatEditor
         fieldType={fieldType}
-        format={(format as unknown) as FieldFormat}
+        format={format as unknown as FieldFormat}
         formatParams={formatParams}
         onChange={onChange}
         onError={onError}
@@ -43,7 +43,7 @@ describe('StaticLookupFormatEditor', () => {
     const component = shallowWithI18nProvider(
       <StaticLookupFormatEditor
         fieldType={fieldType}
-        format={(format as unknown) as FieldFormat}
+        format={format as unknown as FieldFormat}
         formatParams={{
           lookupEntries: [{}, {}, {}] as StaticLookupFormatEditorFormatParams['lookupEntries'],
           unknownKeyValue: 'test value',

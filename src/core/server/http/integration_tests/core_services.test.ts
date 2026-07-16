@@ -235,9 +235,8 @@ describe('http service', () => {
 
       it('runs auth for legacy routes and proxy request to legacy server route handlers', async () => {
         const { http } = await root.setup();
-        const sessionStorageFactory = await http.createCookieSessionStorageFactory<StorageData>(
-          cookieOptions
-        );
+        const sessionStorageFactory =
+          await http.createCookieSessionStorageFactory<StorageData>(cookieOptions);
         http.registerAuth((req, res, toolkit) => {
           if (req.headers.authorization) {
             const user = { id: '42' };
@@ -268,9 +267,8 @@ describe('http service', () => {
       it('passes authHeaders as request headers to the legacy platform', async () => {
         const token = 'Basic: name:password';
         const { http } = await root.setup();
-        const sessionStorageFactory = await http.createCookieSessionStorageFactory<StorageData>(
-          cookieOptions
-        );
+        const sessionStorageFactory =
+          await http.createCookieSessionStorageFactory<StorageData>(cookieOptions);
         http.registerAuth((req, res, toolkit) => {
           if (req.headers.authorization) {
             const user = { id: '42' };

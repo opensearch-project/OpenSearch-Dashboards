@@ -6,7 +6,6 @@
 import { get } from 'lodash';
 import { VisualizeEmbeddable, Vis } from '../../visualizations/public';
 import { ErrorEmbeddable } from '../../embeddable/public';
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { timefilterServiceMock } from '../../data/public/query/timefilter/timefilter_service.mock';
 import { EventVisEmbeddableItem } from './view_events_flyout';
 import {
@@ -56,7 +55,7 @@ export const VALID_AGGS = new AggConfigs(STUB_INDEX_PATTERN_WITH_FIELDS, VALID_C
   typesRegistry: TYPES_REGISTRY,
 });
 
-export const VALID_VIS = ({
+export const VALID_VIS = {
   type: {},
   uiState: {
     on: jest.fn(),
@@ -77,7 +76,7 @@ export const VALID_VIS = ({
   data: {
     aggs: VALID_AGGS,
   },
-} as unknown) as Vis;
+} as unknown as Vis;
 
 const SAVED_OBJ_ID = 'test-saved-obj-id';
 const VIS_TITLE = 'test-vis-title';
@@ -119,7 +118,7 @@ export const createMockVisEmbeddable = (
   const mockTimeFilter = mockTimeFilterService.timefilter;
   const mockVis = validVis
     ? VALID_VIS
-    : (({
+    : ({
         type: {},
         data: {},
         uiState: {
@@ -129,7 +128,7 @@ export const createMockVisEmbeddable = (
           type: 'line',
           seriesParams: [],
         },
-      } as unknown) as Vis);
+      } as unknown as Vis);
   const mockDeps = {
     start: jest.fn(),
   };

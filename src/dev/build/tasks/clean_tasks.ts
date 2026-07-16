@@ -78,7 +78,7 @@ const EXTRA_FILES_FROM_MODULES_REGEXPS: RegExp[] = makeRegexps([
 
   // linters
   '**/.eslintrc',
-  '**/.eslintrc.js',
+  '**/eslint.config.js',
   '**/.eslintrc.yml',
   '**/.prettierrc',
   '**/.jshintrc',

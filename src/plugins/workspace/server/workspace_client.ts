@@ -182,7 +182,7 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
         const uiSettingsClient = this.uiSettings.asScopedToClient(client);
         try {
           await checkAndSetDefaultDataSource(uiSettingsClient, dataSources, false);
-        } catch (e) {
+        } catch {
           this.logger.error('Set default data source error');
         } finally {
           // Reset workspace state
@@ -210,16 +210,12 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
     options: WorkspaceFindOptions
   ): ReturnType<IWorkspaceClientImpl['list']> {
     try {
-      const {
-        saved_objects: savedObjects,
-        ...others
-      } = await this.getSavedObjectClientsFromRequestDetail(requestDetail).find<WorkspaceAttribute>(
-        {
+      const { saved_objects: savedObjects, ...others } =
+        await this.getSavedObjectClientsFromRequestDetail(requestDetail).find<WorkspaceAttribute>({
           ...options,
           type: WORKSPACE_TYPE,
           ACLSearchParams: { permissionModes: options.permissionModes },
-        }
-      );
+        });
       return {
         success: true,
         result: {
@@ -239,9 +235,9 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
     id: string
   ): Promise<IResponse<WorkspaceAttribute>> {
     try {
-      const result = await this.getSavedObjectClientsFromRequestDetail(requestDetail).get<
-        WorkspaceAttribute
-      >(WORKSPACE_TYPE, id);
+      const result = await this.getSavedObjectClientsFromRequestDetail(
+        requestDetail
+      ).get<WorkspaceAttribute>(WORKSPACE_TYPE, id);
       return {
         success: true,
         result: this.getFlattenedResultWithSavedObject(result),
@@ -353,7 +349,7 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
           await checkAndSetDefaultDataSource(uiSettingsClient, newDataSources, true);
           // Doc version may changed after default data source updated.
           workspaceInDB = await client.get(WORKSPACE_TYPE, id);
-        } catch (error) {
+        } catch {
           this.logger.error('Set default data source error during workspace updating');
         }
       }

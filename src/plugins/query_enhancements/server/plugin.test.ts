@@ -14,7 +14,7 @@ describe('QueryEnhancementsPlugin pplLint capability', () => {
       management: {},
       catalogue: {},
       queryEnhancements: { pplLint: false },
-    } as any);
+    }) as any;
 
   // Run the real setup() against core mocks and hand back the registered
   // capability switcher plus the plugin's logger so the catch path is

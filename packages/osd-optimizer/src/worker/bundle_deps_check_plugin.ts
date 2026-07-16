@@ -31,7 +31,10 @@ export class BundleDepsCheckPlugin {
   private usedBundleIds: Set<string> = new Set();
   private allowedBundleIds = new Set<string>();
 
-  constructor(private readonly bundle: Bundle, private readonly bundleRefs: BundleRefs) {
+  constructor(
+    private readonly bundle: Bundle,
+    private readonly bundleRefs: BundleRefs
+  ) {
     this.ignorePrefix = Path.resolve(this.bundle.contextDir) + Path.sep;
   }
 
@@ -140,7 +143,7 @@ export class BundleDepsCheckPlugin {
     try {
       const resolvedPath = resolver.resolveSync({}, startPath, request);
       return resolvedPath;
-    } catch (e) {
+    } catch {
       return false;
     }
   }

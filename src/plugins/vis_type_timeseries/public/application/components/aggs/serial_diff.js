@@ -57,8 +57,8 @@ export const SerialDiffAgg = (props) => {
   const handleNumberChange = createNumberHandler(handleChange);
 
   const htmlId = htmlIdGenerator();
-  const serialDiffDoc = useOpenSearchDashboards().services.docLinks?.links.opensearch.aggregations
-    .pipeline.serial_diff;
+  const serialDiffDoc =
+    useOpenSearchDashboards().services.docLinks?.links.opensearch.aggregations.pipeline.serial_diff;
 
   return (
     <AggRow

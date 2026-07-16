@@ -32,14 +32,9 @@ import { OpenSearchDashboardsRequest, RequestHandler } from 'opensearch-dashboar
 import { trimStart } from 'lodash';
 import { Readable } from 'stream';
 import { stringify } from '@osd/std';
-
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { ensureRawRequest } from '../../../../../../../core/server/http/router';
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { isResponseError } from '../../../../../../../core/server/opensearch/client/errors';
-
 import { RouteDependencies } from '../../../';
-
 import { Body, Query } from './validation_config';
 import { buildBufferedBody } from './utils';
 
@@ -81,88 +76,90 @@ function toUrlPath(path: string) {
   return urlPath;
 }
 
-export const createHandler = ({
-  log,
-  proxy: { readLegacyOpenSearchConfig, pathFilters, proxyConfigCollection },
-}: RouteDependencies): RequestHandler<unknown, Query, Body> => async (ctx, request, response) => {
-  const { body, query } = request;
-  const { path, method, dataSourceId } = query;
+export const createHandler =
+  ({
+    log,
+    proxy: { readLegacyOpenSearchConfig, pathFilters, proxyConfigCollection },
+  }: RouteDependencies): RequestHandler<unknown, Query, Body> =>
+  async (ctx, request, response) => {
+    const { body, query } = request;
+    const { path, method, dataSourceId } = query;
 
-  if (!pathFilters.some((re) => re.test(path))) {
-    return response.forbidden({
-      body: `Error connecting to '${path}':\n\nUnable to send requests to that path.`,
-      headers: {
-        'Content-Type': 'text/plain',
-      },
-    });
-  }
-
-  try {
-    const client = dataSourceId
-      ? await ctx.dataSource.opensearch.getClient(dataSourceId)
-      : ctx.core.opensearch.client.asCurrentUserWithLongNumeralsSupport;
-
-    // TODO: proxy header will fail sigv4 auth type in data source, need create issue in opensearch-js repo to track
-    const requestHeaders = dataSourceId
-      ? {}
-      : {
-          ...getProxyHeaders(request),
-        };
-
-    const bufferedBody = await buildBufferedBody(body);
-    const opensearchResponse = await client.transport.request(
-      { path: toUrlPath(path), method, body: bufferedBody },
-      { headers: requestHeaders }
-    );
-
-    const {
-      statusCode,
-      body: responseContent,
-      warnings,
-      headers: responseHeaders,
-    } = opensearchResponse;
-
-    if (method.toUpperCase() !== 'HEAD') {
-      /* If a response is a parse JSON object, we need to use a custom `stringify` to handle BigInt
-       * values.
-       */
-      const isJSONResponse = responseHeaders?.['content-type']?.includes?.('application/json');
-      return response.custom({
-        statusCode: statusCode!,
-        body: isJSONResponse ? stringify(responseContent) : responseContent,
+    if (!pathFilters.some((re) => re.test(path))) {
+      return response.forbidden({
+        body: `Error connecting to '${path}':\n\nUnable to send requests to that path.`,
         headers: {
-          warning: warnings || '',
-          ...(isJSONResponse ? { 'Content-Type': 'application/json; charset=utf-8' } : {}),
+          'Content-Type': 'text/plain',
         },
       });
     }
 
-    return response.custom({
-      statusCode: statusCode!,
-      body: `${statusCode} - ${responseContent}`,
-      headers: {
-        warning: warnings || '',
-        'Content-Type': 'text/plain',
-      },
-    });
-  } catch (e: any) {
-    const isResponseErrorFlag = isResponseError(e);
-    if (!isResponseErrorFlag) log.error(e);
-    const errorMessage = isResponseErrorFlag ? stringify(e.meta.body) : e.message;
-    // core http route handler has special logic that asks for stream readable input to pass error opaquely
-    const errorResponseBody = new Readable({
-      read() {
-        this.push(errorMessage);
-        this.push(null);
-      },
-    });
-    return response.customError({
-      statusCode: e.statusCode || 502,
-      // @ts-expect-error TS2322 TODO(ts-error): fixme
-      body: errorResponseBody,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-  }
-};
+    try {
+      const client = dataSourceId
+        ? await ctx.dataSource.opensearch.getClient(dataSourceId)
+        : ctx.core.opensearch.client.asCurrentUserWithLongNumeralsSupport;
+
+      // TODO: proxy header will fail sigv4 auth type in data source, need create issue in opensearch-js repo to track
+      const requestHeaders = dataSourceId
+        ? {}
+        : {
+            ...getProxyHeaders(request),
+          };
+
+      const bufferedBody = await buildBufferedBody(body);
+      const opensearchResponse = await client.transport.request(
+        { path: toUrlPath(path), method, body: bufferedBody },
+        { headers: requestHeaders }
+      );
+
+      const {
+        statusCode,
+        body: responseContent,
+        warnings,
+        headers: responseHeaders,
+      } = opensearchResponse;
+
+      if (method.toUpperCase() !== 'HEAD') {
+        /* If a response is a parse JSON object, we need to use a custom `stringify` to handle BigInt
+         * values.
+         */
+        const isJSONResponse = responseHeaders?.['content-type']?.includes?.('application/json');
+        return response.custom({
+          statusCode: statusCode!,
+          body: isJSONResponse ? stringify(responseContent) : responseContent,
+          headers: {
+            warning: warnings || '',
+            ...(isJSONResponse ? { 'Content-Type': 'application/json; charset=utf-8' } : {}),
+          },
+        });
+      }
+
+      return response.custom({
+        statusCode: statusCode!,
+        body: `${statusCode} - ${responseContent}`,
+        headers: {
+          warning: warnings || '',
+          'Content-Type': 'text/plain',
+        },
+      });
+    } catch (e: any) {
+      const isResponseErrorFlag = isResponseError(e);
+      if (!isResponseErrorFlag) log.error(e);
+      const errorMessage = isResponseErrorFlag ? stringify(e.meta.body) : e.message;
+      // core http route handler has special logic that asks for stream readable input to pass error opaquely
+      const errorResponseBody = new Readable({
+        read() {
+          this.push(errorMessage);
+          this.push(null);
+        },
+      });
+      return response.customError({
+        statusCode: e.statusCode || 502,
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
+        body: errorResponseBody,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+    }
+  };

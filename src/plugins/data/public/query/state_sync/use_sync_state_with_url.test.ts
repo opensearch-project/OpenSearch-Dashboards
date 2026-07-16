@@ -65,9 +65,9 @@ describe('use_sync_query_state_with_url', () => {
   let indexPatternsMock: IndexPatternsService;
 
   beforeEach(() => {
-    indexPatternsMock = ({
+    indexPatternsMock = {
       get: jest.fn(),
-    } as unknown) as IndexPatternsService;
+    } as unknown as IndexPatternsService;
   });
 
   let filterManagerChangeSub: Subscription;
