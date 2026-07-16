@@ -30,7 +30,8 @@ import '../../../components/query_panel/query_panel.scss';
 
 /**
  * Logs query panel with a PPL visual builder / code toggle. Gated behind the
- * `explore:enableLogsQueryBuilder` UI setting; the plain `QueryPanel` is used
+ * `logsQueryBuilder` explore dynamic feature flag (surfaced as the
+ * `explore.logsQueryBuilderEnabled` capability); the plain `QueryPanel` is used
  * otherwise.
  *
  * The QueryStringManager draft (NOT Redux) is the working source of truth while

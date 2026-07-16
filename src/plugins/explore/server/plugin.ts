@@ -34,6 +34,7 @@ export class ExplorePlugin implements Plugin<ExplorePluginSetup, ExplorePluginSt
       explore: {
         discoverTracesEnabled: false,
         discoverMetricsEnabled: false,
+        logsQueryBuilderEnabled: false,
       },
     }));
 
@@ -56,6 +57,7 @@ export class ExplorePlugin implements Plugin<ExplorePluginSetup, ExplorePluginSt
             ...(capabilities.explore || {}),
             discoverTracesEnabled: config.discoverTraces?.enabled ?? false,
             discoverMetricsEnabled: config.discoverMetrics?.enabled ?? false,
+            logsQueryBuilderEnabled: config.logsQueryBuilder?.enabled ?? false,
           },
         };
       } catch (error) {

@@ -183,6 +183,10 @@ describe('LogsPage', () => {
     const exploreServices = discoverPluginMock.createExploreServicesMock();
     const exploreServicesMock = exploreServices as jest.MaybeMockedDeep<typeof exploreServices>;
     exploreServicesMock.uiSettings.get.mockImplementation((_, defaultValue) => defaultValue);
+    exploreServicesMock.capabilities = {
+      ...exploreServicesMock.capabilities,
+      explore: { logsQueryBuilderEnabled: true },
+    };
 
     exploreServicesMock.keyboardShortcut = {
       useKeyboardShortcut: mockUseKeyboardShortcut,
@@ -217,12 +221,13 @@ describe('LogsPage', () => {
     expect(screen.getByTestId('top-nav')).toBeInTheDocument();
   });
 
-  it('renders the logs query builder panel when the query builder setting is enabled', () => {
+  it('renders the logs query builder panel when the query builder flag is enabled', () => {
     const exploreServices = discoverPluginMock.createExploreServicesMock();
     const exploreServicesMock = exploreServices as jest.MaybeMockedDeep<typeof exploreServices>;
-    exploreServicesMock.uiSettings.get.mockImplementation((setting, defaultValue) =>
-      setting === 'explore:enableLogsQueryBuilder' ? true : defaultValue
-    );
+    exploreServicesMock.capabilities = {
+      ...exploreServicesMock.capabilities,
+      explore: { logsQueryBuilderEnabled: true },
+    };
     exploreServicesMock.keyboardShortcut = {
       useKeyboardShortcut: mockUseKeyboardShortcut,
       register: jest.fn(),

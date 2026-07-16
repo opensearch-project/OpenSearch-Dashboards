@@ -11,7 +11,6 @@ import {
   DEFAULT_TRACE_COLUMNS_SETTING,
   DEFAULT_LOGS_COLUMNS_SETTING,
   ENABLE_EXPERIMENTAL_SETTING,
-  EXPLORE_ENABLE_QUERY_BUILDER_SETTING,
 } from '../common';
 
 export const exploreUiSettings: Record<string, UiSettingsParams> = {
@@ -54,18 +53,6 @@ export const exploreUiSettings: Record<string, UiSettingsParams> = {
     description: i18n.translate('explore.advancedSettings.enableExperimentalText', {
       defaultMessage:
         'Enable experimental features in Explore including field statistics and histogram breakdown selector.',
-    }),
-    category: ['explore'],
-    schema: schema.boolean(),
-  },
-  [EXPLORE_ENABLE_QUERY_BUILDER_SETTING]: {
-    name: i18n.translate('explore.advancedSettings.enableLogsQueryBuilderTitle', {
-      defaultMessage: 'Enable logs query builder',
-    }),
-    value: true,
-    description: i18n.translate('explore.advancedSettings.enableLogsQueryBuilderText', {
-      defaultMessage:
-        'Experimental: Enable the visual PPL query builder in the Explore logs flavor. When enabled, new logs queries open in a builder that can be toggled to a raw PPL code editor.',
     }),
     category: ['explore'],
     schema: schema.boolean(),
