@@ -14,7 +14,7 @@ interface AddMetricMenuProps {
   onAdd: (fn: AggFn) => void;
   /**
    * Whether any metric already exists. When false the affordance shows its text
-   * label ("＋ Add metric") since the row is sparse and labels teach; once a
+   * label ("＋ Add aggregation") since the row is sparse and labels teach; once a
    * metric exists it collapses to an icon-only dashed ＋ to keep the row dense.
    */
   hasMetrics?: boolean;
@@ -22,7 +22,7 @@ interface AddMetricMenuProps {
 }
 
 /**
- * "Add metric" affordance: opens a popover of aggregations and appends a new
+ * "Add aggregation" affordance: opens a popover of aggregations and appends a new
  * metric using the chosen one. This is the single place a metric is *created*
  * (and its aggregation picked); the aggregation stays editable afterward via the
  * row's "Show" dropdown, and scalar functions via its `ƒx` menu. Renders as a
@@ -35,7 +35,7 @@ export const AddMetricMenu: React.FC<AddMetricMenuProps> = ({
   dataTestSubj,
 }) => {
   const addMetricLabel = i18n.translate('explore.pplBuilder.addMetric', {
-    defaultMessage: 'Add metric',
+    defaultMessage: 'Add aggregation',
   });
 
   const rootItems = useMemo(

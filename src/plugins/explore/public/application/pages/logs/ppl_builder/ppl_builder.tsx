@@ -26,6 +26,8 @@ interface PPLBuilderProps {
   onQueryChange: (query: string, state: PPLBuilderState) => void;
   /** Switch to code mode (the `</>` toggle in the search row). */
   onSwitchToCode?: () => void;
+  /** Execute the query (Cmd/Ctrl+Enter), mirroring the code-mode editor. */
+  onRun?: () => void;
 }
 
 const CHART_BAR_TARGET = 15;
@@ -34,6 +36,7 @@ export const PPLBuilder: React.FC<PPLBuilderProps> = ({
   initialState,
   onQueryChange,
   onSwitchToCode,
+  onRun,
 }) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const { dataset } = useDatasetContext();
@@ -119,8 +122,22 @@ export const PPLBuilder: React.FC<PPLBuilderProps> = ({
     });
   };
 
+  // Cmd/Ctrl+Enter runs the query from anywhere in the builder — the Monaco
+  // search box binds it as an editor action, but the EUI form controls
+  // (comboboxes, buttons) need this root-level handler to catch the same
+  // shortcut. Mirrors the code-mode editor's run keybinding.
+  const onKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+        e.preventDefault();
+        onRun?.();
+      }
+    },
+    [onRun]
+  );
+
   return (
-    <div className="plqBuilder" data-test-subj="pplBuilder">
+    <div className="plqBuilder" data-test-subj="pplBuilder" onKeyDown={onKeyDown}>
       <div className="plqRow">
         <span className="plqRow__label">
           {i18n.translate('explore.pplBuilder.searchFor', { defaultMessage: 'Search for' })}
@@ -131,6 +148,7 @@ export const PPLBuilder: React.FC<PPLBuilderProps> = ({
             fieldNames={fieldNames}
             onRequestValues={getValues}
             onChange={onSearchChange}
+            onRun={onRun}
           />
         </div>
         {onSwitchToCode && <ModeToggleButton isCode={false} onToggle={onSwitchToCode} />}

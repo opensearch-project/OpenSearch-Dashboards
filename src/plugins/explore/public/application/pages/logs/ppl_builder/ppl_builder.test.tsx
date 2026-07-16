@@ -66,9 +66,11 @@ jest.mock('./use_field_data', () => ({
   }),
 }));
 
-const renderBuilder = (initialState: PPLBuilderState = emptyState()) => {
+const renderBuilder = (initialState: PPLBuilderState = emptyState(), onRun?: () => void) => {
   const onQueryChange = jest.fn();
-  const utils = render(<PPLBuilder initialState={initialState} onQueryChange={onQueryChange} />);
+  const utils = render(
+    <PPLBuilder initialState={initialState} onQueryChange={onQueryChange} onRun={onRun} />
+  );
   return { ...utils, onQueryChange };
 };
 
@@ -92,6 +94,22 @@ describe('PPLBuilder', () => {
     });
     expect(onQueryChange).toHaveBeenCalledWith('service="web-store"', expect.anything());
     expect(screen.getByTestId('pplBuilderSearchBoxInput')).toHaveValue('service="web-store"');
+  });
+
+  it('runs the query on Cmd/Ctrl+Enter from a form control', () => {
+    const onRun = jest.fn();
+    renderBuilder(emptyState(), onRun);
+    fireEvent.keyDown(screen.getByTestId('pplBuilder'), { key: 'Enter', metaKey: true });
+    expect(onRun).toHaveBeenCalledTimes(1);
+    fireEvent.keyDown(screen.getByTestId('pplBuilder'), { key: 'Enter', ctrlKey: true });
+    expect(onRun).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not run on a bare Enter (no modifier)', () => {
+    const onRun = jest.fn();
+    renderBuilder(emptyState(), onRun);
+    fireEvent.keyDown(screen.getByTestId('pplBuilder'), { key: 'Enter' });
+    expect(onRun).not.toHaveBeenCalled();
   });
 
   it('emits typed search text without a source clause', () => {

@@ -23,6 +23,7 @@ import {
   selectSavedSearch,
 } from '../../../application/utils/state_management/selectors';
 import { setIsQueryEditorDirty } from '../../../application/utils/state_management/slices/query_editor/query_editor_slice';
+import { onEditorRunActionCreator } from '../../../application/utils/state_management/actions/query_editor';
 import { PPLBuilder, PPLBuilderState, parsePPL } from './ppl_builder';
 import { ModeToggleButton } from './ppl_builder/mode_toggle_button';
 import { LogsBuilderMode } from './logs_query_panel_mode';
@@ -265,6 +266,15 @@ export const LogsQueryPanel: React.FC = () => {
   const switchToCode = useCallback(() => handleModeChange('code'), [handleModeChange]);
   const switchToBuilder = useCallback(() => handleModeChange('builder'), [handleModeChange]);
 
+  // Cmd/Ctrl+Enter in the builder runs the current draft, mirroring the
+  // code-mode editor. The builder emits a source-less query; the execution
+  // layer (`addPPLSourceClause`) prepends `source = <index>` at run time, so we
+  // hand `onEditorRunActionCreator` the builder's live query text as-is.
+  const handleRun = useCallback(() => {
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
+    dispatch(onEditorRunActionCreator(services, builderQueryRef.current));
+  }, [dispatch, services]);
+
   return (
     <EuiPanel paddingSize="s" borderRadius="none" className="exploreQueryPanel">
       <EuiFlexGroup
@@ -294,6 +304,7 @@ export const LogsQueryPanel: React.FC = () => {
                 initialState={builderState}
                 onQueryChange={onBuilderChange}
                 onSwitchToCode={switchToCode}
+                onRun={handleRun}
               />
             ) : (
               editors

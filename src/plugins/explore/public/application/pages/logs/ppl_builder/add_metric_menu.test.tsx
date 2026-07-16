@@ -7,19 +7,19 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { AddMetricMenu } from './add_metric_menu';
 
 describe('AddMetricMenu', () => {
-  it('renders a labelled "Add metric" button when no metric exists yet', () => {
+  it('renders a labelled "Add aggregation" button when no metric exists yet', () => {
     render(<AddMetricMenu onAdd={jest.fn()} dataTestSubj="pplBuilderAddAggregation" />);
     const trigger = screen.getByTestId('pplBuilderAddAggregation');
     expect(trigger).toBeInTheDocument();
-    expect(trigger).toHaveTextContent('Add metric');
+    expect(trigger).toHaveTextContent('Add aggregation');
   });
 
   it('collapses to an icon-only trigger once a metric exists', () => {
     render(<AddMetricMenu onAdd={jest.fn()} hasMetrics dataTestSubj="pplBuilderAddAggregation" />);
     const trigger = screen.getByTestId('pplBuilderAddAggregation');
     // Icon trigger uses the label only as an aria-label, not visible text.
-    expect(trigger).toHaveAttribute('aria-label', 'Add metric');
-    expect(trigger).not.toHaveTextContent('Add metric');
+    expect(trigger).toHaveAttribute('aria-label', 'Add aggregation');
+    expect(trigger).not.toHaveTextContent('Add aggregation');
   });
 
   it('opens the aggregation list and fires onAdd with the chosen aggregation id', () => {

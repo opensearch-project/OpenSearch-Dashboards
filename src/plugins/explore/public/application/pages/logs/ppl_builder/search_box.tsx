@@ -8,6 +8,7 @@ import { i18n } from '@osd/i18n';
 import { monaco, setupPPLTokenization } from '@osd/monaco';
 import { CodeEditor } from '../../../../../../opensearch_dashboards_react/public';
 import { analyzeSearchExpression } from './search_completion';
+import { getCommandEnterAction } from '../../../../components/query_panel/query_panel_editor/use_query_panel_editor/command_enter_action';
 
 /** Dedicated Monaco language id for the restricted PPL search-expression box. */
 export const PPL_SEARCH_LANGUAGE_ID = 'pplSearchExpression';
@@ -44,6 +45,8 @@ interface SearchBoxProps {
   onRequestValues: (field: string) => Promise<string[]>;
   /** Commit the edited search-expression text. */
   onChange: (text: string) => void;
+  /** Execute the query (Cmd/Ctrl+Enter), mirroring the code-mode editor. */
+  onRun?: () => void;
 }
 
 /**
@@ -60,11 +63,14 @@ export const SearchBox: React.FC<SearchBoxProps> = ({
   fieldNames,
   onRequestValues,
   onChange,
+  onRun,
 }) => {
   const fieldNamesRef = useRef(fieldNames);
   fieldNamesRef.current = fieldNames;
   const onRequestValuesRef = useRef(onRequestValues);
   onRequestValuesRef.current = onRequestValues;
+  const onRunRef = useRef(onRun);
+  onRunRef.current = onRun;
 
   const suggestTimerRef = useRef<number | undefined>(undefined);
 
@@ -91,6 +97,11 @@ export const SearchBox: React.FC<SearchBoxProps> = ({
       syncHeight(editor);
 
       editor.onDidContentSizeChange(() => syncHeight(editor));
+
+      // Cmd/Ctrl+Enter runs the query, matching the code-mode editor. Reuses the
+      // shared action so the keybinding and suggest-widget-close behavior stay
+      // identical; the run itself is delegated to the parent via onRun.
+      editor.addAction(getCommandEnterAction(() => onRunRef.current?.()));
 
       // Keep suggestions available at all times: re-open the widget after any
       // content change (typing, delete/backspace) and after the caret moves by
@@ -165,8 +176,17 @@ export const SearchBox: React.FC<SearchBoxProps> = ({
         try {
           const values = await onRequestValuesRef.current(analysis.suggestValuesForField);
           for (const v of values) {
-            const needsQuote = /[\s"'()=<>!,]/.test(v) || v === '';
-            const insert = needsQuote ? `"${v.replace(/"/g, '\\"')}"` : v;
+            // PPL requires string literals to be quoted; only bare numeric and
+            // boolean literals may be unquoted. A value like `www.opensearch.org`
+            // has no whitespace but is still a string, so an unquoted
+            // `host=www.opensearch.org` is invalid PPL — it must be
+            // `host='www.opensearch.org'`. Quote everything that isn't a plain
+            // number/boolean, using single quotes (PPL's string delimiter) and
+            // escaping any embedded backslashes/quotes.
+            const isNumeric = v.trim() !== '' && v === v.trim() && Number.isFinite(Number(v));
+            const isBoolean = v === 'true' || v === 'false';
+            const insert =
+              isNumeric || isBoolean ? v : `'${v.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
             suggestions.push({
               label: v,
               kind: monaco.languages.CompletionItemKind.Value,

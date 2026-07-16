@@ -96,6 +96,12 @@ jest.mock('../../../components/query_panel/query_panel_generated_query', () => (
 jest.mock('../../../components/query_panel/actions/ppl_execute_query_action', () => ({
   usePPLExecuteQueryAction: jest.fn(),
 }));
+// The run action (Cmd/Ctrl+Enter) is imported from the query_editor actions
+// barrel, which transitively pulls in createHistogramConfigs (data plugin) at
+// module load. Stub it to a no-op thunk so that chain isn't required here.
+jest.mock('../../utils/state_management/actions/query_editor', () => ({
+  onEditorRunActionCreator: jest.fn(() => () => {}),
+}));
 // Shared editor-text state so the Code editor round-trip is realistic: whatever
 // the builder pushes via setEditorText is what getEditorText reads back on a
 // Code -> Builder toggle (in the real app the editor is seeded with the
