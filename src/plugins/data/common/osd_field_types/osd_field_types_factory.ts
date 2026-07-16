@@ -66,23 +66,19 @@ export const createOsdFieldTypes = (): OsdFieldType[] => [
       OPENSEARCH_FIELD_TYPES.SHORT,
       OPENSEARCH_FIELD_TYPES.BYTE,
       OPENSEARCH_FIELD_TYPES.TOKEN_COUNT,
-      OPENSEARCH_FIELD_TYPES.INTEGER_RANGE,
-      OPENSEARCH_FIELD_TYPES.FLOAT_RANGE,
-      OPENSEARCH_FIELD_TYPES.LONG_RANGE,
-      OPENSEARCH_FIELD_TYPES.DOUBLE_RANGE,
     ],
   }),
   new OsdFieldType({
     name: OSD_FIELD_TYPES.DATE,
     sortable: true,
     filterable: true,
-    esTypes: [OPENSEARCH_FIELD_TYPES.DATE, OPENSEARCH_FIELD_TYPES.DATE_NANOS, OPENSEARCH_FIELD_TYPES.DATE_RANGE],
+    esTypes: [OPENSEARCH_FIELD_TYPES.DATE, OPENSEARCH_FIELD_TYPES.DATE_NANOS],
   }),
   new OsdFieldType({
     name: OSD_FIELD_TYPES.IP,
     sortable: true,
     filterable: true,
-    esTypes: [OPENSEARCH_FIELD_TYPES.IP, OPENSEARCH_FIELD_TYPES.IP_RANGE],
+    esTypes: [OPENSEARCH_FIELD_TYPES.IP],
   }),
   new OsdFieldType({
     name: OSD_FIELD_TYPES.BOOLEAN,
@@ -122,6 +118,23 @@ export const createOsdFieldTypes = (): OsdFieldType[] => [
     name: OSD_FIELD_TYPES.HISTOGRAM,
     filterable: true,
     esTypes: [OPENSEARCH_FIELD_TYPES.HISTOGRAM],
+  }),
+  new OsdFieldType({
+    name: OSD_FIELD_TYPES.NUMBER_RANGE,
+    esTypes: [
+      OPENSEARCH_FIELD_TYPES.INTEGER_RANGE,
+      OPENSEARCH_FIELD_TYPES.FLOAT_RANGE,
+      OPENSEARCH_FIELD_TYPES.LONG_RANGE,
+      OPENSEARCH_FIELD_TYPES.DOUBLE_RANGE,
+    ],
+  }),
+  new OsdFieldType({
+    name: OSD_FIELD_TYPES.DATE_RANGE,
+    esTypes: [OPENSEARCH_FIELD_TYPES.DATE_RANGE],
+  }),
+  new OsdFieldType({
+    name: OSD_FIELD_TYPES.IP_RANGE,
+    esTypes: [OPENSEARCH_FIELD_TYPES.IP_RANGE],
   }),
   new OsdFieldType({
     name: OSD_FIELD_TYPES.CONFLICT,
