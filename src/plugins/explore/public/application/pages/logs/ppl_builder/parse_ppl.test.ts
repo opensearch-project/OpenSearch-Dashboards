@@ -3,13 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { parsePPL } from './parse_ppl';
+import { parsePPL, parseWherePredicate } from './parse_ppl';
 import { buildPPL } from './build_ppl';
 import { PPLBuilderState } from './types';
 
 // Normalize away builder-generated ids so round-trip comparisons are stable.
 const stripIds = (state: PPLBuilderState) => ({
   searchExpression: state.searchExpression,
+  filters: state.filters.map(({ id, ...rest }) => rest),
   aggregations: state.aggregations.map(({ id, ...rest }) => rest),
   groupBy: state.groupBy,
   sort: state.sort,
@@ -92,7 +93,6 @@ describe('parsePPL — canBuild gating', () => {
     ['dedup command', 'source = logs | dedup field'],
     ['head command', 'source = logs | head 10'],
     ['eval command', 'source = logs | eval x = a + b'],
-    ['where command', "source = logs | where a = '1'"],
     ['aliased agg', 'source = logs | stats count() as total'],
     ['stats then more', 'source = logs | stats count() | head 1'],
     // A scalar function the builder doesn't model (multi-field concat) can't be
@@ -136,31 +136,126 @@ describe('parsePPL — canBuild gating', () => {
   });
 });
 
+describe('parseWherePredicate', () => {
+  const strip = (p: string) => {
+    const f = parseWherePredicate(p);
+    return f && { field: f.field, operator: f.operator, values: f.values };
+  };
+
+  it('parses is / is_not', () => {
+    expect(strip("`response` = '200'")).toEqual({
+      field: 'response',
+      operator: 'is',
+      values: ['200'],
+    });
+    expect(strip('`response` != 200')).toEqual({
+      field: 'response',
+      operator: 'is_not',
+      values: ['200'],
+    });
+  });
+
+  it('parses is_one_of / is_not_one_of', () => {
+    expect(strip('`status` = 200 OR `status` = 404')).toEqual({
+      field: 'status',
+      operator: 'is_one_of',
+      values: ['200', '404'],
+    });
+    expect(strip("`m` != 'GET' AND `m` != 'POST'")).toEqual({
+      field: 'm',
+      operator: 'is_not_one_of',
+      values: ['GET', 'POST'],
+    });
+  });
+
+  it('parses is_between / is_not_between', () => {
+    expect(strip('`bytes` >= 1 AND `bytes` < 9')).toEqual({
+      field: 'bytes',
+      operator: 'is_between',
+      values: ['1', '9'],
+    });
+    expect(strip('`bytes` < 1 OR `bytes` >= 9')).toEqual({
+      field: 'bytes',
+      operator: 'is_not_between',
+      values: ['1', '9'],
+    });
+  });
+
+  it('parses exists / not_exists', () => {
+    expect(strip('ISNOTNULL(`user`)')).toEqual({ field: 'user', operator: 'exists', values: [] });
+    expect(strip('ISNULL(`user`)')).toEqual({ field: 'user', operator: 'not_exists', values: [] });
+  });
+
+  it('returns null for a shape the builder cannot model', () => {
+    // Mixed AND/OR, cross-field comparison, and an arbitrary function.
+    expect(parseWherePredicate('`a` = 1 AND `b` = 2 OR `c` = 3')).toBeNull();
+    expect(parseWherePredicate('`a` = `b`')).toBeNull();
+    expect(parseWherePredicate('LIKE(`a`, "x%")')).toBeNull();
+  });
+});
+
+describe('parsePPL — where filters', () => {
+  it('parses a leading where filter into state.filters', () => {
+    const result = parsePPL("source = logs | where `response` = '200'");
+    expect(result.canBuild).toBe(true);
+    expect(result.state.filters).toHaveLength(1);
+    expect(result.state.filters[0]).toMatchObject({
+      field: 'response',
+      operator: 'is',
+      values: ['200'],
+    });
+  });
+
+  it('parses multiple where filters before a stats clause', () => {
+    const result = parsePPL(
+      'source = logs | where `response` = 500 | where ISNOTNULL(`user`) | stats count() by service'
+    );
+    expect(result.canBuild).toBe(true);
+    expect(result.state.filters.map((f) => f.operator)).toEqual(['is', 'exists']);
+    expect(result.state.aggregations).toHaveLength(1);
+  });
+
+  it('falls back to code mode for a where the builder cannot model', () => {
+    expect(parsePPL('source = logs | where `a` = 1 AND `b` = 2 OR `c` = 3').canBuild).toBe(false);
+  });
+
+  it('falls back to code mode for a where after stats (post-aggregation filter)', () => {
+    expect(
+      parsePPL('source = logs | stats count() by service | where `count()` > 5').canBuild
+    ).toBe(false);
+  });
+});
+
 describe('parsePPL / buildPPL round-trip', () => {
   const cases: PPLBuilderState[] = [
     {
       searchExpression: 'service="web-store"',
+      filters: [],
       aggregations: [],
       groupBy: { fields: [] },
     },
     {
       searchExpression: 'level!="DEBUG" AND timeout',
+      filters: [],
       aggregations: [],
       groupBy: { fields: [] },
     },
     {
       searchExpression: 'status>=500',
+      filters: [],
       aggregations: [{ id: 'a', fn: 'count' }],
       groupBy: { fields: [], span: { field: '@timestamp', interval: '1m', auto: false } },
     },
     {
       searchExpression: '',
+      filters: [],
       aggregations: [{ id: 'a', fn: 'avg', field: 'bytes' }],
       groupBy: { fields: ['service'] },
     },
     // Expanded aggregation functions.
     {
       searchExpression: '',
+      filters: [],
       aggregations: [
         { id: 'a', fn: 'distinct_count', field: 'user.id' },
         { id: 'b', fn: 'median', field: 'latency' },
@@ -171,6 +266,7 @@ describe('parsePPL / buildPPL round-trip', () => {
     // Scalar function wrapping a field.
     {
       searchExpression: '',
+      filters: [],
       aggregations: [
         {
           id: 'a',
@@ -184,6 +280,7 @@ describe('parsePPL / buildPPL round-trip', () => {
     // Scalar chain with an extra param.
     {
       searchExpression: '',
+      filters: [],
       aggregations: [
         {
           id: 'a',
@@ -200,6 +297,7 @@ describe('parsePPL / buildPPL round-trip', () => {
     // Scalar function on a percentile field argument.
     {
       searchExpression: '',
+      filters: [],
       aggregations: [
         {
           id: 'a',
@@ -214,6 +312,7 @@ describe('parsePPL / buildPPL round-trip', () => {
     // Descending sort on an aggregation column (back-quoted on emit).
     {
       searchExpression: '',
+      filters: [],
       aggregations: [{ id: 'a', fn: 'count' }],
       groupBy: { fields: ['service'] },
       sort: { column: 'count()', desc: true },
@@ -221,6 +320,7 @@ describe('parsePPL / buildPPL round-trip', () => {
     // Ascending sort on a group-by field.
     {
       searchExpression: 'ERROR',
+      filters: [],
       aggregations: [{ id: 'a', fn: 'avg', field: 'bytes' }],
       groupBy: { fields: ['service'] },
       sort: { column: 'service', desc: false },
@@ -228,9 +328,56 @@ describe('parsePPL / buildPPL round-trip', () => {
     // Sort on raw rows (no aggregation) — its own pipe operation.
     {
       searchExpression: 'ERROR',
+      filters: [],
       aggregations: [],
       groupBy: { fields: [] },
       sort: { column: 'bytes', desc: true },
+    },
+    // A single `is` filter compiled to a `where` stage.
+    {
+      searchExpression: '',
+      filters: [{ id: 'f1', field: 'response', operator: 'is', values: ['200'] }],
+      aggregations: [],
+      groupBy: { fields: [] },
+    },
+    // Multiple filters, string value with a quote to escape.
+    {
+      searchExpression: 'ERROR',
+      filters: [
+        { id: 'f1', field: 'service', operator: 'is_not', values: ["o'brien"] },
+        { id: 'f2', field: 'status', operator: 'is_one_of', values: ['200', '404'] },
+      ],
+      aggregations: [],
+      groupBy: { fields: [] },
+    },
+    // is_not_one_of + exists.
+    {
+      searchExpression: '',
+      filters: [
+        { id: 'f1', field: 'method', operator: 'is_not_one_of', values: ['GET', 'POST'] },
+        { id: 'f2', field: 'user', operator: 'exists', values: [] },
+      ],
+      aggregations: [],
+      groupBy: { fields: [] },
+    },
+    // Range filters + not_exists.
+    {
+      searchExpression: '',
+      filters: [
+        { id: 'f1', field: 'bytes', operator: 'is_between', values: ['100', '500'] },
+        { id: 'f2', field: 'latency', operator: 'is_not_between', values: ['10', '20'] },
+        { id: 'f3', field: 'agent', operator: 'not_exists', values: [] },
+      ],
+      aggregations: [],
+      groupBy: { fields: [] },
+    },
+    // Filters combined with a stats + sort.
+    {
+      searchExpression: 'ERROR',
+      filters: [{ id: 'f1', field: 'response', operator: 'is', values: ['500'] }],
+      aggregations: [{ id: 'a', fn: 'count' }],
+      groupBy: { fields: ['service'] },
+      sort: { column: 'count()', desc: true },
     },
   ];
 

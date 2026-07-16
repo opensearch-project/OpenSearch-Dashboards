@@ -10,12 +10,17 @@ import {
   ScalarCall,
   Sort,
   TimeBucket,
+  WhereFilter,
   emptyState,
   nextAggId,
+  nextFilterId,
 } from './types';
 
 export type BuilderAction =
   | { type: 'SET_SEARCH_EXPRESSION'; searchExpression: string }
+  | { type: 'ADD_FILTER'; filter?: Partial<WhereFilter> }
+  | { type: 'SET_FILTER'; index: number; filter: Partial<WhereFilter> }
+  | { type: 'REMOVE_FILTER'; index: number }
   | { type: 'ADD_AGGREGATION'; agg?: Partial<Aggregation> }
   | { type: 'SET_AGGREGATION'; index: number; agg: Partial<Aggregation> }
   | { type: 'REMOVE_AGGREGATION'; index: number }
@@ -40,6 +45,24 @@ export function builderReducer(state: PPLBuilderState, action: BuilderAction): P
   switch (action.type) {
     case 'SET_SEARCH_EXPRESSION':
       return { ...state, searchExpression: action.searchExpression };
+    case 'ADD_FILTER':
+      return {
+        ...state,
+        filters: [
+          ...state.filters,
+          { id: nextFilterId(), field: '', operator: 'is', values: [], ...action.filter },
+        ],
+      };
+    case 'SET_FILTER': {
+      const filters = [...state.filters];
+      filters[action.index] = { ...filters[action.index], ...action.filter };
+      return { ...state, filters };
+    }
+    case 'REMOVE_FILTER':
+      return {
+        ...state,
+        filters: state.filters.filter((_, i) => i !== action.index),
+      };
     case 'ADD_AGGREGATION':
       return {
         ...state,
@@ -198,6 +221,79 @@ function compileValidSort(state: PPLBuilderState): string | null {
 }
 
 /**
+ * Back-quote a field name, dropping any `.keyword` multi-field suffix. The PPL
+ * engine appends `.keyword` itself when needed, and `FilterUtils.toPredicate`
+ * strips it too, so this keeps our emitted predicate byte-identical to the one a
+ * sidebar-added filter produces.
+ */
+function whereField(field: string): string {
+  return `\`${field.replace(/\.keyword$/, '')}\``;
+}
+
+// A bare numeric literal is emitted unquoted (matching how `toPredicate` renders
+// a numeric phrase value); anything else is quoted as a PPL string literal with
+// `'` escaped to `''`. Emitting numerics bare keeps builder output identical to
+// the sidebar's `| where` command so the two round-trip and dedupe cleanly.
+const NUMERIC_LITERAL_RE = /^-?\d+(\.\d+)?$/;
+
+function whereValue(value: string): string {
+  const trimmed = value.trim();
+  if (NUMERIC_LITERAL_RE.test(trimmed)) return trimmed;
+  return `'${trimmed.replace(/'/g, "''")}'`;
+}
+
+/**
+ * Compile one structured filter to a PPL `where` predicate, or null when it is
+ * incomplete (missing field or required values) so it is skipped — the same way
+ * a fieldless metric is dropped rather than emitting invalid PPL. The emitted
+ * shapes mirror `FilterUtils.toPredicate` exactly so a filter added via the
+ * field sidebar round-trips into the same chip.
+ */
+export function compileWhereFilter(filter: WhereFilter): string | null {
+  const field = filter.field?.trim();
+  if (!field) return null;
+  const fq = whereField(field);
+  const vals = (filter.values ?? []).map((v) => (v ?? '').trim());
+
+  switch (filter.operator) {
+    case 'is':
+      return vals[0] ? `${fq} = ${whereValue(vals[0])}` : null;
+    case 'is_not':
+      return vals[0] ? `${fq} != ${whereValue(vals[0])}` : null;
+    case 'is_one_of': {
+      const present = vals.filter(Boolean);
+      if (present.length === 0) return null;
+      return present.map((v) => `${fq} = ${whereValue(v)}`).join(' OR ');
+    }
+    case 'is_not_one_of': {
+      const present = vals.filter(Boolean);
+      if (present.length === 0) return null;
+      return present.map((v) => `${fq} != ${whereValue(v)}`).join(' AND ');
+    }
+    case 'is_between': {
+      const [gte, lt] = vals;
+      const parts: string[] = [];
+      if (gte) parts.push(`${fq} >= ${whereValue(gte)}`);
+      if (lt) parts.push(`${fq} < ${whereValue(lt)}`);
+      return parts.length > 0 ? parts.join(' AND ') : null;
+    }
+    case 'is_not_between': {
+      const [gte, lt] = vals;
+      const parts: string[] = [];
+      if (gte) parts.push(`${fq} < ${whereValue(gte)}`);
+      if (lt) parts.push(`${fq} >= ${whereValue(lt)}`);
+      return parts.length > 0 ? parts.join(' OR ') : null;
+    }
+    case 'exists':
+      return `ISNOTNULL(${fq})`;
+    case 'not_exists':
+      return `ISNULL(${fq})`;
+    default:
+      return null;
+  }
+}
+
+/**
  * Serialize builder state to a **source-less** PPL query — just the user's
  * search expression plus any trailing `| stats … by …`. The leading
  * `source = <index>` clause is deliberately omitted: it is the dataset's
@@ -211,6 +307,14 @@ export function buildPPL(state: PPLBuilderState): string {
   const searchExpr = (state.searchExpression || '').trim();
 
   const parts: string[] = searchExpr ? [searchExpr] : [];
+
+  // Structured filters come right after the search expression and before any
+  // stats, each as its own `where` pipe stage — matching where the field-sidebar
+  // filter action (`PPLFilterUtils`) inserts them (position 1, after source).
+  for (const filter of state.filters) {
+    const predicate = compileWhereFilter(filter);
+    if (predicate) parts.push(`where ${predicate}`);
+  }
 
   if (state.aggregations.length > 0) {
     const aggStr = state.aggregations

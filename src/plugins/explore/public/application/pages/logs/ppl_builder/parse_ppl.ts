@@ -11,8 +11,11 @@ import {
   PPLBuilderState,
   ScalarCall,
   Sort,
+  WhereFilter,
+  WhereOperator,
   emptyState,
   nextAggId,
+  nextFilterId,
 } from './types';
 import { AGG_FUNCTIONS, SCALAR_FN_IDS, SCALAR_FN_MAP } from './operations';
 
@@ -152,6 +155,175 @@ function parseStatsByClause(byCtx: any, state: PPLBuilderState): boolean {
   return true;
 }
 
+// A single comparison term inside a where predicate, e.g. `` `status` >= 200 ``.
+const COMPARISON_RE = /^\s*`?([\w.@-]+)`?\s*(=|!=|>=|<=|<|>)\s*(.+?)\s*$/;
+
+/** Unquote a PPL value literal: strip surrounding quotes and unescape `''`. */
+function unquoteValue(text: string): string {
+  const t = text.trim();
+  if ((t[0] === "'" || t[0] === '"') && t.endsWith(t[0]) && t.length >= 2) {
+    return t.slice(1, -1).replace(/''/g, "'").replace(/""/g, '"');
+  }
+  return t;
+}
+
+type BoolSplit =
+  | { kind: 'single' } // no top-level boolean operator — a lone comparison
+  | { kind: 'mixed' } // top level mixes AND and OR — not a modeled shape
+  | { kind: 'split'; joiner: 'AND' | 'OR'; operands: string[] };
+
+/**
+ * Split a where predicate on a single top-level boolean operator (` AND ` or
+ * ` OR `), respecting parentheses and string literals. Returns `single` when the
+ * predicate has no top-level boolean (a lone comparison), `mixed` when it mixes
+ * AND and OR (a shape the builder can't model), or the joiner + operands when it
+ * is a flat join of one operator — which is exactly the shape our known
+ * multi-term filter forms take.
+ */
+function splitTopLevelBool(text: string): BoolSplit {
+  const operands: string[] = [];
+  let depth = 0;
+  let quote = '';
+  let joiner: 'AND' | 'OR' | null = null;
+  let start = 0;
+  const upper = text.toUpperCase();
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (quote) {
+      if (c === quote) quote = '';
+      continue;
+    }
+    if (c === "'" || c === '"') {
+      quote = c;
+      continue;
+    }
+    if (c === '(') depth++;
+    else if (c === ')') depth--;
+    else if (depth === 0) {
+      const isAnd = upper.startsWith(' AND ', i);
+      const isOr = upper.startsWith(' OR ', i);
+      if (isAnd || isOr) {
+        const here: 'AND' | 'OR' = isAnd ? 'AND' : 'OR';
+        // A predicate that mixes AND and OR at the top level isn't a shape the
+        // builder models — signal so the caller falls back to code mode.
+        if (joiner && joiner !== here) return { kind: 'mixed' };
+        joiner = here;
+        operands.push(text.slice(start, i));
+        i += isAnd ? 4 : 3;
+        start = i + 1;
+      }
+    }
+  }
+  operands.push(text.slice(start));
+  if (!joiner) return { kind: 'single' };
+  return { kind: 'split', joiner, operands };
+}
+
+interface Comparison {
+  field: string;
+  op: string;
+  value: string;
+}
+
+function parseComparison(text: string): Comparison | null {
+  const m = text.trim().match(COMPARISON_RE);
+  if (!m) return null;
+  const rhs = m[3].trim();
+  // Reject a back-quoted identifier on the right-hand side (a field-to-field
+  // comparison like `` `a` = `b` ``): the builder only emits literal values, so
+  // this shape isn't ours to model — fall back to code mode.
+  if (rhs.startsWith('`')) return null;
+  return { field: m[1].replace(/\.keyword$/, ''), op: m[2], value: unquoteValue(rhs) };
+}
+
+/**
+ * Reconstruct a structured {@link WhereFilter} from a `where` predicate string,
+ * or null when the predicate isn't one of the shapes the builder emits (see
+ * `compileWhereFilter` / `FilterUtils.toPredicate`). Returning null makes the
+ * caller fall back to code mode, preserving today's safety for arbitrary
+ * boolean expressions the visual builder can't represent.
+ */
+export function parseWherePredicate(text: string): WhereFilter | null {
+  const trimmed = text.trim();
+
+  // exists / not_exists — ISNOTNULL(`f`) / ISNULL(`f`).
+  const existsMatch = trimmed.match(/^(ISNOTNULL|ISNULL)\(\s*`?([\w.@-]+)`?\s*\)$/i);
+  if (existsMatch) {
+    const operator: WhereOperator = /^ISNOTNULL$/i.test(existsMatch[1]) ? 'exists' : 'not_exists';
+    return {
+      id: nextFilterId(),
+      field: existsMatch[2].replace(/\.keyword$/, ''),
+      operator,
+      values: [],
+    };
+  }
+
+  const split = splitTopLevelBool(trimmed);
+
+  // A top level mixing AND and OR isn't a shape the builder models.
+  if (split.kind === 'mixed') return null;
+
+  // Single comparison — is / is_not.
+  if (split.kind === 'single') {
+    const cmp = parseComparison(trimmed);
+    if (!cmp) return null;
+    if (cmp.op === '=') {
+      return { id: nextFilterId(), field: cmp.field, operator: 'is', values: [cmp.value] };
+    }
+    if (cmp.op === '!=') {
+      return { id: nextFilterId(), field: cmp.field, operator: 'is_not', values: [cmp.value] };
+    }
+    return null; // a lone range bound isn't a modeled shape
+  }
+
+  const comparisons = split.operands.map(parseComparison);
+  if (comparisons.some((c) => c === null)) return null;
+  const cmps = comparisons as Comparison[];
+
+  // All terms must reference the same field for a modeled multi-term filter.
+  const field = cmps[0].field;
+  if (cmps.some((c) => c.field !== field)) return null;
+  const ops = cmps.map((c) => c.op);
+
+  // is_between: `f >= gte AND f < lt`
+  if (split.joiner === 'AND' && ops.length === 2 && ops[0] === '>=' && ops[1] === '<') {
+    return {
+      id: nextFilterId(),
+      field,
+      operator: 'is_between',
+      values: [cmps[0].value, cmps[1].value],
+    };
+  }
+  // is_not_between: `f < gte OR f >= lt`
+  if (split.joiner === 'OR' && ops.length === 2 && ops[0] === '<' && ops[1] === '>=') {
+    return {
+      id: nextFilterId(),
+      field,
+      operator: 'is_not_between',
+      values: [cmps[0].value, cmps[1].value],
+    };
+  }
+  // is_one_of: `f = a OR f = b [OR …]`
+  if (split.joiner === 'OR' && ops.every((op) => op === '=')) {
+    return {
+      id: nextFilterId(),
+      field,
+      operator: 'is_one_of',
+      values: cmps.map((c) => c.value),
+    };
+  }
+  // is_not_one_of: `f != a AND f != b [AND …]`
+  if (split.joiner === 'AND' && ops.every((op) => op === '!=')) {
+    return {
+      id: nextFilterId(),
+      field,
+      operator: 'is_not_one_of',
+      values: cmps.map((c) => c.value),
+    };
+  }
+  return null;
+}
+
 /**
  * Parse a `sort` command into a single Sort, or null when it uses a shape the
  * builder can't model (a result limit, more than one column, or a type-cast
@@ -276,18 +448,35 @@ export function parsePPL(query: string): PPLParseResult {
       }
     }
 
-    // Beyond the source, the builder models a single `stats` command and/or a
-    // single trailing `sort`. Sort is its own pipe operation: it may appear
-    // alone (sorting raw search rows) or after stats (sorting the aggregated
-    // output), but must come last — nothing the builder models follows a sort.
+    // Beyond the source, the builder models leading `where` filters, a single
+    // `stats` command, and/or a single trailing `sort`. Sort is its own pipe
+    // operation: it may appear alone (sorting raw search rows) or after stats
+    // (sorting the aggregated output), but must come last — nothing the builder
+    // models follows a sort. `where` filters must precede stats/sort: a `where`
+    // after aggregation is post-aggregation (HAVING-like) filtering the builder
+    // can't represent, so it falls back to code mode.
     const commands = queryStmt.commands ? queryStmt.commands() : [];
     const commandList = Array.isArray(commands) ? commands : commands ? [commands] : [];
     let seenStats = false;
     let seenSort = false;
 
     for (const cmd of commandList) {
+      const whereCtx = cmd.whereCommand && cmd.whereCommand();
       const statsCtx = cmd.statsCommand && cmd.statsCommand();
       const sortCtx = cmd.sortCommand && cmd.sortCommand();
+
+      if (whereCtx) {
+        // Post-aggregation / post-sort `where` isn't a builder-representable filter.
+        if (seenStats || seenSort) return fallback;
+        const exprCtx = whereCtx.logicalExpression && whereCtx.logicalExpression();
+        const range = exprCtx ? exprRange(exprCtx) : null;
+        // Slice the predicate verbatim so quoting/spacing round-trips faithfully.
+        const predicateText = range ? query.slice(range[0], range[1] + 1) : '';
+        const filter = parseWherePredicate(predicateText);
+        if (!filter) return fallback;
+        state.filters.push(filter);
+        continue;
+      }
 
       if (sortCtx) {
         if (seenSort) return fallback;

@@ -3,13 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { emptyState, nextAggId } from './types';
+import { emptyState, nextAggId, nextFilterId } from './types';
 
 describe('emptyState', () => {
   it('returns a blank builder state', () => {
     const state = emptyState();
     expect(state).toEqual({
       searchExpression: '',
+      filters: [],
       aggregations: [],
       groupBy: { fields: [] },
     });
@@ -45,5 +46,14 @@ describe('nextAggId', () => {
     const n1 = Number(first.slice('ag-'.length));
     const n2 = Number(second.slice('ag-'.length));
     expect(n2).toBe(n1 + 1);
+  });
+});
+
+describe('nextFilterId', () => {
+  it('produces the flt- prefixed pattern and is unique per call', () => {
+    const first = nextFilterId();
+    const second = nextFilterId();
+    expect(first).toMatch(/^flt-\d+$/);
+    expect(first).not.toBe(second);
   });
 });

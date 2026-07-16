@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { buildPPL, builderReducer, sortableColumns } from './build_ppl';
-import { PPLBuilderState, emptyState } from './types';
+import { buildPPL, builderReducer, compileWhereFilter, sortableColumns } from './build_ppl';
+import { PPLBuilderState, WhereFilter, emptyState } from './types';
 
 describe('buildPPL — source-less output', () => {
   it('returns an empty string when the state is empty', () => {
@@ -208,6 +208,107 @@ describe('buildPPL — source-less output', () => {
   });
 });
 
+describe('compileWhereFilter', () => {
+  const f = (over: Partial<WhereFilter>): WhereFilter => ({
+    id: 'f',
+    field: 'response',
+    operator: 'is',
+    values: [],
+    ...over,
+  });
+
+  it('compiles is / is_not with a quoted string value', () => {
+    expect(compileWhereFilter(f({ operator: 'is', values: ['ok'] }))).toBe("`response` = 'ok'");
+    expect(compileWhereFilter(f({ operator: 'is_not', values: ['ok'] }))).toBe(
+      "`response` != 'ok'"
+    );
+  });
+
+  it('emits a bare numeric value unquoted', () => {
+    expect(compileWhereFilter(f({ operator: 'is', values: ['200'] }))).toBe('`response` = 200');
+  });
+
+  it('escapes single quotes in a string value', () => {
+    expect(compileWhereFilter(f({ field: 'user', operator: 'is', values: ["o'brien"] }))).toBe(
+      "`user` = 'o''brien'"
+    );
+  });
+
+  it('drops the .keyword suffix from the field', () => {
+    expect(
+      compileWhereFilter(f({ field: 'service.keyword', operator: 'is', values: ['web'] }))
+    ).toBe("`service` = 'web'");
+  });
+
+  it('compiles is_one_of / is_not_one_of', () => {
+    expect(compileWhereFilter(f({ operator: 'is_one_of', values: ['200', '404'] }))).toBe(
+      '`response` = 200 OR `response` = 404'
+    );
+    expect(compileWhereFilter(f({ operator: 'is_not_one_of', values: ['200', '404'] }))).toBe(
+      '`response` != 200 AND `response` != 404'
+    );
+  });
+
+  it('compiles is_between / is_not_between', () => {
+    expect(
+      compileWhereFilter(f({ field: 'bytes', operator: 'is_between', values: ['1', '9'] }))
+    ).toBe('`bytes` >= 1 AND `bytes` < 9');
+    expect(
+      compileWhereFilter(f({ field: 'bytes', operator: 'is_not_between', values: ['1', '9'] }))
+    ).toBe('`bytes` < 1 OR `bytes` >= 9');
+  });
+
+  it('compiles exists / not_exists', () => {
+    expect(compileWhereFilter(f({ field: 'user', operator: 'exists', values: [] }))).toBe(
+      'ISNOTNULL(`user`)'
+    );
+    expect(compileWhereFilter(f({ field: 'user', operator: 'not_exists', values: [] }))).toBe(
+      'ISNULL(`user`)'
+    );
+  });
+
+  it('returns null for an incomplete filter (skipped, like a fieldless metric)', () => {
+    expect(compileWhereFilter(f({ field: '', operator: 'is', values: ['x'] }))).toBeNull();
+    expect(compileWhereFilter(f({ operator: 'is', values: [] }))).toBeNull();
+    expect(compileWhereFilter(f({ operator: 'is_one_of', values: [] }))).toBeNull();
+  });
+});
+
+describe('buildPPL — where filters', () => {
+  it('emits each filter as its own where stage before stats', () => {
+    const state: PPLBuilderState = {
+      ...emptyState(),
+      searchExpression: 'ERROR',
+      filters: [
+        { id: 'f1', field: 'response', operator: 'is', values: ['500'] },
+        { id: 'f2', field: 'user', operator: 'exists', values: [] },
+      ],
+      aggregations: [{ id: 'a', fn: 'count' }],
+      groupBy: { fields: ['service'] },
+    };
+    expect(buildPPL(state)).toBe(
+      'ERROR | where `response` = 500 | where ISNOTNULL(`user`) | stats count() by service'
+    );
+  });
+
+  it('leads with a pipe when a where filter has no search expression', () => {
+    const state: PPLBuilderState = {
+      ...emptyState(),
+      filters: [{ id: 'f1', field: 'response', operator: 'is', values: ['200'] }],
+    };
+    expect(buildPPL(state)).toBe('| where `response` = 200');
+  });
+
+  it('skips incomplete filters', () => {
+    const state: PPLBuilderState = {
+      ...emptyState(),
+      searchExpression: 'ERROR',
+      filters: [{ id: 'f1', field: '', operator: 'is', values: [] }],
+    };
+    expect(buildPPL(state)).toBe('ERROR');
+  });
+});
+
 describe('sortableColumns', () => {
   it('is empty when the query does not aggregate', () => {
     expect(sortableColumns({ ...emptyState(), searchExpression: 'ERROR' })).toEqual([]);
@@ -301,5 +402,57 @@ describe('builderReducer', () => {
     expect(state.sort).toEqual({ column: 'count()', desc: true });
     state = builderReducer(state, { type: 'REMOVE_SORT' });
     expect(state.sort).toBeUndefined();
+  });
+
+  it('adds a filter defaulting to an empty `is`', () => {
+    const state = builderReducer(emptyState(), { type: 'ADD_FILTER' });
+    expect(state.filters).toHaveLength(1);
+    expect(state.filters[0]).toMatchObject({ field: '', operator: 'is', values: [] });
+    expect(state.filters[0].id).toBeTruthy();
+  });
+
+  it('adds a filter with an initial payload', () => {
+    const state = builderReducer(emptyState(), {
+      type: 'ADD_FILTER',
+      filter: { field: 'response', operator: 'is', values: ['200'] },
+    });
+    expect(state.filters[0]).toMatchObject({
+      field: 'response',
+      operator: 'is',
+      values: ['200'],
+    });
+  });
+
+  it('edits a filter by index without touching its id', () => {
+    let state = builderReducer(emptyState(), {
+      type: 'ADD_FILTER',
+      filter: { field: 'response', operator: 'is', values: ['200'] },
+    });
+    const { id } = state.filters[0];
+    state = builderReducer(state, {
+      type: 'SET_FILTER',
+      index: 0,
+      filter: { operator: 'is_not', values: ['404'] },
+    });
+    expect(state.filters[0]).toEqual({
+      id,
+      field: 'response',
+      operator: 'is_not',
+      values: ['404'],
+    });
+  });
+
+  it('removes a filter by index', () => {
+    let state = builderReducer(emptyState(), {
+      type: 'ADD_FILTER',
+      filter: { field: 'a', operator: 'is', values: ['1'] },
+    });
+    state = builderReducer(state, {
+      type: 'ADD_FILTER',
+      filter: { field: 'b', operator: 'is', values: ['2'] },
+    });
+    state = builderReducer(state, { type: 'REMOVE_FILTER', index: 0 });
+    expect(state.filters).toHaveLength(1);
+    expect(state.filters[0].field).toBe('b');
   });
 });

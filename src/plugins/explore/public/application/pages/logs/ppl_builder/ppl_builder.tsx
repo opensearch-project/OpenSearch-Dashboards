@@ -16,6 +16,7 @@ import { SearchBox } from './search_box';
 import { AggregationRow } from './aggregation_row';
 import { SortRow } from './sort_row';
 import { GroupByRow } from './group_by_row';
+import { WhereRow } from './where_row';
 import { AddMetricMenu } from './add_metric_menu';
 import { ModeToggleButton } from './mode_toggle_button';
 import { useFieldData } from './use_field_data';
@@ -155,6 +156,15 @@ export const PPLBuilder: React.FC<PPLBuilderProps> = ({
       </div>
 
       <div className="plqRow plqRow--builder">
+        <WhereRow
+          filters={state.filters}
+          fieldNames={fieldNames}
+          getValues={getValues}
+          dispatch={dispatch}
+        />
+
+        <span className="plqDivider" />
+
         <span className="plqRow__label">
           {i18n.translate('explore.pplBuilder.groupInto', { defaultMessage: 'Group into' })}
         </span>

@@ -457,6 +457,16 @@ $plqControlHeight: 36px;
   flex: 1 1 12px;
 }
 
+// The "where" section: its label, filter chips, and the "Add filter" button laid
+// out as one inline-flex group so they align on the builder row like the group-by
+// controls (which the shared `.plqPill` chip styling already matches).
+.plqWhere {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
 .plqDivider {
   width: 1px;
   align-self: stretch;

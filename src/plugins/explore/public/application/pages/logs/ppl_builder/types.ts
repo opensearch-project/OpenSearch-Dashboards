@@ -69,6 +69,36 @@ export interface GroupBy {
 }
 
 /**
+ * The comparison operators a builder `where` filter can express. These mirror
+ * the Discover filter editor's operators and map 1:1 onto the PPL predicate
+ * shapes emitted by the shared `FilterUtils.toPredicate` (in the
+ * `query_enhancements` plugin), so a filter added via the field sidebar (which
+ * appends a `| where …` command) round-trips back into a builder chip.
+ */
+export type WhereOperator =
+  | 'is'
+  | 'is_not'
+  | 'is_one_of'
+  | 'is_not_one_of'
+  | 'is_between'
+  | 'is_not_between'
+  | 'exists'
+  | 'not_exists';
+
+/**
+ * A single structured `| where` filter. `values` is interpreted by `operator`:
+ * `is`/`is_not` use `values[0]`; `is_one_of`/`is_not_one_of` use the whole list;
+ * `is_between`/`is_not_between` use `[gte, lt]`; `exists`/`not_exists` ignore it.
+ * Each filter compiles to its own `where <predicate>` pipe stage.
+ */
+export interface WhereFilter {
+  id: string;
+  field: string;
+  operator: WhereOperator;
+  values: string[];
+}
+
+/**
  * A single trailing `| sort` key. `column` is the sort target verbatim as it
  * appears in the query's output columns — a bare group-by field (`service`) or
  * an aggregation's compiled expression (`count()`, `avg(bytes)`). `desc` selects
@@ -83,6 +113,9 @@ export interface Sort {
 export interface PPLBuilderState {
   // Raw PPL search-expression text for the "Search for" row (may be empty).
   searchExpression: string;
+  // Structured `| where` filters, each compiled to its own where pipe stage and
+  // rendered as a chip in the "Where" section of the builder.
+  filters: WhereFilter[];
   aggregations: Aggregation[];
   groupBy: GroupBy;
   // Optional trailing `| sort` on one output column; undefined when unsorted.
@@ -92,8 +125,12 @@ export interface PPLBuilderState {
 let aggIdCounter = 0;
 export const nextAggId = (): string => `ag-${++aggIdCounter}`;
 
+let filterIdCounter = 0;
+export const nextFilterId = (): string => `flt-${++filterIdCounter}`;
+
 export const emptyState = (): PPLBuilderState => ({
   searchExpression: '',
+  filters: [],
   aggregations: [],
   groupBy: { fields: [] },
 });
