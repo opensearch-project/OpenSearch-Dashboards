@@ -74,6 +74,7 @@ interface CreateIndexPatternWizardState {
   allIndices: MatchedItem[];
   remoteClustersExist: boolean;
   isInitiallyLoadingIndices: boolean;
+  isServerlessDatasource: boolean;
   toasts: EuiGlobalToastListToast[];
   indexPatternCreationType: IndexPatternCreationConfig;
   selectedTimeField?: string;
@@ -111,6 +112,7 @@ export class CreateIndexPatternWizard extends Component<
       allIndices: [],
       remoteClustersExist: false,
       isInitiallyLoadingIndices,
+      isServerlessDatasource: false,
       toasts: [],
       indexPatternCreationType: context.services.indexPatternManagementStart.creation.getType(type),
       docLinks: context.services.docLinks,
@@ -143,6 +145,20 @@ export class CreateIndexPatternWizard extends Component<
         ]),
       }));
       return errorValue;
+    }
+  };
+
+  checkIfServerlessDatasource = async (dataSourceRef: DataSourceRef) => {
+    try {
+      const dataSource = await this.context.services.savedObjects.client.get(
+        'data-source',
+        dataSourceRef.id
+      );
+      const isServerless =
+        (dataSource.attributes as any).dataSourceEngineType === 'OpenSearch Serverless';
+      this.setState({ isServerlessDatasource: isServerless });
+    } catch {
+      this.setState({ isServerlessDatasource: false });
     }
   };
 
@@ -276,6 +292,7 @@ export class CreateIndexPatternWizard extends Component<
 
   goToNextFromDataSource = (dataSourceRef: DataSourceRef) => {
     this.setState({ isInitiallyLoadingIndices: true, dataSourceRef }, async () => {
+      this.checkIfServerlessDatasource(dataSourceRef);
       this.fetchData();
       this.goToNextStep();
     });
@@ -392,7 +409,8 @@ export class CreateIndexPatternWizard extends Component<
           goToNextStep={this.goToNextFromIndexPattern}
           showSystemIndices={
             this.state.indexPatternCreationType.getShowSystemIndices() &&
-            this.state.step === INDEX_PATTERN_STEP
+            this.state.step === INDEX_PATTERN_STEP &&
+            !this.state.isServerlessDatasource
           }
           dataSourceRef={dataSourceRef}
           stepInfo={stepInfo}

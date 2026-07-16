@@ -49,6 +49,7 @@ interface CreateDatasetWizardState {
   allIndices: MatchedItem[];
   remoteClustersExist: boolean;
   isInitiallyLoadingIndices: boolean;
+  isServerlessDatasource: boolean;
   toasts: EuiGlobalToastListToast[];
   datasetCreationType: DatasetCreationConfig;
   selectedTimeField?: string;
@@ -82,6 +83,7 @@ export class CreateDatasetWizard extends Component<RouteComponentProps, CreateDa
       allIndices: [],
       remoteClustersExist: false,
       isInitiallyLoadingIndices,
+      isServerlessDatasource: false,
       toasts: [],
       datasetCreationType: context.services.datasetManagementStart.creation.getType(type),
       docLinks: context.services.docLinks,
@@ -114,6 +116,20 @@ export class CreateDatasetWizard extends Component<RouteComponentProps, CreateDa
         ]),
       }));
       return errorValue;
+    }
+  };
+
+  checkIfServerlessDatasource = async (dataSourceRef: DataSourceRef) => {
+    try {
+      const dataSource = await this.context.services.savedObjects.client.get(
+        'data-source',
+        dataSourceRef.id
+      );
+      const isServerless =
+        (dataSource.attributes as any).dataSourceEngineType === 'OpenSearch Serverless';
+      this.setState({ isServerlessDatasource: isServerless });
+    } catch {
+      this.setState({ isServerlessDatasource: false });
     }
   };
 
@@ -241,6 +257,7 @@ export class CreateDatasetWizard extends Component<RouteComponentProps, CreateDa
 
   goToNextFromDataSource = (dataSourceRef: DataSourceRef) => {
     this.setState({ isInitiallyLoadingIndices: true, dataSourceRef }, async () => {
+      this.checkIfServerlessDatasource(dataSourceRef);
       this.fetchData();
       this.goToNextStep();
     });
@@ -357,7 +374,8 @@ export class CreateDatasetWizard extends Component<RouteComponentProps, CreateDa
           goToNextStep={this.goToNextFromDataset}
           showSystemIndices={
             this.state.datasetCreationType.getShowSystemIndices() &&
-            this.state.step === INDEX_PATTERN_STEP
+            this.state.step === INDEX_PATTERN_STEP &&
+            !this.state.isServerlessDatasource
           }
           dataSourceRef={dataSourceRef}
           stepInfo={stepInfo}
