@@ -178,6 +178,12 @@ $plqControlHeight: 36px;
       color: $plqSub;
     }
 
+    // No selection yet: the placeholder label reads as muted UI text, not a
+    // chosen value.
+    &__label--placeholder {
+      color: $plqSub;
+    }
+
     // Whole trigger is one button; only the caret tints on hover/focus so the
     // value text stays neutral.
     &:hover &__caret,
@@ -374,7 +380,7 @@ $plqControlHeight: 36px;
     text-align: center;
 
     &::placeholder {
-      color: transparentize($plqInk, 0.4);
+      color: $plqSub;
     }
   }
 }

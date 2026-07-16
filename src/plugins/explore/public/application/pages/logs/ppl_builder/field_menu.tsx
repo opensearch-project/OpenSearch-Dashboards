@@ -4,6 +4,7 @@
  */
 
 import React, { useMemo } from 'react';
+import classNames from 'classnames';
 import { i18n } from '@osd/i18n';
 import { EuiButtonIcon, EuiIcon } from '@elastic/eui';
 import { SearchPopoverMenu, SearchMenuOption } from './search_popover_menu';
@@ -178,7 +179,13 @@ export const FieldMenu: React.FC<FieldMenuProps> = (props) => {
               aria-label={caretAriaLabel ?? placeholder}
               data-test-subj={dataTestSubj}
             >
-              <span className="plqAggTrigger__label">{selectedLabel || placeholder}</span>
+              <span
+                className={classNames('plqAggTrigger__label', {
+                  'plqAggTrigger__label--placeholder': !selectedLabel,
+                })}
+              >
+                {selectedLabel || placeholder}
+              </span>
               <EuiIcon type="arrowDown" size="s" className="plqAggTrigger__caret" />
             </button>
           ),
