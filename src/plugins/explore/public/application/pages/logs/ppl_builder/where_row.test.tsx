@@ -191,6 +191,28 @@ describe('WhereRow', () => {
     });
   });
 
+  it('changes the field from the chip and resets the operator and value', () => {
+    const { dispatch } = renderRow([
+      { id: 'f1', field: 'response', operator: 'is_between', values: ['1', '9'] },
+    ]);
+    fireEvent.click(screen.getByTestId('pplBuilderFilterField-0'));
+    fireEvent.click(screen.getByTestId('pplBuilderFilterFieldOption-service'));
+    expect(dispatch).toHaveBeenCalledWith({
+      type: 'SET_FILTER',
+      index: 0,
+      filter: { field: 'service', operator: 'is', values: [] },
+    });
+  });
+
+  it('does not reset when the picked field is unchanged', () => {
+    const { dispatch } = renderRow([
+      { id: 'f1', field: 'service', operator: 'is', values: ['auth'] },
+    ]);
+    fireEvent.click(screen.getByTestId('pplBuilderFilterField-0'));
+    fireEvent.click(screen.getByTestId('pplBuilderFilterFieldOption-service'));
+    expect(dispatch).not.toHaveBeenCalled();
+  });
+
   it('removes a filter via the chip ✕', () => {
     const { dispatch } = renderRow([
       { id: 'f1', field: 'response', operator: 'is', values: ['200'] },

@@ -371,9 +371,10 @@ const WhereChip: React.FC<{
   filter: WhereFilter;
   index: number;
   fieldType?: string;
+  fieldNames: string[];
   getValues: (field: string) => Promise<string[]>;
   dispatch: React.Dispatch<BuilderAction>;
-}> = ({ filter, index, fieldType, getValues, dispatch }) => {
+}> = ({ filter, index, fieldType, fieldNames, getValues, dispatch }) => {
   const predicate = compileWhereFilter(filter);
   const tooltip = predicate
     ? i18n.translate('explore.pplBuilder.filterChipTooltip', {
@@ -384,6 +385,13 @@ const WhereChip: React.FC<{
         defaultMessage: 'Finish this condition',
       });
 
+  // Changing the field resets the operator and value: the new field may be a
+  // different type whose operators/value editor differ, so a stale operator or
+  // value can't carry over (mirrors the arity reset on an operator change).
+  const setField = (field: string) => {
+    if (field === filter.field) return;
+    dispatch({ type: 'SET_FILTER', index, filter: { field, operator: 'is', values: [] } });
+  };
   const setOperator = (operator: WhereOperator) => {
     const values = operatorArity(operator) === operatorArity(filter.operator) ? filter.values : [];
     dispatch({ type: 'SET_FILTER', index, filter: { operator, values } });
@@ -393,9 +401,27 @@ const WhereChip: React.FC<{
 
   return (
     <span className="plqWhereChip" data-test-subj={`pplBuilderFilterChip-${index}`}>
-      <EuiToolTip content={tooltip} position="top">
-        <span className="plqWhereChip__field">{filter.field}</span>
-      </EuiToolTip>
+      <AddFilterMenu
+        fieldNames={fieldNames}
+        onPick={setField}
+        anchor={(toggle) => (
+          <EuiToolTip content={tooltip} position="top">
+            <button
+              type="button"
+              className="plqWhereChip__field"
+              onClick={toggle}
+              aria-label={i18n.translate('explore.pplBuilder.filterFieldFor', {
+                defaultMessage: 'Field for filter {index}',
+                values: { index: index + 1 },
+              })}
+              data-test-subj={`pplBuilderFilterField-${index}`}
+            >
+              <span>{filter.field}</span>
+              <EuiIcon type="arrowDown" size="s" className="plqWhereChip__caret" />
+            </button>
+          </EuiToolTip>
+        )}
+      />
       <OperatorPopover filter={filter} index={index} fieldType={fieldType} onChange={setOperator} />
       <ChipValues
         filter={filter}
@@ -466,6 +492,7 @@ export const WhereRow: React.FC<WhereRowProps> = ({
           filter={filter}
           index={index}
           fieldType={getFieldType(filter.field)}
+          fieldNames={fieldNames}
           getValues={getValues}
           dispatch={dispatch}
         />
