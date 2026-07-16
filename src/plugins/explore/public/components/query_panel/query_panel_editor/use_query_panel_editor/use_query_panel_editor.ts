@@ -22,7 +22,10 @@ import { useEditorRef } from '../../../../application/hooks';
 import { useLanguageSwitch } from '../../../../application/hooks/editor_hooks/use_switch_language';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../../types';
-import { getEffectiveLanguageForAutoComplete } from '../../../../../../data/public';
+import {
+  getEffectiveLanguageForAutoComplete,
+  runPPLAnalyzeInBackground,
+} from '../../../../../../data/public';
 import { onEditorRunActionCreator } from '../../../../application/utils/state_management/actions/query_editor';
 import { getCommandEnterAction } from './command_enter_action';
 import { getShiftEnterAction } from './shift_enter_action';
@@ -324,7 +327,13 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
   const handleRun = useCallback(() => {
     // @ts-expect-error TS2345 TODO(ts-error): fixme
     dispatch(onEditorRunActionCreator(services, editorTextRef.current));
-  }, [dispatch, services]);
+    runPPLAnalyzeInBackground({
+      query: { query: editorTextRef.current, language: queryLanguage, dataset },
+      http: services.http,
+      timefilter: services.data.query.timefilter.timefilter,
+      onlyIfOpen: true,
+    });
+  }, [dispatch, services, queryLanguage, dataset]);
 
   const editorDidMount = useCallback(
     (editor: IStandaloneCodeEditor) => {

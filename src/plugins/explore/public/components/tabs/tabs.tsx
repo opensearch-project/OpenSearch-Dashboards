@@ -25,6 +25,7 @@ import {
   EXPLORE_PATTERNS_TAB_ID,
   EXPLORE_FIELD_STATS_TAB_ID,
   EXPLORE_METRICS_EXPLORE_TAB_ID,
+  EXPLORE_ANALYZE_TAB_ID,
 } from '../../../common';
 import { DEFAULT_DATA } from '../../../../data/common';
 import { DiscoverUninitialized } from '../../application/legacy/discover/application/components/uninitialized/uninitialized';
@@ -84,6 +85,7 @@ export const ExploreTabs = () => {
   const filteredTabs = useMemo(() => {
     if (flavorId == null) return [];
     return registryTabs.filter((registryTab) => {
+      if (registryTab.id === EXPLORE_ANALYZE_TAB_ID) return false;
       const registeredFlavor = registryTab.flavor.includes(flavorId);
       const isPatternsTab = registryTab.id === EXPLORE_PATTERNS_TAB_ID;
       const isFieldStatsTab = registryTab.id === EXPLORE_FIELD_STATS_TAB_ID;

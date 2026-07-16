@@ -34,6 +34,7 @@ export class ExplorePlugin implements Plugin<ExplorePluginSetup, ExplorePluginSt
       explore: {
         discoverTracesEnabled: false,
         discoverMetricsEnabled: false,
+        pplAnalyzeEnabled: false,
       },
     }));
 
@@ -56,11 +57,12 @@ export class ExplorePlugin implements Plugin<ExplorePluginSetup, ExplorePluginSt
             ...(capabilities.explore || {}),
             discoverTracesEnabled: config.discoverTraces?.enabled ?? false,
             discoverMetricsEnabled: config.discoverMetrics?.enabled ?? false,
+            pplAnalyzeEnabled: config.pplAnalyze?.enabled ?? false,
           },
         };
       } catch (error) {
-        this.logger.error('Failed to load explore dynamic config, using defaults', error);
-        // Keep defaults from provider (false for both flags)
+        this.logger.debug('Failed to load explore dynamic config, using defaults');
+        // Keep defaults from provider (false for all flags)
         return capabilities;
       }
     });

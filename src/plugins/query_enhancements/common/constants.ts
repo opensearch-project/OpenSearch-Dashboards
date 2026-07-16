@@ -43,6 +43,7 @@ export const API = {
     },
   },
   PPL_CANCEL: `${BASE_API}/ppl/cancel`,
+  PPL_ANALYZE: `${BASE_API}/ppl/analyze`,
   PPL_GRAMMAR: `${BASE_API}/ppl/grammar`,
   AGENT_API: {
     CONFIG_EXISTS: `${BASE_API_ASSISTANT}/agent_config/_exists`,

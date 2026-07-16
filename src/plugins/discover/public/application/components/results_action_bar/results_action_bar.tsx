@@ -5,7 +5,8 @@
 
 import './results_action_bar.scss';
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs } from '@elastic/eui';
 import { HitsCounter } from '../chart/hits_counter';
 import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
 import { DiscoverDownloadCsv } from '../download_csv';
@@ -18,6 +19,9 @@ export interface DiscoverResultsActionBarProps {
   resetQuery(): void;
   rows?: OpenSearchSearchHit[];
   indexPattern?: IndexPattern;
+  activeTab?: 'results' | 'analyze';
+  onTabChange?: (tab: 'results' | 'analyze') => void;
+  showAnalyzeTab?: boolean;
 }
 
 export const DiscoverResultsActionBar = ({
@@ -26,30 +30,55 @@ export const DiscoverResultsActionBar = ({
   resetQuery,
   rows,
   indexPattern,
+  activeTab,
+  onTabChange,
+  showAnalyzeTab = false,
 }: DiscoverResultsActionBarProps) => {
+  const rowsCount = rows?.length || 0;
+  const resultsLabel = hits
+    ? `Results (${rowsCount.toLocaleString()}/${hits.toLocaleString()})`
+    : `Results (${rowsCount.toLocaleString()})`;
+
   return (
     <EuiFlexGroup
       direction="row"
       gutterSize="none"
       justifyContent="spaceBetween"
+      alignItems="center"
       className="dscResultsActionBar"
       data-test-subj="dscResultsActionBar"
     >
       <EuiFlexItem>
-        <EuiFlexGroup
-          alignItems="center"
-          direction="row"
-          gutterSize="none"
-          justifyContent="flexStart"
-        >
-          <EuiFlexItem grow={false}>
-            <HitsCounter
-              hits={hits}
-              showResetButton={showResetButton}
-              onResetQuery={resetQuery}
-              rows={rows}
-            />
-          </EuiFlexItem>
+        <EuiFlexGroup alignItems="center" direction="row" gutterSize="s" justifyContent="flexStart">
+          {showAnalyzeTab && onTabChange ? (
+            <EuiFlexItem grow={false}>
+              <EuiTabs size="s" data-test-subj="discoverResultsAnalyzeTabs">
+                <EuiTab
+                  isSelected={activeTab === 'results'}
+                  onClick={() => onTabChange('results')}
+                  data-test-subj="discoverResultsTab"
+                >
+                  {resultsLabel}
+                </EuiTab>
+                <EuiTab
+                  isSelected={activeTab === 'analyze'}
+                  onClick={() => onTabChange('analyze')}
+                  data-test-subj="discoverAnalyzeTab"
+                >
+                  Analyze
+                </EuiTab>
+              </EuiTabs>
+            </EuiFlexItem>
+          ) : (
+            <EuiFlexItem grow={false}>
+              <HitsCounter
+                hits={hits}
+                showResetButton={showResetButton}
+                onResetQuery={resetQuery}
+                rows={rows}
+              />
+            </EuiFlexItem>
+          )}
           {indexPattern && rows?.length ? (
             <EuiFlexItem grow={false}>
               <DiscoverDownloadCsv indexPattern={indexPattern} rows={rows} hits={hits} />
