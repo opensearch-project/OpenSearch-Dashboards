@@ -17,7 +17,7 @@ import {
   EuiCheckbox,
   EuiToolTip,
   EuiSelect,
-  EuiHealth,
+  EuiFieldText,
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
@@ -53,6 +53,10 @@ interface Props {
   docsCount?: number;
   /** Cluster-health of the index (green/yellow/red) from cat.indices — shown as a header dot. */
   health?: 'green' | 'yellow' | 'red';
+  /** Store size / shard counts from cat.indices — shown in the health-pill tooltip. */
+  storeSize?: string;
+  primaryShards?: number;
+  replicaCount?: number;
   /** Index creation time (epoch ms) — shown as "created {age}" in the empty-index compact row. */
   createdAt?: number;
   /** Humanized selected-range label (e.g. "15 minutes") for the no-recent-data copy. */
@@ -75,10 +79,11 @@ interface Props {
   onManage?: () => void;
 }
 
-// Inline log-stream height — the card shows the latest N lines; matches the histogram column height
-// so the two columns' bottoms align (#7).
-const LOGS_MAX_HEIGHT = 132;
-const HIST_HEIGHT = 132;
+// Inline log-stream height — sized to a whole number of ~20.7px log lines (6 × 20.7 ≈ 124px) so no
+// line is ever geometrically half-cut at the bottom on initial load. HIST_HEIGHT matches it exactly
+// so the histogram and log columns' bottoms stay aligned (#7).
+const LOGS_MAX_HEIGHT = 124;
+const HIST_HEIGHT = 124;
 
 // Distinct icons matching manage-workspace / dataset management.
 const ICON_INDEX = 'logoOpenSearch';
@@ -102,6 +107,9 @@ export const LogStreamCard: React.FC<Props> = ({
   dateFields,
   docsCount,
   health,
+  storeSize,
+  primaryShards,
+  replicaCount,
   createdAt,
   rangeLabel,
   data,
@@ -278,46 +286,58 @@ export const LogStreamCard: React.FC<Props> = ({
     </div>
   );
 
-  // Header time-field control: ALWAYS an EuiSelect for a uniform look, but disabled (non-interactive)
-  // when there's only one date field so single- and multi-timestamp indexes present identically.
-  // Datasets carry a single `timeFieldName` and no `dateFields` list → single, disabled option.
+  // Header time-field control. When there's a real choice (multi-timestamp index + a change handler)
+  // it's an interactive EuiSelect; otherwise a read-only compressed field with the same clock-prepend
+  // look — NOT a disabled select (which greys out and reads as broken). Single- and multi-timestamp
+  // cards stay visually uniform; the single case simply has no dropdown caret.
   const hasMultipleTimeFields = !!dateFields && dateFields.length > 1;
   const canSwitchTimeField = !!onTimeFieldChange && hasMultipleTimeFields;
-  const timeFieldOptions = hasMultipleTimeFields
-    ? dateFields!.map((f) => ({ value: f, text: f }))
-    : timeFieldName
-    ? [{ value: timeFieldName, text: timeFieldName }]
-    : [];
   const timeControl = timeFieldName ? (
-    <EuiToolTip
-      content={
-        canSwitchTimeField
-          ? i18n.translate('explore.logsDrilldown.rows.timeFieldSwitchTip', {
-              defaultMessage: 'Time field used for the histogram and sort — switch it here',
-            })
-          : i18n.translate('explore.logsDrilldown.rows.timeFieldTip', {
-              defaultMessage: 'Time field used for the histogram and sort',
-            })
-      }
-    >
-      <EuiSelect
-        compressed
-        disabled={!canSwitchTimeField}
-        prepend={<EuiIcon type="clock" size="s" />}
-        options={timeFieldOptions}
-        value={timeFieldName}
-        onChange={(e) => onTimeFieldChange?.(e.target.value)}
-        aria-label={i18n.translate('explore.logsDrilldown.rows.timeFieldAria', {
-          defaultMessage: 'Select the time field',
+    canSwitchTimeField ? (
+      <EuiToolTip
+        anchorClassName="logStreamCard__timeCapsule"
+        content={i18n.translate('explore.logsDrilldown.rows.timeFieldSwitchTip', {
+          defaultMessage: 'Time field used for the histogram and sort — switch it here',
         })}
-        className="logStreamCard__timeSelect"
-        data-test-subj="logsExploreCardTimeFieldSelect"
-      />
-    </EuiToolTip>
+      >
+        <EuiSelect
+          compressed
+          prepend={<EuiIcon type="clock" size="s" />}
+          options={dateFields!.map((f) => ({ value: f, text: f }))}
+          value={timeFieldName}
+          onChange={(e) => onTimeFieldChange?.(e.target.value)}
+          aria-label={i18n.translate('explore.logsDrilldown.rows.timeFieldAria', {
+            defaultMessage: 'Select the time field',
+          })}
+          className="logStreamCard__timeSelect"
+          data-test-subj="logsExploreCardTimeFieldSelect"
+        />
+      </EuiToolTip>
+    ) : (
+      <EuiToolTip
+        anchorClassName="logStreamCard__timeCapsule"
+        content={i18n.translate('explore.logsDrilldown.rows.timeFieldTip', {
+          defaultMessage: 'Time field used for the histogram and sort',
+        })}
+      >
+        <EuiFieldText
+          compressed
+          readOnly
+          prepend={<EuiIcon type="clock" size="s" />}
+          value={timeFieldName}
+          aria-label={i18n.translate('explore.logsDrilldown.rows.timeFieldAria', {
+            defaultMessage: 'Select the time field',
+          })}
+          className="logStreamCard__timeSelect"
+          data-test-subj="logsExploreCardTimeFieldReadonly"
+        />
+      </EuiToolTip>
+    )
   ) : null;
 
-  // Dataset utility actions (next to the time control): an explicit "Show logs" (mirrors the name
-  // link) and "Manage" (opens the dataset in index-pattern management).
+  // Dataset utility actions (next to the time control): an explicit "Query" action (mirrors the name
+  // link — opens the dataset in the logs Query experience) and "Manage" (opens the dataset in
+  // index-pattern management).
   const datasetActions =
     kind === 'dataset' ? (
       <>
@@ -329,8 +349,8 @@ export const LogStreamCard: React.FC<Props> = ({
               onClick={onPrimary}
               data-test-subj="logsExploreCardShowLogs"
             >
-              {i18n.translate('explore.logsDrilldown.rows.showLogs', {
-                defaultMessage: 'Show logs',
+              {i18n.translate('explore.logsDrilldown.rows.queryDataset', {
+                defaultMessage: 'Query',
               })}
             </EuiButtonEmpty>
           </EuiFlexItem>
@@ -352,26 +372,72 @@ export const LogStreamCard: React.FC<Props> = ({
       </>
     ) : null;
 
-  // Index health dot (green/yellow/red) from cat.indices — a compact status affordance in the header.
-  const healthDot =
+  // Index health (green/yellow/red) from cat.indices, shown right of the time control as a labeled
+  // capsule pill (dot + status word) rather than a bare colored dot. green→Healthy (all shards
+  // allocated), yellow→Degraded (replicas unassigned), red→Unhealthy (primaries unassigned).
+  const HEALTH_LABELS: Record<'green' | 'yellow' | 'red', string> = {
+    green: i18n.translate('explore.logsDrilldown.rows.healthHealthy', {
+      defaultMessage: 'Healthy',
+    }),
+    yellow: i18n.translate('explore.logsDrilldown.rows.healthDegraded', {
+      defaultMessage: 'Degraded',
+    }),
+    red: i18n.translate('explore.logsDrilldown.rows.healthUnhealthy', {
+      defaultMessage: 'Unhealthy',
+    }),
+  };
+  // Rich hover tooltip: the health status plus the store size / shard layout from cat.indices. Each
+  // metadata row is shown only when that value is known (remote/closed indexes omit them).
+  const healthTooltip = (
+    <div className="logStreamCard__healthTip" data-test-subj={`logsExploreCardHealthTip-${name}`}>
+      <div className="logStreamCard__healthTipTitle">
+        {health &&
+          i18n.translate('explore.logsDrilldown.rows.healthTip', {
+            defaultMessage: 'Index health: {status}',
+            values: { status: HEALTH_LABELS[health] },
+          })}
+      </div>
+      {storeSize && (
+        <div>
+          {i18n.translate('explore.logsDrilldown.rows.healthTipSize', {
+            defaultMessage: 'Store size: {size}',
+            values: { size: storeSize },
+          })}
+        </div>
+      )}
+      {primaryShards != null && (
+        <div>
+          {i18n.translate('explore.logsDrilldown.rows.healthTipPrimaries', {
+            defaultMessage: 'Primaries: {count}',
+            values: { count: primaryShards },
+          })}
+        </div>
+      )}
+      {replicaCount != null && (
+        <div>
+          {i18n.translate('explore.logsDrilldown.rows.healthTipReplicas', {
+            defaultMessage: 'Replicas: {count}',
+            values: { count: replicaCount },
+          })}
+        </div>
+      )}
+    </div>
+  );
+  const healthPill =
     kind === 'index' && health ? (
       <EuiFlexItem grow={false} className="logStreamCard__health">
-        <EuiToolTip
-          content={i18n.translate('explore.logsDrilldown.rows.healthTip', {
-            defaultMessage: 'Index health: {health}',
-            values: { health },
-          })}
-        >
-          <EuiHealth
-            color={health}
+        <EuiToolTip content={healthTooltip}>
+          <span
+            className={`logStreamCard__healthPill logStreamCard__healthPill--${health}`}
             data-test-subj={`logsExploreCardHealth-${name}`}
             aria-label={i18n.translate('explore.logsDrilldown.rows.healthAria', {
               defaultMessage: 'Index health {health}',
               values: { health },
             })}
           >
-            {''}
-          </EuiHealth>
+            <span className="logStreamCard__healthDot" />
+            {HEALTH_LABELS[health]}
+          </span>
         </EuiToolTip>
       </EuiFlexItem>
     ) : null;
@@ -406,7 +472,7 @@ export const LogStreamCard: React.FC<Props> = ({
 
   return (
     <div ref={cardRef} className="logStreamCard" data-test-subj={`logsExploreCard-${name}`}>
-      <EuiPanel hasBorder paddingSize="s" hasShadow={false}>
+      <EuiPanel hasBorder paddingSize="s" hasShadow={false} className="logStreamCard__panel">
         {/* Header. Only raw indexes are selectable for batch dataset creation — a dataset already
             exists, so it gets no selection checkbox. */}
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
@@ -424,7 +490,6 @@ export const LogStreamCard: React.FC<Props> = ({
           <EuiFlexItem grow={false}>
             <EuiIcon type={icon} size="s" />
           </EuiFlexItem>
-          {healthDot}
           <EuiFlexItem style={{ minWidth: 0 }}>
             <EuiText size="s" className="logStreamCard__name">
               {onPrimary ? (
@@ -467,6 +532,7 @@ export const LogStreamCard: React.FC<Props> = ({
               {timeControl}
             </EuiFlexItem>
           )}
+          {healthPill}
           {datasetActions}
         </EuiFlexGroup>
 

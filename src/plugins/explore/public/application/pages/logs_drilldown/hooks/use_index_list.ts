@@ -129,16 +129,24 @@ async function sortByCreationDate(
   if (items.length === 0) return items;
 
   try {
-    // Also request `docs.count` + `health` — they ride along on this ONE already-made cat.indices
-    // call (the route is a pass-through), so empty-index detection AND the health dot cost zero
-    // extra round-trips. Both are absent for remote/closed indices → we leave those `docsCount` /
-    // `health` undefined (unknown), never 0/green.
+    // Also request `docs.count`, `health`, `store.size`, `pri`, `rep` — they ride along on this ONE
+    // already-made cat.indices call (the route is a pass-through), so empty-index detection, the
+    // health dot AND the health tooltip metadata cost zero extra round-trips. All are absent for
+    // remote/closed indices → we leave those fields undefined (unknown), never 0/green.
     const response = await services.http.get<
-      Array<{ index: string; 'creation.date'?: string; 'docs.count'?: string; health?: string }>
+      Array<{
+        index: string;
+        'creation.date'?: string;
+        'docs.count'?: string;
+        health?: string;
+        'store.size'?: string;
+        pri?: string;
+        rep?: string;
+      }>
     >(`/api/directquery/dsl/cat.indices/dataSourceMDSId=${dataSourceId ?? ''}`, {
       query: {
         format: 'json',
-        h: 'index,creation.date,docs.count,health',
+        h: 'index,creation.date,docs.count,health,store.size,pri,rep',
         s: 'creation.date:desc',
       },
     });
@@ -147,6 +155,10 @@ async function sortByCreationDate(
     const createdByName = new Map<string, number>();
     const docsByName = new Map<string, number>();
     const healthByName = new Map<string, BrowsableItem['health']>();
+    const metaByName = new Map<
+      string,
+      { storeSize?: string; primaryShards?: number; replicaCount?: number }
+    >();
     response.forEach((row) => {
       const ts = Number(row['creation.date']);
       if (row.index && Number.isFinite(ts)) createdByName.set(row.index, ts);
@@ -156,6 +168,15 @@ async function sortByCreationDate(
       if (row.index && (health === 'green' || health === 'yellow' || health === 'red')) {
         healthByName.set(row.index, health);
       }
+      if (row.index) {
+        const pri = Number(row.pri);
+        const rep = Number(row.rep);
+        metaByName.set(row.index, {
+          storeSize: row['store.size'] || undefined,
+          primaryShards: Number.isFinite(pri) ? pri : undefined,
+          replicaCount: Number.isFinite(rep) ? rep : undefined,
+        });
+      }
     });
 
     return [...items]
@@ -164,6 +185,9 @@ async function sortByCreationDate(
         createdAt: createdByName.get(item.name),
         docsCount: docsByName.get(item.name),
         health: healthByName.get(item.name),
+        storeSize: metaByName.get(item.name)?.storeSize,
+        primaryShards: metaByName.get(item.name)?.primaryShards,
+        replicaCount: metaByName.get(item.name)?.replicaCount,
       }))
       .sort((a, b) => {
         // Rows with a known creation date come first, newest → oldest; then name-descending.

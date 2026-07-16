@@ -54,6 +54,9 @@
   margin-bottom: $euiSizeXS;
   padding: $euiSizeXS $euiSizeS;
 
+  // Match the full card's softer corner rounding (HTML design mock).
+  border-radius: 8px;
+
   &__name {
     min-width: 0;
     overflow: hidden;
@@ -80,6 +83,11 @@
   min-width: 0;
   margin-bottom: $euiSizeS;
 
+  // Softer, larger corner rounding than the default panel — matches the HTML design mock.
+  &__panel {
+    border-radius: 8px;
+  }
+
   &__name {
     overflow: hidden;
     text-overflow: ellipsis;
@@ -93,7 +101,7 @@
   }
 
   &__body {
-    margin-top: $euiSizeS;
+    margin-top: $euiSizeXS;
   }
 
   // Histogram + logs sit side by side; both must be allowed to shrink below content width.
@@ -127,16 +135,101 @@
     min-width: 0;
   }
 
-  // Index health dot in the header — EuiHealth with an empty label renders as a bare status dot.
+  // Index health, shown right of the time control as a labeled capsule pill (dot + status word).
   &__health {
     display: flex;
     align-items: center;
   }
 
+  &__healthPill {
+    display: inline-flex;
+    align-items: center;
+    gap: $euiSizeXS;
+    height: 20px;
+    padding: 0 $euiSizeS;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: $euiFontWeightMedium;
+    line-height: 1;
+    white-space: nowrap;
+
+    // Label uses the theme text color so it stays legible in BOTH light and dark themes; the color
+    // signal comes from the saturated dot + a semi-transparent hue wash (both theme-adaptive).
+    color: $euiTextColor;
+    border: 1px solid transparent;
+
+    // Refined status shades from the OUI VIS palette (theme tokens) — softer/distinct from the stark
+    // stock status red/yellow/green, per design. Background/border are transparentized so the wash
+    // sits correctly over any card background in both light and dark themes.
+    &--green {
+      background-color: transparentize($euiColorVis0, 0.88);
+      border-color: transparentize($euiColorVis0, 0.72);
+
+      .logStreamCard__healthDot {
+        background-color: $euiColorVis0;
+      }
+    }
+
+    &--yellow {
+      background-color: transparentize($euiColorVis5, 0.86);
+      border-color: transparentize($euiColorVis5, 0.7);
+
+      .logStreamCard__healthDot {
+        background-color: $euiColorVis5;
+      }
+    }
+
+    &--red {
+      background-color: transparentize($euiColorVis9, 0.88);
+      border-color: transparentize($euiColorVis9, 0.72);
+
+      .logStreamCard__healthDot {
+        background-color: $euiColorVis9;
+      }
+    }
+  }
+
+  &__healthDot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  // Health-pill hover tooltip: a small stacked list (status + store size + shard layout).
+  &__healthTip {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  &__healthTipTitle {
+    font-weight: $euiFontWeightBold;
+  }
+
   // Compressed time-field control in the header — uniform across single/multi-timestamp cards
-  // (disabled, non-interactive when there's only one date field).
+  // (read-only field when there's only one date field, interactive select otherwise). Kept compact:
+  // a smaller max-width so the capsule reads as a chip. Font bumped to 12px for legibility with the
+  // vertical padding trimmed to 2px so the taller text still fits the same pill height.
   &__timeSelect {
-    max-width: 180px;
+    max-width: 150px;
+    font-size: 12px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+  }
+
+  // Capsule (pill) wrapper around the time control. We can't round the EUI form-control layout
+  // directly (its bordered wrapper is a global .eui* selector the stylelint denylist forbids
+  // touching), so this tooltip-anchor span clips the control — border, clock prepend, and all —
+  // into rounded ends. The inner control's content sits flush to the right edge (≈1px gap), so a
+  // full 999px pill radius would force a half-circle cap with no content clearance and slice the
+  // right edge into a flat vertical cut ("chopped"). A moderate radius (half the control height)
+  // rounds the corners smoothly without needing clearance the flush content doesn't have.
+  &__timeCapsule {
+    display: inline-flex;
+    align-items: center;
+    max-width: 150px;
+    border-radius: $euiSizeM; // 12px — rounded corners that don't chop the flush right edge
+    overflow: hidden;
   }
 
   // Muted placeholder when the histogram query errors (keeps the column height stable).
@@ -184,6 +277,49 @@
     min-width: 0;
     background: transparent;
     padding: 0;
+
+    // Scrollbars hidden at rest, revealed on hover (and while scrolling). The edge fade below is the
+    // resting "more content" cue; the container stays scrollable/focusable so keyboard + trackpad
+    // scrolling are unaffected — only the visual track is hidden.
+    scrollbar-width: none; // Firefox
+
+    &::-webkit-scrollbar {
+      width: 0;
+      height: 0;
+    }
+
+    &:hover {
+      scrollbar-width: thin; // Firefox
+
+      @include euiScrollBar; // WebKit/Chromium: restore the themed thin scrollbar on hover
+    }
+
+    // Faded scroll ends (same technique as EUI's euiYScrollWithShadows / the workspace-selector
+    // popover): a linear-gradient mask softens the FAR scroll ends only — bottom (vertical overflow)
+    // and right (long horizontal lines). The top and left stay crisp, so the first line and the
+    // start of each line are never dimmed. We compose the two gradients and intersect them. `red` is
+    // a mask placeholder — only the gradient's alpha matters (mirrors the OUI ouiOverflowShadow
+    // mixin). Autoprefixer emits the -webkit-mask-composite fallback for Safari.
+    // Fade band trimmed to $euiSizeS (8px): the container is sized to a whole 6 lines (~124px), so
+    // the smaller band sits over the scroll gap / next-line boundary and never dims a full line —
+    // the previous 12px band ate into the last visible line, making it read as clipped.
+    $logsFade: $euiSizeS;
+
+    mask-image:
+      linear-gradient(
+        to bottom,
+        transparentize(red, 0) 0%,
+        transparentize(red, 0) calc(100% - #{$logsFade}),
+        transparentize(red, 0.9) 100%
+      ),
+      linear-gradient(
+        to right,
+        transparentize(red, 0) 0%,
+        transparentize(red, 0) calc(100% - #{$logsFade}),
+        transparentize(red, 0.9) 100%
+      );
+    mask-composite: intersect;
+    contain: paint;
   }
 
   &__empty {

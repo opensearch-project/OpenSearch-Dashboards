@@ -159,7 +159,10 @@ export function buildMetricsNavPopover(): NavPopoverConfig {
  * Nav-popover config for an explore flavor (Logs/Traces/Metrics): quick actions
  * (new search / browse saved searches) plus a recent-searches list.
  */
-export function buildExploreNavPopover(flavor: ExploreFlavor): NavPopoverConfig {
+export function buildExploreNavPopover(
+  flavor: ExploreFlavor,
+  logsDrilldownEnabled: boolean = false
+): NavPopoverConfig {
   const appId = flavorAppId(flavor);
   return {
     actions: [
@@ -172,17 +175,9 @@ export function buildExploreNavPopover(flavor: ExploreFlavor): NavPopoverConfig 
         iconType: 'plusInCircle',
         onClick: ({ navigateToApp }) => navigateToApp(appId, { path: '#/' }),
       },
-      {
-        id: 'browseSaved',
-        label: i18n.translate('explore.navPopover.browseSaved', {
-          defaultMessage: 'Browse saved searches',
-        }),
-        iconType: 'folderOpen',
-        onClick: ({ navigateToApp }) => navigateToApp(appId, { path: OPEN_SAVED_PATH }),
-      },
-      // Logs-only: the onboarding drilldown canvas lives here (a Logs action), NOT as its own
-      // top-level side-nav item.
-      ...(flavor === ExploreFlavor.Logs
+      // Logs-only: the onboarding drilldown canvas lives here (a Logs action, feature-flagged), NOT
+      // as its own top-level side-nav item. Sits second — between New search and Browse saved.
+      ...(flavor === ExploreFlavor.Logs && logsDrilldownEnabled
         ? [
             {
               id: 'logsDrilldown',
@@ -195,6 +190,14 @@ export function buildExploreNavPopover(flavor: ExploreFlavor): NavPopoverConfig 
             },
           ]
         : []),
+      {
+        id: 'browseSaved',
+        label: i18n.translate('explore.navPopover.browseSaved', {
+          defaultMessage: 'Browse saved searches',
+        }),
+        iconType: 'folderOpen',
+        onClick: ({ navigateToApp }) => navigateToApp(appId, { path: OPEN_SAVED_PATH }),
+      },
     ],
     render: (services) => <RecentExploreSearches flavor={flavor} {...services} />,
   };

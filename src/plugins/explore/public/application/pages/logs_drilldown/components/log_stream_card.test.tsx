@@ -303,7 +303,7 @@ describe('LogStreamCard', () => {
       expect(onTimeFieldChange).toHaveBeenCalledWith('event.ingested');
     });
 
-    it('shows the SAME selector — disabled — when there is only one date field (uniform UI)', () => {
+    it('shows a read-only field (NOT a disabled/greyed select) when there is only one date field', () => {
       render(
         <LogStreamCard
           {...baseProps}
@@ -315,14 +315,16 @@ describe('LogStreamCard', () => {
           })}
         />
       );
-      // Same widget as the multi-field case (no separate read-only badge), but non-interactive.
-      const select = screen.getByTestId('logsExploreCardTimeFieldSelect') as HTMLSelectElement;
-      expect(select).toBeDisabled();
-      expect(select.value).toBe('@timestamp');
-      expect(Array.from(select.options).map((o) => o.value)).toEqual(['@timestamp']);
+      // No interactive select (nothing to switch), and NOT a greyed-out disabled select — a
+      // read-only field with the same clock-prepend look and normal colors.
+      expect(screen.queryByTestId('logsExploreCardTimeFieldSelect')).not.toBeInTheDocument();
+      const readonly = screen.getByTestId('logsExploreCardTimeFieldReadonly') as HTMLInputElement;
+      expect(readonly).toHaveValue('@timestamp');
+      expect(readonly).toHaveAttribute('readonly');
+      expect(readonly).not.toBeDisabled();
     });
 
-    it('datasets show the uniform (disabled) time selector from their single timeFieldName', () => {
+    it('datasets show the read-only time field from their single timeFieldName', () => {
       render(
         <LogStreamCard
           {...baseProps}
@@ -335,14 +337,15 @@ describe('LogStreamCard', () => {
           })}
         />
       );
-      const select = screen.getByTestId('logsExploreCardTimeFieldSelect') as HTMLSelectElement;
-      expect(select).toBeDisabled();
-      expect(select.value).toBe('@timestamp');
+      expect(screen.queryByTestId('logsExploreCardTimeFieldSelect')).not.toBeInTheDocument();
+      const readonly = screen.getByTestId('logsExploreCardTimeFieldReadonly') as HTMLInputElement;
+      expect(readonly).toHaveValue('@timestamp');
+      expect(readonly).not.toBeDisabled();
     });
   });
 
   describe('dataset actions + index health', () => {
-    it('dataset card shows Show logs (→ onPrimary) and Manage (→ onManage) buttons', () => {
+    it('dataset card shows a Query action (→ onPrimary) and Manage (→ onManage) buttons', () => {
       const onPrimary = jest.fn();
       const onManage = jest.fn();
       render(
@@ -355,13 +358,15 @@ describe('LogStreamCard', () => {
           data={withData({ preview: { columns: [], rows: [] } })}
         />
       );
-      fireEvent.click(screen.getByTestId('logsExploreCardShowLogs'));
+      const queryBtn = screen.getByTestId('logsExploreCardShowLogs');
+      expect(queryBtn).toHaveTextContent('Query');
+      fireEvent.click(queryBtn);
       expect(onPrimary).toHaveBeenCalled();
       fireEvent.click(screen.getByTestId('logsExploreCardManage'));
       expect(onManage).toHaveBeenCalled();
     });
 
-    it('index cards do NOT show the dataset Show logs / Manage buttons', () => {
+    it('index cards do NOT show the dataset Query / Manage buttons', () => {
       render(
         <LogStreamCard
           {...baseProps}
@@ -374,7 +379,7 @@ describe('LogStreamCard', () => {
       expect(screen.queryByTestId('logsExploreCardManage')).not.toBeInTheDocument();
     });
 
-    it('renders a health dot for an index with cat.indices health', () => {
+    it('renders a labeled health pill for an index with cat.indices health', () => {
       render(
         <LogStreamCard
           {...baseProps}
@@ -383,10 +388,35 @@ describe('LogStreamCard', () => {
           data={withData({ preview: { columns: [], rows: [] } })}
         />
       );
-      expect(screen.getByTestId(`logsExploreCardHealth-${baseProps.name}`)).toBeInTheDocument();
+      const pill = screen.getByTestId(`logsExploreCardHealth-${baseProps.name}`);
+      expect(pill).toBeInTheDocument();
+      // Shown as a labeled status word (better than a bare dot), tinted per status.
+      expect(pill).toHaveTextContent('Degraded');
+      expect(pill.className).toContain('logStreamCard__healthPill--yellow');
     });
 
-    it('shows no health dot when health is unknown, or for a dataset card', () => {
+    it('health pill tooltip shows store size + shard layout from cat.indices on hover', async () => {
+      render(
+        <LogStreamCard
+          {...baseProps}
+          kind="index"
+          health="green"
+          storeSize="2.4gb"
+          primaryShards={5}
+          replicaCount={1}
+          data={withData({ preview: { columns: [], rows: [] } })}
+        />
+      );
+      // EuiToolTip renders its content into the DOM on hover.
+      fireEvent.mouseOver(screen.getByTestId(`logsExploreCardHealth-${baseProps.name}`));
+      const tip = await screen.findByTestId(`logsExploreCardHealthTip-${baseProps.name}`);
+      expect(tip).toHaveTextContent('Index health: Healthy');
+      expect(tip).toHaveTextContent('Store size: 2.4gb');
+      expect(tip).toHaveTextContent('Primaries: 5');
+      expect(tip).toHaveTextContent('Replicas: 1');
+    });
+
+    it('shows no health pill when health is unknown, or for a dataset card', () => {
       const { rerender } = render(
         <LogStreamCard
           {...baseProps}

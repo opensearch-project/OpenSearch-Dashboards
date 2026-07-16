@@ -65,6 +65,7 @@ jest.mock('./log_stream_card', () => ({
     onTimeFieldChange,
     onManage,
     health,
+    severityField,
   }: any) => (
     <div
       data-test-subj={`card-${name}`}
@@ -74,6 +75,7 @@ jest.mock('./log_stream_card', () => ({
       data-time-field={timeFieldName ?? ''}
       data-date-fields={(dateFields ?? []).join(',')}
       data-health={health ?? ''}
+      data-severity-field={severityField ?? ''}
     >
       {onPrimary && (
         <button data-test-subj={`primary-${name}`} onClick={onPrimary}>
@@ -170,11 +172,11 @@ describe('RowsView', () => {
     );
   });
 
-  it('dataset card → Manage opens the dataset in index-pattern management', () => {
+  it('dataset card → Manage opens the dataset in the Datasets management app', () => {
     renderRows();
     fireEvent.click(screen.getByTestId('manage-logs-app-*'));
-    expect(navigateToApp).toHaveBeenCalledWith('management', {
-      path: '/opensearch-dashboards/indexPatterns/patterns/ds1',
+    expect(navigateToApp).toHaveBeenCalledWith('datasets', {
+      path: '/patterns/ds1',
     });
   });
 
@@ -383,6 +385,22 @@ describe('RowsView', () => {
     const card = screen.getByTestId('card-orders-2026');
     expect(card.getAttribute('data-time-field')).toBe('@timestamp');
     expect(card.getAttribute('data-date-fields')).toBe('@timestamp,observedTimestamp');
+  });
+
+  it('passes the detected severity field down to DATASET cards (for the severity-stacked histogram)', () => {
+    // Datasets classify too (a dataset name like `logs-app-*` is a valid field-caps wildcard) so the
+    // detected severityField reaches the card — otherwise the dataset histogram renders as plain logs
+    // even though the log lines show WARN/INFO tokens.
+    renderRows({
+      getCached: () => ({
+        classification: IndexClassification.TIME_BASED,
+        timeFieldName: '@timestamp',
+        severityField: 'severityText',
+      }),
+    });
+    const datasetCard = screen.getByTestId('card-logs-app-*');
+    expect(datasetCard.getAttribute('data-kind')).toBe('dataset');
+    expect(datasetCard.getAttribute('data-severity-field')).toBe('severityText');
   });
 
   it('applies a per-card time-field override (selector → the card shows the new field)', () => {

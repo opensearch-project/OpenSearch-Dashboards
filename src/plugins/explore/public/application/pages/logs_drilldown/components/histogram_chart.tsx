@@ -100,12 +100,26 @@ export const HistogramChart: React.FC<Props> = ({
       ...spec,
       legend: { show: false },
       grid: { ...(spec as any).grid, right: 8 },
+      // Enable a hidden lineX brush so users can DRAG-select a time range on the chart (the toolbar
+      // button stays hidden — the brush is activated programmatically below). Mirrors DiscoverHistogram.
+      brush: { toolbox: ['lineX'], xAxisIndex: 0 },
+      toolbox: { show: false },
     };
     // Disable entry animation — many small charts mounting/refetching on scroll shouldn't all animate.
     inst.setOption({ ...specNoLegend, animation: false } as echarts.EChartsOption, true);
-  }, [chart, palette, isDarkMode, services.uiSettings]);
+    // Activate the brush cursor without a visible toolbar so a plain drag selects a range.
+    if (onBrush) {
+      inst.dispatchAction({
+        type: 'takeGlobalCursor',
+        key: 'brush',
+        brushOption: { brushType: 'lineX', brushMode: 'single' },
+      });
+    }
+  }, [chart, palette, isDarkMode, services.uiSettings, onBrush]);
 
-  // Brush-to-select → onBrush({from,to}); also single-click a bar selects that bucket.
+  // Time-range interactions → onBrush(from,to) → the parent updates the global time picker:
+  //  • DRAG across bars (lineX brush) selects an arbitrary [from,to] range.
+  //  • single-CLICK a bar zooms to that bucket's [start, start + interval].
   useEffect(() => {
     const inst = instanceRef.current;
     if (!inst || !onBrush) return;
@@ -113,12 +127,23 @@ export const HistogramChart: React.FC<Props> = ({
       const range = params.areas?.[0]?.coordRange;
       if (range && range[0] != null && range[1] != null) onBrush(range[0], range[1]);
     };
+    const onClick = (params: { componentType?: string; value?: [number, number] }) => {
+      if (params.componentType === 'series' && params.value) {
+        const start = params.value[0];
+        if (start != null) onBrush(start, start + histogram.intervalMs);
+      }
+    };
     // @ts-expect-error echarts event typing is loose for custom events
     inst.on('brushEnd', onBrushEnd);
+    // @ts-expect-error echarts event typing is loose for click params
+    inst.on('click', onClick);
     return () => {
-      if (!inst.isDisposed()) inst.off('brushEnd', onBrushEnd);
+      if (!inst.isDisposed()) {
+        inst.off('brushEnd', onBrushEnd);
+        inst.off('click', onClick);
+      }
     };
-  }, [onBrush]);
+  }, [onBrush, histogram.intervalMs]);
 
   // Cursor sync: publish this chart's hovered x-index; subscribe to show a crosshair when another
   // chart is hovered (like metrics explore's synced pointer). Uses echarts showTip/axisPointer.

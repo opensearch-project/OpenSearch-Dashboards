@@ -36,6 +36,13 @@ export interface BrowsableItem {
   /** Cluster-health of the index from `_cat/indices` (`green`/`yellow`/`red`). `undefined` ⇒
    *  unknown (remote/closed index, or the cat.indices call was unavailable). */
   health?: 'green' | 'yellow' | 'red';
+  /** Primary+replica store size string from `_cat/indices` (e.g. "2.4gb"). Shown in the health
+   *  tooltip. `undefined` ⇒ unknown (remote/closed, or the call was unavailable). */
+  storeSize?: string;
+  /** Primary shard count from `_cat/indices`. `undefined` ⇒ unknown. */
+  primaryShards?: number;
+  /** Replica count from `_cat/indices`. `undefined` ⇒ unknown. */
+  replicaCount?: number;
   /** For dataset rows: the dataset id to select. */
   datasetId?: string;
   /** For dataset rows: whether the dataset is time-based (carries a timeFieldName). */

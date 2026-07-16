@@ -57,6 +57,19 @@ describe('DataSourceControl', () => {
     expect(lastSelectorProps.uiSettings).toBeDefined();
   });
 
+  it('pre-selects a restored data source via defaultOption when defaultDataSourceId is set', () => {
+    render(
+      <DataSourceControl
+        services={makeServices(true)}
+        onChange={jest.fn()}
+        defaultDataSourceId="ds-restored"
+      />
+    );
+    // A restored id (e.g. from the URL) is fed to the selector as its defaultOption so it re-selects
+    // that source instead of auto-picking the workspace default.
+    expect(lastSelectorProps.defaultOption).toEqual([{ id: 'ds-restored' }]);
+  });
+
   it('maps a selected option to { id, title } via onChange', () => {
     const onChange = jest.fn();
     render(<DataSourceControl services={makeServices(true)} onChange={onChange} />);

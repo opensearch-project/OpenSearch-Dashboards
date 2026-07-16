@@ -161,13 +161,15 @@ export const RowsView: React.FC<Props> = ({
       const item = metaRef.current.get(name);
       if (!item) return { preview: undefined };
 
-      // Determine time field + severity field. Datasets carry timeFieldName; indexes classify.
+      // Determine time field + severity field. Both indexes AND datasets classify (a dataset name
+      // like `otel-*` is a valid field-caps wildcard) so the histogram can be severity-stacked — a
+      // dataset carries its own timeFieldName, but the severity field must still be detected from its
+      // fields. For indexes, classification supplies the time field too.
       let timeFieldName = item.timeFieldName;
-      let severityField: string | undefined;
+      const classification = getCached(name) ?? (await classify(name));
+      const severityField = classification.severityField;
       if (item.kind === 'index') {
-        const result = getCached(name) ?? (await classify(name));
-        timeFieldName = result.timeFieldName;
-        severityField = result.severityField;
+        timeFieldName = classification.timeFieldName;
       }
       // A user-picked time field (multi-timestamp indexes) overrides the auto-selected one.
       timeFieldName = timeFieldOverridesRef.current[name] ?? timeFieldName;
@@ -235,12 +237,12 @@ export const RowsView: React.FC<Props> = ({
   const createDataset = useCreateDataset(services);
   const activateDataset = useActivateDataset(services);
 
-  // Open an existing dataset in index-pattern management (the "Manage" dataset utility action).
+  // Open an existing dataset in the Datasets management app (the "Manage" dataset utility action).
   const manageDataset = useCallback(
     (datasetId?: string) => {
       if (!datasetId) return;
-      services.core.application.navigateToApp('management', {
-        path: `/opensearch-dashboards/indexPatterns/patterns/${datasetId}`,
+      services.core.application.navigateToApp('datasets', {
+        path: `/patterns/${datasetId}`,
       });
     },
     [services]
@@ -426,7 +428,10 @@ export const RowsView: React.FC<Props> = ({
 
   // Render one card. Shared by the primary list and the dead drawer so both stay consistent.
   const renderCard = (item: BrowsableItem, state: LogRowState) => {
-    const cached = item.kind === 'index' ? getCached(item.name) : undefined;
+    // Classification is cached for BOTH kinds (datasets classify too, for severity detection). A
+    // dataset's own timeFieldName still wins for time-based detection; the cached result supplies the
+    // detected severity field (and, for indexes, the time/date fields).
+    const cached = getCached(item.name);
     const isTimeBased =
       item.kind === 'dataset'
         ? Boolean(item.timeFieldName)
@@ -456,6 +461,9 @@ export const RowsView: React.FC<Props> = ({
         dateFields={cached?.dateFields}
         docsCount={item.docsCount}
         health={item.health}
+        storeSize={item.storeSize}
+        primaryShards={item.primaryShards}
+        replicaCount={item.replicaCount}
         createdAt={item.createdAt}
         rangeLabel={rangeLabel}
         data={data}

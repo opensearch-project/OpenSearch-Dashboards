@@ -82,8 +82,28 @@ describe('useIndexList', () => {
     render(<Harness services={makeServices()} search="" />);
     await waitFor(() => expect(result.loading).toBe(false));
     expect(result.items.map((i) => i.name)).toEqual(['b', 'c', 'a']);
-    // One cat.indices call carries creation.date + docs.count + health (no extra round-trips).
-    expect(httpGet.mock.calls[0][1].query.h).toBe('index,creation.date,docs.count,health');
+    // One cat.indices call carries creation.date + docs.count + health + store.size/pri/rep
+    // (no extra round-trips).
+    expect(httpGet.mock.calls[0][1].query.h).toBe(
+      'index,creation.date,docs.count,health,store.size,pri,rep'
+    );
+  });
+
+  it('maps store size + shard layout (store.size/pri/rep) onto items; missing → undefined', async () => {
+    indexFetch.mockResolvedValue(children(['full', 'partial']));
+    httpGet.mockResolvedValue([
+      { index: 'full', 'creation.date': '300', 'store.size': '2.4gb', pri: '5', rep: '1' },
+      { index: 'partial', 'creation.date': '200' }, // no size/shards (e.g. remote/closed)
+    ]);
+    render(<Harness services={makeServices()} search="" />);
+    await waitFor(() => expect(result.loading).toBe(false));
+    const byName = Object.fromEntries(result.items.map((i: any) => [i.name, i]));
+    expect(byName.full.storeSize).toBe('2.4gb');
+    expect(byName.full.primaryShards).toBe(5);
+    expect(byName.full.replicaCount).toBe(1);
+    expect(byName.partial.storeSize).toBeUndefined();
+    expect(byName.partial.primaryShards).toBeUndefined();
+    expect(byName.partial.replicaCount).toBeUndefined();
   });
 
   it('maps index health (green/yellow/red) onto items; unknown/invalid → undefined', async () => {

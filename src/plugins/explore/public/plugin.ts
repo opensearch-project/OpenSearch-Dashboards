@@ -153,6 +153,12 @@ export class ExplorePlugin implements Plugin<
     this.hideLocalCluster = setupDeps.dataSource?.hideLocalCluster || false;
     this.dataSourceManagement = setupDeps.dataSourceManagement;
 
+    // Feature flag: the standalone Logs Drilldown canvas ships behind `explore.logsDrilldown.enabled`
+    // (default off). Read synchronously from the browser-exposed config (mirrors `sqlSupport`); gates
+    // the app registration, the query-bar action, and the nav-popover entry point below.
+    const logsDrilldownEnabled =
+      this.initializerContext.config.get<ConfigSchema>().logsDrilldown?.enabled ?? false;
+
     // Set usage collector
     setUsageCollector(setupDeps.usageCollection);
     this.registerExploreVisualizationAlias(setupDeps);
@@ -166,8 +172,10 @@ export class ExplorePlugin implements Plugin<
       queryPanelActionsRegistry.register(importDataActionConfig);
     }
 
-    // Query-bar entry point to the standalone Logs Drilldown app.
-    queryPanelActionsRegistry.register(logsDrilldownActionConfig);
+    // Query-bar entry point to the standalone Logs Drilldown app (feature-flagged).
+    if (logsDrilldownEnabled) {
+      queryPanelActionsRegistry.register(logsDrilldownActionConfig);
+    }
 
     this.docViewsRegistry = new DocViewsRegistry();
     setDocViewsRegistry(this.docViewsRegistry);
@@ -485,6 +493,15 @@ export class ExplorePlugin implements Plugin<
           this.dataSourceManagement
         );
 
+        // URL state storage (like the flavor apps) so the drilldown persists its time range (`_g`)
+        // and selected data source (`_a`) — bookmarkable/shareable and reload-proof. Uses this app's
+        // own scoped history.
+        services.osdUrlStateStorage = createOsdUrlStateStorage({
+          history: params.history,
+          useHash: coreStart.uiSettings.get('state:storeInSessionStorage'),
+          ...withNotifyOnErrors(coreStart.notifications.toasts),
+        });
+
         const { renderLogsDrilldownApp } = await import('./application/pages/logs_drilldown');
         return renderLogsDrilldownApp(params, services);
       },
@@ -618,10 +635,12 @@ export class ExplorePlugin implements Plugin<
         updater$: this.stateUpdaterByApp[ExploreFlavor.Metrics]!.asObservable(),
       })
     );
-    // Standalone Logs Drilldown app (own mount, no shared store). MUST be registered before the
-    // base `explore` app: the base app's route (`/app/explore`) is a non-exact prefix that would
-    // otherwise match `/app/explore/logs-drilldown` first and redirect to the logs flavor.
-    core.application.register(createLogsDrilldownApp());
+    // Standalone Logs Drilldown app (own mount, no shared store), feature-flagged. MUST be registered
+    // before the base `explore` app: the base app's route (`/app/explore`) is a non-exact prefix that
+    // would otherwise match `/app/explore/logs-drilldown` first and redirect to the logs flavor.
+    if (logsDrilldownEnabled) {
+      core.application.register(createLogsDrilldownApp());
+    }
     core.application.register(createExploreApp());
 
     // Register nav links for different workspaces
@@ -663,14 +682,14 @@ export class ExplorePlugin implements Plugin<
           category: undefined,
           order: 200,
           euiIconType: 'discoverApp' as const,
-          navPopover: buildExploreNavPopover(ExploreFlavor.Logs),
+          navPopover: buildExploreNavPopover(ExploreFlavor.Logs, logsDrilldownEnabled),
         },
         {
           id: `${PLUGIN_ID}/${ExploreFlavor.Traces}`,
           category: DEFAULT_APP_CATEGORIES.applicationPerformance,
           order: 100,
           euiIconType: 'apmTrace' as const,
-          navPopover: buildExploreNavPopover(ExploreFlavor.Traces),
+          navPopover: buildExploreNavPopover(ExploreFlavor.Traces, logsDrilldownEnabled),
         },
         {
           id: `${PLUGIN_ID}/${ExploreFlavor.Metrics}`,
