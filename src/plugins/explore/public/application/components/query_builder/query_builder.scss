@@ -38,13 +38,17 @@ $plqBoxBg: mix($euiColorEmptyShade, $euiColorLightestShade, 55%);
 $plqCtlBg: $euiColorEmptyShade; // #FFF (light) / dark panel (dark)
 $plqHoverBorder: $euiColorMediumShade; // #98A2B3
 /* stylelint-disable @osd/stylelint/no_restricted_values */
-// Neutral chrome (soft border, label chip, chip fill, ✕ hover). Light: the
-// mock's exact hex. Dark: OUI's light shade lifts the chip a step above the
-// panel bg so it stays legible, with the ✕ hover a further step lighter.
+// Neutral chrome (soft border, label chip, chip fill, ✕/trigger hover). Light:
+// the mock's exact hex. Dark: OUI's light shade lifts the chip a step above the
+// panel bg so it stays legible. The hover fill is a subtle shift off the chip
+// fill — in light mode a hair lighter, but in dark mode it must go *darker*
+// (shade), not lighter: the text flips near-white, so a lighter hover would
+// close in on the text (a mid-shade hover drops text contrast below ~2:1). A
+// darker hover keeps ~5.8:1 text contrast while staying distinct from the fill.
 $plqBorderSoft: lightOrDarkTheme(#e6ebf2, $euiColorLightShade);
 $plqLabelChip: lightOrDarkTheme(#e9edf3, $euiColorLightShade);
 $plqChipBg: lightOrDarkTheme(#eef1f6, $euiColorLightShade);
-$plqXHover: lightOrDarkTheme(#dce2ea, $euiColorMediumShade);
+$plqXHover: lightOrDarkTheme(#dce2ea, shade($euiColorLightShade, 40%));
 
 // Soft primary fill (active icon buttons, popover item hover). tintOrShade gives
 // the mock's pale-blue tint under light and a matching dark-blue shade under
