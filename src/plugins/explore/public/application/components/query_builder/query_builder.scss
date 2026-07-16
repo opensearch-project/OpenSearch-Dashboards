@@ -17,27 +17,45 @@
 // `plq` prefix reads as "plugin query builder" — the classes are builder-neutral.
 
 // Palette. The exact OUI-light values the mock was drawn against map 1:1 to
-// these OUI variables, so they're used directly. The remaining tints are the
-// mock's bespoke OUI-adjacent shades with no exact OUI variable; they carry a
-// stylelint disable to keep the prototype's exact hex (matching the precedent in
-// language_toggle.scss), since approximating them via mix() drifts a level or
-// two off the design.
-$plqInk: $euiTextColor; // #343741
+// these OUI variables, so they're used directly — and being OUI vars they also
+// flip correctly under the dark theme. The remaining tints are the mock's
+// bespoke OUI-adjacent shades with no exact OUI variable; the mock was only ever
+// drawn against light, so each is wrapped in `lightOrDarkTheme()` to keep the
+// prototype's exact light hex while supplying an adaptive dark-theme counterpart
+// (derived from the theme-aware OUI shades so it tracks whichever dark palette is
+// active). The stylelint disable keeps the prototype's exact hex (matching the
+// precedent in language_toggle.scss), since approximating the light values via
+// mix() drifts a level or two off the design.
+$plqInk: $euiTextColor; // #343741 (light) / near-white (dark)
 $plqSub: $euiColorDarkShade; // #69707D
 $plqBorder: $euiBorderColor; // #D3DAE6
 $plqPrimary: $euiColorPrimary; // #006BB4
 // The box sits a hair off pure white — lighter than OUI's lightest shade so it
-// reads as a faint tint rather than a solid gray panel.
+// reads as a faint tint rather than a solid gray panel. Both operands are
+// theme-aware OUI shades, so this resolves to a faint dark panel under the dark
+// theme without any explicit branching.
 $plqBoxBg: mix($euiColorEmptyShade, $euiColorLightestShade, 55%);
-$plqCtlBg: $euiColorEmptyShade; // #FFF
+$plqCtlBg: $euiColorEmptyShade; // #FFF (light) / dark panel (dark)
 $plqHoverBorder: $euiColorMediumShade; // #98A2B3
 /* stylelint-disable @osd/stylelint/no_restricted_values */
-$plqBorderSoft: #e6ebf2;
-$plqPrimarySoft: #e6f1fa;
-$plqLabelChip: #e9edf3;
-$plqChipBg: #eef1f6;
-$plqFnText: #00538c;
-$plqXHover: #dce2ea;
+// Neutral chrome (soft border, label chip, chip fill, ✕ hover). Light: the
+// mock's exact hex. Dark: OUI's light shade lifts the chip a step above the
+// panel bg so it stays legible, with the ✕ hover a further step lighter.
+$plqBorderSoft: lightOrDarkTheme(#e6ebf2, $euiColorLightShade);
+$plqLabelChip: lightOrDarkTheme(#e9edf3, $euiColorLightShade);
+$plqChipBg: lightOrDarkTheme(#eef1f6, $euiColorLightShade);
+$plqXHover: lightOrDarkTheme(#dce2ea, $euiColorMediumShade);
+
+// Soft primary fill (active icon buttons, popover item hover). tintOrShade gives
+// the mock's pale-blue tint under light and a matching dark-blue shade under
+// dark — its light value is within ~1 unit of the prototype's #e6f1fa.
+$plqPrimarySoft: tintOrShade($euiColorPrimary, 90%, 70%);
+$plqFnText: lightOrDarkTheme(#00538c, $euiColorPrimary);
+
+// String-literal value text in the Where chips (matching the search box's
+// quoted-string token). Light: the mock's purple. Dark: a lightened purple so it
+// stays legible on the dark chip fill.
+$plqStr: lightOrDarkTheme(#8737a8, #c98fd8);
 /* stylelint-enable @osd/stylelint/no_restricted_values */
 $plqRadius: 2px; // flat, code-style radius inside the builder
 // Every control shares one height, matching the single-line Monaco search editor
@@ -607,8 +625,7 @@ $plqControlHeight: 36px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    /* stylelint-disable-next-line @osd/stylelint/no_restricted_values */
-    color: #8737a8;
+    color: $plqStr;
   }
 
   // Placeholder state (no value yet) reads as muted UI text, not a literal.
@@ -637,8 +654,7 @@ $plqControlHeight: 36px;
     font-family: $euiCodeFontFamily;
     font-size: 11.5px;
     line-height: 18px;
-    /* stylelint-disable-next-line @osd/stylelint/no_restricted_values */
-    color: #8737a8;
+    color: $plqStr;
 
     &::placeholder {
       color: $plqSub;
