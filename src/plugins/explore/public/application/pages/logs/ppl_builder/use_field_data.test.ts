@@ -1,0 +1,82 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { renderHook } from '@testing-library/react';
+import { useFieldData } from './use_field_data';
+
+const mockUseDatasetContext = jest.fn();
+
+jest.mock('../../../../../../opensearch_dashboards_react/public', () => ({
+  useOpenSearchDashboards: () => ({ services: { data: { autocomplete: {} } } }),
+}));
+
+jest.mock('../../../context', () => ({
+  useDatasetContext: () => mockUseDatasetContext(),
+}));
+
+const datasetWithFields = (
+  fields: Array<{ name: string; type?: string; aggregatable?: boolean }>
+) => ({
+  timeFieldName: '@timestamp',
+  fields: { getAll: () => fields },
+});
+
+describe('useFieldData', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('drops a `.keyword` field when its base sibling exists', () => {
+    mockUseDatasetContext.mockReturnValue({
+      dataset: datasetWithFields([
+        { name: 'machine.os', type: 'string', aggregatable: false },
+        { name: 'machine.os.keyword', type: 'string', aggregatable: true },
+      ]),
+    });
+
+    const { result } = renderHook(() => useFieldData());
+
+    expect(result.current.fieldNames).toEqual(['machine.os']);
+  });
+
+  it('keeps a `.keyword` field that has no base sibling', () => {
+    mockUseDatasetContext.mockReturnValue({
+      dataset: datasetWithFields([{ name: 'tags.keyword', type: 'string', aggregatable: true }]),
+    });
+
+    const { result } = renderHook(() => useFieldData());
+
+    expect(result.current.fieldNames).toEqual(['tags.keyword']);
+  });
+
+  it('excludes underscore-prefixed and redundant keyword fields together', () => {
+    mockUseDatasetContext.mockReturnValue({
+      dataset: datasetWithFields([
+        { name: '_id' },
+        { name: 'service' },
+        { name: 'service.keyword' },
+        { name: 'bytes', type: 'number' },
+      ]),
+    });
+
+    const { result } = renderHook(() => useFieldData());
+
+    expect(result.current.fieldNames).toEqual(['service', 'bytes']);
+  });
+
+  it('excludes date-typed fields from group-by options (time grouping is "over time")', () => {
+    mockUseDatasetContext.mockReturnValue({
+      dataset: datasetWithFields([
+        { name: '@timestamp', type: 'date' },
+        { name: 'service' },
+        { name: 'bytes', type: 'number' },
+      ]),
+    });
+
+    const { result } = renderHook(() => useFieldData());
+
+    // The full field list keeps the date field; the group-by options drop it.
+    expect(result.current.fieldNames).toEqual(['@timestamp', 'service', 'bytes']);
+    expect(result.current.groupByFieldNames).toEqual(['service', 'bytes']);
+  });
+});

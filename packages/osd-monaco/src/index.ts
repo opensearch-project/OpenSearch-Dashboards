@@ -34,6 +34,7 @@ export {
   clearPPLValidationContext,
   PPLLang,
   revalidatePPLModel,
+  setupPPLTokenization,
   registerPPLValidationProvider,
   resolvePPLValidationResult,
   setPPLValidationContext,

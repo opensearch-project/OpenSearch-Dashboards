@@ -56,6 +56,9 @@ export const IGNORE_FILE_GLOBS = [
   'release-notes/*',
   '**/antlr/**/.generated/**/*',
   'packages/osd-antlr-grammar/src/**/.generated/**/*',
+  // ANTLR grammar sources use PascalCase filenames (generated class names
+  // derive from the .g4 filename).
+  'packages/osd-antlr-grammar/src/**/grammar/*.g4',
 
   // filename must match language code which requires capital letters
   '**/translations/*.json',

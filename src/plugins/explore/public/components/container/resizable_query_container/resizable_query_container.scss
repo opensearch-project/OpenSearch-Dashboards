@@ -35,6 +35,39 @@
       overflow: visible;
     }
 
+    // The logs builder panel wraps its rows in two EuiFlexGroups. Both default
+    // to `flex: 1`, so any extra height from dragging the handle gets split
+    // between them — leaving a gap above the (vertically centered) widgets row
+    // and below the top-anchored content row. Pin the widgets row to its
+    // natural height and let only the content row absorb the slack, matching
+    // the plain (non-builder) editor's fill behavior.
+    .exploreQueryPanel__widgetsRow {
+      flex-grow: 0;
+    }
+
+    .exploreQueryPanel__contentRow {
+      flex-grow: 1;
+      min-height: 0;
+
+      // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+      >.euiFlexItem {
+        align-self: stretch;
+        min-height: 0;
+      }
+
+      // Only clip the visual builder. When the handle is dragged up past what
+      // the builder needs, scroll its content instead of letting it bleed out
+      // below the panel into the results area (the floating "Show"/"by" labels
+      // were spilling through). Combobox and search-suggestion popovers portal
+      // to <body>, so clipping here never truncates a dropdown. Scoped to the
+      // builder so the code editor (Monaco, which scrolls internally and can be
+      // a sub-pixel taller than its container) never shows a stray scrollbar.
+      // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+      >.euiFlexItem:has(> .plqBuilder) {
+        overflow-y: auto;
+      }
+    }
+
     .exploreQueryPanel__editorsWrapper {
       flex: 1;
       min-height: 0;

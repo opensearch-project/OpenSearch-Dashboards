@@ -82,10 +82,13 @@ const createPPLLanguageConfiguration = (): monaco.languages.LanguageConfiguratio
 });
 
 /**
- * Set up synchronous tokenization for PPL
+ * Register PPL synchronous tokenization on a language id. Defaults to the PPL
+ * language, but any language whose content is (a subset of) PPL — e.g. the logs
+ * builder's restricted search-expression language — can register the same
+ * tokenizer so the shared editor theme colors it identically to code mode.
  */
-const setupPPLTokenization = () => {
-  monaco.languages.setTokensProvider(PPL_LANGUAGE_ID, {
+export const setupPPLTokenization = (languageId: string = PPL_LANGUAGE_ID) => {
+  monaco.languages.setTokensProvider(languageId, {
     getInitialState: () => {
       const state = {
         clone: () => state,

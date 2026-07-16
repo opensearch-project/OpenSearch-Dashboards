@@ -1,0 +1,18 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+// Description line under each function name in the category menu.
+.cfmMenuDescription {
+  max-width: 300px;
+  white-space: normal;
+}
+
+// Cap the menu popover so a long function list scrolls rather than growing into
+// a tall popover that overflows the viewport.
+.cfmMenuPanel {
+  max-height: 400px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}

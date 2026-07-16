@@ -36,7 +36,7 @@ export const OperationPill: React.FC<OperationPillProps> = ({
   const isRangeFn = RANGE_FUNCTIONS.has(op.id);
   // Aggregations render as keyword tokens in the editor and preview —
   // mirror that color on the operation-name combobox.
-  const opComboClass = GROUPABLE_AGGREGATION_IDS.has(op.id) ? 'pqbCombo--aggName' : undefined;
+  const opComboClass = isAgg ? 'pqbCombo--aggName' : undefined;
   // When hasRange is set, the range param (first param for most range fns,
   // second for quantile_over_time) is on the metric row — skip it in the pill.
   const rangeParamIdx = isRangeFn && hasRange ? (op.id === 'quantile_over_time' ? 1 : 0) : -1;

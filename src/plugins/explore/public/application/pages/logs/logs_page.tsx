@@ -26,8 +26,10 @@ import {
   EXPLORE_LOGS_TAB_ID,
   EXPLORE_PATTERNS_TAB_ID,
   EXPLORE_VISUALIZATION_TAB_ID,
+  EXPLORE_ENABLE_QUERY_BUILDER_SETTING,
 } from '../../../../common';
 import { setActiveTab } from '../../utils/state_management/slices';
+import { LogsQueryPanel } from './logs_query_panel';
 
 /**
  * Main application component for the Explore plugin
@@ -84,6 +86,8 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
   useTimefilterSubscription(services);
   useHeaderVariants(services, HeaderVariant.APPLICATION);
 
+  const queryBuilderEnabled = services.uiSettings.get(EXPLORE_ENABLE_QUERY_BUILDER_SETTING, true);
+
   return (
     <EuiErrorBoundary>
       <div className="mainPage">
@@ -92,7 +96,10 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
             <TopNav setHeaderActionMenu={setHeaderActionMenu} savedExplore={savedExplore} />
             <NewExperienceBanner />
 
-            <ResizableQueryContainer queryPanel={<QueryPanel />}>
+            <ResizableQueryContainer
+              queryPanel={queryBuilderEnabled ? <LogsQueryPanel /> : <QueryPanel />}
+              tallDefault={queryBuilderEnabled}
+            >
               {/* Main content area with resizable panels under QueryPanel */}
               <BottomContainer />
             </ResizableQueryContainer>
