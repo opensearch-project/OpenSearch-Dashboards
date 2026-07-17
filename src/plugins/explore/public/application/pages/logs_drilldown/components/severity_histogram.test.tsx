@@ -13,16 +13,20 @@ jest.mock('./histogram_chart', () => ({
   HistogramChart: (props: any) => (
     <div data-test-subj="mock-histogram-chart" data-chart-id={props.chartId} />
   ),
-  SINGLE_SERIES_BUCKET: 'debug',
+  SINGLE_SERIES_BUCKET: 'unknown',
 }));
 jest.mock('../severity', () => ({
+  // Mirrors the real map after the bugbash swap: unknown → "regular logs" blue, debug → purple.
   severityColor: (b: string) =>
     (
-      ({ error: '#f13939', warn: '#F90', info: '#00BD6B', debug: '#0077CC' }) as Record<
-        string,
-        string
-      >
-    )[b] || '#8E96A3',
+      ({
+        error: '#f13939',
+        warn: '#F90',
+        info: '#00BD6B',
+        debug: '#9170B8',
+        unknown: '#0077CC',
+      }) as Record<string, string>
+    )[b] || '#0077CC',
 }));
 
 const services = {} as any;
@@ -56,25 +60,24 @@ describe('SeverityHistogram', () => {
     expect(screen.getByTestId('logsExploreLegend-ERROR')).toHaveTextContent('3');
   });
 
-  it("labels the single-series 'count' total as 'logs' and colors it the debug/blue bar color", () => {
+  it("labels the single-series 'count' total as 'logs' and colors it the 'regular logs' blue", () => {
     const { container } = render(
       <SeverityHistogram
         services={services}
         chartId="x"
         histogram={{
           ...severityHistogram,
-          // bucket is 'unknown' (as normalizeSeverity('count') yields) — the legend must STILL use
-          // the single-series debug/blue, matching the bars, not the grey 'unknown' color.
+          // bucket is 'unknown' (as normalizeSeverity('count') yields) — after the swap that IS the
+          // prominent "regular logs" blue, matching the single-series bars.
           totals: [{ name: 'count', bucket: 'unknown', total: 1500 }],
         }}
       />
     );
     expect(screen.getByTestId('logsExploreLegend-count')).toHaveTextContent('logs');
     expect(screen.getByTestId('logsExploreLegend-count')).toHaveTextContent('1.5K');
-    // The EuiHealth dot uses the debug/blue color (#0077CC), not the grey 'unknown' (#8E96A3).
+    // The EuiHealth dot uses the "regular logs" blue (#0077CC in the mock), via the unknown bucket.
     const html = container.innerHTML;
     expect(html).toContain('#0077CC');
-    expect(html).not.toContain('#8E96A3');
   });
 
   it('humanizes millions with an M suffix and thousands ≥10K without a decimal', () => {

@@ -170,7 +170,9 @@
     display: inline-flex;
     align-items: center;
     gap: $euiSizeXS;
-    height: 20px;
+
+    // Match the time-field capsule height (24px) so the two header chips align (bugbash #1).
+    height: 24px;
     padding: 0 $euiSizeS;
     border-radius: 999px;
     font-size: 11px;
@@ -304,6 +306,10 @@
     min-width: 0;
     background: transparent;
     padding: 0;
+
+    // Reserve the scrollbar gutter permanently so revealing the scrollbar on :hover (below) doesn't
+    // reflow the log lines — fixes the "logs shift slightly on hover" report (bugbash #6).
+    scrollbar-gutter: stable;
 
     // Scrollbars hidden at rest, revealed on hover (and while scrolling). The edge fade below is the
     // resting "more content" cue; the container stays scrollable/focusable so keyboard + trackpad

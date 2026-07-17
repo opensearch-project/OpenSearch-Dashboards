@@ -9,7 +9,12 @@ import { useDatasetList } from './use_dataset_list';
 
 const patternFetch = jest.fn();
 
-const makeServices = (typeRegistered = true) =>
+// `signalTypes`: id → signalType saved-object attribute, returned by savedObjects.client.find so the
+// hook can filter to log datasets. Default {} → find resolves an empty set → hook shows all (fallback).
+const makeServices = (
+  typeRegistered = true,
+  signalTypes: Record<string, string | undefined> = {}
+) =>
   ({
     data: {
       query: {
@@ -21,6 +26,16 @@ const makeServices = (typeRegistered = true) =>
                 : undefined,
           }),
         },
+      },
+    },
+    savedObjects: {
+      client: {
+        find: jest.fn().mockResolvedValue({
+          savedObjects: Object.entries(signalTypes).map(([id, signalType]) => ({
+            id,
+            attributes: { signalType },
+          })),
+        }),
       },
     },
   }) as unknown as any;
@@ -147,5 +162,39 @@ describe('useDatasetList', () => {
     render(<Harness services={makeServices()} search="" />);
     await waitFor(() => expect(result.loading).toBe(false));
     expect(result.datasets).toEqual([]);
+  });
+
+  // --- logs-only signalType filter ---
+  it('shows only log + untyped datasets, hiding traces/metrics (by signalType)', async () => {
+    patternFetch.mockResolvedValue(
+      children([
+        { title: 'app-logs-*', id: 'log-1' },
+        { title: 'otel-traces-*', id: 'trace-1' },
+        { title: 'prom-metrics-*', id: 'metric-1' },
+        { title: 'legacy-*', id: 'legacy-1' }, // no signalType (legacy) → kept
+      ])
+    );
+    const services = makeServices(true, {
+      'log-1': 'logs',
+      'trace-1': 'traces',
+      'metric-1': 'metrics',
+      // legacy-1 intentionally absent → undefined signalType
+    });
+    render(<Harness services={services} search="" />);
+    await waitFor(() => expect(result.loading).toBe(false));
+    expect(result.datasets.map((d) => d.name)).toEqual(['app-logs-*', 'legacy-*']);
+  });
+
+  it('falls back to showing all datasets when the signalType lookup returns nothing', async () => {
+    patternFetch.mockResolvedValue(
+      children([
+        { title: 'app-logs-*', id: 'log-1' },
+        { title: 'otel-traces-*', id: 'trace-1' },
+      ])
+    );
+    // No signalTypes provided → find resolves empty → hook does not filter (over-show, not blank).
+    render(<Harness services={makeServices()} search="" />);
+    await waitFor(() => expect(result.loading).toBe(false));
+    expect(result.datasets.map((d) => d.name).sort()).toEqual(['app-logs-*', 'otel-traces-*']);
   });
 });

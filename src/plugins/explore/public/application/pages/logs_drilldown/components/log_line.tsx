@@ -49,7 +49,7 @@ export const LogLine: React.FC<Props> = ({
       data-test-subj="logsExploreLogLine"
     >
       {tsValue !== undefined && <span className="logsExploreLogLine__ts">{formatTs(tsValue)}</span>}
-      {levelValue !== undefined && (
+      {levelValue != null && String(levelValue).trim() !== '' && (
         <span
           className="logsExploreLogLine__level"
           style={{ color: severityColor(levelBucket) }}

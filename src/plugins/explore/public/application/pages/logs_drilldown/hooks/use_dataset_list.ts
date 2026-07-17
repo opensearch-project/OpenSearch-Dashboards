@@ -22,8 +22,14 @@ interface UseDatasetListResult {
   error?: string;
 }
 
+// Logs Drilldown only surfaces LOG datasets. A dataset qualifies when its saved-object `signalType`
+// is 'logs' OR is absent (legacy index-patterns predate signal typing — treat them as logs). Traces
+// and metrics datasets are hidden. `signalType` isn't carried on the shared index-pattern fetch, so
+// we resolve it client-side via one saved-objects lookup and filter here (drilldown-local).
+const SIGNAL_TYPE_LOGS = 'logs';
+
 /**
- * Lists existing datasets (index-patterns) for the active data source, mapped to `BrowsableItem`s
+ * Lists existing LOG datasets (index-patterns) for the active data source, mapped to `BrowsableItem`s
  * (`kind:'dataset'`). These render first in the Rows view — they're already activated, so their
  * primary action is a direct "Query". Uses the same `datasetService` the dataset-create UI uses.
  */
@@ -53,6 +59,27 @@ export const useDatasetList = ({
         const result = await type.fetch(services as any, [root]);
         const activeId = dataSourceId ?? '';
 
+        // Resolve each index-pattern's signalType (not carried on the shared fetch above) so we can
+        // keep only LOG datasets. One saved-objects lookup; map id → signalType.
+        const signalTypeById = new Map<string, string | undefined>();
+        try {
+          const so = await services.savedObjects.client.find<{ signalType?: string }>({
+            type: 'index-pattern',
+            fields: ['signalType'],
+            perPage: 10000,
+          });
+          so.savedObjects.forEach((s) => signalTypeById.set(s.id, s.attributes?.signalType));
+        } catch {
+          // If the lookup fails, fall back to showing all (data-source-scoped) datasets rather than
+          // hiding everything — better to over-show than to blank the list.
+        }
+        const isLogDataset = (id: string): boolean => {
+          if (signalTypeById.size === 0) return true; // lookup unavailable → don't filter
+          const st = signalTypeById.get(id);
+          // Logs, or untyped/legacy index-patterns (no signalType). Traces/metrics are excluded.
+          return st === SIGNAL_TYPE_LOGS || st == null;
+        };
+
         const datasets: BrowsableItem[] = (result.children ?? [])
           .filter((child) => {
             // Scope to the active data source: local cluster (no parent) when activeId is empty,
@@ -60,6 +87,8 @@ export const useDatasetList = ({
             const parentId = child.parent?.id ?? '';
             return parentId === activeId;
           })
+          // Logs-only: hide traces/metrics datasets; keep logs + untyped legacy index-patterns.
+          .filter((child) => isLogDataset(child.id))
           .map((child) => {
             const meta = child.meta as { timeFieldName?: string; displayName?: string } | undefined;
             return {

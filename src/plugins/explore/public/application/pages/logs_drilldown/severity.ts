@@ -87,11 +87,17 @@ export const normalizeSeverity = (raw: unknown): SeverityBucket => {
   return 'unknown';
 };
 
+// Distinct colorblind-safe purple (euiPaletteColorBlind index 3) for the rare `debug` bucket, so it
+// stays separable from `unknown`, which now takes the prominent "regular logs" blue below.
+const DEBUG_PURPLE = '#9170B8';
+
 /**
  * THE single severity → color map for the whole drilldown. Used identically by the histogram bars,
  * the legend, and the log-line level tokens so a severity reads the same everywhere. Sourced from
- * the SAME palette Metrics Explore uses — `getColors()` status colors (theme-aware, WCAG-tuned) —
- * so the two experiences look like one system: error→red, warn→yellow, info→green, debug→blue.
+ * the SAME palette Metrics Explore uses — `getColors()` status colors (theme-aware, WCAG-tuned).
+ * error→red, warn→yellow, info→green. `unknown` (no recognized level — the common "just logs" case,
+ * and the color of a no-severity index's single series) takes the prominent blue; the rare `debug`
+ * takes a distinct purple so the two never collide (bugbash #2).
  */
 export const severityColor = (bucket: SeverityBucket): string => {
   const c = getColors();
@@ -103,9 +109,10 @@ export const severityColor = (bucket: SeverityBucket): string => {
     case 'info':
       return c.statusGreen;
     case 'debug':
-      return c.statusBlue;
+      return DEBUG_PURPLE;
     default:
-      return c.subText ?? '#8E96A3';
+      // `unknown` (and no-severity single-series logs) → the "regular logs" blue.
+      return c.statusBlue;
   }
 };
 

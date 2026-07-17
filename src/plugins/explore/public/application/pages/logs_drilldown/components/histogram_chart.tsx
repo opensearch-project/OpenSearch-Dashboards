@@ -32,10 +32,11 @@ interface Props {
   chartId: string;
 }
 
-// Blue for the no-severity single-series count (matches the debug/blue status color). Exported so
-// the legend colors the "logs" total the SAME blue as the bars (not the grey 'unknown' color that
-// normalizeSeverity('count') would otherwise yield).
-export const SINGLE_SERIES_BUCKET = 'debug' as const;
+// The no-severity single-series count ("regular logs") is colored via the `unknown` bucket, which
+// now carries the prominent "regular logs" blue (see severity.ts). Exported so the legend colors the
+// "logs" total the SAME blue as the bars. (Previously this pointed at `debug` to borrow its blue;
+// `debug` is now purple, so we point at `unknown` — semantically correct: no level = unknown.)
+export const SINGLE_SERIES_BUCKET = 'unknown' as const;
 const SEVERITY_STACK_ORDER: Record<string, number> = {
   error: 0,
   warn: 1,

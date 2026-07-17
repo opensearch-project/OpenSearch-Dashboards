@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { EuiHealth, EuiText, EuiTextColor } from '@elastic/eui';
+import { EuiHealth, EuiText, EuiTextColor, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { ExploreServices } from '../../../../types';
 import { HistogramResult, SeverityTotal } from '../hooks/fetch_histogram';
@@ -31,6 +31,20 @@ const humanize = (n: number): string => {
   if (n < 1_000_000) return unit(n / 1000, 'K');
   if (n < 1_000_000_000) return unit(n / 1_000_000, 'M');
   return unit(n / 1_000_000_000, 'B');
+};
+
+/** Legend hover copy. `unknown`/`count` explain the "no recognized level" case; others name the level. */
+const legendTooltip = (t: SeverityTotal): string => {
+  if (t.name === 'count' || t.bucket === 'unknown') {
+    return i18n.translate('explore.logsDrilldown.histogram.legend.unknownTip', {
+      defaultMessage:
+        'Documents with no recognized severity/level field (e.g. severityText, level). Counted as logs.',
+    });
+  }
+  return i18n.translate('explore.logsDrilldown.histogram.legend.severityTip', {
+    defaultMessage: 'Documents at the {level} severity level',
+    values: { level: t.name },
+  });
 };
 
 /**
@@ -69,21 +83,21 @@ export const SeverityHistogram: React.FC<Props> = ({ services, histogram, onBrus
       />
       <div className="logStreamCard__legend">
         {histogram.totals.map((t: SeverityTotal) => (
-          <EuiHealth
-            key={t.name}
-            // The no-severity single series ('count') colors the legend dot the SAME blue as its
-            // bars (SINGLE_SERIES_BUCKET), not the grey 'unknown' that normalizeSeverity('count')
-            // yields. Severity series use their own bucket color.
-            color={severityColor(t.name === 'count' ? SINGLE_SERIES_BUCKET : t.bucket)}
-            data-test-subj={`logsExploreLegend-${t.name}`}
-          >
-            <EuiText size="xs" className="logStreamCard__legendRow">
-              <span className="logStreamCard__legendName">
-                {t.name === 'count' ? 'logs' : t.name}
-              </span>{' '}
-              <EuiTextColor color="subdued">{humanize(t.total)}</EuiTextColor>
-            </EuiText>
-          </EuiHealth>
+          <EuiToolTip key={t.name} content={legendTooltip(t)} position="top">
+            <EuiHealth
+              // The no-severity single series ('count') colors the legend dot the SAME blue as its
+              // bars (SINGLE_SERIES_BUCKET), matching the severity series' own bucket colors.
+              color={severityColor(t.name === 'count' ? SINGLE_SERIES_BUCKET : t.bucket)}
+              data-test-subj={`logsExploreLegend-${t.name}`}
+            >
+              <EuiText size="xs" className="logStreamCard__legendRow">
+                <span className="logStreamCard__legendName">
+                  {t.name === 'count' ? 'logs' : t.name}
+                </span>{' '}
+                <EuiTextColor color="subdued">{humanize(t.total)}</EuiTextColor>
+              </EuiText>
+            </EuiHealth>
+          </EuiToolTip>
         ))}
       </div>
     </div>

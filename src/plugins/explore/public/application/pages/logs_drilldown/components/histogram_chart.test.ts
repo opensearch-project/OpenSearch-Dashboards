@@ -29,8 +29,9 @@ describe('buildChart', () => {
         },
       ])
     );
-    // One series, palette is the single debug/blue color.
-    expect(palette).toEqual([severityColor('debug')]);
+    // One series, palette is the single "regular logs" blue — colored via the `unknown` bucket
+    // (SINGLE_SERIES_BUCKET), which now carries the prominent blue.
+    expect(palette).toEqual([severityColor('unknown')]);
     // The point-series builder spans the [from,to] bounds at the given interval, so it carries at
     // least the two real buckets (and includes bucket 0).
     expect(chart.xAxisOrderedValues.length).toBeGreaterThanOrEqual(2);
