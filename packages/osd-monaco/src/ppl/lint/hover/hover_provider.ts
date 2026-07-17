@@ -11,23 +11,38 @@ import { renderHoverCard, SeverityLabel } from './hover_card';
 import { collectPPLDiagnosticActions, DiagnosticAction } from '../diagnostic_action';
 import { getCatalogEntryById } from '../catalog';
 
+// Command ids are dotted identifiers (`ppl.aiFix`). Anything else — spaces,
+// `?`, `)`, path separators — could reshape the `command:` URI, so a contributor
+// cannot smuggle a different command or arguments past the link boundary.
+const SAFE_COMMAND_ID = /^[\w.-]+$/;
+
+// Escape the markdown-significant characters in contributor-supplied link text
+// so a `title` cannot break out of the `[..](..)` link and inject its own
+// `command:` link into the trusted block. Newlines collapse to a space so the
+// link stays on one line. Valid titles ("Ask Olly to fix") are unaffected.
+function escapeMarkdownLinkText(text: string): string {
+  return text.replace(/[\\`*_{}[\]()#+\-.!|<>~]/g, '\\$&').replace(/[\r\n]+/g, ' ');
+}
+
 /**
  * Render contributed actions (e.g. an AI fix) as Monaco command links. This is
  * returned as a SEPARATE, trusted content part so the main hover card can stay
- * untrusted: only these fully-controlled links (fixed titles, JSON-encoded args)
- * live in the trusted block. Returns undefined when nothing is contributed.
+ * untrusted: only these controlled links live in the trusted block. Because the
+ * block is trusted (so `command:` links execute), contributor-supplied strings
+ * are treated as untrusted input: the title is markdown-escaped and the command
+ * id is shape-validated before being embedded, so no contributor can inject
+ * arbitrary markdown or an unintended command. Args are JSON- and URI-encoded.
+ * Returns undefined when nothing renders.
  */
 function renderContributedActions(actions: DiagnosticAction[]): monaco.IMarkdownString | undefined {
-  if (actions.length === 0) {
-    return undefined;
-  }
   const links = actions
+    .filter((action) => SAFE_COMMAND_ID.test(action.commandId))
     .map((action) => {
       const args = encodeURIComponent(JSON.stringify(action.args ?? []));
-      return `[${action.title}](command:${action.commandId}?${args})`;
+      return `[${escapeMarkdownLinkText(action.title)}](command:${action.commandId}?${args})`;
     })
     .join(' &nbsp;·&nbsp; ');
-  return { value: links, isTrusted: true };
+  return links.length > 0 ? { value: links, isTrusted: true } : undefined;
 }
 
 export const LINT_OWNER = 'PPL_LINT';
