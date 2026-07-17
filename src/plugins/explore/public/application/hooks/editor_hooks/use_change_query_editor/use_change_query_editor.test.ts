@@ -13,6 +13,7 @@ import { useSelector } from '../../../legacy/discover/application/utils/state_ma
 import { useDispatch } from 'react-redux';
 import { selectEditorMode, selectQuery } from '../../../utils/state_management/selectors';
 import { onEditorRunActionCreator } from '../../../utils/state_management/actions/query_editor';
+import { setIsQueryEditorDirty } from '../../../utils/state_management/slices/query_editor';
 import { EditorMode } from '../../../utils/state_management/types';
 import { useChangeQueryEditor } from './use_change_query_editor';
 
@@ -196,6 +197,9 @@ describe('useChangeQueryEditor', () => {
     // Prompt mode stages only; it does not commit to the draft or run.
     expect(mockSetQuery).not.toHaveBeenCalled();
     expect(onEditorRunActionCreator).not.toHaveBeenCalled();
+    // Programmatic setValue bypasses Monaco onChange, so the dirty flag is set
+    // explicitly to keep the submit button showing "Update".
+    expect(mockDispatch).toHaveBeenCalledWith(setIsQueryEditorDirty(true));
     expect(mockFocusOnEditor).toHaveBeenCalled();
   });
 

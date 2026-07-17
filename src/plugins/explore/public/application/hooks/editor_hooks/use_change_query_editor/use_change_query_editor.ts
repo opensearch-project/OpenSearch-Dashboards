@@ -17,6 +17,7 @@ import { EditorMode } from '../../../utils/state_management/types';
 import { useSetEditorText } from '../use_set_editor_text';
 import { useEditorFocus } from '../use_editor_focus';
 import { onEditorRunActionCreator } from '../../../utils/state_management/actions/query_editor';
+import { setIsQueryEditorDirty } from '../../../utils/state_management/slices/query_editor';
 
 export const useChangeQueryEditor = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
@@ -57,17 +58,21 @@ export const useChangeQueryEditor = () => {
       );
 
       // Prompt (natural-language) mode is only shown with the editor mounted, so
-      // keep the existing staging behavior via the prompt-filter helper.
+      // keep the existing staging behavior via the prompt-filter helper. Setting
+      // the value programmatically bypasses the Monaco onChange that flips the
+      // dirty flag, so mark the editor dirty explicitly to keep the TopNav submit
+      // button showing "Update" rather than "Refresh".
       if (editorMode === EditorMode.Prompt) {
         setEditorText(languageConfig.addFiltersToPrompt?.(baseText, newFilters) || baseText);
+        dispatch(setIsQueryEditorDirty(true));
         focusOnEditor();
         return;
       }
 
       // Each language config serializes filters into its own syntax. For PPL the
-      // shared util merges value filters into the leading search expression so
-      // the logs visual builder can round-trip them as chips (exists filters use
-      // `| WHERE` and open in code mode).
+      // shared util inserts each filter as its own `| WHERE` command after the
+      // leading search command (including exists/not-exists as ISNOTNULL/ISNULL),
+      // all of which the logs visual builder round-trips back into chips.
       const newText = languageConfig.addFiltersToQuery?.(baseText, newFilters) || baseText;
 
       // Commit to the QueryStringManager draft (keeps TopNav submit in sync even

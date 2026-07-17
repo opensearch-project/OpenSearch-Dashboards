@@ -27,22 +27,25 @@ export class PPLFilterUtils extends FilterUtils {
     if (!predicate) return query;
 
     const whereCommand = 'WHERE ' + predicate;
-    const negatedWhereCommand =
-      'WHERE ' +
-      PPLFilterUtils.toPredicate({
-        ...filter,
-        meta: { ...filter.meta, negate: !filter.meta.negate },
-      });
+    const negatedPredicate = PPLFilterUtils.toPredicate({
+      ...filter,
+      meta: { ...filter.meta, negate: !filter.meta.negate },
+    });
     const commands = query.split('|').map((cmd) => cmd.trim());
     let filterExists = false;
 
+    // Match the WHERE keyword case-insensitively: the PPL visual builder emits a
+    // lowercase `where`, so a case-sensitive prefix check would miss builder-emitted
+    // clauses and duplicate them when the same filter is re-added from the sidebar.
     for (let i = 0; i < commands.length; i++) {
-      if (commands[i].startsWith('WHERE ')) {
-        if (commands[i] === whereCommand) {
+      const match = commands[i].match(/^where\s+(.*)$/is);
+      if (match) {
+        const existingPredicate = match[1];
+        if (existingPredicate === predicate) {
           filterExists = true;
           break;
         }
-        if (commands[i] === negatedWhereCommand) {
+        if (existingPredicate === negatedPredicate) {
           filterExists = true;
           commands[i] = whereCommand;
           break;

@@ -177,9 +177,10 @@ function quoteSortColumn(column: string): string {
 }
 
 function compileSort(sort: Sort | undefined): string | null {
-  const column = sort?.column?.trim();
+  if (!sort) return null;
+  const column = sort.column?.trim();
   if (!column) return null;
-  const prefix = sort!.desc ? '-' : '';
+  const prefix = sort.desc ? '-' : '';
   return `sort ${prefix}${quoteSortColumn(column)}`;
 }
 
@@ -210,19 +211,20 @@ export function compileWhereFilter(filter: WhereFilter): string | null {
   const vals = (filter.values ?? []).map((v) => (v ?? '').trim());
 
   switch (filter.operator) {
+    // The empty string is a real, indexable value (the value picker surfaces it
+    // as "(empty)"), so equality operators guard on a value being present rather
+    // than truthy — otherwise selecting (empty) would silently drop the clause.
     case 'is':
-      return vals[0] ? `${fq} = ${whereValue(vals[0])}` : null;
+      return vals.length > 0 ? `${fq} = ${whereValue(vals[0])}` : null;
     case 'is_not':
-      return vals[0] ? `${fq} != ${whereValue(vals[0])}` : null;
+      return vals.length > 0 ? `${fq} != ${whereValue(vals[0])}` : null;
     case 'is_one_of': {
-      const present = vals.filter(Boolean);
-      if (present.length === 0) return null;
-      return present.map((v) => `${fq} = ${whereValue(v)}`).join(' OR ');
+      if (vals.length === 0) return null;
+      return vals.map((v) => `${fq} = ${whereValue(v)}`).join(' OR ');
     }
     case 'is_not_one_of': {
-      const present = vals.filter(Boolean);
-      if (present.length === 0) return null;
-      return present.map((v) => `${fq} != ${whereValue(v)}`).join(' AND ');
+      if (vals.length === 0) return null;
+      return vals.map((v) => `${fq} != ${whereValue(v)}`).join(' AND ');
     }
     case 'is_between': {
       const [gte, lt] = vals;

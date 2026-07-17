@@ -272,6 +272,17 @@ describe('compileWhereFilter', () => {
     expect(compileWhereFilter(f({ operator: 'is', values: [] }))).toBeNull();
     expect(compileWhereFilter(f({ operator: 'is_one_of', values: [] }))).toBeNull();
   });
+
+  it('emits a clause for the empty-string value (a real, indexable value)', () => {
+    expect(compileWhereFilter(f({ operator: 'is', values: [''] }))).toBe("`response` = ''");
+    expect(compileWhereFilter(f({ operator: 'is_not', values: [''] }))).toBe("`response` != ''");
+    expect(compileWhereFilter(f({ operator: 'is_one_of', values: ['', '200'] }))).toBe(
+      "`response` = '' OR `response` = 200"
+    );
+    expect(compileWhereFilter(f({ operator: 'is_not_one_of', values: [''] }))).toBe(
+      "`response` != ''"
+    );
+  });
 });
 
 describe('buildPPL — where filters', () => {
