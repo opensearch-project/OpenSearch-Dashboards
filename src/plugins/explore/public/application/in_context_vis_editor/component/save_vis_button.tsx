@@ -274,6 +274,8 @@ export const SaveVisButton = () => {
           savedExploreId={exploreId}
           onCancel={() => setShowModal(false)}
           onConfirm={handleSave}
+          // TODO(query-profiling): gate on the per-query complex flag from the profiling response.
+          showComplexQueryWarning={services.queryProfilingEnabled}
         />
       )}
     </EuiFlexGroup>

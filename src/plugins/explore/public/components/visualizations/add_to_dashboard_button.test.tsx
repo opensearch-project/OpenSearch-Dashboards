@@ -135,7 +135,9 @@ describe('SaveAndAddButtonWithModal', () => {
 
     fireEvent.click(button);
 
-    expect(screen.getByTestId('mock-modal')).toBeInTheDocument();
+    // The click handler is async (slow-query save warning is awaited first), so
+    // the modal opens on the next tick.
+    expect(await screen.findByTestId('mock-modal')).toBeInTheDocument();
   });
 
   it('handles save and shows success toast', async () => {
@@ -152,7 +154,7 @@ describe('SaveAndAddButtonWithModal', () => {
     );
 
     fireEvent.click(screen.getByText('Add to dashboard'));
-    fireEvent.click(screen.getByText('Confirm'));
+    fireEvent.click(await screen.findByText('Confirm'));
 
     await waitFor(() => {
       expect(saveSavedExplore).toHaveBeenCalled();
@@ -177,7 +179,7 @@ describe('SaveAndAddButtonWithModal', () => {
     );
 
     fireEvent.click(screen.getByText('Add to dashboard'));
-    fireEvent.click(screen.getByText('Confirm'));
+    fireEvent.click(await screen.findByText('Confirm'));
 
     await waitFor(() => {
       expect(mockToastAdd).toHaveBeenCalledWith(

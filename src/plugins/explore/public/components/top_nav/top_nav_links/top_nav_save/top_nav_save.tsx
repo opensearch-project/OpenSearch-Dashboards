@@ -23,6 +23,7 @@ import {
   showSaveModal,
 } from '../../../../../../saved_objects/public';
 import { saveSavedExplore } from '../../../../helpers/save_explore';
+import { ComplexQueryWarningCallout } from '../../../../helpers/complex_query_warning';
 import { TabState } from '../../../../application/utils/state_management/slices';
 import { TabDefinition } from '../../../../services/tab_registry/tab_registry_service';
 import { saveStateToSavedObject } from '../../../../saved_explore/transforms';
@@ -113,6 +114,10 @@ export const getSaveButtonRun =
         showCopyOnSave={!!savedExplore.id}
         // TODO: Does this need to be type "explore"?
         objectType="discover"
+        // Show the complex-query warning inside the save modal when query profiling is enabled.
+        // TODO(query-profiling): gate on the per-query "complex" flag from the profiling
+        // response once it is surfaced, rather than on the feature flag alone.
+        options={services.queryProfilingEnabled ? <ComplexQueryWarningCallout /> : undefined}
         description={i18n.translate('explore.localMenu.saveSaveSearchDescription', {
           defaultMessage:
             'Save your Discover search so you can use it in visualizations and dashboards',

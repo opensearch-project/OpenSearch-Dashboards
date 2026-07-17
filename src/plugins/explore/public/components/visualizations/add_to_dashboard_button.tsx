@@ -229,11 +229,7 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
 
   return (
     <>
-      <EuiButtonEmpty
-        size="s"
-        onClick={() => setShowAddToDashboardModal(true)}
-        data-test-subj="addToDashboardButton"
-      >
+      <EuiButtonEmpty size="s" onClick={handleAddToDashboard} data-test-subj="addToDashboardButton">
         {i18n.translate('explore.addtoDashboardButton.name', {
           defaultMessage: 'Add to dashboard',
         })}
@@ -244,6 +240,8 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
           savedObjectsClient={saveObjectsClient}
           onCancel={() => setShowAddToDashboardModal(false)}
           onConfirm={handleSave}
+          // TODO(query-profiling): gate on the per-query complex flag from the profiling response.
+          showComplexQueryWarning={services.queryProfilingEnabled}
         />
       )}
     </>
