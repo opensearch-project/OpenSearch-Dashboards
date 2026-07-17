@@ -227,7 +227,11 @@ function whereValue(value: string, fieldType?: string): string {
   const trimmed = value.trim();
   const numericAllowed = fieldType === undefined || fieldType === 'number';
   if (numericAllowed && NUMERIC_LITERAL_RE.test(trimmed)) return trimmed;
-  return `'${trimmed.replace(/'/g, "''")}'`;
+  // Double-quote string literals to match the PPL code editor's insert
+  // convention (getInsertText in the data plugin), so a value built here reads
+  // identically to one completed in code mode. parse_ppl's unquoteValue accepts
+  // both quote styles and un-doubles "" → ", keeping the round-trip lossless.
+  return `"${trimmed.replace(/"/g, '""')}"`;
 }
 
 export function compileWhereFilter(

@@ -201,22 +201,22 @@ describe('compileWhereFilter', () => {
   });
 
   it.each<[string, Partial<WhereFilter>, string | null]>([
-    ['is with a quoted string value', { operator: 'is', values: ['ok'] }, "`response` = 'ok'"],
+    ['is with a quoted string value', { operator: 'is', values: ['ok'] }, '`response` = "ok"'],
     [
       'is_not with a quoted string value',
       { operator: 'is_not', values: ['ok'] },
-      "`response` != 'ok'",
+      '`response` != "ok"',
     ],
     ['a bare numeric value unquoted', { operator: 'is', values: ['200'] }, '`response` = 200'],
     [
-      'escapes single quotes in a string value',
-      { field: 'user', operator: 'is', values: ["o'brien"] },
-      "`user` = 'o''brien'",
+      'escapes double quotes in a string value',
+      { field: 'user', operator: 'is', values: ['a "quoted" name'] },
+      '`user` = "a ""quoted"" name"',
     ],
     [
       'drops the .keyword suffix from the field',
       { field: 'service.keyword', operator: 'is', values: ['web'] },
-      "`service` = 'web'",
+      '`service` = "web"',
     ],
     [
       'is_one_of',
@@ -245,14 +245,14 @@ describe('compileWhereFilter', () => {
     ['incomplete: no value', { operator: 'is', values: [] }, null],
     ['incomplete: empty is_one_of', { operator: 'is_one_of', values: [] }, null],
     // The empty string is a real, indexable value.
-    ['empty-string is', { operator: 'is', values: [''] }, "`response` = ''"],
-    ['empty-string is_not', { operator: 'is_not', values: [''] }, "`response` != ''"],
+    ['empty-string is', { operator: 'is', values: [''] }, '`response` = ""'],
+    ['empty-string is_not', { operator: 'is_not', values: [''] }, '`response` != ""'],
     [
       'empty-string in is_one_of',
       { operator: 'is_one_of', values: ['', '200'] },
-      "`response` = '' OR `response` = 200",
+      '`response` = "" OR `response` = 200',
     ],
-    ['empty-string is_not_one_of', { operator: 'is_not_one_of', values: [''] }, "`response` != ''"],
+    ['empty-string is_not_one_of', { operator: 'is_not_one_of', values: [''] }, '`response` != ""'],
   ])('compiles %s', (_label, over, expected) => {
     expect(compileWhereFilter(f(over))).toBe(expected);
   });
@@ -260,9 +260,9 @@ describe('compileWhereFilter', () => {
   describe('type-aware value quoting', () => {
     it('keeps a numeric-looking value quoted on a string field', () => {
       const getType = () => 'string';
-      expect(compileWhereFilter(f({ field: 'zip', operator: 'is', values: ['02101'] }), getType)).toBe(
-        "`zip` = '02101'"
-      );
+      expect(
+        compileWhereFilter(f({ field: 'zip', operator: 'is', values: ['02101'] }), getType)
+      ).toBe('`zip` = "02101"');
     });
 
     it('leaves a numeric value unquoted on a number field', () => {
@@ -275,15 +275,21 @@ describe('compileWhereFilter', () => {
     it('quotes numeric-looking values on a string field across list operators', () => {
       const getType = () => 'string';
       expect(
-        compileWhereFilter(f({ field: 'code', operator: 'is_one_of', values: ['200', '404'] }), getType)
-      ).toBe("`code` = '200' OR `code` = '404'");
+        compileWhereFilter(
+          f({ field: 'code', operator: 'is_one_of', values: ['200', '404'] }),
+          getType
+        )
+      ).toBe('`code` = "200" OR `code` = "404"');
     });
 
     it('quotes numeric-looking range bounds on a string field', () => {
       const getType = () => 'string';
       expect(
-        compileWhereFilter(f({ field: 'code', operator: 'is_between', values: ['1', '9'] }), getType)
-      ).toBe("`code` >= '1' AND `code` < '9'");
+        compileWhereFilter(
+          f({ field: 'code', operator: 'is_between', values: ['1', '9'] }),
+          getType
+        )
+      ).toBe('`code` >= "1" AND `code` < "9"');
     });
 
     it('falls back to value-shaped quoting when the field type is unknown', () => {
@@ -296,8 +302,11 @@ describe('compileWhereFilter', () => {
     it('resolves types by the field name after the .keyword suffix is stripped', () => {
       const getType = (field: string) => (field === 'service' ? 'string' : undefined);
       expect(
-        compileWhereFilter(f({ field: 'service.keyword', operator: 'is', values: ['200'] }), getType)
-      ).toBe("`service` = '200'");
+        compileWhereFilter(
+          f({ field: 'service.keyword', operator: 'is', values: ['200'] }),
+          getType
+        )
+      ).toBe('`service` = "200"');
     });
   });
 });

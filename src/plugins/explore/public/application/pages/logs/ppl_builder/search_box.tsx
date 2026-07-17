@@ -141,7 +141,7 @@ export const SearchBox: React.FC<SearchBoxProps> = ({
           for (const v of values) {
             const isNumeric = v.trim() !== '' && v === v.trim() && Number.isFinite(Number(v));
             const isBoolean = v === 'true' || v === 'false';
-            const insert = isNumeric || isBoolean ? v : `'${v.replace(/'/g, "''")}'`;
+            const insert = isNumeric || isBoolean ? v : `"${v.replace(/"/g, '""')}"`;
             suggestions.push({
               label: v,
               kind: monaco.languages.CompletionItemKind.Value,
