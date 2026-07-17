@@ -210,18 +210,37 @@ function whereField(field: string): string {
   return `\`${field.replace(/\.keyword$/, '')}\``;
 }
 
+// Resolves a filter field name to its OpenSearch type ('number', 'string',
+// 'date', ...) so value quoting can respect the mapping. Optional throughout:
+// callers that omit it (e.g. round-trip tests) fall back to value-shaped
+// quoting, preserving the resolver-free behavior.
+export type FieldTypeResolver = (field: string) => string | undefined;
+
 const NUMERIC_LITERAL_RE = /^-?\d+(\.\d+)?$/;
 
-function whereValue(value: string): string {
+// A bare numeric literal is only safe when the field is actually numeric.
+// Emitting `zip = 02101` against a keyword field drops the leading zero and
+// compares as a number, matching nothing; quoting keeps it a string literal.
+// When the type is unknown (no resolver, or field not in the mapping) we keep
+// the legacy value-shaped behavior so nothing regresses.
+function whereValue(value: string, fieldType?: string): string {
   const trimmed = value.trim();
-  if (NUMERIC_LITERAL_RE.test(trimmed)) return trimmed;
+  const numericAllowed = fieldType === undefined || fieldType === 'number';
+  if (numericAllowed && NUMERIC_LITERAL_RE.test(trimmed)) return trimmed;
   return `'${trimmed.replace(/'/g, "''")}'`;
 }
 
-export function compileWhereFilter(filter: WhereFilter): string | null {
+export function compileWhereFilter(
+  filter: WhereFilter,
+  getFieldType?: FieldTypeResolver
+): string | null {
   const field = filter.field?.trim();
   if (!field) return null;
   const fq = whereField(field);
+  // Resolve on the base name (matching whereField's .keyword stripping) so a
+  // `service.keyword` filter picks up the `service` mapping type.
+  const fieldType = getFieldType?.(field.replace(/\.keyword$/, ''));
+  const val = (v: string) => whereValue(v, fieldType);
   const vals = (filter.values ?? []).map((v) => (v ?? '').trim());
 
   switch (filter.operator) {
@@ -229,29 +248,29 @@ export function compileWhereFilter(filter: WhereFilter): string | null {
     // as "(empty)"), so equality operators guard on a value being present rather
     // than truthy — otherwise selecting (empty) would silently drop the clause.
     case 'is':
-      return vals.length > 0 ? `${fq} = ${whereValue(vals[0])}` : null;
+      return vals.length > 0 ? `${fq} = ${val(vals[0])}` : null;
     case 'is_not':
-      return vals.length > 0 ? `${fq} != ${whereValue(vals[0])}` : null;
+      return vals.length > 0 ? `${fq} != ${val(vals[0])}` : null;
     case 'is_one_of': {
       if (vals.length === 0) return null;
-      return vals.map((v) => `${fq} = ${whereValue(v)}`).join(' OR ');
+      return vals.map((v) => `${fq} = ${val(v)}`).join(' OR ');
     }
     case 'is_not_one_of': {
       if (vals.length === 0) return null;
-      return vals.map((v) => `${fq} != ${whereValue(v)}`).join(' AND ');
+      return vals.map((v) => `${fq} != ${val(v)}`).join(' AND ');
     }
     case 'is_between': {
       const [gte, lt] = vals;
       const parts: string[] = [];
-      if (gte) parts.push(`${fq} >= ${whereValue(gte)}`);
-      if (lt) parts.push(`${fq} < ${whereValue(lt)}`);
+      if (gte) parts.push(`${fq} >= ${val(gte)}`);
+      if (lt) parts.push(`${fq} < ${val(lt)}`);
       return parts.length > 0 ? parts.join(' AND ') : null;
     }
     case 'is_not_between': {
       const [gte, lt] = vals;
       const parts: string[] = [];
-      if (gte) parts.push(`${fq} < ${whereValue(gte)}`);
-      if (lt) parts.push(`${fq} >= ${whereValue(lt)}`);
+      if (gte) parts.push(`${fq} < ${val(gte)}`);
+      if (lt) parts.push(`${fq} >= ${val(lt)}`);
       return parts.length > 0 ? parts.join(' OR ') : null;
     }
     case 'exists':
@@ -263,13 +282,13 @@ export function compileWhereFilter(filter: WhereFilter): string | null {
   }
 }
 
-export function buildPPL(state: PPLBuilderState): string {
+export function buildPPL(state: PPLBuilderState, getFieldType?: FieldTypeResolver): string {
   const searchExpr = (state.searchExpression || '').trim();
 
   const parts: string[] = searchExpr ? [searchExpr] : [];
 
   for (const filter of state.filters) {
-    const predicate = compileWhereFilter(filter);
+    const predicate = compileWhereFilter(filter, getFieldType);
     if (predicate) parts.push(`where ${predicate}`);
   }
 

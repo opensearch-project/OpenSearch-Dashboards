@@ -351,7 +351,9 @@ const WhereChip: React.FC<{
   getValues: (field: string) => Promise<string[]>;
   dispatch: React.Dispatch<BuilderAction>;
 }> = ({ filter, index, fieldType, fieldNames, getValues, dispatch }) => {
-  const predicate = compileWhereFilter(filter);
+  // Resolve to this chip's known field type so the tooltip preview quotes
+  // values the same way buildPPL does when it emits the query.
+  const predicate = compileWhereFilter(filter, () => fieldType);
   const tooltip = predicate
     ? i18n.translate('explore.pplBuilder.filterChipTooltip', {
         defaultMessage: 'where {predicate}',

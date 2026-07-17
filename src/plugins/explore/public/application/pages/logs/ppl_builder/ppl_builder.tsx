@@ -75,7 +75,7 @@ export const PPLBuilder: React.FC<PPLBuilderProps> = ({
 
   const autoInterval = useMemo(() => deriveAutoInterval(), [deriveAutoInterval]);
 
-  const query = useMemo(() => buildPPL(state), [state]);
+  const query = useMemo(() => buildPPL(state, getFieldType), [state, getFieldType]);
 
   const onQueryChangeRef = useRef(onQueryChange);
   onQueryChangeRef.current = onQueryChange;

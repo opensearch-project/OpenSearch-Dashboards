@@ -256,6 +256,50 @@ describe('compileWhereFilter', () => {
   ])('compiles %s', (_label, over, expected) => {
     expect(compileWhereFilter(f(over))).toBe(expected);
   });
+
+  describe('type-aware value quoting', () => {
+    it('keeps a numeric-looking value quoted on a string field', () => {
+      const getType = () => 'string';
+      expect(compileWhereFilter(f({ field: 'zip', operator: 'is', values: ['02101'] }), getType)).toBe(
+        "`zip` = '02101'"
+      );
+    });
+
+    it('leaves a numeric value unquoted on a number field', () => {
+      const getType = () => 'number';
+      expect(
+        compileWhereFilter(f({ field: 'response', operator: 'is', values: ['200'] }), getType)
+      ).toBe('`response` = 200');
+    });
+
+    it('quotes numeric-looking values on a string field across list operators', () => {
+      const getType = () => 'string';
+      expect(
+        compileWhereFilter(f({ field: 'code', operator: 'is_one_of', values: ['200', '404'] }), getType)
+      ).toBe("`code` = '200' OR `code` = '404'");
+    });
+
+    it('quotes numeric-looking range bounds on a string field', () => {
+      const getType = () => 'string';
+      expect(
+        compileWhereFilter(f({ field: 'code', operator: 'is_between', values: ['1', '9'] }), getType)
+      ).toBe("`code` >= '1' AND `code` < '9'");
+    });
+
+    it('falls back to value-shaped quoting when the field type is unknown', () => {
+      const getType = () => undefined;
+      expect(
+        compileWhereFilter(f({ field: 'response', operator: 'is', values: ['200'] }), getType)
+      ).toBe('`response` = 200');
+    });
+
+    it('resolves types by the field name after the .keyword suffix is stripped', () => {
+      const getType = (field: string) => (field === 'service' ? 'string' : undefined);
+      expect(
+        compileWhereFilter(f({ field: 'service.keyword', operator: 'is', values: ['200'] }), getType)
+      ).toBe("`service` = '200'");
+    });
+  });
 });
 
 describe('buildPPL — where filters', () => {
