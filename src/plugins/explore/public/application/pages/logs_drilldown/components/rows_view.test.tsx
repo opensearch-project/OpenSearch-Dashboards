@@ -33,13 +33,33 @@ jest.mock('../hooks/use_activate_dataset', () => ({ useActivateDataset: () => mo
 // results (e.g. a zero-total histogram → NO_RECENT) to exercise liveness/banner behavior.
 const mockInvalidate = jest.fn();
 let mockResults = new Map<string, any>();
+// Capture the fetchFn RowsView passes to the scheduler so a test can invoke it directly (the stub
+// otherwise never runs it) — used to exercise the per-card fetch error → permission-toast wiring.
+let capturedFetchFn: ((key: string, signal: AbortSignal) => Promise<any>) | undefined;
 jest.mock('../../metrics/explore/hooks/use_concurrent_queries', () => ({
-  useConcurrentQueries: () => ({
-    results: mockResults,
-    errors: new Map(),
-    onVisibilityChange: jest.fn(),
-    invalidate: mockInvalidate,
-  }),
+  useConcurrentQueries: (fetchFn: (key: string, signal: AbortSignal) => Promise<any>) => {
+    capturedFetchFn = fetchFn;
+    return {
+      results: mockResults,
+      errors: new Map(),
+      onVisibilityChange: jest.fn(),
+      invalidate: mockInvalidate,
+    };
+  },
+}));
+
+// fetchPreview is what a card runs; make it rejectable so we can drive the 403 path.
+const mockFetchPreview = jest.fn();
+jest.mock('../hooks/fetch_preview', () => ({
+  ...jest.requireActual('../hooks/fetch_preview'),
+  fetchPreview: (...args: any[]) => mockFetchPreview(...args),
+}));
+jest.mock('../hooks/fetch_histogram', () => ({ fetchHistogram: jest.fn() }));
+
+// Spy on the one-time permission toast so we can assert it's raised on a 4xx card fetch.
+const mockMaybeNotify = jest.fn();
+jest.mock('../permission_toast', () => ({
+  maybeNotifyPermissionDenied: (...args: any[]) => mockMaybeNotify(...args),
 }));
 
 /** Build a resolved concurrency result whose histogram totals sum to `total`. */
@@ -609,5 +629,40 @@ describe('RowsView', () => {
   it('does not show Load more when everything fits in the first window', () => {
     renderRows();
     expect(screen.queryByTestId('logsExploreRowsLoadMore')).not.toBeInTheDocument();
+  });
+
+  // Permission handling: when multiple cards' preview fetches 4xx, each routes through the
+  // permission-toast helper (whose own once-guard collapses them to a single toast — see
+  // permission_toast.test.ts) AND the error re-throws so each card still surfaces its ERROR state.
+  it('routes per-card preview 4xx failures to the permission toast and re-throws', async () => {
+    renderRows();
+    expect(capturedFetchFn).toBeDefined();
+
+    const err403 = { statusCode: 403, message: 'security_exception' };
+    mockFetchPreview.mockRejectedValue(err403);
+
+    // Drive the captured fetchFn for two different cards (as the scheduler would for two indexes).
+    const signal = new AbortController().signal;
+    await expect(capturedFetchFn!('index:logs-app-2026.07.09', signal)).rejects.toBe(err403);
+    await expect(capturedFetchFn!('index:orders-2026', signal)).rejects.toBe(err403);
+
+    // The wiring invoked the toast helper once per failing card (the helper itself dedupes to one
+    // actual toast). Both calls carry services + the 403 error.
+    expect(mockMaybeNotify).toHaveBeenCalledTimes(2);
+    expect(mockMaybeNotify).toHaveBeenCalledWith(services, err403);
+  });
+
+  it('does not toast when a card preview fails with a non-4xx error (still re-throws)', async () => {
+    renderRows();
+    const err500 = { statusCode: 500, message: 'server error' };
+    mockFetchPreview.mockRejectedValue(err500);
+
+    const signal = new AbortController().signal;
+    await expect(capturedFetchFn!('index:logs-app-2026.07.09', signal)).rejects.toBe(err500);
+
+    // The helper is still called (it internally no-ops for non-4xx); the point is the toast itself
+    // never fires — which permission_toast.test.ts asserts for the 500 case. Here we just confirm the
+    // fetchFn routed the error through it and re-threw.
+    expect(mockMaybeNotify).toHaveBeenCalledWith(services, err500);
   });
 });
