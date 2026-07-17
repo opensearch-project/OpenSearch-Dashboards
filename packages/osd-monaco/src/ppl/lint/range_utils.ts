@@ -83,5 +83,13 @@ export function remapPipeFirstColumns(diagnostics: Diagnostic[]): Diagnostic[] {
   return diagnostics.map((diagnostic) => ({
     ...diagnostic,
     range: shift(diagnostic.range),
+    // A quick-fix with an explicit range (e.g. capture-group's Python-opener fix,
+    // which points at the `P` rather than the squiggled name) must get the same
+    // shift as the diagnostic range, or the edit lands `PIPE_FIRST_PREFIX.length`
+    // (9) columns off on a pipe-first query. A default-range fix carries no
+    // `range` and rides the already-shifted diagnostic range via the provider.
+    fix: diagnostic.fix?.range
+      ? { ...diagnostic.fix, range: shift(diagnostic.fix.range) }
+      : diagnostic.fix,
   }));
 }

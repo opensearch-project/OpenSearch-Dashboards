@@ -28,6 +28,11 @@ export const ENGINE_OUTCOMES: Record<string, RuleHoverContent> = {
     safeToIgnoreWhen:
       'null propagation is intentional and handled downstream (e.g. coalesce(expr, 0)).',
   },
+  'invalid-capture-group-name': {
+    engineBehavior:
+      'rex capture-group names must match the Java group-name rule; underscores and leading digits are rejected when the regex runs.',
+    failureClass: 'engine-throw',
+  },
 };
 
 export function getRuleHoverContent(ruleId: string): RuleHoverContent | undefined {

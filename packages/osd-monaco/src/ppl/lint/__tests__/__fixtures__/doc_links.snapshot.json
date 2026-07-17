@@ -55,6 +55,12 @@
       "page": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/fields/",
       "anchor": "",
       "quality": "weak"
+    },
+    "invalid-capture-group-name": {
+      "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/rex/#parameters",
+      "page": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/rex/",
+      "anchor": "parameters",
+      "quality": "exact"
     }
   }
 }

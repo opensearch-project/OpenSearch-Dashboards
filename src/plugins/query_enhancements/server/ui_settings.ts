@@ -25,6 +25,7 @@ const PPL_LINT_RULE_DEFAULTS: ReadonlyArray<{
   { id: 'union-min-datasets', enabled: true, severity: 'error' },
   { id: 'replace-wildcard-asymmetry', enabled: true, severity: 'error' },
   { id: 'field-validation', enabled: true, severity: 'error' },
+  { id: 'invalid-capture-group-name', enabled: true, severity: 'error' },
   { id: 'command-suggestion', enabled: true },
 ];
 
