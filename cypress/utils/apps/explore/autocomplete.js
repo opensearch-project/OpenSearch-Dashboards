@@ -166,6 +166,8 @@ const getLanguageSpecificConfig = (language, config) => {
 export const createOtherQueryUsingAutocomplete = (config) => {
   const langConfig = getLanguageSpecificConfig(config.language, config);
 
+  cy.explore.showQueryEditor();
+
   cy.getElementByTestId(langConfig.editorType)
     .find('.monaco-editor')
     .should('be.visible')
@@ -347,6 +349,8 @@ export const hideWidgets = (maxAttempts = 3) => {
 export const setQueryInMonacoEditor = (query) => {
   const editorType = 'exploreQueryPanelEditor';
 
+  cy.explore.showQueryEditor();
+
   cy.getElementByTestId(editorType)
     .find('.monaco-editor')
     .should('be.visible')
@@ -395,6 +399,8 @@ export const createQuery = (config, useKeyboard = false) => {
  */
 export const createInvalidQuery = (config) => {
   const editorType = 'exploreQueryPanelEditor';
+
+  cy.explore.showQueryEditor();
 
   cy.getElementByTestId(editorType)
     .find('.monaco-editor')
@@ -451,6 +457,8 @@ export const validateImplicitPPLQuery = (config) => {
 export const validateDocumentationPanelIsOpen = (config) => {
   const editorType = 'exploreQueryPanelEditor';
 
+  cy.explore.showQueryEditor();
+
   cy.getElementByTestId(editorType)
     .find('.monaco-editor')
     .should('be.visible')
@@ -484,6 +492,7 @@ export const validateDocumentationPanelIsOpen = (config) => {
  */
 export const verifyMonacoEditorContent = (queryString) => {
   if (!queryString) return;
+  cy.explore.showQueryEditor();
   // Check the editor content against our pattern - try multiple approaches
   cy.getElementByTestId('exploreQueryPanelEditor')
     .should('be.visible')

@@ -77,11 +77,36 @@ const selectIndexWildcardMode = (indexPattern) => {
     .click();
 };
 
+// When the logsQueryBuilder flag is on, the logs query panel renders the visual
+// PPL builder instead of the Monaco code editor for representable queries (and
+// auto-flips back to the builder whenever the query becomes empty/source-only,
+// e.g. right after selecting a dataset). Any command or helper that drives the
+// Monaco editor must call this first to switch into code mode. It is a no-op
+// when the flag is off (no builder rendered) or the panel is already in code
+// mode, so it is safe to call unconditionally before editor interactions.
+cy.explore.add('showQueryEditor', () => {
+  return cy
+    .get('[data-test-subj="pplBuilder"], [data-test-subj="exploreQueryPanelEditor"]', {
+      timeout: 30000,
+    })
+    .should('exist')
+    .then(() => {
+      return cy.get('body').then(($body) => {
+        if ($body.find('[data-test-subj="pplBuilder"]').length > 0) {
+          cy.getElementByTestId('pplBuilderModeToggle').should('not.be.disabled').click();
+          cy.getElementByTestId('exploreQueryPanelEditor').should('be.visible');
+        }
+      });
+    });
+});
+
 cy.explore.add('clearQueryEditor', () => {
   const clearWithRetry = (attempt = 1) => {
     cy.log(`Attempt ${attempt} to clear editor`);
 
-    return forceFocusEditor()
+    return cy.explore
+      .showQueryEditor()
+      .then(forceFocusEditor)
       .then(() => clearMonacoEditor())
       .then(() => {
         return isEditorEmpty().then((isEmpty) => {

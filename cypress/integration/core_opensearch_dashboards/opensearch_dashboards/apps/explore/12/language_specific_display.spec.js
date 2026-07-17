@@ -63,6 +63,9 @@ export const runDisplayTests = () => {
 
         // testing the query editor
         if (config.multilineQuery) {
+          // The logs query panel may open in the PPL builder; switch to the
+          // Monaco code editor before asserting on it (no-op if already shown).
+          cy.explore.showQueryEditor();
           cy.getElementByTestId('exploreQueryPanelEditor').should('be.visible');
           cy.getElementByTestId('discoverQueryElapsedMs').should('be.visible');
           cy.getElementByTestId('exploreRecentQueriesButton').click();
