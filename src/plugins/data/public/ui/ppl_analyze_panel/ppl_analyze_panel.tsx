@@ -622,7 +622,7 @@ function OperatorPlanSection({
                     formatMs(timeMs),
                     nodeIdx === 0
                       ? '—'
-                      : operatorTree[nodeIdx - 1]?.actual_rows?.toLocaleString() ?? '—',
+                      : (operatorTree[nodeIdx - 1]?.actual_rows?.toLocaleString() ?? '—'),
                     op.actual_rows?.toLocaleString() ?? '—',
                   ].map((val, i) => (
                     <EuiText
