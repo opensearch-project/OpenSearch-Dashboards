@@ -10,7 +10,7 @@ import { BrowsableItem } from '../types';
 
 interface UseIndexListArgs {
   services: ExploreServices;
-  /** Data source id to scope to (MDS). Empty string / undefined = local cluster. */
+  /** Data source id to scope to (MDS, required). Empty/undefined ⇒ no resolution (MDS-only). */
   dataSourceId?: string;
   /** Debounced search string; filters the index names. */
   search: string;
@@ -42,6 +42,18 @@ export const useIndexList = ({
   useEffect(() => {
     const requestId = ++requestIdRef.current;
     const fetchIndices = async () => {
+      // MDS-only: index resolution must target an explicit data source. A bare resolve_index (empty
+      // data source id) targets the local cluster, which does not exist under MDS (e.g. Neo) and 500s
+      // on an unconfigured client. With no data source there is nothing to enumerate — return empty
+      // and let the page's empty state guide the user to pick one. Never build the empty-id
+      // LOCAL_DATASOURCE node.
+      if (!dataSourceId) {
+        setAllItems([]);
+        setError(undefined);
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
       setError(undefined);
       try {
@@ -51,19 +63,19 @@ export const useIndexList = ({
           throw new Error('Index dataset type is not registered');
         }
 
-        // Fetch indexes for the target data source directly. We build the DATA_SOURCE node
-        // ourselves rather than walking the data-source LIST first: inside a workspace / non-MDS
-        // setup the list may not contain a local-cluster node (id ''), which would leave us with
-        // nothing to fetch. index_type's fetch only reads `dataStructure.id` to scope the
-        // resolve_index call (empty id => local cluster), so a hand-built node is sufficient.
+        // Fetch indexes for the target data source directly. We build the DATA_SOURCE node ourselves
+        // rather than walking the data-source LIST first. index_type's fetch reads `dataStructure.id`
+        // to scope the resolve_index call to this data source (MDS), so a hand-built node suffices.
         const indexRoot: DataStructure = {
           id: indexType.id,
           title: indexType.title,
           type: indexType.id,
         };
-        const dataSourceNode: DataStructure = dataSourceId
-          ? { id: dataSourceId, title: dataSourceId, type: 'DATA_SOURCE' }
-          : { ...DEFAULT_DATA.STRUCTURES.LOCAL_DATASOURCE };
+        const dataSourceNode: DataStructure = {
+          id: dataSourceId,
+          title: dataSourceId,
+          type: 'DATA_SOURCE',
+        };
 
         const indexesResult = await indexType.fetch(services as any, [indexRoot, dataSourceNode]);
         const items: BrowsableItem[] = (indexesResult.children ?? [])
@@ -127,6 +139,11 @@ async function sortByCreationDate(
   const nameDescending = () => [...items].sort((a, b) => b.name.localeCompare(a.name));
 
   if (items.length === 0) return items;
+
+  // MDS-only: without a data source there is no cluster to hit (no local cluster under MDS). Skip the
+  // cat.indices call entirely rather than issue a bare `dataSourceMDSId=` request, and fall back to
+  // name-descending ordering.
+  if (!dataSourceId) return nameDescending();
 
   try {
     // Also request `docs.count`, `health`, `store.size`, `pri`, `rep` — they ride along on this ONE

@@ -34,10 +34,12 @@ const children = (names: string[], remote: string[] = []) => ({
 });
 
 let result: ReturnType<typeof useIndexList>;
+// MDS-only: the hook requires a data source id, so the harness defaults to one. Cases that exercise
+// the no-data-source path pass `dataSourceId={undefined}` explicitly.
 const Harness: React.FC<{ services: any; search: string; dataSourceId?: string }> = ({
   services,
   search,
-  dataSourceId,
+  dataSourceId = 'ds-default',
 }) => {
   result = useIndexList({ services, search, dataSourceId });
   return <div data-test-subj="names">{result.items.map((i) => i.name).join(',')}</div>;
@@ -51,7 +53,7 @@ describe('useIndexList', () => {
   });
 
   // --- positive cases ---
-  it('lists indexes for the local cluster and filters out `.`-prefixed system indexes', async () => {
+  it('lists indexes for the data source and filters out `.`-prefixed system indexes', async () => {
     indexFetch.mockResolvedValue(children(['logs-app-1', '.kibana_1', 'orders']));
     render(<Harness services={makeServices()} search="" />);
     await waitFor(() => expect(result.loading).toBe(false));
@@ -151,6 +153,17 @@ describe('useIndexList', () => {
     const dataSourceNode = indexFetch.mock.calls[0][1][1];
     expect(dataSourceNode.id).toBe('ds-2');
     expect(httpGet.mock.calls[0][0]).toContain('dataSourceMDSId=ds-2');
+  });
+
+  // MDS-only: no local cluster to enumerate → no request, empty result.
+  // Empty-string id is the "local cluster" sentinel; it must be treated as "no data source".
+  it('does NOT resolve indexes when there is no data source id (never hits the local cluster)', async () => {
+    render(<Harness services={makeServices()} search="" dataSourceId="" />);
+    await waitFor(() => expect(result.loading).toBe(false));
+    expect(indexFetch).not.toHaveBeenCalled();
+    expect(httpGet).not.toHaveBeenCalled();
+    expect(result.items).toEqual([]);
+    expect(result.error).toBeUndefined();
   });
 
   it('returns the FULL list (no internal cap) — RowsView owns the visible-window pagination', async () => {

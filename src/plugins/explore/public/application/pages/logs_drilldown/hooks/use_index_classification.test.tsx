@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render, act } from '@testing-library/react';
+import { render, act, cleanup } from '@testing-library/react';
 import { useIndexClassification } from './use_index_classification';
 import { ClassificationResult, IndexClassification } from '../types';
 
@@ -18,15 +18,17 @@ interface Api {
   getStatus: (name: string) => IndexClassification;
 }
 let api: Api;
-const Harness: React.FC = () => {
-  api = useIndexClassification(makeServices());
+// MDS-only: the hook requires a data source id. `dataSourceId` is passed through verbatim — the outer
+// suite renders with a concrete id; the no-data-source suite passes none.
+const Harness: React.FC<{ dataSourceId?: string }> = ({ dataSourceId }) => {
+  api = useIndexClassification(makeServices(), dataSourceId);
   return null;
 };
 
 describe('useIndexClassification', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    render(<Harness />);
+    render(<Harness dataSourceId="ds-1" />);
   });
 
   it('classifies a time-based index and picks the first date field as the time field', async () => {
@@ -150,5 +152,24 @@ describe('useIndexClassification', () => {
       await api.classify('x');
     });
     expect(api.getStatus('x')).toBe(IndexClassification.TIME_BASED);
+  });
+});
+
+// MDS-only: no local cluster, so field resolution must target an explicit data source.
+// Separate describe so it does NOT inherit the outer beforeEach that renders with a default id.
+describe('useIndexClassification — no data source (MDS-only)', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    cleanup(); // unmount any harness from the prior describe so `api` reflects only this render
+    render(<Harness dataSourceId={undefined} />);
+  });
+
+  it('does NOT call getFieldsForWildcard when there is no data source id', async () => {
+    let res: ClassificationResult;
+    await act(async () => {
+      res = await api.classify('logs-app-1');
+    });
+    expect(getFieldsForWildcard).not.toHaveBeenCalled();
+    expect(res!.classification).toBe(IndexClassification.NO_TIME_FIELD);
   });
 });

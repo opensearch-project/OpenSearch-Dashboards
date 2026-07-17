@@ -34,6 +34,18 @@ export const useIndexClassification = (services: ExploreServices, dataSourceId?:
       if (inFlightRef.current.has(cacheKey))
         return { classification: IndexClassification.CLASSIFYING };
 
+      // MDS-only: field resolution must target an explicit data source. A bare `getFieldsForWildcard`
+      // (no data source id) targets the local cluster, which does not exist under MDS (e.g. Neo) and
+      // 500s on an unconfigured client. With no data source we can't classify — cache/return
+      // NO_TIME_FIELD (same shape as the failure path) without issuing the request.
+      if (!dataSourceId) {
+        const result: ClassificationResult = {
+          classification: IndexClassification.NO_TIME_FIELD,
+        };
+        cacheRef.current.set(cacheKey, result);
+        return result;
+      }
+
       inFlightRef.current.add(cacheKey);
       force((n) => n + 1);
       try {
