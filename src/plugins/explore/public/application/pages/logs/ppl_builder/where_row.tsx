@@ -152,6 +152,7 @@ const ChipValuePopover: React.FC<{
   onChange: (values: string[]) => void;
 }> = ({ field, values, multi, index, suggest, getValues, onChange }) => {
   const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const liveRef = useRef(true);
   // Monotonic request id so a slow earlier fetch can't overwrite the results of
@@ -170,13 +171,18 @@ const ChipValuePopover: React.FC<{
   const loadSuggestions = (searchTerm?: string) => {
     if (!suggest) return;
     const seq = ++requestSeqRef.current;
+    setLoading(true);
+    // Only the latest in-flight request may write results or clear the spinner,
+    // so a slow earlier fetch can't flip loading off while a newer one is still
+    // running.
+    const settle = (apply: () => void) => {
+      if (!liveRef.current || seq !== requestSeqRef.current) return;
+      apply();
+      setLoading(false);
+    };
     getValues(field, searchTerm).then(
-      (vals) => {
-        if (liveRef.current && seq === requestSeqRef.current) setSuggestions(vals);
-      },
-      () => {
-        if (liveRef.current && seq === requestSeqRef.current) setSuggestions([]);
-      }
+      (vals) => settle(() => setSuggestions(vals)),
+      () => settle(() => setSuggestions([]))
     );
   };
 
@@ -222,6 +228,7 @@ const ChipValuePopover: React.FC<{
       options={options}
       checkable={multi}
       keepOpenOnSelect={multi}
+      loading={loading}
       onOpen={() => loadSuggestions()}
       onSearchChange={(searchTerm) => loadSuggestions(searchTerm)}
       allowCreate={{

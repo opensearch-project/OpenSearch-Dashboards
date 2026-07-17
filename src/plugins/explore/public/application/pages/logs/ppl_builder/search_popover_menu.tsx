@@ -4,7 +4,15 @@
  */
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { EuiFieldSearch, EuiIcon, EuiPopover, EuiPopoverTitle, EuiToolTip } from '@elastic/eui';
+import {
+  EuiFieldSearch,
+  EuiIcon,
+  EuiLoadingSpinner,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiToolTip,
+} from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 
 const SEARCH_DEBOUNCE_MS = 250;
 
@@ -41,6 +49,9 @@ interface SearchPopoverMenuProps {
   // Fires (debounced) with the trimmed search text as the user types, for
   // callers that fetch options server-side. Empty string signals "cleared".
   onSearchChange?: (search: string) => void;
+  // Set while a server-side option fetch is in flight; drives the search-box
+  // spinner and the "Loading…" row.
+  loading?: boolean;
   searchPlaceholder: string;
   emptyMessage: string;
   searchDataTestSubj?: string;
@@ -54,6 +65,7 @@ export const SearchPopoverMenu: React.FC<SearchPopoverMenuProps> = ({
   keepOpenOnSelect,
   onOpen,
   onSearchChange,
+  loading,
   searchPlaceholder,
   emptyMessage,
   searchDataTestSubj,
@@ -180,6 +192,7 @@ export const SearchPopoverMenu: React.FC<SearchPopoverMenuProps> = ({
         <EuiFieldSearch
           compressed
           autoFocus
+          isLoading={loading}
           value={search}
           onChange={(e) => changeSearch(e.target.value)}
           onKeyDown={(e) => {
@@ -191,7 +204,14 @@ export const SearchPopoverMenu: React.FC<SearchPopoverMenuProps> = ({
         />
       </EuiPopoverTitle>
       <div className="plqFnPopover__list">
-        {filtered.length === 0 && !allowCreateNow ? (
+        {loading && filtered.length === 0 ? (
+          <div className="plqFnPopover__empty plqFnPopover__loading">
+            <EuiLoadingSpinner size="s" />
+            {i18n.translate('explore.pplBuilder.loadingValues', {
+              defaultMessage: 'Loading…',
+            })}
+          </div>
+        ) : filtered.length === 0 && !allowCreateNow ? (
           <div className="plqFnPopover__empty">{emptyMessage}</div>
         ) : (
           <>

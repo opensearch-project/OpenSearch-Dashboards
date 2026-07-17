@@ -613,6 +613,12 @@ $plqControlHeight: 36px;
     color: $plqSub;
   }
 
+  &__loading {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
   &__labeled {
     display: block;
   }
