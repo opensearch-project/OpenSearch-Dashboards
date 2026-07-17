@@ -4,6 +4,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
+import { fetchColumnValues } from '../../../../../../data/public';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../../types';
 import { useDatasetContext } from '../../../context';
@@ -16,7 +17,6 @@ interface FieldInfo {
 
 export const useFieldData = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
-  const { data } = services;
   const { dataset } = useDatasetContext();
 
   const fields = useMemo<FieldInfo[]>(() => {
@@ -66,28 +66,29 @@ export const useFieldData = () => {
     [fields]
   );
 
+  // Mirror the PPL code editor's value autocomplete: run a `source=<table> |
+  // top <limit> <column>` PPL query via fetchColumnValues so the builder and the
+  // code editor surface the same values with the same limit and caching.
   const getValues = useCallback(
     async (fieldName: string): Promise<string[]> => {
       const indexPattern = dataset as any;
-      if (!indexPattern || !data.autocomplete?.getValueSuggestions) return [];
-      const field =
-        indexPattern.fields?.getByName?.(`${fieldName}.keyword`) ||
-        indexPattern.fields?.getByName?.(fieldName);
-      if (!field) return [];
+      if (!indexPattern?.title) return [];
       try {
-        const suggestions = await data.autocomplete.getValueSuggestions({
+        const values = await fetchColumnValues(
+          indexPattern.title,
+          fieldName,
+          services as any,
           indexPattern,
-          field,
-          query: '',
-        });
-        return (suggestions || [])
-          .filter((s: unknown) => s !== null && s !== undefined)
-          .map((s: unknown) => String(s));
+          indexPattern.type
+        );
+        return (values || [])
+          .filter((v: unknown) => v !== null && v !== undefined)
+          .map((v: unknown) => String(v));
       } catch {
         return [];
       }
     },
-    [data, dataset]
+    [services, dataset]
   );
 
   return {
