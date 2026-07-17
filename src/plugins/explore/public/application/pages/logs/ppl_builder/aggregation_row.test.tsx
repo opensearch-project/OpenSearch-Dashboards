@@ -25,7 +25,7 @@ const renderRow = (agg: Aggregation, idx = 0) => {
 };
 
 describe('AggregationRow', () => {
-  it('renders the "Show" group with the aggregation selector', () => {
+  it('renders the aggregation chip with the aggregation selector', () => {
     renderRow({ id: 'a', fn: 'count' });
     expect(screen.getByTestId('pplBuilderAgg-0')).toBeInTheDocument();
     expect(screen.getByTestId('pplBuilderAggFn-0')).toBeInTheDocument();

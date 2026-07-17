@@ -21,6 +21,7 @@ import { AddMetricMenu } from './add_metric_menu';
 import { ModeToggleButton } from './mode_toggle_button';
 import { useFieldData } from './use_field_data';
 import { useDatasetContext } from '../../../context';
+import { ControlGroup } from '../../../components/query_builder';
 
 interface PPLBuilderProps {
   initialState?: PPLBuilderState;
@@ -142,26 +143,34 @@ export const PPLBuilder: React.FC<PPLBuilderProps> = ({
           dispatch={dispatch}
         />
 
-        <span className="plqRow__label">
-          {i18n.translate('explore.pplBuilder.groupInto', { defaultMessage: 'Group into' })}
-        </span>
-
-        {state.aggregations.map((agg, idx) => (
-          <AggregationRow
-            key={agg.id}
-            agg={agg}
-            idx={idx}
-            numericFieldOptions={numericFieldNames}
-            anyFieldOptions={numericAndAggregatableNames}
-            dispatch={dispatch}
+        {hasAggregation ? (
+          <ControlGroup
+            className="plqGroup--wrap"
+            label={i18n.translate('explore.pplBuilder.stats', { defaultMessage: 'Stats' })}
+            dataTestSubj="pplBuilderStats"
+          >
+            {state.aggregations.map((agg, idx) => (
+              <AggregationRow
+                key={agg.id}
+                agg={agg}
+                idx={idx}
+                numericFieldOptions={numericFieldNames}
+                anyFieldOptions={numericAndAggregatableNames}
+                dispatch={dispatch}
+              />
+            ))}
+            <AddMetricMenu
+              hasMetrics
+              onAdd={(fn) => dispatch({ type: 'ADD_AGGREGATION', agg: { fn } })}
+              dataTestSubj="pplBuilderAddAggregation"
+            />
+          </ControlGroup>
+        ) : (
+          <AddMetricMenu
+            onAdd={(fn) => dispatch({ type: 'ADD_AGGREGATION', agg: { fn } })}
+            dataTestSubj="pplBuilderAddAggregation"
           />
-        ))}
-
-        <AddMetricMenu
-          hasMetrics={hasAggregation}
-          onAdd={(fn) => dispatch({ type: 'ADD_AGGREGATION', agg: { fn } })}
-          dataTestSubj="pplBuilderAddAggregation"
-        />
+        )}
 
         {hasAggregation && (
           <GroupByRow

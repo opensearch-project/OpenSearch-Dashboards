@@ -303,6 +303,21 @@ $plqControlHeight: 36px;
   }
 }
 
+// A stats aggregation rendered as a pill inside the "Stats" group — mirrors the
+// where-filter chip so both operations read the same way.
+.plqAggChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 18px;
+  padding: 0 2px 0 8px;
+  background: $plqChipBg;
+  color: $plqInk;
+  border-radius: $plqRadius;
+  max-width: 100%;
+  min-width: 0;
+}
+
 .plqX.euiButtonIcon {
   width: 16px;
   height: 16px;

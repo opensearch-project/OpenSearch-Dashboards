@@ -12,7 +12,7 @@ import { AGG_FN_MAP, SCALAR_FN_MAP } from './operations';
 import { FunctionMenu } from './function_menu';
 import { AggregationMenu } from './aggregation_menu';
 import { FieldMenu } from './field_menu';
-import { inputWidth, ControlGroup, RemoveButton } from '../../../components/query_builder';
+import { inputWidth, RemoveButton } from '../../../components/query_builder';
 
 interface AggregationRowProps {
   agg: Aggregation;
@@ -80,10 +80,7 @@ export const AggregationRow: React.FC<AggregationRowProps> = ({
   const def = AGG_FN_MAP[agg.fn];
   const fieldOptions = def?.numericOnly ? numericFieldOptions : anyFieldOptions;
   return (
-    <ControlGroup
-      label={i18n.translate('explore.pplBuilder.show', { defaultMessage: 'Show' })}
-      dataTestSubj={`pplBuilderAgg-${idx}`}
-    >
+    <span className="plqAggChip" data-test-subj={`pplBuilderAgg-${idx}`}>
       <AggregationMenu
         value={agg.fn}
         onChange={(fn) => dispatch({ type: 'SET_AGGREGATION', index: idx, agg: { fn } })}
@@ -133,12 +130,13 @@ export const AggregationRow: React.FC<AggregationRowProps> = ({
         />
       )}
       <RemoveButton
+        variant="chip"
         ariaLabel={i18n.translate('explore.pplBuilder.removeAggregation', {
           defaultMessage: 'Remove aggregation',
         })}
         onClick={() => dispatch({ type: 'REMOVE_AGGREGATION', index: idx })}
         dataTestSubj={`pplBuilderRemoveAgg-${idx}`}
       />
-    </ControlGroup>
+    </span>
   );
 };

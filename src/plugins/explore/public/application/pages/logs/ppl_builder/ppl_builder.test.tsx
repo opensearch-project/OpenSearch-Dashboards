@@ -87,7 +87,8 @@ describe('PPLBuilder', () => {
   it('renders the search box and group rows', () => {
     renderBuilder();
     expect(screen.getByText('Search for')).toBeInTheDocument();
-    expect(screen.getByText('Group into')).toBeInTheDocument();
+    // With no aggregation yet, the stats group collapses to a ghost "+ Stats" button.
+    expect(screen.getByTestId('pplBuilderAddAggregation')).toHaveTextContent('Stats');
     expect(screen.getByTestId('pplBuilderSearchBox')).toBeInTheDocument();
   });
 

@@ -16,7 +16,7 @@ import './resizable_query_container.scss';
 // widgets bar (~32px) + editor line (~18px) + editor padding/border (~22px)
 const QUERY_PANEL_SINGLE_LINE_PX = 82;
 // Taller default for the logs visual builder, sized to show its default state
-// (widgets row + the "Search for" / "Group into" rows) without clipping. The
+// (widgets row + the "Search for" / builder rows) without clipping. The
 // panel stays manually resizable from here.
 const QUERY_PANEL_BUILDER_PX = 150;
 const QUERY_PANEL_MIN_SIZE = '3%';
