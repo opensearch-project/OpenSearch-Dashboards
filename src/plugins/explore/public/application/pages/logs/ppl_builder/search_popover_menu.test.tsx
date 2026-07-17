@@ -61,7 +61,7 @@ describe('SearchPopoverMenu', () => {
     expect(searchBox.value).toBe('');
   });
 
-  it('keeps the popover open (search retained) on select when keepOpenOnSelect is set', () => {
+  it('keeps the popover open but clears the search on select when keepOpenOnSelect is set', () => {
     const options = makeOptions();
     renderMenu(options, { keepOpenOnSelect: true });
     open();
@@ -69,8 +69,25 @@ describe('SearchPopoverMenu', () => {
     fireEvent.change(searchBox, { target: { value: 'count' } });
     fireEvent.click(screen.getByTestId('opt-count'));
     expect(options[0].onSelect).toHaveBeenCalledTimes(1);
-    // The popover stays open, so the search query is NOT reset.
-    expect(searchBox.value).toBe('count');
+    // The popover stays open (options still visible), but the search query is
+    // cleared so the next typed value starts fresh rather than appending.
+    expect(screen.getByTestId('opt-count')).toBeInTheDocument();
+    expect(searchBox.value).toBe('');
+  });
+
+  it('clears the search after a create when keepOpenOnSelect is set (multi-value)', () => {
+    const onCreate = jest.fn();
+    renderMenu(makeOptions(), {
+      keepOpenOnSelect: true,
+      allowCreate: { onCreate, dataTestSubj: 'createRow' },
+    });
+    open();
+    const searchBox = screen.getByTestId('menuSearch') as HTMLInputElement;
+    fireEvent.change(searchBox, { target: { value: 'aaa' } });
+    fireEvent.click(screen.getByTestId('createRow'));
+    expect(onCreate).toHaveBeenCalledWith('aaa');
+    // Search is reset so a subsequent value is not concatenated onto the first.
+    expect(searchBox.value).toBe('');
   });
 
   it('filters the list by the search query (matching filterText/key)', () => {

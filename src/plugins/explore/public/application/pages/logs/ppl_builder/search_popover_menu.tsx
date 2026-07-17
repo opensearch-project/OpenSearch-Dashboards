@@ -68,11 +68,15 @@ export const SearchPopoverMenu: React.FC<SearchPopoverMenuProps> = ({
 
   const selectOption = (option: SearchMenuOption) => {
     option.onSelect();
-    if (!keepOpenOnSelect) close();
+    // Keep the popover open for multi-select, but always clear the search so the
+    // next typed value starts fresh rather than appending to the previous text.
+    if (keepOpenOnSelect) setSearch('');
+    else close();
   };
   const create = (value: string) => {
     allowCreate?.onCreate(value);
-    if (!keepOpenOnSelect) close();
+    if (keepOpenOnSelect) setSearch('');
+    else close();
   };
 
   const { filtered, allowCreateNow } = useMemo(() => {
