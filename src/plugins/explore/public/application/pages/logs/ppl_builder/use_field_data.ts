@@ -76,12 +76,18 @@ export const useFieldData = () => {
       const indexPattern = dataset as any;
       if (!indexPattern?.title) return [];
       try {
+        // The DataView's own `.type` is undefined for index patterns; the dataset
+        // descriptor on the query service carries the SET_TYPE ('INDEX_PATTERN')
+        // that fetchColumnValues gates its live query on. Source it the same way
+        // the code editor's autocomplete does, falling back to the DataView type.
+        const datasetType =
+          services.data?.query?.queryString?.getQuery?.()?.dataset?.type ?? indexPattern.type;
         const values = await fetchColumnValues(
           indexPattern.title,
           fieldName,
           services as any,
           indexPattern,
-          indexPattern.type,
+          datasetType,
           undefined,
           searchTerm
         );

@@ -5,15 +5,21 @@
 
 import { renderHook } from '@testing-library/react';
 import { useFieldData } from './use_field_data';
+import { fetchColumnValues } from '../../../../../../data/public';
 
 const mockUseDatasetContext = jest.fn();
+const mockGetQuery = jest.fn(() => ({ dataset: { type: 'INDEX_PATTERN' } }));
 
 jest.mock('../../../../../../data/public', () => ({
   fetchColumnValues: jest.fn().mockResolvedValue([]),
 }));
 
 jest.mock('../../../../../../opensearch_dashboards_react/public', () => ({
-  useOpenSearchDashboards: () => ({ services: { data: { autocomplete: {} } } }),
+  useOpenSearchDashboards: () => ({
+    services: {
+      data: { autocomplete: {}, query: { queryString: { getQuery: mockGetQuery } } },
+    },
+  }),
 }));
 
 jest.mock('../../../context', () => ({
@@ -82,5 +88,45 @@ describe('useFieldData', () => {
     // The full field list keeps the date field; the group-by options drop it.
     expect(result.current.fieldNames).toEqual(['@timestamp', 'service', 'bytes']);
     expect(result.current.groupByFieldNames).toEqual(['service', 'bytes']);
+  });
+
+  it('sources datasetType from the query service (not the DataView) and forwards the search term', async () => {
+    // The DataView has no `.type`; the query service dataset carries INDEX_PATTERN.
+    mockUseDatasetContext.mockReturnValue({
+      dataset: { title: 'logs-*', type: undefined, fields: { getAll: () => [] } },
+    });
+
+    const { result } = renderHook(() => useFieldData());
+    await result.current.getValues('agent', 'MSIE');
+
+    expect(fetchColumnValues).toHaveBeenCalledWith(
+      'logs-*',
+      'agent',
+      expect.anything(),
+      expect.anything(),
+      'INDEX_PATTERN',
+      undefined,
+      'MSIE'
+    );
+  });
+
+  it('falls back to the DataView type when the query service has no dataset', async () => {
+    mockGetQuery.mockReturnValueOnce({ dataset: undefined } as any);
+    mockUseDatasetContext.mockReturnValue({
+      dataset: { title: 'logs-*', type: 'INDEX_PATTERN', fields: { getAll: () => [] } },
+    });
+
+    const { result } = renderHook(() => useFieldData());
+    await result.current.getValues('agent');
+
+    expect(fetchColumnValues).toHaveBeenCalledWith(
+      'logs-*',
+      'agent',
+      expect.anything(),
+      expect.anything(),
+      'INDEX_PATTERN',
+      undefined,
+      undefined
+    );
   });
 });
