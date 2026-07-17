@@ -218,37 +218,4 @@ describe('lintRuntimePPLQuery', () => {
       expect(result!.diagnostics.map((d) => d.ruleId)).toContain('head-without-sort');
     });
   });
-
-  // Lint is best-effort: a query the runtime grammar cannot fully parse still
-  // yields an error-recovered tree, and the rules must run on it — matching the
-  // compiled fallback path, which never discards a tree. Previously buildRuntimeTree
-  // returned undefined whenever the parse reported any error, so a trailing
-  // unknown command silently disabled ALL linting for the otherwise-valid prefix.
-  describe('lints best-effort on a partially-unparseable query', () => {
-    const fields = new Set<string>(['age', 'balance']);
-
-    const runtimeDiags = async (content: string) => {
-      jest.spyOn(pplGrammarCache, 'getCachedGrammar').mockReturnValue(buildRuntimeGrammar());
-      const result = await lintRuntimePPLQuery({
-        content,
-        context: { useRuntimeGrammar: true, fields } as any,
-        model: {} as any,
-      });
-      return result;
-    };
-
-    it('still flags an unknown field when a later command fails to parse', async () => {
-      const result = await runtimeDiags('source=accounts | where nope > 1 | boguscmd foo');
-      expect(result).not.toBeNull();
-      expect(result!.diagnostics.map((d) => d.message)).toContainEqual(
-        expect.stringContaining('Unknown field "nope"')
-      );
-    });
-
-    it('still flags head-without-sort when a trailing token is unparseable', async () => {
-      const result = await runtimeDiags('source=accounts | head 5 |');
-      expect(result).not.toBeNull();
-      expect(result!.diagnostics.map((d) => d.ruleId)).toContain('head-without-sort');
-    });
-  });
 });

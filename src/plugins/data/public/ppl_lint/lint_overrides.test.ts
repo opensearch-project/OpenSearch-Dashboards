@@ -144,7 +144,6 @@ describe('buildOverridesFromSettings', () => {
     expect(overrides).toEqual({});
   });
 
-
   it('ignores unknown rule ids gracefully', () => {
     const overrides = buildOverridesFromSettings(
       makeUiSettings([{ id: 'nonexistent-rule', enabled: false, severity: 'error' }])
@@ -160,7 +159,6 @@ describe('buildOverridesFromSettings', () => {
     );
     expect(overrides).toEqual({});
   });
-
 
   it('does not treat command-suggestion as a catalog override', () => {
     // command-suggestion is a syntax-channel toggle, not a catalog rule, so it

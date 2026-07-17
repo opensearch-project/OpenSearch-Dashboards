@@ -210,7 +210,6 @@ describe('pplLintCodeActionProvider', () => {
     });
   });
 
-
   describe('syntax-error channel (command-typo quick-fix)', () => {
     afterEach(() => clearModelSyntaxFixes(model));
 

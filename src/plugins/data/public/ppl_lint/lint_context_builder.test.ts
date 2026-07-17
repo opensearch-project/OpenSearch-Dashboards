@@ -257,7 +257,6 @@ describe('buildPPLLintContext', () => {
     expect(ctx.isCalcite).toBe(true);
   });
 
-
   it('leaves fields undefined when the cache is empty', () => {
     const ctx = buildPPLLintContext(dataset, {}, services);
     expect(ctx.fields).toBeUndefined();
