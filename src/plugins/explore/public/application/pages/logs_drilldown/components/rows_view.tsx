@@ -30,6 +30,7 @@ import { fetchHistogram } from '../hooks/fetch_histogram';
 import { useCreateDataset } from '../hooks/use_create_dataset';
 import { useActivateDataset } from '../hooks/use_activate_dataset';
 import { indexCoveredByAnyDataset } from '../dataset_coverage';
+import { maybeNotifyPermissionDenied } from '../permission_toast';
 import { suggestWildcardFromName, suggestWildcardFromNames } from '../suggest_wildcard';
 import { PreviewEmptyIllustration } from './preview_empty_illustration';
 import { LogStreamCard, CardData } from './log_stream_card';
@@ -199,18 +200,26 @@ export const RowsView: React.FC<Props> = ({
       const from = bounds?.min?.valueOf() ?? Date.now() - 15 * 60 * 1000;
       const to = bounds?.max?.valueOf() ?? Date.now();
 
-      const preview = await fetchPreview(
-        services,
-        {
-          indexName: name,
-          timeFieldName,
-          dataSource,
-          size: DEFAULT_PREVIEW_SIZE,
-          // Only bound when this is a time-based index; non-time indexes have no field to filter on.
-          ...(timeFieldName ? { from, to } : {}),
-        },
-        signal
-      );
+      let preview;
+      try {
+        preview = await fetchPreview(
+          services,
+          {
+            indexName: name,
+            timeFieldName,
+            dataSource,
+            size: DEFAULT_PREVIEW_SIZE,
+            // Only bound when this is a time-based index; non-time indexes have no field to filter on.
+            ...(timeFieldName ? { from, to } : {}),
+          },
+          signal
+        );
+      } catch (e) {
+        // A 4xx (e.g. no read permission on this index) raises the one-time permission toast; the
+        // card still shows its own ERROR state from the re-thrown error.
+        maybeNotifyPermissionDenied(services, e);
+        throw e;
+      }
 
       let histogram;
       if (timeFieldName) {

@@ -119,6 +119,17 @@ export function extractRows(response: any): PreviewRow[] {
 // a cryptic "Bad Request".
 export function toFriendlyError(e: unknown): string {
   const raw = e instanceof Error ? e.message : String(e ?? '');
+  const statusCode =
+    (e as { statusCode?: number; body?: { statusCode?: number } })?.statusCode ??
+    (e as { body?: { statusCode?: number } })?.body?.statusCode;
+  // Permission denied (403 / security-plugin authorization failure) → actionable copy instead of a
+  // cryptic security message.
+  if (
+    statusCode === 403 ||
+    /\b403\b|forbidden|unauthorized|not authorized|no permissions for|security_exception/i.test(raw)
+  ) {
+    return "You don't have permission to read this index. Ask an administrator for access.";
+  }
   if (/_plugins\/_ppl|no handler found|_ppl/i.test(raw)) {
     return 'Preview needs the PPL query engine, which is not available on this cluster. You can still create a dataset and query it.';
   }

@@ -28,6 +28,7 @@ import { ExploreServices } from '../../../types';
 import { DataSourceControl } from './components/data_source_control';
 import { RowsView, BatchAction } from './components/rows_view';
 import { useIndexClassification } from './hooks/use_index_classification';
+import { resetPermissionToast } from './permission_toast';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
@@ -152,6 +153,12 @@ export const LogsDrilldownPage: React.FC<Props> = ({ services, setHeaderActionMe
 
   // The batch (multi-select) action RowsView reports up — drives the toolbar button.
   const [batchAction, setBatchAction] = useState<BatchAction | null>(null);
+
+  // Reset the one-time "permission denied" toast whenever the data source changes: a different source
+  // is a fresh permission context, so its own failures should be allowed to toast once.
+  useEffect(() => {
+    resetPermissionToast();
+  }, [dataSourceId]);
 
   // Page breadcrumb. This standalone app has no explore tab chrome, so it sets its own.
   useEffect(() => {

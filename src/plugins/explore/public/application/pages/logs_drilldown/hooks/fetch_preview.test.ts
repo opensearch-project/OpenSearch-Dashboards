@@ -93,6 +93,13 @@ describe('toFriendlyError', () => {
     expect(toFriendlyError('GET /_plugins/_ppl failed')).toMatch(/PPL query engine/);
   });
 
+  it('maps a 403 / permission error to actionable guidance', () => {
+    expect(toFriendlyError({ statusCode: 403, message: 'forbidden' })).toMatch(/permission/i);
+    expect(toFriendlyError(new Error('security_exception: no permissions for'))).toMatch(
+      /permission/i
+    );
+  });
+
   it('passes through other messages', () => {
     expect(toFriendlyError(new Error('boom'))).toBe('boom');
   });

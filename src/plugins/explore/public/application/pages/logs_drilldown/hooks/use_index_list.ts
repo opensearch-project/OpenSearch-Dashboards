@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from 'react';
 import { DataStructure, DEFAULT_DATA } from '../../../../../../data/common';
 import { ExploreServices } from '../../../../types';
 import { BrowsableItem } from '../types';
+import { maybeNotifyPermissionDenied } from '../permission_toast';
 
 interface UseIndexListArgs {
   services: ExploreServices;
@@ -213,7 +214,11 @@ async function sortByCreationDate(
         if (b.createdAt != null) return 1;
         return b.name.localeCompare(a.name);
       });
-  } catch {
+  } catch (e) {
+    // cat.indices enrichment is best-effort: on ANY failure we still show the list (name-ordered),
+    // just without creation date / docs.count / health / size. A 4xx (e.g. no cat permission) also
+    // raises the one-time "index details unavailable — check permissions" toast.
+    maybeNotifyPermissionDenied(services, e);
     return nameDescending();
   }
 }
