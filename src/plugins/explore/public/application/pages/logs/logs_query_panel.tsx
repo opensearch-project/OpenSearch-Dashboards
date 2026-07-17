@@ -16,6 +16,7 @@ import { usePPLExecuteQueryAction } from '../../../components/query_panel/action
 import { useEditorRef, useEditorText, useSetEditorTextWithQuery } from '../../../application/hooks';
 import { useSetEditorText } from '../../../application/hooks/editor_hooks/use_set_editor_text/use_set_editor_text';
 import {
+  selectDataset,
   selectIsLoading,
   selectIsPromptEditorMode,
   selectPromptToQueryIsLoading,
@@ -24,7 +25,7 @@ import {
 } from '../../../application/utils/state_management/selectors';
 import { setIsQueryEditorDirty } from '../../../application/utils/state_management/slices/query_editor/query_editor_slice';
 import { onEditorRunActionCreator } from '../../../application/utils/state_management/actions/query_editor';
-import { PPLBuilder, PPLBuilderState, parsePPL } from './ppl_builder';
+import { PPLBuilder, PPLBuilderState, parsePPL, emptyState } from './ppl_builder';
 import { ModeToggleButton } from './ppl_builder/mode_toggle_button';
 import { LogsBuilderMode } from './logs_query_panel_mode';
 import '../../../components/query_panel/query_panel.scss';
@@ -60,6 +61,7 @@ export const LogsQueryPanel: React.FC = () => {
   const isPromptMode = useSelector(selectIsPromptEditorMode);
   const reduxQuery = useSelector(selectQueryString);
   const savedSearch = useSelector(selectSavedSearch);
+  const dataset = useSelector(selectDataset);
 
   const editorRef = useEditorRef();
   const getEditorText = useEditorText();
@@ -165,6 +167,33 @@ export const LogsQueryPanel: React.FC = () => {
     // In Code mode we stay in Code; the toggle stays available when canBuild.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reduxQuery]);
+
+  // Reset the builder when the user switches to a different dataset. A dataset
+  // switch clears the query (dataset_select sets it to EMPTY_QUERY.QUERY), so any
+  // in-progress builder draft belongs to the old dataset and its fields — carrying
+  // it over is wrong. The reduxQuery-keyed effect above doesn't cover this: when
+  // the draft was never run the Redux query string is already '' and stays '' after
+  // the switch, so its `reduxQuery === lastDispatchedRef.current` guard
+  // short-circuits and the draft survives. Fire only on a genuine change between
+  // two defined dataset ids: an undefined -> defined transition is the initial
+  // async dataset load (or a select-from-cleared), where there is no prior draft to
+  // discard and the reduxQuery effect already handles a URL/saved-object restore.
+  const datasetId = dataset?.id;
+  const prevDatasetIdRef = useRef(datasetId);
+  useEffect(() => {
+    const prevDatasetId = prevDatasetIdRef.current;
+    prevDatasetIdRef.current = datasetId;
+    if (!prevDatasetId || !datasetId || prevDatasetId === datasetId) return;
+
+    builderQueryRef.current = '';
+    lastDispatchedRef.current = reduxQuery;
+    preservedBuilderRef.current = null;
+    pendingCodeSeedRef.current = null;
+    setLiveCodeText(reduxQuery);
+    reseedBuilder(emptyState());
+    setMode('builder');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [datasetId]);
 
   // Keep builder output in the QueryStringManager (NOT Redux) so TopNav's submit
   // reads it via queryString.getQuery().query — mirrors MetricsQueryPanel and
