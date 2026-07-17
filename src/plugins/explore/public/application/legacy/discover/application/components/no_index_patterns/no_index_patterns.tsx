@@ -4,7 +4,7 @@
  */
 
 import './no_index_patterns.scss';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import {
   EuiPanel,
@@ -35,6 +35,20 @@ const SQL_DOC_URL = 'https://docs.opensearch.org/latest/sql-and-ppl/sql/index/';
 export const DiscoverNoIndexPatterns: React.FC = () => {
   const services = getServices();
   const { sqlSupportEnabled, logsDrilldownEnabled } = services;
+
+  // This empty state is shared by the Logs AND Traces flavors. Resolve the current flavor once on
+  // mount so we only surface the "Logs drilldown" action on the Logs page (drilldown is a logs-only
+  // canvas — it makes no sense from Traces). `getCurrentFlavor` is async, hence the state.
+  const [flavor, setFlavor] = useState<ExploreFlavor | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    getCurrentFlavor(services).then((f) => {
+      if (!cancelled) setFlavor(f);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [services]);
 
   // Curated doc links: PPL (always) + SQL (only when SQL support is on), replacing the full
   // language list so onboarding users aren't shown languages that don't apply here.
@@ -67,14 +81,14 @@ export const DiscoverNoIndexPatterns: React.FC = () => {
     // flavor we're on (traces on the traces page, logs on the logs page), mirroring the on-page
     // dataset dropdown which uses `signalType={flavorId}`. Falls back to logs if the flavor is
     // unknown. `ExploreFlavor` values match CORE_SIGNAL_TYPES ('logs'/'traces'/'metrics').
-    const flavor = (await getCurrentFlavor(services)) ?? ExploreFlavor.Logs;
+    const createFlavor = flavor ?? (await getCurrentFlavor(services)) ?? ExploreFlavor.Logs;
     // Holder so the modal's own callbacks can close it (the ref is set right after openModal).
     const modalHolder: { close: () => void } = { close: () => {} };
     const element = React.createElement(AdvancedSelector, {
       services: services as any,
       useConfiguratorV2: true,
       alwaysShowDatasetFields: true,
-      signalType: flavor,
+      signalType: createFlavor,
       // Match the on-page dataset dropdown's "Create dataset" modal exactly (same supportedTypes +
       // showNonTimeFieldDatasets) so the same advanced selector opens, not a different type picker.
       supportedTypes: services.supportedTypes || [
@@ -88,10 +102,10 @@ export const DiscoverNoIndexPatterns: React.FC = () => {
         if (!query?.dataset) return;
         try {
           if (saveDataset) {
-            await datasetService.saveDataset(query.dataset, services, flavor);
+            await datasetService.saveDataset(query.dataset, services, createFlavor);
             services.data.dataViews.clearCache();
           } else {
-            await datasetService.cacheDataset(query.dataset, services, false, flavor);
+            await datasetService.cacheDataset(query.dataset, services, false, createFlavor);
           }
           const initialQuery = services.data.query.queryString.getInitialQueryByDataset({
             ...query.dataset,
@@ -113,6 +127,22 @@ export const DiscoverNoIndexPatterns: React.FC = () => {
     });
     modalHolder.close = () => modal.close();
   };
+
+  // Logs drilldown is a logs-only onboarding canvas, so only offer it on the Logs flavor (this empty
+  // state is shared with Traces) and when the feature is enabled.
+  const showLogsDrilldown = logsDrilldownEnabled && flavor === ExploreFlavor.Logs;
+
+  // Description points at the on-screen CTAs. When Logs drilldown is available we surface both ways
+  // to create a dataset (guided canvas vs. the enhanced selector); otherwise just the selector.
+  const selectDataDescription = showLogsDrilldown
+    ? i18n.translate('explore.discover.noIndexPatterns.selectDataDescriptionWithDrilldown', {
+        defaultMessage:
+          'Get started by creating a dataset — explore your indexes with the guided Logs drilldown, or pick your data with the Create dataset button. You can also select data from the dropdown above.',
+      })
+    : i18n.translate('explore.discover.noIndexPatterns.selectDataDescription', {
+        defaultMessage:
+          'Get started by creating a dataset with the Create dataset button, then choose a query language to run your queries. You can also select data from the dropdown above.',
+      });
 
   return (
     <EuiFlexGroup
@@ -139,40 +169,10 @@ export const DiscoverNoIndexPatterns: React.FC = () => {
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText textAlign="center" color="subdued" size="xs">
-                {i18n.translate('explore.discover.noIndexPatterns.selectDataDescription', {
-                  defaultMessage:
-                    'Select an available data source and choose a query language to use for running queries. You can use the data dropdown or use the enhanced data selector to select data.',
-                })}
+                {selectDataDescription}
               </EuiText>
             </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiTitle size="xs">
-                <h4>
-                  {i18n.translate('explore.discover.noIndexPatterns.learnMoreAboutQueryLanguages', {
-                    defaultMessage: 'Learn more about query languages',
-                  })}
-                </h4>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFlexGroup justifyContent="center" gutterSize="s" wrap>
-                {docLinks.map((doc) => (
-                  <EuiFlexItem grow={false} key={doc.id}>
-                    <EuiButtonEmpty
-                      href={doc.url}
-                      target="_blank"
-                      size="xs"
-                      iconType="popout"
-                      iconSide="right"
-                      iconGap="s"
-                      data-test-subj={`discoverNoIndexPatternsDoc-${doc.id}`}
-                    >
-                      <EuiText size="xs">{doc.title}</EuiText>
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
-            </EuiFlexItem>
+            {/* Primary CTAs row: Create dataset (+ guided Logs drilldown on the Logs flavor). */}
             <EuiFlexItem>
               <EuiFlexGroup justifyContent="center" gutterSize="s" responsive={false}>
                 <EuiFlexItem grow={false}>
@@ -186,7 +186,7 @@ export const DiscoverNoIndexPatterns: React.FC = () => {
                     })}
                   </EuiButton>
                 </EuiFlexItem>
-                {logsDrilldownEnabled && (
+                {showLogsDrilldown && (
                   <EuiFlexItem grow={false}>
                     <EuiButton
                       fill
@@ -205,6 +205,42 @@ export const DiscoverNoIndexPatterns: React.FC = () => {
                     </EuiButton>
                   </EuiFlexItem>
                 )}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            {/* Docs row (last): the "Learn more" label sits inline (not bold) with the doc links. */}
+            <EuiFlexItem>
+              <EuiFlexGroup
+                justifyContent="center"
+                alignItems="center"
+                gutterSize="xs"
+                wrap
+                responsive={false}
+              >
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="subdued">
+                    {i18n.translate(
+                      'explore.discover.noIndexPatterns.learnMoreAboutQueryLanguages',
+                      {
+                        defaultMessage: 'Learn more about query languages',
+                      }
+                    )}
+                  </EuiText>
+                </EuiFlexItem>
+                {docLinks.map((doc) => (
+                  <EuiFlexItem grow={false} key={doc.id}>
+                    <EuiButtonEmpty
+                      href={doc.url}
+                      target="_blank"
+                      size="xs"
+                      iconType="popout"
+                      iconSide="right"
+                      iconGap="s"
+                      data-test-subj={`discoverNoIndexPatternsDoc-${doc.id}`}
+                    >
+                      <EuiText size="xs">{doc.title}</EuiText>
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                ))}
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
