@@ -71,8 +71,8 @@ describe('sample data list route', () => {
 
     await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
 
-    expect(mockClient).toBeCalledTimes(2);
-    expect(mockResponse.ok).toBeCalled();
+    expect(mockClient).toHaveBeenCalledTimes(2);
+    expect(mockResponse.ok).toHaveBeenCalled();
     expect(mockSOClient.get.mock.calls[0][1]).toMatch('7adfa750-4c81-11e8-b3d7-01146121b73d');
   });
 
@@ -140,8 +140,8 @@ describe('sample data list route', () => {
 
     await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
 
-    expect(mockClient).toBeCalledTimes(2);
-    expect(mockResponse.ok).toBeCalled();
+    expect(mockClient).toHaveBeenCalledTimes(2);
+    expect(mockResponse.ok).toHaveBeenCalled();
     // First call is for data source, second call is for dashboard
     expect(mockSOClient.get.mock.calls[0]).toEqual(['data-source', mockDataSourceId]);
     expect(mockSOClient.get.mock.calls[1][1]).toMatch(
@@ -192,8 +192,8 @@ describe('sample data list route', () => {
 
     await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
 
-    expect(mockClient).toBeCalledTimes(2);
-    expect(mockResponse.ok).toBeCalled();
+    expect(mockClient).toHaveBeenCalledTimes(2);
+    expect(mockResponse.ok).toHaveBeenCalled();
     expect(mockSOClient.get.mock.calls[0][1]).toMatch(
       `${mockWorkspaceId}_7adfa750-4c81-11e8-b3d7-01146121b73d`
     );
@@ -265,8 +265,8 @@ describe('sample data list route', () => {
 
     await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
 
-    expect(mockClient).toBeCalledTimes(2);
-    expect(mockResponse.ok).toBeCalled();
+    expect(mockClient).toHaveBeenCalledTimes(2);
+    expect(mockResponse.ok).toHaveBeenCalled();
     // First call is for data source, second call is for dashboard
     expect(mockSOClient.get.mock.calls[0]).toEqual(['data-source', mockDataSourceId]);
     expect(mockSOClient.get.mock.calls[1][1]).toMatch(
@@ -326,7 +326,7 @@ describe('sample data list route', () => {
     await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
 
     expect(mockSOClient.get).toHaveBeenCalledWith('data-source', mockDataSourceId);
-    expect(mockResponse.ok).toBeCalled();
+    expect(mockResponse.ok).toHaveBeenCalled();
 
     // Verify that no datasets are returned for AnalyticEngine — sample data installation
     // is not supported because its pluggable data format rejects certain index mappings.
@@ -402,7 +402,7 @@ describe('sample data list route', () => {
     await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
 
     expect(mockSOClient.get).toHaveBeenCalledWith('data-source', mockDataSourceId);
-    expect(mockResponse.ok).toBeCalled();
+    expect(mockResponse.ok).toHaveBeenCalled();
 
     // Verify that all datasets are returned
     const responseBody = mockResponse.ok.mock.calls[0]?.[0]?.body as any[];
@@ -456,7 +456,7 @@ describe('sample data list route', () => {
 
     await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
 
-    expect(mockResponse.ok).toBeCalled();
+    expect(mockResponse.ok).toHaveBeenCalled();
 
     // Verify that all datasets are returned (no filtering without data source)
     const responseBody = mockResponse.ok.mock.calls[0]?.[0]?.body as any[];

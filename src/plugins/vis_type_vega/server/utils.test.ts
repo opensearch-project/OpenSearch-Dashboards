@@ -47,7 +47,7 @@ describe('findDataSourceIdbyName()', () => {
   test('If no matching dataSourceName, then throw error', () => {
     expect(
       findDataSourceIdbyName({ dataSourceName: 'nonexistentDataSource', savedObjectsClient })
-    ).rejects.toThrowError(
+    ).rejects.toThrow(
       'Expected exactly 1 result for data_source_name "nonexistentDataSource" but got 0 results'
     );
   });
@@ -55,7 +55,7 @@ describe('findDataSourceIdbyName()', () => {
   test('If duplicate dataSourceNames, then throw error', () => {
     expect(
       findDataSourceIdbyName({ dataSourceName: 'duplicateDataSource', savedObjectsClient })
-    ).rejects.toThrowError(
+    ).rejects.toThrow(
       'Expected exactly 1 result for data_source_name "duplicateDataSource" but got 2 results'
     );
   });

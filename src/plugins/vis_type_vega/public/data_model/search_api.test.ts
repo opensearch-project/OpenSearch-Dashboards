@@ -77,7 +77,7 @@ describe('SearchAPI.search', () => {
   test('If MDS is disabled and there is a datasource, it should throw an errorr', () => {
     const searchAPI = getSearchAPI(false);
     const requests = [{ name: 'example-id', data_source_name: 'non-existent-datasource' }];
-    expect(searchAPI.search(requests)).rejects.toThrowError();
+    expect(searchAPI.search(requests)).rejects.toThrow();
   });
 
   test('If MDS is enabled and there is no datasource, return params without datasource id', async () => {
@@ -136,21 +136,21 @@ describe('SearchAPI.findDataSourceIdbyName', () => {
 
   test('If dataSource is disabled, throw error', () => {
     const searchAPI = getSearchAPI(false);
-    expect(searchAPI.findDataSourceIdbyName('nonexistentDataSource')).rejects.toThrowError(
+    expect(searchAPI.findDataSourceIdbyName('nonexistentDataSource')).rejects.toThrow(
       'data_source_name cannot be used because data_source.enabled is false'
     );
   });
 
   test('If dataSource is enabled but no matching dataSourceName, then throw error', () => {
     const searchAPI = getSearchAPI(true);
-    expect(searchAPI.findDataSourceIdbyName('nonexistentDataSource')).rejects.toThrowError(
+    expect(searchAPI.findDataSourceIdbyName('nonexistentDataSource')).rejects.toThrow(
       'Expected exactly 1 result for data_source_name "nonexistentDataSource" but got 0 results'
     );
   });
 
   test('If dataSource is enabled but multiple dataSourceNames, then throw error', () => {
     const searchAPI = getSearchAPI(true);
-    expect(searchAPI.findDataSourceIdbyName('duplicateDataSource')).rejects.toThrowError(
+    expect(searchAPI.findDataSourceIdbyName('duplicateDataSource')).rejects.toThrow(
       'Expected exactly 1 result for data_source_name "duplicateDataSource" but got 2 results'
     );
   });

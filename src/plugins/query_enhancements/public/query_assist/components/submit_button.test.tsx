@@ -29,6 +29,6 @@ describe('<SubmitButton /> spec', () => {
   it('should trigger submit form', () => {
     const { component, onSubmit } = renderSubmitButton();
     fireEvent.click(component.getByTestId('query-assist-submit-button'));
-    expect(onSubmit).toBeCalled();
+    expect(onSubmit).toHaveBeenCalled();
   });
 });

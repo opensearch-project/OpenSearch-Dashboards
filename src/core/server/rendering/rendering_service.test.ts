@@ -1,4 +1,11 @@
+/** @jest-environment node */
+
 /*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * SPDX-License-Identifier: Apache-2.0
  *
  * The OpenSearch Contributors require contributions made to
@@ -43,7 +50,7 @@ jest.mock('@osd/i18n', () => {
   };
 });
 
-const i18nLoaderMock = jest.mocked(i18nLoader, true);
+const i18nLoaderMock = jest.mocked(i18nLoader, { shallow: true });
 
 import { httpServerMock } from '../http/http_server.mocks';
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';

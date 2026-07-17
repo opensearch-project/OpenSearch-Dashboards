@@ -77,7 +77,7 @@ describe('PermissionControlledUiSettingsWrapper', () => {
     it('should pass through non-config type requests', async () => {
       const wrapperClient = buildWrapperInstance();
       await wrapperClient.get('dashboard', 'test-id');
-      expect(mockedClient.get).toBeCalledWith('dashboard', 'test-id');
+      expect(mockedClient.get).toHaveBeenCalledWith('dashboard', 'test-id');
     });
 
     it('should handle regular config requests', async () => {
@@ -92,7 +92,7 @@ describe('PermissionControlledUiSettingsWrapper', () => {
 
       const result = await wrapperClient.get('config', '3.0.0');
 
-      expect(mockedClient.get).toBeCalledWith('config', '3.0.0');
+      expect(mockedClient.get).toHaveBeenCalledWith('config', '3.0.0');
       expect(result).toEqual(mockResponse);
     });
 
@@ -108,7 +108,7 @@ describe('PermissionControlledUiSettingsWrapper', () => {
 
       const result = await wrapperClient.get('config', DASHBOARD_ADMIN_SETTINGS_ID);
 
-      expect(mockedClient.get).toBeCalledWith('config', DASHBOARD_ADMIN_SETTINGS_ID);
+      expect(mockedClient.get).toHaveBeenCalledWith('config', DASHBOARD_ADMIN_SETTINGS_ID);
       expect(result).toEqual(adminSettings);
     });
 
@@ -132,14 +132,14 @@ describe('PermissionControlledUiSettingsWrapper', () => {
       const wrapperClient = buildWrapperInstance();
       const attributes = { title: 'Test Dashboard' };
       await wrapperClient.create('dashboard', attributes);
-      expect(mockedClient.create).toBeCalledWith('dashboard', attributes, {});
+      expect(mockedClient.create).toHaveBeenCalledWith('dashboard', attributes, {});
     });
 
     it('should pass through regular config requests', async () => {
       const wrapperClient = buildWrapperInstance();
       const attributes = { 'regular.setting': 'value' };
       await wrapperClient.create('config', attributes);
-      expect(mockedClient.create).toBeCalledWith('config', attributes, {});
+      expect(mockedClient.create).toHaveBeenCalledWith('config', attributes, {});
     });
 
     it('should create admin settings when user is dashboard admin', async () => {
@@ -156,7 +156,7 @@ describe('PermissionControlledUiSettingsWrapper', () => {
 
       await wrapperClient.create('config', attributes, { id: DASHBOARD_ADMIN_SETTINGS_ID });
 
-      expect(mockedClient.create).toBeCalledWith('config', attributes, {
+      expect(mockedClient.create).toHaveBeenCalledWith('config', attributes, {
         id: DASHBOARD_ADMIN_SETTINGS_ID,
         overwrite: true,
         permissions: expect.any(Object),
@@ -180,7 +180,7 @@ describe('PermissionControlledUiSettingsWrapper', () => {
 
       await wrapperClient.create('config', attributes, { id: DASHBOARD_ADMIN_SETTINGS_ID });
 
-      expect(mockedClient.create).toBeCalledWith('config', attributes, {
+      expect(mockedClient.create).toHaveBeenCalledWith('config', attributes, {
         id: DASHBOARD_ADMIN_SETTINGS_ID,
         overwrite: true,
         permissions: { read: { users: ['*'] } },
@@ -197,14 +197,14 @@ describe('PermissionControlledUiSettingsWrapper', () => {
       const wrapperClient = buildWrapperInstance();
       const attributes = { title: 'Updated Dashboard' };
       await wrapperClient.update('dashboard', 'test-id', attributes);
-      expect(mockedClient.update).toBeCalledWith('dashboard', 'test-id', attributes, {});
+      expect(mockedClient.update).toHaveBeenCalledWith('dashboard', 'test-id', attributes, {});
     });
 
     it('should pass through regular config requests', async () => {
       const wrapperClient = buildWrapperInstance();
       const attributes = { 'regular.setting': 'updated_value' };
       await wrapperClient.update('config', '3.0.0', attributes);
-      expect(mockedClient.update).toBeCalledWith('config', '3.0.0', attributes, {});
+      expect(mockedClient.update).toHaveBeenCalledWith('config', '3.0.0', attributes, {});
     });
 
     it('should update admin settings when user is dashboard admin', async () => {
@@ -221,7 +221,7 @@ describe('PermissionControlledUiSettingsWrapper', () => {
 
       await wrapperClient.update('config', DASHBOARD_ADMIN_SETTINGS_ID, attributes);
 
-      expect(mockedClient.update).toBeCalledWith(
+      expect(mockedClient.update).toHaveBeenCalledWith(
         'config',
         DASHBOARD_ADMIN_SETTINGS_ID,
         attributes,
@@ -242,7 +242,7 @@ describe('PermissionControlledUiSettingsWrapper', () => {
 
       await wrapperClient.update('config', DASHBOARD_ADMIN_SETTINGS_ID, attributes);
 
-      expect(mockedClient.create).toBeCalledWith('config', attributes, {
+      expect(mockedClient.create).toHaveBeenCalledWith('config', attributes, {
         id: DASHBOARD_ADMIN_SETTINGS_ID,
         overwrite: true,
         permissions: expect.any(Object),
@@ -263,7 +263,7 @@ describe('PermissionControlledUiSettingsWrapper', () => {
 
       await wrapperClient.bulkCreate(objects);
 
-      expect(mockedClient.bulkCreate).toBeCalledWith(objects, undefined);
+      expect(mockedClient.bulkCreate).toHaveBeenCalledWith(objects, undefined);
     });
 
     it('should throw error when trying to bulk create with admin settings ID', async () => {
@@ -310,7 +310,7 @@ describe('PermissionControlledUiSettingsWrapper', () => {
 
       await wrapperClient.bulkUpdate(objects);
 
-      expect(mockedClient.bulkUpdate).toBeCalledWith(objects, undefined);
+      expect(mockedClient.bulkUpdate).toHaveBeenCalledWith(objects, undefined);
     });
 
     it('should throw error when trying to bulk update admin settings', async () => {
@@ -351,8 +351,8 @@ describe('PermissionControlledUiSettingsWrapper', () => {
 
       await expect(
         wrapperClient.update('config', VERSION, { 'some.setting': 'value' })
-      ).rejects.toThrowError(/No permission to update global settings/);
-      expect(mockedClient.update).not.toBeCalled();
+      ).rejects.toThrow(/No permission to update global settings/);
+      expect(mockedClient.update).not.toHaveBeenCalled();
     });
 
     it('blocks a non-admin from creating the global config doc when the toggle is on', async () => {
@@ -361,8 +361,8 @@ describe('PermissionControlledUiSettingsWrapper', () => {
 
       await expect(
         wrapperClient.create('config', { 'some.setting': 'value' }, { id: VERSION })
-      ).rejects.toThrowError(/No permission to update global settings/);
-      expect(mockedClient.create).not.toBeCalled();
+      ).rejects.toThrow(/No permission to update global settings/);
+      expect(mockedClient.create).not.toHaveBeenCalled();
     });
 
     it('allows a dashboard admin to update the global config doc when the toggle is on', async () => {
@@ -370,7 +370,7 @@ describe('PermissionControlledUiSettingsWrapper', () => {
       const wrapperClient = buildWrapperInstance(true, 'on');
 
       await wrapperClient.update('config', VERSION, { 'some.setting': 'value' });
-      expect(mockedClient.update).toBeCalledWith(
+      expect(mockedClient.update).toHaveBeenCalledWith(
         'config',
         VERSION,
         { 'some.setting': 'value' },
@@ -383,7 +383,7 @@ describe('PermissionControlledUiSettingsWrapper', () => {
       const wrapperClient = buildWrapperInstance(false, 'off');
 
       await wrapperClient.update('config', VERSION, { 'some.setting': 'value' });
-      expect(mockedClient.update).toBeCalledWith(
+      expect(mockedClient.update).toHaveBeenCalledWith(
         'config',
         VERSION,
         { 'some.setting': 'value' },
@@ -396,7 +396,7 @@ describe('PermissionControlledUiSettingsWrapper', () => {
       const wrapperClient = buildWrapperInstance(false, 'unset');
 
       await wrapperClient.update('config', VERSION, { 'some.setting': 'value' });
-      expect(mockedClient.update).toBeCalled();
+      expect(mockedClient.update).toHaveBeenCalled();
     });
 
     // Regression tests for the bug where enabling enableGlobalSettingControl made
@@ -410,7 +410,7 @@ describe('PermissionControlledUiSettingsWrapper', () => {
 
       const userScopedId = `${CURRENT_USER_PLACEHOLDER}_${VERSION}`;
       await wrapperClient.update('config', userScopedId, { 'some.setting': 'value' });
-      expect(mockedClient.update).toBeCalledWith(
+      expect(mockedClient.update).toHaveBeenCalledWith(
         'config',
         userScopedId,
         { 'some.setting': 'value' },
@@ -424,7 +424,7 @@ describe('PermissionControlledUiSettingsWrapper', () => {
 
       const workspaceScopedId = `${CURRENT_WORKSPACE_PLACEHOLDER}_${VERSION}`;
       await wrapperClient.update('config', workspaceScopedId, { 'some.setting': 'value' });
-      expect(mockedClient.update).toBeCalledWith(
+      expect(mockedClient.update).toHaveBeenCalledWith(
         'config',
         workspaceScopedId,
         { 'some.setting': 'value' },
@@ -438,7 +438,7 @@ describe('PermissionControlledUiSettingsWrapper', () => {
 
       const userScopedId = `${CURRENT_USER_PLACEHOLDER}_${VERSION}`;
       await wrapperClient.create('config', { 'some.setting': 'value' }, { id: userScopedId });
-      expect(mockedClient.create).toBeCalledWith(
+      expect(mockedClient.create).toHaveBeenCalledWith(
         'config',
         { 'some.setting': 'value' },
         { id: userScopedId }
@@ -453,7 +453,7 @@ describe('PermissionControlledUiSettingsWrapper', () => {
       await wrapperClient.bulkUpdate([
         { type: 'config', id: userScopedId, attributes: { 'some.setting': 'value' } },
       ]);
-      expect(mockedClient.bulkUpdate).toBeCalled();
+      expect(mockedClient.bulkUpdate).toHaveBeenCalled();
     });
 
     it('does not gate a workspace-scoped config bulkCreate even when the toggle is on', async () => {
@@ -464,7 +464,7 @@ describe('PermissionControlledUiSettingsWrapper', () => {
       await wrapperClient.bulkCreate([
         { type: 'config', id: workspaceScopedId, attributes: { 'some.setting': 'value' } },
       ]);
-      expect(mockedClient.bulkCreate).toBeCalled();
+      expect(mockedClient.bulkCreate).toHaveBeenCalled();
     });
 
     it('blocks a non-admin bulkUpdate that targets the global config doc', async () => {
@@ -475,8 +475,8 @@ describe('PermissionControlledUiSettingsWrapper', () => {
         wrapperClient.bulkUpdate([
           { type: 'config', id: VERSION, attributes: { 'some.setting': 'value' } },
         ])
-      ).rejects.toThrowError(/No permission to update global settings/);
-      expect(mockedClient.bulkUpdate).not.toBeCalled();
+      ).rejects.toThrow(/No permission to update global settings/);
+      expect(mockedClient.bulkUpdate).not.toHaveBeenCalled();
     });
   });
 });

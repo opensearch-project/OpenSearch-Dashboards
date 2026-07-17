@@ -162,9 +162,9 @@ describe('CreateDatasetWizard', () => {
 
     component.setState({ dataset: 'foo' });
     await (component.instance() as CreateDatasetWizard).createDataset(undefined, 'id', undefined);
-    expect(newDatasetAndSave).toBeCalled();
-    expect(clear).toBeCalledWith('1');
-    expect(routeComponentPropsMock.history.push).toBeCalledWith(`/patterns/1`);
+    expect(newDatasetAndSave).toHaveBeenCalled();
+    expect(clear).toHaveBeenCalledWith('1');
+    expect(routeComponentPropsMock.history.push).toHaveBeenCalledWith(`/patterns/1`);
   });
 
   test('should render normally when use update UX', () => {

@@ -159,7 +159,7 @@ describe('SearchSource', () => {
       searchSource.onRequestStart(fn);
       const options = {};
       await searchSource.fetch(options);
-      expect(fn).toBeCalledWith(searchSource, options);
+      expect(fn).toHaveBeenCalledWith(searchSource, options);
     });
 
     test('should not be called on parent searchSource', async () => {
@@ -173,8 +173,8 @@ describe('SearchSource', () => {
       const options = {};
       await searchSource.fetch(options);
 
-      expect(fn).toBeCalledWith(searchSource, options);
-      expect(parentFn).not.toBeCalled();
+      expect(fn).toHaveBeenCalledWith(searchSource, options);
+      expect(parentFn).not.toHaveBeenCalled();
     });
 
     test('should be called on parent searchSource if callParentStartHandlers is true', async () => {
@@ -193,8 +193,8 @@ describe('SearchSource', () => {
       const options = {};
       await searchSource.fetch(options);
 
-      expect(fn).toBeCalledWith(searchSource, options);
-      expect(parentFn).toBeCalledWith(searchSource, options);
+      expect(fn).toHaveBeenCalledWith(searchSource, options);
+      expect(parentFn).toHaveBeenCalledWith(searchSource, options);
     });
   });
 
@@ -212,7 +212,7 @@ describe('SearchSource', () => {
       const searchSource = new SearchSource({ index: indexPattern }, searchSourceDependencies);
       const options = {};
       await searchSource.fetch(options);
-      expect(fetchSoon).toBeCalledTimes(1);
+      expect(fetchSoon).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -222,7 +222,7 @@ describe('SearchSource', () => {
       const options = {};
 
       await searchSource.fetch(options);
-      expect(mockSearchMethod).toBeCalledTimes(1);
+      expect(mockSearchMethod).toHaveBeenCalledTimes(1);
     });
 
     test('index pattern with dataSourceId will generate request with dataSourceId', async () => {
@@ -231,7 +231,7 @@ describe('SearchSource', () => {
       const options = {};
       await searchSource.fetch(options);
       const request = searchSource.history[0];
-      expect(mockSearchMethod).toBeCalledTimes(1);
+      expect(mockSearchMethod).toHaveBeenCalledTimes(1);
       expect(request.dataSourceId).toEqual(dataSourceId);
     });
   });

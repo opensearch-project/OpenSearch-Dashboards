@@ -21,7 +21,7 @@ describe('#WorkspaceClient', () => {
     const { workspaceClient, httpSetupMock, workspaceMock } = getWorkspaceClient();
     await workspaceClient.init();
     expect(workspaceMock.initialized$.getValue()).toEqual(true);
-    expect(httpSetupMock.fetch).toBeCalledWith('/api/workspaces/_list', {
+    expect(httpSetupMock.fetch).toHaveBeenCalledWith('/api/workspaces/_list', {
       method: 'POST',
       body: JSON.stringify({
         perPage: 999,
@@ -41,7 +41,7 @@ describe('#WorkspaceClient', () => {
     });
     const successResult = await workspaceClient.enterWorkspace('foo');
     expect(workspaceMock.currentWorkspaceId$.getValue()).toEqual('foo');
-    expect(httpSetupMock.fetch).toBeCalledWith('/api/workspaces/foo', {
+    expect(httpSetupMock.fetch).toHaveBeenCalledWith('/api/workspaces/foo', {
       method: 'GET',
     });
     expect(successResult.success).toEqual(true);
@@ -100,7 +100,7 @@ describe('#WorkspaceClient', () => {
       });
     await workspaceClient.create({ name: 'foo' }, {});
 
-    expect(httpSetupMock.fetch).toBeCalledWith('/api/workspaces', {
+    expect(httpSetupMock.fetch).toHaveBeenCalledWith('/api/workspaces', {
       method: 'POST',
       body: JSON.stringify({
         attributes: {
@@ -110,14 +110,14 @@ describe('#WorkspaceClient', () => {
       }),
     });
 
-    expect(httpSetupMock.fetch).toBeCalledWith('/api/workspaces/_list', {
+    expect(httpSetupMock.fetch).toHaveBeenCalledWith('/api/workspaces/_list', {
       method: 'POST',
       body: JSON.stringify({
         perPage: 999,
       }),
     });
 
-    expect(httpSetupMock.fetch).toBeCalledWith('/api/workspaces/_list', {
+    expect(httpSetupMock.fetch).toHaveBeenCalledWith('/api/workspaces/_list', {
       method: 'POST',
       body: JSON.stringify({
         perPage: 999,
@@ -136,10 +136,10 @@ describe('#WorkspaceClient', () => {
       },
     });
     await workspaceClient.delete('foo');
-    expect(httpSetupMock.fetch).toBeCalledWith('/api/workspaces/foo', {
+    expect(httpSetupMock.fetch).toHaveBeenCalledWith('/api/workspaces/foo', {
       method: 'DELETE',
     });
-    expect(httpSetupMock.fetch).toBeCalledWith('/api/workspaces/_list', {
+    expect(httpSetupMock.fetch).toHaveBeenCalledWith('/api/workspaces/_list', {
       method: 'POST',
       body: JSON.stringify({
         perPage: 999,
@@ -158,7 +158,7 @@ describe('#WorkspaceClient', () => {
     await workspaceClient.list({
       perPage: 999,
     });
-    expect(httpSetupMock.fetch).toBeCalledWith('/api/workspaces/_list', {
+    expect(httpSetupMock.fetch).toHaveBeenCalledWith('/api/workspaces/_list', {
       method: 'POST',
       body: JSON.stringify({
         perPage: 999,
@@ -169,7 +169,7 @@ describe('#WorkspaceClient', () => {
   it('#get', async () => {
     const { workspaceClient, httpSetupMock } = getWorkspaceClient();
     await workspaceClient.get('foo');
-    expect(httpSetupMock.fetch).toBeCalledWith('/api/workspaces/foo', {
+    expect(httpSetupMock.fetch).toHaveBeenCalledWith('/api/workspaces/foo', {
       method: 'GET',
     });
   });
@@ -199,7 +199,7 @@ describe('#WorkspaceClient', () => {
 
     await workspaceClient.update('foo', { name: 'foo' }, {});
 
-    expect(httpSetupMock.fetch).toBeCalledWith('/api/workspaces/foo', {
+    expect(httpSetupMock.fetch).toHaveBeenCalledWith('/api/workspaces/foo', {
       method: 'PUT',
       body: JSON.stringify({
         attributes: {
@@ -209,14 +209,14 @@ describe('#WorkspaceClient', () => {
       }),
     });
 
-    expect(httpSetupMock.fetch).toBeCalledWith('/api/workspaces/_list', {
+    expect(httpSetupMock.fetch).toHaveBeenCalledWith('/api/workspaces/_list', {
       method: 'POST',
       body: JSON.stringify({
         perPage: 999,
       }),
     });
 
-    expect(httpSetupMock.fetch).toBeCalledWith('/api/workspaces/_list', {
+    expect(httpSetupMock.fetch).toHaveBeenCalledWith('/api/workspaces/_list', {
       method: 'POST',
       body: JSON.stringify({
         perPage: 999,
@@ -257,7 +257,7 @@ describe('#WorkspaceClient', () => {
       includeReferencesDeep: false,
     });
     await workspaceClient.copy([{ id: 'url_id', type: 'url' }], 'workspace-1', false);
-    expect(httpSetupMock.fetch).toBeCalledWith('/api/workspaces/_duplicate_saved_objects', {
+    expect(httpSetupMock.fetch).toHaveBeenCalledWith('/api/workspaces/_duplicate_saved_objects', {
       body,
       method: 'POST',
     });
@@ -393,7 +393,7 @@ describe('WorkspaceClient.batchDelete', () => {
     expect(httpSetupMock.fetch).toHaveBeenCalledWith('/api/workspaces/bar', {
       method: 'DELETE',
     });
-    expect(httpSetupMock.fetch).toBeCalledWith('/api/workspaces/_list', {
+    expect(httpSetupMock.fetch).toHaveBeenCalledWith('/api/workspaces/_list', {
       method: 'POST',
       body: JSON.stringify({
         perPage: 999,
@@ -416,7 +416,7 @@ describe('WorkspaceClient.batchDelete', () => {
     expect(httpSetupMock.fetch).toHaveBeenCalledWith('/api/workspaces/bar', {
       method: 'DELETE',
     });
-    expect(httpSetupMock.fetch).toBeCalledWith('/api/workspaces/_list', {
+    expect(httpSetupMock.fetch).toHaveBeenCalledWith('/api/workspaces/_list', {
       method: 'POST',
       body: JSON.stringify({
         perPage: 999,
@@ -439,7 +439,7 @@ describe('WorkspaceClient.batchDelete', () => {
     expect(httpSetupMock.fetch).toHaveBeenCalledWith('/api/workspaces/bar', {
       method: 'DELETE',
     });
-    expect(httpSetupMock.fetch).toBeCalledWith('/api/workspaces/_list', {
+    expect(httpSetupMock.fetch).toHaveBeenCalledWith('/api/workspaces/_list', {
       method: 'POST',
       body: JSON.stringify({
         perPage: 999,
@@ -452,7 +452,7 @@ describe('WorkspaceClient.batchDelete', () => {
     const { workspaceClient, httpSetupMock } = getWorkspaceClient();
     const result = await workspaceClient.batchDelete([]);
 
-    expect(httpSetupMock.fetch).toBeCalledWith('/api/workspaces/_list', {
+    expect(httpSetupMock.fetch).toHaveBeenCalledWith('/api/workspaces/_list', {
       method: 'POST',
       body: JSON.stringify({
         perPage: 999,

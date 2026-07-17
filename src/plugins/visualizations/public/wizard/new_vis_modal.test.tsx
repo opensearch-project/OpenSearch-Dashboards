@@ -87,11 +87,8 @@ describe('NewVisModal', () => {
   const uiSettings: any = { get: settingsGet };
 
   beforeAll(() => {
-    Object.defineProperty(window, 'location', {
-      value: {
-        assign: jest.fn(),
-      },
-    });
+    // jsdom 26: spy on location.assign rather than replacing the location object.
+    jest.spyOn(window.location, 'assign').mockImplementation(jest.fn());
   });
 
   beforeEach(() => {
@@ -171,7 +168,9 @@ describe('NewVisModal', () => {
       );
       const visButton = wrapper.find('button[data-test-subj="visType-vis"]');
       visButton.simulate('click');
-      expect(window.location.assign).toBeCalledWith('testbasepath/app/visualize#/create?type=vis');
+      expect(window.location.assign).toHaveBeenCalledWith(
+        'testbasepath/app/visualize#/create?type=vis'
+      );
     });
 
     it('passes through editor params to the editor URL', () => {
@@ -190,7 +189,7 @@ describe('NewVisModal', () => {
       );
       const visButton = wrapper.find('button[data-test-subj="visType-vis"]');
       visButton.simulate('click');
-      expect(window.location.assign).toBeCalledWith(
+      expect(window.location.assign).toHaveBeenCalledWith(
         'testbasepath/app/visualize#/create?type=vis&foo=true&bar=42'
       );
     });
@@ -216,7 +215,7 @@ describe('NewVisModal', () => {
       );
       const visButton = wrapper.find('button[data-test-subj="visType-visWithAliasUrl"]');
       visButton.simulate('click');
-      expect(stateTransfer.navigateToEditor).toBeCalledWith('otherApp', {
+      expect(stateTransfer.navigateToEditor).toHaveBeenCalledWith('otherApp', {
         path: '#/aliasUrl',
         state: { originatingApp: 'coolJestTestApp' },
       });
@@ -241,7 +240,7 @@ describe('NewVisModal', () => {
       );
       const visButton = wrapper.find('button[data-test-subj="visType-visWithAliasUrl"]');
       visButton.simulate('click');
-      expect(navigateToApp).toBeCalledWith('otherApp', { path: '#/aliasUrl' });
+      expect(navigateToApp).toHaveBeenCalledWith('otherApp', { path: '#/aliasUrl' });
       expect(onClose).toHaveBeenCalled();
     });
   });

@@ -106,7 +106,10 @@ test('validates contained type', () => {
   const type = schema.nullable(schema.string({ maxLength: 1 }));
 
   expect(() => type.validate('foo')).toThrowErrorMatchingInlineSnapshot(
-    `"SchemaTypeError: expected value to equal [null]"`
+    `
+"SchemaTypeError: expected value to equal [null]
+Cause: SchemaTypeError: expected value to equal [null]"
+`
   );
 });
 
@@ -114,7 +117,10 @@ test('validates basic type', () => {
   const type = schema.nullable(schema.string());
 
   expect(() => type.validate(666)).toThrowErrorMatchingInlineSnapshot(
-    `"SchemaTypeError: expected value to equal [null]"`
+    `
+"SchemaTypeError: expected value to equal [null]
+Cause: SchemaTypeError: expected value to equal [null]"
+`
   );
 });
 
@@ -137,7 +143,10 @@ test('validates type errors in object', () => {
   });
 
   expect(() => type.validate({ foo: 'ab' })).toThrowErrorMatchingInlineSnapshot(
-    `"[foo]: SchemaTypeError: expected value to equal [null]"`
+    `
+"[foo]: SchemaTypeError: expected value to equal [null]
+Cause: SchemaTypeError: expected value to equal [null]"
+`
   );
 });
 
@@ -145,6 +154,9 @@ test('includes namespace in failure', () => {
   const type = schema.nullable(schema.string({ maxLength: 1 }));
 
   expect(() => type.validate('foo', {}, 'foo-namespace')).toThrowErrorMatchingInlineSnapshot(
-    `"[foo-namespace]: SchemaTypeError: expected value to equal [null]"`
+    `
+"[foo-namespace]: SchemaTypeError: expected value to equal [null]
+Cause: SchemaTypeError: expected value to equal [null]"
+`
   );
 });

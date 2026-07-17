@@ -86,7 +86,7 @@ describe('kuery functions', () => {
 
       test('should throw an error for scripted fields', () => {
         const existsNode = nodeTypes.function.buildNode('exists', 'script string');
-        expect(() => exists.toOpenSearchQuery(existsNode, indexPattern)).toThrowError(
+        expect(() => exists.toOpenSearchQuery(existsNode, indexPattern)).toThrow(
           /Exists query does not support scripted fields/
         );
       });

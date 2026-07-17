@@ -92,7 +92,7 @@ describe('msearch route', () => {
         "max_concurrent_shard_requests": undefined,
       }
     `);
-    expect(mockResponse.ok).toBeCalled();
+    expect(mockResponse.ok).toHaveBeenCalled();
     expect(mockResponse.ok.mock.calls[0][0]).toEqual({
       body: response,
     });
@@ -128,8 +128,8 @@ describe('msearch route', () => {
     const handler = mockRouter.post.mock.calls[0][1];
     await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
 
-    expect(mockClient.msearch).toBeCalled();
-    expect(mockResponse.customError).toBeCalled();
+    expect(mockClient.msearch).toHaveBeenCalled();
+    expect(mockResponse.customError).toHaveBeenCalled();
 
     const error: any = mockResponse.customError.mock.calls[0][0];
     expect(error.body.message).toBe('oh no');

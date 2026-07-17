@@ -239,7 +239,7 @@ describe('DocViewTable at Discover Context', () => {
     const btn = findTestSubject(row, 'addInclusiveFilterButton');
     expect(btn.length).toBe(1);
     btn.simulate('click');
-    expect(props.filter).toBeCalled();
+    expect(props.filter).toHaveBeenCalled();
   });
 
   it(`renders functional collapse button`, () => {

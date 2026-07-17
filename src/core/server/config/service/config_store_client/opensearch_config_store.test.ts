@@ -279,14 +279,14 @@ describe('OpenSearchConfigStoreClient', () => {
         const configStoreClient = new OpenSearchConfigStoreClient(mockClient);
 
         if (errorThrown) {
-          expect(configStoreClient.createDynamicConfigIndex()).rejects.toThrowError();
+          expect(configStoreClient.createDynamicConfigIndex()).rejects.toThrow();
         } else {
           await configStoreClient.createDynamicConfigIndex();
         }
 
-        expect(mockClient.indices.existsAlias).toBeCalled();
-        expect(mockClient.indices.create).toBeCalledTimes(numCreateCalls);
-        expect(mockClient.indices.updateAliases).toBeCalledTimes(numUpdateCalls);
+        expect(mockClient.indices.existsAlias).toHaveBeenCalled();
+        expect(mockClient.indices.create).toHaveBeenCalledTimes(numCreateCalls);
+        expect(mockClient.indices.updateAliases).toHaveBeenCalledTimes(numUpdateCalls);
       }
     );
   });
@@ -308,18 +308,18 @@ describe('OpenSearchConfigStoreClient', () => {
       for (let i = 0; i < 2; i++) {
         const result = await configStoreClient.getConfig('some_config_name');
         expect(result).toMatchObject(expectedConfigBlob);
-        expect(mockClient.search).toBeCalledTimes(1);
+        expect(mockClient.search).toHaveBeenCalledTimes(1);
       }
 
       // Clearing cache should induce another search call
       configStoreClient.clearCache();
       const result3 = await configStoreClient.getConfig('some_config_name');
       expect(result3).toMatchObject(expectedConfigBlob);
-      expect(mockClient.search).toBeCalledTimes(2);
+      expect(mockClient.search).toHaveBeenCalledTimes(2);
 
       const nonExistentResult = await configStoreClient.getConfig('non_existent_config');
       expect(nonExistentResult).not.toBeDefined();
-      expect(mockClient.search).toBeCalledTimes(3);
+      expect(mockClient.search).toHaveBeenCalledTimes(3);
     });
   });
 
@@ -347,14 +347,14 @@ describe('OpenSearchConfigStoreClient', () => {
       for (let i = 0; i < 2; i++) {
         const results = await configStoreClient.bulkGetConfigs(partialNames);
         assertMapsAreEqual(expectedConfigMapPartial, results);
-        expect(mockClient.search).toBeCalledTimes(1);
+        expect(mockClient.search).toHaveBeenCalledTimes(1);
       }
 
       // Partial cache hit initially, results are searched and found
       for (let i = 0; i < 2; i++) {
         const results = await configStoreClient.bulkGetConfigs([...partialNames, 'config_c']);
         assertMapsAreEqual(expectedConfigMap, results);
-        expect(mockClient.search).toBeCalledTimes(2);
+        expect(mockClient.search).toHaveBeenCalledTimes(2);
       }
 
       // Partial results
@@ -364,7 +364,7 @@ describe('OpenSearchConfigStoreClient', () => {
           'non_existent_config',
         ]);
         assertMapsAreEqual(expectedConfigMapPartial, results);
-        expect(mockClient.search).toBeCalledTimes(3);
+        expect(mockClient.search).toHaveBeenCalledTimes(3);
       }
 
       // No results
@@ -374,7 +374,7 @@ describe('OpenSearchConfigStoreClient', () => {
           'other_nonexistent_config',
         ]);
         assertMapsAreEqual(new Map(), results);
-        expect(mockClient.search).toBeCalledTimes(4);
+        expect(mockClient.search).toHaveBeenCalledTimes(4);
       }
     });
   });
@@ -484,7 +484,7 @@ describe('OpenSearchConfigStoreClient', () => {
           },
         });
 
-        expect(mockClient.bulk).toBeCalledWith({
+        expect(mockClient.bulk).toHaveBeenCalledWith({
           index: DYNAMIC_APP_CONFIG_ALIAS,
           body: expectedBulkRequest,
         });
@@ -492,7 +492,7 @@ describe('OpenSearchConfigStoreClient', () => {
         // Should cache result (search() is always called before bulk() to find existing configs)
         const result = await configStoreClient.getConfig('some_config_name');
         expect(result).toMatchObject(newConfigBlob);
-        expect(mockClient.search).toBeCalledTimes(1);
+        expect(mockClient.search).toHaveBeenCalledTimes(1);
       }
     );
   });
@@ -681,7 +681,7 @@ describe('OpenSearchConfigStoreClient', () => {
           configs: bulkCreateConfigsRequest,
         });
 
-        expect(mockClient.bulk).toBeCalledWith({
+        expect(mockClient.bulk).toHaveBeenCalledWith({
           index: DYNAMIC_APP_CONFIG_ALIAS,
           body: expectedBulkRequest,
         });
@@ -689,7 +689,7 @@ describe('OpenSearchConfigStoreClient', () => {
         // Should cache result (search() is always called before bulk() to find existing configs)
         const result = await configStoreClient.bulkGetConfigs([...configMap.keys()]);
         assertMapsAreEqual(result, configMap);
-        expect(mockClient.search).toBeCalledTimes(1);
+        expect(mockClient.search).toHaveBeenCalledTimes(1);
       }
     );
   });
@@ -706,7 +706,7 @@ describe('OpenSearchConfigStoreClient', () => {
       const configStoreClient = new OpenSearchConfigStoreClient(mockClient);
       await configStoreClient.deleteConfig({ name: 'some_config_name' });
 
-      expect(mockClient.deleteByQuery).toBeCalledWith({
+      expect(mockClient.deleteByQuery).toHaveBeenCalledWith({
         index: DYNAMIC_APP_CONFIG_ALIAS,
         body: {
           query: {
@@ -749,7 +749,7 @@ describe('OpenSearchConfigStoreClient', () => {
         paths: namespaces.map((name) => ({ name })),
       });
 
-      expect(mockClient.deleteByQuery).toBeCalledWith({
+      expect(mockClient.deleteByQuery).toHaveBeenCalledWith({
         index: DYNAMIC_APP_CONFIG_ALIAS,
         body: {
           query: {

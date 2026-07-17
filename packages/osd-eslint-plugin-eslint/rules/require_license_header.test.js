@@ -72,6 +72,19 @@ ruleTester.run('@osd/eslint/require-license-header', rule, {
 
       options: [{ licenses: ['/* license 1 */', '/* license 2 */'] }],
     },
+
+    // jest docblock pragma before the license header is allowed
+    {
+      code: dedent`
+        /** @jest-environment node */
+
+        /* license */
+
+        console.log('foo')
+      `,
+
+      options: [{ licenses: ['/* license */'] }],
+    },
   ],
 
   invalid: [
@@ -268,6 +281,30 @@ ruleTester.run('@osd/eslint/require-license-header', rule, {
 
             console.log('foo')
           `,
+    },
+
+    // missing license when a jest docblock is present — fix must insert after the docblock
+    {
+      code: dedent`
+        /** @jest-environment node */
+
+        console.log('foo')
+      `,
+
+      options: [{ licenses: ['/* license */'] }],
+      errors: [
+        {
+          message: 'File must start with a license header',
+        },
+      ],
+
+      output: dedent`
+        /** @jest-environment node */
+
+        /* license */
+
+        console.log('foo')
+      `,
     },
   ],
 });

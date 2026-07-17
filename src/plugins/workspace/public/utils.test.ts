@@ -692,6 +692,44 @@ describe('workspace utils: prependWorkspaceToBreadcrumbs', () => {
       />
     `);
   });
+
+  it('workspace breadcrumb onClick skips feature-flag-disabled nav links', () => {
+    const navGroupSearch = {
+      id: 'search',
+      title: 'Search',
+      description: 'search desc',
+      // `alerting` is registered first but flagged off; the breadcrumb must
+      // fall through to `dashboards` instead of landing on the hidden page.
+      navLinks: [{ id: 'alerting' }, { id: 'dashboards' }],
+    };
+
+    const coreStart = coreMock.createStart();
+    (coreStart.application.applications$ as BehaviorSubject<Map<string, PublicAppInfo>>).next(
+      new Map<string, PublicAppInfo>([
+        [
+          'alerting',
+          {
+            status: AppStatus.accessible,
+            navLinkStatus: AppNavLinkStatus.hidden,
+          } as Partial<PublicAppInfo> as PublicAppInfo,
+        ],
+        [
+          'dashboards',
+          {
+            status: AppStatus.accessible,
+            navLinkStatus: AppNavLinkStatus.default,
+          } as Partial<PublicAppInfo> as PublicAppInfo,
+        ],
+      ])
+    );
+
+    prependWorkspaceToBreadcrumbs(coreStart, workspace, { search: navGroupSearch }, []);
+    const enricher = coreStart.chrome.setBreadcrumbsEnricher.mock.calls[0][0];
+    const workspaceBreadcrumb = enricher?.([{ text: 'test app' }])?.[0];
+
+    workspaceBreadcrumb?.onClick?.({} as any);
+    expect(coreStart.application.navigateToApp).toHaveBeenCalledWith('dashboards');
+  });
 });
 
 describe('workspace utils: mergeDataSourcesWithConnections', () => {
