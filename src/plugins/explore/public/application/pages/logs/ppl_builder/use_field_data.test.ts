@@ -8,6 +8,10 @@ import { useFieldData } from './use_field_data';
 
 const mockUseDatasetContext = jest.fn();
 
+jest.mock('../../../../../../data/public', () => ({
+  fetchColumnValues: jest.fn().mockResolvedValue([]),
+}));
+
 jest.mock('../../../../../../opensearch_dashboards_react/public', () => ({
   useOpenSearchDashboards: () => ({ services: { data: { autocomplete: {} } } }),
 }));
