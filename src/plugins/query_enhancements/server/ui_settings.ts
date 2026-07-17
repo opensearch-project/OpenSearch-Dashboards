@@ -26,6 +26,8 @@ const PPL_LINT_RULE_DEFAULTS: ReadonlyArray<{
   { id: 'replace-wildcard-asymmetry', enabled: true, severity: 'error' },
   { id: 'field-validation', enabled: true, severity: 'error' },
   { id: 'invalid-capture-group-name', enabled: true, severity: 'error' },
+  { id: 'operation-not-pushed', enabled: false, severity: 'warning' },
+  { id: 'operation-pushed-as-script', enabled: false, severity: 'info' },
   { id: 'command-suggestion', enabled: true },
 ];
 

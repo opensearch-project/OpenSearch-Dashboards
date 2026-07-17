@@ -42,6 +42,14 @@ export type { BundleRuleOverrides, CatalogEntry, LintRunContext } from './lint/t
 export { runLint } from './lint/lint_runner';
 export { getBundledCatalog } from './lint/catalog';
 export { createRuntimeRuleNameToIndex } from './lint/rule_index';
+export { runExplainLint, hasExplainRules } from './lint/explain/run_explain_lint';
+export type {
+  ExplainPlan,
+  ExplainRelNode,
+  ExplainRelTree,
+  ExplainDetector,
+  ExplainLintContext,
+} from './lint/explain/explain_types';
 
 export { buildCommandSuggestion } from './command_suggestion';
 export type { CommandSuggestion } from './command_suggestion';

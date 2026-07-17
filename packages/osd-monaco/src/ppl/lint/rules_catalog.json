@@ -104,5 +104,31 @@
     "message": "Invalid regex capture group name.",
     "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/rex/#parameters",
     "appliesTo": {}
+  },
+  {
+    "id": "operation-not-pushed",
+    "detector": "operation-not-pushed",
+    "enabled": false,
+    "severity": "warning",
+    "message": "This step may make the query slow. Simplify the highlighted part when possible.",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/limitation/",
+    "appliesTo": {
+      "minVersion": "3.3.0",
+      "engine": "calcite"
+    },
+    "needsExplain": true
+  },
+  {
+    "id": "operation-pushed-as-script",
+    "detector": "operation-pushed-as-script",
+    "enabled": false,
+    "severity": "info",
+    "message": "This step may make the query slow. Simplify the highlighted part when possible.",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/limitation/",
+    "appliesTo": {
+      "minVersion": "3.3.0",
+      "engine": "calcite"
+    },
+    "needsExplain": true
   }
 ]

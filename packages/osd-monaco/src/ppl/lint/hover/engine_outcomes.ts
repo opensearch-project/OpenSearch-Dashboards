@@ -4,7 +4,15 @@
  */
 
 export type FailureClass =
-  'silent-null' | 'silent-empty' | 'engine-throw' | 'nondeterministic' | 'fallback' | 'advisory';
+  | 'silent-null'
+  | 'silent-empty'
+  | 'engine-throw'
+  | 'nondeterministic'
+  | 'fallback'
+  | 'advisory'
+  // query returns correct results, but on a slower execution path (a coordinator
+  // fallback or a per-document script); the cost grows with index size.
+  | 'slow-path';
 
 export interface RuleHoverContent {
   engineBehavior: string;
@@ -32,6 +40,20 @@ export const ENGINE_OUTCOMES: Record<string, RuleHoverContent> = {
     engineBehavior:
       'rex capture-group names must match the Java group-name rule; underscores and leading digits are rejected when the regex runs.',
     failureClass: 'engine-throw',
+  },
+  'operation-not-pushed': {
+    engineBehavior:
+      "OpenSearch can't evaluate this operation on the data nodes, so it fetches the matching rows to the coordinator and finishes the work there — filters and sorts run after a full scan, aggregations run in memory.",
+    failureClass: 'slow-path',
+    safeToIgnoreWhen:
+      'the number of rows reaching this operation is small, so the extra coordinator pass is negligible.',
+  },
+  'operation-pushed-as-script': {
+    engineBehavior:
+      'OpenSearch compiles a small Painless script and runs it per document instead of using the index directly, so the cost scales with the number of documents scanned.',
+    failureClass: 'slow-path',
+    safeToIgnoreWhen:
+      'the query already matches few documents, so running the script per document is cheap.',
   },
 };
 

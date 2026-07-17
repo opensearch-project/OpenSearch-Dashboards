@@ -4,6 +4,7 @@
  */
 
 import type { HoverFacts } from './hover_facts';
+import type { ExplainOutcome } from './explain/explain_types';
 
 export type LintSeverity = 'error' | 'warning' | 'info';
 
@@ -39,6 +40,16 @@ export interface Diagnostic {
   // Optional deterministic quick-fix. Absent for rules with no safe rewrite.
   fix?: DiagnosticFix;
   hoverFacts?: DiagnosticHoverFacts;
+  // Internal hint set by the explain-backed detectors (which read an explain
+  // plan, not a parse tree): which pipeline operation this finding relates to,
+  // plus the normalized outcome and involved fields. Consumed later by the
+  // runtime range/fix resolver to narrow the whole-query range to the offending
+  // command; not rendered in the UI directly.
+  explainTarget?: {
+    operation: 'filter' | 'aggregation' | 'sort';
+    outcome: ExplainOutcome;
+    fields: string[];
+  };
 }
 
 export interface LintResult {
