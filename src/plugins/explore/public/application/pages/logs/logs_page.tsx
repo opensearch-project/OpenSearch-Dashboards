@@ -8,7 +8,7 @@ import '../explore_page.scss';
 import React from 'react';
 import { EuiErrorBoundary, EuiPage, EuiPageBody } from '@elastic/eui';
 import { AppMountParameters, HeaderVariant } from 'opensearch-dashboards/public';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@osd/i18n';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
@@ -29,6 +29,7 @@ import {
   EXPLORE_VISUALIZATION_TAB_ID,
 } from '../../../../common';
 import { setActiveTab } from '../../utils/state_management/slices';
+import { selectDataset } from '../../utils/state_management/selectors';
 import { LogsQueryPanel } from './logs_query_panel';
 
 /**
@@ -90,6 +91,13 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
     Boolean(services.capabilities?.explore?.logsQueryBuilderEnabled) &&
     services.uiSettings.get(ENABLE_LOGS_QUERY_BUILDER_SETTING, true);
 
+  // Remount the builder panel on a dataset switch so all its local state
+  // (mode, seeded builder state, refs) is re-derived from the now-cleared query.
+  // The switch belongs to a different dataset's fields, so any in-progress draft
+  // is stale; keying on the dataset id lets React discard it without the panel
+  // tracking a previous id or reaching into its own refs.
+  const dataset = useSelector(selectDataset);
+
   return (
     <EuiErrorBoundary>
       <div className="mainPage">
@@ -99,7 +107,9 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
             <NewExperienceBanner />
 
             <ResizableQueryContainer
-              queryPanel={queryBuilderEnabled ? <LogsQueryPanel /> : <QueryPanel />}
+              queryPanel={
+                queryBuilderEnabled ? <LogsQueryPanel key={dataset?.id} /> : <QueryPanel />
+              }
               tallDefault={queryBuilderEnabled}
             >
               {/* Main content area with resizable panels under QueryPanel */}
