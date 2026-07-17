@@ -24,6 +24,8 @@ describe('usePersistedChartState', () => {
   // Replace the real localStorage with our mock
   Object.defineProperty(window, 'localStorage', {
     value: localStorageMock,
+    writable: true,
+    configurable: true,
   });
 
   beforeEach(() => {

@@ -852,7 +852,7 @@ describe('SavedObjectsTable', () => {
       component.update();
 
       await waitFor(() => {
-        expect(findObjectsMock).toBeCalledWith(
+        expect(findObjectsMock).toHaveBeenCalledWith(
           http,
           expect.objectContaining({
             workspaces: expect.arrayContaining(['workspace1']),
@@ -898,7 +898,7 @@ describe('SavedObjectsTable', () => {
       component.update();
 
       await waitFor(() => {
-        expect(findObjectsMock).toBeCalledWith(
+        expect(findObjectsMock).toHaveBeenCalledWith(
           http,
           expect.not.objectContaining({
             workspaces,

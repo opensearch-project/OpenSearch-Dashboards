@@ -58,7 +58,7 @@ describe('WorkspaceIdConsumerWrapper', () => {
         name: 'foo',
       });
 
-      expect(mockedClient.create).toBeCalledWith(
+      expect(mockedClient.create).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         expect.objectContaining({
@@ -116,8 +116,8 @@ describe('WorkspaceIdConsumerWrapper', () => {
           { workspaces: ['zoo', 'noo'] }
         )
       ).rejects.toMatchInlineSnapshot(`[Error: Exist invalid workspaces]`);
-      expect(mockedWorkspaceClient.get).toBeCalledTimes(0);
-      expect(mockedWorkspaceClient.list).toBeCalledTimes(1);
+      expect(mockedWorkspaceClient.get).toHaveBeenCalledTimes(0);
+      expect(mockedWorkspaceClient.list).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -139,7 +139,7 @@ describe('WorkspaceIdConsumerWrapper', () => {
         }),
       ]);
 
-      expect(mockedClient.bulkCreate).toBeCalledWith(
+      expect(mockedClient.bulkCreate).toHaveBeenCalledWith(
         [{ attributes: {}, id: 'foo', references: [], type: 'dashboard' }],
         {
           workspaces: ['foo'],
@@ -160,8 +160,8 @@ describe('WorkspaceIdConsumerWrapper', () => {
           }),
         ])
       ).rejects.toMatchInlineSnapshot(`[Error: Exist invalid workspaces]`);
-      expect(mockedWorkspaceClient.get).toBeCalledTimes(1);
-      expect(mockedWorkspaceClient.list).toBeCalledTimes(0);
+      expect(mockedWorkspaceClient.get).toHaveBeenCalledTimes(1);
+      expect(mockedWorkspaceClient.list).toHaveBeenCalledTimes(0);
     });
   });
 
@@ -172,7 +172,7 @@ describe('WorkspaceIdConsumerWrapper', () => {
 
     it(`Should add workspaces parameters when checkConflict`, async () => {
       await wrapperClient.checkConflicts();
-      expect(mockedClient.checkConflicts).toBeCalledWith([], {
+      expect(mockedClient.checkConflicts).toHaveBeenCalledWith([], {
         workspaces: ['foo'],
       });
     });
@@ -210,12 +210,12 @@ describe('WorkspaceIdConsumerWrapper', () => {
       await wrapperClient.find({
         type: 'dashboard',
       });
-      expect(mockedClient.find).toBeCalledWith({
+      expect(mockedClient.find).toHaveBeenCalledWith({
         type: 'dashboard',
         workspaces: ['foo'],
       });
-      expect(mockedWorkspaceClient.get).toBeCalledTimes(1);
-      expect(mockedWorkspaceClient.list).toBeCalledTimes(0);
+      expect(mockedWorkspaceClient.get).toHaveBeenCalledTimes(1);
+      expect(mockedWorkspaceClient.list).toHaveBeenCalledTimes(0);
     });
 
     it(`Should pass a empty workspace array`, async () => {
@@ -233,7 +233,7 @@ describe('WorkspaceIdConsumerWrapper', () => {
       await mockedWrapperClient.find({
         type: ['dashboard', 'visualization'],
       });
-      expect(mockedClient.find).toBeCalledWith({
+      expect(mockedClient.find).toHaveBeenCalledWith({
         type: ['dashboard', 'visualization'],
       });
     });
@@ -256,8 +256,8 @@ describe('WorkspaceIdConsumerWrapper', () => {
           workspaces: ['foo', 'not-exist'],
         })
       ).rejects.toMatchInlineSnapshot(`[Error: Exist invalid workspaces]`);
-      expect(mockedWorkspaceClient.get).toBeCalledTimes(0);
-      expect(mockedWorkspaceClient.list).toBeCalledTimes(1);
+      expect(mockedWorkspaceClient.get).toHaveBeenCalledTimes(0);
+      expect(mockedWorkspaceClient.list).toHaveBeenCalledTimes(1);
     });
 
     it(`Should not throw error when passing in '*'`, async () => {
@@ -276,7 +276,7 @@ describe('WorkspaceIdConsumerWrapper', () => {
         type: ['dashboard', 'visualization'],
         workspaces: ['*'],
       });
-      expect(mockedClient.find).toBeCalledWith({
+      expect(mockedClient.find).toHaveBeenCalledWith({
         type: ['dashboard', 'visualization'],
       });
       expect(logger.warn).toHaveBeenCalledWith(
@@ -304,7 +304,7 @@ describe('WorkspaceIdConsumerWrapper', () => {
       const result = await wrapperClient.get(savedObject.type, savedObject.id, {
         workspaces: savedObject.workspaces,
       });
-      expect(mockedClient.get).toBeCalledWith(savedObject.type, savedObject.id, {
+      expect(mockedClient.get).toHaveBeenCalledWith(savedObject.type, savedObject.id, {
         workspaces: savedObject.workspaces,
       });
       expect(result).toEqual(savedObject);
@@ -320,7 +320,7 @@ describe('WorkspaceIdConsumerWrapper', () => {
       };
       mockedClient.get.mockResolvedValueOnce(savedObject);
       const result = await wrapperClient.get(savedObject.type, savedObject.id);
-      expect(mockedClient.get).toBeCalledWith(savedObject.type, savedObject.id, {});
+      expect(mockedClient.get).toHaveBeenCalledWith(savedObject.type, savedObject.id, {});
       expect(result).toEqual(savedObject);
     });
 
@@ -333,7 +333,7 @@ describe('WorkspaceIdConsumerWrapper', () => {
       };
       mockedClient.get.mockResolvedValueOnce(savedObject);
       const result = await wrapperClient.get(savedObject.type, savedObject.id);
-      expect(mockedClient.get).toBeCalledWith(savedObject.type, savedObject.id, {});
+      expect(mockedClient.get).toHaveBeenCalledWith(savedObject.type, savedObject.id, {});
       expect(result).toEqual(savedObject);
     });
 
@@ -346,7 +346,7 @@ describe('WorkspaceIdConsumerWrapper', () => {
       };
       mockedClient.get.mockResolvedValueOnce(savedObject);
       const result = await wrapperClient.get(savedObject.type, savedObject.id);
-      expect(mockedClient.get).toBeCalledWith(savedObject.type, savedObject.id, {});
+      expect(mockedClient.get).toHaveBeenCalledWith(savedObject.type, savedObject.id, {});
       expect(result).toEqual(savedObject);
     });
 
@@ -370,7 +370,7 @@ describe('WorkspaceIdConsumerWrapper', () => {
       };
       mockedClient.get.mockResolvedValueOnce(savedObject);
       const result = await mockedWrapperClient.get(savedObject.type, savedObject.id);
-      expect(mockedClient.get).toBeCalledWith(savedObject.type, savedObject.id, {});
+      expect(mockedClient.get).toHaveBeenCalledWith(savedObject.type, savedObject.id, {});
       expect(result).toEqual(savedObject);
     });
 
@@ -386,7 +386,7 @@ describe('WorkspaceIdConsumerWrapper', () => {
       expect(wrapperClient.get(savedObject.type, savedObject.id)).rejects.toMatchInlineSnapshot(
         `[Error: Saved object does not belong to the workspace]`
       );
-      expect(mockedClient.get).toBeCalledWith(savedObject.type, savedObject.id, {});
+      expect(mockedClient.get).toHaveBeenCalledWith(savedObject.type, savedObject.id, {});
     });
 
     it(`Should throw error when the object does not exist`, async () => {
@@ -407,7 +407,7 @@ describe('WorkspaceIdConsumerWrapper', () => {
       expect(
         wrapperClient.get(savedObject.type, savedObject.id, options)
       ).rejects.toMatchInlineSnapshot(`[Error: Multiple workspace parameters: Bad Request]`);
-      expect(mockedClient.get).not.toBeCalled();
+      expect(mockedClient.get).not.toHaveBeenCalled();
     });
 
     it(`Should get data source when user is data source admin`, async () => {
@@ -430,7 +430,7 @@ describe('WorkspaceIdConsumerWrapper', () => {
       };
       mockedClient.get.mockResolvedValueOnce(savedObject);
       const result = await mockedWrapperClient.get(savedObject.type, savedObject.id);
-      expect(mockedClient.get).toBeCalledWith(savedObject.type, savedObject.id, {});
+      expect(mockedClient.get).toHaveBeenCalledWith(savedObject.type, savedObject.id, {});
       expect(result).toEqual(savedObject);
     });
 
@@ -446,7 +446,7 @@ describe('WorkspaceIdConsumerWrapper', () => {
       expect(wrapperClient.get(savedObject.type, savedObject.id)).rejects.toMatchInlineSnapshot(
         `[Error: Saved object does not belong to the workspace]`
       );
-      expect(mockedClient.get).toBeCalledWith(savedObject.type, savedObject.id, {});
+      expect(mockedClient.get).toHaveBeenCalledWith(savedObject.type, savedObject.id, {});
     });
   });
 
@@ -560,7 +560,7 @@ describe('WorkspaceIdConsumerWrapper', () => {
     it(`Should bulkGet objects belonging to options.workspaces`, async () => {
       mockedClient.bulkGet.mockResolvedValueOnce({ saved_objects: savedObjects });
       const result = await wrapperClient.bulkGet(payload, options);
-      expect(mockedClient.bulkGet).toBeCalledWith(payload, options);
+      expect(mockedClient.bulkGet).toHaveBeenCalledWith(payload, options);
       expect(result).toMatchInlineSnapshot(`
         Object {
           "saved_objects": Array [
@@ -667,7 +667,7 @@ describe('WorkspaceIdConsumerWrapper', () => {
     it(`Should bulkGet objects belonging to the workspace in request`, async () => {
       mockedClient.bulkGet.mockResolvedValueOnce({ saved_objects: savedObjects });
       const result = await wrapperClient.bulkGet(payload);
-      expect(mockedClient.bulkGet).toBeCalledWith(payload, {});
+      expect(mockedClient.bulkGet).toHaveBeenCalledWith(payload, {});
       expect(result).toMatchInlineSnapshot(`
         Object {
           "saved_objects": Array [
@@ -785,7 +785,7 @@ describe('WorkspaceIdConsumerWrapper', () => {
       });
       mockedClient.bulkGet.mockResolvedValueOnce({ saved_objects: savedObjects });
       const result = await mockedWrapperClient.bulkGet(payload);
-      expect(mockedClient.bulkGet).toBeCalledWith(payload, {});
+      expect(mockedClient.bulkGet).toHaveBeenCalledWith(payload, {});
       expect(result).toEqual({ saved_objects: savedObjects });
     });
 
@@ -794,14 +794,14 @@ describe('WorkspaceIdConsumerWrapper', () => {
         SavedObjectsErrorHelpers.createGenericNotFoundError()
       );
       expect(wrapperClient.bulkGet(payload)).rejects.toMatchInlineSnapshot(`[Error: Not Found]`);
-      expect(mockedClient.bulkGet).toBeCalledWith(payload, {});
+      expect(mockedClient.bulkGet).toHaveBeenCalledWith(payload, {});
     });
 
     it(`Should throw error when the options.workspaces has more than one workspace.`, async () => {
       expect(
         wrapperClient.bulkGet(payload, { workspaces: ['foo', 'var'] })
       ).rejects.toMatchInlineSnapshot(`[Error: Multiple workspace parameters: Bad Request]`);
-      expect(mockedClient.bulkGet).not.toBeCalled();
+      expect(mockedClient.bulkGet).not.toHaveBeenCalled();
     });
 
     it(`Should bulkGet data source when user is data source admin`, async () => {
@@ -819,7 +819,7 @@ describe('WorkspaceIdConsumerWrapper', () => {
 
       mockedClient.bulkGet.mockResolvedValueOnce({ saved_objects: savedObjects });
       const result = await mockedWrapperClient.bulkGet(payload);
-      expect(mockedClient.bulkGet).toBeCalledWith(payload, {});
+      expect(mockedClient.bulkGet).toHaveBeenCalledWith(payload, {});
       expect(result).toMatchInlineSnapshot(`
         Object {
           "saved_objects": Array [

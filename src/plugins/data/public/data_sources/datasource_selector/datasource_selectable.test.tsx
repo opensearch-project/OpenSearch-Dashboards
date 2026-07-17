@@ -244,7 +244,7 @@ describe('DataSourceSelectable', () => {
     fireEvent.click(optionsToSelect[1]);
 
     expect(handleSelect).toHaveBeenCalledWith(
-      expect.objectContaining([{ key: 'unique-key-3', label: 'duplicate-index-pattern' }])
+      expect.arrayContaining([{ key: 'unique-key-3', label: 'duplicate-index-pattern' }])
     );
   });
 

@@ -175,11 +175,8 @@ describe('SaveVisButton', () => {
 
   it('saves and navigates to edit path when originatingApp is set', () => {
     mockOsdUrlStateStorageGet.mockReturnValue({ originatingApp: 'dashboard' });
-    const mockReload = jest.fn();
-    Object.defineProperty(window, 'location', {
-      value: { ...window.location, reload: mockReload },
-      writable: true,
-    });
+    // jsdom 26: spy on location.reload rather than replacing the location object.
+    const reloadSpy = jest.spyOn(window.location, 'reload').mockImplementation(jest.fn());
 
     render(<SaveVisButton />);
     fireEvent.click(screen.getByTestId('discardVisualizationEditorButton'));

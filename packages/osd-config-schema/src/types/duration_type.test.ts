@@ -47,7 +47,10 @@ test('handles number', () => {
 
 test('is required by default', () => {
   expect(() => duration().validate(undefined)).toThrowErrorMatchingInlineSnapshot(
-    `"expected value of type [moment.Duration] but got [undefined]"`
+    `
+"expected value of type [moment.Duration] but got [undefined]
+Cause: expected value of type [moment.Duration] but got [undefined]"
+`
   );
 });
 
@@ -55,7 +58,10 @@ test('includes namespace in failure', () => {
   expect(() =>
     duration().validate(undefined, {}, 'foo-namespace')
   ).toThrowErrorMatchingInlineSnapshot(
-    `"[foo-namespace]: expected value of type [moment.Duration] but got [undefined]"`
+    `
+"[foo-namespace]: expected value of type [moment.Duration] but got [undefined]
+Cause: expected value of type [moment.Duration] but got [undefined]"
+`
   );
 });
 
@@ -159,34 +165,58 @@ describe('#defaultValue', () => {
 
 test('returns error when not valid string or non-safe positive integer', () => {
   expect(() => duration().validate(-123)).toThrowErrorMatchingInlineSnapshot(
-    `"Value in milliseconds is expected to be a safe positive integer."`
+    `
+"Value in milliseconds is expected to be a safe positive integer.
+Cause: Value in milliseconds is expected to be a safe positive integer."
+`
   );
 
   expect(() => duration().validate(NaN)).toThrowErrorMatchingInlineSnapshot(
-    `"Value in milliseconds is expected to be a safe positive integer."`
+    `
+"Value in milliseconds is expected to be a safe positive integer.
+Cause: Value in milliseconds is expected to be a safe positive integer."
+`
   );
 
   expect(() => duration().validate(Infinity)).toThrowErrorMatchingInlineSnapshot(
-    `"Value in milliseconds is expected to be a safe positive integer."`
+    `
+"Value in milliseconds is expected to be a safe positive integer.
+Cause: Value in milliseconds is expected to be a safe positive integer."
+`
   );
 
   expect(() => duration().validate(Math.pow(2, 53))).toThrowErrorMatchingInlineSnapshot(
-    `"Value in milliseconds is expected to be a safe positive integer."`
+    `
+"Value in milliseconds is expected to be a safe positive integer.
+Cause: Value in milliseconds is expected to be a safe positive integer."
+`
   );
 
   expect(() => duration().validate([1, 2, 3])).toThrowErrorMatchingInlineSnapshot(
-    `"expected value of type [moment.Duration] but got [Array]"`
+    `
+"expected value of type [moment.Duration] but got [Array]
+Cause: expected value of type [moment.Duration] but got [Array]"
+`
   );
 
   expect(() => duration().validate(/abc/)).toThrowErrorMatchingInlineSnapshot(
-    `"expected value of type [moment.Duration] but got [RegExp]"`
+    `
+"expected value of type [moment.Duration] but got [RegExp]
+Cause: expected value of type [moment.Duration] but got [RegExp]"
+`
   );
 
   expect(() => duration().validate('123foo')).toThrowErrorMatchingInlineSnapshot(
-    `"Failed to parse value as time value. Value must be a duration in milliseconds, or follow the format <count>[ms|s|m|h|d|w|M|Y] (e.g. '70ms', '5s', '3d', '1Y'), where the duration is a safe positive integer."`
+    `
+"Failed to parse value as time value. Value must be a duration in milliseconds, or follow the format <count>[ms|s|m|h|d|w|M|Y] (e.g. '70ms', '5s', '3d', '1Y'), where the duration is a safe positive integer.
+Cause: Failed to parse value as time value. Value must be a duration in milliseconds, or follow the format <count>[ms|s|m|h|d|w|M|Y] (e.g. '70ms', '5s', '3d', '1Y'), where the duration is a safe positive integer."
+`
   );
 
   expect(() => duration().validate('123 456')).toThrowErrorMatchingInlineSnapshot(
-    `"Failed to parse value as time value. Value must be a duration in milliseconds, or follow the format <count>[ms|s|m|h|d|w|M|Y] (e.g. '70ms', '5s', '3d', '1Y'), where the duration is a safe positive integer."`
+    `
+"Failed to parse value as time value. Value must be a duration in milliseconds, or follow the format <count>[ms|s|m|h|d|w|M|Y] (e.g. '70ms', '5s', '3d', '1Y'), where the duration is a safe positive integer.
+Cause: Failed to parse value as time value. Value must be a duration in milliseconds, or follow the format <count>[ms|s|m|h|d|w|M|Y] (e.g. '70ms', '5s', '3d', '1Y'), where the duration is a safe positive integer."
+`
   );
 });

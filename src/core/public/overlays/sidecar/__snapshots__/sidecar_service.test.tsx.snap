@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`SidecarService SidecarRef#Hide() hide the sidecar when calling hide  1`] = `"<div class=\\"osdSidecarFlyout osdSidecarFlyout--dockedRight osdSidecarFlyout--hide\\" style=\\"width: 460px;\\"><button class=\\"sidecar-resizableButton resizableButton--horizontal\\" data-test-subj=\\"resizableButton\\" type=\\"button\\"></button><div class=\\"osdSidecarMountWrapper\\"><span>Sidecar content</span></div></div>"`;
 

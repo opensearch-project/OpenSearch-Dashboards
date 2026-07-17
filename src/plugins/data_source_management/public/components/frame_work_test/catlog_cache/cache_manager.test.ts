@@ -41,7 +41,11 @@ const sessionStorageMock = (() => {
   };
 })();
 
-Object.defineProperty(window, 'sessionStorage', { value: sessionStorageMock });
+Object.defineProperty(window, 'sessionStorage', {
+  value: sessionStorageMock,
+  writable: true,
+  configurable: true,
+});
 
 describe('CatalogCacheManager', () => {
   beforeEach(() => {
@@ -249,7 +253,7 @@ describe('CatalogCacheManager', () => {
     it('should throw error if data source not found', () => {
       const dataSourceName = 'nonExistingDataSource';
       const databaseName = 'testDatabase';
-      expect(() => CatalogCacheManager.getDatabase(dataSourceName, databaseName)).toThrowError(
+      expect(() => CatalogCacheManager.getDatabase(dataSourceName, databaseName)).toThrow(
         'DataSource not found exception: ' + dataSourceName
       );
     });
@@ -264,7 +268,7 @@ describe('CatalogCacheManager', () => {
         databases: [],
       };
       CatalogCacheManager.addOrUpdateDataSource(dataSource);
-      expect(() => CatalogCacheManager.getDatabase(dataSourceName, databaseName)).toThrowError(
+      expect(() => CatalogCacheManager.getDatabase(dataSourceName, databaseName)).toThrow(
         'Database not found exception: ' + databaseName
       );
     });
@@ -313,9 +317,9 @@ describe('CatalogCacheManager', () => {
         ],
       };
       CatalogCacheManager.addOrUpdateDataSource(dataSource);
-      expect(() =>
-        CatalogCacheManager.getTable(dataSourceName, databaseName, tableName)
-      ).toThrowError('Table not found exception: ' + tableName);
+      expect(() => CatalogCacheManager.getTable(dataSourceName, databaseName, tableName)).toThrow(
+        'Table not found exception: ' + tableName
+      );
     });
   });
 
@@ -355,7 +359,7 @@ describe('CatalogCacheManager', () => {
         lastUpdated: '2024-03-07T12:00:00Z',
         status: CachedDataSourceStatus.Empty,
       };
-      expect(() => CatalogCacheManager.updateDatabase(dataSourceName, database)).toThrowError(
+      expect(() => CatalogCacheManager.updateDatabase(dataSourceName, database)).toThrow(
         'DataSource not found exception: ' + dataSourceName
       );
     });
@@ -375,7 +379,7 @@ describe('CatalogCacheManager', () => {
         databases: [],
       };
       CatalogCacheManager.addOrUpdateDataSource(dataSource);
-      expect(() => CatalogCacheManager.updateDatabase(dataSourceName, database)).toThrowError(
+      expect(() => CatalogCacheManager.updateDatabase(dataSourceName, database)).toThrow(
         'Database not found exception: ' + database.name
       );
     });

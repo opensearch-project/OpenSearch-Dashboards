@@ -148,24 +148,15 @@ describe('<WorkspaceSelector />', () => {
       { id: 'workspace-1', name: 'workspace 1', features: ['use-case-observability'] },
     ]);
 
-    const originalLocation = window.location;
-    Object.defineProperty(window, 'location', {
-      value: {
-        assign: jest.fn(),
-      },
-    });
+    const assignSpy = jest.spyOn(window.location, 'assign').mockImplementation(jest.fn());
 
     render(<WorkspaceSelectorCreatorComponent />);
     fireEvent.click(screen.getByTestId('workspace-selector-button'));
     fireEvent.click(screen.getByText(/workspace 1/i));
 
-    expect(window.location.assign).toHaveBeenCalledWith(
-      'https://test.com/w/workspace-1/app/discover'
-    );
+    expect(assignSpy).toHaveBeenCalledWith('https://test.com/w/workspace-1/app/discover');
 
-    Object.defineProperty(window, 'location', {
-      value: originalLocation,
-    });
+    assignSpy.mockRestore();
   });
 
   it('should navigate to the workspace detail page when use case is all', () => {
@@ -173,24 +164,15 @@ describe('<WorkspaceSelector />', () => {
       { id: 'workspace-1', name: 'workspace 1', features: ['use-case-all'] },
     ]);
 
-    const originalLocation = window.location;
-    Object.defineProperty(window, 'location', {
-      value: {
-        assign: jest.fn(),
-      },
-    });
+    const assignSpy = jest.spyOn(window.location, 'assign').mockImplementation(jest.fn());
 
     render(<WorkspaceSelectorCreatorComponent />);
     fireEvent.click(screen.getByTestId('workspace-selector-button'));
     fireEvent.click(screen.getByText(/workspace 1/i));
 
-    expect(window.location.assign).toHaveBeenCalledWith(
-      'https://test.com/w/workspace-1/app/workspace_detail'
-    );
+    expect(assignSpy).toHaveBeenCalledWith('https://test.com/w/workspace-1/app/workspace_detail');
 
-    Object.defineProperty(window, 'location', {
-      value: originalLocation,
-    });
+    assignSpy.mockRestore();
   });
 
   it('should navigate to create workspace page', () => {
@@ -226,7 +208,6 @@ describe('<WorkspaceSelector />', () => {
   describe('flush variant', () => {
     const FlushComponent = () => (
       <I18nProvider>
-        {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}
         <WorkspaceSelector
           coreStart={coreStartMock}
           registeredUseCases$={registeredUseCases$}

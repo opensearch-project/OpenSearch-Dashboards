@@ -228,6 +228,7 @@ describe('<CollapsibleNavGroupEnabled />', () => {
     const mockDesktopMatchMedia = () => {
       Object.defineProperty(window, 'matchMedia', {
         writable: true,
+        configurable: true,
         value: jest.fn().mockImplementation((query: string) => ({
           matches: query === '(min-width: 992px)',
           media: query,
@@ -240,6 +241,7 @@ describe('<CollapsibleNavGroupEnabled />', () => {
     const mockMobileMatchMedia = () => {
       Object.defineProperty(window, 'matchMedia', {
         writable: true,
+        configurable: true,
         value: jest.fn().mockImplementation((query: string) => ({
           matches: false,
           media: query,

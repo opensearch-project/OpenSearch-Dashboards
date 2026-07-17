@@ -377,6 +377,6 @@ describe('ensureDefaultDataView', () => {
     indexPatterns.getIds.mockResolvedValue(['pattern1']);
     indexPatterns.getDataSource.mockRejectedValue(new Error('Failed to get data source'));
 
-    await expect(async () => await ensureDefaultDataView.call(indexPatterns)).not.toThrowError();
+    await expect(async () => await ensureDefaultDataView.call(indexPatterns)).not.toThrow();
   });
 });

@@ -56,7 +56,7 @@ describe('timeseriesVisualizationClientWrapper()', () => {
     references: SavedObjectReference[],
     savedObjectType = 'visualization'
   ) => {
-    expect(client.create).toBeCalledWith(
+    expect(client.create).toHaveBeenCalledWith(
       savedObjectType,
       attributes,
       expect.objectContaining({ references: expect.arrayContaining(references) })

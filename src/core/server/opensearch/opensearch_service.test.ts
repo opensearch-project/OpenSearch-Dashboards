@@ -412,7 +412,7 @@ describe('#registerClientTransport', () => {
     class AnotherTransport extends Transport {}
 
     setupContract.registerClientTransport(CustomTransport);
-    expect(() => setupContract.registerClientTransport(AnotherTransport)).toThrowError(
+    expect(() => setupContract.registerClientTransport(AnotherTransport)).toThrow(
       'A custom Transport class has already been registered.'
     );
   });

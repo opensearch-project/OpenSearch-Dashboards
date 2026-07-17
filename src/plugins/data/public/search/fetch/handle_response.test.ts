@@ -57,7 +57,7 @@ describe('handleResponse', () => {
     } as SearchResponse<any>;
     const result = handleResponse(request, response);
     expect(result).toBe(response);
-    expect(notifications.toasts.addWarning).toBeCalled();
+    expect(notifications.toasts.addWarning).toHaveBeenCalled();
     expect((notifications.toasts.addWarning as jest.Mock).mock.calls[0][0].title).toMatch(
       'request timed out'
     );
@@ -75,7 +75,7 @@ describe('handleResponse', () => {
     } as SearchResponse<any>;
     const result = handleResponse(request, response);
     expect(result).toBe(response);
-    expect(notifications.toasts.addWarning).toBeCalled();
+    expect(notifications.toasts.addWarning).toHaveBeenCalled();
     expect((notifications.toasts.addWarning as jest.Mock).mock.calls[0][0].title).toMatch(
       'shards failed'
     );

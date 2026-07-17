@@ -260,7 +260,7 @@ describe('configureLegacyClient', () => {
 
     await expect(
       configureLegacyClient(dataSourceClientParams, callApiParams, clientPoolSetup, config, logger)
-    ).rejects.toThrowError();
+    ).rejects.toThrow();
 
     expect(ClientMock).not.toHaveBeenCalled();
     expect(savedObjectsMock.get).toHaveBeenCalledTimes(1);
@@ -275,7 +275,7 @@ describe('configureLegacyClient', () => {
 
     await expect(
       configureLegacyClient(dataSourceClientParams, callApiParams, clientPoolSetup, config, logger)
-    ).rejects.toThrowError();
+    ).rejects.toThrow();
 
     expect(ClientMock).not.toHaveBeenCalled();
     expect(savedObjectsMock.get).toHaveBeenCalledTimes(1);

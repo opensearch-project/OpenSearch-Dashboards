@@ -277,7 +277,7 @@ describe('workspace utils', () => {
     const dataSources = ['id1', 'id2'];
     uiSettingsClient.get = jest.fn().mockResolvedValue(dataSources[0]);
     await checkAndSetDefaultDataSource(uiSettingsClient, dataSources, true);
-    expect(uiSettingsClient.set).not.toBeCalled();
+    expect(uiSettingsClient.set).not.toHaveBeenCalled();
   });
 
   it('should check then set first data sources as default if needed when checking', async () => {

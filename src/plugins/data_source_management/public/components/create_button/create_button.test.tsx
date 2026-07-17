@@ -29,6 +29,6 @@ describe('CreateButton', () => {
   it('should click event normally', () => {
     component.find(createButtonIdentifier).first().simulate('click');
 
-    expect(history.push).toBeCalledWith('/create');
+    expect(history.push).toHaveBeenCalledWith('/create');
   });
 });

@@ -20,7 +20,7 @@ describe('AdvancedSettingsPlugin', () => {
         home: homePluginMock.createSetupContract(),
       })
     ).not.toThrow();
-    expect(setupMock.application.register).toBeCalledTimes(1);
+    expect(setupMock.application.register).toHaveBeenCalledTimes(1);
   });
 });
 

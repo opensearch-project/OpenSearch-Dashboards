@@ -333,7 +333,7 @@ describe('ChatPlugin', () => {
           }),
         },
         writable: true,
-        configurable: true,
+        configurable: true, // Required for jsdom 26: localStorage is non-configurable by default
       });
 
       // Mock core.chat methods
@@ -353,7 +353,7 @@ describe('ChatPlugin', () => {
       Object.defineProperty(window, 'localStorage', {
         value: originalLocalStorage,
         writable: true,
-        configurable: true,
+        configurable: true, // Required for jsdom 26
       });
     });
 
