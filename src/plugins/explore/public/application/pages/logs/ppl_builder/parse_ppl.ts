@@ -227,6 +227,13 @@ export function parseWherePredicate(text: string): WhereFilter | null {
     if (!cmp) return null;
     if (cmp.op === '=') return mkFilter(cmp.field, 'is', [cmp.value]);
     if (cmp.op === '!=') return mkFilter(cmp.field, 'is_not', [cmp.value]);
+    // A range filter with only one bound set compiles to a lone comparison
+    // (`>= min` or `< max`), so map those back to a partial `is_between`. This
+    // keeps a one-sided range representable in Builder mode and round-trips the
+    // recompiled PPL exactly. (A one-sided `is_not_between` produces the same
+    // lone operator, so it collapses to the equivalent `is_between` here.)
+    if (cmp.op === '>=') return mkFilter(cmp.field, 'is_between', [cmp.value, '']);
+    if (cmp.op === '<') return mkFilter(cmp.field, 'is_between', ['', cmp.value]);
     return null;
   }
 

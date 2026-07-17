@@ -145,6 +145,16 @@ describe('parseWherePredicate', () => {
       '`bytes` < 1 OR `bytes` >= 9',
       { field: 'bytes', operator: 'is_not_between', values: ['1', '9'] },
     ],
+    // A range with only one bound compiles to a lone comparison; it must map
+    // back to a partial is_between so the query stays representable in Builder.
+    [
+      '`bytes` >= 10',
+      { field: 'bytes', operator: 'is_between', values: ['10', ''] },
+    ],
+    [
+      '`bytes` < 500',
+      { field: 'bytes', operator: 'is_between', values: ['', '500'] },
+    ],
     ['ISNOTNULL(`user`)', { field: 'user', operator: 'exists', values: [] }],
     ['ISNULL(`user`)', { field: 'user', operator: 'not_exists', values: [] }],
   ])('parses %s', (predicate, expected) => {
@@ -333,6 +343,20 @@ describe('parsePPL / buildPPL round-trip', () => {
         { id: 'f2', field: 'latency', operator: 'is_not_between', values: ['10', '20'] },
         { id: 'f3', field: 'agent', operator: 'not_exists', values: [] },
       ],
+      aggregations: [],
+      groupBy: { fields: [] },
+    },
+    // One-sided range filters: only min set, then only max set. Each compiles
+    // to a lone comparison but must round-trip back to a partial is_between.
+    {
+      searchExpression: '',
+      filters: [{ id: 'f1', field: 'bytes', operator: 'is_between', values: ['10', ''] }],
+      aggregations: [],
+      groupBy: { fields: [] },
+    },
+    {
+      searchExpression: '',
+      filters: [{ id: 'f1', field: 'bytes', operator: 'is_between', values: ['', '500'] }],
       aggregations: [],
       groupBy: { fields: [] },
     },
