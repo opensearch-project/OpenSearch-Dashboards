@@ -160,9 +160,7 @@
     "**/js-yaml": "^4.3.0",
     "**/qs": "^6.15.2",
     "**/fast-xml-parser": "^5.7.0",
-    "**/engine.io/ws": "^8.20.1",
     "**/mime-db": "^1.54.0",
-    "**/socket.io-adapter/ws": "^8.20.1",
     "**/tmp": "^0.2.7"
   },
   "workspaces": {
@@ -501,7 +499,7 @@
     "postcss": "^8.4.31",
     "prettier": "^3.5.3",
     "prop-types": "^15.7.2",
-    "puppeteer": "^24.14.0",
+    "puppeteer": "^24.43.1",
     "react": "^18.2.0",
     "react-grid-layout": "^1.5.3",
     "react-markdown": "^6.0.0",
