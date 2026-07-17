@@ -41,6 +41,7 @@ describe('catalog loading', () => {
     }
   });
 
+
   it('keeps exactly the valid entries and drops malformed ones', () => {
     const entries = [
       {

@@ -78,6 +78,7 @@ export const pplLintCodeActionProvider: monaco.languages.CodeActionProvider = {
         }
       }
 
+
       if (!fix) {
         continue;
       }
