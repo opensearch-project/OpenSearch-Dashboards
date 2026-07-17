@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { DatasetSelectWidget } from './dataset_select';
 import { SaveQueryButton } from './save_query';
@@ -17,32 +17,7 @@ import './query_panel_widgets.scss';
 import { AskAIButton } from './ask_ai_button';
 import { useFlavorId } from '../../../helpers/use_flavor_id';
 import { ExploreFlavor } from '../../../../common';
-import { getPPLAnalyzeResult$, getPPLAnalyzeLoading$ } from '../../../../../data/public';
-
-export const useAnalyzePanelState = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [hasResult, setHasResult] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    const resultSub = getPPLAnalyzeResult$().subscribe((result) => {
-      if (result) {
-        setHasResult(true);
-        // Keep isOpen as-is — panel stays open showing the result
-      } else {
-        setHasResult(false);
-        setIsOpen(false);
-      }
-    });
-    const loadingSub = getPPLAnalyzeLoading$().subscribe(setIsLoading);
-    return () => {
-      resultSub.unsubscribe();
-      loadingSub.unsubscribe();
-    };
-  }, []);
-
-  return { isOpen, setIsOpen, hasResult, isLoading };
-};
+export { useAnalyzePanelState } from './use_analyze_panel_state';
 
 interface QueryPanelWidgetsProps {
   analyzeIsOpen?: boolean;

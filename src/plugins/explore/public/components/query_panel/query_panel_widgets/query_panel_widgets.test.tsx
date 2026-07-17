@@ -59,15 +59,14 @@ jest.mock('../../../helpers/use_flavor_id', () => ({
   useFlavorId: jest.fn(() => 'logs'),
 }));
 
-const mockSubscribe = jest.fn(() => ({ unsubscribe: jest.fn() }));
-jest.mock('../../../../../data/public', () => {
-  const actual = jest.requireActual('../../../../../data/public');
-  return {
-    ...actual,
-    getPPLAnalyzeResult$: jest.fn(() => ({ subscribe: mockSubscribe, getValue: jest.fn(() => null) })),
-    getPPLAnalyzeLoading$: jest.fn(() => ({ subscribe: mockSubscribe, getValue: jest.fn(() => false) })),
-  };
-});
+jest.mock('./use_analyze_panel_state', () => ({
+  useAnalyzePanelState: jest.fn(() => ({
+    isOpen: false,
+    setIsOpen: jest.fn(),
+    hasResult: false,
+    isLoading: false,
+  })),
+}));
 
 jest.mock('../../../application/context', () => ({
   useDatasetContext: jest.fn(),
