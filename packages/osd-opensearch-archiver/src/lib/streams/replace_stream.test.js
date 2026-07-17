@@ -70,7 +70,7 @@ describe('replaceStream', () => {
   });
 
   test('expects toReplace to be a string', () => {
-    expect(() => createReplaceStream(Buffer.from('foo'))).toThrowError(/be a string/);
+    expect(() => createReplaceStream(Buffer.from('foo'))).toThrow(/be a string/);
   });
 
   test('replaces multiple single-char instances in a single chunk', async () => {

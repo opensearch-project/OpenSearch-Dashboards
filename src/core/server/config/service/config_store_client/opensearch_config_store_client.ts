@@ -92,8 +92,9 @@ export class OpenSearchConfigStoreClient implements IDynamicConfigStoreClient {
           `Alias ${DYNAMIC_APP_CONFIG_ALIAS} is pointing to 0 or multiple indices. Please remove the alias(es) and restart the server`
         );
       }
-      const numNonDynamicConfigIndices = indices.filter((index) => !isDynamicConfigIndex(index))
-        .length;
+      const numNonDynamicConfigIndices = indices.filter(
+        (index) => !isDynamicConfigIndex(index)
+      ).length;
 
       if (numNonDynamicConfigIndices > 0) {
         throw new Error(

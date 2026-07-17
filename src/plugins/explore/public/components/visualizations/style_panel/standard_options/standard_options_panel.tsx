@@ -40,7 +40,12 @@ export const StandardOptionsPanel = ({
     >
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
-          <MinMaxControls min={min} max={max} onMaxChange={onMaxChange} onMinChange={onMinChange} />{' '}
+          <MinMaxControls
+            min={min}
+            max={max}
+            onMaxChange={onMaxChange}
+            onMinChange={onMinChange}
+          />{' '}
         </EuiFlexItem>
 
         <EuiFlexItem>

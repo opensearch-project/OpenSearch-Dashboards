@@ -692,6 +692,44 @@ describe('workspace utils: prependWorkspaceToBreadcrumbs', () => {
       />
     `);
   });
+
+  it('workspace breadcrumb onClick skips feature-flag-disabled nav links', () => {
+    const navGroupSearch = {
+      id: 'search',
+      title: 'Search',
+      description: 'search desc',
+      // `alerting` is registered first but flagged off; the breadcrumb must
+      // fall through to `dashboards` instead of landing on the hidden page.
+      navLinks: [{ id: 'alerting' }, { id: 'dashboards' }],
+    };
+
+    const coreStart = coreMock.createStart();
+    (coreStart.application.applications$ as BehaviorSubject<Map<string, PublicAppInfo>>).next(
+      new Map<string, PublicAppInfo>([
+        [
+          'alerting',
+          {
+            status: AppStatus.accessible,
+            navLinkStatus: AppNavLinkStatus.hidden,
+          } as Partial<PublicAppInfo> as PublicAppInfo,
+        ],
+        [
+          'dashboards',
+          {
+            status: AppStatus.accessible,
+            navLinkStatus: AppNavLinkStatus.default,
+          } as Partial<PublicAppInfo> as PublicAppInfo,
+        ],
+      ])
+    );
+
+    prependWorkspaceToBreadcrumbs(coreStart, workspace, { search: navGroupSearch }, []);
+    const enricher = coreStart.chrome.setBreadcrumbsEnricher.mock.calls[0][0];
+    const workspaceBreadcrumb = enricher?.([{ text: 'test app' }])?.[0];
+
+    workspaceBreadcrumb?.onClick?.({} as any);
+    expect(coreStart.application.navigateToApp).toHaveBeenCalledWith('dashboards');
+  });
 });
 
 describe('workspace utils: mergeDataSourcesWithConnections', () => {
@@ -970,22 +1008,22 @@ describe('workspace utils: mergeDataSourcesWithConnections', () => {
 });
 
 describe('workspace utils: pickUseCaseLandingAppId', () => {
-  const accessibleVisible = ({
+  const accessibleVisible = {
     status: AppStatus.accessible,
     navLinkStatus: AppNavLinkStatus.default,
-  } as Partial<PublicAppInfo>) as PublicAppInfo;
-  const featureFlagDisabled = ({
+  } as Partial<PublicAppInfo> as PublicAppInfo;
+  const featureFlagDisabled = {
     status: AppStatus.accessible,
     navLinkStatus: AppNavLinkStatus.hidden,
-  } as Partial<PublicAppInfo>) as PublicAppInfo;
-  const outsideWorkspaceHidden = ({
+  } as Partial<PublicAppInfo> as PublicAppInfo;
+  const outsideWorkspaceHidden = {
     // Mirrors the state read on the workspace creator page for an
     // `insideWorkspace`-only app: workspace plugin pushed `inaccessible`,
     // some other path pushed `navLinkStatus: hidden` — both flip back
     // once the user enters the workspace, so the picker must keep them.
     status: AppStatus.inaccessible,
     navLinkStatus: AppNavLinkStatus.hidden,
-  } as Partial<PublicAppInfo>) as PublicAppInfo;
+  } as Partial<PublicAppInfo> as PublicAppInfo;
 
   it('returns undefined when the use case has no features', () => {
     expect(pickUseCaseLandingAppId(undefined, new Map())).toBeUndefined();
@@ -1065,17 +1103,17 @@ describe('workspace utils: getUseCaseUrl', () => {
         // picker has to fall through to the next feature.
         [
           'bar',
-          ({
+          {
             status: AppStatus.accessible,
             navLinkStatus: AppNavLinkStatus.hidden,
-          } as Partial<PublicAppInfo>) as PublicAppInfo,
+          } as Partial<PublicAppInfo> as PublicAppInfo,
         ],
         [
           'baz',
-          ({
+          {
             status: AppStatus.accessible,
             navLinkStatus: AppNavLinkStatus.default,
-          } as Partial<PublicAppInfo>) as PublicAppInfo,
+          } as Partial<PublicAppInfo> as PublicAppInfo,
         ],
       ])
     );
@@ -1250,7 +1288,7 @@ describe('workspace utils: fetchRemoteClusterConnections', () => {
     const coreStart = coreMock.createStart();
     const httpMock = coreStart.http;
 
-    const dataSources = ([
+    const dataSources = [
       {
         id: 'id1',
         title: 'title1',
@@ -1258,7 +1296,7 @@ describe('workspace utils: fetchRemoteClusterConnections', () => {
         description: '',
         type: DATA_SOURCE_SAVED_OBJECT_TYPE,
       },
-    ] as unknown) as DataSource[]; // force InvalidEngineType to be a valid type
+    ] as unknown as DataSource[]; // force InvalidEngineType to be a valid type
 
     const result = await fetchRemoteClusterConnections(dataSources, httpMock);
 

@@ -68,13 +68,7 @@ export interface DashboardCapabilities {
 
 // TODO: Replace Saved object interfaces by the ones Core will provide when it is ready.
 export type SavedObjectAttribute =
-  | string
-  | number
-  | boolean
-  | null
-  | undefined
-  | SavedObjectAttributes
-  | SavedObjectAttributes[];
+  string | number | boolean | null | undefined | SavedObjectAttributes | SavedObjectAttributes[];
 
 export interface SimpleSavedObject<T extends SavedObjectAttributes> {
   attributes: T;
@@ -138,11 +132,21 @@ export type DashboardAppStateDefaults = DashboardAppState & {
 };
 
 /**
+ * Compact variable state stored in the URL. Full variable definitions are
+ * persisted in dashboard saved objects, while URL state only shares selections.
+ */
+export interface DashboardVariableUrlState {
+  id: string;
+  current?: string[];
+}
+
+/**
  * In URL panels are optional,
  * Panels are not added to the URL when in "view" mode
  */
-export type DashboardAppStateInUrl = Omit<DashboardAppState, 'panels'> & {
+export type DashboardAppStateInUrl = Omit<DashboardAppState, 'panels' | 'variables'> & {
   panels?: SavedDashboardPanel[];
+  variables?: DashboardVariableUrlState[];
 };
 
 export interface DashboardAppStateTransitions {

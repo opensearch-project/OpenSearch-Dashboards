@@ -66,9 +66,8 @@ const createStartContractMock = (typeRegistry?: jest.Mocked<ISavedObjectTypeRegi
 };
 
 const createInternalStartContractMock = (typeRegistry?: jest.Mocked<ISavedObjectTypeRegistry>) => {
-  const internalStartContract: jest.Mocked<InternalSavedObjectsServiceStart> = createStartContractMock(
-    typeRegistry
-  );
+  const internalStartContract: jest.Mocked<InternalSavedObjectsServiceStart> =
+    createStartContractMock(typeRegistry);
 
   return internalStartContract;
 };
@@ -79,11 +78,13 @@ const createSetupContractMock = () => {
     addClientWrapper: jest.fn(),
     registerType: jest.fn(),
     getImportExportObjectLimit: jest.fn(),
+    getPermissionControlEnabled: jest.fn(),
     setRepositoryFactoryProvider: jest.fn(),
     setStatus: jest.fn(),
   };
 
   setupContract.getImportExportObjectLimit.mockReturnValue(100);
+  setupContract.getPermissionControlEnabled.mockReturnValue(false);
 
   return setupContract;
 };

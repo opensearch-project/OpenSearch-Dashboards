@@ -4,7 +4,18 @@
  */
 
 import { DataPublicPluginStart, Query } from '../../../data/public';
-import { VariableQueryParams, VariableOptionType } from './types';
+import { NormalizedVariableOption, VariableQueryParams, VariableOptionType } from './types';
+
+export interface VariableQueryResult {
+  rows: Array<Record<string, unknown>>;
+  fields: string[];
+  fieldTypes: Record<string, VariableOptionType>;
+}
+
+export interface VariableOptionsResult {
+  options: NormalizedVariableOption[];
+  optionType?: VariableOptionType;
+}
 
 /**
  * Adds "source = <dataset>" clause to PPL query if not present.
@@ -70,9 +81,47 @@ function extractValues(value: unknown): string[] {
   return [];
 }
 
+function getScalarLabel(value: unknown): string | undefined {
+  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+    const label = String(value).trim();
+    return label || undefined;
+  }
+
+  return undefined;
+}
+
+function getFirstTypedValue(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      const firstTypedValue = getFirstTypedValue(item);
+      if (firstTypedValue !== undefined) {
+        return firstTypedValue;
+      }
+    }
+    return undefined;
+  }
+
+  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+    return value;
+  }
+
+  return undefined;
+}
+
+function getValueType(value: unknown): VariableOptionType | undefined {
+  if (typeof value === 'number') {
+    return 'number';
+  }
+  if (typeof value === 'boolean') {
+    return 'boolean';
+  }
+  if (typeof value === 'string') {
+    return 'string';
+  }
+}
+
 /**
- * Parse search response and extract options with their data type.
- * Returns options array and the field type determined from the first value.
+ * Parse search response into neutral row metadata.
  *
  * Response structure:
  * {
@@ -85,74 +134,105 @@ function extractValues(value: unknown): string[] {
  *   }
  * }
  */
-export function parseResponseToOptionsWithType(
-  response: any
-): {
-  options: string[];
-  optionType?: VariableOptionType;
-} {
-  let optionType: VariableOptionType | undefined;
-  const optionsSet = new Set<string>();
+export function parseResponseToQueryResult(response: any): VariableQueryResult {
+  const rows: Array<Record<string, unknown>> = [];
+  const fields: string[] = [];
+  const fieldsSet = new Set<string>();
+  const fieldTypes: Record<string, VariableOptionType> = {};
   const hits = response?.hits?.hits;
 
-  if (hits && hits.length > 0 && hits[0]?._source && typeof hits[0]?._source === 'object') {
-    const field = Object.keys(hits[0]._source)[0];
-
-    // Determine type from the first non-null value
-    let firstValue: any;
-    for (const hit of hits) {
-      const rawValue = hit._source?.[field] ?? hit[field];
-      if (rawValue !== null && rawValue !== undefined) {
-        // For arrays, get the first element
-        firstValue = Array.isArray(rawValue) ? rawValue[0] : rawValue;
-        break;
-      }
-    }
-
-    // Determine optionType based on the first value's JavaScript type
-    if (firstValue !== null && firstValue !== undefined) {
-      if (typeof firstValue === 'number') {
-        optionType = 'number';
-      } else if (typeof firstValue === 'boolean') {
-        optionType = 'boolean';
-      } else {
-        optionType = 'string';
-      }
-    }
-    // Extract all values
-    hits.forEach((hit: any) => {
-      const rawValue = hit._source?.[field] ?? hit[field];
-      const extracted = extractValues(rawValue);
-      extracted.forEach((val) => optionsSet.add(val));
-    });
+  if (!Array.isArray(hits)) {
+    return { rows, fields, fieldTypes };
   }
-  return { options: Array.from(optionsSet), optionType };
+
+  hits.forEach((hit: any) => {
+    const source = hit?._source;
+    if (!source || typeof source !== 'object' || Array.isArray(source)) {
+      return;
+    }
+
+    rows.push(source);
+    Object.keys(source).forEach((field) => {
+      if (!fieldsSet.has(field)) {
+        fieldsSet.add(field);
+        fields.push(field);
+      }
+
+      if (!fieldTypes[field]) {
+        const fieldType = getValueType(getFirstTypedValue(source[field]));
+        if (fieldType) {
+          fieldTypes[field] = fieldType;
+        }
+      }
+    });
+  });
+
+  return { rows, fields, fieldTypes };
+}
+
+export function buildVariableOptionsFromQueryResult(
+  result: VariableQueryResult,
+  {
+    valueField,
+    labelField,
+  }: {
+    valueField?: string;
+    labelField?: string;
+  } = {}
+): VariableOptionsResult {
+  const selectedValueField = valueField || result.fields[0];
+
+  if (!selectedValueField || !result.fields.includes(selectedValueField)) {
+    return { options: [], optionType: undefined };
+  }
+
+  const selectedLabelField =
+    labelField && result.fields.includes(labelField) ? labelField : undefined;
+  const optionMap = new Map<string, NormalizedVariableOption>();
+
+  result.rows.forEach((row) => {
+    const rawValue = row[selectedValueField];
+    const values = extractValues(rawValue);
+    const label =
+      !Array.isArray(rawValue) && selectedLabelField
+        ? getScalarLabel(row[selectedLabelField])
+        : undefined;
+
+    values.forEach((value) => {
+      const existing = optionMap.get(value);
+      if (!existing) {
+        optionMap.set(value, {
+          value,
+          ...(label ? { label } : {}),
+        });
+      } else if (!existing.label && label) {
+        optionMap.set(value, { ...existing, label });
+      }
+    });
+  });
+
+  return {
+    options: Array.from(optionMap.values()),
+    optionType: result.fieldTypes[selectedValueField],
+  };
 }
 
 /**
- * Parse search response hits into a deduplicated string array of options.
- * For backward compatibility.
- */
-export function parseResponseToOptions(response: any): string[] {
-  return parseResponseToOptionsWithType(response).options;
-}
-
-/**
- * Execute a query and return the results with type information.
+ * Execute a variable query and return neutral result metadata.
  *
  * @param dataPlugin - The data plugin instance for creating search sources
  * @param params - Query parameters (query string, language, dataset)
  * @param useTimeFilter - Whether to apply time filter to the query (default: false)
- * @returns Options array and the field type from response schema
+ * @returns Rows, available fields, and detected field types from the response
  */
-export async function executeQueryForOptionsWithType(
+export async function executeVariableQuery(
   dataPlugin: DataPublicPluginStart,
   params: VariableQueryParams,
   signal?: AbortSignal,
   useTimeFilter: boolean = false
-): Promise<{ options: string[]; optionType?: VariableOptionType }> {
+): Promise<VariableQueryResult> {
   if (!params.query) {
-    return { options: [] };
+    return { rows: [], fields: [], fieldTypes: {} };
   }
 
   const searchSource = await dataPlugin.search.searchSource.create();
@@ -181,39 +261,18 @@ export async function executeQueryForOptionsWithType(
   }
 
   const response = await searchSource.fetch({ abortSignal: signal });
-  return parseResponseToOptionsWithType(response);
+  return parseResponseToQueryResult(response);
 }
 
-/**
- * Execute a query and return the results as a deduplicated string array of options.
- * For backward compatibility.
- *
- * @param dataPlugin - The data plugin instance for creating search sources
- * @param params - Query parameters (query string, language, dataset)
- * @param useTimeFilter - Whether to apply time filter to the query (default: false)
- * @returns Deduplicated string array of option values
- */
-export async function executeQueryForOptions(
-  dataPlugin: DataPublicPluginStart,
-  params: VariableQueryParams,
-  signal?: AbortSignal,
-  useTimeFilter: boolean = false
-): Promise<string[]> {
-  const result = await executeQueryForOptionsWithType(dataPlugin, params, signal, useTimeFilter);
-  return result.options;
-}
-
-/**
- * Filter options by a regex pattern string.
- * Supports `/pattern/flags` syntax or plain regex string.
- * Returns the original array if regex is empty or invalid.
- */
-export function filterOptionsByRegex(options: string[], regex?: string): string[] {
+export function filterVariableOptionsByRegex(
+  options: NormalizedVariableOption[],
+  regex?: string
+): NormalizedVariableOption[] {
   if (!regex) return options;
   try {
     const match = regex.match(/^\/(.+)\/([gimsuy]*)$/);
     const pattern = match ? new RegExp(match[1], match[2]) : new RegExp(regex);
-    return options.filter((opt) => pattern.test(opt));
+    return options.filter((option) => pattern.test(option.value));
   } catch {
     return options;
   }

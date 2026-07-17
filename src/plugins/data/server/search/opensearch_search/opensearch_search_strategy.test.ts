@@ -131,9 +131,9 @@ describe('OpenSearch search strategy', () => {
     const params = { index: 'logstash-*' };
     const opensearchSearch = await opensearchSearchStrategyProvider(mockConfig$, mockLogger);
 
-    await opensearchSearch.search((mockContext as unknown) as RequestHandlerContext, { params });
+    await opensearchSearch.search(mockContext as unknown as RequestHandlerContext, { params });
 
-    expect(mockOpenSearchApiCaller).toBeCalled();
+    expect(mockOpenSearchApiCaller).toHaveBeenCalled();
     expect(mockOpenSearchApiCaller.mock.calls[0][0]).toEqual({
       ...params,
       ignore_unavailable: true,
@@ -145,9 +145,9 @@ describe('OpenSearch search strategy', () => {
     const params = { index: 'logstash-*', ignore_unavailable: false, timeout: '1000ms' };
     const opensearchSearch = await opensearchSearchStrategyProvider(mockConfig$, mockLogger);
 
-    await opensearchSearch.search((mockContext as unknown) as RequestHandlerContext, { params });
+    await opensearchSearch.search(mockContext as unknown as RequestHandlerContext, { params });
 
-    expect(mockOpenSearchApiCaller).toBeCalled();
+    expect(mockOpenSearchApiCaller).toHaveBeenCalled();
     expect(mockOpenSearchApiCaller.mock.calls[0][0]).toEqual({
       ...params,
       track_total_hits: true,
@@ -159,7 +159,7 @@ describe('OpenSearch search strategy', () => {
     const opensearchSearch = await opensearchSearchStrategyProvider(mockConfig$, mockLogger);
 
     const response = await opensearchSearch.search(
-      (mockContext as unknown) as RequestHandlerContext,
+      mockContext as unknown as RequestHandlerContext,
       {
         params,
       }
@@ -191,14 +191,14 @@ describe('OpenSearch search strategy', () => {
     );
 
     await opensearchSearch.search(
-      (mockDataSourceEnabledContext as unknown) as RequestHandlerContext,
+      mockDataSourceEnabledContext as unknown as RequestHandlerContext,
       {
         dataSourceId,
       }
     );
 
-    expect(mockDataSourceApiCaller).toBeCalled();
-    expect(mockOpenSearchApiCaller).not.toBeCalled();
+    expect(mockDataSourceApiCaller).toHaveBeenCalled();
+    expect(mockOpenSearchApiCaller).not.toHaveBeenCalled();
   });
 
   it('dataSource enabled, config host exist, send request without dataSourceId should get default client', async () => {
@@ -226,11 +226,11 @@ describe('OpenSearch search strategy', () => {
       const testRequest = id === undefined ? {} : { dataSourceId: id };
 
       await opensearchSearch.search(
-        (mockDataSourceEnabledContext as unknown) as RequestHandlerContext,
+        mockDataSourceEnabledContext as unknown as RequestHandlerContext,
         testRequest
       );
-      expect(mockOpenSearchApiCaller).toBeCalled();
-      expect(mockDataSourceApiCaller).not.toBeCalled();
+      expect(mockOpenSearchApiCaller).toHaveBeenCalled();
+      expect(mockDataSourceApiCaller).not.toHaveBeenCalled();
     });
   });
 
@@ -265,7 +265,7 @@ describe('OpenSearch search strategy', () => {
           );
 
           await opensearchSearch.search(
-            (mockDataSourceEnabledContext as unknown) as RequestHandlerContext,
+            mockDataSourceEnabledContext as unknown as RequestHandlerContext,
             testRequest
           );
         } catch (e) {
@@ -280,11 +280,11 @@ describe('OpenSearch search strategy', () => {
   it('dataSource disabled, send request with dataSourceId should get default client', async () => {
     const opensearchSearch = await opensearchSearchStrategyProvider(mockConfig$, mockLogger);
 
-    await opensearchSearch.search((mockContext as unknown) as RequestHandlerContext, {
+    await opensearchSearch.search(mockContext as unknown as RequestHandlerContext, {
       dataSourceId,
     });
-    expect(mockOpenSearchApiCaller).toBeCalled();
-    expect(mockDataSourceApiCaller).not.toBeCalled();
+    expect(mockOpenSearchApiCaller).toHaveBeenCalled();
+    expect(mockDataSourceApiCaller).not.toHaveBeenCalled();
   });
 
   it('dataSource disabled, send request without dataSourceId should get default client', async () => {
@@ -293,11 +293,11 @@ describe('OpenSearch search strategy', () => {
     const dataSourceIdToBeTested = [undefined, ''];
 
     for (const testDataSourceId of dataSourceIdToBeTested) {
-      await opensearchSearch.search((mockContext as unknown) as RequestHandlerContext, {
+      await opensearchSearch.search(mockContext as unknown as RequestHandlerContext, {
         dataSourceId: testDataSourceId,
       });
-      expect(mockOpenSearchApiCaller).toBeCalled();
-      expect(mockDataSourceApiCaller).not.toBeCalled();
+      expect(mockOpenSearchApiCaller).toHaveBeenCalled();
+      expect(mockDataSourceApiCaller).not.toHaveBeenCalled();
     }
   });
 
@@ -315,12 +315,12 @@ describe('OpenSearch search strategy', () => {
     const dataSourceIdToBeTested = [undefined, ''];
 
     for (const testDataSourceId of dataSourceIdToBeTested) {
-      await opensearchSearch.search((mockContext as unknown) as RequestHandlerContext, {
+      await opensearchSearch.search(mockContext as unknown as RequestHandlerContext, {
         dataSourceId: testDataSourceId,
       });
-      expect(mockOpenSearchApiCallerWithLongNumeralsSupport).toBeCalled();
-      expect(mockOpenSearchApiCaller).not.toBeCalled();
-      expect(mockDataSourceApiCaller).not.toBeCalled();
+      expect(mockOpenSearchApiCallerWithLongNumeralsSupport).toHaveBeenCalled();
+      expect(mockOpenSearchApiCaller).not.toHaveBeenCalled();
+      expect(mockDataSourceApiCaller).not.toHaveBeenCalled();
     }
   });
 });

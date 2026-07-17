@@ -50,7 +50,7 @@
     "multimatch": "^4.0.0",
     "ncp": "^2.0.0",
     "ora": "^4.0.4",
-    "prettier": "^2.1.1",
+    "prettier": "^3.5.3",
     "read-pkg": "^5.2.0",
     "rxjs": "^6.5.5",
     "semver": "^7.5.3",

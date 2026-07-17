@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import classNames from 'classnames';
 import React, { useEffect, useRef, useState } from 'react';
-import { monaco, PPLValidationContext, revalidatePPLModel } from '@osd/monaco';
+import { monaco, PPLValidationContext, PPLLintContext, revalidatePPLModel } from '@osd/monaco';
 import {
   IDataPluginServices,
   Query,
@@ -26,6 +26,7 @@ import {
   QueryResult,
   QueryStatus,
   useQueryStringManager,
+  UI_SETTINGS,
 } from '../..';
 import { OpenSearchDashboardsReactContextValue } from '../../../../opensearch_dashboards_react/public';
 import { fromUser, getQueryLog, PersistedLog, toUser } from '../../query';
@@ -40,11 +41,14 @@ import {
   pplGrammarCache,
   shouldUseRuntimeGrammar,
 } from '../../antlr/opensearch_ppl/ppl_grammar_cache';
+import { syncPPLValidationContext } from './validation_context';
 import {
-  attachPPLGrammarRefresh,
-  attachPPLValidationContext,
-  syncPPLValidationContext,
-} from './validation_context';
+  syncPPLLintContext,
+  attachPPLContexts,
+  cleanupPPLContexts,
+  PPLDetachRefs,
+} from './lint_context';
+import { buildPPLLintContext } from '../../ppl_lint/lint_context_builder';
 
 export interface QueryEditorProps {
   query: Query;
@@ -83,8 +87,13 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
   const [currentAppId, setCurrentAppId] = useState<string>(''); // Add app ID state
 
   const inputRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
-  const detachValidationContextRef = useRef<(() => void) | undefined>();
-  const detachGrammarRefreshRef = useRef<(() => void) | undefined>();
+  const detachRefs = useRef<PPLDetachRefs>({
+    validationContext: { current: undefined },
+    grammarRefresh: { current: undefined },
+    lintContext: { current: undefined },
+    lintGrammarRefresh: { current: undefined },
+    lintContextRefresh: { current: undefined },
+  });
   const headerRef = useRef<HTMLDivElement>(null);
   const bannerRef = useRef<HTMLDivElement>(null);
   const bottomPanelRef = useRef<HTMLDivElement>(null);
@@ -125,22 +134,20 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
   const getValidationContext = (): PPLValidationContext => {
     const dsId = queryRef.current.dataset?.dataSource?.id;
     const dsVersion = queryRef.current.dataset?.dataSource?.version;
+    const dsEngineType =
+      queryRef.current.dataset?.dataSource?.engineType ??
+      queryRef.current.dataset?.dataSource?.type;
     return {
-      useRuntimeGrammar: shouldUseRuntimeGrammar(dsId, dsVersion),
+      useRuntimeGrammar: shouldUseRuntimeGrammar(dsId, dsVersion, dsEngineType),
       dataSourceId: dsId,
       dataSourceVersion: dsVersion,
     };
   };
 
-  useEffect(
-    () => () => {
-      detachValidationContextRef.current?.();
-      detachValidationContextRef.current = undefined;
-      detachGrammarRefreshRef.current?.();
-      detachGrammarRefreshRef.current = undefined;
-    },
-    []
-  );
+  const getLintContext = (): PPLLintContext =>
+    buildPPLLintContext(queryRef.current.dataset, services);
+
+  useEffect(() => () => cleanupPPLContexts(detachRefs.current), []);
 
   useEffect(() => {
     const subscription = services.application?.currentAppId$?.subscribe?.((appId) => {
@@ -152,8 +159,9 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
   useEffect(() => {
     const dsId = query.dataset?.dataSource?.id;
     const dsVersion = query.dataset?.dataSource?.version;
+    const dsEngineType = query.dataset?.dataSource?.engineType ?? query.dataset?.dataSource?.type;
     syncPPLValidationContext(inputRef.current, {
-      useRuntimeGrammar: shouldUseRuntimeGrammar(dsId, dsVersion),
+      useRuntimeGrammar: shouldUseRuntimeGrammar(dsId, dsVersion, dsEngineType),
       dataSourceId: dsId,
       dataSourceVersion: dsVersion,
     });
@@ -162,20 +170,52 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
     if (model) {
       void revalidatePPLModel(model);
     }
-  }, [query.dataset?.dataSource?.id, query.dataset?.dataSource?.version]);
+  }, [
+    query.dataset?.dataSource?.id,
+    query.dataset?.dataSource?.version,
+    query.dataset?.dataSource?.engineType,
+    query.dataset?.dataSource?.type,
+  ]);
+
+  useEffect(() => {
+    syncPPLLintContext(inputRef.current, getLintContext());
+    const model = inputRef.current?.getModel();
+    if (model) {
+      void revalidatePPLModel(model);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    query.dataset?.id,
+    query.dataset?.dataSource?.id,
+    query.dataset?.dataSource?.version,
+    services.uiSettings,
+  ]);
+
+  useEffect(() => {
+    const subscription = services.uiSettings.getUpdate$().subscribe(({ key }) => {
+      if (key !== UI_SETTINGS.QUERY_ENHANCEMENTS_PPL_LINT_RULES) {
+        return;
+      }
+      syncPPLLintContext(inputRef.current, getLintContext());
+      const model = inputRef.current?.getModel();
+      if (model) {
+        void revalidatePPLModel(model);
+      }
+    });
+    return () => subscription.unsubscribe();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [services.uiSettings]);
 
   const renderQueryEditorExtensions = () => {
-    if (
-      !(
-        headerRef.current &&
-        bannerRef.current &&
-        queryControlsContainer.current &&
-        bottomPanelRef.current &&
-        query.language &&
-        extensionMap &&
-        Object.keys(extensionMap).length > 0
-      )
-    ) {
+    if (!(
+      headerRef.current &&
+      bannerRef.current &&
+      queryControlsContainer.current &&
+      bottomPanelRef.current &&
+      query.language &&
+      extensionMap &&
+      Object.keys(extensionMap).length > 0
+    )) {
       return null;
     }
     return (
@@ -375,14 +415,14 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
     editorDidMount: (editor: monaco.editor.IStandaloneCodeEditor) => {
       setLineCount(editor.getModel()?.getLineCount());
       inputRef.current = editor;
-      detachValidationContextRef.current?.();
-      detachGrammarRefreshRef.current?.();
-      detachValidationContextRef.current = attachPPLValidationContext(editor, getValidationContext);
-      detachGrammarRefreshRef.current = attachPPLGrammarRefresh(
+      attachPPLContexts(
         editor,
+        detachRefs.current,
         getValidationContext,
+        getLintContext,
         (listener) => pplGrammarCache.subscribeToGrammarUpdates(listener),
-        revalidatePPLModel
+        revalidatePPLModel,
+        (listener) => pplGrammarCache.subscribeToVersionResolved(listener)
       );
       const editorModel = editor.getModel();
       if (editorModel) {
@@ -450,14 +490,14 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
     },
     editorDidMount: (editor: monaco.editor.IStandaloneCodeEditor) => {
       inputRef.current = editor;
-      detachValidationContextRef.current?.();
-      detachGrammarRefreshRef.current?.();
-      detachValidationContextRef.current = attachPPLValidationContext(editor, getValidationContext);
-      detachGrammarRefreshRef.current = attachPPLGrammarRefresh(
+      attachPPLContexts(
         editor,
+        detachRefs.current,
         getValidationContext,
+        getLintContext,
         (listener) => pplGrammarCache.subscribeToGrammarUpdates(listener),
-        revalidatePPLModel
+        revalidatePPLModel,
+        (listener) => pplGrammarCache.subscribeToVersionResolved(listener)
       );
       const singleLineModel = editor.getModel();
       if (singleLineModel) {

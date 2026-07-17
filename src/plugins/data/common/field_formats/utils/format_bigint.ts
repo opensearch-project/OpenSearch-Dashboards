@@ -123,7 +123,7 @@ function formatNumber(value: bigint, format: string, language: NumeralLanguageDa
     } else {
       format = format.replace('o', '');
     }
-    ord = ord + language.ordinal((value as unknown) as number);
+    ord = ord + language.ordinal(value as unknown as number);
   }
 
   if (format.indexOf('[.]') > -1) {
@@ -206,7 +206,7 @@ function formatCurrency(value: bigint, format: string, language: NumeralLanguage
 function formatPercentage(value: bigint, format: string, language: NumeralLanguageData): string {
   // numeral multiplies by 100 (a Number) before formatting. With a BigInt this throws
   // `TypeError: Cannot mix BigInt and other types`.
-  const scaled = ((((value as unknown) as number) * 100) as unknown) as bigint;
+  const scaled = ((value as unknown as number) * 100) as unknown as bigint;
   let space = '';
   if (format.indexOf(' %') > -1) {
     space = ' ';
@@ -229,14 +229,14 @@ function formatPercentage(value: bigint, format: string, language: NumeralLangua
 function formatBytes(value: bigint): string {
   // numeral floors the value (a Number op) to pick a byte unit. With a BigInt this
   // throws `TypeError: Cannot convert a BigInt value to a number`.
-  Math.floor((value as unknown) as number);
+  Math.floor(value as unknown as number);
   // Unreachable; the line above always throws for a BigInt.
   return value.toString();
 }
 
 function formatTime(value: bigint): string {
   // numeral applies Math.floor/Math.abs to the value, which throws for a BigInt.
-  Math.floor(Math.abs((value as unknown) as number));
+  Math.floor(Math.abs(value as unknown as number));
   // Unreachable; the line above always throws for a BigInt.
   return value.toString();
 }

@@ -37,7 +37,10 @@ const helpers = {
   getRouteHref: () => '#',
 };
 
-const getDatasetMock = (mockedFields: any = {}) => ({ ...mockedFields } as IDataset);
+const getDatasetMock = (mockedFields: any = {}) =>
+  ({
+    ...mockedFields,
+  }) as IDataset;
 
 describe('ScriptedFieldsTable', () => {
   let dataset: DataView;
@@ -169,10 +172,10 @@ describe('ScriptedFieldsTable', () => {
     const component = shallow<ScriptedFieldsTable>(
       <ScriptedFieldsTable
         dataset={
-          ({
+          {
             ...dataset,
             removeScriptedField,
-          } as unknown) as DataView
+          } as unknown as DataView
         }
         helpers={helpers}
         painlessDocLink={'painlessDoc'}
@@ -188,6 +191,6 @@ describe('ScriptedFieldsTable', () => {
     await component.instance().deleteField();
     await component.update();
 
-    expect(removeScriptedField).toBeCalled();
+    expect(removeScriptedField).toHaveBeenCalled();
   });
 });

@@ -31,7 +31,7 @@ export abstract class DataSource<
   TDataSetParams extends IDataSetParams = IDataSetParams,
   TDataSet extends IDataSourceDataSet = IDataSourceDataSet,
   TQueryParams extends IDataSourceQueryParams = IDataSourceQueryParams,
-  TQueryResult extends IDataSourceQueryResponse = IDataSourceQueryResponse
+  TQueryResult extends IDataSourceQueryResponse = IDataSourceQueryResponse,
 > {
   private readonly id: string;
   private readonly name: string;

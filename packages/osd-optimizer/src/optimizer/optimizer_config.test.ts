@@ -118,7 +118,7 @@ describe('OptimizerConfig::parseOptions()', () => {
       dist: true,
     });
 
-    expect(parseThemeTags).toBeCalledWith('*');
+    expect(parseThemeTags).toHaveBeenCalledWith('*');
   });
 
   it('defaults to OSD_OPTIMIZER_THEMES when dist = false', () => {
@@ -129,7 +129,7 @@ describe('OptimizerConfig::parseOptions()', () => {
       dist: false,
     });
 
-    expect(parseThemeTags).toBeCalledWith('foo');
+    expect(parseThemeTags).toHaveBeenCalledWith('foo');
   });
 
   it('applies defaults if opensearch-dashboards-extra path does not exist', () => {
@@ -674,8 +674,9 @@ describe('OptimizerConfig::parseOptions()', () => {
  * and just making sure that the arguments are coming from where we expect
  */
 describe('OptimizerConfig::create()', () => {
-  const assignBundlesToWorkers: jest.Mock = jest.requireMock('./assign_bundles_to_workers.ts')
-    .assignBundlesToWorkers;
+  const assignBundlesToWorkers: jest.Mock = jest.requireMock(
+    './assign_bundles_to_workers.ts'
+  ).assignBundlesToWorkers;
   const findOpenSearchDashboardsPlatformPlugins: jest.Mock = jest.requireMock(
     './opensearch_dashboards_platform_plugins.ts'
   ).findOpenSearchDashboardsPlatformPlugins;
@@ -697,24 +698,26 @@ describe('OptimizerConfig::create()', () => {
     filterById.mockReturnValue(Symbol('filtered bundles'));
     readLimits.mockReturnValue(Symbol('limits'));
 
-    jest.spyOn(OptimizerConfig, 'parseOptions').mockImplementation((): {
-      [key in keyof ParsedOptions]: any;
-    } => ({
-      cache: Symbol('parsed cache'),
-      dist: Symbol('parsed dist'),
-      maxWorkerCount: Symbol('parsed max worker count'),
-      pluginPaths: Symbol('parsed plugin paths'),
-      pluginScanDirs: Symbol('parsed plugin scan dirs'),
-      repoRoot: Symbol('parsed repo root'),
-      outputRoot: Symbol('parsed output root'),
-      watch: Symbol('parsed watch'),
-      themeTags: Symbol('theme tags'),
-      inspectWorkers: Symbol('parsed inspect workers'),
-      profileRspack: Symbol('parsed profile rspack'),
-      filters: [],
-      includeCoreBundle: false,
-      bundleRefs: Symbol('bundle refs'),
-    }));
+    jest.spyOn(OptimizerConfig, 'parseOptions').mockImplementation(
+      (): {
+        [key in keyof ParsedOptions]: any;
+      } => ({
+        cache: Symbol('parsed cache'),
+        dist: Symbol('parsed dist'),
+        maxWorkerCount: Symbol('parsed max worker count'),
+        pluginPaths: Symbol('parsed plugin paths'),
+        pluginScanDirs: Symbol('parsed plugin scan dirs'),
+        repoRoot: Symbol('parsed repo root'),
+        outputRoot: Symbol('parsed output root'),
+        watch: Symbol('parsed watch'),
+        themeTags: Symbol('theme tags'),
+        inspectWorkers: Symbol('parsed inspect workers'),
+        profileRspack: Symbol('parsed profile rspack'),
+        filters: [],
+        includeCoreBundle: false,
+        bundleRefs: Symbol('bundle refs'),
+      })
+    );
   });
 
   it('passes parsed options to findOpenSearchDashboardsPlatformPlugins, getBundles, and assignBundlesToWorkers', () => {
@@ -739,96 +742,37 @@ describe('OptimizerConfig::create()', () => {
       }
     `);
 
-    expect(findOpenSearchDashboardsPlatformPlugins.mock).toMatchInlineSnapshot(`
-      Object {
-        "calls": Array [
-          Array [
-            Symbol(parsed plugin scan dirs),
-            Symbol(parsed plugin paths),
-          ],
-        ],
-        "instances": Array [
-          [Window],
-        ],
-        "invocationCallOrder": Array [
-          39,
-        ],
-        "lastCall": Array [
-          Symbol(parsed plugin scan dirs),
-          Symbol(parsed plugin paths),
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": Symbol(new platform plugins),
-          },
-        ],
-      }
-    `);
+    // Capture the symbol values that were passed to and returned from each mock.
+    // Asserting .mock.calls/.mock.results avoids serializing [Window] contexts/instances,
+    // which causes RangeError: Invalid string length in Jest 30 / pretty-format.
+    const parsedOptions = (OptimizerConfig.parseOptions as jest.Mock).mock.results[0].value;
 
-    expect(filterById.mock).toMatchInlineSnapshot(`
-      Object {
-        "calls": Array [
-          Array [
-            Array [],
-            Array [
-              Symbol(bundle1),
-              Symbol(bundle2),
-            ],
-          ],
-        ],
-        "instances": Array [
-          [Window],
-        ],
-        "invocationCallOrder": Array [
-          41,
-        ],
-        "lastCall": Array [
-          Array [],
-          Array [
-            Symbol(bundle1),
-            Symbol(bundle2),
-          ],
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": Symbol(filtered bundles),
-          },
-        ],
-      }
-    `);
+    expect(findOpenSearchDashboardsPlatformPlugins).toHaveBeenCalledTimes(1);
+    expect(findOpenSearchDashboardsPlatformPlugins.mock.calls[0]).toEqual([
+      parsedOptions.pluginScanDirs,
+      parsedOptions.pluginPaths,
+    ]);
+    expect(findOpenSearchDashboardsPlatformPlugins.mock.results[0]).toEqual({
+      type: 'return',
+      value: config.plugins,
+    });
 
-    expect(getPluginBundles.mock).toMatchInlineSnapshot(`
-      Object {
-        "calls": Array [
-          Array [
-            Symbol(new platform plugins),
-            Symbol(parsed repo root),
-            Symbol(parsed output root),
-          ],
-        ],
-        "instances": Array [
-          [Window],
-        ],
-        "invocationCallOrder": Array [
-          40,
-        ],
-        "lastCall": Array [
-          Symbol(new platform plugins),
-          Symbol(parsed repo root),
-          Symbol(parsed output root),
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": Array [
-              Symbol(bundle1),
-              Symbol(bundle2),
-            ],
-          },
-        ],
-      }
-    `);
+    expect(getPluginBundles).toHaveBeenCalledTimes(1);
+    expect(getPluginBundles.mock.calls[0]).toEqual([
+      config.plugins,
+      parsedOptions.repoRoot,
+      parsedOptions.outputRoot,
+    ]);
+    expect(getPluginBundles.mock.results[0].type).toBe('return');
+
+    expect(filterById).toHaveBeenCalledTimes(1);
+    expect(filterById.mock.calls[0]).toEqual([
+      parsedOptions.filters,
+      getPluginBundles.mock.results[0].value,
+    ]);
+    expect(filterById.mock.results[0]).toEqual({
+      type: 'return',
+      value: config.bundles,
+    });
   });
 });

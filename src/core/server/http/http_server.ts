@@ -30,7 +30,7 @@
 
 import { Server } from '@hapi/hapi';
 import HapiStaticFiles from '@hapi/inert';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import { Logger, LoggerFactory } from '../logging';
 import { HttpConfig } from './http_config';
@@ -106,7 +106,10 @@ export class HttpServer {
   private readonly authRequestHeaders: AuthHeadersStorage;
   private readonly authResponseHeaders: AuthHeadersStorage;
 
-  constructor(private readonly logger: LoggerFactory, private readonly name: string) {
+  constructor(
+    private readonly logger: LoggerFactory,
+    private readonly name: string
+  ) {
     this.authState = new AuthStateStorage(() => this.authRegistered);
     this.authRequestHeaders = new AuthHeadersStorage();
     this.authResponseHeaders = new AuthHeadersStorage();
@@ -313,7 +316,7 @@ export class HttpServer {
       request.app = {
         ...(request.app ?? {}),
         requestId: getRequestId(request, config.requestId),
-        requestUuid: uuid.v4(),
+        requestUuid: uuidv4(),
       } as OpenSearchDashboardsRequestState;
       return responseToolkit.continue;
     });

@@ -117,11 +117,8 @@ export function enrichAutocompleteResult(
   query: string,
   tree: ParseTree
 ): PromQLAutocompleteResult {
-  const {
-    shouldSuggestLabels,
-    shouldSuggestLabelValues,
-    ...suggestionsFromRules
-  } = processVisitedRules(rules, cursorTokenIndex, tokenStream);
+  const { shouldSuggestLabels, shouldSuggestLabelValues, ...suggestionsFromRules } =
+    processVisitedRules(rules, cursorTokenIndex, tokenStream);
   const result: PromQLAutocompleteResult = {
     ...baseResult,
     ...suggestionsFromRules,

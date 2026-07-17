@@ -20,12 +20,17 @@ export class FilterUtils {
    * @param timeFieldName Time field name
    * @param timeRange Time range from the time picker
    * @returns where clause of the time range filter
+   *
+   * The time literals are wrapped in `TIMESTAMP('...')` rather than bare string literals. Modern
+   * OpenSearch PPL implicitly coerces a string to a timestamp for `field >= '<string>'`, but legacy
+   * Elasticsearch (Open Distro) PPL does not and rejects it with a [TIMESTAMP,STRING] type error.
+   * `TIMESTAMP('...')` is accepted by both engines, so this form is portable across all data sources.
    */
   public static getTimeFilterWhereClause(timeFieldName: string, timeRange: TimeRange): string {
     const { fromDate, toDate } = formatTimePickerDate(timeRange, 'YYYY-MM-DD HH:mm:ss.SSS');
-    return `WHERE \`${timeFieldName}\` >= '${formatDate(
+    return `WHERE \`${timeFieldName}\` >= TIMESTAMP('${formatDate(
       fromDate
-    )}' AND \`${timeFieldName}\` <= '${formatDate(toDate)}'`;
+    )}') AND \`${timeFieldName}\` <= TIMESTAMP('${formatDate(toDate)}')`;
   }
 
   /**

@@ -32,13 +32,25 @@ describe('useLegendPosition', () => {
     mockTrigger.getBoundingClientRect = jest.fn().mockReturnValue(mockRect);
 
     // Mock window properties using Object.defineProperty (innerWidth and scrollY are value properties in jsdom)
-    Object.defineProperty(window, 'innerWidth', { value: 1024, writable: true });
-    Object.defineProperty(window, 'scrollY', { value: 10, writable: true });
+    Object.defineProperty(window, 'innerWidth', {
+      value: 1024,
+      writable: true,
+      configurable: true,
+    });
+    Object.defineProperty(window, 'scrollY', { value: 10, writable: true, configurable: true });
   });
 
   afterEach(() => {
-    Object.defineProperty(window, 'innerWidth', { value: originalInnerWidth, writable: true });
-    Object.defineProperty(window, 'scrollY', { value: originalScrollY, writable: true });
+    Object.defineProperty(window, 'innerWidth', {
+      value: originalInnerWidth,
+      writable: true,
+      configurable: true,
+    });
+    Object.defineProperty(window, 'scrollY', {
+      value: originalScrollY,
+      writable: true,
+      configurable: true,
+    });
   });
 
   // Test cases

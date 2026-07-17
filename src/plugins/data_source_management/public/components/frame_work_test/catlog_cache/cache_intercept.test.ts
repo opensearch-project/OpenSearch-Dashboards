@@ -33,7 +33,11 @@ const sessionStorageMock = (() => {
   };
 })();
 
-Object.defineProperty(window, 'sessionStorage', { value: sessionStorageMock });
+Object.defineProperty(window, 'sessionStorage', {
+  value: sessionStorageMock,
+  writable: true,
+  configurable: true,
+});
 
 describe('Intercept logout handler', () => {
   beforeEach(() => {
@@ -52,7 +56,7 @@ describe('Intercept logout handler', () => {
     const logoutInterceptFn = catalogRequestIntercept();
     // @ts-expect-error TS2554 TODO(ts-error): fixme
     logoutInterceptFn(logoutPath, null);
-    expect(sessionStorage.removeItem).toBeCalledWith(ASYNC_QUERY_DATASOURCE_CACHE);
-    expect(sessionStorage.removeItem).toBeCalledWith(ASYNC_QUERY_ACCELERATIONS_CACHE);
+    expect(sessionStorage.removeItem).toHaveBeenCalledWith(ASYNC_QUERY_DATASOURCE_CACHE);
+    expect(sessionStorage.removeItem).toHaveBeenCalledWith(ASYNC_QUERY_ACCELERATIONS_CACHE);
   });
 });

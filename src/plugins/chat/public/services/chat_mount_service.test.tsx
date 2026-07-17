@@ -71,9 +71,9 @@ describe('ChatMountService', () => {
     };
 
     // Mock chat service
-    mockChatService = ({
+    mockChatService = {
       getPaddingSize: jest.fn(() => 400),
-    } as unknown) as ChatService;
+    } as unknown as ChatService;
 
     // Mock suggested actions service
     mockSuggestedActionsService = {} as SuggestedActionsService;

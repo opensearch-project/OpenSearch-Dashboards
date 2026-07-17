@@ -58,7 +58,7 @@ export function parseInterval(interval) {
     });
 
     return moment.duration(duration.as(selectedUnit), selectedUnit);
-  } catch (e) {
+  } catch {
     return null;
   }
 }

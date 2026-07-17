@@ -242,7 +242,7 @@ exports.Cluster = class Cluster {
       const pluginUrl = generateEnginePluginUrl(version, id);
       await this.installOpenSearchPlugins(installPath, pluginUrl);
       this._log.info(`Completed setup: ${id}`);
-    } catch (ex) {
+    } catch {
       this._log.warning(`Failed to setup: ${id}`);
     }
   }

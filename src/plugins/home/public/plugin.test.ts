@@ -108,7 +108,7 @@ describe('HomePublicPlugin', () => {
         urlForwarding: urlForwardingPluginMock.createSetupContract(),
         contentManagement: contentManagementPluginMocks.createSetupContract(),
       });
-      expect(coreMocks.application.register).toBeCalledTimes(2);
+      expect(coreMocks.application.register).toHaveBeenCalledTimes(2);
     });
 
     test('wires up and call addNavLinksToGroup if new navigation is enabled and workspace not enabled', async () => {
@@ -118,7 +118,7 @@ describe('HomePublicPlugin', () => {
         urlForwarding: urlForwardingPluginMock.createSetupContract(),
         contentManagement: contentManagementPluginMocks.createSetupContract(),
       });
-      expect(coreMocks.chrome.navGroup.addNavLinksToGroup).toBeCalledTimes(3);
+      expect(coreMocks.chrome.navGroup.addNavLinksToGroup).toHaveBeenCalledTimes(3);
     });
   });
 });

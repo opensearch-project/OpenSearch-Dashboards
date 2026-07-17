@@ -55,6 +55,7 @@ export const IGNORE_FILE_GLOBS = [
   '.ci/pipeline-library/**/*',
   'release-notes/*',
   '**/antlr/**/.generated/**/*',
+  'packages/osd-antlr-grammar/src/**/.generated/**/*',
 
   // filename must match language code which requires capital letters
   '**/translations/*.json',
@@ -99,6 +100,9 @@ export const IGNORE_DIRECTORY_GLOBS = [
   'src/babel-*',
   'packages/*',
   'src/legacy/ui/public/flot-charts',
+  // Kebab-cased subpath-export stub dir, named to match the `@osd/monaco/ppl-lint`
+  // specifier (same idiom as `@osd/i18n/react`). Only holds a redirect package.json.
+  'packages/osd-monaco/ppl-lint',
   'test/functional/fixtures/opensearch_archiver/visualize_source-filters',
   'packages/osd-pm/src/utils/__fixtures__/*',
   'src/dev/build/tasks/__fixtures__/*',

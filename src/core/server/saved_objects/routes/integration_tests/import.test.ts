@@ -75,7 +75,7 @@ describe(`POST ${URL}`, () => {
     handlerContext.savedObjects.typeRegistry.getType.mockImplementation(
       (type: string) =>
         // other attributes aren't needed for the purposes of injecting metadata
-        ({ management: { icon: `${type}-icon` } } as any)
+        ({ management: { icon: `${type}-icon` } }) as any
     );
 
     savedObjectsClient = handlerContext.savedObjects.client;
@@ -485,8 +485,8 @@ describe(`POST ${URL}`, () => {
   describe('createNewCopies enabled', () => {
     it('imports objects, regenerating all IDs/reference IDs present, and resetting all origin IDs', async () => {
       mockUuidv4
-        .mockReturnValueOnce('foo') // a uuid.v4() is generated for the request.id
-        .mockReturnValueOnce('foo') // another uuid.v4() is used for the request.uuid
+        .mockReturnValueOnce('foo') // a uuidv4() is generated for the request.id
+        .mockReturnValueOnce('foo') // another uuidv4() is used for the request.uuid
         .mockReturnValueOnce('new-id-1')
         .mockReturnValueOnce('new-id-2');
       savedObjectsClient.bulkGet.mockResolvedValueOnce({ saved_objects: [mockIndexPattern] });
@@ -598,7 +598,7 @@ describe(`POST ${URL}`, () => {
           [...allowedTypes, 'config'].map(createExportableType)
         );
         handlerContext.savedObjects.typeRegistry.getType.mockImplementation(
-          (type: string) => ({ management: { icon: `${type}-icon` } } as any)
+          (type: string) => ({ management: { icon: `${type}-icon` } }) as any
         );
         savedObjectsClient = handlerContext.savedObjects.client;
         savedObjectsClient.find.mockResolvedValue(emptyResponse);
@@ -635,7 +635,7 @@ describe(`POST ${URL}`, () => {
           [...allowedTypes, 'config'].map(createExportableType)
         );
         handlerContext.savedObjects.typeRegistry.getType.mockImplementation(
-          (type: string) => ({ management: { icon: `${type}-icon` } } as any)
+          (type: string) => ({ management: { icon: `${type}-icon` } }) as any
         );
         savedObjectsClient = handlerContext.savedObjects.client;
         savedObjectsClient.find.mockResolvedValue(emptyResponse);

@@ -95,6 +95,120 @@ describe('workspace utils', () => {
     expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(true);
   });
 
+  it('should handle configUsers as a string instead of array', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    const groups: string[] = [];
+    const users: string[] = ['user1'];
+    const configGroups: string[] = [];
+    const configUsers = 'user1' as unknown as string[];
+    updateDashboardAdminStateForRequest(mockRequest, groups, users, configGroups, configUsers);
+    expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(true);
+  });
+
+  it('should handle configGroups as a string instead of array', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    const groups: string[] = ['admin_group'];
+    const users: string[] = [];
+    const configGroups = 'admin_group' as unknown as string[];
+    const configUsers: string[] = [];
+    updateDashboardAdminStateForRequest(mockRequest, groups, users, configGroups, configUsers);
+    expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(true);
+  });
+
+  it('should handle configUsers as wildcard string instead of array', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    const groups: string[] = [];
+    const users: string[] = ['user1'];
+    const configGroups: string[] = [];
+    const configUsers = OSD_ADMIN_WILDCARD_MATCH_ALL as unknown as string[];
+    updateDashboardAdminStateForRequest(mockRequest, groups, users, configGroups, configUsers);
+    expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(true);
+  });
+
+  it('should not grant admin when configUsers string is a substring match', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    const groups: string[] = [];
+    const users: string[] = ['a'];
+    const configGroups: string[] = [];
+    const configUsers = 'admin' as unknown as string[];
+    updateDashboardAdminStateForRequest(mockRequest, groups, users, configGroups, configUsers);
+    expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(false);
+  });
+
+  it('should split configUsers string by comma', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    const groups: string[] = [];
+    const users: string[] = ['user2'];
+    const configGroups: string[] = [];
+    const configUsers = 'user1,user2' as unknown as string[];
+    updateDashboardAdminStateForRequest(mockRequest, groups, users, configGroups, configUsers);
+    expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(true);
+  });
+
+  it('should split configUsers string by space', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    const groups: string[] = [];
+    const users: string[] = ['user2'];
+    const configGroups: string[] = [];
+    const configUsers = 'user1 user2' as unknown as string[];
+    updateDashboardAdminStateForRequest(mockRequest, groups, users, configGroups, configUsers);
+    expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(true);
+  });
+
+  it('should split configGroups string by comma', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    const groups: string[] = ['group2'];
+    const users: string[] = [];
+    const configGroups = 'group1,group2' as unknown as string[];
+    const configUsers: string[] = [];
+    updateDashboardAdminStateForRequest(mockRequest, groups, users, configGroups, configUsers);
+    expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(true);
+  });
+
+  it('should split configGroups string by space', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    const groups: string[] = ['group2'];
+    const users: string[] = [];
+    const configGroups = 'group1 group2' as unknown as string[];
+    const configUsers: string[] = [];
+    updateDashboardAdminStateForRequest(mockRequest, groups, users, configGroups, configUsers);
+    expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(true);
+  });
+
+  it('should split configUsers string by tab', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    const groups: string[] = [];
+    const users: string[] = ['user2'];
+    const configGroups: string[] = [];
+    const configUsers = 'user1\tuser2' as unknown as string[];
+    updateDashboardAdminStateForRequest(mockRequest, groups, users, configGroups, configUsers);
+    expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(true);
+  });
+
+  it('should split configGroups string by tab', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    const groups: string[] = ['group2'];
+    const users: string[] = [];
+    const configGroups = 'group1\tgroup2' as unknown as string[];
+    const configUsers: string[] = [];
+    updateDashboardAdminStateForRequest(mockRequest, groups, users, configGroups, configUsers);
+    expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(true);
+  });
+
+  it('should not crash when configUsers or configGroups is null or undefined', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    const groups: string[] = [];
+    const users: string[] = ['user1'];
+    updateDashboardAdminStateForRequest(
+      mockRequest,
+      groups,
+      users,
+      null as unknown as string[],
+      undefined as unknown as string[]
+    );
+    expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(false);
+  });
+
   it('should transfer current user placeholder in permissions', () => {
     expect(transferCurrentUserInPermissions('foo', undefined)).toBeUndefined();
     expect(
@@ -163,7 +277,7 @@ describe('workspace utils', () => {
     const dataSources = ['id1', 'id2'];
     uiSettingsClient.get = jest.fn().mockResolvedValue(dataSources[0]);
     await checkAndSetDefaultDataSource(uiSettingsClient, dataSources, true);
-    expect(uiSettingsClient.set).not.toBeCalled();
+    expect(uiSettingsClient.set).not.toHaveBeenCalled();
   });
 
   it('should check then set first data sources as default if needed when checking', async () => {

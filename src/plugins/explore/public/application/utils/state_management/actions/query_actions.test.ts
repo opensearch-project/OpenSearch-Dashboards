@@ -316,9 +316,10 @@ describe('Query Actions - Comprehensive Test Suite', () => {
   });
 
   describe('defaultPrepareQueryString', () => {
-    const mockDefaultPreparePplQuery = languagesModule.defaultPreparePplQuery as jest.MockedFunction<
-      typeof languagesModule.defaultPreparePplQuery
-    >;
+    const mockDefaultPreparePplQuery =
+      languagesModule.defaultPreparePplQuery as jest.MockedFunction<
+        typeof languagesModule.defaultPreparePplQuery
+      >;
 
     beforeEach(() => {
       mockDefaultPreparePplQuery.mockClear();
@@ -397,9 +398,10 @@ describe('Query Actions - Comprehensive Test Suite', () => {
   });
 
   describe('prepareHistogramCacheKey', () => {
-    const mockDefaultPreparePplQuery = languagesModule.defaultPreparePplQuery as jest.MockedFunction<
-      typeof languagesModule.defaultPreparePplQuery
-    >;
+    const mockDefaultPreparePplQuery =
+      languagesModule.defaultPreparePplQuery as jest.MockedFunction<
+        typeof languagesModule.defaultPreparePplQuery
+      >;
 
     beforeEach(() => {
       mockDefaultPreparePplQuery.mockClear();
@@ -670,9 +672,10 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         saveToCache: jest.fn(),
       },
     } as any;
-    const mockCreateHistogramConfigs = chartUtilsModule.createHistogramConfigs as jest.MockedFunction<
-      typeof chartUtilsModule.createHistogramConfigs
-    >;
+    const mockCreateHistogramConfigs =
+      chartUtilsModule.createHistogramConfigs as jest.MockedFunction<
+        typeof chartUtilsModule.createHistogramConfigs
+      >;
     const mockGetDimensions = chartUtilsModule.getDimensions as jest.MockedFunction<
       typeof chartUtilsModule.getDimensions
     >;
@@ -836,9 +839,10 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         yAxisLabel: 'Count',
       };
 
-      const mockBuildChartFromBreakdownSeries = chartUtilsModule.buildChartFromBreakdownSeries as jest.MockedFunction<
-        typeof chartUtilsModule.buildChartFromBreakdownSeries
-      >;
+      const mockBuildChartFromBreakdownSeries =
+        chartUtilsModule.buildChartFromBreakdownSeries as jest.MockedFunction<
+          typeof chartUtilsModule.buildChartFromBreakdownSeries
+        >;
       mockBuildChartFromBreakdownSeries.mockReturnValueOnce(mockChartData as any);
 
       const result = histogramResultsProcessor(
@@ -904,9 +908,10 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         yAxisLabel: 'Count',
       };
 
-      const mockBuildChartFromBreakdownSeries = chartUtilsModule.buildChartFromBreakdownSeries as jest.MockedFunction<
-        typeof chartUtilsModule.buildChartFromBreakdownSeries
-      >;
+      const mockBuildChartFromBreakdownSeries =
+        chartUtilsModule.buildChartFromBreakdownSeries as jest.MockedFunction<
+          typeof chartUtilsModule.buildChartFromBreakdownSeries
+        >;
       mockBuildChartFromBreakdownSeries.mockReturnValueOnce(mockChartData as any);
 
       const result = histogramResultsProcessor(
@@ -982,9 +987,10 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         yAxisLabel: 'Count',
       };
 
-      const mockBuildChartFromBreakdownSeries = chartUtilsModule.buildChartFromBreakdownSeries as jest.MockedFunction<
-        typeof chartUtilsModule.buildChartFromBreakdownSeries
-      >;
+      const mockBuildChartFromBreakdownSeries =
+        chartUtilsModule.buildChartFromBreakdownSeries as jest.MockedFunction<
+          typeof chartUtilsModule.buildChartFromBreakdownSeries
+        >;
       mockBuildChartFromBreakdownSeries.mockReturnValueOnce(mockChartData as any);
 
       const result = histogramResultsProcessor(
@@ -1081,9 +1087,10 @@ describe('Query Actions - Comprehensive Test Suite', () => {
   describe('executeQueries', () => {
     let mockGetState: jest.Mock;
     let mockDispatch: jest.Mock;
-    const mockDefaultPreparePplQuery = languagesModule.defaultPreparePplQuery as jest.MockedFunction<
-      typeof languagesModule.defaultPreparePplQuery
-    >;
+    const mockDefaultPreparePplQuery =
+      languagesModule.defaultPreparePplQuery as jest.MockedFunction<
+        typeof languagesModule.defaultPreparePplQuery
+      >;
 
     beforeEach(() => {
       mockGetState = jest.fn();
@@ -1279,9 +1286,10 @@ describe('Query Actions - Comprehensive Test Suite', () => {
   describe('executeHistogramQuery', () => {
     let mockGetState: jest.Mock;
     let mockDispatch: jest.Mock;
-    const mockCreateHistogramConfigs = chartUtilsModule.createHistogramConfigs as jest.MockedFunction<
-      typeof chartUtilsModule.createHistogramConfigs
-    >;
+    const mockCreateHistogramConfigs =
+      chartUtilsModule.createHistogramConfigs as jest.MockedFunction<
+        typeof chartUtilsModule.createHistogramConfigs
+      >;
 
     beforeEach(() => {
       mockGetState = jest.fn();
@@ -2032,9 +2040,10 @@ describe('Query Actions - Comprehensive Test Suite', () => {
   });
 
   describe('Integration Tests', () => {
-    const mockDefaultPreparePplQuery = languagesModule.defaultPreparePplQuery as jest.MockedFunction<
-      typeof languagesModule.defaultPreparePplQuery
-    >;
+    const mockDefaultPreparePplQuery =
+      languagesModule.defaultPreparePplQuery as jest.MockedFunction<
+        typeof languagesModule.defaultPreparePplQuery
+      >;
 
     it('should handle full query execution flow', async () => {
       mockDefaultPreparePplQuery.mockReturnValue({

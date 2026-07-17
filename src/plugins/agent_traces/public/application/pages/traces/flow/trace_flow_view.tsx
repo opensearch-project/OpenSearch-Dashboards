@@ -112,10 +112,10 @@ export const TraceFlowView: React.FC<TraceFlowViewProps> = ({
     return { mapData: { root: { nodes, edges } }, spanMap: map };
   }, [categorizedTree]);
 
-  const contextValue = useMemo<TraceFlowContextValue>(() => ({ onSelectSpan, spanMap }), [
-    onSelectSpan,
-    spanMap,
-  ]);
+  const contextValue = useMemo<TraceFlowContextValue>(
+    () => ({ onSelectSpan, spanMap }),
+    [onSelectSpan, spanMap]
+  );
 
   // Deselect when clicking the ReactFlow background pane
   const handleContainerClick = useCallback(

@@ -174,6 +174,11 @@ export interface SavedObjectsServiceSetup {
   getImportExportObjectLimit: () => number;
 
   /**
+   * Returns whether saved objects permission control is enabled.
+   */
+  getPermissionControlEnabled: () => boolean;
+
+  /**
    * Set the default {@link SavedObjectRepositoryFactoryProvider | factory provider} for creating Saved Objects repository.
    * Only one repository can be set, subsequent calls to this method will fail.
    */
@@ -298,8 +303,10 @@ export interface SavedObjectsStartDeps {
   pluginsInitialized?: boolean;
 }
 
-export class SavedObjectsService
-  implements CoreService<InternalSavedObjectsServiceSetup, InternalSavedObjectsServiceStart> {
+export class SavedObjectsService implements CoreService<
+  InternalSavedObjectsServiceSetup,
+  InternalSavedObjectsServiceStart
+> {
   private logger: Logger;
 
   private setupDeps?: SavedObjectsSetupDeps;
@@ -410,6 +417,7 @@ export class SavedObjectsService
         this.typeRegistry.registerType(type);
       },
       getImportExportObjectLimit: () => this.config!.maxImportExportSize,
+      getPermissionControlEnabled: () => this.config!.permission.enabled,
       setRepositoryFactoryProvider: (repositoryProvider) => {
         if (this.started) {
           throw new Error('cannot call `setRepositoryFactoryProvider` after service startup.');

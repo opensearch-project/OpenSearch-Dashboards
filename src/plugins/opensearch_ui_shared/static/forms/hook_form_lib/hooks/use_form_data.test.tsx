@@ -83,7 +83,7 @@ describe('useFormData() hook', () => {
     test('should return the form data', () => {
       // Called twice:
       // once when the hook is called and once when the fields have mounted and updated the form data
-      expect(onChangeSpy).toBeCalledTimes(2);
+      expect(onChangeSpy).toHaveBeenCalledTimes(2);
       const [data] = getLastMockValue();
       expect(data).toEqual({ title: 'titleInitialValue' });
     });
@@ -97,7 +97,7 @@ describe('useFormData() hook', () => {
         setInputValue('titleField', 'titleChanged');
       });
 
-      expect(onChangeSpy).toBeCalledTimes(3);
+      expect(onChangeSpy).toHaveBeenCalledTimes(3);
       const [data] = getLastMockValue();
       expect(data).toEqual({ title: 'titleChanged' });
     });

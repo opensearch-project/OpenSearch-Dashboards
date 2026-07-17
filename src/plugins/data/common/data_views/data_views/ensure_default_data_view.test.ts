@@ -33,11 +33,11 @@ describe('ensureDefaultDataView', () => {
       delete: jest.fn(),
     };
 
-    indexPatterns = ({
+    indexPatterns = {
       getIds: jest.fn(),
       get: jest.fn(),
       getDataSource: jest.fn(),
-    } as unknown) as jest.Mocked<DataViewsContract>;
+    } as unknown as jest.Mocked<DataViewsContract>;
   });
 
   test('should return early if canUpdateUiSetting is false', async () => {
@@ -377,6 +377,6 @@ describe('ensureDefaultDataView', () => {
     indexPatterns.getIds.mockResolvedValue(['pattern1']);
     indexPatterns.getDataSource.mockRejectedValue(new Error('Failed to get data source'));
 
-    await expect(async () => await ensureDefaultDataView.call(indexPatterns)).not.toThrowError();
+    await expect(async () => await ensureDefaultDataView.call(indexPatterns)).not.toThrow();
   });
 });

@@ -237,11 +237,8 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
   describe('wrapperFactory', () => {
     describe('delete', () => {
       it('should throw permission error if not permitted', async () => {
-        const {
-          wrapper,
-          permissionControlMock,
-          requestMock,
-        } = generateWorkspaceSavedObjectsClientWrapper();
+        const { wrapper, permissionControlMock, requestMock } =
+          generateWorkspaceSavedObjectsClientWrapper();
         let errorCatched;
         try {
           await wrapper.delete('dashboard', 'not-permitted-dashboard');
@@ -280,11 +277,8 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
 
     describe('update', () => {
       it('should throw permission error if not permitted', async () => {
-        const {
-          wrapper,
-          permissionControlMock,
-          requestMock,
-        } = generateWorkspaceSavedObjectsClientWrapper();
+        const { wrapper, permissionControlMock, requestMock } =
+          generateWorkspaceSavedObjectsClientWrapper();
         let errorCatched;
         try {
           await wrapper.update('dashboard', 'not-permitted-dashboard', {
@@ -334,11 +328,8 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
 
     describe('bulk update', () => {
       it('should throw permission error if not permitted', async () => {
-        const {
-          wrapper,
-          permissionControlMock,
-          requestMock,
-        } = generateWorkspaceSavedObjectsClientWrapper();
+        const { wrapper, permissionControlMock, requestMock } =
+          generateWorkspaceSavedObjectsClientWrapper();
         let errorCatched;
         try {
           await wrapper.bulkUpdate([
@@ -369,11 +360,8 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
 
     describe('bulk create', () => {
       it('should throw workspace permission error if passed workspaces but not permitted', async () => {
-        const {
-          wrapper,
-          permissionControlMock,
-          requestMock,
-        } = generateWorkspaceSavedObjectsClientWrapper();
+        const { wrapper, permissionControlMock, requestMock } =
+          generateWorkspaceSavedObjectsClientWrapper();
         permissionControlMock.validate.mockResolvedValueOnce({ success: true, result: false });
         let errorCatched;
         try {
@@ -391,11 +379,8 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
         expect(errorCatched?.message).toEqual('Invalid workspace permission');
       });
       it("should throw permission error if overwrite and not permitted on object's workspace and object", async () => {
-        const {
-          wrapper,
-          permissionControlMock,
-          requestMock,
-        } = generateWorkspaceSavedObjectsClientWrapper();
+        const { wrapper, permissionControlMock, requestMock } =
+          generateWorkspaceSavedObjectsClientWrapper();
         permissionControlMock.validate.mockResolvedValueOnce({ success: true, result: false });
         let errorCatched;
         try {
@@ -491,11 +476,8 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
 
     describe('create', () => {
       it('should throw workspace permission error if passed workspaces but not permitted', async () => {
-        const {
-          wrapper,
-          permissionControlMock,
-          requestMock,
-        } = generateWorkspaceSavedObjectsClientWrapper();
+        const { wrapper, permissionControlMock, requestMock } =
+          generateWorkspaceSavedObjectsClientWrapper();
         let errorCatched;
         try {
           await wrapper.create('dashboard', 'new-dashboard', {
@@ -512,11 +494,8 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
         expect(errorCatched?.message).toEqual('Invalid workspace permission');
       });
       it("should throw permission error if overwrite and not permitted on object's workspace and object", async () => {
-        const {
-          wrapper,
-          permissionControlMock,
-          requestMock,
-        } = generateWorkspaceSavedObjectsClientWrapper();
+        const { wrapper, permissionControlMock, requestMock } =
+          generateWorkspaceSavedObjectsClientWrapper();
         let errorCatched;
         try {
           await wrapper.create(
@@ -594,11 +573,8 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
         expect(permissionControlMock.validate).not.toHaveBeenCalled();
       });
       it("should call permission validate with object's workspace and throw permission error", async () => {
-        const {
-          wrapper,
-          permissionControlMock,
-          requestMock,
-        } = generateWorkspaceSavedObjectsClientWrapper();
+        const { wrapper, permissionControlMock, requestMock } =
+          generateWorkspaceSavedObjectsClientWrapper();
         let errorCatched;
         try {
           await wrapper.get('dashboard', 'not-permitted-dashboard');
@@ -619,7 +595,7 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
         const { wrapper, permissionControlMock } = generateWorkspaceSavedObjectsClientWrapper();
         try {
           await wrapper.get('dashboard', 'not-permitted-dashboard');
-        } catch (e) {
+        } catch {
           // Add 1 line to pass no-empty lint check
         }
         expect(permissionControlMock.validateSavedObjectsACL).toHaveBeenCalledWith(
@@ -634,11 +610,8 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
         );
       });
       it('should call client.get and return result with arguments if permitted', async () => {
-        const {
-          wrapper,
-          clientMock,
-          permissionControlMock,
-        } = generateWorkspaceSavedObjectsClientWrapper();
+        const { wrapper, clientMock, permissionControlMock } =
+          generateWorkspaceSavedObjectsClientWrapper();
         permissionControlMock.validate.mockResolvedValueOnce({ success: true, result: true });
         const getArgs = ['workspace', 'foo', {}] as const;
         const result = await wrapper.get(...getArgs);
@@ -655,11 +628,8 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
     });
     describe('bulk get', () => {
       it("should call permission validate with object's workspace and throw permission error", async () => {
-        const {
-          wrapper,
-          permissionControlMock,
-          requestMock,
-        } = generateWorkspaceSavedObjectsClientWrapper();
+        const { wrapper, permissionControlMock, requestMock } =
+          generateWorkspaceSavedObjectsClientWrapper();
 
         const result = await wrapper.bulkGet([
           { type: 'dashboard', id: 'not-permitted-dashboard' },
@@ -694,7 +664,7 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
         const { wrapper, permissionControlMock } = generateWorkspaceSavedObjectsClientWrapper();
         try {
           await wrapper.bulkGet([{ type: 'dashboard', id: 'not-permitted-dashboard' }]);
-        } catch (e) {
+        } catch {
           // Add 1 line to pass no-empty lint check
         }
         expect(permissionControlMock.validateSavedObjectsACL).toHaveBeenCalledWith(
@@ -779,9 +749,8 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
         });
       });
       it('should call client.find without ACLSearchParams and workspaceOperator', async () => {
-        const { wrapper, clientMock } = generateWorkspaceSavedObjectsClientWrapper(
-          DATASOURCE_ADMIN
-        );
+        const { wrapper, clientMock } =
+          generateWorkspaceSavedObjectsClientWrapper(DATASOURCE_ADMIN);
         await wrapper.find({
           type: DATA_SOURCE_SAVED_OBJECT_TYPE,
         });
@@ -796,9 +765,8 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
         });
       });
       it('should call client.find without ACLSearchParams and workspaceOperator when find config and the sortField is buildNum', async () => {
-        const { wrapper, clientMock } = generateWorkspaceSavedObjectsClientWrapper(
-          DATASOURCE_ADMIN
-        );
+        const { wrapper, clientMock } =
+          generateWorkspaceSavedObjectsClientWrapper(DATASOURCE_ADMIN);
         clientMock.find.mockImplementation(async () => ({
           total: 2,
           per_page: 10,
@@ -836,11 +804,8 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
 
     describe('deleteByWorkspace', () => {
       it('should call permission validate with workspace and throw workspace permission error if not permitted', async () => {
-        const {
-          wrapper,
-          requestMock,
-          permissionControlMock,
-        } = generateWorkspaceSavedObjectsClientWrapper();
+        const { wrapper, requestMock, permissionControlMock } =
+          generateWorkspaceSavedObjectsClientWrapper();
         let errorCatched;
         try {
           await wrapper.deleteByWorkspace('not-permitted-workspace');
@@ -864,12 +829,8 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
     });
 
     describe('Dashboard admin', () => {
-      const {
-        wrapper,
-        clientMock,
-        permissionControlMock,
-        requestMock,
-      } = generateWorkspaceSavedObjectsClientWrapper(DASHBOARD_ADMIN);
+      const { wrapper, clientMock, permissionControlMock, requestMock } =
+        generateWorkspaceSavedObjectsClientWrapper(DASHBOARD_ADMIN);
       expect(getWorkspaceState(requestMock)).toEqual({
         isDashboardAdmin: true,
         requestWorkspaceId: 'mock-request-workspace-id',
@@ -1098,7 +1059,7 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
         wrapper.get('workspace', 'foo'),
         wrapper.get('workspace', 'foo'),
       ]);
-      expect(checkSpy).toBeCalledTimes(1);
+      expect(checkSpy).toHaveBeenCalledTimes(1);
     });
   });
 });

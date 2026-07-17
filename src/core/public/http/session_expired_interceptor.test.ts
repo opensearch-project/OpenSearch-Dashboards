@@ -22,6 +22,8 @@ describe('setupSessionExpiredInterceptor', () => {
 
   beforeEach(() => {
     jest.useFakeTimers();
+    jest.spyOn(window.location, 'assign').mockImplementation(() => {});
+
     http = httpServiceMock.createSetupContract();
     notifications = notificationServiceMock.createSetupContract();
 
@@ -35,10 +37,6 @@ describe('setupSessionExpiredInterceptor', () => {
       halted: false,
       halt: jest.fn(),
     } as any;
-
-    // Mock window.location
-    delete (window as any).location;
-    (window as any).location = { href: '' };
   });
 
   afterEach(() => {
@@ -80,11 +78,11 @@ describe('setupSessionExpiredInterceptor', () => {
     expect(controller.halt).toHaveBeenCalledTimes(1);
 
     // Redirect should not happen immediately
-    expect(window.location.href).toBe('');
+    expect(window.location.assign).not.toHaveBeenCalled();
 
     // Redirect should happen after 5 seconds
     jest.advanceTimersByTime(5000);
-    expect(window.location.href).toBe('/auth/login');
+    expect(window.location.assign).toHaveBeenCalledWith('/auth/login');
   });
 
   it('does not redirect or show toast for non-401 errors', () => {
@@ -227,7 +225,7 @@ describe('setupSessionExpiredInterceptor', () => {
     expect(controller.halt).toHaveBeenCalledTimes(1);
 
     jest.advanceTimersByTime(5000);
-    expect(window.location.href).toBe(awsConsoleURL);
+    expect(window.location.assign).toHaveBeenCalledWith(awsConsoleURL);
   });
 
   it('allows cross-origin amazonaws.com redirect URLs', () => {
@@ -271,9 +269,7 @@ describe('setupSessionExpiredInterceptor', () => {
   });
 
   it('allows same-origin absolute URLs', () => {
-    // In jsdom, window.location.origin is typically 'http://localhost'
-    (window as any).location = { href: '', origin: 'http://localhost' };
-    const sameOriginURL = 'http://localhost/auth/login';
+    const sameOriginURL = 'http://localhost:5601/auth/login';
     const mockHeaders = new Headers({ 'X-Auth-Redirect-URL': sameOriginURL });
     const mockResponse = { status: 401, headers: mockHeaders } as Response;
 
@@ -292,7 +288,7 @@ describe('setupSessionExpiredInterceptor', () => {
     expect(controller.halt).toHaveBeenCalledTimes(1);
 
     jest.advanceTimersByTime(5000);
-    expect(window.location.href).toBe(sameOriginURL);
+    expect(window.location.assign).toHaveBeenCalledWith(sameOriginURL);
   });
 
   it('resets isRedirecting flag after redirect timeout so subsequent 401s can retrigger', () => {
@@ -335,6 +331,6 @@ describe('setupSessionExpiredInterceptor', () => {
 
     // halt() is called synchronously, before the setTimeout fires
     expect(controller.halt).toHaveBeenCalledTimes(1);
-    expect(window.location.href).toBe('');
+    expect(window.location.assign).not.toHaveBeenCalled();
   });
 });

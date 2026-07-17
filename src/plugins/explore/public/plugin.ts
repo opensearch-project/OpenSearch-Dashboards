@@ -4,7 +4,8 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { stringify } from 'query-string';
+import semver from 'semver';
+import qs from 'query-string';
 import rison from 'rison-node';
 import { BehaviorSubject } from 'rxjs';
 import { filter, map, take } from 'rxjs/operators';
@@ -39,6 +40,7 @@ import {
 } from '../common';
 import { ConfigSchema } from '../common/config';
 import { buildExploreNavPopover, buildMetricsNavPopover } from './nav_popover';
+import * as exploreManifest from '../opensearch_dashboards.json';
 import { generateDocViewsUrl } from './application/legacy/discover/application/components/doc_views/generate_doc_views_url';
 import { DocViewsLinksRegistry } from './application/legacy/discover/application/doc_views_links/doc_views_links_registry';
 import {
@@ -92,14 +94,12 @@ import {
   EXECUTE_PPL_QUERY_TOOL_DEFINITION,
 } from './components/query_panel/actions/ppl_execute_query_action';
 
-export class ExplorePlugin
-  implements
-    Plugin<
-      ExplorePluginSetup,
-      ExplorePluginStart,
-      ExploreSetupDependencies,
-      ExploreStartDependencies
-    > {
+export class ExplorePlugin implements Plugin<
+  ExplorePluginSetup,
+  ExplorePluginStart,
+  ExploreSetupDependencies,
+  ExploreStartDependencies
+> {
   private stateUpdaterByApp: Partial<
     Record<ExploreFlavor | 'explore', BehaviorSubject<AppUpdater>>
   > = {
@@ -209,7 +209,7 @@ export class ExplorePlugin
 
         // Note: Explore uses Redux for filter management, not filterManager
         // So we don't include filter state in URLs for context links
-        const hash = stringify(
+        const hash = qs.stringify(
           url.encodeQuery({
             _g: rison.encode({}), // No global filters (explore uses Redux)
             _a: rison.encode({
@@ -272,7 +272,11 @@ export class ExplorePlugin
       const flavorSuffix = flavor ? `/${flavor}` : '';
       const trackerBaseUrl = core.http.basePath.prepend(`/app/${PLUGIN_ID}${flavorSuffix}`);
       const trackerStorageKey = `lastUrl:${core.http.basePath.get()}:${PLUGIN_ID}${flavorSuffix}`;
-      const { appMounted, appUnMounted, stop: stopUrlTracker } = createOsdUrlTracker({
+      const {
+        appMounted,
+        appUnMounted,
+        stop: stopUrlTracker,
+      } = createOsdUrlTracker({
         baseUrl: trackerBaseUrl,
         defaultSubUrl: '#/',
         storageKey: trackerStorageKey,
@@ -356,9 +360,8 @@ export class ExplorePlugin
           // Check if this is a context or doc route (following discover pattern)
           const path = window.location.hash;
           if (path.startsWith('#/context') || path.startsWith('#/doc')) {
-            const { renderDocView } = await import(
-              './application/legacy/discover/application/components/doc_views'
-            );
+            const { renderDocView } =
+              await import('./application/legacy/discover/application/components/doc_views');
             const unmount = renderDocView(params.element);
             return () => {
               unmount();
@@ -432,7 +435,11 @@ export class ExplorePlugin
     };
 
     const createExploreVisualizationEditorApp = () => {
-      const { appMounted, appUnMounted, stop: stopUrlTracker } = createOsdUrlTracker({
+      const {
+        appMounted,
+        appUnMounted,
+        stop: stopUrlTracker,
+      } = createOsdUrlTracker({
         baseUrl: core.http.basePath.prepend(`/app/${VISUALIZATION_EDITOR_APP_ID}`),
         defaultSubUrl: '#/',
         storageKey: `lastUrl:${core.http.basePath.get()}:${VISUALIZATION_EDITOR_APP_ID}`,
@@ -666,10 +673,56 @@ export class ExplorePlugin
     setUiActions(plugins.uiActions);
     setDashboard(plugins.dashboard);
     const opensearchDashboardsVersion = this.initializerContext.env.packageInfo.version;
+
+    // Register a dataset filter based on minDataSourceEngineVersions from the manifest.
+    // This hides data sources whose engine version is below the declared minimum (e.g.
+    // Elasticsearch < 7.9.0 which lacks PPL support required by Explore).
+    const minVersions = (
+      exploreManifest as {
+        minDataSourceEngineVersions?: Record<string, string>;
+      }
+    ).minDataSourceEngineVersions;
+    if (minVersions) {
+      const datasetService = plugins.data.query.queryString.getDatasetService();
+      datasetService.registerDatasetFilter(PLUGIN_ID, (dataset) => {
+        const engine = dataset.dataSource?.engineType ?? dataset.dataSource?.type;
+        if (!engine) return true;
+        const minVersion = minVersions[engine];
+        if (!minVersion) return true;
+        const coerced = semver.coerce(dataset.dataSource?.version);
+        if (!coerced) return true;
+        return semver.gte(coerced.version, minVersion);
+      });
+    }
     setDashboardVersion({ version: opensearchDashboardsVersion });
 
     if (plugins.expressions) {
       setExpressionLoader(plugins.expressions.ExpressionLoader);
+    }
+
+    // Add 'explore' and 'dataset_management' to SQL's supported apps only when SQL support is
+    // enabled. SQL is registered by query_enhancements (in setup) without 'explore'; explore opts
+    // in here (in start, after registration) when the flag is on.
+    const sqlSupportEnabled =
+      this.initializerContext.config.get<ConfigSchema>().sqlSupport?.enabled ?? false;
+    if (sqlSupportEnabled) {
+      const languageService = plugins.data.query.queryString?.getLanguageService?.();
+      const sqlConfig = languageService?.getLanguage('SQL');
+      if (sqlConfig) {
+        const addApp = (names: string[] = [], app: string) =>
+          names.includes(app) ? names : [...names, app];
+        let supportedAppNames = sqlConfig.supportedAppNames ?? [];
+        let editorSupportedAppNames = sqlConfig.editorSupportedAppNames ?? [];
+        supportedAppNames = addApp(supportedAppNames, 'explore');
+        supportedAppNames = addApp(supportedAppNames, 'dataset_management');
+        editorSupportedAppNames = addApp(editorSupportedAppNames, 'explore');
+        const updated = {
+          ...sqlConfig,
+          supportedAppNames,
+          editorSupportedAppNames,
+        };
+        languageService?.registerLanguage?.(updated);
+      }
     }
 
     // Control nav link visibility based on dynamic capabilities
@@ -840,7 +893,7 @@ export class ExplorePlugin
               iconType = chart.icon;
               chartName = chart.name;
             }
-          } catch (e) {
+          } catch {
             iconType = '';
           }
 

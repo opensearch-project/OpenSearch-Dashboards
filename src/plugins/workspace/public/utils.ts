@@ -84,62 +84,58 @@ export const isFeatureIdInsideUseCase = (
  * 6. For feature id start with use case prefix, it will read use case's features and match every passed apps.
  *    For example, ['user-case-observability'] matches all features under observability use case.
  */
-export const featureMatchesConfig = (featureConfigs: string[], useCases: WorkspaceUseCase[]) => ({
-  id,
-  category,
-}: {
-  id: string;
-  category?: AppCategory;
-}) => {
-  let matched = false;
-  let firstUseCaseId: string | undefined;
+export const featureMatchesConfig =
+  (featureConfigs: string[], useCases: WorkspaceUseCase[]) =>
+  ({ id, category }: { id: string; category?: AppCategory }) => {
+    let matched = false;
+    let firstUseCaseId: string | undefined;
 
-  /**
-   * Iterate through each feature configuration to determine if the given feature matches any of them.
-   * Note: The loop will not break prematurely because the order of featureConfigs array matters.
-   * Later configurations may override previous ones, so each configuration must be evaluated in sequence.
-   */
-  for (const featureConfig of featureConfigs) {
-    // '*' matches any feature
-    if (featureConfig === '*') {
-      matched = true;
-    }
+    /**
+     * Iterate through each feature configuration to determine if the given feature matches any of them.
+     * Note: The loop will not break prematurely because the order of featureConfigs array matters.
+     * Later configurations may override previous ones, so each configuration must be evaluated in sequence.
+     */
+    for (const featureConfig of featureConfigs) {
+      // '*' matches any feature
+      if (featureConfig === '*') {
+        matched = true;
+      }
 
-    // matches any feature inside use cases
-    if (!firstUseCaseId) {
-      const useCaseId = getUseCaseFromFeatureConfig(featureConfig);
-      if (useCaseId) {
-        firstUseCaseId = useCaseId;
-        if (isFeatureIdInsideUseCase(id, firstUseCaseId, useCases)) {
-          matched = true;
+      // matches any feature inside use cases
+      if (!firstUseCaseId) {
+        const useCaseId = getUseCaseFromFeatureConfig(featureConfig);
+        if (useCaseId) {
+          firstUseCaseId = useCaseId;
+          if (isFeatureIdInsideUseCase(id, firstUseCaseId, useCases)) {
+            matched = true;
+          }
+        }
+      }
+
+      // The config starts with `@` matches a category
+      if (category && featureConfig === `@${category.id}`) {
+        matched = true;
+      }
+
+      // The config matches a feature id
+      if (featureConfig === id) {
+        matched = true;
+      }
+
+      // If a config starts with `!`, such feature or category will be excluded
+      if (featureConfig.startsWith('!')) {
+        if (category && featureConfig === `!@${category.id}`) {
+          matched = false;
+        }
+
+        if (featureConfig === `!${id}`) {
+          matched = false;
         }
       }
     }
 
-    // The config starts with `@` matches a category
-    if (category && featureConfig === `@${category.id}`) {
-      matched = true;
-    }
-
-    // The config matches a feature id
-    if (featureConfig === id) {
-      matched = true;
-    }
-
-    // If a config starts with `!`, such feature or category will be excluded
-    if (featureConfig.startsWith('!')) {
-      if (category && featureConfig === `!@${category.id}`) {
-        matched = false;
-      }
-
-      if (featureConfig === `!${id}`) {
-        matched = false;
-      }
-    }
-  }
-
-  return matched;
-};
+    return matched;
+  };
 
 /**
  * Check if an app is accessible in a workspace based on the workspace configured features
@@ -361,10 +357,8 @@ export const mergeDataSourcesWithConnections = (
   mode: AssociationDataSourceModalMode,
   remoteClusterConnections?: DataSourceConnection[]
 ): DataSourceConnection[] => {
-  const {
-    openSearchConnections,
-    dataConnections,
-  } = convertDataSourcesToOpenSearchAndDataConnections(dataSources);
+  const { openSearchConnections, dataConnections } =
+    convertDataSourcesToOpenSearchAndDataConnections(dataSources);
   let result;
   // if the mode is set to OpenSearchConnections, then only display OpenSearch connections
   if (mode === AssociationDataSourceModalMode.OpenSearchConnections) {
@@ -515,7 +509,16 @@ export function prependWorkspaceToBreadcrumbs(
       onClick: () => {
         if (useCase) {
           const allNavGroups = navGroupsMap[useCase];
-          core.application.navigateToApp(allNavGroups?.navLinks[0].id);
+          // Mirror the post-create redirect and `getUseCaseUrl`: skip
+          // feature-flag-disabled nav links (registered but hidden, e.g.
+          // alerting when `observability.alertManager.enabled` is false)
+          // instead of blindly landing on `navLinks[0]`. Falls back to the
+          // first nav link when no snapshot is available or none qualify.
+          const apps = getApplicationsSnapshot(core.application);
+          const landingAppId = pickUseCaseLandingAppId(allNavGroups?.navLinks, apps);
+          if (landingAppId) {
+            core.application.navigateToApp(landingAppId);
+          }
         }
       },
     };
@@ -646,8 +649,15 @@ export const fetchDataSourceConnections = async (
       mode === AssociationDataSourceModalMode.DirectQueryConnections
         ? await fetchDataSourceConnectionsByDataSourceIds(
             // Only data source saved object type needs to fetch data source connections, data connection type object not.
+            // Direct query (`_plugins/_query/_datasources`) is an OpenSearch SQL plugin
+            // feature; Elasticsearch clusters never expose it, so skip those to avoid
+            // confusing errors/log noise. Mirrors `fetchRemoteClusterConnections`.
             dataSources
-              .filter((ds) => ds.type === DATA_SOURCE_SAVED_OBJECT_TYPE)
+              .filter(
+                (ds) =>
+                  ds.type === DATA_SOURCE_SAVED_OBJECT_TYPE &&
+                  ds.dataSourceEngineType !== DataSourceEngineType.Elasticsearch
+              )
               .map((ds) => ds.id),
             http
           )
@@ -664,7 +674,7 @@ export const fetchDataSourceConnections = async (
       mode,
       remoteClusterConnections
     );
-  } catch (error) {
+  } catch {
     notifications?.toasts.addDanger(
       i18n.translate('workspace.detail.dataSources.error.message', {
         defaultMessage: 'Cannot fetch direct query connections',

@@ -46,7 +46,7 @@ export type StreamingRequestHandler<
   P = unknown,
   Q = unknown,
   B = unknown,
-  Method extends RouteMethod = any
+  Method extends RouteMethod = any,
 > = (
   context: RequestHandlerContext,
   request: OpenSearchDashboardsRequest<P, Q, B, Method>

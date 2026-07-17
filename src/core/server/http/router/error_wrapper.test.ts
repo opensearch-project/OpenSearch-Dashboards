@@ -41,9 +41,11 @@ import {
   RequestHandlerContext,
 } from 'opensearch-dashboards/server';
 
-const createHandler = (handler: () => any): RequestHandler<any, any, any> => () => {
-  return handler();
-};
+const createHandler =
+  (handler: () => any): RequestHandler<any, any, any> =>
+  () => {
+    return handler();
+  };
 
 describe('wrapErrors', () => {
   let context: RequestHandlerContext;

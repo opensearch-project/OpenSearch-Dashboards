@@ -40,11 +40,13 @@ import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { capabilitiesProvider } from './capabilities_provider';
 import { UserUISettingsClientWrapper } from './saved_objects/user_ui_settings_client_wrapper';
+import { extractUserName } from './utils';
 
 export class AdvancedSettingsServerPlugin implements Plugin<object, object> {
   private readonly logger: Logger;
   private userUiSettingsClientWrapper?: UserUISettingsClientWrapper;
   private readonly globalConfig$: Observable<SharedGlobalConfig>;
+  private coreStart?: CoreStart;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -101,10 +103,16 @@ export class AdvancedSettingsServerPlugin implements Plugin<object, object> {
     );
 
     core.capabilities.registerSwitcher(async (request, capabilities) => {
+      // User Settings only works when an authenticated user can be resolved.
+      const hasAuthenticatedUser = !!extractUserName(request, this.coreStart);
       return {
         ...capabilities,
+        advancedSettings: {
+          ...capabilities.advancedSettings,
+          permissionControlEnabled: isPermissionControlEnabled,
+        },
         userSettings: {
-          enabled: false,
+          enabled: hasAuthenticatedUser,
         },
       };
     });
@@ -114,6 +122,7 @@ export class AdvancedSettingsServerPlugin implements Plugin<object, object> {
 
   public start(core: CoreStart) {
     this.logger.debug('advancedSettings: Started');
+    this.coreStart = core;
     this.userUiSettingsClientWrapper?.setCore(core);
 
     return {};

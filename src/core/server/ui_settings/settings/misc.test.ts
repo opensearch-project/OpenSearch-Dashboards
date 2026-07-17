@@ -43,10 +43,16 @@ describe('misc settings', () => {
     it('should only accept positive numeric values', () => {
       expect(() => validate(127)).not.toThrow();
       expect(() => validate(-12)).toThrowErrorMatchingInlineSnapshot(
-        `"Value must be equal to or greater than [0]."`
+        `
+        "Value must be equal to or greater than [0].
+        Cause: Value must be equal to or greater than [0]."
+        `
       );
       expect(() => validate('foo')).toThrowErrorMatchingInlineSnapshot(
-        `"expected value of type [number] but got [string]"`
+        `
+        "expected value of type [number] but got [string]
+        Cause: expected value of type [number] but got [string]"
+        `
       );
     });
   });

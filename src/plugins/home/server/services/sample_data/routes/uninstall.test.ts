@@ -62,12 +62,12 @@ describe('sample data uninstall route', () => {
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
     const handler = mockRouter.delete.mock.calls[0][1];
 
-    await handler((mockContext as unknown) as RequestHandlerContext, mockRequest, mockResponse);
+    await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
 
     // @ts-expect-error TS7005 TODO(ts-error): fixme
-    expect(mockClient).toBeCalled();
+    expect(mockClient).toHaveBeenCalled();
     // @ts-expect-error TS7005 TODO(ts-error): fixme
-    expect(mockSOClient.delete).toBeCalled();
+    expect(mockSOClient.delete).toHaveBeenCalled();
   });
 
   it('handler calls expected api with the given request with data source', async () => {
@@ -106,12 +106,12 @@ describe('sample data uninstall route', () => {
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
     const handler = mockRouter.delete.mock.calls[0][1];
 
-    await handler((mockContext as unknown) as RequestHandlerContext, mockRequest, mockResponse);
+    await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
 
     // @ts-expect-error TS7005 TODO(ts-error): fixme
-    expect(mockClient).toBeCalled();
+    expect(mockClient).toHaveBeenCalled();
     // @ts-expect-error TS7005 TODO(ts-error): fixme
-    expect(mockSOClient.delete).toBeCalled();
+    expect(mockSOClient.delete).toHaveBeenCalled();
   });
 
   it('handler calls expected api with the given request with workspace', async () => {
@@ -143,11 +143,11 @@ describe('sample data uninstall route', () => {
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
     const handler = mockRouter.delete.mock.calls[0][1];
 
-    await handler((mockContext as unknown) as RequestHandlerContext, mockRequest, mockResponse);
+    await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
 
     // @ts-expect-error TS7005 TODO(ts-error): fixme
-    expect(mockClient).toBeCalled();
+    expect(mockClient).toHaveBeenCalled();
     // @ts-expect-error TS7005 TODO(ts-error): fixme
-    expect(mockSOClient.delete).toBeCalled();
+    expect(mockSOClient.delete).toHaveBeenCalled();
   });
 });

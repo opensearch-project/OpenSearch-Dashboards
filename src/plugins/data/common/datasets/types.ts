@@ -16,6 +16,13 @@ export interface DataSource {
   title: string;
   /** The engine type of the data source */
   type: string;
+  /**
+   * Explicit data-source engine type (e.g. `Elasticsearch`, `OpenSearch`). Distinct from
+   * {@link type}, which is overloaded across dataset types (engine type for index patterns, the
+   * literal `DATA_SOURCE` for indexes). Consumers gating on the engine should prefer
+   * `engineType ?? type`.
+   */
+  engineType?: string;
   /** Version of the data source */
   version: string;
   /** Optional metadata for the data source */
@@ -197,9 +204,7 @@ export interface DataStructureCustomMeta {
  * Union type for DataStructureMeta
  */
 export type DataStructureMeta =
-  | DataStructureFeatureMeta
-  | DataStructureDataTypeMeta
-  | DataStructureCustomMeta;
+  DataStructureFeatureMeta | DataStructureDataTypeMeta | DataStructureCustomMeta;
 
 /**
  * Represents a cached version of DataStructure with string references instead of object references.

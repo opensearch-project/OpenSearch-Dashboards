@@ -12,6 +12,7 @@ import {
   Query,
   DataView,
   IndexPatternField,
+  getDataSourceEngineCapabilities,
 } from '../../../../../../../../src/plugins/data/common';
 import { QueryExecutionStatus } from '../types';
 import { setResults, ISearchResult, IPrometheusSearchResult } from '../slices';
@@ -181,7 +182,7 @@ const updateFieldTopQueryValues = (hits: any[], dataset: DataView): void => {
         const topValues = result.buckets.map((bucket) => String(bucket.value));
         fieldUpdates.push({ field, topValues });
       }
-    } catch (error) {
+    } catch {
       // Silently continue on field processing errors
     }
   });
@@ -539,8 +540,15 @@ const executeQueryBase = async (
       histogramConfig = createHistogramConfigWithInterval(dataView, interval, services, getState);
     }
 
+    // Some engines (e.g. legacy Elasticsearch / Open Distro) have no `span()`/`timechart`
+    // time-bucketing in the PPL `stats` by-clause, so the histogram query fails to parse. Skip
+    // building it for those engines and run the plain query instead (the histogram chart just won't
+    // populate).
+    const datasetEngineType = dataset?.dataSource?.engineType ?? dataset?.dataSource?.type;
+    const supportsPplSpan = getDataSourceEngineCapabilities(datasetEngineType).supportsPplSpan;
+
     let effectiveQuery = queryString;
-    if (query.language === 'PPL' && histogramConfig && isHistogramQuery) {
+    if (query.language === 'PPL' && histogramConfig && isHistogramQuery && supportsPplSpan) {
       effectiveQuery = buildPPLHistogramQuery(queryString, histogramConfig);
     }
 

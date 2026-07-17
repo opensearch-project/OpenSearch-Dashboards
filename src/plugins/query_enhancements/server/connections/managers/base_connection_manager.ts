@@ -44,7 +44,7 @@ export interface QueryExecutor<TParams = unknown, TResponse = unknown> {
 export abstract class BaseConnectionManager<
   TClient = unknown,
   TQueryParams = unknown,
-  TQueryResponse = unknown
+  TQueryResponse = unknown,
 > {
   private clientFactory?: ClientFactory<TClient>;
   private queryExecutor?: QueryExecutor<TQueryParams, TQueryResponse>;

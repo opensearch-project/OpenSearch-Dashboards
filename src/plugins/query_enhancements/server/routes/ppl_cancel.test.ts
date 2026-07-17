@@ -38,7 +38,7 @@ describe('registerPPLCancelRoute', () => {
           }),
         },
       },
-    } as any);
+    }) as any;
 
   const tasksResponseWithMatch = (queryId: string) => ({
     body: {

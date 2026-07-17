@@ -89,11 +89,11 @@ describe('IndexPatterns', () => {
     uiSettingsGet.mockReturnValue(Promise.resolve(false));
 
     indexPatterns = new IndexPatternsService({
-      uiSettings: ({
+      uiSettings: {
         get: uiSettingsGet,
         getAll: () => {},
-      } as any) as UiSettingsCommon,
-      savedObjectsClient: (savedObjectsClient as unknown) as SavedObjectsClientCommon,
+      } as any as UiSettingsCommon,
+      savedObjectsClient: savedObjectsClient as unknown as SavedObjectsClientCommon,
       apiClient: createFieldsFetcher(),
       fieldFormats,
       onNotification: () => {},
@@ -191,10 +191,10 @@ describe('IndexPatterns', () => {
     const indexPattern = await indexPatterns.create({ title }, true);
     expect(indexPattern).toBeInstanceOf(IndexPattern);
     expect(indexPattern.title).toBe(title);
-    expect(indexPatterns.refreshFields).not.toBeCalled();
+    expect(indexPatterns.refreshFields).not.toHaveBeenCalled();
 
     await indexPatterns.create({ title });
-    expect(indexPatterns.refreshFields).toBeCalled();
+    expect(indexPatterns.refreshFields).toHaveBeenCalled();
   });
 
   test('createAndSave', async () => {
@@ -202,8 +202,8 @@ describe('IndexPatterns', () => {
     indexPatterns.createSavedObject = jest.fn();
     indexPatterns.setDefault = jest.fn();
     await indexPatterns.createAndSave({ title });
-    expect(indexPatterns.createSavedObject).toBeCalled();
-    expect(indexPatterns.setDefault).toBeCalled();
+    expect(indexPatterns.createSavedObject).toHaveBeenCalled();
+    expect(indexPatterns.setDefault).toHaveBeenCalled();
   });
 
   test('savedObjectToSpec', () => {

@@ -15,11 +15,11 @@ describe('TraceAggregationProcessor', () => {
   let mockDataPlugin: any;
 
   beforeEach(() => {
-    mockDataset = ({
+    mockDataset = {
       timeFieldName: 'endTime',
       flattenHit: jest.fn((hit: any) => hit._source || {}),
       fields: [],
-    } as any) as DataView;
+    } as any as DataView;
 
     mockDataPlugin = {
       query: {

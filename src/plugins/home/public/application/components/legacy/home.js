@@ -101,7 +101,7 @@ export class Home extends Component {
       });
 
       this.endLoading({ isNewOpenSearchDashboardsInstance: resp.total === 0 });
-    } catch (err) {
+    } catch {
       // An error here is relatively unimportant, as it only means we don't provide
       // some UI niceties.
       this.endLoading();

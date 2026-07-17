@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`\`format()\` correctly formats record. 1`] = `"{\\"@timestamp\\":\\"2012-02-01T09:30:22.011-05:00\\",\\"message\\":\\"message-1\\",\\"error\\":{\\"message\\":\\"Some error message\\",\\"type\\":\\"Some error name\\",\\"stack_trace\\":\\"Some error stack\\"},\\"log\\":{\\"level\\":\\"FATAL\\",\\"logger\\":\\"context-1\\"},\\"process\\":{\\"pid\\":5355}}"`;
 

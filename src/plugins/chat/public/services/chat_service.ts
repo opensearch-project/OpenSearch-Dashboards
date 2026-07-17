@@ -132,6 +132,40 @@ export class ChatService {
     this.activeRequests.delete(requestId);
   }
 
+  /**
+   * Wait until no OTHER run is active before dispatching a follow-up run.
+   *
+   * Fixes #11881: a frontend-tool round-trip opens a second run (the tool
+   * result dispatch) once the tool executes in the browser. If the first run's
+   * SSE stream hasn't finished yet — e.g. a parallel backend tool is still
+   * resolving — dispatching the second run against the same thread hits the
+   * agent server's per-thread concurrency guard and throws
+   * `ConcurrencyException`. Polling `activeRequests` until it drains (excluding
+   * `exceptRequestId`, the caller's own id) lets the first run close first, so
+   * the two runs are serialized instead of racing.
+   *
+   * Bounded by `maxWaitMs` so a first run that never closes can't hang the UI
+   * forever — after the timeout we proceed anyway (best effort).
+   */
+  private async waitForActiveRunsToClear(
+    exceptRequestId: string,
+    maxWaitMs = 15000,
+    intervalMs = 100
+  ): Promise<void> {
+    const deadline = Date.now() + maxWaitMs;
+    while (Date.now() < deadline) {
+      const others = Array.from(this.activeRequests).filter((id) => id !== exceptRequestId);
+      if (others.length === 0) {
+        return;
+      }
+      await new Promise((resolve) => setTimeout(resolve, intervalMs));
+    }
+    // eslint-disable-next-line no-console
+    console.warn(
+      `waitForActiveRunsToClear: timed out after ${maxWaitMs}ms with active runs still present; dispatching follow-up run anyway`
+    );
+  }
+
   public getPaddingSize(): number {
     if (!this.coreChatService) {
       throw new Error('Core chat service not available');
@@ -613,8 +647,8 @@ export class ChatService {
     }));
 
     // Send the tool result back to the agent with full conversation history
-    const includeFullHistory = this.conversationHistoryService.getMemoryProvider()
-      .includeFullHistory;
+    const includeFullHistory =
+      this.conversationHistoryService.getMemoryProvider().includeFullHistory;
     const mappedMessages = includeFullHistory ? [...messages, toolMessage] : [toolMessage];
 
     const threadId = this.getThreadId();
@@ -653,6 +687,14 @@ export class ChatService {
     }
 
     // If the signal fired between sync completion and dispatch, bail out.
+    if (signal?.aborted) return skip('aborted');
+
+    // Fix #11881: wait for the previous run (e.g. the one that requested this
+    // frontend tool) to finish before dispatching this tool-result run.
+    // Dispatching while the prior run still holds the thread triggers the agent
+    // server's per-thread concurrency guard (ConcurrencyException). This
+    // serializes the two runs instead of racing them.
+    await this.waitForActiveRunsToClear(requestId);
     if (signal?.aborted) return skip('aborted');
 
     // Continue the conversation with the tool result

@@ -268,7 +268,7 @@ export const EditDataset = withRouter(({ dataset, history, location }: EditDatas
       <HeaderControl
         controls={[
           {
-            description: (descriptionText as unknown) as string,
+            description: descriptionText as unknown as string,
             links: dataset.description
               ? undefined
               : [

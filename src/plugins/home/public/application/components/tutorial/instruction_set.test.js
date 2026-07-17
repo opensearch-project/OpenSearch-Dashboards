@@ -72,7 +72,7 @@ test('render', () => {
       replaceTemplateStrings={() => {}}
     />
   );
-  expect(component).toMatchSnapshot(); // eslint-disable-line
+  expect(component).toMatchSnapshot();
 });
 
 describe('statusCheckState', () => {
@@ -97,7 +97,7 @@ describe('statusCheckState', () => {
         statusCheckState={StatusCheckStates.FETCHING}
       />
     );
-    expect(component).toMatchSnapshot(); // eslint-disable-line
+    expect(component).toMatchSnapshot();
   });
 
   test('checking status', () => {
@@ -113,7 +113,7 @@ describe('statusCheckState', () => {
         statusCheckState={StatusCheckStates.FETCHING}
       />
     );
-    expect(component).toMatchSnapshot(); // eslint-disable-line
+    expect(component).toMatchSnapshot();
   });
 
   test('failed status check - error', () => {
@@ -129,7 +129,7 @@ describe('statusCheckState', () => {
         statusCheckState={StatusCheckStates.ERROR}
       />
     );
-    expect(component).toMatchSnapshot(); // eslint-disable-line
+    expect(component).toMatchSnapshot();
   });
 
   test('failed status check - no data', () => {
@@ -145,7 +145,7 @@ describe('statusCheckState', () => {
         statusCheckState={StatusCheckStates.NO_DATA}
       />
     );
-    expect(component).toMatchSnapshot(); // eslint-disable-line
+    expect(component).toMatchSnapshot();
   });
 
   test('successful status check', () => {
@@ -161,6 +161,6 @@ describe('statusCheckState', () => {
         statusCheckState={StatusCheckStates.HAS_DATA}
       />
     );
-    expect(component).toMatchSnapshot(); // eslint-disable-line
+    expect(component).toMatchSnapshot();
   });
 });
