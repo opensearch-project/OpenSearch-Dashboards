@@ -659,7 +659,8 @@ describe('PPLSearchInterceptor', () => {
 
       expect(mockPPLFilterUtils.getTimeFilterWhereClause).toHaveBeenCalledWith(
         '@timestamp',
-        mockTimeRange
+        mockTimeRange,
+        undefined
       );
       expect(result.query).toBe('source=test_index | WHERE @timestamp >= "2023-01-01" | fields *');
     });
