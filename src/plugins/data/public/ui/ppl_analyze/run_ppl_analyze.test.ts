@@ -98,6 +98,27 @@ describe('runPPLAnalyzeInBackground', () => {
       expect(setPPLAnalyzeLoading).toHaveBeenCalledWith(true);
     });
 
+    it('discards results from superseded requests (race condition guard)', async () => {
+      const slowFetch = new Promise<any>((resolve) =>
+        setTimeout(() => resolve({ profile: {} }), 50)
+      );
+      const fastFetch = Promise.resolve({ profile: { summary: { total_time_ms: 1 } } });
+      // First call — will resolve slowly (stale)
+      mockFetch.mockReturnValueOnce(slowFetch);
+      runPPLAnalyzeInBackground({ query: pplQuery, http: mockHttp, timefilter: mockTimefilter });
+      // Second call — resolves immediately (fresh)
+      mockFetch.mockReturnValueOnce(fastFetch);
+      runPPLAnalyzeInBackground({ query: pplQuery, http: mockHttp, timefilter: mockTimefilter });
+      await fastFetch;
+      await Promise.resolve();
+      await Promise.resolve();
+      // Only the fresh result should be committed
+      expect(setPPLAnalyzeResult).toHaveBeenCalledTimes(1);
+      expect(setPPLAnalyzeResult).toHaveBeenCalledWith(
+        expect.objectContaining({ response: { profile: { summary: { total_time_ms: 1 } } } })
+      );
+    });
+
     it('sets result on success', async () => {
       const response = { profile: { summary: { total_time_ms: 5 } } };
       mockFetch.mockResolvedValue(response);
@@ -162,6 +183,63 @@ describe('runPPLAnalyzeInBackground', () => {
       runPPLAnalyzeInBackground({ query: pplQuery, http: mockHttp, timefilter: mockTimefilter });
       const body = JSON.parse(mockFetch.mock.calls[0][0].body);
       expect(body.query).toBe('source=accounts');
+    });
+
+    it('does not inject time filter for describe commands', () => {
+      const describeQuery = {
+        query: 'describe accounts',
+        language: 'PPL',
+        dataset: { timeFieldName: '@timestamp', id: 'accounts', title: 'accounts', type: 'INDEX' },
+      };
+      runPPLAnalyzeInBackground({
+        query: describeQuery,
+        http: mockHttp,
+        timefilter: mockTimefilter,
+      });
+      const body = JSON.parse(mockFetch.mock.calls[0][0].body);
+      expect(body.query).toBe('describe accounts');
+      expect(body.query).not.toContain('WHERE');
+    });
+
+    it('does not inject time filter for show commands', () => {
+      const showQuery = {
+        query: 'show tables',
+        language: 'PPL',
+        dataset: { timeFieldName: '@timestamp', id: 'accounts', title: 'accounts', type: 'INDEX' },
+      };
+      runPPLAnalyzeInBackground({
+        query: showQuery,
+        http: mockHttp,
+        timefilter: mockTimefilter,
+      });
+      const body = JSON.parse(mockFetch.mock.calls[0][0].body);
+      expect(body.query).toBe('show tables');
+      expect(body.query).not.toContain('WHERE');
+    });
+
+    it('escapes backticks in timeFieldName to prevent PPL injection', () => {
+      const maliciousQuery = {
+        query: 'source=accounts',
+        language: 'PPL',
+        dataset: {
+          timeFieldName: 'field`; DROP TABLE accounts; --',
+          id: 'accounts',
+          title: 'accounts',
+          type: 'INDEX',
+        },
+      };
+      runPPLAnalyzeInBackground({
+        query: maliciousQuery,
+        http: mockHttp,
+        timefilter: mockTimefilter,
+      });
+      const body = JSON.parse(mockFetch.mock.calls[0][0].body);
+      // The backtick in the field name is doubled (escaped) so the entire value
+      // stays inside the identifier quotes as a single token — the semicolon and
+      // subsequent text cannot break out into a separate PPL command.
+      expect(body.query).toContain('`field``; DROP TABLE accounts; --`');
+      // Confirm the raw unescaped backtick form is NOT present (which would have closed the identifier early)
+      expect(body.query).not.toContain('`field`; DROP TABLE');
     });
   });
 });

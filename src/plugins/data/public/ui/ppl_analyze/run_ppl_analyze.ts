@@ -13,6 +13,11 @@ import {
   isPPLAnalyzeOpen,
 } from '../../query/ppl_analyze_state';
 
+// Monotonically increasing counter used to discard out-of-order responses.
+// Each call captures the current value; only the response matching the latest
+// call is committed to analyzeResult$.
+let latestRequestId = 0;
+
 export function runPPLAnalyzeInBackground({
   query,
   http,
@@ -31,20 +36,30 @@ export function runPPLAnalyzeInBackground({
   let injectedTimeFilter: string | undefined;
   const timeFieldName = query.dataset?.timeFieldName;
 
-  if (timeFieldName) {
+  // Only inject a time filter for search queries (source=... or search source=...).
+  // Non-search commands like describe, show, or queries that already contain
+  // a WHERE clause in the first position are left untouched to avoid producing
+  // syntactically invalid PPL.
+  const normalised = queryString.toLowerCase().replace(/\s/g, '');
+  const isSearchQuery = normalised.startsWith('source=') || normalised.startsWith('searchsource=');
+
+  if (timeFieldName && isSearchQuery) {
     const timeRange = timefilter.getTime();
     const fromMoment = dateMath.parse(timeRange.from);
     const toMoment = dateMath.parse(timeRange.to, { roundUp: true });
     if (fromMoment && toMoment) {
       const fromStr = fromMoment.utc().format('YYYY-MM-DD HH:mm:ss.SSS');
       const toStr = toMoment.utc().format('YYYY-MM-DD HH:mm:ss.SSS');
-      injectedTimeFilter = `WHERE \`${timeFieldName}\` >= '${fromStr}' AND \`${timeFieldName}\` <= '${toStr}'`;
+      // Escape backticks in the field name to prevent PPL injection via identifier quoting
+      const safeFieldName = timeFieldName.replace(/`/g, '``');
+      injectedTimeFilter = `WHERE \`${safeFieldName}\` >= '${fromStr}' AND \`${safeFieldName}\` <= '${toStr}'`;
       const commands = queryString.split('|');
       commands.splice(1, 0, ` ${injectedTimeFilter} `);
       queryString = commands.map((cmd) => cmd.trim()).join(' | ');
     }
   }
 
+  const requestId = ++latestRequestId;
   setPPLAnalyzeLoading(true);
   http
     .fetch({
@@ -56,6 +71,8 @@ export function runPPLAnalyzeInBackground({
       }),
     })
     .then((result) => {
+      // Discard stale responses from superseded requests
+      if (requestId !== latestRequestId) return;
       setPPLAnalyzeResult({
         query: query.query as string,
         response: result,
@@ -63,6 +80,7 @@ export function runPPLAnalyzeInBackground({
       });
     })
     .catch(() => {
+      if (requestId !== latestRequestId) return;
       setPPLAnalyzeLoading(false);
     });
 }

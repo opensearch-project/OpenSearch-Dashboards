@@ -5,7 +5,7 @@
 
 import '../explore_page.scss';
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { EuiErrorBoundary, EuiLoadingSpinner, EuiPage, EuiPageBody, EuiText } from '@elastic/eui';
 import { AppMountParameters, HeaderVariant } from 'opensearch-dashboards/public';
 import { useDispatch, useSelector } from 'react-redux';
@@ -93,7 +93,11 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
   useHeaderVariants(services, HeaderVariant.APPLICATION);
 
   const { isOpen, setIsOpen, hasResult, isLoading: isAnalyzeLoading } = useAnalyzePanelState();
-  const analyzeResult = getPPLAnalyzeResult$().getValue();
+  const [analyzeResult, setAnalyzeResult] = useState(() => getPPLAnalyzeResult$().getValue());
+  useEffect(() => {
+    const sub = getPPLAnalyzeResult$().subscribe(setAnalyzeResult);
+    return () => sub.unsubscribe();
+  }, []);
   const queryState = useSelector((state: RootState) => state.query);
   const isPPLAnalyzeEnabled = !!services.capabilities.explore?.pplAnalyzeEnabled;
 

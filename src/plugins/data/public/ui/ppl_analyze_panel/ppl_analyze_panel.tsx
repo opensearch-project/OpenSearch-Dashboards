@@ -483,24 +483,25 @@ function OperatorPlanSection({
               borderLeft: '1px solid var(--oui-color-light-shade, #293847)',
             }}
           >
-            {ticks.map((t, i) =>
-              i === 0 || i === ticks.length - 1 ? null : (
-                <span
-                  key={i}
-                  style={{
-                    position: 'absolute',
-                    left: `${(t / totalTimeMs) * 100}%`,
-                    transform: 'translateX(-50%)',
-                    fontSize: 10,
-                    color: 'var(--oui-color-medium-shade, #8D98A3)',
-                    top: 8,
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {t.toFixed(0)} ms
-                </span>
-              )
-            )}
+            {totalTimeMs > 0 &&
+              ticks.map((t, i) =>
+                i === 0 || i === ticks.length - 1 ? null : (
+                  <span
+                    key={i}
+                    style={{
+                      position: 'absolute',
+                      left: `${(t / totalTimeMs) * 100}%`,
+                      transform: 'translateX(-50%)',
+                      fontSize: 10,
+                      color: 'var(--oui-color-medium-shade, #8D98A3)',
+                      top: 8,
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {t.toFixed(0)} ms
+                  </span>
+                )
+              )}
           </div>
         </div>
         {/* Node rows */}
@@ -648,19 +649,20 @@ function OperatorPlanSection({
                     borderLeft: '1px solid var(--oui-color-light-shade, #293847)',
                   }}
                 >
-                  {ticks.slice(1, -1).map((t, i) => (
-                    <div
-                      key={i}
-                      style={{
-                        position: 'absolute',
-                        left: `${(t / totalTimeMs) * 100}%`,
-                        top: 0,
-                        bottom: 0,
-                        width: 1,
-                        backgroundColor: 'var(--oui-color-light-shade, #293847)',
-                      }}
-                    />
-                  ))}
+                  {totalTimeMs > 0 &&
+                    ticks.slice(1, -1).map((t, i) => (
+                      <div
+                        key={i}
+                        style={{
+                          position: 'absolute',
+                          left: `${(t / totalTimeMs) * 100}%`,
+                          top: 0,
+                          bottom: 0,
+                          width: 1,
+                          backgroundColor: 'var(--oui-color-light-shade, #293847)',
+                        }}
+                      />
+                    ))}
                   <div
                     style={{
                       position: 'absolute',

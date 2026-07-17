@@ -41,10 +41,16 @@ export function registerPPLAnalyzeRoute(router: IRouter, logger: Logger) {
         const errorBody = error.body || error.meta?.body;
         logger.error(`PPL analyze error detail: ${JSON.stringify(errorBody)}`);
         const statusCode = error.statusCode || error.meta?.statusCode || 500;
-        const detail =
-          (typeof errorBody === 'string' ? JSON.parse(errorBody) : errorBody)?.error ||
-          error.message ||
-          'PPL analyze request failed';
+        let parsedBody: any = errorBody;
+        if (typeof errorBody === 'string') {
+          try {
+            parsedBody = JSON.parse(errorBody);
+          } catch {
+            // Not JSON (e.g. HTML error page or plain-text proxy error) — use as-is
+            parsedBody = null;
+          }
+        }
+        const detail = parsedBody?.error || error.message || 'PPL analyze request failed';
         return response.custom({
           statusCode: statusCode === 500 ? 503 : statusCode,
           body: JSON.stringify(detail),
