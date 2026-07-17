@@ -39,6 +39,31 @@
     letter-spacing: 0.06em;
   }
 
+  // Selection summary bar: row 1 = "N indexes selected · New dataset {pattern}" + Clear all;
+  // row 2 = the removable index pills. Sticks to the top so the selection stays visible on scroll.
+  &__selectionBar {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    margin-bottom: $euiSizeS;
+    padding: $euiSizeS;
+    border-radius: 8px;
+    background-color: $euiColorLightestShade;
+  }
+
+  // Amber warning line (e.g. no common time field) between the summary row and the pills.
+  &__selectionWarning {
+    margin-top: $euiSizeXS;
+  }
+
+  // Row 2: pills wrap onto their own line, comfortably spaced below the summary row.
+  &__selectionPills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $euiSizeXS;
+    margin-top: $euiSizeXS;
+  }
+
   // The collapsed "N indexes with no recent data" drawer at the bottom of the list.
   &__deadGroup {
     margin-top: $euiSizeM;
@@ -213,8 +238,8 @@
   &__timeSelect {
     max-width: 150px;
     font-size: 12px;
-    padding-top: 2px;
-    padding-bottom: 2px;
+    padding-top: 0;
+    padding-bottom: 0;
   }
 
   // Capsule (pill) wrapper around the time control. We can't round the EUI form-control layout
@@ -228,6 +253,8 @@
     display: inline-flex;
     align-items: center;
     max-width: 150px;
+    height: 24px; // compact fixed height for the header chip
+    border: $euiBorderThin; // pill outline (the inner control's border is clipped by overflow:hidden)
     border-radius: $euiSizeM; // 12px — rounded corners that don't chop the flush right edge
     overflow: hidden;
   }

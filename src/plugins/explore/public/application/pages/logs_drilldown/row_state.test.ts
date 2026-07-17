@@ -27,12 +27,65 @@ describe('deriveRowState', () => {
     expect(deriveRowState({ ...base, docsCount: undefined })).toBe(LogRowState.LOADING);
   });
 
-  it('NO_RECENT requires a resolved histogram summing to zero', () => {
+  it('NO_RECENT when a resolved histogram sums to zero', () => {
     expect(deriveRowState({ ...base, docsCount: 42, hasResult: true, histogramTotalsSum: 0 })).toBe(
       LogRowState.NO_RECENT
     );
     // No result yet → still loading, not no-recent.
     expect(deriveRowState({ ...base, docsCount: 42, hasResult: false })).toBe(LogRowState.LOADING);
+  });
+
+  it('falls back to the preview row count when the (best-effort) histogram did not resolve', () => {
+    // Histogram absent (undefined total) but the time-bounded preview came back with 0 rows → the
+    // index genuinely has no recent data. This is the deterministic fallback that stops the row from
+    // flip-flopping between NO_RECENT and FULL depending on whether the histogram query succeeded.
+    expect(
+      deriveRowState({
+        ...base,
+        docsCount: 42,
+        hasResult: true,
+        histogramTotalsSum: undefined,
+        previewRowCount: 0,
+      })
+    ).toBe(LogRowState.NO_RECENT);
+    // Histogram absent but the preview has rows → FULL.
+    expect(
+      deriveRowState({
+        ...base,
+        docsCount: 42,
+        hasResult: true,
+        histogramTotalsSum: undefined,
+        previewRowCount: 5,
+      })
+    ).toBe(LogRowState.FULL);
+  });
+
+  it('the histogram total wins over the preview count when both are present', () => {
+    // Histogram says there is data → FULL even if the preview page happened to be empty.
+    expect(
+      deriveRowState({
+        ...base,
+        docsCount: 42,
+        hasResult: true,
+        histogramTotalsSum: 100,
+        previewRowCount: 0,
+      })
+    ).toBe(LogRowState.FULL);
+    // Histogram says zero → NO_RECENT even if a stray preview row exists.
+    expect(
+      deriveRowState({
+        ...base,
+        docsCount: 42,
+        hasResult: true,
+        histogramTotalsSum: 0,
+        previewRowCount: 3,
+      })
+    ).toBe(LogRowState.NO_RECENT);
+  });
+
+  it('resolved with neither histogram nor preview counts → FULL (safe default, not dead)', () => {
+    // Both undefined (e.g. non-time index result): don't demote to the dead group on a missing signal.
+    expect(deriveRowState({ ...base, docsCount: 42, hasResult: true })).toBe(LogRowState.FULL);
   });
 
   it('LOADING when unresolved and not otherwise classified', () => {

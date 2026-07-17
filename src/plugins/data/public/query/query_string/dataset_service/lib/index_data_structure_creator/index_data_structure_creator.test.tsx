@@ -17,9 +17,10 @@ jest.mock('./use_index_fetcher', () => ({
 
 // Mock the UnifiedIndexSelector component
 jest.mock('./unified_index_selector', () => ({
-  UnifiedIndexSelector: ({ selectedItems, onSelectionChange }: any) => (
+  UnifiedIndexSelector: ({ selectedItems, onSelectionChange, autoFocus }: any) => (
     <div>
       <div data-test-subj="unified-selector">Unified Index Selector</div>
+      <div data-test-subj="unified-selector-autofocus">{String(autoFocus)}</div>
       <div data-test-subj="selected-count">{selectedItems.length}</div>
       <button
         data-test-subj="add-single-index"
@@ -113,6 +114,16 @@ describe('IndexDataStructureCreator', () => {
     it('starts with no selected items', () => {
       const { getByTestId } = renderComponent();
       expect(getByTestId('selected-count')).toHaveTextContent('0');
+    });
+
+    it('leaves autoFocus undefined by default (keeps the selector default focus-on-mount)', () => {
+      const { getByTestId } = renderComponent();
+      expect(getByTestId('unified-selector-autofocus')).toHaveTextContent('undefined');
+    });
+
+    it('threads an explicit autoFocus=false down to the unified index selector', () => {
+      const { getByTestId } = renderComponent({ autoFocus: false });
+      expect(getByTestId('unified-selector-autofocus')).toHaveTextContent('false');
     });
   });
 

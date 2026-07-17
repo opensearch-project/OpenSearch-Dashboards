@@ -37,6 +37,10 @@ interface DeriveArgs {
   hasError: boolean;
   /** Sum of the histogram severity totals for the selected window (undefined = no histogram yet). */
   histogramTotalsSum?: number;
+  /** Count of preview log lines returned for the selected window (undefined = no preview yet).
+   *  The histogram is best-effort and can fail independently; the time-bounded preview is the
+   *  authoritative "has recent data?" signal so the row-state stays deterministic when it doesn't. */
+  previewRowCount?: number;
 }
 
 /**
@@ -45,8 +49,11 @@ interface DeriveArgs {
  *
  * Rationale for the order: a structural fact (no time field) trumps everything; a hard failure
  * (error) trumps emptiness; a definitively-empty index (docs.count === 0, known up-front from
- * cat.indices) trumps a window-empty one; "no events in range" only applies once a histogram has
- * come back with a zero total; otherwise we're still loading, and finally the happy full card.
+ * cat.indices) trumps a window-empty one; "no events in range" applies once EITHER the histogram
+ * has come back with a zero total OR the (time-bounded) preview came back with zero rows — the
+ * histogram is best-effort and can fail independently, so relying on it alone made a window-empty
+ * index flip between "no recent data" and the full list across loads; otherwise we're still loading,
+ * and finally the happy full card.
  */
 export const deriveRowState = ({
   kind,
@@ -55,16 +62,21 @@ export const deriveRowState = ({
   hasResult,
   hasError,
   histogramTotalsSum,
+  previewRowCount,
 }: DeriveArgs): LogRowState => {
   if (kind === 'index' && isNoTimeField) return LogRowState.NO_TIME_FIELD;
   if (hasError) return LogRowState.ERROR;
   // Empty-index is known synchronously from cat.indices — only ever on an explicit 0, never on
   // `undefined` (remote/closed indices report no count and must not be mistaken for empty).
   if (docsCount === 0) return LogRowState.EMPTY_INDEX;
-  // "No events in range" requires a resolved histogram whose totals sum to exactly zero.
-  if (hasResult && histogramTotalsSum === 0) return LogRowState.NO_RECENT;
   if (!hasResult) return LogRowState.LOADING;
-  return LogRowState.FULL;
+  // Resolved: decide "no events in range" from whichever in-window signal is available. Prefer the
+  // histogram total; if the (best-effort) histogram didn't resolve, fall back to the preview row
+  // count. Relying on the histogram alone made a window-empty index flip between NO_RECENT and the
+  // full list depending on whether that query happened to succeed.
+  const emptyInRange =
+    histogramTotalsSum !== undefined ? histogramTotalsSum === 0 : previewRowCount === 0;
+  return emptyInRange ? LogRowState.NO_RECENT : LogRowState.FULL;
 };
 
 /**

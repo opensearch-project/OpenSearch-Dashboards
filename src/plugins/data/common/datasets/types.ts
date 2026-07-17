@@ -63,6 +63,12 @@ export interface DataStructureCreatorProps<FetchOptions = unknown> {
    * any title containing `*` is treated as a wildcard.
    */
   initialSelectedItems?: string[];
+  /**
+   * Auto-focus the creator's search input on mount (opens the index dropdown). Default true
+   * (today's behavior); a caller that opens the creator pre-seeded can pass false so it doesn't
+   * grab focus / pop the dropdown immediately.
+   */
+  autoFocus?: boolean;
 }
 
 /**

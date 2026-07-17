@@ -60,12 +60,18 @@ export const useDatasetList = ({
             const parentId = child.parent?.id ?? '';
             return parentId === activeId;
           })
-          .map((child) => ({
-            name: child.title,
-            kind: 'dataset' as const,
-            datasetId: child.id,
-            timeFieldName: (child.meta as { timeFieldName?: string } | undefined)?.timeFieldName,
-          }));
+          .map((child) => {
+            const meta = child.meta as { timeFieldName?: string; displayName?: string } | undefined;
+            return {
+              name: child.title,
+              // Friendly name (index-pattern displayName) → shown as the card label; the pattern
+              // (`name`) stays the identity for coverage/activation/create-seeding.
+              displayName: meta?.displayName || undefined,
+              kind: 'dataset' as const,
+              datasetId: child.id,
+              timeFieldName: meta?.timeFieldName,
+            };
+          });
 
         if (requestId === requestIdRef.current) setAll(datasets);
       } catch (e) {

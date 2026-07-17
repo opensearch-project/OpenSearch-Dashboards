@@ -27,13 +27,19 @@ const makeServices = (typeRegistered = true) =>
 
 // Build a children result where each child carries a parent data-source id + a time field.
 const children = (
-  rows: Array<{ title: string; id: string; parentId?: string; timeFieldName?: string }>
+  rows: Array<{
+    title: string;
+    id: string;
+    parentId?: string;
+    timeFieldName?: string;
+    displayName?: string;
+  }>
 ) => ({
   children: rows.map((r) => ({
     title: r.title,
     id: r.id,
     parent: r.parentId != null ? { id: r.parentId } : undefined,
-    meta: { timeFieldName: r.timeFieldName },
+    meta: { timeFieldName: r.timeFieldName, displayName: r.displayName },
   })),
 });
 
@@ -61,9 +67,36 @@ describe('useDatasetList', () => {
     render(<Harness services={makeServices()} search="" />);
     await waitFor(() => expect(result.loading).toBe(false));
     expect(result.datasets).toEqual([
-      { name: 'logs-app-*', kind: 'dataset', datasetId: 'ds-logs', timeFieldName: '@timestamp' },
-      { name: 'orders-*', kind: 'dataset', datasetId: 'ds-orders', timeFieldName: undefined },
+      {
+        name: 'logs-app-*',
+        displayName: undefined,
+        kind: 'dataset',
+        datasetId: 'ds-logs',
+        timeFieldName: '@timestamp',
+      },
+      {
+        name: 'orders-*',
+        displayName: undefined,
+        kind: 'dataset',
+        datasetId: 'ds-orders',
+        timeFieldName: undefined,
+      },
     ]);
+  });
+
+  it('maps the friendly displayName when the index-pattern has one (pattern stays as name)', async () => {
+    patternFetch.mockResolvedValue(
+      children([
+        { title: 'nginx-access-*', id: 'ds1', displayName: 'Nginx access logs' },
+        { title: 'orders-*', id: 'ds2' }, // no displayName → undefined
+      ])
+    );
+    render(<Harness services={makeServices()} search="" />);
+    await waitFor(() => expect(result.loading).toBe(false));
+    expect(result.datasets[0]).toEqual(
+      expect.objectContaining({ name: 'nginx-access-*', displayName: 'Nginx access logs' })
+    );
+    expect(result.datasets[1].displayName).toBeUndefined();
   });
 
   it('scopes to the active data source id (MDS), excluding datasets from other sources', async () => {

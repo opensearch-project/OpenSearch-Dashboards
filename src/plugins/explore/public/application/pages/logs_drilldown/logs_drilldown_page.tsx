@@ -14,6 +14,7 @@ import {
   EuiFieldSearch,
   EuiSuperDatePicker,
   EuiSpacer,
+  EuiToolTip,
   OnTimeChangeProps,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
@@ -59,6 +60,20 @@ export const LogsDrilldownPage: React.FC<Props> = ({ services, setHeaderActionMe
   );
   const dataSource = selectedDataSource;
   const dataSourceId = dataSource?.id;
+
+  // Default the time range to the last 15 minutes on mount UNLESS this drilldown's own URL already
+  // pins a range (`_g.time`). The timefilter is a shared singleton, so without this the drilldown
+  // would inherit whatever (possibly very wide) range the Logs Query page had — flooding the cluster
+  // with heavy per-card queries on first load. A user-picked range persists to `_g` (via the sync
+  // below), so it survives reloads and is respected here. Runs once, before the URL sync starts.
+  useEffect(() => {
+    const urlTime = urlStateStorage?.get<{ time?: unknown }>('_g')?.time;
+    if (!urlTime) {
+      timefilter.setTime({ from: 'now-15m', to: 'now' });
+    }
+    // Mount-only: we intentionally read the URL once and don't re-run on range changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Sync the global time range (`_g`) with the URL so it survives a hard reload and stays shareable
   // — the time range is already shared across apps via the singleton timefilter; this adds URL
@@ -144,17 +159,6 @@ export const LogsDrilldownPage: React.FC<Props> = ({ services, setHeaderActionMe
   // refreshKey changes when the range OR the manual-refresh nonce changes → RowsView re-fetches.
   const refreshKey = `${time.from}|${time.to}|${refreshNonce}`;
 
-  // Resolve the picked range to epoch-ms bounds for the "No events in the last {range}" copy.
-  // Depends on time.from/time.to intentionally — getBounds() reflects the range but isn't itself a dep.
-  const { rangeFrom, rangeTo } = useMemo(() => {
-    const bounds = timefilter.getBounds();
-    return {
-      rangeFrom: bounds?.min?.valueOf() ?? Date.now() - 15 * 60 * 1000,
-      rangeTo: bounds?.max?.valueOf() ?? Date.now(),
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [timefilter, time.from, time.to]);
-
   const onTimeChange = useCallback(
     ({ start, end }: OnTimeChangeProps) => {
       timefilter.setTime({ from: start, to: end });
@@ -233,18 +237,30 @@ export const LogsDrilldownPage: React.FC<Props> = ({ services, setHeaderActionMe
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton
-            size="s"
-            fill
-            isDisabled={!batchAction}
-            onClick={() => batchAction?.onClick()}
-            data-test-subj="logsExploreToolbarBatch"
+          <EuiToolTip
+            // Only explain the disabled state; when enabled the button label is self-explanatory.
+            // EuiToolTip anchors on its wrapper span, so it still shows over the disabled button.
+            content={
+              batchAction
+                ? undefined
+                : i18n.translate('explore.logsDrilldown.rows.createDatasetDisabledTip', {
+                    defaultMessage: 'Select one or more indexes to create a dataset',
+                  })
+            }
           >
-            {batchAction?.label ??
-              i18n.translate('explore.logsDrilldown.rows.createDataset', {
-                defaultMessage: 'Create dataset',
-              })}
-          </EuiButton>
+            <EuiButton
+              size="s"
+              fill
+              isDisabled={!batchAction}
+              onClick={() => batchAction?.onClick()}
+              data-test-subj="logsExploreToolbarBatch"
+            >
+              {batchAction?.label ??
+                i18n.translate('explore.logsDrilldown.rows.createDataset', {
+                  defaultMessage: 'Create dataset',
+                })}
+            </EuiButton>
+          </EuiToolTip>
         </EuiFlexItem>
         {/* When there's no app header to portal into (embedded / tests), keep the picker inline. */}
         {!setHeaderActionMenu && (
@@ -283,8 +299,6 @@ export const LogsDrilldownPage: React.FC<Props> = ({ services, setHeaderActionMe
           classify={classify}
           getCached={getCached}
           onBrushTime={onBrushTime}
-          rangeFrom={rangeFrom}
-          rangeTo={rangeTo}
           onBatchActionChange={setBatchAction}
         />
       ) : hasAnyDataSource === false ? (
@@ -308,6 +322,18 @@ export const LogsDrilldownPage: React.FC<Props> = ({ services, setHeaderActionMe
               })}
             </p>
           }
+          actions={[
+            <EuiButton
+              key="associate"
+              fill
+              onClick={() => services.core.application.navigateToApp('dataSources')}
+              data-test-subj="logsDrilldownAssociateDataSource"
+            >
+              {i18n.translate('explore.logsDrilldown.noDataSource.associate', {
+                defaultMessage: 'Associate a data source',
+              })}
+            </EuiButton>,
+          ]}
         />
       ) : (
         // Data sources exist but none is selected yet → prompt the user to pick one from the toolbar

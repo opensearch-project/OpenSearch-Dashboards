@@ -32,8 +32,10 @@ interface Props {
   chartId: string;
 }
 
-// Blue for the no-severity single-series count (matches the debug/blue status color).
-const SINGLE_SERIES_BUCKET = 'debug' as const;
+// Blue for the no-severity single-series count (matches the debug/blue status color). Exported so
+// the legend colors the "logs" total the SAME blue as the bars (not the grey 'unknown' color that
+// normalizeSeverity('count') would otherwise yield).
+export const SINGLE_SERIES_BUCKET = 'debug' as const;
 const SEVERITY_STACK_ORDER: Record<string, number> = {
   error: 0,
   warn: 1,
@@ -84,6 +86,11 @@ export const HistogramChart: React.FC<Props> = ({
   useEffect(() => {
     const inst = instanceRef.current;
     if (!inst || inst.isDisposed()) return;
+    // For the no-severity single series, `createHistogramSpec` colors the bars from `customColor`
+    // (NOT `colorPalette`, which only applies to the multi-series path). Pass our single blue as
+    // customColor so the bars match the legend dot exactly (both severityColor(SINGLE_SERIES_BUCKET));
+    // otherwise the bars fall back to the generic category color and mismatch the dot.
+    const isSingleSeries = palette.length === 1;
     const spec = createHistogramSpec(chart, {
       chartType: 'HistogramBar',
       timeZone: getTimezone(services.uiSettings),
@@ -92,6 +99,7 @@ export const HistogramChart: React.FC<Props> = ({
       yAxisLabel: 'Count',
       useSmartDateFormat: true,
       colorPalette: palette,
+      ...(isSingleSeries ? { customColor: palette[0] } : {}),
     });
     // The shared spec draws its OWN ECharts legend for multi-series charts. We render a richer
     // custom legend (with humanized totals) below the chart, so suppress the built-in one to avoid a

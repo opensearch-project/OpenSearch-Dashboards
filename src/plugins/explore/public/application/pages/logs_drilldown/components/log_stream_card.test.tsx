@@ -51,7 +51,6 @@ const baseProps = {
   isTimeBased: true,
   rowState: LogRowState.FULL,
   timeFieldName: '@timestamp',
-  rangeLabel: '15 minutes',
   primaryLabel: 'Create dataset',
   onPrimary: jest.fn(),
   checked: false,
@@ -165,6 +164,34 @@ describe('LogStreamCard', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('shows the friendly label when provided, falling back to the name (pattern) otherwise', () => {
+    const { rerender } = render(
+      <LogStreamCard
+        {...baseProps}
+        kind="dataset"
+        name="nginx-access-*"
+        label="Nginx access logs"
+        primaryLabel="Query"
+        data={withData({ preview: { columns: [], rows: [] } })}
+      />
+    );
+    // The friendly label shows, not the raw pattern.
+    expect(screen.getByTestId('logsExploreCardNameLink')).toHaveTextContent('Nginx access logs');
+    expect(screen.getByTestId('logsExploreCardNameLink')).not.toHaveTextContent('nginx-access-*');
+    // No label → falls back to the name (pattern).
+    rerender(
+      <LogStreamCard
+        {...baseProps}
+        kind="dataset"
+        name="nginx-access-*"
+        label={undefined}
+        primaryLabel="Query"
+        data={withData({ preview: { columns: [], rows: [] } })}
+      />
+    );
+    expect(screen.getByTestId('logsExploreCardNameLink')).toHaveTextContent('nginx-access-*');
+  });
+
   it('shows the cross-cluster (remote) token for a remote index', () => {
     render(
       <LogStreamCard
@@ -178,7 +205,7 @@ describe('LogStreamCard', () => {
 
   // ---- compact variants ----
 
-  it('NO_RECENT: compact row with "No events in the last {range}" + actionable name + checkbox', () => {
+  it('NO_RECENT: compact row with "no events in the selected time range" + actionable name + checkbox', () => {
     const onPrimary = jest.fn();
     render(
       <LogStreamCard
@@ -192,14 +219,32 @@ describe('LogStreamCard', () => {
       />
     );
     const row = screen.getByTestId('logsExploreCardNoRecent');
-    expect(row).toHaveTextContent('No events in the last 15 minutes');
+    expect(row).toHaveTextContent('No events in the selected time range');
     // No full body.
     expect(screen.queryByTestId('logsExploreCardLogs')).not.toBeInTheDocument();
     expect(screen.queryByTestId('mock-severity-histogram')).not.toBeInTheDocument();
-    // Name still actionable, checkbox present.
+    // Name still actionable, checkbox present (this is an index).
     fireEvent.click(screen.getByTestId('logsExploreCardNameLink'));
     expect(onPrimary).toHaveBeenCalled();
     expect(screen.getByRole('checkbox')).toBeInTheDocument();
+  });
+
+  it('NO_RECENT: a DATASET in the no-recent-data group has NO checkbox', () => {
+    render(
+      <LogStreamCard
+        {...baseProps}
+        kind="dataset"
+        rowState={LogRowState.NO_RECENT}
+        onPrimary={jest.fn()}
+        data={withData({
+          histogram: { series: [], intervalMs: 60000, from: 0, to: 60000, totals: [] },
+          preview: { columns: [], rows: [] },
+        })}
+      />
+    );
+    // Only raw indexes are selectable; a dataset compact row must not render a selection checkbox.
+    expect(screen.getByTestId('logsExploreCardNoRecent')).toBeInTheDocument();
+    expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
   });
 
   it('EMPTY_INDEX: "No documents yet" + count/age, muted name (no link), no checkbox', () => {
@@ -410,7 +455,9 @@ describe('LogStreamCard', () => {
       // EuiToolTip renders its content into the DOM on hover.
       fireEvent.mouseOver(screen.getByTestId(`logsExploreCardHealth-${baseProps.name}`));
       const tip = await screen.findByTestId(`logsExploreCardHealthTip-${baseProps.name}`);
-      expect(tip).toHaveTextContent('Index health: Healthy');
+      // The tooltip shows the RAW cat.indices health status as-is (not the pill's "Healthy" label).
+      expect(tip).toHaveTextContent('Status: green');
+      expect(tip).not.toHaveTextContent('Healthy');
       expect(tip).toHaveTextContent('Store size: 2.4gb');
       expect(tip).toHaveTextContent('Primaries: 5');
       expect(tip).toHaveTextContent('Replicas: 1');

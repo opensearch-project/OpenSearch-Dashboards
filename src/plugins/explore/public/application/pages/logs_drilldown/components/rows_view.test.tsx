@@ -211,7 +211,7 @@ describe('RowsView', () => {
     expect(mockCreate).toHaveBeenCalledWith(expect.objectContaining({ pattern: 'orders-*' }));
   });
 
-  it('multi-select reports a Create-dataset batch action up (wildcard union), no selection bar', () => {
+  it('multi-select reports a Create-dataset batch action up (wildcard union)', () => {
     mockIndexList.mockReturnValue({
       items: [
         { name: 'app-svc-1', kind: 'index' },
@@ -223,7 +223,7 @@ describe('RowsView', () => {
     });
     mockDatasets.mockReturnValue({ datasets: [], loading: false });
     renderRows();
-    // The old sticky selection bar is gone.
+    // The selection bar only appears once something is checked.
     expect(screen.queryByTestId('logsExploreSelectionBar')).not.toBeInTheDocument();
     fireEvent.click(screen.getByTestId('check-app-svc-1'));
     fireEvent.click(screen.getByTestId('check-app-svc-2'));
@@ -233,6 +233,120 @@ describe('RowsView', () => {
     );
     lastBatchAction.onClick();
     expect(mockCreate).toHaveBeenCalledWith(expect.objectContaining({ pattern: 'app-svc-*' }));
+  });
+
+  it('shows a selection bar with the checked index names + Clear all deselects them', () => {
+    mockIndexList.mockReturnValue({
+      items: [
+        { name: 'app-svc-1', kind: 'index' },
+        { name: 'app-svc-2', kind: 'index' },
+      ],
+      loading: false,
+      hasNext: false,
+      loadMore: jest.fn(),
+    });
+    mockDatasets.mockReturnValue({ datasets: [], loading: false });
+    renderRows();
+
+    fireEvent.click(screen.getByTestId('check-app-svc-1'));
+    fireEvent.click(screen.getByTestId('check-app-svc-2'));
+
+    // The bar lists both checked index names as pills.
+    const bar = screen.getByTestId('logsExploreSelectionBar');
+    expect(bar).toHaveTextContent('2 indexes selected');
+    expect(screen.getByTestId('logsExploreSelectionPill-app-svc-1')).toBeInTheDocument();
+    expect(screen.getByTestId('logsExploreSelectionPill-app-svc-2')).toBeInTheDocument();
+    // Uncovered indexes → the bar previews the proposed create-dataset wildcard family.
+    expect(screen.getByTestId('logsExploreSelectionWildcard')).toHaveTextContent('app-svc-*');
+
+    // Clear all deselects everything → the bar disappears and the batch action clears.
+    fireEvent.click(screen.getByTestId('logsExploreSelectionClear'));
+    expect(screen.queryByTestId('logsExploreSelectionBar')).not.toBeInTheDocument();
+    expect(lastBatchAction).toBeNull();
+  });
+
+  it('hides the proposed wildcard when the selection is all covered by one dataset (a Query, not a create)', () => {
+    mockDatasets.mockReturnValue({
+      datasets: [
+        { name: 'logs-app-*', kind: 'dataset', datasetId: 'ds1', timeFieldName: '@timestamp' },
+      ],
+      loading: false,
+    });
+    mockIndexList.mockReturnValue({
+      items: [
+        { name: 'logs-app-2026.07.08', kind: 'index' },
+        { name: 'logs-app-2026.07.09', kind: 'index' },
+      ],
+      loading: false,
+      hasNext: false,
+      loadMore: jest.fn(),
+    });
+    renderRows();
+    fireEvent.click(screen.getByTestId('check-logs-app-2026.07.08'));
+    fireEvent.click(screen.getByTestId('check-logs-app-2026.07.09'));
+    // These resolve to Query (via the covering dataset), so there's no NEW dataset wildcard to show.
+    expect(screen.getByTestId('logsExploreSelectionBar')).toBeInTheDocument();
+    expect(screen.queryByTestId('logsExploreSelectionWildcard')).not.toBeInTheDocument();
+  });
+
+  it('warns when the selected indexes share no common time field', () => {
+    mockDatasets.mockReturnValue({ datasets: [], loading: false });
+    mockIndexList.mockReturnValue({
+      items: [
+        { name: 'app-logs', kind: 'index' },
+        { name: 'telemetry', kind: 'index' },
+      ],
+      loading: false,
+    });
+    // Per-index classification: app-logs → @timestamp, telemetry → observedTimestamp (no overlap).
+    renderRows({
+      getCached: (name: string) =>
+        name === 'telemetry'
+          ? {
+              classification: IndexClassification.TIME_BASED,
+              timeFieldName: 'observedTimestamp',
+              dateFields: ['observedTimestamp'],
+            }
+          : {
+              classification: IndexClassification.TIME_BASED,
+              timeFieldName: '@timestamp',
+              dateFields: ['@timestamp'],
+            },
+    });
+    fireEvent.click(screen.getByTestId('check-app-logs'));
+    fireEvent.click(screen.getByTestId('check-telemetry'));
+    expect(screen.getByTestId('logsExploreSelectionNoCommonTimeField')).toHaveTextContent(
+      'No common time field across the selected indexes'
+    );
+  });
+
+  it('does NOT warn when the selected indexes share a common time field', () => {
+    mockDatasets.mockReturnValue({ datasets: [], loading: false });
+    mockIndexList.mockReturnValue({
+      items: [
+        { name: 'a-logs', kind: 'index' },
+        { name: 'b-logs', kind: 'index' },
+      ],
+      loading: false,
+    });
+    // Both have @timestamp (a-logs also has event.ingested) → common {@timestamp} → no warning.
+    renderRows({
+      getCached: (name: string) =>
+        name === 'a-logs'
+          ? {
+              classification: IndexClassification.TIME_BASED,
+              timeFieldName: '@timestamp',
+              dateFields: ['@timestamp', 'event.ingested'],
+            }
+          : {
+              classification: IndexClassification.TIME_BASED,
+              timeFieldName: '@timestamp',
+              dateFields: ['@timestamp'],
+            },
+    });
+    fireEvent.click(screen.getByTestId('check-a-logs'));
+    fireEvent.click(screen.getByTestId('check-b-logs'));
+    expect(screen.queryByTestId('logsExploreSelectionNoCommonTimeField')).not.toBeInTheDocument();
   });
 
   it('multi-select of indexes all covered by the SAME dataset reports a Query batch action', () => {
@@ -294,6 +408,35 @@ describe('RowsView', () => {
     expect(lastBatchAction).toEqual(expect.objectContaining({ count: 1 }));
   });
 
+  it('a same-named dataset + index resolve independently (no shared scheduler slot → no stuck card)', () => {
+    // Regression: keying the fetch scheduler by bare name collided a same-named dataset + index onto
+    // one results slot, leaving one card hung in LOADING. Keyed by kind:name, only the index result
+    // lands on the index card; the dataset (no result injected) stays LOADING on its own.
+    mockDatasets.mockReturnValue({
+      datasets: [{ name: 'nginx-access-logs', kind: 'dataset', datasetId: 'ds1' }],
+      loading: false,
+    });
+    mockIndexList.mockReturnValue({
+      items: [{ name: 'nginx-access-logs', kind: 'index', docsCount: 10 }],
+      loading: false,
+      hasNext: false,
+      loadMore: jest.fn(),
+    });
+    // Only the INDEX key has a resolved result.
+    mockResults = new Map([['index:nginx-access-logs', resultWithTotal(500)]]);
+    renderRows();
+
+    const cardByKind = (kind: string) =>
+      Array.from(document.querySelectorAll('[data-test-subj="card-nginx-access-logs"]')).find(
+        (el) => el.getAttribute('data-kind') === kind
+      )!;
+
+    // The index resolved (FULL) from its own slot; the dataset has no result → still LOADING, not
+    // wrongly showing the index's result.
+    expect(cardByKind('index').getAttribute('data-row-state')).toBe('full');
+    expect(cardByKind('dataset').getAttribute('data-row-state')).toBe('loading');
+  });
+
   it('demotes both no-recent and empty-index (0 docs) rows into the dead group', () => {
     mockDatasets.mockReturnValue({ datasets: [], loading: false });
     mockIndexList.mockReturnValue({
@@ -306,9 +449,10 @@ describe('RowsView', () => {
       hasNext: false,
       loadMore: jest.fn(),
     });
+    // The scheduler is keyed by kind:name.
     mockResults = new Map([
-      ['no-recent', resultWithTotal(0)],
-      ['live', resultWithTotal(500)],
+      ['index:no-recent', resultWithTotal(0)],
+      ['index:live', resultWithTotal(500)],
     ]);
     renderRows();
     // 2 dead (no-recent + empty) demote into the collapsed drawer; the live one stays primary.
@@ -417,7 +561,8 @@ describe('RowsView', () => {
     fireEvent.click(screen.getByTestId('tf-orders-2026'));
     expect(card().getAttribute('data-time-field')).toBe('observedTimestamp');
     // Only that card is invalidated — the scheduler is NOT reset (which would refetch every card).
-    expect(mockInvalidate).toHaveBeenCalledWith('orders-2026');
+    // The scheduler key is kind:name.
+    expect(mockInvalidate).toHaveBeenCalledWith('index:orders-2026');
     expect(mockInvalidate).toHaveBeenCalledTimes(1);
   });
 
@@ -443,9 +588,9 @@ describe('RowsView', () => {
     );
   });
 
-  it('shows the first 20 rows, then reveals 10 more per Load more click', () => {
-    // 35 indexes → first window 20; +10 → 30; +10 → capped at 35 (Load more then disappears).
-    const many = Array.from({ length: 35 }, (_, i) => ({
+  it('shows the first 10 rows, then reveals 10 more per Load more click', () => {
+    // 25 indexes → first window 10; +10 → 20; +10 → capped at 25 (Load more then disappears).
+    const many = Array.from({ length: 25 }, (_, i) => ({
       name: `idx-${String(i).padStart(2, '0')}`,
       kind: 'index' as const,
     }));
@@ -453,11 +598,11 @@ describe('RowsView', () => {
     mockIndexList.mockReturnValue({ items: many, loading: false });
     renderRows();
 
-    expect(screen.getAllByTestId(/^card-idx-/)).toHaveLength(20);
+    expect(screen.getAllByTestId(/^card-idx-/)).toHaveLength(10);
     fireEvent.click(screen.getByTestId('logsExploreRowsLoadMore'));
-    expect(screen.getAllByTestId(/^card-idx-/)).toHaveLength(30); // +10
+    expect(screen.getAllByTestId(/^card-idx-/)).toHaveLength(20); // +10
     fireEvent.click(screen.getByTestId('logsExploreRowsLoadMore'));
-    expect(screen.getAllByTestId(/^card-idx-/)).toHaveLength(35); // +10, capped at total
+    expect(screen.getAllByTestId(/^card-idx-/)).toHaveLength(25); // +10, capped at total
     expect(screen.queryByTestId('logsExploreRowsLoadMore')).not.toBeInTheDocument();
   });
 

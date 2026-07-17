@@ -22,8 +22,13 @@ export enum IndexClassification {
 
 /** A browsable row in the left list. */
 export interface BrowsableItem {
-  /** Concrete index / alias / data_stream name, or dataset title. */
+  /** Concrete index / alias / data_stream name, or dataset title (the PATTERN, e.g. `nginx-*`).
+   *  This is the identity used for coverage matching, activation, and create-seeding — NOT for the
+   *  visible label when a dataset has a friendly `displayName`. */
   name: string;
+  /** Datasets only: the user-chosen friendly name (index-pattern `displayName`), if any. Shown as
+   *  the card label in preference to the pattern; falls back to `name` when empty. */
+  displayName?: string;
   /** Whether this row is an existing dataset (jump straight into Query) vs a raw index. */
   kind: 'index' | 'dataset';
   /** True for cross-cluster (remote) indices. */

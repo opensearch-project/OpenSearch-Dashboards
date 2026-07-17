@@ -42,6 +42,7 @@ export const DatasetExplorer = ({
   onCancel,
   initialSelectedItems,
   initialDataSourceId,
+  autoFocus,
 }: {
   services: IDataPluginServices;
   queryString: QueryStringContract;
@@ -54,6 +55,8 @@ export const DatasetExplorer = ({
   /** When auto-selecting the data-source level, prefer this data source id (MDS) instead of the
    * first child. Opt-in; default undefined = today's "select first" behavior. */
   initialDataSourceId?: string;
+  /** Auto-focus the custom creator's search input on mount. Opt-in; default keeps today's behavior. */
+  autoFocus?: boolean;
 }) => {
   const uiSettings = services.uiSettings;
   const [explorerDataset, setExplorerDataset] = useState<BaseDataset | undefined>(undefined);
@@ -245,6 +248,7 @@ export const DatasetExplorer = ({
                     // @ts-ignore custom component can have their own fetch options
                     fetchDataStructure={fetchNextDataStructure}
                     initialSelectedItems={initialSelectedItems}
+                    autoFocus={autoFocus}
                   />
                 ) : current.multiSelect ? (
                   <DatasetTable

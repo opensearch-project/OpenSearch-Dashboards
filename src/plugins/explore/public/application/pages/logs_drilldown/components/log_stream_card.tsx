@@ -39,7 +39,11 @@ export interface CardData {
 
 interface Props {
   services: ExploreServices;
+  /** Identity: the index/pattern name. Used for test-subj, keys, and the viewport observer. */
   name: string;
+  /** Visible label — defaults to `name`. For datasets with a friendly displayName, this is that
+   *  name while `name` stays the pattern (identity). */
+  label?: string;
   kind: 'index' | 'dataset';
   isRemote?: boolean;
   isTimeBased: boolean;
@@ -59,8 +63,6 @@ interface Props {
   replicaCount?: number;
   /** Index creation time (epoch ms) — shown as "created {age}" in the empty-index compact row. */
   createdAt?: number;
-  /** Humanized selected-range label (e.g. "15 minutes") for the no-recent-data copy. */
-  rangeLabel: string;
   data: CardData;
   /** The primary action label ("Query" / "Create dataset"); titles the name link. */
   primaryLabel: string;
@@ -98,6 +100,7 @@ const ICON_DATASET = 'indexPatternApp';
 export const LogStreamCard: React.FC<Props> = ({
   services,
   name,
+  label,
   kind,
   isRemote,
   isTimeBased,
@@ -111,7 +114,6 @@ export const LogStreamCard: React.FC<Props> = ({
   primaryShards,
   replicaCount,
   createdAt,
-  rangeLabel,
   data,
   primaryLabel,
   onPrimary,
@@ -140,15 +142,23 @@ export const LogStreamCard: React.FC<Props> = ({
   }, [name, onVisibilityChange]);
 
   const icon = kind === 'dataset' ? ICON_DATASET : ICON_INDEX;
-  const checkboxProps = {
-    id: `logsDrilldownCheckCard-${name}`,
-    checked,
-    onChange: onToggleCheck,
-    ariaLabel: i18n.translate('explore.logsDrilldown.rows.selectForCreate', {
-      defaultMessage: 'Select {name} for dataset creation',
-      values: { name },
-    }),
-  };
+  // The visible label (friendly dataset name when present) — falls back to the identity `name`.
+  const displayLabel = label || name;
+  // Only raw indexes are selectable for batch dataset creation — a dataset already exists, so it
+  // gets no selection checkbox (in the full card OR the compact variants). Undefined ⇒ CompactRow
+  // renders no checkbox.
+  const checkboxProps =
+    kind === 'index'
+      ? {
+          id: `logsDrilldownCheckCard-${name}`,
+          checked,
+          onChange: onToggleCheck,
+          ariaLabel: i18n.translate('explore.logsDrilldown.rows.selectForCreate', {
+            defaultMessage: 'Select {name} for dataset creation',
+            values: { name },
+          }),
+        }
+      : undefined;
 
   // ---- Compact variants (a card whose body carries nothing to scan → one row) --------------------
 
@@ -158,9 +168,9 @@ export const LogStreamCard: React.FC<Props> = ({
       <div ref={cardRef} data-test-subj={`logsExploreCard-${name}`}>
         <CompactRow
           icon="clock"
-          name={name}
+          name={displayLabel}
           message={i18n.translate('explore.logsDrilldown.rows.noTimeField', {
-            defaultMessage: 'No time field — can’t chart or create a dataset',
+            defaultMessage: 'No time field found, can’t create a logs dataset',
           })}
           tone="subdued"
           data-test-subj="logsExploreCardNoTimeBadge"
@@ -189,7 +199,7 @@ export const LogStreamCard: React.FC<Props> = ({
       <div ref={cardRef} data-test-subj={`logsExploreCard-${name}`}>
         <CompactRow
           icon={icon}
-          name={name}
+          name={displayLabel}
           message={i18n.translate('explore.logsDrilldown.rows.noDocsYet', {
             defaultMessage: 'No documents yet',
           })}
@@ -209,7 +219,7 @@ export const LogStreamCard: React.FC<Props> = ({
       <div ref={cardRef} data-test-subj={`logsExploreCard-${name}`}>
         <CompactRow
           icon={icon}
-          name={name}
+          name={displayLabel}
           nameOnClick={onPrimary}
           nameTitle={primaryLabel}
           message={i18n.translate('explore.logsDrilldown.rows.previewError', {
@@ -237,12 +247,11 @@ export const LogStreamCard: React.FC<Props> = ({
       <div ref={cardRef} data-test-subj={`logsExploreCard-${name}`}>
         <CompactRow
           icon={icon}
-          name={name}
+          name={displayLabel}
           nameOnClick={onPrimary}
           nameTitle={primaryLabel}
           message={i18n.translate('explore.logsDrilldown.rows.noEventsInRange', {
-            defaultMessage: 'No events in the last {range}',
-            values: { range: rangeLabel },
+            defaultMessage: 'No events in the selected time range',
           })}
           tone="subdued"
           checkbox={checkboxProps}
@@ -297,7 +306,8 @@ export const LogStreamCard: React.FC<Props> = ({
       <EuiToolTip
         anchorClassName="logStreamCard__timeCapsule"
         content={i18n.translate('explore.logsDrilldown.rows.timeFieldSwitchTip', {
-          defaultMessage: 'Time field used for the histogram and sort — switch it here',
+          defaultMessage: 'Time field: {field} — used for the histogram and sort. Switch it here.',
+          values: { field: timeFieldName },
         })}
       >
         <EuiSelect
@@ -317,7 +327,8 @@ export const LogStreamCard: React.FC<Props> = ({
       <EuiToolTip
         anchorClassName="logStreamCard__timeCapsule"
         content={i18n.translate('explore.logsDrilldown.rows.timeFieldTip', {
-          defaultMessage: 'Time field used for the histogram and sort',
+          defaultMessage: 'Time field: {field} — used for the histogram and sort',
+          values: { field: timeFieldName },
         })}
       >
         <EuiFieldText
@@ -386,17 +397,19 @@ export const LogStreamCard: React.FC<Props> = ({
       defaultMessage: 'Unhealthy',
     }),
   };
-  // Rich hover tooltip: the health status plus the store size / shard layout from cat.indices. Each
-  // metadata row is shown only when that value is known (remote/closed indexes omit them).
+  // Rich hover tooltip: the raw cat.indices health status as-is (green/yellow/red), plus the store
+  // size / shard layout. Each metadata row is shown only when that value is known (remote/closed
+  // indexes omit them).
   const healthTooltip = (
     <div className="logStreamCard__healthTip" data-test-subj={`logsExploreCardHealthTip-${name}`}>
-      <div className="logStreamCard__healthTipTitle">
-        {health &&
-          i18n.translate('explore.logsDrilldown.rows.healthTip', {
-            defaultMessage: 'Index health: {status}',
-            values: { status: HEALTH_LABELS[health] },
+      {health && (
+        <div className="logStreamCard__healthTipTitle">
+          {i18n.translate('explore.logsDrilldown.rows.healthTipStatus', {
+            defaultMessage: 'Status: {health}',
+            values: { health },
           })}
-      </div>
+        </div>
+      )}
       {storeSize && (
         <div>
           {i18n.translate('explore.logsDrilldown.rows.healthTipSize', {
@@ -476,7 +489,7 @@ export const LogStreamCard: React.FC<Props> = ({
         {/* Header. Only raw indexes are selectable for batch dataset creation — a dataset already
             exists, so it gets no selection checkbox. */}
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
-          {kind === 'index' && (
+          {checkboxProps && (
             <EuiFlexItem grow={false}>
               <EuiCheckbox
                 id={checkboxProps.id}
@@ -498,10 +511,10 @@ export const LogStreamCard: React.FC<Props> = ({
                   title={primaryLabel}
                   data-test-subj="logsExploreCardNameLink"
                 >
-                  <strong>{name}</strong>
+                  <strong>{displayLabel}</strong>
                 </EuiLink>
               ) : (
-                <strong>{name}</strong>
+                <strong>{displayLabel}</strong>
               )}{' '}
               <EuiTextColor color="subdued">
                 <small>

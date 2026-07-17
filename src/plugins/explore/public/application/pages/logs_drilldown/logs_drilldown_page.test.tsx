@@ -116,6 +116,18 @@ describe('LogsDrilldownPage', () => {
     expect(setBreadcrumbs).toHaveBeenCalledWith([{ text: 'Logs drilldown' }]);
   });
 
+  it('defaults the time range to last 15m on mount when the URL has no _g time', () => {
+    const urlStateStorage = makeUrlStateStorage(); // no _g
+    render(<LogsDrilldownPage services={makeServices({ urlStateStorage })} />);
+    expect(setTime).toHaveBeenCalledWith({ from: 'now-15m', to: 'now' });
+  });
+
+  it('respects the URL _g time on mount (does NOT override with 15m)', () => {
+    const urlStateStorage = makeUrlStateStorage({ _g: { time: { from: 'now-7d', to: 'now' } } });
+    render(<LogsDrilldownPage services={makeServices({ urlStateStorage })} />);
+    expect(setTime).not.toHaveBeenCalledWith({ from: 'now-15m', to: 'now' });
+  });
+
   it('updates refreshKey when the global time range changes (timeUpdate$)', async () => {
     render(<LogsDrilldownPage services={makeServices()} />);
     expect(lastRowsProps.refreshKey).toBe('now-15m|now|0');
@@ -142,6 +154,28 @@ describe('LogsDrilldownPage', () => {
     );
     expect(screen.getByTestId('logsExploreToolbarBatch')).not.toBeDisabled();
     expect(screen.getByTestId('logsExploreToolbarBatch')).toHaveTextContent('Query (2)');
+  });
+
+  it('shows a select-index tooltip on the disabled batch button, and none once enabled', async () => {
+    render(<LogsDrilldownPage services={makeServices()} />);
+    // Disabled → hovering the button's tooltip anchor reveals the guidance.
+    fireEvent.mouseOver(screen.getByTestId('logsExploreToolbarBatch'));
+    expect(
+      await screen.findByText('Select one or more indexes to create a dataset')
+    ).toBeInTheDocument();
+
+    // Enabled → the tooltip content is cleared (no guidance needed).
+    act(() =>
+      lastRowsProps.onBatchActionChange({
+        count: 1,
+        label: 'Create dataset (1)',
+        pattern: 'x',
+        onClick: jest.fn(),
+      })
+    );
+    expect(
+      screen.queryByText('Select one or more indexes to create a dataset')
+    ).not.toBeInTheDocument();
   });
 
   it('the batch button runs the reported onClick', () => {

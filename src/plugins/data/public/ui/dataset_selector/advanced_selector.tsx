@@ -48,6 +48,7 @@ export const AdvancedSelector = ({
   showNonTimeFieldDatasets,
   initialSelectedItems,
   initialDataSourceId,
+  autoFocus,
 }: {
   services: IDataPluginServices;
   onSelect: (query: Partial<Query>, saveDataset?: boolean) => void;
@@ -64,6 +65,9 @@ export const AdvancedSelector = ({
   initialSelectedItems?: string[];
   /** Optional data source id (MDS) to auto-select at step 1. Opt-in. */
   initialDataSourceId?: string;
+  /** Auto-focus the creator's search input on mount. Opt-in; default (undefined) keeps today's
+   *  focus-on-mount behavior. Pass false to open the selector without grabbing focus. */
+  autoFocus?: boolean;
 }) => {
   const queryString = getQueryService().queryString;
 
@@ -123,6 +127,7 @@ export const AdvancedSelector = ({
       onCancel={onCancel}
       initialSelectedItems={initialSelectedItems}
       initialDataSourceId={initialDataSourceId}
+      autoFocus={autoFocus}
     />
   );
 };

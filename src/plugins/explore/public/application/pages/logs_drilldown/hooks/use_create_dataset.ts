@@ -93,6 +93,9 @@ export const useCreateDataset = (services: ExploreServices) => {
         useConfiguratorV2: true,
         alwaysShowDatasetFields: true,
         signalType: SIGNAL_TYPE_LOGS,
+        // Don't grab focus / auto-open the index dropdown: this flow opens pre-seeded from a card,
+        // so the user's context is the staged selection, not the search box.
+        autoFocus: false,
         // Comma-joined multi-index patterns split into individual pre-selected items in the creator.
         ...(pattern ? { initialSelectedItems: [pattern] } : {}),
         ...(dataSource?.id ? { initialDataSourceId: dataSource.id } : {}),

@@ -13,11 +13,14 @@ jest.mock('./histogram_chart', () => ({
   HistogramChart: (props: any) => (
     <div data-test-subj="mock-histogram-chart" data-chart-id={props.chartId} />
   ),
+  SINGLE_SERIES_BUCKET: 'debug',
 }));
 jest.mock('../severity', () => ({
   severityColor: (b: string) =>
-    (({ error: '#f13939', warn: '#F90', info: '#00BD6B' } as Record<string, string>)[b] ||
-    '#8E96A3'),
+    (({ error: '#f13939', warn: '#F90', info: '#00BD6B', debug: '#0077CC' } as Record<
+      string,
+      string
+    >)[b] || '#8E96A3'),
 }));
 
 const services = {} as any;
@@ -51,19 +54,25 @@ describe('SeverityHistogram', () => {
     expect(screen.getByTestId('logsExploreLegend-ERROR')).toHaveTextContent('3');
   });
 
-  it("labels the single-series 'count' total as 'logs'", () => {
-    render(
+  it("labels the single-series 'count' total as 'logs' and colors it the debug/blue bar color", () => {
+    const { container } = render(
       <SeverityHistogram
         services={services}
         chartId="x"
         histogram={{
           ...severityHistogram,
+          // bucket is 'unknown' (as normalizeSeverity('count') yields) — the legend must STILL use
+          // the single-series debug/blue, matching the bars, not the grey 'unknown' color.
           totals: [{ name: 'count', bucket: 'unknown', total: 1500 }],
         }}
       />
     );
     expect(screen.getByTestId('logsExploreLegend-count')).toHaveTextContent('logs');
     expect(screen.getByTestId('logsExploreLegend-count')).toHaveTextContent('1.5K');
+    // The EuiHealth dot uses the debug/blue color (#0077CC), not the grey 'unknown' (#8E96A3).
+    const html = container.innerHTML;
+    expect(html).toContain('#0077CC');
+    expect(html).not.toContain('#8E96A3');
   });
 
   it('humanizes millions with an M suffix and thousands ≥10K without a decimal', () => {
@@ -82,6 +91,24 @@ describe('SeverityHistogram', () => {
     );
     expect(screen.getByTestId('logsExploreLegend-INFO')).toHaveTextContent('2.4M');
     expect(screen.getByTestId('logsExploreLegend-ERROR')).toHaveTextContent('42K');
+  });
+
+  it('humanizes billions with a B suffix', () => {
+    render(
+      <SeverityHistogram
+        services={services}
+        chartId="x"
+        histogram={{
+          ...severityHistogram,
+          totals: [
+            { name: 'INFO', bucket: 'info', total: 3_200_000_000 },
+            { name: 'WARN', bucket: 'warn', total: 45_000_000_000 },
+          ],
+        }}
+      />
+    );
+    expect(screen.getByTestId('logsExploreLegend-INFO')).toHaveTextContent('3.2B');
+    expect(screen.getByTestId('logsExploreLegend-WARN')).toHaveTextContent('45B');
   });
 
   it('renders raw counts under 1000 without a suffix', () => {

@@ -9,7 +9,7 @@ import { i18n } from '@osd/i18n';
 import { ExploreServices } from '../../../../types';
 import { HistogramResult, SeverityTotal } from '../hooks/fetch_histogram';
 import { severityColor } from '../severity';
-import { HistogramChart } from './histogram_chart';
+import { HistogramChart, SINGLE_SERIES_BUCKET } from './histogram_chart';
 
 interface Props {
   services: ExploreServices;
@@ -22,11 +22,15 @@ interface Props {
 
 const CHART_HEIGHT = 96;
 
-/** Humanize a count like 14100 → "14.1K". */
+/** Humanize a count with K / M / B units, e.g. 999 → "999", 14100 → "14.1K", 2_500_000 → "2.5M",
+ *  3_200_000_000 → "3.2B". One decimal below 10×the unit, none above (14.1K but 141K). */
 const humanize = (n: number): string => {
+  const unit = (value: number, suffix: string) =>
+    `${value < 10 ? value.toFixed(1) : Math.round(value)}${suffix}`;
   if (n < 1000) return String(n);
-  if (n < 1_000_000) return `${(n / 1000).toFixed(n < 10_000 ? 1 : 0)}K`;
-  return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n < 1_000_000) return unit(n / 1000, 'K');
+  if (n < 1_000_000_000) return unit(n / 1_000_000, 'M');
+  return unit(n / 1_000_000_000, 'B');
 };
 
 /**
@@ -67,7 +71,10 @@ export const SeverityHistogram: React.FC<Props> = ({ services, histogram, onBrus
         {histogram.totals.map((t: SeverityTotal) => (
           <EuiHealth
             key={t.name}
-            color={severityColor(t.bucket)}
+            // The no-severity single series ('count') colors the legend dot the SAME blue as its
+            // bars (SINGLE_SERIES_BUCKET), not the grey 'unknown' that normalizeSeverity('count')
+            // yields. Severity series use their own bucket color.
+            color={severityColor(t.name === 'count' ? SINGLE_SERIES_BUCKET : t.bucket)}
             data-test-subj={`logsExploreLegend-${t.name}`}
           >
             <EuiText size="xs" className="logStreamCard__legendRow">

@@ -53,6 +53,7 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
   selectDataStructure,
   services,
   initialSelectedItems,
+  autoFocus,
 }) => {
   const [selectedItems, setSelectedItems] = useState<SelectedItem[]>([]);
   const [openPopoverIndex, setOpenPopoverIndex] = useState<number | null>(null);
@@ -545,6 +546,7 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
         onSelectionChange={handleSelectionChange}
         services={services}
         path={path}
+        autoFocus={autoFocus}
       />
 
       <EuiSpacer size="s" />
