@@ -23,12 +23,18 @@ import { AppMountParameters } from 'opensearch-dashboards/public';
 import { MountPointPortal } from '../../../../../opensearch_dashboards_react/public';
 import { Dataset } from '../../../../../data/common';
 import { syncQueryStateWithUrl } from '../../../../../data/public';
+import { Storage } from '../../../../../opensearch_dashboards_utils/public';
 import { ExploreServices } from '../../../types';
 import { DataSourceControl } from './components/data_source_control';
 import { RowsView, BatchAction } from './components/rows_view';
 import { useIndexClassification } from './hooks/use_index_classification';
 
 const SEARCH_DEBOUNCE_MS = 300;
+
+// Per-tab remembered data source. The nav-popover / query-bar entry points open the drilldown at a
+// bare `#/` (no `_a`), so the URL alone can't survive re-entry — this sessionStorage fallback keeps
+// the last selection for the tab session. URL `_a` still wins when present (shareable/bookmarkable).
+const DATA_SOURCE_STORAGE_KEY = 'logsDrilldown.dataSource';
 
 type Props = {
   services: ExploreServices;
@@ -46,10 +52,15 @@ export const LogsDrilldownPage: React.FC<Props> = ({ services, setHeaderActionMe
   const timefilter = services.data.query.timefilter.timefilter;
   const urlStateStorage = services.osdUrlStateStorage;
 
-  // Restore the selected data source from the `_a` URL state on first mount (bookmarkable/shareable).
+  // Per-tab session store for the last selected data source (survives re-entry from a bare `#/`).
+  const sessionStore = useMemo(() => new Storage(window.sessionStorage), []);
+
+  // Restore the selected data source on first mount. The URL `_a` wins (bookmarkable/shareable);
+  // when it's absent — as when the nav-popover / query-bar action opens the drilldown at a bare
+  // `#/` — fall back to the per-tab session store so the last selection isn't lost on re-entry.
   const initialDataSource = useMemo<Dataset['dataSource'] | undefined>(() => {
-    const appState = urlStateStorage?.get<{ dataSource?: Dataset['dataSource'] }>('_a');
-    return appState?.dataSource;
+    const fromUrl = urlStateStorage?.get<{ dataSource?: Dataset['dataSource'] }>('_a')?.dataSource;
+    return fromUrl ?? sessionStore.get(DATA_SOURCE_STORAGE_KEY) ?? undefined;
     // Read once on mount; later changes are written out, not read back in.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -60,6 +71,16 @@ export const LogsDrilldownPage: React.FC<Props> = ({ services, setHeaderActionMe
   );
   const dataSource = selectedDataSource;
   const dataSourceId = dataSource?.id;
+
+  // If the source was restored from the session store (the URL had no `_a`, e.g. re-entry from a
+  // bare `#/`), seed it into the URL now so `_a` is authoritative immediately — shareable and
+  // reload-safe without waiting for the picker to fire a change.
+  useEffect(() => {
+    if (initialDataSource && !urlStateStorage?.get('_a')) {
+      urlStateStorage?.set('_a', { dataSource: initialDataSource }, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Default the time range to the last 15 minutes on mount UNLESS this drilldown's own URL already
   // pins a range (`_g.time`). The timefilter is a shared singleton, so without this the drilldown
@@ -186,8 +207,11 @@ export const LogsDrilldownPage: React.FC<Props> = ({ services, setHeaderActionMe
       setSelectedDataSource(nextDataSource);
       // Persist to the `_a` URL key so the selection is restored on reload / shared via the URL.
       urlStateStorage?.set('_a', { dataSource: nextDataSource }, { replace: true });
+      // Also remember it per-tab so re-entry from a bare `#/` (nav-popover / query-bar) restores it.
+      if (nextDataSource) sessionStore.set(DATA_SOURCE_STORAGE_KEY, nextDataSource);
+      else sessionStore.remove(DATA_SOURCE_STORAGE_KEY);
     },
-    [urlStateStorage]
+    [urlStateStorage, sessionStore]
   );
 
   const { classify, getCached } = useIndexClassification(services, dataSourceId);

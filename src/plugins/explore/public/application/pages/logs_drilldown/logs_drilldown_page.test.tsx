@@ -101,6 +101,8 @@ describe('LogsDrilldownPage', () => {
     jest.clearAllMocks();
     lastRowsProps = undefined;
     currentTime = { from: 'now-15m', to: 'now' };
+    // The page remembers the data source in sessionStorage; jsdom persists it across tests.
+    window.sessionStorage.clear();
   });
 
   it('renders the toolbar + RowsView and threads the initial time range into refreshKey', () => {
@@ -219,7 +221,7 @@ describe('LogsDrilldownPage', () => {
     );
   });
 
-  it('persists the selected data source to the _a URL key on change', async () => {
+  it('persists the selected data source to the _a URL key AND sessionStorage on change', async () => {
     const urlStateStorage = makeUrlStateStorage();
     render(<LogsDrilldownPage services={makeServices({ urlStateStorage })} />);
     fireEvent.click(screen.getByTestId('ds-change'));
@@ -228,6 +230,10 @@ describe('LogsDrilldownPage', () => {
       '_a',
       { dataSource: expect.objectContaining({ id: 'ds-2' }) },
       { replace: true }
+    );
+    // Also remembered per-tab so re-entry from a bare `#/` restores it.
+    expect(JSON.parse(window.sessionStorage.getItem('logsDrilldown.dataSource')!)).toEqual(
+      expect.objectContaining({ id: 'ds-2' })
     );
   });
 
@@ -238,6 +244,34 @@ describe('LogsDrilldownPage', () => {
     render(<LogsDrilldownPage services={makeServices({ urlStateStorage })} />);
     // The restored data source flows straight into RowsView (no user interaction needed).
     expect(lastRowsProps.dataSourceId).toBe('ds-restored');
+  });
+
+  it('falls back to the sessionStorage data source when the URL has no _a (re-entry from #/)', () => {
+    window.sessionStorage.setItem(
+      'logsDrilldown.dataSource',
+      JSON.stringify({ id: 'ds-session', title: 'Session', type: 'DATA_SOURCE' })
+    );
+    const urlStateStorage = makeUrlStateStorage(); // no _a
+    render(<LogsDrilldownPage services={makeServices({ urlStateStorage })} />);
+    expect(lastRowsProps.dataSourceId).toBe('ds-session');
+    // The session-restored source is seeded back into the URL so `_a` is authoritative immediately.
+    expect(urlStateStorage.set).toHaveBeenCalledWith(
+      '_a',
+      { dataSource: expect.objectContaining({ id: 'ds-session' }) },
+      { replace: true }
+    );
+  });
+
+  it('URL _a wins over sessionStorage when both are present', () => {
+    window.sessionStorage.setItem(
+      'logsDrilldown.dataSource',
+      JSON.stringify({ id: 'ds-session', title: 'Session', type: 'DATA_SOURCE' })
+    );
+    const urlStateStorage = makeUrlStateStorage({
+      _a: { dataSource: { id: 'ds-url', title: 'FromUrl', type: 'DATA_SOURCE' } },
+    });
+    render(<LogsDrilldownPage services={makeServices({ urlStateStorage })} />);
+    expect(lastRowsProps.dataSourceId).toBe('ds-url');
   });
 
   it('non-MDS: shows the index list (implicit local cluster is the queryable target)', () => {
