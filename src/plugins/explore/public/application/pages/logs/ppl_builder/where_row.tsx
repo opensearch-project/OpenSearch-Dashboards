@@ -184,7 +184,11 @@ const ChipValuePopover: React.FC<{
     onChange(values.includes(value) ? values.filter((v) => v !== value) : [...values, value]);
   };
 
-  const options: SearchMenuOption[] = suggestions.map((value) => ({
+  // Include any selected values that aren't in the fetched suggestions (custom
+  // typed-in values, or every value when the field doesn't suggest) so they
+  // still render as checked rows and can be toggled back off.
+  const optionValues = [...suggestions, ...values.filter((v) => !suggestions.includes(v))];
+  const options: SearchMenuOption[] = optionValues.map((value) => ({
     key: value,
     label: renderValue(value),
     filterText: value === '' ? emptyValueLabel() : value,

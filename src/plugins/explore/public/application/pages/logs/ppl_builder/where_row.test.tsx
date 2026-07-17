@@ -191,6 +191,25 @@ describe('WhereRow', () => {
     });
   });
 
+  it('renders a selected custom value not in the suggestions so it can be removed (one-of)', async () => {
+    // `aaa` was typed in by the user, so it is selected but not among getValues.
+    const { dispatch } = renderRow(
+      [{ id: 'f1', field: 'service', operator: 'is_one_of', values: ['aaa', '200'] }],
+      stringType
+    );
+    fireEvent.click(screen.getByTestId('pplBuilderFilterValues-0'));
+    // The custom value still appears as a (checked) row alongside the suggestions.
+    const customOption = await screen.findByTestId('pplBuilderFilterValueOption-0-aaa');
+    expect(customOption).toBeInTheDocument();
+    // Clicking it toggles it back off, leaving the other value.
+    fireEvent.click(customOption);
+    expect(dispatch).toHaveBeenCalledWith({
+      type: 'SET_FILTER',
+      index: 0,
+      filter: { values: ['200'] },
+    });
+  });
+
   it('shows an empty-string term as a muted "(empty)" marker in the chip and popover', async () => {
     const getValues = jest.fn().mockResolvedValue(['', 'auth']);
     render(
