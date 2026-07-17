@@ -12,6 +12,7 @@ import { disabledJoinTypeDetector } from './rules/disabled_join_type';
 import { dedupConsecutiveUnsupportedDetector } from './rules/dedup_consecutive_unsupported';
 import { unionMinDatasetsDetector } from './rules/union_min_datasets';
 import { replaceWildcardAsymmetryDetector } from './rules/replace_wildcard_asymmetry';
+import { fieldValidationDetector } from './rules/field_validation';
 
 const registry = new Map<string, Detector>();
 
@@ -37,6 +38,7 @@ export function registerBuiltInDetectors(): void {
   registerDetector('dedup-consecutive-unsupported', dedupConsecutiveUnsupportedDetector);
   registerDetector('union-min-datasets', unionMinDatasetsDetector);
   registerDetector('replace-wildcard-asymmetry', replaceWildcardAsymmetryDetector);
+  registerDetector('field-validation', fieldValidationDetector);
 }
 
 registerBuiltInDetectors();

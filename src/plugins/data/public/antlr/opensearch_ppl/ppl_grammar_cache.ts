@@ -442,6 +442,14 @@ class PPLGrammarCache {
 
 export const pplGrammarCache = new PPLGrammarCache();
 
+// Synchronous render-time gate. When the version is unknown it intentionally
+// returns `true` (optimistic) because the version is only knowable async, letting
+// the later `warmUp` → `resolveVersion` → `shouldFetchFromBackend` chain make the
+// real decision — which is why this and `shouldFetchFromBackend` treat an unknown
+// version oppositely (deliberate, not a bug). It's safe: if the runtime grammar
+// can't load, the runtime lint/validate paths return null and the editor falls
+// back to the compiled grammar. Do NOT change this to `false` on unknown version —
+// that breaks the local cluster.
 export function shouldUseRuntimeGrammar(
   _dataSourceId?: string,
   dataSourceVersion?: string,
