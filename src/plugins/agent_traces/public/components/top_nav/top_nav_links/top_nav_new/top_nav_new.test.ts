@@ -30,10 +30,10 @@ describe('getNewButtonRun', () => {
   it('should dispatch resetAgentTracesStateActionCreator and navigate to clean URL', () => {
     const dispatch = jest.fn();
     const mockPush = jest.fn();
-    const services = ({
+    const services = {
       store: { dispatch },
       scopedHistory: { push: mockPush },
-    } as unknown) as AgentTracesServices;
+    } as unknown as AgentTracesServices;
     const clearEditors = jest.fn();
 
     const run = getNewButtonRun(services, clearEditors);
@@ -46,10 +46,10 @@ describe('getNewButtonRun', () => {
 
   it('should handle missing scopedHistory gracefully', () => {
     const dispatch = jest.fn();
-    const services = ({
+    const services = {
       store: { dispatch },
       scopedHistory: undefined,
-    } as unknown) as AgentTracesServices;
+    } as unknown as AgentTracesServices;
     const clearEditors = jest.fn();
 
     const run = getNewButtonRun(services, clearEditors);

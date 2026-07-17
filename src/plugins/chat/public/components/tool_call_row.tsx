@@ -23,6 +23,7 @@ import {
   AssistantActionContextValue,
 } from '../../../context_provider/public';
 import { GraphVisualization } from './graph_visualization';
+import { ToolResultRenderer } from './tool_result_renderer';
 import './tool_call_row.scss';
 
 export interface TimelineToolCall {
@@ -58,7 +59,7 @@ const renderFallbackGraphTool = ({
         if (parsedResult.success && parsedResult.graphData) {
           return parsedResult;
         }
-      } catch (error) {
+      } catch {
         // Not JSON, continue
       }
     }
@@ -219,7 +220,7 @@ const renderFallbackGraphTool = ({
           </div>
         );
       }
-    } catch (error) {
+    } catch {
       // Failed to parse graph result, show error state
       return (
         <div className="toolCallRow">
@@ -293,7 +294,7 @@ const getCustomizedRenderOptions = ({
   if (!result && toolCall.result) {
     try {
       result = JSON.parse(toolCall.result);
-    } catch (error) {
+    } catch {
       // Not JSON, use as is
       result = toolCall.result;
     }
@@ -302,7 +303,7 @@ const getCustomizedRenderOptions = ({
   if (!args && toolCall.arguments) {
     try {
       args = JSON.parse(toolCall.arguments);
-    } catch (error) {
+    } catch {
       // Not JSON, use as is
       args = toolCall.arguments;
     }
@@ -335,7 +336,7 @@ const isValidJSON = (content: string) => {
   try {
     JSON.parse(content);
     return true;
-  } catch (error) {
+  } catch {
     return false;
   }
 };
@@ -497,20 +498,7 @@ export const ToolCallRow: React.FC<ToolCallRowProps> = ({
                 }),
             },
           })}
-        {!isError && toolCall.result && isValidJSON(toolCall.result) ? (
-          <EuiCodeBlock
-            language="json"
-            paddingSize="none"
-            fontSize="s"
-            transparentBackground
-            overflowHeight={200}
-            isCopyable
-          >
-            {toolCall.result}
-          </EuiCodeBlock>
-        ) : (
-          toolCall.result
-        )}
+        {!isError && toolCall.result && <ToolResultRenderer result={toolCall.result} />}
       </EuiPanel>
     </EuiAccordion>
   );

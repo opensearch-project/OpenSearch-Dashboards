@@ -31,7 +31,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiScreenReaderOnly, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { debounce } from 'lodash';
-import { parse } from 'query-string';
+import qs from 'query-string';
 import React, { CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
 import { ace } from '../../../../../../../opensearch_ui_shared/public';
 // @ts-ignore
@@ -114,7 +114,7 @@ function EditorUI({ initialTextValue, dataSourceId }: EditorProps) {
     const readQueryParams = () => {
       const [, queryString] = (window.location.hash || '').split('?');
 
-      return parse(queryString || '', { sort: false }) as Required<QueryParams>;
+      return qs.parse(queryString || '', { sort: false }) as Required<QueryParams>;
     };
 
     const loadBufferFromRemote = (url: string) => {
@@ -177,7 +177,7 @@ function EditorUI({ initialTextValue, dataSourceId }: EditorProps) {
       try {
         const content = editor.getCoreEditor().getValue();
         saveCurrentTextObject(content);
-      } catch (e) {
+      } catch {
         // Ignoring saving error
       }
     }

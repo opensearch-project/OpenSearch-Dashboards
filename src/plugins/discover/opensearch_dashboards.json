@@ -16,7 +16,7 @@
     "visualizations",
     "usageCollection"
   ],
-  "optionalPlugins": ["home", "share", "explore"],
+  "optionalPlugins": ["home", "share", "explore", "contextProvider"],
   "requiredBundles": [
     "home",
     "opensearchDashboardsUtils",

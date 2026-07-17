@@ -41,10 +41,10 @@ import type { OpenSearchClientConfig } from './client_config';
 import { configureClient } from './configure_client';
 
 const createFakeConfig = (parts: Partial<OpenSearchClientConfig> = {}): OpenSearchClientConfig => {
-  return ({
+  return {
     type: 'fake-config',
     ...parts,
-  } as unknown) as OpenSearchClientConfig;
+  } as unknown as OpenSearchClientConfig;
 };
 
 const createFakeClient = () => {

@@ -34,7 +34,7 @@ interface VisState {
 
 export const saveStateToSavedObject = (
   obj: SavedExplore,
-  flavorId: string,
+  flavorId?: string,
   tabDefinition?: TabDefinition,
   visState?: VisState,
   dataset?: IndexPattern | Dataset,
@@ -90,7 +90,7 @@ export const getStateFromSavedObject = (obj: SavedExploreAttributes): ExploreSav
         query: queryState,
       },
     };
-  } catch (error) {
+  } catch {
     throw new InvalidJSONProperty(
       i18n.translate('explore.getStateFromSavedObject.genericJSONError', {
         defaultMessage:
@@ -115,7 +115,7 @@ export const getLegacyPropertiesFromSavedObject = (savedExplore: SavedExplore) =
       columns: legacyState.columns || [],
       sort: legacyState.sort || [],
     };
-  } catch (error) {
+  } catch {
     return {
       columns: [],
       sort: [],
@@ -140,7 +140,7 @@ export const updateLegacyPropertiesInSavedObject = (
 
     savedExplore.legacyState = JSON.stringify(updatedLegacyState);
     return savedExplore;
-  } catch (error) {
+  } catch {
     return savedExplore;
   }
 };

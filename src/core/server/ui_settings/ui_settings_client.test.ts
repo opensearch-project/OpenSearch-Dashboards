@@ -56,11 +56,19 @@ interface SetupOptions {
   defaults?: Record<string, any>;
   opensearchDocSource?: Record<string, any>;
   overrides?: Record<string, any>;
+  permissionControlEnabled?: boolean;
 }
 
 describe('ui settings', () => {
   function setup(options: SetupOptions = {}) {
-    const { defaults = {}, overrides = {}, opensearchDocSource = {} } = options;
+    const {
+      defaults = {},
+      overrides = {},
+      opensearchDocSource = {},
+      // Default to true so the pre-existing tests keep exercising all scopes (including
+      // DASHBOARD_ADMIN); the permission-disabled behavior is covered by dedicated tests.
+      permissionControlEnabled = true,
+    } = options;
 
     const savedObjectsClient = savedObjectsClientMock.create();
     savedObjectsClient.get.mockReturnValue({ attributes: opensearchDocSource } as any);
@@ -73,6 +81,7 @@ describe('ui settings', () => {
       savedObjectsClient,
       overrides,
       log: logger,
+      permissionControlEnabled,
     });
 
     const createOrUpgradeSavedConfig = createOrUpgradeSavedConfigMock;
@@ -155,19 +164,23 @@ describe('ui settings', () => {
         })
       ).resolves.not.toThrow();
 
-      expect(savedObjectsClient.update).toBeCalledWith('config', ID, {
+      expect(savedObjectsClient.update).toHaveBeenCalledWith('config', ID, {
         globalAndWorkspace: 'value',
         one: 'value',
       });
-      expect(savedObjectsClient.update).toBeCalledWith('config', `<current_workspace>_${ID}`, {
-        workspace: 'value',
-      });
+      expect(savedObjectsClient.update).toHaveBeenCalledWith(
+        'config',
+        `<current_workspace>_${ID}`,
+        {
+          workspace: 'value',
+        }
+      );
 
-      expect(logger.warn).toBeCalledWith(
+      expect(logger.warn).toHaveBeenCalledWith(
         'Deprecation warning: The setting "workspace" has multiple scopes. Please specify a scope when updating it.'
       );
 
-      expect(logger.warn).toBeCalledWith(
+      expect(logger.warn).toHaveBeenCalledWith(
         'Deprecation warning: The setting "globalAndWorkspace" has multiple scopes. Please specify a scope when updating it.'
       );
     });
@@ -745,6 +758,54 @@ describe('ui settings', () => {
         `${CURRENT_USER_PLACEHOLDER}_${ID}`
       );
       expect(savedObjectsClient.get).toHaveBeenCalledWith(TYPE, DASHBOARD_ADMIN_SETTINGS_ID);
+    });
+
+    it('skips the dashboard_admin scope when permission control is disabled', async () => {
+      const { uiSettings, savedObjectsClient } = setup({ permissionControlEnabled: false });
+
+      await uiSettings.getUserProvided();
+
+      // Only global, workspace and user are read; the admin scope is filtered out.
+      expect(savedObjectsClient.get).toHaveBeenCalledTimes(3);
+      expect(savedObjectsClient.get).toHaveBeenCalledWith(TYPE, ID);
+      expect(savedObjectsClient.get).toHaveBeenCalledWith(
+        TYPE,
+        `${CURRENT_WORKSPACE_PLACEHOLDER}_${ID}`
+      );
+      expect(savedObjectsClient.get).toHaveBeenCalledWith(
+        TYPE,
+        `${CURRENT_USER_PLACEHOLDER}_${ID}`
+      );
+      expect(savedObjectsClient.get).not.toHaveBeenCalledWith(TYPE, DASHBOARD_ADMIN_SETTINGS_ID);
+    });
+
+    it('reads the dashboard_admin scope when permission control is enabled', async () => {
+      const { uiSettings, savedObjectsClient } = setup({ permissionControlEnabled: true });
+
+      await uiSettings.getUserProvided();
+
+      expect(savedObjectsClient.get).toHaveBeenCalledTimes(4);
+      expect(savedObjectsClient.get).toHaveBeenCalledWith(TYPE, DASHBOARD_ADMIN_SETTINGS_ID);
+    });
+
+    it('defaults permissionControlEnabled to false, skipping the dashboard_admin scope', async () => {
+      // Construct the client directly without the option to assert the constructor default.
+      const savedObjectsClient = savedObjectsClientMock.create();
+      savedObjectsClient.get.mockReturnValue({ attributes: {} } as any);
+      const uiSettings = new UiSettingsClient({
+        type: TYPE,
+        id: ID,
+        buildNum: BUILD_NUM,
+        defaults: {},
+        savedObjectsClient,
+        overrides: {},
+        log: logger,
+      });
+
+      await uiSettings.getUserProvided();
+
+      expect(savedObjectsClient.get).toHaveBeenCalledTimes(3);
+      expect(savedObjectsClient.get).not.toHaveBeenCalledWith(TYPE, DASHBOARD_ADMIN_SETTINGS_ID);
     });
   });
 

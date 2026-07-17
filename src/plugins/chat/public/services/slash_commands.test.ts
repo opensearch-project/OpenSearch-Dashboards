@@ -508,6 +508,32 @@ describe('SlashCommandRegistry', () => {
       expect(result.handled).toBe(true);
       expect(result.localMessage).toBe('Info: some details');
     });
+
+    it('should return role when handler returns object with role', async () => {
+      slashCommandRegistry.register({
+        command: 'welcome',
+        description: 'Welcome command',
+        handler: () => ({ localMessage: 'Welcome!', role: 'assistant' as const }),
+      });
+
+      const result = await slashCommandRegistry.execute('/welcome');
+      expect(result.handled).toBe(true);
+      expect(result.localMessage).toBe('Welcome!');
+      expect(result.role).toBe('assistant');
+    });
+
+    it('should return undefined role when not specified', async () => {
+      slashCommandRegistry.register({
+        command: 'norole',
+        description: 'No role command',
+        handler: () => ({ localMessage: 'Error occurred' }),
+      });
+
+      const result = await slashCommandRegistry.execute('/norole');
+      expect(result.handled).toBe(true);
+      expect(result.localMessage).toBe('Error occurred');
+      expect(result.role).toBeUndefined();
+    });
   });
 
   describe('integration scenarios', () => {
@@ -596,6 +622,67 @@ describe('SlashCommandRegistry', () => {
       expect(consoleWarnSpy).toHaveBeenCalledWith('Slash command "/test" is already registered.');
 
       consoleWarnSpy.mockRestore();
+    });
+  });
+
+  describe('onChange', () => {
+    it('should notify listener on register', () => {
+      const listener = jest.fn();
+      slashCommandRegistry.onChange(listener);
+
+      slashCommandRegistry.register({
+        command: 'test',
+        description: 'Test',
+        handler: () => 'result',
+      });
+
+      expect(listener).toHaveBeenCalledTimes(1);
+    });
+
+    it('should notify listener on unregister', () => {
+      slashCommandRegistry.register({
+        command: 'test',
+        description: 'Test',
+        handler: () => 'result',
+      });
+
+      const listener = jest.fn();
+      slashCommandRegistry.onChange(listener);
+
+      slashCommandRegistry.unregister('test');
+
+      expect(listener).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not notify after unsubscribe', () => {
+      const listener = jest.fn();
+      const unsubscribe = slashCommandRegistry.onChange(listener);
+
+      unsubscribe();
+
+      slashCommandRegistry.register({
+        command: 'test',
+        description: 'Test',
+        handler: () => 'result',
+      });
+
+      expect(listener).not.toHaveBeenCalled();
+    });
+
+    it('should notify multiple listeners', () => {
+      const listener1 = jest.fn();
+      const listener2 = jest.fn();
+      slashCommandRegistry.onChange(listener1);
+      slashCommandRegistry.onChange(listener2);
+
+      slashCommandRegistry.register({
+        command: 'test',
+        description: 'Test',
+        handler: () => 'result',
+      });
+
+      expect(listener1).toHaveBeenCalledTimes(1);
+      expect(listener2).toHaveBeenCalledTimes(1);
     });
   });
 });

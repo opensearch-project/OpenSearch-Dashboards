@@ -130,7 +130,7 @@ export class DataSourceMultiSelectable extends React.Component<
       });
 
       this.onSelectedDataSources(selectedOptions);
-    } catch (error) {
+    } catch {
       handleDataSourceFetchError(
         this.onError.bind(this),
         this.props.notifications,

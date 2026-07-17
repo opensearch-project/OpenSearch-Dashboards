@@ -84,7 +84,7 @@ export function setupSessionExpiredInterceptor(http: HttpSetup, notifications: N
             // (e.g. navigation is blocked), subsequent 401s can still trigger
             // the toast and redirect flow again.
             isRedirecting = false;
-            window.location.href = redirectURL;
+            window.location.assign(redirectURL);
           }, SESSION_REDIRECT_DELAY_MS);
         }
       }

@@ -53,6 +53,7 @@ import {
   SavedObjectConfig,
 } from './saved_objects_config';
 import { OpenSearchDashboardsRequest, InternalHttpServiceSetup } from '../http';
+import { Capabilities } from '../capabilities';
 import { SavedObjectsClientContract, SavedObjectsType, SavedObjectStatusMeta } from './types';
 import { ISavedObjectsRepository, SavedObjectsRepository } from './service/lib/repository';
 import {
@@ -171,6 +172,11 @@ export interface SavedObjectsServiceSetup {
    * Returns the maximum number of objects allowed for import or export operations.
    */
   getImportExportObjectLimit: () => number;
+
+  /**
+   * Returns whether saved objects permission control is enabled.
+   */
+  getPermissionControlEnabled: () => boolean;
 
   /**
    * Set the default {@link SavedObjectRepositoryFactoryProvider | factory provider} for creating Saved Objects repository.
@@ -297,8 +303,10 @@ export interface SavedObjectsStartDeps {
   pluginsInitialized?: boolean;
 }
 
-export class SavedObjectsService
-  implements CoreService<InternalSavedObjectsServiceSetup, InternalSavedObjectsServiceStart> {
+export class SavedObjectsService implements CoreService<
+  InternalSavedObjectsServiceSetup,
+  InternalSavedObjectsServiceStart
+> {
   private logger: Logger;
 
   private setupDeps?: SavedObjectsSetupDeps;
@@ -308,6 +316,7 @@ export class SavedObjectsService
 
   private migrator$ = new Subject<IOpenSearchDashboardsMigrator>();
   private typeRegistry = new SavedObjectTypeRegistry();
+  private capabilitiesResolver?: (request: OpenSearchDashboardsRequest) => Promise<Capabilities>;
   private started = false;
 
   private respositoryFactoryProvider?: SavedObjectRepositoryFactoryProvider;
@@ -322,6 +331,12 @@ export class SavedObjectsService
 
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger.get('savedobjects-service');
+  }
+
+  public setCapabilitiesResolver(
+    resolver: (request: OpenSearchDashboardsRequest) => Promise<Capabilities>
+  ) {
+    this.capabilitiesResolver = resolver;
   }
 
   public async setup(setupDeps: SavedObjectsSetupDeps): Promise<InternalSavedObjectsServiceSetup> {
@@ -371,6 +386,7 @@ export class SavedObjectsService
       logger: this.logger,
       config: this.config,
       migratorPromise: this.migrator$.pipe(first()).toPromise(),
+      getCapabilities: () => this.capabilitiesResolver,
     });
 
     return {
@@ -401,6 +417,7 @@ export class SavedObjectsService
         this.typeRegistry.registerType(type);
       },
       getImportExportObjectLimit: () => this.config!.maxImportExportSize,
+      getPermissionControlEnabled: () => this.config!.permission.enabled,
       setRepositoryFactoryProvider: (repositoryProvider) => {
         if (this.started) {
           throw new Error('cannot call `setRepositoryFactoryProvider` after service startup.');

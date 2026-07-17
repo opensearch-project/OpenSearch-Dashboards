@@ -10,7 +10,7 @@ import {
   mergeConfigs,
   pathToString,
 } from './utils';
-import { Request } from 'hapi__hapi';
+import { Request } from '@hapi/hapi';
 import { loggerMock } from '../../logging/logger.mock';
 import { DYNAMIC_APP_CONFIG_INDEX_PREFIX } from './constants';
 
@@ -176,7 +176,7 @@ describe('Utils', () => {
     ({ headers, requestMock, expectedMap }) => {
       const actualMap = createLocalStore(
         loggerMock.create(),
-        (requestMock as unknown) as Request,
+        requestMock as unknown as Request,
         headers
       );
       expect(actualMap.size).toEqual(expectedMap.size);

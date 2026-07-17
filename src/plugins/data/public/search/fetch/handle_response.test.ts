@@ -30,8 +30,6 @@
 
 import { handleResponse } from './handle_response';
 
-// Temporary disable eslint, will be removed after moving to new platform folder
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { notificationServiceMock } from '../../../../../core/public/notifications/notifications_service.mock';
 import { setNotifications } from '../../services';
 import { SearchResponse } from 'elasticsearch';
@@ -59,7 +57,7 @@ describe('handleResponse', () => {
     } as SearchResponse<any>;
     const result = handleResponse(request, response);
     expect(result).toBe(response);
-    expect(notifications.toasts.addWarning).toBeCalled();
+    expect(notifications.toasts.addWarning).toHaveBeenCalled();
     expect((notifications.toasts.addWarning as jest.Mock).mock.calls[0][0].title).toMatch(
       'request timed out'
     );
@@ -77,7 +75,7 @@ describe('handleResponse', () => {
     } as SearchResponse<any>;
     const result = handleResponse(request, response);
     expect(result).toBe(response);
-    expect(notifications.toasts.addWarning).toBeCalled();
+    expect(notifications.toasts.addWarning).toHaveBeenCalled();
     expect((notifications.toasts.addWarning as jest.Mock).mock.calls[0][0].title).toMatch(
       'shards failed'
     );

@@ -144,13 +144,13 @@ describe('CreateDatasetWizard', () => {
     });
     const clear = jest.fn();
     mockContext.data.dataViews.clearCache = clear;
-    const dataset = ({
+    const dataset = {
       id: '1',
       title: 'my-fake-index-pattern',
       timeFieldName: 'timestamp',
       fields: [],
       _fetchFields: jest.fn(),
-    } as unknown) as DataView;
+    } as unknown as DataView;
     mockContext.data.dataViews.createAndSave = newDatasetAndSave;
     mockContext.data.dataViews.setDefault = jest.fn();
 
@@ -162,9 +162,9 @@ describe('CreateDatasetWizard', () => {
 
     component.setState({ dataset: 'foo' });
     await (component.instance() as CreateDatasetWizard).createDataset(undefined, 'id', undefined);
-    expect(newDatasetAndSave).toBeCalled();
-    expect(clear).toBeCalledWith('1');
-    expect(routeComponentPropsMock.history.push).toBeCalledWith(`/patterns/1`);
+    expect(newDatasetAndSave).toHaveBeenCalled();
+    expect(clear).toHaveBeenCalledWith('1');
+    expect(routeComponentPropsMock.history.push).toHaveBeenCalledWith(`/patterns/1`);
   });
 
   test('should render normally when use update UX', () => {

@@ -17,7 +17,7 @@ import {
   Dataset,
 } from '../../../../../common';
 import { DatasetTypeConfig } from '../types';
-import { getIndexPatterns } from '../../../../services';
+import { getIndexPatterns, getQueryService } from '../../../../services';
 import {
   getRemoteClusterConnections,
   getRemoteClusterIndices,
@@ -42,6 +42,12 @@ export const indexTypeConfig: DatasetTypeConfig = {
     const index = path[path.length - 1];
     const dataSource = path.find((ds) => ds.type === 'DATA_SOURCE');
     const indexMeta = index.meta as DataStructureCustomMeta;
+    const dataSourceMeta = dataSource?.meta as DataStructureCustomMeta | undefined;
+    // Prefer the engine type/version carried on the DATA_SOURCE node's meta; fall back to the leaf
+    // index's meta (stashed defensively in `fetch`) in case the node's meta did not survive.
+    const dataSourceEngineType =
+      dataSourceMeta?.dataSourceEngineType ?? indexMeta?.dataSourceEngineType;
+    const dataSourceVersion = dataSourceMeta?.dataSourceVersion ?? indexMeta?.dataSourceVersion;
 
     // Build dataset title from multi-selections (wildcards and/or exact indices)
     let datasetTitle = index.title;
@@ -75,6 +81,8 @@ export const indexTypeConfig: DatasetTypeConfig = {
             id: dataSource.id,
             title: dataSource.title,
             type: dataSource.type,
+            engineType: dataSourceEngineType,
+            version: dataSourceVersion ?? '',
           }
         : DEFAULT_DATA.STRUCTURES.LOCAL_DATASOURCE,
     } as Dataset;
@@ -85,6 +93,11 @@ export const indexTypeConfig: DatasetTypeConfig = {
     switch (dataStructure.type) {
       case 'DATA_SOURCE': {
         const indices = await fetchAllIndices(dataStructure, services.http); // contains all indices
+
+        // Defensively stash the engine type + version (carried on the DATA_SOURCE node's meta) onto
+        // each child INDEX leaf, so `toDataset` can recover them even if the DATA_SOURCE node's meta
+        // does not survive to selection time.
+        const dataSourceMeta = dataStructure.meta as DataStructureCustomMeta | undefined;
 
         return {
           ...dataStructure,
@@ -98,6 +111,8 @@ export const indexTypeConfig: DatasetTypeConfig = {
             meta: {
               type: DATA_STRUCTURE_META_TYPES.CUSTOM,
               isRemoteIndex: index.isRemoteIndex,
+              dataSourceEngineType: dataSourceMeta?.dataSourceEngineType,
+              dataSourceVersion: dataSourceMeta?.dataSourceVersion,
             },
           })),
         };
@@ -105,12 +120,29 @@ export const indexTypeConfig: DatasetTypeConfig = {
 
       default: {
         const dataSources = await fetchDataSources(services.savedObjects.client, services.http);
-        // enrich dataSources with remoteConnections
+        const datasetService = getQueryService().queryString.getDatasetService();
+        const filteredDataSources = dataSources.filter((ds) => {
+          const meta = ds.meta as DataStructureCustomMeta | undefined;
+          if (!meta?.dataSourceEngineType && !meta?.dataSourceVersion) return true;
+          const fakeDataset: Dataset = {
+            id: ds.id,
+            title: ds.title,
+            type: DEFAULT_DATA.SET_TYPES.INDEX,
+            dataSource: {
+              id: ds.id,
+              title: ds.title,
+              type: meta.dataSourceEngineType ?? '',
+              engineType: meta.dataSourceEngineType,
+              version: meta.dataSourceVersion ?? '',
+            },
+          };
+          return datasetService.isDatasetAllowed(fakeDataset, services.appName);
+        });
         return {
           ...dataStructure,
           columnHeader: 'Data sources',
           hasNext: true,
-          children: dataSources,
+          children: filteredDataSources,
         };
       }
     }
@@ -129,7 +161,7 @@ export const indexTypeConfig: DatasetTypeConfig = {
   },
 
   supportedLanguages: (dataset?: Dataset): string[] => {
-    return ['SQL', 'PPL'];
+    return ['PPL', 'SQL'];
   },
 
   getSampleQueries: (dataset?: Dataset, language?: string) => {
@@ -196,32 +228,40 @@ const mapDataSourceSavedObjectToDataStructure = (
     .filter((connection) => connection.parentId === dataSourceId)
     .map((connection) => connection.connectionsAliases)?.[0]; // Each parentdatasourcce will have only one remote connections entry hence getting the first element
 
+  // Always carry the engine type + version through CUSTOM meta so `toDataset` can populate
+  // `dataSource.engineType`/`dataSource.version` for per-dataset language gating. Merge the
+  // cross-cluster-search icon when remote connections exist.
+  const meta: DataStructureCustomMeta = {
+    type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+    dataSourceEngineType: savedObject.attributes.dataSourceEngineType,
+    dataSourceVersion: savedObject.attributes.dataSourceVersion,
+    ...(relevantRemoteConnections && relevantRemoteConnections.length > 0
+      ? {
+          additionalAppendIcons: [
+            {
+              type: 'iInCircle',
+              tooltip: i18n.translate(
+                'data.query.queryString.datasetExplorer.index.additonalmetaIcon.tooltip',
+                {
+                  defaultMessage:
+                    'Connnected with {remoteConnections} indexes using Cross cluster search.',
+                  values: {
+                    remoteConnections: relevantRemoteConnections.join(','),
+                  },
+                }
+              ),
+            },
+          ],
+        }
+      : {}),
+  };
+
   return {
     id: dataSourceId,
     title: dataSourceTitle,
     type: 'DATA_SOURCE',
     remoteConnections: relevantRemoteConnections,
-    meta:
-      relevantRemoteConnections && relevantRemoteConnections.length > 0
-        ? {
-            type: DATA_STRUCTURE_META_TYPES.CUSTOM,
-            additionalAppendIcons: [
-              {
-                type: 'iInCircle',
-                tooltip: i18n.translate(
-                  'data.query.queryString.datasetExplorer.index.additonalmetaIcon.tooltip',
-                  {
-                    defaultMessage:
-                      'Connnected with {remoteConnections} indexes using Cross cluster search.',
-                    values: {
-                      remoteConnections: relevantRemoteConnections.join(','),
-                    },
-                  }
-                ),
-              },
-            ],
-          }
-        : undefined,
+    meta,
   };
 };
 
@@ -272,7 +312,7 @@ const fetchIndices = async (dataStructure: DataStructure, http: HttpSetup): Prom
     }
 
     return indices.sort();
-  } catch (error) {
+  } catch {
     return [];
   }
 };

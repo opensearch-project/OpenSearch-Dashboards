@@ -60,11 +60,11 @@ describe('extractReferences()', () => {
 
 describe('injectReferences()', () => {
   test('injects nothing when visName is null', () => {
-    const context = ({
+    const context = {
       id: '1',
       pluginResourceId: 'test-resource-id',
       visLayerExpressionFn: 'test-fn',
-    } as unknown) as AugmentVisSavedObject;
+    } as unknown as AugmentVisSavedObject;
     injectReferences(context, []);
     expect(context).toMatchInlineSnapshot(`
       Object {
@@ -76,12 +76,12 @@ describe('injectReferences()', () => {
   });
 
   test('injects references into context', () => {
-    const context = ({
+    const context = {
       id: '1',
       pluginResourceId: 'test-resource-id',
       visLayerExpressionFn: 'test-fn',
       visName: VIS_REFERENCE_NAME,
-    } as unknown) as AugmentVisSavedObject;
+    } as unknown as AugmentVisSavedObject;
     const references = [
       {
         name: VIS_REFERENCE_NAME,
@@ -101,14 +101,14 @@ describe('injectReferences()', () => {
   });
 
   test(`fails when it can't find the saved object reference in the array`, () => {
-    const context = ({
+    const context = {
       id: '1',
       pluginResourceId: 'test-resource-id',
       visLayerExpressionFn: 'test-fn',
       visName: VIS_REFERENCE_NAME,
-    } as unknown) as AugmentVisSavedObject;
+    } as unknown as AugmentVisSavedObject;
     expect(() => injectReferences(context, [])).toThrowErrorMatchingInlineSnapshot(
-      `"Could not find visualization reference \\"${VIS_REFERENCE_NAME}\\""`
+      `"Could not find visualization reference \\"visualization_0\\""`
     );
   });
 });

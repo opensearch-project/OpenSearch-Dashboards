@@ -226,6 +226,15 @@ export interface PluginManifest {
    * engines are added.
    */
   readonly unsupportedOSDataSourceEngineTypes?: readonly string[];
+
+  /**
+   * Specifies minimum data source engine versions required by this plugin. Data sources whose
+   * engine version is below the declared minimum for their engine type will be hidden from
+   * selectors in this plugin's context.
+   *
+   * Keyed by engine type (e.g. "Elasticsearch"), value is a semver minimum (e.g. "7.9.0").
+   */
+  readonly minDataSourceEngineVersions?: Readonly<Record<string, string>>;
 }
 
 /**
@@ -304,7 +313,7 @@ export interface Plugin<
   TSetup = void,
   TStart = void,
   TPluginsSetup extends object = object,
-  TPluginsStart extends object = object
+  TPluginsStart extends object = object,
 > {
   setup(core: CoreSetup, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
   start(core: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart>;
@@ -332,11 +341,11 @@ export const SharedGlobalConfigKeys = {
 export type SharedGlobalConfig = RecursiveReadonly<{
   opensearchDashboards: Pick<
     OpenSearchDashboardsConfigType,
-    typeof SharedGlobalConfigKeys.opensearchDashboards[number]
+    (typeof SharedGlobalConfigKeys.opensearchDashboards)[number]
   >;
-  opensearch: Pick<OpenSearchConfigType, typeof SharedGlobalConfigKeys.opensearch[number]>;
-  path: Pick<PathConfigType, typeof SharedGlobalConfigKeys.path[number]>;
-  savedObjects: Pick<SavedObjectsConfigType, typeof SharedGlobalConfigKeys.savedObjects[number]>;
+  opensearch: Pick<OpenSearchConfigType, (typeof SharedGlobalConfigKeys.opensearch)[number]>;
+  path: Pick<PathConfigType, (typeof SharedGlobalConfigKeys.path)[number]>;
+  savedObjects: Pick<SavedObjectsConfigType, (typeof SharedGlobalConfigKeys.savedObjects)[number]>;
 }>;
 
 /**
@@ -369,5 +378,5 @@ export type PluginInitializer<
   TSetup,
   TStart,
   TPluginsSetup extends object = object,
-  TPluginsStart extends object = object
+  TPluginsStart extends object = object,
 > = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;

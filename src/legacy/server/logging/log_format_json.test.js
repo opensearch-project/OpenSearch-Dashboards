@@ -30,7 +30,6 @@
 
 import moment from 'moment';
 
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { attachMetaData } from '../../../../src/core/server/legacy/logging/legacy_logging_server';
 import { createListStream, createPromiseFromStreams } from '../../../core/server/utils';
 

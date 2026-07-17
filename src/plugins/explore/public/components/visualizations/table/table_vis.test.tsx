@@ -191,16 +191,12 @@ describe('TableVis', () => {
       name: 'Column 1',
       column: 'column1',
       schema: VisFieldType.Numerical,
-      validValuesCount: 2,
-      uniqueValuesCount: 2,
     },
     {
       id: 2,
       name: 'Column 2',
       column: 'column2',
       schema: VisFieldType.Categorical,
-      validValuesCount: 2,
-      uniqueValuesCount: 2,
     },
   ];
   const mockRows = [

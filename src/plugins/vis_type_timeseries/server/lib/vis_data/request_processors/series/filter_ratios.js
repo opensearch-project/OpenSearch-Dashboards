@@ -68,7 +68,7 @@ export function ratios(req, panel, series, opensearchQueryConfig, indexPatternOb
               type: metric.metric_agg,
               field: metric.field,
             });
-          } catch (e) {
+          } catch {
             metricAgg = {};
           }
           const aggBody = { metric: metricAgg };

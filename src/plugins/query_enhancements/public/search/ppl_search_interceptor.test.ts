@@ -1150,6 +1150,28 @@ describe('PPLSearchInterceptor', () => {
       });
     });
 
+    it('should return undefined for Elasticsearch data sources (no span() support)', () => {
+      const esQuery = {
+        language: 'PPL',
+        query: 'source=test_index',
+        dataset: {
+          type: 'INDEX_PATTERN',
+          timeFieldName: '@timestamp',
+          dataSource: {
+            id: 'es-1',
+            title: 'escluster-710',
+            type: 'Elasticsearch',
+            engineType: 'Elasticsearch',
+            version: '7.10.2',
+          },
+        },
+      };
+
+      const result = (pplSearchInterceptor as any).getAggConfig(mockRequest, esQuery);
+
+      expect(result).toBeUndefined();
+    });
+
     it('should build agg config for date_histogram with calendar_interval', () => {
       const requestWithCalendarInterval = {
         params: {

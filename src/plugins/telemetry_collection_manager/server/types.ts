@@ -132,7 +132,7 @@ export type ClusterDetailsGetter<CustomContext extends Record<string, any> = {}>
 ) => Promise<ClusterDetails[]>;
 export type StatsGetter<
   CustomContext extends Record<string, any> = {},
-  T extends BasicStatsPayload = BasicStatsPayload
+  T extends BasicStatsPayload = BasicStatsPayload,
 > = (
   clustersDetails: ClusterDetails[],
   config: StatsCollectionConfig,
@@ -146,7 +146,7 @@ export type LicenseGetter<CustomContext extends Record<string, any> = {}> = (
 
 export interface CollectionConfig<
   CustomContext extends Record<string, any> = {},
-  T extends BasicStatsPayload = BasicStatsPayload
+  T extends BasicStatsPayload = BasicStatsPayload,
 > {
   title: string;
   priority: number;
@@ -160,7 +160,7 @@ export interface CollectionConfig<
 
 export interface Collection<
   CustomContext extends Record<string, any> = {},
-  T extends BasicStatsPayload = BasicStatsPayload
+  T extends BasicStatsPayload = BasicStatsPayload,
 > {
   customContext?: CustomContext;
   statsGetter: StatsGetter<CustomContext, T>;

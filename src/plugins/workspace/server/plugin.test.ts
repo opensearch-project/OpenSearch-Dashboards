@@ -65,7 +65,7 @@ describe('Workspace server plugin', () => {
         },
       }
     `);
-    expect(setupMock.savedObjects.addClientWrapper).toBeCalledTimes(5);
+    expect(setupMock.savedObjects.addClientWrapper).toHaveBeenCalledTimes(5);
 
     let registerSwitcher;
     let result;
@@ -106,8 +106,8 @@ describe('Workspace server plugin', () => {
       path: '/w/foo/app',
     });
     onPreRoutingFn(requestWithWorkspaceInUrl, httpServerMock.createResponseFactory(), toolKitMock);
-    expect(toolKitMock.rewriteUrl).toBeCalledWith('http://localhost/app');
-    expect(toolKitMock.next).toBeCalledTimes(0);
+    expect(toolKitMock.rewriteUrl).toHaveBeenCalledWith('http://localhost/app');
+    expect(toolKitMock.next).toHaveBeenCalledTimes(0);
     expect(getWorkspaceState(requestWithWorkspaceInUrl)).toEqual({
       requestWorkspaceId: 'foo',
     });
@@ -120,7 +120,7 @@ describe('Workspace server plugin', () => {
       httpServerMock.createResponseFactory(),
       toolKitMock
     );
-    expect(toolKitMock.next).toBeCalledTimes(1);
+    expect(toolKitMock.next).toHaveBeenCalledTimes(1);
   });
 
   describe('#setupPermission', () => {
@@ -165,7 +165,7 @@ describe('Workspace server plugin', () => {
         httpServerMock.createResponseFactory(),
         toolKitMock
       );
-      expect(toolKitMock.next).toBeCalledTimes(1);
+      expect(toolKitMock.next).toHaveBeenCalledTimes(1);
     });
 
     it('with dynamic config and user is dashboard admin', async () => {
@@ -185,7 +185,7 @@ describe('Workspace server plugin', () => {
       expect(getWorkspaceState(requestWithWorkspaceInUrl)).toEqual({
         isDashboardAdmin: true,
       });
-      expect(toolKitMock.next).toBeCalledTimes(1);
+      expect(toolKitMock.next).toHaveBeenCalledTimes(1);
     });
 
     it('with dynamic config and user is not dashboard admin', async () => {
@@ -205,7 +205,7 @@ describe('Workspace server plugin', () => {
       expect(getWorkspaceState(requestWithWorkspaceInUrl)).toEqual({
         isDashboardAdmin: false,
       });
-      expect(toolKitMock.next).toBeCalledTimes(1);
+      expect(toolKitMock.next).toHaveBeenCalledTimes(1);
     });
 
     it('with configuring wildcard * and anyone will be OSD admin', async () => {
@@ -231,7 +231,7 @@ describe('Workspace server plugin', () => {
       expect(getWorkspaceState(requestWithWorkspaceInUrl)).toEqual({
         isDashboardAdmin: true,
       });
-      expect(toolKitMock.next).toBeCalledTimes(1);
+      expect(toolKitMock.next).toHaveBeenCalledTimes(1);
     });
 
     it('without configuring yml config and anyone will be not OSD admin', async () => {
@@ -257,7 +257,7 @@ describe('Workspace server plugin', () => {
       expect(getWorkspaceState(requestWithWorkspaceInUrl)).toEqual({
         isDashboardAdmin: false,
       });
-      expect(toolKitMock.next).toBeCalledTimes(1);
+      expect(toolKitMock.next).toHaveBeenCalledTimes(1);
     });
 
     it('uninstall security plugin and anyone will be OSD admin', async () => {
@@ -275,7 +275,7 @@ describe('Workspace server plugin', () => {
       expect(getWorkspaceState(requestWithWorkspaceInUrl)).toEqual({
         isDashboardAdmin: true,
       });
-      expect(toolKitMock.next).toBeCalledTimes(1);
+      expect(toolKitMock.next).toHaveBeenCalledTimes(1);
     });
 
     it('should clear saved objects cache', async () => {
@@ -326,7 +326,7 @@ describe('Workspace server plugin', () => {
 
         preResponse(nonDashboardAdminRequest, { statusCode: 200 }, toolKitMock);
 
-        expect(checkoutSpy).toBeCalled();
+        expect(checkoutSpy).toHaveBeenCalled();
         expect(getACLAuditor(nonDashboardAdminRequest)).toBeFalsy();
         expect(getClientCallAuditor(nonDashboardAdminRequest)).toBeFalsy();
       });
@@ -352,7 +352,7 @@ describe('Workspace server plugin', () => {
         }
         preResponse(dashboardAdminRequest, { statusCode: 200 }, toolKitMock);
 
-        expect(checkoutSpy).toBeCalledTimes(0);
+        expect(checkoutSpy).toHaveBeenCalledTimes(0);
       });
     });
   });
@@ -382,7 +382,7 @@ describe('Workspace server plugin', () => {
       const toolKitMock = httpServerMock.createToolkit();
 
       await registerOnPostAuthFn(request, response, toolKitMock);
-      expect(toolKitMock.next).toBeCalledTimes(1);
+      expect(toolKitMock.next).toHaveBeenCalledTimes(1);
     });
 
     it('with / request path and no workspaces', async () => {
@@ -393,7 +393,7 @@ describe('Workspace server plugin', () => {
       const toolKitMock = httpServerMock.createToolkit();
 
       await registerOnPostAuthFn(request, response, toolKitMock);
-      expect(response.redirected).toBeCalledWith({
+      expect(response.redirected).toHaveBeenCalledWith({
         headers: { location: '/mock-server-basepath/app/workspace_initial' },
       });
     });
@@ -416,7 +416,7 @@ describe('Workspace server plugin', () => {
       const toolKitMock = httpServerMock.createToolkit();
 
       await registerOnPostAuthFn(request, response, toolKitMock);
-      expect(response.redirected).toBeCalledWith({
+      expect(response.redirected).toHaveBeenCalledWith({
         headers: {
           location: '/mock-server-basepath/w/workspace-1/app/workspace_navigation',
         },
@@ -444,7 +444,7 @@ describe('Workspace server plugin', () => {
       const toolKitMock = httpServerMock.createToolkit();
 
       await registerOnPostAuthFn(request, response, toolKitMock);
-      expect(response.redirected).toBeCalledWith({
+      expect(response.redirected).toHaveBeenCalledWith({
         headers: {
           location: '/mock-server-basepath/app/home',
         },
@@ -489,11 +489,106 @@ describe('Workspace server plugin', () => {
       const toolKitMock = httpServerMock.createToolkit();
 
       await registerOnPostAuthFn(request, response, toolKitMock);
-      expect(response.redirected).toBeCalledWith({
+      expect(response.redirected).toHaveBeenCalledWith({
         headers: {
           location: '/mock-server-basepath/w/defaultWorkspace/app/workspace_navigation',
         },
       });
+    });
+
+    it('with / request path, defaultRoute set, and no workspaces', async () => {
+      const request = httpServerMock.createOpenSearchDashboardsRequest({
+        path: '/',
+      });
+      setupMock.getStartServices.mockResolvedValue([
+        {
+          ...coreMock.createStart(),
+          uiSettings: {
+            asScopedToClient: () => ({
+              ...uiSettingsMock,
+              get: jest.fn().mockResolvedValue('/app/dashboards'),
+            }),
+          },
+        },
+        {},
+        {},
+      ]);
+      await workspacePlugin.setup(setupMock, mockDeps);
+      const toolKitMock = httpServerMock.createToolkit();
+
+      await registerOnPostAuthFn(request, response, toolKitMock);
+      expect(toolKitMock.next).toHaveBeenCalledTimes(1);
+    });
+
+    it('with / request path, defaultRoute set, and one workspace', async () => {
+      const request = httpServerMock.createOpenSearchDashboardsRequest({
+        path: '/',
+      });
+      setupMock.getStartServices.mockResolvedValue([
+        {
+          ...coreMock.createStart(),
+          uiSettings: {
+            asScopedToClient: () => ({
+              ...uiSettingsMock,
+              get: jest.fn().mockResolvedValue('/app/dashboards'),
+            }),
+          },
+        },
+        {},
+        {},
+      ]);
+      const workspaceSetup = await workspacePlugin.setup(setupMock, mockDeps);
+      const client = workspaceSetup.client;
+      jest.spyOn(client, 'list').mockResolvedValue({
+        success: true,
+        result: {
+          total: 2,
+          per_page: 100,
+          page: 1,
+          workspaces: [{ id: 'workspace-1', name: 'workspace-1' }],
+        },
+      });
+      const toolKitMock = httpServerMock.createToolkit();
+
+      await registerOnPostAuthFn(request, response, toolKitMock);
+      expect(toolKitMock.next).toHaveBeenCalledTimes(1);
+    });
+
+    it('with / request path, defaultRoute set, and more than one workspaces', async () => {
+      const request = httpServerMock.createOpenSearchDashboardsRequest({
+        path: '/',
+      });
+      setupMock.getStartServices.mockResolvedValue([
+        {
+          ...coreMock.createStart(),
+          uiSettings: {
+            asScopedToClient: () => ({
+              ...uiSettingsMock,
+              get: jest.fn().mockResolvedValue('/app/dashboards'),
+            }),
+          },
+        },
+        {},
+        {},
+      ]);
+      const workspaceSetup = await workspacePlugin.setup(setupMock, mockDeps);
+      const client = workspaceSetup.client;
+      jest.spyOn(client, 'list').mockResolvedValue({
+        success: true,
+        result: {
+          total: 2,
+          per_page: 100,
+          page: 1,
+          workspaces: [
+            { id: 'workspace-1', name: 'workspace-1' },
+            { id: 'workspace-2', name: 'workspace-2' },
+          ],
+        },
+      });
+      const toolKitMock = httpServerMock.createToolkit();
+
+      await registerOnPostAuthFn(request, response, toolKitMock);
+      expect(toolKitMock.next).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -510,7 +605,7 @@ describe('Workspace server plugin', () => {
     const workspacePlugin = new WorkspacePlugin(initializerContextConfigMock);
     await workspacePlugin.setup(setupMock, mockDeps);
     await workspacePlugin.start(startMock);
-    expect(startMock.savedObjects.createSerializer).toBeCalledTimes(1);
+    expect(startMock.savedObjects.createSerializer).toHaveBeenCalledTimes(1);
   });
 
   describe('#authorizeWorkspace', () => {

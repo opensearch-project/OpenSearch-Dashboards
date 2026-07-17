@@ -11,11 +11,7 @@ import { VisualizationRegistryService } from '../../services/visualization_regis
 // Register all built-in visualizations into the singleton registry
 new VisualizationRegistryService();
 
-const createMockVisColumns = (
-  size: number,
-  type: VisFieldType,
-  options = { validValuesCount: 1, uniqueValuesCount: 1 }
-) => {
+const createMockVisColumns = (size: number, type: VisFieldType) => {
   const result: VisColumn[] = [];
   for (let i = 0; i < size; i++) {
     result.push({
@@ -23,7 +19,6 @@ const createMockVisColumns = (
       name: `name-${type}-${i}`,
       schema: type,
       column: `field-${type}-${i}`,
-      ...options,
     });
   }
   return result;
@@ -322,10 +317,7 @@ describe('VisualizationBuilder', () => {
 
         // Multi data points won't work with metric
         builder.onDataChange({
-          numericalColumns: createMockVisColumns(2, VisFieldType.Numerical, {
-            validValuesCount: 2,
-            uniqueValuesCount: 2,
-          }),
+          numericalColumns: createMockVisColumns(2, VisFieldType.Numerical),
           categoricalColumns: [],
           dateColumns: [],
           transformedData: [],
@@ -357,10 +349,7 @@ describe('VisualizationBuilder', () => {
         });
 
         builder.onDataChange({
-          numericalColumns: createMockVisColumns(2, VisFieldType.Numerical, {
-            validValuesCount: 2,
-            uniqueValuesCount: 2,
-          }),
+          numericalColumns: createMockVisColumns(2, VisFieldType.Numerical),
           categoricalColumns: [],
           dateColumns: [],
           transformedData: [],
@@ -392,10 +381,7 @@ describe('VisualizationBuilder', () => {
       });
 
       builder.onDataChange({
-        numericalColumns: createMockVisColumns(2, VisFieldType.Numerical, {
-          validValuesCount: 2,
-          uniqueValuesCount: 2,
-        }),
+        numericalColumns: createMockVisColumns(2, VisFieldType.Numerical),
         categoricalColumns: [],
         dateColumns: [],
         transformedData: [],
@@ -569,29 +555,25 @@ describe('VisualizationBuilder', () => {
     expect(builder.data$.value).toEqual({
       categoricalColumns: [
         {
-          column: 'field-1',
+          column: 'name',
           id: 1,
           name: 'name',
           schema: 'categorical',
-          uniqueValuesCount: 1,
-          validValuesCount: 1,
         },
       ],
       dateColumns: [],
       numericalColumns: [
         {
-          column: 'field-0',
+          column: 'age',
           id: 0,
           name: 'age',
           schema: 'numerical',
-          uniqueValuesCount: 1,
-          validValuesCount: 1,
         },
       ],
       transformedData: [
         {
-          'field-0': 10,
-          'field-1': 'name',
+          age: 10,
+          name: 'name',
         },
       ],
       unknownColumns: [],

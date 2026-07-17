@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { render } from '@testing-library/react';
+import { render, act } from '@testing-library/react';
 import { ChatMessages } from './chat_messages';
 import { ChatLayoutMode } from '../types';
 import type { Message, AssistantMessage, ToolMessage, UserMessage } from '../../common/types';
@@ -89,12 +89,48 @@ describe('ChatMessages', () => {
         <ChatMessages {...defaultProps} onShowHistory={onShowHistory} />
       );
 
-      // Verify all starter suggestions are still present
+      // Verify non-tool-gated starter suggestions are present
       expect(getByText('Ask questions about your data')).toBeTruthy();
-      expect(getByText('/investigate an issue')).toBeTruthy();
       expect(getByText('Explain a concept')).toBeTruthy();
+      // /investigate card is hidden when create_investigation tool is not registered
+      expect(queryByText('/investigate an issue')).toBeNull();
       // RecentSessions should not render without required props
       expect(queryByText('RECENT')).toBeNull();
+    });
+
+    it('should show /investigate card when create_investigation tool is registered', () => {
+      const service = AssistantActionService.getInstance();
+      service.registerAction({
+        name: 'create_investigation',
+        description: 'Create an investigation',
+        parameters: { type: 'object', properties: {}, required: [] },
+      });
+
+      const { getByText } = render(<ChatMessages {...defaultProps} />);
+
+      expect(getByText('/investigate an issue')).toBeTruthy();
+
+      // Cleanup
+      service.unregisterAction('create_investigation');
+    });
+
+    it('should hide /investigate card when create_investigation tool is unregistered', () => {
+      const service = AssistantActionService.getInstance();
+      service.registerAction({
+        name: 'create_investigation',
+        description: 'Create an investigation',
+        parameters: { type: 'object', properties: {}, required: [] },
+      });
+
+      const { queryByText } = render(<ChatMessages {...defaultProps} />);
+      expect(queryByText('/investigate an issue')).toBeTruthy();
+
+      // Unregister the tool within act() to flush state updates
+      act(() => {
+        service.unregisterAction('create_investigation');
+      });
+
+      expect(queryByText('/investigate an issue')).toBeNull();
     });
 
     it('should render RecentSessions component when all required props are provided', async () => {
@@ -204,14 +240,14 @@ describe('ChatMessages', () => {
 
     it('should render assistant messages with array content', () => {
       const timeline: Message[] = [
-        ({
+        {
           id: '1',
           role: 'assistant',
           content: [
             { type: 'text', text: 'First part' },
             { type: 'text', text: 'Second part' },
           ],
-        } as unknown) as AssistantMessage, // Force type casting for the corner case.
+        } as unknown as AssistantMessage, // Force type casting for the corner case.
       ];
 
       const { getAllByTestId } = render(<ChatMessages {...defaultProps} timeline={timeline} />);
@@ -260,7 +296,7 @@ describe('ChatMessages', () => {
     it('should not render assistant message with null/undefined content', () => {
       const timeline: Message[] = [
         { id: '1', role: 'user', content: 'Hello' },
-        ({ id: '2', role: 'assistant', content: undefined } as unknown) as AssistantMessage,
+        { id: '2', role: 'assistant', content: undefined } as unknown as AssistantMessage,
       ];
 
       const { getAllByTestId } = render(<ChatMessages {...defaultProps} timeline={timeline} />);
@@ -272,7 +308,7 @@ describe('ChatMessages', () => {
     it('should handle assistant message with empty array content', () => {
       const timeline: Message[] = [
         { id: '1', role: 'user', content: 'Hello' },
-        ({ id: '2', role: 'assistant', content: [] } as unknown) as AssistantMessage,
+        { id: '2', role: 'assistant', content: [] } as unknown as AssistantMessage,
       ];
 
       const { getAllByTestId } = render(<ChatMessages {...defaultProps} timeline={timeline} />);

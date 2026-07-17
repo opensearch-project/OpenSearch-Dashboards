@@ -17,14 +17,17 @@ import {
   COLLABORATOR_ID_INPUT_LABEL_ID,
 } from './workspace_collaborator_input';
 
-export interface WorkspaceCollaboratorInner
-  extends Pick<WorkspaceCollaborator, 'collaboratorId' | 'accessLevel'> {
+export interface WorkspaceCollaboratorInner extends Pick<
+  WorkspaceCollaborator,
+  'collaboratorId' | 'accessLevel'
+> {
   id: number;
 }
 
 export interface WorkspaceCollaboratorsPanelProps {
   label: string;
   errors?: { [key: number]: string };
+  onErrorsChange?: (errors: { [key: number]: string }) => void;
   description?: string;
   collaborators: WorkspaceCollaboratorInner[];
   onChange: (value: WorkspaceCollaboratorInner[]) => void;
@@ -37,6 +40,7 @@ export interface WorkspaceCollaboratorsPanelProps {
 export const WorkspaceCollaboratorsPanel = ({
   label,
   errors,
+  onErrorsChange,
   description,
   collaborators,
   addAnotherButtonLabel,
@@ -80,6 +84,18 @@ export const WorkspaceCollaboratorsPanel = ({
     onChange([...collaborators.slice(0, index), ...collaborators.slice(index + 1)]);
   };
 
+  const handleSearchError = (errorMessage: string | undefined, index: number) => {
+    const id = collaborators[index]?.id;
+    if (id === undefined) return;
+    const updated = { ...(errors ?? {}) };
+    if (errorMessage) {
+      updated[id] = errorMessage;
+    } else {
+      delete updated[id];
+    }
+    onErrorsChange?.(updated);
+  };
+
   return (
     <>
       {collaborators.length > 0 && (
@@ -112,6 +128,7 @@ export const WorkspaceCollaboratorsPanel = ({
             onDelete={handleDelete}
             collaboratorIdInputPlaceholder={collaboratorIdInputPlaceholder}
             error={errors?.[item.id]}
+            onSearchError={handleSearchError}
             identitySource={identitySource}
             http={http}
           />

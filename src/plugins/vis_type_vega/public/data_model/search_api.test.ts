@@ -14,6 +14,14 @@ jest.mock('rxjs', () => ({
 
 jest.mock('../../../data/public', () => ({
   getSearchParamsFromRequest: jest.fn().mockImplementation((obj, _) => obj),
+  AnalyticEngineError: class AnalyticEngineError extends Error {
+    constructor() {
+      super(
+        'This data source uses Analytic Engine which does not support DSL queries. Use PPL-compatible features or switch to a standard OpenSearch data source.'
+      );
+      this.name = 'AnalyticEngineError';
+    }
+  },
 }));
 
 interface MockSearch {
@@ -61,7 +69,7 @@ describe('SearchAPI.search', () => {
   test('If MDS is disabled and there is no datasource, return params without datasource id', async () => {
     const searchAPI = getSearchAPI(false);
     const requests = [{ name: 'example-id' }];
-    const fetchParams = ((await searchAPI.search(requests)) as unknown) as MockSearch[];
+    const fetchParams = (await searchAPI.search(requests)) as unknown as MockSearch[];
     expect(fetchParams[0].params).toBe(requests[0]);
     expect(fetchParams[0].hasOwnProperty('dataSourceId')).toBe(false);
   });
@@ -69,13 +77,13 @@ describe('SearchAPI.search', () => {
   test('If MDS is disabled and there is a datasource, it should throw an errorr', () => {
     const searchAPI = getSearchAPI(false);
     const requests = [{ name: 'example-id', data_source_name: 'non-existent-datasource' }];
-    expect(searchAPI.search(requests)).rejects.toThrowError();
+    expect(searchAPI.search(requests)).rejects.toThrow();
   });
 
   test('If MDS is enabled and there is no datasource, return params without datasource id', async () => {
     const searchAPI = getSearchAPI(true);
     const requests = [{ name: 'example-id' }];
-    const fetchParams = ((await searchAPI.search(requests)) as unknown) as MockSearch[];
+    const fetchParams = (await searchAPI.search(requests)) as unknown as MockSearch[];
     expect(fetchParams[0].params).toBe(requests[0]);
     expect(fetchParams[0].hasOwnProperty('dataSourceId')).toBe(false);
   });
@@ -83,7 +91,7 @@ describe('SearchAPI.search', () => {
   test('If MDS is enabled and there is a datasource, return params with datasource id', async () => {
     const searchAPI = getSearchAPI(true);
     const requests = [{ name: 'example-id', data_source_name: 'exampleName' }];
-    const fetchParams = ((await searchAPI.search(requests)) as unknown) as MockSearch[];
+    const fetchParams = (await searchAPI.search(requests)) as unknown as MockSearch[];
     expect(fetchParams[0].hasOwnProperty('params')).toBe(true);
     expect(fetchParams[0].dataSourceId).toBe('some-id');
   });
@@ -128,21 +136,21 @@ describe('SearchAPI.findDataSourceIdbyName', () => {
 
   test('If dataSource is disabled, throw error', () => {
     const searchAPI = getSearchAPI(false);
-    expect(searchAPI.findDataSourceIdbyName('nonexistentDataSource')).rejects.toThrowError(
+    expect(searchAPI.findDataSourceIdbyName('nonexistentDataSource')).rejects.toThrow(
       'data_source_name cannot be used because data_source.enabled is false'
     );
   });
 
   test('If dataSource is enabled but no matching dataSourceName, then throw error', () => {
     const searchAPI = getSearchAPI(true);
-    expect(searchAPI.findDataSourceIdbyName('nonexistentDataSource')).rejects.toThrowError(
+    expect(searchAPI.findDataSourceIdbyName('nonexistentDataSource')).rejects.toThrow(
       'Expected exactly 1 result for data_source_name "nonexistentDataSource" but got 0 results'
     );
   });
 
   test('If dataSource is enabled but multiple dataSourceNames, then throw error', () => {
     const searchAPI = getSearchAPI(true);
-    expect(searchAPI.findDataSourceIdbyName('duplicateDataSource')).rejects.toThrowError(
+    expect(searchAPI.findDataSourceIdbyName('duplicateDataSource')).rejects.toThrow(
       'Expected exactly 1 result for data_source_name "duplicateDataSource" but got 2 results'
     );
   });
@@ -187,6 +195,40 @@ describe('SearchAPI.findDataSourceIdbyName', () => {
 
     await expect(searchAPI.findDataSourceIdbyName('analyticEngineDataSource')).rejects.toThrow(
       'This data source uses Analytic Engine which does not support DSL queries'
+    );
+  });
+
+  test('If dataSource is AnalyticEngine but the query is PPL, return id without throwing', async () => {
+    const savedObjectsClientWithAnalyticEngine = {} as SavedObjectsClientContract;
+    savedObjectsClientWithAnalyticEngine.find = jest
+      .fn()
+      .mockImplementation((query: SavedObjectsFindOptions) => {
+        if (query.search === `"analyticEngineDataSource"`) {
+          return Promise.resolve({
+            total: 1,
+            savedObjects: [
+              {
+                id: 'ae-datasource-id',
+                attributes: {
+                  title: 'analyticEngineDataSource',
+                  dataSourceEngineType: 'AnalyticEngine',
+                },
+              },
+            ],
+          });
+        }
+        return Promise.resolve({ total: 0, savedObjects: [] });
+      });
+
+    const dependencies = {
+      savedObjectsClient: savedObjectsClientWithAnalyticEngine,
+      dataSourceEnabled: true,
+    } as SearchAPIDependencies;
+    const searchAPI = new SearchAPI(dependencies);
+
+    // AnalyticEngine supports PPL, so a PPL query must not be blocked.
+    expect(await searchAPI.findDataSourceIdbyName('analyticEngineDataSource', true)).toBe(
+      'ae-datasource-id'
     );
   });
 

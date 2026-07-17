@@ -21,12 +21,12 @@ describe('sidecar helper', () => {
 
     test('return clientX for touch event when horizontal', () => {
       expect(
-        getPosition(({ touches: [{ clientX: 1, clientY: 2 }] } as unknown) as TouchEvent, true)
+        getPosition({ touches: [{ clientX: 1, clientY: 2 }] } as unknown as TouchEvent, true)
       ).toEqual(1);
     });
     test('return clientY for touch event when not horizontal', () => {
       expect(
-        getPosition(({ touches: [{ clientX: 1, clientY: 2 }] } as unknown) as TouchEvent, false)
+        getPosition({ touches: [{ clientX: 1, clientY: 2 }] } as unknown as TouchEvent, false)
       ).toEqual(2);
     });
   });
@@ -44,9 +44,9 @@ describe('sidecar helper', () => {
     });
 
     test('return paddingLeft style object when dockedMode is left ', () => {
-      expect(
-        getOsdSidecarPaddingStyle({ ...props, dockedMode: SIDECAR_DOCKED_MODE.LEFT })
-      ).toEqual({ paddingLeft: 468 }); // 460 + 8
+      expect(getOsdSidecarPaddingStyle({ ...props, dockedMode: SIDECAR_DOCKED_MODE.LEFT })).toEqual(
+        { paddingLeft: 468 }
+      ); // 460 + 8
     });
 
     test('return null object when isHidden is true ', () => {

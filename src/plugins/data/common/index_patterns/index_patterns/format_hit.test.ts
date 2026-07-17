@@ -22,13 +22,13 @@ const defaultFormatMock = {
 };
 
 // this is a mock of index pattern that has just the things needed for this test
-const indexPatternMock = ({
+const indexPatternMock = {
   fields: {
     getByName: getByNameMock,
   },
   flattenHit: () => mockFlattenHit,
   getFormatterForField: () => ({ convert: indexPatternGetFormatterForFieldConvertMock }),
-} as unknown) as IndexPattern;
+} as unknown as IndexPattern;
 
 describe('formatHit', () => {
   let formatHit: any;

@@ -32,7 +32,7 @@ import { visualizationSavedObjectTypeMigrations } from './visualization_migratio
 import { SavedObjectMigrationContext, SavedObjectMigrationFn } from 'opensearch-dashboards/server';
 import { createReplaceSerializer } from '@osd/dev-utils';
 
-const savedObjectMigrationContext = (null as unknown) as SavedObjectMigrationContext;
+const savedObjectMigrationContext = null as unknown as SavedObjectMigrationContext;
 
 // ToDo: Remove this logic when Node 14 support is removed
 if (process.version.startsWith('v14.')) {
@@ -803,7 +803,7 @@ describe('migration visualization', () => {
           },
         },
       };
-      expect(() => migrate(doc)).toThrowError(/My Vis/);
+      expect(() => migrate(doc)).toThrow(/My Vis/);
     });
   });
 
@@ -955,11 +955,11 @@ describe('migration visualization', () => {
 
   describe('7.3.0', () => {
     const logMsgArr: string[] = [];
-    const logger = ({
+    const logger = {
       log: {
         warn: (msg: string) => logMsgArr.push(msg),
       },
-    } as unknown) as SavedObjectMigrationContext;
+    } as unknown as SavedObjectMigrationContext;
 
     const migrate = (doc: any) =>
       visualizationSavedObjectTypeMigrations['7.3.0'](
@@ -1669,10 +1669,8 @@ describe('migration visualization', () => {
       const migratedtimeSeriesDoc = migrate(timeSeriesDoc);
       expect(migratedtimeSeriesDoc.attributes.kibanaSavedObjectMeta.searchSourceJSON).toEqual('{}');
       const { kibanaSavedObjectMeta, ...attributes } = migratedtimeSeriesDoc.attributes;
-      const {
-        kibanaSavedObjectMeta: oldOpenSearchDashboardsSavedObjectMeta,
-        ...oldAttributes
-      } = migratedtimeSeriesDoc.attributes;
+      const { kibanaSavedObjectMeta: oldOpenSearchDashboardsSavedObjectMeta, ...oldAttributes } =
+        migratedtimeSeriesDoc.attributes;
       expect(attributes).toEqual(oldAttributes);
     });
   });

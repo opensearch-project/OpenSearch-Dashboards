@@ -31,7 +31,7 @@
 import { schema } from '@osd/config-schema';
 import { i18n } from '@osd/i18n';
 import { isRelativeUrl } from '@osd/std';
-import { UiSettingsParams } from '../../../types';
+import { UiSettingScope, UiSettingsParams } from '../../../types';
 
 export const getNavigationSettings = (): Record<string, UiSettingsParams> => {
   return {
@@ -78,6 +78,7 @@ export const getNavigationSettings = (): Record<string, UiSettingsParams> => {
         }),
       },
       category: ['appearance'],
+      scope: [UiSettingScope.USER, UiSettingScope.GLOBAL],
       schema: schema.oneOf([schema.literal('modern'), schema.literal('legacy')]),
     },
   };

@@ -96,14 +96,14 @@ describe('Search service', () => {
 
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
     const handler = mockRouter.post.mock.calls[0][1];
-    await handler((mockContext as unknown) as RequestHandlerContext, mockRequest, mockResponse);
+    await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
 
-    expect(mockDataStart.search.search).toBeCalled();
+    expect(mockDataStart.search.search).toHaveBeenCalled();
     expect(mockDataStart.search.search.mock.calls[0][1]).toStrictEqual({
       ...mockBody,
       rawRequest: mockRequest,
     });
-    expect(mockResponse.ok).toBeCalled();
+    expect(mockResponse.ok).toHaveBeenCalled();
     expect(mockResponse.ok.mock.calls[0][0]).toEqual({
       body: response,
     });
@@ -130,14 +130,14 @@ describe('Search service', () => {
 
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
     const handler = mockRouter.post.mock.calls[0][1];
-    await handler((mockContext as unknown) as RequestHandlerContext, mockRequest, mockResponse);
+    await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
 
-    expect(mockDataStart.search.search).toBeCalled();
+    expect(mockDataStart.search.search).toHaveBeenCalled();
     expect(mockDataStart.search.search.mock.calls[0][1]).toStrictEqual({
       ...mockBody,
       rawRequest: mockRequest,
     });
-    expect(mockResponse.customError).toBeCalled();
+    expect(mockResponse.customError).toHaveBeenCalled();
     const error: any = mockResponse.customError.mock.calls[0][0];
     expect(error.body.message).toBe('oh no');
     expect(error.body.attributes.error).toBe('oops');

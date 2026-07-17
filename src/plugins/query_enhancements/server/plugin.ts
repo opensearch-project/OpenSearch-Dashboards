@@ -36,9 +36,12 @@ import { resourceManagerService } from './connections/resource_manager_service';
 import { queryManagerService } from './connections/query_manager_service';
 import { BaseConnectionManager } from './connections/managers/base_connection_manager';
 import { prometheusManager } from './connections/managers/prometheus_manager';
+import { getPplLintRuleSettings } from './ui_settings';
 
-export class QueryEnhancementsPlugin
-  implements Plugin<QueryEnhancementsPluginSetup, QueryEnhancementsPluginStart> {
+export class QueryEnhancementsPlugin implements Plugin<
+  QueryEnhancementsPluginSetup,
+  QueryEnhancementsPluginStart
+> {
   private readonly logger: Logger;
   private readonly config$: Observable<SharedGlobalConfig>;
   private capabilitiesResolver?: (request: OpenSearchDashboardsRequest) => Promise<Capabilities>;
@@ -48,8 +51,55 @@ export class QueryEnhancementsPlugin
     this.config$ = initializerContext.config.legacy.globalConfig$;
   }
 
-  public setup(core: CoreSetup, { data, dataSource }: QueryEnhancementsPluginSetupDependencies) {
+  public async setup(
+    core: CoreSetup,
+    { data, dataSource }: QueryEnhancementsPluginSetupDependencies
+  ) {
     this.logger.debug('queryEnhancements: Setup');
+
+    // PPL lint capability — disabled by default. The public plugin reads
+    // capabilities.queryEnhancements.pplLint (see public/plugin.tsx) to decide
+    // whether to register the lint bridge. The switcher below overrides this
+    // default from DynamicConfigService.
+    core.capabilities.registerProvider(() => ({
+      queryEnhancements: { pplLint: false },
+    }));
+
+    // Override the default with the value from DynamicConfigService.
+    core.capabilities.registerSwitcher(async (request, capabilities) => {
+      try {
+        const dynamicConfigServiceStart = await core.dynamicConfigService.getStartService();
+        const client = dynamicConfigServiceStart.getClient();
+        const store = dynamicConfigServiceStart.getAsyncLocalStore();
+
+        // Use pluginConfigPath, NOT { name: 'queryEnhancements' }: pathToString
+        // runs _.snakeCase on `name`, turning 'queryEnhancements' into
+        // 'query_enhancements' — the wrong namespace, which would throw, be
+        // swallowed here, and leave pplLint off forever. pluginConfigPath joins
+        // verbatim and matches configPath: ['queryEnhancements'] in the manifest.
+        const config = await client.getConfig(
+          { pluginConfigPath: ['queryEnhancements'] },
+          store ? { asyncLocalStorageContext: store } : undefined
+        );
+
+        // Return only the changed subtree; recursiveApplyChanges merges it onto
+        // the resolved capabilities. `=== true` coerces explicitly — dynamic
+        // config writes are not schema-validated, so the stored value could be a
+        // non-boolean (e.g. the string 'true') that must not leak into the flag.
+        return {
+          queryEnhancements: {
+            ...(capabilities.queryEnhancements || {}),
+            pplLint: config.ppl?.lint?.enabled === true,
+          },
+        };
+      } catch (error) {
+        this.logger.error('Failed to load queryEnhancements dynamic config, using defaults', error);
+        return capabilities;
+      }
+    });
+
+    core.uiSettings.register(getPplLintRuleSettings(core.workspace.isWorkspaceEnabled()));
+
     const router = core.http.createRouter();
     // Register server side APIs
     const client = core.opensearch.legacy.createClient('opensearch_enhancements', {
@@ -63,10 +113,32 @@ export class QueryEnhancementsPlugin
     // Initialize the default query executor for prometheus
     prometheusManager.initializeDefaultQueryExecutor(client);
 
-    const pplSearchStrategy = pplSearchStrategyProvider(this.config$, this.logger, client);
+    // Read the scoped config flag that gates legacy Elasticsearch compatibility (Open Distro
+    // endpoint routing). Await the first emission so the strategies below are always constructed
+    // with the resolved value rather than relying on synchronous observable emission.
+    const queryEnhancementsConfig = await this.initializerContext.config
+      .create<ConfigSchema>()
+      .pipe(first())
+      .toPromise();
+    const legacyEsCompatEnabled =
+      queryEnhancementsConfig.legacyElasticsearchCompatibility?.enabled ?? false;
+
+    const pplSearchStrategy = pplSearchStrategyProvider(
+      this.config$,
+      this.logger,
+      client,
+      undefined,
+      legacyEsCompatEnabled
+    );
     const pplRawSearchStrategy = pplRawSearchStrategyProvider(this.config$, this.logger, client);
     const promqlSearchStrategy = promqlSearchStrategyProvider(this.config$, this.logger);
-    const sqlSearchStrategy = sqlSearchStrategyProvider(this.config$, this.logger, client);
+    const sqlSearchStrategy = sqlSearchStrategyProvider(
+      this.config$,
+      this.logger,
+      client,
+      undefined,
+      legacyEsCompatEnabled
+    );
     const sqlAsyncSearchStrategy = sqlAsyncSearchStrategyProvider(
       this.config$,
       this.logger,

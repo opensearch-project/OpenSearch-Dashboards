@@ -62,7 +62,10 @@ test('fails if string input cannot be parsed', () => {
     name: schema.string(),
   });
   expect(() => type.validate(`invalidjson`)).toThrowErrorMatchingInlineSnapshot(
-    `"could not parse object value from json input"`
+    `
+"could not parse object value from json input
+Cause: could not parse object value from json input"
+`
   );
 });
 
@@ -71,7 +74,10 @@ test('fails with correct type if parsed input is not an object', () => {
     name: schema.string(),
   });
   expect(() => type.validate('[1,2,3]')).toThrowErrorMatchingInlineSnapshot(
-    `"expected a plain object value, but found [Array] instead."`
+    `
+"expected a plain object value, but found [Array] instead.
+Cause: expected a plain object value, but found [Array] instead."
+`
   );
 });
 
@@ -82,7 +88,10 @@ test('fails if missing required value', () => {
   const value = {};
 
   expect(() => type.validate(value)).toThrowErrorMatchingInlineSnapshot(
-    `"[name]: expected value of type [string] but got [undefined]"`
+    `
+"[name]: expected value of type [string] but got [undefined]
+Cause: expected value of type [string] but got [undefined]"
+`
   );
 });
 
@@ -105,7 +114,10 @@ test('fails if key does not exist in schema', () => {
   };
 
   expect(() => type.validate(value)).toThrowErrorMatchingInlineSnapshot(
-    `"[bar]: definition for this key is missing"`
+    `
+"[bar]: definition for this key is missing
+Cause: definition for this key is missing"
+`
   );
 });
 
@@ -158,10 +170,16 @@ test('object within object with key without defaultValue', () => {
   const value = { foo: {} };
 
   expect(() => type.validate(undefined)).toThrowErrorMatchingInlineSnapshot(
-    `"[foo.bar]: expected value of type [string] but got [undefined]"`
+    `
+"[foo.bar]: expected value of type [string] but got [undefined]
+Cause: expected value of type [string] but got [undefined]"
+`
   );
   expect(() => type.validate(value)).toThrowErrorMatchingInlineSnapshot(
-    `"[foo.bar]: expected value of type [string] but got [undefined]"`
+    `
+"[foo.bar]: expected value of type [string] but got [undefined]
+Cause: expected value of type [string] but got [undefined]"
+`
   );
 });
 
@@ -194,10 +212,16 @@ test('called with wrong type', () => {
   const type = schema.object({});
 
   expect(() => type.validate('foo')).toThrowErrorMatchingInlineSnapshot(
-    `"could not parse object value from json input"`
+    `
+"could not parse object value from json input
+Cause: could not parse object value from json input"
+`
   );
   expect(() => type.validate(123)).toThrowErrorMatchingInlineSnapshot(
-    `"expected a plain object value, but found [number] instead."`
+    `
+"expected a plain object value, but found [number] instead.
+Cause: expected a plain object value, but found [number] instead."
+`
   );
 });
 
@@ -207,10 +231,12 @@ test('handles oneOf', () => {
   });
 
   expect(type.validate({ key: 'foo' })).toEqual({ key: 'foo' });
-  expect(() => type.validate({ key: 123 })).toThrowErrorMatchingInlineSnapshot(`
-"[key]: types that failed validation:
-- [key.0]: expected value of type [string] but got [number]"
-`);
+  expect(() => type.validate({ key: 123 })).toThrowErrorMatchingInlineSnapshot(
+    `
+"[key]: expected value of type [string] but got [number]
+Cause: expected value of type [string] but got [number]"
+`
+  );
 });
 
 test('handles references', () => {
@@ -260,7 +286,10 @@ test('includes namespace in failure when wrong top-level type', () => {
   });
 
   expect(() => type.validate([], {}, 'foo-namespace')).toThrowErrorMatchingInlineSnapshot(
-    `"[foo-namespace]: expected a plain object value, but found [Array] instead."`
+    `
+"[foo-namespace]: expected a plain object value, but found [Array] instead.
+Cause: expected a plain object value, but found [Array] instead."
+`
   );
 });
 
@@ -273,7 +302,10 @@ test('includes namespace in failure when wrong value type', () => {
   };
 
   expect(() => type.validate(value, {}, 'foo-namespace')).toThrowErrorMatchingInlineSnapshot(
-    `"[foo-namespace.foo]: expected value of type [string] but got [number]"`
+    `
+"[foo-namespace.foo]: expected value of type [string] but got [number]
+Cause: expected value of type [string] but got [number]"
+`
   );
 });
 
@@ -283,7 +315,7 @@ test('individual keys can validated', () => {
   });
 
   const value = false;
-  expect(() => type.validateKey('foo', value)).not.toThrowError();
+  expect(() => type.validateKey('foo', value)).not.toThrow();
   expect(() => type.validateKey('bar', '')).toThrowErrorMatchingInlineSnapshot(
     `"bar is not a valid part of this schema"`
   );
@@ -318,7 +350,12 @@ test('unknowns = `allow` affects only own keys', () => {
         baz: 'baz',
       },
     })
-  ).toThrowErrorMatchingInlineSnapshot(`"[foo.baz]: definition for this key is missing"`);
+  ).toThrowErrorMatchingInlineSnapshot(
+    `
+"[foo.baz]: definition for this key is missing
+Cause: definition for this key is missing"
+`
+  );
 });
 
 test('does not allow unknown keys when unknowns = `forbid`', () => {
@@ -330,7 +367,12 @@ test('does not allow unknown keys when unknowns = `forbid`', () => {
     type.validate({
       bar: 'baz',
     })
-  ).toThrowErrorMatchingInlineSnapshot(`"[bar]: definition for this key is missing"`);
+  ).toThrowErrorMatchingInlineSnapshot(
+    `
+"[bar]: definition for this key is missing
+Cause: definition for this key is missing"
+`
+  );
 });
 
 test('allow and remove unknown keys when unknowns = `ignore`', () => {
@@ -361,7 +403,12 @@ test('unknowns = `ignore` affects only own keys', () => {
         baz: 'baz',
       },
     })
-  ).toThrowErrorMatchingInlineSnapshot(`"[foo.baz]: definition for this key is missing"`);
+  ).toThrowErrorMatchingInlineSnapshot(
+    `
+"[foo.baz]: definition for this key is missing
+Cause: definition for this key is missing"
+`
+  );
 });
 
 test('handles optional properties', () => {
@@ -398,12 +445,15 @@ describe('#extends', () => {
     expect(() => {
       extended.validate({ initial: 'foo' });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"[added]: expected value of type [number] but got [undefined]"`
+      `
+"[added]: expected value of type [number] but got [undefined]
+Cause: expected value of type [number] but got [undefined]"
+`
     );
 
     expect(() => {
       extended.validate({ initial: 'foo', added: 42 });
-    }).not.toThrowError();
+    }).not.toThrow();
 
     expectType<TypeOf<typeof extended>>({
       added: 12,
@@ -421,11 +471,16 @@ describe('#extends', () => {
 
     expect(() => {
       extended.validate({ string: 'foo', number: 12 });
-    }).toThrowErrorMatchingInlineSnapshot(`"[number]: definition for this key is missing"`);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `
+"[number]: definition for this key is missing
+Cause: definition for this key is missing"
+`
+    );
 
     expect(() => {
       extended.validate({ string: 'foo' });
-    }).not.toThrowError();
+    }).not.toThrow();
 
     expectType<TypeOf<typeof extended>>({
       string: 'foo',
@@ -445,12 +500,15 @@ describe('#extends', () => {
     expect(() => {
       extended.validate({ string: 'foo', mutated: 12 });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"[mutated]: expected value of type [string] but got [number]"`
+      `
+"[mutated]: expected value of type [string] but got [number]
+Cause: expected value of type [string] but got [number]"
+`
     );
 
     expect(() => {
       extended.validate({ string: 'foo', mutated: 'bar' });
-    }).not.toThrowError();
+    }).not.toThrow();
 
     expectType<TypeOf<typeof extended>>({
       string: 'foo',
@@ -473,16 +531,22 @@ describe('#extends', () => {
     expect(() => {
       extended.validate({ original: 'foo' });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"[mutated]: expected value of type [string] but got [undefined]"`
+      `
+"[mutated]: expected value of type [string] but got [undefined]
+Cause: expected value of type [string] but got [undefined]"
+`
     );
     expect(() => {
       extended.validate({ original: 'foo' });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"[mutated]: expected value of type [string] but got [undefined]"`
+      `
+"[mutated]: expected value of type [string] but got [undefined]
+Cause: expected value of type [string] but got [undefined]"
+`
     );
     expect(() => {
       extended.validate({ original: 'foo', mutated: 'bar' });
-    }).not.toThrowError();
+    }).not.toThrow();
 
     expectType<TypeOf<typeof extended>>({
       original: 'foo',

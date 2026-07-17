@@ -37,10 +37,8 @@ import { getActiveSeries } from './helpers/get_active_series';
 import { validateNotAnalyticEngineDataSource } from '../../../../data/server';
 
 export async function getSeriesData(req, panel) {
-  const {
-    searchStrategy,
-    capabilities,
-  } = await req.framework.searchStrategyRegistry.getViableStrategyForPanel(req, panel);
+  const { searchStrategy, capabilities } =
+    await req.framework.searchStrategyRegistry.getViableStrategyForPanel(req, panel);
   const opensearchQueryConfig = await getOpenSearchQueryConfig(req);
   const panelDataSourceId = panel.data_source_id;
   const meta = {
@@ -88,7 +86,7 @@ export async function getSeriesData(req, panel) {
       },
     };
   } catch (err) {
-    if (err.body || err.name === 'DQLSyntaxError' || err.name === 'AnalyticEngineError') {
+    if (err.body || err.name === 'DQLSyntaxError') {
       err.response = err.body;
 
       return {

@@ -11,11 +11,13 @@ import { TraceAutoDetectCallout } from './trace_auto_detect_callout';
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
 import { AgentTracesServices } from '../types';
 import * as autoDetectModule from '../utils/auto_detect_trace_data';
-import * as createDatasetsModule from '../utils/create_auto_datasets';
+import * as createDatasetsModule from '../../../explore/public';
 
 // Mock the utility functions
 jest.mock('../utils/auto_detect_trace_data');
-jest.mock('../utils/create_auto_datasets');
+jest.mock('../../../explore/public', () => ({
+  createAutoDetectedDatasets: jest.fn(),
+}));
 
 // Mock the DiscoverNoIndexPatterns component
 jest.mock(
@@ -28,8 +30,10 @@ jest.mock(
 describe('TraceAutoDetectCallout', () => {
   const mockCore = coreMock.createStart();
   let mockServices: Partial<AgentTracesServices>;
-  const mockDetectTraceDataAcrossDataSources = autoDetectModule.detectTraceDataAcrossDataSources as jest.Mock;
-  const mockCreateAutoDetectedDatasets = createDatasetsModule.createAutoDetectedDatasets as jest.Mock;
+  const mockDetectTraceDataAcrossDataSources =
+    autoDetectModule.detectTraceDataAcrossDataSources as jest.Mock;
+  const mockCreateAutoDetectedDatasets =
+    createDatasetsModule.createAutoDetectedDatasets as jest.Mock;
 
   // Setup localStorage mock
   const localStorageMock = (() => {
@@ -50,19 +54,27 @@ describe('TraceAutoDetectCallout', () => {
 
   Object.defineProperty(window, 'localStorage', {
     value: localStorageMock,
+    writable: true,
+    configurable: true,
   });
 
-  // Mock window.location.reload
-  const mockReload = jest.fn();
-  Object.defineProperty(window, 'location', {
-    value: { reload: mockReload },
-    writable: true,
+  // Mock window.location.reload via spy. The spy must be created inside beforeAll so that
+  // jest-location-mock's beforeAll hook has already replaced window.location with its
+  // configurable proxy before we attempt to spy on it.
+  let reloadSpy: jest.SpyInstance;
+
+  beforeAll(() => {
+    reloadSpy = jest.spyOn(window.location, 'reload').mockImplementation(jest.fn());
+  });
+
+  afterAll(() => {
+    reloadSpy.mockRestore();
   });
 
   beforeEach(() => {
     jest.clearAllMocks();
     localStorageMock.clear();
-    mockReload.mockClear();
+    reloadSpy.mockClear();
 
     // Setup mock services
     mockServices = {
@@ -71,6 +83,13 @@ describe('TraceAutoDetectCallout', () => {
       indexPatterns: {
         getIds: jest.fn().mockResolvedValue([]),
         get: jest.fn(),
+      } as any,
+      dataViews: {
+        createAndSave: jest.fn(),
+        get: jest.fn(),
+        refreshFields: jest.fn(),
+        updateSavedObject: jest.fn(),
+        clearCache: jest.fn(),
       } as any,
     };
   });
@@ -249,6 +268,7 @@ describe('TraceAutoDetectCallout', () => {
     await waitFor(() => {
       expect(mockCreateAutoDetectedDatasets).toHaveBeenCalledWith(
         mockServices.savedObjects!.client,
+        mockServices.dataViews,
         expect.objectContaining({
           tracesDetected: true,
           logsDetected: true,
@@ -296,7 +316,7 @@ describe('TraceAutoDetectCallout', () => {
     // Wait for the setTimeout (1500ms in component) to complete
     await waitFor(
       () => {
-        expect(mockReload).toHaveBeenCalled();
+        expect(reloadSpy).toHaveBeenCalled();
       },
       { timeout: 3000 }
     );

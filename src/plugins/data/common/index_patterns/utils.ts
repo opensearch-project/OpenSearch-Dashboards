@@ -94,7 +94,7 @@ export const getIndexPatternTitle = async (
         error,
       } = await getDataSource(dataSourceId);
       dataSourceTitle = error ? dataSourceId : title;
-    } catch (e) {
+    } catch {
       // use datasource id as title when failing to fetch datasource
       dataSourceTitle = dataSourceId;
     }
@@ -139,6 +139,14 @@ export const getDataSourceIdFromIndexPattern = (indexPattern: {
   }
   if (indexPattern.id?.includes('::')) {
     return indexPattern.id.split('::')[0];
+  }
+  // Check _ format: <dataSourceId>_<uuid> where prefix is a valid UUID
+  const uIdx = indexPattern.id?.indexOf('_');
+  if (uIdx !== undefined && uIdx > 0) {
+    const prefix = indexPattern.id.substring(0, uIdx);
+    if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(prefix)) {
+      return prefix;
+    }
   }
   return undefined;
 };

@@ -31,6 +31,7 @@ const languageService = {
     return languages.find((lang) => lang.id === languageId);
   },
   setUserQueryLanguage: jest.fn(),
+  isLanguageSupportedForDataset: jest.fn().mockReturnValue(true),
 };
 
 const datasetService = {

@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import {
   httpServerMock,
   savedObjectsClientMock,
@@ -37,9 +37,8 @@ describe('DataSourceSavedObjectsClientWrapper', () => {
     credentialProvider: jest.fn(),
   };
   jest.mock('../auth_registry');
-  const { AuthenticationMethodRegistry: authenticationMethodRegistry } = jest.requireActual(
-    '../auth_registry'
-  );
+  const { AuthenticationMethodRegistry: authenticationMethodRegistry } =
+    jest.requireActual('../auth_registry');
   const authRegistry = new authenticationMethodRegistry();
   authRegistry.registerAuthenticationMethod(customAuthMethod);
 
@@ -95,7 +94,7 @@ describe('DataSourceSavedObjectsClientWrapper', () => {
         mockDataSourceAttributesWithNoAuth,
         {}
       );
-      expect(mockedClient.create).toBeCalledWith(
+      expect(mockedClient.create).toHaveBeenCalledWith(
         expect.stringMatching(DATA_SOURCE_SAVED_OBJECT_TYPE),
         expect.objectContaining(mockDataSourceAttributesWithNoAuth),
         expect.anything()
@@ -120,7 +119,7 @@ describe('DataSourceSavedObjectsClientWrapper', () => {
         mockDataSourceAttributesWithAuth,
         {}
       );
-      expect(mockedClient.create).toBeCalledWith(
+      expect(mockedClient.create).toHaveBeenCalledWith(
         expect.stringMatching(DATA_SOURCE_SAVED_OBJECT_TYPE),
         expect.objectContaining({
           ...mockDataSourceAttributesWithAuth,
@@ -137,8 +136,8 @@ describe('DataSourceSavedObjectsClientWrapper', () => {
     });
 
     it('should create data source when auth type is SigV4', async () => {
-      const accessKey = uuid();
-      const secretKey = uuid();
+      const accessKey = uuidv4();
+      const secretKey = uuidv4();
       const region = 'us-east-1';
       const service = 'es';
       const encryptedAccessKey = `encrypted_${accessKey}`;
@@ -161,7 +160,7 @@ describe('DataSourceSavedObjectsClientWrapper', () => {
         mockDataSourceAttributesWithSigV4,
         {}
       );
-      expect(mockedClient.create).toBeCalledWith(
+      expect(mockedClient.create).toHaveBeenCalledWith(
         expect.stringMatching(DATA_SOURCE_SAVED_OBJECT_TYPE),
         expect.objectContaining({
           ...mockDataSourceAttributesWithSigV4,
@@ -185,7 +184,7 @@ describe('DataSourceSavedObjectsClientWrapper', () => {
         },
       });
       await wrapperClient.create(DATA_SOURCE_SAVED_OBJECT_TYPE, mockDataSourceAttributes, {});
-      expect(mockedClient.create).toBeCalledWith(
+      expect(mockedClient.create).toHaveBeenCalledWith(
         expect.stringMatching(DATA_SOURCE_SAVED_OBJECT_TYPE),
         expect.objectContaining(mockDataSourceAttributes),
         expect.anything()
@@ -201,7 +200,7 @@ describe('DataSourceSavedObjectsClientWrapper', () => {
       });
       await expect(
         wrapperClient.create(DATA_SOURCE_SAVED_OBJECT_TYPE, mockDataSourceAttributes, {})
-      ).rejects.toThrowError(`Invalid auth type: 'not_in_registry': Bad Request`);
+      ).rejects.toThrow(`Invalid auth type: 'not_in_registry': Bad Request`);
     });
 
     describe('createWithCredentialsEncryption: Error handling', () => {
@@ -211,7 +210,7 @@ describe('DataSourceSavedObjectsClientWrapper', () => {
         });
         await expect(
           wrapperClient.create(DATA_SOURCE_SAVED_OBJECT_TYPE, mockDataSourceAttributes, {})
-        ).rejects.toThrowError(`"title" attribute must be a non-empty string`);
+        ).rejects.toThrow(`"title" attribute must be a non-empty string`);
       });
 
       it(`should throw error when title is longer than ${DATA_SOURCE_TITLE_LENGTH_LIMIT} characters`, async () => {
@@ -220,7 +219,7 @@ describe('DataSourceSavedObjectsClientWrapper', () => {
         });
         await expect(
           wrapperClient.create(DATA_SOURCE_SAVED_OBJECT_TYPE, mockDataSourceAttributes, {})
-        ).rejects.toThrowError(
+        ).rejects.toThrow(
           `"title" attribute is limited to ${DATA_SOURCE_TITLE_LENGTH_LIMIT} characters`
         );
       });
@@ -231,7 +230,7 @@ describe('DataSourceSavedObjectsClientWrapper', () => {
         });
         await expect(
           wrapperClient.create(DATA_SOURCE_SAVED_OBJECT_TYPE, mockDataSourceAttributes, {})
-        ).rejects.toThrowError(`Invalid URL format`);
+        ).rejects.toThrow(`Invalid URL format`);
       });
 
       it('should throw error when endpoint is blocked by IP restrictions', async () => {
@@ -256,13 +255,13 @@ describe('DataSourceSavedObjectsClientWrapper', () => {
             mockDataSourceAttributes,
             {}
           )
-        ).rejects.toThrowError(`Endpoint IP address is not allowed`);
+        ).rejects.toThrow(`Endpoint IP address is not allowed`);
       });
 
       it('should throw error when auth is not present', async () => {
         await expect(
           wrapperClient.create(DATA_SOURCE_SAVED_OBJECT_TYPE, attributes(), {})
-        ).rejects.toThrowError(`"auth" attribute is required`);
+        ).rejects.toThrow(`"auth" attribute is required`);
       });
 
       it('should throw error when type field is not present in auth', async () => {
@@ -271,7 +270,7 @@ describe('DataSourceSavedObjectsClientWrapper', () => {
         });
         await expect(
           wrapperClient.create(DATA_SOURCE_SAVED_OBJECT_TYPE, mockDataSourceAttributes, {})
-        ).rejects.toThrowError(`"auth.type" attribute is required`);
+        ).rejects.toThrow(`"auth.type" attribute is required`);
       });
 
       it('should throw error when credentials are not present in auth when auth type is UsernamePasswordType', async () => {
@@ -282,7 +281,7 @@ describe('DataSourceSavedObjectsClientWrapper', () => {
         });
         await expect(
           wrapperClient.create(DATA_SOURCE_SAVED_OBJECT_TYPE, mockDataSourceAttributesWithAuth, {})
-        ).rejects.toThrowError(`"auth.credentials" attribute is required`);
+        ).rejects.toThrow(`"auth.credentials" attribute is required`);
       });
 
       it('should throw error when username is not present in auth when auth type is UsernamePasswordType', async () => {
@@ -294,7 +293,7 @@ describe('DataSourceSavedObjectsClientWrapper', () => {
         });
         await expect(
           wrapperClient.create(DATA_SOURCE_SAVED_OBJECT_TYPE, mockDataSourceAttributesWithAuth, {})
-        ).rejects.toThrowError(`"auth.credentials.username" attribute is required`);
+        ).rejects.toThrow(`"auth.credentials.username" attribute is required`);
       });
 
       it('should throw error when password is not present in auth when auth type is UsernamePasswordType', async () => {
@@ -308,7 +307,7 @@ describe('DataSourceSavedObjectsClientWrapper', () => {
         });
         await expect(
           wrapperClient.create(DATA_SOURCE_SAVED_OBJECT_TYPE, mockDataSourceAttributesWithAuth, {})
-        ).rejects.toThrowError(`"auth.credentials.password" attribute is required`);
+        ).rejects.toThrow(`"auth.credentials.password" attribute is required`);
       });
 
       it('should throw error when credentials are not present in auth when auth type is SigV4', async () => {
@@ -319,7 +318,7 @@ describe('DataSourceSavedObjectsClientWrapper', () => {
         });
         await expect(
           wrapperClient.create(DATA_SOURCE_SAVED_OBJECT_TYPE, mockDataSourceAttributesWithAuth, {})
-        ).rejects.toThrowError(`"auth.credentials" attribute is required`);
+        ).rejects.toThrow(`"auth.credentials" attribute is required`);
       });
 
       it('should throw error when accessKey is not present in auth when auth type is SigV4', async () => {
@@ -331,7 +330,7 @@ describe('DataSourceSavedObjectsClientWrapper', () => {
         });
         await expect(
           wrapperClient.create(DATA_SOURCE_SAVED_OBJECT_TYPE, mockDataSourceAttributesWithAuth, {})
-        ).rejects.toThrowError(`"auth.credentials.accessKey" attribute is required`);
+        ).rejects.toThrow(`"auth.credentials.accessKey" attribute is required`);
       });
 
       it('should throw error when secretKey is not present in auth when auth type is SigV4', async () => {
@@ -345,7 +344,7 @@ describe('DataSourceSavedObjectsClientWrapper', () => {
         });
         await expect(
           wrapperClient.create(DATA_SOURCE_SAVED_OBJECT_TYPE, mockDataSourceAttributesWithAuth, {})
-        ).rejects.toThrowError(`"auth.credentials.secretKey" attribute is required`);
+        ).rejects.toThrow(`"auth.credentials.secretKey" attribute is required`);
       });
 
       it('should throw error when region is not present in auth when auth type is SigV4', async () => {
@@ -360,7 +359,7 @@ describe('DataSourceSavedObjectsClientWrapper', () => {
         });
         await expect(
           wrapperClient.create(DATA_SOURCE_SAVED_OBJECT_TYPE, mockDataSourceAttributesWithAuth, {})
-        ).rejects.toThrowError(`"auth.credentials.region" attribute is required`);
+        ).rejects.toThrow(`"auth.credentials.region" attribute is required`);
       });
 
       it('should throw error when service is not present in auth when auth type is SigV4', async () => {
@@ -376,7 +375,7 @@ describe('DataSourceSavedObjectsClientWrapper', () => {
         });
         await expect(
           wrapperClient.create(DATA_SOURCE_SAVED_OBJECT_TYPE, mockDataSourceAttributesWithAuth, {})
-        ).rejects.toThrowError(`"auth.credentials.service" attribute is required`);
+        ).rejects.toThrow(`"auth.credentials.service" attribute is required`);
       });
     });
   });
@@ -409,7 +408,7 @@ describe('DataSourceSavedObjectsClientWrapper', () => {
         ],
         {}
       );
-      expect(mockedClient.bulkCreate).toBeCalledWith(
+      expect(mockedClient.bulkCreate).toHaveBeenCalledWith(
         [
           {
             attributes: {
@@ -446,7 +445,7 @@ describe('DataSourceSavedObjectsClientWrapper', () => {
         ],
         {}
       );
-      expect(mockedClient.bulkCreate).toBeCalledWith(
+      expect(mockedClient.bulkCreate).toHaveBeenCalledWith(
         [
           {
             attributes: mockDataSourceAttributes,
@@ -469,7 +468,7 @@ describe('DataSourceSavedObjectsClientWrapper', () => {
       const id = 'test1';
       await expect(
         wrapperClient.update(DATA_SOURCE_SAVED_OBJECT_TYPE, id, attributes())
-      ).rejects.toThrowError(`Updating a dataSource endpoint is not supported`);
+      ).rejects.toThrow(`Updating a dataSource endpoint is not supported`);
     });
 
     it('should update data source when auth type is present in auth registry', async () => {
@@ -487,13 +486,13 @@ describe('DataSourceSavedObjectsClientWrapper', () => {
         })
       );
       await wrapperClient.update(DATA_SOURCE_SAVED_OBJECT_TYPE, id, newObject1);
-      expect(mockedClient.update).toBeCalledWith(
+      expect(mockedClient.update).toHaveBeenCalledWith(
         expect.stringMatching(DATA_SOURCE_SAVED_OBJECT_TYPE),
         expect.stringMatching(id),
         expect.objectContaining(newObject1),
         expect.anything()
       );
-      expect(mockedClient.update).not.toBeCalledWith(
+      expect(mockedClient.update).not.toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         expect.objectContaining({ endpoint }),
@@ -517,7 +516,7 @@ describe('DataSourceSavedObjectsClientWrapper', () => {
       );
       await expect(
         wrapperClient.update(DATA_SOURCE_SAVED_OBJECT_TYPE, id, newObject1)
-      ).rejects.toThrowError(`Invalid auth type: 'not_in_registry': Bad Request`);
+      ).rejects.toThrow(`Invalid auth type: 'not_in_registry': Bad Request`);
     });
   });
 
@@ -549,7 +548,7 @@ describe('DataSourceSavedObjectsClientWrapper', () => {
         ],
         {}
       );
-      expect(mockedClient.bulkUpdate).toBeCalledWith(
+      expect(mockedClient.bulkUpdate).toHaveBeenCalledWith(
         [
           {
             attributes: bulkUpdateObject,
@@ -585,7 +584,7 @@ describe('DataSourceSavedObjectsClientWrapper', () => {
           ],
           {}
         )
-      ).rejects.toThrowError(`Invalid auth type: 'not_in_registry': Bad Request`);
+      ).rejects.toThrow(`Invalid auth type: 'not_in_registry': Bad Request`);
     });
   });
 });

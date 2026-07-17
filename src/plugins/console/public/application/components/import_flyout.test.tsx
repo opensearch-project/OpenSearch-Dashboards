@@ -122,9 +122,9 @@ describe('ImportFlyout Component', () => {
     expect(component.find(overwriteOptionIdentifier).first().props().checked).toBe(false);
 
     // should update existing query
-    expect(mockUpdate).toBeCalledTimes(1);
-    expect(mockClose).toBeCalledTimes(1);
-    expect(mockRefresh).toBeCalledTimes(1);
+    expect(mockUpdate).toHaveBeenCalledTimes(1);
+    expect(mockClose).toHaveBeenCalledTimes(1);
+    expect(mockRefresh).toHaveBeenCalledTimes(1);
   });
 
   it('should handle errors during import', async () => {
@@ -179,7 +179,7 @@ describe('ImportFlyout Component', () => {
       component.find(cancelBtnIdentifier).first().simulate('click');
     });
 
-    expect(mockClose).toBeCalledTimes(1);
+    expect(mockClose).toHaveBeenCalledTimes(1);
   });
 
   describe('OverwriteModal', () => {
@@ -223,9 +223,9 @@ describe('ImportFlyout Component', () => {
       component.update();
 
       // should update existing query
-      expect(mockUpdate).toBeCalledTimes(1);
-      expect(mockClose).toBeCalledTimes(1);
-      expect(mockRefresh).toBeCalledTimes(1);
+      expect(mockUpdate).toHaveBeenCalledTimes(1);
+      expect(mockClose).toHaveBeenCalledTimes(1);
+      expect(mockRefresh).toHaveBeenCalledTimes(1);
 
       // confirm overwrite modal should close after confirmation.
       expect(component.find('OverwriteModal').exists()).toBe(false);
@@ -260,9 +260,9 @@ describe('ImportFlyout Component', () => {
       expect(component.find(overwriteOptionIdentifier).first().props().checked).toBe(true);
 
       // should create new query
-      expect(mockCreate).toBeCalledTimes(1);
-      expect(mockClose).toBeCalledTimes(1);
-      expect(mockRefresh).toBeCalledTimes(1);
+      expect(mockCreate).toHaveBeenCalledTimes(1);
+      expect(mockClose).toHaveBeenCalledTimes(1);
+      expect(mockRefresh).toHaveBeenCalledTimes(1);
     });
   });
 });

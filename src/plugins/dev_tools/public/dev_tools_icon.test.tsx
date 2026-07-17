@@ -37,7 +37,7 @@ describe('<DevToolsIcon />', () => {
           class="euiToolTipAnchor"
         >
           <button
-            aria-label="go-to-dev-tools"
+            aria-label="Developer tools"
             class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
             data-test-subj="openDevToolsModal"
             type="button"

@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`home change home route should render a link to change the default route in advanced settings if advanced settings is enabled 1`] = `
 <main

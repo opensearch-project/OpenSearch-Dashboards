@@ -13,8 +13,6 @@ describe('TableColumnHeader', () => {
     column: 'test_col',
     schema: VisFieldType.Categorical,
     id: 1,
-    validValuesCount: 3,
-    uniqueValuesCount: 3,
   };
 
   const mockSetFilters = jest.fn();
@@ -57,7 +55,7 @@ describe('TableColumnHeader', () => {
     };
     render(<TableColumnHeader {...defaultProps} filters={activeFilters} />);
     const filterIcon = screen.getByTestId('visTableFilterIcon-test_col');
-    expect(filterIcon).toHaveStyle('color: primary');
+    expect(filterIcon).toHaveAttribute('color', 'primary');
   });
 });
 
@@ -67,8 +65,6 @@ describe('ColumnFilterContent', () => {
     column: 'test_col',
     schema: VisFieldType.Categorical,
     id: 1,
-    validValuesCount: 3,
-    uniqueValuesCount: 3,
   };
 
   const mockOnApply = jest.fn();

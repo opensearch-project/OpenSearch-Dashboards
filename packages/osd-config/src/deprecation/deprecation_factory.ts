@@ -113,33 +113,35 @@ const _unused = (
   return config;
 };
 
-const renameWithoutMap = (oldKey: string, newKey: string): ConfigDeprecation => (
-  config,
-  rootPath,
-  log
-) => _renameWithoutMap(config, rootPath, log, oldKey, newKey);
+const renameWithoutMap =
+  (oldKey: string, newKey: string): ConfigDeprecation =>
+  (config, rootPath, log) =>
+    _renameWithoutMap(config, rootPath, log, oldKey, newKey);
 
-const renameFromRootWithoutMap = (
-  oldKey: string,
-  newKey: string,
-  silent?: boolean
-): ConfigDeprecation => (config, rootPath, log) =>
-  _renameWithoutMap(config, '', log, oldKey, newKey, silent);
+const renameFromRootWithoutMap =
+  (oldKey: string, newKey: string, silent?: boolean): ConfigDeprecation =>
+  (config, rootPath, log) =>
+    _renameWithoutMap(config, '', log, oldKey, newKey, silent);
 
-const rename = (oldKey: string, newKey: string): ConfigDeprecation => (config, rootPath, log) =>
-  _rename(config, rootPath, log, oldKey, newKey);
+const rename =
+  (oldKey: string, newKey: string): ConfigDeprecation =>
+  (config, rootPath, log) =>
+    _rename(config, rootPath, log, oldKey, newKey);
 
-const renameFromRoot = (oldKey: string, newKey: string, silent?: boolean): ConfigDeprecation => (
-  config,
-  rootPath,
-  log
-) => _rename(config, '', log, oldKey, newKey, silent);
+const renameFromRoot =
+  (oldKey: string, newKey: string, silent?: boolean): ConfigDeprecation =>
+  (config, rootPath, log) =>
+    _rename(config, '', log, oldKey, newKey, silent);
 
-const unused = (unusedKey: string): ConfigDeprecation => (config, rootPath, log) =>
-  _unused(config, rootPath, log, unusedKey);
+const unused =
+  (unusedKey: string): ConfigDeprecation =>
+  (config, rootPath, log) =>
+    _unused(config, rootPath, log, unusedKey);
 
-const unusedFromRoot = (unusedKey: string): ConfigDeprecation => (config, rootPath, log) =>
-  _unused(config, '', log, unusedKey);
+const unusedFromRoot =
+  (unusedKey: string): ConfigDeprecation =>
+  (config, rootPath, log) =>
+    _unused(config, '', log, unusedKey);
 
 const getPath = (rootPath: string, subPath: string) =>
   rootPath !== '' ? `${rootPath}.${subPath}` : subPath;

@@ -38,7 +38,7 @@ export class ExecutionContract<
   ExtraContext extends Record<string, unknown> = Record<string, unknown>,
   Input = unknown,
   Output = unknown,
-  InspectorAdapters = unknown
+  InspectorAdapters = unknown,
 > {
   public get isPending(): boolean {
     const state = this.execution.state.get().state;

@@ -42,12 +42,14 @@ describe('navigation settings', () => {
 
     it('should only accept relative urls', () => {
       expect(() => validate('/some-url')).not.toThrow();
-      expect(() => validate('http://some-url')).toThrowErrorMatchingInlineSnapshot(
-        `"Must be a relative URL."`
-      );
-      expect(() => validate(125)).toThrowErrorMatchingInlineSnapshot(
-        `"expected value of type [string] but got [number]"`
-      );
+      expect(() => validate('http://some-url')).toThrowErrorMatchingInlineSnapshot(`
+        "Must be a relative URL.
+        Cause: Must be a relative URL."
+      `);
+      expect(() => validate(125)).toThrowErrorMatchingInlineSnapshot(`
+        "value.startsWith is not a function
+        Cause: value.startsWith is not a function"
+      `);
     });
   });
 
@@ -58,10 +60,9 @@ describe('navigation settings', () => {
       expect(() => validate('modern')).not.toThrow();
       expect(() => validate('legacy')).not.toThrow();
       expect(() => validate('invalid')).toThrowErrorMatchingInlineSnapshot(`
-"types that failed validation:
-- [0]: expected value to equal [modern]
-- [1]: expected value to equal [legacy]"
-`);
+        "SchemaTypeError: expected value to equal [legacy]
+        Cause: SchemaTypeError: expected value to equal [legacy]"
+      `);
     });
   });
 });

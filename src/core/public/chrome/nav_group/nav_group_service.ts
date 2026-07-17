@@ -27,6 +27,7 @@ import { InternalApplicationStart } from '../../application';
 import { NavGroupStatus, NavGroupType } from '../../../../core/types';
 import { ChromeBreadcrumb, ChromeBreadcrumbEnricher } from '../chrome_service';
 import { ALL_USE_CASE_ID, DEFAULT_APP_CATEGORIES } from '../../../utils';
+import { NavPopoverConfig } from './types';
 
 export const CURRENT_NAV_GROUP_ID = 'core.chrome.currentNavGroupId';
 
@@ -68,6 +69,15 @@ export interface ChromeRegistrationNavLink {
    * can use this to create visual clusters without introducing categories.
    */
   startCluster?: boolean;
+
+  /**
+   * Configures the nav item's hover popover in the icon side navigation. May
+   * declare action buttons (`actions`) and/or custom content (`render`), e.g.
+   * "Create new dashboard" actions plus a list of recently visited dashboards.
+   * The nav item still navigates on direct click. Callbacks receive core
+   * services ({@link NavPopoverServices}) so plugins do not re-resolve them.
+   */
+  navPopover?: NavPopoverConfig;
 }
 
 export type NavGroupItemInMap = ChromeNavGroup & {
@@ -253,24 +263,27 @@ export class ChromeNavGroupService {
       .pipe(takeUntil(this.stop$))
       .pipe(
         map(([navGroupsMap, navLinks]) => {
-          return Object.keys(navGroupsMap).reduce((sortedNavGroupsMap, navGroupId) => {
-            const navGroup = navGroupsMap[navGroupId];
-            if (navGroupId === ALL_USE_CASE_ID) {
-              sortedNavGroupsMap[navGroupId] = {
-                ...navGroup,
-                navLinks: this.sortNavGroupNavLinks(
-                  this.getNavLinksForAllUseCase(navGroupsMap, navLinks),
-                  navLinks
-                ),
-              };
-            } else {
-              sortedNavGroupsMap[navGroupId] = {
-                ...navGroup,
-                navLinks: this.sortNavGroupNavLinks(navGroup.navLinks, navLinks),
-              };
-            }
-            return sortedNavGroupsMap;
-          }, {} as Record<string, NavGroupItemInMap>);
+          return Object.keys(navGroupsMap).reduce(
+            (sortedNavGroupsMap, navGroupId) => {
+              const navGroup = navGroupsMap[navGroupId];
+              if (navGroupId === ALL_USE_CASE_ID) {
+                sortedNavGroupsMap[navGroupId] = {
+                  ...navGroup,
+                  navLinks: this.sortNavGroupNavLinks(
+                    this.getNavLinksForAllUseCase(navGroupsMap, navLinks),
+                    navLinks
+                  ),
+                };
+              } else {
+                sortedNavGroupsMap[navGroupId] = {
+                  ...navGroup,
+                  navLinks: this.sortNavGroupNavLinks(navGroup.navLinks, navLinks),
+                };
+              }
+              return sortedNavGroupsMap;
+            },
+            {} as Record<string, NavGroupItemInMap>
+          );
         })
       );
   }

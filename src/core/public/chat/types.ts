@@ -113,11 +113,7 @@ export interface ToolMessage {
  * Discriminated union of all message types
  */
 export type Message =
-  | DeveloperMessage
-  | SystemMessage
-  | AssistantMessage
-  | UserMessage
-  | ToolMessage;
+  DeveloperMessage | SystemMessage | AssistantMessage | UserMessage | ToolMessage;
 
 /**
  * Valid message role types
@@ -184,7 +180,8 @@ export interface ChatImplementationFunctions {
   // Message operations
   sendMessage: (
     content: string,
-    messages: Message[]
+    messages: Message[],
+    userMessage?: UserMessage
   ) => Promise<{ observable: any; userMessage: UserMessage }>;
 
   sendMessageWithWindow: (

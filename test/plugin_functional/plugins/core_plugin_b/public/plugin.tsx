@@ -46,8 +46,11 @@ export interface CorePluginBDeps {
   core_plugin_a: CorePluginAPluginSetup;
 }
 
-export class CorePluginBPlugin
-  implements Plugin<CorePluginBPluginSetup, CorePluginBPluginStart, CorePluginBDeps> {
+export class CorePluginBPlugin implements Plugin<
+  CorePluginBPluginSetup,
+  CorePluginBPluginStart,
+  CorePluginBDeps
+> {
   constructor(pluginContext: PluginInitializerContext) {
     window.env = pluginContext.env;
   }

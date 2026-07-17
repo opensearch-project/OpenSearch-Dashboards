@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`Integration Setup Inputs Renders the S3 connector form as expected 1`] = `
 <EuiForm>

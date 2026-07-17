@@ -54,13 +54,13 @@ export * from './theme_config';
 export const baseCssDistFilename: string;
 
 /**
- * Externals mapping inteded to be used in a webpack config
+ * Externals mapping inteded to be used in an rspack/webpack config
  */
 export const externals: {
   [key: string]: string;
 };
 
 /**
- * Webpack loader for configuring the public path lookup from `window.__osdPublicPath__`.
+ * Rspack/webpack loader for configuring the public path lookup from `window.__osdPublicPath__`.
  */
 export const publicPathLoader: string;

@@ -52,13 +52,13 @@ const helpers = {
   getFieldInfo: () => [],
 };
 
-const indexPattern = ({
+const indexPattern = {
   getNonScriptedFields: () => fields,
-} as unknown) as IndexPattern;
+} as unknown as IndexPattern;
 
 const mockFieldToIndexPatternField = (spec: Record<string, string | boolean | undefined>) => {
   return new IndexPatternField(
-    (spec as unknown) as IndexPatternField['spec'],
+    spec as unknown as IndexPatternField['spec'],
     spec.displayName as string
   );
 };

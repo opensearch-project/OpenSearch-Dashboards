@@ -81,18 +81,16 @@ export async function getFields(
     indexPatternString = get(defaultIndexPattern, 'title', '');
   }
 
-  const {
-    searchStrategy,
-    capabilities,
-  } = (await framework.searchStrategyRegistry.getViableStrategy(reqFacade, indexPatternString))!;
+  const { searchStrategy, capabilities } =
+    (await framework.searchStrategyRegistry.getViableStrategy(reqFacade, indexPatternString))!;
 
-  const fields = ((await searchStrategy.getFieldsForWildcard(
-    reqFacade,
-    indexPatternString,
-    capabilities
-  )) as IndexPatternFieldDescriptor[]).filter(
-    (field) => field.aggregatable && !indexPatterns.isNestedField(field)
-  );
+  const fields = (
+    (await searchStrategy.getFieldsForWildcard(
+      reqFacade,
+      indexPatternString,
+      capabilities
+    )) as IndexPatternFieldDescriptor[]
+  ).filter((field) => field.aggregatable && !indexPatterns.isNestedField(field));
 
   return uniqBy(fields, (field) => field.name);
 }

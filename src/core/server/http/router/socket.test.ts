@@ -47,8 +47,8 @@ describe('OpenSearchDashboardsSocket', () => {
       const socket = new OpenSearchDashboardsSocket(tlsSocket);
       const result = socket.getPeerCertificate(true);
 
-      expect(spy).toBeCalledTimes(1);
-      expect(spy).toBeCalledWith(true);
+      expect(spy).toHaveBeenCalledTimes(1);
+      expect(spy).toHaveBeenCalledWith(true);
       expect(result).toBe(cert);
     });
 
@@ -62,7 +62,7 @@ describe('OpenSearchDashboardsSocket', () => {
 
     it('returns null if tls.Socket getPeerCertificate returns empty object', () => {
       const tlsSocket = new TLSSocket(new Socket());
-      jest.spyOn(tlsSocket, 'getPeerCertificate').mockImplementation(() => ({} as any));
+      jest.spyOn(tlsSocket, 'getPeerCertificate').mockImplementation(() => ({}) as any);
       const socket = new OpenSearchDashboardsSocket(tlsSocket);
 
       expect(socket.getPeerCertificate()).toBe(null);

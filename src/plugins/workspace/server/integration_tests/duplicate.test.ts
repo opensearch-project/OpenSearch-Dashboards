@@ -94,7 +94,7 @@ describe(`duplicate saved objects among workspaces`, () => {
     handlerContext.savedObjects.typeRegistry.getType.mockImplementation(
       (type: string) =>
         // other attributes aren't needed for the purposes of injecting metadata
-        ({ management: { icon: `${type}-icon` } } as any)
+        ({ management: { icon: `${type}-icon` } }) as any
     );
 
     savedObjectsClient = handlerContext.savedObjects.client;

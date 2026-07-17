@@ -22,14 +22,14 @@ const createFieldsFetcher = jest.fn().mockImplementation(() => ({
 const fieldFormats = fieldFormatsMock;
 let object: any = {};
 
-const indexPatternsMock = ({
+const indexPatternsMock = {
   clearCache: jest.fn(),
   get: jest.fn().mockImplementation((id, onlyCheckCache) => {
     return onlyCheckCache ? null : Promise.resolve(null);
   }),
   getByTitle: jest.fn(),
   saveToCache: jest.fn(),
-} as unknown) as IndexPatternsService;
+} as unknown as IndexPatternsService;
 
 function setDocsourcePayload(id: string | null, providedPayload: any) {
   object = defaults(providedPayload || {}, stubbedSavedObjectIndexPattern(id));
@@ -76,11 +76,11 @@ describe('DataViews', () => {
 
     dataViews = new DataViewsService({
       patterns: indexPatternsMock,
-      uiSettings: ({
+      uiSettings: {
         get: uiSettingsGet,
         getAll: () => {},
-      } as any) as DataViewUiSettingsCommon,
-      savedObjectsClient: (savedObjectsClient as unknown) as DataViewSavedObjectsClientCommon,
+      } as any as DataViewUiSettingsCommon,
+      savedObjectsClient: savedObjectsClient as unknown as DataViewSavedObjectsClientCommon,
       apiClient: createFieldsFetcher(),
       fieldFormats,
       onNotification: () => {},
@@ -177,10 +177,10 @@ describe('DataViews', () => {
     const indexPattern = await dataViews.create({ title }, true);
     expect(indexPattern).toBeInstanceOf(DataView);
     expect(indexPattern.title).toBe(title);
-    expect(dataViews.refreshFields).not.toBeCalled();
+    expect(dataViews.refreshFields).not.toHaveBeenCalled();
 
     await dataViews.create({ title });
-    expect(dataViews.refreshFields).toBeCalled();
+    expect(dataViews.refreshFields).toHaveBeenCalled();
   });
 
   test('createAndSave', async () => {
@@ -188,8 +188,8 @@ describe('DataViews', () => {
     dataViews.createSavedObject = jest.fn();
     dataViews.setDefault = jest.fn();
     await dataViews.createAndSave({ title });
-    expect(dataViews.createSavedObject).toBeCalled();
-    expect(dataViews.setDefault).toBeCalled();
+    expect(dataViews.createSavedObject).toHaveBeenCalled();
+    expect(dataViews.setDefault).toHaveBeenCalled();
   });
 
   test('savedObjectToSpec', () => {
@@ -361,24 +361,24 @@ describe('DataViews', () => {
 
     const plainIndexPattern = { id: 'test-id', title: 'test-*' }; // no toDataset
 
-    const properDataView = ({
+    const properDataView = {
       id: 'test-id',
       title: 'test-*',
       toDataset: jest.fn(),
-    } as unknown) as DataView;
+    } as unknown as DataView;
 
     test('get() bypasses cache when cached entry is a plain IndexPattern', async () => {
-      const localPatternsMock = ({
+      const localPatternsMock = {
         clearCache: jest.fn(),
         get: jest.fn().mockResolvedValue(plainIndexPattern),
         getByTitle: jest.fn(),
         saveToCache: jest.fn(),
-      } as unknown) as IndexPatternsService;
+      } as unknown as IndexPatternsService;
 
       const localDataViews = new DataViewsService({
         patterns: localPatternsMock,
         uiSettings: { get: jest.fn().mockResolvedValue(false), getAll: () => {} } as any,
-        savedObjectsClient: (savedObjectsClient as unknown) as DataViewSavedObjectsClientCommon,
+        savedObjectsClient: savedObjectsClient as unknown as DataViewSavedObjectsClientCommon,
         apiClient: createFieldsFetcher(),
         fieldFormats,
         onNotification: () => {},
@@ -401,17 +401,17 @@ describe('DataViews', () => {
     });
 
     test('get() with onlyCheckCache returns undefined when cached entry is a plain IndexPattern', async () => {
-      const localPatternsMock = ({
+      const localPatternsMock = {
         clearCache: jest.fn(),
         get: jest.fn().mockResolvedValue(plainIndexPattern),
         getByTitle: jest.fn(),
         saveToCache: jest.fn(),
-      } as unknown) as IndexPatternsService;
+      } as unknown as IndexPatternsService;
 
       const localDataViews = new DataViewsService({
         patterns: localPatternsMock,
         uiSettings: { get: jest.fn().mockResolvedValue(false), getAll: () => {} } as any,
-        savedObjectsClient: (savedObjectsClient as unknown) as DataViewSavedObjectsClientCommon,
+        savedObjectsClient: savedObjectsClient as unknown as DataViewSavedObjectsClientCommon,
         apiClient: createFieldsFetcher(),
         fieldFormats,
         onNotification: () => {},
@@ -427,17 +427,17 @@ describe('DataViews', () => {
     });
 
     test('get() uses cache when entry is a proper DataView', async () => {
-      const localPatternsMock = ({
+      const localPatternsMock = {
         clearCache: jest.fn(),
         get: jest.fn().mockResolvedValue(properDataView),
         getByTitle: jest.fn(),
         saveToCache: jest.fn(),
-      } as unknown) as IndexPatternsService;
+      } as unknown as IndexPatternsService;
 
       const localDataViews = new DataViewsService({
         patterns: localPatternsMock,
         uiSettings: { get: jest.fn().mockResolvedValue(false), getAll: () => {} } as any,
-        savedObjectsClient: (savedObjectsClient as unknown) as DataViewSavedObjectsClientCommon,
+        savedObjectsClient: savedObjectsClient as unknown as DataViewSavedObjectsClientCommon,
         apiClient: createFieldsFetcher(),
         fieldFormats,
         onNotification: () => {},
@@ -453,17 +453,17 @@ describe('DataViews', () => {
     });
 
     test('getMultiple() bypasses cache when cached entry is a plain IndexPattern', async () => {
-      const localPatternsMock = ({
+      const localPatternsMock = {
         clearCache: jest.fn(),
         get: jest.fn().mockResolvedValue(plainIndexPattern),
         getByTitle: jest.fn(),
         saveToCache: jest.fn(),
-      } as unknown) as IndexPatternsService;
+      } as unknown as IndexPatternsService;
 
       const localDataViews = new DataViewsService({
         patterns: localPatternsMock,
         uiSettings: { get: jest.fn().mockResolvedValue(false), getAll: () => {} } as any,
-        savedObjectsClient: (savedObjectsClient as unknown) as DataViewSavedObjectsClientCommon,
+        savedObjectsClient: savedObjectsClient as unknown as DataViewSavedObjectsClientCommon,
         apiClient: createFieldsFetcher(),
         fieldFormats,
         onNotification: () => {},
@@ -492,17 +492,17 @@ describe('DataViews', () => {
     });
 
     test('getMultiple() uses cache when entry is a proper DataView', async () => {
-      const localPatternsMock = ({
+      const localPatternsMock = {
         clearCache: jest.fn(),
         get: jest.fn().mockResolvedValue(properDataView),
         getByTitle: jest.fn(),
         saveToCache: jest.fn(),
-      } as unknown) as IndexPatternsService;
+      } as unknown as IndexPatternsService;
 
       const localDataViews = new DataViewsService({
         patterns: localPatternsMock,
         uiSettings: { get: jest.fn().mockResolvedValue(false), getAll: () => {} } as any,
-        savedObjectsClient: (savedObjectsClient as unknown) as DataViewSavedObjectsClientCommon,
+        savedObjectsClient: savedObjectsClient as unknown as DataViewSavedObjectsClientCommon,
         apiClient: createFieldsFetcher(),
         fieldFormats,
         onNotification: () => {},
@@ -520,17 +520,17 @@ describe('DataViews', () => {
     });
 
     test('getMultiple() skips not-found saved objects instead of throwing', async () => {
-      const localPatternsMock = ({
+      const localPatternsMock = {
         clearCache: jest.fn(),
         get: jest.fn().mockResolvedValue(undefined),
         getByTitle: jest.fn(),
         saveToCache: jest.fn(),
-      } as unknown) as IndexPatternsService;
+      } as unknown as IndexPatternsService;
 
       const localDataViews = new DataViewsService({
         patterns: localPatternsMock,
         uiSettings: { get: jest.fn().mockResolvedValue(false), getAll: () => {} } as any,
-        savedObjectsClient: (savedObjectsClient as unknown) as DataViewSavedObjectsClientCommon,
+        savedObjectsClient: savedObjectsClient as unknown as DataViewSavedObjectsClientCommon,
         apiClient: createFieldsFetcher(),
         fieldFormats,
         onNotification: () => {},
@@ -567,17 +567,17 @@ describe('DataViews', () => {
 
     test('getMultiple() skips objects that throw during processing without breaking others', async () => {
       const onErrorMock = jest.fn();
-      const localPatternsMock = ({
+      const localPatternsMock = {
         clearCache: jest.fn(),
         get: jest.fn().mockResolvedValue(undefined),
         getByTitle: jest.fn(),
         saveToCache: jest.fn(),
-      } as unknown) as IndexPatternsService;
+      } as unknown as IndexPatternsService;
 
       const localDataViews = new DataViewsService({
         patterns: localPatternsMock,
         uiSettings: { get: jest.fn().mockResolvedValue(false), getAll: () => {} } as any,
-        savedObjectsClient: (savedObjectsClient as unknown) as DataViewSavedObjectsClientCommon,
+        savedObjectsClient: savedObjectsClient as unknown as DataViewSavedObjectsClientCommon,
         apiClient: createFieldsFetcher(),
         fieldFormats,
         onNotification: () => {},
@@ -613,6 +613,53 @@ describe('DataViews', () => {
         expect.any(Error),
         expect.objectContaining({ title: 'Failed to load data view "corrupt-id"' })
       );
+    });
+  });
+
+  describe('convertToDataset', () => {
+    // A plain IndexPattern (no `toDataset` method) whose `dataSourceRef` is the raw saved-object
+    // reference: `type` is the saved-object type ('data-source'), not the engine type, and there is
+    // no version. This mirrors what `IndexPatternsService.get()` returns.
+    const indexPatternWithRawRef = {
+      id: 'ip-1',
+      title: 'kibana_sample_data_ecommerce*',
+      type: undefined,
+      timeFieldName: 'order_date',
+      dataSourceRef: { id: 'ds-1', type: 'data-source', name: 'dataSource' },
+    } as any;
+
+    it('resolves the real engine type and version by fetching the data-source saved object', async () => {
+      savedObjectsClient.get = jest.fn().mockResolvedValue({
+        id: 'ds-1',
+        attributes: {
+          title: 'escluster-710',
+          dataSourceEngineType: 'Elasticsearch',
+          dataSourceVersion: '7.10.2',
+        },
+      });
+
+      const dataset = await dataViews.convertToDataset(indexPatternWithRawRef);
+
+      expect(savedObjectsClient.get).toHaveBeenCalledWith('data-source', 'ds-1');
+      expect(dataset.dataSource).toEqual({
+        id: 'ds-1',
+        title: 'escluster-710',
+        type: 'Elasticsearch',
+        version: '7.10.2',
+      });
+    });
+
+    it('falls back to the reference values when the data-source fetch fails', async () => {
+      savedObjectsClient.get = jest.fn().mockRejectedValue(new Error('not found'));
+
+      const dataset = await dataViews.convertToDataset(indexPatternWithRawRef);
+
+      expect(dataset.dataSource).toEqual({
+        id: 'ds-1',
+        title: 'dataSource',
+        type: 'data-source',
+        version: '',
+      });
     });
   });
 });

@@ -82,10 +82,10 @@ export const MetricsQueryPanel: React.FC = () => {
     return languageService.getLanguage(queryLanguage)?.title ?? queryLanguage;
   }, [queryLanguage, services.data.query.queryString]);
 
-  const client = useMemo(() => new PrometheusClient(services, dataConnectionId), [
-    services,
-    dataConnectionId,
-  ]);
+  const client = useMemo(
+    () => new PrometheusClient(services, dataConnectionId),
+    [services, dataConnectionId]
+  );
 
   const rowIdCounter = useRef(0);
   const nextRowId = useCallback(() => `row-${++rowIdCounter.current}`, []);

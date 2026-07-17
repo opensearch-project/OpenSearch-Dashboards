@@ -8,6 +8,8 @@ import {
   IOpenSearchDashboardsResponse,
   IRouter,
   Logger,
+  OpenSearchClient,
+  RequestHandlerContext,
   ResponseError,
 } from '../../../../core/server';
 import { IDataFrameResponse, IOpenSearchDashboardsSearchRequest } from '../../../data/common';
@@ -18,15 +20,39 @@ import { registerDataSourceConnectionsRoutes } from './data_source_connection';
 import { registerResourceRoutes } from './resources';
 import { registerPPLCancelRoute } from './ppl_cancel';
 import { registerPPLAnalyzeRoute } from './ppl_analyze';
+import { definePPLCalciteSettingsRoute } from './ppl_calcite_settings';
+import { definePPLExplainRoute } from './ppl_explain';
 
 /**
  * Coerce status code to 503 for 500 errors from dependency services. Only use
  * this function to handle errors throw by other services, and not from OSD.
  */
-export const coerceStatusCode = (statusCode: number) => {
+export const coerceStatusCode = (statusCode?: number) => {
   if (statusCode === 500) return 503;
   return statusCode || 503;
 };
+
+export const DATASOURCE_UNAVAILABLE_MESSAGE =
+  'dataSourceId is not supported because data source plugin is unavailable';
+
+/**
+ * Resolves the OpenSearch client for an optional dataSourceId. Returns the
+ * data source's client when a dataSourceId is given, the current-user client
+ * otherwise, or `null` when a dataSourceId is requested but the data source
+ * plugin is unavailable (the caller should respond 400 in that case).
+ */
+export async function resolveOpenSearchClient(
+  context: RequestHandlerContext,
+  dataSourceId?: string
+): Promise<OpenSearchClient | null> {
+  if (dataSourceId) {
+    if (!context.dataSource?.opensearch?.getClient) {
+      return null;
+    }
+    return context.dataSource.opensearch.getClient(dataSourceId);
+  }
+  return context.core.opensearch.client.asCurrentUser;
+}
 
 /**
  * @experimental
@@ -104,7 +130,7 @@ export function defineSearchStrategyRouteProvider(logger: Logger, router: IRoute
           let error;
           try {
             error = JSON.parse(err.message);
-          } catch (e) {
+          } catch {
             error = err;
           }
           return res.custom({
@@ -194,4 +220,6 @@ export function defineRoutes(
   registerPPLAnalyzeRoute(router, logger);
 
   definePPLBundleRoute(logger, router);
+  definePPLCalciteSettingsRoute(logger, router);
+  definePPLExplainRoute(logger, router);
 }

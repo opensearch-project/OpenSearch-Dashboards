@@ -7,7 +7,12 @@ import { trimEnd } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { from, Observable } from 'rxjs';
 import { first, switchMap } from 'rxjs/operators';
-import { formatTimePickerDate, Query, UI_SETTINGS } from '../../../data/common';
+import {
+  formatTimePickerDate,
+  getDataSourceEngineCapabilities,
+  Query,
+  UI_SETTINGS,
+} from '../../../data/common';
 import {
   DataPublicPluginStart,
   IndexPatternsContract,
@@ -48,7 +53,9 @@ export class PPLSearchInterceptor extends SearchInterceptor {
       this.queryService = (depsStart as QueryEnhancementsPluginStartDependencies).data.query;
       this.aggsService = (depsStart as QueryEnhancementsPluginStartDependencies).data.search.aggs;
       this.uiSettings = coreStart.uiSettings;
-      this.indexPatterns = (depsStart as QueryEnhancementsPluginStartDependencies).data.indexPatterns;
+      this.indexPatterns = (
+        depsStart as QueryEnhancementsPluginStartDependencies
+      ).data.indexPatterns;
     });
   }
 
@@ -173,6 +180,13 @@ export class PPLSearchInterceptor extends SearchInterceptor {
   private getAggConfig(request: IOpenSearchDashboardsSearchRequest, query: Query) {
     const { aggs } = request.params.body;
     if (!aggs || !query.dataset || !query.dataset.timeFieldName) return;
+
+    // Some engines (e.g. legacy Elasticsearch / Open Distro) have no `span()` grouping expression in
+    // the PPL `stats` by-clause, so the histogram aggregation query fails to parse. Skip emitting the
+    // agg config for those engines; the main query still runs.
+    const engineType = query.dataset.dataSource?.engineType ?? query.dataset.dataSource?.type;
+    if (!getDataSourceEngineCapabilities(engineType).supportsPplSpan) return;
+
     const aggsConfig: QueryAggConfig = {};
     const { fromDate, toDate } = formatTimePickerDate(
       this.queryService.timefilter.timefilter.getTime(),

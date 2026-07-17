@@ -73,9 +73,8 @@ export interface DataSourceManagementToastMessageItem {
   success?: boolean;
 }
 
-export type DataSourceManagementContextValue = OpenSearchDashboardsReactContextValue<
-  DataSourceManagementContext
->;
+export type DataSourceManagementContextValue =
+  OpenSearchDashboardsReactContextValue<DataSourceManagementContext>;
 
 export const defaultAuthType = AuthType.UsernamePasswordType;
 

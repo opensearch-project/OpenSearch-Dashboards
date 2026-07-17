@@ -864,8 +864,8 @@ export class HTTPServer {
                 <div class="iteration-stats">
                     <span class="stat-badge duration">⏱️ ${formattedDuration}</span>
                     <span class="stat-badge tools">🔧 ${toolCount} tool${
-      toolCount !== 1 ? 's' : ''
-    }</span>
+                      toolCount !== 1 ? 's' : ''
+                    }</span>
                     <span class="stat-badge">📝 ${
                       iteration.request?.messages?.length || 0
                     } messages</span>

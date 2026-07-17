@@ -51,7 +51,10 @@ export class SearchableListContainer extends Container<ChildInput, SearchableCon
   public readonly type = SEARCHABLE_LIST_CONTAINER;
   private root: Root | null = null;
 
-  constructor(input: SearchableContainerInput, private embeddableServices: EmbeddableStart) {
+  constructor(
+    input: SearchableContainerInput,
+    private embeddableServices: EmbeddableStart
+  ) {
     super(input, { embeddableLoaded: {} }, embeddableServices.getEmbeddableFactory);
   }
 

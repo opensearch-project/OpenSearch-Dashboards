@@ -445,7 +445,7 @@ class FilterEditorUI extends Component<Props, State> {
     if (isCustomEditorOpen) {
       try {
         return Boolean(parse(queryDsl));
-      } catch (e) {
+      } catch {
         return false;
       }
     }

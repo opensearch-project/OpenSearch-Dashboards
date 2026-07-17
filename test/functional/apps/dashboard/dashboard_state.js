@@ -86,9 +86,8 @@ export default function ({ getService, getPageObjects }) {
 
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.loadSavedDashboard('Overridden colors');
-      const colorChoiceRetained = await PageObjects.visChart.doesSelectedLegendColorExist(
-        '#8d4059'
-      );
+      const colorChoiceRetained =
+        await PageObjects.visChart.doesSelectedLegendColorExist('#8d4059');
 
       expect(colorChoiceRetained).to.be(true);
     });

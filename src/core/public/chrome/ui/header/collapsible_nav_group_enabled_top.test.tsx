@@ -43,7 +43,7 @@ describe('<CollapsibleNavTop />', () => {
     const { findByTestId, getByTestId } = render(<CollapsibleNavTop {...props} />);
     await findByTestId('collapsibleNavHome');
     fireEvent.click(getByTestId('collapsibleNavHome'));
-    expect(props.navigateToApp).toBeCalledWith('home');
+    expect(props.navigateToApp).toHaveBeenCalledWith('home');
   });
 
   it('should render expand button when collapsed (original nav)', async () => {
@@ -54,11 +54,18 @@ describe('<CollapsibleNavTop />', () => {
     await findByTestId('collapsibleNavShrinkButton');
   });
 
-  it('should render home icon and toggle buttons when icon side nav enabled', async () => {
-    const { getAllByTestId } = render(
-      <CollapsibleNavTop {...getMockedProps()} shouldShrinkNavigation enableIconSideNav />
+  it('should render home logo and pin button when icon side nav enabled', async () => {
+    const onIsLockedUpdate = jest.fn();
+    const { findByTestId } = render(
+      <CollapsibleNavTop
+        {...getMockedProps()}
+        shouldShrinkNavigation
+        enableIconSideNav
+        onIsLockedUpdate={onIsLockedUpdate}
+      />
     );
-    // Icon side nav renders both expanded and collapsed toggle buttons (CSS controls visibility)
-    expect(getAllByTestId('collapsibleNavToggleButton').length).toBeGreaterThanOrEqual(1);
+    // The logo (home link) is present; expansion is hover-driven, and a pin
+    // button keeps the nav open (no dedicated collapse toggle anymore).
+    await findByTestId('collapsibleNavLockButton');
   });
 });

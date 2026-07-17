@@ -210,7 +210,7 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup> {
       });
     }
     if (core.chrome.navGroup.getNavGroupEnabled()) {
-      const mountDevToolsIcon = () =>
+      const mountDevToolsIcon = (useRailPopover = false) =>
         toMountPoint(
           React.createElement(DevToolsIcon, {
             core,
@@ -219,20 +219,23 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup> {
             devTools: this.getSortedDevTools(),
             deps: this.setupDeps as DevToolsSetupDependencies,
             title: this.title,
+            useRailPopover,
           })
         );
       core.chrome.navControls.registerLeftBottom({
         order: 4,
-        mount: mountDevToolsIcon(),
+        // Expanded footer + classic nav: plain tooltip on hover.
+        mount: mountDevToolsIcon(false),
       });
       // Also mount Dev Tools into the icon-side-nav collapsed footer slot so
       // users can reach it without expanding the sidebar when the observability
       // icon-side-nav is enabled. The slot is only rendered in the icon-side-nav
-      // collapsed state, so this is a no-op elsewhere.
+      // collapsed state, so this is a no-op elsewhere. Use the rail-flush popover
+      // here to match the collapsed nav leaf icons.
       if (core.chrome.getIsIconSideNavEnabled()) {
         core.chrome.navControls.registerIconSideNavFooter({
           order: 4,
-          mount: mountDevToolsIcon(),
+          mount: mountDevToolsIcon(true),
         });
       }
     }

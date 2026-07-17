@@ -74,6 +74,82 @@ describe('indexPatternTypeConfig', () => {
     });
   });
 
+  describe('toDataset engineType/version plumbing', () => {
+    test('populates engineType and version from pattern.parent and its CUSTOM meta', () => {
+      const mockPath: DataStructure[] = [
+        {
+          id: 'test-pattern',
+          title: 'Test Pattern',
+          type: 'INDEX_PATTERN',
+          meta: { timeFieldName: '@timestamp', type: DATA_STRUCTURE_META_TYPES.CUSTOM },
+          parent: {
+            id: 'datasource-es',
+            title: 'My ES Cluster',
+            type: 'Elasticsearch',
+            meta: {
+              type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+              dataSourceVersion: '7.10.2',
+            },
+          },
+        },
+      ];
+
+      const result = indexPatternTypeConfig.toDataset(mockPath);
+
+      expect(result.dataSource).toEqual({
+        id: 'datasource-es',
+        title: 'My ES Cluster',
+        type: 'Elasticsearch',
+        engineType: 'Elasticsearch',
+        version: '7.10.2',
+      });
+    });
+
+    test('defaults version to empty string when parent meta has no dataSourceVersion', () => {
+      const mockPath: DataStructure[] = [
+        {
+          id: 'test-pattern',
+          title: 'Test Pattern',
+          type: 'INDEX_PATTERN',
+          meta: { timeFieldName: '@timestamp', type: DATA_STRUCTURE_META_TYPES.CUSTOM },
+          parent: {
+            id: 'datasource-es',
+            title: 'My ES Cluster',
+            type: 'Elasticsearch',
+            meta: {
+              type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+            },
+          },
+        },
+      ];
+
+      const result = indexPatternTypeConfig.toDataset(mockPath);
+
+      expect(result.dataSource).toEqual({
+        id: 'datasource-es',
+        title: 'My ES Cluster',
+        type: 'Elasticsearch',
+        engineType: 'Elasticsearch',
+        version: '',
+      });
+    });
+
+    test('leaves dataSource undefined when pattern has no parent', () => {
+      const mockPath: DataStructure[] = [
+        {
+          id: 'test-pattern',
+          title: 'Test Pattern',
+          type: 'INDEX_PATTERN',
+          meta: { timeFieldName: '@timestamp', type: DATA_STRUCTURE_META_TYPES.CUSTOM },
+        },
+      ];
+
+      const result = indexPatternTypeConfig.toDataset(mockPath);
+
+      expect(result.dataSource).toBeUndefined();
+    });
+  });
+
   test('fetchFields returns fields from index pattern', async () => {
     const mockIndexPattern = {
       fields: [
@@ -124,7 +200,7 @@ describe('indexPatternTypeConfig', () => {
     });
 
     test('should extract data source from references array (traditional method)', async () => {
-      const client = ({
+      const client = {
         find: jest.fn().mockResolvedValue({
           savedObjects: [
             {
@@ -147,7 +223,7 @@ describe('indexPatternTypeConfig', () => {
             },
           ],
         }),
-      } as unknown) as SavedObjectsClientContract;
+      } as unknown as SavedObjectsClientContract;
 
       // @ts-expect-error - Partial mock for testing
       const result = await indexPatternTypeConfig.fetch({ savedObjects: { client } }, []);
@@ -175,12 +251,16 @@ describe('indexPatternTypeConfig', () => {
           id: 'datasource-abc',
           title: 'My Data Source',
           type: 'OpenSearch',
+          meta: {
+            type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+            dataSourceVersion: undefined,
+          },
         },
       });
     });
 
     test('should extract data source from namespaced ID when references are empty', async () => {
-      const client = ({
+      const client = {
         find: jest.fn().mockResolvedValue({
           savedObjects: [
             {
@@ -203,7 +283,7 @@ describe('indexPatternTypeConfig', () => {
             },
           ],
         }),
-      } as unknown) as SavedObjectsClientContract;
+      } as unknown as SavedObjectsClientContract;
 
       // @ts-expect-error - Partial mock for testing
       const result = await indexPatternTypeConfig.fetch({ savedObjects: { client } }, []);
@@ -223,12 +303,16 @@ describe('indexPatternTypeConfig', () => {
           id: 'datasource-xyz',
           title: 'External Data Source',
           type: 'OpenSearch',
+          meta: {
+            type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+            dataSourceVersion: undefined,
+          },
         },
       });
     });
 
     test('should handle index patterns without data source', async () => {
-      const client = ({
+      const client = {
         find: jest.fn().mockResolvedValue({
           savedObjects: [
             {
@@ -243,7 +327,7 @@ describe('indexPatternTypeConfig', () => {
           ],
         }),
         bulkGet: jest.fn().mockResolvedValue({ savedObjects: [] }),
-      } as unknown) as SavedObjectsClientContract;
+      } as unknown as SavedObjectsClientContract;
 
       // @ts-expect-error - Partial mock for testing
       const result = await indexPatternTypeConfig.fetch({ savedObjects: { client } }, []);
@@ -265,7 +349,7 @@ describe('indexPatternTypeConfig', () => {
     });
 
     test('should handle mixed scenarios with both traditional and namespaced methods', async () => {
-      const client = ({
+      const client = {
         find: jest.fn().mockResolvedValue({
           savedObjects: [
             {
@@ -302,7 +386,7 @@ describe('indexPatternTypeConfig', () => {
             },
           ],
         }),
-      } as unknown) as SavedObjectsClientContract;
+      } as unknown as SavedObjectsClientContract;
 
       // @ts-expect-error - Partial mock for testing
       const result = await indexPatternTypeConfig.fetch({ savedObjects: { client } }, []);
@@ -319,6 +403,10 @@ describe('indexPatternTypeConfig', () => {
         id: 'datasource-1',
         title: 'Data Source 1',
         type: 'OpenSearch',
+        meta: {
+          type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+          dataSourceVersion: undefined,
+        },
       });
 
       // Namespaced method
@@ -326,6 +414,10 @@ describe('indexPatternTypeConfig', () => {
         id: 'datasource-2',
         title: 'Data Source 2',
         type: 'OpenSearch',
+        meta: {
+          type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+          dataSourceVersion: undefined,
+        },
       });
 
       // No data source

@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-/* eslint-env jest */
-
 // Global mock for monaco-editor to fix issues with monaco-editor 0.30.1
 //
 // In monaco-editor 0.30.1, the initialization pattern changed from the previous version (0.17.0):

@@ -206,10 +206,23 @@ describe('SQLSearchInterceptor', () => {
     };
 
     beforeEach(() => {
-      // Default to a non-dashboards app so filter-manager merging is skipped.
-      (mockCoreStart.application.currentAppId$ as any) = of('explore/logs');
+      // Default to dashboards app so time filtering is applied.
+      (mockCoreStart.application.currentAppId$ as any) = of('dashboards');
       (sqlSearchInterceptor as any).application = mockCoreStart.application;
       (mockDataService.query.filterManager.getFilters as jest.Mock).mockReturnValue([]);
+    });
+
+    it('returns the query unchanged when not in a supported app', async () => {
+      (mockCoreStart.application.currentAppId$ as any) = of('discover');
+      (sqlSearchInterceptor as any).application = mockCoreStart.application;
+
+      const query = {
+        language: 'SQL',
+        query: 'SELECT * FROM test_index',
+        dataset: { type: 'DEFAULT', title: 'test_index', timeFieldName: '@timestamp' },
+      };
+      const result = await (sqlSearchInterceptor as any).buildQuery(query, baseRequest);
+      expect(result).toBe(query);
     });
 
     it('returns the query unchanged when the dataset has no timeFieldName', async () => {
@@ -222,28 +235,17 @@ describe('SQLSearchInterceptor', () => {
       expect(result).toBe(query);
     });
 
-    it('returns the query unchanged when enableTimeFiltering is not set', async () => {
+    it('inserts WHERE clause with time filter into user query when in supported app', async () => {
       const query = {
         language: 'SQL',
         query: 'SELECT * FROM test_index',
         dataset: { type: 'DEFAULT', title: 'test_index', timeFieldName: '@timestamp' },
       };
       const result = await (sqlSearchInterceptor as any).buildQuery(query, baseRequest);
-      expect(result).toBe(query);
-    });
-
-    it('inserts WHERE clause with time filter into user query', async () => {
-      const query = {
-        language: 'SQL',
-        query: 'SELECT * FROM test_index',
-        dataset: { type: 'DEFAULT', title: 'test_index', timeFieldName: '@timestamp' },
-      };
-      const request = { params: { body: { enableTimeFiltering: true } } };
-      const result = await (sqlSearchInterceptor as any).buildQuery(query, request);
 
       expect(result.query).toBe(
-        "SELECT * FROM test_index WHERE `@timestamp` >= '2023-01-01 00:00:00.000' " +
-          "AND `@timestamp` <= '2023-01-02 00:00:00.000'"
+        "SELECT * FROM test_index WHERE `@timestamp` >= TIMESTAMP('2023-01-01 00:00:00.000') " +
+          "AND `@timestamp` <= TIMESTAMP('2023-01-02 00:00:00.000')"
       );
     });
 
@@ -253,8 +255,7 @@ describe('SQLSearchInterceptor', () => {
         query: 'WITH foo AS (SELECT 1) SELECT * FROM foo, test_index',
         dataset: { type: 'DEFAULT', title: 'test_index', timeFieldName: '@timestamp' },
       };
-      const request = { params: { body: { enableTimeFiltering: true } } };
-      const result = await (sqlSearchInterceptor as any).buildQuery(query, request);
+      const result = await (sqlSearchInterceptor as any).buildQuery(query, baseRequest);
 
       // WITH queries are not SELECT statements at the root level, so we return unchanged
       expect(result.query).toBe(query.query);
@@ -266,12 +267,29 @@ describe('SQLSearchInterceptor', () => {
         query: 'SELECT method, COUNT(*) FROM test_index GROUP BY method',
         dataset: { type: 'DEFAULT', title: 'test_index', timeFieldName: '@timestamp' },
       };
-      const request = { params: { body: { enableTimeFiltering: true } } };
-      const result = await (sqlSearchInterceptor as any).buildQuery(query, request);
+      const result = await (sqlSearchInterceptor as any).buildQuery(query, baseRequest);
 
       expect(result.query).toBe(
-        "SELECT method, COUNT(*) FROM test_index WHERE `@timestamp` >= '2023-01-01 00:00:00.000' " +
-          "AND `@timestamp` <= '2023-01-02 00:00:00.000' GROUP BY method"
+        "SELECT method, COUNT(*) FROM test_index WHERE `@timestamp` >= TIMESTAMP('2023-01-01 00:00:00.000') " +
+          "AND `@timestamp` <= TIMESTAMP('2023-01-02 00:00:00.000') GROUP BY method"
+      );
+    });
+
+    it('applies time filtering for explore/logs app', async () => {
+      (mockCoreStart.application.currentAppId$ as any) = of('explore/logs');
+      (sqlSearchInterceptor as any).application = mockCoreStart.application;
+      (mockDataService.query.filterManager.getFilters as jest.Mock).mockReturnValue([]);
+
+      const query = {
+        language: 'SQL',
+        query: 'SELECT * FROM test_index',
+        dataset: { type: 'DEFAULT', title: 'test_index', timeFieldName: '@timestamp' },
+      };
+      const result = await (sqlSearchInterceptor as any).buildQuery(query, baseRequest);
+
+      expect(result.query).toBe(
+        "SELECT * FROM test_index WHERE `@timestamp` >= TIMESTAMP('2023-01-01 00:00:00.000') " +
+          "AND `@timestamp` <= TIMESTAMP('2023-01-02 00:00:00.000')"
       );
     });
   });
@@ -317,14 +335,16 @@ describe('SQLSearchInterceptor', () => {
       const query = {
         language: 'SQL',
         query: 'SELECT * FROM test_index',
-        dataset: { type: 'DEFAULT', title: 'test_index' },
+        dataset: { type: 'DEFAULT', title: 'test_index', timeFieldName: '@timestamp' },
       };
       const result = await (sqlSearchInterceptor as any).buildQuery(query, baseRequest);
-      expect(result.query).toBe("SELECT * FROM test_index WHERE `host` = 'a'");
+      expect(result.query).toBe(
+        "SELECT * FROM test_index WHERE `@timestamp` >= TIMESTAMP('2023-01-01 00:00:00.000') AND `@timestamp` <= TIMESTAMP('2023-01-02 00:00:00.000') AND ( `host` = 'a')"
+      );
     });
 
     it('skips filterManager filters when not on a supported app', async () => {
-      (mockCoreStart.application.currentAppId$ as any) = of('explore/logs');
+      (mockCoreStart.application.currentAppId$ as any) = of('discover');
       (sqlSearchInterceptor as any).application = mockCoreStart.application;
       (mockDataService.query.filterManager.getFilters as jest.Mock).mockReturnValue([
         phraseFilter('host', 'a'),
@@ -332,7 +352,7 @@ describe('SQLSearchInterceptor', () => {
       const query = {
         language: 'SQL',
         query: 'SELECT * FROM test_index',
-        dataset: { type: 'DEFAULT', title: 'test_index' },
+        dataset: { type: 'DEFAULT', title: 'test_index', timeFieldName: '@timestamp' },
       };
       const result = await (sqlSearchInterceptor as any).buildQuery(query, baseRequest);
       expect(result).toBe(query);

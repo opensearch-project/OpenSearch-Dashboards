@@ -6,7 +6,6 @@
 import supertest from 'supertest';
 import { UnwrapPromise } from '@osd/utility-types';
 import { setupServer } from '../../../../../src/core/server/test_utils';
-
 import { IAuthenticationMethodRegistry } from '../auth_registry';
 import { authenticationMethodRegistryMock } from '../auth_registry/authentication_methods_registry.mock';
 import { CustomApiSchemaRegistry } from '../schema_registry';
@@ -14,7 +13,6 @@ import { DataSourceServiceSetup } from '../../server/data_source_service';
 import { CryptographyServiceSetup } from '../cryptography_service';
 import { registerTestConnectionRoute } from './test_connection';
 import { AuthType } from '../../common/data_sources';
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { opensearchClientMock } from '../../../../../src/core/server/opensearch/client/mocks';
 import { dynamicConfigServiceMock } from '../../../../../src/core/server/mocks';
 

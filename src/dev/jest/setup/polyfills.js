@@ -28,6 +28,8 @@
  * under the License.
  */
 
+/* globals global */
+
 // Disable chalk colors in tests for consistent snapshot results across environments
 // (TTY detection varies between Docker containers, CI, and local terminals)
 process.env.FORCE_COLOR = '0';
@@ -57,3 +59,8 @@ global.React = require('react');
 // component constructors don't throw. Individual tests can spy on this global
 // to assert observe/unobserve behavior.
 global.ResizeObserver = require('../mocks/resize_observer_mock');
+
+// jsdom does not implement IntersectionObserver. Provide a mock that immediately
+// reports elements as intersecting so lazy-loading components render in tests.
+// Tests that need fine-grained control can override window.IntersectionObserver.
+global.IntersectionObserver = require('../mocks/intersection_observer_mock');

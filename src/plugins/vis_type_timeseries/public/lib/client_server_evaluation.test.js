@@ -108,9 +108,8 @@ describe('Client-side vs Server-side evaluation', () => {
       // Compare data points with tolerance for floating point precision
       clientResult['test-panel'].series[0].data.forEach((point, index) => {
         const [ts, value] = point;
-        const [expectedTs, expectedValue] = expectedServerResult['test-panel'].series[0].data[
-          index
-        ];
+        const [expectedTs, expectedValue] =
+          expectedServerResult['test-panel'].series[0].data[index];
 
         expect(ts).toBe(expectedTs);
         expect(value).toBeCloseTo(expectedValue, 3);

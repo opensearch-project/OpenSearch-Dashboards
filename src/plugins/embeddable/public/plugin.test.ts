@@ -130,24 +130,24 @@ describe('embeddable factory', () => {
     setup.registerEmbeddableFactory(embeddableFactoryId, embeddableFactory);
     expect(() =>
       setup.registerEmbeddableFactory(embeddableFactoryId, embeddableFactory)
-    ).toThrowError(
+    ).toThrow(
       'Embeddable factory [embeddableFactoryId = ID] already registered in Embeddables API.'
     );
   });
 
   test('embeddableFactory extract function gets called when calling embeddable extract', () => {
     start.extract(embeddableState);
-    expect(embeddableFactory.extract).toBeCalledWith(embeddableState);
+    expect(embeddableFactory.extract).toHaveBeenCalledWith(embeddableState);
   });
 
   test('embeddableFactory inject function gets called when calling embeddable inject', () => {
     start.inject(embeddableState, []);
-    expect(embeddableFactory.extract).toBeCalledWith(embeddableState);
+    expect(embeddableFactory.extract).toHaveBeenCalledWith(embeddableState);
   });
 
   test('embeddableFactory telemetry function gets called when calling embeddable telemetry', () => {
     start.telemetry(embeddableState, {});
-    expect(embeddableFactory.telemetry).toBeCalledWith(embeddableState, {});
+    expect(embeddableFactory.telemetry).toHaveBeenCalledWith(embeddableState, {});
   });
 });
 
@@ -172,23 +172,23 @@ describe('embeddable enhancements', () => {
 
   test('cannot register embeddable enhancement with the same ID', async () => {
     setup.registerEnhancement(embeddableEnhancement);
-    expect(() => setup.registerEnhancement(embeddableEnhancement)).toThrowError(
+    expect(() => setup.registerEnhancement(embeddableEnhancement)).toThrow(
       'enhancement with id test already exists in the registry'
     );
   });
 
   test('enhancement extract function gets called when calling embeddable extract', () => {
     start.extract(embeddableState);
-    expect(embeddableEnhancement.extract).toBeCalledWith(embeddableState.enhancements.test);
+    expect(embeddableEnhancement.extract).toHaveBeenCalledWith(embeddableState.enhancements.test);
   });
 
   test('enhancement inject function gets called when calling embeddable inject', () => {
     start.inject(embeddableState, []);
-    expect(embeddableEnhancement.extract).toBeCalledWith(embeddableState.enhancements.test);
+    expect(embeddableEnhancement.extract).toHaveBeenCalledWith(embeddableState.enhancements.test);
   });
 
   test('enhancement telemetry function gets called when calling embeddable telemetry', () => {
     start.telemetry(embeddableState, {});
-    expect(embeddableEnhancement.telemetry).toBeCalledWith(embeddableState.enhancements.test, {});
+    expect(embeddableEnhancement.telemetry).toHaveBeenCalledWith(embeddableState.enhancements.test, {});
   });
 });
