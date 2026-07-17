@@ -137,7 +137,13 @@ function parseStatsByClause(byCtx: any, state: PPLBuilderState): boolean {
   return true;
 }
 
-const COMPARISON_RE = /^\s*`?([\w.@-]+)`?\s*(=|!=|>=|<=|<|>)\s*(.+?)\s*$/;
+// The field may be a bare identifier or back-quoted. whereField (build_ppl)
+// always back-quotes the WHERE field, and a back-quoted name can hold any
+// character except a backtick (spaces, colons, slashes, parens, #, ...), so the
+// quoted alternative must accept `[^`]+` rather than the bare-identifier charset
+// — otherwise a filter on a field like `geo.city name` compiles but cannot be
+// parsed back, and the query is wrongly flagged as unrepresentable in Builder.
+const COMPARISON_RE = /^\s*(?:`([^`]+)`|([\w.@-]+))\s*(=|!=|>=|<=|<|>)\s*(.+?)\s*$/;
 
 function unquoteValue(text: string): string {
   const t = text.trim();
@@ -165,7 +171,7 @@ function splitTopLevelBool(text: string): BoolSplit {
       if (c === quote) quote = '';
       continue;
     }
-    if (c === "'" || c === '"') {
+    if (c === "'" || c === '"' || c === '`') {
       quote = c;
       continue;
     }
@@ -198,9 +204,10 @@ interface Comparison {
 function parseComparison(text: string): Comparison | null {
   const m = text.trim().match(COMPARISON_RE);
   if (!m) return null;
-  const rhs = m[3].trim();
+  const rhs = m[4].trim();
   if (rhs.startsWith('`')) return null;
-  return { field: m[1].replace(/\.keyword$/, ''), op: m[2], value: unquoteValue(rhs) };
+  const field = (m[1] ?? m[2]).replace(/\.keyword$/, '');
+  return { field, op: m[3], value: unquoteValue(rhs) };
 }
 
 export function parseWherePredicate(text: string): WhereFilter | null {
@@ -212,10 +219,10 @@ export function parseWherePredicate(text: string): WhereFilter | null {
     values,
   });
 
-  const existsMatch = trimmed.match(/^(ISNOTNULL|ISNULL)\(\s*`?([\w.@-]+)`?\s*\)$/i);
+  const existsMatch = trimmed.match(/^(ISNOTNULL|ISNULL)\(\s*(?:`([^`]+)`|([\w.@-]+))\s*\)$/i);
   if (existsMatch) {
     const operator: WhereOperator = /^ISNOTNULL$/i.test(existsMatch[1]) ? 'exists' : 'not_exists';
-    return mkFilter(existsMatch[2].replace(/\.keyword$/, ''), operator, []);
+    return mkFilter((existsMatch[2] ?? existsMatch[3]).replace(/\.keyword$/, ''), operator, []);
   }
 
   const split = splitTopLevelBool(trimmed);

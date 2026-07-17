@@ -147,16 +147,22 @@ describe('parseWherePredicate', () => {
     ],
     // A range with only one bound compiles to a lone comparison; it must map
     // back to a partial is_between so the query stays representable in Builder.
-    [
-      '`bytes` >= 10',
-      { field: 'bytes', operator: 'is_between', values: ['10', ''] },
-    ],
-    [
-      '`bytes` < 500',
-      { field: 'bytes', operator: 'is_between', values: ['', '500'] },
-    ],
+    ['`bytes` >= 10', { field: 'bytes', operator: 'is_between', values: ['10', ''] }],
+    ['`bytes` < 500', { field: 'bytes', operator: 'is_between', values: ['', '500'] }],
     ['ISNOTNULL(`user`)', { field: 'user', operator: 'exists', values: [] }],
     ['ISNULL(`user`)', { field: 'user', operator: 'not_exists', values: [] }],
+    // Back-quoted field names holding characters outside the bare-identifier
+    // charset (spaces, dots-with-spaces, #, ...) must parse back — whereField
+    // always back-quotes, so these are shapes the builder itself emits.
+    ["`geo.city name` = 'NYC'", { field: 'geo.city name', operator: 'is', values: ['NYC'] }],
+    [
+      '`weird#hash` >= 1 AND `weird#hash` < 9',
+      { field: 'weird#hash', operator: 'is_between', values: ['1', '9'] },
+    ],
+    ['ISNOTNULL(`my field`)', { field: 'my field', operator: 'exists', values: [] }],
+    // A back-quoted field name that itself contains AND/OR must not be split as
+    // a boolean operator.
+    ["`a AND b` = 'x'", { field: 'a AND b', operator: 'is', values: ['x'] }],
   ])('parses %s', (predicate, expected) => {
     expect(strip(predicate)).toEqual(expected);
   });
@@ -342,6 +348,20 @@ describe('parsePPL / buildPPL round-trip', () => {
         { id: 'f1', field: 'bytes', operator: 'is_between', values: ['100', '500'] },
         { id: 'f2', field: 'latency', operator: 'is_not_between', values: ['10', '20'] },
         { id: 'f3', field: 'agent', operator: 'not_exists', values: [] },
+      ],
+      aggregations: [],
+      groupBy: { fields: [] },
+    },
+    // Field names with characters outside the bare-identifier charset. These
+    // are back-quoted on emit and must parse back across every operator.
+    {
+      searchExpression: '',
+      filters: [
+        { id: 'f1', field: 'geo.city name', operator: 'is', values: ['NYC'] },
+        { id: 'f2', field: 'field:colon', operator: 'is_not', values: ['x'] },
+        { id: 'f3', field: 'req/path', operator: 'is_one_of', values: ['/a', '/b'] },
+        { id: 'f4', field: 'weird#hash', operator: 'is_between', values: ['1', '9'] },
+        { id: 'f5', field: 'my field', operator: 'exists', values: [] },
       ],
       aggregations: [],
       groupBy: { fields: [] },
