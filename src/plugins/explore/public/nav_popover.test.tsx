@@ -31,9 +31,9 @@ describe('buildExploreNavPopover (Logs)', () => {
     expect((popover.actions ?? []).map((a) => a.id)).toEqual(['newSearch', 'browseSaved']);
   });
 
-  it('includes the Logs drilldown action SECOND when the feature flag is on', () => {
+  it('includes the Explore logs action SECOND when the feature flag is on', () => {
     const flagged = buildExploreNavPopover(ExploreFlavor.Logs, true);
-    // Ordered: New search → Logs drilldown → Browse saved searches.
+    // Ordered: New search → Explore logs → Browse saved searches.
     expect((flagged.actions ?? []).map((a) => a.id)).toEqual([
       'newSearch',
       'logsDrilldown',

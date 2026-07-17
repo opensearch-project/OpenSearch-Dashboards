@@ -59,7 +59,7 @@ const setBreadcrumbs = jest.fn();
 const makeServices = (
   opts: { mds?: boolean; dataSourceTotal?: number; urlStateStorage?: any } = {}
 ) =>
-  (({
+  ({
     chrome: { setBreadcrumbs },
     // MDS on ⇒ dataSourceManagement.ui.DataSourceSelector is present (the page's mdsEnabled gate).
     dataSourceManagement: opts.mds ? { ui: { DataSourceSelector: () => null } } : undefined,
@@ -82,7 +82,7 @@ const makeServices = (
         },
       },
     },
-  } as unknown) as any);
+  }) as unknown as any;
 
 // A minimal in-memory osdUrlStateStorage stub for the URL-state tests.
 const makeUrlStateStorage = (initial: Record<string, any> = {}) => {
@@ -113,9 +113,9 @@ describe('LogsDrilldownPage', () => {
     expect(lastRowsProps.refreshKey).toBe('now-15m|now|0');
   });
 
-  it('sets the "Logs drilldown" breadcrumb on mount', () => {
+  it('sets the "Explore logs" breadcrumb on mount', () => {
     render(<LogsDrilldownPage services={makeServices()} />);
-    expect(setBreadcrumbs).toHaveBeenCalledWith([{ text: 'Logs drilldown' }]);
+    expect(setBreadcrumbs).toHaveBeenCalledWith([{ text: 'Explore logs' }]);
   });
 
   it('defaults the time range to last 15m on mount when the URL has no _g time', () => {

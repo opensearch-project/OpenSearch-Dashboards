@@ -137,7 +137,7 @@ export const DiscoverNoIndexPatterns: React.FC = () => {
   const selectDataDescription = showLogsDrilldown
     ? i18n.translate('explore.discover.noIndexPatterns.selectDataDescriptionWithDrilldown', {
         defaultMessage:
-          'Get started by creating a dataset — explore your indexes with the guided Logs drilldown, or pick your data with the Create dataset button. You can also select data from the dropdown above.',
+          'Get started by creating a dataset — explore your indexes with the guided Explore logs experience, or pick your data with the Create dataset button. You can also select data from the dropdown above.',
       })
     : i18n.translate('explore.discover.noIndexPatterns.selectDataDescription', {
         defaultMessage:
@@ -200,7 +200,7 @@ export const DiscoverNoIndexPatterns: React.FC = () => {
                       data-test-subj="discoverNoIndexPatternsLogsDrilldown"
                     >
                       {i18n.translate('explore.discover.noIndexPatterns.logsDrilldown', {
-                        defaultMessage: 'Logs drilldown',
+                        defaultMessage: 'Explore logs',
                       })}
                     </EuiButton>
                   </EuiFlexItem>

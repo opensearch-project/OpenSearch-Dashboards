@@ -66,9 +66,8 @@ export const LogsDrilldownPage: React.FC<Props> = ({ services, setHeaderActionMe
   }, []);
 
   // Data source scoping the list (MDS). Local state, mirrored to the `_a` URL key.
-  const [selectedDataSource, setSelectedDataSource] = useState<Dataset['dataSource']>(
-    initialDataSource
-  );
+  const [selectedDataSource, setSelectedDataSource] =
+    useState<Dataset['dataSource']>(initialDataSource);
   const dataSource = selectedDataSource;
   const dataSourceId = dataSource?.id;
 
@@ -159,7 +158,7 @@ export const LogsDrilldownPage: React.FC<Props> = ({ services, setHeaderActionMe
     services.chrome.setBreadcrumbs([
       {
         text: i18n.translate('explore.logsDrilldown.breadcrumb', {
-          defaultMessage: 'Logs drilldown',
+          defaultMessage: 'Explore logs',
         }),
       },
     ]);

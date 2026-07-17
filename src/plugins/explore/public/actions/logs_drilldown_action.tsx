@@ -9,7 +9,7 @@ import { getServices } from '../application/legacy/discover/opensearch_dashboard
 import { LOGS_DRILLDOWN_APP_ID } from '../../common';
 
 const label = i18n.translate('explore.queryPanel.logsDrilldownLabel', {
-  defaultMessage: 'Logs drilldown',
+  defaultMessage: 'Explore logs',
 });
 
 /**

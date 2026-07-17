@@ -42,21 +42,21 @@ const makeServices = (opts: { logsDrilldownEnabled?: boolean; sqlSupportEnabled?
     data: { query: { queryString: { getDatasetService: jest.fn() } } },
     overlays: { openModal: jest.fn(() => ({ close: jest.fn() })) },
     notifications: { toasts: { addError: jest.fn() } },
-  } as any);
+  }) as any;
 
-describe('DiscoverNoIndexPatterns — Logs drilldown gating', () => {
+describe('DiscoverNoIndexPatterns — Explore logs gating', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockServices = makeServices();
   });
 
-  it('shows the Logs drilldown button on the Logs flavor when the flag is on', async () => {
+  it('shows the Explore logs button on the Logs flavor when the flag is on', async () => {
     mockGetCurrentFlavor.mockResolvedValue(ExploreFlavor.Logs);
     render(<DiscoverNoIndexPatterns />);
     expect(await screen.findByTestId('discoverNoIndexPatternsLogsDrilldown')).toBeInTheDocument();
   });
 
-  it('hides the Logs drilldown button on the Traces flavor (shared empty state)', async () => {
+  it('hides the Explore logs button on the Traces flavor (shared empty state)', async () => {
     mockGetCurrentFlavor.mockResolvedValue(ExploreFlavor.Traces);
     render(<DiscoverNoIndexPatterns />);
     // The create-dataset action still renders, so the component has settled.
@@ -64,7 +64,7 @@ describe('DiscoverNoIndexPatterns — Logs drilldown gating', () => {
     expect(screen.queryByTestId('discoverNoIndexPatternsLogsDrilldown')).not.toBeInTheDocument();
   });
 
-  it('hides the Logs drilldown button when the flag is off, even on Logs', async () => {
+  it('hides the Explore logs button when the flag is off, even on Logs', async () => {
     mockServices = makeServices({ logsDrilldownEnabled: false });
     mockGetCurrentFlavor.mockResolvedValue(ExploreFlavor.Logs);
     render(<DiscoverNoIndexPatterns />);
@@ -72,7 +72,7 @@ describe('DiscoverNoIndexPatterns — Logs drilldown gating', () => {
     expect(screen.queryByTestId('discoverNoIndexPatternsLogsDrilldown')).not.toBeInTheDocument();
   });
 
-  it('navigates to the Logs drilldown app on click', async () => {
+  it('navigates to the Explore logs app on click', async () => {
     mockGetCurrentFlavor.mockResolvedValue(ExploreFlavor.Logs);
     render(<DiscoverNoIndexPatterns />);
     const btn = await screen.findByTestId('discoverNoIndexPatternsLogsDrilldown');

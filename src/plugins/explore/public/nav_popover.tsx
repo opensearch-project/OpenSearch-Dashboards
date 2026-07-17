@@ -182,7 +182,7 @@ export function buildExploreNavPopover(
             {
               id: 'logsDrilldown',
               label: i18n.translate('explore.navPopover.logsDrilldown', {
-                defaultMessage: 'Logs drilldown',
+                defaultMessage: 'Explore logs',
               }),
               iconType: 'inspect',
               onClick: ({ navigateToApp }: NavPopoverServices) =>
