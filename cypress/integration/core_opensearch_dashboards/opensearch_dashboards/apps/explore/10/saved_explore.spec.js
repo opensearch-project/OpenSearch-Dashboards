@@ -63,9 +63,13 @@ const runSavedExploreTests = () => {
       cy.explore.setDataset(INDEX_PATTERN_WITH_TIME, DATASOURCE_NAME, 'INDEX_PATTERN');
       cy.explore.setTopNavDate(START_TIME, END_TIME, false);
 
-      // Set query input
+      // Set query input. The saved search reloads in code mode (never through the
+      // builder), and the execution layer (`addPPLSourceClause`) back-quotes an
+      // INDEX_PATTERN source, so the editor shows a back-quoted index. Type and
+      // assert that exact form (verifyMonacoEditorContent no longer folds
+      // back-quotes) so the round-trip compares equal.
       cy.explore.clearQueryEditor();
-      const query = `source=\`${INDEX_PATTERN_WITH_TIME}\` | stats count() by category`;
+      const query = `source = \`${INDEX_PATTERN_WITH_TIME}\` | stats count() by category`;
       cy.explore.setQueryEditor(query, { submit: false });
 
       // Run the query
@@ -104,7 +108,7 @@ const runSavedExploreTests = () => {
 
       // Update the saved search with a new query
       cy.explore.clearQueryEditor();
-      const newQuery = `source=\`${INDEX_PATTERN_WITH_TIME}\` | stats count()`;
+      const newQuery = `source = \`${INDEX_PATTERN_WITH_TIME}\` | stats count()`;
       cy.explore.setQueryEditor(newQuery, { submit: false });
 
       // Run the query

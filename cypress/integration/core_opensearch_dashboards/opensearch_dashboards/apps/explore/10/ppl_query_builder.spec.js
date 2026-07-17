@@ -86,8 +86,13 @@ const pplQueryBuilderTestSuite = () => {
       cy.explore.setDataset(INDEX_PATTERN_WITH_TIME, DATASOURCE_NAME, 'INDEX_PATTERN');
       cy.explore.setTopNavDate(START_TIME, END_TIME);
 
-      // Reset to a clean builder state for each test.
+      // Reset to a clean builder state for each test. "New" resets the Redux
+      // query asynchronously; the panel reacts by remounting the builder in its
+      // empty state. Let that settle before interacting, otherwise a late remount
+      // discards the element added by the test under it (mirrors resetPageState's
+      // wait in saved_queries.js).
       cy.getElementByTestId('discoverNewButton').click();
+      cy.wait(2000);
       cy.getElementByTestId('pplBuilder').should('be.visible');
     });
 
@@ -125,7 +130,7 @@ const pplQueryBuilderTestSuite = () => {
       cy.getElementByTestId('pplBuilderFilterChip-0').should('be.visible');
       cy.getElementByTestId('pplBuilderFilterValue-0').should('be.visible').type('5000');
 
-      expectGeneratedQueryToContain('where `bytes_transferred` = 5000');
+      expectGeneratedQueryToContain('WHERE `bytes_transferred` = 5000');
 
       // Removing the only chip collapses back to the empty-state add button.
       cy.getElementByTestId('pplBuilderRemoveFilter-0').click();

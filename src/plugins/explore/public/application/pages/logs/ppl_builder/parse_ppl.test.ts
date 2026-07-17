@@ -24,17 +24,39 @@ describe('parsePPL — canBuild gating', () => {
   });
 
   it.each<[string, string]>([
-    // The source clause is always dropped; the search expression is captured verbatim.
+    // The source clause is captured (not surfaced in the UI); the search
+    // expression is captured verbatim as the remainder of the search command.
     ['a plain source with no search expression', ''],
     ['a field-comparison search expression', 'service="web-store"'],
     ['a boolean search expression', 'status>=500 AND service="web-store"'],
     // The compact `field=value` form emitted by the add-filter path.
     ["the compact field='value' form", "service='web'"],
     ['a full-text search term', 'ERROR'],
-  ])('captures %s (source dropped)', (_label, expr) => {
+  ])('captures %s (source preserved)', (_label, expr) => {
     const result = parsePPL(`source = logs ${expr}`.trim());
     expect(result.canBuild).toBe(true);
     expect(result.state.searchExpression).toBe(expr);
+    expect(result.state.sourceClause).toBe('source = logs');
+  });
+
+  it.each<[string, string]>([
+    // The source clause is captured verbatim, preserving the exact form the user
+    // typed (spacing, quoting, `index =` vs `source =`) so a Builder -> Code
+    // round-trip re-emits it unchanged.
+    ['spaced source', 'source = logs'],
+    ['compact source', 'source=logs'],
+    ['back-quoted index', 'source = `my-index`'],
+    ['the index = alias', 'index = logs'],
+  ])('captures the source clause verbatim: %s', (_label, src) => {
+    const result = parsePPL(`${src} | stats count()`);
+    expect(result.canBuild).toBe(true);
+    expect(result.state.sourceClause).toBe(src);
+  });
+
+  it('leaves sourceClause undefined for a source-less query', () => {
+    const result = parsePPL('ERROR | stats count()');
+    expect(result.canBuild).toBe(true);
+    expect(result.state.sourceClause).toBeUndefined();
   });
 
   it('parses stats count by span', () => {
@@ -416,11 +438,36 @@ describe('parsePPL / buildPPL round-trip', () => {
   ];
 
   it.each(cases.map((c, i) => [i, c]))('round-trips case %i', (_i, state) => {
-    // buildPPL emits a source-less query; prepend a source clause (as the
-    // execution layer does) before reparsing so parsePPL sees a full query.
+    // These cases carry no sourceClause; buildPPL emits a source-less query, so
+    // prepend a source clause (as the execution layer does) before reparsing so
+    // parsePPL sees a full query. The reparse then captures `source = logs`, which
+    // stripIds ignores — this block asserts the body round-trips.
     const ppl = `source = logs ${buildPPL(state as PPLBuilderState)}`.trim();
     const reparsed = parsePPL(ppl);
     expect(reparsed.canBuild).toBe(true);
     expect(stripIds(reparsed.state)).toEqual(stripIds(state as PPLBuilderState));
+  });
+
+  it.each<[string, string]>([
+    ['spaced source', 'source = logs'],
+    ['compact source', 'source=logs'],
+    ['back-quoted index', 'source = `my-index`'],
+    ['index = alias', 'index = logs'],
+  ])('preserves the source clause verbatim through parse -> build -> parse (%s)', (_label, src) => {
+    // buildPPL re-emits the captured sourceClause, so the full query survives a
+    // Builder -> Code round-trip byte-for-byte (modulo the body it already
+    // round-trips), without the execution layer having to re-add source.
+    const original = `${src} | WHERE \`bytes\` < 200 | stats count() by service`;
+    const parsed = parsePPL(original);
+    expect(parsed.canBuild).toBe(true);
+    expect(parsed.state.sourceClause).toBe(src);
+
+    const rebuilt = buildPPL(parsed.state);
+    expect(rebuilt.startsWith(src)).toBe(true);
+
+    const reparsed = parsePPL(rebuilt);
+    expect(reparsed.canBuild).toBe(true);
+    expect(reparsed.state.sourceClause).toBe(src);
+    expect(stripIds(reparsed.state)).toEqual(stripIds(parsed.state));
   });
 });

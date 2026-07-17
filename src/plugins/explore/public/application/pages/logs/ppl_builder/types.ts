@@ -65,6 +65,15 @@ export interface Sort {
 }
 
 export interface PPLBuilderState {
+  // The leading `source = <index>` (or `index = <index>`) clause exactly as it
+  // appeared in the parsed query. The builder does not surface or edit it — the
+  // clause is owned by the dataset selector — but it is carried through the
+  // builder round-trip verbatim so a Builder -> Code toggle re-emits the source
+  // the user actually typed (preserving its spacing/quoting/index form) rather
+  // than reconstructing a canonical one. Absent for a source-less query (e.g. a
+  // fresh builder built from an empty dataset selection), in which case the
+  // execution layer (`addPPLSourceClause`) supplies the source at run time.
+  sourceClause?: string;
   searchExpression: string;
   filters: WhereFilter[];
   aggregations: Aggregation[];

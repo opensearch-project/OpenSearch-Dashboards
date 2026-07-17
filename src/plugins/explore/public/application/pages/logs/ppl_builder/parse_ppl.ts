@@ -338,6 +338,25 @@ export function parsePPL(query: string): PPLParseResult {
       return typeof s === 'number' && typeof t === 'number' ? [s, t] : null;
     };
 
+    // Capture the leading `source = <index>` / `index = <index>` clause exactly as
+    // written (spacing, quoting, index form) so a Builder -> Code round-trip
+    // re-emits the source the user actually typed rather than a reconstructed one.
+    // A back-quoted source (source = `my-index`) does NOT parse as a
+    // searchExpression node, so match it on the raw search-command text (bounded to
+    // the text before the first pipe) rather than relying on exprList[0]. The value
+    // matches a back-quoted name, a comma-separated index list, or a bare token.
+    const searchCmdRange = exprRange(searchCmd);
+    const searchCmdText =
+      searchCmdRange && Number.isFinite(searchCmdRange[0])
+        ? query.slice(searchCmdRange[0], searchCmdRange[1] + 1)
+        : '';
+    const sourceMatch = searchCmdText.match(
+      /^(?:search\s+)?(?:source|index)\s*=\s*(?:`[^`]+`|[^\s|]+(?:\s*,\s*[^\s|]+)*)/i
+    );
+    if (sourceMatch) {
+      state.sourceClause = sourceMatch[0].trim();
+    }
+
     let searchStartIdx = 0;
     if (exprList.length > 0 && /^(source|index)\s*=/i.test(exprList[0].getText())) {
       searchStartIdx = 1;

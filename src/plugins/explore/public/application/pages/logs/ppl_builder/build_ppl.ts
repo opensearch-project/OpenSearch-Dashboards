@@ -230,11 +230,14 @@ function whereValue(value: string, fieldType?: string): string {
   const trimmed = value.trim();
   const numericAllowed = fieldType === undefined || fieldType === 'number';
   if (numericAllowed && NUMERIC_LITERAL_RE.test(trimmed)) return trimmed;
-  // Double-quote string literals to match the PPL code editor's insert
-  // convention (getInsertText in the data plugin), so a value built here reads
-  // identically to one completed in code mode. parse_ppl's unquoteValue accepts
-  // both quote styles and un-doubles "" → ", keeping the round-trip lossless.
-  return `"${trimmed.replace(/"/g, '""')}"`;
+  // Single-quote string literals to match the shared filter-add path
+  // (PPLFilterUtils.quote in query_enhancements), which is what the sidebar /
+  // table-cell "filter for value" actions emit. A filter added there is committed
+  // to the query, round-tripped through the builder, and re-serialized here on the
+  // Builder -> Code toggle; matching that convention keeps the editor text
+  // byte-identical to the pre-builder behavior. parse_ppl's unquoteValue accepts
+  // both quote styles and un-doubles '' -> ', so the round-trip stays lossless.
+  return `'${trimmed.replace(/'/g, "''")}'`;
 }
 
 export function compileWhereFilter(
@@ -291,12 +294,23 @@ export function compileWhereFilter(
 
 export function buildPPL(state: PPLBuilderState, getFieldType?: FieldTypeResolver): string {
   const searchExpr = (state.searchExpression || '').trim();
+  const source = (state.sourceClause || '').trim();
 
-  const parts: string[] = searchExpr ? [searchExpr] : [];
+  // The leading PPL search command combines the source clause and any free-text
+  // search expression (space-separated — PPL parses them into one command). The
+  // builder re-emits the captured source verbatim, so a Builder -> Code toggle
+  // shows the exact source the query carried instead of a reconstructed one.
+  const searchCommand = [source, searchExpr].filter(Boolean).join(' ');
+
+  const parts: string[] = searchCommand ? [searchCommand] : [];
 
   for (const filter of state.filters) {
     const predicate = compileWhereFilter(filter, getFieldType);
-    if (predicate) parts.push(`where ${predicate}`);
+    // Uppercase WHERE to match the shared filter-add path (PPLFilterUtils emits
+    // `WHERE `) and the code-editor/observability convention, so a builder ->
+    // code round-trip reads identically to the pre-builder behavior. PPL keywords
+    // are case-insensitive, so parse_ppl still round-trips this back into Builder.
+    if (predicate) parts.push(`WHERE ${predicate}`);
   }
 
   if (state.aggregations.length > 0) {
@@ -317,7 +331,7 @@ export function buildPPL(state: PPLBuilderState, getFieldType?: FieldTypeResolve
   const sortClause = compileValidSort(state);
   if (sortClause) parts.push(sortClause);
 
-  if (parts.length > 0 && !searchExpr) {
+  if (parts.length > 0 && !searchCommand) {
     return `| ${parts.join(' | ')}`;
   }
   return parts.join(' | ');

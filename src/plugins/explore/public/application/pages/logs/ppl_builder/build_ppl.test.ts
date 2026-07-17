@@ -201,22 +201,22 @@ describe('compileWhereFilter', () => {
   });
 
   it.each<[string, Partial<WhereFilter>, string | null]>([
-    ['is with a quoted string value', { operator: 'is', values: ['ok'] }, '`response` = "ok"'],
+    ['is with a quoted string value', { operator: 'is', values: ['ok'] }, "`response` = 'ok'"],
     [
       'is_not with a quoted string value',
       { operator: 'is_not', values: ['ok'] },
-      '`response` != "ok"',
+      "`response` != 'ok'",
     ],
     ['a bare numeric value unquoted', { operator: 'is', values: ['200'] }, '`response` = 200'],
     [
-      'escapes double quotes in a string value',
-      { field: 'user', operator: 'is', values: ['a "quoted" name'] },
-      '`user` = "a ""quoted"" name"',
+      'escapes single quotes in a string value',
+      { field: 'user', operator: 'is', values: ["a 'quoted' name"] },
+      "`user` = 'a ''quoted'' name'",
     ],
     [
       'drops the .keyword suffix from the field',
       { field: 'service.keyword', operator: 'is', values: ['web'] },
-      '`service` = "web"',
+      "`service` = 'web'",
     ],
     [
       'is_one_of',
@@ -245,14 +245,14 @@ describe('compileWhereFilter', () => {
     ['incomplete: no value', { operator: 'is', values: [] }, null],
     ['incomplete: empty is_one_of', { operator: 'is_one_of', values: [] }, null],
     // The empty string is a real, indexable value.
-    ['empty-string is', { operator: 'is', values: [''] }, '`response` = ""'],
-    ['empty-string is_not', { operator: 'is_not', values: [''] }, '`response` != ""'],
+    ['empty-string is', { operator: 'is', values: [''] }, "`response` = ''"],
+    ['empty-string is_not', { operator: 'is_not', values: [''] }, "`response` != ''"],
     [
       'empty-string in is_one_of',
       { operator: 'is_one_of', values: ['', '200'] },
-      '`response` = "" OR `response` = 200',
+      "`response` = '' OR `response` = 200",
     ],
-    ['empty-string is_not_one_of', { operator: 'is_not_one_of', values: [''] }, '`response` != ""'],
+    ['empty-string is_not_one_of', { operator: 'is_not_one_of', values: [''] }, "`response` != ''"],
   ])('compiles %s', (_label, over, expected) => {
     expect(compileWhereFilter(f(over))).toBe(expected);
   });
@@ -262,7 +262,7 @@ describe('compileWhereFilter', () => {
       const getType = () => 'string';
       expect(
         compileWhereFilter(f({ field: 'zip', operator: 'is', values: ['02101'] }), getType)
-      ).toBe('`zip` = "02101"');
+      ).toBe("`zip` = '02101'");
     });
 
     it('leaves a numeric value unquoted on a number field', () => {
@@ -279,7 +279,7 @@ describe('compileWhereFilter', () => {
           f({ field: 'code', operator: 'is_one_of', values: ['200', '404'] }),
           getType
         )
-      ).toBe('`code` = "200" OR `code` = "404"');
+      ).toBe("`code` = '200' OR `code` = '404'");
     });
 
     it('quotes numeric-looking range bounds on a string field', () => {
@@ -289,7 +289,7 @@ describe('compileWhereFilter', () => {
           f({ field: 'code', operator: 'is_between', values: ['1', '9'] }),
           getType
         )
-      ).toBe('`code` >= "1" AND `code` < "9"');
+      ).toBe("`code` >= '1' AND `code` < '9'");
     });
 
     it('falls back to value-shaped quoting when the field type is unknown', () => {
@@ -306,7 +306,7 @@ describe('compileWhereFilter', () => {
           f({ field: 'service.keyword', operator: 'is', values: ['200'] }),
           getType
         )
-      ).toBe('`service` = "200"');
+      ).toBe("`service` = '200'");
     });
   });
 });
@@ -325,7 +325,7 @@ describe('buildPPL — where filters', () => {
           groupBy: { fields: ['service'] },
         })
       )
-    ).toBe('ERROR | where `response` = 500 | where ISNOTNULL(`user`) | stats count() by service');
+    ).toBe('ERROR | WHERE `response` = 500 | WHERE ISNOTNULL(`user`) | stats count() by service');
   });
 
   it('leads with a pipe when a where filter has no search expression', () => {
@@ -333,7 +333,7 @@ describe('buildPPL — where filters', () => {
       buildPPL(
         state({ filters: [{ id: 'f1', field: 'response', operator: 'is', values: ['200'] }] })
       )
-    ).toBe('| where `response` = 200');
+    ).toBe('| WHERE `response` = 200');
   });
 
   it('skips incomplete filters', () => {
@@ -345,6 +345,39 @@ describe('buildPPL — where filters', () => {
         })
       )
     ).toBe('ERROR');
+  });
+});
+
+describe('buildPPL — source clause', () => {
+  it('re-emits a captured source clause verbatim, ahead of the body', () => {
+    expect(
+      buildPPL(
+        state({
+          sourceClause: 'source = logs',
+          filters: [{ id: 'f1', field: 'response', operator: 'is', values: ['200'] }],
+        })
+      )
+    ).toBe('source = logs | WHERE `response` = 200');
+  });
+
+  it('preserves the exact source form (compact / back-quoted / index alias)', () => {
+    expect(buildPPL(state({ sourceClause: 'source=logs', aggregations: [agg({})] }))).toBe(
+      'source=logs | stats count()'
+    );
+    expect(buildPPL(state({ sourceClause: 'source = `my-index`' }))).toBe('source = `my-index`');
+    expect(buildPPL(state({ sourceClause: 'index = logs', searchExpression: 'ERROR' }))).toBe(
+      'index = logs ERROR'
+    );
+  });
+
+  it('joins the source clause and a search expression into one search command', () => {
+    expect(
+      buildPPL(state({ sourceClause: 'source = logs', searchExpression: 'service="web-store"' }))
+    ).toBe('source = logs service="web-store"');
+  });
+
+  it('emits a source-less query (leading pipe) when no source was captured', () => {
+    expect(buildPPL(state({ aggregations: [agg({})] }))).toBe('| stats count()');
   });
 });
 

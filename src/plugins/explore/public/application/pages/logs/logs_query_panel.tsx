@@ -69,10 +69,11 @@ export const LogsQueryPanel: React.FC = () => {
 
   const { queryString } = services.data.query;
 
-  // The builder works with source-less queries: the `source = <index>` clause is
-  // owned by the dataset selector, hidden from the builder UI, and re-added by
-  // the execution layer (`addPPLSourceClause`) at run time. parsePPL drops the
-  // clause and keeps the rest as the builder's search expression.
+  // The `source = <index>` clause is owned by the dataset selector and hidden
+  // from the builder UI. parsePPL captures it into `state.sourceClause` (verbatim)
+  // and buildPPL re-emits it, so it rides through the builder round-trip without
+  // being surfaced as an editable field; the execution layer (`addPPLSourceClause`)
+  // still supplies it at run time when a query carries none.
   const initialParse = useMemo(() => parsePPL(reduxQuery), []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // A query loaded from a saved object opens in code. It can still be switched
@@ -223,10 +224,13 @@ export const LogsQueryPanel: React.FC = () => {
         // Carry the builder's current text into the code editor on mount, and
         // snapshot the full builder state so partial work (fieldless metrics,
         // `auto` spans, stale sorts) survives an unedited round-trip back — the
-        // parse(build(state)) path is lossy and would otherwise drop it.
-        pendingCodeSeedRef.current = builderQueryRef.current;
+        // parse(build(state)) path is lossy and would otherwise drop it. buildPPL
+        // re-emits the captured source clause, so builderQueryRef already holds
+        // the full query the editor should show (no reconstruction needed).
+        const codeSeed = builderQueryRef.current;
+        pendingCodeSeedRef.current = codeSeed;
         preservedBuilderRef.current = {
-          query: builderQueryRef.current,
+          query: codeSeed,
           state: builderStateRef.current,
         };
         setMode('code');
@@ -278,9 +282,10 @@ export const LogsQueryPanel: React.FC = () => {
   const switchToBuilder = useCallback(() => handleModeChange('builder'), [handleModeChange]);
 
   // Cmd/Ctrl+Enter in the builder runs the current draft, mirroring the
-  // code-mode editor. The builder emits a source-less query; the execution
-  // layer (`addPPLSourceClause`) prepends `source = <index>` at run time, so we
-  // hand `onEditorRunActionCreator` the builder's live query text as-is.
+  // code-mode editor. The builder's query carries its source clause when it had
+  // one; the execution layer (`addPPLSourceClause`) supplies it otherwise (and is
+  // idempotent when present), so we hand `onEditorRunActionCreator` the builder's
+  // live query text as-is.
   const handleRun = useCallback(() => {
     // @ts-expect-error TS2345 TODO(ts-error): fixme
     dispatch(onEditorRunActionCreator(services, builderQueryRef.current));
@@ -299,40 +304,42 @@ export const LogsQueryPanel: React.FC = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      {isPromptMode ? (
-        editors
-      ) : (
-        <EuiFlexGroup
-          className="exploreQueryPanel__contentRow"
-          gutterSize="s"
-          alignItems="flexStart"
-          responsive={false}
-        >
-          <EuiFlexItem>
-            {showBuilder ? (
-              <PPLBuilder
-                key={builderKey}
-                initialState={builderState}
-                onQueryChange={onBuilderChange}
-                onSwitchToCode={switchToCode}
-                onRun={handleRun}
-              />
-            ) : (
-              editors
-            )}
-          </EuiFlexItem>
-          {!showBuilder && (
-            <EuiFlexItem grow={false}>
-              <ModeToggleButton
-                isCode
-                onToggle={switchToBuilder}
-                disabled={builderDisabled}
-                tooltip={modeToggleTooltip}
-              />
-            </EuiFlexItem>
+      {/* The editor (`editors`) must stay in ONE reconciliation slot across prompt
+          and code modes. `showBuilder` is already false in prompt mode
+          (`mode === 'builder' && !isPromptMode`), so a single, non-forking tree
+          keeps `<QueryPanelEditor/>` mounted when toggling AI <-> code — remounting
+          it mid-type drops the natural-language prompt and the AI query never runs.
+          The mode toggle is hidden in prompt mode (no code<->builder switch there). */}
+      <EuiFlexGroup
+        className="exploreQueryPanel__contentRow"
+        gutterSize="s"
+        alignItems="flexStart"
+        responsive={false}
+      >
+        <EuiFlexItem>
+          {showBuilder ? (
+            <PPLBuilder
+              key={builderKey}
+              initialState={builderState}
+              onQueryChange={onBuilderChange}
+              onSwitchToCode={switchToCode}
+              onRun={handleRun}
+            />
+          ) : (
+            editors
           )}
-        </EuiFlexGroup>
-      )}
+        </EuiFlexItem>
+        {!showBuilder && !isPromptMode && (
+          <EuiFlexItem grow={false}>
+            <ModeToggleButton
+              isCode
+              onToggle={switchToBuilder}
+              disabled={builderDisabled}
+              tooltip={modeToggleTooltip}
+            />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
 
       {isLoading && (
         <EuiProgress
