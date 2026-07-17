@@ -12,7 +12,7 @@ const indexFetch = jest.fn();
 const httpGet = jest.fn();
 
 const makeServices = () =>
-  (({
+  ({
     data: {
       query: {
         queryString: {
@@ -24,7 +24,7 @@ const makeServices = () =>
       },
     },
     http: { get: httpGet },
-  } as unknown) as any);
+  }) as unknown as any;
 
 const children = (names: string[], remote: string[] = []) => ({
   children: names.map((title) => ({
@@ -164,12 +164,12 @@ describe('useIndexList', () => {
 
   // --- negative cases ---
   it('surfaces an error and empties the list when the INDEX type is not registered', async () => {
-    const services = ({
+    const services = {
       data: {
         query: { queryString: { getDatasetService: () => ({ getType: () => undefined }) } },
       },
       http: { get: httpGet },
-    } as unknown) as any;
+    } as unknown as any;
     render(<Harness services={services} search="" />);
     await waitFor(() => expect(result.loading).toBe(false));
     expect(result.error).toMatch(/not registered/);

@@ -21,9 +21,10 @@ export const useIndexClassification = (services: ExploreServices, dataSourceId?:
   const inFlightRef = useRef<Set<string>>(new Set());
   const [, force] = useState(0);
 
-  const keyFor = useCallback((indexName: string) => `${dataSourceId ?? ''}::${indexName}`, [
-    dataSourceId,
-  ]);
+  const keyFor = useCallback(
+    (indexName: string) => `${dataSourceId ?? ''}::${indexName}`,
+    [dataSourceId]
+  );
 
   const classify = useCallback(
     async (indexName: string): Promise<ClassificationResult> => {

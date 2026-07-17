@@ -29,18 +29,18 @@ const fetchOptions = jest.fn().mockResolvedValue({
 });
 
 const makeQueryString = () =>
-  (({
+  ({
     getDatasetService: () => ({
       fetchOptions,
       getType: () => ({ id: 'INDEX', toDataset: jest.fn() }),
       getLastCacheTime: () => undefined,
     }),
-  } as unknown) as any);
+  }) as unknown as any;
 
-const services = ({
+const services = {
   uiSettings: { get: () => 'MMM D, YYYY @ HH:mm:ss.SSS' },
   http: { basePath: { get: () => '' } },
-} as unknown) as any;
+} as unknown as any;
 
 const dataSourceNode = (id: string, title: string): DataStructure => ({
   id,

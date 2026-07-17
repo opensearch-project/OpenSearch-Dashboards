@@ -256,7 +256,7 @@ export function buildChart(histogram: HistogramResult): { chart: Chart; palette:
 
 /** Minimal Dimensions the Chart builders need: x = time bucket (moment interval + bounds), y = count. */
 function buildDimensions(intervalMs: number, from: number, to: number): Dimensions {
-  return ({
+  return {
     x: {
       accessor: 0,
       format: { id: 'date', params: { pattern: 'HH:mm' } },
@@ -270,5 +270,5 @@ function buildDimensions(intervalMs: number, from: number, to: number): Dimensio
       },
     },
     y: { accessor: 1, format: { id: 'number' }, params: {} },
-  } as unknown) as Dimensions;
+  } as unknown as Dimensions;
 }

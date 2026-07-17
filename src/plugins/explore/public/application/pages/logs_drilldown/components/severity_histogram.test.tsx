@@ -17,10 +17,12 @@ jest.mock('./histogram_chart', () => ({
 }));
 jest.mock('../severity', () => ({
   severityColor: (b: string) =>
-    (({ error: '#f13939', warn: '#F90', info: '#00BD6B', debug: '#0077CC' } as Record<
-      string,
-      string
-    >)[b] || '#8E96A3'),
+    (
+      ({ error: '#f13939', warn: '#F90', info: '#00BD6B', debug: '#0077CC' }) as Record<
+        string,
+        string
+      >
+    )[b] || '#8E96A3',
 }));
 
 const services = {} as any;

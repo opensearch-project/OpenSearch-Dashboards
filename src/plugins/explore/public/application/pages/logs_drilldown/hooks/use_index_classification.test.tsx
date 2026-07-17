@@ -9,7 +9,7 @@ import { useIndexClassification } from './use_index_classification';
 import { ClassificationResult, IndexClassification } from '../types';
 
 const getFieldsForWildcard = jest.fn();
-const makeServices = () => (({ indexPatterns: { getFieldsForWildcard } } as unknown) as any);
+const makeServices = () => ({ indexPatterns: { getFieldsForWildcard } }) as unknown as any;
 
 // Expose the hook's API to the test via a ref-carrying harness (no react-hooks testing lib here).
 interface Api {

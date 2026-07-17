@@ -50,17 +50,13 @@ interface Props {
   /** Primitive that changes when the global time range changes; drives re-fetch of all cards. */
   refreshKey: string;
   /** Lazily classify an index (time-based? severity fields?) — from useIndexClassification. */
-  classify: (
-    name: string
-  ) => Promise<{
+  classify: (name: string) => Promise<{
     classification: IndexClassification;
     timeFieldName?: string;
     dateFields?: string[];
     severityField?: string;
   }>;
-  getCached: (
-    name: string
-  ) =>
+  getCached: (name: string) =>
     | {
         classification: IndexClassification;
         timeFieldName?: string;

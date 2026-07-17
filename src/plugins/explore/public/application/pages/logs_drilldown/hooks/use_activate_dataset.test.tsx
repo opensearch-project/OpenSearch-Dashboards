@@ -15,7 +15,7 @@ const setQuery = jest.fn();
 const navigateToApp = jest.fn();
 
 const makeServices = () =>
-  (({
+  ({
     core: { application: { navigateToApp } },
     uiSettings: {},
     savedObjects: {},
@@ -30,7 +30,7 @@ const makeServices = () =>
         },
       },
     },
-  } as unknown) as any);
+  }) as unknown as any;
 
 const Harness: React.FC<{ services: any; args: any }> = ({ services, args }) => {
   const activate = useActivateDataset(services);

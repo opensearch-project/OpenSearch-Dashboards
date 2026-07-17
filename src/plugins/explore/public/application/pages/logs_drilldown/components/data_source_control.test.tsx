@@ -19,12 +19,12 @@ const StubSelector = (props: any) => {
 };
 
 const makeServices = (withMds: boolean) =>
-  (({
+  ({
     dataSourceManagement: withMds ? { ui: { DataSourceSelector: StubSelector } } : undefined,
     savedObjects: { client: {} },
     notifications: { toasts: {} },
     uiSettings: { get: jest.fn() },
-  } as unknown) as any);
+  }) as unknown as any;
 
 describe('DataSourceControl', () => {
   beforeEach(() => {

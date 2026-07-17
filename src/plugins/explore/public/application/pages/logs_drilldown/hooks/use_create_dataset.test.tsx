@@ -48,7 +48,7 @@ const openModal = jest.fn().mockImplementation((node: any) => {
 });
 
 const makeServices = () =>
-  (({
+  ({
     core: { application: { navigateToApp } },
     overlays: { openModal },
     notifications: { toasts: { addSuccess, addDanger } },
@@ -62,7 +62,7 @@ const makeServices = () =>
         },
       },
     },
-  } as unknown) as any);
+  }) as unknown as any;
 
 const Harness: React.FC<{ services: any; args: any }> = ({ services, args }) => {
   const createDataset = useCreateDataset(services);

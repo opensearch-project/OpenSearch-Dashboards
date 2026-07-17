@@ -10,7 +10,7 @@ import { useDatasetList } from './use_dataset_list';
 const patternFetch = jest.fn();
 
 const makeServices = (typeRegistered = true) =>
-  (({
+  ({
     data: {
       query: {
         queryString: {
@@ -23,7 +23,7 @@ const makeServices = (typeRegistered = true) =>
         },
       },
     },
-  } as unknown) as any);
+  }) as unknown as any;
 
 // Build a children result where each child carries a parent data-source id + a time field.
 const children = (

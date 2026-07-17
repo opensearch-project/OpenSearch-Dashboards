@@ -169,7 +169,7 @@ function parseColumnar(
   const size: number = response?.body?.size ?? fields[0]?.values?.length ?? 0;
 
   const countCol = fields.find((f) => /count/i.test(f.name))?.values ?? [];
-  const sevCol = severityField ? fields.find((f) => f.name === severityField)?.values ?? [] : [];
+  const sevCol = severityField ? (fields.find((f) => f.name === severityField)?.values ?? []) : [];
   // The time-bucket column is whatever remains (the `span(...)` expression echoes as the column
   // name, which varies by engine) — pick the first field that is neither count nor severity.
   const timeCol =

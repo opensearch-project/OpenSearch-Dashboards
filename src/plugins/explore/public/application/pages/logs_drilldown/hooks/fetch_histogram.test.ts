@@ -11,7 +11,7 @@ const TO = 1_783_740_000_000; // 2026-07-11T03:20:00Z
 const FROM = TO - 15 * 60 * 1000; // 2026-07-11T03:05:00Z
 
 const post = jest.fn();
-const makeServices = () => (({ http: { post } } as unknown) as any);
+const makeServices = () => ({ http: { post } }) as unknown as any;
 
 // Build a columnar PPL data_frame response the way the enhancements endpoint returns it.
 const dataFrame = (fields: Array<{ name: string; values: unknown[] }>) => ({

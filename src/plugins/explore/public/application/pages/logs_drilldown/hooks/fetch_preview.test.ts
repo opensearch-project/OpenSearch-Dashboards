@@ -108,7 +108,7 @@ describe('fetchPreview', () => {
 
   it('sorts by the (backtick-quoted) time field for a time-based index and issues head N', async () => {
     const post = mkPost();
-    await fetchPreview(({ http: { post } } as unknown) as any, {
+    await fetchPreview({ http: { post } } as unknown as any, {
       indexName: 'logs-app-1',
       timeFieldName: '@timestamp',
       size: 10,
@@ -119,7 +119,7 @@ describe('fetchPreview', () => {
 
   it('bounds the preview to the time range (WHERE before sort) when from/to are given', async () => {
     const post = mkPost();
-    await fetchPreview(({ http: { post } } as unknown) as any, {
+    await fetchPreview({ http: { post } } as unknown as any, {
       indexName: 'logs-app-1',
       timeFieldName: '@timestamp',
       size: 10,
@@ -135,7 +135,7 @@ describe('fetchPreview', () => {
 
   it('does NOT add a time filter when from/to are omitted (latest N docs)', async () => {
     const post = mkPost();
-    await fetchPreview(({ http: { post } } as unknown) as any, {
+    await fetchPreview({ http: { post } } as unknown as any, {
       indexName: 'logs-app-1',
       timeFieldName: '@timestamp',
       size: 10,
@@ -147,7 +147,7 @@ describe('fetchPreview', () => {
 
   it('does NOT add a time filter for a no-time-field index even if from/to are passed', async () => {
     const post = mkPost();
-    await fetchPreview(({ http: { post } } as unknown) as any, {
+    await fetchPreview({ http: { post } } as unknown as any, {
       indexName: 'lookup-users',
       size: 10,
       from: 1,
@@ -159,7 +159,7 @@ describe('fetchPreview', () => {
 
   it('backtick-quotes a dotted nested time field so the sort path resolves', async () => {
     const post = mkPost();
-    await fetchPreview(({ http: { post } } as unknown) as any, {
+    await fetchPreview({ http: { post } } as unknown as any, {
       indexName: 'otel-nested',
       timeFieldName: 'attributes.time',
       size: 5,
@@ -171,7 +171,7 @@ describe('fetchPreview', () => {
 
   it('omits the sort for a no-time-field index', async () => {
     const post = mkPost();
-    await fetchPreview(({ http: { post } } as unknown) as any, {
+    await fetchPreview({ http: { post } } as unknown as any, {
       indexName: 'lookup-users',
       size: 10,
     });
@@ -181,7 +181,7 @@ describe('fetchPreview', () => {
 
   it('defaults to DEFAULT_PREVIEW_SIZE when size is omitted', async () => {
     const post = mkPost();
-    await fetchPreview(({ http: { post } } as unknown) as any, { indexName: 'logs' });
+    await fetchPreview({ http: { post } } as unknown as any, { indexName: 'logs' });
     const q = JSON.parse(post.mock.calls[0][1].body).query.query as string;
     expect(q).toBe(`source = logs | head ${DEFAULT_PREVIEW_SIZE}`);
   });
@@ -190,7 +190,7 @@ describe('fetchPreview', () => {
     const post = mkPost();
     const signal = new AbortController().signal;
     await fetchPreview(
-      ({ http: { post } } as unknown) as any,
+      { http: { post } } as unknown as any,
       {
         indexName: 'remote-logs',
         timeFieldName: '@timestamp',
@@ -214,7 +214,7 @@ describe('fetchPreview', () => {
         ],
       },
     });
-    const res = await fetchPreview(({ http: { post } } as unknown) as any, {
+    const res = await fetchPreview({ http: { post } } as unknown as any, {
       indexName: 'logs',
       timeFieldName: '@timestamp',
     });
