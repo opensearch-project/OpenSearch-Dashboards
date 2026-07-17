@@ -68,9 +68,11 @@ export const useFieldData = () => {
 
   // Mirror the PPL code editor's value autocomplete: run a `source=<table> |
   // top <limit> <column>` PPL query via fetchColumnValues so the builder and the
-  // code editor surface the same values with the same limit and caching.
+  // code editor surface the same values with the same limit and caching. When a
+  // search term is given, fetchColumnValues narrows the values server-side
+  // (`where like(...)`) so the user can reach values beyond the cached top-N.
   const getValues = useCallback(
-    async (fieldName: string): Promise<string[]> => {
+    async (fieldName: string, searchTerm?: string): Promise<string[]> => {
       const indexPattern = dataset as any;
       if (!indexPattern?.title) return [];
       try {
@@ -79,7 +81,9 @@ export const useFieldData = () => {
           fieldName,
           services as any,
           indexPattern,
-          indexPattern.type
+          indexPattern.type,
+          undefined,
+          searchTerm
         );
         return (values || [])
           .filter((v: unknown) => v !== null && v !== undefined)

@@ -3,8 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { EuiFieldSearch, EuiIcon, EuiPopover, EuiPopoverTitle, EuiToolTip } from '@elastic/eui';
+
+const SEARCH_DEBOUNCE_MS = 250;
 
 export interface SearchMenuOption {
   key: string;
@@ -36,6 +38,9 @@ interface SearchPopoverMenuProps {
   };
   keepOpenOnSelect?: boolean;
   onOpen?: () => void;
+  // Fires (debounced) with the trimmed search text as the user types, for
+  // callers that fetch options server-side. Empty string signals "cleared".
+  onSearchChange?: (search: string) => void;
   searchPlaceholder: string;
   emptyMessage: string;
   searchDataTestSubj?: string;
@@ -48,6 +53,7 @@ export const SearchPopoverMenu: React.FC<SearchPopoverMenuProps> = ({
   allowCreate,
   keepOpenOnSelect,
   onOpen,
+  onSearchChange,
   searchPlaceholder,
   emptyMessage,
   searchDataTestSubj,
@@ -55,6 +61,27 @@ export const SearchPopoverMenu: React.FC<SearchPopoverMenuProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
   const firstMatchRef = useRef<SearchMenuOption | null>(null);
+
+  // Debounce the server-side search notification so a burst of keystrokes
+  // fires at most one fetch. Latest callback is read via ref to avoid
+  // re-arming the timer when the parent passes a new function identity.
+  const onSearchChangeRef = useRef(onSearchChange);
+  onSearchChangeRef.current = onSearchChange;
+  const changeSearch = (next: string) => {
+    setSearch(next);
+    if (!onSearchChangeRef.current) return;
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+    searchTimerRef.current = setTimeout(() => {
+      onSearchChangeRef.current?.(next.trim());
+    }, SEARCH_DEBOUNCE_MS);
+  };
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  useEffect(
+    () => () => {
+      if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+    },
+    []
+  );
 
   const close = () => {
     setIsOpen(false);
@@ -70,7 +97,9 @@ export const SearchPopoverMenu: React.FC<SearchPopoverMenuProps> = ({
     option.onSelect();
     // Keep the popover open for multi-select, but always clear the search so the
     // next typed value starts fresh rather than appending to the previous text.
-    if (keepOpenOnSelect) setSearch('');
+    // changeSearch (not setSearch) so a server-side option source is asked to
+    // restore its unfiltered list.
+    if (keepOpenOnSelect) changeSearch('');
     else close();
   };
   const create = (value: string) => {
@@ -152,7 +181,7 @@ export const SearchPopoverMenu: React.FC<SearchPopoverMenuProps> = ({
           compressed
           autoFocus
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => changeSearch(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === 'Enter') applyFirst();
             if (e.key === 'Escape') close();

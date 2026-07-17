@@ -113,7 +113,11 @@ export const fetchColumnValues = async (
   services: IDataPluginServices,
   indexPattern: IndexPattern,
   datasetType: string | undefined,
-  skipTimeFilter?: boolean
+  skipTimeFilter?: boolean,
+  // When set, values are narrowed server-side to those containing the term. The
+  // unfiltered top-N caches (`values`/`topValues`) are bypassed and left
+  // untouched — a narrowed result is not the canonical top-N for the field.
+  searchTerm?: string
 ): Promise<any[]> => {
   const fieldInOsd = indexPattern.fields.getByName(column);
 
@@ -124,6 +128,26 @@ export const fetchColumnValues = async (
   // For Boolean fields directly return the values
   if (fieldInOsd?.type === 'boolean') {
     return ['true', 'false'];
+  }
+
+  const trimmedSearch = searchTerm?.trim();
+
+  // A search term always fires a fresh, filtered live query and returns its
+  // results directly, so the caches below are only consulted for the
+  // unfiltered (open-the-picker) path.
+  if (trimmedSearch) {
+    return (
+      (await updateFieldValuesAsync(
+        table,
+        column,
+        services,
+        indexPattern,
+        datasetType,
+        fieldInOsd,
+        skipTimeFilter,
+        trimmedSearch
+      )) ?? []
+    );
   }
 
   // Return cached Autocomplete Results if available
@@ -164,21 +188,37 @@ export const fetchColumnValues = async (
   return fieldInOsd?.spec.suggestions?.values ?? [];
 };
 
+// Wrap a user-typed term as a PPL/SQL string literal, doubling single quotes so
+// it can't break out of the literal. Wildcards are escaped so `%`/`_` typed by
+// the user match literally rather than acting as LIKE metacharacters.
+const escapeLikeLiteral = (term: string): string =>
+  `'%${term.replace(/'/g, "''").replace(/[%_]/g, '\\$&')}%'`;
+
 const buildColumnValueQuery = (
   table: string,
   column: string,
   limit: number,
-  language: 'PPL' | 'SQL'
+  language: 'PPL' | 'SQL',
+  searchTerm?: string
 ): string => {
   if (language === 'SQL') {
+    const where = searchTerm
+      ? ` WHERE ${escapeIdentifier(column)} LIKE ${escapeLikeLiteral(searchTerm)}`
+      : '';
     return `SELECT ${escapeIdentifier(column)} FROM ${escapeIdentifier(
       table
-    )} GROUP BY ${escapeIdentifier(column)} ORDER BY COUNT(*) DESC LIMIT ${limit}`;
+    )}${where} GROUP BY ${escapeIdentifier(column)} ORDER BY COUNT(*) DESC LIMIT ${limit}`;
   }
-  return `source = ${escapeIdentifier(table)} | top ${limit} ${escapeIdentifier(column)}`;
+  const where = searchTerm
+    ? ` | where like(${escapeIdentifier(column)}, ${escapeLikeLiteral(searchTerm)})`
+    : '';
+  return `source = ${escapeIdentifier(table)}${where} | top ${limit} ${escapeIdentifier(column)}`;
 };
 
-// Non-blocking async function to update field values in background
+// Fetch field values via a live query. Without a search term this refreshes the
+// field's unfiltered top-N cache in the background; with one it runs a filtered
+// query and returns the values without touching the cache. Returns the fetched
+// values, or undefined when the query was skipped (disabled/unsupported).
 const updateFieldValuesAsync = async (
   table: string,
   column: string,
@@ -186,8 +226,9 @@ const updateFieldValuesAsync = async (
   indexPattern: IndexPattern,
   datasetType: string | undefined,
   fieldInOsd: IndexPatternField | undefined,
-  skipTimeFilter?: boolean
-): Promise<void> => {
+  skipTimeFilter?: boolean,
+  searchTerm?: string
+): Promise<any[] | undefined> => {
   try {
     // Check if conditions allow API call
     if (!datasetType || !Object.values(DEFAULT_DATA.SET_TYPES).includes(datasetType)) {
@@ -213,7 +254,7 @@ const updateFieldValuesAsync = async (
     }
 
     const language = caps.columnValueSuggestionLanguage;
-    const queryString = buildColumnValueQuery(table, column, limit, language);
+    const queryString = buildColumnValueQuery(table, column, limit, language, searchTerm);
 
     const searchSource = await services.data.search.searchSource.create();
     searchSource.setFields({
@@ -231,6 +272,12 @@ const updateFieldValuesAsync = async (
     // Extract field values from response
     const values = response.hits.hits.map((hit) => hit._source?.[column]);
 
+    // A filtered (searched) result is not the canonical top-N, so return it
+    // without writing to the field's suggestion cache.
+    if (searchTerm) {
+      return values;
+    }
+
     if (values) {
       // Update the field with fresh API values
       if (!fieldInOsd.spec.suggestions) {
@@ -241,8 +288,11 @@ const updateFieldValuesAsync = async (
       // Save the updated IndexPattern to cache
       getDataViews().saveToCache(indexPattern.id!, indexPattern as any);
     }
+
+    return values;
   } catch {
     // Silently failing here not blocking the user
+    return;
   }
 };
 

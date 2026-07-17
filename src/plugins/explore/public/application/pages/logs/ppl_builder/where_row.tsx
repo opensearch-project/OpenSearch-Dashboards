@@ -22,7 +22,7 @@ interface WhereRowProps {
   filters: WhereFilter[];
   fieldNames: string[];
   getFieldType: (field: string) => string | undefined;
-  getValues: (field: string) => Promise<string[]>;
+  getValues: (field: string, searchTerm?: string) => Promise<string[]>;
   dispatch: React.Dispatch<BuilderAction>;
 }
 
@@ -148,12 +148,15 @@ const ChipValuePopover: React.FC<{
   multi: boolean;
   index: number;
   suggest: boolean;
-  getValues: (field: string) => Promise<string[]>;
+  getValues: (field: string, searchTerm?: string) => Promise<string[]>;
   onChange: (values: string[]) => void;
 }> = ({ field, values, multi, index, suggest, getValues, onChange }) => {
   const [suggestions, setSuggestions] = useState<string[]>([]);
 
   const liveRef = useRef(true);
+  // Monotonic request id so a slow earlier fetch can't overwrite the results of
+  // a later search term that resolved first.
+  const requestSeqRef = useRef(0);
   useEffect(() => {
     setSuggestions([]);
   }, [field]);
@@ -164,14 +167,15 @@ const ChipValuePopover: React.FC<{
     };
   }, []);
 
-  const loadSuggestions = () => {
+  const loadSuggestions = (searchTerm?: string) => {
     if (!suggest) return;
-    getValues(field).then(
+    const seq = ++requestSeqRef.current;
+    getValues(field, searchTerm).then(
       (vals) => {
-        if (liveRef.current) setSuggestions(vals);
+        if (liveRef.current && seq === requestSeqRef.current) setSuggestions(vals);
       },
       () => {
-        if (liveRef.current) setSuggestions([]);
+        if (liveRef.current && seq === requestSeqRef.current) setSuggestions([]);
       }
     );
   };
@@ -218,7 +222,8 @@ const ChipValuePopover: React.FC<{
       options={options}
       checkable={multi}
       keepOpenOnSelect={multi}
-      onOpen={loadSuggestions}
+      onOpen={() => loadSuggestions()}
+      onSearchChange={(searchTerm) => loadSuggestions(searchTerm)}
       allowCreate={{
         onCreate: (value) => {
           if (!multi) {
@@ -278,7 +283,7 @@ const ChipValues: React.FC<{
   filter: WhereFilter;
   index: number;
   fieldType?: string;
-  getValues: (field: string) => Promise<string[]>;
+  getValues: (field: string, searchTerm?: string) => Promise<string[]>;
   onChange: (values: string[]) => void;
 }> = ({ filter, index, fieldType, getValues, onChange }) => {
   const arity = operatorArity(filter.operator);
@@ -352,7 +357,7 @@ const WhereChip: React.FC<{
   index: number;
   fieldType?: string;
   fieldNames: string[];
-  getValues: (field: string) => Promise<string[]>;
+  getValues: (field: string, searchTerm?: string) => Promise<string[]>;
   dispatch: React.Dispatch<BuilderAction>;
 }> = ({ filter, index, fieldType, fieldNames, getValues, dispatch }) => {
   // Resolve to this chip's known field type so the tooltip preview quotes

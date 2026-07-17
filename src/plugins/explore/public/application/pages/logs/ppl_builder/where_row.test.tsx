@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { WhereRow } from './where_row';
 import { WhereFilter } from './types';
 
@@ -271,5 +271,35 @@ describe('WhereRow', () => {
       type: 'ADD_FILTER',
       filter: { field: 'service', operator: 'is', values: [] },
     });
+  });
+
+  it('re-fetches suggestions with the typed search term (debounced)', () => {
+    jest.useFakeTimers();
+    try {
+      const getValues = jest.fn().mockResolvedValue(['auth', 'authz']);
+      render(
+        <WhereRow
+          filters={[{ id: 'f1', field: 'service', operator: 'is', values: [] }]}
+          fieldNames={fieldNames}
+          getFieldType={stringType}
+          getValues={getValues}
+          dispatch={jest.fn()}
+        />
+      );
+      // Opening the popover fetches the unfiltered list (no search term).
+      fireEvent.click(screen.getByTestId('pplBuilderFilterValue-0'));
+      expect(getValues).toHaveBeenLastCalledWith('service', undefined);
+
+      const search = screen.getByTestId('pplBuilderFilterValue-0-search');
+      fireEvent.change(search, { target: { value: 'aut' } });
+      // Debounced: the filtered fetch fires only after the timer elapses.
+      expect(getValues).toHaveBeenCalledTimes(1);
+      act(() => {
+        jest.advanceTimersByTime(250);
+      });
+      expect(getValues).toHaveBeenLastCalledWith('service', 'aut');
+    } finally {
+      jest.useRealTimers();
+    }
   });
 });

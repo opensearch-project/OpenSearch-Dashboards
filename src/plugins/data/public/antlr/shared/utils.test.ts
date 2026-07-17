@@ -698,4 +698,101 @@ describe('fetchColumnValues', () => {
     // Verify that field suggestions were updated
     expect(mockField.spec.suggestions!.values).toEqual(['value1', 'value2', 'value3']);
   });
+
+  it('should emit a filtered PPL query and return values when given a search term', async () => {
+    const mockIndexPattern = createMockIndexPattern('string');
+
+    const result = await fetchColumnValues(
+      'test-table',
+      'test-column',
+      mockServices,
+      mockIndexPattern,
+      'INDEX_PATTERN',
+      undefined,
+      'foo'
+    );
+
+    expect(mockSearchSource.setFields).toHaveBeenCalledWith({
+      index: mockIndexPattern,
+      query: {
+        query: "source = `test-table` | where like(`test-column`, '%foo%') | top 10 `test-column`",
+        language: 'PPL',
+        dataset: expect.any(Object),
+      },
+    });
+    expect(result).toEqual(['value1', 'value2', 'value3']);
+  });
+
+  it('should bypass the cache for a search term and leave it untouched', async () => {
+    const mockField = {
+      type: 'string',
+      isSuggestionAvailable: jest.fn().mockReturnValue(true),
+      spec: { suggestions: { values: ['cached1', 'cached2'] } },
+    } as unknown as IndexPatternField;
+    const mockIndexPattern = {
+      id: 'test-index',
+      fields: { getByName: jest.fn().mockReturnValue(mockField) },
+    } as unknown as IndexPattern;
+
+    const result = await fetchColumnValues(
+      'test-table',
+      'test-column',
+      mockServices,
+      mockIndexPattern,
+      'INDEX_PATTERN',
+      undefined,
+      'val'
+    );
+
+    // A filtered fetch runs a fresh query rather than serving the cache...
+    expect(mockServices.data.search.searchSource.create).toHaveBeenCalled();
+    expect(result).toEqual(['value1', 'value2', 'value3']);
+    // ...and does not overwrite the field's canonical top-N cache.
+    expect(mockField.spec.suggestions!.values).toEqual(['cached1', 'cached2']);
+  });
+
+  it('should escape quotes and LIKE wildcards in the search term', async () => {
+    const mockIndexPattern = createMockIndexPattern('string');
+
+    await fetchColumnValues(
+      'test-table',
+      'test-column',
+      mockServices,
+      mockIndexPattern,
+      'INDEX_PATTERN',
+      undefined,
+      "a'b%c_d"
+    );
+
+    expect(mockSearchSource.setFields).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: expect.objectContaining({
+          query:
+            "source = `test-table` | where like(`test-column`, '%a''b\\%c\\_d%') | top 10 `test-column`",
+        }),
+      })
+    );
+  });
+
+  it('should ignore a whitespace-only search term and take the unfiltered path', async () => {
+    const mockIndexPattern = createMockIndexPattern('string');
+
+    await fetchColumnValues(
+      'test-table',
+      'test-column',
+      mockServices,
+      mockIndexPattern,
+      'INDEX_PATTERN',
+      undefined,
+      '   '
+    );
+
+    expect(mockSearchSource.setFields).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: expect.objectContaining({
+          query: 'source = `test-table` | top 10 `test-column`',
+        }),
+      })
+    );
+  });
 });
