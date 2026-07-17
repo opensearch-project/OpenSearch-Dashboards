@@ -196,12 +196,13 @@ function quoteSortColumn(column: string): string {
 }
 
 function compileValidSort(state: PPLBuilderState): string | null {
-  const column = state.sort?.column?.trim();
-  if (!column) return null;
-  if (state.aggregations.length > 0 && !sortableColumns(state).includes(state.sort!.column)) {
+  const { sort } = state;
+  const column = sort?.column?.trim();
+  if (!sort || !column) return null;
+  if (state.aggregations.length > 0 && !sortableColumns(state).includes(sort.column)) {
     return null;
   }
-  const prefix = state.sort!.desc ? '-' : '';
+  const prefix = sort.desc ? '-' : '';
   return `sort ${prefix}${quoteSortColumn(column)}`;
 }
 
