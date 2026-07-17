@@ -108,7 +108,7 @@ describe('injectReferences()', () => {
       visName: VIS_REFERENCE_NAME,
     } as unknown as AugmentVisSavedObject;
     expect(() => injectReferences(context, [])).toThrowErrorMatchingInlineSnapshot(
-      `"Could not find visualization reference \\"${VIS_REFERENCE_NAME}\\""`
+      `"Could not find visualization reference \\"visualization_0\\""`
     );
   });
 });

@@ -51,9 +51,9 @@ describe('Workspace plugin', () => {
       savedObjectsManagement: savedObjectManagementSetupMock,
       management: managementPluginMock.createSetupContract(),
     });
-    expect(setupMock.application.register).toBeCalledTimes(registrationAppNumber);
-    expect(WorkspaceClientMock).toBeCalledTimes(1);
-    expect(savedObjectManagementSetupMock.columns.register).toBeCalledTimes(1);
+    expect(setupMock.application.register).toHaveBeenCalledTimes(registrationAppNumber);
+    expect(WorkspaceClientMock).toHaveBeenCalledTimes(1);
+    expect(savedObjectManagementSetupMock.columns.register).toHaveBeenCalledTimes(1);
   });
 
   it('#call savedObjectsClient.setCurrentWorkspace when current workspace id changed', async () => {
@@ -64,9 +64,9 @@ describe('Workspace plugin', () => {
     workspacePlugin.start(coreStart, getMockDependencies());
     coreStart.workspaces.currentWorkspaceId$.next('foo');
     expect(coreStart.savedObjects.client.setCurrentWorkspace).toHaveBeenCalledWith('foo');
-    expect(setupMock.application.register).toBeCalledTimes(registrationAppNumber);
-    expect(WorkspaceClientMock).toBeCalledTimes(1);
-    expect(workspaceClientMock.enterWorkspace).toBeCalledTimes(0);
+    expect(setupMock.application.register).toHaveBeenCalledTimes(registrationAppNumber);
+    expect(WorkspaceClientMock).toHaveBeenCalledTimes(1);
+    expect(workspaceClientMock.enterWorkspace).toHaveBeenCalledTimes(0);
   });
 
   it('#setup should register workspace list with a visible application and register to settingsAndSetup nav group', async () => {
@@ -133,15 +133,7 @@ describe('Workspace plugin', () => {
   });
 
   it('#setup should register registerCollapsibleNavHeader when enter a workspace', async () => {
-    const windowSpy = jest.spyOn(window, 'window', 'get');
-    windowSpy.mockImplementation(
-      () =>
-        ({
-          location: {
-            href: 'http://localhost/w/workspaceId/app',
-          },
-        }) as any
-    );
+    window.history.pushState({}, '', '/w/workspaceId/app');
     workspaceClientMock.enterWorkspace.mockResolvedValueOnce({
       success: true,
       result: null,
@@ -158,7 +150,7 @@ describe('Workspace plugin', () => {
     const startMock = coreMock.createStart();
     await workspacePlugin.start(startMock, getMockDependencies());
     expect(collapsibleNavHeaderImplementation()).not.toEqual(null);
-    windowSpy.mockRestore();
+    window.history.pushState({}, '', '/');
   });
 
   it('#setup should register workspace essential use case when new home is disabled', async () => {
@@ -276,15 +268,7 @@ describe('Workspace plugin', () => {
   });
 
   it('#start should handle fatal error when workspace is stale', async () => {
-    const windowSpy = jest.spyOn(window, 'window', 'get');
-    windowSpy.mockImplementation(
-      () =>
-        ({
-          location: {
-            href: 'http://localhost/w/workspaceId/app',
-          },
-        }) as any
-    );
+    window.history.pushState({}, '', '/w/workspaceId/app');
 
     const setupMock = coreMock.createSetup();
 
@@ -292,8 +276,8 @@ describe('Workspace plugin', () => {
 
     await workspacePlugin.setup(setupMock, {});
 
-    expect(WorkspaceClientMock).toBeCalledTimes(1);
-    expect(workspaceClientMock.enterWorkspace).toBeCalledWith('workspaceId');
+    expect(WorkspaceClientMock).toHaveBeenCalledTimes(1);
+    expect(workspaceClientMock.enterWorkspace).toHaveBeenCalledWith('workspaceId');
 
     const startMock = coreMock.createStart();
     startMock.application.currentAppId$ = new BehaviorSubject(WORKSPACE_DETAIL_APP_ID);
@@ -302,25 +286,17 @@ describe('Workspace plugin', () => {
     startMock.workspaces.workspaceError$.next(WorkspaceError.WORKSPACE_IS_STALE);
     startMock.workspaces.initialized$.next(true);
 
-    expect(startMock.application.navigateToApp).toBeCalledWith(WORKSPACE_FATAL_ERROR_APP_ID, {
+    expect(startMock.application.navigateToApp).toHaveBeenCalledWith(WORKSPACE_FATAL_ERROR_APP_ID, {
       replace: true,
       state: {
         error: 'Cannot find current workspace since it is stale',
       },
     });
-    windowSpy.mockRestore();
+    window.history.pushState({}, '', '/');
   });
 
   it('#start when workspace id is in url and enterWorkspace return success', async () => {
-    const windowSpy = jest.spyOn(window, 'window', 'get');
-    windowSpy.mockImplementation(
-      () =>
-        ({
-          location: {
-            href: 'http://localhost/w/workspaceId/app',
-          },
-        }) as any
-    );
+    window.history.pushState({}, '', '/w/workspaceId/app');
     workspaceClientMock.enterWorkspace.mockResolvedValue({
       success: true,
       result: null,
@@ -329,8 +305,8 @@ describe('Workspace plugin', () => {
     const workspacePlugin = new WorkspacePlugin();
     await workspacePlugin.setup(getSetupMock(), {});
 
-    expect(WorkspaceClientMock).toBeCalledTimes(1);
-    expect(workspaceClientMock.enterWorkspace).toBeCalledWith('workspaceId');
+    expect(WorkspaceClientMock).toHaveBeenCalledTimes(1);
+    expect(workspaceClientMock.enterWorkspace).toHaveBeenCalledWith('workspaceId');
 
     const startMock = coreMock.createStart();
     workspacePlugin.start(startMock, getMockDependencies());
@@ -339,27 +315,19 @@ describe('Workspace plugin', () => {
     startMock.application.currentAppId$ = new BehaviorSubject(WORKSPACE_FATAL_ERROR_APP_ID);
     startMock.workspaces.initialized$.next(true);
 
-    expect(startMock.application.navigateToApp).toBeCalledWith(WORKSPACE_DETAIL_APP_ID);
-    windowSpy.mockRestore();
+    expect(startMock.application.navigateToApp).toHaveBeenCalledWith(WORKSPACE_DETAIL_APP_ID);
+    window.history.pushState({}, '', '/');
   });
 
   it('#start when workspace id is in url and enterWorkspace return error', async () => {
-    const windowSpy = jest.spyOn(window, 'window', 'get');
-    windowSpy.mockImplementation(
-      () =>
-        ({
-          location: {
-            href: 'http://localhost/w/workspaceId/app',
-          },
-        }) as any
-    );
+    window.history.pushState({}, '', '/w/workspaceId/app');
 
     const workspacePlugin = new WorkspacePlugin();
 
     await workspacePlugin.setup(getSetupMock(), {});
 
-    expect(WorkspaceClientMock).toBeCalledTimes(1);
-    expect(workspaceClientMock.enterWorkspace).toBeCalledWith('workspaceId');
+    expect(WorkspaceClientMock).toHaveBeenCalledTimes(1);
+    expect(workspaceClientMock.enterWorkspace).toHaveBeenCalledWith('workspaceId');
 
     const startMock = coreMock.createStart();
     startMock.application.currentAppId$ = new BehaviorSubject(WORKSPACE_DETAIL_APP_ID);
@@ -369,14 +337,14 @@ describe('Workspace plugin', () => {
     startMock.workspaces.initialized$.next(true);
     startMock.workspaces.workspaceError$.next('error');
 
-    expect(startMock.application.navigateToApp).toBeCalledWith(WORKSPACE_FATAL_ERROR_APP_ID, {
+    expect(startMock.application.navigateToApp).toHaveBeenCalledWith(WORKSPACE_FATAL_ERROR_APP_ID, {
       replace: true,
       state: {
         error: 'error',
       },
     });
 
-    windowSpy.mockRestore();
+    window.history.pushState({}, '', '/');
   });
 
   it('#start add workspace detail page to breadcrumbs when start', async () => {
@@ -390,7 +358,7 @@ describe('Workspace plugin', () => {
     startMock.chrome.getBreadcrumbs$.mockReturnValue(breadcrumbs);
     const workspacePlugin = new WorkspacePlugin();
     workspacePlugin.start(startMock, getMockDependencies());
-    expect(startMock.chrome.setBreadcrumbs).toBeCalledWith(
+    expect(startMock.chrome.setBreadcrumbs).toHaveBeenCalledWith(
       expect.arrayContaining([
         expect.objectContaining({
           text: 'bar',
@@ -460,7 +428,7 @@ describe('Workspace plugin', () => {
     const workspacePlugin = new WorkspacePlugin();
     workspacePlugin.start(coreStart, getMockDependencies());
 
-    expect(coreStart.chrome.navControls.registerLeftBottom).toBeCalledTimes(1);
+    expect(coreStart.chrome.navControls.registerLeftBottom).toHaveBeenCalledTimes(1);
   });
 
   it('#start should not update systematic use case features after currentWorkspace set', async () => {
@@ -555,7 +523,9 @@ describe('Workspace plugin', () => {
 
     workspacePlugin.start(coreStart, getMockDependencies());
 
-    expect(coreStart.chrome.globalSearch.unregisterSearchCommand).toBeCalledWith('pagesSearch');
+    expect(coreStart.chrome.globalSearch.unregisterSearchCommand).toHaveBeenCalledWith(
+      'pagesSearch'
+    );
   });
 
   it('#start should update collaboratorsAppUpdater correctly if permission enabled', async () => {

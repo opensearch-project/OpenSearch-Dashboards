@@ -311,24 +311,31 @@ export class DataPublicPlugin implements Plugin<
     });
     setQueryService(query);
 
-    // Subscribe to dataset changes to pre-fetch PPL grammar.
+    // Subscribe to dataset changes to pre-fetch PPL grammar and Calcite settings.
     // The handler fires when the query language is PPL and the dataset changes.
     // The initial fire with the current query covers the page-load case.
     // the subscription covers subsequent dataset switches.
-    // Gated by query:enhancements:runtimePplGrammar setting (default: true).
+    //
+    // The handler is subscribed unconditionally: the grammar cache self-gates on
+    // query:enhancements:runtimePplGrammar internally (resetting and skipping the
+    // network fetch when disabled), while the Calcite settings cache must warm
+    // regardless of that flag because the compiled-surface `disabled-join-type`
+    // rule reads `allJoinTypesAllowed` to suppress warnings. Only the runtime
+    // validation provider stays behind the flag.
     const isRuntimePplGrammarEnabled =
       uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_RUNTIME_PPL_GRAMMAR) !== false;
 
+    const maybeWarmUpPplGrammar = createPplGrammarWarmupHandler(
+      http,
+      uiSettings,
+      savedObjects.client
+    );
+    maybeWarmUpPplGrammar(query.queryString.getQuery());
+    this.pplGrammarWarmupSubscription = query.queryString
+      .getUpdates$()
+      .subscribe(maybeWarmUpPplGrammar);
+
     if (isRuntimePplGrammarEnabled) {
-      const maybeWarmUpPplGrammar = createPplGrammarWarmupHandler(
-        http,
-        uiSettings,
-        savedObjects.client
-      );
-      maybeWarmUpPplGrammar(query.queryString.getQuery());
-      this.pplGrammarWarmupSubscription = query.queryString
-        .getUpdates$()
-        .subscribe(maybeWarmUpPplGrammar);
       this.unregisterPplValidationProvider = registerPPLValidationProvider(validateRuntimePPLQuery);
     }
 

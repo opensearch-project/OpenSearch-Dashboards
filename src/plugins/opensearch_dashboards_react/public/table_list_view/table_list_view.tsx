@@ -204,7 +204,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
             values={{ entityName: this.props.entityName }}
           />
         ),
-        text: `${error}`,
+        text: error?.body?.message || error?.message || `${error}`,
       });
     }
     this.fetchItems();

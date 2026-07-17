@@ -435,7 +435,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             values: { useUpdatedUX },
           }
         ),
-        text: `${error}`,
+        text: error?.body?.message || error?.message || `${error}`,
       });
     }
   }, 300);
@@ -473,7 +473,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             values: { useUpdatedUX },
           }
         ),
-        text: `${error}`,
+        text: error?.body?.message || error?.message || `${error}`,
       });
     }
   }, 300);
@@ -682,7 +682,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             values: { useUpdatedUX },
           }
         ),
-        text: `${error}`,
+        text: error?.body?.message || error?.message || `${error}`,
       });
     }
 
@@ -755,7 +755,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             values: { useUpdatedUX },
           }
         ),
-        text: `${error}`,
+        text: error?.body?.message || error?.message || `${error}`,
       });
     }
   };

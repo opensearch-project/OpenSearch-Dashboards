@@ -97,7 +97,7 @@ describe('UseCaseService', () => {
         features: [`use-case-${OBSERVABILITY_USE_CASE_ID}`],
       });
       await waitFor(() => {
-        expect(coreSetup.chrome.navGroup.addNavLinksToGroup).toBeCalledWith(navGroupInfo, [
+        expect(coreSetup.chrome.navGroup.addNavLinksToGroup).toHaveBeenCalledWith(navGroupInfo, [
           {
             id: WORKSPACE_DETAIL_APP_ID,
             category: DEFAULT_APP_CATEGORIES.manageWorkspace,
@@ -142,6 +142,13 @@ describe('UseCaseService', () => {
             order: 600,
             title: 'Sample data',
             euiIconType: 'navGetStarted',
+          },
+          {
+            id: 'workspace_settings',
+            category: DEFAULT_APP_CATEGORIES.manageWorkspace,
+            order: 700,
+            title: 'Settings',
+            euiIconType: 'gear',
           },
         ]);
       });
@@ -207,7 +214,7 @@ describe('UseCaseService', () => {
         features: [`use-case-${OBSERVABILITY_USE_CASE_ID}`],
       });
       await waitFor(() => {
-        expect(coreSetup.chrome.navGroup.addNavLinksToGroup).toBeCalledWith(
+        expect(coreSetup.chrome.navGroup.addNavLinksToGroup).toHaveBeenCalledWith(
           navGroupInfo,
           expect.arrayContaining([
             expect.objectContaining({
@@ -237,6 +244,10 @@ describe('UseCaseService', () => {
             expect.objectContaining({
               id: 'import_sample_data',
               euiIconType: 'navGetStarted',
+            }),
+            expect.objectContaining({
+              id: 'workspace_settings',
+              euiIconType: 'gear',
             }),
           ])
         );

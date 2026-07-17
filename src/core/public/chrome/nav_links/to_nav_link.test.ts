@@ -82,7 +82,7 @@ describe('toNavLink', () => {
       }),
       basePath
     );
-    expect(link.properties.baseUrl).toEqual('http://localhost/base-path/my-route/my-path');
+    expect(link.properties.baseUrl).toEqual('http://localhost:5601/base-path/my-route/my-path');
   });
 
   it('generates the `url` property', () => {
@@ -92,7 +92,7 @@ describe('toNavLink', () => {
       }),
       basePath
     );
-    expect(link.properties.url).toEqual('http://localhost/base-path/my-route/my-path');
+    expect(link.properties.url).toEqual('http://localhost:5601/base-path/my-route/my-path');
 
     link = toNavLink(
       app({
@@ -102,7 +102,7 @@ describe('toNavLink', () => {
       basePath
     );
     expect(link.properties.url).toEqual(
-      'http://localhost/base-path/my-route/my-path/some/default/path'
+      'http://localhost:5601/base-path/my-route/my-path/some/default/path'
     );
   });
 
@@ -196,8 +196,8 @@ describe('toNavLink', () => {
       ).properties
     ).toEqual(
       expect.objectContaining({
-        url: 'http://localhost/base_path/app/some-id',
-        baseUrl: 'http://localhost/base_path/app/some-id',
+        url: 'http://localhost:5601/base_path/app/some-id',
+        baseUrl: 'http://localhost:5601/base_path/app/some-id',
       })
     );
 
@@ -211,8 +211,8 @@ describe('toNavLink', () => {
       ).properties
     ).toEqual(
       expect.objectContaining({
-        url: 'http://localhost/base_path/client_base_path/app/some-id',
-        baseUrl: 'http://localhost/base_path/client_base_path/app/some-id',
+        url: 'http://localhost:5601/base_path/client_base_path/app/some-id',
+        baseUrl: 'http://localhost:5601/base_path/client_base_path/app/some-id',
       })
     );
 
@@ -227,8 +227,8 @@ describe('toNavLink', () => {
       ).properties
     ).toEqual(
       expect.objectContaining({
-        url: 'http://localhost/base_path/client_base_path/app/some-id',
-        baseUrl: 'http://localhost/base_path/client_base_path/app/some-id',
+        url: 'http://localhost:5601/base_path/client_base_path/app/some-id',
+        baseUrl: 'http://localhost:5601/base_path/client_base_path/app/some-id',
       })
     );
   });

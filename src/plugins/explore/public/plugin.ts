@@ -5,7 +5,7 @@
 
 import { i18n } from '@osd/i18n';
 import semver from 'semver';
-import { stringify } from 'query-string';
+import qs from 'query-string';
 import rison from 'rison-node';
 import { BehaviorSubject } from 'rxjs';
 import { filter, map, take } from 'rxjs/operators';
@@ -209,7 +209,7 @@ export class ExplorePlugin implements Plugin<
 
         // Note: Explore uses Redux for filter management, not filterManager
         // So we don't include filter state in URLs for context links
-        const hash = stringify(
+        const hash = qs.stringify(
           url.encodeQuery({
             _g: rison.encode({}), // No global filters (explore uses Redux)
             _a: rison.encode({
@@ -698,6 +698,31 @@ export class ExplorePlugin implements Plugin<
 
     if (plugins.expressions) {
       setExpressionLoader(plugins.expressions.ExpressionLoader);
+    }
+
+    // Add 'explore' and 'dataset_management' to SQL's supported apps only when SQL support is
+    // enabled. SQL is registered by query_enhancements (in setup) without 'explore'; explore opts
+    // in here (in start, after registration) when the flag is on.
+    const sqlSupportEnabled =
+      this.initializerContext.config.get<ConfigSchema>().sqlSupport?.enabled ?? false;
+    if (sqlSupportEnabled) {
+      const languageService = plugins.data.query.queryString?.getLanguageService?.();
+      const sqlConfig = languageService?.getLanguage('SQL');
+      if (sqlConfig) {
+        const addApp = (names: string[] = [], app: string) =>
+          names.includes(app) ? names : [...names, app];
+        let supportedAppNames = sqlConfig.supportedAppNames ?? [];
+        let editorSupportedAppNames = sqlConfig.editorSupportedAppNames ?? [];
+        supportedAppNames = addApp(supportedAppNames, 'explore');
+        supportedAppNames = addApp(supportedAppNames, 'dataset_management');
+        editorSupportedAppNames = addApp(editorSupportedAppNames, 'explore');
+        const updated = {
+          ...sqlConfig,
+          supportedAppNames,
+          editorSupportedAppNames,
+        };
+        languageService?.registerLanguage?.(updated);
+      }
     }
 
     // Control nav link visibility based on dynamic capabilities

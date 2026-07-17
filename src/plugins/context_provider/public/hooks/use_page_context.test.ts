@@ -17,7 +17,6 @@ jest.mock('../../../opensearch_dashboards_utils/public', () => ({
 describe('usePageContext', () => {
   let mockUseDynamicContext: jest.Mock;
   let mockGetStateFromOsdUrl: jest.Mock;
-  let originalLocation: Location;
   let originalHistory: History;
 
   beforeEach(() => {
@@ -29,18 +28,15 @@ describe('usePageContext', () => {
     mockGetStateFromOsdUrl = getStateFromOsdUrl as jest.Mock;
     mockGetStateFromOsdUrl.mockReturnValue(null);
 
-    // Store original objects
-    originalLocation = window.location;
+    // Store original history
     originalHistory = window.history;
 
-    // Mock window.location
-    delete (window as any).location;
-    (window as any).location = {
-      href: 'http://localhost:5601/app/explore#/?_g=(time:(from:now-15m,to:now))&_a=(query:(language:PPL,query:"source=logs"))&_q=(dataset:(id:logs-*,title:logs-*,type:index-pattern))',
-      pathname: '/app/explore',
-      search: '',
-      hash: '#/?_g=(time:(from:now-15m,to:now))&_a=(query:(language:PPL,query:"source=logs"))&_q=(dataset:(id:logs-*,title:logs-*,type:index-pattern))',
-    };
+    // Set the URL used by the hook via the History API (jsdom 26 compatible).
+    window.history.pushState(
+      {},
+      '',
+      '/app/explore#/?_g=(time:(from:now-15m,to:now))&_a=(query:(language:PPL,query:"source=logs"))&_q=(dataset:(id:logs-*,title:logs-*,type:index-pattern))'
+    );
 
     // Mock window.history
     delete (window as any).history;
@@ -67,8 +63,7 @@ describe('usePageContext', () => {
     jest.clearAllMocks();
     jest.restoreAllMocks();
 
-    // Restore original objects
-    (window as any).location = originalLocation;
+    // Restore original history
     (window as any).history = originalHistory;
   });
 
@@ -297,34 +292,36 @@ describe('usePageContext', () => {
       expect(mockUseDynamicContext).toHaveBeenCalled();
     });
 
-    it('should handle pushState calls', () => {
+    it('should handle pushState calls', async () => {
       renderHook(() => usePageContext());
 
       // Clear initial call
       mockUseDynamicContext.mockClear();
 
-      // Simulate pushState call
-      window.history.pushState({}, '', '/new-path');
+      // Simulate pushState call and flush microtasks queued by queueMicrotask
+      await act(async () => {
+        window.history.pushState({}, '', '/new-path');
+        // Yield to the microtask queue
+        await Promise.resolve();
+      });
 
-      // Use setTimeout to wait for microtask
-      setTimeout(() => {
-        expect(mockUseDynamicContext).toHaveBeenCalled();
-      }, 0);
+      expect(mockUseDynamicContext).toHaveBeenCalled();
     });
 
-    it('should handle replaceState calls', () => {
+    it('should handle replaceState calls', async () => {
       renderHook(() => usePageContext());
 
       // Clear initial call
       mockUseDynamicContext.mockClear();
 
-      // Simulate replaceState call
-      window.history.replaceState({}, '', '/new-path');
+      // Simulate replaceState call and flush microtasks queued by queueMicrotask
+      await act(async () => {
+        window.history.replaceState({}, '', '/new-path');
+        // Yield to the microtask queue
+        await Promise.resolve();
+      });
 
-      // Use setTimeout to wait for microtask
-      setTimeout(() => {
-        expect(mockUseDynamicContext).toHaveBeenCalled();
-      }, 0);
+      expect(mockUseDynamicContext).toHaveBeenCalled();
     });
   });
 
@@ -598,7 +595,10 @@ describe('usePageContext', () => {
 
       // Simulate rapid hash changes
       for (let i = 0; i < 10; i++) {
-        window.location.hash = `#/path-${i}`;
+        // Restore real history momentarily to push a hash change, then fire the handler.
+        (window as any).history = originalHistory;
+        window.history.pushState({}, '', `#/path-${i}`);
+        (window as any).history = { pushState: jest.fn(), replaceState: jest.fn() };
         act(() => {
           hashChangeHandler!();
         });

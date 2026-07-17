@@ -12,6 +12,7 @@ import {
 } from '@osd/monaco';
 import { MutableRefObject } from 'react';
 import { attachPPLGrammarRefresh, attachPPLValidationContext } from './validation_context';
+import { calciteSettingsCache } from '../../ppl_lint/calcite_settings_cache';
 
 function applyLintContext(
   model: monaco.editor.ITextModel | null | undefined,
@@ -79,6 +80,34 @@ export function attachPPLLintGrammarRefresh(
   });
 }
 
+export function attachPPLLintContextRefresh(
+  editor: monaco.editor.IStandaloneCodeEditor,
+  getContext: () => PPLLintContext,
+  subscribeToVersionResolved: (
+    listener: (event: { dataSourceId?: string; version: string }) => void
+  ) => () => void,
+  revalidateModel: (model: monaco.editor.ITextModel) => Promise<void> | void
+): () => void {
+  const unsubVersion = subscribeToVersionResolved(() => {
+    const model = editor.getModel();
+    if (!model) return;
+    setPPLLintContext(model, getContext());
+    void revalidateModel(model);
+  });
+
+  const unsubSettings = calciteSettingsCache.subscribe(() => {
+    const model = editor.getModel();
+    if (!model) return;
+    setPPLLintContext(model, getContext());
+    void revalidateModel(model);
+  });
+
+  return () => {
+    unsubVersion();
+    unsubSettings();
+  };
+}
+
 type DetachRef = MutableRefObject<(() => void) | undefined>;
 
 /** Bundled detach callbacks for the PPL validation + lint lifecycle. */
@@ -87,6 +116,7 @@ export interface PPLDetachRefs {
   grammarRefresh: DetachRef;
   lintContext: DetachRef;
   lintGrammarRefresh: DetachRef;
+  lintContextRefresh: DetachRef;
 }
 
 /** Attach (or re-attach) all PPL validation + lint contexts; detaches previous ones first. */
@@ -98,7 +128,10 @@ export function attachPPLContexts(
   subscribeToGrammarUpdates: (
     listener: (event: { dataSourceId?: string; grammarHash: string }) => void
   ) => () => void,
-  revalidateModel: (model: monaco.editor.ITextModel) => Promise<void> | void
+  revalidateModel: (model: monaco.editor.ITextModel) => Promise<void> | void,
+  subscribeToVersionResolved?: (
+    listener: (event: { dataSourceId?: string; version: string }) => void
+  ) => () => void
 ): void {
   refs.validationContext.current?.();
   refs.grammarRefresh.current?.();
@@ -112,6 +145,7 @@ export function attachPPLContexts(
 
   refs.lintContext.current?.();
   refs.lintGrammarRefresh.current?.();
+  refs.lintContextRefresh.current?.();
   refs.lintContext.current = attachPPLLintContext(editor, getLintContext);
   refs.lintGrammarRefresh.current = attachPPLLintGrammarRefresh(
     editor,
@@ -119,6 +153,14 @@ export function attachPPLContexts(
     subscribeToGrammarUpdates,
     revalidateModel
   );
+  if (subscribeToVersionResolved) {
+    refs.lintContextRefresh.current = attachPPLLintContextRefresh(
+      editor,
+      getLintContext,
+      subscribeToVersionResolved,
+      revalidateModel
+    );
+  }
 }
 
 /** Detach all PPL validation + lint contexts and clear the refs. */

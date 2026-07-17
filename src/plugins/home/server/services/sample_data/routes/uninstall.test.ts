@@ -65,9 +65,9 @@ describe('sample data uninstall route', () => {
     await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
 
     // @ts-expect-error TS7005 TODO(ts-error): fixme
-    expect(mockClient).toBeCalled();
+    expect(mockClient).toHaveBeenCalled();
     // @ts-expect-error TS7005 TODO(ts-error): fixme
-    expect(mockSOClient.delete).toBeCalled();
+    expect(mockSOClient.delete).toHaveBeenCalled();
   });
 
   it('handler calls expected api with the given request with data source', async () => {
@@ -109,9 +109,9 @@ describe('sample data uninstall route', () => {
     await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
 
     // @ts-expect-error TS7005 TODO(ts-error): fixme
-    expect(mockClient).toBeCalled();
+    expect(mockClient).toHaveBeenCalled();
     // @ts-expect-error TS7005 TODO(ts-error): fixme
-    expect(mockSOClient.delete).toBeCalled();
+    expect(mockSOClient.delete).toHaveBeenCalled();
   });
 
   it('handler calls expected api with the given request with workspace', async () => {
@@ -146,8 +146,8 @@ describe('sample data uninstall route', () => {
     await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
 
     // @ts-expect-error TS7005 TODO(ts-error): fixme
-    expect(mockClient).toBeCalled();
+    expect(mockClient).toHaveBeenCalled();
     // @ts-expect-error TS7005 TODO(ts-error): fixme
-    expect(mockSOClient.delete).toBeCalled();
+    expect(mockSOClient.delete).toHaveBeenCalled();
   });
 });

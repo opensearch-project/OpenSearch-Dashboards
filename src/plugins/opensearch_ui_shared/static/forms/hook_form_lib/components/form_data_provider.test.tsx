@@ -87,7 +87,7 @@ describe('<FormDataProvider />', () => {
       setInputValue('lastNameField', 'updated value');
     });
 
-    expect(onFormData).toBeCalledTimes(2);
+    expect(onFormData).toHaveBeenCalledTimes(2);
 
     const [formDataUpdated] = onFormData.mock.calls[
       onFormData.mock.calls.length - 1
@@ -133,7 +133,7 @@ describe('<FormDataProvider />', () => {
       find,
     } = setup() as TestBed;
 
-    expect(onFormData).toBeCalledTimes(0); // Not present in the DOM yet
+    expect(onFormData).toHaveBeenCalledTimes(0); // Not present in the DOM yet
 
     // Make some changes to the form fields
     await act(async () => {
@@ -191,7 +191,7 @@ describe('<FormDataProvider />', () => {
       setInputValue('lastNameField', 'updated value');
     });
 
-    expect(onFormData).toBeCalledTimes(0);
+    expect(onFormData).toHaveBeenCalledTimes(0);
   });
 
   test('props.pathsToWatch (Array<string>): should not re-render the children when the field that changed is not in the watch list', async () => {
@@ -231,14 +231,14 @@ describe('<FormDataProvider />', () => {
     });
 
     // No re-render
-    expect(onFormData).toBeCalledTimes(0);
+    expect(onFormData).toHaveBeenCalledTimes(0);
 
     // Make some changes to fields in the watch list
     await act(async () => {
       setInputValue('nameField', 'updated value');
     });
 
-    expect(onFormData).toBeCalledTimes(1);
+    expect(onFormData).toHaveBeenCalledTimes(1);
 
     onFormData.mockReset();
 

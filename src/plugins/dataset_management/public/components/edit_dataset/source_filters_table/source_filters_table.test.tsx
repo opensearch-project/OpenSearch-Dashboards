@@ -127,7 +127,7 @@ describe('SourceFiltersTable', () => {
     await component.instance().deleteFilter();
     component.update(); // We are not calling `.setState` directly so we need to re-render
 
-    expect(saveDataset).toBeCalled();
+    expect(saveDataset).toHaveBeenCalled();
     expect(component).toMatchSnapshot();
   });
 
@@ -148,7 +148,7 @@ describe('SourceFiltersTable', () => {
     await component.instance().onAddFilter('na*');
     component.update(); // We are not calling `.setState` directly so we need to re-render
 
-    expect(saveDataset).toBeCalled();
+    expect(saveDataset).toHaveBeenCalled();
     expect(component).toMatchSnapshot();
   });
 
@@ -171,7 +171,7 @@ describe('SourceFiltersTable', () => {
     await component.instance().saveFilter({ clientId: 'tim*', value: 'ti*' });
     component.update(); // We are not calling `.setState` directly so we need to re-render
 
-    expect(saveDataset).toBeCalled();
+    expect(saveDataset).toHaveBeenCalled();
     expect(component).toMatchSnapshot();
   });
 });

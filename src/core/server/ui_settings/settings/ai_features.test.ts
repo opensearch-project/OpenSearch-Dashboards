@@ -19,12 +19,14 @@ describe('AI features setting', () => {
       expect(() => validate(true)).not.toThrow();
       expect(() => validate(false)).not.toThrow();
 
-      expect(() => validate(42)).toThrowErrorMatchingInlineSnapshot(
-        `"expected value of type [boolean] but got [number]"`
-      );
-      expect(() => validate('foo')).toThrowErrorMatchingInlineSnapshot(
-        `"expected value of type [boolean] but got [string]"`
-      );
+      expect(() => validate(42)).toThrowErrorMatchingInlineSnapshot(`
+        "expected value of type [boolean] but got [number]
+        Cause: expected value of type [boolean] but got [number]"
+      `);
+      expect(() => validate('foo')).toThrowErrorMatchingInlineSnapshot(`
+        "expected value of type [boolean] but got [string]
+        Cause: expected value of type [boolean] but got [string]"
+      `);
     });
 
     it('should have the correct default value', () => {

@@ -91,7 +91,7 @@ describe('createRecentNavLink', () => {
       mockedNavigateToUrl
     );
 
-    expect(recentLink.href).toEqual('http://localhost/test/app/foo');
+    expect(recentLink.href).toEqual('http://localhost:5601/test/app/foo');
   });
 
   it('create a recent link with workspace id', () => {
@@ -108,7 +108,7 @@ describe('createRecentNavLink', () => {
       true
     );
 
-    expect(recentLink.href).toEqual('http://localhost/test/w/foo/app/foo');
+    expect(recentLink.href).toEqual('http://localhost:5601/test/w/foo/app/foo');
   });
 
   it('create a recent link when workspace disabled', () => {
@@ -125,6 +125,6 @@ describe('createRecentNavLink', () => {
       false
     );
 
-    expect(recentLink.href).toEqual('http://localhost/test/app/foo');
+    expect(recentLink.href).toEqual('http://localhost:5601/test/app/foo');
   });
 });

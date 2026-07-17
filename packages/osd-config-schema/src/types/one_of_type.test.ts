@@ -87,7 +87,10 @@ test('handles object with wrong type', () => {
   const type = schema.oneOf([schema.object({ age: schema.number() })]);
 
   expect(() => type.validate({ age: 'foo' })).toThrowErrorMatchingInlineSnapshot(
-    `"[age]: expected value of type [number] but got [string]"`
+    `
+"[age]: expected value of type [number] but got [string]
+Cause: expected value of type [number] but got [string]"
+`
   );
 });
 
@@ -97,7 +100,10 @@ test('includes namespace in failure', () => {
   expect(() =>
     type.validate({ age: 'foo' }, {}, 'foo-namespace')
   ).toThrowErrorMatchingInlineSnapshot(
-    `"[foo-namespace.age]: expected value of type [number] but got [string]"`
+    `
+"[foo-namespace.age]: expected value of type [number] but got [string]
+Cause: expected value of type [number] but got [string]"
+`
   );
 });
 
@@ -128,10 +134,16 @@ test('fails if not matching type', () => {
   const type = schema.oneOf([schema.string()]);
 
   expect(() => type.validate(false)).toThrowErrorMatchingInlineSnapshot(
-    `"expected value of type [string] but got [boolean]"`
+    `
+"expected value of type [string] but got [boolean]
+Cause: expected value of type [string] but got [boolean]"
+`
   );
   expect(() => type.validate(123)).toThrowErrorMatchingInlineSnapshot(
-    `"expected value of type [string] but got [number]"`
+    `
+"expected value of type [string] but got [number]
+Cause: expected value of type [string] but got [number]"
+`
   );
 });
 
@@ -139,7 +151,10 @@ test('fails if not matching multiple types', () => {
   const type = schema.oneOf([schema.string(), schema.number()]);
 
   expect(() => type.validate(false)).toThrowErrorMatchingInlineSnapshot(
-    `"SchemaTypeError: expected value of type [number] but got [boolean]"`
+    `
+"SchemaTypeError: expected value of type [number] but got [boolean]
+Cause: SchemaTypeError: expected value of type [number] but got [boolean]"
+`
   );
 });
 
@@ -147,7 +162,10 @@ test('fails if not matching literal', () => {
   const type = schema.oneOf([schema.literal('foo')]);
 
   expect(() => type.validate('bar')).toThrowErrorMatchingInlineSnapshot(
-    `"expected value to equal [foo]"`
+    `
+"expected value to equal [foo]
+Cause: expected value to equal [foo]"
+`
   );
 });
 
@@ -158,6 +176,9 @@ test('fails if nested union type fail', () => {
   ]);
 
   expect(() => type.validate('aaa')).toThrowErrorMatchingInlineSnapshot(
-    `"SchemaTypeError: SchemaTypeError: expected value of type [number] but got [string]"`
+    `
+"SchemaTypeError: SchemaTypeError: expected value of type [number] but got [string]
+Cause: SchemaTypeError: SchemaTypeError: expected value of type [number] but got [string]"
+`
   );
 });

@@ -47,7 +47,12 @@ import {
 import { FormattedMessage } from '@osd/i18n/react';
 import { isEmpty } from 'lodash';
 import { i18n } from '@osd/i18n';
-import { DocLinksStart, ToastsStart } from 'opensearch-dashboards/public';
+import {
+  DocLinksStart,
+  ToastsStart,
+  UiSettingScope,
+  ENABLE_GLOBAL_SETTING_CONTROL,
+} from 'opensearch-dashboards/public';
 import { createPortal } from 'react-dom';
 import { toMountPoint } from '../../../../../opensearch_dashboards_react/public';
 
@@ -68,6 +73,7 @@ interface FormProps {
   enableSaving: boolean;
   dockLinks: DocLinksStart['links'];
   toasts: ToastsStart;
+  pageScope?: UiSettingScope;
 }
 
 interface FormState {
@@ -77,7 +83,7 @@ interface FormState {
   loading: boolean;
 }
 
-export class Form extends PureComponent<FormProps> {
+export class Form extends PureComponent<FormProps, FormState> {
   state: FormState = {
     unsavedChanges: {},
     loading: false,
@@ -119,7 +125,11 @@ export class Form extends PureComponent<FormProps> {
     }
     const { type, defVal, value } = setting;
     const savedValue = getEditableValue(type, value, defVal);
-    if (change.value === savedValue) {
+    // clearToInherit ("Use global value") is an intent to clear this scope's stored
+    // value (persist null), which is distinct from the displayed value even when they
+    // look identical — e.g. the stored value equals the code default. So it must be
+    // kept as an unsaved change rather than discarded by the value-equality check.
+    if (change.value === savedValue && !change.clearToInherit) {
       return this.clearChange(key);
     }
     this.setState({
@@ -147,16 +157,19 @@ export class Form extends PureComponent<FormProps> {
   };
 
   saveAll = async () => {
-    this.setLoading(true);
     const { unsavedChanges } = this.state;
 
     if (isEmpty(unsavedChanges)) {
       return;
     }
+    this.setLoading(true);
     const configToSave: SettingsChanges = {};
-    let requiresReload = false;
+    const reloadKeys = new Set<string>();
 
-    Object.entries(unsavedChanges).forEach(([name, { value }]) => {
+    const isScopedPage =
+      this.props.pageScope !== undefined && this.props.pageScope !== UiSettingScope.GLOBAL;
+
+    Object.entries(unsavedChanges).forEach(([name, { value, clearToInherit }]) => {
       const setting = this.getSettingByKey(name);
       if (!setting) {
         return;
@@ -179,15 +192,61 @@ export class Form extends PureComponent<FormProps> {
           equalsToDefault = valueToSave === defVal;
       }
       if (requiresPageReload) {
-        requiresReload = true;
+        reloadKeys.add(name);
       }
-      configToSave[name] = equalsToDefault ? null : valueToSave;
+      // For this toggle a missing key means "follow dynamic config", so always store
+      // its boolean (even when equal to the default) to keep an explicit override.
+      const preserveExplicitValue = name === ENABLE_GLOBAL_SETTING_CONTROL;
+
+      // clearToInherit ("Use global value" on a scoped page) → persist null so the
+      // setting inherits from global. Otherwise, only the global page collapses an
+      // equal-to-default value to null; a scoped page always stores the actual value.
+      configToSave[name] =
+        clearToInherit || (!isScopedPage && equalsToDefault && !preserveExplicitValue)
+          ? null
+          : valueToSave;
     });
 
     try {
-      await this.props.save(configToSave);
-      this.clearAllUnsaved();
-      if (requiresReload) {
+      // save() returns a per-key boolean[] aligned with configToSave's key order.
+      const savedKeys = Object.keys(configToSave);
+      const results = await this.props.save(configToSave);
+      // Treat a non-array/missing result as failure so a malformed response never
+      // clears the unsaved marker for a key that wasn't persisted.
+      const succeeded = (key: string, i: number) => Array.isArray(results) && results[i] !== false;
+      const failedKeys = savedKeys.filter((key, i) => !succeeded(key, i));
+
+      // Clear only the succeeded keys in one setState — per-key clearChange calls would
+      // each read the same stale state, so only the last delete would survive.
+      const failedKeySet = new Set(failedKeys);
+      this.setState((state) => {
+        const remaining: FormState['unsavedChanges'] = {};
+        Object.entries(state.unsavedChanges).forEach(([key, change]) => {
+          // Keep failed keys (for retry) and any key not in this save batch.
+          if (failedKeySet.has(key) || !savedKeys.includes(key)) {
+            remaining[key] = change;
+          }
+        });
+        return { unsavedChanges: remaining };
+      });
+
+      if (failedKeys.length > 0) {
+        const failedNames = failedKeys
+          .map((key) => this.getSettingByKey(key)?.displayName || key)
+          .join(', ');
+        this.props.toasts.addDanger(
+          i18n.translate('advancedSettings.form.savePartialErrorMessage', {
+            defaultMessage:
+              'Unable to save {count, plural, one {setting} other {settings}}: {settingNames}',
+            values: { count: failedKeys.length, settingNames: failedNames },
+          })
+        );
+      }
+
+      // Prompt for reload if any successfully-saved key requires it — independent of
+      // failures, so a partial failure doesn't swallow the hint for the saved keys.
+      const reloadNeeded = savedKeys.some((key, i) => reloadKeys.has(key) && succeeded(key, i));
+      if (reloadNeeded) {
         this.renderPageReloadToast();
       }
     } catch {
@@ -279,6 +338,7 @@ export class Form extends PureComponent<FormProps> {
                   enableSaving={this.props.enableSaving}
                   dockLinks={this.props.dockLinks}
                   toasts={this.props.toasts}
+                  pageScope={this.props.pageScope}
                 />
               );
             })}

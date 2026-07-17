@@ -49,6 +49,7 @@ Object.defineProperty(window, 'localStorage', {
     setItem: stub(),
   },
   writable: true,
+  configurable: true,
 });
 Object.defineProperty(window, 'sessionStorage', {
   value: {
@@ -56,6 +57,7 @@ Object.defineProperty(window, 'sessionStorage', {
     setItem: stub(),
   },
   writable: true,
+  configurable: true,
 });
 
 jest.mock('uuid', () => ({

@@ -643,4 +643,100 @@ describe('ppl_grammar_cache', () => {
     expect(pplGrammarCache.getCachedGrammar('ds-1')?.grammarHash).toBe('sha256:second');
     expect(http.get).toHaveBeenCalledTimes(2);
   });
+
+  describe('getResolvedVersion', () => {
+    it('returns undefined when no version has been resolved', () => {
+      expect(pplGrammarCache.getResolvedVersion(undefined)).toBeUndefined();
+      expect(pplGrammarCache.getResolvedVersion('ds-1')).toBeUndefined();
+    });
+
+    it('returns the version after warmUp resolves it from the provided version', async () => {
+      const http = {
+        get: jest.fn().mockResolvedValue(createBundle()),
+      } as unknown as HttpSetup;
+
+      pplGrammarCache.warmUp(http, mockUiSettings, undefined, 'ds-1', '3.8.0');
+      expect(pplGrammarCache.getResolvedVersion('ds-1')).toBe('3.8.0');
+    });
+
+    it('returns the version resolved from /api/status for local cluster', async () => {
+      const http = {
+        get: jest.fn().mockImplementation((path: string) => {
+          if (path === '/api/status') {
+            return Promise.resolve({ version: { number: '3.6.0' } });
+          }
+          return Promise.resolve(createBundle());
+        }),
+      } as unknown as HttpSetup;
+
+      pplGrammarCache.warmUp(http, mockUiSettings, undefined, undefined, undefined);
+      await flushPromises();
+
+      expect(pplGrammarCache.getResolvedVersion(undefined)).toBe('3.6.0');
+    });
+
+    it('returns undefined for a different datasourceId', async () => {
+      const http = {
+        get: jest.fn().mockResolvedValue(createBundle()),
+      } as unknown as HttpSetup;
+
+      pplGrammarCache.warmUp(http, mockUiSettings, undefined, 'ds-1', '3.8.0');
+      expect(pplGrammarCache.getResolvedVersion('ds-other')).toBeUndefined();
+    });
+  });
+
+  describe('subscribeToVersionResolved', () => {
+    it('notifies listener when version is resolved asynchronously', async () => {
+      const http = {
+        get: jest.fn().mockImplementation((path: string) => {
+          if (path === '/api/status') {
+            return Promise.resolve({ version: { number: '3.6.0' } });
+          }
+          return Promise.resolve(createBundle());
+        }),
+      } as unknown as HttpSetup;
+
+      const listener = jest.fn();
+      pplGrammarCache.subscribeToVersionResolved(listener);
+
+      pplGrammarCache.warmUp(http, mockUiSettings, undefined, undefined, undefined);
+      await flushPromises();
+
+      expect(listener).toHaveBeenCalledWith({ dataSourceId: undefined, version: '3.6.0' });
+    });
+
+    it('does not notify when version was already provided (no async resolution)', async () => {
+      const http = {
+        get: jest.fn().mockResolvedValue(createBundle()),
+      } as unknown as HttpSetup;
+
+      const listener = jest.fn();
+      pplGrammarCache.subscribeToVersionResolved(listener);
+
+      pplGrammarCache.warmUp(http, mockUiSettings, undefined, 'ds-1', '3.8.0');
+      await flushPromises();
+
+      expect(listener).not.toHaveBeenCalled();
+    });
+
+    it('unsubscribe stops notifications', async () => {
+      const http = {
+        get: jest.fn().mockImplementation((path: string) => {
+          if (path === '/api/status') {
+            return Promise.resolve({ version: { number: '3.6.0' } });
+          }
+          return Promise.resolve(createBundle());
+        }),
+      } as unknown as HttpSetup;
+
+      const listener = jest.fn();
+      const unsub = pplGrammarCache.subscribeToVersionResolved(listener);
+      unsub();
+
+      pplGrammarCache.warmUp(http, mockUiSettings, undefined, undefined, undefined);
+      await flushPromises();
+
+      expect(listener).not.toHaveBeenCalled();
+    });
+  });
 });

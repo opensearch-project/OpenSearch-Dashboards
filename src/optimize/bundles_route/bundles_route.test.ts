@@ -120,12 +120,12 @@ describe('validation', () => {
       createServer({
         basePublicPath: '/a',
       });
-    }).not.toThrowError();
+    }).not.toThrow();
     expect(() => {
       createServer({
         basePublicPath: '',
       });
-    }).not.toThrowError();
+    }).not.toThrow();
   });
 });
 

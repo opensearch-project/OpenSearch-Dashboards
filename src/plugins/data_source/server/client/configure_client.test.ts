@@ -249,7 +249,7 @@ describe('configureClient', () => {
 
     expect(ClientMock).toHaveBeenCalledTimes(1);
     expect(client).toBe(dsClient.child.mock.results[0].value);
-    expect(dsClient.child).toBeCalledWith({
+    expect(dsClient.child).toHaveBeenCalledWith({
       auth: {
         credentials: {
           accessKeyId: 'accessKey',
@@ -288,7 +288,7 @@ describe('configureClient', () => {
 
     await expect(
       configureClient(dataSourceClientParams, clientPoolSetup, config, logger)
-    ).rejects.toThrowError();
+    ).rejects.toThrow();
 
     expect(ClientMock).not.toHaveBeenCalled();
     expect(savedObjectsMock.get).toHaveBeenCalledTimes(1);
@@ -303,7 +303,7 @@ describe('configureClient', () => {
 
     await expect(
       configureClient(dataSourceClientParams, clientPoolSetup, config, logger)
-    ).rejects.toThrowError();
+    ).rejects.toThrow();
 
     expect(ClientMock).not.toHaveBeenCalled();
     expect(savedObjectsMock.get).toHaveBeenCalledTimes(1);
@@ -335,7 +335,7 @@ describe('configureClient', () => {
     expect(ClientMock).toHaveBeenCalledTimes(1);
     expect(savedObjectsMock.get).toHaveBeenCalledTimes(1);
     expect(client).toBe(dsClient.child.mock.results[0].value);
-    expect(dsClient.child).toBeCalledWith({
+    expect(dsClient.child).toHaveBeenCalledWith({
       auth: {
         credentials: {
           accessKeyId: sigV4AuthContent.accessKey,
@@ -377,7 +377,7 @@ describe('configureClient', () => {
 
     expect(ClientMock).toHaveBeenCalledTimes(1);
     expect(client).toBe(dsClient.child.mock.results[0].value);
-    expect(dsClient.child).toBeCalledWith({
+    expect(dsClient.child).toHaveBeenCalledWith({
       auth: {
         credentials: {
           accessKeyId: mockCredentials.accessKey,
@@ -413,7 +413,7 @@ describe('configureClient', () => {
 
     expect(ClientMock).toHaveBeenCalledTimes(1);
     expect(client).toBe(dsClient.child.mock.results[0].value);
-    expect(dsClient.child).toBeCalledWith({
+    expect(dsClient.child).toHaveBeenCalledWith({
       auth: {
         credentials: {
           accessKeyId: sigV4AuthContent.accessKey,

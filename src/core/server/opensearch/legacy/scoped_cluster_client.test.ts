@@ -189,7 +189,7 @@ describe('#callAsCurrentUser', () => {
     const expectedErrorResponse = new Error('Cannot override default header one.');
     const withHeaderOverride = async () =>
       clusterClient.callAsCurrentUser('security.authenticate', { headers: { one: 'OVERRIDE' } });
-    await expect(withHeaderOverride()).rejects.toThrowError(expectedErrorResponse);
+    await expect(withHeaderOverride()).rejects.toThrow(expectedErrorResponse);
     expect(scopedAPICaller).toHaveBeenCalledTimes(0);
   });
 

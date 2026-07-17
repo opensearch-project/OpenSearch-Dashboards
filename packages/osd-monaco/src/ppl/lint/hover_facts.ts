@@ -14,4 +14,11 @@ export interface HoverFacts {
   pattern?: string;
   candidateIndices?: string[];
   totalIndices?: number;
+  /** The disabled join keyword detected (e.g. `cross`) for disabled-join-type. */
+  joinType?: string;
+  /** The unsupported window function name for unsupported-window-function-in-eventstats. */
+  windowFunction?: string;
+  /** Wildcard counts for replace-wildcard-asymmetry. */
+  patternWildcards?: number;
+  replacementWildcards?: number;
 }

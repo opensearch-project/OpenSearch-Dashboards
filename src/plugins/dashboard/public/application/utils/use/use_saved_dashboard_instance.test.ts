@@ -99,7 +99,7 @@ describe('useSavedDashboardInstance', () => {
         savedDashboard: savedDashboardInstance,
         dashboard,
       });
-      expect(getDashboardInstance).toBeCalledWith(mockServices, dashboardIdFromUrl);
+      expect(getDashboardInstance).toHaveBeenCalledWith(mockServices, dashboardIdFromUrl);
     });
 
     test('if dashboardIdFromUrl is set and updated', async () => {
@@ -142,7 +142,7 @@ describe('useSavedDashboardInstance', () => {
         savedDashboard: saveDashboardInstanceNext,
         dashboard: dashboardNext,
       });
-      expect(getDashboardInstance).toBeCalledWith(mockServices, dashboardIdFromUrlNext);
+      expect(getDashboardInstance).toHaveBeenCalledWith(mockServices, dashboardIdFromUrlNext);
     });
 
     test('if dashboard is being created', async () => {
@@ -164,7 +164,7 @@ describe('useSavedDashboardInstance', () => {
         savedDashboard: savedDashboardInstance,
         dashboard,
       });
-      expect(getDashboardInstance).toBeCalledWith(mockServices);
+      expect(getDashboardInstance).toHaveBeenCalledWith(mockServices);
     });
   });
 
@@ -187,9 +187,11 @@ describe('useSavedDashboardInstance', () => {
       });
 
       expect(hook!.result.current).toEqual({});
-      expect(getDashboardInstance).toBeCalledWith(mockServices, dashboardIdFromUrl);
-      expect(mockServices.notifications.toasts.addDanger).toBeCalled();
-      expect(mockServices.history.replace).toBeCalledWith(DashboardConstants.LANDING_PAGE_PATH);
+      expect(getDashboardInstance).toHaveBeenCalledWith(mockServices, dashboardIdFromUrl);
+      expect(mockServices.notifications.toasts.addDanger).toHaveBeenCalled();
+      expect(mockServices.history.replace).toHaveBeenCalledWith(
+        DashboardConstants.LANDING_PAGE_PATH
+      );
     });
 
     test('if dashboard is being created', async () => {
@@ -211,7 +213,7 @@ describe('useSavedDashboardInstance', () => {
       });
 
       expect(hook!.result.current).toEqual({});
-      expect(getDashboardInstance).toBeCalledWith(mockServices);
+      expect(getDashboardInstance).toHaveBeenCalledWith(mockServices);
     });
 
     test('if legacy dashboard is being created', async () => {
@@ -232,9 +234,9 @@ describe('useSavedDashboardInstance', () => {
       });
 
       expect(hook!.result.current).toEqual({});
-      expect(getDashboardInstance).toBeCalledWith(mockServices, 'create');
-      expect(mockServices.notifications.toasts.addWarning).toBeCalled();
-      expect(mockServices.history.replace).toBeCalledWith({
+      expect(getDashboardInstance).toHaveBeenCalledWith(mockServices, 'create');
+      expect(mockServices.notifications.toasts.addWarning).toHaveBeenCalled();
+      expect(mockServices.history.replace).toHaveBeenCalledWith({
         ...mockServices.history.location,
         pathname: DashboardConstants.CREATE_NEW_DASHBOARD_URL,
       });

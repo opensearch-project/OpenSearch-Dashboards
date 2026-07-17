@@ -187,9 +187,9 @@ describe('CreateIndexPatternWizard', () => {
 
     component.setState({ indexPattern: 'foo' });
     await (component.instance() as CreateIndexPatternWizard).createIndexPattern(undefined, 'id');
-    expect(newIndexPatternAndSave).toBeCalled();
-    expect(clear).toBeCalledWith('1');
-    expect(routeComponentPropsMock.history.push).toBeCalledWith(`/patterns/1`);
+    expect(newIndexPatternAndSave).toHaveBeenCalled();
+    expect(clear).toHaveBeenCalledWith('1');
+    expect(routeComponentPropsMock.history.push).toHaveBeenCalledWith(`/patterns/1`);
   });
 
   test('should render normally when use update UX', () => {

@@ -177,10 +177,10 @@ describe('DataViews', () => {
     const indexPattern = await dataViews.create({ title }, true);
     expect(indexPattern).toBeInstanceOf(DataView);
     expect(indexPattern.title).toBe(title);
-    expect(dataViews.refreshFields).not.toBeCalled();
+    expect(dataViews.refreshFields).not.toHaveBeenCalled();
 
     await dataViews.create({ title });
-    expect(dataViews.refreshFields).toBeCalled();
+    expect(dataViews.refreshFields).toHaveBeenCalled();
   });
 
   test('createAndSave', async () => {
@@ -188,8 +188,8 @@ describe('DataViews', () => {
     dataViews.createSavedObject = jest.fn();
     dataViews.setDefault = jest.fn();
     await dataViews.createAndSave({ title });
-    expect(dataViews.createSavedObject).toBeCalled();
-    expect(dataViews.setDefault).toBeCalled();
+    expect(dataViews.createSavedObject).toHaveBeenCalled();
+    expect(dataViews.setDefault).toHaveBeenCalled();
   });
 
   test('savedObjectToSpec', () => {
