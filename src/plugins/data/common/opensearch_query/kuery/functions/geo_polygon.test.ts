@@ -132,7 +132,7 @@ describe('kuery functions', () => {
 
       test('should throw an error for scripted fields', () => {
         const node = nodeTypes.function.buildNode('geoPolygon', 'script number', points);
-        expect(() => geoPolygon.toOpenSearchQuery(node, indexPattern)).toThrowError(
+        expect(() => geoPolygon.toOpenSearchQuery(node, indexPattern)).toThrow(
           /Geo polygon query does not support scripted fields/
         );
       });

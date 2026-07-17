@@ -407,7 +407,7 @@ describe('buildExpressionFunction()', () => {
       const fn = buildExpressionFunction('hello', { world: [true] });
       expect(() => {
         fn.replaceArgument('whoops', [false]);
-      }).toThrowError();
+      }).toThrow();
     });
   });
 

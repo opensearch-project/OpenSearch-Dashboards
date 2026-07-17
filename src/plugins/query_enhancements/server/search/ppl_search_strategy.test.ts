@@ -167,7 +167,7 @@ describe('pplSearchStrategyProvider', () => {
         } as unknown as IOpenSearchDashboardsSearchRequest<unknown>,
         {}
       )
-    ).rejects.toThrowError();
+    ).rejects.toThrow();
     expect(logger.error).toHaveBeenCalledWith(expect.stringContaining(mockError.message));
     expect(usage.trackError).toHaveBeenCalled();
   });

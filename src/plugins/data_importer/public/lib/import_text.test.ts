@@ -106,7 +106,7 @@ describe('importText()', () => {
 
       expect(response.success).toBe(true);
       expect(response.message.total).toBe(5);
-      expect(httpMock.post).toBeCalledWith('/api/data_importer/_import_text', {
+      expect(httpMock.post).toHaveBeenCalledWith('/api/data_importer/_import_text', {
         query: {
           indexName,
           delimiter,

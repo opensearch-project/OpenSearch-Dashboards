@@ -164,19 +164,23 @@ describe('ui settings', () => {
         })
       ).resolves.not.toThrow();
 
-      expect(savedObjectsClient.update).toBeCalledWith('config', ID, {
+      expect(savedObjectsClient.update).toHaveBeenCalledWith('config', ID, {
         globalAndWorkspace: 'value',
         one: 'value',
       });
-      expect(savedObjectsClient.update).toBeCalledWith('config', `<current_workspace>_${ID}`, {
-        workspace: 'value',
-      });
+      expect(savedObjectsClient.update).toHaveBeenCalledWith(
+        'config',
+        `<current_workspace>_${ID}`,
+        {
+          workspace: 'value',
+        }
+      );
 
-      expect(logger.warn).toBeCalledWith(
+      expect(logger.warn).toHaveBeenCalledWith(
         'Deprecation warning: The setting "workspace" has multiple scopes. Please specify a scope when updating it.'
       );
 
-      expect(logger.warn).toBeCalledWith(
+      expect(logger.warn).toHaveBeenCalledWith(
         'Deprecation warning: The setting "globalAndWorkspace" has multiple scopes. Please specify a scope when updating it.'
       );
     });

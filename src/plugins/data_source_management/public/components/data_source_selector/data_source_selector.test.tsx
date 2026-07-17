@@ -31,7 +31,7 @@ describe('DataSourceSelector', () => {
     client = {
       find: jest.fn().mockResolvedValue([]),
     } as any;
-    spyOn(utils, 'getWorkspaces').and.returnValue({
+    jest.spyOn(utils, 'getWorkspaces').mockReturnValue({
       currentWorkspaceId$: {
         getValue: jest.fn().mockReturnValue('workspace-id'),
       },
@@ -39,7 +39,7 @@ describe('DataSourceSelector', () => {
   });
 
   it('should render normally with local cluster not hidden', () => {
-    spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
+    jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
     component = shallow(
       <DataSourceSelector
         savedObjectsClient={client}
@@ -51,7 +51,7 @@ describe('DataSourceSelector', () => {
       />
     );
     expect(component).toMatchSnapshot();
-    expect(client.find).toBeCalledWith({
+    expect(client.find).toHaveBeenCalledWith({
       fields: [
         'id',
         'title',
@@ -63,11 +63,11 @@ describe('DataSourceSelector', () => {
       perPage: 10000,
       type: 'data-source',
     });
-    expect(toasts.addWarning).toBeCalledTimes(0);
+    expect(toasts.addWarning).toHaveBeenCalledTimes(0);
   });
 
   it('should render normally with local cluster is hidden', () => {
-    spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
+    jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
     component = shallow(
       <DataSourceSelector
         savedObjectsClient={client}
@@ -79,7 +79,7 @@ describe('DataSourceSelector', () => {
       />
     );
     expect(component).toMatchSnapshot();
-    expect(client.find).toBeCalledWith({
+    expect(client.find).toHaveBeenCalledWith({
       fields: [
         'id',
         'title',
@@ -91,7 +91,7 @@ describe('DataSourceSelector', () => {
       perPage: 10000,
       type: 'data-source',
     });
-    expect(toasts.addWarning).toBeCalledTimes(0);
+    expect(toasts.addWarning).toHaveBeenCalledTimes(0);
   });
 });
 
@@ -110,7 +110,7 @@ describe('DataSourceSelector: check dataSource options', () => {
     client = {
       find: jest.fn().mockResolvedValue([]),
     } as any;
-    spyOn(utils, 'getWorkspaces').and.returnValue({
+    jest.spyOn(utils, 'getWorkspaces').mockReturnValue({
       currentWorkspaceId$: {
         getValue: jest.fn().mockReturnValue('workspace-id'),
       },
@@ -119,7 +119,7 @@ describe('DataSourceSelector: check dataSource options', () => {
   });
 
   it('should always place local cluster option as the first option when local cluster not hidden', async () => {
-    spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
+    jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
     component = shallow(
       <DataSourceSelector
         savedObjectsClient={client}
@@ -134,11 +134,11 @@ describe('DataSourceSelector: check dataSource options', () => {
     component.instance().componentDidMount!();
     await nextTick();
     expect(component).toMatchSnapshot();
-    expect(toasts.addWarning).toBeCalledTimes(0);
+    expect(toasts.addWarning).toHaveBeenCalledTimes(0);
   });
 
   it('should hide prepend if removePrepend is true', async () => {
-    spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
+    jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
     component = shallow(
       <DataSourceSelector
         savedObjectsClient={client}
@@ -154,11 +154,11 @@ describe('DataSourceSelector: check dataSource options', () => {
     component.instance().componentDidMount!();
     await nextTick();
     expect(component).toMatchSnapshot();
-    expect(toasts.addWarning).toBeCalledTimes(0);
+    expect(toasts.addWarning).toHaveBeenCalledTimes(0);
   });
 
   it('should show custom placeholder text if configured', async () => {
-    spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
+    jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
     component = shallow(
       <DataSourceSelector
         savedObjectsClient={client}
@@ -174,11 +174,11 @@ describe('DataSourceSelector: check dataSource options', () => {
     component.instance().componentDidMount!();
     await nextTick();
     expect(component).toMatchSnapshot();
-    expect(toasts.addWarning).toBeCalledTimes(0);
+    expect(toasts.addWarning).toHaveBeenCalledTimes(0);
   });
 
   it('should filter options if configured', async () => {
-    spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
+    jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
     component = shallow(
       <DataSourceSelector
         savedObjectsClient={client}
@@ -194,11 +194,11 @@ describe('DataSourceSelector: check dataSource options', () => {
     component.instance().componentDidMount!();
     await nextTick();
     expect(component).toMatchSnapshot();
-    expect(toasts.addWarning).toBeCalledTimes(0);
+    expect(toasts.addWarning).toHaveBeenCalledTimes(0);
   });
 
   it('should return empty options if filter out all options and hide local cluster', async () => {
-    spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
+    jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
     component = shallow(
       <DataSourceSelector
         savedObjectsClient={client}
@@ -217,8 +217,8 @@ describe('DataSourceSelector: check dataSource options', () => {
   });
 
   it('should get default datasource if uiSettings exists', async () => {
-    spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
-    spyOn(uiSettings, 'getUserProvidedWithScope').and.returnValue('test1');
+    jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
+    jest.spyOn(uiSettings, 'getUserProvidedWithScope').mockReturnValue('test1');
     component = shallow(
       <DataSourceSelector
         savedObjectsClient={client}
@@ -234,11 +234,14 @@ describe('DataSourceSelector: check dataSource options', () => {
     component.instance().componentDidMount!();
     await nextTick();
     expect(component).toMatchSnapshot();
-    expect(uiSettings.getUserProvidedWithScope).toBeCalledWith('defaultDataSource', 'workspace');
+    expect(uiSettings.getUserProvidedWithScope).toHaveBeenCalledWith(
+      'defaultDataSource',
+      'workspace'
+    );
   });
 
   it('should not render options with default badge when id does not matches defaultDataSource', () => {
-    spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
+    jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
     component = shallow(
       <DataSourceSelector
         savedObjectsClient={client}
@@ -280,7 +283,7 @@ describe('DataSourceSelector: check defaultOption behavior', () => {
       find: jest.fn().mockResolvedValue([]),
     } as any;
     mockResponseForSavedObjectsCalls(client, 'find', getDataSourcesWithFieldsResponse);
-    spyOn(utils, 'getWorkspaces').and.returnValue({
+    jest.spyOn(utils, 'getWorkspaces').mockReturnValue({
       currentWorkspaceId$: {
         getValue: jest.fn().mockReturnValue('workspace-id'),
       },
@@ -289,8 +292,8 @@ describe('DataSourceSelector: check defaultOption behavior', () => {
 
   // When defaultOption is undefined
   it('should render defaultDataSource as the selected option', async () => {
-    spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
-    spyOn(uiSettings, 'getUserProvidedWithScope').and.returnValue('test1');
+    jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
+    jest.spyOn(uiSettings, 'getUserProvidedWithScope').mockReturnValue('test1');
 
     component = shallow(
       <DataSourceSelector
@@ -317,8 +320,8 @@ describe('DataSourceSelector: check defaultOption behavior', () => {
   });
 
   it('should render Local Cluster as the selected option when hideLocalCluster is false', async () => {
-    spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
-    spyOn(uiSettings, 'getUserProvidedWithScope').and.returnValue(null);
+    jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
+    jest.spyOn(uiSettings, 'getUserProvidedWithScope').mockReturnValue(null);
     component = shallow(
       <DataSourceSelector
         savedObjectsClient={client}
@@ -337,8 +340,8 @@ describe('DataSourceSelector: check defaultOption behavior', () => {
   });
 
   it('should render random datasource as the selected option if defaultDataSource and Local Cluster are not present', async () => {
-    spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
-    spyOn(uiSettings, 'getUserProvidedWithScope').and.returnValue(null);
+    jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
+    jest.spyOn(uiSettings, 'getUserProvidedWithScope').mockReturnValue(null);
     component = shallow(
       <DataSourceSelector
         savedObjectsClient={client}
@@ -367,8 +370,8 @@ describe('DataSourceSelector: check defaultOption behavior', () => {
   });
 
   it('should return toast', async () => {
-    spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
-    spyOn(uiSettings, 'getUserProvidedWithScope').and.returnValue(null);
+    jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
+    jest.spyOn(uiSettings, 'getUserProvidedWithScope').mockReturnValue(null);
     component = shallow(
       <DataSourceSelector
         savedObjectsClient={client}
@@ -387,13 +390,13 @@ describe('DataSourceSelector: check defaultOption behavior', () => {
     await nextTick();
     const euiComboBox = component.find(EuiComboBox);
     expect(euiComboBox.prop('selectedOptions')).toEqual(expect.arrayContaining([]));
-    expect(toasts.addWarning).toBeCalled();
+    expect(toasts.addWarning).toHaveBeenCalled();
   });
 
   // When defaultOption is []
   it('should render placeholder and all options when Local Cluster is not hidden', async () => {
-    spyOn(uiSettings, 'getUserProvidedWithScope').and.returnValue('test1');
-    spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
+    jest.spyOn(uiSettings, 'getUserProvidedWithScope').mockReturnValue('test1');
+    jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
     component = shallow(
       <DataSourceSelector
         savedObjectsClient={client}
@@ -417,8 +420,8 @@ describe('DataSourceSelector: check defaultOption behavior', () => {
   });
 
   it('should render placeholder and all options when Local Cluster is hidden', async () => {
-    spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
-    spyOn(uiSettings, 'getUserProvidedWithScope').and.returnValue('test1');
+    jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
+    jest.spyOn(uiSettings, 'getUserProvidedWithScope').mockReturnValue('test1');
     component = shallow(
       <DataSourceSelector
         savedObjectsClient={client}
@@ -455,8 +458,8 @@ describe('DataSourceSelector: check defaultOption behavior', () => {
       id: 'non-existent-id',
     },
   ])('should all throw a toast warning when the available dataSources is empty', async ({ id }) => {
-    spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
-    spyOn(uiSettings, 'getUserProvidedWithScope').and.returnValue('test1');
+    jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
+    jest.spyOn(uiSettings, 'getUserProvidedWithScope').mockReturnValue('test1');
     component = shallow(
       <DataSourceSelector
         savedObjectsClient={client}
@@ -477,7 +480,7 @@ describe('DataSourceSelector: check defaultOption behavior', () => {
     await nextTick();
     const euiComboBox = component.find(EuiComboBox);
     expect(euiComboBox.prop('selectedOptions')).toEqual(expect.arrayContaining([]));
-    expect(toasts.addWarning).toBeCalled();
+    expect(toasts.addWarning).toHaveBeenCalled();
   });
 
   it.each([
@@ -494,8 +497,8 @@ describe('DataSourceSelector: check defaultOption behavior', () => {
       id: 'non-existent-id',
     },
   ])('should all throw a toast warning when the id is filtered out', async ({ id }) => {
-    spyOn(uiSettings, 'getUserProvidedWithScope').and.returnValue('test1');
-    spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
+    jest.spyOn(uiSettings, 'getUserProvidedWithScope').mockReturnValue('test1');
+    jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
     component = shallow(
       <DataSourceSelector
         savedObjectsClient={client}
@@ -517,7 +520,7 @@ describe('DataSourceSelector: check defaultOption behavior', () => {
     await nextTick();
     const euiComboBox = component.find(EuiComboBox);
     expect(euiComboBox.prop('selectedOptions')).toEqual(expect.arrayContaining([]));
-    expect(toasts.addWarning).toBeCalled();
+    expect(toasts.addWarning).toHaveBeenCalled();
   });
 
   it.each([
@@ -544,8 +547,8 @@ describe('DataSourceSelector: check defaultOption behavior', () => {
   ])(
     'should handle selectedOption correctly when defaultOption = [{id}]',
     async ({ id, error, selectedOption }) => {
-      spyOn(uiSettings, 'getUserProvidedWithScope').and.returnValue('test1');
-      spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
+      jest.spyOn(uiSettings, 'getUserProvidedWithScope').mockReturnValue('test1');
+      jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
       component = shallow(
         <DataSourceSelector
           savedObjectsClient={client}
@@ -565,9 +568,9 @@ describe('DataSourceSelector: check defaultOption behavior', () => {
       const euiComboBox = component.find(EuiComboBox);
       expect(euiComboBox.prop('selectedOptions')).toEqual(expect.arrayContaining(selectedOption));
       if (error) {
-        expect(toasts.addWarning).toBeCalled();
+        expect(toasts.addWarning).toHaveBeenCalled();
       } else {
-        expect(toasts.addWarning).toBeCalledTimes(0);
+        expect(toasts.addWarning).toHaveBeenCalledTimes(0);
       }
     }
   );

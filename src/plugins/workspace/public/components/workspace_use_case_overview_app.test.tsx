@@ -152,7 +152,7 @@ describe('WorkspaceUseCaseOverviewApp - Essential', () => {
     act(() => {
       fireEvent.click(queryByText(/Show Get started/)!);
     });
-    expect(coreStartMocks.uiSettings.set).toBeCalledWith(
+    expect(coreStartMocks.uiSettings.set).toHaveBeenCalledWith(
       ESSENTIAL_WORKSPACE_DISMISS_GET_STARTED,
       false
     );

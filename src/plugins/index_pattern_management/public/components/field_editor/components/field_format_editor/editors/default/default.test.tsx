@@ -87,8 +87,8 @@ describe('DefaultFormatEditor', () => {
       />
     );
 
-    expect(format.getConverterFor).toBeCalled();
-    expect(onError).toBeCalled();
+    expect(format.getConverterFor).toHaveBeenCalled();
+    expect(onError).toHaveBeenCalled();
     expect(component).toMatchSnapshot();
   });
 
@@ -104,7 +104,7 @@ describe('DefaultFormatEditor', () => {
     );
 
     (component.instance() as DefaultFormatEditor).onChange();
-    expect(onChange).toBeCalled();
+    expect(onChange).toHaveBeenCalled();
   });
 
   it('should call prop onError() if converter throws an error', async () => {
@@ -124,6 +124,6 @@ describe('DefaultFormatEditor', () => {
       />
     );
 
-    expect(onError).toBeCalled();
+    expect(onError).toHaveBeenCalled();
   });
 });

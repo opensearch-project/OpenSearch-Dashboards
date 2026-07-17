@@ -256,7 +256,7 @@ describe('WorkspaceList', () => {
     fireEvent.click(operationIcons);
     const editIcon = getByText('Edit');
     fireEvent.click(editIcon);
-    expect(navigateToAppWithinWorkspace).toBeCalled();
+    expect(navigateToAppWithinWorkspace).toHaveBeenCalled();
   });
 
   it('should be able to call delete modal after clicking delete button', async () => {

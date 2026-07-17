@@ -1,3 +1,5 @@
+/** @jest-environment node */
+
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -9,11 +11,6 @@
  * GitHub history for details.
  */
 
-/**
- * @jest-environment node
- */
-
-// @ts-ignore
 import numeral from '@elastic/numeral';
 // @ts-ignore
 import numeralLanguages from '@elastic/numeral/languages';

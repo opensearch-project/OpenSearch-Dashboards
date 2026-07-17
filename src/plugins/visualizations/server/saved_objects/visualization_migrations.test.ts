@@ -803,7 +803,7 @@ describe('migration visualization', () => {
           },
         },
       };
-      expect(() => migrate(doc)).toThrowError(/My Vis/);
+      expect(() => migrate(doc)).toThrow(/My Vis/);
     });
   });
 

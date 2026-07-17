@@ -221,8 +221,9 @@ export class QueryEnhancementsPlugin implements Plugin<
       },
       showDocLinks: false,
       editor: createEditor(SingleLineInput, null, sqlControls, DefaultInput),
-      editorSupportedAppNames: ['discover', 'explore', 'agentTraces'],
-      supportedAppNames: ['discover', 'data-explorer', 'explore', 'agentTraces'],
+      // 'explore' is added by the explore plugin only when explore.sqlSupport.enabled is on.
+      editorSupportedAppNames: ['discover', 'agentTraces'],
+      supportedAppNames: ['discover', 'data-explorer', 'agentTraces'],
       supportedDataSources: sqlSupportedDataSources,
       hideDatePicker: true,
       sampleQueries: [

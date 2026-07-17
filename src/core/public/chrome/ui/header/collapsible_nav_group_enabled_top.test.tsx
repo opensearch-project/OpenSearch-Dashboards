@@ -43,7 +43,7 @@ describe('<CollapsibleNavTop />', () => {
     const { findByTestId, getByTestId } = render(<CollapsibleNavTop {...props} />);
     await findByTestId('collapsibleNavHome');
     fireEvent.click(getByTestId('collapsibleNavHome'));
-    expect(props.navigateToApp).toBeCalledWith('home');
+    expect(props.navigateToApp).toHaveBeenCalledWith('home');
   });
 
   it('should render expand button when collapsed (original nav)', async () => {

@@ -77,7 +77,7 @@ describe('modifyUrl()', () => {
   test('does not throw URIError for malformed urls', () => {
     expect(() => {
       modifyUrl('http://user:%E0%A4@example.com', () => {});
-    }).not.toThrowError();
+    }).not.toThrow();
   });
 });
 
@@ -96,7 +96,7 @@ describe('isRelativeUrl()', () => {
   test('does not throw URIError for malformed urls', () => {
     expect(() => {
       isRelativeUrl('http://user:%E0%A4@example.com');
-    }).not.toThrowError();
+    }).not.toThrow();
   });
 });
 
@@ -113,7 +113,7 @@ describe('getOrigin', () => {
     it('does not throw URIError for malformed urls', () => {
       expect(() => {
         getUrlOrigin('http://user:%E0%A4@example.com');
-      }).not.toThrowError();
+      }).not.toThrow();
     });
   });
   describe('when passing a non absolute url', () => {

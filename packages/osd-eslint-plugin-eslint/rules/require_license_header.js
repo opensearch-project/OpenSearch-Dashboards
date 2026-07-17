@@ -36,6 +36,26 @@ function isHashbang(text) {
   return text.trim().startsWith('#!') && !text.trim().includes('\n');
 }
 
+/**
+ * Returns true if `text` consists solely of a Jest docblock pragma comment,
+ * e.g. `/** @jest-environment node *\/`.  These must appear before the license
+ * header so that jest-docblock can read them (it only inspects the first block
+ * comment in a file).
+ */
+function isJestDocblock(text) {
+  return /^\s*\/\*\*[\s\S]*?@jest-environment\s+\S+[\s\S]*?\*\/\s*$/.test(text);
+}
+
+/**
+ * If `sourceText` begins with a jest docblock pragma, returns the index
+ * immediately after it (past any trailing whitespace/newlines).  Returns 0
+ * otherwise, so callers can always use the result as a safe insertion point.
+ */
+function insertionPointAfterJestDocblock(sourceText) {
+  const match = sourceText.match(/^(\s*\/\*\*[\s\S]*?@jest-environment\s+\S+[\s\S]*?\*\/\s*)/);
+  return match ? match[1].length : 0;
+}
+
 module.exports = {
   meta: {
     fixable: 'code',
@@ -131,7 +151,9 @@ module.exports = {
                 return undefined;
               }
 
-              return fixer.replaceTextRange([0, 0], licenses[0].source + '\n\n');
+              const fullSource = sourceCode.getText();
+              const insertAt = insertionPointAfterJestDocblock(fullSource);
+              return fixer.replaceTextRange([insertAt, insertAt], licenses[0].source + '\n\n');
             },
           });
           return;
@@ -144,7 +166,11 @@ module.exports = {
         const sourceBeforeNode = sourceCode
           .getText()
           .slice(0, sourceCode.getIndexFromLoc(comment.loc.start));
-        if (sourceBeforeNode.length && !isHashbang(sourceBeforeNode)) {
+        if (
+          sourceBeforeNode.length &&
+          !isHashbang(sourceBeforeNode) &&
+          !isJestDocblock(sourceBeforeNode)
+        ) {
           context.report({
             node: comment,
             message: 'License header must be at the very beginning of the file',
@@ -154,11 +180,12 @@ module.exports = {
                 return fixer.replaceTextRange([0, sourceBeforeNode.length], '');
               }
 
-              // inject content at top and remove node from current location
-              // if removing whitespace is not possible
+              // inject content at top (after any jest docblock) and remove
+              // node from current location if removing whitespace is not possible
+              const insertAt = insertionPointAfterJestDocblock(sourceCode.getText());
               return [
                 fixer.remove(comment),
-                fixer.replaceTextRange([0, 0], currentLicense.source + '\n\n'),
+                fixer.replaceTextRange([insertAt, insertAt], currentLicense.source + '\n\n'),
               ];
             },
           });

@@ -40,7 +40,7 @@ describe('DiscoverPlugin', () => {
       // @ts-expect-error TS2345 TODO(ts-error): fixme
       pluginInstance.setup(setupMock, getSetupDeps())
     ).not.toThrow();
-    expect(setupMock.chrome.navGroup.addNavLinksToGroup).toBeCalledTimes(5);
+    expect(setupMock.chrome.navGroup.addNavLinksToGroup).toHaveBeenCalledTimes(5);
   });
 
   it('should not register discover in observability when icon side nav is enabled', () => {

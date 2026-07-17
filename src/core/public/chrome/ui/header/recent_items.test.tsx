@@ -206,7 +206,7 @@ describe('Recent items', () => {
     fireEvent.click(getByTestId('recentItemsSectionButton'));
     await findByText('Recent assets');
     fireEvent.click(getByText('visualizeMock'));
-    expect(createRecentNavLink).toBeCalledWith(
+    expect(createRecentNavLink).toHaveBeenCalledWith(
       expect.anything(),
       expect.anything(),
       expect.anything(),

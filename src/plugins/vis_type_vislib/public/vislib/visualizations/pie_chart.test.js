@@ -115,16 +115,16 @@ describe('No global chart settings', function () {
     test('should throw an error when all charts contain zeros', function () {
       expect(function () {
         chart1.handler.ChartClass.prototype._validatePieData(allZeros);
-      }).toThrowError();
+      }).toThrow();
     });
 
     test('should not throw an error when only some or no charts contain zeros', function () {
       expect(function () {
         chart1.handler.ChartClass.prototype._validatePieData(someZeros);
-      }).not.toThrowError();
+      }).not.toThrow();
       expect(function () {
         chart1.handler.ChartClass.prototype._validatePieData(noZeros);
-      }).not.toThrowError();
+      }).not.toThrow();
     });
   });
 });
@@ -268,7 +268,7 @@ describe('Vislib PieChart Class Test Suite', function () {
               if (size < 20) {
                 expect(function () {
                   chart.render();
-                }).toThrowError();
+                }).toThrow();
               }
             });
           });
@@ -281,7 +281,7 @@ describe('Vislib PieChart Class Test Suite', function () {
               if (size > 20) {
                 expect(function () {
                   chart.render();
-                }).not.toThrowError();
+                }).not.toThrow();
               }
             });
           });

@@ -26,7 +26,7 @@ describe('DashboardPlugin', () => {
     const initializerContext = coreMock.createPluginInitializerContext();
     const pluginInstance = new DashboardPlugin(initializerContext);
     expect(() => pluginInstance.setup(setupMock, getSetupDeps())).not.toThrow();
-    expect(setupMock.chrome.navGroup.addNavLinksToGroup).toBeCalledTimes(5);
+    expect(setupMock.chrome.navGroup.addNavLinksToGroup).toHaveBeenCalledTimes(5);
   });
 
   it('should register dashboard in observability with order 100 when icon side nav is enabled', () => {

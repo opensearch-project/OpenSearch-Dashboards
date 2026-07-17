@@ -196,7 +196,7 @@ test('Container.removeEmbeddable removes and cleans up', async () => {
         expect(false).toBe(true);
       }
 
-      expect(() => embeddable.updateInput({ nameTitle: 'Sir' })).toThrowError();
+      expect(() => embeddable.updateInput({ nameTitle: 'Sir' })).toThrow();
       expect(container.getOutput().embeddableLoaded[embeddable.id]).toBeUndefined();
     });
 
@@ -232,13 +232,13 @@ test('Container.input$ is notified when child embeddable input is updated', asyn
 
   expect(embeddable.getInput().lastName === 'Q');
 
-  expect(changes).toBeCalledTimes(3);
+  expect(changes).toHaveBeenCalledTimes(3);
 
   subscription.unsubscribe();
 
   embeddable.updateInput({ nameTitle: 'Dr.' });
 
-  expect(changes).toBeCalledTimes(3);
+  expect(changes).toHaveBeenCalledTimes(3);
 });
 
 test('Container.input$', async () => {
@@ -285,9 +285,9 @@ test('Container.getInput$ not triggered if state is the same', async () => {
   });
   const subscription = container.getInput$().subscribe(changes);
   embeddable.updateInput({ nameTitle: 'Dr.' });
-  expect(changes).toBeCalledTimes(2);
+  expect(changes).toHaveBeenCalledTimes(2);
   embeddable.updateInput({ nameTitle: 'Dr.' });
-  expect(changes).toBeCalledTimes(2);
+  expect(changes).toHaveBeenCalledTimes(2);
   subscription.unsubscribe();
 });
 
@@ -697,7 +697,7 @@ test('untilEmbeddableLoaded() throws an error if there is no such child panel in
     panels: {},
   });
 
-  expect(container.untilEmbeddableLoaded('idontexist')).rejects.toThrowError();
+  expect(container.untilEmbeddableLoaded('idontexist')).rejects.toThrow();
 });
 
 test('untilEmbeddableLoaded() throws an error if there is no such child panel in the container - 2', async () => {

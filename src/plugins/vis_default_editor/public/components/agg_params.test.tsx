@@ -130,11 +130,11 @@ describe('DefaultEditorAggParams component', () => {
   it('should reset the validity to true when destroyed', () => {
     const comp = mount(<DefaultEditorAggParams {...defaultProps} aggIsTooLow={true} />);
 
-    expect(setValidity).lastCalledWith(false);
+    expect(setValidity).toHaveBeenLastCalledWith(false);
 
     comp.unmount();
 
-    expect(setValidity).lastCalledWith(true);
+    expect(setValidity).toHaveBeenLastCalledWith(true);
   });
 
   it('should set fixed and default values when editorConfig is defined (works in rollup index)', () => {
@@ -160,7 +160,7 @@ describe('DefaultEditorAggParams component', () => {
 
     comp.setProps({ agg: { type: { params: [] } } });
 
-    expect(setTouched).lastCalledWith(false);
+    expect(setTouched).toHaveBeenLastCalledWith(false);
   });
 
   it('should set the validity when it changed', () => {
@@ -168,11 +168,11 @@ describe('DefaultEditorAggParams component', () => {
 
     comp.setProps({ aggIsTooLow: true });
 
-    expect(setValidity).lastCalledWith(false);
+    expect(setValidity).toHaveBeenLastCalledWith(false);
 
     comp.setProps({ aggIsTooLow: false });
 
-    expect(setValidity).lastCalledWith(true);
+    expect(setValidity).toHaveBeenLastCalledWith(true);
   });
 
   it('should call setTouched when all invalid controls were touched or they are untouched', () => {
@@ -180,10 +180,10 @@ describe('DefaultEditorAggParams component', () => {
 
     comp.setProps({ aggIsTooLow: true });
 
-    expect(setTouched).lastCalledWith(true);
+    expect(setTouched).toHaveBeenLastCalledWith(true);
 
     comp.setProps({ aggIsTooLow: false });
 
-    expect(setTouched).lastCalledWith(false);
+    expect(setTouched).toHaveBeenLastCalledWith(false);
   });
 });

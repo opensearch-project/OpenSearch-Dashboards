@@ -311,16 +311,18 @@ describe('throws when config is invalid', () => {
 
   it('throws if key and keystore.path are both specified', () => {
     const value = { ssl: { key: 'foo', keystore: { path: 'bar' } } };
-    expect(() => config.schema.validate(value)).toThrowErrorMatchingInlineSnapshot(
-      `"[ssl]: cannot use [key] when [keystore.path] is specified"`
-    );
+    expect(() => config.schema.validate(value)).toThrowErrorMatchingInlineSnapshot(`
+      "[ssl]: cannot use [key] when [keystore.path] is specified
+      Cause: cannot use [key] when [keystore.path] is specified"
+    `);
   });
 
   it('throws if certificate and keystore.path are both specified', () => {
     const value = { ssl: { certificate: 'foo', keystore: { path: 'bar' } } };
-    expect(() => config.schema.validate(value)).toThrowErrorMatchingInlineSnapshot(
-      `"[ssl]: cannot use [certificate] when [keystore.path] is specified"`
-    );
+    expect(() => config.schema.validate(value)).toThrowErrorMatchingInlineSnapshot(`
+      "[ssl]: cannot use [certificate] when [keystore.path] is specified
+      Cause: cannot use [certificate] when [keystore.path] is specified"
+    `);
   });
 });
 
@@ -553,8 +555,9 @@ test('#username throws if equal to "elastic", only while running from source', (
   const obj = {
     username: 'elastic',
   };
-  expect(() => config.schema.validate(obj, { dist: false })).toThrowErrorMatchingInlineSnapshot(
-    `"[username]: value of \\"elastic\\" is forbidden. This is a superuser account that can obfuscate privilege-related issues. You should use the \\"opensearch_dashboards_system\\" user instead."`
-  );
+  expect(() => config.schema.validate(obj, { dist: false })).toThrowErrorMatchingInlineSnapshot(`
+    "[username]: value of \\"elastic\\" is forbidden. This is a superuser account that can obfuscate privilege-related issues. You should use the \\"opensearch_dashboards_system\\" user instead.
+    Cause: value of \\"elastic\\" is forbidden. This is a superuser account that can obfuscate privilege-related issues. You should use the \\"opensearch_dashboards_system\\" user instead."
+  `);
   expect(() => config.schema.validate(obj, { dist: true })).not.toThrow();
 });

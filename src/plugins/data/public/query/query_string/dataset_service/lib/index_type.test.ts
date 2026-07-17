@@ -268,7 +268,7 @@ describe('indexTypeConfig', () => {
 
   test('supportedLanguages returns correct languages', () => {
     const mockDataset: Dataset = { id: 'index1', title: 'Index 1', type: 'INDEX' };
-    expect(indexTypeConfig.supportedLanguages(mockDataset)).toEqual(['SQL', 'PPL']);
+    expect(indexTypeConfig.supportedLanguages(mockDataset)).toEqual(['PPL', 'SQL']);
   });
 
   test('should fetch data sources for unknown type', async () => {

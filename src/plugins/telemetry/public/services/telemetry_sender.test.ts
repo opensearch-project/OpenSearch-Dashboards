@@ -41,6 +41,8 @@ const mockLocalStorage = new LocalStorageMock();
 const originalLocalStorage = window.localStorage;
 Object.defineProperty(window, 'localStorage', {
   value: mockLocalStorage,
+  writable: true,
+  configurable: true,
 });
 
 describe('TelemetrySender', () => {
@@ -51,6 +53,8 @@ describe('TelemetrySender', () => {
   afterAll(() =>
     Object.defineProperty(window, 'localStorage', {
       value: originalLocalStorage,
+      writable: true,
+      configurable: true,
     })
   );
 
@@ -59,7 +63,7 @@ describe('TelemetrySender', () => {
       const telemetryService = mockTelemetryService();
       const telemetrySender = new TelemetrySender(telemetryService);
       expect(telemetrySender['lastReported']).toBeUndefined();
-      expect(mockLocalStorage.getItem).toBeCalledTimes(1);
+      expect(mockLocalStorage.getItem).toHaveBeenCalledTimes(1);
       expect(mockLocalStorage.getItem).toHaveBeenCalledWith(LOCALSTORAGE_KEY);
     });
 
@@ -95,7 +99,7 @@ describe('TelemetrySender', () => {
       const telemetrySender = new TelemetrySender(telemetryService);
       const shouldSendRerpot = telemetrySender['shouldSendReport']();
 
-      expect(telemetryService.getIsOptedIn).toBeCalledTimes(1);
+      expect(telemetryService.getIsOptedIn).toHaveBeenCalledTimes(1);
       expect(shouldSendRerpot).toBe(false);
     });
 
@@ -160,8 +164,8 @@ describe('TelemetrySender', () => {
         telemetrySender['isSending'] = true;
         await telemetrySender['sendIfDue']();
 
-        expect(telemetrySender['shouldSendReport']).toBeCalledTimes(0);
-        expect(mockFetch).toBeCalledTimes(0);
+        expect(telemetrySender['shouldSendReport']).toHaveBeenCalledTimes(0);
+        expect(mockFetch).toHaveBeenCalledTimes(0);
       });
 
       it('does not send if shouldSendReport returns false', async () => {
@@ -171,8 +175,8 @@ describe('TelemetrySender', () => {
         telemetrySender['isSending'] = false;
         await telemetrySender['sendIfDue']();
 
-        expect(telemetrySender['shouldSendReport']).toBeCalledTimes(1);
-        expect(mockFetch).toBeCalledTimes(0);
+        expect(telemetrySender['shouldSendReport']).toHaveBeenCalledTimes(1);
+        expect(mockFetch).toHaveBeenCalledTimes(0);
       });
 
       it('sends report if due', async () => {
@@ -187,8 +191,8 @@ describe('TelemetrySender', () => {
         telemetrySender['isSending'] = false;
         await telemetrySender['sendIfDue']();
 
-        expect(telemetryService.fetchTelemetry).toBeCalledTimes(0);
-        expect(mockFetch).toBeCalledTimes(0);
+        expect(telemetryService.fetchTelemetry).toHaveBeenCalledTimes(0);
+        expect(mockFetch).toHaveBeenCalledTimes(0);
       });
 
       it('sends report separately for every cluster', async () => {
@@ -203,8 +207,8 @@ describe('TelemetrySender', () => {
         telemetrySender['isSending'] = false;
         await telemetrySender['sendIfDue']();
 
-        expect(telemetryService.fetchTelemetry).toBeCalledTimes(0);
-        expect(mockFetch).toBeCalledTimes(0);
+        expect(telemetryService.fetchTelemetry).toHaveBeenCalledTimes(0);
+        expect(mockFetch).toHaveBeenCalledTimes(0);
       });
 
       it('updates last lastReported and calls saveToBrowser', async () => {
@@ -220,9 +224,9 @@ describe('TelemetrySender', () => {
 
         await telemetrySender['sendIfDue']();
 
-        expect(mockFetch).toBeCalledTimes(0);
+        expect(mockFetch).toHaveBeenCalledTimes(0);
         expect(telemetrySender['lastReported']).toBeDefined();
-        expect(telemetrySender['saveToBrowser']).toBeCalledTimes(1);
+        expect(telemetrySender['saveToBrowser']).toHaveBeenCalledTimes(1);
         expect(telemetrySender['isSending']).toBe(false);
       });
 
@@ -234,7 +238,7 @@ describe('TelemetrySender', () => {
           throw Error('Error fetching usage');
         });
         await telemetrySender['sendIfDue']();
-        expect(telemetryService.fetchTelemetry).toBeCalledTimes(0);
+        expect(telemetryService.fetchTelemetry).toHaveBeenCalledTimes(0);
         expect(telemetrySender['lastReported']).toBeUndefined();
         expect(telemetrySender['isSending']).toBe(false);
       });
@@ -249,8 +253,8 @@ describe('TelemetrySender', () => {
           throw Error('Error sending usage');
         });
         await telemetrySender['sendIfDue']();
-        expect(telemetryService.fetchTelemetry).toBeCalledTimes(0);
-        expect(mockFetch).toBeCalledTimes(0);
+        expect(telemetryService.fetchTelemetry).toHaveBeenCalledTimes(0);
+        expect(mockFetch).toHaveBeenCalledTimes(0);
         expect(telemetrySender['lastReported']).toBeUndefined();
         expect(telemetrySender['isSending']).toBe(false);
       });
@@ -273,8 +277,8 @@ describe('TelemetrySender', () => {
       const telemetryService = mockTelemetryService();
       const telemetrySender = new TelemetrySender(telemetryService);
       telemetrySender.startChecking();
-      expect(mockSetInterval).toBeCalledTimes(1);
-      expect(mockSetInterval).toBeCalledWith(telemetrySender['sendIfDue'], 60000);
+      expect(mockSetInterval).toHaveBeenCalledTimes(1);
+      expect(mockSetInterval).toHaveBeenCalledWith(telemetrySender['sendIfDue'], 60000);
     });
   });
 });

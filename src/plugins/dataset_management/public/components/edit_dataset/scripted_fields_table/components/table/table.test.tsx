@@ -10,7 +10,10 @@ import { ScriptedFieldItem } from '../../types';
 // @ts-expect-error TS2305 TODO(ts-error): fixme
 import { IDataset } from 'src/plugins/data/public';
 
-const getDatasetMock = (mockedFields: any = {}) => ({ ...mockedFields }) as IDataset;
+const getDatasetMock = (mockedFields: any = {}) =>
+  ({
+    ...mockedFields,
+  }) as IDataset;
 
 const items: ScriptedFieldItem[] = [{ name: '1', lang: 'Elastic', script: '' }];
 
@@ -55,7 +58,7 @@ describe('Table', () => {
 
     // Click the delete button
     component.prop('columns')[4].actions[0].onClick();
-    expect(editField).toBeCalled();
+    expect(editField).toHaveBeenCalled();
   });
 
   test('should allow deletes', () => {
@@ -67,6 +70,6 @@ describe('Table', () => {
 
     // Click the delete button
     component.prop('columns')[4].actions[1].onClick();
-    expect(deleteField).toBeCalled();
+    expect(deleteField).toHaveBeenCalled();
   });
 });
