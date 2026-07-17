@@ -116,8 +116,8 @@ describe('useDashboardAppAndGlobalState', () => {
 
     unmount();
 
-    expect(stopStateSyncMock).toBeCalledTimes(1);
-    expect(stopSyncingAppFiltersMock).toBeCalledTimes(1);
-    expect(stopSyncingQueryServiceStateWithUrlMock).toBeCalledTimes(1);
+    expect(stopStateSyncMock).toHaveBeenCalledTimes(1);
+    expect(stopSyncingAppFiltersMock).toHaveBeenCalledTimes(1);
+    expect(stopSyncingQueryServiceStateWithUrlMock).toHaveBeenCalledTimes(1);
   });
 });

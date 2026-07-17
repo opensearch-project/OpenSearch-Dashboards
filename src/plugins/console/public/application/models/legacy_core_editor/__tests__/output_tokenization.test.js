@@ -69,17 +69,18 @@ describe('Output Tokenization', () => {
       data = JSON.stringify(data, null, 3);
     }
 
-    test('Token test ' + testCount++, async function (done) {
-      output.update(data, function () {
-        const tokens = tokensAsList();
-        const normTokenList = [];
-        for (let i = 0; i < tokenList.length; i++) {
-          normTokenList.push({ type: tokenList[i++], value: tokenList[i] });
-        }
-
-        expect(tokens).toEqual(normTokenList);
-        done();
+    test('Token test ' + testCount++, async function () {
+      await new Promise((resolve) => {
+        output.update(data, resolve);
       });
+
+      const tokens = tokensAsList();
+      const normTokenList = [];
+      for (let i = 0; i < tokenList.length; i++) {
+        normTokenList.push({ type: tokenList[i++], value: tokenList[i] });
+      }
+
+      expect(tokens).toEqual(normTokenList);
     });
   }
 

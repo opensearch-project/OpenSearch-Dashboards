@@ -245,7 +245,7 @@ describe('uiSettings', () => {
         const start = await service.start();
         start.asScopedToClient(savedObjectsClient);
 
-        expect(MockUiSettingsClientConstructor).toBeCalledTimes(1);
+        expect(MockUiSettingsClientConstructor).toHaveBeenCalledTimes(1);
         expect(MockUiSettingsClientConstructor.mock.calls[0][0].type).toBe('config');
       });
 
@@ -253,7 +253,7 @@ describe('uiSettings', () => {
         await service.setup(setupDeps);
         const start = await service.start();
         start.asScopedToClient(savedObjectsClient);
-        expect(MockUiSettingsClientConstructor).toBeCalledTimes(1);
+        expect(MockUiSettingsClientConstructor).toHaveBeenCalledTimes(1);
         expect(MockUiSettingsClientConstructor.mock.calls[0][0].overrides).toBe(overrides);
         expect(MockUiSettingsClientConstructor.mock.calls[0][0].overrides).toEqual(overrides);
       });
@@ -265,7 +265,7 @@ describe('uiSettings', () => {
         const start = await service.start();
         start.asScopedToClient(savedObjectsClient);
 
-        expect(MockUiSettingsClientConstructor).toBeCalledTimes(1);
+        expect(MockUiSettingsClientConstructor).toHaveBeenCalledTimes(1);
         expect(MockUiSettingsClientConstructor.mock.calls[0][0].defaults).toMatchObject(defaults);
         expect(MockUiSettingsClientConstructor.mock.calls[0][0].defaults).toMatchObject(
           adminUiSettings
@@ -294,7 +294,7 @@ describe('uiSettings', () => {
         await customizedService.setup(setupDeps);
         const start = await customizedService.start();
         start.asScopedToClient(savedObjectsClient);
-        expect(MockUiSettingsClientConstructor).toBeCalledTimes(1);
+        expect(MockUiSettingsClientConstructor).toHaveBeenCalledTimes(1);
         expect(MockUiSettingsClientConstructor.mock.calls[0][0].defaults?.foo?.value).toEqual(
           'configured'
         );

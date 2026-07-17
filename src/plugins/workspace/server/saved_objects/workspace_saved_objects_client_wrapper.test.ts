@@ -1059,7 +1059,7 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
         wrapper.get('workspace', 'foo'),
         wrapper.get('workspace', 'foo'),
       ]);
-      expect(checkSpy).toBeCalledTimes(1);
+      expect(checkSpy).toHaveBeenCalledTimes(1);
     });
   });
 });

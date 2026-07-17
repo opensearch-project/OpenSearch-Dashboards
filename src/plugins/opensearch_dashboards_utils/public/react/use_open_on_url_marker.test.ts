@@ -120,17 +120,11 @@ describe('useOpenOnUrlMarker', () => {
     expect(window.location.hash).toBe('#/');
   });
 
-  it('does not throw when window.location.hash is undefined (partial mock)', () => {
-    // Some component tests stub window.location without a `hash` property; the
-    // hook must default to '' rather than call .indexOf on undefined.
-    const originalDescriptor = Object.getOwnPropertyDescriptor(window, 'location');
-    // @ts-expect-error intentionally partial mock, mirroring how apm tests stub it
-    delete window.location;
-    // @ts-expect-error assign a hash-less location
-    window.location = { pathname: '/', search: '' };
+  it('does not throw when window.location has no marker in hash', () => {
+    // Set a URL with no hash at all; the hook must default to '' and not throw.
+    window.history.pushState({}, '', '/');
     const onOpen = jest.fn();
     expect(() => renderHook(() => useOpenOnUrlMarker('_openSaved', onOpen))).not.toThrow();
     expect(onOpen).not.toHaveBeenCalled();
-    if (originalDescriptor) Object.defineProperty(window, 'location', originalDescriptor);
   });
 });

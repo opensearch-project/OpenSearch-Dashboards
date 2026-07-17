@@ -16,9 +16,9 @@ test('it should throw error if with invalid url object', () => {
   const timeCache = new TimeCache(timefilterServiceMock.createStartContract().timefilter, 100);
   // @ts-expect-error TS2345 TODO(ts-error): fixme
   const parser = new PPLQueryParser(timeCache, searchApiMock);
-  expect(() => parser.parseUrl({}, {})).toThrowError();
-  expect(() => parser.parseUrl({}, { body: {} })).toThrowError();
-  expect(() => parser.parseUrl({}, { body: { query: {} } })).toThrowError();
+  expect(() => parser.parseUrl({}, {})).toThrow();
+  expect(() => parser.parseUrl({}, { body: {} })).toThrow();
+  expect(() => parser.parseUrl({}, { body: { query: {} } })).toThrow();
 });
 
 test('it should parse url object', () => {

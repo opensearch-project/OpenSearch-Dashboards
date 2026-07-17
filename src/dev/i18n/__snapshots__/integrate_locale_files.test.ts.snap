@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`dev/i18n/integrate_locale_files integrateLocaleFiles adds translations despite missing formats object 1`] = `
 Array [

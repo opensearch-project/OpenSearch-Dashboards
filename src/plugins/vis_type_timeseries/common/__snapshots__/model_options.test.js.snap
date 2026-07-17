@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`src/legacy/core_plugins/metrics/common/model_options.js MODEL_TYPES should match a snapshot of constants 1`] = `
 Object {

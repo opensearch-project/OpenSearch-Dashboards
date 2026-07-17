@@ -41,19 +41,23 @@ describe('UserUISettingsClientWrapper', () => {
     it('should skip replacing user id if not user level config', async () => {
       await wrapperClient.get('config', '3.0.0');
 
-      expect(mockedClient.get).toBeCalledWith('config', '3.0.0', {});
+      expect(mockedClient.get).toHaveBeenCalledWith('config', '3.0.0', {});
     });
 
     it('should skip replacing user id if type is not config', async () => {
       await wrapperClient.get('config1', `${CURRENT_USER_PLACEHOLDER}_3.0.0`);
 
-      expect(mockedClient.get).toBeCalledWith('config1', `${CURRENT_USER_PLACEHOLDER}_3.0.0`, {});
+      expect(mockedClient.get).toHaveBeenCalledWith(
+        'config1',
+        `${CURRENT_USER_PLACEHOLDER}_3.0.0`,
+        {}
+      );
     });
 
     it('should replace user id placeholder with real user id', async () => {
       await wrapperClient.get('config', `${CURRENT_USER_PLACEHOLDER}_3.0.0`);
 
-      expect(mockedClient.get).toBeCalledWith('config', 'test_user', {});
+      expect(mockedClient.get).toHaveBeenCalledWith('config', 'test_user', {});
     });
   });
 
@@ -67,13 +71,13 @@ describe('UserUISettingsClientWrapper', () => {
     it('should skip replacing user id if not user level config', async () => {
       await wrapperClient.update('config', '3.0.0', {});
 
-      expect(mockedClient.update).toBeCalledWith('config', '3.0.0', {}, {});
+      expect(mockedClient.update).toHaveBeenCalledWith('config', '3.0.0', {}, {});
     });
 
     it('should skip replacing user id if type is not config', async () => {
       await wrapperClient.update('config1', `${CURRENT_USER_PLACEHOLDER}_3.0.0`, {});
 
-      expect(mockedClient.update).toBeCalledWith(
+      expect(mockedClient.update).toHaveBeenCalledWith(
         'config1',
         `${CURRENT_USER_PLACEHOLDER}_3.0.0`,
         {},
@@ -84,7 +88,7 @@ describe('UserUISettingsClientWrapper', () => {
     it('should replace user id placeholder with real user id', async () => {
       await wrapperClient.update('config', `${CURRENT_USER_PLACEHOLDER}_3.0.0`, {});
 
-      expect(mockedClient.update).toBeCalledWith('config', 'test_user', {}, {});
+      expect(mockedClient.update).toHaveBeenCalledWith('config', 'test_user', {}, {});
     });
   });
 
@@ -98,13 +102,13 @@ describe('UserUISettingsClientWrapper', () => {
     it('should skip replacing user id if not user level config', async () => {
       await wrapperClient.create('config', {}, { id: '3.0.0' });
 
-      expect(mockedClient.create).toBeCalledWith('config', {}, { id: '3.0.0' });
+      expect(mockedClient.create).toHaveBeenCalledWith('config', {}, { id: '3.0.0' });
     });
 
     it('should skip replacing user id if type is not config', async () => {
       await wrapperClient.create('config1', {}, { id: `${CURRENT_USER_PLACEHOLDER}_3.0.0` });
 
-      expect(mockedClient.create).toBeCalledWith(
+      expect(mockedClient.create).toHaveBeenCalledWith(
         'config1',
         {},
         { id: `${CURRENT_USER_PLACEHOLDER}_3.0.0` }
@@ -114,7 +118,7 @@ describe('UserUISettingsClientWrapper', () => {
     it('should replace user id placeholder with real user id', async () => {
       await wrapperClient.create('config', {}, { id: `${CURRENT_USER_PLACEHOLDER}_3.0.0` });
 
-      expect(mockedClient.create).toBeCalledWith(
+      expect(mockedClient.create).toHaveBeenCalledWith(
         'config',
         {},
         {
@@ -131,7 +135,7 @@ describe('UserUISettingsClientWrapper', () => {
         { id: `${CURRENT_USER_PLACEHOLDER}_3.0.0` }
       );
 
-      expect(mockedClient.create).toBeCalledWith(
+      expect(mockedClient.create).toHaveBeenCalledWith(
         'config',
         {},
         {
@@ -177,7 +181,7 @@ describe('UserUISettingsClientWrapper - security not enabled', () => {
     it('should replace user id placeholder with version', async () => {
       await wrapperClient.get('config', `${CURRENT_USER_PLACEHOLDER}_3.0.0`);
 
-      expect(mockedClient.get).toBeCalledWith('config', '3.0.0', {});
+      expect(mockedClient.get).toHaveBeenCalledWith('config', '3.0.0', {});
     });
   });
 
@@ -185,7 +189,7 @@ describe('UserUISettingsClientWrapper - security not enabled', () => {
     it('should replace user id placeholder with version', async () => {
       await wrapperClient.update('config', `${CURRENT_USER_PLACEHOLDER}_3.0.0`, {});
 
-      expect(mockedClient.update).toBeCalledWith('config', '3.0.0', {}, {});
+      expect(mockedClient.update).toHaveBeenCalledWith('config', '3.0.0', {}, {});
     });
   });
 
@@ -193,7 +197,7 @@ describe('UserUISettingsClientWrapper - security not enabled', () => {
     it('should replace user id placeholder with version', async () => {
       await wrapperClient.create('config', {}, { id: `${CURRENT_USER_PLACEHOLDER}_3.0.0` });
 
-      expect(mockedClient.create).toBeCalledWith(
+      expect(mockedClient.create).toHaveBeenCalledWith(
         'config',
         {},
         {

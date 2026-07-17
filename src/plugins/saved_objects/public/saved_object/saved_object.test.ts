@@ -628,7 +628,7 @@ describe('Saved Object', () => {
           ],
         };
         await savedObject.applyOpenSearchResp(response);
-        expect(dataStartMock.search.searchSource.create).toBeCalledWith({
+        expect(dataStartMock.search.searchSource.create).toHaveBeenCalledWith({
           filter: [{ meta: { index: 'my-index-2' } }],
           index: 'my-index-1',
         });

@@ -47,8 +47,8 @@ describe('OpenSearchDashboardsSocket', () => {
       const socket = new OpenSearchDashboardsSocket(tlsSocket);
       const result = socket.getPeerCertificate(true);
 
-      expect(spy).toBeCalledTimes(1);
-      expect(spy).toBeCalledWith(true);
+      expect(spy).toHaveBeenCalledTimes(1);
+      expect(spy).toHaveBeenCalledWith(true);
       expect(result).toBe(cert);
     });
 

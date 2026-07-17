@@ -28,7 +28,7 @@ describe('ReadonlyService', () => {
       { foo: { show: false } }
     );
 
-    expect(readonlyService.isReadonly).toBeCalledTimes(1);
+    expect(readonlyService.isReadonly).toHaveBeenCalledTimes(1);
     expect(result).resolves.toEqual({ foo: { show: false } });
   });
 });

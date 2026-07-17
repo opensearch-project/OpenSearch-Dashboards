@@ -32,6 +32,7 @@ import { readdirSync } from 'fs';
 import path from 'path';
 import { RESERVED_DIR_JEST_INTEGRATION_TESTS } from '../constants';
 
+process.env.TZ = 'UTC';
 const rootDir = '../../..';
 /* The rootGroups will go through a transformation to narrow down the CI groups.
  * The transformation pattern is not RegExp or glob compatible and only accepts
@@ -176,12 +177,18 @@ export default {
     '\\.editor\\.worker.js$': '<rootDir>/src/dev/jest/mocks/worker_module_mock.js',
     '^(!!)?file-loader!': '<rootDir>/src/dev/jest/mocks/file_mock.js',
   },
+  testEnvironmentOptions: {
+    // Set the default URL so window.location.origin is 'http://localhost:5601' rather than
+    // 'http://localhost', avoiding the need for tests to mock window.location.origin.
+    url: 'http://localhost:5601',
+  },
   setupFiles: [
     '<rootDir>/src/dev/jest/setup/babel_polyfill.js',
     '<rootDir>/src/dev/jest/setup/polyfills.js',
     '<rootDir>/src/dev/jest/setup/enzyme.js',
   ],
   setupFilesAfterEnv: [
+    'jest-location-mock',
     '<rootDir>/src/dev/jest/setup/mocks.js',
     '<rootDir>/src/dev/jest/setup/react_testing_library.js',
     '<rootDir>/src/dev/jest/setup/monaco_mock.js',
@@ -202,18 +209,16 @@ export default {
     '<rootDir>/packages/osd-ui-framework/(dist)/',
     '<rootDir>/packages/osd-pm/dist/',
     `${RESERVED_DIR_JEST_INTEGRATION_TESTS}/`,
-    // current jest-runtime 27.x doesn't handle ESM module @babel/eslint-parser with import.meta
-    // remove these excludes after jest-runtime upgrade
+    // Jest's require(ESM) requires Node v24.9+ for synchronous vm module APIs
+    // remove these excludes after node upgrade
     '<rootDir>/packages/osd-eslint-plugin-eslint/rules/disallow_license_headers.test.js',
     '<rootDir>/packages/osd-eslint-plugin-eslint/rules/require_license_header.test.js',
     '<rootDir>/packages/osd-eslint-plugin-eslint/rules/no_restricted_paths.test.js',
   ],
-  // angular is not compatible with the default circus runner
-  testRunner: 'jest-jasmine2',
   transform: {
     '^.+\\.(js|tsx?)$': '<rootDir>/src/dev/jest/babel_transform.js',
-    '^.+\\.txt?$': 'jest-raw-loader',
-    '^.+\\.html?$': 'jest-raw-loader',
+    '^.+\\.txt?$': '<rootDir>/src/dev/jest/raw_loader_transformer.js',
+    '^.+\\.html?$': '<rootDir>/src/dev/jest/raw_loader_transformer.js',
   },
   transformIgnorePatterns: [
     // ignore all node_modules except those which require babel transforms to handle dynamic import()
@@ -225,10 +230,15 @@ export default {
     '<rootDir>/src/plugins/opensearch_dashboards_react/public/util/test_helpers/react_mount_serializer.ts',
     '<rootDir>/node_modules/enzyme-to-json/serializer',
   ],
+  // Retain Jest 28 snapshot defaults; Jest 29 flipped escapeString and printBasicPrototype to false,
+  // which would invalidate existing snapshots. See https://jestjs.io/docs/29.0/upgrading-to-jest29
+  snapshotFormat: {
+    escapeString: true,
+    printBasicPrototype: true,
+  },
   reporters: ['default', '<rootDir>/src/dev/jest/junit_reporter.js'],
   globals: {
     Uint8Array: Uint8Array,
   },
-  flakyTestRetries: 2,
   verbose: true,
 };

@@ -244,7 +244,7 @@ describe('saved query service', () => {
       });
       const response = await findSavedQueries();
       expect(response.queries).toEqual(
-        expect.objectContaining([
+        expect.arrayContaining([
           {
             attributes: {
               description: 'bar',
@@ -275,7 +275,7 @@ describe('saved query service', () => {
         type: 'query',
       });
       expect(response.queries).toEqual(
-        expect.objectContaining([
+        expect.arrayContaining([
           {
             attributes: {
               description: 'bar',
@@ -444,7 +444,7 @@ describe('saved query service', () => {
       });
       const response = await getAllSavedQueries();
       expect(response).toEqual(
-        expect.objectContaining([
+        expect.arrayContaining([
           {
             attributes: {
               description: 'bar',

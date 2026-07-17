@@ -35,7 +35,7 @@ describe('ManageDirectQueryDataConnectionsTable', () => {
   const history = scopedHistoryMock.create() as unknown as ScopedHistory;
   describe('should get direct query connections failed', () => {
     beforeEach(async () => {
-      spyOn(utils, 'getDataSources').and.returnValue(Promise.reject());
+      jest.spyOn(utils, 'getDataSources').mockReturnValue(Promise.reject());
       await act(async () => {
         component = await mount(
           wrapWithIntl(
@@ -64,11 +64,11 @@ describe('ManageDirectQueryDataConnectionsTable', () => {
 
   describe('should get direct query connections successful', () => {
     beforeEach(async () => {
-      spyOn(utils, 'getDataSources').and.returnValue(Promise.resolve(getMappedDataSources));
-      spyOn(utils, 'fetchDataSourceConnections').and.returnValue(
-        Promise.resolve(getMappedDataSources)
-      );
-      spyOn(utils, 'getHideLocalCluster').and.returnValue(false);
+      jest.spyOn(utils, 'getDataSources').mockReturnValue(Promise.resolve(getMappedDataSources));
+      jest
+        .spyOn(utils, 'fetchDataSourceConnections')
+        .mockReturnValue(Promise.resolve(getMappedDataSources));
+      jest.spyOn(utils, 'getHideLocalCluster').mockReturnValue(false);
       await act(async () => {
         component = await mount(
           wrapWithIntl(
@@ -126,8 +126,8 @@ describe('ManageDirectQueryDataConnectionsTable', () => {
     });
 
     it('should delete confirm modal confirm button work normally', async () => {
-      spyOn(utils, 'deleteMultipleDataSources').and.returnValue(Promise.resolve({}));
-      spyOn(utils, 'setFirstDataSourceAsDefault').and.returnValue({});
+      jest.spyOn(utils, 'deleteMultipleDataSources').mockReturnValue(Promise.resolve({}));
+      jest.spyOn(utils, 'setFirstDataSourceAsDefault').mockReturnValue({});
       act(() => {
         // @ts-ignore
         component.find(tableIdentifier).props().selection.onSelectionChange(getMappedDataSources);
@@ -145,8 +145,8 @@ describe('ManageDirectQueryDataConnectionsTable', () => {
     });
 
     it('should delete datasources & fail', async () => {
-      spyOn(utils, 'deleteMultipleDataSources').and.returnValue(Promise.reject({}));
-      spyOn(utils, 'setFirstDataSourceAsDefault').and.returnValue({});
+      jest.spyOn(utils, 'deleteMultipleDataSources').mockReturnValue(Promise.reject({}));
+      jest.spyOn(utils, 'setFirstDataSourceAsDefault').mockReturnValue({});
       act(() => {
         // @ts-ignore
         component.find(tableIdentifier).props().selection.onSelectionChange(getMappedDataSources);
@@ -169,7 +169,7 @@ describe('ManageDirectQueryDataConnectionsTable', () => {
 
   describe('fetch security lake, cloudwatch, and AWS Prometheus direct query connections', () => {
     beforeEach(async () => {
-      spyOn(utils, 'getDataConnections').and.returnValue(
+      jest.spyOn(utils, 'getDataConnections').mockReturnValue(
         Promise.resolve([
           {
             type: 'data-connection',
@@ -326,12 +326,14 @@ describe('ManageDirectQueryDataConnectionsTable', () => {
           },
         },
       ];
-      spyOn(utils, 'getDataSources').and.returnValue(Promise.resolve(getMappedDataSources));
-      spyOn(utils, 'fetchDataSourceConnections').and.returnValue(
-        Promise.resolve(getMappedDataSources)
-      );
-      spyOn(utils, 'getDataConnections').and.returnValue(Promise.resolve(mockedDataConnections));
-      spyOn(utils, 'getHideLocalCluster').and.returnValue(false);
+      jest.spyOn(utils, 'getDataSources').mockReturnValue(Promise.resolve(getMappedDataSources));
+      jest
+        .spyOn(utils, 'fetchDataSourceConnections')
+        .mockReturnValue(Promise.resolve(getMappedDataSources));
+      jest
+        .spyOn(utils, 'getDataConnections')
+        .mockReturnValue(Promise.resolve(mockedDataConnections));
+      jest.spyOn(utils, 'getHideLocalCluster').mockReturnValue(false);
 
       const context = {
         ...mockedContext,

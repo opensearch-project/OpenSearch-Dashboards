@@ -97,7 +97,7 @@ describe('UseCaseService', () => {
         features: [`use-case-${OBSERVABILITY_USE_CASE_ID}`],
       });
       await waitFor(() => {
-        expect(coreSetup.chrome.navGroup.addNavLinksToGroup).toBeCalledWith(navGroupInfo, [
+        expect(coreSetup.chrome.navGroup.addNavLinksToGroup).toHaveBeenCalledWith(navGroupInfo, [
           {
             id: WORKSPACE_DETAIL_APP_ID,
             category: DEFAULT_APP_CATEGORIES.manageWorkspace,
@@ -214,7 +214,7 @@ describe('UseCaseService', () => {
         features: [`use-case-${OBSERVABILITY_USE_CASE_ID}`],
       });
       await waitFor(() => {
-        expect(coreSetup.chrome.navGroup.addNavLinksToGroup).toBeCalledWith(
+        expect(coreSetup.chrome.navGroup.addNavLinksToGroup).toHaveBeenCalledWith(
           navGroupInfo,
           expect.arrayContaining([
             expect.objectContaining({
