@@ -4,14 +4,7 @@
  */
 
 import React, { useMemo, useRef, useState } from 'react';
-import {
-  EuiFieldSearch,
-  EuiIcon,
-  EuiPopover,
-  EuiPopoverProps,
-  EuiPopoverTitle,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiFieldSearch, EuiIcon, EuiPopover, EuiPopoverTitle, EuiToolTip } from '@elastic/eui';
 
 export interface SearchMenuOption {
   key: string;
@@ -45,7 +38,6 @@ interface SearchPopoverMenuProps {
   onOpen?: () => void;
   searchPlaceholder: string;
   emptyMessage: string;
-  anchorPosition?: EuiPopoverProps['anchorPosition'];
   searchDataTestSubj?: string;
 }
 
@@ -58,7 +50,6 @@ export const SearchPopoverMenu: React.FC<SearchPopoverMenuProps> = ({
   onOpen,
   searchPlaceholder,
   emptyMessage,
-  anchorPosition = 'downLeft',
   searchDataTestSubj,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -149,7 +140,7 @@ export const SearchPopoverMenu: React.FC<SearchPopoverMenuProps> = ({
       isOpen={isOpen}
       closePopover={close}
       panelPaddingSize="none"
-      anchorPosition={anchorPosition}
+      anchorPosition="downLeft"
       panelClassName="plqFnPopover"
     >
       <EuiPopoverTitle paddingSize="s">

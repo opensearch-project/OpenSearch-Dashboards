@@ -12,50 +12,42 @@ describe('analyzeSearchExpression', () => {
     expect(a.suggestValuesForField).toBeUndefined();
   });
 
-  it('suggests fields while typing a bare term / field name', () => {
-    const a = analyzeSearchExpression('stat', 4);
+  it.each<[string, string, number, { partial: string; start: number; end: number }]>([
+    // Typing a bare term/field name: the token under the caret is replaced.
+    ['a bare term / field name', 'stat', 4, { partial: 'stat', start: 0, end: 4 }],
+    // Caret before `@timestamp` (col 16): accepting a field inserts, not overwrites.
+    [
+      'the start of an existing term (empty range insert)',
+      "extension='deb' @timestamp='sample'",
+      16,
+      { partial: '', start: 16, end: 16 },
+    ],
+    // Caret one char into `status`: the term being edited is replaced in full.
+    ['inside a term (replaces its extent)', 'status=500', 3, { partial: 'sta', start: 0, end: 6 }],
+  ])('suggests fields at %s', (_label, query, cursor, expected) => {
+    const a = analyzeSearchExpression(query, cursor);
     expect(a.suggestFields).toBe(true);
-    expect(a.partial).toBe('stat');
-    // The token under the caret is replaced, not appended.
-    expect(a.replaceStart).toBe(0);
-    expect(a.replaceEnd).toBe(4);
-  });
-
-  it('inserts (empty range) when the caret is at the start of an existing term', () => {
-    // Caret sits right before `@timestamp` (column 16). Accepting a field
-    // suggestion should insert at the caret, not overwrite the following word.
-    const query = "extension='deb' @timestamp='sample'";
-    const a = analyzeSearchExpression(query, 16);
-    expect(a.suggestFields).toBe(true);
-    expect(a.partial).toBe('');
-    expect(a.replaceStart).toBe(16);
-    expect(a.replaceEnd).toBe(16);
-  });
-
-  it('replaces the term when the caret is inside it', () => {
-    // Caret one char into `status` — the user is editing that term, so it is
-    // replaced (its full extent), not inserted before.
-    const a = analyzeSearchExpression('status=500', 3);
-    expect(a.partial).toBe('sta');
-    expect(a.replaceStart).toBe(0);
-    expect(a.replaceEnd).toBe(6);
+    expect(a.partial).toBe(expected.partial);
+    expect(a.replaceStart).toBe(expected.start);
+    expect(a.replaceEnd).toBe(expected.end);
   });
 
   it('suggests comparison operators right after a field', () => {
-    // caret right after "status" (before the operator is typed)
     const a = analyzeSearchExpression('status ', 7);
     expect(a.keywords).toEqual(expect.arrayContaining(['=', '!=', '>', '>=', '<', '<=']));
   });
 
-  it('suggests values for the governing field after an operator', () => {
-    const a = analyzeSearchExpression('status=', 7);
-    expect(a.suggestValuesForField).toBe('status');
+  it.each<[string, string, number, string]>([
+    ['for the governing field after an operator', 'status=', 7, 'status'],
+    ['for the field while typing the value', 'service=web', 11, 'service'],
+    ['for the governing field of an IN list', 'severityText IN (', 17, 'severityText'],
+    ['for a backtick-quoted field name', '`resource.service`=', 19, '`resource.service`'],
+  ])('suggests values %s', (_label, query, cursor, field) => {
+    expect(analyzeSearchExpression(query, cursor).suggestValuesForField).toBe(field);
   });
 
-  it('suggests values for the field while typing the value', () => {
-    const a = analyzeSearchExpression('service=web', 11);
-    expect(a.suggestValuesForField).toBe('service');
-    expect(a.partial).toBe('web');
+  it('captures the partial value while typing it', () => {
+    expect(analyzeSearchExpression('service=web', 11).partial).toBe('web');
   });
 
   it('suggests boolean keywords after a completed comparison', () => {
@@ -64,17 +56,6 @@ describe('analyzeSearchExpression', () => {
   });
 
   it('suggests fields again after a boolean keyword', () => {
-    const a = analyzeSearchExpression('status=500 AND ', 15);
-    expect(a.suggestFields).toBe(true);
-  });
-
-  it('resolves the governing field for an IN list', () => {
-    const a = analyzeSearchExpression('severityText IN (', 17);
-    expect(a.suggestValuesForField).toBe('severityText');
-  });
-
-  it('handles a backtick-quoted field name', () => {
-    const a = analyzeSearchExpression('`resource.service`=', 19);
-    expect(a.suggestValuesForField).toBe('`resource.service`');
+    expect(analyzeSearchExpression('status=500 AND ', 15).suggestFields).toBe(true);
   });
 });

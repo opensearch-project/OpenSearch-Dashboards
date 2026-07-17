@@ -5,7 +5,7 @@
 
 import { parsePPL, parseWherePredicate } from './parse_ppl';
 import { buildPPL } from './build_ppl';
-import { PPLBuilderState } from './types';
+import { PPLBuilderState, WhereFilter } from './types';
 
 // Normalize away builder-generated ids so round-trip comparisons are stable.
 const stripIds = (state: PPLBuilderState) => ({
@@ -23,45 +23,25 @@ describe('parsePPL — canBuild gating', () => {
     expect(result.state.searchExpression).toBe('');
   });
 
-  it('parses a plain source with no search expression', () => {
-    const result = parsePPL('source = logs');
+  it.each<[string, string]>([
+    // The source clause is always dropped; the search expression is captured verbatim.
+    ['a plain source with no search expression', ''],
+    ['a field-comparison search expression', 'service="web-store"'],
+    ['a boolean search expression', 'status>=500 AND service="web-store"'],
+    // The compact `field=value` form emitted by the add-filter path.
+    ["the compact field='value' form", "service='web'"],
+    ['a full-text search term', 'ERROR'],
+  ])('captures %s (source dropped)', (_label, expr) => {
+    const result = parsePPL(`source = logs ${expr}`.trim());
     expect(result.canBuild).toBe(true);
-    expect(result.state.searchExpression).toBe('');
-  });
-
-  it('captures a field-comparison search expression verbatim (source dropped)', () => {
-    const result = parsePPL('source = logs service="web-store"');
-    expect(result.canBuild).toBe(true);
-    expect(result.state.searchExpression).toBe('service="web-store"');
-  });
-
-  it('captures a boolean search expression verbatim (source dropped)', () => {
-    const result = parsePPL('source = logs status>=500 AND service="web-store"');
-    expect(result.canBuild).toBe(true);
-    expect(result.state.searchExpression).toBe('status>=500 AND service="web-store"');
-  });
-
-  it('round-trips the compact `field=value` form emitted by the add-filter path', () => {
-    const result = parsePPL("source = logs service='web'");
-    expect(result.canBuild).toBe(true);
-    expect(result.state.searchExpression).toBe("service='web'");
-  });
-
-  it('captures a full-text search term', () => {
-    const result = parsePPL('source = logs ERROR');
-    expect(result.canBuild).toBe(true);
-    expect(result.state.searchExpression).toBe('ERROR');
+    expect(result.state.searchExpression).toBe(expr);
   });
 
   it('parses stats count by span', () => {
     const result = parsePPL('source = logs | stats count() by span(@timestamp, 1m)');
     expect(result.canBuild).toBe(true);
     expect(stripIds(result.state).aggregations).toEqual([{ fn: 'count' }]);
-    expect(result.state.groupBy.span).toEqual({
-      field: '@timestamp',
-      interval: '1m',
-      auto: false,
-    });
+    expect(result.state.groupBy.span).toEqual({ field: '@timestamp', interval: '1m', auto: false });
   });
 
   it('parses a search expression combined with stats', () => {
@@ -117,22 +97,26 @@ describe('parsePPL — canBuild gating', () => {
     expect(result.state.sort).toEqual({ column: 'bytes', desc: true });
   });
 
-  it('parses a trailing sort on a group-by field (ascending by default)', () => {
-    const result = parsePPL('source = logs | stats count() by service | sort service');
+  it.each<[string, string, PPLBuilderState['sort']]>([
+    [
+      'a trailing sort on a group-by field (ascending by default)',
+      'source = logs | stats count() by service | sort service',
+      { column: 'service', desc: false },
+    ],
+    [
+      'a descending sort on a back-quoted aggregation column',
+      'source = logs | stats count() by service | sort -`count()`',
+      { column: 'count()', desc: true },
+    ],
+    [
+      'a trailing `desc` keyword as descending',
+      'source = logs | stats avg(bytes) by service | sort service desc',
+      { column: 'service', desc: true },
+    ],
+  ])('parses %s', (_label, query, sort) => {
+    const result = parsePPL(query);
     expect(result.canBuild).toBe(true);
-    expect(result.state.sort).toEqual({ column: 'service', desc: false });
-  });
-
-  it('parses a descending sort on a back-quoted aggregation column', () => {
-    const result = parsePPL('source = logs | stats count() by service | sort -`count()`');
-    expect(result.canBuild).toBe(true);
-    expect(result.state.sort).toEqual({ column: 'count()', desc: true });
-  });
-
-  it('parses a trailing `desc` keyword as descending', () => {
-    const result = parsePPL('source = logs | stats avg(bytes) by service | sort service desc');
-    expect(result.canBuild).toBe(true);
-    expect(result.state.sort).toEqual({ column: 'service', desc: true });
+    expect(result.state.sort).toEqual(sort);
   });
 });
 
@@ -142,55 +126,38 @@ describe('parseWherePredicate', () => {
     return f && { field: f.field, operator: f.operator, values: f.values };
   };
 
-  it('parses is / is_not', () => {
-    expect(strip("`response` = '200'")).toEqual({
-      field: 'response',
-      operator: 'is',
-      values: ['200'],
-    });
-    expect(strip('`response` != 200')).toEqual({
-      field: 'response',
-      operator: 'is_not',
-      values: ['200'],
-    });
+  it.each<[string, Pick<WhereFilter, 'field' | 'operator' | 'values'>]>([
+    ["`response` = '200'", { field: 'response', operator: 'is', values: ['200'] }],
+    ['`response` != 200', { field: 'response', operator: 'is_not', values: ['200'] }],
+    [
+      '`status` = 200 OR `status` = 404',
+      { field: 'status', operator: 'is_one_of', values: ['200', '404'] },
+    ],
+    [
+      "`m` != 'GET' AND `m` != 'POST'",
+      { field: 'm', operator: 'is_not_one_of', values: ['GET', 'POST'] },
+    ],
+    [
+      '`bytes` >= 1 AND `bytes` < 9',
+      { field: 'bytes', operator: 'is_between', values: ['1', '9'] },
+    ],
+    [
+      '`bytes` < 1 OR `bytes` >= 9',
+      { field: 'bytes', operator: 'is_not_between', values: ['1', '9'] },
+    ],
+    ['ISNOTNULL(`user`)', { field: 'user', operator: 'exists', values: [] }],
+    ['ISNULL(`user`)', { field: 'user', operator: 'not_exists', values: [] }],
+  ])('parses %s', (predicate, expected) => {
+    expect(strip(predicate)).toEqual(expected);
   });
 
-  it('parses is_one_of / is_not_one_of', () => {
-    expect(strip('`status` = 200 OR `status` = 404')).toEqual({
-      field: 'status',
-      operator: 'is_one_of',
-      values: ['200', '404'],
-    });
-    expect(strip("`m` != 'GET' AND `m` != 'POST'")).toEqual({
-      field: 'm',
-      operator: 'is_not_one_of',
-      values: ['GET', 'POST'],
-    });
-  });
-
-  it('parses is_between / is_not_between', () => {
-    expect(strip('`bytes` >= 1 AND `bytes` < 9')).toEqual({
-      field: 'bytes',
-      operator: 'is_between',
-      values: ['1', '9'],
-    });
-    expect(strip('`bytes` < 1 OR `bytes` >= 9')).toEqual({
-      field: 'bytes',
-      operator: 'is_not_between',
-      values: ['1', '9'],
-    });
-  });
-
-  it('parses exists / not_exists', () => {
-    expect(strip('ISNOTNULL(`user`)')).toEqual({ field: 'user', operator: 'exists', values: [] });
-    expect(strip('ISNULL(`user`)')).toEqual({ field: 'user', operator: 'not_exists', values: [] });
-  });
-
-  it('returns null for a shape the builder cannot model', () => {
+  it.each([
     // Mixed AND/OR, cross-field comparison, and an arbitrary function.
-    expect(parseWherePredicate('`a` = 1 AND `b` = 2 OR `c` = 3')).toBeNull();
-    expect(parseWherePredicate('`a` = `b`')).toBeNull();
-    expect(parseWherePredicate('LIKE(`a`, "x%")')).toBeNull();
+    ['mixed AND/OR', '`a` = 1 AND `b` = 2 OR `c` = 3'],
+    ['cross-field comparison', '`a` = `b`'],
+    ['arbitrary function', 'LIKE(`a`, "x%")'],
+  ])('returns null for %s (a shape the builder cannot model)', (_label, predicate) => {
+    expect(parseWherePredicate(predicate)).toBeNull();
   });
 });
 
@@ -215,14 +182,12 @@ describe('parsePPL — where filters', () => {
     expect(result.state.aggregations).toHaveLength(1);
   });
 
-  it('falls back to code mode for a where the builder cannot model', () => {
-    expect(parsePPL('source = logs | where `a` = 1 AND `b` = 2 OR `c` = 3').canBuild).toBe(false);
-  });
-
-  it('falls back to code mode for a where after stats (post-aggregation filter)', () => {
-    expect(
-      parsePPL('source = logs | stats count() by service | where `count()` > 5').canBuild
-    ).toBe(false);
+  it.each([
+    ['a where the builder cannot model', 'source = logs | where `a` = 1 AND `b` = 2 OR `c` = 3'],
+    // Post-aggregation filter.
+    ['a where after stats', 'source = logs | stats count() by service | where `count()` > 5'],
+  ])('falls back to code mode for %s', (_label, query) => {
+    expect(parsePPL(query).canBuild).toBe(false);
   });
 });
 
@@ -378,6 +343,31 @@ describe('parsePPL / buildPPL round-trip', () => {
       aggregations: [{ id: 'a', fn: 'count' }],
       groupBy: { fields: ['service'] },
       sort: { column: 'count()', desc: true },
+    },
+    // Aggregation on a dash-bearing field: must back-quote on emit so it does
+    // not reparse as `response - time` (subtraction) and disable the builder.
+    {
+      searchExpression: '',
+      filters: [],
+      aggregations: [{ id: 'a', fn: 'avg', field: 'response-time' }],
+      groupBy: { fields: [] },
+    },
+    // Dash-bearing field group-by + span, with a scalar-wrapped metric.
+    {
+      searchExpression: '',
+      filters: [],
+      aggregations: [
+        {
+          id: 'a',
+          fn: 'max',
+          field: 'response-time',
+          functions: [{ id: 'abs', name: 'abs', params: [] }],
+        },
+      ],
+      groupBy: {
+        fields: ['host-name'],
+        span: { field: 'event-time', interval: '1m', auto: false },
+      },
     },
   ];
 

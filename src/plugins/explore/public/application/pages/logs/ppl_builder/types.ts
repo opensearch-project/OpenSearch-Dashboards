@@ -72,11 +72,24 @@ export interface PPLBuilderState {
   sort?: Sort;
 }
 
-let aggIdCounter = 0;
-export const nextAggId = (): string => `ag-${++aggIdCounter}`;
+// Build a `Record` keyed by each item's `key(item)`, used to turn the various
+// definition arrays (agg fns, operators, scalar fns) into lookup maps.
+export function indexBy<T, K extends string>(items: T[], key: (item: T) => K): Record<K, T> {
+  return items.reduce(
+    (acc, item) => {
+      acc[key(item)] = item;
+      return acc;
+    },
+    {} as Record<K, T>
+  );
+}
 
-let filterIdCounter = 0;
-export const nextFilterId = (): string => `flt-${++filterIdCounter}`;
+const makeIdGenerator = (prefix: string) => {
+  let counter = 0;
+  return () => `${prefix}-${++counter}`;
+};
+export const nextAggId = makeIdGenerator('ag');
+export const nextFilterId = makeIdGenerator('flt');
 
 export const emptyState = (): PPLBuilderState => ({
   searchExpression: '',

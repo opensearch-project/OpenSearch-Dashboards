@@ -41,6 +41,16 @@ export type BuilderAction =
   | { type: 'INIT'; state: PPLBuilderState }
   | { type: 'RESET' };
 
+// Return a copy of `arr` with the element at `index` replaced by `patch(current)`.
+// Returns the original array unchanged when `patch` yields null (missing target).
+function updateAt<T>(arr: T[], index: number, patch: (current: T) => T | null): T[] {
+  const next = patch(arr[index]);
+  if (next === null) return arr;
+  const copy = [...arr];
+  copy[index] = next;
+  return copy;
+}
+
 export function builderReducer(state: PPLBuilderState, action: BuilderAction): PPLBuilderState {
   switch (action.type) {
     case 'SET_SEARCH_EXPRESSION':
@@ -53,11 +63,11 @@ export function builderReducer(state: PPLBuilderState, action: BuilderAction): P
           { id: nextFilterId(), field: '', operator: 'is', values: [], ...action.filter },
         ],
       };
-    case 'SET_FILTER': {
-      const filters = [...state.filters];
-      filters[action.index] = { ...filters[action.index], ...action.filter };
-      return { ...state, filters };
-    }
+    case 'SET_FILTER':
+      return {
+        ...state,
+        filters: updateAt(state.filters, action.index, (f) => ({ ...f, ...action.filter })),
+      };
     case 'REMOVE_FILTER':
       return {
         ...state,
@@ -68,47 +78,45 @@ export function builderReducer(state: PPLBuilderState, action: BuilderAction): P
         ...state,
         aggregations: [...state.aggregations, { id: nextAggId(), fn: 'count', ...action.agg }],
       };
-    case 'SET_AGGREGATION': {
-      const aggregations = [...state.aggregations];
-      aggregations[action.index] = { ...aggregations[action.index], ...action.agg };
-      return { ...state, aggregations };
-    }
+    case 'SET_AGGREGATION':
+      return {
+        ...state,
+        aggregations: updateAt(state.aggregations, action.index, (a) => ({ ...a, ...action.agg })),
+      };
     case 'REMOVE_AGGREGATION':
       return {
         ...state,
         aggregations: state.aggregations.filter((_, i) => i !== action.index),
       };
-    case 'ADD_FUNCTION': {
-      const aggregations = [...state.aggregations];
-      const agg = aggregations[action.index];
-      if (!agg) return state;
-      aggregations[action.index] = {
-        ...agg,
-        functions: [...(agg.functions ?? []), action.fn],
+    case 'ADD_FUNCTION':
+      return {
+        ...state,
+        aggregations: updateAt(state.aggregations, action.index, (agg) =>
+          agg ? { ...agg, functions: [...(agg.functions ?? []), action.fn] } : null
+        ),
       };
-      return { ...state, aggregations };
-    }
-    case 'SET_FUNCTION_PARAM': {
-      const aggregations = [...state.aggregations];
-      const agg = aggregations[action.index];
-      if (!agg?.functions?.[action.fnIndex]) return state;
-      const functions = [...agg.functions];
-      const params = [...functions[action.fnIndex].params];
-      params[action.paramIndex] = action.value;
-      functions[action.fnIndex] = { ...functions[action.fnIndex], params };
-      aggregations[action.index] = { ...agg, functions };
-      return { ...state, aggregations };
-    }
-    case 'REMOVE_FUNCTION': {
-      const aggregations = [...state.aggregations];
-      const agg = aggregations[action.index];
-      if (!agg?.functions) return state;
-      aggregations[action.index] = {
-        ...agg,
-        functions: agg.functions.filter((_, i) => i !== action.fnIndex),
+    case 'SET_FUNCTION_PARAM':
+      return {
+        ...state,
+        aggregations: updateAt(state.aggregations, action.index, (agg) => {
+          if (!agg?.functions?.[action.fnIndex]) return null;
+          const functions = updateAt(agg.functions, action.fnIndex, (fn) => {
+            const params = [...fn.params];
+            params[action.paramIndex] = action.value;
+            return { ...fn, params };
+          });
+          return { ...agg, functions };
+        }),
       };
-      return { ...state, aggregations };
-    }
+    case 'REMOVE_FUNCTION':
+      return {
+        ...state,
+        aggregations: updateAt(state.aggregations, action.index, (agg) =>
+          agg?.functions
+            ? { ...agg, functions: agg.functions.filter((_, i) => i !== action.fnIndex) }
+            : null
+        ),
+      };
     case 'SET_GROUPBY_FIELDS':
       return { ...state, groupBy: { ...state.groupBy, fields: action.fields } };
     case 'SET_SPAN':
@@ -132,6 +140,17 @@ export function builderReducer(state: PPLBuilderState, action: BuilderAction): P
   }
 }
 
+// A bare PPL identifier is a leading letter/underscore/@ followed by word chars,
+// dots, or @ (e.g. user.id, @timestamp). Anything else — a dash, a space — would
+// parse as an expression (`response-time` reads as subtraction), so back-quote
+// it. WHERE fields go through whereField which always back-quotes; aggregation
+// and group-by fields quote only when needed so common fields stay unadorned.
+const BARE_FIELD_RE = /^[a-zA-Z_@][\w.@]*$/;
+
+function quoteFieldExpr(field: string): string {
+  return BARE_FIELD_RE.test(field) ? field : `\`${field}\``;
+}
+
 function applyFunctions(fieldExpr: string, functions?: ScalarCall[]): string {
   let expr = fieldExpr;
   for (const fn of functions ?? []) {
@@ -147,7 +166,7 @@ export function compileAggregation(agg: Aggregation): string | null {
     return 'count()';
   }
   if (!agg.field) return null;
-  const arg = applyFunctions(agg.field, agg.functions);
+  const arg = applyFunctions(quoteFieldExpr(agg.field), agg.functions);
   switch (agg.fn) {
     case 'percentile':
       return `percentile(${arg}, ${agg.percentile ?? 95})`;
@@ -159,9 +178,9 @@ export function compileAggregation(agg: Aggregation): string | null {
 }
 
 function compileGroupBy(groupBy: GroupBy): string {
-  const parts: string[] = [...groupBy.fields.filter(Boolean)];
+  const parts: string[] = groupBy.fields.filter(Boolean).map(quoteFieldExpr);
   if (groupBy.span) {
-    parts.push(`span(${groupBy.span.field}, ${groupBy.span.interval})`);
+    parts.push(`span(${quoteFieldExpr(groupBy.span.field)}, ${groupBy.span.interval})`);
   }
   return parts.join(', ');
 }
@@ -176,20 +195,14 @@ function quoteSortColumn(column: string): string {
   return /[()]/.test(column) ? `\`${column}\`` : column;
 }
 
-function compileSort(sort: Sort | undefined): string | null {
-  if (!sort) return null;
-  const column = sort.column?.trim();
-  if (!column) return null;
-  const prefix = sort.desc ? '-' : '';
-  return `sort ${prefix}${quoteSortColumn(column)}`;
-}
-
 function compileValidSort(state: PPLBuilderState): string | null {
-  if (!state.sort?.column?.trim()) return null;
-  if (state.aggregations.length > 0 && !sortableColumns(state).includes(state.sort.column)) {
+  const column = state.sort?.column?.trim();
+  if (!column) return null;
+  if (state.aggregations.length > 0 && !sortableColumns(state).includes(state.sort!.column)) {
     return null;
   }
-  return compileSort(state.sort);
+  const prefix = state.sort!.desc ? '-' : '';
+  return `sort ${prefix}${quoteSortColumn(column)}`;
 }
 
 function whereField(field: string): string {

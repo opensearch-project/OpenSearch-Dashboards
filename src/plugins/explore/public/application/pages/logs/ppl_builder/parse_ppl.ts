@@ -24,16 +24,15 @@ export interface PPLParseResult {
   state: PPLBuilderState;
 }
 
-const SINGLE_ARG_AGG: Record<string, AggFn> = {
-  ...AGG_FUNCTIONS.reduce(
-    (acc, def) => {
-      if (def.needsField && def.id !== 'percentile') acc[def.id] = def.id;
-      return acc;
-    },
-    {} as Record<string, AggFn>
-  ),
-  dc: 'distinct_count',
-};
+// Normalize an ANTLR optional-context accessor result (single node, array, or
+// nullish) into a plain array.
+const toArray = <T>(x: T | T[] | null | undefined): T[] =>
+  Array.isArray(x) ? x : x != null ? [x] : [];
+
+const SINGLE_ARG_AGG: Record<string, AggFn> = { dc: 'distinct_count' };
+for (const def of AGG_FUNCTIONS) {
+  if (def.needsField && def.id !== 'percentile') SINGLE_ARG_AGG[def.id] = def.id;
+}
 
 function unquote(text: string): string {
   const trimmed = text.trim();
@@ -62,6 +61,13 @@ function splitTopLevelArgs(s: string): string[] {
 }
 
 function parseFieldExpression(text: string): { field: string; functions: ScalarCall[] } | null {
+  const trimmed = text.trim();
+  // A back-quoted field is a literal identifier, not an expression: accept it
+  // verbatim so names with dashes/spaces (e.g. `response-time`) round-trip.
+  // buildPPL emits these quoted via quoteFieldExpr; parsing must mirror that.
+  if (trimmed[0] === '`' && trimmed.endsWith('`') && trimmed.length >= 2) {
+    return { field: unquote(trimmed), functions: [] };
+  }
   const call = text.match(/^([a-zA-Z_][\w]*)\((.*)\)$/);
   if (!call) {
     if (!text || /[()+\-*/%<>=!&|^~]/.test(text)) return null;
@@ -113,8 +119,7 @@ function parseAggFunctionText(text: string): Aggregation | null {
 function parseStatsByClause(byCtx: any, state: PPLBuilderState): boolean {
   const fieldListCtx = byCtx.fieldList && byCtx.fieldList();
   if (fieldListCtx) {
-    const exprs = fieldListCtx.fieldExpression ? fieldListCtx.fieldExpression() : [];
-    const list = Array.isArray(exprs) ? exprs : [exprs];
+    const list = toArray(fieldListCtx.fieldExpression && fieldListCtx.fieldExpression());
     state.groupBy.fields = list.map((e: any) => unquote(e.getText())).filter(Boolean);
   }
   const bySpanCtx = byCtx.bySpanClause && byCtx.bySpanClause();
@@ -200,16 +205,17 @@ function parseComparison(text: string): Comparison | null {
 
 export function parseWherePredicate(text: string): WhereFilter | null {
   const trimmed = text.trim();
+  const mkFilter = (field: string, operator: WhereOperator, values: string[]): WhereFilter => ({
+    id: nextFilterId(),
+    field,
+    operator,
+    values,
+  });
 
   const existsMatch = trimmed.match(/^(ISNOTNULL|ISNULL)\(\s*`?([\w.@-]+)`?\s*\)$/i);
   if (existsMatch) {
     const operator: WhereOperator = /^ISNOTNULL$/i.test(existsMatch[1]) ? 'exists' : 'not_exists';
-    return {
-      id: nextFilterId(),
-      field: existsMatch[2].replace(/\.keyword$/, ''),
-      operator,
-      values: [],
-    };
+    return mkFilter(existsMatch[2].replace(/\.keyword$/, ''), operator, []);
   }
 
   const split = splitTopLevelBool(trimmed);
@@ -219,12 +225,8 @@ export function parseWherePredicate(text: string): WhereFilter | null {
   if (split.kind === 'single') {
     const cmp = parseComparison(trimmed);
     if (!cmp) return null;
-    if (cmp.op === '=') {
-      return { id: nextFilterId(), field: cmp.field, operator: 'is', values: [cmp.value] };
-    }
-    if (cmp.op === '!=') {
-      return { id: nextFilterId(), field: cmp.field, operator: 'is_not', values: [cmp.value] };
-    }
+    if (cmp.op === '=') return mkFilter(cmp.field, 'is', [cmp.value]);
+    if (cmp.op === '!=') return mkFilter(cmp.field, 'is_not', [cmp.value]);
     return null;
   }
 
@@ -235,38 +237,19 @@ export function parseWherePredicate(text: string): WhereFilter | null {
   const field = cmps[0].field;
   if (cmps.some((c) => c.field !== field)) return null;
   const ops = cmps.map((c) => c.op);
+  const values = cmps.map((c) => c.value);
 
   if (split.joiner === 'AND' && ops.length === 2 && ops[0] === '>=' && ops[1] === '<') {
-    return {
-      id: nextFilterId(),
-      field,
-      operator: 'is_between',
-      values: [cmps[0].value, cmps[1].value],
-    };
+    return mkFilter(field, 'is_between', values);
   }
   if (split.joiner === 'OR' && ops.length === 2 && ops[0] === '<' && ops[1] === '>=') {
-    return {
-      id: nextFilterId(),
-      field,
-      operator: 'is_not_between',
-      values: [cmps[0].value, cmps[1].value],
-    };
+    return mkFilter(field, 'is_not_between', values);
   }
   if (split.joiner === 'OR' && ops.every((op) => op === '=')) {
-    return {
-      id: nextFilterId(),
-      field,
-      operator: 'is_one_of',
-      values: cmps.map((c) => c.value),
-    };
+    return mkFilter(field, 'is_one_of', values);
   }
   if (split.joiner === 'AND' && ops.every((op) => op === '!=')) {
-    return {
-      id: nextFilterId(),
-      field,
-      operator: 'is_not_one_of',
-      values: cmps.map((c) => c.value),
-    };
+    return mkFilter(field, 'is_not_one_of', values);
   }
   return null;
 }
@@ -276,8 +259,7 @@ function parseSortCommand(sortCtx: any): Sort | null {
 
   const byCtx = sortCtx.sortbyClause && sortCtx.sortbyClause();
   if (!byCtx) return null;
-  const rawFields = byCtx.sortField ? byCtx.sortField() : [];
-  const fields = Array.isArray(rawFields) ? rawFields : rawFields ? [rawFields] : [];
+  const fields = toArray(byCtx.sortField && byCtx.sortField());
   if (fields.length !== 1) return null;
 
   const field = fields[0];
@@ -334,8 +316,7 @@ export function parsePPL(query: string): PPLParseResult {
     const state = emptyState();
 
     const searchFrom = searchCmd as any;
-    const searchExprs = searchFrom.searchExpression ? searchFrom.searchExpression() : [];
-    const exprList = Array.isArray(searchExprs) ? searchExprs : searchExprs ? [searchExprs] : [];
+    const exprList = toArray(searchFrom.searchExpression && searchFrom.searchExpression());
 
     const exprRange = (e: any): [number, number] | null => {
       const s = e?.start ? e.start.start : undefined;
@@ -364,8 +345,7 @@ export function parsePPL(query: string): PPLParseResult {
       }
     }
 
-    const commands = queryStmt.commands ? queryStmt.commands() : [];
-    const commandList = Array.isArray(commands) ? commands : commands ? [commands] : [];
+    const commandList = toArray(queryStmt.commands && queryStmt.commands());
     let seenStats = false;
     let seenSort = false;
 
@@ -403,8 +383,7 @@ export function parsePPL(query: string): PPLParseResult {
       if (statsArgs && statsArgs.getText && statsArgs.getText() !== '') return fallback;
       if (statsCtx.dedupSplitArg && statsCtx.dedupSplitArg()) return fallback;
 
-      const aggTerms = statsCtx.statsAggTerm ? statsCtx.statsAggTerm() : [];
-      const terms = Array.isArray(aggTerms) ? aggTerms : [aggTerms];
+      const terms = toArray(statsCtx.statsAggTerm && statsCtx.statsAggTerm());
       for (const term of terms) {
         if (typeof term.AS === 'function' && term.AS()) return fallback;
         const fnCtx = term.statsFunction && term.statsFunction();

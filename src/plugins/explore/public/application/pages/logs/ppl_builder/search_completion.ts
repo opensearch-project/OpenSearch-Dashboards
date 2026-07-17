@@ -37,14 +37,7 @@ const VALUE_LIKE = new Set<number>([
   OpenSearchPPLSearchOnlyParser.TERM,
   OpenSearchPPLSearchOnlyParser.BACKTICK,
 ]);
-const COMPARISON_OPS = new Set<number>([
-  OpenSearchPPLSearchOnlyParser.EQ,
-  OpenSearchPPLSearchOnlyParser.NEQ,
-  OpenSearchPPLSearchOnlyParser.GT,
-  OpenSearchPPLSearchOnlyParser.GE,
-  OpenSearchPPLSearchOnlyParser.LT,
-  OpenSearchPPLSearchOnlyParser.LE,
-]);
+const COMPARISON_OPS = new Set<number>(Object.keys(OPERATOR_TOKENS).map(Number));
 
 const tokenEnd = (t: Token) => t.column + (t.text?.length || 0);
 
@@ -52,7 +45,6 @@ function findCursorTokenIndex(tokenStream: CommonTokenStream, cursorColumn: numb
   for (let i = 0; i < tokenStream.size; i++) {
     const token = tokenStream.get(i);
     if (token.type === Token.EOF) return i;
-    const start = token.column;
     const end = tokenEnd(token);
     if (end >= cursorColumn) {
       const moveNext =
@@ -62,7 +54,6 @@ function findCursorTokenIndex(tokenStream: CommonTokenStream, cursorColumn: numb
         token.type === OpenSearchPPLSearchOnlyParser.COMMA ||
         token.type === OpenSearchPPLSearchOnlyParser.IN;
       if (moveNext && cursorColumn >= end) return i + 1;
-      if (start > cursorColumn) return i;
       return i;
     }
   }

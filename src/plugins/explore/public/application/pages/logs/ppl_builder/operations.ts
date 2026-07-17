@@ -4,7 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { AggFn } from './types';
+import { AggFn, indexBy } from './types';
 
 export interface AggDef {
   id: AggFn;
@@ -109,13 +109,7 @@ export const AGG_FUNCTIONS: AggDef[] = [
   },
 ];
 
-export const AGG_FN_MAP: Record<AggFn, AggDef> = AGG_FUNCTIONS.reduce(
-  (acc, def) => {
-    acc[def.id] = def;
-    return acc;
-  },
-  {} as Record<AggFn, AggDef>
-);
+export const AGG_FN_MAP: Record<AggFn, AggDef> = indexBy(AGG_FUNCTIONS, (def) => def.id);
 
 export interface ScalarFnDef {
   id: string;
@@ -222,14 +216,9 @@ export const SCALAR_FN_CATEGORIES: ScalarFnCategory[] = [
   },
 ];
 
-export const SCALAR_FN_MAP: Record<string, ScalarFnDef> = SCALAR_FN_CATEGORIES.reduce(
-  (acc, cat) => {
-    cat.items.forEach((item) => {
-      acc[item.id] = item;
-    });
-    return acc;
-  },
-  {} as Record<string, ScalarFnDef>
+export const SCALAR_FN_MAP: Record<string, ScalarFnDef> = indexBy(
+  SCALAR_FN_CATEGORIES.flatMap((cat) => cat.items),
+  (item) => item.id
 );
 
 export const SCALAR_FN_IDS = new Set<string>(Object.keys(SCALAR_FN_MAP));

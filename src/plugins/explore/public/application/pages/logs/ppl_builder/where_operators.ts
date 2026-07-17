@@ -4,7 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { WhereOperator } from './types';
+import { WhereOperator, indexBy } from './types';
 
 export type OperatorArity = 'none' | 'one' | 'many' | 'range';
 
@@ -84,12 +84,9 @@ export const OPERATOR_DEFS: OperatorDef[] = [
   },
 ];
 
-export const OPERATOR_DEF_MAP: Record<WhereOperator, OperatorDef> = OPERATOR_DEFS.reduce(
-  (acc, def) => {
-    acc[def.value] = def;
-    return acc;
-  },
-  {} as Record<WhereOperator, OperatorDef>
+export const OPERATOR_DEF_MAP: Record<WhereOperator, OperatorDef> = indexBy(
+  OPERATOR_DEFS,
+  (def) => def.value
 );
 
 export const operatorArity = (operator: WhereOperator): OperatorArity =>

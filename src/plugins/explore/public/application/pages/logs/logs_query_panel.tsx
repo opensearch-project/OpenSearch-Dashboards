@@ -144,7 +144,9 @@ export const LogsQueryPanel: React.FC = () => {
     const isEmptyBuilder =
       parsed.canBuild &&
       parsed.state.searchExpression.trim() === '' &&
-      parsed.state.aggregations.length === 0;
+      parsed.state.aggregations.length === 0 &&
+      parsed.state.filters.length === 0 &&
+      !parsed.state.sort;
 
     if (isEmptyBuilder) {
       // A cleared / fresh query returns to Builder.

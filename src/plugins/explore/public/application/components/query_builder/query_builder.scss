@@ -407,6 +407,39 @@ $plqControlHeight: 36px;
   }
 }
 
+// Common shape for the inline chip trigger buttons (field / operator / value):
+// a borderless, transparent button that highlights on hover/focus. This is the
+// exact subset the three share; each adds its own extras below.
+%plq-chip-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 18px;
+  padding: 0 4px;
+  border: none;
+  outline: none;
+  background: transparent;
+  cursor: pointer;
+
+  &:hover,
+  &:focus {
+    background: $plqXHover;
+    border-radius: $plqRadius;
+  }
+}
+
+// The field/operator triggers additionally render their text in the mono chip
+// font; the value trigger styles its own inner text span instead.
+%plq-chip-button-text {
+  @extend %plq-chip-button;
+
+  // stylelint-disable-next-line @osd/stylelint/no_restricted_properties
+  font-family: $euiCodeFontFamily;
+  font-size: 11.5px;
+  line-height: 18px;
+  color: $plqInk;
+}
+
 .plqWhereChip {
   display: inline-flex;
   align-items: center;
@@ -420,72 +453,23 @@ $plqControlHeight: 36px;
   min-width: 0;
 
   &__field {
-    display: inline-flex;
-    align-items: center;
-    gap: 2px;
-    min-width: 0;
-    height: 18px;
-    padding: 0 4px;
-    border: none;
-    outline: none;
-    background: transparent;
-    // stylelint-disable-next-line @osd/stylelint/no_restricted_properties
-    font-family: $euiCodeFontFamily;
-    font-size: 11.5px;
-    line-height: 18px;
-    color: $plqInk;
-    cursor: pointer;
-    user-select: none;
+    @extend %plq-chip-button-text;
 
-    &:hover,
-    &:focus {
-      background: $plqXHover;
-      border-radius: $plqRadius;
-    }
+    min-width: 0;
+    user-select: none;
   }
 
   &__op {
-    display: inline-flex;
-    align-items: center;
-    gap: 2px;
-    height: 18px;
-    padding: 0 4px;
-    border: none;
-    outline: none;
-    background: transparent;
-    // stylelint-disable-next-line @osd/stylelint/no_restricted_properties
-    font-family: $euiCodeFontFamily;
-    font-size: 11.5px;
-    line-height: 18px;
-    color: $plqInk;
-    cursor: pointer;
-    white-space: nowrap;
+    @extend %plq-chip-button-text;
 
-    &:hover,
-    &:focus {
-      background: $plqXHover;
-      border-radius: $plqRadius;
-    }
+    white-space: nowrap;
   }
 
   &__val {
-    display: inline-flex;
-    align-items: center;
-    gap: 2px;
-    min-width: 0;
-    height: 18px;
-    padding: 0 4px;
-    border: none;
-    outline: none;
-    background: transparent;
-    cursor: pointer;
-    white-space: nowrap;
+    @extend %plq-chip-button;
 
-    &:hover,
-    &:focus {
-      background: $plqXHover;
-      border-radius: $plqRadius;
-    }
+    min-width: 0;
+    white-space: nowrap;
   }
 
   &__valText {

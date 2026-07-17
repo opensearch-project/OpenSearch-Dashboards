@@ -33,23 +33,32 @@ const CHIP_MONO_FONT = '11.5px "Source Code Pro", Consolas, Menlo, Courier, mono
 const emptyValueLabel = () =>
   i18n.translate('explore.pplBuilder.filterEmptyValue', { defaultMessage: '(empty)' });
 
-const ChipCaretButton: React.FC<
-  {
-    className: string;
-    labelClassName?: string;
-    label: React.ReactNode;
-    ariaLabel: string;
-    dataTestSubj: string;
-    onClick: () => void;
-  } & React.ButtonHTMLAttributes<HTMLButtonElement>
-> = ({ className, labelClassName, label, ariaLabel, dataTestSubj, onClick, ...rest }) => (
+// Render a value that may be the empty string as a muted "(empty)" marker.
+const renderValue = (value: string): React.ReactNode =>
+  value === '' ? <span className="plqWhereChip__emptyVal">{emptyValueLabel()}</span> : value;
+
+// "Value for {field}" aria-label, shared by the popover trigger and the plain
+// single-value text input.
+const valueForLabel = (field: string) =>
+  i18n.translate('explore.pplBuilder.filterValueFor', {
+    defaultMessage: 'Value for {field}',
+    values: { field },
+  });
+
+const ChipCaretButton: React.FC<{
+  className: string;
+  labelClassName?: string;
+  label: React.ReactNode;
+  ariaLabel: string;
+  dataTestSubj: string;
+  onClick: () => void;
+}> = ({ className, labelClassName, label, ariaLabel, dataTestSubj, onClick }) => (
   <button
     type="button"
     className={className}
     onClick={onClick}
     aria-label={ariaLabel}
     data-test-subj={dataTestSubj}
-    {...rest}
   >
     <span className={labelClassName}>{label}</span>
     <EuiIcon type="arrowDown" size="s" className="plqWhereChip__caret" />
@@ -177,8 +186,7 @@ const ChipValuePopover: React.FC<{
 
   const options: SearchMenuOption[] = suggestions.map((value) => ({
     key: value,
-    label:
-      value === '' ? <span className="plqWhereChip__emptyVal">{emptyValueLabel()}</span> : value,
+    label: renderValue(value),
     filterText: value === '' ? emptyValueLabel() : value,
     selected: values.includes(value),
     onSelect: () => toggleValue(value),
@@ -195,11 +203,7 @@ const ChipValuePopover: React.FC<{
       ? values.map((value, i) => (
           <React.Fragment key={i}>
             {i > 0 && ', '}
-            {value === '' ? (
-              <span className="plqWhereChip__emptyVal">{emptyValueLabel()}</span>
-            ) : (
-              value
-            )}
+            {renderValue(value)}
           </React.Fragment>
         ))
       : placeholder;
@@ -236,10 +240,7 @@ const ChipValuePopover: React.FC<{
             })}
             labelClassName="plqWhereChip__valText"
             label={display}
-            ariaLabel={i18n.translate('explore.pplBuilder.filterValueFor', {
-              defaultMessage: 'Value for {field}',
-              values: { field },
-            })}
+            ariaLabel={valueForLabel(field)}
             dataTestSubj={triggerSubj}
             onClick={toggle}
           />
@@ -282,6 +283,8 @@ const ChipValues: React.FC<{
 
   const numeric = fieldType === 'number';
 
+  const inputMode = numeric ? 'numeric' : 'text';
+
   if (arity === 'range') {
     return (
       <>
@@ -291,7 +294,7 @@ const ChipValues: React.FC<{
           ariaLabel={i18n.translate('explore.pplBuilder.filterFromValue', {
             defaultMessage: 'From value',
           })}
-          inputMode={numeric ? 'numeric' : 'text'}
+          inputMode={inputMode}
           onChange={(v) => onChange([v, filter.values[1] ?? ''])}
           dataTestSubj={`pplBuilderFilterRangeFrom-${index}`}
         />
@@ -304,7 +307,7 @@ const ChipValues: React.FC<{
           ariaLabel={i18n.translate('explore.pplBuilder.filterToValue', {
             defaultMessage: 'To value',
           })}
-          inputMode={numeric ? 'numeric' : 'text'}
+          inputMode={inputMode}
           onChange={(v) => onChange([filter.values[0] ?? '', v])}
           dataTestSubj={`pplBuilderFilterRangeTo-${index}`}
         />
@@ -319,11 +322,8 @@ const ChipValues: React.FC<{
         placeholder={i18n.translate('explore.pplBuilder.filterValuePlaceholder', {
           defaultMessage: 'value',
         })}
-        ariaLabel={i18n.translate('explore.pplBuilder.filterValueFor', {
-          defaultMessage: 'Value for {field}',
-          values: { field: filter.field },
-        })}
-        inputMode={numeric ? 'numeric' : 'text'}
+        ariaLabel={valueForLabel(filter.field)}
+        inputMode={inputMode}
         onChange={(v) => onChange([v])}
         dataTestSubj={`pplBuilderFilterValue-${index}`}
       />

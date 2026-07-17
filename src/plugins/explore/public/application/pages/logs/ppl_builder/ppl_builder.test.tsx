@@ -74,6 +74,15 @@ const renderBuilder = (initialState: PPLBuilderState = emptyState(), onRun?: () 
   return { ...utils, onQueryChange };
 };
 
+// A count-aggregated state, optionally time-grouped with the given span interval.
+const countState = (interval?: string): PPLBuilderState => ({
+  ...emptyState(),
+  aggregations: [{ id: 'a', fn: 'count' }],
+  groupBy: interval
+    ? { fields: [], span: { field: '@timestamp', interval, auto: false } }
+    : { fields: [] },
+});
+
 describe('PPLBuilder', () => {
   it('renders the search box and group rows', () => {
     renderBuilder();
@@ -129,11 +138,7 @@ describe('PPLBuilder', () => {
   });
 
   it('renders a natural-language "every" chip and interval for a time-grouped state', () => {
-    renderBuilder({
-      ...emptyState(),
-      aggregations: [{ id: 'a', fn: 'count' }],
-      groupBy: { fields: [], span: { field: '@timestamp', interval: '5m', auto: false } },
-    });
+    renderBuilder(countState('5m'));
     const chip = screen.getByTestId('pplBuilderSpanChip');
     expect(chip).toBeInTheDocument();
     // The chip reads as plain language, not `span(...)`.
@@ -143,11 +148,7 @@ describe('PPLBuilder', () => {
   });
 
   it('changes the span interval from the interval popover presets', () => {
-    const { onQueryChange } = renderBuilder({
-      ...emptyState(),
-      aggregations: [{ id: 'a', fn: 'count' }],
-      groupBy: { fields: [], span: { field: '@timestamp', interval: '5m', auto: false } },
-    });
+    const { onQueryChange } = renderBuilder(countState('5m'));
     // Open the interval popover and pick a common preset.
     fireEvent.click(screen.getByTestId('pplBuilderSpanInterval'));
     fireEvent.click(screen.getByTestId('pplBuilderSpanIntervalOption-1h'));
@@ -158,11 +159,7 @@ describe('PPLBuilder', () => {
   });
 
   it('adds time grouping from the "over time" entry in the group-by popover', () => {
-    const { onQueryChange } = renderBuilder({
-      ...emptyState(),
-      aggregations: [{ id: 'a', fn: 'count' }],
-      groupBy: { fields: [] },
-    });
+    const { onQueryChange } = renderBuilder(countState());
     // Open the group-by popover (the "Everything" placeholder is its trigger).
     fireEvent.click(screen.getByTestId('pplBuilderGroupByFields'));
     // "Over time" leads the list; picking it adds a span on the time field. The
@@ -175,11 +172,7 @@ describe('PPLBuilder', () => {
   });
 
   it('removes time grouping via the chip ✕', () => {
-    const { onQueryChange } = renderBuilder({
-      ...emptyState(),
-      aggregations: [{ id: 'a', fn: 'count' }],
-      groupBy: { fields: [], span: { field: '@timestamp', interval: '5m', auto: false } },
-    });
+    const { onQueryChange } = renderBuilder(countState('5m'));
     fireEvent.click(screen.getByTestId('pplBuilderRemoveSpan'));
     expect(onQueryChange).toHaveBeenLastCalledWith('| stats count()', expect.anything());
   });
@@ -209,8 +202,7 @@ describe('PPLBuilder', () => {
 
   it('adds a descending sort on the first output column of an aggregated query', () => {
     const { onQueryChange } = renderBuilder({
-      ...emptyState(),
-      aggregations: [{ id: 'a', fn: 'count' }],
+      ...countState(),
       groupBy: { fields: ['service'] },
     });
     fireEvent.click(screen.getByTestId('pplBuilderAddSort'));
@@ -223,8 +215,7 @@ describe('PPLBuilder', () => {
 
   it('renders a sort chip and removes the sort', () => {
     const { onQueryChange } = renderBuilder({
-      ...emptyState(),
-      aggregations: [{ id: 'a', fn: 'count' }],
+      ...countState(),
       groupBy: { fields: ['service'] },
       sort: { column: 'service', desc: false },
     });
