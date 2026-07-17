@@ -295,7 +295,7 @@ describe('WhereRow', () => {
       // Debounced: the filtered fetch fires only after the timer elapses.
       expect(getValues).toHaveBeenCalledTimes(1);
       act(() => {
-        jest.advanceTimersByTime(250);
+        jest.advanceTimersByTime(400);
       });
       expect(getValues).toHaveBeenLastCalledWith('service', 'aut');
     } finally {

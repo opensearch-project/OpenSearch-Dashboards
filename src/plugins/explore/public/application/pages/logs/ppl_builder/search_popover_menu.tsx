@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 
-const SEARCH_DEBOUNCE_MS = 250;
+const SEARCH_DEBOUNCE_MS = 400;
 
 export interface SearchMenuOption {
   key: string;
