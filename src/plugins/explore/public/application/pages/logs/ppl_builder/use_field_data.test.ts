@@ -36,7 +36,7 @@ const datasetWithFields = (
 describe('useFieldData', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it('drops a `.keyword` field when its base sibling exists', () => {
+  it('keeps a `.keyword` field alongside its base sibling', () => {
     mockUseDatasetContext.mockReturnValue({
       dataset: datasetWithFields([
         { name: 'machine.os', type: 'string', aggregatable: false },
@@ -46,20 +46,10 @@ describe('useFieldData', () => {
 
     const { result } = renderHook(() => useFieldData());
 
-    expect(result.current.fieldNames).toEqual(['machine.os']);
+    expect(result.current.fieldNames).toEqual(['machine.os', 'machine.os.keyword']);
   });
 
-  it('keeps a `.keyword` field that has no base sibling', () => {
-    mockUseDatasetContext.mockReturnValue({
-      dataset: datasetWithFields([{ name: 'tags.keyword', type: 'string', aggregatable: true }]),
-    });
-
-    const { result } = renderHook(() => useFieldData());
-
-    expect(result.current.fieldNames).toEqual(['tags.keyword']);
-  });
-
-  it('excludes underscore-prefixed and redundant keyword fields together', () => {
+  it('excludes only underscore-prefixed fields, keeping keyword siblings', () => {
     mockUseDatasetContext.mockReturnValue({
       dataset: datasetWithFields([
         { name: '_id' },
@@ -71,7 +61,7 @@ describe('useFieldData', () => {
 
     const { result } = renderHook(() => useFieldData());
 
-    expect(result.current.fieldNames).toEqual(['service', 'bytes']);
+    expect(result.current.fieldNames).toEqual(['service', 'service.keyword', 'bytes']);
   });
 
   it('excludes date-typed fields from group-by options (time grouping is "over time")', () => {

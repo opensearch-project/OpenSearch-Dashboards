@@ -84,11 +84,20 @@ export function builderReducer(state: PPLBuilderState, action: BuilderAction): P
         ...state,
         aggregations: updateAt(state.aggregations, action.index, (a) => ({ ...a, ...action.agg })),
       };
-    case 'REMOVE_AGGREGATION':
-      return {
+    case 'REMOVE_AGGREGATION': {
+      const next = {
         ...state,
         aggregations: state.aggregations.filter((_, i) => i !== action.index),
       };
+      // Drop a sort left pointing at the removed metric so its chip doesn't
+      // linger as a stale no-op (compileValidSort already omits it from the
+      // query). Raw-field sorts stay valid on non-aggregated rows and are kept.
+      if (isOrphanedAggregateSort(next)) {
+        const { sort: _sort, ...rest } = next;
+        return rest;
+      }
+      return next;
+    }
     case 'ADD_FUNCTION':
       return {
         ...state,
@@ -195,14 +204,32 @@ export function sortableColumns(state: PPLBuilderState): string[] {
   return [...metrics, ...state.groupBy.fields.filter(Boolean)];
 }
 
+// An aggregate sort column carries its compiled form (parens, e.g. `count()`),
+// so paren-sniffing is how we tell it apart from a raw field reference.
+function isAggregateColumn(column: string): boolean {
+  return /[()]/.test(column);
+}
+
+// True when the sort points at an aggregate metric the query no longer
+// produces. Emitting `sort -\`count()\`` against such a state makes the backend
+// reject an unknown field, so both the reducer (chip state) and compileValidSort
+// (query text) drop it.
+function isOrphanedAggregateSort(state: PPLBuilderState): boolean {
+  const { sort } = state;
+  return !!sort && isAggregateColumn(sort.column) && !sortableColumns(state).includes(sort.column);
+}
+
 function quoteSortColumn(column: string): string {
-  return /[()]/.test(column) ? `\`${column}\`` : column;
+  return isAggregateColumn(column) ? `\`${column}\`` : column;
 }
 
 function compileValidSort(state: PPLBuilderState): string | null {
   const { sort } = state;
   const column = sort?.column?.trim();
   if (!sort || !column) return null;
+  if (isOrphanedAggregateSort(state)) return null;
+  // A raw-field sort is only valid against an aggregated query when it names a
+  // group-by field the stats command still emits.
   if (state.aggregations.length > 0 && !sortableColumns(state).includes(sort.column)) {
     return null;
   }

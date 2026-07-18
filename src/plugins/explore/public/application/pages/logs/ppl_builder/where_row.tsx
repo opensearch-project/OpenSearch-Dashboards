@@ -347,7 +347,12 @@ const ChipValues: React.FC<{
   }
 
   return (
+    // Key by arity so switching between single- and multi-value operators (e.g.
+    // `is` -> `is one of`) mounts a fresh popover. Otherwise React reuses the
+    // same instance and its in-progress, uncommitted search text leaks into the
+    // new picker, silently concatenating onto the next typed value.
     <ChipValuePopover
+      key={arity}
       field={filter.field}
       values={filter.values}
       multi={arity === 'many'}

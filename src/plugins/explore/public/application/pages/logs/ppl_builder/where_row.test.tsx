@@ -191,6 +191,33 @@ describe('WhereRow', () => {
     });
   });
 
+  it('does not carry stale search text across a value-operator arity change', async () => {
+    const getValues = jest.fn().mockResolvedValue(['auth', 'authz']);
+    const baseFilter = { id: 'f1', field: 'service', operator: 'is', values: [] } as WhereFilter;
+    const props = {
+      fieldNames,
+      getFieldType: stringType,
+      getValues,
+      dispatch: jest.fn(),
+    };
+    const { rerender } = render(<WhereRow filters={[baseFilter]} {...props} />);
+
+    // Type into the single-value picker without committing.
+    fireEvent.click(screen.getByTestId('pplBuilderFilterValue-0'));
+    fireEvent.change(await screen.findByTestId('pplBuilderFilterValue-0-search'), {
+      target: { value: 'xy' },
+    });
+
+    // Switch to a multi-value operator (arity `one` -> `many`): the picker must
+    // mount fresh with an empty search box, not inherit the uncommitted text.
+    rerender(<WhereRow filters={[{ ...baseFilter, operator: 'is_one_of' }]} {...props} />);
+    fireEvent.click(screen.getByTestId('pplBuilderFilterValues-0'));
+    const search = (await screen.findByTestId(
+      'pplBuilderFilterValues-0-search'
+    )) as HTMLInputElement;
+    expect(search.value).toBe('');
+  });
+
   it('renders a selected custom value not in the suggestions so it can be removed (one-of)', async () => {
     // `aaa` was typed in by the user, so it is selected but not among getValues.
     const { dispatch } = renderRow(

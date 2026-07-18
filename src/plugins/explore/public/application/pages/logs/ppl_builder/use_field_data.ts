@@ -22,10 +22,7 @@ export const useFieldData = () => {
   const fields = useMemo<FieldInfo[]>(() => {
     const all = (dataset as any)?.fields?.getAll?.() ?? [];
     const named = all.filter((f: any) => f?.name && !f.name.startsWith('_'));
-    const names = new Set<string>(named.map((f: any) => f.name));
-    return named
-      .filter((f: any) => !(f.name.endsWith('.keyword') && names.has(f.name.slice(0, -8))))
-      .map((f: any) => ({ name: f.name, type: f.type, aggregatable: f.aggregatable }));
+    return named.map((f: any) => ({ name: f.name, type: f.type, aggregatable: f.aggregatable }));
   }, [dataset]);
 
   const fieldNames = useMemo<string[]>(() => fields.map((f) => f.name), [fields]);

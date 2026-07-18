@@ -182,6 +182,13 @@ describe('buildPPL', () => {
       'ERROR | sort -service',
     ],
     [
+      // The aggregation was removed but a `count()` sort lingered; it must not
+      // emit an invalid `sort -`count()`` against a non-aggregated query.
+      'drops a dangling aggregate sort when the query no longer aggregates',
+      state({ searchExpression: 'ERROR', sort: { column: 'count()', desc: true } }),
+      'ERROR',
+    ],
+    [
       'leads a sort-only query with a pipe so the source clause prepends cleanly',
       state({ sort: { column: 'timestamp', desc: false } }),
       '| sort timestamp',
@@ -487,6 +494,21 @@ describe('builderReducer', () => {
     expect(next.sort).toEqual({ column: 'count()', desc: true });
     next = builderReducer(next, { type: 'REMOVE_SORT' });
     expect(next.sort).toBeUndefined();
+  });
+
+  it('clears a sort on the removed metric, keeping a group-by-field sort', () => {
+    let next = builderReducer(emptyState(), { type: 'ADD_AGGREGATION' });
+    next = builderReducer(next, { type: 'SET_GROUPBY_FIELDS', fields: ['service'] });
+    next = builderReducer(next, { type: 'SET_SORT', sort: { column: 'count()', desc: true } });
+    next = builderReducer(next, { type: 'REMOVE_AGGREGATION', index: 0 });
+    expect(next.sort).toBeUndefined();
+  });
+
+  it('keeps a raw-field sort when an aggregation is removed', () => {
+    let next = builderReducer(emptyState(), { type: 'ADD_AGGREGATION' });
+    next = builderReducer(next, { type: 'SET_SORT', sort: { column: 'service', desc: true } });
+    next = builderReducer(next, { type: 'REMOVE_AGGREGATION', index: 0 });
+    expect(next.sort).toEqual({ column: 'service', desc: true });
   });
 
   it('adds a filter defaulting to an empty `is`', () => {
