@@ -142,9 +142,9 @@ const pplQueryBuilderTestSuite = () => {
       cy.getElementByTestId('pplBuilderAddAggregation').click();
       cy.getElementByTestId('pplBuilderAddAggregationOption-count').should('be.visible').click();
 
-      // A metric row is created and the group-by row becomes available.
+      // A metric row is created and the collapsed "+ Group by" affordance appears.
       cy.getElementByTestId('pplBuilderAgg-0').should('be.visible');
-      cy.getElementByTestId('pplBuilderGroupBy').should('be.visible');
+      cy.getElementByTestId('pplBuilderAddGroupBy').should('be.visible');
 
       expectGeneratedQueryToContain('stats count()');
 
@@ -158,8 +158,10 @@ const pplQueryBuilderTestSuite = () => {
       cy.getElementByTestId('pplBuilderAddAggregationOption-count').should('be.visible').click();
       cy.getElementByTestId('pplBuilderAgg-0').should('be.visible');
 
-      // Open the group-by field picker and pick a field.
-      cy.getElementByTestId('pplBuilderGroupByFields').should('be.visible').click();
+      // Reveal the group-by row via the "+ Group by" affordance, which auto-opens
+      // its field picker, then pick a field.
+      cy.getElementByTestId('pplBuilderAddGroupBy').should('be.visible').click();
+      cy.getElementByTestId('pplBuilderGroupBy').should('be.visible');
       cy.getElementByTestId('pplBuilderFieldOption-category').should('be.visible').click();
       // Close the (multi-select) popover.
       cy.get('body').type('{esc}');
