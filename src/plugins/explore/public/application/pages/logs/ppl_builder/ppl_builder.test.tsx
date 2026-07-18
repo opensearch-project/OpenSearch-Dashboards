@@ -87,9 +87,30 @@ describe('PPLBuilder', () => {
   it('renders the search box and group rows', () => {
     renderBuilder();
     expect(screen.getByText('Search for')).toBeInTheDocument();
-    // With no aggregation yet, the stats group collapses to a ghost "+ Stats" button.
-    expect(screen.getByTestId('pplBuilderAddAggregation')).toHaveTextContent('Stats');
+    // With no aggregation yet, the aggregation group collapses to a ghost
+    // "+ Aggregation" button, and group-by collapses to a "+ Group by" button.
+    expect(screen.getByTestId('pplBuilderAddAggregation')).toHaveTextContent('Aggregation');
+    expect(screen.getByTestId('pplBuilderAddGroupBy')).toHaveTextContent('Group by');
     expect(screen.getByTestId('pplBuilderSearchBox')).toBeInTheDocument();
+  });
+
+  it('adds an aggregation without expanding group-by', () => {
+    const { onQueryChange } = renderBuilder();
+    fireEvent.click(screen.getByTestId('pplBuilderAddAggregation'));
+    fireEvent.click(screen.getByText('Count'));
+    // The aggregation lands, but group-by stays collapsed behind its "+" button.
+    expect(onQueryChange).toHaveBeenLastCalledWith('| stats count()', expect.anything());
+    expect(screen.getByTestId('pplBuilderAddGroupBy')).toBeInTheDocument();
+    expect(screen.queryByTestId('pplBuilderGroupByFields')).not.toBeInTheDocument();
+  });
+
+  it('expands both components with a default count() when "+ Group by" is clicked directly', () => {
+    const { onQueryChange } = renderBuilder();
+    fireEvent.click(screen.getByTestId('pplBuilderAddGroupBy'));
+    // A count() aggregation is seeded and the group-by row (Everything) appears.
+    expect(onQueryChange).toHaveBeenLastCalledWith('| stats count()', expect.anything());
+    expect(screen.getByTestId('pplBuilderGroupByFields')).toBeInTheDocument();
+    expect(screen.queryByTestId('pplBuilderAddGroupBy')).not.toBeInTheDocument();
   });
 
   it('emits a source-less (empty) query on mount for an empty state', () => {
@@ -161,6 +182,8 @@ describe('PPLBuilder', () => {
 
   it('adds time grouping from the "over time" entry in the group-by popover', () => {
     const { onQueryChange } = renderBuilder(countState());
+    // Reveal the group-by row (it starts collapsed for an aggregation-only state).
+    fireEvent.click(screen.getByTestId('pplBuilderAddGroupBy'));
     // Open the group-by popover (the "Everything" placeholder is its trigger).
     fireEvent.click(screen.getByTestId('pplBuilderGroupByFields'));
     // "Over time" leads the list; picking it adds a span on the time field. The

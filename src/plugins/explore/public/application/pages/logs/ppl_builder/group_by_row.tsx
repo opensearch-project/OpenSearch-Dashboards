@@ -72,7 +72,7 @@ export const GroupByRow: React.FC<GroupByRowProps> = ({
 
   return (
     <ControlGroup
-      label={i18n.translate('explore.pplBuilder.by', { defaultMessage: 'by' })}
+      label={i18n.translate('explore.pplBuilder.by', { defaultMessage: 'Group by' })}
       dataTestSubj="pplBuilderGroupBy"
     >
       <FieldMenu

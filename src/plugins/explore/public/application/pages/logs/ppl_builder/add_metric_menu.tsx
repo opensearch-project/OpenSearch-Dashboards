@@ -22,7 +22,7 @@ export const AddMetricMenu: React.FC<AddMetricMenuProps> = ({
   dataTestSubj,
 }) => {
   const addMetricLabel = i18n.translate('explore.pplBuilder.addMetric', {
-    defaultMessage: 'Stats',
+    defaultMessage: 'Aggregation',
   });
 
   const options = useMemo<SearchMenuOption[]>(

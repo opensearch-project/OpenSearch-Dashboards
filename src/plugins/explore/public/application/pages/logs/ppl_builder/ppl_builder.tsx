@@ -5,7 +5,7 @@
 
 import './ppl_builder.scss';
 
-import React, { useCallback, useMemo, useReducer, useRef, useEffect } from 'react';
+import React, { useCallback, useMemo, useReducer, useRef, useState, useEffect } from 'react';
 import { i18n } from '@osd/i18n';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../../types';
@@ -21,7 +21,7 @@ import { AddMetricMenu } from './add_metric_menu';
 import { ModeToggleButton } from './mode_toggle_button';
 import { useFieldData } from './use_field_data';
 import { useDatasetContext } from '../../../context';
-import { ControlGroup } from '../../../components/query_builder';
+import { ControlGroup, GhostAddButton } from '../../../components/query_builder';
 
 interface PPLBuilderProps {
   initialState?: PPLBuilderState;
@@ -93,6 +93,26 @@ export const PPLBuilder: React.FC<PPLBuilderProps> = ({
 
   const hasAggregation = state.aggregations.length > 0;
 
+  // The group-by ("by everything") row is revealed only when the user asks for
+  // it — either by clicking "+ group by" or by seeding state that already
+  // groups. Adding an aggregation on its own leaves it collapsed.
+  const [showGroupBy, setShowGroupBy] = useState(
+    () => !!(initialState && (initialState.groupBy.fields.length > 0 || initialState.groupBy.span))
+  );
+
+  const expandGroupBy = useCallback(() => {
+    if (state.aggregations.length === 0) {
+      dispatch({ type: 'ADD_AGGREGATION' });
+    }
+    setShowGroupBy(true);
+  }, [state.aggregations.length]);
+
+  // Group-by only makes sense alongside an aggregation. Once the last one is
+  // removed, collapse it so a later "+ Aggregation" doesn't re-reveal it.
+  useEffect(() => {
+    if (!hasAggregation) setShowGroupBy(false);
+  }, [hasAggregation]);
+
   const sortColumns = useMemo(
     () => (hasAggregation ? sortableColumns(state) : sortableFieldNames),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -146,7 +166,9 @@ export const PPLBuilder: React.FC<PPLBuilderProps> = ({
         {hasAggregation ? (
           <ControlGroup
             className="plqGroup--wrap"
-            label={i18n.translate('explore.pplBuilder.stats', { defaultMessage: 'Stats' })}
+            label={i18n.translate('explore.pplBuilder.aggregations', {
+              defaultMessage: 'Aggregations',
+            })}
             dataTestSubj="pplBuilderStats"
           >
             {state.aggregations.map((agg, idx) => (
@@ -172,7 +194,7 @@ export const PPLBuilder: React.FC<PPLBuilderProps> = ({
           />
         )}
 
-        {hasAggregation && (
+        {showGroupBy ? (
           <GroupByRow
             groupBy={state.groupBy}
             options={groupByFieldNames}
@@ -180,6 +202,12 @@ export const PPLBuilder: React.FC<PPLBuilderProps> = ({
             autoInterval={autoInterval}
             onAddSpan={addSpan}
             dispatch={dispatch}
+          />
+        ) : (
+          <GhostAddButton
+            label={i18n.translate('explore.pplBuilder.addGroupBy', { defaultMessage: 'Group by' })}
+            onClick={expandGroupBy}
+            dataTestSubj="pplBuilderAddGroupBy"
           />
         )}
 
