@@ -3,12 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// The module caches the canvas 2d context in a closure on first use, so each
-// test re-imports it fresh (jest.resetModules) with a controlled getContext.
+// Context is cached in a module closure, so each test re-imports fresh via jest.resetModules.
 
 describe('measure_text — with a working 2d canvas context', () => {
-  // Fake context whose measured width is proportional to the text length so
-  // assertions are deterministic regardless of the (absent) jsdom font engine.
+  // Width proportional to text length for deterministic assertions.
   const makeCtx = () => {
     const ctx: any = {
       font: '',

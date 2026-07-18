@@ -167,7 +167,6 @@ describe('buildPPL', () => {
       '| stats count() by service | sort service',
     ],
     [
-      // `avg(bytes)` was removed; the dangling sort must not be emitted.
       'drops a sort whose column is no longer produced by the query',
       state({
         aggregations: [agg({})],
@@ -182,8 +181,6 @@ describe('buildPPL', () => {
       'ERROR | sort -service',
     ],
     [
-      // The aggregation was removed but a `count()` sort lingered; it must not
-      // emit an invalid `sort -`count()`` against a non-aggregated query.
       'drops a dangling aggregate sort when the query no longer aggregates',
       state({ searchExpression: 'ERROR', sort: { column: 'count()', desc: true } }),
       'ERROR',
@@ -247,11 +244,9 @@ describe('compileWhereFilter', () => {
     ],
     ['exists', { field: 'user', operator: 'exists', values: [] }, 'ISNOTNULL(`user`)'],
     ['not_exists', { field: 'user', operator: 'not_exists', values: [] }, 'ISNULL(`user`)'],
-    // Incomplete filters are skipped (like a fieldless metric).
     ['incomplete: empty field', { field: '', operator: 'is', values: ['x'] }, null],
     ['incomplete: no value', { operator: 'is', values: [] }, null],
     ['incomplete: empty is_one_of', { operator: 'is_one_of', values: [] }, null],
-    // The empty string is a real, indexable value.
     ['empty-string is', { operator: 'is', values: [''] }, "`response` = ''"],
     ['empty-string is_not', { operator: 'is_not', values: [''] }, "`response` != ''"],
     [

@@ -63,20 +63,17 @@ export const useFieldData = () => {
     [fields]
   );
 
-  // Mirror the PPL code editor's value autocomplete: run a `source=<table> |
-  // top <limit> <column>` PPL query via fetchColumnValues so the builder and the
-  // code editor surface the same values with the same limit and caching. When a
-  // search term is given, fetchColumnValues narrows the values server-side
-  // (`where like(...)`) so the user can reach values beyond the cached top-N.
+  // Mirror the PPL code editor's value autocomplete via fetchColumnValues so the
+  // builder surfaces the same values with the same limit and caching. A search
+  // term narrows values server-side to reach beyond the cached top-N.
   const getValues = useCallback(
     async (fieldName: string, searchTerm?: string): Promise<string[]> => {
       const indexPattern = dataset as any;
       if (!indexPattern?.title) return [];
       try {
-        // The DataView's own `.type` is undefined for index patterns; the dataset
-        // descriptor on the query service carries the SET_TYPE ('INDEX_PATTERN')
-        // that fetchColumnValues gates its live query on. Source it the same way
-        // the code editor's autocomplete does, falling back to the DataView type.
+        // The DataView's `.type` is undefined for index patterns; the query
+        // service dataset carries the SET_TYPE ('INDEX_PATTERN') fetchColumnValues
+        // gates its live query on. Fall back to the DataView type.
         const datasetType =
           services.data?.query?.queryString?.getQuery?.()?.dataset?.type ?? indexPattern.type;
         const values = await fetchColumnValues(

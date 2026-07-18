@@ -9,8 +9,6 @@ import { WhereFilter } from './types';
 
 const fieldNames = ['response', 'service', 'bytes'];
 
-// `response` and `bytes` are numeric; everything else defaults to string so the
-// suggestion popover stays the default path in most tests.
 const fieldTypes: Record<string, string> = { response: 'number', bytes: 'number' };
 const getFieldType = (field: string): string | undefined => fieldTypes[field] ?? 'string';
 
@@ -29,7 +27,6 @@ const renderRow = (filters: WhereFilter[] = [], typeOverride?: (field: string) =
   return { ...utils, dispatch, getValues };
 };
 
-// A string field takes the suggestion-popover value editor.
 const stringType = () => 'string';
 
 describe('WhereRow', () => {
@@ -42,8 +39,6 @@ describe('WhereRow', () => {
   it('opens the field picker from the ghost and adds a filter on field pick', () => {
     const { dispatch } = renderRow([]);
     fireEvent.click(screen.getByTestId('pplBuilderAddFilter'));
-
-    // Pick a field from the popover list — a fresh `is` filter is appended.
     fireEvent.click(screen.getByTestId('pplBuilderFilterFieldOption-response'));
     expect(dispatch).toHaveBeenCalledWith({
       type: 'ADD_FILTER',
@@ -58,8 +53,7 @@ describe('WhereRow', () => {
     ]);
     expect(screen.getByTestId('pplBuilderFilterChip-0')).toBeInTheDocument();
     expect(screen.getByTestId('pplBuilderFilterChip-1')).toBeInTheDocument();
-    // The `is` chip on a string field exposes a value trigger showing the value;
-    // `exists` has none.
+    // `is` on a string field has a value trigger; `exists` has none.
     expect(screen.getByTestId('pplBuilderFilterValue-0')).toHaveTextContent('auth');
     expect(screen.queryByTestId('pplBuilderFilterValue-1')).not.toBeInTheDocument();
   });
@@ -67,7 +61,6 @@ describe('WhereRow', () => {
   it('edits the value from the suggestion popover via SET_FILTER (string field)', async () => {
     const { dispatch } = renderRow([{ id: 'f1', field: 'service', operator: 'is', values: ['a'] }]);
     fireEvent.click(screen.getByTestId('pplBuilderFilterValue-0'));
-    // Suggestions load asynchronously from getValues; pick 500.
     await waitFor(() =>
       expect(screen.getByTestId('pplBuilderFilterValueOption-0-500')).toBeInTheDocument()
     );
@@ -100,7 +93,6 @@ describe('WhereRow', () => {
     const input = screen.getByTestId('pplBuilderFilterValue-0') as HTMLInputElement;
     expect(input.tagName).toBe('INPUT');
     expect(input.value).toBe('200');
-    // Editing it writes straight back through SET_FILTER — no async suggestions.
     fireEvent.change(input, { target: { value: '404' } });
     expect(dispatch).toHaveBeenCalledWith({
       type: 'SET_FILTER',
@@ -114,7 +106,6 @@ describe('WhereRow', () => {
       { id: 'f1', field: 'response', operator: 'is', values: ['200'] },
     ]);
     fireEvent.click(screen.getByTestId('pplBuilderFilterOperator-0'));
-    // Numeric field: `is between` is offered (mirrors Discover's type gating).
     expect(screen.getByTestId('pplBuilderFilterOperatorOption-is_between-0')).toBeInTheDocument();
 
     rerender(
@@ -127,7 +118,6 @@ describe('WhereRow', () => {
       />
     );
     fireEvent.click(screen.getByTestId('pplBuilderFilterOperator-0'));
-    // String field: the between operators are hidden; one-of stays available.
     expect(
       screen.queryByTestId('pplBuilderFilterOperatorOption-is_between-0')
     ).not.toBeInTheDocument();
@@ -202,14 +192,12 @@ describe('WhereRow', () => {
     };
     const { rerender } = render(<WhereRow filters={[baseFilter]} {...props} />);
 
-    // Type into the single-value picker without committing.
     fireEvent.click(screen.getByTestId('pplBuilderFilterValue-0'));
     fireEvent.change(await screen.findByTestId('pplBuilderFilterValue-0-search'), {
       target: { value: 'xy' },
     });
 
-    // Switch to a multi-value operator (arity `one` -> `many`): the picker must
-    // mount fresh with an empty search box, not inherit the uncommitted text.
+    // Switching arity `one` -> `many` must mount a fresh, empty search box.
     rerender(<WhereRow filters={[{ ...baseFilter, operator: 'is_one_of' }]} {...props} />);
     fireEvent.click(screen.getByTestId('pplBuilderFilterValues-0'));
     const search = (await screen.findByTestId(
@@ -225,10 +213,8 @@ describe('WhereRow', () => {
       stringType
     );
     fireEvent.click(screen.getByTestId('pplBuilderFilterValues-0'));
-    // The custom value still appears as a (checked) row alongside the suggestions.
     const customOption = await screen.findByTestId('pplBuilderFilterValueOption-0-aaa');
     expect(customOption).toBeInTheDocument();
-    // Clicking it toggles it back off, leaving the other value.
     fireEvent.click(customOption);
     expect(dispatch).toHaveBeenCalledWith({
       type: 'SET_FILTER',
@@ -248,11 +234,9 @@ describe('WhereRow', () => {
         dispatch={jest.fn()}
       />
     );
-    // The chip renders the empty term as "(empty)" rather than a blank gap.
     const trigger = screen.getByTestId('pplBuilderFilterValues-0');
     expect(trigger).toHaveTextContent('(empty), auth');
 
-    // The suggestion for the empty term is reachable and labeled "(empty)".
     fireEvent.click(trigger);
     const emptyOption = await screen.findByTestId('pplBuilderFilterValueOption-0-');
     expect(emptyOption).toHaveTextContent('(empty)');

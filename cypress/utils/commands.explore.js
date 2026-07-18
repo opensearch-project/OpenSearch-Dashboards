@@ -77,30 +77,9 @@ const selectIndexWildcardMode = (indexPattern) => {
     .click();
 };
 
-// When the logsQueryBuilder flag is on, the logs query panel renders the visual
-// PPL builder instead of the Monaco code editor for representable queries (and
-// auto-flips back to the builder whenever the query becomes empty/source-only,
-// e.g. right after selecting a dataset). Any command or helper that drives the
-// Monaco editor must call this first to switch into code mode. It is a no-op
-// when the flag is off (no builder rendered) or the panel is already in code
-// mode, so it is safe to call unconditionally before editor interactions.
 cy.explore.add('showQueryEditor', () => {
-  // Switching to code mode races an asynchronous panel effect: resetting or
-  // clearing the query (e.g. the "New" button) settles the query to empty, which
-  // the logs panel reacts to by flipping *back* to the builder. That flip can land
-  // just after we toggle to code — or just after we observe code mode and return —
-  // unmounting the Monaco editor out from under the caller. So converge on a stable
-  // code editor: toggle whenever the builder is showing, and after each toggle (or
-  // when already in code) wait a beat and re-check, only returning once the code
-  // editor has stayed mounted with no builder for a couple of settle rounds.
   const SETTLE_ROUNDS = 2;
   const MAX_TOGGLES = 5;
-  // Toggle builder -> code with a click that tolerates the builder re-rendering
-  // mid-action. As field data / the query settle, PPLBuilder remounts (its key
-  // bumps), which detaches the toggle button; a plain `.click()` then fails with
-  // "the page updated while this command was executing". Waiting for the builder
-  // to be settled first, then re-querying the button immediately before the click,
-  // keeps Cypress acting on a fresh, attached element.
   const clickToggleToCode = () => {
     // Let the current render settle before resolving the button.
     cy.wait(500);
@@ -127,8 +106,6 @@ cy.explore.add('showQueryEditor', () => {
     .should('exist')
     .then(() => ensureCode())
     .then(() => {
-      // Only assert the code editor mounted when a builder is present in the DOM
-      // tree at all (flag on); with the flag off this command is a no-op.
       return cy.get('body').then(($body) => {
         if ($body.find('[data-test-subj="exploreQueryPanelEditor"]').length > 0) {
           cy.getElementByTestId('exploreQueryPanelEditor').should('be.visible');

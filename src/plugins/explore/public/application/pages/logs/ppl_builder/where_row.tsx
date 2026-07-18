@@ -33,12 +33,9 @@ const CHIP_MONO_FONT = '11.5px "Source Code Pro", Consolas, Menlo, Courier, mono
 const emptyValueLabel = () =>
   i18n.translate('explore.pplBuilder.filterEmptyValue', { defaultMessage: '(empty)' });
 
-// Render a value that may be the empty string as a muted "(empty)" marker.
 const renderValue = (value: string): React.ReactNode =>
   value === '' ? <span className="plqWhereChip__emptyVal">{emptyValueLabel()}</span> : value;
 
-// "Value for {field}" aria-label, shared by the popover trigger and the plain
-// single-value text input.
 const valueForLabel = (field: string) =>
   i18n.translate('explore.pplBuilder.filterValueFor', {
     defaultMessage: 'Value for {field}',
@@ -155,8 +152,7 @@ const ChipValuePopover: React.FC<{
   const [loading, setLoading] = useState(false);
 
   const liveRef = useRef(true);
-  // Monotonic request id so a slow earlier fetch can't overwrite the results of
-  // a later search term that resolved first.
+  // Monotonic request id so a slow earlier fetch can't overwrite a later one.
   const requestSeqRef = useRef(0);
   useEffect(() => {
     setSuggestions([]);
@@ -172,9 +168,6 @@ const ChipValuePopover: React.FC<{
     if (!suggest) return;
     const seq = ++requestSeqRef.current;
     setLoading(true);
-    // Only the latest in-flight request may write results or clear the spinner,
-    // so a slow earlier fetch can't flip loading off while a newer one is still
-    // running.
     const settle = (apply: () => void) => {
       if (!liveRef.current || seq !== requestSeqRef.current) return;
       apply();
@@ -194,9 +187,8 @@ const ChipValuePopover: React.FC<{
     onChange(values.includes(value) ? values.filter((v) => v !== value) : [...values, value]);
   };
 
-  // Include any selected values that aren't in the fetched suggestions (custom
-  // typed-in values, or every value when the field doesn't suggest) so they
-  // still render as checked rows and can be toggled back off.
+  // Keep selected values missing from the fetched suggestions (custom typed-in
+  // values) as checked rows so they can be toggled back off.
   const optionValues = [...suggestions, ...values.filter((v) => !suggestions.includes(v))];
   const options: SearchMenuOption[] = optionValues.map((value) => ({
     key: value,
@@ -347,10 +339,8 @@ const ChipValues: React.FC<{
   }
 
   return (
-    // Key by arity so switching between single- and multi-value operators (e.g.
-    // `is` -> `is one of`) mounts a fresh popover. Otherwise React reuses the
-    // same instance and its in-progress, uncommitted search text leaks into the
-    // new picker, silently concatenating onto the next typed value.
+    // Key by arity so switching single<->multi-value operators mounts a fresh
+    // popover; reuse would leak uncommitted search text into the next value.
     <ChipValuePopover
       key={arity}
       field={filter.field}
@@ -372,8 +362,7 @@ const WhereChip: React.FC<{
   getValues: (field: string, searchTerm?: string) => Promise<string[]>;
   dispatch: React.Dispatch<BuilderAction>;
 }> = ({ filter, index, fieldType, fieldNames, getValues, dispatch }) => {
-  // Resolve to this chip's known field type so the tooltip preview quotes
-  // values the same way buildPPL does when it emits the query.
+  // Use this chip's field type so the tooltip quotes values as buildPPL does.
   const predicate = compileWhereFilter(filter, () => fieldType);
   const tooltip = predicate
     ? i18n.translate('explore.pplBuilder.filterChipTooltip', {

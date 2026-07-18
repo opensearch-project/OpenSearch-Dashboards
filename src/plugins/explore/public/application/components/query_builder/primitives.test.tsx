@@ -24,7 +24,6 @@ describe('ControlGroup', () => {
         <span>inner</span>
       </ControlGroup>
     );
-    // The only child is the content; no floating label element rendered.
     expect(screen.getByTestId('cg').querySelector('.plqGroup__label')).toBeNull();
   });
 

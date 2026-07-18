@@ -42,8 +42,7 @@ export type BuilderAction =
   | { type: 'INIT'; state: PPLBuilderState }
   | { type: 'RESET' };
 
-// Return a copy of `arr` with the element at `index` replaced by `patch(current)`.
-// Returns the original array unchanged when `patch` yields null (missing target).
+// Returns `arr` unchanged when `patch` yields null (missing target).
 function updateAt<T>(arr: T[], index: number, patch: (current: T) => T | null): T[] {
   const next = patch(arr[index]);
   if (next === null) return arr;
@@ -89,9 +88,7 @@ export function builderReducer(state: PPLBuilderState, action: BuilderAction): P
         ...state,
         aggregations: state.aggregations.filter((_, i) => i !== action.index),
       };
-      // Drop a sort left pointing at the removed metric so its chip doesn't
-      // linger as a stale no-op (compileValidSort already omits it from the
-      // query). Raw-field sorts stay valid on non-aggregated rows and are kept.
+      // Drop a sort chip left pointing at a removed metric; raw-field sorts stay valid.
       if (isOrphanedAggregateSort(next)) {
         const { sort: _sort, ...rest } = next;
         return rest;
@@ -153,11 +150,9 @@ export function builderReducer(state: PPLBuilderState, action: BuilderAction): P
   }
 }
 
-// A bare PPL identifier is a leading letter/underscore/@ followed by word chars,
-// dots, or @ (e.g. user.id, @timestamp). Anything else — a dash, a space — would
-// parse as an expression (`response-time` reads as subtraction), so back-quote
-// it. WHERE fields go through whereField which always back-quotes; aggregation
-// and group-by fields quote only when needed so common fields stay unadorned.
+// Fields that aren't bare PPL identifiers must be back-quoted, else e.g.
+// `response-time` parses as subtraction. WHERE fields always back-quote (whereField);
+// aggregation/group-by fields quote only when needed.
 const BARE_FIELD_RE = /^[a-zA-Z_@][\w.@]*$/;
 
 function quoteFieldExpr(field: string): string {
@@ -204,16 +199,13 @@ export function sortableColumns(state: PPLBuilderState): string[] {
   return [...metrics, ...state.groupBy.fields.filter(Boolean)];
 }
 
-// An aggregate sort column carries its compiled form (parens, e.g. `count()`),
-// so paren-sniffing is how we tell it apart from a raw field reference.
+// Aggregate sort columns carry their compiled form (parens, e.g. `count()`); raw fields don't.
 function isAggregateColumn(column: string): boolean {
   return /[()]/.test(column);
 }
 
-// True when the sort points at an aggregate metric the query no longer
-// produces. Emitting `sort -\`count()\`` against such a state makes the backend
-// reject an unknown field, so both the reducer (chip state) and compileValidSort
-// (query text) drop it.
+// True when the sort points at an aggregate metric the query no longer produces;
+// emitting it would make the backend reject an unknown field.
 function isOrphanedAggregateSort(state: PPLBuilderState): boolean {
   const { sort } = state;
   return !!sort && isAggregateColumn(sort.column) && !sortableColumns(state).includes(sort.column);
@@ -228,8 +220,7 @@ function compileValidSort(state: PPLBuilderState): string | null {
   const column = sort?.column?.trim();
   if (!sort || !column) return null;
   if (isOrphanedAggregateSort(state)) return null;
-  // A raw-field sort is only valid against an aggregated query when it names a
-  // group-by field the stats command still emits.
+  // On an aggregated query, a raw-field sort is valid only if it names an emitted group-by field.
   if (state.aggregations.length > 0 && !sortableColumns(state).includes(sort.column)) {
     return null;
   }
@@ -241,30 +232,21 @@ function whereField(field: string): string {
   return `\`${field.replace(/\.keyword$/, '')}\``;
 }
 
-// Resolves a filter field name to its OpenSearch type ('number', 'string',
-// 'date', ...) so value quoting can respect the mapping. Optional throughout:
-// callers that omit it (e.g. round-trip tests) fall back to value-shaped
-// quoting, preserving the resolver-free behavior.
+// Resolves a filter field name to its OpenSearch type so value quoting respects
+// the mapping. Optional: callers that omit it fall back to value-shaped quoting.
 export type FieldTypeResolver = (field: string) => string | undefined;
 
 const NUMERIC_LITERAL_RE = /^-?\d+(\.\d+)?$/;
 
-// A bare numeric literal is only safe when the field is actually numeric.
-// Emitting `zip = 02101` against a keyword field drops the leading zero and
-// compares as a number, matching nothing; quoting keeps it a string literal.
-// When the type is unknown (no resolver, or field not in the mapping) we keep
-// the legacy value-shaped behavior so nothing regresses.
+// A bare numeric literal is only safe when the field is numeric: `zip = 02101`
+// against a keyword field drops the leading zero and matches nothing. Unknown
+// type (no resolver / field not in mapping) keeps value-shaped behavior.
 function whereValue(value: string, fieldType?: string): string {
   const trimmed = value.trim();
   const numericAllowed = fieldType === undefined || fieldType === 'number';
   if (numericAllowed && NUMERIC_LITERAL_RE.test(trimmed)) return trimmed;
-  // Single-quote string literals to match the shared filter-add path
-  // (PPLFilterUtils.quote in query_enhancements), which is what the sidebar /
-  // table-cell "filter for value" actions emit. A filter added there is committed
-  // to the query, round-tripped through the builder, and re-serialized here on the
-  // Builder -> Code toggle; matching that convention keeps the editor text
-  // byte-identical to the pre-builder behavior. parse_ppl's unquoteValue accepts
-  // both quote styles and un-doubles '' -> ', so the round-trip stays lossless.
+  // Single-quote to match PPLFilterUtils.quote (the shared filter-add path), keeping
+  // Builder -> Code output byte-identical. parse_ppl's unquoteValue reverses both styles.
   return `'${trimmed.replace(/'/g, "''")}'`;
 }
 
@@ -275,16 +257,14 @@ export function compileWhereFilter(
   const field = filter.field?.trim();
   if (!field) return null;
   const fq = whereField(field);
-  // Resolve on the base name (matching whereField's .keyword stripping) so a
-  // `service.keyword` filter picks up the `service` mapping type.
+  // Resolve on the base name (matching whereField's .keyword stripping).
   const fieldType = getFieldType?.(field.replace(/\.keyword$/, ''));
   const val = (v: string) => whereValue(v, fieldType);
   const vals = (filter.values ?? []).map((v) => (v ?? '').trim());
 
   switch (filter.operator) {
-    // The empty string is a real, indexable value (the value picker surfaces it
-    // as "(empty)"), so equality operators guard on a value being present rather
-    // than truthy — otherwise selecting (empty) would silently drop the clause.
+    // The empty string is a real, indexable value ("(empty)"), so equality operators
+    // guard on values.length rather than truthiness.
     case 'is':
       return vals.length > 0 ? `${fq} = ${val(vals[0])}` : null;
     case 'is_not':
@@ -324,20 +304,16 @@ export function buildPPL(state: PPLBuilderState, getFieldType?: FieldTypeResolve
   const searchExpr = (state.searchExpression || '').trim();
   const source = (state.sourceClause || '').trim();
 
-  // The leading PPL search command combines the source clause and any free-text
-  // search expression (space-separated — PPL parses them into one command). The
-  // builder re-emits the captured source verbatim, so a Builder -> Code toggle
-  // shows the exact source the query carried instead of a reconstructed one.
+  // Leading search command: source clause + free-text expression, space-joined
+  // (PPL parses them as one command). Source is re-emitted verbatim.
   const searchCommand = [source, searchExpr].filter(Boolean).join(' ');
 
   const parts: string[] = searchCommand ? [searchCommand] : [];
 
   for (const filter of state.filters) {
     const predicate = compileWhereFilter(filter, getFieldType);
-    // Uppercase WHERE to match the shared filter-add path (PPLFilterUtils emits
-    // `WHERE `) and the code-editor/observability convention, so a builder ->
-    // code round-trip reads identically to the pre-builder behavior. PPL keywords
-    // are case-insensitive, so parse_ppl still round-trips this back into Builder.
+    // Uppercase WHERE matches PPLFilterUtils' shared filter-add path; parse_ppl is
+    // case-insensitive so this still round-trips.
     if (predicate) parts.push(`WHERE ${predicate}`);
   }
 

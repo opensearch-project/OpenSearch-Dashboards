@@ -17,7 +17,6 @@ describe('FunctionMenu', () => {
   it('opens the popover and shows grouped scalar functions with category headers', () => {
     render(<FunctionMenu onAddFunction={jest.fn()} dataTestSubj="pplBuilderFx" />);
     fireEvent.click(screen.getByTestId('pplBuilderFx'));
-    // Category headers derived from consecutive option groups.
     expect(screen.getByText('Math')).toBeInTheDocument();
     expect(screen.getByText('String')).toBeInTheDocument();
     expect(screen.getByText('Date & time')).toBeInTheDocument();

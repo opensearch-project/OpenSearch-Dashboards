@@ -6,7 +6,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { SearchPopoverMenu, SearchMenuOption } from './search_popover_menu';
 
-// A single-button trigger: the whole control opens the popover.
 const simpleTrigger = (toggle: () => void) => ({
   anchor: (
     <button type="button" data-test-subj="menuTrigger" onClick={toggle}>
@@ -50,14 +49,12 @@ describe('SearchPopoverMenu', () => {
     const options = makeOptions();
     renderMenu(options);
     open();
-    // Type a filter so the reset-to-empty on close is observable (the EUI
-    // test-env keeps the portaled panel mounted, so closing is asserted via the
-    // search box being cleared rather than the panel unmounting).
+    // EUI keeps the portaled panel mounted in the test env, so close is asserted
+    // via the search box clearing rather than the panel unmounting.
     const searchBox = screen.getByTestId('menuSearch') as HTMLInputElement;
     fireEvent.change(searchBox, { target: { value: 'count' } });
     fireEvent.click(screen.getByTestId('opt-count'));
     expect(options[0].onSelect).toHaveBeenCalledTimes(1);
-    // Default behaviour closes the popover, which resets the search query.
     expect(searchBox.value).toBe('');
   });
 
@@ -69,8 +66,6 @@ describe('SearchPopoverMenu', () => {
     fireEvent.change(searchBox, { target: { value: 'count' } });
     fireEvent.click(screen.getByTestId('opt-count'));
     expect(options[0].onSelect).toHaveBeenCalledTimes(1);
-    // The popover stays open (options still visible), but the search query is
-    // cleared so the next typed value starts fresh rather than appending.
     expect(screen.getByTestId('opt-count')).toBeInTheDocument();
     expect(searchBox.value).toBe('');
   });
@@ -86,7 +81,6 @@ describe('SearchPopoverMenu', () => {
     fireEvent.change(searchBox, { target: { value: 'aaa' } });
     fireEvent.click(screen.getByTestId('createRow'));
     expect(onCreate).toHaveBeenCalledWith('aaa');
-    // Search is reset so a subsequent value is not concatenated onto the first.
     expect(searchBox.value).toBe('');
   });
 
@@ -156,7 +150,6 @@ describe('SearchPopoverMenu', () => {
     ];
     renderMenu(options);
     open();
-    // One header per contiguous group run, not per row.
     expect(screen.getByText('Group 1')).toBeInTheDocument();
     expect(screen.getByText('Group 2')).toBeInTheDocument();
   });
@@ -168,8 +161,7 @@ describe('SearchPopoverMenu', () => {
     ];
     renderMenu(options, { checkable: true });
     open();
-    // The panel renders in a portal, so query the document. The unselected
-    // row's check carries the --hidden modifier; the selected one does not.
+    // Unselected rows carry the --hidden modifier on their check; selected ones do not.
     const allChecks = document.querySelectorAll('.plqFieldOption__check');
     const hiddenChecks = document.querySelectorAll('.plqFieldOption__check--hidden');
     expect(allChecks).toHaveLength(2);

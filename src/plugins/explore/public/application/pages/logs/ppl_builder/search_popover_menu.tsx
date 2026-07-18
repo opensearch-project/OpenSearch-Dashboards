@@ -45,15 +45,12 @@ interface SearchPopoverMenuProps {
     dataTestSubj?: string;
   };
   keepOpenOnSelect?: boolean;
-  // Open the popover (and focus its search box) once on mount. For callers that
-  // reveal the menu in response to a user action and want it ready to type in.
+  // Open and focus the search box once on mount.
   autoOpen?: boolean;
   onOpen?: () => void;
-  // Fires (debounced) with the trimmed search text as the user types, for
-  // callers that fetch options server-side. Empty string signals "cleared".
+  // Debounced trimmed search text for server-side option fetches; empty string signals "cleared".
   onSearchChange?: (search: string) => void;
-  // Set while a server-side option fetch is in flight; drives the search-box
-  // spinner and the "Loading…" row.
+  // Server-side fetch in flight: drives the search-box spinner and "Loading…" row.
   loading?: boolean;
   searchPlaceholder: string;
   emptyMessage: string;
@@ -83,13 +80,11 @@ export const SearchPopoverMenu: React.FC<SearchPopoverMenuProps> = ({
       setIsOpen(true);
       onOpen?.();
     }
-    // Run once on mount: autoOpen reflects the initial reveal intent.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Debounce the server-side search notification so a burst of keystrokes
-  // fires at most one fetch. Latest callback is read via ref to avoid
-  // re-arming the timer when the parent passes a new function identity.
+  // Debounce so a keystroke burst fires at most one fetch; ref avoids re-arming
+  // the timer when the parent passes a new callback identity.
   const onSearchChangeRef = useRef(onSearchChange);
   onSearchChangeRef.current = onSearchChange;
   const changeSearch = (next: string) => {
@@ -120,10 +115,8 @@ export const SearchPopoverMenu: React.FC<SearchPopoverMenuProps> = ({
 
   const selectOption = (option: SearchMenuOption) => {
     option.onSelect();
-    // Keep the popover open for multi-select, but always clear the search so the
-    // next typed value starts fresh rather than appending to the previous text.
-    // changeSearch (not setSearch) so a server-side option source is asked to
-    // restore its unfiltered list.
+    // On multi-select, clear via changeSearch (not setSearch) so a server-side
+    // source restores its unfiltered list.
     if (keepOpenOnSelect) changeSearch('');
     else close();
   };

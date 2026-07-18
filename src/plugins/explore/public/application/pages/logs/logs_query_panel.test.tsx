@@ -26,9 +26,8 @@ jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
   useOpenSearchDashboards: jest.fn(),
 }));
 
-// The data plugin's UI barrel calls withOpenSearchDashboards at import time and
-// isn't needed here; stub it (keeping harmless value exports) so the selectors'
-// transitive import resolves without mounting the query bar.
+// The data plugin's UI barrel calls withOpenSearchDashboards at import time;
+// stub it so the selectors' transitive import resolves without the query bar.
 jest.mock('../../../../../data/public', () => ({
   ResultStatus: {
     UNINITIALIZED: 'uninitialized',
@@ -40,16 +39,14 @@ jest.mock('../../../../../data/public', () => ({
 }));
 
 // Keep the real parsePPL/types (mode decision depends on parsePPL) but stub the
-// heavy PPLBuilder component, whose module pulls in the data plugin via
+// heavy PPLBuilder, whose module pulls in the data plugin via
 // createHistogramConfigs. Re-export from the leaf modules to avoid that chain.
 jest.mock('./ppl_builder', () => ({
   ...jest.requireActual('./ppl_builder/parse_ppl'),
   ...jest.requireActual('./ppl_builder/types'),
-  // The builder's `</>` toggle (search-row code switch) is driven by
-  // onSwitchToCode; expose it so the mode tests can switch to code. The stub also
-  // surfaces the `initialState` it was mounted with (so tests can assert what
-  // survives a Code round-trip) and lets a test push a builder edit whose state
-  // carries partial work that buildPPL can't serialize (a fieldless metric).
+  // The stub surfaces the `initialState` it mounted with and exposes buttons to
+  // switch to code and to push a builder edit whose state carries partial work
+  // buildPPL can't serialize (a fieldless metric).
   PPLBuilder: ({
     initialState,
     onSwitchToCode,
@@ -69,8 +66,8 @@ jest.mock('./ppl_builder', () => ({
         type="button"
         data-test-subj="stub-add-partial-metric"
         onClick={() =>
-          // A metric with no field yet compiles to nothing, so buildPPL emits
-          // just the search expression — the partial work lives only in state.
+          // A fieldless metric compiles to nothing, so the emitted query is just
+          // the search expression; the partial work lives only in state.
           onQueryChange?.('service="web-store"', {
             searchExpression: 'service="web-store"',
             aggregations: [{ id: 'ag-partial', fn: 'avg' }],
@@ -96,16 +93,13 @@ jest.mock('../../../components/query_panel/query_panel_generated_query', () => (
 jest.mock('../../../components/query_panel/actions/ppl_execute_query_action', () => ({
   usePPLExecuteQueryAction: jest.fn(),
 }));
-// The run action (Cmd/Ctrl+Enter) is imported from the query_editor actions
-// barrel, which transitively pulls in createHistogramConfigs (data plugin) at
-// module load. Stub it to a no-op thunk so that chain isn't required here.
+// Stubbed to a no-op thunk; the real action pulls in createHistogramConfigs
+// (data plugin) at module load.
 jest.mock('../../utils/state_management/actions/query_editor', () => ({
   onEditorRunActionCreator: jest.fn(() => () => {}),
 }));
-// Shared editor-text state so the Code editor round-trip is realistic: whatever
-// the builder pushes via setEditorText is what getEditorText reads back on a
-// Code -> Builder toggle (in the real app the editor is seeded with the
-// source-less builder output). Reset per-test in beforeEach.
+// Shared editor-text state so the Code round-trip is realistic: what the builder
+// pushes via setEditorText is what getEditorText reads back.
 const mockEditorText = { current: '' };
 jest.mock('../../../application/hooks', () => ({
   useSetEditorTextWithQuery: () => jest.fn(),
@@ -188,12 +182,9 @@ describe('LogsQueryPanel', () => {
     renderPanel('source = logs service="web-store"');
     expect(screen.getByTestId('ppl-builder-stub')).toBeInTheDocument();
 
-    // The builder's `</>` toggle switches to code.
     fireEvent.click(screen.getByTestId('stub-switch-to-code'));
     expect(screen.getByTestId('code-editor-stub')).toBeInTheDocument();
 
-    // In code mode the `</>` toggle (pinned top-right) switches back to builder;
-    // the query is still representable, so it is enabled.
     fireEvent.click(screen.getByTestId('pplBuilderModeToggle'));
     expect(screen.getByTestId('ppl-builder-stub')).toBeInTheDocument();
     expect(screen.queryByTestId('code-editor-stub')).not.toBeInTheDocument();
@@ -202,7 +193,6 @@ describe('LogsQueryPanel', () => {
   it('disables the Builder toggle for an unrepresentable query in Code mode', () => {
     renderPanel('source = logs | sort field');
     expect(screen.getByTestId('code-editor-stub')).toBeInTheDocument();
-    // The `</>` toggle is rendered but disabled (query can't round-trip).
     expect(screen.getByTestId('pplBuilderModeToggle')).toBeDisabled();
   });
 
@@ -210,17 +200,13 @@ describe('LogsQueryPanel', () => {
     renderPanel('service="web-store"');
     expect(screen.getByTestId('ppl-builder-stub')).toBeInTheDocument();
 
-    // Build partial work that buildPPL can't serialize: a metric with no field.
-    // The emitted query is just the search expression; the fieldless metric lives
-    // only in the builder state.
     fireEvent.click(screen.getByTestId('stub-add-partial-metric'));
 
     // Toggle to Code and back WITHOUT editing the code.
     fireEvent.click(screen.getByTestId('stub-switch-to-code'));
     fireEvent.click(screen.getByTestId('pplBuilderModeToggle'));
 
-    // The builder remounts with the preserved state verbatim — the fieldless
-    // metric is still there (a re-parse of the code would have dropped it).
+    // The preserved state is restored verbatim; a re-parse would drop the metric.
     const initial = JSON.parse(screen.getByTestId('stub-initial-state').textContent || '{}');
     expect(initial.aggregations).toEqual([{ id: 'ag-partial', fn: 'avg' }]);
   });
@@ -230,10 +216,8 @@ describe('LogsQueryPanel', () => {
     fireEvent.click(screen.getByTestId('stub-add-partial-metric'));
     fireEvent.click(screen.getByTestId('stub-switch-to-code'));
 
-    // Monaco can hand the text back with a different EOL or a trailing newline
-    // even when the user didn't edit it. That must NOT be treated as an edit:
-    // the preserved snapshot (with the fieldless metric) should still be
-    // restored rather than falling into the lossy re-parse.
+    // A trailing newline / CRLF from Monaco must NOT count as an edit: the
+    // preserved snapshot should still be restored rather than lossily re-parsed.
     mockEditorText.current = 'service="web-store"\r\n';
     fireEvent.click(screen.getByTestId('pplBuilderModeToggle'));
 
@@ -246,9 +230,8 @@ describe('LogsQueryPanel', () => {
     fireEvent.click(screen.getByTestId('stub-add-partial-metric'));
     fireEvent.click(screen.getByTestId('stub-switch-to-code'));
 
-    // Simulate the user editing the code so it no longer matches the builder's
-    // last output. The preserved snapshot must NOT be restored — the edited code
-    // is now authoritative, so the fieldless metric is gone.
+    // Edited code no longer matches the builder's output, so it is authoritative:
+    // the preserved snapshot is dropped in favor of re-parsing.
     mockEditorText.current = 'service="web-store" | stats count()';
     fireEvent.click(screen.getByTestId('pplBuilderModeToggle'));
 

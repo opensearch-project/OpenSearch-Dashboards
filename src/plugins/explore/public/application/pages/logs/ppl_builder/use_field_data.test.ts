@@ -75,13 +75,11 @@ describe('useFieldData', () => {
 
     const { result } = renderHook(() => useFieldData());
 
-    // The full field list keeps the date field; the group-by options drop it.
     expect(result.current.fieldNames).toEqual(['@timestamp', 'service', 'bytes']);
     expect(result.current.groupByFieldNames).toEqual(['service', 'bytes']);
   });
 
   it('sources datasetType from the query service (not the DataView) and forwards the search term', async () => {
-    // The DataView has no `.type`; the query service dataset carries INDEX_PATTERN.
     mockUseDatasetContext.mockReturnValue({
       dataset: { title: 'logs-*', type: undefined, fields: { getAll: () => [] } },
     });

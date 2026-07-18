@@ -39,10 +39,9 @@ export const useChangeQueryEditor = () => {
       const languageConfig = queryString.getLanguageService().getLanguage(query.language);
       if (!languageConfig) return;
 
-      // Base query text: read from the QueryStringManager draft, not the Monaco
-      // editor ref. In the logs visual builder the editor is unmounted, so the
-      // ref would be empty and the filter would be silently dropped — the bug
-      // this fixes. Fall back to the language's default query string when empty.
+      // Base text from the QueryStringManager draft, not the Monaco ref: in the
+      // logs visual builder the editor is unmounted, so the ref would be empty and
+      // the filter silently dropped. Fall back to the language default when empty.
       const currentQuery = queryString.getQuery();
       const baseText =
         (typeof currentQuery.query === 'string' && currentQuery.query) ||
@@ -57,11 +56,10 @@ export const useChangeQueryEditor = () => {
         dataset.id ?? ''
       );
 
-      // Prompt (natural-language) mode is only shown with the editor mounted, so
-      // keep the existing staging behavior via the prompt-filter helper. Setting
-      // the value programmatically bypasses the Monaco onChange that flips the
-      // dirty flag, so mark the editor dirty explicitly to keep the TopNav submit
-      // button showing "Update" rather than "Refresh".
+      // Prompt mode only shows with the editor mounted; keep staging via the
+      // prompt-filter helper. Programmatic setValue bypasses the Monaco onChange
+      // that flips the dirty flag, so mark dirty explicitly to keep TopNav on
+      // "Update".
       if (editorMode === EditorMode.Prompt) {
         setEditorText(languageConfig.addFiltersToPrompt?.(baseText, newFilters) || baseText);
         dispatch(setIsQueryEditorDirty(true));
@@ -69,16 +67,12 @@ export const useChangeQueryEditor = () => {
         return;
       }
 
-      // Each language config serializes filters into its own syntax. For PPL the
-      // shared util inserts each filter as its own `| WHERE` command after the
-      // leading search command (including exists/not-exists as ISNOTNULL/ISNULL),
-      // all of which the logs visual builder round-trips back into chips.
+      // Each language config serializes filters into its own syntax; PPL emits a
+      // `| WHERE` command per filter, which the logs builder round-trips to chips.
       const newText = languageConfig.addFiltersToQuery?.(baseText, newFilters) || baseText;
 
-      // Commit to the QueryStringManager draft (keeps TopNav submit in sync even
-      // if the run below is short-circuited), mirror into the code editor when
-      // mounted (no-op otherwise), then run the query so results refresh and the
-      // builder re-seeds from the new Redux query.
+      // Commit to the draft, mirror into the code editor (no-op when unmounted),
+      // then run so results refresh and the builder re-seeds from the new query.
       queryString.setQuery({ ...currentQuery, query: newText });
       setEditorText(newText);
       dispatch(onEditorRunActionCreator(services, newText));

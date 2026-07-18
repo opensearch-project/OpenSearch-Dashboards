@@ -17,7 +17,6 @@ describe('AddMetricMenu', () => {
   it('collapses to an icon-only trigger once a metric exists', () => {
     render(<AddMetricMenu onAdd={jest.fn()} hasMetrics dataTestSubj="pplBuilderAddAggregation" />);
     const trigger = screen.getByTestId('pplBuilderAddAggregation');
-    // Icon trigger uses the label only as an aria-label, not visible text.
     expect(trigger).toHaveAttribute('aria-label', 'Aggregation');
     expect(trigger).not.toHaveTextContent('Aggregation');
   });
@@ -26,7 +25,6 @@ describe('AddMetricMenu', () => {
     const onAdd = jest.fn();
     render(<AddMetricMenu onAdd={onAdd} dataTestSubj="pplBuilderAddAggregation" />);
     fireEvent.click(screen.getByTestId('pplBuilderAddAggregation'));
-    // The catalog labels appear inside the opened popover.
     fireEvent.click(screen.getByText('Count'));
     expect(onAdd).toHaveBeenCalledWith('count');
   });

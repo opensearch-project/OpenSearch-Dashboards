@@ -139,18 +139,14 @@ describe('useChangeQueryEditor', () => {
     const { result } = renderHook(() => useChangeQueryEditor());
     result.current.onAddFilter('service', 'web', '+');
 
-    // Delegated serialization to the (PPL) language config.
     expect(mockLanguageConfig.addFiltersToQuery).toHaveBeenCalledWith('source = logs', [
       { meta: { key: 'field', value: 'value' } },
     ]);
-    // Committed to the QueryStringManager draft.
     expect(mockSetQuery).toHaveBeenCalledWith({
       query: "source = logs service='web'",
       language: 'PPL',
     });
-    // Mirrored into the (possibly unmounted) code editor.
     expect(mockSetEditorText).toHaveBeenCalledWith("source = logs service='web'");
-    // Ran the query so results refresh and the builder re-seeds.
     expect(onEditorRunActionCreator).toHaveBeenCalledWith(
       mockServices,
       "source = logs service='web'"
@@ -167,7 +163,6 @@ describe('useChangeQueryEditor', () => {
     result.current.onAddFilter('service', 'web', '+');
 
     expect(mockLanguageConfig.getQueryString).toHaveBeenCalled();
-    // The language default seeds the base text passed to the serializer.
     expect(mockLanguageConfig.addFiltersToQuery).toHaveBeenCalledWith('source = logs', [
       { meta: { key: 'field', value: 'value' } },
     ]);
@@ -197,8 +192,6 @@ describe('useChangeQueryEditor', () => {
     // Prompt mode stages only; it does not commit to the draft or run.
     expect(mockSetQuery).not.toHaveBeenCalled();
     expect(onEditorRunActionCreator).not.toHaveBeenCalled();
-    // Programmatic setValue bypasses Monaco onChange, so the dirty flag is set
-    // explicitly to keep the submit button showing "Update".
     expect(mockDispatch).toHaveBeenCalledWith(setIsQueryEditorDirty(true));
     expect(mockFocusOnEditor).toHaveBeenCalled();
   });
@@ -239,7 +232,6 @@ describe('useChangeQueryEditor', () => {
     const { result } = renderHook(() => useChangeQueryEditor());
     result.current.onAddFilter(mockField, 'web', '+');
 
-    // The field object is forwarded to generateFilters untouched.
     expect(opensearchFilters.generateFilters).toHaveBeenCalledWith(
       mockFilterManager,
       mockField,

@@ -25,7 +25,6 @@ describe('emptyState', () => {
     expect(a.groupBy).not.toBe(b.groupBy);
     expect(a.groupBy.fields).not.toBe(b.groupBy.fields);
 
-    // Mutating one must not leak into a subsequent empty state.
     a.aggregations.push({ id: 'x', fn: 'count' });
     a.groupBy.fields.push('service');
     expect(emptyState().aggregations).toEqual([]);

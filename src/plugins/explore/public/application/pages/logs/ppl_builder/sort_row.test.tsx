@@ -61,7 +61,6 @@ describe('SortRow', () => {
 
   it('toggles the sort direction to ascending', () => {
     const { dispatch } = renderRow({ column: 'service', desc: true });
-    // Open the direction super-select and pick "Asc".
     fireEvent.click(screen.getByTestId('pplBuilderSortDirection'));
     fireEvent.click(screen.getByText('Asc'));
     expect(dispatch).toHaveBeenCalledWith({

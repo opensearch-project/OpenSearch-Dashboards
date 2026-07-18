@@ -7,9 +7,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { PPLBuilder } from './ppl_builder';
 import { PPLBuilderState, emptyState } from './types';
 
-// Mock the shared react kibana module: CodeEditor (used by SearchBox) is
-// rendered as a simple textbox so we can drive onChange, and
-// useOpenSearchDashboards returns the minimal services the builder reads.
+// Render CodeEditor as a plain textbox so onChange is drivable; stub services the builder reads.
 jest.mock('../../../../../../opensearch_dashboards_react/public', () => ({
   CodeEditor: ({ value, onChange }: any) => (
     <input
@@ -32,34 +30,26 @@ jest.mock('../../../../../../opensearch_dashboards_react/public', () => ({
   })),
 }));
 
-// @osd/monaco is globally mocked; SearchBox only needs monaco.languages.register.
-
-// createHistogramConfigs pulls in the whole data plugin; stub it so the auto
-// span interval derivation resolves without that import chain.
+// Stub createHistogramConfigs to avoid pulling in the whole data plugin.
 jest.mock('../../../../components/chart/utils', () => ({
   createHistogramConfigs: jest.fn(() => ({
     aggs: [{}, { buckets: { getInterval: () => ({ expression: '30s' }) } }],
   })),
 }));
 
-// The dataset context supplies the resolved DataView; the builder reads
-// dataset.timeFieldName for span derivation.
 jest.mock('../../../context', () => ({
   useDatasetContext: () => ({ dataset: { timeFieldName: '@timestamp' } }),
 }));
 
-// The field-data hook talks to services/autocomplete; stub it with static data.
 jest.mock('./use_field_data', () => ({
   useFieldData: () => ({
     fields: [{ name: 'service' }, { name: 'bytes', type: 'number' }, { name: 'service.keyword' }],
     fieldNames: ['service', 'bytes', 'service.keyword'],
-    // `.keyword` sub-fields are excluded — the PPL engine rejects them as a
-    // sort target.
+    // `.keyword` sub-fields excluded: the PPL engine rejects them as sort targets.
     sortableFieldNames: ['service', 'bytes'],
     numericAndAggregatableNames: ['bytes'],
     numericFieldNames: ['bytes'],
-    // Group-by options exclude date-typed fields — time grouping is the
-    // "over time" popover entry, not a bare @timestamp field.
+    // Group-by excludes date-typed fields: time grouping is the "over time" popover entry.
     groupByFieldNames: ['service', 'bytes', 'service.keyword'],
     timeFieldName: '@timestamp',
     getValues: jest.fn(async () => []),
@@ -74,7 +64,6 @@ const renderBuilder = (initialState: PPLBuilderState = emptyState(), onRun?: () 
   return { ...utils, onQueryChange };
 };
 
-// A count-aggregated state, optionally time-grouped with the given span interval.
 const countState = (interval?: string): PPLBuilderState => ({
   ...emptyState(),
   aggregations: [{ id: 'a', fn: 'count' }],
@@ -87,8 +76,6 @@ describe('PPLBuilder', () => {
   it('renders the search box and group rows', () => {
     renderBuilder();
     expect(screen.getByText('Search for')).toBeInTheDocument();
-    // With no aggregation yet, the aggregation group collapses to a ghost
-    // "+ Aggregation" button, and group-by collapses to a "+ Group by" button.
     expect(screen.getByTestId('pplBuilderAddAggregation')).toHaveTextContent('Aggregation');
     expect(screen.getByTestId('pplBuilderAddGroupBy')).toHaveTextContent('Group by');
     expect(screen.getByTestId('pplBuilderSearchBox')).toBeInTheDocument();
@@ -98,7 +85,6 @@ describe('PPLBuilder', () => {
     const { onQueryChange } = renderBuilder();
     fireEvent.click(screen.getByTestId('pplBuilderAddAggregation'));
     fireEvent.click(screen.getByText('Count'));
-    // The aggregation lands, but group-by stays collapsed behind its "+" button.
     expect(onQueryChange).toHaveBeenLastCalledWith('| stats count()', expect.anything());
     expect(screen.getByTestId('pplBuilderAddGroupBy')).toBeInTheDocument();
     expect(screen.queryByTestId('pplBuilderGroupByFields')).not.toBeInTheDocument();
@@ -107,12 +93,10 @@ describe('PPLBuilder', () => {
   it('expands both components with a default count() when "+ Group by" is clicked directly', () => {
     const { onQueryChange } = renderBuilder();
     fireEvent.click(screen.getByTestId('pplBuilderAddGroupBy'));
-    // A count() aggregation is seeded and the group-by row (Everything) appears.
     expect(onQueryChange).toHaveBeenLastCalledWith('| stats count()', expect.anything());
     expect(screen.getByTestId('pplBuilderGroupByFields')).toBeInTheDocument();
     expect(screen.queryByTestId('pplBuilderAddGroupBy')).not.toBeInTheDocument();
-    // The field picker opens focused so the user can pick fields immediately;
-    // its options (the dataset fields) are visible without a further click.
+    // Field picker auto-opens, so its options are visible without a further click.
     expect(screen.getByTestId('pplBuilderFieldOption-service')).toBeInTheDocument();
   });
 
@@ -121,12 +105,10 @@ describe('PPLBuilder', () => {
       ...countState(),
       groupBy: { fields: ['service'] },
     });
-    // The seeded group-by field is grouping the query.
     expect(onQueryChange).toHaveBeenLastCalledWith('| stats count() by service', expect.anything());
-    // Remove the only aggregation: group-by collapses back to its "+" button…
     fireEvent.click(screen.getByTestId('pplBuilderRemoveAgg-0'));
     expect(screen.getByTestId('pplBuilderAddGroupBy')).toBeInTheDocument();
-    // …and re-expanding shows "Everything" again, not the prior `service` field.
+    // Re-expanding shows "Everything", not the prior `service` field.
     fireEvent.click(screen.getByTestId('pplBuilderAddGroupBy'));
     expect(onQueryChange).toHaveBeenLastCalledWith('| stats count()', expect.anything());
     expect(screen.getByTestId('pplBuilderGroupByFields')).toHaveTextContent('Everything');
@@ -172,7 +154,6 @@ describe('PPLBuilder', () => {
 
   it('emits a leading pipe for a stats-only query so source prepends cleanly', () => {
     const { onQueryChange } = renderBuilder();
-    // "Add metric" opens an aggregation picker; choosing Count appends the metric.
     fireEvent.click(screen.getByTestId('pplBuilderAddAggregation'));
     fireEvent.click(screen.getByText('Count'));
     expect(onQueryChange).toHaveBeenLastCalledWith('| stats count()', expect.anything());
@@ -182,15 +163,12 @@ describe('PPLBuilder', () => {
     renderBuilder(countState('5m'));
     const chip = screen.getByTestId('pplBuilderSpanChip');
     expect(chip).toBeInTheDocument();
-    // The chip reads as plain language, not `span(...)`.
     expect(chip).toHaveTextContent('every');
-    // The interval is a popover trigger button showing the current value.
     expect(screen.getByTestId('pplBuilderSpanInterval')).toHaveTextContent('5m');
   });
 
   it('changes the span interval from the interval popover presets', () => {
     const { onQueryChange } = renderBuilder(countState('5m'));
-    // Open the interval popover and pick a common preset.
     fireEvent.click(screen.getByTestId('pplBuilderSpanInterval'));
     fireEvent.click(screen.getByTestId('pplBuilderSpanIntervalOption-1h'));
     expect(onQueryChange).toHaveBeenLastCalledWith(
@@ -201,12 +179,9 @@ describe('PPLBuilder', () => {
 
   it('adds time grouping from the "over time" entry in the group-by popover', () => {
     const { onQueryChange } = renderBuilder(countState());
-    // Reveal the group-by row (it starts collapsed for an aggregation-only state).
     fireEvent.click(screen.getByTestId('pplBuilderAddGroupBy'));
-    // Open the group-by popover (the "Everything" placeholder is its trigger).
     fireEvent.click(screen.getByTestId('pplBuilderGroupByFields'));
-    // "Over time" leads the list; picking it adds a span on the time field. The
-    // mocked auto interval is 30s (see createHistogramConfigs stub).
+    // Mocked auto interval is 30s (see createHistogramConfigs stub).
     fireEvent.click(screen.getByTestId('pplBuilderGroupByOverTime'));
     expect(onQueryChange).toHaveBeenLastCalledWith(
       '| stats count() by span(@timestamp, 30s)',
@@ -222,22 +197,18 @@ describe('PPLBuilder', () => {
 
   it('offers an "Add sort" affordance as its own operation, even without aggregation', () => {
     renderBuilder();
-    // Sort is an independent pipe stage: available up front, not gated on stats.
     expect(screen.getByTestId('pplBuilderAddSort')).toBeInTheDocument();
   });
 
   it('sorts raw rows by a dataset field when the query does not aggregate', () => {
     const { onQueryChange } = renderBuilder();
     fireEvent.click(screen.getByTestId('pplBuilderAddSort'));
-    // Defaults to the first sortable dataset field (service), descending.
     expect(onQueryChange).toHaveBeenLastCalledWith('| sort -service', expect.anything());
   });
 
   it('omits `.keyword` sub-fields from the sort column suggestions', () => {
     renderBuilder({ ...emptyState(), sort: { column: 'service', desc: true } });
-    // Open the sort column field popover to reveal its option list.
     fireEvent.click(screen.getByTestId('pplBuilderSortColumn'));
-    // The plain fields are offered; the unsortable `.keyword` sub-field is not.
     expect(screen.getByTestId('pplBuilderFieldOption-service')).toBeInTheDocument();
     expect(screen.getByTestId('pplBuilderFieldOption-bytes')).toBeInTheDocument();
     expect(screen.queryByTestId('pplBuilderFieldOption-service.keyword')).not.toBeInTheDocument();
@@ -249,7 +220,6 @@ describe('PPLBuilder', () => {
       groupBy: { fields: ['service'] },
     });
     fireEvent.click(screen.getByTestId('pplBuilderAddSort'));
-    // Defaults to the first sortable column (the count() metric), descending.
     expect(onQueryChange).toHaveBeenLastCalledWith(
       '| stats count() by service | sort -`count()`',
       expect.anything()

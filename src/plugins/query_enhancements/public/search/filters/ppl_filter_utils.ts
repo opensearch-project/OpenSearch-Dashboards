@@ -34,9 +34,6 @@ export class PPLFilterUtils extends FilterUtils {
     const commands = query.split('|').map((cmd) => cmd.trim());
     let filterExists = false;
 
-    // Match the WHERE keyword case-insensitively: the PPL visual builder emits a
-    // lowercase `where`, so a case-sensitive prefix check would miss builder-emitted
-    // clauses and duplicate them when the same filter is re-added from the sidebar.
     for (let i = 0; i < commands.length; i++) {
       const match = commands[i].match(/^where\s+(.*)$/is);
       if (match) {

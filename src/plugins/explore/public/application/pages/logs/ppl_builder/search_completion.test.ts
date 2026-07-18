@@ -13,16 +13,13 @@ describe('analyzeSearchExpression', () => {
   });
 
   it.each<[string, string, number, { partial: string; start: number; end: number }]>([
-    // Typing a bare term/field name: the token under the caret is replaced.
     ['a bare term / field name', 'stat', 4, { partial: 'stat', start: 0, end: 4 }],
-    // Caret before `@timestamp` (col 16): accepting a field inserts, not overwrites.
     [
       'the start of an existing term (empty range insert)',
       "extension='deb' @timestamp='sample'",
       16,
       { partial: '', start: 16, end: 16 },
     ],
-    // Caret one char into `status`: the term being edited is replaced in full.
     ['inside a term (replaces its extent)', 'status=500', 3, { partial: 'sta', start: 0, end: 6 }],
   ])('suggests fields at %s', (_label, query, cursor, expected) => {
     const a = analyzeSearchExpression(query, cursor);

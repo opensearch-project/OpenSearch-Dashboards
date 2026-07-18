@@ -563,8 +563,6 @@ describe('useQueryPanelEditor', () => {
 
       unmount();
 
-      // Otherwise submit handlers would read stale text from a disposed editor
-      // instead of the query string the visual builder wrote.
       expect(mockEditorRef.current).toBeNull();
     });
   });

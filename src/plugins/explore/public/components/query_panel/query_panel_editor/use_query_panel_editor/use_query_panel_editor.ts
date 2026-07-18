@@ -273,10 +273,6 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
     [editorRef]
   );
 
-  // Clear the shared editor ref when the code editor unmounts (e.g. switching to
-  // the visual builder, which doesn't render it). Otherwise the ref keeps
-  // pointing at a disposed editor and submit handlers read its stale text
-  // instead of falling back to the query string the builder wrote.
   useEffect(() => {
     return () => {
       editorRef.current = null;

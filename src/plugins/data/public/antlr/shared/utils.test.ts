@@ -744,10 +744,8 @@ describe('fetchColumnValues', () => {
       'val'
     );
 
-    // A filtered fetch runs a fresh query rather than serving the cache...
     expect(mockServices.data.search.searchSource.create).toHaveBeenCalled();
     expect(result).toEqual(['value1', 'value2', 'value3']);
-    // ...and does not overwrite the field's canonical top-N cache.
     expect(mockField.spec.suggestions!.values).toEqual(['cached1', 'cached2']);
   });
 

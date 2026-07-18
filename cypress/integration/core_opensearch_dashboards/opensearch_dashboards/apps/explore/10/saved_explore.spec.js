@@ -63,8 +63,7 @@ const runSavedExploreTests = () => {
       cy.explore.setDataset(INDEX_PATTERN_WITH_TIME, DATASOURCE_NAME, 'INDEX_PATTERN');
       cy.explore.setTopNavDate(START_TIME, END_TIME, false);
 
-      // `addPPLSourceClause` back-quotes an INDEX_PATTERN source, so type and assert
-      // the back-quoted form to match what the reloaded editor shows.
+      // Set query input
       cy.explore.clearQueryEditor();
       const query = `source = \`${INDEX_PATTERN_WITH_TIME}\` | stats count() by category`;
       cy.explore.setQueryEditor(query, { submit: false });

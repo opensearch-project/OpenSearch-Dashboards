@@ -188,9 +188,6 @@ export const fetchColumnValues = async (
   return fieldInOsd?.spec.suggestions?.values ?? [];
 };
 
-// Wrap a user-typed term as a PPL/SQL string literal, doubling single quotes so
-// it can't break out of the literal. Wildcards are escaped so `%`/`_` typed by
-// the user match literally rather than acting as LIKE metacharacters.
 const escapeLikeLiteral = (term: string): string =>
   `'%${term.replace(/'/g, "''").replace(/[%_]/g, '\\$&')}%'`;
 
@@ -215,10 +212,7 @@ const buildColumnValueQuery = (
   return `source = ${escapeIdentifier(table)}${where} | top ${limit} ${escapeIdentifier(column)}`;
 };
 
-// Fetch field values via a live query. Without a search term this refreshes the
-// field's unfiltered top-N cache in the background; with one it runs a filtered
-// query and returns the values without touching the cache. Returns the fetched
-// values, or undefined when the query was skipped (disabled/unsupported).
+// Non-blocking async function to update field values in background
 const updateFieldValuesAsync = async (
   table: string,
   column: string,

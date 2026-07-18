@@ -91,11 +91,7 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
     Boolean(services.capabilities?.explore?.logsQueryBuilderEnabled) &&
     services.uiSettings.get(ENABLE_LOGS_QUERY_BUILDER_SETTING, true);
 
-  // Remount the builder panel on a dataset switch so all its local state
-  // (mode, seeded builder state, refs) is re-derived from the now-cleared query.
-  // The switch belongs to a different dataset's fields, so any in-progress draft
-  // is stale; keying on the dataset id lets React discard it without the panel
-  // tracking a previous id or reaching into its own refs.
+  // Keyed on dataset id below to remount the builder panel on dataset switch, discarding stale draft state.
   const dataset = useSelector(selectDataset);
 
   return (

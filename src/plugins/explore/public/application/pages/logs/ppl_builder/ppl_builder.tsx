@@ -93,15 +93,10 @@ export const PPLBuilder: React.FC<PPLBuilderProps> = ({
 
   const hasAggregation = state.aggregations.length > 0;
 
-  // The group-by ("by everything") row is revealed only when the user asks for
-  // it — either by clicking "+ group by" or by seeding state that already
-  // groups. Adding an aggregation on its own leaves it collapsed.
   const [showGroupBy, setShowGroupBy] = useState(
     () => !!(initialState && (initialState.groupBy.fields.length > 0 || initialState.groupBy.span))
   );
-  // True only when group-by was just revealed by clicking "+ group by", so the
-  // field picker opens focused for immediate selection. Seeded state does not
-  // auto-open.
+  // Auto-focus the field picker only when group-by is revealed by a click, not when seeded.
   const [autoOpenGroupBy, setAutoOpenGroupBy] = useState(false);
 
   const expandGroupBy = useCallback(() => {
@@ -112,9 +107,7 @@ export const PPLBuilder: React.FC<PPLBuilderProps> = ({
     setAutoOpenGroupBy(true);
   }, [state.aggregations.length]);
 
-  // Group-by only makes sense alongside an aggregation. Once the last one is
-  // removed, collapse it and drop any selected fields/span, so the next
-  // "+ Aggregation" or "+ Group by" starts fresh at "group by Everything".
+  // Group-by requires an aggregation; collapse and reset it once the last one is removed.
   useEffect(() => {
     if (!hasAggregation) {
       setShowGroupBy(false);

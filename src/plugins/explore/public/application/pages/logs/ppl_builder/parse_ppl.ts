@@ -24,8 +24,7 @@ export interface PPLParseResult {
   state: PPLBuilderState;
 }
 
-// Normalize an ANTLR optional-context accessor result (single node, array, or
-// nullish) into a plain array.
+// Normalize an ANTLR optional-context accessor result into a plain array.
 const toArray = <T>(x: T | T[] | null | undefined): T[] =>
   Array.isArray(x) ? x : x != null ? [x] : [];
 
@@ -64,7 +63,6 @@ function parseFieldExpression(text: string): { field: string; functions: ScalarC
   const trimmed = text.trim();
   // A back-quoted field is a literal identifier, not an expression: accept it
   // verbatim so names with dashes/spaces (e.g. `response-time`) round-trip.
-  // buildPPL emits these quoted via quoteFieldExpr; parsing must mirror that.
   if (trimmed[0] === '`' && trimmed.endsWith('`') && trimmed.length >= 2) {
     return { field: unquote(trimmed), functions: [] };
   }
@@ -137,12 +135,8 @@ function parseStatsByClause(byCtx: any, state: PPLBuilderState): boolean {
   return true;
 }
 
-// The field may be a bare identifier or back-quoted. whereField (build_ppl)
-// always back-quotes the WHERE field, and a back-quoted name can hold any
-// character except a backtick (spaces, colons, slashes, parens, #, ...), so the
-// quoted alternative must accept `[^`]+` rather than the bare-identifier charset
-// — otherwise a filter on a field like `geo.city name` compiles but cannot be
-// parsed back, and the query is wrongly flagged as unrepresentable in Builder.
+// The quoted alternative accepts `[^`]+` (any char but backtick), not just the
+// bare-identifier charset, so a back-quoted field like `geo.city name` parses back.
 const COMPARISON_RE = /^\s*(?:`([^`]+)`|([\w.@-]+))\s*(=|!=|>=|<=|<|>)\s*(.+?)\s*$/;
 
 function unquoteValue(text: string): string {
@@ -234,11 +228,8 @@ export function parseWherePredicate(text: string): WhereFilter | null {
     if (!cmp) return null;
     if (cmp.op === '=') return mkFilter(cmp.field, 'is', [cmp.value]);
     if (cmp.op === '!=') return mkFilter(cmp.field, 'is_not', [cmp.value]);
-    // A range filter with only one bound set compiles to a lone comparison
-    // (`>= min` or `< max`), so map those back to a partial `is_between`. This
-    // keeps a one-sided range representable in Builder mode and round-trips the
-    // recompiled PPL exactly. (A one-sided `is_not_between` produces the same
-    // lone operator, so it collapses to the equivalent `is_between` here.)
+    // A one-sided range compiles to a lone `>=`/`<`; map it back to a partial
+    // is_between (one-sided is_not_between collapses to the same form).
     if (cmp.op === '>=') return mkFilter(cmp.field, 'is_between', [cmp.value, '']);
     if (cmp.op === '<') return mkFilter(cmp.field, 'is_between', ['', cmp.value]);
     return null;
@@ -338,13 +329,10 @@ export function parsePPL(query: string): PPLParseResult {
       return typeof s === 'number' && typeof t === 'number' ? [s, t] : null;
     };
 
-    // Capture the leading `source = <index>` / `index = <index>` clause exactly as
-    // written (spacing, quoting, index form) so a Builder -> Code round-trip
-    // re-emits the source the user actually typed rather than a reconstructed one.
-    // A back-quoted source (source = `my-index`) does NOT parse as a
-    // searchExpression node, so match it on the raw search-command text (bounded to
-    // the text before the first pipe) rather than relying on exprList[0]. The value
-    // matches a back-quoted name, a comma-separated index list, or a bare token.
+    // Capture the leading `source|index = <index>` clause verbatim (spacing, quoting,
+    // index form) for an exact round-trip. Matched on raw search-command text (up to
+    // the first pipe) because a back-quoted source (source = `my-index`) does NOT
+    // parse as a searchExpression node. Value: back-quoted name, comma-list, or bare token.
     const searchCmdRange = exprRange(searchCmd);
     const searchCmdText =
       searchCmdRange && Number.isFinite(searchCmdRange[0])

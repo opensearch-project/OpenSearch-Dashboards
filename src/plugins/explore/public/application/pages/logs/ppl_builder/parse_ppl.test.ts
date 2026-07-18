@@ -24,12 +24,9 @@ describe('parsePPL — canBuild gating', () => {
   });
 
   it.each<[string, string]>([
-    // The source clause is captured (not surfaced in the UI); the search
-    // expression is captured verbatim as the remainder of the search command.
     ['a plain source with no search expression', ''],
     ['a field-comparison search expression', 'service="web-store"'],
     ['a boolean search expression', 'status>=500 AND service="web-store"'],
-    // The compact `field=value` form emitted by the add-filter path.
     ["the compact field='value' form", "service='web'"],
     ['a full-text search term', 'ERROR'],
   ])('captures %s (source preserved)', (_label, expr) => {
@@ -40,9 +37,6 @@ describe('parsePPL — canBuild gating', () => {
   });
 
   it.each<[string, string]>([
-    // The source clause is captured verbatim, preserving the exact form the user
-    // typed (spacing, quoting, `index =` vs `source =`) so a Builder -> Code
-    // round-trip re-emits it unchanged.
     ['spaced source', 'source = logs'],
     ['compact source', 'source=logs'],
     ['back-quoted index', 'source = `my-index`'],
@@ -97,8 +91,6 @@ describe('parsePPL — canBuild gating', () => {
     ['eval command', 'source = logs | eval x = a + b'],
     ['aliased agg', 'source = logs | stats count() as total'],
     ['stats then more', 'source = logs | stats count() | head 1'],
-    // A scalar function the builder doesn't model (multi-field concat) can't be
-    // represented as a single-field wrap, so it falls back to code mode.
     ['unmodeled scalar fn', 'source = logs | stats avg(concat(a, b))'],
     ['arithmetic field expr', 'source = logs | stats avg(latency / 1000)'],
   ])('sets canBuild=false for %s', (_label, query) => {
@@ -167,30 +159,24 @@ describe('parseWherePredicate', () => {
       '`bytes` < 1 OR `bytes` >= 9',
       { field: 'bytes', operator: 'is_not_between', values: ['1', '9'] },
     ],
-    // A range with only one bound compiles to a lone comparison; it must map
-    // back to a partial is_between so the query stays representable in Builder.
     ['`bytes` >= 10', { field: 'bytes', operator: 'is_between', values: ['10', ''] }],
     ['`bytes` < 500', { field: 'bytes', operator: 'is_between', values: ['', '500'] }],
     ['ISNOTNULL(`user`)', { field: 'user', operator: 'exists', values: [] }],
     ['ISNULL(`user`)', { field: 'user', operator: 'not_exists', values: [] }],
-    // Back-quoted field names holding characters outside the bare-identifier
-    // charset (spaces, dots-with-spaces, #, ...) must parse back — whereField
-    // always back-quotes, so these are shapes the builder itself emits.
+    // Back-quoted field names with non-identifier chars (spaces, #, ...) must parse back.
     ["`geo.city name` = 'NYC'", { field: 'geo.city name', operator: 'is', values: ['NYC'] }],
     [
       '`weird#hash` >= 1 AND `weird#hash` < 9',
       { field: 'weird#hash', operator: 'is_between', values: ['1', '9'] },
     ],
     ['ISNOTNULL(`my field`)', { field: 'my field', operator: 'exists', values: [] }],
-    // A back-quoted field name that itself contains AND/OR must not be split as
-    // a boolean operator.
+    // A back-quoted field name containing AND/OR must not be split as a boolean.
     ["`a AND b` = 'x'", { field: 'a AND b', operator: 'is', values: ['x'] }],
   ])('parses %s', (predicate, expected) => {
     expect(strip(predicate)).toEqual(expected);
   });
 
   it.each([
-    // Mixed AND/OR, cross-field comparison, and an arbitrary function.
     ['mixed AND/OR', '`a` = 1 AND `b` = 2 OR `c` = 3'],
     ['cross-field comparison', '`a` = `b`'],
     ['arbitrary function', 'LIKE(`a`, "x%")'],
@@ -222,7 +208,6 @@ describe('parsePPL — where filters', () => {
 
   it.each([
     ['a where the builder cannot model', 'source = logs | where `a` = 1 AND `b` = 2 OR `c` = 3'],
-    // Post-aggregation filter.
     ['a where after stats', 'source = logs | stats count() by service | where `count()` > 5'],
   ])('falls back to code mode for %s', (_label, query) => {
     expect(parsePPL(query).canBuild).toBe(false);
@@ -255,7 +240,6 @@ describe('parsePPL / buildPPL round-trip', () => {
       aggregations: [{ id: 'a', fn: 'avg', field: 'bytes' }],
       groupBy: { fields: ['service'] },
     },
-    // Expanded aggregation functions.
     {
       searchExpression: '',
       filters: [],
@@ -266,7 +250,6 @@ describe('parsePPL / buildPPL round-trip', () => {
       ],
       groupBy: { fields: ['service'] },
     },
-    // Scalar function wrapping a field.
     {
       searchExpression: '',
       filters: [],
@@ -280,7 +263,6 @@ describe('parsePPL / buildPPL round-trip', () => {
       ],
       groupBy: { fields: [] },
     },
-    // Scalar chain with an extra param.
     {
       searchExpression: '',
       filters: [],
@@ -297,7 +279,6 @@ describe('parsePPL / buildPPL round-trip', () => {
       ],
       groupBy: { fields: ['service'] },
     },
-    // Scalar function on a percentile field argument.
     {
       searchExpression: '',
       filters: [],
@@ -312,7 +293,6 @@ describe('parsePPL / buildPPL round-trip', () => {
       ],
       groupBy: { fields: [] },
     },
-    // Descending sort on an aggregation column (back-quoted on emit).
     {
       searchExpression: '',
       filters: [],
@@ -320,7 +300,6 @@ describe('parsePPL / buildPPL round-trip', () => {
       groupBy: { fields: ['service'] },
       sort: { column: 'count()', desc: true },
     },
-    // Ascending sort on a group-by field.
     {
       searchExpression: 'ERROR',
       filters: [],
@@ -328,7 +307,6 @@ describe('parsePPL / buildPPL round-trip', () => {
       groupBy: { fields: ['service'] },
       sort: { column: 'service', desc: false },
     },
-    // Sort on raw rows (no aggregation) — its own pipe operation.
     {
       searchExpression: 'ERROR',
       filters: [],
@@ -336,14 +314,12 @@ describe('parsePPL / buildPPL round-trip', () => {
       groupBy: { fields: [] },
       sort: { column: 'bytes', desc: true },
     },
-    // A single `is` filter compiled to a `where` stage.
     {
       searchExpression: '',
       filters: [{ id: 'f1', field: 'response', operator: 'is', values: ['200'] }],
       aggregations: [],
       groupBy: { fields: [] },
     },
-    // Multiple filters, string value with a quote to escape.
     {
       searchExpression: 'ERROR',
       filters: [
@@ -353,7 +329,6 @@ describe('parsePPL / buildPPL round-trip', () => {
       aggregations: [],
       groupBy: { fields: [] },
     },
-    // is_not_one_of + exists.
     {
       searchExpression: '',
       filters: [
@@ -363,7 +338,6 @@ describe('parsePPL / buildPPL round-trip', () => {
       aggregations: [],
       groupBy: { fields: [] },
     },
-    // Range filters + not_exists.
     {
       searchExpression: '',
       filters: [
@@ -374,8 +348,7 @@ describe('parsePPL / buildPPL round-trip', () => {
       aggregations: [],
       groupBy: { fields: [] },
     },
-    // Field names with characters outside the bare-identifier charset. These
-    // are back-quoted on emit and must parse back across every operator.
+    // Non-bare-identifier field names are back-quoted on emit and must parse back.
     {
       searchExpression: '',
       filters: [
@@ -388,8 +361,7 @@ describe('parsePPL / buildPPL round-trip', () => {
       aggregations: [],
       groupBy: { fields: [] },
     },
-    // One-sided range filters: only min set, then only max set. Each compiles
-    // to a lone comparison but must round-trip back to a partial is_between.
+    // One-sided ranges compile to a lone comparison; must round-trip to a partial is_between.
     {
       searchExpression: '',
       filters: [{ id: 'f1', field: 'bytes', operator: 'is_between', values: ['10', ''] }],
@@ -402,7 +374,6 @@ describe('parsePPL / buildPPL round-trip', () => {
       aggregations: [],
       groupBy: { fields: [] },
     },
-    // Filters combined with a stats + sort.
     {
       searchExpression: 'ERROR',
       filters: [{ id: 'f1', field: 'response', operator: 'is', values: ['500'] }],
@@ -410,15 +381,12 @@ describe('parsePPL / buildPPL round-trip', () => {
       groupBy: { fields: ['service'] },
       sort: { column: 'count()', desc: true },
     },
-    // Aggregation on a dash-bearing field: must back-quote on emit so it does
-    // not reparse as `response - time` (subtraction) and disable the builder.
     {
       searchExpression: '',
       filters: [],
       aggregations: [{ id: 'a', fn: 'avg', field: 'response-time' }],
       groupBy: { fields: [] },
     },
-    // Dash-bearing field group-by + span, with a scalar-wrapped metric.
     {
       searchExpression: '',
       filters: [],
@@ -438,10 +406,8 @@ describe('parsePPL / buildPPL round-trip', () => {
   ];
 
   it.each(cases.map((c, i) => [i, c]))('round-trips case %i', (_i, state) => {
-    // These cases carry no sourceClause; buildPPL emits a source-less query, so
-    // prepend a source clause (as the execution layer does) before reparsing so
-    // parsePPL sees a full query. The reparse then captures `source = logs`, which
-    // stripIds ignores — this block asserts the body round-trips.
+    // Cases carry no sourceClause; prepend one (as the execution layer does) so
+    // parsePPL sees a full query. stripIds ignores the captured source.
     const ppl = `source = logs ${buildPPL(state as PPLBuilderState)}`.trim();
     const reparsed = parsePPL(ppl);
     expect(reparsed.canBuild).toBe(true);
@@ -454,9 +420,6 @@ describe('parsePPL / buildPPL round-trip', () => {
     ['back-quoted index', 'source = `my-index`'],
     ['index = alias', 'index = logs'],
   ])('preserves the source clause verbatim through parse -> build -> parse (%s)', (_label, src) => {
-    // buildPPL re-emits the captured sourceClause, so the full query survives a
-    // Builder -> Code round-trip byte-for-byte (modulo the body it already
-    // round-trips), without the execution layer having to re-add source.
     const original = `${src} | WHERE \`bytes\` < 200 | stats count() by service`;
     const parsed = parsePPL(original);
     expect(parsed.canBuild).toBe(true);

@@ -15,9 +15,8 @@ import './resizable_query_container.scss';
 // Approximate pixel height needed for the query panel to show one line:
 // widgets bar (~32px) + editor line (~18px) + editor padding/border (~22px)
 const QUERY_PANEL_SINGLE_LINE_PX = 82;
-// Taller default for the logs visual builder, sized to show its default state
-// (widgets row + the "Search for" / builder rows) without clipping. The
-// panel stays manually resizable from here.
+// Taller default for the logs visual builder, sized to show its default rows
+// without clipping. Still manually resizable.
 const QUERY_PANEL_BUILDER_PX = 150;
 const QUERY_PANEL_MIN_SIZE = '3%';
 const QUERY_PANEL_MIN_PCT = 3;
@@ -25,10 +24,8 @@ const QUERY_PANEL_MAX_PCT = 72;
 const GENERATED_QUERY_SELECTOR = '.exploreQueryPanelGeneratedQuery';
 const RESIZABLE_CONTAINER_SELECTOR = '.exploreResizableQueryContainer';
 
-// Compute initial size as a percentage of the viewport so the panel always fits
-// its target height regardless of screen height. `targetPx` is the natural
-// height of the panel's content; `maxPct` clamps how much of the viewport it may
-// take.
+// Initial size as a viewport percentage so the panel fits its target height on
+// any screen. `targetPx` is the content height; `maxPct` clamps viewport share.
 export function getInitialQueryPanelSize(
   targetPx: number = QUERY_PANEL_SINGLE_LINE_PX,
   maxPct: number = 15
@@ -42,10 +39,7 @@ export function getInitialQueryPanelSize(
 interface ResizableQueryContainerProps {
   queryPanel: React.ReactNode;
   children: React.ReactNode;
-  /**
-   * Give the query panel a taller default height, for the logs visual builder
-   * whose rows don't fit in a single editor line. Resizing stays manual.
-   */
+  /** Taller default height for the logs visual builder, whose rows don't fit one editor line. */
   tallDefault?: boolean;
 }
 
