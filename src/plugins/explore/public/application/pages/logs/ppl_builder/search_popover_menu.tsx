@@ -45,6 +45,9 @@ interface SearchPopoverMenuProps {
     dataTestSubj?: string;
   };
   keepOpenOnSelect?: boolean;
+  // Open the popover (and focus its search box) once on mount. For callers that
+  // reveal the menu in response to a user action and want it ready to type in.
+  autoOpen?: boolean;
   onOpen?: () => void;
   // Fires (debounced) with the trimmed search text as the user types, for
   // callers that fetch options server-side. Empty string signals "cleared".
@@ -63,6 +66,7 @@ export const SearchPopoverMenu: React.FC<SearchPopoverMenuProps> = ({
   checkable,
   allowCreate,
   keepOpenOnSelect,
+  autoOpen,
   onOpen,
   onSearchChange,
   loading,
@@ -73,6 +77,15 @@ export const SearchPopoverMenu: React.FC<SearchPopoverMenuProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
   const firstMatchRef = useRef<SearchMenuOption | null>(null);
+
+  useEffect(() => {
+    if (autoOpen) {
+      setIsOpen(true);
+      onOpen?.();
+    }
+    // Run once on mount: autoOpen reflects the initial reveal intent.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Debounce the server-side search notification so a burst of keystrokes
   // fires at most one fetch. Latest callback is read via ref to avoid

@@ -111,6 +111,9 @@ describe('PPLBuilder', () => {
     expect(onQueryChange).toHaveBeenLastCalledWith('| stats count()', expect.anything());
     expect(screen.getByTestId('pplBuilderGroupByFields')).toBeInTheDocument();
     expect(screen.queryByTestId('pplBuilderAddGroupBy')).not.toBeInTheDocument();
+    // The field picker opens focused so the user can pick fields immediately;
+    // its options (the dataset fields) are visible without a further click.
+    expect(screen.getByTestId('pplBuilderFieldOption-service')).toBeInTheDocument();
   });
 
   it('drops group-by selections when the aggregation is removed, resetting to Everything', () => {

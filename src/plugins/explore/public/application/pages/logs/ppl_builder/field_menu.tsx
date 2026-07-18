@@ -22,6 +22,7 @@ interface FieldMenuBaseProps {
   renderTrigger?: (onToggle: () => void) => React.ReactNode;
   caretAriaLabel?: string;
   overTime?: OverTimeEntry;
+  autoOpen?: boolean;
   dataTestSubj?: string;
 }
 
@@ -47,6 +48,7 @@ export const FieldMenu: React.FC<FieldMenuProps> = (props) => {
     renderTrigger,
     caretAriaLabel,
     overTime,
+    autoOpen,
     dataTestSubj,
   } = props;
 
@@ -105,6 +107,7 @@ export const FieldMenu: React.FC<FieldMenuProps> = (props) => {
       options={menuOptions}
       checkable
       keepOpenOnSelect={props.multi}
+      autoOpen={autoOpen}
       allowCreate={{
         onCreate: choose,
         dataTestSubj: 'pplBuilderFieldOptionCreate',

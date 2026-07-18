@@ -57,6 +57,7 @@ interface GroupByRowProps {
   timeFieldName: string;
   autoInterval: string;
   onAddSpan: () => void;
+  autoOpen?: boolean;
   dispatch: React.Dispatch<BuilderAction>;
 }
 
@@ -66,6 +67,7 @@ export const GroupByRow: React.FC<GroupByRowProps> = ({
   timeFieldName,
   autoInterval,
   onAddSpan,
+  autoOpen,
   dispatch,
 }) => {
   const hasSelection = groupBy.fields.length > 0 || !!groupBy.span;
@@ -77,6 +79,7 @@ export const GroupByRow: React.FC<GroupByRowProps> = ({
     >
       <FieldMenu
         multi
+        autoOpen={autoOpen}
         options={options}
         value={groupBy.fields}
         onChange={(fields) => dispatch({ type: 'SET_GROUPBY_FIELDS', fields })}

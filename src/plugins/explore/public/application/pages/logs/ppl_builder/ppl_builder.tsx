@@ -99,12 +99,17 @@ export const PPLBuilder: React.FC<PPLBuilderProps> = ({
   const [showGroupBy, setShowGroupBy] = useState(
     () => !!(initialState && (initialState.groupBy.fields.length > 0 || initialState.groupBy.span))
   );
+  // True only when group-by was just revealed by clicking "+ group by", so the
+  // field picker opens focused for immediate selection. Seeded state does not
+  // auto-open.
+  const [autoOpenGroupBy, setAutoOpenGroupBy] = useState(false);
 
   const expandGroupBy = useCallback(() => {
     if (state.aggregations.length === 0) {
       dispatch({ type: 'ADD_AGGREGATION' });
     }
     setShowGroupBy(true);
+    setAutoOpenGroupBy(true);
   }, [state.aggregations.length]);
 
   // Group-by only makes sense alongside an aggregation. Once the last one is
@@ -113,6 +118,7 @@ export const PPLBuilder: React.FC<PPLBuilderProps> = ({
   useEffect(() => {
     if (!hasAggregation) {
       setShowGroupBy(false);
+      setAutoOpenGroupBy(false);
       dispatch({ type: 'RESET_GROUPBY' });
     }
   }, [hasAggregation]);
@@ -205,6 +211,7 @@ export const PPLBuilder: React.FC<PPLBuilderProps> = ({
             timeFieldName={timeFieldName}
             autoInterval={autoInterval}
             onAddSpan={addSpan}
+            autoOpen={autoOpenGroupBy}
             dispatch={dispatch}
           />
         ) : (
