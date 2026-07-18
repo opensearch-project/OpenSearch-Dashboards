@@ -113,6 +113,7 @@
     "osd:ciGroup21Explore": "echo \"cypress/integration/core_opensearch_dashboards/opensearch_dashboards/apps/explore/21/*.spec.js\"",
     "osd:ciGroup22Explore": "echo \"cypress/integration/core_opensearch_dashboards/opensearch_dashboards/apps/explore/22/*.spec.js\"",
     "osd:ciGroup23Explore": "echo \"cypress/integration/core_opensearch_dashboards/opensearch_dashboards/apps/explore/23/*.spec.js\"",
+    "osd:ciGroup24Explore": "echo \"cypress/integration/core_opensearch_dashboards/opensearch_dashboards/apps/explore/24/*.spec.js\"",
     "osd:ciGroupS3Explore": "echo \"cypress/integration/core_opensearch_dashboards/opensearch_dashboards/apps/explore/s3_tests/*.spec.js\"",
     "osd:ciGroupDashboards": "echo \"cypress/integration/core_opensearch_dashboards/opensearch_dashboards/apps/dashboards/*.spec.js\"",
     "osd:ciGroup1Observability": "echo \"cypress/integration/core_opensearch_dashboards/opensearch_dashboards/apps/observability/1/*.spec.js\"",
