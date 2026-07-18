@@ -24,6 +24,7 @@ import {
 } from '../../../../../../saved_objects/public';
 import { saveSavedExplore } from '../../../../helpers/save_explore';
 import { ComplexQueryWarningCallout } from '../../../../helpers/complex_query_warning';
+import { defaultPrepareQueryString } from '../../../../application/utils/state_management/actions/query_actions';
 import { TabState } from '../../../../application/utils/state_management/slices';
 import { TabDefinition } from '../../../../services/tab_registry/tab_registry_service';
 import { saveStateToSavedObject } from '../../../../saved_explore/transforms';
@@ -60,6 +61,14 @@ export const getSaveButtonRun =
   ): TopNavMenuIconRun =>
   () => {
     if (!savedExplore) return;
+
+    // Whether the query being saved was flagged complex by query profiling (see
+    // results.isComplex), used to decide whether to show the warning banner in the save modal.
+    const rootState = services.store.getState();
+    const prepareQuery =
+      services.tabRegistry?.getTab(saveStateProps.activeTabId)?.prepareQuery ||
+      defaultPrepareQueryString;
+    const isQueryComplex = rootState.results[prepareQuery(rootState.query)]?.isComplex ?? false;
 
     const onSave = async ({
       newTitle,
@@ -114,10 +123,8 @@ export const getSaveButtonRun =
         showCopyOnSave={!!savedExplore.id}
         // TODO: Does this need to be type "explore"?
         objectType="discover"
-        // Show the complex-query warning inside the save modal when query profiling is enabled.
-        // TODO(query-profiling): gate on the per-query "complex" flag from the profiling
-        // response once it is surfaced, rather than on the feature flag alone.
-        options={services.queryProfilingEnabled ? <ComplexQueryWarningCallout /> : undefined}
+        // Show the complex-query warning banner inside the save modal for a complex query.
+        options={isQueryComplex ? <ComplexQueryWarningCallout /> : undefined}
         description={i18n.translate('explore.localMenu.saveSaveSearchDescription', {
           defaultMessage:
             'Save your Discover search so you can use it in visualizations and dashboards',

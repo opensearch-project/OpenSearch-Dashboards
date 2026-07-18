@@ -37,4 +37,7 @@ export type Query = {
   query: string | { [key: string]: any };
   language: string;
   dataset?: Dataset;
+  // When true, the engine profiles this query and returns a `profile` object in the response
+  // body (including the worker thread pool it ran on). Used to detect complex queries.
+  profile?: boolean;
 };

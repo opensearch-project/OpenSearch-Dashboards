@@ -25,6 +25,7 @@ import { saveStateToSavedObject } from '../../saved_explore/transforms';
 import { addToDashboard } from './utils/add_to_dashboard';
 import { saveSavedExplore } from '../../helpers/save_explore';
 import { useCurrentExploreId } from '../../application/utils/hooks/use_current_explore_id';
+import { useIsQueryComplex } from '../../application/utils/hooks/use_is_query_complex';
 import { useSearchContext } from '../query_panel/utils/use_search_context';
 import { ExploreServices } from '../../types';
 import { getVisualizationBuilder } from './visualization_builder';
@@ -50,6 +51,7 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
   const chartConfig = useObservable(visualizationBuilder.visConfig$);
 
   const searchContext = useSearchContext();
+  const isQueryComplex = useIsQueryComplex();
 
   const transformationService = visualizationBuilder.getTransformationService();
 
@@ -240,8 +242,7 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
           savedObjectsClient={saveObjectsClient}
           onCancel={() => setShowAddToDashboardModal(false)}
           onConfirm={handleSave}
-          // TODO(query-profiling): gate on the per-query complex flag from the profiling response.
-          showComplexQueryWarning={services.queryProfilingEnabled}
+          showComplexQueryWarning={isQueryComplex}
         />
       )}
     </>

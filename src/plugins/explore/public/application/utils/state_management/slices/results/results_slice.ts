@@ -11,6 +11,8 @@ import { IFieldType } from '../../../../../../../../../src/plugins/data/common';
 export interface ISearchResult extends SearchResponse<any> {
   elapsedMs: number;
   fieldSchema?: Array<Partial<IFieldType>>;
+  // True when query profiling classified this query as complex (ran on the complex worker pool).
+  isComplex?: boolean;
 }
 
 export interface IPrometheusSearchResult extends ISearchResult {
@@ -32,6 +34,7 @@ export interface ResultMetadata {
   fieldSchema?: Array<Partial<IFieldType>>;
   instantFieldSchema?: Array<Partial<IFieldType>>;
   hasResults: boolean;
+  isComplex?: boolean;
 }
 
 export type ResultsState = Record<string, ResultMetadata>;
@@ -57,6 +60,7 @@ const extractMetadata = (result: ISearchResult): ResultMetadata => ({
   fieldSchema: result.fieldSchema,
   instantFieldSchema: (result as IPrometheusSearchResult).instantFieldSchema,
   hasResults: (result.hits?.hits?.length ?? 0) > 0,
+  isComplex: result.isComplex,
 });
 
 const initialState: ResultsState = {};

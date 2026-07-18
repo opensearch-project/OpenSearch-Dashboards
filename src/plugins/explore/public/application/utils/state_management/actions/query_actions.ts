@@ -612,6 +612,7 @@ const executeQueryBase = async (
       ...rawResults,
       elapsedMs: inspectorRequest.getTime()!,
       fieldSchema: searchSource.getDataFrame()?.schema,
+      isComplex: searchSource.getDataFrame()?.meta?.isComplex ?? false,
     };
 
     if (isHistogramQuery && histogramConfig) {
@@ -739,6 +740,9 @@ export const createSearchSourceWithQuery = async (
   const queryStringWithExecutedQuery = {
     ...data.query.queryString.getQuery(),
     query: preparedQuery.query,
+    // When query profiling is enabled, ask the engine to profile this query so the response
+    // reports whether it ran on the complex worker pool (see results.isComplex).
+    ...(services.queryProfilingEnabled ? { profile: true } : {}),
   };
 
   searchSource.setFields({

@@ -75,6 +75,17 @@ export const pplSearchStrategyProvider = (
           dataFrame.meta = { ...dataFrame.meta, highlights };
         }
 
+        // Surface the query-profiling result (present when the request asked to profile). The
+        // backend reports which worker pool ran the query; `sql-complex-worker` means complex.
+        const threadPool = rawResponse.data.profile?.thread_pool;
+        if (threadPool) {
+          dataFrame.meta = {
+            ...dataFrame.meta,
+            queryPool: threadPool,
+            isComplex: threadPool === 'sql-complex-worker',
+          };
+        }
+
         if (usage) usage.trackSuccess(rawResponse.took);
 
         if (aggConfig) {
