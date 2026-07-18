@@ -436,6 +436,16 @@ describe('builderReducer', () => {
     expect(next.groupBy.span).toBeUndefined();
   });
 
+  it('resets group-by fields and span to empty', () => {
+    let next = builderReducer(emptyState(), { type: 'SET_GROUPBY_FIELDS', fields: ['service'] });
+    next = builderReducer(next, {
+      type: 'SET_SPAN',
+      span: { field: '@timestamp', interval: '1m', auto: true },
+    });
+    next = builderReducer(next, { type: 'RESET_GROUPBY' });
+    expect(next.groupBy).toEqual({ fields: [] });
+  });
+
   it('sets and removes the sort', () => {
     let next = builderReducer(emptyState(), {
       type: 'SET_SORT',

@@ -108,9 +108,13 @@ export const PPLBuilder: React.FC<PPLBuilderProps> = ({
   }, [state.aggregations.length]);
 
   // Group-by only makes sense alongside an aggregation. Once the last one is
-  // removed, collapse it so a later "+ Aggregation" doesn't re-reveal it.
+  // removed, collapse it and drop any selected fields/span, so the next
+  // "+ Aggregation" or "+ Group by" starts fresh at "group by Everything".
   useEffect(() => {
-    if (!hasAggregation) setShowGroupBy(false);
+    if (!hasAggregation) {
+      setShowGroupBy(false);
+      dispatch({ type: 'RESET_GROUPBY' });
+    }
   }, [hasAggregation]);
 
   const sortColumns = useMemo(

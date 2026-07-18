@@ -34,6 +34,7 @@ export type BuilderAction =
     }
   | { type: 'REMOVE_FUNCTION'; index: number; fnIndex: number }
   | { type: 'SET_GROUPBY_FIELDS'; fields: string[] }
+  | { type: 'RESET_GROUPBY' }
   | { type: 'SET_SPAN'; span: TimeBucket }
   | { type: 'REMOVE_SPAN' }
   | { type: 'SET_SORT'; sort: Sort }
@@ -119,6 +120,8 @@ export function builderReducer(state: PPLBuilderState, action: BuilderAction): P
       };
     case 'SET_GROUPBY_FIELDS':
       return { ...state, groupBy: { ...state.groupBy, fields: action.fields } };
+    case 'RESET_GROUPBY':
+      return { ...state, groupBy: { fields: [] } };
     case 'SET_SPAN':
       return { ...state, groupBy: { ...state.groupBy, span: action.span } };
     case 'REMOVE_SPAN': {

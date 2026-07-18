@@ -113,6 +113,22 @@ describe('PPLBuilder', () => {
     expect(screen.queryByTestId('pplBuilderAddGroupBy')).not.toBeInTheDocument();
   });
 
+  it('drops group-by selections when the aggregation is removed, resetting to Everything', () => {
+    const { onQueryChange } = renderBuilder({
+      ...countState(),
+      groupBy: { fields: ['service'] },
+    });
+    // The seeded group-by field is grouping the query.
+    expect(onQueryChange).toHaveBeenLastCalledWith('| stats count() by service', expect.anything());
+    // Remove the only aggregation: group-by collapses back to its "+" button…
+    fireEvent.click(screen.getByTestId('pplBuilderRemoveAgg-0'));
+    expect(screen.getByTestId('pplBuilderAddGroupBy')).toBeInTheDocument();
+    // …and re-expanding shows "Everything" again, not the prior `service` field.
+    fireEvent.click(screen.getByTestId('pplBuilderAddGroupBy'));
+    expect(onQueryChange).toHaveBeenLastCalledWith('| stats count()', expect.anything());
+    expect(screen.getByTestId('pplBuilderGroupByFields')).toHaveTextContent('Everything');
+  });
+
   it('emits a source-less (empty) query on mount for an empty state', () => {
     const { onQueryChange } = renderBuilder();
     expect(onQueryChange).toHaveBeenCalledWith('', expect.anything());
