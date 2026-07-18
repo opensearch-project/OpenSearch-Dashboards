@@ -22,6 +22,10 @@ export const useIsQueryComplex = (): boolean => {
   const activeTabId = useSelector(selectActiveTabId);
 
   const cacheKey = useMemo(() => {
+    // Guard against an unpopulated query slice so the save button never throws.
+    if (!query?.language) {
+      return undefined;
+    }
     const prepareQuery =
       services.tabRegistry.getTab(activeTabId)?.prepareQuery || defaultPrepareQueryString;
     return prepareQuery(query);

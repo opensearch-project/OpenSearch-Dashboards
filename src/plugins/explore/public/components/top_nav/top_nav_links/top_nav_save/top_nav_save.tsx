@@ -64,11 +64,16 @@ export const getSaveButtonRun =
 
     // Whether the query being saved was flagged complex by query profiling (see
     // results.isComplex), used to decide whether to show the warning banner in the save modal.
-    const rootState = services.store.getState();
+    // Guarded so the save flow never breaks if the store or query state is unavailable.
+    const rootState = services.store?.getState();
+    const query = rootState?.query;
     const prepareQuery =
       services.tabRegistry?.getTab(saveStateProps.activeTabId)?.prepareQuery ||
       defaultPrepareQueryString;
-    const isQueryComplex = rootState.results[prepareQuery(rootState.query)]?.isComplex ?? false;
+    const isQueryComplex =
+      rootState && query?.language
+        ? (rootState.results[prepareQuery(query)]?.isComplex ?? false)
+        : false;
 
     const onSave = async ({
       newTitle,
