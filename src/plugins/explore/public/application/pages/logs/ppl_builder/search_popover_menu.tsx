@@ -192,6 +192,51 @@ export const SearchPopoverMenu: React.FC<SearchPopoverMenuProps> = ({
     );
   };
 
+  const renderListBody = () => {
+    if (loading && filtered.length === 0) {
+      return (
+        <div className="plqFnPopover__empty plqFnPopover__loading">
+          <EuiLoadingSpinner size="s" />
+          {i18n.translate('explore.pplBuilder.loadingValues', {
+            defaultMessage: 'Loading…',
+          })}
+        </div>
+      );
+    }
+    if (filtered.length === 0 && !allowCreateNow) {
+      return <div className="plqFnPopover__empty">{emptyMessage}</div>;
+    }
+    return (
+      <>
+        {filtered.map((option, i) => {
+          const header =
+            option.group && option.group !== filtered[i - 1]?.group ? (
+              <div key={`${option.group}-header`} className="plqFnPopover__group">
+                {option.group}
+              </div>
+            ) : null;
+          return (
+            <React.Fragment key={option.key}>
+              {header}
+              {renderRow(option)}
+            </React.Fragment>
+          );
+        })}
+        {allowCreateNow && (
+          <button
+            type="button"
+            className="plqFnPopover__item plqFieldOption"
+            onClick={() => create(search.trim())}
+            data-test-subj={allowCreate?.dataTestSubj}
+          >
+            <EuiIcon type="plus" size="s" className="plqFieldOption__check" />
+            {search.trim()}
+          </button>
+        )}
+      </>
+    );
+  };
+
   const popover = (
     <EuiPopover
       button={anchor}
@@ -216,46 +261,7 @@ export const SearchPopoverMenu: React.FC<SearchPopoverMenuProps> = ({
           data-test-subj={searchDataTestSubj}
         />
       </EuiPopoverTitle>
-      <div className="plqFnPopover__list">
-        {loading && filtered.length === 0 ? (
-          <div className="plqFnPopover__empty plqFnPopover__loading">
-            <EuiLoadingSpinner size="s" />
-            {i18n.translate('explore.pplBuilder.loadingValues', {
-              defaultMessage: 'Loading…',
-            })}
-          </div>
-        ) : filtered.length === 0 && !allowCreateNow ? (
-          <div className="plqFnPopover__empty">{emptyMessage}</div>
-        ) : (
-          <>
-            {filtered.map((option, i) => {
-              const header =
-                option.group && option.group !== filtered[i - 1]?.group ? (
-                  <div key={`${option.group}-header`} className="plqFnPopover__group">
-                    {option.group}
-                  </div>
-                ) : null;
-              return (
-                <React.Fragment key={option.key}>
-                  {header}
-                  {renderRow(option)}
-                </React.Fragment>
-              );
-            })}
-            {allowCreateNow && (
-              <button
-                type="button"
-                className="plqFnPopover__item plqFieldOption"
-                onClick={() => create(search.trim())}
-                data-test-subj={allowCreate?.dataTestSubj}
-              >
-                <EuiIcon type="plus" size="s" className="plqFieldOption__check" />
-                {search.trim()}
-              </button>
-            )}
-          </>
-        )}
-      </div>
+      <div className="plqFnPopover__list">{renderListBody()}</div>
     </EuiPopover>
   );
 

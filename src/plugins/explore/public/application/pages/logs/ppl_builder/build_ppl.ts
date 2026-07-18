@@ -121,6 +121,7 @@ export function builderReducer(state: PPLBuilderState, action: BuilderAction): P
     case 'SET_GROUPBY_FIELDS':
       return { ...state, groupBy: { ...state.groupBy, fields: action.fields } };
     case 'RESET_GROUPBY':
+      if (state.groupBy.fields.length === 0 && !state.groupBy.span) return state;
       return { ...state, groupBy: { fields: [] } };
     case 'SET_SPAN':
       return { ...state, groupBy: { ...state.groupBy, span: action.span } };

@@ -65,11 +65,9 @@ export const ALTERNATE_APPLIED_FILTERS = {
 const getAlternateQueryString = (dataset, language) => {
   switch (language) {
     case QueryLanguages.PPL.name:
-      // `<` is representable in the visual builder, so on reload this query opens in
-      // the builder and the code editor shows the builder's canonical serialization:
-      // an uppercase WHERE keyword and a back-quoted field, matching the shared
-      // filter-add convention. Written in that exact form so the round-trip compares
-      // equal without the editor-content helper having to normalize case/quoting.
+      // Written in the builder's canonical serialization (uppercase WHERE,
+      // back-quoted field) so the reload round-trip compares equal without
+      // normalizing case/quoting.
       return `source = ${dataset} | WHERE \`bytes_transferred\` < 200`;
     default:
       throw new Error(`getQueryString encountered unsupported language: ${language}`);

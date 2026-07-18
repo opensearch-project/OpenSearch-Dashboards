@@ -81,8 +81,6 @@ export interface PPLBuilderState {
   sort?: Sort;
 }
 
-// Build a `Record` keyed by each item's `key(item)`, used to turn the various
-// definition arrays (agg fns, operators, scalar fns) into lookup maps.
 export function indexBy<T, K extends string>(items: T[], key: (item: T) => K): Record<K, T> {
   return items.reduce(
     (acc, item) => {
