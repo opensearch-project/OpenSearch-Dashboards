@@ -16,7 +16,6 @@ import { ExploreServices } from '../../../types';
 
 import { useQueryBuilderState } from '../hooks/use_query_builder_state';
 import { useSavedExplore } from '../../utils/hooks/use_saved_explore';
-import { useIsQueryComplex } from '../../utils/hooks/use_is_query_complex';
 import { useSearchContext } from '../../../components/query_panel/utils/use_search_context';
 import { Query } from '../../../../../data/common';
 
@@ -47,7 +46,7 @@ const saveButtonText = i18n.translate('explore.topNav.saveVisButton.save', {
 });
 
 export const SaveVisButton = () => {
-  const { queryEditorState, datasetView } = useQueryBuilderState();
+  const { queryEditorState, datasetView, resultState } = useQueryBuilderState();
   const { visualizationBuilderForEditor: visualizationBuilder } = useVisualizationBuilder();
   const visConfig = visualizationBuilder.visConfig$.value;
   const transformationService = visualizationBuilder.getTransformationService();
@@ -57,7 +56,6 @@ export const SaveVisButton = () => {
   const exploreId = useCurrentExploreId('edit');
 
   const { savedExplore } = useSavedExplore(exploreId);
-  const isQueryComplex = useIsQueryComplex();
 
   const { toastNotifications, chrome, embeddable, osdUrlStateStorage } = services;
   const stateTransfer = embeddable.getStateTransfer();
@@ -276,7 +274,7 @@ export const SaveVisButton = () => {
           savedExploreId={exploreId}
           onCancel={() => setShowModal(false)}
           onConfirm={handleSave}
-          showComplexQueryWarning={isQueryComplex}
+          showComplexQueryWarning={resultState?.isComplex ?? false}
         />
       )}
     </EuiFlexGroup>
