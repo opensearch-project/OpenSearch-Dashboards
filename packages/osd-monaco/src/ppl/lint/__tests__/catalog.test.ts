@@ -102,6 +102,35 @@ describe('catalog loading', () => {
     ).toBeNull();
   });
 
+  it('preserves the aiFixable flag so a contributor can read it off the catalog', () => {
+    const entry = validateCatalogEntry({
+      id: 'x',
+      detector: 'x',
+      enabled: true,
+      severity: 'warning',
+      message: 'm',
+      docUrl: 'd',
+      appliesTo: {},
+      aiFixable: true,
+    });
+    expect(entry?.aiFixable).toBe(true);
+  });
+
+  it('rejects a non-boolean aiFixable', () => {
+    expect(
+      validateCatalogEntry({
+        id: 'x',
+        detector: 'x',
+        enabled: true,
+        severity: 'warning',
+        message: 'm',
+        docUrl: 'd',
+        appliesTo: {},
+        aiFixable: 'yes',
+      })
+    ).toBeNull();
+  });
+
   // OSD_KNOWN_VERSION is the *undefined-version* self-suppress horizon: when a
   // cluster's version is unknown, rules with minVersion above this threshold are
   // suppressed (conservative). It is NOT a ceiling for known-version clusters.

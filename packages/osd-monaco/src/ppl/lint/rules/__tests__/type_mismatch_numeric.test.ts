@@ -24,6 +24,7 @@ const typeMap = new Map<string, string>([
   ['age', 'long'],
   ['price', 'double'],
   ['name', 'text'],
+  ['wordcount', 'token_count'],
 ]);
 const ctx: LintRunContext = { typeMap };
 
@@ -49,6 +50,9 @@ describe('type-mismatch-numeric (compiled surface, analyzer path)', () => {
 
     it('flags a double field too', () =>
       expect(ids('search t | where price = "cheap"', ctx)).toContain(RULE_ID));
+
+    it('flags a token_count field (numeric per OSD_FIELD_TYPES.NUMBER)', () =>
+      expect(ids('search t | where wordcount = "many"', ctx)).toContain(RULE_ID));
   });
 
   describe('does NOT flag coercible / non-numeric / unknown cases', () => {

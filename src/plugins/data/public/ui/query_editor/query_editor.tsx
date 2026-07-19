@@ -208,7 +208,7 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query.dataset?.id, query.dataset?.dataSource?.id, query.dataset?.type]);
+  }, [query.dataset?.id, query.dataset?.dataSource?.id, query.dataset?.type, query.dataset?.title]);
 
   useEffect(() => {
     const subscription = services.application?.currentAppId$?.subscribe?.((appId) => {

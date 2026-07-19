@@ -83,5 +83,13 @@ export function remapPipeFirstColumns(diagnostics: Diagnostic[]): Diagnostic[] {
   return diagnostics.map((diagnostic) => ({
     ...diagnostic,
     range: shift(diagnostic.range),
+    // A fix that targets a span different from the squiggle carries its own
+    // range in the same prefixed coordinate space, so it must be shifted too —
+    // otherwise applying the quick-fix on a pipe-first query lands the edit
+    // `prefixLength` columns off. When the fix has no explicit range it reuses
+    // the (already-shifted) diagnostic range, so nothing to do there.
+    ...(diagnostic.fix?.range
+      ? { fix: { ...diagnostic.fix, range: shift(diagnostic.fix.range) } }
+      : {}),
   }));
 }

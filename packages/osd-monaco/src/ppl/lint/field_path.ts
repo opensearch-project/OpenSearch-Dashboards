@@ -35,129 +35,31 @@
  *     guess.
  */
 
-const QUOTES = new Set(['`', "'", '"']);
-
-/**
- * Split a raw field-path token into its dot-separated segments, honoring quotes:
- * a `.` inside a matching quote pair is part of the segment, not a separator.
- * A quote only opens a span when it starts a segment (so `a'b` — a stray quote
- * mid-segment — is not treated as an opener and stays literal), matching how the
- * grammar only quotes whole identifiers.
- */
-export function splitFieldPath(raw: string): string[] {
-  const segments: string[] = [];
-  let current = '';
-  let quote: string | undefined;
-  let atSegmentStart = true;
-
-  for (let i = 0; i < raw.length; i++) {
-    const ch = raw[i];
-
-    if (quote) {
-      current += ch;
-      if (ch === quote) {
-        quote = undefined;
-      }
-      continue;
-    }
-
-    if (ch === '.') {
-      segments.push(current);
-      current = '';
-      atSegmentStart = true;
-      continue;
-    }
-
-    // A quote only opens a span at the start of a segment; a quote appearing
-    // mid-segment is a literal character.
-    if (atSegmentStart && QUOTES.has(ch)) {
-      quote = ch;
-    }
-    current += ch;
-    atSegmentStart = false;
-  }
-  segments.push(current);
-
-  return segments;
-}
-
-/** Strip one enclosing quote pair from a single segment, if present. */
-function unquoteSegment(segment: string): string {
-  return segment.length >= 2 && QUOTES.has(segment[0]) && segment[0] === segment[segment.length - 1]
-    ? segment.slice(1, -1)
-    : segment;
-}
-
-/**
- * Normalize a created/derived or referenced field-path token so the two sides
- * match: split into segments honoring quotes, strip one enclosing quote pair per
- * segment, and rejoin on `.`.
- *
- *   `` `total` ``     → `total`
- *   `` a.`b` ``       → `a.b`
- *   `` `a.b` ``       → `a.b`   (one quoted segment containing a dot)
- *   `'years'`         → `years`
- */
-export function normalizeFieldPath(raw: string): string {
-  return splitFieldPath(raw).map(unquoteSegment).join('.');
-}
-
-/**
- * The leading segment of a normalized field path — the part before the first
- * *unquoted* dot — or null when the path has a single segment. Used to test a
- * dotted reference's prefix against declared join aliases. Because the split is
- * quote-aware, `` `a.b`.c `` yields the prefix `a.b`, not `a`.
- */
-export function fieldPathPrefix(raw: string): string | null {
-  const segments = splitFieldPath(raw);
-  if (segments.length < 2) {
-    return null;
-  }
-  return unquoteSegment(segments[0]);
-}
-
 // The three identifier/string delimiters PPL accepts around a path segment. A
 // backtick quotes an identifier (reference or created name); single/double
 // quotes appear only on the created-alias side and are stripped one-directionally
-// so a reference is never reinterpreted. (Same set as QUOTES above, retyped as a
-// ReadonlySet for the structured parser below.)
-const SEGMENT_QUOTES: ReadonlySet<string> = new Set(['`', "'", '"']);
-
-export interface ParsedFieldPath {
-  /** Canonical, quote-stripped segments in path order. */
-  segments: string[];
-  /** `segments.join('.')` — the canonical dotted lookup key. */
-  canonical: string;
-}
-
-/** Strip exactly one enclosing quote pair from a segment when it is fully wrapped. */
-function stripOneQuotePair(segment: string): string {
-  if (
-    segment.length >= 2 &&
-    SEGMENT_QUOTES.has(segment[0]) &&
-    segment[0] === segment[segment.length - 1]
-  ) {
-    return segment.slice(1, -1);
-  }
-  return segment;
-}
+// so a reference is never reinterpreted.
+const QUOTES: ReadonlySet<string> = new Set(['`', "'", '"']);
 
 /**
- * Parse a raw field reference into canonical segments, splitting on dots that
- * fall outside a quoted region. Returns `undefined` for an unbalanced/malformed
- * quoted path so callers can suppress rather than guess.
+ * The one quote-aware segment scanner shared by both the string and structured
+ * APIs, so a reference canonicalizes identically no matter which side reads it.
  *
- * Quote handling follows the PPL lexer: inside a quoted region a doubled
- * delimiter (`` `` ``, `''`, `""`) is an escaped delimiter (region stays open)
- * and a backslash escapes the next character. Escapes and doubled delimiters are
- * preserved verbatim in the segment text — this module only removes the single
- * outer pair, matching the pre-existing normalizer's behavior for every case it
- * already handled.
+ * Splits `raw` on dots that fall outside a quoted region, honoring the PPL lexer
+ * rules: a quote only opens a span at the start of a segment (a stray quote
+ * mid-segment — `a'b` — stays literal, matching how the grammar only quotes
+ * whole identifiers); inside a region a backslash escapes the next character and
+ * a doubled delimiter (`` `` ``, `''`, `""`) is an escaped delimiter that keeps
+ * the region open. Escapes and doubled delimiters are preserved verbatim; only
+ * the outer pair is stripped later. `balanced` is false when a quote never
+ * closes, so the structured API can suppress rather than guess while the string
+ * API stays best-effort.
  */
-export function parseFieldPath(raw: string): ParsedFieldPath | undefined {
-  const rawSegments: string[] = [];
+function scanSegments(raw: string): { segments: string[]; balanced: boolean } {
+  const segments: string[] = [];
   let current = '';
   let quote: string | null = null;
+  let atSegmentStart = true;
   let i = 0;
 
   while (i < raw.length) {
@@ -177,7 +79,6 @@ export function parseFieldPath(raw: string): ParsedFieldPath | undefined {
           i += 2;
           continue;
         }
-        // Closing delimiter.
         current += ch;
         quote = null;
         i += 1;
@@ -189,24 +90,92 @@ export function parseFieldPath(raw: string): ParsedFieldPath | undefined {
     }
 
     if (ch === '.') {
-      rawSegments.push(current);
+      segments.push(current);
       current = '';
+      atSegmentStart = true;
       i += 1;
       continue;
     }
-    if (SEGMENT_QUOTES.has(ch)) {
+
+    // A quote only opens a span at the start of a segment; a quote appearing
+    // mid-segment is a literal character.
+    if (atSegmentStart && QUOTES.has(ch)) {
       quote = ch;
     }
     current += ch;
+    atSegmentStart = false;
     i += 1;
   }
+  segments.push(current);
 
-  if (quote !== null) {
+  return { segments, balanced: quote === null };
+}
+
+/** Strip exactly one enclosing quote pair from a segment when it is fully wrapped. */
+function stripOneQuotePair(segment: string): string {
+  return segment.length >= 2 && QUOTES.has(segment[0]) && segment[0] === segment[segment.length - 1]
+    ? segment.slice(1, -1)
+    : segment;
+}
+
+/**
+ * Split a raw field-path token into its dot-separated segments, honoring quotes:
+ * a `.` inside a matching quote pair is part of the segment, not a separator.
+ * Best-effort — an unterminated quote yields whatever accumulated rather than
+ * failing, matching the string API's non-suppressing contract.
+ */
+export function splitFieldPath(raw: string): string[] {
+  return scanSegments(raw).segments;
+}
+
+/**
+ * Normalize a created/derived or referenced field-path token so the two sides
+ * match: split into segments honoring quotes, strip one enclosing quote pair per
+ * segment, and rejoin on `.`.
+ *
+ *   `` `total` ``     → `total`
+ *   `` a.`b` ``       → `a.b`
+ *   `` `a.b` ``       → `a.b`   (one quoted segment containing a dot)
+ *   `'years'`         → `years`
+ */
+export function normalizeFieldPath(raw: string): string {
+  return splitFieldPath(raw).map(stripOneQuotePair).join('.');
+}
+
+/**
+ * The leading segment of a normalized field path — the part before the first
+ * *unquoted* dot — or null when the path has a single segment. Used to test a
+ * dotted reference's prefix against declared join aliases. Because the split is
+ * quote-aware, `` `a.b`.c `` yields the prefix `a.b`, not `a`.
+ */
+export function fieldPathPrefix(raw: string): string | null {
+  const segments = splitFieldPath(raw);
+  if (segments.length < 2) {
+    return null;
+  }
+  return stripOneQuotePair(segments[0]);
+}
+
+export interface ParsedFieldPath {
+  /** Canonical, quote-stripped segments in path order. */
+  segments: string[];
+  /** `segments.join('.')` — the canonical dotted lookup key. */
+  canonical: string;
+}
+
+/**
+ * Parse a raw field reference into canonical segments, splitting on dots that
+ * fall outside a quoted region. Returns `undefined` for an unbalanced/malformed
+ * quoted path so callers can suppress rather than guess. Shares the exact
+ * segment scan {@link splitFieldPath} uses, so the string and structured sides
+ * can never canonicalize the same reference differently.
+ */
+export function parseFieldPath(raw: string): ParsedFieldPath | undefined {
+  const { segments: rawSegments, balanced } = scanSegments(raw);
+  if (!balanced) {
     // Unterminated quote — malformed, no canonical lookup.
     return undefined;
   }
-  rawSegments.push(current);
-
   const segments = rawSegments.map(stripOneQuotePair);
   return { segments, canonical: segments.join('.') };
 }

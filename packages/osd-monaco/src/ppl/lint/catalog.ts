@@ -46,7 +46,7 @@ export function validateCatalogEntry(value: unknown): CatalogEntry | null {
     return null;
   }
 
-  for (const key of ['runtimeOnly', 'needsContext', 'needsExplain'] as const) {
+  for (const key of ['runtimeOnly', 'needsContext', 'needsExplain', 'aiFixable'] as const) {
     if (candidate[key] !== undefined && typeof candidate[key] !== 'boolean') return null;
   }
 
@@ -61,6 +61,7 @@ export function validateCatalogEntry(value: unknown): CatalogEntry | null {
     runtimeOnly: candidate.runtimeOnly as boolean | undefined,
     needsContext: candidate.needsContext as boolean | undefined,
     needsExplain: candidate.needsExplain as boolean | undefined,
+    aiFixable: candidate.aiFixable as boolean | undefined,
   };
 }
 

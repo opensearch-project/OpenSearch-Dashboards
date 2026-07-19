@@ -31,6 +31,8 @@ import { parseFieldPath } from '../field_path';
 // than on the runtime-only `comparisonExpression` rule.
 const VERIFIED_OPERATORS: ReadonlySet<string> = new Set(['=', '==']);
 
+// Kept in sync with the platform's numeric esType list (OSD_FIELD_TYPES.NUMBER
+// in data/common/osd_field_types/osd_field_types_factory.ts).
 const NUMERIC_TYPES: ReadonlySet<string> = new Set([
   'byte',
   'short',
@@ -41,6 +43,7 @@ const NUMERIC_TYPES: ReadonlySet<string> = new Set([
   'float',
   'double',
   'scaled_float',
+  'token_count',
 ]);
 
 /** Is this operand a bare string literal (e.g. `"thirty"`), not a computed expr? */
