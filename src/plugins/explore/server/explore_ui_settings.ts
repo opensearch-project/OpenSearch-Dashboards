@@ -58,6 +58,11 @@ export const exploreUiSettings: Record<string, UiSettingsParams> = {
     category: ['explore'],
     schema: schema.boolean(),
   },
+};
+
+// Registered only when the logsQueryBuilder server config is enabled, so the setting
+// stays hidden from Advanced Settings when the feature is turned off server-side.
+export const exploreLogsQueryBuilderUiSetting: Record<string, UiSettingsParams> = {
   [ENABLE_LOGS_QUERY_BUILDER_SETTING]: {
     name: i18n.translate('explore.advancedSettings.enableLogsQueryBuilderTitle', {
       defaultMessage: 'Enable logs query builder',
