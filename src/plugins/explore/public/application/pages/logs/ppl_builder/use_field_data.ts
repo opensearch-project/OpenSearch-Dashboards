@@ -21,16 +21,11 @@ export const useFieldData = () => {
 
   const fields = useMemo<FieldInfo[]>(() => {
     const all = (dataset as any)?.fields?.getAll?.() ?? [];
-    const named = all.filter((f: any) => f?.name && !f.name.startsWith('_'));
+    const named = all.filter((f: any) => f?.name && !f.name.startsWith('_') && !f.subType);
     return named.map((f: any) => ({ name: f.name, type: f.type, aggregatable: f.aggregatable }));
   }, [dataset]);
 
   const fieldNames = useMemo<string[]>(() => fields.map((f) => f.name), [fields]);
-
-  const sortableFieldNames = useMemo<string[]>(
-    () => fieldNames.filter((name) => !name.endsWith('.keyword')),
-    [fieldNames]
-  );
 
   const numericAndAggregatableNames = useMemo<string[]>(
     () => fields.filter((f) => f.type === 'number' || f.aggregatable).map((f) => f.name),
@@ -98,7 +93,6 @@ export const useFieldData = () => {
   return {
     fields,
     fieldNames,
-    sortableFieldNames,
     numericAndAggregatableNames,
     numericFieldNames,
     groupByFieldNames,

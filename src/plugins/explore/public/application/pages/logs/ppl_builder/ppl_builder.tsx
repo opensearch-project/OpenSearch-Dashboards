@@ -47,7 +47,6 @@ export const PPLBuilder: React.FC<PPLBuilderProps> = ({
   );
   const {
     fieldNames,
-    sortableFieldNames,
     numericAndAggregatableNames,
     numericFieldNames,
     groupByFieldNames,
@@ -117,9 +116,9 @@ export const PPLBuilder: React.FC<PPLBuilderProps> = ({
   }, [hasAggregation]);
 
   const sortColumns = useMemo(
-    () => (hasAggregation ? sortableColumns(state) : sortableFieldNames),
+    () => (hasAggregation ? sortableColumns(state) : fieldNames),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [hasAggregation, state.aggregations, state.groupBy.fields, sortableFieldNames]
+    [hasAggregation, state.aggregations, state.groupBy.fields, fieldNames]
   );
 
   const addSpan = () => {

@@ -43,14 +43,11 @@ jest.mock('../../../context', () => ({
 
 jest.mock('./use_field_data', () => ({
   useFieldData: () => ({
-    fields: [{ name: 'service' }, { name: 'bytes', type: 'number' }, { name: 'service.keyword' }],
-    fieldNames: ['service', 'bytes', 'service.keyword'],
-    // `.keyword` sub-fields excluded: the PPL engine rejects them as sort targets.
-    sortableFieldNames: ['service', 'bytes'],
+    fields: [{ name: 'service' }, { name: 'bytes', type: 'number' }],
+    fieldNames: ['service', 'bytes'],
     numericAndAggregatableNames: ['bytes'],
     numericFieldNames: ['bytes'],
-    // Group-by excludes date-typed fields: time grouping is the "over time" popover entry.
-    groupByFieldNames: ['service', 'bytes', 'service.keyword'],
+    groupByFieldNames: ['service', 'bytes'],
     timeFieldName: '@timestamp',
     getValues: jest.fn(async () => []),
   }),
@@ -204,14 +201,6 @@ describe('PPLBuilder', () => {
     const { onQueryChange } = renderBuilder();
     fireEvent.click(screen.getByTestId('pplBuilderAddSort'));
     expect(onQueryChange).toHaveBeenLastCalledWith('| sort -service', expect.anything());
-  });
-
-  it('omits `.keyword` sub-fields from the sort column suggestions', () => {
-    renderBuilder({ ...emptyState(), sort: { column: 'service', desc: true } });
-    fireEvent.click(screen.getByTestId('pplBuilderSortColumn'));
-    expect(screen.getByTestId('pplBuilderFieldOption-service')).toBeInTheDocument();
-    expect(screen.getByTestId('pplBuilderFieldOption-bytes')).toBeInTheDocument();
-    expect(screen.queryByTestId('pplBuilderFieldOption-service.keyword')).not.toBeInTheDocument();
   });
 
   it('adds a descending sort on the first output column of an aggregated query', () => {

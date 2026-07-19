@@ -27,7 +27,7 @@ jest.mock('../../../context', () => ({
 }));
 
 const datasetWithFields = (
-  fields: Array<{ name: string; type?: string; aggregatable?: boolean }>
+  fields: Array<{ name: string; type?: string; aggregatable?: boolean; subType?: unknown }>
 ) => ({
   timeFieldName: '@timestamp',
   fields: { getAll: () => fields },
@@ -36,32 +36,47 @@ const datasetWithFields = (
 describe('useFieldData', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it('keeps a `.keyword` field alongside its base sibling', () => {
+  it('drops a `.keyword` multi-field, mirroring the code editor autocomplete', () => {
     mockUseDatasetContext.mockReturnValue({
       dataset: datasetWithFields([
         { name: 'machine.os', type: 'string', aggregatable: false },
-        { name: 'machine.os.keyword', type: 'string', aggregatable: true },
+        {
+          name: 'machine.os.keyword',
+          type: 'string',
+          aggregatable: true,
+          subType: { multi: { parent: 'machine.os' } },
+        },
       ]),
     });
 
     const { result } = renderHook(() => useFieldData());
 
-    expect(result.current.fieldNames).toEqual(['machine.os', 'machine.os.keyword']);
+    expect(result.current.fieldNames).toEqual(['machine.os']);
   });
 
-  it('excludes only underscore-prefixed fields, keeping keyword siblings', () => {
+  it('keeps a top-level keyword field that has no multi-field subType', () => {
+    mockUseDatasetContext.mockReturnValue({
+      dataset: datasetWithFields([{ name: 'tags', type: 'string', aggregatable: true }]),
+    });
+
+    const { result } = renderHook(() => useFieldData());
+
+    expect(result.current.fieldNames).toEqual(['tags']);
+  });
+
+  it('excludes underscore-prefixed and multi-field keyword fields together', () => {
     mockUseDatasetContext.mockReturnValue({
       dataset: datasetWithFields([
         { name: '_id' },
         { name: 'service' },
-        { name: 'service.keyword' },
+        { name: 'service.keyword', subType: { multi: { parent: 'service' } } },
         { name: 'bytes', type: 'number' },
       ]),
     });
 
     const { result } = renderHook(() => useFieldData());
 
-    expect(result.current.fieldNames).toEqual(['service', 'service.keyword', 'bytes']);
+    expect(result.current.fieldNames).toEqual(['service', 'bytes']);
   });
 
   it('excludes date-typed fields from group-by options (time grouping is "over time")', () => {
