@@ -11,9 +11,11 @@ import { getPPLDocumentationLink } from './ppl_documentation';
 import { pplRangeFormatProvider } from './formatter';
 import { resolvePPLValidationResult } from './validation_provider';
 import { getPPLLintContext, isPPLLintEnabled, resolvePPLLintResult } from './lint_bridge';
-import { LintResult } from './lint/diagnostic';
+import { Diagnostic, LintResult } from './lint/diagnostic';
 import { SerializableLintContext } from './lint/types';
 import { diagnosticToMarker, SYNTAX_MARKER_SOURCE } from './lint/diagnostic_to_marker';
+import { hasExplainRules, runExplainLint } from './lint/explain/run_explain_lint';
+import { explainCache } from './lint/explain/explain_cache';
 import { pplLintCodeActionProvider } from './lint/code_action_provider';
 import {
   clearModelFixes,
@@ -296,59 +298,133 @@ const processLintHighlighting = (model: monaco.editor.IModel): void => {
     async (query) => (await pplWorkerProxyService.lint(query, workerContext)) as LintResult
   )
     .then((lintResult: LintResult) => {
-      if (
-        lintGenerations.get(model.id) !== generation ||
-        model.isDisposed() ||
-        model.getValue() !== content
-      ) {
+      if (isLintPassStale(model, generation, content)) {
         return;
       }
-      if (model.getLanguageId() !== PPL_LANGUAGE_ID) {
-        return;
-      }
-      const markers = lintResult.diagnostics.map(diagnosticToMarker);
-      // Monaco's MarkerService rebuilds each marker from a fixed field list and
-      // drops the custom `fix` / `hoverFacts` properties, so they would never
-      // reach the code-action or hover providers. Capture each into a side table
-      // keyed by the fields the service preserves, then strip them off the marker
-      // before handing it over.
-      const fixes = new Map<string, MarkerFix>();
-      const hoverFacts = new Map<string, HoverFacts>();
-      for (const marker of markers) {
-        const withExtras = marker as monaco.editor.IMarkerData & {
-          fix?: MarkerFix;
-          hoverFacts?: HoverFacts;
-        };
-        const key = markerFixKey(marker);
-        if (withExtras.fix) {
-          // markerFixKey is range + message; two diagnostics that collide on that
-          // key but carry different fixes would silently last-write-wins. Today
-          // separate tables + suppressContained prevent it, so this is a latent
-          // tripwire that surfaces if a future rule introduces a real collision.
-          // The dead branch is eliminated from production bundles.
-          if (
-            process.env.NODE_ENV !== 'production' &&
-            fixes.has(key) &&
-            JSON.stringify(fixes.get(key)) !== JSON.stringify(withExtras.fix)
-          ) {
-            // eslint-disable-next-line no-console
-            console.warn('[ppl-lint] fix key collision:', key);
-          }
-          fixes.set(key, withExtras.fix);
-          delete withExtras.fix;
-        }
-        if (withExtras.hoverFacts) {
-          hoverFacts.set(key, withExtras.hoverFacts);
-          delete withExtras.hoverFacts;
-        }
-      }
-      setModelFixes(model, fixes);
-      setModelHoverFacts(model, hoverFacts);
-      monaco.editor.setModelMarkers(model, LINT_OWNER, markers);
+      // Render the static diagnostics immediately so squiggles never wait on a
+      // network round-trip. The explain pass (below) re-renders with its extra
+      // diagnostics merged in when it completes.
+      renderLintMarkers(model, lintResult.diagnostics);
+      layerExplainDiagnostics(model, content, lintContext, generation, lintResult.diagnostics);
     })
     .catch((e) => {
       // eslint-disable-next-line no-console
       if (e) console.warn('[ppl-lint] lint pipeline error:', e);
+    });
+};
+
+/**
+ * True when a lint pass's result should be discarded: the model was superseded
+ * by a newer pass, disposed, edited out from under us, or switched languages.
+ * Shared by the static render and the async explain re-render so both drop stale
+ * results identically.
+ */
+const isLintPassStale = (
+  model: monaco.editor.IModel,
+  generation: number,
+  content: string
+): boolean =>
+  lintGenerations.get(model.id) !== generation ||
+  model.isDisposed() ||
+  model.getValue() !== content ||
+  model.getLanguageId() !== PPL_LANGUAGE_ID;
+
+/**
+ * Convert diagnostics to Monaco markers and apply them, capturing each
+ * diagnostic's `fix` / `hoverFacts` into the side tables the code-action and
+ * hover providers read (Monaco's MarkerService rebuilds markers from a fixed
+ * field list and would otherwise drop those custom properties).
+ */
+const renderLintMarkers = (model: monaco.editor.IModel, diagnostics: Diagnostic[]): void => {
+  const markers = diagnostics.map(diagnosticToMarker);
+  const fixes = new Map<string, MarkerFix>();
+  const hoverFacts = new Map<string, HoverFacts>();
+  for (const marker of markers) {
+    const withExtras = marker as monaco.editor.IMarkerData & {
+      fix?: MarkerFix;
+      hoverFacts?: HoverFacts;
+    };
+    const key = markerFixKey(marker);
+    if (withExtras.fix) {
+      // markerFixKey is range + message; two diagnostics that collide on that
+      // key but carry different fixes would silently last-write-wins. Today
+      // separate tables + suppressContained prevent it, so this is a latent
+      // tripwire that surfaces if a future rule introduces a real collision.
+      // The dead branch is eliminated from production bundles.
+      if (
+        process.env.NODE_ENV !== 'production' &&
+        fixes.has(key) &&
+        JSON.stringify(fixes.get(key)) !== JSON.stringify(withExtras.fix)
+      ) {
+        // eslint-disable-next-line no-console
+        console.warn('[ppl-lint] fix key collision:', key);
+      }
+      fixes.set(key, withExtras.fix);
+      delete withExtras.fix;
+    }
+    if (withExtras.hoverFacts) {
+      hoverFacts.set(key, withExtras.hoverFacts);
+      delete withExtras.hoverFacts;
+    }
+  }
+  setModelFixes(model, fixes);
+  setModelHoverFacts(model, hoverFacts);
+  monaco.editor.setModelMarkers(model, LINT_OWNER, markers);
+};
+
+/**
+ * Layer the explain-backed diagnostics on top of the already-rendered static
+ * markers. Best-effort and fully async: it issues the `_explain` round-trip only
+ * when a Calcite-applicable explain rule is enabled and an http client is
+ * present, so a query with no explain rule active pays no network cost. Any
+ * failure (no plan, network error, non-Calcite cluster) leaves the static
+ * markers untouched.
+ *
+ * No clean-parse guard is needed: a half-typed or unparseable query makes
+ * `_explain` return a non-Calcite / error body, which `toExplainPlan` maps to
+ * `{ isCalcite: false }`, and every explain detector no-ops on that — so the
+ * round-trip simply yields no diagnostics rather than a wrong one.
+ */
+const layerExplainDiagnostics = (
+  model: monaco.editor.IModel,
+  content: string,
+  lintContext: ReturnType<typeof getPPLLintContext>,
+  generation: number,
+  staticDiagnostics: Diagnostic[]
+): void => {
+  const http = lintContext?.http;
+  if (
+    !http ||
+    !hasExplainRules({
+      overrides: lintContext?.overrides,
+      dataSourceVersion: lintContext?.dataSourceVersion,
+      isCalcite: lintContext?.isCalcite,
+    })
+  ) {
+    return;
+  }
+
+  void explainCache
+    .resolveResult(http, content, lintContext?.dataSourceId)
+    .then((resolution) => {
+      if (resolution.status !== 'ok' || isLintPassStale(model, generation, content)) {
+        return;
+      }
+      const explainDiagnostics = runExplainLint(resolution.plan, {
+        query: content,
+        overrides: lintContext?.overrides,
+        dataSourceVersion: lintContext?.dataSourceVersion,
+        isCalcite: lintContext?.isCalcite,
+      });
+      if (explainDiagnostics.length === 0) {
+        return;
+      }
+      // Re-render with the explain diagnostics merged after the static ones.
+      renderLintMarkers(model, [...staticDiagnostics, ...explainDiagnostics]);
+    })
+    .catch((e) => {
+      // eslint-disable-next-line no-console
+      if (e) console.warn('[ppl-lint] explain lint layer error:', e);
     });
 };
 

@@ -43,6 +43,8 @@ export { runLint } from './lint/lint_runner';
 export { getBundledCatalog } from './lint/catalog';
 export { createRuntimeRuleNameToIndex } from './lint/rule_index';
 export { runExplainLint, hasExplainRules } from './lint/explain/run_explain_lint';
+export { explainCache, toExplainPlan } from './lint/explain/explain_cache';
+export type { ExplainResolution } from './lint/explain/explain_cache';
 export type {
   ExplainPlan,
   ExplainRelNode,
