@@ -66,6 +66,10 @@ export function toExplainPlan(res: unknown): ExplainPlan {
 class ExplainCache {
   private cache = new Map<string, ExplainResolution>();
   private pending = new Map<string, Promise<ExplainResolution>>();
+  // Bumped by clear() so an in-flight request started before the clear cannot
+  // write its (now stale) resolution back into the fresh cache, and cannot
+  // delete a pending entry belonging to a request issued after the clear.
+  private epoch = 0;
 
   private key(query: string, dataSourceId: string | undefined): string {
     return `${dataSourceId ?? '__local__'}::${query}`;
@@ -86,6 +90,7 @@ class ExplainCache {
       return inFlight;
     }
 
+    const requestEpoch = this.epoch;
     const promise = http
       .post(EXPLAIN_PATH, {
         body: JSON.stringify({ query }),
@@ -96,18 +101,25 @@ class ExplainCache {
         const resolution: ExplainResolution = plan.isCalcite
           ? { status: 'ok', plan }
           : { status: 'unsupported' };
-        if (this.cache.size >= MAX_ENTRIES) {
-          const oldest = this.cache.keys().next().value;
-          if (oldest !== undefined) {
-            this.cache.delete(oldest);
+        if (this.epoch === requestEpoch) {
+          if (this.cache.size >= MAX_ENTRIES) {
+            const oldest = this.cache.keys().next().value;
+            if (oldest !== undefined) {
+              this.cache.delete(oldest);
+            }
           }
+          this.cache.set(k, resolution);
+          this.pending.delete(k);
         }
-        this.cache.set(k, resolution);
-        this.pending.delete(k);
+        // A pre-clear response is still returned to its own caller — the
+        // caller's generation guard decides whether to use it — but it must
+        // not repopulate the cleared cache or evict the post-clear request.
         return resolution;
       })
       .catch((error) => {
-        this.pending.delete(k);
+        if (this.epoch === requestEpoch) {
+          this.pending.delete(k);
+        }
         // Deliberately not cached: a transient failure must not become a
         // permanent "no plan" for a later pass over the same text.
         return { status: 'error', error } as ExplainResolution;
@@ -118,6 +130,7 @@ class ExplainCache {
   }
 
   clear(): void {
+    this.epoch++;
     this.cache.clear();
     this.pending.clear();
   }

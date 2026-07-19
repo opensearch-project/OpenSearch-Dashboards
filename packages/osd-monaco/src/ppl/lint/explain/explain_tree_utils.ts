@@ -69,10 +69,30 @@ export function physicalPlanText(plan: ExplainPlan): string {
  * fall back to a small JSON-string canary for `$condition`.
  */
 export function relTreeContainsCondition(plan: ExplainPlan): boolean {
-  return getPhysicalRels(plan).some(relContainsCondition);
+  return getPhysicalRels(plan).some(isResidualFilterRel);
 }
 
-export function relContainsCondition(rel: ExplainRelNode): boolean {
+// Calcite rel names are <Convention><Operator> (EnumerableCalc, LogicalFilter),
+// so suffix-matching the operator is anchored: it cannot collide with rels that
+// merely *contain* the operator name ("CalciteEnumerableIndexScan" contains
+// "Calc"; "EnumerableSortMergeJoin" contains "Sort").
+const RESIDUAL_FILTER_REL_SUFFIXES = ['Calc', 'Filter'];
+
+/**
+ * True when a rel operator name belongs to the Calc/Filter family — the only
+ * rels that can carry a residual (coordinator-side) filter condition. Join rels
+ * also serialize a `condition` attribute (their join predicate), but a join
+ * condition always evaluates at the coordinator by design and must not be
+ * reported as a filter that failed to push down.
+ */
+export function isResidualFilterRelOp(relOp: string): boolean {
+  return RESIDUAL_FILTER_REL_SUFFIXES.some((suffix) => relOp.endsWith(suffix));
+}
+
+export function isResidualFilterRel(rel: ExplainRelNode): boolean {
+  if (!isResidualFilterRelOp(String(rel.relOp ?? ''))) {
+    return false;
+  }
   const keys = Object.keys(rel);
   if (keys.some((key) => key === '$condition' || key.toLowerCase() === 'condition')) {
     return true;

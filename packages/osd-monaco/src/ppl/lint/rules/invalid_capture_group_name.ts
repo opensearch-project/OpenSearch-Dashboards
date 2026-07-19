@@ -28,8 +28,13 @@ function sanitizeGroupName(name: string): string | undefined {
 
 // Matches both the Java `(?<name>` opener and the Python/PCRE `(?P<name>`
 // opener. Group 1 captures the `P` when the Python opener is used; group 2
-// captures the name.
-const CAPTURE_GROUP_OPENER = /\(\?(P?)<([^>]*)>/g;
+// captures the name. The bare `(?<` branch excludes lookbehind assertions
+// (`(?<=`, `(?<!`) via `(?![=!])` — they share the prefix but declare no group
+// name, and without the exclusion the `[^>]*` name capture swallows the
+// assertion body (e.g. `(?<=id: )(?<val>` would "flag" the phantom name
+// `=id: )(?<val`). The `(?P<` branch stays unexcluded: `P` makes it a group
+// opener (never an assertion), so even a name starting with `=` is flagged.
+const CAPTURE_GROUP_OPENER = /\(\?(?:(P)<|<(?![=!]))([^>]*)>/g;
 
 // Rule names whose string-literal argument carries a regex with capture groups.
 const REGEX_COMMAND_RULES = ['rexExpr', 'parseCommand', 'grokCommand'];

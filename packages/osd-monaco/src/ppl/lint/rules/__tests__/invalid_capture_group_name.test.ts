@@ -40,6 +40,19 @@ describe('invalid-capture-group-name (compiled surface)', () => {
 
     it('does not flag a query with no extraction command', () =>
       expect(ids('source=logs | where status = 200')).not.toContain(RULE));
+
+    it('does not flag a lookbehind assertion (shares the "(?<" prefix)', () =>
+      expect(ids('source=logs | rex field=body "(?<=id: )(?<year>[0-9]+)"')).not.toContain(RULE));
+
+    it('does not flag a negative lookbehind assertion', () =>
+      expect(ids('source=logs | rex field=body "(?<!id: )(?<year>[0-9]+)"')).not.toContain(RULE));
+
+    it('still flags an invalid name that follows a lookbehind, on the right span', () => {
+      const code = 'source=logs | rex field=body "(?<!x)(?<1bad>[0-9]+)"';
+      const [d] = diags(code);
+      expect(d).toBeDefined();
+      expect(code.slice(d.range.startColumn, d.range.endColumn)).toBe('1bad');
+    });
   });
 
   describe('invalid name (Fix B: strip disallowed characters)', () => {

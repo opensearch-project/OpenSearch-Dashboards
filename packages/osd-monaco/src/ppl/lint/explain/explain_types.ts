@@ -24,7 +24,7 @@ export type ExplainOutcome =
 
 export interface ExplainOutcomeEvidence {
   outcome: ExplainOutcome;
-  /** A tree rel id when available, otherwise the legacy plan-wide scope. */
+  /** A tree rel id when available, otherwise the legacy plan line (`line:N`). */
   scope: string;
   format: 'tree' | 'legacy';
 }
