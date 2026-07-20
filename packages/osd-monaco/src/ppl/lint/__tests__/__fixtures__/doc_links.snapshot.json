@@ -1,0 +1,60 @@
+{
+  "_comment": "Pinned per-rule doc-link metadata for the shipping catalog. doc_links.test.ts (offline, always-on) asserts catalog<->snapshot parity, no legacy URL, and URL-shape/specificity invariants. quality: exact|close|weak|gap. gap rules are listed in expectedUnpublished and point at a page root until upstream publishes the page.",
+  "expectedUnpublished": [],
+  "rules": {
+    "head-without-sort": {
+      "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/head/",
+      "page": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/head/",
+      "anchor": "",
+      "quality": "weak"
+    },
+    "division-by-zero": {
+      "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/functions/expressions/#arithmetic-operators",
+      "page": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/functions/expressions/",
+      "anchor": "arithmetic-operators",
+      "quality": "close"
+    },
+    "unsupported-window-function-in-eventstats": {
+      "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/eventstats/",
+      "page": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/eventstats/",
+      "anchor": "",
+      "quality": "weak"
+    },
+    "multisearch-min-subsearch": {
+      "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/multisearch/",
+      "page": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/multisearch/",
+      "anchor": "",
+      "quality": "weak"
+    },
+    "disabled-join-type": {
+      "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/join/",
+      "page": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/join/",
+      "anchor": "",
+      "quality": "weak"
+    },
+    "dedup-consecutive-unsupported": {
+      "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/dedup/",
+      "page": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/dedup/",
+      "anchor": "",
+      "quality": "weak"
+    },
+    "union-min-datasets": {
+      "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/",
+      "page": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/",
+      "anchor": "",
+      "quality": "weak"
+    },
+    "replace-wildcard-asymmetry": {
+      "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/replace/",
+      "page": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/replace/",
+      "anchor": "",
+      "quality": "weak"
+    },
+    "field-validation": {
+      "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/fields/",
+      "page": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/fields/",
+      "anchor": "",
+      "quality": "weak"
+    }
+  }
+}

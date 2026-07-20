@@ -159,7 +159,8 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     ) {
       const timeFilter = PPLFilterUtils.getTimeFilterWhereClause(
         dataset.timeFieldName,
-        this.queryService.timefilter.timefilter.getTime()
+        this.queryService.timefilter.timefilter.getTime(),
+        dataset.dataSource?.engineType ?? dataset.dataSource?.type
       );
       whereCommands.push(timeFilter);
     }

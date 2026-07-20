@@ -26,6 +26,11 @@ function toMonacoRange(range: DiagnosticRange): MonacoRange {
 
 export const LINT_MARKER_SOURCE = 'ppl-lint';
 
+// Marker source tag for syntax-error markers (owner PPL_WORKER). Lets the
+// code-action provider recognize the syntax channel and offer command-typo
+// quick-fixes there, without disturbing the lint channel (`ppl-lint`).
+export const SYNTAX_MARKER_SOURCE = 'ppl-syntax';
+
 function toMarkerSeverity(severity: LintSeverity): monaco.MarkerSeverity {
   switch (severity) {
     case 'error':
@@ -57,6 +62,23 @@ export function diagnosticToMarker(diagnostic: Diagnostic): monaco.editor.IMarke
     marker.code = diagnostic.docUrl
       ? { value: diagnostic.ruleId, target: monaco.Uri.parse(diagnostic.docUrl) }
       : diagnostic.ruleId;
+  }
+
+  // Attach the quick-fix payload the code-action provider reads off the marker.
+  // An explicit fix range is converted to Monaco coordinates here; when absent,
+  // the provider falls back to the marker's own range. This transient property
+  // does not survive Monaco's MarkerService rebuild; language.ts moves it into
+  // the fix side table before calling setModelMarkers.
+  if (diagnostic.fix) {
+    (
+      marker as monaco.editor.IMarkerData & {
+        fix?: { title: string; text: string; range?: MonacoRange };
+      }
+    ).fix = {
+      title: diagnostic.fix.title,
+      text: diagnostic.fix.text,
+      range: diagnostic.fix.range ? toMonacoRange(diagnostic.fix.range) : undefined,
+    };
   }
 
   if (diagnostic.hoverFacts) {

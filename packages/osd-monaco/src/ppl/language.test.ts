@@ -25,6 +25,7 @@ jest.mock('../monaco', () => ({
       setMonarchTokensProvider: jest.fn(),
       setTokensProvider: jest.fn(),
       registerCompletionItemProvider: jest.fn(),
+      registerCodeActionProvider: jest.fn(),
       registerHoverProvider: jest.fn(),
       registerDocumentRangeFormattingEditProvider: jest.fn(),
     },

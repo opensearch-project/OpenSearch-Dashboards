@@ -33,12 +33,15 @@ describe('query_enhancements PPL lint rules uiSetting', () => {
       expect(Object.keys(settings)).toHaveLength(1);
     });
 
-    it('defaults to a JSON array matching the bundled catalog', () => {
+    it('defaults to a JSON array of the bundled catalog rules plus the command-suggestion toggle', () => {
       const settings = getPplLintRuleSettings(false);
       const value = JSON.parse(settings[KEY].value as string);
-      expect(value).toEqual(
-        bundledCatalog.map((r) => ({ id: r.id, enabled: r.enabled, severity: r.severity }))
-      );
+      expect(value).toEqual([
+        ...bundledCatalog.map((r) => ({ id: r.id, enabled: r.enabled, severity: r.severity })),
+        // command-suggestion is a syntax-channel toggle, not a catalog rule, and
+        // carries no severity.
+        { id: 'command-suggestion', enabled: true },
+      ]);
     });
 
     it('uses type=json', () => {
@@ -111,8 +114,12 @@ describe('query_enhancements PPL lint rules uiSetting', () => {
       ).toThrow();
     });
 
-    it('rejects a missing field', () => {
-      expect(() => validate([{ id: 'head-without-sort', enabled: true }])).toThrow();
+    it('accepts an entry with no severity (the command-suggestion toggle shape)', () => {
+      expect(() => validate([{ id: 'command-suggestion', enabled: true }])).not.toThrow();
+    });
+
+    it('rejects a missing required field (id or enabled)', () => {
+      // severity is optional now, but id and enabled are still required.
       expect(() => validate([{ id: 'head-without-sort', severity: 'info' }])).toThrow();
       expect(() => validate([{ enabled: true, severity: 'info' }])).toThrow();
     });
