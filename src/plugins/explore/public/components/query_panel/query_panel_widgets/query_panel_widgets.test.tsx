@@ -19,6 +19,8 @@ jest.mock('react-redux', () => ({
 jest.mock('../../../application/utils/state_management/selectors', () => ({
   selectQueryStatus: jest.fn(),
   selectEditorMode: jest.fn(),
+  selectQueryLanguage: jest.fn(() => 'PPL'),
+  selectIsPromptEditorMode: jest.fn(() => false),
 }));
 
 // Mock opensearch-dashboards-react
