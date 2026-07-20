@@ -23,7 +23,6 @@ import { ResizableQueryContainer } from '../../../components/container/resizable
 import { TopNav } from '../../../components/top_nav/top_nav';
 import { useInitPage } from '../../../application/utils/hooks/use_page_initialization';
 import {
-  ENABLE_LOGS_QUERY_BUILDER_SETTING,
   EXPLORE_LOGS_TAB_ID,
   EXPLORE_PATTERNS_TAB_ID,
   EXPLORE_VISUALIZATION_TAB_ID,
@@ -87,9 +86,7 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
   useTimefilterSubscription(services);
   useHeaderVariants(services, HeaderVariant.APPLICATION);
 
-  const queryBuilderEnabled =
-    Boolean(services.capabilities?.explore?.logsQueryBuilderEnabled) &&
-    services.uiSettings.get(ENABLE_LOGS_QUERY_BUILDER_SETTING, true);
+  const queryBuilderEnabled = Boolean(services.capabilities?.explore?.logsQueryBuilderEnabled);
 
   // Keyed on dataset id below to remount the builder panel on dataset switch, discarding stale draft state.
   const dataset = useSelector(selectDataset);

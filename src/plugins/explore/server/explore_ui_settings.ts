@@ -11,7 +11,6 @@ import {
   DEFAULT_TRACE_COLUMNS_SETTING,
   DEFAULT_LOGS_COLUMNS_SETTING,
   ENABLE_EXPERIMENTAL_SETTING,
-  ENABLE_LOGS_QUERY_BUILDER_SETTING,
 } from '../common';
 
 export const exploreUiSettings: Record<string, UiSettingsParams> = {
@@ -54,22 +53,6 @@ export const exploreUiSettings: Record<string, UiSettingsParams> = {
     description: i18n.translate('explore.advancedSettings.enableExperimentalText', {
       defaultMessage:
         'Enable experimental features in Explore including field statistics and histogram breakdown selector.',
-    }),
-    category: ['explore'],
-    schema: schema.boolean(),
-  },
-};
-
-// Registered only when the logsQueryBuilder server config is enabled, so the setting
-// stays hidden from Advanced Settings when the feature is turned off server-side.
-export const exploreLogsQueryBuilderUiSetting: Record<string, UiSettingsParams> = {
-  [ENABLE_LOGS_QUERY_BUILDER_SETTING]: {
-    name: i18n.translate('explore.advancedSettings.enableLogsQueryBuilderTitle', {
-      defaultMessage: 'Enable logs query builder',
-    }),
-    value: true,
-    description: i18n.translate('explore.advancedSettings.enableLogsQueryBuilderText', {
-      defaultMessage: 'Enable the visual query builder in the Explore logs tab.',
     }),
     category: ['explore'],
     schema: schema.boolean(),

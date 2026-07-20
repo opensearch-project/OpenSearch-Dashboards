@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { first } from 'rxjs/operators';
 import {
   PluginInitializerContext,
   CoreSetup,
@@ -13,15 +12,14 @@ import {
 } from '../../../core/server';
 import { capabilitiesProvider } from './capabilities_provider';
 import { exploreSavedObjectType } from './saved_objects';
-import { exploreUiSettings, exploreLogsQueryBuilderUiSetting } from './explore_ui_settings';
-import { ConfigSchema } from '../common/config';
+import { exploreUiSettings } from './explore_ui_settings';
 
 import { ExplorePluginSetup, ExplorePluginStart } from './types';
 
 export class ExplorePlugin implements Plugin<ExplorePluginSetup, ExplorePluginStart> {
   private readonly logger: Logger;
 
-  constructor(private readonly initializerContext: PluginInitializerContext) {
+  constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
   }
 
@@ -79,21 +77,6 @@ export class ExplorePlugin implements Plugin<ExplorePluginSetup, ExplorePluginSt
     });
     // core.uiSettings.register(uiSettings);
     core.uiSettings.register(exploreUiSettings);
-
-    // Only expose the logs query builder UI setting when the feature is enabled server-side;
-    // otherwise the toggle would show in Advanced Settings with no effect.
-    this.initializerContext.config
-      .create<ConfigSchema>()
-      .pipe(first())
-      .toPromise()
-      .then((config) => {
-        if (config.logsQueryBuilder?.enabled) {
-          core.uiSettings.register(exploreLogsQueryBuilderUiSetting);
-        }
-      })
-      .catch((error) => {
-        this.logger.error('Failed to register logs query builder UI setting', error);
-      });
 
     core.savedObjects.registerType(exploreSavedObjectType);
 
