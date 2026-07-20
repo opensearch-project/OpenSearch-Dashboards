@@ -38,7 +38,7 @@ export const ENGINE_OUTCOMES: Record<string, RuleHoverContent> = {
   },
   'invalid-capture-group-name': {
     engineBehavior:
-      'rex capture-group names must match the Java group-name rule; underscores and leading digits are rejected when the regex runs.',
+      'A capture-group name may only contain letters and numbers and must start with a letter; names with other characters (such as underscores or hyphens) or a leading digit are rejected when the pattern runs.',
     failureClass: 'engine-throw',
   },
   'operation-not-pushed': {

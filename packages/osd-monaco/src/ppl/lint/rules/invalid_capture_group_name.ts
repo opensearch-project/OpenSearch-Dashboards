@@ -133,7 +133,7 @@ export const invalidCaptureGroupNameDetector: Detector = (
         diagnostics.push({
           ruleId: config.id,
           severity: config.severity,
-          message: `Invalid capture group name "${group.name}". Names must match ^[A-Za-z][A-Za-z0-9]*$.`,
+          message: `Invalid capture group name "${group.name}". Use only letters and numbers, and start with a letter.`,
           range,
           docUrl: config.docUrl,
           ...(fixed
