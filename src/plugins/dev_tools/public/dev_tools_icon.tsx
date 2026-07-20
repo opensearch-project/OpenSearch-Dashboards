@@ -46,7 +46,6 @@ export function DevToolsIcon({
 }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [devToolTab, setDevToolTab] = useState('');
-  const [sidecarPaddingRight, setSidecarPaddingRight] = useState('0px');
   // Hover popover (matches the icon side nav's title-only popover instead of a
   // plain EUI tooltip, so the dev-tools footer icon reads consistently with the
   // rest of the rail).
@@ -65,15 +64,6 @@ export function DevToolsIcon({
   const devToolsLabel = i18n.translate('devTools.icon.nav.title', {
     defaultMessage: 'Developer tools',
   });
-
-  useEffect(() => {
-    const subscription = core.overlays.sidecar.getSidecarConfig$().subscribe((config) => {
-      setSidecarPaddingRight(
-        config?.dockedMode === 'right' && !config.isHidden ? `${config.paddingSize}px` : '0px'
-      );
-    });
-    return () => subscription.unsubscribe();
-  }, [core.overlays.sidecar]);
 
   // Use refs to avoid closure issues
   const modalVisibleRef = useRef(modalVisible);
@@ -237,10 +227,8 @@ export function DevToolsIcon({
         <EuiOverlayMask className="devToolsOverlayMask" headerZindexLocation="below">
           <div
             style={{
-              width: '100vw',
+              width: '100%',
               height: '100vh',
-              maxWidth: '100vw',
-              marginRight: sidecarPaddingRight,
               position: 'relative',
             }}
           >
