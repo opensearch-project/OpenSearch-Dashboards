@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import classNames from 'classnames';
-import React, { useState, useCallback, useRef, useMemo } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import {
   DatasetSelector,
@@ -33,7 +33,6 @@ import {
 } from '../../../../opensearch_dashboards_react/public';
 import { UI_SETTINGS } from '../../../common';
 import { getQueryLog, PersistedLog, QueryStatus } from '../../query';
-import { runPPLAnalyzeInBackground } from '../ppl_analyze/run_ppl_analyze';
 import { NoDataPopover } from './no_data_popover';
 import QueryEditorUI from './query_editor';
 import { useCancelButtonTiming } from '../hooks';
@@ -127,8 +126,6 @@ export default function QueryEditorTopRow({
     [queryLanguage, uiSettings, storage, appName]
   );
 
-  const isPPL = useMemo(() => queryLanguage?.toLowerCase() === 'ppl', [queryLanguage]);
-
   function onClickSubmitButton(event: React.MouseEvent<HTMLButtonElement>) {
     if (persistedLog && props.query) {
       persistedLog.add(props.query.query);
@@ -201,14 +198,6 @@ export default function QueryEditorTopRow({
     }
 
     props.onSubmit({ query, dateRange });
-    if (query) {
-      runPPLAnalyzeInBackground({
-        query,
-        http: opensearchDashboards.services.http,
-        timefilter: data.query.timefilter.timefilter,
-        onlyIfOpen: true,
-      });
-    }
   }
 
   function onInputSubmit(query: Query, dateRange?: TimeRange) {

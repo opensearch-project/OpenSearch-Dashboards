@@ -16,7 +16,11 @@ import {
   EuiIcon,
   EuiButtonEmpty,
 } from '@elastic/eui';
+import { euiThemeVars } from '@osd/ui-shared-deps/theme';
 import { PPLAnalyzeResult } from '../../query/ppl_analyze_state';
+
+// Theme-reactive colors that resolve to light/dark values automatically.
+const { euiColorEmptyShade, euiColorLightShade, euiColorMediumShade } = euiThemeVars;
 
 interface PPLAnalyzePanelProps {
   analyzeResult: PPLAnalyzeResult;
@@ -207,14 +211,14 @@ function OperationSubTable({
   const nodeColor = op.is_pushed_down ? OPERATOR_COLORS.pushedDown : OPERATOR_COLORS.inMemory;
 
   return (
-    <div style={{ borderTop: '1px solid var(--oui-color-light-shade, #293847)' }}>
+    <div style={{ borderTop: `1px solid ${euiColorLightShade}` }}>
       {/* Sub-header */}
       <div
         style={{
           display: 'flex',
           padding: '6px 12px 6px 36px',
-          borderBottom: '1px solid var(--oui-color-light-shade, #293847)',
-          backgroundColor: 'var(--oui-color-empty-shade, #ffffff)',
+          borderBottom: `1px solid ${euiColorLightShade}`,
+          backgroundColor: euiColorEmptyShade,
           gap: 8,
         }}
       >
@@ -223,7 +227,7 @@ function OperationSubTable({
             key={h}
             style={{
               fontSize: 10,
-              color: 'var(--oui-color-medium-shade, #8D98A3)',
+              color: euiColorMediumShade,
               flex: i === 0 ? 3 : i === 2 ? 2 : 1,
               textAlign: i === 0 ? 'left' : 'center',
             }}
@@ -245,11 +249,8 @@ function OperationSubTable({
               display: 'flex',
               alignItems: 'center',
               padding: '6px 12px 6px 8px',
-              borderBottom:
-                typeIdx < types.length - 1
-                  ? '1px solid var(--oui-color-light-shade, #293847)'
-                  : 'none',
-              backgroundColor: 'var(--oui-color-empty-shade, #ffffff)',
+              borderBottom: typeIdx < types.length - 1 ? `1px solid ${euiColorLightShade}` : 'none',
+              backgroundColor: euiColorEmptyShade,
               gap: 8,
             }}
           >
@@ -271,7 +272,7 @@ function OperationSubTable({
             <EuiText size="xs" style={{ flex: 3 }}>
               <span style={{ fontFamily: 'monospace' }}>
                 <strong>{keyword}</strong>{' '}
-                <span style={{ color: 'var(--oui-color-medium-shade, #8D98A3)' }}>
+                <span style={{ color: euiColorMediumShade }}>
                   {args.replace(keyword, '').trim()}
                 </span>
               </span>
@@ -297,8 +298,8 @@ function OperationSubTable({
       <div
         style={{
           padding: '12px 16px',
-          borderTop: '1px solid var(--oui-color-light-shade, #293847)',
-          backgroundColor: 'var(--oui-color-empty-shade, #ffffff)',
+          borderTop: `1px solid ${euiColorLightShade}`,
+          backgroundColor: euiColorEmptyShade,
         }}
       >
         <EuiFlexGroup gutterSize="l" responsive={false}>
@@ -426,7 +427,7 @@ function OperatorPlanSection({
       <EuiSpacer size="m" />
       <div
         style={{
-          border: '1px solid var(--oui-color-light-shade, #293847)',
+          border: `1px solid ${euiColorLightShade}`,
           borderRadius: 4,
           overflow: 'hidden',
         }}
@@ -435,20 +436,18 @@ function OperatorPlanSection({
         <div
           style={{
             display: 'flex',
-            backgroundColor: 'var(--oui-color-empty-shade, #ffffff)',
+            backgroundColor: euiColorEmptyShade,
           }}
         >
           <div
             style={{
               width: LABEL_COL_WIDTH,
               flexShrink: 0,
-              borderRight: '1px solid var(--oui-color-light-shade, #293847)',
+              borderRight: `1px solid ${euiColorLightShade}`,
               padding: '6px 12px',
             }}
           >
-            <span style={{ fontSize: 10, color: 'var(--oui-color-medium-shade, #8D98A3)' }}>
-              STAGE
-            </span>
+            <span style={{ fontSize: 10, color: euiColorMediumShade }}>STAGE</span>
           </div>
           <div
             style={{
@@ -467,7 +466,7 @@ function OperatorPlanSection({
                   width: `${STATS_COL_WIDTH / 3}px`,
                   flexShrink: 0,
                   fontSize: 10,
-                  color: 'var(--oui-color-medium-shade, #8D98A3)',
+                  color: euiColorMediumShade,
                   textAlign: 'center',
                 }}
               >
@@ -480,7 +479,7 @@ function OperatorPlanSection({
               flex: 1,
               position: 'relative',
               height: 28,
-              borderLeft: '1px solid var(--oui-color-light-shade, #293847)',
+              borderLeft: `1px solid ${euiColorLightShade}`,
             }}
           >
             {totalTimeMs > 0 &&
@@ -493,7 +492,7 @@ function OperatorPlanSection({
                       left: `${(t / totalTimeMs) * 100}%`,
                       transform: 'translateX(-50%)',
                       fontSize: 10,
-                      color: 'var(--oui-color-medium-shade, #8D98A3)',
+                      color: euiColorMediumShade,
                       top: 8,
                       whiteSpace: 'nowrap',
                     }}
@@ -543,7 +542,7 @@ function OperatorPlanSection({
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  borderTop: '1px solid var(--oui-color-light-shade, #293847)',
+                  borderTop: `1px solid ${euiColorLightShade}`,
                   backgroundColor: rowBg,
                   cursor: 'pointer',
                   transition: 'background-color 0.1s',
@@ -555,7 +554,7 @@ function OperatorPlanSection({
                     width: LABEL_COL_WIDTH,
                     flexShrink: 0,
                     padding: '8px 8px 8px 12px',
-                    borderRight: '1px solid var(--oui-color-light-shade, #293847)',
+                    borderRight: `1px solid ${euiColorLightShade}`,
                     display: 'flex',
                     alignItems: 'center',
                     gap: 6,
@@ -646,7 +645,7 @@ function OperatorPlanSection({
                     padding: '8px 0',
                     position: 'relative',
                     height: 46,
-                    borderLeft: '1px solid var(--oui-color-light-shade, #293847)',
+                    borderLeft: `1px solid ${euiColorLightShade}`,
                   }}
                 >
                   {totalTimeMs > 0 &&
@@ -659,7 +658,7 @@ function OperatorPlanSection({
                           top: 0,
                           bottom: 0,
                           width: 1,
-                          backgroundColor: 'var(--oui-color-light-shade, #293847)',
+                          backgroundColor: euiColorLightShade,
                         }}
                       />
                     ))}
@@ -731,7 +730,7 @@ function OperatorPlanSection({
         <div
           style={{
             display: 'flex',
-            borderTop: '1px solid var(--oui-color-light-shade, #293847)',
+            borderTop: `1px solid ${euiColorLightShade}`,
             padding: '8px 12px',
             gap: 24,
           }}

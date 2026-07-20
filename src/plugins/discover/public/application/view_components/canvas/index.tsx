@@ -22,11 +22,6 @@ import { QUERY_ENHANCEMENT_ENABLED_SETTING } from '../../../../common';
 import { OpenSearchSearchHit } from '../../../application/doc_views/doc_views_types';
 import './discover_canvas.scss';
 import { HeaderVariant } from '../../../../../../core/public';
-import {
-  getPPLAnalyzeResult$,
-  PPLAnalyzeResult,
-  PPLAnalyzePanel,
-} from '../../../../../data/public';
 
 // eslint-disable-next-line import/no-default-export
 export default function DiscoverCanvas({ setHeaderActionMenu, optionalRef }: ViewProps) {
@@ -59,8 +54,6 @@ export default function DiscoverCanvas({ setHeaderActionMenu, optionalRef }: Vie
     [refetch$]
   );
   const [rows, setRows] = useState<OpenSearchSearchHit[] | undefined>(undefined);
-  const [analyzeResult, setAnalyzeResult] = useState<PPLAnalyzeResult | null>(null);
-  const [activeTab, setActiveTab] = useState<'results' | 'analyze'>('results');
 
   useEffect(() => {
     const subscription = data$.subscribe((next) => {
@@ -95,13 +88,6 @@ export default function DiscoverCanvas({ setHeaderActionMenu, optionalRef }: Vie
   }, [data$, fetchState]);
 
   useEffect(() => {
-    const sub = getPPLAnalyzeResult$().subscribe((result) => {
-      setAnalyzeResult(result);
-    });
-    return () => sub.unsubscribe();
-  }, []);
-
-  useEffect(() => {
     setHeaderVariant?.(HeaderVariant.APPLICATION);
     return () => {
       setHeaderVariant?.();
@@ -125,9 +111,6 @@ export default function DiscoverCanvas({ setHeaderActionMenu, optionalRef }: Vie
       }}
       rows={rows}
       indexPattern={indexPattern}
-      showAnalyzeTab={!!analyzeResult}
-      activeTab={activeTab}
-      onTabChange={setActiveTab}
     />
   );
 
@@ -175,15 +158,11 @@ export default function DiscoverCanvas({ setHeaderActionMenu, optionalRef }: Vie
               <>
                 <MemoizedDiscoverChartContainer {...fetchState} />
                 {discoverResultsActionBar}
-                {analyzeResult && activeTab === 'analyze' ? (
-                  <PPLAnalyzePanel analyzeResult={analyzeResult} />
-                ) : (
-                  <MemoizedDiscoverTable
-                    rows={rows}
-                    scrollToTop={scrollToTop}
-                    fetchState={fetchState}
-                  />
-                )}
+                <MemoizedDiscoverTable
+                  rows={rows}
+                  scrollToTop={scrollToTop}
+                  fetchState={fetchState}
+                />
               </>
             ) : (
               <EuiPanel
