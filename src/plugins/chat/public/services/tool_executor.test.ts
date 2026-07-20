@@ -11,6 +11,7 @@ import { AssistantActionService } from '../../../context_provider/public';
 const mockAssistantActionService = {
   executeAction: jest.fn(),
   isUserConfirmRequired: jest.fn(),
+  getRejectionMessage: jest.fn(),
 } as unknown as jest.Mocked<AssistantActionService>;
 
 describe('ToolExecutor', () => {
@@ -109,6 +110,48 @@ describe('ToolExecutor', () => {
       expect(result.userRejected).toBe(true);
       expect(result.error).toBe('User rejected the tool execution');
       expect(mockAssistantActionService.executeAction).not.toHaveBeenCalled();
+    });
+
+    it('uses the generic message when the action has no custom rejection message', async () => {
+      mockAssistantActionService.isUserConfirmRequired.mockReturnValue(true);
+      mockAssistantActionService.getRejectionMessage.mockReturnValue(undefined);
+
+      const executionPromise = toolExecutor.executeTool('confirmTool', { param: 'value' }, 'call-1');
+      confirmationService.reject(confirmationService.getPendingConfirmations()[0].id);
+      const result = await executionPromise;
+
+      expect(result.userRejected).toBe(true);
+      expect(result.data.message).toBe('The user chose not to proceed with this action.');
+    });
+
+    it('uses a string rejection message as-is', async () => {
+      mockAssistantActionService.isUserConfirmRequired.mockReturnValue(true);
+      mockAssistantActionService.getRejectionMessage.mockReturnValue('Static rejection guidance.');
+
+      const executionPromise = toolExecutor.executeTool('confirmTool', { param: 'value' }, 'call-1');
+      confirmationService.reject(confirmationService.getPendingConfirmations()[0].id);
+      const result = await executionPromise;
+
+      expect(result.data.message).toBe('Static rejection guidance.');
+    });
+
+    it('resolves a function rejection message with the rejected call args', async () => {
+      mockAssistantActionService.isUserConfirmRequired.mockReturnValue(true);
+      const rejectionFn = jest.fn(
+        (args: any) => `Rejected - reuse the range from ${args.from} to ${args.to}.`
+      );
+      mockAssistantActionService.getRejectionMessage.mockReturnValue(rejectionFn);
+
+      const executionPromise = toolExecutor.executeTool(
+        'confirmTool',
+        { from: 'now-3d', to: 'now' },
+        'call-1'
+      );
+      confirmationService.reject(confirmationService.getPendingConfirmations()[0].id);
+      const result = await executionPromise;
+
+      expect(rejectionFn).toHaveBeenCalledWith({ from: 'now-3d', to: 'now' });
+      expect(result.data.message).toBe('Rejected - reuse the range from now-3d to now.');
     });
 
     it('should include datasourceId even with confirmation', async () => {

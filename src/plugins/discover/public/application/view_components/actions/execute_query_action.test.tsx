@@ -101,6 +101,12 @@ describe('EXECUTE_QUERY_TOOL_DEFINITION', () => {
     const props = EXECUTE_QUERY_TOOL_DEFINITION.parameters.properties;
     expect(Object.keys(props)).toEqual(expect.arrayContaining(['query', 'language', 'from', 'to']));
   });
+
+  it('declares a languageSwitchReason parameter for explaining a language change', () => {
+    const props = EXECUTE_QUERY_TOOL_DEFINITION.parameters.properties as Record<string, any>;
+    expect(props.languageSwitchReason).toBeDefined();
+    expect(props.languageSwitchReason.type).toBe('string');
+  });
 });
 
 describe('registerDisabledExecuteQueryAction', () => {
@@ -141,6 +147,27 @@ describe('useExecuteQueryAction', () => {
     expect(real.requiresConfirmation).toBe(true);
     expect(real.useCustomRenderer).toBe(true);
     expect(typeof real.render).toBe('function');
+  });
+
+  describe('rejectionMessage', () => {
+    it('is a function that embeds the exact from/to time range and forbids changing it', () => {
+      const { registered } = setup();
+      const real = getRealAction(registered);
+      expect(typeof real.rejectionMessage).toBe('function');
+
+      const msg = real.rejectionMessage({ from: 'now-3d', to: 'now' });
+      expect(msg).toContain('from now-3d to now');
+      expect(msg).toContain('MUST NOT change');
+      expect(msg).toContain('declined to switch the query language');
+    });
+
+    it('falls back to the current UI time range when the call had no from/to', () => {
+      const { registered } = setup();
+      const real = getRealAction(registered);
+
+      const msg = real.rejectionMessage({});
+      expect(msg).toContain('currently shown in the Discover UI');
+    });
   });
 
   it('restores the disabled action on unmount', () => {
@@ -238,6 +265,7 @@ describe('useExecuteQueryAction', () => {
       expect(renderDefault).not.toHaveBeenCalled();
       expect(queryByText('DEFAULT_UI')).toBeNull();
     });
+
 
     it('calls onApprove and immediately shows the default UI once the switch button is clicked', () => {
       const { registered } = setup();
