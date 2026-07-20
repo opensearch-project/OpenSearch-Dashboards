@@ -274,7 +274,7 @@ export const SaveVisButton = () => {
           savedExploreId={exploreId}
           onCancel={() => setShowModal(false)}
           onConfirm={handleSave}
-          showComplexQueryWarning={resultState?.isComplex ?? false}
+          showComplexQueryWarning={resultState?.profile?.isComplex ?? false}
         />
       )}
     </EuiFlexGroup>

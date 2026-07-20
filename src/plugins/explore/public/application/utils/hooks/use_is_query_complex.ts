@@ -32,6 +32,6 @@ export const useIsQueryComplex = (): boolean => {
   }, [query, activeTabId, services]);
 
   return useSelector(
-    (state: RootState) => (cacheKey ? state.results[cacheKey]?.isComplex : false) ?? false
+    (state: RootState) => (cacheKey ? state.results[cacheKey]?.profile?.isComplex : false) ?? false
   );
 };

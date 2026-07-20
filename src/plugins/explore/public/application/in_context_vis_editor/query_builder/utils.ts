@@ -255,7 +255,7 @@ export const queryExecution = async ({
       ...rawResults,
       elapsedMs: inspectorRequest.getTime()!,
       fieldSchema: searchSource.getDataFrame()?.schema,
-      isComplex: searchSource.getDataFrame()?.meta?.isComplex ?? false,
+      profile: searchSource.getDataFrame()?.meta?.profile,
     };
 
     updateResultFn(rawResultsWithMeta);

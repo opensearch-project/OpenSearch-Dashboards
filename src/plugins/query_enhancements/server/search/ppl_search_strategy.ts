@@ -81,8 +81,11 @@ export const pplSearchStrategyProvider = (
         if (threadPool) {
           dataFrame.meta = {
             ...dataFrame.meta,
-            queryPool: threadPool,
-            isComplex: threadPool === 'sql-complex-worker',
+            // Group profiling fields under `profile` so future ones stay nested together.
+            profile: {
+              queryPool: threadPool,
+              isComplex: threadPool === 'sql-complex-worker',
+            },
           };
         }
 
