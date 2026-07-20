@@ -102,5 +102,14 @@ jest.mock('@osd/monaco', () => {
   // Mock getWorker function to return a mock Worker without requiring setBuildHash
   const getWorker = jest.fn(() => new MockWorker('mock-worker-url'));
 
-  return { monaco, getWorker };
+  // The command-suggestion helper depends only on antlr4ng (no monaco-editor),
+  // so it can be pulled in via requireActual without re-triggering the
+  // monaco-editor 0.30.1 init bug this whole mock exists to dodge. Data-plugin
+  // code under test (PPLCommandErrorListener) imports it from '@osd/monaco', so
+  // it must be present on the mocked module or it resolves to undefined.
+  const { buildCommandSuggestion } = jest.requireActual(
+    '../../../../packages/osd-monaco/src/ppl/command_suggestion'
+  );
+
+  return { monaco, getWorker, buildCommandSuggestion };
 });

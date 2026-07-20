@@ -4,13 +4,13 @@
  */
 
 import { IUiSettingsClient } from 'opensearch-dashboards/public';
-import { buildOverridesFromSettings } from './lint_overrides';
+import { buildOverridesFromSettings, isCommandSuggestionEnabled } from './lint_overrides';
 
 jest.mock('@osd/monaco', () => ({
   getBundledCatalog: () => [
     { id: 'head-without-sort', enabled: true, severity: 'info' },
     { id: 'division-by-zero', enabled: true, severity: 'warning' },
-    { id: 'field-validation', enabled: true, severity: 'warning' },
+    { id: 'field-validation', enabled: true, severity: 'error' },
   ],
 }));
 
@@ -70,11 +70,13 @@ describe('buildOverridesFromSettings', () => {
   });
 
   it('combines enabled + severity changes for a non-floored rule', () => {
+    // field-validation's catalog default is `error`, so a downgrade to `warning`
+    // is the severity change here (there is no MIN_SEVERITY floor on this rule).
     const overrides = buildOverridesFromSettings(
-      makeUiSettings([{ id: 'field-validation', enabled: false, severity: 'error' }])
+      makeUiSettings([{ id: 'field-validation', enabled: false, severity: 'warning' }])
     );
     expect(overrides).toEqual({
-      'field-validation': { enabled: false, severity: 'error' },
+      'field-validation': { enabled: false, severity: 'warning' },
     });
   });
 
@@ -91,10 +93,64 @@ describe('buildOverridesFromSettings', () => {
     });
   });
 
+  it('ignores an unknown severity on a non-floored rule (no patch)', () => {
+    // 'critical' is not a real level; with a missing membership check the junk
+    // value would leak straight into the override.
+    const overrides = buildOverridesFromSettings(
+      makeUiSettings([{ id: 'head-without-sort', enabled: true, severity: 'critical' as never }])
+    );
+    expect(overrides).toEqual({});
+  });
+
+  it('ignores an unknown severity on a floored rule without bypassing the floor', () => {
+    // Regression: an unknown severity makes SEV_RANK[...] undefined, so the floor
+    // comparison is false — without the membership check 'critical' would slip
+    // past the division-by-zero floor instead of being dropped.
+    const overrides = buildOverridesFromSettings(
+      makeUiSettings([{ id: 'division-by-zero', enabled: true, severity: 'critical' as never }])
+    );
+    expect(overrides).toEqual({});
+  });
+
   it('ignores unknown rule ids gracefully', () => {
     const overrides = buildOverridesFromSettings(
       makeUiSettings([{ id: 'nonexistent-rule', enabled: false, severity: 'error' }])
     );
     expect(overrides).toEqual({});
+  });
+
+  it('does not treat command-suggestion as a catalog override', () => {
+    // command-suggestion is a syntax-channel toggle, not a catalog rule, so it
+    // must not leak into the bundle rule overrides.
+    const overrides = buildOverridesFromSettings(
+      makeUiSettings([{ id: 'command-suggestion', enabled: false }])
+    );
+    expect(overrides).toEqual({});
+  });
+});
+
+describe('isCommandSuggestionEnabled', () => {
+  it('defaults to enabled when the setting is unset', () => {
+    expect(isCommandSuggestionEnabled(makeUiSettings(undefined))).toBe(true);
+  });
+
+  it('defaults to enabled when the entry is absent from the array', () => {
+    expect(
+      isCommandSuggestionEnabled(
+        makeUiSettings([{ id: 'field-validation', enabled: true, severity: 'error' }])
+      )
+    ).toBe(true);
+  });
+
+  it('returns false only when the entry is explicitly disabled', () => {
+    expect(
+      isCommandSuggestionEnabled(makeUiSettings([{ id: 'command-suggestion', enabled: false }]))
+    ).toBe(false);
+  });
+
+  it('returns true when the entry is explicitly enabled', () => {
+    expect(
+      isCommandSuggestionEnabled(makeUiSettings([{ id: 'command-suggestion', enabled: true }]))
+    ).toBe(true);
   });
 });
