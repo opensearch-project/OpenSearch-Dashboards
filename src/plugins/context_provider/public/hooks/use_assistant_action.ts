@@ -41,6 +41,7 @@ export interface AssistantAction<T = any> {
   deps?: any[];
   requiresConfirmation?: boolean; // Whether this action requires user confirmation
   useCustomRenderer?: boolean; // Whether to use custom render method for tool results
+  rejectionMessage?: string | ((args: T) => string); // Message fed back to the agent as the tool result when the user rejects a confirmation for this action.
 }
 
 export function useAssistantAction<T = any>(action: AssistantAction<T>) {

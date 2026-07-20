@@ -32,7 +32,7 @@ export const EXECUTE_QUERY_TOOL_DEFINITION = {
   name: 'execute_dsl_ppl_query',
   description: `Updates the query bar with a DQL/PPL/Lucene/SQL query and runs the search in the classic Discover UI. When generating the query, only reference fields you already know exist (e.g. from IndexMappingTool or the page context) - do not guess field names. A single call can set the query, the query language, and the time range (from/to) together.
   WHEN TO USE (critical): Call this tool for ANY request that maps to a query, filter, or search over the data shown in Discover - regardless of how the user phrases it. This includes not only imperative phrasings ("show", "list", "display", "find", "filter") but ALSO interrogative and analytical ones: yes/no and existence questions ("is there any error?", "are there failed logins?", "do we have 5xx responses?"), counts ("how many 400s?"), and lookups ("which hosts returned errors?"). If answering the user requires looking at the Discover data, you MUST run the corresponding query through this tool first so the UI reflects exactly what is being answered.
-  LANGUAGE RULE (critical): write the query in the user\'s CURRENT language on the interface, given in page context as query.language (e.g. "kuery" = DQL, "lucene", "PPL", "SQL") - omit this parameter or pass that same key to keep the current language. Do NOT switch to PPL or any other language on your own. Keep the current language unless the user EXPLICITLY names a different one (e.g. "use PPL", "in SQL").
+  LANGUAGE RULE (critical): write the query in the user\'s CURRENT language on the interface, given in page context as query.language (e.g. "kuery" = DQL, "lucene", "PPL", "SQL") - omit this parameter or pass that same key to keep the current language. Do NOT switch to PPL or any other language on your own. Keep the current language unless the user EXPLICITLY names a different one (e.g. "use PPL", "in SQL"). Whenever you DO set a different language, you MUST also pass "languageSwitchReason" with a short user-facing explanation of why the switch is required.
   IMPORTANT: This tool only updates the visual query interface and returns execution status (success/failure) - it does NOT return the actual query results or data. If you need to retrieve actual data for analysis or generating reports, use backend data retrieval tools instead, and make sure to pass the same time range (from/to) to those backend tools for consistent results. 
   The query should NOT contain time filters - use the from/to parameters to specify the time range.`,
   parameters: {
@@ -51,6 +51,11 @@ export const EXECUTE_QUERY_TOOL_DEFINITION = {
       description: {
         type: 'string',
         description: 'Optional description of what the query does',
+      },
+      languageSwitchReason: {
+        type: 'string',
+        description:
+          'REQUIRED whenever you set "language" to a language different from the current interface language. A short, user-facing explanation of WHY the switch is needed (e.g. "PPL is needed to aggregate the average price per day; the current DQL language cannot compute aggregations."). This reason is shown to the user in the confirmation prompt before the switch happens. Omit it when you are not changing the language.',
       },
       from: {
         type: 'string',
@@ -196,6 +201,17 @@ export function useExecuteQueryAction(
       ...EXECUTE_QUERY_TOOL_DEFINITION,
       requiresConfirmation: true,
       useCustomRenderer: true,
+      rejectionMessage: (args: any) => {
+        const timeRange =
+          args?.from && args?.to
+            ? `from ${args.from} to ${args.to}`
+            : 'currently shown in the Discover UI';
+        return (
+          'The user declined to switch the query language, so the Discover page was not updated. ' +
+          `Use backend data retrieval tools to compute the result directly, using the EXACT time range ${timeRange}, which you MUST NOT change, widen, shorten, or default. ` +
+          'Then tell the user why the language must be changed in order to update the page for this request.'
+        );
+      },
       render: (props: RenderProps) => {
         // Once the tool call has settled, defer entirely to the default
         // presentation (running spinner already passed; now the

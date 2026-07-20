@@ -204,6 +204,17 @@ export class AssistantActionService {
     return !!action?.requiresConfirmation;
   };
 
+  /**
+   * Custom message to feed back to the agent when the user rejects this
+   * action's confirmation. Returns undefined when the action did not define one.
+   */
+  getRejectionMessage = (name: string): string | ((args: any) => string) | undefined => {
+    const currentState = this.state$.getValue();
+    const action = currentState.actions.get(name);
+
+    return action?.rejectionMessage;
+  };
+
   private createToolDefinitions = (actions: Map<string, AssistantAction>): ToolDefinition[] => {
     return Array.from(actions.values())
       .filter((action) => action.available !== 'disabled')
