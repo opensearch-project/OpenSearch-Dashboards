@@ -41,6 +41,7 @@ const SpanChip: React.FC<SpanChipProps> = ({ span, dispatch }) => (
         dataTestSubj="pplBuilderSpanInterval"
       />
       <RemoveButton
+        variant="chip"
         ariaLabel={i18n.translate('explore.pplBuilder.removeSpan', {
           defaultMessage: 'Remove time grouping',
         })}
