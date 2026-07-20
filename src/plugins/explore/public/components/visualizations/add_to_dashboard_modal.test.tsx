@@ -45,6 +45,38 @@ describe('AddToDashboardModal', () => {
     expect(screen.getByLabelText('Save to new dashboard')).not.toBeChecked();
   });
 
+  it('shows the complex query warning when showComplexQueryWarning is true', async () => {
+    await act(async () => {
+      render(
+        <AddToDashboardModal
+          savedObjectsClient={mockSavedObjectsClient}
+          onConfirm={mockOnConfirm}
+          onCancel={mockOnCancel}
+          savedExploreId="explore-1"
+          showComplexQueryWarning={true}
+        />
+      );
+    });
+
+    expect(await screen.findByTestId('complexQueryWarningCallout')).toBeInTheDocument();
+  });
+
+  it('does not show the complex query warning by default', async () => {
+    await act(async () => {
+      render(
+        <AddToDashboardModal
+          savedObjectsClient={mockSavedObjectsClient}
+          onConfirm={mockOnConfirm}
+          onCancel={mockOnCancel}
+          savedExploreId="explore-1"
+        />
+      );
+    });
+
+    await screen.findByText('Save and Add to Dashboard');
+    expect(screen.queryByTestId('complexQueryWarningCallout')).not.toBeInTheDocument();
+  });
+
   it('allows entering a title and selecting an existing dashboard', async () => {
     await act(async () => {
       render(
