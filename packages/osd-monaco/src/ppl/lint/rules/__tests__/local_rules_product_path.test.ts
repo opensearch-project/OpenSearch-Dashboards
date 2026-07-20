@@ -10,8 +10,8 @@ import { getBundledCatalog } from '../../catalog';
 import { createCompiledRuleNameToIndex } from '../../rule_index';
 import type { CatalogEntry, LintRunContext } from '../../types';
 
-// Product-path test (design doc §9 "Product path") for the five local rules that
-// run on the COMPILED-SIMPLIFIED grammar surface. Unlike the per-rule detector
+// Product-path test (design doc §9 "Product path") for the local type-aware rules
+// that run on the COMPILED-SIMPLIFIED grammar surface. Unlike the per-rule detector
 // unit tests (which call a detector directly), this drives each rule through the
 // FULL path: real trees from SimplifiedOpenSearchPPLParser, the real bundled
 // rules_catalog.json (getBundledCatalog), the real detector registry, and
@@ -50,28 +50,19 @@ const messageFor = (id: string): string => {
 };
 
 // Every rule under test runs on the compiled-simplified surface. `context` adds
-// the typeMap (or lack of one) per case; `bundleOverrides` is threaded through
-// for the expand enable/suppress cases.
-const run = (
-  query: string,
-  context: Partial<LintRunContext> = {},
-  bundleOverrides?: Record<string, Partial<CatalogEntry>>
-) =>
+// the typeMap (or lack of one) per case.
+const run = (query: string, context: Partial<LintRunContext> = {}) =>
   runLint(buildTree(query), {
     catalog: getBundledCatalog(),
     ruleNameToIndex,
-    bundleOverrides,
     context: { ...context, grammarSurface: 'compiled-simplified' },
   });
 
-const ruleIds = (
-  query: string,
-  context?: Partial<LintRunContext>,
-  bundleOverrides?: Record<string, Partial<CatalogEntry>>
-) => run(query, context, bundleOverrides).map((d) => d.ruleId);
+const ruleIds = (query: string, context?: Partial<LintRunContext>) =>
+  run(query, context).map((d) => d.ruleId);
 
 // A firing query + the typeMap it needs, for each rule that self-suppresses
-// without type metadata. Capture-group is context-independent and handled apart.
+// without type metadata.
 const AGG_QUERY = 'search t | stats avg(name)';
 const AGG_TYPES: Partial<LintRunContext> = { typeMap: new Map([['name', 'text']]) };
 
@@ -80,11 +71,6 @@ const FLAT_TYPES: Partial<LintRunContext> = { typeMap: new Map([['attributes', '
 
 const MISMATCH_QUERY = 'search t | where age = "thirty"';
 const MISMATCH_TYPES: Partial<LintRunContext> = { typeMap: new Map([['age', 'long']]) };
-
-const EXPAND_QUERY = 'search t | expand user';
-const EXPAND_TYPES: Partial<LintRunContext> = { typeMap: new Map([['user', 'keyword']]) };
-
-const CAPTURE_QUERY = 'search t | parse message "(?P<year>x)"';
 
 describe('local rules: product-path plumbing (catalog + registry + runLint, compiled-simplified)', () => {
   describe('each enabled rule fires end-to-end with the real catalog message', () => {
@@ -107,34 +93,9 @@ describe('local rules: product-path plumbing (catalog + registry + runLint, comp
       expect(diag).toBeDefined();
       expect(diag?.message).toBe(messageFor('type-mismatch-numeric'));
     });
-
-    it('invalid-capture-group-name fires on a Python (?P<name>) opener (no typeMap needed)', () => {
-      const diag = run(CAPTURE_QUERY).find((d) => d.ruleId === 'invalid-capture-group-name');
-      expect(diag).toBeDefined();
-      expect(diag?.message).toBe(messageFor('invalid-capture-group-name'));
-    });
   });
 
-  describe('expand-on-non-array ships disabled and is togglable via bundleOverrides', () => {
-    it('is SUPPRESSED by default even when a scalar-typed expand target is present', () => {
-      // The catalog entry is enabled:false; runLint drops it before the detector
-      // runs. The typeMap is supplied so this proves the *enabled* flag suppresses
-      // it, not the needsContext gate.
-      expect(ruleIds(EXPAND_QUERY, EXPAND_TYPES)).not.toContain('expand-on-non-array');
-    });
-
-    it('DOES fire once bundleOverrides re-enables it', () => {
-      const diags = run(EXPAND_QUERY, EXPAND_TYPES, {
-        'expand-on-non-array': { enabled: true },
-      });
-      const diag = diags.find((d) => d.ruleId === 'expand-on-non-array');
-      expect(diag).toBeDefined();
-      // The override flips `enabled` only; the message still flows from the catalog.
-      expect(diag?.message).toBe(messageFor('expand-on-non-array'));
-    });
-  });
-
-  describe('the four typeMap-dependent rules self-suppress without type metadata (needsContext gate)', () => {
+  describe('the typeMap-dependent rules self-suppress without type metadata (needsContext gate)', () => {
     it('agg-on-text is suppressed when the context carries no typeMap', () => {
       expect(ruleIds(AGG_QUERY)).not.toContain('agg-on-text');
     });
@@ -145,14 +106,6 @@ describe('local rules: product-path plumbing (catalog + registry + runLint, comp
 
     it('type-mismatch-numeric is suppressed when the context carries no typeMap', () => {
       expect(ruleIds(MISMATCH_QUERY)).not.toContain('type-mismatch-numeric');
-    });
-
-    it('expand-on-non-array is suppressed by the needsContext gate even when re-enabled', () => {
-      // Enable it via override but pass no typeMap: the needsContext gate (empty
-      // context) must still drop it, isolating that gate from the enabled flag.
-      expect(ruleIds(EXPAND_QUERY, {}, { 'expand-on-non-array': { enabled: true } })).not.toContain(
-        'expand-on-non-array'
-      );
     });
   });
 });

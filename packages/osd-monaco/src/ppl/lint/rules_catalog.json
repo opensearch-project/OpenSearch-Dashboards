@@ -97,31 +97,12 @@
     "appliesTo": {}
   },
   {
-    "id": "invalid-capture-group-name",
-    "detector": "invalid-capture-group-name",
-    "enabled": true,
-    "severity": "error",
-    "message": "Invalid regex capture-group name. Java named groups must match ^[A-Za-z][A-Za-z0-9]*$ and use the (?<name>) syntax, not (?P<name>).",
-    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/rex/",
-    "appliesTo": {}
-  },
-  {
     "id": "agg-on-text",
     "detector": "agg-on-text",
     "enabled": true,
     "severity": "warning",
     "message": "Numeric aggregation on a text/keyword field returns null rather than a numeric result.",
     "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/stats/",
-    "needsContext": true,
-    "appliesTo": {}
-  },
-  {
-    "id": "expand-on-non-array",
-    "detector": "expand-on-non-array",
-    "enabled": false,
-    "severity": "warning",
-    "message": "expand target is not a nested/object field; mappings do not record primitive array cardinality, so verify the field holds multiple values.",
-    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/expand/",
     "needsContext": true,
     "appliesTo": {}
   },

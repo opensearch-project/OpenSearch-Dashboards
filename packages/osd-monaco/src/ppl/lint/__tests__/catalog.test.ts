@@ -15,28 +15,16 @@ describe('catalog loading', () => {
         'head-without-sort',
         'division-by-zero',
         'field-validation',
-        'invalid-capture-group-name',
         'agg-on-text',
-        'expand-on-non-array',
         'flat-object-subfield',
         'type-mismatch-numeric',
       ])
     );
   });
 
-  it('ships expand-on-non-array disabled by default (opt-in only)', () => {
-    const expand = getBundledCatalog().find((c) => c.id === 'expand-on-non-array');
-    expect(expand?.enabled).toBe(false);
-  });
-
   it('marks the type-aware rules as needing context', () => {
     const byId = new Map(getBundledCatalog().map((c) => [c.id, c]));
-    for (const id of [
-      'agg-on-text',
-      'expand-on-non-array',
-      'flat-object-subfield',
-      'type-mismatch-numeric',
-    ]) {
+    for (const id of ['agg-on-text', 'flat-object-subfield', 'type-mismatch-numeric']) {
       expect(byId.get(id)?.needsContext).toBe(true);
     }
   });

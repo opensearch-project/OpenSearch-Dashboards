@@ -56,21 +56,9 @@
       "anchor": "",
       "quality": "weak"
     },
-    "invalid-capture-group-name": {
-      "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/rex/",
-      "page": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/rex/",
-      "anchor": "",
-      "quality": "weak"
-    },
     "agg-on-text": {
       "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/stats/",
       "page": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/stats/",
-      "anchor": "",
-      "quality": "weak"
-    },
-    "expand-on-non-array": {
-      "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/expand/",
-      "page": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/expand/",
       "anchor": "",
       "quality": "weak"
     },
