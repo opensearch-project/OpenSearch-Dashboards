@@ -34,8 +34,7 @@ const TREE_FILTER_SCRIPT_PLAN: ExplainPlan = {
 };
 
 // A small catalog covering: a tree rule (must be ignored here), and the two
-// explain rules. Enabled here so we exercise the run path; the shipped catalog
-// has them disabled by default.
+// explain rules, all enabled so we exercise the run path.
 const CATALOG: CatalogEntry[] = [
   {
     id: 'head-without-sort',

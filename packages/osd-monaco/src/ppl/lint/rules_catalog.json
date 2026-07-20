@@ -108,7 +108,7 @@
   {
     "id": "operation-not-pushed",
     "detector": "operation-not-pushed",
-    "enabled": false,
+    "enabled": true,
     "severity": "warning",
     "message": "This step may make the query slow. Simplify the highlighted part when possible.",
     "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/limitation/",
@@ -121,7 +121,7 @@
   {
     "id": "operation-pushed-as-script",
     "detector": "operation-pushed-as-script",
-    "enabled": false,
+    "enabled": true,
     "severity": "info",
     "message": "This step may make the query slow. Simplify the highlighted part when possible.",
     "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/limitation/",

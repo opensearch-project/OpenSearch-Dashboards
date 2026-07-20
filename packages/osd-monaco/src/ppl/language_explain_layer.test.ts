@@ -114,8 +114,16 @@ const NOT_PUSHED_PLAN = {
   },
 };
 
-// Overrides that turn on operation-not-pushed (shipped disabled by default).
+// operation-not-pushed ships enabled by default; this pins it on explicitly so
+// the positive-path tests don't depend on the shipped catalog default.
 const ENABLE_NOT_PUSHED = { 'operation-not-pushed': { enabled: true } };
+
+// Turns both explain rules off, exercising the no-network path when the user has
+// disabled them.
+const DISABLE_EXPLAIN = {
+  'operation-not-pushed': { enabled: false },
+  'operation-pushed-as-script': { enabled: false },
+};
 
 function httpClient() {
   return { post: (...args: unknown[]) => mockHttpPost(...args) };
@@ -169,7 +177,9 @@ describe('processLintHighlighting — explain layer', () => {
       http: httpClient(),
       isCalcite: true,
       dataSourceVersion: '3.5.0',
-      // no overrides → operation rules stay disabled (shipped default)
+      // Both explain rules ship enabled, so disable them explicitly to exercise
+      // the no-network path.
+      overrides: DISABLE_EXPLAIN,
     } as any;
 
     await revalidatePPLModel(makeModel('e2'));
