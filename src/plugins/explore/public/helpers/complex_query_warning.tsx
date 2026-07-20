@@ -27,7 +27,7 @@ export const ComplexQueryWarningCallout = () => (
   >
     {i18n.translate('explore.queryProfiling.warnMessage', {
       defaultMessage:
-        'This query can use significant cluster resources and re-runs every time the dashboard loads or refreshes.',
+        'This query is resource-intensive and re-runs every time the dashboard loads or refreshes.',
     })}
   </EuiCallOut>
 );
