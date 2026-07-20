@@ -11,6 +11,7 @@ import {
   DEFAULT_TRACE_COLUMNS_SETTING,
   DEFAULT_LOGS_COLUMNS_SETTING,
   ENABLE_EXPERIMENTAL_SETTING,
+  ENABLE_QUERY_PROFILING_SETTING,
 } from '../common';
 
 export const exploreUiSettings: Record<string, UiSettingsParams> = {
@@ -53,6 +54,18 @@ export const exploreUiSettings: Record<string, UiSettingsParams> = {
     description: i18n.translate('explore.advancedSettings.enableExperimentalText', {
       defaultMessage:
         'Enable experimental features in Explore including field statistics and histogram breakdown selector.',
+    }),
+    category: ['explore'],
+    schema: schema.boolean(),
+  },
+  [ENABLE_QUERY_PROFILING_SETTING]: {
+    name: i18n.translate('explore.advancedSettings.enableQueryProfilingTitle', {
+      defaultMessage: 'Enable query profiling',
+    }),
+    value: false,
+    description: i18n.translate('explore.advancedSettings.enableQueryProfilingText', {
+      defaultMessage:
+        'Profile PPL queries so complex ones can be flagged with a warning before they are saved as visualizations. Takes effect only when the "explore.queryProfiling.enabled" configuration is also enabled.',
     }),
     category: ['explore'],
     schema: schema.boolean(),

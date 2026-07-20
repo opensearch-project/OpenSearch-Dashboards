@@ -19,6 +19,7 @@ export const MODIFY_COLUMNS_ON_SWITCH = 'discover:modifyColumnsOnSwitch';
 export const DEFAULT_TRACE_COLUMNS_SETTING = 'explore:defaultTraceColumns';
 export const DEFAULT_LOGS_COLUMNS_SETTING = 'explore:defaultLogsColumns';
 export const ENABLE_EXPERIMENTAL_SETTING = 'explore:experimental';
+export const ENABLE_QUERY_PROFILING_SETTING = 'explore:enableQueryProfiling';
 export const EXPLORE_DEFAULT_LANGUAGE = 'PPL';
 export const EXPLORE_LOGS_TAB_ID = 'logs';
 export const EXPLORE_STATISTICS_TAB_ID = 'explore_statistics';

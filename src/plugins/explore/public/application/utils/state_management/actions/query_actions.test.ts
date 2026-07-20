@@ -65,7 +65,7 @@ import { QueryExecutionStatus } from '../types';
 import { setResults } from '../slices';
 import { Query, DataView } from 'src/plugins/data/common';
 import { ExploreServices } from '../../../../types';
-import { SAMPLE_SIZE_SETTING } from '../../../../../common';
+import { ENABLE_QUERY_PROFILING_SETTING, SAMPLE_SIZE_SETTING } from '../../../../../common';
 
 // Mock dependencies
 jest.mock('@osd/i18n', () => ({
@@ -1836,6 +1836,49 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       expect(mockSearchSource.setFields).toHaveBeenCalledWith(
         expect.objectContaining({ size: customSize })
       );
+    });
+
+    describe('query profiling gate', () => {
+      const runAndGetQuery = async () => {
+        const thunk = executeTabQuery({
+          services: mockServices,
+          cacheKey: 'test-cache-key',
+          queryString: 'source=logs',
+        });
+        await thunk(mockDispatch, mockGetState, undefined);
+        const call = (mockSearchSource.setFields as jest.Mock).mock.calls.find((c) => c[0]?.query);
+        return call?.[0]?.query;
+      };
+
+      it('sends profile:true only when the config gate and the Advanced Setting are both on', async () => {
+        mockServices.queryProfilingEnabled = true;
+        (mockServices.uiSettings.get as jest.Mock).mockImplementation((key: string) =>
+          key === ENABLE_QUERY_PROFILING_SETTING ? true : undefined
+        );
+
+        const query = await runAndGetQuery();
+        expect(query).toEqual(expect.objectContaining({ profile: true }));
+      });
+
+      it('does not send profile when the config gate is on but the Advanced Setting is off', async () => {
+        mockServices.queryProfilingEnabled = true;
+        (mockServices.uiSettings.get as jest.Mock).mockImplementation((key: string) =>
+          key === ENABLE_QUERY_PROFILING_SETTING ? false : undefined
+        );
+
+        const query = await runAndGetQuery();
+        expect(query.profile).toBeUndefined();
+      });
+
+      it('does not send profile when the config gate is off, even if the Advanced Setting is on', async () => {
+        mockServices.queryProfilingEnabled = false;
+        (mockServices.uiSettings.get as jest.Mock).mockImplementation((key: string) =>
+          key === ENABLE_QUERY_PROFILING_SETTING ? true : undefined
+        );
+
+        const query = await runAndGetQuery();
+        expect(query.profile).toBeUndefined();
+      });
     });
 
     it('should handle non-default dataView in time filter logic', async () => {
