@@ -23,6 +23,9 @@ export const configSchema = schema.object({
   sqlSupport: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
   }),
+  queryProfiling: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+  }),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;
