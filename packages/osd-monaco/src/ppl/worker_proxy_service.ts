@@ -6,6 +6,7 @@
 import { PPLValidationResult, PPLToken } from './ppl_language_analyzer';
 import { LintResult } from './lint/diagnostic';
 import { SerializableLintContext } from './lint/types';
+import { CompiledPPLLintAnalysis } from './lint/explain/attribution/snapshot';
 import { getWorker } from '../monaco_environment';
 import { WorkerLabels } from '../worker_config';
 
@@ -84,6 +85,36 @@ export class PPLWorkerProxyService {
     }
 
     return this.sendMessage('lint', [content, context]);
+  }
+
+  /**
+   * Lint and, on a clean explain-applicable query, also return the source
+   * candidate snapshot the explain range-narrowing pass consumes. One worker
+   * round-trip; the snapshot is `undefined` when nothing applies.
+   */
+  public async analyzeLint(
+    content: string,
+    context?: SerializableLintContext
+  ): Promise<CompiledPPLLintAnalysis> {
+    if (!this.worker) {
+      throw new Error('PPL Worker Proxy Service has not been setup!');
+    }
+
+    return this.sendMessage('analyzeLint', [content, context]);
+  }
+
+  /**
+   * Validate a batch of generated probe queries in a single worker round-trip.
+   * Returns one boolean per query (true = parses cleanly). Used by the Thorough
+   * attribution pass to reject malformed control/treatment probes before they
+   * reach the network.
+   */
+  public async validateLintQueries(queries: string[]): Promise<boolean[]> {
+    if (!this.worker) {
+      throw new Error('PPL Worker Proxy Service has not been setup!');
+    }
+
+    return this.sendMessage('validateLintQueries', [queries]);
   }
 
   /**

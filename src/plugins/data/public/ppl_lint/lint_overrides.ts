@@ -20,6 +20,51 @@ interface StoredRule {
   severity?: LintSeverity;
 }
 
+export type ExplainMode = 'fast' | 'thorough';
+
+interface NormalizedRulesSetting {
+  mode: ExplainMode;
+  rules: StoredRule[];
+}
+
+/**
+ * Read the PPL lint rules uiSetting into a stable `{ mode, rules }` shape,
+ * accepting both the current object form and the legacy top-level array.
+ *
+ * The setting shipped as a bare array before the fast/thorough mode was added.
+ * An install that persisted that array must keep working, so a stored array is
+ * treated as `{ mode: 'thorough', rules: <array> }` — upgrading installs get the
+ * new default (probe-backed) behavior automatically. Anything unrecognized
+ * (unset, or a corrupt value reachable via the raw uiSettings API) yields an
+ * empty rule list at the default mode, so callers fall back to catalog defaults.
+ */
+export function readRulesSetting(uiSettings: IUiSettingsClient): NormalizedRulesSetting {
+  const stored = uiSettings.get<unknown>(UI_SETTINGS.QUERY_ENHANCEMENTS_PPL_LINT_RULES, undefined);
+  if (Array.isArray(stored)) {
+    return { mode: 'thorough', rules: stored as StoredRule[] };
+  }
+  if (
+    stored &&
+    typeof stored === 'object' &&
+    Array.isArray((stored as { rules?: unknown }).rules)
+  ) {
+    const rawMode = (stored as { mode?: unknown }).mode;
+    return {
+      mode: rawMode === 'fast' ? 'fast' : 'thorough',
+      rules: (stored as { rules: StoredRule[] }).rules,
+    };
+  }
+  return { mode: 'thorough', rules: [] };
+}
+
+/**
+ * Read the explain resolution mode from the PPL lint rules uiSetting. Defaults
+ * to `'thorough'` when unset or malformed (and for the legacy array shape).
+ */
+export function readExplainMode(uiSettings: IUiSettingsClient): ExplainMode {
+  return readRulesSetting(uiSettings).mode;
+}
+
 /**
  * Build a {@link BundleRuleOverrides} from the PPL lint rules uiSetting.
  * Only emits fields that differ from catalog defaults; severity is clamped to MIN_SEVERITY.
@@ -27,13 +72,7 @@ interface StoredRule {
 export function buildOverridesFromSettings(uiSettings: IUiSettingsClient): BundleRuleOverrides {
   const overrides: BundleRuleOverrides = {};
 
-  const stored = uiSettings.get<StoredRule[] | undefined>(
-    UI_SETTINGS.QUERY_ENHANCEMENTS_PPL_LINT_RULES,
-    undefined
-  );
-  if (!Array.isArray(stored)) {
-    return overrides;
-  }
+  const { rules: stored } = readRulesSetting(uiSettings);
 
   const storedById = new Map(stored.filter((r) => r && r.id).map((r) => [r.id, r]));
 
@@ -82,13 +121,7 @@ export const COMMAND_SUGGESTION_RULE_ID = 'command-suggestion';
  * preserving the pre-toggle behavior; only an explicit `enabled: false` turns it off.
  */
 export function isCommandSuggestionEnabled(uiSettings: IUiSettingsClient): boolean {
-  const stored = uiSettings.get<StoredRule[] | undefined>(
-    UI_SETTINGS.QUERY_ENHANCEMENTS_PPL_LINT_RULES,
-    undefined
-  );
-  if (!Array.isArray(stored)) {
-    return true;
-  }
-  const entry = stored.find((r) => r && r.id === COMMAND_SUGGESTION_RULE_ID);
+  const { rules } = readRulesSetting(uiSettings);
+  const entry = rules.find((r) => r && r.id === COMMAND_SUGGESTION_RULE_ID);
   return entry?.enabled !== false;
 }

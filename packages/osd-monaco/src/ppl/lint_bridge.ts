@@ -14,6 +14,10 @@ export interface PPLLintHttpClient {
     options?: {
       body?: BodyInit | null;
       query?: Record<string, string | number | boolean | undefined>;
+      // Optional abort signal so a probe request can be cancelled once its
+      // wall-clock budget expires. Core's HttpFetchOptions accepts it; a client
+      // that ignores it still stays within the probe layer's timeout race.
+      signal?: AbortSignal;
     }
   ) => Promise<unknown>;
 }

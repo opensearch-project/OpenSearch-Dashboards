@@ -16,6 +16,12 @@ import { SerializableLintContext } from './lint/types';
 import { diagnosticToMarker, SYNTAX_MARKER_SOURCE } from './lint/diagnostic_to_marker';
 import { hasExplainRules, runExplainLint } from './lint/explain/run_explain_lint';
 import { explainCache } from './lint/explain/explain_cache';
+import { resolveExplainRanges } from './lint/explain/resolve_explain_ranges';
+import {
+  createExplainAttributionState,
+  runExplainIsolation,
+} from './lint/explain/explain_attribution';
+import { validateExplainAttributionSnapshot } from './lint/explain/attribution/snapshot';
 import { pplLintCodeActionProvider } from './lint/code_action_provider';
 import {
   clearModelFixes,
@@ -305,7 +311,14 @@ const processLintHighlighting = (model: monaco.editor.IModel): void => {
       // network round-trip. The explain pass (below) re-renders with its extra
       // diagnostics merged in when it completes.
       renderLintMarkers(model, lintResult.diagnostics);
-      layerExplainDiagnostics(model, content, lintContext, generation, lintResult.diagnostics);
+      layerExplainDiagnostics(
+        model,
+        content,
+        lintContext,
+        workerContext,
+        generation,
+        lintResult.diagnostics
+      );
     })
     .catch((e) => {
       // eslint-disable-next-line no-console
@@ -374,21 +387,32 @@ const renderLintMarkers = (model: monaco.editor.IModel, diagnostics: Diagnostic[
 
 /**
  * Layer the explain-backed diagnostics on top of the already-rendered static
- * markers. Best-effort and fully async: it issues the `_explain` round-trip only
- * when a Calcite-applicable explain rule is enabled and an http client is
- * present, so a query with no explain rule active pays no network cost. Any
- * failure (no plan, network error, non-Calcite cluster) leaves the static
- * markers untouched.
+ * markers, narrowed to the offending command. Best-effort and fully async: it
+ * issues the `_explain` round-trip only when a Calcite-applicable explain rule
+ * is enabled and an http client is present, so a query with no explain rule
+ * active pays no network cost. Any failure (no plan, network error, non-Calcite
+ * cluster) leaves the static markers untouched.
  *
  * No clean-parse guard is needed: a half-typed or unparseable query makes
  * `_explain` return a non-Calcite / error body, which `toExplainPlan` maps to
  * `{ isCalcite: false }`, and every explain detector no-ops on that — so the
  * round-trip simply yields no diagnostics rather than a wrong one.
+ *
+ * The explain detectors flag a *whole-query* range. Before rendering, the
+ * attribution snapshot (built at parse time by `analyzeLint`) narrows each
+ * finding to the specific `where` / `stats` / `sort` command. When the flagged
+ * operation has exactly one candidate, that happens with no extra network. When
+ * several commands share the operation:
+ *  - Fast mode drops the finding (the resolver never emits a wide marker).
+ *  - Thorough mode fires bounded control/treatment `_explain` probes to pin the
+ *    culprit, then narrows to it.
+ * Thorough is the default; the mode rides on the lint context.
  */
 const layerExplainDiagnostics = (
   model: monaco.editor.IModel,
   content: string,
   lintContext: ReturnType<typeof getPPLLintContext>,
+  workerContext: SerializableLintContext | undefined,
   generation: number,
   staticDiagnostics: Diagnostic[]
 ): void => {
@@ -403,29 +427,73 @@ const layerExplainDiagnostics = (
   ) {
     return;
   }
+  const thorough = (lintContext?.explainMode ?? 'thorough') === 'thorough';
 
-  void explainCache
-    .resolveResult(http, content, lintContext?.dataSourceId)
-    .then((resolution) => {
-      if (resolution.status !== 'ok' || isLintPassStale(model, generation, content)) {
-        return;
-      }
-      const explainDiagnostics = runExplainLint(resolution.plan, {
-        query: content,
-        overrides: lintContext?.overrides,
-        dataSourceVersion: lintContext?.dataSourceVersion,
-        isCalcite: lintContext?.isCalcite,
-      });
-      if (explainDiagnostics.length === 0) {
-        return;
-      }
-      // Re-render with the explain diagnostics merged after the static ones.
-      renderLintMarkers(model, [...staticDiagnostics, ...explainDiagnostics]);
-    })
-    .catch((e) => {
-      // eslint-disable-next-line no-console
-      if (e) console.warn('[ppl-lint] explain lint layer error:', e);
+  const run = async (): Promise<void> => {
+    // Kick off the whole-query plan and the parse-time candidate snapshot
+    // together; both describe the same `content`.
+    const [resolution, analysis] = await Promise.all([
+      explainCache.resolveResult(http, content, lintContext?.dataSourceId),
+      pplWorkerProxyService.analyzeLint(content, workerContext),
+    ]);
+    if (resolution.status !== 'ok' || isLintPassStale(model, generation, content)) {
+      return;
+    }
+    const explainDiagnostics = runExplainLint(resolution.plan, {
+      query: content,
+      overrides: lintContext?.overrides,
+      dataSourceVersion: lintContext?.dataSourceVersion,
+      isCalcite: lintContext?.isCalcite,
     });
+    if (explainDiagnostics.length === 0) {
+      return;
+    }
+
+    // The snapshot crosses the worker boundary as plain data; validate it
+    // against the current text before it can move a range. Without a usable
+    // snapshot there is no provenance to narrow with, so drop the (whole-query)
+    // explain findings rather than render them wide.
+    const snapshot =
+      analysis.attribution && validateExplainAttributionSnapshot(analysis.attribution, content);
+    if (!snapshot) {
+      return;
+    }
+
+    const attributionInputs = {
+      query: content,
+      snapshot,
+      typeMap: lintContext?.typeMap,
+      baselineDiagnostics: explainDiagnostics,
+      http,
+      dataSourceId: lintContext?.dataSourceId,
+      validateGeneratedQueries: (queries: string[]) =>
+        pplWorkerProxyService.validateLintQueries(queries),
+      isCurrent: () => !isLintPassStale(model, generation, content),
+    };
+    const state = createExplainAttributionState(attributionInputs);
+
+    // Fast, and the shared first pass for Thorough: render the uniquely-sourced
+    // findings immediately (fixes withheld until a probe confirms them).
+    renderLintMarkers(model, [...staticDiagnostics, ...state.immediateDiagnostics]);
+
+    if (!thorough || !state.needsIsolation || isLintPassStale(model, generation, content)) {
+      return;
+    }
+
+    // Thorough: disambiguate the remaining ambiguous findings with probes, then
+    // re-render with the culprit-narrowed set (which supersedes the immediate
+    // one and may add back a probe-confirmed quick fix).
+    const isolated = await runExplainIsolation(attributionInputs, state);
+    if (isLintPassStale(model, generation, content)) {
+      return;
+    }
+    renderLintMarkers(model, [...staticDiagnostics, ...isolated]);
+  };
+
+  void run().catch((e) => {
+    // eslint-disable-next-line no-console
+    if (e) console.warn('[ppl-lint] explain lint layer error:', e);
+  });
 };
 
 const scheduleLintHighlighting = (model: monaco.editor.IModel): void => {

@@ -84,4 +84,21 @@ describe('explainCache', () => {
     await explainCache.resolveResult(http(post), 'q', 'ds-2');
     expect(post).toHaveBeenCalledTimes(2);
   });
+
+  it('caches baseline and probe partitions independently for the same text', async () => {
+    const post = jest.fn().mockResolvedValue(okPlan);
+    await explainCache.resolveResult(http(post), 'q', 'ds-1');
+    await explainCache.resolveResult(http(post), 'q', 'ds-1'); // baseline cache hit
+    await explainCache.resolveResult(http(post), 'q', 'ds-1', { partition: 'probe' });
+    await explainCache.resolveResult(http(post), 'q', 'ds-1', { partition: 'probe' }); // probe hit
+    // One call per partition: the two partitions never share an entry.
+    expect(post).toHaveBeenCalledTimes(2);
+  });
+
+  it('forwards an abort signal to the http client', async () => {
+    const post = jest.fn().mockResolvedValue(okPlan);
+    const signal = new AbortController().signal;
+    await explainCache.resolveResult(http(post), 'q', 'ds-1', { partition: 'probe', signal });
+    expect(post).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({ signal }));
+  });
 });

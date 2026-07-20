@@ -14,6 +14,9 @@ import { runLint } from './lint/lint_runner';
 import { createCompiledRuleNameToIndex } from './lint/rule_index';
 import { PIPE_FIRST_PREFIX, remapPipeFirstColumns } from './lint/range_utils';
 import { LintRunContext } from './lint/types';
+import { hasExplainRules } from './lint/explain/run_explain_lint';
+import { buildExplainAttributionSnapshot } from './lint/explain/attribution/candidates';
+import { CompiledPPLLintAnalysis } from './lint/explain/attribution/snapshot';
 
 export interface PPLToken {
   type: string;
@@ -60,20 +63,33 @@ export class PPLLanguageAnalyzer {
   }
 
   /**
-   * Creates and configures ANTLR parser with a parser error listener
+   * Creates and configures an ANTLR parser with a parser error listener, and —
+   * when a lexer is supplied — also attaches a lexer error listener and returns
+   * it. The lexer listener lets callers that must decide whether a parse was
+   * completely clean (attribution, probe validation) see lexer errors too; the
+   * plain `parser.root()` callers can ignore it.
    */
-  private createParserWithErrorHandling(tokenStream: antlr.CommonTokenStream): {
+  private createParserWithErrorHandling(
+    tokenStream: antlr.CommonTokenStream,
+    lexer?: OpenSearchPPLLexer
+  ): {
     parser: OpenSearchPPLParser;
+    lexerErrorListener: PPLSyntaxErrorListener;
     parserErrorListener: PPLSyntaxErrorListener;
   } {
     const parser = new OpenSearchPPLParser(tokenStream);
 
+    const lexerErrorListener = new PPLSyntaxErrorListener();
     const parserErrorListener = new PPLSyntaxErrorListener();
 
+    if (lexer) {
+      lexer.removeErrorListeners();
+      lexer.addErrorListener(lexerErrorListener);
+    }
     parser.removeErrorListeners();
     parser.addErrorListener(parserErrorListener);
 
-    return { parser, parserErrorListener };
+    return { parser, lexerErrorListener, parserErrorListener };
   }
 
   /**
@@ -156,17 +172,31 @@ export class PPLLanguageAnalyzer {
   }
 
   lint(code: string, context?: LintRunContext): LintResult {
+    return this.analyzeLint(code, context).result;
+  }
+
+  /**
+   * Parse once for static lint and, on a clean query with an active explain
+   * rule, also serialize the parser-owned source candidates the Explain
+   * attribution/range-narrowing pass needs. `attribution` is left `undefined`
+   * for empty input, syntax errors, or when no explain rule applies — the
+   * explain layer treats a missing snapshot as "resolve nothing, show wide"
+   * (which the resolver never actually does — it drops instead).
+   */
+  analyzeLint(code: string, context?: LintRunContext): CompiledPPLLintAnalysis {
     try {
       const trimmed = code.trimStart();
       const isPipeFirst = trimmed.startsWith('|');
       const effectiveCode = isPipeFirst ? PIPE_FIRST_PREFIX + code : code;
 
-      const { tokenStream } = this.createLexerAndTokenStream(effectiveCode);
-      const { parser } = this.createParserWithErrorHandling(tokenStream);
+      const { lexer, tokenStream } = this.createLexerAndTokenStream(effectiveCode);
+      const { parser, lexerErrorListener, parserErrorListener } =
+        this.createParserWithErrorHandling(tokenStream, lexer);
+      const ruleNameToIndex = createCompiledRuleNameToIndex();
       const tree = parser.root();
 
       const diagnostics = runLint(tree, {
-        ruleNameToIndex: createCompiledRuleNameToIndex(),
+        ruleNameToIndex,
         dataSourceVersion: context?.dataSourceVersion,
         // Declare the surface AND the source text so the field-slot shape pass
         // can run a narrow text-side detector here (on the simplified grammar
@@ -174,14 +204,66 @@ export class PPLLanguageAnalyzer {
         context: { ...context, sourceText: effectiveCode, grammarSurface: 'compiled-simplified' },
       });
 
-      if (isPipeFirst) {
-        return { diagnostics: remapPipeFirstColumns(diagnostics) };
+      const result = {
+        diagnostics: isPipeFirst ? remapPipeFirstColumns(diagnostics) : diagnostics,
+      };
+
+      // Only build the attribution snapshot on a fully clean parse with an
+      // applicable explain rule: the candidates are source-offset spans, so a
+      // half-parsed tree would produce misaligned ranges, and there is no point
+      // paying for the walk when no explain rule will consume it.
+      if (
+        !code.trim() ||
+        lexerErrorListener.errors.length > 0 ||
+        parserErrorListener.errors.length > 0 ||
+        !hasExplainRules({
+          overrides: context?.overrides,
+          dataSourceVersion: context?.dataSourceVersion,
+          isCalcite: context?.isCalcite,
+        })
+      ) {
+        return { result };
       }
 
-      return { diagnostics };
+      return {
+        result,
+        attribution: buildExplainAttributionSnapshot(tree, ruleNameToIndex, effectiveCode, {
+          parserPrefixLength: isPipeFirst ? PIPE_FIRST_PREFIX.length : 0,
+          typeMap: context?.typeMap,
+        }),
+      };
     } catch {
-      return { diagnostics: [] };
+      return { result: { diagnostics: [] } };
     }
+  }
+
+  /**
+   * Validate a batch of generated probe queries in one worker round trip. Every
+   * query gets the same pipe-first preprocessing the attribution snapshot used,
+   * so a probe built from a pipe-first source is judged on the same surface.
+   * Returns one boolean per input: true only when the query parses with no lexer
+   * or parser error.
+   */
+  validateLintQueries(queries: string[]): boolean[] {
+    if (!Array.isArray(queries) || queries.some((query) => typeof query !== 'string')) {
+      throw new TypeError('validateLintQueries expects an array of strings');
+    }
+    return queries.map((query) => {
+      if (!query.trim()) {
+        return false;
+      }
+      try {
+        const isPipeFirst = query.trimStart().startsWith('|');
+        const effectiveCode = isPipeFirst ? PIPE_FIRST_PREFIX + query : query;
+        const { lexer, tokenStream } = this.createLexerAndTokenStream(effectiveCode);
+        const { parser, lexerErrorListener, parserErrorListener } =
+          this.createParserWithErrorHandling(tokenStream, lexer);
+        parser.root();
+        return lexerErrorListener.errors.length === 0 && parserErrorListener.errors.length === 0;
+      } catch {
+        return false;
+      }
+    });
   }
 
   /**

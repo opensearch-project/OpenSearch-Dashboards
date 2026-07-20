@@ -11,7 +11,11 @@ import {
   pplGrammarCache,
   shouldUseRuntimeGrammar,
 } from '../antlr/opensearch_ppl/ppl_grammar_cache';
-import { buildOverridesFromSettings, isCommandSuggestionEnabled } from './lint_overrides';
+import {
+  buildOverridesFromSettings,
+  isCommandSuggestionEnabled,
+  readExplainMode,
+} from './lint_overrides';
 import { calciteSettingsCache } from './calcite_settings_cache';
 
 /** Subset of dataset fields needed for lint context construction. */
@@ -82,6 +86,7 @@ export function buildPPLLintContext(
       : undefined,
     overrides: buildOverridesFromSettings(services.uiSettings),
     commandSuggestionEnabled: isCommandSuggestionEnabled(services.uiSettings),
+    explainMode: readExplainMode(services.uiSettings),
     http: services.http,
   };
 }

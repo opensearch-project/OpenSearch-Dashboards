@@ -41,6 +41,12 @@ export interface LintPayloadContext {
   // on the lint context because the syntax marker builder reads it alongside the
   // lint config, though it does not affect any tree-walking lint rule.
   commandSuggestionEnabled?: boolean;
+  // How the explain layer resolves a whole-query finding that has several
+  // candidate commands for the flagged operation. `'fast'` narrows only when
+  // exactly one candidate matches and drops ambiguous findings; `'thorough'`
+  // (the default when unset) fires bounded control/treatment `_explain` probes
+  // to pin the culprit. A global behavior, not per-rule.
+  explainMode?: 'fast' | 'thorough';
 }
 
 export interface LintRunContext extends LintPayloadContext {

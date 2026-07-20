@@ -48,22 +48,51 @@ jest.mock('./lint_bridge', () => ({
   ) => fallback(_content),
 }));
 
-// Static fallback returns a single head-without-sort diagnostic.
-jest.mock('./worker_proxy_service', () => ({
-  PPLWorkerProxyService: class {
-    setup = jest.fn();
-    lint = async () => ({
-      diagnostics: [
-        {
-          ruleId: 'head-without-sort',
-          severity: 'info',
-          message: 'head-without-sort',
-          range: { startLine: 1, startColumn: 0, endLine: 1, endColumn: 1 },
-        },
-      ],
-    });
-  },
-}));
+// Static fallback returns a single head-without-sort diagnostic. analyzeLint
+// builds a REAL attribution snapshot from the compiled grammar for the content
+// under test, so the explain layer can narrow the whole-query finding to the
+// actual `where` command; validateLintQueries accepts every probe.
+jest.mock('./worker_proxy_service', () => {
+  /* eslint-disable @typescript-eslint/no-var-requires */
+  const {
+    SimplifiedOpenSearchPPLLexer,
+    SimplifiedOpenSearchPPLParser,
+  } = require('@osd/antlr-grammar');
+  const { CharStream, CommonTokenStream } = require('antlr4ng');
+  const { buildExplainAttributionSnapshot } = require('./lint/explain/attribution/candidates');
+  const { createCompiledRuleNameToIndex } = require('./lint/rule_index');
+  /* eslint-enable @typescript-eslint/no-var-requires */
+  return {
+    PPLWorkerProxyService: class {
+      setup = jest.fn();
+      lint = async () => ({
+        diagnostics: [
+          {
+            ruleId: 'head-without-sort',
+            severity: 'info',
+            message: 'head-without-sort',
+            range: { startLine: 1, startColumn: 0, endLine: 1, endColumn: 1 },
+          },
+        ],
+      });
+      analyzeLint = async (content: string) => {
+        const lexer = new SimplifiedOpenSearchPPLLexer(CharStream.fromString(content));
+        lexer.removeErrorListeners();
+        const parser = new SimplifiedOpenSearchPPLParser(new CommonTokenStream(lexer));
+        parser.removeErrorListeners();
+        return {
+          result: { diagnostics: [] },
+          attribution: buildExplainAttributionSnapshot(
+            parser.root(),
+            createCompiledRuleNameToIndex(),
+            content
+          ),
+        };
+      };
+      validateLintQueries = async (queries: string[]) => queries.map(() => true);
+    },
+  };
+});
 
 jest.mock('./validation_provider', () => ({
   resolvePPLValidationResult: jest.fn().mockResolvedValue({ isValid: true, errors: [] }),
@@ -72,7 +101,11 @@ jest.mock('./validation_provider', () => ({
 // Identity-map ruleId into marker.code so assertions identify which pass produced
 // each marker; markerFixKey uses the same code.
 jest.mock('./lint/diagnostic_to_marker', () => ({
-  diagnosticToMarker: (d: { ruleId: string }) => ({ message: d.ruleId, code: d.ruleId }),
+  diagnosticToMarker: (d: { ruleId: string; range: unknown }) => ({
+    message: d.ruleId,
+    code: d.ruleId,
+    range: d.range,
+  }),
   SYNTAX_MARKER_SOURCE: 'ppl-syntax',
 }));
 jest.mock('./lint/hover/hover_registry', () => ({
@@ -133,7 +166,7 @@ function lintMarkerCalls() {
   return mockSetModelMarkers.mock.calls.filter((c) => c[1] === LINT_OWNER);
 }
 
-const flush = async (n = 20) => {
+const flush = async (n = 60) => {
   for (let i = 0; i < n; i++) await Promise.resolve();
 };
 
@@ -168,6 +201,14 @@ describe('processLintHighlighting — explain layer', () => {
       'head-without-sort',
       'operation-not-pushed',
     ]);
+    // The explain marker is NARROWED to the `where age > 30` predicate, not the
+    // whole query: a single candidate resolves without any probe request.
+    const explainMarker = calls[1][2].find((m: any) => m.code === 'operation-not-pushed');
+    const query = 'source=logs | where age > 30';
+    expect(explainMarker.range.startColumn).toBeGreaterThan(0);
+    expect(query.slice(explainMarker.range.startColumn, explainMarker.range.endColumn)).toBe(
+      'age > 30'
+    );
     expect(mockHttpPost).toHaveBeenCalledTimes(1);
     expect(mockHttpPost.mock.calls[0][0]).toBe('/api/enhancements/ppl/explain');
   });
@@ -223,6 +264,63 @@ describe('processLintHighlighting — explain layer', () => {
     expect(mockHttpPost).toHaveBeenCalledTimes(1);
     expect(lintMarkerCalls().length).toBe(1);
     expect(lintMarkerCalls()[0][2].map((m: any) => m.code)).toEqual(['head-without-sort']);
+  });
+
+  it('fast mode drops an ambiguous multi-candidate finding (no probes)', async () => {
+    // Two `where` clauses both flagged → the resolver cannot attribute the
+    // whole-query finding to one command; fast mode issues no probe and shows no
+    // explain marker (only the baseline `_explain` request fires).
+    mockHttpPost.mockResolvedValue(NOT_PUSHED_PLAN);
+    mockLintContext = {
+      http: httpClient(),
+      isCalcite: true,
+      dataSourceVersion: '3.5.0',
+      dataSourceId: 'ds-fast',
+      overrides: ENABLE_NOT_PUSHED,
+      explainMode: 'fast',
+    } as any;
+
+    await revalidatePPLModel(makeModel('e6', 'source=logs | where age > 30 | where bytes > 5'));
+    await flush();
+
+    // The last render drops the ambiguous finding: no operation-not-pushed
+    // marker, and exactly one (baseline) http call — probes never fired.
+    const last = lintMarkerCalls().slice(-1)[0];
+    expect(last[2].map((m: any) => m.code)).toEqual(['head-without-sort']);
+    expect(mockHttpPost).toHaveBeenCalledTimes(1);
+  });
+
+  it('thorough mode probes an ambiguous finding and narrows to the culprit', async () => {
+    // Two `where` clauses; only `bytes > 5` reproduces the outcome under probing.
+    // The probe set neutralizes non-culprit predicates to `true`, so only a
+    // query still carrying `bytes > 5` reproduces the coordinator-filter plan.
+    const query = 'source=logs | where age > 30 | where bytes > 5';
+    mockHttpPost.mockImplementation(async (_path: string, req: { body?: BodyInit | null }) => {
+      const q = JSON.parse(String(req.body)).query as string;
+      return q.includes('bytes > 5')
+        ? NOT_PUSHED_PLAN
+        : { calcite: { physical: { rels: [{ id: '1', relOp: 'CalciteEnumerableIndexScan' }] } } };
+    });
+    mockLintContext = {
+      http: httpClient(),
+      isCalcite: true,
+      dataSourceVersion: '3.5.0',
+      dataSourceId: 'ds-thorough',
+      overrides: ENABLE_NOT_PUSHED,
+      explainMode: 'thorough',
+    } as any;
+
+    await revalidatePPLModel(makeModel('e7', query));
+    await flush();
+
+    const last = lintMarkerCalls().slice(-1)[0];
+    const explainMarker = last[2].find((m: any) => m.code === 'operation-not-pushed');
+    expect(explainMarker).toBeDefined();
+    expect(query.slice(explainMarker.range.startColumn, explainMarker.range.endColumn)).toBe(
+      'bytes > 5'
+    );
+    // More than the single baseline request fired: control + treatment probes ran.
+    expect(mockHttpPost.mock.calls.length).toBeGreaterThan(1);
   });
 
   it('drops the explain re-render when the model was edited mid-flight', async () => {

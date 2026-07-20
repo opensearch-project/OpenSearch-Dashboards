@@ -6,7 +6,11 @@
 import { IUiSettingsClient } from 'opensearch-dashboards/public';
 import { HttpSetup } from '../../../../core/public';
 import { buildPPLLintContext, extractFieldNames } from './lint_context_builder';
-import { buildOverridesFromSettings, isCommandSuggestionEnabled } from './lint_overrides';
+import {
+  buildOverridesFromSettings,
+  isCommandSuggestionEnabled,
+  readExplainMode,
+} from './lint_overrides';
 import {
   pplGrammarCache,
   shouldUseRuntimeGrammar,
@@ -16,6 +20,7 @@ import { calciteSettingsCache } from './calcite_settings_cache';
 jest.mock('./lint_overrides', () => ({
   buildOverridesFromSettings: jest.fn(),
   isCommandSuggestionEnabled: jest.fn(),
+  readExplainMode: jest.fn(),
 }));
 jest.mock('../antlr/opensearch_ppl/ppl_grammar_cache', () => {
   const actual = jest.requireActual('../antlr/opensearch_ppl/ppl_grammar_cache');
@@ -36,6 +41,7 @@ jest.mock('./calcite_settings_cache', () => ({
 
 const mockBuildOverrides = buildOverridesFromSettings as jest.Mock;
 const mockIsCommandSuggestionEnabled = isCommandSuggestionEnabled as jest.Mock;
+const mockReadExplainMode = readExplainMode as jest.Mock;
 const mockShouldUseRuntimeGrammar = shouldUseRuntimeGrammar as jest.Mock;
 const mockGetResolvedVersion = pplGrammarCache.getResolvedVersion as jest.Mock;
 const mockGetCachedSettings = calciteSettingsCache.getCached as jest.Mock;
@@ -58,6 +64,7 @@ describe('buildPPLLintContext', () => {
     mockGetResolvedVersion.mockReturnValue(undefined);
     mockGetCachedSettings.mockReturnValue(undefined);
     mockIsCommandSuggestionEnabled.mockReturnValue(true);
+    mockReadExplainMode.mockReturnValue('thorough');
   });
 
   it('derives dataSourceId/version from the dataset and carries http + overrides', () => {
@@ -76,6 +83,13 @@ describe('buildPPLLintContext', () => {
     const ctx = buildPPLLintContext(dataset, {}, services);
     expect(ctx.commandSuggestionEnabled).toBe(false);
     expect(mockIsCommandSuggestionEnabled).toHaveBeenCalledWith(services.uiSettings);
+  });
+
+  it('carries the explain mode read from uiSettings', () => {
+    mockReadExplainMode.mockReturnValue('fast');
+    const ctx = buildPPLLintContext(dataset, {}, services);
+    expect(ctx.explainMode).toBe('fast');
+    expect(mockReadExplainMode).toHaveBeenCalledWith(services.uiSettings);
   });
 
   it('marks isCalcite false for a pre-3.3.0 data source', () => {

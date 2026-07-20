@@ -4,7 +4,12 @@
  */
 
 import { IUiSettingsClient } from 'opensearch-dashboards/public';
-import { buildOverridesFromSettings, isCommandSuggestionEnabled } from './lint_overrides';
+import {
+  buildOverridesFromSettings,
+  isCommandSuggestionEnabled,
+  readExplainMode,
+  readRulesSetting,
+} from './lint_overrides';
 
 jest.mock('@osd/monaco', () => ({
   getBundledCatalog: () => [
@@ -152,5 +157,65 @@ describe('isCommandSuggestionEnabled', () => {
     expect(
       isCommandSuggestionEnabled(makeUiSettings([{ id: 'command-suggestion', enabled: true }]))
     ).toBe(true);
+  });
+
+  it('reads command-suggestion from the new object shape too', () => {
+    expect(
+      isCommandSuggestionEnabled(
+        makeUiSettings({ mode: 'fast', rules: [{ id: 'command-suggestion', enabled: false }] })
+      )
+    ).toBe(false);
+  });
+});
+
+describe('readRulesSetting (shape migration)', () => {
+  it('treats a legacy top-level array as thorough mode', () => {
+    const rules = [{ id: 'head-without-sort', enabled: false }];
+    expect(readRulesSetting(makeUiSettings(rules))).toEqual({ mode: 'thorough', rules });
+  });
+
+  it('reads the new object shape with an explicit mode', () => {
+    const rules = [{ id: 'head-without-sort', enabled: true }];
+    expect(readRulesSetting(makeUiSettings({ mode: 'fast', rules }))).toEqual({
+      mode: 'fast',
+      rules,
+    });
+  });
+
+  it('defaults an object with an unknown mode to thorough', () => {
+    expect(readRulesSetting(makeUiSettings({ mode: 'sideways', rules: [] })).mode).toBe('thorough');
+  });
+
+  it('falls back to empty thorough for unset or garbage', () => {
+    expect(readRulesSetting(makeUiSettings(undefined))).toEqual({ mode: 'thorough', rules: [] });
+    expect(readRulesSetting(makeUiSettings(42))).toEqual({ mode: 'thorough', rules: [] });
+    expect(readRulesSetting(makeUiSettings({ rules: 'nope' }))).toEqual({
+      mode: 'thorough',
+      rules: [],
+    });
+  });
+
+  it('builds overrides from the rules inside the object shape', () => {
+    const overrides = buildOverridesFromSettings(
+      makeUiSettings({
+        mode: 'thorough',
+        rules: [{ id: 'head-without-sort', enabled: false, severity: 'info' }],
+      })
+    );
+    expect(overrides).toEqual({ 'head-without-sort': { enabled: false } });
+  });
+});
+
+describe('readExplainMode', () => {
+  it('defaults to thorough when unset (and for a legacy array)', () => {
+    expect(readExplainMode(makeUiSettings(undefined))).toBe('thorough');
+    expect(readExplainMode(makeUiSettings([{ id: 'head-without-sort', enabled: true }]))).toBe(
+      'thorough'
+    );
+  });
+
+  it('returns fast only when the object shape explicitly sets it', () => {
+    expect(readExplainMode(makeUiSettings({ mode: 'fast', rules: [] }))).toBe('fast');
+    expect(readExplainMode(makeUiSettings({ mode: 'thorough', rules: [] }))).toBe('thorough');
   });
 });

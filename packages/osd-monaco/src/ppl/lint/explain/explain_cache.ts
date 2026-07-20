@@ -5,6 +5,7 @@
 
 import type { PPLLintHttpClient } from '../../lint_bridge';
 import { ExplainPlan, ExplainRelTree } from './explain_types';
+import { EXPLAIN_OUTCOME_DETECTOR_VERSION } from './explain_outcomes';
 
 // Hardcoded rather than imported from query_enhancements/common: `@osd/monaco`
 // cannot depend on a plugin. `BASE_API` there is `/api/enhancements`, so the
@@ -22,6 +23,23 @@ export type ExplainResolution =
   | { status: 'ok'; plan: ExplainPlan }
   | { status: 'unsupported' }
   | { status: 'error'; error?: unknown };
+
+/**
+ * Per-call options for {@link ExplainCache.resolveResult}.
+ *
+ * - `partition` splits the cache into two independent maps. `'baseline'` (the
+ *   default) is the whole-query `_explain` a lint pass issues once. `'probe'` is
+ *   the bounded control/treatment queries the Thorough attribution pass fires to
+ *   disambiguate multiple candidates; those are keyed with the outcome-detector
+ *   version so a detector change never reuses a stale probe verdict, and they
+ *   never share entries with baseline plans for the same text.
+ * - `signal` lets the caller abort an in-flight probe once its wall-clock budget
+ *   expires; the underlying http client honors it when supported.
+ */
+export interface ExplainResolveOptions {
+  partition?: 'baseline' | 'probe';
+  signal?: AbortSignal;
+}
 
 function isRelTree(value: unknown): value is ExplainRelTree {
   return !!value && typeof value === 'object' && Array.isArray((value as { rels?: unknown }).rels);
@@ -64,28 +82,42 @@ export function toExplainPlan(res: unknown): ExplainPlan {
  * cached, so a transient failure does not become a permanent "no plan".
  */
 class ExplainCache {
-  private cache = new Map<string, ExplainResolution>();
-  private pending = new Map<string, Promise<ExplainResolution>>();
+  private baselineCache = new Map<string, ExplainResolution>();
+  private probeCache = new Map<string, ExplainResolution>();
+  private baselinePending = new Map<string, Promise<ExplainResolution>>();
+  private probePending = new Map<string, Promise<ExplainResolution>>();
   // Bumped by clear() so an in-flight request started before the clear cannot
   // write its (now stale) resolution back into the fresh cache, and cannot
   // delete a pending entry belonging to a request issued after the clear.
   private epoch = 0;
 
-  private key(query: string, dataSourceId: string | undefined): string {
-    return `${dataSourceId ?? '__local__'}::${query}`;
+  private key(
+    query: string,
+    dataSourceId: string | undefined,
+    partition: 'baseline' | 'probe'
+  ): string {
+    // Probe verdicts depend on the outcome detector; version the key so a
+    // detector change never reuses a stale probe result. Baseline plans are the
+    // raw `_explain`, independent of the detector, so they carry no version.
+    const version = partition === 'probe' ? `::outcomes-${EXPLAIN_OUTCOME_DETECTOR_VERSION}` : '';
+    return `${dataSourceId ?? '__local__'}${version}::${query}`;
   }
 
   async resolveResult(
     http: PPLLintHttpClient,
     query: string,
-    dataSourceId?: string
+    dataSourceId?: string,
+    options: ExplainResolveOptions = {}
   ): Promise<ExplainResolution> {
-    const k = this.key(query, dataSourceId);
-    const cached = this.cache.get(k);
+    const partition = options.partition ?? 'baseline';
+    const cache = partition === 'probe' ? this.probeCache : this.baselineCache;
+    const pending = partition === 'probe' ? this.probePending : this.baselinePending;
+    const k = this.key(query, dataSourceId, partition);
+    const cached = cache.get(k);
     if (cached) {
       return cached;
     }
-    const inFlight = this.pending.get(k);
+    const inFlight = pending.get(k);
     if (inFlight) {
       return inFlight;
     }
@@ -95,6 +127,7 @@ class ExplainCache {
       .post(EXPLAIN_PATH, {
         body: JSON.stringify({ query }),
         query: dataSourceId ? { dataSourceId } : {},
+        signal: options.signal,
       })
       .then(toExplainPlan)
       .then((plan) => {
@@ -102,14 +135,14 @@ class ExplainCache {
           ? { status: 'ok', plan }
           : { status: 'unsupported' };
         if (this.epoch === requestEpoch) {
-          if (this.cache.size >= MAX_ENTRIES) {
-            const oldest = this.cache.keys().next().value;
+          if (cache.size >= MAX_ENTRIES) {
+            const oldest = cache.keys().next().value;
             if (oldest !== undefined) {
-              this.cache.delete(oldest);
+              cache.delete(oldest);
             }
           }
-          this.cache.set(k, resolution);
-          this.pending.delete(k);
+          cache.set(k, resolution);
+          pending.delete(k);
         }
         // A pre-clear response is still returned to its own caller — the
         // caller's generation guard decides whether to use it — but it must
@@ -118,21 +151,23 @@ class ExplainCache {
       })
       .catch((error) => {
         if (this.epoch === requestEpoch) {
-          this.pending.delete(k);
+          pending.delete(k);
         }
         // Deliberately not cached: a transient failure must not become a
         // permanent "no plan" for a later pass over the same text.
         return { status: 'error', error } as ExplainResolution;
       });
 
-    this.pending.set(k, promise);
+    pending.set(k, promise);
     return promise;
   }
 
   clear(): void {
     this.epoch++;
-    this.cache.clear();
-    this.pending.clear();
+    this.baselineCache.clear();
+    this.probeCache.clear();
+    this.baselinePending.clear();
+    this.probePending.clear();
   }
 }
 
