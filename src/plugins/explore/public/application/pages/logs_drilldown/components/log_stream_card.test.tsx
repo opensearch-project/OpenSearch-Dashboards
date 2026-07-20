@@ -205,45 +205,54 @@ describe('LogStreamCard', () => {
 
   // ---- compact variants ----
 
-  it('NO_RECENT: compact row with "no events in the selected time range" + actionable name + checkbox', () => {
+  it('NO_RECENT: renders the FULL card (meta controls + histogram + empty-logs body) so the time field stays switchable', () => {
     const onPrimary = jest.fn();
     render(
       <LogStreamCard
         {...baseProps}
         rowState={LogRowState.NO_RECENT}
         onPrimary={onPrimary}
+        health="green"
         data={withData({
           histogram: { series: [], intervalMs: 60000, from: 0, to: 60000, totals: [] },
           preview: { columns: [], rows: [] },
         })}
       />
     );
-    const row = screen.getByTestId('logsExploreCardNoRecent');
-    expect(row).toHaveTextContent('No events in the selected time range');
-    // No full body.
-    expect(screen.queryByTestId('logsExploreCardLogs')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('mock-severity-histogram')).not.toBeInTheDocument();
+    // NOT the stripped compact row — the full card renders instead.
+    expect(screen.queryByTestId('logsExploreCardNoRecent')).not.toBeInTheDocument();
+    // Header meta controls are present: the (read-only) time-field capsule and index health pill.
+    expect(screen.getByTestId('logsExploreCardTimeFieldReadonly')).toBeInTheDocument();
+    expect(screen.getByTestId(`logsExploreCardHealth-${baseProps.name}`)).toBeInTheDocument();
+    // Full body: histogram column + logs region (with the empty "no documents in range" message).
+    expect(screen.getByTestId('mock-severity-histogram')).toBeInTheDocument();
+    expect(screen.getByTestId('logsExploreCardLogs')).toHaveTextContent(
+      'No documents in the selected time range'
+    );
     // Name still actionable, checkbox present (this is an index).
     fireEvent.click(screen.getByTestId('logsExploreCardNameLink'));
     expect(onPrimary).toHaveBeenCalled();
     expect(screen.getByRole('checkbox')).toBeInTheDocument();
   });
 
-  it('NO_RECENT: a DATASET in the no-recent-data group has NO checkbox', () => {
+  it('NO_RECENT: a DATASET renders the full card with Query/Manage actions and NO checkbox', () => {
+    const onManage = jest.fn();
     render(
       <LogStreamCard
         {...baseProps}
         kind="dataset"
         rowState={LogRowState.NO_RECENT}
         onPrimary={jest.fn()}
+        onManage={onManage}
         data={withData({
           histogram: { series: [], intervalMs: 60000, from: 0, to: 60000, totals: [] },
           preview: { columns: [], rows: [] },
         })}
       />
     );
-    // Only raw indexes are selectable; a dataset compact row must not render a selection checkbox.
-    expect(screen.getByTestId('logsExploreCardNoRecent')).toBeInTheDocument();
+    // Full card, not the compact row; dataset actions available but no selection checkbox.
+    expect(screen.queryByTestId('logsExploreCardNoRecent')).not.toBeInTheDocument();
+    expect(screen.getByTestId('logsExploreCardManage')).toBeInTheDocument();
     expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
   });
 

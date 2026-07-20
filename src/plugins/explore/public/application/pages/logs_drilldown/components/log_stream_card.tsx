@@ -241,27 +241,14 @@ export const LogStreamCard: React.FC<Props> = ({
     );
   }
 
-  // 02 · No events in range: healthy index, wrong window → compact, name still actionable.
-  if (rowState === LogRowState.NO_RECENT) {
-    return (
-      <div ref={cardRef} data-test-subj={`logsExploreCard-${name}`}>
-        <CompactRow
-          icon={icon}
-          name={displayLabel}
-          nameOnClick={onPrimary}
-          nameTitle={primaryLabel}
-          message={i18n.translate('explore.logsDrilldown.rows.noEventsInRange', {
-            defaultMessage: 'No events in the selected time range',
-          })}
-          tone="subdued"
-          checkbox={checkboxProps}
-          data-test-subj="logsExploreCardNoRecent"
-        />
-      </div>
-    );
-  }
+  // 02 · No events in range: the index/dataset HAS data, just none in the selected window (commonly a
+  // wrong default time range vs. a different time field). Render the FULL card — not a stripped compact
+  // row — so the header meta controls (time-field selector, index health, Query/Manage) stay available;
+  // switching the time field here is exactly what lets the user find their data. The histogram column
+  // shows its own "No data in the selected time range" state and the log stream shows the empty message.
+  // (NO_RECENT rows are still demoted into the collapsed drawer by rows_view via `isDead`.)
 
-  // ---- Full card (FULL / LOADING) ----------------------------------------------------------------
+  // ---- Full card (FULL / LOADING / NO_RECENT) ----------------------------------------------------
 
   const rows = data.preview?.rows ?? [];
 
