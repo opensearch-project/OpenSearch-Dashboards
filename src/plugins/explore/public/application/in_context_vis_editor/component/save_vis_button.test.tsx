@@ -127,10 +127,12 @@ describe('SaveVisButton', () => {
     expect(screen.getByTestId('saveVisualizationEditorButton')).toHaveTextContent('Save and back');
   });
 
-  it('opens SaveVisModal when save is clicked for new explore', () => {
+  it('opens SaveVisModal when save is clicked for new explore', async () => {
     render(<SaveVisButton />);
     fireEvent.click(screen.getByTestId('saveVisualizationEditorButton'));
-    expect(screen.getByTestId('save-vis-modal')).toBeInTheDocument();
+    // The click handler is async (slow-query save warning is awaited first), so
+    // the modal opens on the next tick.
+    expect(await screen.findByTestId('save-vis-modal')).toBeInTheDocument();
   });
 
   it('saves directly without modal for existing explore when not dirty', async () => {
