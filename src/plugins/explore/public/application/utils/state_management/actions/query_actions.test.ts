@@ -1838,6 +1838,49 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       );
     });
 
+    describe('query profiling gate (PPL only)', () => {
+      const runAndGetQuery = async () => {
+        const thunk = executeTabQuery({
+          services: mockServices,
+          cacheKey: 'test-cache-key',
+          queryString: 'source=logs',
+        });
+        await thunk(mockDispatch, mockGetState, undefined);
+        const call = (mockSearchSource.setFields as jest.Mock).mock.calls.find((c) => c[0]?.query);
+        return call?.[0]?.query;
+      };
+
+      it('sends profile:true for a PPL query when profiling is enabled', async () => {
+        mockServices.queryProfilingEnabled = true;
+        // executeTabQuery mock state defaults to language: 'PPL'
+        const query = await runAndGetQuery();
+        expect(query).toEqual(expect.objectContaining({ profile: true }));
+      });
+
+      it('does not send profile for a non-PPL (SQL) query even when profiling is enabled', async () => {
+        mockServices.queryProfilingEnabled = true;
+        mockGetState.mockReturnValue({
+          query: {
+            query: 'SELECT * FROM logs',
+            language: 'SQL',
+            dataset: { id: 'test', type: 'INDEX_PATTERN' },
+          },
+          legacy: { interval: '1h' },
+          ui: { activeTabId: 'test-tab' },
+          queryEditor: { breakdownField: undefined, queryStatusMap: {} },
+        });
+
+        const query = await runAndGetQuery();
+        expect(query.profile).toBeUndefined();
+      });
+
+      it('does not send profile when profiling is disabled', async () => {
+        mockServices.queryProfilingEnabled = false;
+        const query = await runAndGetQuery();
+        expect(query.profile).toBeUndefined();
+      });
+    });
+
     it('should handle non-default dataView in time filter logic', async () => {
       const mockIndexPatterns = dataPublicModule.indexPatterns as any;
       mockIndexPatterns.isDefault.mockReturnValue(false);

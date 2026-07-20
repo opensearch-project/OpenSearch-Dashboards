@@ -110,6 +110,7 @@ export class Facet {
           ...(lang && { lang }),
           ...(highlight && { highlight }),
           ...(queryId && { queryId }),
+          ...(query.profile && { profile: true }),
         },
         ...(format && { format }),
         ...(Object.keys(compressionHeaders).length > 0 && { headers: compressionHeaders }),
