@@ -30,7 +30,7 @@ import {
   getDimensions,
   Dimensions,
 } from '../../../../components/chart/utils';
-import { ENABLE_QUERY_PROFILING_SETTING, SAMPLE_SIZE_SETTING } from '../../../../../common';
+import { SAMPLE_SIZE_SETTING } from '../../../../../common';
 import { RootState } from '../store';
 import { getResponseInspectorStats } from '../../../../application/legacy/discover/opensearch_dashboards_services';
 import { getFieldValueCounts } from '../../../../components/fields_selector/lib/field_calculator';
@@ -737,19 +737,12 @@ export const createSearchSourceWithQuery = async (
   }
 
   searchSource.setParent(timeRangeSearchSource);
-  // Query profiling requires both the deployment-level config gate (services.queryProfilingEnabled,
-  // from explore.queryProfiling.enabled) and the runtime Advanced Setting, so an admin can turn it
-  // on/off from /app/settings without a config change. Read the setting live so the toggle takes
-  // effect on the next query.
-  const queryProfilingEnabled =
-    services.queryProfilingEnabled &&
-    services.uiSettings.get(ENABLE_QUERY_PROFILING_SETTING, false);
   const queryStringWithExecutedQuery = {
     ...data.query.queryString.getQuery(),
     query: preparedQuery.query,
     // When query profiling is enabled, ask the engine to profile this query so the response
     // reports whether it ran on the complex worker pool (see results.isComplex).
-    ...(queryProfilingEnabled ? { profile: true } : {}),
+    ...(services.queryProfilingEnabled ? { profile: true } : {}),
   };
 
   searchSource.setFields({
