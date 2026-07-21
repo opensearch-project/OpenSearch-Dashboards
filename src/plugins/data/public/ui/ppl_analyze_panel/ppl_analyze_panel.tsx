@@ -705,6 +705,11 @@ function OperatorPlanSection({
                         transform: 'translateY(-50%)',
                         paddingLeft: 4,
                         fontSize: 11,
+                        // Kept as a fixed dark color on purpose. This label sits just
+                        // outside the bar, but a theme-reactive euiTextColor renders
+                        // near-white in dark mode and is actually harder to read here
+                        // against the surrounding bar/gridline area, so black stays
+                        // the most legible option across themes.
                         color: '#000',
                         whiteSpace: 'nowrap',
                       }}
@@ -898,7 +903,7 @@ export const PPLAnalyzePanel: React.FC<PPLAnalyzePanelProps> = ({ analyzeResult,
           data-test-subj="analyzeProfileUnavailable"
         >
           <EuiText size="s">
-            There was an error retreiving your query analysis from the backend. Typically, this is
+            There was an error retrieving your query analysis from the backend. Typically, this is
             the result of an outdated version of the backend that does not support analyzing
             queries.
           </EuiText>
