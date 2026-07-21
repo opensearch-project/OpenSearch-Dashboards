@@ -4,7 +4,7 @@
  */
 
 import { configureStore } from '@reduxjs/toolkit';
-import { render, screen } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import { FC } from 'react';
 import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
@@ -44,12 +44,47 @@ jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
   withOpenSearchDashboards: jest.fn((component: any) => component),
 }));
 
+// Surface whether the analyze props were passed (vs. gated to `undefined`) and
+// expose the `onModeChange` callback so tests can drive builder code/visual mode.
+interface StubAnalyzeProps {
+  analyzeIsOpen?: boolean;
+  onToggleAnalyze?: () => void;
+  hasAnalyzeResult?: boolean;
+  onModeChange?: (isCode: boolean) => void;
+}
+
+let latestOnModeChange: ((isCode: boolean) => void) | undefined;
+
 jest.mock('../../../components/query_panel', () => ({
-  QueryPanel: () => <div data-test-subj="query-panel">Query Panel</div>,
+  QueryPanel: ({ onToggleAnalyze }: StubAnalyzeProps) => (
+    <div data-test-subj="query-panel">
+      Query Panel
+      {onToggleAnalyze !== undefined && <span data-test-subj="query-panel-analyze-enabled" />}
+    </div>
+  ),
 }));
 
 jest.mock('./logs_query_panel', () => ({
-  LogsQueryPanel: () => <div data-test-subj="logs-query-panel">Logs Query Panel</div>,
+  LogsQueryPanel: ({ onToggleAnalyze, onModeChange }: StubAnalyzeProps) => {
+    latestOnModeChange = onModeChange;
+    return (
+      <div data-test-subj="logs-query-panel">
+        Logs Query Panel
+        {onToggleAnalyze !== undefined && <span data-test-subj="logs-query-panel-analyze-enabled" />}
+      </div>
+    );
+  },
+}));
+
+// Control the analyze panel open/loading/result state directly.
+const mockAnalyzeState = {
+  isOpen: false,
+  setIsOpen: jest.fn(),
+  hasResult: false,
+  isLoading: false,
+};
+jest.mock('../../../components/query_panel/query_panel_widgets', () => ({
+  useAnalyzePanelState: () => mockAnalyzeState,
 }));
 
 jest.mock('../../../components/container/bottom_container', () => ({
@@ -179,13 +214,16 @@ describe('LogsPage', () => {
     );
   };
 
-  beforeEach(() => {
+  const setupServices = ({
+    pplAnalyzeEnabled = false,
+    logsQueryBuilderEnabled = true,
+  }: { pplAnalyzeEnabled?: boolean; logsQueryBuilderEnabled?: boolean } = {}) => {
     const exploreServices = discoverPluginMock.createExploreServicesMock();
     const exploreServicesMock = exploreServices as jest.MaybeMockedDeep<typeof exploreServices>;
-    exploreServicesMock.uiSettings.get.mockImplementation((_, defaultValue) => defaultValue);
+    exploreServicesMock.pplAnalyzeEnabled = pplAnalyzeEnabled;
     exploreServicesMock.capabilities = {
       ...exploreServicesMock.capabilities,
-      explore: { logsQueryBuilderEnabled: true },
+      explore: { logsQueryBuilderEnabled },
     };
 
     exploreServicesMock.keyboardShortcut = {
@@ -198,6 +236,15 @@ describe('LogsPage', () => {
     (useOpenSearchDashboards as jest.Mock).mockReturnValue({
       services: exploreServicesMock,
     });
+    return exploreServicesMock;
+  };
+
+  beforeEach(() => {
+    mockAnalyzeState.isOpen = false;
+    mockAnalyzeState.hasResult = false;
+    mockAnalyzeState.isLoading = false;
+    latestOnModeChange = undefined;
+    setupServices();
   });
 
   afterEach(() => {
@@ -222,21 +269,7 @@ describe('LogsPage', () => {
   });
 
   it('renders the logs query builder panel when the query builder flag is enabled', () => {
-    const exploreServices = discoverPluginMock.createExploreServicesMock();
-    const exploreServicesMock = exploreServices as jest.MaybeMockedDeep<typeof exploreServices>;
-    exploreServicesMock.uiSettings.get.mockImplementation((_, defaultValue) => defaultValue);
-    exploreServicesMock.capabilities = {
-      ...exploreServicesMock.capabilities,
-      explore: { logsQueryBuilderEnabled: true },
-    };
-    exploreServicesMock.keyboardShortcut = {
-      useKeyboardShortcut: mockUseKeyboardShortcut,
-      register: jest.fn(),
-      unregister: jest.fn(),
-      getAllShortcuts: jest.fn(),
-    };
-    (useOpenSearchDashboards as jest.Mock).mockReturnValue({ services: exploreServicesMock });
-
+    setupServices({ logsQueryBuilderEnabled: true });
     const store = createTestStore();
     render(
       // @ts-expect-error TS2322 TODO(ts-error): fixme
@@ -274,6 +307,77 @@ describe('LogsPage', () => {
 
     expect(screen.getByTestId('logs-query-panel')).toBeInTheDocument();
     expect(screen.getByTestId('top-nav')).toBeInTheDocument();
+  });
+
+  describe('PPL Analyze availability', () => {
+    const renderPage = () => {
+      const store = createTestStore();
+      return render(
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
+        <TestHarness store={store}>
+          <LogsPage />
+        </TestHarness>
+      );
+    };
+
+    it('reads the analyze flag from services.pplAnalyzeEnabled, not capabilities', () => {
+      // The flag lives on services (static config), not on capabilities. Setting it
+      // only on capabilities must NOT enable analyze.
+      const services = setupServices({ pplAnalyzeEnabled: false, logsQueryBuilderEnabled: false });
+      (services.capabilities.explore as Record<string, unknown>).pplAnalyzeEnabled = true;
+
+      renderPage();
+
+      expect(screen.queryByTestId('query-panel-analyze-enabled')).not.toBeInTheDocument();
+    });
+
+    it('passes analyze props to QueryPanel when analyze is enabled and the builder is off', () => {
+      setupServices({ pplAnalyzeEnabled: true, logsQueryBuilderEnabled: false });
+
+      renderPage();
+
+      expect(screen.getByTestId('query-panel')).toBeInTheDocument();
+      expect(screen.getByTestId('query-panel-analyze-enabled')).toBeInTheDocument();
+    });
+
+    it('does not pass analyze props to QueryPanel when analyze is disabled', () => {
+      setupServices({ pplAnalyzeEnabled: false, logsQueryBuilderEnabled: false });
+
+      renderPage();
+
+      expect(screen.getByTestId('query-panel')).toBeInTheDocument();
+      expect(screen.queryByTestId('query-panel-analyze-enabled')).not.toBeInTheDocument();
+    });
+
+    it('shows the analyze region in builder code mode when analyze is open', () => {
+      setupServices({ pplAnalyzeEnabled: true, logsQueryBuilderEnabled: true });
+      mockAnalyzeState.isOpen = true;
+      mockAnalyzeState.isLoading = true;
+
+      renderPage();
+
+      // The builder mounts in code mode (onModeChange(true)); analyze is available,
+      // so the analyze region replaces the BottomContainer.
+      act(() => latestOnModeChange?.(true));
+
+      expect(screen.queryByTestId('bottom-container')).not.toBeInTheDocument();
+      expect(screen.getByText('Running query analysis…')).toBeInTheDocument();
+    });
+
+    it('hides the analyze region when the builder switches to visual mode', () => {
+      setupServices({ pplAnalyzeEnabled: true, logsQueryBuilderEnabled: true });
+      mockAnalyzeState.isOpen = true;
+      mockAnalyzeState.isLoading = true;
+
+      renderPage();
+
+      // Visual builder mode: analyze is not available even though it is open, so the
+      // BottomContainer is shown instead of the analyze region.
+      act(() => latestOnModeChange?.(false));
+
+      expect(screen.getByTestId('bottom-container')).toBeInTheDocument();
+      expect(screen.queryByText('Running query analysis…')).not.toBeInTheDocument();
+    });
   });
 
   describe('Keyboard Shortcuts', () => {

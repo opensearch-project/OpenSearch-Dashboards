@@ -101,7 +101,23 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
     return () => sub.unsubscribe();
   }, []);
   const queryState = useSelector((state: RootState) => state.query);
+
+  const queryBuilderEnabled = Boolean(services.capabilities?.explore?.logsQueryBuilderEnabled);
+
+  // Keyed on dataset id below to remount the builder panel on dataset switch, discarding stale draft state.
+  const dataset = useSelector(selectDataset);
+
+  // When the logs query builder is active, analyze is only available while the
+  // builder is showing its code editor (not the visual builder). The builder
+  // reports its live mode up via onModeChange; default to true for the classic
+  // editor, which is always "code mode".
+  const [isBuilderCodeMode, setIsBuilderCodeMode] = useState(true);
+
   const isPPLAnalyzeEnabled = services.pplAnalyzeEnabled;
+
+  // Analyze is available in the classic editor and in the builder's code mode,
+  // but never while the visual builder is on screen.
+  const isAnalyzeAvailable = isPPLAnalyzeEnabled && (!queryBuilderEnabled || isBuilderCodeMode);
 
   const handleToggleAnalyze = useCallback(() => {
     if (!isOpen) {
@@ -118,11 +134,6 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
     }
   }, [isOpen, queryState, services, setIsOpen]);
 
-  const queryBuilderEnabled = Boolean(services.capabilities?.explore?.logsQueryBuilderEnabled);
-
-  // Keyed on dataset id below to remount the builder panel on dataset switch, discarding stale draft state.
-  const dataset = useSelector(selectDataset);
-
   return (
     <EuiErrorBoundary>
       <div className="mainPage">
@@ -134,7 +145,13 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
             <ResizableQueryContainer
               queryPanel={
                 queryBuilderEnabled ? (
-                  <LogsQueryPanel key={dataset?.id} />
+                  <LogsQueryPanel
+                    key={dataset?.id}
+                    analyzeIsOpen={isPPLAnalyzeEnabled ? isOpen : undefined}
+                    onToggleAnalyze={isPPLAnalyzeEnabled ? handleToggleAnalyze : undefined}
+                    hasAnalyzeResult={isPPLAnalyzeEnabled ? hasResult : undefined}
+                    onModeChange={setIsBuilderCodeMode}
+                  />
                 ) : (
                   <QueryPanel
                     analyzeIsOpen={isPPLAnalyzeEnabled ? isOpen : undefined}
@@ -145,7 +162,7 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
               }
               tallDefault={queryBuilderEnabled}
             >
-              {isPPLAnalyzeEnabled && isOpen && (isAnalyzeLoading || analyzeResult) ? (
+              {isAnalyzeAvailable && isOpen && (isAnalyzeLoading || analyzeResult) ? (
                 isAnalyzeLoading ? (
                   <div
                     style={{
@@ -174,6 +191,7 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
                   </div>
                 )
               ) : (
+                /* Main content area with resizable panels under QueryPanel */
                 <BottomContainer />
               )}
             </ResizableQueryContainer>
