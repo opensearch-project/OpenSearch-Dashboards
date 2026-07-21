@@ -36,6 +36,8 @@ import {
   EXPLORE_VISUALIZATION_TAB_ID,
 } from '../../../../common';
 import { setActiveTab } from '../../utils/state_management/slices';
+import { selectDataset } from '../../utils/state_management/selectors';
+import { LogsQueryPanel } from './logs_query_panel';
 
 /**
  * Main application component for the Explore plugin
@@ -116,6 +118,11 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
     }
   }, [isOpen, queryState, services, setIsOpen]);
 
+  const queryBuilderEnabled = Boolean(services.capabilities?.explore?.logsQueryBuilderEnabled);
+
+  // Keyed on dataset id below to remount the builder panel on dataset switch, discarding stale draft state.
+  const dataset = useSelector(selectDataset);
+
   return (
     <EuiErrorBoundary>
       <div className="mainPage">
@@ -126,12 +133,17 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
 
             <ResizableQueryContainer
               queryPanel={
-                <QueryPanel
-                  analyzeIsOpen={isPPLAnalyzeEnabled ? isOpen : undefined}
-                  onToggleAnalyze={isPPLAnalyzeEnabled ? handleToggleAnalyze : undefined}
-                  hasAnalyzeResult={isPPLAnalyzeEnabled ? hasResult : undefined}
-                />
+                queryBuilderEnabled ? (
+                  <LogsQueryPanel key={dataset?.id} />
+                ) : (
+                  <QueryPanel
+                    analyzeIsOpen={isPPLAnalyzeEnabled ? isOpen : undefined}
+                    onToggleAnalyze={isPPLAnalyzeEnabled ? handleToggleAnalyze : undefined}
+                    hasAnalyzeResult={isPPLAnalyzeEnabled ? hasResult : undefined}
+                  />
+                )
               }
+              tallDefault={queryBuilderEnabled}
             >
               {isPPLAnalyzeEnabled && isOpen && (isAnalyzeLoading || analyzeResult) ? (
                 isAnalyzeLoading ? (

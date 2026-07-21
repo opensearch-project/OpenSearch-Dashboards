@@ -56,6 +56,7 @@ export const IGNORE_FILE_GLOBS = [
   'release-notes/*',
   '**/antlr/**/.generated/**/*',
   'packages/osd-antlr-grammar/src/**/.generated/**/*',
+  'packages/osd-antlr-grammar/src/**/grammar/*.g4',
 
   // filename must match language code which requires capital letters
   '**/translations/*.json',

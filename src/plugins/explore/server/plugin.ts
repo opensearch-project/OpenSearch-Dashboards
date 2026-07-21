@@ -19,8 +19,7 @@ import { ExplorePluginSetup, ExplorePluginStart } from './types';
 export class ExplorePlugin implements Plugin<ExplorePluginSetup, ExplorePluginStart> {
   private readonly logger: Logger;
 
-  // @ts-ignore
-  constructor(private readonly initializerContext: PluginInitializerContext) {
+  constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
   }
 
@@ -34,6 +33,7 @@ export class ExplorePlugin implements Plugin<ExplorePluginSetup, ExplorePluginSt
       explore: {
         discoverTracesEnabled: false,
         discoverMetricsEnabled: false,
+        logsQueryBuilderEnabled: false,
       },
     }));
 
@@ -56,6 +56,7 @@ export class ExplorePlugin implements Plugin<ExplorePluginSetup, ExplorePluginSt
             ...(capabilities.explore || {}),
             discoverTracesEnabled: config.discoverTraces?.enabled ?? false,
             discoverMetricsEnabled: config.discoverMetrics?.enabled ?? false,
+            logsQueryBuilderEnabled: config.logsQueryBuilder?.enabled ?? false,
           },
         };
       } catch (error) {
@@ -76,6 +77,7 @@ export class ExplorePlugin implements Plugin<ExplorePluginSetup, ExplorePluginSt
     });
     // core.uiSettings.register(uiSettings);
     core.uiSettings.register(exploreUiSettings);
+
     core.savedObjects.registerType(exploreSavedObjectType);
 
     return {};

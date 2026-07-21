@@ -58,6 +58,7 @@ const createMockInitializerContext = (
       pplAnalyze: { enabled: pplAnalyzeEnabled },
       discoverTraces: { enabled: false },
       discoverMetrics: { enabled: false },
+      logsQueryBuilder: { enabled: false },
       agentTraces: { enabled: false },
     }),
     create: jest.fn(),
