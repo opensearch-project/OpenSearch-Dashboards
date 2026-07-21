@@ -313,7 +313,7 @@
     "@babel/types": "^7.29.7",
     "@cfaester/enzyme-adapter-react-18": "^0.8.0",
     "@elastic/apm-rum": "^5.6.1",
-    "@elastic/charts": "31.1.0",
+    "@elastic/charts": "71.8.1",
     "@elastic/ems-client": "7.10.0",
     "@elastic/eslint-config-kibana": "1.0.0",
     "@elastic/eslint-plugin-eui": "^2.14.0",

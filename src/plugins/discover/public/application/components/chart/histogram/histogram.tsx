@@ -33,6 +33,7 @@ import moment from 'moment-timezone';
 import { unitOfTime } from 'moment';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { cloneDeep } from 'lodash';
 import { euiThemeVars } from '@osd/ui-shared-deps/theme';
 
 import {
@@ -224,7 +225,9 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
     const { chartData, services } = this.props;
     const { uiSettings } = services;
     const timeZone = getTimezone(uiSettings);
-    const chartsTheme = services.theme.chartsDefaultTheme;
+    // `chartsDefaultTheme` is a shared singleton (and is frozen/immutable in
+    // @elastic/charts >=71), so clone it before applying the overrides below.
+    const chartsTheme = cloneDeep(services.theme.chartsDefaultTheme);
     const chartsBaseTheme = services.theme.chartsDefaultBaseTheme;
 
     if (!chartData) {
@@ -343,6 +346,11 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
           position={Position.Bottom}
           title={chartData.xAxisLabel}
           tickFormat={this.formatXValue}
+          // @elastic/charts >=71 defaults to a multi-layer time axis
+          // (timeAxisLayerCount=2), which ignores `tickFormat` and renders
+          // layered ordinal date labels. Use 0 for the single-row time axis
+          // so our `formatXValue` pattern drives the labels as before.
+          timeAxisLayerCount={0}
           ticks={10}
         />
         <LineAnnotation
