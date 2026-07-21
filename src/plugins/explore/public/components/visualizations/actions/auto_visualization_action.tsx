@@ -263,22 +263,6 @@ async function executePPLQuery(
   const uiSettings = core.uiSettings;
   const dataset = preparedQueryObject.dataset;
 
-  // The dataset is temporary and will not be created
-  // cache it will resolve it into a data view(also temporary)
-  // use it to add time filter
-  // await data.query.queryString.getDatasetService().cacheDataset(
-  //   dataset,
-  //   {
-  //     uiSettings: core.uiSettings,
-  //     savedObjects: core.savedObjects,
-  //     notifications: core.notifications,
-  //     http: core.http,
-  //     data,
-  //   },
-  //   false
-  // );
-  // const dataView = await data.dataViews.get(dataset.id);
-
   const size = uiSettings.get(SAMPLE_SIZE_SETTING);
   // const filters = data.query.filterManager.getFilters();
 
@@ -286,12 +270,11 @@ async function executePPLQuery(
   const searchSource = await data.search.searchSource.create();
 
   searchSource.setFields({
-    // index: dataView,
     size,
     query: preparedQueryObject,
     highlightAll: false,
     version: false,
-    // filter: filters,
+
     // Pass absolute time range so the PPL search interceptor injects
     // it into the query instead of using the global timefilter.
     ...(timeRange && dataset.timeFieldName ? { timeRange } : {}),
