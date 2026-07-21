@@ -276,23 +276,25 @@ function getNonEmptyCapture(value: unknown): string | undefined {
     return undefined;
   }
 
-  return value.trim() ? value : undefined;
-}
-
-function getNonEmptyLabelCapture(value: unknown): string | undefined {
-  return getNonEmptyCapture(value)?.trim();
+  const trimmedValue = value.trim();
+  return trimmedValue ? trimmedValue : undefined;
 }
 
 function buildRegexOption(
   option: NormalizedVariableOption,
   match: RegExpExecArray
 ): NormalizedVariableOption | undefined {
-  const groups = match.groups;
+  const groups = match.groups ?? {};
 
-  if (groups?.value !== undefined || groups?.label !== undefined || groups?.text !== undefined) {
+  const hasNamedValue = Object.prototype.hasOwnProperty.call(groups, 'value');
+  const hasNamedLabel = Object.prototype.hasOwnProperty.call(groups, 'label');
+  const hasNamedText = Object.prototype.hasOwnProperty.call(groups, 'text');
+
+  if (hasNamedValue || hasNamedLabel || hasNamedText) {
+    // Empty named captures should not erase the original option identity or display label.
     const value = getNonEmptyCapture(groups.value) ?? option.value;
     const label =
-      getNonEmptyLabelCapture(groups.label) ?? getNonEmptyLabelCapture(groups.text) ?? option.label;
+      getNonEmptyCapture(groups.label) ?? getNonEmptyCapture(groups.text) ?? option.label;
 
     return {
       value,
@@ -300,17 +302,7 @@ function buildRegexOption(
     };
   }
 
-  const capturedValue = getNonEmptyCapture(match[1]);
-  if (!capturedValue) {
-    return option;
-  }
-
-  const capturedLabel = getNonEmptyLabelCapture(match[2]) ?? option.label;
-
-  return {
-    value: capturedValue,
-    ...(capturedLabel ? { label: capturedLabel } : {}),
-  };
+  return option;
 }
 
 export function applyRegexToVariableOptions(
@@ -325,8 +317,7 @@ export function applyRegexToVariableOptions(
     const optionMap = new Map<string, NormalizedVariableOption>();
 
     options.forEach((option) => {
-      pattern.lastIndex = 0;
-      const match = pattern.exec(option.value);
+      const match = new RegExp(pattern).exec(option.value);
       if (!match) {
         return;
       }
@@ -349,5 +340,3 @@ export function applyRegexToVariableOptions(
     return options;
   }
 }
-
-export const filterVariableOptionsByRegex = applyRegexToVariableOptions;
