@@ -53,11 +53,15 @@ describe('ToolExecutor', () => {
       mockAssistantActionService.isUserConfirmRequired.mockReturnValue(false);
       mockAssistantActionService.executeAction.mockResolvedValue({ result: 'success' });
 
-      await toolExecutor.executeTool('testTool', { param: 'value' }, 'call-123', 'datasource-1');
+      await toolExecutor.executeTool('testTool', { param: 'value' }, 'call-123', {
+        id: 'datasource-1',
+        title: 'Datasource 1',
+      });
 
       expect(mockAssistantActionService.executeAction).toHaveBeenCalledWith('testTool', {
         param: 'value',
         datasourceId: 'datasource-1',
+        datasourceTitle: 'Datasource 1',
       });
     });
   });
@@ -119,7 +123,8 @@ describe('ToolExecutor', () => {
         'confirmTool',
         { param: 'value' },
         'call-123',
-        'datasource-1'
+        // 'datasource-1'
+        { id: 'datasource-1', title: 'Datasource 1' }
       );
 
       const pending = confirmationService.getPendingConfirmations();
@@ -131,6 +136,7 @@ describe('ToolExecutor', () => {
         param: 'value',
         confirmed: true,
         datasourceId: 'datasource-1',
+        datasourceTitle: 'Datasource 1',
       });
     });
   });
