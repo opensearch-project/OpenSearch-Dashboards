@@ -70,7 +70,9 @@ jest.mock('./logs_query_panel', () => ({
     return (
       <div data-test-subj="logs-query-panel">
         Logs Query Panel
-        {onToggleAnalyze !== undefined && <span data-test-subj="logs-query-panel-analyze-enabled" />}
+        {onToggleAnalyze !== undefined && (
+          <span data-test-subj="logs-query-panel-analyze-enabled" />
+        )}
       </div>
     );
   },
