@@ -74,7 +74,7 @@ import {
   ExploreStartDependencies,
 } from './types';
 import { DocViewsRegistry } from './types/doc_views_types';
-import { ExploreEmbeddableFactory } from './embeddable';
+import { ExploreEmbeddableFactory, PanelDataService } from './embeddable';
 import { SAVED_OBJECT_TYPE } from './saved_explore/_saved_explore';
 import { DASHBOARD_ADD_PANEL_TRIGGER } from '../../dashboard/public';
 import { createAbortDataQueryAction } from './application/utils/state_management/actions/abort_controller';
@@ -828,6 +828,9 @@ export class ExplorePlugin implements Plugin<
       this.unregisterVisualizationTools = () => {
         unregisterAssistantAction(AUTO_VISUALIZATION_TOOL_NAME);
       };
+
+      // Inject contextProvider action helpers into PanelDataService
+      PanelDataService.init(registerAssistantAction, unregisterAssistantAction);
     }
 
     const savedExploreLoader = createSavedExploreLoader({
@@ -854,6 +857,8 @@ export class ExplorePlugin implements Plugin<
     }
     this.unregisterPPLExecuteQueryAction?.();
     this.unregisterVisualizationTools?.();
+    // cleanup shared panel-data store + fetch_panel_data tool.
+    PanelDataService.getInstance().reset();
   }
 
   private registerEmbeddable(

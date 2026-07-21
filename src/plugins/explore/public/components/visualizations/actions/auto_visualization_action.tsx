@@ -263,13 +263,24 @@ async function executePPLQuery(
   const uiSettings = core.uiSettings;
   const dataset = preparedQueryObject.dataset;
 
-  const size = uiSettings.get(SAMPLE_SIZE_SETTING);
-  // const filters = data.query.filterManager.getFilters();
+  await data.query.queryString.getDatasetService().cacheDataset(
+    dataset,
+    {
+      uiSettings: core.uiSettings,
+      savedObjects: core.savedObjects,
+      notifications: core.notifications,
+      http: core.http,
+      data,
+    },
+    false
+  );
+  const dataView = await data.dataViews.get(dataset.id);
 
-  // console.log('filters', filters);
+  const size = uiSettings.get(SAMPLE_SIZE_SETTING);
   const searchSource = await data.search.searchSource.create();
 
   searchSource.setFields({
+    index: dataView,
     size,
     query: preparedQueryObject,
     highlightAll: false,

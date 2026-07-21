@@ -105,22 +105,10 @@ export class AskAIEmbeddableAction implements Action<EmbeddableContext> {
       // Use JPEG format with low quality to save tokens
       visualizationBase64 = canvas.toDataURL('image/jpeg', 0.5).split(',')[1];
 
-      // Create context for the assistant with summary
-      const visualizationContext = {
-        title,
-        visType,
-        savedObjectId,
-        timeRange,
-        query: query?.query,
-        filters,
-        index: query?.dataset?.title,
-      };
-
       // Parse visualization config for axes mapping and transformations
       const visualizationConfig = JSON.parse(visEmbeddable.savedExplore.visualization || '{}');
       const axesMapping = visualizationConfig.axesMapping;
       const chartType = visualizationConfig.chartType;
-      const styleOptions = visualizationConfig.params;
       const dataTransformations = visualizationConfig.dataTransformations;
 
       const visualizationContextText = [

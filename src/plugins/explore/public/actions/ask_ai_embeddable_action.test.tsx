@@ -162,17 +162,23 @@ describe('AskAIEmbeddableAction', () => {
       document.body.innerHTML = '';
     });
 
-    it('should add context to context provider', async () => {
+    it('should send visualization context to chat', async () => {
       await action.execute({ embeddable: mockEmbeddable });
 
       await waitFor(() => {
-        expect(mockContextProvider.getAssistantContextStore).toHaveBeenCalled();
-        expect(mockContextProvider.getAssistantContextStore().addContext).toHaveBeenCalledWith(
-          expect.objectContaining({
-            id: expect.stringContaining('visualization-'),
-            description: expect.stringContaining('Test Visualization'),
-            categories: ['visualization', 'dashboard', 'chat'],
-          })
+        expect(mockCore.chat.sendMessageWithWindow).toHaveBeenCalledWith(
+          expect.any(String),
+          expect.arrayContaining([
+            expect.objectContaining({
+              role: 'user',
+              content: expect.arrayContaining([
+                expect.objectContaining({
+                  type: 'text',
+                  text: expect.stringContaining('Test Visualization'),
+                }),
+              ]),
+            }),
+          ])
         );
       });
     });
