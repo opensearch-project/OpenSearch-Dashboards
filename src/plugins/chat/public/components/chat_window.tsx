@@ -111,9 +111,17 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
     const timelineRef = React.useRef<Message[]>(timeline);
 
-    React.useEffect(() => {
-      timelineRef.current = timeline;
-    }, [timeline]);
+    // Wrap setTimeline so timelineRef updates synchronously within the updater, before React renders.
+    const setTimelineSynced = useCallback(
+      (updater: Message[] | ((prev: Message[]) => Message[])) => {
+        setTimeline((prev) => {
+          const next = typeof updater === 'function' ? updater(prev) : updater;
+          timelineRef.current = next;
+          return next;
+        });
+      },
+      []
+    );
 
     // Subscribe to pending confirmations
     useEffect(() => {
@@ -144,13 +152,14 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
           confirmationService,
           telemetryRecorder,
           callbacks: {
-            onTimelineUpdate: setTimeline,
+            onTimelineUpdate: setTimelineSynced,
+            // onTimelineUpdate: setTimeline,
             onStreamingStateChange: setIsStreaming,
             onStartResponse: setStartResponse,
             getTimeline: () => timelineRef.current,
           },
         }),
-      [service, chatService, confirmationService, telemetryRecorder]
+      [service, chatService, confirmationService, telemetryRecorder, setTimelineSynced]
     );
 
     // Subscribe to tool updates from the service
@@ -431,7 +440,23 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       if (handled) return;
 
       // Normal message flow — add user message to timeline then stream
-      const userMsg = chatService.getUserMessage(messageContent);
+      const userAdditionalMessage =
+        additionalMessages[0] && additionalMessages[0]?.role === 'user'
+          ? additionalMessages[0]
+          : null;
+
+      // add additional msg such as image or context to message list
+      const userMsg: UserMessage = userAdditionalMessage
+        ? {
+            id: chatService.generateMessageId(),
+            role: 'user',
+            content: [
+              ...(userAdditionalMessage.content as Exclude<UserMessage['content'], string>),
+              { type: 'text' as const, text: messageContent.trim() },
+            ],
+          }
+        : chatService.getUserMessage(messageContent);
+
       setTimeline((prev) => [...prev, userMsg]);
       return subscribeToMessageStream(messagesToSend, userMsg);
     };

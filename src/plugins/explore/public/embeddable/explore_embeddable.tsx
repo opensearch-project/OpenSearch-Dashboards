@@ -66,6 +66,59 @@ import {
   TransformationService,
   registerAllTransformations,
 } from '../components/data_transformations';
+import { AssistantActionService } from '../../../context_provider/public';
+
+/**
+ * Module-level shared data store keyed by savedObjectId.
+ * Each embeddable writes its latest transformed rows here after fetch().
+ * A single global `fetch_panel_data` tool reads from this store,
+ */
+export const panelDataStore = new Map<string, { rows: any[]; panelTitle: string }>();
+
+let fetchPanelDataToolRegistered = false;
+
+function registerGlobalFetchPanelDataTool() {
+  if (fetchPanelDataToolRegistered) return;
+  fetchPanelDataToolRegistered = true;
+
+  const service = AssistantActionService.getInstance();
+  service.registerAction({
+    name: 'fetch_panel_data',
+    description:
+      'Retrieves the underlying data rows from a dashboard panel by its saved object ID. ' +
+      'IMPORTANT: Do NOT call this tool for general questions like "summarize this", "what does this show", or "explain the chart" — ' +
+      'use the screenshot and visualization context already provided in the conversation for those. ' +
+      'ONLY call this tool when the user explicitly asks for specific data that requires exact values. ',
+    parameters: {
+      type: 'object',
+      properties: {
+        savedObjectId: {
+          type: 'string',
+          description: 'The saved explore object ID of the panel to fetch data from',
+        },
+      },
+      required: ['savedObjectId'],
+    },
+    handler: async (args: { savedObjectId: string }) => {
+      const entry = panelDataStore.get(args.savedObjectId);
+      if (!entry) {
+        return {
+          success: false,
+          message: `No data available for panel ${args.savedObjectId}. The panel may not be loaded yet.`,
+        };
+      }
+
+      const formattedRows = entry.rows.map((hit: any) => hit._source || hit.fields || hit);
+      return {
+        success: true,
+        panelTitle: entry.panelTitle,
+        savedObjectId: args.savedObjectId,
+        rowCount: formattedRows.length,
+        rows: formattedRows,
+      };
+    },
+  });
+}
 
 // TODO cleanup unused props
 export interface SearchProps {
@@ -657,6 +710,16 @@ export class ExploreEmbeddable
     this.searchProps.hits = transformedRows.length;
     this.searchProps.isLoading = false;
 
+    // Update shared panel data store so the global fetch_panel_data tool returns fresh data
+    const savedExploreId = this.savedExplore.id;
+    if (savedExploreId) {
+      panelDataStore.set(savedExploreId, {
+        rows: transformedRows,
+        panelTitle: this.panelTitle || this.savedExplore.title,
+      });
+      registerGlobalFetchPanelDataTool();
+    }
+
     // set tabular for DataViewComponent to display via adapters.data.getTabular()
     if (this.inspectorAdaptors.data && visualizationData?.transformedData) {
       const allColumns = [
@@ -722,6 +785,10 @@ export class ExploreEmbeddable
     // Cleanup transformation service
     if (this.transformationService) {
       this.transformationService.destroy();
+    }
+
+    if (this.savedExplore.id) {
+      panelDataStore.delete(this.savedExplore.id);
     }
 
     if (this.abortController) {

@@ -157,9 +157,10 @@ export class PPLSearchInterceptor extends SearchInterceptor {
       // Skip adding time filters if hideDatePicker is false. Let search strategy insert time filters.
       datasetService.getType(dataset.type)?.languageOverrides?.PPL?.hideDatePicker !== false
     ) {
+      // Prefer an explicit time range passed and fall back to the global timefilter.
       const timeFilter = PPLFilterUtils.getTimeFilterWhereClause(
         dataset.timeFieldName,
-        this.queryService.timefilter.timefilter.getTime()
+        request.params?.body?.timeRange ?? this.queryService.timefilter.timefilter.getTime()
       );
       whereCommands.push(timeFilter);
     }

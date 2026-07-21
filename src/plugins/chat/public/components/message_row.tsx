@@ -71,28 +71,30 @@ export const MessageRow: React.FC<MessageRowProps> = ({
     if (Array.isArray(content)) {
       return (
         <>
-          {content.map((block: any, index: number) => {
-            // Render binary content (images)
-            if (block.type === 'binary' && block.data) {
-              return (
-                <img
-                  key={index}
-                  src={`data:${block.mimeType || 'image/jpeg'};base64,${block.data}`}
-                  alt={block.filename || 'Visualization'}
-                  style={{ maxWidth: '100%', marginBottom: '8px', borderRadius: '4px' }}
-                />
-              );
-            }
-            // Render text content as markdown
-            if (block.type === 'text' && block.text) {
-              return <Markdown key={index} markdown={block.text} openLinksInNewTab={true} />;
-            }
-            // Handle plain text blocks (for backward compatibility)
-            if (block.text) {
-              return <Markdown key={index} markdown={block.text} openLinksInNewTab={true} />;
-            }
-            return null;
-          })}
+          {content
+            .filter((block: any) => !block.hiddenInConversation)
+            .map((block: any, index: number) => {
+              // Render binary content (images)
+              if (block.type === 'binary' && block.data) {
+                return (
+                  <img
+                    key={index}
+                    src={`data:${block.mimeType || 'image/jpeg'};base64,${block.data}`}
+                    alt={block.filename || 'Visualization'}
+                    style={{ maxWidth: '100%', marginBottom: '8px', borderRadius: '4px' }}
+                  />
+                );
+              }
+              // Render text content as markdown
+              if (block.type === 'text' && block.text) {
+                return <Markdown key={index} markdown={block.text} openLinksInNewTab={true} />;
+              }
+              // Handle plain text blocks (for backward compatibility)
+              if (block.text) {
+                return <Markdown key={index} markdown={block.text} openLinksInNewTab={true} />;
+              }
+              return null;
+            })}
         </>
       );
     }

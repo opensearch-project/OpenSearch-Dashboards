@@ -394,11 +394,14 @@ export class ChatEventHandler {
       });
 
       // Execute the tool and update tool execution status
+      const dataSourceInfo = await this.chatService.getCurrentDataSourceInfo();
+      const timeRange = this.chatService.getCurrentTimeRange();
       const result = await this.toolExecutor.executeTool(
         toolCall.function.name,
         args,
         toolCallId,
-        await this.chatService.getCurrentDataSourceId()
+        dataSourceInfo,
+        timeRange
       );
 
       // Check if tool execution was cancelled (e.g., due to cleanup)
