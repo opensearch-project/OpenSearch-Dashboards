@@ -282,6 +282,13 @@
 # functionality in Visualization.
 # vis_builder.enabled: false
 
+# Enable the Dashboard Variables feature (disabled by default). When off, the `variablesJSON`
+# field is never added to the dashboard mapping or written on save.
+# Turning it on triggers a one-time saved object index migration.
+# Warning: before turning it back off, remove `variablesJSON` from all dashboard documents,
+# otherwise the index migration fails with strict_dynamic_mapping_exception on every startup.
+# dashboard.variables.enabled: false
+
 # Set the value of this setting to true to hide local cluster in data source feature.
 # data_source.hideLocalCluster: true
 
