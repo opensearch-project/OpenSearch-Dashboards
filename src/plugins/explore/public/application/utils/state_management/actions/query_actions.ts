@@ -612,6 +612,7 @@ const executeQueryBase = async (
       ...rawResults,
       elapsedMs: inspectorRequest.getTime()!,
       fieldSchema: searchSource.getDataFrame()?.schema,
+      profile: searchSource.getDataFrame()?.meta?.profile,
     };
 
     if (isHistogramQuery && histogramConfig) {
@@ -739,6 +740,13 @@ export const createSearchSourceWithQuery = async (
   const queryStringWithExecutedQuery = {
     ...data.query.queryString.getQuery(),
     query: preparedQuery.query,
+    // When query profiling is enabled, ask the engine to profile this query so the response
+    // reports whether it ran on the complex worker pool (see results.profile.isComplex). PPL-only:
+    // only PPL runs on that pool, and this factory is shared, so sending the field on other
+    // languages (e.g. SQL) is meaningless and can affect engine selection on some backends.
+    ...(services.queryProfilingEnabled && preparedQuery.language === 'PPL'
+      ? { profile: true }
+      : {}),
   };
 
   searchSource.setFields({

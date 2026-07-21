@@ -28,6 +28,11 @@ export function isTerminalNode(node: unknown): node is TerminalNode {
   );
 }
 
+// Typed narrowing alias over isRuleNode for parse-tree callers (same duck-type).
+export function isParserRuleContext(node: ParseTree | null | undefined): node is ParserRuleContext {
+  return isRuleNode(node);
+}
+
 let compiledRuleNameToIndexMap: Map<string, number> | undefined;
 
 function getCompiledRuleNameToIndexMap(): Map<string, number> {
