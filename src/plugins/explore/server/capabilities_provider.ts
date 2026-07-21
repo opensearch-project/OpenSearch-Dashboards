@@ -34,6 +34,5 @@ export const capabilitiesProvider = () => ({
     createShortUrl: true,
     save: true,
     saveQuery: true,
-    pplAnalyzeEnabled: false,
   },
 });

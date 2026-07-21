@@ -21,7 +21,6 @@ import {
   EXPLORE_METRICS_EXPLORE_TAB_ID,
   ENABLE_EXPERIMENTAL_SETTING,
   EXPLORE_STATISTICS_TAB_ID,
-  EXPLORE_ANALYZE_TAB_ID,
 } from '../../common';
 import { VisTab } from '../components/tabs/vis_tab';
 import { prepareQueryForLanguage } from './utils/languages';
@@ -37,7 +36,6 @@ import { QueryExecutionStatus } from './utils/state_management/types';
 import { PatternsTab } from '../components/tabs/patterns_tab';
 import { BRAIN_QUERY_OLD_ENGINE_ERROR_PREFIX } from '../components/patterns_table/utils/constants';
 import { StatisticsTab } from '../components/tabs/statistics_tab';
-import { AnalyzeTab } from '../components/tabs/analyze_tab';
 
 /**
  * Registers built-in tabs with the tab registry
@@ -228,18 +226,6 @@ export const registerBuiltInTabs = (
     },
 
     component: StatisticsTab,
-  });
-
-  // Register Analyze Tab
-  tabRegistry.registerTab({
-    id: EXPLORE_ANALYZE_TAB_ID,
-    label: i18n.translate('explore.analyzeTab.label', {
-      defaultMessage: 'Analyze',
-    }),
-    flavor: [ExploreFlavor.Logs, ExploreFlavor.Traces],
-    order: 18,
-    supportedLanguages: [EXPLORE_DEFAULT_LANGUAGE],
-    component: AnalyzeTab,
   });
 
   // Register Field Stats Tab

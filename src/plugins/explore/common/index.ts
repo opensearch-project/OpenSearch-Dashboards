@@ -27,7 +27,6 @@ export const EXPLORE_VISUALIZATION_TAB_ID = 'explore_visualization_tab';
 export const EXPLORE_FIELD_STATS_TAB_ID = 'explore_field_stats_tab';
 export const EXPLORE_NO_TAB_ID = '';
 export const EXPLORE_METRICS_EXPLORE_TAB_ID = 'metrics-explore';
-export const EXPLORE_ANALYZE_TAB_ID = 'explore_analyze_tab';
 export const VISUALIZATION_EDITOR_APP_ID = 'visualization-editor';
 export const VISUALIZATION_EDITOR_APP_NAME = 'VisualizationEditor';
 

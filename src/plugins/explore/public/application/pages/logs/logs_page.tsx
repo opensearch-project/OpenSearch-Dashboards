@@ -99,7 +99,7 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
     return () => sub.unsubscribe();
   }, []);
   const queryState = useSelector((state: RootState) => state.query);
-  const isPPLAnalyzeEnabled = !!services.capabilities.explore?.pplAnalyzeEnabled;
+  const isPPLAnalyzeEnabled = services.pplAnalyzeEnabled;
 
   const handleToggleAnalyze = useCallback(() => {
     if (!isOpen) {
