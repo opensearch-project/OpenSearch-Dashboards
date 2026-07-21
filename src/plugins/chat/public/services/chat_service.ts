@@ -266,39 +266,42 @@ export class ChatService {
     return { observable: dummyObservable, userMessage };
   }
 
-  /**
-   * Extract data source ID from page context
-   * Looks for page contexts with appId and dataset.dataSource.id structure
-   */
-  private extractDataSourceIdFromPageContext(allContexts: any[]): string | undefined {
-    // Find page context by checking for 'page' category and appId in value
-    const pageContext = allContexts.find((ctx) => {
-      // Look for contexts in 'page' category instead of filtering by ID existence
-      if (!ctx.categories?.includes('page')) return false;
+  private getDataSourceFromPageContext() {
+    const dsId = this.getPageContextValue()?.dataset?.dataSource?.id;
+    return dsId;
+  }
 
+  private getAllAssistantContexts(): any[] {
+    const contextStore = (window as any).assistantContextStore;
+    return contextStore ? contextStore.getAllContexts() : [];
+  }
+
+  /**
+   * Resolve the parsed value of the current page context (the one carrying appId).
+   */
+  private getPageContextValue(): any | undefined {
+    const pageContext = this.getAllAssistantContexts().find((ctx) => {
+      if (!ctx.categories?.includes('page')) return false;
       try {
         const value = typeof ctx.value === 'string' ? JSON.parse(ctx.value) : ctx.value;
-        return value?.appId; // Page contexts have appId
+        return value?.appId;
       } catch {
         return false;
       }
     });
-
     if (!pageContext) return undefined;
 
-    const contextValue =
-      typeof pageContext.value === 'string' ? JSON.parse(pageContext.value) : pageContext.value;
-
-    // TODO: Consider adding more robust nested field search for dataSource.id
-    // if the standard dataset.dataSource.id pattern is not found
-    return contextValue?.dataset?.dataSource?.id;
+    return typeof pageContext.value === 'string'
+      ? JSON.parse(pageContext.value)
+      : pageContext.value;
   }
 
-  private getDataSourceFromPageContext() {
-    const contextStore = (window as any).assistantContextStore;
-    const allContexts = contextStore ? contextStore.getAllContexts() : [];
-
-    return this.extractDataSourceIdFromPageContext(allContexts);
+  public getCurrentTimeRange(): { from: string; to: string } | undefined {
+    const timeRange = this.getPageContextValue()?.timeRange;
+    if (timeRange?.from && timeRange?.to) {
+      return { from: timeRange.from, to: timeRange.to };
+    }
+    return undefined;
   }
 
   /**
@@ -357,6 +360,14 @@ export class ChatService {
       this.cachedDataSourceId ||
       (await this.getWorkspaceAwareDataSourceId())
     );
+  }
+
+  public async getCurrentDataSourceInfo(): Promise<{ id: string; title?: string } | undefined> {
+    const id = await this.getCurrentDataSourceId();
+    if (!id) return undefined;
+    const availableDs = await this.getAvailableDataSources();
+    const title = availableDs.find((ds) => ds.id === id)?.title;
+    return { id, title };
   }
 
   public async sendMessage(

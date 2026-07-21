@@ -10,6 +10,7 @@ import type { Event } from './events';
 export interface TextInputContent {
   type: 'text';
   text: string;
+  hiddenInConversation?: boolean;
 }
 
 interface BinaryInputContent {
@@ -19,6 +20,7 @@ interface BinaryInputContent {
   url?: string;
   data?: string;
   filename?: string;
+  hiddenInConversation?: boolean;
 }
 
 type InputContent = TextInputContent | BinaryInputContent;

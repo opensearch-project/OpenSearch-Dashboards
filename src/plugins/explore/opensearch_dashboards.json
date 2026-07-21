@@ -20,7 +20,7 @@
     "expressions",
     "dashboard"
   ],
-  "requiredBundles": ["opensearchDashboardsReact", "opensearchDashboardsUtils", "dashboard", "dataImporter"],
+  "requiredBundles": ["opensearchDashboardsReact", "opensearchDashboardsUtils", "dashboard", "dataImporter","contextProvider"],
   "optionalPlugins": ["home", "share", "contextProvider", "datasetManagement", "dataImporter", "dataSource", "dataSourceManagement"],
   "configPath": ["explore"],
   "minDataSourceEngineVersions": {

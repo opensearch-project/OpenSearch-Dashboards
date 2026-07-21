@@ -93,6 +93,10 @@ import {
   registerDisabledPPLExecuteQueryAction,
   EXECUTE_PPL_QUERY_TOOL_DEFINITION,
 } from './components/query_panel/actions/ppl_execute_query_action';
+import {
+  registerAutoVisualizationAction,
+  AUTO_VISUALIZATION_TOOL_NAME,
+} from './components/visualizations/actions/auto_visualization_action';
 
 export class ExplorePlugin implements Plugin<
   ExplorePluginSetup,
@@ -132,6 +136,7 @@ export class ExplorePlugin implements Plugin<
   private editorAppStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private editorStopUrlTracking?: () => void;
   private unregisterPPLExecuteQueryAction?: () => void;
+  private unregisterVisualizationTools?: () => void;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
@@ -805,13 +810,24 @@ export class ExplorePlugin implements Plugin<
     // Register disabled execute_ppl_query action as placeholder
     // This will be overridden when query panel mounts and restored when it unmounts
     if (plugins.contextProvider) {
-      registerDisabledPPLExecuteQueryAction(
-        plugins.contextProvider.actions.registerAssistantAction
-      );
+      const { registerAssistantAction, unregisterAssistantAction } =
+        plugins.contextProvider.actions;
+
+      registerDisabledPPLExecuteQueryAction(registerAssistantAction);
       this.unregisterPPLExecuteQueryAction = () =>
-        plugins.contextProvider!.actions.unregisterAssistantAction(
-          EXECUTE_PPL_QUERY_TOOL_DEFINITION.name
-        );
+        unregisterAssistantAction(EXECUTE_PPL_QUERY_TOOL_DEFINITION.name);
+
+      // Register visualization tool for AI-driven visualization creation
+      registerAutoVisualizationAction(
+        registerAssistantAction,
+        core,
+        plugins.data,
+        plugins.contextProvider
+      );
+
+      this.unregisterVisualizationTools = () => {
+        unregisterAssistantAction(AUTO_VISUALIZATION_TOOL_NAME);
+      };
     }
 
     const savedExploreLoader = createSavedExploreLoader({
@@ -837,6 +853,7 @@ export class ExplorePlugin implements Plugin<
       this.editorStopUrlTracking();
     }
     this.unregisterPPLExecuteQueryAction?.();
+    this.unregisterVisualizationTools?.();
   }
 
   private registerEmbeddable(

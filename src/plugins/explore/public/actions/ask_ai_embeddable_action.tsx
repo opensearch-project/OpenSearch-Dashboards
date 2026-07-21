@@ -116,17 +116,36 @@ export class AskAIEmbeddableAction implements Action<EmbeddableContext> {
         index: query?.dataset?.title,
       };
 
-      // Add context to the context provider
-      if (this.contextProvider) {
-        const contextStore = this.contextProvider.getAssistantContextStore();
-        await contextStore.addContext({
-          id: `visualization-${savedObjectId || embeddable.id}`,
-          description: `Visualization: ${title}`,
-          value: visualizationContext,
-          label: `Visualization: ${title}`,
-          categories: ['visualization', 'dashboard', 'chat'],
-        });
-      }
+      // Parse visualization config for axes mapping and transformations
+      const visualizationConfig = JSON.parse(visEmbeddable.savedExplore.visualization || '{}');
+      const axesMapping = visualizationConfig.axesMapping;
+      const chartType = visualizationConfig.chartType;
+      const styleOptions = visualizationConfig.params;
+      const dataTransformations = visualizationConfig.dataTransformations;
+
+      const visualizationContextText = [
+        `[Visualization Context]`,
+        `Title: ${title}`,
+        `Chart Type: ${chartType || visType}`,
+        `Saved Object ID: ${savedObjectId}`,
+        `Index: ${query?.dataset?.title || 'N/A'}`,
+        `Query: ${query?.query || 'N/A'}`,
+        `Time Range: ${timeRange ? `${timeRange.from} → ${timeRange.to}` : 'N/A'}`,
+        filters && filters.length > 0 ? `Filters: ${JSON.stringify(filters)}` : null,
+        axesMapping && Object.keys(axesMapping).length > 0
+          ? `Axes Mapping: ${JSON.stringify(axesMapping)}`
+          : null,
+        dataTransformations && dataTransformations.length > 0
+          ? `Data Transformations: ${dataTransformations
+              .map(
+                (t: any) =>
+                  `${t.definitionId}${t.hide ? ' (disabled)' : ''}: ${JSON.stringify(t.config)}`
+              )
+              .join('; ')}`
+          : null,
+      ]
+        .filter(Boolean)
+        .join('\n');
 
       // Send visualization screenshot to chat
       if (this.core.chat) {
@@ -139,6 +158,11 @@ export class AskAIEmbeddableAction implements Action<EmbeddableContext> {
               type: 'binary' as const,
               mimeType: 'image/jpeg',
               data: visualizationBase64,
+            },
+            {
+              type: 'text' as const,
+              text: visualizationContextText,
+              hiddenInConversation: true,
             },
           ],
         };
