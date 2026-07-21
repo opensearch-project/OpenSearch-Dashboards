@@ -321,13 +321,13 @@ describe('applyRegexToVariableOptions', () => {
     ).toEqual([{ value: 'env=,label=', label: 'Original label' }]);
   });
 
-  it('should support named text capture as a label alias', () => {
+  it('should ignore unsupported named capture groups', () => {
     expect(
       applyRegexToVariableOptions(
         [{ value: 'env=prod,label=Production' }],
         '^env=(?<value>[^,]+),label=(?<text>.+)$'
       )
-    ).toEqual([{ value: 'prod', label: 'Production' }]);
+    ).toEqual([{ value: 'prod' }]);
   });
 
   it('should keep the original value when only a label capture is provided', () => {

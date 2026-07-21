@@ -288,13 +288,11 @@ function buildRegexOption(
 
   const hasNamedValue = Object.prototype.hasOwnProperty.call(groups, 'value');
   const hasNamedLabel = Object.prototype.hasOwnProperty.call(groups, 'label');
-  const hasNamedText = Object.prototype.hasOwnProperty.call(groups, 'text');
 
-  if (hasNamedValue || hasNamedLabel || hasNamedText) {
+  if (hasNamedValue || hasNamedLabel) {
     // Empty named captures should not erase the original option identity or display label.
     const value = getNonEmptyCapture(groups.value) ?? option.value;
-    const label =
-      getNonEmptyCapture(groups.label) ?? getNonEmptyCapture(groups.text) ?? option.label;
+    const label = getNonEmptyCapture(groups.label) ?? option.label;
 
     return {
       value,
