@@ -37,9 +37,16 @@ export const ENGINE_OUTCOMES: Record<string, RuleHoverContent> = {
       'null propagation is intentional and handled downstream (e.g. coalesce(expr, 0)).',
   },
   'invalid-capture-group-name': {
+    // Mirrors OpenSearch's own capture-group name validation (RegexCommonUtils,
+    // present from 3.4 onward) for `rex` extract mode and `parse`. On 3.4+ the
+    // engine rejects a name that is not `[A-Za-z][A-Za-z0-9]*` — including one
+    // read out of escaped text, a character class, `\Q…\E`, or a lookbehind,
+    // because the engine's scan is lexerless too. This is not a Java-regex
+    // parser: it deliberately reproduces that scan, imperfections and all.
     engineBehavior:
       'A capture-group name may only contain letters and numbers and must start with a letter; names with other characters (such as underscores or hyphens) or a leading digit are rejected when the pattern runs.',
     failureClass: 'engine-throw',
+    verifiedVersion: '3.8',
   },
   'operation-not-pushed': {
     engineBehavior:

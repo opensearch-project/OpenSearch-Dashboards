@@ -103,7 +103,9 @@
     "severity": "error",
     "message": "Invalid regex capture group name.",
     "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/rex/#parameters",
-    "appliesTo": {}
+    "appliesTo": {
+      "minVersion": "3.4.0"
+    }
   },
   {
     "id": "operation-not-pushed",

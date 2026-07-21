@@ -8,10 +8,13 @@ import { findAllDescendantsByRule, findChildByRule, RuleNameToIndex } from './ru
 
 // Shared helper for locating the string-literal *pattern* argument of the
 // extraction commands `rex`/`parse`/`grok`. The `invalid-capture-group-name`
-// rule uses it to find the literal and scan its raw text for named-group
-// openers. Kept here (rather than inline in the rule) so a later rule that also
-// reads the pattern literal — e.g. a scan-cost prefilter hint — can reuse the
-// same locate walk instead of duplicating it.
+// rule uses it to find the literal for `rex` (extract mode) and `parse` and scan
+// its raw text for named-group openers; it does not scan `grok` (a different
+// dialect that never reaches OpenSearch's capture-group name validator). The
+// locate walk itself is command-agnostic and kept here (rather than inline in
+// the rule) so a later rule that also reads the pattern literal — e.g. a
+// scan-cost prefilter hint, or a dedicated Grok rule — can reuse it instead of
+// duplicating the walk.
 
 /**
  * Find the regex pattern's string-literal node for an extraction command node.

@@ -6,38 +6,34 @@
 import type { ParserRuleContext } from 'antlr4ng';
 import { Diagnostic } from '../diagnostic';
 import { Detector } from '../types';
-import { findAllDescendantsByRule } from '../rule_index';
+import { findAllDescendantsByRule, isTerminalNode, RuleNameToIndex } from '../rule_index';
 import { findPatternLiteral } from '../pattern_literal';
 import { rangeFromContext, rangeWithinToken } from '../range_utils';
 
-// Engine ground truth: RegexCommonUtils.isValidJavaRegexGroupName validates
-// names against this pattern (core/.../parse/RegexCommonUtils.java:73,101,105).
+// Engine ground truth: OpenSearch validates capture-group names with
+// RegexCommonUtils.isValidJavaRegexGroupName, which accepts exactly this shape
+// (core/.../parse/RegexCommonUtils.java, present from 3.4 onward via #4434 and
+// unchanged through current main). Matched verbatim so the rule and the engine
+// never disagree on which names are invalid.
 const VALID_GROUP_NAME = /^[A-Za-z][A-Za-z0-9]*$/;
 
-/**
- * Produce the Java-valid form of a capture-group name by stripping disallowed
- * characters, then removing any leading digits so the first-character rule
- * holds. Returns `undefined` when nothing valid remains (e.g. `123` -> `''`,
- * `1-2` -> `''`), so a quick-fix is never offered when it would re-fire the
- * same diagnostic.
- */
-function sanitizeGroupName(name: string): string | undefined {
-  const cleaned = name.replace(/[^A-Za-z0-9]/g, '').replace(/^[0-9]+/, '');
-  return VALID_GROUP_NAME.test(cleaned) ? cleaned : undefined;
-}
+// Mirrors OpenSearch's own lexerless name scan
+// (RegexCommonUtils.ANY_NAMED_GROUP_PATTERN = `\(\?<([^>]+)>`, unchanged 3.4 →
+// main). It is deliberately naive: it does NOT understand escapes, character
+// classes, `\Q…\E`, or lookbehind, because the engine's scan does not either. On
+// 3.4+ clusters that means a lookbehind such as `(?<=id: )(?<word>…)` is rejected
+// by the engine (it reads the phantom name `=id: )(?<word`), so this rule flags
+// it too — an escape/lexer-aware scan here would emit a false negative against
+// the real engine. Group 1 captures the `P` of a Python/PCRE opener
+// (`(?P<name>`); group 2 captures the name.
+const CAPTURE_GROUP_OPENER = /\(\?(P?)<([^>]*)>/g;
 
-// Matches both the Java `(?<name>` opener and the Python/PCRE `(?P<name>`
-// opener. Group 1 captures the `P` when the Python opener is used; group 2
-// captures the name. The bare `(?<` branch excludes lookbehind assertions
-// (`(?<=`, `(?<!`) via `(?![=!])` — they share the prefix but declare no group
-// name, and without the exclusion the `[^>]*` name capture swallows the
-// assertion body (e.g. `(?<=id: )(?<val>` would "flag" the phantom name
-// `=id: )(?<val`). The `(?P<` branch stays unexcluded: `P` makes it a group
-// opener (never an assertion), so even a name starting with `=` is flagged.
-const CAPTURE_GROUP_OPENER = /\(\?(?:(P)<|<(?![=!]))([^>]*)>/g;
-
-// Rule names whose string-literal argument carries a regex with capture groups.
-const REGEX_COMMAND_RULES = ['rexExpr', 'parseCommand', 'grokCommand'];
+// Extraction commands whose string-literal pattern reaches the engine's
+// capture-group name validator: `rex` in extract mode and `parse`. `grok` uses a
+// different dialect that never reaches this validator, and `rex mode=sed` treats
+// the pattern as a sed substitution (its text is never read as capture-group
+// names), so both are excluded — grok by its absence here, sed by `isSedMode`.
+const REGEX_COMMAND_RULES = ['rexExpr', 'parseCommand'];
 
 interface ExtractedGroup {
   name: string;
@@ -71,6 +67,26 @@ function extractGroups(literalRaw: string): ExtractedGroup[] {
   return groups;
 }
 
+/**
+ * True when a `rex` command runs in sed mode (`rex field=… mode=sed …`). In sed
+ * mode the pattern is a sed substitution whose text OpenSearch never reads as
+ * capture-group names, so this rule must not inspect it. Detected off the parse
+ * tree — a `rexOption` child whose `MODE EQUAL (EXTRACT | SED)` alternative
+ * resolved to the `SED` terminal — rather than by text matching, so option
+ * order, casing (the lexer is case-insensitive), and whitespace do not affect
+ * the result. Returns false for a `parseCommand`, which carries no `rexOption`.
+ */
+function isSedMode(command: ParserRuleContext, ruleNameToIndex: RuleNameToIndex): boolean {
+  for (const option of findAllDescendantsByRule(command, ruleNameToIndex, 'rexOption')) {
+    for (const child of option.children ?? []) {
+      if (isTerminalNode(child) && child.getText().toUpperCase() === 'SED') {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 export const invalidCaptureGroupNameDetector: Detector = (
   tree,
   config,
@@ -85,6 +101,9 @@ export const invalidCaptureGroupNameDetector: Detector = (
   }
 
   for (const command of commands) {
+    if (isSedMode(command, ruleNameToIndex)) {
+      continue;
+    }
     const literalNode = findPatternLiteral(command, ruleNameToIndex);
     if (!literalNode) {
       continue;
@@ -93,23 +112,53 @@ export const invalidCaptureGroupNameDetector: Detector = (
     const groups = extractGroups(literalRaw);
     const literalToken = literalNode.start;
 
+    // Case-sensitive count of the names that would exist after every Python
+    // opener is converted to Java syntax. Conversion keeps the name unchanged,
+    // so this is simply the multiset of all group names in this one pattern.
+    // Used to withhold the Python-opener fix when converting would introduce a
+    // duplicate named group (which the engine rejects) rather than silently
+    // create one. Names are case-sensitive in Java regex, so the raw name keys
+    // the map directly.
+    const nameCounts = new Map<string, number>();
+    for (const group of groups) {
+      nameCounts.set(group.name, (nameCounts.get(group.name) ?? 0) + 1);
+    }
+
     for (const group of groups) {
       const range = literalToken
         ? rangeWithinToken(literalToken, group.nameOffsetInLiteral, Math.max(1, group.name.length))
         : rangeFromContext(literalNode);
+      const nameIsValid = VALID_GROUP_NAME.test(group.name);
 
       if (group.isPythonOpener) {
-        // Fix A: delete the single `P`, turning `(?P<name>` into `(?<name>`.
-        // The name is untouched, so the edit targets a span (the `P`) different
-        // from the squiggle (the name) and needs an explicit fix range.
+        if (!nameIsValid) {
+          // Two defects in one opener: unsupported Python/PCRE syntax AND an
+          // invalid name. One combined diagnostic, and no fix — deleting the `P`
+          // would leave the still-invalid name and re-fire the rule.
+          diagnostics.push({
+            ruleId: config.id,
+            severity: config.severity,
+            message: `Python/PCRE named-group syntax "(?P<${group.name}>" is not supported, and "${group.name}" is not a valid capture group name. Use "(?<…>" with a name containing only letters and numbers and starting with a letter.`,
+            range,
+            docUrl: config.docUrl,
+          });
+          continue;
+        }
+
+        // Valid Python name. Offer the P-deletion fix only when the resulting
+        // name is unique among all groups in the pattern; if it collides,
+        // converting would create a duplicate named group the engine rejects, so
+        // withhold the fix. The edit targets the `P` (a span different from the
+        // squiggled name) and needs an explicit fix range.
+        const unique = nameCounts.get(group.name) === 1;
         const fixRange =
-          literalToken && group.pOffsetInLiteral !== undefined
+          unique && literalToken && group.pOffsetInLiteral !== undefined
             ? rangeWithinToken(literalToken, group.pOffsetInLiteral, 1)
             : undefined;
         diagnostics.push({
           ruleId: config.id,
           severity: config.severity,
-          message: `Python/PCRE named-group opener "(?P<${group.name}>" is invalid in Java regex; use "(?<${group.name}>" instead.`,
+          message: `Python/PCRE named-group syntax "(?P<${group.name}>" is not supported; use "(?<${group.name}>" instead.`,
           range,
           docUrl: config.docUrl,
           ...(fixRange
@@ -125,20 +174,16 @@ export const invalidCaptureGroupNameDetector: Detector = (
         continue;
       }
 
-      if (!VALID_GROUP_NAME.test(group.name)) {
-        // Fix B: strip disallowed characters from the name. The squiggle spans
-        // exactly the name, so this is an in-place replacement (default range).
-        // Only offered when sanitizing yields a valid non-empty name.
-        const fixed = sanitizeGroupName(group.name);
+      // Java opener: flag only an invalid name. A valid name is accepted by the
+      // engine and gets no diagnostic; this rule does not offer a rename fix,
+      // because renaming would silently change the extracted field name.
+      if (!nameIsValid) {
         diagnostics.push({
           ruleId: config.id,
           severity: config.severity,
           message: `Invalid capture group name "${group.name}". Use only letters and numbers, and start with a letter.`,
           range,
           docUrl: config.docUrl,
-          ...(fixed
-            ? { fix: { title: `Remove invalid characters → "${fixed}"`, text: fixed } }
-            : {}),
         });
       }
     }
