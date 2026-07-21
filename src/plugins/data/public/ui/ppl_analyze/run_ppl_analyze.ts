@@ -79,8 +79,21 @@ export function runPPLAnalyzeInBackground({
         injectedTimeFilter,
       });
     })
-    .catch(() => {
+    .catch((err) => {
       if (requestId !== latestRequestId) return;
-      setPPLAnalyzeLoading(false);
+      // A non-2xx response rejects with an HttpFetchError whose `body` holds the
+      // parsed error payload ({ statusCode, error, message }). Commit that as the
+      // result so the panel can surface the error; fall back to a synthetic body
+      // when no structured payload is available (e.g. a network failure).
+      const response = err?.body ?? {
+        error: err?.response?.statusText || 'Request failed',
+        message: err?.message || 'The analyze request could not be completed.',
+        statusCode: err?.response?.status,
+      };
+      setPPLAnalyzeResult({
+        query: query.query as string,
+        response,
+        injectedTimeFilter,
+      });
     });
 }

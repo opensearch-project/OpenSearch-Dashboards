@@ -347,7 +347,7 @@ function OperationSubTable({
         />
         <EuiSpacer size="xs" />
         <EuiText size="xs" color="subdued">
-          <em>Detailed per-operation metrics are not yet available.</em>
+          {/* <em>Detailed per-operation metrics are not yet available.</em> */}
         </EuiText>
       </div>
     </div>
@@ -829,8 +829,34 @@ function RecommendationsSection({ recommendations }: { recommendations: any[] })
   );
 }
 
+// An error response looks like { statusCode, error, message } where `message`
+// may itself be a JSON string with { reason, details, type }.
+function parseAnalyzeError(response: any): { title: string; message: string } | null {
+  const isError =
+    !!response &&
+    ((typeof response.statusCode === 'number' && response.statusCode >= 400) ||
+      (typeof response.error === 'string' && response.message !== undefined));
+  if (!isError) return null;
+
+  const title = response.error || `Error ${response.statusCode ?? ''}`.trim();
+
+  let message = typeof response.message === 'string' ? response.message : '';
+  try {
+    const parsed = JSON.parse(message);
+    if (parsed && typeof parsed === 'object') {
+      message = [parsed.reason, parsed.details].filter(Boolean).join(': ') || message;
+    }
+  } catch {
+    // message wasn't JSON — use it as-is
+  }
+
+  return { title, message };
+}
+
 export const PPLAnalyzePanel: React.FC<PPLAnalyzePanelProps> = ({ analyzeResult, onClose }) => {
   const { response, injectedTimeFilter } = analyzeResult;
+  const analyzeError = parseAnalyzeError(response);
+  const hasProfile = !!response.profile;
   const totalTimeMs = response.profile?.summary?.total_time_ms || 0;
   const hasOperatorTree = response.operator_tree && response.operator_tree.length > 0;
   const possibleCacheHit = !!response.possibleCacheHit;
@@ -855,51 +881,77 @@ export const PPLAnalyzePanel: React.FC<PPLAnalyzePanelProps> = ({ analyzeResult,
           <EuiSpacer size="s" />
         </>
       )}
-      {possibleCacheHit && (
+      {analyzeError ? (
+        <EuiCallOut
+          title={analyzeError.title}
+          iconType="alert"
+          color="danger"
+          data-test-subj="analyzeErrorCallout"
+        >
+          <EuiText size="s">{analyzeError.message}</EuiText>
+        </EuiCallOut>
+      ) : !hasProfile ? (
+        <EuiCallOut
+          title="Query Profiling Unavailable - Error"
+          iconType="iInCircle"
+          color="danger"
+          data-test-subj="analyzeProfileUnavailable"
+        >
+          <EuiText size="s">
+            There was an error retreiving your query analysis from the backend. Typically, this is
+            the result of an outdated version of the backend that does not support analyzing
+            queries.
+          </EuiText>
+        </EuiCallOut>
+      ) : (
         <>
-          <EuiCallOut title="Possible cache hit detected" iconType="iInCircle" color="primary">
-            <EuiText size="s">
-              This query may have been previously cached, which can produce a much faster execution
-              phase time than normal. Cache hits can make profiling results inaccurate. This
-              behavior can be toggled in Settings.
-            </EuiText>
-          </EuiCallOut>
-          <EuiSpacer size="m" />
+          {possibleCacheHit && (
+            <>
+              <EuiCallOut title="Possible cache hit detected" iconType="iInCircle" color="primary">
+                <EuiText size="s">
+                  This query may have been previously cached, which can produce a much faster
+                  execution phase time than normal. Cache hits can make profiling results
+                  inaccurate. This behavior can be toggled in Settings.
+                </EuiText>
+              </EuiCallOut>
+              <EuiSpacer size="m" />
+            </>
+          )}
+          {response.profile?.phases && (
+            <TimingBar phases={response.profile.phases} totalTimeMs={totalTimeMs} />
+          )}
+          <EuiSpacer size="l" />
+          <EuiFlexGroup gutterSize="l">
+            <EuiFlexItem grow={3}>
+              {hasOperatorTree ? (
+                <OperatorPlanSection
+                  operatorTree={response.operator_tree}
+                  executionPhaseMs={response.profile?.phases?.execute?.time_ms || 0}
+                  injectedTimeFilter={injectedTimeFilter}
+                />
+              ) : (
+                <EuiCallOut
+                  title="Execution Phase Profiling unavailable"
+                  iconType="iInCircle"
+                  color="warning"
+                >
+                  <EuiText size="s">
+                    The per-stage execution breakdown is only available for queries with a linear
+                    execution plan. Queries that produce non-linear plans (e.g. JOINs) are not yet
+                    supported and fall back to profile-only output. The phase timing bar above
+                    reflects the full query profile.
+                  </EuiText>
+                </EuiCallOut>
+              )}
+            </EuiFlexItem>
+            {response.recommendations && response.recommendations.length > 0 && (
+              <EuiFlexItem grow={2}>
+                <RecommendationsSection recommendations={response.recommendations} />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         </>
       )}
-      {response.profile?.phases && (
-        <TimingBar phases={response.profile.phases} totalTimeMs={totalTimeMs} />
-      )}
-      <EuiSpacer size="l" />
-      <EuiFlexGroup gutterSize="l">
-        <EuiFlexItem grow={3}>
-          {hasOperatorTree ? (
-            <OperatorPlanSection
-              operatorTree={response.operator_tree}
-              executionPhaseMs={response.profile?.phases?.execute?.time_ms || 0}
-              injectedTimeFilter={injectedTimeFilter}
-            />
-          ) : (
-            <EuiCallOut
-              title="Execution Phase Profiling unavailable"
-              iconType="iInCircle"
-              color="warning"
-            >
-              <EuiText size="s">
-                The per-stage execution breakdown is only available for queries with a linear
-                execution plan. Queries that produce non-linear plans (e.g. JOINs) are not yet
-                supported and fall back to profile-only output. The phase timing bar above reflects
-                the full query profile.
-              </EuiText>
-            </EuiCallOut>
-          )}
-        </EuiFlexItem>
-        {response.recommendations && response.recommendations.length > 0 && (
-          <EuiFlexItem grow={2}>
-            <RecommendationsSection recommendations={response.recommendations} />
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
     </EuiPanel>
   );
 };

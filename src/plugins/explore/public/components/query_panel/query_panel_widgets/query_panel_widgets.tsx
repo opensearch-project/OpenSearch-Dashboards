@@ -73,7 +73,7 @@ export const QueryPanelWidgets = ({
               data-test-subj="exploreAnalyzeButton"
               iconType="inspect"
             >
-              Analyze Query
+              Inspect Query
             </EuiButtonEmpty>
             <div className="exploreQueryPanelWidgets__verticalSeparator" />
           </>
