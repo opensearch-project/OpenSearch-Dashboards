@@ -13,16 +13,8 @@ type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
 export const useEditorOperations = () => {
   const { queryBuilder } = useQueryBuilderState();
   const getEditorRef = useCallback((): IStandaloneCodeEditor | null => {
-    return queryBuilder.getEditorRef();
+    return queryBuilder.getEditor();
   }, [queryBuilder]);
-
-  // Set editor ref
-  const setEditorRef = useCallback(
-    (editor: IStandaloneCodeEditor | null) => {
-      queryBuilder.setEditorRef(editor);
-    },
-    [queryBuilder]
-  );
 
   // Focus editor
   const focusEditor = useCallback(
@@ -85,7 +77,6 @@ export const useEditorOperations = () => {
 
   return {
     getEditorRef,
-    setEditorRef,
     focusEditor,
     getEditorText,
     setEditorText,

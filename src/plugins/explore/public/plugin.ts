@@ -96,6 +96,7 @@ import {
   registerDisabledPPLExecuteQueryAction,
   EXECUTE_PPL_QUERY_TOOL_DEFINITION,
 } from './components/query_panel/actions/ppl_execute_query_action';
+import { QueryPanelEditor } from './components/query_panel';
 
 export class ExplorePlugin implements Plugin<
   ExplorePluginSetup,
@@ -907,6 +908,9 @@ export class ExplorePlugin implements Plugin<
       savedExploreLoader,
       visualizationRegistry: this.visualizationRegistryService.start(),
       slotRegistry: this.slotRegistryService.start(),
+      ui: {
+        QueryEditor: QueryPanelEditor,
+      },
     };
   }
 

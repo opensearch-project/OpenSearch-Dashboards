@@ -16,7 +16,10 @@ export * from './use_query_panel_editor/use_query_panel_editor';
 
 export * from './use_query_panel_editor/use_prompt_is_typing';
 export * from './use_query_panel_editor/use_multi_query_decorations';
-export * from './use_query_panel_editor/use_query_panel_editor_utils';
 
 export { EditorMode } from '../../../application/utils/state_management/types';
 export { getAutocompleteContext } from '../../../application/utils/multi_query_utils';
+
+export { ExploreQueryPanelEditor } from './explore_query_panel_editor';
+
+export { QueryPanelEditor } from './query_panel_editor';
