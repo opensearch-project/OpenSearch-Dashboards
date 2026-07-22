@@ -7,7 +7,7 @@
  * This import registers the PPL monaco language contribution
  */
 import './language';
-export { revalidatePPLModel } from './language';
+export { revalidatePPLModel, setupPPLTokenization } from './language';
 import { ID } from './constants';
 export {
   clearPPLValidationContext,

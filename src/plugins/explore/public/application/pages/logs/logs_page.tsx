@@ -8,7 +8,7 @@ import '../explore_page.scss';
 import React from 'react';
 import { EuiErrorBoundary, EuiPage, EuiPageBody } from '@elastic/eui';
 import { AppMountParameters, HeaderVariant } from 'opensearch-dashboards/public';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@osd/i18n';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
@@ -28,6 +28,8 @@ import {
   EXPLORE_VISUALIZATION_TAB_ID,
 } from '../../../../common';
 import { setActiveTab } from '../../utils/state_management/slices';
+import { selectDataset } from '../../utils/state_management/selectors';
+import { LogsQueryPanel } from './logs_query_panel';
 
 /**
  * Main application component for the Explore plugin
@@ -84,6 +86,11 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
   useTimefilterSubscription(services);
   useHeaderVariants(services, HeaderVariant.APPLICATION);
 
+  const queryBuilderEnabled = Boolean(services.capabilities?.explore?.logsQueryBuilderEnabled);
+
+  // Keyed on dataset id below to remount the builder panel on dataset switch, discarding stale draft state.
+  const dataset = useSelector(selectDataset);
+
   return (
     <EuiErrorBoundary>
       <div className="mainPage">
@@ -92,7 +99,12 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
             <TopNav setHeaderActionMenu={setHeaderActionMenu} savedExplore={savedExplore} />
             <NewExperienceBanner />
 
-            <ResizableQueryContainer queryPanel={<QueryPanel />}>
+            <ResizableQueryContainer
+              queryPanel={
+                queryBuilderEnabled ? <LogsQueryPanel key={dataset?.id} /> : <QueryPanel />
+              }
+              tallDefault={queryBuilderEnabled}
+            >
               {/* Main content area with resizable panels under QueryPanel */}
               <BottomContainer />
             </ResizableQueryContainer>

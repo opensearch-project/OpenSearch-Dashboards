@@ -48,6 +48,38 @@ describe('useConcurrentQueries', () => {
     expect(result.current.results.get('a')).toBe('data-a');
   });
 
+  it('invalidate() re-fetches only the given key (leaves the rest cached)', async () => {
+    const fetchFn = jest.fn().mockImplementation((key: string) => Promise.resolve(`v1-${key}`));
+    const { result } = renderHook(() => useConcurrentQueries(fetchFn, [1]));
+
+    act(() => {
+      result.current.onVisibilityChange('a', true);
+      result.current.onVisibilityChange('b', true);
+    });
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+    expect(result.current.results.get('a')).toBe('v1-a');
+    expect(result.current.results.get('b')).toBe('v1-b');
+    const callsAfterInitial = fetchFn.mock.calls.length;
+
+    // Second-round fetches return a new value so we can see WHICH keys re-ran.
+    fetchFn.mockImplementation((key: string) => Promise.resolve(`v2-${key}`));
+
+    act(() => {
+      result.current.invalidate('a');
+    });
+    await act(async () => {
+      jest.advanceTimersByTime(600);
+    });
+
+    // 'a' re-fetched (new value); 'b' untouched (still cached, no extra fetch for it).
+    expect(result.current.results.get('a')).toBe('v2-a');
+    expect(result.current.results.get('b')).toBe('v1-b');
+    expect(fetchFn).toHaveBeenCalledTimes(callsAfterInitial + 1);
+    expect(fetchFn.mock.calls[callsAfterInitial][0]).toBe('a');
+  });
+
   it('cancels pending fetch when key leaves viewport', async () => {
     const fetchFn = jest.fn().mockResolvedValue('data');
     const { result } = renderHook(() => useConcurrentQueries(fetchFn, [1]));

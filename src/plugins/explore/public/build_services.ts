@@ -107,6 +107,7 @@ export function buildServices(
     supportedTypes,
     sqlSupportEnabled: config.sqlSupport?.enabled ?? false,
     queryProfilingEnabled: config.queryProfiling?.enabled ?? false,
+    logsDrilldownEnabled: config.logsDrilldown?.enabled ?? false,
     isDatasetManagementEnabled,
     dataImporterConfig,
     dataSourceEnabled,

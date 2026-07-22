@@ -17,6 +17,9 @@ export const configSchema = schema.object({
   discoverMetrics: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
   }),
+  logsQueryBuilder: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+  }),
   agentTraces: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
   }),
@@ -24,6 +27,9 @@ export const configSchema = schema.object({
     enabled: schema.boolean({ defaultValue: false }),
   }),
   queryProfiling: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+  }),
+  logsDrilldown: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
   }),
 });
