@@ -133,12 +133,35 @@ describe('runPPLAnalyzeInBackground', () => {
       );
     });
 
-    it('sets loading to false on error', async () => {
+    it('commits the error body as the result when the request rejects', async () => {
+      const errorBody = {
+        statusCode: 400,
+        error: 'Bad Request',
+        message: '{"reason":"Invalid Query","details":"...","type":"SyntaxCheckException"}',
+      };
+      mockFetch.mockRejectedValue({ body: errorBody });
+      runPPLAnalyzeInBackground({ query: pplQuery, http: mockHttp, timefilter: mockTimefilter });
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(setPPLAnalyzeResult).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: 'source=accounts',
+          response: errorBody,
+        })
+      );
+    });
+
+    it('synthesizes an error response when the rejection has no body', async () => {
       mockFetch.mockRejectedValue(new Error('network error'));
       runPPLAnalyzeInBackground({ query: pplQuery, http: mockHttp, timefilter: mockTimefilter });
       await Promise.resolve();
       await Promise.resolve();
-      expect(setPPLAnalyzeLoading).toHaveBeenCalledWith(false);
+      expect(setPPLAnalyzeResult).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: 'source=accounts',
+          response: expect.objectContaining({ message: 'network error' }),
+        })
+      );
     });
   });
 
