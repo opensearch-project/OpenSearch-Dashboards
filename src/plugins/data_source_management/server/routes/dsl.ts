@@ -58,6 +58,10 @@ export function registerDslRoute(
         query: schema.object({
           format: schema.string(),
           index: schema.maybe(schema.string()),
+          // Optional _cat/indices column + sort controls (e.g. h=index,creation.date.string
+          // & s=creation.date.string:desc) so callers can get creation dates / order.
+          h: schema.maybe(schema.string()),
+          s: schema.maybe(schema.string()),
         }),
       },
     },
@@ -136,6 +140,9 @@ export function registerDslRoute(
         query: schema.object({
           format: schema.string(),
           index: schema.maybe(schema.string()),
+          // Optional _cat/indices column + sort controls (see the non-MDS route above).
+          h: schema.maybe(schema.string()),
+          s: schema.maybe(schema.string()),
         }),
         params: schema.object({
           dataSourceMDSId: schema.maybe(schema.string({ defaultValue: '' })),

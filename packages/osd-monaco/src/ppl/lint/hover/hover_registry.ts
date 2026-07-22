@@ -8,24 +8,10 @@ import type { HoverFacts } from '../hover_facts';
 
 export type { HoverFacts } from '../hover_facts';
 
-interface MarkerKeyParts {
-  startLineNumber: number;
-  startColumn: number;
-  endLineNumber: number;
-  endColumn: number;
-  message: string;
-}
-
-/** Key from marker fields that survive MarkerService rebuilds (position + message). */
-export function markerFixKey(marker: MarkerKeyParts): string {
-  return [
-    marker.startLineNumber,
-    marker.startColumn,
-    marker.endLineNumber,
-    marker.endColumn,
-    marker.message,
-  ].join(':');
-}
+// markerFixKey now lives in fix_registry (its canonical home, shared by the
+// quick-fix code-action provider). Re-exported here so existing hover importers
+// keep their import path. See lint/fix_registry.ts.
+export { markerFixKey } from '../fix_registry';
 
 interface HoverRegistryState {
   byModel: WeakMap<monaco.editor.ITextModel, Map<string, HoverFacts>>;

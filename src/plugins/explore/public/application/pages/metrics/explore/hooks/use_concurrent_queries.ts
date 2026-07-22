@@ -181,5 +181,27 @@ export function useConcurrentQueries<T>(
     drainRef.current();
   }, []);
 
-  return { results, errors, onVisibilityChange, enqueueAll };
+  // Re-fetch a SINGLE key without resetting the whole scheduler: forget its cached result, abort any
+  // in-flight/pending work for it, and (if it's still in the viewport) re-queue just that one. Lets a
+  // caller refresh one card in place — e.g. a per-item option change — without churning every other.
+  const invalidate = useCallback((key: string) => {
+    const s = stateRef.current;
+    s.fetched.delete(key);
+    const ctrl = s.inflight.get(key);
+    if (ctrl) {
+      ctrl.abort();
+      s.inflight.delete(key);
+    }
+    const timer = s.pending.get(key);
+    if (timer) {
+      clearTimeout(timer);
+      s.pending.delete(key);
+    }
+    if (s.viewport.has(key) && !s.queue.includes(key)) {
+      s.queue.push(key);
+    }
+    drainRef.current();
+  }, []);
+
+  return { results, errors, onVisibilityChange, enqueueAll, invalidate };
 }

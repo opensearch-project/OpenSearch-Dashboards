@@ -1,0 +1,2 @@
+feat:
+- Add a complex-query warning banner in Explore save windows behind the explore.queryProfiling.enabled feature flag ([#12410](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/12410))

@@ -36,11 +36,23 @@ export interface LintPayloadContext {
   visibleIndices?: string[];
   settings?: { allJoinTypesAllowed?: boolean };
   overrides?: BundleRuleOverrides;
+  // Whether the command-typo suggestion (a syntax-channel UX layer, not a lint
+  // rule) is enabled. Undefined means enabled; only `false` turns it off. Carried
+  // on the lint context because the syntax marker builder reads it alongside the
+  // lint config, though it does not affect any tree-walking lint rule.
+  commandSuggestionEnabled?: boolean;
 }
 
 export interface LintRunContext extends LintPayloadContext {
   dataSourceId?: string;
   dataSourceVersion?: string;
+  /**
+   * Original source text, used by detectors that need a narrow text-side
+   * fallback on the compiled grammar surface (e.g. field-validation's field-slot
+   * shape pass, which cannot read `grok field=body` off the simplified parse
+   * tree). Set by `PPLLanguageAnalyzer.lint`; absent on the runtime bridge path.
+   */
+  sourceText?: string;
   grammarSurface?: 'compiled-simplified' | 'runtime-bundle';
   grammarHash?: string;
 }

@@ -17,6 +17,8 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {
     enabled: true,
     sqlSupport: true,
+    queryProfiling: true,
+    logsDrilldown: true,
   },
   schema: configSchema,
   deprecations: ({ rename, unused }) => [

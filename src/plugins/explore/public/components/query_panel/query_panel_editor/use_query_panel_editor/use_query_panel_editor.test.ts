@@ -66,7 +66,7 @@ jest.mock('../../../../../../data/public', () => {
     syncPPLValidationContext: jest.fn(),
     syncPPLLintContext: jest.fn(),
     // Simplified mock; full behavior covered in lint_context_builder.test.ts.
-    buildPPLLintContext: jest.fn((dataset, services) => ({
+    buildPPLLintContext: jest.fn((dataset, _lintFields, services) => ({
       useRuntimeGrammar: false,
       dataSourceId: dataset?.dataSource?.id,
       dataSourceVersion: dataset?.dataSource?.version,
@@ -615,7 +615,11 @@ describe('useQueryPanelEditor', () => {
     it('getLintContext delegates to buildPPLLintContext with the live dataset', () => {
       captureContexts().getLintContext();
       // The live dataset (from datasetRef), not the dataset-less queryString.getQuery().
-      expect(buildPPLLintContext).toHaveBeenCalledWith(mdsDataset, mockServices);
+      expect(buildPPLLintContext).toHaveBeenCalledWith(
+        mdsDataset,
+        expect.any(Object),
+        mockServices
+      );
     });
 
     it('getValidationContext reads dataSourceId from the dataset, not queryString', () => {

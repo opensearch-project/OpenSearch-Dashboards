@@ -48,6 +48,7 @@ export {
   runLint,
   getBundledCatalog,
   createRuntimeRuleNameToIndex,
+  buildCommandSuggestion,
 } from './ppl';
 export type {
   PPLValidationContext,
@@ -64,6 +65,7 @@ export type {
   BundleRuleOverrides,
   CatalogEntry,
   LintRunContext,
+  CommandSuggestion,
 } from './ppl';
 
 /* eslint-disable-next-line @osd/eslint/module_migration */

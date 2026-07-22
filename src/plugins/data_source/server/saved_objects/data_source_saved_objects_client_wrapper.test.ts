@@ -215,7 +215,7 @@ describe('DataSourceSavedObjectsClientWrapper', () => {
 
       it(`should throw error when title is longer than ${DATA_SOURCE_TITLE_LENGTH_LIMIT} characters`, async () => {
         const mockDataSourceAttributes = attributes({
-          title: 'a'.repeat(33),
+          title: 'a'.repeat(65),
         });
         await expect(
           wrapperClient.create(DATA_SOURCE_SAVED_OBJECT_TYPE, mockDataSourceAttributes, {})

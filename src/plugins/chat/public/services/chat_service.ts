@@ -112,11 +112,11 @@ export class ChatService {
   };
 
   private generateRunId(): string {
-    return `run-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+    return `run-${Date.now()}-${Math.random().toString(36).substring(2, 11).padEnd(9, '0')}`;
   }
 
   public generateMessageId(): string {
-    return `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+    return `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11).padEnd(9, '0')}`;
   }
 
   private generateRequestId(): string {

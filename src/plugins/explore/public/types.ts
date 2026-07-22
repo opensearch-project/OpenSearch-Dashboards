@@ -198,6 +198,8 @@ export interface ExploreServices {
 
   supportedTypes?: string[];
   sqlSupportEnabled: boolean;
+  queryProfilingEnabled: boolean;
+  logsDrilldownEnabled: boolean;
   isDatasetManagementEnabled: boolean;
   dataImporterConfig?: DataImporterPluginSetup['config'];
   dataSourceEnabled: boolean;

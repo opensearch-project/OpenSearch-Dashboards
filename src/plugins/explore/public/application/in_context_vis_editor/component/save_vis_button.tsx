@@ -46,7 +46,7 @@ const saveButtonText = i18n.translate('explore.topNav.saveVisButton.save', {
 });
 
 export const SaveVisButton = () => {
-  const { queryEditorState, datasetView } = useQueryBuilderState();
+  const { queryEditorState, datasetView, resultState } = useQueryBuilderState();
   const { visualizationBuilderForEditor: visualizationBuilder } = useVisualizationBuilder();
   const visConfig = visualizationBuilder.visConfig$.value;
   const transformationService = visualizationBuilder.getTransformationService();
@@ -274,6 +274,7 @@ export const SaveVisButton = () => {
           savedExploreId={exploreId}
           onCancel={() => setShowModal(false)}
           onConfirm={handleSave}
+          showComplexQueryWarning={resultState?.profile?.isComplex ?? false}
         />
       )}
     </EuiFlexGroup>
