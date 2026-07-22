@@ -223,6 +223,7 @@ describe('LogsPage', () => {
     const exploreServices = discoverPluginMock.createExploreServicesMock();
     const exploreServicesMock = exploreServices as jest.MaybeMockedDeep<typeof exploreServices>;
     exploreServicesMock.pplAnalyzeEnabled = pplAnalyzeEnabled;
+    exploreServicesMock.uiSettings.get.mockImplementation((_, defaultValue) => defaultValue);
     exploreServicesMock.capabilities = {
       ...exploreServicesMock.capabilities,
       explore: { logsQueryBuilderEnabled },
