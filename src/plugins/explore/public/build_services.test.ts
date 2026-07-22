@@ -54,6 +54,7 @@ const createMockInitializerContext = (sqlSupportEnabled: boolean) => ({
       sqlSupport: { enabled: sqlSupportEnabled },
       discoverTraces: { enabled: false },
       discoverMetrics: { enabled: false },
+      logsQueryBuilder: { enabled: false },
       agentTraces: { enabled: false },
     }),
     create: jest.fn(),

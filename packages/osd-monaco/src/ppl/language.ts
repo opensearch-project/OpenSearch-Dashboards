@@ -89,8 +89,8 @@ const createPPLLanguageConfiguration = (): monaco.languages.LanguageConfiguratio
 /**
  * Set up synchronous tokenization for PPL
  */
-const setupPPLTokenization = () => {
-  monaco.languages.setTokensProvider(PPL_LANGUAGE_ID, {
+export const setupPPLTokenization = (languageId: string = PPL_LANGUAGE_ID) => {
+  monaco.languages.setTokensProvider(languageId, {
     getInitialState: () => {
       const state = {
         clone: () => state,
