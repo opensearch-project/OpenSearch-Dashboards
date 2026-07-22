@@ -281,6 +281,7 @@ export const TimeSeries = ({
         position={Position.Bottom}
         title={xAxisLabel}
         tickFormat={xAxisFormatter}
+        timeAxisLayerCount={0}
         gridLine={{
           ...GRID_LINE_CONFIG,
           visible: showGrid,
