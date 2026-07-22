@@ -46,10 +46,11 @@ describe('TSVB theme', () => {
     // red use a near full-black color
     expect(getBaseTheme(LIGHT_THEME, 'red').axes.axisTitle.fill).toEqual('rgb(23,23,23)');
 
-    // violet increased the text color to full white for higer contrast
-    expect(getBaseTheme(LIGHT_THEME, '#ba26ff').axes.axisTitle.fill).toEqual('rgb(255,255,255)');
+    // violet: with the charts >=71 (Borealis) theme text colors, the best
+    // contrast axis-title color resolves to a near-black high-contrast gray
+    expect(getBaseTheme(LIGHT_THEME, '#ba26ff').axes.axisTitle.fill).toEqual('rgb(11,11,11)');
 
     // light yellow, prefer the LIGHT_THEME fill color because already with a good contrast
-    expect(getBaseTheme(LIGHT_THEME, '#fff49f').axes.axisTitle.fill).toEqual('#333');
+    expect(getBaseTheme(LIGHT_THEME, '#fff49f').axes.axisTitle.fill).toEqual('#1D2A3E');
   });
 });
