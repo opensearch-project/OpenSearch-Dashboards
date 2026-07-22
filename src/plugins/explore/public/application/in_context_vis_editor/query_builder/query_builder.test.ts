@@ -231,9 +231,9 @@ describe('QueryBuilder', () => {
     });
 
     it('resets editorRef to null', () => {
-      builder.setEditorRef({ getValue: jest.fn() } as any);
+      builder.setEditor({ getValue: jest.fn() } as any);
       builder.reset();
-      expect(builder.getEditorRef()).toBeNull();
+      expect(builder.getEditor()).toBeNull();
     });
   });
 
@@ -345,13 +345,13 @@ describe('QueryBuilder', () => {
     });
 
     it('shows missing prompt warning when editor is empty', async () => {
-      builder.setEditorRef({ getValue: jest.fn().mockReturnValue('') } as any);
+      builder.setEditor({ getValue: jest.fn().mockReturnValue('') } as any);
       await builder.callAgent();
       expect(showMissingPromptWarning).toHaveBeenCalledWith(services.notifications.toasts);
     });
 
     it('shows missing dataset warning when no dataset', async () => {
-      builder.setEditorRef({ getValue: jest.fn().mockReturnValue('some text') } as any);
+      builder.setEditor({ getValue: jest.fn().mockReturnValue('some text') } as any);
       services.data.query.queryString.getQuery.mockReturnValue({
         query: '',
         language: 'PPL',
@@ -362,7 +362,7 @@ describe('QueryBuilder', () => {
     });
 
     it('handles PROMETHEUS dataset type', async () => {
-      builder.setEditorRef({
+      builder.setEditor({
         getValue: jest.fn().mockReturnValue('question'),
       } as any);
 
@@ -386,7 +386,7 @@ describe('QueryBuilder', () => {
     });
 
     it('able to handle t2ppl', async () => {
-      builder.setEditorRef({
+      builder.setEditor({
         getValue: jest.fn().mockReturnValue('question'),
       } as any);
 

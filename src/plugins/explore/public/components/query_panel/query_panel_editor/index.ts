@@ -21,5 +21,4 @@ export { EditorMode } from '../../../application/utils/state_management/types';
 export { getAutocompleteContext } from '../../../application/utils/multi_query_utils';
 
 export { ExploreQueryPanelEditor } from './explore_query_panel_editor';
-
 export { QueryPanelEditor } from './query_panel_editor';

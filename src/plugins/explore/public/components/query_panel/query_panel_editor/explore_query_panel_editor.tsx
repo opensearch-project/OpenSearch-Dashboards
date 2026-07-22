@@ -8,7 +8,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import './query_panel_editor.scss';
 import { QueryPanelEditor } from './query_panel_editor';
 import { useQueryPanelEditorProps } from './use_query_panel_editor/use_query_panel_editor_props';
 
