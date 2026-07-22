@@ -514,11 +514,12 @@ exports[`App should render with MDS 1`] = `
                     data-test-subj="comboBoxInput"
                     tabindex="-1"
                   >
-                    <p
-                      class="euiComboBoxPlaceholder"
+                    <span
+                      class="euiComboBoxPill euiComboBoxPill--plainText"
+                      id=""
                     >
-                      Select a data source
-                    </p>
+                      Local cluster
+                    </span>
                     <div
                       class="euiComboBox__input"
                       style="font-size: 14px; display: inline-block;"
@@ -538,6 +539,17 @@ exports[`App should render with MDS 1`] = `
                   <div
                     class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
                   >
+                    <button
+                      aria-label="Clear input"
+                      class="euiFormControlLayoutClearButton"
+                      data-test-subj="comboBoxClearButton"
+                      type="button"
+                    >
+                      <span
+                        class="euiFormControlLayoutClearButton__icon"
+                        data-euiicon-type="cross"
+                      />
+                    </button>
                     <button
                       aria-label="Open list of options"
                       class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"

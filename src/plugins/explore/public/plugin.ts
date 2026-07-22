@@ -37,6 +37,8 @@ import {
   PLUGIN_NAME,
   VISUALIZATION_EDITOR_APP_ID,
   VISUALIZATION_EDITOR_APP_NAME,
+  LOGS_DRILLDOWN_APP_ID,
+  LOGS_DRILLDOWN_APP_NAME,
 } from '../common';
 import { ConfigSchema } from '../common/config';
 import { buildExploreNavPopover, buildMetricsNavPopover } from './nav_popover';
@@ -87,6 +89,7 @@ import { SlotRegistryService } from './services/slot_registry';
 import { logActionRegistry } from './services/log_action_registry';
 import { createAskAiAction } from './actions/ask_ai_action';
 import { importDataActionConfig } from './actions/import_data_action';
+import { logsDrilldownActionConfig } from './actions/logs_drilldown_action';
 import { AskAIEmbeddableAction } from './actions/ask_ai_embeddable_action';
 import { CONTEXT_MENU_TRIGGER } from '../../embeddable/public';
 import {
@@ -150,6 +153,12 @@ export class ExplorePlugin implements Plugin<
     this.hideLocalCluster = setupDeps.dataSource?.hideLocalCluster || false;
     this.dataSourceManagement = setupDeps.dataSourceManagement;
 
+    // Feature flag: the standalone Logs Drilldown canvas ships behind `explore.logsDrilldown.enabled`
+    // (default off). Read synchronously from the browser-exposed config (mirrors `sqlSupport`); gates
+    // the app registration, the query-bar action, and the nav-popover entry point below.
+    const logsDrilldownEnabled =
+      this.initializerContext.config.get<ConfigSchema>().logsDrilldown?.enabled ?? false;
+
     // Set usage collector
     setUsageCollector(setupDeps.usageCollection);
     this.registerExploreVisualizationAlias(setupDeps);
@@ -161,6 +170,11 @@ export class ExplorePlugin implements Plugin<
     // Register import data action if data importer is available
     if (this.dataImporterConfig) {
       queryPanelActionsRegistry.register(importDataActionConfig);
+    }
+
+    // Query-bar entry point to the standalone Logs Drilldown app (feature-flagged).
+    if (logsDrilldownEnabled) {
+      queryPanelActionsRegistry.register(logsDrilldownActionConfig);
     }
 
     this.docViewsRegistry = new DocViewsRegistry();
@@ -434,6 +448,65 @@ export class ExplorePlugin implements Plugin<
       };
     };
 
+    // Standalone Logs Drilldown app: its OWN lightweight mount — builds `services` via the shared
+    // buildServices, but renders the self-contained onboarding canvas WITHOUT the explore Redux
+    // store, tabs, or query panel. Handoff to the logs Query experience is via navigateToApp, so the
+    // widely-used logs flavor state is never touched.
+    const createLogsDrilldownApp = (): App => ({
+      id: LOGS_DRILLDOWN_APP_ID,
+      title: LOGS_DRILLDOWN_APP_NAME,
+      order: 1000,
+      workspaceAvailability: WorkspaceAvailability.insideWorkspace,
+      euiIconType: 'discoverApp',
+      defaultPath: '#/',
+      category: DEFAULT_APP_CATEGORIES.observability,
+      // Reached via the Logs nav-popover action + the query-bar action, NOT its own side-nav item.
+      navLinkStatus: AppNavLinkStatus.hidden,
+      mount: async (params: AppMountParameters) => {
+        if (!this.initializeServices) {
+          throw Error('Explore plugin method initializeServices is undefined');
+        }
+        const { core: coreStart, plugins: pluginsStart } = await this.initializeServices();
+        const isExploreEnabledWorkspace = await this.getIsExploreEnabledWorkspace(coreStart);
+        if (
+          !isExploreEnabledWorkspace ||
+          !!localStorage.getItem(SHOW_CLASSIC_DISCOVER_LOCAL_STORAGE_KEY)
+        ) {
+          coreStart.application.navigateToApp('discover', { replace: true });
+          return () => {};
+        }
+
+        pluginsStart.data.indexPatterns.clearCache();
+
+        const services = buildServices(
+          coreStart,
+          pluginsStart,
+          this.initializerContext,
+          this.tabRegistry,
+          this.visualizationRegistryService,
+          this.queryPanelActionsRegistryService,
+          this.isDatasetManagementEnabled,
+          this.slotRegistryService,
+          this.dataImporterConfig,
+          this.dataSourceEnabled,
+          this.hideLocalCluster,
+          this.dataSourceManagement
+        );
+
+        // URL state storage (like the flavor apps) so the drilldown persists its time range (`_g`)
+        // and selected data source (`_a`) — bookmarkable/shareable and reload-proof. Uses this app's
+        // own scoped history.
+        services.osdUrlStateStorage = createOsdUrlStateStorage({
+          history: params.history,
+          useHash: coreStart.uiSettings.get('state:storeInSessionStorage'),
+          ...withNotifyOnErrors(coreStart.notifications.toasts),
+        });
+
+        const { renderLogsDrilldownApp } = await import('./application/pages/logs_drilldown');
+        return renderLogsDrilldownApp(params, services);
+      },
+    });
+
     const createExploreVisualizationEditorApp = () => {
       const {
         appMounted,
@@ -562,6 +635,12 @@ export class ExplorePlugin implements Plugin<
         updater$: this.stateUpdaterByApp[ExploreFlavor.Metrics]!.asObservable(),
       })
     );
+    // Standalone Logs Drilldown app (own mount, no shared store), feature-flagged. MUST be registered
+    // before the base `explore` app: the base app's route (`/app/explore`) is a non-exact prefix that
+    // would otherwise match `/app/explore/logs-drilldown` first and redirect to the logs flavor.
+    if (logsDrilldownEnabled) {
+      core.application.register(createLogsDrilldownApp());
+    }
     core.application.register(createExploreApp());
 
     // Register nav links for different workspaces
@@ -603,14 +682,14 @@ export class ExplorePlugin implements Plugin<
           category: undefined,
           order: 200,
           euiIconType: 'discoverApp' as const,
-          navPopover: buildExploreNavPopover(ExploreFlavor.Logs),
+          navPopover: buildExploreNavPopover(ExploreFlavor.Logs, logsDrilldownEnabled),
         },
         {
           id: `${PLUGIN_ID}/${ExploreFlavor.Traces}`,
           category: DEFAULT_APP_CATEGORIES.applicationPerformance,
           order: 100,
           euiIconType: 'apmTrace' as const,
-          navPopover: buildExploreNavPopover(ExploreFlavor.Traces),
+          navPopover: buildExploreNavPopover(ExploreFlavor.Traces, logsDrilldownEnabled),
         },
         {
           id: `${PLUGIN_ID}/${ExploreFlavor.Metrics}`,

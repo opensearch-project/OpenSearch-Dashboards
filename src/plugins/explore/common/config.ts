@@ -26,6 +26,9 @@ export const configSchema = schema.object({
   queryProfiling: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
   }),
+  logsDrilldown: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+  }),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;

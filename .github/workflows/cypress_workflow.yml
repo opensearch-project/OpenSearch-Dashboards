@@ -270,6 +270,9 @@ jobs:
           - group: 23Explore
             config: explore
             test_location: source
+          - group: 24Explore
+            config: explore
+            test_location: source
           # Dashboard tests that require workspace and data source support
           - group: Dashboards
             config: explore
@@ -288,7 +291,7 @@ jobs:
       START_CMD: ${{ matrix.config == 'query_enhanced' &&
         'node scripts/opensearch_dashboards --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=true --uiSettings.overrides[''home:useNewHomePage'']=true --data_source.enabled=true --workspace.enabled=true --opensearch.ignoreVersionMismatch=true --data.savedQueriesNewUI.enabled=true --home.disableExperienceModal=true' ||
         matrix.config == 'explore' &&
-        'node scripts/opensearch_dashboards --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=true --uiSettings.overrides[''home:useNewHomePage'']=true --data_source.enabled=true --workspace.enabled=true --opensearch.ignoreVersionMismatch=true --data.savedQueriesNewUI.enabled=true --explore.enabled=true --explore.discoverTraces.enabled=true --home.disableExperienceModal=true --datasetManagement.enabled=true --dashboard.variables.enabled=true' ||
+        'node scripts/opensearch_dashboards --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=true --uiSettings.overrides[''home:useNewHomePage'']=true --data_source.enabled=true --workspace.enabled=true --opensearch.ignoreVersionMismatch=true --data.savedQueriesNewUI.enabled=true --explore.enabled=true --explore.discoverTraces.enabled=true --explore.logsDrilldown.enabled=true --home.disableExperienceModal=true --datasetManagement.enabled=true --dashboard.variables.enabled=true' ||
         matrix.config == 'observability' &&
         'node scripts/opensearch_dashboards --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=true --uiSettings.overrides[''home:useNewHomePage'']=true --data_source.enabled=true --workspace.enabled=true --opensearch.ignoreVersionMismatch=true --data.savedQueriesNewUI.enabled=true --explore.enabled=true --explore.discoverTraces.enabled=true --home.disableExperienceModal=true --datasetManagement.enabled=true' ||
         matrix.config == 'dashboard' &&
