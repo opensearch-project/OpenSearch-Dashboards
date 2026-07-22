@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React from 'react';
+
 import { Provider } from 'react-redux';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -16,9 +16,7 @@ const mockStore = configureMockStore([]);
 const store = mockStore({
   tab: {
     visualizations: {
-      styleOptions: {
-        switchAxes: false,
-      },
+      styleOptions: {},
     },
   },
 });
@@ -30,24 +28,18 @@ const mockNumericalColumns: VisColumn[] = [
     name: 'value 1',
     schema: VisFieldType.Numerical,
     column: 'x1',
-    validValuesCount: 6,
-    uniqueValuesCount: 6,
   },
   {
     id: 2,
     name: 'value 2',
     schema: VisFieldType.Numerical,
     column: 'x2',
-    validValuesCount: 6,
-    uniqueValuesCount: 6,
   },
   {
     id: 3,
     name: 'value 3',
     schema: VisFieldType.Numerical,
     column: 'x3',
-    validValuesCount: 6,
-    uniqueValuesCount: 6,
   },
 ];
 
@@ -189,24 +181,6 @@ jest.mock('../style_panel/legend/legend', () => {
   };
 });
 
-jest.mock('../style_panel/title/title', () => ({
-  TitleOptionsPanel: jest.fn(({ titleOptions, onShowTitleChange }) => (
-    <div data-test-subj="mockTitleOptionsPanel">
-      <button
-        data-test-subj="titleModeSwitch"
-        onClick={() => onShowTitleChange({ show: !titleOptions.show })}
-      >
-        Toggle Title
-      </button>
-      <input
-        data-test-subj="titleInput"
-        placeholder="Default title"
-        onChange={(e) => onShowTitleChange({ titleName: e.target.value })}
-      />
-    </div>
-  )),
-}));
-
 jest.mock('../style_panel/tooltip/tooltip', () => ({
   TooltipOptionsPanel: jest.fn(({ tooltipOptions, onTooltipOptionsChange }) => (
     <div data-test-subj="mockTooltipOptionsPanel">
@@ -272,7 +246,6 @@ describe('HeatmapVisStyleControls', () => {
     expect(screen.getByTestId('heatmapLabelOptions')).toBeInTheDocument();
     expect(screen.getByTestId('heatmapExclusiveOptions')).toBeInTheDocument();
     expect(screen.getByTestId('mockLegendOptionsPanel')).toBeInTheDocument();
-    expect(screen.getByTestId('mockTitleOptionsPanel')).toBeInTheDocument();
   });
 
   it('calls onStyleChange with correct parameters for legend options', async () => {
@@ -410,57 +383,6 @@ describe('HeatmapVisStyleControls', () => {
           color: '#FF0000',
         },
       },
-    });
-  });
-
-  it('updates title show option correctly', async () => {
-    render(
-      <Provider store={store}>
-        <HeatmapVisStyleControls {...mockProps} />
-      </Provider>
-    );
-
-    // Find the title switch and toggle it
-    const titleSwitch = screen.getByTestId('titleModeSwitch');
-    await userEvent.click(titleSwitch);
-
-    expect(mockProps.onStyleChange).toHaveBeenCalledWith({
-      titleOptions: {
-        ...mockProps.styleOptions.titleOptions,
-        show: true,
-      },
-    });
-  });
-
-  it('updates title name when text is entered', async () => {
-    // Set show to true to ensure the title field is visible
-    const props = {
-      ...mockProps,
-      styleOptions: {
-        ...mockProps.styleOptions,
-        titleOptions: {
-          show: true,
-          titleName: '',
-        },
-      },
-    };
-
-    render(
-      <Provider store={store}>
-        <HeatmapVisStyleControls {...props} />
-      </Provider>
-    );
-
-    const titleInput = screen.getByPlaceholderText('Default title');
-    await userEvent.type(titleInput, 'New Chart Title');
-
-    await waitFor(() => {
-      expect(mockProps.onStyleChange).toHaveBeenCalledWith({
-        titleOptions: {
-          ...props.styleOptions.titleOptions,
-          titleName: 'New Chart Title',
-        },
-      });
     });
   });
 

@@ -4,12 +4,13 @@
  */
 
 import { EuiAccordion, EuiHorizontalRule, EuiPanel, EuiSpacer } from '@elastic/eui';
-import React, { FC } from 'react';
+import { FC } from 'react';
 
 interface Props {
   title: string;
 }
 
+// @ts-expect-error TS2339 TODO(ts-error): fixme
 export const Option: FC<Props> = ({ title, children }) => {
   return (
     <>

@@ -10,14 +10,26 @@
  */
 
 import { IOsdUrlStateStorage } from 'src/plugins/opensearch_dashboards_utils/public';
-import { createDashboardGlobalAndAppState, updateStateUrl } from './create_dashboard_app_state';
+import {
+  createDashboardGlobalAndAppState,
+  hydrateDashboardAppState,
+  updateStateUrl,
+} from './create_dashboard_app_state';
 import { migrateAppState } from './migrate_app_state';
 import { dashboardAppStateStub } from './stubs';
 import { createDashboardServicesMock } from './mocks';
 import { SavedObjectDashboard } from '../..';
+import { DashboardAppState } from '../../types';
 import { syncQueryStateWithUrl } from 'src/plugins/data/public';
 import { ViewMode } from 'src/plugins/embeddable/public';
 import { scopedHistoryMock } from '../../../../../core/public/mocks';
+import {
+  CustomVariable,
+  QueryVariable,
+  Variable,
+  VariableSortOrder,
+  VariableType,
+} from '../../variables/types';
 
 const mockStartStateSync = jest.fn();
 const mockStopStateSync = jest.fn();
@@ -39,18 +51,18 @@ jest.mock('../../../../data/public', () => ({
 }));
 
 jest.mock('./migrate_app_state', () => ({
-  migrateAppState: jest.fn(() => 'migratedAppState'),
+  migrateAppState: jest.fn((state) => state),
 }));
 
 const { createStateContainer, syncState } = jest.requireMock(
   '../../../../opensearch_dashboards_utils/public'
 );
 
-const osdUrlStateStorage = ({
+const osdUrlStateStorage = {
   set: jest.fn(),
   get: jest.fn(() => ({ linked: false })),
   flush: jest.fn().mockReturnValue(true),
-} as unknown) as IOsdUrlStateStorage;
+} as unknown as IOsdUrlStateStorage;
 
 describe('createDashboardGlobalAndAppState', () => {
   const mockServices = createDashboardServicesMock();
@@ -64,16 +76,13 @@ describe('createDashboardGlobalAndAppState', () => {
     getFilters: () => {},
   } as SavedObjectDashboard;
 
-  const {
-    stateContainer,
-    stopStateSync,
-    stopSyncingQueryServiceStateWithUrl,
-  } = createDashboardGlobalAndAppState({
-    stateDefaults: dashboardAppStateStub,
-    osdUrlStateStorage,
-    services: mockServices,
-    savedDashboardInstance,
-  });
+  const { stateContainer, stopStateSync, stopSyncingQueryServiceStateWithUrl } =
+    createDashboardGlobalAndAppState({
+      stateDefaults: dashboardAppStateStub,
+      osdUrlStateStorage,
+      services: mockServices,
+      savedDashboardInstance,
+    });
   const transitions = createStateContainer.mock.calls[0][1];
 
   test('should initialize dashboard app state', () => {
@@ -86,9 +95,16 @@ describe('createDashboardGlobalAndAppState', () => {
       mockServices.opensearchDashboardsVersion,
       mockServices.usageCollection
     );
-    expect(osdUrlStateStorage.set).toHaveBeenCalledWith('_a', 'migratedAppState', {
-      replace: true,
-    });
+    expect(osdUrlStateStorage.set).toHaveBeenCalledWith(
+      '_a',
+      {
+        ...dashboardAppStateStub,
+        linked: false,
+      },
+      {
+        replace: true,
+      }
+    );
     expect(createStateContainer).toHaveBeenCalled();
     expect(syncState).toHaveBeenCalled();
     expect(syncQueryStateWithUrl).toHaveBeenCalled();
@@ -151,7 +167,7 @@ describe('updateStateUrl', () => {
   };
 
   test('update URL to not contain panels', () => {
-    const { panels, ...statesWithoutPanels } = dashboardAppState;
+    const { panels, variables, ...statesWithoutPanelsAndVariables } = dashboardAppState;
 
     const basePath = '/base';
     const history = scopedHistoryMock.create({
@@ -165,10 +181,68 @@ describe('updateStateUrl', () => {
       replace: true,
     });
 
-    expect(osdUrlStateStorage.set).toHaveBeenCalledWith('_a', statesWithoutPanels, {
+    expect(osdUrlStateStorage.set).toHaveBeenCalledWith('_a', statesWithoutPanelsAndVariables, {
       replace: true,
     });
     expect(osdUrlStateStorage.flush).toHaveBeenCalledWith({ replace: true });
+  });
+
+  test('serializes only variable selection overrides in URL state', () => {
+    const stateWithVariables: DashboardAppState = {
+      ...dashboardAppState,
+      variables: [
+        {
+          id: 'custom-1',
+          name: 'OS',
+          type: VariableType.Custom,
+          current: ['ios'],
+          customOptions: [{ value: 'ios', label: 'Apple iOS' }],
+          sort: VariableSortOrder.AlphabeticalAsc,
+        },
+        {
+          id: 'query-1',
+          name: 'Airport',
+          type: VariableType.Query,
+          current: ['YOW'],
+          query: 'source = flights | dedup DestAirportID',
+          language: 'PPL',
+          dataset: {
+            id: 'dataset-1',
+            title: 'opensearch_dashboards_sample_data_flights',
+            type: 'INDEX_PATTERN',
+          },
+          valueField: 'DestAirportID',
+          labelField: 'Dest',
+        },
+      ],
+    };
+
+    const basePath = '/base';
+    const history = scopedHistoryMock.create({
+      pathname: basePath,
+    });
+
+    updateStateUrl({
+      osdUrlStateStorage,
+      state: stateWithVariables,
+      scopedHistory: history,
+      replace: true,
+    });
+
+    const { panels, variables, ...stateWithoutPanelsAndVariables } = stateWithVariables;
+    expect(osdUrlStateStorage.set).toHaveBeenCalledWith(
+      '_a',
+      {
+        ...stateWithoutPanelsAndVariables,
+        variables: [
+          { id: 'custom-1', current: ['ios'] },
+          { id: 'query-1', current: ['YOW'] },
+        ],
+      },
+      {
+        replace: true,
+      }
+    );
   });
 
   test('preserve Dashboards scoped history state', () => {
@@ -191,5 +265,336 @@ describe('updateStateUrl', () => {
     expect(history.location.state).toEqual(someState);
     expect(changed).toBe(true);
     expect(replaceSpy).toHaveBeenCalledWith({ ...location, state: someState });
+  });
+});
+
+describe('hydrateDashboardAppState variable URL state', () => {
+  const savedVariables: [CustomVariable, QueryVariable] = [
+    {
+      id: 'custom-1',
+      name: 'OS',
+      type: VariableType.Custom,
+      current: ['win'],
+      customOptions: [
+        { value: 'win', label: 'Windows' },
+        { value: 'ios', label: 'Apple iOS' },
+      ],
+    },
+    {
+      id: 'query-1',
+      name: 'Airport',
+      type: VariableType.Query,
+      current: ['PVG'],
+      query: 'source = flights | dedup DestAirportID',
+      language: 'PPL',
+      dataset: {
+        id: 'dataset-1',
+        title: 'opensearch_dashboards_sample_data_flights',
+        type: 'INDEX_PATTERN',
+      },
+      valueField: 'DestAirportID',
+      labelField: 'Dest',
+    },
+  ];
+
+  test('applies compact URL current values to saved variable definitions', () => {
+    const result = hydrateDashboardAppState(
+      {
+        ...dashboardAppStateStub,
+        variables: savedVariables,
+      },
+      {
+        viewMode: ViewMode.VIEW,
+        variables: [
+          { id: 'custom-1', current: ['ios'] },
+          { id: 'query-1', current: ['YOW'] },
+        ],
+      }
+    );
+
+    expect(result.variables).toEqual([
+      {
+        ...savedVariables[0],
+        current: ['ios'],
+      },
+      {
+        ...savedVariables[1],
+        current: ['YOW'],
+      },
+    ]);
+  });
+
+  test('keeps saved variable definitions when URL has no variable overrides', () => {
+    const result = hydrateDashboardAppState(
+      {
+        ...dashboardAppStateStub,
+        variables: savedVariables,
+      },
+      {
+        viewMode: ViewMode.VIEW,
+      }
+    );
+
+    expect(result.variables).toEqual(savedVariables);
+  });
+
+  test('applies compact URL current values to current variable definitions when provided', () => {
+    const currentVariables: Variable[] = [
+      {
+        ...savedVariables[0],
+        customOptions: [
+          { value: 'linux', label: 'Linux' },
+          { value: 'ios', label: 'Apple iOS' },
+        ],
+      },
+      savedVariables[1],
+    ];
+
+    const result = hydrateDashboardAppState(
+      {
+        ...dashboardAppStateStub,
+        variables: savedVariables,
+      },
+      {
+        viewMode: ViewMode.VIEW,
+        variables: [{ id: 'custom-1', current: ['linux'] }],
+      },
+      undefined,
+      currentVariables
+    );
+
+    expect(result.variables).toEqual([
+      {
+        ...currentVariables[0],
+        current: ['linux'],
+      },
+      currentVariables[1],
+    ]);
+  });
+
+  test('applies current values from legacy full variables in URL state', () => {
+    const legacyUrlVariable = {
+      ...savedVariables[1],
+      current: ['YOW'],
+      query: 'source = flights | dedup Dest',
+      valueField: 'Dest',
+      labelField: undefined,
+    };
+
+    const result = hydrateDashboardAppState(
+      {
+        ...dashboardAppStateStub,
+        variables: savedVariables,
+      },
+      {
+        viewMode: ViewMode.VIEW,
+        variables: [legacyUrlVariable],
+      }
+    );
+
+    expect(result.variables).toEqual([
+      savedVariables[0],
+      {
+        ...savedVariables[1],
+        current: ['YOW'],
+      },
+    ]);
+  });
+
+  test('ignores URL entries that do not match saved variables', () => {
+    const deletedLegacyUrlVariable: QueryVariable = {
+      ...savedVariables[1],
+      id: 'deleted-query',
+      current: ['value'],
+    };
+
+    const result = hydrateDashboardAppState(
+      {
+        ...dashboardAppStateStub,
+        variables: savedVariables,
+      },
+      {
+        viewMode: ViewMode.VIEW,
+        variables: [{ id: 'missing', current: ['value'] }, deletedLegacyUrlVariable],
+      }
+    );
+
+    expect(result.variables).toEqual(savedVariables);
+  });
+});
+
+describe('panels preservation logic in URL sync', () => {
+  /**
+   * This test suite verifies the fix for the bug where panels were being reset
+   * when switching variables in VIEW mode.
+   *
+   * The bug occurred because:
+   * 1. In VIEW mode, toUrlState() excludes panels from URL
+   * 2. When syncing back from URL, stateDefaults (with initial panels) was merged
+   * 3. This caused panels to revert to their initial state
+   *
+   * The fix: `panels: state.panels ?? stateContainer.getState().panels`
+   * This preserves current panels when URL state doesn't include them.
+   */
+
+  // Helper to simulate the set function logic from createDashboardGlobalAndAppState
+  const simulateSetFunction = (state: any, stateDefaults: any, currentPanels: any[]) => {
+    return state ? hydrateDashboardAppState(stateDefaults, state, currentPanels) : null;
+  };
+
+  test('should preserve current panels when URL state has no panels field (VIEW mode)', () => {
+    const initialPanels = [{ panelIndex: 'old-panel', gridData: { x: 0, y: 0, w: 10, h: 10 } }];
+    const currentPanels = [{ panelIndex: 'new-panel', gridData: { x: 0, y: 0, w: 10, h: 10 } }];
+    const stateDefaults = { ...dashboardAppStateStub, panels: initialPanels };
+
+    // URL state in VIEW mode (panels excluded)
+    const urlState = {
+      viewMode: ViewMode.VIEW,
+      title: 'Test Dashboard',
+      variables: [{ id: 'var1', current: ['value1'] }],
+      // panels field is missing
+    };
+
+    const result = simulateSetFunction(urlState, stateDefaults, currentPanels);
+
+    // Should use current panels, not initial panels from stateDefaults
+    expect(result?.panels).toEqual(currentPanels);
+    expect(result?.panels).not.toEqual(initialPanels);
+    expect(result?.viewMode).toBe(ViewMode.VIEW);
+    expect(result?.variables).toEqual(stateDefaults.variables);
+  });
+
+  test('should use panels from URL state when explicitly provided (EDIT mode)', () => {
+    const initialPanels = [{ panelIndex: 'initial', gridData: { x: 0, y: 0, w: 10, h: 10 } }];
+    const currentPanels = [{ panelIndex: 'current', gridData: { x: 0, y: 0, w: 10, h: 10 } }];
+    const urlPanels = [
+      { panelIndex: 'url-panel-1', gridData: { x: 0, y: 0, w: 5, h: 5 } },
+      { panelIndex: 'url-panel-2', gridData: { x: 5, y: 0, w: 5, h: 5 } },
+    ];
+    const stateDefaults = { ...dashboardAppStateStub, panels: initialPanels };
+
+    // URL state with explicit panels (EDIT mode)
+    const urlState = {
+      viewMode: ViewMode.EDIT,
+      title: 'Test Dashboard',
+      panels: urlPanels,
+    };
+
+    const result = simulateSetFunction(urlState, stateDefaults, currentPanels);
+
+    // Should use panels from URL, not current panels
+    expect(result?.panels).toEqual(urlPanels);
+    expect(result?.panels).not.toEqual(currentPanels);
+  });
+
+  test('should handle the complete bug scenario: add/delete panels, save, change variable', () => {
+    // Initial state: dashboard loaded with old panel that will be deleted
+    const initialPanels = [{ panelIndex: 'deleted-panel', gridData: { x: 0, y: 0, w: 10, h: 10 } }];
+
+    // Current state: user added new panel and deleted old one
+    const currentPanels = [{ panelIndex: 'added-panel', gridData: { x: 0, y: 0, w: 10, h: 10 } }];
+
+    const stateDefaults = { ...dashboardAppStateStub, panels: initialPanels };
+
+    // After save, user switches variable in VIEW mode
+    const urlStateAfterVariableChange = {
+      viewMode: ViewMode.VIEW,
+      title: 'Test Dashboard',
+      variables: [{ id: 'var1', current: ['us-west'] }],
+      // panels field is missing (VIEW mode excludes them from URL)
+    };
+
+    const result = simulateSetFunction(urlStateAfterVariableChange, stateDefaults, currentPanels);
+
+    // Verify panels are preserved (bug fix verification)
+    expect(result?.panels).toEqual(currentPanels);
+    expect(result?.panels).not.toEqual(initialPanels);
+    expect(result?.panels[0].panelIndex).toBe('added-panel');
+    expect(result?.panels[0].panelIndex).not.toBe('deleted-panel');
+  });
+
+  test('should handle undefined panels field correctly', () => {
+    const initialPanels = [{ panelIndex: 'initial', gridData: { x: 0, y: 0, w: 10, h: 10 } }];
+    const currentPanels = [{ panelIndex: 'current', gridData: { x: 0, y: 0, w: 10, h: 10 } }];
+    const stateDefaults = { ...dashboardAppStateStub, panels: initialPanels };
+
+    const urlState = {
+      viewMode: ViewMode.VIEW,
+      title: 'Test',
+      panels: undefined, // Explicitly undefined
+    };
+
+    const result = simulateSetFunction(urlState, stateDefaults, currentPanels);
+
+    expect(result?.panels).toEqual(currentPanels);
+  });
+
+  test('should handle null panels field correctly', () => {
+    const initialPanels = [{ panelIndex: 'initial', gridData: { x: 0, y: 0, w: 10, h: 10 } }];
+    const currentPanels = [{ panelIndex: 'current', gridData: { x: 0, y: 0, w: 10, h: 10 } }];
+    const stateDefaults = { ...dashboardAppStateStub, panels: initialPanels };
+
+    const urlState = {
+      viewMode: ViewMode.VIEW,
+      title: 'Test',
+      panels: null as any, // Explicitly null
+    };
+
+    const result = simulateSetFunction(urlState, stateDefaults, currentPanels);
+
+    expect(result?.panels).toEqual(currentPanels);
+  });
+
+  test('should not return anything when state is null', () => {
+    const currentPanels = [{ panelIndex: 'test', gridData: { x: 0, y: 0, w: 10, h: 10 } }];
+    const stateDefaults = { ...dashboardAppStateStub, panels: [] };
+
+    const result = simulateSetFunction(null, stateDefaults, currentPanels);
+
+    expect(result).toBeNull();
+  });
+
+  test('should use empty array when explicitly provided (not preserve current)', () => {
+    const initialPanels = [{ panelIndex: 'initial', gridData: { x: 0, y: 0, w: 10, h: 10 } }];
+    const currentPanels = [{ panelIndex: 'current', gridData: { x: 0, y: 0, w: 10, h: 10 } }];
+    const stateDefaults = { ...dashboardAppStateStub, panels: initialPanels };
+
+    const urlState = {
+      viewMode: ViewMode.VIEW,
+      title: 'Test',
+      panels: [], // Empty array (valid state for empty dashboard)
+    };
+
+    const result = simulateSetFunction(urlState, stateDefaults, currentPanels);
+
+    // Empty array should be used as-is (it's a valid state, not undefined/null)
+    expect(result?.panels).toEqual([]);
+  });
+
+  test('should preserve panels across multiple variable changes', () => {
+    const initialPanels = [{ panelIndex: 'initial', gridData: { x: 0, y: 0, w: 10, h: 10 } }];
+    const modifiedPanels = [
+      { panelIndex: 'panel-1', gridData: { x: 0, y: 0, w: 5, h: 5 } },
+      { panelIndex: 'panel-2', gridData: { x: 5, y: 0, w: 5, h: 5 } },
+      { panelIndex: 'panel-3', gridData: { x: 0, y: 5, w: 5, h: 5 } },
+    ];
+    const stateDefaults = { ...dashboardAppStateStub, panels: initialPanels };
+
+    // First variable change
+    const urlState1 = {
+      viewMode: ViewMode.VIEW,
+      variables: [{ id: 'var1', current: ['value1'] }],
+    };
+    const result1 = simulateSetFunction(urlState1, stateDefaults, modifiedPanels);
+    expect(result1?.panels).toEqual(modifiedPanels);
+
+    // Second variable change - panels should still be preserved
+    const urlState2 = {
+      viewMode: ViewMode.VIEW,
+      variables: [{ id: 'var1', current: ['value2'] }],
+    };
+    const result2 = simulateSetFunction(urlState2, stateDefaults, modifiedPanels);
+    expect(result2?.panels).toEqual(modifiedPanels);
+    expect(result2?.panels).not.toEqual(initialPanels);
   });
 });

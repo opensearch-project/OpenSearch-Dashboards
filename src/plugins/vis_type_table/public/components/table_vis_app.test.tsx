@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
 import { coreMock } from '../../../../core/public/mocks';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
@@ -23,7 +22,7 @@ jest.mock('./table_vis_component', () => ({
 
 describe('TableVisApp', () => {
   const serviceMock = coreMock.createStart();
-  const handlersMock = ({
+  const handlersMock = {
     done: jest.fn(),
     uiState: {
       get: jest.fn((key) => {
@@ -39,8 +38,8 @@ describe('TableVisApp', () => {
       set: jest.fn(),
     },
     event: 'event',
-  } as unknown) as IInterpreterRenderHandlers;
-  const visConfigMock = ({} as unknown) as TableVisConfig;
+  } as unknown as IInterpreterRenderHandlers;
+  const visConfigMock = {} as unknown as TableVisConfig;
 
   const createMockFormattedTableContext = (rowCount: number): FormattedTableContext => ({
     columns: [{ id: 'col1', name: 'Column 1' }],

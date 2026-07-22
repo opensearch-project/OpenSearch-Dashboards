@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`DataSourceMultiSelectable should render normally with local cluster hidden 1`] = `
 <DataSourceMultiSelectable
@@ -62,6 +62,7 @@ exports[`DataSourceMultiSelectable should render normally with local cluster hid
                 "auth.type",
                 "dataSourceVersion",
                 "installedPlugins",
+                "dataSourceEngineType",
               ],
               "perPage": 10000,
               "type": "data-source",
@@ -275,6 +276,7 @@ exports[`DataSourceMultiSelectable should render normally with local cluster not
                 "auth.type",
                 "dataSourceVersion",
                 "installedPlugins",
+                "dataSourceEngineType",
               ],
               "perPage": 10000,
               "type": "data-source",

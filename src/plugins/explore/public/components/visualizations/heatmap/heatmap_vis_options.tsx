@@ -12,8 +12,6 @@ import { LegendOptionsWrapper } from '../style_panel/legend/legend_options_wrapp
 import { HeatmapExclusiveVisOptions } from './heatmap_exclusive_vis_options';
 import { AllAxesOptions } from '../style_panel/axes/standard_axes_options';
 import { StyleControlsProps } from '../utils/use_visualization_types';
-import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
-import { TitleOptionsPanel } from '../style_panel/title/title';
 import { AxisRole } from '../types';
 import { ThresholdPanel } from '../style_panel/threshold/threshold_panel';
 
@@ -25,8 +23,6 @@ export const HeatmapVisStyleControls: React.FC<HeatmapVisStyleControlsProps> = (
   numericalColumns = [],
   categoricalColumns = [],
   dateColumns = [],
-  availableChartTypes = [],
-  selectedChartType,
   axisColumnMappings,
   updateVisualization,
 }) => {
@@ -46,18 +42,6 @@ export const HeatmapVisStyleControls: React.FC<HeatmapVisStyleControlsProps> = (
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
-      <EuiFlexItem>
-        <AxesSelectPanel
-          numericalColumns={numericalColumns}
-          categoricalColumns={categoricalColumns}
-          dateColumns={dateColumns}
-          currentMapping={axisColumnMappings}
-          updateVisualization={updateVisualization}
-          chartType="heatmap"
-          onSwitchAxes={(v) => updateStyleOption('switchAxes', v)}
-          switchAxes={styleOptions.switchAxes}
-        />
-      </EuiFlexItem>
       {hasMappingSelected && (
         <>
           <EuiFlexItem grow={false}>
@@ -84,7 +68,6 @@ export const HeatmapVisStyleControls: React.FC<HeatmapVisStyleControlsProps> = (
               onStandardAxesChange={(standardAxes) =>
                 updateStyleOption('standardAxes', standardAxes)
               }
-              switchAxes={styleOptions.switchAxes}
             />
           </EuiFlexItem>
 
@@ -94,17 +77,6 @@ export const HeatmapVisStyleControls: React.FC<HeatmapVisStyleControlsProps> = (
             shouldShow={shouldShowLegend}
           />
 
-          <EuiFlexItem grow={false}>
-            <TitleOptionsPanel
-              titleOptions={styleOptions.titleOptions}
-              onShowTitleChange={(titleOptions) => {
-                updateStyleOption('titleOptions', {
-                  ...styleOptions.titleOptions,
-                  ...titleOptions,
-                });
-              }}
-            />
-          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <TooltipOptionsPanel
               tooltipOptions={styleOptions.tooltipOptions}

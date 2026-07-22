@@ -28,6 +28,7 @@
  * under the License.
  */
 
+/* globals global */
 import { isAbsolute } from 'path';
 
 import { loadTracer } from '../load_tracer';

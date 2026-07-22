@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { AggParamEditorProps } from '../agg_param_props';
 import { IAggConfig } from 'src/plugins/data/public';
 // @ts-expect-error TS6133 TODO(ts-error): fixme
@@ -67,12 +66,12 @@ describe('PercentilesEditor component', () => {
   it('should set valid state to true after adding a unique percentile', () => {
     defaultProps.value = [1, 5, 25, 50, 70];
     mountWithIntl(<PercentilesEditor {...defaultProps} />);
-    expect(setValidity).lastCalledWith(true);
+    expect(setValidity).toHaveBeenLastCalledWith(true);
   });
 
   it('should set valid state to false after adding a duplicate percentile', () => {
     defaultProps.value = [1, 5, 25, 50, 50];
     mountWithIntl(<PercentilesEditor {...defaultProps} />);
-    expect(setValidity).lastCalledWith(false);
+    expect(setValidity).toHaveBeenLastCalledWith(false);
   });
 });

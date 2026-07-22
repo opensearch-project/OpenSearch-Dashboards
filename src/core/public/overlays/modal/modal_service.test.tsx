@@ -30,7 +30,6 @@
 
 import { mockReactDomRender, mockReactDomUnmount } from '../overlay.test.mocks';
 
-import React from 'react';
 import { mount } from 'enzyme';
 import { i18nServiceMock } from '../../i18n/i18n_service.mock';
 import { ModalService, OverlayModalStart } from './modal_service';
@@ -80,7 +79,7 @@ describe('ModalService', () => {
         modals.open(mountReactNode(<span>Flyout content 2</span>));
         expect(mockReactDomRender.mock.calls).toMatchSnapshot();
         expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
-        expect(() => ref1.close()).not.toThrowError();
+        expect(() => ref1.close()).not.toThrow();
         expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
       });
 
@@ -89,7 +88,7 @@ describe('ModalService', () => {
         ref1.onClose.then(onCloseComplete);
         modals.open(mountReactNode(<span>Flyout content 2</span>));
         await ref1.onClose;
-        expect(onCloseComplete).toBeCalledTimes(1);
+        expect(onCloseComplete).toHaveBeenCalledTimes(1);
       });
     });
 
@@ -146,7 +145,7 @@ describe('ModalService', () => {
         modals.openConfirm('some confirm');
         expect(mockReactDomRender.mock.calls).toMatchSnapshot();
         expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
-        expect(() => ref1.close()).not.toThrowError();
+        expect(() => ref1.close()).not.toThrow();
         expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
       });
 
@@ -155,7 +154,7 @@ describe('ModalService', () => {
         ref1.onClose.then(onCloseComplete);
         modals.openConfirm('some confirm');
         await ref1.onClose;
-        expect(onCloseComplete).toBeCalledTimes(1);
+        expect(onCloseComplete).toHaveBeenCalledTimes(1);
       });
     });
 
@@ -206,8 +205,8 @@ describe('ModalService', () => {
       ref2.onClose.then(onCloseComplete);
       mockReactDomUnmount.mockClear();
       await ref1.close();
-      expect(mockReactDomUnmount).toBeCalledTimes(0);
-      expect(onCloseComplete).toBeCalledTimes(0);
+      expect(mockReactDomUnmount).toHaveBeenCalledTimes(0);
+      expect(onCloseComplete).toHaveBeenCalledTimes(0);
     });
   });
 });

@@ -6,22 +6,33 @@
 import React, { useState } from 'react';
 import { EuiPanel, EuiButtonIcon } from '@elastic/eui';
 import { euiThemeVars } from '@osd/ui-shared-deps/theme';
+import { i18n } from '@osd/i18n';
 import { Markdown } from '../../../opensearch_dashboards_react/public';
-import type { Message } from '../../common/types';
+import type { Message, AssistantMessage } from '../../common/types';
+import { stripInlineSuggestions } from '../../common/parse_inline_suggestions';
+import { ShareModal } from './share_modal';
 import './message_row.scss';
 
 interface MessageRowProps {
   message: Message;
   isStreaming?: boolean;
   onResend?: (message: Message) => void;
+  timeline?: Message[];
+  threadId?: string;
+  /** Original assistant message for ShareModal when rendering synthetic array content messages */
+  shareTargetMessage?: AssistantMessage;
 }
 
 export const MessageRow: React.FC<MessageRowProps> = ({
   message,
   isStreaming = false,
   onResend,
+  timeline,
+  threadId,
+  shareTargetMessage,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   const handleResend = () => {
     if (onResend) {
@@ -40,10 +51,16 @@ export const MessageRow: React.FC<MessageRowProps> = ({
 
   // Handle multimodal content (text + images) or simple string content
   const renderContent = () => {
-    const content =
+    const rawContent =
       message.role === 'user' && 'rawMessage' in message && message.rawMessage
         ? message.rawMessage
         : message.content || '';
+
+    // Strip inline suggestions from assistant messages before display
+    const content =
+      typeof rawContent === 'string' && message.role === 'assistant'
+        ? stripInlineSuggestions(rawContent)
+        : rawContent;
 
     // If content is a string, render as markdown
     if (typeof content === 'string') {
@@ -119,7 +136,41 @@ export const MessageRow: React.FC<MessageRowProps> = ({
             />
           </div>
         )}
+
+        {/* Share action for assistant messages — appears on hover */}
+        {message.role === 'assistant' &&
+          message.content &&
+          timeline &&
+          (() => {
+            const shareLabel = i18n.translate('chat.messageRow.shareInvestigation', {
+              defaultMessage: 'Share',
+            });
+            return (
+              <div
+                className={`messageRow__actions ${isHovered ? 'messageRow__actions--visible' : ''}`}
+              >
+                <EuiButtonIcon
+                  iconType="share"
+                  color="primary"
+                  size="s"
+                  display="base"
+                  onClick={() => setShowShareModal(true)}
+                  aria-label={shareLabel}
+                  title={shareLabel}
+                />
+              </div>
+            );
+          })()}
       </div>
+
+      {showShareModal && message.role === 'assistant' && timeline && (
+        <ShareModal
+          onClose={() => setShowShareModal(false)}
+          timeline={timeline}
+          targetMessage={(shareTargetMessage || message) as AssistantMessage}
+          threadId={threadId}
+        />
+      )}
     </div>
   );
 };

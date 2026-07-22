@@ -9,7 +9,7 @@
  * GitHub history for details.
  */
 
-import React, { Fragment, useEffect, useState, Suspense, useRef, useCallback } from 'react';
+import React, { useEffect, useState, Suspense, useRef, useCallback } from 'react';
 import { EuiCallOut, EuiLoadingSpinner } from '@elastic/eui';
 import { BannerConfig, HIDDEN_BANNER_HEIGHT, DEFAULT_BANNER_CONFIG } from '../../common';
 import { LinkRenderer } from './link_renderer';
@@ -33,7 +33,7 @@ export const GlobalBanner: React.FC<GlobalBannerProps> = ({ http }) => {
   const isBannerHidden = useCallback(() => {
     try {
       return sessionStorage.getItem(BANNER_HIDDEN_KEY) === 'true';
-    } catch (e) {
+    } catch {
       // If sessionStorage is not available, return false
       return false;
     }
@@ -54,7 +54,7 @@ export const GlobalBanner: React.FC<GlobalBannerProps> = ({ http }) => {
       } else {
         setBannerConfig(response);
       }
-    } catch (error) {
+    } catch {
       // Hide banner on error
       setBannerConfig({
         ...DEFAULT_BANNER_CONFIG,
@@ -117,7 +117,7 @@ export const GlobalBanner: React.FC<GlobalBannerProps> = ({ http }) => {
     // Store the hidden state in sessionStorage
     try {
       sessionStorage.setItem(BANNER_HIDDEN_KEY, 'true');
-    } catch (e) {
+    } catch {
       // Intentionally empty - state is already updated above so banner will still be hidden
     }
   }, []);
@@ -147,12 +147,12 @@ export const GlobalBanner: React.FC<GlobalBannerProps> = ({ http }) => {
           }
         >
           <ReactMarkdownLazy
-            renderers={{
-              root: Fragment,
-              link: LinkRenderer,
+            components={{
+              a: LinkRenderer,
             }}
-            source={bannerConfig.content.trim()}
-          />
+          >
+            {bannerConfig.content.trim()}
+          </ReactMarkdownLazy>
         </Suspense>
       );
     }

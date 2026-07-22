@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@osd/i18n';

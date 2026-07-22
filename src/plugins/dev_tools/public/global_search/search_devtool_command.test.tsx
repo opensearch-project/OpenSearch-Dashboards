@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { DevToolItem, searchForDevTools } from './search_devtool_command';
 import { fireEvent, render } from '@testing-library/react';
 import { uiActionsPluginMock } from 'src/plugins/ui_actions/public/mocks';

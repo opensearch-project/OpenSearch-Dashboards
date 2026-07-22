@@ -29,7 +29,7 @@
  */
 
 import { EuiHeaderSectionItemButton } from '@elastic/eui';
-import React from 'react';
+
 import { act } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
@@ -97,6 +97,7 @@ function mockProps() {
     currentWorkspace$: new BehaviorSubject<WorkspaceObject | null>(null),
     useUpdatedHeader: false,
     globalSearchCommands$: new BehaviorSubject([]),
+    navControlsIconSideNavFooter$: new BehaviorSubject([]),
   };
 }
 
@@ -104,6 +105,8 @@ describe('Header', () => {
   beforeAll(() => {
     Object.defineProperty(window, 'localStorage', {
       value: new StubBrowserStorage(),
+      writable: true,
+      configurable: true,
     });
   });
 
@@ -276,7 +279,7 @@ describe('Header', () => {
     };
     const component = mountWithIntl(<Header {...props} />);
     component.find(EuiHeaderSectionItemButton).first().simulate('click');
-    expect(props.onIsLockedUpdate).toBeCalledWith(true);
+    expect(props.onIsLockedUpdate).toHaveBeenCalledWith(true);
   });
 
   describe('banner plugin integration', () => {

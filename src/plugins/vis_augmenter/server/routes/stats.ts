@@ -27,10 +27,8 @@ export const registerStatsRoute = (router: IRouter, logger: Logger) => {
     ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
       try {
         const savedObjectsClient = context.core.savedObjects.client;
-        const augmentVisSavedObjects: SavedObjectsFindResponse<AugmentVisSavedObjectAttributes> = await getAugmentVisSavedObjects(
-          savedObjectsClient,
-          PER_PAGE_VALUE
-        );
+        const augmentVisSavedObjects: SavedObjectsFindResponse<AugmentVisSavedObjectAttributes> =
+          await getAugmentVisSavedObjects(savedObjectsClient, PER_PAGE_VALUE);
         const stats = getStats(augmentVisSavedObjects);
         return response.ok({
           body: stats,

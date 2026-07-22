@@ -40,7 +40,10 @@ import { TriggerId, TriggerContextMapping } from '../types';
 export class TriggerInternal<T extends TriggerId> {
   public readonly contract = new TriggerContract<T>(this);
 
-  constructor(public readonly service: UiActionsService, public readonly trigger: Trigger<T>) {}
+  constructor(
+    public readonly service: UiActionsService,
+    public readonly trigger: Trigger<T>
+  ) {}
 
   public async execute(context: TriggerContextMapping[T]) {
     const triggerId = this.trigger.id;

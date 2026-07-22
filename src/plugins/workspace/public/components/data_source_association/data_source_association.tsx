@@ -10,7 +10,7 @@ import {
   EuiIcon,
   EuiPopover,
 } from '@elastic/eui';
-import React, { useCallback, useState, useRef } from 'react';
+import { useCallback, useState, useRef } from 'react';
 import { i18n } from '@osd/i18n';
 import { useObservable } from 'react-use';
 import { of } from 'rxjs';
@@ -36,14 +36,8 @@ interface Props {
 export const DataSourceAssociation = ({ excludedDataSourceIds, onComplete, onError }: Props) => {
   const [isOpen, setIsOpen] = useState(false);
   const associationModalRef = useRef<OverlayRef>();
-  const {
-    chrome,
-    savedObjects,
-    http,
-    notifications,
-    overlays,
-    workspaces,
-  } = useOpenSearchDashboards().services;
+  const { chrome, savedObjects, http, notifications, overlays, workspaces } =
+    useOpenSearchDashboards().services;
   const workspaceClient = useObservable(workspaces?.client$ ?? of(null));
   const currentWorkspaceId = useObservable(workspaces?.currentWorkspaceId$ ?? of(null));
 
@@ -74,7 +68,7 @@ export const DataSourceAssociation = ({ excludedDataSourceIds, onComplete, onErr
           if (onComplete) {
             onComplete();
           }
-        } catch (e) {
+        } catch {
           failedCount = objects.length;
           if (onError) {
             onError();

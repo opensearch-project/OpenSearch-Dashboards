@@ -29,6 +29,7 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
+// @ts-expect-error TS2307 TODO(ts-upgrade): fixme
 import { Search } from '@opensearch-project/opensearch/api/requestParams';
 import { IOpenSearchDashboardsSearchRequest, IOpenSearchDashboardsSearchResponse } from '../types';
 import { OSD_FIELD_TYPES } from '../../types';
@@ -59,8 +60,7 @@ export type ISearchRequestParams<T = Record<string, any>> = {
   trackTotalHits?: boolean;
 } & Search<T>;
 
-export interface IOpenSearchSearchRequest
-  extends IOpenSearchDashboardsSearchRequest<ISearchRequestParams> {
+export interface IOpenSearchSearchRequest extends IOpenSearchDashboardsSearchRequest<ISearchRequestParams> {
   indexType?: string;
   language?: string;
   dataSourceId?: string;

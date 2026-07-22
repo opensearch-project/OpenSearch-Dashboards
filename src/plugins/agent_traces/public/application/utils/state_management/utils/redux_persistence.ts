@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { getCurrentAppId } from '../../../../helpers/get_flavor_from_app_id';
 import { RootState } from '../store';
 import { AppState, QueryExecutionStatus } from '../types';
 import { AgentTracesServices } from '../../../../types';
@@ -46,7 +45,7 @@ export const persistReduxState = (state: RootState, services: AgentTracesService
       },
       { replace: true }
     );
-  } catch (err) {
+  } catch {
     return;
   }
 };
@@ -136,7 +135,7 @@ export const loadReduxState = async (services: AgentTracesServices): Promise<Roo
       queryEditor: finalQueryEditorState,
       meta: finalMetaState,
     };
-  } catch (err) {
+  } catch {
     return await getPreloadedState(services); // Fallback to full preload
   }
 };
@@ -226,7 +225,7 @@ const fetchFirstAvailableDataset = async (
               return dataset;
             }
           }
-        } catch (error) {
+        } catch {
           // Continue to next dataset if this one fails
           continue;
         }
@@ -235,7 +234,7 @@ const fetchFirstAvailableDataset = async (
     }
 
     return undefined;
-  } catch (error) {
+  } catch {
     return undefined;
   }
 };
@@ -252,6 +251,7 @@ const resolveDataset = async (
   // Get existing dataset from QueryStringManager or use preferred dataset
   const queryStringQuery = services.data?.query?.queryString?.getQuery();
   const defaultQuery = undefined;
+  // @ts-expect-error TS2339 TODO(ts-error): fixme
   const existingDataset = preferredDataset || queryStringQuery?.dataset || defaultQuery?.dataset;
 
   // If we have an existing dataset, validate SignalType compatibility
@@ -271,7 +271,7 @@ const resolveDataset = async (
           return existingDataset;
         }
       }
-    } catch (error) {
+    } catch {
       // Silently continue to fetch a new dataset if validation fails
       // This is expected behavior when datasets are incompatible with current flavor
     }

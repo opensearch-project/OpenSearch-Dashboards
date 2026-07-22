@@ -24,6 +24,7 @@ export const loadReduxState = async (services: DataExplorerServices) => {
         const dataset: Dataset = {
           id: serializedState.metadata.indexPattern,
           title: indexPattern.title,
+          displayName: indexPattern.displayName,
           type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
         };
 
@@ -33,6 +34,7 @@ export const loadReduxState = async (services: DataExplorerServices) => {
           );
 
           if (dataSource) {
+            // @ts-expect-error TS2741 TODO(ts-error): fixme
             dataset.dataSource = {
               id: dataSource.id,
               title: dataSource.attributes.title,
@@ -63,7 +65,7 @@ export const persistReduxState = (root: RootState, services: DataExplorerService
     services.osdUrlStateStorage.set<RootState>('_a', root, {
       replace: true,
     });
-  } catch (err) {
+  } catch {
     return;
   }
 };

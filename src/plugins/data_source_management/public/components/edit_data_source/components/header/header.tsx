@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 import {
   EuiSpacer,
@@ -55,8 +55,8 @@ export const Header = ({
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const [isDefaultDataSourceState, setIsDefaultDataSourceState] = useState(isDefault);
 
-  const changeTitle = useOpenSearchDashboards<DataSourceManagementContext>().services.chrome
-    .docTitle.change;
+  const changeTitle =
+    useOpenSearchDashboards<DataSourceManagementContext>().services.chrome.docTitle.change;
 
   changeTitle(dataSourceName);
 

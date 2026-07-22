@@ -1,10 +1,11 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`StepIndexPattern renders errors when input is invalid 1`] = `
 Object {
   "component": <Header
     characterList="\\\\, /, ?, \\", <, >, |"
     data-test-subj="createIndexPatternStep1Header"
+    displayName=""
     errors={
       Array [
         "A name cannot contain spaces or the characters: \\\\, /, ?, \\", <, >, |",
@@ -15,6 +16,7 @@ Object {
     isInputInvalid={true}
     isNextStepDisabled={true}
     onChangeIncludingSystemIndices={[Function]}
+    onDisplayNameChanged={[Function]}
     onQueryChanged={[Function]}
     query="?"
   />,

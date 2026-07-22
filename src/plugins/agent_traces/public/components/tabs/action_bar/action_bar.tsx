@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React, { memo, useMemo } from 'react';
+import { memo, useMemo } from 'react';
 import { useObservable } from 'react-use';
 import { of } from 'rxjs';
 import { DiscoverResultsActionBar } from './results_action_bar/results_action_bar';

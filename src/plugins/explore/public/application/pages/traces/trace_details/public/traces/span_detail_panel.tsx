@@ -4,7 +4,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
-import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
+import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { ChromeStart } from 'opensearch-dashboards/public';
 import './span_detail_panel.scss';
@@ -30,14 +30,8 @@ export function SpanDetailPanel(props: {
   servicesInOrder?: string[];
   isFlyoutPanel?: boolean;
 }) {
-  const {
-    chrome,
-    spanFilters,
-    setSpanFiltersWithStorage,
-    payloadData,
-    onSpanSelect,
-    colorMap,
-  } = props;
+  const { chrome, spanFilters, setSpanFiltersWithStorage, payloadData, onSpanSelect, colorMap } =
+    props;
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [availableWidth, setAvailableWidth] = useState<number>(

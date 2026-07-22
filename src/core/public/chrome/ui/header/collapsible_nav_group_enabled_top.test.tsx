@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import { ChromeNavLink } from '../../nav_links';
 import { ChromeRegistrationNavLink } from '../../nav_group';
@@ -44,13 +43,29 @@ describe('<CollapsibleNavTop />', () => {
     const { findByTestId, getByTestId } = render(<CollapsibleNavTop {...props} />);
     await findByTestId('collapsibleNavHome');
     fireEvent.click(getByTestId('collapsibleNavHome'));
-    expect(props.navigateToApp).toBeCalledWith('home');
+    expect(props.navigateToApp).toHaveBeenCalledWith('home');
   });
 
-  it('should render expand icon when collapsed', async () => {
+  it('should render expand button when collapsed (original nav)', async () => {
     const { findByTestId } = render(
       <CollapsibleNavTop {...getMockedProps()} shouldShrinkNavigation />
     );
+    // In the original nav (no enableIconSideNav), collapsed state shows hamburger (menu) button
     await findByTestId('collapsibleNavShrinkButton');
+  });
+
+  it('should render home logo and pin button when icon side nav enabled', async () => {
+    const onIsLockedUpdate = jest.fn();
+    const { findByTestId } = render(
+      <CollapsibleNavTop
+        {...getMockedProps()}
+        shouldShrinkNavigation
+        enableIconSideNav
+        onIsLockedUpdate={onIsLockedUpdate}
+      />
+    );
+    // The logo (home link) is present; expansion is hover-driven, and a pin
+    // button keeps the nav open (no dedicated collapse toggle anymore).
+    await findByTestId('collapsibleNavLockButton');
   });
 });

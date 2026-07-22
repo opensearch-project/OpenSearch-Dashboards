@@ -101,13 +101,14 @@ export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
 
   const flattenedItems = useMemo(() => flattenHierarchy(items), [items, expandedRows]);
 
-  const columns = useMemo(() => getSpanHierarchyTableColumns(traceTimeRange, availableWidth), [
-    traceTimeRange,
-    availableWidth,
-  ]);
+  const columns = useMemo(
+    () => getSpanHierarchyTableColumns(traceTimeRange, availableWidth),
+    [traceTimeRange, availableWidth]
+  );
   const visibleColumns = useMemo(() => columns.map(({ id }) => id), [columns]);
 
   const renderCellValue = useCallback(
+    // @ts-expect-error TS7031 TODO(ts-error): fixme
     ({ rowIndex, columnId, disableInteractions, setCellProps }) => {
       return columnId === 'span' ? (
         <HierarchySpanCell
@@ -186,6 +187,7 @@ export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
     <div data-test-subj="span-hierarchy-table">
       {RenderCustomDataGrid({
         columns,
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         renderCellValue,
         rowCount: flattenedItems.length,
         showColumnSelector: false,

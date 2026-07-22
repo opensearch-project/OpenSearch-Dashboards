@@ -59,6 +59,18 @@ export const OpenSearchEnhancements = (client: any, config: any, components: any
     method: 'POST',
     needBody: true,
   });
+  // Open Distro endpoints for legacy Elasticsearch data sources, used when
+  // legacyElasticsearchCompatibility is enabled and the selected data source is Elasticsearch.
+  enhancements.pplQueryOpenDistro = createAction(client, components, {
+    endpoint: URI.PPL_OPENDISTRO,
+    method: 'POST',
+    needBody: true,
+  });
+  enhancements.sqlQueryOpenDistro = createAction(client, components, {
+    endpoint: URI.SQL_OPENDISTRO,
+    method: 'POST',
+    needBody: true,
+  });
   enhancements.promqlQuery = createAction(client, components, {
     endpoint: URI.DIRECT_QUERY.QUERY,
     method: 'POST',
@@ -156,5 +168,10 @@ export const OpenSearchEnhancements = (client: any, config: any, components: any
     endpoint: URI.ASYNC_QUERY,
     method: 'POST',
     needBody: true,
+  });
+
+  enhancements.pplBundle = createAction(client, components, {
+    endpoint: URI.PPL_BUNDLE,
+    method: 'GET',
   });
 };

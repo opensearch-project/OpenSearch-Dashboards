@@ -29,13 +29,13 @@
  */
 
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
+import { Component } from 'react';
 import { SeriesEditor } from '../series_editor';
 import { IndexPattern } from '../index_pattern';
 import { createTextHandler } from '../lib/create_text_handler';
 import { ColorRules } from '../color_rules';
 import { ColorPicker } from '../color_picker';
-import uuid from 'uuid';
+import { v1 as uuidv1 } from 'uuid';
 import { YesNo } from '../yes_no';
 import {
   htmlIdGenerator,
@@ -66,7 +66,7 @@ export class TopNPanelConfig extends Component {
     const { model } = this.props;
     const parts = {};
     if (!model.bar_color_rules || (model.bar_color_rules && model.bar_color_rules.length === 0)) {
-      parts.bar_color_rules = [{ id: uuid.v1() }];
+      parts.bar_color_rules = [{ id: uuidv1() }];
     }
     this.props.onChange(parts);
   }

@@ -43,12 +43,14 @@ import { FieldSelect } from './field_select';
 import { ControlParams, ControlParamsOptions } from '../../editor_utils';
 import { IIndexPattern, IFieldType, IndexPatternSelectProps } from '../../../../data/public';
 import { InputControlVisDependencies } from '../../plugin';
+import { UNSUPPORTED_ENGINE_TYPES } from '../../../../data/common';
 
 interface ListControlEditorState {
   isLoadingFieldType: boolean;
   isStringField: boolean;
   prevFieldName: string;
   IndexPatternSelect: ComponentType<IndexPatternSelectProps> | null;
+  allowedIndexPatternIds: Set<string>;
 }
 
 interface ListControlEditorProps {
@@ -85,6 +87,7 @@ export class ListControlEditor extends PureComponent<
     isStringField: false,
     prevFieldName: this.props.controlParams.fieldName,
     IndexPatternSelect: null,
+    allowedIndexPatternIds: new Set(),
   };
 
   componentDidMount() {
@@ -120,8 +123,16 @@ export class ListControlEditor extends PureComponent<
 
   async getIndexPatternSelect() {
     const [, { data }] = await this.props.deps.core.getStartServices();
+
+    // Get allowed index pattern IDs (excluding AnalyticEngine)
+    const indexPatternList = await data.indexPatterns.getCache({
+      excludeEngineTypes: UNSUPPORTED_ENGINE_TYPES,
+    });
+    const allowedIndexPatternIds = new Set(indexPatternList?.map((i) => i.id) || []);
+
     this.setState({
       IndexPatternSelect: data.ui.IndexPatternSelect,
+      allowedIndexPatternIds,
     });
   }
 
@@ -310,6 +321,7 @@ export class ListControlEditor extends PureComponent<
           onChange={this.props.handleIndexPatternChange}
           controlIndex={this.props.controlIndex}
           IndexPatternSelect={this.state.IndexPatternSelect}
+          allowedIndexPatternIds={this.state.allowedIndexPatternIds}
         />
 
         <FieldSelect

@@ -31,7 +31,6 @@
 // @ts-ignore
 import sizeMe from 'react-sizeme';
 
-import React from 'react';
 import { act } from 'react';
 import { waitFor } from '@testing-library/react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';

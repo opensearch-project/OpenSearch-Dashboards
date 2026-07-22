@@ -8,7 +8,6 @@ import {
   setQueryState,
   setQueryWithHistory,
   clearResults,
-  setActiveTab,
   setPromptModeIsAvailable,
   setSummaryAgentIsAvailable,
   clearLastExecutedData,
@@ -35,10 +34,6 @@ jest.mock('../actions/query_actions', () => ({
   executeQueries: jest.fn().mockReturnValue({ type: 'mock/executeQueries' }),
 }));
 
-jest.mock('../actions/detect_optimal_tab', () => ({
-  detectAndSetOptimalTab: jest.fn().mockReturnValue({ type: 'mock/detectOptimalTab' }),
-}));
-
 jest.mock('../actions/reset_legacy_state', () => ({
   resetLegacyStateActionCreator: jest.fn().mockReturnValue({ type: 'mock/resetLegacyState' }),
 }));
@@ -52,9 +47,10 @@ const mockedGetPromptModeIsAvailable = getPromptModeIsAvailable as jest.MockedFu
 const mockedGetSummaryAgentIsAvailable = getSummaryAgentIsAvailable as jest.MockedFunction<
   typeof getSummaryAgentIsAvailable
 >;
-const mockedResetLegacyStateActionCreator = resetLegacyStateActions.resetLegacyStateActionCreator as jest.MockedFunction<
-  typeof resetLegacyStateActions.resetLegacyStateActionCreator
->;
+const mockedResetLegacyStateActionCreator =
+  resetLegacyStateActions.resetLegacyStateActionCreator as jest.MockedFunction<
+    typeof resetLegacyStateActions.resetLegacyStateActionCreator
+  >;
 
 describe('createDatasetChangeMiddleware', () => {
   let mockServices: ReturnType<typeof createMockExploreServices>;
@@ -108,7 +104,6 @@ describe('createDatasetChangeMiddleware', () => {
     await middleware(action);
 
     // Verify the clearing actions were dispatched
-    expect(mockStore.dispatch).toHaveBeenCalledWith(setActiveTab(''));
     expect(mockStore.dispatch).toHaveBeenCalledWith(clearResults());
     expect(mockStore.dispatch).toHaveBeenCalledWith(clearQueryStatusMap());
     expect(mockStore.dispatch).toHaveBeenCalledWith(clearLastExecutedData());
@@ -139,7 +134,6 @@ describe('createDatasetChangeMiddleware', () => {
     await middleware(action);
 
     // Verify the clearing actions were dispatched
-    expect(mockStore.dispatch).toHaveBeenCalledWith(setActiveTab(''));
     expect(mockStore.dispatch).toHaveBeenCalledWith(clearResults());
     expect(mockStore.dispatch).toHaveBeenCalledWith(clearQueryStatusMap());
     expect(mockStore.dispatch).toHaveBeenCalledWith(clearLastExecutedData());
@@ -173,7 +167,6 @@ describe('createDatasetChangeMiddleware', () => {
     await middleware(setQueryState({ query: 'source=updated', language: 'PPL' }));
 
     // Verify that no clearing actions were dispatched since dataset didn't change
-    expect(mockStore.dispatch).not.toHaveBeenCalledWith(setActiveTab(''));
     expect(mockStore.dispatch).not.toHaveBeenCalledWith(clearResults());
     expect(mockStore.dispatch).not.toHaveBeenCalledWith(clearQueryStatusMap());
   });

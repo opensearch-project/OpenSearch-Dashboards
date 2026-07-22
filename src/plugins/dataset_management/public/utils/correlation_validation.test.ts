@@ -110,6 +110,7 @@ describe('correlation_validation', () => {
 
   describe('checkMissingFieldMappings', () => {
     it('should return empty array when all required fields are present', () => {
+      // @ts-expect-error TS2352 TODO(ts-error): fixme
       const dataset = {
         id: 'dataset-1',
         title: 'Test Dataset',
@@ -128,6 +129,7 @@ describe('correlation_validation', () => {
     });
 
     it('should return missing fields when some are not present', () => {
+      // @ts-expect-error TS2352 TODO(ts-error): fixme
       const dataset = {
         id: 'dataset-1',
         title: 'Test Dataset',
@@ -158,18 +160,18 @@ describe('correlation_validation', () => {
     });
 
     it('should return all required fields when schemaMappings is null', () => {
-      const dataset = ({
+      const dataset = {
         id: 'dataset-1',
         title: 'Test Dataset',
         schemaMappings: null,
-      } as any) as DataView;
+      } as any as DataView;
 
       const missing = checkMissingFieldMappings(dataset);
       expect(missing).toEqual(['traceId', 'spanId', 'serviceName', 'timestamp']);
     });
 
     it('should handle schemaMappings as JSON string', () => {
-      const dataset = ({
+      const dataset = {
         id: 'dataset-1',
         title: 'Test Dataset',
         schemaMappings: JSON.stringify({
@@ -180,24 +182,25 @@ describe('correlation_validation', () => {
             timestamp: 'timestamp',
           },
         }),
-      } as any) as DataView;
+      } as any as DataView;
 
       const missing = checkMissingFieldMappings(dataset);
       expect(missing).toEqual([]);
     });
 
     it('should return all fields when JSON parsing fails', () => {
-      const dataset = ({
+      const dataset = {
         id: 'dataset-1',
         title: 'Test Dataset',
         schemaMappings: 'invalid-json',
-      } as any) as DataView;
+      } as any as DataView;
 
       const missing = checkMissingFieldMappings(dataset);
       expect(missing).toEqual(['traceId', 'spanId', 'serviceName', 'timestamp']);
     });
 
     it('should detect empty string values as missing', () => {
+      // @ts-expect-error TS2352 TODO(ts-error): fixme
       const dataset = {
         id: 'dataset-1',
         title: 'Test Dataset',
@@ -220,6 +223,7 @@ describe('correlation_validation', () => {
 
   describe('validateFieldMappings', () => {
     it('should return valid result when all datasets have complete mappings', () => {
+      // @ts-expect-error TS2352 TODO(ts-error): fixme
       const datasets = [
         {
           id: 'dataset-1',
@@ -253,6 +257,7 @@ describe('correlation_validation', () => {
     });
 
     it('should return invalid result with errors when some datasets have missing fields', () => {
+      // @ts-expect-error TS2352 TODO(ts-error): fixme
       const datasets = [
         {
           id: 'dataset-1',
@@ -311,6 +316,7 @@ describe('correlation_validation', () => {
 
   describe('hasValidFieldMappings', () => {
     it('should return true when dataset has all required field mappings', () => {
+      // @ts-expect-error TS2352 TODO(ts-error): fixme
       const dataset = {
         id: 'dataset-1',
         title: 'Test Dataset',
@@ -328,6 +334,7 @@ describe('correlation_validation', () => {
     });
 
     it('should return false when dataset has missing field mappings', () => {
+      // @ts-expect-error TS2352 TODO(ts-error): fixme
       const dataset = {
         id: 'dataset-1',
         title: 'Test Dataset',

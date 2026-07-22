@@ -28,11 +28,20 @@
  * under the License.
  */
 
-import React, { Component } from 'react';
-import { Subscription } from 'rxjs';
-import { Comparators, EuiFlexGroup, EuiFlexItem, EuiSpacer, Query } from '@elastic/eui';
+import { Component } from 'react';
+import {
+  Comparators,
+  EuiButton,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiSpacer,
+  Query,
+} from '@elastic/eui';
 
 import { useParams } from 'react-router-dom';
+import { FormattedMessage } from '@osd/i18n/react';
 import { CallOuts } from './components/call_outs';
 import { Search } from './components/search';
 import { Form } from './components/form';
@@ -42,14 +51,21 @@ import {
   DocLinksStart,
   ToastsStart,
   ApplicationStart,
+  UserProvidedValues,
 } from '../../../../core/public/';
 import { ComponentRegistry } from '../';
 
-import { getAriaName, toEditableConfig, DEFAULT_CATEGORY } from './lib';
+import {
+  getAriaName,
+  toEditableConfig,
+  DEFAULT_CATEGORY,
+  ADMIN_CATEGORY,
+  toScopeArray,
+} from './lib';
 
 import { FieldSetting, SettingsChanges } from './types';
 import { NavigationPublicPluginStart } from '../../../../plugins/navigation/public';
-import { UiSettingScope } from '../../../../core/public';
+import { UiSettingScope, ENABLE_GLOBAL_SETTING_CONTROL } from '../../../../core/public';
 
 interface AdvancedSettingsProps {
   enableSaving: boolean;
@@ -60,6 +76,7 @@ interface AdvancedSettingsProps {
   useUpdatedUX: boolean;
   navigationUI: NavigationPublicPluginStart['ui'];
   application: ApplicationStart;
+  scope?: UiSettingScope;
 }
 
 interface AdvancedSettingsComponentProps extends AdvancedSettingsProps {
@@ -70,9 +87,25 @@ interface AdvancedSettingsState {
   footerQueryMatched: boolean;
   query: Query;
   filteredSettings: Record<string, FieldSetting[]>;
+  loading: boolean;
+  loadError: boolean;
 }
 
 type GroupedSettings = Record<string, FieldSetting[]>;
+
+const getPageScopes = (
+  scope: UiSettingScope | undefined,
+  permissionControlEnabled: boolean
+): UiSettingScope[] => {
+  if (scope) {
+    return [scope];
+  }
+  // Application page edits GLOBAL, plus DASHBOARD_ADMIN only when permission control
+  // is on. Without it there is no admin area, so skip reading the admin scope.
+  return permissionControlEnabled
+    ? [UiSettingScope.GLOBAL, UiSettingScope.DASHBOARD_ADMIN]
+    : [UiSettingScope.GLOBAL];
+};
 
 export class AdvancedSettingsComponent extends Component<
   AdvancedSettingsComponentProps,
@@ -82,7 +115,9 @@ export class AdvancedSettingsComponent extends Component<
   private groupedSettings: GroupedSettings;
   private categoryCounts: Record<string, number>;
   private categories: string[] = [];
-  private uiSettingsSubscription?: Subscription;
+  private isMounted = false;
+  private scopedUserProvided: Record<string, UserProvidedValues> = {};
+  private inheritedFromGlobal: Record<string, UserProvidedValues> = {};
 
   constructor(props: AdvancedSettingsComponentProps) {
     super(props);
@@ -97,8 +132,49 @@ export class AdvancedSettingsComponent extends Component<
       query: parsedQuery,
       footerQueryMatched: false,
       filteredSettings: this.mapSettings(Query.execute(parsedQuery, this.settings)),
+      loading: true,
+      loadError: false,
     };
   }
+
+  fetchScopedValues = async () => {
+    const { uiSettings, scope, application } = this.props;
+    const isScopedPage = scope !== undefined && scope !== UiSettingScope.GLOBAL;
+    const permissionControlEnabled =
+      !!application.capabilities.advancedSettings?.permissionControlEnabled;
+
+    const merged: Record<string, UserProvidedValues> = {};
+
+    try {
+      const [, inherited] = await Promise.all([
+        // This page's own scope layer(s) — drives the displayed value and provenance.
+        Promise.all(
+          getPageScopes(scope, permissionControlEnabled).map(async (s) => {
+            Object.assign(merged, await uiSettings.getAllUserProvidedWithScope(s));
+          })
+        ),
+        // On a scoped page, also read the GLOBAL layer so a setting with no value in
+        // this scope can show the effective value it inherits.
+        isScopedPage
+          ? uiSettings.getAllUserProvidedWithScope(UiSettingScope.GLOBAL)
+          : Promise.resolve({} as Record<string, UserProvidedValues>),
+      ]);
+
+      this.scopedUserProvided = merged;
+      this.inheritedFromGlobal = inherited;
+      if (!this.isMounted) return;
+
+      this.init(this.props.uiSettings);
+      this.setState((state) => ({
+        filteredSettings: this.mapSettings(Query.execute(state.query, this.settings)),
+        loading: false,
+        loadError: false,
+      }));
+    } catch (e) {
+      if (!this.isMounted) return;
+      this.setState({ loading: false, loadError: true });
+    }
+  };
 
   init(config: IUiSettingsClient) {
     this.settings = this.initSettings(config);
@@ -111,6 +187,9 @@ export class AdvancedSettingsComponent extends Component<
   initGroupedSettings = this.mapSettings;
   initCategories(groupedSettings: GroupedSettings) {
     return Object.keys(groupedSettings).sort((a, b) => {
+      // Admin settings come first, then the default "general" category.
+      if (a === ADMIN_CATEGORY) return -1;
+      if (b === ADMIN_CATEGORY) return 1;
       if (a === DEFAULT_CATEGORY) return -1;
       if (b === DEFAULT_CATEGORY) return 1;
       if (a > b) return 1;
@@ -128,13 +207,8 @@ export class AdvancedSettingsComponent extends Component<
   }
 
   componentDidMount() {
-    this.uiSettingsSubscription = this.props.uiSettings.getUpdate$().subscribe(() => {
-      const { query } = this.state;
-      this.init(this.props.uiSettings);
-      this.setState({
-        filteredSettings: this.mapSettings(Query.execute(query, this.settings)),
-      });
-    });
+    this.isMounted = true;
+    this.fetchScopedValues();
 
     // scrolls to setting provided in the URL hash
     const { hash } = window.location;
@@ -164,46 +238,82 @@ export class AdvancedSettingsComponent extends Component<
   }
 
   componentWillUnmount() {
-    if (this.uiSettingsSubscription) {
-      this.uiSettingsSubscription.unsubscribe();
-    }
+    this.isMounted = false;
   }
 
   mapConfig(config: IUiSettingsClient) {
     const all = config.getAll();
     const userSettingsEnabled = config.get('theme:enableUserControl');
-    const isDashboardAdmin = !!this.props.application.capabilities.dashboards?.isDashboardAdmin;
+    const isDashboardAdmin =
+      this.props.application.capabilities.dashboards?.isDashboardAdmin !== false;
+    const pageScope = this.props.scope;
+    // Values stored in this page's own scope(s).
+    const pageScopeValues = this.scopedUserProvided;
+
+    // Effective "restrict global settings to admins" flag: an explicit admin toggle
+    // is the source of truth, else fall back to the legacy globalScopeEditable.
+    const permissionControlEnabled =
+      !!this.props.application.capabilities.advancedSettings?.permissionControlEnabled;
+    const adminToggleValue = pageScopeValues[ENABLE_GLOBAL_SETTING_CONTROL]?.userValue;
+    const globalScopeEditable = this.props.application.capabilities.globalScopeEditable?.enabled as
+      boolean | undefined;
+    const restrictGlobalToAdmins =
+      permissionControlEnabled &&
+      (adminToggleValue !== undefined ? !!adminToggleValue : globalScopeEditable === false);
+
+    // A setting belongs on a page when its registered scope matches: the Application
+    // page shows GLOBAL/DASHBOARD_ADMIN (unscoped counts as GLOBAL); a scoped page
+    // shows only its own scope.
+    const belongsToScope = (setting: { scope?: UiSettingScope | UiSettingScope[] }) => {
+      const scopes = toScopeArray(setting.scope);
+      if (pageScope) {
+        return scopes.includes(pageScope);
+      }
+      return (
+        scopes.includes(UiSettingScope.GLOBAL) || scopes.includes(UiSettingScope.DASHBOARD_ADMIN)
+      );
+    };
 
     return Object.entries(all)
-      .filter(([, setting]) => {
-        const scope = setting.scope;
-        // if scope is not defined, then it's a global ui setting
-        if (!scope) {
-          return true;
+      .filter(([, setting]) => belongsToScope(setting))
+      .map(([key, def]) => {
+        const pageScopeValue = pageScopeValues[key];
+        const isOverridden = config.isOverridden(key);
+        const hasStoredValue = pageScopeValue?.userValue !== undefined;
+        // The value inherited from the Application (global) scope on a scoped page.
+        const inheritedValue = this.inheritedFromGlobal[key]?.userValue;
+
+        // Displayed value: this scope's stored value, else the inherited global value
+        // , else the code default.
+        let displayedValue = hasStoredValue
+          ? pageScopeValue.userValue
+          : (inheritedValue ?? undefined);
+        // The global-control toggle has no stored value until an admin sets it; show
+        // its effective (dynamic-config-derived) value so an upgraded deployment
+        // reflects the pre-existing state instead of the code default (off).
+        if (key === ENABLE_GLOBAL_SETTING_CONTROL && !hasStoredValue) {
+          displayedValue = restrictGlobalToAdmins;
         }
 
-        if (typeof scope === 'string') {
-          return scope === UiSettingScope.GLOBAL || scope === UiSettingScope.DASHBOARD_ADMIN;
-        }
+        // DASHBOARD_ADMIN settings are always admin-only. GLOBAL settings are too while
+        // restriction is on — but only on the Application page (which edits GLOBAL); a
+        // GLOBAL+USER setting edited on a scoped page touches its own scope, not GLOBAL.
+        const scopes = toScopeArray(def.scope);
+        const globalLocked =
+          !pageScope && restrictGlobalToAdmins && scopes.includes(UiSettingScope.GLOBAL);
+        const isPermissionControlled =
+          (scopes.includes(UiSettingScope.DASHBOARD_ADMIN) || globalLocked) && !isDashboardAdmin;
 
-        if (Array.isArray(scope)) {
-          return (
-            scope.includes(UiSettingScope.GLOBAL) || scope.includes(UiSettingScope.DASHBOARD_ADMIN)
-          );
-        }
-
-        return false;
-      })
-      .map((setting) => {
         return toEditableConfig({
-          def: setting[1],
-          name: setting[0],
-          value: setting[1].userValue,
-          isCustom: config.isCustom(setting[0]),
-          isOverridden: config.isOverridden(setting[0]),
-          isPermissionControlled:
-            all[setting[0]].scope === UiSettingScope.DASHBOARD_ADMIN && !isDashboardAdmin,
+          def,
+          name: key,
+          value: displayedValue,
+          isCustom: config.isCustom(key),
+          isOverridden,
+          isPermissionControlled,
           userSettingsEnabled,
+          isUserProvided: pageScope ? hasStoredValue && !isOverridden : undefined,
+          inheritedValue: pageScope ? inheritedValue : undefined,
         });
       })
       .filter((c) => !c.readonly)
@@ -243,21 +353,62 @@ export class AdvancedSettingsComponent extends Component<
   };
 
   saveConfig = async (changes: SettingsChanges) => {
-    const arr = Object.entries(changes).map(([key, value]) =>
-      this.props.uiSettings.set(key, value)
-    );
-    return Promise.all(arr);
+    const { uiSettings, scope } = this.props;
+    const all = uiSettings.getAll();
+    const arr = Object.entries(changes).map(([key, value]) => {
+      // Always write with an explicit scope so the value lands in the exact layer
+      // this page edits (and so the client's merged-cache "unchanged" de-dup never
+      // suppresses the request). On a dedicated page that is the page scope; on the
+      // Application page it is DASHBOARD_ADMIN for admin settings, otherwise GLOBAL.
+      let effectiveScope = scope;
+      if (!effectiveScope) {
+        const scopes = toScopeArray(all[key]?.scope);
+        effectiveScope = scopes.includes(UiSettingScope.DASHBOARD_ADMIN)
+          ? UiSettingScope.DASHBOARD_ADMIN
+          : UiSettingScope.GLOBAL;
+      }
+      return uiSettings.set(key, value, effectiveScope);
+    });
+    const results = await Promise.all(arr);
+
+    Object.keys(changes).forEach((key, i) => {
+      // Write failed show the last persisted state.
+      if (!results[i]) {
+        return;
+      }
+      // A null value clears the key (back to inherited); any other value stores it.
+      if (changes[key] === null || changes[key] === undefined) {
+        delete this.scopedUserProvided[key];
+      } else {
+        this.scopedUserProvided[key] = {
+          ...this.scopedUserProvided[key],
+          userValue: changes[key],
+        };
+      }
+    });
+
+    // Re-render from the freshly folded scoped values / rolled-back client cache so the
+    // displayed value stays truthful for both the succeeded and failed keys.
+    this.init(this.props.uiSettings);
+    this.setState((state) => ({
+      filteredSettings: this.mapSettings(Query.execute(state.query, this.settings)),
+    }));
+
+    return results;
   };
 
   render() {
-    const { filteredSettings, query, footerQueryMatched } = this.state;
-    const componentRegistry = this.props.componentRegistry;
+    const { filteredSettings, query, footerQueryMatched, loading } = this.state;
+    const { componentRegistry, scope } = this.props;
 
     const PageTitle = componentRegistry.get(componentRegistry.componentType.PAGE_TITLE_COMPONENT);
     const PageSubtitle = componentRegistry.get(
       componentRegistry.componentType.PAGE_SUBTITLE_COMPONENT
     );
     const PageFooter = componentRegistry.get(componentRegistry.componentType.PAGE_FOOTER_COMPONENT);
+
+    // Only show caution in application setting page.
+    const showCallOuts = scope === undefined;
 
     const renderHeader = () => {
       if (!this.props.useUpdatedUX) {
@@ -277,22 +428,28 @@ export class AdvancedSettingsComponent extends Component<
             </EuiFlexGroup>
             <PageSubtitle />
             <EuiSpacer size="m" />
-            <CallOuts />
-            <EuiSpacer size="m" />
+            {showCallOuts && (
+              <>
+                <CallOuts />
+                <EuiSpacer size="m" />
+              </>
+            )}
           </>
         );
       } else {
         const { HeaderControl } = this.props.navigationUI;
         return (
           <>
-            <HeaderControl
-              setMountPoint={this.props.application.setAppBottomControls}
-              controls={[
-                {
-                  renderComponent: <CallOuts />,
-                },
-              ]}
-            />
+            {showCallOuts && (
+              <HeaderControl
+                setMountPoint={this.props.application.setAppBottomControls}
+                controls={[
+                  {
+                    renderComponent: <CallOuts />,
+                  },
+                ]}
+              />
+            )}
             <Search query={query} categories={this.categories} onQueryChange={this.onQueryChange} />
             <EuiSpacer size="s" />
           </>
@@ -303,26 +460,73 @@ export class AdvancedSettingsComponent extends Component<
     return (
       <div>
         {renderHeader()}
-        <AdvancedSettingsVoiceAnnouncement queryText={query.text} settings={filteredSettings} />
+        {loading ? (
+          <EuiFlexGroup justifyContent="center" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiSpacer size="xxl" />
+              <EuiLoadingSpinner size="xl" data-test-subj="advancedSettingsLoading" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : this.state.loadError ? (
+          <EuiEmptyPrompt
+            iconType="alert"
+            iconColor="danger"
+            data-test-subj="advancedSettingsLoadError"
+            title={
+              <h2>
+                <FormattedMessage
+                  id="advancedSettings.loadErrorTitle"
+                  defaultMessage="Unable to load settings"
+                />
+              </h2>
+            }
+            body={
+              <p>
+                <FormattedMessage
+                  id="advancedSettings.loadErrorDescription"
+                  defaultMessage="Something went wrong while loading settings. Reload the page to try again."
+                />
+              </p>
+            }
+            actions={
+              <EuiButton
+                color="primary"
+                fill
+                onClick={() => window.location.reload()}
+                data-test-subj="advancedSettingsReload"
+              >
+                <FormattedMessage
+                  id="advancedSettings.loadErrorReloadButton"
+                  defaultMessage="Reload page"
+                />
+              </EuiButton>
+            }
+          />
+        ) : (
+          <>
+            <AdvancedSettingsVoiceAnnouncement queryText={query.text} settings={filteredSettings} />
 
-        <Form
-          settings={this.groupedSettings}
-          visibleSettings={filteredSettings}
-          categories={this.categories}
-          categoryCounts={this.categoryCounts}
-          clearQuery={this.clearQuery}
-          save={this.saveConfig}
-          showNoResultsMessage={!footerQueryMatched}
-          enableSaving={this.props.enableSaving}
-          dockLinks={this.props.dockLinks}
-          toasts={this.props.toasts}
-        />
-        <PageFooter
-          toasts={this.props.toasts}
-          query={query}
-          onQueryMatchChange={this.onFooterQueryMatchChange}
-          enableSaving={this.props.enableSaving}
-        />
+            <Form
+              settings={this.groupedSettings}
+              visibleSettings={filteredSettings}
+              categories={this.categories}
+              categoryCounts={this.categoryCounts}
+              clearQuery={this.clearQuery}
+              save={this.saveConfig}
+              showNoResultsMessage={!footerQueryMatched}
+              enableSaving={this.props.enableSaving}
+              dockLinks={this.props.dockLinks}
+              toasts={this.props.toasts}
+              pageScope={scope}
+            />
+            <PageFooter
+              toasts={this.props.toasts}
+              query={query}
+              onQueryMatchChange={this.onFooterQueryMatchChange}
+              enableSaving={this.props.enableSaving}
+            />
+          </>
+        )}
       </div>
     );
   }
@@ -341,6 +545,7 @@ export const AdvancedSettings = (props: AdvancedSettingsProps) => {
       useUpdatedUX={props.useUpdatedUX}
       navigationUI={props.navigationUI}
       application={props.application}
+      scope={props.scope}
     />
   );
 };

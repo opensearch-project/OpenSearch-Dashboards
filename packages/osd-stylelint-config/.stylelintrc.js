@@ -10,39 +10,37 @@
  */
 
 module.exports = {
-  plugins: [
-    '@osd/stylelint-plugin-stylelint',
-  ],
+  plugins: ['@osd/stylelint-plugin-stylelint'],
 
   rules: {
     '@osd/stylelint/no_modifying_global_selectors': [
       {
-        config: "./../../../osd-stylelint-config/config/global_selectors.json"
+        config: './../../../osd-stylelint-config/config/global_selectors.json',
       },
       {
-        severity: "error"
-      }
+        severity: 'error',
+      },
     ],
     '@osd/stylelint/no_custom_colors': [
       {
-        config: './../../../osd-stylelint-config/config/colors.json'
+        config: './../../../osd-stylelint-config/config/colors.json',
       },
     ],
     '@osd/stylelint/no_restricted_properties': [
       {
-        config: "./../../../osd-stylelint-config/config/restricted_properties.json"
+        config: './../../../osd-stylelint-config/config/restricted_properties.json',
       },
       {
-        severity: "error"
-      }
+        severity: 'error',
+      },
     ],
     '@osd/stylelint/no_restricted_values': [
       {
-        config: "./../../../osd-stylelint-config/config/restricted_values.json"
+        config: './../../../osd-stylelint-config/config/restricted_values.json',
       },
       {
-        severity: "error"
-      }
+        severity: 'error',
+      },
     ],
-  }
-}
+  },
+};

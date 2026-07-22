@@ -5,7 +5,7 @@
 
 import { configure, mount, shallow } from 'enzyme';
 import Adapter from '@cfaester/enzyme-adapter-react-18';
-import React from 'react';
+
 import { waitFor } from '@testing-library/react';
 import moment from 'moment';
 import {
@@ -161,7 +161,7 @@ describe('Integration Setup Inputs', () => {
       // Find and trigger the switch onChange to enable "no limit"
       const switchComponent = wrapper.find('EuiSwitch');
       expect(switchComponent.exists()).toBe(true);
-      const onChangeHandler = (switchComponent.prop('onChange') as unknown) as (e: {
+      const onChangeHandler = switchComponent.prop('onChange') as unknown as (e: {
         target: { checked: boolean };
       }) => void;
       onChangeHandler({ target: { checked: true } });
@@ -184,7 +184,7 @@ describe('Integration Setup Inputs', () => {
       // Find and trigger the switch onChange to disable "no limit"
       const switchComponent = wrapper.find('EuiSwitch');
       expect(switchComponent.exists()).toBe(true);
-      const onChangeHandler = (switchComponent.prop('onChange') as unknown) as (e: {
+      const onChangeHandler = switchComponent.prop('onChange') as unknown as (e: {
         target: { checked: boolean };
       }) => void;
       onChangeHandler({ target: { checked: false } });
@@ -238,7 +238,7 @@ describe('Integration Setup Inputs', () => {
 
       // Simulate selecting a date 14 days ago by calling the onChange prop directly
       const selectedDate = moment().subtract(14, 'days');
-      const onChangeHandler = (datePicker.prop('onChange') as unknown) as (
+      const onChangeHandler = datePicker.prop('onChange') as unknown as (
         date: moment.Moment | null
       ) => void;
       onChangeHandler(selectedDate);

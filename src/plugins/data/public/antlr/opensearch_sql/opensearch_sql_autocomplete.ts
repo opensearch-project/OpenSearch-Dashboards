@@ -32,6 +32,7 @@ import {
 import { shouldSuggestTemplates } from './parse';
 import { removePotentialBackticks } from '../shared/utils';
 
+// @ts-expect-error TS2741 TODO(ts-error): fixme
 const tokenDictionary: TokenDictionary = {
   SPACE: OpenSearchSQLParser.SPACE,
   FROM: OpenSearchSQLParser.FROM,
@@ -87,7 +88,8 @@ const rulesToVisit = new Set([
 
 class OpenSearchSqlSymbolTableVisitor
   extends OpenSearchSQLParserVisitor<{}>
-  implements ISymbolTableVisitor {
+  implements ISymbolTableVisitor
+{
   symbolTable: c3.SymbolTable;
   scope: c3.ScopedSymbol;
 

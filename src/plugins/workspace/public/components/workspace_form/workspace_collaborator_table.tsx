@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiSearchBarProps,
   EuiBasicTableColumn,
@@ -39,6 +39,8 @@ import { BackgroundPic } from '../../assets/background_pic';
 
 export type PermissionSetting = Pick<WorkspacePermissionSetting, 'id'> &
   Partial<WorkspacePermissionSetting>;
+
+const MAX_IDS_PER_REQUEST = 1000;
 
 // TODO: Update PermissionModeId to align with WorkspaceCollaboratorAccessLevel
 const permissionModeId2WorkspaceAccessLevelMap: {
@@ -150,6 +152,7 @@ interface Props {
 type PermissionSettingWithAccessLevelAndDisplayedType = PermissionSetting & {
   accessLevel?: string;
   displayedType?: string;
+  name?: string;
 };
 
 export const WorkspaceCollaboratorTable = ({
@@ -160,8 +163,91 @@ export const WorkspaceCollaboratorTable = ({
   const [selection, setSelection] = useState<PermissionSetting[]>([]);
   const {
     overlays,
-    services: { notifications },
+    services: { notifications, http },
   } = useOpenSearchDashboards();
+  const [idToAttributesMap, setIdToAttributesMap] = useState<
+    Record<string, { name: string; alias?: string }>
+  >({});
+  const idToAttributesMapRef = useRef(idToAttributesMap);
+  idToAttributesMapRef.current = idToAttributesMap;
+
+  useEffect(() => {
+    if (!http) return;
+    const abortController = new AbortController();
+    const fetchNames = async () => {
+      // Group collaborator IDs by (source, type) from their matching WorkspaceCollaboratorType
+      const groupMap = new Map<string, { source: string; type: string; ids: string[] }>();
+      const keysWithNewId = new Set<string>();
+      permissionSettings.forEach((setting) => {
+        if (!isWorkspacePermissionSetting(setting)) return;
+        const collaborator = convertPermissionSettingToWorkspaceCollaborator(setting);
+        // Find the collaborator type that owns this collaborator and has identitySource
+        const collaboratorType = displayedCollaboratorTypes.find(
+          (ct) => ct.identitySource && ct.getDisplayedType?.(collaborator)
+        );
+        const identitySource = collaboratorType?.identitySource;
+        if (!identitySource) return;
+        const key = `${identitySource.source}__${identitySource.type}`;
+        const id =
+          setting.type === WorkspacePermissionItemType.User ? setting.userId : setting.group;
+        if (!id) return;
+        if (!(id in idToAttributesMapRef.current)) keysWithNewId.add(key);
+        if (!groupMap.has(key)) {
+          groupMap.set(key, { ...identitySource, ids: [] });
+        }
+        groupMap.get(key)!.ids.push(id);
+      });
+
+      if (keysWithNewId.size === 0) return;
+
+      const newMap: Record<string, { name: string; alias?: string }> = {
+        ...idToAttributesMapRef.current,
+      };
+      await Promise.all(
+        Array.from(groupMap.entries())
+          .filter(([key]) => keysWithNewId.has(key))
+          .map(async ([, { source, type, ids }]) => {
+            const newIds = ids.filter((id) => !(id in idToAttributesMapRef.current));
+            try {
+              for (let i = 0; i < newIds.length; i += MAX_IDS_PER_REQUEST) {
+                const slice = newIds.slice(i, i + MAX_IDS_PER_REQUEST);
+                const resp = await http.post<Array<{ id: string; name: string; alias?: string }>>(
+                  '/api/security/identity/_entries',
+                  {
+                    body: JSON.stringify({ source, type, ids: slice }),
+                    signal: abortController.signal,
+                  }
+                );
+                resp?.forEach(({ id, name, alias }) => {
+                  newMap[id] = { name, alias };
+                });
+                // Mark requested IDs not returned by the API as sentinel to avoid re-fetching
+                slice.forEach((id) => {
+                  if (!(id in newMap)) newMap[id] = { name: '' };
+                });
+              }
+            } catch (e) {
+              if ((e as Error).name !== 'AbortError') {
+                const detail = (e as any)?.body?.message;
+                notifications?.toasts?.addDanger(
+                  detail
+                    ? i18n.translate('workspace.collaborator.table.fetchNames.errorWithDetail', {
+                        defaultMessage: 'Failed to load collaborator names: {detail}',
+                        values: { detail },
+                      })
+                    : i18n.translate('workspace.collaborator.table.fetchNames.error', {
+                        defaultMessage: 'Failed to load collaborator names.',
+                      })
+                );
+              }
+            }
+          })
+      );
+      if (!abortController.signal.aborted) setIdToAttributesMap(newMap);
+    };
+    fetchNames();
+    return () => abortController.abort();
+  }, [permissionSettings, displayedCollaboratorTypes, http, notifications?.toasts]);
 
   const items: PermissionSettingWithAccessLevelAndDisplayedType[] = useMemo(() => {
     return permissionSettings
@@ -181,21 +267,23 @@ export const WorkspaceCollaboratorTable = ({
         };
         // Unique primary key and filter null value
         if (setting.type === WorkspacePermissionItemType.User) {
+          const entry = setting.userId ? idToAttributesMap[setting.userId] : undefined;
           return {
             ...basicSettings,
-            // Id represents the index of the permission setting in the array, will use primaryId for displayed id
             primaryId: setting.userId,
+            name: entry ? (entry.alias ? `${entry.name} (${entry.alias})` : entry.name) : undefined,
           };
         } else if (setting.type === WorkspacePermissionItemType.Group) {
           return {
             ...basicSettings,
             primaryId: setting.group,
+            name: setting.group ? idToAttributesMap[setting.group]?.name : undefined,
           };
         }
         return basicSettings;
       })
       .filter((item) => !(item.type === WorkspacePermissionItemType.User && item.userId === '*'));
-  }, [permissionSettings, displayedCollaboratorTypes]);
+  }, [permissionSettings, displayedCollaboratorTypes, idToAttributesMap]);
 
   const adminCollaboratorsNum = useMemo(() => {
     const admins = items.filter((item) => item.accessLevel === WORKSPACE_ACCESS_LEVEL_NAMES.admin);
@@ -428,7 +516,15 @@ export const WorkspaceCollaboratorTable = ({
       name: i18n.translate('workspace.collaborator.id.name', {
         defaultMessage: 'ID',
       }),
-      width: '30%',
+      width: '25%',
+    },
+    {
+      field: 'name',
+      name: i18n.translate('workspace.collaborator.name.name', {
+        defaultMessage: 'Name',
+      }),
+      render: (name: string) => name || <>&mdash;</>,
+      width: '25%',
     },
     {
       field: 'displayedType',
@@ -436,7 +532,7 @@ export const WorkspaceCollaboratorTable = ({
         defaultMessage: 'Type',
       }),
       render: (displayedType: string) => displayedType || <>&mdash;</>,
-      width: '30%',
+      width: '25%',
     },
     {
       field: 'accessLevel',
@@ -444,7 +540,7 @@ export const WorkspaceCollaboratorTable = ({
         defaultMessage: 'Access level',
       }),
       render: (accessLevel: string) => accessLevel || <>&mdash;</>,
-      width: '30%',
+      width: '15%',
     },
     {
       name: i18n.translate('workspace.collaborator.actions.name', {
@@ -520,9 +616,9 @@ const Actions = ({
     services: { notifications },
   } = useOpenSearchDashboards();
 
-  const accessLevelOptions = (Object.keys(
-    WORKSPACE_ACCESS_LEVEL_NAMES
-  ) as WorkspaceCollaboratorAccessLevel[]).map((level) => ({
+  const accessLevelOptions = (
+    Object.keys(WORKSPACE_ACCESS_LEVEL_NAMES) as WorkspaceCollaboratorAccessLevel[]
+  ).map((level) => ({
     name: WORKSPACE_ACCESS_LEVEL_NAMES[level],
     onClick: () => {
       setIsPopoverOpen(false);
@@ -571,7 +667,7 @@ const Actions = ({
     icon: '',
   }));
 
-  const panelItems = ([
+  const panelItems = [
     {
       id: 0,
       items: [
@@ -624,7 +720,7 @@ const Actions = ({
       }),
       items: accessLevelOptions,
     },
-  ] as unknown) as EuiContextMenuPanelDescriptor[];
+  ] as unknown as EuiContextMenuPanelDescriptor[];
 
   const button = isTableAction ? (
     <EuiButtonIcon

@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import moment from 'moment';
 import { PatternsFlyoutEventTable } from './patterns_flyout_event_table';
@@ -96,12 +95,8 @@ describe('PatternsFlyoutEventTable', () => {
     jest.clearAllMocks();
 
     (useSelector as jest.Mock).mockImplementation((selector) => {
-      const {
-        selectDataset,
-        selectQuery,
-        selectPatternsField,
-        selectUsingRegexPatterns,
-      } = jest.requireActual('../../../application/utils/state_management/selectors');
+      const { selectDataset, selectQuery, selectPatternsField, selectUsingRegexPatterns } =
+        jest.requireActual('../../../application/utils/state_management/selectors');
 
       if (selector === selectDataset) return mockDataset;
       if (selector === selectQuery) return mockQuery;
@@ -280,12 +275,8 @@ describe('PatternsFlyoutEventTable', () => {
     mockServices.data.search.searchSource.create.mockResolvedValue(mockSearchSourceInstance);
 
     (useSelector as jest.Mock).mockImplementation((selector) => {
-      const {
-        selectDataset,
-        selectQuery,
-        selectPatternsField,
-        selectUsingRegexPatterns,
-      } = jest.requireActual('../../../application/utils/state_management/selectors');
+      const { selectDataset, selectQuery, selectPatternsField, selectUsingRegexPatterns } =
+        jest.requireActual('../../../application/utils/state_management/selectors');
 
       if (selector === selectDataset) return mockDatasetWithoutTimeField;
       if (selector === selectQuery) return mockQuery;

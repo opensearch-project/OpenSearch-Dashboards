@@ -33,9 +33,12 @@ const rule = require('./require_license_header');
 const dedent = require('dedent');
 
 const ruleTester = new RuleTester({
-  parser: require.resolve('babel-eslint'),
-  parserOptions: {
-    ecmaVersion: 2015,
+  languageOptions: {
+    parser: require('@babel/eslint-parser'),
+    parserOptions: {
+      ecmaVersion: 2015,
+      requireConfigFile: false,
+    },
   },
 });
 
@@ -68,6 +71,19 @@ ruleTester.run('@osd/eslint/require-license-header', rule, {
       `,
 
       options: [{ licenses: ['/* license 1 */', '/* license 2 */'] }],
+    },
+
+    // jest docblock pragma before the license header is allowed
+    {
+      code: dedent`
+        /** @jest-environment node */
+
+        /* license */
+
+        console.log('foo')
+      `,
+
+      options: [{ licenses: ['/* license */'] }],
     },
   ],
 
@@ -265,6 +281,30 @@ ruleTester.run('@osd/eslint/require-license-header', rule, {
 
             console.log('foo')
           `,
+    },
+
+    // missing license when a jest docblock is present — fix must insert after the docblock
+    {
+      code: dedent`
+        /** @jest-environment node */
+
+        console.log('foo')
+      `,
+
+      options: [{ licenses: ['/* license */'] }],
+      errors: [
+        {
+          message: 'File must start with a license header',
+        },
+      ],
+
+      output: dedent`
+        /** @jest-environment node */
+
+        /* license */
+
+        console.log('foo')
+      `,
     },
   ],
 });

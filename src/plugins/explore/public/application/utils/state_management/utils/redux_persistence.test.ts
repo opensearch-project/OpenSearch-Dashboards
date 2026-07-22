@@ -99,6 +99,7 @@ describe('redux_persistence', () => {
           language: 'PPL',
           dataset: { id: 'test-dataset', title: 'test-dataset', type: 'INDEX_PATTERN' },
         },
+        // @ts-expect-error TS2741 TODO(ts-error): fixme
         ui: {
           activeTabId: '',
           showHistogram: true,
@@ -120,6 +121,7 @@ describe('redux_persistence', () => {
           savedQuery: undefined,
           lineCount: undefined,
         },
+        // @ts-expect-error TS2741 TODO(ts-error): fixme
         queryEditor: {
           queryStatusMap: {},
           overallQueryStatus: {

@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import { ScriptingHelpFlyout } from './help_flyout';
@@ -26,7 +26,7 @@ describe('ScriptingHelpFlyout', () => {
         isVisible={true}
         dataset={indexPatternMock}
         lang="painless"
-        executeScript={((() => {}) as unknown) as ExecuteScript}
+        executeScript={(() => {}) as unknown as ExecuteScript}
         onClose={() => {}}
       />
     );
@@ -40,7 +40,7 @@ describe('ScriptingHelpFlyout', () => {
         isVisible={true}
         dataset={indexPatternMock}
         lang="painless"
-        executeScript={((() => {}) as unknown) as ExecuteScript}
+        executeScript={(() => {}) as unknown as ExecuteScript}
         onClose={() => {}}
       />
     );

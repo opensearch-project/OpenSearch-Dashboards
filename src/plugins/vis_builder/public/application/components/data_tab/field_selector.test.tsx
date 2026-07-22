@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { FilterManager, IndexPatternField } from '../../../../../data/public';
 import { FieldGroup } from './field_selector';

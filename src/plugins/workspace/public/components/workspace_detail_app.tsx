@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { I18nProvider } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
 import { AppMountParameters, CoreStart } from 'opensearch-dashboards/public';
@@ -55,9 +55,8 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailPropsWithOnAppLeave) =>
       http,
     },
   } = useOpenSearchDashboards<{ CoreStart: CoreStart; workspaceClient: WorkspaceClient }>();
-  const [currentWorkspaceFormData, setCurrentWorkspaceFormData] = useState<
-    WorkspaceFormSubmitData
-  >();
+  const [currentWorkspaceFormData, setCurrentWorkspaceFormData] =
+    useState<WorkspaceFormSubmitData>();
   const currentWorkspace = useObservable(workspaces ? workspaces.currentWorkspace$ : of(null));
   const availableUseCases = useObservable(props.registeredUseCases$, []);
   const isPermissionEnabled = application?.capabilities.workspaces.permissionEnabled;

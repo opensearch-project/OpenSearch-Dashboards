@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { DatasetSelectWidget } from './dataset_select';
 import { SaveQueryButton } from './save_query';
 import { RecentQueriesButton } from './recent_queries_button';
@@ -14,17 +13,21 @@ import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_re
 // @ts-ignore - allow side-effect scss import without type declarations
 import './query_panel_widgets.scss';
 import { AskAIButton } from './ask_ai_button';
+import { useFlavorId } from '../../../helpers/use_flavor_id';
+import { ExploreFlavor } from '../../../../common';
 
 export const QueryPanelWidgets = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const { queryPanelActionsRegistry } = services;
+  const flavorId = useFlavorId();
+  const isMetrics = flavorId === ExploreFlavor.Metrics;
 
   return (
     <div className="exploreQueryPanelWidgets">
       {/* Left Section */}
       <div className="exploreQueryPanelWidgets__left">
         <LanguageToggle />
-        <DatasetSelectWidget />
+        {!isMetrics && <DatasetSelectWidget />}
         <div className="exploreQueryPanelWidgets__verticalSeparator" />
         <RecentQueriesButton />
         <div className="exploreQueryPanelWidgets__verticalSeparator" />

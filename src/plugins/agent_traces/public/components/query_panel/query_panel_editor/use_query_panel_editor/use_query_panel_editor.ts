@@ -252,18 +252,18 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
   );
 
   const suggestionProvider = useMemo(() => {
-    const languageTriggerCharacters = services?.data?.autocomplete?.getTriggerCharacters(
-      queryLanguage
-    );
+    const languageTriggerCharacters =
+      services?.data?.autocomplete?.getTriggerCharacters(queryLanguage);
     return {
       triggerCharacters: isPromptMode
         ? ['=']
-        : languageTriggerCharacters ?? DEFAULT_TRIGGER_CHARACTERS,
+        : (languageTriggerCharacters ?? DEFAULT_TRIGGER_CHARACTERS),
       provideCompletionItems,
     };
   }, [isPromptMode, provideCompletionItems, queryLanguage, services]);
 
   const handleRun = useCallback(() => {
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     dispatch(onEditorRunActionCreator(services, editorTextRef.current));
   }, [dispatch, services]);
 
@@ -307,7 +307,13 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
 
       editor.onDidContentSizeChange(() => {
         const contentHeight = editor.getContentHeight();
-        const maxHeight = 100;
+        // Read the resizable panel's allocated height rather than the editor's
+        // immediate parent, which may have been pushed taller by content.
+        const domNode = editor.getDomNode();
+        const panelEl = domNode?.closest('.exploreResizableQueryContainer__queryPanel');
+        const containerHeight =
+          panelEl?.clientHeight ?? domNode?.parentElement?.clientHeight ?? 100;
+        const maxHeight = Math.max(containerHeight, 36);
         const finalHeight = Math.min(contentHeight, maxHeight);
 
         editor.layout({

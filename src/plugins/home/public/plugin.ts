@@ -97,14 +97,12 @@ export interface HomePluginSetupDependencies {
   contentManagement: ContentManagementPluginSetup;
 }
 
-export class HomePublicPlugin
-  implements
-    Plugin<
-      HomePublicPluginSetup,
-      HomePublicPluginStart,
-      HomePluginSetupDependencies,
-      HomePluginStartDependencies
-    > {
+export class HomePublicPlugin implements Plugin<
+  HomePublicPluginSetup,
+  HomePublicPluginStart,
+  HomePluginSetupDependencies,
+  HomePluginStartDependencies
+> {
   private readonly featuresCatalogueRegistry = new FeatureCatalogueRegistry();
   private readonly environmentService = new EnvironmentService();
   private readonly tutorialService = new TutorialService();
@@ -195,10 +193,8 @@ export class HomePublicPlugin
         id: SEARCH_OVERVIEW_PAGE_ID,
         title: 'Overview',
         mount: async (params: AppMountParameters) => {
-          const [
-            coreStart,
-            { contentManagement: contentManagementStart, navigation },
-          ] = await core.getStartServices();
+          const [coreStart, { contentManagement: contentManagementStart, navigation }] =
+            await core.getStartServices();
           setCommonService();
 
           const { renderSearchUseCaseOverviewApp } = await import('./application');
@@ -216,6 +212,7 @@ export class HomePublicPlugin
         {
           id: SEARCH_OVERVIEW_PAGE_ID,
           order: -1,
+          euiIconType: 'home',
         },
       ]);
 
@@ -224,6 +221,7 @@ export class HomePublicPlugin
         {
           id: SEARCH_OVERVIEW_PAGE_ID,
           order: -1,
+          euiIconType: 'home',
           category: {
             id: DEFAULT_NAV_GROUPS.search.id,
             label: DEFAULT_NAV_GROUPS.search.title,
@@ -264,7 +262,7 @@ export class HomePublicPlugin
     core.getStartServices().then(([coreStart]) => {
       if (!coreStart.application.capabilities.workspaces.enabled) {
         core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.settingsAndSetup, [
-          { id: IMPORT_SAMPLE_DATA_APP_ID },
+          { id: IMPORT_SAMPLE_DATA_APP_ID, euiIconType: 'importAction' },
         ]);
       }
     });

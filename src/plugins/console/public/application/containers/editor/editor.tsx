@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useCallback, memo, useEffect } from 'react';
+import { useCallback, memo, useEffect } from 'react';
 import { debounce } from 'lodash';
 import { EuiProgress } from '@elastic/eui';
 

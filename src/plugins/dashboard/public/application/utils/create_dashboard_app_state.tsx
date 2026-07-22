@@ -15,11 +15,13 @@ import {
   DashboardAppStateTransitions,
   DashboardAppStateInUrl,
   DashboardServices,
+  DashboardVariableUrlState,
 } from '../../types';
 import { ViewMode } from '../../../../embeddable/public';
 import { getDashboardIdFromUrl } from '../utils';
 import { syncQueryStateWithUrl } from '../../../../data/public';
 import { SavedObjectDashboard } from '../../saved_dashboards';
+import { Variable } from '../../variables/types';
 
 const APP_STATE_STORAGE_KEY = '_a';
 
@@ -36,7 +38,7 @@ export const createDashboardGlobalAndAppState = ({
   services,
   savedDashboardInstance,
 }: Arguments) => {
-  const urlState = osdUrlStateStorage.get<DashboardAppState>(APP_STATE_STORAGE_KEY);
+  const urlState = osdUrlStateStorage.get<DashboardAppStateInUrl>(APP_STATE_STORAGE_KEY);
   const {
     opensearchDashboardsVersion,
     usageCollection,
@@ -53,10 +55,7 @@ export const createDashboardGlobalAndAppState = ({
   2. Update the version number on each panel to the current version.
   */
   const initialState = migrateAppState(
-    {
-      ...stateDefaults,
-      ...urlState,
-    },
+    hydrateDashboardAppState(stateDefaults, urlState),
     opensearchDashboardsVersion,
     usageCollection
   );
@@ -102,10 +101,18 @@ export const createDashboardGlobalAndAppState = ({
           const currentDashboardIdInUrl = getDashboardIdFromUrl(history.location.pathname);
           if (currentDashboardIdInUrl !== savedDashboardInstance.id) return;
 
-          stateContainer.set({
-            ...stateDefaults,
-            ...state,
-          });
+          // In VIEW mode, toUrlState() excludes panels from URL to keep URLs clean.
+          // When syncing URL back to state, preserve current panels if URL state doesn't include them.
+          // This prevents panels from being reset to stateDefaults after variable changes in VIEW mode.
+          const currentState = stateContainer.getState();
+          stateContainer.set(
+            hydrateDashboardAppState(
+              stateDefaults,
+              state,
+              currentState.panels,
+              currentState.variables
+            )
+          );
         } else {
           // TODO: This logic was ported over this but can be handled more gracefully and intentionally
           // Sync from state url should be refactored within this application. The app is syncing from
@@ -137,6 +144,49 @@ export const createDashboardGlobalAndAppState = ({
   // start syncing the appState with the ('_a') url
   startStateSync();
   return { stateContainer, stopStateSync, stopSyncingQueryServiceStateWithUrl };
+};
+
+const hydrateVariablesFromUrl = (
+  defaultVariables: Variable[] | undefined,
+  urlVariables: DashboardVariableUrlState[] | undefined
+): Variable[] | undefined => {
+  if (!urlVariables || !defaultVariables) {
+    return defaultVariables;
+  }
+
+  const urlVariablesById = new Map(urlVariables.map((variable) => [variable.id, variable]));
+  return defaultVariables.map((variable) => {
+    const urlVariable = urlVariablesById.get(variable.id);
+    if (!urlVariable) {
+      return variable;
+    }
+
+    return {
+      ...variable,
+      current: urlVariable.current,
+    };
+  });
+};
+
+export const hydrateDashboardAppState = (
+  stateDefaults: DashboardAppState,
+  urlState?: Partial<DashboardAppStateInUrl> | null,
+  currentPanels?: DashboardAppState['panels'],
+  currentVariables?: Variable[]
+): DashboardAppState => {
+  if (!urlState) {
+    return stateDefaults;
+  }
+
+  const { variables, panels, ...urlStateWithoutVariablesAndPanels } = urlState;
+  const baseVariables = currentVariables ?? stateDefaults.variables;
+
+  return {
+    ...stateDefaults,
+    ...urlStateWithoutVariablesAndPanels,
+    panels: panels ?? currentPanels ?? stateDefaults.panels,
+    variables: hydrateVariablesFromUrl(baseVariables, variables),
+  };
 };
 
 /**
@@ -172,9 +222,19 @@ export const updateStateUrl = ({
 };
 
 const toUrlState = (state: DashboardAppState): DashboardAppStateInUrl => {
+  // Only include variables in URL when they have actual content.
+  // Excluding `undefined` / empty avoids rison round-trip issues where
+  // undefined values are dropped during encoding, causing applyDiff to
+  // treat the missing key as a removal and trigger spurious dirty flags.
+  const { variables, ...stateWithoutVariables } = state;
+  const hasVariables = variables && variables.length > 0;
+  const variableUrlState = variables?.map(({ id, current }) => ({ id, current }));
+
   if (state.viewMode === ViewMode.VIEW) {
-    const { panels, ...stateWithoutPanels } = state;
-    return stateWithoutPanels;
+    const { panels, ...rest } = stateWithoutVariables;
+    return hasVariables ? { ...rest, variables: variableUrlState } : rest;
   }
-  return state;
+  return hasVariables
+    ? { ...stateWithoutVariables, variables: variableUrlState }
+    : stateWithoutVariables;
 };

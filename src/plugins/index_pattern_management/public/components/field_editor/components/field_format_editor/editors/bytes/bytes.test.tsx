@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
 
 import { BytesFormatEditor } from './bytes';
@@ -56,7 +55,7 @@ describe('BytesFormatEditor', () => {
     const component = shallow(
       <BytesFormatEditor
         fieldType={fieldType}
-        format={(format as unknown) as FieldFormat}
+        format={format as unknown as FieldFormat}
         formatParams={formatParams}
         onChange={onChange}
         onError={onError}

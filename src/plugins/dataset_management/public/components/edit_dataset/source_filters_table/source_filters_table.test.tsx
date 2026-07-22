@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import { SourceFiltersTable } from './source_filters_table';
@@ -37,7 +37,7 @@ const getDatasetMock = (mockedFields: any = {}) =>
   ({
     sourceFilters: [{ value: 'time*' }, { value: 'nam*' }, { value: 'age*' }],
     ...mockedFields,
-  } as DataView);
+  }) as DataView;
 
 describe('SourceFiltersTable', () => {
   test('should render normally', () => {
@@ -127,7 +127,7 @@ describe('SourceFiltersTable', () => {
     await component.instance().deleteFilter();
     component.update(); // We are not calling `.setState` directly so we need to re-render
 
-    expect(saveDataset).toBeCalled();
+    expect(saveDataset).toHaveBeenCalled();
     expect(component).toMatchSnapshot();
   });
 
@@ -148,7 +148,7 @@ describe('SourceFiltersTable', () => {
     await component.instance().onAddFilter('na*');
     component.update(); // We are not calling `.setState` directly so we need to re-render
 
-    expect(saveDataset).toBeCalled();
+    expect(saveDataset).toHaveBeenCalled();
     expect(component).toMatchSnapshot();
   });
 
@@ -171,7 +171,7 @@ describe('SourceFiltersTable', () => {
     await component.instance().saveFilter({ clientId: 'tim*', value: 'ti*' });
     component.update(); // We are not calling `.setState` directly so we need to re-render
 
-    expect(saveDataset).toBeCalled();
+    expect(saveDataset).toHaveBeenCalled();
     expect(component).toMatchSnapshot();
   });
 });

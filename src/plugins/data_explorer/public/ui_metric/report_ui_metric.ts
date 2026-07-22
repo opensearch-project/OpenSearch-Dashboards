@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// @ts-expect-error TS2307 TODO(ts-upgrade): fixme
 import { UiStatsMetricType } from 'packages/osd-analytics/target/types';
 import { METRIC_TYPE } from '../../../usage_collection/public';
 import { NEW_DISCOVER_APP_NAME } from './constants';

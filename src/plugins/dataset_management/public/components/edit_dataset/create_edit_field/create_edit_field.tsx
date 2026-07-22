@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
@@ -31,17 +30,16 @@ const newFieldPlaceholder = i18n.translate(
 
 export const CreateEditField = withRouter(
   ({ dataset, mode, fieldName, history }: CreateEditFieldProps) => {
-    const { uiSettings, chrome, notifications, data } = useOpenSearchDashboards<
-      DatasetManagmentContext
-    >().services;
+    const { uiSettings, chrome, notifications, data } =
+      useOpenSearchDashboards<DatasetManagmentContext>().services;
     const spec =
       mode === 'edit' && fieldName
         ? dataset.fields.getByName(fieldName)?.spec
-        : (({
+        : ({
             scripted: true,
             type: 'number',
             name: undefined,
-          } as unknown) as IndexPatternField);
+          } as unknown as IndexPatternField);
 
     const url = `/patterns/${dataset.id}`;
 

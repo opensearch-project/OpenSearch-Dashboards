@@ -1,0 +1,784 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
+import { monaco } from '@osd/monaco';
+import {
+  EuiPanel,
+  EuiProgress,
+  EuiSmallButtonEmpty,
+  EuiLoadingSpinner,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiBadge,
+  EuiText,
+  EuiSpacer,
+  EuiFormRow,
+  EuiFieldText,
+  EuiButtonGroup,
+  EuiSelect,
+} from '@elastic/eui';
+import { i18n } from '@osd/i18n';
+import {
+  useOpenSearchDashboards,
+  CodeEditor,
+} from '../../../../../../opensearch_dashboards_react/public';
+import { DashboardServices } from '../../../../types';
+import {
+  buildVariableOptionsFromQueryResult,
+  executeVariableQuery,
+  filterVariableOptionsByRegex,
+  VariableQueryResult,
+} from '../../../../variables/variable_query_utils';
+import {
+  buildVariableOptionDisplayTextMap,
+  getVariableOptionDisplayText,
+} from '../../../../variables/variable_option_display_utils';
+import { IVariableInterpolationService } from '../../../../variables/variable_interpolation_service';
+import { NormalizedVariableOption } from '../../../../variables/types';
+import { getEffectiveLanguageForAutoComplete } from '../../../../../../data/public';
+import { DEFAULT_DATA } from '../../../../../../data/common';
+import { LanguageToggle } from './language_toggle';
+import { DatasetSelectWidget } from './dataset_select_widget';
+import './variable_query_panel.scss';
+
+/**
+ * Maximum number of options to display in preview.
+ * This prevents performance issues with large result sets.
+ */
+const MAX_PREVIEW_OPTIONS = 100;
+const EMPTY_FIELDS: string[] = [];
+
+type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
+type IEditorConstructionOptions = monaco.editor.IEditorConstructionOptions;
+
+const queryEditorOptions: IEditorConstructionOptions = {
+  minimap: { enabled: false },
+  scrollBeyondLastLine: false,
+  lineHeight: 18,
+  fontSize: 12,
+  cursorStyle: 'line-thin',
+  wordWrap: 'on',
+  lineDecorationsWidth: 0,
+  renderLineHighlight: 'none',
+  scrollbar: {
+    vertical: 'visible',
+    horizontalScrollbarSize: 1,
+  },
+  overviewRulerLanes: 0,
+  hideCursorInOverviewRuler: true,
+  lineNumbers: 'on',
+  folding: true,
+  wrappingIndent: 'same',
+  lineNumbersMinChars: 1,
+  tabCompletion: 'on',
+  renderValidationDecorations: 'off',
+  formatOnType: true,
+  formatOnPaste: true,
+  glyphMargin: false,
+  suggest: {
+    snippetsPreventQuickSuggestions: false,
+    filterGraceful: false,
+    showStatusBar: true,
+    showWords: false,
+  },
+};
+
+const languageConfiguration: monaco.languages.LanguageConfiguration = {
+  autoClosingPairs: [
+    { open: '(', close: ')' },
+    { open: '[', close: ']' },
+    { open: '{', close: '}' },
+    { open: '"', close: '"' },
+    { open: "'", close: "'" },
+    { open: '`', close: '`' },
+  ],
+  comments: {
+    lineComment: '//',
+    blockComment: ['/*', '*/'],
+  },
+  wordPattern: /@?\w[\w@'.-]*[?!,;:""]*/,
+};
+
+const DEFAULT_TRIGGER_CHARACTERS = [' ', '=', "'", '"', '`', '$'];
+
+export interface VariableQueryPanelProps {
+  query: string;
+  language: string;
+  dataset: any;
+  onQueryChange: (query: string) => void;
+  onLanguageChange: (language: string) => void;
+  onDatasetChange: (dataset: any) => void;
+  existingVariableNames?: string[];
+  interpolationService?: IVariableInterpolationService;
+  /** Regex filter string for preview results */
+  regex?: string;
+  onRegexChange?: (regex: string) => void;
+  /** Whether to refresh on time range change */
+  useTimeFilter?: boolean;
+  onUseTimeFilterChange?: (useTimeFilter: boolean) => void;
+  valueField?: string;
+  onValueFieldChange?: (valueField: string) => void;
+  labelField?: string;
+  onLabelFieldChange?: (labelField: string) => void;
+  /** Callback to notify parent about preview validation state */
+  onPreviewValidationChange?: (isValid: boolean) => void;
+  currentVariableName?: string;
+}
+
+export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
+  query,
+  language,
+  dataset,
+  onQueryChange,
+  onLanguageChange,
+  onDatasetChange,
+  existingVariableNames = [],
+  interpolationService,
+  regex = '',
+  onRegexChange,
+  useTimeFilter = false,
+  onUseTimeFilterChange,
+  valueField = '',
+  onValueFieldChange,
+  labelField = '',
+  onLabelFieldChange,
+  onPreviewValidationChange,
+  currentVariableName,
+}) => {
+  const { services } = useOpenSearchDashboards<DashboardServices>();
+  const { data } = services;
+
+  const [isFocused, setIsFocused] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [queryResult, setQueryResult] = useState<VariableQueryResult | null>(null);
+  const [executionError, setExecutionError] = useState<string | null>(null);
+  const editorRef = useRef<IStandaloneCodeEditor | null>(null);
+
+  const placeholder = useMemo(() => {
+    const lang = language.toUpperCase();
+    if (lang === 'PPL') {
+      return 'source=logs | dedup service | fields service';
+    }
+    return `Enter ${language} query...`;
+  }, [language]);
+
+  // Keep dataset ref updated to avoid stale closures
+  const datasetRef = useRef(dataset);
+  const languageRef = useRef(language);
+  const variableNamesRef = useRef(existingVariableNames);
+  useEffect(() => {
+    datasetRef.current = dataset;
+  }, [dataset]);
+  useEffect(() => {
+    languageRef.current = language;
+  }, [language]);
+  useEffect(() => {
+    variableNamesRef.current = existingVariableNames;
+  }, [existingVariableNames]);
+
+  // Reset validation when query, dataset, or language changes
+  useEffect(() => {
+    if (onPreviewValidationChange) {
+      onPreviewValidationChange(false);
+    }
+  }, [query, dataset, language, onPreviewValidationChange]);
+
+  const availableFields = queryResult?.fields ?? EMPTY_FIELDS;
+
+  const previewOptionsResult = useMemo(() => {
+    if (!queryResult) {
+      return { options: [] as NormalizedVariableOption[] };
+    }
+
+    return buildVariableOptionsFromQueryResult(queryResult, {
+      valueField: valueField || undefined,
+      labelField: labelField || undefined,
+    });
+  }, [queryResult, valueField, labelField]);
+
+  const filteredPreviewOptions = useMemo(
+    () => filterVariableOptionsByRegex(previewOptionsResult.options, regex),
+    [previewOptionsResult.options, regex]
+  );
+
+  const previewOptions = useMemo(
+    () => filteredPreviewOptions.slice(0, MAX_PREVIEW_OPTIONS),
+    [filteredPreviewOptions]
+  );
+  const previewOptionDisplayTextMap = useMemo(
+    () => buildVariableOptionDisplayTextMap(previewOptions),
+    [previewOptions]
+  );
+
+  const isTruncated = filteredPreviewOptions.length > MAX_PREVIEW_OPTIONS;
+  const selectedValueField = valueField || availableFields[0];
+  const previewResultError = useMemo(() => {
+    if (!queryResult || filteredPreviewOptions.length > 0) {
+      return null;
+    }
+
+    if (queryResult.rows.length === 0) {
+      return i18n.translate('dashboard.variableQueryPanel.noResults', {
+        defaultMessage: 'Query returned no results',
+      });
+    }
+
+    if (!selectedValueField) {
+      return i18n.translate('dashboard.variableQueryPanel.noValueField', {
+        defaultMessage: 'Query returned results, but no fields are available for variable values',
+      });
+    }
+
+    if (!availableFields.includes(selectedValueField)) {
+      return i18n.translate('dashboard.variableQueryPanel.valueFieldMissing', {
+        defaultMessage: 'Selected value field was not found in query results',
+      });
+    }
+
+    if (previewOptionsResult.options.length === 0) {
+      return i18n.translate('dashboard.variableQueryPanel.noScalarValues', {
+        defaultMessage:
+          'Query returned results, but the selected value field does not contain string, number, or boolean values',
+      });
+    }
+
+    return i18n.translate('dashboard.variableQueryPanel.noRegexMatches', {
+      defaultMessage: 'No options match the regex filter',
+    });
+  }, [
+    availableFields,
+    filteredPreviewOptions.length,
+    previewOptionsResult.options.length,
+    queryResult,
+    selectedValueField,
+  ]);
+  const previewError = executionError || previewResultError;
+
+  // --- Autocomplete (adapted from useQueryPanelEditor.provideCompletionItems) ---
+  const provideCompletionItems = useCallback(
+    async (
+      model: monaco.editor.ITextModel,
+      position: monaco.Position,
+      _context: monaco.languages.CompletionContext,
+      token: monaco.CancellationToken
+    ): Promise<monaco.languages.CompletionList> => {
+      if (token.isCancellationRequested) {
+        return { suggestions: [], incomplete: false };
+      }
+      try {
+        // Use refs to always get the latest values
+        const currentLanguage = languageRef.current;
+        const currentDataset = datasetRef.current || data.query.queryString.getQuery().dataset;
+
+        const effectiveLanguage = getEffectiveLanguageForAutoComplete(currentLanguage, 'explore');
+
+        let currentDataView;
+        if (currentDataset?.id) {
+          try {
+            currentDataView = await data.dataViews.get(
+              currentDataset.id,
+              currentDataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
+            );
+          } catch (e) {
+            // eslint-disable-next-line no-console
+            console.warn('[VariableQueryPanel] DataView not found for:', currentDataset.id, e);
+          }
+        }
+
+        const queryText = model.getValue();
+        const offset = model.getOffsetAt(position);
+        const servicesWithAppName = { ...services, appName: 'dashboard' };
+
+        const suggestions = await data.autocomplete?.getQuerySuggestions({
+          query: queryText,
+          selectionStart: offset,
+          selectionEnd: offset,
+          language: effectiveLanguage,
+          baseLanguage: currentLanguage,
+          indexPattern: currentDataView,
+          datasetType: currentDataset?.type,
+          position,
+          services: servicesWithAppName as any,
+        });
+
+        const wordUntil = model.getWordUntilPosition(position);
+        const defaultRange = new monaco.Range(
+          position.lineNumber,
+          wordUntil.startColumn,
+          position.lineNumber,
+          wordUntil.endColumn
+        );
+
+        const filteredSuggestions = suggestions || [];
+
+        const monacoSuggestions: monaco.languages.CompletionItem[] = filteredSuggestions.map(
+          (s: any) => ({
+            label: s.text,
+            kind: s.type as monaco.languages.CompletionItemKind,
+            insertText: s.insertText ?? s.text,
+            insertTextRules: s.insertTextRules ?? undefined,
+            range: defaultRange,
+            detail: s.detail,
+            sortText: s.sortText,
+            documentation: s.documentation
+              ? {
+                  value: s.documentation,
+                  isTrusted: true,
+                }
+              : '',
+            command: {
+              id: 'editor.action.triggerSuggest',
+              title: 'Trigger Next Suggestion',
+            },
+          })
+        );
+
+        // Inject variable suggestions only when the user types '$' — same UX as Grafana.
+        const textBeforeCursor = model.getValueInRange(
+          new monaco.Range(position.lineNumber, 1, position.lineNumber, position.column)
+        );
+        const dollarMatch = textBeforeCursor.match(/\$\{?(\w*)$/);
+        if (dollarMatch) {
+          const fullPrefix = dollarMatch[0]; // e.g. "$", "$se", "${", "${se"
+          const varRange = new monaco.Range(
+            position.lineNumber,
+            position.column - fullPrefix.length,
+            position.lineNumber,
+            position.column
+          );
+          const varNames = variableNamesRef.current || [];
+          varNames.forEach((name) => {
+            monacoSuggestions.push({
+              label: `\${${name}}`,
+              kind: monaco.languages.CompletionItemKind.Variable,
+              insertText: `\${${name}}`,
+              range: varRange,
+              detail: 'Dashboard variable',
+              sortText: `!${name}`,
+              documentation: {
+                value: `Reference variable **${name}** — will be replaced at query time`,
+                isTrusted: true,
+              },
+            });
+          });
+        }
+
+        return { suggestions: monacoSuggestions, incomplete: false };
+      } catch {
+        return { suggestions: [], incomplete: false };
+      }
+    },
+    [data, services]
+  );
+
+  const provideCompletionItemsRef = useRef(provideCompletionItems);
+  useEffect(() => {
+    provideCompletionItemsRef.current = provideCompletionItems;
+  }, [provideCompletionItems]);
+
+  const suggestionProvider = useMemo(() => {
+    const languageTriggerCharacters = data.autocomplete?.getTriggerCharacters?.(language);
+    return {
+      triggerCharacters: languageTriggerCharacters ?? DEFAULT_TRIGGER_CHARACTERS,
+      provideCompletionItems: (
+        model: monaco.editor.ITextModel,
+        position: monaco.Position,
+        context: monaco.languages.CompletionContext,
+        token: monaco.CancellationToken
+      ) => provideCompletionItemsRef.current(model, position, context, token),
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const editorDidMount = useCallback((editor: IStandaloneCodeEditor) => {
+    editorRef.current = editor;
+
+    const focusDisposable = editor.onDidFocusEditorText(() => setIsFocused(true));
+    const blurDisposable = editor.onDidBlurEditorText(() => setIsFocused(false));
+
+    // Cmd/Ctrl+Enter to run query
+    editor.addAction({
+      id: 'variableQueryPanel.runQuery',
+      label: 'Run Query',
+      // eslint-disable-next-line no-bitwise
+      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
+      run: () => {
+        handleRunQueryRef.current();
+      },
+    });
+
+    const onDidFocusDisposable = editor.onDidFocusEditorWidget(() => {
+      editor.trigger('keyboard', 'editor.action.triggerSuggest', {});
+    });
+
+    editor.onDidContentSizeChange(() => {
+      const contentHeight = editor.getContentHeight();
+      const maxHeight = 150;
+      const finalHeight = Math.min(contentHeight, maxHeight);
+
+      editor.layout({
+        width: editor.getLayoutInfo().width,
+        height: finalHeight,
+      });
+
+      editor.updateOptions({
+        scrollBeyondLastLine: false,
+        scrollbar: {
+          vertical: contentHeight > maxHeight ? 'visible' : 'hidden',
+        },
+      });
+    });
+
+    return () => {
+      focusDisposable.dispose();
+      blurDisposable.dispose();
+      onDidFocusDisposable.dispose();
+      return editor;
+    };
+  }, []);
+
+  const handleRunQueryRef = useRef<() => void>(() => {});
+
+  const handleRunQuery = useCallback(async () => {
+    if (!query.trim()) {
+      setExecutionError(
+        i18n.translate('dashboard.variableQueryPanel.queryEmpty', {
+          defaultMessage: 'Query is empty',
+        })
+      );
+      return;
+    }
+
+    setIsLoading(true);
+    setExecutionError(null);
+
+    try {
+      // Interpolate variable references before executing the preview query
+      let queryToExecute = query.trim();
+      if (interpolationService && interpolationService.hasVariables(queryToExecute)) {
+        queryToExecute = interpolationService.interpolate(
+          queryToExecute,
+          language,
+          currentVariableName
+        );
+      }
+
+      const result = await executeVariableQuery(
+        data,
+        {
+          query: queryToExecute,
+          language,
+          dataset: dataset || undefined,
+        },
+        undefined,
+        useTimeFilter
+      );
+
+      setQueryResult(result);
+      if (onPreviewValidationChange) {
+        onPreviewValidationChange(true);
+      }
+    } catch (err: any) {
+      if (onPreviewValidationChange) {
+        onPreviewValidationChange(false);
+      }
+      setExecutionError(
+        err.message ||
+          i18n.translate('dashboard.variableQueryPanel.executionFailed', {
+            defaultMessage: 'Failed to execute query',
+          })
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  }, [
+    query,
+    interpolationService,
+    data,
+    language,
+    dataset,
+    useTimeFilter,
+    onPreviewValidationChange,
+    currentVariableName,
+  ]);
+
+  // Keep ref updated for use in editorDidMount closure
+  useEffect(() => {
+    handleRunQueryRef.current = handleRunQuery;
+  }, [handleRunQuery]);
+
+  const onEditorClick = useCallback(() => {
+    editorRef.current?.focus();
+  }, []);
+
+  const valueFieldOptions = useMemo(() => {
+    const options = availableFields.map((field) => ({ value: field, text: field }));
+    if (valueField && !availableFields.includes(valueField)) {
+      options.unshift({
+        value: valueField,
+        text: valueField,
+      });
+    }
+    return options.length > 0
+      ? options
+      : [
+          {
+            value: '',
+            text: i18n.translate('dashboard.variableQueryPanel.noFieldsOption', {
+              defaultMessage: 'Run preview to load fields',
+            }),
+          },
+        ];
+  }, [availableFields, valueField]);
+
+  const labelFieldOptions = useMemo(() => {
+    const options = [
+      {
+        value: '',
+        text: i18n.translate('dashboard.variableQueryPanel.noLabelFieldOption', {
+          defaultMessage: 'None',
+        }),
+      },
+      ...availableFields.map((field) => ({ value: field, text: field })),
+    ];
+    if (labelField && !availableFields.includes(labelField)) {
+      options.push({
+        value: labelField,
+        text: labelField,
+      });
+    }
+    return options;
+  }, [availableFields, labelField]);
+
+  return (
+    <>
+      <EuiFormRow
+        className="variableQueryPanelFormRow"
+        label={i18n.translate('dashboard.variableEditor.queryLabel', {
+          defaultMessage: 'Options Query',
+        })}
+        helpText={i18n.translate('dashboard.variableEditor.queryHelp', {
+          defaultMessage:
+            'Select a dataset, write a query, and run it to preview variable options. Maximum 100 options will be displayed.',
+        })}
+        fullWidth
+      >
+        <div>
+          <EuiPanel paddingSize="s" borderRadius="none" className="variableQueryPanel">
+            <EuiFlexGroup gutterSize="xs" direction="column">
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize="none" alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <LanguageToggle language={language} onLanguageChange={onLanguageChange} />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <DatasetSelectWidget
+                      selectedDataset={dataset}
+                      onDatasetChange={onDatasetChange}
+                      language={language}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    {isLoading ? (
+                      <EuiLoadingSpinner size="m" />
+                    ) : (
+                      <EuiSmallButtonEmpty
+                        onClick={handleRunQuery}
+                        data-test-subj="variableQueryPanelRunQuery"
+                        flush="right"
+                      >
+                        {i18n.translate('dashboard.variableQueryPanel.runQuery', {
+                          defaultMessage: 'Preview',
+                        })}
+                      </EuiSmallButtonEmpty>
+                    )}
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <div className="exploreQueryPanel__editorsWrapper">
+                  {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
+                  <div
+                    className={`variableQueryPanelEditor ${
+                      isFocused ? 'variableQueryPanelEditor--focused' : ''
+                    }`}
+                    data-test-subj="variableQueryPanelEditor"
+                    onClick={onEditorClick}
+                  >
+                    <CodeEditor
+                      languageId={language}
+                      languageConfiguration={languageConfiguration}
+                      value={query}
+                      onChange={onQueryChange}
+                      width="100%"
+                      editorDidMount={editorDidMount}
+                      suggestionProvider={suggestionProvider}
+                      options={queryEditorOptions}
+                      useLatestTheme
+                      data-test-subj="variableQueryPanelCodeEditor"
+                    />
+                    {!query && (
+                      <div className="variableQueryPanelEditor__placeholder">{placeholder}</div>
+                    )}
+                  </div>
+                </div>
+              </EuiFlexItem>
+              <EuiSpacer size="s" />
+            </EuiFlexGroup>
+
+            {isLoading && (
+              <EuiProgress
+                size="xs"
+                color="accent"
+                position="absolute"
+                data-test-subj="variableQueryPanelIsLoading"
+              />
+            )}
+          </EuiPanel>
+
+          {/* Preview of values */}
+        </div>
+      </EuiFormRow>
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          <EuiFormRow
+            label={i18n.translate('dashboard.variableQueryPanel.valueFieldLabel', {
+              defaultMessage: 'Value field',
+            })}
+            helpText={i18n.translate('dashboard.variableQueryPanel.valueFieldHelp', {
+              defaultMessage: 'Field used as the stored variable value.',
+            })}
+          >
+            <EuiSelect
+              value={valueField || availableFields[0] || ''}
+              options={valueFieldOptions}
+              onChange={(e) => onValueFieldChange?.(e.target.value)}
+              disabled={availableFields.length === 0 && !valueField}
+              data-test-subj="variableEditorValueField"
+              compressed
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            label={i18n.translate('dashboard.variableQueryPanel.labelFieldLabel', {
+              defaultMessage: 'Label field',
+            })}
+            helpText={i18n.translate('dashboard.variableQueryPanel.labelFieldHelp', {
+              defaultMessage: 'Optional field used as the display label.',
+            })}
+          >
+            <EuiSelect
+              value={labelField}
+              options={labelFieldOptions}
+              onChange={(e) => onLabelFieldChange?.(e.target.value)}
+              disabled={availableFields.length === 0 && !labelField}
+              data-test-subj="variableEditorLabelField"
+              compressed
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {/* Regex filter */}
+      {onRegexChange && (
+        <EuiFormRow
+          label={i18n.translate('dashboard.variableQueryPanel.regexLabel', {
+            defaultMessage: 'Regex',
+          })}
+          helpText={i18n.translate('dashboard.variableQueryPanel.regexHelp', {
+            defaultMessage: 'Optional regex to filter options. Only matching options are shown.',
+          })}
+        >
+          <EuiFieldText
+            value={regex}
+            onChange={(e) => onRegexChange(e.target.value)}
+            placeholder="/^prod-/"
+            data-test-subj="variableEditorRegex"
+            compressed
+          />
+        </EuiFormRow>
+      )}
+      {/* Time filter toggle */}
+      {onUseTimeFilterChange && (
+        <EuiFormRow
+          label={i18n.translate('dashboard.variableQueryPanel.refreshLabel', {
+            defaultMessage: 'Refresh',
+          })}
+          helpText={i18n.translate('dashboard.variableQueryPanel.refreshHelp', {
+            defaultMessage: 'When to update the options of this variable',
+          })}
+        >
+          <EuiButtonGroup
+            legend={i18n.translate('dashboard.variableQueryPanel.refreshLegend', {
+              defaultMessage: 'Variable refresh options',
+            })}
+            options={[
+              {
+                id: 'onDashboardLoad',
+                label: i18n.translate('dashboard.variableQueryPanel.onDashboardLoad', {
+                  defaultMessage: 'On dashboard load',
+                }),
+              },
+              {
+                id: 'onTimeRangeChange',
+                label: i18n.translate('dashboard.variableQueryPanel.onTimeRangeChange', {
+                  defaultMessage: 'On time range change',
+                }),
+              },
+            ]}
+            idSelected={useTimeFilter ? 'onTimeRangeChange' : 'onDashboardLoad'}
+            onChange={(id) => onUseTimeFilterChange(id === 'onTimeRangeChange')}
+            buttonSize="compressed"
+            data-test-subj="variableEditorUseTimeFilter"
+          />
+        </EuiFormRow>
+      )}
+      <EuiFormRow
+        fullWidth
+        label={
+          isTruncated
+            ? i18n.translate('dashboard.variableQueryPanel.previewTitleTruncated', {
+                defaultMessage: 'Preview of values ({count}, showing first {max})',
+                values: { count: filteredPreviewOptions.length, max: MAX_PREVIEW_OPTIONS },
+              })
+            : i18n.translate('dashboard.variableQueryPanel.previewTitle', {
+                defaultMessage: 'Preview of values ({count})',
+                values: { count: filteredPreviewOptions.length },
+              })
+        }
+      >
+        <>
+          {(previewOptions.length > 0 || previewError) && (
+            <>
+              <EuiPanel
+                paddingSize="s"
+                color="subdued"
+                hasBorder={false}
+                style={{ maxHeight: '200px', overflowY: 'auto' }}
+              >
+                {previewError ? (
+                  <EuiText size="xs" color="danger">
+                    {previewError}
+                  </EuiText>
+                ) : (
+                  <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+                    {previewOptions.map((option) => (
+                      <EuiFlexItem key={option.value} grow={false}>
+                        <EuiBadge color="hollow">
+                          {getVariableOptionDisplayText(option, previewOptionDisplayTextMap)}
+                        </EuiBadge>
+                      </EuiFlexItem>
+                    ))}
+                  </EuiFlexGroup>
+                )}
+              </EuiPanel>
+            </>
+          )}
+        </>
+      </EuiFormRow>
+    </>
+  );
+};

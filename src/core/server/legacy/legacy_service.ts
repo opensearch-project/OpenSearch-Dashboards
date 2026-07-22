@@ -250,6 +250,8 @@ export class LegacyService implements CoreService {
       context: setupDeps.core.context,
       opensearch: {
         legacy: setupDeps.core.opensearch.legacy,
+        registerClientTransport: setupDeps.core.opensearch.registerClientTransport,
+        hasClientTransport: setupDeps.core.opensearch.hasClientTransport,
       },
       http: {
         createCookieSessionStorageFactory: setupDeps.core.http.createCookieSessionStorageFactory,
@@ -285,6 +287,7 @@ export class LegacyService implements CoreService {
         addClientWrapper: setupDeps.core.savedObjects.addClientWrapper,
         registerType: setupDeps.core.savedObjects.registerType,
         getImportExportObjectLimit: setupDeps.core.savedObjects.getImportExportObjectLimit,
+        getPermissionControlEnabled: setupDeps.core.savedObjects.getPermissionControlEnabled,
         setRepositoryFactoryProvider: setupDeps.core.savedObjects.setRepositoryFactoryProvider,
         setStatus: () => {
           throw new Error(`core.savedObjects.setStatus is unsupported in legacy`);

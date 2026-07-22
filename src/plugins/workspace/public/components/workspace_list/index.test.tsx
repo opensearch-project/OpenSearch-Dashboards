@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import moment from 'moment';
 import { of } from 'rxjs';
 import { render, fireEvent, screen, waitFor } from '@testing-library/react';
@@ -257,7 +256,7 @@ describe('WorkspaceList', () => {
     fireEvent.click(operationIcons);
     const editIcon = getByText('Edit');
     fireEvent.click(editIcon);
-    expect(navigateToAppWithinWorkspace).toBeCalled();
+    expect(navigateToAppWithinWorkspace).toHaveBeenCalled();
   });
 
   it('should be able to call delete modal after clicking delete button', async () => {

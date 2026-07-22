@@ -28,11 +28,11 @@
  * under the License.
  */
 
-import { Lifecycle, Request, ResponseToolkit, Server, ServerOptions, Util } from '@hapi/hapi';
+import { Lifecycle, Request, ResponseToolkit, Server, ServerOptions, Utils } from '@hapi/hapi';
 import Hoek from '@hapi/hoek';
 import { ServerOptions as TLSOptions } from 'https';
 import { ValidationError } from 'joi';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { HttpConfig } from './http_config';
 import { validateObject } from './prototype_pollution';
 import { getWorkspaceState } from '../utils';
@@ -143,7 +143,7 @@ export function createServer(serverOptions: ServerOptions, listenerOptions: List
 export interface HapiValidationError extends ValidationError {
   output: {
     statusCode: number;
-    headers: Util.Dictionary<string | string[]>;
+    headers: Utils.Dictionary<string | string[]>;
     payload: {
       statusCode: number;
       error: string;
@@ -194,8 +194,10 @@ export function getRequestId(request: Request, options: HttpConfig['requestId'])
     // socket may be undefined in integration tests that connect via the http listener directly
     (request.raw.req.socket?.remoteAddress &&
       options.ipAllowlist.includes(request.raw.req.socket.remoteAddress))
-    ? request.headers['x-opaque-id'] ?? uuid.v4()
-    : uuid.v4();
+    ? ((Array.isArray(request.headers['x-opaque-id'])
+        ? request.headers['x-opaque-id'][0]
+        : request.headers['x-opaque-id']) ?? uuidv4())
+    : uuidv4();
 }
 
 /**

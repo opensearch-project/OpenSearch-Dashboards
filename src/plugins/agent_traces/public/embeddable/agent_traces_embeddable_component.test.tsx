@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { AgentTracesEmbeddableComponent } from './agent_traces_embeddable_component';
 import { SearchProps } from './agent_traces_embeddable';

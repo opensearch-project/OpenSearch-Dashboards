@@ -51,30 +51,62 @@ import { DEFAULT_DATA } from '../../constants';
  *
  *
  * @public */
-export const createSearchSource = (
-  indexPatterns: IndexPatternsContract,
-  searchSourceDependencies: SearchSourceDependencies
-) => async (searchSourceFields: SearchSourceFields = {}) => {
-  const fields = { ...searchSourceFields };
+export const createSearchSource =
+  (indexPatterns: IndexPatternsContract, searchSourceDependencies: SearchSourceDependencies) =>
+  async (searchSourceFields: SearchSourceFields = {}) => {
+    const fields = { ...searchSourceFields };
 
-  // hydrating index pattern
-  if (
-    fields.index &&
-    typeof fields.index === 'string' &&
-    (!fields.query?.dataset?.type ||
-      fields.query.dataset.type === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN)
-  ) {
-    fields.index = await indexPatterns.get(fields.index as string);
-  }
+    // hydrating index pattern
+    if (fields.index && typeof fields.index === 'string') {
+      const dataset = fields.query?.dataset;
+      const isIndexPattern =
+        !dataset?.type || dataset.type === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN;
 
-  const searchSource = new SearchSource(fields, searchSourceDependencies);
+      if (isIndexPattern) {
+        // Legacy/INDEX_PATTERN path: let SavedObjectNotFound propagate so callers
+        // like `applyOpenSearchResp` can record `unresolvedIndexPatternReference`
+        // and drive the import-conflict UI.
+        fields.index = await indexPatterns.get(fields.index as string);
+      } else {
+        // Non-INDEX_PATTERN datasets (INDEXES, S3, Prometheus, etc.) have no
+        // backing saved object; the authoritative id for cache lookup is
+        // `dataset.id`, which is what `datasetService.cacheDataset` uses as the
+        // cache key.
+        const lookupId = (dataset?.id ?? fields.index) as string;
+        let pattern;
+        try {
+          pattern = await indexPatterns.get(lookupId, true);
+        } catch {
+          // swallow — fall through to hydrateDataset
+        }
 
-  // todo: move to migration script .. create issue
-  const query = searchSource.getOwnField('query');
+        // On a cache miss (or lookup failure), ask the public layer to prime the
+        // dataset cache via `hydrateDataset`, then retry the cache-only lookup.
+        // Centralized here so Discover, Explore embeddables, and any other
+        // consumer of `searchSource.create()` all benefit.
+        if (!pattern && dataset && searchSourceDependencies.hydrateDataset) {
+          try {
+            await searchSourceDependencies.hydrateDataset(dataset);
+            pattern = await indexPatterns.get(lookupId, true);
+          } catch {
+            // leave fields.index as a string; downstream consumers must guard for this.
+          }
+        }
 
-  if (typeof query !== 'undefined') {
-    searchSource.setField('query', migrateLegacyQuery(query));
-  }
+        if (pattern) {
+          fields.index = pattern;
+        }
+      }
+    }
 
-  return searchSource;
-};
+    const searchSource = new SearchSource(fields, searchSourceDependencies);
+
+    // todo: move to migration script .. create issue
+    const query = searchSource.getOwnField('query');
+
+    if (typeof query !== 'undefined') {
+      searchSource.setField('query', migrateLegacyQuery(query));
+    }
+
+    return searchSource;
+  };

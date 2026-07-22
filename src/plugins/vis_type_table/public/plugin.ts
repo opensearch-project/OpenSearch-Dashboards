@@ -30,10 +30,11 @@ const setupTableVis = async (
   core: CoreSetup,
   { expressions, visualizations }: TableVisPluginSetupDependencies
 ) => {
+  // Register visualization at setup, it should not wait for plugin start
+  visualizations.createBaseVisualization(getTableVisTypeDefinition());
   const [coreStart] = await core.getStartServices();
   expressions.registerFunction(createTableVisFn);
   expressions.registerRenderer(getTableVisRenderer(coreStart));
-  visualizations.createBaseVisualization(getTableVisTypeDefinition());
 };
 export class TableVisPlugin implements Plugin<void, void> {
   initializerContext: PluginInitializerContext<ConfigSchema>;

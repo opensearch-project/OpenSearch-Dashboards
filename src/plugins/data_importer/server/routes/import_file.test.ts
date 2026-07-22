@@ -96,6 +96,7 @@ describe('Import file route', () => {
     };
 
     const handler = router.post.mock.calls[0][1];
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     await handler(context, request, response);
 
     expect(mockClient.indices.create).toHaveBeenCalledWith({
@@ -145,6 +146,7 @@ describe('Import file route', () => {
     };
 
     const handler = router.post.mock.calls[0][1];
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     await handler(context, request, response);
 
     // Verify index was created with lookup field in mapping
@@ -225,6 +227,7 @@ describe('Import file route', () => {
     };
 
     const handler = router.post.mock.calls[0][1];
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     await handler(context, request, response);
 
     expect(mockClient.indices.create).toHaveBeenCalledWith({
@@ -270,6 +273,7 @@ describe('Import file route', () => {
     };
 
     const handler = router.post.mock.calls[0][1];
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     await handler(context, request, response);
 
     expect(mockClient.indices.updateAliases).not.toHaveBeenCalled();
@@ -310,6 +314,7 @@ describe('Import file route', () => {
     };
 
     const handler = router.post.mock.calls[0][1];
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     await handler(context, request, response);
 
     // Verify import still succeeds despite alias failure
@@ -352,6 +357,7 @@ describe('Import file route', () => {
     };
 
     const handler = router.post.mock.calls[0][1];
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     await handler(context, request, response);
 
     expect(response.badRequest).toHaveBeenCalledWith({
@@ -384,6 +390,7 @@ describe('Import file route', () => {
     };
 
     const handler = router.post.mock.calls[0][1];
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     await handler(context, request, response);
 
     expect(response.badRequest).toHaveBeenCalledWith({
@@ -414,6 +421,7 @@ describe('Import file route', () => {
     };
 
     const handler = router.post.mock.calls[0][1];
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     await handler(context, request, response);
 
     expect(response.notFound).toHaveBeenCalledWith({

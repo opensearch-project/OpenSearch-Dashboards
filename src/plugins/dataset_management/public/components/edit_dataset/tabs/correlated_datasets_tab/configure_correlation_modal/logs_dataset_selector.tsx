@@ -6,8 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow, EuiText } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { DataPublicPluginStart, DataView } from '../../../../../../../data/public';
-import { MAX_LOG_DATASETS_PER_CORRELATION } from '../../../../../types/correlations';
+import { DataPublicPluginStart } from '../../../../../../../data/public';
 
 interface LogsDatasetSelectorProps {
   dataService: DataPublicPluginStart;
@@ -108,6 +107,7 @@ export const LogsDatasetSelector: React.FC<LogsDatasetSelectorProps> = ({
       fullWidth
     >
       <EuiComboBox
+        isInvalid={isInvalid}
         placeholder={i18n.translate(
           'datasetManagement.correlatedDatasets.modal.logsDatasetSelectorPlaceholder',
           {

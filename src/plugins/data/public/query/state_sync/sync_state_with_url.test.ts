@@ -83,9 +83,9 @@ describe('sync_query_state_with_url', () => {
   let indexPatternsMock: IndexPatternsService;
 
   beforeEach(() => {
-    indexPatternsMock = ({
+    indexPatternsMock = {
       get: jest.fn(),
-    } as unknown) as IndexPatternsService;
+    } as unknown as IndexPatternsService;
   });
 
   let filterManagerChangeSub: Subscription;
@@ -104,6 +104,7 @@ describe('sync_query_state_with_url', () => {
       uiSettings: setupMock.uiSettings,
       storage: new DataStorage(window.localStorage, 'opensearch_dashboards.'),
       sessionStorage: new DataStorage(window.sessionStorage, 'opensearch_dashboards.'),
+      // @ts-expect-error TS2454 TODO(ts-upgrade): fixme
       defaultSearchInterceptor: mockSearchInterceptor,
       application: setupMock.application,
       notifications: setupMock.notifications,
@@ -122,7 +123,7 @@ describe('sync_query_state_with_url', () => {
     filterManagerChangeTriggered = jest.fn();
     filterManagerChangeSub = filterManager.getUpdates$().subscribe(filterManagerChangeTriggered);
 
-    window.location.href = '/';
+    window.location.href = 'http://localhost:5601/';
     history = createBrowserHistory();
     osdUrlStateStorage = createOsdUrlStateStorage({ useHash: false, history });
 
@@ -198,7 +199,7 @@ describe('sync_query_state_with_url', () => {
     history.push(pathWithFilter);
     history.push(pathWithFilter);
 
-    expect(filterManagerChangeTriggered).not.toBeCalled();
+    expect(filterManagerChangeTriggered).not.toHaveBeenCalled();
     stop();
   });
 
@@ -207,7 +208,7 @@ describe('sync_query_state_with_url', () => {
     filterManager.setFilters([gF, aF]);
     const spy = jest.spyOn(osdUrlStateStorage, 'set');
     filterManager.setFilters([gF]); // global filters didn't change
-    expect(spy).not.toBeCalled();
+    expect(spy).not.toHaveBeenCalled();
     stop();
   });
 });

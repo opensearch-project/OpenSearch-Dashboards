@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import { NavGroups } from './collapsible_nav_groups';
 import { ChromeRegistrationNavLink } from '../../nav_group';
@@ -67,14 +66,14 @@ describe('<NavGroups />', () => {
     expect(container).toMatchSnapshot();
     expect(container.querySelectorAll('.nav-link-item-btn').length).toEqual(5);
     fireEvent.click(getByTestId('collapsibleNavAppLink-pure'));
-    expect(navigateToApp).toBeCalledTimes(0);
+    expect(navigateToApp).toHaveBeenCalledTimes(0);
     // The accordion is collapsed by default
     expect(queryByTestId('collapsibleNavAppLink-subLink')).toBeNull();
 
     // Expand the accordion
     fireEvent.click(getByTestId('collapsibleNavAppLink-pure'));
     fireEvent.click(getByTestId('collapsibleNavAppLink-subLink'));
-    expect(navigateToApp).toBeCalledWith('subLink');
+    expect(navigateToApp).toHaveBeenCalledWith('subLink');
   });
 
   it('should keep parent nav links collapsible when categoryCollapsible is true', () => {

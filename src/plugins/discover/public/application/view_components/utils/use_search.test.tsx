@@ -116,6 +116,7 @@ const mockStore = {
   subscribe: jest.fn(() => () => {}), // Return unsubscribe function
   dispatch: jest.fn(),
 };
+// @ts-expect-error TS2339 TODO(ts-error): fixme
 const wrapper: React.FC = ({ children }) => {
   return (
     // @ts-expect-error TS2769 TODO(ts-error): fixme
@@ -281,10 +282,10 @@ describe('useSearch', () => {
     });
 
     await waitFor(() => {
-      expect(services.data.query.queryString.setQuery).toBeCalledWith(mockQuery);
+      expect(services.data.query.queryString.setQuery).toHaveBeenCalledWith(mockQuery);
     });
 
-    expect(services.filterManager.setAppFilters).toBeCalledWith(
+    expect(services.filterManager.setAppFilters).toHaveBeenCalledWith(
       expect.arrayContaining([mockFilterB])
     );
   });
@@ -300,7 +301,7 @@ describe('useSearch', () => {
     });
 
     await waitFor(() => {
-      expect(services.data.query.queryString.setQuery).toBeCalledWith(mockDefaultQuery);
+      expect(services.data.query.queryString.setQuery).toHaveBeenCalledWith(mockDefaultQuery);
     });
   });
 

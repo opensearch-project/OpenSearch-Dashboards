@@ -128,6 +128,8 @@ import {
 } from './attribute_service/attribute_service';
 import { DashboardProvider, DashboardServices } from './types';
 import { bootstrap } from './ui_triggers';
+import { VariablesBar } from './application/components/dashboard_variables';
+import { dashboardNavPopover } from './dashboard_nav_popover';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -139,6 +141,7 @@ export type DashboardUrlGenerator = UrlGeneratorContract<typeof DASHBOARD_APP_UR
 
 export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
+  variables: { enabled: boolean };
 }
 
 interface SetupDependencies {
@@ -177,6 +180,7 @@ export interface DashboardStart {
     embeddableId: string;
     embeddableType: string;
   }) => void | undefined;
+  VariablesBar: typeof VariablesBar;
   dashboardUrlGenerator?: DashboardUrlGenerator;
   dashboardFeatureFlagConfig: DashboardFeatureFlagConfig;
   DashboardContainerByValueRenderer: ReturnType<typeof createDashboardContainerByValueRenderer>;
@@ -185,7 +189,7 @@ export interface DashboardStart {
     V extends EmbeddableInput & { [ATTRIBUTE_SERVICE_KEY]: A } = EmbeddableInput & {
       [ATTRIBUTE_SERVICE_KEY]: A;
     },
-    R extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
+    R extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput,
   >(
     type: string,
     options: AttributeServiceOptions<A>
@@ -203,8 +207,12 @@ declare module '../../../plugins/ui_actions/public' {
   }
 }
 
-export class DashboardPlugin
-  implements Plugin<DashboardSetup, DashboardStart, SetupDependencies, StartDependencies> {
+export class DashboardPlugin implements Plugin<
+  DashboardSetup,
+  DashboardStart,
+  SetupDependencies,
+  StartDependencies
+> {
   constructor(private initializerContext: PluginInitializerContext) {}
 
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
@@ -223,9 +231,8 @@ export class DashboardPlugin
     // bootstrap UI Actions
     bootstrap(uiActions);
 
-    this.dashboardFeatureFlagConfig = this.initializerContext.config.get<
-      DashboardFeatureFlagConfig
-    >();
+    this.dashboardFeatureFlagConfig =
+      this.initializerContext.config.get<DashboardFeatureFlagConfig>();
     const expandPanelAction = new ExpandPanelAction();
     uiActions.registerAction(expandPanelAction);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, expandPanelAction.id);
@@ -273,6 +280,7 @@ export class DashboardPlugin
         capabilities: coreStart.application.capabilities,
         application: coreStart.application,
         chrome: coreStart.chrome,
+        savedObjects: coreStart.savedObjects,
         notifications: coreStart.notifications,
         overlays: coreStart.overlays,
         embeddable: deps.embeddable,
@@ -280,6 +288,7 @@ export class DashboardPlugin
         SavedObjectFinder: getSavedObjectFinder(coreStart.savedObjects, coreStart.uiSettings),
         ExitFullScreenButton,
         uiActions: deps.uiActions,
+        data: deps.data,
       };
     };
 
@@ -461,11 +470,17 @@ export class DashboardPlugin
 
     core.application.register(app);
 
+    const isIconSideNavEnabled = core.chrome.getIsIconSideNavEnabled();
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
       {
         id: app.id,
-        order: 400,
+        order: isIconSideNavEnabled ? 100 : 400,
         category: undefined,
+        euiIconType: isIconSideNavEnabled ? 'navDashboards' : 'dashboard',
+        // In the icon side nav, hovering Dashboards reveals quick actions
+        // (create / view all) and recently accessed dashboards. Direct click
+        // still navigates to the Dashboards app.
+        ...(isIconSideNavEnabled ? { navPopover: dashboardNavPopover } : {}),
       },
     ]);
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS['security-analytics'], [
@@ -473,6 +488,7 @@ export class DashboardPlugin
         id: app.id,
         order: 400,
         category: undefined,
+        euiIconType: 'dashboard',
       },
     ]);
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.essentials, [
@@ -480,6 +496,7 @@ export class DashboardPlugin
         id: app.id,
         order: 300,
         category: undefined,
+        euiIconType: 'dashboard',
       },
     ]);
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.search, [
@@ -487,6 +504,7 @@ export class DashboardPlugin
         id: app.id,
         order: 300,
         category: undefined,
+        euiIconType: 'dashboard',
       },
     ]);
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
@@ -494,6 +512,7 @@ export class DashboardPlugin
         id: app.id,
         order: 300,
         category: undefined,
+        euiIconType: 'dashboard',
       },
     ]);
 
@@ -646,6 +665,7 @@ export class DashboardPlugin
     return {
       getSavedDashboardLoader: () => savedDashboardLoader,
       addEmbeddableToDashboard: this.addEmbeddableToDashboard.bind(this, core),
+      VariablesBar,
       dashboardUrlGenerator: this.dashboardUrlGenerator,
       dashboardFeatureFlagConfig: this.dashboardFeatureFlagConfig!,
       DashboardContainerByValueRenderer: createDashboardContainerByValueRenderer({

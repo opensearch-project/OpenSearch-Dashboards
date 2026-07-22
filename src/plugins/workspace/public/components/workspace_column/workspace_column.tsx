@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { EuiText, EuiBadge, EuiPopover } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@osd/i18n';

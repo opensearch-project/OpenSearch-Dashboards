@@ -66,6 +66,8 @@ interface HeaderProps {
   isIncludingSystemIndices: boolean;
   stepInfo: StepInfo;
   dataSourceRef?: DataSourceRef;
+  displayName: string;
+  onDisplayNameChanged: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -81,6 +83,8 @@ export const Header: React.FC<HeaderProps> = ({
   isIncludingSystemIndices,
   stepInfo,
   dataSourceRef,
+  displayName,
+  onDisplayNameChanged,
   ...rest
 }) => {
   const { dataSourceEnabled } = useOpenSearchDashboards<IndexPatternManagmentContext>().services;
@@ -119,6 +123,35 @@ export const Header: React.FC<HeaderProps> = ({
                   query,
                   onQueryChanged
                 )}
+            <EuiCompressedFormRow
+              fullWidth
+              label={
+                <FormattedMessage
+                  id="indexPatternManagement.createIndexPattern.step.displayNameLabel"
+                  defaultMessage="Display name"
+                />
+              }
+              helpText={
+                <FormattedMessage
+                  id="indexPatternManagement.createIndexPattern.step.displayNameHelpText"
+                  defaultMessage="A friendly name to show in the UI instead of the index pattern. Leave empty to use the pattern as the display name."
+                />
+              }
+            >
+              <EuiCompressedFieldText
+                name="displayName"
+                placeholder={i18n.translate(
+                  'indexPatternManagement.createIndexPattern.step.displayNamePlaceholder',
+                  {
+                    defaultMessage: 'e.g., Production Logs',
+                  }
+                )}
+                value={displayName}
+                onChange={onDisplayNameChanged}
+                data-test-subj="createIndexPatternDisplayNameInput"
+                fullWidth
+              />
+            </EuiCompressedFormRow>
             {showSystemIndices ? (
               <EuiCompressedFormRow>
                 <EuiCompressedSwitch

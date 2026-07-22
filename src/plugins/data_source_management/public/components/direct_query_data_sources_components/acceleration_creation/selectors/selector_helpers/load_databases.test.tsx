@@ -5,7 +5,7 @@
 
 import { mount } from 'enzyme';
 import { act } from 'react';
-import React from 'react';
+
 import { EuiButtonIcon, EuiLoadingSpinner } from '@elastic/eui';
 import { SelectorLoadDatabases } from './load_databases';
 import { HttpStart, NotificationsStart } from 'opensearch-dashboards/public';
@@ -14,12 +14,12 @@ import { useLoadDatabasesToCache } from '../../../../../../framework/catalog_cac
 
 jest.mock('../../../../../../framework/catalog_cache/cache_loader');
 
-const mockHttp: HttpStart = ({} as unknown) as HttpStart;
-const mockNotifications: NotificationsStart = ({
+const mockHttp: HttpStart = {} as unknown as HttpStart;
+const mockNotifications: NotificationsStart = {
   toasts: {
     addWarning: jest.fn(),
   },
-} as unknown) as NotificationsStart;
+} as unknown as NotificationsStart;
 
 const defaultProps = {
   dataSourceName: 'test_source',
@@ -87,40 +87,31 @@ describe('SelectorLoadDatabases', () => {
       stopLoading: stopDatabasesLoading,
     }));
 
-    // @ts-expect-error TS7034 TODO(ts-error): fixme
     let wrapper;
     await act(async () => {
       wrapper = mount(<SelectorLoadDatabases {...defaultProps} />);
     });
-    // @ts-expect-error TS7005 TODO(ts-error): fixme
     wrapper!.update();
 
     // Click button to start loading
     await act(async () => {
-      // @ts-expect-error TS7005 TODO(ts-error): fixme
       wrapper!.find(EuiButtonIcon).simulate('click');
     });
-    // @ts-expect-error TS7005 TODO(ts-error): fixme
     wrapper!.update();
 
     // Verify loading state
-    // @ts-expect-error TS7005 TODO(ts-error): fixme
     expect(wrapper!.find(EuiLoadingSpinner).exists()).toBe(true);
 
     // Simulate SUCCESS status from the hook
     mockLoadStatus.current = DirectQueryLoadingStatus.SUCCESS;
 
     await act(async () => {
-      // @ts-expect-error TS7005 TODO(ts-error): fixme
       wrapper!.setProps({}); // Trigger re-render with new status
     });
-    // @ts-expect-error TS7005 TODO(ts-error): fixme
     wrapper!.update();
 
     expect(defaultProps.loadDatabases).toHaveBeenCalled();
-    // @ts-expect-error TS7005 TODO(ts-error): fixme
     expect(wrapper!.find(EuiLoadingSpinner).exists()).toBe(false);
-    // @ts-expect-error TS7005 TODO(ts-error): fixme
     expect(wrapper!.find(EuiButtonIcon).exists()).toBe(true);
   });
 

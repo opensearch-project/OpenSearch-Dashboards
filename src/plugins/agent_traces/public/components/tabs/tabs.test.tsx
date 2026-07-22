@@ -68,7 +68,7 @@ describe('AgentTracesTabsComponent', () => {
           flavor: [AgentTracesFlavor.Traces],
         },
         {
-          id: 'agent_traces_visualization_tab',
+          id: 'visualization',
           label: 'Visualization',
           component: () => <div>Visualization Content</div>,
           flavor: [AgentTracesFlavor.Traces],
@@ -159,7 +159,7 @@ describe('AgentTracesTabsComponent', () => {
       jest.runAllTimers();
     });
 
-    expect(mockSetActiveTab).toHaveBeenCalledWith('agent_traces_visualization_tab');
+    expect(mockSetActiveTab).toHaveBeenCalledWith('visualization');
     expect(mockClearQueryStatusMapByKey).toHaveBeenCalled();
     expect(mockExecuteTabQuery).toHaveBeenCalled();
     jest.useRealTimers();
@@ -195,7 +195,7 @@ describe('AgentTracesTabsComponent', () => {
       jest.runAllTimers();
     });
 
-    expect(mockSetActiveTab).toHaveBeenCalledWith('agent_traces_visualization_tab');
+    expect(mockSetActiveTab).toHaveBeenCalledWith('visualization');
     expect(mockClearQueryStatusMapByKey).not.toHaveBeenCalled();
     expect(mockExecuteTabQuery).not.toHaveBeenCalled();
     jest.useRealTimers();
@@ -204,7 +204,7 @@ describe('AgentTracesTabsComponent', () => {
   it('should render selected tab content when activeTabId is set', () => {
     const store = createMockStore({
       ui: {
-        activeTabId: 'agent_traces_visualization_tab',
+        activeTabId: 'visualization',
         showHistogram: true,
       },
     });

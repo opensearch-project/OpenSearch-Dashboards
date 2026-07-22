@@ -39,16 +39,39 @@ const DEFAULT_CONFIG = Object.freeze(config.schema.validate({}));
  */
 export interface ICspConfig {
   /**
-   * The CSP rules used for OpenSearch Dashboards.
+   * The CSP rules used for OpenSearch Dashboards. Reflects the rules
+   * selected at startup based on `enable`/`strict` (strict rules if either
+   * is true, otherwise loose rules).
    */
   readonly rules: string[];
+
+  /**
+   * The STRICT CSP rules, always computed — includes allowed sources
+   * (frame-ancestors, connect-src, img-src) and any loosened directives.
+   * Use together with `buildStrictHeaderWithNonce` to emit the strict
+   * header at request time regardless of the startup `enable` value.
+   */
+  readonly strictRules: string[];
+
+  /**
+   * The LOOSE CSP rules, always available. These come from the
+   * schema default (`LOOSE_CSP_RULES_DEFAULT_VALUE`) unless overridden
+   * via `csp.rules` in the config.
+   */
+  readonly looseRules: string[];
 
   /**
    * Specify whether browsers that do not support CSP should be
    * able to use OpenSearch Dashboards. Use `true` to block and `false` to allow.
    * This will also add the STRICT_CSP_RULES
+   * @deprecated Use `enable` instead.
    */
   readonly strict: boolean;
+
+  /**
+   * Specify whether CSP hardening mode is enabled.
+   */
+  readonly enable: boolean;
 
   /**
    * Specify whether users with legacy browsers should be warned
@@ -79,15 +102,23 @@ export interface ICspConfig {
 
   /**
    * Loosens the specified CSP directives back to the default_values.
-   * This is only used when strict === true
+   * This is only used when enable === true
    */
   readonly loosenCspDirectives?: string[];
 
   /**
    * The CSP rules in a formatted directives string for use
-   * in a `Content-Security-Policy` header.
+   * in a `Content-Security-Policy` header. Reflects the startup
+   * `enable`/`strict` selection.
    */
   readonly header: string;
+
+  /**
+   * The LOOSE CSP header, always available — the loose rules joined
+   * with '; '. Use at request time when dynamic config disables CSP
+   * hardening, independent of the startup config.
+   */
+  readonly looseHeader: string;
 
   /**
    * Directives that should have a nonce value appended when building the header.
@@ -97,10 +128,21 @@ export interface ICspConfig {
 
   /**
    * Builds the CSP header with nonce values inserted into configured directives.
+   * Uses whichever rule set was selected at startup (strict or loose).
    * @param nonce - The nonce value to insert (without 'nonce-' prefix)
    * @returns The complete CSP header string with nonces
    */
   buildHeaderWithNonce(nonce: string): string;
+
+  /**
+   * Builds the STRICT CSP header with nonce values inserted — always uses
+   * the strict rule set (with allowed sources applied), regardless of the
+   * startup `enable`/`strict` value. Use when dynamic configuration enables
+   * CSP hardening at request time.
+   * @param nonce - The nonce value to insert (without 'nonce-' prefix)
+   * @returns The complete strict CSP header string with nonces
+   */
+  buildStrictHeaderWithNonce(nonce: string): string;
 }
 
 /**
@@ -111,33 +153,57 @@ export class CspConfig implements ICspConfig {
   static readonly DEFAULT = new CspConfig();
 
   public readonly rules: string[];
+  public readonly strictRules: string[];
+  public readonly looseRules: string[];
   public readonly nonceDirectives: string[];
+  /** @deprecated Use `enable` instead. */
   public readonly strict: boolean;
+  public readonly enable: boolean;
   public readonly warnLegacyBrowsers: boolean;
   public readonly header: string;
+  public readonly looseHeader: string;
   public readonly loosenCspDirectives: string[];
 
   /**
    * Returns the default CSP configuration when passed with no config
    * @internal
    */
-  constructor(rawCspConfig: Partial<Omit<ICspConfig, 'header'>> = {}) {
+  constructor(
+    rawCspConfig: Partial<
+      Omit<ICspConfig, 'header' | 'looseHeader' | 'strictRules' | 'looseRules'>
+    > = {}
+  ) {
     const source = { ...DEFAULT_CONFIG, ...rawCspConfig };
 
-    this.rules = source.rules;
+    this.enable = source.enable;
+    this.strict = source.enable;
     this.warnLegacyBrowsers = source.warnLegacyBrowsers;
-    this.strict = source.strict;
     this.nonceDirectives = source.nonceDirectives;
     this.loosenCspDirectives = source.loosenCspDirectives || [];
 
-    if (source.strict) {
-      this.rules = this.applyLoosenCspRules(
-        this.applyAllowedSources(STRICT_CSP_RULES_DEFAULT_VALUE, source)
-      );
+    // Always compute both rule sets so the strict/loose choice can be made
+    // dynamically at request time regardless of the startup config.
+    // Note: `applyLoosenCspRules` references `this.rules` to look up the
+    // "original" loose directive when a rule is loosened, so the loose
+    // rules must be stored on `this.rules` before calling it.
+    this.looseRules = source.rules;
+    this.rules = source.rules;
+
+    this.strictRules = this.applyLoosenCspRules(
+      this.applyAllowedSources(STRICT_CSP_RULES_DEFAULT_VALUE, source)
+    );
+
+    this.looseHeader = this.looseRules.join('; ');
+
+    // Startup-time selection — preserves existing behavior for consumers
+    // that read `this.rules` or `this.header` directly.
+    const isCspEnabledAtStartup = source.enable || source.strict;
+    if (isCspEnabledAtStartup) {
+      this.rules = this.strictRules;
       this.header = this.buildHeaderInternal();
     } else {
-      this.rules = source.rules;
-      this.header = source.rules.join('; ');
+      this.rules = this.looseRules;
+      this.header = this.looseHeader;
     }
   }
 
@@ -157,11 +223,23 @@ export class CspConfig implements ICspConfig {
 
   /**
    * Builds the CSP header with nonce values inserted into configured directives.
+   * Uses whichever rule set was selected at startup (strict or loose).
    * @param nonce - The nonce value to insert (without 'nonce-' prefix)
    * @returns The complete CSP header string with nonces
    */
   public buildHeaderWithNonce(nonce: string): string {
     return this.buildHeaderInternal(nonce);
+  }
+
+  /**
+   * Builds the STRICT CSP header with nonce values inserted — always uses
+   * the strict rule set (with allowed sources applied), regardless of the
+   * startup `enable`/`strict` value.
+   * @param nonce - The nonce value to insert (without 'nonce-' prefix)
+   * @returns The complete strict CSP header string with nonces
+   */
+  public buildStrictHeaderWithNonce(nonce: string): string {
+    return this.applyNonces(this.strictRules, nonce).join('; ');
   }
 
   /**

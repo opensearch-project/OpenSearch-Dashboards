@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { TraceDetailsFlyout, TraceDetailsProps } from './trace_details_flyout';
 import { TraceRow } from '../hooks/tree_utils';

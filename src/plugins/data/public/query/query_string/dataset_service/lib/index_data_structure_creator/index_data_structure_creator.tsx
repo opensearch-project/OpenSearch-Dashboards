@@ -485,8 +485,8 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
                 infoData.health === 'green'
                   ? 'success'
                   : infoData.health === 'yellow'
-                  ? 'warning'
-                  : 'danger'
+                    ? 'warning'
+                    : 'danger'
               }
             >
               {infoData.health}
@@ -630,6 +630,7 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
                                   onClick={() => handleInfoIconClick(itemIndex, item)}
                                   className="indexDataStructureCreator__wildcardButton"
                                 >
+                                  {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}
                                   <EuiText size="xs" color="primary">
                                     {matchingIndices.length}{' '}
                                     {matchingIndices.length === 1 ? 'index' : 'indices'}
@@ -654,8 +655,8 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
                             infoData.health === 'green'
                               ? 'success'
                               : infoData.health === 'yellow'
-                              ? 'warning'
-                              : 'danger'
+                                ? 'warning'
+                                : 'danger'
                           }
                         >
                           <EuiText size="xs">{infoData.health}</EuiText>

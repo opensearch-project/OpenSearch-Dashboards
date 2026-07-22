@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React from 'react';
+
 import { shallow } from 'enzyme';
 import { IndexPatternField, DataView } from 'src/plugins/data/public';
 import { IndexedFieldsTable } from './indexed_fields_table';
@@ -27,13 +27,13 @@ const helpers = {
   getFieldInfo: () => [],
 };
 
-const dataset = ({
+const dataset = {
   getNonScriptedFields: () => fields,
-} as unknown) as DataView;
+} as unknown as DataView;
 
 const mockFieldToIndexPatternField = (spec: Record<string, string | boolean | undefined>) => {
   return new IndexPatternField(
-    (spec as unknown) as IndexPatternField['spec'],
+    spec as unknown as IndexPatternField['spec'],
     spec.displayName as string
   );
 };

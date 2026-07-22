@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { i18n } from '@osd/i18n';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -119,7 +119,7 @@ export const EditValueMappingsModel = ({
 
   const handleAddMapping = (type: 'value' | 'range') => {
     const newMapping: ValueMapping = {
-      id: uuid.v4(),
+      id: uuidv4(),
       type,
       displayText: '',
       ...(type === 'value' ? { value: undefined } : { range: { min: undefined, max: undefined } }),

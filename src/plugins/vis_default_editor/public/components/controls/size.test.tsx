@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { EuiIconTip } from '@elastic/eui';
 import { SizeParamEditor, SizeParamEditorProps } from './size';
@@ -88,11 +87,11 @@ describe('SizeParamEditor', () => {
     const input = comp.find('[type="number"]');
     input.simulate('change', { target: { value: '3' } });
 
-    expect(defaultProps.setValue).toBeCalledWith(3);
+    expect(defaultProps.setValue).toHaveBeenCalledWith(3);
 
     input.simulate('change', { target: { value: '' } });
 
-    expect(defaultProps.setValue).toBeCalledWith('');
+    expect(defaultProps.setValue).toHaveBeenCalledWith('');
     expect(defaultProps.setValue).toHaveBeenCalledTimes(2);
   });
 

@@ -13,6 +13,8 @@ import {
   ChartType,
   StyleOptions,
 } from '../components/visualizations/utils/use_visualization_types';
+import { AxisFieldNameMappings } from '../components/visualizations/types';
+import { UrlTransformationState } from '../components/data_transformations';
 
 export interface ExploreState {
   legacy: LegacyState;
@@ -23,13 +25,17 @@ export interface ExploreState {
 interface VisState {
   chartType?: ChartType;
   styleOptions?: StyleOptions;
-  axesMapping?: Record<string, string>;
+  axesMapping?: AxisFieldNameMappings;
+  splitField?: string;
+  splitLayout?: string;
+  showSplitLabel?: boolean;
+  serializedPipeline?: UrlTransformationState[];
 }
 
 export const saveStateToSavedObject = (
   obj: SavedExplore,
-  flavorId: string,
-  tabDefinition: TabDefinition,
+  flavorId?: string,
+  tabDefinition?: TabDefinition,
   visState?: VisState,
   dataset?: IndexPattern | Dataset,
   activeTabId?: string
@@ -43,10 +49,14 @@ export const saveStateToSavedObject = (
     chartType: visState?.chartType ?? 'line',
     params: visState?.styleOptions ?? {},
     axesMapping: visState?.axesMapping,
+    splitField: visState?.splitField,
+    splitLayout: visState?.splitLayout,
+    showSplitLabel: visState?.showSplitLabel,
+    dataTransformations: visState?.serializedPipeline,
   });
 
   obj.uiState = JSON.stringify({
-    activeTab: activeTabId || tabDefinition.id,
+    activeTab: (tabDefinition ? activeTabId : undefined) || tabDefinition?.id || '',
   });
   obj.searchSourceFields = { index: dataset };
 
@@ -80,7 +90,7 @@ export const getStateFromSavedObject = (obj: SavedExploreAttributes): ExploreSav
         query: queryState,
       },
     };
-  } catch (error) {
+  } catch {
     throw new InvalidJSONProperty(
       i18n.translate('explore.getStateFromSavedObject.genericJSONError', {
         defaultMessage:
@@ -105,7 +115,7 @@ export const getLegacyPropertiesFromSavedObject = (savedExplore: SavedExplore) =
       columns: legacyState.columns || [],
       sort: legacyState.sort || [],
     };
-  } catch (error) {
+  } catch {
     return {
       columns: [],
       sort: [],
@@ -130,7 +140,7 @@ export const updateLegacyPropertiesInSavedObject = (
 
     savedExplore.legacyState = JSON.stringify(updatedLegacyState);
     return savedExplore;
-  } catch (error) {
+  } catch {
     return savedExplore;
   }
 };

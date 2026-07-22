@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
 import { ValueAxesPanel, ValueAxesPanelProps } from './value_axes_panel';
 import { ValueAxis, SeriesParam } from '../../../types';
@@ -105,14 +104,14 @@ describe('ValueAxesPanel component', () => {
     const comp = mountWithIntl(<ValueAxesPanel {...defaultProps} />);
     comp.find('[data-test-subj="removeValueAxisBtn"] button').first().simulate('click');
 
-    expect(removeValueAxis).toBeCalledWith(axisLeft);
+    expect(removeValueAxis).toHaveBeenCalledWith(axisLeft);
   });
 
   it('should call addValueAxis', () => {
     const comp = mountWithIntl(<ValueAxesPanel {...defaultProps} />);
     comp.find('[data-test-subj="visualizeAddYAxisButton"] button').simulate('click');
 
-    expect(addValueAxis).toBeCalled();
+    expect(addValueAxis).toHaveBeenCalled();
   });
 
   describe('description', () => {

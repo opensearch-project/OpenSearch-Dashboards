@@ -97,6 +97,7 @@ describe('field_filter', function () {
     ].forEach((test) => {
       const filtered = fieldList
         .filter((field) =>
+          // @ts-expect-error TS2345 TODO(ts-error): fixme
           isFieldFiltered(field, { ...defaultState, ...test.filter }, { bytes: 1, extension: 1 })
         )
         .map((field) => field.name);

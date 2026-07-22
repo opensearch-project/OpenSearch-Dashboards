@@ -17,16 +17,43 @@ import {
   splitMultiQueries,
 } from '../../../data/common';
 import {
+  MetricResult,
   prometheusManager,
   PromQLQueryParams,
   PromQLQueryResponse,
 } from '../connections/managers/prometheus_manager';
 import { calculateStep, DEFAULT_RESOLUTION } from './prom_utils';
 
+function normalizeResult(
+  resultType: string | undefined,
+  result: MetricResult[] | [number, string] | undefined
+): MetricResult[] {
+  if (!result) return [];
+  if (resultType === 'scalar' || resultType === 'string') {
+    const [timestamp, value] = result as [number, string];
+    return [{ metric: {}, value: [timestamp, Number(value)] }];
+  }
+  return result as MetricResult[];
+}
+
+function parseTimeValue(
+  value: string | undefined,
+  options?: Parameters<typeof dateMath.parse>[1]
+): number {
+  if (!value) {
+    throw new Error('Time or time range option missing');
+  }
+  const epoch = Number(value);
+  if (Number.isFinite(epoch)) return epoch;
+  const parsed = dateMath.parse(value, options)?.unix();
+  if (!parsed) {
+    throw new Error('Invalid time or time range option');
+  }
+  return parsed;
+}
+
 // MAX_SERIES_TABLE: Maximum series for table display
 const MAX_SERIES_TABLE = 2000;
-// MAX_SERIES_VIZ: Maximum series for visualization. This should be lower than MAX_SERIES_TABLE
-const MAX_SERIES_VIZ = 100;
 // We'll want to re-evaluate this when we provide an affordance for step configuration
 const MAX_DATAPOINTS = DEFAULT_RESOLUTION * MAX_SERIES_TABLE;
 
@@ -48,35 +75,52 @@ export const promqlSearchStrategyProvider = (
     search: async (context, request: any, options) => {
       try {
         const { body: requestBody } = request;
-        const parsedFrom = dateMath.parse(requestBody.timeRange.from);
-        const parsedTo = dateMath.parse(requestBody.timeRange.to, { roundUp: true });
-        if (!parsedFrom || !parsedTo) {
-          throw new Error('Invalid time range format');
-        }
-        const timeRange = {
-          start: parsedFrom.unix(),
-          end: parsedTo.unix(),
-        };
-        const durationMs = (timeRange.end - timeRange.start) * 1000;
-        const step = requestBody.step ?? calculateStep(durationMs);
         const { dataset, query, language }: Query = requestBody.query;
         const datasetId = dataset?.id ?? '';
 
+        const requestOptions = requestBody.options as
+          { queryType?: string; time?: string; step?: number } | undefined;
+        const isInstantQuery = requestOptions?.queryType?.toUpperCase() === 'INSTANT';
+
         const parsedQueries = splitMultiQueries(query as string);
         const isSingleQuery = parsedQueries.length === 1;
+
+        let queryOptions: ExecuteQueryOptions;
+
+        if (isInstantQuery) {
+          const parsedTime = parseTimeValue(requestOptions?.time);
+          queryOptions = {
+            language,
+            maxResults: Math.floor(MAX_DATAPOINTS / parsedQueries.length),
+            timeout: 30,
+            queryType: 'instant' as const,
+            time: parsedTime,
+          };
+        } else {
+          const parsedFrom = parseTimeValue(requestBody.timeRange?.from);
+          const parsedTo = parseTimeValue(requestBody.timeRange?.to, { roundUp: true });
+          const timeRange = {
+            start: parsedFrom,
+            end: parsedTo,
+          };
+          queryOptions = {
+            language,
+            maxResults: Math.floor(MAX_DATAPOINTS / parsedQueries.length),
+            timeout: 30,
+            queryType: 'range' as const,
+            timeRange,
+            step: (
+              requestOptions?.step ?? calculateStep((timeRange.end - timeRange.start) * 1000)
+            ).toString(),
+          };
+        }
 
         // Execute all queries uniformly
         const queryResults = await executeMultipleQueries(
           context,
           request,
           parsedQueries,
-          {
-            language,
-            maxResults: Math.floor(MAX_DATAPOINTS / parsedQueries.length),
-            timeout: 30,
-            timeRange,
-            step: step.toString(),
-          },
+          queryOptions,
           datasetId,
           logger
         );
@@ -103,77 +147,93 @@ export const promqlSearchStrategyProvider = (
 };
 
 /**
+ * Options for executing queries — discriminated union on queryType
+ */
+type ExecuteQueryOptions =
+  | {
+      language: string;
+      maxResults: number;
+      timeout: number;
+      queryType: 'range';
+      timeRange: { start: number; end: number };
+      step: string;
+    }
+  | {
+      language: string;
+      maxResults: number;
+      timeout: number;
+      queryType: 'instant';
+      time: number;
+    };
+
+/**
  * Executes multiple PromQL queries in parallel
  */
 async function executeMultipleQueries(
   context: any,
   request: any,
   queries: ParsedQuery[],
-  options: {
-    language: string;
-    maxResults: number;
-    timeout: number;
-    timeRange: { start: number; end: number };
-    step: string;
-  },
+  options: ExecuteQueryOptions,
   datasetId: string,
   logger: Logger
 ): Promise<LabeledQueryResult[]> {
-  const promises = queries.map(
-    async (parsedQuery): Promise<LabeledQueryResult> => {
-      const params: PromQLQueryParams = {
-        body: {
-          query: parsedQuery.query,
-          language: options.language,
-          maxResults: options.maxResults,
-          timeout: options.timeout,
-          options: {
+  const promises = queries.map(async (parsedQuery): Promise<LabeledQueryResult> => {
+    const queryOptions: PromQLQueryParams['body']['options'] =
+      options.queryType === 'instant'
+        ? { queryType: 'instant', time: options.time.toString() }
+        : {
             queryType: 'range',
             start: options.timeRange.start.toString(),
             end: options.timeRange.end.toString(),
             step: options.step,
-          },
-        },
-        dataconnection: datasetId,
+          };
+
+    const params: PromQLQueryParams = {
+      body: {
+        query: parsedQuery.query,
+        language: options.language,
+        maxResults: options.maxResults,
+        timeout: options.timeout,
+        options: queryOptions,
+      },
+      dataconnection: datasetId,
+    };
+
+    try {
+      const queryRes = await prometheusManager.query(context, request, params);
+
+      return {
+        label: parsedQuery.label,
+        response: queryRes,
       };
+    } catch (error) {
+      let errorMessage = `Query ${parsedQuery.label} failed`;
 
-      try {
-        const queryRes = await prometheusManager.query(context, request, params);
-
-        return {
-          label: parsedQuery.label,
-          response: queryRes,
-        };
-      } catch (error) {
-        let errorMessage = `Query ${parsedQuery.label} failed`;
-
-        if (error instanceof Error) {
-          errorMessage = error.message;
-        }
-
-        // Try to extract detailed error from response body from SQL plugin
-        const responseBody = (error as any)?.body ?? (error as any)?.response;
-        if (responseBody) {
-          try {
-            const parsed =
-              typeof responseBody === 'string' ? JSON.parse(responseBody) : responseBody;
-            errorMessage =
-              parsed?.error?.details ??
-              parsed?.error?.reason ??
-              parsed?.error?.message ??
-              errorMessage;
-          } catch {
-            // error might come from other places, use original message if failed
-          }
-        }
-
-        return {
-          label: parsedQuery.label,
-          error: errorMessage,
-        };
+      if (error instanceof Error) {
+        errorMessage = error.message;
       }
+
+      // Try to extract detailed error from response body from SQL plugin
+      const responseBody = (error as any)?.body ?? (error as any)?.response;
+      if (responseBody) {
+        try {
+          const parsed = typeof responseBody === 'string' ? JSON.parse(responseBody) : responseBody;
+          errorMessage =
+            parsed?.error?.details ??
+            parsed?.error?.reason ??
+            parsed?.error?.message ??
+            errorMessage;
+        } catch {
+          // error might come from other places, use original message if failed
+        }
+      }
+
+      return {
+        label: parsedQuery.label,
+        error: errorMessage,
+      };
     }
-  );
+  });
 
   return Promise.all(promises);
 }
@@ -203,6 +263,7 @@ function createDataFrame(
 ): IDataFrame {
   const allVizRows: Array<Record<string, unknown>> = [];
   const allLabelKeys = new Set<string>();
+  let totalSeriesCount = 0;
 
   // instantDataMap is used for table display, we only show the latest datapoint in the table.
   const instantDataMap = new Map<
@@ -220,7 +281,9 @@ function createDataFrame(
   queryResults.forEach((result) => {
     if (!result.response || result.error) return;
 
-    const series = result.response.results[datasetId]?.result || [];
+    const queryResult = result.response.results[datasetId];
+    const series = normalizeResult(queryResult?.resultType, queryResult?.result);
+    totalSeriesCount += series.length;
 
     series.forEach((metricResult, i) => {
       if (i >= MAX_SERIES_TABLE) return;
@@ -239,7 +302,8 @@ function createDataFrame(
   queryResults.forEach((result) => {
     if (!result.response || result.error) return;
 
-    const series = result.response.results[datasetId]?.result || [];
+    const queryResult = result.response.results[datasetId];
+    const series = normalizeResult(queryResult?.resultType, queryResult?.result);
 
     series.forEach((metricResult, seriesIndex) => {
       if (seriesIndex >= MAX_SERIES_TABLE) return;
@@ -256,7 +320,9 @@ function createDataFrame(
       // interpreting them as array index notation when used as field names
       const escapedSeriesName = seriesName.replace(/\[/g, '\\[').replace(/\]/g, '\\]');
 
-      metricResult.values.forEach(([timestamp, value]) => {
+      const dataPoints = metricResult.values ?? (metricResult.value ? [metricResult.value] : []);
+
+      dataPoints.forEach(([timestamp, value]) => {
         const metricSignature = JSON.stringify({
           name: metricName,
           labels: labelsWithoutName,
@@ -279,10 +345,11 @@ function createDataFrame(
           existing.valuesByQuery[result.label] = Number(value);
         }
 
-        if (seriesIndex < MAX_SERIES_VIZ) {
+        if (seriesIndex < MAX_SERIES_TABLE) {
           allVizRows.push({
             Time: timeMs,
             Series: escapedSeriesName,
+            Labels: labelsWithoutName,
             Value: Number(value),
           });
         }
@@ -329,6 +396,7 @@ function createDataFrame(
   const vizSchema = [
     { name: 'Time', type: 'time', values: [] },
     { name: 'Series', type: 'string', values: [] },
+    { name: 'Labels', type: 'object', values: [] },
     { name: 'Value', type: 'number', values: [] },
   ];
 
@@ -348,6 +416,15 @@ function createDataFrame(
       rows: allInstantRows,
     },
   };
+
+  const tableTruncated = totalSeriesCount > MAX_SERIES_TABLE;
+  if (tableTruncated || totalSeriesCount > 0) {
+    meta.truncation = {
+      tableTruncated,
+      totalSeriesCount,
+      displayedSeriesCount: Math.min(totalSeriesCount, MAX_SERIES_TABLE),
+    };
+  }
 
   if (!isSingleQuery) {
     meta.multiQuery = {

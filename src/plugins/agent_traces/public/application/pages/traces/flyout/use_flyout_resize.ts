@@ -46,5 +46,6 @@ export const useFlyoutResize = (): UseFlyoutResizeResult => {
     };
   }, [isResizingFlyout]);
 
+  // @ts-expect-error TS2322 TODO(ts-error): fixme
   return { flyoutWidth, isResizingFlyout, handleFlyoutMouseDown };
 };

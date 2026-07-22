@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import { Subscription } from 'rxjs';
 import {
@@ -68,16 +67,16 @@ function getHasMatch(search?: string, savedAttributes?: BookSavedObjectAttribute
   if (!savedAttributes) return false;
   return Boolean(
     (savedAttributes.author && savedAttributes.author.match(search)) ||
-      (savedAttributes.title && savedAttributes.title.match(search))
+    (savedAttributes.title && savedAttributes.title.match(search))
   );
 }
 
 export class BookEmbeddable
   extends Embeddable<BookEmbeddableInput, BookEmbeddableOutput>
-  implements ReferenceOrValueEmbeddable<BookByValueInput, BookByReferenceInput> {
+  implements ReferenceOrValueEmbeddable<BookByValueInput, BookByReferenceInput>
+{
   public readonly type = BOOK_EMBEDDABLE;
   private subscription: Subscription;
-  private node?: HTMLElement;
   private root: Root | null = null;
   private savedObjectId?: string;
   private attributes?: BookSavedObjectAttributes;
@@ -131,7 +130,6 @@ export class BookEmbeddable
       this.root.unmount();
       this.root = null;
     }
-    this.node = node;
     this.root = createRoot(node);
     this.root.render(<BookEmbeddableComponent embeddable={this} />);
   }

@@ -6,6 +6,7 @@
 import React, { createContext, useCallback, useContext, useMemo } from 'react';
 import { EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
+// @ts-expect-error TS7016 TODO(ts-error): fixme
 import { CelestialMap, AgentCardNode } from '@osd/apm-topology';
 import type { NodeProps } from '@xyflow/react';
 
@@ -111,10 +112,10 @@ export const TraceFlowView: React.FC<TraceFlowViewProps> = ({
     return { mapData: { root: { nodes, edges } }, spanMap: map };
   }, [categorizedTree]);
 
-  const contextValue = useMemo<TraceFlowContextValue>(() => ({ onSelectSpan, spanMap }), [
-    onSelectSpan,
-    spanMap,
-  ]);
+  const contextValue = useMemo<TraceFlowContextValue>(
+    () => ({ onSelectSpan, spanMap }),
+    [onSelectSpan, spanMap]
+  );
 
   // Deselect when clicking the ReactFlow background pane
   const handleContainerClick = useCallback(

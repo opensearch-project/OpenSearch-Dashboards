@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { renderWithIntl } from 'test_utils/enzyme_helpers';
 import { RouteComponentProps } from 'react-router-dom';
 import { ScopedHistory } from 'opensearch-dashboards/public';
@@ -40,9 +39,9 @@ describe('Header', () => {
     const component = renderWithIntl(
       <Header.WrappedComponent
         indexPatternId="test"
-        history={(scopedHistoryMock.create() as unknown) as ScopedHistory}
-        location={({} as unknown) as RouteComponentProps['location']}
-        match={({} as unknown) as RouteComponentProps['match']}
+        history={scopedHistoryMock.create() as unknown as ScopedHistory}
+        location={{} as unknown as RouteComponentProps['location']}
+        match={{} as unknown as RouteComponentProps['match']}
         useUpdatedUX
       />
     );
@@ -54,9 +53,9 @@ describe('Header', () => {
     const component = renderWithIntl(
       <Header.WrappedComponent
         indexPatternId="test"
-        history={(scopedHistoryMock.create() as unknown) as ScopedHistory}
-        location={({} as unknown) as RouteComponentProps['location']}
-        match={({} as unknown) as RouteComponentProps['match']}
+        history={scopedHistoryMock.create() as unknown as ScopedHistory}
+        location={{} as unknown as RouteComponentProps['location']}
+        match={{} as unknown as RouteComponentProps['match']}
         useUpdatedUX={false}
       />
     );

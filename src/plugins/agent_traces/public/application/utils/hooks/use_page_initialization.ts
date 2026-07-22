@@ -54,6 +54,7 @@ export const useInitPage = () => {
           const query = {
             ...queryFromSavedSearch,
             ...queryFromUrl,
+            // @ts-expect-error TS2339 TODO(ts-error): fixme
             query: queryFromUrl.query ?? queryFromSavedSearch.query,
           };
           if (query) {
@@ -111,6 +112,7 @@ export const useInitPage = () => {
         // Mark as initialized so the table moves past the loading gate.
         dispatch(setIsInitialized(true));
 
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         dispatch(executeQueries({ services })).then(() => {
           if (savedAgentTraces.sort && savedAgentTraces.sort.length > 0) {
             dispatch(setSort(savedAgentTraces.sort));

@@ -6,7 +6,7 @@
 import supertest from 'supertest';
 import { setupServer } from '../../../../../core/server/test_utils';
 import { loggingSystemMock } from '../../../../../core/server/mocks';
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
+
 import { opensearchClientMock } from '../../../../../core/server/opensearch/client/mocks';
 import { registerQueryAssistRoutes } from './routes';
 import { API } from '../../../common';
@@ -143,6 +143,30 @@ describe('Query Assist Routes', () => {
       expect(result.body).toEqual({
         configuredLanguages: [],
       });
+    });
+
+    it('returns empty languages with a timeout error when the agent probe hangs', async () => {
+      mockGetAgentIdByConfig.mockReturnValue(new Promise(() => {}));
+
+      const realSetTimeout = global.setTimeout;
+      const setTimeoutSpy = jest
+        .spyOn(global, 'setTimeout')
+        .mockImplementation(((fn: (...args: any[]) => void, ms?: number, ...args: any[]) =>
+          realSetTimeout(fn, ms === 5000 ? 0 : ms, ...args)) as typeof setTimeout);
+
+      try {
+        const httpSetup = await testSetup();
+        const result = await supertest(httpSetup.server.listener)
+          .get(API.QUERY_ASSIST.LANGUAGES)
+          .expect(200);
+
+        expect(result.body).toEqual({
+          configuredLanguages: [],
+          error: 'assist/languages probe timed out',
+        });
+      } finally {
+        setTimeoutSpy.mockRestore();
+      }
     });
   });
 

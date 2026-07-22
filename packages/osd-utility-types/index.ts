@@ -61,9 +61,8 @@ export interface ObservableLike<T> {
 /**
  * Returns wrapped type of an observable.
  */
-export type UnwrapObservable<T extends ObservableLike<any>> = T extends ObservableLike<infer U>
-  ? U
-  : never;
+export type UnwrapObservable<T extends ObservableLike<any>> =
+  T extends ObservableLike<infer U> ? U : never;
 
 /**
  * Ensures T is of type X.
@@ -77,10 +76,10 @@ export interface RecursiveReadonlyArray<T> extends ReadonlyArray<RecursiveReadon
 export type RecursiveReadonly<T> = T extends (...args: any) => any
   ? T
   : T extends any[]
-  ? RecursiveReadonlyArray<T[number]>
-  : T extends object
-  ? Readonly<{ [K in keyof T]: RecursiveReadonly<T[K]> }>
-  : T;
+    ? RecursiveReadonlyArray<T[number]>
+    : T extends object
+      ? Readonly<{ [K in keyof T]: RecursiveReadonly<T[K]> }>
+      : T;
 
 /**
  * Returns types or array or object values.

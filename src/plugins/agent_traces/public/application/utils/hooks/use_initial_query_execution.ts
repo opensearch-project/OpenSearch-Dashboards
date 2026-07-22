@@ -71,8 +71,10 @@ export const useInitialQueryExecution = (services: AgentTracesServices) => {
           dispatch(setSort([[datasetFromContext.timeFieldName, 'desc']]));
         }
 
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         await dispatch(executeQueries({ services }));
         if (!activeTabId) {
+          // @ts-expect-error TS2345 TODO(ts-error): fixme
           dispatch(detectAndSetOptimalTab({ services }));
         }
         dispatch(setIsInitialized(true));

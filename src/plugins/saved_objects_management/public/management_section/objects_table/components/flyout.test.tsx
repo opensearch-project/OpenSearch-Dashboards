@@ -38,7 +38,6 @@ import {
   saveObjectsMock,
 } from './flyout.test.mocks';
 
-import React from 'react';
 import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 import { coreMock, notificationServiceMock } from '../../../../../../core/public/mocks';
 import { serviceRegistryMock } from '../../../services/service_registry.mock';
@@ -46,14 +45,14 @@ import { Flyout, FlyoutProps, FlyoutState } from './flyout';
 import { ShallowWrapper } from 'enzyme';
 import { dataPluginMock } from '../../../../../data/public/mocks';
 
-const mockFile = ({
+const mockFile = {
   name: 'foo.ndjson',
   path: '/home/foo.ndjson',
-} as unknown) as File;
-const legacyMockFile = ({
+} as unknown as File;
+const legacyMockFile = {
   name: 'foo.json',
   path: '/home/foo.json',
-} as unknown) as File;
+} as unknown as File;
 
 const dataSourceManagementMock = {
   ui: {
@@ -65,7 +64,7 @@ describe('Flyout', () => {
   let defaultProps: FlyoutProps;
 
   const shallowRender = (props: FlyoutProps) => {
-    return (shallowWithI18nProvider(<Flyout {...props} />) as unknown) as ShallowWrapper<
+    return shallowWithI18nProvider(<Flyout {...props} />) as unknown as ShallowWrapper<
       FlyoutProps,
       FlyoutState,
       Flyout
@@ -368,7 +367,8 @@ describe('Flyout', () => {
       importLegacyFileMock.mockImplementation(() => mockData);
       resolveSavedObjectsMock.mockImplementation(() => ({
         conflictedIndexPatterns: mockConflictedIndexPatterns,
-        conflictedSavedObjectsLinkedToSavedSearches: mockConflictedSavedObjectsLinkedToSavedSearches,
+        conflictedSavedObjectsLinkedToSavedSearches:
+          mockConflictedSavedObjectsLinkedToSavedSearches,
         conflictedSearchDocs: mockConflictedSearchDocs,
         importedObjectCount: 2,
         confirmModalPromise: () => {},
@@ -398,7 +398,8 @@ describe('Flyout', () => {
 
       expect(component.state()).toMatchObject({
         conflictedIndexPatterns: mockConflictedIndexPatterns,
-        conflictedSavedObjectsLinkedToSavedSearches: mockConflictedSavedObjectsLinkedToSavedSearches,
+        conflictedSavedObjectsLinkedToSavedSearches:
+          mockConflictedSavedObjectsLinkedToSavedSearches,
         conflictedSearchDocs: mockConflictedSearchDocs,
         importCount: 2,
         status: 'idle',

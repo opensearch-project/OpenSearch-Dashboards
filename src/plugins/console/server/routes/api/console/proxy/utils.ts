@@ -16,6 +16,7 @@ export const buildBufferedBody = (body: Stream): Promise<Buffer> => {
     let buff: Buffer = Buffer.alloc(0);
 
     body.on('data', function (chunk: Buffer) {
+      // @ts-expect-error TS2322 TODO(ts-upgrade): fixme
       buff = Buffer.concat([buff, chunk]);
     });
 

@@ -4,7 +4,7 @@
  */
 
 import { fireEvent, render } from '@testing-library/react';
-import React, { ComponentProps } from 'react';
+import { ComponentProps } from 'react';
 import { QueryAssistSubmitButton } from './submit_button';
 
 type SubmitButtonProps = ComponentProps<typeof QueryAssistSubmitButton>;
@@ -29,6 +29,6 @@ describe('<SubmitButton /> spec', () => {
   it('should trigger submit form', () => {
     const { component, onSubmit } = renderSubmitButton();
     fireEvent.click(component.getByTestId('query-assist-submit-button'));
-    expect(onSubmit).toBeCalled();
+    expect(onSubmit).toHaveBeenCalled();
   });
 });

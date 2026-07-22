@@ -55,7 +55,9 @@ export class DataSourceConnectionValidator {
 
       await this.callDataCluster
         .info()
+        // @ts-expect-error TS7006 TODO(ts-upgrade): fixme
         .then((response) => response.body)
+        // @ts-expect-error TS7006 TODO(ts-upgrade): fixme
         .then((body) => {
           dataSourceInfo.dataSourceVersion = body.version.number;
 
@@ -70,10 +72,39 @@ export class DataSourceConnectionValidator {
           }
         });
 
+      if (
+        dataSourceInfo.dataSourceEngineType === DataSourceEngineType.OpenSearch &&
+        (await this.isAnalyticEngineDomain())
+      ) {
+        dataSourceInfo.dataSourceEngineType = DataSourceEngineType.AnalyticEngine;
+      }
+
       return dataSourceInfo;
-    } catch (e) {
+    } catch {
       // return default dataSourceInfo instead of throwing exception in case info() api call fails
       return dataSourceInfo;
+    }
+  }
+
+  // Detects AnalyticEngine domains via the persistent cluster setting
+  // `cluster.pluggable.dataformat`. An AnalyticEngine domain reports
+  // `dataformat=composite` and `dataformat.enabled=true`.
+  //
+  // Errors (permission denied, network timeout, older cluster without the setting) all
+  // resolve to `false`. This is fail-open at registration time: better to register the
+  // data source as plain OpenSearch than to fail Test Connection entirely. The trade-off
+  // is that a transient error during detection causes the data source to be persisted
+  // as OpenSearch; the user can re-run detection by re-saving the data source once the
+  // transient condition clears.
+  private async isAnalyticEngineDomain(): Promise<boolean> {
+    try {
+      const response = await this.callDataCluster.cluster.getSettings({
+        filter_path: 'persistent.cluster.pluggable*',
+      });
+      const pluggable = response?.body?.persistent?.cluster?.pluggable;
+      return pluggable?.dataformat === 'composite' && pluggable?.['dataformat.enabled'] === 'true';
+    } catch {
+      return false;
     }
   }
 
@@ -92,15 +123,18 @@ export class DataSourceConnectionValidator {
           format: 'JSON',
           v: true,
         })
+        // @ts-expect-error TS7006 TODO(ts-upgrade): fixme
         .then((response) => response.body)
+        // @ts-expect-error TS7006 TODO(ts-upgrade): fixme
         .then((body) => {
+          // @ts-expect-error TS7006 TODO(ts-upgrade): fixme
           body.forEach((plugin) => {
             installedPlugins.add(plugin.component);
           });
         });
 
       return installedPlugins;
-    } catch (e) {
+    } catch {
       // return empty installedPlugins instead of throwing exception in case cat.plugins() api call fails
       return installedPlugins;
     }

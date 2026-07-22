@@ -8,7 +8,7 @@
  */
 
 import { shallow } from 'enzyme';
-import React from 'react';
+
 import { CreateAccelerationHeader } from './create_acceleration_header';
 
 describe('CreateAccelerationHeader', () => {

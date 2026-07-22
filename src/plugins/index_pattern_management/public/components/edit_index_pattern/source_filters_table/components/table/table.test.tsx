@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { ReactElement } from 'react';
+import { ReactElement } from 'react';
 import { shallow, ShallowWrapper } from 'enzyme';
 
 import { Table, TableProps, TableState } from './table';
@@ -39,15 +39,17 @@ import { SourceFiltersTableFilter } from '../../types';
 const indexPattern = {} as IndexPattern;
 const items: SourceFiltersTableFilter[] = [{ value: 'tim*', clientId: '' }];
 
-const getIndexPatternMock = (mockedFields: any = {}) => ({ ...mockedFields } as IndexPattern);
+const getIndexPatternMock = (mockedFields: any = {}) =>
+  ({
+    ...mockedFields,
+  }) as IndexPattern;
 
 const getTableColumnRender = (
   component: ShallowWrapper<TableProps, TableState, Table>,
   index: number = 0
 ) => {
-  const columns = component.prop<Array<EuiTableFieldDataColumnType<SourceFiltersTableFilter>>>(
-    'columns'
-  );
+  const columns =
+    component.prop<Array<EuiTableFieldDataColumnType<SourceFiltersTableFilter>>>('columns');
   return {
     render: columns[index].render as (...args: any) => ReactElement,
   };
@@ -198,7 +200,7 @@ describe('Table', () => {
       editingComponent.update();
 
       // Ensure we call saveFilter properly
-      expect(saveFilter).toBeCalledWith({
+      expect(saveFilter).toHaveBeenCalledWith({
         clientId,
         value: 'ti*',
       });
@@ -228,7 +230,7 @@ describe('Table', () => {
       <div>{component.prop('columns')[2].render({ clientId: 1, value: 'tim*' })}</div>
     );
     deleteCellComponent.find('EuiButtonIcon').at(1).simulate('click');
-    expect(deleteFilter).toBeCalled();
+    expect(deleteFilter).toHaveBeenCalled();
   });
 
   test('should save when in edit mode and the enter key is pressed', () => {
@@ -262,7 +264,7 @@ describe('Table', () => {
 
     // Press the enter key
     filterNameTableCell.find('EuiCompressedFieldText').simulate('keydown', { key: keys.ENTER });
-    expect(saveFilter).toBeCalled();
+    expect(saveFilter).toHaveBeenCalled();
 
     // It should reset
     expect(component.state('editingFilterId')).toBe('');
@@ -301,7 +303,7 @@ describe('Table', () => {
 
     // Press the ESCAPE key
     filterNameTableCell.find('EuiCompressedFieldText').simulate('keydown', { key: keys.ESCAPE });
-    expect(saveFilter).not.toBeCalled();
+    expect(saveFilter).not.toHaveBeenCalled();
 
     // It should reset
     expect(component.state('editingFilterId')).toBe('');

@@ -45,6 +45,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, optionalRef }: Vie
   });
 
   const onQuerySubmit = useCallback(
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     (payload, isUpdate) => {
       if (isUpdate === false) {
         refetch$.next();

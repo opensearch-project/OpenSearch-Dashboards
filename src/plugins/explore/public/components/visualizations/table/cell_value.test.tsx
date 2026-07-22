@@ -90,6 +90,43 @@ describe('CellValue', () => {
     expect(screen.getByText('TestValue')).toBeInTheDocument();
   });
 
+  it('renders boolean true as text', () => {
+    render(<CellValue {...baseProps} value={true} />);
+    expect(screen.getByText('true')).toBeInTheDocument();
+  });
+
+  it('renders boolean false as text', () => {
+    render(<CellValue {...baseProps} value={false} />);
+    expect(screen.getByText('false')).toBeInTheDocument();
+  });
+
+  it('renders numeric zero as text', () => {
+    render(<CellValue {...baseProps} value={0} />);
+    expect(screen.getByText('0')).toBeInTheDocument();
+  });
+
+  it('renders null as empty string', () => {
+    const { container } = render(<CellValue {...baseProps} value={null} />);
+    expect(container.querySelector('span')?.textContent).toBe('');
+  });
+
+  it('renders undefined as empty string', () => {
+    const { container } = render(<CellValue {...baseProps} value={undefined} />);
+    expect(container.querySelector('span')?.textContent).toBe('');
+  });
+
+  it('renders object value as JSON string', () => {
+    const objValue = { name: 'John', age: 30 };
+    render(<CellValue {...baseProps} value={objValue} />);
+    expect(screen.getByText(JSON.stringify(objValue))).toBeInTheDocument();
+  });
+
+  it('renders array value as JSON string', () => {
+    const arrValue = ['tag1', 'tag2', 'tag3'];
+    render(<CellValue {...baseProps} value={arrValue} />);
+    expect(screen.getByText(JSON.stringify(arrValue))).toBeInTheDocument();
+  });
+
   it('renders a single link correctly', () => {
     const links: DataLink[] = [
       {
@@ -104,6 +141,21 @@ describe('CellValue', () => {
     const link = screen.getByRole('link', { name: 'TestValue' });
     expect(link).toHaveAttribute('href', 'https://google.com?q=TestValue');
     expect(link).toHaveAttribute('target', '_blank');
+  });
+
+  it('renders boolean value as text inside a single link', () => {
+    const links: DataLink[] = [
+      {
+        id: '1',
+        title: 'Link',
+        url: 'https://example.com?q=${__value.text}',
+        openInNewTab: false,
+        fields: ['col1'],
+      },
+    ];
+    render(<CellValue {...baseProps} value={true} dataLinks={links} />);
+    const link = screen.getByRole('link', { name: 'true' });
+    expect(link).toHaveAttribute('href', 'https://example.com?q=true');
   });
 
   it('renders multiple links with popover', async () => {

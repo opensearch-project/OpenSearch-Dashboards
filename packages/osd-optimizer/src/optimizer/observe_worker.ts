@@ -148,7 +148,7 @@ function initWorker(
         args: [
           JSON.stringify(workerConfig),
           JSON.stringify(bundles.map((b) => b.toSpec())),
-          BundleRefs.fromBundles(config.bundles).toSpecJson(),
+          BundleRefs.fromBundles(config.bundles).addRefs(config.bundleRefs).toSpecJson(),
         ],
       });
       return [];
@@ -178,22 +178,18 @@ export function observeWorker(
         bundles,
       }),
       observeStdio$(proc.stdout!).pipe(
-        map(
-          (line): WorkerStdio => ({
-            type: 'worker stdio',
-            line,
-            stream: 'stdout',
-          })
-        )
+        map((line): WorkerStdio => ({
+          type: 'worker stdio',
+          line,
+          stream: 'stdout',
+        }))
       ),
       observeStdio$(proc.stderr!).pipe(
-        map(
-          (line): WorkerStdio => ({
-            type: 'worker stdio',
-            line,
-            stream: 'stderr',
-          })
-        )
+        map((line): WorkerStdio => ({
+          type: 'worker stdio',
+          line,
+          stream: 'stderr',
+        }))
       ),
       Rx.fromEvent<[unknown]>(proc, 'message')
         .pipe(

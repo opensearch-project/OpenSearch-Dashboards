@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// @ts-expect-error TS2345 TODO Fix me
 import { ApiResponse } from '@opensearch-project/opensearch/.';
 import { IDynamicConfigurationClient, IInternalDynamicConfigurationClient } from '../types';
 import { createApiResponse } from '../utils/utils';
@@ -49,7 +50,7 @@ const createDynamicConfigurationClientMock = (
     if (getConfigProps.name && getConfigProps.name === 'csp') {
       return Promise.resolve({
         rules: [],
-        strict: false,
+        enable: false,
         warnLegacyBrowsers: false,
       });
     }

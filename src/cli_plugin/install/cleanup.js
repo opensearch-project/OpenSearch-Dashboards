@@ -52,5 +52,5 @@ export function cleanArtifacts(settings) {
   // Delete the working directory; at this point we're bailing, so swallow any errors on delete.
   try {
     rmSync(settings.workingPath, { recursive: true, force: true });
-  } catch (e) {} // eslint-disable-line no-empty
+  } catch {} // eslint-disable-line no-empty
 }

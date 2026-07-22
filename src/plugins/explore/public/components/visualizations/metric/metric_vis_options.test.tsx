@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React from 'react';
+
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MetricVisStyleControls, MetricVisStyleControlsProps } from './metric_vis_options';
 import { VisFieldType } from '../types';
@@ -37,14 +37,14 @@ jest.mock('../style_panel/standard_options/standard_options_panel', () => ({
 describe('MetricVisStyleControls', () => {
   const mockProps: MetricVisStyleControlsProps = {
     axisColumnMappings: {
-      value: {
-        id: 1,
-        name: 'value',
-        schema: VisFieldType.Numerical,
-        column: 'field-1',
-        validValuesCount: 1,
-        uniqueValuesCount: 1,
-      },
+      value: [
+        {
+          id: 1,
+          name: 'value',
+          schema: VisFieldType.Numerical,
+          column: 'field-1',
+        },
+      ],
     },
     updateVisualization: jest.fn(),
     styleOptions: defaultMetricChartStyles,
@@ -55,8 +55,6 @@ describe('MetricVisStyleControls', () => {
         name: 'value',
         schema: VisFieldType.Numerical,
         column: 'field-1',
-        validValuesCount: 1,
-        uniqueValuesCount: 1,
       },
     ],
     categoricalColumns: [],

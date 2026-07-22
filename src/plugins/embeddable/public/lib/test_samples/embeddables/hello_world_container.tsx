@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import { I18nProvider } from '@osd/i18n/react';
 import { Container, ViewMode, ContainerInput } from '../..';
@@ -42,11 +41,11 @@ export const HELLO_WORLD_CONTAINER = 'HELLO_WORLD_CONTAINER';
  * https://github.com/microsoft/TypeScript/issues/15300 is fixed so we use a type
  * here instead
  */
-type InheritedInput = {
+interface InheritedInput {
   id: string;
   viewMode: ViewMode;
   lastName: string;
-};
+}
 
 interface HelloWorldContainerInput extends ContainerInput {
   lastName?: string;

@@ -126,9 +126,8 @@ export const TableEmptyState: React.FC<{
       <p>
         <FormattedMessage
           id="agentTraces.table.emptyBody"
-          defaultMessage="No AI agent spans were found in the {indexName} index. Make sure your application is instrumented with OpenTelemetry and is sending spans with {attributeName} attribute."
+          defaultMessage="No AI agent spans were found in the selected index. Make sure your application is instrumented with OpenTelemetry and is sending spans with {attributeName} attribute."
           values={{
-            indexName: <code>otel-v1-apm-span-*</code>,
             attributeName: <code>gen_ai.operation.name</code>,
           }}
         />

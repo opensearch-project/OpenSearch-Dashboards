@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { RecentWork } from './recent_work';
@@ -234,7 +233,7 @@ describe('<RecentWork />', () => {
     const allCardsAfterSort = await findAllByTestId('recentlyCard');
     // @ts-expect-error TS2339 TODO(ts-error): fixme
     expect(allCardsAfterSort[0].querySelector('.euiCard__titleAnchor')?.href).toEqual(
-      'http://localhost/w/foo/app/search#/search-in-workspace'
+      'http://localhost:5601/w/foo/app/search#/search-in-workspace'
     );
     expect(allCardsAfterSort[0].querySelector('.euiCard__description')?.textContent).toEqual(
       'My Search'

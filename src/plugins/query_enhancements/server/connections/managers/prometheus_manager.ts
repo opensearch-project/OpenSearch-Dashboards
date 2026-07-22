@@ -41,12 +41,17 @@ export interface PromQLQueryParams {
     language: string;
     maxResults: number;
     timeout: number;
-    options: {
-      queryType: 'range' | 'instant';
-      start: string;
-      end: string;
-      step: string;
-    };
+    options:
+      | {
+          queryType: 'range';
+          start: string;
+          end: string;
+          step: string;
+        }
+      | {
+          queryType: 'instant';
+          time: string;
+        };
   };
   dataconnection: string;
 }
@@ -56,7 +61,8 @@ export interface PromQLQueryParams {
  */
 export interface MetricResult {
   metric: Record<string, string>;
-  values: Array<[number, number]>;
+  values?: Array<[number, number]>;
+  value?: [number, number];
 }
 
 /**
@@ -68,7 +74,7 @@ export interface PromQLQueryResponse {
   results: {
     [connectionId: string]: {
       resultType: string;
-      result: MetricResult[];
+      result: MetricResult[] | [number, string];
     };
   };
 }
@@ -202,7 +208,7 @@ class PrometheusManager extends BaseConnectionManager<
 
   handlePostRequest(
     context: RequestHandlerContext,
-    request: ResourcesRequest<{ start?: number; end?: number }>
+    request: ResourcesRequest<{ start?: number; end?: number; 'match[]'?: string }>
   ) {
     const { id: dataSourceName } = request.body.connection;
     const { type: resourceType, name: resourceName } = request.body.resource;
@@ -215,6 +221,10 @@ class PrometheusManager extends BaseConnectionManager<
       queryParams.metric = resourceName;
     } else if (resourceType === RESOURCE_TYPES.PROMETHEUS.SERIES && resourceName) {
       queryParams['match[]'] = resourceName;
+    }
+
+    if (resourceType === RESOURCE_TYPES.PROMETHEUS.LABEL_VALUES && content?.['match[]']) {
+      queryParams['match[]'] = content['match[]'];
     }
 
     if (content?.start !== undefined) {

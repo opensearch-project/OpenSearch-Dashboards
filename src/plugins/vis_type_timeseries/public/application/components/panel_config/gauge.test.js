@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 jest.mock('../lib/get_default_query_language', () => ({
@@ -47,7 +46,7 @@ describe('GaugePanelConfig', () => {
     const wrapper = shallowWithIntl(<GaugePanelConfig.WrappedComponent {...props} />);
 
     wrapper.find('EuiTab').first().simulate('onClick');
-    expect(props.onChange).toBeCalled();
+    expect(props.onChange).toHaveBeenCalled();
   });
 
   it('call onChange={handleChange}', () => {
@@ -59,6 +58,6 @@ describe('GaugePanelConfig', () => {
     const wrapper = shallowWithIntl(<GaugePanelConfig.WrappedComponent {...props} />);
 
     wrapper.simulate('onClick');
-    expect(props.onChange).toBeCalled();
+    expect(props.onChange).toHaveBeenCalled();
   });
 });

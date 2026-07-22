@@ -31,11 +31,10 @@
 import { ResizeChecker } from './resize_checker';
 import { EventEmitter } from 'events';
 
-// If you want to know why these mocks are created,
-// please check: https://github.com/elastic/kibana/pull/44750
-jest.mock('resize-observer-polyfill');
-import ResizeObserver from 'resize-observer-polyfill';
-
+// Replace the global no-op ResizeObserver (registered in jest setup) with one
+// whose observe()/unobserve() route through the test's MockElement so tests
+// can drive resize notifications via dispatchEvent('resize'). See the
+// upstream rationale at https://github.com/elastic/kibana/pull/44750.
 class MockElement {
   public clientWidth: number;
   public clientHeight: number;
@@ -62,14 +61,24 @@ class MockElement {
   }
 }
 
-(ResizeObserver as any).mockImplementation(function (this: any, callback: any) {
-  this.observe = function (el: MockElement) {
-    el.addEventListener('resize', callback);
-  };
-  this.disconnect = function () {};
-  this.unobserve = function (el: MockElement) {
-    el.removeEventListener('resize', callback);
-  };
+beforeAll(() => {
+  jest.spyOn(global, 'ResizeObserver').mockImplementation(function (
+    this: ResizeObserver,
+    callback: ResizeObserverCallback
+  ) {
+    this.observe = (el: Element) => {
+      (el as unknown as MockElement).addEventListener('resize', callback as any);
+    };
+    this.disconnect = () => {};
+    this.unobserve = (el: Element) => {
+      (el as unknown as MockElement).removeEventListener('resize', callback as any);
+    };
+    return this;
+  });
+});
+
+afterAll(() => {
+  jest.restoreAllMocks();
 });
 
 describe('Resize Checker', () => {
@@ -103,11 +112,11 @@ describe('Resize Checker', () => {
       const listener = jest.fn();
       checker.on('resize', listener);
 
-      expect(listener).not.toBeCalled();
+      expect(listener).not.toHaveBeenCalled();
       el.clientHeight = 100;
       el.dispatchEvent('resize');
       setTimeout(() => {
-        expect(listener).not.toBeCalled();
+        expect(listener).not.toHaveBeenCalled();
         done();
       }, 100);
     });
@@ -118,12 +127,12 @@ describe('Resize Checker', () => {
       const listener = jest.fn();
       checker.on('resize', listener);
 
-      expect(listener).not.toBeCalled();
+      expect(listener).not.toHaveBeenCalled();
       checker.enable();
       el.clientHeight = 100;
       el.dispatchEvent('resize');
       setTimeout(() => {
-        expect(listener).toBeCalled();
+        expect(listener).toHaveBeenCalled();
         done();
       }, 100);
     });
@@ -134,12 +143,12 @@ describe('Resize Checker', () => {
       const listener = jest.fn();
       checker.on('resize', listener);
 
-      expect(listener).not.toBeCalled();
+      expect(listener).not.toHaveBeenCalled();
       el.clientHeight = 100;
       checker.enable();
       el.clientHeight = 100;
       setTimeout(() => {
-        expect(listener).not.toBeCalled();
+        expect(listener).not.toHaveBeenCalled();
         done();
       }, 100);
     });
@@ -157,7 +166,7 @@ describe('Resize Checker', () => {
       });
       el.dispatchEvent('resize');
       setTimeout(() => {
-        expect(listener).not.toBeCalled();
+        expect(listener).not.toHaveBeenCalled();
         done();
       }, 1000);
     });
@@ -172,12 +181,12 @@ describe('Resize Checker', () => {
         el.clientHeight = 100;
       });
       el.dispatchEvent('resize');
-      expect(listener).not.toBeCalled();
+      expect(listener).not.toHaveBeenCalled();
 
       el.clientHeight = 200;
       el.dispatchEvent('resize');
       setTimeout(() => {
-        expect(listener).not.toBeCalled();
+        expect(listener).not.toHaveBeenCalled();
         done();
       }, 100);
     });
@@ -203,7 +212,7 @@ describe('Resize Checker', () => {
       el.clientHeight = 100;
       el.dispatchEvent('resize');
       setTimeout(() => {
-        expect(listener).not.toBeCalled();
+        expect(listener).not.toHaveBeenCalled();
         done();
       }, 100);
     });

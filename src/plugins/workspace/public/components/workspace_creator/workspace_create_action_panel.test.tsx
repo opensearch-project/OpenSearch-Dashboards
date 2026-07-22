@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React from 'react';
+
 import { render, screen } from '@testing-library/react';
 import { applicationServiceMock } from '../../../../../core/public/mocks';
 import {

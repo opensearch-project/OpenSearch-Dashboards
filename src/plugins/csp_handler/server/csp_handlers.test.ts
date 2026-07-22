@@ -57,12 +57,12 @@ describe('CSP handlers', () => {
       },
     });
 
-    expect(configurationClient.getEntityConfig).toBeCalledTimes(1);
-    expect(configurationClient.getEntityConfig).toBeCalledWith(
+    expect(configurationClient.getEntityConfig).toHaveBeenCalledTimes(1);
+    expect(configurationClient.getEntityConfig).toHaveBeenCalledWith(
       CSP_RULES_FRAME_ANCESTORS_CONFIG_KEY,
       { headers: { 'sec-fetch-dest': 'document' } }
     );
-    expect(getConfigurationClient).toBeCalledWith(request);
+    expect(getConfigurationClient).toHaveBeenCalledWith(request);
   });
 
   it('do not modify frame-ancestors when the client returns empty and CSP from YML already has frame-ancestors', async () => {
@@ -101,14 +101,14 @@ describe('CSP handlers', () => {
       },
     });
 
-    expect(configurationClient.getEntityConfig).toBeCalledTimes(1);
+    expect(configurationClient.getEntityConfig).toHaveBeenCalledTimes(1);
 
-    expect(configurationClient.getEntityConfig).toBeCalledWith(
+    expect(configurationClient.getEntityConfig).toHaveBeenCalledWith(
       CSP_RULES_FRAME_ANCESTORS_CONFIG_KEY,
       { headers: { 'sec-fetch-dest': 'document' } }
     );
 
-    expect(getConfigurationClient).toBeCalledWith(request);
+    expect(getConfigurationClient).toHaveBeenCalledWith(request);
   });
 
   it('add frame-ancestors when the client returns empty and CSP from YML has no frame-ancestors', async () => {
@@ -148,14 +148,14 @@ describe('CSP handlers', () => {
       },
     });
 
-    expect(configurationClient.getEntityConfig).toBeCalledTimes(1);
+    expect(configurationClient.getEntityConfig).toHaveBeenCalledTimes(1);
 
-    expect(configurationClient.getEntityConfig).toBeCalledWith(
+    expect(configurationClient.getEntityConfig).toHaveBeenCalledWith(
       CSP_RULES_FRAME_ANCESTORS_CONFIG_KEY,
       { headers: { 'sec-fetch-dest': 'document' } }
     );
 
-    expect(getConfigurationClient).toBeCalledWith(request);
+    expect(getConfigurationClient).toHaveBeenCalledWith(request);
   });
 
   it('do not modify frame-ancestors when the configuration does not exist and CSP from YML already has frame-ancestors', async () => {
@@ -189,21 +189,21 @@ describe('CSP handlers', () => {
 
     expect(result).toEqual('next');
 
-    expect(toolkit.next).toBeCalledTimes(1);
-    expect(toolkit.next).toBeCalledWith({
+    expect(toolkit.next).toHaveBeenCalledTimes(1);
+    expect(toolkit.next).toHaveBeenCalledWith({
       headers: {
         'content-security-policy': cspRulesFromYML,
       },
     });
 
-    expect(configurationClient.getEntityConfig).toBeCalledTimes(1);
+    expect(configurationClient.getEntityConfig).toHaveBeenCalledTimes(1);
 
-    expect(configurationClient.getEntityConfig).toBeCalledWith(
+    expect(configurationClient.getEntityConfig).toHaveBeenCalledWith(
       CSP_RULES_FRAME_ANCESTORS_CONFIG_KEY,
       { headers: { 'sec-fetch-dest': 'document' } }
     );
 
-    expect(getConfigurationClient).toBeCalledWith(request);
+    expect(getConfigurationClient).toHaveBeenCalledWith(request);
   });
 
   it('add frame-ancestors when the configuration does not exist and CSP from YML has no frame-ancestors', async () => {
@@ -233,21 +233,21 @@ describe('CSP handlers', () => {
 
     expect(result).toEqual('next');
 
-    expect(toolkit.next).toBeCalledTimes(1);
-    expect(toolkit.next).toBeCalledWith({
+    expect(toolkit.next).toHaveBeenCalledTimes(1);
+    expect(toolkit.next).toHaveBeenCalledWith({
       headers: {
         'content-security-policy': "script-src 'unsafe-eval' 'self'; frame-ancestors 'self'",
       },
     });
 
-    expect(configurationClient.getEntityConfig).toBeCalledTimes(1);
+    expect(configurationClient.getEntityConfig).toHaveBeenCalledTimes(1);
 
-    expect(configurationClient.getEntityConfig).toBeCalledWith(
+    expect(configurationClient.getEntityConfig).toHaveBeenCalledWith(
       CSP_RULES_FRAME_ANCESTORS_CONFIG_KEY,
       { headers: { 'sec-fetch-dest': 'document' } }
     );
 
-    expect(getConfigurationClient).toBeCalledWith(request);
+    expect(getConfigurationClient).toHaveBeenCalledWith(request);
   });
 
   it('do not add frame-ancestors when request dest exists and shall skip', async () => {
@@ -280,11 +280,11 @@ describe('CSP handlers', () => {
 
     expect(result).toEqual('next');
 
-    expect(toolkit.next).toBeCalledTimes(1);
-    expect(toolkit.next).toBeCalledWith({});
+    expect(toolkit.next).toHaveBeenCalledTimes(1);
+    expect(toolkit.next).toHaveBeenCalledWith({});
 
-    expect(configurationClient.getEntityConfig).toBeCalledTimes(0);
-    expect(getConfigurationClient).toBeCalledTimes(0);
+    expect(configurationClient.getEntityConfig).toHaveBeenCalledTimes(0);
+    expect(getConfigurationClient).toHaveBeenCalledTimes(0);
   });
 
   it('do not add frame-ancestors when request dest does not exist', async () => {
@@ -316,11 +316,11 @@ describe('CSP handlers', () => {
 
     expect(result).toEqual('next');
 
-    expect(toolkit.next).toBeCalledTimes(1);
-    expect(toolkit.next).toBeCalledWith({});
+    expect(toolkit.next).toHaveBeenCalledTimes(1);
+    expect(toolkit.next).toHaveBeenCalledWith({});
 
-    expect(configurationClient.getEntityConfig).toBeCalledTimes(0);
-    expect(getConfigurationClient).toBeCalledTimes(0);
+    expect(configurationClient.getEntityConfig).toHaveBeenCalledTimes(0);
+    expect(getConfigurationClient).toHaveBeenCalledTimes(0);
   });
 
   it('use default values when getting client throws error and CSP from YML has no frame-ancestors', async () => {
@@ -357,7 +357,7 @@ describe('CSP handlers', () => {
       },
     });
 
-    expect(getConfigurationClient).toBeCalledWith(request);
+    expect(getConfigurationClient).toHaveBeenCalledWith(request);
   });
 
   it('do not modify when getting client throws error and CSP from YML has frame-ancestors', async () => {
@@ -394,6 +394,6 @@ describe('CSP handlers', () => {
       },
     });
 
-    expect(getConfigurationClient).toBeCalledWith(request);
+    expect(getConfigurationClient).toHaveBeenCalledWith(request);
   });
 });

@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { DataLinkOptions, DataLink, DataLinkModal } from './data_link_options';
@@ -15,8 +14,6 @@ const numericalColumns: VisColumn[] = [
     column: 'num1',
     name: 'Num1',
     schema: VisFieldType.Numerical,
-    validValuesCount: 0,
-    uniqueValuesCount: 0,
   },
 ];
 
@@ -26,8 +23,6 @@ const categoricalColumns: VisColumn[] = [
     column: 'cat1',
     name: 'Cat1',
     schema: VisFieldType.Categorical,
-    validValuesCount: 0,
-    uniqueValuesCount: 0,
   },
 ];
 
@@ -37,8 +32,6 @@ const dateColumns: VisColumn[] = [
     column: 'date1',
     name: 'Date1',
     schema: VisFieldType.Date,
-    validValuesCount: 0,
-    uniqueValuesCount: 0,
   },
 ];
 
@@ -118,6 +111,7 @@ describe('DataLinkOptions', () => {
     const handleChange = jest.fn();
     render(
       <DataLinkOptions
+        // @ts-expect-error TS2740 TODO(ts-error): fixme
         styleOptions={{ dataLinks: [] }}
         onStyleChange={handleChange}
         numericalColumns={numericalColumns}
@@ -150,6 +144,7 @@ describe('DataLinkOptions', () => {
 
     render(
       <DataLinkOptions
+        // @ts-expect-error TS2740 TODO(ts-error): fixme
         styleOptions={{ dataLinks: [link] }}
         onStyleChange={handleChange}
         numericalColumns={numericalColumns}
@@ -178,6 +173,7 @@ describe('DataLinkOptions', () => {
 
     render(
       <DataLinkOptions
+        // @ts-expect-error TS2740 TODO(ts-error): fixme
         styleOptions={{ dataLinks: [link] }}
         onStyleChange={handleChange}
         numericalColumns={numericalColumns}

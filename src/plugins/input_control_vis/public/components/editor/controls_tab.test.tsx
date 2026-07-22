@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
 import { findTestSubject } from 'test_utils/helpers';
 import { getDepsMock, getIndexPatternMock } from '../../test_utils';
@@ -43,7 +42,7 @@ let props: ControlsTabUiProps;
 beforeEach(() => {
   props = {
     deps: getDepsMock(),
-    vis: ({
+    vis: {
       API: {
         indexPatterns: indexPatternsMock,
       },
@@ -57,7 +56,7 @@ beforeEach(() => {
         requiresSearch: false,
         hidden: false,
       },
-    } as unknown) as Vis,
+    } as unknown as Vis,
     stateParams: {
       controls: [
         {

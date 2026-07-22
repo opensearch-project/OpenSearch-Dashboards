@@ -61,7 +61,7 @@ interface StepIndexPatternProps {
   allIndices: MatchedItem[];
   indexPatternCreationType: IndexPatternCreationConfig;
   goToPreviousStep: () => void;
-  goToNextStep: (query: string, timestampField?: string) => void;
+  goToNextStep: (query: string, timestampField?: string, displayName?: string) => void;
   initialQuery?: string;
   showSystemIndices: boolean;
   dataSourceRef?: DataSourceRef;
@@ -84,6 +84,7 @@ interface StepIndexPatternState {
   showingIndexPatternQueryErrors: boolean;
   indexPatternName: string;
   isIncludingSystemIndices: boolean;
+  displayName: string;
 }
 
 export const canPreselectTimeField = (indices: MatchedItem[]) => {
@@ -129,6 +130,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
     showingIndexPatternQueryErrors: false,
     indexPatternName: '',
     isIncludingSystemIndices: false,
+    displayName: '',
   };
 
   ILLEGAL_CHARACTERS = [...indexPatterns.ILLEGAL_CHARACTERS];
@@ -156,13 +158,12 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
   }
 
   fetchExistingIndexPatterns = async () => {
-    const { savedObjects } = await this.context.services.savedObjects.client.find<
-      IndexPatternAttributes
-    >({
-      type: 'index-pattern',
-      fields: ['title'],
-      perPage: 10000,
-    });
+    const { savedObjects } =
+      await this.context.services.savedObjects.client.find<IndexPatternAttributes>({
+        type: 'index-pattern',
+        fields: ['title'],
+        perPage: 10000,
+      });
 
     const existingIndexPatterns = savedObjects.map((obj) =>
       obj && obj.attributes && validateDataSourceReference(obj, this.props.dataSourceRef?.id)
@@ -379,6 +380,10 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
     );
   }
 
+  onDisplayNameChanged = (e: React.ChangeEvent<HTMLInputElement>) => {
+    this.setState({ displayName: e.target.value });
+  };
+
   renderHeader({ exactMatchedIndices: indices }: { exactMatchedIndices: MatchedItem[] }) {
     const { goToNextStep, indexPatternCreationType, stepInfo, dataSourceRef } = this.props;
     const {
@@ -387,6 +392,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
       indexPatternExists,
       indexPatternName,
       isIncludingSystemIndices,
+      displayName,
     } = this.state;
 
     let containsErrors = false;
@@ -428,13 +434,17 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
         characterList={characterList}
         query={query}
         onQueryChanged={this.onQueryChanged}
-        goToNextStep={() => goToNextStep(query, canPreselectTimeField(indices))}
+        goToNextStep={() =>
+          goToNextStep(query, canPreselectTimeField(indices), displayName || undefined)
+        }
         isNextStepDisabled={isNextStepDisabled}
         onChangeIncludingSystemIndices={this.onChangeIncludingSystemIndices}
         isIncludingSystemIndices={isIncludingSystemIndices}
         showSystemIndices={this.props.showSystemIndices}
         stepInfo={stepInfo}
         dataSourceRef={dataSourceRef}
+        displayName={displayName}
+        onDisplayNameChanged={this.onDisplayNameChanged}
       />
     );
   }

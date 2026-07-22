@@ -4,7 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import React from 'react';
+
 import { TopNavMenuIconRun, TopNavMenuIconUIData } from '../types';
 import { ExploreServices } from '../../../../types';
 import {
@@ -25,12 +25,14 @@ export const openTopNavData: TopNavMenuIconUIData = {
   controlType: 'icon',
 };
 
-export const getOpenButtonRun = (services: ExploreServices): TopNavMenuIconRun => () => {
-  const flyoutSession = services.overlays.openFlyout(
-    toMountPoint(
-      <OpenSearchDashboardsContextProvider services={services}>
-        <OpenSearchPanel onClose={() => flyoutSession?.close?.().then()} />
-      </OpenSearchDashboardsContextProvider>
-    )
-  );
-};
+export const getOpenButtonRun =
+  (services: ExploreServices): TopNavMenuIconRun =>
+  () => {
+    const flyoutSession = services.overlays.openFlyout(
+      toMountPoint(
+        <OpenSearchDashboardsContextProvider services={services}>
+          <OpenSearchPanel onClose={() => flyoutSession?.close?.().then()} />
+        </OpenSearchDashboardsContextProvider>
+      )
+    );
+  };

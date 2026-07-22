@@ -32,9 +32,12 @@ export const indexPatternTypeConfig: DatasetTypeConfig = {
     const pattern = path[path.length - 1];
     const patternMeta = pattern.meta as DataStructureCustomMeta;
 
+    const parentMeta = pattern.parent?.meta as DataStructureCustomMeta | undefined;
+
     return {
       id: pattern.id,
       title: pattern.title,
+      ...(patternMeta?.displayName && { displayName: patternMeta.displayName }),
       type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
       timeFieldName: patternMeta?.timeFieldName,
       isRemoteDataset: pattern?.title?.includes(':') ?? false,
@@ -43,6 +46,8 @@ export const indexPatternTypeConfig: DatasetTypeConfig = {
             id: pattern.parent.id,
             title: pattern.parent.title,
             type: pattern.parent.type,
+            engineType: pattern.parent.type,
+            version: parentMeta?.dataSourceVersion ?? '',
           }
         : undefined,
     } as Dataset;
@@ -99,10 +104,10 @@ export const indexPatternTypeConfig: DatasetTypeConfig = {
 const fetchIndexPatterns = async (client: SavedObjectsClientContract): Promise<DataStructure[]> => {
   const resp = await client.find<IIndexPattern>({
     type: 'index-pattern',
-    fields: ['title', 'timeFieldName', 'references'],
+    fields: ['title', 'displayName', 'timeFieldName', 'references'],
     search: `*`,
-    searchFields: ['title'],
-    perPage: 100,
+    searchFields: ['title', 'displayName'],
+    perPage: 10000,
   });
 
   // Get all unique data source ids from both references and index pattern IDs
@@ -111,14 +116,23 @@ const fetchIndexPatterns = async (client: SavedObjectsClientContract): Promise<D
       resp.savedObjects
         .map((savedObject) => {
           // First try to get from references
-          const refDataSourceId = savedObject.references.find((ref) => ref.type === 'data-source')
-            ?.id;
+          const refDataSourceId = savedObject.references.find(
+            (ref) => ref.type === 'data-source'
+          )?.id;
           if (refDataSourceId) {
             return refDataSourceId;
           }
           // If not in references, check if the ID contains :: (namespaced format)
           if (savedObject.id.includes('::')) {
             return savedObject.id.split('::')[0];
+          }
+          // Check _ format: <dataSourceId>_<uuid> where prefix is a valid UUID
+          const uIdx = savedObject.id.indexOf('_');
+          if (uIdx > 0) {
+            const prefix = savedObject.id.substring(0, uIdx);
+            if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(prefix)) {
+              return prefix;
+            }
           }
           return undefined;
         })
@@ -137,38 +151,53 @@ const fetchIndexPatterns = async (client: SavedObjectsClientContract): Promise<D
     });
   }
 
-  const dataStructures = resp.savedObjects.map(
-    (savedObject): DataStructure => {
-      // First try to get dataSourceId from references
-      let dataSourceId = savedObject.references.find((ref) => ref.type === 'data-source')?.id;
+  const dataStructures = resp.savedObjects.map((savedObject): DataStructure => {
+    // First try to get dataSourceId from references
+    let dataSourceId = savedObject.references.find((ref) => ref.type === 'data-source')?.id;
 
-      // If not in references, check if the ID contains :: (namespaced format)
-      if (!dataSourceId && savedObject.id.includes('::')) {
-        dataSourceId = savedObject.id.split('::')[0];
+    // If not in references, check if the ID contains :: (namespaced format)
+    if (!dataSourceId && savedObject.id.includes('::')) {
+      dataSourceId = savedObject.id.split('::')[0];
+    }
+    // Check _ format: <dataSourceId>_<uuid> where prefix is a valid UUID
+    if (!dataSourceId) {
+      const uIdx = savedObject.id.indexOf('_');
+      if (uIdx > 0) {
+        const prefix = savedObject.id.substring(0, uIdx);
+        if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(prefix)) {
+          dataSourceId = prefix;
+        }
       }
+    }
 
-      const dataSource = dataSourceId ? dataSourceMap[dataSourceId] : undefined;
+    const dataSource = dataSourceId ? dataSourceMap[dataSourceId] : undefined;
 
-      const indexPatternDataStructure: DataStructure = {
-        id: savedObject.id,
-        title: savedObject.attributes.title,
-        type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+    const indexPatternDataStructure: DataStructure = {
+      id: savedObject.id,
+      title: savedObject.attributes.title,
+      type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+      meta: {
+        type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+        timeFieldName: savedObject.attributes.timeFieldName,
+        displayName: savedObject.attributes.displayName,
+      },
+    };
+
+    if (dataSource) {
+      indexPatternDataStructure.parent = {
+        id: dataSourceId!, // Since we know it exists
+        title: dataSource.title,
+        type: dataSource.dataSourceEngineType ?? DEFAULT_DATA.SOURCE_TYPES.OPENSEARCH,
+        // Carry the data-source version through CUSTOM meta so `toDataset` can populate
+        // `dataSource.version` for per-dataset language gating. Engine type stays in `type`.
         meta: {
           type: DATA_STRUCTURE_META_TYPES.CUSTOM,
-          timeFieldName: savedObject.attributes.timeFieldName,
-        },
+          dataSourceVersion: dataSource.dataSourceVersion,
+        } as DataStructureCustomMeta,
       };
-
-      if (dataSource) {
-        indexPatternDataStructure.parent = {
-          id: dataSourceId!, // Since we know it exists
-          title: dataSource.title,
-          type: dataSource.dataSourceEngineType ?? DEFAULT_DATA.SOURCE_TYPES.OPENSEARCH,
-        };
-      }
-      return indexPatternDataStructure;
     }
-  );
+    return indexPatternDataStructure;
+  });
 
   return injectMetaToDataStructures(dataStructures, (dataStructure) => dataStructure.parent?.id);
 };

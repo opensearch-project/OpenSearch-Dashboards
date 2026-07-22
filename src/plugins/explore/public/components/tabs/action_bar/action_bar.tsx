@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React, { memo, useMemo } from 'react';
+import { memo, useMemo } from 'react';
 import { useObservable } from 'react-use';
 import { of } from 'rxjs';
 import { useSelector as useReduxSelector } from 'react-redux';
@@ -41,6 +41,11 @@ const ActionBarComponent = ({ filteredRowsCount }: ActionBarProps = {}) => {
   }, [slotRegistry]);
   const slotItems = useObservable(sortedSlotItems$, []);
 
+  const compatibleSlotItems = useMemo(() => {
+    const context = { dataSourceEngineType: dataset?.dataSourceRef?.type };
+    return slotItems.filter((item) => !item.isCompatible || item.isCompatible(context));
+  }, [slotItems, dataset?.dataSourceRef?.type]);
+
   const openInspector = () => {
     if (inspector) {
       inspector.open(inspectorAdapters, {
@@ -69,7 +74,7 @@ const ActionBarComponent = ({ filteredRowsCount }: ActionBarProps = {}) => {
       elapsedMs={elapsedMs}
       dataset={dataset}
       inspectionHanlder={openInspector}
-      extraActions={slotItems}
+      extraActions={compatibleSlotItems}
       rowsCountOverride={filteredRowsCount}
     />
   );

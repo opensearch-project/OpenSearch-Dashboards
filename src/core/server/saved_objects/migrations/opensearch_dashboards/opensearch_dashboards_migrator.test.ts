@@ -258,6 +258,7 @@ const mockOptions = (
         types: rawConfig.get('migrations.delete.types'),
       },
     },
+    // @ts-expect-error TS2345 TODO Fix me
     client: opensearchClientMock.createOpenSearchClient(),
     opensearchDashboardsRawConfig: rawConfig,
   };

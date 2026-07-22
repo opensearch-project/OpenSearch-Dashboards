@@ -57,6 +57,27 @@ export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze
     euiIconType: 'logoObservability',
     order: 3000,
   },
+  agentMonitoring: {
+    id: 'agentMonitoring',
+    label: i18n.translate('core.ui.agentMonitoring.label', {
+      defaultMessage: 'Agent Monitoring',
+    }),
+    order: 3000,
+  },
+  applicationPerformance: {
+    id: 'applicationPerformance',
+    label: i18n.translate('core.ui.applicationPerformance.label', {
+      defaultMessage: 'Application Performance',
+    }),
+    order: 3500,
+  },
+  traceAnalytics: {
+    id: 'traceAnalytics',
+    label: i18n.translate('core.ui.traceAnalytics.label', {
+      defaultMessage: 'Trace Analytics',
+    }),
+    order: 3500,
+  },
   security: {
     id: 'securitySolution',
     label: i18n.translate('core.ui.securityNavList.label', {
@@ -123,6 +144,16 @@ export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze
     }),
     order: 3000,
   },
+  observabilityTools: {
+    id: 'observabilityTools',
+    label: i18n.translate('core.ui.observabilityTools.label', {
+      defaultMessage: 'More',
+    }),
+    order: 7000,
+    collapsible: true,
+    defaultOpen: true,
+    euiIconType: 'navQuerySets',
+  },
   manage: {
     id: 'manage',
     label: i18n.translate('core.ui.manageNav.label', {
@@ -143,5 +174,11 @@ export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze
       defaultMessage: 'Manage workspace',
     }),
     order: 9000,
+    collapsible: true,
+    defaultOpen: false,
+    // Always start collapsed on a fresh page load (don't restore a prior
+    // expanded state) — it's a low-priority section.
+    alwaysUseDefaultOpen: true,
+    euiIconType: 'navQuerySets',
   },
 });

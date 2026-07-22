@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { unparse } from 'papaparse';
 import moment from 'moment';
 import { saveAs } from 'file-saver';
+import { autoBom } from '@osd/std';
 import { useDiscoverContext } from '../../view_components/context';
 import { DownloadCsvFormId, MAX_DOWNLOAD_CSV_COUNT } from './constants';
 import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
@@ -25,39 +26,41 @@ export interface UseDiscoverDownloadCsvProps {
   onError(): void;
 }
 
-export const formatRowsForCsv = ({
-  displayedColumnNames,
-  indexPattern,
-}: {
-  displayedColumnNames: string[];
-  indexPattern: IndexPattern;
-}) => (row: OpenSearchSearchHit) => {
-  return displayedColumnNames.map((colName) => {
-    const fieldInfo = indexPattern.fields.getByName(colName);
+export const formatRowsForCsv =
+  ({
+    displayedColumnNames,
+    indexPattern,
+  }: {
+    displayedColumnNames: string[];
+    indexPattern: IndexPattern;
+  }) =>
+  (row: OpenSearchSearchHit) => {
+    return displayedColumnNames.map((colName) => {
+      const fieldInfo = indexPattern.fields.getByName(colName);
 
-    if (typeof row === 'undefined') {
-      return '';
-    }
+      if (typeof row === 'undefined') {
+        return '';
+      }
 
-    if (fieldInfo?.type === '_source') {
-      const formattedRow = indexPattern.formatHit(row, 'text');
-      return JSON.stringify(formattedRow);
-    }
+      if (fieldInfo?.type === '_source') {
+        const formattedRow = indexPattern.formatHit(row, 'text');
+        return JSON.stringify(formattedRow);
+      }
 
-    const formattedValue = indexPattern.formatField(row, colName, 'text');
+      const formattedValue = indexPattern.formatField(row, colName, 'text');
 
-    if (typeof formattedValue === 'undefined') {
-      return '';
-    }
+      if (typeof formattedValue === 'undefined') {
+        return '';
+      }
 
-    return formattedValue;
-  });
-};
+      return formattedValue;
+    });
+  };
 
 export const saveDataAsCsv = (csvData: string) => {
   const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8' });
   const fileName = `opensearch_export_${moment().format('YYYY-MM-DD')}`;
-  saveAs(blob, fileName);
+  saveAs(autoBom(blob), fileName);
 };
 
 export const useDiscoverDownloadCsv = ({

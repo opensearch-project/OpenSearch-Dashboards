@@ -42,19 +42,19 @@ describe('tabifyAggResponse Integration', () => {
       name: '@timestamp',
     };
 
-    const indexPattern = ({
+    const indexPattern = {
       id: '1234',
       title: 'logstash-*',
       fields: {
         getByName: () => field,
         filter: () => [field],
       },
-    } as unknown) as IndexPattern;
+    } as unknown as IndexPattern;
 
     return new AggConfigs(indexPattern, aggs, { typesRegistry });
   };
 
-  const mockAggConfig = (agg: any): IAggConfig => (agg as unknown) as IAggConfig;
+  const mockAggConfig = (agg: any): IAggConfig => agg as unknown as IAggConfig;
 
   test('transforms a simple response properly', () => {
     const aggConfigs = createAggConfigs([{ type: 'count' } as any]);
@@ -137,6 +137,7 @@ describe('tabifyAggResponse Integration', () => {
     // check for something like an average bytes result
     function expectAvgBytes(val: string | number) {
       expect(typeof val).toBe('number');
+      // @ts-expect-error TS2365 TODO(ts-error): fixme
       expect(val === 0 || val > 1000).toBeDefined();
     }
 

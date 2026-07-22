@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { Fragment, useState, useEffect, useCallback } from 'react';
+import { Fragment, useState, useEffect, useCallback } from 'react';
 import {
   htmlIdGenerator,
   EuiSmallButtonIcon,
@@ -96,10 +96,10 @@ function DateRangesParamEditor({
     [setValue]
   );
 
-  const onAddRange = useCallback(() => updateRanges([...ranges, { id: generateId() }]), [
-    ranges,
-    updateRanges,
-  ]);
+  const onAddRange = useCallback(
+    () => updateRanges([...ranges, { id: generateId() }]),
+    [ranges, updateRanges]
+  );
 
   useMount(() => {
     // set up an initial range when there is no default range

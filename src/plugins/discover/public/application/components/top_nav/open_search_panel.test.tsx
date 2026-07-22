@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
 
 jest.mock('../../../../../saved_objects/public', () => ({

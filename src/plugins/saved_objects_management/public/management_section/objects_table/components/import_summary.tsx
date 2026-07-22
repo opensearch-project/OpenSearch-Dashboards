@@ -30,7 +30,7 @@
 
 import './import_summary.scss';
 import _ from 'lodash';
-import React, { Fragment } from 'react';
+import { Fragment } from 'react';
 import {
   EuiText,
   EuiFlexGroup,

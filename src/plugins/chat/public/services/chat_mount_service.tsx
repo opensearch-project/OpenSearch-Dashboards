@@ -4,7 +4,7 @@
  */
 
 import { createRoot } from 'react-dom/client';
-import React from 'react';
+
 import { Subscription } from 'rxjs';
 
 import { distinctUntilChanged } from 'rxjs/operators';

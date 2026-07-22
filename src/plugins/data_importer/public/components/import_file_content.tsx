@@ -4,7 +4,6 @@
  */
 
 import { EuiFilePicker } from '@elastic/eui';
-import React from 'react';
 
 export interface ImportFileContentBodyProps {
   enabledFileTypes: string[];
@@ -32,7 +31,7 @@ export const ImportFileContentBody = ({
           lastModified: selectedFile.lastModified,
         });
         onFileUpdate(detachedFile);
-      } catch (error) {
+      } catch {
         // fallback to empty handle
         onFileUpdate(selectedFile);
       }

@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import { Introduction } from './introduction';
@@ -46,7 +45,7 @@ test('render', () => {
       title="Great tutorial"
     />
   );
-  expect(component).toMatchSnapshot(); // eslint-disable-line
+  expect(component).toMatchSnapshot();
 });
 
 describe('props', () => {
@@ -58,7 +57,7 @@ describe('props', () => {
         iconType="heatmap"
       />
     );
-    expect(component).toMatchSnapshot(); // eslint-disable-line
+    expect(component).toMatchSnapshot();
   });
 
   test('exportedFieldsUrl', () => {
@@ -69,7 +68,7 @@ describe('props', () => {
         exportedFieldsUrl="exported_fields_url"
       />
     );
-    expect(component).toMatchSnapshot(); // eslint-disable-line
+    expect(component).toMatchSnapshot();
   });
 
   test('previewUrl', () => {
@@ -80,7 +79,7 @@ describe('props', () => {
         previewUrl="preview_image_url"
       />
     );
-    expect(component).toMatchSnapshot(); // eslint-disable-line
+    expect(component).toMatchSnapshot();
   });
 
   test('isBeta', () => {
@@ -91,6 +90,6 @@ describe('props', () => {
         isBeta={true}
       />
     );
-    expect(component).toMatchSnapshot(); // eslint-disable-line
+    expect(component).toMatchSnapshot();
   });
 });

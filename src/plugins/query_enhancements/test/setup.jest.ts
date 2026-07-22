@@ -10,13 +10,14 @@ import '@testing-library/jest-dom';
 configure({ testIdAttribute: 'data-test-subj' });
 
 // https://github.com/inrupt/solid-client-authn-js/issues/1676#issuecomment-917016646
+// @ts-expect-error TS2322 TODO(ts-upgrade): fixme
 global.TextEncoder = TextEncoder;
 global.TextDecoder = TextDecoder as typeof global.TextDecoder;
 
 window.URL.createObjectURL = () => '';
 HTMLCanvasElement.prototype.getContext = () => '' as any;
 Element.prototype.scrollIntoView = jest.fn();
-window.IntersectionObserver = (class IntersectionObserver {
+window.IntersectionObserver = class IntersectionObserver {
   constructor() {}
 
   disconnect() {
@@ -34,7 +35,7 @@ window.IntersectionObserver = (class IntersectionObserver {
   unobserve() {
     return null;
   }
-} as unknown) as typeof window.IntersectionObserver;
+} as unknown as typeof window.IntersectionObserver;
 
 jest.mock('@elastic/eui/lib/components/form/form_row/make_id', () => () => 'random-id');
 

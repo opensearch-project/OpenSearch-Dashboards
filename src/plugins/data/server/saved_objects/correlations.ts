@@ -31,6 +31,7 @@ export const correlationsSavedObjectType: SavedObjectsType = {
       }
       return `Correlation ${obj.id}`;
     },
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     getInAppUrl(obj) {
       const correlationType = obj.attributes?.correlationType || '';
       if (correlationType.startsWith(CORRELATION_TYPE_PREFIXES.APM_CONFIG)) {

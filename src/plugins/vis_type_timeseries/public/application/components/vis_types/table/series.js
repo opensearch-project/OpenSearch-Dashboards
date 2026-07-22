@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import PropTypes from 'prop-types';
 import { AddDeleteButtons } from '../../add_delete_buttons';
 import { TableSeriesConfig as SeriesConfig } from './config';

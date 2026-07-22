@@ -8,7 +8,7 @@ import { i18n } from '@osd/i18n';
 import './_recent_query.scss';
 import { EuiButtonEmpty, EuiPopover, EuiText, EuiPopoverTitle } from '@elastic/eui';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 export enum ResultStatus {
   UNINITIALIZED = 'uninitialized',
@@ -63,7 +63,7 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
     const interval = setInterval(updateElapsedTime, 1000);
 
     return () => {
-      clearInterval((interval as unknown) as NodeJS.Timeout);
+      clearInterval(interval as unknown as NodeJS.Timeout);
       setElapsedTime(0);
     };
   }, [props.queryStatus.startTime]);

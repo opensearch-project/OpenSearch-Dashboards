@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
 
 import { DurationFormatEditor } from './duration';
@@ -83,7 +82,7 @@ describe('DurationFormatEditor', () => {
     const component = shallow(
       <DurationFormatEditor
         fieldType={fieldType}
-        format={(format as unknown) as FieldFormat}
+        format={format as unknown as FieldFormat}
         formatParams={formatParams}
         onChange={onChange}
         onError={onError}
@@ -107,7 +106,7 @@ describe('DurationFormatEditor', () => {
     const component = shallow(
       <DurationFormatEditor
         fieldType={fieldType}
-        format={(newFormat as unknown) as FieldFormat}
+        format={newFormat as unknown as FieldFormat}
         formatParams={formatParams}
         onChange={onChange}
         onError={onError}

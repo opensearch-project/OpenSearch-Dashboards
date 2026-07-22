@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { importDataActionConfig } from '../../../../actions/import_data_action';
 import {
@@ -11,6 +10,7 @@ import {
   QueryPanelActionDependencies,
 } from '../../../../services/query_panel_actions_registry';
 import { ResultStatus } from 'src/plugins/discover/public';
+// @ts-expect-error TS2307 TODO(ts-error): fixme
 import { AgentTracesServices } from 'src/plugins/agentTraces/public/types';
 
 // Mock DataImporterPluginApp component - must be hoisted for dynamic imports
@@ -166,7 +166,7 @@ describe('Import Data Action', () => {
     const props: FlyoutComponentProps = {
       closeFlyout: mockCloseFlyout,
       dependencies: mockDependencies,
-      services: (customServices as unknown) as AgentTracesServices,
+      services: customServices as unknown as AgentTracesServices,
     };
 
     render(<ImportDataModal {...props} />);

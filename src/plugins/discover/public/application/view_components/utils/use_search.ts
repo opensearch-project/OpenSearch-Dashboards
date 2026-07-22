@@ -4,7 +4,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { BehaviorSubject, Subject, merge } from 'rxjs';
 import { debounceTime, filter, pairwise } from 'rxjs/operators';
 import { i18n } from '@osd/i18n';
@@ -54,7 +54,7 @@ declare module '../../../../../ui_actions/public' {
 export function safeJSONParse(text: any) {
   try {
     return JSON.parse(text);
-  } catch (error) {
+  } catch {
     return text;
   }
 }
@@ -119,9 +119,12 @@ export const useSearch = (services: DiscoverViewServices) => {
   const { pathname } = useLocation();
   const initalSearchComplete = useRef(false);
   const [savedSearch, setSavedSearch] = useState<SavedSearch | undefined>(undefined);
-  const { savedSearch: savedSearchId, sort, interval, savedQuery } = useSelector(
-    (state) => state.discover
-  );
+  const {
+    savedSearch: savedSearchId,
+    sort,
+    interval,
+    savedQuery,
+  } = useSelector((state) => state.discover);
   const indexPattern = useIndexPattern(services);
   const skipInitialFetch = useRef(false);
   const {
@@ -159,7 +162,7 @@ export const useSearch = (services: DiscoverViewServices) => {
     abortController: undefined,
   });
 
-  const actionId = useRef(`ACTION_ABORT_DATA_QUERY_${uuid.v4()}`);
+  const actionId = useRef(`ACTION_ABORT_DATA_QUERY_${uuidv4()}`);
 
   const inspectorAdapters = {
     requests: new RequestAdapter(),
@@ -397,7 +400,7 @@ export const useSearch = (services: DiscoverViewServices) => {
           }
         */
         errorBody = JSON.parse(error.body);
-      } catch (e) {
+      } catch {
         if (error.body) {
           errorBody = error.body;
         } else {
@@ -563,8 +566,12 @@ export const useSearch = (services: DiscoverViewServices) => {
       const isDataQueryDefault = dataQuery.query === defaultQuery.query;
       const savedSearchQuery = savedSearchInstance.searchSource.getField('query');
 
-      // Use eixisting query, if eixisting query match default, use query from saved search
-      const query = isDataQueryDefault ? savedSearchQuery ?? dataQuery : dataQuery;
+      // Use existing query; if it matches default, prefer savedSearchQuery, then the freshly
+      // computed defaultQuery (which reflects the post-init default dataset and language clamp),
+      // falling back to dataQuery for back-compat.
+      const query = isDataQueryDefault
+        ? (savedSearchQuery ?? defaultQuery ?? dataQuery)
+        : dataQuery;
 
       const isEnhancementsEnabled = await uiSettings.get('query:enhancements:enabled');
       if (isEnhancementsEnabled && query.dataset) {

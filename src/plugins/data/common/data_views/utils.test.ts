@@ -10,7 +10,7 @@ import { getDataViewTitle, validateDataViewDataSourceReference } from './utils';
 
 describe('test validateDataViewDataSourceReference', () => {
   const getDataViewSavedObjectMock = (mockedFields: any = {}) =>
-    ({ ...mockedFields } as SavedObject<DataViewSavedObjectAttrs>);
+    ({ ...mockedFields }) as SavedObject<DataViewSavedObjectAttrs>;
   let dataViewSavedObjectMock;
   const dataSourceId = 'fakeDataSourceId';
 
@@ -50,6 +50,7 @@ describe('test getDataViewTitle', () => {
   };
   const dataViewMockTitle = 'dataViewMockTitle';
   const referencesMock: DataViewSavedObjectReference[] = [
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     { type: 'data-source', id: 'dataSourceId' },
   ];
 

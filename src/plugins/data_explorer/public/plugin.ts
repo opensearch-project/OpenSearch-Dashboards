@@ -34,14 +34,12 @@ import { opensearchFilters } from '../../data/public';
 import { setUsageCollector } from './services';
 import { WorkspaceAvailability } from '../../../../src/core/public';
 
-export class DataExplorerPlugin
-  implements
-    Plugin<
-      DataExplorerPluginSetup,
-      DataExplorerPluginStart,
-      DataExplorerPluginSetupDependencies,
-      DataExplorerPluginStartDependencies
-    > {
+export class DataExplorerPlugin implements Plugin<
+  DataExplorerPluginSetup,
+  DataExplorerPluginStart,
+  DataExplorerPluginSetupDependencies,
+  DataExplorerPluginStartDependencies
+> {
   private viewService = new ViewService();
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private stopUrlTracking?: () => void;
@@ -54,7 +52,11 @@ export class DataExplorerPlugin
     const viewService = this.viewService;
 
     setUsageCollector(usageCollection);
-    const { appMounted, appUnMounted, stop: stopUrlTracker } = createOsdUrlTracker({
+    const {
+      appMounted,
+      appUnMounted,
+      stop: stopUrlTracker,
+    } = createOsdUrlTracker({
       baseUrl: core.http.basePath.prepend(`/app/${PLUGIN_ID}`),
       defaultSubUrl: '#/',
       storageKey: `lastUrl:${core.http.basePath.get()}:${PLUGIN_ID}`,
@@ -128,17 +130,21 @@ export class DataExplorerPlugin
       },
     });
 
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
-      {
-        id: PLUGIN_ID,
-        order: 301, // The nav link should be put behind discover
-      },
-    ]);
+    if (!core.chrome.getIsIconSideNavEnabled()) {
+      core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
+        {
+          id: PLUGIN_ID,
+          order: 301, // The nav link should be put behind discover
+          euiIconType: 'discoverApp',
+        },
+      ]);
+    }
 
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS['security-analytics'], [
       {
         id: PLUGIN_ID,
         order: 301,
+        euiIconType: 'discoverApp',
       },
     ]);
 
@@ -146,6 +152,7 @@ export class DataExplorerPlugin
       {
         id: PLUGIN_ID,
         order: 201,
+        euiIconType: 'discoverApp',
       },
     ]);
 
@@ -153,6 +160,7 @@ export class DataExplorerPlugin
       {
         id: PLUGIN_ID,
         order: 201,
+        euiIconType: 'discoverApp',
       },
     ]);
 
@@ -160,6 +168,7 @@ export class DataExplorerPlugin
       {
         id: PLUGIN_ID,
         order: 201,
+        euiIconType: 'discoverApp',
       },
     ]);
 

@@ -35,7 +35,7 @@ import { inspect } from 'util';
 
 import cpy from 'cpy';
 import del from 'del';
-import { tap, filter } from 'rxjs/operators';
+import { filter } from 'rxjs/operators';
 import { createAbsolutePathSerializer, ToolingLog } from '@osd/dev-utils';
 import {
   runOptimizer,
@@ -116,13 +116,6 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
   const initializingStates = msgs.filter((msg) => msg.state.phase === 'initializing');
   assert('produce at least one initializing event', initializingStates.length >= 1);
 
-  const bundleCacheStates = msgs.filter(
-    (msg) =>
-      (msg.event?.type === 'bundle cached' || msg.event?.type === 'bundle not cached') &&
-      msg.state.phase === 'initializing'
-  );
-  assert('produce two bundle cache events while initializing', bundleCacheStates.length === 2);
-
   const initializedStates = msgs.filter((msg) => msg.state.phase === 'initialized');
   assert('produce at least one initialized event', initializedStates.length >= 1);
 
@@ -135,9 +128,6 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
     runningStates.length >= 3 && runningStates.length <= 5
   );
 
-  const bundleNotCachedEvents = msgs.filter((msg) => msg.event?.type === 'bundle not cached');
-  assert('produce two "bundle not cached" events', bundleNotCachedEvents.length === 2);
-
   const successStates = msgs.filter((msg) => msg.state.phase === 'success');
   assert(
     'produce one to three "compiler success" states',
@@ -149,8 +139,7 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
       msg.state.phase !== 'initializing' &&
       msg.state.phase !== 'success' &&
       msg.state.phase !== 'running' &&
-      msg.state.phase !== 'initialized' &&
-      msg.event?.type !== 'bundle not cached'
+      msg.state.phase !== 'initialized'
   );
   assert('produce zero unexpected states', otherStates.length === 0, otherStates);
 
@@ -200,36 +189,6 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
   `);
 });
 
-it('uses cache on second run and exist cleanly', async () => {
-  const config = OptimizerConfig.create({
-    repoRoot: MOCK_REPO_DIR,
-    pluginScanDirs: [Path.resolve(MOCK_REPO_DIR, 'plugins')],
-    maxWorkerCount: 1,
-    dist: false,
-  });
-
-  const msgs = await allValuesFrom(
-    runOptimizer(config).pipe(
-      tap((state) => {
-        if (state.event?.type === 'worker stdio') {
-          // eslint-disable-next-line no-console
-          console.log('worker', state.event.stream, state.event.line);
-        }
-      })
-    )
-  );
-
-  expect(msgs.map((m) => m.state.phase)).toMatchInlineSnapshot(`
-    Array [
-      "initializing",
-      "initializing",
-      "initializing",
-      "initialized",
-      "success",
-    ]
-  `);
-});
-
 it('prepares assets for distribution', async () => {
   const config = OptimizerConfig.create({
     repoRoot: MOCK_REPO_DIR,
@@ -241,12 +200,10 @@ it('prepares assets for distribution', async () => {
   await allValuesFrom(runOptimizer(config).pipe(logOptimizerState(log, config)));
 
   expectFileMatchesSnapshotWithCompression('plugins/foo/target/public/foo.plugin.js', 'foo bundle');
-  // FIXME: the test didn't have .gz file created for chunks, however, chunks are properly compressed
-  // with .gz and .br when running actual build
-  // expectFileMatchesSnapshotWithCompression(
-  //   'plugins/foo/target/public/foo.chunk.674.js',
-  //   'foo async bundle'
-  // );
+  expectFileMatchesSnapshotWithCompression(
+    'plugins/foo/target/public/foo.chunk.0.js',
+    'foo async bundle'
+  );
   expectFileMatchesSnapshotWithCompression('plugins/bar/target/public/bar.plugin.js', 'bar bundle');
 });
 

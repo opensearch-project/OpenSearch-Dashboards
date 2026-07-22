@@ -4,7 +4,7 @@
  */
 
 import './map_choice_options.scss';
-import React, { useCallback, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import {
   EuiPanel,
   EuiSpacer,
@@ -48,9 +48,10 @@ function MapChoiceOptions(props: MapChoiceOptionsProps) {
   const vectorLayers = vis.type.editorConfig.collections.vectorLayers;
   const customVectorLayers = vis.type.editorConfig.collections.customVectorLayers;
   const vectorLayerOptions = useMemo(() => vectorLayers.map(mapLayerForOption), [vectorLayers]);
-  const customVectorLayerOptions = useMemo(() => customVectorLayers.map(mapLayerForOption), [
-    customVectorLayers,
-  ]);
+  const customVectorLayerOptions = useMemo(
+    () => customVectorLayers.map(mapLayerForOption),
+    [customVectorLayers]
+  );
 
   const fieldOptions = useMemo(
     () =>
@@ -113,6 +114,7 @@ function MapChoiceOptions(props: MapChoiceOptionsProps) {
   );
 
   const setCustomJoinField = useCallback(
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     async (paramName: 'selectedCustomJoinField', value) => {
       if (stateParams.selectedCustomLayer) {
         setValue(

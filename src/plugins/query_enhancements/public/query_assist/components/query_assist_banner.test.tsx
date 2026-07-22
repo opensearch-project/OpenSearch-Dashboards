@@ -5,7 +5,7 @@
 
 import { I18nProvider } from '@osd/i18n/react';
 import { fireEvent, render } from '@testing-library/react';
-import React, { ComponentProps } from 'react';
+import { ComponentProps } from 'react';
 import { QueryAssistBanner } from './query_assist_banner';
 
 jest.mock('../../services', () => ({
@@ -59,7 +59,7 @@ describe('<QueryAssistBanner /> spec', () => {
     const { props, component } = renderQueryAssistBanner();
 
     fireEvent.click(component.getByTestId('queryAssist-banner-changeLanguage'));
-    expect(props.dependencies.onSelectLanguage).toBeCalledWith('test-lang1');
-    expect(props.dependencies.setIsCollapsed).toBeCalledWith(false);
+    expect(props.dependencies.onSelectLanguage).toHaveBeenCalledWith('test-lang1');
+    expect(props.dependencies.setIsCollapsed).toHaveBeenCalledWith(false);
   });
 });

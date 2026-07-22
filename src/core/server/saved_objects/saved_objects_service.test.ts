@@ -68,6 +68,11 @@ describe('SavedObjectsService', () => {
       return new BehaviorSubject({
         maxImportPayloadBytes: new ByteSizeValue(0),
         maxImportExportSize: new ByteSizeValue(0),
+        permission: { enabled: false },
+        storage: {
+          backend: 'opensearch',
+          sqlite: { path: ':memory:' },
+        },
       });
     });
     const config$ = new BehaviorSubject<Config>(
@@ -241,14 +246,15 @@ describe('SavedObjectsService', () => {
           Promise.reject(new opensearchErrors.NoLivingConnectionsError('reason', {} as any))
         )
         .mockImplementationOnce(() =>
-          opensearchClientMock.createSuccessTransportRequestPromise('success')
+          opensearchClientMock.createSuccessTransportRequestPromise({ success: true })
         );
 
       await soService.setup(coreSetup);
       await soService.start(coreStart, 1);
 
-      const response = await OpenSearchDashboardsMigratorMock.mock.calls[0][0].client.indices.create();
-      return expect(response.body).toBe('success');
+      const response =
+        await OpenSearchDashboardsMigratorMock.mock.calls[0][0].client.indices.create();
+      return expect(response.body).toEqual({ success: true });
     });
 
     it('skips OpenSearchDashboardsMigrator migrations when pluginsInitialized=false', async () => {
@@ -284,9 +290,10 @@ describe('SavedObjectsService', () => {
       soService.setup(setupDeps).then(() => {
         soService.start(createStartDeps());
         expect(migratorInstanceMock.runMigrations).toHaveBeenCalledTimes(0);
-        ((setupDeps.opensearch.opensearchNodesCompatibility$ as any) as BehaviorSubject<
-          NodesVersionCompatibility
-        >).next({
+        (
+          setupDeps.opensearch
+            .opensearchNodesCompatibility$ as any as BehaviorSubject<NodesVersionCompatibility>
+        ).next({
           isCompatible: true,
           incompatibleNodes: [],
           warningNodes: [],
@@ -382,9 +389,9 @@ describe('SavedObjectsService', () => {
 
         expect(coreStart.opensearch.client.asScoped).toHaveBeenCalledWith(req);
 
-        const [
-          [, , , , includedHiddenTypes],
-        ] = (SavedObjectsRepository.createRepository as jest.Mocked<any>).mock.calls;
+        const [[, , , , includedHiddenTypes]] = (
+          SavedObjectsRepository.createRepository as jest.Mocked<any>
+        ).mock.calls;
 
         expect(includedHiddenTypes).toEqual([]);
       });
@@ -400,9 +407,9 @@ describe('SavedObjectsService', () => {
         const req = httpServerMock.createOpenSearchDashboardsRequest();
         createScopedRepository(req, ['someHiddenType']);
 
-        const [
-          [, , , , includedHiddenTypes],
-        ] = (SavedObjectsRepository.createRepository as jest.Mocked<any>).mock.calls;
+        const [[, , , , includedHiddenTypes]] = (
+          SavedObjectsRepository.createRepository as jest.Mocked<any>
+        ).mock.calls;
 
         expect(includedHiddenTypes).toEqual(['someHiddenType']);
       });
@@ -419,9 +426,9 @@ describe('SavedObjectsService', () => {
 
         createInternalRepository();
 
-        const [
-          [, , , client, includedHiddenTypes],
-        ] = (SavedObjectsRepository.createRepository as jest.Mocked<any>).mock.calls;
+        const [[, , , client, includedHiddenTypes]] = (
+          SavedObjectsRepository.createRepository as jest.Mocked<any>
+        ).mock.calls;
 
         expect(coreStart.opensearch.client.asInternalUser).toBe(client);
         expect(includedHiddenTypes).toEqual([]);
@@ -436,9 +443,9 @@ describe('SavedObjectsService', () => {
 
         createInternalRepository(['someHiddenType']);
 
-        const [
-          [, , , , includedHiddenTypes],
-        ] = (SavedObjectsRepository.createRepository as jest.Mocked<any>).mock.calls;
+        const [[, , , , includedHiddenTypes]] = (
+          SavedObjectsRepository.createRepository as jest.Mocked<any>
+        ).mock.calls;
 
         expect(includedHiddenTypes).toEqual(['someHiddenType']);
       });

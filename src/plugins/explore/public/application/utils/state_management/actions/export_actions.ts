@@ -5,6 +5,7 @@
 
 import { Dispatch } from 'redux';
 import { saveAs } from 'file-saver';
+import { autoBom } from '@osd/std';
 import { ExploreServices } from '../../../../types';
 import { AppDispatch, RootState } from '../store';
 import { processDisplayedColumnNames } from '../../../../helpers/use_displayed_columns';
@@ -76,7 +77,7 @@ export const exportToCsv = (options: { fileName?: string; services?: ExploreServ
     // Download CSV
     const fileName = options.fileName || `explore_export_${new Date().toISOString()}.csv`;
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
-    saveAs(blob, fileName);
+    saveAs(autoBom(blob), fileName);
   };
 };
 
@@ -165,7 +166,7 @@ export const exportMaxSizeCsv = (
       // Download CSV
       const fileName = options.fileName || `explore_export_${new Date().toISOString()}.csv`;
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
-      saveAs(blob, fileName);
+      saveAs(autoBom(blob), fileName);
     } catch (error) {
       // Error exporting CSV
       throw error;

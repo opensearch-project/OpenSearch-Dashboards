@@ -20,6 +20,7 @@ describe('resultsSlice reducers', () => {
     took: 10,
     timed_out: false,
     _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     hits: { total: 1, max_score: 1, hits: [{ _index: 'i', _type: 't', _id: '1', _score: 1 }] },
     elapsedMs: 100,
   };

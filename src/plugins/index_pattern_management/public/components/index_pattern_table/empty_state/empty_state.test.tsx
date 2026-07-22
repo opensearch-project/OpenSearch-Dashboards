@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { EmptyState } from '../empty_state';
 import { shallow } from 'enzyme';
 import sinon from 'sinon';

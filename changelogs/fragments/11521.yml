@@ -1,2 +1,0 @@
-fix:
-- Fix cross-flavor navigation and state isolation in Explore plugin ([#11521](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11521))

@@ -120,12 +120,12 @@ describe('validation', () => {
       createServer({
         basePublicPath: '/a',
       });
-    }).not.toThrowError();
+    }).not.toThrow();
     expect(() => {
       createServer({
         basePublicPath: '',
       });
-    }).not.toThrowError();
+    }).not.toThrow();
   });
 });
 
@@ -138,10 +138,7 @@ describe('js file', () => {
 
     expect(response.statusCode).toBe(200);
     expect(response.headers).not.toHaveProperty('content-length');
-    expect(response.headers).toHaveProperty(
-      'content-type',
-      'application/javascript; charset=utf-8'
-    );
+    expect(response.headers).toHaveProperty('content-type', 'text/javascript; charset=utf-8');
     expect(readFileSync(resolve(fooPluginFixture, 'plugin.js'), { encoding: 'utf8' })).toEqual(
       response.rawPayload.toString('utf8')
     );

@@ -81,18 +81,14 @@ export function getCallMsearchWithOpenSearchClient(
     const timeout = getShardTimeout(config);
 
     // trackTotalHits and dataFrameHydrationStrategy is not supported by msearch
-    const {
-      trackTotalHits,
-      dataFrameHydrationStrategy,
-      ...defaultParams
-    } = await getDefaultSearchParams(uiSettings);
+    const { trackTotalHits, dataFrameHydrationStrategy, ...defaultParams } =
+      await getDefaultSearchParams(uiSettings);
 
     const body = convertRequestBody(params.body, timeout);
 
     const promise = shimAbortSignal(
       opensearchClient.msearch(
         {
-          // @ts-expect-error TS2322 TODO(ts-error): fixme
           body,
         },
         {
@@ -101,7 +97,6 @@ export function getCallMsearchWithOpenSearchClient(
       ),
       params.signal
     );
-    // @ts-expect-error TS2352 TODO(ts-error): fixme
     const response = (await promise) as ApiResponse<{ responses: Array<SearchResponse<any>> }>;
 
     return {

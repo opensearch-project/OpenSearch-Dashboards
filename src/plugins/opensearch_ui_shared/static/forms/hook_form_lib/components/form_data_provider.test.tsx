@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { act } from 'react';
 
 import { registerTestBed, TestBed } from '../shared_imports';
@@ -70,9 +70,9 @@ describe('<FormDataProvider />', () => {
 
     expect(onFormData.mock.calls.length).toBe(1);
 
-    const [formDataInitial] = onFormData.mock.calls[onFormData.mock.calls.length - 1] as Parameters<
-      OnUpdateHandler
-    >;
+    const [formDataInitial] = onFormData.mock.calls[
+      onFormData.mock.calls.length - 1
+    ] as Parameters<OnUpdateHandler>;
 
     expect(formDataInitial).toEqual({
       name: 'Initial value',
@@ -87,11 +87,11 @@ describe('<FormDataProvider />', () => {
       setInputValue('lastNameField', 'updated value');
     });
 
-    expect(onFormData).toBeCalledTimes(2);
+    expect(onFormData).toHaveBeenCalledTimes(2);
 
-    const [formDataUpdated] = onFormData.mock.calls[onFormData.mock.calls.length - 1] as Parameters<
-      OnUpdateHandler
-    >;
+    const [formDataUpdated] = onFormData.mock.calls[
+      onFormData.mock.calls.length - 1
+    ] as Parameters<OnUpdateHandler>;
 
     expect(formDataUpdated).toEqual({
       name: 'updated value',
@@ -133,7 +133,7 @@ describe('<FormDataProvider />', () => {
       find,
     } = setup() as TestBed;
 
-    expect(onFormData).toBeCalledTimes(0); // Not present in the DOM yet
+    expect(onFormData).toHaveBeenCalledTimes(0); // Not present in the DOM yet
 
     // Make some changes to the form fields
     await act(async () => {
@@ -147,9 +147,9 @@ describe('<FormDataProvider />', () => {
 
     expect(onFormData.mock.calls.length).toBe(1);
 
-    const [formDataUpdated] = onFormData.mock.calls[onFormData.mock.calls.length - 1] as Parameters<
-      OnUpdateHandler
-    >;
+    const [formDataUpdated] = onFormData.mock.calls[
+      onFormData.mock.calls.length - 1
+    ] as Parameters<OnUpdateHandler>;
 
     expect(formDataUpdated).toEqual({
       name: 'updated value',
@@ -191,7 +191,7 @@ describe('<FormDataProvider />', () => {
       setInputValue('lastNameField', 'updated value');
     });
 
-    expect(onFormData).toBeCalledTimes(0);
+    expect(onFormData).toHaveBeenCalledTimes(0);
   });
 
   test('props.pathsToWatch (Array<string>): should not re-render the children when the field that changed is not in the watch list', async () => {
@@ -231,14 +231,14 @@ describe('<FormDataProvider />', () => {
     });
 
     // No re-render
-    expect(onFormData).toBeCalledTimes(0);
+    expect(onFormData).toHaveBeenCalledTimes(0);
 
     // Make some changes to fields in the watch list
     await act(async () => {
       setInputValue('nameField', 'updated value');
     });
 
-    expect(onFormData).toBeCalledTimes(1);
+    expect(onFormData).toHaveBeenCalledTimes(1);
 
     onFormData.mockReset();
 
@@ -248,9 +248,9 @@ describe('<FormDataProvider />', () => {
 
     expect(onFormData.mock.calls.length).toBe(2); // 2 as the form "isValid" change caused a re-render
 
-    const [formData] = onFormData.mock.calls[onFormData.mock.calls.length - 1] as Parameters<
-      OnUpdateHandler
-    >;
+    const [formData] = onFormData.mock.calls[
+      onFormData.mock.calls.length - 1
+    ] as Parameters<OnUpdateHandler>;
 
     expect(formData).toEqual({
       name: 'updated value',

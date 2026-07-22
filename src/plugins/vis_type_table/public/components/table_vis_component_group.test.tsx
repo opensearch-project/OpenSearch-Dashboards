@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
 import { TableVisComponentGroup } from './table_vis_component_group';
 import { TableVisConfig, ColumnSort } from '../types';
@@ -43,7 +42,7 @@ describe('TableVisApp', () => {
     const { container, queryAllByText } = render(
       <TableVisComponentGroup
         tableGroups={[]}
-        visConfig={({} as unknown) as TableVisConfig}
+        visConfig={{} as unknown as TableVisConfig}
         event={jest.fn()}
         // @ts-expect-error TS2741 TODO(ts-error): fixme
         uiState={tableUiStateMock}
@@ -57,7 +56,7 @@ describe('TableVisApp', () => {
     const { container, queryAllByText } = render(
       <TableVisComponentGroup
         tableGroups={[table1, table2]}
-        visConfig={({} as unknown) as TableVisConfig}
+        visConfig={{} as unknown as TableVisConfig}
         event={jest.fn()}
         // @ts-expect-error TS2322 TODO(ts-error): fixme
         uiState={tableUiStateMock}

@@ -93,4 +93,4 @@ oop.inherits(Mode, TextMode);
 
     return worker;
   };
-}.call(Mode.prototype));
+}).call(Mode.prototype);

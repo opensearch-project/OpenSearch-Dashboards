@@ -89,11 +89,11 @@ describe('IndexPatterns', () => {
     uiSettingsGet.mockReturnValue(Promise.resolve(false));
 
     indexPatterns = new IndexPatternsService({
-      uiSettings: ({
+      uiSettings: {
         get: uiSettingsGet,
         getAll: () => {},
-      } as any) as UiSettingsCommon,
-      savedObjectsClient: (savedObjectsClient as unknown) as SavedObjectsClientCommon,
+      } as any as UiSettingsCommon,
+      savedObjectsClient: savedObjectsClient as unknown as SavedObjectsClientCommon,
       apiClient: createFieldsFetcher(),
       fieldFormats,
       onNotification: () => {},
@@ -119,11 +119,11 @@ describe('IndexPatterns', () => {
     expect(indexPattern).toBe(await indexPatterns.get(id));
   });
 
-  test('savedObjectCache pre-fetches only title', async () => {
+  test('savedObjectCache pre-fetches title and displayName', async () => {
     expect(await indexPatterns.getIds()).toEqual(['id']);
     expect(savedObjectsClient.find).toHaveBeenCalledWith({
       type: 'index-pattern',
-      fields: ['title'],
+      fields: ['title', 'displayName'],
       perPage: 10000,
     });
   });
@@ -158,23 +158,20 @@ describe('IndexPatterns', () => {
       },
     });
 
-    // Create a normal index patterns
+    // get() is read-only and does not trigger a save
     const pattern = await indexPatterns.get('foo');
-
-    expect(pattern.version).toBe('fooa');
+    expect(pattern.version).toBe('foo');
     indexPatterns.clearCache();
 
-    // Create the same one - we're going to handle concurrency
     const samePattern = await indexPatterns.get('foo');
+    expect(samePattern.version).toBe('foo');
 
-    expect(samePattern.version).toBe('fooaa');
-
-    // This will conflict because samePattern did a save (from refreshFields)
-    // but the resave should work fine
+    // First save succeeds and bumps the version
     pattern.title = 'foo2';
     await indexPatterns.updateSavedObject(pattern);
+    expect(pattern.version).toBe('fooa');
 
-    // This should not be able to recover
+    // Second save conflicts because samePattern still has the old version
     samePattern.title = 'foo3';
 
     let result;
@@ -194,10 +191,10 @@ describe('IndexPatterns', () => {
     const indexPattern = await indexPatterns.create({ title }, true);
     expect(indexPattern).toBeInstanceOf(IndexPattern);
     expect(indexPattern.title).toBe(title);
-    expect(indexPatterns.refreshFields).not.toBeCalled();
+    expect(indexPatterns.refreshFields).not.toHaveBeenCalled();
 
     await indexPatterns.create({ title });
-    expect(indexPatterns.refreshFields).toBeCalled();
+    expect(indexPatterns.refreshFields).toHaveBeenCalled();
   });
 
   test('createAndSave', async () => {
@@ -205,8 +202,8 @@ describe('IndexPatterns', () => {
     indexPatterns.createSavedObject = jest.fn();
     indexPatterns.setDefault = jest.fn();
     await indexPatterns.createAndSave({ title });
-    expect(indexPatterns.createSavedObject).toBeCalled();
-    expect(indexPatterns.setDefault).toBeCalled();
+    expect(indexPatterns.createSavedObject).toHaveBeenCalled();
+    expect(indexPatterns.setDefault).toHaveBeenCalled();
   });
 
   test('savedObjectToSpec', () => {
@@ -264,5 +261,124 @@ describe('IndexPatterns', () => {
       Promise.resolve(key === UI_SETTINGS.DATA_WITH_LONG_NUMERALS ? true : undefined)
     );
     expect(await indexPatterns.isLongNumeralsSupported()).toBe(true);
+  });
+
+  describe('getCache - excludeEngineTypes', () => {
+    const buildPattern = (id: string, dataSourceId?: string) => ({
+      id,
+      type: 'index-pattern',
+      version: '1',
+      attributes: { title: id },
+      references: dataSourceId ? [{ id: dataSourceId, type: 'data-source', name: 'ds' }] : [],
+    });
+
+    const setupClientWithDataSources = (
+      patterns: Array<ReturnType<typeof buildPattern>>,
+      dataSourceEngineTypes: Record<string, string | undefined>
+    ) => {
+      savedObjectsClient.find = jest.fn(
+        () => Promise.resolve(patterns) as Promise<Array<SavedObject<any>>>
+      );
+      const buildDsObject = (id: string) => {
+        const engineType = dataSourceEngineTypes[id];
+        return {
+          id,
+          type: 'data-source',
+          version: '1',
+          attributes: { title: id, ...(engineType && { dataSourceEngineType: engineType }) },
+          references: [],
+        } as SavedObject<any>;
+      };
+      // getDataSource (called from refreshSavedObjectsCache to resolve titles) uses get()
+      savedObjectsClient.get = jest.fn(async (_type, id) => buildDsObject(id as string));
+      // applyEngineTypeFilter uses bulkGet()
+      // @ts-expect-error TS2339 bulkGet is on SavedObjectsClientCommon but not strongly typed in this mock
+      savedObjectsClient.bulkGet = jest.fn(async (objs) => ({
+        savedObjects: (objs as Array<{ id: string; type: string }>).map((o) => buildDsObject(o.id)),
+      }));
+    };
+
+    test('returns full cache when options omitted', async () => {
+      setupClientWithDataSources([buildPattern('a', 'ds-os'), buildPattern('b', 'ds-ae')], {
+        'ds-os': 'OpenSearch',
+        'ds-ae': 'AnalyticEngine',
+      });
+      const cache = await indexPatterns.getCache();
+      expect(cache?.map((o) => o.id)).toEqual(['a', 'b']);
+    });
+
+    test('returns full cache when excludeEngineTypes is empty', async () => {
+      setupClientWithDataSources([buildPattern('a', 'ds-os'), buildPattern('b', 'ds-ae')], {
+        'ds-os': 'OpenSearch',
+        'ds-ae': 'AnalyticEngine',
+      });
+      const cache = await indexPatterns.getCache({ excludeEngineTypes: [] });
+      expect(cache?.map((o) => o.id)).toEqual(['a', 'b']);
+    });
+
+    test('excludes patterns whose data source has a blocked engine type', async () => {
+      setupClientWithDataSources([buildPattern('a', 'ds-os'), buildPattern('b', 'ds-ae')], {
+        'ds-os': 'OpenSearch',
+        'ds-ae': 'AnalyticEngine',
+      });
+      const cache = await indexPatterns.getCache({ excludeEngineTypes: ['AnalyticEngine'] });
+      expect(cache?.map((o) => o.id)).toEqual(['a']);
+    });
+
+    test('keeps patterns with no data-source reference', async () => {
+      setupClientWithDataSources([buildPattern('local'), buildPattern('a', 'ds-ae')], {
+        'ds-ae': 'AnalyticEngine',
+      });
+      const cache = await indexPatterns.getCache({ excludeEngineTypes: ['AnalyticEngine'] });
+      expect(cache?.map((o) => o.id)).toEqual(['local']);
+    });
+
+    test('keeps patterns when bulkGet returns an error per object', async () => {
+      const patterns = [buildPattern('a', 'ds-missing')];
+      savedObjectsClient.find = jest.fn(
+        () => Promise.resolve(patterns) as Promise<Array<SavedObject<any>>>
+      );
+      // getDataSource (title resolution) needs to succeed
+      savedObjectsClient.get = jest.fn(async (_type, id) => ({
+        id,
+        type: 'data-source',
+        version: '1',
+        attributes: { title: id as string },
+        references: [],
+      })) as any;
+      // bulkGet reports the SO as having an error — applyEngineTypeFilter should skip it
+      // @ts-expect-error TS2339 bulkGet typing
+      savedObjectsClient.bulkGet = jest.fn(async (objs) => ({
+        savedObjects: (objs as Array<{ id: string; type: string }>).map((o) => ({
+          id: o.id,
+          type: o.type,
+          attributes: {},
+          references: [],
+          error: { error: 'Not Found', message: 'not found', statusCode: 404 },
+        })),
+      }));
+      const cache = await indexPatterns.getCache({ excludeEngineTypes: ['AnalyticEngine'] });
+      expect(cache?.map((o) => o.id)).toEqual(['a']);
+    });
+
+    test('keeps all patterns when bulkGet itself throws', async () => {
+      const patterns = [buildPattern('a', 'ds-ae')];
+      savedObjectsClient.find = jest.fn(
+        () => Promise.resolve(patterns) as Promise<Array<SavedObject<any>>>
+      );
+      savedObjectsClient.get = jest.fn(async (_type, id) => ({
+        id,
+        type: 'data-source',
+        version: '1',
+        attributes: { title: id as string },
+        references: [],
+      })) as any;
+      // @ts-expect-error TS2339 bulkGet typing
+      savedObjectsClient.bulkGet = jest.fn(async () => {
+        throw new Error('network error');
+      });
+      const cache = await indexPatterns.getCache({ excludeEngineTypes: ['AnalyticEngine'] });
+      expect(cache?.map((o) => o.id)).toEqual(['a']);
+    });
   });
 });

@@ -37,7 +37,7 @@ import {
   EuiHeaderLinkProps,
 } from '@elastic/eui';
 import { upperFirst } from 'lodash';
-import React, { MouseEvent } from 'react';
+import { MouseEvent } from 'react';
 import { TopNavControlData } from './top_nav_control_data';
 
 export function TopNavControlItem(props: TopNavControlData) {

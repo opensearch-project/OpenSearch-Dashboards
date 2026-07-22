@@ -9,7 +9,6 @@ on:
       - 'docs/**'
       - '.lycheeignore'
       - 'CODEOWNERS'
-      - 'changelogs/fragments/**'
   workflow_dispatch:
     inputs:
       test_branch:
@@ -48,10 +47,10 @@ jobs:
     name: Run cypress tests with S3
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version-file: '.nvmrc'
           registry-url: 'https://registry.npmjs.org'
@@ -76,7 +75,7 @@ jobs:
           echo "DASHBOARDS_SPEC=${DASHBOARDS_SPEC}"
 
       - name: Download OpenSearch
-        uses: suisei-cn/actions-download-file@v1.4.0
+        uses: suisei-cn/actions-download-file@15306412d2c75df56b46844362b86b65235b7db1 # v1.4.0
         with:
           url: https://artifacts.opensearch.org/releases/bundle/opensearch/${{ env.LATEST_VERSION }}/opensearch-${{ env.LATEST_VERSION }}-linux-x64.tar.gz
 
@@ -101,7 +100,7 @@ jobs:
         run: npx cypress cache clear
 
       - name: Run Dashboards Cypress tests with query enhancements
-        uses: cypress-io/github-action@v6
+        uses: cypress-io/github-action@f790eee7a50d9505912f50c2095510be7de06aa7 # v6
         env:
           S3_CONNECTION_URL: ${{ secrets.S3_CONNECTION_URL }}
           S3_CONNECTION_USERNAME: ${{ secrets.S3_CONNECTION_USERNAME }}
@@ -127,7 +126,7 @@ jobs:
 
       - name: Upload Dashboards repo artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: dashboards-cypress-artifacts-s3
           path: dashboards-cypress-artifacts-s3.tar.gz

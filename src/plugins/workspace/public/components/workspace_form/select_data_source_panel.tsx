@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import {
   EuiSpacer,
   EuiFlexItem,
@@ -46,9 +46,10 @@ export const SelectDataSourcePanel = ({
     services: { notifications, http, chrome },
   } = useOpenSearchDashboards<{ CoreStart: CoreStart; workspaceClient: WorkspaceClient }>();
 
-  const excludedConnectionIds = useMemo(() => assignedDataSourceConnections.map((c) => c.id), [
-    assignedDataSourceConnections,
-  ]);
+  const excludedConnectionIds = useMemo(
+    () => assignedDataSourceConnections.map((c) => c.id),
+    [assignedDataSourceConnections]
+  );
 
   const handleAssignDataSourceConnections = (newDataSourceConnections: DataSourceConnection[]) => {
     setModalVisible(false);

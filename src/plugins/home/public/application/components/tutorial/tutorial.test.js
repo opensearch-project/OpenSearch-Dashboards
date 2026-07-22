@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { act } from 'react';
+import { act } from 'react';
 import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { waitFor } from '@testing-library/react';
@@ -177,5 +177,5 @@ test('should render ELASTIC_CLOUD instructions when isCloudEnabled is true', asy
   );
   await loadTutorialPromise;
   component.update();
-  expect(component).toMatchSnapshot(); // eslint-disable-line
+  expect(component).toMatchSnapshot();
 });

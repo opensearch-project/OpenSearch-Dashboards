@@ -127,6 +127,21 @@ describe('PPL Query Snippet Suggestions', () => {
       // Should only have 2 unique suggestions (source = logs, where status = "error")
       expect(result).toHaveLength(2);
     });
+
+    it('should skip snippets that contain no word-like tokens', () => {
+      const malformedQueries: QuerySnippetItem[] = [
+        {
+          id: '1',
+          query: { query: '{} (() | where status = "error"', language: 'PPL' },
+          source: 'Saved Query',
+        },
+      ];
+
+      const result = convertQueryToMonacoSuggestion(malformedQueries);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].text).toBe('where status = "error"');
+    });
   });
 
   describe('getPPLQuerySnippetForSuggestions', () => {

@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-
 import { EuiSpacer, EuiText, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -12,8 +10,8 @@ import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards
 import { DataSourceManagementContext } from '../../../../types';
 
 export const Header = () => {
-  const changeTitle = useOpenSearchDashboards<DataSourceManagementContext>().services.chrome
-    .docTitle.change;
+  const changeTitle =
+    useOpenSearchDashboards<DataSourceManagementContext>().services.chrome.docTitle.change;
 
   changeTitle(
     i18n.translate('dataSourcesManagement.createDataSourceHeader', {

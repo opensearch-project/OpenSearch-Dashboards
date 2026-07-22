@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
 import { IndexPatternField, IndexPattern } from 'src/plugins/data/public';
 import { IndexedFieldsTable } from './indexed_fields_table';
@@ -53,13 +52,13 @@ const helpers = {
   getFieldInfo: () => [],
 };
 
-const indexPattern = ({
+const indexPattern = {
   getNonScriptedFields: () => fields,
-} as unknown) as IndexPattern;
+} as unknown as IndexPattern;
 
 const mockFieldToIndexPatternField = (spec: Record<string, string | boolean | undefined>) => {
   return new IndexPatternField(
-    (spec as unknown) as IndexPatternField['spec'],
+    spec as unknown as IndexPatternField['spec'],
     spec.displayName as string
   );
 };

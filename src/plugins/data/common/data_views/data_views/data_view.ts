@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SavedObjectsClientCommon, Dataset, DataSource, DataStructureCustomMeta } from '../..';
+import { SavedObjectsClientCommon, Dataset, DataSource } from '../..';
 import { IndexPattern } from '../../index_patterns/index_patterns/index_pattern';
 import { IDataView, DataViewSpec } from '../types';
 import { FieldFormatsStartCommon } from '../../field_formats';
@@ -102,7 +102,7 @@ export class DataView extends IndexPattern implements IDataView {
         version: attributes.dataSourceVersion || this.dataSourceRef.version,
         name: attributes.title || this.dataSourceRef.name || this.dataSourceRef.id,
       };
-    } catch (error) {
+    } catch {
       // If data source fetch fails, keep the existing dataSourceRef as-is
       // This ensures the DataView can still be used even if the data source is unavailable
     }
@@ -184,7 +184,7 @@ export class DataView extends IndexPattern implements IDataView {
             type: attributes.dataSourceEngineType || 'OpenSearch',
             version: attributes.dataSourceVersion || '',
           };
-        } catch (error) {
+        } catch {
           // If fetch fails, create minimal version from what we have
           dataSource = {
             id: dataSourceReference.id,

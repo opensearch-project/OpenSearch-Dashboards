@@ -53,6 +53,7 @@ import {
   SavedObjectConfig,
 } from './saved_objects_config';
 import { OpenSearchDashboardsRequest, InternalHttpServiceSetup } from '../http';
+import { Capabilities } from '../capabilities';
 import { SavedObjectsClientContract, SavedObjectsType, SavedObjectStatusMeta } from './types';
 import { ISavedObjectsRepository, SavedObjectsRepository } from './service/lib/repository';
 import {
@@ -68,6 +69,7 @@ import { ServiceStatus, ServiceStatusLevels } from '../status';
 import { calculateStatus$ } from './status';
 import { createMigrationOpenSearchClient } from './migrations/core/';
 import { Config } from '../config';
+import { SqliteSavedObjectsRepository } from './storage/sqlite_repository';
 /**
  * Saved Objects is OpenSearchDashboards's data persistence mechanism allowing plugins to
  * use OpenSearch for storing and querying state. The SavedObjectsServiceSetup API exposes methods
@@ -170,6 +172,11 @@ export interface SavedObjectsServiceSetup {
    * Returns the maximum number of objects allowed for import or export operations.
    */
   getImportExportObjectLimit: () => number;
+
+  /**
+   * Returns whether saved objects permission control is enabled.
+   */
+  getPermissionControlEnabled: () => boolean;
 
   /**
    * Set the default {@link SavedObjectRepositoryFactoryProvider | factory provider} for creating Saved Objects repository.
@@ -296,8 +303,10 @@ export interface SavedObjectsStartDeps {
   pluginsInitialized?: boolean;
 }
 
-export class SavedObjectsService
-  implements CoreService<InternalSavedObjectsServiceSetup, InternalSavedObjectsServiceStart> {
+export class SavedObjectsService implements CoreService<
+  InternalSavedObjectsServiceSetup,
+  InternalSavedObjectsServiceStart
+> {
   private logger: Logger;
 
   private setupDeps?: SavedObjectsSetupDeps;
@@ -307,6 +316,7 @@ export class SavedObjectsService
 
   private migrator$ = new Subject<IOpenSearchDashboardsMigrator>();
   private typeRegistry = new SavedObjectTypeRegistry();
+  private capabilitiesResolver?: (request: OpenSearchDashboardsRequest) => Promise<Capabilities>;
   private started = false;
 
   private respositoryFactoryProvider?: SavedObjectRepositoryFactoryProvider;
@@ -317,9 +327,16 @@ export class SavedObjectsService
   });
 
   private opensearchDashboardsRawConfig?: Config;
+  private sqliteRepository?: SqliteSavedObjectsRepository;
 
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger.get('savedobjects-service');
+  }
+
+  public setCapabilitiesResolver(
+    resolver: (request: OpenSearchDashboardsRequest) => Promise<Capabilities>
+  ) {
+    this.capabilitiesResolver = resolver;
   }
 
   public async setup(setupDeps: SavedObjectsSetupDeps): Promise<InternalSavedObjectsServiceSetup> {
@@ -341,11 +358,35 @@ export class SavedObjectsService
       .toPromise();
     this.config = new SavedObjectConfig(savedObjectsConfig, savedObjectsMigrationConfig);
 
+    // Wire up SQLite backend via the existing repository factory provider hook
+    if (this.config.storage.backend === 'sqlite') {
+      // Set the repository factory provider directly (same as setRepositoryFactoryProvider)
+      // since we're inside setup() before the public API is returned.
+      const dbPath = this.config.storage.sqlite.path;
+      const typeRegistry = this.typeRegistry;
+      const logger = this.logger;
+      this.respositoryFactoryProvider = ({ migrator, includedHiddenTypes }) => {
+        if (!this.sqliteRepository) {
+          const serializer = new SavedObjectsSerializer(typeRegistry);
+          this.sqliteRepository = new SqliteSavedObjectsRepository({
+            dbPath,
+            migrator,
+            typeRegistry,
+            serializer,
+            includedHiddenTypes,
+            logger,
+          });
+        }
+        return this.sqliteRepository;
+      };
+    }
+
     registerRoutes({
       http: setupDeps.http,
       logger: this.logger,
       config: this.config,
       migratorPromise: this.migrator$.pipe(first()).toPromise(),
+      getCapabilities: () => this.capabilitiesResolver,
     });
 
     return {
@@ -376,6 +417,7 @@ export class SavedObjectsService
         this.typeRegistry.registerType(type);
       },
       getImportExportObjectLimit: () => this.config!.maxImportExportSize,
+      getPermissionControlEnabled: () => this.config!.permission.enabled,
       setRepositoryFactoryProvider: (repositoryProvider) => {
         if (this.started) {
           throw new Error('cannot call `setRepositoryFactoryProvider` after service startup.');
@@ -409,6 +451,8 @@ export class SavedObjectsService
 
     this.logger.debug('Starting SavedObjects service');
 
+    const useSqliteBackend = this.config.storage.backend === 'sqlite';
+
     if (this.savedObjectServiceCustomStatus$) {
       this.savedObjectServiceCustomStatus$
         .pipe(
@@ -418,6 +462,11 @@ export class SavedObjectsService
           distinctUntilChanged<ServiceStatus<SavedObjectStatusMeta>>(isDeepStrictEqual)
         )
         .subscribe((value) => this.savedObjectServiceStatus$.next(value));
+    } else if (useSqliteBackend) {
+      this.savedObjectServiceStatus$.next({
+        level: ServiceStatusLevels.available,
+        summary: 'SavedObjects service is using SQLite backend',
+      });
     } else {
       calculateStatus$(
         this.migrator$.pipe(switchMap((migrator) => migrator.getStatus$())),
@@ -460,12 +509,16 @@ export class SavedObjectsService
      * We also cannot safely run migrations if plugins are not initialized since
      * not plugin migrations won't be registered.
      */
-    const skipMigrations = this.config.migration.skip || !pluginsInitialized;
+    const skipMigrations = useSqliteBackend || this.config.migration.skip || !pluginsInitialized;
 
     if (skipMigrations) {
-      this.logger.warn(
-        'Skipping Saved Object migrations on startup. Note: Individual documents will still be migrated when read or written.'
-      );
+      if (useSqliteBackend) {
+        this.logger.info('Skipping OpenSearch migrations — using SQLite storage backend.');
+      } else {
+        this.logger.warn(
+          'Skipping Saved Object migrations on startup. Note: Individual documents will still be migrated when read or written.'
+        );
+      }
     } else {
       this.logger.info(
         'Waiting until all OpenSearch nodes are compatible with OpenSearch Dashboards before starting saved objects migrations...'
@@ -544,6 +597,9 @@ export class SavedObjectsService
   }
 
   public async stop() {
+    if (this.sqliteRepository) {
+      this.sqliteRepository.shutdown();
+    }
     this.savedObjectServiceStatus$.unsubscribe();
   }
 

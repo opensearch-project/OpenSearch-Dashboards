@@ -9,7 +9,7 @@ import {
   NavGroupItemInMap,
   WorkspaceObject,
 } from 'opensearch-dashboards/public';
-import React from 'react';
+
 import { useObservable } from 'react-use';
 import { EuiBreadcrumb } from '@elastic/eui';
 import { BehaviorSubject } from 'rxjs';

@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { CSSProperties, ReactNode, useEffect, useRef, useState } from 'react';
+import { CSSProperties, ReactNode, useEffect, useRef, useState } from 'react';
 import { usePanelContext } from '../context';
 
 export interface Props {

@@ -1,9 +1,15 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`renders RangeControlEditor 1`] = `
 <Fragment>
   <InjectIntl(IndexPatternSelectFormRowUi)
     IndexPatternSelect={[Function]}
+    allowedIndexPatternIds={
+      Set {
+        "indexPattern1",
+        "mockIndexPattern",
+      }
+    }
     controlIndex={0}
     indexPatternId="indexPattern1"
     onChange={[Function]}

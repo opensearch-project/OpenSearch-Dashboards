@@ -6,7 +6,7 @@
 import { EuiSplitPanel } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { I18nProvider } from '@osd/i18n/react';
-import React, { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { OpenSearchSearchHit } from '../../types/doc_views_types';
 import { DataView, DataViewField, UI_SETTINGS } from '../../../../data/public';
 import { getServices } from '../../application/legacy/discover/opensearch_dashboards_services';
@@ -64,14 +64,8 @@ export interface DiscoverSidebarProps {
 }
 
 export function DiscoverSidebar(props: DiscoverSidebarProps) {
-  const {
-    columns,
-    fieldCounts,
-    hits,
-    selectedDataSet,
-    isEnhancementsEnabledOverride,
-    onCollapse,
-  } = props;
+  const { columns, fieldCounts, hits, selectedDataSet, isEnhancementsEnabledOverride, onCollapse } =
+    props;
   const [fieldFilterState, setFieldFilterState] = useState(getDefaultFieldFilter());
   const flavorId = useFlavorId();
   const shortDotsEnabled = useMemo(() => {

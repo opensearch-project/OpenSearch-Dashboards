@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
 
 import { SampleDataViewDataButton } from './sample_data_view_data_button';
@@ -53,7 +52,7 @@ test('should render simple button when appLinks is empty', () => {
       appLinks={[]}
     />
   );
-  expect(component).toMatchSnapshot(); // eslint-disable-line
+  expect(component).toMatchSnapshot();
 });
 
 test('should render popover when appLinks is not empty', () => {
@@ -73,5 +72,5 @@ test('should render popover when appLinks is not empty', () => {
       appLinks={appLinks}
     />
   );
-  expect(component).toMatchSnapshot(); // eslint-disable-line
+  expect(component).toMatchSnapshot();
 });

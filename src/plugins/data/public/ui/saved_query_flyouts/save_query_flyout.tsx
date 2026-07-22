@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { SavedQueryAttributes, SavedQueryService } from '../../query';
 import { SaveQueryForm, SavedQueryMeta } from '../saved_query_form';
 
@@ -34,7 +34,7 @@ export function SaveQueryFlyout({
         try {
           await onSave(savedQueryMeta, saveAsNew);
           onClose();
-        } catch (error) {
+        } catch {
           // error toast is already shown inside the onSave above,
           // catching error to avoid UI crash
           // adding comment to prevent no-empty lint error

@@ -3,15 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { IndicesList } from '../indices_list';
 import { shallow } from 'enzyme';
 import { MatchedItem } from '../../../../types';
 
-const indices = ([
+const indices = [
   { name: 'opensearch-dashboards', tags: [] },
   { name: 'opensearch', tags: [] },
-] as unknown) as MatchedItem[];
+] as unknown as MatchedItem[];
 
 describe('IndicesList', () => {
   it('should render normally', () => {

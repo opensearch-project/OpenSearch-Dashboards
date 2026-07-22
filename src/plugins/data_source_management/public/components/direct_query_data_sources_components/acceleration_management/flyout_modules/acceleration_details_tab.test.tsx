@@ -3,14 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
 import { AccelerationDetailsTab } from './acceleration_details_tab';
 import { ApplicationStart } from 'opensearch-dashboards/public';
 
-const mockApplication = ({
+const mockApplication = {
   navigateToApp: jest.fn(),
-} as unknown) as ApplicationStart;
+} as unknown as ApplicationStart;
 
 const mockAcceleration = {
   flintIndexName: 'flint_index',

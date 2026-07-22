@@ -203,6 +203,7 @@ export class Server {
     const uiSettingsSetup = await this.uiSettings.setup({
       http: httpSetup,
       savedObjects: savedObjectsSetup,
+      dynamicConfig: dynamicConfigServiceSetup,
     });
     const workspaceSetup = await this.workspace.setup();
 
@@ -233,7 +234,9 @@ export class Server {
       loggingSystem: this.loggingSystem,
     });
 
-    const securitySetup = this.security.setup();
+    const securitySetup = this.security.setup({
+      http: httpSetup,
+    });
 
     this.coreUsageData.setup({ metrics: metricsSetup });
 
@@ -291,6 +294,9 @@ export class Server {
     });
     soStartSpan?.end();
     const capabilitiesStart = this.capabilities.start();
+    this.savedObjects.setCapabilitiesResolver((request) =>
+      capabilitiesStart.resolveCapabilities(request)
+    );
     const uiSettingsStart = await this.uiSettings.start();
     const workspaceStart = await this.workspace.start();
     const metricsStart = await this.metrics.start();

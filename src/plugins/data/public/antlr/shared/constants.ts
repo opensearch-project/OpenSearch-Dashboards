@@ -20,7 +20,7 @@ export const enum SuggestionItemDetailsTags {
 }
 export const quotesRegex = /^'(.*)'$/;
 
-export const testingIndex = ({
+export const testingIndex = {
   title: 'opensearch_dashboards_sample_data_flights',
   fields: [
     {
@@ -182,4 +182,4 @@ export const testingIndex = ({
   getFieldByName: (fieldName: string) => {
     return testingIndex.fields.find((field) => field.name === fieldName);
   },
-} as unknown) as IndexPattern;
+} as unknown as IndexPattern;

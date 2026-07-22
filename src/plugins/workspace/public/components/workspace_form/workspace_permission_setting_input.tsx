@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -68,6 +68,7 @@ export const WorkspacePermissionSettingInput = ({
   );
 
   const handleGroupOrUserIdChange = useCallback(
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     (event) => {
       const groupOrUserId = event.target.value;
       onGroupOrUserIdChange(
@@ -106,6 +107,7 @@ export const WorkspacePermissionSettingInput = ({
         ) : (
           <EuiSuperSelect
             compressed={true}
+            // @ts-expect-error TS2769 TODO(ts-error): fixme
             placeholder={i18n.translate('workspace.form.permissionSetting.selectType', {
               defaultMessage: 'Select',
             })}

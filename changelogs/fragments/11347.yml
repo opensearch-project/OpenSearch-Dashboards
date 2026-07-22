@@ -1,2 +1,0 @@
-fix:
-- Fix blank discover because of json type queries ([#11347](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11347))

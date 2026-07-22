@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { OptInBanner } from './opt_in_banner';
@@ -53,7 +52,7 @@ describe('OptInDetailsComponent', () => {
 
     enableButton.simulate('click');
     expect(onClick).toHaveBeenCalled();
-    expect(onClick).toBeCalledWith(true);
+    expect(onClick).toHaveBeenCalledWith(true);
   });
 
   it('fires the "onChangeOptInClick" with false when a disable is clicked', () => {
@@ -71,6 +70,6 @@ describe('OptInDetailsComponent', () => {
 
     disableButton.simulate('click');
     expect(onClick).toHaveBeenCalled();
-    expect(onClick).toBeCalledWith(false);
+    expect(onClick).toHaveBeenCalledWith(false);
   });
 });

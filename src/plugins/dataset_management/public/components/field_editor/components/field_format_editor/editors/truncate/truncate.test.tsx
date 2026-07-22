@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React, { ChangeEvent } from 'react';
+import { ChangeEvent } from 'react';
 import { shallow } from 'enzyme';
 import { EuiCompressedFieldNumber } from '@elastic/eui';
 import { FieldFormat } from 'src/plugins/data/public';
@@ -36,7 +36,7 @@ describe('TruncateFormatEditor', () => {
     const component = shallow(
       <TruncateFormatEditor
         fieldType={fieldType}
-        format={(format as unknown) as FieldFormat}
+        format={format as unknown as FieldFormat}
         formatParams={formatParams}
         onChange={onChange}
         onError={onError}
@@ -49,7 +49,7 @@ describe('TruncateFormatEditor', () => {
     const component = shallow(
       <TruncateFormatEditor
         fieldType={fieldType}
-        format={(format as unknown) as FieldFormat}
+        format={format as unknown as FieldFormat}
         formatParams={formatParams}
         onChange={onChange}
         onError={onError}
@@ -65,17 +65,17 @@ describe('TruncateFormatEditor', () => {
       },
     };
 
-    await input!.invoke('onChange')!((changeEvent as unknown) as ChangeEvent<HTMLInputElement>);
+    await input!.invoke('onChange')!(changeEvent as unknown as ChangeEvent<HTMLInputElement>);
 
-    expect(onError).toBeCalledWith(changeEvent.target.validationMessage);
-    expect(onChange).not.toBeCalled();
+    expect(onError).toHaveBeenCalledWith(changeEvent.target.validationMessage);
+    expect(onChange).not.toHaveBeenCalled();
   });
 
   it('should fire change, when input changed and is valid', async () => {
     const component = shallow(
       <TruncateFormatEditor
         fieldType={fieldType}
-        format={(format as unknown) as FieldFormat}
+        format={format as unknown as FieldFormat}
         formatParams={formatParams}
         onChange={onChange}
         onError={onError}
@@ -91,8 +91,8 @@ describe('TruncateFormatEditor', () => {
       },
     };
     onError.mockClear();
-    await input!.invoke('onChange')!((changeEvent as unknown) as ChangeEvent<HTMLInputElement>);
-    expect(onError).not.toBeCalled();
-    expect(onChange).toBeCalledWith({ fieldLength: 123 });
+    await input!.invoke('onChange')!(changeEvent as unknown as ChangeEvent<HTMLInputElement>);
+    expect(onError).not.toHaveBeenCalled();
+    expect(onChange).toHaveBeenCalledWith({ fieldLength: 123 });
   });
 });

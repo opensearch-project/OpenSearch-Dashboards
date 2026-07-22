@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 
 import { VisualizationContainer } from './visualization_container';
@@ -54,8 +53,6 @@ const mockVisualizationBuilder = {
         name: 'count',
         schema: VisFieldType.Numerical,
         column: 'count',
-        validValuesCount: 2,
-        uniqueValuesCount: 2,
       },
     ],
     categoricalColumns: [
@@ -64,8 +61,6 @@ const mockVisualizationBuilder = {
         name: 'field1',
         schema: VisFieldType.Categorical,
         column: 'field1',
-        validValuesCount: 2,
-        uniqueValuesCount: 2,
       },
     ],
     dateColumns: [],
@@ -110,6 +105,7 @@ describe('VisualizationContainer', () => {
 
   it('handles empty results', () => {
     // Override the mock for this test
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     jest.spyOn(TabResultsHooks, 'useTabResults').mockReturnValueOnce({
       results: null,
     });

@@ -4,9 +4,9 @@
  */
 
 import { configureStore } from '@reduxjs/toolkit';
-import { render, screen } from '@testing-library/react';
-import React, { FC } from 'react';
-import { Provider } from 'react-redux';
+import { act, render, screen } from '@testing-library/react';
+import { FC } from 'react';
+import { Provider, useDispatch } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { OpenSearchSearchHit } from '../../../types/doc_views_types';
@@ -25,6 +25,16 @@ import {
 import { QueryExecutionStatus } from '../../utils/state_management/types';
 import { MetricsPage } from './metrics_page';
 import { defaultPrepareQueryString } from '../../utils/state_management/actions/query_actions';
+import { setMetricsPageMode } from '../../utils/state_management/slices/ui/ui_slice';
+import { useInitPage } from '../../../application/utils/hooks/use_page_initialization';
+
+jest.mock('react-redux', () => {
+  const actual = jest.requireActual('react-redux');
+  return {
+    ...actual,
+    useDispatch: jest.fn(),
+  };
+});
 
 jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
   useOpenSearchDashboards: jest.fn().mockReturnValue({
@@ -41,6 +51,10 @@ jest.mock('./metrics_bottom_container/bottom_right_container', () => ({
   BottomRightContainer: () => (
     <div data-test-subj="bottom-right-container">Bottom Right Container</div>
   ),
+}));
+
+jest.mock('./metrics_page_tabs', () => ({
+  MetricsPageTabs: () => <div data-test-subj="metrics-page-tabs">Metrics Page Tabs</div>,
 }));
 
 jest.mock('../../../components/experience_banners/new_experience_banner', () => ({
@@ -142,10 +156,12 @@ describe('MetricsPage', () => {
         query: queryReducer,
         queryEditor: queryEditorReducer,
       },
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       preloadedState,
     });
   };
 
+  // @ts-expect-error TS2339 TODO(ts-error): fixme
   const TestHarness: FC<{ store: ReturnType<typeof createTestStore> }> = ({ children, store }) => {
     return (
       <MemoryRouter>
@@ -154,6 +170,8 @@ describe('MetricsPage', () => {
     );
   };
 
+  const mockDispatch = jest.fn();
+
   beforeEach(() => {
     const exploreServices = discoverPluginMock.createExploreServicesMock();
     const exploreServicesMock = exploreServices as jest.MaybeMockedDeep<typeof exploreServices>;
@@ -161,6 +179,7 @@ describe('MetricsPage', () => {
     (useOpenSearchDashboards as jest.Mock).mockReturnValue({
       services: exploreServicesMock,
     });
+    (useDispatch as jest.Mock).mockReturnValue(mockDispatch);
   });
 
   afterEach(() => {
@@ -170,13 +189,13 @@ describe('MetricsPage', () => {
   it('renders without crashing', () => {
     const store = createTestStore();
     render(
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       <TestHarness store={store}>
         <MetricsPage />
       </TestHarness>
     );
 
-    expect(screen.getByTestId('query-panel')).toBeInTheDocument();
-    expect(screen.getByTestId('bottom-right-container')).toBeInTheDocument();
+    expect(screen.getByTestId('metrics-page-tabs')).toBeInTheDocument();
     expect(screen.getByTestId('new-experience-banner')).toBeInTheDocument();
     expect(screen.getByTestId('top-nav')).toBeInTheDocument();
   });
@@ -185,24 +204,122 @@ describe('MetricsPage', () => {
     const mockSetHeaderActionMenu = jest.fn();
     const store = createTestStore();
     render(
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       <TestHarness store={store}>
         <MetricsPage setHeaderActionMenu={mockSetHeaderActionMenu} />
       </TestHarness>
     );
 
     expect(screen.getByTestId('top-nav')).toBeInTheDocument();
-    expect(screen.getByTestId('bottom-right-container')).toBeInTheDocument();
+    expect(screen.getByTestId('metrics-page-tabs')).toBeInTheDocument();
   });
 
   it('renders when dataset is loading', () => {
     const store = createTestStore();
     render(
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       <TestHarness store={store}>
         <MetricsPage />
       </TestHarness>
     );
 
-    expect(screen.getByTestId('query-panel')).toBeInTheDocument();
+    expect(screen.getByTestId('metrics-page-tabs')).toBeInTheDocument();
     expect(screen.getByTestId('top-nav')).toBeInTheDocument();
+  });
+
+  describe('applyModeFromUrl effect', () => {
+    const originalHash = window.location.hash;
+
+    const setHash = (hash: string) => {
+      window.history.replaceState(undefined, '', hash);
+    };
+
+    const renderMetricsPage = () => {
+      const store = createTestStore();
+      render(
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
+        <TestHarness store={store}>
+          <MetricsPage />
+        </TestHarness>
+      );
+    };
+
+    const setMetricsPageModeCalls = () =>
+      mockDispatch.mock.calls.filter(
+        ([action]) => action?.type === setMetricsPageMode('query').type
+      );
+
+    beforeEach(() => {
+      // Avoid the unrelated savedExplore?.id effect which also dispatches
+      // setMetricsPageMode('query') so we isolate the URL-driven behavior.
+      (useInitPage as jest.Mock).mockReturnValue({ savedExplore: undefined });
+    });
+
+    afterEach(() => {
+      setHash(originalHash);
+    });
+
+    it('dispatches setMetricsPageMode("query") when hash has metricsPageMode:query', () => {
+      setHash('#/?_a=(ui:(activeTabId:logs,metricsPageMode:query,showHistogram:!t))');
+
+      renderMetricsPage();
+
+      expect(mockDispatch).toHaveBeenCalledWith(setMetricsPageMode('query'));
+    });
+
+    it('dispatches setMetricsPageMode("explore") when hash has metricsPageMode:explore', () => {
+      setHash('#/?_a=(ui:(activeTabId:logs,metricsPageMode:explore,showHistogram:!t))');
+
+      renderMetricsPage();
+
+      expect(mockDispatch).toHaveBeenCalledWith(setMetricsPageMode('explore'));
+    });
+
+    it('does not dispatch the mode action when there is no _a / metricsPageMode token', () => {
+      setHash('#/?a=b');
+
+      renderMetricsPage();
+
+      expect(setMetricsPageModeCalls()).toHaveLength(0);
+    });
+
+    it('re-dispatches on a window hashchange with a changed metricsPageMode', () => {
+      setHash('#/?_a=(ui:(activeTabId:logs,metricsPageMode:query,showHistogram:!t))');
+
+      renderMetricsPage();
+
+      expect(mockDispatch).toHaveBeenCalledWith(setMetricsPageMode('query'));
+      mockDispatch.mockClear();
+
+      setHash('#/?_a=(ui:(activeTabId:logs,metricsPageMode:explore,showHistogram:!t))');
+      act(() => {
+        window.dispatchEvent(new HashChangeEvent('hashchange'));
+      });
+
+      expect(mockDispatch).toHaveBeenCalledWith(setMetricsPageMode('explore'));
+    });
+
+    it('reads ui.metricsPageMode structurally, ignoring the token inside user data', () => {
+      // The real ui mode is `explore`, but the literal `metricsPageMode:query`
+      // also appears inside a query VALUE. A substring match would wrongly flip
+      // to query; rison-decoding reads only the structured ui field.
+      setHash(
+        "#/?_a=(query:'search metricsPageMode:query here'," +
+          'ui:(activeTabId:logs,metricsPageMode:explore,showHistogram:!t))'
+      );
+
+      renderMetricsPage();
+
+      expect(mockDispatch).toHaveBeenCalledWith(setMetricsPageMode('explore'));
+      expect(mockDispatch).not.toHaveBeenCalledWith(setMetricsPageMode('query'));
+    });
+
+    it('does not dispatch a mode when _a is malformed', () => {
+      setHash('#/?_a=(ui:(this is not valid rison');
+
+      renderMetricsPage();
+
+      expect(setMetricsPageModeCalls()).toHaveLength(0);
+    });
   });
 });

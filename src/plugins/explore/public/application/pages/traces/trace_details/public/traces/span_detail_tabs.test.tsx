@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { SpanDetailTabs } from './span_detail_tabs';
 import { SpanDetailTab } from '../../constants/span_detail_tabs';

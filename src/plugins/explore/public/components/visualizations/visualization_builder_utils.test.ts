@@ -19,17 +19,6 @@ import { LineChartStyleOptions } from './line/line_vis_config';
 import { GaugeChartStyleOptions } from './gauge/gauge_vis_config';
 import { HeatmapChartStyleOptions } from './heatmap/heatmap_vis_config';
 
-jest.mock('./rule_repository', () => ({
-  ALL_VISUALIZATION_RULES: [
-    {
-      id: 'rule1',
-    },
-    {
-      id: 'rule2',
-    },
-  ],
-}));
-
 jest.mock('./style_panel/threshold/threshold_utils', () => ({
   Colors: {
     ['blues']: {
@@ -61,52 +50,46 @@ describe('visualization_container_utils', () => {
       name: 'count',
       schema: VisFieldType.Numerical,
       column: 'count',
-      validValuesCount: 100,
-      uniqueValuesCount: 50,
     },
     {
       id: 2,
       name: 'category',
       schema: VisFieldType.Categorical,
       column: 'category',
-      validValuesCount: 100,
-      uniqueValuesCount: 10,
     },
     {
       id: 3,
       name: 'timestamp',
       schema: VisFieldType.Date,
       column: 'timestamp',
-      validValuesCount: 100,
-      uniqueValuesCount: 80,
     },
   ];
 
   describe('convertMappingsToStrings', () => {
     it('converts axis mappings to string format', () => {
       const mappings = {
-        [AxisRole.X]: mockColumns[1],
-        [AxisRole.Y]: mockColumns[0],
+        [AxisRole.X]: [mockColumns[1]],
+        [AxisRole.Y]: [mockColumns[0]],
       };
 
       const result = convertMappingsToStrings(mappings);
 
       expect(result).toEqual({
-        [AxisRole.X]: 'category',
-        [AxisRole.Y]: 'count',
+        [AxisRole.X]: ['category'],
+        [AxisRole.Y]: ['count'],
       });
     });
 
     it('handles undefined columns', () => {
       const mappings = {
-        [AxisRole.X]: mockColumns[0],
+        [AxisRole.X]: [mockColumns[0]],
         [AxisRole.Y]: undefined,
       };
 
       const result = convertMappingsToStrings(mappings);
 
       expect(result).toEqual({
-        [AxisRole.X]: 'count',
+        [AxisRole.X]: ['count'],
         [AxisRole.Y]: undefined,
       });
     });
@@ -122,8 +105,8 @@ describe('visualization_container_utils', () => {
       const result = convertStringsToMappings(stringMappings, mockColumns);
 
       expect(result).toEqual({
-        [AxisRole.X]: mockColumns[1],
-        [AxisRole.Y]: mockColumns[0],
+        [AxisRole.X]: [mockColumns[1]],
+        [AxisRole.Y]: [mockColumns[0]],
       });
     });
 
@@ -135,7 +118,7 @@ describe('visualization_container_utils', () => {
       const result = convertStringsToMappings(stringMappings, mockColumns);
 
       expect(result).toEqual({
-        [AxisRole.X]: undefined,
+        [AxisRole.X]: [],
       });
     });
   });
@@ -235,8 +218,6 @@ describe('visualization_container_utils', () => {
           name: 'average',
           schema: VisFieldType.Numerical,
           column: 'average',
-          validValuesCount: 100,
-          uniqueValuesCount: 30,
         },
       ];
 
@@ -397,6 +378,61 @@ describe('visualization_container_utils', () => {
           thresholdStyle: ThresholdMode.Off,
         },
       });
+    });
+
+    it('migrates facet string in axesMapping to splitField', () => {
+      const config: ChartConfig = {
+        type: 'line',
+        styles: {} as LineChartStyleOptions,
+        axesMapping: { x: 'timestamp', y: 'bytes', facet: 'region' },
+      };
+
+      const result = adaptLegacyData(config);
+
+      expect(result?.splitField).toBe('region');
+      expect(result?.axesMapping?.facet).toBeUndefined();
+      expect(result?.axesMapping?.x).toBe('timestamp');
+      expect(result?.axesMapping?.y).toBe('bytes');
+    });
+
+    it('migrates facet array in axesMapping to splitField', () => {
+      const config: ChartConfig = {
+        type: 'bar',
+        styles: {} as BarChartStyleOptions,
+        axesMapping: { x: 'timestamp', y: 'bytes', facet: ['host'] },
+      };
+
+      const result = adaptLegacyData(config);
+
+      expect(result?.splitField).toBe('host');
+      expect(result?.axesMapping?.facet).toBeUndefined();
+    });
+
+    it('does not overwrite existing splitField when facet is present', () => {
+      const config: ChartConfig = {
+        type: 'bar',
+        styles: {} as BarChartStyleOptions,
+        axesMapping: { x: 'timestamp', y: 'bytes', facet: 'region' },
+        splitField: 'host',
+      };
+
+      const result = adaptLegacyData(config);
+
+      expect(result?.splitField).toBe('host');
+      expect(result?.axesMapping?.facet).toBe('region');
+    });
+
+    it('preserves config when no facet in axesMapping', () => {
+      const config: ChartConfig = {
+        type: 'bar',
+        styles: {} as BarChartStyleOptions,
+        axesMapping: { x: 'timestamp', y: 'bytes' },
+      };
+
+      const result = adaptLegacyData(config);
+
+      expect(result?.splitField).toBeUndefined();
+      expect(result?.axesMapping).toEqual({ x: 'timestamp', y: 'bytes' });
     });
   });
 });

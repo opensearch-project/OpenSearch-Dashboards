@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiToolTip } from '@elastic/eui';
 import {
   DataStructure,

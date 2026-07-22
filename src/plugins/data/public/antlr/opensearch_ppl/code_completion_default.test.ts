@@ -12,6 +12,10 @@ import * as utils from '../shared/utils';
 import { PPL_AGGREGATE_FUNCTIONS } from './constants';
 
 describe('ppl code_completion', () => {
+  beforeEach(() => {
+    jest.restoreAllMocks();
+  });
+
   describe('getSuggestions', () => {
     const mockIndexPattern = {
       title: 'test-index',
@@ -60,12 +64,12 @@ describe('ppl code_completion', () => {
     it('should return empty array when required parameters are missing', async () => {
       const result = await getDefaultSuggestions({
         query: '',
-        indexPattern: (null as unknown) as IndexPattern,
+        indexPattern: null as unknown as IndexPattern,
         position: mockPosition,
         language: 'PPL',
         selectionStart: 0,
         selectionEnd: 0,
-        services: (null as unknown) as IDataPluginServices,
+        services: null as unknown as IDataPluginServices,
       });
 
       expect(result).toEqual([]);
@@ -120,6 +124,23 @@ describe('ppl code_completion', () => {
       checkSuggestionsContain(result, {
         text: 'as',
         type: monaco.languages.CompletionItemKind.Keyword,
+      });
+    });
+
+    it('should always use compiled default grammar (runtime grammar is only for simplified path)', async () => {
+      const result = await getDefaultSuggestions({
+        query: 'source = ',
+        indexPattern: mockIndexPattern,
+        position: new monaco.Position(1, 'source = '.length + 1),
+        language: 'PPL',
+        selectionStart: 0,
+        selectionEnd: 0,
+        services: mockServices,
+      });
+
+      checkSuggestionsContain(result, {
+        text: 'test-index',
+        type: monaco.languages.CompletionItemKind.Struct,
       });
     });
   });

@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { DocViewTableRowBtnToggleColumn } from './table_row_btn_toggle_column';
 

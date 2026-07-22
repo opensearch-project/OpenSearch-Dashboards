@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { Fragment } from 'react';
+import { Fragment } from 'react';
 import { EuiCode, EuiIcon, EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
 
 import { FormattedMessage } from '@osd/i18n/react';
@@ -36,8 +36,9 @@ import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards
 import { IndexPatternManagmentContext } from '../../../../types';
 
 export const ScriptingSyntax = () => {
-  const docLinksScriptedFields = useOpenSearchDashboards<IndexPatternManagmentContext>().services
-    .docLinks?.links.noDocumentation.scriptedFields;
+  const docLinksScriptedFields =
+    useOpenSearchDashboards<IndexPatternManagmentContext>().services.docLinks?.links.noDocumentation
+      .scriptedFields;
   return (
     <Fragment>
       <EuiSpacer />

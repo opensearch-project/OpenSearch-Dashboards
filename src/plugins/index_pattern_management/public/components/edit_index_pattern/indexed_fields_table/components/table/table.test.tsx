@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
 import { IIndexPattern } from 'src/plugins/data/public';
 import { IndexedFieldItem } from '../../types';
@@ -138,6 +137,6 @@ describe('Table', () => {
 
     // Click the edit button
     component.prop('columns')[6].actions[0].onClick();
-    expect(editField).toBeCalled();
+    expect(editField).toHaveBeenCalled();
   });
 });

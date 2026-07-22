@@ -6,7 +6,7 @@
 import { i18n } from '@osd/i18n';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
+
 import { indexPatternMock } from '../../__mock__/index_pattern_mock';
 import { DocViewRenderProps, DocViewsRegistry } from '../../types/doc_views_types';
 import { DocViewer } from './doc_viewer';

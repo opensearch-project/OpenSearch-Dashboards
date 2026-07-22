@@ -1,2 +1,0 @@
-fix:
-- [Explore] Optimize initial workflow and remove redundant saved_objects calls ([#11413](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11413))

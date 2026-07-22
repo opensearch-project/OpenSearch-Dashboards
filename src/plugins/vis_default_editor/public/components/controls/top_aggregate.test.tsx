@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import {
   AggregateValueProp,
@@ -73,14 +72,14 @@ describe('TopAggregateParamEditor', () => {
     aggParam = {
       options,
     };
-    agg = ({
+    agg = {
       params: {
         field: {
           type: 'number',
         },
       },
       getAggParams: jest.fn(() => [{ name: 'aggregate', options }]),
-    } as any) as IAggConfig;
+    } as any as IAggConfig;
     defaultProps = {
       ...aggParamCommonPropsMock,
       agg,

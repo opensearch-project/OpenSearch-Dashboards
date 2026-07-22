@@ -4,7 +4,7 @@
  */
 
 import './discover_chart_container.scss';
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { ExploreFlavor } from '../../../common';
 import { ExploreServices } from '../../types';
@@ -69,7 +69,7 @@ export const DiscoverChartContainer = () => {
   const rawResultsMetadata = useSelector((state: RootState) =>
     cacheKey ? state.results[cacheKey] : null
   );
-  const rawResults = rawResultsMetadata ? resultsCache.get(cacheKey) ?? null : null;
+  const rawResults = rawResultsMetadata ? (resultsCache.get(cacheKey) ?? null) : null;
 
   const actualInterval = useMemo(() => {
     if (flavorId === ExploreFlavor.Traces && dataset && services?.data && interval) {
@@ -106,9 +106,13 @@ export const DiscoverChartContainer = () => {
   const latencyResultsMetadata = useSelector((state: RootState) =>
     latencyCacheKey ? state.results[latencyCacheKey] : null
   );
-  const requestResults = requestResultsMetadata ? resultsCache.get(requestCacheKey!) ?? null : null;
-  const errorResults = errorResultsMetadata ? resultsCache.get(errorCacheKey!) ?? null : null;
-  const latencyResults = latencyResultsMetadata ? resultsCache.get(latencyCacheKey!) ?? null : null;
+  const requestResults = requestResultsMetadata
+    ? (resultsCache.get(requestCacheKey!) ?? null)
+    : null;
+  const errorResults = errorResultsMetadata ? (resultsCache.get(errorCacheKey!) ?? null) : null;
+  const latencyResults = latencyResultsMetadata
+    ? (resultsCache.get(latencyCacheKey!) ?? null)
+    : null;
 
   // Get error states for each trace query
   const requestError = requestCacheKey ? queryStatusMap[requestCacheKey]?.error : null;

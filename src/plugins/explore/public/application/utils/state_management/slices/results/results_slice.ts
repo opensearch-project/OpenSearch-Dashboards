@@ -8,9 +8,22 @@ import { SearchResponse } from 'elasticsearch';
 
 import { IFieldType } from '../../../../../../../../../src/plugins/data/common';
 
+/**
+ * Query profiling results, populated when query profiling is enabled
+ * (explore.queryProfiling.enabled) and the backend supports it. Grouped under one object so
+ * future profiling fields live together rather than as top-level result attributes.
+ */
+export interface QueryProfile {
+  // Raw worker thread pool the query ran on (e.g. 'sql-worker' | 'sql-complex-worker').
+  queryPool?: string;
+  // True when profiling classified this query as complex (ran on the complex worker pool).
+  isComplex?: boolean;
+}
+
 export interface ISearchResult extends SearchResponse<any> {
   elapsedMs: number;
   fieldSchema?: Array<Partial<IFieldType>>;
+  profile?: QueryProfile;
 }
 
 export interface IPrometheusSearchResult extends ISearchResult {
@@ -19,6 +32,11 @@ export interface IPrometheusSearchResult extends ISearchResult {
     total: number;
   };
   instantFieldSchema?: Array<Partial<IFieldType>>;
+  truncation?: {
+    tableTruncated: boolean;
+    totalSeriesCount: number;
+    displayedSeriesCount: number;
+  };
 }
 
 export interface ResultMetadata {
@@ -27,6 +45,7 @@ export interface ResultMetadata {
   fieldSchema?: Array<Partial<IFieldType>>;
   instantFieldSchema?: Array<Partial<IFieldType>>;
   hasResults: boolean;
+  profile?: QueryProfile;
 }
 
 export type ResultsState = Record<string, ResultMetadata>;
@@ -47,11 +66,12 @@ const extractMetadata = (result: ISearchResult): ResultMetadata => ({
   total:
     typeof result.hits?.total === 'number'
       ? result.hits.total
-      : (result.hits?.total as any)?.value ?? 0,
+      : ((result.hits?.total as any)?.value ?? 0),
   elapsedMs: result.elapsedMs,
   fieldSchema: result.fieldSchema,
   instantFieldSchema: (result as IPrometheusSearchResult).instantFieldSchema,
   hasResults: (result.hits?.hits?.length ?? 0) > 0,
+  profile: result.profile,
 });
 
 const initialState: ResultsState = {};

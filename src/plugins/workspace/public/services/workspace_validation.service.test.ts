@@ -42,9 +42,9 @@ describe('WorkspaceValidationService', () => {
       const service = new WorkspaceValidationService();
       await service.setup(core, 'test-workspace-123');
 
-      expect(WorkspaceClientMock).toBeCalledTimes(1);
+      expect(WorkspaceClientMock).toHaveBeenCalledTimes(1);
       expect(core.workspaces.setClient).toHaveBeenCalled();
-      expect(workspaceClientMock.enterWorkspace).toBeCalledTimes(1);
+      expect(workspaceClientMock.enterWorkspace).toHaveBeenCalledTimes(1);
     });
 
     it('should not enter workspace it workspace id is not set', async () => {
@@ -52,9 +52,9 @@ describe('WorkspaceValidationService', () => {
       const service = new WorkspaceValidationService();
       await service.setup(core, '');
 
-      expect(WorkspaceClientMock).toBeCalledTimes(1);
+      expect(WorkspaceClientMock).toHaveBeenCalledTimes(1);
       expect(core.workspaces.setClient).toHaveBeenCalled();
-      expect(workspaceClientMock.enterWorkspace).toBeCalledTimes(0);
+      expect(workspaceClientMock.enterWorkspace).toHaveBeenCalledTimes(0);
     });
   });
 
@@ -69,6 +69,152 @@ describe('WorkspaceValidationService', () => {
         expect(core.chrome.setIsVisible).not.toHaveBeenCalled();
         expect(core.application.navigateToApp).not.toHaveBeenCalled();
       });
+    });
+
+    it('should show fatal error page when refreshWorkspace returns permission error on page switch', async () => {
+      const core = coreMock.createStart();
+      const service = new WorkspaceValidationService();
+
+      const currentAppId$ = new BehaviorSubject<string | undefined>(undefined);
+      core.application.currentAppId$ = currentAppId$;
+      core.application.capabilities = {
+        ...core.application.capabilities,
+        workspaces: { permissionEnabled: true },
+      };
+
+      workspaceClientMock.refreshWorkspace.mockResolvedValue({
+        success: false,
+        error: 'Invalid saved objects permission',
+      });
+
+      const coreSetup = coreMock.createSetup();
+      await service.setup(coreSetup, 'test-workspace');
+      service.start(core);
+
+      // Simulate page switch
+      currentAppId$.next('some-app');
+
+      await waitFor(() => {
+        expect(workspaceClientMock.refreshWorkspace).toHaveBeenCalledWith('test-workspace');
+        expect(core.chrome.setIsVisible).toHaveBeenCalledWith(false);
+        expect(core.application.navigateToApp).toHaveBeenCalledWith(WORKSPACE_FATAL_ERROR_APP_ID, {
+          replace: true,
+          state: { error: expect.any(String) },
+        });
+      });
+    });
+
+    it('should not show fatal error page when refreshWorkspace succeeds on page switch', async () => {
+      const core = coreMock.createStart();
+      const service = new WorkspaceValidationService();
+
+      const currentAppId$ = new BehaviorSubject<string | undefined>(undefined);
+      core.application.currentAppId$ = currentAppId$;
+      core.application.capabilities = {
+        ...core.application.capabilities,
+        workspaces: { permissionEnabled: true },
+      };
+
+      workspaceClientMock.refreshWorkspace.mockResolvedValue({
+        success: true,
+        result: { id: 'test-workspace', name: 'Test' },
+      });
+
+      const coreSetup = coreMock.createSetup();
+      await service.setup(coreSetup, 'test-workspace');
+      service.start(core);
+
+      // Simulate page switch
+      currentAppId$.next('some-app');
+
+      await waitFor(() => {
+        expect(workspaceClientMock.refreshWorkspace).toHaveBeenCalledWith('test-workspace');
+      });
+      expect(core.chrome.setIsVisible).not.toHaveBeenCalled();
+    });
+
+    it('should not show fatal error page when refreshWorkspace returns non-permission error', async () => {
+      const core = coreMock.createStart();
+      const service = new WorkspaceValidationService();
+
+      const currentAppId$ = new BehaviorSubject<string | undefined>(undefined);
+      core.application.currentAppId$ = currentAppId$;
+      core.application.capabilities = {
+        ...core.application.capabilities,
+        workspaces: { permissionEnabled: true },
+      };
+
+      workspaceClientMock.refreshWorkspace.mockResolvedValue({
+        success: false,
+        error: 'Network error',
+      });
+
+      const coreSetup = coreMock.createSetup();
+      await service.setup(coreSetup, 'test-workspace');
+      service.start(core);
+
+      // Simulate page switch
+      currentAppId$.next('some-app');
+
+      await waitFor(() => {
+        expect(workspaceClientMock.refreshWorkspace).toHaveBeenCalledWith('test-workspace');
+      });
+      expect(core.chrome.setIsVisible).not.toHaveBeenCalled();
+    });
+
+    it('should not show fatal error page on page switch when permission control is disabled', async () => {
+      const core = coreMock.createStart();
+      const service = new WorkspaceValidationService();
+      workspaceClientMock.refreshWorkspace.mockClear();
+
+      const currentAppId$ = new BehaviorSubject<string | undefined>(undefined);
+      core.application.currentAppId$ = currentAppId$;
+      // permissionEnabled is falsy by default
+
+      workspaceClientMock.refreshWorkspace.mockResolvedValue({
+        success: false,
+        error: 'Invalid saved objects permission',
+      });
+
+      const coreSetup = coreMock.createSetup();
+      await service.setup(coreSetup, 'test-workspace');
+      service.start(core);
+
+      // Simulate page switch
+      currentAppId$.next('some-app');
+
+      await waitFor(() => {
+        expect(workspaceClientMock.refreshWorkspace).toHaveBeenCalledWith('test-workspace');
+      });
+      // Should not show error page when permission control is disabled
+      expect(core.chrome.setIsVisible).not.toHaveBeenCalled();
+    });
+
+    it('should not refresh workspace when navigating to fatal error page', async () => {
+      const core = coreMock.createStart();
+      const service = new WorkspaceValidationService();
+      workspaceClientMock.refreshWorkspace.mockClear();
+
+      const currentAppId$ = new BehaviorSubject<string | undefined>(undefined);
+      core.application.currentAppId$ = currentAppId$;
+      core.application.capabilities = {
+        ...core.application.capabilities,
+        workspaces: { permissionEnabled: true },
+      };
+
+      workspaceClientMock.refreshWorkspace.mockResolvedValue({ success: true, result: {} });
+
+      const coreSetup = coreMock.createSetup();
+      await service.setup(coreSetup, 'test-workspace');
+      service.start(core);
+
+      // Clear calls from initial subscription emission
+      workspaceClientMock.refreshWorkspace.mockClear();
+
+      // Simulate navigation to fatal error page
+      currentAppId$.next(WORKSPACE_FATAL_ERROR_APP_ID);
+
+      expect(workspaceClientMock.refreshWorkspace).not.toHaveBeenCalled();
     });
 
     it('should redirect from error page to workspace detail when workspace becomes valid', async () => {

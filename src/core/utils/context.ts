@@ -53,14 +53,13 @@ type PartialExceptFor<T, K extends keyof T> = Partial<T> & Pick<T, K>;
  */
 export type IContextProvider<
   THandler extends HandlerFunction<any>,
-  TContextName extends keyof HandlerContextType<THandler>
+  TContextName extends keyof HandlerContextType<THandler>,
 > = (
   // context.core will always be available, but plugin contexts are typed as optional
   context: PartialExceptFor<HandlerContextType<THandler>, 'core'>,
   ...rest: HandlerParameters<THandler>
 ) =>
-  | Promise<HandlerContextType<THandler>[TContextName]>
-  | HandlerContextType<THandler>[TContextName];
+  Promise<HandlerContextType<THandler>[TContextName]> | HandlerContextType<THandler>[TContextName];
 
 /**
  * A function that accepts a context object and an optional number of additional arguments. Used for the generic types
@@ -75,9 +74,8 @@ export type HandlerFunction<T extends object> = (context: T, ...args: any[]) => 
  *
  * @public
  */
-export type HandlerContextType<T extends HandlerFunction<any>> = T extends HandlerFunction<infer U>
-  ? U
-  : never;
+export type HandlerContextType<T extends HandlerFunction<any>> =
+  T extends HandlerFunction<infer U> ? U : never;
 
 /**
  * Extracts the types of the additional arguments of a {@link HandlerFunction}, excluding the
@@ -200,8 +198,9 @@ export interface IContextContainer<THandler extends HandlerFunction<any>> {
 }
 
 /** @internal */
-export class ContextContainer<THandler extends HandlerFunction<any>>
-  implements IContextContainer<THandler> {
+export class ContextContainer<
+  THandler extends HandlerFunction<any>,
+> implements IContextContainer<THandler> {
   /**
    * Used to map contexts to their providers and associated plugin. In registration order which is tightly coupled to
    * plugin load order.
@@ -234,7 +233,7 @@ export class ContextContainer<THandler extends HandlerFunction<any>>
     provider: IContextProvider<THandler, TContextName>
   ): this => {
     if (this.contextProviders.has(contextName)) {
-      throw new Error(`Context provider for ${contextName} has already been registered.`);
+      throw new Error(`Context provider for ${String(contextName)} has already been registered.`);
     }
     if (source !== this.coreId && !this.pluginDependencies.has(source)) {
       throw new Error(`Cannot register context for unknown plugin: ${source.toString()}`);
@@ -271,20 +270,23 @@ export class ContextContainer<THandler extends HandlerFunction<any>>
     return [...this.contextProviders]
       .sort(sortByCoreFirst(this.coreId))
       .filter(([contextName]) => contextsToBuild.has(contextName))
-      .reduce(async (contextPromise, [contextName, { provider, source: providerSource }]) => {
-        const resolvedContext = await contextPromise;
+      .reduce(
+        async (contextPromise, [contextName, { provider, source: providerSource }]) => {
+          const resolvedContext = await contextPromise;
 
-        // For the next provider, only expose the context available based on the dependencies of the plugin that
-        // registered that provider.
-        const exposedContext = pick(resolvedContext, [
-          ...this.getContextNamesForSource(providerSource),
-        ]) as PartialExceptFor<HandlerContextType<THandler>, 'core'>;
+          // For the next provider, only expose the context available based on the dependencies of the plugin that
+          // registered that provider.
+          const exposedContext = pick(resolvedContext, [
+            ...this.getContextNamesForSource(providerSource),
+          ]) as PartialExceptFor<HandlerContextType<THandler>, 'core'>;
 
-        return {
-          ...resolvedContext,
-          [contextName]: await provider(exposedContext, ...contextArgs),
-        };
-      }, Promise.resolve({}) as Promise<HandlerContextType<THandler>>);
+          return {
+            ...resolvedContext,
+            [contextName]: await provider(exposedContext, ...contextArgs),
+          };
+        },
+        Promise.resolve({}) as Promise<HandlerContextType<THandler>>
+      );
   }
 
   private getContextNamesForSource(
@@ -321,15 +323,14 @@ export class ContextContainer<THandler extends HandlerFunction<any>>
 }
 
 /** Sorts context provider pairs by core pairs first. */
-const sortByCoreFirst = (
-  coreId: symbol
-): ((left: [any, { source: symbol }], right: [any, { source: symbol }]) => number) => (
-  [leftName, leftProvider],
-  [rightName, rightProvider]
-) => {
-  if (leftProvider.source === coreId) {
-    return rightProvider.source === coreId ? 0 : -1;
-  } else {
-    return rightProvider.source === coreId ? 1 : 0;
-  }
-};
+const sortByCoreFirst =
+  (
+    coreId: symbol
+  ): ((left: [any, { source: symbol }], right: [any, { source: symbol }]) => number) =>
+  ([leftName, leftProvider], [rightName, rightProvider]) => {
+    if (leftProvider.source === coreId) {
+      return rightProvider.source === coreId ? 0 : -1;
+    } else {
+      return rightProvider.source === coreId ? 1 : 0;
+    }
+  };

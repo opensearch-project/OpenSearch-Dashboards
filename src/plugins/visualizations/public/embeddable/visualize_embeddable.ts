@@ -109,6 +109,13 @@ export interface VisualizeOutput extends EmbeddableOutput {
   editUrl: string;
   indexPatterns?: IIndexPattern[];
   visTypeName: string;
+  /**
+   * Whether the visualization is backed by a data source whose engine type is unsupported by
+   * features that require a DSL-queryable data source (e.g. "Ask AI"). Resolved asynchronously
+   * once after construction; `undefined` until resolution completes, in which case consumers
+   * should fail open.
+   */
+  usesUnsupportedEngineDataSource?: boolean;
 }
 
 export type VisualizeSavedObjectAttributes = SavedObjectAttributes & {
@@ -123,7 +130,8 @@ type ExpressionLoader = InstanceType<ExpressionsStart['ExpressionLoader']>;
 
 export class VisualizeEmbeddable
   extends Embeddable<VisualizeInput, VisualizeOutput>
-  implements ReferenceOrValueEmbeddable<VisualizeByValueInput, VisualizeByReferenceInput> {
+  implements ReferenceOrValueEmbeddable<VisualizeByValueInput, VisualizeByReferenceInput>
+{
   private handler?: ExpressionLoader;
   private timefilter: TimefilterContract;
   private timeRange?: TimeRange;
@@ -297,7 +305,9 @@ export class VisualizeEmbeddable
 
   onContainerRender = () => {
     this.renderComplete.dispatchComplete();
-    this.updateOutput({ loading: false, error: undefined });
+    // A successful render means the data source is DSL-queryable, so it is not an unsupported
+    // (e.g. AnalyticEngine) engine. Clear any previously-set flag.
+    this.updateOutput({ loading: false, error: undefined, usesUnsupportedEngineDataSource: false });
   };
 
   onContainerError = (error: ExpressionRenderError) => {
@@ -305,7 +315,15 @@ export class VisualizeEmbeddable
       this.abortController.abort();
     }
     this.renderComplete.dispatchError();
-    this.updateOutput({ loading: false, error });
+    // Visualizations backed by an unsupported (AnalyticEngine / PPL-only) data source fail to render
+    // as DSL. Detect that here and publish it on the output so actions (e.g. "Ask AI") can gate
+    // synchronously without their own data-source lookups. Covers any viz type whose AnalyticEngine
+    // failure surfaces as a render error (agg-based, Timeline, Vega, TSVB).
+    this.updateOutput({
+      loading: false,
+      error,
+      usesUnsupportedEngineDataSource: error?.name === 'AnalyticEngineError',
+    });
   };
 
   /**

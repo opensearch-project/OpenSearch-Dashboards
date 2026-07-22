@@ -158,6 +158,7 @@ const PatternsFlyoutEventTableComponent = ({
       aria-label={i18n.translate('explore.patterns.flyout.eventTable', {
         defaultMessage: 'Pattern event table',
       })}
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       items={fetchedItems}
       columns={eventTableColumns}
       tableLayout="auto"
@@ -167,6 +168,7 @@ const PatternsFlyoutEventTableComponent = ({
         totalItemCount,
         hidePerPageOptions: true,
       }}
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       onChange={({ page: { index } }: CriteriaWithPagination<EventTableItem>) => {
         setTableLoading(true);
         setPageIndex(index);

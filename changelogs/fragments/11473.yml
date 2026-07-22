@@ -1,2 +1,0 @@
-fix:
-- Optimize chat with assistant message content in array type ([#11473](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11473))

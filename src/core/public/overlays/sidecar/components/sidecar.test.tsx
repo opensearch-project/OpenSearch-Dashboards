@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-
 import { render, mount } from 'enzyme';
 import { BehaviorSubject } from 'rxjs';
 
@@ -45,7 +43,7 @@ const props = {
 
 describe('Sidecar component', () => {
   test('is rendered', () => {
-    const component = render(<Sidecar {...((props as unknown) as Props)} />);
+    const component = render(<Sidecar {...(props as unknown as Props)} />);
     expect(component).toMatchSnapshot();
   });
 
@@ -56,7 +54,7 @@ describe('Sidecar component', () => {
       setSidecarConfig,
     };
     const windowEvents = storeWindowEvents();
-    const component = mount(<Sidecar {...((newProps as unknown) as Props)} />);
+    const component = mount(<Sidecar {...(newProps as unknown as Props)} />);
     expect(component).toMatchSnapshot();
     expect(setSidecarConfig).not.toHaveBeenCalled();
     const resizer = component.find(`[data-test-subj~="resizableButton"]`).first();
@@ -67,10 +65,11 @@ describe('Sidecar component', () => {
   });
 
   test('it should have a width style when dockedDirection is right', () => {
-    const component = mount(<Sidecar {...((props as unknown) as Props)} />);
+    const component = mount(<Sidecar {...(props as unknown as Props)} />);
     expect(component).toMatchSnapshot();
-    const wrapperProps = component.find(`[data-test-subj~="sidecar-component-wrapper"]`).get(0)
-      .props;
+    const wrapperProps = component
+      .find(`[data-test-subj~="sidecar-component-wrapper"]`)
+      .get(0).props;
     expect(wrapperProps.style).toHaveProperty('width', DEFAULT_FLYOUT_SIZE);
     expect(wrapperProps.style).not.toHaveProperty('height');
   });
@@ -85,10 +84,11 @@ describe('Sidecar component', () => {
       }),
     };
 
-    const component = mount(<Sidecar {...((newProps as unknown) as Props)} />);
+    const component = mount(<Sidecar {...(newProps as unknown as Props)} />);
     expect(component).toMatchSnapshot();
-    const wrapperProps = component.find(`[data-test-subj~="sidecar-component-wrapper"]`).get(0)
-      .props;
+    const wrapperProps = component
+      .find(`[data-test-subj~="sidecar-component-wrapper"]`)
+      .get(0).props;
     expect(wrapperProps.style).toHaveProperty('height', DEFAULT_FLYOUT_SIZE);
     expect(wrapperProps.style).not.toHaveProperty('width');
   });
@@ -103,7 +103,7 @@ describe('Sidecar component', () => {
       }),
     };
 
-    const component = mount(<Sidecar {...((newProps as unknown) as Props)} />);
+    const component = mount(<Sidecar {...(newProps as unknown as Props)} />);
     expect(component).toMatchSnapshot();
     expect(
       component

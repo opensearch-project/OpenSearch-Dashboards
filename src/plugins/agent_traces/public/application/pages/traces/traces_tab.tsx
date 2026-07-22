@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React from 'react';
+
 import { TracesDataTable } from './traces_data_table';
 
 export const TracesTab = () => {

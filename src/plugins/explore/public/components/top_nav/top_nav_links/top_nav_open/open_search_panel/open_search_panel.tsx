@@ -10,7 +10,6 @@ TODO: This file needs to be updated.
 - this file needs unit tests once above has been resolved.
  */
 
-import React from 'react';
 import rison from 'rison-node';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -24,6 +23,7 @@ import {
   EuiFlyoutBody,
   EuiText,
 } from '@elastic/eui';
+import { SimpleSavedObject } from 'src/core/public';
 import { ExploreFlavor } from '../../../../../../common';
 import { SavedObjectFinderUi } from '../../../../../../../saved_objects/public';
 import { SAVED_OBJECT_TYPE } from '../../../../../saved_explore/_saved_explore';
@@ -34,25 +34,17 @@ export interface OpenSearchPanelProps {
   onClose: () => void;
 }
 
-const savedObjectMetadata = [
-  // NOTE: Should saved search be included?
-  {
-    type: 'search',
-    getIconForSavedObject: () => 'search',
-    name: i18n.translate('explore.savedSearch.savedObjectName', {
-      defaultMessage: 'Saved search',
-    }),
-    includeFields: ['kibanaSavedObjectMeta'],
-  },
-  {
-    type: SAVED_OBJECT_TYPE,
-    getIconForSavedObject: () => 'integrationSearch',
-    name: i18n.translate('explore.savedExplore.savedObjectName', {
-      defaultMessage: 'Saved explore',
-    }),
-    includeFields: ['kibanaSavedObjectMeta', 'type'],
-  },
-];
+const isSqlSavedObject = (savedObject: {
+  attributes?: { kibanaSavedObjectMeta?: { searchSourceJSON?: string } };
+}): boolean => {
+  const json = savedObject.attributes?.kibanaSavedObjectMeta?.searchSourceJSON;
+  if (!json) return false;
+  try {
+    return JSON.parse(json)?.query?.language === 'SQL';
+  } catch {
+    return false;
+  }
+};
 
 export const OpenSearchPanel = ({ onClose }: OpenSearchPanelProps) => {
   const {
@@ -62,8 +54,37 @@ export const OpenSearchPanel = ({ onClose }: OpenSearchPanelProps) => {
       data,
       filterManager,
       store,
+      sqlSupportEnabled,
     },
   } = useOpenSearchDashboards<ExploreServices>();
+
+  const savedObjectMetadata = [
+    // NOTE: Should saved search be included?
+    {
+      type: 'search',
+      getIconForSavedObject: () => 'search',
+      name: i18n.translate('explore.savedSearch.savedObjectName', {
+        defaultMessage: 'Saved search',
+      }),
+      includeFields: ['kibanaSavedObjectMeta'],
+    },
+    {
+      type: SAVED_OBJECT_TYPE,
+      getIconForSavedObject: () => 'integrationSearch',
+      name: i18n.translate('explore.savedExplore.savedObjectName', {
+        defaultMessage: 'Saved explore',
+      }),
+      includeFields: ['kibanaSavedObjectMeta', 'type'],
+      // Filter out explores created in the in-context editor (no flavor/type),
+      // and filter out SQL-language ones when the SQL feature is disabled.
+      showSavedObject: (
+        savedObject: SimpleSavedObject<{
+          type?: string;
+          kibanaSavedObjectMeta?: { searchSourceJSON?: string };
+        }>
+      ) => !!savedObject.attributes?.type && (sqlSupportEnabled || !isSqlSavedObject(savedObject)),
+    },
+  ];
 
   return (
     <EuiFlyout ownFocus onClose={onClose} data-test-subj="loadSearchForm">

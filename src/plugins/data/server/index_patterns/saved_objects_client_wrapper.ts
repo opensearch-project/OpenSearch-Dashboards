@@ -34,6 +34,7 @@ import {
   SavedObjectsClientCommonFindArgs,
 } from '../../common/index_patterns';
 
+// @ts-expect-error TS2420 TODO(ts-error): fixme
 export class SavedObjectsClientServerToCommon implements SavedObjectsClientCommon {
   private savedObjectClient: SavedObjectsClientContract;
   constructor(savedObjectClient: SavedObjectsClientContract) {

@@ -318,9 +318,10 @@ describe('Query Actions - Comprehensive Test Suite', () => {
   });
 
   describe('defaultPrepareQueryString', () => {
-    const mockDefaultPreparePplQuery = languagesModule.defaultPreparePplQuery as jest.MockedFunction<
-      typeof languagesModule.defaultPreparePplQuery
-    >;
+    const mockDefaultPreparePplQuery =
+      languagesModule.defaultPreparePplQuery as jest.MockedFunction<
+        typeof languagesModule.defaultPreparePplQuery
+      >;
 
     beforeEach(() => {
       mockDefaultPreparePplQuery.mockClear();
@@ -388,9 +389,10 @@ describe('Query Actions - Comprehensive Test Suite', () => {
   });
 
   describe('prepareHistogramCacheKey', () => {
-    const mockDefaultPreparePplQuery = languagesModule.defaultPreparePplQuery as jest.MockedFunction<
-      typeof languagesModule.defaultPreparePplQuery
-    >;
+    const mockDefaultPreparePplQuery =
+      languagesModule.defaultPreparePplQuery as jest.MockedFunction<
+        typeof languagesModule.defaultPreparePplQuery
+      >;
 
     beforeEach(() => {
       mockDefaultPreparePplQuery.mockClear();
@@ -738,9 +740,10 @@ describe('Query Actions - Comprehensive Test Suite', () => {
   describe('executeQueries', () => {
     let mockGetState: jest.Mock;
     let mockDispatch: jest.Mock;
-    const mockDefaultPreparePplQuery = languagesModule.defaultPreparePplQuery as jest.MockedFunction<
-      typeof languagesModule.defaultPreparePplQuery
-    >;
+    const mockDefaultPreparePplQuery =
+      languagesModule.defaultPreparePplQuery as jest.MockedFunction<
+        typeof languagesModule.defaultPreparePplQuery
+      >;
 
     beforeEach(() => {
       mockGetState = jest.fn();
@@ -834,7 +837,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
     it('should handle visualization tab query execution', async () => {
       const mockState = {
         query: { query: 'source=logs', language: 'PPL', dataset: null },
-        ui: { activeTabId: 'agent_traces_visualization_tab' },
+        ui: { activeTabId: 'visualization' },
         results: {},
         legacy: { interval: '1h' },
         queryEditor: { breakdownField: undefined, queryStatusMap: {} },
@@ -842,7 +845,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
 
       mockGetState.mockReturnValue(mockState);
       (mockServices.tabRegistry.getTab as jest.Mock).mockImplementation((tabId: string) => {
-        if (tabId === 'agent_traces_visualization_tab') {
+        if (tabId === 'visualization') {
           return { prepareQuery: jest.fn().mockReturnValue('viz-query') };
         }
         return null;
@@ -851,9 +854,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       const thunk = executeQueries({ services: mockServices });
       await thunk(mockDispatch, mockGetState, undefined);
 
-      expect(mockServices.tabRegistry.getTab).toHaveBeenCalledWith(
-        'agent_traces_visualization_tab'
-      );
+      expect(mockServices.tabRegistry.getTab).toHaveBeenCalledWith('visualization');
     });
 
     it('should handle missing tab registry gracefully', async () => {
@@ -1288,9 +1289,10 @@ describe('Query Actions - Comprehensive Test Suite', () => {
   });
 
   describe('Integration Tests', () => {
-    const mockDefaultPreparePplQuery = languagesModule.defaultPreparePplQuery as jest.MockedFunction<
-      typeof languagesModule.defaultPreparePplQuery
-    >;
+    const mockDefaultPreparePplQuery =
+      languagesModule.defaultPreparePplQuery as jest.MockedFunction<
+        typeof languagesModule.defaultPreparePplQuery
+      >;
 
     it('should handle full query execution flow', async () => {
       mockDefaultPreparePplQuery.mockReturnValue({

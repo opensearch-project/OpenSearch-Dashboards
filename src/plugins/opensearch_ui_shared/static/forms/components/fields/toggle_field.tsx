@@ -45,7 +45,7 @@ export const ToggleField = ({ field, euiFieldProps = {}, ...rest }: Props) => {
 
   // Shim for sufficient overlap between EuiSwitchEvent and FieldHook[onChange] event
   const onChange = (e: EuiSwitchEvent) => {
-    const event = ({ ...e, value: `${e.target.checked}` } as unknown) as React.ChangeEvent<{
+    const event = { ...e, value: `${e.target.checked}` } as unknown as React.ChangeEvent<{
       value: string;
     }>;
     field.onChange(event);
@@ -53,6 +53,7 @@ export const ToggleField = ({ field, euiFieldProps = {}, ...rest }: Props) => {
 
   return (
     <EuiCompressedFormRow
+      // @ts-expect-error TS2349 TODO(ts-error): fixme
       helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
       error={errorMessage}
       isInvalid={isInvalid}

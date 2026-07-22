@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import classNames from 'classnames';
 import React, { useEffect, useRef, useState } from 'react';
-import { monaco } from '@osd/monaco';
+import { monaco, PPLValidationContext, PPLLintContext, revalidatePPLModel } from '@osd/monaco';
 import {
   IDataPluginServices,
   Query,
@@ -26,6 +26,7 @@ import {
   QueryResult,
   QueryStatus,
   useQueryStringManager,
+  UI_SETTINGS,
 } from '../..';
 import { OpenSearchDashboardsReactContextValue } from '../../../../opensearch_dashboards_react/public';
 import { fromUser, getQueryLog, PersistedLog, toUser } from '../../query';
@@ -36,6 +37,22 @@ import { getQueryService, getIndexPatterns } from '../../services';
 import { DefaultInputProps } from './editors';
 import { MonacoCompatibleQuerySuggestion } from '../../autocomplete/providers/query_suggestion_provider';
 import { getEffectiveLanguageForAutoComplete } from './utils';
+import {
+  pplGrammarCache,
+  shouldUseRuntimeGrammar,
+} from '../../antlr/opensearch_ppl/ppl_grammar_cache';
+import { syncPPLValidationContext } from './validation_context';
+import {
+  syncPPLLintContext,
+  attachPPLContexts,
+  cleanupPPLContexts,
+  PPLDetachRefs,
+} from './lint_context';
+import {
+  buildPPLLintContext,
+  extractFieldNames,
+  LintFieldsCache,
+} from '../../ppl_lint/lint_context_builder';
 
 export interface QueryEditorProps {
   query: Query;
@@ -74,6 +91,16 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
   const [currentAppId, setCurrentAppId] = useState<string>(''); // Add app ID state
 
   const inputRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
+  const detachRefs = useRef<PPLDetachRefs>({
+    validationContext: { current: undefined },
+    grammarRefresh: { current: undefined },
+    lintContext: { current: undefined },
+    lintGrammarRefresh: { current: undefined },
+    lintContextRefresh: { current: undefined },
+  });
+  // Cache of index-pattern field names per dataset id, populated asynchronously
+  // for field-validation lint. Self-suppresses until loaded.
+  const lintFieldsRef = useRef<LintFieldsCache>({});
   const headerRef = useRef<HTMLDivElement>(null);
   const bannerRef = useRef<HTMLDivElement>(null);
   const bottomPanelRef = useRef<HTMLDivElement>(null);
@@ -111,24 +138,139 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
     };
   }, []);
 
+  const getValidationContext = (): PPLValidationContext => {
+    const dsId = queryRef.current.dataset?.dataSource?.id;
+    const dsVersion = queryRef.current.dataset?.dataSource?.version;
+    const dsEngineType =
+      queryRef.current.dataset?.dataSource?.engineType ??
+      queryRef.current.dataset?.dataSource?.type;
+    return {
+      useRuntimeGrammar: shouldUseRuntimeGrammar(dsId, dsVersion, dsEngineType),
+      dataSourceId: dsId,
+      dataSourceVersion: dsVersion,
+    };
+  };
+
+  const getLintContext = (): PPLLintContext =>
+    buildPPLLintContext(queryRef.current.dataset, lintFieldsRef.current, services);
+
+  useEffect(() => () => cleanupPPLContexts(detachRefs.current), []);
+
+  // Load index-pattern field names for the active dataset and feed them to the
+  // lint context. Field-validation self-suppresses until this resolves; we push
+  // the context in a single phase after the async load to avoid flicker.
   useEffect(() => {
-    services.application?.currentAppId$?.subscribe?.((appId) => {
+    const datasetId = query.dataset?.id;
+    const dataSourceId = query.dataset?.dataSource?.id;
+    let cancelled = false;
+
+    const loadFields = async () => {
+      if (!datasetId) {
+        // No dataset: drop cached fields so field-validation self-suppresses
+        // rather than running against a previous dataset's metadata.
+        lintFieldsRef.current = {};
+      } else {
+        try {
+          const indexPattern = await getIndexPatterns().get(datasetId);
+          if (cancelled || !indexPattern) {
+            return;
+          }
+          lintFieldsRef.current = {
+            datasetId,
+            dataSourceId,
+            fields: extractFieldNames(indexPattern),
+          };
+        } catch {
+          // On failure leave fields unset so field-validation self-suppresses.
+          if (cancelled) {
+            return;
+          }
+          lintFieldsRef.current = {};
+        }
+      }
+
+      syncPPLLintContext(inputRef.current, getLintContext());
+      const model = inputRef.current?.getModel();
+      if (model) {
+        void revalidatePPLModel(model);
+      }
+    };
+
+    void loadFields();
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query.dataset?.id, query.dataset?.dataSource?.id]);
+
+  useEffect(() => {
+    const subscription = services.application?.currentAppId$?.subscribe?.((appId) => {
       setCurrentAppId(appId || '');
     });
+    return () => subscription?.unsubscribe();
   }, [services.application?.currentAppId$]);
 
+  useEffect(() => {
+    const dsId = query.dataset?.dataSource?.id;
+    const dsVersion = query.dataset?.dataSource?.version;
+    const dsEngineType = query.dataset?.dataSource?.engineType ?? query.dataset?.dataSource?.type;
+    syncPPLValidationContext(inputRef.current, {
+      useRuntimeGrammar: shouldUseRuntimeGrammar(dsId, dsVersion, dsEngineType),
+      dataSourceId: dsId,
+      dataSourceVersion: dsVersion,
+    });
+
+    const model = inputRef.current?.getModel();
+    if (model) {
+      void revalidatePPLModel(model);
+    }
+  }, [
+    query.dataset?.dataSource?.id,
+    query.dataset?.dataSource?.version,
+    query.dataset?.dataSource?.engineType,
+    query.dataset?.dataSource?.type,
+  ]);
+
+  useEffect(() => {
+    syncPPLLintContext(inputRef.current, getLintContext());
+    const model = inputRef.current?.getModel();
+    if (model) {
+      void revalidatePPLModel(model);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    query.dataset?.id,
+    query.dataset?.dataSource?.id,
+    query.dataset?.dataSource?.version,
+    services.uiSettings,
+  ]);
+
+  useEffect(() => {
+    const subscription = services.uiSettings.getUpdate$().subscribe(({ key }) => {
+      if (key !== UI_SETTINGS.QUERY_ENHANCEMENTS_PPL_LINT_RULES) {
+        return;
+      }
+      syncPPLLintContext(inputRef.current, getLintContext());
+      const model = inputRef.current?.getModel();
+      if (model) {
+        void revalidatePPLModel(model);
+      }
+    });
+    return () => subscription.unsubscribe();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [services.uiSettings]);
+
   const renderQueryEditorExtensions = () => {
-    if (
-      !(
-        headerRef.current &&
-        bannerRef.current &&
-        queryControlsContainer.current &&
-        bottomPanelRef.current &&
-        query.language &&
-        extensionMap &&
-        Object.keys(extensionMap).length > 0
-      )
-    ) {
+    if (!(
+      headerRef.current &&
+      bannerRef.current &&
+      queryControlsContainer.current &&
+      bottomPanelRef.current &&
+      query.language &&
+      extensionMap &&
+      Object.keys(extensionMap).length > 0
+    )) {
       return null;
     }
     return (
@@ -152,6 +294,11 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
     if (props.onSubmit) {
       if (persistedLogRef.current) {
         persistedLogRef.current.add(currentQuery.query);
+      }
+
+      // Add query to queryString history for Recent Queries feature
+      if (currentQuery.query?.trim()) {
+        queryString.addToQueryHistory(currentQuery, dateRange);
       }
 
       props.onSubmit(
@@ -239,7 +386,16 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
     }
 
     const dataset = queryString.getQuery().dataset;
-    const indexPattern = dataset ? await getIndexPatterns().get(dataset.id) : undefined;
+    let indexPattern;
+    if (dataset) {
+      try {
+        indexPattern = await getIndexPatterns().get(dataset.id);
+      } catch {
+        // INDEXES datasets use a cached temporary index pattern that may not
+        // exist as a saved object. Gracefully degrade — keyword suggestions
+        // still work without an index pattern.
+      }
+    }
 
     const language = getEffectiveLanguageForAutoComplete(queryRef.current.language, currentAppId);
 
@@ -314,6 +470,19 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
     editorDidMount: (editor: monaco.editor.IStandaloneCodeEditor) => {
       setLineCount(editor.getModel()?.getLineCount());
       inputRef.current = editor;
+      attachPPLContexts(
+        editor,
+        detachRefs.current,
+        getValidationContext,
+        getLintContext,
+        (listener) => pplGrammarCache.subscribeToGrammarUpdates(listener),
+        revalidatePPLModel,
+        (listener) => pplGrammarCache.subscribeToVersionResolved(listener)
+      );
+      const editorModel = editor.getModel();
+      if (editorModel) {
+        void revalidatePPLModel(editorModel);
+      }
       // eslint-disable-next-line no-bitwise
       editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
         const newQuery = {
@@ -376,6 +545,19 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
     },
     editorDidMount: (editor: monaco.editor.IStandaloneCodeEditor) => {
       inputRef.current = editor;
+      attachPPLContexts(
+        editor,
+        detachRefs.current,
+        getValidationContext,
+        getLintContext,
+        (listener) => pplGrammarCache.subscribeToGrammarUpdates(listener),
+        revalidatePPLModel,
+        (listener) => pplGrammarCache.subscribeToVersionResolved(listener)
+      );
+      const singleLineModel = editor.getModel();
+      if (singleLineModel) {
+        void revalidatePPLModel(singleLineModel);
+      }
 
       editor.addCommand(monaco.KeyCode.Enter, () => {
         const newQuery = {
@@ -479,7 +661,7 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
         </>
       )}
       <RecentQueriesTable
-        isVisible={isRecentQueryVisible && useQueryEditor}
+        isVisible={isRecentQueryVisible}
         queryString={queryString}
         onClickRecentQuery={onClickRecentQuery}
       />

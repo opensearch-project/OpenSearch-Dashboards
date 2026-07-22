@@ -28,6 +28,10 @@ describe('check timeline visualization', () => {
         .find('[data-test-subj="newItemButton"]')
         .click();
       cy.get('[data-test-subj="visType-timelion"]').click();
+      // Dismiss any existing toasts that may cover the render button
+      cy.get('body').then(($body) => {
+        $body.find('[data-test-subj="toastCloseButton"]').trigger('click');
+      });
       // Because monaco editor doesn't use a contenteditable, input, or textarea, .clear() or .type('{selectall}') won't work. To clear, we just backspace for each character instead.
       cy.get('[class="view-line"]')
         .invoke('text')

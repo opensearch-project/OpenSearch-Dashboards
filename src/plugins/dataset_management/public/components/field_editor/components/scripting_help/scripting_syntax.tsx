@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React, { Fragment } from 'react';
+import { Fragment } from 'react';
 import { EuiCode, EuiIcon, EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
 
 import { FormattedMessage } from '@osd/i18n/react';
@@ -10,8 +10,9 @@ import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards
 import { DatasetManagmentContext } from '../../../../types';
 
 export const ScriptingSyntax = () => {
-  const docLinksScriptedFields = useOpenSearchDashboards<DatasetManagmentContext>().services
-    .docLinks?.links.noDocumentation.scriptedFields;
+  const docLinksScriptedFields =
+    useOpenSearchDashboards<DatasetManagmentContext>().services.docLinks?.links.noDocumentation
+      .scriptedFields;
   return (
     <Fragment>
       <EuiSpacer />

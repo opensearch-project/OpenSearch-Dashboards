@@ -50,7 +50,11 @@ const localStorageMock = (() => {
   };
 })();
 
-Object.defineProperty(window, 'localStorage', { value: localStorageMock });
+Object.defineProperty(window, 'localStorage', {
+  value: localStorageMock,
+  writable: true,
+  configurable: true,
+});
 
 // Mock dependencies
 jest.mock('../../../../framework/requests/sql');
@@ -83,15 +87,15 @@ jest.mock('../../../../framework/requests/sql', () => {
 });
 
 // Mock data
-const mockHttp: HttpStart = ({
+const mockHttp: HttpStart = {
   get: jest.fn(),
   post: jest.fn(),
-} as unknown) as HttpStart;
-const mockNotifications: NotificationsStart = ({
+} as unknown as HttpStart;
+const mockNotifications: NotificationsStart = {
   toasts: {
     addError: jest.fn(),
   },
-} as unknown) as NotificationsStart;
+} as unknown as NotificationsStart;
 
 describe('loadCacheTests', () => {
   beforeEach(() => {

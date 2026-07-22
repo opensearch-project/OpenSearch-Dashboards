@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { escapeRegExp } from 'lodash';
 import { DocViewTableRow } from './table_row';
 import { arrayContainsObjects } from './table_helper';

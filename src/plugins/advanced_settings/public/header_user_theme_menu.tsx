@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { ChangeEvent, SyntheticEvent, useState } from 'react';
+import { ChangeEvent, SyntheticEvent, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import {
@@ -62,8 +62,8 @@ export const HeaderUserThemeMenu = () => {
     isUsingBrowserColorScheme
       ? colorModeOptions[2].value
       : isDarkMode
-      ? colorModeOptions[1].value
-      : colorModeOptions[0].value
+        ? colorModeOptions[1].value
+        : colorModeOptions[0].value
   );
   const useLegacyAppearance = !uiSettings.get('home:useNewHomePage');
 
@@ -100,7 +100,7 @@ export const HeaderUserThemeMenu = () => {
       window.localStorage.removeItem('useBrowserColorScheme');
     }
     // TODO: only set changed
-    await Promise.all(pendingActions);
+    await Promise.allSettled(pendingActions);
     window.location.reload();
   };
 

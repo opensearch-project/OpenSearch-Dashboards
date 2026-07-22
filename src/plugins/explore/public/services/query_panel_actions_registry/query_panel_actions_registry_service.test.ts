@@ -215,6 +215,7 @@ describe('QueryPanelActionsRegistryService', () => {
       setup.register(action);
       const actions = service.getSortedActions();
 
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       actions[0].onClick(mockDeps);
 
       expect(mockOnClick).toHaveBeenCalledTimes(1);
@@ -275,16 +276,6 @@ describe('QueryPanelActionsRegistryService', () => {
       });
 
       it('should handle query with parse command and capture groups', () => {
-        const mockDeps: QueryPanelActionDependencies = {
-          query: {
-            query:
-              'source=logs | parse message "(?<ip>\\d+\\.\\d+\\.\\d+\\.\\d+).*(?<status>\\d{3})"',
-            language: 'PPL',
-          },
-          resultStatus: { status: QueryExecutionStatus.READY },
-          queryInEditor: '| parse message "(?<ip>\\d+\\.\\d+\\.\\d+\\.\\d+).*(?<status>\\d{3})"',
-        };
-
         const setup = service.setup();
         const action: QueryPanelActionConfig = {
           actionType: 'button',
@@ -300,15 +291,6 @@ describe('QueryPanelActionsRegistryService', () => {
       });
 
       it('should handle query with backticks and field names with dots', () => {
-        const mockDeps: QueryPanelActionDependencies = {
-          query: {
-            query: 'source=`index-with-special-chars_@#$` | where `field.with.dots` = "value"',
-            language: 'PPL',
-          },
-          resultStatus: { status: QueryExecutionStatus.READY },
-          queryInEditor: '| where `field.with.dots` = "value"',
-        };
-
         const setup = service.setup();
         const action: QueryPanelActionConfig = {
           actionType: 'button',
@@ -352,15 +334,6 @@ describe('QueryPanelActionsRegistryService', () => {
       });
 
       it('should handle query with unicode characters', () => {
-        const mockDeps: QueryPanelActionDependencies = {
-          query: {
-            query: 'source=logs | where message = "Error: फ़ाइल मौजूद नहीं है 🔥"',
-            language: 'PPL',
-          },
-          resultStatus: { status: QueryExecutionStatus.READY },
-          queryInEditor: '| where message = "Error: फ़ाइल मौजूद नहीं है 🔥"',
-        };
-
         const setup = service.setup();
         const action: QueryPanelActionConfig = {
           actionType: 'button',
@@ -378,9 +351,8 @@ describe('QueryPanelActionsRegistryService', () => {
     describe('query length and complexity', () => {
       it('should handle very long query (>1000 characters)', () => {
         // Construct a realistic long query with multiple conditions
-        const longWhereClause = 'field1 = "value1" OR field2 = "value2" OR field3 = "value3" OR '.repeat(
-          30
-        );
+        const longWhereClause =
+          'field1 = "value1" OR field2 = "value2" OR field3 = "value3" OR '.repeat(30);
         const longQuery =
           'source=logs | where ' +
           longWhereClause +
@@ -416,19 +388,6 @@ describe('QueryPanelActionsRegistryService', () => {
       });
 
       it('should handle multiline query with pipes', () => {
-        const multilineQuery = `source=logs
-| where status > 200
-| stats count() by host
-| sort - count()`;
-
-        const mockDeps: QueryPanelActionDependencies = {
-          query: { query: multilineQuery, language: 'PPL' },
-          resultStatus: { status: QueryExecutionStatus.READY },
-          queryInEditor: `| where status > 200
-| stats count() by host
-| sort - count()`,
-        };
-
         const setup = service.setup();
         const action: QueryPanelActionConfig = {
           actionType: 'button',
@@ -477,6 +436,7 @@ describe('QueryPanelActionsRegistryService', () => {
           query: { query: 'source=logs | invalid_command', language: 'PPL' },
           resultStatus: {
             status: QueryExecutionStatus.ERROR,
+            // @ts-expect-error TS2741 TODO(ts-error): fixme
             error: {
               message: {
                 details: 'Unknown command',
@@ -755,6 +715,7 @@ describe('QueryPanelActionsRegistryService', () => {
           getLabel: (deps) => `Flyout for ${deps.query.language}`,
           getIcon: () => 'beaker',
           component: mockComponent,
+          // @ts-expect-error TS2353 TODO(ts-error): fixme
           onOpen: mockOnOpen,
         };
 
@@ -769,6 +730,7 @@ describe('QueryPanelActionsRegistryService', () => {
         expect(fullFlyoutAction.getIcon!(mockDeps)).toBe('beaker');
 
         // Test onOpen callback
+        // @ts-expect-error TS2339 TODO(ts-error): fixme
         fullFlyoutAction.onOpen!(mockDeps);
         expect(mockOnOpen).toHaveBeenCalledTimes(1);
         expect(mockOnOpen).toHaveBeenCalledWith(mockDeps);
@@ -830,6 +792,7 @@ describe('QueryPanelActionsRegistryService', () => {
           getLabel: () => 'Analyze Complex Query',
           getIsEnabled: (deps) => deps.queryInEditor.includes('parse'),
           component: mockComponent,
+          // @ts-expect-error TS2353 TODO(ts-error): fixme
           onOpen: mockOnOpen,
         };
 
@@ -839,6 +802,7 @@ describe('QueryPanelActionsRegistryService', () => {
         expect(flyoutAction.getIsEnabled!(complexPPLDeps)).toBe(true);
 
         // Test onOpen receives correct dependencies
+        // @ts-expect-error TS2339 TODO(ts-error): fixme
         flyoutAction.onOpen!(complexPPLDeps);
         expect(mockOnOpen).toHaveBeenCalledWith(complexPPLDeps);
         expect(mockOnOpen.mock.calls[0][0].queryInEditor).toContain('parse');
@@ -847,9 +811,8 @@ describe('QueryPanelActionsRegistryService', () => {
       it('should handle flyout action with very long query', () => {
         const setup = service.setup();
         const mockComponent = jest.fn();
-        const longWhereClause = 'field1 = "value1" OR field2 = "value2" OR field3 = "value3" OR '.repeat(
-          30
-        );
+        const longWhereClause =
+          'field1 = "value1" OR field2 = "value2" OR field3 = "value3" OR '.repeat(30);
         const longQuery =
           'source=logs | where ' +
           longWhereClause +

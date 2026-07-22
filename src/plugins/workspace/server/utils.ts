@@ -13,7 +13,7 @@ import {
   WorkspacePermissionMode,
   UiSettingScope,
 } from '../../../core/server';
-import { updateWorkspaceState } from '../../../core/server/utils';
+import { getWorkspaceState, updateWorkspaceState } from '../../../core/server/utils';
 import { DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from '../../data_source_management/common';
 import {
   CURRENT_USER_PLACEHOLDER,
@@ -21,6 +21,7 @@ import {
   OSD_ADMIN_WILDCARD_MATCH_ALL,
 } from '../common/constants';
 import { PermissionModeId } from '../../../core/server';
+import { SavedObjectsPermissionControlContract } from './permission_control/client';
 
 /**
  * Generate URL friendly random ID
@@ -33,19 +34,35 @@ export const updateDashboardAdminStateForRequest = (
   request: OpenSearchDashboardsRequest,
   groups: string[],
   users: string[],
-  configGroups: string[],
-  configUsers: string[]
+  configGroups: string | string[],
+  configUsers: string | string[]
 ) => {
+  const normalizedConfigUsers = Array.isArray(configUsers)
+    ? configUsers
+    : configUsers
+      ? configUsers
+          .trim()
+          .split(/[\s,]+/)
+          .filter(Boolean)
+      : [];
+  const normalizedConfigGroups = Array.isArray(configGroups)
+    ? configGroups
+    : configGroups
+      ? configGroups
+          .trim()
+          .split(/[\s,]+/)
+          .filter(Boolean)
+      : [];
   // If the security plugin is not installed, login defaults to OSD Admin
   if (!groups.length && !users.length) {
     return updateWorkspaceState(request, { isDashboardAdmin: true });
   }
   // If user config contains wildcard characters '*', login defaults to OSD Admin
-  if (configUsers.includes(OSD_ADMIN_WILDCARD_MATCH_ALL)) {
+  if (normalizedConfigUsers.includes(OSD_ADMIN_WILDCARD_MATCH_ALL)) {
     return updateWorkspaceState(request, { isDashboardAdmin: true });
   }
-  const groupMatchAny = groups.some((group) => configGroups.includes(group));
-  const userMatchAny = users.some((user) => configUsers.includes(user));
+  const groupMatchAny = groups.some((group) => normalizedConfigGroups.includes(group));
+  const userMatchAny = users.some((user) => normalizedConfigUsers.includes(user));
   return updateWorkspaceState(request, {
     isDashboardAdmin: groupMatchAny || userMatchAny,
   });
@@ -180,5 +197,33 @@ export const translatePermissionsToRole = (
   } else {
     permissionMode = PermissionModeId.Read;
   }
+  return permissionMode;
+};
+
+/**
+ * get workspace permission mode
+ * @param req OSD request
+ * @param permissions workspace permission object
+ * @returns PermissionModeId
+ */
+export const getPermissionMode = (props: {
+  request: OpenSearchDashboardsRequest;
+  isPermissionControlEnabled: boolean;
+  permissionControlClient?: SavedObjectsPermissionControlContract;
+  permissions?: Permissions;
+}) => {
+  const { isDashboardAdmin } = getWorkspaceState(props.request);
+  let permissionMode: PermissionModeId = PermissionModeId.Read;
+  if (isDashboardAdmin) {
+    permissionMode = PermissionModeId.Owner;
+  } else {
+    const principals = props.permissionControlClient?.getPrincipalsFromRequest(props.request);
+    permissionMode = translatePermissionsToRole(
+      props.isPermissionControlEnabled,
+      props.permissions,
+      principals
+    );
+  }
+
   return permissionMode;
 };

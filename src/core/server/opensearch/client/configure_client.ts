@@ -30,7 +30,7 @@
 
 import { Buffer } from 'buffer';
 import { stringify } from 'querystring';
-import { Client } from '@opensearch-project/opensearch';
+import { Client, ClientOptions, Transport } from '@opensearch-project/opensearch';
 import { RequestBody } from '@opensearch-project/opensearch/lib/Transport';
 
 import { Logger } from '../../logging';
@@ -42,10 +42,17 @@ export const configureClient = (
     logger,
     scoped = false,
     withLongNumeralsSupport = false,
-  }: { logger: Logger; scoped?: boolean; withLongNumeralsSupport?: boolean }
+    customTransport,
+  }: {
+    logger: Logger;
+    scoped?: boolean;
+    withLongNumeralsSupport?: boolean;
+    customTransport?: typeof Transport;
+  }
 ): Client => {
-  const clientOptions = parseClientOptions(config, scoped);
+  const clientOptions: ClientOptions = parseClientOptions(config, scoped);
   if (withLongNumeralsSupport) clientOptions.enableLongNumeralSupport = true;
+  if (customTransport) clientOptions.Transport = customTransport;
 
   const client = new Client(clientOptions);
   addLogging(client, logger, config.logQueries);

@@ -4,7 +4,7 @@
  */
 import './data_grid_table_cell_value.scss';
 
-import React, { Fragment } from 'react';
+import { Fragment } from 'react';
 import dompurify from 'dompurify';
 
 import {

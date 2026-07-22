@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { ReactElement, Component } from 'react';
+import { ReactElement, Component } from 'react';
 
 import {
   EuiGlobalToastList,
@@ -79,6 +79,7 @@ interface CreateIndexPatternWizardState {
   selectedTimeField?: string;
   docLinks: DocLinksStart;
   dataSourceRef?: DataSourceRef;
+  displayName?: string;
 }
 
 export class CreateIndexPatternWizard extends Component<
@@ -217,13 +218,15 @@ export class CreateIndexPatternWizard extends Component<
   createIndexPattern = async (timeFieldName: string | undefined, indexPatternId: string) => {
     let emptyPattern: IndexPattern;
     const { history } = this.props;
-    const { indexPattern, dataSourceRef } = this.state;
+    const { indexPattern, dataSourceRef, displayName } = this.state;
 
     try {
       emptyPattern = await this.context.services.data.indexPatterns.createAndSave({
         id: indexPatternId,
         title: indexPattern,
+        displayName: displayName || undefined,
         timeFieldName,
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         dataSourceRef,
         ...this.state.indexPatternCreationType.getIndexPatternMappings(),
       });
@@ -262,8 +265,12 @@ export class CreateIndexPatternWizard extends Component<
     history.push(`/patterns/${emptyPattern.id}`);
   };
 
-  goToNextFromIndexPattern = (indexPattern: string, selectedTimeField?: string) => {
-    this.setState({ indexPattern, selectedTimeField });
+  goToNextFromIndexPattern = (
+    indexPattern: string,
+    selectedTimeField?: string,
+    displayName?: string
+  ) => {
+    this.setState({ indexPattern, selectedTimeField, displayName });
     this.goToNextStep();
   };
 
@@ -299,14 +306,8 @@ export class CreateIndexPatternWizard extends Component<
   }
 
   renderContent() {
-    const {
-      allIndices,
-      isInitiallyLoadingIndices,
-      step,
-      indexPattern,
-      dataSourceRef,
-      docLinks,
-    } = this.state;
+    const { allIndices, isInitiallyLoadingIndices, step, indexPattern, dataSourceRef, docLinks } =
+      this.state;
 
     const stepInfo = {
       totalStepNumber: this.totalSteps,
@@ -328,7 +329,7 @@ export class CreateIndexPatternWizard extends Component<
       <HeaderControl
         controls={[
           {
-            description: ((
+            description: (
               <FormattedMessage
                 id="indexPatternManagement.createIndexPattern.description"
                 defaultMessage="An index pattern can match a single source, for example, {single}, or {multiple} data sources, {star}."
@@ -338,7 +339,7 @@ export class CreateIndexPatternWizard extends Component<
                   star: <EuiCode>filebeat-*</EuiCode>,
                 }}
               />
-            ) as unknown) as string,
+            ) as unknown as string,
             links: [
               {
                 href: docLinks.links.noDocumentation.indexPatterns.introduction,

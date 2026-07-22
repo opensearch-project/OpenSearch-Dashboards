@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { memo, useRef } from 'react';
+import React, { memo, useCallback, useRef } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -37,6 +37,19 @@ export const AppContainer = React.memo(
     const topLinkRef = useRef<HTMLDivElement>(null);
     const datasetSelectorRef = useRef<HTMLDivElement>(null);
     const datePickerRef = useRef<HTMLDivElement>(null);
+
+    // In Safari, mousedown on the collapse toggle moves focus away from the resizer,
+    // triggering a re-render that hides the button before the click event fires.
+    // Preventing default on mousedown preserves the resizer's focus state.
+    const handleResizableMouseDown = useCallback((e: React.MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (
+        target.closest('.ouiResizableToggleButton') ||
+        target.closest('.euiResizableToggleButton')
+      ) {
+        e.preventDefault();
+      }
+    }, []);
 
     if (!view) {
       return <NoView />;
@@ -90,7 +103,10 @@ export const AppContainer = React.memo(
           {/* TODO: improve fallback state */}
           <Suspense fallback={<div>Loading...</div>}>
             <Context {...params}>
-              <EuiResizableContainer direction={isMobile ? 'vertical' : 'horizontal'}>
+              <EuiResizableContainer
+                direction={isMobile ? 'vertical' : 'horizontal'}
+                onMouseDown={handleResizableMouseDown}
+              >
                 {(EuiResizablePanel, EuiResizableButton) => (
                   <>
                     <EuiResizablePanel

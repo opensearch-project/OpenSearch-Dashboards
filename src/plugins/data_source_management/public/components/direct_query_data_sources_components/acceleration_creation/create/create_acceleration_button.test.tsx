@@ -23,12 +23,12 @@ jest.mock('../visual_editors/query_builder', () => ({
 
 describe('CreateAccelerationButton', () => {
   const mockHttp: HttpStart = {} as HttpStart;
-  const mockNotifications = ({
+  const mockNotifications = {
     toasts: {
       addSuccess: jest.fn(),
       addDanger: jest.fn(),
     },
-  } as unknown) as NotificationsStart;
+  } as unknown as NotificationsStart;
 
   const mockFormData: CreateAccelerationForm = {
     dataSource: 'test_source',
@@ -123,7 +123,6 @@ describe('CreateAccelerationButton', () => {
     await act(async () => {
       const onClick = wrapper.find(EuiButton).prop('onClick');
       if (onClick) {
-        // @ts-expect-error TS2345 TODO(ts-error): fixme
         onClick({} as React.MouseEvent<HTMLElement>);
       }
     });
@@ -135,7 +134,6 @@ describe('CreateAccelerationButton', () => {
     await act(async () => {
       const onClick = wrapper.find(EuiButton).prop('onClick');
       if (onClick) {
-        // @ts-expect-error TS2345 TODO(ts-error): fixme
         onClick({} as React.MouseEvent<HTMLElement>);
       }
     });
@@ -148,7 +146,6 @@ describe('CreateAccelerationButton', () => {
     await act(async () => {
       const onClick = wrapper.find(EuiButton).prop('onClick');
       if (onClick) {
-        // @ts-expect-error TS2345 TODO(ts-error): fixme
         onClick({} as React.MouseEvent<HTMLElement>);
       }
     });
@@ -171,7 +168,6 @@ describe('CreateAccelerationButton', () => {
     await act(async () => {
       const onClick = wrapper.find(EuiButton).prop('onClick');
       if (onClick) {
-        // @ts-expect-error TS2345 TODO(ts-error): fixme
         onClick({} as React.MouseEvent<HTMLElement>);
       }
     });
@@ -198,7 +194,6 @@ describe('CreateAccelerationButton', () => {
       await act(async () => {
         const onClick = wrapper.find(EuiButton).prop('onClick');
         if (onClick) {
-          // @ts-expect-error TS2345 TODO(ts-error): fixme
           onClick({} as React.MouseEvent<HTMLElement>);
         }
       });

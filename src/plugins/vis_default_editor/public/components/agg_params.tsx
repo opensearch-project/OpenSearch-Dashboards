@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useCallback, useReducer, useEffect, useMemo } from 'react';
+import { useCallback, useReducer, useEffect, useMemo } from 'react';
 import { EuiForm, EuiAccordion, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import useUnmount from 'react-use/lib/useUnmount';
@@ -96,14 +96,15 @@ function DefaultEditorAggParams({
   hideCustomLabel = false,
 }: DefaultEditorAggParamsProps) {
   const schema = useMemo(() => getSchemaByName(schemas, agg.schema), [agg.schema, schemas]);
-  const aggFilter = useMemo(() => [...allowedAggs, ...(schema.aggFilter || [])], [
-    allowedAggs,
-    schema.aggFilter,
-  ]);
+  const aggFilter = useMemo(
+    () => [...allowedAggs, ...(schema.aggFilter || [])],
+    [allowedAggs, schema.aggFilter]
+  );
   const { services } = useOpenSearchDashboards<VisDefaultEditorOpenSearchDashboardsServices>();
-  const aggTypes = useMemo(() => services.data.search.aggs.types.getAll(), [
-    services.data.search.aggs.types,
-  ]);
+  const aggTypes = useMemo(
+    () => services.data.search.aggs.types.getAll(),
+    [services.data.search.aggs.types]
+  );
   const groupedAggTypeOptions = useMemo(
     () => getAggTypeOptions(aggTypes, agg, indexPattern, groupName, aggFilter),
     [aggTypes, agg, indexPattern, groupName, aggFilter]
@@ -117,11 +118,10 @@ function DefaultEditorAggParams({
     : '';
   const aggTypeName = agg.type?.name;
   const fieldName = agg.params?.field?.name;
-  const editorConfig = useMemo(() => getEditorConfig(indexPattern, aggTypeName, fieldName), [
-    indexPattern,
-    aggTypeName,
-    fieldName,
-  ]);
+  const editorConfig = useMemo(
+    () => getEditorConfig(indexPattern, aggTypeName, fieldName),
+    [indexPattern, aggTypeName, fieldName]
+  );
   const params = useMemo(
     () => getAggParamsToRender({ agg, editorConfig, metricAggs, state, schemas, hideCustomLabel }),
     [agg, editorConfig, metricAggs, state, schemas, hideCustomLabel]
@@ -143,6 +143,7 @@ function DefaultEditorAggParams({
     !!error || isInvalidParamsTouched(agg.type, aggType, paramsState);
 
   const onAggSelect = useCallback(
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     (value) => {
       if (agg.type !== value) {
         onAggTypeChange(agg.id, value);

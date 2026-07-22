@@ -306,6 +306,44 @@ describe('AssistantActionService', () => {
 
       await expect(service.executeAction('test-action', {})).rejects.toThrow('Handler error');
     });
+
+    it('should allow execution of disabled actions to return stop instructions', async () => {
+      // Disabled actions CAN execute - they return instructions to stop tool execution
+      const mockHandler = jest.fn().mockResolvedValue({
+        success: false,
+        error: 'STOP: Tool not available - context has changed',
+        message:
+          'Do not attempt to use any more tools. Please respond directly to the user explaining the situation.',
+        stop_tool_execution: true,
+        context_lost: true,
+      });
+      const action: AssistantAction = {
+        name: 'disabled-action',
+        description: 'Disabled action',
+        parameters: {
+          type: 'object',
+          properties: {},
+          required: [],
+        },
+        available: 'disabled',
+        handler: mockHandler,
+      };
+
+      service.registerAction(action);
+
+      // Should execute and return the stop instruction
+      const result = await service.executeAction('disabled-action', { test: 'arg' });
+
+      expect(mockHandler).toHaveBeenCalledWith({ test: 'arg' });
+      expect(result).toEqual({
+        success: false,
+        error: 'STOP: Tool not available - context has changed',
+        message:
+          'Do not attempt to use any more tools. Please respond directly to the user explaining the situation.',
+        stop_tool_execution: true,
+        context_lost: true,
+      });
+    });
   });
 
   describe('updateToolCallState', () => {
@@ -544,6 +582,63 @@ describe('AssistantActionService', () => {
 
       expect(toolCallState?.error).toBe(error);
       expect(toolCallState?.status).toBe('failed');
+    });
+  });
+
+  describe('clearToolCallState', () => {
+    it('should remove the specified tool call state entry', () => {
+      service.updateToolCallState('call-1', { name: 'a', status: 'executing' });
+      service.updateToolCallState('call-2', { name: 'b', status: 'executing' });
+
+      service.clearToolCallState('call-1');
+
+      const state = service.getCurrentState();
+      expect(state.toolCallStates.has('call-1')).toBe(false);
+      expect(state.toolCallStates.has('call-2')).toBe(true);
+    });
+
+    it('should not notify subscribers when the id does not exist', () => {
+      const subscriber = jest.fn();
+      service.getState$().subscribe(subscriber);
+      subscriber.mockClear();
+
+      service.clearToolCallState('never-existed');
+
+      expect(subscriber).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('clearAllToolCallStates', () => {
+    it('should remove every tool call state entry', () => {
+      service.updateToolCallState('call-1', { name: 'a', status: 'executing' });
+      service.updateToolCallState('call-2', { name: 'b', status: 'pending' });
+
+      service.clearAllToolCallStates();
+
+      const state = service.getCurrentState();
+      expect(state.toolCallStates.size).toBe(0);
+    });
+
+    it('should notify subscribers once when the map had entries', () => {
+      service.updateToolCallState('call-1', { name: 'a', status: 'executing' });
+
+      const subscriber = jest.fn();
+      service.getState$().subscribe(subscriber);
+      subscriber.mockClear();
+
+      service.clearAllToolCallStates();
+
+      expect(subscriber).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not notify subscribers when already empty', () => {
+      const subscriber = jest.fn();
+      service.getState$().subscribe(subscriber);
+      subscriber.mockClear();
+
+      service.clearAllToolCallStates();
+
+      expect(subscriber).not.toHaveBeenCalled();
     });
   });
 });

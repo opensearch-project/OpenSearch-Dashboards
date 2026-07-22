@@ -38,14 +38,14 @@ describe('resetExploreStateActionCreator', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (getPreloadedState as jest.Mock).mockResolvedValue(preloadedState);
-    ((setUiState as unknown) as jest.Mock).mockReturnValue({ type: 'SET_UI' });
-    ((clearResults as unknown) as jest.Mock).mockReturnValue({ type: 'CLEAR_RESULTS' });
-    ((setTabState as unknown) as jest.Mock).mockReturnValue({ type: 'SET_TAB' });
-    ((setLegacyState as unknown) as jest.Mock).mockReturnValue({ type: 'SET_LEGACY' });
-    ((setQueryState as unknown) as jest.Mock).mockReturnValue({ type: 'SET_QUERY' });
-    ((setQueryEditorState as unknown) as jest.Mock).mockReturnValue({ type: 'SET_QUERY_EDITOR' });
-    ((executeQueries as unknown) as jest.Mock).mockReturnValue({ type: 'EXECUTE_QUERIES' });
-    ((detectAndSetOptimalTab as unknown) as jest.Mock).mockReturnValue({
+    (setUiState as unknown as jest.Mock).mockReturnValue({ type: 'SET_UI' });
+    (clearResults as unknown as jest.Mock).mockReturnValue({ type: 'CLEAR_RESULTS' });
+    (setTabState as unknown as jest.Mock).mockReturnValue({ type: 'SET_TAB' });
+    (setLegacyState as unknown as jest.Mock).mockReturnValue({ type: 'SET_LEGACY' });
+    (setQueryState as unknown as jest.Mock).mockReturnValue({ type: 'SET_QUERY' });
+    (setQueryEditorState as unknown as jest.Mock).mockReturnValue({ type: 'SET_QUERY_EDITOR' });
+    (executeQueries as unknown as jest.Mock).mockReturnValue({ type: 'EXECUTE_QUERIES' });
+    (detectAndSetOptimalTab as unknown as jest.Mock).mockReturnValue({
       type: 'DETECT_OPTIMAL_TAB',
     });
   });
@@ -61,7 +61,7 @@ describe('resetExploreStateActionCreator', () => {
     expect(mockDispatch).toHaveBeenNthCalledWith(4, { type: 'SET_LEGACY' });
     expect(mockDispatch).toHaveBeenNthCalledWith(5, { type: 'SET_QUERY' });
     expect(mockDispatch).toHaveBeenNthCalledWith(6, { type: 'SET_QUERY_EDITOR' });
-    expect(mockDispatch).toHaveBeenNthCalledWith(7, { type: 'EXECUTE_QUERIES' });
-    expect(mockDispatch).toHaveBeenNthCalledWith(8, { type: 'DETECT_OPTIMAL_TAB' });
+    expect(mockDispatch).toHaveBeenNthCalledWith(7, { type: 'DETECT_OPTIMAL_TAB' });
+    expect(mockDispatch).toHaveBeenNthCalledWith(8, { type: 'EXECUTE_QUERIES' });
   });
 });

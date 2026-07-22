@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { Component } from 'react';
+import { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiIcon,
@@ -89,10 +89,11 @@ export class RequestDetailsStats extends Component<RequestDetailsProps> {
 
     const sortedStats = Object.keys(stats)
       .sort()
-      .map((id) => ({ id, ...stats[id] } as RequestDetailsStatRow));
+      .map((id) => ({ id, ...stats[id] }) as RequestDetailsStatRow);
 
     return (
       <EuiTable responsive={false}>
+        {/* @ts-expect-error TS2559 TODO(ts-error): fixme */}
         <EuiTableBody>{sortedStats.map(this.renderStatRow)}</EuiTableBody>
       </EuiTable>
     );

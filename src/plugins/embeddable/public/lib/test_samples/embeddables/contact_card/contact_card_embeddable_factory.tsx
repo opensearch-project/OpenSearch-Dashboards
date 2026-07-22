@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { i18n } from '@osd/i18n';
 import { UiActionsStart } from 'src/plugins/ui_actions/public';
 
@@ -41,8 +40,7 @@ import { ContactCardInitializer } from './contact_card_initializer';
 
 export const CONTACT_CARD_EMBEDDABLE = 'CONTACT_CARD_EMBEDDABLE';
 
-export class ContactCardEmbeddableFactory
-  implements EmbeddableFactoryDefinition<ContactCardEmbeddableInput> {
+export class ContactCardEmbeddableFactory implements EmbeddableFactoryDefinition<ContactCardEmbeddableInput> {
   public readonly type = CONTACT_CARD_EMBEDDABLE;
 
   constructor(

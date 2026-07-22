@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { DiscoverResultsActionBar, DiscoverResultsActionBarProps } from './results_action_bar';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { OpenSearchSearchHit } from '../../../../types/doc_views_types';
@@ -187,7 +186,7 @@ describe('ResultsActionBar', () => {
   test('should render and toggle the show raw data switch for non-table visualizations', () => {
     const mockGetVisualizationBuilder = jest
       .spyOn(visualizationBuilder, 'getVisualizationBuilder')
-      .mockReturnValue(({
+      .mockReturnValue({
         visConfig$: new BehaviorSubject<ChartConfig | undefined>({
           type: 'bar',
           styles: undefined,
@@ -195,7 +194,7 @@ describe('ResultsActionBar', () => {
         }),
         showRawTable$: new BehaviorSubject<boolean>(false),
         setShowRawTable: mockSetShowRawTable,
-      } as unknown) as visualizationBuilder.VisualizationBuilder);
+      } as unknown as visualizationBuilder.VisualizationBuilder);
 
     render(
       <Provider store={store}>

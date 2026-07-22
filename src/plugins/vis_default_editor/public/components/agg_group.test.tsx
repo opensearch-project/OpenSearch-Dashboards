@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { act } from 'react';
 import { IAggConfigs, IAggConfig } from 'src/plugins/data/public';
@@ -141,7 +140,7 @@ describe('DefaultEditorAgg component', () => {
   it('should call setTouched with false', () => {
     mount(<DefaultEditorAggGroup {...defaultProps} />);
 
-    expect(setTouched).toBeCalledWith(false);
+    expect(setTouched).toHaveBeenCalledWith(false);
   });
 
   it('should last bucket has truthy isLastBucket prop', () => {

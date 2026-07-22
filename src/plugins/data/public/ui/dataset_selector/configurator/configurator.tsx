@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { BaseDataset, DEFAULT_DATA, Dataset, DatasetField, Query } from '../../../../common';
 import { getIndexPatterns, getQueryService } from '../../../services';
 import { IDataPluginServices } from '../../../types';
@@ -46,11 +46,13 @@ export const Configurator = ({
   const indexPatternsService = getIndexPatterns();
   const type = queryString.getDatasetService().getType(baseDataset.type);
   const supportedLanguages = type?.supportedLanguages(baseDataset) || [];
-  const languages = supportedLanguages.filter(
-    (langId) =>
-      !services.appName ||
-      languageService.getLanguage(langId)?.supportedAppNames?.includes(services.appName)
-  );
+  const languages = supportedLanguages.filter((langId) => {
+    const langConfig = languageService.getLanguage(langId);
+    return (
+      (!services.appName || langConfig?.supportedAppNames?.includes(services.appName)) &&
+      (!langConfig || languageService.isLanguageSupportedForDataset(langConfig, baseDataset))
+    );
+  });
   const [shouldSelectIndexedView, setShouldSelectIndexedView] = useState(false);
 
   const [language, setLanguage] = useState<string>(() => {
@@ -136,9 +138,8 @@ export const Configurator = ({
 
     let connectedDataSource;
     if (dataset.dataSource?.id) {
-      const connectedDataSourceSavedObj: any = await indexedViewsService.getConnectedDataSource(
-        dataset
-      );
+      const connectedDataSourceSavedObj: any =
+        await indexedViewsService.getConnectedDataSource(dataset);
       if (connectedDataSourceSavedObj) {
         connectedDataSource = {
           id: connectedDataSourceSavedObj.id,
@@ -335,6 +336,7 @@ export const Configurator = ({
           onClick={async () => {
             let newDataset = dataset;
             if (shouldSelectIndexedView && selectedIndexedView) {
+              // @ts-expect-error TS2322 TODO(ts-error): fixme
               newDataset = await updateDatasetForIndexedView();
             }
             await queryString.getDatasetService().cacheDataset(newDataset, services);

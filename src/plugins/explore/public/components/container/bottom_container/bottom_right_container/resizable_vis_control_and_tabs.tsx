@@ -20,13 +20,13 @@ import { PanelDirection } from '@elastic/eui/src/components/resizable_container/
 
 import { getVisualizationBuilder } from '../../../visualizations/visualization_builder';
 import { ExploreTabs } from '../../../tabs/tabs';
-import { selectActiveTab } from '../../../../application/utils/state_management/selectors';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { useTabError } from '../../../../application/utils/hooks/use_tab_error';
 import { ExploreServices } from '../../../../types';
 import { EXPLORE_VISUALIZATION_TAB_ID } from '../../../../../common';
+import { selectActiveTab } from '../../../../application/utils/state_management/selectors';
 
-export const ResizableVisControlAndTabs = () => {
+export const ResizableVisControlAndTabs = React.memo(() => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const visualizationTab = services.tabRegistry.getTab(EXPLORE_VISUALIZATION_TAB_ID);
   const visualizationTabError = useTabError(visualizationTab);
@@ -109,4 +109,4 @@ export const ResizableVisControlAndTabs = () => {
       }}
     </EuiResizableContainer>
   );
-};
+});

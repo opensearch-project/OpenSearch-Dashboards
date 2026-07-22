@@ -15,7 +15,7 @@ import {
   WorkspacesSetup,
   DEFAULT_NAV_GROUPS,
   ALL_USE_CASE_ID,
-  UseCaseId,
+  OBSERVABILITY_USE_CASE_ID,
 } from '../../../../core/public';
 import {
   WORKSPACE_DETAIL_APP_ID,
@@ -37,13 +37,6 @@ export interface UseCaseServiceSetupDeps {
 
 export class UseCaseService {
   private workspaceAndManageWorkspaceCategorySubscription?: Subscription;
-  private supportedUseCasesForServerlessCollections = new Set<UseCaseId>([
-    UseCaseId.ESSENTIAL_USE_CASE_ID,
-  ]);
-
-  public get supportedUseCasesForServerless(): UseCaseId[] {
-    return Array.from(this.supportedUseCasesForServerlessCollections);
-  }
 
   constructor() {}
 
@@ -86,6 +79,7 @@ export class UseCaseService {
               title: i18n.translate('workspace.settings.workspaceDetails', {
                 defaultMessage: 'Workspace details',
               }),
+              euiIconType: 'wsSelector',
             },
             ...(isPermissionEnabled
               ? [
@@ -96,6 +90,7 @@ export class UseCaseService {
                     title: i18n.translate('workspace.settings.workspaceCollaborators', {
                       defaultMessage: 'Collaborators',
                     }),
+                    euiIconType: 'users',
                   },
                 ]
               : []),
@@ -103,21 +98,31 @@ export class UseCaseService {
               id: 'dataSources',
               category: DEFAULT_APP_CATEGORIES.manageWorkspace,
               order: 300,
+              euiIconType: 'database',
             },
             {
               id: 'indexPatterns',
               category: DEFAULT_APP_CATEGORIES.manageWorkspace,
               order: 400,
+              euiIconType: 'indexPatternApp',
             },
-            {
-              id: 'datasets',
-              category: DEFAULT_APP_CATEGORIES.manageWorkspace,
-              order: 400,
-            },
+            // Datasets management only applies to the Observability workspace; do
+            // not surface it under "Manage workspace" for other use cases.
+            ...(navGroupInfo.id === OBSERVABILITY_USE_CASE_ID
+              ? [
+                  {
+                    id: 'datasets',
+                    category: DEFAULT_APP_CATEGORIES.manageWorkspace,
+                    order: 400,
+                    euiIconType: 'indexMapping',
+                  },
+                ]
+              : []),
             {
               id: 'objects',
               category: DEFAULT_APP_CATEGORIES.manageWorkspace,
               order: 500,
+              euiIconType: 'package',
             },
             {
               id: 'import_sample_data',
@@ -126,6 +131,16 @@ export class UseCaseService {
               title: i18n.translate('workspace.left.sampleData.label', {
                 defaultMessage: 'Sample data',
               }),
+              euiIconType: 'navGetStarted',
+            },
+            {
+              id: 'workspace_settings',
+              category: DEFAULT_APP_CATEGORIES.manageWorkspace,
+              order: 700,
+              title: i18n.translate('workspace.left.settings.label', {
+                defaultMessage: 'Settings',
+              }),
+              euiIconType: 'gear',
             },
           ]);
         }
@@ -209,7 +224,7 @@ export class UseCaseService {
                       title: configurableApps.find((app) => app.id === featureId)?.title,
                       id: featureId,
                     })),
-                  } as WorkspaceUseCase)
+                  }) as WorkspaceUseCase
               )
               .concat({
                 ...DEFAULT_NAV_GROUPS.all,
@@ -227,8 +242,4 @@ export class UseCaseService {
   stop() {
     this.workspaceAndManageWorkspaceCategorySubscription?.unsubscribe();
   }
-
-  registerSupportedUseCasesForServerlessCollections = (useCaseIds: UseCaseId[]) => {
-    useCaseIds.forEach((id) => this.supportedUseCasesForServerlessCollections.add(id));
-  };
 }

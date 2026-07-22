@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
 import { VectorLayer, IServiceSettings } from '../../../maps_legacy/public';
@@ -48,9 +48,10 @@ export type RegionMapOptionsProps = {
 
 function RegionMapOptions(props: RegionMapOptionsProps) {
   const customVectorLayers = props.vis.type.editorConfig.collections.customVectorLayers;
-  const customVectorLayerOptions = useMemo(() => customVectorLayers.map(mapLayerForOption), [
-    customVectorLayers,
-  ]);
+  const customVectorLayerOptions = useMemo(
+    () => customVectorLayers.map(mapLayerForOption),
+    [customVectorLayers]
+  );
 
   if (customVectorLayerOptions.length === 0) {
     return (

@@ -24,9 +24,9 @@ interface CelestialNodeActionsProviderProps {
 }
 const CelestialNodeActions = createContext<CelestialNodeActionsType | undefined>(undefined);
 
-export const CelestialNodeActionsProvider: React.FC<PropsWithChildren<
-  CelestialNodeActionsProviderProps
->> = ({ onDataFetch, addBreadcrumb, onDashboardClick, children }) => {
+export const CelestialNodeActionsProvider: React.FC<
+  PropsWithChildren<CelestialNodeActionsProviderProps>
+> = ({ onDataFetch, addBreadcrumb, onDashboardClick, children }) => {
   // Track the selected node ID
   const {
     selectedNodeId,

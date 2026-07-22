@@ -36,7 +36,6 @@ import numeralLanguages from '@elastic/numeral/languages';
 import { DEFAULT_QUERY_LANGUAGE, UI_SETTINGS } from '../common';
 // cannot import from core/server due to src/core/server/saved_objects/opensearch_query.js which
 // export { opensearchKuery } from '../../../plugins/data/server';
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { UiSettingScope } from '../../../core/server/ui_settings/types';
 
 const luceneQueryLanguageLabel = i18n.translate('data.advancedSettings.searchQueryLanguageLucene', {
@@ -734,6 +733,23 @@ export function getUiSettings(
           Allows users to query data using enhancements where available. If disabled,
           only querying and querying languages that are considered production-ready are available to the user.`,
       }),
+      category: ['search'],
+      requiresPageReload: true,
+      schema: schema.boolean(),
+    },
+    [UI_SETTINGS.QUERY_ENHANCEMENTS_RUNTIME_PPL_GRAMMAR]: {
+      name: i18n.translate('data.advancedSettings.query.enhancements.runtimePplGrammarTitle', {
+        defaultMessage: 'Enable runtime PPL grammar',
+      }),
+      value: true,
+      description: i18n.translate(
+        'data.advancedSettings.query.enhancements.runtimePplGrammarText',
+        {
+          defaultMessage: `
+          Use the runtime PPL grammar fetched from the data source for autocomplete and validation. When disabled, falls back to the locally compiled grammar.
+          <strong>Experimental</strong>: Requires query enhancements enabled.`,
+        }
+      ),
       category: ['search'],
       requiresPageReload: true,
       schema: schema.boolean(),

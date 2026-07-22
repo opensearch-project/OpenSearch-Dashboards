@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
 import { CategoryAxisPanel, CategoryAxisPanelProps } from './category_axis_panel';
 import { Axis } from '../../../types';
@@ -76,6 +75,6 @@ describe('CategoryAxisPanel component', () => {
     comp.find({ paramName: 'position' }).prop('setValue')('position', value);
 
     expect(setCategoryAxis).toHaveBeenLastCalledWith({ ...axis, position: value });
-    expect(onPositionChanged).toBeCalledWith(value);
+    expect(onPositionChanged).toHaveBeenCalledWith(value);
   });
 });

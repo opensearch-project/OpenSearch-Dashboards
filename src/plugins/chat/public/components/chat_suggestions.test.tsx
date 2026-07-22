@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ChatSuggestions } from './chat_suggestions';
@@ -78,7 +77,7 @@ describe('ChatSuggestions', () => {
 
     // Wait for suggestions to load
     await waitFor(() => {
-      expect(screen.getByText('Available suggestions')).toBeInTheDocument();
+      expect(screen.getByText('Follow up')).toBeInTheDocument();
     });
 
     // Check that both suggestions are rendered

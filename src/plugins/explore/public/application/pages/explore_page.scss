@@ -17,9 +17,11 @@ $osdHeaderOffset: $euiHeaderHeightCompensation;
   }
 
   &__page-body {
-    // within Explore we do not use the globalQueryEditor
-    // Although this element is empty the way we configure props, it contributes to extra padding
-    & .globalQueryEditor {
+    // Empty wrapper adds padding when controls are portaled to the header, so
+    // hide it. In embed mode (`?embed=true`) the controls render inline here,
+    // so keep it visible.
+    // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+    .app-wrapper:not(.hidden-chrome) & .globalQueryEditor {
       display: none;
     }
   }
@@ -77,7 +79,8 @@ $osdHeaderOffset: $euiHeaderHeightCompensation;
   }
 
   .dscCanvas__chart {
-    margin-bottom: $ouiSizeXXS;
+    // margin-bottom: $euiSizeXS;
+    border-bottom: $ouiBorderThin;
   }
 
   @include euiYScroll;

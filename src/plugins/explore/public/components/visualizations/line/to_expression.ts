@@ -4,55 +4,55 @@
  */
 
 import { LineChartStyle } from './line_vis_config';
-import { VisColumn, AxisColumnMappings, AxisRole } from '../types';
-import { createLineSeries, createLineBarSeries, createFacetLineSeries } from './line_chart_utils';
-import { getSwappedAxisRole } from '../utils/utils';
+import { AxisRole, VisColumn } from '../types';
+import { createLineSeries, createLineBarSeries } from './line_chart_utils';
+import { getAxisConfig, getColumnsFromAxisColumnMapping } from '../utils/utils';
 import {
   pipe,
   createBaseConfig,
   buildAxisConfigs,
   assembleSpec,
   applyTimeRange,
+  collectLegend,
 } from '../utils/echarts_spec';
 import {
   convertTo2DArray,
   transform,
   pivot,
   sortByTime,
-  facetTransform,
   flatten,
 } from '../utils/data_transformation';
+import { ColorMap } from '../utils/color_map';
 
 /**
  * Create a simple line chart with one metric and one date
  */
 export const createSimpleLineChart = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
-  dateColumns: VisColumn[],
   styles: LineChartStyle,
-  axisColumnMappings?: AxisColumnMappings,
-  timeRange?: { from: string; to: string }
+  axisColumnMappings: { [AxisRole.X]: VisColumn; [AxisRole.Y]: VisColumn[] },
+  timeRange?: { from: string; to: string },
+  onLegend?: (legend: ColorMap) => void
 ): any => {
-  const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
+  const axisConfig = getAxisConfig(styles);
 
-  const timeField = axisConfig.xAxis?.column;
-  const valueField = axisConfig.yAxis?.column;
+  const timeField = axisColumnMappings[AxisRole.X].column;
+  const valueField = axisColumnMappings[AxisRole.Y].map((y) => y.column);
+  const valueFieldNames = axisColumnMappings[AxisRole.Y].map((y) => y.name) ?? [];
 
-  if (!valueField || !timeField) throw Error('Missing axis config for line chart');
-
-  const allColumns = [...Object.values(axisColumnMappings ?? {}).map((m) => m.column)];
+  const allColumns = getColumnsFromAxisColumnMapping(axisColumnMappings);
 
   const result = pipe(
-    transform(sortByTime(axisColumnMappings?.x?.column), convertTo2DArray(allColumns)),
-    createBaseConfig({ title: `${axisConfig.yAxis?.name} Over Time`, legend: { show: false } }),
+    transform(sortByTime(timeField), convertTo2DArray(allColumns)),
+    createBaseConfig({ legend: { show: false } }),
     buildAxisConfigs,
     applyTimeRange,
     createLineSeries({
       styles,
       categoryField: timeField,
-      seriesFields: [valueField],
+      seriesFields: valueField,
     }),
+    collectLegend(onLegend),
     assembleSpec
   )({
     data: transformedData,
@@ -70,33 +70,38 @@ export const createSimpleLineChart = (
  */
 export const createLineBarChart = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
-  dateColumns: VisColumn[],
   styles: LineChartStyle,
-  axisColumnMappings?: AxisColumnMappings,
-  timeRange?: { from: string; to: string }
+  axisColumnMappings: {
+    [AxisRole.X]: VisColumn;
+    [AxisRole.Y]: VisColumn[];
+    [AxisRole.Y_SECOND]: VisColumn[];
+  },
+  timeRange?: { from: string; to: string },
+  onLegend?: (legend: ColorMap) => void
 ): any => {
-  const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
+  const axisConfig = getAxisConfig(styles);
 
-  const timeField = axisConfig.xAxis?.column;
-  const valueField = axisConfig.yAxis;
-  const value2Field = axisColumnMappings?.[AxisRole.Y_SECOND];
+  const timeField = axisColumnMappings.x.column;
+  const valueField = axisColumnMappings.y.map((y) => y.column);
+  const valueFieldNames = axisColumnMappings.y.map((y) => y.name) ?? [];
+  const value2Field = axisColumnMappings.y2.map((y) => y.column);
+  const value2FieldNames = axisColumnMappings.y2.map((y) => y.name) ?? [];
 
   if (!timeField || !valueField || !value2Field) {
     throw Error('Missing axis config or color field for line-bar chart');
   }
 
-  const allColumns = [...Object.values(axisColumnMappings ?? {}).map((m) => m.column)];
+  const allColumns = getColumnsFromAxisColumnMapping(axisColumnMappings);
 
   const result = pipe(
-    transform(sortByTime(axisColumnMappings?.x?.column), convertTo2DArray(allColumns)),
+    transform(sortByTime(timeField), convertTo2DArray(allColumns)),
     createBaseConfig({
-      title: `${valueField.name} (Bar) and ${value2Field.name} (Line) Over Time`,
-      legend: { show: styles.addLegend },
+      legend: { show: false },
     }),
     buildAxisConfigs,
     applyTimeRange,
     createLineBarSeries({ styles, categoryField: timeField, value2Field, valueField }),
+    collectLegend(onLegend),
     assembleSpec
   )({
     data: transformedData,
@@ -114,22 +119,20 @@ export const createLineBarChart = (
  */
 export const createMultiLineChart = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
-  categoricalColumns: VisColumn[],
-  dateColumns: VisColumn[],
   styles: LineChartStyle,
-  axisColumnMappings?: AxisColumnMappings,
-  timeRange?: { from: string; to: string }
+  axisColumnMappings: {
+    [AxisRole.X]: VisColumn;
+    [AxisRole.Y]: VisColumn;
+    [AxisRole.COLOR]: VisColumn;
+  },
+  timeRange?: { from: string; to: string },
+  onLegend?: (legend: ColorMap) => void
 ): any => {
-  const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
-  const timeField = axisConfig.xAxis?.column;
-  const valueField = axisConfig.yAxis?.column;
-  const colorColumn = axisColumnMappings?.[AxisRole.COLOR];
-  const colorField = colorColumn?.column;
+  const axisConfig = getAxisConfig(styles);
 
-  if (!timeField || !valueField || !colorField) {
-    throw Error('Missing axis config or color field for multi lines chart');
-  }
+  const timeField = axisColumnMappings[AxisRole.X].column;
+  const valueField = axisColumnMappings[AxisRole.Y].column;
+  const colorField = axisColumnMappings[AxisRole.COLOR].column;
 
   const result = pipe(
     transform(
@@ -143,8 +146,7 @@ export const createMultiLineChart = (
       convertTo2DArray()
     ),
     createBaseConfig({
-      title: `${axisConfig.yAxis?.name} Over Time by ${axisColumnMappings?.[AxisRole.COLOR]?.name}`,
-      legend: { show: styles.addLegend },
+      legend: { show: false },
     }),
     buildAxisConfigs,
     applyTimeRange,
@@ -153,66 +155,7 @@ export const createMultiLineChart = (
       categoryField: timeField,
       seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
     }),
-    assembleSpec
-  )({
-    data: transformedData,
-    styles,
-    axisConfig,
-    axisColumnMappings: axisColumnMappings ?? {},
-    timeRange,
-  });
-
-  return result.spec;
-};
-
-/**
- * Create a faceted multi-line chart with one metric, one date, and two categorical columns
- */
-export const createFacetedMultiLineChart = (
-  transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
-  categoricalColumns: VisColumn[],
-  dateColumns: VisColumn[],
-  styles: LineChartStyle,
-  axisColumnMappings?: AxisColumnMappings,
-  timeRange?: { from: string; to: string }
-): any => {
-  const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
-  const timeField = axisConfig.xAxis?.column;
-  const valueField = axisConfig.yAxis?.column;
-  const colorColumn = axisColumnMappings?.[AxisRole.COLOR];
-  const colorField = colorColumn?.column;
-
-  const facetColumn = axisColumnMappings?.[AxisRole.FACET]?.column;
-  if (!timeField || !valueField || !colorField || !facetColumn) {
-    throw Error('Missing axis config for facet time line chart');
-  }
-
-  const result = pipe(
-    facetTransform(
-      facetColumn,
-      sortByTime(timeField),
-      pivot({
-        groupBy: timeField,
-        pivot: colorField,
-        field: valueField,
-      }),
-      flatten(),
-      convertTo2DArray()
-    ),
-    createBaseConfig({
-      title: `${axisConfig.yAxis?.name} Over Time by ${
-        axisColumnMappings?.[AxisRole.COLOR]?.name
-      } (Faceted by ${axisColumnMappings?.[AxisRole.FACET]?.name})`,
-      legend: { show: styles.addLegend },
-    }),
-    buildAxisConfigs,
-    applyTimeRange,
-    createFacetLineSeries({
-      styles,
-      categoryField: timeField,
-      seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
-    }),
+    collectLegend(onLegend),
     assembleSpec
   )({
     data: transformedData,
@@ -230,34 +173,31 @@ export const createFacetedMultiLineChart = (
  */
 export const createCategoryLineChart = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
-  categoricalColumns: VisColumn[],
-  dateColumns: VisColumn[],
   styles: LineChartStyle,
-  axisColumnMappings?: AxisColumnMappings
+  axisColumnMappings: { [AxisRole.X]: VisColumn; [AxisRole.Y]: VisColumn[] },
+  onLegend?: (legend: ColorMap) => void
 ): any => {
-  const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
+  const axisConfig = getAxisConfig(styles);
 
-  const categoryField = axisConfig.xAxis?.column;
-  const valueField = axisConfig.yAxis?.column;
+  const categoryField = axisColumnMappings[AxisRole.X].column;
+  const valueField = axisColumnMappings[AxisRole.Y].map((y) => y.column);
+  const valueFieldNames = axisColumnMappings[AxisRole.Y].map((y) => y.name) ?? [];
 
-  if (!valueField || !categoryField) throw Error('Missing axis config for line chart');
-
-  const allColumns = [...Object.values(axisColumnMappings ?? {}).map((m) => m.column)];
+  const allColumns = getColumnsFromAxisColumnMapping(axisColumnMappings);
 
   const result = pipe(
     transform(convertTo2DArray(allColumns)),
     createBaseConfig({
-      title: `${axisConfig.yAxis?.name} by ${axisConfig.xAxis?.name}`,
       legend: { show: false },
     }),
     buildAxisConfigs,
     createLineSeries({
       styles,
       categoryField,
-      seriesFields: [valueField],
+      seriesFields: valueField,
       addTimeMarker: false,
     }),
+    collectLegend(onLegend),
     assembleSpec
   )({
     data: transformedData,
@@ -271,21 +211,20 @@ export const createCategoryLineChart = (
 
 export const createCategoryMultiLineChart = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
-  categoricalColumns: VisColumn[],
-  dateColumns: VisColumn[],
   styles: LineChartStyle,
-  axisColumnMappings?: AxisColumnMappings
+  axisColumnMappings: {
+    [AxisRole.X]: VisColumn;
+    [AxisRole.Y]: VisColumn;
+    [AxisRole.COLOR]: VisColumn;
+  },
+  onLegend?: (legend: ColorMap) => void
 ): any => {
-  const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
-  const cateField = axisConfig.xAxis?.column;
-  const valueField = axisConfig.yAxis?.column;
-  const colorColumn = axisColumnMappings?.[AxisRole.COLOR];
-  const colorField = colorColumn?.column;
+  const axisConfig = getAxisConfig(styles);
 
-  if (!cateField || !valueField || !colorField) {
-    throw Error('Missing axis config or color field for multi lines chart');
-  }
+  const cateField = axisColumnMappings[AxisRole.X].column;
+  const valueField = axisColumnMappings[AxisRole.Y].column;
+  const colorField = axisColumnMappings[AxisRole.COLOR].column;
+
   const result = pipe(
     transform(
       pivot({
@@ -297,10 +236,7 @@ export const createCategoryMultiLineChart = (
       convertTo2DArray()
     ),
     createBaseConfig({
-      title: `${axisConfig.yAxis?.name} by ${axisConfig.xAxis?.name} and ${
-        axisColumnMappings?.[AxisRole.COLOR]?.name
-      }`,
-      legend: { show: styles.addLegend },
+      legend: { show: false },
     }),
     buildAxisConfigs,
     createLineSeries({
@@ -309,7 +245,7 @@ export const createCategoryMultiLineChart = (
       seriesFields: (headers) => (headers ?? []).filter((h) => h !== cateField),
       addTimeMarker: false,
     }),
-
+    collectLegend(onLegend),
     assembleSpec
   )({
     data: transformedData,

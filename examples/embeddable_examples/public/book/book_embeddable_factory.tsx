@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { i18n } from '@osd/i18n';
 import { BookSavedObjectAttributes, BOOK_SAVED_OBJECT } from '../../common';
 import { toMountPoint } from '../../../../src/plugins/opensearch_dashboards_react/public';
@@ -66,14 +65,12 @@ export type BookEmbeddableFactory = EmbeddableFactory<
   BookSavedObjectAttributes
 >;
 
-export class BookEmbeddableFactoryDefinition
-  implements
-    EmbeddableFactoryDefinition<
-      BookEmbeddableInput,
-      BookEmbeddableOutput,
-      BookEmbeddable,
-      BookSavedObjectAttributes
-    > {
+export class BookEmbeddableFactoryDefinition implements EmbeddableFactoryDefinition<
+  BookEmbeddableInput,
+  BookEmbeddableOutput,
+  BookEmbeddable,
+  BookSavedObjectAttributes
+> {
   public readonly type = BOOK_EMBEDDABLE;
   public savedObjectMetaData = {
     name: 'Book',
@@ -137,9 +134,8 @@ export class BookEmbeddableFactoryDefinition
 
   private async unwrapMethod(savedObjectId: string): Promise<BookSavedObjectAttributes> {
     const { savedObjectsClient } = await this.getStartServices();
-    const savedObject: SimpleSavedObject<BookSavedObjectAttributes> = await savedObjectsClient.get<
-      BookSavedObjectAttributes
-    >(this.type, savedObjectId);
+    const savedObject: SimpleSavedObject<BookSavedObjectAttributes> =
+      await savedObjectsClient.get<BookSavedObjectAttributes>(this.type, savedObjectId);
     return { ...savedObject.attributes };
   }
 
@@ -173,9 +169,9 @@ export class BookEmbeddableFactoryDefinition
 
   private async getAttributeService() {
     if (!this.attributeService) {
-      this.attributeService = (await this.getStartServices()).getAttributeService<
-        BookSavedObjectAttributes
-      >(this.type, {
+      this.attributeService = (
+        await this.getStartServices()
+      ).getAttributeService<BookSavedObjectAttributes>(this.type, {
         saveMethod: this.saveMethod.bind(this),
         unwrapMethod: this.unwrapMethod.bind(this),
         checkForDuplicateTitle: this.checkForDuplicateTitleMethod.bind(this),

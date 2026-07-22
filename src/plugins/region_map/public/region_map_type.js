@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { i18n } from '@osd/i18n';
 import { mapToLayerWithId } from './util';
 import { createRegionMapVisualization } from './region_map_visualization';
@@ -40,13 +39,8 @@ import { getServices } from './services';
 import { DEFAULT_MAP_CHOICE } from '../common';
 
 export function createRegionMapTypeDefinition(dependencies) {
-  const {
-    http,
-    uiSettings,
-    regionmapsConfig,
-    getServiceSettings,
-    additionalOptions,
-  } = dependencies;
+  const { http, uiSettings, regionmapsConfig, getServiceSettings, additionalOptions } =
+    dependencies;
 
   const services = getServices(http);
   const visualization = createRegionMapVisualization(dependencies);
@@ -59,7 +53,7 @@ export function createRegionMapTypeDefinition(dependencies) {
     try {
       const result = await services.getCustomIndices(dataSourceRefId);
       return result.resp;
-    } catch (e) {
+    } catch {
       return false;
     }
   };
@@ -77,7 +71,7 @@ export function createRegionMapTypeDefinition(dependencies) {
           description: property,
         };
       });
-    } catch (e) {
+    } catch {
       return false;
     }
   };

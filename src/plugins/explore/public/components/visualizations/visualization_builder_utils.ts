@@ -11,6 +11,7 @@ import {
   StandardAxes,
   AxisRole,
   Positions,
+  AxisFieldNameMappings,
 } from './types';
 import { StyleOptions } from './utils/use_visualization_types';
 import { ChartConfig } from './visualization_builder.types';
@@ -27,46 +28,54 @@ import { LineChartStyleOptions } from './line/line_vis_config';
 import { GaugeChartStyleOptions } from './gauge/gauge_vis_config';
 import { HeatmapChartStyleOptions } from './heatmap/heatmap_vis_config';
 
-export const convertMappingsToStrings = (mappings: AxisColumnMappings): Record<string, string> =>
-  Object.fromEntries(Object.entries(mappings).map(([axis, column]) => [axis, column?.name]));
+export const convertMappingsToStrings = (mappings: AxisColumnMappings): AxisFieldNameMappings =>
+  Object.fromEntries(
+    Object.entries(mappings).map(([axis, columns]) => [axis, columns?.map((col) => col.name)])
+  );
 
 export const convertStringsToMappings = (
-  stringMappings: Partial<Record<string, string>>,
+  stringMappings: AxisFieldNameMappings,
   allColumns: VisColumn[]
 ): AxisColumnMappings =>
   Object.fromEntries(
     Object.entries(stringMappings).map(([axis, columnName]) => [
       axis,
-      allColumns.find((col) => col.name === columnName),
+      (Array.isArray(columnName) ? columnName : [columnName])
+        .map((name) => allColumns.find((col) => col.name === name))
+        .filter((col): col is VisColumn => col !== undefined),
     ])
   );
 
 export const isValidMapping = (
-  selectedAxesMapping: Partial<Record<string, string>>,
+  selectedAxesMapping: AxisFieldNameMappings,
   allColumns: VisColumn[]
 ) =>
-  Object.values(selectedAxesMapping).every((columnName) =>
-    allColumns.some((col) => col.name === columnName)
-  );
+  Object.values(selectedAxesMapping).every((columnName) => {
+    const names = Array.isArray(columnName) ? columnName : [columnName];
+    return names.every((name) => allColumns.some((col) => col.name === name));
+  });
 
 export const getColumnsByAxesMapping = (
-  selectedAxesMapping: Partial<Record<string, string>>,
+  selectedAxesMapping: AxisFieldNameMappings,
   allColumns: VisColumn[]
 ) => {
   const numericalColumns: VisColumn[] = [];
   const categoricalColumns: VisColumn[] = [];
   const dateColumns: VisColumn[] = [];
   Object.values(selectedAxesMapping).forEach((fieldName) => {
-    const column = allColumns.find((c) => c.name === fieldName);
-    if (column?.schema === VisFieldType.Numerical) {
-      numericalColumns.push(column);
-    }
-    if (column?.schema === VisFieldType.Categorical) {
-      categoricalColumns.push(column);
-    }
-    if (column?.schema === VisFieldType.Date) {
-      dateColumns.push(column);
-    }
+    const names = Array.isArray(fieldName) ? fieldName : [fieldName];
+    names.forEach((name) => {
+      const column = allColumns.find((c) => c.name === name);
+      if (column?.schema === VisFieldType.Numerical) {
+        numericalColumns.push(column);
+      }
+      if (column?.schema === VisFieldType.Categorical) {
+        categoricalColumns.push(column);
+      }
+      if (column?.schema === VisFieldType.Date) {
+        dateColumns.push(column);
+      }
+    });
   });
   return { numericalColumns, categoricalColumns, dateColumns };
 };
@@ -96,6 +105,20 @@ export const adaptLegacyData = (config?: ChartConfig) => {
   }
 
   let transformedConfig = { ...config };
+
+  // Migrate legacy FACET axis mapping to splitField
+  if (transformedConfig.axesMapping?.facet && !transformedConfig.splitField) {
+    const facetValue = transformedConfig.axesMapping.facet;
+    const fieldName = Array.isArray(facetValue) ? facetValue[0] : facetValue;
+    if (fieldName) {
+      const { facet, ...remainingMapping } = transformedConfig.axesMapping;
+      transformedConfig = {
+        ...transformedConfig,
+        splitField: fieldName,
+        axesMapping: remainingMapping,
+      };
+    }
+  }
 
   // only transform data when user saved old custom ranges config or threshold-lines config
   // and once user makes some updates on threshold, will only focus on threshold
@@ -143,10 +166,7 @@ export const adaptLegacyData = (config?: ChartConfig) => {
     transformedConfig.type === 'area'
   ) {
     const styles = config.styles as
-      | BarChartStyleOptions
-      | LineChartStyleOptions
-      | AreaChartStyleOptions
-      | undefined;
+      BarChartStyleOptions | LineChartStyleOptions | AreaChartStyleOptions | undefined;
     const { thresholdOptions, thresholdLines } = styles || {};
     if (thresholdLines && !thresholdOptions) {
       const thresholds = transformThresholdLinesToThreshold(thresholdLines);
@@ -191,8 +211,7 @@ export const adaptLegacyData = (config?: ChartConfig) => {
   if (transformedConfig.type === 'line' || transformedConfig.type === 'area') {
     const standardAxes: StandardAxes[] = [];
     const { valueAxes, categoryAxes } = transformedConfig.styles as
-      | AreaChartStyleOptions
-      | LineChartStyleOptions;
+      AreaChartStyleOptions | LineChartStyleOptions;
     if (categoryAxes || valueAxes) {
       transformedConfig = {
         ...transformedConfig,

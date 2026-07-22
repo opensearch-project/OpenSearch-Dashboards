@@ -34,7 +34,6 @@
  * in OpenSearch.
  */
 
-import React from 'react';
 import {
   // @ts-ignore
   EuiCard,

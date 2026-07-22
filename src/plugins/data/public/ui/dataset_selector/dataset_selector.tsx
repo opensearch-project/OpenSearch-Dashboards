@@ -95,10 +95,11 @@ export const DatasetSelector = ({
 
       const fetchedIndexPatternDataStructures = await typeConfig.fetch(services, []);
 
-      const fetchedDatasets =
+      const fetchedDatasets = (
         fetchedIndexPatternDataStructures.children?.map((pattern) =>
           typeConfig.toDataset([pattern])
-        ) ?? [];
+        ) ?? []
+      ).filter((ds) => datasetService.isDatasetAllowed(ds, services.appName));
       setIndexPatterns(fetchedDatasets);
 
       // If no dataset is selected, select the first one
@@ -117,7 +118,9 @@ export const DatasetSelector = ({
   }, [datasetService]);
 
   const recentDatasets = useMemo(() => {
-    return datasetService.getRecentDatasets();
+    return datasetService
+      .getRecentDatasets()
+      .filter((ds) => datasetService.isDatasetAllowed(ds, services.appName));
     // NOTE: Intentionally adding dependencies to ensure that we have the latest recentDatasets
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, datasetService]);
@@ -140,8 +143,9 @@ export const DatasetSelector = ({
           isGroupLabel: true,
         },
       ];
-      ds.forEach(({ id, title, type, dataSource }) => {
-        const label = dataSource ? `${dataSource.title}::${title}` : title;
+      ds.forEach(({ id, title, type, dataSource, displayName }) => {
+        const displayLabel = displayName || title;
+        const label = dataSource ? `${dataSource.title}::${displayLabel}` : displayLabel;
         datasetOptions.push({
           label,
           checked: id === selectedDatasetId ? 'on' : undefined,
@@ -193,11 +197,13 @@ export const DatasetSelector = ({
       return 'Select data';
     }
 
+    const displayLabel = selectedDataset.displayName || selectedDataset.title;
+
     if (selectedDataset.dataSource) {
-      return `${selectedDataset.dataSource.title}::${selectedDataset.title}`;
+      return `${selectedDataset.dataSource.title}::${displayLabel}`;
     }
 
-    return selectedDataset.title;
+    return displayLabel;
   }, [selectedDataset]);
 
   return (
@@ -205,12 +211,12 @@ export const DatasetSelector = ({
       button={
         <EuiToolTip
           display="block"
-          content={`${
-            selectedDataset?.title ??
+          content={
+            datasetTitle ||
             i18n.translate('data.dataSelector.defaultTitle', {
               defaultMessage: 'Select data',
             })
-          }`}
+          }
         >
           <RootComponent
             appearance={appearance}

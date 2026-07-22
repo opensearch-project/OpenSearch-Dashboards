@@ -10,7 +10,7 @@ import {
   EuiSmallButtonEmpty,
   PopoverAnchorPosition,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { isEqual } from 'lodash';
 import { LanguageConfig } from '../../query';
 import { getQueryService } from '../../services';
@@ -57,20 +57,21 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
       // Get supported languages
       const languages = !dataset
         ? languageService.getLanguages().map((l) => l.id)
-        : queryString.getDatasetService().getType(dataset.type)?.supportedLanguages(dataset) ??
-          null;
+        : (queryString.getDatasetService().getType(dataset.type)?.supportedLanguages(dataset) ??
+          null);
 
       if (!languages) {
         return;
       }
 
-      // Build new options including app support check
+      // Build new options including app support check and per-dataset engine/version gating
       const newOptions = languageService
         .getLanguages()
         .filter(
           (lang) =>
             languages.includes(lang.id) &&
-            (!props.appName || lang.editorSupportedAppNames?.includes(props.appName))
+            (!props.appName || lang.editorSupportedAppNames?.includes(props.appName)) &&
+            languageService.isLanguageSupportedForDataset(lang, dataset)
         )
         .map(mapExternalLanguageToOptions)
         .sort((a, b) => a.label.localeCompare(b.label));

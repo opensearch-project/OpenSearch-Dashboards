@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { mount, configure, render } from 'enzyme';
 import Adapter from '@cfaester/enzyme-adapter-react-18';
 import { EuiLoadingSpinner } from '@elastic/eui';

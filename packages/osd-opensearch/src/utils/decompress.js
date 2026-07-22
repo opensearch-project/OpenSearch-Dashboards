@@ -30,6 +30,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { pipeline } = require('stream/promises');
 
 const yauzl = require('yauzl');
 const zlib = require('zlib');
@@ -47,54 +48,35 @@ function decompressTarball(archive, dirPath) {
   });
 }
 
-function decompressZip(input, output) {
-  fs.mkdirSync(output, { recursive: true });
-  return new Promise((resolve, reject) => {
-    yauzl.open(input, { lazyEntries: true }, (err, zipfile) => {
-      if (err) {
-        reject(err);
-      }
+async function decompressZip(input, output) {
+  const resolvedOutput = path.resolve(output);
+  fs.mkdirSync(resolvedOutput, { recursive: true });
+  const zipfile = await yauzl.openPromise(input);
+  for await (const entry of zipfile.eachEntry()) {
+    // Strip the leading root-directory segment (all supported archives have one)
+    const zipPath = entry.fileName.split(/\/|\\/).slice(1).join(path.sep);
+    const resolvedPath = path.resolve(resolvedOutput, zipPath);
 
-      zipfile.readEntry();
+    // Guard against zip-slip for both files and directories
+    if (resolvedPath !== resolvedOutput && !resolvedPath.startsWith(resolvedOutput + path.sep)) {
+      throw new Error(`Zip slip detected: ${entry.fileName}`);
+    }
 
-      zipfile.on('close', () => {
-        resolve();
-      });
-
-      zipfile.on('error', (err) => {
-        reject(err);
-      });
-
-      zipfile.on('entry', (entry) => {
-        const zipPath = entry.fileName.split(/\/|\\/).slice(1).join(path.sep);
-        const fileName = path.resolve(output, zipPath);
-
-        if (/\/$/.test(entry.fileName)) {
-          fs.mkdirSync(fileName, { recursive: true });
-          zipfile.readEntry();
-        } else {
-          // file entry
-          zipfile.openReadStream(entry, (err, readStream) => {
-            if (err) {
-              reject(err);
-            }
-
-            readStream.on('end', () => {
-              zipfile.readEntry();
-            });
-
-            readStream.pipe(fs.createWriteStream(fileName));
-          });
-        }
-      });
-    });
-  });
+    if (entry.fileName.endsWith('/')) {
+      fs.mkdirSync(resolvedPath, { recursive: true });
+    } else {
+      // ensure parent directory exists
+      fs.mkdirSync(path.dirname(resolvedPath), { recursive: true });
+      const readStream = await zipfile.openReadStreamPromise(entry);
+      await pipeline(readStream, fs.createWriteStream(resolvedPath));
+    }
+  }
 }
 
 exports.decompress = async function (input, output) {
   const ext = path.extname(input);
 
-  switch (path.extname(input)) {
+  switch (ext) {
     case '.zip':
       await decompressZip(input, output);
       break;

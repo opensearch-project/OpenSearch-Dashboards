@@ -52,22 +52,29 @@ describe('create data source menu', () => {
       onManageDataSource: jest.fn(),
     };
 
-    spyOn(utils, 'getApplication').and.returnValue({ id: 'test2' });
-    spyOn(utils, 'getUiSettings').and.returnValue(uiSettings);
-    spyOn(utils, 'getWorkspaces').and.returnValue(workspaces);
-    spyOn(utils, 'getHideLocalCluster').and.returnValue({ enabled: true });
-    spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
+    jest.spyOn(utils, 'getApplication').mockReturnValue({ id: 'test2' });
+    jest.spyOn(utils, 'getUiSettings').mockReturnValue(uiSettings);
+    jest.spyOn(utils, 'getWorkspaces').mockReturnValue(workspaces);
+    jest.spyOn(utils, 'getHideLocalCluster').mockReturnValue({ enabled: true });
+    jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
 
     const TestComponent = createDataSourceMenu<DataSourceSelectableConfig>();
 
     const component = render(<TestComponent {...props} />);
     expect(component).toMatchSnapshot();
-    expect(client.find).toBeCalledWith({
-      fields: ['id', 'title', 'auth.type', 'dataSourceVersion', 'installedPlugins'],
+    expect(client.find).toHaveBeenCalledWith({
+      fields: [
+        'id',
+        'title',
+        'auth.type',
+        'dataSourceVersion',
+        'installedPlugins',
+        'dataSourceEngineType',
+      ],
       perPage: 10000,
       type: 'data-source',
     });
-    expect(notifications.toasts.addWarning).toBeCalledTimes(0);
+    expect(notifications.toasts.addWarning).toHaveBeenCalledTimes(0);
   });
 
   it('should ignore props.hideLocalCluster, and show local cluster when data_source.hideLocalCluster is set to false', async () => {
@@ -86,23 +93,30 @@ describe('create data source menu', () => {
       application,
       onManageDataSource: jest.fn(),
     };
-    spyOn(utils, 'getApplication').and.returnValue({ id: 'test2' });
-    spyOn(utils, 'getUiSettings').and.returnValue(uiSettings);
-    spyOn(utils, 'getWorkspaces').and.returnValue(workspaces);
-    spyOn(utils, 'getHideLocalCluster').and.returnValue({ enabled: true });
-    spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
+    jest.spyOn(utils, 'getApplication').mockReturnValue({ id: 'test2' });
+    jest.spyOn(utils, 'getUiSettings').mockReturnValue(uiSettings);
+    jest.spyOn(utils, 'getWorkspaces').mockReturnValue(workspaces);
+    jest.spyOn(utils, 'getHideLocalCluster').mockReturnValue({ enabled: true });
+    jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
     const TestComponent = createDataSourceMenu<DataSourceSelectableConfig>();
     await act(async () => {
       component = render(<TestComponent {...props} />);
     });
 
     expect(component).toMatchSnapshot();
-    expect(client.find).toBeCalledWith({
-      fields: ['id', 'title', 'auth.type', 'dataSourceVersion', 'installedPlugins'],
+    expect(client.find).toHaveBeenCalledWith({
+      fields: [
+        'id',
+        'title',
+        'auth.type',
+        'dataSourceVersion',
+        'installedPlugins',
+        'dataSourceEngineType',
+      ],
       perPage: 10000,
       type: 'data-source',
     });
-    expect(notifications.toasts.add).toBeCalledTimes(2);
+    expect(notifications.toasts.add).toHaveBeenCalledTimes(2);
   });
 });
 
@@ -160,11 +174,11 @@ describe('when setMenuMountPoint is provided', () => {
       onManageDataSource: jest.fn(),
     };
 
-    spyOn(utils, 'getApplication').and.returnValue({ id: 'test2' });
-    spyOn(utils, 'getUiSettings').and.returnValue(uiSettings);
-    spyOn(utils, 'getWorkspaces').and.returnValue(workspaces);
-    spyOn(utils, 'getHideLocalCluster').and.returnValue({ enabled: true });
-    spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
+    jest.spyOn(utils, 'getApplication').mockReturnValue({ id: 'test2' });
+    jest.spyOn(utils, 'getUiSettings').mockReturnValue(uiSettings);
+    jest.spyOn(utils, 'getWorkspaces').mockReturnValue(workspaces);
+    jest.spyOn(utils, 'getHideLocalCluster').mockReturnValue({ enabled: true });
+    jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
 
     const TestComponent = createDataSourceMenu<DataSourceSelectableConfig>();
     const component = render(<TestComponent {...props} />);
@@ -174,12 +188,19 @@ describe('when setMenuMountPoint is provided', () => {
 
     await refresh();
     expect(component).toMatchSnapshot();
-    expect(client.find).toBeCalledWith({
-      fields: ['id', 'title', 'auth.type', 'dataSourceVersion', 'installedPlugins'],
+    expect(client.find).toHaveBeenCalledWith({
+      fields: [
+        'id',
+        'title',
+        'auth.type',
+        'dataSourceVersion',
+        'installedPlugins',
+        'dataSourceEngineType',
+      ],
       perPage: 10000,
       type: 'data-source',
     });
-    expect(notifications.toasts.addWarning).toBeCalledTimes(0);
-    expect(setMountPoint).toBeCalledTimes(1);
+    expect(notifications.toasts.addWarning).toHaveBeenCalledTimes(0);
+    expect(setMountPoint).toHaveBeenCalledTimes(1);
   });
 });

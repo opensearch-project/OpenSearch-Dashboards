@@ -46,7 +46,7 @@ export const RangeField = ({ field, euiFieldProps = {}, ...rest }: Props) => {
 
   const onChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>) => {
-      const event = ({ ...e, value: `${e.currentTarget.value}` } as unknown) as React.ChangeEvent<{
+      const event = { ...e, value: `${e.currentTarget.value}` } as unknown as React.ChangeEvent<{
         value: string;
       }>;
       onFieldChange(event);
@@ -57,6 +57,7 @@ export const RangeField = ({ field, euiFieldProps = {}, ...rest }: Props) => {
   return (
     <EuiCompressedFormRow
       label={field.label}
+      // @ts-expect-error TS2349 TODO(ts-error): fixme
       helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
       error={errorMessage}
       isInvalid={isInvalid}

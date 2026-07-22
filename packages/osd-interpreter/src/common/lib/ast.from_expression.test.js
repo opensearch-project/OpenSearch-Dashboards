@@ -35,12 +35,12 @@ describe('ast fromExpression', () => {
   describe('invalid expression', () => {
     it('throws when empty', () => {
       const check = () => fromExpression('');
-      expect(check).toThrowError(/Unable to parse expression/i);
+      expect(check).toThrow(/Unable to parse expression/i);
     });
 
     it('throws with invalid expression', () => {
       const check = () => fromExpression('wat!');
-      expect(check).toThrowError(/Unable to parse expression/i);
+      expect(check).toThrow(/Unable to parse expression/i);
     });
   });
 

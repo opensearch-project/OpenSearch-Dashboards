@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { PureComponent } from 'react';
+import { PureComponent } from 'react';
 import { injectI18n, FormattedMessage, InjectedIntlProps } from '@osd/i18n/react';
 
 import {
@@ -236,6 +236,7 @@ class ControlsTabUi extends PureComponent<ControlsTabUiProps, ControlsTabUiState
 
 export const ControlsTab = injectI18n(ControlsTabUi);
 
-export const getControlsTab = (deps: InputControlVisDependencies) => (
-  props: Omit<ControlsTabUiProps, 'core'>
-) => <ControlsTab {...props} deps={deps} />;
+export const getControlsTab =
+  (deps: InputControlVisDependencies) => (props: Omit<ControlsTabUiProps, 'core'>) => (
+    <ControlsTab {...props} deps={deps} />
+  );

@@ -32,6 +32,9 @@ import { schema, TypeOf } from '@osd/config-schema';
 
 export const configSchema = schema.object({
   allowByValueEmbeddables: schema.boolean({ defaultValue: false }),
+  variables: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+  }),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;

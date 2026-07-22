@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { StatusMessage } from '../status_message';
 import { shallow } from 'enzyme';
 import { MatchedItem } from '../../../../types';
@@ -38,14 +37,14 @@ const tagsPartial = {
 };
 
 const matchedIndices = {
-  allIndices: ([
+  allIndices: [
     { name: 'opensearch-dashboards', ...tagsPartial },
     { name: 'opensearch', ...tagsPartial },
-  ] as unknown) as MatchedItem[],
+  ] as unknown as MatchedItem[],
   exactMatchedIndices: [] as MatchedItem[],
-  partialMatchedIndices: ([
+  partialMatchedIndices: [
     { name: 'opensearch-dashboards', ...tagsPartial },
-  ] as unknown) as MatchedItem[],
+  ] as unknown as MatchedItem[],
 };
 
 describe('StatusMessage', () => {
@@ -65,9 +64,9 @@ describe('StatusMessage', () => {
   it('should render with exact matches', () => {
     const localMatchedIndices = {
       ...matchedIndices,
-      exactMatchedIndices: ([
+      exactMatchedIndices: [
         { name: 'opensearch-dashboards', ...tagsPartial },
-      ] as unknown) as MatchedItem[],
+      ] as unknown as MatchedItem[],
     };
 
     const component = shallow(

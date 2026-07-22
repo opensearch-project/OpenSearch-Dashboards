@@ -29,6 +29,7 @@
  */
 
 import { configureClientMock } from './cluster_client.test.mocks';
+import { Transport } from '@opensearch-project/opensearch';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { httpServerMock } from '../../http/http_server.mocks';
 import { GetAuthHeaders } from '../../http';
@@ -56,8 +57,12 @@ describe('ClusterClient', () => {
   let getAuthHeaders: jest.MockedFunction<GetAuthHeaders>;
   let internalClient: ReturnType<typeof opensearchClientMock.createInternalClient>;
   let scopedClient: ReturnType<typeof opensearchClientMock.createInternalClient>;
-  let internalClientWithLongNumeralsSupport: ReturnType<typeof opensearchClientMock.createInternalClient>;
-  let scopedClientWithLongNumeralsSupport: ReturnType<typeof opensearchClientMock.createInternalClient>;
+  let internalClientWithLongNumeralsSupport: ReturnType<
+    typeof opensearchClientMock.createInternalClient
+  >;
+  let scopedClientWithLongNumeralsSupport: ReturnType<
+    typeof opensearchClientMock.createInternalClient
+  >;
 
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
@@ -96,6 +101,23 @@ describe('ClusterClient', () => {
     expect(configureClientMock).toHaveBeenCalledTimes(4);
     expect(configureClientMock).toHaveBeenCalledWith(config, { logger });
     expect(configureClientMock).toHaveBeenCalledWith(config, { logger, scoped: true });
+  });
+
+  it('passes custom transport to configureClient when provided', () => {
+    const config = createConfig();
+    class CustomTransport extends Transport {}
+
+    new ClusterClient(config, logger, getAuthHeaders, CustomTransport);
+
+    expect(configureClientMock).toHaveBeenCalledWith(config, {
+      logger,
+      customTransport: CustomTransport,
+    });
+    expect(configureClientMock).toHaveBeenCalledWith(config, {
+      logger,
+      scoped: true,
+      customTransport: CustomTransport,
+    });
   });
 
   describe('#asInternalUser', () => {

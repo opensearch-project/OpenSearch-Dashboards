@@ -3,10 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { i18n } from '@osd/i18n';
 import { CoreSetup, OverlayRef } from '../../../core/public';
-import { toMountPoint } from '../../../plugins/opensearch_dashboards_react/public';
+import {
+  toMountPoint,
+  OpenSearchDashboardsContextProvider,
+} from '../../../plugins/opensearch_dashboards_react/public';
 
 import { WorkspaceCollaboratorTypesService, WorkspaceCollaboratorType } from './services';
 import {
@@ -18,26 +20,29 @@ export const generateOnAddCallback: (
   options: Omit<AddCollaboratorsModalProps, 'onClose' | 'onAddCollaborators'> & {
     getStartServices: CoreSetup['getStartServices'];
   }
-) => WorkspaceCollaboratorType['onAdd'] = ({ getStartServices, ...props }) => async ({
-  onAddCollaborators,
-}) => {
-  let overlayRef: OverlayRef | null = null;
-  const [coreStart] = await getStartServices();
-  overlayRef = coreStart.overlays.openModal(
-    toMountPoint(
-      <AddCollaboratorsModal
-        {...props}
-        onClose={() => {
-          overlayRef?.close();
-        }}
-        onAddCollaborators={async (collaborators) => {
-          await onAddCollaborators(collaborators);
-          overlayRef?.close();
-        }}
-      />
-    )
-  );
-};
+) => WorkspaceCollaboratorType['onAdd'] =
+  ({ getStartServices, ...props }) =>
+  async ({ onAddCollaborators }) => {
+    let overlayRef: OverlayRef | null = null;
+    const [coreStart] = await getStartServices();
+    overlayRef = coreStart.overlays.openModal(
+      toMountPoint(
+        <OpenSearchDashboardsContextProvider services={coreStart}>
+          <AddCollaboratorsModal
+            {...props}
+            http={coreStart.http}
+            onClose={() => {
+              overlayRef?.close();
+            }}
+            onAddCollaborators={async (collaborators) => {
+              await onAddCollaborators(collaborators);
+              overlayRef?.close();
+            }}
+          />
+        </OpenSearchDashboardsContextProvider>
+      )
+    );
+  };
 
 export const registerDefaultCollaboratorTypes = ({
   getStartServices,

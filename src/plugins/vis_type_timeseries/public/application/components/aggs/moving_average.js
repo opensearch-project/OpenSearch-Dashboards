@@ -29,7 +29,7 @@
  */
 
 import PropTypes from 'prop-types';
-import React, { Fragment } from 'react';
+import { Fragment } from 'react';
 import { AggRow } from './agg_row';
 import { AggSelect } from './agg_select';
 import { MetricSelect } from './metric_select';

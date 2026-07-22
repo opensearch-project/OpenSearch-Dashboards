@@ -28,7 +28,7 @@ describe('CSVProcessor', () => {
           const testValidity = await processor.validateText(rawStringArray.join(''), { delimiter });
           expect(testValidity).toBe(false);
           // eslint-disable-next-line no-empty
-        } catch (e) {}
+        } catch {}
       }
     );
   });
@@ -70,6 +70,7 @@ describe('CSVProcessor', () => {
         expect(clientMock.index).toHaveBeenCalledTimes(expected.length);
 
         // Verify each indexed document includes the lookup field
+        // @ts-expect-error TS7006 TODO(ts-upgrade): fixme
         clientMock.index.mock.calls.forEach((call) => {
           const callArgs = call[0];
           expect(callArgs.body).toHaveProperty(lookupField, lookupId);
@@ -143,6 +144,7 @@ describe('CSVProcessor', () => {
         expect(clientMock.index).toHaveBeenCalledTimes(expected.length);
 
         // Verify each indexed document includes the lookup field
+        // @ts-expect-error TS7006 TODO(ts-upgrade): fixme
         clientMock.index.mock.calls.forEach((call) => {
           const callArgs = call[0];
           expect(callArgs.body).toHaveProperty(lookupField, lookupId);

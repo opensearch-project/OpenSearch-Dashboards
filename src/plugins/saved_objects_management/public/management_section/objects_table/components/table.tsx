@@ -29,7 +29,7 @@
  */
 
 import { IBasePath, WorkspaceAttribute } from 'src/core/public';
-import React, { PureComponent, Fragment } from 'react';
+import { PureComponent, Fragment } from 'react';
 import moment from 'moment';
 import {
   EuiSearchBar,
@@ -264,7 +264,7 @@ export class Table extends PureComponent<TableProps, TableState> {
           // Decode the path
           try {
             finalPath = decodeURIComponent(finalPath);
-          } catch (e) {
+          } catch {
             // If decoding fails, use the original path
           }
           let inAppUrl = basePath.prepend(finalPath);

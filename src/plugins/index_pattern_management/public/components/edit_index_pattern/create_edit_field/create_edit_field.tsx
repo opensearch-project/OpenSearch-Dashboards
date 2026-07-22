@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
@@ -56,17 +55,16 @@ const newFieldPlaceholder = i18n.translate(
 
 export const CreateEditField = withRouter(
   ({ indexPattern, mode, fieldName, history }: CreateEditFieldProps) => {
-    const { uiSettings, chrome, notifications, data } = useOpenSearchDashboards<
-      IndexPatternManagmentContext
-    >().services;
+    const { uiSettings, chrome, notifications, data } =
+      useOpenSearchDashboards<IndexPatternManagmentContext>().services;
     const spec =
       mode === 'edit' && fieldName
         ? indexPattern.fields.getByName(fieldName)?.spec
-        : (({
+        : ({
             scripted: true,
             type: 'number',
             name: undefined,
-          } as unknown) as IndexPatternField);
+          } as unknown as IndexPatternField);
 
     const url = `/patterns/${indexPattern.id}`;
 
@@ -76,7 +74,7 @@ export const CreateEditField = withRouter(
         {
           defaultMessage:
             "'{indexPatternTitle}' index pattern doesn't have a scripted field called '{fieldName}'",
-          values: { indexPatternTitle: indexPattern.title, fieldName },
+          values: { indexPatternTitle: indexPattern.getDisplayName(), fieldName },
         }
       );
       notifications.toasts.addWarning(message);
@@ -85,7 +83,7 @@ export const CreateEditField = withRouter(
 
     const docFieldName = spec?.name || newFieldPlaceholder;
 
-    chrome.docTitle.change([docFieldName, indexPattern.title]);
+    chrome.docTitle.change([docFieldName, indexPattern.getDisplayName()]);
 
     const redirectAway = () => {
       history.push(

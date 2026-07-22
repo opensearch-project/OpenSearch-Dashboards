@@ -4,7 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import React from 'react';
+
 import { DiscoverViewServices } from '../../../build_services';
 import { SavedSearch } from '../../../saved_searches';
 import { Adapters } from '../../../../../inspector/public';
@@ -33,16 +33,8 @@ const getLegacyTopNavLinks = (
   startSyncingQueryStateWithUrl: () => void,
   isEnhancementEnabled: boolean = false
 ) => {
-  const {
-    history,
-    inspector,
-    core,
-    capabilities,
-    share,
-    toastNotifications,
-    chrome,
-    store,
-  } = services;
+  const { history, inspector, core, capabilities, share, toastNotifications, chrome, store } =
+    services;
 
   const newSearch: TopNavMenuData = {
     id: 'new',
@@ -207,8 +199,7 @@ const getLegacyTopNavLinks = (
     ariaLabel: i18n.translate('discover.topNav.discoverShareButtonLabel', {
       defaultMessage: `Share search`,
     }),
-    // @ts-expect-error TS7006 TODO(ts-error): fixme
-    run: async (anchorElement) => {
+    run: async (anchorElement: any) => {
       const state: DiscoverState = store!.getState().discover; // store is defined before the view is loaded
       const sharingData = await getSharingData({
         searchSource: savedSearch.searchSource,

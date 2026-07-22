@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { mount } from 'enzyme';
 import { DirectQueryDataSourceConfigure } from './configure_direct_query_data_sources';
 import { NotificationsStart } from '../../../../../../core/public';
@@ -74,7 +73,7 @@ jest.mock('react', () => ({
 }));
 
 describe('ConfigureDirectQueryDataSourceWithRouter', () => {
-  const mockNotifications = ({ toasts: mockToasts } as unknown) as NotificationsStart;
+  const mockNotifications = { toasts: mockToasts } as unknown as NotificationsStart;
   const mockLocation = { pathname: '', search: '', state: '', hash: '' };
   const mockMatch = { params: { type: 'AmazonS3AWSGlue' }, isExact: true, path: '', url: '' };
   const mockHistory = createMemoryHistory();

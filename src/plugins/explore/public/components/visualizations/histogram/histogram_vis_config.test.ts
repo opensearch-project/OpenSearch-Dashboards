@@ -29,10 +29,6 @@ describe('bar_vis_config', () => {
           thresholdStyle: ThresholdMode.Off,
         },
 
-        titleOptions: {
-          show: false,
-          titleName: '',
-        },
         bucket: {
           aggregationType: AggregationType.SUM,
         },
@@ -49,11 +45,6 @@ describe('bar_vis_config', () => {
           axisRole: AxisRole.X,
         })
       );
-
-      expect(defaultHistogramChartStyles.titleOptions).toMatchObject({
-        show: false,
-        titleName: '',
-      });
     });
   });
 
@@ -62,7 +53,7 @@ describe('bar_vis_config', () => {
       const config = createHistogramConfig();
 
       expect(config).toMatchObject({
-        name: 'histogram',
+        name: 'Histogram',
         type: 'histogram',
         ui: {
           style: {
@@ -72,9 +63,8 @@ describe('bar_vis_config', () => {
         },
       });
 
-      // Verify availableMappings exists
-      expect(config.ui.availableMappings).toBeDefined();
-      expect(Array.isArray(config.ui.availableMappings)).toBe(true);
+      expect(typeof config.getRules).toBe('function');
+      expect(Array.isArray(config.getRules())).toBe(true);
     });
 
     test('render function should create a HistogramVisStyleControls component', () => {

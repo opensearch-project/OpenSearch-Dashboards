@@ -13,6 +13,7 @@ import './source_field_table_cell.scss';
 
 import React, { Fragment } from 'react';
 import { IndexPattern, DataView as Dataset } from 'src/plugins/data/public';
+import { getDisplayValue } from '../../../../../data/common';
 import { shortenDottedString } from '../../../helpers/shorten_dotted_string';
 import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 
@@ -52,7 +53,7 @@ const SourceFieldTableCellComponent: React.FC<SourceFieldTableCellProps> = ({
                 {key}:
               </span>
               <span className="source__value" data-test-subj="sourceFieldValue">
-                {formattedRow[rawKeys[index]]}
+                {getDisplayValue(rawKeys[index], formattedRow[rawKeys[index]], row.highlight)}
               </span>
               {index !== keys.length - 1 && ' '}
             </Fragment>

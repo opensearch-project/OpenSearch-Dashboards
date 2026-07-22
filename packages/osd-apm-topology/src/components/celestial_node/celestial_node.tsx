@@ -4,7 +4,6 @@
  */
 import React from 'react';
 
-import '../../_celestial.generated.scss';
 import { Handle, Node, NodeProps, Position } from '@xyflow/react';
 import { useCallback, useRef } from 'react';
 import { useContextMenu } from '../../shared/hooks/use_context_menu.hook';
@@ -30,20 +29,10 @@ export const CelestialNode = ({ data, id }: NodeProps<CelestialCustomNode>) => {
     getChildrenNodes,
   } = useNodeRelationships();
 
-  const {
-    isCollapsed,
-    isCollapsable,
-    isStacked,
-    isStackable,
-    isExpanded,
-    isExpandable,
-  } = useNodeClustering();
-  const {
-    onExpandChildren,
-    onExpandSiblings,
-    onCollapseSiblings,
-    onCollapseDescendants,
-  } = useContextMenuActions(id);
+  const { isCollapsed, isCollapsable, isStacked, isStackable, isExpanded, isExpandable } =
+    useNodeClustering();
+  const { onExpandChildren, onExpandSiblings, onCollapseSiblings, onCollapseDescendants } =
+    useContextMenuActions(id);
   const count = data.isStacked
     ? getAggregateSiblingsCount(id) + 1
     : getOutgoingEdgesCount(id, Visibility.Hidden);

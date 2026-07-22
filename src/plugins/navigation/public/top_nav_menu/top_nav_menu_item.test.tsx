@@ -29,7 +29,7 @@
  */
 
 import { EuiButton, EuiButtonIcon, EuiSwitch, EuiToolTip } from '@elastic/eui';
-import React from 'react';
+
 import { TopNavMenuItem } from './top_nav_menu_item';
 import {
   TopNavMenuData,
@@ -61,11 +61,11 @@ describe('TopNavMenu', () => {
 
     const event = { currentTarget: { value: 'a' } };
     component.simulate('click', event);
-    expect(data.run).toBeCalledTimes(1);
+    expect(data.run).toHaveBeenCalledTimes(1);
     expect(data.run).toHaveBeenCalledWith(event.currentTarget);
 
     component.simulate('click', event);
-    expect(data.run).toBeCalledTimes(2);
+    expect(data.run).toHaveBeenCalledTimes(2);
   });
 
   it('Should render item with all attributes', () => {

@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React from 'react';
+
 import { shallow } from 'enzyme';
 import { FieldFormat } from 'src/plugins/data/public';
 
@@ -55,15 +55,15 @@ describe('DefaultFormatEditor', () => {
     const component = shallow(
       <DefaultFormatEditor
         fieldType={fieldType}
-        format={(format as unknown) as FieldFormat}
+        format={format as unknown as FieldFormat}
         formatParams={formatParams}
         onChange={onChange}
         onError={onError}
       />
     );
 
-    expect(format.getConverterFor).toBeCalled();
-    expect(onError).toBeCalled();
+    expect(format.getConverterFor).toHaveBeenCalled();
+    expect(onError).toHaveBeenCalled();
     expect(component).toMatchSnapshot();
   });
 
@@ -71,7 +71,7 @@ describe('DefaultFormatEditor', () => {
     const component = shallow(
       <DefaultFormatEditor
         fieldType={fieldType}
-        format={(format as unknown) as FieldFormat}
+        format={format as unknown as FieldFormat}
         formatParams={formatParams}
         onChange={onChange}
         onError={onError}
@@ -79,7 +79,7 @@ describe('DefaultFormatEditor', () => {
     );
 
     (component.instance() as DefaultFormatEditor).onChange();
-    expect(onChange).toBeCalled();
+    expect(onChange).toHaveBeenCalled();
   });
 
   it('should call prop onError() if converter throws an error', async () => {
@@ -92,13 +92,13 @@ describe('DefaultFormatEditor', () => {
     shallow(
       <DefaultFormatEditor
         fieldType={fieldType}
-        format={(newFormat as unknown) as FieldFormat}
+        format={newFormat as unknown as FieldFormat}
         formatParams={formatParams}
         onChange={onChange}
         onError={onError}
       />
     );
 
-    expect(onError).toBeCalled();
+    expect(onError).toHaveBeenCalled();
   });
 });

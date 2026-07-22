@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React from 'react';
+
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { GaugeVisStyleControls, GaugeVisStyleControlsProps } from './gauge_vis_options';
 import { VisFieldType } from '../types';
@@ -59,8 +59,6 @@ describe('GaugeVisStyleControls', () => {
         name: 'value',
         schema: VisFieldType.Numerical,
         column: 'field-1',
-        validValuesCount: 1,
-        uniqueValuesCount: 1,
       },
     },
     updateVisualization: jest.fn(),
@@ -72,8 +70,6 @@ describe('GaugeVisStyleControls', () => {
         name: 'value',
         schema: VisFieldType.Numerical,
         column: 'field-1',
-        validValuesCount: 1,
-        uniqueValuesCount: 1,
       },
     ],
     categoricalColumns: [],

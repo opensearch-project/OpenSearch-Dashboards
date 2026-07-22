@@ -29,7 +29,7 @@
  */
 
 import { URL } from 'url';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { Request, RouteOptionsApp, RequestApplicationState } from '@hapi/hapi';
 import { Observable, fromEvent, merge } from 'rxjs';
 import { shareReplay, first, takeUntil } from 'rxjs/operators';
@@ -63,8 +63,7 @@ export interface OpenSearchDashboardsRequestState extends RequestApplicationStat
  * @public
  */
 export type OpenSearchDashboardsRequestRouteOptions<Method extends RouteMethod> = Method extends
-  | 'get'
-  | 'options'
+  'get' | 'options'
   ? Required<Omit<RouteConfigOptions<Method>, 'body'>>
   : Required<RouteConfigOptions<Method>>;
 
@@ -114,7 +113,7 @@ export class OpenSearchDashboardsRequest<
   Params = unknown,
   Query = unknown,
   Body = unknown,
-  Method extends RouteMethod = any
+  Method extends RouteMethod = any,
 > {
   /**
    * Factory for creating requests. Validates the request before creating an
@@ -200,7 +199,7 @@ export class OpenSearchDashboardsRequest<
   };
 
   /** @internal */
-  protected readonly [requestSymbol]: Request;
+  protected readonly [requestSymbol]!: Request;
 
   constructor(
     request: Request,
@@ -214,12 +213,12 @@ export class OpenSearchDashboardsRequest<
     // The `requestId` and `requestUuid` properties will not be populated for requests that are 'faked' by internal systems that leverage
     // OpenSearchDashboardsRequest in conjunction with scoped Elaticcsearch and SavedObjectsClient in order to pass credentials.
     // In these cases, the ids default to a newly generated UUID.
-    this.id = (request.app as OpenSearchDashboardsRequestState | undefined)?.requestId ?? uuid.v4();
+    this.id = (request.app as OpenSearchDashboardsRequestState | undefined)?.requestId ?? uuidv4();
     this.uuid =
-      (request.app as OpenSearchDashboardsRequestState | undefined)?.requestUuid ?? uuid.v4();
+      (request.app as OpenSearchDashboardsRequestState | undefined)?.requestUuid ?? uuidv4();
 
     this.url = request.url;
-    this.headers = deepFreeze({ ...request.headers });
+    this.headers = deepFreeze({ ...request.headers }) as Headers;
     this.isSystemRequest =
       request.headers['osd-system-request'] === 'true' ||
       // Remove support for `osd-system-api` in 8.x. Used only by legacy platform.
@@ -254,13 +253,18 @@ export class OpenSearchDashboardsRequest<
 
   private getRouteInfo(request: Request): OpenSearchDashboardsRequestRoute<Method> {
     const method = request.method as Method;
-    const { parse, maxBytes, allow, output, timeout: payloadTimeout } =
-      request.route.settings.payload || {};
+    const {
+      parse,
+      maxBytes,
+      allow,
+      output,
+      timeout: payloadTimeout,
+    } = request.route.settings.payload || {};
 
     // net.Socket#timeout isn't documented, yet, and isn't part of the types... https://github.com/nodejs/node/pull/34543
     // the socket is also undefined when using @hapi/shot, or when a "fake request" is used
     const socketTimeout = (request.raw.req.socket as any)?.timeout;
-    const options = ({
+    const options = {
       authRequired: this.getAuthRequired(request),
       // some places in LP call OpenSearchDashboardsRequest.from(request) manually. remove fallback to true before v8
       xsrfRequired:
@@ -276,9 +280,9 @@ export class OpenSearchDashboardsRequest<
             parse,
             maxBytes,
             accepts: allow,
-            output: output as typeof validBodyOutput[number], // We do not support all the HAPI-supported outputs and TS complains
+            output: output as (typeof validBodyOutput)[number], // We do not support all the HAPI-supported outputs and TS complains
           },
-    } as unknown) as OpenSearchDashboardsRequestRouteOptions<Method>; // TS does not understand this is OK so I'm enforced to do this enforced casting
+    } as unknown as OpenSearchDashboardsRequestRouteOptions<Method>; // TS does not understand this is OK so I'm enforced to do this enforced casting
 
     return {
       path: request.path,

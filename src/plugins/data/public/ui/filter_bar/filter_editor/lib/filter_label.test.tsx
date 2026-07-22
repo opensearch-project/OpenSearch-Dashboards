@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import FilterLabel from './filter_label';
 import { render } from '@testing-library/react';
 import { phraseFilter } from '../../../../stubs';

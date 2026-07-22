@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 import { GettingStarted } from './getting_started';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';

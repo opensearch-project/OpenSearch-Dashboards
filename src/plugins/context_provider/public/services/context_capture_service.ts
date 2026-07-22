@@ -31,7 +31,11 @@ export class ContextCaptureService {
   private cachedAppTitle?: string;
   private cachedBreadcrumbs: string[] = [];
 
-  constructor(private coreSetup: CoreSetup, private pluginsSetup: ContextProviderSetupDeps) {
+  // @ts-expect-error TS6138 TODO(ts-error): fixme
+  constructor(
+    private coreSetup: CoreSetup,
+    private pluginsSetup: ContextProviderSetupDeps
+  ) {
     this.assistantContextStore = new AssistantContextStoreImpl();
   }
 

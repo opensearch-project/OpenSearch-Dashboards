@@ -207,7 +207,7 @@ class OpenSearchIngestor {
               if (isValid(parsedDate)) {
                 break;
               }
-            } catch (e) {
+            } catch {
               // Try next format
             }
           }

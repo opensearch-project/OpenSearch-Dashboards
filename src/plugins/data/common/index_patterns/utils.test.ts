@@ -12,11 +12,15 @@
 import { AuthType, DataSourceAttributes } from 'src/plugins/data_source/common/data_sources';
 import { IndexPatternSavedObjectAttrs } from './index_patterns';
 import { SavedObject, SavedObjectReference } from './types';
-import { getIndexPatternTitle, validateDataSourceReference } from './utils';
+import {
+  getDataSourceIdFromIndexPattern,
+  getIndexPatternTitle,
+  validateDataSourceReference,
+} from './utils';
 
 describe('test validateDataSourceReference', () => {
   const getIndexPatternSavedObjectMock = (mockedFields: any = {}) =>
-    ({ ...mockedFields } as SavedObject<IndexPatternSavedObjectAttrs>);
+    ({ ...mockedFields }) as SavedObject<IndexPatternSavedObjectAttrs>;
   let indexPatternSavedObjectMock;
   const dataSourceId = 'fakeDataSourceId';
 
@@ -55,6 +59,7 @@ describe('test getIndexPatternTitle', () => {
     references: [],
   };
   const indexPatternMockTitle = 'indexPatternMockTitle';
+  // @ts-expect-error TS2741 TODO(ts-error): fixme
   const referencesMock: SavedObjectReference[] = [{ type: 'data-source', id: 'dataSourceId' }];
 
   let getDataSourceMock: jest.Mock<any, any>;
@@ -89,5 +94,60 @@ describe('test getIndexPatternTitle', () => {
       getDataSourceMock
     );
     expect(res).toEqual('dataSourceId::indexPatternMockTitle');
+  });
+});
+
+describe('test getDataSourceIdFromIndexPattern', () => {
+  test('returns the id from data-source reference when present', () => {
+    expect(
+      getDataSourceIdFromIndexPattern({
+        id: 'logs-*',
+        references: [{ id: 'ds-1', type: 'data-source', name: 'dataSource' }],
+      })
+    ).toBe('ds-1');
+  });
+
+  test('falls back to splitting the id on `::` when references are absent', () => {
+    expect(
+      getDataSourceIdFromIndexPattern({
+        id: 'ds-2::logs-*',
+        references: [],
+      })
+    ).toBe('ds-2');
+  });
+
+  test('falls back to splitting the id when references is undefined', () => {
+    expect(
+      getDataSourceIdFromIndexPattern({
+        id: 'ds-3::logs-*',
+      })
+    ).toBe('ds-3');
+  });
+
+  test('prefers the references entry over the namespaced id', () => {
+    expect(
+      getDataSourceIdFromIndexPattern({
+        id: 'ds-stale::logs-*',
+        references: [{ id: 'ds-current', type: 'data-source', name: 'dataSource' }],
+      })
+    ).toBe('ds-current');
+  });
+
+  test('returns undefined when neither encoding has a data source', () => {
+    expect(
+      getDataSourceIdFromIndexPattern({
+        id: 'logs-*',
+        references: [],
+      })
+    ).toBeUndefined();
+  });
+
+  test('ignores non-data-source references', () => {
+    expect(
+      getDataSourceIdFromIndexPattern({
+        id: 'logs-*',
+        references: [{ id: 'space-1', type: 'space', name: 'space' }],
+      })
+    ).toBeUndefined();
   });
 });

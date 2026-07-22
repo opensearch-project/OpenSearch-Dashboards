@@ -82,7 +82,7 @@ const fetchConnections = async (services: IDataPluginServices): Promise<DataStru
           type: DATASET.PROMETHEUS,
         }))
     );
-  } catch (error) {
+  } catch {
     return [];
   }
 };

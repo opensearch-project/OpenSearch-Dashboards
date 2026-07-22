@@ -5,7 +5,7 @@
 import { createDataSourceSelector } from './create_data_source_selector';
 import { SavedObjectsClientContract } from '../../../../../core/public';
 import { notificationServiceMock } from '../../../../../core/public/mocks';
-import React from 'react';
+
 import { getByText, render } from '@testing-library/react';
 import { coreMock } from '../../../../../core/public/mocks';
 import {
@@ -36,7 +36,7 @@ describe('create data source selector', () => {
       fullWidth: false,
     };
     const dataSourceSelection = new DataSourceSelectionService();
-    spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
+    jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
 
     const TestComponent = createDataSourceSelector(
       uiSettings,
@@ -44,12 +44,19 @@ describe('create data source selector', () => {
     );
     const component = render(<TestComponent {...props} />);
     expect(component).toMatchSnapshot();
-    expect(client.find).toBeCalledWith({
-      fields: ['id', 'title', 'auth.type', 'dataSourceVersion', 'installedPlugins'],
+    expect(client.find).toHaveBeenCalledWith({
+      fields: [
+        'id',
+        'title',
+        'auth.type',
+        'dataSourceVersion',
+        'installedPlugins',
+        'dataSourceEngineType',
+      ],
       perPage: 10000,
       type: 'data-source',
     });
-    expect(toasts.addWarning).toBeCalledTimes(0);
+    expect(toasts.addWarning).toHaveBeenCalledTimes(0);
   });
 
   it('should ignore props.hideLocalCluster, and show local cluster when data_source.hideLocalCluster is set to false', () => {
@@ -62,7 +69,7 @@ describe('create data source selector', () => {
       fullWidth: false,
     };
     const dataSourceSelection = new DataSourceSelectionService();
-    spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
+    jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
 
     const TestComponent = createDataSourceSelector(
       uiSettings,

@@ -4,7 +4,7 @@
  */
 
 import { ReactElement, useEffect, useState } from 'react';
-import React from 'react';
+
 import { EuiButtonEmpty, EuiText, EuiTourStep } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { DataStorage } from 'src/plugins/data/common';

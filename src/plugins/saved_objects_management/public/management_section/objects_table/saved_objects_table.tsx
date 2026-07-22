@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { Component } from 'react';
+import { Component } from 'react';
 import { debounce } from 'lodash';
 import { saveAs } from 'file-saver';
 import {
@@ -178,10 +178,13 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   constructor(props: SavedObjectsTableProps) {
     super(props);
 
-    const typeCounts = props.allowedTypes.reduce((typeToCountMap, type) => {
-      typeToCountMap[type] = 0;
-      return typeToCountMap;
-    }, {} as Record<string, number>);
+    const typeCounts = props.allowedTypes.reduce(
+      (typeToCountMap, type) => {
+        typeToCountMap[type] = 0;
+        return typeToCountMap;
+      },
+      {} as Record<string, number>
+    );
 
     this.state = {
       totalCount: 0,
@@ -432,7 +435,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             values: { useUpdatedUX },
           }
         ),
-        text: `${error}`,
+        text: error?.body?.message || error?.message || `${error}`,
       });
     }
   }, 300);
@@ -470,7 +473,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             values: { useUpdatedUX },
           }
         ),
-        text: `${error}`,
+        text: error?.body?.message || error?.message || `${error}`,
       });
     }
   }, 300);
@@ -679,7 +682,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             values: { useUpdatedUX },
           }
         ),
-        text: `${error}`,
+        text: error?.body?.message || error?.message || `${error}`,
       });
     }
 
@@ -752,7 +755,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             values: { useUpdatedUX },
           }
         ),
-        text: `${error}`,
+        text: error?.body?.message || error?.message || `${error}`,
       });
     }
   };
@@ -793,7 +796,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         targetWorkspace,
         targetWorkspaceName,
       });
-    } catch (e) {
+    } catch {
       showErrorNotification();
     } finally {
       this.hideDuplicateModal();

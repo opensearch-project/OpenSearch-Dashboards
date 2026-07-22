@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { ReactElement, Component } from 'react';
+import { ReactElement, Component } from 'react';
 
 import {
   EuiGlobalToastList,
@@ -200,6 +200,7 @@ export class CreateDatasetWizard extends Component<RouteComponentProps, CreateDa
         id: datasetId,
         title: dataset,
         timeFieldName,
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         dataSourceRef,
         signalType,
         ...this.state.datasetCreationType.getDatasetMappings(),
@@ -270,14 +271,8 @@ export class CreateDatasetWizard extends Component<RouteComponentProps, CreateDa
   }
 
   renderContent() {
-    const {
-      allIndices,
-      isInitiallyLoadingIndices,
-      step,
-      dataset,
-      dataSourceRef,
-      docLinks,
-    } = this.state;
+    const { allIndices, isInitiallyLoadingIndices, step, dataset, dataSourceRef, docLinks } =
+      this.state;
 
     const stepInfo = {
       totalStepNumber: this.totalSteps,
@@ -299,7 +294,7 @@ export class CreateDatasetWizard extends Component<RouteComponentProps, CreateDa
       <HeaderControl
         controls={[
           {
-            description: ((
+            description: (
               <FormattedMessage
                 id="datasetManagement.createDataset.description"
                 defaultMessage="An index pattern can match a single source, for example, {single}, or {multiple} data sources, {star}."
@@ -309,7 +304,7 @@ export class CreateDatasetWizard extends Component<RouteComponentProps, CreateDa
                   star: <EuiCode>filebeat-*</EuiCode>,
                 }}
               />
-            ) as unknown) as string,
+            ) as unknown as string,
             links: [
               {
                 href: docLinks.links.noDocumentation.indexPatterns.introduction,

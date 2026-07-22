@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import {
   EuiPopover,
   EuiContextMenu,
@@ -150,11 +150,11 @@ export const AddCollaboratorButton = ({
       <EuiContextMenu
         size="s"
         panels={
-          ([
+          [
             {
               items: panelItems,
             },
-          ] as unknown) as EuiContextMenuPanelDescriptor[]
+          ] as unknown as EuiContextMenuPanelDescriptor[]
         }
       />
     </EuiPopover>

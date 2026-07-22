@@ -44,6 +44,7 @@ const automcompleteSetupMock: jest.Mocked<AutocompleteSetup> = {
   getQuerySuggestions: jest.fn(),
 };
 
+// @ts-expect-error TS2322 TODO(ts-error): fixme
 const autocompleteStartMock: jest.Mocked<AutocompleteStart> = {
   getValueSuggestions: jest.fn(),
   getQuerySuggestions: jest.fn(),
@@ -52,6 +53,7 @@ const autocompleteStartMock: jest.Mocked<AutocompleteStart> = {
 
 const createSetupContract = (isEnhancementsEnabled: boolean = false): Setup => {
   const querySetupMock = queryServiceMock.createSetupContract(isEnhancementsEnabled);
+  // @ts-expect-error TS2322 TODO(ts-error): fixme
   return {
     autocomplete: automcompleteSetupMock,
     search: searchServiceMock.createSetupContract(),
@@ -63,6 +65,7 @@ const createSetupContract = (isEnhancementsEnabled: boolean = false): Setup => {
 
 const createStartContract = (isEnhancementsEnabled: boolean = false): Start => {
   const queryStartMock = queryServiceMock.createStartContract(isEnhancementsEnabled);
+  // @ts-expect-error TS2322 TODO(ts-error): fixme
   return {
     actions: {
       createFiltersFromValueClickAction: jest.fn().mockResolvedValue(['yes']),
@@ -73,7 +76,7 @@ const createStartContract = (isEnhancementsEnabled: boolean = false): Start => {
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
     query: queryStartMock,
     ui: uiServiceMock.createStartContract(),
-    indexPatterns: ({
+    indexPatterns: {
       find: jest.fn((search) => [{ id: search, title: search }]),
       createField: jest.fn(() => {}),
       createFieldList: jest.fn(() => []),
@@ -116,8 +119,8 @@ const createStartContract = (isEnhancementsEnabled: boolean = false): Start => {
         type: 'INDEX_PATTERN',
       }),
       saveToCache: jest.fn(),
-    } as unknown) as IndexPatternsContract,
-    dataViews: ({
+    } as unknown as IndexPatternsContract,
+    dataViews: {
       find: jest.fn((search) => [{ id: search, title: search }]),
       createField: jest.fn(() => {}),
       createFieldList: jest.fn(() => []),
@@ -153,7 +156,7 @@ const createStartContract = (isEnhancementsEnabled: boolean = false): Start => {
       }),
       saveToCache: jest.fn(),
       convertToDataset: jest.fn(),
-    } as unknown) as DataViewsContract,
+    } as unknown as DataViewsContract,
     dataSources: dataSourceServiceMock.createStartContract(),
   };
 };

@@ -252,7 +252,7 @@ test(`#deleteFromWorkspaces should throw error if no workspaces passed`, () => {
   const type = Symbol();
   const id = Symbol();
   const workspaces = [];
-  expect(() => client.deleteFromWorkspaces(type, id, workspaces)).rejects.toThrowError();
+  expect(() => client.deleteFromWorkspaces(type, id, workspaces)).rejects.toThrow();
 });
 
 test(`#addToWorkspaces`, async () => {
@@ -283,5 +283,5 @@ test(`#addToWorkspaces should throw error if no workspaces passed`, () => {
   const type = Symbol();
   const id = Symbol();
   const workspaces = [];
-  expect(() => client.addToWorkspaces(type, id, workspaces)).rejects.toThrowError();
+  expect(() => client.addToWorkspaces(type, id, workspaces)).rejects.toThrow();
 });

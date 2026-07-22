@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { CLIEngine } from 'eslint';
+import { ESLint } from 'eslint';
 
 import { REPO_ROOT } from '@osd/utils';
 import { createFailError, ToolingLog } from '@osd/dev-utils';
@@ -42,29 +42,34 @@ import { File } from '../file';
  * @param  {Array<File>} files
  * @return {undefined}
  */
-export function lintFiles(log: ToolingLog, files: File[], { fix }: { fix?: boolean } = {}) {
-  const cli = new CLIEngine({
+export async function lintFiles(log: ToolingLog, files: File[], { fix }: { fix?: boolean } = {}) {
+  const eslint = new ESLint({
     cache: true,
     cwd: REPO_ROOT,
     fix,
   });
 
   const paths = files.map((file) => file.getRelativePath());
-  const report = cli.executeOnFiles(paths);
+  const results = await eslint.lintFiles(paths);
 
   if (fix) {
-    CLIEngine.outputFixes(report);
+    await ESLint.outputFixes(results);
   }
 
+  const formatter = await eslint.loadFormatter('stylish');
+  const errorCount = results.reduce((sum, result) => sum + result.errorCount, 0);
+  const warningCount = results.reduce((sum, result) => sum + result.warningCount, 0);
+
   const failTypes = [];
-  if (report.errorCount > 0) failTypes.push('errors');
-  if (report.warningCount > 0) failTypes.push('warning');
+  if (errorCount > 0) failTypes.push('errors');
+  if (warningCount > 0) failTypes.push('warning');
 
   if (!failTypes.length) {
     log.success('[eslint] %d files linted successfully', files.length);
     return;
   }
 
-  log.error(cli.getFormatter()(report.results));
+  // @ts-expect-error TS2345 TODO(ts-error): fixme
+  log.error(formatter.format(results));
   throw createFailError(`[eslint] ${failTypes.join(' & ')}`);
 }

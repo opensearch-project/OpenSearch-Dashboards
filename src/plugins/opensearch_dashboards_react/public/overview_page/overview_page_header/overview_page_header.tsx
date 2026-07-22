@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { FC } from 'react';
+import { FC } from 'react';
 import {
   EuiSmallButtonEmpty,
   EuiFlexGroup,
@@ -74,10 +74,8 @@ export const OverviewPageHeader: FC<Props> = ({
     services: { application },
   } = useOpenSearchDashboards<CoreStart>();
 
-  const {
-    management: isManagementEnabled,
-    dev_tools: isDevToolsEnabled,
-  } = application.capabilities.navLinks;
+  const { management: isManagementEnabled, dev_tools: isDevToolsEnabled } =
+    application.capabilities.navLinks;
 
   return (
     <header

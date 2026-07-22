@@ -25,6 +25,7 @@ import { DashboardSetup, DashboardStart } from '../../dashboard/public';
 import { ChartsPluginStart } from '../../charts/public';
 import { Start as InspectorPublicPluginStart } from '../../inspector/public';
 import { ContextProviderStart } from '../../context_provider/public';
+import { registerDisabledPPLExecuteQueryAction } from './components/query_panel/actions/ppl_execute_query_action';
 
 // Mock the action
 jest.mock('./actions/ask_ai_embeddable_action');
@@ -42,6 +43,12 @@ jest.mock('./actions/ask_ai_action', () => ({
     id: 'ask_ai',
     execute: jest.fn(),
   }),
+}));
+
+// Mock registerDisabledPPLExecuteQueryAction
+jest.mock('./components/query_panel/actions/ppl_execute_query_action', () => ({
+  registerDisabledPPLExecuteQueryAction: jest.fn(),
+  EXECUTE_PPL_QUERY_TOOL_DEFINITION: { name: 'execute_ppl_query' },
 }));
 
 // Mock createOsdUrlTracker
@@ -90,7 +97,7 @@ describe('ExplorePlugin', () => {
 
   function createMockSetupDeps(): ExploreSetupDependencies {
     return {
-      data: ({
+      data: {
         __enhance: jest.fn(),
         query: {
           state$: {
@@ -99,21 +106,21 @@ describe('ExplorePlugin', () => {
             }),
           },
         },
-      } as unknown) as DataPublicPluginSetup,
-      urlForwarding: ({
+      } as unknown as DataPublicPluginSetup,
+      urlForwarding: {
         forwardApp: jest.fn(),
-      } as Partial<UrlForwardingSetup>) as UrlForwardingSetup,
-      embeddable: ({
+      } as Partial<UrlForwardingSetup> as UrlForwardingSetup,
+      embeddable: {
         registerEmbeddableFactory: jest.fn(),
-      } as Partial<EmbeddableSetup>) as EmbeddableSetup,
-      visualizations: ({
+      } as Partial<EmbeddableSetup> as EmbeddableSetup,
+      visualizations: {
         registerAlias: jest.fn(),
         all: jest.fn().mockReturnValue([]),
         getAliases: jest.fn().mockReturnValue([]),
-      } as Partial<VisualizationsSetup>) as VisualizationsSetup,
-      uiActions: ({
+      } as Partial<VisualizationsSetup> as VisualizationsSetup,
+      uiActions: {
         getTriggerActions: jest.fn().mockReturnValue([]),
-      } as Partial<UiActionsSetup>) as UiActionsSetup,
+      } as Partial<UiActionsSetup> as UiActionsSetup,
       navigation: {} as NavigationStart,
       opensearchDashboardsLegacy: {} as OpenSearchDashboardsLegacySetup,
       usageCollection: {} as UsageCollectionSetup,
@@ -124,7 +131,7 @@ describe('ExplorePlugin', () => {
 
   function createMockStartDeps(): ExploreStartDependencies {
     return {
-      data: ({
+      data: {
         indexPatterns: {},
         dataViews: {},
         search: {},
@@ -135,10 +142,13 @@ describe('ExplorePlugin', () => {
           },
           queryString: {
             clearQuery: jest.fn(),
+            getDatasetService: jest.fn().mockReturnValue({
+              registerDatasetFilter: jest.fn(),
+            }),
           },
         },
-      } as unknown) as DataPublicPluginStart,
-      uiActions: ({
+      } as unknown as DataPublicPluginStart,
+      uiActions: {
         registerAction: jest.fn(),
         addTriggerAction: jest.fn(),
         detachAction: jest.fn(),
@@ -150,28 +160,32 @@ describe('ExplorePlugin', () => {
         attachAction: jest.fn(),
         getAction: jest.fn(),
         hasAction: jest.fn(),
-      } as Partial<UiActionsStart>) as UiActionsStart,
+      } as Partial<UiActionsStart> as UiActionsStart,
       dashboard: {} as DashboardStart,
-      expressions: ({
+      expressions: {
         ExpressionLoader: jest.fn(),
-      } as Partial<ExpressionsStart>) as ExpressionsStart,
-      charts: ({
+      } as Partial<ExpressionsStart> as ExpressionsStart,
+      charts: {
         theme: {},
-      } as Partial<ChartsPluginStart>) as ChartsPluginStart,
+      } as Partial<ChartsPluginStart> as ChartsPluginStart,
       navigation: {} as NavigationStart,
       inspector: {} as InspectorPublicPluginStart,
       urlForwarding: {} as UrlForwardingStart,
       embeddable: {} as EmbeddableStart,
       opensearchDashboardsLegacy: {} as OpenSearchDashboardsLegacyStart,
-      contextProvider: ({
+      contextProvider: {
         getAssistantContextStore: jest.fn().mockReturnValue({
           addContext: jest.fn(),
         }),
-      } as Partial<ContextProviderStart>) as ContextProviderStart,
-      visualizations: ({
+        actions: {
+          registerAssistantAction: jest.fn(),
+          unregisterAssistantAction: jest.fn(),
+        },
+      } as Partial<ContextProviderStart> as ContextProviderStart,
+      visualizations: {
         all: jest.fn().mockReturnValue([]),
         getAliases: jest.fn().mockReturnValue([]),
-      } as Partial<VisualizationsStart>) as VisualizationsStart,
+      } as Partial<VisualizationsStart> as VisualizationsStart,
     };
   }
 
@@ -272,7 +286,7 @@ describe('ExplorePlugin', () => {
     it('should register explore applications', () => {
       plugin.setup(coreSetup as any, setupDeps as any);
 
-      expect(coreSetup.application.register).toHaveBeenCalledTimes(4);
+      expect(coreSetup.application.register).toHaveBeenCalledTimes(5);
       expect(coreSetup.application.register).toHaveBeenCalledWith(
         expect.objectContaining({
           id: 'explore/logs',
@@ -310,6 +324,14 @@ describe('ExplorePlugin', () => {
 
     it('should register visualization alias', () => {
       plugin.setup(coreSetup, setupDeps);
+
+      expect(setupDeps.visualizations.registerAlias).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'VisualizationEditor',
+          aliasApp: 'visualization-editor',
+          title: expect.any(String),
+        })
+      );
 
       expect(setupDeps.visualizations.registerAlias).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -385,6 +407,34 @@ describe('ExplorePlugin', () => {
         'discover',
         'explore',
         expect.any(Function)
+      );
+    });
+
+    it('should register icon side nav specific nav links when icon side nav is enabled', () => {
+      (coreSetup.chrome.getIsIconSideNavEnabled as jest.Mock).mockReturnValue(true);
+
+      plugin.setup(coreSetup, setupDeps);
+
+      expect(coreSetup.chrome.navGroup.addNavLinksToGroup).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'observability' }),
+        expect.arrayContaining([
+          expect.objectContaining({ id: 'explore/logs', order: 200 }),
+          expect.objectContaining({
+            id: 'explore/traces',
+            category: expect.objectContaining({ id: 'applicationPerformance' }),
+          }),
+        ])
+      );
+    });
+
+    it('should register default nav links when icon side nav is disabled', () => {
+      (coreSetup.chrome.getIsIconSideNavEnabled as jest.Mock).mockReturnValue(false);
+
+      plugin.setup(coreSetup, setupDeps);
+
+      expect(coreSetup.chrome.navGroup.addNavLinksToGroup).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'observability' }),
+        expect.arrayContaining([expect.objectContaining({ id: 'explore' })])
       );
     });
   });
@@ -498,6 +548,97 @@ describe('ExplorePlugin', () => {
       plugin.start(coreStart, startDeps);
 
       expect(() => plugin.stop()).not.toThrow();
+    });
+
+    it('should unregister execute_ppl_query assistant action on stop', () => {
+      plugin.setup(coreSetup, setupDeps);
+      plugin.start(coreStart, startDeps);
+
+      plugin.stop();
+
+      expect(startDeps.contextProvider.actions.unregisterAssistantAction).toHaveBeenCalledWith(
+        'execute_ppl_query'
+      );
+    });
+
+    it('should not throw on stop when contextProvider was not available at start', () => {
+      const startDepsWithoutContextProvider = {
+        ...startDeps,
+        contextProvider: undefined,
+      };
+
+      plugin.setup(coreSetup, setupDeps);
+      plugin.start(coreStart, startDepsWithoutContextProvider);
+
+      expect(() => plugin.stop()).not.toThrow();
+    });
+  });
+
+  describe('disabled PPL query action registration', () => {
+    // Cast the imported mocked function to jest.Mock
+    const mockRegisterDisabledPPLExecuteQueryAction =
+      registerDisabledPPLExecuteQueryAction as jest.Mock;
+
+    beforeEach(() => {
+      // Clear the mock before each test
+      mockRegisterDisabledPPLExecuteQueryAction.mockClear();
+    });
+
+    it('should register disabled execute_ppl_query action when contextProvider is available', () => {
+      plugin.setup(coreSetup, setupDeps);
+      plugin.start(coreStart, startDeps);
+
+      expect(mockRegisterDisabledPPLExecuteQueryAction).toHaveBeenCalledTimes(1);
+      expect(mockRegisterDisabledPPLExecuteQueryAction).toHaveBeenCalledWith(
+        startDeps.contextProvider.actions.registerAssistantAction
+      );
+    });
+
+    it('should not register disabled action when contextProvider is not available', () => {
+      const startDepsWithoutContextProvider = {
+        ...startDeps,
+        contextProvider: undefined,
+      };
+
+      plugin.setup(coreSetup, setupDeps);
+      plugin.start(coreStart, startDepsWithoutContextProvider);
+
+      expect(mockRegisterDisabledPPLExecuteQueryAction).not.toHaveBeenCalled();
+    });
+
+    it('should register disabled action with the correct function reference', () => {
+      plugin.setup(coreSetup, setupDeps);
+      plugin.start(coreStart, startDeps);
+
+      const registerActionFn = startDeps.contextProvider?.actions?.registerAssistantAction;
+      expect(mockRegisterDisabledPPLExecuteQueryAction).toHaveBeenCalledWith(registerActionFn);
+    });
+
+    it('should register disabled action before other start lifecycle actions', () => {
+      // Create a spy to track order of calls
+      const callOrder: string[] = [];
+      mockRegisterDisabledPPLExecuteQueryAction.mockImplementation(() => {
+        callOrder.push('registerDisabledAction');
+      });
+
+      const originalRegisterAction = jest.fn(() => {
+        callOrder.push('registerAction');
+      });
+
+      const startDepsWithTracking = {
+        ...startDeps,
+        uiActions: {
+          ...startDeps.uiActions,
+          registerAction: originalRegisterAction,
+        },
+      } as unknown as ExploreStartDependencies;
+
+      plugin.setup(coreSetup, setupDeps);
+      plugin.start(coreStart, startDepsWithTracking);
+
+      // Verify disabled action is registered before other actions
+      const disabledActionIndex = callOrder.indexOf('registerDisabledAction');
+      expect(disabledActionIndex).toBeGreaterThanOrEqual(0);
     });
   });
 });

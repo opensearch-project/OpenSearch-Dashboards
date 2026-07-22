@@ -61,7 +61,7 @@ export async function detectTraceData(
         continue;
       }
     }
-  } catch (error) {
+  } catch {
     // If loading fails, continue with detection
   }
 
@@ -73,8 +73,11 @@ export async function detectTraceData(
     });
 
     // Verify required trace fields exist
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     const hasSpanId = traceFields.some((f) => f.name === 'spanId');
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     const hasTraceId = traceFields.some((f) => f.name === 'traceId');
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     const hasEndTime = traceFields.some((f) => f.name === 'endTime');
 
     if (hasSpanId && hasTraceId && hasEndTime) {
@@ -82,7 +85,7 @@ export async function detectTraceData(
       result.tracePattern = 'otel-v1-apm-span*';
       result.traceTimeField = 'endTime';
     }
-  } catch (error) {
+  } catch {
     // No matching indices found, continue
   }
 
@@ -94,8 +97,11 @@ export async function detectTraceData(
     });
 
     // Verify correlation fields exist
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     const hasTraceId = logFields.some((f) => f.name === 'traceId');
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     const hasSpanId = logFields.some((f) => f.name === 'spanId');
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     const hasTime = logFields.some((f) => f.name === 'time');
 
     if (hasTraceId && hasSpanId && hasTime) {
@@ -103,7 +109,7 @@ export async function detectTraceData(
       result.logPattern = 'logs-otel-v1*';
       result.logTimeField = 'time';
     }
-  } catch (error) {
+  } catch {
     // No matching indices found
   }
 
@@ -146,12 +152,12 @@ export async function detectTraceDataAcrossDataSources(
           };
           results.push(detectionWithSource);
         }
-      } catch (error) {
+      } catch {
         // Skip this datasource if detection fails
         continue;
       }
     }
-  } catch (error) {
+  } catch {
     // If fetching data sources fails, fall through
   }
 
@@ -173,7 +179,7 @@ export async function detectTraceDataAcrossDataSources(
         };
         results.push(detectionWithSource);
       }
-    } catch (error) {
+    } catch {
       // Continue if local cluster check fails
     }
   }

@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
@@ -61,7 +61,10 @@ const generateAnnotationData = (values, formatter) =>
     }),
   }));
 
-const decorateFormatter = (formatter) => ({ value }) => formatter(value);
+const decorateFormatter =
+  (formatter) =>
+  ({ value }) =>
+    formatter(value);
 
 const handleCursorUpdate = (cursor) => {
   eventBus.trigger(ACTIVE_CURSOR, cursor);

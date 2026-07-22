@@ -31,7 +31,7 @@
 import moment from 'moment-timezone';
 import { schema } from '@osd/config-schema';
 import { i18n } from '@osd/i18n';
-import { UiSettingsParams } from '../../../types';
+import { UiSettingScope, UiSettingsParams } from '../../../types';
 
 export const getDateFormatSettings = (): Record<string, UiSettingsParams> => {
   const weekdays = moment.weekdays().slice();
@@ -98,6 +98,7 @@ export const getDateFormatSettings = (): Record<string, UiSettingsParams> => {
           }
         },
       }),
+      scope: [UiSettingScope.USER, UiSettingScope.GLOBAL],
     },
     'dateFormat:scaled': {
       name: i18n.translate('core.ui_settings.params.dateFormat.scaledTitle', {
@@ -156,6 +157,7 @@ export const getDateFormatSettings = (): Record<string, UiSettingsParams> => {
           }
         },
       }),
+      scope: [UiSettingScope.USER, UiSettingScope.GLOBAL],
     },
     dateNanosFormat: {
       name: i18n.translate('core.ui_settings.params.dateNanosFormatTitle', {

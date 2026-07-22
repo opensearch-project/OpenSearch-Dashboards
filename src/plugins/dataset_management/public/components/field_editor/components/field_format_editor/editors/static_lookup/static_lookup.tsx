@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React, { Fragment } from 'react';
+import { Fragment } from 'react';
 
 import {
   EuiBasicTable,
@@ -27,9 +27,7 @@ interface StaticLookupItem {
   index: number;
 }
 
-export class StaticLookupFormatEditor extends DefaultFormatEditor<
-  StaticLookupFormatEditorFormatParams
-> {
+export class StaticLookupFormatEditor extends DefaultFormatEditor<StaticLookupFormatEditorFormatParams> {
   static formatId = 'static_lookup';
   onLookupChange = (newLookupParams: { value?: string; key?: string }, index: number) => {
     const lookupEntries = [...this.props.formatParams.lookupEntries];

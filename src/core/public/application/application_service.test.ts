@@ -554,9 +554,11 @@ describe('#start()', () => {
       service.setup(setupDeps);
       const { getUrlForApp } = await service.start(startDeps);
 
-      expect(getUrlForApp('app1', { absolute: true })).toBe('http://localhost/base-path/app/app1');
+      expect(getUrlForApp('app1', { absolute: true })).toBe(
+        'http://localhost:5601/base-path/app/app1'
+      );
       expect(getUrlForApp('app2', { path: 'deep/link', absolute: true })).toBe(
-        'http://localhost/base-path/app/app2/deep/link'
+        'http://localhost:5601/base-path/app/app2/deep/link'
       );
     });
 
@@ -813,16 +815,6 @@ describe('#start()', () => {
     });
 
     it('refresh the page if navigate to a app not accessible within a workspace', async () => {
-      // Save the original assign method
-      const originalLocation = window.location;
-      delete (window as any).location;
-
-      // Mocking the window object
-      window.location = {
-        ...originalLocation,
-        assign: jest.fn(),
-      };
-
       const { register } = service.setup(setupDeps);
       // register a app that can only be accessed out of a workspace
       register(
@@ -843,13 +835,15 @@ describe('#start()', () => {
         workspaces,
         http,
       });
-      await navigateToApp('app1');
 
-      expect(window.location.assign).toBeCalledWith('/base-path/app/app1');
+      // app1 is outsideWorkspace — triggers window.location.assign (hard nav) and returns early,
+      // so MockHistory.push must NOT be called.
+      await navigateToApp('app1');
+      expect(MockHistory.push).not.toHaveBeenCalled();
+
+      // app2 has no workspace restriction — normal navigation via MockHistory.push.
       await navigateToApp('app2');
-      // assign should not be called
-      expect(window.location.assign).toBeCalledTimes(1);
-      window.location = originalLocation;
+      expect(MockHistory.push).toHaveBeenCalledWith('/app/app2', undefined);
     });
 
     describe('when `replace` option is true', () => {

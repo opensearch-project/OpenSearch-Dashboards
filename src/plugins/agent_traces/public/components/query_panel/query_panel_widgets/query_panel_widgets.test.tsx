@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { QueryPanelWidgets } from './query_panel_widgets';
 import { useDatasetContext } from '../../../application/context';
@@ -85,9 +84,10 @@ describe('QueryPanelWidgets', () => {
     } as any;
 
     // Mock useOpenSearchDashboards
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    mockUseOpenSearchDashboards = require('../../../../../opensearch_dashboards_react/public')
-      .useOpenSearchDashboards;
+
+    mockUseOpenSearchDashboards =
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      require('../../../../../opensearch_dashboards_react/public').useOpenSearchDashboards;
     mockUseOpenSearchDashboards.mockReturnValue({
       services: {
         queryPanelActionsRegistry: mockQueryPanelActionsRegistry,

@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { mount, shallow } from 'enzyme';
 
 import { IAggConfig } from 'src/plugins/data/public';
@@ -136,12 +135,12 @@ describe('MetricAggParamEditor', () => {
     );
 
     expect(comp.children().props()).toHaveProperty('isInvalid', false);
-    expect(useValidation).lastCalledWith(defaultProps.setValidity, true);
+    expect(useValidation).toHaveBeenLastCalledWith(defaultProps.setValidity, true);
 
     comp.setProps({ value: undefined, showValidation: true });
 
     expect(comp.children().props()).toHaveProperty('isInvalid', true);
-    expect(useValidation).lastCalledWith(defaultProps.setValidity, false);
+    expect(useValidation).toHaveBeenLastCalledWith(defaultProps.setValidity, false);
   });
 
   test('should set new value into the model on change', () => {
@@ -154,6 +153,6 @@ describe('MetricAggParamEditor', () => {
     );
 
     comp.find('select').simulate('change', { target: { value: '2' } });
-    expect(defaultProps.setValue).lastCalledWith('2');
+    expect(defaultProps.setValue).toHaveBeenLastCalledWith('2');
   });
 });

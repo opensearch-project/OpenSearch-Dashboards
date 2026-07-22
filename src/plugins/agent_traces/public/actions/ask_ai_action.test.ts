@@ -4,6 +4,7 @@
  */
 
 import { createAskAiAction } from './ask_ai_action';
+// @ts-expect-error TS2307 TODO(ts-error): fixme
 import { ChatServiceStart } from '../../../../../core/public';
 
 // Mock the AskAIActionItem component

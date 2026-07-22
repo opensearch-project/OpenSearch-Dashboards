@@ -28,6 +28,7 @@
  * under the License.
  */
 
+// @ts-expect-error TS1192 TODO(ts-upgrade): fixme
 import getopts from 'getopts';
 import { ToolingLog, pickLevelFromFlags } from '@osd/dev-utils';
 
@@ -75,6 +76,7 @@ export function readCliArgs(argv: string[]) {
       docker: null,
       'version-qualifier': '',
     },
+    // @ts-expect-error TS7006 TODO(ts-upgrade): fixme
     unknown: (flag) => {
       unknownFlags.push(flag);
       return false;

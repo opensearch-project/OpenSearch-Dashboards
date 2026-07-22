@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`Flyout conflicts should allow conflict resolution 1`] = `
 <EuiFlyout
@@ -227,10 +227,12 @@ exports[`Flyout conflicts should allow conflict resolution 2`] = `
           },
           "indexPatterns": Array [
             Object {
+              "displayTitle": undefined,
               "id": "1",
               "title": undefined,
             },
             Object {
+              "displayTitle": undefined,
               "id": "2",
               "title": undefined,
             },

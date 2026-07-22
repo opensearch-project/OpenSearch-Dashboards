@@ -8,23 +8,50 @@ import {
   IOpenSearchDashboardsResponse,
   IRouter,
   Logger,
+  OpenSearchClient,
+  RequestHandlerContext,
   ResponseError,
 } from '../../../../core/server';
 import { IDataFrameResponse, IOpenSearchDashboardsSearchRequest } from '../../../data/common';
 import { ISearchStrategy } from '../../../data/server';
-import { API } from '../../common';
+import { API, URI } from '../../common';
 import { registerQueryAssistRoutes } from './query_assist';
 import { registerDataSourceConnectionsRoutes } from './data_source_connection';
 import { registerResourceRoutes } from './resources';
+import { registerPPLCancelRoute } from './ppl_cancel';
+import { definePPLCalciteSettingsRoute } from './ppl_calcite_settings';
+import { definePPLExplainRoute } from './ppl_explain';
 
 /**
  * Coerce status code to 503 for 500 errors from dependency services. Only use
  * this function to handle errors throw by other services, and not from OSD.
  */
-export const coerceStatusCode = (statusCode: number) => {
+export const coerceStatusCode = (statusCode?: number) => {
   if (statusCode === 500) return 503;
   return statusCode || 503;
 };
+
+export const DATASOURCE_UNAVAILABLE_MESSAGE =
+  'dataSourceId is not supported because data source plugin is unavailable';
+
+/**
+ * Resolves the OpenSearch client for an optional dataSourceId. Returns the
+ * data source's client when a dataSourceId is given, the current-user client
+ * otherwise, or `null` when a dataSourceId is requested but the data source
+ * plugin is unavailable (the caller should respond 400 in that case).
+ */
+export async function resolveOpenSearchClient(
+  context: RequestHandlerContext,
+  dataSourceId?: string
+): Promise<OpenSearchClient | null> {
+  if (dataSourceId) {
+    if (!context.dataSource?.opensearch?.getClient) {
+      return null;
+    }
+    return context.dataSource.opensearch.getClient(dataSourceId);
+  }
+  return context.core.opensearch.client.asCurrentUser;
+}
 
 /**
  * @experimental
@@ -79,6 +106,7 @@ export function defineSearchStrategyRouteProvider(logger: Logger, router: IRoute
               language: schema.string(),
               dataset: schema.nullable(schema.object({}, { unknowns: 'allow' })),
               format: schema.string(),
+              profile: schema.maybe(schema.boolean()),
             }),
             aggConfig: schema.nullable(schema.object({}, { unknowns: 'allow' })),
             pollQueryResultsParams: schema.maybe(
@@ -89,6 +117,8 @@ export function defineSearchStrategyRouteProvider(logger: Logger, router: IRoute
             ),
             timeRange: schema.maybe(schema.object({}, { unknowns: 'allow' })),
             options: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+            highlight: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+            queryId: schema.maybe(schema.string()),
           }),
         },
       },
@@ -100,7 +130,7 @@ export function defineSearchStrategyRouteProvider(logger: Logger, router: IRoute
           let error;
           try {
             error = JSON.parse(err.message);
-          } catch (e) {
+          } catch {
             error = err;
           }
           return res.custom({
@@ -111,6 +141,53 @@ export function defineSearchStrategyRouteProvider(logger: Logger, router: IRoute
       }
     );
   };
+}
+
+/**
+ * Defines route for PPL grammar bundle endpoint
+ * Forwards requests to OpenSearch /_plugins/_ppl/_grammar
+ */
+export function definePPLBundleRoute(logger: Logger, router: IRouter) {
+  router.get(
+    {
+      path: API.PPL_GRAMMAR,
+      validate: {
+        query: schema.object({
+          dataSourceId: schema.maybe(schema.string()),
+        }),
+      },
+    },
+    async (context, req, res): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
+      try {
+        const { dataSourceId } = req.query;
+        if (dataSourceId && !context.dataSource?.opensearch?.getClient) {
+          return res.custom({
+            statusCode: 400,
+            body: 'dataSourceId is not supported because data source plugin is unavailable',
+          });
+        }
+        const opensearchClient = dataSourceId
+          ? await context.dataSource.opensearch.getClient(dataSourceId)
+          : context.core.opensearch.client.asCurrentUser;
+        const result = await opensearchClient.transport.request({
+          method: 'GET',
+          path: URI.PPL_BUNDLE,
+        });
+        const body = result?.body ?? result;
+
+        return res.ok({ body });
+      } catch (err: any) {
+        // Don't try to return 304 - let frontend handle caching from localStorage
+        // The OSD framework treats 304 as a redirect which requires a location header
+        logger.debug(`PPL grammar bundle fetch error: ${err.message || err}`);
+
+        return res.custom({
+          statusCode: coerceStatusCode(err.status || err.statusCode || err?.meta?.statusCode),
+          body: err.message || 'Failed to fetch PPL grammar bundle',
+        });
+      }
+    }
+  );
 }
 
 /**
@@ -139,4 +216,9 @@ export function defineRoutes(
   registerDataSourceConnectionsRoutes(router, client);
   registerQueryAssistRoutes(router);
   registerResourceRoutes(router);
+  registerPPLCancelRoute(router, logger);
+
+  definePPLBundleRoute(logger, router);
+  definePPLCalciteSettingsRoute(logger, router);
+  definePPLExplainRoute(logger, router);
 }

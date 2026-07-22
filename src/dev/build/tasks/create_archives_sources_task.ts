@@ -40,6 +40,7 @@ export const CreateArchivesSources: Task = {
         await scanCopy({
           source: build.resolvePath(),
           destination: build.resolvePathForPlatform(platform),
+          log,
         });
 
         log.debug(
@@ -52,6 +53,7 @@ export const CreateArchivesSources: Task = {
         await scanCopy({
           source: (await getNodeDownloadInfo(config, platform)).extractDir,
           destination: build.resolvePathForPlatform(platform, 'node'),
+          log,
         });
 
         log.debug('Node.js copied into', platform.getNodeArch(), 'specific build directory');

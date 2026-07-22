@@ -65,9 +65,9 @@ describe('use_sync_query_state_with_url', () => {
   let indexPatternsMock: IndexPatternsService;
 
   beforeEach(() => {
-    indexPatternsMock = ({
+    indexPatternsMock = {
       get: jest.fn(),
-    } as unknown) as IndexPatternsService;
+    } as unknown as IndexPatternsService;
   });
 
   let filterManagerChangeSub: Subscription;
@@ -85,6 +85,7 @@ describe('use_sync_query_state_with_url', () => {
       uiSettings: setupMock.uiSettings,
       storage: new DataStorage(window.localStorage, 'opensearch_dashboards.'),
       sessionStorage: new DataStorage(window.sessionStorage, 'opensearch_dashboards.'),
+      // @ts-expect-error TS2454 TODO(ts-upgrade): fixme
       defaultSearchInterceptor: mockSearchInterceptor,
       application: setupMock.application,
       notifications: setupMock.notifications,
@@ -103,7 +104,7 @@ describe('use_sync_query_state_with_url', () => {
     filterManagerChangeTriggered = jest.fn();
     filterManagerChangeSub = filterManager.getUpdates$().subscribe(filterManagerChangeTriggered);
 
-    window.location.href = '/';
+    window.location.href = 'http://localhost:5601/';
     history = createBrowserHistory();
     osdUrlStateStorage = createOsdUrlStateStorage({ useHash: false, history });
 

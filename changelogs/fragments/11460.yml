@@ -1,2 +1,0 @@
-fix:
-- Bugs fix for stack bar display and incompatible bar size options ([#11460](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11460))

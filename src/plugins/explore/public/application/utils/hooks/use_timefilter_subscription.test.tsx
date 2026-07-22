@@ -4,7 +4,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import React from 'react';
+
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import { useTimefilterSubscription } from './use_timefilter_subscription';

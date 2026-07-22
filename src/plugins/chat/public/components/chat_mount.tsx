@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useMemo, useCallback } from 'react';
+import { useMemo, useCallback } from 'react';
 import { CoreStart } from '../../../../core/public';
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
 import { TextSelectionMonitor } from '../../../context_provider/public';

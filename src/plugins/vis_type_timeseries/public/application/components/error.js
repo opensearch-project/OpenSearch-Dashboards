@@ -30,7 +30,6 @@
 
 import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import PropTypes from 'prop-types';
-import React from 'react';
 import _ from 'lodash';
 import { FormattedMessage } from '@osd/i18n/react';
 

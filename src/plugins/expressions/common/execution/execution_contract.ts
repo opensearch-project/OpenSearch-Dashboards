@@ -38,7 +38,7 @@ export class ExecutionContract<
   ExtraContext extends Record<string, unknown> = Record<string, unknown>,
   Input = unknown,
   Output = unknown,
-  InspectorAdapters = unknown
+  InspectorAdapters = unknown,
 > {
   public get isPending(): boolean {
     const state = this.execution.state.get().state;
@@ -47,6 +47,7 @@ export class ExecutionContract<
   }
 
   constructor(
+    // @ts-expect-error TS2344 TODO(ts-error): fixme
     protected readonly execution: Execution<ExtraContext, Input, Output, InspectorAdapters>
   ) {}
 

@@ -2,8 +2,9 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React from 'react';
+
 import { shallow } from 'enzyme';
+// @ts-expect-error TS2305 TODO(ts-error): fixme
 import { IDataset } from 'src/plugins/data/public';
 import { IndexedFieldItem } from '../../types';
 import { Table } from './table';
@@ -96,6 +97,6 @@ describe('Table', () => {
 
     // Click the edit button
     component.prop('columns')[6].actions[0].onClick();
-    expect(editField).toBeCalled();
+    expect(editField).toHaveBeenCalled();
   });
 });

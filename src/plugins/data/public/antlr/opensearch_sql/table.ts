@@ -26,6 +26,7 @@ export interface TokenDictionary {
   SEMICOLON: number;
   SELECT: number;
   ID: number;
+  WHITESPACE: number;
 }
 
 export interface TableQueryPosition extends TableQueryPositionBase {

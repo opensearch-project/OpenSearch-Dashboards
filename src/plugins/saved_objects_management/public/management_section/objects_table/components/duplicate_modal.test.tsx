@@ -11,7 +11,7 @@ import {
 import { ShowDuplicateModalProps, SavedObjectsDuplicateModal } from './duplicate_modal';
 import { SavedObjectWithMetadata } from '../../../types';
 import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
-import React from 'react';
+
 import { WorkspaceAttribute } from 'src/core/types';
 import { render } from '@testing-library/react';
 import { WorkspaceOption } from './utils';

@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { Fragment } from 'react';
+import { Fragment } from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 import { EuiEmptyPrompt, EuiLink, EuiText } from '@elastic/eui';
 import { getDocLinks } from '../services';

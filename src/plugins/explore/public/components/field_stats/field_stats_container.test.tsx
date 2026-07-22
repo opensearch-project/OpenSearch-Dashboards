@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 
 // Mock the data plugin before any imports that use it

@@ -22,8 +22,10 @@ import {
 import { PLUGIN_ID, PLUGIN_DESCRIPTION, PLUGIN_NAME_AS_TITLE } from '../common';
 import { ConfigSchema } from '../config';
 
-export class DataImporterPlugin
-  implements Plugin<DataImporterPluginSetup, DataImporterPluginStart> {
+export class DataImporterPlugin implements Plugin<
+  DataImporterPluginSetup,
+  DataImporterPluginStart
+> {
   private readonly config: ConfigSchema;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
@@ -60,6 +62,7 @@ export class DataImporterPlugin
         id: PLUGIN_ID,
         category: DEFAULT_APP_CATEGORIES.manageData,
         order: 450,
+        euiIconType: 'importAction',
       },
     ]);
 

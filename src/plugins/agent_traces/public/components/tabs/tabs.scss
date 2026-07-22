@@ -10,8 +10,17 @@
   flex-direction: column;
   flex-grow: 1;
 
+  // EuiTabbedContent renders an unstyled wrapper div. Make it fill the
+  // flex container so the tab panel can take the remaining vertical space.
+  > div {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
   // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
-  > .euiTabs {
+  .euiTabs {
     position: sticky;
     top: 0;
     z-index: 1;
@@ -19,32 +28,19 @@
     flex-shrink: 0;
   }
 
-  // Container for all tab panels, stacked on top of each other.
-  &__panels {
-    position: relative;
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  [role="tabpanel"] {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
     min-height: 0;
-    flex-grow: 1;
-  }
-
-  // Hidden panels use visibility:hidden (not display:none) to keep each
-  // panel's layout tree intact so switching avoids a full reflow.
-  &__panel {
-    position: absolute;
-    inset: 0;
-    overflow: auto;
-    visibility: hidden;
-    pointer-events: none;
-
-    &--active {
-      visibility: visible;
-      pointer-events: auto;
-    }
   }
 
   .tab-container {
     display: flex;
     flex-direction: column;
-    height: 100%;
+    flex: 1 1 auto;
+    min-height: 0;
   }
 
   // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors

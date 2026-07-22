@@ -28,9 +28,9 @@
  * under the License.
  */
 
-import React, { Component } from 'react';
+import { Component } from 'react';
 import PropTypes from 'prop-types';
-import uuid from 'uuid';
+import { v1 as uuidv1 } from 'uuid';
 import { DataFormatPicker } from '../../data_format_picker';
 import { createSelectHandler } from '../../lib/create_select_handler';
 import { createTextHandler } from '../../lib/create_text_handler';
@@ -59,7 +59,7 @@ class TableSeriesConfigUI extends Component {
     const { model } = this.props;
     if (!model.color_rules || (model.color_rules && model.color_rules.length === 0)) {
       this.props.onChange({
-        color_rules: [{ id: uuid.v1() }],
+        color_rules: [{ id: uuidv1() }],
       });
     }
   }

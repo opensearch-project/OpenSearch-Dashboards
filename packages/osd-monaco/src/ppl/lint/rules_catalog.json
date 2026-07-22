@@ -1,0 +1,99 @@
+[
+  {
+    "id": "head-without-sort",
+    "detector": "head-without-sort",
+    "enabled": true,
+    "severity": "info",
+    "message": "Add sort before head to get stable results.",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/head/",
+    "appliesTo": {}
+  },
+  {
+    "id": "division-by-zero",
+    "detector": "division-by-zero",
+    "enabled": true,
+    "severity": "warning",
+    "message": "Dividing or taking modulo by zero returns null silently — guard with coalesce() or a conditional.",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/functions/expressions/#arithmetic-operators",
+    "appliesTo": {}
+  },
+  {
+    "id": "unsupported-window-function-in-eventstats",
+    "detector": "unsupported-window-function-in-eventstats",
+    "enabled": true,
+    "severity": "error",
+    "message": "This window function is not supported in eventstats/streamstats — only row_number is available.",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/eventstats/",
+    "appliesTo": {
+      "minVersion": "3.4.0"
+    }
+  },
+  {
+    "id": "multisearch-min-subsearch",
+    "detector": "multisearch-min-subsearch",
+    "enabled": true,
+    "severity": "error",
+    "message": "multisearch requires at least two subsearches.",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/multisearch/",
+    "runtimeOnly": true,
+    "appliesTo": {
+      "minVersion": "3.4.0"
+    }
+  },
+  {
+    "id": "disabled-join-type",
+    "detector": "disabled-join-type",
+    "enabled": true,
+    "severity": "warning",
+    "message": "This join type is disabled by default — enable plugins.calcite.all_join_types.allowed to use it.",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/join/",
+    "appliesTo": {}
+  },
+  {
+    "id": "dedup-consecutive-unsupported",
+    "detector": "dedup-consecutive-unsupported",
+    "enabled": true,
+    "severity": "warning",
+    "message": "dedup consecutive=true is not natively supported on Calcite and relies on engine fallback.",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/dedup/",
+    "appliesTo": {
+      "minVersion": "3.3.0",
+      "engine": "calcite"
+    }
+  },
+  {
+    "id": "union-min-datasets",
+    "detector": "union-min-datasets",
+    "enabled": true,
+    "severity": "error",
+    "message": "union requires at least two datasets.",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/",
+    "runtimeOnly": true,
+    "appliesTo": {
+      "minVersion": "3.7.0",
+      "engine": "calcite"
+    }
+  },
+  {
+    "id": "replace-wildcard-asymmetry",
+    "detector": "replace-wildcard-asymmetry",
+    "enabled": true,
+    "severity": "error",
+    "message": "replace pattern and replacement have asymmetric wildcard counts.",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/replace/",
+    "runtimeOnly": true,
+    "appliesTo": {
+      "minVersion": "3.4.0",
+      "engine": "calcite"
+    }
+  },
+  {
+    "id": "field-validation",
+    "detector": "field-validation",
+    "enabled": true,
+    "severity": "error",
+    "message": "Reference to an unknown field.",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/fields/",
+    "appliesTo": {}
+  }
+]

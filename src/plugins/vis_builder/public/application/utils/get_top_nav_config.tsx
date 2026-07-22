@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { i18n } from '@osd/i18n';
 import { TopNavMenuData } from '../../../../navigation/public';
 import {
@@ -128,12 +127,12 @@ export const getTopNavConfig = (
       tooltip: !!saveDisabledReason
         ? saveDisabledReason
         : savedVisBuilderVis?.id && originatingApp
-        ? i18n.translate('visBuilder.topNavMenu.saveAsVisualizationAsButtonLabel', {
-            defaultMessage: 'Save as',
-          })
-        : i18n.translate('visBuilder.topNavMenu.saveVisualizationButtonLabel', {
-            defaultMessage: 'Save',
-          }),
+          ? i18n.translate('visBuilder.topNavMenu.saveAsVisualizationAsButtonLabel', {
+              defaultMessage: 'Save as',
+            })
+          : i18n.translate('visBuilder.topNavMenu.saveVisualizationButtonLabel', {
+              defaultMessage: 'Save',
+            }),
       ariaLabel: i18n.translate('visBuilder.topNavMenu.saveVisualizationAsButtonLabel', {
         defaultMessage: 'Save',
       }),
@@ -168,15 +167,15 @@ export const getTopNavConfig = (
 };
 
 export const getOnSave = (
-  // @ts-expect-error TS7006 TODO(ts-error): fixme
+  // @ts-expect-error TS7006 TODO(ts-upgrade): fixme
   savedVisBuilderVis,
-  // @ts-expect-error TS7006 TODO(ts-error): fixme
+  // @ts-expect-error TS7006 TODO(ts-upgrade): fixme
   originatingApp,
-  // @ts-expect-error TS7006 TODO(ts-error): fixme
+  // @ts-expect-error TS7006 TODO(ts-upgrade): fixme
   visualizationIdFromUrl,
-  // @ts-expect-error TS7006 TODO(ts-error): fixme
+  // @ts-expect-error TS7006 TODO(ts-upgrade): fixme
   dispatch,
-  // @ts-expect-error TS7006 TODO(ts-error): fixme
+  // @ts-expect-error TS7006 TODO(ts-upgrade): fixme
   services
 ) => {
   const onSave = async ({
@@ -326,7 +325,7 @@ export const getNavActions = (
   };
   navActions.saveAndReturn = saveAndReturnNavAction;
 
-  // @ts-expect-error TS7006 TODO(ts-error): fixme
+  // @ts-expect-error TS7006 TODO(ts-upgrade): fixme
   const saveNavAction = (_anchorElement) => {
     const saveModal = (
       <SavedObjectSaveModalOrigin

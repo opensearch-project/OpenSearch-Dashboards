@@ -17,13 +17,12 @@ describe('table_vis_config', () => {
       const config = createTableConfig();
 
       // Check the basic properties
-      expect(config.name).toBe('table');
+      expect(config.name).toBe('Table');
       expect(config.type).toBe('table');
 
       // Check the UI configuration
       expect(config.ui).toBeDefined();
       expect(config.ui.style).toBeDefined();
-      expect(config.ui.availableMappings).toEqual([]);
 
       // Check the style defaults
       expect(config.ui.style.defaults).toBeDefined();

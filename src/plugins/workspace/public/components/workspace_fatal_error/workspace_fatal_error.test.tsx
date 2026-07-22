@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { IntlProvider } from 'react-intl';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { WorkspaceFatalError } from './workspace_fatal_error';
@@ -13,6 +12,7 @@ import { coreMock } from '../../../../../core/public/mocks';
 describe('<WorkspaceFatalError />', () => {
   it('render normally', async () => {
     const { findByText, container } = render(
+      // @ts-expect-error TS2769 TODO(ts-error): fixme
       <IntlProvider locale="en">
         <WorkspaceFatalError />
       </IntlProvider>
@@ -23,6 +23,7 @@ describe('<WorkspaceFatalError />', () => {
 
   it('render error with callout', async () => {
     const { findByText, container } = render(
+      // @ts-expect-error TS2769 TODO(ts-error): fixme
       <IntlProvider locale="en">
         <WorkspaceFatalError error="errorInCallout" />
       </IntlProvider>
@@ -32,19 +33,14 @@ describe('<WorkspaceFatalError />', () => {
   });
 
   it('click go back to homepage', async () => {
-    const { location } = window;
-    const setHrefSpy = jest.fn((href) => href);
-    if (window.location) {
-      // @ts-ignore
-      delete window.location;
-    }
-    window.location = {} as Location;
-    Object.defineProperty(window.location, 'href', {
-      get: () => 'http://localhost/',
-      set: setHrefSpy,
-    });
     const coreStartMock = coreMock.createStart();
+    // Replace prepend with a jest.fn() that returns an absolute URL so that
+    // window.location.href = prepend('/') doesn't throw "Invalid URL" in jsdom 26.
+    const prependMock = jest.fn().mockReturnValue('http://localhost:5601/');
+    coreStartMock.http.basePath.prepend = prependMock;
+
     const { getByText } = render(
+      // @ts-expect-error TS2769 TODO(ts-error): fixme
       <IntlProvider locale="en">
         <context.Provider
           value={
@@ -58,14 +54,8 @@ describe('<WorkspaceFatalError />', () => {
       </IntlProvider>
     );
     fireEvent.click(getByText('Go back to homepage'));
-    await waitFor(
-      () => {
-        expect(setHrefSpy).toBeCalledTimes(1);
-      },
-      {
-        container: document.body,
-      }
-    );
-    window.location = location;
+    await waitFor(() => {
+      expect(prependMock).toHaveBeenCalledWith('/', expect.anything());
+    });
   });
 });

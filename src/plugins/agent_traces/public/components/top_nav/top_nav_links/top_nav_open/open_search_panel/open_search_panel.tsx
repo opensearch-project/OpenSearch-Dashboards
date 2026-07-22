@@ -10,7 +10,6 @@ TODO: This file needs to be updated.
 - this file needs unit tests once above has been resolved.
  */
 
-import React from 'react';
 import rison from 'rison-node';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';

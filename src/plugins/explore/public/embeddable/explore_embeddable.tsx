@@ -9,7 +9,7 @@ import { merge, Subscription } from 'rxjs';
 import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import { i18n } from '@osd/i18n';
-import { RequestAdapter, Adapters } from '../../../inspector/public';
+import { RequestAdapter, DataAdapter, Adapters, FormattedData } from '../../../inspector/public';
 import {
   opensearchFilters,
   Filter,
@@ -21,6 +21,11 @@ import {
   IFieldType,
 } from '../../../data/public';
 import { Container, Embeddable, IEmbeddable } from '../../../embeddable/public';
+import {
+  DashboardContainer,
+  IVariableInterpolationService,
+  createNoOpVariableInterpolationService,
+} from '../../../dashboard/public';
 import { ExploreInput, ExploreOutput } from './types';
 import {
   getRequestInspectorStats,
@@ -48,12 +53,21 @@ import { defaultPrepareQueryString } from '../application/utils/state_management
 import {
   adaptLegacyData,
   convertStringsToMappings,
+  isValidMapping,
 } from '../components/visualizations/visualization_builder_utils';
 import { normalizeResultRows } from '../components/visualizations/utils/normalize_result_rows';
 import { visualizationRegistry } from '../components/visualizations/visualization_registry';
 import { prepareQueryForLanguage } from '../application/utils/languages';
 import { mergeStyles } from '../components/visualizations/utils/utils';
+import { SplitLayout } from '../components/visualizations/visualization_builder.types';
+import { CommonVisualizationRender } from '../components/visualizations/visualization_render';
+import { RenderChartConfig } from '../components/visualizations/types';
+import {
+  TransformationService,
+  registerAllTransformations,
+} from '../components/data_transformations';
 
+// TODO cleanup unused props
 export interface SearchProps {
   description?: string;
   sort?: SortOrder[];
@@ -62,8 +76,9 @@ export interface SearchProps {
   indexPattern?: IndexPattern;
   hits?: number;
   isLoading?: boolean;
+  error?: ExpressionRenderError;
   services: ExploreServices;
-  spec?: any;
+  chartRender?: () => any;
   sharedItemTitle?: string;
   chartType?: ChartType;
   activeTab?: string;
@@ -80,7 +95,7 @@ export interface SearchProps {
   onSetColumns?: (columns: string[]) => void;
   onFilter?: (field: IFieldType, value: string[], operator: string) => void;
   onExpressionEvent?: (e: ExpressionRendererEvent) => void;
-  onSelectTimeRange?: (range: TimeRange) => void;
+  onSelectTimeRange?: (range?: TimeRange) => void;
   tableData?: {
     rows: Array<Record<string, any>>;
     columns: VisColumn[];
@@ -100,7 +115,8 @@ interface ExploreEmbeddableConfig {
 
 export class ExploreEmbeddable
   extends Embeddable<ExploreInput, ExploreOutput>
-  implements IEmbeddable<ExploreInput, ExploreOutput> {
+  implements IEmbeddable<ExploreInput, ExploreOutput>
+{
   private abortController?: AbortController;
   private readonly savedExplore: SavedExplore;
   private inspectorAdaptors: Adapters;
@@ -108,6 +124,7 @@ export class ExploreEmbeddable
   private filtersSearchSource?: ISearchSource;
   private subscription: Subscription;
   private autoRefreshFetchSubscription?: Subscription;
+  private titleVariableSubscription?: Subscription;
   public readonly type = EXPLORE_EMBEDDABLE_TYPE;
   private panelTitle: string = '';
   private filterManager: FilterManager;
@@ -119,6 +136,16 @@ export class ExploreEmbeddable
   };
   private node?: HTMLElement;
   private root?: Root;
+
+  // Variable interpolation support
+  private interpolationService: IVariableInterpolationService =
+    createNoOpVariableInterpolationService();
+  private variableSubscription?: Subscription;
+  public originalQuery?: string;
+  private lastInterpolatedQuery?: string;
+
+  // Data transformation support
+  private transformationService: TransformationService;
 
   constructor(
     {
@@ -150,9 +177,20 @@ export class ExploreEmbeddable
     this.services = services;
     this.filterManager = filterManager;
     this.savedExplore = savedExplore;
+    // manage data adapters for CSV export
     this.inspectorAdaptors = {
       requests: new RequestAdapter(),
+      data: new DataAdapter(),
     };
+    // Initialize transformation service
+    this.transformationService = new TransformationService();
+    registerAllTransformations(this.transformationService);
+
+    this.initializeTransformationPipeline();
+
+    // Initialize variable support BEFORE search props so the interpolation
+    // service is available for the initial query setup.
+    this.initializeVariableSubscription(parent);
     this.initializeSearchProps();
 
     this.subscription = merge(this.getOutput$(), this.getInput$()).subscribe(() => {
@@ -168,6 +206,103 @@ export class ExploreEmbeddable
           this.updateHandler(this.searchProps, true);
         }
       });
+    // Must include output$ here: when a panel title is edited, the base Embeddable.onResetInput()
+    // fires input$.next() (which triggers handleTitleVariables correctly) but then immediately
+    // overwrites the output title with the raw un-interpolated input.title via getPanelTitle().
+    // Subscribing to output$ ensures handleTitleVariables re-applies variable interpolation
+    // after that overwrite. The isEqual guard in updateOutput() prevents infinite loops.
+    if (parent && 'variableService' in parent) {
+      const dashboardContainer = parent as unknown as DashboardContainer;
+      this.titleVariableSubscription = merge(
+        this.getInput$(),
+        this.getOutput$(),
+        dashboardContainer.variableService.getVariables$()
+      ).subscribe(this.handleTitleVariables);
+    }
+  }
+
+  // initialize transformation pipeline from saved explore
+  private initializeTransformationPipeline() {
+    if (!this.savedExplore.visualization) {
+      return;
+    }
+
+    try {
+      const parsed = JSON.parse(this.savedExplore.visualization);
+      if (parsed?.dataTransformations) {
+        this.transformationService.restoreFromState(parsed?.dataTransformations);
+      }
+    } catch (error) {
+      // skip failed pipeline, no transformations applied
+    }
+  }
+
+  private handleTitleVariables = () => {
+    let panelTitle = this.output.title ?? '';
+    if (this.input.title && this.interpolationService.hasVariables(this.input.title)) {
+      panelTitle = this.interpolationService.interpolate(this.input.title);
+    } else if (this.interpolationService.hasVariables(this.savedExplore.title)) {
+      panelTitle = this.interpolationService.interpolate(this.savedExplore.title);
+    }
+    this.updateOutput({ title: panelTitle });
+    this.panelTitle = panelTitle;
+  };
+
+  /**
+   * Initialize variable interpolation service and subscription
+   * Variables are managed by the parent DashboardContainer
+   */
+  private initializeVariableSubscription(parent?: Container) {
+    // Default to no-op interpolation service
+    this.interpolationService = createNoOpVariableInterpolationService();
+
+    if (parent && 'variableInterpolationService' in parent) {
+      const dashboardContainer = parent as unknown as DashboardContainer;
+      this.interpolationService = dashboardContainer.variableInterpolationService;
+
+      if ('variableService' in dashboardContainer) {
+        this.variableSubscription = dashboardContainer.variableService
+          .getVariables$()
+          .subscribe((variables) => {
+            const hasLoading = variables.some((v) => 'loading' in v && v?.loading);
+            if (hasLoading) return;
+
+            this.handleVariablesChange();
+          });
+      }
+    }
+  }
+
+  /**
+   * Handle variable changes - interpolate query and refetch
+   */
+  private handleVariablesChange() {
+    if (!this.originalQuery || !this.interpolationService.hasVariables(this.originalQuery)) {
+      return;
+    }
+
+    const { searchSource } = this.savedExplore;
+    const currentQuery = searchSource.getField('query');
+    const interpolatedQuery = this.interpolationService.interpolate(
+      this.originalQuery,
+      currentQuery?.language
+    );
+
+    if (interpolatedQuery === this.lastInterpolatedQuery) {
+      return;
+    }
+    this.lastInterpolatedQuery = interpolatedQuery;
+
+    if (currentQuery) {
+      searchSource.setField('query', {
+        ...currentQuery,
+        query: interpolatedQuery,
+      });
+    }
+
+    if (this.searchProps) {
+      this.updateHandler(this.searchProps, true);
+    }
   }
 
   private initializeSearchProps() {
@@ -202,6 +337,18 @@ export class ExploreEmbeddable
         query.query = prepareQueryForLanguage(query).query;
       }
     }
+
+    // If the query contains variable placeholders, apply initial interpolation
+    // using whatever current values are available (from saved state).
+    const queryHasVariables =
+      query?.query && this.interpolationService.hasVariables(String(query.query));
+    if (queryHasVariables && query) {
+      // Store the original (pre-interpolation) query for later use
+      this.originalQuery = String(query.query);
+      query.query = this.interpolationService.interpolate(this.originalQuery, query.language);
+      this.lastInterpolatedQuery = String(query.query);
+    }
+
     searchSource.setFields({
       index: indexPattern,
       query,
@@ -276,11 +423,15 @@ export class ExploreEmbeddable
       }
     };
 
-    searchProps.onSelectTimeRange = async (range: TimeRange) => {
+    searchProps.onSelectTimeRange = async (range?: TimeRange) => {
+      if (!range) {
+        return;
+      }
       await this.executeTriggerActions(APPLY_FILTER_TRIGGER, {
         embeddable: this,
         filters: [
           {
+            // @ts-expect-error TS2353 TODO(ts-error): fixme
             range: {
               '*': {
                 mode: 'absolute',
@@ -294,16 +445,18 @@ export class ExploreEmbeddable
       });
     };
 
-    this.updateHandler(searchProps);
+    this.searchProps = searchProps;
   }
 
   private async updateHandler(searchProps: SearchProps, force = false) {
     const { filters, query, timeRange } = this.input;
+    // no fetch until the panel is mounted in the viewport and render(node) sets this.node.
     const needFetch =
-      force ||
-      !opensearchFilters.onlyDisabledFiltersChanged(filters, this.prevState.filters) ||
-      !isEqual(query, this.prevState.query) ||
-      !isEqual(timeRange, this.prevState.timeRange);
+      this.node &&
+      (force ||
+        !opensearchFilters.onlyDisabledFiltersChanged(filters, this.prevState.filters) ||
+        !isEqual(query, this.prevState.query) ||
+        !isEqual(timeRange, this.prevState.timeRange));
 
     // If there is column or sort data on the panel, that means the original columns or sort settings have
     // been overridden in a dashboard.
@@ -314,17 +467,27 @@ export class ExploreEmbeddable
     if (needFetch) {
       this.prevState = { filters, query, timeRange };
       this.searchProps = searchProps;
+
+      // Apply dashboard filters to the SearchSource (same as PPL)
+      if (this.filtersSearchSource) {
+        this.filtersSearchSource.setField('filter', filters || []);
+      }
+
       try {
         await this.fetch();
       } catch (error: any) {
+        if (error?.name === 'AbortError' || this.abortController?.signal?.aborted) {
+          return;
+        }
+        this.searchProps.isLoading = false;
+        this.searchProps.error = {
+          name: error?.body?.error || error?.name || 'Error',
+          message: error?.body?.message || error?.message || 'An error occurred',
+        };
         this.updateOutput({
           loading: false,
-          error: {
-            name: error?.body?.error,
-            message: error?.body?.message,
-          },
+          error: this.searchProps.error,
         });
-        throw error;
       }
     } else if (searchProps) {
       this.searchProps = searchProps;
@@ -361,6 +524,7 @@ export class ExploreEmbeddable
     });
     this.updateOutput({ loading: true, error: undefined });
     this.searchProps.isLoading = true;
+    this.searchProps.error = undefined;
     const query = searchSource.getField('query');
     const languageConfig = this.services.data.query.queryString
       .getLanguageService()
@@ -375,25 +539,32 @@ export class ExploreEmbeddable
           formatter: languageConfig.fields.formatter,
         }),
     });
-    const rows = resp.hits.hits;
+    const rawRows = resp.hits.hits;
     const fieldSchema = searchSource.getDataFrame()?.schema;
-    const visualizationData = normalizeResultRows(rows, fieldSchema ?? []);
+    const { rows: transformedRows, finalSchema } = this.transformationService.applyPipeline(
+      rawRows,
+      fieldSchema ?? []
+    );
+
+    const visualizationData = normalizeResultRows(transformedRows, finalSchema ?? []);
 
     // TODO: Confirm if tab is in visualization but visualization is null, what to display?
     // const displayVis = rows?.length > 0 && visualizationData && visualizationData.ruleId;
     const visualization = JSON.parse(this.savedExplore.visualization || '{}');
     const uiState = JSON.parse(this.savedExplore.uiState || '{}');
     const selectedChartType = visualization.chartType ?? 'line';
-    const vis = visualizationRegistry.getVisualizationConfig(selectedChartType);
+    const vis = visualizationRegistry.getVisualization(selectedChartType);
     this.searchProps.chartType = selectedChartType;
     this.searchProps.activeTab = uiState.activeTab;
     this.searchProps.styleOptions = visualization.params;
     if (uiState.activeTab !== 'logs' && visualizationData) {
-      const { numericalColumns, categoricalColumns, dateColumns } = visualizationData;
+      const { numericalColumns, categoricalColumns, dateColumns, unknownColumns } =
+        visualizationData;
       const allColumns = [
         ...(numericalColumns ?? []),
         ...(categoricalColumns ?? []),
         ...(dateColumns ?? []),
+        ...(unknownColumns ?? []),
       ];
 
       // Check if there's data to visualize
@@ -404,13 +575,39 @@ export class ExploreEmbeddable
             rows: visualizationData.transformedData ?? [],
           };
         } else {
-          const axesMapping = convertStringsToMappings(visualization.axesMapping, allColumns);
+          const savedAxesMapping = visualization.axesMapping ?? {};
+          const styleOptions = visualization.params;
+
+          // Apply legacy migration (FACET→splitField, threshold conversions)
+          const migratedConfig = adaptLegacyData({
+            type: selectedChartType,
+            styles: styleOptions,
+            axesMapping: savedAxesMapping,
+          });
+          let effectiveAxesMapping = migratedConfig?.axesMapping ?? savedAxesMapping;
+          let styles = migratedConfig?.styles;
+
+          // Check if the axes mapping is still compatible with the current data columns.
+          if (!isValidMapping(effectiveAxesMapping, allColumns)) {
+            const reusedMapping = visualizationRegistry.reuseAxesMapping(
+              selectedChartType,
+              effectiveAxesMapping,
+              allColumns
+            );
+
+            if (reusedMapping) {
+              effectiveAxesMapping = reusedMapping;
+            }
+          }
+
+          const axesMapping = convertStringsToMappings(effectiveAxesMapping, allColumns);
           this.searchProps.axisColumnMappings = axesMapping;
           const matchedRule = visualizationRegistry.findRuleByAxesMapping(
-            visualization.axesMapping,
+            selectedChartType,
+            effectiveAxesMapping,
             allColumns
           );
-          if (!matchedRule || !matchedRule.toSpec) {
+          if (!matchedRule) {
             throw new Error(
               `Cannot load saved visualization "${this.panelTitle}" with id ${this.savedExplore.id}`
             );
@@ -420,39 +617,81 @@ export class ExploreEmbeddable
             filters: this.input.filters,
             timeRange: this.input.timeRange,
           };
-          const styleOptions = visualization.params;
-
-          let styles = adaptLegacyData({
-            type: selectedChartType,
-            styles: styleOptions,
-            axesMapping: visualization.axesMapping,
-          })?.styles;
 
           if (vis) {
             styles = mergeStyles(vis.ui.style.defaults, styles);
           }
           this.searchProps.styleOptions = styles;
 
-          const spec = matchedRule.toSpec(
-            visualizationData.transformedData,
-            numericalColumns,
-            categoricalColumns,
-            dateColumns,
-            styles || styleOptions,
-            selectedChartType,
-            axesMapping,
-            searchContext.timeRange
+          const splitField =
+            (visualization.splitField as string | undefined) ?? migratedConfig?.splitField;
+          const splitLayout = (visualization.splitLayout as SplitLayout) ?? 'auto';
+          const showSplitLabel = (visualization.showSplitLabel as boolean) ?? false;
+
+          const visConfig: RenderChartConfig = {
+            type: selectedChartType,
+            axesMapping: effectiveAxesMapping,
+            styles: styles || styleOptions,
+            splitField,
+            splitLayout,
+            showSplitLabel,
+          };
+
+          const chartRender = () => (
+            <CommonVisualizationRender
+              visualizationData={visualizationData}
+              visConfig={visConfig}
+              showRawTable={false}
+              timeRange={searchContext.timeRange}
+              onSelectTimeRange={this.searchProps?.onSelectTimeRange}
+            />
           );
-          this.searchProps.spec = spec;
+          this.searchProps.chartRender = chartRender;
         }
       }
     }
     this.updateOutput({ loading: false, error: undefined });
     inspectorRequest.stats(getResponseInspectorStats(resp, searchSource)).ok({ json: resp });
-    this.searchProps.rows = rows;
+    this.searchProps.rows = transformedRows;
     // NOTE: PPL response is not the same as OpenSearch response, resp.hits.total here is 0.
-    this.searchProps.hits = resp.hits.hits.length;
+    this.searchProps.hits = transformedRows.length;
     this.searchProps.isLoading = false;
+
+    // set tabular for DataViewComponent to display via adapters.data.getTabular()
+    if (this.inspectorAdaptors.data && visualizationData?.transformedData) {
+      const allColumns = [
+        ...(visualizationData.numericalColumns ?? []),
+        ...(visualizationData.categoricalColumns ?? []),
+        ...(visualizationData.dateColumns ?? []),
+        ...(visualizationData.unknownColumns ?? []),
+      ].sort((a, b) => a.id - b.id);
+      const indexPattern = searchSource.getField('index');
+
+      this.inspectorAdaptors.data.setTabularLoader(
+        () => ({
+          columns: allColumns.map((col) => ({
+            name: col.name,
+            field: col.column,
+          })),
+
+          // format data rows and transform into shape {raw, formatted}
+          rows: visualizationData.transformedData.map((row) => {
+            const formattedRow: Record<string, FormattedData> = {};
+            for (const col of allColumns) {
+              const value = row[col.column];
+              const field = indexPattern?.fields.getByName(col.name);
+              const formatted =
+                field && indexPattern?.getFormatterForField
+                  ? indexPattern.getFormatterForField(field).convert(value)
+                  : String(value ?? '');
+              formattedRow[col.column] = new FormattedData(value, formatted);
+            }
+            return formattedRow;
+          }),
+        }),
+        { returnsFormattedValues: true }
+      );
+    }
   };
 
   private renderComponent(node: HTMLElement, searchProps: SearchProps) {
@@ -469,6 +708,20 @@ export class ExploreEmbeddable
 
     if (this.autoRefreshFetchSubscription) {
       this.autoRefreshFetchSubscription.unsubscribe();
+    }
+
+    // Cleanup variable subscription
+    if (this.variableSubscription) {
+      this.variableSubscription.unsubscribe();
+    }
+
+    if (this.titleVariableSubscription) {
+      this.titleVariableSubscription.unsubscribe();
+    }
+
+    // Cleanup transformation service
+    if (this.transformationService) {
+      this.transformationService.destroy();
     }
 
     if (this.abortController) {
@@ -500,6 +753,7 @@ export class ExploreEmbeddable
     this.node = node;
     this.node.style.height = '100%';
     this.root = createRoot(node);
+    this.updateHandler(this.searchProps);
   }
 
   public getInspectorAdapters() {

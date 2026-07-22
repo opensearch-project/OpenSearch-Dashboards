@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { act, waitFor } from '@testing-library/react';

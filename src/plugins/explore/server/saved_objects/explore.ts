@@ -45,9 +45,15 @@ export const exploreSavedObjectType: SavedObjectsType = {
       return `/management/opensearch-dashboards/objects/savedExplore/${encodeURIComponent(obj.id)}`;
     },
     getInAppUrl(obj) {
+      // If type is undefined, this is an in-context editor visualization
+      // and should open in the visualization editor, not explore
+      const isInContextVis = !obj.attributes.type;
+      const appPath = isInContextVis
+        ? `/app/visualization-editor/#/edit/${encodeURIComponent(obj.id)}`
+        : `/app/explore/${obj.attributes.type}/#/view/${encodeURIComponent(obj.id)}`;
+
       return {
-        // TODO:finalize this until flavor and view route are finalized
-        path: `/app/explore/${obj.attributes.type}/#/view/${encodeURIComponent(obj.id)}`,
+        path: appPath,
         uiCapabilitiesPath: 'discover.show',
       };
     },

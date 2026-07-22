@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiSmallButtonEmpty } from '@elastic/eui';
 import { getServices } from '../../../opensearch_dashboards_services';
@@ -46,7 +46,7 @@ export const useDiscoverDownloadCsvToasts = () => {
         }),
         // TODO: Update the toast notification API to accept ReactNodes
         // The underlying API supports this to be a React Node but we added a type on top of it to disable it for some reason
-        text: ((
+        text: (
           <EuiSmallButtonEmpty
             onClick={onAbort}
             color="danger"
@@ -56,7 +56,7 @@ export const useDiscoverDownloadCsvToasts = () => {
               defaultMessage: 'Cancel download',
             })}
           </EuiSmallButtonEmpty>
-        ) as unknown) as string,
+        ) as unknown as string,
         'data-test-subj': 'dscDownloadCsvToastLoading',
       },
       // TODO: Putting a high number here as Infinity or Number.MAX_SAFE_INTEGER makes the toast go away right away

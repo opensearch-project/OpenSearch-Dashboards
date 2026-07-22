@@ -68,23 +68,23 @@ type PanelDescriptor = EuiContextMenuPanelDescriptor & {
   _order?: number;
 };
 
-const onClick = (action: Action, context: ActionExecutionContext<object>, close: () => void) => (
-  event: React.MouseEvent
-) => {
-  if (event.currentTarget instanceof HTMLAnchorElement) {
-    // from react-router's <Link/>
-    if (
-      !event.defaultPrevented && // onClick prevented default
-      event.button === 0 && // ignore everything but left clicks
-      (!event.currentTarget.target || event.currentTarget.target === '_self') && // let browser handle "target=_blank" etc.
-      !(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey) // ignore clicks with modifier keys
-    ) {
-      event.preventDefault();
-      action.execute(context);
-    }
-  } else action.execute(context);
-  close();
-};
+const onClick =
+  (action: Action, context: ActionExecutionContext<object>, close: () => void) =>
+  (event: React.MouseEvent) => {
+    if (event.currentTarget instanceof HTMLAnchorElement) {
+      // from react-router's <Link/>
+      if (
+        !event.defaultPrevented && // onClick prevented default
+        event.button === 0 && // ignore everything but left clicks
+        (!event.currentTarget.target || event.currentTarget.target === '_self') && // let browser handle "target=_blank" etc.
+        !(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey) // ignore clicks with modifier keys
+      ) {
+        event.preventDefault();
+        action.execute(context);
+      }
+    } else action.execute(context);
+    close();
+  };
 
 /**
  * This method adds "More" item to panels, which have more than 4 items; and
@@ -169,6 +169,7 @@ export async function buildContextMenuForActions({
 
     if (action.grouping) {
       for (let i = 0; i < action.grouping.length; i++) {
+        // @ts-expect-error TS7022 TODO(ts-error): fixme
         const group = action.grouping[i];
         const groupId = group.id;
 

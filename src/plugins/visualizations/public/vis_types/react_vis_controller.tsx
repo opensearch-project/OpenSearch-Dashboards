@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import { VisualizationController } from '../types';
 import { getI18n, getUISettings } from '../services';
@@ -37,7 +36,10 @@ import { ExprVis } from '../expressions/vis';
 export class ReactVisController implements VisualizationController {
   private root?: Root;
 
-  constructor(private element: HTMLElement, private vis: ExprVis) {}
+  constructor(
+    private element: HTMLElement,
+    private vis: ExprVis
+  ) {}
 
   public render(visData: any, visParams: any): Promise<void> {
     const I18nContext = getI18n().Context;

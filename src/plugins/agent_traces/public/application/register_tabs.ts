@@ -6,6 +6,7 @@
 import { i18n } from '@osd/i18n';
 import { TracesTab } from './pages/traces/traces_tab';
 import { SpansTab } from './pages/traces/spans_tab';
+import { VisTab } from './pages/traces/vis_tab';
 import { TabDefinition, TabRegistryService } from '../services/tab_registry/tab_registry_service';
 import { AgentTracesServices } from '../types';
 import {
@@ -13,9 +14,11 @@ import {
   AGENT_TRACES_DEFAULT_LANGUAGE,
   AGENT_TRACES_TRACES_TAB_ID,
   AGENT_TRACES_SPANS_TAB_ID,
+  AGENT_TRACES_VISUALIZATION_TAB_ID,
 } from '../../common';
 import { defaultPrepareQueryString } from './utils/state_management/actions/query_actions';
 import { buildPplSortClause, splitPplWhereAndTail } from './pages/traces/table_shared';
+import { prepareQueryForLanguage } from './utils/languages';
 
 /**
  * Registers built-in tabs with the tab registry
@@ -64,6 +67,23 @@ export const registerBuiltInTabs = (tabRegistry: TabRegistryService) => {
     component: SpansTab,
   };
   tabRegistry.registerTab(spansTabDefinition);
+
+  // Register Visualization Tab
+  tabRegistry.registerTab({
+    id: AGENT_TRACES_VISUALIZATION_TAB_ID,
+    label: i18n.translate('agentTraces.visualizationTab.label', {
+      defaultMessage: 'Visualization',
+    }),
+    flavor: [AgentTracesFlavor.Traces],
+    order: 30,
+    supportedLanguages: [AGENT_TRACES_DEFAULT_LANGUAGE],
+
+    prepareQuery: (query) => {
+      return prepareQueryForLanguage(query).query;
+    },
+
+    component: VisTab,
+  });
 };
 
 /**

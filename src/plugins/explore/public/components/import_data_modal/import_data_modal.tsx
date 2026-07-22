@@ -35,9 +35,8 @@ export const ImportDataModal: React.FC<ImportDataModalProps> = ({
   isVisible,
   onClose,
 }) => {
-  const [DataImporterApp, setDataImporterApp] = useState<React.ComponentType<
-    DataImporterPluginAppProps
-  > | null>(null);
+  const [DataImporterApp, setDataImporterApp] =
+    useState<React.ComponentType<DataImporterPluginAppProps> | null>(null);
 
   // Lazy load the data importer component when modal is opened
   useEffect(() => {
@@ -75,6 +74,7 @@ export const ImportDataModal: React.FC<ImportDataModalProps> = ({
             notifications={services.notifications}
             http={services.http}
             navigation={services.navigation}
+            // @ts-expect-error TS2322 TODO(ts-error): fixme
             config={services.dataImporterConfig}
             savedObjects={services.savedObjects}
             dataSourceEnabled={services.dataSourceEnabled}

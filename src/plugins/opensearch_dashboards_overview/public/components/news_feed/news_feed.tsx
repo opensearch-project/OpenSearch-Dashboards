@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { FC } from 'react';
+import { FC } from 'react';
 import { EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { FetchResult } from 'src/plugins/newsfeed/public';

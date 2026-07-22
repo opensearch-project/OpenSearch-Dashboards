@@ -23,6 +23,7 @@ import {
   AssistantActionContextValue,
 } from '../../../context_provider/public';
 import { GraphVisualization } from './graph_visualization';
+import { ToolResultRenderer } from './tool_result_renderer';
 import './tool_call_row.scss';
 
 export interface TimelineToolCall {
@@ -58,7 +59,7 @@ const renderFallbackGraphTool = ({
         if (parsedResult.success && parsedResult.graphData) {
           return parsedResult;
         }
-      } catch (error) {
+      } catch {
         // Not JSON, continue
       }
     }
@@ -219,7 +220,7 @@ const renderFallbackGraphTool = ({
           </div>
         );
       }
-    } catch (error) {
+    } catch {
       // Failed to parse graph result, show error state
       return (
         <div className="toolCallRow">
@@ -293,7 +294,7 @@ const getCustomizedRenderOptions = ({
   if (!result && toolCall.result) {
     try {
       result = JSON.parse(toolCall.result);
-    } catch (error) {
+    } catch {
       // Not JSON, use as is
       result = toolCall.result;
     }
@@ -302,7 +303,7 @@ const getCustomizedRenderOptions = ({
   if (!args && toolCall.arguments) {
     try {
       args = JSON.parse(toolCall.arguments);
-    } catch (error) {
+    } catch {
       // Not JSON, use as is
       args = toolCall.arguments;
     }
@@ -335,7 +336,7 @@ const isValidJSON = (content: string) => {
   try {
     JSON.parse(content);
     return true;
-  } catch (error) {
+  } catch {
     return false;
   }
 };
@@ -451,28 +452,53 @@ export const ToolCallRow: React.FC<ToolCallRowProps> = ({
       }
     >
       <EuiSpacer size="xs" />
+      {toolCall.arguments && (
+        <>
+          <EuiText size="xs" color="subdued">
+            <strong>
+              {i18n.translate('chat.toolCall.parametersLabel', {
+                defaultMessage: 'Parameters:',
+              })}
+            </strong>
+          </EuiText>
+          <EuiPanel hasBorder paddingSize="s" style={{ wordBreak: 'break-all', marginBottom: 8 }}>
+            {isValidJSON(toolCall.arguments) ? (
+              <EuiCodeBlock
+                language="json"
+                paddingSize="none"
+                fontSize="s"
+                transparentBackground
+                overflowHeight={150}
+                isCopyable
+              >
+                {JSON.stringify(JSON.parse(toolCall.arguments), null, 2)}
+              </EuiCodeBlock>
+            ) : (
+              <EuiText size="s">{toolCall.arguments}</EuiText>
+            )}
+          </EuiPanel>
+        </>
+      )}
+      <EuiText size="xs" color="subdued">
+        <strong>
+          {i18n.translate('chat.toolCall.resultLabel', {
+            defaultMessage: 'Result:',
+          })}
+        </strong>
+      </EuiText>
       <EuiPanel hasBorder paddingSize="s" style={{ wordBreak: 'break-all' }}>
         {isError &&
           i18n.translate('chat.toolCall.errorMessage', {
             defaultMessage: 'Error message: {errorMessage}',
             values: {
-              errorMessage: toolCall.result,
+              errorMessage:
+                toolCall.result ||
+                i18n.translate('chat.toolCall.errorNoResult', {
+                  defaultMessage: 'No results',
+                }),
             },
           })}
-        {!isError && toolCall.result && isValidJSON(toolCall.result) ? (
-          <EuiCodeBlock
-            language="json"
-            paddingSize="none"
-            fontSize="s"
-            transparentBackground
-            overflowHeight={200}
-            isCopyable
-          >
-            {toolCall.result}
-          </EuiCodeBlock>
-        ) : (
-          toolCall.result
-        )}
+        {!isError && toolCall.result && <ToolResultRenderer result={toolCall.result} />}
       </EuiPanel>
     </EuiAccordion>
   );

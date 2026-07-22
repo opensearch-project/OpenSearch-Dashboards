@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { CoreStart } from 'opensearch-dashboards/public';
 import { EuiI18n, EuiIcon, EuiLink, EuiTextColor } from '@elastic/eui';
 import { i18n } from '@osd/i18n';

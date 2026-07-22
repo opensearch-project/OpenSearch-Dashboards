@@ -23,7 +23,7 @@ describe('createStateTimelineConfig', () => {
     const config = createStateTimelineConfig();
 
     // Verify the basic structure
-    expect(config).toHaveProperty('name', 'state_timeline');
+    expect(config).toHaveProperty('name', 'State timeline');
     expect(config).toHaveProperty('type', 'state_timeline');
     expect(config).toHaveProperty('ui.style.defaults');
     expect(config).toHaveProperty('ui.style.render');
@@ -56,11 +56,8 @@ describe('createStateTimelineConfig', () => {
     expect(xAxis).toHaveProperty('position', Positions.BOTTOM);
     const yAxis = defaults.standardAxes.find((axis) => axis.axisRole === AxisRole.Y);
     expect(yAxis).toHaveProperty('position', Positions.LEFT);
-
-    // Verify title
-    expect(defaults.titleOptions.show).toBe(false);
-    expect(defaults.titleOptions.titleName).toBe('');
   });
+
   it('should render the ScatterVisStyleControls component with the provided props', () => {
     const config = createStateTimelineConfig();
     const renderFunction = config.ui.style.render;

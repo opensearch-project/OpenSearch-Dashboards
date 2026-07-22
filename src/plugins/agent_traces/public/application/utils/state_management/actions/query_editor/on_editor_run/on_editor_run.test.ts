@@ -45,6 +45,7 @@ describe('onEditorRunActionCreator', () => {
   // Helper function to create mock state with overrides
   const createTestState = (overrides: Partial<RootState['queryEditor']> = {}) => {
     return createMockRootState({
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       queryEditor: {
         queryStatusMap: {},
         overallQueryStatus: {
@@ -77,7 +78,7 @@ describe('onEditorRunActionCreator', () => {
     mockDispatch = jest.fn();
     mockGetState = jest.fn();
 
-    mockServices = ({
+    mockServices = {
       notifications: {
         toasts: {
           addWarning: jest.fn(),
@@ -92,7 +93,7 @@ describe('onEditorRunActionCreator', () => {
           },
         },
       },
-    } as unknown) as AgentTracesServices;
+    } as unknown as AgentTracesServices;
 
     // Default state with REFRESH status
     setMockState();
@@ -109,6 +110,7 @@ describe('onEditorRunActionCreator', () => {
   it('should return early when queryExecutionButtonStatus is DISABLED', () => {
     mockGetState.mockReturnValue(
       createMockRootState({
+        // @ts-expect-error TS2739 TODO(ts-error): fixme
         queryEditor: {
           queryStatusMap: {},
           overallQueryStatus: {
@@ -142,6 +144,7 @@ describe('onEditorRunActionCreator', () => {
   it('should always dispatch clearLastExecutedData first when enabled', () => {
     mockGetState.mockReturnValue(
       createMockRootState({
+        // @ts-expect-error TS2739 TODO(ts-error): fixme
         queryEditor: {
           queryStatusMap: {},
           overallQueryStatus: {
@@ -207,6 +210,7 @@ describe('onEditorRunActionCreator', () => {
     it('should still dispatch clearLastExecutedData even when prompt mode unavailable', () => {
       mockGetState.mockReturnValue(
         createMockRootState({
+          // @ts-expect-error TS2739 TODO(ts-error): fixme
           queryEditor: {
             queryStatusMap: {},
             overallQueryStatus: {

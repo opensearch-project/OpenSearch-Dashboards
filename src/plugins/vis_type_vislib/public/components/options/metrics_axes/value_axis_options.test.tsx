@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
 import { ValueAxisOptions, ValueAxisOptionsParams } from './value_axis_options';
 import { ValueAxis } from '../../../types';
@@ -131,7 +130,7 @@ describe('ValueAxisOptions component', () => {
     const comp = shallow(<ValueAxisOptions {...defaultProps} />);
     comp.find({ paramName: POSITION }).prop('setValue')(POSITION, value);
 
-    expect(onValueAxisPositionChanged).toBeCalledWith(defaultProps.index, value);
+    expect(onValueAxisPositionChanged).toHaveBeenCalledWith(defaultProps.index, value);
   });
 
   it('should call setValueAxis when title is changed', () => {
@@ -140,7 +139,7 @@ describe('ValueAxisOptions component', () => {
     const comp = shallow(<ValueAxisOptions {...defaultProps} />);
     comp.find(TextInputOption).prop('setValue')('text', textValue);
 
-    expect(setParamByIndex).toBeCalledWith('valueAxes', defaultProps.index, 'title', {
+    expect(setParamByIndex).toHaveBeenCalledWith('valueAxes', defaultProps.index, 'title', {
       text: textValue,
     });
   });
@@ -150,7 +149,7 @@ describe('ValueAxisOptions component', () => {
     const comp = shallow(<ValueAxisOptions {...defaultProps} />);
     comp.find({ paramName: 'type' }).prop('setValue')('type', scaleValue);
 
-    expect(setParamByIndex).toBeCalledWith('valueAxes', defaultProps.index, 'scale', {
+    expect(setParamByIndex).toHaveBeenCalledWith('valueAxes', defaultProps.index, 'scale', {
       ...defaultProps.axis.scale,
       type: scaleValue,
     });

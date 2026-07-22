@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -55,9 +55,10 @@ export const WorkspaceCollaboratorPrivacySettingPanel = ({
     WorkspacePrivacyItemType.PrivateToCollaborators
   );
 
-  const privacyType = useMemo(() => convertPermissionsToPrivacyType(permissionSettings), [
-    permissionSettings,
-  ]);
+  const privacyType = useMemo(
+    () => convertPermissionsToPrivacyType(permissionSettings),
+    [permissionSettings]
+  );
 
   const handleModalOpen = () => {
     setSelectedPrivacyType(privacyType);

@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { parse } from 'query-string';
+import qs from 'query-string';
 
 /** @internal */
 export function parseQueryString() {
@@ -39,5 +39,5 @@ export function parseQueryString() {
     return {};
   }
 
-  return parse(hrefSplit[1], { sort: false });
+  return qs.parse(hrefSplit[1], { sort: false });
 }

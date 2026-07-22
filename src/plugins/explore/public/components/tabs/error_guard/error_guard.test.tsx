@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ErrorGuard } from './error_guard';
 import { TabDefinition } from '../../../services/tab_registry/tab_registry_service';

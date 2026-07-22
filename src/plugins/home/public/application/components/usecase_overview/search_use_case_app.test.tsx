@@ -4,7 +4,7 @@
  */
 
 import { act, fireEvent, render } from '@testing-library/react';
-import React from 'react';
+
 import { coreMock } from '../../../../../../core/public/mocks';
 import { OpenSearchDashboardsContextProvider } from '../../../../../opensearch_dashboards_react/public';
 import { contentManagementPluginMocks } from '../../../../../content_management/public/mocks';
@@ -104,7 +104,7 @@ describe('<SearchUseCaseOverviewApp />', () => {
     `);
 
     expect(coreStartMocks.chrome.setBreadcrumbs).toHaveBeenCalledWith([{ text: 'Overview' }]);
-    expect(mock.renderPage).toBeCalledWith('search_overview');
+    expect(mock.renderPage).toHaveBeenCalledWith('search_overview');
   });
 
   it('set page title correctly in all use case', () => {
@@ -130,7 +130,10 @@ describe('<SearchUseCaseOverviewApp />', () => {
     act(() => {
       fireEvent.click(queryByText('Hide Get started with Search')!);
     });
-    expect(coreStartMocks.uiSettings.set).toBeCalledWith('searchWorkspace:dismissGetStarted', true);
+    expect(coreStartMocks.uiSettings.set).toHaveBeenCalledWith(
+      'searchWorkspace:dismissGetStarted',
+      true
+    );
   });
 
   it('user able to enable get started', () => {
@@ -148,7 +151,7 @@ describe('<SearchUseCaseOverviewApp />', () => {
     act(() => {
       fireEvent.click(queryByText('Show Get started with Search')!);
     });
-    expect(coreStartMocks.uiSettings.set).toBeCalledWith(
+    expect(coreStartMocks.uiSettings.set).toHaveBeenCalledWith(
       'searchWorkspace:dismissGetStarted',
       false
     );

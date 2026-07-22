@@ -56,7 +56,30 @@ jest.mock('../../../../application/hooks', () => ({
 }));
 
 jest.mock('../../../../application/context');
-jest.mock('../../../../../../data/public');
+jest.mock('../../../../../../data/public', () => {
+  const actual = jest.createMockFromModule<any>('../../../../../../data/public');
+  const overrides = { 'some-rule': { enabled: false } };
+  return {
+    ...actual,
+    attachPPLContexts: jest.fn(),
+    cleanupPPLContexts: jest.fn(),
+    syncPPLValidationContext: jest.fn(),
+    syncPPLLintContext: jest.fn(),
+    // Simplified mock; full behavior covered in lint_context_builder.test.ts.
+    buildPPLLintContext: jest.fn((dataset, _lintFields, services) => ({
+      useRuntimeGrammar: false,
+      dataSourceId: dataset?.dataSource?.id,
+      dataSourceVersion: dataset?.dataSource?.version,
+      overrides: services.uiSettings ? overrides : undefined,
+      http: services.http,
+    })),
+    UI_SETTINGS: { QUERY_ENHANCEMENTS_PPL_LINT_RULES: 'query:enhancements:pplLint:rules' },
+    shouldUseRuntimeGrammar: jest.fn(() => false),
+    pplGrammarCache: {
+      subscribeToGrammarUpdates: jest.fn(() => jest.fn()),
+    },
+  };
+});
 jest.mock('../../../../application/utils/state_management/actions/query_editor');
 jest.mock('../../../../application/utils/state_management/slices');
 jest.mock('../../../../application/utils/state_management/selectors', () => ({
@@ -64,6 +87,7 @@ jest.mock('../../../../application/utils/state_management/selectors', () => ({
   selectPromptModeIsAvailable: jest.fn((state) => state.promptModeIsAvailable),
   selectQueryLanguage: jest.fn((state) => state.queryLanguage),
   selectQueryString: jest.fn((state) => state.queryString),
+  selectDataset: jest.fn((state) => state.dataset),
 }));
 jest.mock('../../../../application/utils/state_management/types', () => ({
   EditorMode: {
@@ -115,18 +139,26 @@ jest.mock('@osd/monaco', () => ({
       },
     },
   },
+  setPPLValidationContext: jest.fn(),
+  clearPPLValidationContext: jest.fn(),
+  revalidatePPLModel: jest.fn(),
 }));
 
 // Now import after mocking
 import { act } from '@testing-library/react';
 import { renderHook } from '@testing-library/react';
 import { useSelector, useDispatch } from 'react-redux';
-import { monaco } from '@osd/monaco';
+import { monaco, revalidatePPLModel } from '@osd/monaco';
 import { useQueryPanelEditor } from './use_query_panel_editor';
 import { useEditorRef } from '../../../../application/hooks';
 import { useDatasetContext } from '../../../../application/context';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
-import { getEffectiveLanguageForAutoComplete } from '../../../../../../data/public';
+import {
+  getEffectiveLanguageForAutoComplete,
+  attachPPLContexts,
+  buildPPLLintContext,
+  syncPPLLintContext,
+} from '../../../../../../data/public';
 import { onEditorRunActionCreator } from '../../../../application/utils/state_management/actions/query_editor';
 import { setEditorMode } from '../../../../application/utils/state_management/slices';
 import { EditorMode } from '../../../../application/utils/state_management/types';
@@ -170,6 +202,10 @@ describe('useQueryPanelEditor', () => {
       trigger: jest.fn(),
       focus: jest.fn(),
       getContentHeight: jest.fn(() => 50),
+      getDomNode: jest.fn(() => ({
+        parentElement: { clientHeight: 100 },
+        closest: jest.fn(() => ({ clientHeight: 100 })),
+      })),
       getLayoutInfo: jest.fn(() => ({ width: 800 })),
       layout: jest.fn(),
       updateOptions: jest.fn(),
@@ -214,6 +250,10 @@ describe('useQueryPanelEditor', () => {
       datasets: {
         get: jest.fn(() => Promise.resolve(mockDataset)),
       },
+      uiSettings: {
+        get: jest.fn(),
+        getUpdate$: jest.fn(() => ({ subscribe: jest.fn(() => ({ unsubscribe: jest.fn() })) })),
+      },
     };
 
     // Mock implementations
@@ -255,6 +295,7 @@ describe('useQueryPanelEditor', () => {
       if (selectorString.includes('selectIsPromptEditorMode')) return false;
       if (selectorString.includes('selectQueryString')) return '';
       if (selectorString.includes('selectIsQueryEditorDirty')) return false;
+      if (selectorString.includes('selectDataset')) return undefined;
       return '';
     });
 
@@ -516,6 +557,71 @@ describe('useQueryPanelEditor', () => {
     });
   });
 
+  describe('PPL lint context (Fix 1: datasetRef + overrides)', () => {
+    const mdsDataset = {
+      id: 'ds-dataset',
+      title: 'MDS Dataset',
+      dataSource: { id: 'mds-1', version: '3.8.0' },
+    };
+
+    beforeEach(() => {
+      // Drive useSelector with a state object so selectDataset returns an MDS dataset.
+      const state = {
+        promptModeIsAvailable: false,
+        queryLanguage: 'PPL',
+        isPromptEditorMode: false,
+        queryString: '',
+        isQueryEditorDirty: false,
+        dataset: mdsDataset,
+      };
+      mockUseSelector.mockImplementation((selector) => (selector ? selector(state) : ''));
+      // queryString.getQuery() returns a dataset-less query (stale-closure scenario).
+      mockServices.data.query.queryString.getQuery = jest.fn(() => ({ dataset: undefined }));
+      mockServices.uiSettings = {
+        get: jest.fn(),
+        getUpdate$: jest.fn(() => ({ subscribe: jest.fn(() => ({ unsubscribe: jest.fn() })) })),
+      };
+    });
+
+    const captureContexts = () => {
+      const { result } = renderHook(() => useQueryPanelEditor());
+      act(() => {
+        result.current.editorDidMount(mockEditor);
+      });
+      const calls = (attachPPLContexts as jest.Mock).mock.calls;
+      const lastCall = calls[calls.length - 1];
+      return {
+        getValidationContext: lastCall[2] as () => any,
+        getLintContext: lastCall[3] as () => any,
+      };
+    };
+
+    it('getLintContext reads dataSourceId from the dataset, not queryString', () => {
+      const ctx = captureContexts().getLintContext();
+      expect(ctx.dataSourceId).toBe('mds-1');
+      expect(ctx.dataSourceVersion).toBe('3.8.0');
+    });
+
+    it('getLintContext delegates to buildPPLLintContext with the live dataset', () => {
+      captureContexts().getLintContext();
+      // The live dataset (from datasetRef), not the dataset-less queryString.getQuery().
+      expect(buildPPLLintContext).toHaveBeenCalledWith(
+        mdsDataset,
+        expect.any(Object),
+        mockServices
+      );
+    });
+
+    it('getValidationContext reads dataSourceId from the dataset, not queryString', () => {
+      expect(captureContexts().getValidationContext().dataSourceId).toBe('mds-1');
+    });
+
+    it('getLintContext includes overrides built from uiSettings', () => {
+      const ctx = captureContexts().getLintContext();
+      expect(ctx.overrides).toEqual({ 'some-rule': { enabled: false } });
+    });
+  });
+
   describe('autocomplete functionality', () => {
     beforeEach(() => {
       // Mock Monaco's Range constructor
@@ -749,6 +855,7 @@ describe('useQueryPanelEditor', () => {
         await result.current.suggestionProvider.provideCompletionItems(
           mockModel,
           mockPosition,
+          // @ts-expect-error TS2345 TODO(ts-error): fixme
           {},
           { isCancellationRequested: false }
         );
@@ -791,6 +898,7 @@ describe('useQueryPanelEditor', () => {
         await result.current.suggestionProvider.provideCompletionItems(
           mockModel,
           mockPosition,
+          // @ts-expect-error TS2345 TODO(ts-error): fixme
           {},
           { isCancellationRequested: false }
         );
@@ -934,6 +1042,56 @@ describe('useQueryPanelEditor', () => {
 
       // Should not reveal when no visible ranges
       expect(mockEditor.revealLine).not.toHaveBeenCalled();
+    });
+  });
+
+  // B3: rule setting change must immediately revalidate, not wait for next keystroke.
+  describe('re-lints on a pplLint rule setting change (B3)', () => {
+    let subscribeCallback: ((event: { key: string }) => void) | undefined;
+
+    beforeEach(() => {
+      subscribeCallback = undefined;
+      mockServices.uiSettings = {
+        get: jest.fn(),
+        getUpdate$: jest.fn(() => ({
+          subscribe: (cb: (event: { key: string }) => void) => {
+            subscribeCallback = cb;
+            return { unsubscribe: jest.fn() };
+          },
+        })),
+      };
+    });
+
+    it('re-syncs the lint context and revalidates when the pplLint:rules key changes', () => {
+      const { result } = renderHook(() => useQueryPanelEditor());
+      act(() => {
+        result.current.editorDidMount(mockEditor);
+      });
+      (syncPPLLintContext as jest.Mock).mockClear();
+      (revalidatePPLModel as jest.Mock).mockClear();
+
+      act(() => {
+        subscribeCallback?.({ key: 'query:enhancements:pplLint:rules' });
+      });
+
+      expect(syncPPLLintContext).toHaveBeenCalledTimes(1);
+      expect(revalidatePPLModel).toHaveBeenCalledTimes(1);
+    });
+
+    it('ignores unrelated uiSettings keys', () => {
+      const { result } = renderHook(() => useQueryPanelEditor());
+      act(() => {
+        result.current.editorDidMount(mockEditor);
+      });
+      (syncPPLLintContext as jest.Mock).mockClear();
+      (revalidatePPLModel as jest.Mock).mockClear();
+
+      act(() => {
+        subscribeCallback?.({ key: 'theme:darkMode' });
+      });
+
+      expect(syncPPLLintContext).not.toHaveBeenCalled();
+      expect(revalidatePPLModel).not.toHaveBeenCalled();
     });
   });
 });

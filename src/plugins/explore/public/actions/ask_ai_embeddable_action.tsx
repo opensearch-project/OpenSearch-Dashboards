@@ -60,7 +60,15 @@ export class AskAIEmbeddableAction implements Action<EmbeddableContext> {
   public async isCompatible({ embeddable }: EmbeddableContext) {
     // Check if this is an explore embeddable and if context provider is available
     const hasContextProvider = this.contextProvider !== undefined;
-    return embeddable.type === 'explore' && hasContextProvider && this.core.chat.isAvailable();
+    if (!(embeddable.type === 'explore' && hasContextProvider && this.core.chat.isAvailable())) {
+      return false;
+    }
+    // Check if the embeddable's data source is AnalyticEngine
+    const visEmbeddable = embeddable as DiscoverVisualizationEmbeddable;
+    const dsType =
+      visEmbeddable.savedExplore?.searchSource?.getFields()?.query?.dataset?.dataSource?.type;
+    if (dsType === 'AnalyticEngine') return false;
+    return true;
   }
 
   public async execute({ embeddable }: EmbeddableContext) {

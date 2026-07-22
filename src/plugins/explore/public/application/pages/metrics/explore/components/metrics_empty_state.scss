@@ -1,0 +1,19 @@
+.metricsEmptyState__sampleTrigger {
+  // Reset native <button> styles so the EuiCodeBlock inside keeps its own look.
+  all: unset;
+  display: block;
+  width: 100%;
+  cursor: pointer;
+  border-radius: $ouiBorderRadius;
+  transition: background-color 120ms ease;
+
+  &:hover,
+  &:focus-visible {
+    background-color: $ouiColorLightShade;
+  }
+
+  &:focus-visible {
+    outline: $ouiFocusRingSize solid $ouiFocusRingColor;
+    outline-offset: 2px;
+  }
+}

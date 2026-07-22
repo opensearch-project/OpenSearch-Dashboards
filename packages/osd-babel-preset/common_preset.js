@@ -33,25 +33,26 @@ const plugins = [
   require.resolve('@babel/plugin-transform-private-methods'),
   require.resolve('babel-plugin-add-module-exports'),
 
-  // Optional Chaining proposal is stage 4 (https://github.com/tc39/proposal-optional-chaining)
   // Need this since we are using TypeScript 3.7+
   require.resolve('@babel/plugin-transform-optional-chaining'),
-  // Nullish coalescing proposal is stage 4 (https://github.com/tc39/proposal-nullish-coalescing)
   // Need this since we are using TypeScript 3.7+
   require.resolve('@babel/plugin-transform-nullish-coalescing-operator'),
 
-  // Proposal is merged into ECMA-262 (https://github.com/tc39/proposal-export-ns-from)
   // Need this since we are using TypeScript 3.8+
   require.resolve('@babel/plugin-transform-export-namespace-from'),
 
-  // Proposal is on stage 4 (https://github.com/tc39/proposal-logical-assignment)
   require.resolve('@babel/plugin-transform-logical-assignment-operators'),
 ];
 
 module.exports = {
   presets: [
     [require.resolve('@babel/preset-typescript'), { allowNamespaces: true }],
-    require.resolve('@babel/preset-react'),
+    [
+      require.resolve('@babel/preset-react'),
+      {
+        runtime: process.env.NODE_ENV === 'test' ? 'classic' : 'automatic',
+      },
+    ],
   ],
   plugins,
 };

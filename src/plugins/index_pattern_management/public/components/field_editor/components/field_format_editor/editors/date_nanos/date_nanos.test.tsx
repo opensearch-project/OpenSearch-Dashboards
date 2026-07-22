@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
 import { FieldFormat } from '../../../../../../../../data/public';
 
@@ -58,7 +57,7 @@ describe('DateFormatEditor', () => {
     const component = shallow(
       <DateNanosFormatEditor
         fieldType={fieldType}
-        format={(format as unknown) as FieldFormat}
+        format={format as unknown as FieldFormat}
         formatParams={formatParams}
         onChange={onChange}
         onError={onError}

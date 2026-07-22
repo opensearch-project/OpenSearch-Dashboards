@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiFormRow } from '@elastic/eui';
 

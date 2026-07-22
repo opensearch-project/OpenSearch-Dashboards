@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { ReactElement } from 'react';
+import { ReactElement } from 'react';
 import { UiSettingScope } from 'opensearch-dashboards/public';
 import { DataSourceAggregatedView } from '../data_source_aggregated_view';
 import { DataSourceView } from '../data_source_view';
@@ -140,17 +140,15 @@ export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement |
     switch (componentType) {
       case DataSourceComponentType.DataSourceAggregatedView:
         return renderDataSourceAggregatedView(
-          (componentConfig as unknown) as DataSourceAggregatedViewConfig
+          componentConfig as unknown as DataSourceAggregatedViewConfig
         );
       case DataSourceComponentType.DataSourceSelectable:
-        return renderDataSourceSelectable(
-          (componentConfig as unknown) as DataSourceSelectableConfig
-        );
+        return renderDataSourceSelectable(componentConfig as unknown as DataSourceSelectableConfig);
       case DataSourceComponentType.DataSourceView:
-        return renderDataSourceView((componentConfig as unknown) as DataSourceViewConfig);
+        return renderDataSourceView(componentConfig as unknown as DataSourceViewConfig);
       case DataSourceComponentType.DataSourceMultiSelectable:
         return renderDataSourceMultiSelectable(
-          (componentConfig as unknown) as DataSourceMultiSelectableConfig
+          componentConfig as unknown as DataSourceMultiSelectableConfig
         );
       default:
         return null;

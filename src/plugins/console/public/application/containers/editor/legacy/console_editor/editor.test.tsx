@@ -30,7 +30,6 @@
 
 import './editor.test.mock';
 
-import React from 'react';
 import { mount } from 'enzyme';
 import { I18nProvider } from '@osd/i18n/react';
 import { act } from 'react';
@@ -88,7 +87,7 @@ describe('Legacy (Ace) Console Editor Component Smoke Test with dataSourceId', (
       editor.find('[data-test-subj~="sendRequestButton"]').simulate('click');
     });
     await nextTick();
-    expect(sendRequestToOpenSearch).toBeCalledTimes(1);
+    expect(sendRequestToOpenSearch).toHaveBeenCalledTimes(1);
   });
 
   it('opens docs', () => {
@@ -151,7 +150,7 @@ describe('Legacy (Ace) Console Editor Component Smoke Test with empty dataSource
       editor.find('[data-test-subj~="sendRequestButton"]').simulate('click');
     });
     await nextTick();
-    expect(sendRequestToOpenSearch).toBeCalledTimes(1);
+    expect(sendRequestToOpenSearch).toHaveBeenCalledTimes(1);
   });
 
   it('opens docs', () => {
@@ -221,7 +220,7 @@ describe('Legacy (Ace) Console Editor Component Smoke Test with dataSouceId unde
       editor.find('[data-test-subj~="sendRequestButton"]').simulate('click');
     });
     await nextTick();
-    expect(sendRequestToOpenSearch).toBeCalledTimes(0);
+    expect(sendRequestToOpenSearch).toHaveBeenCalledTimes(0);
   });
 
   it('opens docs', () => {

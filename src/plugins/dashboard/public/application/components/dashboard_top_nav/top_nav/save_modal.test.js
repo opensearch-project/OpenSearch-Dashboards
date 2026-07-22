@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 
 jest.mock('../../../../../../saved_objects/public', () => ({
@@ -48,5 +47,5 @@ test('renders DashboardSaveModal', () => {
       showCopyOnSave={true}
     />
   );
-  expect(component).toMatchSnapshot(); // eslint-disable-line
+  expect(component).toMatchSnapshot();
 });

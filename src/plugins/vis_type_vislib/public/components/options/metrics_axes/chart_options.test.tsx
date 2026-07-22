@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
 import { ChartOptions, ChartOptionsParams } from './chart_options';
 import { SeriesParam } from '../../../types';
@@ -83,7 +82,7 @@ describe('ChartOptions component', () => {
     const value = 'new';
     comp.find({ paramName }).prop('setValue')(paramName, value);
 
-    expect(changeValueAxis).toBeCalledWith(0, paramName, value);
+    expect(changeValueAxis).toHaveBeenCalledWith(0, paramName, value);
   });
 
   it('should call setParamByIndex when mode is changed', () => {
@@ -91,6 +90,6 @@ describe('ChartOptions component', () => {
     const paramName = 'mode';
     comp.find({ paramName }).prop('setValue')(paramName, ChartModes.NORMAL);
 
-    expect(setParamByIndex).toBeCalledWith('seriesParams', 0, paramName, ChartModes.NORMAL);
+    expect(setParamByIndex).toHaveBeenCalledWith('seriesParams', 0, paramName, ChartModes.NORMAL);
   });
 });

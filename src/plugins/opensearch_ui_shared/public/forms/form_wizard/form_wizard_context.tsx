@@ -28,8 +28,7 @@
  * under the License.
  */
 
-import React, { useState, createContext, useContext, useCallback } from 'react';
-
+import { useState, createContext, useContext, useCallback } from 'react';
 import { WithMultiContent, useMultiContentContext, HookProps } from '../multi_content';
 
 export interface Props<T extends object> {
@@ -68,8 +67,9 @@ export interface Context<Id extends string = any> extends State {
 
 const formWizardContext = createContext<Context>({} as Context);
 
+// eslint-disable-next-line @typescript-eslint/no-shadow
 export const FormWizardProvider = WithMultiContent<Props<any>>(function FormWizardProvider<
-  T extends object = { [key: string]: any }
+  T extends object = { [key: string]: any },
 >({ children, defaultActiveStep = 0, isEditing, onSave }: Props<T>) {
   const { getData, validate, validation } = useMultiContentContext<T>();
 

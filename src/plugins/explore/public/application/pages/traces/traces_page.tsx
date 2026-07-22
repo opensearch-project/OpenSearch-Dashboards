@@ -19,6 +19,7 @@ import { useTimefilterSubscription } from '../../utils/hooks/use_timefilter_subs
 import { useHeaderVariants } from '../../utils/hooks/use_header_variants';
 import { NewExperienceBanner } from '../../../components/experience_banners/new_experience_banner';
 import { BottomContainer } from '../../../components/container/bottom_container';
+import { ResizableQueryContainer } from '../../../components/container/resizable_query_container';
 import { TopNav } from '../../../components/top_nav/top_nav';
 import { useInitPage } from '../../../application/utils/hooks/use_page_initialization';
 import { EXPLORE_PATTERNS_TAB_ID, EXPLORE_VISUALIZATION_TAB_ID } from '../../../../common';
@@ -77,12 +78,10 @@ export const TracesPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAct
               <TopNav setHeaderActionMenu={setHeaderActionMenu} savedExplore={savedExplore} />
               <NewExperienceBanner />
 
-              <div className="dscCanvas__queryPanel">
-                <QueryPanel />
-              </div>
-
-              {/* Main content area with resizable panels under QueryPanel */}
-              <BottomContainer />
+              <ResizableQueryContainer queryPanel={<QueryPanel />}>
+                {/* Main content area with resizable panels under QueryPanel */}
+                <BottomContainer />
+              </ResizableQueryContainer>
             </EuiPageBody>
           </EuiPage>
         </div>

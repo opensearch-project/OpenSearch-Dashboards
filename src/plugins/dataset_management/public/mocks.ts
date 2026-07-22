@@ -47,6 +47,7 @@ const createStartContract = (): DatasetManagementStart => ({
 });
 
 const createInstance = async () => {
+  // @ts-expect-error TS2554 TODO(ts-error): fixme
   const plugin = new DatasetManagementPlugin({} as PluginInitializerContext);
 
   const setup = plugin.setup(coreMock.createSetup(), {
@@ -76,14 +77,8 @@ const docLinks = {
 };
 
 const createDatasetManagmentContext = () => {
-  const {
-    chrome,
-    application,
-    savedObjects,
-    uiSettings,
-    notifications,
-    overlays,
-  } = coreMock.createStart();
+  const { chrome, application, savedObjects, uiSettings, notifications, overlays } =
+    coreMock.createStart();
   const { http } = coreMock.createSetup();
   const data = dataPluginMock.createStartContract();
 

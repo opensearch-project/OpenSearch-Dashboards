@@ -24,6 +24,7 @@ describe('ensureDefaultIndexPattern', () => {
     };
 
     onRedirectNoIndexPattern = jest.fn();
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     savedObjectsClient = {
       find: jest.fn(),
       get: jest.fn(),
@@ -32,11 +33,11 @@ describe('ensureDefaultIndexPattern', () => {
       delete: jest.fn(),
     };
 
-    indexPatterns = ({
+    indexPatterns = {
       getIds: jest.fn(),
       get: jest.fn(),
       getDataSource: jest.fn(),
-    } as unknown) as jest.Mocked<IndexPatternsContract>;
+    } as unknown as jest.Mocked<IndexPatternsContract>;
   });
 
   test('should return early if canUpdateUiSetting is false', async () => {
@@ -376,8 +377,6 @@ describe('ensureDefaultIndexPattern', () => {
     indexPatterns.getIds.mockResolvedValue(['pattern1']);
     indexPatterns.getDataSource.mockRejectedValue(new Error('Failed to get data source'));
 
-    await expect(
-      async () => await ensureDefaultIndexPattern.call(indexPatterns)
-    ).not.toThrowError();
+    await expect(async () => await ensureDefaultIndexPattern.call(indexPatterns)).not.toThrow();
   });
 });

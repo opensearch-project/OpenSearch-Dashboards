@@ -28,8 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
-
 import { i18n } from '@osd/i18n';
 import { IUiSettingsClient } from 'opensearch-dashboards/public';
 import { VegaAdapter } from './vega_adapter';
@@ -61,7 +59,7 @@ export const getVegaInspectorView = (dependencies: VegaInspectorViewDependencies
         <VegaDataInspector {...(props as VegaDataInspectorProps)}> </VegaDataInspector>
       </OpenSearchDashboardsContextProvider>
     ),
-  } as InspectorViewDescription);
+  }) as InspectorViewDescription;
 
 export const createInspectorAdapters = (): VegaInspectorAdapters => ({
   requests: new RequestAdapter(),

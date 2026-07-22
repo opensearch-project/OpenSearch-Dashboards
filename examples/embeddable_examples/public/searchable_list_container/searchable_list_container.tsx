@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import {
   Container,
@@ -50,10 +49,12 @@ interface ChildInput extends EmbeddableInput {
 
 export class SearchableListContainer extends Container<ChildInput, SearchableContainerInput> {
   public readonly type = SEARCHABLE_LIST_CONTAINER;
-  private node?: HTMLElement;
   private root: Root | null = null;
 
-  constructor(input: SearchableContainerInput, private embeddableServices: EmbeddableStart) {
+  constructor(
+    input: SearchableContainerInput,
+    private embeddableServices: EmbeddableStart
+  ) {
     super(input, { embeddableLoaded: {} }, embeddableServices.getEmbeddableFactory);
   }
 
@@ -72,7 +73,6 @@ export class SearchableListContainer extends Container<ChildInput, SearchableCon
       this.root.unmount();
       this.root = null;
     }
-    this.node = node;
     this.root = createRoot(node);
     this.root.render(
       <SearchableListContainerComponent

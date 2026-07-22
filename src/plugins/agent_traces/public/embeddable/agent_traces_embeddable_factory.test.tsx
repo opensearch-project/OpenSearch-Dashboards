@@ -119,7 +119,7 @@ describe('AgentTracesEmbeddableFactory', () => {
       references: [],
     };
 
-    const result = await factory.create(input as any);
+    await factory.create(input as any);
 
     expect(AgentTracesEmbeddable).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -166,7 +166,7 @@ describe('AgentTracesEmbeddableFactory', () => {
       references: [],
     };
 
-    const result = await factory.create(input as any);
+    await factory.create(input as any);
 
     expect(AgentTracesEmbeddable).toHaveBeenCalledWith(
       expect.objectContaining({

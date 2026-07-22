@@ -3,7 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// @ts-expect-error TS7016 TODO(ts-error): fixme
 import type { AgentNodeData, AgentNodeKind } from '@osd/apm-topology';
+// @ts-expect-error TS7016 TODO(ts-error): fixme
 import type { CelestialEdgeStyleData } from '@osd/apm-topology';
 import { CategorizedSpan, SpanCategory } from './span_categorization';
 

@@ -100,6 +100,7 @@ describe('useMultiQueryDecorations', () => {
     };
 
     act(() => {
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       result.current.updateDecorations(newMockEditor, 'PPL');
     });
 

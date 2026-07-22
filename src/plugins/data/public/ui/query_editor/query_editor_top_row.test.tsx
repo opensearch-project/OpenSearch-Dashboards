@@ -5,7 +5,7 @@
 
 import { I18nProvider } from '@osd/i18n/react';
 import { cleanup, render, waitFor } from '@testing-library/react';
-import React from 'react';
+
 import { OpenSearchDashboardsContextProvider } from 'src/plugins/opensearch_dashboards_react/public';
 import { createEditor, DQLBody, QueryEditorTopRow, SingleLineInput } from '../';
 import { coreMock } from '../../../../../core/public/mocks';
@@ -191,10 +191,10 @@ describe('QueryEditorTopRow', () => {
       language: 'test-language',
     };
     dataPlugin.query.queryString.getQuery = jest.fn().mockReturnValue(query);
-    datasetService.getType.mockReturnValue(({
+    datasetService.getType.mockReturnValue({
       meta: { supportsTimeFilter: true },
       languageOverrides: { 'test-language': { hideDatePicker: false } },
-    } as unknown) as DatasetTypeConfig);
+    } as unknown as DatasetTypeConfig);
 
     const { container } = render(
       wrapQueryEditorTopRowInContext({

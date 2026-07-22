@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { act } from 'react';
 import { mount } from 'enzyme';
 import { EditActionDropdown, VisualizationItem } from './edit_action_dropdown';

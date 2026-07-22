@@ -4,9 +4,15 @@
  */
 
 import { trimEnd } from 'lodash';
+import { v4 as uuidv4 } from 'uuid';
 import { from, Observable } from 'rxjs';
 import { first, switchMap } from 'rxjs/operators';
-import { formatTimePickerDate, Query, UI_SETTINGS } from '../../../data/common';
+import {
+  formatTimePickerDate,
+  getDataSourceEngineCapabilities,
+  Query,
+  UI_SETTINGS,
+} from '../../../data/common';
 import {
   DataPublicPluginStart,
   IndexPatternsContract,
@@ -23,11 +29,14 @@ import {
   fetch,
   isPPLSearchQuery,
   QueryAggConfig,
+  queryEndsWithHead,
   SEARCH_STRATEGY,
 } from '../../common';
 import { QueryEnhancementsPluginStartDependencies } from '../types';
 import { IUiSettingsClient } from '../../../../core/public';
 import { PPLFilterUtils } from './filters';
+
+export const DEFAULT_PPL_ASYNC_HEAD_SIZE = 10000;
 
 export class PPLSearchInterceptor extends SearchInterceptor {
   private static readonly filterManagerSupportedAppNames = ['dashboards'];
@@ -44,7 +53,9 @@ export class PPLSearchInterceptor extends SearchInterceptor {
       this.queryService = (depsStart as QueryEnhancementsPluginStartDependencies).data.query;
       this.aggsService = (depsStart as QueryEnhancementsPluginStartDependencies).data.search.aggs;
       this.uiSettings = coreStart.uiSettings;
-      this.indexPatterns = (depsStart as QueryEnhancementsPluginStartDependencies).data.indexPatterns;
+      this.indexPatterns = (
+        depsStart as QueryEnhancementsPluginStartDependencies
+      ).data.indexPatterns;
     });
   }
 
@@ -54,6 +65,7 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     strategy?: string
   ): Observable<IOpenSearchDashboardsSearchResponse> {
     const { id, ...searchRequest } = request;
+    const isAsync = strategy === SEARCH_STRATEGY.PPL_ASYNC;
     const context: EnhancedFetchContext = {
       http: this.deps.http,
       path: trimEnd(`${API.SEARCH}/${strategy}`),
@@ -61,6 +73,7 @@ export class PPLSearchInterceptor extends SearchInterceptor {
       body: {
         pollQueryResultsParams: request.params?.pollQueryResultsParams,
         timeRange: request.params?.body?.timeRange,
+        ...(!isAsync && { queryId: uuidv4() }),
       },
     };
 
@@ -110,8 +123,14 @@ export class PPLSearchInterceptor extends SearchInterceptor {
 
     const whereCommands: string[] = [];
 
+    const skipFilters = request.params?.body?.skipFilters;
+
     const appId = await this.application.currentAppId$.pipe(first()).toPromise();
-    if (appId && PPLSearchInterceptor.filterManagerSupportedAppNames.includes(appId)) {
+    if (
+      !skipFilters &&
+      appId &&
+      PPLSearchInterceptor.filterManagerSupportedAppNames.includes(appId)
+    ) {
       const filters = this.queryService.filterManager.getFilters();
       const index = request.params?.index
         ? this.indexPatterns.getByTitle(request.params.index, true)
@@ -140,13 +159,21 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     ) {
       const timeFilter = PPLFilterUtils.getTimeFilterWhereClause(
         dataset.timeFieldName,
-        this.queryService.timefilter.timefilter.getTime()
+        this.queryService.timefilter.timefilter.getTime(),
+        dataset.dataSource?.engineType ?? dataset.dataSource?.type
       );
       whereCommands.push(timeFilter);
     }
+    const queryWithFilters = whereCommands.reduce(PPLFilterUtils.insertWhereCommand, query.query);
+
+    const finalQuery =
+      query.dataset?.type === DATASET.S3 && !queryEndsWithHead(queryWithFilters)
+        ? `${queryWithFilters} | head ${DEFAULT_PPL_ASYNC_HEAD_SIZE}`
+        : queryWithFilters;
+
     return {
       ...query,
-      query: whereCommands.reduce(PPLFilterUtils.insertWhereCommand, query.query),
+      query: finalQuery,
     };
   }
 
@@ -154,6 +181,13 @@ export class PPLSearchInterceptor extends SearchInterceptor {
   private getAggConfig(request: IOpenSearchDashboardsSearchRequest, query: Query) {
     const { aggs } = request.params.body;
     if (!aggs || !query.dataset || !query.dataset.timeFieldName) return;
+
+    // Some engines (e.g. legacy Elasticsearch / Open Distro) have no `span()` grouping expression in
+    // the PPL `stats` by-clause, so the histogram aggregation query fails to parse. Skip emitting the
+    // agg config for those engines; the main query still runs.
+    const engineType = query.dataset.dataSource?.engineType ?? query.dataset.dataSource?.type;
+    if (!getDataSourceEngineCapabilities(engineType).supportsPplSpan) return;
+
     const aggsConfig: QueryAggConfig = {};
     const { fromDate, toDate } = formatTimePickerDate(
       this.queryService.timefilter.timefilter.getTime(),

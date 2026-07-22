@@ -87,6 +87,7 @@ import { normalizeSortRequest } from './normalize_sort_request';
 import { filterDocvalueFields } from './filter_docvalue_fields';
 import { fieldWildcardFilter } from '../../../../opensearch_dashboards_utils/common';
 import { IIndexPattern } from '../../index_patterns';
+import { Dataset } from '../../datasets';
 import {
   DATA_FRAME_TYPES,
   FetchStatusResponse,
@@ -145,9 +146,8 @@ export interface SearchSourceDependencies extends FetchHandlers {
   // search options required here and returning a promise instead of observable.
   search: <
     SearchStrategyRequest extends IOpenSearchDashboardsSearchRequest = IOpenSearchSearchRequest,
-    SearchStrategyResponse extends
-      | IOpenSearchDashboardsSearchResponse
-      | IDataFrameResponse = IOpenSearchSearchResponse
+    SearchStrategyResponse extends IOpenSearchDashboardsSearchResponse | IDataFrameResponse =
+      IOpenSearchSearchResponse,
   >(
     request: SearchStrategyRequest,
     options: ISearchOptions
@@ -157,6 +157,14 @@ export interface SearchSourceDependencies extends FetchHandlers {
     set: (dataFrame: IDataFrame) => void;
     clear: () => void;
   };
+  /**
+   * Optional hook to prime the index-pattern cache for a dataset that has no backing
+   * saved object (e.g. INDEXES, S3, Prometheus). Invoked by `createSearchSource` when
+   * it encounters a non-INDEX_PATTERN dataset whose id is not already cached. Wired
+   * up in `data/public` plugin start via `datasetService.cacheDataset`; left
+   * undefined on the server or in tests that don't care about hydration.
+   */
+  hydrateDataset?: (dataset: Dataset) => Promise<void>;
 }
 
 /** @public **/
@@ -355,11 +363,14 @@ export class SearchSource {
     const indexPattern = this.getField('index');
 
     let response;
-    if (getConfig(UI_SETTINGS.COURIER_BATCH_SEARCHES)) {
+
+    // Unsupported queries' type will be processed as unsupported and legacyFetch cannot parse {type: 'unsupported'} correctly
+    // need to call fetchExternalSearch before COURIER_BATCH_SEARCHES check
+    if (this.isUnsupportedRequest(searchRequest)) {
+      response = await this.fetchExternalSearch(searchRequest, options);
+    } else if (getConfig(UI_SETTINGS.COURIER_BATCH_SEARCHES)) {
       searchRequest.dataSourceId = indexPattern?.dataSourceRef?.id;
       response = await this.legacyFetch(searchRequest, options);
-    } else if (this.isUnsupportedRequest(searchRequest)) {
-      response = await this.fetchExternalSearch(searchRequest, options);
     } else {
       searchRequest.dataSourceId = indexPattern?.dataSourceRef?.id;
       response = await this.fetchSearch(searchRequest, options);

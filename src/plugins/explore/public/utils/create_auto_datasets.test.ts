@@ -4,17 +4,40 @@
  */
 
 import { SavedObjectsClientContract } from 'src/core/public';
+import { DataViewsContract, DuplicateDataViewError } from '../../../data/public';
 import { createAutoDetectedDatasets } from './create_auto_datasets';
 import { DetectionResult } from './auto_detect_trace_data';
 
 describe('createAutoDetectedDatasets', () => {
   let mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  let mockDataViews: jest.Mocked<DataViewsContract>;
+
+  const makeDataView = (id: string) => ({ id, title: '' }) as any;
 
   beforeEach(() => {
-    // Create mock saved objects client
     mockSavedObjectsClient = {
       create: jest.fn(),
       find: jest.fn().mockResolvedValue({ total: 0, savedObjects: [] }),
+    } as any;
+
+    mockDataViews = {
+      create: jest.fn(),
+      createSavedObject: jest.fn().mockResolvedValue(undefined),
+      // createAndSave should not be invoked by the implementation; assert this below.
+      createAndSave: jest.fn(),
+      setDefault: jest.fn(),
+      get: jest.fn().mockImplementation((id: string) => Promise.resolve(makeDataView(id))),
+      refreshFields: jest.fn().mockResolvedValue(undefined),
+      updateSavedObject: jest.fn().mockResolvedValue(undefined),
+      clearCache: jest.fn(),
+      getFieldsForWildcard: jest.fn().mockResolvedValue([
+        { name: 'endTime', type: 'date', searchable: true, aggregatable: true },
+        { name: 'traceId', type: 'string', searchable: true, aggregatable: true },
+        { name: 'spanId', type: 'string', searchable: true, aggregatable: true },
+      ]),
+      fieldArrayToMap: jest.fn((fields: any[]) =>
+        fields.reduce((acc, f) => ({ ...acc, [f.name]: f }), {})
+      ),
     } as any;
   });
 
@@ -22,7 +45,7 @@ describe('createAutoDetectedDatasets', () => {
     jest.clearAllMocks();
   });
 
-  it('should create trace dataset when traces are detected', async () => {
+  it('pre-fetches fields and embeds them in the spec; uses create()/createSavedObject() (no setDefault)', async () => {
     const detection: DetectionResult = {
       tracesDetected: true,
       logsDetected: false,
@@ -32,35 +55,77 @@ describe('createAutoDetectedDatasets', () => {
       logTimeField: null,
     };
 
-    mockSavedObjectsClient.create.mockResolvedValue({
-      id: 'trace-dataset-id',
-      type: 'index-pattern',
-      attributes: {},
-      references: [],
-    } as any);
+    mockDataViews.create.mockResolvedValue(makeDataView('trace-dataset-id'));
 
-    const result = await createAutoDetectedDatasets(mockSavedObjectsClient, detection);
+    const result = await createAutoDetectedDatasets(
+      mockSavedObjectsClient,
+      mockDataViews,
+      detection,
+      'datasource-id'
+    );
 
     expect(result.traceDatasetId).toBe('trace-dataset-id');
-    expect(result.logDatasetId).toBeNull();
-    expect(result.correlationId).toBeNull();
 
-    expect(mockSavedObjectsClient.create).toHaveBeenCalledTimes(1);
-    expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
-      'index-pattern',
-      {
+    // Pre-fetch happens.
+    expect(mockDataViews.getFieldsForWildcard).toHaveBeenCalledWith({
+      pattern: 'otel-v1-apm-span*',
+      dataSourceId: 'datasource-id',
+    });
+
+    // Spec passed to create() carries the fields, and skipFetchFields=true so
+    // DataViewsService.create() doesn't re-fetch the field list.
+    expect(mockDataViews.create).toHaveBeenCalledWith(
+      expect.objectContaining({
         title: 'otel-v1-apm-span*',
-        displayName: 'Trace Dataset',
         timeFieldName: 'endTime',
         signalType: 'traces',
-      },
-      {
-        references: [],
-      }
+        fields: expect.objectContaining({
+          endTime: expect.objectContaining({ name: 'endTime' }),
+          traceId: expect.objectContaining({ name: 'traceId' }),
+        }),
+      }),
+      true
+    );
+    expect(mockDataViews.createSavedObject).toHaveBeenCalled();
+
+    // Auto-creation must NOT touch the user's default index pattern. createAndSave
+    // calls setDefault() internally; we sidestep both.
+    expect(mockDataViews.createAndSave).not.toHaveBeenCalled();
+    expect(mockDataViews.setDefault).not.toHaveBeenCalled();
+
+    // Belt-and-suspenders post-save refresh.
+    expect(mockDataViews.get).toHaveBeenCalledWith('trace-dataset-id');
+    expect(mockDataViews.refreshFields).toHaveBeenCalled();
+    expect(mockDataViews.updateSavedObject).toHaveBeenCalled();
+  });
+
+  it('creates the dataset even when the field pre-fetch returns nothing', async () => {
+    const detection: DetectionResult = {
+      tracesDetected: true,
+      logsDetected: false,
+      tracePattern: 'otel-v1-apm-span*',
+      logPattern: null,
+      traceTimeField: 'endTime',
+      logTimeField: null,
+    };
+
+    (mockDataViews.getFieldsForWildcard as jest.Mock).mockResolvedValue([]);
+    mockDataViews.create.mockResolvedValue(makeDataView('trace-dataset-id'));
+
+    const result = await createAutoDetectedDatasets(
+      mockSavedObjectsClient,
+      mockDataViews,
+      detection
+    );
+
+    expect(result.traceDatasetId).toBe('trace-dataset-id');
+    expect(mockDataViews.create).toHaveBeenCalledWith(
+      expect.objectContaining({ title: 'otel-v1-apm-span*', fields: undefined }),
+      true
     );
   });
 
-  it('should create log dataset when logs are detected', async () => {
+  it('creates a log dataset with schema mappings', async () => {
     const detection: DetectionResult = {
       tracesDetected: false,
       logsDetected: true,
@@ -70,43 +135,35 @@ describe('createAutoDetectedDatasets', () => {
       logTimeField: 'time',
     };
 
-    mockSavedObjectsClient.create.mockResolvedValue({
-      id: 'log-dataset-id',
-      type: 'index-pattern',
-      attributes: {},
-      references: [],
-    } as any);
+    mockDataViews.create.mockResolvedValue(makeDataView('log-dataset-id'));
 
-    const result = await createAutoDetectedDatasets(mockSavedObjectsClient, detection);
+    const result = await createAutoDetectedDatasets(
+      mockSavedObjectsClient,
+      mockDataViews,
+      detection
+    );
 
-    expect(result.traceDatasetId).toBeNull();
     expect(result.logDatasetId).toBe('log-dataset-id');
-    expect(result.correlationId).toBeNull();
-
-    expect(mockSavedObjectsClient.create).toHaveBeenCalledTimes(1);
-    expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
-      'index-pattern',
-      {
+    expect(mockDataViews.create).toHaveBeenCalledWith(
+      expect.objectContaining({
         title: 'logs-otel-v1*',
         displayName: 'Log Dataset',
         timeFieldName: 'time',
         signalType: 'logs',
-        schemaMappings: JSON.stringify({
+        schemaMappings: {
           otelLogs: {
             timestamp: 'time',
             traceId: 'traceId',
             spanId: 'spanId',
             serviceName: 'resource.attributes.service.name',
           },
-        }),
-      },
-      {
-        references: [],
-      }
+        },
+      }),
+      true
     );
   });
 
-  it('should create both datasets and correlation when both are detected', async () => {
+  it('creates both datasets and a correlation when both are detected', async () => {
     const detection: DetectionResult = {
       tracesDetected: true,
       logsDetected: true,
@@ -116,103 +173,50 @@ describe('createAutoDetectedDatasets', () => {
       logTimeField: 'time',
     };
 
-    mockSavedObjectsClient.create
-      .mockResolvedValueOnce({
-        id: 'trace-dataset-id',
-        type: 'index-pattern',
-        attributes: {},
-        references: [],
-      } as any)
-      .mockResolvedValueOnce({
-        id: 'log-dataset-id',
-        type: 'index-pattern',
-        attributes: {},
-        references: [],
-      } as any)
-      .mockResolvedValueOnce({
-        id: 'correlation-id',
-        type: 'correlations',
-        attributes: {},
-        references: [],
-      } as any);
+    mockDataViews.create
+      .mockResolvedValueOnce(makeDataView('trace-dataset-id'))
+      .mockResolvedValueOnce(makeDataView('log-dataset-id'));
 
-    const result = await createAutoDetectedDatasets(mockSavedObjectsClient, detection);
+    mockSavedObjectsClient.create.mockResolvedValueOnce({
+      id: 'correlation-id',
+      type: 'correlations',
+      attributes: {},
+      references: [],
+    } as any);
 
-    expect(result.traceDatasetId).toBe('trace-dataset-id');
-    expect(result.logDatasetId).toBe('log-dataset-id');
-    expect(result.correlationId).toBe('correlation-id');
-
-    expect(mockSavedObjectsClient.create).toHaveBeenCalledTimes(3);
-
-    // Verify trace dataset creation
-    expect(mockSavedObjectsClient.create).toHaveBeenNthCalledWith(
-      1,
-      'index-pattern',
-      {
-        title: 'otel-v1-apm-span*',
-        displayName: 'Trace Dataset',
-        timeFieldName: 'endTime',
-        signalType: 'traces',
-      },
-      {
-        references: [],
-      }
+    const result = await createAutoDetectedDatasets(
+      mockSavedObjectsClient,
+      mockDataViews,
+      detection
     );
 
-    // Verify log dataset creation
-    expect(mockSavedObjectsClient.create).toHaveBeenNthCalledWith(
-      2,
-      'index-pattern',
-      {
-        title: 'logs-otel-v1*',
-        displayName: 'Log Dataset',
-        timeFieldName: 'time',
-        signalType: 'logs',
-        schemaMappings: JSON.stringify({
-          otelLogs: {
-            timestamp: 'time',
-            traceId: 'traceId',
-            spanId: 'spanId',
-            serviceName: 'resource.attributes.service.name',
-          },
-        }),
-      },
-      {
-        references: [],
-      }
-    );
+    expect(result).toEqual({
+      traceDatasetId: 'trace-dataset-id',
+      logDatasetId: 'log-dataset-id',
+      correlationId: 'correlation-id',
+    });
 
-    // Verify correlation creation
-    expect(mockSavedObjectsClient.create).toHaveBeenNthCalledWith(
-      3,
+    expect(mockDataViews.create).toHaveBeenCalledTimes(2);
+    expect(mockDataViews.createSavedObject).toHaveBeenCalledTimes(2);
+    expect(mockDataViews.refreshFields).toHaveBeenCalledTimes(2);
+    expect(mockDataViews.updateSavedObject).toHaveBeenCalledTimes(2);
+
+    expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
       'correlations',
-      {
+      expect.objectContaining({
         title: 'trace-to-logs_otel-v1-apm-span*',
         correlationType: 'trace-to-logs-otel-v1-apm-span*',
-        version: '1.0.0',
-        entities: [
-          { tracesDataset: { id: 'references[0].id' } },
-          { logsDataset: { id: 'references[1].id' } },
-        ],
-      },
-      {
+      }),
+      expect.objectContaining({
         references: [
-          {
-            name: 'entities[0].index',
-            type: 'index-pattern',
-            id: 'trace-dataset-id',
-          },
-          {
-            name: 'entities[1].index',
-            type: 'index-pattern',
-            id: 'log-dataset-id',
-          },
+          { name: 'entities[0].index', type: 'index-pattern', id: 'trace-dataset-id' },
+          { name: 'entities[1].index', type: 'index-pattern', id: 'log-dataset-id' },
         ],
-      }
+      })
     );
   });
 
-  it('should include dataSourceRef when dataSourceId is provided for trace dataset', async () => {
+  it('passes dataSourceRef when dataSourceId is provided', async () => {
     const detection: DetectionResult = {
       tracesDetected: true,
       logsDetected: false,
@@ -222,159 +226,66 @@ describe('createAutoDetectedDatasets', () => {
       logTimeField: null,
     };
 
-    const dataSourceId = 'test-datasource-id';
+    mockDataViews.create.mockResolvedValue(makeDataView('trace-dataset-id'));
 
-    mockSavedObjectsClient.create.mockResolvedValue({
-      id: 'trace-dataset-id',
-      type: 'index-pattern',
-      attributes: {},
-      references: [],
-    } as any);
+    await createAutoDetectedDatasets(
+      mockSavedObjectsClient,
+      mockDataViews,
+      detection,
+      'test-datasource-id'
+    );
 
-    await createAutoDetectedDatasets(mockSavedObjectsClient, detection, dataSourceId);
-
-    expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
-      'index-pattern',
-      {
-        title: 'otel-v1-apm-span*',
-        displayName: 'Trace Dataset',
-        timeFieldName: 'endTime',
-        signalType: 'traces',
-      },
-      {
-        references: [
-          {
-            id: dataSourceId,
-            type: 'data-source',
-            name: 'dataSource',
-          },
-        ],
-      }
+    expect(mockDataViews.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        dataSourceRef: { id: 'test-datasource-id', type: 'data-source', name: 'dataSource' },
+      }),
+      true
     );
   });
 
-  it('should include dataSourceRef when dataSourceId is provided for log dataset', async () => {
+  it('reuses an existing index pattern instead of creating a duplicate, and still refreshes its fields', async () => {
     const detection: DetectionResult = {
-      tracesDetected: false,
-      logsDetected: true,
-      tracePattern: null,
-      logPattern: 'logs-otel-v1*',
-      traceTimeField: null,
-      logTimeField: 'time',
+      tracesDetected: true,
+      logsDetected: false,
+      tracePattern: 'otel-v1-apm-span*',
+      logPattern: null,
+      traceTimeField: 'endTime',
+      logTimeField: null,
     };
 
-    const dataSourceId = 'test-datasource-id';
-
-    mockSavedObjectsClient.create.mockResolvedValue({
-      id: 'log-dataset-id',
-      type: 'index-pattern',
-      attributes: {},
-      references: [],
+    mockSavedObjectsClient.find.mockResolvedValueOnce({
+      total: 1,
+      savedObjects: [
+        {
+          id: 'existing-trace-dataset-id',
+          type: 'index-pattern',
+          attributes: { title: 'otel-v1-apm-span*' },
+          references: [],
+        },
+      ],
     } as any);
 
-    await createAutoDetectedDatasets(mockSavedObjectsClient, detection, dataSourceId);
+    const existingDataView = makeDataView('existing-trace-dataset-id');
+    mockDataViews.get.mockResolvedValue(existingDataView);
 
-    expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
-      'index-pattern',
-      {
-        title: 'logs-otel-v1*',
-        displayName: 'Log Dataset',
-        timeFieldName: 'time',
-        signalType: 'logs',
-        schemaMappings: JSON.stringify({
-          otelLogs: {
-            timestamp: 'time',
-            traceId: 'traceId',
-            spanId: 'spanId',
-            serviceName: 'resource.attributes.service.name',
-          },
-        }),
-      },
-      {
-        references: [
-          {
-            id: dataSourceId,
-            type: 'data-source',
-            name: 'dataSource',
-          },
-        ],
-      }
+    const result = await createAutoDetectedDatasets(
+      mockSavedObjectsClient,
+      mockDataViews,
+      detection
     );
+
+    expect(result.traceDatasetId).toBe('existing-trace-dataset-id');
+    expect(mockDataViews.create).not.toHaveBeenCalled();
+    expect(mockDataViews.createSavedObject).not.toHaveBeenCalled();
+
+    // Refresh existing pattern so previously-broken ones recover their field list.
+    expect(mockDataViews.get).toHaveBeenCalledWith('existing-trace-dataset-id');
+    expect(mockDataViews.refreshFields).toHaveBeenCalledWith(existingDataView);
+    expect(mockDataViews.updateSavedObject).toHaveBeenCalledWith(existingDataView);
+    expect(mockDataViews.clearCache).toHaveBeenCalledWith('existing-trace-dataset-id');
   });
 
-  it('should not create trace dataset when tracePattern is missing', async () => {
-    const detection: DetectionResult = {
-      tracesDetected: true,
-      logsDetected: false,
-      tracePattern: null, // Missing pattern
-      logPattern: null,
-      traceTimeField: 'endTime',
-      logTimeField: null,
-    };
-
-    const result = await createAutoDetectedDatasets(mockSavedObjectsClient, detection);
-
-    expect(result.traceDatasetId).toBeNull();
-    expect(result.logDatasetId).toBeNull();
-    expect(result.correlationId).toBeNull();
-    expect(mockSavedObjectsClient.create).not.toHaveBeenCalled();
-  });
-
-  it('should not create trace dataset when traceTimeField is missing', async () => {
-    const detection: DetectionResult = {
-      tracesDetected: true,
-      logsDetected: false,
-      tracePattern: 'otel-v1-apm-span*',
-      logPattern: null,
-      traceTimeField: null, // Missing time field
-      logTimeField: null,
-    };
-
-    const result = await createAutoDetectedDatasets(mockSavedObjectsClient, detection);
-
-    expect(result.traceDatasetId).toBeNull();
-    expect(result.logDatasetId).toBeNull();
-    expect(result.correlationId).toBeNull();
-    expect(mockSavedObjectsClient.create).not.toHaveBeenCalled();
-  });
-
-  it('should not create log dataset when logPattern is missing', async () => {
-    const detection: DetectionResult = {
-      tracesDetected: false,
-      logsDetected: true,
-      tracePattern: null,
-      logPattern: null, // Missing pattern
-      traceTimeField: null,
-      logTimeField: 'time',
-    };
-
-    const result = await createAutoDetectedDatasets(mockSavedObjectsClient, detection);
-
-    expect(result.traceDatasetId).toBeNull();
-    expect(result.logDatasetId).toBeNull();
-    expect(result.correlationId).toBeNull();
-    expect(mockSavedObjectsClient.create).not.toHaveBeenCalled();
-  });
-
-  it('should not create log dataset when logTimeField is missing', async () => {
-    const detection: DetectionResult = {
-      tracesDetected: false,
-      logsDetected: true,
-      tracePattern: null,
-      logPattern: 'logs-otel-v1*',
-      traceTimeField: null,
-      logTimeField: null, // Missing time field
-    };
-
-    const result = await createAutoDetectedDatasets(mockSavedObjectsClient, detection);
-
-    expect(result.traceDatasetId).toBeNull();
-    expect(result.logDatasetId).toBeNull();
-    expect(result.correlationId).toBeNull();
-    expect(mockSavedObjectsClient.create).not.toHaveBeenCalled();
-  });
-
-  it('should not create correlation if only trace dataset was created', async () => {
+  it('still returns the existing id when refreshing fields on an existing pattern fails', async () => {
     const detection: DetectionResult = {
       tracesDetected: true,
       logsDetected: false,
@@ -384,61 +295,23 @@ describe('createAutoDetectedDatasets', () => {
       logTimeField: null,
     };
 
-    mockSavedObjectsClient.create.mockResolvedValue({
-      id: 'trace-dataset-id',
-      type: 'index-pattern',
-      attributes: {},
-      references: [],
+    mockSavedObjectsClient.find.mockResolvedValueOnce({
+      total: 1,
+      savedObjects: [{ id: 'existing-id' }],
     } as any);
 
-    const result = await createAutoDetectedDatasets(mockSavedObjectsClient, detection);
+    mockDataViews.get.mockRejectedValueOnce(new Error('boom'));
 
-    expect(result.correlationId).toBeNull();
-    expect(mockSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+    const result = await createAutoDetectedDatasets(
+      mockSavedObjectsClient,
+      mockDataViews,
+      detection
+    );
+
+    expect(result.traceDatasetId).toBe('existing-id');
   });
 
-  it('should not create correlation if only log dataset was created', async () => {
-    const detection: DetectionResult = {
-      tracesDetected: false,
-      logsDetected: true,
-      tracePattern: null,
-      logPattern: 'logs-otel-v1*',
-      traceTimeField: null,
-      logTimeField: 'time',
-    };
-
-    mockSavedObjectsClient.create.mockResolvedValue({
-      id: 'log-dataset-id',
-      type: 'index-pattern',
-      attributes: {},
-      references: [],
-    } as any);
-
-    const result = await createAutoDetectedDatasets(mockSavedObjectsClient, detection);
-
-    expect(result.correlationId).toBeNull();
-    expect(mockSavedObjectsClient.create).toHaveBeenCalledTimes(1);
-  });
-
-  it('should return empty result when nothing is detected', async () => {
-    const detection: DetectionResult = {
-      tracesDetected: false,
-      logsDetected: false,
-      tracePattern: null,
-      logPattern: null,
-      traceTimeField: null,
-      logTimeField: null,
-    };
-
-    const result = await createAutoDetectedDatasets(mockSavedObjectsClient, detection);
-
-    expect(result.traceDatasetId).toBeNull();
-    expect(result.logDatasetId).toBeNull();
-    expect(result.correlationId).toBeNull();
-    expect(mockSavedObjectsClient.create).not.toHaveBeenCalled();
-  });
-
-  it('should handle errors gracefully when trace dataset creation fails', async () => {
+  it('falls back to find() when createSavedObject throws DuplicateDataViewError', async () => {
     const detection: DetectionResult = {
       tracesDetected: true,
       logsDetected: false,
@@ -448,228 +321,146 @@ describe('createAutoDetectedDatasets', () => {
       logTimeField: null,
     };
 
-    const error = new Error('Failed to create trace dataset');
-    mockSavedObjectsClient.create.mockRejectedValue(error);
-
-    const result = await createAutoDetectedDatasets(mockSavedObjectsClient, detection);
-
-    // Should return null instead of throwing
-    expect(result.traceDatasetId).toBeNull();
-    expect(result.logDatasetId).toBeNull();
-    expect(result.correlationId).toBeNull();
-  });
-
-  it('should handle errors gracefully when log dataset creation fails', async () => {
-    const detection: DetectionResult = {
-      tracesDetected: false,
-      logsDetected: true,
-      tracePattern: null,
-      logPattern: 'logs-otel-v1*',
-      traceTimeField: null,
-      logTimeField: 'time',
-    };
-
-    const error = new Error('Failed to create log dataset');
-    mockSavedObjectsClient.create.mockRejectedValue(error);
-
-    const result = await createAutoDetectedDatasets(mockSavedObjectsClient, detection);
-
-    // Should return null instead of throwing
-    expect(result.traceDatasetId).toBeNull();
-    expect(result.logDatasetId).toBeNull();
-    expect(result.correlationId).toBeNull();
-  });
-
-  it('should handle errors gracefully when correlation creation fails', async () => {
-    const detection: DetectionResult = {
-      tracesDetected: true,
-      logsDetected: true,
-      tracePattern: 'otel-v1-apm-span*',
-      logPattern: 'logs-otel-v1*',
-      traceTimeField: 'endTime',
-      logTimeField: 'time',
-    };
-
-    mockSavedObjectsClient.create
+    mockSavedObjectsClient.find
+      .mockResolvedValueOnce({ total: 0, savedObjects: [] } as any)
       .mockResolvedValueOnce({
-        id: 'trace-dataset-id',
-        type: 'index-pattern',
-        attributes: {},
-        references: [],
-      } as any)
-      .mockResolvedValueOnce({
-        id: 'log-dataset-id',
-        type: 'index-pattern',
-        attributes: {},
-        references: [],
-      } as any)
-      .mockRejectedValueOnce(new Error('Failed to create correlation'));
+        total: 1,
+        savedObjects: [{ id: 'existing-after-conflict' }],
+      } as any);
 
-    const result = await createAutoDetectedDatasets(mockSavedObjectsClient, detection);
+    mockDataViews.create.mockResolvedValue(makeDataView('new-id'));
+    mockDataViews.createSavedObject.mockRejectedValueOnce(new DuplicateDataViewError('dup'));
 
-    // Should return successfully with dataset IDs even if correlation fails
+    const result = await createAutoDetectedDatasets(
+      mockSavedObjectsClient,
+      mockDataViews,
+      detection
+    );
+
+    expect(result.traceDatasetId).toBe('existing-after-conflict');
+  });
+
+  it('skips dataset creation when required fields are missing', async () => {
+    const detection: DetectionResult = {
+      tracesDetected: true,
+      logsDetected: true,
+      tracePattern: null,
+      logPattern: 'logs-otel-v1*',
+      traceTimeField: 'endTime',
+      logTimeField: null,
+    };
+
+    const result = await createAutoDetectedDatasets(
+      mockSavedObjectsClient,
+      mockDataViews,
+      detection
+    );
+
+    expect(result).toEqual({
+      traceDatasetId: null,
+      logDatasetId: null,
+      correlationId: null,
+    });
+    expect(mockDataViews.create).not.toHaveBeenCalled();
+    expect(mockSavedObjectsClient.create).not.toHaveBeenCalled();
+  });
+
+  it('returns an empty result when nothing is detected', async () => {
+    const detection: DetectionResult = {
+      tracesDetected: false,
+      logsDetected: false,
+      tracePattern: null,
+      logPattern: null,
+      traceTimeField: null,
+      logTimeField: null,
+    };
+
+    const result = await createAutoDetectedDatasets(
+      mockSavedObjectsClient,
+      mockDataViews,
+      detection
+    );
+
+    expect(result).toEqual({
+      traceDatasetId: null,
+      logDatasetId: null,
+      correlationId: null,
+    });
+    expect(mockDataViews.create).not.toHaveBeenCalled();
+    expect(mockSavedObjectsClient.create).not.toHaveBeenCalled();
+  });
+
+  it('does not create a correlation if only one dataset was created', async () => {
+    const detection: DetectionResult = {
+      tracesDetected: true,
+      logsDetected: false,
+      tracePattern: 'otel-v1-apm-span*',
+      logPattern: null,
+      traceTimeField: 'endTime',
+      logTimeField: null,
+    };
+
+    mockDataViews.create.mockResolvedValue(makeDataView('trace-dataset-id'));
+
+    const result = await createAutoDetectedDatasets(
+      mockSavedObjectsClient,
+      mockDataViews,
+      detection
+    );
+
+    expect(result.correlationId).toBeNull();
+    expect(mockSavedObjectsClient.create).not.toHaveBeenCalled();
+  });
+
+  it('handles dataset creation errors gracefully', async () => {
+    const detection: DetectionResult = {
+      tracesDetected: true,
+      logsDetected: false,
+      tracePattern: 'otel-v1-apm-span*',
+      logPattern: null,
+      traceTimeField: 'endTime',
+      logTimeField: null,
+    };
+
+    mockDataViews.create.mockRejectedValue(new Error('Failed to create trace dataset'));
+
+    const result = await createAutoDetectedDatasets(
+      mockSavedObjectsClient,
+      mockDataViews,
+      detection
+    );
+
+    expect(result.traceDatasetId).toBeNull();
+  });
+
+  it('handles correlation creation errors gracefully', async () => {
+    const detection: DetectionResult = {
+      tracesDetected: true,
+      logsDetected: true,
+      tracePattern: 'otel-v1-apm-span*',
+      logPattern: 'logs-otel-v1*',
+      traceTimeField: 'endTime',
+      logTimeField: 'time',
+    };
+
+    mockDataViews.create
+      .mockResolvedValueOnce(makeDataView('trace-dataset-id'))
+      .mockResolvedValueOnce(makeDataView('log-dataset-id'));
+
+    mockSavedObjectsClient.create.mockRejectedValueOnce(new Error('Failed to create correlation'));
+
+    const result = await createAutoDetectedDatasets(
+      mockSavedObjectsClient,
+      mockDataViews,
+      detection
+    );
+
     expect(result.traceDatasetId).toBe('trace-dataset-id');
     expect(result.logDatasetId).toBe('log-dataset-id');
     expect(result.correlationId).toBeNull();
   });
 
-  it('should include dataSourceRef for both datasets when dataSourceId is provided', async () => {
-    const detection: DetectionResult = {
-      tracesDetected: true,
-      logsDetected: true,
-      tracePattern: 'otel-v1-apm-span*',
-      logPattern: 'logs-otel-v1*',
-      traceTimeField: 'endTime',
-      logTimeField: 'time',
-    };
-
-    const dataSourceId = 'test-datasource-id';
-
-    mockSavedObjectsClient.create
-      .mockResolvedValueOnce({
-        id: 'trace-dataset-id',
-        type: 'index-pattern',
-        attributes: {},
-        references: [],
-      } as any)
-      .mockResolvedValueOnce({
-        id: 'log-dataset-id',
-        type: 'index-pattern',
-        attributes: {},
-        references: [],
-      } as any)
-      .mockResolvedValueOnce({
-        id: 'correlation-id',
-        type: 'correlations',
-        attributes: {},
-        references: [],
-      } as any);
-
-    await createAutoDetectedDatasets(mockSavedObjectsClient, detection, dataSourceId);
-
-    // Verify both datasets have dataSourceRef in references
-    expect(mockSavedObjectsClient.create).toHaveBeenNthCalledWith(
-      1,
-      'index-pattern',
-      expect.anything(),
-      expect.objectContaining({
-        references: [
-          {
-            id: dataSourceId,
-            type: 'data-source',
-            name: 'dataSource',
-          },
-        ],
-      })
-    );
-
-    expect(mockSavedObjectsClient.create).toHaveBeenNthCalledWith(
-      2,
-      'index-pattern',
-      expect.anything(),
-      expect.objectContaining({
-        references: [
-          {
-            id: dataSourceId,
-            type: 'data-source',
-            name: 'dataSource',
-          },
-        ],
-      })
-    );
-  });
-
-  it('should create datasets with correct signal types', async () => {
-    const detection: DetectionResult = {
-      tracesDetected: true,
-      logsDetected: true,
-      tracePattern: 'otel-v1-apm-span*',
-      logPattern: 'logs-otel-v1*',
-      traceTimeField: 'endTime',
-      logTimeField: 'time',
-    };
-
-    mockSavedObjectsClient.create
-      .mockResolvedValueOnce({
-        id: 'trace-dataset-id',
-        type: 'index-pattern',
-        attributes: {},
-        references: [],
-      } as any)
-      .mockResolvedValueOnce({
-        id: 'log-dataset-id',
-        type: 'index-pattern',
-        attributes: {},
-        references: [],
-      } as any)
-      .mockResolvedValueOnce({
-        id: 'correlation-id',
-        type: 'correlations',
-        attributes: {},
-        references: [],
-      } as any);
-
-    await createAutoDetectedDatasets(mockSavedObjectsClient, detection);
-
-    // Verify trace dataset has signalType='traces'
-    expect(mockSavedObjectsClient.create).toHaveBeenNthCalledWith(
-      1,
-      'index-pattern',
-      expect.objectContaining({
-        signalType: 'traces',
-      }),
-      expect.anything()
-    );
-
-    // Verify log dataset has signalType='logs'
-    expect(mockSavedObjectsClient.create).toHaveBeenNthCalledWith(
-      2,
-      'index-pattern',
-      expect.objectContaining({
-        signalType: 'logs',
-      }),
-      expect.anything()
-    );
-  });
-
-  it('should create log dataset with correct schema mappings', async () => {
-    const detection: DetectionResult = {
-      tracesDetected: false,
-      logsDetected: true,
-      tracePattern: null,
-      logPattern: 'logs-otel-v1*',
-      traceTimeField: null,
-      logTimeField: 'time',
-    };
-
-    mockSavedObjectsClient.create.mockResolvedValue({
-      id: 'log-dataset-id',
-      type: 'index-pattern',
-      attributes: {},
-      references: [],
-    } as any);
-
-    await createAutoDetectedDatasets(mockSavedObjectsClient, detection);
-
-    const expectedSchemaMappings = {
-      otelLogs: {
-        timestamp: 'time',
-        traceId: 'traceId',
-        spanId: 'spanId',
-        serviceName: 'resource.attributes.service.name',
-      },
-    };
-
-    expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
-      'index-pattern',
-      expect.objectContaining({
-        schemaMappings: JSON.stringify(expectedSchemaMappings),
-      }),
-      expect.anything()
-    );
-  });
-
-  it('should use detected logTimeField in schema mappings when different from default', async () => {
+  it('uses the detected logTimeField in schema mappings', async () => {
     const detection: DetectionResult = {
       tracesDetected: false,
       logsDetected: true,
@@ -679,31 +470,18 @@ describe('createAutoDetectedDatasets', () => {
       logTimeField: 'timestamp',
     };
 
-    mockSavedObjectsClient.create.mockResolvedValue({
-      id: 'log-dataset-id',
-      type: 'index-pattern',
-      attributes: {},
-      references: [],
-    } as any);
+    mockDataViews.create.mockResolvedValue(makeDataView('log-dataset-id'));
 
-    await createAutoDetectedDatasets(mockSavedObjectsClient, detection);
+    await createAutoDetectedDatasets(mockSavedObjectsClient, mockDataViews, detection);
 
-    const expectedSchemaMappings = {
-      otelLogs: {
-        timestamp: 'timestamp',
-        traceId: 'traceId',
-        spanId: 'spanId',
-        serviceName: 'resource.attributes.service.name',
-      },
-    };
-
-    expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
-      'index-pattern',
+    expect(mockDataViews.create).toHaveBeenCalledWith(
       expect.objectContaining({
         timeFieldName: 'timestamp',
-        schemaMappings: JSON.stringify(expectedSchemaMappings),
+        schemaMappings: expect.objectContaining({
+          otelLogs: expect.objectContaining({ timestamp: 'timestamp' }),
+        }),
       }),
-      expect.anything()
+      true
     );
   });
 });

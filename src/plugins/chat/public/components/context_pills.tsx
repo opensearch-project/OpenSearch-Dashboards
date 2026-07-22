@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { AssistantContextOptions } from '../../../context_provider/public';
 import './context_pills.scss';
 

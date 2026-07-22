@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useMemo, useState, useEffect, useRef, useCallback } from 'react';
+import { useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import moment from 'moment';
 import {
   EuiFlexItem,
@@ -89,7 +89,7 @@ const bulkGetDetail = (
               references: [],
               meta: {},
               updated_at: '',
-            } as SavedObjectWithMetadata)
+            }) as SavedObjectWithMetadata
         )
     )
   );

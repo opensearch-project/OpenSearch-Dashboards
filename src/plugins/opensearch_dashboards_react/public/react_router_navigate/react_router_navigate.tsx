@@ -54,36 +54,34 @@ export const reactRouterNavigate = (
   onClick: reactRouterOnClickHandler(history, toLocationObject(to), onClickCallback),
 });
 
-export const reactRouterOnClickHandler = (
-  history: ScopedHistory | History,
-  to: string | LocationObject,
-  onClickCallback?: Function
-) => (event: any) => {
-  if (onClickCallback) {
-    onClickCallback(event);
-  }
+export const reactRouterOnClickHandler =
+  (history: ScopedHistory | History, to: string | LocationObject, onClickCallback?: Function) =>
+  (event: any) => {
+    if (onClickCallback) {
+      onClickCallback(event);
+    }
 
-  if (event.defaultPrevented) {
-    return;
-  }
+    if (event.defaultPrevented) {
+      return;
+    }
 
-  if (event.target.getAttribute('target')) {
-    return;
-  }
+    if (event.target.getAttribute('target')) {
+      return;
+    }
 
-  if (isModifiedEvent(event) || !isLeftClickEvent(event)) {
-    return;
-  }
+    if (isModifiedEvent(event) || !isLeftClickEvent(event)) {
+      return;
+    }
 
-  // prevents page reload
-  event.preventDefault();
-  history.push(toLocationObject(to));
-};
+    // prevents page reload
+    event.preventDefault();
+    history.push(toLocationObject(to));
+  };
 
 export const getScopedBreadcrumbs = (
   crumbs: ChromeBreadcrumb[] = [],
   appHistory: ScopedHistory
-) => {
+): ChromeBreadcrumb[] => {
   const wrapBreadcrumb = (item: ChromeBreadcrumb, scopedHistory: ScopedHistory) => ({
     ...item,
     ...(item.href ? reactRouterNavigate(scopedHistory, item.href) : {}),

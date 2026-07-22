@@ -2,10 +2,11 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+// @ts-expect-error TS2305 TODO(ts-error): fixme
 import { IDataset } from '../../../../../../data/public';
 import { getFieldFormat } from './get_field_format';
 
-const dataset = ({
+const dataset = {
   fieldFormatMap: {
     Elastic: {
       type: {
@@ -13,7 +14,7 @@ const dataset = ({
       },
     },
   },
-} as unknown) as IDataset;
+} as unknown as IDataset;
 
 describe('getFieldFormat', () => {
   test('should handle no arguments', () => {

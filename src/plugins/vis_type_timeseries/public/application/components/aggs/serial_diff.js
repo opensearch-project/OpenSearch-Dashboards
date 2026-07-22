@@ -29,7 +29,6 @@
  */
 
 import PropTypes from 'prop-types';
-import React from 'react';
 import { AggSelect } from './agg_select';
 import { MetricSelect } from './metric_select';
 import { AggRow } from './agg_row';
@@ -58,8 +57,8 @@ export const SerialDiffAgg = (props) => {
   const handleNumberChange = createNumberHandler(handleChange);
 
   const htmlId = htmlIdGenerator();
-  const serialDiffDoc = useOpenSearchDashboards().services.docLinks?.links.opensearch.aggregations
-    .pipeline.serial_diff;
+  const serialDiffDoc =
+    useOpenSearchDashboards().services.docLinks?.links.opensearch.aggregations.pipeline.serial_diff;
 
   return (
     <AggRow

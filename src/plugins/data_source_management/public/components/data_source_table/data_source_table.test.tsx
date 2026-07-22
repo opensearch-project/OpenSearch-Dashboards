@@ -48,20 +48,21 @@ describe('DataSourceTable', () => {
   };
   const uiSettings = mockedContext.uiSettings;
   let component: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
-  const history = (scopedHistoryMock.create() as unknown) as ScopedHistory;
+  const history = scopedHistoryMock.create() as unknown as ScopedHistory;
   describe('should get datasources failed', () => {
     beforeEach(async () => {
-      spyOn(utils, 'getDataSources').and.returnValue(Promise.reject());
+      jest.spyOn(utils, 'getDataSources').mockReturnValue(Promise.reject());
       await act(async () => {
         component = await mount(
           wrapWithIntl(
             <DataSourceTable
               history={history}
-              location={({} as unknown) as RouteComponentProps['location']}
-              match={({} as unknown) as RouteComponentProps['match']}
+              location={{} as unknown as RouteComponentProps['location']}
+              match={{} as unknown as RouteComponentProps['match']}
             />
           ),
           {
+            // @ts-expect-error TS2769 TODO(ts-error): fixme
             wrappingComponent: OpenSearchDashboardsContextProvider,
             wrappingComponentProps: {
               services: mockedContext,
@@ -79,18 +80,19 @@ describe('DataSourceTable', () => {
 
   describe('should get datasources successful', () => {
     beforeEach(async () => {
-      spyOn(utils, 'getDataSources').and.returnValue(Promise.resolve(getMappedDataSources));
-      spyOn(uiSettings, 'getUserProvidedWithScope').and.returnValue('test1');
+      jest.spyOn(utils, 'getDataSources').mockReturnValue(Promise.resolve(getMappedDataSources));
+      jest.spyOn(uiSettings, 'getUserProvidedWithScope').mockReturnValue('test1');
       await act(async () => {
         component = await mount(
           wrapWithIntl(
             <DataSourceTable
               history={history}
-              location={({} as unknown) as RouteComponentProps['location']}
-              match={({} as unknown) as RouteComponentProps['match']}
+              location={{} as unknown as RouteComponentProps['location']}
+              match={{} as unknown as RouteComponentProps['match']}
             />
           ),
           {
+            // @ts-expect-error TS2769 TODO(ts-error): fixme
             wrappingComponent: OpenSearchDashboardsContextProvider,
             wrappingComponentProps: {
               services: mockedContext,
@@ -148,8 +150,8 @@ describe('DataSourceTable', () => {
     });
 
     it('should delete confirm modal confirm button work normally', async () => {
-      spyOn(utils, 'deleteMultipleDataSources').and.returnValue(Promise.resolve({}));
-      spyOn(utils, 'setFirstDataSourceAsDefault').and.returnValue({});
+      jest.spyOn(utils, 'deleteMultipleDataSources').mockReturnValue(Promise.resolve({}));
+      jest.spyOn(utils, 'setFirstDataSourceAsDefault').mockReturnValue({});
       act(() => {
         // @ts-ignore
         component.find(tableIdentifier).props().selection.onSelectionChange(getMappedDataSources);
@@ -168,8 +170,8 @@ describe('DataSourceTable', () => {
     });
 
     it('should delete datasources & fail', async () => {
-      spyOn(utils, 'deleteMultipleDataSources').and.returnValue(Promise.reject({}));
-      spyOn(utils, 'setFirstDataSourceAsDefault').and.returnValue({});
+      jest.spyOn(utils, 'deleteMultipleDataSources').mockReturnValue(Promise.reject({}));
+      jest.spyOn(utils, 'setFirstDataSourceAsDefault').mockReturnValue({});
       act(() => {
         // @ts-ignore
         component.find(tableIdentifier).props().selection.onSelectionChange(getMappedDataSources);
@@ -203,11 +205,12 @@ describe('DataSourceTable', () => {
           wrapWithIntl(
             <DataSourceTable
               history={history}
-              location={({} as unknown) as RouteComponentProps['location']}
-              match={({} as unknown) as RouteComponentProps['match']}
+              location={{} as unknown as RouteComponentProps['location']}
+              match={{} as unknown as RouteComponentProps['match']}
             />
           ),
           {
+            // @ts-expect-error TS2769 TODO(ts-error): fixme
             wrappingComponent: OpenSearchDashboardsContextProvider,
             wrappingComponentProps: {
               services: mockedContext,
@@ -229,17 +232,18 @@ describe('DataSourceTable', () => {
       application: { capabilities: { dataSource: { canManage: false } } },
     };
     beforeEach(async () => {
-      spyOn(utils, 'getDataSources').and.returnValue(Promise.reject());
+      jest.spyOn(utils, 'getDataSources').mockReturnValue(Promise.reject());
       await act(async () => {
         component = await mount(
           wrapWithIntl(
             <DataSourceTable
               history={history}
-              location={({} as unknown) as RouteComponentProps['location']}
-              match={({} as unknown) as RouteComponentProps['match']}
+              location={{} as unknown as RouteComponentProps['location']}
+              match={{} as unknown as RouteComponentProps['match']}
             />
           ),
           {
+            // @ts-expect-error TS2769 TODO(ts-error): fixme
             wrappingComponent: OpenSearchDashboardsContextProvider,
             wrappingComponentProps: {
               services: mockedContextWithFalseManage,
@@ -257,9 +261,9 @@ describe('DataSourceTable', () => {
 
   describe('data source table with actions', () => {
     beforeEach(() => {
-      spyOn(utils, 'getDataSources').and.returnValue(Promise.resolve(getMappedDataSources));
-      spyOn(uiSettings, 'getUserProvidedWithScope').and.returnValue('test1');
-      spyOn(utils, 'setFirstDataSourceAsDefault').and.returnValue({});
+      jest.spyOn(utils, 'getDataSources').mockReturnValue(Promise.resolve(getMappedDataSources));
+      jest.spyOn(uiSettings, 'getUserProvidedWithScope').mockReturnValue('test1');
+      jest.spyOn(utils, 'setFirstDataSourceAsDefault').mockReturnValue({});
     });
 
     test('should display set as default action', async () => {
@@ -275,11 +279,12 @@ describe('DataSourceTable', () => {
           wrapWithIntl(
             <DataSourceTable
               history={history}
-              location={({} as unknown) as RouteComponentProps['location']}
-              match={({} as unknown) as RouteComponentProps['match']}
+              location={{} as unknown as RouteComponentProps['location']}
+              match={{} as unknown as RouteComponentProps['match']}
             />
           ),
           {
+            // @ts-expect-error TS2769 TODO(ts-error): fixme
             wrappingComponent: OpenSearchDashboardsContextProvider,
             wrappingComponentProps: {
               services: mockedContext,
@@ -301,7 +306,7 @@ describe('DataSourceTable', () => {
         .find('[data-test-subj="dataSourcesManagement-dataSourceTable-setAsDefaultButton"]')
         .first()
         .simulate('click');
-      expect(uiSettings.set).toBeCalledWith(
+      expect(uiSettings.set).toHaveBeenCalledWith(
         DEFAULT_DATA_SOURCE_UI_SETTINGS_ID,
         'alpha-test',
         UiSettingScope.WORKSPACE
@@ -323,11 +328,12 @@ describe('DataSourceTable', () => {
           wrapWithIntl(
             <DataSourceTable
               history={history}
-              location={({} as unknown) as RouteComponentProps['location']}
-              match={({} as unknown) as RouteComponentProps['match']}
+              location={{} as unknown as RouteComponentProps['location']}
+              match={{} as unknown as RouteComponentProps['match']}
             />
           ),
           {
+            // @ts-expect-error TS2769 TODO(ts-error): fixme
             wrappingComponent: OpenSearchDashboardsContextProvider,
             wrappingComponentProps: {
               services: mockedContext,
@@ -367,11 +373,12 @@ describe('DataSourceTable', () => {
           wrapWithIntl(
             <DataSourceTable
               history={history}
-              location={({} as unknown) as RouteComponentProps['location']}
-              match={({} as unknown) as RouteComponentProps['match']}
+              location={{} as unknown as RouteComponentProps['location']}
+              match={{} as unknown as RouteComponentProps['match']}
             />
           ),
           {
+            // @ts-expect-error TS2769 TODO(ts-error): fixme
             wrappingComponent: OpenSearchDashboardsContextProvider,
             wrappingComponentProps: {
               services: mockedContext,
@@ -412,11 +419,12 @@ describe('DataSourceTable', () => {
           wrapWithIntl(
             <DataSourceTable
               history={history}
-              location={({} as unknown) as RouteComponentProps['location']}
-              match={({} as unknown) as RouteComponentProps['match']}
+              location={{} as unknown as RouteComponentProps['location']}
+              match={{} as unknown as RouteComponentProps['match']}
             />
           ),
           {
+            // @ts-expect-error TS2769 TODO(ts-error): fixme
             wrappingComponent: OpenSearchDashboardsContextProvider,
             wrappingComponentProps: {
               services: mockedContext,
@@ -456,11 +464,12 @@ describe('DataSourceTable', () => {
           wrapWithIntl(
             <DataSourceTable
               history={history}
-              location={({} as unknown) as RouteComponentProps['location']}
-              match={({} as unknown) as RouteComponentProps['match']}
+              location={{} as unknown as RouteComponentProps['location']}
+              match={{} as unknown as RouteComponentProps['match']}
             />
           ),
           {
+            // @ts-expect-error TS2769 TODO(ts-error): fixme
             wrappingComponent: OpenSearchDashboardsContextProvider,
             wrappingComponentProps: {
               services: mockedContext,
@@ -485,21 +494,22 @@ describe('DataSourceTable', () => {
 
   describe('should handle datasources with empty description correctly', () => {
     beforeEach(async () => {
-      spyOn(utils, 'setFirstDataSourceAsDefault').and.returnValue({});
-      spyOn(utils, 'getDataSources').and.returnValue(
-        Promise.resolve(getMappedDataSourcesWithEmptyDescription)
-      );
-      spyOn(uiSettings, 'getUserProvidedWithScope').and.returnValue('test1');
+      jest.spyOn(utils, 'setFirstDataSourceAsDefault').mockReturnValue({});
+      jest
+        .spyOn(utils, 'getDataSources')
+        .mockReturnValue(Promise.resolve(getMappedDataSourcesWithEmptyDescription));
+      jest.spyOn(uiSettings, 'getUserProvidedWithScope').mockReturnValue('test1');
       await act(async () => {
         component = await mount(
           wrapWithIntl(
             <DataSourceTable
               history={history}
-              location={({} as unknown) as RouteComponentProps['location']}
-              match={({} as unknown) as RouteComponentProps['match']}
+              location={{} as unknown as RouteComponentProps['location']}
+              match={{} as unknown as RouteComponentProps['match']}
             />
           ),
           {
+            // @ts-expect-error TS2769 TODO(ts-error): fixme
             wrappingComponent: OpenSearchDashboardsContextProvider,
             wrappingComponentProps: {
               services: mockedContext,
@@ -526,23 +536,24 @@ describe('DataSourceTable', () => {
 
   describe('should handle opensearch remote clusters', () => {
     beforeEach(async () => {
-      spyOn(utils, 'setFirstDataSourceAsDefault').and.returnValue({});
-      spyOn(utils, 'getDataSources').and.returnValue(
-        Promise.resolve(getDataSourcesWithCrossClusterConnections)
-      );
-      spyOn(utils, 'fetchDataSourceConnections').and.returnValue(
-        Promise.resolve(getDataSourcesWithCrossClusterConnections)
-      );
+      jest.spyOn(utils, 'setFirstDataSourceAsDefault').mockReturnValue({});
+      jest
+        .spyOn(utils, 'getDataSources')
+        .mockReturnValue(Promise.resolve(getDataSourcesWithCrossClusterConnections));
+      jest
+        .spyOn(utils, 'fetchDataSourceConnections')
+        .mockReturnValue(Promise.resolve(getDataSourcesWithCrossClusterConnections));
       await act(async () => {
         component = await mount(
           wrapWithIntl(
             <DataSourceTable
               history={history}
-              location={({} as unknown) as RouteComponentProps['location']}
-              match={({} as unknown) as RouteComponentProps['match']}
+              location={{} as unknown as RouteComponentProps['location']}
+              match={{} as unknown as RouteComponentProps['match']}
             />
           ),
           {
+            // @ts-expect-error TS2769 TODO(ts-error): fixme
             wrappingComponent: OpenSearchDashboardsContextProvider,
             wrappingComponentProps: {
               services: mockedContext,
@@ -569,20 +580,21 @@ describe('DataSourceTable', () => {
 
   describe('uiSettings APIs throw failure', () => {
     beforeEach(async () => {
-      spyOn(utils, 'getDataSources').and.returnValue(Promise.resolve(getMappedDataSources));
-      spyOn(uiSettings, 'getUserProvidedWithScope').and.returnValue(
-        Promise.reject(new Error('Failed to get default data source'))
-      );
+      jest.spyOn(utils, 'getDataSources').mockReturnValue(Promise.resolve(getMappedDataSources));
+      jest
+        .spyOn(uiSettings, 'getUserProvidedWithScope')
+        .mockReturnValue(Promise.reject(new Error('Failed to get default data source')));
       await act(async () => {
         component = await mount(
           wrapWithIntl(
             <DataSourceTable
               history={history}
-              location={({} as unknown) as RouteComponentProps['location']}
-              match={({} as unknown) as RouteComponentProps['match']}
+              location={{} as unknown as RouteComponentProps['location']}
+              match={{} as unknown as RouteComponentProps['match']}
             />
           ),
           {
+            // @ts-expect-error TS2769 TODO(ts-error): fixme
             wrappingComponent: OpenSearchDashboardsContextProvider,
             wrappingComponentProps: {
               services: mockedContext,

@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import {
   isOnTracesPage,
@@ -19,63 +18,49 @@ import {
 } from './trace_utils';
 import { extractFieldFromRowData } from '../../../../utils/trace_field_validation';
 
-const mockLocation = {
-  pathname: '',
-  hash: '',
-  origin: 'http://localhost:5601',
-};
-
 const mockOpen = jest.fn();
 
-Object.defineProperty(window, 'location', {
-  value: mockLocation,
-  writable: true,
-});
-
-Object.defineProperty(window, 'open', {
-  value: mockOpen,
-  writable: true,
-});
+jest.spyOn(window, 'open').mockImplementation(mockOpen);
 
 describe('trace_utils', () => {
-  beforeEach(() => {
+  afterEach(() => {
     jest.clearAllMocks();
-    mockLocation.pathname = '';
-    mockLocation.hash = '';
-    mockLocation.origin = 'http://localhost:5601';
+    // Reset URL back to the jsdom default after each test.
+    window.history.pushState({}, '', '/');
   });
 
   describe('isOnTracesPage', () => {
     it('should return true when pathname includes /agentTraces/traces', () => {
-      mockLocation.pathname = '/app/agentTraces/traces';
+      window.history.pushState({}, '', '/app/agentTraces/traces');
       expect(isOnTracesPage()).toBe(true);
     });
 
     it('should return true when pathname includes /agentTraces with hash routing', () => {
-      mockLocation.pathname = '/w/workspace/app/agentTraces/';
-      mockLocation.hash = '#/?_q=...&_a=(ui:(activeTabId:traces))';
+      window.history.pushState(
+        {},
+        '',
+        '/w/workspace/app/agentTraces/#/?_q=...&_a=(ui:(activeTabId:traces))'
+      );
       expect(isOnTracesPage()).toBe(true);
     });
 
     it('should return true when pathname includes /agentTraces without /traces suffix', () => {
-      mockLocation.pathname = '/app/agentTraces/';
+      window.history.pushState({}, '', '/app/agentTraces/');
       expect(isOnTracesPage()).toBe(true);
     });
 
     it('should return false when neither pathname nor hash include /agentTraces/traces', () => {
-      mockLocation.pathname = '/app/discover';
-      mockLocation.hash = '#/discover';
+      window.history.pushState({}, '', '/app/discover#/discover');
       expect(isOnTracesPage()).toBe(false);
     });
 
     it('should return false when pathname is empty', () => {
-      mockLocation.pathname = '';
-      mockLocation.hash = '';
+      window.history.pushState({}, '', '/');
       expect(isOnTracesPage()).toBe(false);
     });
 
     it('should handle partial matches correctly', () => {
-      mockLocation.pathname = '/app/agentTrace'; // missing 's' - not /agentTraces
+      window.history.pushState({}, '', '/app/agentTrace'); // missing 's' - not /agentTraces
       expect(isOnTracesPage()).toBe(false);
     });
   });
@@ -296,7 +281,7 @@ describe('trace_utils', () => {
 
   describe('buildTraceDetailsUrl', () => {
     beforeEach(() => {
-      mockLocation.pathname = '/app/agentTraces/traces';
+      window.history.pushState({}, '', '/app/agentTraces/traces');
     });
 
     it('should build URL with span ID and trace ID', () => {
@@ -343,7 +328,7 @@ describe('trace_utils', () => {
     });
 
     it('should handle base path correctly', () => {
-      mockLocation.pathname = '/custom-base/app/agentTraces/traces';
+      window.history.pushState({}, '', '/custom-base/app/agentTraces/traces');
       const dataset = {
         id: 'test-dataset',
         title: 'test-title',
@@ -357,7 +342,7 @@ describe('trace_utils', () => {
     });
 
     it('should handle no base path', () => {
-      mockLocation.pathname = '/app/agentTraces/traces';
+      window.history.pushState({}, '', '/app/agentTraces/traces');
       const dataset = {
         id: 'test-dataset',
         title: 'test-title',
@@ -450,7 +435,7 @@ describe('trace_utils', () => {
 
   describe('handleSpanIdNavigation', () => {
     beforeEach(() => {
-      mockLocation.pathname = '/app/agentTraces/traces';
+      window.history.pushState({}, '', '/app/agentTraces/traces');
     });
 
     it('should open new window with correct URL', () => {
@@ -548,7 +533,7 @@ describe('trace_utils', () => {
 
   describe('SpanIdLink', () => {
     beforeEach(() => {
-      mockLocation.pathname = '/app/agentTraces/traces';
+      window.history.pushState({}, '', '/app/agentTraces/traces');
     });
 
     const validRowData = {

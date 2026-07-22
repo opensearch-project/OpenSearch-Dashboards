@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import {
   EuiBasicTable,
   EuiPageBody,
@@ -38,6 +38,7 @@ export const DataSourceViewExample = ({
   savedObjects,
 }: DataSourceViewExampleProps) => {
   const DataSourceMenu = dataSourceManagement.ui.getDataSourceMenu<DataSourceViewConfig>();
+  // @ts-expect-error TODO FIX ME
   const [selectedDataSources, setSelectedDataSources] = useState<string[]>([]);
   const data: ComponentProp[] = [
     {
@@ -85,11 +86,13 @@ export const DataSourceViewExample = ({
             return true;
           },
           onSelectedDataSources: (ds) => {
+            // @ts-expect-error TODO FIX ME
             setSelectedDataSources(ds);
           },
         }}
       />
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setActionMenu, notifications, savedObjects]);
 
   return (

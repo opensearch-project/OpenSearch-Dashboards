@@ -30,7 +30,9 @@
 
 import './index.scss';
 
+import { registerPPLValidationProvider } from '@osd/monaco';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { Subscription } from 'rxjs';
 import { ConfigSchema } from '../config';
 import { createStartServicesGetter } from '../../opensearch_dashboards_utils/public';
 import {
@@ -107,6 +109,8 @@ import {
   getDefaultSuggestions as getPPLSuggestions,
   getSimplifiedPPLSuggestions,
 } from './antlr/opensearch_ppl/code_completion';
+import { createPplGrammarWarmupHandler } from './antlr/opensearch_ppl/ppl_grammar_warmup';
+import { validateRuntimePPLQuery } from './antlr/opensearch_ppl/runtime_validation';
 import { getSuggestions as getPromQLSuggestions } from './antlr/promql/code_completion';
 import { promqlTriggerCharacters } from './antlr/promql/constants';
 import { createStorage, DataStorage, UI_SETTINGS } from '../common';
@@ -120,14 +124,12 @@ declare module '../../ui_actions/public' {
   }
 }
 
-export class DataPublicPlugin
-  implements
-    Plugin<
-      DataPublicPluginSetup,
-      DataPublicPluginStart,
-      DataSetupDependencies,
-      DataStartDependencies
-    > {
+export class DataPublicPlugin implements Plugin<
+  DataPublicPluginSetup,
+  DataPublicPluginStart,
+  DataSetupDependencies,
+  DataStartDependencies
+> {
   private readonly autocomplete: AutocompleteService;
   private readonly searchService: SearchService;
   private readonly uiService: UiService;
@@ -137,6 +139,8 @@ export class DataPublicPlugin
   private readonly sessionStorage: DataStorage;
   private readonly config: ConfigSchema;
   private resourceClientFactory!: ResourceClientFactory;
+  private pplGrammarWarmupSubscription?: Subscription;
+  private unregisterPplValidationProvider?: () => void;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.searchService = new SearchService(initializerContext);
@@ -231,15 +235,8 @@ export class DataPublicPlugin
     core: CoreStart,
     { uiActions, contextProvider }: DataStartDependencies
   ): DataPublicPluginStart {
-    const {
-      uiSettings,
-      http,
-      notifications,
-      savedObjects,
-      overlays,
-      application,
-      workspaces,
-    } = core;
+    const { uiSettings, http, notifications, savedObjects, overlays, application, workspaces } =
+      core;
     setNotifications(notifications);
     setOverlays(overlays);
     setUiSettings(uiSettings);
@@ -314,6 +311,34 @@ export class DataPublicPlugin
     });
     setQueryService(query);
 
+    // Subscribe to dataset changes to pre-fetch PPL grammar and Calcite settings.
+    // The handler fires when the query language is PPL and the dataset changes.
+    // The initial fire with the current query covers the page-load case.
+    // the subscription covers subsequent dataset switches.
+    //
+    // The handler is subscribed unconditionally: the grammar cache self-gates on
+    // query:enhancements:runtimePplGrammar internally (resetting and skipping the
+    // network fetch when disabled), while the Calcite settings cache must warm
+    // regardless of that flag because the compiled-surface `disabled-join-type`
+    // rule reads `allJoinTypesAllowed` to suppress warnings. Only the runtime
+    // validation provider stays behind the flag.
+    const isRuntimePplGrammarEnabled =
+      uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_RUNTIME_PPL_GRAMMAR) !== false;
+
+    const maybeWarmUpPplGrammar = createPplGrammarWarmupHandler(
+      http,
+      uiSettings,
+      savedObjects.client
+    );
+    maybeWarmUpPplGrammar(query.queryString.getQuery());
+    this.pplGrammarWarmupSubscription = query.queryString
+      .getUpdates$()
+      .subscribe(maybeWarmUpPplGrammar);
+
+    if (isRuntimePplGrammarEnabled) {
+      this.unregisterPplValidationProvider = registerPPLValidationProvider(validateRuntimePPLQuery);
+    }
+
     const search = this.searchService.start(core, { fieldFormats, indexPatterns });
     setSearchService(search);
 
@@ -367,6 +392,10 @@ export class DataPublicPlugin
   }
 
   public stop() {
+    this.pplGrammarWarmupSubscription?.unsubscribe();
+    this.pplGrammarWarmupSubscription = undefined;
+    this.unregisterPplValidationProvider?.();
+    this.unregisterPplValidationProvider = undefined;
     this.autocomplete.clearProviders();
     this.queryService.stop();
     this.searchService.stop();

@@ -23,9 +23,11 @@ import {
   EuiSmallButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import React, { Fragment, useMemo } from 'react';
+import { Fragment, useMemo } from 'react';
 import {
   UpdatedWorkspaceObject,
+  WorkspaceFilterCriteria,
+  filterWorkspaces,
   getWorkspacesWithRecentMessage,
   sortByRecentVisitedAndAlphabetical,
 } from './utils';
@@ -44,6 +46,7 @@ interface WorkspaceUseCaseCardProps {
   application: ApplicationStart;
   http: HttpSetup;
   isDashboardAdmin: boolean;
+  filterCriteria: WorkspaceFilterCriteria;
   handleClickUseCaseInformation: (useCaseId: string) => void;
 }
 
@@ -53,21 +56,28 @@ export const WorkspaceUseCaseCard = ({
   application,
   http,
   isDashboardAdmin,
+  filterCriteria,
   handleClickUseCaseInformation,
 }: WorkspaceUseCaseCardProps) => {
   const useCaseIcon = useCase.icon || 'logoOpenSearch';
 
   // Display the recently accessed workspaces first, and then arrange other workspaces in alphabetical order.
   const sortedWorkspaceList: UpdatedWorkspaceObject[] = useMemo(() => {
-    const filterWorkspaces = workspaces.filter(
+    const workspacesForUseCase = workspaces.filter(
       (workspace) => getFirstUseCaseOfFeatureConfigs(workspace?.features || []) === useCase.id
     );
-    return getWorkspacesWithRecentMessage(filterWorkspaces).sort(
+    return getWorkspacesWithRecentMessage(workspacesForUseCase).sort(
       sortByRecentVisitedAndAlphabetical
     );
   }, [useCase.id, workspaces]);
 
   const hasWorkspaces = sortedWorkspaceList.length > 0;
+
+  const filteredWorkspaceList: UpdatedWorkspaceObject[] = useMemo(
+    () => filterWorkspaces(sortedWorkspaceList, filterCriteria),
+    [sortedWorkspaceList, filterCriteria]
+  );
+  const hasMatches = filteredWorkspaceList.length > 0;
 
   const adminCreateWorkspaceText = i18n.translate(
     'workspace.initial.useCaseCard.adminCreateWorkspaceText',
@@ -157,15 +167,33 @@ export const WorkspaceUseCaseCard = ({
       <EuiHorizontalRule margin="none" />
       {hasWorkspaces ? (
         <>
-          <EuiSplitPanel.Inner paddingSize="none">
-            <div className="eui-yScrollWithShadows" style={{ maxHeight: '272px' }}>
-              <EuiContextMenuPanel
+          {hasMatches ? (
+            <EuiSplitPanel.Inner paddingSize="none">
+              <div className="eui-yScrollWithShadows" style={{ maxHeight: '272px' }}>
+                <EuiContextMenuPanel
+                  size="s"
+                  items={filteredWorkspaceList.map(workspaceToItem)}
+                  hasFocus={false}
+                />
+              </div>
+            </EuiSplitPanel.Inner>
+          ) : (
+            <EuiSplitPanel.Inner
+              paddingSize="m"
+              style={{ display: 'grid', placeItems: 'center', minHeight: '272px' }}
+            >
+              <EuiText
+                textAlign="center"
                 size="s"
-                items={sortedWorkspaceList.map(workspaceToItem)}
-                hasFocus={false}
-              />
-            </div>
-          </EuiSplitPanel.Inner>
+                color="subdued"
+                data-test-subj={`workspace-initial-useCaseCard-${useCase.id}-noMatchingWorkspaces`}
+              >
+                {i18n.translate('workspace.initial.useCaseCard.noMatchingWorkspaces', {
+                  defaultMessage: 'No matching workspaces',
+                })}
+              </EuiText>
+            </EuiSplitPanel.Inner>
+          )}
           <EuiHorizontalRule margin="none" />
           <EuiSplitPanel.Inner paddingSize="s" grow={false}>
             <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>

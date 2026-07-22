@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { memo, useState, useEffect, useCallback } from 'react';
+import { memo, useState, useEffect, useCallback } from 'react';
 import { IndexPattern } from 'src/plugins/data/public';
 import { useLocation } from 'react-router-dom';
 import { i18n } from '@osd/i18n';
@@ -28,6 +28,7 @@ interface DashboardTopNavProps {
   indexPatterns: IndexPattern[];
   currentContainer?: DashboardContainer;
   dashboardIdFromUrl?: string;
+  eventEmitter?: any;
 }
 
 export enum UrlParams {
@@ -48,6 +49,7 @@ const TopNav = ({
   currentContainer,
   indexPatterns,
   dashboardIdFromUrl,
+  eventEmitter,
 }: DashboardTopNavProps) => {
   const [topNavMenu, setTopNavMenu] = useState<any>();
   const [topRightControls, setTopRightControls] = useState<TopNavControlData[]>([]);
@@ -100,6 +102,19 @@ const TopNav = ({
       });
     }
   }, [currentContainer, services]);
+
+  // Listen for triggerDashboardSave event from DashboardVariables
+  useEffect(() => {
+    if (eventEmitter) {
+      const handleTriggerSave = () => {
+        handleSave();
+      };
+      eventEmitter.on('triggerDashboardSave', handleTriggerSave);
+      return () => {
+        eventEmitter.off('triggerDashboardSave', handleTriggerSave);
+      };
+    }
+  }, [eventEmitter, handleSave]);
 
   // Register/unregister save shortcut based on edit mode
   useEffect(() => {

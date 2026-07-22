@@ -29,7 +29,7 @@
  */
 
 import './no_results.scss';
-import React, { Fragment, useEffect, useMemo, useState } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 import { I18nProvider } from '@osd/i18n/react';
 
 import {
@@ -191,8 +191,9 @@ export const DiscoverNoResults = ({ queryString, query, savedQuery, timeFieldNam
     // Samples for the language
     const newSampleQueries: any = [];
     if (query?.language) {
-      const languageSampleQueries = queryString.getLanguageService()?.getLanguage(query.language)
-        ?.sampleQueries;
+      const languageSampleQueries = queryString
+        .getLanguageService()
+        ?.getLanguage(query.language)?.sampleQueries;
       if (Array.isArray(languageSampleQueries)) {
         newSampleQueries.push(...languageSampleQueries);
       }

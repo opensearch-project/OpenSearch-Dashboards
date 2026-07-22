@@ -27,7 +27,7 @@ import {
 import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
 import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
-import { stringify } from 'query-string';
+import qs from 'query-string';
 import rison from 'rison-node';
 import { lazy } from 'react';
 import { DataPublicPluginStart, DataPublicPluginSetup, opensearchFilters } from '../../data/public';
@@ -37,7 +37,6 @@ import { DEFAULT_APP_CATEGORIES, DEFAULT_NAV_GROUPS } from '../../../core/public
 import { WorkspaceAvailability } from '../../../../src/core/public';
 import { UrlGeneratorState } from '../../share/public';
 import { DocViewInput, DocViewInputFn } from './application/doc_views/doc_views_types';
-import { generateDocViewsUrl } from './application/components/doc_views/generate_doc_views_url';
 import { DocViewLink } from './application/doc_views_links/doc_views_links_types';
 import { DocViewsRegistry } from './application/doc_views/doc_views_registry';
 import { DocViewsLinksRegistry } from './application/doc_views_links/doc_views_links_registry';
@@ -79,6 +78,7 @@ declare module '../../share/public' {
 }
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import { ExplorePluginSetup } from '../../explore/public';
+import { ContextProviderStart } from '../../context_provider/public';
 
 /**
  * @public
@@ -150,14 +150,19 @@ export interface DiscoverStartPlugins {
   urlForwarding: UrlForwardingStart;
   inspector: InspectorPublicPluginStart;
   visualizations: VisualizationsStart;
+  contextProvider?: ContextProviderStart;
 }
 
 /**
  * Contains Discover, one of the oldest parts of OpenSearch Dashboards
  * Discover provides embeddables for Dashboards
  */
-export class DiscoverPlugin
-  implements Plugin<DiscoverSetup, DiscoverStart, DiscoverSetupPlugins, DiscoverStartPlugins> {
+export class DiscoverPlugin implements Plugin<
+  DiscoverSetup,
+  DiscoverStart,
+  DiscoverSetupPlugins,
+  DiscoverStartPlugins
+> {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
@@ -214,7 +219,7 @@ export class DiscoverPlugin
           queryString.getLanguageService().getLanguage(queryString.getQuery().language)
             ?.showDocLinks ?? undefined;
 
-        const hash = stringify(
+        const hash = qs.stringify(
           url.encodeQuery({
             _g: rison.encode({
               filters: globalFilters || [],
@@ -232,7 +237,7 @@ export class DiscoverPlugin
         )}/${encodeURIComponent(renderProps.hit._id)}?${hash}`;
 
         return {
-          url: generateDocViewsUrl(contextUrl),
+          url: `${baseUrl}${contextUrl}`,
           hide:
             (showDocLinks !== undefined ? !showDocLinks : false) ||
             !renderProps.indexPattern.isTimeBased(),
@@ -256,7 +261,7 @@ export class DiscoverPlugin
         }?id=${encodeURIComponent(renderProps.hit._id)}`;
 
         return {
-          url: generateDocViewsUrl(docUrl),
+          url: `${baseUrl}${docUrl}`,
           hide: showDocLinks !== undefined ? !showDocLinks : false,
         };
       },
@@ -307,7 +312,8 @@ export class DiscoverPlugin
 
     // If Explore plugin is enabled, it will register a Discover menu to the
     // side nav in observability workspaces, we should skip registration here.
-    if (!plugins.explore) {
+    // Also hide from observability when icon side nav is enabled.
+    if (!plugins.explore && !core.chrome.getIsIconSideNavEnabled()) {
       core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
         {
           id: PLUGIN_ID,
@@ -322,6 +328,7 @@ export class DiscoverPlugin
         id: PLUGIN_ID,
         category: undefined,
         order: 300,
+        euiIconType: 'discoverApp',
       },
     ]);
 
@@ -330,6 +337,7 @@ export class DiscoverPlugin
         id: PLUGIN_ID,
         category: undefined,
         order: 200,
+        euiIconType: 'discoverApp',
       },
     ]);
 
@@ -338,6 +346,7 @@ export class DiscoverPlugin
         id: PLUGIN_ID,
         category: undefined,
         order: 200,
+        euiIconType: 'discoverApp',
       },
     ]);
 
@@ -346,6 +355,7 @@ export class DiscoverPlugin
         id: PLUGIN_ID,
         category: undefined,
         order: 200,
+        euiIconType: 'discoverApp',
       },
     ]);
 

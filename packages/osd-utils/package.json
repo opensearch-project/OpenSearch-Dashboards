@@ -12,6 +12,7 @@
   "dependencies": {
     "@osd/config-schema": "1.0.0",
     "@osd/cross-platform": "1.0.0",
+    "ip-address": "^10.2.0",
     "load-json-file": "^6.2.0"
   }
 }

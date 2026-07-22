@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
 
 import { ScriptingHelpFlyout } from './help_flyout';
@@ -52,7 +51,7 @@ describe('ScriptingHelpFlyout', () => {
         isVisible={true}
         indexPattern={indexPatternMock}
         lang="painless"
-        executeScript={((() => {}) as unknown) as ExecuteScript}
+        executeScript={(() => {}) as unknown as ExecuteScript}
         onClose={() => {}}
       />
     );
@@ -66,7 +65,7 @@ describe('ScriptingHelpFlyout', () => {
         isVisible={true}
         indexPattern={indexPatternMock}
         lang="painless"
-        executeScript={((() => {}) as unknown) as ExecuteScript}
+        executeScript={(() => {}) as unknown as ExecuteScript}
         onClose={() => {}}
       />
     );

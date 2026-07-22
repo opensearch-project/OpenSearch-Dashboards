@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { TraceMetricsBar } from './trace_metrics_bar';
 import { TraceMetrics } from './hooks/use_trace_metrics';

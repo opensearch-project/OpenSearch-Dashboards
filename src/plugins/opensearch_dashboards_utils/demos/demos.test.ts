@@ -30,7 +30,6 @@
 
 import { result as counterResult } from './state_containers/counter';
 import { result as todomvcResult } from './state_containers/todomvc';
-import { result as urlSyncResult } from './state_sync/url';
 
 describe('demos', () => {
   describe('state containers', () => {
@@ -48,8 +47,20 @@ describe('demos', () => {
 
   describe('state sync', () => {
     test('url sync demo works', async () => {
+      // The url.ts demo module must be loaded inside the test body so it runs
+      // after Jest's jsdom environment is fully initialised. A static top-level
+      // import executes during module evaluation (before any test setup), which
+      // in jsdom 26 means window.history.pushState updates may not be reflected
+      // in window.location.href by the time the demo's result promise resolves.
+      // jest.isolateModules() gives us a fresh module registry scoped to this
+      // callback, so the demo re-executes in a clean state right here.
+      let urlSyncResult!: Promise<string>;
+      jest.isolateModules(() => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        urlSyncResult = require('./state_sync/url').result;
+      });
       expect(await urlSyncResult).toMatchInlineSnapshot(
-        `"http://localhost/#?_s=(todos:!((completed:!f,id:0,text:'Learning%20state%20containers'),(completed:!f,id:2,text:test)))"`
+        `"http://localhost:5601/#?_s=(todos:!((completed:!f,id:0,text:'Learning%20state%20containers'),(completed:!f,id:2,text:test)))"`
       );
     });
   });

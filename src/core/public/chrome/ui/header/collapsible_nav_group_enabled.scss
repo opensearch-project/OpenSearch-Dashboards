@@ -1,3 +1,7 @@
+// ════════════════════════════════════════════════════════════════
+// ── Original styles: EuiFlyout-based nav (default when enableIconSideNav is OFF) ──
+// ════════════════════════════════════════════════════════════════
+
 .context-nav-wrapper {
   top: var(--global-banner-height, 0);
   height: calc(100% - var(--global-banner-height, 0));
@@ -94,6 +98,18 @@
     display: flex;
     -ms-overflow-style: -ms-autohiding-scrollbar;
 
+    // Some footer controls are mount-point-only with no rendered output (e.g. the
+    // trigger-less keyboard-shortcut listener that just keeps shift+/ active).
+    // HeaderNavControls still wraps each in a flex child, so an empty one would
+    // consume a `gap` slot and throw the icon row off-center. Hide footer items
+    // whose mounted content is empty. Targets the section-item wrapper directly
+    // (the `.nav-controls-padding` class is only applied when the nav is open, so
+    // scoping to it would miss the collapsed classic footer).
+    // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+    .euiHeaderSectionItem:has(> div:empty) {
+      display: none;
+    }
+
     &.bottom-container-collapsed {
       flex-direction: column;
       align-items: center;
@@ -143,5 +159,1122 @@
     position: relative;
     top: $ouiHeaderChildSize;
     left: 0;
+  }
+}
+
+// ════════════════════════════════════════════════════════════════
+// ── Icon side nav styles (only active when enableIconSideNav is ON) ──
+// ── These styles apply to the two-div sidebar pattern (.osd-sidebar) ──
+// ════════════════════════════════════════════════════════════════
+
+$osd-sidebar-width: 248px;
+$osd-sidebar-width-collapsed: 48px;
+$osd-sidebar-transition: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+
+// Shared surface for the hovered / open / active nav item AND the popover
+// panel, so a highlighted item and its popover read as one connected block.
+// Per-theme: light keeps the original subtle neutral grey (a 6% text/empty-shade
+// mix ≈ #eff2f4); dark uses the theme's "lightest shade" (#25262E over the
+// #1D1E24 panel) which has far better contrast than the same mix would in dark.
+// stylelint-disable-next-line @osd/stylelint/no_restricted_values
+$osd-nav-surface: lightOrDarkTheme(
+  mix($euiTextColor, $euiColorEmptyShade, 6%),
+  $euiColorLightestShade
+);
+$osd-nav-hover-tint: $osd-nav-surface;
+
+// Subtle rounded corners (kept rounded, not angled — just gentler than the
+// EUI defaults): 3px on nav rows/items, 6px on the popover card.
+$osd-nav-radius: 3px;
+$osd-nav-popover-radius: $euiSizeXS + 2px;
+
+// Gap div (hidden — layout push handled via CSS variable on app-wrapper)
+.osd-sidebar-gap {
+  display: none;
+}
+
+// Push the main app content and header to the right of the fixed sidebar.
+// The --osd-sidebar-width CSS variable is set by CollapsibleNavGroupEnabled via JS
+// ONLY when enableIconSideNav is true.
+// No transition on margin-left — animating it forces full page relayout every frame,
+// which is very expensive on content-heavy pages (Discover, Traces).
+// The sidebar's own width transition + overflow:hidden handles the visual slide.
+// stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+.app-wrapper {
+  // stylelint-disable-next-line length-zero-no-unit
+  margin-left: var(--osd-sidebar-width, 0px);
+}
+
+#globalHeaderBars {
+  // stylelint-disable-next-line length-zero-no-unit
+  margin-left: var(--osd-sidebar-width, 0px);
+}
+
+// Fixed sidebar container
+.osd-sidebar {
+  position: fixed;
+  left: 0;
+  // stylelint-disable-next-line length-zero-no-unit
+  top: var(--global-banner-height, 0px);
+  // stylelint-disable-next-line length-zero-no-unit
+  height: calc(100vh - var(--global-banner-height, 0px));
+  width: $osd-sidebar-width;
+  z-index: $ouiZHeader - 3;
+  background-color: $euiSideNavBackgroundColor;
+  border-top-right-radius: $euiSizeL;
+  box-shadow: 1px 0 0 $euiBorderColor;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: width $osd-sidebar-transition;
+  will-change: width;
+
+  // Force GPU compositing — avoids Firefox reflow jitter on width transitions
+  transform: translateZ(0);
+  backface-visibility: hidden;
+
+  // Limit reflow scope — sidebar contents don't affect outside layout
+  contain: layout style;
+
+  &[data-state="collapsed"] {
+    width: $osd-sidebar-width-collapsed;
+  }
+}
+
+// Fixed min-height for the top panel — ensures nav item icons start at the
+// same Y offset in both collapsed and expanded states.
+$osd-sidebar-top-min-height: 116px;
+
+.osd-sidebar-top-panel {
+  flex-grow: 0;
+  flex-shrink: 0;
+  min-height: $osd-sidebar-top-min-height;
+}
+
+// Inner wrapper
+.osd-sidebar-inner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+
+  // Prevent inner content from triggering parent reflow during transition
+  contain: layout style;
+}
+
+// Nav item styles inside .osd-sidebar
+// stylelint-disable-next-line no-duplicate-selectors
+.osd-sidebar {
+  .nav-link-item {
+    padding: $euiSizeS;
+    border-radius: $euiSizeS;
+    box-shadow: none;
+    margin-bottom: 0;
+    margin-top: 0;
+
+    .nav-link-item-btn {
+      margin-bottom: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+  }
+
+  .nav-link-parent-item {
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-bottom: $euiSizeS;
+
+    > .nav-link-item-btn {
+      padding: $euiSizeS;
+      margin-bottom: $euiSizeXS;
+    }
+
+    svg {
+      display: none;
+    }
+
+    .leftNavCustomizedAccordionIcon {
+      display: inline-block;
+    }
+  }
+
+  .nav-link-item-category-button {
+    margin-bottom: $euiSizeXS;
+
+    .nav-link-item {
+      padding: $euiSizeXS $euiSizeS;
+    }
+  }
+
+  .nav-link-item-category-item {
+    margin-top: $euiSizeL;
+  }
+
+  .nav-link-fake-item {
+    margin-top: 0;
+  }
+
+  .nav-link-fake-item-button {
+    display: none;
+  }
+
+  .nav-nested-item {
+    padding: $euiSizeS 0;
+
+    &::after,
+    .nav-link-item-btn::after {
+      background-color: $euiColorDarkShade;
+    }
+
+    &:last-of-type::after {
+      height: 20px;
+    }
+  }
+
+  .left-navigation-wrapper {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .flex-1-container {
+    flex: 1;
+    min-height: 0;
+  }
+
+  .bottom-container {
+    padding: 0 $euiSizeM;
+    display: flex;
+    -ms-overflow-style: -ms-autohiding-scrollbar;
+
+    // Hide mount-point-only footer controls that render nothing (e.g. the
+    // trigger-less keyboard-shortcut listener) so their empty flex slot doesn't
+    // consume a `gap` and off-center the icon row. See the matching note above.
+    // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+    .euiHeaderSectionItem:has(> div:empty) {
+      display: none;
+    }
+
+    &.bottom-container-collapsed {
+      flex-direction: column;
+
+      // Stretch children to the full 48px rail width (not center) and drop the
+      // 12px side padding, so a footer control (e.g. Dev Tools) fills the rail
+      // and its hover popover anchors from the rail's right edge — flush, like
+      // the nav leaf icons. Each control centers its own button internally.
+      align-items: stretch;
+      gap: $euiSize;
+      padding: $euiSizeS 0;
+
+      // The control wrapper + its EuiPopover anchor chain default to hugging
+      // their content (~40px), which leaves the popover anchored 4px short of
+      // the rail edge. Force the chain to the full rail width so the hover
+      // popover lands flush against the rail like the nav leaf icons.
+      // Scoped to the footer control's OWN wrapper + a `.nav-controls-padding`
+      // direct child rather than a bare descendant `.euiPopover` selector, so we
+      // don't restyle arbitrary popovers a future footer control might render
+      // (e.g. a menu inside its own panel).
+      > * {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+      }
+
+      /* stylelint-disable @osd/stylelint/no_modifying_global_selectors */
+      .nav-controls-padding > .euiPopover,
+      .nav-controls-padding > .euiPopover > .euiPopover__anchor {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+      }
+      /* stylelint-enable @osd/stylelint/no_modifying_global_selectors */
+    }
+
+    &.bottom-container-expanded {
+      gap: $euiSizeM;
+      padding-top: $euiSizeM;
+      padding-bottom: $euiSizeM;
+      border-top: $euiBorderThin;
+      border-color: $euiColorMediumShade;
+    }
+  }
+
+  .navGroupEnabledNavTopWrapper {
+    // Pull the top row up so the logo's vertical center lines up with the
+    // chrome header's recent-items/breadcrumb row (was offset ~12px lower from
+    // the EuiPanel padding + spacer above it).
+    padding: 0 $euiSizeS;
+
+    .navGroupEnabledHomeIcon {
+      margin-left: $euiSizeS;
+    }
+  }
+
+  .searchBar-wrapper {
+    padding: $euiSize;
+    padding-top: $euiSizeS;
+    background-color: transparent;
+    flex-grow: 0;
+
+    .searchInput {
+      background-color: transparentize($euiFormBackgroundColor, 0.5);
+    }
+
+    .searchInput:focus {
+      background-color: $euiFormBackgroundColor;
+    }
+  }
+
+  .searchBarIcon {
+    position: relative;
+    top: $ouiHeaderChildSize;
+    left: 0;
+  }
+}
+
+// ════════════════════════════════════════════════════════════════
+// ── Observability hardcoded nav styles ──
+// ════════════════════════════════════════════════════════════════
+
+// Cluster gap: inserted in the expanded nav before a top-level item whose
+// registration opts into `startCluster`, and before every category block.
+// Provides the "visual grouping" intended by plugins without changing
+// ordering semantics.
+.obs-nav-cluster-gap {
+  height: $euiSizeM;
+}
+
+// Cluster gap for the collapsed icon rail — a subtle centered hairline
+// separator (50% of the rail width) instead of plain empty space, so the
+// icon groups read as distinct clusters. The flex item is centered in a
+// column with align-items:center, so give it the full rail width to anchor
+// the 50% hairline (otherwise it shrinks to 0 and the line disappears).
+.obsCollapsedNav-clusterGap {
+  height: $euiSizeM;
+  width: $osd-sidebar-width-collapsed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &::before {
+    content: "";
+    width: 50%;
+    height: 1px;
+    background-color: $euiBorderColor;
+  }
+}
+
+// Agent Traces/Spans badge halo: the small circle behind the AI sparkle/diamond
+// badge that punches it out from the glyph lines. Filled with the sidebar
+// background color (compiled per-theme) so it reads cleanly in light AND dark —
+// a hardcoded white halo looked wrong on the dark panel. When the badge sits on
+// a hovered/active row (which paints the surface tint), match that surface so
+// the halo blends with the row instead of showing a background-colored disc.
+.agentBadgeHalo {
+  fill: $euiSideNavBackgroundColor;
+}
+
+.obs-nav-item:hover .agentBadgeHalo,
+.obs-nav-item[data-active="true"] .agentBadgeHalo,
+.obsCollapsedNavIcon:hover .agentBadgeHalo,
+.obsSimplePopover-anchor--open .agentBadgeHalo,
+.obsSimplePopover-anchor--active .agentBadgeHalo {
+  fill: $osd-nav-surface;
+}
+
+// Remove blue focus ring on mouse click — keep :focus-visible for keyboard a11y
+.obs-expanded-nav {
+  a:focus:not(:focus-visible),
+  button:focus:not(:focus-visible) {
+    outline: none !important;
+    box-shadow: none !important;
+  }
+}
+
+.obs-nav-category-toggle:focus:not(:focus-visible),
+.obs-nav-item-toggle:focus:not(:focus-visible) {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+// Monochrome icon rendering
+// App icons (dashboardApp, discoverApp, etc.) ship with two-tone SVGs.
+// EUI renders them as .ouiIcon (not .euiIcon). The secondary fill class
+// .ouiIcon__fillSecondary gets a contrasting color by default. Override both.
+.obs-nav-icon,
+.obsCollapsedNavIcon {
+  /* stylelint-disable @osd/stylelint/no_modifying_global_selectors */
+  .ouiIcon {
+    fill: currentColor;
+
+    .ouiIcon__fillSecondary {
+      fill: currentColor;
+    }
+  }
+  /* stylelint-enable @osd/stylelint/no_modifying_global_selectors */
+}
+
+// Expanded nav — align icons with collapsed state (centered in 48px strip)
+// Collapsed icon center: (48 - 28) / 2 + 14 = 24px
+// Expanded: 2px + 8px item padding + 14px icon center = 24px ✓
+// stylelint-disable-next-line no-duplicate-selectors
+.obs-expanded-nav {
+  padding: $euiSizeS 0;
+  padding-left: 2px;
+  padding-right: $euiSizeS;
+}
+
+// Reset button UA styles so <button> parent rows match <a> leaf rows and
+// stretch full width (fixes the parent hover highlight not covering the row).
+.obs-nav-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: transparent;
+  appearance: none;
+  font: inherit;
+  padding: $euiSizeXS $euiSizeS;
+  border-radius: $osd-nav-radius;
+  text-decoration: none;
+  color: $euiTextColor;
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease;
+
+  &:hover {
+    // Bleed the hover grey full-width to the rail edge (past the nav's 8px
+    // right padding) and square the right corners, so rows WITHOUT a popover
+    // (e.g. Topology Map) fill the rail on hover with no white sliver — matching
+    // the popover-open / active treatments.
+    background-color: $osd-nav-hover-tint;
+    width: calc(100% + #{$euiSizeS});
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    text-decoration: none;
+  }
+
+  &[data-active="true"] {
+    // Same solid grey as the hovered/open row + popover panel, and bleed the
+    // grey full-width to the rail edge (matching the hover-open treatment) so
+    // the selected row reads identically to a hovered one — not a slightly
+    // different translucent tint.
+    background-color: $osd-nav-surface;
+    width: calc(100% + #{$euiSizeS});
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    color: $euiTextColor;
+    font-weight: $euiFontWeightMedium;
+    position: relative;
+
+    &::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 4px;
+      bottom: 4px;
+      width: 3px;
+      background-color: $euiColorPrimary;
+      border-radius: 0 2px 2px 0;
+    }
+  }
+}
+
+// Button variant for items with custom onClick (e.g. dev tools modal)
+.obs-nav-item-button {
+  width: 100%;
+  border: none;
+  background: none;
+  text-align: left;
+  font: inherit;
+}
+
+.obs-nav-item-row {
+  min-height: 28px;
+}
+
+// Label glide: the label fades + slides toward the (pinned) icon as the rail
+// collapses, and slides back out as it expands — the shadcn "glide" effect.
+// The icon cell never transforms, so it reads as staying in place.
+.obs-nav-label {
+  transition: opacity $osd-sidebar-transition, transform $osd-sidebar-transition;
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.osd-sidebar[data-state="collapsed"] .obs-nav-label {
+  opacity: 0;
+  transform: translateX(-8px);
+}
+
+.obs-nav-icon {
+  // Match collapsed icon sizing (28x28 button, 16x16 icon)
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  .ouiIcon {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+// Animated chevron for collapsible items and sections (shadcn-style rotation)
+.obs-nav-chevron {
+  transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
+
+  &[data-collapsed="true"] {
+    transform: rotate(-90deg);
+  }
+}
+
+// Inline children (Alerts, Anomaly Detection)
+// Indent to align with text next to the 28px icon container + gutterSize s (8px)
+.obs-nav-children {
+  padding-left: 44px; // 8px item padding + 28px icon + 8px gutter
+  margin-top: $euiSizeXS;
+}
+
+// Smooth collapsible animation using CSS grid trick
+.obs-nav-collapsible-wrapper {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 200ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  &[data-collapsed="true"] {
+    grid-template-rows: 0fr;
+  }
+
+  > .obs-nav-collapsible-inner {
+    // The grid-trick (1fr↔0fr) needs the inner to clip vertically while
+    // animating. But plain `overflow: hidden` also clips horizontally, which
+    // cuts off child rows' full-width hover/active grey bleed at the rail edge
+    // (white gap on e.g. Notebooks). Extend the inner box past the nav's 8px
+    // right padding so the bleed fits inside the clip region instead of being
+    // cropped.
+    overflow: hidden;
+    margin-right: -$euiSizeS;
+    padding-right: $euiSizeS;
+  }
+}
+
+.obs-nav-child-item {
+  display: block;
+  padding: $euiSizeXS $euiSizeS;
+  border-radius: $osd-nav-radius;
+  text-decoration: none;
+  color: $euiTextSubduedColor;
+  transition: color 150ms ease, background-color 150ms ease;
+
+  &:hover {
+    color: $euiColorPrimary;
+    text-decoration: none;
+  }
+
+  &[data-active="true"] {
+    background-color: $osd-nav-surface;
+    color: $euiTextColor;
+    font-weight: $euiFontWeightMedium;
+    position: relative;
+
+    &::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 4px;
+      bottom: 4px;
+      width: 3px;
+      background-color: $euiColorPrimary;
+      border-radius: 0 2px 2px 0;
+    }
+  }
+}
+
+// Category labels — shadcn-style: small, muted, no uppercase
+.obs-nav-category-label {
+  padding: $euiSizeM $euiSizeS $euiSizeXS;
+  color: $euiTextSubduedColor;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+// Dividers
+.obs-nav-divider {
+  margin: $euiSizeXS 0;
+}
+
+// ── Icon side nav top bar — single DOM, CSS-driven layout transitions ──
+
+.iconSideNavTop {
+  // Row 1: logo + action buttons in a horizontal row
+  .iconSideNavTop__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    white-space: nowrap;
+  }
+
+  // Action buttons — search in its own slot, then the chrome-control pair
+  // (collapse + pin) grouped at the trailing edge. A gap + thin divider between
+  // them keeps the destination affordance (search) visually distinct from the
+  // chrome controls.
+  .iconSideNavTop__actions {
+    display: flex;
+    align-items: center;
+    gap: $euiSizeS;
+    transition: opacity $osd-sidebar-transition;
+    opacity: 1;
+  }
+
+  .iconSideNavTop__chromeControls {
+    display: flex;
+    align-items: center;
+    gap: $euiSizeXS;
+    padding-left: $euiSizeS;
+    border-left: $euiBorderThin;
+  }
+
+  // Row 2: collapsed-only controls (hamburger + search stacked)
+  .iconSideNavTop__collapsedControls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: $euiSizeXS;
+    transition: opacity $osd-sidebar-transition;
+    opacity: 0;
+    height: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  // ── Expanded state ──
+  &.iconSideNavTop--expanded {
+    // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+    .iconSideNavTop__logo .ouiIcon {
+      transition: width $osd-sidebar-transition, height $osd-sidebar-transition;
+    }
+  }
+
+  // ── Collapsed state ──
+  &.iconSideNavTop--collapsed {
+    .iconSideNavTop__row {
+      justify-content: center;
+    }
+
+    .iconSideNavTop__actions {
+      opacity: 0;
+      width: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .iconSideNavTop__collapsedControls {
+      opacity: 1;
+      height: auto;
+      overflow: visible;
+      pointer-events: auto;
+    }
+
+    .navGroupEnabledHomeIcon {
+      margin-left: 0;
+    }
+  }
+}
+
+// Collapsed sidebar overrides — center content in 48px
+// stylelint-disable-next-line no-duplicate-selectors
+.osd-sidebar[data-state="collapsed"] {
+  .navGroupEnabledNavTopWrapper {
+    // No top padding so the logo lines up vertically with the chrome header
+    // row (the EuiSpacer above already provides a small offset).
+    padding: 0;
+  }
+}
+
+// Collapsible section toggle (category-level accordion)
+.obs-nav-category-toggle {
+  display: block;
+  width: 100%;
+  padding: $euiSizeM $euiSizeS $euiSizeXS;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+
+  &:hover {
+    background-color: $osd-nav-surface;
+    border-radius: $osd-nav-radius;
+  }
+
+  .obs-nav-category-label-text {
+    color: $euiTextSubduedColor;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    text-transform: none;
+  }
+}
+
+// Collapsible item toggle (item-level accordion, e.g. Anomaly Detection, Alerting)
+.obs-nav-item-toggle {
+  display: block;
+  width: 100%;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+// Iconless items inside collapsible sections (Manage Workspace children)
+// Indent to align with text of icon-bearing items: 28px icon + 8px gutter = 36px
+.obs-nav-collapsible-section .obs-nav-item-row--no-icon {
+  padding-left: 36px;
+}
+
+// Smooth show/hide for expanded ↔ collapsed nav transition.
+// Both components stay mounted; CSS handles opacity + pointer-events.
+// Asymmetric crossfade: the incoming body fades in slightly delayed while the
+// outgoing one fades out fast, so the two icon sets never show together at ~50%
+// (which previously read as a flash/swap). Combined with the matched icon
+// x-position + label glide, the icon reads as continuous.
+.obs-nav-scroll-container,
+.obsCollapsedNav-wrapper {
+  transition: opacity 180ms ease 100ms;
+  opacity: 1;
+
+  &.obs-nav-hidden {
+    opacity: 0;
+    transition: opacity 120ms ease;
+    pointer-events: none;
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+  }
+}
+
+// Wrapper for collapsed nav (keeps flex layout when visible)
+.obsCollapsedNav-wrapper {
+  flex: 1;
+  min-height: 0;
+}
+
+// Scroll container for expanded observability nav
+.obs-nav-scroll-container {
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+  padding: 0;
+}
+
+// Collapsed observability nav
+.obsCollapsedNav {
+  padding: ($euiSizeS + $euiSizeXS) 0 $euiSizeS; // 12px top to match expanded .obs-nav-item 4px padding
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  .obsCollapsedNavIcon {
+    width: 28px;
+    height: 28px;
+
+    // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+    .euiIcon {
+      width: 16px;
+      height: 16px;
+    }
+  }
+}
+
+// Popover arrow indicator (Datadog-style) — shows a small chevron on collapsed icons
+// that have a popover submenu. Arrow sits inside the icon bounding box.
+.obsCollapsedNavIcon-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  .obsCollapsedNav-popoverArrow {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 6px;
+    height: 6px;
+    color: $euiTextSubduedColor;
+    opacity: 0.5;
+    pointer-events: none;
+  }
+}
+
+.obsCollapsedNav-divider {
+  width: 24px;
+  margin: $euiSizeXS auto;
+}
+
+// ── Nav item hover popover (declarative actions + custom content + child list) ──
+// Hover-popover anchor wrapper. Shrinks to its trigger by default (so the
+// collapsed icon rail does not get a full-width click target); the --fullWidth
+// modifier makes it fill its container for the full-width expanded nav rows.
+.obsSimplePopover-anchor {
+  display: inline-flex;
+}
+
+.obsSimplePopover-anchor--fullWidth {
+  display: block;
+  width: 100%;
+}
+
+// While a nav item's popover is open, the triggering row keeps the grey hover
+// tint and squares its right edge so it flows into the flush popover beside it
+// (the popover panel uses the same grey, so item + panel read as one block).
+// Expanded nav: when a row's popover is open, paint the grey on the anchor
+// wrapper and bleed it past the nav's 8px right padding + 1px right border to
+// the rail edge, so the row's grey meets the flush grey popover with no white
+// sliver or border line between them.
+.obs-expanded-nav .obsSimplePopover-anchor--open {
+  // Same solid grey as the popover panel so the row and panel are identical.
+  background-color: $osd-nav-surface;
+
+  // The anchor is width:100% inside the nav's 8px right padding (+1px border).
+  // Extend its width past that so the grey reaches the rail edge and meets the
+  // flush popover with no white sliver / border line.
+  width: calc(100% + #{$euiSizeS} + 1px);
+  border-top-left-radius: $euiSizeXS;
+  border-bottom-left-radius: $euiSizeXS;
+
+  .obs-nav-item,
+  .obs-nav-item:hover,
+  .obs-nav-item:focus {
+    background-color: transparent;
+    border-radius: 0;
+
+    // The anchor wrapper already bleeds full-width; keep the inner row at 100%
+    // so it doesn't double-extend past the rail.
+    width: 100%;
+  }
+}
+
+// Collapsed rail: when an icon's popover is open, the icon button shows a grey
+// background that bleeds to the rail's right edge so it connects to the flush
+// grey popover beside it (no white gap between the icon highlight and panel).
+.obsCollapsedNav .obsSimplePopover-anchor--open {
+  // Fill the full 48px rail width (the icon button is only 28px) so the grey
+  // reaches the rail edge and meets the flush popover beside it with no gap,
+  // mirroring the expanded full-width row treatment. Centered in the rail.
+  align-self: stretch;
+  display: flex;
+  justify-content: center;
+  width: $osd-sidebar-width-collapsed;
+  background-color: $osd-nav-surface;
+
+  // Square the right edge so the grey runs cleanly into the flush popover.
+  border-radius: $osd-nav-radius 0 0 $osd-nav-radius;
+
+  .obsCollapsedNavIcon,
+  .obsCollapsedNavIcon:hover {
+    background-color: transparent;
+  }
+}
+
+// Collapsed rail: the current/selected icon gets the same treatment as the
+// expanded selected row — full-rail grey fill plus a blue vertical accent bar
+// on the rail edge — instead of EUI's solid blue button fill, so selection
+// reads consistently across collapsed and expanded states.
+.obsCollapsedNav .obsSimplePopover-anchor--active {
+  position: relative;
+  align-self: stretch;
+  display: flex;
+  justify-content: center;
+  width: $osd-sidebar-width-collapsed;
+  background-color: $osd-nav-surface;
+  border-radius: $osd-nav-radius 0 0 $osd-nav-radius;
+
+  // Full-height accent bar (top to bottom of the grey cell) for a crisp, bold
+  // selection marker on the rail edge.
+  &::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background-color: $euiColorPrimary;
+    border-radius: 0 2px 2px 0;
+  }
+
+  .obsCollapsedNavIcon,
+  .obsCollapsedNavIcon:hover {
+    background-color: transparent;
+  }
+}
+
+// ── shadcn-inspired popover ──
+// Clean, low-chrome menu: crisp 8px-radius panel, hairline border, soft shadow,
+// a muted section label, and compact rows that highlight on hover. The visual
+// container (border/radius/shadow) is applied to the EuiPopover panel via the
+// .obsNavPopover--shadcn panelClassName so the default EUI panel chrome is
+// replaced rather than layered on top.
+// Opacity-only entrance (no x-translate, so the panel never slides across the
+// seam and flashes a gap). Positioning is pinned flush below.
+@keyframes obsNavPopoverFade {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+// The panel butts flush against the nav edge: left corners squared, no left
+// border, and a shadow that only casts right/down so the left edge merges into
+// the nav background instead of reading as a detached floating card.
+// EUI anchors `rightUp` with a residual inline `transform: translateX(-8px)`.
+// For the expanded nav the inline `left` already equals the nav's right edge
+// (248px), so we just neutralize the -8px to land flush. The collapsed --rail
+// variant overrides this (its inline `left` differs — see below).
+// stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+.euiPopover__panel.obsNavPopover-panel {
+  border: $euiBorderThin;
+
+  // EUI anchors `rightUp` with the panel top ~4px above the trigger row and a
+  // residual `translateX(-8px)`. Neutralize both so the panel sits flush to the
+  // nav's right edge AND its top aligns with the hovered row (verified: expanded
+  // delta was -4px).
+  transform: translate(0, 4px) !important;
+
+  // Match the hovered/open nav item's grey tint (baked solid) so the item and
+  // its popover read as one connected block.
+  background-color: $osd-nav-surface;
+
+  // stylelint-disable-next-line @osd/stylelint/no_restricted_values
+  box-shadow: 6px 8px 24px rgba($euiShadowColor, 0.18);
+  animation: obsNavPopoverFade 140ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  // Drop the default EUI popover arrow for the flat shadcn look.
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  .euiPopover__panelArrow {
+    display: none;
+  }
+}
+
+// Seam side is direction dependent: in LTR the panel opens to the RIGHT of the
+// nav (seam on its LEFT edge); in RTL EUI mirrors it to the LEFT (seam on its
+// RIGHT edge). Drop the border and square the corners on the seam side so the
+// panel reads as one surface with the hovered row, mirrored per `dir`.
+// stylelint-disable @osd/stylelint/no_modifying_global_selectors
+.euiPopover__panel.obsNavPopover-panel:not([dir="rtl"]) {
+  border-left: none;
+  border-radius: 0 $osd-nav-popover-radius $osd-nav-popover-radius 0;
+}
+
+.euiPopover__panel.obsNavPopover-panel[dir="rtl"] {
+  border-right: none;
+  border-radius: $osd-nav-popover-radius 0 0 $osd-nav-popover-radius;
+}
+// stylelint-enable @osd/stylelint/no_modifying_global_selectors
+
+// Collapsed rail popover positioning. The open anchor fills the full 48px rail
+// width, which shifts EUI's rightUp positioning ~9px right; pull the panel back
+// so its left edge lands flush on the rail edge (no gap), +8px down so the panel
+// top aligns with the hovered icon's row (verified live: rail-edge=48, left=48).
+// ---
+// This -8px pull is only correct when EUI keeps the panel on the RIGHT of the
+// anchor (`--right`). For a control near the bottom of the rail (e.g. Dev Tools)
+// EUI has no vertical room and FLIPS the panel to open upward (`--top`),
+// positioning it from a different origin — there the -8px shoves it off-screen
+// left, detached from the rail. So scope the pull to `--right`, and push the
+// flipped `--top`/`--bottom` panel right to the rail edge (+46px) instead.
+// stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+.euiPopover__panel.obsNavPopover-panel--rail.euiPopover__panel--right {
+  transform: translate(-8px, 8px) !important;
+}
+
+// stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+.euiPopover__panel.obsNavPopover-panel--rail.euiPopover__panel--top,
+.euiPopover__panel.obsNavPopover-panel--rail.euiPopover__panel--bottom {
+  // +46px right to the rail edge, and +32px down so the panel's bottom aligns
+  // with the hovered icon's row (it sits BESIDE the icon, not floating above it
+  // with a diagonal gap). Verified live: rail-edge=48, panel overlaps icon row.
+  transform: translate(46px, 32px) !important;
+}
+
+.obsNavPopover {
+  min-width: 240px;
+  max-width: 320px;
+}
+
+.obsNavPopover-content {
+  padding: $euiSizeXS;
+  overflow-y: auto;
+  max-height: 420px;
+}
+
+.obsNavPopover-section {
+  & + & {
+    margin-top: $euiSizeXS;
+    padding-top: $euiSizeXS;
+    border-top: $euiBorderThin;
+  }
+}
+
+// Muted section label (e.g. "Teams" / "Actions"): small, subdued, sentence case.
+.obsNavPopover-sectionTitle {
+  display: block;
+  padding: $euiSizeXS $euiSizeS;
+  color: $euiTextSubduedColor;
+  font-size: 11px;
+  font-weight: $euiFontWeightMedium;
+  letter-spacing: 0.02em;
+}
+
+.obsNavPopover-item {
+  position: relative;
+  display: block;
+  width: 100%;
+  min-height: $euiSizeL; // ~24px compact shadcn row
+  text-align: left;
+  border: none;
+  background: transparent;
+  padding: $euiSizeXS $euiSizeS;
+  border-radius: $osd-nav-radius;
+  cursor: pointer;
+  color: $euiTextColor;
+  transition: background-color $euiAnimSpeedFast ease-in, color $euiAnimSpeedFast ease-in;
+
+  &:hover,
+  &:focus {
+    background-color: transparentize($euiColorPrimary, 0.9);
+    color: $euiColorPrimaryText;
+
+    .obsNavPopover-itemIcon {
+      color: $euiColorPrimary;
+    }
+  }
+
+  // Active (current page) row: primary tint + left accent bar + medium weight,
+  // mirroring the nav rows' active treatment.
+  &[data-active="true"] {
+    background-color: transparentize($euiColorPrimary, 0.9);
+    color: $euiColorPrimaryText;
+    font-weight: $euiFontWeightMedium;
+
+    .obsNavPopover-itemIcon {
+      color: $euiColorPrimary;
+    }
+
+    &::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 4px;
+      bottom: 4px;
+      width: 3px;
+      background-color: $euiColorPrimary;
+      border-radius: 0 2px 2px 0;
+    }
+  }
+}
+
+.obsNavPopover-itemRow {
+  display: flex;
+  align-items: center;
+  gap: $euiSizeS;
+}
+
+.obsNavPopover-itemIcon {
+  flex-shrink: 0;
+  color: $euiTextSubduedColor;
+  transition: color $euiAnimSpeedFast ease-in;
+}
+
+// Item labels sit at the default body size (~14px) rather than the cramped
+// 12px the small EuiText would give, and truncate cleanly when too long.
+.obsNavPopover-itemLabel {
+  display: block;
+  flex-grow: 1;
+  font-size: $euiFontSizeS;
+  line-height: $euiLineHeight;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// Secondary (cascading) popover panel: nudge it toward the primary panel so it
+// sits flush against the primary's adjacent edge, with the seam-side corners
+// squared + that border removed so the two read as one continuous surface.
+// The seam is direction-dependent: in LTR the secondary opens to the RIGHT of
+// the primary (seam on its LEFT edge); in RTL EUI mirrors the anchor so it opens
+// to the LEFT (seam on its RIGHT edge). We therefore mirror the corner/border/
+// nudge per direction. The transform is `!important` to override EUI's inline
+// positioning transform; the small px nudge just closes EUI's default rightUp
+// gap (~3px) and overlaps ~2px so the borders merge into one seam.
+// stylelint-disable @osd/stylelint/no_modifying_global_selectors
+.euiPopover__panel.obsNavPopover-panel--secondary:not([dir="rtl"]) {
+  border-left: none;
+  border-radius: 0 $osd-nav-popover-radius $osd-nav-popover-radius 0;
+  transform: translate(-5px, 0) !important;
+}
+
+.euiPopover__panel.obsNavPopover-panel--secondary[dir="rtl"] {
+  border-right: none;
+  border-radius: $osd-nav-popover-radius 0 0 $osd-nav-popover-radius;
+  transform: translate(5px, 0) !important;
+}
+// stylelint-enable @osd/stylelint/no_modifying_global_selectors
+
+.obsNavPopover-emptyState {
+  display: block;
+  padding: $euiSizeXS $euiSizeS;
+}
+
+// Match the popover title header height to the collapsed icon cell (28px), so
+// the header band and the selected icon's grey area are the same height.
+// EUI's paddingSize="s" yields 8px top/bottom (+1px border) = 34px; trim the
+// vertical padding to 5px so 5 + 5 + 17px line + 1px border = 28px.
+// stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+.euiPopover__panel.obsNavPopover-panel .euiPopoverTitle {
+  padding-top: $euiSizeXS + 1px;
+  padding-bottom: $euiSizeXS + 1px;
+}
+
+// Title-only popover (a collapsed leaf with no registered actions/content):
+// behaves like a tooltip but uses the same card styling for consistency.
+.obsNavPopover--titleOnly {
+  min-width: 0;
+
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  .euiPopoverTitle {
+    border-bottom: none;
+  }
+}
+
+// Respect the user's reduced-motion preference: keep the same end states but
+// drop all the icon-side-nav tweens (rail width, label glide, crossfade,
+// popover entrance, chevrons, accordion grid).
+@media (prefers-reduced-motion: reduce) {
+  .osd-sidebar,
+  .osd-sidebar .obs-nav-label,
+  .obs-nav-scroll-container,
+  .obsCollapsedNav-wrapper,
+  .obs-nav-chevron,
+  .obs-nav-collapsible-wrapper {
+    transition: none !important;
+  }
+
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  .euiPopover__panel.obsNavPopover-panel {
+    animation: none !important;
   }
 }

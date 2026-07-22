@@ -28,12 +28,32 @@
  * under the License.
  */
 
-const babelEslint = require('babel-eslint');
+const babelEslint = require('@babel/eslint-parser');
 
 const { assert, normalizeWhitespace, init } = require('../lib');
 
 function isHashbang(text) {
   return text.trim().startsWith('#!') && !text.trim().includes('\n');
+}
+
+/**
+ * Returns true if `text` consists solely of a Jest docblock pragma comment,
+ * e.g. `/** @jest-environment node *\/`.  These must appear before the license
+ * header so that jest-docblock can read them (it only inspects the first block
+ * comment in a file).
+ */
+function isJestDocblock(text) {
+  return /^\s*\/\*\*[\s\S]*?@jest-environment\s+\S+[\s\S]*?\*\/\s*$/.test(text);
+}
+
+/**
+ * If `sourceText` begins with a jest docblock pragma, returns the index
+ * immediately after it (past any trailing whitespace/newlines).  Returns 0
+ * otherwise, so callers can always use the result as a safe insertion point.
+ */
+function insertionPointAfterJestDocblock(sourceText) {
+  const match = sourceText.match(/^(\s*\/\*\*[\s\S]*?@jest-environment\s+\S+[\s\S]*?\*\/\s*)/);
+  return match ? match[1].length : 0;
 }
 
 module.exports = {
@@ -61,10 +81,38 @@ module.exports = {
           const options = context.options[0] || {};
           const licenses = options.licenses;
 
+          // Debug logging to understand the structure
+          if (!licenses) {
+            console.error('require-license-header: licenses option not found');
+            console.error('context.options:', JSON.stringify(context.options, null, 2));
+            console.error('options:', JSON.stringify(options, null, 2));
+          }
+
           assert(!!licenses, '"licenses" option is required');
 
           return licenses.map((license, i) => {
-            const parsed = babelEslint.parse(license);
+            let parsed;
+            try {
+              parsed = babelEslint.parse(license, {
+                sourceType: 'module',
+                requireConfigFile: false,
+                allowImportExportEverywhere: true,
+                allowReturnOutsideFunction: true,
+                ranges: true,
+                attachComments: true,
+              });
+            } catch (parseError) {
+              // If babel parsing fails, try a simpler regex approach
+              const commentMatch = license.match(/\/\*(.*?)\*\//s);
+              if (commentMatch) {
+                return {
+                  source: license,
+                  nodeValue: normalizeWhitespace(commentMatch[1]),
+                };
+              }
+              throw new Error(`Failed to parse license[${i}]: ${parseError.message}`);
+            }
+
             assert(
               !parsed.body.length,
               `"licenses[${i}]" option must only include a single comment`
@@ -83,7 +131,7 @@ module.exports = {
 
         if (!licenses || !licenses.length) return;
 
-        const sourceCode = context.getSourceCode();
+        const sourceCode = context.sourceCode;
         const comment = sourceCode
           .getAllComments()
           .find((node) =>
@@ -103,7 +151,9 @@ module.exports = {
                 return undefined;
               }
 
-              return fixer.replaceTextRange([0, 0], licenses[0].source + '\n\n');
+              const fullSource = sourceCode.getText();
+              const insertAt = insertionPointAfterJestDocblock(fullSource);
+              return fixer.replaceTextRange([insertAt, insertAt], licenses[0].source + '\n\n');
             },
           });
           return;
@@ -116,7 +166,11 @@ module.exports = {
         const sourceBeforeNode = sourceCode
           .getText()
           .slice(0, sourceCode.getIndexFromLoc(comment.loc.start));
-        if (sourceBeforeNode.length && !isHashbang(sourceBeforeNode)) {
+        if (
+          sourceBeforeNode.length &&
+          !isHashbang(sourceBeforeNode) &&
+          !isJestDocblock(sourceBeforeNode)
+        ) {
           context.report({
             node: comment,
             message: 'License header must be at the very beginning of the file',
@@ -126,11 +180,12 @@ module.exports = {
                 return fixer.replaceTextRange([0, sourceBeforeNode.length], '');
               }
 
-              // inject content at top and remove node from current location
-              // if removing whitespace is not possible
+              // inject content at top (after any jest docblock) and remove
+              // node from current location if removing whitespace is not possible
+              const insertAt = insertionPointAfterJestDocblock(sourceCode.getText());
               return [
                 fixer.remove(comment),
-                fixer.replaceTextRange([0, 0], currentLicense.source + '\n\n'),
+                fixer.replaceTextRange([insertAt, insertAt], currentLicense.source + '\n\n'),
               ];
             },
           });

@@ -197,6 +197,162 @@ describe('aggregate', () => {
     });
   });
 });
+describe('aggregate with multiple fields', () => {
+  const data = [
+    { product: 'A', sales: 100, quantity: 10 },
+    { product: 'A', sales: 150, quantity: 20 },
+    { product: 'B', sales: 200, quantity: 30 },
+    { product: 'B', sales: 120, quantity: 15 },
+  ];
+
+  it('aggregates multiple fields with SUM', () => {
+    const result = aggregate({
+      groupBy: 'product',
+      field: ['sales', 'quantity'],
+      aggregationType: AggregationType.SUM,
+    })(data);
+
+    expect(result).toEqual([
+      { product: 'A', sales: 250, quantity: 30 },
+      { product: 'B', sales: 320, quantity: 45 },
+    ]);
+  });
+
+  it('aggregates multiple fields with MEAN', () => {
+    const result = aggregate({
+      groupBy: 'product',
+      field: ['sales', 'quantity'],
+      aggregationType: AggregationType.MEAN,
+    })(data);
+
+    expect(result).toEqual([
+      { product: 'A', sales: 125, quantity: 15 },
+      { product: 'B', sales: 160, quantity: 22.5 },
+    ]);
+  });
+
+  it('aggregates multiple fields with MAX', () => {
+    const result = aggregate({
+      groupBy: 'product',
+      field: ['sales', 'quantity'],
+      aggregationType: AggregationType.MAX,
+    })(data);
+
+    expect(result).toEqual([
+      { product: 'A', sales: 150, quantity: 20 },
+      { product: 'B', sales: 200, quantity: 30 },
+    ]);
+  });
+
+  it('aggregates multiple fields with MIN', () => {
+    const result = aggregate({
+      groupBy: 'product',
+      field: ['sales', 'quantity'],
+      aggregationType: AggregationType.MIN,
+    })(data);
+
+    expect(result).toEqual([
+      { product: 'A', sales: 100, quantity: 10 },
+      { product: 'B', sales: 120, quantity: 15 },
+    ]);
+  });
+
+  it('aggregates multiple fields with COUNT', () => {
+    const result = aggregate({
+      groupBy: 'product',
+      field: ['sales', 'quantity'],
+      aggregationType: AggregationType.COUNT,
+    })(data);
+
+    expect(result).toEqual([
+      { product: 'A', sales: 2, quantity: 2 },
+      { product: 'B', sales: 2, quantity: 2 },
+    ]);
+  });
+
+  it('handles NaN in one field but valid in another', () => {
+    const mixedData = [
+      { product: 'A', sales: 100, quantity: 'invalid' },
+      { product: 'A', sales: 150, quantity: 20 },
+    ];
+
+    const result = aggregate({
+      groupBy: 'product',
+      field: ['sales', 'quantity'],
+      aggregationType: AggregationType.SUM,
+    })(mixedData);
+
+    expect(result).toEqual([{ product: 'A', sales: 250, quantity: 20 }]);
+  });
+
+  it('returns null for fields with no valid values', () => {
+    const mixedData = [
+      { product: 'A', sales: 100, quantity: 'invalid' },
+      { product: 'A', sales: 150, quantity: 'also-invalid' },
+    ];
+
+    const result = aggregate({
+      groupBy: 'product',
+      field: ['sales', 'quantity'],
+      aggregationType: AggregationType.SUM,
+    })(mixedData);
+
+    expect(result).toEqual([{ product: 'A', sales: 250, quantity: null }]);
+  });
+
+  it('handles time-based aggregation with multiple fields', () => {
+    const timeData = [
+      { timestamp: '2024-01-01T00:00:00Z', sales: 100, quantity: 10 },
+      { timestamp: '2024-01-01T12:00:00Z', sales: 150, quantity: 20 },
+      { timestamp: '2024-01-02T00:00:00Z', sales: 200, quantity: 30 },
+      { timestamp: '2024-01-02T12:00:00Z', sales: 180, quantity: 15 },
+    ];
+
+    const result = aggregate({
+      groupBy: 'timestamp',
+      field: ['sales', 'quantity'],
+      timeUnit: TimeUnit.DATE,
+      aggregationType: AggregationType.SUM,
+    })(timeData);
+
+    expect(result).toEqual([
+      { timestamp: new Date('2024-01-01T00:00:00.000Z'), sales: 250, quantity: 30 },
+      { timestamp: new Date('2024-01-02T00:00:00.000Z'), sales: 380, quantity: 45 },
+    ]);
+  });
+
+  it('handles empty data with multiple fields', () => {
+    const result = aggregate({
+      groupBy: 'product',
+      field: ['sales', 'quantity'],
+      aggregationType: AggregationType.SUM,
+    })([]);
+
+    expect(result).toEqual([]);
+  });
+
+  it('single-element array behaves same as string', () => {
+    const testData = [
+      { product: 'A', sales: 100 },
+      { product: 'A', sales: 150 },
+    ];
+
+    const arrayResult = aggregate({
+      groupBy: 'product',
+      field: ['sales'],
+      aggregationType: AggregationType.SUM,
+    })(testData);
+
+    const stringResult = aggregate({
+      groupBy: 'product',
+      field: 'sales',
+      aggregationType: AggregationType.SUM,
+    })(testData);
+
+    expect(arrayResult).toEqual(stringResult);
+  });
+});
+
 describe('aggregateByGroups', () => {
   const data = [
     { region: 'North', product: 'A', sales: 100 },

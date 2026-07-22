@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { i18n } from '@osd/i18n';
 import { convertToGeoJson, MapTypes } from '../../maps_legacy/public';
 import { Schemas } from '../../vis_default_editor/public';
@@ -155,7 +154,7 @@ export function createTileMapTypeDefinition(dependencies) {
       try {
         const serviceSettings = await getServiceSettings();
         tmsLayers = await serviceSettings.getTMSServices();
-      } catch (e) {
+      } catch {
         return vis;
       }
 

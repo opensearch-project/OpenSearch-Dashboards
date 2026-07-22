@@ -142,11 +142,11 @@ describe('Range filter builder', () => {
 
     expect(() => {
       buildRangeFilter(field, { gte: 1, gt: 3 }, indexPattern);
-    }).toThrowError();
+    }).toThrow();
 
     expect(() => {
       buildRangeFilter(field, { lte: 1, lt: 3 }, indexPattern);
-    }).toThrowError();
+    }).toThrow();
   });
 
   it('to use the right operator for each of gte, gt, lt and lte', () => {
@@ -223,9 +223,9 @@ describe('Range filter builder', () => {
 });
 
 describe('getRangeFilterField', function () {
-  const indexPattern: IIndexPattern = ({
+  const indexPattern: IIndexPattern = {
     fields,
-  } as unknown) as IIndexPattern;
+  } as unknown as IIndexPattern;
 
   test('should return the name of the field a range query is targeting', () => {
     const field = indexPattern.fields.find((patternField) => patternField.name === 'bytes');

@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { act } from 'react';
 
 import { CustomContentEmbeddable } from './custom_content_embeddable';

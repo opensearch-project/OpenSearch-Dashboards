@@ -151,14 +151,12 @@ export interface VisualizationsStartDeps {
  *
  * @internal
  */
-export class VisualizationsPlugin
-  implements
-    Plugin<
-      VisualizationsSetup,
-      VisualizationsStart,
-      VisualizationsSetupDeps,
-      VisualizationsStartDeps
-    > {
+export class VisualizationsPlugin implements Plugin<
+  VisualizationsSetup,
+  VisualizationsStart,
+  VisualizationsSetupDeps,
+  VisualizationsStartDeps
+> {
   private readonly types: TypesService = new TypesService();
   private getStartServicesOrDie?: StartServicesGetter<VisualizationsStartDeps, VisualizationsStart>;
 
@@ -213,10 +211,15 @@ export class VisualizationsPlugin
       overlays: core.overlays,
       application: core.application,
       savedObjects: core.savedObjects,
+      embeddable,
     });
 
     // Register Ask AI action for visualizations
-    const askAIAction = new AskAIVisualizeEmbeddableAction(core, contextProvider);
+    const askAIAction = new AskAIVisualizeEmbeddableAction(
+      core,
+      data.indexPatterns,
+      contextProvider
+    );
     uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, askAIAction);
 
     setDataStart(data);

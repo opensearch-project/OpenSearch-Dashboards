@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { EmptyIndexPatternPrompt } from '../empty_index_pattern_prompt';
 import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 

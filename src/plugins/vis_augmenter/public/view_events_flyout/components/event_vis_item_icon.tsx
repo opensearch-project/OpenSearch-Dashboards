@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { get } from 'lodash';
 import { EuiFlexItem, EuiNotificationBadge, EuiButtonIcon, EuiPopover } from '@elastic/eui';
 import './styles.scss';

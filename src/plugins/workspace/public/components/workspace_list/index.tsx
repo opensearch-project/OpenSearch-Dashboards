@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import moment from 'moment';
 import {
   EuiPage,
@@ -134,21 +134,19 @@ export const WorkspaceListInner = ({
   }, [savedObjects, uiSettings]);
 
   const newWorkspaceList: WorkspaceAttributeWithUseCaseIDAndDataSources[] = useMemo(() => {
-    return workspaceList.map(
-      (workspace): WorkspaceAttributeWithUseCaseIDAndDataSources => {
-        const associatedDataSourcesTitles = allDataSources
-          .filter((ds) => ds.workspaces && ds.workspaces.includes(workspace.id))
-          .map((ds) => ds.title as string);
-        return {
-          ...workspace,
-          useCase: extractUseCaseTitleFromFeatures(
-            registeredUseCases ?? [],
-            workspace.features ?? []
-          ),
-          dataSources: associatedDataSourcesTitles,
-        };
-      }
-    );
+    return workspaceList.map((workspace): WorkspaceAttributeWithUseCaseIDAndDataSources => {
+      const associatedDataSourcesTitles = allDataSources
+        .filter((ds) => ds.workspaces && ds.workspaces.includes(workspace.id))
+        .map((ds) => ds.title as string);
+      return {
+        ...workspace,
+        useCase: extractUseCaseTitleFromFeatures(
+          registeredUseCases ?? [],
+          workspace.features ?? []
+        ),
+        dataSources: associatedDataSourcesTitles,
+      };
+    });
   }, [workspaceList, allDataSources, registeredUseCases]);
 
   const useCaseFilterOptions = useMemo(() => {
@@ -164,7 +162,7 @@ export const WorkspaceListInner = ({
     const params = new URLSearchParams(location.search);
     const useCase = params.get('useCase');
     if (useCase && useCaseFilterOptions.find((item) => item.value === useCase)) {
-      setQuery((Query.parse(`useCase:"${useCase}"`) as unknown) as EuiSearchBarProps['query']);
+      setQuery(Query.parse(`useCase:"${useCase}"`) as unknown as EuiSearchBarProps['query']);
     }
   }, [location.search, useCaseFilterOptions]);
 
@@ -382,7 +380,7 @@ export const WorkspaceListInner = ({
       incremental: true,
     },
     query,
-    onChange: (args) => setQuery((args.query as unknown) as EuiSearchBarProps['query']),
+    onChange: (args) => setQuery(args.query as unknown as EuiSearchBarProps['query']),
     filters: [
       {
         type: 'field_value_selection',

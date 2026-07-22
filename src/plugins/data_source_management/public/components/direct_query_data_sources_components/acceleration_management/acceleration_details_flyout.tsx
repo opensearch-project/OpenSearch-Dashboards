@@ -15,7 +15,7 @@ import {
   EuiTabs,
   EuiText,
 } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ApplicationStart, HttpStart, NotificationsStart } from 'opensearch-dashboards/public';
 import { CachedAcceleration } from '../../../../framework/types';
 import { AccelerationActionOverlay } from './acceleration_action_overlay';
@@ -27,7 +27,6 @@ import {
   getAccelerationName,
   onDiscoverIconClick,
 } from './acceleration_utils';
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { OpenSearchDashboardsResponse } from '../../../../../../core/server/http/router';
 import { DSL_BASE } from '../../../../framework/utils/shared';
 import { getUiSettings } from '../../utils';
@@ -239,7 +238,7 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
         isDisabled={(() => {
           try {
             return !getUiSettings().get('query:enhancements:enabled');
-          } catch (e) {
+          } catch {
             return false;
           }
         })()}

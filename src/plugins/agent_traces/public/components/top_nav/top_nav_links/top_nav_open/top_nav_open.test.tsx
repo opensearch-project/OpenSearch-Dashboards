@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { openTopNavData, getOpenButtonRun } from './top_nav_open';
 
 jest.mock('../../../../../../opensearch_dashboards_react/public', () => ({

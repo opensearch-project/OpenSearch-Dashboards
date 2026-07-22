@@ -36,6 +36,9 @@ export const CellValue = (props: Props) => {
     columnId,
   } = props;
 
+  const valueDisplay =
+    value !== null && typeof value === 'object' ? JSON.stringify(value) : `${value ?? ''}`;
+
   useEffect(() => {
     const cellStyle: React.CSSProperties = { textAlign };
 
@@ -56,14 +59,14 @@ export const CellValue = (props: Props) => {
   }, [setCellProps, value, textAlign, color, colorMode]);
 
   const resolveUrl = (url: string) => {
-    return url.replace('${__value.text}', encodeURIComponent(value || ''));
+    return url.replace('${__value.text}', encodeURIComponent(value ?? ''));
   };
 
   const applicableLinks =
     dataLinks?.filter((link) => columnId && link.fields.includes(columnId)) || [];
 
   if (!applicableLinks || applicableLinks.length === 0) {
-    return <span>{value}</span>;
+    return <span>{valueDisplay}</span>;
   }
 
   if (applicableLinks.length === 1) {
@@ -75,7 +78,7 @@ export const CellValue = (props: Props) => {
         target={link.openInNewTab ? '_blank' : '_self'}
         rel={link.openInNewTab ? 'noopener noreferrer' : undefined}
       >
-        {value}
+        {valueDisplay}
       </a>
     );
   }
@@ -99,7 +102,7 @@ export const CellValue = (props: Props) => {
               setPopoverOpen(true);
             }}
           >
-            {value}
+            {valueDisplay}
           </a>
         }
         isOpen={isPopoverOpen}
@@ -121,5 +124,5 @@ export const CellValue = (props: Props) => {
       </EuiPopover>
     );
   }
-  return <span>{value}</span>;
+  return <span>{valueDisplay}</span>;
 };

@@ -8,10 +8,8 @@ import {
   EuiSpacer,
   EuiCallOut,
   EuiAccordion,
-  EuiText,
   EuiBasicTable,
   EuiBasicTableColumn,
-  EuiHealth,
   EuiIcon,
   EuiComboBox,
   EuiComboBoxOptionOption,
@@ -85,8 +83,8 @@ const FieldSelector: React.FC<{
   const filteredFields = isTimestamp
     ? fields.filter((field) => TIME_FIELD_TYPES.includes(field.type))
     : isStringField
-    ? fields.filter((field) => STRING_FIELD_TYPES.includes(field.type))
-    : fields;
+      ? fields.filter((field) => STRING_FIELD_TYPES.includes(field.type))
+      : fields;
 
   const options: Array<EuiComboBoxOptionOption<string>> = filteredFields.map((field) => ({
     label: field.name,
@@ -172,6 +170,7 @@ export const FieldMappingEditor: React.FC<FieldMappingEditorProps> = ({
             // Get dataset title from saved object
             let datasetTitle = dataView.title;
             try {
+              // @ts-expect-error TS2339 TODO(ts-error): fixme
               const savedObject = await dataService.indexPatterns.savedObjectsClient.get(
                 'index-pattern',
                 dataView.id
@@ -179,7 +178,7 @@ export const FieldMappingEditor: React.FC<FieldMappingEditorProps> = ({
               const attributes = savedObject.attributes as any;
               // Use displayName if available, fallback to title
               datasetTitle = attributes.displayName || attributes.title || dataView.title;
-            } catch (err) {
+            } catch {
               // If fetch fails, use dataView.title
             }
 
@@ -547,6 +546,7 @@ export const FieldMappingEditor: React.FC<FieldMappingEditorProps> = ({
                 iconType="save"
                 onClick={() => handleSaveDataset(row.datasetId)}
                 aria-label="Save"
+                // @ts-expect-error TS2322 TODO(ts-error): fixme
                 isLoading={savingDatasetId === row.datasetId}
                 disabled={savingDatasetId === row.datasetId}
                 data-test-subj={`saveDataset-${row.datasetId}`}

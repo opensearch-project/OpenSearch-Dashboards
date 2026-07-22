@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import sinon from 'sinon';
 import { shallowWithI18nProvider, mountWithI18nProvider } from 'test_utils/enzyme_helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
@@ -47,7 +46,7 @@ test('renders DashboardCloneModal', () => {
   const component = shallowWithI18nProvider(
     <DashboardCloneModal title="dash title" onClose={onClose} onClone={onClone} />
   );
-  expect(component).toMatchSnapshot(); // eslint-disable-line
+  expect(component).toMatchSnapshot();
 });
 
 test('onClone', () => {

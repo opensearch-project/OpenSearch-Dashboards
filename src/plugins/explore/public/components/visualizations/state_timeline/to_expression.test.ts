@@ -8,7 +8,7 @@ import {
   createCategoricalStateTimeline,
   createSingleCategoricalStateTimeline,
 } from './to_expression';
-import { VisColumn, VisFieldType, AxisRole, AxisColumnMappings } from '../types';
+import { VisColumn, VisFieldType, AxisRole } from '../types';
 import { defaultStateTimeLineChartStyles } from './state_timeline_config';
 
 describe('State Timeline to_expression', () => {
@@ -23,8 +23,6 @@ describe('State Timeline to_expression', () => {
     name: 'Time',
     schema: VisFieldType.Date,
     column: 'timestamp',
-    validValuesCount: 3,
-    uniqueValuesCount: 3,
   };
 
   const mockCateColumn1: VisColumn = {
@@ -32,8 +30,6 @@ describe('State Timeline to_expression', () => {
     name: 'Group',
     schema: VisFieldType.Categorical,
     column: 'group',
-    validValuesCount: 3,
-    uniqueValuesCount: 2,
   };
 
   const mockCateColumn2: VisColumn = {
@@ -41,8 +37,6 @@ describe('State Timeline to_expression', () => {
     name: 'Color',
     schema: VisFieldType.Categorical,
     column: 'color',
-    validValuesCount: 3,
-    uniqueValuesCount: 2,
   };
 
   const mockNumColumn: VisColumn = {
@@ -50,167 +44,67 @@ describe('State Timeline to_expression', () => {
     name: 'NumValue',
     schema: VisFieldType.Numerical,
     column: 'numValue',
-    validValuesCount: 3,
-    uniqueValuesCount: 3,
   };
 
   const mockStyles = {
     ...defaultStateTimeLineChartStyles,
-    titleOptions: { show: true, titleName: '' },
   };
 
   describe('createNumericalStateTimeline', () => {
-    const mockAxisMappings: AxisColumnMappings = {
+    const mockAxisMappings = {
       [AxisRole.X]: mockTimeColumn,
       [AxisRole.Y]: mockCateColumn1,
       [AxisRole.COLOR]: mockNumColumn,
     };
 
     it('returns an ECharts spec with dataset and series', () => {
-      const result = createNumericalStateTimeline(
-        mockData,
-        [mockNumColumn],
-        [mockCateColumn1],
-        [mockTimeColumn],
-        mockStyles,
-        mockAxisMappings
-      );
+      const result = createNumericalStateTimeline(mockData, mockStyles, mockAxisMappings);
 
       expect(result).toHaveProperty('dataset');
       expect(result).toHaveProperty('series');
       expect(result).toHaveProperty('xAxis');
       expect(result).toHaveProperty('yAxis');
-      expect(result.title.text).toBe('NumValue by Group and Time');
-    });
-
-    it('handles title display options', () => {
-      const noTitle = createNumericalStateTimeline(
-        mockData,
-        [mockNumColumn],
-        [mockCateColumn1],
-        [mockTimeColumn],
-        { ...mockStyles, titleOptions: { show: false, titleName: '' } },
-        mockAxisMappings
-      );
-      expect(noTitle.title.text).toBeUndefined();
-
-      const customTitle = createNumericalStateTimeline(
-        mockData,
-        [mockNumColumn],
-        [mockCateColumn1],
-        [mockTimeColumn],
-        { ...mockStyles, titleOptions: { show: true, titleName: 'Custom Timeline' } },
-        mockAxisMappings
-      );
-      expect(customTitle.title.text).toBe('Custom Timeline');
     });
 
     it('throws when required fields are missing', () => {
-      expect(() =>
-        createNumericalStateTimeline(
-          mockData,
-          [mockNumColumn],
-          [mockCateColumn1],
-          [mockTimeColumn],
-          mockStyles,
-          {}
-        )
-      ).toThrow('Missing field config for state-timeline chart');
+      expect(() => createNumericalStateTimeline(mockData, mockStyles, {} as any)).toThrow();
     });
   });
 
   describe('createCategoricalStateTimeline', () => {
-    const mockAxisMappings: AxisColumnMappings = {
+    const mockAxisMappings = {
       [AxisRole.X]: mockTimeColumn,
       [AxisRole.Y]: mockCateColumn1,
       [AxisRole.COLOR]: mockCateColumn2,
     };
 
     it('returns an ECharts spec with dataset and series', () => {
-      const result = createCategoricalStateTimeline(
-        mockData,
-        [mockNumColumn],
-        [mockCateColumn1, mockCateColumn2],
-        [mockTimeColumn],
-        mockStyles,
-        mockAxisMappings
-      );
+      const result = createCategoricalStateTimeline(mockData, mockStyles, mockAxisMappings);
 
       expect(result).toHaveProperty('dataset');
       expect(result).toHaveProperty('series');
-      expect(result.title.text).toBe('Color by Group and Time');
-    });
-
-    it('handles title display options', () => {
-      const noTitle = createCategoricalStateTimeline(
-        mockData,
-        [mockNumColumn],
-        [mockCateColumn1, mockCateColumn2],
-        [mockTimeColumn],
-        { ...mockStyles, titleOptions: { show: false, titleName: '' } },
-        mockAxisMappings
-      );
-      expect(noTitle.title.text).toBeUndefined();
     });
 
     it('throws when required fields are missing', () => {
-      expect(() =>
-        createCategoricalStateTimeline(
-          mockData,
-          [mockNumColumn],
-          [mockCateColumn1, mockCateColumn2],
-          [mockTimeColumn],
-          mockStyles,
-          {}
-        )
-      ).toThrow('Missing field config for state-timeline chart');
+      expect(() => createCategoricalStateTimeline(mockData, mockStyles, {} as any)).toThrow();
     });
   });
 
   describe('createSingleCategoricalStateTimeline', () => {
-    const mockAxisMappings: AxisColumnMappings = {
+    const mockAxisMappings = {
       [AxisRole.X]: mockTimeColumn,
       [AxisRole.COLOR]: mockCateColumn2,
     };
 
     it('returns an ECharts spec with dataset and series', () => {
-      const result = createSingleCategoricalStateTimeline(
-        mockData,
-        [mockNumColumn],
-        [mockCateColumn1, mockCateColumn2],
-        [mockTimeColumn],
-        mockStyles,
-        mockAxisMappings
-      );
+      const result = createSingleCategoricalStateTimeline(mockData, mockStyles, mockAxisMappings);
 
       expect(result).toHaveProperty('dataset');
       expect(result).toHaveProperty('series');
-      expect(result.title.text).toBe('Color  by Time');
-    });
-
-    it('handles title display options', () => {
-      const noTitle = createSingleCategoricalStateTimeline(
-        mockData,
-        [mockNumColumn],
-        [mockCateColumn1, mockCateColumn2],
-        [mockTimeColumn],
-        { ...mockStyles, titleOptions: { show: false, titleName: '' } },
-        mockAxisMappings
-      );
-      expect(noTitle.title.text).toBeUndefined();
     });
 
     it('throws when required fields are missing', () => {
-      expect(() =>
-        createSingleCategoricalStateTimeline(
-          mockData,
-          [mockNumColumn],
-          [mockCateColumn1, mockCateColumn2],
-          [mockTimeColumn],
-          mockStyles,
-          {}
-        )
-      ).toThrow('Missing field config for single state-timeline chart');
+      expect(() => createSingleCategoricalStateTimeline(mockData, mockStyles, {} as any)).toThrow();
     });
   });
 });

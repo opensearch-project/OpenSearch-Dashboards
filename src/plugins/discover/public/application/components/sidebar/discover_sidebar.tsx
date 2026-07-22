@@ -39,7 +39,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { I18nProvider } from '@osd/i18n/react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { IndexPattern, IndexPatternField, UI_SETTINGS } from '../../../../../data/public';
 import { FIELDS_LIMIT_SETTING } from '../../../../common';
 import { getServices } from '../../../opensearch_dashboards_services';
@@ -146,13 +146,10 @@ export function DiscoverSidebar(props: DiscoverSidebarProps) {
     selected: selectedFields,
     popular: popularFields,
     unpopular: unpopularFields,
-  } = useMemo(() => groupFields(fields, columns, popularLimit, fieldCounts, fieldFilterState), [
-    fields,
-    columns,
-    popularLimit,
-    fieldCounts,
-    fieldFilterState,
-  ]);
+  } = useMemo(
+    () => groupFields(fields, columns, popularLimit, fieldCounts, fieldFilterState),
+    [fields, columns, popularLimit, fieldCounts, fieldFilterState]
+  );
 
   const fieldTypes = useMemo(() => {
     const result = ['any'];

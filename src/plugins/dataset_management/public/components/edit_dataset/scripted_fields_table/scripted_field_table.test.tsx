@@ -2,10 +2,11 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import { ScriptedFieldsTable } from '../scripted_fields_table';
+// @ts-expect-error TS2724, TS2305 TODO(ts-error): fixme
 import { IDataset, DataView } from '../../../../../../plugins/data/common/datasets';
 
 jest.mock('@elastic/eui', () => ({
@@ -36,7 +37,10 @@ const helpers = {
   getRouteHref: () => '#',
 };
 
-const getDatasetMock = (mockedFields: any = {}) => ({ ...mockedFields } as IDataset);
+const getDatasetMock = (mockedFields: any = {}) =>
+  ({
+    ...mockedFields,
+  }) as IDataset;
 
 describe('ScriptedFieldsTable', () => {
   let dataset: DataView;
@@ -168,10 +172,10 @@ describe('ScriptedFieldsTable', () => {
     const component = shallow<ScriptedFieldsTable>(
       <ScriptedFieldsTable
         dataset={
-          ({
+          {
             ...dataset,
             removeScriptedField,
-          } as unknown) as DataView
+          } as unknown as DataView
         }
         helpers={helpers}
         painlessDocLink={'painlessDoc'}
@@ -187,6 +191,6 @@ describe('ScriptedFieldsTable', () => {
     await component.instance().deleteField();
     await component.update();
 
-    expect(removeScriptedField).toBeCalled();
+    expect(removeScriptedField).toHaveBeenCalled();
   });
 });

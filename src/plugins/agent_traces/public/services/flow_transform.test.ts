@@ -6,6 +6,7 @@
 import { spansToFlow } from './flow_transform';
 import { CategorizedSpan } from './span_categorization';
 
+// @ts-expect-error TS2322 TODO(ts-error): fixme
 const makeSpan = (overrides: Partial<CategorizedSpan> = {}): CategorizedSpan => ({
   id: 'span-1',
   spanId: 'span-1',

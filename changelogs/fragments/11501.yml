@@ -1,2 +1,0 @@
-fix:
-- [CVE] bump packages versions to address CVEs. ([#11501](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11501))

@@ -63,5 +63,77 @@ describe('filter manager utilities', () => {
         done();
       }
     });
+
+    test('should return the key and value for scripted phrase filters with value 0', () => {
+      const filter = {
+        meta: { index: 'logstash-*', field: 'script_number' },
+        script: {
+          script: {
+            lang: 'painless',
+            params: { value: 0 },
+            source:
+              'boolean compare(Supplier s, def v) {return s.get() == v;}compare(() -> { doc["bytes"].value }, params.value);',
+          },
+        },
+      } as unknown as PhraseFilter;
+
+      const result = mapPhrase(filter);
+
+      expect(result).toHaveProperty('key', 'script_number');
+      expect(result).toHaveProperty('type', 'phrase');
+
+      if (result.value) {
+        const displayName = result.value();
+        expect(displayName).toBe(0);
+      }
+    });
+
+    test('should return the key and value for scripted phrase filters with value false', () => {
+      const filter = {
+        meta: { index: 'logstash-*', field: 'script_boolean' },
+        script: {
+          script: {
+            lang: 'painless',
+            params: { value: false },
+            source:
+              'boolean compare(Supplier s, def v) {return s.get() == v;}compare(() -> { doc["is_active"].value }, params.value);',
+          },
+        },
+      } as unknown as PhraseFilter;
+
+      const result = mapPhrase(filter);
+
+      expect(result).toHaveProperty('key', 'script_boolean');
+      expect(result).toHaveProperty('type', 'phrase');
+
+      if (result.value) {
+        const displayName = result.value();
+        expect(displayName).toBe(false);
+      }
+    });
+
+    test('should return the key and value for scripted phrase filters with empty string value', () => {
+      const filter = {
+        meta: { index: 'logstash-*', field: 'script_string' },
+        script: {
+          script: {
+            lang: 'painless',
+            params: { value: '' },
+            source:
+              'boolean compare(Supplier s, def v) {return s.get() == v;}compare(() -> { doc["status"].value }, params.value);',
+          },
+        },
+      } as unknown as PhraseFilter;
+
+      const result = mapPhrase(filter);
+
+      expect(result).toHaveProperty('key', 'script_string');
+      expect(result).toHaveProperty('type', 'phrase');
+
+      if (result.value) {
+        const displayName = result.value();
+        expect(displayName).toBe('');
+      }
+    });
   });
 });

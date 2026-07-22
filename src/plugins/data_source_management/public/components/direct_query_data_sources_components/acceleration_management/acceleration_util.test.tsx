@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
 import { EuiHealth, EuiSmallButton } from '@elastic/eui';
 import { ApplicationStart } from 'opensearch-dashboards/public';
@@ -196,14 +195,13 @@ describe('acceleration_utils', () => {
         status: 'active',
       };
 
-      const application = ({
+      const application = {
         navigateToApp: jest.fn(),
-      } as unknown) as ApplicationStart;
+      } as unknown as ApplicationStart;
 
       onDiscoverIconClick(acceleration, 'test_data_source', 'testMDSId', application);
       expect(application.navigateToApp).toHaveBeenCalledWith('data-explorer', {
-        path:
-          "discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(view:discover))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_q=(filters:!(),query:(dataset:(dataSource:(id:'testMDSId',meta:(name:test_data_source,type:CUSTOM),title:'',type:DATA_SOURCE),id:'testMDSId::test_data_source.default.test_table',title:test_data_source.default.test_table,type:S3),language:SQL,query:'SELECT%20*%20FROM%20test_data_source.default.test_table%20LIMIT%2010'))",
+        path: "discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(view:discover))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_q=(filters:!(),query:(dataset:(dataSource:(id:'testMDSId',meta:(name:test_data_source,type:CUSTOM),title:'',type:DATA_SOURCE),id:'testMDSId::test_data_source.default.test_table',title:test_data_source.default.test_table,type:S3),language:SQL,query:'SELECT%20*%20FROM%20test_data_source.default.test_table%20LIMIT%2010'))",
       });
     });
 
@@ -218,14 +216,13 @@ describe('acceleration_utils', () => {
         status: 'active',
       };
 
-      const application = ({
+      const application = {
         navigateToApp: jest.fn(),
-      } as unknown) as ApplicationStart;
+      } as unknown as ApplicationStart;
 
       onDiscoverIconClick(acceleration, 'test_data_source', 'testMDSId', application);
       expect(application.navigateToApp).toHaveBeenCalledWith('data-explorer', {
-        path:
-          "discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(view:discover))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_q=(filters:!(),query:(dataset:(dataSource:(id:'testMDSId',title:'',type:DATA_SOURCE),id:'testMDSId::flint_index',title:flint_index,type:INDEXES),language:SQL,query:'SELECT%20*%20FROM%20flint_index%20LIMIT%2010'))",
+        path: "discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(view:discover))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_q=(filters:!(),query:(dataset:(dataSource:(id:'testMDSId',title:'',type:DATA_SOURCE),id:'testMDSId::flint_index',title:flint_index,type:INDEXES),language:SQL,query:'SELECT%20*%20FROM%20flint_index%20LIMIT%2010'))",
       });
     });
   });

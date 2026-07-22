@@ -1,2 +1,0 @@
-fix:
-- Dev tools modal no longer applies padding when sidecar is hidden ([#11542](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11542))

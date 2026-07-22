@@ -96,8 +96,8 @@ type RouteValidationResultType<T extends RouteValidationSpec<any> | undefined> =
   T extends RouteValidationFunction<any>
     ? ReturnType<T>['value']
     : T extends Type<any>
-    ? T['type']
-    : undefined
+      ? T['type']
+      : undefined
 >;
 
 /**
@@ -248,9 +248,13 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
     namespace?: string
   ): RouteValidationResultType<typeof validationRule> {
     if (isConfigSchema(validationRule)) {
-      return validationRule.validate(data, {}, namespace);
+      return validationRule.validate(data, {}, namespace) as RouteValidationResultType<
+        typeof validationRule
+      >;
     } else if (typeof validationRule === 'function') {
-      return this.validateFunction(validationRule, data, namespace);
+      return this.validateFunction(validationRule, data, namespace) as RouteValidationResultType<
+        typeof validationRule
+      >;
     } else {
       throw new ValidationError(
         new RouteValidationError(`The validation rule provided in the handler is not valid`),

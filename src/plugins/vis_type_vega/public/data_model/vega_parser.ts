@@ -64,6 +64,7 @@ import {
   OpenSearchDashboards,
 } from './types';
 import { PPLQueryParser } from './ppl_parser';
+import { validateVegaExpression } from './vega_validation';
 
 // Set default single color to match other OpenSearch Dashboards visualizations
 const defaultColor: string = euiPaletteColorBlind()[0];
@@ -126,6 +127,12 @@ export class VegaParser {
     try {
       await this._parseAsync();
     } catch (err) {
+      // Let AnalyticEngine errors propagate so they surface through the unified embeddable error
+      // path (output.error.name === 'AnalyticEngineError') and render via ErrorEmbeddable, instead
+      // of being shown inline as a Vega warning.
+      if (err.name === 'AnalyticEngineError') {
+        throw err;
+      }
       // if we reject current promise, it will use the standard OpenSearch Dashboards error handling
       this.error = Utils.formatErrorToStr(err);
     }
@@ -164,6 +171,22 @@ The URL is an identifier only. OpenSearch Dashboards and your browser will never
         })
       );
     }
+
+    const validationResults = validateVegaExpression(this.spec);
+    if (validationResults.length > 0) {
+      const reason = validationResults
+        .map((r) => `${r.reason} in "${r.expression}" at ${r.location}`)
+        .join('\n');
+      throw new Error(
+        i18n.translate('visTypeVega.vegaParser.unexpectedVegaExpression', {
+          defaultMessage: 'Unexpected Vega expression: {reason}',
+          values: {
+            reason,
+          },
+        })
+      );
+    }
+
     this.isVegaLite = this.parseSchema(this.spec).isVegaLite;
     this.useHover = !this.isVegaLite;
 

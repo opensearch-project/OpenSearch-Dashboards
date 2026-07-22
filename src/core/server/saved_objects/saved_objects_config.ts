@@ -65,6 +65,14 @@ export const savedObjectsConfig = {
     permission: schema.object({
       enabled: schema.boolean({ defaultValue: false }),
     }),
+    storage: schema.object({
+      backend: schema.oneOf([schema.literal('opensearch'), schema.literal('sqlite')], {
+        defaultValue: 'opensearch',
+      }),
+      sqlite: schema.object({
+        path: schema.string({ defaultValue: 'data/osd-metadata.db' }),
+      }),
+    }),
   }),
 };
 
@@ -73,6 +81,13 @@ export class SavedObjectConfig {
   public maxImportExportSize: number;
 
   public migration: SavedObjectsMigrationConfigType;
+  public permission: {
+    enabled: boolean;
+  };
+  public storage: {
+    backend: 'opensearch' | 'sqlite';
+    sqlite: { path: string };
+  };
 
   constructor(
     rawConfig: SavedObjectsConfigType,
@@ -81,5 +96,12 @@ export class SavedObjectConfig {
     this.maxImportPayloadBytes = rawConfig.maxImportPayloadBytes.getValueInBytes();
     this.maxImportExportSize = rawConfig.maxImportExportSize.getValueInBytes();
     this.migration = rawMigrationConfig;
+    this.permission = {
+      enabled: rawConfig.permission.enabled,
+    };
+    this.storage = {
+      backend: rawConfig.storage.backend,
+      sqlite: { path: rawConfig.storage.sqlite.path },
+    };
   }
 }

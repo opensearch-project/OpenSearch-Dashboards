@@ -32,6 +32,7 @@ import { readdirSync } from 'fs';
 import path from 'path';
 import { RESERVED_DIR_JEST_INTEGRATION_TESTS } from '../constants';
 
+process.env.TZ = 'UTC';
 const rootDir = '../../..';
 /* The rootGroups will go through a transformation to narrow down the CI groups.
  * The transformation pattern is not RegExp or glob compatible and only accepts
@@ -49,9 +50,7 @@ const rootDir = '../../..';
  * non A to Z character.
  */
 const rootGroups = [
-  [
-    /* CI Group 0 is left empty to make numbering natural */
-  ],
+  [/* CI Group 0 is left empty to make numbering natural */],
   [
     // CI Group 1 (roughly 280 files)
     '<rootDir>/src/plugins/[v-z]', // plugins v-u
@@ -64,16 +63,17 @@ const rootGroups = [
     '<rootDir>/packages',
   ],
   [
-    // CI Group 3 (roughly 400 files)
-    '<rootDir>/src/plugins/[a-d]', // plugins a-d
+    // CI Group 3 (roughly 440 files)
+    '<rootDir>/src/plugins/[a-c]', // plugins a-c
+    '<rootDir>/src/plugins/[q-u]', // lighter utility plugins q-u (saved_objects*, share, telemetry*, ui_actions, etc.)
   ],
   [
-    // CI Group 4 (roughly 410 files)
+    // CI Group 4 (roughly 280 files)
     '<rootDir>/src/cli',
     '<rootDir>/src/cli_keystore',
     '<rootDir>/src/cli_plugin',
     '<rootDir>/src/dev',
-    '<rootDir>/src/plugins/[e-u]', // plugins e-u
+    '<rootDir>/src/plugins/[e-k]', // plugins e-k (explore, embeddable, expressions, home, etc.)
     '<rootDir>/src/legacy/server',
     '<rootDir>/src/legacy/ui',
     '<rootDir>/src/legacy/utils',
@@ -81,6 +81,14 @@ const rootGroups = [
     '<rootDir>/src/setup_node_env',
     '<rootDir>/src/test_utils',
     '<rootDir>/test/functional/services/remote',
+  ],
+  [
+    // CI Group 5 (roughly 755 files)
+    // [d] plugins are the heaviest (data, dashboard, discover, data_source, data_source_management)
+    // [l-p] plugins (legacy_export, management*, navigation, newsfeed, opensearch_*, opensearch_ui_shared)
+    // [q-u] moved to group 3 to keep Windows wall-clock time under 30 minutes
+    '<rootDir>/src/plugins/[d]', // plugins d
+    '<rootDir>/src/plugins/[l-p]', // plugins l-p
   ],
 ];
 
@@ -135,12 +143,30 @@ export default {
   rootDir,
   roots,
   moduleNameMapper: {
+    // query-string v9 is pure ESM; this shim restores the default-import shape
+    // (`import qs from 'query-string'`) under Jest's CJS transform.
+    '^query-string$': '<rootDir>/src/dev/jest/mocks/query_string_mock.js',
+    // @eslint/* packages ship with `"main"` pointing at their ESM build, which
+    // Jest (CommonJS mode) cannot parse.  Redirect each one to its CJS build.
+    '^@eslint/plugin-kit$': '<rootDir>/node_modules/@eslint/plugin-kit/dist/cjs/index.cjs',
+    '^@eslint/config-array$': '<rootDir>/node_modules/@eslint/config-array/dist/cjs/index.cjs',
+    '^@eslint/config-helpers$': '<rootDir>/node_modules/@eslint/config-helpers/dist/cjs/index.cjs',
+    '^@eslint/object-schema$': '<rootDir>/node_modules/@eslint/object-schema/dist/cjs/index.cjs',
+    '^@eslint/compat$': '<rootDir>/node_modules/@eslint/compat/dist/cjs/index.cjs',
+    '^uuid$': '<rootDir>/node_modules/uuid/dist/cjs/index.js',
     '@elastic/eui$': '<rootDir>/node_modules/@elastic/eui/test-env',
     '@elastic/eui/lib/(.*)?': '<rootDir>/node_modules/@elastic/eui/test-env/$1',
     '@opensearch-project/opensearch/aws':
       '<rootDir>/node_modules/@opensearch-project/opensearch/lib/aws',
     '@opensearch-project/opensearch/lib/(.*)':
       '<rootDir>/node_modules/@opensearch-project/opensearch/lib/$1',
+    '@hapi/hoek/(?!lib/)(.*)': '<rootDir>/node_modules/@hapi/hoek/lib/$1',
+    // The `@osd/monaco` barrel is globally jest.mock()'d (monaco-editor breaks in
+    // jsdom), but the `@osd/monaco/ppl-lint` subpath is a Monaco-free engine
+    // stub that resolves to `target/`, which `modulePathIgnorePatterns` blocks —
+    // so it can't resolve in tests without a build. Map it to its source barrel,
+    // which depends only on antlr4ng/@osd/antlr-grammar/semver (no monaco-editor).
+    '^@osd/monaco/ppl-lint$': '<rootDir>/packages/osd-monaco/src/ppl/lint/index.ts',
     '^src/plugins/(.*)': '<rootDir>/src/plugins/$1',
     '^test_utils/(.*)': '<rootDir>/src/test_utils/public/$1',
     '^fixtures/(.*)': '<rootDir>/src/fixtures/$1',
@@ -151,12 +177,18 @@ export default {
     '\\.editor\\.worker.js$': '<rootDir>/src/dev/jest/mocks/worker_module_mock.js',
     '^(!!)?file-loader!': '<rootDir>/src/dev/jest/mocks/file_mock.js',
   },
+  testEnvironmentOptions: {
+    // Set the default URL so window.location.origin is 'http://localhost:5601' rather than
+    // 'http://localhost', avoiding the need for tests to mock window.location.origin.
+    url: 'http://localhost:5601',
+  },
   setupFiles: [
     '<rootDir>/src/dev/jest/setup/babel_polyfill.js',
     '<rootDir>/src/dev/jest/setup/polyfills.js',
     '<rootDir>/src/dev/jest/setup/enzyme.js',
   ],
   setupFilesAfterEnv: [
+    'jest-location-mock',
     '<rootDir>/src/dev/jest/setup/mocks.js',
     '<rootDir>/src/dev/jest/setup/react_testing_library.js',
     '<rootDir>/src/dev/jest/setup/monaco_mock.js',
@@ -177,28 +209,36 @@ export default {
     '<rootDir>/packages/osd-ui-framework/(dist)/',
     '<rootDir>/packages/osd-pm/dist/',
     `${RESERVED_DIR_JEST_INTEGRATION_TESTS}/`,
+    // Jest's require(ESM) requires Node v24.9+ for synchronous vm module APIs
+    // remove these excludes after node upgrade
+    '<rootDir>/packages/osd-eslint-plugin-eslint/rules/disallow_license_headers.test.js',
+    '<rootDir>/packages/osd-eslint-plugin-eslint/rules/require_license_header.test.js',
+    '<rootDir>/packages/osd-eslint-plugin-eslint/rules/no_restricted_paths.test.js',
   ],
-  // angular is not compatible with the default circus runner
-  testRunner: 'jest-jasmine2',
   transform: {
     '^.+\\.(js|tsx?)$': '<rootDir>/src/dev/jest/babel_transform.js',
-    '^.+\\.txt?$': 'jest-raw-loader',
-    '^.+\\.html?$': 'jest-raw-loader',
+    '^.+\\.txt?$': '<rootDir>/src/dev/jest/raw_loader_transformer.js',
+    '^.+\\.html?$': '<rootDir>/src/dev/jest/raw_loader_transformer.js',
   },
   transformIgnorePatterns: [
     // ignore all node_modules except those which require babel transforms to handle dynamic import()
     // since ESM modules are not natively supported in Jest yet (https://github.com/facebook/jest/issues/4842)
-    '[/\\\\]node_modules(?![\\/\\\\](monaco-editor|react-monaco-editor|weak-lru-cache|ordered-binary|d3-[^/\\\\]+|axios|@smithy|@aws-crypto|@aws-sdk|uuid|@xyflow|@dagrejs|classcat|internmap|delaunator|robust-predicates|ramda))[/\\\\].+\\.js$',
+    '[/\\\\]node_modules(?![\\/\\\\](monaco-editor|react-monaco-editor|weak-lru-cache|ordered-binary|d3-[^/\\\\]+|axios|@smithy|@aws-crypto|@aws-sdk|@xyflow|@dagrejs|classcat|internmap|delaunator|robust-predicates|ramda|query-string|decode-uri-component|filter-obj|split-on-first|vega-expression|vega-util))[/\\\\].+\\.js$',
     'packages/osd-pm/dist/index.js',
   ],
   snapshotSerializers: [
     '<rootDir>/src/plugins/opensearch_dashboards_react/public/util/test_helpers/react_mount_serializer.ts',
     '<rootDir>/node_modules/enzyme-to-json/serializer',
   ],
+  // Retain Jest 28 snapshot defaults; Jest 29 flipped escapeString and printBasicPrototype to false,
+  // which would invalidate existing snapshots. See https://jestjs.io/docs/29.0/upgrading-to-jest29
+  snapshotFormat: {
+    escapeString: true,
+    printBasicPrototype: true,
+  },
   reporters: ['default', '<rootDir>/src/dev/jest/junit_reporter.js'],
   globals: {
     Uint8Array: Uint8Array,
   },
-  flakyTestRetries: 2,
   verbose: true,
 };

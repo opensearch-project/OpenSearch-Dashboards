@@ -29,7 +29,7 @@
  */
 
 import './visualize_editor.scss';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { EventEmitter } from 'events';
 
 import { VisualizeInput } from 'src/plugins/visualizations/public';
@@ -66,11 +66,14 @@ export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
   }, [setHeaderVariant, showActionsInGroup]);
 
   useEffect(() => {
-    const { originatingApp: value, embeddableId: embeddableIdValue, valueInput: valueInputValue } =
-      services.embeddable
-        .getStateTransfer(services.scopedHistory)
-        .getIncomingEditorState({ keysToRemoveAfterFetch: ['id', 'embeddableId', 'valueInput'] }) ||
-      {};
+    const {
+      originatingApp: value,
+      embeddableId: embeddableIdValue,
+      valueInput: valueInputValue,
+    } = services.embeddable
+      .getStateTransfer(services.scopedHistory)
+      .getIncomingEditorState({ keysToRemoveAfterFetch: ['id', 'embeddableId', 'valueInput'] }) ||
+    {};
     setOriginatingApp(value);
     setValueInput(valueInputValue);
     setEmbeddableId(embeddableIdValue);

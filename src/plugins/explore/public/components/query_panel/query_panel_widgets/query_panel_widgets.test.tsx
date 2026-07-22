@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { QueryPanelWidgets } from './query_panel_widgets';
 import { useDatasetContext } from '../../../application/context';
@@ -56,6 +55,10 @@ jest.mock('./ask_ai_button', () => ({
   AskAIButton: () => <div data-test-subj="ask-ai-button">Ask AI Button</div>,
 }));
 
+jest.mock('../../../helpers/use_flavor_id', () => ({
+  useFlavorId: jest.fn(() => 'logs'),
+}));
+
 jest.mock('../../../application/context', () => ({
   useDatasetContext: jest.fn(),
 }));
@@ -85,9 +88,10 @@ describe('QueryPanelWidgets', () => {
     } as any;
 
     // Mock useOpenSearchDashboards
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    mockUseOpenSearchDashboards = require('../../../../../opensearch_dashboards_react/public')
-      .useOpenSearchDashboards;
+
+    mockUseOpenSearchDashboards =
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      require('../../../../../opensearch_dashboards_react/public').useOpenSearchDashboards;
     mockUseOpenSearchDashboards.mockReturnValue({
       services: {
         queryPanelActionsRegistry: mockQueryPanelActionsRegistry,

@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useEffect, useCallback, createContext, useContext, useRef } from 'react';
+import { useEffect, useCallback, createContext, useContext, useRef } from 'react';
 
 import { useMultiContent, HookProps, Content, MultiContent } from './use_multi_content';
 
@@ -68,12 +68,8 @@ export function useMultiContentContext<T extends object = { [key: string]: any }
 export function useContent<T extends object, K extends keyof T>(contentId: K) {
   const isMounted = useRef(false);
   const defaultValue = useRef<T[K] | undefined>(undefined);
-  const {
-    updateContentAt,
-    saveSnapshotAndRemoveContent,
-    getData,
-    getSingleContentData,
-  } = useMultiContentContext<T>();
+  const { updateContentAt, saveSnapshotAndRemoveContent, getData, getSingleContentData } =
+    useMultiContentContext<T>();
 
   const updateContent = useCallback(
     (content: Content) => {

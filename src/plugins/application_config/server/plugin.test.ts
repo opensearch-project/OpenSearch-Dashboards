@@ -75,7 +75,7 @@ describe('application config plugin', () => {
     // call the register function again
     const secondCall = () => setup.registerConfigurationClient(client2);
 
-    expect(secondCall).toThrowError(
+    expect(secondCall).toThrow(
       'Configuration client is already registered! Cannot register again!'
     );
 
@@ -187,6 +187,6 @@ describe('application config plugin', () => {
       cache,
     ]);
 
-    expect(coreStart.opensearch.client.asScoped).toBeCalledTimes(1);
+    expect(coreStart.opensearch.client.asScoped).toHaveBeenCalledTimes(1);
   });
 });

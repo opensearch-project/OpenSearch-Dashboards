@@ -29,7 +29,7 @@
  */
 
 import './loading_spinner.scss';
-import React from 'react';
+
 import { EuiTitle, EuiPanel, EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 

@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { HttpSetup, IUiSettingsClient, NotificationsSetup } from 'src/core/public';
 import { ServicesContextProvider, EditorContextProvider, RequestContextProvider } from './contexts';

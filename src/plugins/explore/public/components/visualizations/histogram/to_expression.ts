@@ -4,8 +4,8 @@
  */
 
 import { HistogramChartStyle } from './histogram_vis_config';
-import { AxisColumnMappings, VisColumn, VisFieldType } from '../types';
-import { getSwappedAxisRole } from '../utils/utils';
+import { AxisRole, VisColumn, VisFieldType } from '../types';
+import { getAxisConfig } from '../utils/utils';
 import { assembleSpec, buildAxisConfigs, createBaseConfig, pipe } from '../utils/echarts_spec';
 import { convertTo2DArray, transform } from '../utils/data_transformation';
 import { bin } from '../utils/data_transformation/bin';
@@ -13,18 +13,13 @@ import { createHistogramSeries } from './histogram_chart_utils';
 
 export const createNumericalHistogramChart = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
   styles: HistogramChartStyle,
-  axisColumnMappings?: AxisColumnMappings
+  axisColumnMappings: { [AxisRole.X]: VisColumn; [AxisRole.Y]: VisColumn }
 ): any => {
-  const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
-  const { xAxis, yAxis } = axisConfig;
-  if (!xAxis) {
-    throw Error('Missing axis config for Histogram chart');
-  }
+  const axisConfig = getAxisConfig(styles);
 
-  const categoryField = xAxis.column;
-  const valueField = yAxis?.column;
+  const categoryField = axisColumnMappings[AxisRole.X].column;
+  const valueField = axisColumnMappings[AxisRole.Y].column;
 
   const result = pipe(
     transform(
@@ -48,37 +43,20 @@ export const createNumericalHistogramChart = (
   )({
     data: transformedData,
     styles,
-    axisConfig: {
-      ...axisConfig,
-      xAxis: {
-        name: 'bucket',
-        column: 'bucket',
-        schema: VisFieldType.Numerical,
-      },
-      yAxis: {
-        name: 'value',
-        column: 'value',
-        schema: VisFieldType.Numerical,
-      },
-    },
-    axisColumnMappings: axisColumnMappings ?? {},
+    axisConfig,
+    axisColumnMappings,
   });
   return result.spec;
 };
 
 export const createSingleHistogramChart = (
   transformedData: Array<Record<string, any>>,
-  numericalColumns: VisColumn[],
   styles: HistogramChartStyle,
-  axisColumnMappings?: AxisColumnMappings
+  axisColumnMappings: { [AxisRole.X]: VisColumn }
 ): any => {
-  const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
-  const { xAxis } = axisConfig;
-  if (!xAxis) {
-    throw Error('Missing axis config for Histogram chart');
-  }
+  const axisConfig = getAxisConfig(styles);
 
-  const categoryField = xAxis.column;
+  const categoryField = axisColumnMappings[AxisRole.X].column;
 
   const result = pipe(
     transform(
@@ -100,20 +78,8 @@ export const createSingleHistogramChart = (
   )({
     data: transformedData,
     styles,
-    axisConfig: {
-      ...axisConfig,
-      xAxis: {
-        name: 'bucket',
-        column: 'bucket',
-        schema: VisFieldType.Numerical,
-      },
-      yAxis: {
-        name: 'value',
-        column: 'value',
-        schema: VisFieldType.Numerical,
-      },
-    },
-    axisColumnMappings: axisColumnMappings ?? {},
+    axisConfig,
+    axisColumnMappings,
   });
   return result.spec;
 };

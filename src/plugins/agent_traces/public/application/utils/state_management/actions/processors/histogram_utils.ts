@@ -73,6 +73,7 @@ export function createHistogramConfigs(
         customBuckets.setBounds(bounds);
         customBuckets.setInterval(minInterval || histogramInterval);
 
+        // @ts-expect-error TS2790 TODO(ts-error): fixme
         delete dateHistogramAgg.buckets;
 
         Object.defineProperty(dateHistogramAgg, 'buckets', {

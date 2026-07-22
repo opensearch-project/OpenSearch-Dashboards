@@ -82,6 +82,7 @@ describe('ChatPlugin', () => {
         ),
       },
       workspaces: {},
+      savedObjects: { client: {} },
     };
 
     // Mock dependencies
@@ -128,7 +129,8 @@ describe('ChatPlugin', () => {
       expect(ChatService).toHaveBeenCalledWith(
         mockCoreStart.uiSettings,
         mockCoreStart.chat,
-        mockCoreStart.workspaces
+        mockCoreStart.workspaces,
+        mockCoreStart.savedObjects.client
       );
     });
 
@@ -159,7 +161,8 @@ describe('ChatPlugin', () => {
       expect(ChatService).toHaveBeenCalledWith(
         mockCoreStart.uiSettings,
         mockCoreStart.chat,
-        mockCoreStart.workspaces
+        mockCoreStart.workspaces,
+        mockCoreStart.savedObjects.client
       );
       expect(startContract.chatService).toBeInstanceOf(ChatService);
       expect(mockCoreStart.chrome.navControls.registerPrimaryHeaderRight).toHaveBeenCalled();
@@ -171,7 +174,8 @@ describe('ChatPlugin', () => {
       expect(ChatService).toHaveBeenCalledWith(
         mockCoreStart.uiSettings,
         mockCoreStart.chat,
-        mockCoreStart.workspaces
+        mockCoreStart.workspaces,
+        mockCoreStart.savedObjects.client
       );
       expect(startContract.chatService).toBeInstanceOf(ChatService);
       expect(mockCoreStart.chrome.navControls.registerPrimaryHeaderRight).toHaveBeenCalled();
@@ -185,8 +189,9 @@ describe('ChatPlugin', () => {
       plugin.start(mockCoreStart, mockDeps);
 
       // Get the mount function that was registered
-      const registerCall = (mockCoreStart.chrome.navControls
-        .registerPrimaryHeaderRight as jest.Mock).mock.calls[0];
+      const registerCall = (
+        mockCoreStart.chrome.navControls.registerPrimaryHeaderRight as jest.Mock
+      ).mock.calls[0];
       mountFunction = registerCall[0].mount;
     });
 
@@ -234,7 +239,8 @@ describe('ChatPlugin', () => {
         expect(ChatService).toHaveBeenCalledWith(
           mockCoreStart.uiSettings,
           mockCoreStart.chat,
-          mockCoreStart.workspaces
+          mockCoreStart.workspaces,
+          mockCoreStart.savedObjects.client
         );
       });
     });
@@ -244,8 +250,9 @@ describe('ChatPlugin', () => {
     it('should pass correct props to ChatHeaderButton', () => {
       plugin.start(mockCoreStart, mockDeps);
 
-      const registerCall = (mockCoreStart.chrome.navControls
-        .registerPrimaryHeaderRight as jest.Mock).mock.calls[0];
+      const registerCall = (
+        mockCoreStart.chrome.navControls.registerPrimaryHeaderRight as jest.Mock
+      ).mock.calls[0];
       const mountFunction = registerCall[0].mount;
       const mockElement = document.createElement('div');
 
@@ -326,7 +333,7 @@ describe('ChatPlugin', () => {
           }),
         },
         writable: true,
-        configurable: true,
+        configurable: true, // Required for jsdom 26: localStorage is non-configurable by default
       });
 
       // Mock core.chat methods
@@ -346,7 +353,7 @@ describe('ChatPlugin', () => {
       Object.defineProperty(window, 'localStorage', {
         value: originalLocalStorage,
         writable: true,
-        configurable: true,
+        configurable: true, // Required for jsdom 26
       });
     });
 

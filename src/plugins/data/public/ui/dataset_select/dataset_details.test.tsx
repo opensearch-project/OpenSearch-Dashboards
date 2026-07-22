@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { CoreStart } from 'src/core/public';
 import { DataPublicPluginStart, IDataPluginServices } from '../..';
@@ -44,14 +43,14 @@ describe('Dataset Details Components', () => {
     notifications: {} as CoreStart['notifications'],
     http: {} as CoreStart['http'],
     storage: {} as DataStorage,
-    data: ({
+    data: {
       query: {
         queryString: mockQueryService.queryString,
       },
-    } as unknown) as DataPublicPluginStart,
-    application: ({
+    } as unknown as DataPublicPluginStart,
+    application: {
       navigateToApp: mockNavigateToApp,
-    } as unknown) as CoreStart['application'],
+    } as unknown as CoreStart['application'],
   };
 
   const mockDataset: DetailedDataset = {
@@ -61,6 +60,7 @@ describe('Dataset Details Components', () => {
     description: 'Test index pattern description',
     type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
     timeFieldName: '@timestamp',
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     dataSource: {
       id: 'opensearch-datasource',
       title: 'OpenSearch DataSource',
@@ -142,7 +142,7 @@ describe('Dataset Details Components', () => {
     it('does not navigate when dataset or dataSource is undefined', () => {
       renderWithContext({
         ...mockDataset,
-        dataSource: (undefined as unknown) as DataSource,
+        dataSource: undefined as unknown as DataSource,
       });
 
       const dataDefinitionButton = screen.getByTestId('datasetDetailsDataDefinition');
@@ -154,7 +154,7 @@ describe('Dataset Details Components', () => {
     it('renders default datasource text when no datasource provided', () => {
       renderWithContext({
         ...mockDataset,
-        dataSource: (undefined as unknown) as DataSource,
+        dataSource: undefined as unknown as DataSource,
       });
 
       expect(screen.getByText('default')).toBeInTheDocument();
@@ -163,7 +163,7 @@ describe('Dataset Details Components', () => {
     it('handles dataset without timeFieldName', () => {
       renderWithContext({
         ...mockDataset,
-        timeFieldName: (undefined as unknown) as string,
+        timeFieldName: undefined as unknown as string,
       });
 
       expect(screen.getByText("I don't want to use a time filter")).toBeInTheDocument();

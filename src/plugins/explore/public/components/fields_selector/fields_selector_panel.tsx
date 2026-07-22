@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useRef, useMemo } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { UI_SETTINGS } from '../../../../data/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
@@ -38,7 +38,7 @@ export function DiscoverPanel({ collapsePanel }: IDiscoverPanelProps) {
   const query = useSelector(selectQuery);
   const cacheKey = useMemo(() => defaultPrepareQueryString(query), [query]);
   const metadata = useSelector((state: any) => state.results[cacheKey]);
-  const rawResults = metadata ? resultsCache.get(cacheKey) ?? null : null;
+  const rawResults = metadata ? (resultsCache.get(cacheKey) ?? null) : null;
   const { dataset } = useDatasetContext();
 
   // Process raw results to get field counts and rows

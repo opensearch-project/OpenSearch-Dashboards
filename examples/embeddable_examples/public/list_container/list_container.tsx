@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import {
   Container,
@@ -41,10 +40,12 @@ export const LIST_CONTAINER = 'LIST_CONTAINER';
 
 export class ListContainer extends Container<{}, ContainerInput> {
   public readonly type = LIST_CONTAINER;
-  private node?: HTMLElement;
   private root: Root | null = null;
 
-  constructor(input: ContainerInput, private embeddableServices: EmbeddableStart) {
+  constructor(
+    input: ContainerInput,
+    private embeddableServices: EmbeddableStart
+  ) {
     super(input, { embeddableLoaded: {} }, embeddableServices.getEmbeddableFactory);
   }
 
@@ -59,7 +60,6 @@ export class ListContainer extends Container<{}, ContainerInput> {
       this.root.unmount();
       this.root = null;
     }
-    this.node = node;
     this.root = createRoot(node);
     this.root.render(
       <ListContainerComponent embeddable={this} embeddableServices={this.embeddableServices} />

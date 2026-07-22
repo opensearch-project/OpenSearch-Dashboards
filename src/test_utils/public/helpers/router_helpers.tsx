@@ -28,44 +28,45 @@
  * under the License.
  */
 
-import React, { Component, ComponentType } from 'react';
+import { Component, ComponentType } from 'react';
 import { MemoryRouter, Route, withRouter } from 'react-router-dom';
 import * as H from 'history';
 
-export const WithMemoryRouter = (initialEntries: string[] = ['/'], initialIndex: number = 0) => (
-  WrappedComponent: ComponentType<any>
-) => (props: any) => (
-  <MemoryRouter initialEntries={initialEntries} initialIndex={initialIndex}>
-    <WrappedComponent {...props} />
-  </MemoryRouter>
-);
-
-export const WithRoute = (componentRoutePath = '/', onRouter = (router: any) => {}) => (
-  WrappedComponent: ComponentType<any>
-) => {
-  // Create a class component that will catch the router
-  // and forward it to our "onRouter()" handler.
-  const CatchRouter = withRouter(
-    class extends Component<any> {
-      componentDidMount() {
-        const { match, location, history } = this.props;
-        const router = { route: { match, location }, history };
-        onRouter(router);
-      }
-
-      render() {
-        return <WrappedComponent {...this.props} />;
-      }
-    }
+export const WithMemoryRouter =
+  (initialEntries: string[] = ['/'], initialIndex: number = 0) =>
+  (WrappedComponent: ComponentType<any>) =>
+  (props: any) => (
+    <MemoryRouter initialEntries={initialEntries} initialIndex={initialIndex}>
+      <WrappedComponent {...props} />
+    </MemoryRouter>
   );
 
-  return (props: any) => (
-    <Route
-      path={componentRoutePath}
-      render={(routerProps) => <CatchRouter {...routerProps} {...props} />}
-    />
-  );
-};
+export const WithRoute =
+  (componentRoutePath = '/', onRouter = (router: any) => {}) =>
+  (WrappedComponent: ComponentType<any>) => {
+    // Create a class component that will catch the router
+    // and forward it to our "onRouter()" handler.
+    const CatchRouter = withRouter(
+      class extends Component<any> {
+        componentDidMount() {
+          const { match, location, history } = this.props;
+          const router = { route: { match, location }, history };
+          onRouter(router);
+        }
+
+        render() {
+          return <WrappedComponent {...this.props} />;
+        }
+      }
+    );
+
+    return (props: any) => (
+      <Route
+        path={componentRoutePath}
+        render={(routerProps) => <CatchRouter {...routerProps} {...props} />}
+      />
+    );
+  };
 
 interface Router {
   history: Partial<H.History>;

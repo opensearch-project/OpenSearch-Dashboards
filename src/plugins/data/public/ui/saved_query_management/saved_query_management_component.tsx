@@ -103,10 +103,8 @@ export function SavedQueryManagementComponent({
         requestGotCancelled = true;
       };
 
-      const {
-        total: savedQueryCount,
-        queries: savedQueryItems,
-      } = await savedQueryService.findSavedQueries('', perPage, activePage + 1);
+      const { total: savedQueryCount, queries: savedQueryItems } =
+        await savedQueryService.findSavedQueries('', perPage, activePage + 1);
 
       if (requestGotCancelled) return;
 
@@ -132,6 +130,7 @@ export function SavedQueryManagementComponent({
   }, [handleClosePopover, onInitiateSaveAsNew]);
 
   const handleSelect = useCallback(
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     (savedQueryToSelect) => {
       handleClosePopover();
       onLoad(savedQueryToSelect);

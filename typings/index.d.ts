@@ -52,6 +52,18 @@ declare module '*.txt' {
   export default content;
 }
 
+declare module '*.scss' {
+  const content: Record<string, string>;
+  // eslint-disable-next-line import/no-default-export
+  export default content;
+}
+
+declare module '*.css' {
+  const content: Record<string, string>;
+  // eslint-disable-next-line import/no-default-export
+  export default content;
+}
+
 type MethodKeysOf<T> = {
   [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never;
 }[keyof T];
@@ -64,8 +76,7 @@ type DeeplyMockedKeys<T> = {
   [P in keyof T]: T[P] extends (...args: any[]) => any
     ? jest.MockInstance<ReturnType<T[P]>, Parameters<T[P]>>
     : DeeplyMockedKeys<T[P]>;
-} &
-  T;
+} & T;
 
 type Writable<T> = {
   -readonly [K in keyof T]: T[K];

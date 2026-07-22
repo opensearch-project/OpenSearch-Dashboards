@@ -30,6 +30,7 @@ export interface EnhancedFetchContext {
     pollQueryResultsParams?: PollQueryResultsParams;
     timeRange?: TimeRange;
     options?: Record<string, unknown>;
+    queryId?: string;
   };
 }
 

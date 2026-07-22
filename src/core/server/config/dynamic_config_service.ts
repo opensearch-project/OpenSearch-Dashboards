@@ -39,16 +39,17 @@ export interface StartDeps {
 export type IDynamicConfigService = PublicMethodsOf<DynamicConfigService>;
 
 /** @internal */
-export class DynamicConfigService
-  implements CoreService<unknown, InternalDynamicConfigServiceStart> {
+export class DynamicConfigService implements CoreService<
+  unknown,
+  InternalDynamicConfigServiceStart
+> {
   readonly #configService: IConfigService;
   readonly #envService: Env;
   readonly #logger: Logger;
   readonly #schemas = new Map<string, Type<unknown>>();
   readonly #config$: Observable<DynamicConfigServiceConfigType>;
-  readonly #asyncLocalStorage: AsyncLocalStorage<
-    AsyncLocalStorageContext
-  > = new AsyncLocalStorage();
+  readonly #asyncLocalStorage: AsyncLocalStorage<AsyncLocalStorageContext> =
+    new AsyncLocalStorage();
   readonly #requestHeaders: string[] = [];
   #configStoreClientFactory?: IDynamicConfigStoreClientFactory;
   #started = false;
@@ -111,6 +112,7 @@ export class DynamicConfigService
         if (!config.skipMigrations) {
           await defaultConfigStoreClient.createDynamicConfigIndex();
         }
+        // @ts-expect-error TS2345 TODO Fix me
         configStoreClient = defaultConfigStoreClient;
       }
     }

@@ -46,7 +46,7 @@ export const BreakdownFieldSelector: React.FC<BreakdownFieldSelectorProps> = ({ 
       ? breakdownQueryStatus.error.message.details || 'Breakdown query failed'
       : undefined;
 
-  const availableFields = ((dataset?.fields?.getAll() || []) as unknown) as DataViewField[];
+  const availableFields = (dataset?.fields?.getAll() || []) as unknown as DataViewField[];
   const stringFields = availableFields.filter(
     (field) =>
       field.type === 'string' &&
@@ -73,6 +73,7 @@ export const BreakdownFieldSelector: React.FC<BreakdownFieldSelectorProps> = ({ 
     dispatch(clearResultsByKey(histogramCacheKey));
     dispatch(clearQueryStatusMapByKey(histogramCacheKey));
     dispatch(
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       executeHistogramQuery({
         services,
         cacheKey: histogramCacheKey,

@@ -452,7 +452,7 @@ describe('PluginsService', () => {
         ]),
       });
       await pluginsService.discover({ environment: environmentSetup });
-      expect(configService.setSchema).toBeCalledWith('path', configSchema);
+      expect(configService.setSchema).toHaveBeenCalledWith('path', configSchema);
     });
 
     it('registers plugin config deprecation provider in config service', async () => {
@@ -483,7 +483,7 @@ describe('PluginsService', () => {
         ]),
       });
       await pluginsService.discover({ environment: environmentSetup });
-      expect(configService.addDeprecationProvider).toBeCalledWith(
+      expect(configService.addDeprecationProvider).toHaveBeenCalledWith(
         'config-path',
         deprecationProvider
       );

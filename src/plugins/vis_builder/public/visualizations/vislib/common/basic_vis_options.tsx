@@ -4,7 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import React from 'react';
+
 import { Draft } from 'immer';
 import { SelectOption, SwitchOption } from '../../../../../charts/public';
 import { getConfigCollections } from '../../../../../vis_type_vislib/public';

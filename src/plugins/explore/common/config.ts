@@ -20,6 +20,12 @@ export const configSchema = schema.object({
   agentTraces: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
   }),
+  sqlSupport: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+  }),
+  queryProfiling: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+  }),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;

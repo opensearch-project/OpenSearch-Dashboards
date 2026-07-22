@@ -12,6 +12,7 @@ import {
   Query,
   DataView,
   IndexPatternField,
+  getDataSourceEngineCapabilities,
 } from '../../../../../../../../src/plugins/data/common';
 import { QueryExecutionStatus } from '../types';
 import { setResults, ISearchResult, IPrometheusSearchResult } from '../slices';
@@ -78,6 +79,7 @@ export const defaultPrepareQueryString = (query: Query): string => {
   switch (query.language) {
     case 'PPL':
       return defaultPreparePplQuery(query).query;
+    case 'SQL':
     case 'PROMQL':
       return query.query as string;
     default:
@@ -180,7 +182,7 @@ const updateFieldTopQueryValues = (hits: any[], dataset: DataView): void => {
         const topValues = result.buckets.map((bucket) => String(bucket.value));
         fieldUpdates.push({ field, topValues });
       }
-    } catch (error) {
+    } catch {
       // Silently continue on field processing errors
     }
   });
@@ -276,6 +278,7 @@ export const executeQueries = createAsyncThunk<
     dataTableQueryStatus?.status === QueryExecutionStatus.UNINITIALIZED;
   const needsHistogramQuery =
     query.language !== 'PROMQL' &&
+    query.language !== 'SQL' && // Disable histograms for SQL
     (!results[histogramCacheKey] ||
       histogramQueryStatus?.status === QueryExecutionStatus.UNINITIALIZED);
   const promises = [];
@@ -537,8 +540,15 @@ const executeQueryBase = async (
       histogramConfig = createHistogramConfigWithInterval(dataView, interval, services, getState);
     }
 
+    // Some engines (e.g. legacy Elasticsearch / Open Distro) have no `span()`/`timechart`
+    // time-bucketing in the PPL `stats` by-clause, so the histogram query fails to parse. Skip
+    // building it for those engines and run the plain query instead (the histogram chart just won't
+    // populate).
+    const datasetEngineType = dataset?.dataSource?.engineType ?? dataset?.dataSource?.type;
+    const supportsPplSpan = getDataSourceEngineCapabilities(datasetEngineType).supportsPplSpan;
+
     let effectiveQuery = queryString;
-    if (query.language === 'PPL' && histogramConfig && isHistogramQuery) {
+    if (query.language === 'PPL' && histogramConfig && isHistogramQuery && supportsPplSpan) {
       effectiveQuery = buildPPLHistogramQuery(queryString, histogramConfig);
     }
 
@@ -602,6 +612,7 @@ const executeQueryBase = async (
       ...rawResults,
       elapsedMs: inspectorRequest.getTime()!,
       fieldSchema: searchSource.getDataFrame()?.schema,
+      profile: searchSource.getDataFrame()?.meta?.profile,
     };
 
     if (isHistogramQuery && histogramConfig) {
@@ -701,7 +712,7 @@ const executeQueryBase = async (
 /**
  * Helper function to create SearchSource with common configuration
  */
-const createSearchSourceWithQuery = async (
+export const createSearchSourceWithQuery = async (
   preparedQuery: any,
   dataView: DataView,
   services: ExploreServices,
@@ -729,6 +740,13 @@ const createSearchSourceWithQuery = async (
   const queryStringWithExecutedQuery = {
     ...data.query.queryString.getQuery(),
     query: preparedQuery.query,
+    // When query profiling is enabled, ask the engine to profile this query so the response
+    // reports whether it ran on the complex worker pool (see results.profile.isComplex). PPL-only:
+    // only PPL runs on that pool, and this factory is shared, so sending the field on other
+    // languages (e.g. SQL) is meaningless and can affect engine selection on some backends.
+    ...(services.queryProfilingEnabled && preparedQuery.language === 'PPL'
+      ? { profile: true }
+      : {}),
   };
 
   searchSource.setFields({
@@ -745,6 +763,7 @@ const createSearchSourceWithQuery = async (
   }
 
   // Add histogram aggregations if requested and time-based
+  // @ts-expect-error TS2554 TODO(ts-error): fixme
   const histogramConfigs = createHistogramConfigs(dataView, customInterval, services.data);
   if (histogramConfigs) {
     searchSource.setField('aggs', histogramConfigs.toDsl());

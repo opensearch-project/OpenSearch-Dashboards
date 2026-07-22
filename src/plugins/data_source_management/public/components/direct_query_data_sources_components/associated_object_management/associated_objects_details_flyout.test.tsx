@@ -3,18 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { AssociatedObjectsDetailsFlyout } from './associated_objects_details_flyout';
 import { ApplicationStart, HttpStart, NotificationsStart } from 'opensearch-dashboards/public';
-import {
-  // @ts-expect-error TS6133 TODO(ts-error): fixme
-  getRenderAccelerationDetailsFlyout,
-  getRenderCreateAccelerationFlyout,
-} from '../../../plugin';
-// @ts-expect-error TS6133 TODO(ts-error): fixme
-import { CatalogCacheManager } from '../../../../framework/catalog_cache/cache_manager';
+import { getRenderCreateAccelerationFlyout } from '../../../plugin';
 import { DirectQueryLoadingStatus } from '../../../../framework/types';
 import { useLoadTableColumnsToCache } from '../../../../framework/catalog_cache/cache_loader';
 
@@ -111,8 +104,7 @@ describe('AssociatedObjectsDetailsFlyout', () => {
     fireEvent.click(screen.getAllByRole('button')[0]);
     await waitFor(() => {
       expect(mockApplication.navigateToApp).toHaveBeenCalledWith('data-explorer', {
-        path:
-          "discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(view:discover))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_q=(filters:!(),query:(dataset:(dataSource:(id:'',meta:(name:testDatasource,type:CUSTOM),title:'',type:DATA_SOURCE),id:'::testDatasource.testDatabase.testTable',title:testDatasource.testDatabase.testTable,type:S3),language:SQL,query:'SELECT%20*%20FROM%20testDatasource.testDatabase.testTable%20LIMIT%2010'))",
+        path: "discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(view:discover))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_q=(filters:!(),query:(dataset:(dataSource:(id:'',meta:(name:testDatasource,type:CUSTOM),title:'',type:DATA_SOURCE),id:'::testDatasource.testDatabase.testTable',title:testDatasource.testDatabase.testTable,type:S3),language:SQL,query:'SELECT%20*%20FROM%20testDatasource.testDatabase.testTable%20LIMIT%2010'))",
       });
     });
   });

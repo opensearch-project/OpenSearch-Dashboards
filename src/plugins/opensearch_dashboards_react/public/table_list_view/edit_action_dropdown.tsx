@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import { useState, FC } from 'react';
 import {
   EuiIcon,
   EuiPopover,
@@ -31,7 +31,7 @@ interface EditActionDropdownProps {
   visbuilderEditItem?(item: VisualizationItem): void;
 }
 
-export const EditActionDropdown: React.FC<EditActionDropdownProps> = ({
+export const EditActionDropdown: FC<EditActionDropdownProps> = ({
   item,
   editItem,
   visbuilderEditItem,

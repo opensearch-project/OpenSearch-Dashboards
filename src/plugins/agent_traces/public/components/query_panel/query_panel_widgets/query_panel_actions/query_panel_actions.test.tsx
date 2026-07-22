@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { useSelector } from 'react-redux';
 import { QueryPanelActions } from './query_panel_actions';

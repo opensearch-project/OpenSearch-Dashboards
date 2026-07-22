@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { ComponentType } from 'react';
+import { ComponentType } from 'react';
 import { Store } from 'redux';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react';

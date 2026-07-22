@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { render } from '@testing-library/react';
 import { coreMock } from '../../../../core/public/mocks';
 import { renderImportSampleDataApp } from './application';

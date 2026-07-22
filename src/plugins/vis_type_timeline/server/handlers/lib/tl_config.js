@@ -37,7 +37,6 @@ export default function tlConfigFn(setup) {
   let tlConfig = {
     getTargetSeries: function () {
       return _.map(targetSeries, function (bucket) {
-        // eslint-disable-line no-use-before-define
         return [bucket, null];
       });
     },

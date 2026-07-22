@@ -6,7 +6,7 @@
 import { i18n } from '@osd/i18n';
 import React from 'react';
 import { EuiText } from '@elastic/eui';
-import { debounceTime, distinctUntilChanged, map, take } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
 
 import {
@@ -132,7 +132,12 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
     );
 
     // Always initialize chat service - core service handles enablement
-    this.chatService = new ChatService(core.uiSettings, core.chat, core.workspaces);
+    this.chatService = new ChatService(
+      core.uiSettings,
+      core.chat,
+      core.workspaces,
+      core.savedObjects.client
+    );
 
     if (!isEnabled) {
       return {

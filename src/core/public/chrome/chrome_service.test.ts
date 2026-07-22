@@ -105,7 +105,7 @@ async function start({
 }: { options?: any; cspConfigMock?: any; startDeps?: ReturnType<typeof defaultStartDeps> } = {}) {
   const service = new ChromeService();
 
-  service.setup({ uiSettings: startDeps.uiSettings });
+  service.setup({ uiSettings: startDeps.uiSettings, injectedMetadata: startDeps.injectedMetadata });
 
   if (cspConfigMock) {
     startDeps.injectedMetadata.getCspConfig.mockReturnValue(cspConfigMock);
@@ -138,7 +138,8 @@ describe('setup', () => {
     const chrome = new ChromeService();
     const uiSettings = uiSettingsServiceMock.createSetupContract();
 
-    const chromeSetup = chrome.setup({ uiSettings });
+    const injectedMetadata = injectedMetadataServiceMock.createStartContract();
+    const chromeSetup = chrome.setup({ uiSettings, injectedMetadata });
     chromeSetup.registerCollapsibleNavHeader(renderMock);
 
     const chromeStart = await chrome.start(defaultStartDeps());
@@ -155,7 +156,8 @@ describe('setup', () => {
     const chrome = new ChromeService();
     const uiSettings = uiSettingsServiceMock.createSetupContract();
 
-    const chromeSetup = chrome.setup({ uiSettings });
+    const injectedMetadata = injectedMetadataServiceMock.createStartContract();
+    const chromeSetup = chrome.setup({ uiSettings, injectedMetadata });
     // call 1st time
     chromeSetup.registerCollapsibleNavHeader(renderMock);
     // call 2nd time
@@ -175,7 +177,8 @@ describe('setup', () => {
       registerSearchCommand: registerSearchCommandSpy,
     });
 
-    chrome.setup({ uiSettings });
+    const injectedMetadata = injectedMetadataServiceMock.createStartContract();
+    chrome.setup({ uiSettings, injectedMetadata });
 
     expect(registerSearchCommandSpy).toHaveBeenCalledWith({
       id: 'pagesSearch',
@@ -189,7 +192,7 @@ describe('start', () => {
   it('does not add legacy browser warning if browser supports CSP', async () => {
     const { startDeps } = await start();
 
-    expect(startDeps.notifications.toasts.addWarning).not.toBeCalled();
+    expect(startDeps.notifications.toasts.addWarning).not.toHaveBeenCalled();
   });
 
   it('does not add legacy browser warning if warnLegacyBrowsers is disabled', async () => {
@@ -197,7 +200,7 @@ describe('start', () => {
       cspConfigMock: { warnLegacyBrowsers: false },
     });
 
-    expect(startDeps.notifications.toasts.addWarning).not.toBeCalled();
+    expect(startDeps.notifications.toasts.addWarning).not.toHaveBeenCalled();
   });
 
   describe('getComponent', () => {
@@ -569,7 +572,7 @@ describe('start', () => {
 
       service.stop();
 
-      expect(docTitleResetSpy).toBeCalledTimes(1);
+      expect(docTitleResetSpy).toHaveBeenCalledTimes(1);
       await expect(promises).resolves.toMatchInlineSnapshot(`
         Array [
           Array [
@@ -630,5 +633,61 @@ describe('stop', () => {
         chrome.getHelpExtension$()
       ).toPromise()
     ).resolves.toBe(undefined);
+  });
+});
+
+describe('navPopoverServices.navigateToApp hashchange wrapper', () => {
+  // navPopoverServices is not part of the public start() contract; it is passed
+  // into the Header component. We reach it by shallow-rendering the header and
+  // reading the prop, then drive its wrapped navigateToApp.
+  const getNavPopoverServices = async () => {
+    const startDeps = defaultStartDeps([new FakeApp('appA'), new FakeApp('appB')]);
+    const { chrome } = await start({ startDeps });
+    const header = shallow(React.createElement(() => chrome.getHeaderComponent()));
+    const navPopoverServices = header.prop('navPopoverServices') as {
+      navigateToApp: (appId: string, options?: unknown) => unknown;
+    };
+    return { navPopoverServices, startDeps };
+  };
+
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.clearAllTimers();
+    jest.useRealTimers();
+  });
+
+  it('dispatches a window hashchange for same-app navigation', async () => {
+    const { navPopoverServices, startDeps } = await getNavPopoverServices();
+    // Establish the current app id as appA.
+    startDeps.application.navigateToApp('appA');
+
+    const hashChangeSpy = jest.fn();
+    window.addEventListener('hashchange', hashChangeSpy);
+
+    navPopoverServices.navigateToApp('appA');
+    expect(hashChangeSpy).not.toHaveBeenCalled();
+
+    jest.advanceTimersByTime(0);
+    expect(hashChangeSpy).toHaveBeenCalledTimes(1);
+
+    window.removeEventListener('hashchange', hashChangeSpy);
+  });
+
+  it('does not dispatch a window hashchange for cross-app navigation', async () => {
+    const { navPopoverServices, startDeps } = await getNavPopoverServices();
+    // Establish the current app id as appA.
+    startDeps.application.navigateToApp('appA');
+
+    const hashChangeSpy = jest.fn();
+    window.addEventListener('hashchange', hashChangeSpy);
+
+    navPopoverServices.navigateToApp('appB');
+    jest.advanceTimersByTime(0);
+    expect(hashChangeSpy).not.toHaveBeenCalled();
+
+    window.removeEventListener('hashchange', hashChangeSpy);
   });
 });

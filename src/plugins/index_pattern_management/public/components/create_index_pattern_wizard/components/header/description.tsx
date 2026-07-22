@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 import { DocLinksStart } from 'opensearch-dashboards/public';
 

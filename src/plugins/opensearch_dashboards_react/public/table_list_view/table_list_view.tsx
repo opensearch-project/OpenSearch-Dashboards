@@ -204,7 +204,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
             values={{ entityName: this.props.entityName }}
           />
         ),
-        text: `${error}`,
+        text: error?.body?.message || error?.message || `${error}`,
       });
     }
     this.fetchItems();
@@ -486,7 +486,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
       <EuiInMemoryTable<VisualizationItem>
         itemId="id"
         items={this.state.items}
-        columns={(columns as unknown) as Array<EuiBasicTableColumn<VisualizationItem>>} // EuiBasicTableColumn is stricter than Column
+        columns={columns as unknown as Array<EuiBasicTableColumn<VisualizationItem>>} // EuiBasicTableColumn is stricter than Column
         pagination={this.pagination}
         loading={this.state.isFetchingItems}
         message={noItemsMessage}

@@ -8,19 +8,27 @@ import { AgUiAgent } from './ag_ui_agent';
 import { RunAgentInput, Message, UserMessage, ToolMessage } from '../../common/types';
 import type { ToolDefinition } from '../../../context_provider/public';
 import { AssistantActionService } from '../../../context_provider/public';
-import { ChatLayoutMode } from '../types';
 import type { ChatWindowInstance } from '../components/chat_window';
 import {
   IUiSettingsClient,
   UiSettingScope,
   ChatServiceStart,
-  ChatWindowState,
   WorkspacesStart,
+  SavedObjectsClientContract,
   Event,
   EventType,
+  MessagesSnapshotEvent,
+  ToolCallStartEvent,
+  ToolCallArgsEvent,
+  ToolCallEndEvent,
 } from '../../../../core/public';
 import { getDefaultDataSourceId } from '../../../data_source_management/public';
 import { ConversationHistoryService } from './conversation_history_service';
+
+export interface DataSourceInfo {
+  id: string;
+  title: string;
+}
 
 export interface ChatState {
   messages: Message[];
@@ -42,6 +50,7 @@ export class ChatService {
   private uiSettings: IUiSettingsClient;
   private coreChatService?: ChatServiceStart;
   private workspaces?: WorkspacesStart;
+  private savedObjectsClient?: SavedObjectsClientContract;
 
   // ChatWindow instance for delegating sendMessage calls to proper timeline management
   private chatWindowInstance: ChatWindowInstance | null = null;
@@ -53,8 +62,11 @@ export class ChatService {
   // Subscription to assistant action service for tool updates
   private toolSubscription?: Subscription;
 
-  // Cache for datasourceId to avoid repeated lookups
+  // Data source explicitly selected by user in this session
   private cachedDataSourceId?: string;
+
+  // Cached available data sources for the current workspace
+  private cachedAvailableDataSources?: DataSourceInfo[];
 
   // Conversation history service
   public conversationHistoryService: ConversationHistoryService;
@@ -62,13 +74,15 @@ export class ChatService {
   constructor(
     uiSettings: IUiSettingsClient,
     coreChatService?: ChatServiceStart,
-    workspaces?: WorkspacesStart
+    workspaces?: WorkspacesStart,
+    savedObjectsClient?: SavedObjectsClientContract
   ) {
     // No need to pass URL anymore - agent will use the proxy endpoint
     this.agent = new AgUiAgent();
     this.uiSettings = uiSettings;
     this.coreChatService = coreChatService;
     this.workspaces = workspaces;
+    this.savedObjectsClient = savedObjectsClient;
 
     // Initialize conversation history service
     if (!coreChatService) {
@@ -98,11 +112,11 @@ export class ChatService {
   };
 
   private generateRunId(): string {
-    return `run-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+    return `run-${Date.now()}-${Math.random().toString(36).substring(2, 11).padEnd(9, '0')}`;
   }
 
   public generateMessageId(): string {
-    return `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+    return `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11).padEnd(9, '0')}`;
   }
 
   private generateRequestId(): string {
@@ -116,6 +130,40 @@ export class ChatService {
 
   private removeActiveRequest(requestId: string): void {
     this.activeRequests.delete(requestId);
+  }
+
+  /**
+   * Wait until no OTHER run is active before dispatching a follow-up run.
+   *
+   * Fixes #11881: a frontend-tool round-trip opens a second run (the tool
+   * result dispatch) once the tool executes in the browser. If the first run's
+   * SSE stream hasn't finished yet — e.g. a parallel backend tool is still
+   * resolving — dispatching the second run against the same thread hits the
+   * agent server's per-thread concurrency guard and throws
+   * `ConcurrencyException`. Polling `activeRequests` until it drains (excluding
+   * `exceptRequestId`, the caller's own id) lets the first run close first, so
+   * the two runs are serialized instead of racing.
+   *
+   * Bounded by `maxWaitMs` so a first run that never closes can't hang the UI
+   * forever — after the timeout we proceed anyway (best effort).
+   */
+  private async waitForActiveRunsToClear(
+    exceptRequestId: string,
+    maxWaitMs = 15000,
+    intervalMs = 100
+  ): Promise<void> {
+    const deadline = Date.now() + maxWaitMs;
+    while (Date.now() < deadline) {
+      const others = Array.from(this.activeRequests).filter((id) => id !== exceptRequestId);
+      if (others.length === 0) {
+        return;
+      }
+      await new Promise((resolve) => setTimeout(resolve, intervalMs));
+    }
+    // eslint-disable-next-line no-console
+    console.warn(
+      `waitForActiveRunsToClear: timed out after ${maxWaitMs}ms with active runs still present; dispatching follow-up run anyway`
+    );
   }
 
   public getPaddingSize(): number {
@@ -246,6 +294,13 @@ export class ChatService {
     return contextValue?.dataset?.dataSource?.id;
   }
 
+  private getDataSourceFromPageContext() {
+    const contextStore = (window as any).assistantContextStore;
+    const allContexts = contextStore ? contextStore.getAllContexts() : [];
+
+    return this.extractDataSourceIdFromPageContext(allContexts);
+  }
+
   /**
    * Get workspace-aware data source ID
    * Determines the correct data source based on current workspace context
@@ -253,10 +308,7 @@ export class ChatService {
   private async getWorkspaceAwareDataSourceId(): Promise<string | undefined> {
     try {
       // Try to get data source from page context first
-      const contextStore = (window as any).assistantContextStore;
-      const allContexts = contextStore ? contextStore.getAllContexts() : [];
-
-      const pageDataSourceId = this.extractDataSourceIdFromPageContext(allContexts);
+      const pageDataSourceId = this.getDataSourceFromPageContext();
       if (pageDataSourceId) {
         this.cachedDataSourceId = pageDataSourceId;
         return pageDataSourceId;
@@ -297,16 +349,20 @@ export class ChatService {
   }
 
   /**
-   * Get the current cached data source ID
-   * Returns the datasourceId that was last retrieved
+   * Get the current data source ID from all resolution sources.
    */
   public async getCurrentDataSourceId(): Promise<string | undefined> {
-    return this.cachedDataSourceId || (await this.getWorkspaceAwareDataSourceId());
+    return (
+      this.getDataSourceFromPageContext() ||
+      this.cachedDataSourceId ||
+      (await this.getWorkspaceAwareDataSourceId())
+    );
   }
 
   public async sendMessage(
     content: string,
-    messages: Message[]
+    messages: Message[],
+    userMessage?: UserMessage
   ): Promise<{
     observable: any;
     userMessage: UserMessage;
@@ -315,33 +371,28 @@ export class ChatService {
 
     this.addActiveRequest(requestId);
 
-    // Check if the last message in the array is a user message with array content
-    // If so, append the text to the existing content array (for multimodal messages)
-    let userMessage: UserMessage;
-    const lastMessage = messages.length > 0 ? messages[messages.length - 1] : null;
-    const hasArrayContent = lastMessage?.role === 'user' && Array.isArray(lastMessage.content);
+    // Use provided user message or create one
+    if (!userMessage) {
+      const lastMessage = messages.length > 0 ? messages[messages.length - 1] : null;
+      const hasArrayContent = lastMessage?.role === 'user' && Array.isArray(lastMessage.content);
 
-    if (hasArrayContent && lastMessage) {
-      // Remove the last message from the array since we'll merge it with the new message
-      messages = messages.slice(0, -1);
+      if (hasArrayContent && lastMessage) {
+        // Remove the last message from the array since we'll merge it with the new message
+        messages = messages.slice(0, -1);
 
-      // Append text to the existing content array (preserves order from caller)
-      userMessage = {
-        ...lastMessage,
-        id: this.generateMessageId(),
-        content: [...(lastMessage.content as any[]), { type: 'text', text: content.trim() }],
-      };
-    } else {
-      // No array content, create a simple text message
-      userMessage = {
-        id: this.generateMessageId(),
-        role: 'user',
-        content: content.trim(),
-      };
+        // Append text to the existing content array (preserves order from caller)
+        userMessage = {
+          ...lastMessage,
+          id: this.generateMessageId(),
+          content: [...(lastMessage.content as any[]), { type: 'text', text: content.trim() }],
+        };
+      } else {
+        userMessage = this.getUserMessage(content);
+      }
     }
 
     // Get workspace-aware data source ID
-    const dataSourceId = await this.getWorkspaceAwareDataSourceId();
+    const dataSourceId = await this.getCurrentDataSourceId();
 
     // Get all contexts from the assistant context store (static + dynamic)
     const contextStore = (window as any).assistantContextStore;
@@ -395,74 +446,192 @@ export class ChatService {
   }
 
   /**
-   * Wait for tool call result to be synced to agentic memory
-   * Polls the conversation history to check if the tool call has been saved
+   * Number of consecutive polls in which the tool call id must be observed
+   * in history before we treat it as stably synced. Any pending observation
+   * or error resets the streak. This guards against transient snapshots
+   * where the id briefly appears then disappears as memory is rewritten.
+   */
+  private readonly TOOL_CALL_SYNC_MATURITY_THRESHOLD = 3;
+
+  /**
+   * Sleep for `ms` milliseconds, bailing out early if `signal` aborts.
+   * Returns true if the sleep was interrupted by the signal, false if the
+   * timer completed normally.
+   */
+  private interruptibleSleep(ms: number, signal?: AbortSignal): Promise<boolean> {
+    if (signal?.aborted) return Promise.resolve(true);
+
+    return new Promise<boolean>((resolve) => {
+      const onAbort = () => {
+        clearTimeout(timeoutId);
+        resolve(true);
+      };
+      const timeoutId = setTimeout(() => {
+        signal?.removeEventListener('abort', onAbort);
+        resolve(false);
+      }, ms);
+      signal?.addEventListener('abort', onAbort, { once: true });
+    });
+  }
+
+  /**
+   * Wait for tool call to be synced to agentic memory.
+   *
+   * Polls conversation history up to `maxAttempts` times, waiting `intervalMs`
+   * between polls. Returns one of:
+   * - `{ shouldSend: true,  reason: 'synced' }`              — tool call is in
+   *   history, caller may dispatch the tool result.
+   * - `{ shouldSend: false, reason: 'result_already_exists' }` — another
+   *   window persisted a tool result first; caller should skip dispatch.
+   * - `{ shouldSend: false, reason: 'sync_timeout' }`        — polling
+   *   exhausted without observing sync; caller should skip dispatch and
+   *   surface a resendable failure to the user.
+   * - `{ shouldSend: false, reason: 'no_thread_id' }`        — no thread id
+   *   available; caller should skip dispatch.
+   * - `{ shouldSend: false, reason: 'aborted' }`             — caller-supplied
+   *   abort signal fired; caller should skip dispatch.
+   *
+   * Note: exhausted attempts no longer silently proceed — the caller must
+   * decide whether to resend.
    */
   private async waitForToolCallSync(
     toolCallId: string,
-    maxAttempts: number = 10,
-    intervalMs: number = 1000
-  ): Promise<void> {
+    maxAttempts: number = 15,
+    intervalMs: number = 1000,
+    signal?: AbortSignal
+  ): Promise<{
+    shouldSend: boolean;
+    reason: 'synced' | 'no_thread_id' | 'result_already_exists' | 'sync_timeout' | 'aborted';
+  }> {
+    if (signal?.aborted) return { shouldSend: false, reason: 'aborted' };
+
     const threadId = this.getThreadId();
+    if (!threadId) return { shouldSend: false, reason: 'no_thread_id' };
+
+    const checkSyncStatus = async (): Promise<'result_already_exists' | 'synced' | 'pending'> => {
+      const events = await this.conversationHistoryService.getConversation(threadId);
+      if (!events) return 'pending';
+
+      const hasToolResult = events.some((event) => {
+        if (event.type === EventType.MESSAGES_SNAPSHOT && 'messages' in event) {
+          const messages = (event as any).messages as Message[];
+          return messages.some(
+            (msg) =>
+              msg.role === 'tool' && 'toolCallId' in msg && (msg as any).toolCallId === toolCallId
+          );
+        }
+        return false;
+      });
+      if (hasToolResult) return 'result_already_exists';
+
+      const hasToolCall = events.some((event) => {
+        if (event.type === EventType.MESSAGES_SNAPSHOT && 'messages' in event) {
+          const messages = (event as any).messages as Message[];
+          return messages.some(
+            (msg) =>
+              msg.role === 'assistant' &&
+              'toolCalls' in msg &&
+              Array.isArray((msg as any).toolCalls) &&
+              (msg as any).toolCalls.some((tc: any) => tc.id === toolCallId)
+          );
+        }
+        return false;
+      });
+      return hasToolCall ? 'synced' : 'pending';
+    };
+
+    let consecutiveSyncedPolls = 0;
 
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      if (signal?.aborted) return { shouldSend: false, reason: 'aborted' };
+
       try {
-        const events = await this.conversationHistoryService.getConversation(threadId);
+        const status = await checkSyncStatus();
+        if (signal?.aborted) return { shouldSend: false, reason: 'aborted' };
 
-        if (events) {
-          // Check for tool call in MESSAGES_SNAPSHOT events
-          // The tool call is stored in assistant messages' toolCalls array
-          const toolCallSynced = events.some((event) => {
-            if (event.type === EventType.MESSAGES_SNAPSHOT && 'messages' in event) {
-              const messages = (event as any).messages as Message[];
-              return messages.some(
-                (msg) =>
-                  msg.role === 'assistant' &&
-                  'toolCalls' in msg &&
-                  Array.isArray((msg as any).toolCalls) &&
-                  (msg as any).toolCalls.some((tc: any) => tc.id === toolCallId)
-              );
-            }
-            return false;
-          });
-
-          if (toolCallSynced) {
-            return; // Tool call has been synced
+        if (status === 'result_already_exists') {
+          return { shouldSend: false, reason: 'result_already_exists' };
+        }
+        if (status === 'synced') {
+          // Require `TOOL_CALL_SYNC_MATURITY_THRESHOLD` consecutive synced
+          // observations before treating the tool call as stably synced.
+          // This guards against transient snapshots where the id appears
+          // briefly before being rewritten.
+          consecutiveSyncedPolls += 1;
+          if (consecutiveSyncedPolls >= this.TOOL_CALL_SYNC_MATURITY_THRESHOLD) {
+            return { shouldSend: true, reason: 'synced' };
           }
+        } else {
+          // Pending — id not yet in snapshot. Reset the streak so the
+          // maturity guarantee is "consecutive", not "cumulative".
+          consecutiveSyncedPolls = 0;
         }
       } catch (error) {
+        // Reset the streak on any error — maturity requires uninterrupted
+        // successful observations.
+        consecutiveSyncedPolls = 0;
         // eslint-disable-next-line no-console
         console.warn(`Failed to check tool call sync status (attempt ${attempt + 1}):`, error);
       }
 
-      // Wait before next attempt
-      await new Promise((resolve) => setTimeout(resolve, intervalMs));
+      // Wait before next attempt (skip the wait after the final attempt).
+      // The sleep is interruptible so `cancelToolResultDispatch` aborts
+      // immediately rather than waiting for the next tick.
+      if (attempt < maxAttempts - 1) {
+        const interrupted = await this.interruptibleSleep(intervalMs, signal);
+        if (interrupted) return { shouldSend: false, reason: 'aborted' };
+      }
     }
 
-    // If we've exhausted all attempts, log a warning but continue
+    // Exhausted attempts without observing sync — do NOT silently dispatch.
+    // Surface the failure so the caller can show a system message and let the
+    // user decide whether to resend.
     // eslint-disable-next-line no-console
     console.warn(
       `Tool call sync check timed out after ${maxAttempts} attempts for toolCallId: ${toolCallId}`
     );
+    return { shouldSend: false, reason: 'sync_timeout' };
   }
 
   public async sendToolResult(
     toolCallId: string,
     result: any,
-    messages: Message[]
+    messages: Message[],
+    signal?: AbortSignal
   ): Promise<{
     observable: any;
     toolMessage: ToolMessage;
+    skipped?: {
+      reason: 'result_already_exists' | 'sync_timeout' | 'no_thread_id' | 'aborted';
+    };
   }> {
     const requestId = this.generateRequestId();
 
     this.addActiveRequest(requestId);
+
     const toolMessage: ToolMessage = {
       id: this.generateMessageId(),
       role: 'tool',
       content: typeof result === 'string' ? result : JSON.stringify(result),
       toolCallId,
     };
+
+    // Helper to return a completed empty observable paired with a skip
+    // reason. Centralizes active-request cleanup so callers don't have to
+    // repeat it in each branch.
+    const skip = (
+      reason: 'result_already_exists' | 'sync_timeout' | 'no_thread_id' | 'aborted'
+    ) => {
+      this.removeActiveRequest(requestId);
+      return {
+        observable: new Observable((subscriber) => subscriber.complete()),
+        toolMessage,
+        skipped: { reason },
+      };
+    };
+
+    // Early-out if the caller aborted before we even began.
+    if (signal?.aborted) return skip('aborted');
 
     // Get workspace-aware data source ID
     const dataSourceId = await this.getWorkspaceAwareDataSourceId();
@@ -478,14 +647,17 @@ export class ChatService {
     }));
 
     // Send the tool result back to the agent with full conversation history
-    const includeFullHistory = this.conversationHistoryService.getMemoryProvider()
-      .includeFullHistory;
+    const includeFullHistory =
+      this.conversationHistoryService.getMemoryProvider().includeFullHistory;
     const mappedMessages = includeFullHistory ? [...messages, toolMessage] : [toolMessage];
 
     const threadId = this.getThreadId();
 
     if (!threadId) {
-      throw new Error('Thread ID is required to send a tool result');
+      // No thread id — dispatch isn't possible. Skip rather than throwing so
+      // callers can surface a user-visible system message instead of a
+      // silent console error.
+      return skip('no_thread_id');
     }
 
     const runInput: RunAgentInput = {
@@ -501,26 +673,80 @@ export class ChatService {
     // Wait for tool call result to be synced to agentic memory only when not including full history
     // (when full history is included, messages are passed directly so no sync wait needed)
     if (!includeFullHistory) {
-      await this.waitForToolCallSync(toolCallId);
+      const syncResult = await this.waitForToolCallSync(toolCallId, undefined, undefined, signal);
+
+      // Sync check returned a reason to skip dispatch:
+      // - `result_already_exists`: another window already persisted a tool
+      //   result. Skip to avoid a duplicate.
+      // - `sync_timeout`: polling exhausted. Skip and surface the failure so
+      //   the user can resend.
+      // - `aborted`: caller cancelled via the AbortSignal. Skip silently.
+      if (!syncResult.shouldSend) {
+        return skip(syncResult.reason as Exclude<typeof syncResult.reason, 'synced'>);
+      }
     }
+
+    // If the signal fired between sync completion and dispatch, bail out.
+    if (signal?.aborted) return skip('aborted');
+
+    // Fix #11881: wait for the previous run (e.g. the one that requested this
+    // frontend tool) to finish before dispatching this tool-result run.
+    // Dispatching while the prior run still holds the thread triggers the agent
+    // server's per-thread concurrency guard (ConcurrencyException). This
+    // serializes the two runs instead of racing them.
+    await this.waitForActiveRunsToClear(requestId);
+    if (signal?.aborted) return skip('aborted');
 
     // Continue the conversation with the tool result
     const observable = this.agent.runAgent(runInput, dataSourceId);
 
-    // Wrap observable to track completion
+    // Wrap observable to track completion and honor the caller's abort
+    // signal. When the signal fires, we abort the underlying agent fetch and
+    // surface an AbortError to subscribers so they can distinguish a
+    // cancellation from a real stream error.
     const trackedObservable = new Observable((subscriber: any) => {
+      // `settled` guards against emitting twice when the abort handler races
+      // with the inner subscription's error/complete (aborting the agent
+      // typically triggers both paths).
+      let settled = false;
+      const settle = (fn: () => void) => {
+        if (settled) return;
+        settled = true;
+        signal?.removeEventListener('abort', onAbort);
+        this.removeActiveRequest(requestId);
+        fn();
+      };
+
+      const onAbort = () => {
+        settle(() => {
+          this.agent.abort();
+          const abortError = new Error('Tool result send aborted');
+          abortError.name = 'AbortError';
+          subscriber.error(abortError);
+        });
+      };
+
+      if (signal?.aborted) {
+        onAbort();
+        return;
+      }
+
+      signal?.addEventListener('abort', onAbort, { once: true });
+
       const subscription = observable.subscribe({
-        next: (value: any) => subscriber.next(value),
-        error: (error: any) => {
-          this.removeActiveRequest(requestId);
-          subscriber.error(error);
+        next: (value: any) => {
+          if (!settled) subscriber.next(value);
         },
-        complete: () => {
-          this.removeActiveRequest(requestId);
-          subscriber.complete();
-        },
+        error: (error: any) => settle(() => subscriber.error(error)),
+        complete: () => settle(() => subscriber.complete()),
       });
-      return () => subscription.unsubscribe();
+
+      return () => {
+        settle(() => {
+          /* no-op — unsubscribe path just needs cleanup, not an error */
+        });
+        subscription.unsubscribe();
+      };
     });
 
     this.events$ = trackedObservable;
@@ -573,6 +799,10 @@ export class ChatService {
     }
     this.coreChatService.newThread();
 
+    // Clear data source selection and cache for new session
+    this.cachedDataSourceId = undefined;
+    this.cachedAvailableDataSources = undefined;
+
     // Clear dynamic context from global store for fresh chat session
     this.clearDynamicContextFromStore();
 
@@ -581,15 +811,103 @@ export class ChatService {
   }
 
   /**
-   * Restore the latest conversation from agentic memory
-   * Returns the messages and thread ID
-   * If thread ID is already set, skip restore (use existing thread)
-   * If no conversation can be restored, generate a new thread
+   * Preprocess a conversation's event array before replay.
+   *
+   * Finds the MESSAGES_SNAPSHOT event and checks whether the last assistant message
+   * contains tool calls that have no corresponding tool result messages (i.e. the
+   * frontend tool execution never completed). When such "unfinished" tool calls are
+   * found the method:
+   *   1. Rewrites the MESSAGES_SNAPSHOT so the last assistant message only contains
+   *      the *finished* tool calls — giving the event handler a clean baseline.
+   *   2. Appends synthetic TOOL_CALL_START → TOOL_CALL_ARGS → TOOL_CALL_END events
+   *      for every unfinished tool call so the event handler re-executes them exactly
+   *      as if they had just arrived from the agent.
+   *
+   * If there are no unfinished tool calls the original array is returned unchanged.
    */
-  public async restoreLatestConversation(): Promise<{
-    threadId: string;
-    messages: Message[];
-  } | null> {
+  private injectUnfinishedToolCallEvents(events: Event[]): Event[] {
+    const snapshotIndex = events.findIndex((e) => e.type === EventType.MESSAGES_SNAPSHOT);
+    if (snapshotIndex === -1) return events;
+
+    const snapshot = events[snapshotIndex] as MessagesSnapshotEvent;
+    const messages = snapshot.messages;
+    if (!messages || messages.length === 0) return events;
+
+    const lastMessage = messages[messages.length - 1];
+    if (
+      lastMessage.role !== 'assistant' ||
+      !('toolCalls' in lastMessage) ||
+      !lastMessage.toolCalls
+    ) {
+      return events;
+    }
+
+    const toolResultIds = new Set(
+      messages
+        .filter((m) => m.role === 'tool' && 'toolCallId' in m)
+        .map((m) => (m as any).toolCallId as string)
+    );
+
+    const assistantActionService = AssistantActionService.getInstance();
+
+    const unfinished = lastMessage.toolCalls.filter(
+      (tc) => assistantActionService.hasAction(tc.function.name) && !toolResultIds.has(tc.id)
+    );
+
+    if (unfinished.length === 0) return events;
+
+    const unfinishedIds = new Set(unfinished.map((tc) => tc.id));
+
+    // Rewrite the snapshot: strip unfinished tool calls from the last assistant message
+    const patchedLastMessage = {
+      ...lastMessage,
+      toolCalls: lastMessage.toolCalls.filter((tc) => !unfinishedIds.has(tc.id)),
+    };
+    const patchedSnapshot: MessagesSnapshotEvent = {
+      ...snapshot,
+      messages: [...messages.slice(0, -1), patchedLastMessage],
+    };
+
+    // Build synthetic tool call events for each unfinished tool call
+    const syntheticEvents: Event[] = [];
+    for (const toolCall of unfinished) {
+      syntheticEvents.push({
+        type: EventType.TOOL_CALL_START,
+        toolCallId: toolCall.id,
+        toolCallName: toolCall.function.name,
+        parentMessageId: lastMessage.id,
+        timestamp: Date.now(),
+      } as ToolCallStartEvent);
+
+      syntheticEvents.push({
+        type: EventType.TOOL_CALL_ARGS,
+        toolCallId: toolCall.id,
+        delta: toolCall.function.arguments,
+        timestamp: Date.now(),
+      } as ToolCallArgsEvent);
+
+      syntheticEvents.push({
+        type: EventType.TOOL_CALL_END,
+        toolCallId: toolCall.id,
+        timestamp: Date.now(),
+      } as ToolCallEndEvent);
+    }
+
+    // Return: events before snapshot + patched snapshot + events after snapshot + synthetic events
+    return [
+      ...events.slice(0, snapshotIndex),
+      patchedSnapshot,
+      ...events.slice(snapshotIndex + 1),
+      ...syntheticEvents,
+    ];
+  }
+
+  /**
+   * Restore the latest conversation from agentic memory.
+   * Returns the AG-UI event array (with unfinished tool calls injected) for replay,
+   * or null if no conversation exists or a thread is already active.
+   */
+  public async restoreLatestConversation(): Promise<Event[] | null> {
     // Check if thread ID is already set - if so, skip restore and use existing thread
     const currentThreadId = this.coreChatService?.getThreadId();
     if (currentThreadId) {
@@ -606,7 +924,6 @@ export class ChatService {
     if (result.conversations.length > 0) {
       // Found a latest conversation - get full details
       const latestConversationSummary = result.conversations[0];
-
       // Get the full conversation with all events
       const events = await this.conversationHistoryService.getConversation(
         latestConversationSummary.threadId
@@ -618,28 +935,22 @@ export class ChatService {
         return null;
       }
 
-      // Extract messages from MESSAGES_SNAPSHOT event
-      const snapshotEvent = events.find((e) => e.type === EventType.MESSAGES_SNAPSHOT);
-      if (snapshotEvent && 'messages' in snapshotEvent) {
-        // Set the thread ID in core service
-        if (this.coreChatService) {
-          this.coreChatService.setThreadId(latestConversationSummary.threadId);
-        }
-        return {
-          threadId: latestConversationSummary.threadId,
-          messages: snapshotEvent.messages,
-        };
+      // Set the thread ID in core service
+      if (this.coreChatService) {
+        this.coreChatService.setThreadId(latestConversationSummary.threadId);
       }
+
+      return this.injectUnfinishedToolCallEvents(events);
     }
 
-    // No conversation found or no snapshot event, generate a new thread
+    // No conversation found, generate a new thread
     this.newThread();
     return null;
   }
 
   /**
-   * Load a conversation from history
-   * Returns AG-UI event array for proper state restoration
+   * Load a specific conversation from history by thread ID.
+   * Returns the AG-UI event array (with unfinished tool calls injected) for replay.
    */
   public async loadConversation(threadId: string): Promise<Event[] | null> {
     const events = await this.conversationHistoryService.getConversation(threadId);
@@ -652,7 +963,53 @@ export class ChatService {
       this.coreChatService.setThreadId(threadId);
     }
 
-    return events;
+    return this.injectUnfinishedToolCallEvents(events);
+  }
+
+  /**
+   * Create a user message for timeline display
+   */
+  public getUserMessage(content: string, rawMessage?: string): UserMessage {
+    return {
+      id: this.generateMessageId(),
+      role: 'user',
+      content: content.trim(),
+      rawMessage: rawMessage || content.trim(),
+    };
+  }
+
+  /**
+   * Explicitly set the data source ID (e.g., after user selection)
+   */
+  public setDataSourceId(id: string): void {
+    this.cachedDataSourceId = id;
+  }
+
+  /**
+   * Get all available data sources, excluding incompatible ones (e.g. AnalyticEngine)
+   */
+  public async getAvailableDataSources(): Promise<DataSourceInfo[]> {
+    if (this.cachedAvailableDataSources) return this.cachedAvailableDataSources;
+    if (!this.savedObjectsClient) return [];
+
+    try {
+      const response = await this.savedObjectsClient.find<{
+        title: string;
+        dataSourceEngineType?: string;
+      }>({
+        type: 'data-source',
+        fields: ['title', 'dataSourceEngineType'],
+        perPage: 100,
+      });
+
+      this.cachedAvailableDataSources = (response?.savedObjects || [])
+        .filter((ds) => ds.attributes?.dataSourceEngineType !== 'AnalyticEngine')
+        .map((ds) => ({ id: ds.id, title: ds.attributes?.title || ds.id }))
+        .sort((a, b) => a.title.toLowerCase().localeCompare(b.title.toLowerCase()));
+      return this.cachedAvailableDataSources;
+    } catch {
+      return [];
+    }
   }
 
   /**

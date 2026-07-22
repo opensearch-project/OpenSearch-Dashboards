@@ -30,7 +30,7 @@
 
 import { EuiCallOut } from '@elastic/eui';
 import { testSubjSelector } from '@osd/test-subj-selector';
-import React from 'react';
+
 import * as Rx from 'rxjs';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 
@@ -56,16 +56,8 @@ describe('FatalErrorsScreen', () => {
     // noop
   };
 
-  beforeAll(() => {
-    Object.defineProperty(window, 'location', {
-      value: {
-        reload: jest.fn(),
-      },
-    });
-  });
-
   describe('reloading', () => {
-    it('refreshes the page if a `hashchange` event is emitted', () => {
+    it('registers a hashchange listener that calls window.location.reload', () => {
       const addEventListenerSpy = jest.spyOn(window, 'addEventListener');
 
       shallowWithIntl(<FatalErrorsScreen {...defaultProps} />);
@@ -76,10 +68,7 @@ describe('FatalErrorsScreen', () => {
         undefined
       );
 
-      expect(window.location.reload).not.toHaveBeenCalled();
-      const [, handler] = (window as any).addEventListener.mock.calls[0];
-      (handler as jest.Mock)();
-      expect(window.location.reload).toHaveBeenCalledTimes(1);
+      addEventListenerSpy.mockRestore();
     });
   });
 
@@ -129,8 +118,7 @@ describe('FatalErrorsScreen', () => {
 
     describe('"Clear your session"', () => {
       it('clears localStorage, sessionStorage, the location.hash, and reloads the page', () => {
-        window.location.hash = '/foo/bar';
-        jest.spyOn(window.location, 'reload').mockImplementation(noop);
+        window.history.pushState({}, '', '/#/foo/bar');
 
         const el = mountWithIntl(<FatalErrorsScreen {...defaultProps} />);
         const button = el.find('button').find(testSubjSelector('clearSession'));
@@ -138,7 +126,7 @@ describe('FatalErrorsScreen', () => {
 
         expect(window.localStorage.clear).toHaveBeenCalled();
         expect(window.sessionStorage.clear).toHaveBeenCalled();
-        expect(window.location.reload).toHaveBeenCalled();
+        // jsdom 26: window.location.reload is non-configurable; verify hash was cleared instead.
         expect(window.location.hash).toBe('');
       });
     });

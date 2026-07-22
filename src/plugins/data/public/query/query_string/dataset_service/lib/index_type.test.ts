@@ -9,6 +9,7 @@ import { indexTypeConfig } from './index_type';
 import { HttpSetup, SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import {
   DATA_STRUCTURE_META_TYPES,
+  DEFAULT_DATA,
   DataStructure,
   DataStructureCustomMeta,
   Dataset,
@@ -30,6 +31,9 @@ jest.mock('../../../../services', () => {
       queryString: {
         getLanguageService: () => ({
           getQueryEditorExtensionMap: jest.fn().mockReturnValue({}),
+        }),
+        getDatasetService: () => ({
+          isDatasetAllowed: jest.fn().mockReturnValue(true),
         }),
       },
     }),
@@ -72,10 +76,13 @@ describe('indexTypeConfig', () => {
       title: 'Index 1',
       type: 'INDEXES',
       timeFieldName: '@timestamp',
+      isRemoteDataset: undefined,
       dataSource: {
         id: 'datasource1',
         title: 'DataSource 1',
         type: 'DATA_SOURCE',
+        engineType: undefined,
+        version: '',
       },
     });
   });
@@ -159,6 +166,88 @@ describe('indexTypeConfig', () => {
     expect(result.type).toBe('INDEXES');
   });
 
+  describe('toDataset engineType/version plumbing', () => {
+    test('populates engineType/version from the DATA_SOURCE node meta', () => {
+      const mockPath: DataStructure[] = [
+        {
+          id: 'datasource1',
+          title: 'DataSource 1',
+          type: 'DATA_SOURCE',
+          meta: {
+            type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+            dataSourceEngineType: 'Elasticsearch',
+            dataSourceVersion: '7.10.2',
+          } as DataStructureCustomMeta,
+        },
+        {
+          id: 'index1',
+          title: 'Index 1',
+          type: 'INDEX',
+          meta: { timeFieldName: '@timestamp', type: DATA_STRUCTURE_META_TYPES.CUSTOM },
+        },
+      ];
+
+      const result = indexTypeConfig.toDataset(mockPath);
+
+      expect(result.dataSource).toEqual({
+        id: 'datasource1',
+        title: 'DataSource 1',
+        type: 'DATA_SOURCE',
+        engineType: 'Elasticsearch',
+        version: '7.10.2',
+      });
+    });
+
+    test('falls back to leaf index meta when DATA_SOURCE node meta lacks engineType/version', () => {
+      const mockPath: DataStructure[] = [
+        {
+          id: 'datasource1',
+          title: 'DataSource 1',
+          type: 'DATA_SOURCE',
+          meta: {
+            type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+          } as DataStructureCustomMeta,
+        },
+        {
+          id: 'index1',
+          title: 'Index 1',
+          type: 'INDEX',
+          meta: {
+            type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+            timeFieldName: '@timestamp',
+            dataSourceEngineType: 'Elasticsearch',
+            dataSourceVersion: '7.10.2',
+          } as DataStructureCustomMeta,
+        },
+      ];
+
+      const result = indexTypeConfig.toDataset(mockPath);
+
+      expect(result.dataSource).toEqual({
+        id: 'datasource1',
+        title: 'DataSource 1',
+        type: 'DATA_SOURCE',
+        engineType: 'Elasticsearch',
+        version: '7.10.2',
+      });
+    });
+
+    test('falls back to LOCAL_DATASOURCE when there is no DATA_SOURCE node in path', () => {
+      const mockPath: DataStructure[] = [
+        {
+          id: 'index1',
+          title: 'Index 1',
+          type: 'INDEX',
+          meta: { timeFieldName: '@timestamp', type: DATA_STRUCTURE_META_TYPES.CUSTOM },
+        },
+      ];
+
+      const result = indexTypeConfig.toDataset(mockPath);
+
+      expect(result.dataSource).toEqual(DEFAULT_DATA.STRUCTURES.LOCAL_DATASOURCE);
+    });
+  });
+
   test('fetchFields returns fields from index', async () => {
     const mockFields = [
       { name: 'field1', type: 'string' },
@@ -179,7 +268,7 @@ describe('indexTypeConfig', () => {
 
   test('supportedLanguages returns correct languages', () => {
     const mockDataset: Dataset = { id: 'index1', title: 'Index 1', type: 'INDEX' };
-    expect(indexTypeConfig.supportedLanguages(mockDataset)).toEqual(['SQL', 'PPL']);
+    expect(indexTypeConfig.supportedLanguages(mockDataset)).toEqual(['PPL', 'SQL']);
   });
 
   test('should fetch data sources for unknown type', async () => {
@@ -307,7 +396,6 @@ describe('indexTypeConfig', () => {
         expect.objectContaining({
           query: expect.objectContaining({
             data_source: 'datasource1',
-            expand_wildcards: 'all',
           }),
         })
       );
@@ -387,7 +475,6 @@ describe('indexTypeConfig', () => {
         expect.objectContaining({
           query: expect.objectContaining({
             data_source: 'datasource1',
-            expand_wildcards: 'all',
           }),
         })
       );
@@ -440,7 +527,6 @@ describe('indexTypeConfig', () => {
         expect.objectContaining({
           query: expect.objectContaining({
             data_source: 'datasource1',
-            expand_wildcards: 'all',
           }),
         })
       );
@@ -470,9 +556,7 @@ describe('indexTypeConfig', () => {
       expect(mockHttp.get).toHaveBeenCalledWith(
         '/internal/index-pattern-management/resolve_index/*',
         expect.objectContaining({
-          query: expect.objectContaining({
-            expand_wildcards: 'all',
-          }),
+          query: { data_source: 'datasource1' },
         })
       );
     });
@@ -511,7 +595,6 @@ describe('indexTypeConfig', () => {
         expect.objectContaining({
           query: expect.objectContaining({
             data_source: 'datasource1',
-            expand_wildcards: 'all',
           }),
         })
       );
@@ -521,7 +604,6 @@ describe('indexTypeConfig', () => {
         expect.objectContaining({
           query: expect.objectContaining({
             data_source: 'datasource1',
-            expand_wildcards: 'all',
           }),
         })
       );
@@ -596,6 +678,8 @@ describe('indexTypeConfig', () => {
           id: 'test-datasource',
           title: 'Test DataSource',
           type: 'DATA_SOURCE',
+          engineType: undefined,
+          version: '',
         },
       });
     });

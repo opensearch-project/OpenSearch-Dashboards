@@ -62,7 +62,7 @@ describe('useIndexFetcher', () => {
       expect(mockHttpGet).toHaveBeenCalledWith(
         '/internal/index-pattern-management/resolve_index/test-*',
         {
-          query: { expand_wildcards: 'all', data_source: 'test-datasource' },
+          query: { data_source: 'test-datasource' },
         }
       );
 
@@ -199,7 +199,6 @@ describe('useIndexFetcher', () => {
         '/internal/index-pattern-management/resolve_index/test-*',
         {
           query: {
-            expand_wildcards: 'all',
             data_source: 'test-datasource',
           },
         }
@@ -229,9 +228,7 @@ describe('useIndexFetcher', () => {
       expect(mockHttpGet).toHaveBeenCalledWith(
         '/internal/index-pattern-management/resolve_index/test-*',
         {
-          query: {
-            expand_wildcards: 'all',
-          },
+          query: {},
         }
       );
     });

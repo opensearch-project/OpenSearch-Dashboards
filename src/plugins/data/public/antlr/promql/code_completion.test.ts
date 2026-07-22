@@ -46,6 +46,7 @@ const mockParseQuery = sharedUtils.parseQuery as jest.Mock;
 describe('promql code_completion', () => {
   describe('getSuggestions', () => {
     const mockDataSourceMeta = { prometheusUrl: 'http://localhost:9090' };
+    // @ts-expect-error TS2352 TODO(ts-error): fixme
     const mockIndexPattern = {
       id: 'test-datasource-id',
       title: 'test-index',
@@ -65,7 +66,7 @@ describe('promql code_completion', () => {
 
     const mockTimeRange = { from: 'now-15m', to: 'now' };
 
-    const mockServices = ({
+    const mockServices = {
       appName: 'test-app',
       data: {
         resourceClientFactory: {
@@ -79,7 +80,7 @@ describe('promql code_completion', () => {
           },
         },
       },
-    } as unknown) as IDataPluginServices;
+    } as unknown as IDataPluginServices;
 
     const mockPosition = {
       lineNumber: 1,
@@ -136,12 +137,12 @@ describe('promql code_completion', () => {
     it('should return empty array when required parameters are missing', async () => {
       const result = await getSuggestions({
         query: '',
-        indexPattern: (null as unknown) as IndexPattern,
+        indexPattern: null as unknown as IndexPattern,
         position: mockPosition,
         language: 'SQL',
         selectionStart: 0,
         selectionEnd: 0,
-        services: (null as unknown) as IDataPluginServices,
+        services: null as unknown as IDataPluginServices,
       });
 
       expect(result).toEqual([]);
@@ -170,7 +171,9 @@ describe('promql code_completion', () => {
 
       const functionSuggestion = result.find((s) => s.text === 'rate');
       expect(functionSuggestion).toBeDefined();
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       expect(functionSuggestion?.detail).toBeDefined();
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       expect(typeof functionSuggestion?.detail).toBe('string');
     });
 
@@ -190,6 +193,7 @@ describe('promql code_completion', () => {
       const functionSuggestion = result.find((s) => s.text === 'rate');
       expect(functionSuggestion).toBeDefined();
       expect(functionSuggestion?.insertText).toBe('rate($0)');
+      // @ts-expect-error TS2551 TODO(ts-error): fixme
       expect(functionSuggestion?.insertTextRules).toBe(
         monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
       );

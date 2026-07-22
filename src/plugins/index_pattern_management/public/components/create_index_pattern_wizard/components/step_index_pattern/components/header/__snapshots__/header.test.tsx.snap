@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`Header should mark the input as invalid 1`] = `
 <div>
@@ -82,6 +82,37 @@ exports[`Header should mark the input as invalid 1`] = `
             onChange={[Function]}
             placeholder="index-name-*"
             value="%"
+          />
+        </EuiCompressedFormRow>
+        <EuiCompressedFormRow
+          describedByIds={Array []}
+          display="rowCompressed"
+          fullWidth={true}
+          hasChildLabel={true}
+          hasEmptyLabelSpace={false}
+          helpText={
+            <FormattedMessage
+              defaultMessage="A friendly name to show in the UI instead of the index pattern. Leave empty to use the pattern as the display name."
+              id="indexPatternManagement.createIndexPattern.step.displayNameHelpText"
+              values={Object {}}
+            />
+          }
+          label={
+            <FormattedMessage
+              defaultMessage="Display name"
+              id="indexPatternManagement.createIndexPattern.step.displayNameLabel"
+              values={Object {}}
+            />
+          }
+          labelType="label"
+        >
+          <EuiCompressedFieldText
+            data-test-subj="createIndexPatternDisplayNameInput"
+            fullWidth={true}
+            name="displayName"
+            onChange={[Function]}
+            placeholder="e.g., Production Logs"
+            value=""
           />
         </EuiCompressedFormRow>
       </EuiForm>
@@ -195,6 +226,37 @@ exports[`Header should render normally 1`] = `
             onChange={[Function]}
             placeholder="index-name-*"
             value="k"
+          />
+        </EuiCompressedFormRow>
+        <EuiCompressedFormRow
+          describedByIds={Array []}
+          display="rowCompressed"
+          fullWidth={true}
+          hasChildLabel={true}
+          hasEmptyLabelSpace={false}
+          helpText={
+            <FormattedMessage
+              defaultMessage="A friendly name to show in the UI instead of the index pattern. Leave empty to use the pattern as the display name."
+              id="indexPatternManagement.createIndexPattern.step.displayNameHelpText"
+              values={Object {}}
+            />
+          }
+          label={
+            <FormattedMessage
+              defaultMessage="Display name"
+              id="indexPatternManagement.createIndexPattern.step.displayNameLabel"
+              values={Object {}}
+            />
+          }
+          labelType="label"
+        >
+          <EuiCompressedFieldText
+            data-test-subj="createIndexPatternDisplayNameInput"
+            fullWidth={true}
+            name="displayName"
+            onChange={[Function]}
+            placeholder="e.g., Production Logs"
+            value=""
           />
         </EuiCompressedFormRow>
       </EuiForm>

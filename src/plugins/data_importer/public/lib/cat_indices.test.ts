@@ -27,7 +27,7 @@ describe('catIndices()', () => {
     async ({ http, dataSourceId }) => {
       const response = await catIndices({ http, dataSourceId });
       expect(response.indices).toMatchObject([...mockIndexNames]);
-      expect(http.get).toBeCalledWith('/api/data_importer/_cat_indices', {
+      expect(http.get).toHaveBeenCalledWith('/api/data_importer/_cat_indices', {
         ...(dataSourceId && { query: { dataSource: dataSourceId } }),
       });
     }

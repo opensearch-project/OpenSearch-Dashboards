@@ -30,7 +30,42 @@
 
 export { monaco } from './monaco';
 export { XJsonLang } from './xjson';
-export { PPLLang } from './ppl';
+export {
+  clearPPLValidationContext,
+  PPLLang,
+  revalidatePPLModel,
+  registerPPLValidationProvider,
+  resolvePPLValidationResult,
+  setPPLValidationContext,
+  clearPPLLintContext,
+  getPPLLintContext,
+  isPPLLintEnabled,
+  registerPPLLintBridge,
+  resolvePPLLintResult,
+  setPPLLintContext,
+  setPPLLintEnabled,
+  runLint,
+  getBundledCatalog,
+  createRuntimeRuleNameToIndex,
+  buildCommandSuggestion,
+} from './ppl';
+export type {
+  PPLValidationContext,
+  PPLValidationProvider,
+  PPLValidationProviderRequest,
+  PPLValidationResult,
+  PPLLintContext,
+  PPLLintBridge,
+  PPLLintBridgeRequest,
+  Diagnostic,
+  DiagnosticRange,
+  LintResult,
+  LintSeverity,
+  BundleRuleOverrides,
+  CatalogEntry,
+  LintRunContext,
+  CommandSuggestion,
+} from './ppl';
 
 /* eslint-disable-next-line @osd/eslint/module_migration */
 import * as BarePluginApi from 'monaco-editor/esm/vs/editor/editor.api';

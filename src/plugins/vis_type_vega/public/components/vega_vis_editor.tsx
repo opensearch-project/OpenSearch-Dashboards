@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 import { EuiCodeEditor } from '@elastic/eui';
 import compactStringify from 'json-stringify-pretty-compact';
 import hjson from 'hjson';

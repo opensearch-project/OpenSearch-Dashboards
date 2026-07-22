@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { FunctionComponent } from 'react';
+import { FunctionComponent } from 'react';
 import { EuiText, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiBadge } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import type { FormattedStatus } from '../lib';

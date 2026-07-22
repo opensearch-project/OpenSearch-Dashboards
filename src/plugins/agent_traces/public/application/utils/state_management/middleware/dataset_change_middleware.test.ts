@@ -14,8 +14,13 @@ import {
   clearLastExecutedData,
   setPatternsField,
   setUsingRegexPatterns,
+  setSort,
 } from '../slices';
-import { clearQueryStatusMap } from '../slices/query_editor/query_editor_slice';
+import {
+  clearQueryStatusMap,
+  setOverallQueryStatus,
+} from '../slices/query_editor/query_editor_slice';
+import { QueryExecutionStatus } from '../types';
 import { createMockAgentTracesServices, createMockStore, MockStore } from '../__mocks__';
 import { DEFAULT_DATA } from '../../../../../../data/common';
 import { getPromptModeIsAvailable } from '../../get_prompt_mode_is_available';
@@ -52,9 +57,10 @@ const mockedGetPromptModeIsAvailable = getPromptModeIsAvailable as jest.MockedFu
 const mockedGetSummaryAgentIsAvailable = getSummaryAgentIsAvailable as jest.MockedFunction<
   typeof getSummaryAgentIsAvailable
 >;
-const mockedResetLegacyStateActionCreator = resetLegacyStateActions.resetLegacyStateActionCreator as jest.MockedFunction<
-  typeof resetLegacyStateActions.resetLegacyStateActionCreator
->;
+const mockedResetLegacyStateActionCreator =
+  resetLegacyStateActions.resetLegacyStateActionCreator as jest.MockedFunction<
+    typeof resetLegacyStateActions.resetLegacyStateActionCreator
+  >;
 
 describe('createDatasetChangeMiddleware', () => {
   let mockServices: ReturnType<typeof createMockAgentTracesServices>;
@@ -80,6 +86,7 @@ describe('createDatasetChangeMiddleware', () => {
         promptModeIsAvailable: false,
         summaryAgentIsAvailable: false,
       },
+      ui: { activeTabId: '' },
     });
 
     mockStore.dispatch = jest.fn();
@@ -102,6 +109,7 @@ describe('createDatasetChangeMiddleware', () => {
         promptModeIsAvailable: false,
         summaryAgentIsAvailable: false,
       },
+      ui: { activeTabId: '' },
     });
 
     const action = setQueryState({ query: 'source=hello', language: 'PPL' });
@@ -133,6 +141,7 @@ describe('createDatasetChangeMiddleware', () => {
         promptModeIsAvailable: false,
         summaryAgentIsAvailable: false,
       },
+      ui: { activeTabId: '' },
     });
 
     const action = setQueryWithHistory({ query: 'source=hello', language: 'PPL' });
@@ -162,6 +171,7 @@ describe('createDatasetChangeMiddleware', () => {
         promptModeIsAvailable: false,
         summaryAgentIsAvailable: false,
       },
+      ui: { activeTabId: '' },
     });
 
     await middleware(setQueryState({ query: 'source=hello', language: 'PPL' }));
@@ -190,6 +200,7 @@ describe('createDatasetChangeMiddleware', () => {
         promptModeIsAvailable: false,
         summaryAgentIsAvailable: false,
       },
+      ui: { activeTabId: '' },
     });
 
     const action = setQueryState({ query: 'source=hello', language: 'PPL' });
@@ -206,6 +217,7 @@ describe('createDatasetChangeMiddleware', () => {
         promptModeIsAvailable: false,
         summaryAgentIsAvailable: false,
       },
+      ui: { activeTabId: '' },
     });
 
     const action = setQueryState({ query: 'source=hello', language: 'PPL' });
@@ -224,6 +236,7 @@ describe('createDatasetChangeMiddleware', () => {
         promptModeIsAvailable: true, // Already true
         summaryAgentIsAvailable: false,
       },
+      ui: { activeTabId: '' },
     });
 
     const action = setQueryState({ query: 'source=hello', language: 'PPL' });
@@ -248,6 +261,7 @@ describe('createDatasetChangeMiddleware', () => {
         promptModeIsAvailable: false,
         summaryAgentIsAvailable: true, // Already true
       },
+      ui: { activeTabId: '' },
     });
 
     const action = setQueryState({ query: 'source=hello', language: 'PPL' });
@@ -257,5 +271,85 @@ describe('createDatasetChangeMiddleware', () => {
     expect(mockStore.dispatch).not.toHaveBeenCalledWith(setSummaryAgentIsAvailable(true));
     // But should call getSummaryAgentIsAvailable with the correct data source ID
     expect(mockedGetSummaryAgentIsAvailable).toHaveBeenCalledWith(mockServices, 'data-source-id');
+  });
+
+  it('should dispatch LOADING overall query status immediately after clearing', async () => {
+    const newDataset = { id: 'new-dataset', type: 'index_pattern' };
+    mockStore.getState = jest.fn().mockReturnValue({
+      query: { dataset: newDataset },
+      queryEditor: {
+        promptModeIsAvailable: false,
+        summaryAgentIsAvailable: false,
+      },
+      ui: { activeTabId: '' },
+    });
+
+    await middleware(setQueryState({ query: 'source=hello', language: 'PPL' }));
+
+    // setOverallQueryStatus(LOADING) must be dispatched right after clearQueryStatusMap
+    // to prevent the UI from flashing "No agent traces found" during the async gap.
+    const dispatchCalls = (mockStore.dispatch as jest.Mock).mock.calls.map((call) => call[0]);
+    const clearIdx = dispatchCalls.findIndex((a: any) => a.type === clearQueryStatusMap.type);
+    const loadingIdx = dispatchCalls.findIndex(
+      (a: any) =>
+        a.type === setOverallQueryStatus.type && a.payload?.status === QueryExecutionStatus.LOADING
+    );
+
+    expect(clearIdx).toBeGreaterThanOrEqual(0);
+    expect(loadingIdx).toBeGreaterThanOrEqual(0);
+    expect(loadingIdx).toBe(clearIdx + 1);
+  });
+
+  it('should dispatch setSort with default sort before executing queries when dataset has timeFieldName', async () => {
+    const newDataset = {
+      id: 'new-dataset',
+      type: 'INDEXES',
+      timeFieldName: 'startTime',
+      dataSource: { id: 'ds-id' },
+    };
+    mockStore.getState = jest.fn().mockReturnValue({
+      query: { dataset: newDataset },
+      queryEditor: {
+        promptModeIsAvailable: false,
+        summaryAgentIsAvailable: false,
+      },
+      ui: { activeTabId: '' },
+    });
+
+    await middleware(setQueryState({ query: 'source=hello', language: 'PPL' }));
+
+    const dispatchCalls = (mockStore.dispatch as jest.Mock).mock.calls.map((call) => call[0]);
+    const setSortIdx = dispatchCalls.findIndex((a: any) => a.type === setSort.type);
+    const execIdx = dispatchCalls.findIndex((a: any) => a.type === 'mock/executeQueries');
+
+    // setSort must be dispatched with the dataset's time field as default sort
+    expect(setSortIdx).toBeGreaterThanOrEqual(0);
+    expect(dispatchCalls[setSortIdx].payload).toEqual([['startTime', 'desc']]);
+
+    // setSort must come before executeQueries so the cache key matches
+    expect(execIdx).toBeGreaterThanOrEqual(0);
+    expect(setSortIdx).toBeLessThan(execIdx);
+  });
+
+  it('should not dispatch setSort when dataset has no timeFieldName', async () => {
+    const newDataset = {
+      id: 'new-dataset',
+      type: 'INDEXES',
+      dataSource: { id: 'ds-id' },
+    };
+    mockStore.getState = jest.fn().mockReturnValue({
+      query: { dataset: newDataset },
+      queryEditor: {
+        promptModeIsAvailable: false,
+        summaryAgentIsAvailable: false,
+      },
+      ui: { activeTabId: '' },
+    });
+
+    await middleware(setQueryState({ query: 'source=hello', language: 'PPL' }));
+
+    const dispatchCalls = (mockStore.dispatch as jest.Mock).mock.calls.map((call) => call[0]);
+    const setSortAction = dispatchCalls.find((a: any) => a.type === setSort.type);
+    expect(setSortAction).toBeUndefined();
   });
 });

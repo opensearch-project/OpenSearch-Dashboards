@@ -42,7 +42,7 @@ import {
   PopoverAnchorPosition,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 
 interface Props {
@@ -52,8 +52,8 @@ interface Props {
 }
 
 export function QueryLanguageSwitcher(props: Props) {
-  const osdDQLDocs = useOpenSearchDashboards().services.docLinks?.links.opensearchDashboards.dql
-    .base;
+  const osdDQLDocs =
+    useOpenSearchDashboards().services.docLinks?.links.opensearchDashboards.dql.base;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const luceneLabel = (
     <FormattedMessage id="data.query.queryBar.luceneLanguageName" defaultMessage="Lucene" />

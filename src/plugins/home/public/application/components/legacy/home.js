@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { Component } from 'react';
+import { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@osd/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
@@ -101,7 +101,7 @@ export class Home extends Component {
       });
 
       this.endLoading({ isNewOpenSearchDashboardsInstance: resp.total === 0 });
-    } catch (err) {
+    } catch {
       // An error here is relatively unimportant, as it only means we don't provide
       // some UI niceties.
       this.endLoading();

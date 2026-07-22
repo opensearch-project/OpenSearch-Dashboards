@@ -47,6 +47,13 @@ function getEscapedQuery(query = '') {
   return query.replace(/[.?+*|{}[\]()"\\#@&<>~]/g, (match) => `\\${match}`);
 }
 
+function getCaseInsensitiveQuery(query = '') {
+  // Lucene regexp has no case-insensitive flag; expand letters into [aA] classes instead.
+  return getEscapedQuery(query).replace(/[a-zA-Z]/g, (match) => {
+    return `[${match.toLowerCase()}${match.toUpperCase()}]`;
+  });
+}
+
 interface TermsAggArgs {
   field?: IFieldType;
   size: number | null;
@@ -76,7 +83,7 @@ const termsAgg = ({ field, size, direction, query }: TermsAggArgs) => {
   }
 
   if (query) {
-    terms.include = `.*${getEscapedQuery(query)}.*`;
+    terms.include = `.*${getCaseInsensitiveQuery(query)}.*`;
   }
 
   return {
@@ -90,6 +97,7 @@ export class ListControl extends Control<PhraseFilterManager> {
   private getSettings: () => Promise<InputControlSettings>;
   private timefilter: TimefilterContract;
   private searchSource: DataPublicPluginStart['search']['searchSource'];
+  private allowedIndexPatternIds: Set<string>;
 
   abortController?: AbortController;
   lastAncestorValues: any;
@@ -102,12 +110,14 @@ export class ListControl extends Control<PhraseFilterManager> {
     filterManager: PhraseFilterManager,
     useTimeFilter: boolean,
     searchSource: DataPublicPluginStart['search']['searchSource'],
-    deps: InputControlVisDependencies
+    deps: InputControlVisDependencies,
+    allowedIndexPatternIds: Set<string>
   ) {
     super(controlParams, filterManager, useTimeFilter);
     this.getSettings = deps.getSettings;
     this.timefilter = deps.data.query.timefilter.timefilter;
     this.searchSource = searchSource;
+    this.allowedIndexPatternIds = allowedIndexPatternIds;
   }
 
   fetch = async (query?: string) => {
@@ -120,6 +130,18 @@ export class ListControl extends Control<PhraseFilterManager> {
     const indexPattern = this.filterManager.getIndexPattern();
     if (!indexPattern) {
       this.disable(noIndexPatternMsg(this.controlParams.indexPattern));
+      return;
+    }
+
+    // Check if the index pattern uses an AnalyticEngine data source
+    const isAnalyticEngine = !this.allowedIndexPatternIds.has(indexPattern.id || '');
+    if (isAnalyticEngine) {
+      this.disable(
+        i18n.translate('inputControl.listControl.analyticEngineNotSupported', {
+          defaultMessage:
+            'This data source uses Analytic Engine which does not support DSL queries. Use PPL-compatible features or switch to a standard OpenSearch data source.',
+        })
+      );
       return;
     }
 
@@ -221,7 +243,8 @@ export class ListControl extends Control<PhraseFilterManager> {
 export async function listControlFactory(
   controlParams: ControlParams,
   useTimeFilter: boolean,
-  deps: InputControlVisDependencies
+  deps: InputControlVisDependencies,
+  allowedIndexPatternIds: Set<string>
 ) {
   const [, { data: dataPluginStart }] = await deps.core.getStartServices();
   const indexPattern = await dataPluginStart.indexPatterns.get(controlParams.indexPattern);
@@ -244,7 +267,8 @@ export async function listControlFactory(
     ),
     useTimeFilter,
     dataPluginStart.search.searchSource,
-    deps
+    deps,
+    allowedIndexPatternIds
   );
   return listControl;
 }

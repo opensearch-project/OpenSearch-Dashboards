@@ -5,6 +5,8 @@
 
 export const PLUGIN_ID = 'agentTraces';
 export const PLUGIN_NAME = 'Agent Traces';
+export const AGENT_TRACES_NAV_ID = 'agentTraces/traces';
+export const AGENT_SPANS_NAV_ID = 'agentTraces/spans';
 export const DEFAULT_COLUMNS_SETTING = 'defaultColumns';
 export const SAMPLE_SIZE_SETTING = 'discover:sampleSize';
 export const SORT_DEFAULT_ORDER_SETTING = 'discover:sort:defaultOrder';
@@ -15,6 +17,7 @@ export const DEFAULT_LOGS_COLUMNS_SETTING = 'explore:defaultLogsColumns';
 export const AGENT_TRACES_DEFAULT_LANGUAGE = 'PPL';
 export const AGENT_TRACES_TRACES_TAB_ID = 'traces';
 export const AGENT_TRACES_SPANS_TAB_ID = 'spans';
+export const AGENT_TRACES_VISUALIZATION_TAB_ID = 'visualization';
 
 export enum AgentTracesFlavor {
   Traces = 'traces',

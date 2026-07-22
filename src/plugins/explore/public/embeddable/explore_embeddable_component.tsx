@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { SearchProps } from './explore_embeddable';
-import { VisualizationNoResults } from '../../../visualizations/public';
+import { VisualizationNoResults, VisualizationRequestError } from '../../../visualizations/public';
 // TODO: refactor it to now use legacy getServices
 import {
   getDocViewsRegistry,
@@ -17,9 +17,6 @@ import { TableVis } from '../components/visualizations/table/table_vis';
 import { TableChartStyle } from '../components/visualizations/table/table_vis_config';
 import { getLegacyDisplayedColumns } from '../helpers/data_table_helper';
 import { SAMPLE_SIZE_SETTING } from '../../common';
-import { EchartsRender } from '../components/visualizations/echarts_render';
-import { MetricChartRender } from '../components/visualizations/metric/metric_component';
-import { MetricChartStyle } from '../components/visualizations/metric/metric_vis_config';
 
 interface ExploreEmbeddableProps {
   searchProps: SearchProps;
@@ -80,6 +77,16 @@ export const ExploreEmbeddableComponent = ({ searchProps }: ExploreEmbeddablePro
   }, [searchProps]);
 
   const getEmbeddableContent = () => {
+    if (searchProps?.error) {
+      return (
+        <EuiFlexItem>
+          <VisualizationRequestError
+            error={searchProps.error.message || searchProps.error.name || 'An error occurred'}
+          />
+        </EuiFlexItem>
+      );
+    }
+
     if (searchProps?.rows?.length === 0) {
       return (
         <EuiFlexItem>
@@ -117,19 +124,8 @@ export const ExploreEmbeddableComponent = ({ searchProps }: ExploreEmbeddablePro
       );
     }
 
-    if (searchProps.spec) {
-      if (searchProps.chartType === 'metric') {
-        return (
-          <MetricChartRender
-            spec={searchProps.spec}
-            styles={searchProps.styleOptions as MetricChartStyle}
-            axisColumnMappings={searchProps.axisColumnMappings}
-          />
-        );
-      }
-      return (
-        <EchartsRender spec={searchProps.spec} onSelectTimeRange={searchProps.onSelectTimeRange} />
-      );
+    if (searchProps.chartRender) {
+      return searchProps.chartRender();
     }
 
     return null;

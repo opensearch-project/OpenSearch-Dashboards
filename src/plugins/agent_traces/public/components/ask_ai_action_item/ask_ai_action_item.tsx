@@ -80,7 +80,7 @@ export const AskAIActionItem: React.FC<AskAIActionItemProps> = ({
     try {
       // Always use sendMessageWithWindow since it works in both open and closed states
       // It will handle opening the window if needed, and properly delegate when window is open
-      const result = await chatService.sendMessageWithWindow(userInput.trim(), []);
+      await chatService.sendMessageWithWindow(userInput.trim(), []);
 
       onResult?.({
         success: true,

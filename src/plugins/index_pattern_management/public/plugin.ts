@@ -77,14 +77,12 @@ const sectionsHeader = i18n.translate('indexPatternManagement.indexPattern.secti
  */
 const IPM_APP_ID = 'indexPatterns';
 
-export class IndexPatternManagementPlugin
-  implements
-    Plugin<
-      IndexPatternManagementSetup,
-      IndexPatternManagementStart,
-      IndexPatternManagementSetupDependencies,
-      IndexPatternManagementStartDependencies
-    > {
+export class IndexPatternManagementPlugin implements Plugin<
+  IndexPatternManagementSetup,
+  IndexPatternManagementStart,
+  IndexPatternManagementSetupDependencies,
+  IndexPatternManagementStartDependencies
+> {
   private readonly indexPatternManagementService = new IndexPatternManagementService();
 
   constructor(initializerContext: PluginInitializerContext) {}
@@ -93,9 +91,7 @@ export class IndexPatternManagementPlugin
     core: CoreSetup<IndexPatternManagementStartDependencies, IndexPatternManagementStart>,
     dependencies: IndexPatternManagementSetupDependencies
   ) {
-    const { urlForwarding, management, dataSource, datasetManagement } = dependencies;
-    // Check if dataset management plugin is present, which indicates it's enabled
-    const isDatasetManagementEnabled = !!datasetManagement;
+    const { urlForwarding, management, dataSource } = dependencies;
 
     const opensearchDashboardsSection = management.sections.section.opensearchDashboards;
 
@@ -213,6 +209,7 @@ export class IndexPatternManagementPlugin
             id: IPM_APP_ID,
             title: sectionsHeader,
             order: 400,
+            euiIconType: 'indexPatternApp',
           },
         ]);
       }

@@ -28,6 +28,7 @@
  * under the License.
  */
 
+/* eslint-disable react-hooks/rules-of-hooks */
 import { useEffect, useState } from 'react';
 import { Observable, BehaviorSubject } from 'rxjs';
 
@@ -61,10 +62,8 @@ export class ThemeService {
 
   /** A React hook for consuming the dark mode value */
   public useDarkMode = (): boolean => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     const [value, update] = useState(false);
 
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
       const s = this.darkModeEnabled$.subscribe(update);
       return () => s.unsubscribe();
@@ -75,10 +74,8 @@ export class ThemeService {
 
   /** A React hook for consuming the charts theme */
   public useChartsTheme = (): PartialTheme => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     const [value, update] = useState(this.chartsDefaultTheme);
 
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
       const s = this.chartsTheme$.subscribe(update);
       return () => s.unsubscribe();
@@ -89,10 +86,8 @@ export class ThemeService {
 
   /** A React hook for consuming the charts theme */
   public useChartsBaseTheme = (): Theme => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     const [value, update] = useState(this.chartsDefaultBaseTheme);
 
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
       const s = this.chartsBaseTheme$.subscribe(update);
       return () => s.unsubscribe();

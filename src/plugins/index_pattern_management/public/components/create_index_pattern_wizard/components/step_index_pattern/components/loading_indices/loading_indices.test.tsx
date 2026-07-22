@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { LoadingIndices } from '../loading_indices';
 import { shallow } from 'enzyme';
 

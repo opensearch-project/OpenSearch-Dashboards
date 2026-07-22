@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { Provider } from 'react-redux';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { AllAxesOptions } from './standard_axes_options';
@@ -15,9 +14,7 @@ const mockStore = configureMockStore([]);
 const store = mockStore({
   tab: {
     visualizations: {
-      styleOptions: {
-        switchAxes: false,
-      },
+      styleOptions: {},
     },
   },
 });
@@ -104,7 +101,6 @@ describe('AllAxesOptions', () => {
   const defaultProps = {
     standardAxes: mockStandardAxes,
     onStandardAxesChange: jest.fn(),
-    onChangeSwitchAxes: jest.fn(),
     disableGrid: false,
     axisColumnMappings: {
       [AxisRole.X]: {
@@ -112,16 +108,12 @@ describe('AllAxesOptions', () => {
         column: 'category',
         id: 0,
         schema: VisFieldType.Categorical,
-        validValuesCount: 1,
-        uniqueValuesCount: 1,
       },
       [AxisRole.Y]: {
         name: 'value',
         column: 'value',
         id: 1,
         schema: VisFieldType.Numerical,
-        validValuesCount: 1,
-        uniqueValuesCount: 1,
       },
     },
     showFullTimeRange: false,
@@ -151,23 +143,6 @@ describe('AllAxesOptions', () => {
     expect(screen.getByText('Show Y-Axis')).toBeInTheDocument();
   });
 
-  it('should switch label is switchAxes is true', () => {
-    const switchStore = mockStore({
-      tab: {
-        visualizations: {
-          styleOptions: {
-            switchAxes: true,
-          },
-        },
-      },
-    });
-
-    render(
-      <Provider store={switchStore}>
-        <AllAxesOptions {...defaultProps} />
-      </Provider>
-    );
-  });
   it('shows/hides label options based on show labels toggle', () => {
     render(
       <Provider store={store}>
@@ -349,8 +324,6 @@ describe('AllAxesOptions', () => {
         name: 'category',
         column: 'category',
         schema: VisFieldType.Categorical,
-        validValuesCount: 10,
-        uniqueValuesCount: 5,
       },
     };
 

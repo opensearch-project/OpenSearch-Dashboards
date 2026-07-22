@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { SectionRender } from './section_render';
 import { Content, Section } from '../services';

@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { isEqual } from 'lodash';
 import { createRoot, Root } from 'react-dom/client';
 
@@ -43,6 +42,7 @@ import { ListControl } from './control/list_control_factory';
 import { InputControlVisDependencies } from './plugin';
 import { FilterManager, Filter } from '../../data/public';
 import { VisParams, ExprVis } from '../../visualizations/public';
+import { UNSUPPORTED_ENGINE_TYPES } from '../../data/common';
 
 export const createInputControlVisController = (deps: InputControlVisDependencies) => {
   return class InputControlVisController {
@@ -57,7 +57,10 @@ export const createInputControlVisController = (deps: InputControlVisDependencie
     timeFilterSubscription: Subscription;
     visParams?: VisParams;
 
-    constructor(public el: Element, public vis: ExprVis) {
+    constructor(
+      public el: Element,
+      public vis: ExprVis
+    ) {
       this.controls = [];
 
       this.queryBarUpdateHandler = this.updateControlsFromOsd.bind(this);
@@ -133,10 +136,17 @@ export const createInputControlVisController = (deps: InputControlVisDependencie
         }
       );
 
+      // Get allowed index pattern IDs (excluding AnalyticEngine data sources) once for all controls
+      const [, { data: dataPluginStart }] = await deps.core.getStartServices();
+      const indexPatternList = await dataPluginStart.indexPatterns.getCache({
+        excludeEngineTypes: UNSUPPORTED_ENGINE_TYPES,
+      });
+      const allowedIndexPatternIds = new Set(indexPatternList?.map((i) => i.id) || []);
+
       const controlFactoryPromises = controlParamsList.map((controlParams) => {
         const factory = getControlFactory(controlParams);
 
-        return factory(controlParams, this.visParams?.useTimeFilter, deps);
+        return factory(controlParams, this.visParams?.useTimeFilter, deps, allowedIndexPatternIds);
       });
       const controls = await Promise.all<RangeControl | ListControl>(controlFactoryPromises);
 

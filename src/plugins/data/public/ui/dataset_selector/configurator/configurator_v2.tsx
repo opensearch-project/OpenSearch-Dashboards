@@ -7,8 +7,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiForm,
   EuiFormRow,
   EuiModalBody,
@@ -21,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
-import React, { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { BaseDataset, DEFAULT_DATA, Dataset, Query } from '../../../../common';
 import { getQueryService } from '../../../services';
 import { IDataPluginServices } from '../../../types';
@@ -61,11 +59,13 @@ export const ConfiguratorV2 = ({
 
   // Derived values
   const supportedLanguages = datasetType?.supportedLanguages(baseDataset) || [];
-  const languages = supportedLanguages.filter(
-    (langId) =>
-      !services.appName ||
-      languageService.getLanguage(langId)?.supportedAppNames?.includes(services.appName)
-  );
+  const languages = supportedLanguages.filter((langId) => {
+    const langConfig = languageService.getLanguage(langId);
+    return (
+      (!services.appName || langConfig?.supportedAppNames?.includes(services.appName)) &&
+      (!langConfig || languageService.isLanguageSupportedForDataset(langConfig, baseDataset))
+    );
+  });
   const isAsyncType = datasetType?.meta.isFieldLoadAsync ?? false;
   const supportsTimeFilter = datasetType?.meta?.supportsTimeFilter ?? true;
 
@@ -74,7 +74,7 @@ export const ConfiguratorV2 = ({
     if (languages.includes(currentLanguage)) {
       return currentLanguage;
     }
-    return languages[0];
+    return languages[0] || currentLanguage;
   });
 
   // State
@@ -86,11 +86,11 @@ export const ConfiguratorV2 = ({
   );
 
   // Fetch fields using custom hook
-  const { allFields, dateFields, loading: timeFieldsLoading } = useDatasetFields(
-    baseDataset,
-    datasetType,
-    supportsTimeFilter
-  );
+  const {
+    allFields,
+    dateFields,
+    loading: timeFieldsLoading,
+  } = useDatasetFields(baseDataset, datasetType, supportsTimeFilter);
 
   // Constants
   const noTimeFilter = i18n.translate(

@@ -187,7 +187,6 @@ export const downloadCsvAndVerify = (downloadOption, readCsvCallback) => {
       Cypress.config('downloadsFolder'),
       `opensearch_export_${moment().format('YYYY-MM-DD')}.csv`
     )
-    // eslint-disable-next-line no-loop-func
   ).then(readCsvCallback);
 };
 

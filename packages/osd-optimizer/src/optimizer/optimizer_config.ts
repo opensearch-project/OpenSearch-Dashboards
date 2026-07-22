@@ -31,14 +31,7 @@
 import Path from 'path';
 import Os from 'os';
 
-import {
-  Bundle,
-  WorkerConfig,
-  CacheableWorkerConfig,
-  ThemeTag,
-  ThemeTags,
-  parseThemeTags,
-} from '../common';
+import { Bundle, WorkerConfig, ThemeTag, ThemeTags, parseThemeTags, BundleRef } from '../common';
 
 import {
   findOpenSearchDashboardsPlatformPlugins,
@@ -63,16 +56,6 @@ function pickMaxWorkerCount(dist: boolean) {
   return Math.max(maxWorkers, 2);
 }
 
-function omit<T, K extends keyof T>(obj: T, keys: K[]): Omit<T, K> {
-  const result: any = {};
-  for (const [key, value] of Object.entries(obj) as any) {
-    if (!keys.includes(key)) {
-      result[key] = value;
-    }
-  }
-  return result as Omit<T, K>;
-}
-
 interface Options {
   /** absolute path to root of the repo/build */
   repoRoot: string;
@@ -91,8 +74,8 @@ interface Options {
   cache?: boolean;
   /** build assets suitable for use in the distributable */
   dist?: boolean;
-  /** enable webpack profiling, writes stats.json files to the root of each plugin's output dir */
-  profileWebpack?: boolean;
+  /** enable rspack profiling, writes stats.json files to the root of each plugin's output dir */
+  profileRspack?: boolean;
   /** set to true to inspecting workers when the parent process is being inspected */
   inspectWorkers?: boolean;
 
@@ -131,6 +114,8 @@ interface Options {
    *  - "k7light"
    */
   themes?: ThemeTag | '*' | ThemeTag[];
+
+  bundleRefs?: BundleRef[];
 }
 
 export interface ParsedOptions {
@@ -138,7 +123,7 @@ export interface ParsedOptions {
   outputRoot: string;
   watch: boolean;
   maxWorkerCount: number;
-  profileWebpack: boolean;
+  profileRspack: boolean;
   cache: boolean;
   dist: boolean;
   pluginPaths: string[];
@@ -147,6 +132,7 @@ export interface ParsedOptions {
   inspectWorkers: boolean;
   includeCoreBundle: boolean;
   themeTags: ThemeTags;
+  bundleRefs: BundleRef[];
 }
 
 export class OptimizerConfig {
@@ -154,11 +140,12 @@ export class OptimizerConfig {
     const watch = !!options.watch;
     const dist = !!options.dist;
     const examples = !!options.examples;
-    const profileWebpack = !!options.profileWebpack;
+    const profileRspack = !!options.profileRspack;
     const inspectWorkers = !!options.inspectWorkers;
     const cache = options.cache !== false && !process.env.OSD_OPTIMIZER_NO_CACHE;
     const includeCoreBundle = !!options.includeCoreBundle;
     const filters = options.filter || [];
+    const bundleRefs = options.bundleRefs ?? [];
 
     const repoRoot = options.repoRoot;
     if (!Path.isAbsolute(repoRoot)) {
@@ -200,7 +187,7 @@ export class OptimizerConfig {
 
     const maxWorkerCount = process.env.OSD_OPTIMIZER_MAX_WORKERS
       ? parseInt(process.env.OSD_OPTIMIZER_MAX_WORKERS, 10)
-      : options.maxWorkerCount ?? pickMaxWorkerCount(dist);
+      : (options.maxWorkerCount ?? pickMaxWorkerCount(dist));
     if (typeof maxWorkerCount !== 'number' || !Number.isFinite(maxWorkerCount)) {
       throw new TypeError('worker count must be a number');
     }
@@ -215,7 +202,7 @@ export class OptimizerConfig {
       repoRoot,
       outputRoot,
       maxWorkerCount,
-      profileWebpack,
+      profileRspack,
       cache,
       pluginScanDirs,
       pluginPaths,
@@ -223,6 +210,7 @@ export class OptimizerConfig {
       inspectWorkers,
       includeCoreBundle,
       themeTags,
+      bundleRefs,
     };
   }
 
@@ -257,9 +245,10 @@ export class OptimizerConfig {
       options.repoRoot,
       options.maxWorkerCount,
       options.dist,
-      options.profileWebpack,
+      options.profileRspack,
       options.themeTags,
-      readLimits()
+      readLimits(),
+      options.bundleRefs
     );
   }
 
@@ -272,31 +261,21 @@ export class OptimizerConfig {
     public readonly repoRoot: string,
     public readonly maxWorkerCount: number,
     public readonly dist: boolean,
-    public readonly profileWebpack: boolean,
+    public readonly profileRspack: boolean,
     public readonly themeTags: ThemeTags,
-    public readonly limits: Limits
+    public readonly limits: Limits,
+    public readonly bundleRefs: BundleRef[]
   ) {}
 
-  getWorkerConfig(optimizerCacheKey: unknown): WorkerConfig {
+  getWorkerConfig(): WorkerConfig {
     return {
       cache: this.cache,
       dist: this.dist,
-      profileWebpack: this.profileWebpack,
+      profileRspack: this.profileRspack,
       repoRoot: this.repoRoot,
       watch: this.watch,
-      optimizerCacheKey,
       themeTags: this.themeTags,
       browserslistEnv: this.dist ? 'production' : process.env.BROWSERSLIST_ENV || 'dev',
     };
-  }
-
-  getCacheableWorkerConfig(): CacheableWorkerConfig {
-    return omit(this.getWorkerConfig('♻'), [
-      // these config options don't change the output of the bundles, so
-      // should not invalidate caches when they change
-      'watch',
-      'profileWebpack',
-      'cache',
-    ]);
   }
 }

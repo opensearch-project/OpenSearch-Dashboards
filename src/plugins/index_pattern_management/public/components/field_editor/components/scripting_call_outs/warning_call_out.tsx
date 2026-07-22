@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { Fragment } from 'react';
+import { Fragment } from 'react';
 
 import { EuiCallOut, EuiIcon, EuiLink, EuiSpacer } from '@elastic/eui';
 
@@ -42,8 +42,9 @@ export interface ScriptingWarningCallOutProps {
 }
 
 export const ScriptingWarningCallOut = ({ isVisible = false }: ScriptingWarningCallOutProps) => {
-  const docLinksScriptedFields = useOpenSearchDashboards<IndexPatternManagmentContext>().services
-    .docLinks?.links.noDocumentation.scriptedFields;
+  const docLinksScriptedFields =
+    useOpenSearchDashboards<IndexPatternManagmentContext>().services.docLinks?.links.noDocumentation
+      .scriptedFields;
   return isVisible ? (
     <Fragment>
       <EuiCallOut

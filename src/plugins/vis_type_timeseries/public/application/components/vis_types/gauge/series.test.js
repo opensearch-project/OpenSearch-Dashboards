@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { GaugeSeries } from './series';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
@@ -59,5 +58,5 @@ it('should disable delete data', () => {
 it('should call toggleVisible function', () => {
   const wrapper = mountWithIntl(<GaugeSeries {...defaultProps} />);
   wrapper.find('EuiButtonIcon').at(0).simulate('click');
-  expect(defaultProps.toggleVisible).toBeCalled();
+  expect(defaultProps.toggleVisible).toHaveBeenCalled();
 });

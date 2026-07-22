@@ -2,7 +2,6 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React from 'react';
 import { coreMock } from '../../../../../core/public/mocks';
 import { render, fireEvent, waitFor, screen, act } from '@testing-library/react';
 import { AddToDashboardModal } from './add_to_dashboard_modal'; // adjust path if needed
@@ -44,6 +43,38 @@ describe('AddToDashboardModal', () => {
     expect(await screen.findByText('Save and Add to Dashboard')).toBeInTheDocument();
     expect(screen.getByLabelText('Save to existing dashboard')).toBeChecked();
     expect(screen.getByLabelText('Save to new dashboard')).not.toBeChecked();
+  });
+
+  it('shows the complex query warning when showComplexQueryWarning is true', async () => {
+    await act(async () => {
+      render(
+        <AddToDashboardModal
+          savedObjectsClient={mockSavedObjectsClient}
+          onConfirm={mockOnConfirm}
+          onCancel={mockOnCancel}
+          savedExploreId="explore-1"
+          showComplexQueryWarning={true}
+        />
+      );
+    });
+
+    expect(await screen.findByTestId('complexQueryWarningCallout')).toBeInTheDocument();
+  });
+
+  it('does not show the complex query warning by default', async () => {
+    await act(async () => {
+      render(
+        <AddToDashboardModal
+          savedObjectsClient={mockSavedObjectsClient}
+          onConfirm={mockOnConfirm}
+          onCancel={mockOnCancel}
+          savedExploreId="explore-1"
+        />
+      );
+    });
+
+    await screen.findByText('Save and Add to Dashboard');
+    expect(screen.queryByTestId('complexQueryWarningCallout')).not.toBeInTheDocument();
   });
 
   it('allows entering a title and selecting an existing dashboard', async () => {
@@ -337,11 +368,15 @@ describe('AddToDashboardModal', () => {
     });
   });
 
-  it('shows duplicate title warning when title already exists', async () => {
-    // Mock the onConfirm to call handleTitleDuplicate immediately
-    mockOnConfirm.mockImplementation((props) => {
-      props.onTitleDuplicate();
-    });
+  it('shows duplicate explore title warning when title already exists', async () => {
+    mockSavedObjectsClient.find = jest
+      .fn()
+      .mockResolvedValueOnce({
+        savedObjects: [{ id: 'dash-1', attributes: { title: 'Dashboard One' } }],
+      })
+      .mockResolvedValueOnce({
+        savedObjects: [{ id: 'explore-1', attributes: { title: 'Explore One' } }],
+      });
 
     await act(async () => {
       render(
@@ -355,38 +390,43 @@ describe('AddToDashboardModal', () => {
     });
 
     const titleInput = await screen.findByPlaceholderText('Enter save search name');
-    fireEvent.change(titleInput, { target: { value: 'Test Title' } });
-
-    // Wait for dashboard selection
-    await waitFor(() => {
-      expect(screen.getByTestId('selectExistingDashboard')).toBeInTheDocument();
-    });
-
-    const comboBoxInput = screen.getByTestId('selectExistingDashboard').querySelector('input');
-    fireEvent.click(comboBoxInput!);
-
-    // Select Dashboard One from the dropdown
-    await waitFor(() => {
-      const option = screen.getByText('Dashboard One');
-      fireEvent.click(option);
-    });
-
-    const addButton = screen.getByRole('button', { name: 'Add' });
-
-    await waitFor(() => {
-      expect(addButton).toBeEnabled();
-    });
-
-    fireEvent.click(addButton);
-
-    await waitFor(() => {
-      expect(mockOnConfirm).toHaveBeenCalled();
-    });
+    fireEvent.change(titleInput, { target: { value: 'Explore One' } });
 
     // Check for duplicate warning callout
     await waitFor(() => {
-      expect(screen.getByTestId('titleDupicateWarnMsg')).toBeInTheDocument();
-      expect(screen.getByText('This object already exists')).toBeInTheDocument();
+      expect(screen.getByTestId('titleDuplicateWarnMsg')).toBeInTheDocument();
+      expect(
+        screen.getByText('A visualization with this name already exists.')
+      ).toBeInTheDocument();
+    });
+  });
+
+  it('shows duplicate dashboard title warning when title already exists', async () => {
+    mockSavedObjectsClient.find = jest.fn().mockResolvedValue({
+      savedObjects: [{ id: 'dash-1', attributes: { title: 'Dashboard One' } }],
+    });
+
+    await act(async () => {
+      render(
+        <AddToDashboardModal
+          savedObjectsClient={mockSavedObjectsClient}
+          onConfirm={mockOnConfirm}
+          onCancel={mockOnCancel}
+          savedExploreId="explore-1"
+        />
+      );
+    });
+
+    const newRadio = screen.getByLabelText('Save to new dashboard');
+    fireEvent.click(newRadio);
+
+    const titleInput = await screen.findByPlaceholderText('Enter dashboard name');
+    fireEvent.change(titleInput, { target: { value: 'Dashboard One' } });
+
+    // Check for duplicate warning callout
+    await waitFor(() => {
+      expect(screen.getByTestId('dashboardTitleDuplicateWarnMsg')).toBeInTheDocument();
+      expect(screen.getByText('A dashboard with this name already exists.')).toBeInTheDocument();
     });
   });
 });

@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { shallowWithI18nProvider } from '../../../../../../../../../test_utils/public/enzyme_helpers';
 import { StaticLookupFormatEditorFormatParams } from './static_lookup';
 import { FieldFormat } from '../../../../../../../../data/public';
@@ -55,7 +54,7 @@ describe('StaticLookupFormatEditor', () => {
     const component = shallowWithI18nProvider(
       <StaticLookupFormatEditor
         fieldType={fieldType}
-        format={(format as unknown) as FieldFormat}
+        format={format as unknown as FieldFormat}
         formatParams={formatParams}
         onChange={onChange}
         onError={onError}
@@ -69,7 +68,7 @@ describe('StaticLookupFormatEditor', () => {
     const component = shallowWithI18nProvider(
       <StaticLookupFormatEditor
         fieldType={fieldType}
-        format={(format as unknown) as FieldFormat}
+        format={format as unknown as FieldFormat}
         formatParams={{
           lookupEntries: [{}, {}, {}] as StaticLookupFormatEditorFormatParams['lookupEntries'],
           unknownKeyValue: 'test value',
