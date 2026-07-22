@@ -37,6 +37,12 @@ jobs:
       - name: Run bootstrap
         run: yarn osd bootstrap
 
+      - name: Setup Java
+        uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9 # v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
       - name: Download OpenSearch
         uses: suisei-cn/actions-download-file@15306412d2c75df56b46844362b86b65235b7db1 # v1.4.0
         with:
