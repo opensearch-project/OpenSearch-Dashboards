@@ -41,6 +41,7 @@ import {
   LineAnnotation,
   TooltipType,
   StackMode,
+  LegendValue,
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 import { getTimezone } from '../../../lib/get_timezone';
@@ -127,7 +128,7 @@ export const TimeSeries = ({
     <Chart ref={chartRef} renderer="canvas" className={classes}>
       <Settings
         showLegend={legend}
-        showLegendExtra={true}
+        legendValues={[LegendValue.CurrentAndLastValue]}
         legendPosition={legendPosition}
         onBrushEnd={onBrushEndListener}
         animateData={false}
@@ -281,6 +282,7 @@ export const TimeSeries = ({
         position={Position.Bottom}
         title={xAxisLabel}
         tickFormat={xAxisFormatter}
+        timeAxisLayerCount={0}
         gridLine={{
           ...GRID_LINE_CONFIG,
           visible: showGrid,
