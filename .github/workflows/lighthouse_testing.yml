@@ -54,8 +54,11 @@ jobs:
           rm -f opensearch-*.tar.gz
         shell: bash
 
-      - name: Remove security plugin
+      - name: Remove security plugin and dependent plugins
         run: |
+          /bin/bash -c "yes | ./opensearch-${{ env.LATEST_VERSION }}/bin/opensearch-plugin remove opensearch-flow-framework"
+          /bin/bash -c "yes | ./opensearch-${{ env.LATEST_VERSION }}/bin/opensearch-plugin remove opensearch-anomaly-detection"
+          /bin/bash -c "yes | ./opensearch-${{ env.LATEST_VERSION }}/bin/opensearch-plugin remove opensearch-ml"
           /bin/bash -c "yes | ./opensearch-${{ env.LATEST_VERSION }}/bin/opensearch-plugin remove opensearch-security"
         shell: bash
 
