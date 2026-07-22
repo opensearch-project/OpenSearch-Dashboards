@@ -32,12 +32,10 @@
 import colorJS from 'color';
 import { Theme, LIGHT_THEME, DARK_THEME } from '@elastic/charts';
 
-// Axis-title fill colors from @elastic/charts' pre-71 (Amsterdam) LIGHT_THEME
-// and DARK_THEME. charts >=71 switched its default themes to Borealis text
-// tokens; using these legacy reference colors in the contrast computation
-// below keeps TSVB's axis text color consistent with pre-upgrade behavior.
-const LEGACY_LIGHT_AXIS_TITLE_FILL = '#333';
-const LEGACY_DARK_AXIS_TITLE_FILL = '#D4D4D4';
+// Axis-title fill colors used as the light/dark reference when computing a
+// high-contrast axis color for a given panel background.
+const LIGHT_AXIS_TITLE_FILL = '#333';
+const DARK_AXIS_TITLE_FILL = '#D4D4D4';
 
 function computeRelativeLuminosity(rgb: string) {
   return colorJS(rgb).luminosity();
@@ -126,15 +124,7 @@ export function getBaseTheme(baseTheme: Theme, bgColor?: string | null): Theme {
 
   const bgLuminosity = computeRelativeLuminosity(bgColor);
   const mainTheme = bgLuminosity <= 0.179 ? DARK_THEME : LIGHT_THEME;
-  // Reference the legacy (Amsterdam) axis-title fills so the computed
-  // high-contrast color stays consistent with pre-71 behavior (charts >=71's
-  // Borealis text tokens would otherwise flip some colors, e.g. white ->
-  // near-black). The base `mainTheme` still uses the current charts theme.
-  const color = findBestContrastColor(
-    bgColor,
-    LEGACY_LIGHT_AXIS_TITLE_FILL,
-    LEGACY_DARK_AXIS_TITLE_FILL
-  );
+  const color = findBestContrastColor(bgColor, LIGHT_AXIS_TITLE_FILL, DARK_AXIS_TITLE_FILL);
   return {
     ...mainTheme,
     axes: {

@@ -74,17 +74,12 @@ const run = async () => {
         from: '$euiBorderRadius / 2',
         to: 'calc($euiBorderRadius / 2)',
       },
-      // @elastic/charts >=71 wraps its legend focus styles with the EUI focus-ring
-      // mixin using the newer 2-argument signature `euiFocusRing($color, $type)`.
-      // OUI (our @elastic/eui alias) only defines the single-argument
-      // `euiFocusRing($size)`, so the extra argument aborts the SCSS build.
-      // Drop the arguments to fall back to OUI's default focus ring.
+      // OUI's euiFocusRing mixin takes a single argument; drop the extra args.
       {
         from: '@include euiFocusRing(null, 1);',
         to: '@include euiFocusRing;',
       },
-      // Newer theme.scss also introduces legacy Sass division on $euiSizeXS
-      // (both spaced and unspaced), which Dart Sass rejects. Wrap in calc().
+      // Wrap legacy Sass division so Dart Sass accepts it.
       {
         from: '$euiSizeXS / 2',
         to: 'calc($euiSizeXS / 2)',

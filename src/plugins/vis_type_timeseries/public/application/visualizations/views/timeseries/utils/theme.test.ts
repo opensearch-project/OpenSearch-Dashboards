@@ -49,7 +49,7 @@ describe('TSVB theme', () => {
     // violet increased the text color to full white for higer contrast
     expect(getBaseTheme(LIGHT_THEME, '#ba26ff').axes.axisTitle.fill).toEqual('rgb(255,255,255)');
 
-    // light yellow, prefer the legacy light-theme fill color because already with a good contrast
+    // light yellow, prefer the light-theme fill color because already with a good contrast
     expect(getBaseTheme(LIGHT_THEME, '#fff49f').axes.axisTitle.fill).toEqual('#333');
   });
 });
