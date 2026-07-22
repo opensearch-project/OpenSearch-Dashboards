@@ -108,6 +108,7 @@ export function buildServices(
     sqlSupportEnabled: config.sqlSupport?.enabled ?? false,
     queryProfilingEnabled: config.queryProfiling?.enabled ?? false,
     pplAnalyzeEnabled: config.pplAnalyze?.enabled ?? false,
+    logsDrilldownEnabled: config.logsDrilldown?.enabled ?? false,
     isDatasetManagementEnabled,
     dataImporterConfig,
     dataSourceEnabled,

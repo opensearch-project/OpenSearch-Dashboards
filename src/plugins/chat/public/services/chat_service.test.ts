@@ -60,7 +60,7 @@ describe('ChatService', () => {
     // Create mock thread ID observable - starts as undefined
     const generateMockThreadId = () => {
       const timestamp = Date.now();
-      const randomStr = Math.random().toString(36).substring(2, 11);
+      const randomStr = Math.random().toString(36).substring(2, 11).padEnd(9, '0');
       return `thread-${timestamp}-${randomStr}`;
     };
     mockThreadId$ = new BehaviorSubject<string | undefined>(undefined);
@@ -214,9 +214,9 @@ describe('ChatService', () => {
     it('should generate unique thread IDs', () => {
       // Create separate mock core services for independent instances
       const generateThreadId1 = () =>
-        `thread-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+        `thread-${Date.now()}-${Math.random().toString(36).substring(2, 11).padEnd(9, '0')}`;
       const generateThreadId2 = () =>
-        `thread-${Date.now() + 1}-${Math.random().toString(36).substring(2, 11)}`;
+        `thread-${Date.now() + 1}-${Math.random().toString(36).substring(2, 11).padEnd(9, '0')}`;
 
       const mockThreadId1$ = new BehaviorSubject<string>(generateThreadId1());
       const mockThreadId2$ = new BehaviorSubject<string>(generateThreadId2());

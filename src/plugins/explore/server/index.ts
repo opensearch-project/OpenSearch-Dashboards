@@ -19,6 +19,7 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
     sqlSupport: true,
     queryProfiling: true,
     pplAnalyze: true,
+    logsDrilldown: true,
   },
   schema: configSchema,
   deprecations: ({ rename, unused }) => [
