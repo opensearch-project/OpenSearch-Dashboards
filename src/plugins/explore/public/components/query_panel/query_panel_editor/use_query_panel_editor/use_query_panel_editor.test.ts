@@ -556,6 +556,16 @@ describe('useQueryPanelEditor', () => {
       expect(mockFocusDisposable.dispose).toHaveBeenCalled();
       expect(mockBlurDisposable.dispose).toHaveBeenCalled();
     });
+
+    it('clears the shared editor ref when the editor unmounts', () => {
+      mockEditorRef.current = mockEditor;
+
+      const { unmount } = renderHook(() => useQueryPanelEditor());
+
+      unmount();
+
+      expect(mockEditorRef.current).toBeNull();
+    });
   });
 
   describe('PPL lint context (Fix 1: datasetRef + overrides)', () => {

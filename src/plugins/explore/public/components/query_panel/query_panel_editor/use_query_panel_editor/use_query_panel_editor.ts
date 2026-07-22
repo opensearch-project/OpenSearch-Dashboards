@@ -341,6 +341,12 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
     [editorRef]
   );
 
+  useEffect(() => {
+    return () => {
+      editorRef.current = null;
+    };
+  }, [editorRef]);
+
   // Real autocomplete implementation using the data plugin's autocomplete service
   const provideCompletionItems = useCallback(
     async (

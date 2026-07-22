@@ -30,6 +30,9 @@ interface UnifiedIndexSelectorProps {
   onSelectionChange: (items: Array<{ id: string; title: string; isWildcard: boolean }>) => void;
   services?: IDataPluginServices;
   path?: DataStructure[];
+  /** Auto-focus the search input (and open the dropdown) on mount. Default true; callers that open
+   *  the selector pre-seeded (e.g. from the logs drilldown) can pass false to avoid grabbing focus. */
+  autoFocus?: boolean;
 }
 
 // Note: * is NOT in this list because it's used for wildcards
@@ -40,6 +43,7 @@ export const UnifiedIndexSelector: React.FC<UnifiedIndexSelectorProps> = ({
   onSelectionChange,
   services,
   path,
+  autoFocus = true,
 }) => {
   const [searchValue, setSearchValue] = useState('');
   const [searchResults, setSearchResults] = useState<string[]>([]);
@@ -177,15 +181,16 @@ export const UnifiedIndexSelector: React.FC<UnifiedIndexSelectorProps> = ({
     };
   }, [searchValue, fetchIndices]);
 
-  // Auto-focus input on first mount to open dropdown
+  // Auto-focus input on first mount to open dropdown (opt-out via autoFocus=false).
   useEffect(() => {
+    if (!autoFocus) return;
     if (inputRef.current) {
       // Small delay to ensure component is fully mounted
       setTimeout(() => {
         inputRef.current?.focus();
       }, 100);
     }
-  }, []);
+  }, [autoFocus]);
 
   // Reposition cursor after wildcard is auto-appended
   useEffect(() => {

@@ -48,6 +48,10 @@ jest.mock('../../../components/query_panel', () => ({
   QueryPanel: () => <div data-test-subj="query-panel">Query Panel</div>,
 }));
 
+jest.mock('./logs_query_panel', () => ({
+  LogsQueryPanel: () => <div data-test-subj="logs-query-panel">Logs Query Panel</div>,
+}));
+
 jest.mock('../../../components/container/bottom_container', () => ({
   BottomContainer: () => (
     <div data-test-subj="bottom-container">
@@ -179,6 +183,10 @@ describe('LogsPage', () => {
     const exploreServices = discoverPluginMock.createExploreServicesMock();
     const exploreServicesMock = exploreServices as jest.MaybeMockedDeep<typeof exploreServices>;
     exploreServicesMock.uiSettings.get.mockImplementation((_, defaultValue) => defaultValue);
+    exploreServicesMock.capabilities = {
+      ...exploreServicesMock.capabilities,
+      explore: { logsQueryBuilderEnabled: true },
+    };
 
     exploreServicesMock.keyboardShortcut = {
       useKeyboardShortcut: mockUseKeyboardShortcut,
@@ -206,10 +214,39 @@ describe('LogsPage', () => {
       </TestHarness>
     );
 
-    expect(screen.getByTestId('query-panel')).toBeInTheDocument();
+    expect(screen.getByTestId('logs-query-panel')).toBeInTheDocument();
+    expect(screen.queryByTestId('query-panel')).not.toBeInTheDocument();
     expect(screen.getByTestId('bottom-container')).toBeInTheDocument();
     expect(screen.getByTestId('new-experience-banner')).toBeInTheDocument();
     expect(screen.getByTestId('top-nav')).toBeInTheDocument();
+  });
+
+  it('renders the logs query builder panel when the query builder flag is enabled', () => {
+    const exploreServices = discoverPluginMock.createExploreServicesMock();
+    const exploreServicesMock = exploreServices as jest.MaybeMockedDeep<typeof exploreServices>;
+    exploreServicesMock.uiSettings.get.mockImplementation((_, defaultValue) => defaultValue);
+    exploreServicesMock.capabilities = {
+      ...exploreServicesMock.capabilities,
+      explore: { logsQueryBuilderEnabled: true },
+    };
+    exploreServicesMock.keyboardShortcut = {
+      useKeyboardShortcut: mockUseKeyboardShortcut,
+      register: jest.fn(),
+      unregister: jest.fn(),
+      getAllShortcuts: jest.fn(),
+    };
+    (useOpenSearchDashboards as jest.Mock).mockReturnValue({ services: exploreServicesMock });
+
+    const store = createTestStore();
+    render(
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
+      <TestHarness store={store}>
+        <LogsPage />
+      </TestHarness>
+    );
+
+    expect(screen.getByTestId('logs-query-panel')).toBeInTheDocument();
+    expect(screen.queryByTestId('query-panel')).not.toBeInTheDocument();
   });
 
   it('passes setHeaderActionMenu prop to TopNav', () => {
@@ -235,7 +272,7 @@ describe('LogsPage', () => {
       </TestHarness>
     );
 
-    expect(screen.getByTestId('query-panel')).toBeInTheDocument();
+    expect(screen.getByTestId('logs-query-panel')).toBeInTheDocument();
     expect(screen.getByTestId('top-nav')).toBeInTheDocument();
   });
 
