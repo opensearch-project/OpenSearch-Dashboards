@@ -33,6 +33,7 @@ import moment from 'moment-timezone';
 import { unitOfTime } from 'moment';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { cloneDeep } from 'lodash';
 import { euiThemeVars } from '@osd/ui-shared-deps/theme';
 
 import {
@@ -224,7 +225,8 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
     const { chartData, services } = this.props;
     const { uiSettings } = services;
     const timeZone = getTimezone(uiSettings);
-    const chartsTheme = services.theme.chartsDefaultTheme;
+    // Clone before mutating; the default theme is a shared, frozen object.
+    const chartsTheme = cloneDeep(services.theme.chartsDefaultTheme);
     const chartsBaseTheme = services.theme.chartsDefaultBaseTheme;
 
     if (!chartData) {
@@ -343,6 +345,8 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
           position={Position.Bottom}
           title={chartData.xAxisLabel}
           tickFormat={this.formatXValue}
+          // Use the single-row time axis so `tickFormat` drives the labels.
+          timeAxisLayerCount={0}
           ticks={10}
         />
         <LineAnnotation
