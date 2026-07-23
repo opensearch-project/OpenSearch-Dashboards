@@ -7,7 +7,7 @@ import semver from 'semver';
 import { CatalogEntry } from './types';
 
 /** Latest engine version the catalog was verified against. */
-export const OSD_KNOWN_VERSION = '3.7.0';
+export const OSD_KNOWN_VERSION = '3.8.0';
 
 function coerce(version: string): string | null {
   return semver.coerce(version)?.version ?? null;

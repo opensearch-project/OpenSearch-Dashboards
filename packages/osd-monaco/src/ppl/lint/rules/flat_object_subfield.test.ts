@@ -30,15 +30,22 @@ describe('flat-object-subfield (compiled surface)', () => {
 
   // attributes is a flat_object; attributes.http is a separately-typed keyword
   // (so the longest-prefix logic must treat it as a real queryable field); name
-  // is a plain text field.
+  // is a plain text field. flat-object-subfield is gated to Calcite >= 3.8, so the
+  // context must declare that surface or the version filter suppresses the rule.
   const ctx: LintRunContext = {
+    dataSourceVersion: '3.8.0',
+    isCalcite: true,
     typeMap: new Map([
       ['attributes', 'flat_object'],
       ['attributes.http', 'keyword'],
       ['name', 'text'],
     ]),
   };
-  const flatOnly: LintRunContext = { typeMap: new Map([['attributes', 'flat_object']]) };
+  const flatOnly: LintRunContext = {
+    dataSourceVersion: '3.8.0',
+    isCalcite: true,
+    typeMap: new Map([['attributes', 'flat_object']]),
+  };
 
   const ids = (code: string, c?: LintRunContext) =>
     analyzer.lint(code, c).diagnostics.map((d) => d.ruleId);
@@ -72,13 +79,22 @@ describe('flat-object-subfield (compiled surface)', () => {
   it('does NOT flag a non-flat path (name is text)', () =>
     expect(ids('search t | fields name', ctx)).not.toContain('flat-object-subfield'));
 
-  it('self-suppresses when no typeMap is provided', () =>
-    expect(ids('search t | fields attributes.http.method')).not.toContain('flat-object-subfield'));
+  // The enabling surface (Calcite >= 3.8) is present, so the ONLY reason to
+  // suppress here is the absent/empty typeMap.
+  const enablingSurface: LintRunContext = { dataSourceVersion: '3.8.0', isCalcite: true };
 
-  it('self-suppresses on an empty typeMap', () =>
-    expect(ids('search t | fields attributes.http.method', { typeMap: new Map() })).not.toContain(
+  it('self-suppresses when no typeMap is provided', () =>
+    expect(ids('search t | fields attributes.http.method', enablingSurface)).not.toContain(
       'flat-object-subfield'
     ));
+
+  it('self-suppresses on an empty typeMap', () =>
+    expect(
+      ids('search t | fields attributes.http.method', {
+        ...enablingSurface,
+        typeMap: new Map(),
+      })
+    ).not.toContain('flat-object-subfield'));
 
   describe('diagnostic shape', () => {
     it('reports hoverFacts {field, root, esType} and offers NO fix', () => {

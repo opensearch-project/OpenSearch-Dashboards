@@ -25,6 +25,13 @@ export interface CatalogEntry {
   needsContext?: boolean;
   needsExplain?: boolean;
   aiFixable?: boolean;
+  /**
+   * The rule reads the active dataset's field metadata (`fields`/`typeMap`), so
+   * its findings are only meaningful when the query's top-level source is the
+   * dataset those types came from. The runner suppresses the rule on a proven
+   * source mismatch (see `sourceConflictsWithDataset`).
+   */
+  sourceScoped?: boolean;
 }
 
 export type BundleRuleOverrides = Record<string, Partial<CatalogEntry>>;

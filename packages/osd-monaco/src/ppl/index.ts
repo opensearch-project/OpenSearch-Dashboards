@@ -55,7 +55,11 @@ export type {
   DiagnosticActionContext,
   PPLDiagnosticActionContributor,
 } from './lint/diagnostic_action';
-export { classifyTopLevelSource, isPipeFirstQuery } from './lint/top_level_source';
+export {
+  classifyTopLevelSource,
+  isPipeFirstQuery,
+  sourceConflictsWithDataset,
+} from './lint/top_level_source';
 export type { TopLevelSource } from './lint/top_level_source';
 
 export { buildCommandSuggestion } from './command_suggestion';

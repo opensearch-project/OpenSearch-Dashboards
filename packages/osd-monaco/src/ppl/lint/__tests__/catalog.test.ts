@@ -29,6 +29,30 @@ describe('catalog loading', () => {
     }
   });
 
+  it('marks the metadata rules as source-scoped so a source mismatch suppresses them', () => {
+    const byId = new Map(getBundledCatalog().map((c) => [c.id, c]));
+    for (const id of [
+      'field-validation',
+      'agg-on-text',
+      'flat-object-subfield',
+      'type-mismatch-numeric',
+    ]) {
+      expect(byId.get(id)?.sourceScoped).toBe(true);
+    }
+  });
+
+  it('gates the metadata rules to the engine surface they were verified against', () => {
+    const byId = new Map(getBundledCatalog().map((c) => [c.id, c]));
+    // agg-on-text / type-mismatch-numeric verified on OpenSearch 3.7 (warnings).
+    expect(byId.get('agg-on-text')?.appliesTo).toEqual({ minVersion: '3.7.0' });
+    expect(byId.get('type-mismatch-numeric')?.appliesTo).toEqual({ minVersion: '3.7.0' });
+    // flat-object-subfield verified only on Calcite 3.8 and is an error.
+    expect(byId.get('flat-object-subfield')?.appliesTo).toEqual({
+      minVersion: '3.8.0',
+      engine: 'calcite',
+    });
+  });
+
   it('keeps exactly the valid entries and drops malformed ones', () => {
     const entries = [
       {

@@ -72,11 +72,12 @@ function collectTopLevelSources(
 export function classifyTopLevelSource(
   tree: ParserRuleContext,
   ruleNameToIndex: RuleNameToIndex,
-  query: string
+  isPipeFirst: boolean
 ): TopLevelSource {
-  // Check the original text first: editor paths prepend a synthetic `source=t` so pipe-first parses,
-  // and that fake source would otherwise read as a real one.
-  if (isPipeFirstQuery(query)) {
+  // Decide pipe-first from the ORIGINAL query, not the tree: editor paths prepend a
+  // synthetic `source=t` so a pipe-first query parses, and that fake source would
+  // otherwise read as a real one. Callers pass the flag they already derived.
+  if (isPipeFirst) {
     return { kind: 'pipe-first', range: rangeFromContext(tree) };
   }
 
@@ -92,4 +93,35 @@ export function classifyTopLevelSource(
 
   const only = sources[0];
   return { kind: 'single-table', value: only.value, range: rangeFromContext(only.node) };
+}
+
+/**
+ * Confident-mismatch check: true ONLY when we can prove the query's single
+ * top-level source differs from the dataset whose field metadata was loaded.
+ *
+ * Fails open (returns false) for every uncertain case — no selected pattern,
+ * pipe-first / inconclusive / multi-source queries, or a wildcard on either
+ * side — so a source-scoped rule is suppressed only on a genuine mismatch and
+ * never hidden on a legitimate match we merely can't confirm.
+ */
+export function sourceConflictsWithDataset(
+  source: TopLevelSource,
+  selectedSourcePattern: string | undefined
+): boolean {
+  if (!selectedSourcePattern) {
+    return false;
+  }
+  if (source.kind !== 'single-table') {
+    return false;
+  }
+  const querySource = normalizeSource(source.value);
+  const selected = normalizeSource(selectedSourcePattern);
+  if (!querySource || !selected) {
+    return false;
+  }
+  // Wildcard index patterns (`logs-*`) can't be compared literally; don't guess.
+  if (querySource.includes('*') || selected.includes('*')) {
+    return false;
+  }
+  return querySource !== selected;
 }

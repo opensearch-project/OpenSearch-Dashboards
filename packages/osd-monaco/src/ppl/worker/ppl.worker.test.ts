@@ -31,7 +31,11 @@ describe('PPLWorkerImpl typeMap hydration', () => {
   });
 
   it('rebuilds a dotted-key typeMap (Object.entries preserves the dotted name)', async () => {
+    // flat-object-subfield is gated to Calcite >= 3.8; declare that surface so the
+    // test exercises typeMap hydration rather than the version filter.
     const context: SerializableLintContext = {
+      dataSourceVersion: '3.8.0',
+      isCalcite: true,
       typeMap: { attributes: 'flat_object' },
     };
     const { diagnostics } = await worker.lint('search t | fields attributes.http', context);

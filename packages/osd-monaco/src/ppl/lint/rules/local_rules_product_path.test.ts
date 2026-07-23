@@ -55,6 +55,10 @@ const run = (query: string, context: Partial<LintRunContext> = {}) =>
   runLint(buildTree(query), {
     catalog: getBundledCatalog(),
     ruleNameToIndex,
+    // The analyzer/runtime paths forward context.dataSourceVersion as the
+    // dataSourceVersion option (what appliesTo reads); mirror that here so
+    // version-gated rules resolve against the surface the context declares.
+    dataSourceVersion: context.dataSourceVersion,
     context: { ...context, grammarSurface: 'compiled-simplified' },
   });
 
@@ -67,7 +71,13 @@ const AGG_QUERY = 'search t | stats avg(name)';
 const AGG_TYPES: Partial<LintRunContext> = { typeMap: new Map([['name', 'text']]) };
 
 const FLAT_QUERY = 'search t | fields attributes';
-const FLAT_TYPES: Partial<LintRunContext> = { typeMap: new Map([['attributes', 'flat_object']]) };
+// flat-object-subfield is gated to Calcite >= 3.8, so its firing case must declare
+// that surface alongside the typeMap.
+const FLAT_ENGINE: Partial<LintRunContext> = { dataSourceVersion: '3.8.0', isCalcite: true };
+const FLAT_TYPES: Partial<LintRunContext> = {
+  ...FLAT_ENGINE,
+  typeMap: new Map([['attributes', 'flat_object']]),
+};
 
 const MISMATCH_QUERY = 'search t | where age = "thirty"';
 const MISMATCH_TYPES: Partial<LintRunContext> = { typeMap: new Map([['age', 'long']]) };
@@ -101,7 +111,8 @@ describe('local rules: product-path plumbing (catalog + registry + runLint, comp
     });
 
     it('flat-object-subfield is suppressed when the context carries no typeMap', () => {
-      expect(ruleIds(FLAT_QUERY)).not.toContain('flat-object-subfield');
+      // Enabling surface present, so the absent typeMap is the only suppression cause.
+      expect(ruleIds(FLAT_QUERY, FLAT_ENGINE)).not.toContain('flat-object-subfield');
     });
 
     it('type-mismatch-numeric is suppressed when the context carries no typeMap', () => {

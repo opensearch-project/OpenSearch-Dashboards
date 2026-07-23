@@ -122,8 +122,12 @@ describe('lintRuntimePPLQuery', () => {
       ['attributes', 'flat_object'],
     ]);
     const fields = new Set<string>([...typeMap.keys(), 'raw']);
+    // flat-object-subfield is gated to Calcite >= 3.8; the agg/type warnings apply
+    // from 3.7. Declare a Calcite 3.8 surface so all three fire on this path.
     const runtimeContext = {
       useRuntimeGrammar: true,
+      dataSourceVersion: '3.8.0',
+      isCalcite: true,
       fields,
       typeMap,
       disabledObjectFields: new Set(['raw']),
