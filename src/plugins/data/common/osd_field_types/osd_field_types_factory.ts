@@ -120,6 +120,26 @@ export const createOsdFieldTypes = (): OsdFieldType[] => [
     esTypes: [OPENSEARCH_FIELD_TYPES.HISTOGRAM],
   }),
   new OsdFieldType({
+    name: OSD_FIELD_TYPES.NUMBER_RANGE,
+    filterable: true,
+    esTypes: [
+      OPENSEARCH_FIELD_TYPES.INTEGER_RANGE,
+      OPENSEARCH_FIELD_TYPES.FLOAT_RANGE,
+      OPENSEARCH_FIELD_TYPES.LONG_RANGE,
+      OPENSEARCH_FIELD_TYPES.DOUBLE_RANGE,
+    ],
+  }),
+  new OsdFieldType({
+    name: OSD_FIELD_TYPES.DATE_RANGE,
+    filterable: true,
+    esTypes: [OPENSEARCH_FIELD_TYPES.DATE_RANGE],
+  }),
+  new OsdFieldType({
+    name: OSD_FIELD_TYPES.IP_RANGE,
+    filterable: true,
+    esTypes: [OPENSEARCH_FIELD_TYPES.IP_RANGE],
+  }),
+  new OsdFieldType({
     name: OSD_FIELD_TYPES.CONFLICT,
   }),
   OsdFieldTypeUnknown,
