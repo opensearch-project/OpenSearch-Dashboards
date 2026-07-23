@@ -249,4 +249,86 @@ describe('ToolCallRow', () => {
       expect(container.querySelector('.toolCallRow')).toBeInTheDocument();
     });
   });
+
+  describe('renderDefault passed to custom renderers', () => {
+    // Import the real context so a custom renderer actually gets invoked.
+    const { AssistantActionContext } = jest.requireMock('../../../context_provider/public');
+
+    const renderWithCustomAction = (
+      toolCall: TimelineToolCall,
+      renderFn: (props: any) => JSX.Element,
+      opts: { initialOpen?: boolean } = {}
+    ) => {
+      const contextValue = {
+        toolCallStates: new Map(),
+        getActionRenderer: (name: string) => (name === toolCall.toolName ? renderFn : undefined),
+        shouldUseCustomRenderer: (name: string) => name === toolCall.toolName,
+      };
+      return render(
+        <AssistantActionContext.Provider value={contextValue}>
+          <ToolCallRow toolCall={toolCall} initialOpen={opts.initialOpen} />
+        </AssistantActionContext.Provider>
+      );
+    };
+
+    it('provides a renderDefault function in the custom renderer props', () => {
+      const toolCall = createToolCall({ status: 'completed', result: '{"ok":true}' });
+      let capturedRenderDefault: (() => JSX.Element) | undefined;
+
+      renderWithCustomAction(toolCall, (props) => {
+        capturedRenderDefault = props.renderDefault;
+        return <div>custom UI</div>;
+      });
+
+      expect(screen.getByText('custom UI')).toBeInTheDocument();
+      expect(typeof capturedRenderDefault).toBe('function');
+    });
+
+    it('renderDefault() renders the same running spinner as the plain default path', () => {
+      const toolCall = createToolCall({ status: 'running' });
+
+      renderWithCustomAction(toolCall, (props) => <div>{props.renderDefault()}</div>);
+
+      expect(screen.getByText(/Running test_tool/)).toBeInTheDocument();
+      expect(document.querySelector('.euiLoadingSpinner')).toBeInTheDocument();
+    });
+
+    it('renderDefault() renders the same Parameters/Result accordion as the plain default path', () => {
+      const toolCall = createToolCall({
+        status: 'completed',
+        arguments: '{"query":"test"}',
+        result: '{"data":[]}',
+      });
+
+      renderWithCustomAction(toolCall, (props) => <div>{props.renderDefault()}</div>, {
+        initialOpen: true,
+      });
+
+      expect(screen.getByText('Parameters:')).toBeInTheDocument();
+      expect(screen.getByText('Result:')).toBeInTheDocument();
+      expect(screen.getByText('test_tool')).toBeInTheDocument();
+    });
+
+    it('lets a custom renderer show its own UI while pending and defer to renderDefault once complete', () => {
+      // Simulates our language-switch confirmation pattern: custom UI only
+      // while running, renderDefault() for the settled states.
+      const renderFn = (props: any) => {
+        if (props.status === 'executing' || props.status === 'pending') {
+          return <div>Confirm language switch?</div>;
+        }
+        return <div>{props.renderDefault()}</div>;
+      };
+
+      const runningToolCall = createToolCall({ status: 'running' });
+      const { unmount } = renderWithCustomAction(runningToolCall, renderFn);
+      expect(screen.getByText('Confirm language switch?')).toBeInTheDocument();
+      expect(screen.queryByText('Result:')).not.toBeInTheDocument();
+      unmount();
+
+      const completedToolCall = createToolCall({ status: 'completed', result: '{"done":true}' });
+      renderWithCustomAction(completedToolCall, renderFn, { initialOpen: true });
+      expect(screen.queryByText('Confirm language switch?')).not.toBeInTheDocument();
+      expect(screen.getByText('Result:')).toBeInTheDocument();
+    });
+  });
 });

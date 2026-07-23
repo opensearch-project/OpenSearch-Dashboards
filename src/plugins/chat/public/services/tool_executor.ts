@@ -68,12 +68,17 @@ export class ToolExecutor {
         }
 
         if (!response.approved) {
+          const customRejectionMessage = this.assistantActionService.getRejectionMessage(toolName);
+          const message =
+            (typeof customRejectionMessage === 'function'
+              ? customRejectionMessage(toolArgs)
+              : customRejectionMessage) || 'The user chose not to proceed with this action.';
           return {
             success: false,
             error: 'User rejected the tool execution',
             userRejected: true,
             data: {
-              message: 'The user chose not to proceed with this action.',
+              message,
               toolName,
               args: toolArgs,
             },

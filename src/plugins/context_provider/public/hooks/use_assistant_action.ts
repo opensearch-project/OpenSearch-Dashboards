@@ -15,6 +15,15 @@ export interface RenderProps<T = any> {
   error?: Error;
   onApprove?: () => void;
   onReject?: () => void;
+  /**
+   * Renders the same default presentation (running spinner, or an
+   * accordion with Parameters/Result) that a tool call gets when it has
+   * no custom renderer. Lets a custom renderer show its own UI only for
+   * the states it actually needs to customize (e.g. a confirmation
+   * prompt while pending) and defer to the default look otherwise,
+   * instead of being forced to replace the whole row unconditionally.
+   */
+  renderDefault?: () => ReactNode;
 }
 
 export interface AssistantAction<T = any> {
@@ -32,6 +41,7 @@ export interface AssistantAction<T = any> {
   deps?: any[];
   requiresConfirmation?: boolean; // Whether this action requires user confirmation
   useCustomRenderer?: boolean; // Whether to use custom render method for tool results
+  rejectionMessage?: string | ((args: T) => string); // Message fed back to the agent as the tool result when the user rejects a confirmation for this action.
 }
 
 export function useAssistantAction<T = any>(action: AssistantAction<T>) {
