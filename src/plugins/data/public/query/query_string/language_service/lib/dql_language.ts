@@ -19,10 +19,6 @@ export const getDQLLanguageConfig = (
       return '';
     },
     editor: defaultEditor,
-    fields: {
-      filterable: true,
-      visualizable: true,
-    },
     showDocLinks: true,
     docLink: {
       title: i18n.translate('data.dqlLanguage.docLink', {
