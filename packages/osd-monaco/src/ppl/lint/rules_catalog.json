@@ -107,7 +107,8 @@
     "needsContext": true,
     "sourceScoped": true,
     "appliesTo": {
-      "minVersion": "3.7.0"
+      "minVersion": "3.7.0",
+      "engine": "calcite"
     }
   },
   {
@@ -134,7 +135,8 @@
     "needsContext": true,
     "sourceScoped": true,
     "appliesTo": {
-      "minVersion": "3.7.0"
+      "minVersion": "3.7.0",
+      "engine": "calcite"
     }
   }
 ]
