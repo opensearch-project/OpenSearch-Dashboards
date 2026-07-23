@@ -36,6 +36,8 @@ const mockAssistantActionService = {
 const mockChatService = {
   sendToolResult: jest.fn(),
   getCurrentDataSourceId: jest.fn().mockReturnValue(undefined),
+  getCurrentDataSourceInfo: jest.fn().mockResolvedValue(undefined),
+  getCurrentTimeRange: jest.fn().mockReturnValue(undefined),
   resetConnection: jest.fn(),
 } as unknown as jest.Mocked<ChatService>;
 

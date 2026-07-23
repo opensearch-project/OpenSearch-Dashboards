@@ -111,9 +111,17 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
     const timelineRef = React.useRef<Message[]>(timeline);
 
-    React.useEffect(() => {
-      timelineRef.current = timeline;
-    }, [timeline]);
+    // Wrap setTimeline so timelineRef updates synchronously within the updater, before React renders.
+    const setTimelineSynced = useCallback(
+      (updater: Message[] | ((prev: Message[]) => Message[])) => {
+        setTimeline((prev) => {
+          const next = typeof updater === 'function' ? updater(prev) : updater;
+          timelineRef.current = next;
+          return next;
+        });
+      },
+      []
+    );
 
     // Subscribe to pending confirmations
     useEffect(() => {
@@ -144,13 +152,13 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
           confirmationService,
           telemetryRecorder,
           callbacks: {
-            onTimelineUpdate: setTimeline,
+            onTimelineUpdate: setTimelineSynced,
             onStreamingStateChange: setIsStreaming,
             onStartResponse: setStartResponse,
             getTimeline: () => timelineRef.current,
           },
         }),
-      [service, chatService, confirmationService, telemetryRecorder]
+      [service, chatService, confirmationService, telemetryRecorder, setTimelineSynced]
     );
 
     // Subscribe to tool updates from the service
@@ -300,10 +308,10 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
           };
           if (pendingUserMessage) {
             // User message already in timeline (data source selection flow) — append response
-            setTimeline((prev) => [...prev, responseMsg]);
+            setTimelineSynced((prev) => [...prev, responseMsg]);
           } else {
             const userMsg = chatService.getUserMessage(messageContent);
-            setTimeline((prev) => [...prev, userMsg, responseMsg]);
+            setTimelineSynced((prev) => [...prev, userMsg, responseMsg]);
           }
           setScreenshotData(undefined);
           return true;
@@ -312,18 +320,18 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
           const userMsg = chatService.getUserMessage(commandResult.message, messageContent);
           if (pendingUserMessage) {
             // Replace the pending user message (by id) with the resolved command message
-            setTimeline((prev) =>
+            setTimelineSynced((prev) =>
               prev.map((msg) => (msg.id === pendingUserMessage.id ? userMsg : msg))
             );
           } else {
-            setTimeline((prev) => [...prev, userMsg]);
+            setTimelineSynced((prev) => [...prev, userMsg]);
           }
           subscribeToMessageStream(messagesToSend, userMsg);
           return true;
         }
         return true;
       },
-      [chatService, subscribeToMessageStream]
+      [chatService, subscribeToMessageStream, setTimelineSynced]
     );
 
     // Handler for when user selects a data source from the prompt
@@ -391,7 +399,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             defaultMessage: 'The current data source does not support AI features.',
           }),
         };
-        setTimeline((prev) => [...prev, userMsg, systemMsg]);
+        setTimelineSynced((prev) => [...prev, userMsg, systemMsg]);
         return;
       }
 
@@ -408,7 +416,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
           const userMsg = chatService.getUserMessage(messageContent);
           setPendingMessage(userMsg);
           setAvailableDataSources(compatibleDataSources);
-          setTimeline((prev) => [...prev, userMsg]);
+          setTimelineSynced((prev) => [...prev, userMsg]);
           return;
         }
 
@@ -422,7 +430,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
               'There are no data sources associated with this workspace. Please ask your workspace admin to associate data sources to this workspace.',
           }),
         };
-        setTimeline((prev) => [...prev, userMsg, infoMsg]);
+        setTimelineSynced((prev) => [...prev, userMsg, infoMsg]);
         return;
       }
 
@@ -431,8 +439,27 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       if (handled) return;
 
       // Normal message flow — add user message to timeline then stream
-      const userMsg = chatService.getUserMessage(messageContent);
-      setTimeline((prev) => [...prev, userMsg]);
+      const userAdditionalMessage =
+        additionalMessages[0] && additionalMessages[0]?.role === 'user'
+          ? additionalMessages[0]
+          : null;
+
+      const additionalContent = userAdditionalMessage
+        ? Array.isArray(userAdditionalMessage.content)
+          ? userAdditionalMessage.content
+          : [{ type: 'text' as const, text: String(userAdditionalMessage.content) }]
+        : [];
+
+      // add additional msg such as image or context to message list
+      const userMsg: UserMessage = userAdditionalMessage
+        ? {
+            id: chatService.generateMessageId(),
+            role: 'user',
+            content: [...additionalContent, { type: 'text' as const, text: messageContent.trim() }],
+          }
+        : chatService.getUserMessage(messageContent);
+
+      setTimelineSynced((prev) => [...prev, userMsg]);
       return subscribeToMessageStream(messagesToSend, userMsg);
     };
 
@@ -484,10 +511,10 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
         // Add user message back and stream
         const userMsg = chatService.getUserMessage(textContent);
-        setTimeline([...truncatedTimeline, userMsg]);
+        setTimelineSynced([...truncatedTimeline, userMsg]);
         subscribeToMessageStream([...truncatedTimeline, ...additionalMessages], userMsg);
       },
-      [timeline, subscribeToMessageStream, setInput, chatService]
+      [timeline, subscribeToMessageStream, setInput, setTimelineSynced, chatService]
     );
 
     const handleResendToolResult = useCallback(
@@ -503,10 +530,10 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         // Avoid concurrent resends while streaming or already sending a tool result
         if (isStreamingRef.current || hasActiveToolCallsRef.current) return;
         // Remove the error message from timeline
-        setTimeline((prev) => prev.filter((msg) => msg.id !== messageId));
+        setTimelineSynced((prev) => prev.filter((msg) => msg.id !== messageId));
         await eventHandler.sendToolResultToAssistant(toolCallId, toolResult);
       },
-      [eventHandler, setTimeline]
+      [eventHandler, setTimelineSynced]
     );
 
     // Helper function to stop streaming and clean up subscriptions
@@ -538,14 +565,14 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       eventHandler.clearState();
 
       chatService.newThread();
-      setTimeline([]);
+      setTimelineSynced([]);
       setCurrentRunId(null);
       setPendingConfirmation(null);
       setPendingMessage(null);
       setAvailableDataSources([]);
       confirmationService.cleanAll();
       setShowHistory(false);
-    }, [chatService, confirmationService, eventHandler, stopStreaming]);
+    }, [chatService, confirmationService, eventHandler, stopStreaming, setTimelineSynced]);
 
     const handleStop = useCallback(() => {
       stopStreaming();

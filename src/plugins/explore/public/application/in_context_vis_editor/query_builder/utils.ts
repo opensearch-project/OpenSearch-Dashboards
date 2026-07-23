@@ -210,7 +210,7 @@ export const queryExecution = async ({
       throw new Error('Dataset not found for query execution');
     }
 
-    const dataset = services.data.dataViews.convertToDataset(dataView);
+    const dataset = await services.data.dataViews.convertToDataset(dataView);
 
     const preparedQueryObject = {
       ...query,
