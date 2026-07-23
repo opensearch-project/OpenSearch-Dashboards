@@ -24,11 +24,6 @@ export interface CatalogEntry {
   runtimeOnly?: boolean;
   needsContext?: boolean;
   needsExplain?: boolean;
-  /**
-   * Whether an AI-assisted quick fix may be offered for this rule's markers. Read
-   * generically by the AI contributor from the catalog, without importing any rule.
-   * Undefined/false means no AI action is offered.
-   */
   aiFixable?: boolean;
 }
 
@@ -42,19 +37,9 @@ export interface LintPayloadContext {
   visibleIndices?: string[];
   settings?: { allJoinTypesAllowed?: boolean };
   overrides?: BundleRuleOverrides;
-  /**
-   * Identity of the source the field/type metadata was loaded for. Exposed by
-   * the context builder only when the loaded data view's dataset id, data source
-   * id, and dataset type all match the query's active dataset — so a rule can
-   * trust that `fields`/`typeMap` describe this exact source and is not a stale
-   * carryover. Absent when provenance cannot be established.
-   */
+  /** Set only when the loaded metadata's dataset/source/type match the active dataset, so `fields`/`typeMap` are known non-stale for this source. */
   selectedSourcePattern?: string;
-  /**
-   * Data source engine classification carried into lint context so a
-   * Calcite-only rule can reject an Elasticsearch-compatible source. Derived
-   * from `dataSource.engineType ?? dataSource.type` at the host.
-   */
+  /** Data source engine classification, so a Calcite-only rule can reject an Elasticsearch-compatible source. */
   engineType?: string;
   // Whether the command-typo suggestion (a syntax-channel UX layer, not a lint
   // rule) is enabled. Undefined means enabled; only `false` turns it off. Carried
@@ -75,11 +60,7 @@ export interface LintRunContext extends LintPayloadContext {
   sourceText?: string;
   grammarSurface?: 'compiled-simplified' | 'runtime-bundle';
   grammarHash?: string;
-  /**
-   * Whether the linted query is pipe-first (`| where ...`). Derived run-local
-   * from the query text by the lint runner so rules that care about a leading
-   * source do not each re-derive it. Absent means "not determined".
-   */
+  /** Whether the query is pipe-first (`| where ...`), derived once by the runner so rules needn't re-derive it. */
   isPipeFirst?: boolean;
 }
 

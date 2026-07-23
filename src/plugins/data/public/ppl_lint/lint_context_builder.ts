@@ -23,25 +23,18 @@ interface LintContextDataset {
 }
 
 /**
- * Host-maintained cache of the index-pattern field metadata for the active
- * dataset, used by field- and type-aware lint rules. The host refreshes it on
- * dataset change (see the loadFields effect in query_editor /
- * use_query_panel_editor) and stamps the dataset id, data source id, and dataset
- * type it belongs to, so a stale cache from a previous source is never applied
- * to the current one.
+ * Host-maintained cache of the active dataset's field metadata, stamped with
+ * dataset/data-source/type identity so a stale cache is never applied here.
  */
 export interface LintFieldsCache {
   datasetId?: string;
   dataSourceId?: string;
   datasetType?: string;
-  /** The source pattern (index/title) the metadata was loaded for. */
   selectedSourcePattern?: string;
   fields?: Set<string>;
-  /** Field name → its single unambiguous OpenSearch type, when one exists. */
   typeMap?: Map<string, string>;
 }
 
-/** Minimal index-pattern field shape the metadata extraction reads. */
 interface IndexPatternLike {
   fields?: Array<{ name?: string; esTypes?: string[] } | undefined>;
 }
@@ -56,20 +49,15 @@ export function extractFieldNames(indexPattern: IndexPatternLike): Set<string> {
 }
 
 /**
- * Extract both the field-name set and a name→type map from an index pattern.
- *
- * A field name can resolve to more than one `esType` (multi-field mappings,
- * merged patterns, or a wildcard-backed field whose indices disagree). The type
- * map keeps a field only when all its types agree; a field with conflicting
- * types is omitted from the map (but still present in `fields`), so a type-aware
- * rule self-suppresses on it rather than acting on an arbitrary type.
+ * Extract the field-name set plus a name→type map. A name with conflicting
+ * `esTypes` is omitted from the map (kept in `fields`) so type-aware rules
+ * self-suppress rather than act on an arbitrary type.
  */
 export function extractFieldMetadata(indexPattern: IndexPatternLike): {
   fields: Set<string>;
   typeMap: Map<string, string>;
 } {
   const fields = new Set<string>();
-  // Track the distinct types seen per name; collapse to one only if unambiguous.
   const seenTypes = new Map<string, Set<string>>();
 
   for (const field of indexPattern.fields ?? []) {
@@ -112,19 +100,15 @@ export function buildPPLLintContext(
 
   const cachedSettings = calciteSettingsCache.getCached(dsId);
 
-  // Only apply cached metadata when it belongs to the active dataset AND data
-  // source AND dataset type; otherwise leave it undefined so field/type/source
-  // rules self-suppress (no false results from a stale source). The dataset type
-  // is part of the identity so a dataset id reused across types cannot match.
+  // Apply cached metadata only when dataset id, data source, and type all match;
+  // otherwise leave it undefined so field/type/source rules self-suppress.
   const cacheMatchesDataset =
     lintFields.datasetId === dataset?.id &&
     lintFields.dataSourceId === dsId &&
     lintFields.datasetType === dataset?.type;
 
-  // Authoritative Calcite classification: prefer the cluster settings the
-  // backend reported; fall back to the version heuristic only when settings are
-  // not cached yet. `deriveIsCalcite` alone cannot see an administratively
-  // disabled Calcite on a >= 3.3 cluster, so the cached value wins when present.
+  // Prefer backend-reported settings; the version heuristic can't see an
+  // admin-disabled Calcite on a >= 3.3 cluster, so cached settings win.
   const isCalcite = cachedSettings
     ? cachedSettings.calciteEnabled
     : deriveIsCalcite(effectiveVersion);
@@ -137,8 +121,6 @@ export function buildPPLLintContext(
     isCalcite,
     fields: cacheMatchesDataset ? lintFields.fields : undefined,
     typeMap: cacheMatchesDataset ? lintFields.typeMap : undefined,
-    // Expose the selected source pattern only when provenance holds, so a rule
-    // can trust it identifies this exact source.
     selectedSourcePattern: cacheMatchesDataset ? lintFields.selectedSourcePattern : undefined,
     settings: cachedSettings
       ? { allJoinTypesAllowed: cachedSettings.allJoinTypesAllowed }

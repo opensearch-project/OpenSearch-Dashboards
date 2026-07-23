@@ -9,16 +9,8 @@ import { findAllDescendantsByRule, findChildByRule } from '../rule_index';
 import { rangeFromContext } from '../range_utils';
 import { parseFieldPath } from '../field_path';
 
-// Engine ground truth (verified live, OpenSearch 3.7): a numeric aggregation
-// (avg/sum/stddev/var/median) on a `text`/`keyword` field returns null with a
-// `double` schema type and no error — a silent failure. This is a warning and
-// self-suppresses without a typeMap.
-//
-// Exclusions:
-//   - `count`/`min`/`max` are type-agnostic and deliberately excluded.
-//   - `percentile`/`percentile_approx` parse through their own alternative
-//     (no `statsFunctionName`), so they never reach here; excluded pending a
-//     separate live-verified follow-up.
+// Live-verified (OpenSearch 3.7): these aggs on a text/keyword field silently return null.
+// count/min/max are type-agnostic; percentile* parse via a different alternative, so both are excluded.
 const NUMERIC_ONLY_AGGS: ReadonlySet<string> = new Set([
   'avg',
   'sum',
@@ -29,13 +21,12 @@ const NUMERIC_ONLY_AGGS: ReadonlySet<string> = new Set([
   'median',
 ]);
 
-// esTypes that hold non-numeric text and so cannot be numerically aggregated.
 const TEXT_TYPES: ReadonlySet<string> = new Set(['text', 'keyword']);
 
 export const aggOnTextDetector: Detector = (tree, config, context, ruleNameToIndex) => {
   const typeMap = context.typeMap;
   if (!typeMap || typeMap.size === 0) {
-    return []; // self-suppress without type metadata
+    return [];
   }
 
   const diagnostics: Diagnostic[] = [];
@@ -44,17 +35,14 @@ export const aggOnTextDetector: Detector = (tree, config, context, ruleNameToInd
   for (const statsFunction of statsFunctions) {
     const nameNode = findChildByRule(statsFunction, ruleNameToIndex, 'statsFunctionName');
     if (!nameNode) {
-      continue; // count()/percentile(x,p)/take(...) route through other alternatives
+      continue;
     }
     const aggName = nameNode.getText().toLowerCase();
     if (!NUMERIC_ONLY_AGGS.has(aggName)) {
       continue;
     }
 
-    // Resolve the aggregation argument. Open-world: only flag when the argument
-    // is a single bare field (the functionArgs text equals the one field name).
-    // A computed argument like `avg(balance / 2)` carries operators and is left
-    // alone.
+    // Only flag a single bare field argument; leave computed args like avg(balance / 2) alone.
     const argsNode = findChildByRule(statsFunction, ruleNameToIndex, 'functionArgs');
     if (!argsNode) {
       continue;
@@ -65,14 +53,13 @@ export const aggOnTextDetector: Detector = (tree, config, context, ruleNameToInd
     }
     const fieldExpr = fieldExprs[0];
     if (fieldExpr.getText() !== argsNode.getText()) {
-      continue; // argument is more than just the bare field
+      continue;
     }
 
-    // Exact canonical lookup: an ancestor's type must never classify a child, so
-    // this uses the full canonical path, not a prefix.
+    // Match on the full canonical path, not a prefix, so an ancestor's type never classifies a child.
     const parsed = parseFieldPath(fieldExpr.getText());
     if (!parsed) {
-      continue; // malformed quoted path — suppress rather than guess
+      continue;
     }
     const esType = typeMap.get(parsed.canonical);
     if (esType !== undefined && TEXT_TYPES.has(esType)) {

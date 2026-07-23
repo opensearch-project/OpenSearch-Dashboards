@@ -11,25 +11,15 @@ import { renderHoverCard, SeverityLabel } from './hover_card';
 import { collectPPLDiagnosticActions, DiagnosticAction } from '../diagnostic_action';
 import { getCatalogEntryById } from '../catalog';
 
-// Command ids are dotted identifiers (`ppl.aiFix`). Anything else — spaces,
-// `?`, `)`, path separators — could reshape the `command:` URI, so a contributor
-// cannot smuggle a different command or arguments past the link boundary.
+// Restrict command ids so a contributor can't reshape the `command:` URI to smuggle a different command/args.
 const SAFE_COMMAND_ID = /^[\w.-]+$/;
 
-// Escape the markdown-significant characters in contributor-supplied link text
-// so a `title` cannot break out of the `[..](..)` link and inject its own
-// `command:` link into the trusted block. Newlines collapse to a space so the
-// link stays on one line. Valid titles ("Ask Olly to fix") are unaffected.
+// Escape markdown so a contributor title can't break out of the link and inject its own `command:` link.
 function escapeMarkdownLinkText(text: string): string {
   return text.replace(/[\\`*_{}[\]()#+\-.!|<>~]/g, '\\$&').replace(/[\r\n]+/g, ' ');
 }
 
-/**
- * Render contributed actions (e.g. an AI fix) as Monaco command links, returned
- * as a SEPARATE, trusted content part so the main hover card can stay untrusted:
- * only these controlled links live in the trusted block. The title-escape and
- * command-id guards above keep contributor strings from injecting into it.
- */
+// Returned as a SEPARATE trusted part so the main hover card stays untrusted; only these guarded links are trusted.
 function renderContributedActions(actions: DiagnosticAction[]): monaco.IMarkdownString | undefined {
   const links = actions
     .filter((action) => SAFE_COMMAND_ID.test(action.commandId))

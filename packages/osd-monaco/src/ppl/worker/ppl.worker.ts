@@ -14,8 +14,7 @@ import { LintResult } from '../lint/diagnostic';
 import { LintRunContext, SerializableLintContext } from '../lint/types';
 
 // Simple worker implementation that doesn't depend on Monaco's internal modules.
-// Exported so the structured-clone hydration path can be unit-tested without a
-// live Web Worker.
+// Exported so the structured-clone hydration path can be unit-tested.
 export class PPLWorkerImpl {
   private analyzer: PPLLanguageAnalyzer;
 

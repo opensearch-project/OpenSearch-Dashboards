@@ -9,7 +9,6 @@ import { getModelFix, getModelSyntaxFix, markerFixKey, MarkerFix } from './fix_r
 import { collectPPLDiagnosticActions } from './diagnostic_action';
 import { getCatalogEntryById } from './catalog';
 
-/** Resolve a marker's catalog rule id from its `code` field (string or link). */
 function ruleIdOfMarker(marker: monaco.editor.IMarkerData): string | undefined {
   const { code } = marker;
   if (typeof code === 'string') {
@@ -51,9 +50,8 @@ export const pplLintCodeActionProvider: monaco.languages.CodeActionProvider = {
         continue;
       }
 
-      // Contributed actions (e.g. an AI-assisted fix) are offered on lint
-      // markers regardless of whether a deterministic fix exists. They read only
-      // neutral, catalog-owned metadata, so no rule module is imported here.
+      // Contributed actions (e.g. AI-assisted fix) run even without a deterministic
+      // fix and read only catalog metadata, so no rule module is imported here.
       if (marker.source === LINT_MARKER_SOURCE) {
         const ruleId = ruleIdOfMarker(marker);
         const entry = ruleId ? getCatalogEntryById(ruleId) : undefined;

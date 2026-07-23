@@ -333,15 +333,8 @@ class PPLGrammarCache {
         const savedObject = await savedObjectsClient.get('data-source', datasourceId);
         version = (savedObject.attributes as any)?.dataSourceVersion as string | undefined;
       } else if (!datasourceId) {
-        // Local cluster — read the real OpenSearch engine version, not the OSD
-        // server version: the grammar endpoint and the `>=3.6.0` check are
-        // cluster-side, so /api/status is the wrong source. Reuse
-        // data_source_management's localClusterVersion route with a plain runtime
-        // HTTP call, not a declared plugin dependency — that would create a cycle
-        // (data_source_management -> indexPatternManagement/navigation -> data).
-        // The route always responds 200 ({ version: '' } on failure), so a missing
-        // route or empty string yields no version and we fall back to the
-        // compiled grammar.
+        // Local cluster — read the cluster engine version (the >=3.6.0 check is
+        // cluster-side); runtime HTTP call, not a plugin dep, to avoid a data_source_management cycle.
         const response = await http.get<{ version?: string }>(
           '/internal/data-source-management/localClusterVersion'
         );

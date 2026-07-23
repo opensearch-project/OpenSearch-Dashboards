@@ -9,11 +9,7 @@ import { UI_SETTINGS } from '../../common';
 
 const SEV_RANK: Record<LintSeverity, number> = { info: 0, warning: 1, error: 2 };
 
-/**
- * Narrowing, prototype-safe check that a stored severity is a real level. Uses an
- * own-property test (not `in`), so an inherited name like `toString` is rejected,
- * and narrows the type so `SEV_RANK[value]` indexes safely.
- */
+/** Own-property test (not `in`) so inherited names like `toString` are rejected. */
 function isLintSeverity(value: string): value is LintSeverity {
   return Object.prototype.hasOwnProperty.call(SEV_RANK, value);
 }

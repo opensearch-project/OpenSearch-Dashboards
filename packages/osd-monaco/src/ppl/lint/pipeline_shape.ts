@@ -88,12 +88,7 @@ function unquote(raw: string): string {
     : raw;
 }
 
-/**
- * Normalize a created/derived field name so it matches how references are
- * written. Delegates to the shared quote-aware {@link normalizeFieldPath} so the
- * created-field side here and the reference side in field_validation strip
- * quotes identically and can never drift.
- */
+// Shared with field_validation's reference side so quote-stripping can't drift.
 export const normalizeFieldName = normalizeFieldPath;
 
 /**
