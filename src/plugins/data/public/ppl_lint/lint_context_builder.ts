@@ -58,15 +58,11 @@ export function extractFieldNames(indexPattern: IndexPatternLike): Set<string> {
 /**
  * Extract both the field-name set and a name→type map from an index pattern.
  *
- * A field can appear more than once across a data view (e.g. multi-field
- * mappings surface `text` and `keyword` under related names, and merged index
- * patterns can carry conflicting types), and a single wildcard-backed field can
- * itself carry more than one `esType` (`['long', 'keyword']`) when its backing
- * indices disagree. The type map keeps a field only when every entry for that
- * name — across all of its `esTypes` — agrees on one type; a field with
- * conflicting types is omitted from the map (but still present in `fields`), so
- * a type-aware rule self-suppresses on it rather than acting on an arbitrary
- * type.
+ * A field name can resolve to more than one `esType` (multi-field mappings,
+ * merged patterns, or a wildcard-backed field whose indices disagree). The type
+ * map keeps a field only when all its types agree; a field with conflicting
+ * types is omitted from the map (but still present in `fields`), so a type-aware
+ * rule self-suppresses on it rather than acting on an arbitrary type.
  */
 export function extractFieldMetadata(indexPattern: IndexPatternLike): {
   fields: Set<string>;

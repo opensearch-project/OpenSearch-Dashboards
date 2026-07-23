@@ -25,14 +25,10 @@ function escapeMarkdownLinkText(text: string): string {
 }
 
 /**
- * Render contributed actions (e.g. an AI fix) as Monaco command links. This is
- * returned as a SEPARATE, trusted content part so the main hover card can stay
- * untrusted: only these controlled links live in the trusted block. Because the
- * block is trusted (so `command:` links execute), contributor-supplied strings
- * are treated as untrusted input: the title is markdown-escaped and the command
- * id is shape-validated before being embedded, so no contributor can inject
- * arbitrary markdown or an unintended command. Args are JSON- and URI-encoded.
- * Returns undefined when nothing renders.
+ * Render contributed actions (e.g. an AI fix) as Monaco command links, returned
+ * as a SEPARATE, trusted content part so the main hover card can stay untrusted:
+ * only these controlled links live in the trusted block. The title-escape and
+ * command-id guards above keep contributor strings from injecting into it.
  */
 function renderContributedActions(actions: DiagnosticAction[]): monaco.IMarkdownString | undefined {
   const links = actions

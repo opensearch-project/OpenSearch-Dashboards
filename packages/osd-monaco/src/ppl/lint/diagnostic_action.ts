@@ -9,17 +9,12 @@ import { monaco } from '../../monaco';
  * Neutral extension point that lets a feature register additional quick-fix
  * actions for a lint marker without editing the code-action or hover providers.
  *
- * The deterministic quick fixes shipped by the rule catalog flow through the fix
- * side table and are handled directly by the providers. This registry is for
- * *contributed* actions — e.g. the AI "Ask Olly to fix" action — which are not
- * tied to a specific rule's detector. Both the code-action provider and the
- * hover provider consult the registered contributors, so a single registration
- * surfaces the action on every consuming provider.
- *
- * A contributor is called once per marker with enough context to decide whether
- * to offer an action. It returns zero or more actions; returning none is the
- * common case (most markers are not eligible). Contributors must be pure and
- * fast — they run inside Monaco's synchronous code-action/hover computation.
+ * Deterministic catalog quick fixes flow through the fix side table and are
+ * handled by the providers directly; this registry is for *contributed* actions
+ * (e.g. the AI "Ask Olly to fix" action) that aren't tied to a specific rule's
+ * detector. Both providers consult the contributors, so one registration
+ * surfaces the action everywhere. Contributors must be pure and fast — they run
+ * inside Monaco's synchronous code-action/hover computation.
  */
 
 /** Context a contributor receives for a single marker. */
@@ -94,7 +89,9 @@ export function collectPPLDiagnosticActions(context: DiagnosticActionContext): D
     return [];
   }
   const actions: DiagnosticAction[] = [];
-  for (const contributor of contributors) {
+  // Snapshot the set so a contributor that (dis)registers during its own run
+  // can't perturb this iteration.
+  for (const contributor of Array.from(contributors)) {
     try {
       actions.push(...contributor(context));
     } catch {

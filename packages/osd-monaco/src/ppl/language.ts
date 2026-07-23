@@ -323,12 +323,10 @@ const processLintHighlighting = (model: monaco.editor.IModel): void => {
         };
         const key = markerFixKey(marker);
         if (withExtras.fix) {
-          // markerFixKey is range + message + rule id (marker.code), so two
-          // diagnostics from DIFFERENT rules can no longer collide. The residual
-          // case is the SAME rule emitting two different fixes on one range +
-          // message; separate tables + suppressContained prevent it today, so this
-          // is a latent tripwire that surfaces only if a future rule introduces
-          // such a collision. The dead branch is eliminated from production bundles.
+          // markerFixKey is range + message + rule id (marker.code), so different
+          // rules can't collide. The residual case — one rule emitting two fixes on
+          // the same range + message — is prevented by separate tables +
+          // suppressContained, so this dev-only check is a tripwire, dead in prod.
           if (
             process.env.NODE_ENV !== 'production' &&
             fixes.has(key) &&

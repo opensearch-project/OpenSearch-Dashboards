@@ -285,9 +285,7 @@ function equalsRhs(
   }
   // Only offer the `field=value` → `value` rewrite when the RHS is a single bare
   // field reference. A computed RHS (`field = a + b`, `field = fn(x)`) has
-  // ambiguous intent, and blindly concatenating the sibling text would produce a
-  // misleading fix — so we confirm off the AST that the RHS collapses to exactly
-  // one fieldExpression spanning the whole right side before proposing it.
+  // ambiguous intent, so we confirm the RHS is exactly one fieldExpression first.
   const fieldExprIdx = ruleNameToIndex('fieldExpression');
   if (fieldExprIdx === -1) {
     return undefined;

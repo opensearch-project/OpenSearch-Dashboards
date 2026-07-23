@@ -5,10 +5,10 @@
 
 import { CharStream, CommonTokenStream, ParserRuleContext, TerminalNode } from 'antlr4ng';
 import { SimplifiedOpenSearchPPLLexer, SimplifiedOpenSearchPPLParser } from '@osd/antlr-grammar';
-import { PPLLanguageAnalyzer } from '../../../ppl_language_analyzer';
-import { flatObjectSubfieldDetector } from '../flat_object_subfield';
-import { createCompiledRuleNameToIndex } from '../../rule_index';
-import type { CatalogEntry, LintRunContext } from '../../types';
+import { PPLLanguageAnalyzer } from '../../ppl_language_analyzer';
+import { flatObjectSubfieldDetector } from './flat_object_subfield';
+import { createCompiledRuleNameToIndex } from '../rule_index';
+import type { CatalogEntry, LintRunContext } from '../types';
 
 // Engine ground truth (see flat_object_subfield.ts header): a flat_object field
 // cannot be referenced in a PPL expression at all — neither the bare root nor a

@@ -15,7 +15,6 @@ import { findLongestTypedPrefix, parseFieldPath } from '../field_path';
 // AND the bare root (`attributes`) raise `IllegalArgumentException: Field [...]
 // not found.` The data is reachable only at the DSL/document level, never
 // through a PPL expression. This rule surfaces it before Run, as an error.
-// Self-suppresses without a typeMap.
 //
 // No quick-fix: there is no valid PPL rewrite target (neither the root, a
 // flatten, nor a cast works), so the rule is diagnostic-only.
@@ -30,10 +29,7 @@ import { findLongestTypedPrefix, parseFieldPath } from '../field_path';
 // and must NOT be flagged even when `a` is a flat_object. A flat_object's
 // subfields never appear in `_field_caps` as separately-typed fields, so a more
 // specific typed prefix proves the reference is not under the flat_object.
-//
-// Grammar anchor (both surfaces): field references parse to a `qualifiedName`
-// (where/eval/by) or a `wcQualifiedName` (fields projection); both carry the
-// full reference text.
+
 const FLAT_OBJECT_TYPES: ReadonlySet<string> = new Set(['flat_object']);
 
 export const flatObjectSubfieldDetector: Detector = (tree, config, context, ruleNameToIndex) => {

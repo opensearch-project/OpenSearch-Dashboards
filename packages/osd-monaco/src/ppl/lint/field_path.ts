@@ -12,33 +12,16 @@
  * so both the created-field side and the reference side must strip those quotes
  * the same way, or a created `` `total` `` would never match a bare `total`.
  *
- * This replaces the earlier `pipeline_shape.normalizeFieldName`, whose
- * `raw.split('.')` split *before* stripping quotes and therefore mis-parsed a
- * quoted segment that itself contained a dot: `` `a.b` `` split into `` `a `` and
- * `` b` ``, normalized to the two-segment `a.b` (path depth 2) instead of the
- * single quoted name `a.b` (path depth 1). The scanners below track whether they
- * are inside a quote, so a dot within a quoted segment is treated as literal.
+ * The scanners track whether they are inside a quote, so a dot within a quoted
+ * segment (`` `a.b` `` is one field named `a.b`, not two) is treated as literal.
  *
  * References can only be backtick-quoted, but created names written as
  * `` as 'years' `` reach these helpers too, so single/double quotes are stripped
  * as well. That is one-directional and safe: it rescues a created name without
  * changing how any reference is interpreted (a reference never carries `'`/`"`).
- *
- * Two APIs coexist here:
- *   - `splitFieldPath` / `normalizeFieldPath` / `fieldPathPrefix` — the string
- *     helpers the field-existence pass, pipeline-shape collection, and top-level
- *     source classifier use.
- *   - `parseFieldPath` / `normalizeFieldName` / `findLongestTypedPrefix` — the
- *     structured API the type-aware rules use: it returns quote-stripped
- *     segments plus a canonical key, handles lexer escapes, and reports
- *     malformed input as `undefined` so a type lookup can suppress rather than
- *     guess.
  */
 
-// The three identifier/string delimiters PPL accepts around a path segment. A
-// backtick quotes an identifier (reference or created name); single/double
-// quotes appear only on the created-alias side and are stripped one-directionally
-// so a reference is never reinterpreted.
+// The three identifier/string delimiters PPL accepts around a path segment.
 const QUOTES: ReadonlySet<string> = new Set(['`', "'", '"']);
 
 /**

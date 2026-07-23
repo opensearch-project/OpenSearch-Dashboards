@@ -5,10 +5,10 @@
 
 import { CharStream, CommonTokenStream, ParserRuleContext } from 'antlr4ng';
 import { SimplifiedOpenSearchPPLLexer, SimplifiedOpenSearchPPLParser } from '@osd/antlr-grammar';
-import { runLint } from '../../lint_runner';
-import { getBundledCatalog } from '../../catalog';
-import { createCompiledRuleNameToIndex } from '../../rule_index';
-import type { CatalogEntry, LintRunContext } from '../../types';
+import { runLint } from '../lint_runner';
+import { getBundledCatalog } from '../catalog';
+import { createCompiledRuleNameToIndex } from '../rule_index';
+import type { CatalogEntry, LintRunContext } from '../types';
 
 // Product-path test (design doc §9 "Product path") for the local type-aware rules
 // that run on the COMPILED-SIMPLIFIED grammar surface. Unlike the per-rule detector

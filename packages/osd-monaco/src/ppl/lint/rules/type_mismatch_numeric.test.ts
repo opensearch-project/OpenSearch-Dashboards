@@ -5,10 +5,10 @@
 
 import { CharStream, CommonTokenStream, ParserRuleContext } from 'antlr4ng';
 import { SimplifiedOpenSearchPPLLexer, SimplifiedOpenSearchPPLParser } from '@osd/antlr-grammar';
-import { PPLLanguageAnalyzer } from '../../../ppl_language_analyzer';
-import { typeMismatchNumericDetector } from '../type_mismatch_numeric';
-import { createCompiledRuleNameToIndex } from '../../rule_index';
-import type { CatalogEntry, LintRunContext } from '../../types';
+import { PPLLanguageAnalyzer } from '../../ppl_language_analyzer';
+import { typeMismatchNumericDetector } from './type_mismatch_numeric';
+import { createCompiledRuleNameToIndex } from '../rule_index';
+import type { CatalogEntry, LintRunContext } from '../types';
 
 // Plan §9 "Numeric mismatch": comparing a numeric field to a NON-coercible
 // string literal (e.g. `age = "thirty"`) silently matches 0 rows on the engine.

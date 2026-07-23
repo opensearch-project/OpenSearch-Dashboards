@@ -30,25 +30,20 @@ export type TopLevelSource =
   | { kind: 'pipe-first'; range: DiagnosticRange }
   | { kind: 'inconclusive' };
 
-/** Strip a single enclosing quote pair from a source token (kept identical to
- * how field paths are normalized so a quoted source name compares cleanly). */
+/** Normalize a source token like a field path, so quoted names compare cleanly. */
 function normalizeSource(raw: string): string {
   return normalizeFieldPath(raw);
 }
 
 /**
- * Whether a query is pipe-first (its first non-space character is `|`). This is
- * a run-local text derivation — cheaper and surface-independent than inspecting
- * the tree, and it matches how the runtime bridge decides to prepend its
- * pipe-first prefix.
+ * Whether a query is pipe-first (its first non-space character is `|`). Matches
+ * how the runtime bridge decides to prepend its pipe-first prefix.
  */
 export function isPipeFirstQuery(query: string): boolean {
   return query.trimStart().startsWith('|');
 }
 
-/**
- * A single located source name plus the node whose span it occupies.
- */
+/** A source name plus the node whose span it occupies. */
 interface LocatedSource {
   value: string;
   node: ParserRuleContext;
@@ -103,10 +98,7 @@ function collectTopLevelSources(
 }
 
 /**
- * Classify the top-level source of a parsed query. When exactly one source name
- * is present we report it; zero (with a pipe-first query) is `pipe-first`;
- * anything else — no source, or more than one (union/multisearch) — is
- * `inconclusive`.
+ * Classify the top-level source of a parsed query.
  */
 export function classifyTopLevelSource(
   tree: ParserRuleContext,
@@ -127,7 +119,6 @@ export function classifyTopLevelSource(
   }
 
   if (sources.length > 1) {
-    // Multiple recognizable top-level sources — not a single-table query.
     return { kind: 'inconclusive' };
   }
 

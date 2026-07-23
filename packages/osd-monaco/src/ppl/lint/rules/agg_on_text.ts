@@ -14,19 +14,11 @@ import { parseFieldPath } from '../field_path';
 // `double` schema type and no error — a silent failure. This is a warning and
 // self-suppresses without a typeMap.
 //
-// Grammar anchor (both surfaces):
-//   statsFunction : ... | statsFunctionName LT_PRTHS functionArgs RT_PRTHS  # statsFunctionCall
-//   statsFunctionName : AVG | COUNT | SUM | MIN | MAX | VAR_SAMP | VAR_POP
-//                     | STDDEV_SAMP | STDDEV_POP | MEDIAN
-//
 // Exclusions:
 //   - `count`/`min`/`max` are type-agnostic and deliberately excluded.
-//   - `percentile`/`percentile_approx` use a dedicated argument shape
-//     (`percentileAggFunction` on the runtime surface, comma-separated args on
-//     both) and are excluded from this rule pending a separate live-verified
-//     follow-up. They never reach here anyway: they parse through their own
-//     alternative, so `statsFunctionName` is absent — but the exclusion is
-//     documented so the follow-up is explicit.
+//   - `percentile`/`percentile_approx` parse through their own alternative
+//     (no `statsFunctionName`), so they never reach here; excluded pending a
+//     separate live-verified follow-up.
 const NUMERIC_ONLY_AGGS: ReadonlySet<string> = new Set([
   'avg',
   'sum',

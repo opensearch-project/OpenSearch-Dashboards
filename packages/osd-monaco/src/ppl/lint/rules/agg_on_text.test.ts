@@ -5,10 +5,10 @@
 
 import { CharStream, CommonTokenStream, ParserRuleContext } from 'antlr4ng';
 import { SimplifiedOpenSearchPPLLexer, SimplifiedOpenSearchPPLParser } from '@osd/antlr-grammar';
-import { PPLLanguageAnalyzer } from '../../../ppl_language_analyzer';
-import { aggOnTextDetector } from '../agg_on_text';
-import { createCompiledRuleNameToIndex } from '../../rule_index';
-import type { CatalogEntry, LintRunContext } from '../../types';
+import { PPLLanguageAnalyzer } from '../../ppl_language_analyzer';
+import { aggOnTextDetector } from './agg_on_text';
+import { createCompiledRuleNameToIndex } from '../rule_index';
+import type { CatalogEntry, LintRunContext } from '../types';
 
 // agg-on-text (design doc §9 "Aggregations"): a numeric aggregation
 // (avg/sum/median/var_*/stddev_*) on a `text`/`keyword` field silently returns

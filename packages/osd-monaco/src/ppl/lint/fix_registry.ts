@@ -29,9 +29,7 @@ interface MarkerKeyParts {
   endColumn: number;
   message: string;
   // The rule id, carried on the marker's `code` field (a plain string, or a
-  // `{ value, target }` link when the diagnostic has a doc URL). Included in the
-  // key so two diagnostics that share a range and message but come from
-  // different rules cannot collide on one fix.
+  // `{ value, target }` link when the diagnostic has a doc URL).
   code?: string | { value?: string };
 }
 

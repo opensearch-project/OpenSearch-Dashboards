@@ -9,8 +9,6 @@
  * This is a neutral, no-op-by-default extension point. The static, explain,
  * deterministic-fix, and AI paths can emit through it without importing a
  * telemetry implementation, and no event fires unless a host registers a sink.
- * The telemetry PR registers a real sink; every other path treats emission as a
- * harmless call that may reach nobody.
  *
  * Payloads carry only stable rule/action identifiers and coarse status — never
  * query text, field names, index names, diagnostic messages, or replacement
@@ -38,7 +36,6 @@ export interface PPLLintEvent {
   type: PPLLintEventType;
   /** Stable catalog rule id (e.g. `field-validation`). Never a field or value. */
   ruleId: string;
-  /** Which layer emitted this. */
   layer: PPLLintLayer;
   /** Stable action identifier for fix/AI events (e.g. `deterministic`, `olly`). */
   action?: string;

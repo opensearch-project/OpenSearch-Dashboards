@@ -10,7 +10,7 @@ import {
   parseFieldPath,
   normalizeFieldName,
   findLongestTypedPrefix,
-} from '../field_path';
+} from './field_path';
 
 describe('splitFieldPath', () => {
   it('splits an unquoted dotted path on every dot', () => {

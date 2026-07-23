@@ -8,9 +8,9 @@ import {
   SimplifiedOpenSearchPPLLexer as OpenSearchPPLLexer,
   SimplifiedOpenSearchPPLParser as OpenSearchPPLParser,
 } from '@osd/antlr-grammar';
-import { classifyTopLevelSource, isPipeFirstQuery } from '../top_level_source';
-import { createCompiledRuleNameToIndex } from '../rule_index';
-import { PIPE_FIRST_PREFIX } from '../range_utils';
+import { classifyTopLevelSource, isPipeFirstQuery } from './top_level_source';
+import { createCompiledRuleNameToIndex } from './rule_index';
+import { PIPE_FIRST_PREFIX } from './range_utils';
 
 const ruleNameToIndex = createCompiledRuleNameToIndex();
 

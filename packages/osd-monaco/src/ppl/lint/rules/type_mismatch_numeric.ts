@@ -13,8 +13,7 @@ import { parseFieldPath } from '../field_path';
 // Engine ground truth (verified live, OpenSearch 3.7): comparing a numeric field
 // to a NON-coercible string literal (e.g. `age = "thirty"`) returns 0 rows with
 // HTTP 200 and no error — a silent failure. A coercible quoted number like
-// `age = "32"` works correctly and must NOT be flagged. Warning severity;
-// self-suppresses without a typeMap.
+// `age = "32"` works correctly and must NOT be flagged.
 //
 // SCOPE: deliberately the narrow literal-vs-field equality form. The general
 // type-mismatch case (computed expressions, field-vs-field) requires dataflow
@@ -110,8 +109,7 @@ export const typeMismatchNumericDetector: Detector = (tree, config, context, rul
     }
     const [left, right] = operands;
 
-    // One side must be a bare field, the other a bare string literal. Support
-    // both operand orders.
+    // One side must be a bare field, the other a bare string literal.
     let fieldName: string | undefined;
     let literalSide: ParserRuleContext | undefined;
     if (asStringLiteral(right, ruleNameToIndex)) {

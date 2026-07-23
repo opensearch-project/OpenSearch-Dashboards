@@ -30,8 +30,8 @@ function ruleIdOfMarker(marker: monaco.editor.IMarkerData): string | undefined {
 // each marker from a fixed field list when `setModelMarkers` is called, dropping
 // any custom property, so a fix hung off the marker never survives to here.
 // Instead each lifecycle records fixes in a side table keyed by the marker
-// fields the service preserves (position + message); we re-associate them here,
-// reading the table that matches the marker's source.
+// fields the service preserves (range + message + rule id); we re-associate them
+// here, reading the table that matches the marker's source.
 export const pplLintCodeActionProvider: monaco.languages.CodeActionProvider = {
   provideCodeActions(
     model: monaco.editor.ITextModel,

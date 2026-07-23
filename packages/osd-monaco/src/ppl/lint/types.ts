@@ -25,10 +25,9 @@ export interface CatalogEntry {
   needsContext?: boolean;
   needsExplain?: boolean;
   /**
-   * Whether an AI-assisted quick fix may be offered for this rule's markers.
-   * The flag is owned by the catalog (this schema); a feature PR sets it on the
-   * rows it wants AI-fixable, and the AI contributor reads it generically without
-   * importing any rule. Undefined/false means no AI action is offered.
+   * Whether an AI-assisted quick fix may be offered for this rule's markers. Read
+   * generically by the AI contributor from the catalog, without importing any rule.
+   * Undefined/false means no AI action is offered.
    */
   aiFixable?: boolean;
 }

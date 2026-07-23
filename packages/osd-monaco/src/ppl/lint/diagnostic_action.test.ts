@@ -3,12 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { monaco } from '../../../monaco';
+import { monaco } from '../../monaco';
 import {
   registerPPLDiagnosticActionContributor,
   collectPPLDiagnosticActions,
   DiagnosticActionContext,
-} from '../diagnostic_action';
+} from './diagnostic_action';
 
 const ctx: DiagnosticActionContext = {
   marker: {

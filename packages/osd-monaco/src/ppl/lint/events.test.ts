@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { registerPPLLintEventSink, emitPPLLintEvent, PPLLintEvent } from '../events';
+import { registerPPLLintEventSink, emitPPLLintEvent, PPLLintEvent } from './events';
 
 const sampleEvent: PPLLintEvent = {
   type: 'diagnostic-shown',
