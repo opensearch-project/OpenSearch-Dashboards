@@ -31,6 +31,32 @@ export const brainPatternQuery = (queryBase: string, patternsField: string) => {
   return `${queryBase} | patterns \`${patternsField}\` method=brain mode=label | stats count() as ${COUNT_FIELD}, take(\`${patternsField}\`, 1) as ${SAMPLE_FIELD} by patterns_field | sort - ${COUNT_FIELD} | fields ${PATTERNS_FIELD}, ${COUNT_FIELD}, ${SAMPLE_FIELD}`;
 };
 
+/**
+ * SQL equivalent of the simple (regex) pattern query.
+ *
+ * The analytics engine has no REGEXP_REPLACE, but Calcite's REPLACE is
+ * regex-capable, so REPLACE(field, '[a-zA-Z0-9]+', '<*>') reproduces PPL's
+ * simple-patterns output exactly (e.g. `<*> /<*>/<*> <*>/<*>.<*>`).
+ *
+ * The engine does not honor outer-SELECT aliases in this GROUP BY context (same
+ * quirk as the SQL histogram's COUNT(*)), so the columns are left unaliased and
+ * come back, in order, as [pattern, COUNT(*), MIN(sample)] — mapped to
+ * patterns_field / pattern_count / sample_logs by position downstream. The
+ * sample uses MIN(field) (a deterministic real log) in place of PPL's
+ * take(field, 1).
+ */
+export const SQL_PATTERN_TOKEN_REGEX = '[a-zA-Z0-9]+';
+export const SQL_PATTERN_PLACEHOLDER = '<*>';
+
+export const sqlPatternQuery = (queryBase: string, patternsField: string) => {
+  const field = `\`${patternsField}\``;
+  return (
+    `SELECT pattern, COUNT(*), MIN(sample) ` +
+    `FROM (SELECT REPLACE(${field}, '${SQL_PATTERN_TOKEN_REGEX}', '${SQL_PATTERN_PLACEHOLDER}') AS pattern, ${field} AS sample FROM (${queryBase}) sub_inner) sub ` +
+    `GROUP BY pattern ORDER BY COUNT(*) DESC`
+  );
+};
+
 export const regexUpdateSearchPatternQuery = (
   queryBase: string,
   patternsField: string,
@@ -71,6 +97,31 @@ export const brainExcludeSearchPatternQuery = (
   )}`;
 };
 
+// Wraps a value as a single-quoted SQL string literal, doubling any embedded single quotes.
+export const escapeSqlValue = (value: string) => `'${String(value).replace(/'/g, "''")}'`;
+
+// SQL filter-for: keep only rows whose simple pattern matches patternString.
+export const sqlUpdateSearchPatternQuery = (
+  queryBase: string,
+  patternsField: string,
+  patternString: string
+) => {
+  return `SELECT * FROM (${queryBase}) sub WHERE REPLACE(\`${patternsField}\`, '${SQL_PATTERN_TOKEN_REGEX}', '${SQL_PATTERN_PLACEHOLDER}') = ${escapeSqlValue(
+    patternString
+  )}`;
+};
+
+// SQL filter-out: exclude rows whose simple pattern matches patternString.
+export const sqlExcludeSearchPatternQuery = (
+  queryBase: string,
+  patternsField: string,
+  patternString: string
+) => {
+  return `SELECT * FROM (${queryBase}) sub WHERE REPLACE(\`${patternsField}\`, '${SQL_PATTERN_TOKEN_REGEX}', '${SQL_PATTERN_PLACEHOLDER}') <> ${escapeSqlValue(
+    patternString
+  )}`;
+};
+
 export const createSearchPatternQuery = (
   query: Query,
   patternsField: string,
@@ -78,6 +129,9 @@ export const createSearchPatternQuery = (
   patternString: string
 ) => {
   const queryString = typeof query.query === 'string' ? query.query : '';
+  if (query.language === 'SQL') {
+    return sqlUpdateSearchPatternQuery(queryString, patternsField, patternString);
+  }
   return usingRegexPatterns
     ? regexUpdateSearchPatternQuery(queryString, patternsField, patternString)
     : brainUpdateSearchPatternQuery(queryString, patternsField, patternString);
@@ -90,6 +144,9 @@ export const createExcludeSearchPatternQuery = (
   patternString: string
 ) => {
   const queryString = typeof query.query === 'string' ? query.query : '';
+  if (query.language === 'SQL') {
+    return sqlExcludeSearchPatternQuery(queryString, patternsField, patternString);
+  }
   return usingRegexPatterns
     ? regexExcludeSearchPatternQuery(queryString, patternsField, patternString)
     : brainExcludeSearchPatternQuery(queryString, patternsField, patternString);
@@ -109,6 +166,15 @@ export const createSearchPatternQueryWithSlice = (
 
   const preparedQuery = prepareQueryForLanguage(query);
   const sortClause = timeField ? ` | sort - ${timeField}` : '';
+
+  if (query.language === 'SQL') {
+    const sqlSort = timeField ? ` ORDER BY \`${timeField}\` DESC` : '';
+    return `${sqlUpdateSearchPatternQuery(
+      preparedQuery.query,
+      patternsField,
+      patternString
+    )}${sqlSort} LIMIT ${pageSize} OFFSET ${pageOffset}`;
+  }
 
   return usingRegexPatterns
     ? `${regexUpdateSearchPatternQuery(
