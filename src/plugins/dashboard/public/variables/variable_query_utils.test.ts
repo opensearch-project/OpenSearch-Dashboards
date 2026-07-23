@@ -4,9 +4,9 @@
  */
 
 import {
+  applyRegexToVariableOptions,
   buildVariableOptionsFromQueryResult,
   parseResponseToQueryResult,
-  filterVariableOptionsByRegex,
   executeVariableQuery,
 } from './variable_query_utils';
 
@@ -221,7 +221,7 @@ describe('buildVariableOptionsFromQueryResult', () => {
   });
 });
 
-describe('filterVariableOptionsByRegex', () => {
+describe('applyRegexToVariableOptions', () => {
   const options = [
     { value: 'prod-api', label: 'Production API' },
     { value: 'staging-api', label: 'Production-like label' },
@@ -229,32 +229,123 @@ describe('filterVariableOptionsByRegex', () => {
   ];
 
   it('should filter normalized options by value', () => {
-    expect(filterVariableOptionsByRegex(options, '^prod')).toEqual([
+    expect(applyRegexToVariableOptions(options, '^prod')).toEqual([
       { value: 'prod-api', label: 'Production API' },
     ]);
   });
 
   it('should return original normalized options for invalid regex', () => {
-    expect(filterVariableOptionsByRegex(options, '/[invalid')).toEqual(options);
+    expect(applyRegexToVariableOptions(options, '/[invalid')).toEqual(options);
   });
 
   it('should return all normalized options when regex is undefined or empty', () => {
-    expect(filterVariableOptionsByRegex(options, undefined)).toEqual(options);
-    expect(filterVariableOptionsByRegex(options, '')).toEqual(options);
+    expect(applyRegexToVariableOptions(options, undefined)).toEqual(options);
+    expect(applyRegexToVariableOptions(options, '')).toEqual(options);
   });
 
   it('should support /pattern/flags syntax', () => {
-    expect(filterVariableOptionsByRegex(options, '/^prod/i')).toEqual([
+    expect(applyRegexToVariableOptions(options, '/^prod/i')).toEqual([
       { value: 'prod-api', label: 'Production API' },
     ]);
   });
 
+  it('should support global regex flags across all options', () => {
+    expect(
+      applyRegexToVariableOptions(
+        [{ value: 'env=prod,label=Production' }, { value: 'env=dev,label=Development' }],
+        '/env=(?<value>[^,]+),label=(?<label>.+)/g'
+      )
+    ).toEqual([
+      { value: 'prod', label: 'Production' },
+      { value: 'dev', label: 'Development' },
+    ]);
+  });
+
   it('should return empty array when no options match', () => {
-    expect(filterVariableOptionsByRegex(options, '^qa')).toEqual([]);
+    expect(applyRegexToVariableOptions(options, '^qa')).toEqual([]);
   });
 
   it('should return all options when every value matches', () => {
-    expect(filterVariableOptionsByRegex(options, 'api|worker')).toEqual(options);
+    expect(applyRegexToVariableOptions(options, 'api|worker')).toEqual(options);
+  });
+
+  it('should keep positional capture groups filter-only', () => {
+    expect(applyRegexToVariableOptions(options, '^([^-]+)-')).toEqual([
+      { value: 'prod-api', label: 'Production API' },
+      { value: 'staging-api', label: 'Production-like label' },
+      { value: 'dev-worker' },
+    ]);
+  });
+
+  it('should keep multiple positional capture groups filter-only', () => {
+    const encodedOptions = [
+      { value: 'env=prod,label=Production' },
+      { value: 'env=dev,label=Development' },
+    ];
+
+    expect(applyRegexToVariableOptions(encodedOptions, '^env=([^,]+),label=(.+)$')).toEqual([
+      { value: 'env=prod,label=Production' },
+      { value: 'env=dev,label=Development' },
+    ]);
+  });
+
+  it('should extract value and label from named capture groups', () => {
+    const encodedOptions = [
+      { value: 'env=prod,label=Production' },
+      { value: 'env=dev,label=Development' },
+    ];
+
+    expect(
+      applyRegexToVariableOptions(encodedOptions, '^env=(?<value>[^,]+),label=(?<label>.+)$')
+    ).toEqual([
+      { value: 'prod', label: 'Production' },
+      { value: 'dev', label: 'Development' },
+    ]);
+  });
+
+  it('should trim extracted values and labels', () => {
+    expect(
+      applyRegexToVariableOptions(
+        [{ value: 'env= dev ,label= Development ' }],
+        '^env=(?<value>[^,]+),label=(?<label>.+)$'
+      )
+    ).toEqual([{ value: 'dev', label: 'Development' }]);
+  });
+
+  it('should fall back when named capture groups are empty', () => {
+    expect(
+      applyRegexToVariableOptions(
+        [{ value: 'env=,label=', label: 'Original label' }],
+        '^env=(?<value>[^,]*),label=(?<label>.*)$'
+      )
+    ).toEqual([{ value: 'env=,label=', label: 'Original label' }]);
+  });
+
+  it('should ignore unsupported named capture groups', () => {
+    expect(
+      applyRegexToVariableOptions(
+        [{ value: 'env=prod,label=Production' }],
+        '^env=(?<value>[^,]+),label=(?<text>.+)$'
+      )
+    ).toEqual([{ value: 'prod' }]);
+  });
+
+  it('should keep the original value when only a label capture is provided', () => {
+    expect(
+      applyRegexToVariableOptions(
+        [{ value: 'env=prod,label=Production' }],
+        '^env=prod,label=(?<label>.+)$'
+      )
+    ).toEqual([{ value: 'env=prod,label=Production', label: 'Production' }]);
+  });
+
+  it('should deduplicate extracted values', () => {
+    expect(
+      applyRegexToVariableOptions(
+        [{ value: 'env=prod,source=a' }, { value: 'env=prod,source=b', label: 'Production' }],
+        '^env=(?<value>[^,]+)'
+      )
+    ).toEqual([{ value: 'prod', label: 'Production' }]);
   });
 });
 
