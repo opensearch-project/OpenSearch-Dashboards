@@ -58,7 +58,6 @@ import {
   QueryPanelActionsRegistryServiceSetup,
 } from './services/query_panel_actions_registry';
 import { SlotRegistryService, SlotRegistryServiceStart } from './services/slot_registry';
-import { QueryEditorProps } from './components/query_panel/query_panel_editor/types';
 
 // ============================================================================
 // PLUGIN INTERFACES - What Explore provides to other plugins
@@ -84,9 +83,6 @@ export interface ExplorePluginStart {
   savedSearchLoader: SavedExploreLoader;
   savedExploreLoader: SavedExploreLoader;
   slotRegistry: SlotRegistryServiceStart;
-  ui: {
-    QueryEditor: React.ComponentType<QueryEditorProps>;
-  };
 }
 
 // ============================================================================
