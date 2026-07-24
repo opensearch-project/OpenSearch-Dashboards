@@ -81,8 +81,15 @@ jest.mock('./ppl_builder', () => ({
   ),
 }));
 
+// Surface whether the analyze props were passed through (vs. gated to `undefined`
+// in visual builder mode).
 jest.mock('../../../components/query_panel/query_panel_widgets', () => ({
-  QueryPanelWidgets: () => <div data-test-subj="query-panel-widgets">Widgets</div>,
+  QueryPanelWidgets: ({ onToggleAnalyze }: { onToggleAnalyze?: () => void }) => (
+    <div data-test-subj="query-panel-widgets">
+      Widgets
+      {onToggleAnalyze !== undefined && <span data-test-subj="widgets-analyze-enabled" />}
+    </div>
+  ),
 }));
 jest.mock('../../../components/query_panel/query_panel_editor', () => ({
   QueryPanelEditor: () => <div data-test-subj="code-editor-stub">Code Editor</div>,
@@ -141,10 +148,14 @@ const setupServices = () => {
   });
 };
 
-const renderPanel = (query: string, savedSearch?: string) =>
+const renderPanel = (
+  query: string,
+  savedSearch?: string,
+  props: React.ComponentProps<typeof LogsQueryPanel> = {}
+) =>
   render(
     <Provider store={makeStore(query, savedSearch)}>
-      <LogsQueryPanel />
+      <LogsQueryPanel {...props} />
     </Provider>
   );
 
@@ -237,5 +248,56 @@ describe('LogsQueryPanel', () => {
 
     const initial = JSON.parse(screen.getByTestId('stub-initial-state').textContent || '{}');
     expect(initial.aggregations).toEqual([{ id: expect.any(String), fn: 'count' }]);
+  });
+
+  describe('analyze mode gating', () => {
+    const noop = () => {};
+
+    it('reports code mode via onModeChange when opening an unparseable query', () => {
+      const onModeChange = jest.fn();
+      // An unparseable query opens in code mode.
+      renderPanel('source = logs | sort field', undefined, { onModeChange });
+      expect(onModeChange).toHaveBeenLastCalledWith(true);
+    });
+
+    it('reports visual (non-code) mode via onModeChange when opening in builder', () => {
+      const onModeChange = jest.fn();
+      // A fresh query opens in builder mode.
+      renderPanel('', undefined, { onModeChange });
+      expect(onModeChange).toHaveBeenLastCalledWith(false);
+    });
+
+    it('reports the mode change when toggling between code and builder', () => {
+      const onModeChange = jest.fn();
+      renderPanel('source = logs service="web-store"', undefined, { onModeChange });
+      // Opens in builder mode.
+      expect(onModeChange).toHaveBeenLastCalledWith(false);
+
+      fireEvent.click(screen.getByTestId('stub-switch-to-code'));
+      expect(onModeChange).toHaveBeenLastCalledWith(true);
+
+      fireEvent.click(screen.getByTestId('pplBuilderModeToggle'));
+      expect(onModeChange).toHaveBeenLastCalledWith(false);
+    });
+
+    it('passes analyze props to the widgets in code mode', () => {
+      // Unparseable query -> code mode.
+      renderPanel('source = logs | sort field', undefined, {
+        analyzeIsOpen: false,
+        onToggleAnalyze: noop,
+        hasAnalyzeResult: false,
+      });
+      expect(screen.getByTestId('widgets-analyze-enabled')).toBeInTheDocument();
+    });
+
+    it('does not pass analyze props to the widgets in visual builder mode', () => {
+      // Fresh query -> builder mode, so analyze props are gated to undefined.
+      renderPanel('', undefined, {
+        analyzeIsOpen: false,
+        onToggleAnalyze: noop,
+        hasAnalyzeResult: false,
+      });
+      expect(screen.queryByTestId('widgets-analyze-enabled')).not.toBeInTheDocument();
+    });
   });
 });

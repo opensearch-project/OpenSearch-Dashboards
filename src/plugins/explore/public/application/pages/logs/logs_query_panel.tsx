@@ -42,7 +42,21 @@ const normalizeQueryText = (text: string) => text.replace(/\r\n?/g, '\n').trim()
  * `useTabResults`), so mutating it per keystroke re-keys results and blanks the
  * table/histogram until the next run.
  */
-export const LogsQueryPanel: React.FC = () => {
+interface LogsQueryPanelProps {
+  analyzeIsOpen?: boolean;
+  onToggleAnalyze?: () => void;
+  hasAnalyzeResult?: boolean;
+  // Reports the live editor mode up so the page can gate the analyze panel:
+  // analyze is only available in code mode, not the visual builder.
+  onModeChange?: (isCode: boolean) => void;
+}
+
+export const LogsQueryPanel: React.FC<LogsQueryPanelProps> = ({
+  analyzeIsOpen,
+  onToggleAnalyze,
+  hasAnalyzeResult,
+  onModeChange,
+}) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const dispatch = useDispatch();
   const queryIsLoading = useSelector(selectIsLoading);
@@ -234,6 +248,13 @@ export const LogsQueryPanel: React.FC = () => {
 
   const showBuilder = mode === 'builder' && !isPromptMode;
 
+  // Analyze is only available on the code editor, not the visual builder. Report
+  // the live editor mode up so the page can show/hide the analyze panel to match.
+  const isCodeMode = !showBuilder;
+  useEffect(() => {
+    onModeChange?.(isCodeMode);
+  }, [isCodeMode, onModeChange]);
+
   const editors = (
     <div className="exploreQueryPanel__editorsWrapper">
       <QueryPanelEditor />
@@ -260,7 +281,11 @@ export const LogsQueryPanel: React.FC = () => {
         responsive={false}
       >
         <EuiFlexItem>
-          <QueryPanelWidgets />
+          <QueryPanelWidgets
+            analyzeIsOpen={isCodeMode ? analyzeIsOpen : undefined}
+            onToggleAnalyze={isCodeMode ? onToggleAnalyze : undefined}
+            hasAnalyzeResult={isCodeMode ? hasAnalyzeResult : undefined}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
 

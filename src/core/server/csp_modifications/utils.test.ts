@@ -268,4 +268,77 @@ describe('applyCspModifications', () => {
       expect(result).toContain('https://*.examples.com');
     });
   });
+
+  describe('case handling', () => {
+    it('should preserve the case of nonce values in base rules', () => {
+      const nonceRules = ["style-src-elem 'self' 'nonce-AbC123+dEf/GhI=='", "script-src 'self'"];
+      const modifications: CspModificationRule[] = [
+        { directive: 'frame-ancestors', action: 'add', values: ['https://app.example.com'] },
+      ];
+      const result = applyCspModifications(nonceRules, modifications);
+      expect(result).toContain("'nonce-AbC123+dEf/GhI=='");
+    });
+
+    it('should preserve the case of hash values in base rules', () => {
+      const hashRules = ["script-src 'self' 'sha256-AbCdEfGh123=='"];
+      const result = applyCspModifications(hashRules, []);
+      expect(result).toContain("'sha256-AbCdEfGh123=='");
+    });
+
+    it('should preserve the case of modification values', () => {
+      const modifications: CspModificationRule[] = [
+        { directive: 'script-src', action: 'add', values: ["'nonce-XyZ987=='"] },
+      ];
+      const result = applyCspModifications(defaultRules, modifications);
+      expect(result).toContain("'nonce-XyZ987=='");
+    });
+
+    it('should match directive names case-insensitively', () => {
+      const modifications: CspModificationRule[] = [
+        { directive: 'Frame-Ancestors', action: 'add', values: ['https://app.example.com'] },
+      ];
+      const result = applyCspModifications(
+        ["frame-ancestors 'self'", "script-src 'self'"],
+        modifications
+      );
+      expect(result).toContain("frame-ancestors 'self' https://app.example.com");
+      // Must not create a duplicate directive
+      expect(result.match(/frame-ancestors/g)).toHaveLength(1);
+    });
+
+    it('should normalize mixed-case directive names in base rules', () => {
+      const result = applyCspModifications(
+        ["Frame-Ancestors 'self'"],
+        [{ directive: 'frame-ancestors', action: 'add', values: ['https://app.example.com'] }]
+      );
+      expect(result).toContain("frame-ancestors 'self' https://app.example.com");
+    });
+  });
+
+  describe('semicolon handling', () => {
+    it('should strip trailing semicolons from base rules', () => {
+      const result = applyCspModifications(
+        ["frame-ancestors 'self' https://console.example.com;"],
+        [{ directive: 'frame-ancestors', action: 'add', values: ['http://localhost:9000'] }]
+      );
+      expect(result).toBe(
+        "frame-ancestors 'self' https://console.example.com http://localhost:9000"
+      );
+    });
+
+    it('should split base rules containing embedded semicolons', () => {
+      const result = applyCspModifications(
+        ["script-src 'self'; style-src 'self'"],
+        [{ directive: 'style-src', action: 'add', values: ["'unsafe-inline'"] }]
+      );
+      expect(result).toContain("script-src 'self'");
+      expect(result).toContain("style-src 'self' 'unsafe-inline'");
+    });
+
+    it('should not emit double semicolons', () => {
+      const result = applyCspModifications(["default-src 'self' data:;", "font-src 'self';"], []);
+      expect(result).not.toContain(';;');
+      expect(result).toBe("default-src 'self' data:; font-src 'self'");
+    });
+  });
 });

@@ -43,6 +43,7 @@ export const API = {
     },
   },
   PPL_CANCEL: `${BASE_API}/ppl/cancel`,
+  PPL_ANALYZE: `${BASE_API}/ppl/analyze`,
   PPL_GRAMMAR: `${BASE_API}/ppl/grammar`,
   PPL_CALCITE_SETTINGS: `${BASE_API}/ppl/calcite_settings`,
   PPL_EXPLAIN: `${BASE_API}/ppl/explain`,

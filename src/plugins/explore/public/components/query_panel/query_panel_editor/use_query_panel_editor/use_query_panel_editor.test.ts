@@ -78,6 +78,7 @@ jest.mock('../../../../../../data/public', () => {
     pplGrammarCache: {
       subscribeToGrammarUpdates: jest.fn(() => jest.fn()),
     },
+    runPPLAnalyzeInBackground: jest.fn(),
   };
 });
 jest.mock('../../../../application/utils/state_management/actions/query_editor');
@@ -226,6 +227,7 @@ describe('useQueryPanelEditor', () => {
     };
 
     mockServices = {
+      http: { fetch: jest.fn() },
       data: {
         query: {
           queryString: {
@@ -233,6 +235,11 @@ describe('useQueryPanelEditor', () => {
             getLanguageService: jest.fn(() => ({
               getLanguage: jest.fn((languageId: string) => ({ title: languageId })),
             })),
+          },
+          timefilter: {
+            timefilter: {
+              getTime: jest.fn(() => ({ from: 'now-15m', to: 'now' })),
+            },
           },
         },
         autocomplete: {
