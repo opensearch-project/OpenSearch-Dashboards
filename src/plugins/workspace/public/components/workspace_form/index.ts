@@ -8,7 +8,7 @@ export { WorkspaceFormErrorCallout } from './workspace_form_error_callout';
 export { WorkspaceUseCase } from './workspace_use_case';
 export { WorkspacePermissionSettingPanel } from './workspace_permission_setting_panel';
 export { WorkspaceCancelModal } from './workspace_cancel_modal';
-export { WorkspaceNameField, WorkspaceDescriptionField } from './fields';
+export { WorkspaceNameField, WorkspaceDescriptionField, WorkspaceIdField } from './fields';
 export { ConnectionTypeIcon } from './connection_type_icon';
 export { DataSourceConnectionTable } from './data_source_connection_table';
 export { WorkspaceUseCaseFlyout } from './workspace_use_case_flyout';
