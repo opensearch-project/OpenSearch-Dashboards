@@ -82,6 +82,7 @@ const DEFAULT_PARSER: string = 'opensearch';
 export class VegaParser {
   spec: VegaSpec;
   hideWarnings: boolean;
+  restoreSignalValuesOnRefresh: boolean;
   error?: string;
   warnings: string[];
   _urlParsers: UrlParserConfig | undefined;
@@ -112,6 +113,7 @@ export class VegaParser {
   ) {
     this.spec = spec as VegaSpec;
     this.hideWarnings = false;
+    this.restoreSignalValuesOnRefresh = false;
     this.visibleVisLayers = new Map<VisLayerTypes, boolean>();
     this.visAugmenterConfig = {} as VisAugmenterEmbeddableConfig;
 
@@ -192,6 +194,8 @@ The URL is an identifier only. OpenSearch Dashboards and your browser will never
 
     this._config = this._parseConfig();
     this.hideWarnings = !!this._config.hideWarnings;
+    this._parseBool('restoreSignalValuesOnRefresh', this._config, false);
+    this.restoreSignalValuesOnRefresh = !!this._config.restoreSignalValuesOnRefresh;
     this.visibleVisLayers = this._config.visibleVisLayers;
     this.visAugmenterConfig = this._config.visAugmenterConfig;
     this.useMap = this._config.type === 'map';
