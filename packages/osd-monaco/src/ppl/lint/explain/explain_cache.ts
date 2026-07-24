@@ -35,10 +35,17 @@ export type ExplainResolution =
  *   never share entries with baseline plans for the same text.
  * - `signal` lets the caller abort an in-flight probe once its wall-clock budget
  *   expires; the underlying http client honors it when supported.
+ * - `cacheKey` overrides the string the entry is keyed on, defaulting to `query`.
+ *   It lets the caller explain the fully-prepared query (with the volatile time
+ *   filter) while keying the cache on a stable variant that omits the time range,
+ *   so the plan is reused across time-picker moves — pushdown behavior is a
+ *   property of the operation, not the concrete time bounds. The POST body always
+ *   carries the real `query`.
  */
 export interface ExplainResolveOptions {
   partition?: 'baseline' | 'probe';
   signal?: AbortSignal;
+  cacheKey?: string;
 }
 
 function isRelTree(value: unknown): value is ExplainRelTree {
@@ -112,7 +119,7 @@ class ExplainCache {
     const partition = options.partition ?? 'baseline';
     const cache = partition === 'probe' ? this.probeCache : this.baselineCache;
     const pending = partition === 'probe' ? this.probePending : this.baselinePending;
-    const k = this.key(query, dataSourceId, partition);
+    const k = this.key(options.cacheKey ?? query, dataSourceId, partition);
     const cached = cache.get(k);
     if (cached) {
       return cached;

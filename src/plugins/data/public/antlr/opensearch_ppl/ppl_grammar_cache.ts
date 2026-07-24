@@ -465,11 +465,23 @@ export function shouldUseRuntimeGrammar(
 }
 
 /**
- * Derive whether a data source runs the Calcite engine from its version.
+ * Derive whether a data source runs the Calcite engine from its version and engine.
  * Returns true for >= 3.3.0, false below 3.3.0, undefined when unknown.
+ *
+ * Open Distro engines (e.g. Elasticsearch) never run Calcite regardless of the
+ * version number they report, so the engine check is authoritative over the
+ * version: without it an Elasticsearch 7.x/8.x source would coerce to >= 3.3.0
+ * and be misread as Calcite, causing the explain-backed rules to issue
+ * `/_plugins/_ppl/_explain` against an endpoint Open Distro does not expose.
  * Cannot detect an administratively-disabled Calcite on a >= 3.3.0 cluster.
  */
-export function deriveIsCalcite(dataSourceVersion?: string): boolean | undefined {
+export function deriveIsCalcite(
+  dataSourceVersion?: string,
+  dataSourceEngineType?: string
+): boolean | undefined {
+  if (getDataSourceEngineCapabilities(dataSourceEngineType).usesOpenDistroSqlPpl) {
+    return false;
+  }
   if (!dataSourceVersion) {
     return undefined;
   }

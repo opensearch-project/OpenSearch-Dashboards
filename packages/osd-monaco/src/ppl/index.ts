@@ -36,6 +36,7 @@ export type {
   PPLLintBridge,
   PPLLintBridgeRequest,
   PPLLintHttpClient,
+  PrepareExplainQuery,
 } from './lint_bridge';
 export type { Diagnostic, DiagnosticRange, LintResult, LintSeverity } from './lint/diagnostic';
 export type { BundleRuleOverrides, CatalogEntry, LintRunContext } from './lint/types';

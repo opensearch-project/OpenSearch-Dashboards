@@ -40,6 +40,21 @@ const LINT_DEBOUNCE_MS = 500;
 const lintDebounceTimers = new Map<string, ReturnType<typeof setTimeout>>();
 const lintGenerations = new Map<string, number>();
 const syntaxGenerations = new Map<string, number>();
+// Per-model abort controller for the in-flight explain request(s). A new lint
+// pass, a dispose, or a language switch aborts the prior one so a superseded
+// `_explain` round-trip is cancelled rather than left to complete and be
+// discarded by the generation guard. Aborting is safe: explain_cache returns a
+// (never-cached) error for the aborted request, which the caller drops anyway.
+const lintAbortControllers = new Map<string, AbortController>();
+
+/** Abort and forget any in-flight explain request for the model. */
+const abortInFlightExplain = (modelId: string): void => {
+  const controller = lintAbortControllers.get(modelId);
+  if (controller) {
+    controller.abort();
+    lintAbortControllers.delete(modelId);
+  }
+};
 
 // PPL worker proxy service for worker-based syntax highlighting
 const pplWorkerProxyService = new PPLWorkerProxyService();
@@ -267,6 +282,9 @@ const processLintHighlighting = (model: monaco.editor.IModel): void => {
   const generation = (lintGenerations.get(model.id) ?? 0) + 1;
   lintGenerations.set(model.id, generation);
 
+  // Supersede any in-flight explain request from the previous pass.
+  abortInFlightExplain(model.id);
+
   if (!isPPLLintEnabled() || model.getLanguageId() !== PPL_LANGUAGE_ID) {
     monaco.editor.setModelMarkers(model, LINT_OWNER, []);
     clearModelFixes(model);
@@ -393,10 +411,10 @@ const renderLintMarkers = (model: monaco.editor.IModel, diagnostics: Diagnostic[
  * active pays no network cost. Any failure (no plan, network error, non-Calcite
  * cluster) leaves the static markers untouched.
  *
- * No clean-parse guard is needed: a half-typed or unparseable query makes
- * `_explain` return a non-Calcite / error body, which `toExplainPlan` maps to
- * `{ isCalcite: false }`, and every explain detector no-ops on that — so the
- * round-trip simply yields no diagnostics rather than a wrong one.
+ * Incomplete queries are skipped before the round-trip: the pass parses first
+ * and only issues `_explain` when the parse-time attribution snapshot is present
+ * (a valid, complete query), so a half-typed query costs no network. Superseded
+ * requests are aborted via a per-model AbortController.
  *
  * The explain detectors flag a *whole-query* range. Before rendering, the
  * attribution snapshot (built at parse time by `analyzeLint`) narrows each
@@ -430,12 +448,41 @@ const layerExplainDiagnostics = (
   const thorough = (lintContext?.explainMode ?? 'thorough') === 'thorough';
 
   const run = async (): Promise<void> => {
-    // Kick off the whole-query plan and the parse-time candidate snapshot
-    // together; both describe the same `content`.
-    const [resolution, analysis] = await Promise.all([
-      explainCache.resolveResult(http, content, lintContext?.dataSourceId),
-      pplWorkerProxyService.analyzeLint(content, workerContext),
-    ]);
+    // Parse first, network second. The parse-time attribution snapshot is the
+    // authoritative "clean parse" signal — it is absent for an empty, syntax-
+    // error, or otherwise unparseable query. Gating the `_explain` round-trip on
+    // it means a half-typed query issues zero network requests (rather than one
+    // that resolves to an empty plan). Without a usable snapshot there is also no
+    // provenance to narrow a whole-query finding with, so it would be dropped
+    // anyway — checking it up front just saves the request.
+    const analysis = await pplWorkerProxyService.analyzeLint(content, workerContext);
+    if (isLintPassStale(model, generation, content)) {
+      return;
+    }
+    const snapshot =
+      analysis.attribution && validateExplainAttributionSnapshot(analysis.attribution, content);
+    if (!snapshot) {
+      return;
+    }
+
+    // Explain the query the host would actually run (source-prepend + dashboard/
+    // time filters) so the plan matches execution; key the cache on the stable
+    // (time-stripped) variant so it is reused across time-picker moves. Falls
+    // back to the raw content when no preparer is registered (e.g. explore).
+    const prepared = lintContext?.prepareExplainQuery?.(content) ?? {
+      query: content,
+      cacheKey: content,
+    };
+    const controller = typeof AbortController === 'undefined' ? undefined : new AbortController();
+    if (controller) {
+      lintAbortControllers.set(model.id, controller);
+    }
+    const resolution = await explainCache.resolveResult(
+      http,
+      prepared.query,
+      lintContext?.dataSourceId,
+      { cacheKey: prepared.cacheKey, signal: controller?.signal }
+    );
     if (resolution.status !== 'ok' || isLintPassStale(model, generation, content)) {
       return;
     }
@@ -446,16 +493,6 @@ const layerExplainDiagnostics = (
       isCalcite: lintContext?.isCalcite,
     });
     if (explainDiagnostics.length === 0) {
-      return;
-    }
-
-    // The snapshot crosses the worker boundary as plain data; validate it
-    // against the current text before it can move a range. Without a usable
-    // snapshot there is no provenance to narrow with, so drop the (whole-query)
-    // explain findings rather than render them wide.
-    const snapshot =
-      analysis.attribution && validateExplainAttributionSnapshot(analysis.attribution, content);
-    if (!snapshot) {
       return;
     }
 
@@ -542,6 +579,7 @@ const setupPPLSyntaxHighlighting = () => {
           await processSyntaxHighlighting(model);
           processLintHighlighting(model);
         } else {
+          abortInFlightExplain(model.id);
           monaco.editor.setModelMarkers(model, OWNER, []);
           monaco.editor.setModelMarkers(model, LINT_OWNER, []);
           clearModelFixes(model);
@@ -569,6 +607,7 @@ const setupPPLSyntaxHighlighting = () => {
         clearTimeout(pending);
         lintDebounceTimers.delete(model.id);
       }
+      abortInFlightExplain(model.id);
       lintGenerations.delete(model.id);
       syntaxGenerations.delete(model.id);
       monaco.editor.setModelMarkers(model, OWNER, []);
@@ -586,6 +625,8 @@ const setupPPLSyntaxHighlighting = () => {
   return () => {
     lintDebounceTimers.forEach(clearTimeout);
     lintDebounceTimers.clear();
+    lintAbortControllers.forEach((c) => c.abort());
+    lintAbortControllers.clear();
     lintGenerations.clear();
     syntaxGenerations.clear();
     disposables.forEach((d) => d.dispose());

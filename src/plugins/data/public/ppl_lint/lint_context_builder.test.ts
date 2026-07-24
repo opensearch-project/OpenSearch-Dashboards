@@ -101,6 +101,26 @@ describe('buildPPLLintContext', () => {
     expect(ctx.isCalcite).toBe(false);
   });
 
+  it('marks isCalcite false for an Elasticsearch source despite a Calcite-range version', () => {
+    // An Open Distro engine never runs Calcite; the engine check overrides the
+    // version so the explain-backed rules do not fire /_plugins/_ppl/_explain.
+    const esDataset = {
+      id: 'dataset-es',
+      dataSource: { id: 'mds-es', version: '7.10.2', engineType: 'Elasticsearch' },
+    };
+    const ctx = buildPPLLintContext(esDataset, {}, services);
+    expect(ctx.isCalcite).toBe(false);
+  });
+
+  it('passes the dataset engine type through to shouldUseRuntimeGrammar', () => {
+    const esDataset = {
+      id: 'dataset-es',
+      dataSource: { id: 'mds-es', version: '7.10.2', engineType: 'Elasticsearch' },
+    };
+    buildPPLLintContext(esDataset, {}, services);
+    expect(mockShouldUseRuntimeGrammar).toHaveBeenCalledWith('mds-es', '7.10.2', 'Elasticsearch');
+  });
+
   it('handles an undefined dataset (no source selected)', () => {
     const ctx = buildPPLLintContext(undefined, {}, services);
     expect(ctx.dataSourceId).toBeUndefined();
