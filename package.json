@@ -140,6 +140,7 @@
     "**/@types/node": "~22.19.0",
     "**/@types/hapi__cookie/joi": "^18.2.1",
     "**/@types/hapi__h2o2/joi": "^18.2.1",
+    "**/adm-zip": "^0.6.0",
     "**/ansi-regex": "^5.0.1",
     "**/async": "^3.2.3",
     "**/cpy/globby": "^10.0.1",
