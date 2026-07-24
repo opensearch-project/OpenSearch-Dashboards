@@ -80,6 +80,7 @@ export class VegaBaseView {
     this._applyFilter = opts.applyFilter;
     this._triggerExternalAction = opts.externalAction;
     this._timefilter = opts.timefilter;
+    this._vegaSignalStateManager = opts.vegaSignalStateManager;
     this._view = null;
     this._vegaViewConfig = null;
     this._vegaViewOptions = null;
@@ -116,6 +117,10 @@ export class VegaBaseView {
       ).appendTo(this._$parentEl);
 
       this._addDestroyHandler(() => {
+        if (this._view && this._vegaSignalStateManager) {
+          const signalNames = this.getSignalNames();
+          this._vegaSignalStateManager.save(this._view, this._$controls?.[0], signalNames);
+        }
         if (this._$container) {
           this._$container.remove();
           this._$container = null;
@@ -281,6 +286,14 @@ export class VegaBaseView {
     }
   }
 
+  getSignalNames() {
+    // Bound signals back Vega-generated controls. Future config-provided signal
+    // names can be merged here without changing the state manager API.
+    return (this._parser.spec?.signals || [])
+      .filter((signal) => signal?.name && signal.bind)
+      .map((signal) => signal.name);
+  }
+
   setView(view) {
     if (this._view === view) return;
 
@@ -300,7 +313,9 @@ export class VegaBaseView {
         new TooltipHandler(this._$container[0], view, this._parser.tooltips);
       }
 
-      return view.runAsync(); // Allows callers to await rendering
+      return this._vegaSignalStateManager
+        ? this._vegaSignalStateManager.restore(view, this._$controls?.[0])
+        : view.runAsync(); // Allows callers to await rendering
     }
   }
 
