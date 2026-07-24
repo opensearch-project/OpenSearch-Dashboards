@@ -528,6 +528,8 @@ export {
   useQueryStringManager,
   getEffectiveLanguageForAutoComplete,
   useCancelButtonTiming,
+  PPLAnalyzePanel,
+  runPPLAnalyzeInBackground,
 } from './ui';
 
 /**
@@ -572,6 +574,14 @@ export {
   LanguageReference,
   DatasetIndexedViewsService,
   validateTimeRange,
+  getPPLAnalyzeResult$,
+  getPPLAnalyzeLoading$,
+  getPPLAnalyzeOpen$,
+  setPPLAnalyzeResult,
+  setPPLAnalyzeLoading,
+  setPPLAnalyzeOpen,
+  isPPLAnalyzeOpen,
+  PPLAnalyzeResult,
 } from './query';
 
 export { useSavedQuery } from './ui/search_bar';

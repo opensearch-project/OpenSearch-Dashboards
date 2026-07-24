@@ -19,6 +19,8 @@ jest.mock('react-redux', () => ({
 jest.mock('../../../application/utils/state_management/selectors', () => ({
   selectQueryStatus: jest.fn(),
   selectEditorMode: jest.fn(),
+  selectQueryLanguage: jest.fn(() => 'PPL'),
+  selectIsPromptEditorMode: jest.fn(() => false),
 }));
 
 // Mock opensearch-dashboards-react
@@ -57,6 +59,15 @@ jest.mock('./ask_ai_button', () => ({
 
 jest.mock('../../../helpers/use_flavor_id', () => ({
   useFlavorId: jest.fn(() => 'logs'),
+}));
+
+jest.mock('./use_analyze_panel_state', () => ({
+  useAnalyzePanelState: jest.fn(() => ({
+    isOpen: false,
+    setIsOpen: jest.fn(),
+    hasResult: false,
+    isLoading: false,
+  })),
 }));
 
 jest.mock('../../../application/context', () => ({
