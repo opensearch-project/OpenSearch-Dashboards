@@ -1,6 +1,6 @@
 {
   "_comment": "Pinned per-rule doc-link metadata for the shipping catalog. doc_links.test.ts (offline, always-on) asserts catalog<->snapshot parity, no legacy URL, and URL-shape/specificity invariants. quality: exact|close|weak|gap. gap rules are listed in expectedUnpublished and point at a page root until upstream publishes the page.",
-  "expectedUnpublished": [],
+  "expectedUnpublished": ["operation-not-pushed", "operation-pushed-as-script"],
   "rules": {
     "head-without-sort": {
       "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/head/",
@@ -55,6 +55,26 @@
       "page": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/fields/",
       "anchor": "",
       "quality": "weak"
+    },
+    "invalid-capture-group-name": {
+      "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/rex/#parameters",
+      "page": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/rex/",
+      "anchor": "parameters",
+      "quality": "exact"
+    },
+    "operation-not-pushed": {
+      "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/limitation/",
+      "page": "https://docs.opensearch.org/latest/sql-and-ppl/limitation/",
+      "anchor": "",
+      "quality": "gap",
+      "futureDocUrl": "https://docs.opensearch.org/latest/sql-and-ppl/limitation/#pushdown-optimization"
+    },
+    "operation-pushed-as-script": {
+      "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/limitation/",
+      "page": "https://docs.opensearch.org/latest/sql-and-ppl/limitation/",
+      "anchor": "",
+      "quality": "gap",
+      "futureDocUrl": "https://docs.opensearch.org/latest/sql-and-ppl/limitation/#pushdown-optimization"
     }
   }
 }

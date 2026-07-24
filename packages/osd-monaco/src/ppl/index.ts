@@ -36,12 +36,34 @@ export type {
   PPLLintBridge,
   PPLLintBridgeRequest,
   PPLLintHttpClient,
+  PrepareExplainQuery,
 } from './lint_bridge';
 export type { Diagnostic, DiagnosticRange, LintResult, LintSeverity } from './lint/diagnostic';
 export type { BundleRuleOverrides, CatalogEntry, LintRunContext } from './lint/types';
 export { runLint } from './lint/lint_runner';
 export { getBundledCatalog } from './lint/catalog';
 export { createRuntimeRuleNameToIndex } from './lint/rule_index';
+export { runExplainLint, hasExplainRules } from './lint/explain/run_explain_lint';
+export { explainCache, toExplainPlan } from './lint/explain/explain_cache';
+export type { ExplainResolution, ExplainResolveOptions } from './lint/explain/explain_cache';
+export type {
+  ExplainPlan,
+  ExplainRelNode,
+  ExplainRelTree,
+  ExplainDetector,
+  ExplainLintContext,
+} from './lint/explain/explain_types';
+// Explain range-narrowing + attribution. The resolver, snapshot builder, and
+// probe orchestration are driven from this package's language layer; the types
+// are exported so hosts and tests can read the same contract.
+export { resolveExplainRanges } from './lint/explain/resolve_explain_ranges';
+export { buildExplainAttributionSnapshot } from './lint/explain/attribution/candidates';
+export { validateExplainAttributionSnapshot } from './lint/explain/attribution/snapshot';
+export type {
+  CompiledPPLLintAnalysis,
+  ExplainAttributionSnapshot,
+  ExplainAttributionCandidateSnapshot,
+} from './lint/explain/attribution/snapshot';
 
 export { buildCommandSuggestion } from './command_suggestion';
 export type { CommandSuggestion } from './command_suggestion';

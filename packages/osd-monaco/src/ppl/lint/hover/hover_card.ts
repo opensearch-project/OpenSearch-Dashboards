@@ -35,6 +35,8 @@ const FAILURE_CLASS_EXPLAINER: Record<FailureClass, string> = {
     'the primary engine cannot run this natively and falls back to a secondary engine — it succeeds, but on a slower path.',
   advisory:
     'the query runs and may return data, but the command can behave differently than intended on this input — this is a heads-up, not a guaranteed outcome.',
+  'slow-path':
+    'the query returns correct results, but the engine cannot push this operation into the index, so it runs on a slower path — the cost grows with index size.',
 };
 
 // Escapes Markdown inline-formatting chars in untrusted text. ( ) # ! are intentionally

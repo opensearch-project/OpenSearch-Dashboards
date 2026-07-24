@@ -13,6 +13,7 @@ import { dedupConsecutiveUnsupportedDetector } from './rules/dedup_consecutive_u
 import { unionMinDatasetsDetector } from './rules/union_min_datasets';
 import { replaceWildcardAsymmetryDetector } from './rules/replace_wildcard_asymmetry';
 import { fieldValidationDetector } from './rules/field_validation';
+import { invalidCaptureGroupNameDetector } from './rules/invalid_capture_group_name';
 
 const registry = new Map<string, Detector>();
 
@@ -39,6 +40,7 @@ export function registerBuiltInDetectors(): void {
   registerDetector('union-min-datasets', unionMinDatasetsDetector);
   registerDetector('replace-wildcard-asymmetry', replaceWildcardAsymmetryDetector);
   registerDetector('field-validation', fieldValidationDetector);
+  registerDetector('invalid-capture-group-name', invalidCaptureGroupNameDetector);
 }
 
 registerBuiltInDetectors();

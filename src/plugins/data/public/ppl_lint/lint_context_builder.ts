@@ -11,13 +11,18 @@ import {
   pplGrammarCache,
   shouldUseRuntimeGrammar,
 } from '../antlr/opensearch_ppl/ppl_grammar_cache';
-import { buildOverridesFromSettings, isCommandSuggestionEnabled } from './lint_overrides';
+import {
+  buildOverridesFromSettings,
+  isCommandSuggestionEnabled,
+  readExplainMode,
+} from './lint_overrides';
 import { calciteSettingsCache } from './calcite_settings_cache';
+import { explainQueryPreparer } from './explain_query_preparer';
 
 /** Subset of dataset fields needed for lint context construction. */
 interface LintContextDataset {
   id?: string;
-  dataSource?: { id?: string; version?: string };
+  dataSource?: { id?: string; version?: string; engineType?: string; type?: string };
 }
 
 /**
@@ -58,6 +63,9 @@ export function buildPPLLintContext(
 ): PPLLintContext {
   const dsId = dataset?.dataSource?.id;
   const dsVersion = dataset?.dataSource?.version;
+  // Engine identity for capability lookups. Matches the sibling validation-context
+  // builders (query_editor / use_query_panel_editor), which use `engineType ?? type`.
+  const dsEngineType = dataset?.dataSource?.engineType ?? dataset?.dataSource?.type;
 
   // Fallback to the grammar cache's resolved version when the dataset metadata
   // does not carry a version (common on local-cluster datasets).
@@ -72,16 +80,20 @@ export function buildPPLLintContext(
     lintFields.datasetId === dataset?.id && lintFields.dataSourceId === dsId;
 
   return {
-    useRuntimeGrammar: shouldUseRuntimeGrammar(dsId, effectiveVersion),
+    useRuntimeGrammar: shouldUseRuntimeGrammar(dsId, effectiveVersion, dsEngineType),
     dataSourceId: dsId,
     dataSourceVersion: effectiveVersion,
-    isCalcite: deriveIsCalcite(effectiveVersion),
+    isCalcite: deriveIsCalcite(effectiveVersion, dsEngineType),
     fields: cacheMatchesDataset ? lintFields.fields : undefined,
     settings: cachedSettings
       ? { allJoinTypesAllowed: cachedSettings.allJoinTypesAllowed }
       : undefined,
     overrides: buildOverridesFromSettings(services.uiSettings),
     commandSuggestionEnabled: isCommandSuggestionEnabled(services.uiSettings),
+    explainMode: readExplainMode(services.uiSettings),
     http: services.http,
+    // Host-registered by query_enhancements; undefined elsewhere (e.g. explore),
+    // in which case the explain layer explains the raw editor text.
+    prepareExplainQuery: explainQueryPreparer.get(),
   };
 }

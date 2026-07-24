@@ -14,12 +14,31 @@ export interface PPLLintHttpClient {
     options?: {
       body?: BodyInit | null;
       query?: Record<string, string | number | boolean | undefined>;
+      // Optional abort signal so a probe request can be cancelled once its
+      // wall-clock budget expires. Core's HttpFetchOptions accepts it; a client
+      // that ignores it still stays within the probe layer's timeout race.
+      signal?: AbortSignal;
     }
   ) => Promise<unknown>;
 }
 
+/**
+ * Turns raw editor text into the query the host would actually run, for the
+ * explain-backed rules. It prepends `source = <dataset>` (so a leading-pipe
+ * query explains against a real source) and folds in the dashboard + time
+ * filters the search interceptor applies, so the `_explain` plan matches what
+ * executes. Sync + pure snapshot of the current filter state.
+ *
+ * Returns both the query to explain (`query`, with the volatile time clause) and
+ * the string to key the cache on (`cacheKey`, without it) so the cached plan is
+ * reused across time-picker moves. Only the text sent to `_explain` is affected;
+ * rendered marker ranges stay on the raw editor offsets.
+ */
+export type PrepareExplainQuery = (raw: string) => { query: string; cacheKey: string };
+
 export interface PPLLintContext extends PPLValidationContext, LintPayloadContext {
   http?: PPLLintHttpClient;
+  prepareExplainQuery?: PrepareExplainQuery;
 }
 
 export interface PPLLintBridgeRequest {

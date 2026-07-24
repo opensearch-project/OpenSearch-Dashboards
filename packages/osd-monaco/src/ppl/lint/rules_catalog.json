@@ -95,5 +95,42 @@
     "message": "Reference to an unknown field.",
     "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/fields/",
     "appliesTo": {}
+  },
+  {
+    "id": "invalid-capture-group-name",
+    "detector": "invalid-capture-group-name",
+    "enabled": true,
+    "severity": "error",
+    "message": "Invalid regex capture group name.",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/rex/#parameters",
+    "appliesTo": {
+      "minVersion": "3.4.0"
+    }
+  },
+  {
+    "id": "operation-not-pushed",
+    "detector": "operation-not-pushed",
+    "enabled": true,
+    "severity": "warning",
+    "message": "This step may make the query slow. Simplify the highlighted part when possible.",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/limitation/",
+    "appliesTo": {
+      "minVersion": "3.3.0",
+      "engine": "calcite"
+    },
+    "needsExplain": true
+  },
+  {
+    "id": "operation-pushed-as-script",
+    "detector": "operation-pushed-as-script",
+    "enabled": true,
+    "severity": "info",
+    "message": "This step may make the query slow. Simplify the highlighted part when possible.",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/limitation/",
+    "appliesTo": {
+      "minVersion": "3.3.0",
+      "engine": "calcite"
+    },
+    "needsExplain": true
   }
 ]
