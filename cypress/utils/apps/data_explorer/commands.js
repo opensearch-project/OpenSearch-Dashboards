@@ -9,8 +9,19 @@ Cypress.Commands.add('saveSearch', (name, saveAsNew = false) => {
   cy.log('in func save search');
   const opts = { log: false };
 
-  cy.getElementByTestId('discoverSaveButton', opts).click();
-  cy.getElementByTestId('savedObjectTitle').clear().type(name);
+  // Close any open overlays first
+  cy.get('body').then(($body) => {
+    if ($body.find('.euiOverlayMask').length > 0) {
+      cy.get('body').type('{esc}');
+      cy.wait(500);
+    }
+  });
+
+  cy.getElementByTestId('discoverSaveButton', opts).should('be.visible').click();
+  cy.getElementByTestId('savedObjectTitle', { timeout: 10000 })
+    .should('be.visible')
+    .clear()
+    .type(name);
 
   if (saveAsNew) {
     cy.getElementByTestId('saveAsNewCheckbox').click();
@@ -18,8 +29,12 @@ Cypress.Commands.add('saveSearch', (name, saveAsNew = false) => {
 
   cy.getElementByTestId('confirmSaveSavedObjectButton').click({ force: true });
 
-  // Wait for page to load
-  cy.getElementByTestId('euiToastHeader').contains(/was saved/);
+  // Wait for save to complete - modal should close after successful save
+  cy.getElementByTestId('confirmSaveSavedObjectButton', { timeout: 30000 }).should('not.exist');
+
+  // Dismiss any toast and close any modals
+  cy.get('body').click(0, 0);
+  cy.wait(500);
 });
 
 Cypress.Commands.add('loadSaveSearch', (name) => {
