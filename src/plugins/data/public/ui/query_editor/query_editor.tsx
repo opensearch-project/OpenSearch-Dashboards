@@ -50,7 +50,7 @@ import {
 } from './lint_context';
 import {
   buildPPLLintContext,
-  extractFieldNames,
+  extractFieldMetadata,
   LintFieldsCache,
 } from '../../ppl_lint/lint_context_builder';
 
@@ -162,6 +162,8 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
   useEffect(() => {
     const datasetId = query.dataset?.id;
     const dataSourceId = query.dataset?.dataSource?.id;
+    const datasetType = query.dataset?.type;
+    const sourcePattern = query.dataset?.title;
     let cancelled = false;
 
     const loadFields = async () => {
@@ -175,10 +177,14 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
           if (cancelled || !indexPattern) {
             return;
           }
+          const { fields, typeMap } = extractFieldMetadata(indexPattern);
           lintFieldsRef.current = {
             datasetId,
             dataSourceId,
-            fields: extractFieldNames(indexPattern),
+            datasetType,
+            selectedSourcePattern: sourcePattern,
+            fields,
+            typeMap,
           };
         } catch {
           // On failure leave fields unset so field-validation self-suppresses.
@@ -202,7 +208,7 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query.dataset?.id, query.dataset?.dataSource?.id]);
+  }, [query.dataset?.id, query.dataset?.dataSource?.id, query.dataset?.type, query.dataset?.title]);
 
   useEffect(() => {
     const subscription = services.application?.currentAppId$?.subscribe?.((appId) => {

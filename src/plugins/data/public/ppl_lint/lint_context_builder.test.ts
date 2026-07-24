@@ -5,7 +5,11 @@
 
 import { IUiSettingsClient } from 'opensearch-dashboards/public';
 import { HttpSetup } from '../../../../core/public';
-import { buildPPLLintContext, extractFieldNames } from './lint_context_builder';
+import {
+  buildPPLLintContext,
+  extractFieldNames,
+  extractFieldMetadata,
+} from './lint_context_builder';
 import { buildOverridesFromSettings, isCommandSuggestionEnabled } from './lint_overrides';
 import {
   pplGrammarCache,
@@ -47,6 +51,7 @@ const services = {
 
 const dataset = {
   id: 'dataset-1',
+  type: 'INDEX_PATTERN',
   dataSource: { id: 'mds-1', version: '3.8.0' },
 };
 
@@ -136,11 +141,11 @@ describe('buildPPLLintContext', () => {
     expect(ctx.settings?.allJoinTypesAllowed).toBe(true);
   });
 
-  it('applies cached fields when dataset id and data source id both match', () => {
+  it('applies cached fields when dataset id, data source id, and type all match', () => {
     const fields = new Set(['a', 'b']);
     const ctx = buildPPLLintContext(
       dataset,
-      { datasetId: 'dataset-1', dataSourceId: 'mds-1', fields },
+      { datasetId: 'dataset-1', dataSourceId: 'mds-1', datasetType: 'INDEX_PATTERN', fields },
       services
     );
     expect(ctx.fields).toBe(fields);
@@ -150,7 +155,17 @@ describe('buildPPLLintContext', () => {
     const fields = new Set(['a', 'b']);
     const ctx = buildPPLLintContext(
       dataset,
-      { datasetId: 'dataset-1', dataSourceId: 'other-mds', fields },
+      { datasetId: 'dataset-1', dataSourceId: 'other-mds', datasetType: 'INDEX_PATTERN', fields },
+      services
+    );
+    expect(ctx.fields).toBeUndefined();
+  });
+
+  it('drops cached fields when the dataset type differs (id reused across types)', () => {
+    const fields = new Set(['a', 'b']);
+    const ctx = buildPPLLintContext(
+      dataset,
+      { datasetId: 'dataset-1', dataSourceId: 'mds-1', datasetType: 'INDEXES', fields },
       services
     );
     expect(ctx.fields).toBeUndefined();
@@ -160,7 +175,7 @@ describe('buildPPLLintContext', () => {
     const fields = new Set(['a', 'b']);
     const ctx = buildPPLLintContext(
       dataset,
-      { datasetId: 'other-dataset', dataSourceId: 'mds-1', fields },
+      { datasetId: 'other-dataset', dataSourceId: 'mds-1', datasetType: 'INDEX_PATTERN', fields },
       services
     );
     expect(ctx.fields).toBeUndefined();
@@ -175,6 +190,71 @@ describe('buildPPLLintContext', () => {
       services
     );
     expect(ctx.fields).toBe(fields);
+  });
+
+  it('carries typeMap and selectedSourcePattern only when provenance matches', () => {
+    const fields = new Set(['age']);
+    const typeMap = new Map([['age', 'integer']]);
+    const ctx = buildPPLLintContext(
+      dataset,
+      {
+        datasetId: 'dataset-1',
+        dataSourceId: 'mds-1',
+        datasetType: 'INDEX_PATTERN',
+        selectedSourcePattern: 'logs-*',
+        fields,
+        typeMap,
+      },
+      services
+    );
+    expect(ctx.typeMap).toBe(typeMap);
+    expect(ctx.selectedSourcePattern).toBe('logs-*');
+  });
+
+  it('drops typeMap and selectedSourcePattern when provenance fails', () => {
+    const ctx = buildPPLLintContext(
+      dataset,
+      {
+        datasetId: 'other',
+        dataSourceId: 'mds-1',
+        datasetType: 'INDEX_PATTERN',
+        selectedSourcePattern: 'logs-*',
+        typeMap: new Map([['age', 'integer']]),
+      },
+      services
+    );
+    expect(ctx.typeMap).toBeUndefined();
+    expect(ctx.selectedSourcePattern).toBeUndefined();
+  });
+
+  it('carries the data source engine type from engineType then type', () => {
+    const withEngine = {
+      id: 'd',
+      type: 'INDEX_PATTERN',
+      dataSource: { id: 'mds-1', version: '3.8.0', engineType: 'OpenSearch' },
+    };
+    expect(buildPPLLintContext(withEngine, {}, services).engineType).toBe('OpenSearch');
+
+    const typeOnly = {
+      id: 'd',
+      type: 'INDEX_PATTERN',
+      dataSource: { id: 'mds-1', version: '3.8.0', type: 'data-source' },
+    };
+    expect(buildPPLLintContext(typeOnly, {}, services).engineType).toBe('data-source');
+  });
+
+  it('prefers cached calciteEnabled over the version heuristic (authoritative)', () => {
+    // A >= 3.3 cluster with Calcite administratively disabled: the version says
+    // Calcite, the cached settings say it is off, and the cache must win.
+    mockGetCachedSettings.mockReturnValue({ calciteEnabled: false, allJoinTypesAllowed: false });
+    const ctx = buildPPLLintContext(dataset, {}, services);
+    expect(ctx.isCalcite).toBe(false);
+  });
+
+  it('falls back to the version heuristic when no settings are cached', () => {
+    mockGetCachedSettings.mockReturnValue(undefined);
+    const ctx = buildPPLLintContext(dataset, {}, services);
+    expect(ctx.isCalcite).toBe(true);
   });
 
   it('leaves fields undefined when the cache is empty', () => {
@@ -197,5 +277,45 @@ describe('extractFieldNames', () => {
   it('returns an empty set when there are no fields', () => {
     expect(extractFieldNames({})).toEqual(new Set());
     expect(extractFieldNames({ fields: [] })).toEqual(new Set());
+  });
+});
+
+describe('extractFieldMetadata', () => {
+  it('collects names and a name→type map from esTypes', () => {
+    const ip = {
+      fields: [
+        { name: 'age', esTypes: ['integer'] },
+        { name: 'status', esTypes: ['keyword'] },
+      ],
+    };
+    const { fields, typeMap } = extractFieldMetadata(ip);
+    expect(fields).toEqual(new Set(['age', 'status']));
+    expect(typeMap.get('age')).toBe('integer');
+    expect(typeMap.get('status')).toBe('keyword');
+  });
+
+  it('keeps a field in the map only when its type is unambiguous', () => {
+    // Same name with two different esTypes (conflicting merged mapping): the name
+    // stays in `fields` but is omitted from the type map so a type rule self-suppresses.
+    const ip = {
+      fields: [
+        { name: 'val', esTypes: ['integer'] },
+        { name: 'val', esTypes: ['keyword'] },
+        { name: 'ok', esTypes: ['double'] },
+        { name: 'ok', esTypes: ['double'] },
+      ],
+    };
+    const { fields, typeMap } = extractFieldMetadata(ip);
+    expect(fields).toEqual(new Set(['val', 'ok']));
+    expect(typeMap.has('val')).toBe(false);
+    expect(typeMap.get('ok')).toBe('double');
+  });
+
+  it('omits a field with no esType from the map but keeps it in fields', () => {
+    const ip = { fields: [{ name: 'raw' }, { name: 'n', esTypes: ['long'] }] };
+    const { fields, typeMap } = extractFieldMetadata(ip);
+    expect(fields).toEqual(new Set(['raw', 'n']));
+    expect(typeMap.has('raw')).toBe(false);
+    expect(typeMap.get('n')).toBe('long');
   });
 });

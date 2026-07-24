@@ -10,6 +10,7 @@ import { RuleNameToIndex } from './rule_index';
 import { getBundledCatalog } from './catalog';
 import { getDetector } from './detector_registry';
 import { appliesTo, OSD_KNOWN_VERSION } from './version_filter';
+import { classifyTopLevelSource, sourceConflictsWithDataset } from './top_level_source';
 
 export type { BundleRuleOverrides };
 
@@ -36,6 +37,7 @@ export function mergeConfig(local: CatalogEntry, override?: Partial<CatalogEntry
 function isContextEmpty(context: LintRunContext | undefined): boolean {
   return (
     (!context?.fields || context.fields.size === 0) &&
+    (!context?.typeMap || context.typeMap.size === 0) &&
     (!context?.visibleIndices || context.visibleIndices.length === 0)
   );
 }
@@ -54,6 +56,17 @@ export function runLint(tree: ParserRuleContext, options: RunLintOptions): Diagn
 
   const effectiveOverrides = bundleOverrides ?? context?.overrides;
 
+  // A source-scoped rule reads the selected dataset's field metadata, so it must
+  // not run when the query's explicit `source=` names a different index. Classify
+  // once, and only when there is a selected pattern to compare against (otherwise
+  // we fail open and skip the tree walk).
+  const sourceConflict = context?.selectedSourcePattern
+    ? sourceConflictsWithDataset(
+        classifyTopLevelSource(tree, ruleNameToIndex, context.isPipeFirst ?? false),
+        context.selectedSourcePattern
+      )
+    : false;
+
   for (const localConfig of catalog) {
     const config = mergeConfig(localConfig, effectiveOverrides?.[localConfig.id]);
 
@@ -62,7 +75,8 @@ export function runLint(tree: ParserRuleContext, options: RunLintOptions): Diagn
       config.needsExplain ||
       (config.runtimeOnly && context?.grammarSurface !== 'runtime-bundle') ||
       !appliesTo(config, dataSourceVersion, context?.isCalcite, knownVersion) ||
-      (config.needsContext && isContextEmpty(context))
+      (config.needsContext && isContextEmpty(context)) ||
+      (config.sourceScoped && sourceConflict)
     ) {
       continue;
     }

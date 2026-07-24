@@ -12,6 +12,7 @@ import {
 } from './rule_index';
 import { RuleNameToIndex } from './rule_index';
 import { extractCreatedFieldNames } from './pattern_fields';
+import { normalizeFieldPath } from './field_path';
 
 export interface PipelineStage {
   command: string;
@@ -87,37 +88,8 @@ function unquote(raw: string): string {
     : raw;
 }
 
-/**
- * Normalize a created/derived field name so it matches how references are
- * written. Strips one enclosing quote pair per dotted segment, where a "quote"
- * is a backtick, single, or double quote (`` `total` `` → `total`,
- * `` a.`b` `` → `a.b`, `'years'` → `years`).
- *
- * This MUST stay identical to the reference-side normalization in
- * field_validation, which routes `fieldExpression` text through this same
- * helper — otherwise a created `` `total` `` registered here would never match a
- * bare `total` reference and field-validation would false-flag valid queries.
- * References can only be backtick-quoted, so the single/double-quote stripping
- * is one-directional: it rescues created names written as `` as 'years' ``
- * without changing how any reference is interpreted.
- *
- * Known limitation (symmetric on both sides, pre-existing): a quoted segment
- * containing a literal dot (`` `a.b` ``) is mis-split before the strip, so it is
- * normalized as two segments. A complete fix would unquote a fully-enclosed
- * token before splitting.
- */
-export function normalizeFieldName(raw: string): string {
-  return raw
-    .split('.')
-    .map((seg) =>
-      seg.length >= 2 &&
-      (seg[0] === '`' || seg[0] === "'" || seg[0] === '"') &&
-      seg[0] === seg[seg.length - 1]
-        ? seg.slice(1, -1)
-        : seg
-    )
-    .join('.');
-}
+// Shared with field_validation's reference side so quote-stripping can't drift.
+export const normalizeFieldName = normalizeFieldPath;
 
 /**
  * Value of a named-slot parameter: find the terminal matching `keyword`, then

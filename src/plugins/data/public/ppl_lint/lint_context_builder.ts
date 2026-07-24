@@ -17,20 +17,26 @@ import { calciteSettingsCache } from './calcite_settings_cache';
 /** Subset of dataset fields needed for lint context construction. */
 interface LintContextDataset {
   id?: string;
-  dataSource?: { id?: string; version?: string };
+  title?: string;
+  type?: string;
+  dataSource?: { id?: string; version?: string; engineType?: string; type?: string };
 }
 
 /**
- * Host-maintained cache of the index-pattern field names for the active
- * dataset, used by field-validation. The host refreshes it on dataset change
- * (see the loadFields effect in query_editor / use_query_panel_editor) and
- * stamps the dataset + data source ids it belongs to, so a stale cache from a
- * previous dataset or data source is never applied to the current one.
+ * Host-maintained cache of the active dataset's field metadata, stamped with
+ * dataset/data-source/type identity so a stale cache is never applied here.
  */
 export interface LintFieldsCache {
   datasetId?: string;
   dataSourceId?: string;
+  datasetType?: string;
+  selectedSourcePattern?: string;
   fields?: Set<string>;
+  typeMap?: Map<string, string>;
+}
+
+interface IndexPatternLike {
+  fields?: Array<{ name?: string; esTypes?: string[] } | undefined>;
 }
 
 /**
@@ -38,16 +44,44 @@ export interface LintFieldsCache {
  * field-validation lint context. Shared by the data and explore loadFields
  * effects so both extract names the same way.
  */
-export function extractFieldNames(indexPattern: {
-  fields?: Array<{ name?: string } | undefined>;
-}): Set<string> {
+export function extractFieldNames(indexPattern: IndexPatternLike): Set<string> {
+  return extractFieldMetadata(indexPattern).fields;
+}
+
+/**
+ * Extract the field-name set plus a name→type map. A name with conflicting
+ * `esTypes` is omitted from the map (kept in `fields`) so type-aware rules
+ * self-suppress rather than act on an arbitrary type.
+ */
+export function extractFieldMetadata(indexPattern: IndexPatternLike): {
+  fields: Set<string>;
+  typeMap: Map<string, string>;
+} {
   const fields = new Set<string>();
+  const seenTypes = new Map<string, Set<string>>();
+
   for (const field of indexPattern.fields ?? []) {
-    if (field?.name) {
-      fields.add(field.name);
+    if (!field?.name) {
+      continue;
+    }
+    fields.add(field.name);
+    const set = seenTypes.get(field.name) ?? new Set<string>();
+    for (const esType of field.esTypes ?? []) {
+      if (esType) {
+        set.add(esType);
+      }
+    }
+    seenTypes.set(field.name, set);
+  }
+
+  const typeMap = new Map<string, string>();
+  for (const [name, types] of seenTypes) {
+    if (types.size === 1) {
+      typeMap.set(name, [...types][0]);
     }
   }
-  return fields;
+
+  return { fields, typeMap };
 }
 
 /** Build the {@link PPLLintContext} for the active dataset and per-rule overrides. */
@@ -58,6 +92,7 @@ export function buildPPLLintContext(
 ): PPLLintContext {
   const dsId = dataset?.dataSource?.id;
   const dsVersion = dataset?.dataSource?.version;
+  const engineType = dataset?.dataSource?.engineType ?? dataset?.dataSource?.type;
 
   // Fallback to the grammar cache's resolved version when the dataset metadata
   // does not carry a version (common on local-cluster datasets).
@@ -65,18 +100,28 @@ export function buildPPLLintContext(
 
   const cachedSettings = calciteSettingsCache.getCached(dsId);
 
-  // Only apply cached fields when they belong to the active dataset AND data
-  // source; otherwise leave them undefined so field-validation self-suppresses
-  // (no false unknowns from a stale source).
+  // Apply cached metadata only when dataset id, data source, and type all match;
+  // otherwise leave it undefined so field/type/source rules self-suppress.
   const cacheMatchesDataset =
-    lintFields.datasetId === dataset?.id && lintFields.dataSourceId === dsId;
+    lintFields.datasetId === dataset?.id &&
+    lintFields.dataSourceId === dsId &&
+    lintFields.datasetType === dataset?.type;
+
+  // Prefer backend-reported settings; the version heuristic can't see an
+  // admin-disabled Calcite on a >= 3.3 cluster, so cached settings win.
+  const isCalcite = cachedSettings
+    ? cachedSettings.calciteEnabled
+    : deriveIsCalcite(effectiveVersion);
 
   return {
-    useRuntimeGrammar: shouldUseRuntimeGrammar(dsId, effectiveVersion),
+    useRuntimeGrammar: shouldUseRuntimeGrammar(dsId, effectiveVersion, engineType),
     dataSourceId: dsId,
     dataSourceVersion: effectiveVersion,
-    isCalcite: deriveIsCalcite(effectiveVersion),
+    engineType,
+    isCalcite,
     fields: cacheMatchesDataset ? lintFields.fields : undefined,
+    typeMap: cacheMatchesDataset ? lintFields.typeMap : undefined,
+    selectedSourcePattern: cacheMatchesDataset ? lintFields.selectedSourcePattern : undefined,
     settings: cachedSettings
       ? { allJoinTypesAllowed: cachedSettings.allJoinTypesAllowed }
       : undefined,

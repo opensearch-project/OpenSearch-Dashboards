@@ -46,7 +46,13 @@ export function validateCatalogEntry(value: unknown): CatalogEntry | null {
     return null;
   }
 
-  for (const key of ['runtimeOnly', 'needsContext', 'needsExplain'] as const) {
+  for (const key of [
+    'runtimeOnly',
+    'needsContext',
+    'needsExplain',
+    'aiFixable',
+    'sourceScoped',
+  ] as const) {
     if (candidate[key] !== undefined && typeof candidate[key] !== 'boolean') return null;
   }
 
@@ -61,6 +67,8 @@ export function validateCatalogEntry(value: unknown): CatalogEntry | null {
     runtimeOnly: candidate.runtimeOnly as boolean | undefined,
     needsContext: candidate.needsContext as boolean | undefined,
     needsExplain: candidate.needsExplain as boolean | undefined,
+    aiFixable: candidate.aiFixable as boolean | undefined,
+    sourceScoped: candidate.sourceScoped as boolean | undefined,
   };
 }
 
@@ -94,4 +102,14 @@ export function getBundledCatalog(): CatalogEntry[] {
     bundledCatalog = loadCatalog(source);
   }
   return bundledCatalog;
+}
+
+let bundledCatalogById: Map<string, CatalogEntry> | undefined;
+
+/** Lets marker providers read catalog metadata without importing a rule module. */
+export function getCatalogEntryById(ruleId: string): CatalogEntry | undefined {
+  if (!bundledCatalogById) {
+    bundledCatalogById = new Map(getBundledCatalog().map((entry) => [entry.id, entry]));
+  }
+  return bundledCatalogById.get(ruleId);
 }

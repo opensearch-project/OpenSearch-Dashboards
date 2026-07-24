@@ -3,13 +3,23 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ParserRuleContext } from 'antlr4ng';
+import { CharStream, CommonTokenStream, ParserRuleContext } from 'antlr4ng';
+import { SimplifiedOpenSearchPPLLexer, SimplifiedOpenSearchPPLParser } from '@osd/antlr-grammar';
 import { runLint } from '../lint_runner';
 import { registerDetector, resetDetectorRegistry } from '../detector_registry';
+import { createCompiledRuleNameToIndex } from '../rule_index';
 import { CatalogEntry } from '../types';
 
 const fakeTree = {} as unknown as ParserRuleContext;
 const rni = () => -1;
+
+function buildCompiledTree(query: string): ParserRuleContext {
+  const lexer = new SimplifiedOpenSearchPPLLexer(CharStream.fromString(query));
+  lexer.removeErrorListeners();
+  const parser = new SimplifiedOpenSearchPPLParser(new CommonTokenStream(lexer));
+  parser.removeErrorListeners();
+  return parser.root();
+}
 
 function makeRule(overrides: Partial<CatalogEntry>): CatalogEntry {
   return {
@@ -90,6 +100,35 @@ describe('runLint resolution loop', () => {
     ).toHaveLength(1);
   });
 
+  it('satisfies needsContext with a non-empty typeMap alone (no field set)', () => {
+    registerDetector('ctx', (_t, cfg) => [
+      {
+        ruleId: cfg.id,
+        severity: cfg.severity,
+        message: 'x',
+        range: { startLine: 1, startColumn: 0, endLine: 1, endColumn: 1 },
+      },
+    ]);
+    const catalog = [makeRule({ id: 'a', detector: 'ctx', needsContext: true })];
+
+    // An empty typeMap is still "empty context" and gates the rule out.
+    expect(
+      runLint(fakeTree, {
+        catalog,
+        ruleNameToIndex: rni,
+        context: { typeMap: new Map() },
+      })
+    ).toEqual([]);
+    // A populated typeMap alone lets the type-aware rules run.
+    expect(
+      runLint(fakeTree, {
+        catalog,
+        ruleNameToIndex: rni,
+        context: { typeMap: new Map([['age', 'long']]) },
+      })
+    ).toHaveLength(1);
+  });
+
   describe('runtimeOnly flag', () => {
     const probe = () => {
       registerDetector('probe', (_t, cfg) => [
@@ -142,6 +181,61 @@ describe('runLint resolution loop', () => {
           context: { grammarSurface: 'compiled-simplified' },
         })
       ).toHaveLength(1);
+    });
+  });
+
+  describe('sourceScoped gate', () => {
+    const compiledRni = createCompiledRuleNameToIndex();
+    const probe = () =>
+      registerDetector('scoped', (_t, cfg) => [
+        {
+          ruleId: cfg.id,
+          severity: cfg.severity,
+          message: 'x',
+          range: { startLine: 1, startColumn: 0, endLine: 1, endColumn: 1 },
+        },
+      ]);
+    const catalog = [makeRule({ id: 'a', detector: 'scoped', sourceScoped: true })];
+
+    it('suppresses a sourceScoped rule when the query source differs from the selected pattern', () => {
+      probe();
+      const diags = runLint(buildCompiledTree('source=returns | head 5'), {
+        catalog,
+        ruleNameToIndex: compiledRni,
+        context: { selectedSourcePattern: 'orders' },
+      });
+      expect(diags).toEqual([]);
+    });
+
+    it('runs a sourceScoped rule when the query source matches the selected pattern', () => {
+      probe();
+      const diags = runLint(buildCompiledTree('source=orders | head 5'), {
+        catalog,
+        ruleNameToIndex: compiledRni,
+        context: { selectedSourcePattern: 'orders' },
+      });
+      expect(diags).toHaveLength(1);
+    });
+
+    it('runs a sourceScoped rule when no selected pattern is set (fails open)', () => {
+      probe();
+      const diags = runLint(buildCompiledTree('source=returns | head 5'), {
+        catalog,
+        ruleNameToIndex: compiledRni,
+        context: {},
+      });
+      expect(diags).toHaveLength(1);
+    });
+
+    it('does not suppress a non-sourceScoped rule on a source mismatch', () => {
+      probe();
+      const plainCatalog = [makeRule({ id: 'a', detector: 'scoped' })];
+      const diags = runLint(buildCompiledTree('source=returns | head 5'), {
+        catalog: plainCatalog,
+        ruleNameToIndex: compiledRni,
+        context: { selectedSourcePattern: 'orders' },
+      });
+      expect(diags).toHaveLength(1);
     });
   });
 

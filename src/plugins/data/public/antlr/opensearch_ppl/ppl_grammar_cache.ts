@@ -301,7 +301,8 @@ class PPLGrammarCache {
     if (!this.shouldFetchFromBackend(version, datasourceEngineType)) {
       // Version unsupported or unknown — not a failure, just nothing to fetch.
       // Don't set fetchFailed so that future warmUp calls can retry when the
-      // version becomes available (e.g. /api/status wasn't ready on page load).
+      // version becomes available (e.g. the local cluster version route wasn't
+      // ready on page load).
       return null;
     }
     const result = await this.doFetch(http, datasourceId);
@@ -332,9 +333,12 @@ class PPLGrammarCache {
         const savedObject = await savedObjectsClient.get('data-source', datasourceId);
         version = (savedObject.attributes as any)?.dataSourceVersion as string | undefined;
       } else if (!datasourceId) {
-        // Local cluster — read OSD server version from /api/status.
-        const response = await http.get<{ version?: { number?: string } }>('/api/status');
-        version = response?.version?.number;
+        // Local cluster — read the cluster engine version (the >=3.6.0 check is
+        // cluster-side); runtime HTTP call, not a plugin dep, to avoid a data_source_management cycle.
+        const response = await http.get<{ version?: string }>(
+          '/internal/data-source-management/localClusterVersion'
+        );
+        version = response?.version || undefined;
       }
       if (version) {
         this.cachedVersion = version;

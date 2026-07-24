@@ -11,8 +11,51 @@ describe('catalog loading', () => {
   it('loads the bundled catalog with the expected rule ids', () => {
     const ids = getBundledCatalog().map((c) => c.id);
     expect(ids).toEqual(
-      expect.arrayContaining(['head-without-sort', 'division-by-zero', 'field-validation'])
+      expect.arrayContaining([
+        'head-without-sort',
+        'division-by-zero',
+        'field-validation',
+        'agg-on-text',
+        'flat-object-subfield',
+        'type-mismatch-numeric',
+      ])
     );
+  });
+
+  it('marks the type-aware rules as needing context', () => {
+    const byId = new Map(getBundledCatalog().map((c) => [c.id, c]));
+    for (const id of ['agg-on-text', 'flat-object-subfield', 'type-mismatch-numeric']) {
+      expect(byId.get(id)?.needsContext).toBe(true);
+    }
+  });
+
+  it('marks the metadata rules as source-scoped so a source mismatch suppresses them', () => {
+    const byId = new Map(getBundledCatalog().map((c) => [c.id, c]));
+    for (const id of [
+      'field-validation',
+      'agg-on-text',
+      'flat-object-subfield',
+      'type-mismatch-numeric',
+    ]) {
+      expect(byId.get(id)?.sourceScoped).toBe(true);
+    }
+  });
+
+  it('gates the metadata rules to the engine surface they were verified against', () => {
+    const byId = new Map(getBundledCatalog().map((c) => [c.id, c]));
+    // All three behaviors are Calcite-specific: on the v2 engine avg(text) and a
+    // numeric-vs-string comparison raise a hard error instead of the silent
+    // null / 0-rows the messages describe, so gate them to Calcite. agg-on-text /
+    // type-mismatch-numeric verified from 3.7, flat-object-subfield from 3.8.
+    expect(byId.get('agg-on-text')?.appliesTo).toEqual({ minVersion: '3.7.0', engine: 'calcite' });
+    expect(byId.get('type-mismatch-numeric')?.appliesTo).toEqual({
+      minVersion: '3.7.0',
+      engine: 'calcite',
+    });
+    expect(byId.get('flat-object-subfield')?.appliesTo).toEqual({
+      minVersion: '3.8.0',
+      engine: 'calcite',
+    });
   });
 
   it('keeps exactly the valid entries and drops malformed ones', () => {
@@ -72,6 +115,35 @@ describe('catalog loading', () => {
         message: 'm',
         docUrl: 'd',
         appliesTo: { engine: 'spark' },
+      })
+    ).toBeNull();
+  });
+
+  it('preserves the aiFixable flag so a contributor can read it off the catalog', () => {
+    const entry = validateCatalogEntry({
+      id: 'x',
+      detector: 'x',
+      enabled: true,
+      severity: 'warning',
+      message: 'm',
+      docUrl: 'd',
+      appliesTo: {},
+      aiFixable: true,
+    });
+    expect(entry?.aiFixable).toBe(true);
+  });
+
+  it('rejects a non-boolean aiFixable', () => {
+    expect(
+      validateCatalogEntry({
+        id: 'x',
+        detector: 'x',
+        enabled: true,
+        severity: 'warning',
+        message: 'm',
+        docUrl: 'd',
+        appliesTo: {},
+        aiFixable: 'yes',
       })
     ).toBeNull();
   });

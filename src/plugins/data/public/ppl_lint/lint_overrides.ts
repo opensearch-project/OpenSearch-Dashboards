@@ -9,9 +9,16 @@ import { UI_SETTINGS } from '../../common';
 
 const SEV_RANK: Record<LintSeverity, number> = { info: 0, warning: 1, error: 2 };
 
+/** Own-property test (not `in`) so inherited names like `toString` are rejected. */
+function isLintSeverity(value: string): value is LintSeverity {
+  return Object.prototype.hasOwnProperty.call(SEV_RANK, value);
+}
+
 /** Per-rule severity floors. Users may disable these but may not downgrade below the floor. */
 const MIN_SEVERITY: Record<string, LintSeverity> = {
   'division-by-zero': 'warning',
+  'agg-on-text': 'warning',
+  'type-mismatch-numeric': 'warning',
 };
 
 interface StoredRule {
@@ -52,7 +59,7 @@ export function buildOverridesFromSettings(uiSettings: IUiSettingsClient): Bundl
     // Ignore severities that aren't real levels (reachable via the raw uiSettings
     // API): an unknown value makes SEV_RANK[...] undefined, so the floor comparison
     // is false and the junk value would slip past the MIN_SEVERITY clamp.
-    if (rule.severity && rule.severity in SEV_RANK) {
+    if (rule.severity && isLintSeverity(rule.severity)) {
       const floor = MIN_SEVERITY[entry.id];
       const effective = floor && SEV_RANK[rule.severity] < SEV_RANK[floor] ? floor : rule.severity;
       if (effective !== entry.severity) {

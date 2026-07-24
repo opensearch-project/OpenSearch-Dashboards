@@ -107,6 +107,8 @@ function lintWithGrammar(
     return { diagnostics: [] };
   }
 
+  const isPipeFirst = query.trimStart().startsWith('|');
+
   const diagnostics = runLint(tree, {
     ruleNameToIndex: createRuntimeRuleNameToIndex(grammar.runtimeRuleNameToIndex),
     dataSourceVersion: context?.dataSourceVersion,
@@ -114,10 +116,10 @@ function lintWithGrammar(
       ...context,
       grammarSurface: 'runtime-bundle',
       grammarHash: grammar.grammarHash,
+      isPipeFirst,
     },
   });
 
-  const isPipeFirst = query.trimStart().startsWith('|');
   return { diagnostics: isPipeFirst ? remapPipeFirstColumns(diagnostics) : diagnostics };
 }
 

@@ -287,6 +287,8 @@ const processLintHighlighting = (model: monaco.editor.IModel): void => {
         overrides: lintContext.overrides,
         dataSourceId: lintContext.dataSourceId,
         dataSourceVersion: lintContext.dataSourceVersion,
+        selectedSourcePattern: lintContext.selectedSourcePattern,
+        engineType: lintContext.engineType,
       }
     : undefined;
 
@@ -321,11 +323,8 @@ const processLintHighlighting = (model: monaco.editor.IModel): void => {
         };
         const key = markerFixKey(marker);
         if (withExtras.fix) {
-          // markerFixKey is range + message; two diagnostics that collide on that
-          // key but carry different fixes would silently last-write-wins. Today
-          // separate tables + suppressContained prevent it, so this is a latent
-          // tripwire that surfaces if a future rule introduces a real collision.
-          // The dead branch is eliminated from production bundles.
+          // Dev-only tripwire, dead in prod: key includes rule id (marker.code) and
+          // separate tables + suppressContained already prevent real collisions.
           if (
             process.env.NODE_ENV !== 'production' &&
             fixes.has(key) &&

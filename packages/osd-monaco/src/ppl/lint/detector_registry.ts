@@ -13,6 +13,9 @@ import { dedupConsecutiveUnsupportedDetector } from './rules/dedup_consecutive_u
 import { unionMinDatasetsDetector } from './rules/union_min_datasets';
 import { replaceWildcardAsymmetryDetector } from './rules/replace_wildcard_asymmetry';
 import { fieldValidationDetector } from './rules/field_validation';
+import { aggOnTextDetector } from './rules/agg_on_text';
+import { flatObjectSubfieldDetector } from './rules/flat_object_subfield';
+import { typeMismatchNumericDetector } from './rules/type_mismatch_numeric';
 
 const registry = new Map<string, Detector>();
 
@@ -39,6 +42,9 @@ export function registerBuiltInDetectors(): void {
   registerDetector('union-min-datasets', unionMinDatasetsDetector);
   registerDetector('replace-wildcard-asymmetry', replaceWildcardAsymmetryDetector);
   registerDetector('field-validation', fieldValidationDetector);
+  registerDetector('agg-on-text', aggOnTextDetector);
+  registerDetector('flat-object-subfield', flatObjectSubfieldDetector);
+  registerDetector('type-mismatch-numeric', typeMismatchNumericDetector);
 }
 
 registerBuiltInDetectors();

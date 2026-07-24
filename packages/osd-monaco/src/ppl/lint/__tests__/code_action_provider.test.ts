@@ -14,6 +14,7 @@ import {
   setModelFixes,
   setModelSyntaxFixes,
 } from '../fix_registry';
+import { registerPPLDiagnosticActionContributor } from '../diagnostic_action';
 
 type LintMarker = monaco.editor.IMarkerData;
 
@@ -143,6 +144,70 @@ describe('pplLintCodeActionProvider', () => {
     setModelFixes(model, fixes);
     expect(provide([m1]).map((a) => a.title)).toEqual(['fix-1']);
     expect(provide([m2]).map((a) => a.title)).toEqual(['fix-2']);
+  });
+
+  describe('contributed actions (diagnostic-action registry)', () => {
+    // A marker whose `code` is a real catalog rule id, so the provider can look
+    // up the entry and pass catalog metadata to contributors.
+    const ruleMarker = (overrides: Partial<LintMarker> = {}): LintMarker =>
+      makeMarker({ code: 'field-validation', ...overrides });
+
+    it('offers a contributed action on a lint marker even with no deterministic fix', () => {
+      const dispose = registerPPLDiagnosticActionContributor((c) => [
+        { title: `AI: ${c.ruleId}`, commandId: 'ppl.aiFix', args: [c.ruleId] },
+      ]);
+      try {
+        const actions = provide([ruleMarker()]);
+        expect(actions).toHaveLength(1);
+        expect(actions[0].title).toBe('AI: field-validation');
+        expect(actions[0].kind).toBe('quickfix');
+        expect(actions[0].command?.id).toBe('ppl.aiFix');
+        expect(actions[0].command?.arguments).toEqual(['field-validation']);
+      } finally {
+        dispose();
+      }
+    });
+
+    it('passes catalog aiFixable/needsExplain metadata to the contributor', () => {
+      let seen: { aiFixable?: boolean; needsExplain?: boolean } | undefined;
+      const dispose = registerPPLDiagnosticActionContributor((c) => {
+        seen = { aiFixable: c.aiFixable, needsExplain: c.needsExplain };
+        return [];
+      });
+      try {
+        provide([ruleMarker()]);
+        // field-validation is not aiFixable and not needsExplain in the F0 catalog.
+        expect(seen).toEqual({ aiFixable: undefined, needsExplain: undefined });
+      } finally {
+        dispose();
+      }
+    });
+
+    it('does not offer contributed actions on a non-lint (syntax) marker', () => {
+      const dispose = registerPPLDiagnosticActionContributor(() => [
+        { title: 'should not appear', commandId: 'x' },
+      ]);
+      try {
+        expect(provide([makeMarker({ source: SYNTAX_MARKER_SOURCE })])).toHaveLength(0);
+      } finally {
+        dispose();
+      }
+    });
+
+    it('emits both a deterministic fix and a contributed action for the same marker', () => {
+      const dispose = registerPPLDiagnosticActionContributor(() => [
+        { title: 'AI fix', commandId: 'ppl.aiFix' },
+      ]);
+      try {
+        const marker = ruleMarker();
+        seedFix(marker, { title: 'Deterministic fix', text: 'foo' });
+        const titles = provide([marker]).map((a) => a.title);
+        expect(titles).toContain('Deterministic fix');
+        expect(titles).toContain('AI fix');
+      } finally {
+        dispose();
+      }
+    });
   });
 
   describe('syntax-error channel (command-typo quick-fix)', () => {

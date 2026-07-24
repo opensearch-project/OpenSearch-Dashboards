@@ -6,6 +6,18 @@
 import { monaco } from '../../monaco';
 import { LINT_MARKER_SOURCE, SYNTAX_MARKER_SOURCE } from './diagnostic_to_marker';
 import { getModelFix, getModelSyntaxFix, markerFixKey, MarkerFix } from './fix_registry';
+import { collectPPLDiagnosticActions } from './diagnostic_action';
+import { getCatalogEntryById } from './catalog';
+
+function ruleIdOfMarker(marker: monaco.editor.IMarkerData): string | undefined {
+  const { code } = marker;
+  if (typeof code === 'string') {
+    return code;
+  }
+  return code && typeof code === 'object' && typeof code.value === 'string'
+    ? code.value
+    : undefined;
+}
 
 // Code-action provider that surfaces quick-fixes for PPL markers on two
 // channels: lint diagnostics (`ppl-lint`, owner PPL_LINT) and syntax errors
@@ -17,8 +29,8 @@ import { getModelFix, getModelSyntaxFix, markerFixKey, MarkerFix } from './fix_r
 // each marker from a fixed field list when `setModelMarkers` is called, dropping
 // any custom property, so a fix hung off the marker never survives to here.
 // Instead each lifecycle records fixes in a side table keyed by the marker
-// fields the service preserves (position + message); we re-associate them here,
-// reading the table that matches the marker's source.
+// fields the service preserves (range + message + rule id); we re-associate them
+// here, reading the table that matches the marker's source.
 export const pplLintCodeActionProvider: monaco.languages.CodeActionProvider = {
   provideCodeActions(
     model: monaco.editor.ITextModel,
@@ -36,6 +48,32 @@ export const pplLintCodeActionProvider: monaco.languages.CodeActionProvider = {
         fix = getModelSyntaxFix(model, key);
       } else {
         continue;
+      }
+
+      // Contributed actions (e.g. AI-assisted fix) run even without a deterministic
+      // fix and read only catalog metadata, so no rule module is imported here.
+      if (marker.source === LINT_MARKER_SOURCE) {
+        const ruleId = ruleIdOfMarker(marker);
+        const entry = ruleId ? getCatalogEntryById(ruleId) : undefined;
+        const contributed = collectPPLDiagnosticActions({
+          marker,
+          model,
+          ruleId,
+          aiFixable: entry?.aiFixable,
+          needsExplain: entry?.needsExplain,
+        });
+        for (const action of contributed) {
+          actions.push({
+            title: action.title,
+            diagnostics: [marker],
+            kind: 'quickfix',
+            command: {
+              id: action.commandId,
+              title: action.title,
+              arguments: action.args,
+            },
+          });
+        }
       }
 
       if (!fix) {
