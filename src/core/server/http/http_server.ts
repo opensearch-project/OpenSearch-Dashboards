@@ -301,7 +301,12 @@ export class HttpServer {
       this.server.ext('onRequest', (request, h) => {
         const { referrer } = request.info;
         if (referrer !== '') {
-          const { hostname } = new URL('', referrer);
+          let hostname: string | undefined;
+          try {
+            ({ hostname } = new URL('', referrer));
+          } catch {
+            // Malformed referer header — treat as non-allowlisted and disable compression
+          }
           if (!hostname || !list.includes(hostname)) {
             request.info.acceptEncoding = '';
           }
