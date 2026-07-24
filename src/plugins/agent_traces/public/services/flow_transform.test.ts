@@ -51,6 +51,8 @@ describe('spansToFlow', () => {
         title: 'TestAgent',
         nodeKind: 'agent',
         duration: 100,
+        maxDuration: 100,
+        startOffset: undefined,
         latency: '100ms',
         status: undefined,
       },
@@ -174,5 +176,29 @@ describe('spansToFlow', () => {
 
     expect(spansToFlow([errorSpan]).nodes[0].data.status).toBe('error');
     expect(spansToFlow([successSpan]).nodes[0].data.status).toBeUndefined();
+  });
+
+  it('computes startOffset based on span start time relative to root', () => {
+    const root = makeSpan({
+      id: 'root',
+      spanId: 'root',
+      durationNanos: 1_000_000_000, // 1000ms
+      rawDocument: { startTime: '2025-05-29 03:11:25.000' },
+    });
+    const child = makeSpan({
+      id: 'child',
+      spanId: 'child',
+      category: 'LLM',
+      durationNanos: 200_000_000, // 200ms
+      rawDocument: { startTime: '2025-05-29 03:11:25.500' }, // 500ms after root
+    });
+    root.children = [child];
+
+    const { nodes } = spansToFlow([root]);
+
+    // Root starts at 0%
+    expect(nodes[0].data.startOffset).toBe(0);
+    // Child starts at 500ms / 1000ms = 50%
+    expect(nodes[1].data.startOffset).toBe(50);
   });
 });

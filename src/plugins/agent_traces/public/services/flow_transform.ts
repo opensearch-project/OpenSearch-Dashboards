@@ -8,6 +8,7 @@ import type { AgentNodeData, AgentNodeKind } from '@osd/apm-topology';
 // @ts-expect-error TS7016 TODO(ts-error): fixme
 import type { CelestialEdgeStyleData } from '@osd/apm-topology';
 import { CategorizedSpan, SpanCategory } from './span_categorization';
+import { parseTimestampMs } from '../application/pages/traces/trace_details/utils/span_timerange_utils';
 
 interface FlowNode {
   id: string;
@@ -46,10 +47,29 @@ export function spansToFlow(spanTree: CategorizedSpan[]): FlowTransformResult {
   const nodes: FlowNode[] = [];
   const edges: FlowEdge[] = [];
 
+  // Compute the root span duration to use as the max for latency bars
+  const rootDurationMs =
+    spanTree.length > 0 && spanTree[0].durationNanos > 0
+      ? spanTree[0].durationNanos / 1_000_000
+      : 0;
+
+  // Root span start time for computing Gantt-style offsets
+  const rootStartMs =
+    spanTree.length > 0 ? parseTimestampMs(spanTree[0].rawDocument?.startTime) : 0;
+
   const processSpan = (span: CategorizedSpan, parentId?: string) => {
     const nodeId = span.spanId || span.id;
     const nodeKind = CATEGORY_TO_NODE_KIND[span.category] ?? 'other';
     const durationMs = span.durationNanos > 0 ? span.durationNanos / 1_000_000 : 0;
+
+    // Compute start offset as percentage of root duration
+    let startOffset: number | undefined;
+    if (rootDurationMs > 0 && rootStartMs > 0) {
+      const spanStartMs = parseTimestampMs(span.rawDocument?.startTime);
+      if (spanStartMs > 0) {
+        startOffset = ((spanStartMs - rootStartMs) / rootDurationMs) * 100;
+      }
+    }
 
     nodes.push({
       id: nodeId,
@@ -60,6 +80,8 @@ export function spansToFlow(spanTree: CategorizedSpan[]): FlowTransformResult {
         title: span.displayName || span.name || 'Unknown',
         nodeKind,
         duration: durationMs > 0 ? durationMs : undefined,
+        maxDuration: rootDurationMs > 0 ? rootDurationMs : undefined,
+        startOffset,
         latency: span.latency || undefined,
         status: span.status === 'error' ? 'error' : undefined,
       },
