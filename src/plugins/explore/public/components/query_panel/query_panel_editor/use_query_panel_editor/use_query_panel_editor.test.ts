@@ -441,7 +441,7 @@ describe('useQueryPanelEditor', () => {
     it('clears the shared editor ref when the editor unmounts', () => {
       mockEditorRef.current = mockEditor;
 
-      const { unmount } = renderHook(() => useQueryPanelEditor());
+      const { unmount } = renderHook(() => useQueryPanelEditor(buildProps()));
 
       unmount();
 

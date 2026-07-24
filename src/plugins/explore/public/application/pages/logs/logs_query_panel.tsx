@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiProgress } from '@elastic/eui';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
 import { QueryPanelWidgets } from '../../../components/query_panel/query_panel_widgets';
-import { QueryPanelEditor } from '../../../components/query_panel/query_panel_editor';
+import { ExploreQueryPanelEditor } from '../../../components/query_panel/query_panel_editor';
 import { QueryPanelGeneratedQuery } from '../../../components/query_panel/query_panel_generated_query';
 import { usePPLExecuteQueryAction } from '../../../components/query_panel/actions/ppl_execute_query_action';
 import { useEditorRef, useEditorText, useSetEditorTextWithQuery } from '../../../application/hooks';
@@ -257,7 +257,7 @@ export const LogsQueryPanel: React.FC<LogsQueryPanelProps> = ({
 
   const editors = (
     <div className="exploreQueryPanel__editorsWrapper">
-      <QueryPanelEditor />
+      <ExploreQueryPanelEditor />
       <QueryPanelGeneratedQuery />
     </div>
   );

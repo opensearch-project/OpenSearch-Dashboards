@@ -347,7 +347,7 @@ export const useQueryPanelEditor = (props: QueryEditorProps): UseQueryPanelEdito
           'explore'
         );
 
-        const currentDataset = queryString.getQuery().dataset;
+        const currentDataset = datasetRef.current;
         const currentDataView = await dataViews.get(
           currentDataset?.id!,
           currentDataset?.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
@@ -414,7 +414,7 @@ export const useQueryPanelEditor = (props: QueryEditorProps): UseQueryPanelEdito
         return { suggestions: [], incomplete: false };
       }
     },
-    [isPromptModeRef, queryLanguage, queryString, dataViews, services]
+    [isPromptModeRef, queryLanguage, dataViews, services]
   );
 
   const suggestionProvider = useMemo(() => {

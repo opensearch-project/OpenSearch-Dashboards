@@ -92,7 +92,7 @@ jest.mock('../../../components/query_panel/query_panel_widgets', () => ({
   ),
 }));
 jest.mock('../../../components/query_panel/query_panel_editor', () => ({
-  QueryPanelEditor: () => <div data-test-subj="code-editor-stub">Code Editor</div>,
+  ExploreQueryPanelEditor: () => <div data-test-subj="code-editor-stub">Code Editor</div>,
 }));
 jest.mock('../../../components/query_panel/query_panel_generated_query', () => ({
   QueryPanelGeneratedQuery: () => <div />,
