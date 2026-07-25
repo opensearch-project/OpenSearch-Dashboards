@@ -130,6 +130,7 @@ export const useQueryPanelEditor = (props: QueryEditorProps): UseQueryPanelEdito
     lintContext: { current: undefined },
     lintGrammarRefresh: { current: undefined },
     lintContextRefresh: { current: undefined },
+    lintHoverPersistence: { current: undefined },
   });
 
   const getValidationContext = useCallback((): PPLValidationContext => {

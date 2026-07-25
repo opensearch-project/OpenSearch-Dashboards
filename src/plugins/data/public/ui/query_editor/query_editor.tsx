@@ -99,6 +99,7 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
     lintContext: { current: undefined },
     lintGrammarRefresh: { current: undefined },
     lintContextRefresh: { current: undefined },
+    lintHoverPersistence: { current: undefined },
   });
   // Cache of index-pattern field names per dataset id, populated asynchronously
   // for field-validation lint. Self-suppresses until loaded.

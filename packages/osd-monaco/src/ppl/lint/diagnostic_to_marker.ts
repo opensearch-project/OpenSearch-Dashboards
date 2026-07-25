@@ -31,6 +31,22 @@ export const LINT_MARKER_SOURCE = 'ppl-lint';
 // quick-fixes there, without disturbing the lint channel (`ppl-lint`).
 export const SYNTAX_MARKER_SOURCE = 'ppl-syntax';
 
+/**
+ * Read a marker's rule id back out of `code`, which `diagnosticToMarker` writes
+ * either as a bare string or as a `{ value, target }` pair when the rule has a
+ * doc link. Exported so the code-action and hover providers decode it the same
+ * way as it was encoded, rather than each keeping its own copy.
+ */
+export function ruleIdOf(marker: Pick<monaco.editor.IMarkerData, 'code'>): string | undefined {
+  const { code } = marker;
+  if (typeof code === 'string') {
+    return code;
+  }
+  return code && typeof code === 'object' && typeof code.value === 'string'
+    ? code.value
+    : undefined;
+}
+
 function toMarkerSeverity(severity: LintSeverity): monaco.MarkerSeverity {
   switch (severity) {
     case 'error':

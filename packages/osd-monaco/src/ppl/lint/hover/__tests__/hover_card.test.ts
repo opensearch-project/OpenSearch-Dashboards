@@ -162,4 +162,9 @@ describe('renderHoverCard', () => {
     });
     expect(md).toContain('use \\*star\\* and \\_under\\_ and \\[brackets\\]');
   });
+
+  // The explain-backed performance rules write `operation` and nothing else, so
+  // without that branch their per-query line renders empty. Covered above by
+  // 'names the flagged clause for an explain-backed operation fact', which also
+  // pins the precedence against the richer field/literal facts.
 });

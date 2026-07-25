@@ -4,20 +4,10 @@
  */
 
 import { monaco } from '../../monaco';
-import { LINT_MARKER_SOURCE, SYNTAX_MARKER_SOURCE } from './diagnostic_to_marker';
+import { LINT_MARKER_SOURCE, ruleIdOf, SYNTAX_MARKER_SOURCE } from './diagnostic_to_marker';
 import { getModelFix, getModelSyntaxFix, markerFixKey, MarkerFix } from './fix_registry';
 import { collectPPLDiagnosticActions } from './diagnostic_action';
 import { getCatalogEntryById } from './catalog';
-
-function ruleIdOfMarker(marker: monaco.editor.IMarkerData): string | undefined {
-  const { code } = marker;
-  if (typeof code === 'string') {
-    return code;
-  }
-  return code && typeof code === 'object' && typeof code.value === 'string'
-    ? code.value
-    : undefined;
-}
 
 // Code-action provider that surfaces quick-fixes for PPL markers on two
 // channels: lint diagnostics (`ppl-lint`, owner PPL_LINT) and syntax errors
@@ -53,7 +43,7 @@ export const pplLintCodeActionProvider: monaco.languages.CodeActionProvider = {
       // Contributed actions (e.g. AI-assisted fix) run even without a deterministic
       // fix and read only catalog metadata, so no rule module is imported here.
       if (marker.source === LINT_MARKER_SOURCE) {
-        const ruleId = ruleIdOfMarker(marker);
+        const ruleId = ruleIdOf(marker);
         const entry = ruleId ? getCatalogEntryById(ruleId) : undefined;
         const contributed = collectPPLDiagnosticActions({
           marker,

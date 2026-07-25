@@ -4,7 +4,7 @@
  */
 
 import { monaco } from '../../../monaco';
-import { LINT_MARKER_SOURCE } from '../diagnostic_to_marker';
+import { LINT_MARKER_SOURCE, ruleIdOf } from '../diagnostic_to_marker';
 import { getModelHoverFacts, markerFixKey } from './hover_registry';
 import { getRuleHoverContent } from './engine_outcomes';
 import { renderHoverCard, SeverityLabel } from './hover_card';
@@ -42,14 +42,6 @@ function severityLabel(severity: monaco.MarkerSeverity): SeverityLabel {
     default:
       return 'Info';
   }
-}
-
-function ruleIdOf(marker: monaco.editor.IMarker): string | undefined {
-  const code = marker.code;
-  if (typeof code === 'string') return code;
-  return code && typeof code === 'object' && typeof code.value === 'string'
-    ? code.value
-    : undefined;
 }
 
 function docUrlOf(marker: monaco.editor.IMarker): string | undefined {
