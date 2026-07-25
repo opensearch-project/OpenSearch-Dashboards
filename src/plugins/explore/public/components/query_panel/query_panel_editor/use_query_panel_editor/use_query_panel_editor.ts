@@ -30,6 +30,8 @@ import {
   PPLDetachRefs,
   buildPPLLintContext,
   extractFieldMetadata,
+  fetchDisabledObjectFields,
+  fetchVisibleIndices,
   LintFieldsCache,
   pplGrammarCache,
   shouldUseRuntimeGrammar,
@@ -237,6 +239,16 @@ export const useQueryPanelEditor = (props: QueryEditorProps): UseQueryPanelEdito
             return;
           }
           const { fields, typeMap } = extractFieldMetadata(indexPattern);
+          // Two metadata probes the field list cannot supply: `enabled:false` is
+          // stripped by _field_caps, and the visible-index list is cluster-wide.
+          // Both are best-effort — their rules self-suppress when absent.
+          const [disabledObjectFields, visibleIndices] = await Promise.all([
+            fetchDisabledObjectFields(services.http, indexPattern),
+            fetchVisibleIndices(services.http, dataSourceId),
+          ]);
+          if (cancelled) {
+            return;
+          }
           lintFieldsRef.current = {
             datasetId,
             dataSourceId,
@@ -244,6 +256,8 @@ export const useQueryPanelEditor = (props: QueryEditorProps): UseQueryPanelEdito
             selectedSourcePattern: sourcePattern,
             fields,
             typeMap,
+            disabledObjectFields,
+            visibleIndices,
           };
         } catch {
           if (cancelled) {
@@ -274,6 +288,7 @@ export const useQueryPanelEditor = (props: QueryEditorProps): UseQueryPanelEdito
     dataViews,
     editorRef,
     getLintContext,
+    services.http,
   ]);
 
   // Cleanup validation + lint context on unmount

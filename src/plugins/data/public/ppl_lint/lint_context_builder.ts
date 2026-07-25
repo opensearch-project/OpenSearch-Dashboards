@@ -38,6 +38,10 @@ export interface LintFieldsCache {
   selectedSourcePattern?: string;
   fields?: Set<string>;
   typeMap?: Map<string, string>;
+  /** Object fields mapped `enabled:false`; absent from `_field_caps`. */
+  disabledObjectFields?: Set<string>;
+  /** Index/alias/data-stream names visible to the user, for wildcard checks. */
+  visibleIndices?: string[];
 }
 
 interface IndexPatternLike {
@@ -132,7 +136,11 @@ export function buildPPLLintContext(
     isCalcite,
     fields: cacheMatchesDataset ? lintFields.fields : undefined,
     typeMap: cacheMatchesDataset ? lintFields.typeMap : undefined,
+    disabledObjectFields: cacheMatchesDataset ? lintFields.disabledObjectFields : undefined,
     selectedSourcePattern: cacheMatchesDataset ? lintFields.selectedSourcePattern : undefined,
+    // Cluster-wide rather than dataset-scoped, so it is not gated on the
+    // dataset-identity check the field metadata uses.
+    visibleIndices: lintFields.visibleIndices,
     settings: cachedSettings
       ? { allJoinTypesAllowed: cachedSettings.allJoinTypesAllowed }
       : undefined,

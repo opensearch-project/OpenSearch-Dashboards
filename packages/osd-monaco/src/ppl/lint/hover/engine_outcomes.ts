@@ -62,6 +62,21 @@ export const ENGINE_OUTCOMES: Record<string, RuleHoverContent> = {
     safeToIgnoreWhen:
       'the query already matches few documents, so running the script per document is cheap.',
   },
+  'enabled-false-object': {
+    engineBehavior:
+      'a field inside an object mapped enabled:false is stored but not indexed, so references resolve to null (type undefined, HTTP 200) — never the stored value.',
+    failureClass: 'silent-null',
+    verifiedVersion: '3.7',
+    safeToIgnoreWhen:
+      'you only read the field from _source after fetch, never filtering, aggregating, or sorting on it.',
+  },
+  'wildcard-source-zero-match': {
+    engineBehavior:
+      'a source= wildcard matching zero visible indices returns no data; this is an advisory host-side check against the visible index list, not an engine error.',
+    failureClass: 'silent-empty',
+    safeToIgnoreWhen:
+      'the matching index will exist when the query runs but is not visible right now.',
+  },
 };
 
 export function getRuleHoverContent(ruleId: string): RuleHoverContent | undefined {

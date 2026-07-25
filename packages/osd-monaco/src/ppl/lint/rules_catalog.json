@@ -13,7 +13,7 @@
     "detector": "division-by-zero",
     "enabled": true,
     "severity": "warning",
-    "message": "Dividing or taking modulo by zero returns null silently — guard with coalesce() or a conditional.",
+    "message": "Dividing or taking modulo by zero returns null silently \u2014 guard with coalesce() or a conditional.",
     "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/functions/expressions/#arithmetic-operators",
     "appliesTo": {}
   },
@@ -22,7 +22,7 @@
     "detector": "unsupported-window-function-in-eventstats",
     "enabled": true,
     "severity": "error",
-    "message": "This window function is not supported in eventstats/streamstats — only row_number is available.",
+    "message": "This window function is not supported in eventstats/streamstats \u2014 only row_number is available.",
     "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/eventstats/",
     "appliesTo": {
       "minVersion": "3.4.0"
@@ -45,7 +45,7 @@
     "detector": "disabled-join-type",
     "enabled": true,
     "severity": "warning",
-    "message": "This join type is disabled by default — enable plugins.calcite.all_join_types.allowed to use it.",
+    "message": "This join type is disabled by default \u2014 enable plugins.calcite.all_join_types.allowed to use it.",
     "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/join/",
     "appliesTo": {}
   },
@@ -175,5 +175,25 @@
       "engine": "calcite"
     },
     "needsExplain": true
+  },
+  {
+    "id": "enabled-false-object",
+    "detector": "enabled-false-object",
+    "enabled": true,
+    "severity": "warning",
+    "message": "Field inside an enabled:false object is not indexed and resolves to null.",
+    "docUrl": "https://docs.opensearch.org/latest/mappings/mapping-parameters/enabled/#disabling-object-fields",
+    "needsContext": true,
+    "appliesTo": {}
+  },
+  {
+    "id": "wildcard-source-zero-match",
+    "detector": "wildcard-source-zero-match",
+    "enabled": true,
+    "severity": "info",
+    "message": "Wildcard source pattern matches no index.",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/search/",
+    "needsContext": true,
+    "appliesTo": {}
   }
 ]
