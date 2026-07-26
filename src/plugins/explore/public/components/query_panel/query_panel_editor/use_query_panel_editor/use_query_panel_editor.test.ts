@@ -492,10 +492,13 @@ describe('useQueryPanelEditor', () => {
     it('getLintContext delegates to buildPPLLintContext with the live dataset', () => {
       captureContexts().getLintContext();
       // The live dataset (from datasetRef), not the dataset-less queryString.getQuery().
+      // The 4th argument is the AI-fix hooks — undefined here because the mock
+      // services carry no chat service, so the AI action stays unwired.
       expect(buildPPLLintContext).toHaveBeenCalledWith(
         mdsDataset,
         expect.any(Object),
-        mockServices
+        mockServices,
+        undefined
       );
     });
 
@@ -1114,6 +1117,55 @@ describe('useQueryPanelEditor', () => {
       const { list } = await runCompletion(buildProps(), model, 12);
       // Only built-in suggestions (none from getQuerySuggestions mock) — no throw, valid list.
       expect(Array.isArray(list.suggestions)).toBe(true);
+    });
+  });
+
+  describe('AI lint-fix launch', () => {
+    // Grabs the onAskAiFix callback the hook hands to buildPPLLintContext (its
+    // 4th argument), so the test can drive the launch path directly.
+    const getOnAskAiFix = (): ((request: any) => void) => {
+      const calls = (buildPPLLintContext as jest.Mock).mock.calls;
+      for (let i = calls.length - 1; i >= 0; i--) {
+        const hooks = calls[i][3];
+        if (hooks?.onAskAiFix) {
+          return hooks.onAskAiFix;
+        }
+      }
+      throw new Error('onAskAiFix was not wired into buildPPLLintContext');
+    };
+
+    it('tags the fix context `page` so clearConversation does not wipe it before the model reads it', () => {
+      const addContext = jest.fn();
+      // clearConversation runs newThread() -> clearDynamicContextFromStore(),
+      // which removes every non-`page` context before the message is sent. If the
+      // fix context is not tagged `page` the model never receives the tool-calling
+      // instructions, so this regression pins the category set.
+      mockServices.core = {
+        chat: {
+          isAvailable: jest.fn(() => true),
+          sendMessageWithWindow: jest.fn(() => new Promise(() => {})),
+        },
+      };
+      mockServices.contextProvider = {
+        getAssistantContextStore: jest.fn(() => ({
+          addContext,
+          removeContextById: jest.fn(),
+        })),
+      };
+      mockServices.notifications = { toasts: { addWarning: jest.fn() } };
+
+      renderHook(() => useQueryPanelEditor(buildProps()));
+
+      act(() => {
+        getOnAskAiFix()({
+          requestId: 'req-page-1',
+          chatMessage: 'Please fix this query',
+          chatContext: { requestId: 'req-page-1', instructions: 'call the test tool first' },
+        });
+      });
+
+      expect(addContext).toHaveBeenCalledTimes(1);
+      expect(addContext.mock.calls[0][0].categories).toContain('page');
     });
   });
 });

@@ -4,8 +4,15 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { monaco, PPLValidationContext, PPLLintContext, revalidatePPLModel } from '@osd/monaco';
+import {
+  AskPPLLintFixRequest,
+  monaco,
+  PPLValidationContext,
+  PPLLintContext,
+  revalidatePPLModel,
+} from '@osd/monaco';
 import { i18n } from '@osd/i18n';
+import { withTimeout } from '@osd/std';
 import { DEFAULT_DATA } from '../../../../../../data/common';
 import { promptEditorOptions, queryEditorOptions } from './editor_options';
 import {
@@ -32,16 +39,24 @@ import {
   extractFieldMetadata,
   fetchDisabledObjectFields,
   fetchVisibleIndices,
+  getAiAgentAvailableForDataSource,
   LintFieldsCache,
   pplGrammarCache,
   shouldUseRuntimeGrammar,
   UI_SETTINGS,
 } from '../../../../../../data/public';
 import { QueryEditorProps } from '../types';
+import {
+  APPLY_PPL_LINT_FIX_EXPLORE_TOOL_NAME,
+  PPL_LINT_FIX_CONTEXT_ID_PREFIX,
+  PPL_LINT_FIX_EXPLORE_HOST,
+  setActivePPLLintFixSession,
+} from '../../actions/ppl_lint_fix_session';
 
 type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
 type LanguageConfiguration = monaco.languages.LanguageConfiguration;
 type IEditorConstructionOptions = monaco.editor.IEditorConstructionOptions;
+type PPLLintAiFixHooks = Pick<PPLLintContext, 'onAskAiFix' | 'aiFixToolName'>;
 
 export const DEFAULT_TRIGGER_CHARACTERS = [' ', '=', "'", '"', '`', '$'];
 
@@ -146,13 +161,94 @@ export const useQueryPanelEditor = (props: QueryEditorProps): UseQueryPanelEdito
     };
   }, []);
 
+  // Always-current accessor for closures registered once at editorDidMount.
+  const getLintContextRef = useRef<() => PPLLintContext>(() =>
+    buildPPLLintContext(datasetRef.current, lintFieldsRef.current, services)
+  );
+
+  const chat = services.core?.chat;
+  const chatIsAvailable = Boolean(chat?.isAvailable?.());
+  const onAskAiFix = useCallback(
+    (request: AskPPLLintFixRequest) => {
+      setActivePPLLintFixSession({
+        host: PPL_LINT_FIX_EXPLORE_HOST,
+        request,
+        getCurrentQuery: () => editorRef.current?.getValue() ?? editorTextRef.current,
+        getLintContext: () => getLintContextRef.current(),
+      });
+
+      if (!chat?.sendMessageWithWindow) {
+        services.notifications?.toasts?.addWarning(
+          i18n.translate('explore.queryPanelEditor.pplLintFix.chatUnavailable', {
+            defaultMessage: 'AI chat is not available for this PPL fix.',
+          })
+        );
+        return;
+      }
+
+      // Push the fix request's machine plumbing (correlation ids + tool-calling
+      // instructions) into the assistant context store so the model receives it
+      // via the AG-UI `context` array without it rendering as a chat bubble. The
+      // visible bubble stays the short human message (request.chatMessage).
+      // Keyed by requestId so the apply handler can drop it once the fix lands.
+      const contextStore = services.contextProvider?.getAssistantContextStore?.();
+      if (request.chatContext && contextStore) {
+        contextStore.addContext({
+          id: PPL_LINT_FIX_CONTEXT_ID_PREFIX + request.requestId,
+          description: 'OpenSearch PPL lint quick-fix request details',
+          value: request.chatContext,
+          label: 'PPL lint fix request',
+          // clearConversation runs newThread() -> clearDynamicContextFromStore()
+          // before the message is sent, which drops every non-`page` context. Tag
+          // `page` so the tool-calling instructions survive to reach the model;
+          // the .catch below and the apply/dismiss cleanup still remove this entry
+          // on every exit path so it never leaks into an unrelated conversation.
+          categories: ['page', 'chat', 'ppl-lint-fix'],
+        });
+      }
+
+      void withTimeout({
+        promise: chat.sendMessageWithWindow(request.chatMessage, [], { clearConversation: true }),
+        timeout: 4000,
+        errorMessage: i18n.translate('explore.queryPanelEditor.pplLintFix.chatTimeout', {
+          defaultMessage: 'Timed out opening AI chat for this PPL fix.',
+        }),
+      }).catch((error) => {
+        // On failure to open chat, drop the context entry we just added so it does
+        // not leak into an unrelated future conversation.
+        contextStore?.removeContextById?.(PPL_LINT_FIX_CONTEXT_ID_PREFIX + request.requestId);
+        services.notifications?.toasts?.addWarning(
+          error instanceof Error
+            ? error.message
+            : i18n.translate('explore.queryPanelEditor.pplLintFix.chatError', {
+                defaultMessage: 'Could not open AI chat for this PPL fix.',
+              })
+        );
+      });
+    },
+    [chat, editorRef, services.notifications?.toasts, services.contextProvider]
+  );
+
+  const aiFixHooks = useMemo<PPLLintAiFixHooks | undefined>(
+    () =>
+      chatIsAvailable
+        ? {
+            aiFixToolName: APPLY_PPL_LINT_FIX_EXPLORE_TOOL_NAME,
+            onAskAiFix,
+          }
+        : undefined,
+    [chatIsAvailable, onAskAiFix]
+  );
+
   const getLintContext = useCallback(
-    (): PPLLintContext => buildPPLLintContext(datasetRef.current, lintFieldsRef.current, services),
+    (): PPLLintContext =>
+      buildPPLLintContext(datasetRef.current, lintFieldsRef.current, services, aiFixHooks),
     // buildPPLLintContext only reads services.uiSettings and services.http;
     // lintFieldsRef.current is a stable ref read at call time.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [services.uiSettings, services.http]
+    [services.uiSettings, services.http, aiFixHooks]
   );
+  getLintContextRef.current = getLintContext;
 
   // Keep the refs updated with latest context
   useEffect(() => {
@@ -236,7 +332,17 @@ export const useQueryPanelEditor = (props: QueryEditorProps): UseQueryPanelEdito
         try {
           // onlyCheckCache is left false: a cache-only fetch returns undefined
           // on a miss (non-index-pattern datasets), which would throw below.
-          const indexPattern = await dataViews.get(datasetId);
+          // Probe per-source AI reachability alongside the field load, only when
+          // chat is wired at all — otherwise the AI action is already hidden by
+          // the missing opener, so the probe would be a wasted call on every
+          // dataset switch. Fail-open when unprobed (undefined leaves it shown).
+          const shouldProbeAi = Boolean(services.http && chatIsAvailable);
+          const [indexPattern, aiAgentAvailableForSource] = await Promise.all([
+            dataViews.get(datasetId),
+            shouldProbeAi
+              ? getAiAgentAvailableForDataSource(services.http, dataSourceId, 5000)
+              : Promise.resolve(undefined),
+          ]);
           if (cancelled || !indexPattern) {
             return;
           }
@@ -260,6 +366,7 @@ export const useQueryPanelEditor = (props: QueryEditorProps): UseQueryPanelEdito
             typeMap,
             disabledObjectFields,
             visibleIndices,
+            aiAgentAvailableForSource,
           };
         } catch {
           if (cancelled) {
@@ -290,6 +397,7 @@ export const useQueryPanelEditor = (props: QueryEditorProps): UseQueryPanelEdito
     dataViews,
     editorRef,
     getLintContext,
+    chatIsAvailable,
     services.http,
   ]);
 
