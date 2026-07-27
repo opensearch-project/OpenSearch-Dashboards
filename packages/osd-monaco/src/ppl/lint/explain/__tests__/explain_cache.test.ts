@@ -69,6 +69,32 @@ describe('explainCache', () => {
     });
   });
 
+  it('does not cache unsupported, so enabling Calcite is picked up', async () => {
+    // `unsupported` reflects the cluster's engine settings, not the query, and
+    // nothing in production invalidates this cache when an administrator toggles
+    // Calcite — so caching it would pin the verdict for the whole session.
+    const post = jest.fn().mockResolvedValueOnce({ root: {} }).mockResolvedValueOnce(okPlan);
+
+    expect((await explainCache.resolveResult(http(post), 'q', 'ds-1')).status).toBe('unsupported');
+    expect((await explainCache.resolveResult(http(post), 'q', 'ds-1')).status).toBe('ok');
+    expect(post).toHaveBeenCalledTimes(2);
+  });
+
+  it('still deduplicates concurrent requests that resolve to unsupported', async () => {
+    // Not caching the verdict must not cost in-flight deduplication: several
+    // passes over the same text within one window still make one request.
+    let resolve!: (value: unknown) => void;
+    const post = jest.fn().mockReturnValue(new Promise((r) => (resolve = r)));
+
+    const first = explainCache.resolveResult(http(post), 'q', 'ds-1');
+    const second = explainCache.resolveResult(http(post), 'q', 'ds-1');
+    resolve({ root: {} });
+
+    expect((await first).status).toBe('unsupported');
+    expect((await second).status).toBe('unsupported');
+    expect(post).toHaveBeenCalledTimes(1);
+  });
+
   it('returns an error resolution and does not cache it (retries next time)', async () => {
     const post = jest.fn().mockRejectedValueOnce(new Error('boom')).mockResolvedValueOnce(okPlan);
     const first = await explainCache.resolveResult(http(post), 'q', 'ds-1');

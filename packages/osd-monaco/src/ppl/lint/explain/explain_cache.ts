@@ -142,13 +142,22 @@ class ExplainCache {
           ? { status: 'ok', plan }
           : { status: 'unsupported' };
         if (this.epoch === requestEpoch) {
-          if (cache.size >= MAX_ENTRIES) {
-            const oldest = cache.keys().next().value;
-            if (oldest !== undefined) {
-              cache.delete(oldest);
+          // Only a real plan is cached. `unsupported` means the response had no
+          // Calcite plan, which depends on the cluster's engine settings rather
+          // than the query — and nothing in production invalidates this cache
+          // when an administrator toggles Calcite, so caching it would make the
+          // verdict permanent for the session. In-flight deduplication below is
+          // unaffected, so a stream of passes over the same text still collapses
+          // to one request.
+          if (resolution.status === 'ok') {
+            if (cache.size >= MAX_ENTRIES) {
+              const oldest = cache.keys().next().value;
+              if (oldest !== undefined) {
+                cache.delete(oldest);
+              }
             }
+            cache.set(k, resolution);
           }
-          cache.set(k, resolution);
           pending.delete(k);
         }
         // A pre-clear response is still returned to its own caller — the
