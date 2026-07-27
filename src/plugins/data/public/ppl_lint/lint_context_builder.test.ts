@@ -70,7 +70,8 @@ describe('buildPPLLintContext', () => {
     expect(ctx.dataSourceId).toBe('mds-1');
     expect(ctx.dataSourceVersion).toBe('3.8.0');
     expect(ctx.useRuntimeGrammar).toBe(true);
-    expect(ctx.isCalcite).toBe(true);
+    // Unknown until the engine is measured; see the engine-state cases below.
+    expect(ctx.isCalcite).toBeUndefined();
     expect(ctx.http).toBe(services.http);
     expect(ctx.overrides).toEqual({ 'some-rule': { enabled: false } });
     expect(mockBuildOverrides).toHaveBeenCalledWith(services.uiSettings);
@@ -107,7 +108,9 @@ describe('buildPPLLintContext', () => {
 
     expect(mockGetResolvedVersion).toHaveBeenCalledWith(undefined);
     expect(ctx.dataSourceVersion).toBe('3.6.0');
-    expect(ctx.isCalcite).toBe(true);
+    // The resolved version feeds the grammar decision; the engine stays unknown
+    // until measured.
+    expect(ctx.isCalcite).toBeUndefined();
   });
 
   it('uses dataset version over resolved version when both exist', () => {
@@ -243,18 +246,61 @@ describe('buildPPLLintContext', () => {
     expect(buildPPLLintContext(typeOnly, {}, services).engineType).toBe('data-source');
   });
 
-  it('prefers cached calciteEnabled over the version heuristic (authoritative)', () => {
+  it('reports a measured calciteEnabled:false, overriding the version', () => {
     // A >= 3.3 cluster with Calcite administratively disabled: the version says
-    // Calcite, the cached settings say it is off, and the cache must win.
-    mockGetCachedSettings.mockReturnValue({ calciteEnabled: false, allJoinTypesAllowed: false });
-    const ctx = buildPPLLintContext(dataset, {}, services);
-    expect(ctx.isCalcite).toBe(false);
+    // Calcite is likely, the measured settings say it is off, and the reading wins.
+    mockGetCachedSettings.mockReturnValue({
+      calciteEnabled: false,
+      allJoinTypesAllowed: false,
+      calciteMeasured: true,
+    });
+    expect(buildPPLLintContext(dataset, {}, services).isCalcite).toBe(false);
   });
 
-  it('falls back to the version heuristic when no settings are cached', () => {
+  it('reports a measured calciteEnabled:true', () => {
+    mockGetCachedSettings.mockReturnValue({
+      calciteEnabled: true,
+      allJoinTypesAllowed: false,
+      calciteMeasured: true,
+    });
+    expect(buildPPLLintContext(dataset, {}, services).isCalcite).toBe(true);
+  });
+
+  it('stays unknown on a >= 3.3 cluster until the engine is measured', () => {
+    // The version cannot see an admin-disabled Calcite, so it is not proof.
     mockGetCachedSettings.mockReturnValue(undefined);
-    const ctx = buildPPLLintContext(dataset, {}, services);
-    expect(ctx.isCalcite).toBe(true);
+    expect(buildPPLLintContext(dataset, {}, services).isCalcite).toBeUndefined();
+  });
+
+  it('stays unknown when the settings read failed open', () => {
+    // The route fails open to calciteEnabled:true. Without calciteMeasured that
+    // is the engine default, not a reading, so it must not enable Calcite rules.
+    mockGetCachedSettings.mockReturnValue({
+      calciteEnabled: true,
+      allJoinTypesAllowed: false,
+      calciteMeasured: false,
+    });
+    expect(buildPPLLintContext(dataset, {}, services).isCalcite).toBeUndefined();
+  });
+
+  it('treats a response from an older server (no calciteMeasured) as unmeasured', () => {
+    mockGetCachedSettings.mockReturnValue({ calciteEnabled: true, allJoinTypesAllowed: false });
+    expect(buildPPLLintContext(dataset, {}, services).isCalcite).toBeUndefined();
+  });
+
+  it('marks isCalcite false for an Open Distro engine regardless of measurement', () => {
+    // Elasticsearch speaks Open Distro SQL/PPL and has no Calcite engine, so the
+    // engine type is conclusive even if a settings read claims otherwise.
+    mockGetCachedSettings.mockReturnValue({
+      calciteEnabled: true,
+      allJoinTypesAllowed: false,
+      calciteMeasured: true,
+    });
+    const esDataset = {
+      id: 'dataset-es',
+      dataSource: { id: 'mds-es', version: '7.10.2', engineType: 'Elasticsearch' },
+    };
+    expect(buildPPLLintContext(esDataset, {}, services).isCalcite).toBe(false);
   });
 
   it('leaves fields undefined when the cache is empty', () => {

@@ -60,6 +60,12 @@ function asBareField(
 }
 
 export const typeMismatchNumericDetector: Detector = (tree, config, context, ruleNameToIndex) => {
+  // Verified on Calcite only; the version filter enforces the same predicate,
+  // but a direct detector invocation bypasses it.
+  if (context.isCalcite !== true) {
+    return [];
+  }
+
   const typeMap = context.typeMap;
   if (!typeMap || typeMap.size === 0) {
     return [];

@@ -15,7 +15,11 @@ describe('PPLWorkerImpl typeMap hydration', () => {
   const worker = new PPLWorkerImpl();
 
   it('rebuilds typeMap from the flattened record and fires a type-aware rule', async () => {
+    // agg-on-text is gated to Calcite >= 3.7; declare that surface so the test
+    // exercises typeMap hydration rather than the version filter.
     const context: SerializableLintContext = {
+      dataSourceVersion: '3.8.0',
+      isCalcite: true,
       typeMap: { name: 'text' },
     };
     const { diagnostics } = await worker.lint('search t | stats avg(name)', context);

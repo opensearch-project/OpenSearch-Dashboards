@@ -16,6 +16,12 @@ import { findLongestTypedPrefix, parseFieldPath } from '../field_path';
 const FLAT_OBJECT_TYPES: ReadonlySet<string> = new Set(['flat_object']);
 
 export const flatObjectSubfieldDetector: Detector = (tree, config, context, ruleNameToIndex) => {
+  // Verified on Calcite only; the version filter enforces the same predicate,
+  // but a direct detector invocation bypasses it.
+  if (context.isCalcite !== true) {
+    return [];
+  }
+
   const typeMap = context.typeMap;
   if (!typeMap || typeMap.size === 0) {
     return [];

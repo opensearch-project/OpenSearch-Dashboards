@@ -26,7 +26,9 @@ const typeMap = new Map<string, string>([
   ['name', 'text'],
   ['wordcount', 'token_count'],
 ]);
-const ctx: LintRunContext = { typeMap };
+// The engine surface the rule is gated to (Calcite >= 3.7) must be declared too:
+// the version filter suppresses a Calcite-only rule until the engine is measured.
+const ctx: LintRunContext = { typeMap, dataSourceVersion: '3.8.0', isCalcite: true };
 
 // --- Pattern A: end-to-end through the analyzer (real bundled catalog) --------
 
@@ -143,7 +145,22 @@ describe('type-mismatch-numeric (direct detector, sentinel config)', () => {
     const diags = typeMismatchNumericDetector(
       buildTree('search t | where age = "thirty"'),
       config,
-      { typeMap: new Map<string, string>() },
+      { isCalcite: true, typeMap: new Map<string, string>() },
+      ruleNameToIndex
+    );
+    expect(diags).toEqual([]);
+  });
+
+  // The version filter also enforces this, but a direct invocation bypasses it.
+  // The typeMap is populated so engine state is the only variable.
+  it.each([
+    ['false', false],
+    ['undefined', undefined],
+  ])('self-suppresses when isCalcite is %s', (_label, isCalcite) => {
+    const diags = typeMismatchNumericDetector(
+      buildTree('search t | where age = "thirty"'),
+      config,
+      { isCalcite, typeMap },
       ruleNameToIndex
     );
     expect(diags).toEqual([]);

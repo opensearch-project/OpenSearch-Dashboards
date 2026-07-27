@@ -74,7 +74,15 @@ export function runLint(tree: ParserRuleContext, options: RunLintOptions): Diagn
       !config.enabled ||
       config.needsExplain ||
       (config.runtimeOnly && context?.grammarSurface !== 'runtime-bundle') ||
-      !appliesTo(config, dataSourceVersion, context?.isCalcite, knownVersion) ||
+      // The catalog severity is passed separately: `config` carries the user's
+      // merged override, which must not decide the unknown-version policy.
+      !appliesTo(
+        config,
+        dataSourceVersion,
+        context?.isCalcite,
+        knownVersion,
+        localConfig.severity
+      ) ||
       (config.needsContext && isContextEmpty(context)) ||
       (config.sourceScoped && sourceConflict)
     ) {

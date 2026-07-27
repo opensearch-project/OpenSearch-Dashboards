@@ -107,11 +107,15 @@ export function buildPPLLintContext(
     lintFields.dataSourceId === dsId &&
     lintFields.datasetType === dataset?.type;
 
-  // Prefer backend-reported settings; the version heuristic can't see an
-  // admin-disabled Calcite on a >= 3.3 cluster, so cached settings win.
-  const isCalcite = cachedSettings
-    ? cachedSettings.calciteEnabled
-    : deriveIsCalcite(effectiveVersion);
+  // Only a reading the route actually took counts. The route fails open, so a
+  // cached response from a failed read still says `calciteEnabled: true` — using
+  // it would let Calcite-only rules fire against an unreachable or 403 cluster.
+  // Leaving this undefined keeps those rules quiet until a real reading arrives,
+  // and the settings cache re-lints both hosts when one does.
+  const measuredCalciteEnabled =
+    cachedSettings?.calciteMeasured === true ? cachedSettings.calciteEnabled : undefined;
+
+  const isCalcite = deriveIsCalcite(effectiveVersion, engineType, measuredCalciteEnabled);
 
   return {
     useRuntimeGrammar: shouldUseRuntimeGrammar(dsId, effectiveVersion, engineType),

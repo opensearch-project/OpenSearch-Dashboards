@@ -26,42 +26,125 @@ export interface PipelineShape {
   createdFields: Set<string>;
 }
 
-const COMMAND_RULE_NAMES = [
-  'searchCommand',
-  'whereCommand',
-  'fieldsCommand',
-  'tableCommand',
-  'joinCommand',
-  'renameCommand',
-  'statsCommand',
-  'eventstatsCommand',
-  'streamstatsCommand',
-  'dedupCommand',
-  'sortCommand',
-  'evalCommand',
-  'headCommand',
-  'binCommand',
-  'topCommand',
-  'rareCommand',
-  'grokCommand',
-  'parseCommand',
-  'spathCommand',
-  'patternsCommand',
-  'lookupCommand',
-  'fillnullCommand',
-  'trendlineCommand',
-  'appendcolCommand',
-  'appendCommand',
-  'expandCommand',
-  'flattenCommand',
-  'reverseCommand',
-  'regexCommand',
-  'timechartCommand',
-  'rexCommand',
-  'replaceCommand',
-  'unionCommand',
-  'multisearchCommand',
-];
+/**
+ * What a command does to the row order it receives.
+ *
+ * - `preserves` — rows come out in the order they went in.
+ * - `establishes` — the command imposes its own deterministic order, so whatever
+ *   order it received no longer matters and the result is still ordered.
+ * - `invalidates` — the outgoing order is not guaranteed.
+ *
+ * Every command must be classified, because an unclassified one is invisible to
+ * {@link buildPipelineShape}: it never becomes a stage, so `head-without-sort`
+ * treats it as order-preserving AND the fields it creates are never registered,
+ * which makes field-validation report them as unknown.
+ *
+ * Classifications were read off `_explain` on a live 3.8 cluster: a surviving
+ * top-level `sort0` means the incoming order carried through, a new top-level
+ * sort means the command established one, and an aggregate or union that
+ * swallows the sort means the order is gone.
+ */
+export type CommandOrderEffect = 'preserves' | 'establishes' | 'invalidates';
+
+/**
+ * Every direct alternative of the grammar's `commands` rule, on both the bundled
+ * (203-rule) and runtime (259-rule on 3.8) surfaces, plus the initial-position
+ * commands that can start a pipeline.
+ *
+ * Names are resolved per grammar, so an entry absent from the active grammar is
+ * simply skipped — which is why aliases for the same command can coexist here.
+ */
+const COMMAND_ORDER_EFFECTS: Record<string, CommandOrderEffect> = {
+  // Row-shaping commands: they add, rename, drop, or reformat columns and emit
+  // one row per input row, in order.
+  searchCommand: 'preserves',
+  whereCommand: 'preserves',
+  fieldsCommand: 'preserves',
+  tableCommand: 'preserves',
+  renameCommand: 'preserves',
+  evalCommand: 'preserves',
+  headCommand: 'preserves',
+  binCommand: 'preserves',
+  grokCommand: 'preserves',
+  parseCommand: 'preserves',
+  rexCommand: 'preserves',
+  spathCommand: 'preserves',
+  patternsCommand: 'preserves',
+  regexCommand: 'preserves',
+  fillnullCommand: 'preserves',
+  flattenCommand: 'preserves',
+  reverseCommand: 'preserves',
+  dedupCommand: 'preserves',
+  streamstatsCommand: 'preserves',
+  trendlineCommand: 'preserves',
+  appendcolCommand: 'preserves',
+  convertCommand: 'preserves',
+  fieldformatCommand: 'preserves',
+  nomvCommand: 'preserves',
+  foreachCommand: 'preserves',
+  // Expansion multiplies rows, but the copies stay grouped with their source row,
+  // so a prior sort still holds.
+  expandCommand: 'preserves',
+  mvexpandCommand: 'preserves',
+  // Adds a per-row total column; no union, no re-sort.
+  addtotalsCommand: 'preserves',
+
+  // These impose their own order.
+  sortCommand: 'establishes',
+  // top/rare rank by count (ROW_NUMBER over ORDER BY count, with the field list
+  // as a deterministic tie-break) and are one grammar rule from 3.6 on.
+  topCommand: 'establishes',
+  rareCommand: 'establishes',
+  rareTopCommand: 'establishes',
+  // Both aggregate and then sort by the row-split key / time bucket.
+  chartCommand: 'establishes',
+  timechartCommand: 'establishes',
+
+  // Aggregation, pivots, joins, and unions: the incoming order does not survive.
+  statsCommand: 'invalidates',
+  eventstatsCommand: 'invalidates',
+  joinCommand: 'invalidates',
+  lookupCommand: 'invalidates',
+  appendCommand: 'invalidates',
+  unionCommand: 'invalidates',
+  multisearchCommand: 'invalidates',
+  replaceCommand: 'invalidates',
+  // Output rows are the input columns, so an upstream row order is meaningless.
+  transposeCommand: 'invalidates',
+  // Groups rows into arrays via an aggregate that swallows the sort.
+  mvcombineCommand: 'invalidates',
+  // Appends a summary row through a union.
+  appendPipeCommand: 'invalidates',
+  addcoltotalsCommand: 'invalidates',
+  // Joins a second table, like lookup.
+  graphLookupCommand: 'invalidates',
+  // Re-sorts by span and series.
+  timewrapCommand: 'invalidates',
+  // ML commands route through a separate transport action rather than the query
+  // pipeline. Not verifiable on a cluster without the ML plugin, so treated
+  // conservatively: an unnecessary "add sort" hint beats a silent false negative.
+  adCommand: 'invalidates',
+  kmeansCommand: 'invalidates',
+  mlCommand: 'invalidates',
+
+  // Metadata commands. They start a pipeline rather than transform one, and
+  // return a small fixed result set in a defined order.
+  describeCommand: 'establishes',
+  showDataSourcesCommand: 'establishes',
+  restCommand: 'establishes',
+};
+
+/** Commands whose row order survives, for {@link CommandOrderEffect} consumers. */
+export const ORDER_PRESERVING_COMMANDS: ReadonlySet<string> = new Set(
+  Object.keys(COMMAND_ORDER_EFFECTS).filter((name) => COMMAND_ORDER_EFFECTS[name] === 'preserves')
+);
+
+/** Commands that impose their own deterministic order. */
+export const ORDER_ESTABLISHING_COMMANDS: ReadonlySet<string> = new Set(
+  Object.keys(COMMAND_ORDER_EFFECTS).filter((name) => COMMAND_ORDER_EFFECTS[name] === 'establishes')
+);
+
+export const COMMAND_RULE_NAMES = Object.keys(COMMAND_ORDER_EFFECTS);
 
 function buildIndexToCommandName(ruleNameToIndex: RuleNameToIndex): Map<number, string> {
   const map = new Map<number, string>();
@@ -73,6 +156,10 @@ function buildIndexToCommandName(ruleNameToIndex: RuleNameToIndex): Map<number, 
   }
   return map;
 }
+
+// Default totals column name `addtotals`/`addcoltotals` use when FIELDNAME is
+// omitted (confirmed against the live 3.8 engine).
+const TOTALS_DEFAULT_FIELD = 'Total';
 
 // Default output field name `patterns` uses when NEW_FIELD is omitted.
 const PATTERNS_DEFAULT_FIELD = 'patterns_field';
@@ -253,6 +340,14 @@ function collectCreatedFields(
       }
     }
   }
+
+  // (d) Named-slot extraction: addtotals / addcoltotals. Both add a totals column
+  // named by `FIELDNAME = <literal>`, defaulting to `Total` (confirmed on a live
+  // 3.8 cluster). Neither uses `AS`, so the scans above never see the name.
+  if (stage.command === 'addtotalsCommand' || stage.command === 'addcoltotalsCommand') {
+    const fieldName = findSlotValueAfterKeyword(stage.node, 'FIELDNAME');
+    out.add(fieldName ? unquote(fieldName) : TOTALS_DEFAULT_FIELD);
+  }
 }
 
 export function buildPipelineShape(
@@ -334,12 +429,20 @@ export function collectAlternateSourceSubtrees(
     }
   }
 
-  // appendcol's bracketed pipeline computes an attached column; its internal row
-  // order is independent of the main pipeline, so commands inside it must not
-  // affect (or be affected by) the top-level sort/head ordering analysis.
-  for (const node of findAllDescendantsByRule(tree, ruleNameToIndex, 'appendcolCommand')) {
-    subtrees.add(node);
+  // Commands carrying a bracketed sub-pipeline: its internal row order is
+  // independent of the main pipeline, so commands inside it must not affect (or
+  // be affected by) the top-level sort/head ordering analysis. Without this, a
+  // `sort` inside the brackets would suppress an unordered outer `head`.
+  for (const name of ['appendcolCommand', 'appendPipeCommand', 'foreachCommand']) {
+    for (const node of findAllDescendantsByRule(tree, ruleNameToIndex, name)) {
+      subtrees.add(node);
+    }
   }
+
+  // graphlookup is deliberately NOT pruned. It joins a second table like lookup,
+  // but its `as <name>` output IS a column on the outer pipeline (verified on a
+  // live 3.8 cluster: `graphlookup ... as outf | fields outf` returns `outf`), so
+  // pruning it would drop that created field and false-flag a valid reference.
 
   for (const node of findAllDescendantsByRule(tree, ruleNameToIndex, 'subSearch')) {
     subtrees.add(node);

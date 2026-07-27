@@ -28,16 +28,33 @@ interface StoredRule {
 }
 
 /**
+ * Read the PPL lint rules uiSetting, tolerating its absence.
+ *
+ * The key is registered by queryEnhancements, but this module is called from
+ * explore and data, neither of which requires that plugin — so on a deployment
+ * with queryEnhancements disabled the key is undeclared and `get()` throws,
+ * which would break the query editor's mount even with lint off.
+ *
+ * `isDeclared` is the guard rather than a `get()` default, because the setting is
+ * registered `type: 'json'`: a default is substituted for the registered value
+ * and then JSON-parsed, so passing `[]` or `{}` would throw on every deployment
+ * where the key IS registered and the user has not customised it.
+ */
+function readRulesSetting(uiSettings: IUiSettingsClient): StoredRule[] | undefined {
+  if (!uiSettings.isDeclared(UI_SETTINGS.QUERY_ENHANCEMENTS_PPL_LINT_RULES)) {
+    return undefined;
+  }
+  return uiSettings.get<StoredRule[] | undefined>(UI_SETTINGS.QUERY_ENHANCEMENTS_PPL_LINT_RULES);
+}
+
+/**
  * Build a {@link BundleRuleOverrides} from the PPL lint rules uiSetting.
  * Only emits fields that differ from catalog defaults; severity is clamped to MIN_SEVERITY.
  */
 export function buildOverridesFromSettings(uiSettings: IUiSettingsClient): BundleRuleOverrides {
   const overrides: BundleRuleOverrides = {};
 
-  const stored = uiSettings.get<StoredRule[] | undefined>(
-    UI_SETTINGS.QUERY_ENHANCEMENTS_PPL_LINT_RULES,
-    undefined
-  );
+  const stored = readRulesSetting(uiSettings);
   if (!Array.isArray(stored)) {
     return overrides;
   }
@@ -89,10 +106,7 @@ export const COMMAND_SUGGESTION_RULE_ID = 'command-suggestion';
  * preserving the pre-toggle behavior; only an explicit `enabled: false` turns it off.
  */
 export function isCommandSuggestionEnabled(uiSettings: IUiSettingsClient): boolean {
-  const stored = uiSettings.get<StoredRule[] | undefined>(
-    UI_SETTINGS.QUERY_ENHANCEMENTS_PPL_LINT_RULES,
-    undefined
-  );
+  const stored = readRulesSetting(uiSettings);
   if (!Array.isArray(stored)) {
     return true;
   }

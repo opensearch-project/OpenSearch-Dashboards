@@ -67,20 +67,29 @@ const ruleIds = (query: string, context?: Partial<LintRunContext>) =>
 
 // A firing query + the typeMap it needs, for each rule that self-suppresses
 // without type metadata.
+// All three metadata rules are gated to Calcite (>= 3.7, and >= 3.8 for
+// flat-object-subfield), so every firing case must declare that surface
+// alongside its typeMap — the version filter suppresses a Calcite-only rule
+// until the engine is measured.
+const CALCITE_ENGINE: Partial<LintRunContext> = { dataSourceVersion: '3.8.0', isCalcite: true };
+
 const AGG_QUERY = 'search t | stats avg(name)';
-const AGG_TYPES: Partial<LintRunContext> = { typeMap: new Map([['name', 'text']]) };
+const AGG_TYPES: Partial<LintRunContext> = {
+  ...CALCITE_ENGINE,
+  typeMap: new Map([['name', 'text']]),
+};
 
 const FLAT_QUERY = 'search t | fields attributes';
-// flat-object-subfield is gated to Calcite >= 3.8, so its firing case must declare
-// that surface alongside the typeMap.
-const FLAT_ENGINE: Partial<LintRunContext> = { dataSourceVersion: '3.8.0', isCalcite: true };
 const FLAT_TYPES: Partial<LintRunContext> = {
-  ...FLAT_ENGINE,
+  ...CALCITE_ENGINE,
   typeMap: new Map([['attributes', 'flat_object']]),
 };
 
 const MISMATCH_QUERY = 'search t | where age = "thirty"';
-const MISMATCH_TYPES: Partial<LintRunContext> = { typeMap: new Map([['age', 'long']]) };
+const MISMATCH_TYPES: Partial<LintRunContext> = {
+  ...CALCITE_ENGINE,
+  typeMap: new Map([['age', 'long']]),
+};
 
 describe('local rules: product-path plumbing (catalog + registry + runLint, compiled-simplified)', () => {
   describe('each enabled rule fires end-to-end with the real catalog message', () => {
@@ -112,7 +121,7 @@ describe('local rules: product-path plumbing (catalog + registry + runLint, comp
 
     it('flat-object-subfield is suppressed when the context carries no typeMap', () => {
       // Enabling surface present, so the absent typeMap is the only suppression cause.
-      expect(ruleIds(FLAT_QUERY, FLAT_ENGINE)).not.toContain('flat-object-subfield');
+      expect(ruleIds(FLAT_QUERY, CALCITE_ENGINE)).not.toContain('flat-object-subfield');
     });
 
     it('type-mismatch-numeric is suppressed when the context carries no typeMap', () => {

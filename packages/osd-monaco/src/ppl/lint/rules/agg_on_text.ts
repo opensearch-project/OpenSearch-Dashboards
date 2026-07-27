@@ -24,6 +24,13 @@ const NUMERIC_ONLY_AGGS: ReadonlySet<string> = new Set([
 const TEXT_TYPES: ReadonlySet<string> = new Set(['text', 'keyword']);
 
 export const aggOnTextDetector: Detector = (tree, config, context, ruleNameToIndex) => {
+  // The silent-null behaviour this rule describes is Calcite-only — v2 raises a
+  // hard error instead. The version filter enforces the same predicate, but a
+  // direct detector invocation bypasses it, so check here too.
+  if (context.isCalcite !== true) {
+    return [];
+  }
+
   const typeMap = context.typeMap;
   if (!typeMap || typeMap.size === 0) {
     return [];

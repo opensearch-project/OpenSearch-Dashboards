@@ -16,8 +16,12 @@ import type { CatalogEntry, LintRunContext } from '../types';
 // without a typeMap. `count`/`min`/`max` are type-agnostic and excluded;
 // `percentile` parses through its own alternative and never reaches the rule.
 
-// Type metadata for the field names used across the query fixtures.
+// Type metadata for the field names used across the query fixtures, plus the
+// engine surface the rule is gated to (Calcite >= 3.7). Both are required: the
+// version filter suppresses a Calcite-only rule until the engine is measured.
 const ctx: LintRunContext = {
+  dataSourceVersion: '3.8.0',
+  isCalcite: true,
   fields: new Set(['name', 'tag', 'age', 'balance']),
   typeMap: new Map<string, string>([
     ['name', 'text'],
@@ -137,7 +141,10 @@ describe('agg-on-text (direct detector, sentinel config, Pattern B)', () => {
   }
 
   it('emits the configured message and carries hover facts', () => {
-    const context: LintRunContext = { typeMap: new Map([['name', 'text']]) };
+    const context: LintRunContext = {
+      isCalcite: true,
+      typeMap: new Map([['name', 'text']]),
+    };
     const found = aggOnTextDetector(
       buildTree('source=t | stats avg(name)'),
       config,
@@ -154,7 +161,23 @@ describe('agg-on-text (direct detector, sentinel config, Pattern B)', () => {
     const found = aggOnTextDetector(
       buildTree('source=t | stats avg(name)'),
       config,
-      {},
+      { isCalcite: true },
+      ruleNameToIndex
+    );
+    expect(found).toEqual([]);
+  });
+
+  // The version filter also enforces this, but a direct invocation bypasses it,
+  // so the detector must refuse a non-Calcite or unknown engine on its own. The
+  // typeMap is populated in both cases so engine state is the only variable.
+  it.each([
+    ['false', false],
+    ['undefined', undefined],
+  ])('self-suppresses when isCalcite is %s', (_label, isCalcite) => {
+    const found = aggOnTextDetector(
+      buildTree('source=t | stats avg(name)'),
+      config,
+      { isCalcite, typeMap: new Map([['name', 'text']]) },
       ruleNameToIndex
     );
     expect(found).toEqual([]);

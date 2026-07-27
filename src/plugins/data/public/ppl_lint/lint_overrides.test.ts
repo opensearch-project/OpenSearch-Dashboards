@@ -16,10 +16,32 @@ jest.mock('@osd/monaco', () => ({
   ],
 }));
 
+const RULES_KEY = 'query:enhancements:pplLint:rules';
+
 function makeUiSettings(rules: unknown): IUiSettingsClient {
   return {
-    get: (key: string, defaultOverride?: unknown) =>
-      key === 'query:enhancements:pplLint:rules' ? rules : defaultOverride,
+    isDeclared: (key: string) => key === RULES_KEY,
+    get: (key: string, defaultOverride?: unknown) => (key === RULES_KEY ? rules : defaultOverride),
+  } as unknown as IUiSettingsClient;
+}
+
+/**
+ * Stands in for core's UiSettingsClient on a deployment where queryEnhancements
+ * is disabled: the key is undeclared, so `get()` throws rather than returning a
+ * default. A permissive fake cannot reproduce this, which is why the throw went
+ * unnoticed.
+ */
+function makeUndeclaredUiSettings(): IUiSettingsClient {
+  return {
+    isDeclared: () => false,
+    get: (key: string, defaultOverride?: unknown) => {
+      if (defaultOverride !== undefined) {
+        return defaultOverride;
+      }
+      throw new Error(
+        `Unexpected \`IUiSettingsClient.get("${key}")\` call on unrecognized configuration setting`
+      );
+    },
   } as unknown as IUiSettingsClient;
 }
 
@@ -193,5 +215,18 @@ describe('isCommandSuggestionEnabled', () => {
     expect(
       isCommandSuggestionEnabled(makeUiSettings([{ id: 'command-suggestion', enabled: true }]))
     ).toBe(true);
+  });
+});
+
+describe('an undeclared lint-rules setting (queryEnhancements disabled)', () => {
+  // Both readers run while building the lint context, which the query editor does
+  // on mount with no capability check — so a throw here breaks the editor even
+  // when lint is off. Neither may reach `get()` for an undeclared key.
+  it('does not throw and falls back to catalog defaults', () => {
+    const uiSettings = makeUndeclaredUiSettings();
+    expect(() => buildOverridesFromSettings(uiSettings)).not.toThrow();
+    expect(buildOverridesFromSettings(uiSettings)).toEqual({});
+    expect(() => isCommandSuggestionEnabled(uiSettings)).not.toThrow();
+    expect(isCommandSuggestionEnabled(uiSettings)).toBe(true);
   });
 });

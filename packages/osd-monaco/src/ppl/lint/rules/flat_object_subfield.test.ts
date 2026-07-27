@@ -136,7 +136,10 @@ describe('flat-object-subfield (detector unit + sentinel message)', () => {
     docUrl: 'https://x',
     appliesTo: {},
   };
-  const ctx: LintRunContext = { typeMap: new Map([['attributes', 'flat_object']]) };
+  const ctx: LintRunContext = {
+    isCalcite: true,
+    typeMap: new Map([['attributes', 'flat_object']]),
+  };
 
   function buildTree(query: string): ParserRuleContext {
     const lexer = new SimplifiedOpenSearchPPLLexer(CharStream.fromString(query));
@@ -214,5 +217,20 @@ describe('flat-object-subfield (detector unit + sentinel message)', () => {
       root: 'attributes',
       esType: 'flat_object',
     });
+  });
+
+  // The version filter also enforces this, but a direct invocation bypasses it.
+  // The typeMap is populated so engine state is the only variable.
+  it.each([
+    ['false', false],
+    ['undefined', undefined],
+  ])('self-suppresses when isCalcite is %s', (_label, isCalcite) => {
+    const diags = flatObjectSubfieldDetector(
+      buildTree('search t | fields attributes.http'),
+      config,
+      { isCalcite, typeMap: new Map([['attributes', 'flat_object']]) },
+      ruleNameToIndex
+    );
+    expect(diags).toEqual([]);
   });
 });
