@@ -61,6 +61,16 @@ describe('detectAndSetOptimalTab', () => {
       expect(tab).toBe(EXPLORE_STATISTICS_TAB_ID);
     });
 
+    it('switches to Statistics when query contains | top', async () => {
+      const tab = await runDetect('source = idx | top 10 category', EXPLORE_LOGS_TAB_ID);
+      expect(tab).toBe(EXPLORE_STATISTICS_TAB_ID);
+    });
+
+    it('switches to Statistics when query contains | rare', async () => {
+      const tab = await runDetect('source = idx | rare 10 category', EXPLORE_LOGS_TAB_ID);
+      expect(tab).toBe(EXPLORE_STATISTICS_TAB_ID);
+    });
+
     it('switches to Visualization when query contains | chart', async () => {
       const tab = await runDetect('source = idx | chart count() by cat', EXPLORE_LOGS_TAB_ID);
       expect(tab).toBe(EXPLORE_VISUALIZATION_TAB_ID);
