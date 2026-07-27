@@ -31,6 +31,12 @@ import { normalizeResultRows } from '../../../components/visualizations/utils/no
 import { visualizationRegistry } from '../../../components/visualizations/visualization_registry';
 import { SAMPLE_SIZE_SETTING, VISUALIZATION_EDITOR_APP_ID } from '../../../../common';
 import { VisEditorNoResults } from '../../../application/in_context_vis_editor/component/vis_editor_no_results';
+import {
+  TransformationService,
+  registerAllTransformations,
+  UrlTransformationState,
+} from '../../../components/data_transformations';
+import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 import { AutoVisMeta } from './utils';
 
 export const AUTO_VISUALIZATION_TOOL_NAME = 'auto_create_visualization';
@@ -53,6 +59,11 @@ interface AutoVisualizationArgs {
   // the time range the llm passed
   from?: string;
   to?: string;
+  // Optional transformation pipeline applied to raw query results before rendering
+  transformations?: UrlTransformationState[];
+  // Optional sample row from the ppl_execute result — a single data row as a plain object.
+  // Used to derive the post-transformation column schema
+  sampleRow?: Record<string, unknown>;
 }
 
 interface PreparedQuery {
@@ -77,7 +88,8 @@ function buildEditorPath(
   timeRange?: TimeRange,
   dashboardId?: string,
   dashboardName?: string,
-  originatingApp?: string
+  originatingApp?: string,
+  transformations?: UrlTransformationState[]
 ): string {
   const visState: Record<string, any> = {
     chartType: visConfig.type,
@@ -110,7 +122,13 @@ function buildEditorPath(
       )}`
     : '';
 
-  return `#/?_v=${encodeURIComponent(vParam)}&_eq=${encodeURIComponent(eqParam)}${gParam}${cParam}`;
+  // Encode transformations into _t so initUrlSync restores them directly.
+  const tParam =
+    transformations && transformations.length > 0
+      ? `&_t=${encodeURIComponent(rison.encode(transformations as any))}`
+      : '';
+
+  return `#/?_v=${encodeURIComponent(vParam)}&_eq=${encodeURIComponent(eqParam)}${gParam}${cParam}${tParam}`;
 }
 
 /**
@@ -180,7 +198,6 @@ function resolveChartFromSchema(
 
   // 4. No potential chart and candidates, use table
   if (candidates.length === 0) {
-    // fallback to table vis
     return { chartType: 'table', axesMapping: {} };
   }
 
@@ -209,12 +226,7 @@ function buildPreparedQuery(args: AutoVisualizationArgs): PreparedQuery {
       },
     }),
   };
-
-  return {
-    dataset,
-    language: 'PPL',
-    query: args.query,
-  };
+  return { dataset, language: 'PPL', query: args.query };
 }
 
 /**
@@ -273,7 +285,7 @@ async function executePPLQuery(
   data: DataPublicPluginStart,
   timeRange?: TimeRange,
   abortSignal?: AbortSignal
-): Promise<VisData> {
+): Promise<{ rawRows: OpenSearchSearchHit[]; rawSchema: Array<{ name?: string; type?: string }> }> {
   const uiSettings = core.uiSettings;
   const dataset = preparedQueryObject.dataset;
 
@@ -316,19 +328,62 @@ async function executePPLQuery(
     ...(languageConfig?.fields?.formatter ? { formatter: languageConfig.fields.formatter } : {}),
   });
 
-  const rawResultsHit = rawResults.hits?.hits ?? [];
-  const fieldSchema = searchSource.getDataFrame()?.schema ?? [];
-  return normalizeResultRows(rawResultsHit, fieldSchema);
+  return {
+    rawRows: rawResults.hits?.hits ?? [],
+    rawSchema: searchSource.getDataFrame()?.schema ?? [],
+  };
 }
 
 /**
- * resolve the chart config from ppl execution columns results
+ * Apply a UrlTransformationState[] pipeline to raw rows and return the result.
+ */
+function applyTransformationPipeline(
+  rawRows: OpenSearchSearchHit[],
+  rawSchema: Array<{ name?: string; type?: string }>,
+  transformations: UrlTransformationState[] | undefined
+): { rows: OpenSearchSearchHit[]; finalSchema: Array<{ name?: string; type?: string }> } {
+  if (!transformations || transformations.length === 0) {
+    return { rows: rawRows, finalSchema: rawSchema };
+  }
+  const service = new TransformationService();
+  registerAllTransformations(service);
+  service.restoreFromState(transformations);
+  return service.applyPipeline(rawRows, rawSchema);
+}
+
+// Derive the post-transformation schema without executing PPL given a sample row
+function deriveSchemaAfterTransformations(
+  originalSchema: Array<{ name?: string; type?: string }>,
+  transformations: UrlTransformationState[] | undefined,
+  sampleRow?: Record<string, unknown>
+): Array<{ name?: string; type?: string }> {
+  if (!transformations || transformations.length === 0 || !sampleRow) {
+    return originalSchema;
+  }
+
+  const rows: OpenSearchSearchHit[] = [{ _source: sampleRow } as OpenSearchSearchHit];
+
+  const service = new TransformationService();
+  registerAllTransformations(service);
+  service.restoreFromState(transformations);
+  const { finalSchema } = service.applyPipeline(rows, originalSchema);
+  return finalSchema;
+}
+
+/**
+ * resolve the chart config from ppl execution columns results.
  */
 function buildVisConfig(args: AutoVisualizationArgs): VisualizationConfigResult {
   const preparedQueryObject = buildPreparedQuery(args);
 
-  // 1. get normalized schema
-  const schema = (args.columns || []).map((col) => ({ name: col.name, type: col.type }));
+  // 1. get normalized schema — use post-transformation schema when available
+  const originalSchema = (args.columns || []).map((col) => ({ name: col.name, type: col.type }));
+  const schema = deriveSchemaAfterTransformations(
+    originalSchema,
+    args.transformations,
+    args.sampleRow
+  );
+
   const { numericalColumns, categoricalColumns, dateColumns } = normalizeResultRows([], schema);
 
   // 2. resolve axes mapping and chart type
@@ -368,12 +423,14 @@ function ChartPreview({
   core,
   data,
   timeRange,
+  transformations,
 }: {
   query: PreparedQuery;
   visConfig: RenderChartConfig;
   core: CoreStart;
   data: DataPublicPluginStart;
   timeRange?: TimeRange;
+  transformations?: UrlTransformationState[];
 }) {
   const [visData, setVisData] = useState<VisData | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -381,9 +438,17 @@ function ChartPreview({
   useEffect(() => {
     let cancelled = false;
     const abortController = new AbortController();
+
     executePPLQuery(query, core, data, timeRange, abortController.signal)
-      .then((result) => {
-        if (!cancelled) setVisData(result);
+      .then(({ rawRows, rawSchema }) => {
+        if (cancelled) return;
+        // Apply transformation pipeline before normalizing into VisData columns.
+        const { rows: transformedRows, finalSchema } = applyTransformationPipeline(
+          rawRows,
+          rawSchema,
+          transformations
+        );
+        setVisData(normalizeResultRows(transformedRows, finalSchema));
       })
       .catch((e) => {
         if (!cancelled && !abortController.signal.aborted) {
@@ -525,6 +590,7 @@ export function registerAutoVisualizationAction(
             core={core}
             data={data}
             timeRange={result.resolvedTimeRange}
+            transformations={result.transformations}
           />
           <EuiSpacer size="s" />
           <EuiButton size="s" onClick={() => openVisualizationEditor(core, result.editorPath)}>
@@ -554,7 +620,8 @@ export function registerAutoVisualizationAction(
           resolvedTimeRange,
           dashboardId,
           dashboardName,
-          originatingApp
+          originatingApp,
+          args.transformations
         );
 
         return {
@@ -567,6 +634,7 @@ export function registerAutoVisualizationAction(
           visConfig,
           preparedQuery: query,
           resolvedTimeRange,
+          transformations: args.transformations,
           message: `Created ${resolvedChartType} visualization for ${args.indexName}`,
         };
       } catch (error) {
