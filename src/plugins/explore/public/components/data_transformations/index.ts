@@ -10,6 +10,10 @@ export type {
   ITransformationService,
   FieldSchema,
   UrlTransformationState,
+  TransformationConfigSchema,
+  ConfigFieldSpec,
+  ConfigFieldKind,
+  ConfigEnumOption,
 } from './types';
 
 export {
@@ -25,34 +29,42 @@ export {
 export {
   createLimitTransformation,
   limitTransformationDefinition,
+  limitConfigSchema,
 } from './transformations/limit_transformation';
 export {
   createSortByTransformation,
   sortByTransformationDefinition,
+  sortByConfigSchema,
 } from './transformations/sortby_transformation';
 export {
   createFilterTransformation,
   filterTransformationDefinition,
+  filterConfigSchema,
 } from './transformations/filter_transformation';
 export {
   createFilterFieldsTransformation,
   filterFieldsTransformationDefinition,
+  filterFieldsConfigSchema,
 } from './transformations/filter_fields_transformation';
 export {
   createConvertFieldTypeTransformation,
   convertFieldTypeTransformationDefinition,
+  convertFieldTypeConfigSchema,
 } from './transformations/convert_field_type_transformation';
 export {
   createGroupByTransformation,
   groupByTransformationDefinition,
+  groupByConfigSchema,
 } from './transformations/group_by_transformation';
 export {
   createExtractFieldsTransformation,
   extractFieldsTransformationDefinition,
+  extractFieldsConfigSchema,
 } from './transformations/extract_fields_transformation';
 export {
   createAddFieldTransformation,
   addFieldTransformationDefinition,
+  addFieldConfigSchema,
 } from './transformations/add_field_transformation';
 
 export { TransformPanel } from './transform_panel';

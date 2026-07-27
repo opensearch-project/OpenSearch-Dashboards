@@ -8,6 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { TransformationInstance, TransformationDefinition, FieldSchema } from '../index';
+import { TransformationConfigSchema } from '../types';
 import { FieldSelector } from '../field_selector';
 import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 
@@ -128,4 +129,32 @@ export const filterFieldsTransformationDefinition: TransformationDefinition<Filt
   }),
   iconType: 'tableOfContents',
   createInstance: createFilterFieldsTransformation,
+};
+
+export const filterFieldsConfigSchema: TransformationConfigSchema = {
+  mode: {
+    description: 'Whether to keep only the listed fields (include) or drop them (exclude).',
+    kind: 'enum',
+    defaultValue: 'exclude',
+    required: true,
+    enumOptions: [
+      { value: 'include', label: 'Include only these fields' },
+      { value: 'exclude', label: 'Exclude these fields' },
+    ],
+  },
+  fieldOptions: {
+    description:
+      'List of column names to include or exclude. Only the "name" property is used at runtime; ' +
+      'provide objects with just { name: string }.',
+    kind: 'object[]',
+    defaultValue: [],
+    required: true,
+    nestedSchema: {
+      name: {
+        description: 'Column name from the result schema.',
+        kind: 'field_name',
+        required: true,
+      },
+    },
+  },
 };

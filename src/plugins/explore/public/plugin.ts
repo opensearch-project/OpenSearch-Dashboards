@@ -100,6 +100,8 @@ import {
   registerAutoVisualizationAction,
   AUTO_VISUALIZATION_TOOL_NAME,
 } from './components/visualizations/actions/auto_visualization_action';
+import { registerGetTransformationSchemaAction } from './components/visualizations/actions/get_transformation_schema_action';
+import { GET_TRANSFORMATION_SCHEMA_TOOL_NAME } from './components/visualizations/actions/utils';
 
 export class ExplorePlugin implements Plugin<
   ExplorePluginSetup,
@@ -904,8 +906,12 @@ export class ExplorePlugin implements Plugin<
         plugins.contextProvider
       );
 
+      // Register transformation schema lookup tool
+      registerGetTransformationSchemaAction(registerAssistantAction);
+
       this.unregisterVisualizationTools = () => {
         unregisterAssistantAction(AUTO_VISUALIZATION_TOOL_NAME);
+        unregisterAssistantAction(GET_TRANSFORMATION_SCHEMA_TOOL_NAME);
       };
 
       // Inject contextProvider action helpers into PanelDataService
