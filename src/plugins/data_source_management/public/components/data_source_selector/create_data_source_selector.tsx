@@ -13,6 +13,13 @@ export function createDataSourceSelector(
 ) {
   const { hideLocalCluster } = dataSourcePluginSetup;
   return (props: DataSourceSelectorProps) => (
-    <DataSourceSelector {...props} uiSettings={uiSettings} hideLocalCluster={hideLocalCluster} />
+    <DataSourceSelector
+      {...props}
+      uiSettings={uiSettings}
+      // An explicit `hideLocalCluster` prop from the caller wins; otherwise fall back to the
+      // cluster-wide data_source config default. (Previously the config value always overrode the
+      // prop, so callers like Logs Drilldown that pass `hideLocalCluster` were silently ignored.)
+      hideLocalCluster={props.hideLocalCluster ?? hideLocalCluster}
+    />
   );
 }

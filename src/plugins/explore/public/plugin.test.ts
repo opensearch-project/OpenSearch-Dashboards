@@ -283,9 +283,11 @@ describe('ExplorePlugin', () => {
   });
 
   describe('setup', () => {
-    it('should register explore applications', () => {
+    it('should register explore applications (logs drilldown OFF by default)', () => {
       plugin.setup(coreSetup as any, setupDeps as any);
 
+      // logsDrilldown flag is off in the default mock config → the drilldown app is NOT registered,
+      // so only the 5 always-on apps register (visualization editor + logs/traces/metrics + explore).
       expect(coreSetup.application.register).toHaveBeenCalledTimes(5);
       expect(coreSetup.application.register).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -310,6 +312,25 @@ describe('ExplorePlugin', () => {
           id: 'explore',
           title: 'Discover',
         })
+      );
+      // The feature-flagged Logs Drilldown app is absent.
+      expect(coreSetup.application.register).not.toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'explore/logs-drilldown' })
+      );
+    });
+
+    it('registers the Logs Drilldown app + query-bar action when the feature flag is ON', () => {
+      initializerContext.config.get.mockReturnValue({
+        discoverTraces: { enabled: false },
+        logsDrilldown: { enabled: true },
+      });
+      plugin = new ExplorePlugin(initializerContext as any);
+      plugin.setup(coreSetup as any, setupDeps as any);
+
+      // The 5 always-on apps + the drilldown app = 6 registrations.
+      expect(coreSetup.application.register).toHaveBeenCalledTimes(6);
+      expect(coreSetup.application.register).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'explore/logs-drilldown' })
       );
     });
 

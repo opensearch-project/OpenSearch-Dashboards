@@ -30,6 +30,11 @@ export const EXPLORE_METRICS_EXPLORE_TAB_ID = 'metrics-explore';
 export const VISUALIZATION_EDITOR_APP_ID = 'visualization-editor';
 export const VISUALIZATION_EDITOR_APP_NAME = 'VisualizationEditor';
 
+// Standalone Logs Drilldown app (onboarding canvas): a separate app id under the explore plugin,
+// with its own lightweight mount (no shared Redux store).
+export const LOGS_DRILLDOWN_APP_ID = `${PLUGIN_ID}/logs-drilldown`;
+export const LOGS_DRILLDOWN_APP_NAME = 'Explore logs';
+
 export enum ExploreFlavor {
   Logs = 'logs',
   Traces = 'traces',

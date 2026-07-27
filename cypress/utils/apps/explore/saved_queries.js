@@ -65,7 +65,7 @@ export const ALTERNATE_APPLIED_FILTERS = {
 const getAlternateQueryString = (dataset, language) => {
   switch (language) {
     case QueryLanguages.PPL.name:
-      return `source = ${dataset} | where bytes_transferred < 200`;
+      return `source = ${dataset} | WHERE \`bytes_transferred\` < 200`;
     default:
       throw new Error(`getQueryString encountered unsupported language: ${language}`);
   }

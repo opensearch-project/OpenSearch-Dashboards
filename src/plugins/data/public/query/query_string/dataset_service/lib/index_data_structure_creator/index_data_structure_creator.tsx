@@ -52,6 +52,8 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
   index,
   selectDataStructure,
   services,
+  initialSelectedItems,
+  autoFocus,
 }) => {
   const [selectedItems, setSelectedItems] = useState<SelectedItem[]>([]);
   const [openPopoverIndex, setOpenPopoverIndex] = useState<number | null>(null);
@@ -262,6 +264,36 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
     },
     [path, index, selectDataStructure]
   );
+
+  // Seed the selection once on mount from initialSelectedItems (opt-in; default = empty selection).
+  // Splitting comma-joined titles keeps parity with how multi-index datasets are titled elsewhere.
+  const hasSeededRef = React.useRef(false);
+  useEffect(() => {
+    if (hasSeededRef.current) return;
+    if (!initialSelectedItems || initialSelectedItems.length === 0) return;
+    hasSeededRef.current = true;
+
+    const dataSourceId = path.find((item) => item.type === 'DATA_SOURCE')?.id || 'local';
+    const seen = new Set<string>();
+    const seededItems: SelectedItem[] = [];
+    initialSelectedItems
+      .flatMap((raw) => raw.split(','))
+      .map((title) => title.trim())
+      .filter((title) => title.length > 0)
+      .forEach((title) => {
+        if (seen.has(title)) return;
+        seen.add(title);
+        seededItems.push({
+          id: `${dataSourceId}::${title}`,
+          title,
+          isWildcard: title.includes('*'),
+        });
+      });
+
+    if (seededItems.length > 0) {
+      handleSelectionChange(seededItems);
+    }
+  }, [initialSelectedItems, path, handleSelectionChange]);
 
   const handleRemoveItem = (indexToRemove: number) => {
     const newItems = selectedItems.filter((_, itemIndex) => itemIndex !== indexToRemove);
@@ -514,6 +546,7 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
         onSelectionChange={handleSelectionChange}
         services={services}
         path={path}
+        autoFocus={autoFocus}
       />
 
       <EuiSpacer size="s" />

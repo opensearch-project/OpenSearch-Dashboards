@@ -6,7 +6,7 @@
 import { render, fireEvent } from '@testing-library/react';
 import { of } from 'rxjs';
 import { buildExploreNavPopover } from './nav_popover';
-import { ExploreFlavor } from '../common';
+import { ExploreFlavor, LOGS_DRILLDOWN_APP_ID } from '../common';
 import { httpServiceMock } from '../../../core/public/mocks';
 import { NavPopoverServices, ChromeRecentlyAccessedHistoryItem } from '../../../core/public';
 
@@ -27,8 +27,30 @@ describe('buildExploreNavPopover (Logs)', () => {
 
   afterEach(() => jest.clearAllMocks());
 
-  it('declares new + browse actions', () => {
+  it('declares new + browse actions (no drilldown item when the flag is off / omitted)', () => {
     expect((popover.actions ?? []).map((a) => a.id)).toEqual(['newSearch', 'browseSaved']);
+  });
+
+  it('includes the Explore logs action SECOND when the feature flag is on', () => {
+    const flagged = buildExploreNavPopover(ExploreFlavor.Logs, true);
+    // Ordered: New search → Explore logs → Browse saved searches.
+    expect((flagged.actions ?? []).map((a) => a.id)).toEqual([
+      'newSearch',
+      'logsDrilldown',
+      'browseSaved',
+    ]);
+  });
+
+  it('the drilldown action navigates to the Logs Drilldown app', () => {
+    const flagged = buildExploreNavPopover(ExploreFlavor.Logs, true);
+    const services = makeServices();
+    flagged.actions!.find((a) => a.id === 'logsDrilldown')!.onClick(services);
+    expect(services.navigateToApp).toHaveBeenCalledWith(LOGS_DRILLDOWN_APP_ID, { path: '#/' });
+  });
+
+  it('never shows the drilldown action for a non-Logs flavor even when the flag is on', () => {
+    const traces = buildExploreNavPopover(ExploreFlavor.Traces, true);
+    expect((traces.actions ?? []).map((a) => a.id)).not.toContain('logsDrilldown');
   });
 
   it('opens a blank logs search on "New search"', () => {

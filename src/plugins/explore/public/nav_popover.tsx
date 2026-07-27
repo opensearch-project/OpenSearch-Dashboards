@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { NavPopoverConfig, NavPopoverServices } from '../../../core/public';
-import { PLUGIN_ID, ExploreFlavor } from '../common';
+import { PLUGIN_ID, ExploreFlavor, LOGS_DRILLDOWN_APP_ID } from '../common';
 
 interface RecentItem {
   id: string;
@@ -159,7 +159,10 @@ export function buildMetricsNavPopover(): NavPopoverConfig {
  * Nav-popover config for an explore flavor (Logs/Traces/Metrics): quick actions
  * (new search / browse saved searches) plus a recent-searches list.
  */
-export function buildExploreNavPopover(flavor: ExploreFlavor): NavPopoverConfig {
+export function buildExploreNavPopover(
+  flavor: ExploreFlavor,
+  logsDrilldownEnabled: boolean = false
+): NavPopoverConfig {
   const appId = flavorAppId(flavor);
   return {
     actions: [
@@ -172,6 +175,21 @@ export function buildExploreNavPopover(flavor: ExploreFlavor): NavPopoverConfig 
         iconType: 'plusInCircle',
         onClick: ({ navigateToApp }) => navigateToApp(appId, { path: '#/' }),
       },
+      // Logs-only: the onboarding drilldown canvas lives here (a Logs action, feature-flagged), NOT
+      // as its own top-level side-nav item. Sits second — between New search and Browse saved.
+      ...(flavor === ExploreFlavor.Logs && logsDrilldownEnabled
+        ? [
+            {
+              id: 'logsDrilldown',
+              label: i18n.translate('explore.navPopover.logsDrilldown', {
+                defaultMessage: 'Explore logs',
+              }),
+              iconType: 'inspect',
+              onClick: ({ navigateToApp }: NavPopoverServices) =>
+                navigateToApp(LOGS_DRILLDOWN_APP_ID, { path: '#/' }),
+            },
+          ]
+        : []),
       {
         id: 'browseSaved',
         label: i18n.translate('explore.navPopover.browseSaved', {

@@ -15,30 +15,38 @@ import './resizable_query_container.scss';
 // Approximate pixel height needed for the query panel to show one line:
 // widgets bar (~32px) + editor line (~18px) + editor padding/border (~22px)
 const QUERY_PANEL_SINGLE_LINE_PX = 82;
+// Taller default for the logs visual builder, sized to show its default rows
+// without clipping. Still manually resizable.
+const QUERY_PANEL_BUILDER_PX = 150;
 const QUERY_PANEL_MIN_SIZE = '3%';
 const QUERY_PANEL_MIN_PCT = 3;
 const QUERY_PANEL_MAX_PCT = 72;
 const GENERATED_QUERY_SELECTOR = '.exploreQueryPanelGeneratedQuery';
 const RESIZABLE_CONTAINER_SELECTOR = '.exploreResizableQueryContainer';
 
-// Compute initial size as a percentage of the viewport so the panel
-// always fits at least one editor line regardless of screen height.
-export function getInitialQueryPanelSize(): number {
+// Initial size as a viewport percentage so the panel fits its target height on
+// any screen. `targetPx` is the content height; `maxPct` clamps viewport share.
+export function getInitialQueryPanelSize(
+  targetPx: number = QUERY_PANEL_SINGLE_LINE_PX,
+  maxPct: number = 15
+): number {
   const layoutEl = document.querySelector('.explore-layout');
   const availableHeight = layoutEl?.clientHeight || window.innerHeight || 800;
-  const pct = (QUERY_PANEL_SINGLE_LINE_PX / availableHeight) * 100;
-  // Clamp between 5% and 15% to stay reasonable on all screen sizes
-  return Math.min(Math.max(pct, 5), 15);
+  const pct = (targetPx / availableHeight) * 100;
+  return Math.min(Math.max(pct, 5), maxPct);
 }
 
 interface ResizableQueryContainerProps {
   queryPanel: React.ReactNode;
   children: React.ReactNode;
+  /** Taller default height for the logs visual builder, whose rows don't fit one editor line. */
+  tallDefault?: boolean;
 }
 
 export const ResizableQueryContainer: React.FC<ResizableQueryContainerProps> = ({
   queryPanel,
   children,
+  tallDefault = false,
 }) => {
   const isPromptMode = useSelector(selectIsPromptEditorMode);
   const lastExecutedTranslatedQuery = useSelector(selectLastExecutedTranslatedQuery);
@@ -46,7 +54,13 @@ export const ResizableQueryContainer: React.FC<ResizableQueryContainerProps> = (
 
   const innerRef = useRef<HTMLDivElement | null>(null);
   const rafRef = useRef<number>(0);
-  const initialSize = useMemo(() => getInitialQueryPanelSize(), []);
+  const initialSize = useMemo(
+    () =>
+      tallDefault
+        ? getInitialQueryPanelSize(QUERY_PANEL_BUILDER_PX, 30)
+        : getInitialQueryPanelSize(),
+    [tallDefault]
+  );
 
   // Panel size = userBase + barPct. Tracking them separately lets the
   // generated-query bar grow and shrink the panel by exactly its height

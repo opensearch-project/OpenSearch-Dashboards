@@ -528,6 +528,8 @@ export {
   useQueryStringManager,
   getEffectiveLanguageForAutoComplete,
   useCancelButtonTiming,
+  PPLAnalyzePanel,
+  runPPLAnalyzeInBackground,
 } from './ui';
 
 /**
@@ -572,6 +574,14 @@ export {
   LanguageReference,
   DatasetIndexedViewsService,
   validateTimeRange,
+  getPPLAnalyzeResult$,
+  getPPLAnalyzeLoading$,
+  getPPLAnalyzeOpen$,
+  setPPLAnalyzeResult,
+  setPPLAnalyzeLoading,
+  setPPLAnalyzeOpen,
+  isPPLAnalyzeOpen,
+  PPLAnalyzeResult,
 } from './query';
 
 export { useSavedQuery } from './ui/search_bar';
@@ -663,3 +673,4 @@ export { calciteSettingsCache } from './ppl_lint/calcite_settings_cache';
 export type { LintFieldsCache } from './ppl_lint/lint_context_builder';
 export { lintRuntimePPLQuery } from './antlr/opensearch_ppl/runtime_lint';
 export { pplGrammarCache, shouldUseRuntimeGrammar } from './antlr/opensearch_ppl/ppl_grammar_cache';
+export { fetchColumnValues } from './antlr/shared/utils';

@@ -74,6 +74,20 @@ const run = async () => {
         from: '$euiBorderRadius / 2',
         to: 'calc($euiBorderRadius / 2)',
       },
+      // OUI's euiFocusRing mixin takes a single argument; drop the extra args.
+      {
+        from: '@include euiFocusRing(null, 1);',
+        to: '@include euiFocusRing;',
+      },
+      // Wrap legacy Sass division so Dart Sass accepts it.
+      {
+        from: '$euiSizeXS / 2',
+        to: 'calc($euiSizeXS / 2)',
+      },
+      {
+        from: '$euiSizeXS/2',
+        to: 'calc($euiSizeXS/2)',
+      },
     ])
   );
   promises.push(

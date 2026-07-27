@@ -45,8 +45,14 @@ jest.doMock('../../../../../../opensearch_dashboards_react/public', () => ({
               { query: 'source = table | head 10', language: 'PPL' },
             ]),
           },
+          timefilter: {
+            timefilter: {
+              getTime: jest.fn(() => ({ from: 'now-15m', to: 'now' })),
+            },
+          },
         },
       },
+      http: { fetch: jest.fn() },
       keyboardShortcut: {
         useKeyboardShortcut: mockUseKeyboardShortcut,
         register: jest.fn(),
@@ -72,6 +78,7 @@ jest.doMock('../../../../application/hooks', () => ({
 }));
 
 jest.doMock('../../../../../../data/public', () => ({
+  runPPLAnalyzeInBackground: jest.fn(),
   RecentQueriesTable: ({ isVisible, onClickRecentQuery }: any) => (
     <div data-test-subj="recent-queries-table" style={{ display: isVisible ? 'block' : 'none' }}>
       <button

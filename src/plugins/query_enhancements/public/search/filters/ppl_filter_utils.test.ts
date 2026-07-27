@@ -84,6 +84,20 @@ describe('PPLFilterUtils', () => {
       const result = addFilterToQuery(query, filter);
       expect(result).toBe("source=test_index | WHERE `field1` = 'value1' | fields *");
     });
+
+    it('should not duplicate a filter emitted by the builder as lowercase where', () => {
+      const query = "source=test_index | where `field1` = 'value1' | fields *";
+      const filter = createFilter('field1', 'value1');
+      const result = addFilterToQuery(query, filter);
+      expect(result).toBe("source=test_index | where `field1` = 'value1' | fields *");
+    });
+
+    it('should replace a negated lowercase where clause', () => {
+      const query = "source=test_index | where `field1` != 'value1' | fields *";
+      const filter = createFilter('field1', 'value1', false);
+      const result = addFilterToQuery(query, filter);
+      expect(result).toBe("source=test_index | WHERE `field1` = 'value1' | fields *");
+    });
   });
 
   describe('addFiltersToQuery', () => {

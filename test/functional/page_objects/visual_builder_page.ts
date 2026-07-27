@@ -342,7 +342,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     public async getRhythmChartLegendValue(nth = 0) {
       await PageObjects.visChart.waitForVisualizationRenderingStabilized();
       const metricValue = (
-        await find.allByCssSelector(`.echLegendItem .echLegendItem__extra`, 20000)
+        await find.allByCssSelector(`.echLegend__legendValue, .echLegendItem__legendValue`, 20000)
       )[nth];
       await metricValue.moveMouseTo();
       return await metricValue.getVisibleText();
@@ -593,17 +593,21 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     public async getLegendItemsContent(): Promise<string[]> {
-      const legendList = await find.byCssSelector('.echLegendList');
-      const $ = await legendList.parseDomContent();
+      const legend = await find.byCssSelector('.echLegend');
+      const $ = await legend.parseDomContent();
 
-      return $('li')
-        .toArray()
-        .map((li) => {
-          const label = $(li).find('.echLegendItem__label').text();
-          const value = $(li).find('.echLegendItem__extra').text();
+      // Charts renders a table-based legend when legend values are shown and a
+      // list-based one otherwise; support both.
+      const rows = $('.echLegendTable__item').length
+        ? $('.echLegendTable__item')
+        : $('.echLegendItem');
 
-          return `${label}: ${value}`;
-        });
+      return rows.toArray().map((row) => {
+        const label = $(row).find('.echLegendItem__label').text();
+        const value = $(row).find('.echLegend__legendValue, .echLegendItem__legendValue').text();
+
+        return `${label}: ${value}`;
+      });
     }
 
     public async getSeries(): Promise<WebElementWrapper[]> {

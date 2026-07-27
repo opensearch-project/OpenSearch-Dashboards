@@ -63,6 +63,7 @@ export const runDisplayTests = () => {
 
         // testing the query editor
         if (config.multilineQuery) {
+          cy.explore.showQueryEditor();
           cy.getElementByTestId('exploreQueryPanelEditor').should('be.visible');
           cy.getElementByTestId('discoverQueryElapsedMs').should('be.visible');
           cy.getElementByTestId('exploreRecentQueriesButton').click();

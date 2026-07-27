@@ -17,9 +17,10 @@ jest.mock('./use_index_fetcher', () => ({
 
 // Mock the UnifiedIndexSelector component
 jest.mock('./unified_index_selector', () => ({
-  UnifiedIndexSelector: ({ selectedItems, onSelectionChange }: any) => (
+  UnifiedIndexSelector: ({ selectedItems, onSelectionChange, autoFocus }: any) => (
     <div>
       <div data-test-subj="unified-selector">Unified Index Selector</div>
+      <div data-test-subj="unified-selector-autofocus">{String(autoFocus)}</div>
       <div data-test-subj="selected-count">{selectedItems.length}</div>
       <button
         data-test-subj="add-single-index"
@@ -113,6 +114,16 @@ describe('IndexDataStructureCreator', () => {
     it('starts with no selected items', () => {
       const { getByTestId } = renderComponent();
       expect(getByTestId('selected-count')).toHaveTextContent('0');
+    });
+
+    it('leaves autoFocus undefined by default (keeps the selector default focus-on-mount)', () => {
+      const { getByTestId } = renderComponent();
+      expect(getByTestId('unified-selector-autofocus')).toHaveTextContent('undefined');
+    });
+
+    it('threads an explicit autoFocus=false down to the unified index selector', () => {
+      const { getByTestId } = renderComponent({ autoFocus: false });
+      expect(getByTestId('unified-selector-autofocus')).toHaveTextContent('false');
     });
   });
 
@@ -343,6 +354,77 @@ describe('IndexDataStructureCreator', () => {
         services: undefined,
       });
       expect(container.querySelector('.indexDataStructureCreator')).toBeInTheDocument();
+    });
+  });
+
+  describe('initialSelectedItems (opt-in pre-selection)', () => {
+    it('pre-selects a seeded exact index on mount and notifies via selectDataStructure', async () => {
+      const { getByTestId } = renderComponent({ initialSelectedItems: ['logs-app-1'] });
+
+      await waitFor(() => {
+        expect(getByTestId('selected-count')).toHaveTextContent('1');
+      });
+      expect(mockSelectDataStructure).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'logs-app-1',
+          meta: expect.objectContaining({ isMultiIndex: true, selectedTitles: ['logs-app-1'] }),
+        }),
+        expect.any(Array)
+      );
+    });
+
+    it('splits a comma-joined seed into multiple pre-selected items', async () => {
+      const { getByTestId } = renderComponent({ initialSelectedItems: ['a-logs,b-logs'] });
+
+      await waitFor(() => {
+        expect(getByTestId('selected-count')).toHaveTextContent('2');
+      });
+      expect(mockSelectDataStructure).toHaveBeenCalledWith(
+        expect.objectContaining({
+          meta: expect.objectContaining({ selectedTitles: ['a-logs', 'b-logs'] }),
+        }),
+        expect.any(Array)
+      );
+    });
+
+    it('treats a `*`-containing seed as a wildcard pattern', async () => {
+      const { getByTestId } = renderComponent({ initialSelectedItems: ['logs-app-*'] });
+
+      await waitFor(() => {
+        expect(getByTestId('selected-count')).toHaveTextContent('1');
+      });
+      expect(mockSelectDataStructure).toHaveBeenCalledWith(
+        expect.objectContaining({
+          meta: expect.objectContaining({
+            isMultiWildcard: true,
+            wildcardPatterns: ['logs-app-*'],
+          }),
+        }),
+        expect.any(Array)
+      );
+    });
+
+    it('de-duplicates repeated titles in the seed', async () => {
+      const { getByTestId } = renderComponent({ initialSelectedItems: ['dupe,dupe,other'] });
+      await waitFor(() => {
+        expect(getByTestId('selected-count')).toHaveTextContent('2');
+      });
+    });
+
+    it('does not pre-select anything when initialSelectedItems is omitted (default)', async () => {
+      const { getByTestId } = renderComponent();
+      await waitFor(() => {
+        expect(getByTestId('selected-count')).toHaveTextContent('0');
+      });
+      expect(mockSelectDataStructure).not.toHaveBeenCalled();
+    });
+
+    it('ignores an empty seed array and empty/whitespace titles', async () => {
+      const { getByTestId } = renderComponent({ initialSelectedItems: ['', '  ', ' , '] });
+      await waitFor(() => {
+        expect(getByTestId('selected-count')).toHaveTextContent('0');
+      });
+      expect(mockSelectDataStructure).not.toHaveBeenCalled();
     });
   });
 });

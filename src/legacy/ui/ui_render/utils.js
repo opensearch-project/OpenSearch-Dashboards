@@ -14,23 +14,23 @@ export function applyCspModifications(baseRules, modifications) {
   const directiveMap = new Map();
 
   for (const rule of baseRules) {
-    const trimmed = rule.trim().toLowerCase();
-    if (!trimmed) continue;
-
-    const firstSpace = trimmed.indexOf(' ');
-    if (firstSpace === -1) {
-      // Directive with no values (e.g., "upgrade-insecure-requests")
-      directiveMap.set(trimmed, new Set());
-    } else {
-      const [directive, ...values] = trimmed.split(' ').filter((v) => !!v.length);
-      directiveMap.set(directive, new Set(values));
+    // Rules may carry embedded or trailing ';' separators.
+    for (const segment of rule.split(';')) {
+      const tokens = segment
+        .trim()
+        .split(' ')
+        .filter((v) => !!v.length);
+      if (tokens.length === 0) continue;
+      // Directive names are case-insensitive; values (e.g. nonces, hashes) are not.
+      const [directive, ...values] = tokens;
+      directiveMap.set(directive.toLowerCase(), new Set(values));
     }
   }
 
   for (const mod of modifications) {
     const directive = mod.directive.toLowerCase();
     const action = mod.action;
-    const values = mod.values.map((v) => v.toLowerCase());
+    const values = mod.values;
 
     switch (action) {
       case 'add':
