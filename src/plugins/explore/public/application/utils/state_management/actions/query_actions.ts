@@ -708,6 +708,7 @@ const executeQueryBase = async (
       fieldSchema: searchSource.getDataFrame()?.schema,
       profile: searchSource.getDataFrame()?.meta?.profile,
       frameMeta: searchSource.getDataFrame()?.meta,
+      warnings: searchSource.getDataFrame()?.meta?.warnings,
     };
 
     if (isHistogramQuery && effectiveHistogramConfig) {
