@@ -22,6 +22,14 @@ interface StoredRule {
 
 export type ExplainMode = 'fast' | 'thorough';
 
+/**
+ * Mode used when the setting is unset, malformed, or in the legacy array shape.
+ * Must match the registered default in query_enhancements/server/ui_settings.ts:
+ * "thorough" issues up to four extra probe requests per pause, which is more
+ * network than a first release should take by default.
+ */
+const DEFAULT_EXPLAIN_MODE: ExplainMode = 'fast';
+
 interface NormalizedRulesSetting {
   mode: ExplainMode;
   rules: StoredRule[];
@@ -33,15 +41,24 @@ interface NormalizedRulesSetting {
  *
  * The setting shipped as a bare array before the fast/thorough mode was added.
  * An install that persisted that array must keep working, so a stored array is
- * treated as `{ mode: 'thorough', rules: <array> }` — upgrading installs get the
- * new default (probe-backed) behavior automatically. Anything unrecognized
- * (unset, or a corrupt value reachable via the raw uiSettings API) yields an
- * empty rule list at the default mode, so callers fall back to catalog defaults.
+ * treated as `{ mode: DEFAULT_EXPLAIN_MODE, rules: <array> }`. Anything
+ * unrecognized (unset, or a corrupt value reachable via the raw uiSettings API)
+ * yields an empty rule list at the same default, so callers fall back to catalog
+ * defaults.
+ *
+ * `isDeclared` guards the read rather than a `get()` default: the key is
+ * registered `type: 'json'`, so a default is substituted for the registered value
+ * and then JSON-parsed — passing `{}` would throw on every deployment where the
+ * key IS registered and the user has not customised it. Without the guard, an
+ * undeclared key (queryEnhancements disabled while explore is not) throws and
+ * breaks the query editor's mount even with lint off.
  */
 export function readRulesSetting(uiSettings: IUiSettingsClient): NormalizedRulesSetting {
-  const stored = uiSettings.get<unknown>(UI_SETTINGS.QUERY_ENHANCEMENTS_PPL_LINT_RULES, undefined);
+  const stored = uiSettings.isDeclared(UI_SETTINGS.QUERY_ENHANCEMENTS_PPL_LINT_RULES)
+    ? uiSettings.get<unknown>(UI_SETTINGS.QUERY_ENHANCEMENTS_PPL_LINT_RULES)
+    : undefined;
   if (Array.isArray(stored)) {
-    return { mode: 'thorough', rules: stored as StoredRule[] };
+    return { mode: DEFAULT_EXPLAIN_MODE, rules: stored as StoredRule[] };
   }
   if (
     stored &&
@@ -50,16 +67,17 @@ export function readRulesSetting(uiSettings: IUiSettingsClient): NormalizedRules
   ) {
     const rawMode = (stored as { mode?: unknown }).mode;
     return {
-      mode: rawMode === 'fast' ? 'fast' : 'thorough',
+      mode: rawMode === 'thorough' ? 'thorough' : 'fast',
       rules: (stored as { rules: StoredRule[] }).rules,
     };
   }
-  return { mode: 'thorough', rules: [] };
+  return { mode: DEFAULT_EXPLAIN_MODE, rules: [] };
 }
 
 /**
  * Read the explain resolution mode from the PPL lint rules uiSetting. Defaults
- * to `'thorough'` when unset or malformed (and for the legacy array shape).
+ * to {@link DEFAULT_EXPLAIN_MODE} when unset or malformed, and for the legacy
+ * array shape.
  */
 export function readExplainMode(uiSettings: IUiSettingsClient): ExplainMode {
   return readRulesSetting(uiSettings).mode;

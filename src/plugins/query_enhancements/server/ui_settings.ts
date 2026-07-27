@@ -38,7 +38,10 @@ const PPL_LINT_RULE_DEFAULTS: ReadonlyArray<{
 // drops ambiguous findings, issuing no extra network. A global behavior, so it
 // sits beside the rule list rather than on each rule.
 const PPL_LINT_DEFAULTS = {
-  mode: 'thorough' as const,
+  // Defaults to "fast": "thorough" fires up to four extra probe requests per
+  // pause on top of the baseline plan, which is too much network for a first
+  // release. Operators who want the extra precision can opt in.
+  mode: 'fast' as const,
   rules: PPL_LINT_RULE_DEFAULTS,
 };
 

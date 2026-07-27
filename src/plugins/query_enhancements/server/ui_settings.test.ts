@@ -33,12 +33,14 @@ describe('query_enhancements PPL lint rules uiSetting', () => {
       expect(Object.keys(settings)).toHaveLength(1);
     });
 
-    it('defaults to a { mode, rules } object: thorough mode + the bundled catalog plus command-suggestion', () => {
+    it('defaults to a { mode, rules } object: fast mode + the bundled catalog plus command-suggestion', () => {
       const settings = getPplLintRuleSettings(false);
       const value = JSON.parse(settings[KEY].value as string);
       expect(value).toEqual({
-        // Probe-backed narrowing is the default; the toggle rides beside the list.
-        mode: 'thorough',
+        // Fast is the default: probe-backed narrowing ("thorough") issues up to
+        // four extra requests per pause, so it is opt-in. The toggle rides
+        // beside the list.
+        mode: 'fast',
         rules: [
           ...bundledCatalog.map((r) => ({ id: r.id, enabled: r.enabled, severity: r.severity })),
           // command-suggestion is a syntax-channel toggle, not a catalog rule, and

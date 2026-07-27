@@ -19,10 +19,32 @@ jest.mock('@osd/monaco', () => ({
   ],
 }));
 
+const RULES_KEY = 'query:enhancements:pplLint:rules';
+
 function makeUiSettings(rules: unknown): IUiSettingsClient {
   return {
-    get: (key: string, defaultOverride?: unknown) =>
-      key === 'query:enhancements:pplLint:rules' ? rules : defaultOverride,
+    isDeclared: (key: string) => key === RULES_KEY,
+    get: (key: string, defaultOverride?: unknown) => (key === RULES_KEY ? rules : defaultOverride),
+  } as unknown as IUiSettingsClient;
+}
+
+/**
+ * Stands in for core's UiSettingsClient on a deployment where queryEnhancements
+ * is disabled: the key is undeclared, so `get()` throws rather than returning a
+ * default. A permissive fake cannot reproduce this, which is why the throw went
+ * unnoticed.
+ */
+function makeUndeclaredUiSettings(): IUiSettingsClient {
+  return {
+    isDeclared: () => false,
+    get: (key: string, defaultOverride?: unknown) => {
+      if (defaultOverride !== undefined) {
+        return defaultOverride;
+      }
+      throw new Error(
+        `Unexpected \`IUiSettingsClient.get("${key}")\` call on unrecognized configuration setting`
+      );
+    },
   } as unknown as IUiSettingsClient;
 }
 
@@ -169,9 +191,9 @@ describe('isCommandSuggestionEnabled', () => {
 });
 
 describe('readRulesSetting (shape migration)', () => {
-  it('treats a legacy top-level array as thorough mode', () => {
+  it('treats a legacy top-level array as the default (fast) mode', () => {
     const rules = [{ id: 'head-without-sort', enabled: false }];
-    expect(readRulesSetting(makeUiSettings(rules))).toEqual({ mode: 'thorough', rules });
+    expect(readRulesSetting(makeUiSettings(rules))).toEqual({ mode: 'fast', rules });
   });
 
   it('reads the new object shape with an explicit mode', () => {
@@ -182,15 +204,15 @@ describe('readRulesSetting (shape migration)', () => {
     });
   });
 
-  it('defaults an object with an unknown mode to thorough', () => {
-    expect(readRulesSetting(makeUiSettings({ mode: 'sideways', rules: [] })).mode).toBe('thorough');
+  it('defaults an object with an unknown mode to fast', () => {
+    expect(readRulesSetting(makeUiSettings({ mode: 'sideways', rules: [] })).mode).toBe('fast');
   });
 
-  it('falls back to empty thorough for unset or garbage', () => {
-    expect(readRulesSetting(makeUiSettings(undefined))).toEqual({ mode: 'thorough', rules: [] });
-    expect(readRulesSetting(makeUiSettings(42))).toEqual({ mode: 'thorough', rules: [] });
+  it('falls back to an empty rule list at the default mode for unset or garbage', () => {
+    expect(readRulesSetting(makeUiSettings(undefined))).toEqual({ mode: 'fast', rules: [] });
+    expect(readRulesSetting(makeUiSettings(42))).toEqual({ mode: 'fast', rules: [] });
     expect(readRulesSetting(makeUiSettings({ rules: 'nope' }))).toEqual({
-      mode: 'thorough',
+      mode: 'fast',
       rules: [],
     });
   });
@@ -207,15 +229,34 @@ describe('readRulesSetting (shape migration)', () => {
 });
 
 describe('readExplainMode', () => {
-  it('defaults to thorough when unset (and for a legacy array)', () => {
-    expect(readExplainMode(makeUiSettings(undefined))).toBe('thorough');
+  it('defaults to fast when unset (and for a legacy array)', () => {
+    // Thorough fires up to four extra probe requests per pause, so it must be
+    // opted into rather than inherited.
+    expect(readExplainMode(makeUiSettings(undefined))).toBe('fast');
     expect(readExplainMode(makeUiSettings([{ id: 'head-without-sort', enabled: true }]))).toBe(
-      'thorough'
+      'fast'
     );
   });
 
-  it('returns fast only when the object shape explicitly sets it', () => {
-    expect(readExplainMode(makeUiSettings({ mode: 'fast', rules: [] }))).toBe('fast');
+  it('returns thorough only when the object shape explicitly sets it', () => {
     expect(readExplainMode(makeUiSettings({ mode: 'thorough', rules: [] }))).toBe('thorough');
+    expect(readExplainMode(makeUiSettings({ mode: 'fast', rules: [] }))).toBe('fast');
+    // An unrecognized mode falls back to the default rather than to thorough.
+    expect(readExplainMode(makeUiSettings({ mode: 'bogus', rules: [] }))).toBe('fast');
+  });
+});
+
+describe('an undeclared lint-rules setting (queryEnhancements disabled)', () => {
+  // Both readers run while building the lint context, which the query editor does
+  // on mount with no capability check — so a throw here breaks the editor even
+  // when lint is off.
+  it('does not throw and falls back to catalog defaults', () => {
+    const uiSettings = makeUndeclaredUiSettings();
+    expect(() => buildOverridesFromSettings(uiSettings)).not.toThrow();
+    expect(buildOverridesFromSettings(uiSettings)).toEqual({});
+    expect(() => isCommandSuggestionEnabled(uiSettings)).not.toThrow();
+    expect(isCommandSuggestionEnabled(uiSettings)).toBe(true);
+    expect(() => readExplainMode(uiSettings)).not.toThrow();
+    expect(readExplainMode(uiSettings)).toBe('fast');
   });
 });

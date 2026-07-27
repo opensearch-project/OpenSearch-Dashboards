@@ -445,7 +445,9 @@ const layerExplainDiagnostics = (
   ) {
     return;
   }
-  const thorough = (lintContext?.explainMode ?? 'thorough') === 'thorough';
+  // Thorough only when explicitly asked for. It fires up to four extra probe
+  // requests per pause, so an absent mode must not opt into that.
+  const thorough = lintContext?.explainMode === 'thorough';
 
   const run = async (): Promise<void> => {
     // Parse first, network second. The parse-time attribution snapshot is the
