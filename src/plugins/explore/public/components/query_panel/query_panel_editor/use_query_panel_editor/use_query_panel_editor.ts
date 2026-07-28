@@ -5,34 +5,18 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { monaco, PPLValidationContext, PPLLintContext, revalidatePPLModel } from '@osd/monaco';
-import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@osd/i18n';
 import { DEFAULT_DATA } from '../../../../../../data/common';
-import {
-  selectIsPromptEditorMode,
-  selectPromptModeIsAvailable,
-  selectQueryLanguage,
-  selectQueryString,
-  selectIsQueryEditorDirty,
-  selectDataset,
-} from '../../../../application/utils/state_management/selectors';
 import { promptEditorOptions, queryEditorOptions } from './editor_options';
-
-import { useEditorRef } from '../../../../application/hooks';
-import { useLanguageSwitch } from '../../../../application/hooks/editor_hooks/use_switch_language';
-import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
-import { ExploreServices } from '../../../../types';
 import {
   getEffectiveLanguageForAutoComplete,
   runPPLAnalyzeInBackground,
 } from '../../../../../../data/public';
-import { onEditorRunActionCreator } from '../../../../application/utils/state_management/actions/query_editor';
 import { getCommandEnterAction } from './command_enter_action';
 import { getShiftEnterAction } from './shift_enter_action';
 import { getTabAction } from './tab_action';
 import { getEnterAction } from './enter_action';
 import { getSpacebarAction } from './spacebar_action';
-import { setIsQueryEditorDirty } from '../../../../application/utils/state_management/slices/query_editor/query_editor_slice';
 import { getEscapeAction } from './escape_action';
 import { usePromptIsTyping } from './use_prompt_is_typing';
 import { EditorMode } from '../../../../application/utils/state_management/types';
@@ -51,6 +35,7 @@ import {
   shouldUseRuntimeGrammar,
   UI_SETTINGS,
 } from '../../../../../../data/public';
+import { QueryEditorProps } from '../types';
 
 type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
 type LanguageConfiguration = monaco.languages.LanguageConfiguration;
@@ -91,12 +76,22 @@ export interface UseQueryPanelEditorReturnType {
   value: string;
 }
 
-export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
+export const useQueryPanelEditor = (props: QueryEditorProps): UseQueryPanelEditorReturnType => {
+  const {
+    services,
+    queryEditorState,
+    queryState,
+    handleEditorChange,
+    focusShortcutId,
+    onRun,
+    switchEditorMode,
+    editorRef,
+    getEditorContainerHeight,
+  } = props;
+
   const { promptIsTyping, handleChangeForPromptIsTyping } = usePromptIsTyping();
-  const promptModeIsAvailable = useSelector(selectPromptModeIsAvailable);
-  const { services } = useOpenSearchDashboards<ExploreServices>();
-  const { keyboardShortcut } = services;
-  const userQueryString = useSelector(selectQueryString);
+  const promptModeIsAvailable = queryEditorState.promptModeIsAvailable;
+  const userQueryString = queryState.query;
   const [editorText, setEditorText] = useState<string>(userQueryString);
   const [editorIsFocused, setEditorIsFocused] = useState(false);
   const {
@@ -104,25 +99,25 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
       dataViews,
       query: { queryString },
     },
+    keyboardShortcut,
   } = services;
   const { updateDecorations, clearDecorations } = useMultiQueryDecorations();
   // The 'onRun' functions in editorDidMount uses the context values when the editor is mounted.
   // Using a ref will ensure it always uses the latest value
   const editorTextRef = useRef(editorText);
-  const queryLanguage = useSelector(selectQueryLanguage);
+  const queryLanguage = queryState.language;
   const languageTitle = useMemo(() => {
-    const languageService = services.data.query.queryString.getLanguageService();
+    const languageService = queryString.getLanguageService();
     return languageService.getLanguage(queryLanguage)?.title ?? queryLanguage;
-  }, [queryLanguage, services.data.query.queryString]);
-  const dispatch = useDispatch();
-  const editorRef = useEditorRef();
-  const isPromptMode = useSelector(selectIsPromptEditorMode);
+  }, [queryLanguage, queryString]);
+
+  const isPromptMode = queryEditorState.editorMode === EditorMode.Prompt;
   const isQueryMode = !isPromptMode;
   const isPromptModeRef = useRef(isPromptMode);
   const promptModeIsAvailableRef = useRef(promptModeIsAvailable);
   const queryLanguageRef = useRef(queryLanguage);
-  const isQueryEditorDirty = useSelector(selectIsQueryEditorDirty);
-  const dataset = useSelector(selectDataset);
+  const isQueryEditorDirty = queryEditorState.isQueryEditorDirty;
+  const dataset = queryState.dataset;
   // Ref so grammar-refresh closures always see the latest dataset.
   const datasetRef = useRef(dataset);
   // Cache of index-pattern field names per dataset id for field-validation.
@@ -154,8 +149,6 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [services.uiSettings, services.http]
   );
-
-  const switchEditorMode = useLanguageSwitch();
 
   // Keep the refs updated with latest context
   useEffect(() => {
@@ -293,7 +286,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
   }, [editorRef]);
 
   keyboardShortcut?.useKeyboardShortcut({
-    id: 'focus_explore_query_bar',
+    id: focusShortcutId || 'focus_explore_query_bar',
     pluginId: 'explore',
     name: i18n.translate('explore.queryPanelEditor.focusQueryBarShortcut', {
       defaultMessage: 'Focus query bar',
@@ -354,8 +347,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
           'explore'
         );
 
-        // Get the current dataset from Query Service to avoid stale closure values
-        const currentDataset = queryString.getQuery().dataset;
+        const currentDataset = datasetRef.current;
         const currentDataView = await dataViews.get(
           currentDataset?.id!,
           currentDataset?.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
@@ -422,7 +414,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
         return { suggestions: [], incomplete: false };
       }
     },
-    [isPromptModeRef, queryLanguage, queryString, dataViews, services]
+    [isPromptModeRef, queryLanguage, dataViews, services]
   );
 
   const suggestionProvider = useMemo(() => {
@@ -437,15 +429,14 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
   }, [isPromptMode, provideCompletionItems, queryLanguage, services]);
 
   const handleRun = useCallback(() => {
-    // @ts-expect-error TS2345 TODO(ts-error): fixme
-    dispatch(onEditorRunActionCreator(services, editorTextRef.current));
+    onRun(editorTextRef.current);
     runPPLAnalyzeInBackground({
       query: { query: editorTextRef.current, language: queryLanguage, dataset },
       http: services.http,
       timefilter: services.data.query.timefilter.timefilter,
       onlyIfOpen: true,
     });
-  }, [dispatch, services, queryLanguage, dataset]);
+  }, [onRun, dataset, queryLanguage, services.http, services.data.query.timefilter.timefilter]);
 
   const editorDidMount = useCallback(
     (editor: IStandaloneCodeEditor) => {
@@ -507,9 +498,9 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
         // Read the resizable panel's allocated height rather than the editor's
         // immediate parent, which may have been pushed taller by content.
         const domNode = editor.getDomNode();
-        const panelEl = domNode?.closest('.exploreResizableQueryContainer__queryPanel');
-        const containerHeight =
-          panelEl?.clientHeight ?? domNode?.parentElement?.clientHeight ?? 100;
+        const containerHeight = getEditorContainerHeight
+          ? getEditorContainerHeight(domNode)
+          : (domNode?.parentElement?.clientHeight ?? 100);
         const maxHeight = Math.max(containerHeight, 36);
         const finalHeight = Math.min(contentHeight, maxHeight);
 
@@ -559,6 +550,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
       clearDecorations,
       getValidationContext,
       getLintContext,
+      getEditorContainerHeight,
     ]
   );
 
@@ -616,14 +608,20 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
       setEditorText(newText);
 
       if (!isQueryEditorDirty) {
-        dispatch(setIsQueryEditorDirty(true));
+        handleEditorChange({ isQueryEditorDirty: true });
       }
 
       if (isPromptMode) {
         handleChangeForPromptIsTyping();
       }
     },
-    [setEditorText, isPromptMode, handleChangeForPromptIsTyping, isQueryEditorDirty, dispatch]
+    [
+      setEditorText,
+      isPromptMode,
+      handleChangeForPromptIsTyping,
+      handleEditorChange,
+      isQueryEditorDirty,
+    ]
   );
 
   return {

@@ -5,7 +5,7 @@
 
 import { useSelector } from 'react-redux';
 import { EuiPanel, EuiProgress } from '@elastic/eui';
-import { QueryPanelEditor } from './query_panel_editor';
+import { ExploreQueryPanelEditor } from './query_panel_editor';
 import { QueryPanelWidgets } from './query_panel_widgets';
 import {
   selectIsLoading,
@@ -41,7 +41,7 @@ const QueryPanel = ({ analyzeIsOpen, onToggleAnalyze, hasAnalyzeResult }: QueryP
         hasAnalyzeResult={hasAnalyzeResult}
       />
       <div className="exploreQueryPanel__editorsWrapper">
-        <QueryPanelEditor />
+        <ExploreQueryPanelEditor />
         <QueryPanelGeneratedQuery />
       </div>
       {isLoading && (
