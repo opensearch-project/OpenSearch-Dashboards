@@ -170,13 +170,6 @@ export const MAX_WORKSPACE_DESCRIPTION_LENGTH = 200;
  */
 export const DEFAULT_WORKSPACE_LIST_PER_PAGE = 999;
 
-/**
- * The page size used when listing workspaces solely to validate that the requested
- * ones exist. A large fixed value is enough here, so this path does not need to read
- * `workspace.maximum_workspaces`.
- */
-export const WORKSPACE_EXISTENCE_CHECK_PER_PAGE = 9999;
-
 export enum AssociationDataSourceModalMode {
   OpenSearchConnections = 'opensearch-connections',
   DirectQueryConnections = 'direction-query-connections',
