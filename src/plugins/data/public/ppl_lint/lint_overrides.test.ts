@@ -301,16 +301,3 @@ describe('an undeclared lint-rules setting (queryEnhancements disabled)', () => 
     expect(readExplainMode(uiSettings)).toBe('fast');
   });
 });
-
-describe('an undeclared lint-rules setting (queryEnhancements disabled)', () => {
-  // Both readers run while building the lint context, which the query editor does
-  // on mount with no capability check — so a throw here breaks the editor even
-  // when lint is off. Neither may reach `get()` for an undeclared key.
-  it('does not throw and falls back to catalog defaults', () => {
-    const uiSettings = makeUndeclaredUiSettings();
-    expect(() => buildOverridesFromSettings(uiSettings)).not.toThrow();
-    expect(buildOverridesFromSettings(uiSettings)).toEqual({});
-    expect(() => isCommandSuggestionEnabled(uiSettings)).not.toThrow();
-    expect(isCommandSuggestionEnabled(uiSettings)).toBe(true);
-  });
-});
