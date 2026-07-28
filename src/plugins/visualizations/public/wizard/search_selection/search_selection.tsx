@@ -28,7 +28,13 @@
  * under the License.
  */
 
-import { EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiModalBody,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiSpacer,
+} from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import React from 'react';
@@ -50,6 +56,7 @@ interface SearchSelectionProps {
 
 interface SearchSelectionState {
   indexPatternIds: Set<string>;
+  hasAnalyticEngine: boolean;
 }
 
 export class SearchSelection extends React.Component<SearchSelectionProps, SearchSelectionState> {
@@ -59,16 +66,21 @@ export class SearchSelection extends React.Component<SearchSelectionProps, Searc
     super(props);
     this.state = {
       indexPatternIds: new Set(),
+      hasAnalyticEngine: false,
     };
   }
 
   async componentDidMount() {
-    const indexPatternList = await this.props.data.indexPatterns.getCache({
-      excludeEngineTypes: UNSUPPORTED_ENGINE_TYPES,
-    });
+    const [allIndexPatterns, indexPatternList] = await Promise.all([
+      this.props.data.indexPatterns.getCache(),
+      this.props.data.indexPatterns.getCache({
+        excludeEngineTypes: UNSUPPORTED_ENGINE_TYPES,
+      }),
+    ]);
 
     this.setState({
       indexPatternIds: new Set(indexPatternList?.map((indexpattern) => indexpattern.id)),
+      hasAnalyticEngine: (allIndexPatterns?.length ?? 0) > (indexPatternList?.length ?? 0),
     });
   }
 
@@ -90,6 +102,22 @@ export class SearchSelection extends React.Component<SearchSelectionProps, Searc
           </EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>
+          {this.state.hasAnalyticEngine && (
+            <>
+              <EuiCallOut
+                size="s"
+                iconType="iInCircle"
+                title={i18n.translate(
+                  'visualizations.newVisWizard.searchSelection.optimizedEngineNotSupported',
+                  {
+                    defaultMessage:
+                      "This visualization type supports only DSL queries. Index patterns and saved searches backed by Optimized engine (AnalyticEngine type) data sources aren't supported and are hidden from the list below.",
+                  }
+                )}
+              />
+              <EuiSpacer size="s" />
+            </>
+          )}
           <SavedObjectFinderUi
             key="searchSavedObjectFinder"
             onChoose={this.props.onSearchSelected}
