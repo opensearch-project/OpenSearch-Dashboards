@@ -530,7 +530,13 @@ describe('useQueryPanelEditor', () => {
       });
 
       const lastLintFieldsCache = async () => {
-        const { result } = renderHook(() => useQueryPanelEditor());
+        const { result } = renderHook(() =>
+          useQueryPanelEditor(
+            buildProps({
+              queryState: { query: '', language: 'PPL', dataset: mdsDataset },
+            })
+          )
+        );
         await act(async () => {
           result.current.editorDidMount(mockEditor);
           // Let the async loadFields effect resolve.
