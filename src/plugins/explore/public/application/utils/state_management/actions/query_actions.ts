@@ -31,7 +31,7 @@ import {
   getDimensions,
   Dimensions,
 } from '../../../../components/chart/utils';
-import { SAMPLE_SIZE_SETTING } from '../../../../../common';
+import { SAMPLE_SIZE_SETTING, PARTIAL_RESULTS_SETTING } from '../../../../../common';
 import { RootState } from '../store';
 import { getResponseInspectorStats } from '../../../../application/legacy/discover/opensearch_dashboards_services';
 import { getFieldValueCounts } from '../../../../components/fields_selector/lib/field_calculator';
@@ -847,6 +847,12 @@ export const createSearchSourceWithQuery = async (
     // languages (e.g. SQL) is meaningless and can affect engine selection on some backends.
     ...(services.queryProfilingEnabled && preparedQuery.language === 'PPL'
       ? { profile: true }
+      : {}),
+    // When the partial-results setting is on, ask the engine to return a partial result (with a
+    // warning) instead of failing an aggregation whose field is mapped inconsistently across
+    // indices. PPL-only, and sent explicitly so it overrides the cluster-side default.
+    ...(preparedQuery.language === 'PPL'
+      ? { partial_result: !!uiSettings.get(PARTIAL_RESULTS_SETTING, false) }
       : {}),
   };
 
