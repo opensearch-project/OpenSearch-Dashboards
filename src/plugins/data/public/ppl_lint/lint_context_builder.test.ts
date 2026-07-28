@@ -112,6 +112,21 @@ describe('buildPPLLintContext', () => {
     expect(ctx.isCalcite).toBe(false);
   });
 
+  it('marks isCalcite false when the cluster reports Calcite administratively disabled', () => {
+    // Version-derivation alone cannot see plugins.calcite.enabled=false on a
+    // >= 3.3.0 cluster; the cached capability from the settings route must win,
+    // so the explain-backed rules issue no wasted `_explain` there.
+    mockGetCachedSettings.mockReturnValue({ calciteEnabled: false, allJoinTypesAllowed: true });
+    const ctx = buildPPLLintContext(dataset, {}, services);
+    expect(ctx.isCalcite).toBe(false);
+  });
+
+  it('keeps the version-derived isCalcite when the cluster reports Calcite enabled', () => {
+    mockGetCachedSettings.mockReturnValue({ calciteEnabled: true, allJoinTypesAllowed: true });
+    const ctx = buildPPLLintContext(dataset, {}, services);
+    expect(ctx.isCalcite).toBe(true);
+  });
+
   it('passes the dataset engine type through to shouldUseRuntimeGrammar', () => {
     const esDataset = {
       id: 'dataset-es',

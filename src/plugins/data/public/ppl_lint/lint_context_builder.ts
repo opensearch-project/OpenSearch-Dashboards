@@ -83,7 +83,18 @@ export function buildPPLLintContext(
     useRuntimeGrammar: shouldUseRuntimeGrammar(dsId, effectiveVersion, dsEngineType),
     dataSourceId: dsId,
     dataSourceVersion: effectiveVersion,
-    isCalcite: deriveIsCalcite(effectiveVersion, dsEngineType),
+    // Version+engine derivation, overridden by the cluster's own capability
+    // report: `deriveIsCalcite` cannot see an administratively-disabled Calcite
+    // on a >= 3.3.0 cluster (its own caveat), but the settings route already
+    // resolves `plugins.calcite.enabled`. Honoring it here keeps the
+    // explain-backed rules (and their `_explain` round-trips) off clusters
+    // whose v2 engine would never return a Calcite plan. The route fails open
+    // (`calciteEnabled: true` when unreadable), so unknown state keeps the
+    // version-derived answer.
+    isCalcite:
+      cachedSettings?.calciteEnabled === false
+        ? false
+        : deriveIsCalcite(effectiveVersion, dsEngineType),
     fields: cacheMatchesDataset ? lintFields.fields : undefined,
     settings: cachedSettings
       ? { allJoinTypesAllowed: cachedSettings.allJoinTypesAllowed }

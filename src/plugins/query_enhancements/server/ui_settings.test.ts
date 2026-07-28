@@ -144,12 +144,30 @@ describe('query_enhancements PPL lint rules uiSetting', () => {
       expect(() => validate(withRules([{ enabled: true, severity: 'info' }]))).toThrow();
     });
 
-    it('rejects the legacy bare-array value (must now be an object)', () => {
-      // The stored shape moved to { mode, rules }; the client normalizer still
-      // accepts a legacy array for back-compat, but the SERVER schema (which
-      // validates writes) requires the object form.
-      expect(() => validate([{ id: 'x', enabled: true, severity: 'info' }])).toThrow();
+    it('accepts the legacy bare-array value persisted by earlier releases', () => {
+      // The stored shape moved to { mode, rules }, but the server validates
+      // persisted user values against this schema on every read
+      // (UiSettingsClient.onReadHook) and silently drops values that fail.
+      // Rejecting the legacy array would wipe an upgrading user's saved rule
+      // customizations, so both shapes must validate.
+      expect(() => validate([{ id: 'x', enabled: true, severity: 'info' }])).not.toThrow();
+      expect(() => validate([])).not.toThrow();
       expect(() => validate('warning')).toThrow();
+    });
+
+    it('accepts both shapes as the JSON strings the ui settings client persists', () => {
+      // type:'json' settings are stored stringified; onReadHook validates the
+      // raw string, relying on the schema's string coercion. Both shapes must
+      // survive that path.
+      expect(() =>
+        validate(JSON.stringify([{ id: 'x', enabled: true, severity: 'info' }]))
+      ).not.toThrow();
+      expect(() =>
+        validate(
+          JSON.stringify({ mode: 'fast', rules: [{ id: 'x', enabled: true, severity: 'info' }] })
+        )
+      ).not.toThrow();
+      expect(() => validate('not json')).toThrow();
     });
 
     it('rejects an object missing the rules list', () => {

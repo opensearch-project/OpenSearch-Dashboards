@@ -45,6 +45,16 @@ const PPL_LINT_DEFAULTS = {
   rules: PPL_LINT_RULE_DEFAULTS,
 };
 
+// One rule entry, shared by both accepted shapes below.
+const pplLintRuleEntrySchema = schema.object({
+  id: schema.string(),
+  enabled: schema.boolean(),
+  // Optional: the command-suggestion toggle carries no severity.
+  severity: schema.maybe(
+    schema.oneOf([schema.literal('error'), schema.literal('warning'), schema.literal('info')])
+  ),
+});
+
 /** Build PPL lint rule uiSettings. Adds WORKSPACE scope when the workspace feature is on. */
 export function getPplLintRuleSettings(
   workspaceEnabled: boolean
@@ -63,29 +73,27 @@ export function getPplLintRuleSettings(
         '"enabled" (true/false), and an optional "severity" (error, warning, or info); the ' +
         '"command-suggestion" entry toggles the command-typo "Did you mean ...?" hint and takes ' +
         'no severity. "mode" controls how the performance rules pinpoint a slow command: ' +
-        '"thorough" (default) runs extra explain probes to isolate the exact command, while ' +
-        '"fast" skips those probes and only flags a command when it can be identified without them.',
+        '"thorough" runs extra explain probes to isolate the exact command, while "fast" ' +
+        '(default) skips those probes and only flags a command when it can be identified ' +
+        'without them.',
       category: ['search'],
       scope,
-      schema: schema.object({
-        mode: schema.oneOf([schema.literal('fast'), schema.literal('thorough')], {
-          defaultValue: 'thorough',
+      // Both shapes are accepted: the current `{ mode, rules }` object and the
+      // bare rules array this key shipped as before `mode` existed. The server
+      // validates persisted user values against this schema on every read
+      // (UiSettingsClient.onReadHook) and silently DROPS values that fail, so
+      // rejecting the legacy array would wipe an upgrading user's saved rule
+      // customizations. The client (`readRulesSetting` in
+      // data/public/ppl_lint/lint_overrides.ts) normalizes either shape.
+      schema: schema.oneOf([
+        schema.object({
+          mode: schema.oneOf([schema.literal('fast'), schema.literal('thorough')], {
+            defaultValue: 'fast',
+          }),
+          rules: schema.arrayOf(pplLintRuleEntrySchema),
         }),
-        rules: schema.arrayOf(
-          schema.object({
-            id: schema.string(),
-            enabled: schema.boolean(),
-            // Optional: the command-suggestion toggle carries no severity.
-            severity: schema.maybe(
-              schema.oneOf([
-                schema.literal('error'),
-                schema.literal('warning'),
-                schema.literal('info'),
-              ])
-            ),
-          })
-        ),
-      }),
+        schema.arrayOf(pplLintRuleEntrySchema),
+      ]),
     },
   };
 }
