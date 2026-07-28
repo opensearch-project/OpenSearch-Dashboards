@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import dateMath from '@elastic/datemath';
 import { VisualizationRender, CommonVisualizationRender } from './visualization_render';
@@ -226,6 +226,52 @@ describe('VisualizationRender', () => {
     );
 
     expect(screen.getByTestId('metricChartRender')).toBeInTheDocument();
+  });
+
+  it('passes split group render context to chart render', () => {
+    jest.useFakeTimers();
+
+    (global as any).ResizeObserver = jest.fn().mockImplementation(() => ({
+      observe: jest.fn(),
+      disconnect: jest.fn(),
+      unobserve: jest.fn(),
+    }));
+
+    (global as any).IntersectionObserver = jest.fn().mockImplementation((callback) => ({
+      observe: () => callback([{ isIntersecting: true }]),
+      disconnect: jest.fn(),
+      unobserve: jest.fn(),
+    }));
+
+    const metricConfig: RenderChartConfig = {
+      type: 'metric',
+      styles: { ...defaultMetricChartStyles },
+      axesMapping: { value: 'count' },
+      splitField: 'field1',
+    };
+
+    const data$ = new BehaviorSubject<VisData | undefined>(mockVisData);
+    const visConfig$ = new BehaviorSubject<RenderChartConfig | undefined>(metricConfig);
+    const showRawTable$ = new BehaviorSubject<boolean>(false);
+
+    render(
+      <VisualizationRender data$={data$} config$={visConfig$} showRawTable$={showRawTable$} />
+    );
+
+    act(() => {
+      jest.advanceTimersByTime(100);
+    });
+
+    expect(mockRender).toHaveBeenCalledWith(
+      expect.objectContaining({
+        transformedData: [{ field1: 'value1', count: 10 }],
+        renderContext: expect.objectContaining({
+          seriesName: 'value1',
+        }),
+      })
+    );
+
+    jest.useRealTimers();
   });
 
   it('returns null when no matching rule is found', () => {

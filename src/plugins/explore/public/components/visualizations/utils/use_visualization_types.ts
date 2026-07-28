@@ -84,11 +84,16 @@ export interface StyleControlsProps<T extends ChartStyles> {
   updateVisualization: (data: UpdateVisualizationProps) => void;
 }
 
+export interface VisualizationRenderContext {
+  seriesName?: string;
+}
+
 export interface VisRenderProps<T extends ChartType> {
   transformedData: Array<Record<string, any>>;
   styleOptions: ChartStylesMapping[T];
   axisColumnMappings: AxisColumnMappings;
   timeRange?: { from: string; to: string };
+  renderContext?: VisualizationRenderContext;
   onSelectTimeRange?: (timeRange: TimeRange) => void;
   onLegend?: (legend: ColorMap) => void;
   legendSelected$?: BehaviorSubject<Record<string, boolean>>;

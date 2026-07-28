@@ -33,6 +33,7 @@ interface MetricChartRenderProps {
   styles: MetricChartStyle;
   axisColumnMappings: MetricAxisMapping;
   spec?: RendererSpecConfig | RendererSpecConfig[];
+  seriesName?: string;
 }
 
 // Helper functions for metric text data calculation
@@ -257,6 +258,7 @@ export const MetricChartRender: React.FC<MetricChartRenderProps> = ({
   styles,
   axisColumnMappings,
   spec: rawSpec,
+  seriesName,
 }) => {
   const s = useMemo(
     () => (rawSpec ? (Array.isArray(rawSpec) ? rawSpec[0] : rawSpec) : undefined),
@@ -265,6 +267,7 @@ export const MetricChartRender: React.FC<MetricChartRenderProps> = ({
   const data = useMemo(() => s?.data ?? [], [s]);
   const spec = s?.spec;
   const name = s?.name ?? '';
+  const displayName = seriesName ?? name;
 
   const valueColumn = axisColumnMappings[AxisRole.Value];
   const numericField = valueColumn?.column;
@@ -287,7 +290,7 @@ export const MetricChartRender: React.FC<MetricChartRenderProps> = ({
     return calculateMetricTextData(data, styles, numericField);
   }, [data, styles, numericField]);
 
-  const title = getTitleText(styles.textMode, name);
+  const title = getTitleText(styles.textMode, displayName);
 
   // ResizeObserver to track container dimensions
   useEffect(() => {
@@ -332,7 +335,7 @@ export const MetricChartRender: React.FC<MetricChartRenderProps> = ({
     }
 
     // Calculate number of visible elements
-    const hasTitle = !!name;
+    const hasTitle = !!title;
     const hasValue = !!textData.numericValue;
     const hasChange = styles.showPercentage && !!textData.changeText;
     const visibleElements = [hasTitle, hasValue, hasChange].filter(Boolean).length;
@@ -416,9 +419,8 @@ export const MetricChartRender: React.FC<MetricChartRenderProps> = ({
     styles.fontSize,
     styles.percentageSize,
     styles.showPercentage,
-    name,
-    textData,
     title,
+    textData,
   ]);
 
   if (!s || !textData) {
