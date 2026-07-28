@@ -73,13 +73,15 @@ describe('workspace service api integration test', () => {
     afterEach(async () => clearWorkspaces(root, osd));
 
     it('create', async () => {
+      // invalid id format should be rejected
       await osdTestServer.request
         .post(root, `/api/workspaces`)
         .send({
-          attributes: testWorkspace,
+          attributes: { ...testWorkspace, id: 'invalid id!' },
         })
         .expect(400);
 
+      // no id — server assigns one
       const result: any = await osdTestServer.request
         .post(root, `/api/workspaces`)
         .send({
@@ -89,6 +91,18 @@ describe('workspace service api integration test', () => {
 
       expect(result.body.success).toEqual(true);
       expect(typeof result.body.result.id).toBe('string');
+
+      // custom valid id — accepted and used
+      const customId = 'my-ws-01';
+      const resultWithId: any = await osdTestServer.request
+        .post(root, `/api/workspaces`)
+        .send({
+          attributes: { ...omitId(testWorkspace), id: customId, name: 'custom_id_ws' },
+        })
+        .expect(200);
+
+      expect(resultWithId.body.success).toEqual(true);
+      expect(resultWithId.body.result.id).toEqual(customId);
     });
     it('create with empty/blank name', async () => {
       let result = await osdTestServer.request

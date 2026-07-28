@@ -54,6 +54,7 @@ export interface IWorkspaceClientImpl {
   create(
     requestDetail: IRequestDetail,
     payload: Omit<WorkspaceAttributeWithPermission, 'id'> & {
+      id?: string;
       dataSources?: string[];
     }
   ): Promise<IResponse<{ id: WorkspaceAttribute['id'] }>>;
