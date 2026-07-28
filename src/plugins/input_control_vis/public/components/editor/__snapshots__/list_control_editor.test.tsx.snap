@@ -11,6 +11,7 @@ exports[`renders dynamic options should display disabled dynamic options with to
       }
     }
     controlIndex={0}
+    hasAnalyticEngine={false}
     indexPatternId="mockIndexPattern"
     onChange={[Function]}
   />
@@ -128,6 +129,7 @@ exports[`renders dynamic options should display dynamic options for string field
       }
     }
     controlIndex={0}
+    hasAnalyticEngine={false}
     indexPatternId="mockIndexPattern"
     onChange={[Function]}
   />
@@ -214,6 +216,7 @@ exports[`renders dynamic options should display size field when dynamic options 
       }
     }
     controlIndex={0}
+    hasAnalyticEngine={false}
     indexPatternId="mockIndexPattern"
     onChange={[Function]}
   />
@@ -331,6 +334,7 @@ exports[`renders should display chaining input when parents are provided 1`] = `
       }
     }
     controlIndex={0}
+    hasAnalyticEngine={false}
     indexPatternId="indexPattern1"
     onChange={[Function]}
   />
@@ -493,6 +497,7 @@ exports[`renders should not display any options until field is selected 1`] = `
       }
     }
     controlIndex={0}
+    hasAnalyticEngine={false}
     indexPatternId="mockIndexPattern"
     onChange={[Function]}
   />

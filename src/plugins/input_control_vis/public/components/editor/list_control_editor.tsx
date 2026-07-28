@@ -126,12 +126,10 @@ export class ListControlEditor extends PureComponent<
   async getIndexPatternSelect() {
     const [, { data }] = await this.props.deps.core.getStartServices();
 
-    const [allIndexPatterns, indexPatternList] = await Promise.all([
-      data.indexPatterns.getCache(),
-      data.indexPatterns.getCache({
-        excludeEngineTypes: UNSUPPORTED_ENGINE_TYPES,
-      }),
-    ]);
+    const allIndexPatterns = await data.indexPatterns.getCache();
+    const indexPatternList = await data.indexPatterns.getCache({
+      excludeEngineTypes: UNSUPPORTED_ENGINE_TYPES,
+    });
     const allowedIndexPatternIds = new Set(indexPatternList?.map((i) => i.id) || []);
 
     this.setState({
