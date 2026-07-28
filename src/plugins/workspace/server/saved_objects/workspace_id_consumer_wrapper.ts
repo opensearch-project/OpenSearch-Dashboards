@@ -22,6 +22,7 @@ import {
 } from '../../../../core/server';
 import { IWorkspaceClientImpl } from '../types';
 import { validateIsWorkspaceDataSourceAndConnectionObjectType } from '../../common/utils';
+import { WORKSPACE_EXISTENCE_CHECK_PER_PAGE } from '../../common/constants';
 
 const UI_SETTINGS_SAVED_OBJECTS_TYPE = 'config';
 
@@ -91,7 +92,7 @@ export class WorkspaceIdConsumerWrapper {
             request: wrapperOptions.request,
           },
           {
-            perPage: 9999,
+            perPage: WORKSPACE_EXISTENCE_CHECK_PER_PAGE,
           }
         );
         if (workspaceList.success) {

@@ -19,6 +19,7 @@ import {
 } from '../../../core/public';
 import { SavedObjectPermissions, WorkspaceAttributeWithPermission } from '../../../core/types';
 import { DataSourceAssociation } from './components/data_source_association/data_source_association';
+import { DEFAULT_WORKSPACE_LIST_PER_PAGE } from '../common/constants';
 
 const WORKSPACES_API_BASE_URL = '/api/workspaces';
 
@@ -38,10 +39,21 @@ export class WorkspaceClient implements IWorkspaceClient {
   private http: HttpSetup;
   private workspaces: WorkspacesSetup;
   private isPermissionEnabled: boolean = false;
+  /**
+   * The page size used when fetching the full workspace list. It honors
+   * `workspace.maximum_workspaces` so that every workspace a user is allowed to
+   * create can also be listed.
+   */
+  private listPerPage: number;
 
-  constructor(http: HttpSetup, workspaces: WorkspacesSetup) {
+  constructor(
+    http: HttpSetup,
+    workspaces: WorkspacesSetup,
+    options: { maximumWorkspaces?: number } = {}
+  ) {
     this.http = http;
     this.workspaces = workspaces;
+    this.listPerPage = options.maximumWorkspaces ?? DEFAULT_WORKSPACE_LIST_PER_PAGE;
   }
 
   public setPermissionEnabled(enabled: boolean) {
@@ -107,17 +119,17 @@ export class WorkspaceClient implements IWorkspaceClient {
    */
   private async updateWorkspaceList(): Promise<void> {
     const result = await this.list({
-      perPage: 999,
+      perPage: this.listPerPage,
     });
 
     if (result?.success) {
       const [resultWithWritePermission, resultWithOwnerPermission] = await Promise.all([
         this.list({
-          perPage: 999,
+          perPage: this.listPerPage,
           permissionModes: [WorkspacePermissionMode.LibraryWrite],
         }),
         this.list({
-          perPage: 999,
+          perPage: this.listPerPage,
           permissionModes: [WorkspacePermissionMode.Write],
         }),
       ]);
