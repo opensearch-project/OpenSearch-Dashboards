@@ -12,6 +12,7 @@ import {
   HoverFacts,
 } from '../hover_registry';
 import { pplLintHoverProvider, LINT_OWNER } from '../hover_provider';
+import { registerPPLDiagnosticActionContributor } from '../../diagnostic_action';
 
 type Marker = monaco.editor.IMarker;
 
@@ -125,5 +126,65 @@ describe('pplLintHoverProvider', () => {
     expect(md).toContain('no code here');
     // No static content, no doc link — but never throws / never blank.
     expect(md).not.toContain('**Engine behavior**');
+  });
+
+  describe('contributed actions', () => {
+    it('appends contributed actions as a separate trusted command-link block', () => {
+      const dispose = registerPPLDiagnosticActionContributor((c) => [
+        { title: 'Ask Olly to fix', commandId: 'ppl.aiFix', args: [c.ruleId] },
+      ]);
+      try {
+        markersByOwner[LINT_OWNER] = [makeMarker()];
+        const hover = hoverAt(1, 7);
+        expect(hover).not.toBeNull();
+        // Main card stays untrusted; the action block is a second, trusted part.
+        expect((hover!.contents[0] as monaco.IMarkdownString).isTrusted).toBe(false);
+        const actionPart = hover!.contents[1] as monaco.IMarkdownString;
+        expect(actionPart.isTrusted).toBe(true);
+        expect(actionPart.value).toContain('Ask Olly to fix');
+        expect(actionPart.value).toContain('command:ppl.aiFix');
+      } finally {
+        dispose();
+      }
+    });
+
+    it('adds no extra content part when nothing is contributed', () => {
+      markersByOwner[LINT_OWNER] = [makeMarker()];
+      const hover = hoverAt(1, 7);
+      expect(hover!.contents).toHaveLength(1);
+    });
+
+    it('escapes a contributor title so it cannot inject markdown into the trusted block', () => {
+      // A title that tries to close the link early and open its own command link.
+      const dispose = registerPPLDiagnosticActionContributor(() => [
+        { title: '](command:evil?[]) [x', commandId: 'ppl.aiFix' },
+      ]);
+      try {
+        markersByOwner[LINT_OWNER] = [makeMarker()];
+        const actionPart = hoverAt(1, 7)!.contents[1] as monaco.IMarkdownString;
+        expect(actionPart.isTrusted).toBe(true);
+        // The declared link is the only real one. The injected `evil` text
+        // survives only as escaped, inert link text: no link-forming `](command:`
+        // sequence points at it, so markdown never renders it as a command link.
+        expect(actionPart.value).toContain('](command:ppl.aiFix');
+        expect(actionPart.value).not.toContain('](command:evil');
+      } finally {
+        dispose();
+      }
+    });
+
+    it('drops an action whose commandId is not a plain identifier', () => {
+      const dispose = registerPPLDiagnosticActionContributor(() => [
+        { title: 'sneaky', commandId: 'ppl.aiFix?evil=1) [x](command:evil' },
+      ]);
+      try {
+        markersByOwner[LINT_OWNER] = [makeMarker()];
+        const hover = hoverAt(1, 7);
+        // The sole action was rejected, so no trusted action block is added.
+        expect(hover!.contents).toHaveLength(1);
+      } finally {
+        dispose();
+      }
+    });
   });
 });

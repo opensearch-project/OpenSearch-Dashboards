@@ -65,6 +65,25 @@ export type {
   ExplainAttributionCandidateSnapshot,
 } from './lint/explain/attribution/snapshot';
 
+// Neutral lint extension points (inert until a feature registers into them).
+export { registerPPLLintEventSink, emitPPLLintEvent } from './lint/events';
+export type { PPLLintEvent, PPLLintEventSink, PPLLintEventType, PPLLintLayer } from './lint/events';
+export {
+  registerPPLDiagnosticActionContributor,
+  collectPPLDiagnosticActions,
+} from './lint/diagnostic_action';
+export type {
+  DiagnosticAction,
+  DiagnosticActionContext,
+  PPLDiagnosticActionContributor,
+} from './lint/diagnostic_action';
+export {
+  classifyTopLevelSource,
+  isPipeFirstQuery,
+  sourceConflictsWithDataset,
+} from './lint/top_level_source';
+export type { TopLevelSource } from './lint/top_level_source';
+
 export { buildCommandSuggestion } from './command_suggestion';
 export type { CommandSuggestion } from './command_suggestion';
 

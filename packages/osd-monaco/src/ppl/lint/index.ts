@@ -22,5 +22,21 @@ export { runLint } from './lint_runner';
 export { getBundledCatalog } from './catalog';
 export { createRuntimeRuleNameToIndex } from './rule_index';
 export { PIPE_FIRST_PREFIX, remapPipeFirstColumns } from './range_utils';
+export { normalizeFieldPath, splitFieldPath, fieldPathPrefix } from './field_path';
+export {
+  classifyTopLevelSource,
+  isPipeFirstQuery,
+  sourceConflictsWithDataset,
+} from './top_level_source';
+export { registerPPLLintEventSink, emitPPLLintEvent } from './events';
+export {
+  buildPipelineShape,
+  COMMAND_RULE_NAMES,
+  ORDER_ESTABLISHING_COMMANDS,
+  ORDER_PRESERVING_COMMANDS,
+} from './pipeline_shape';
 export type { Diagnostic, DiagnosticRange, LintResult, LintSeverity } from './diagnostic';
 export type { BundleRuleOverrides, CatalogEntry, LintRunContext } from './types';
+export type { CommandOrderEffect } from './pipeline_shape';
+export type { TopLevelSource } from './top_level_source';
+export type { PPLLintEvent, PPLLintEventSink, PPLLintEventType, PPLLintLayer } from './events';

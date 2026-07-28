@@ -668,7 +668,11 @@ export {
   cleanupPPLContexts,
   PPLDetachRefs,
 } from './ui/query_editor/lint_context';
-export { buildPPLLintContext, extractFieldNames } from './ppl_lint/lint_context_builder';
+export {
+  buildPPLLintContext,
+  extractFieldNames,
+  extractFieldMetadata,
+} from './ppl_lint/lint_context_builder';
 export { calciteSettingsCache } from './ppl_lint/calcite_settings_cache';
 export { explainQueryPreparer } from './ppl_lint/explain_query_preparer';
 export type { LintFieldsCache } from './ppl_lint/lint_context_builder';

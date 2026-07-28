@@ -57,6 +57,8 @@ export function definePPLCalciteSettingsRoute(logger: Logger, router: IRouter) {
             // from a transient failure, so it fails open. Don't reconcile the two paths.
             calciteEnabled: resolveValue('plugins.calcite.enabled') === 'true',
             allJoinTypesAllowed: resolveValue('plugins.calcite.all_join_types.allowed') === 'true',
+            // This reading came from the cluster, so callers may act on it.
+            calciteMeasured: true,
           },
         });
       } catch (err) {
@@ -64,15 +66,20 @@ export function definePPLCalciteSettingsRoute(logger: Logger, router: IRouter) {
         const metaStatus = (err as { meta?: { statusCode?: number } })?.meta?.statusCode;
         const message = err instanceof Error ? err.message : String(err);
         // Fail open: a missing/failed cluster-settings read must not block the
-        // editor. Calcite is assumed enabled (the engine default) so lint rules
-        // still run. Surface auth/permission failures at warn so an operator can
-        // see them; everything else stays at debug.
+        // editor, so the response still describes the engine default. But
+        // `calciteMeasured: false` marks it as an assumption rather than a
+        // reading, so a caller that needs proof (Calcite-only lint rules) can
+        // tell the two apart instead of treating a 403 as "Calcite is on".
+        // Surface auth/permission failures at warn so an operator can see them;
+        // everything else stays at debug.
         if (status === 401 || status === 403 || metaStatus === 401 || metaStatus === 403) {
           logger.warn(`PPL calcite settings unauthorized (${status ?? metaStatus}): ${message}`);
         } else {
           logger.debug(`PPL calcite settings error: ${message}`);
         }
-        return res.ok({ body: { calciteEnabled: true, allJoinTypesAllowed: false } });
+        return res.ok({
+          body: { calciteEnabled: true, allJoinTypesAllowed: false, calciteMeasured: false },
+        });
       }
     }
   );

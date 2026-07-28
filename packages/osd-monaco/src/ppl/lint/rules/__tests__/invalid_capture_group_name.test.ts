@@ -255,10 +255,13 @@ describe('invalid-capture-group-name (compiled surface)', () => {
       expect(ids(code, { dataSourceVersion: '2.19.0' })).not.toContain(RULE);
     });
 
-    it('fires when the version is unknown (documented default: fire, like sibling minVersion rules)', () => {
-      // With no dataSourceVersion, appliesTo self-suppresses only maxVersion
-      // rules; a minVersion-only rule below OSD_KNOWN_VERSION stays on.
-      expect(analyzer.lint(code).diagnostics.map((d) => d.ruleId)).toContain(RULE);
+    it('does NOT fire when the version is unknown (error + minVersion self-suppresses)', () => {
+      // The rule is error severity with a 3.4.0 floor, so an unknown version
+      // cannot prove the floor is met and self-suppresses — same policy as the
+      // sibling error+minVersion rule unsupported-window-function-in-eventstats.
+      // Withholding here keeps an unreadable-version cluster from getting a red
+      // squiggle for a rule whose applicability cannot be confirmed.
+      expect(analyzer.lint(code).diagnostics.map((d) => d.ruleId)).not.toContain(RULE);
     });
   });
 

@@ -14,8 +14,9 @@ import { LintResult } from '../lint/diagnostic';
 import { LintRunContext, SerializableLintContext } from '../lint/types';
 import { CompiledPPLLintAnalysis } from '../lint/explain/attribution/snapshot';
 
-// Simple worker implementation that doesn't depend on Monaco's internal modules
-class PPLWorkerImpl {
+// Simple worker implementation that doesn't depend on Monaco's internal modules.
+// Exported so the structured-clone hydration path can be unit-tested.
+export class PPLWorkerImpl {
   private analyzer: PPLLanguageAnalyzer;
 
   async tokenize(content: string): Promise<PPLToken[]> {
@@ -78,6 +79,11 @@ function rebuildRunContext(context?: SerializableLintContext): LintRunContext | 
     overrides: context.overrides,
     dataSourceId: context.dataSourceId,
     dataSourceVersion: context.dataSourceVersion,
+    // Required by the source-scoped rules: without these two the runner cannot
+    // detect a dataset/source mismatch, so `sourceScoped` suppression silently
+    // stops firing for every field-type rule.
+    selectedSourcePattern: context.selectedSourcePattern,
+    engineType: context.engineType,
   };
 }
 

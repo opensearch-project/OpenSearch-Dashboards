@@ -16,6 +16,8 @@ jest.mock('@osd/monaco', () => ({
     { id: 'head-without-sort', enabled: true, severity: 'info' },
     { id: 'division-by-zero', enabled: true, severity: 'warning' },
     { id: 'field-validation', enabled: true, severity: 'error' },
+    { id: 'agg-on-text', enabled: true, severity: 'warning' },
+    { id: 'type-mismatch-numeric', enabled: true, severity: 'warning' },
   ],
 }));
 
@@ -139,9 +141,48 @@ describe('buildOverridesFromSettings', () => {
     expect(overrides).toEqual({});
   });
 
+  it('clamps agg-on-text up to its warning floor (info downgrade blocked)', () => {
+    const overrides = buildOverridesFromSettings(
+      makeUiSettings([{ id: 'agg-on-text', enabled: true, severity: 'info' }])
+    );
+    expect(overrides).toEqual({});
+  });
+
+  it('clamps type-mismatch-numeric up to its warning floor (info downgrade blocked)', () => {
+    const overrides = buildOverridesFromSettings(
+      makeUiSettings([{ id: 'type-mismatch-numeric', enabled: true, severity: 'info' }])
+    );
+    expect(overrides).toEqual({});
+  });
+
+  it('still allows disabling a floored PR A rule', () => {
+    const overrides = buildOverridesFromSettings(
+      makeUiSettings([{ id: 'agg-on-text', enabled: false, severity: 'info' }])
+    );
+    expect(overrides).toEqual({ 'agg-on-text': { enabled: false } });
+  });
+
+  it('rejects an inherited Object property name as a severity (own-property check)', () => {
+    // 'toString' is `in SEV_RANK` via the prototype chain, but is not an own
+    // property, so the own-property guard must drop it rather than clamp/pass it.
+    const overrides = buildOverridesFromSettings(
+      makeUiSettings([{ id: 'agg-on-text', enabled: true, severity: 'toString' as never }])
+    );
+    expect(overrides).toEqual({});
+  });
+
   it('ignores unknown rule ids gracefully', () => {
     const overrides = buildOverridesFromSettings(
       makeUiSettings([{ id: 'nonexistent-rule', enabled: false, severity: 'error' }])
+    );
+    expect(overrides).toEqual({});
+  });
+
+  it('ignores a prototype-chain name as severity (hasOwnProperty, not `in`)', () => {
+    // 'toString' resolves on SEV_RANK's prototype, so a plain `severity in SEV_RANK`
+    // check would treat it as a valid level; the own-property guard rejects it.
+    const overrides = buildOverridesFromSettings(
+      makeUiSettings([{ id: 'head-without-sort', enabled: true, severity: 'toString' as never }])
     );
     expect(overrides).toEqual({});
   });
@@ -258,5 +299,18 @@ describe('an undeclared lint-rules setting (queryEnhancements disabled)', () => 
     expect(isCommandSuggestionEnabled(uiSettings)).toBe(true);
     expect(() => readExplainMode(uiSettings)).not.toThrow();
     expect(readExplainMode(uiSettings)).toBe('fast');
+  });
+});
+
+describe('an undeclared lint-rules setting (queryEnhancements disabled)', () => {
+  // Both readers run while building the lint context, which the query editor does
+  // on mount with no capability check — so a throw here breaks the editor even
+  // when lint is off. Neither may reach `get()` for an undeclared key.
+  it('does not throw and falls back to catalog defaults', () => {
+    const uiSettings = makeUndeclaredUiSettings();
+    expect(() => buildOverridesFromSettings(uiSettings)).not.toThrow();
+    expect(buildOverridesFromSettings(uiSettings)).toEqual({});
+    expect(() => isCommandSuggestionEnabled(uiSettings)).not.toThrow();
+    expect(isCommandSuggestionEnabled(uiSettings)).toBe(true);
   });
 });

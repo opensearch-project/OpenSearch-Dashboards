@@ -44,7 +44,9 @@ describe('registerPplLint', () => {
     expect(mockSetPPLLintEnabled).toHaveBeenCalledWith(false);
     expect(mockRegisterPPLLintBridge).not.toHaveBeenCalled();
     expect(mockRegisterPreparer).not.toHaveBeenCalled();
-    expect(disposer).toBeUndefined();
+    // Always a disposer: the engine flag lives on globalThis and outlives the
+    // plugin, so teardown must be able to reset it even when no bridge was set.
+    expect(disposer).toEqual(expect.any(Function));
   });
 
   it('enables the engine and registers the runtime bridge + preparer when both flags are on', () => {
@@ -64,13 +66,25 @@ describe('registerPplLint', () => {
     expect(mockSetPPLLintEnabled).toHaveBeenCalledWith(true);
     expect(mockRegisterPPLLintBridge).not.toHaveBeenCalled();
     expect(mockRegisterPreparer).not.toHaveBeenCalled();
-    expect(disposer).toBeUndefined();
+    expect(disposer).toEqual(expect.any(Function));
   });
 
-  it('returns a disposer that unregisters both the bridge and the preparer', () => {
+  it('returns a disposer that unregisters the bridge and preparer and disables the engine', () => {
     const disposer = registerPplLint(true, true, services);
-    disposer?.();
+    disposer();
+
     expect(mockUnregister).toHaveBeenCalledTimes(1);
     expect(mockUnregisterPreparer).toHaveBeenCalledTimes(1);
+    expect(mockSetPPLLintEnabled).toHaveBeenLastCalledWith(false);
+  });
+
+  it('still disables the engine on teardown when no bridge was registered', () => {
+    // The engine flag lives on globalThis and outlives the plugin, so teardown
+    // must reset it even in the runtime-grammar-disabled case.
+    const disposer = registerPplLint(true, false, services);
+    expect(mockSetPPLLintEnabled).toHaveBeenLastCalledWith(true);
+
+    disposer();
+    expect(mockSetPPLLintEnabled).toHaveBeenLastCalledWith(false);
   });
 });
