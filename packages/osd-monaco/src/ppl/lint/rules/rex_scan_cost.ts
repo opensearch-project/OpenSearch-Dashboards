@@ -36,6 +36,11 @@ import { rangeFromContext } from '../range_utils';
 // `rex` exists only on the simplified (compiled) surface; `parse`/`grok` exist on
 // both. A command absent on the active surface resolves to -1 and no-ops.
 
+// Catalogued `sourceScoped`: `typeMap` describes the selected dataset's mapping,
+// so an explicit `source=` naming a different index would have the source field's
+// type read from the wrong mapping — flagging a scan cost on a field that is not
+// `text` there, or missing one that is.
+//
 // esTypes for which extraction incurs the analyzed-text scan cost this rule is
 // about. `keyword` is deliberately excluded: its cost profile differs (whole-
 // value, doc-values backed) and folding it in would dilute the message. See

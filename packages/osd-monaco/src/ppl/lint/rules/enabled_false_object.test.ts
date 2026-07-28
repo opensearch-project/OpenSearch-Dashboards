@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { PPLLanguageAnalyzer } from '../../../ppl_language_analyzer';
-import type { LintRunContext } from '../../types';
-import { getBundledCatalog } from '../../catalog';
+import { PPLLanguageAnalyzer } from '../../ppl_language_analyzer';
+import type { LintRunContext } from '../types';
+import { getBundledCatalog } from '../catalog';
 
 const RULE_ID = 'enabled-false-object';
 

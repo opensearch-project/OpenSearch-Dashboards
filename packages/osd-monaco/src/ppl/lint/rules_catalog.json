@@ -184,6 +184,7 @@
     "message": "Field inside an enabled:false object is not indexed and resolves to null.",
     "docUrl": "https://docs.opensearch.org/latest/mappings/mapping-parameters/enabled/#disabling-object-fields",
     "needsContext": true,
+    "sourceScoped": true,
     "appliesTo": {}
   },
   {
@@ -204,6 +205,7 @@
     "message": "Pattern extraction over a large text field can be expensive.",
     "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/rex/",
     "appliesTo": {},
-    "needsContext": true
+    "needsContext": true,
+    "sourceScoped": true
   }
 ]

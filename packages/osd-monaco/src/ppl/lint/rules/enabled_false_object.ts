@@ -21,6 +21,11 @@ import { rangeFromContext } from '../range_utils';
 // Grammar anchor (both surfaces): a dotted reference parses to a `qualifiedName`
 // (where/eval/by) or a `wcQualifiedName` (fields projection), and both carry the
 // full dotted path as their text.
+//
+// Catalogued `sourceScoped`: `disabledObjectFields` describes the selected
+// dataset's mapping, so an explicit `source=` naming a different index would have
+// this checked against the wrong mapping and report a field that is perfectly
+// indexed there.
 export const enabledFalseObjectDetector: Detector = (tree, config, context, ruleNameToIndex) => {
   const disabled = context.disabledObjectFields;
   if (!disabled || disabled.size === 0) {

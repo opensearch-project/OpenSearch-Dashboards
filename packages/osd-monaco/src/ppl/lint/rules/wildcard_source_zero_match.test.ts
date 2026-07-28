@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { PPLLanguageAnalyzer } from '../../../ppl_language_analyzer';
-import type { LintRunContext } from '../../types';
-import { getBundledCatalog } from '../../catalog';
+import { PPLLanguageAnalyzer } from '../../ppl_language_analyzer';
+import type { LintRunContext } from '../types';
+import { getBundledCatalog } from '../catalog';
 
 const RULE_ID = 'wildcard-source-zero-match';
 const VISIBLE = ['logs-2024', 'logs-2025', 'accounts'];

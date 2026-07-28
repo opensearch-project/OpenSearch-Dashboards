@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { PPLLanguageAnalyzer } from '../../../ppl_language_analyzer';
-import type { LintRunContext } from '../../types';
+import { PPLLanguageAnalyzer } from '../../ppl_language_analyzer';
+import type { LintRunContext } from '../types';
 
 // `rex-scan-cost` is an advisory, `info`-severity rule that flags pattern
 // extraction (`rex`/`parse`/`grok`) over a `text`-mapped source field. It ships
