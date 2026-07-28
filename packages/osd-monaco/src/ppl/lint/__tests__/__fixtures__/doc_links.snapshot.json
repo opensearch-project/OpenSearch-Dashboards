@@ -108,6 +108,12 @@
       "page": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/search/",
       "anchor": "",
       "quality": "weak"
+    },
+    "rex-scan-cost": {
+      "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/rex/",
+      "page": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/rex/",
+      "anchor": "",
+      "quality": "weak"
     }
   }
 }

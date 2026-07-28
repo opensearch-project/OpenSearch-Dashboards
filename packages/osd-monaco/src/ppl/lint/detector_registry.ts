@@ -19,6 +19,7 @@ import { typeMismatchNumericDetector } from './rules/type_mismatch_numeric';
 import { invalidCaptureGroupNameDetector } from './rules/invalid_capture_group_name';
 import { enabledFalseObjectDetector } from './rules/enabled_false_object';
 import { wildcardSourceZeroMatchDetector } from './rules/wildcard_source_zero_match';
+import { rexScanCostDetector } from './rules/rex_scan_cost';
 
 const registry = new Map<string, Detector>();
 
@@ -51,6 +52,7 @@ export function registerBuiltInDetectors(): void {
   registerDetector('invalid-capture-group-name', invalidCaptureGroupNameDetector);
   registerDetector('enabled-false-object', enabledFalseObjectDetector);
   registerDetector('wildcard-source-zero-match', wildcardSourceZeroMatchDetector);
+  registerDetector('rex-scan-cost', rexScanCostDetector);
 }
 
 registerBuiltInDetectors();

@@ -33,6 +33,7 @@ const PPL_LINT_RULE_DEFAULTS: ReadonlyArray<{
   { id: 'operation-pushed-as-script', enabled: true, severity: 'info' },
   { id: 'enabled-false-object', enabled: true, severity: 'warning' },
   { id: 'wildcard-source-zero-match', enabled: true, severity: 'info' },
+  { id: 'rex-scan-cost', enabled: false, severity: 'info' },
   { id: 'command-suggestion', enabled: true },
 ];
 
