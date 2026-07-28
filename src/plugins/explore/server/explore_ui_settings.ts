@@ -11,6 +11,7 @@ import {
   DEFAULT_TRACE_COLUMNS_SETTING,
   DEFAULT_LOGS_COLUMNS_SETTING,
   ENABLE_EXPERIMENTAL_SETTING,
+  PARTIAL_RESULTS_SETTING,
 } from '../common';
 
 export const exploreUiSettings: Record<string, UiSettingsParams> = {
@@ -53,6 +54,21 @@ export const exploreUiSettings: Record<string, UiSettingsParams> = {
     description: i18n.translate('explore.advancedSettings.enableExperimentalText', {
       defaultMessage:
         'Enable experimental features in Explore including field statistics and histogram breakdown selector.',
+    }),
+    category: ['explore'],
+    schema: schema.boolean(),
+  },
+  [PARTIAL_RESULTS_SETTING]: {
+    name: i18n.translate('explore.advancedSettings.enablePartialResultsTitle', {
+      defaultMessage: 'Return partial results on mapping conflicts',
+    }),
+    value: false,
+    description: i18n.translate('explore.advancedSettings.enablePartialResultsText', {
+      defaultMessage:
+        'When a field is mapped inconsistently across indices (e.g. text in some, keyword in ' +
+        'others), an aggregation on that field normally fails. When enabled, the aggregation runs ' +
+        'over the indices where the field is aggregatable and the result is returned with a ' +
+        'warning naming the excluded indices, instead of failing the query.',
     }),
     category: ['explore'],
     schema: schema.boolean(),
