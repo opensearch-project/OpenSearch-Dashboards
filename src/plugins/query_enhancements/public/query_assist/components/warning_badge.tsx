@@ -152,7 +152,11 @@ export const WarningBadge: React.FC<WarningBadgeProps> = (props) => {
               </EuiFlexItem>
               {chatAvailable && (
                 <EuiFlexItem grow={false}>
-                  <AskT2pplErrorButton error={props.error} question={props.question} />
+                  <AskT2pplErrorButton
+                    chatService={services.chat}
+                    error={props.error}
+                    question={props.question}
+                  />
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>
