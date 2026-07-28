@@ -308,6 +308,22 @@ export const applyAxisStyling = ({
   return echartsAxisConfig;
 };
 
+export const buildThresholds = (styles: BaseChartStyle) => {
+  const completeThreshold =
+    styles.thresholdOptions && styles?.thresholdOptions.thresholds
+      ? [
+          { value: 0, color: styles.thresholdOptions.baseColor } as Threshold,
+          ...styles.thresholdOptions.thresholds,
+        ]
+      : [];
+
+  return convertThresholds(completeThreshold).map((t) => ({
+    gte: t.min,
+    lt: t.max,
+    color: t.color,
+  }));
+};
+
 export const buildVisMap =
   ({ seriesFields }: { seriesFields: (headers?: string[]) => string[] }) =>
   (state: EChartsSpecState) => {
@@ -315,20 +331,7 @@ export const buildVisMap =
 
     if (!styles.useThresholdColor) return state;
 
-    const completeThreshold =
-      styles.thresholdOptions && styles?.thresholdOptions.thresholds
-        ? [
-            { value: 0, color: styles.thresholdOptions.baseColor } as Threshold,
-            ...styles.thresholdOptions.thresholds,
-          ]
-        : [];
-
-    const convertedThresholds = convertThresholds(completeThreshold);
-    const pieces = convertedThresholds.map((t) => ({
-      gte: t.min,
-      lt: t.max,
-      color: t.color,
-    }));
+    const pieces = buildThresholds(styles);
 
     const visualMap = seriesFields(transformedData[0]).map((c: string, index: number) => {
       const originalIndex = transformedData[0]?.indexOf(c);

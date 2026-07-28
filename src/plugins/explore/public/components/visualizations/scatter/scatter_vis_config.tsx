@@ -147,6 +147,35 @@ export const createScatterConfig = (): VisualizationType<'scatter'> => ({
           {
             [AxisRole.X]: { type: VisFieldType.Numerical },
             [AxisRole.Y]: { type: VisFieldType.Numerical },
+            [AxisRole.SIZE]: { type: VisFieldType.Numerical },
+          },
+        ],
+        render(props) {
+          const x = props.axisColumnMappings.x?.[0];
+          const y = props.axisColumnMappings.y?.[0];
+          const size = props.axisColumnMappings.size?.[0];
+          if (!x || !y || !size) throw Error('Missing axis config for scatter chart');
+          const spec = createThreeMetricOneCateScatter(
+            props.transformedData,
+            props.styleOptions,
+            { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.SIZE]: size },
+            props.onLegend
+          );
+          return (
+            <EchartsRender
+              spec={spec}
+              legendSelected$={props.legendSelected$}
+              highlightedSeries$={props.highlightedSeries$}
+            />
+          );
+        },
+      },
+      {
+        priority: 100,
+        mappings: [
+          {
+            [AxisRole.X]: { type: VisFieldType.Numerical },
+            [AxisRole.Y]: { type: VisFieldType.Numerical },
             [AxisRole.COLOR]: { type: VisFieldType.Categorical },
             [AxisRole.SIZE]: { type: VisFieldType.Numerical },
           },

@@ -109,7 +109,7 @@ export const createThreeMetricOneCateScatter = (
   axisColumnMappings: {
     [AxisRole.X]: VisColumn;
     [AxisRole.Y]: VisColumn;
-    [AxisRole.COLOR]: VisColumn;
+    [AxisRole.COLOR]?: VisColumn;
     [AxisRole.SIZE]: VisColumn;
   },
   onLegend?: (legend: ColorMap) => void
@@ -130,7 +130,7 @@ export const createThreeMetricOneCateScatter = (
       styles,
       xField: xCol.column,
       yField: yCol.column,
-      colorField: colorCol.column,
+      colorField: colorCol?.column,
       sizeField: sizeCol.column,
     }),
     collectLegend(onLegend),
