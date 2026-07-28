@@ -66,7 +66,7 @@ describe('definePPLCalciteSettingsRoute', () => {
       path: EXPECTED_PATH,
     });
     expect(res.ok).toHaveBeenCalledWith({
-      body: { calciteEnabled: true, allJoinTypesAllowed: false },
+      body: { calciteEnabled: true, allJoinTypesAllowed: false, calciteMeasured: true },
     });
     expect(result).toEqual(res.ok.mock.results[0].value);
   });
@@ -93,7 +93,7 @@ describe('definePPLCalciteSettingsRoute', () => {
     });
     // Absent key on a successful read = no Calcite engine = disabled; join types not allowed.
     expect(res.ok).toHaveBeenCalledWith({
-      body: { calciteEnabled: false, allJoinTypesAllowed: false },
+      body: { calciteEnabled: false, allJoinTypesAllowed: false, calciteMeasured: true },
     });
   });
 
@@ -116,7 +116,7 @@ describe('definePPLCalciteSettingsRoute', () => {
     await handler()(context, req, res);
 
     expect(res.ok).toHaveBeenCalledWith({
-      body: { calciteEnabled: false, allJoinTypesAllowed: false },
+      body: { calciteEnabled: false, allJoinTypesAllowed: false, calciteMeasured: true },
     });
   });
 
@@ -149,7 +149,7 @@ describe('definePPLCalciteSettingsRoute', () => {
 
     // transient 'false' wins for calcite.enabled; persistent 'true' wins for join types.
     expect(res.ok).toHaveBeenCalledWith({
-      body: { calciteEnabled: false, allJoinTypesAllowed: true },
+      body: { calciteEnabled: false, allJoinTypesAllowed: true, calciteMeasured: true },
     });
   });
 
@@ -196,7 +196,7 @@ describe('definePPLCalciteSettingsRoute', () => {
     await handler()(context, req, res);
 
     expect(res.ok).toHaveBeenCalledWith({
-      body: { calciteEnabled: true, allJoinTypesAllowed: false },
+      body: { calciteEnabled: true, allJoinTypesAllowed: false, calciteMeasured: false },
     });
     expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('boom'));
   });
@@ -223,7 +223,7 @@ describe('definePPLCalciteSettingsRoute', () => {
     await handler()(context, req, res);
 
     expect(res.ok).toHaveBeenCalledWith({
-      body: { calciteEnabled: false, allJoinTypesAllowed: false },
+      body: { calciteEnabled: false, allJoinTypesAllowed: false, calciteMeasured: true },
     });
   });
 
@@ -252,7 +252,7 @@ describe('definePPLCalciteSettingsRoute', () => {
     await handler()(context, req, res);
 
     expect(res.ok).toHaveBeenCalledWith({
-      body: { calciteEnabled: false, allJoinTypesAllowed: true },
+      body: { calciteEnabled: false, allJoinTypesAllowed: true, calciteMeasured: true },
     });
   });
 
@@ -280,7 +280,7 @@ describe('definePPLCalciteSettingsRoute', () => {
 
     // Still fails open so the editor is never blocked...
     expect(res.ok).toHaveBeenCalledWith({
-      body: { calciteEnabled: true, allJoinTypesAllowed: false },
+      body: { calciteEnabled: true, allJoinTypesAllowed: false, calciteMeasured: false },
     });
     // ...but the permission failure is surfaced at warn, not buried at debug.
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('403'));

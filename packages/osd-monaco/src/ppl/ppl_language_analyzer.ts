@@ -171,7 +171,12 @@ export class PPLLanguageAnalyzer {
         // Declare the surface AND the source text so the field-slot shape pass
         // can run a narrow text-side detector here (on the simplified grammar
         // `grok field=body` error-recovers and can't be read off the tree).
-        context: { ...context, sourceText: effectiveCode, grammarSurface: 'compiled-simplified' },
+        context: {
+          ...context,
+          sourceText: effectiveCode,
+          grammarSurface: 'compiled-simplified',
+          isPipeFirst,
+        },
       });
 
       if (isPipeFirst) {

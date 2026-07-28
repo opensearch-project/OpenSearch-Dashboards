@@ -94,6 +94,49 @@
     "severity": "error",
     "message": "Reference to an unknown field.",
     "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/fields/",
+    "sourceScoped": true,
     "appliesTo": {}
+  },
+  {
+    "id": "agg-on-text",
+    "detector": "agg-on-text",
+    "enabled": true,
+    "severity": "warning",
+    "message": "Numeric aggregation on a text/keyword field returns null rather than a numeric result.",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/stats/",
+    "needsContext": true,
+    "sourceScoped": true,
+    "appliesTo": {
+      "minVersion": "3.7.0",
+      "engine": "calcite"
+    }
+  },
+  {
+    "id": "flat-object-subfield",
+    "detector": "flat-object-subfield",
+    "enabled": true,
+    "severity": "error",
+    "message": "flat_object fields and their subfields cannot be referenced in a PPL expression; their values are only retrievable at the document level.",
+    "docUrl": "https://docs.opensearch.org/latest/field-types/supported-field-types/object-fields/",
+    "needsContext": true,
+    "sourceScoped": true,
+    "appliesTo": {
+      "minVersion": "3.8.0",
+      "engine": "calcite"
+    }
+  },
+  {
+    "id": "type-mismatch-numeric",
+    "detector": "type-mismatch-numeric",
+    "enabled": true,
+    "severity": "warning",
+    "message": "Comparing a numeric field to a non-numeric string literal matches no documents (returns 0 rows, no error).",
+    "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/functions/expressions/#comparison-operators",
+    "needsContext": true,
+    "sourceScoped": true,
+    "appliesTo": {
+      "minVersion": "3.7.0",
+      "engine": "calcite"
+    }
   }
 ]

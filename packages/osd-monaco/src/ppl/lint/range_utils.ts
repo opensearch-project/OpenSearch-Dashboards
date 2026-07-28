@@ -83,5 +83,11 @@ export function remapPipeFirstColumns(diagnostics: Diagnostic[]): Diagnostic[] {
   return diagnostics.map((diagnostic) => ({
     ...diagnostic,
     range: shift(diagnostic.range),
+    // The fix carries its own range in the same prefixed coordinate space, so
+    // shift it too — otherwise the quick-fix edit lands `prefixLength` columns
+    // off. A fix without its own range reuses the already-shifted diagnostic range.
+    ...(diagnostic.fix?.range
+      ? { fix: { ...diagnostic.fix, range: shift(diagnostic.fix.range) } }
+      : {}),
   }));
 }

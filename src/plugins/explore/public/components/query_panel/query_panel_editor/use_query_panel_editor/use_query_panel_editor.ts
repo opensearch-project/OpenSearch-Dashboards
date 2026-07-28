@@ -29,7 +29,7 @@ import {
   cleanupPPLContexts,
   PPLDetachRefs,
   buildPPLLintContext,
-  extractFieldNames,
+  extractFieldMetadata,
   LintFieldsCache,
   pplGrammarCache,
   shouldUseRuntimeGrammar,
@@ -219,6 +219,8 @@ export const useQueryPanelEditor = (props: QueryEditorProps): UseQueryPanelEdito
   useEffect(() => {
     const datasetId = dataset?.id;
     const dataSourceId = dataset?.dataSource?.id;
+    const datasetType = dataset?.type;
+    const sourcePattern = dataset?.title;
     let cancelled = false;
 
     const loadFields = async () => {
@@ -234,10 +236,14 @@ export const useQueryPanelEditor = (props: QueryEditorProps): UseQueryPanelEdito
           if (cancelled || !indexPattern) {
             return;
           }
+          const { fields, typeMap } = extractFieldMetadata(indexPattern);
           lintFieldsRef.current = {
             datasetId,
             dataSourceId,
-            fields: extractFieldNames(indexPattern),
+            datasetType,
+            selectedSourcePattern: sourcePattern,
+            fields,
+            typeMap,
           };
         } catch {
           if (cancelled) {
@@ -260,7 +266,15 @@ export const useQueryPanelEditor = (props: QueryEditorProps): UseQueryPanelEdito
     return () => {
       cancelled = true;
     };
-  }, [dataset?.id, dataset?.dataSource?.id, dataViews, editorRef, getLintContext]);
+  }, [
+    dataset?.id,
+    dataset?.dataSource?.id,
+    dataset?.type,
+    dataset?.title,
+    dataViews,
+    editorRef,
+    getLintContext,
+  ]);
 
   // Cleanup validation + lint context on unmount
   useEffect(() => () => cleanupPPLContexts(detachRefs.current), []);

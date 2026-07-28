@@ -8,11 +8,8 @@ import { isRuleNode } from '../rule_index';
 import { Diagnostic, DiagnosticRange } from '../diagnostic';
 import { findCompiledFieldSlotShapeMatches } from '../field_slot_shape_text';
 import { CatalogEntry, Detector, LintRunContext } from '../types';
-import {
-  buildPipelineShape,
-  collectAlternateSourceSubtrees,
-  normalizeFieldName,
-} from '../pipeline_shape';
+import { buildPipelineShape, collectAlternateSourceSubtrees } from '../pipeline_shape';
+import { fieldPathPrefix, normalizeFieldPath } from '../field_path';
 import {
   findAllDescendantsByRule,
   findChildByRule,
@@ -99,7 +96,7 @@ function collectJoinAliases(
     for (const qn of findAllDescendantsByRule(sideAlias, ruleNameToIndex, 'qualifiedName')) {
       // Normalize so a backtick-quoted alias declaration (`` left=`l` ``) matches
       // a bare `l.response` reference downstream, mirroring the reference side.
-      const text = normalizeFieldName(qn.getText());
+      const text = normalizeFieldPath(qn.getText());
       if (text) {
         aliases.add(text);
       }
@@ -180,7 +177,7 @@ function detectUnknownFields(
       // Normalize backtick-quoted segments per dotted part so `` `age` ``
       // matches the unquoted `age` in the field set. Shares the exact helper the
       // created-field registration uses, so the two sides can never drift.
-      const name = normalizeFieldName(raw);
+      const name = normalizeFieldPath(raw);
       // On the compiled-simplified surface, `source=idx` / `index=idx` parses the
       // leading `source`/`index` keyword into a fieldExpression (the runtime
       // grammar instead parses it as an excluded fromClause). Skip that keyword
@@ -188,7 +185,9 @@ function detectUnknownFields(
       if (skipSourceKeywords && SOURCE_KEYWORDS.has(name.toLowerCase())) {
         continue;
       }
-      const prefix = name.includes('.') ? name.split('.')[0] : null;
+      // Quote-aware prefix: `` `a.b`.c `` has prefix `a.b`, not `a`. Derived from
+      // the raw text so a quoted dot is not mistaken for a path separator.
+      const prefix = fieldPathPrefix(raw);
       // Soft skip: alias-qualified refs (`l.response` where `l` is a declared
       // join alias). Still descend into children — alias-qualified refs appear
       // in downstream pipeline stages outside the alternate-source regions.
@@ -279,11 +278,27 @@ function equalsRhs(
   if (opPos === -1 || opPos === siblings.length - 1) {
     return undefined;
   }
-  const rhs = siblings
-    .slice(opPos + 1)
-    .map((c) => (c as ParseTree).getText())
-    .join('');
-  return rhs.length > 0 ? rhs : undefined;
+  const rhsNodes = siblings.slice(opPos + 1);
+  const rhsText = rhsNodes.map((c) => (c as ParseTree).getText()).join('');
+  if (rhsText.length === 0) {
+    return undefined;
+  }
+  // Only offer the `field=value` → `value` rewrite when the RHS is a single bare
+  // field reference. A computed RHS (`field = a + b`, `field = fn(x)`) has
+  // ambiguous intent, so we confirm the RHS is exactly one fieldExpression first.
+  const fieldExprIdx = ruleNameToIndex('fieldExpression');
+  if (fieldExprIdx === -1) {
+    return undefined;
+  }
+  const rhsFieldExprs = rhsNodes.flatMap((node) =>
+    isParserRuleContext(node)
+      ? findAllDescendantsByRule(node, ruleNameToIndex, 'fieldExpression')
+      : []
+  );
+  if (rhsFieldExprs.length !== 1 || rhsFieldExprs[0].getText() !== rhsText) {
+    return undefined;
+  }
+  return rhsText;
 }
 
 /**

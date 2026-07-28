@@ -12,7 +12,7 @@ import { ATN, ATNDeserializer, Vocabulary } from 'antlr4ng';
 import semver from 'semver';
 import { PPLGrammarBundle } from './ppl_bundle_loader';
 import { TokenDictionary } from '../opensearch_sql/table';
-import { getDataSourceEngineCapabilities } from '../../../common';
+import { getDataSourceEngineCapabilities, UI_SETTINGS } from '../../../common';
 
 const ARTIFACT_ENDPOINT = '/api/enhancements/ppl/grammar';
 
@@ -205,7 +205,10 @@ class PPLGrammarCache {
     datasourceEngineType?: string
   ): void {
     // Check feature flag - if disabled, reset cache state but keep subscribers
-    const runtimeGrammarEnabled = uiSettings?.get('query:enhancements:runtimePplGrammar') !== false;
+    // `?.` covers a missing client; the explicit default covers an undeclared
+    // key, which would otherwise throw rather than fall back.
+    const runtimeGrammarEnabled =
+      uiSettings?.get<boolean>(UI_SETTINGS.QUERY_ENHANCEMENTS_RUNTIME_PPL_GRAMMAR, true) !== false;
     if (!runtimeGrammarEnabled) {
       this.reset();
       return;
@@ -301,7 +304,8 @@ class PPLGrammarCache {
     if (!this.shouldFetchFromBackend(version, datasourceEngineType)) {
       // Version unsupported or unknown — not a failure, just nothing to fetch.
       // Don't set fetchFailed so that future warmUp calls can retry when the
-      // version becomes available (e.g. /api/status wasn't ready on page load).
+      // version becomes available (e.g. the local cluster version route wasn't
+      // ready on page load).
       return null;
     }
     const result = await this.doFetch(http, datasourceId);
@@ -332,9 +336,12 @@ class PPLGrammarCache {
         const savedObject = await savedObjectsClient.get('data-source', datasourceId);
         version = (savedObject.attributes as any)?.dataSourceVersion as string | undefined;
       } else if (!datasourceId) {
-        // Local cluster — read OSD server version from /api/status.
-        const response = await http.get<{ version?: { number?: string } }>('/api/status');
-        version = response?.version?.number;
+        // Local cluster — read the cluster engine version (the >=3.6.0 check is
+        // cluster-side); runtime HTTP call, not a plugin dep, to avoid a data_source_management cycle.
+        const response = await http.get<{ version?: string }>(
+          '/internal/data-source-management/localClusterVersion'
+        );
+        version = response?.version || undefined;
       }
       if (version) {
         this.cachedVersion = version;
@@ -465,17 +472,37 @@ export function shouldUseRuntimeGrammar(
 }
 
 /**
- * Derive whether a data source runs the Calcite engine from its version.
- * Returns true for >= 3.3.0, false below 3.3.0, undefined when unknown.
- * Cannot detect an administratively-disabled Calcite on a >= 3.3.0 cluster.
+ * Derive whether a data source runs the Calcite engine.
+ *
+ * An engine that speaks Open Distro SQL/PPL (Elasticsearch) has no Calcite
+ * engine at all, so that answer is definitive. Otherwise the only proof is a
+ * successful cluster-settings reading: `measuredCalciteEnabled` is the value the
+ * route actually read, and `undefined` means it has not been read yet.
+ *
+ * The version alone is deliberately never enough to return `true`. It cannot see
+ * an administratively-disabled Calcite on a >= 3.3.0 cluster, and treating it as
+ * proof let Calcite-only rules fire on clusters that do not run Calcite. A
+ * version below 3.3.0 is still conclusive in the negative direction.
  */
-export function deriveIsCalcite(dataSourceVersion?: string): boolean | undefined {
-  if (!dataSourceVersion) {
-    return undefined;
+export function deriveIsCalcite(
+  dataSourceVersion?: string,
+  dataSourceEngineType?: string,
+  measuredCalciteEnabled?: boolean
+): boolean | undefined {
+  if (getDataSourceEngineCapabilities(dataSourceEngineType).usesOpenDistroSqlPpl) {
+    return false;
   }
-  const coerced = semver.coerce(dataSourceVersion);
+
+  if (measuredCalciteEnabled !== undefined) {
+    return measuredCalciteEnabled;
+  }
+
+  const coerced = dataSourceVersion ? semver.coerce(dataSourceVersion) : null;
   if (!coerced) {
     return undefined;
   }
-  return semver.gte(coerced.version, '3.3.0');
+
+  // Pre-Calcite cluster: conclusive. At or above 3.3.0 the engine is on by
+  // default but may be disabled, so withhold judgement until measured.
+  return semver.gte(coerced.version, '3.3.0') ? undefined : false;
 }

@@ -11,13 +11,37 @@ jest.mock('@osd/monaco', () => ({
     { id: 'head-without-sort', enabled: true, severity: 'info' },
     { id: 'division-by-zero', enabled: true, severity: 'warning' },
     { id: 'field-validation', enabled: true, severity: 'error' },
+    { id: 'agg-on-text', enabled: true, severity: 'warning' },
+    { id: 'type-mismatch-numeric', enabled: true, severity: 'warning' },
   ],
 }));
 
+const RULES_KEY = 'query:enhancements:pplLint:rules';
+
 function makeUiSettings(rules: unknown): IUiSettingsClient {
   return {
-    get: (key: string, defaultOverride?: unknown) =>
-      key === 'query:enhancements:pplLint:rules' ? rules : defaultOverride,
+    isDeclared: (key: string) => key === RULES_KEY,
+    get: (key: string, defaultOverride?: unknown) => (key === RULES_KEY ? rules : defaultOverride),
+  } as unknown as IUiSettingsClient;
+}
+
+/**
+ * Stands in for core's UiSettingsClient on a deployment where queryEnhancements
+ * is disabled: the key is undeclared, so `get()` throws rather than returning a
+ * default. A permissive fake cannot reproduce this, which is why the throw went
+ * unnoticed.
+ */
+function makeUndeclaredUiSettings(): IUiSettingsClient {
+  return {
+    isDeclared: () => false,
+    get: (key: string, defaultOverride?: unknown) => {
+      if (defaultOverride !== undefined) {
+        return defaultOverride;
+      }
+      throw new Error(
+        `Unexpected \`IUiSettingsClient.get("${key}")\` call on unrecognized configuration setting`
+      );
+    },
   } as unknown as IUiSettingsClient;
 }
 
@@ -112,9 +136,48 @@ describe('buildOverridesFromSettings', () => {
     expect(overrides).toEqual({});
   });
 
+  it('clamps agg-on-text up to its warning floor (info downgrade blocked)', () => {
+    const overrides = buildOverridesFromSettings(
+      makeUiSettings([{ id: 'agg-on-text', enabled: true, severity: 'info' }])
+    );
+    expect(overrides).toEqual({});
+  });
+
+  it('clamps type-mismatch-numeric up to its warning floor (info downgrade blocked)', () => {
+    const overrides = buildOverridesFromSettings(
+      makeUiSettings([{ id: 'type-mismatch-numeric', enabled: true, severity: 'info' }])
+    );
+    expect(overrides).toEqual({});
+  });
+
+  it('still allows disabling a floored PR A rule', () => {
+    const overrides = buildOverridesFromSettings(
+      makeUiSettings([{ id: 'agg-on-text', enabled: false, severity: 'info' }])
+    );
+    expect(overrides).toEqual({ 'agg-on-text': { enabled: false } });
+  });
+
+  it('rejects an inherited Object property name as a severity (own-property check)', () => {
+    // 'toString' is `in SEV_RANK` via the prototype chain, but is not an own
+    // property, so the own-property guard must drop it rather than clamp/pass it.
+    const overrides = buildOverridesFromSettings(
+      makeUiSettings([{ id: 'agg-on-text', enabled: true, severity: 'toString' as never }])
+    );
+    expect(overrides).toEqual({});
+  });
+
   it('ignores unknown rule ids gracefully', () => {
     const overrides = buildOverridesFromSettings(
       makeUiSettings([{ id: 'nonexistent-rule', enabled: false, severity: 'error' }])
+    );
+    expect(overrides).toEqual({});
+  });
+
+  it('ignores a prototype-chain name as severity (hasOwnProperty, not `in`)', () => {
+    // 'toString' resolves on SEV_RANK's prototype, so a plain `severity in SEV_RANK`
+    // check would treat it as a valid level; the own-property guard rejects it.
+    const overrides = buildOverridesFromSettings(
+      makeUiSettings([{ id: 'head-without-sort', enabled: true, severity: 'toString' as never }])
     );
     expect(overrides).toEqual({});
   });
@@ -152,5 +215,18 @@ describe('isCommandSuggestionEnabled', () => {
     expect(
       isCommandSuggestionEnabled(makeUiSettings([{ id: 'command-suggestion', enabled: true }]))
     ).toBe(true);
+  });
+});
+
+describe('an undeclared lint-rules setting (queryEnhancements disabled)', () => {
+  // Both readers run while building the lint context, which the query editor does
+  // on mount with no capability check — so a throw here breaks the editor even
+  // when lint is off. Neither may reach `get()` for an undeclared key.
+  it('does not throw and falls back to catalog defaults', () => {
+    const uiSettings = makeUndeclaredUiSettings();
+    expect(() => buildOverridesFromSettings(uiSettings)).not.toThrow();
+    expect(buildOverridesFromSettings(uiSettings)).toEqual({});
+    expect(() => isCommandSuggestionEnabled(uiSettings)).not.toThrow();
+    expect(isCommandSuggestionEnabled(uiSettings)).toBe(true);
   });
 });
