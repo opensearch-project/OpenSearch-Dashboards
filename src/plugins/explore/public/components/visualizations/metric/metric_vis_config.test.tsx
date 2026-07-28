@@ -65,7 +65,7 @@ describe('createMetrictmapeConfig', () => {
     expect(React.createElement).toHaveBeenCalledWith(MetricVisStyleControls, mockProps);
   });
 
-  it('passes render context series name to MetricChartRender as title', () => {
+  it('passes render context series name to MetricChartRender as seriesName', () => {
     const config = createMetricConfig();
     const renderFunction = config.getRules()[0].render;
     const valueColumn = {
@@ -83,6 +83,6 @@ describe('createMetrictmapeConfig', () => {
     }) as React.ReactElement;
 
     expect(renderedMetric.type).toBe(MetricChartRender);
-    expect(renderedMetric.props.title).toBe('jpg');
+    expect(renderedMetric.props.seriesName).toBe('jpg');
   });
 });

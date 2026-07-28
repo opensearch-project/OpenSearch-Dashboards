@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { act, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import dateMath from '@elastic/datemath';
 import { VisualizationRender, CommonVisualizationRender } from './visualization_render';
@@ -15,6 +15,13 @@ import { defaultMetricChartStyles } from './metric/metric_vis_config';
 
 const mockRender = jest.fn(() => <div data-test-subj="echartsRender">Echarts Render</div>);
 const mockFindRuleByAxesMapping = jest.fn();
+const mockSplitContainer = jest.fn(({ groups, renderChart }) => (
+  <div data-test-subj="splitContainer">
+    {groups.map((group: { key: string; data: Array<Record<string, unknown>> }) => (
+      <div key={group.key}>{renderChart(group.data, group.key)}</div>
+    ))}
+  </div>
+));
 
 jest.mock('./visualization_registry', () => ({
   visualizationRegistry: {
@@ -34,6 +41,10 @@ jest.mock('./visualization_empty_state', () => ({
 
 jest.mock('./custom_legend', () => ({
   CustomLegend: jest.fn(() => <div data-test-subj="customLegend">Custom Legend</div>),
+}));
+
+jest.mock('./split_container', () => ({
+  SplitContainer: (props: any) => mockSplitContainer(props),
 }));
 
 jest.mock('../../services/services', () => ({
@@ -229,25 +240,12 @@ describe('VisualizationRender', () => {
   });
 
   it('passes split group render context to chart render', () => {
-    jest.useFakeTimers();
-
-    (global as any).ResizeObserver = jest.fn().mockImplementation(() => ({
-      observe: jest.fn(),
-      disconnect: jest.fn(),
-      unobserve: jest.fn(),
-    }));
-
-    (global as any).IntersectionObserver = jest.fn().mockImplementation((callback) => ({
-      observe: () => callback([{ isIntersecting: true }]),
-      disconnect: jest.fn(),
-      unobserve: jest.fn(),
-    }));
-
     const metricConfig: RenderChartConfig = {
       type: 'metric',
       styles: { ...defaultMetricChartStyles },
       axesMapping: { value: 'count' },
       splitField: 'field1',
+      showSplitLabel: true,
     };
 
     const data$ = new BehaviorSubject<VisData | undefined>(mockVisData);
@@ -258,9 +256,11 @@ describe('VisualizationRender', () => {
       <VisualizationRender data$={data$} config$={visConfig$} showRawTable$={showRawTable$} />
     );
 
-    act(() => {
-      jest.advanceTimersByTime(100);
-    });
+    expect(mockSplitContainer.mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        showLabel: true,
+      })
+    );
 
     expect(mockRender).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -270,8 +270,6 @@ describe('VisualizationRender', () => {
         }),
       })
     );
-
-    jest.useRealTimers();
   });
 
   it('returns null when no matching rule is found', () => {
