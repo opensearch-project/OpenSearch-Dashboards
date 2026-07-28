@@ -57,6 +57,33 @@ describe('renderHoverCard', () => {
     expect(md).toContain('Did you mean one of: `logs_2024`, `logs_2025`?');
   });
 
+  it('names the flagged clause for an explain-backed operation fact', () => {
+    for (const operation of ['filter', 'aggregation', 'sort'] as const) {
+      const md = renderHoverCard({
+        ruleId: 'operation-not-pushed',
+        severityLabel: 'Warning',
+        message: 'This part of the query runs outside the index.',
+        content: getRuleHoverContent('operation-not-pushed'),
+        facts: { operation },
+      });
+      expect(md).toContain(`The flagged operation is a \`${operation}\`.`);
+    }
+  });
+
+  it('prefers the fix-resolved field/literal facts over the operation fallback', () => {
+    // A filter finding whose quick fix resolved concrete tokens carries both
+    // fact families; the richer field line must win.
+    const md = renderHoverCard({
+      ruleId: 'operation-not-pushed',
+      severityLabel: 'Warning',
+      message: 'This filter runs outside the index.',
+      content: getRuleHoverContent('operation-not-pushed'),
+      facts: { operation: 'filter', field: 'age', literal: '30' },
+    });
+    expect(md).toContain('`age`');
+    expect(md).not.toContain('The flagged operation is a');
+  });
+
   it('renders a closest-field suggestion from facts', () => {
     const md = renderHoverCard({
       ruleId: 'field-validation',

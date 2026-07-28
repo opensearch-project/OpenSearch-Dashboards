@@ -114,6 +114,14 @@ function renderFactsLine(facts: HoverFacts): string | undefined {
     return `Pattern has ${facts.patternWildcards} wildcard(s), replacement has ${facts.replacementWildcards}.`;
   }
 
+  // Last on purpose: an explain-backed finding whose quick fix resolved a
+  // concrete field/literal renders those richer facts above; `operation` is the
+  // fallback that still names the flagged clause for aggregation/sort findings
+  // (and filter findings without a resolved fix).
+  if (facts.operation !== undefined) {
+    return `The flagged operation is a ${code(facts.operation)}.`;
+  }
+
   return undefined;
 }
 

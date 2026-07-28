@@ -33,8 +33,18 @@ export interface PPLLintHttpClient {
  * the string to key the cache on (`cacheKey`, without it) so the cached plan is
  * reused across time-picker moves. Only the text sent to `_explain` is affected;
  * rendered marker ranges stay on the raw editor offsets.
+ *
+ * `injectedWhereCount` reports how many `where` commands the preparer folded in
+ * (dashboard filters, time range). When it is non-zero the explained plan can
+ * contain filter operations with no counterpart in the editor text, so the
+ * attribution layer must not pin a filter outcome on the user's only `where`
+ * without a probe — the injected one may be the culprit.
  */
-export type PrepareExplainQuery = (raw: string) => { query: string; cacheKey: string };
+export type PrepareExplainQuery = (raw: string) => {
+  query: string;
+  cacheKey: string;
+  injectedWhereCount?: number;
+};
 
 export interface PPLLintContext extends PPLValidationContext, LintPayloadContext {
   http?: PPLLintHttpClient;

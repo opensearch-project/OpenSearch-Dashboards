@@ -121,10 +121,112 @@ describe('explainCache', () => {
     expect(post).toHaveBeenCalledTimes(2);
   });
 
-  it('forwards an abort signal to the http client', async () => {
-    const post = jest.fn().mockResolvedValue(okPlan);
-    const signal = new AbortController().signal;
-    await explainCache.resolveResult(http(post), 'q', 'ds-1', { partition: 'probe', signal });
-    expect(post).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({ signal }));
+  describe('abort refcounting', () => {
+    it('aborts the underlying request when the only subscriber aborts', async () => {
+      let fetchSignal: AbortSignal | undefined;
+      const post = jest.fn((_path: string, request: { signal?: AbortSignal }) => {
+        fetchSignal = request.signal;
+        return new Promise(() => {}); // never settles on its own
+      });
+      const caller = new AbortController();
+      const result = explainCache.resolveResult(http(post as any), 'q', 'ds-1', {
+        partition: 'probe',
+        signal: caller.signal,
+      });
+
+      expect(fetchSignal?.aborted).toBe(false);
+      caller.abort();
+      expect(fetchSignal?.aborted).toBe(true);
+      expect((await result).status).toBe('error');
+    });
+
+    it("one subscriber's abort does not destroy a co-subscriber's response", async () => {
+      // Realistic trigger: a remounted editor joins the in-flight request, then
+      // the old model's dispose aborts its own controller. The survivor must
+      // still get the plan.
+      let fetchSignal: AbortSignal | undefined;
+      let resolveFetch!: (v: unknown) => void;
+      const post = jest.fn((_path: string, request: { signal?: AbortSignal }) => {
+        fetchSignal = request.signal;
+        return new Promise((r) => (resolveFetch = r));
+      });
+      const first = new AbortController();
+      const p1 = explainCache.resolveResult(http(post as any), 'q', 'ds-1', {
+        signal: first.signal,
+      });
+      const second = new AbortController();
+      const p2 = explainCache.resolveResult(http(post as any), 'q', 'ds-1', {
+        signal: second.signal,
+      });
+      expect(post).toHaveBeenCalledTimes(1);
+
+      first.abort();
+      // The aborting caller gets an immediate error; the fetch stays alive for
+      // the co-subscriber.
+      expect((await p1).status).toBe('error');
+      expect(fetchSignal?.aborted).toBe(false);
+
+      resolveFetch(okPlan);
+      expect((await p2).status).toBe('ok');
+    });
+
+    it('a signal-less subscriber pins the request open across a co-subscriber abort', async () => {
+      let fetchSignal: AbortSignal | undefined;
+      let resolveFetch!: (v: unknown) => void;
+      const post = jest.fn((_path: string, request: { signal?: AbortSignal }) => {
+        fetchSignal = request.signal;
+        return new Promise((r) => (resolveFetch = r));
+      });
+      const pinned = explainCache.resolveResult(http(post as any), 'q', 'ds-1');
+      const aborting = new AbortController();
+      const cancelled = explainCache.resolveResult(http(post as any), 'q', 'ds-1', {
+        signal: aborting.signal,
+      });
+
+      aborting.abort();
+      expect((await cancelled).status).toBe('error');
+      expect(fetchSignal?.aborted).toBe(false);
+
+      resolveFetch(okPlan);
+      expect((await pinned).status).toBe('ok');
+    });
+
+    it('an already-aborted signal returns an error without joining or fetching alone', async () => {
+      const post = jest.fn().mockResolvedValue(okPlan);
+      const aborted = new AbortController();
+      aborted.abort();
+      const result = await explainCache.resolveResult(http(post), 'q-solo', 'ds-1', {
+        signal: aborted.signal,
+      });
+      expect(result.status).toBe('error');
+    });
+
+    it('all subscribers aborting cancels the fetch; a later pass retries cleanly', async () => {
+      let fetchSignal: AbortSignal | undefined;
+      const post = jest
+        .fn()
+        .mockImplementationOnce((_path: string, request: { signal?: AbortSignal }) => {
+          fetchSignal = request.signal;
+          return new Promise((_, reject) => {
+            request.signal?.addEventListener('abort', () => reject(new Error('aborted by client')));
+          });
+        })
+        .mockResolvedValueOnce(okPlan);
+      const a = new AbortController();
+      const b = new AbortController();
+      const p1 = explainCache.resolveResult(http(post as any), 'q', 'ds-1', { signal: a.signal });
+      const p2 = explainCache.resolveResult(http(post as any), 'q', 'ds-1', { signal: b.signal });
+
+      a.abort();
+      expect(fetchSignal?.aborted).toBe(false);
+      b.abort();
+      expect(fetchSignal?.aborted).toBe(true);
+      expect((await p1).status).toBe('error');
+      expect((await p2).status).toBe('error');
+
+      // The aborted attempt was never cached; the next pass re-fetches.
+      expect((await explainCache.resolveResult(http(post as any), 'q', 'ds-1')).status).toBe('ok');
+      expect(post).toHaveBeenCalledTimes(2);
+    });
   });
 });

@@ -94,7 +94,9 @@ describe('createExplainQueryPreparer', () => {
     expect(mockConvertFiltersToWhereClause).not.toHaveBeenCalled();
   });
 
-  it('leaves an already-sourced query unchanged (no double source)', () => {
+  it('backtick-wraps an existing unquoted source for an index-pattern dataset (no double source)', () => {
+    // Mirrors addPPLSourceClause's hasSource branch: the host executes the
+    // backticked form, so the explained query must match it (sql#4444/#4445).
     const prepare = createExplainQueryPreparer(
       makeServices({
         appId: 'dashboards',
@@ -106,7 +108,53 @@ describe('createExplainQueryPreparer', () => {
       })
     );
     const { cacheKey } = prepare('source = logs | stats count()');
-    expect(cacheKey).toBe('source = logs | stats count()');
+    expect(cacheKey).toBe('source = `logs` | stats count()');
+  });
+
+  it('leaves an already-backticked source and non-index datasets unchanged', () => {
+    const prepareIndex = createExplainQueryPreparer(
+      makeServices({
+        appId: 'dashboards',
+        query: {
+          language: 'PPL',
+          query: 'source = `logs` | stats count()',
+          dataset: { id: 'ds', title: 'logs', type: 'INDEX_PATTERN' },
+        },
+      })
+    );
+    expect(prepareIndex('source = `logs` | stats count()').cacheKey).toBe(
+      'source = `logs` | stats count()'
+    );
+
+    const prepareS3 = createExplainQueryPreparer(
+      makeServices({
+        appId: 'dashboards',
+        query: {
+          language: 'PPL',
+          query: 'source = catalog.db.table | stats count()',
+          dataset: { id: 'ds', title: 'catalog.db.table', type: 'S3' },
+        },
+      })
+    );
+    expect(prepareS3('source = catalog.db.table | stats count()').cacheKey).toBe(
+      'source = catalog.db.table | stats count()'
+    );
+  });
+
+  it('does not touch field comparisons named source after the first pipe', () => {
+    const prepare = createExplainQueryPreparer(
+      makeServices({
+        appId: 'dashboards',
+        query: {
+          language: 'PPL',
+          query: 'source = logs | where source=prod',
+          dataset: { id: 'ds', title: 'logs', type: 'INDEX_PATTERN' },
+        },
+      })
+    );
+    expect(prepare('source = logs | where source=prod').cacheKey).toBe(
+      'source = `logs` | where source=prod'
+    );
   });
 
   it('does not add filters to a non-search query (describe)', () => {
@@ -125,6 +173,30 @@ describe('createExplainQueryPreparer', () => {
     expect(query).toBe('describe logs');
     expect(cacheKey).toBe('describe logs');
     expect(mockConvertFiltersToWhereClause).not.toHaveBeenCalled();
+  });
+
+  it('reports how many where commands it injected (dashboard + time)', () => {
+    mockConvertFiltersToWhereClause.mockReturnValue('WHERE `status` = 500');
+    const prepare = createExplainQueryPreparer(
+      makeServices({ appId: 'dashboards', filters: [{ any: true }] })
+    );
+    // Dashboard filter + time filter (dataset has timeFieldName) = 2.
+    expect(prepare('source = logs').injectedWhereCount).toBe(2);
+  });
+
+  it('reports zero injected where commands when nothing is folded in', () => {
+    const prepare = createExplainQueryPreparer(
+      makeServices({
+        appId: 'explore/logs',
+        query: {
+          language: 'PPL',
+          query: 'source = logs',
+          dataset: { id: 'ds', title: 'logs', type: 'INDEX_PATTERN' },
+        },
+      })
+    );
+    // Not a filter-manager app and no time field: nothing injected.
+    expect(prepare('source = logs').injectedWhereCount).toBe(0);
   });
 
   it('skips the time filter when the dataset has no time field', () => {

@@ -69,6 +69,8 @@ function makeInputs(
     typeMap?: Map<string, string>;
     isCurrent?: () => boolean;
     validateGeneratedQueries?: (queries: string[]) => Promise<boolean[]>;
+    prepareExplainQuery?: ExplainAttributionInputs['prepareExplainQuery'];
+    injectedWhereCount?: number;
   } = {}
 ): { inputs: ExplainAttributionInputs; http: { post: jest.Mock } } {
   const http = {
@@ -89,6 +91,8 @@ function makeInputs(
     validateGeneratedQueries:
       options.validateGeneratedQueries ?? (async (queries) => queries.map(() => true)),
     isCurrent: options.isCurrent ?? (() => true),
+    prepareExplainQuery: options.prepareExplainQuery,
+    injectedWhereCount: options.injectedWhereCount,
   };
   return { inputs, http };
 }
@@ -327,5 +331,117 @@ describe('runExplainIsolation', () => {
       runExplainIsolation(inputs, createExplainAttributionState(inputs))
     ).resolves.toEqual([]);
     expect(http.post).not.toHaveBeenCalled();
+  });
+
+  it('sends probes through the host preparer, so a leading-pipe probe explains with a source', async () => {
+    // Probe text is built from RAW editor offsets; without preparation a
+    // leading-pipe control probe has no `source=` and the engine rejects it,
+    // silently dropping the finding after wasted round-trips.
+    const query = '| where bytes > 1 | where bytes - 1000 > 5000';
+    const prepare = (raw: string) => ({
+      query: `source = logs ${raw}`,
+      cacheKey: `source = logs ${raw}`,
+    });
+    const { inputs, http } = makeInputs(
+      query,
+      'filter:script',
+      (generated) => {
+        if (!generated.startsWith('source = logs')) {
+          // A sourceless probe reaching the engine is exactly the bug: fail loud.
+          return Promise.reject(new Error(`sourceless explain: ${generated}`));
+        }
+        return generated.includes('bytes - 1000 > 5000') ? PLANS.filterScript : PLANS.filterNative;
+      },
+      { prepareExplainQuery: prepare }
+    );
+    const state = createExplainAttributionState(inputs);
+    const result = await runExplainIsolation(inputs, state);
+
+    expect(result).toHaveLength(1);
+    expect(sourceAt(query, result[0])).toBe('bytes - 1000 > 5000');
+    expect(result[0].attribution?.confidence).toBe('causal-probe');
+    // Every explain body carried the prepared (sourced) text.
+    for (const call of http.post.mock.calls) {
+      expect(JSON.parse(String(call[1].body)).query).toMatch(/^source = logs /);
+    }
+  });
+
+  describe('injected host filters (dashboard/time where commands)', () => {
+    const INJECTED = "WHERE `ts` >= '1'";
+    // Mimics the host preparer: splice the injected clause in after the first
+    // command, exactly like PPLFilterUtils.insertWhereCommand.
+    const prepareWithInjected = (raw: string) => {
+      const commands = raw.split('|');
+      commands.splice(1, 0, INJECTED);
+      const prepared = commands.map((c) => c.trim()).join(' | ');
+      return { query: prepared, cacheKey: prepared, injectedWhereCount: 1 };
+    };
+
+    it('withholds unique-source attribution for a lone filter when the host injected a where', () => {
+      const query = 'source=logs | where message = "x"';
+      const { inputs, http } = makeInputs(query, 'filter:coordinator', () => PLANS.none, {
+        injectedWhereCount: 1,
+      });
+      const state = createExplainAttributionState(inputs);
+
+      // Fast mode: no marker pinned on the user's only filter — the injected
+      // clause may be the culprit. The finding needs a probe instead.
+      expect(state.immediateDiagnostics).toEqual([]);
+      expect(state.needsIsolation).toBe(true);
+      expect(http.post).not.toHaveBeenCalled();
+    });
+
+    it('keeps unique-source attribution for aggregations (never injected)', () => {
+      const query = 'source=logs | stats avg(bytes)';
+      const { inputs } = makeInputs(query, 'aggregation:coordinator', () => PLANS.none, {
+        injectedWhereCount: 1,
+      });
+      const state = createExplainAttributionState(inputs);
+      expect(state.immediateDiagnostics).toHaveLength(1);
+      expect(state.immediateDiagnostics[0].attribution?.confidence).toBe('unique-source');
+    });
+
+    it('clears the user filter via probe when the injected clause is the culprit', async () => {
+      const query = 'source=logs | where message = "x"';
+      const { inputs, http } = makeInputs(
+        query,
+        'filter:script',
+        (generated) =>
+          // The injected clause always scripts; the user's filter is innocent.
+          generated.includes(INJECTED) ? PLANS.filterScript : PLANS.filterNative,
+        { prepareExplainQuery: prepareWithInjected, injectedWhereCount: 1 }
+      );
+      const state = createExplainAttributionState(inputs);
+      expect(state.immediateDiagnostics).toEqual([]);
+
+      const result = await runExplainIsolation(inputs, state);
+
+      // Control (user filter neutralized, injected clause kept) still shows the
+      // outcome → the injected clause owns it → nothing pinned on the user.
+      expect(result).toEqual([]);
+      expect(http.post).toHaveBeenCalledTimes(1);
+    });
+
+    it('pins the user filter via probe when it is the real culprit despite injection', async () => {
+      const query = 'source=logs | where bytes - 1000 > 5000';
+      const { inputs, http } = makeInputs(
+        query,
+        'filter:script',
+        (generated) =>
+          // Only the user's arithmetic predicate scripts; the injected time
+          // clause is native.
+          generated.includes('bytes - 1000 > 5000') ? PLANS.filterScript : PLANS.filterNative,
+        { prepareExplainQuery: prepareWithInjected, injectedWhereCount: 1 }
+      );
+      const state = createExplainAttributionState(inputs);
+      expect(state.immediateDiagnostics).toEqual([]);
+
+      const result = await runExplainIsolation(inputs, state);
+
+      expect(result).toHaveLength(1);
+      expect(sourceAt(query, result[0])).toBe('bytes - 1000 > 5000');
+      expect(result[0].attribution?.confidence).toBe('causal-probe');
+      expect(http.post).toHaveBeenCalledTimes(2); // control + one treatment
+    });
   });
 });

@@ -33,8 +33,12 @@ export type ExplainResolution =
  *   disambiguate multiple candidates; those are keyed with the outcome-detector
  *   version so a detector change never reuses a stale probe verdict, and they
  *   never share entries with baseline plans for the same text.
- * - `signal` lets the caller abort an in-flight probe once its wall-clock budget
- *   expires; the underlying http client honors it when supported.
+ * - `signal` lets the caller abandon the request (a superseded lint pass, a
+ *   probe whose wall-clock budget expired). The signal is never wired into the
+ *   shared fetch directly — the cache refcounts subscribers and aborts the
+ *   underlying request only when every subscriber's signal has fired, so one
+ *   caller's abort cannot destroy a co-subscribed caller's response. The
+ *   aborting caller immediately receives an `error` resolution.
  * - `cacheKey` overrides the string the entry is keyed on, defaulting to `query`.
  *   It lets the caller explain the fully-prepared query (with the volatile time
  *   filter) while keying the cache on a stable variant that omits the time range,
@@ -81,18 +85,37 @@ export function toExplainPlan(res: unknown): ExplainPlan {
 }
 
 /**
+ * One in-flight request, shared by every caller that asked for the same key
+ * while it was pending. The underlying fetch carries the entry's own internal
+ * controller, never a caller's signal: an in-flight request can be shared (a
+ * second editor model, or a remounted editor joining before the old model's
+ * dispose fires), and wiring the first caller's signal straight into the fetch
+ * would let that caller's abort destroy the response for subscribers that are
+ * still current. Instead each aborting subscriber decrements the refcount, and
+ * the fetch is cancelled only when the last subscriber has aborted. A caller
+ * without a signal counts as a subscriber that never aborts, pinning the
+ * request open.
+ */
+interface PendingEntry {
+  subscribe(signal?: AbortSignal): Promise<ExplainResolution>;
+}
+
+/**
  * Caches `_explain` results per (dataSourceId, query) with in-flight dedup, so
- * repeated lint passes over the same text issue at most one network call. The
- * runtime layer relies on the generation guard (not this cache) for staleness,
- * so the cache never needs to abort a request — a superseded response is simply
- * dropped by the caller. Fail-safe: a network error is returned but never
- * cached, so a transient failure does not become a permanent "no plan".
+ * repeated lint passes over the same text issue at most one network call.
+ * Callers may pass an abort signal (a superseded lint pass cancels its request
+ * rather than letting it complete just to be dropped by the generation guard);
+ * the cache refcounts subscribers per in-flight request and aborts the
+ * underlying fetch only when every subscriber has aborted, so one caller's
+ * supersession never destroys a co-subscribed caller's response. Fail-safe: a
+ * network error is returned but never cached, so a transient failure does not
+ * become a permanent "no plan".
  */
 class ExplainCache {
   private baselineCache = new Map<string, ExplainResolution>();
   private probeCache = new Map<string, ExplainResolution>();
-  private baselinePending = new Map<string, Promise<ExplainResolution>>();
-  private probePending = new Map<string, Promise<ExplainResolution>>();
+  private baselinePending = new Map<string, PendingEntry>();
+  private probePending = new Map<string, PendingEntry>();
   // Bumped by clear() so an in-flight request started before the clear cannot
   // write its (now stale) resolution back into the fresh cache, and cannot
   // delete a pending entry belonging to a request issued after the clear.
@@ -126,15 +149,19 @@ class ExplainCache {
     }
     const inFlight = pending.get(k);
     if (inFlight) {
-      return inFlight;
+      return inFlight.subscribe(options.signal);
     }
 
     const requestEpoch = this.epoch;
+    // The fetch carries the entry's own controller (see PendingEntry): caller
+    // signals only ever decrement the subscriber count below.
+    const controller = typeof AbortController === 'undefined' ? undefined : new AbortController();
+    let settled = false;
     const promise = http
       .post(EXPLAIN_PATH, {
         body: JSON.stringify({ query }),
         query: dataSourceId ? { dataSourceId } : {},
-        signal: options.signal,
+        signal: controller?.signal,
       })
       .then(toExplainPlan)
       .then((plan) => {
@@ -172,10 +199,50 @@ class ExplainCache {
         // Deliberately not cached: a transient failure must not become a
         // permanent "no plan" for a later pass over the same text.
         return { status: 'error', error } as ExplainResolution;
+      })
+      .then((resolution) => {
+        settled = true;
+        return resolution;
       });
 
-    pending.set(k, promise);
-    return promise;
+    // Subscribers that can still cancel the fetch: signal-less subscribers pin
+    // the request open (they count but never abort), signalled ones drop out
+    // when their signal fires. The shared fetch aborts only at zero.
+    let liveSubscribers = 0;
+    const subscribe = (signal?: AbortSignal): Promise<ExplainResolution> => {
+      if (!signal) {
+        liveSubscribers++;
+        return promise;
+      }
+      if (signal.aborted) {
+        // Never joined: no refcount change, and the caller gets the same
+        // error-shaped resolution an abort mid-flight would have produced.
+        return Promise.resolve({
+          status: 'error',
+          error: new Error('explain request aborted'),
+        } as ExplainResolution);
+      }
+      liveSubscribers++;
+      return new Promise<ExplainResolution>((resolve) => {
+        const onAbort = () => {
+          liveSubscribers--;
+          if (liveSubscribers === 0 && !settled) {
+            controller?.abort();
+          }
+          // This caller is done regardless of what the shared fetch does next;
+          // co-subscribers keep their own pending resolution.
+          resolve({ status: 'error', error: new Error('explain request aborted') });
+        };
+        signal.addEventListener('abort', onAbort, { once: true });
+        promise.then((resolution) => {
+          signal.removeEventListener('abort', onAbort);
+          resolve(resolution);
+        });
+      });
+    };
+
+    pending.set(k, { subscribe });
+    return subscribe(options.signal);
   }
 
   clear(): void {

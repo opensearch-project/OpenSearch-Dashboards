@@ -43,8 +43,10 @@ const syntaxGenerations = new Map<string, number>();
 // Per-model abort controller for the in-flight explain request(s). A new lint
 // pass, a dispose, or a language switch aborts the prior one so a superseded
 // `_explain` round-trip is cancelled rather than left to complete and be
-// discarded by the generation guard. Aborting is safe: explain_cache returns a
-// (never-cached) error for the aborted request, which the caller drops anyway.
+// discarded by the generation guard. Aborting is safe: explain_cache refcounts
+// subscribers per shared in-flight request (this model's abort cannot destroy
+// another still-current subscriber's response) and hands the aborting caller a
+// never-cached error, which the stale pass drops anyway.
 const lintAbortControllers = new Map<string, AbortController>();
 
 /** Abort and forget any in-flight explain request for the model. */
@@ -508,6 +510,11 @@ const layerExplainDiagnostics = (
       validateGeneratedQueries: (queries: string[]) =>
         pplWorkerProxyService.validateLintQueries(queries),
       isCurrent: () => !isLintPassStale(model, generation, content),
+      // Probes edit the raw editor text, so each one is re-prepared with the
+      // same host preparer the baseline went through (source prepend + injected
+      // filters); its verdict is otherwise rendered against a different query.
+      prepareExplainQuery: lintContext?.prepareExplainQuery,
+      injectedWhereCount: prepared.injectedWhereCount,
     };
     const state = createExplainAttributionState(attributionInputs);
 

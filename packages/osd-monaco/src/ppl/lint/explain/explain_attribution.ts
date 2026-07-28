@@ -26,7 +26,7 @@
  * which already owns the cache and can reach the worker's query validator.
  */
 
-import type { PPLLintHttpClient } from '../../lint_bridge';
+import type { PPLLintHttpClient, PrepareExplainQuery } from '../../lint_bridge';
 import type { Diagnostic } from '../diagnostic';
 import { explainCache, ExplainResolution } from './explain_cache';
 import { hasExplainOutcome } from './explain_outcomes';
@@ -58,6 +58,39 @@ export interface ExplainAttributionInputs {
   dataSourceId?: string;
   validateGeneratedQueries: (queries: string[]) => Promise<boolean[]>;
   isCurrent: () => boolean;
+  /**
+   * The same host preparer the baseline `_explain` went through. Probe queries
+   * are built by editing the RAW editor text (candidate offsets are editor
+   * offsets), so each one must be re-prepared before it is explained: without
+   * the source-prepend a leading-pipe probe is rejected by the engine, and
+   * without the injected dashboard/time filters a probe verdict is rendered
+   * against a different query than the baseline plan it explains. Validation
+   * still runs on the raw probe text (the worker applies its own pipe-first
+   * handling); only the text sent to `_explain` is prepared.
+   */
+  prepareExplainQuery?: PrepareExplainQuery;
+  /**
+   * How many `where` commands the baseline preparer injected beyond the editor
+   * text (dashboard filters, time range). See {@link filterCountingUnsafe}.
+   */
+  injectedWhereCount?: number;
+}
+
+/**
+ * True when a filter finding cannot be attributed by counting editor candidates
+ * alone: the host injected `where` commands into the explained query, so the
+ * plan may contain filter operations with no editor counterpart. Taking the
+ * "only one editor candidate" shortcut there would pin an injected filter's
+ * outcome on the user's clause with unearned `unique-source` confidence — the
+ * finding must instead go through a causal probe (Thorough) or be dropped
+ * (Fast). Aggregations and sorts are never injected, so counting stays safe for
+ * them.
+ */
+function filterCountingUnsafe(
+  operation: ExplainOperation,
+  injectedWhereCount: number | undefined
+): boolean {
+  return operation === 'filter' && (injectedWhereCount ?? 0) > 0;
 }
 
 function candidatesFor(
@@ -69,12 +102,17 @@ function candidatesFor(
 
 function selectionsForUniqueCandidates(
   diagnostics: Diagnostic[],
-  snapshot: ExplainAttributionSnapshot
+  snapshot: ExplainAttributionSnapshot,
+  injectedWhereCount: number | undefined
 ): Map<ExplainOutcome, ExplainAttributionSelection> {
   const selections = new Map<ExplainOutcome, ExplainAttributionSelection>();
   for (const diagnostic of diagnostics) {
     const target = diagnostic.explainTarget;
-    if (!target || snapshot.unsupportedOperations.includes(target.operation)) {
+    if (
+      !target ||
+      snapshot.unsupportedOperations.includes(target.operation) ||
+      filterCountingUnsafe(target.operation, injectedWhereCount)
+    ) {
       continue;
     }
     const candidates = candidatesFor(snapshot, target.operation);
@@ -89,14 +127,22 @@ function selectionsForUniqueCandidates(
 }
 
 export function createExplainAttributionState(
-  inputs: Pick<ExplainAttributionInputs, 'query' | 'snapshot' | 'typeMap' | 'baselineDiagnostics'>
+  inputs: Pick<
+    ExplainAttributionInputs,
+    'query' | 'snapshot' | 'typeMap' | 'baselineDiagnostics' | 'injectedWhereCount'
+  >
 ): ExplainAttributionState {
-  const selections = selectionsForUniqueCandidates(inputs.baselineDiagnostics, inputs.snapshot);
+  const selections = selectionsForUniqueCandidates(
+    inputs.baselineDiagnostics,
+    inputs.snapshot,
+    inputs.injectedWhereCount
+  );
   const resolvedDiagnostics = resolveExplainRanges(inputs.baselineDiagnostics, {
     query: inputs.query,
     snapshot: inputs.snapshot,
     typeMap: inputs.typeMap,
     attributions: selections,
+    injectedWhereCount: inputs.injectedWhereCount,
   });
   const immediateDiagnostics = resolvedDiagnostics.map((diagnostic) => ({
     ...diagnostic,
@@ -109,7 +155,10 @@ export function createExplainAttributionState(
       return false;
     }
     const count = candidatesFor(inputs.snapshot, target.operation).length;
-    return count > 1 && count <= EXPLAIN_MAX_AMBIGUOUS_CANDIDATES;
+    // An injected filter makes even a single-candidate filter finding ambiguous
+    // (the culprit may be the injected clause), so it needs a probe too.
+    const minAmbiguous = filterCountingUnsafe(target.operation, inputs.injectedWhereCount) ? 1 : 2;
+    return count >= minAmbiguous && count <= EXPLAIN_MAX_AMBIGUOUS_CANDIDATES;
   });
   const needsVerification = resolvedDiagnostics.some((diagnostic) => {
     const candidateId = diagnostic.attribution?.candidateId;
@@ -242,10 +291,18 @@ class ProbeBudget {
         resolve({ status: 'error', error: new Error('probe wall-clock budget exceeded') });
       }, remainingMs);
     });
+    // Prepare the raw probe text the same way the baseline was prepared (source
+    // prepend + injected filters) so its plan is comparable to the baseline's;
+    // key the cache on the time-stripped variant, exactly like the baseline.
+    const prepared = this.inputs.prepareExplainQuery?.(query) ?? {
+      query,
+      cacheKey: query,
+    };
     const resolution = await Promise.race([
-      explainCache.resolveResult(this.inputs.http, query, this.inputs.dataSourceId, {
+      explainCache.resolveResult(this.inputs.http, prepared.query, this.inputs.dataSourceId, {
         partition: 'probe',
         signal: controller?.signal,
+        cacheKey: prepared.cacheKey,
       }),
       timeoutResult,
     ]);
@@ -416,7 +473,11 @@ export async function runExplainIsolation(
   inputs: ExplainAttributionInputs,
   state: ExplainAttributionState
 ): Promise<Diagnostic[]> {
-  const selections = selectionsForUniqueCandidates(inputs.baselineDiagnostics, state.snapshot);
+  const selections = selectionsForUniqueCandidates(
+    inputs.baselineDiagnostics,
+    state.snapshot,
+    inputs.injectedWhereCount
+  );
   const probeSets = new Map<ExplainOperation, ExplainProbeSet>();
   const budget = new ProbeBudget(inputs);
 
@@ -430,8 +491,13 @@ export async function runExplainIsolation(
       continue;
     }
     const candidates = candidatesFor(state.snapshot, target.operation);
+    // When the host injected filters, even a lone editor filter needs a causal
+    // probe: the control (all editor candidates neutralized, injected filters
+    // kept by the probe preparer) tells us whether the outcome belongs to an
+    // injected clause instead.
+    const minCandidates = filterCountingUnsafe(target.operation, inputs.injectedWhereCount) ? 1 : 2;
     if (
-      candidates.length < 2 ||
+      candidates.length < minCandidates ||
       candidates.length > EXPLAIN_MAX_AMBIGUOUS_CANDIDATES ||
       budget.remainingRequests() < candidates.length + 1
     ) {
@@ -484,6 +550,7 @@ export async function runExplainIsolation(
     snapshot: state.snapshot,
     typeMap: inputs.typeMap,
     attributions: selections,
+    injectedWhereCount: inputs.injectedWhereCount,
   });
   const verifiedFixes = await verifyFixes(resolved, state.snapshot, inputs, budget);
   if (!inputs.isCurrent()) {

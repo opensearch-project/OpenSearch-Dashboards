@@ -23,6 +23,15 @@ export interface ResolveExplainRangesOptions {
   snapshot: ExplainAttributionSnapshot;
   typeMap?: Map<string, string>;
   attributions?: Map<ExplainOutcome, ExplainAttributionSelection>;
+  /**
+   * How many `where` commands the host injected into the explained query
+   * (dashboard filters, time range). When non-zero, the single-candidate
+   * `unique-source` fallback is disabled for filter findings: the plan may
+   * contain filter operations with no editor counterpart, so "only one editor
+   * candidate" no longer implies "that candidate caused the outcome". An
+   * explicit (probe-confirmed) attribution still resolves normally.
+   */
+  injectedWhereCount?: number;
 }
 
 interface FixResult {
@@ -121,9 +130,10 @@ export function resolveExplainRanges(
       (candidate) => candidate.operation === target.operation
     );
     const explicit = options.attributions?.get(target.outcome);
+    const countingUnsafe = target.operation === 'filter' && (options.injectedWhereCount ?? 0) > 0;
     const selection: ExplainAttributionSelection | undefined =
       explicit ??
-      (candidates.length === 1
+      (candidates.length === 1 && !countingUnsafe
         ? { candidateIds: new Set([candidates[0].id]), confidence: 'unique-source' }
         : undefined);
     if (!selection) {
