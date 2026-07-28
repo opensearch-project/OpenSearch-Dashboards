@@ -19,6 +19,7 @@ import { getStorage, getUiActions } from '../../services';
 import { useGenerateQuery } from '../hooks';
 import { getPersistedLog, AgentError, ProhibitedQueryError } from '../utils';
 import { QueryAssistCallOut, QueryAssistCallOutType } from './call_outs';
+import { AskT2pplErrorButton } from './ask_t2ppl_error_button';
 import { QueryAssistInput } from './query_assist_input';
 import { QueryAssistSubmitButton } from './submit_button';
 import { useQueryAssist } from '../hooks';
@@ -108,7 +109,18 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
         setCallOutType('invalid_query');
         setAgentError(error);
       } else {
-        services.notifications.toasts.addError(error, { title: 'Failed to generate results' });
+        const chatService = services.chat;
+        services.notifications.toasts.addError(error, {
+          title: 'Failed to generate results',
+          extraAction: chatService?.isAvailable?.() ? (
+            <AskT2pplErrorButton
+              as="button"
+              chatService={chatService}
+              error={error}
+              question={previousQuestionRef.current}
+            />
+          ) : undefined,
+        });
       }
       updateQueryState({
         question: previousQuestionRef.current,
