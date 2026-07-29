@@ -2346,6 +2346,44 @@
     uuid "^9.0.0"
     vfile "^4.2.0"
 
+"@elastic/eui@npm:@opensearch-project/oui@1.24.1":
+  version "1.24.1"
+  resolved "https://registry.yarnpkg.com/@opensearch-project/oui/-/oui-1.24.1.tgz#6e4babafc1e2b1bf8c9b325bea318b6514937ea6"
+  integrity sha512-NaqPaVhj/jXuamAnn71hGfnMq1nCXD0ANqjZC1r+v/LorNpZutb2PwvvV9mUKwYaUJJTDOuFt1BZyHAXF29CSQ==
+  dependencies:
+    "@types/chroma-js" "^2.4.0"
+    "@types/react-beautiful-dnd" "^13.1.3"
+    "@types/react-input-autosize" "^2.2.4"
+    "@types/react-window" "^1.8.5"
+    chroma-js "^2.4.2"
+    classnames "^2.3.2"
+    lodash "^4.18.1"
+    mdast-util-to-hast "^10.0.0"
+    numeral "^2.0.6"
+    prop-types "^15.8.1"
+    react-ace "^7.0.5"
+    react-beautiful-dnd "^13.1.1"
+    react-dropzone "^14.2.3"
+    react-focus-on "^3.5.0"
+    react-input-autosize "npm:react-18-input-autosize@^3.0.0"
+    react-is "~16.3.0"
+    react-virtualized-auto-sizer "1.0.7"
+    react-window "^1.8.9"
+    refractor "^3.6.0"
+    rehype-react "^6.0.0"
+    rehype-slug "^4.0.1"
+    rehype-stringify "^8.0.0"
+    remark-emoji "^2.1.0"
+    remark-parse "^8.0.3"
+    remark-rehype "^8.0.0"
+    tabbable "^6.1.2"
+    text-diff "^1.0.1"
+    unified "^9.2.0"
+    unist-util-visit "^2.0.3"
+    url-parse "^1.5.10"
+    uuid "^14.0.0"
+    vfile "^4.2.0"
+
 "@elastic/good@^9.0.1-kibana3":
   version "9.0.1-kibana3"
   resolved "https://registry.yarnpkg.com/@elastic/good/-/good-9.0.1-kibana3.tgz#a70c2b30cbb4f44d1cf4a464562e0680322eac9b"
@@ -14401,7 +14439,7 @@ lodash.uniq@^4.5.0:
   resolved "https://registry.yarnpkg.com/lodash.uniq/-/lodash.uniq-4.5.0.tgz#d0225373aeb652adc1bc82e4945339a842754773"
   integrity sha512-xfBaXQd9ryd9dlSDvnvI0lvxfLJlYAZzXomUYzLKtUeOQvOP5piqAWuGtrhWeqaXK9hhoM/iyJc5AV+XfsX3HQ==
 
-lodash@^4.0.1, lodash@^4.15.0, lodash@^4.17.10, lodash@^4.17.11, lodash@^4.17.13, lodash@^4.17.15, lodash@^4.17.19, lodash@^4.17.21, lodash@^4.18.0, lodash@~4.18.1:
+lodash@^4.0.1, lodash@^4.15.0, lodash@^4.17.10, lodash@^4.17.11, lodash@^4.17.13, lodash@^4.17.15, lodash@^4.17.19, lodash@^4.17.21, lodash@^4.18.0, lodash@^4.18.1, lodash@~4.18.1:
   version "4.18.1"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.18.1.tgz#ff2b66c1f6326d59513de2407bf881439812771c"
   integrity sha512-dMInicTPVE8d1e5otfwmmjlxkZoUpiVLwyeTdUsi/Caj/gfzzblBcCE5sRHV/AsjuCmxWrte2TNGSYuCeCq+0Q==
@@ -20262,15 +20300,10 @@ utrie@^1.0.2:
   dependencies:
     base64-arraybuffer "^1.0.2"
 
-uuid@^10.0.0, uuid@^11.1.0, uuid@^11.1.1, uuid@^8.3.2, uuid@^9.0.0:
+uuid@^10.0.0, uuid@^11.1.0, uuid@^11.1.1, uuid@^14.0.0, uuid@^8.3.2, uuid@^9.0.0:
   version "11.1.1"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-11.1.1.tgz#f6d81d2e1c65d00762e5e29b16c5d2d995e208ad"
   integrity sha512-vIYxrBCC/N/K+Js3qSN88go7kIfNPssr/hHCesKCQNAjmgvYS2oqr69kIufEG+O4+PfezOH4EbIeHCfFov8ZgQ==
-
-uuid@^14.0.0:
-  version "14.0.1"
-  resolved "https://registry.yarnpkg.com/uuid/-/uuid-14.0.1.tgz#8a5975b3e038902bfd169a10b5202f5ec0cf3faf"
-  integrity sha512-6ZxzVpzDXDa3bJWaHilVayA+BH/1zmxCJoVgvmqJnid/gPoKHxUrS/aC/T6LGQtNHT+XHG9fXPJB4d+IrU30Ew==
 
 v8-compile-cache-lib@^3.0.1:
   version "3.0.1"
