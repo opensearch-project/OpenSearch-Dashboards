@@ -4,7 +4,12 @@
  */
 
 import { IUiSettingsClient } from 'opensearch-dashboards/public';
-import { buildOverridesFromSettings, isCommandSuggestionEnabled } from './lint_overrides';
+import {
+  buildOverridesFromSettings,
+  isCommandSuggestionEnabled,
+  readExplainMode,
+  readRulesSetting,
+} from './lint_overrides';
 
 jest.mock('@osd/monaco', () => ({
   getBundledCatalog: () => [
@@ -216,17 +221,83 @@ describe('isCommandSuggestionEnabled', () => {
       isCommandSuggestionEnabled(makeUiSettings([{ id: 'command-suggestion', enabled: true }]))
     ).toBe(true);
   });
+
+  it('reads command-suggestion from the new object shape too', () => {
+    expect(
+      isCommandSuggestionEnabled(
+        makeUiSettings({ mode: 'fast', rules: [{ id: 'command-suggestion', enabled: false }] })
+      )
+    ).toBe(false);
+  });
+});
+
+describe('readRulesSetting (shape migration)', () => {
+  it('treats a legacy top-level array as the default (fast) mode', () => {
+    const rules = [{ id: 'head-without-sort', enabled: false }];
+    expect(readRulesSetting(makeUiSettings(rules))).toEqual({ mode: 'fast', rules });
+  });
+
+  it('reads the new object shape with an explicit mode', () => {
+    const rules = [{ id: 'head-without-sort', enabled: true }];
+    expect(readRulesSetting(makeUiSettings({ mode: 'fast', rules }))).toEqual({
+      mode: 'fast',
+      rules,
+    });
+  });
+
+  it('defaults an object with an unknown mode to fast', () => {
+    expect(readRulesSetting(makeUiSettings({ mode: 'sideways', rules: [] })).mode).toBe('fast');
+  });
+
+  it('falls back to an empty rule list at the default mode for unset or garbage', () => {
+    expect(readRulesSetting(makeUiSettings(undefined))).toEqual({ mode: 'fast', rules: [] });
+    expect(readRulesSetting(makeUiSettings(42))).toEqual({ mode: 'fast', rules: [] });
+    expect(readRulesSetting(makeUiSettings({ rules: 'nope' }))).toEqual({
+      mode: 'fast',
+      rules: [],
+    });
+  });
+
+  it('builds overrides from the rules inside the object shape', () => {
+    const overrides = buildOverridesFromSettings(
+      makeUiSettings({
+        mode: 'thorough',
+        rules: [{ id: 'head-without-sort', enabled: false, severity: 'info' }],
+      })
+    );
+    expect(overrides).toEqual({ 'head-without-sort': { enabled: false } });
+  });
+});
+
+describe('readExplainMode', () => {
+  it('defaults to fast when unset (and for a legacy array)', () => {
+    // Thorough fires up to four extra probe requests per pause, so it must be
+    // opted into rather than inherited.
+    expect(readExplainMode(makeUiSettings(undefined))).toBe('fast');
+    expect(readExplainMode(makeUiSettings([{ id: 'head-without-sort', enabled: true }]))).toBe(
+      'fast'
+    );
+  });
+
+  it('returns thorough only when the object shape explicitly sets it', () => {
+    expect(readExplainMode(makeUiSettings({ mode: 'thorough', rules: [] }))).toBe('thorough');
+    expect(readExplainMode(makeUiSettings({ mode: 'fast', rules: [] }))).toBe('fast');
+    // An unrecognized mode falls back to the default rather than to thorough.
+    expect(readExplainMode(makeUiSettings({ mode: 'bogus', rules: [] }))).toBe('fast');
+  });
 });
 
 describe('an undeclared lint-rules setting (queryEnhancements disabled)', () => {
   // Both readers run while building the lint context, which the query editor does
   // on mount with no capability check — so a throw here breaks the editor even
-  // when lint is off. Neither may reach `get()` for an undeclared key.
+  // when lint is off.
   it('does not throw and falls back to catalog defaults', () => {
     const uiSettings = makeUndeclaredUiSettings();
     expect(() => buildOverridesFromSettings(uiSettings)).not.toThrow();
     expect(buildOverridesFromSettings(uiSettings)).toEqual({});
     expect(() => isCommandSuggestionEnabled(uiSettings)).not.toThrow();
     expect(isCommandSuggestionEnabled(uiSettings)).toBe(true);
+    expect(() => readExplainMode(uiSettings)).not.toThrow();
+    expect(readExplainMode(uiSettings)).toBe('fast');
   });
 });

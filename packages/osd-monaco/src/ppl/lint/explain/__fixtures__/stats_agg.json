@@ -1,0 +1,6 @@
+{
+  "calcite": {
+    "logical": "LogicalSystemLimit(fetch=[10000], type=[QUERY_SIZE_LIMIT])\n  LogicalProject(avg(age)=[$1], state=[$0])\n    LogicalAggregate(group=[{0}], avg(age)=[AVG($1)])\n      LogicalProject(state=[$7], age=[$8])\n        CalciteLogicalIndexScan(table=[[OpenSearch, accounts]])\n",
+    "physical": "CalciteEnumerableIndexScan(table=[[OpenSearch, accounts]], PushDownContext=[[AGGREGATION->rel#87451:LogicalAggregate.NONE.[](input=RelSubset#87450,group={0},avg(age)=AVG($1)), PROJECT->[avg(age), state], LIMIT->10000], OpenSearchRequestBuilder(sourceBuilder={\"from\":0,\"size\":0,\"timeout\":\"1m\",\"aggregations\":{\"composite_buckets\":{\"composite\":{\"size\":10000,\"sources\":[{\"state\":{\"terms\":{\"field\":\"state.keyword\",\"missing_bucket\":true,\"missing_order\":\"first\",\"order\":\"asc\"}}}]},\"aggregations\":{\"avg(age)\":{\"avg\":{\"field\":\"age\"}}}}}}, requestedTotalSize=10000, pageSize=null, startFrom=0)])\n"
+  }
+}

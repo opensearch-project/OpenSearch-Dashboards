@@ -16,6 +16,7 @@ import { fieldValidationDetector } from './rules/field_validation';
 import { aggOnTextDetector } from './rules/agg_on_text';
 import { flatObjectSubfieldDetector } from './rules/flat_object_subfield';
 import { typeMismatchNumericDetector } from './rules/type_mismatch_numeric';
+import { invalidCaptureGroupNameDetector } from './rules/invalid_capture_group_name';
 
 const registry = new Map<string, Detector>();
 
@@ -45,6 +46,7 @@ export function registerBuiltInDetectors(): void {
   registerDetector('agg-on-text', aggOnTextDetector);
   registerDetector('flat-object-subfield', flatObjectSubfieldDetector);
   registerDetector('type-mismatch-numeric', typeMismatchNumericDetector);
+  registerDetector('invalid-capture-group-name', invalidCaptureGroupNameDetector);
 }
 
 registerBuiltInDetectors();

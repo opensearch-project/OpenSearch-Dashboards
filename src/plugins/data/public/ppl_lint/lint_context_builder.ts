@@ -11,8 +11,13 @@ import {
   pplGrammarCache,
   shouldUseRuntimeGrammar,
 } from '../antlr/opensearch_ppl/ppl_grammar_cache';
-import { buildOverridesFromSettings, isCommandSuggestionEnabled } from './lint_overrides';
+import {
+  buildOverridesFromSettings,
+  isCommandSuggestionEnabled,
+  readExplainMode,
+} from './lint_overrides';
 import { calciteSettingsCache } from './calcite_settings_cache';
+import { explainQueryPreparer } from './explain_query_preparer';
 
 /** Subset of dataset fields needed for lint context construction. */
 interface LintContextDataset {
@@ -92,6 +97,8 @@ export function buildPPLLintContext(
 ): PPLLintContext {
   const dsId = dataset?.dataSource?.id;
   const dsVersion = dataset?.dataSource?.version;
+  // Engine identity for capability lookups. Matches the sibling validation-context
+  // builders (query_editor / use_query_panel_editor), which use `engineType ?? type`.
   const engineType = dataset?.dataSource?.engineType ?? dataset?.dataSource?.type;
 
   // Fallback to the grammar cache's resolved version when the dataset metadata
@@ -131,6 +138,10 @@ export function buildPPLLintContext(
       : undefined,
     overrides: buildOverridesFromSettings(services.uiSettings),
     commandSuggestionEnabled: isCommandSuggestionEnabled(services.uiSettings),
+    explainMode: readExplainMode(services.uiSettings),
     http: services.http,
+    // Host-registered by query_enhancements; undefined elsewhere (e.g. explore),
+    // in which case the explain layer explains the raw editor text.
+    prepareExplainQuery: explainQueryPreparer.get(),
   };
 }

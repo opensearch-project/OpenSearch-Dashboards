@@ -27,24 +27,67 @@ interface StoredRule {
   severity?: LintSeverity;
 }
 
+export type ExplainMode = 'fast' | 'thorough';
+
 /**
- * Read the PPL lint rules uiSetting, tolerating its absence.
- *
- * The key is registered by queryEnhancements, but this module is called from
- * explore and data, neither of which requires that plugin — so on a deployment
- * with queryEnhancements disabled the key is undeclared and `get()` throws,
- * which would break the query editor's mount even with lint off.
- *
- * `isDeclared` is the guard rather than a `get()` default, because the setting is
- * registered `type: 'json'`: a default is substituted for the registered value
- * and then JSON-parsed, so passing `[]` or `{}` would throw on every deployment
- * where the key IS registered and the user has not customised it.
+ * Mode used when the setting is unset, malformed, or in the legacy array shape.
+ * Must match the registered default in query_enhancements/server/ui_settings.ts:
+ * "thorough" issues up to four extra probe requests per pause, which is more
+ * network than a first release should take by default.
  */
-function readRulesSetting(uiSettings: IUiSettingsClient): StoredRule[] | undefined {
-  if (!uiSettings.isDeclared(UI_SETTINGS.QUERY_ENHANCEMENTS_PPL_LINT_RULES)) {
-    return undefined;
+const DEFAULT_EXPLAIN_MODE: ExplainMode = 'fast';
+
+interface NormalizedRulesSetting {
+  mode: ExplainMode;
+  rules: StoredRule[];
+}
+
+/**
+ * Read the PPL lint rules uiSetting into a stable `{ mode, rules }` shape,
+ * accepting both the current object form and the legacy top-level array.
+ *
+ * The setting shipped as a bare array before the fast/thorough mode was added.
+ * An install that persisted that array must keep working, so a stored array is
+ * treated as `{ mode: DEFAULT_EXPLAIN_MODE, rules: <array> }`. Anything
+ * unrecognized (unset, or a corrupt value reachable via the raw uiSettings API)
+ * yields an empty rule list at the same default, so callers fall back to catalog
+ * defaults.
+ *
+ * `isDeclared` guards the read rather than a `get()` default: the key is
+ * registered `type: 'json'`, so a default is substituted for the registered value
+ * and then JSON-parsed — passing `{}` would throw on every deployment where the
+ * key IS registered and the user has not customised it. Without the guard, an
+ * undeclared key (queryEnhancements disabled while explore is not) throws and
+ * breaks the query editor's mount even with lint off.
+ */
+export function readRulesSetting(uiSettings: IUiSettingsClient): NormalizedRulesSetting {
+  const stored = uiSettings.isDeclared(UI_SETTINGS.QUERY_ENHANCEMENTS_PPL_LINT_RULES)
+    ? uiSettings.get<unknown>(UI_SETTINGS.QUERY_ENHANCEMENTS_PPL_LINT_RULES)
+    : undefined;
+  if (Array.isArray(stored)) {
+    return { mode: DEFAULT_EXPLAIN_MODE, rules: stored as StoredRule[] };
   }
-  return uiSettings.get<StoredRule[] | undefined>(UI_SETTINGS.QUERY_ENHANCEMENTS_PPL_LINT_RULES);
+  if (
+    stored &&
+    typeof stored === 'object' &&
+    Array.isArray((stored as { rules?: unknown }).rules)
+  ) {
+    const rawMode = (stored as { mode?: unknown }).mode;
+    return {
+      mode: rawMode === 'thorough' ? 'thorough' : 'fast',
+      rules: (stored as { rules: StoredRule[] }).rules,
+    };
+  }
+  return { mode: DEFAULT_EXPLAIN_MODE, rules: [] };
+}
+
+/**
+ * Read the explain resolution mode from the PPL lint rules uiSetting. Defaults
+ * to {@link DEFAULT_EXPLAIN_MODE} when unset or malformed, and for the legacy
+ * array shape.
+ */
+export function readExplainMode(uiSettings: IUiSettingsClient): ExplainMode {
+  return readRulesSetting(uiSettings).mode;
 }
 
 /**
@@ -54,10 +97,7 @@ function readRulesSetting(uiSettings: IUiSettingsClient): StoredRule[] | undefin
 export function buildOverridesFromSettings(uiSettings: IUiSettingsClient): BundleRuleOverrides {
   const overrides: BundleRuleOverrides = {};
 
-  const stored = readRulesSetting(uiSettings);
-  if (!Array.isArray(stored)) {
-    return overrides;
-  }
+  const { rules: stored } = readRulesSetting(uiSettings);
 
   const storedById = new Map(stored.filter((r) => r && r.id).map((r) => [r.id, r]));
 
@@ -106,10 +146,7 @@ export const COMMAND_SUGGESTION_RULE_ID = 'command-suggestion';
  * preserving the pre-toggle behavior; only an explicit `enabled: false` turns it off.
  */
 export function isCommandSuggestionEnabled(uiSettings: IUiSettingsClient): boolean {
-  const stored = readRulesSetting(uiSettings);
-  if (!Array.isArray(stored)) {
-    return true;
-  }
-  const entry = stored.find((r) => r && r.id === COMMAND_SUGGESTION_RULE_ID);
+  const { rules } = readRulesSetting(uiSettings);
+  const entry = rules.find((r) => r && r.id === COMMAND_SUGGESTION_RULE_ID);
   return entry?.enabled !== false;
 }

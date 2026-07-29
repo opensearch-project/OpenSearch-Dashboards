@@ -4,7 +4,15 @@
  */
 
 export type FailureClass =
-  'silent-null' | 'silent-empty' | 'engine-throw' | 'nondeterministic' | 'fallback' | 'advisory';
+  | 'silent-null'
+  | 'silent-empty'
+  | 'engine-throw'
+  | 'nondeterministic'
+  | 'fallback'
+  | 'advisory'
+  // query returns correct results, but on a slower execution path (a coordinator
+  // fallback or a per-document script); the cost grows with index size.
+  | 'slow-path';
 
 export interface RuleHoverContent {
   engineBehavior: string;
@@ -27,6 +35,32 @@ export const ENGINE_OUTCOMES: Record<string, RuleHoverContent> = {
     verifiedVersion: '3.7',
     safeToIgnoreWhen:
       'null propagation is intentional and handled downstream (e.g. coalesce(expr, 0)).',
+  },
+  'invalid-capture-group-name': {
+    // Mirrors OpenSearch's own capture-group name validation (RegexCommonUtils,
+    // present from 3.4 onward) for `rex` extract mode and `parse`. On 3.4+ the
+    // engine rejects a name that is not `[A-Za-z][A-Za-z0-9]*` — including one
+    // read out of escaped text, a character class, `\Q…\E`, or a lookbehind,
+    // because the engine's scan is lexerless too. This is not a Java-regex
+    // parser: it deliberately reproduces that scan, imperfections and all.
+    engineBehavior:
+      'A capture-group name may only contain letters and numbers and must start with a letter; names with other characters (such as underscores or hyphens) or a leading digit are rejected when the pattern runs.',
+    failureClass: 'engine-throw',
+    verifiedVersion: '3.8',
+  },
+  'operation-not-pushed': {
+    engineBehavior:
+      "OpenSearch can't evaluate this operation on the data nodes, so it fetches the matching rows to the coordinator and finishes the work there — filters and sorts run after a full scan, aggregations run in memory.",
+    failureClass: 'slow-path',
+    safeToIgnoreWhen:
+      'the number of rows reaching this operation is small, so the extra coordinator pass is negligible.',
+  },
+  'operation-pushed-as-script': {
+    engineBehavior:
+      'OpenSearch compiles a small Painless script and runs it per document instead of using the index directly, so the cost scales with the number of documents scanned.',
+    failureClass: 'slow-path',
+    safeToIgnoreWhen:
+      'the query already matches few documents, so running the script per document is cheap.',
   },
 };
 

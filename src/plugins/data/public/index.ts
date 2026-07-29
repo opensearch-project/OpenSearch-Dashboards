@@ -674,6 +674,7 @@ export {
   extractFieldMetadata,
 } from './ppl_lint/lint_context_builder';
 export { calciteSettingsCache } from './ppl_lint/calcite_settings_cache';
+export { explainQueryPreparer } from './ppl_lint/explain_query_preparer';
 export type { LintFieldsCache } from './ppl_lint/lint_context_builder';
 export { lintRuntimePPLQuery } from './antlr/opensearch_ppl/runtime_lint';
 export { pplGrammarCache, shouldUseRuntimeGrammar } from './antlr/opensearch_ppl/ppl_grammar_cache';
