@@ -2308,10 +2308,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.14.0.tgz#d95243369de3b08c1986d2c871a0522546e4363f"
   integrity sha512-2MPb4JhCz6wO9meq5bOMqWxvW0uzsmkYvKjFRcIY/R1pPdcxHJsRfxCb4x4Ibg3gs6DjN2+O70zHYllJ6Mjo4w==
 
-"@elastic/eui@npm:@opensearch-project/oui@1.22.1":
-  version "1.22.1"
-  resolved "https://registry.yarnpkg.com/@opensearch-project/oui/-/oui-1.22.1.tgz#19b526341d73ed17c6ab8ccb3912dd9bd6c73947"
-  integrity sha512-F5LQtDtTARVIfuo7029cMN3BT9dsAanOxZwtGgI88q/VODhUoYmcT2Nj4dzXOlTlY6uk9lr0BMxaysCmqbwfDw==
+"@elastic/eui@npm:@opensearch-project/oui@1.24.1":
+  version "1.24.1"
+  resolved "https://registry.yarnpkg.com/@opensearch-project/oui/-/oui-1.24.1.tgz#6e4babafc1e2b1bf8c9b325bea318b6514937ea6"
+  integrity sha512-NaqPaVhj/jXuamAnn71hGfnMq1nCXD0ANqjZC1r+v/LorNpZutb2PwvvV9mUKwYaUJJTDOuFt1BZyHAXF29CSQ==
   dependencies:
     "@types/chroma-js" "^2.4.0"
     "@types/react-beautiful-dnd" "^13.1.3"
@@ -2319,7 +2319,7 @@
     "@types/react-window" "^1.8.5"
     chroma-js "^2.4.2"
     classnames "^2.3.2"
-    lodash "^4.17.21"
+    lodash "^4.18.1"
     mdast-util-to-hast "^10.0.0"
     numeral "^2.0.6"
     prop-types "^15.8.1"
@@ -2343,7 +2343,7 @@
     unified "^9.2.0"
     unist-util-visit "^2.0.3"
     url-parse "^1.5.10"
-    uuid "^9.0.0"
+    uuid "^14.0.0"
     vfile "^4.2.0"
 
 "@elastic/good@^9.0.1-kibana3":
@@ -14401,7 +14401,7 @@ lodash.uniq@^4.5.0:
   resolved "https://registry.yarnpkg.com/lodash.uniq/-/lodash.uniq-4.5.0.tgz#d0225373aeb652adc1bc82e4945339a842754773"
   integrity sha512-xfBaXQd9ryd9dlSDvnvI0lvxfLJlYAZzXomUYzLKtUeOQvOP5piqAWuGtrhWeqaXK9hhoM/iyJc5AV+XfsX3HQ==
 
-lodash@^4.0.1, lodash@^4.15.0, lodash@^4.17.10, lodash@^4.17.11, lodash@^4.17.13, lodash@^4.17.15, lodash@^4.17.19, lodash@^4.17.21, lodash@^4.18.0, lodash@~4.18.1:
+lodash@^4.0.1, lodash@^4.15.0, lodash@^4.17.10, lodash@^4.17.11, lodash@^4.17.13, lodash@^4.17.15, lodash@^4.17.19, lodash@^4.17.21, lodash@^4.18.0, lodash@^4.18.1, lodash@~4.18.1:
   version "4.18.1"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.18.1.tgz#ff2b66c1f6326d59513de2407bf881439812771c"
   integrity sha512-dMInicTPVE8d1e5otfwmmjlxkZoUpiVLwyeTdUsi/Caj/gfzzblBcCE5sRHV/AsjuCmxWrte2TNGSYuCeCq+0Q==

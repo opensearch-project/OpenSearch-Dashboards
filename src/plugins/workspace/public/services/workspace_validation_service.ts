@@ -44,10 +44,10 @@ export class WorkspaceValidationService {
     });
   }
 
-  async setup(core: CoreSetup, workspaceId: string) {
+  async setup(core: CoreSetup, workspaceId: string, options: { maximumWorkspaces?: number } = {}) {
     this.workspaceId = workspaceId;
 
-    const workspaceClient = new WorkspaceClient(core.http, core.workspaces);
+    const workspaceClient = new WorkspaceClient(core.http, core.workspaces, options);
     await workspaceClient.init();
     core.workspaces.setClient(workspaceClient);
     this.workspaceClient = workspaceClient;

@@ -22,6 +22,8 @@ import {
 } from '../../../../core/server';
 import { IWorkspaceClientImpl } from '../types';
 import { validateIsWorkspaceDataSourceAndConnectionObjectType } from '../../common/utils';
+import { DEFAULT_WORKSPACE_LIST_PER_PAGE } from '../../common/constants';
+import { IWorkspaceConfigService } from '../services';
 
 const UI_SETTINGS_SAVED_OBJECTS_TYPE = 'config';
 
@@ -38,6 +40,21 @@ const generateSavedObjectsForbiddenError = () =>
 
 export class WorkspaceIdConsumerWrapper {
   private readonly logger: Logger;
+
+  /**
+   * Resolves the page size used when listing workspaces to validate the requested ones
+   * exist. It honors `workspace.maximum_workspaces` so that workspaces beyond the
+   * default page size are not reported as invalid.
+   */
+  private async getWorkspaceListPerPage(request: OpenSearchDashboardsRequest): Promise<number> {
+    const maximumWorkspaces = await this.configService
+      ?.asScopedToRequest(request)
+      .getMaximumWorkspaces()
+      .catch(() => undefined);
+
+    return maximumWorkspaces ?? DEFAULT_WORKSPACE_LIST_PER_PAGE;
+  }
+
   private formatWorkspaceIdParams<T extends WorkspaceOptions>(
     request: OpenSearchDashboardsRequest,
     options?: T
@@ -91,7 +108,7 @@ export class WorkspaceIdConsumerWrapper {
             request: wrapperOptions.request,
           },
           {
-            perPage: 9999,
+            perPage: await this.getWorkspaceListPerPage(wrapperOptions.request),
           }
         );
         if (workspaceList.success) {
@@ -249,7 +266,8 @@ export class WorkspaceIdConsumerWrapper {
 
   constructor(
     private readonly workspaceClient: IWorkspaceClientImpl,
-    logger: Logger
+    logger: Logger,
+    private readonly configService?: IWorkspaceConfigService
   ) {
     this.logger = logger;
   }

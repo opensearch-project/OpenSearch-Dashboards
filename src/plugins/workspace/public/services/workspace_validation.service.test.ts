@@ -47,6 +47,16 @@ describe('WorkspaceValidationService', () => {
       expect(workspaceClientMock.enterWorkspace).toHaveBeenCalledTimes(1);
     });
 
+    it('should pass the maximum workspaces option to the workspace client', async () => {
+      const core = coreMock.createSetup();
+      const service = new WorkspaceValidationService();
+      await service.setup(core, 'test-workspace-123', { maximumWorkspaces: 5000 });
+
+      expect(WorkspaceClientMock).toHaveBeenCalledWith(core.http, core.workspaces, {
+        maximumWorkspaces: 5000,
+      });
+    });
+
     it('should not enter workspace it workspace id is not set', async () => {
       const core = coreMock.createSetup();
       const service = new WorkspaceValidationService();

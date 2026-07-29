@@ -21,6 +21,7 @@ import {
   IUiSettingsClient,
 } from '../../../core/server';
 import { IRequestDetail } from './types';
+import { createWorkspaceConfigServiceMock } from './services/workspace_config_service.mock';
 
 const coreSetup = coreMock.createSetup();
 
@@ -131,9 +132,11 @@ describe('#WorkspaceClient', () => {
   });
 
   it('create# should call find when maximum workspaces are set', async () => {
-    const client = new WorkspaceClient(coreSetup, logger, {
-      maximum_workspaces: 1,
-    });
+    const client = new WorkspaceClient(
+      coreSetup,
+      logger,
+      createWorkspaceConfigServiceMock({ maximum_workspaces: 1 })
+    );
     client?.setSavedObjects(savedObjects);
 
     find.mockImplementation((findParams) => {
