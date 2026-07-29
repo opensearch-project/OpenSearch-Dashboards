@@ -132,7 +132,6 @@
   "resolutions": {
     "**/@aws-crypto/**/uuid": "^11.1.1",
     "**/@cypress/**/uuid": "^11.1.1",
-    "**/@elastic/eui/**/uuid": "^11.1.1",
     "**/@langchain/**/uuid": "^11.1.1",
     "**/istanbul-lib-processinfo/uuid": "^11.1.1",
     "**/node-jose/uuid": "^11.1.1",
