@@ -23,6 +23,7 @@ import {
   DEFAULT_NAV_GROUPS,
   NavGroupType,
   ALL_USE_CASE_ID,
+  PluginInitializerContext,
 } from 'opensearch-dashboards/public';
 import { getWorkspaceIdFromUrl } from 'opensearch-dashboards/public/utils';
 import {
@@ -76,6 +77,7 @@ import { WorkspaceValidationService } from './services/workspace_validation_serv
 import { workspaceSearchPages } from './components/global_search/search_pages_command';
 import { isNavGroupInFeatureConfigs } from '../../../core/public';
 import { searchAssets } from './components/global_search/search_assets_command';
+import { WorkspacePublicConfig } from '../config';
 
 type WorkspaceAppType = (
   params: AppMountParameters,
@@ -117,6 +119,10 @@ export class WorkspacePlugin implements Plugin<
   private workspaceValidationService = new WorkspaceValidationService();
   private collaboratorTypes = new WorkspaceCollaboratorTypesService();
   private collaboratorsAppUpdater$ = new BehaviorSubject<AppUpdater>(() => undefined);
+
+  constructor(
+    private readonly initializerContext: PluginInitializerContext<WorkspacePublicConfig>
+  ) {}
 
   private _changeSavedObjectCurrentWorkspace() {
     if (this.coreStart) {
@@ -301,7 +307,9 @@ export class WorkspacePlugin implements Plugin<
       core.http.basePath.getBasePath()
     );
 
-    await this.workspaceValidationService.setup(core, workspaceId);
+    await this.workspaceValidationService.setup(core, workspaceId, {
+      maximumWorkspaces: this.initializerContext.config.get().maximum_workspaces,
+    });
 
     const mountWorkspaceApp = async (params: AppMountParameters, renderApp: WorkspaceAppType) => {
       const [coreStart, { navigation, data }] = await core.getStartServices();

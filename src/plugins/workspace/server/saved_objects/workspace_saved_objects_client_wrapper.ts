@@ -37,8 +37,12 @@ import {
   WorkspacePermissionMode,
 } from '../../../../core/server';
 import { SavedObjectsPermissionControlContract } from '../permission_control/client';
-import { WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID } from '../../common/constants';
+import {
+  DEFAULT_WORKSPACE_LIST_PER_PAGE,
+  WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
+} from '../../common/constants';
 import { validateIsWorkspaceDataSourceAndConnectionObjectType } from '../../common/utils';
+import { IWorkspaceConfigService } from '../services';
 
 // Can't throw unauthorized for now, the page will be refreshed if unauthorized
 const generateWorkspacePermissionError = () =>
@@ -86,6 +90,20 @@ const getDefaultValuesForEmpty = <T>(values: T[] | undefined, defaultValues: T[]
 
 export class WorkspaceSavedObjectsClientWrapper {
   private getScopedClient?: SavedObjectsServiceStart['getScopedClient'];
+
+  /**
+   * Resolves the page size used when looking up every workspace the current user may
+   * read. It honors `workspace.maximum_workspaces` so that a user who is allowed to
+   * create N workspaces can also see saved objects in all N of them.
+   */
+  private async getWorkspaceListPerPage(request: OpenSearchDashboardsRequest): Promise<number> {
+    const maximumWorkspaces = await this.configService
+      ?.asScopedToRequest(request)
+      .getMaximumWorkspaces()
+      .catch(() => undefined);
+
+    return maximumWorkspaces ?? DEFAULT_WORKSPACE_LIST_PER_PAGE;
+  }
 
   private async validateObjectsPermissions(
     objects: Array<Pick<SavedObject, 'id' | 'type'>>,
@@ -512,7 +530,7 @@ export class WorkspaceSavedObjectsClientWrapper {
       const permittedWorkspaceIds = (
         await this.getWorkspaceTypeEnabledClient(wrapperOptions.request).find({
           type: WORKSPACE_TYPE,
-          perPage: 999,
+          perPage: await this.getWorkspaceListPerPage(wrapperOptions.request),
           ACLSearchParams: {
             principals,
             permissionModes: [
@@ -686,5 +704,8 @@ export class WorkspaceSavedObjectsClientWrapper {
     };
   };
 
-  constructor(private readonly permissionControl: SavedObjectsPermissionControlContract) {}
+  constructor(
+    private readonly permissionControl: SavedObjectsPermissionControlContract,
+    private readonly configService?: IWorkspaceConfigService
+  ) {}
 }

@@ -33,7 +33,7 @@ import {
   DATA_SOURCE_SAVED_OBJECT_TYPE,
   DATA_CONNECTION_SAVED_OBJECT_TYPE,
 } from '../../data_source/common';
-import { ConfigSchema } from '../config';
+import { IWorkspaceConfigService } from './services';
 
 const WORKSPACE_ID_SIZE = 6;
 
@@ -45,21 +45,17 @@ const WORKSPACE_NOT_FOUND_ERROR = i18n.translate('workspace.notFound.error', {
   defaultMessage: 'workspace not found',
 });
 
-interface ConfigType {
-  maximum_workspaces?: ConfigSchema['maximum_workspaces'];
-}
-
 export class WorkspaceClient implements IWorkspaceClientImpl {
   private setupDep: CoreSetup;
   private logger: Logger;
   private savedObjects?: SavedObjectsServiceStart;
   private uiSettings?: UiSettingsServiceStart;
-  private config?: ConfigType;
+  private configService?: IWorkspaceConfigService;
 
-  constructor(core: CoreSetup, logger: Logger, config?: ConfigType) {
+  constructor(core: CoreSetup, logger: Logger, configService?: IWorkspaceConfigService) {
     this.setupDep = core;
     this.logger = logger;
-    this.config = config;
+    this.configService = configService;
   }
 
   private getScopedClientWithoutPermission(
@@ -132,16 +128,19 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
         throw new Error(DUPLICATE_WORKSPACE_NAME_ERROR);
       }
 
-      if (this.config?.maximum_workspaces) {
+      const maximumWorkspaces = await this.configService
+        ?.asScopedToRequest(requestDetail.request)
+        .getMaximumWorkspaces();
+      if (maximumWorkspaces) {
         const workspaces = await clientWithoutPermission?.find({
           type: WORKSPACE_TYPE,
         });
-        if (workspaces && workspaces.total >= this.config.maximum_workspaces) {
+        if (workspaces && workspaces.total >= maximumWorkspaces) {
           throw new Error(
             i18n.translate('workspace.maximum.error', {
               defaultMessage: 'Maximum number of workspaces ({length}) reached',
               values: {
-                length: this.config.maximum_workspaces,
+                length: maximumWorkspaces,
               },
             })
           );
