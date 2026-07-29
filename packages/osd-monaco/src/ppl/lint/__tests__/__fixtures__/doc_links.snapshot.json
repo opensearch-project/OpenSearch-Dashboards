@@ -55,6 +55,24 @@
       "page": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/fields/",
       "anchor": "",
       "quality": "weak"
+    },
+    "agg-on-text": {
+      "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/stats/",
+      "page": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/commands/stats/",
+      "anchor": "",
+      "quality": "weak"
+    },
+    "flat-object-subfield": {
+      "docUrl": "https://docs.opensearch.org/latest/field-types/supported-field-types/object-fields/",
+      "page": "https://docs.opensearch.org/latest/field-types/supported-field-types/object-fields/",
+      "anchor": "",
+      "quality": "weak"
+    },
+    "type-mismatch-numeric": {
+      "docUrl": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/functions/expressions/#comparison-operators",
+      "page": "https://docs.opensearch.org/latest/sql-and-ppl/ppl/functions/expressions/",
+      "anchor": "comparison-operators",
+      "quality": "close"
     }
   }
 }

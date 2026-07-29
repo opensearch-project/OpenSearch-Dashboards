@@ -28,6 +28,8 @@ interface MarkerKeyParts {
   endLineNumber: number;
   endColumn: number;
   message: string;
+  // Rule id, carried on the marker's `code` field (string, or `{ value }` link).
+  code?: string | { value?: string };
 }
 
 interface FixRegistryState {
@@ -60,15 +62,19 @@ function getState(): FixRegistryState {
   return state;
 }
 
-// Stable key correlating a stored fix with a marker after the marker has
-// round-tripped through Monaco's MarkerService (position + message survive).
+// Stable key correlating a stored fix with a marker after Monaco's MarkerService
+// rebuild (position + message + code survive). Rule id disambiguates diagnostics
+// that collide on range + message but carry different fixes.
 export function markerFixKey(marker: MarkerKeyParts): string {
+  const code = marker.code;
+  const ruleId = typeof code === 'string' ? code : (code?.value ?? '');
   return [
     marker.startLineNumber,
     marker.startColumn,
     marker.endLineNumber,
     marker.endColumn,
     marker.message,
+    ruleId,
   ].join(':');
 }
 

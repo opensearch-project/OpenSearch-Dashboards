@@ -29,13 +29,9 @@ import { DashboardServices } from '../../../../types';
 import {
   buildVariableOptionsFromQueryResult,
   executeVariableQuery,
-  filterVariableOptionsByRegex,
+  applyRegexToVariableOptions,
   VariableQueryResult,
 } from '../../../../variables/variable_query_utils';
-import {
-  buildVariableOptionDisplayTextMap,
-  getVariableOptionDisplayText,
-} from '../../../../variables/variable_option_display_utils';
 import { IVariableInterpolationService } from '../../../../variables/variable_interpolation_service';
 import { NormalizedVariableOption } from '../../../../variables/types';
 import { getEffectiveLanguageForAutoComplete } from '../../../../../../data/public';
@@ -50,6 +46,9 @@ import './variable_query_panel.scss';
  */
 const MAX_PREVIEW_OPTIONS = 100;
 const EMPTY_FIELDS: string[] = [];
+
+const getPreviewOptionDisplayText = (option: NormalizedVariableOption): string =>
+  option.label ? `${option.label} (${option.value})` : option.value;
 
 type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
 type IEditorConstructionOptions = monaco.editor.IEditorConstructionOptions;
@@ -113,7 +112,7 @@ export interface VariableQueryPanelProps {
   onDatasetChange: (dataset: any) => void;
   existingVariableNames?: string[];
   interpolationService?: IVariableInterpolationService;
-  /** Regex filter string for preview results */
+  /** Regex filter/extractor string for preview results */
   regex?: string;
   onRegexChange?: (regex: string) => void;
   /** Whether to refresh on time range change */
@@ -156,6 +155,7 @@ export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
   const [queryResult, setQueryResult] = useState<VariableQueryResult | null>(null);
   const [executionError, setExecutionError] = useState<string | null>(null);
   const editorRef = useRef<IStandaloneCodeEditor | null>(null);
+  const initialQueryRef = useRef(query);
 
   const placeholder = useMemo(() => {
     const lang = language.toUpperCase();
@@ -200,17 +200,13 @@ export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
   }, [queryResult, valueField, labelField]);
 
   const filteredPreviewOptions = useMemo(
-    () => filterVariableOptionsByRegex(previewOptionsResult.options, regex),
+    () => applyRegexToVariableOptions(previewOptionsResult.options, regex),
     [previewOptionsResult.options, regex]
   );
 
   const previewOptions = useMemo(
     () => filteredPreviewOptions.slice(0, MAX_PREVIEW_OPTIONS),
     [filteredPreviewOptions]
-  );
-  const previewOptionDisplayTextMap = useMemo(
-    () => buildVariableOptionDisplayTextMap(previewOptions),
-    [previewOptions]
   );
 
   const isTruncated = filteredPreviewOptions.length > MAX_PREVIEW_OPTIONS;
@@ -246,7 +242,7 @@ export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
     }
 
     return i18n.translate('dashboard.variableQueryPanel.noRegexMatches', {
-      defaultMessage: 'No options match the regex filter',
+      defaultMessage: 'No options match the regex',
     });
   }, [
     availableFields,
@@ -510,6 +506,16 @@ export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
     handleRunQueryRef.current = handleRunQuery;
   }, [handleRunQuery]);
 
+  useEffect(() => {
+    // Existing query variables should show their preview immediately when edited.
+    // New query variables start empty, so users still run preview explicitly.
+    if (!initialQueryRef.current.trim()) {
+      return;
+    }
+
+    handleRunQueryRef.current();
+  }, []);
+
   const onEditorClick = useCallback(() => {
     editorRef.current?.focus();
   }, []);
@@ -689,13 +695,14 @@ export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
             defaultMessage: 'Regex',
           })}
           helpText={i18n.translate('dashboard.variableQueryPanel.regexHelp', {
-            defaultMessage: 'Optional regex to filter options. Only matching options are shown.',
+            defaultMessage:
+              'Optional regex to filter options or extract values with capture groups.',
           })}
         >
           <EuiFieldText
             value={regex}
             onChange={(e) => onRegexChange(e.target.value)}
-            placeholder="/^prod-/"
+            placeholder="/^env=(?<value>[^,]+),label=(?<label>.+)$/"
             data-test-subj="variableEditorRegex"
             compressed
           />
@@ -767,9 +774,7 @@ export const VariableQueryPanel: React.FC<VariableQueryPanelProps> = ({
                   <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
                     {previewOptions.map((option) => (
                       <EuiFlexItem key={option.value} grow={false}>
-                        <EuiBadge color="hollow">
-                          {getVariableOptionDisplayText(option, previewOptionDisplayTextMap)}
-                        </EuiBadge>
+                        <EuiBadge color="hollow">{getPreviewOptionDisplayText(option)}</EuiBadge>
                       </EuiFlexItem>
                     ))}
                   </EuiFlexGroup>

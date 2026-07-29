@@ -106,6 +106,21 @@ describe('field-slot shape (runtime-bundle proxy)', () => {
       expect(diags).toHaveLength(1);
       expect(diags[0].fix).toBeUndefined();
     });
+
+    it('flags field=<computed> but offers NO fix (RHS is not a bare field)', () => {
+      // `field = a + b` is an equality, but the RHS is a computed expression, not
+      // a single bare field — the AST-confirmed guard must withhold the misleading
+      // "use a+b" rewrite while still flagging the non-bare-field shape.
+      const diags = shapeDiagnostics('source=t | grok field = a + b "x"', 'runtime-bundle');
+      expect(diags).toHaveLength(1);
+      expect(diags[0].fix).toBeUndefined();
+    });
+
+    it('flags field=fn(x) but offers NO fix (RHS is a call, not a bare field)', () => {
+      const diags = shapeDiagnostics('source=t | grok field = upper(body) "x"', 'runtime-bundle');
+      expect(diags).toHaveLength(1);
+      expect(diags[0].fix).toBeUndefined();
+    });
   });
 
   describe('does NOT flag a bare field reference', () => {

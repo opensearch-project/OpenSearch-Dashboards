@@ -10,7 +10,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import { QueryPanel } from './query_panel';
 
 jest.mock('./query_panel_editor', () => ({
-  QueryPanelEditor: () => <div data-test-subj="query-panel-editor">Query Panel Editor</div>,
+  ExploreQueryPanelEditor: () => <div data-test-subj="query-panel-editor">Query Panel Editor</div>,
 }));
 
 jest.mock('./query_panel_generated_query', () => ({

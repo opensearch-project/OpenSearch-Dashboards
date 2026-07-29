@@ -8,6 +8,7 @@ import type { LintResult } from './lint/diagnostic';
 // mock-prefixed for jest-hoist compatibility.
 const mockLintFallback = jest.fn();
 const mockSetModelMarkers = jest.fn();
+const mockGetPPLLintContext = jest.fn();
 
 jest.mock('../monaco', () => ({
   monaco: {
@@ -37,7 +38,7 @@ jest.mock('../monaco', () => ({
 // resolvePPLLintResult delegates to fallback so tests control timing.
 jest.mock('./lint_bridge', () => ({
   isPPLLintEnabled: () => true,
-  getPPLLintContext: () => undefined,
+  getPPLLintContext: (...args: unknown[]) => mockGetPPLLintContext(...args),
   resolvePPLLintResult: (
     _model: unknown,
     content: string,
@@ -109,6 +110,8 @@ describe('processLintHighlighting — generation guard (stale-response drop)', (
   beforeEach(() => {
     mockSetModelMarkers.mockClear();
     mockLintFallback.mockReset();
+    mockGetPPLLintContext.mockReset();
+    mockGetPPLLintContext.mockReturnValue(undefined);
   });
 
   it('drops an earlier pass whose response resolves AFTER a later pass', async () => {
@@ -164,5 +167,48 @@ describe('processLintHighlighting — generation guard (stale-response drop)', (
     // Generation counter is per-model.
     const owners = lintMarkerCalls().map((c) => c[0].id);
     expect(owners).toEqual(expect.arrayContaining(['a', 'b']));
+  });
+});
+
+describe('worker context serialization (structured-clone safety)', () => {
+  beforeEach(() => {
+    mockSetModelMarkers.mockClear();
+    mockLintFallback.mockReset();
+    mockLintFallback.mockResolvedValue({ diagnostics: [] });
+    mockGetPPLLintContext.mockReset();
+  });
+
+  it('flattens the typeMap Map to a plain object for the compiled worker', async () => {
+    mockGetPPLLintContext.mockReturnValue({
+      isCalcite: true,
+      fields: new Set(['name', 'age']),
+      typeMap: new Map([
+        ['name', 'text'],
+        ['age', 'long'],
+      ]),
+    });
+
+    await revalidatePPLModel(makeModel('serialize-1'));
+    await flush();
+
+    expect(mockLintFallback).toHaveBeenCalledTimes(1);
+    const workerContext = mockLintFallback.mock.calls[0][1];
+    // Map -> plain object, Set -> array; both must be structured-clone-safe.
+    expect(workerContext.typeMap).toEqual({ name: 'text', age: 'long' });
+    expect(workerContext.typeMap instanceof Map).toBe(false);
+    expect(Array.isArray(workerContext.fields)).toBe(true);
+  });
+
+  it('leaves typeMap undefined in the worker context when the host has none', async () => {
+    mockGetPPLLintContext.mockReturnValue({
+      isCalcite: true,
+      fields: new Set(['name']),
+    });
+
+    await revalidatePPLModel(makeModel('serialize-2'));
+    await flush();
+
+    const workerContext = mockLintFallback.mock.calls[0][1];
+    expect(workerContext.typeMap).toBeUndefined();
   });
 });
