@@ -15,7 +15,7 @@
     "@cfaester/enzyme-adapter-react-18": "^0.8.0"
   },
   "devDependencies": {
-    "@elastic/eui": "npm:@opensearch-project/oui@1.22.1",
+    "@elastic/eui": "npm:@opensearch-project/oui@1.24.1",
     "@osd/babel-preset": "1.0.0",
     "@osd/optimizer": "1.0.0",
     "comment-stripper": "^0.0.4",
