@@ -12,3 +12,9 @@ export const configSchema = schema.object({
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;
+
+/**
+ * The subset of the workspace config which is exposed to the browser,
+ * see `exposeToBrowser` in `server/index.ts`.
+ */
+export type WorkspacePublicConfig = Pick<ConfigSchema, 'maximum_workspaces'>;

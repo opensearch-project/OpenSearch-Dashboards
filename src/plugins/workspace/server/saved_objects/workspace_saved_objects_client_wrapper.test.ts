@@ -23,12 +23,20 @@ import {
   DATA_SOURCE_SAVED_OBJECT_TYPE,
   DATA_CONNECTION_SAVED_OBJECT_TYPE,
 } from '../../../data_source/common';
+import { DEFAULT_WORKSPACE_LIST_PER_PAGE } from '../../common/constants';
+import {
+  createWorkspaceConfigServiceMock,
+  WorkspaceConfigServiceMock,
+} from '../services/workspace_config_service.mock';
 
 const DASHBOARD_ADMIN = 'dashboard_admin';
 const NO_DASHBOARD_ADMIN = 'no_dashboard_admin';
 const DATASOURCE_ADMIN = 'dataSource_admin';
 
-const generateWorkspaceSavedObjectsClientWrapper = (role = NO_DASHBOARD_ADMIN) => {
+const generateWorkspaceSavedObjectsClientWrapper = (
+  role = NO_DASHBOARD_ADMIN,
+  configServiceMock?: WorkspaceConfigServiceMock
+) => {
   const savedObjectsStore: SavedObject[] = [
     {
       type: 'dashboard',
@@ -213,7 +221,7 @@ const generateWorkspaceSavedObjectsClientWrapper = (role = NO_DASHBOARD_ADMIN) =
     clearSavedObjectsCache: jest.fn(),
   };
 
-  const wrapper = new WorkspaceSavedObjectsClientWrapper(permissionControlMock);
+  const wrapper = new WorkspaceSavedObjectsClientWrapper(permissionControlMock, configServiceMock);
   const scopedClientMock = savedObjectsClientMock.create();
   scopedClientMock.find.mockImplementation(async () => ({
     total: 1,
@@ -718,6 +726,46 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
           workspaces: ['workspace-1'],
           workspacesSearchOperator: 'OR',
         });
+      });
+      it('should look up permitted workspaces with the default page size', async () => {
+        const { wrapper, scopedClientMock } = generateWorkspaceSavedObjectsClientWrapper();
+        await wrapper.find({ type: 'dashboard' });
+        expect(scopedClientMock.find).toHaveBeenCalledWith(
+          expect.objectContaining({
+            type: 'workspace',
+            perPage: DEFAULT_WORKSPACE_LIST_PER_PAGE,
+          })
+        );
+      });
+      it('should look up permitted workspaces with the resolved maximum_workspaces as page size', async () => {
+        const { wrapper, scopedClientMock } = generateWorkspaceSavedObjectsClientWrapper(
+          NO_DASHBOARD_ADMIN,
+          createWorkspaceConfigServiceMock({ maximum_workspaces: 5000 })
+        );
+        await wrapper.find({ type: 'dashboard' });
+        expect(scopedClientMock.find).toHaveBeenCalledWith(
+          expect.objectContaining({
+            type: 'workspace',
+            perPage: 5000,
+          })
+        );
+      });
+      it('should look up permitted workspaces with the default page size when maximum_workspaces cannot be resolved', async () => {
+        const configServiceMock = createWorkspaceConfigServiceMock();
+        configServiceMock.scopedClient.getMaximumWorkspaces.mockRejectedValue(
+          new Error('config store unavailable')
+        );
+        const { wrapper, scopedClientMock } = generateWorkspaceSavedObjectsClientWrapper(
+          NO_DASHBOARD_ADMIN,
+          configServiceMock
+        );
+        await wrapper.find({ type: 'dashboard' });
+        expect(scopedClientMock.find).toHaveBeenCalledWith(
+          expect.objectContaining({
+            type: 'workspace',
+            perPage: DEFAULT_WORKSPACE_LIST_PER_PAGE,
+          })
+        );
       });
       it('should call client.find with ACLSearchParams when only ACLSearchParams provided', async () => {
         const { wrapper, clientMock } = generateWorkspaceSavedObjectsClientWrapper();
