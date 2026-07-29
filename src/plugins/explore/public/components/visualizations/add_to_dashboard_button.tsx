@@ -30,6 +30,7 @@ import { useSearchContext } from '../query_panel/utils/use_search_context';
 import { ExploreServices } from '../../types';
 import { getVisualizationBuilder } from './visualization_builder';
 import { UrlTransformationState } from '../data_transformations';
+import { EXPLORE_LOGS_TAB_ID, ExploreFlavor } from '../../../common';
 
 export interface DashboardAttributes {
   title?: string;
@@ -104,8 +105,8 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
 
     const savedExploreWithState = saveStateToSavedObject(
       savedExplore,
-      // Don't store flavor for visualization snapshot
-      undefined,
+      // Don't store flavor for visualization snapshot except Logs table
+      activeTabId === EXPLORE_LOGS_TAB_ID ? ExploreFlavor.Logs : undefined,
       tabDefinition,
       {
         chartType: chartConfig?.type,
