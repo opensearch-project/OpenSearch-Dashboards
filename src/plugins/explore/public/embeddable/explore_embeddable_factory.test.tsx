@@ -19,25 +19,26 @@ jest.mock('./explore_embeddable', () => {
 
 describe('ExploreEmbeddableFactory', () => {
   let factory: ExploreEmbeddableFactory;
+  const mockSavedExplore = {
+    id: 'test-id',
+    title: 'Test Explore',
+    description: 'Test description',
+    searchSource: {
+      getField: jest.fn((field) => {
+        if (field === 'index') {
+          return { id: 'test-index' };
+        }
+        if (field === 'query') {
+          return { query: 'test', language: 'kuery' };
+        }
+        return null;
+      }),
+    },
+    type: 'logs',
+  };
   const mockedGetServicesResults = {
     getSavedExploreUrlById: jest.fn().mockResolvedValue('saved-explore-url'),
-    getSavedExploreById: jest.fn().mockResolvedValue({
-      id: 'test-id',
-      title: 'Test Explore',
-      description: 'Test description',
-      searchSource: {
-        getField: jest.fn((field) => {
-          if (field === 'index') {
-            return { id: 'test-index' };
-          }
-          if (field === 'query') {
-            return { query: 'test', language: 'kuery' };
-          }
-          return null;
-        }),
-      },
-      type: 'logs',
-    }),
+    getSavedExploreById: jest.fn().mockResolvedValue(mockSavedExplore),
     addBasePath: jest.fn((path) => `/base${path}`),
     capabilities: {
       discover: {
@@ -218,7 +219,7 @@ describe('ExploreEmbeddableFactory', () => {
     expect(result).toBeInstanceOf(ErrorEmbeddable);
   });
 
-  test('createFromSavedObject creates an ExploreEmbeddable', async () => {
+  test('createFromSavedObject opens non-logs panels in visualization editor', async () => {
     const input = { id: 'test', timeRange: { from: 'now-15m', to: 'now' } };
 
     await factory.createFromSavedObject('test-id', input as any);
@@ -228,10 +229,35 @@ describe('ExploreEmbeddableFactory', () => {
           id: 'test-id',
           title: 'Test Explore',
         }),
-        editUrl: '/base/app/explore/logs/saved-explore-url',
-        editPath: 'saved-explore-url',
+        editUrl: '/base/app/visualization-editor#/edit/test-id',
+        editPath: '#/edit/test-id',
         editable: true,
         indexPatterns: [{ id: 'test-index' }],
+        editApp: 'visualization-editor',
+      }),
+      input,
+      mockStartServices.executeTriggerActions,
+      undefined
+    );
+  });
+
+  test('createFromSavedObject opens logs tab panels in Explore logs', async () => {
+    jest.spyOn(OsdServices, 'getServices').mockReturnValue({
+      ...mockedGetServicesResults,
+      getSavedExploreById: jest.fn().mockResolvedValue({
+        ...mockSavedExplore,
+        type: undefined,
+        uiState: JSON.stringify({ activeTab: 'logs' }),
+      }),
+    } as any);
+
+    const input = { id: 'test', timeRange: { from: 'now-15m', to: 'now' } };
+
+    await factory.createFromSavedObject('test-id', input as any);
+    expect(ExploreEmbeddable).toHaveBeenCalledWith(
+      expect.objectContaining({
+        editUrl: '/base/app/explore/logs/saved-explore-url',
+        editPath: 'saved-explore-url',
         editApp: 'explore/logs',
       }),
       input,
@@ -315,7 +341,7 @@ describe('ExploreEmbeddableFactory', () => {
     jest.spyOn(OsdServices, 'getServices').mockReturnValue({
       ...mockedGetServicesResults,
       getSavedExploreById: jest.fn().mockResolvedValue({
-        ...mockedGetServicesResults.getSavedExploreById(),
+        ...mockSavedExplore,
         searchSource: {
           getField: jest.fn(() => null),
         },
