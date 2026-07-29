@@ -221,6 +221,19 @@ describe('ScatterVisStyleControls (updated structure)', () => {
     },
   };
 
+  const propsWithSize: ScatterVisStyleControlsProps = {
+    ...mockProps,
+    axisColumnMappings: {
+      ...mockProps.axisColumnMappings,
+      [AxisRole.SIZE]: {
+        id: 5,
+        name: 'Size Value',
+        schema: VisFieldType.Numerical,
+        column: 'size',
+      },
+    },
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -249,6 +262,17 @@ describe('ScatterVisStyleControls (updated structure)', () => {
     expect(screen.getByTestId('mockTooltipOptionsPanel')).toBeInTheDocument();
     expect(screen.getByTestId('scatterExclusiveOptions')).toBeInTheDocument();
     expect(screen.getByTestId('mockLegendOptionsPanel')).toBeInTheDocument();
+  });
+
+  it('renders and shows legend panel when size column is present without color', () => {
+    render(
+      <Provider store={store}>
+        <ScatterVisStyleControls {...propsWithSize} />
+      </Provider>
+    );
+
+    expect(screen.getByTestId('mockLegendOptionsPanel')).toBeInTheDocument();
+    expect(screen.getByTestId('mockLegendTitleForSize')).toBeInTheDocument();
   });
 
   it('calls onStyleChange with correct parameters for legend options', () => {
