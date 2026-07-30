@@ -4,7 +4,7 @@
  */
 
 import { monaco } from '../../monaco';
-import { Diagnostic, DiagnosticHoverFacts, DiagnosticRange, LintSeverity } from './diagnostic';
+import { Diagnostic, DiagnosticRange, LintSeverity } from './diagnostic';
 
 interface MonacoRange {
   startLineNumber: number;
@@ -95,14 +95,6 @@ export function diagnosticToMarker(diagnostic: Diagnostic): monaco.editor.IMarke
       text: diagnostic.fix.text,
       range: diagnostic.fix.range ? toMonacoRange(diagnostic.fix.range) : undefined,
     };
-  }
-
-  if (diagnostic.hoverFacts) {
-    (
-      marker as monaco.editor.IMarkerData & {
-        hoverFacts?: DiagnosticHoverFacts;
-      }
-    ).hoverFacts = diagnostic.hoverFacts;
   }
 
   return marker;

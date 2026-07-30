@@ -201,7 +201,7 @@
     "docUrl": "https://docs.opensearch.org/latest/mappings/mapping-parameters/enabled/#disabling-object-fields",
     "needsContext": true,
     "sourceScoped": true,
-    "appliesTo": {}
+    "appliesTo": { "minVersion": "3.7.0", "engine": "calcite" }
   },
   {
     "id": "wildcard-source-zero-match",

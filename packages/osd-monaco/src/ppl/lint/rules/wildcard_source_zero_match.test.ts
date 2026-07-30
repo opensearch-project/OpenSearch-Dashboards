@@ -69,31 +69,6 @@ describe('wildcard-source-zero-match', () => {
       expect(diagnostic.message).toBe(catalogMessage);
     });
 
-    it('carries the pattern and index count as hover facts', () => {
-      const [diagnostic] = diagnosticsFor('source=nope-*', { visibleIndices: VISIBLE });
-      expect(diagnostic.hoverFacts).toMatchObject({
-        pattern: 'nope-*',
-        totalIndices: VISIBLE.length,
-      });
-    });
-
-    it('offers prefix-matched candidates from the leading literal run', () => {
-      // Anchored, so `logs*archive` matches nothing, but its `logs` prefix does
-      // name two real indices — exactly the "did you mean" case.
-      const [diagnostic] = diagnosticsFor('source=logs*archive', { visibleIndices: VISIBLE });
-      expect(diagnostic.hoverFacts?.candidateIndices).toEqual(['logs-2024', 'logs-2025']);
-    });
-
-    it('offers no candidates when nothing shares the literal run', () => {
-      const [diagnostic] = diagnosticsFor('source=nope-*', { visibleIndices: VISIBLE });
-      expect(diagnostic.hoverFacts?.candidateIndices).toBeUndefined();
-    });
-
-    it('offers no candidates when the literal run is too short to be a useful hint', () => {
-      const [diagnostic] = diagnosticsFor('source=z*', { visibleIndices: VISIBLE });
-      expect(diagnostic.hoverFacts?.candidateIndices).toBeUndefined();
-    });
-
     it('ranges over the source pattern', () => {
       const [diagnostic] = diagnosticsFor('source=nope-*', { visibleIndices: VISIBLE });
       expect(diagnostic.range.startColumn).toBeLessThan(diagnostic.range.endColumn);

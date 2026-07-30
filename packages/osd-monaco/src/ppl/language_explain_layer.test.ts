@@ -19,6 +19,7 @@ jest.mock('../monaco', () => ({
       onWillDisposeModel: jest.fn(),
       getModels: () => [],
       defineTheme: jest.fn(),
+      registerCommand: jest.fn(() => ({ dispose: jest.fn() })),
     },
     languages: {
       register: jest.fn(),
@@ -108,12 +109,6 @@ jest.mock('./lint/diagnostic_to_marker', () => ({
   }),
   SYNTAX_MARKER_SOURCE: 'ppl-syntax',
 }));
-jest.mock('./lint/hover/hover_registry', () => ({
-  markerFixKey: (m: { code: string }) => m.code,
-  setModelHoverFacts: jest.fn(),
-  clearModelHoverFacts: jest.fn(),
-}));
-
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { revalidatePPLModel } = require('./language');
 // eslint-disable-next-line @typescript-eslint/no-var-requires

@@ -97,26 +97,16 @@ describe('flat-object-subfield (compiled surface)', () => {
     ).not.toContain('flat-object-subfield'));
 
   describe('diagnostic shape', () => {
-    it('reports hoverFacts {field, root, esType} and offers NO fix', () => {
+    it('reports an error and offers NO fix', () => {
       const diags = flatDiags('search t | fields attributes.http.method', flatOnly);
       expect(diags).toHaveLength(1);
       expect(diags[0].severity).toBe('error');
-      expect(diags[0].hoverFacts).toEqual({
-        field: 'attributes.http.method',
-        root: 'attributes',
-        esType: 'flat_object',
-      });
       expect(diags[0].fix).toBeUndefined();
     });
 
-    it('sets root to the matched typed prefix, not the leaf, for a bare root reference', () => {
+    it('fires on a bare reference to the flat_object root', () => {
       const diags = flatDiags('search t | fields attributes', flatOnly);
       expect(diags).toHaveLength(1);
-      expect(diags[0].hoverFacts).toEqual({
-        field: 'attributes',
-        root: 'attributes',
-        esType: 'flat_object',
-      });
     });
   });
 });
@@ -213,11 +203,6 @@ describe('flat-object-subfield (detector unit + sentinel message)', () => {
 
     const diags = flatObjectSubfieldDetector(root, config, ctx, ruleNameToIndex);
     expect(diags).toHaveLength(1);
-    expect(diags[0].hoverFacts).toEqual({
-      field: 'attributes',
-      root: 'attributes',
-      esType: 'flat_object',
-    });
   });
 
   // The version filter also enforces this, but a direct invocation bypasses it.

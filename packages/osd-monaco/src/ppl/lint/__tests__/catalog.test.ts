@@ -56,6 +56,12 @@ describe('catalog loading', () => {
       minVersion: '3.8.0',
       engine: 'calcite',
     });
+    // enabled-false-object is the same class of context-fed mapping rule
+    // (verified live on 3.7 Calcite); gate it to that surface too.
+    expect(byId.get('enabled-false-object')?.appliesTo).toEqual({
+      minVersion: '3.7.0',
+      engine: 'calcite',
+    });
   });
 
   it('keeps exactly the valid entries and drops malformed ones', () => {

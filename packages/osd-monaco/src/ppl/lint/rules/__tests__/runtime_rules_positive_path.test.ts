@@ -176,7 +176,6 @@ describe('runtime-only rules: positive-path (detector fires on matching tree)', 
       expect(diags).toHaveLength(1);
       expect(diags[0].ruleId).toBe('replace-wildcard-asymmetry');
       expect(diags[0].message).toBe(config.message);
-      expect(diags[0].hoverFacts).toEqual({ patternWildcards: 2, replacementWildcards: 1 });
     });
 
     it('does not fire on symmetric wildcard counts', () => {
@@ -234,7 +233,6 @@ describe('runtime-only rules: positive-path (detector fires on matching tree)', 
       const diags = disabledJoinTypeDetector(tree, config, context, ruleNameToIndex);
       expect(diags).toHaveLength(1);
       expect(diags[0].ruleId).toBe('disabled-join-type');
-      expect(diags[0].hoverFacts).toEqual({ joinType: 'cross' });
     });
 
     it('suppresses when allJoinTypesAllowed is true (end-to-end settings wiring)', () => {
@@ -267,8 +265,9 @@ describe('runtime-only rules: positive-path (detector fires on matching tree)', 
       const context: LintRunContext = {};
 
       const diags = disabledJoinTypeDetector(tree, config, context, ruleNameToIndex);
-      const keywords = diags.map((d) => d.hoverFacts?.joinType).sort();
-      expect(keywords).toEqual(['cross', 'full']);
+      // Two joins (outer `full`, nested `cross`): each reported exactly once, so
+      // the nested one is neither duplicated nor masks the outer.
+      expect(diags).toHaveLength(2);
     });
   });
 });

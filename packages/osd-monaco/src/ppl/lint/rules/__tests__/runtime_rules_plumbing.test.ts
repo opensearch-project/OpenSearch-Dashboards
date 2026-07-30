@@ -126,7 +126,6 @@ describe('runtime-only rules: product-path plumbing (catalog + registry + runLin
     expect(replace?.message).toBe(
       'The replace match and replacement have different numbers of "*" wildcards. The counts must match.'
     );
-    expect(replace?.hoverFacts).toEqual({ patternWildcards: 2, replacementWildcards: 1 });
   });
 
   it('suppresses runtime-only rules on the compiled-simplified surface (runtimeOnly gate)', () => {

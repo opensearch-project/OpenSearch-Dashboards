@@ -5,8 +5,7 @@
 
 import { monaco } from '../../../../monaco';
 import { LINT_MARKER_SOURCE } from '../../diagnostic_to_marker';
-import { markerFixKey, clearModelHoverFacts } from '../hover_registry';
-import { setModelFixes, clearModelFixes, MarkerFix } from '../../fix_registry';
+import { markerFixKey, setModelFixes, clearModelFixes, MarkerFix } from '../../fix_registry';
 import { pplLintHoverProvider, LINT_OWNER } from '../hover_provider';
 import { registerPPLDiagnosticActionContributor } from '../../diagnostic_action';
 import {
@@ -48,7 +47,6 @@ beforeEach(() => {
 });
 afterEach(() => {
   jest.restoreAllMocks();
-  clearModelHoverFacts(model);
   clearModelFixes(model);
 });
 

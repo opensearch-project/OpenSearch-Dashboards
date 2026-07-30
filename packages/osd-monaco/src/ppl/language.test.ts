@@ -68,12 +68,6 @@ jest.mock('./validation_provider', () => ({
 jest.mock('./lint/diagnostic_to_marker', () => ({
   diagnosticToMarker: (d: { ruleId: string }) => ({ message: d.ruleId, code: d.ruleId }),
 }));
-jest.mock('./lint/hover/hover_registry', () => ({
-  markerFixKey: (m: { code: string }) => m.code,
-  setModelHoverFacts: jest.fn(),
-  clearModelHoverFacts: jest.fn(),
-}));
-
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { revalidatePPLModel } = require('./language');
 

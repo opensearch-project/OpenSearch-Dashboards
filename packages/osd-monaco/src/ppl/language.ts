@@ -32,7 +32,6 @@ import {
   setModelSyntaxFixes,
 } from './lint/fix_registry';
 import { LINT_OWNER, pplLintHoverProvider } from './lint/hover/hover_provider';
-import { clearModelHoverFacts, HoverFacts, setModelHoverFacts } from './lint/hover/hover_registry';
 import {
   emitPPLLintTelemetry,
   PPL_LINT_QUICKFIX_COMMAND_ID,
@@ -296,7 +295,6 @@ const processLintHighlighting = (model: monaco.editor.IModel): void => {
   if (!isPPLLintEnabled() || model.getLanguageId() !== PPL_LANGUAGE_ID) {
     monaco.editor.setModelMarkers(model, LINT_OWNER, []);
     clearModelFixes(model);
-    clearModelHoverFacts(model);
     return;
   }
 
@@ -393,18 +391,16 @@ const isLintPassStale = (
 
 /**
  * Convert diagnostics to Monaco markers and apply them, capturing each
- * diagnostic's `fix` / `hoverFacts` into the side tables the code-action and
- * hover providers read (Monaco's MarkerService rebuilds markers from a fixed
- * field list and would otherwise drop those custom properties).
+ * diagnostic's `fix` into the side table the code-action provider reads
+ * (Monaco's MarkerService rebuilds markers from a fixed field list and would
+ * otherwise drop that custom property).
  */
 const renderLintMarkers = (model: monaco.editor.IModel, diagnostics: Diagnostic[]): void => {
   const markers = diagnostics.map(diagnosticToMarker);
   const fixes = new Map<string, MarkerFix>();
-  const hoverFacts = new Map<string, HoverFacts>();
   for (const marker of markers) {
     const withExtras = marker as monaco.editor.IMarkerData & {
       fix?: MarkerFix;
-      hoverFacts?: HoverFacts;
     };
     const key = markerFixKey(marker);
     if (withExtras.fix) {
@@ -424,13 +420,8 @@ const renderLintMarkers = (model: monaco.editor.IModel, diagnostics: Diagnostic[
       fixes.set(key, withExtras.fix);
       delete withExtras.fix;
     }
-    if (withExtras.hoverFacts) {
-      hoverFacts.set(key, withExtras.hoverFacts);
-      delete withExtras.hoverFacts;
-    }
   }
   setModelFixes(model, fixes);
-  setModelHoverFacts(model, hoverFacts);
   monaco.editor.setModelMarkers(model, LINT_OWNER, markers);
 };
 
@@ -622,7 +613,6 @@ const setupPPLSyntaxHighlighting = () => {
           monaco.editor.setModelMarkers(model, LINT_OWNER, []);
           clearModelFixes(model);
           clearModelSyntaxFixes(model);
-          clearModelHoverFacts(model);
           resetPPLLintTelemetryDedup(model);
         }
       })
@@ -653,7 +643,6 @@ const setupPPLSyntaxHighlighting = () => {
       monaco.editor.setModelMarkers(model, LINT_OWNER, []);
       clearModelFixes(model);
       clearModelSyntaxFixes(model);
-      clearModelHoverFacts(model);
       resetPPLLintTelemetryDedup(model);
     })
   );

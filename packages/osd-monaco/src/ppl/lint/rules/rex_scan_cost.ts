@@ -150,7 +150,6 @@ export const rexScanCostDetector: Detector = (tree, config, context, ruleNameToI
         message: scanCostMessage(keyword, field),
         range: rangeFromContext(command),
         docUrl: config.docUrl,
-        hoverFacts: { field, esType },
       });
     }
   }

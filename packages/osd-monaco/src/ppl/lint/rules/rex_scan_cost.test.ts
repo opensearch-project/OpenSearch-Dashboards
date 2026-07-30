@@ -160,10 +160,5 @@ describe('rex-scan-cost (compiled surface)', () => {
         'grok runs the pattern'
       );
     });
-
-    it('carries { field, esType } hover facts and no suggestion', () => {
-      const found = diag('source=logs | rex field=raw_log "GET (?<path>\\S+)"');
-      expect(found?.hoverFacts).toEqual({ field: 'raw_log', esType: 'text' });
-    });
   });
 });

@@ -36,8 +36,12 @@ export const enabledFalseObjectDetector: Detector = (tree, config, context, rule
 
   for (const node of collectDottedPathNodes(tree, ruleNameToIndex)) {
     const path = node.getText();
-    const root = path.slice(0, path.indexOf('.'));
-    if (!disabled.has(root)) {
+    // A disabled object may itself be dotted (e.g. `outer.inner`), which is the
+    // form the producer (`collectDisabledObjectFields`) emits. Match the full
+    // path or any subfield beneath it; the `d + '.'` boundary keeps `log` from
+    // matching an unrelated `logger.field`.
+    const disabledRoot = [...disabled].find((d) => path === d || path.startsWith(d + '.'));
+    if (!disabledRoot) {
       continue;
     }
 
@@ -47,8 +51,6 @@ export const enabledFalseObjectDetector: Detector = (tree, config, context, rule
       message: config.message,
       range: rangeFromContext(node),
       docUrl: config.docUrl,
-      // The hover card renders the specific field and its enclosing object.
-      hoverFacts: { field: path, root },
     });
   }
 

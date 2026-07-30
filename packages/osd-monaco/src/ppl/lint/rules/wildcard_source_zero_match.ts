@@ -16,38 +16,6 @@ function wildcardToRegExp(pattern: string): RegExp {
   return new RegExp(`^${escaped}$`);
 }
 
-/** Max candidate index names surfaced in the hover card. */
-const MAX_CANDIDATES = 5;
-
-/** Shortest leading literal run worth offering a "did you mean" hint for. */
-const MIN_PREFIX_LENGTH = 2;
-
-/**
- * Pick up to {@link MAX_CANDIDATES} visible indices whose name starts with the
- * pattern's leading literal run (the text before its first `*`) — e.g. `logs-*`
- * surfaces `logs_2024`, `logs_2025`. One prefix check per visible index, computed
- * only on the rare zero-match path where the rule has already fired.
- */
-function nearbyCandidates(pattern: string, visibleIndices: string[]): string[] {
-  const literalPrefix = pattern.slice(0, pattern.indexOf('*')).replace(/[^a-zA-Z0-9]+$/, '');
-  if (literalPrefix.length < MIN_PREFIX_LENGTH) {
-    return [];
-  }
-  const lower = literalPrefix.toLowerCase();
-  const out: string[] = [];
-  for (const index of visibleIndices) {
-    // Prefix match, not substring: `logs` should surface `logs_2024`, not an
-    // unrelated `applogs_archive`.
-    if (index.toLowerCase().startsWith(lower)) {
-      out.push(index);
-      if (out.length === MAX_CANDIDATES) {
-        break;
-      }
-    }
-  }
-  return out;
-}
-
 /**
  * Flag a wildcard `source=` pattern that matches none of the indices visible to
  * the user. Advisory only: the query is valid PPL and returns zero rows.
@@ -85,19 +53,12 @@ export const wildcardSourceZeroMatchDetector: Detector = (
     return [];
   }
 
-  const candidateIndices = nearbyCandidates(pattern, visibleIndices);
   const diagnostic: Diagnostic = {
     ruleId: config.id,
     severity: config.severity,
     message: config.message,
     range: source.range,
     docUrl: config.docUrl,
-    // The hover card renders the pattern, the index count, and the candidates.
-    hoverFacts: {
-      pattern,
-      totalIndices: visibleIndices.length,
-      ...(candidateIndices.length > 0 ? { candidateIndices } : {}),
-    },
   };
 
   return [diagnostic];

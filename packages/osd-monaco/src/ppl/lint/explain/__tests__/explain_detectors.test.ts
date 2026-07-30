@@ -311,13 +311,12 @@ describe('explain detectors against captured and json_tree payloads', () => {
     expect(Number.isFinite(diag.range.endColumn)).toBe(true);
   });
 
-  it('tags each finding with hoverFacts.operation and an explainTarget', () => {
+  it('tags each finding with an explainTarget naming the operation', () => {
     const [notPushed] = operationNotPushedDetector(
       TREE_FIXTURES.filterNotPushedWindow,
       NOT_PUSHED_CONFIG,
       CTX
     );
-    expect(notPushed.hoverFacts?.operation).toBe('filter');
     expect(notPushed.explainTarget).toEqual({
       operation: 'filter',
       outcome: 'filter:coordinator',
@@ -329,7 +328,6 @@ describe('explain detectors against captured and json_tree payloads', () => {
       NOT_PUSHED_CONFIG,
       CTX
     );
-    expect(aggNotPushed.hoverFacts?.operation).toBe('aggregation');
     expect(aggNotPushed.explainTarget?.operation).toBe('aggregation');
 
     const [script] = operationPushedAsScriptDetector(
@@ -337,7 +335,6 @@ describe('explain detectors against captured and json_tree payloads', () => {
       PUSHED_AS_SCRIPT_CONFIG,
       CTX
     );
-    expect(script.hoverFacts?.operation).toBe('filter');
     expect(script.explainTarget?.operation).toBe('filter');
 
     const [sortScript] = operationPushedAsScriptDetector(
@@ -345,7 +342,6 @@ describe('explain detectors against captured and json_tree payloads', () => {
       PUSHED_AS_SCRIPT_CONFIG,
       CTX
     );
-    expect(sortScript.hoverFacts?.operation).toBe('sort');
     expect(sortScript.explainTarget?.operation).toBe('sort');
   });
 });

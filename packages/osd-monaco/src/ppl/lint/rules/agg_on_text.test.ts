@@ -105,16 +105,6 @@ describe('agg-on-text (compiled surface, Pattern A)', () => {
       expect(ids('search t | stats avg(name / 2)', ctx)).not.toContain('agg-on-text');
     });
   });
-
-  describe('per-instance hover facts', () => {
-    it('records { field, esType, aggName } on the diagnostic', () => {
-      const finding = diags('search t | stats avg(name)', ctx).find(
-        (d) => d.ruleId === 'agg-on-text'
-      );
-      expect(finding).toBeDefined();
-      expect(finding?.hoverFacts).toEqual({ field: 'name', esType: 'text', aggName: 'avg' });
-    });
-  });
 });
 
 // Pattern B — call the detector directly with a sentinel config to prove the
@@ -155,7 +145,6 @@ describe('agg-on-text (direct detector, sentinel config, Pattern B)', () => {
     expect(found).toHaveLength(1);
     expect(found[0].message).toBe(SENTINEL);
     expect(found[0].severity).toBe('warning');
-    expect(found[0].hoverFacts).toEqual({ field: 'name', esType: 'text', aggName: 'avg' });
   });
 
   it('self-suppresses when the typeMap is absent', () => {

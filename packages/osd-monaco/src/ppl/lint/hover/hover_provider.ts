@@ -5,8 +5,7 @@
 
 import { monaco } from '../../../monaco';
 import { LINT_MARKER_SOURCE, ruleIdOf } from '../diagnostic_to_marker';
-import { markerFixKey } from './hover_registry';
-import { getModelFix } from '../fix_registry';
+import { getModelFix, markerFixKey } from '../fix_registry';
 import { renderHoverCard, SeverityLabel } from './hover_card';
 import { collectPPLDiagnosticActions, DiagnosticAction } from '../diagnostic_action';
 import { getCatalogEntryById } from '../catalog';
