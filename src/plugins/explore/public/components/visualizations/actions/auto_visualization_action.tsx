@@ -41,7 +41,7 @@ import { AutoVisMeta } from './utils';
 
 export const AUTO_VISUALIZATION_TOOL_NAME = 'auto_create_visualization';
 
-interface AutoVisualizationArgs {
+export interface AutoVisualizationArgs {
   query: string;
   indexName: string;
   // user intended chart type
@@ -62,13 +62,13 @@ interface AutoVisualizationArgs {
   sampleRow?: Record<string, unknown>;
 }
 
-interface PreparedQuery {
+export interface PreparedQuery {
   dataset: Dataset;
   language: string;
   query: string;
 }
 
-interface VisualizationConfigResult {
+export interface VisualizationConfigResult {
   success: true;
   visConfig: RenderChartConfig;
   query: PreparedQuery;
@@ -206,7 +206,7 @@ function resolveChartFromSchema(
  * Build the dataset manually + prepared query object from the tool args. The dataset is
  * built manually and will not be created.
  */
-function buildPreparedQuery(args: AutoVisualizationArgs): PreparedQuery {
+export function buildPreparedQuery(args: AutoVisualizationArgs): PreparedQuery {
   const datasetId = args.datasourceId ? `${args?.datasourceId}_${args.indexName}` : args.indexName;
   const dataset: Dataset = {
     id: datasetId,
@@ -259,7 +259,7 @@ async function getDashboardName(core: CoreStart, dashboardId: string): Promise<s
   }
 }
 
-function getAbsoluteTimeRange(
+export function getAbsoluteTimeRange(
   data: DataPublicPluginStart,
   timeRange?: TimeRange
 ): TimeRange | undefined {
@@ -367,7 +367,7 @@ function deriveSchemaAfterTransformations(
 /**
  * resolve the chart config from ppl execution columns results.
  */
-function buildVisConfig(args: AutoVisualizationArgs): VisualizationConfigResult {
+export function buildVisConfig(args: AutoVisualizationArgs): VisualizationConfigResult {
   const preparedQueryObject = buildPreparedQuery(args);
 
   // 1. get normalized schema — use post-transformation schema when available
@@ -411,7 +411,7 @@ function buildVisConfig(args: AutoVisualizationArgs): VisualizationConfigResult 
 /**
  * Chart preview that executes the PPL query at render time to fetch the row data,
  */
-function ChartPreview({
+export function ChartPreview({
   query,
   visConfig,
   core,

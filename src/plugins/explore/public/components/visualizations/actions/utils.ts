@@ -21,16 +21,6 @@ const CHART_TYPE_INFO: Record<string, string> = {
   table: 'raw tabular display',
 };
 
-function buildChartTypeGuide(): string {
-  return Object.entries(CHART_TYPE_INFO)
-    .map(([type, desc]) => `\n"${type}" — ${desc}`)
-    .join('');
-}
-
-/**
- * Brief one-liner per transformation type — enough to pick the right one.
- * Full config schema is available on demand via get_transformation_schema.
- */
 const TRANSFORMATION_BRIEF: Record<string, string> = {
   limit: 'keep only the first N rows',
   sort_by: 'sort rows by a field ascending or descending',
@@ -42,11 +32,122 @@ const TRANSFORMATION_BRIEF: Record<string, string> = {
   add_field: 'create a new computed column from existing numerical fields',
 };
 
+function buildChartTypeList(): string {
+  return Object.keys(CHART_TYPE_INFO)
+    .map((type) => `"${type}"`)
+    .join(', ');
+}
+function buildChartTypeGuide(): string {
+  return Object.entries(CHART_TYPE_INFO)
+    .map(([type, desc]) => `\n"${type}" — ${desc}`)
+    .join('');
+}
+
+function buildTransformationIdList(): string {
+  return Object.keys(TRANSFORMATION_BRIEF)
+    .map((id) => `"${id}"`)
+    .join(', ');
+}
+
 function buildTransformationBrief(): string {
   return Object.entries(TRANSFORMATION_BRIEF)
     .map(([id, desc]) => `\n"${id}" — ${desc}`)
     .join('');
 }
+
+const CHART_AND_TRANSFORMATION_GUIDE =
+  '\n\nCHART TYPE GUIDE (choose based on user intent and data shape):' +
+  buildChartTypeGuide() +
+  '\n\nAVAILABLE TRANSFORMATION TYPES (pick one, then call get_transformation_schema for details):' +
+  buildTransformationBrief();
+
+const VIS_SPEC_PROPERTIES = {
+  query: {
+    type: 'string',
+    description:
+      'The PPL query to visualize (e.g. "source=flights | stats avg(delay) by carrier"). ' +
+      'This must be the same query previously run via ppl_execute.',
+  },
+  indexName: {
+    type: 'string',
+    description: 'The index/dataset name to query',
+  },
+  potentialChartType: {
+    type: 'string',
+    description:
+      'Optional. The chart type you infer the user most likely wants, based on their input. ' +
+      `The chart type must be one of: ${buildChartTypeList()}. ` +
+      'This is only a hint. Omit it when the user does not imply a specific chart type.',
+  },
+  columns: {
+    type: 'array',
+    description:
+      'The result column schema returned by ppl execution. Each column has a name and type ' +
+      '(e.g. "integer", "keyword", "date", "double", "long", "float", "text", "timestamp"). ' +
+      'Used to resolve which chart types and axes mappings are compatible.',
+    items: {
+      type: 'object',
+      properties: {
+        name: { type: 'string', description: 'Field name' },
+        type: {
+          type: 'string',
+          description: 'Field type from the query result schema',
+        },
+      },
+      required: ['name', 'type'],
+    },
+  },
+  splitField: {
+    type: 'string',
+    description:
+      'Optional categorical or numerical field to split/facet the chart by (small multiples). ' +
+      'Infer the user most likely wants.',
+  },
+  timeFieldName: {
+    type: 'string',
+    description:
+      'The time field name of the index (e.g. "@timestamp", "timestamp"). ' +
+      'Get this from the index mapping.',
+  },
+  transformations: {
+    type: 'array',
+    description:
+      'Optional data transformation pipeline applied to query results before rendering. ' +
+      'Each step runs in order. Call get_transformation_schema first to get the exact ' +
+      'config shape for the transformation type you want to use.',
+    items: {
+      type: 'object',
+      properties: {
+        definitionId: {
+          type: 'string',
+          description: `Transformation type id. One of: ${buildTransformationIdList()}.`,
+        },
+        config: {
+          type: 'object',
+          description:
+            'Config object for this step. Call get_transformation_schema to get the ' +
+            'exact required shape for the chosen definitionId.',
+        },
+        hide: {
+          type: 'boolean',
+          description: 'Set to true to disable this step without removing it. Default false.',
+        },
+      },
+      required: ['definitionId', 'config'],
+    },
+  },
+  sampleRow: {
+    type: 'object',
+    description:
+      'Optional. A single data row from the ppl_execute result as a plain key-value object ' +
+      '(one entry from the datarows array, with column names as keys). ' +
+      'Required when transformations include types that add new columns ' +
+      '(for example: add_field, group_by,extract_fields) so the axes mapping can reflect the post-transformation schema. ' +
+      'Pass one representative row — the first non-null row is ideal.',
+  },
+};
+
+const VIS_SPEC_REQUIRED = ['query', 'indexName', 'columns'];
 
 export const AutoVisMeta = {
   name: AUTO_VISUALIZATION_TOOL_NAME,
@@ -55,107 +156,17 @@ export const AutoVisMeta = {
     'execute the query itself — it resolves the axes mapping from the provided columns, renders a ' +
     'chart preview, and provides an editor link.' +
     '\n\nWORKFLOW (follow in order):' +
-    '\n1. IMPOARTANT: always Call the index mapping tool to look up the timeFieldName; if it exists, pass it in.' +
+    '\n1. IMPOARTANT: always call the index mapping tool to look up the timeFieldName; if it exists, pass it in.' +
     '\n2. Call the ppl_execute tool with the PPL query to run it and obtain the result column schema.' +
     '\n3. (Optional) If the user wants data shaping (filtering, sorting, limiting, etc.), ' +
     'decide which transformation types fit, call get_transformation_schema with all needed ' +
     'type ids at once, then pass the filled-in transformations array to this tool.' +
-    '\n\nCHART TYPE GUIDE (choose based on user intent and data shape):' +
-    buildChartTypeGuide() +
-    '\n\nAVAILABLE TRANSFORMATION TYPES (pick one, then call get_transformation_schema for details):' +
-    buildTransformationBrief(),
+    CHART_AND_TRANSFORMATION_GUIDE,
 
   parameters: {
     type: 'object',
-    properties: {
-      query: {
-        type: 'string',
-        description:
-          'The PPL query to visualize (e.g. "source=flights | stats avg(delay) by carrier"). ' +
-          'This must be the same query previously run via ppl_execute.',
-      },
-      indexName: {
-        type: 'string',
-        description: 'The index/dataset name to query',
-      },
-      potentialChartType: {
-        type: 'string',
-        description:
-          'Optional. The chart type you infer the user most likely wants, based on their input ' +
-          'The chart type must be on one of: "line", "bar", "area", "pie", "scatter", ' +
-          '"heatmap", "metric", "gauge", "histogram", "state_timeline", "table". ' +
-          'This is only a hint. Omit it when the user does not imply a specific chart type.',
-      },
-      columns: {
-        type: 'array',
-        description:
-          'The result column schema returned by ppl execution. Each column has a name and type ' +
-          '(e.g. "integer", "keyword", "date", "double", "long", "float", "text", "timestamp"). ' +
-          'Used to resolve which chart types and axes mappings are compatible.',
-        items: {
-          type: 'object',
-          properties: {
-            name: { type: 'string', description: 'Field name' },
-            type: {
-              type: 'string',
-              description: 'Field type from the query result schema',
-            },
-          },
-          required: ['name', 'type'],
-        },
-      },
-      splitField: {
-        type: 'string',
-        description:
-          'Optional categorical or numerical field to split/facet the chart by (small multiples). ' +
-          'Infer the user most likely wants.',
-      },
-      timeFieldName: {
-        type: 'string',
-        description:
-          'The time field name of the index (e.g. "@timestamp", "timestamp"). ' +
-          'Get this from the index mapping.',
-      },
-      transformations: {
-        type: 'array',
-        description:
-          'Optional data transformation pipeline applied to query results before rendering. ' +
-          'Each step runs in order. Call get_transformation_schema first to get the exact ' +
-          'config shape for the transformation type you want to use.',
-        items: {
-          type: 'object',
-          properties: {
-            definitionId: {
-              type: 'string',
-              description:
-                'Transformation type id. One of: "limit", "sort_by", "filter", ' +
-                '"filter_fields", "convert_field_type", "group_by", "extract_fields", "add_field".',
-            },
-            config: {
-              type: 'object',
-              description:
-                'Config object for this step. Call get_transformation_schema to get the ' +
-                'exact required shape for the chosen definitionId.',
-            },
-            hide: {
-              type: 'boolean',
-              description: 'Set to true to disable this step without removing it. Default false.',
-            },
-          },
-          required: ['definitionId', 'config'],
-        },
-      },
-      sampleRow: {
-        type: 'object',
-        description:
-          'Optional. A single data row from the ppl_execute result as a plain key-value object ' +
-          '(one entry from the datarows array, with column names as keys). ' +
-          'Required when transformations include types that add new columns ' +
-          '(for example: add_field, group_by,extract_fields) so the axes mapping can reflect the post-transformation schema. ' +
-          'Pass one representative row — the first non-null row is ideal.',
-      },
-    },
-    required: ['query', 'indexName', 'columns'],
+    properties: VIS_SPEC_PROPERTIES,
+    required: VIS_SPEC_REQUIRED,
   },
 };
 
@@ -176,8 +187,7 @@ export const GetTransformationSchemaMeta = {
         type: 'array',
         description:
           'One or more transformation type ids to fetch schemas for. ' +
-          'Valid values: "limit", "sort_by", "filter", "filter_fields", ' +
-          '"convert_field_type", "group_by", "extract_fields", "add_field".',
+          `Valid values: ${buildTransformationIdList()}.`,
         items: {
           type: 'string',
         },
@@ -185,5 +195,47 @@ export const GetTransformationSchemaMeta = {
       },
     },
     required: ['definitionIds'],
+  },
+};
+
+export const T2_DASHBOARD_TOOL_NAME = 'text_to_dashboard';
+
+export const TextToDashboardMeta = {
+  name: T2_DASHBOARD_TOOL_NAME,
+  description:
+    'Creates multiple visualizations from an array of PPL queries and use them to build a ad-hoc dashboard.' +
+    'Use this when the user asks for a dashboard or several charts at once.' +
+    'WORKFLOW (follow in order):\n' +
+    '1. Call the index mapping tool to get timeFieldName for each relevant index.\n' +
+    '2. Call ppl_execute for each query to obtain the column schema.\n' +
+    '3. Call this tool with all visualization specs in a single call.\n' +
+    '4. (Optional) If the user wants data shaping (filtering, sorting, limiting, etc.), ' +
+    'decide which transformation types fit, call get_transformation_schema with all needed ' +
+    'type ids at once, then pass the filled-in transformations array on each spec.' +
+    CHART_AND_TRANSFORMATION_GUIDE,
+  parameters: {
+    type: 'object',
+    properties: {
+      visualizations: {
+        type: 'array',
+        description:
+          'Array of visualization specs. Each spec produces one chart panel on the dashboard. ' +
+          'Minimum 1 item. Each item has the same fields as auto_create_visualization, plus ' +
+          'an optional title, timeRange, datasourceId and datasourceTitle.',
+        minItems: 1,
+        items: {
+          type: 'object',
+          properties: {
+            ...VIS_SPEC_PROPERTIES,
+            title: {
+              type: 'string',
+              description: 'Human-readable chart title.',
+            },
+          },
+          required: [...VIS_SPEC_REQUIRED, 'title'],
+        },
+      },
+    },
+    required: ['visualizations'],
   },
 };
