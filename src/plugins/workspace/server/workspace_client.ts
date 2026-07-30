@@ -28,12 +28,13 @@ import { generateRandomId, getDataSourcesList, checkAndSetDefaultDataSource } fr
 import {
   WORKSPACE_ID_CONSUMER_WRAPPER_ID,
   WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
+  MAXIMUM_WORKSPACES_PER_PAGE,
 } from '../common/constants';
 import {
   DATA_SOURCE_SAVED_OBJECT_TYPE,
   DATA_CONNECTION_SAVED_OBJECT_TYPE,
 } from '../../data_source/common';
-import { IWorkspaceConfigService } from './services';
+import { IWorkspaceConfigService, fetchAllWorkspaces } from './services';
 
 const WORKSPACE_ID_SIZE = 6;
 
@@ -209,12 +210,34 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
     options: WorkspaceFindOptions
   ): ReturnType<IWorkspaceClientImpl['list']> {
     try {
-      const { saved_objects: savedObjects, ...others } =
-        await this.getSavedObjectClientsFromRequestDetail(requestDetail).find<WorkspaceAttribute>({
-          ...options,
-          type: WORKSPACE_TYPE,
+      const client = this.getSavedObjectClientsFromRequestDetail(requestDetail);
+      const { perPage, ...findOptions } = options;
+
+      // The `MAXIMUM_WORKSPACES_PER_PAGE` sentinel means "give me every workspace", so
+      // exhaust all pages instead of guessing a single large page size. Any other value
+      // pages as usual, keeping the default behavior unchanged.
+      if (perPage === MAXIMUM_WORKSPACES_PER_PAGE) {
+        const savedObjects = await fetchAllWorkspaces(client, {
+          ...findOptions,
           ACLSearchParams: { permissionModes: options.permissionModes },
         });
+        return {
+          success: true,
+          result: {
+            page: 1,
+            per_page: savedObjects.length,
+            total: savedObjects.length,
+            workspaces: savedObjects.map((item) => this.getFlattenedResultWithSavedObject(item)),
+          },
+        };
+      }
+
+      const { saved_objects: savedObjects, ...others } = await client.find<WorkspaceAttribute>({
+        ...findOptions,
+        perPage,
+        type: WORKSPACE_TYPE,
+        ACLSearchParams: { permissionModes: options.permissionModes },
+      });
       return {
         success: true,
         result: {

@@ -22,6 +22,7 @@ import {
 } from '../../../core/server';
 import { IRequestDetail } from './types';
 import { createWorkspaceConfigServiceMock } from './services/workspace_config_service.mock';
+import { MAXIMUM_WORKSPACES_PER_PAGE, WORKSPACE_FETCH_ALL_PER_PAGE } from '../common/constants';
 
 const coreSetup = coreMock.createSetup();
 
@@ -163,6 +164,62 @@ describe('#WorkspaceClient', () => {
 
     expect(find).toHaveBeenCalledTimes(2);
     find.mockClear();
+  });
+
+  describe('list#', () => {
+    beforeEach(() => {
+      find.mockResolvedValue({ saved_objects: [], total: 0, per_page: 0, page: 1 });
+    });
+
+    it('exhausts all pages at WORKSPACE_FETCH_ALL_PER_PAGE for the MAXIMUM_WORKSPACES_PER_PAGE sentinel', async () => {
+      const client = new WorkspaceClient(coreSetup, logger);
+      client?.setSavedObjects(savedObjects);
+
+      await client.list(mockRequestDetail, { perPage: MAXIMUM_WORKSPACES_PER_PAGE });
+
+      expect(find).toHaveBeenCalledWith(
+        expect.objectContaining({ perPage: WORKSPACE_FETCH_ALL_PER_PAGE, page: 1 })
+      );
+    });
+
+    it('walks every page for the sentinel until the total is reached', async () => {
+      const client = new WorkspaceClient(coreSetup, logger);
+      client?.setSavedObjects(savedObjects);
+
+      const total = WORKSPACE_FETCH_ALL_PER_PAGE + 2;
+      // Pages after the first are fanned out in parallel, so mock by page number.
+      find.mockImplementation(async ({ page }) => {
+        const count = page === 2 ? 2 : WORKSPACE_FETCH_ALL_PER_PAGE;
+        return {
+          total,
+          per_page: WORKSPACE_FETCH_ALL_PER_PAGE,
+          page,
+          saved_objects: new Array(count).fill(0).map((_, i) => ({
+            id: `page${page}-${i}`,
+            type: 'workspace',
+            attributes: {},
+            references: [],
+          })),
+        };
+      });
+
+      const result = await client.list(mockRequestDetail, {
+        perPage: MAXIMUM_WORKSPACES_PER_PAGE,
+      });
+
+      expect(find).toHaveBeenCalledTimes(2);
+      expect(result.success && result.result.workspaces).toHaveLength(total);
+    });
+
+    it('passes a numeric perPage through unchanged with a single find', async () => {
+      const client = new WorkspaceClient(coreSetup, logger);
+      client?.setSavedObjects(savedObjects);
+
+      await client.list(mockRequestDetail, { perPage: 10 });
+
+      expect(find).toHaveBeenCalledTimes(1);
+      expect(find).toHaveBeenCalledWith(expect.objectContaining({ perPage: 10 }));
+    });
   });
 
   it('update# should not call addToWorkspaces if no new data sources and data connections added', async () => {
