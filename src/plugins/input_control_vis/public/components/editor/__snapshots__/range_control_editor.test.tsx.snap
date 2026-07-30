@@ -11,6 +11,7 @@ exports[`renders RangeControlEditor 1`] = `
       }
     }
     controlIndex={0}
+    hasAnalyticEngine={false}
     indexPatternId="indexPattern1"
     onChange={[Function]}
   />
