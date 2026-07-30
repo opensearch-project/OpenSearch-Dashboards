@@ -121,6 +121,7 @@ const config: CatalogEntry = {
   enabled: true,
   severity: 'warning',
   message: SENTINEL,
+  howToFix: 'f',
   docUrl: 'https://x',
   appliesTo: {},
 };

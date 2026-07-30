@@ -133,6 +133,7 @@ describe('flat-object-subfield (detector unit + sentinel message)', () => {
     enabled: true,
     severity: 'error',
     message: SENTINEL,
+    howToFix: 'f',
     docUrl: 'https://x',
     appliesTo: {},
   };

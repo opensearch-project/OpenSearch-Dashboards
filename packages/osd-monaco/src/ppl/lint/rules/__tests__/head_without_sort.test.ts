@@ -18,7 +18,9 @@ describe('head-without-sort (compiled surface)', () => {
     const diagnostic = analyzer
       .lint('search source=logs | head 5')
       .diagnostics.find((d) => d.ruleId === 'head-without-sort');
-    expect(diagnostic?.message).toBe('Add sort before head to get stable results.');
+    expect(diagnostic?.message).toBe(
+      'Without sort, head can return different rows each time the query runs.'
+    );
   });
   it('does not flag a head preceded by sort', () =>
     expect(ids('search source=logs | sort age | head 5')).not.toContain('head-without-sort'));

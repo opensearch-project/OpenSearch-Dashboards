@@ -25,9 +25,7 @@ describe('disabled-join-type (compiled surface, option form)', () => {
 
   it('reports the catalog message (not a hardcoded literal) with the keyword in hoverFacts', () => {
     const diagnostic = joinDiags('source=a | join type=cross b on a.id=b.id')[0];
-    expect(diagnostic?.message).toBe(
-      'This join type is disabled by default — enable plugins.calcite.all_join_types.allowed to use it.'
-    );
+    expect(diagnostic?.message).toBe('This join type is disabled by default.');
     expect(diagnostic?.hoverFacts).toEqual({ joinType: 'cross' });
   });
 

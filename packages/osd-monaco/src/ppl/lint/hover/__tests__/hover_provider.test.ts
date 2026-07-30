@@ -5,12 +5,8 @@
 
 import { monaco } from '../../../../monaco';
 import { LINT_MARKER_SOURCE } from '../../diagnostic_to_marker';
-import {
-  markerFixKey,
-  setModelHoverFacts,
-  clearModelHoverFacts,
-  HoverFacts,
-} from '../hover_registry';
+import { markerFixKey, clearModelHoverFacts } from '../hover_registry';
+import { setModelFixes, clearModelFixes, MarkerFix } from '../../fix_registry';
 import { pplLintHoverProvider, LINT_OWNER } from '../hover_provider';
 import { registerPPLDiagnosticActionContributor } from '../../diagnostic_action';
 
@@ -47,6 +43,7 @@ beforeEach(() => {
 afterEach(() => {
   jest.restoreAllMocks();
   clearModelHoverFacts(model);
+  clearModelFixes(model);
 });
 
 function hoverAt(line: number, column: number) {
@@ -66,11 +63,15 @@ function markdownOf(hover: monaco.languages.Hover | null): string {
 
 describe('pplLintHoverProvider', () => {
   it('returns a card for a lint marker under the cursor', () => {
-    markersByOwner[LINT_OWNER] = [makeMarker()];
+    markersByOwner[LINT_OWNER] = [makeMarker({ message: 'Dividing by zero returns null.' })];
     const hover = hoverAt(1, 7);
     expect(hover).not.toBeNull();
-    expect(markdownOf(hover)).toContain('**division-by-zero** · Warning');
-    expect(markdownOf(hover)).toContain('**Engine behavior** —');
+    // Simplified card: severity glyph + message + the catalog Fix line, no rule-id header.
+    expect(markdownOf(hover)).toContain('⚠️ **Warning**');
+    expect(markdownOf(hover)).toContain('Dividing by zero returns null.');
+    expect(markdownOf(hover)).toContain('**Fix** — Use the intended divisor');
+    expect(markdownOf(hover)).not.toContain('**Engine behavior**');
+    expect(markdownOf(hover)).not.toContain('· Warning');
   });
 
   it('returns null when the cursor is outside every marker range', () => {
@@ -87,17 +88,18 @@ describe('pplLintHoverProvider', () => {
     expect(hoverAt(1, 7)).toBeNull();
   });
 
-  it('includes per-instance facts from the side table', () => {
+  it('renders the quick-fix preview from the side table', () => {
     const marker = makeMarker({
       code: { value: 'field-validation', target: monaco.Uri.parse('https://docs.example/f') },
       message: 'Unknown field "reveneu". Did you mean "revenue"?',
     });
     markersByOwner[LINT_OWNER] = [marker];
-    const facts: HoverFacts = { field: 'reveneu', suggestion: 'revenue' };
-    setModelHoverFacts(model, new Map([[markerFixKey(marker), facts]]));
+    const fix: MarkerFix = { title: 'Replace with "revenue"', text: 'revenue' };
+    setModelFixes(model, new Map([[markerFixKey(marker), fix]]));
 
     const md = markdownOf(hoverAt(1, 7));
-    expect(md).toContain('Closest known field: `revenue`');
+    expect(md).toContain('**Quick fix available** — `revenue`');
+    expect(md).not.toContain('Closest known field');
   });
 
   it('picks the innermost marker when several overlap', () => {
@@ -115,16 +117,18 @@ describe('pplLintHoverProvider', () => {
     });
     markersByOwner[LINT_OWNER] = [outer, inner];
     const md = markdownOf(hoverAt(1, 7));
-    expect(md).toContain('**division-by-zero**');
-    expect(md).not.toContain('**agg-on-text**');
+    // The innermost marker's message wins.
+    expect(md).toContain('inner');
+    expect(md).not.toContain('outer');
   });
 
-  it('still renders when code (ruleId) is absent, using a fallback id', () => {
+  it('still renders when code (ruleId) is absent', () => {
     const marker = makeMarker({ code: undefined, message: 'no code here' });
     markersByOwner[LINT_OWNER] = [marker];
     const md = markdownOf(hoverAt(1, 7));
     expect(md).toContain('no code here');
-    // No static content, no doc link — but never throws / never blank.
+    // No catalog entry → no Fix line, but never throws / never blank.
+    expect(md).not.toContain('**Fix**');
     expect(md).not.toContain('**Engine behavior**');
   });
 

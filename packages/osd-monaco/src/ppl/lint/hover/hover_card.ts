@@ -3,40 +3,37 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { RuleHoverContent, FailureClass } from './engine_outcomes';
-import { HoverFacts } from './hover_registry';
+/**
+ * Pure renderer for the lint hover card ("view more") body. Composes the
+ * detector message, static per-rule guidance (`Fix`), an optional quick-fix
+ * preview, and the doc link into a single Markdown string. Intentionally free of
+ * any Monaco import so it is trivially unit-testable; the provider does the
+ * Monaco-specific marker extraction and hands plain values here.
+ *
+ * The detector message already identifies the problem and its consequence.
+ * Keeping the card focused on that message and the next action avoids repeating
+ * the same field, value, and engine outcome in several differently named
+ * sections.
+ */
 
 export type SeverityLabel = 'Error' | 'Warning' | 'Info';
 
 export interface HoverCardInput {
-  ruleId: string;
   severityLabel: SeverityLabel;
+  /** The marker's short message — always shown as the card lead. */
   message: string;
+  /** code.target — the specific doc link from the catalog. */
   docUrl?: string;
-  content?: RuleHoverContent;
-  facts?: HoverFacts;
+  /** Static, task-oriented guidance for this rule (catalog `howToFix`). */
+  howToFix?: string;
+  /** Quick-fix preview text (the replacement), when a MarkerFix exists. */
+  fixText?: string;
 }
 
 const SEVERITY_GLYPH: Record<SeverityLabel, string> = {
   Error: '❌',
   Warning: '⚠️',
   Info: 'ℹ️',
-};
-
-const FAILURE_CLASS_EXPLAINER: Record<FailureClass, string> = {
-  'silent-null':
-    'the query succeeds (HTTP 200) but a value resolves to null and propagates silently — nothing signals that anything went wrong.',
-  'silent-empty':
-    'the query succeeds (HTTP 200) but matches zero rows — it looks like "no data" rather than a mistake.',
-  'engine-throw': 'the engine rejects the query, so it will not run.',
-  nondeterministic:
-    'the query runs, but the rows it returns are not stable across identical re-runs.',
-  fallback:
-    'the primary engine cannot run this natively and falls back to a secondary engine — it succeeds, but on a slower path.',
-  advisory:
-    'the query runs and may return data, but the command can behave differently than intended on this input — this is a heads-up, not a guaranteed outcome.',
-  'slow-path':
-    'the query returns correct results, but the engine cannot push this operation into the index, so it runs on a slower path — the cost grows with index size.',
 };
 
 // Escapes Markdown inline-formatting chars in untrusted text. ( ) # ! are intentionally
@@ -47,6 +44,12 @@ function escapeInline(text: string): string {
   return text.replace(/([\\`*_[\]<>~|])/g, '\\$1');
 }
 
+/**
+ * Render a value as inline code. When the value itself contains backticks, fence
+ * it with a longer run of backticks (and pad with a space, per CommonMark §6.3)
+ * so the literal backticks survive verbatim rather than being substituted for a
+ * lookalike glyph.
+ */
 function code(text: string): string {
   const runs = text.match(/`+/g);
   const longestRun = runs ? Math.max(...runs.map((r) => r.length)) : 0;
@@ -55,115 +58,45 @@ function code(text: string): string {
   return `${fence}${pad}${text}${pad}${fence}`;
 }
 
+/**
+ * Make a URL safe to drop into a Markdown link target. An unescaped `)` would
+ * close the `[text](url)` form early; percent-encoding parens keeps the link
+ * intact and is decoded transparently by the browser.
+ */
 function encodeLinkTarget(url: string): string {
   return url.replace(/\(/g, '%28').replace(/\)/g, '%29');
 }
 
-function renderFactsLine(facts: HoverFacts): string | undefined {
-  if (facts.pattern !== undefined) {
-    const head =
-      facts.totalIndices !== undefined
-        ? `${code(facts.pattern)} matched 0 of ${facts.totalIndices} visible indices.`
-        : `${code(facts.pattern)} matched no visible index.`;
-    if (facts.candidateIndices && facts.candidateIndices.length > 0) {
-      return `${head} Did you mean one of: ${facts.candidateIndices.map(code).join(', ')}?`;
-    }
-    return head;
-  }
-
-  if (facts.field !== undefined) {
-    const parts: string[] = [];
-    if (facts.root !== undefined) {
-      parts.push(
-        facts.esType !== undefined
-          ? `${code(facts.field)} lives inside ${code(facts.root)}, mapped as ${code(
-              facts.esType
-            )} on this index.`
-          : `${code(facts.field)} lives inside ${code(facts.root)}.`
-      );
-    } else if (facts.esType !== undefined) {
-      parts.push(`${code(facts.field)} is mapped as ${code(facts.esType)} on this index.`);
-    } else {
-      parts.push(`${code(facts.field)}.`);
-    }
-    if (facts.aggName !== undefined) {
-      parts.push(`${code(facts.aggName + '()')} needs a numeric type.`);
-    }
-    if (facts.literal !== undefined) {
-      parts.push(`Compared to ${code(facts.literal)}.`);
-    }
-    if (facts.suggestion !== undefined) {
-      parts.push(`Closest known field: ${code(facts.suggestion)}.`);
-    }
-    return parts.join(' ');
-  }
-
-  if (facts.literal !== undefined) {
-    return `Offending value: ${code(facts.literal)}.`;
-  }
-
-  if (facts.joinType !== undefined) {
-    return `Join type ${code(facts.joinType)}.`;
-  }
-
-  if (facts.windowFunction !== undefined) {
-    return `Window function ${code(facts.windowFunction)}.`;
-  }
-
-  if (facts.patternWildcards !== undefined && facts.replacementWildcards !== undefined) {
-    return `Pattern has ${facts.patternWildcards} wildcard(s), replacement has ${facts.replacementWildcards}.`;
-  }
-
-  // Last on purpose: an explain-backed finding whose quick fix resolved a
-  // concrete field/literal renders those richer facts above; `operation` is the
-  // fallback that still names the flagged clause for aggregation/sort findings
-  // (and filter findings without a resolved fix).
-  if (facts.operation !== undefined) {
-    return `The flagged operation is a ${code(facts.operation)}.`;
-  }
-
-  return undefined;
-}
-
+/**
+ * Render the full hover card to a Markdown string. The provider wraps the result
+ * in `{ value, isTrusted: false }` and hands it to Monaco.
+ */
 export function renderHoverCard(input: HoverCardInput): string {
-  const { ruleId, severityLabel, message, docUrl, content, facts } = input;
+  const { severityLabel, message, docUrl, howToFix, fixText } = input;
   const lines: string[] = [];
 
-  lines.push(`${SEVERITY_GLYPH[severityLabel]} **${escapeInline(ruleId)}** · ${severityLabel}`);
+  // The rule id remains on the marker for lookup and support diagnostics, but it
+  // is implementation detail rather than the card's headline.
+  lines.push(`${SEVERITY_GLYPH[severityLabel]} **${severityLabel}**`);
 
+  // Lead: the short message (always present).
   lines.push('');
   lines.push(escapeInline(message));
 
-  if (content) {
-    const verified = content.verifiedVersion
-      ? ` _(verified on OpenSearch ${escapeInline(content.verifiedVersion)})_`
-      : '';
+  // Every known rule gives the user a concrete next action, whether or not an
+  // automatic edit can be offered safely.
+  if (howToFix) {
     lines.push('');
-    lines.push(`**Engine behavior** — ${escapeInline(content.engineBehavior)}${verified}`);
+    lines.push(`**Fix** — ${howToFix}`);
   }
 
-  if (facts) {
-    const factsLine = renderFactsLine(facts);
-    if (factsLine) {
-      lines.push('');
-      lines.push(`**Your query** — ${factsLine}`);
-    }
-  }
-
-  if (content) {
+  // Exact replacement preview for deterministic quick fixes.
+  if (fixText !== undefined) {
     lines.push('');
-    lines.push(
-      `**Why ${severityLabel.toLowerCase()}** — ${FAILURE_CLASS_EXPLAINER[content.failureClass]}`
-    );
+    lines.push(`**Quick fix available** — ${code(fixText)}`);
   }
 
-  if (content?.safeToIgnoreWhen) {
-    const label =
-      content.failureClass === 'engine-throw' ? 'Possible false positive' : 'Safe to ignore';
-    lines.push('');
-    lines.push(`**${label}** — ${escapeInline(content.safeToIgnoreWhen)}`);
-  }
-
+  // Learn more — the specific doc link.
   if (docUrl) {
     lines.push('');
     lines.push(`[Learn more →](${encodeLinkTarget(docUrl)})`);

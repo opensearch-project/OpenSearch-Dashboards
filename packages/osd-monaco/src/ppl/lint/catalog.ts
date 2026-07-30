@@ -40,6 +40,7 @@ export function validateCatalogEntry(value: unknown): CatalogEntry | null {
     typeof candidate.severity !== 'string' ||
     !VALID_SEVERITIES.has(candidate.severity) ||
     typeof candidate.message !== 'string' ||
+    typeof candidate.howToFix !== 'string' ||
     typeof candidate.docUrl !== 'string' ||
     !isValidAppliesTo(candidate.appliesTo)
   ) {
@@ -62,6 +63,7 @@ export function validateCatalogEntry(value: unknown): CatalogEntry | null {
     enabled: candidate.enabled,
     severity: candidate.severity as LintSeverity,
     message: candidate.message,
+    howToFix: candidate.howToFix,
     docUrl: candidate.docUrl,
     appliesTo: candidate.appliesTo as AppliesTo,
     runtimeOnly: candidate.runtimeOnly as boolean | undefined,

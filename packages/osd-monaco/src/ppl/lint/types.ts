@@ -19,6 +19,8 @@ export interface CatalogEntry {
   enabled: boolean;
   severity: LintSeverity;
   message: string;
+  /** Static, task-oriented guidance rendered as the hover card's `Fix` line. */
+  howToFix: string;
   docUrl: string;
   appliesTo: AppliesTo;
   runtimeOnly?: boolean;

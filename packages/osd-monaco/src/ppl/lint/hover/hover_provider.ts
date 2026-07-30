@@ -5,8 +5,8 @@
 
 import { monaco } from '../../../monaco';
 import { LINT_MARKER_SOURCE, ruleIdOf } from '../diagnostic_to_marker';
-import { getModelHoverFacts, markerFixKey } from './hover_registry';
-import { getRuleHoverContent } from './engine_outcomes';
+import { markerFixKey } from './hover_registry';
+import { getModelFix } from '../fix_registry';
 import { renderHoverCard, SeverityLabel } from './hover_card';
 import { collectPPLDiagnosticActions, DiagnosticAction } from '../diagnostic_action';
 import { getCatalogEntryById } from '../catalog';
@@ -80,7 +80,7 @@ export const pplLintHoverProvider: monaco.languages.HoverProvider = {
     const marker = markers.reduce((a, b) => (markerSpan(b) < markerSpan(a) ? b : a));
 
     const ruleId = ruleIdOf(marker);
-    const facts = getModelHoverFacts(model, markerFixKey(marker));
+    const fix = getModelFix(model, markerFixKey(marker));
 
     const entry = ruleId ? getCatalogEntryById(ruleId) : undefined;
     const contributedActions = renderContributedActions(
@@ -96,12 +96,11 @@ export const pplLintHoverProvider: monaco.languages.HoverProvider = {
     const contents: monaco.IMarkdownString[] = [
       {
         value: renderHoverCard({
-          ruleId: ruleId ?? 'ppl-lint',
           severityLabel: severityLabel(marker.severity),
           message: marker.message,
           docUrl: docUrlOf(marker),
-          content: ruleId ? getRuleHoverContent(ruleId) : undefined,
-          facts,
+          howToFix: entry?.howToFix,
+          fixText: fix?.text,
         }),
         isTrusted: false,
       },

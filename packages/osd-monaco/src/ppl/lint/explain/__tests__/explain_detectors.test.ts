@@ -42,6 +42,7 @@ const NOT_PUSHED_CONFIG: CatalogEntry = {
   enabled: true,
   severity: 'warning',
   message: 'fallback',
+  howToFix: 'f',
   docUrl: 'https://docs.opensearch.org/latest/sql-and-ppl/ppl/functions/',
   appliesTo: { minVersion: '3.3.0', engine: 'calcite' },
 };
@@ -52,6 +53,7 @@ const PUSHED_AS_SCRIPT_CONFIG: CatalogEntry = {
   enabled: true,
   severity: 'info',
   message: 'fallback',
+  howToFix: 'f',
   docUrl: 'https://docs.opensearch.org/latest/sql-and-ppl/ppl/functions/',
   appliesTo: { minVersion: '3.3.0', engine: 'calcite' },
 };

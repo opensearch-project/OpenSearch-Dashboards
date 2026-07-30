@@ -75,6 +75,7 @@ const makeConfig = (id: string): CatalogEntry => ({
   enabled: true,
   severity: 'error',
   message: 'test',
+  howToFix: 'f',
   docUrl: 'https://example.com',
   appliesTo: {},
 });
