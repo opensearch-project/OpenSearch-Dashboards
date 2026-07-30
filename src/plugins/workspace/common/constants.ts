@@ -170,6 +170,22 @@ export const MAX_WORKSPACE_DESCRIPTION_LENGTH = 200;
  */
 export const DEFAULT_WORKSPACE_LIST_PER_PAGE = 999;
 
+/**
+ * A sentinel value for the `_list` API `perPage` parameter. When passed, the server
+ * resolves the page size to `workspace.maximum_workspaces` (via the dynamic config
+ * service, falling back to {@link DEFAULT_WORKSPACE_LIST_PER_PAGE}) so that every
+ * workspace a user is allowed to create can also be listed. Any other numeric value
+ * pages as usual, keeping the default API behavior unchanged.
+ */
+export const MAXIMUM_WORKSPACES_PER_PAGE = 'maximum_workspaces' as const;
+
+/**
+ * The page size used when exhaustively fetching every workspace on the server side (see
+ * the workspace collection fetcher). A large but bounded value keeps each request cheap
+ * while still walking every page.
+ */
+export const WORKSPACE_FETCH_ALL_PER_PAGE = 1000;
+
 export enum AssociationDataSourceModalMode {
   OpenSearchConnections = 'opensearch-connections',
   DirectQueryConnections = 'direction-query-connections',

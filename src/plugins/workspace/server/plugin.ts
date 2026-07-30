@@ -133,8 +133,7 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
     });
 
     this.workspaceSavedObjectsClientWrapper = new WorkspaceSavedObjectsClientWrapper(
-      this.permissionControl,
-      this.configService
+      this.permissionControl
     );
 
     core.savedObjects.addClientWrapper(
@@ -296,7 +295,7 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
     core.savedObjects.addClientWrapper(
       PRIORITY_FOR_WORKSPACE_ID_CONSUMER_WRAPPER,
       WORKSPACE_ID_CONSUMER_WRAPPER_ID,
-      new WorkspaceIdConsumerWrapper(this.client, this.logger, this.configService).wrapperFactory
+      new WorkspaceIdConsumerWrapper(this.client, this.logger).wrapperFactory
     );
 
     const maxImportExportSize = core.savedObjects.getImportExportObjectLimit();

@@ -5,55 +5,44 @@
 
 import { httpServiceMock, workspacesServiceMock } from '../../../core/public/mocks';
 import { WorkspaceClient } from './workspace_client';
-import { DEFAULT_WORKSPACE_LIST_PER_PAGE } from '../common/constants';
+import { DEFAULT_WORKSPACE_LIST_PER_PAGE, MAXIMUM_WORKSPACES_PER_PAGE } from '../common/constants';
 
-const getWorkspaceClient = (options?: { maximumWorkspaces?: number }) => {
+const getWorkspaceClient = () => {
   const httpSetupMock = httpServiceMock.createSetupContract();
   const workspaceMock = workspacesServiceMock.createSetupContract();
   return {
     httpSetupMock,
     workspaceMock,
-    workspaceClient: new WorkspaceClient(httpSetupMock, workspaceMock, options),
+    workspaceClient: new WorkspaceClient(httpSetupMock, workspaceMock),
   };
 };
 
 describe('#WorkspaceClient', () => {
-  it('#init', async () => {
+  it('#init requests the maximum_workspaces page size so the server pages by it', async () => {
     const { workspaceClient, httpSetupMock, workspaceMock } = getWorkspaceClient();
-    await workspaceClient.init();
-    expect(workspaceMock.initialized$.getValue()).toEqual(true);
-    expect(httpSetupMock.fetch).toHaveBeenCalledWith('/api/workspaces/_list', {
-      method: 'POST',
-      body: JSON.stringify({
-        perPage: DEFAULT_WORKSPACE_LIST_PER_PAGE,
-      }),
-    });
-  });
-
-  it('#init uses the configured maximum_workspaces as the page size', async () => {
-    const { workspaceClient, httpSetupMock } = getWorkspaceClient({ maximumWorkspaces: 5000 });
     httpSetupMock.fetch.mockResolvedValue({
       success: true,
       result: { workspaces: [] },
     });
     await workspaceClient.init();
+    expect(workspaceMock.initialized$.getValue()).toEqual(true);
     expect(httpSetupMock.fetch).toHaveBeenCalledWith('/api/workspaces/_list', {
       method: 'POST',
       body: JSON.stringify({
-        perPage: 5000,
+        perPage: MAXIMUM_WORKSPACES_PER_PAGE,
       }),
     });
     expect(httpSetupMock.fetch).toHaveBeenCalledWith('/api/workspaces/_list', {
       method: 'POST',
       body: JSON.stringify({
-        perPage: 5000,
+        perPage: MAXIMUM_WORKSPACES_PER_PAGE,
         permissionModes: ['library_write'],
       }),
     });
     expect(httpSetupMock.fetch).toHaveBeenCalledWith('/api/workspaces/_list', {
       method: 'POST',
       body: JSON.stringify({
-        perPage: 5000,
+        perPage: MAXIMUM_WORKSPACES_PER_PAGE,
         permissionModes: ['write'],
       }),
     });
@@ -143,14 +132,14 @@ describe('#WorkspaceClient', () => {
     expect(httpSetupMock.fetch).toHaveBeenCalledWith('/api/workspaces/_list', {
       method: 'POST',
       body: JSON.stringify({
-        perPage: DEFAULT_WORKSPACE_LIST_PER_PAGE,
+        perPage: MAXIMUM_WORKSPACES_PER_PAGE,
       }),
     });
 
     expect(httpSetupMock.fetch).toHaveBeenCalledWith('/api/workspaces/_list', {
       method: 'POST',
       body: JSON.stringify({
-        perPage: DEFAULT_WORKSPACE_LIST_PER_PAGE,
+        perPage: MAXIMUM_WORKSPACES_PER_PAGE,
         permissionModes: ['library_write'],
       }),
     });
@@ -172,7 +161,7 @@ describe('#WorkspaceClient', () => {
     expect(httpSetupMock.fetch).toHaveBeenCalledWith('/api/workspaces/_list', {
       method: 'POST',
       body: JSON.stringify({
-        perPage: DEFAULT_WORKSPACE_LIST_PER_PAGE,
+        perPage: MAXIMUM_WORKSPACES_PER_PAGE,
       }),
     });
   });
@@ -242,14 +231,14 @@ describe('#WorkspaceClient', () => {
     expect(httpSetupMock.fetch).toHaveBeenCalledWith('/api/workspaces/_list', {
       method: 'POST',
       body: JSON.stringify({
-        perPage: DEFAULT_WORKSPACE_LIST_PER_PAGE,
+        perPage: MAXIMUM_WORKSPACES_PER_PAGE,
       }),
     });
 
     expect(httpSetupMock.fetch).toHaveBeenCalledWith('/api/workspaces/_list', {
       method: 'POST',
       body: JSON.stringify({
-        perPage: DEFAULT_WORKSPACE_LIST_PER_PAGE,
+        perPage: MAXIMUM_WORKSPACES_PER_PAGE,
         permissionModes: ['library_write'],
       }),
     });
@@ -426,7 +415,7 @@ describe('WorkspaceClient.batchDelete', () => {
     expect(httpSetupMock.fetch).toHaveBeenCalledWith('/api/workspaces/_list', {
       method: 'POST',
       body: JSON.stringify({
-        perPage: DEFAULT_WORKSPACE_LIST_PER_PAGE,
+        perPage: MAXIMUM_WORKSPACES_PER_PAGE,
       }),
     });
     expect(result).toEqual({ success: 2, fail: 0, failedIds: [] });
@@ -449,7 +438,7 @@ describe('WorkspaceClient.batchDelete', () => {
     expect(httpSetupMock.fetch).toHaveBeenCalledWith('/api/workspaces/_list', {
       method: 'POST',
       body: JSON.stringify({
-        perPage: DEFAULT_WORKSPACE_LIST_PER_PAGE,
+        perPage: MAXIMUM_WORKSPACES_PER_PAGE,
       }),
     });
     expect(result).toEqual({ success: 1, fail: 1, failedIds: ['bar'] });
@@ -472,7 +461,7 @@ describe('WorkspaceClient.batchDelete', () => {
     expect(httpSetupMock.fetch).toHaveBeenCalledWith('/api/workspaces/_list', {
       method: 'POST',
       body: JSON.stringify({
-        perPage: DEFAULT_WORKSPACE_LIST_PER_PAGE,
+        perPage: MAXIMUM_WORKSPACES_PER_PAGE,
       }),
     });
     expect(result).toEqual({ success: 0, fail: 2, failedIds: ['foo', 'bar'] });
@@ -485,7 +474,7 @@ describe('WorkspaceClient.batchDelete', () => {
     expect(httpSetupMock.fetch).toHaveBeenCalledWith('/api/workspaces/_list', {
       method: 'POST',
       body: JSON.stringify({
-        perPage: DEFAULT_WORKSPACE_LIST_PER_PAGE,
+        perPage: MAXIMUM_WORKSPACES_PER_PAGE,
       }),
     });
     expect(result).toEqual({ success: 0, fail: 0, failedIds: [] });

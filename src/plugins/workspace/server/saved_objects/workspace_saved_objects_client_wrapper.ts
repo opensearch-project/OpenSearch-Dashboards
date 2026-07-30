@@ -37,12 +37,9 @@ import {
   WorkspacePermissionMode,
 } from '../../../../core/server';
 import { SavedObjectsPermissionControlContract } from '../permission_control/client';
-import {
-  DEFAULT_WORKSPACE_LIST_PER_PAGE,
-  WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
-} from '../../common/constants';
+import { WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID } from '../../common/constants';
 import { validateIsWorkspaceDataSourceAndConnectionObjectType } from '../../common/utils';
-import { IWorkspaceConfigService } from '../services';
+import { fetchAllWorkspaces } from '../services';
 
 // Can't throw unauthorized for now, the page will be refreshed if unauthorized
 const generateWorkspacePermissionError = () =>
@@ -90,20 +87,6 @@ const getDefaultValuesForEmpty = <T>(values: T[] | undefined, defaultValues: T[]
 
 export class WorkspaceSavedObjectsClientWrapper {
   private getScopedClient?: SavedObjectsServiceStart['getScopedClient'];
-
-  /**
-   * Resolves the page size used when looking up every workspace the current user may
-   * read. It honors `workspace.maximum_workspaces` so that a user who is allowed to
-   * create N workspaces can also see saved objects in all N of them.
-   */
-  private async getWorkspaceListPerPage(request: OpenSearchDashboardsRequest): Promise<number> {
-    const maximumWorkspaces = await this.configService
-      ?.asScopedToRequest(request)
-      .getMaximumWorkspaces()
-      .catch(() => undefined);
-
-    return maximumWorkspaces ?? DEFAULT_WORKSPACE_LIST_PER_PAGE;
-  }
 
   private async validateObjectsPermissions(
     objects: Array<Pick<SavedObject, 'id' | 'type'>>,
@@ -528,9 +511,7 @@ export class WorkspaceSavedObjectsClientWrapper {
       }
       const principals = this.permissionControl.getPrincipalsFromRequest(wrapperOptions.request);
       const permittedWorkspaceIds = (
-        await this.getWorkspaceTypeEnabledClient(wrapperOptions.request).find({
-          type: WORKSPACE_TYPE,
-          perPage: await this.getWorkspaceListPerPage(wrapperOptions.request),
+        await fetchAllWorkspaces(this.getWorkspaceTypeEnabledClient(wrapperOptions.request), {
           ACLSearchParams: {
             principals,
             permissionModes: [
@@ -543,7 +524,7 @@ export class WorkspaceSavedObjectsClientWrapper {
           // or workspaces can not be found because workspace object do not have `workspaces` field.
           workspaces: null,
         })
-      ).saved_objects.map((item) => item.id);
+      ).map((item) => item.id);
 
       // Based on https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/src/core/server/ui_settings/create_or_upgrade_saved_config/get_upgradeable_config.ts#L49
       // we need to make sure the find call for upgrade config should be able to find all the global configs as it was before.
@@ -704,8 +685,5 @@ export class WorkspaceSavedObjectsClientWrapper {
     };
   };
 
-  constructor(
-    private readonly permissionControl: SavedObjectsPermissionControlContract,
-    private readonly configService?: IWorkspaceConfigService
-  ) {}
+  constructor(private readonly permissionControl: SavedObjectsPermissionControlContract) {}
 }
