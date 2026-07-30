@@ -9,3 +9,4 @@ export {
   WorkspaceConfigServiceSetupDeps,
 } from './workspace_config_service';
 export { IScopedWorkspaceConfigClient } from './scoped_workspace_config_client';
+export { fetchAllWorkspaces, FetchAllWorkspacesOptions } from './workspace_collection_fetcher';

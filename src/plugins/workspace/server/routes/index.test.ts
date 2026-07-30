@@ -10,6 +10,7 @@ import { setupServer } from '../../../../core/server/test_utils';
 import { loggingSystemMock, dynamicConfigServiceMock } from '../../../../core/server/mocks';
 
 import { workspaceClientMock } from '../workspace_client.mock';
+import { MAXIMUM_WORKSPACES_PER_PAGE } from '../../common/constants';
 
 import { registerRoutes, WORKSPACES_API_BASE_URL } from './index';
 import { IWorkspaceClientImpl } from '../types';
@@ -28,6 +29,10 @@ describe(`Workspace routes`, () => {
     const router = httpSetup.createRouter('');
 
     mockedWorkspaceClient = workspaceClientMock.create();
+    (mockedWorkspaceClient.list as jest.Mock).mockResolvedValue({
+      success: true,
+      result: { workspaces: [], total: 0, per_page: 0, page: 1 },
+    });
 
     registerRoutes({
       router,
@@ -63,6 +68,51 @@ describe(`Workspace routes`, () => {
         features: ['use-case-observability'],
       })
     );
+  });
+
+  describe('_list', () => {
+    it('accepts the MAXIMUM_WORKSPACES_PER_PAGE sentinel and forwards it to the client', async () => {
+      await supertest(httpSetup.server.listener)
+        .post(`${WORKSPACES_API_BASE_URL}/_list`)
+        .send({ perPage: MAXIMUM_WORKSPACES_PER_PAGE })
+        .expect(200);
+
+      expect(mockedWorkspaceClient.list).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.objectContaining({ perPage: MAXIMUM_WORKSPACES_PER_PAGE })
+      );
+    });
+
+    it('defaults to a page size of 20 when perPage is omitted', async () => {
+      await supertest(httpSetup.server.listener)
+        .post(`${WORKSPACES_API_BASE_URL}/_list`)
+        .send({})
+        .expect(200);
+
+      expect(mockedWorkspaceClient.list).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.objectContaining({ perPage: 20 })
+      );
+    });
+
+    it('honors an explicit numeric perPage from the request', async () => {
+      await supertest(httpSetup.server.listener)
+        .post(`${WORKSPACES_API_BASE_URL}/_list`)
+        .send({ perPage: 10 })
+        .expect(200);
+
+      expect(mockedWorkspaceClient.list).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.objectContaining({ perPage: 10 })
+      );
+    });
+
+    it('rejects a perPage that is neither a number nor the sentinel', async () => {
+      await supertest(httpSetup.server.listener)
+        .post(`${WORKSPACES_API_BASE_URL}/_list`)
+        .send({ perPage: 'not-a-number' })
+        .expect(400);
+    });
   });
 
   /**

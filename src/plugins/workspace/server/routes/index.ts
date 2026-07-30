@@ -15,6 +15,7 @@ import {
 import {
   MAX_WORKSPACE_NAME_LENGTH,
   MAX_WORKSPACE_DESCRIPTION_LENGTH,
+  MAXIMUM_WORKSPACES_PER_PAGE,
 } from '../../common/constants';
 import { IWorkspaceClientImpl, WorkspaceAttributeWithPermission } from '../types';
 import { SavedObjectsPermissionControlContract } from '../permission_control/client';
@@ -141,7 +142,14 @@ export function registerRoutes({
         body: schema.object({
           search: schema.maybe(schema.string()),
           sortOrder: schema.maybe(schema.string()),
-          perPage: schema.number({ min: 0, defaultValue: 20 }),
+          // Accepts a number for regular paging, or the `MAXIMUM_WORKSPACES_PER_PAGE`
+          // sentinel to page by `workspace.maximum_workspaces` (resolved per request
+          // through the dynamic config service). Defaults to 20, keeping the original
+          // API behavior unchanged.
+          perPage: schema.oneOf(
+            [schema.number({ min: 0 }), schema.literal(MAXIMUM_WORKSPACES_PER_PAGE)],
+            { defaultValue: 20 }
+          ),
           page: schema.number({ min: 0, defaultValue: 1 }),
           sortField: schema.maybe(schema.string()),
           searchFields: schema.maybe(schema.arrayOf(schema.string())),
@@ -150,6 +158,8 @@ export function registerRoutes({
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
+      // The `perPage` value (including the `MAXIMUM_WORKSPACES_PER_PAGE` sentinel) is
+      // resolved inside `client.list`.
       const result = await client.list(
         {
           request: req,

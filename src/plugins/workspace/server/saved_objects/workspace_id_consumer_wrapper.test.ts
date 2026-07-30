@@ -14,8 +14,7 @@ import {
 import { WorkspaceIdConsumerWrapper } from './workspace_id_consumer_wrapper';
 import { workspaceClientMock } from '../workspace_client.mock';
 import { SavedObjectsErrorHelpers } from '../../../../core/server';
-import { DEFAULT_WORKSPACE_LIST_PER_PAGE } from '../../common/constants';
-import { createWorkspaceConfigServiceMock } from '../services/workspace_config_service.mock';
+import { MAXIMUM_WORKSPACES_PER_PAGE } from '../../common/constants';
 
 describe('WorkspaceIdConsumerWrapper', () => {
   const requestHandlerContext = coreMock.createRequestHandlerContext();
@@ -122,7 +121,7 @@ describe('WorkspaceIdConsumerWrapper', () => {
       expect(mockedWorkspaceClient.list).toHaveBeenCalledTimes(1);
     });
 
-    it(`Should list workspaces with the default page size`, async () => {
+    it(`Should list all workspaces via the MAXIMUM_WORKSPACES_PER_PAGE sentinel`, async () => {
       const workspaceIdConsumerWrapper = new WorkspaceIdConsumerWrapper(
         mockedWorkspaceClient,
         logger
@@ -147,71 +146,7 @@ describe('WorkspaceIdConsumerWrapper', () => {
       );
 
       expect(mockedWorkspaceClient.list).toHaveBeenCalledWith(expect.anything(), {
-        perPage: DEFAULT_WORKSPACE_LIST_PER_PAGE,
-      });
-    });
-
-    it(`Should list workspaces with the resolved maximum_workspaces as page size`, async () => {
-      const workspaceIdConsumerWrapper = new WorkspaceIdConsumerWrapper(
-        mockedWorkspaceClient,
-        logger,
-        createWorkspaceConfigServiceMock({ maximum_workspaces: 5000 })
-      );
-      const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
-      updateWorkspaceState(mockRequest, {});
-      const mockedWrapperClient = workspaceIdConsumerWrapper.wrapperFactory({
-        client: mockedClient,
-        typeRegistry: requestHandlerContext.savedObjects.typeRegistry,
-        request: mockRequest,
-      });
-
-      mockedWorkspaceClient.list.mockResolvedValueOnce({
-        success: true,
-        result: { workspaces: [{ id: 'foo' }, { id: 'bar' }] },
-      });
-
-      await mockedWrapperClient.create(
-        'dashboard',
-        { name: 'foo' },
-        { workspaces: ['foo', 'bar'] }
-      );
-
-      expect(mockedWorkspaceClient.list).toHaveBeenCalledWith(expect.anything(), {
-        perPage: 5000,
-      });
-    });
-
-    it(`Should fall back to the default page size when maximum_workspaces cannot be resolved`, async () => {
-      const configServiceMock = createWorkspaceConfigServiceMock();
-      configServiceMock.scopedClient.getMaximumWorkspaces.mockRejectedValue(
-        new Error('config store unavailable')
-      );
-      const workspaceIdConsumerWrapper = new WorkspaceIdConsumerWrapper(
-        mockedWorkspaceClient,
-        logger,
-        configServiceMock
-      );
-      const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
-      updateWorkspaceState(mockRequest, {});
-      const mockedWrapperClient = workspaceIdConsumerWrapper.wrapperFactory({
-        client: mockedClient,
-        typeRegistry: requestHandlerContext.savedObjects.typeRegistry,
-        request: mockRequest,
-      });
-
-      mockedWorkspaceClient.list.mockResolvedValueOnce({
-        success: true,
-        result: { workspaces: [{ id: 'foo' }, { id: 'bar' }] },
-      });
-
-      await mockedWrapperClient.create(
-        'dashboard',
-        { name: 'foo' },
-        { workspaces: ['foo', 'bar'] }
-      );
-
-      expect(mockedWorkspaceClient.list).toHaveBeenCalledWith(expect.anything(), {
-        perPage: DEFAULT_WORKSPACE_LIST_PER_PAGE,
+        perPage: MAXIMUM_WORKSPACES_PER_PAGE,
       });
     });
   });
