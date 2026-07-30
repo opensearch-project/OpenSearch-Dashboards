@@ -652,6 +652,9 @@ const executeQueryBase = async (
       query: effectiveQuery,
     };
 
+    // One-shot opt-out set by the partial-results warning banner's rerun action.
+    const disablePartialResults = !!getState().ui?.disablePartialResults;
+
     let searchSource;
     // TODO: Following split queries change, we can move away from creating search source with includeHistogram
     if (includeHistogram) {
@@ -663,7 +666,9 @@ const executeQueryBase = async (
         dataView,
         services,
         true, // Include histogram
-        effectiveInterval
+        effectiveInterval,
+        undefined,
+        disablePartialResults
       );
     } else {
       // Tab-specific: Create without aggregations
@@ -671,7 +676,10 @@ const executeQueryBase = async (
         preparedQueryObject,
         dataView,
         services,
-        false // No histogram
+        false, // No histogram
+        undefined,
+        undefined,
+        disablePartialResults
       );
     }
 
@@ -819,7 +827,8 @@ export const createSearchSourceWithQuery = async (
   services: ExploreServices,
   includeHistogram: boolean = false,
   customInterval?: string,
-  sizeParam?: number
+  sizeParam?: number,
+  disablePartialResults: boolean = false
 ) => {
   const { uiSettings, data } = services;
   const size = sizeParam || uiSettings.get(SAMPLE_SIZE_SETTING);
@@ -848,11 +857,14 @@ export const createSearchSourceWithQuery = async (
     ...(services.queryProfilingEnabled && preparedQuery.language === 'PPL'
       ? { profile: true }
       : {}),
-    // When the partial-results setting is on, ask the engine to return a partial result (with a
-    // warning) instead of failing an aggregation whose field is mapped inconsistently across
-    // indices. PPL-only, and sent explicitly so it overrides the cluster-side default.
+    // Ask the engine to return a partial result (with a warning) instead of failing an aggregation
+    // whose field is mapped inconsistently across indices. PPL-only, and sent explicitly so it
+    // overrides the cluster-side default. `disablePartialResults` is the one-shot override behind
+    // the warning banner's rerun action, which wins over the setting.
     ...(preparedQuery.language === 'PPL'
-      ? { partial_result: !!uiSettings.get(PARTIAL_RESULTS_SETTING, false) }
+      ? {
+          partial_result: !disablePartialResults && !!uiSettings.get(PARTIAL_RESULTS_SETTING, true),
+        }
       : {}),
   };
 

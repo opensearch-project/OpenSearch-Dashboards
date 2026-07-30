@@ -58,6 +58,37 @@ describe('QueryWarningsCallout', () => {
     expect(screen.queryByTestId('queryWarningsToggle')).not.toBeInTheDocument();
   });
 
+  it('offers a rerun action on a partial result and invokes it when clicked', () => {
+    const onRerun = jest.fn();
+    render(
+      <QueryWarningsCallout
+        warnings={[{ type: 'PARTIAL_RESULT', message: 'Partial.' }]}
+        onRerunWithoutPartialResults={onRerun}
+      />
+    );
+
+    const rerun = screen.getByTestId('queryWarningsRerunWithoutPartial');
+    expect(rerun).toBeInTheDocument();
+    fireEvent.click(rerun);
+    expect(onRerun).toHaveBeenCalledTimes(1);
+  });
+
+  it('hides the rerun action when no handler is supplied', () => {
+    render(<QueryWarningsCallout warnings={[{ type: 'PARTIAL_RESULT', message: 'Partial.' }]} />);
+    expect(screen.queryByTestId('queryWarningsRerunWithoutPartial')).not.toBeInTheDocument();
+  });
+
+  it('hides the rerun action for warnings that are not partial results', () => {
+    render(
+      <QueryWarningsCallout
+        warnings={[{ type: 'SOMETHING_ELSE', message: 'Unrelated notice.' }]}
+        onRerunWithoutPartialResults={jest.fn()}
+      />
+    );
+    expect(screen.getByText('Warning')).toBeInTheDocument();
+    expect(screen.queryByTestId('queryWarningsRerunWithoutPartial')).not.toBeInTheDocument();
+  });
+
   it('renders one callout per warning', () => {
     render(
       <QueryWarningsCallout

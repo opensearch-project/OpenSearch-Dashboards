@@ -5,11 +5,16 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@osd/i18n';
-import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiButtonEmpty, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { QueryWarning } from '../../application/utils/state_management/slices';
 
 interface QueryWarningsCalloutProps {
   warnings: QueryWarning[];
+  /**
+   * Rerun the query with partial results turned off, so an inconsistently-mapped aggregation fails
+   * instead of returning a subset. Omit to hide the action (e.g. where a rerun is not available).
+   */
+  onRerunWithoutPartialResults?: () => void;
 }
 
 /** Machine-readable warning type set by the backend (see Warning.TYPE_PARTIAL_RESULT). */
@@ -31,6 +36,10 @@ const showLessLabel = i18n.translate('explore.queryWarnings.showLess', {
   defaultMessage: 'Show less',
 });
 
+const rerunWithoutPartialLabel = i18n.translate('explore.queryWarnings.rerunWithoutPartial', {
+  defaultMessage: 'Rerun without partial results',
+});
+
 /** A short, explicit heading for the callout, chosen from the warning's machine-readable type. */
 const titleForType = (type: string): string =>
   type === PARTIAL_RESULT_TYPE ? partialResultTitle : defaultTitle;
@@ -41,8 +50,14 @@ const titleForType = (type: string): string =>
  * {@link QueryWarning.detail} (which can name many indices) is collapsed behind a "Show more"
  * toggle so the banner stays compact.
  */
-const WarningCallout: React.FC<{ warning: QueryWarning }> = ({ warning }) => {
+const WarningCallout: React.FC<{
+  warning: QueryWarning;
+  onRerunWithoutPartialResults?: () => void;
+}> = ({ warning, onRerunWithoutPartialResults }) => {
   const [expanded, setExpanded] = useState(false);
+  // The rerun only makes sense for a partial result -- it is what turns the subset back into a
+  // complete-or-fail answer.
+  const showRerun = warning.type === PARTIAL_RESULT_TYPE && !!onRerunWithoutPartialResults;
 
   return (
     <EuiCallOut
@@ -65,6 +80,21 @@ const WarningCallout: React.FC<{ warning: QueryWarning }> = ({ warning }) => {
           </EuiLink>
         </>
       ) : null}
+      {showRerun ? (
+        <>
+          <EuiSpacer size="s" />
+          <EuiButtonEmpty
+            size="s"
+            flush="left"
+            iconType="refresh"
+            color="warning"
+            onClick={onRerunWithoutPartialResults}
+            data-test-subj="queryWarningsRerunWithoutPartial"
+          >
+            {rerunWithoutPartialLabel}
+          </EuiButtonEmpty>
+        </>
+      ) : null}
     </EuiCallOut>
   );
 };
@@ -75,7 +105,10 @@ const WarningCallout: React.FC<{ warning: QueryWarning }> = ({ warning }) => {
  * It is rendered on every result view (not only save windows) so a partial, and therefore
  * potentially undercounted, result is never mistaken for a complete one.
  */
-export const QueryWarningsCallout: React.FC<QueryWarningsCalloutProps> = ({ warnings }) => {
+export const QueryWarningsCallout: React.FC<QueryWarningsCalloutProps> = ({
+  warnings,
+  onRerunWithoutPartialResults,
+}) => {
   if (!warnings || warnings.length === 0) {
     return null;
   }
@@ -84,7 +117,10 @@ export const QueryWarningsCallout: React.FC<QueryWarningsCalloutProps> = ({ warn
     <>
       {warnings.map((warning, index) => (
         <React.Fragment key={index}>
-          <WarningCallout warning={warning} />
+          <WarningCallout
+            warning={warning}
+            onRerunWithoutPartialResults={onRerunWithoutPartialResults}
+          />
           <EuiSpacer size="s" />
         </React.Fragment>
       ))}
