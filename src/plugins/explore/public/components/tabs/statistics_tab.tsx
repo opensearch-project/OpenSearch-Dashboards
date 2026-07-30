@@ -17,6 +17,7 @@ import { EXPLORE_ACTION_BAR_SLOT_ID } from './tabs';
 import { ActionBar } from './action_bar/action_bar';
 import { useTabResults } from '../../application/utils/hooks/use_tab_results';
 import { QueryWarningsCallout } from '../data_table/query_warnings_callout';
+import { useRerunWithoutPartialResults } from '../../application/hooks';
 
 const STATISTICS_PAGE_SIZE = 100;
 
@@ -133,10 +134,15 @@ export const StatisticsTab = React.memo(() => {
     [toggleDetails]
   );
 
+  const rerunWithoutPartialResults = useRerunWithoutPartialResults();
+
   return (
     <div className="explore-statistic-tab tab-container">
       {slot && createPortal(<ActionBar />, slot)}
-      <QueryWarningsCallout warnings={results?.warnings ?? []} />
+      <QueryWarningsCallout
+        warnings={results?.warnings ?? []}
+        onRerunWithoutPartialResults={rerunWithoutPartialResults}
+      />
       <EuiBasicTable
         className="exploreStatisticTable"
         items={pageOfItems}
