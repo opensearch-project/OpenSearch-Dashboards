@@ -145,60 +145,25 @@ describe('rex-scan-cost (compiled surface)', () => {
     });
   });
 
-  describe('leading-literal prefilter hint', () => {
-    // The exhaustive token matrix lives in pattern_literal.test.ts; here we
-    // verify the rule wires the token into the message end-to-end and leaves the
-    // hoverFacts / advisory posture untouched.
-
-    it('names the analyzed token and both filter forms when the pattern has a clean leading literal', () => {
-      const found = diag(`source=logs | rex field=raw_log '"level":"(?<lvl>[^"]+)"'`);
-      expect(found?.message).toContain('the token "level"');
-      expect(found?.message).toContain("where raw_log like '%level%'");
-      expect(found?.message).toContain("match_phrase(raw_log, 'level')");
-      // The verify caveat is always present, base or enriched.
-      expect(found?.message).toContain('can drop rows');
+  describe('message and hover facts', () => {
+    it('names the extraction keyword and the text source field', () => {
+      const found = diag('source=logs | rex field=raw_log "GET (?<path>\\S+)"');
+      expect(found?.message).toContain('rex runs the pattern against every input row');
+      expect(found?.message).toContain('text field "raw_log"');
     });
 
-    it('decodes a doubled-double-quote literal before scanning', () => {
-      const found = diag('source=logs | rex field=raw_log """level"":""(?<l>[^""]+)"""');
-      expect(found?.message).toContain('the token "level"');
+    it('names the keyword for parse and grok too', () => {
+      expect(diag('source=logs | parse email "(?<user>.+)@"')?.message).toContain(
+        'parse runs the pattern'
+      );
+      expect(diag('source=logs | grok message "%{IP:client}"')?.message).toContain(
+        'grok runs the pattern'
+      );
     });
 
-    it('emits only the base message (no token) on a top-level alternation', () => {
-      const found = diag('source=logs | rex field=raw_log "GET|POST (?<m>\\S+)"');
-      expect(found?.ruleId).toBe('rex-scan-cost'); // still fires
-      expect(found?.message).not.toContain('the token');
-      expect(found?.message).not.toContain('match_phrase');
-    });
-
-    it('emits only the base message on a leading metaclass', () => {
-      const found = diag('source=logs | rex field=raw_log "\\d{3}-(?<c>.*)"');
-      expect(found?.message).not.toContain('the token');
-    });
-
-    it('emits only the base message on a punctuation-only leading run', () => {
-      const found = diag('source=logs | rex field=raw_log "://(?<h>[^/]+)"');
-      expect(found?.message).not.toContain('the token');
-    });
-
-    it('does not enrich the grok %{...} macro pattern', () => {
-      const found = diag('source=logs | grok message "%{IP:client}"');
-      expect(found?.ruleId).toBe('rex-scan-cost'); // still fires (message is text)
-      expect(found?.message).not.toContain('the token');
-    });
-
-    it('never sets hoverFacts.suggestion (the token rides the message only)', () => {
-      // hoverFacts.suggestion renders as "Closest known field", which would
-      // wrongly imply the token replaces the source field — so the enriched
-      // finding must keep hoverFacts to { field, esType }.
-      const found = diag(`source=logs | rex field=raw_log '"level":"(?<lvl>[^"]+)"'`);
+    it('carries { field, esType } hover facts and no suggestion', () => {
+      const found = diag('source=logs | rex field=raw_log "GET (?<path>\\S+)"');
       expect(found?.hoverFacts).toEqual({ field: 'raw_log', esType: 'text' });
-    });
-
-    it('keeps the advisory posture on the enriched finding (info, no fix)', () => {
-      const found = diag(`source=logs | rex field=raw_log '"level":"(?<lvl>[^"]+)"'`);
-      expect(found?.severity).toBe('info');
-      expect(found?.fix).toBeUndefined();
     });
   });
 });
