@@ -59,4 +59,7 @@ export interface QueryEditorProps {
 
   // compute editor container height
   getEditorContainerHeight?: (domNode: HTMLElement | null) => number;
+
+  readOnly?: boolean;
+  readOnlyTooltip?: string;
 }

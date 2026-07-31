@@ -49,6 +49,10 @@ interface LogsQueryPanelProps {
   // Reports the live editor mode up so the page can gate the analyze panel:
   // analyze is only available in code mode, not the visual builder.
   onModeChange?: (isCode: boolean) => void;
+  // Workspace setting: allow only the visual builder. Code is used solely as a
+  // read-only fallback for queries the builder can't represent; the Code/Builder
+  // toggle and AI generation are hidden.
+  builderOnlyMode?: boolean;
 }
 
 export const LogsQueryPanel: React.FC<LogsQueryPanelProps> = ({
@@ -56,6 +60,7 @@ export const LogsQueryPanel: React.FC<LogsQueryPanelProps> = ({
   onToggleAnalyze,
   hasAnalyzeResult,
   onModeChange,
+  builderOnlyMode = false,
 }) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const dispatch = useDispatch();
@@ -79,9 +84,11 @@ export const LogsQueryPanel: React.FC<LogsQueryPanelProps> = ({
   const initialParse = useMemo(() => parsePPL(reduxQuery), []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // A query loaded from a saved object opens in code, switchable to Builder later.
+  // In builder-only mode there is no code editing, so representable queries always
+  // open in Builder and code is only the read-only fallback for unrepresentable ones.
   const loadedFromSaved = !!savedSearch;
   const [mode, setMode] = useState<LogsBuilderMode>(() =>
-    !loadedFromSaved && initialParse.canBuild ? 'builder' : 'code'
+    initialParse.canBuild && (builderOnlyMode || !loadedFromSaved) ? 'builder' : 'code'
   );
 
   // Seed handed to PPLBuilder on (re)mount; only re-seeded deliberately (external
@@ -255,15 +262,36 @@ export const LogsQueryPanel: React.FC<LogsQueryPanelProps> = ({
     onModeChange?.(isCodeMode);
   }, [isCodeMode, onModeChange]);
 
+  // In builder-only mode, code is only ever the read-only fallback for a query
+  // the builder can't represent, so the editor is never editable.
   const editors = (
     <div className="exploreQueryPanel__editorsWrapper">
-      <ExploreQueryPanelEditor />
+      <ExploreQueryPanelEditor
+        readOnly={builderOnlyMode}
+        readOnlyTooltip={
+          builderOnlyMode
+            ? i18n.translate('explore.logsQueryPanel.readOnlyCodeTooltip', {
+                defaultMessage:
+                  'This query cannot be shown in the query builder and is read-only. Start a new query to edit.',
+              })
+            : undefined
+        }
+      />
       <QueryPanelGeneratedQuery />
     </div>
   );
 
   const switchToCode = useCallback(() => handleModeChange('code'), [handleModeChange]);
   const switchToBuilder = useCallback(() => handleModeChange('builder'), [handleModeChange]);
+
+  // builderOnlyMode resolves asynchronously (workspace-scoped setting read), so the
+  // mode initializer above runs before it's known. Once it's on, a representable
+  // query must open in the builder.
+  useEffect(() => {
+    if (builderOnlyMode && mode === 'code' && canSwitchToBuilder) {
+      switchToBuilder();
+    }
+  }, [builderOnlyMode, mode, canSwitchToBuilder, switchToBuilder]);
 
   // Cmd/Ctrl+Enter runs the current draft. The execution layer
   // (`addPPLSourceClause`) supplies the source clause when the query lacks one.
@@ -285,6 +313,7 @@ export const LogsQueryPanel: React.FC<LogsQueryPanelProps> = ({
             analyzeIsOpen={isCodeMode ? analyzeIsOpen : undefined}
             onToggleAnalyze={isCodeMode ? onToggleAnalyze : undefined}
             hasAnalyzeResult={isCodeMode ? hasAnalyzeResult : undefined}
+            hideAskAI={builderOnlyMode}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -304,14 +333,14 @@ export const LogsQueryPanel: React.FC<LogsQueryPanelProps> = ({
               key={builderKey}
               initialState={builderState}
               onQueryChange={onBuilderChange}
-              onSwitchToCode={switchToCode}
+              onSwitchToCode={builderOnlyMode ? undefined : switchToCode}
               onRun={handleRun}
             />
           ) : (
             editors
           )}
         </EuiFlexItem>
-        {!showBuilder && !isPromptMode && (
+        {!showBuilder && !isPromptMode && !builderOnlyMode && (
           <EuiFlexItem grow={false}>
             <ModeToggleButton
               isCode
