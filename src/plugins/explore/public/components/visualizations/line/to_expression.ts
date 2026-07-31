@@ -22,7 +22,7 @@ import {
   sortByTime,
   flatten,
 } from '../utils/data_transformation';
-import { ColorMap } from '../utils/color_map';
+import { LegendItem } from '../utils/legend';
 
 /**
  * Create a simple line chart with one metric and one date
@@ -32,7 +32,7 @@ export const createSimpleLineChart = (
   styles: LineChartStyle,
   axisColumnMappings: { [AxisRole.X]: VisColumn; [AxisRole.Y]: VisColumn[] },
   timeRange?: { from: string; to: string },
-  onLegend?: (legend: ColorMap) => void
+  onLegend?: (legendItems: LegendItem[]) => void
 ): any => {
   const axisConfig = getAxisConfig(styles);
 
@@ -77,7 +77,7 @@ export const createLineBarChart = (
     [AxisRole.Y_SECOND]: VisColumn[];
   },
   timeRange?: { from: string; to: string },
-  onLegend?: (legend: ColorMap) => void
+  onLegend?: (legendItems: LegendItem[]) => void
 ): any => {
   const axisConfig = getAxisConfig(styles);
 
@@ -126,7 +126,7 @@ export const createMultiLineChart = (
     [AxisRole.COLOR]: VisColumn;
   },
   timeRange?: { from: string; to: string },
-  onLegend?: (legend: ColorMap) => void
+  onLegend?: (legendItems: LegendItem[]) => void
 ): any => {
   const axisConfig = getAxisConfig(styles);
 
@@ -175,7 +175,7 @@ export const createCategoryLineChart = (
   transformedData: Array<Record<string, any>>,
   styles: LineChartStyle,
   axisColumnMappings: { [AxisRole.X]: VisColumn; [AxisRole.Y]: VisColumn[] },
-  onLegend?: (legend: ColorMap) => void
+  onLegend?: (legendItems: LegendItem[]) => void
 ): any => {
   const axisConfig = getAxisConfig(styles);
 
@@ -217,7 +217,7 @@ export const createCategoryMultiLineChart = (
     [AxisRole.Y]: VisColumn;
     [AxisRole.COLOR]: VisColumn;
   },
-  onLegend?: (legend: ColorMap) => void
+  onLegend?: (legendItems: LegendItem[]) => void
 ): any => {
   const axisConfig = getAxisConfig(styles);
 

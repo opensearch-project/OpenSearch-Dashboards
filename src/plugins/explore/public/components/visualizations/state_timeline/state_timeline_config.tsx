@@ -125,7 +125,7 @@ export const createStateTimelineConfig = (): VisualizationType<'state_timeline'>
           const color = props.axisColumnMappings.color?.[0];
           if (!x || !y || !color) throw Error('Missing axis config for state timeline');
           const spec = createNumericalStateTimeline(
-            props.transformedData,
+            props.data,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
             props.onLegend
@@ -135,7 +135,7 @@ export const createStateTimelineConfig = (): VisualizationType<'state_timeline'>
               spec={spec}
               onSelectTimeRange={props.onSelectTimeRange}
               legendSelected$={props.legendSelected$}
-              highlightedSeries$={props.highlightedSeries$}
+              highlightedLegendTarget$={props.highlightedLegendTarget$}
             />
           );
         },
@@ -155,7 +155,7 @@ export const createStateTimelineConfig = (): VisualizationType<'state_timeline'>
           const color = props.axisColumnMappings.color?.[0];
           if (!x || !y || !color) throw Error('Missing axis config for state timeline');
           const spec = createCategoricalStateTimeline(
-            props.transformedData,
+            props.data,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
             props.onLegend
@@ -165,7 +165,7 @@ export const createStateTimelineConfig = (): VisualizationType<'state_timeline'>
               spec={spec}
               onSelectTimeRange={props.onSelectTimeRange}
               legendSelected$={props.legendSelected$}
-              highlightedSeries$={props.highlightedSeries$}
+              highlightedLegendTarget$={props.highlightedLegendTarget$}
             />
           );
         },
@@ -183,7 +183,7 @@ export const createStateTimelineConfig = (): VisualizationType<'state_timeline'>
           const color = props.axisColumnMappings.color?.[0];
           if (!x || !color) throw Error('Missing axis config for state timeline');
           const spec = createSingleCategoricalStateTimeline(
-            props.transformedData,
+            props.data,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.COLOR]: color },
             props.onLegend
@@ -193,7 +193,7 @@ export const createStateTimelineConfig = (): VisualizationType<'state_timeline'>
               spec={spec}
               onSelectTimeRange={props.onSelectTimeRange}
               legendSelected$={props.legendSelected$}
-              highlightedSeries$={props.highlightedSeries$}
+              highlightedLegendTarget$={props.highlightedLegendTarget$}
             />
           );
         },
@@ -211,7 +211,7 @@ export const createStateTimelineConfig = (): VisualizationType<'state_timeline'>
           const color = props.axisColumnMappings.color?.[0];
           if (!x || !color) throw Error('Missing axis config for state timeline');
           const spec = createSingleNumericalStateTimeline(
-            props.transformedData,
+            props.data,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.COLOR]: color },
             props.onLegend
@@ -221,7 +221,7 @@ export const createStateTimelineConfig = (): VisualizationType<'state_timeline'>
               spec={spec}
               onSelectTimeRange={props.onSelectTimeRange}
               legendSelected$={props.legendSelected$}
-              highlightedSeries$={props.highlightedSeries$}
+              highlightedLegendTarget$={props.highlightedLegendTarget$}
             />
           );
         },

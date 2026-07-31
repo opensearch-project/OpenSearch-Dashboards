@@ -7,32 +7,41 @@ import { PieSeriesOption } from 'echarts';
 import { PieChartStyle } from './pie_vis_config';
 import { BaseChartStyle, PipelineFn, EChartsSpecState } from '../utils/echarts_spec';
 import { getColors } from '../theme/default_colors';
+import { createDataLegendItem, getLegendColor, LegendItem } from '../utils/legend';
+import { normalizeEmptyValue } from '../utils/data_transformation';
 
 export const createPieSeries =
   <T extends BaseChartStyle>({
     styles,
     cateField,
     valueField,
+    colorDomainData,
   }: {
     styles: PieChartStyle;
     cateField: string;
     valueField: string;
+    colorDomainData?: Array<Record<string, any>>;
   }): PipelineFn<T> =>
   (state: EChartsSpecState<T>) => {
     const radius = styles?.exclusive.donut ? ['50%', '70%'] : '70%';
     const palette = getColors().categories;
     const data: PieSeriesOption['data'] = [];
+    const legendItems: LegendItem[] = [];
     if (state.transformedData) {
-      const sortedNames = state.transformedData.map((d) => String(d[cateField])).sort();
+      const domainData = colorDomainData ?? state.transformedData;
+      const sortedNames = Array.from(
+        new Set(domainData.map((d) => normalizeEmptyValue(d[cateField])))
+      ).sort();
       state.transformedData.forEach((d) => {
         const value = d[valueField];
-        const name = d[cateField];
-        const colorIndex = sortedNames.indexOf(String(name));
+        const name = normalizeEmptyValue(d[cateField]);
+        const color = getLegendColor(name, palette, sortedNames);
+        legendItems.push(createDataLegendItem(name, color, 0));
         data.push({
           name,
           value,
           itemStyle: {
-            color: palette[colorIndex % palette.length],
+            color,
           },
         });
       });
@@ -66,5 +75,5 @@ export const createPieSeries =
       },
     ];
 
-    return { ...state, series };
+    return { ...state, series, legendItems };
   };

@@ -115,7 +115,7 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
           if (!x || !y || y.length === 0) throw Error('Missing axis config for line chart');
 
           const spec = createSimpleLineChart(
-            props.transformedData,
+            props.data,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y },
             props.timeRange,
@@ -126,7 +126,7 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
               spec={spec}
               onSelectTimeRange={props.onSelectTimeRange}
               legendSelected$={props.legendSelected$}
-              highlightedSeries$={props.highlightedSeries$}
+              highlightedLegendTarget$={props.highlightedLegendTarget$}
             />
           );
         },
@@ -149,7 +149,7 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
             throw Error('Missing axis config for line/bar combo chart');
 
           const spec = createLineBarChart(
-            props.transformedData,
+            props.data,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.Y_SECOND]: y2 },
             props.timeRange,
@@ -160,7 +160,7 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
               spec={spec}
               onSelectTimeRange={props.onSelectTimeRange}
               legendSelected$={props.legendSelected$}
-              highlightedSeries$={props.highlightedSeries$}
+              highlightedLegendTarget$={props.highlightedLegendTarget$}
             />
           );
         },
@@ -181,7 +181,7 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
           if (!x || !y || !color) throw Error('Missing axis config for multi-line chart');
 
           const spec = createMultiLineChart(
-            props.transformedData,
+            props.data,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
             props.timeRange,
@@ -192,7 +192,7 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
               spec={spec}
               onSelectTimeRange={props.onSelectTimeRange}
               legendSelected$={props.legendSelected$}
-              highlightedSeries$={props.highlightedSeries$}
+              highlightedLegendTarget$={props.highlightedLegendTarget$}
             />
           );
         },
@@ -213,7 +213,7 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
           if (!x || !y || !color) throw Error('Missing axis config for multi-line chart');
 
           const spec = createMultiLineChart(
-            props.transformedData,
+            props.data,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
             props.timeRange,
@@ -224,7 +224,7 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
               spec={spec}
               onSelectTimeRange={props.onSelectTimeRange}
               legendSelected$={props.legendSelected$}
-              highlightedSeries$={props.highlightedSeries$}
+              highlightedLegendTarget$={props.highlightedLegendTarget$}
             />
           );
         },
@@ -244,7 +244,7 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
             throw Error('Missing axis config for category line chart');
 
           const spec = createCategoryLineChart(
-            props.transformedData,
+            props.data,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y },
             props.onLegend
@@ -254,7 +254,7 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
               spec={spec}
               onSelectTimeRange={props.onSelectTimeRange}
               legendSelected$={props.legendSelected$}
-              highlightedSeries$={props.highlightedSeries$}
+              highlightedLegendTarget$={props.highlightedLegendTarget$}
             />
           );
         },
@@ -275,7 +275,7 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
           if (!x || !y || !color) throw Error('Missing axis config for category multi-line chart');
 
           const spec = createCategoryMultiLineChart(
-            props.transformedData,
+            props.data,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
             props.onLegend
@@ -285,7 +285,7 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
               spec={spec}
               onSelectTimeRange={props.onSelectTimeRange}
               legendSelected$={props.legendSelected$}
-              highlightedSeries$={props.highlightedSeries$}
+              highlightedLegendTarget$={props.highlightedLegendTarget$}
             />
           );
         },
@@ -306,7 +306,7 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
           if (!x || !y || !color) throw Error('Missing axis config for category multi-line chart');
 
           const spec = createCategoryMultiLineChart(
-            props.transformedData,
+            props.data,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
             props.onLegend
@@ -316,7 +316,7 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
               spec={spec}
               onSelectTimeRange={props.onSelectTimeRange}
               legendSelected$={props.legendSelected$}
-              highlightedSeries$={props.highlightedSeries$}
+              highlightedLegendTarget$={props.highlightedLegendTarget$}
             />
           );
         },

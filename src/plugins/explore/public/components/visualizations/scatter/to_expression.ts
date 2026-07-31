@@ -23,7 +23,7 @@ import {
   assembleScatterSpec,
 } from './scatter_chart_utils';
 import { convertTo2DArray, transform, pivot } from '../utils/data_transformation';
-import { ColorMap } from '../utils/color_map';
+import { LegendItem } from '../utils/legend';
 
 const clearLegend =
   <T extends BaseChartStyle>(onLegend?: (legend: ColorMap) => void): PipelineFn<T> =>
@@ -36,7 +36,7 @@ export const createTwoMetricScatter = (
   transformedData: Array<Record<string, any>>,
   styles: ScatterChartStyle,
   axisColumnMappings: { [AxisRole.X]: VisColumn; [AxisRole.Y]: VisColumn },
-  onLegend?: (legend: ColorMap) => void
+  onLegend?: (legendItems: LegendItem[]) => void
 ): any => {
   const axisConfig = getAxisConfig(styles);
   const xCol = axisColumnMappings[AxisRole.X];
@@ -76,7 +76,7 @@ export const createTwoMetricOneCateScatter = (
     [AxisRole.Y]: VisColumn;
     [AxisRole.COLOR]: VisColumn;
   },
-  onLegend?: (legend: ColorMap) => void
+  onLegend?: (legendItems: LegendItem[]) => void
 ): any => {
   const axisConfig = getAxisConfig(styles);
   const xCol = axisColumnMappings[AxisRole.X];
@@ -121,7 +121,7 @@ export const createThreeMetricOneCateScatter = (
     [AxisRole.COLOR]?: VisColumn;
     [AxisRole.SIZE]: VisColumn;
   },
-  onLegend?: (legend: ColorMap) => void
+  onLegend?: (legendItems: LegendItem[]) => void
 ): any => {
   const axisConfig = getAxisConfig(styles);
   const xCol = axisColumnMappings[AxisRole.X];

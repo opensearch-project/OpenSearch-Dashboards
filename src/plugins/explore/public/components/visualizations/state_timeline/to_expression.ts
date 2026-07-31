@@ -19,7 +19,7 @@ import {
   assembleSpec,
   collectLegend,
 } from '../utils/echarts_spec';
-import { ColorMap } from '../utils/color_map';
+import { LegendItem } from '../utils/legend';
 import { convertTo2DArray, transform, map, pick, sortByTime } from '../utils/data_transformation';
 
 const normalizeConfig = (styleOptions: StateTimeLineChartStyle) => {
@@ -52,7 +52,7 @@ export const createNumericalStateTimeline = (
     [AxisRole.Y]: VisColumn;
     [AxisRole.COLOR]: VisColumn;
   },
-  onLegend?: (legend: ColorMap) => void
+  onLegend?: (legendItems: LegendItem[]) => void
 ): any => {
   const axisConfig = getAxisConfig(styleOptions);
   const xCol = axisColumnMappings[AxisRole.X];
@@ -116,7 +116,7 @@ export const createCategoricalStateTimeline = (
     [AxisRole.Y]: VisColumn;
     [AxisRole.COLOR]: VisColumn;
   },
-  onLegend?: (legend: ColorMap) => void
+  onLegend?: (legendItems: LegendItem[]) => void
 ): any => {
   const axisConfig = getAxisConfig(styleOptions);
   const xCol = axisColumnMappings[AxisRole.X];
@@ -166,7 +166,7 @@ export const createSingleCategoricalStateTimeline = (
   transformedData: Array<Record<string, any>>,
   styleOptions: StateTimeLineChartStyle,
   axisColumnMappings: { [AxisRole.X]: VisColumn; [AxisRole.COLOR]: VisColumn },
-  onLegend?: (legend: ColorMap) => void
+  onLegend?: (legendItems: LegendItem[]) => void
 ): any => {
   const axisConfig = getAxisConfig(styleOptions);
   const xCol = axisColumnMappings[AxisRole.X];
@@ -215,7 +215,7 @@ export const createSingleNumericalStateTimeline = (
   transformedData: Array<Record<string, any>>,
   styleOptions: StateTimeLineChartStyle,
   axisColumnMappings: { [AxisRole.X]: VisColumn; [AxisRole.COLOR]: VisColumn },
-  onLegend?: (legend: ColorMap) => void
+  onLegend?: (legendItems: LegendItem[]) => void
 ): any => {
   const axisConfig = getAxisConfig(styleOptions);
   const xCol = axisColumnMappings[AxisRole.X];

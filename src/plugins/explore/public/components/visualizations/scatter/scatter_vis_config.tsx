@@ -98,7 +98,7 @@ export const createScatterConfig = (): VisualizationType<'scatter'> => ({
           const y = props.axisColumnMappings.y?.[0];
           if (!x || !y) throw Error('Missing axis config for scatter chart');
           const spec = createTwoMetricScatter(
-            props.transformedData,
+            props.data,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y },
             props.onLegend
@@ -107,7 +107,7 @@ export const createScatterConfig = (): VisualizationType<'scatter'> => ({
             <EchartsRender
               spec={spec}
               legendSelected$={props.legendSelected$}
-              highlightedSeries$={props.highlightedSeries$}
+              highlightedLegendTarget$={props.highlightedLegendTarget$}
             />
           );
         },
@@ -127,7 +127,7 @@ export const createScatterConfig = (): VisualizationType<'scatter'> => ({
           const color = props.axisColumnMappings.color?.[0];
           if (!x || !y || !color) throw Error('Missing axis config for scatter chart');
           const spec = createTwoMetricOneCateScatter(
-            props.transformedData,
+            props.data,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
             props.onLegend
@@ -136,7 +136,7 @@ export const createScatterConfig = (): VisualizationType<'scatter'> => ({
             <EchartsRender
               spec={spec}
               legendSelected$={props.legendSelected$}
-              highlightedSeries$={props.highlightedSeries$}
+              highlightedLegendTarget$={props.highlightedLegendTarget$}
             />
           );
         },
@@ -187,7 +187,7 @@ export const createScatterConfig = (): VisualizationType<'scatter'> => ({
           const size = props.axisColumnMappings.size?.[0];
           if (!x || !y || !color || !size) throw Error('Missing axis config for scatter chart');
           const spec = createThreeMetricOneCateScatter(
-            props.transformedData,
+            props.data,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color, [AxisRole.SIZE]: size },
             props.onLegend
@@ -196,7 +196,7 @@ export const createScatterConfig = (): VisualizationType<'scatter'> => ({
             <EchartsRender
               spec={spec}
               legendSelected$={props.legendSelected$}
-              highlightedSeries$={props.highlightedSeries$}
+              highlightedLegendTarget$={props.highlightedLegendTarget$}
             />
           );
         },

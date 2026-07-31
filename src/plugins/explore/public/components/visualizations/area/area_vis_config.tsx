@@ -109,7 +109,7 @@ export const createAreaConfig = (): VisualizationType<'area'> => ({
           if (!x || !y || y.length === 0) throw Error('Missing axis config for area chart');
 
           const spec = createSimpleAreaChart(
-            props.transformedData,
+            props.data,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y },
             props.timeRange,
@@ -120,7 +120,7 @@ export const createAreaConfig = (): VisualizationType<'area'> => ({
               spec={spec}
               onSelectTimeRange={props.onSelectTimeRange}
               legendSelected$={props.legendSelected$}
-              highlightedSeries$={props.highlightedSeries$}
+              highlightedLegendTarget$={props.highlightedLegendTarget$}
             />
           );
         },
@@ -141,7 +141,7 @@ export const createAreaConfig = (): VisualizationType<'area'> => ({
           if (!x || !y || !color) throw Error('Missing axis config for multi-area chart');
 
           const spec = createMultiAreaChart(
-            props.transformedData,
+            props.data,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
             props.timeRange,
@@ -152,7 +152,7 @@ export const createAreaConfig = (): VisualizationType<'area'> => ({
               spec={spec}
               onSelectTimeRange={props.onSelectTimeRange}
               legendSelected$={props.legendSelected$}
-              highlightedSeries$={props.highlightedSeries$}
+              highlightedLegendTarget$={props.highlightedLegendTarget$}
             />
           );
         },
@@ -173,7 +173,7 @@ export const createAreaConfig = (): VisualizationType<'area'> => ({
           if (!x || !y || !color) throw Error('Missing axis config for multi-area chart');
 
           const spec = createMultiAreaChart(
-            props.transformedData,
+            props.data,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
             props.timeRange,
@@ -184,7 +184,7 @@ export const createAreaConfig = (): VisualizationType<'area'> => ({
               spec={spec}
               onSelectTimeRange={props.onSelectTimeRange}
               legendSelected$={props.legendSelected$}
-              highlightedSeries$={props.highlightedSeries$}
+              highlightedLegendTarget$={props.highlightedLegendTarget$}
             />
           );
         },
@@ -204,7 +204,7 @@ export const createAreaConfig = (): VisualizationType<'area'> => ({
             throw Error('Missing axis config for category area chart');
 
           const spec = createCategoryAreaChart(
-            props.transformedData,
+            props.data,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y },
             props.onLegend
@@ -214,7 +214,7 @@ export const createAreaConfig = (): VisualizationType<'area'> => ({
               spec={spec}
               onSelectTimeRange={props.onSelectTimeRange}
               legendSelected$={props.legendSelected$}
-              highlightedSeries$={props.highlightedSeries$}
+              highlightedLegendTarget$={props.highlightedLegendTarget$}
             />
           );
         },
@@ -235,7 +235,7 @@ export const createAreaConfig = (): VisualizationType<'area'> => ({
           if (!x || !y || !color) throw Error('Missing axis config for stacked area chart');
 
           const spec = createStackedAreaChart(
-            props.transformedData,
+            props.data,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
             props.onLegend
@@ -245,7 +245,7 @@ export const createAreaConfig = (): VisualizationType<'area'> => ({
               spec={spec}
               onSelectTimeRange={props.onSelectTimeRange}
               legendSelected$={props.legendSelected$}
-              highlightedSeries$={props.highlightedSeries$}
+              highlightedLegendTarget$={props.highlightedLegendTarget$}
             />
           );
         },
@@ -266,7 +266,7 @@ export const createAreaConfig = (): VisualizationType<'area'> => ({
           if (!x || !y || !color) throw Error('Missing axis config for stacked area chart');
 
           const spec = createStackedAreaChart(
-            props.transformedData,
+            props.data,
             props.styleOptions,
             { [AxisRole.X]: x, [AxisRole.Y]: y, [AxisRole.COLOR]: color },
             props.onLegend
@@ -276,7 +276,7 @@ export const createAreaConfig = (): VisualizationType<'area'> => ({
               spec={spec}
               onSelectTimeRange={props.onSelectTimeRange}
               legendSelected$={props.legendSelected$}
-              highlightedSeries$={props.highlightedSeries$}
+              highlightedLegendTarget$={props.highlightedLegendTarget$}
             />
           );
         },

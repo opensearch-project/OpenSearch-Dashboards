@@ -23,7 +23,7 @@ import {
   pivot,
   aggregate,
 } from '../utils/data_transformation';
-import { ColorMap } from '../utils/color_map';
+import { LegendItem } from '../utils/legend';
 
 /**
  * Create a simple area chart with one metric and one date
@@ -33,7 +33,7 @@ export const createSimpleAreaChart = (
   styles: AreaChartStyle,
   axisColumnMappings: { [AxisRole.X]: VisColumn; [AxisRole.Y]: VisColumn[] },
   timeRange?: { from: string; to: string },
-  onLegend?: (legend: ColorMap) => void
+  onLegend?: (legendItems: LegendItem[]) => void
 ): any => {
   const axisConfig = getAxisConfig(styles);
 
@@ -80,7 +80,7 @@ export const createMultiAreaChart = (
     [AxisRole.COLOR]: VisColumn;
   },
   timeRange?: { from: string; to: string },
-  onLegend?: (legend: ColorMap) => void
+  onLegend?: (legendItems: LegendItem[]) => void
 ): any => {
   const axisConfig = getAxisConfig(styles);
 
@@ -135,7 +135,7 @@ export const createCategoryAreaChart = (
   transformedData: Array<Record<string, any>>,
   styles: AreaChartStyle,
   axisColumnMappings: { [AxisRole.X]: VisColumn; [AxisRole.Y]: VisColumn[] },
-  onLegend?: (legend: ColorMap) => void
+  onLegend?: (legendItems: LegendItem[]) => void
 ): any => {
   const axisConfig = getAxisConfig(styles);
 
@@ -183,7 +183,7 @@ export const createStackedAreaChart = (
     [AxisRole.Y]: VisColumn;
     [AxisRole.COLOR]: VisColumn;
   },
-  onLegend?: (legend: ColorMap) => void
+  onLegend?: (legendItems: LegendItem[]) => void
 ): any => {
   const axisConfig = getAxisConfig(styles);
 

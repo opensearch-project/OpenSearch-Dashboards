@@ -7,23 +7,35 @@ import { render, fireEvent } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import { CustomLegend } from './custom_legend';
 import { Positions } from './types';
-import { ColorMap } from './utils/color_map';
+import { LegendItem, LegendTarget } from './utils/legend';
 
 describe('CustomLegend', () => {
-  const colorMap: ColorMap = {
-    seriesA: '#5C7FFF',
-    seriesB: '#A669E2',
-    seriesC: '#FF4B14',
-  };
+  const legendItems: LegendItem[] = [
+    {
+      label: 'seriesA',
+      color: '#5C7FFF',
+      target: { type: 'series', name: 'seriesA' },
+    },
+    {
+      label: 'seriesB',
+      color: '#A669E2',
+      target: { type: 'series', name: 'seriesB' },
+    },
+    {
+      label: 'seriesC',
+      color: '#FF4B14',
+      target: { type: 'series', name: 'seriesC' },
+    },
+  ];
 
-  let legend$: BehaviorSubject<Record<string, ColorMap>>;
+  let legend$: BehaviorSubject<Record<string, LegendItem[]>>;
   let legendSelected$: BehaviorSubject<Record<string, boolean>>;
-  let highlightedSeries$: BehaviorSubject<string | undefined>;
+  let highlightedLegendTarget$: BehaviorSubject<LegendTarget | undefined>;
 
   beforeEach(() => {
-    legend$ = new BehaviorSubject<Record<string, ColorMap>>({ default: colorMap });
+    legend$ = new BehaviorSubject<Record<string, LegendItem[]>>({ default: legendItems });
     legendSelected$ = new BehaviorSubject<Record<string, boolean>>({});
-    highlightedSeries$ = new BehaviorSubject<string | undefined>(undefined);
+    highlightedLegendTarget$ = new BehaviorSubject<LegendTarget | undefined>(undefined);
   });
 
   it('renders all legend items', () => {
@@ -31,7 +43,7 @@ describe('CustomLegend', () => {
       <CustomLegend
         legend$={legend$}
         legendSelected$={legendSelected$}
-        highlightedSeries$={highlightedSeries$}
+        highlightedLegendTarget$={highlightedLegendTarget$}
       />
     );
 
@@ -46,7 +58,7 @@ describe('CustomLegend', () => {
       <CustomLegend
         legend$={legend$}
         legendSelected$={legendSelected$}
-        highlightedSeries$={highlightedSeries$}
+        highlightedLegendTarget$={highlightedLegendTarget$}
       />
     );
 
@@ -59,7 +71,7 @@ describe('CustomLegend', () => {
       <CustomLegend
         legend$={legend$}
         legendSelected$={legendSelected$}
-        highlightedSeries$={highlightedSeries$}
+        highlightedLegendTarget$={highlightedLegendTarget$}
       />
     );
 
@@ -80,12 +92,12 @@ describe('CustomLegend', () => {
       <CustomLegend
         legend$={legend$}
         legendSelected$={legendSelected$}
-        highlightedSeries$={highlightedSeries$}
+        highlightedLegendTarget$={highlightedLegendTarget$}
       />
     );
 
     fireEvent.mouseEnter(getByTestId('customLegendItem-seriesB'));
-    expect(highlightedSeries$.getValue()).toBe('seriesB');
+    expect(highlightedLegendTarget$.getValue()).toEqual({ type: 'series', name: 'seriesB' });
   });
 
   it('clears highlighted series on mouse leave', () => {
@@ -93,13 +105,13 @@ describe('CustomLegend', () => {
       <CustomLegend
         legend$={legend$}
         legendSelected$={legendSelected$}
-        highlightedSeries$={highlightedSeries$}
+        highlightedLegendTarget$={highlightedLegendTarget$}
       />
     );
 
     fireEvent.mouseEnter(getByTestId('customLegendItem-seriesB'));
     fireEvent.mouseLeave(getByTestId('customLegendItem-seriesB'));
-    expect(highlightedSeries$.getValue()).toBeUndefined();
+    expect(highlightedLegendTarget$.getValue()).toBeUndefined();
   });
 
   it('does not highlight a hidden series on hover', () => {
@@ -107,7 +119,7 @@ describe('CustomLegend', () => {
       <CustomLegend
         legend$={legend$}
         legendSelected$={legendSelected$}
-        highlightedSeries$={highlightedSeries$}
+        highlightedLegendTarget$={highlightedLegendTarget$}
       />
     );
 
@@ -117,7 +129,7 @@ describe('CustomLegend', () => {
 
     // Hover hidden item
     fireEvent.mouseEnter(getByTestId('customLegendItem-seriesA'));
-    expect(highlightedSeries$.getValue()).toBeUndefined();
+    expect(highlightedLegendTarget$.getValue()).toBeUndefined();
   });
 
   it('applies horizontal layout by default (bottom position)', () => {
@@ -125,7 +137,7 @@ describe('CustomLegend', () => {
       <CustomLegend
         legend$={legend$}
         legendSelected$={legendSelected$}
-        highlightedSeries$={highlightedSeries$}
+        highlightedLegendTarget$={highlightedLegendTarget$}
         position={Positions.BOTTOM}
       />
     );
@@ -138,7 +150,7 @@ describe('CustomLegend', () => {
       <CustomLegend
         legend$={legend$}
         legendSelected$={legendSelected$}
-        highlightedSeries$={highlightedSeries$}
+        highlightedLegendTarget$={highlightedLegendTarget$}
         position={Positions.LEFT}
       />
     );
@@ -151,7 +163,7 @@ describe('CustomLegend', () => {
       <CustomLegend
         legend$={legend$}
         legendSelected$={legendSelected$}
-        highlightedSeries$={highlightedSeries$}
+        highlightedLegendTarget$={highlightedLegendTarget$}
         position={Positions.RIGHT}
       />
     );
@@ -164,7 +176,7 @@ describe('CustomLegend', () => {
       <CustomLegend
         legend$={legend$}
         legendSelected$={legendSelected$}
-        highlightedSeries$={highlightedSeries$}
+        highlightedLegendTarget$={highlightedLegendTarget$}
       />
     );
 
@@ -179,7 +191,7 @@ describe('CustomLegend', () => {
       <CustomLegend
         legend$={legend$}
         legendSelected$={legendSelected$}
-        highlightedSeries$={highlightedSeries$}
+        highlightedLegendTarget$={highlightedLegendTarget$}
       />
     );
 
@@ -189,5 +201,28 @@ describe('CustomLegend', () => {
       '.customLegend__indicator'
     );
     expect(indicator).not.toHaveStyle({ backgroundColor: '#5C7FFF' });
+  });
+
+  it('dedupes legend items by target across split groups', () => {
+    legend$.next({
+      splitA: [legendItems[0], legendItems[1]],
+      splitB: [
+        {
+          ...legendItems[1],
+          color: '#000000',
+        },
+        legendItems[2],
+      ],
+    });
+
+    const { getAllByTestId } = render(
+      <CustomLegend
+        legend$={legend$}
+        legendSelected$={legendSelected$}
+        highlightedLegendTarget$={highlightedLegendTarget$}
+      />
+    );
+
+    expect(getAllByTestId(/customLegendItem-/)).toHaveLength(3);
   });
 });

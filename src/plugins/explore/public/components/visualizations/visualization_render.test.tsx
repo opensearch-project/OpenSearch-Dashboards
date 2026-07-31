@@ -12,6 +12,7 @@ import { VisFieldType, Positions, RenderChartConfig } from './types';
 import { defaultBarChartStyles } from './bar/bar_vis_config';
 import { defaultTableChartStyles } from './table/table_vis_config';
 import { defaultMetricChartStyles } from './metric/metric_vis_config';
+import { ChartType } from './utils/use_visualization_types';
 
 const mockRender = jest.fn(() => <div data-test-subj="echartsRender">Echarts Render</div>);
 const mockFindRuleByAxesMapping = jest.fn();
@@ -87,6 +88,40 @@ describe('VisualizationRender', () => {
       },
     ],
     dateColumns: [],
+    unknownColumns: [],
+  };
+
+  const mockSplitVisData: VisData = {
+    transformedData: [
+      { field1: 'A', split: 'one', count: 10 },
+      { field1: 'C', split: 'one', count: 20 },
+      { field1: 'B', split: 'two', count: 30 },
+      { field1: 'C', split: 'two', count: 40 },
+    ],
+    numericalColumns: [
+      {
+        id: 1,
+        name: 'count',
+        schema: VisFieldType.Numerical,
+        column: 'count',
+      },
+    ],
+    categoricalColumns: [
+      {
+        id: 2,
+        name: 'field1',
+        schema: VisFieldType.Categorical,
+        column: 'field1',
+      },
+      {
+        id: 3,
+        name: 'split',
+        schema: VisFieldType.Categorical,
+        column: 'split',
+      },
+    ],
+    dateColumns: [],
+    unknownColumns: [],
   };
 
   const mockTableConfig: RenderChartConfig = {
@@ -199,6 +234,44 @@ describe('VisualizationRender', () => {
     expect(screen.getByTestId('tableVisualization')).toBeInTheDocument();
   });
 
+  it('passes visible split data and full data into every split chart', () => {
+    const splitRender = jest.fn(() => <div data-test-subj="splitChart">Split Chart</div>);
+    mockFindRuleByAxesMapping.mockReturnValue({
+      render: splitRender,
+    });
+
+    const splitConfig: RenderChartConfig = {
+      type: 'pie',
+      styles: {
+        ...defaultBarChartStyles,
+        addLegend: true,
+        legendPosition: Positions.BOTTOM,
+      },
+      axesMapping: { size: 'count', color: 'field1' },
+      splitField: 'split',
+    };
+
+    render(
+      <CommonVisualizationRender
+        visualizationData={mockSplitVisData}
+        visConfig={splitConfig}
+        showRawTable={false}
+      />
+    );
+
+    expect(splitRender).toHaveBeenCalledTimes(2);
+    expect(splitRender.mock.calls[0][0].data).toEqual([
+      { field1: 'A', split: 'one', count: 10 },
+      { field1: 'C', split: 'one', count: 20 },
+    ]);
+    expect(splitRender.mock.calls[1][0].data).toEqual([
+      { field1: 'B', split: 'two', count: 30 },
+      { field1: 'C', split: 'two', count: 40 },
+    ]);
+    expect(splitRender.mock.calls[0][0].allData).toBe(mockSplitVisData.transformedData);
+    expect(splitRender.mock.calls[1][0].allData).toBe(mockSplitVisData.transformedData);
+  });
+
   it('returns null when data has no columns', () => {
     const emptyColumnsData: VisData = {
       transformedData: [{ field1: 'value1' }],
@@ -291,7 +364,7 @@ describe('VisualizationRender', () => {
       'renders custom legend for %s chart type when addLegend is true',
       (chartType) => {
         const config: RenderChartConfig = {
-          type: chartType,
+          type: chartType as ChartType,
           styles: {
             ...defaultBarChartStyles,
             addLegend: true,

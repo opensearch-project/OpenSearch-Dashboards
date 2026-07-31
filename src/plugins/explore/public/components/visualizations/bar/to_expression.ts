@@ -17,7 +17,7 @@ import {
   applyTimeRange,
   collectLegend,
 } from '../utils/echarts_spec';
-import { ColorMap } from '../utils/color_map';
+import { LegendItem } from '../utils/legend';
 import { aggregate, convertTo2DArray, transform, pivot } from '../utils/data_transformation';
 
 const getNormalizedAxisConfig = (
@@ -64,7 +64,7 @@ export const createBarSpec = (
   axisColumnMappings:
     | { [AxisRole.X]: VisColumn; [AxisRole.Y]: VisColumn[] }
     | { [AxisRole.X]: VisColumn[]; [AxisRole.Y]: VisColumn },
-  onLegend?: (legend: ColorMap) => void
+  onLegend?: (legendItems: LegendItem[]) => void
 ): any => {
   const axisConfig = getAxisConfig(styles);
 
@@ -122,7 +122,7 @@ export const createTimeBarChart = (
     | { [AxisRole.X]: VisColumn; [AxisRole.Y]: VisColumn[] }
     | { [AxisRole.X]: VisColumn[]; [AxisRole.Y]: VisColumn },
   timeRange?: { from: string; to: string },
-  onLegend?: (legend: ColorMap) => void
+  onLegend?: (legendItems: LegendItem[]) => void
 ): any => {
   const axisConfig = getAxisConfig(styles);
 
@@ -189,7 +189,7 @@ export const createGroupedTimeBarChart = (
     [AxisRole.COLOR]: VisColumn;
   },
   timeRange?: { from: string; to: string },
-  onLegend?: (legend: ColorMap) => void
+  onLegend?: (legendItems: LegendItem[]) => void
 ): any => {
   const axisConfig = getAxisConfig(styles);
 
@@ -268,7 +268,7 @@ export const createStackedBarSpec = (
     [AxisRole.Y]: VisColumn;
     [AxisRole.COLOR]: VisColumn;
   },
-  onLegend?: (legend: ColorMap) => void
+  onLegend?: (legendItems: LegendItem[]) => void
 ): any => {
   const axisConfig = getAxisConfig(styles);
 
@@ -339,7 +339,7 @@ export const createDoubleNumericalBarChart = (
   transformedData: Array<Record<string, any>>,
   styles: BarChartStyle,
   axisColumnMappings: { [AxisRole.X]: VisColumn; [AxisRole.Y]: VisColumn[] },
-  onLegend?: (legend: ColorMap) => void
+  onLegend?: (legendItems: LegendItem[]) => void
 ): any => {
   const axisConfig = getAxisConfig(styles);
 
